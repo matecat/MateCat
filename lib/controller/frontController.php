@@ -62,7 +62,7 @@ abstract class viewcontroller extends controller {
 
     public function __construct() {
         parent::__construct();
-        require_once ROOT.'/inc/PHPTAL/PHPTAL.php';
+        require_once INIT::$ROOT.'/inc/PHPTAL/PHPTAL.php';
         
     }
 
@@ -119,7 +119,7 @@ abstract class viewcontroller extends controller {
 
     protected function makeTemplate($skeleton_file) {
         try {
-            $this->template = new PHPTAL(TEMPLATE_ROOT . "/$skeleton_file"); // create a new template object
+            $this->template = new PHPTAL(INIT::$TEMPLATE_ROOT . "/$skeleton_file"); // create a new template object
 //            $this->template->setOutputMode(PHPTAL::HTML5);
 
 		
@@ -135,15 +135,13 @@ abstract class viewcontroller extends controller {
     
 
     public function executeTemplate() {
-
+        $this->setTemplateVars();
         try {
             $buffer = ob_get_contents();
             ob_clean();
             ob_start("ob_gzhandler");  // compress page before sending
             $this->nocache();
-		
-            header('Content-Type: text/html; charset=utf-8');          
-		
+            header('Content-Type: text/html; charset=utf-8');          		
             echo $this->template->execute();
             //echo $buffer;
         } catch (Exception $e) {
