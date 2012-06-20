@@ -32,7 +32,7 @@
 class Database {
 
     // debug flag for showing error messages
-    public $debug = false;
+    public $debug = true;
     // Store the single instance of Database
     private static $instance;
     private $server = ""; //database server
@@ -71,12 +71,10 @@ class Database {
 # desc: singleton declaration
 
     public static function obtain($server=null, $user=null, $pass=null, $database=null) {
-        
         log::doLog(__FUNCTION__);
         if (!self::$instance) {
             self::$instance = new Database($server, $user, $pass, $database);
         }
-
         return self::$instance;
     }
 

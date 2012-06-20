@@ -1,0 +1,1142 @@
+[2012-06-15 16:31:36 (HTR-ANTONIO)]Log->doLog(line:75) : obtain
+[2012-06-15 16:31:37 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-15 17:02:20 (HTR-ANTONIO)]Log->doLog(line:75) : obtain
+[2012-06-15 17:02:20 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-15 17:02:20 (HTR-ANTONIO)]Log->doLog(line:325) : query error : (1045) Access denied for user 'root'@'localhost' (using password: YES)
+[2012-06-15 17:02:20 (HTR-ANTONIO)]Log->doLog(line:325) : query error : (1045) Access denied for user 'root'@'localhost' (using password: YES)
+[2012-06-15 17:02:42 (HTR-ANTONIO)]Log->doLog(line:75) : obtain
+[2012-06-15 17:02:42 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-15 17:13:45 (HTR-ANTONIO)]Log->doLog(line:75) : obtain
+[2012-06-15 17:13:45 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-15 17:13:45 (HTR-ANTONIO)]Log->doLog(line:325) : query error : (1045) Access denied for user 'root'@'localhost' (using password: YES)
+[2012-06-15 17:13:45 (HTR-ANTONIO)]Log->doLog(line:325) : query error : (1045) Access denied for user 'root'@'localhost' (using password: YES)
+[2012-06-15 17:13:52 (HTR-ANTONIO)]Log->doLog(line:75) : obtain
+[2012-06-15 17:13:52 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-15 17:13:52 (HTR-ANTONIO)]Log->doLog(line:325) : query error : (1045) Access denied for user 'root'@'localhost' (using password: YES)
+[2012-06-15 17:15:00 (HTR-ANTONIO)]Log->doLog(line:75) : obtain
+[2012-06-15 17:15:00 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-15 17:15:00 (HTR-ANTONIO)]Log->doLog(line:325) : query error : (1045) Access denied for user 'root'@'localhost' (using password: YES)
+[2012-06-15 17:15:13 (HTR-ANTONIO)]Log->doLog(line:75) : obtain
+[2012-06-15 17:15:13 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-15 17:15:13 (HTR-ANTONIO)]Log->doLog(line:325) : query error : (1045) Access denied for user 'root'@'localhost' (using password: NO)
+[2012-06-15 17:18:00 (HTR-ANTONIO)]Log->doLog(line:75) : obtain
+[2012-06-15 17:18:00 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-15 17:25:01 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-15 17:25:01 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-15 17:49:42 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-15 17:49:42 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-15 17:50:18 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-15 17:50:18 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-15 17:50:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-15 17:50:36 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-15 17:51:30 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-15 17:51:30 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-15 17:51:47 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-15 17:51:47 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-15 17:52:07 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-15 17:52:07 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-15 17:52:40 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-15 17:52:40 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-15 17:52:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-15 17:52:48 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-15 17:53:05 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-15 17:53:05 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-15 18:47:15 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-15 18:47:15 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 11:36:32 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 11:36:32 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 11:36:40 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 11:36:40 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 11:36:44 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 11:36:44 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:11:04 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:11:04 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:11:22 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:11:22 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:13:58 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:13:58 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:14:32 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:14:32 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:15:32 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:15:32 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:47:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:47:48 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:48:31 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:48:31 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:48:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:48:36 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:48:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:48:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:48:48 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:48:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:48:57 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:48:57 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:48:57 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:48:57 (HTR-ANTONIO)]Log->doLog(line:323) : query error : (1146) Table 'matecat_sandbox.segment' doesn't exist - select  segment from segment where id_file =1
+[2012-06-18 12:48:57 (HTR-ANTONIO)]Log->doLog(line:323) : query error : (1146) Table 'matecat_sandbox.segment' doesn't exist - select  segment from segment where id_file =1
+[2012-06-18 12:49:06 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:49:06 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:49:06 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:49:06 (HTR-ANTONIO)]Log->doLog(line:323) : query error : (1146) Table 'matecat_sandbox.segment' doesn't exist - select  segments from segment where id_file =1
+[2012-06-18 12:49:06 (HTR-ANTONIO)]Log->doLog(line:323) : query error : (1146) Table 'matecat_sandbox.segment' doesn't exist - select  segments from segment where id_file =1
+[2012-06-18 12:49:19 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:49:19 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:49:19 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:49:25 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:49:25 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:49:25 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:49:42 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:49:42 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:49:42 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:49:59 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:49:59 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:49:59 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:50:04 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:50:04 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:50:04 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:55:05 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:55:05 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:55:05 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:55:16 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:55:16 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:55:16 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:55:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:55:52 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:55:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:56:13 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:56:13 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:56:13 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:56:58 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:56:58 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:56:58 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:57:06 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:57:06 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:57:06 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:57:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:57:08 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:57:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:57:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 12:57:08 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 12:57:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:06:22 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:06:22 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 13:06:22 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:06:38 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:06:38 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 13:06:38 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:06:50 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:06:50 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 13:06:50 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:08:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:08:48 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 13:08:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:10:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:10:36 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 13:10:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:13:01 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:13:01 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 13:13:01 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:13:17 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:13:17 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 13:13:17 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:13:43 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:13:43 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 13:13:43 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:14:41 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:14:41 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 13:14:41 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:15:50 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:15:50 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 13:15:50 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:16:12 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 13:16:12 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 13:16:12 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 15:13:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 15:13:52 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 15:13:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 15:14:01 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 15:14:01 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 15:14:01 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:02:59 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:02:59 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:02:59 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:03:33 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:03:33 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:03:33 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:06:12 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:06:12 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:06:12 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:06:35 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:06:35 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:06:35 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:07:21 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:07:21 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:07:21 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:08:47 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:08:47 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:08:47 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:08:49 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:08:49 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:08:49 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:08:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:08:52 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:08:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:08:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:08:52 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:08:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:08:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:08:52 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:08:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:08:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:08:52 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:08:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:08:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:08:52 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:08:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:08:53 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:08:53 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:08:53 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:09:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:09:08 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:09:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:09:34 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:09:34 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:09:34 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:09:41 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:09:41 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:09:41 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:09:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:09:51 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:09:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:09:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:09:51 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:09:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:09:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:09:52 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:09:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:11:03 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:11:03 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:11:03 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:19:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:19:36 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:19:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:20:55 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:20:55 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:20:55 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:21:22 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:21:22 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:21:22 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:21:53 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:21:53 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:21:53 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:22:44 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:22:44 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:22:44 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:23:25 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:23:25 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:23:25 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:23:50 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:23:50 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:23:50 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:24:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:24:36 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:24:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:24:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:24:51 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:24:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:25:22 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:25:22 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:25:22 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:25:46 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:25:46 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:25:46 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:26:10 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:26:10 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:26:10 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:29:14 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:29:14 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:29:14 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:30:00 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:30:00 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:30:00 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:31:21 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:31:21 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:31:21 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:31:41 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:31:41 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:31:41 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:34:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-18 19:34:45 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-18 19:34:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 14:42:28 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 14:42:29 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 14:42:29 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 14:42:47 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 14:42:47 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 14:42:47 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 14:43:25 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 14:43:25 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 14:43:25 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 14:44:35 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 14:44:35 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 14:44:35 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:01:02 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:01:02 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 15:01:02 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:05:16 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:05:16 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 15:05:16 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:10:18 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:10:18 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 15:10:18 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:21:06 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:21:06 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 15:21:06 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:21:38 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:21:38 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 15:21:38 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:22:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:22:08 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 15:22:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:22:19 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:22:19 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 15:22:19 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:22:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:22:45 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 15:22:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:22:53 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:22:53 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 15:22:53 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:25:29 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:25:29 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 15:25:29 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:25:33 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:25:33 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 15:25:33 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:32:18 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:32:18 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 15:32:18 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:32:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:32:36 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 15:32:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:37:24 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:37:24 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 15:37:24 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:37:34 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:37:34 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 15:37:34 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:38:33 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:38:33 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 15:38:33 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:40:00 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 15:40:00 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 15:40:00 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 16:56:54 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 16:56:54 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 16:56:54 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 17:20:20 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 17:20:20 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 17:20:20 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 17:20:22 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 17:20:22 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 17:20:22 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 17:20:37 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 17:20:37 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 17:20:37 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 17:23:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 17:23:45 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 17:23:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 17:23:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 17:23:48 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 17:23:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 17:27:29 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 17:27:29 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 17:27:29 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 17:30:01 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 17:30:01 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 17:30:01 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 17:47:42 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 17:47:42 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 17:47:42 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 17:59:01 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 17:59:01 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 17:59:01 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 18:05:58 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 18:05:58 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 18:05:58 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 18:06:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 18:06:36 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 18:06:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 18:07:44 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 18:07:44 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 18:07:44 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 18:42:06 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 18:42:06 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 18:42:06 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 18:43:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 18:43:51 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 18:43:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 19:04:29 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 19:04:29 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 19:04:29 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 19:05:06 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 19:05:06 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 19:05:06 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 19:29:42 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 19:29:42 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 19:29:42 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 19:33:14 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 19:33:14 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 19:33:14 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 19:34:43 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 19:34:43 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 19:34:43 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 19:35:49 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 19:35:49 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 19:35:49 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 19:35:57 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-19 19:35:57 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-19 19:35:57 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-20 12:43:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-20 12:43:45 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-20 12:43:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-20 12:43:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-20 12:43:48 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-20 12:43:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-20 12:53:30 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-20 12:53:30 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-20 12:53:30 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-20 12:54:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-20 12:54:51 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-20 12:54:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-20 13:01:07 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-20 13:01:07 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-20 13:01:07 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-20 13:02:02 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-20 13:02:02 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-20 13:02:02 (HTR-ANTONIO)]Log->doLog(line:74) : obtain

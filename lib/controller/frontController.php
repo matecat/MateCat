@@ -150,6 +150,7 @@ abstract class viewcontroller extends controller {
             echo "\n\n\n";
             print_r($this->template);
             echo "</pre>";
+            exit;
         }
     }
 

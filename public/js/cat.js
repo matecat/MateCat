@@ -275,9 +275,9 @@ UI = {
 		})
 
 		$(".copysource").click(function(){
-			//console.log ("cp");
+			console.log ("cp");
 			var source_val = $.trim($(this).parents(".ed").find("li.source").html());
-			//console.log(source_val)
+			console.log(source_val)
 			$(this).parents(".ed").find("li.target>textarea").val(source_val).keyup().focus();
 			$(this).parents(".ed").find("li.target>textarea").effect("highlight", {}, 1000);
 		})
