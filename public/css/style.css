@@ -188,7 +188,7 @@ z-index:9;
 
 
 /*done & draft*/
-.Translated, .draft, .approved{background:#6397cd url(../img/green-point.gif) 0 0 repeat-x;border:1px solid #848689;color:#000;font-weight:bold;-moz-box-shadow: 0 1px 1px #333;text-decoration:none;padding:7px 16px;-moz-border-radius: 2px;border-radius: 2px;margin:0 0px 5px 5px;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;
+.Translated, .draft, .approved{background:#6397cd;border:1px solid #848689;color:#000;font-weight:bold;-moz-box-shadow: 0 1px 1px #333;text-decoration:none;padding:7px 16px;-moz-border-radius: 2px;border-radius: 2px;margin:0 0px 5px 5px;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;
 
 -webkit-box-shadow:
 	  inset 0 2px 1px  rgba(255,255,255,0.2),
@@ -403,7 +403,7 @@ width:88.1%;-moz-border-radius-bottomright:2px;	-webkit-border-bottom-right-radi
 .col-draft{background:#fff;}
 .col-notapproved{background:#dc2e34;}
 
-.menucolor{position:absolute; border:1px solid #ADADAD; margin:35px 0 0 -200px;width:auto;background:#fff; width:140px;z-index:9999;border-bottom:none;right:8px;-moz-border-radius: 2px;border-radius: 2px;-moz-box-shadow: 0 1px 4px #666;-webkit-box-shadow: 0 1px 4px #666;box-shadow: 0 1px 4px #666;font-weight:bold;font-size:14px;}
+.menucolor{position:absolute; border:1px solid #ADADAD; margin:35px 0 0 -200px;width:auto;background:#fff; width:140px;z-index:99999999999999;border-bottom:none;right:8px;-moz-border-radius: 2px;border-radius: 2px;-moz-box-shadow: 0 1px 4px #666;-webkit-box-shadow: 0 1px 4px #666;box-shadow: 0 1px 4px #666;font-weight:bold;font-size:14px;}
 .menucolor li{margin:0;padding:0;float:none;width:100%;border-bottom:1px solid #ADADAD;border-top:1px solid #fff}
 .menucolor li a{background: url(../img/status.png) 119px 9px no-repeat;padding:7px 20px 7px 10px;display:block;color:#000; text-decoration:none; }
 
@@ -528,7 +528,7 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 .upload-input{width:300px;padding:5px;font-size:22px;-moz-border-radius: 2px;border-radius: 2px;border:1px solid #727272;-moz-box-shadow: inset 0 1px 2px #888;-webkit-box-shadow: inset 0 1px 2px #888;}
 .uploadtext{float:left;width:55%;}
 .uploadtext h2{margin:15px 0 0 0;}
-.uploadbtn{background: #7cc576 url(../img/green-point.gif) 0 0 repeat-x;border:1px solid #848689;color:#000;font-weight:bold;-moz-box-shadow: 0 1px 1px #333;padding:4px 36px 6px 36px;-moz-border-radius: 2px;border-radius: 2px;margin:10px 0px 5px 0px;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;font-size:26px !important;cursor:pointer;
+.uploadbtn{background: #7cc576;border:1px solid #848689;color:#000;font-weight:bold;-moz-box-shadow: 0 1px 1px #333;padding:4px 36px 6px 36px;-moz-border-radius: 2px;border-radius: 2px;margin:10px 0px 5px 0px;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;font-size:26px !important;cursor:pointer;
 -webkit-box-shadow:	  inset 0 2px 1px  rgba(255,255,255,0.2),	  inset 0 -2px 3px rgba(0,0,0,0.2),	  0 1px 1px #333;	 
 	-moz-box-shadow:	  inset 0 2px 1px  rgba(255,255,255,0.2),	  inset 0 -2px 3px rgba(0,0,0,0.2)}
 
@@ -541,3 +541,6 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 /*
 .ed {overflow: hidden;}
 */
+
+.hide {display:none}
+.source .original {display:none;}

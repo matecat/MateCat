@@ -14,7 +14,7 @@ Loader = {
 		'jquery-ui-1.8.20.custom.min',
 		'jquery.tabify',
 		'jquery.hotkeys',
-		'smoothscroll',
+//		'smoothscroll',
 		'jquery.autogrow-textarea',
 		'jquery.atooltip'
 	),

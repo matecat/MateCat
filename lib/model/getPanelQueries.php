@@ -2,18 +2,19 @@
 
 include_once 'Database.class.php';
 
-function getCurrentFormalOffer($pid){
-    $query = "select id,id_file, segment from segments where id_file =4  limit 100 ";
+function getCurrentFormalOffer($id){
+    $query = "select pass, last_visit_datetime, 
+                accepted, accepting_ip, accepting_datetime
+                from " . OFFER_HTML_TABLE . " 
+                where id_offer_stat=$id 
+                order by id desc limit 0,1";
     
     // log::doLog($query);
 
     $db = Database::obtain();
-    $results = $db->fetch_array($query);
+    $results = $db->query_first($query);
     // // log::doLog($results);
-//    echo "<pre>";
-//    echo count($results);
-//    print_r ($results);exit;
-   return $results;
+    return $results;
 }
 
 function getAllData($t, $am, $qof_go, $qof_id, $qof_pid, $qof_source, $qof_reqdate, $qof_tdelivdate, $qof_delivdate, $qof_cid, $qof_curroff, $qof_accoff, $qof_faxreq, $qof_status, $qof_am, $qof_limit) {

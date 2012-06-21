@@ -192,6 +192,7 @@ UI = {
 		});
 
 		$(".target-textarea").click(function(e) {
+                    console.log ("t click");
 
 //			console.log($(this).parents(".ed").offset().top);
 //			$('body').animate({
@@ -208,15 +209,12 @@ UI = {
 			//console.log(anchor2);
 
 			var segment = $(this).parents(".ed");
-			if(!$(".target-textarea",segment).val().length) UI.getContribution(segment);
-
 			if ( $(segment).find(".toggle").is(":visible")){return null}
 
 			$(".editor:visible").find(".x").click();
 			$(".target-textarea").addClass("grayed-text");
 
 			$("div.grayed").toggle();	
-
 			/* console.log ($(this).parents(".ed"));*/
 			$(this).parents(".ed").addClass("editor");
 			$(this).focus();
@@ -225,8 +223,7 @@ UI = {
 				direction: "vertical"
 				}, 250);
 //			UI.getSegmentComments(segment);
-//			if(!$(".target-textarea",segment).val().length) UI.getContribution(segment);
-			UI.getNextContribution(segment);
+			UI.getNextContribution();
 
 //			$(this).parents(".ed").scrollMinimal();
 			//  $(this).removeClass("editor-click");
@@ -359,12 +356,30 @@ UI = {
 */
 	},
 
-	getContribution: function(currentSegment) {
-		var n = $(currentSegment);
-		if($(n).hasClass('loaded')) return false;
-		var id = n.attr('id');
+	getNextContribution_BAK: function() {
+		var n = $('.editor').next().next();
+                console.log ("n is ");
+                console.log (n);
+                n_len=n.length;
+               // console.log("n_len is "+ n_len);
+                
+                if (n_len>1){
+                    n_next=n[1];
+                }else {
+                    n_next=n;
+                }
+                
+//                console.log ("editor  is ");
+//                console.log ($('.editor'));
+//                console.log ("n_next is ");
+//                console.log (n_next);
+              
+		if($(n[1]).hasClass('loaded')) return false;
+		var id = $(n_next).attr('id');
+                
 		var id_segment = id.split('-')[1];
-		var txt = $('.source .original',n).text();
+		//var txt = $('.original',n).text();
+                var txt = $(n_next).find(".original").text();
 		$.ajax({
 			url: config.basepath + '?action=getContribution',
 			data: {
@@ -377,25 +392,49 @@ UI = {
 			dataType: 'json',
 			context: $('#'+id),
 			success: function(d){
-				$('.target-textarea', this).text(d.data.matches.translation);
+                                translation=d.data.matches[0].translation
+				//$('.target-textarea', this).val(translation);
+                                $('.target-textarea', n_next).val(translation);
 				var tt = this;
 				$(tt).addClass('loaded');
 				$('.sub-editor .overflow',tt).empty();
 				$('.submenu li.matches a span', this).text(d.data.matches.length);
 				$.each(d.data.matches, function() {
+                                        
 					$('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen">'+(this.match*100)+'%</li><li>'+this.last_update_date+'</li><li>Created by '+this.created_by+'</li></ul></ul>');
 				});
 			}
 		});
 	},
-
-	getNextContribution: function(currentSegment) {
-		var n = $(currentSegment).nextAll('.ed').first() || $(currentSegment).parents('.main').next().find('.ed').first();
-		if(!$(currentSegment).nextAll('.ed').length) {n = $(currentSegment).parents('.main').next().find('.ed').first()};
-		if($(n).hasClass('loaded')) return false;
-		var id = n.attr('id');
+        
+        getNextContribution: function() {
+		var n = $('.editor').next().next();
+                
+                console.log ("editor is");
+                console.log ($('.editor'));
+                //console.log ("n is " + n.length);
+                
+                
+                console.log ("n is");
+                console.log (n);
+                console.log ("n is " + n.length);
+                
+                $(n).each(function(e){
+                
+//                console.log ("editor  is ");
+//                console.log ($('.editor'));
+//                console.log ("n_next is ");
+//                console.log (n_next);
+              
+		if($(this).hasClass('loaded')) {
+                    console.log ("eee");
+                    return;
+                }
+		var id = $(this).attr('id');
+                
 		var id_segment = id.split('-')[1];
-		var txt = $('.source .original',n).text();
+		//var txt = $('.original',n).text();
+                var txt = $(this).find(".original").text();
 		$.ajax({
 			url: config.basepath + '?action=getContribution',
 			data: {
@@ -408,17 +447,19 @@ UI = {
 			dataType: 'json',
 			context: $('#'+id),
 			success: function(d){
-                            console.log(d.data);
-				$('.target-textarea', this).text(d.data.matches[0].translation);
+                                translation=d.data.matches[0].translation
+				$('.target-textarea', this).val(translation);
+                                //$('.target-textarea', n[i]).val(translation);
 				var tt = this;
 				$(tt).addClass('loaded');
 				$('.sub-editor .overflow',tt).empty();
 				$('.submenu li.matches a span', this).text(d.data.matches.length);
-				$.each(d.data.matches, function() {
+				$.each(d.data.matches, function() {                                        
 					$('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen">'+(this.match*100)+'%</li><li>'+this.last_update_date+'</li><li>Created by '+this.created_by+'</li></ul></ul>');
 				});
 			}
 		});
+                });
 	},
 	
 	setContribution: function(segment) {

@@ -52,6 +52,12 @@ abstract class controller {
             echo "</pre>";
         }
     }
+    
+    protected function get_from_get_post($varname){
+        $ret=null;
+        $ret=isset($_GET[$varname])?$_GET[$varname]:(isset($_POST[$varname])?$_POST[$varname]:null);
+        return $ret;
+    }
 
 }
 
@@ -148,7 +154,7 @@ abstract class viewcontroller extends controller {
             echo "<pre>";
             print_r($e);
             echo "\n\n\n";
-            print_r($this->template);
+           // print_r($this->template);
             echo "</pre>";
             exit;
         }
@@ -167,7 +173,7 @@ abstract class ajaxcontroller extends controller {
         ob_clean();
         // ob_start("ob_gzhandler");		// compress page before sending
         header('Content-Type: application/json; charset=utf-8');
-        $this->result=array("error"=>0, "result"=> "");
+        $this->result=array("errors"=>array(), "data"=> array());
     }
 
     public function echoJSONResult() {
