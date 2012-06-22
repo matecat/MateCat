@@ -5121,3 +5121,70 @@
     [1] => 33
 )
 
+[2012-06-22 15:46:06 (192.168.1.53)]Log->doLog(line:74) : obtain
+[2012-06-22 15:46:06 (192.168.1.53)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:46:06 (192.168.1.53)]Log->doLog(line:323) : query error : (1049) Unknown database 'matecat'
+[2012-06-22 15:46:06 (192.168.1.53)]Log->doLog(line:74) : obtain
+[2012-06-22 15:46:06 (192.168.1.53)]Log->doLog(line:323) : query error : (1046) No database selected - select id,id_file, segment from segments where id_file =4  limit 100
+[2012-06-22 15:46:10 (192.168.1.53)]Log->doLog(line:74) : obtain
+[2012-06-22 15:46:10 (192.168.1.53)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:46:10 (192.168.1.53)]Log->doLog(line:323) : query error : (1049) Unknown database 'matecat'
+[2012-06-22 15:46:10 (192.168.1.53)]Log->doLog(line:74) : obtain
+[2012-06-22 15:46:10 (192.168.1.53)]Log->doLog(line:323) : query error : (1046) No database selected - select id,id_file, segment from segments where id_file =4  limit 100
+[2012-06-22 15:46:23 (192.168.1.97)]Log->doLog(line:74) : obtain
+[2012-06-22 15:46:23 (192.168.1.97)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:46:23 (192.168.1.97)]Log->doLog(line:323) : query error : (1049) Unknown database 'matecat'
+[2012-06-22 15:46:23 (192.168.1.97)]Log->doLog(line:74) : obtain
+[2012-06-22 15:46:23 (192.168.1.97)]Log->doLog(line:323) : query error : (1046) No database selected - select id,id_file, segment from segments where id_file =4  limit 100
+[2012-06-22 15:47:05 (192.168.1.53)]Log->doLog(line:74) : obtain
+[2012-06-22 15:47:05 (192.168.1.53)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:47:05 (192.168.1.53)]Log->doLog(line:74) : obtain
+[2012-06-22 15:47:07 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:47:07 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:50:18 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:50:18 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:50:30 (192.168.1.97)]Log->doLog(line:74) : obtain
+[2012-06-22 15:50:30 (192.168.1.97)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:50:30 (192.168.1.97)]Log->doLog(line:74) : obtain
+[2012-06-22 15:50:34 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:50:34 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
