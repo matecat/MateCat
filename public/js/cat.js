@@ -21,6 +21,12 @@ UI = {
 			e.preventDefault();
 			$('.editor .Translated').click();
 		});
+		
+		$(".target-textarea").bind('keydown','Ctrl+return', function(e){
+                        e.preventDefault();
+                        $('.editor .Translated').click();
+                });
+
 
 		$('.sbm').tabify();
 		$(".sbm a").click(function() {
