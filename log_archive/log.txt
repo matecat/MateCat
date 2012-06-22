@@ -5121,1851 +5121,3242 @@
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:46:06 (192.168.1.53)]Log->doLog(line:74) : obtain
 [2012-06-22 15:46:06 (192.168.1.53)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 15:43:03 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 15:43:03 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:46:06 (192.168.1.53)]Log->doLog(line:323) : query error : (1049) Unknown database 'matecat'
 [2012-06-22 15:46:06 (192.168.1.53)]Log->doLog(line:74) : obtain
 [2012-06-22 15:46:06 (192.168.1.53)]Log->doLog(line:323) : query error : (1046) No database selected - select id,id_file, segment from segments where id_file =4  limit 100
 [2012-06-22 15:46:10 (192.168.1.53)]Log->doLog(line:74) : obtain
 [2012-06-22 15:46:10 (192.168.1.53)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:01:29 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:01:29 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:46:10 (192.168.1.53)]Log->doLog(line:323) : query error : (1049) Unknown database 'matecat'
 [2012-06-22 15:46:10 (192.168.1.53)]Log->doLog(line:74) : obtain
 [2012-06-22 15:46:10 (192.168.1.53)]Log->doLog(line:323) : query error : (1046) No database selected - select id,id_file, segment from segments where id_file =4  limit 100
 [2012-06-22 15:46:23 (192.168.1.97)]Log->doLog(line:74) : obtain
 [2012-06-22 15:46:23 (192.168.1.97)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:01:29 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:01:31 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:01:31 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:46:23 (192.168.1.97)]Log->doLog(line:323) : query error : (1049) Unknown database 'matecat'
 [2012-06-22 15:46:23 (192.168.1.97)]Log->doLog(line:74) : obtain
 [2012-06-22 15:46:23 (192.168.1.97)]Log->doLog(line:323) : query error : (1046) No database selected - select id,id_file, segment from segments where id_file =4  limit 100
 [2012-06-22 15:47:05 (192.168.1.53)]Log->doLog(line:74) : obtain
 [2012-06-22 15:47:05 (192.168.1.53)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:01:43 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:01:43 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:47:05 (192.168.1.53)]Log->doLog(line:74) : obtain
 [2012-06-22 15:47:07 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:47:07 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:01:43 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:01:43 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:50:18 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:50:18 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:01:43 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:01:43 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:50:30 (192.168.1.97)]Log->doLog(line:74) : obtain
 [2012-06-22 15:50:30 (192.168.1.97)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:03:34 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:03:34 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:50:30 (192.168.1.97)]Log->doLog(line:74) : obtain
 [2012-06-22 15:50:34 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:50:34 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:03:34 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:03:34 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:03:34 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:57:34 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 15:57:34 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:03:34 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:03:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:03:36 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:57:34 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 15:57:35 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:57:35 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:03:43 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:03:43 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:57:37 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:57:37 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:03:43 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:03:43 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:57:37 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:57:37 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:03:43 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:03:43 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:57:38 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:57:38 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:04:32 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:04:32 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:57:38 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:57:38 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:04:32 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:04:32 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:04:32 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:57:38 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:57:38 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:04:32 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:04:34 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:04:34 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:57:38 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:57:38 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:05:29 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:05:29 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:57:39 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:57:39 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:05:29 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:05:31 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:05:31 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:57:39 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:57:39 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:05:57 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:05:57 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:57:39 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:57:39 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:05:57 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:05:59 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:05:59 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:58:01 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 15:58:01 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:27 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:27 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:58:01 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 15:58:04 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:58:04 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:27 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:27 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:27 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:58:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:58:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:27 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:29 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:29 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:58:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:58:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:32 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:32 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:58:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:58:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:32 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:32 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:58:23 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:58:23 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:32 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:32 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:58:23 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:58:23 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:44 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:44 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:58:23 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:58:23 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:44 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:44 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:58:57 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 15:58:57 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:44 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:44 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:58:57 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 15:59:04 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 15:59:04 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:45 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 15:59:04 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 15:59:06 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 15:59:06 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:45 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:01:17 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 16:01:17 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:45 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:01:17 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 16:03:08 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 16:03:08 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:46 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:46 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:03:08 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 16:03:10 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:03:10 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:47 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:47 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:03:15 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:03:15 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:47 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:47 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:03:15 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:03:15 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:47 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:47 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:11:48 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 16:11:48 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:48 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:11:48 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 16:11:49 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 16:11:49 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:48 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:11:49 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 16:11:50 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:11:50 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:48 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:11:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:11:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:51 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:11:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:11:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:51 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:11:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:11:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:51 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:12:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:12:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:06:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:06:51 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:12:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:12:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:07:03 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:07:03 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:12:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:12:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:07:03 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:07:03 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:12:44 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:12:44 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:07:03 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:07:03 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:12:45 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:12:45 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:07:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:07:08 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:12:45 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:12:45 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:07:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:07:08 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:12:45 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:12:45 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:07:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:07:08 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:12:46 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:12:46 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:32:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:32:08 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:12:46 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:12:46 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:32:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:32:09 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:32:09 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:12:46 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:12:46 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:36:55 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:36:55 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:12:52 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:12:52 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:36:55 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:36:57 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:36:57 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:12:53 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:12:53 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:37:00 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:37:00 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:12:53 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:12:53 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:37:00 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:37:00 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:12:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:12:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:37:11 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:37:11 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:12:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:12:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:37:12 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:37:12 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:12:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:12:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:37:12 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:37:14 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:37:14 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:12:59 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 16:12:59 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:37:43 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:37:43 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:12:59 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 16:13:00 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:13:00 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:37:43 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:37:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:37:45 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:13:04 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:13:04 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:39:11 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:39:11 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:13:04 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:13:04 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:39:11 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:39:15 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:39:15 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:13:04 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:13:04 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:40:00 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:40:00 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:13:14 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:13:14 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:40:00 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:41:03 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:41:03 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:13:14 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:13:14 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:41:03 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:41:07 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:41:07 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:13:14 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:13:14 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:41:07 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:41:07 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:13:15 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:13:15 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:41:07 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:41:11 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:41:11 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:13:15 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:13:15 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:53:02 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:53:02 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:13:15 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:13:15 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:53:02 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:53:06 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:53:06 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:13:17 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:13:17 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:53:13 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:53:13 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:13:17 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:13:17 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:53:13 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:53:17 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:53:17 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:13:18 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:13:18 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:59:59 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 16:59:59 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:13:18 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:13:18 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 16:59:59 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:00:03 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:00:03 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:16:47 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:16:47 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:01:31 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:01:31 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:16:47 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:16:47 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:01:31 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:01:33 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:01:33 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:16:48 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:16:48 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:02:53 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:02:53 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:16:55 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:16:55 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:02:53 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:02:53 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:16:55 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:16:55 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:02:54 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:02:54 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:16:55 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:16:55 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:02:54 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:06:56 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:06:56 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:16:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:16:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:06:56 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:07:09 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:07:09 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:16:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:16:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:07:09 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:07:11 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:07:11 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:16:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:16:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:09:07 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:09:07 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:16:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:16:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:09:07 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:09:41 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:09:41 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:17:04 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:17:04 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:09:41 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:12:31 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:12:31 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:17:04 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:17:04 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:12:31 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:13:31 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:13:31 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:17:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:17:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:13:31 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:13:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:13:36 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:17:25 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:17:25 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:13:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:13:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:13:48 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:17:25 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:17:25 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:13:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:13:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:13:51 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:17:25 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:17:25 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:23:03 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:23:03 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:17:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:17:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:23:03 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:23:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:23:08 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:17:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:17:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:23:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:23:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:23:08 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:17:28 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:17:28 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:23:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:24:21 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:24:21 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:17:28 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:17:28 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:24:21 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:24:24 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:24:24 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:17:34 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:17:34 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:24:26 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:24:26 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:17:34 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:17:34 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:27:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:27:08 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:17:34 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:17:34 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:27:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:27:10 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:27:10 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:21 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:21 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:27:15 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:27:15 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:21 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:23 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:23 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:27:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:27:45 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:27:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:27:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:27:45 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:27:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:27:47 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:27:47 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:27:50 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:27:50 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:28:35 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:28:35 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:28:35 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:28:37 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:28:37 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:28:40 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:28:40 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:29:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:29:48 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:28 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:28 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:29:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:29:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:29:51 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:28 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:28 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:30:59 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:30:59 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:28 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:28 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:30:59 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:31:01 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:31:01 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:29 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:29 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:31:07 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:31:07 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:29 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:29 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:31:07 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:33:57 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:33:57 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:29 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:29 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:33:57 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:34:00 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:34:00 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:29 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:29 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:38:20 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:38:20 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:32 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:32 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:38:20 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:38:22 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:38:22 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:32 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:32 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:38:47 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:38:47 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:32 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:32 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:38:47 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:39:09 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:39:09 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:34 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:34 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:39:09 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:39:11 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:39:11 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:34 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:34 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:39:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:39:45 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:34 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:34 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:39:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:39:47 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:39:47 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:34 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:34 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:41:57 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:41:57 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:37 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:37 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:41:57 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:42:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:42:45 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:37 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:37 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:42:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:44:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:44:52 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:18:37 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:18:37 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:44:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:45:02 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:45:02 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:18 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:18 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:45:02 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:45:28 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:45:28 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:18 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:18 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:45:28 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:45:38 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:45:38 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:18 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:18 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:45:38 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:45:42 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:45:42 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:20 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:20 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:46:46 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:46:46 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:20 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:20 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:46:46 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:46:49 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:46:49 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:20 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:20 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:48:30 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:48:30 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:48:30 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:48:32 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:48:32 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:48:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:48:36 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:23 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:23 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:48:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:48:48 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:23 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:23 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:48:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:48:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:48:48 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:24 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:24 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:48:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:48:50 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:48:50 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:24 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:24 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 17:48:53 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 17:48:53 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:24 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:24 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:08:06 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:08:06 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:08:06 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:08:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:08:08 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:08:10 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:08:10 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:08:27 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:08:27 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:10:55 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:10:55 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:10:55 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:10:57 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:10:57 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:10:59 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:10:59 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:13:21 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:13:21 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:13:21 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:13:23 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:13:23 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:14:14 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:14:14 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:14:14 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:15:20 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:15:20 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:15:20 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:15:43 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:15:43 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:15:43 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:15:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:15:45 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:15:58 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:15:58 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:15:58 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:16:00 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:16:00 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:15 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:15 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:16:03 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:16:03 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:16 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:17 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:17 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:21:09 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:21:09 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:17 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:17 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:21:09 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:21:11 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:21:11 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:17 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:19 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:19 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:21:15 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:21:15 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:20 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:20 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:21:28 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:21:28 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:20 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:20 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:21:39 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:21:39 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:20 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:20 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:21:42 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:21:42 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:21 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:21 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:21:47 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:21:47 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:21 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:21 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:21:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:21:51 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:21 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:21 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:21:54 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:21:54 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:21 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:21 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:21:57 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:21:57 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:22:00 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:22:00 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:22:22 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:22:22 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:22:46 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:22:46 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:24 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:24 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:22:49 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:22:49 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:24 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:24 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:22:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:22:51 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:24 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:24 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:22:51 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:22:51 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:24 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:24 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:23:11 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:23:11 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:23:21 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:23:21 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:23:21 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:23:21 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:23:27 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:23:27 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:28 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:28 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:24:29 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:24:29 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:28 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:28 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:24:29 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:24:29 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:28 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:28 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:24:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:24:52 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:24:28 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:24:28 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:25:01 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:25:01 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:28:18 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:28:18 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:25:05 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:25:05 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:28:18 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:28:18 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:25:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:25:08 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:28:18 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:28:18 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:25:10 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:25:10 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 16:43:16 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 16:43:16 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:25:12 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:25:12 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:22:23 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 17:22:23 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:25:12 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:25:12 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:22:23 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 17:22:24 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:22:24 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:26:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:26:36 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:36:09 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 17:36:09 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:26:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:26:38 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:26:38 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:36:09 (192.168.1.78)]Log->doLog(line:74) : obtain
 [2012-06-22 17:57:55 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:57:55 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:26:41 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:26:41 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:57:55 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:57:55 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:26:41 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:26:41 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:57:55 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:57:55 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:26:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:26:48 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:57:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:57:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:26:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:26:48 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:57:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:57:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:28:18 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:28:18 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:57:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:57:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:29:02 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:29:02 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:57:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:57:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:29:02 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:29:02 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:57:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:57:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:29:02 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:29:04 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:29:04 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:57:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:57:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:29:14 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:29:14 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:57:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:57:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:29:24 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:29:24 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:00 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:00 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:30:40 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:40 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:00 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:00 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:30:40 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:42 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:42 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:00 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:00 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:30:45 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:45 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:00 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:00 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:30:50 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:50 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:30:59 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:59 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:30:59 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:59 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:35:04 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:35:04 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:08 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:08 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:35:04 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:35:07 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:35:07 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:08 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:08 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:35:28 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:35:28 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:08 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:08 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:35:28 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:35:30 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:35:30 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:13 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:13 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:36:33 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:36:33 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:13 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:13 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:36:33 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:36:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:36:36 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:13 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:13 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:36:39 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:36:39 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:16 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:16 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:36:41 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:36:41 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:16 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:16 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:38:18 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:38:18 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:16 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:16 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:38:18 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:38:20 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:38:20 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:19 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:19 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:38:24 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:38:24 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:19 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:19 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:38:27 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:38:27 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:19 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:19 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:38:37 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:38:37 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:38:37 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:38:37 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:50:04 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:50:04 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:50:04 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:50:06 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:50:06 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:26 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:26 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:53:22 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:53:22 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:26 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:26 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:53:22 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:53:39 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:53:39 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:26 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:26 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:53:39 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:53:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:53:48 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:32 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:32 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:53:48 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:53:50 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:53:50 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:32 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:32 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:54:19 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:54:19 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:58:32 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:58:32 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:55:10 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:55:10 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:59:19 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:59:19 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:55:10 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:56:25 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:56:25 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:59:19 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:59:19 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:56:25 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:56:28 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:56:28 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:59:21 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:59:21 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:57:18 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:57:18 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:59:21 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:59:21 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:57:18 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:57:37 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:57:37 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 17:59:21 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 17:59:21 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:57:37 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:58:29 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:58:29 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:39 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:39 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:58:29 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:58:32 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:58:32 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:39 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:39 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:58:39 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:58:39 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:39 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:39 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:59:31 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:59:31 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:39 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:39 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:59:31 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:59:34 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:59:34 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:42 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:42 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:59:38 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:59:38 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:42 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:42 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 18:59:43 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 18:59:43 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:42 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:42 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:12:02 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:12:02 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:48 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:48 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:12:02 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:12:04 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:12:04 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:48 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:48 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:12:06 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:12:06 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:48 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:48 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:12:06 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:12:06 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:12:06 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:50 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:50 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:12:06 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:12:08 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:12:08 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:50 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:50 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:12:10 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:12:10 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:50 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:50 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:12:10 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:12:10 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:51 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:51 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:12:10 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:12:10 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:51 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:51 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:12:13 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:12:13 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:51 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:51 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:12:13 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:12:13 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:51 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:51 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:12:13 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:12:13 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:53 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:53 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:12:17 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:12:17 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:53 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:53 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:12:17 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:12:17 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:53 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:53 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:12:17 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:12:17 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:53 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:53 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:15:33 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:15:33 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:54 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:54 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:15:33 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:15:35 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:15:35 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:54 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:54 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:15:39 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:15:39 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:54 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:54 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:16:13 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:16:13 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:16:13 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:16:15 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:16:15 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:16:20 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:16:20 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:17:40 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:17:40 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:17:40 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:17:42 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:17:42 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:17:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:17:52 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:17:52 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:17:53 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:17:53 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:17:53 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:17:55 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:17:55 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:58 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:58 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:18:25 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:18:25 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:58 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:58 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:18:25 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:18:27 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:18:27 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:58 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:58 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:18:30 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:18:30 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:59 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:59 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:18:33 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:18:33 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:59 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:59 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:19:26 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:19:26 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:59 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:59 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:19:26 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:19:26 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
 )
 
+<<<<<<< HEAD:log_archive/log.txt
 [2012-06-22 18:02:59 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 18:02:59 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
 (
@@ -7921,6 +9312,10 @@
 
 [2012-06-22 19:10:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
 [2012-06-22 19:10:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+=======
+[2012-06-22 19:19:36 (HTR-ANTONIO)]Log->doLog(line:74) : obtain
+[2012-06-22 19:19:36 (HTR-ANTONIO)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+>>>>>>> b1b7011720e0fdb9a4b9a4359faeaf7cfe56e4c6:log_archive/log.txt
 (
     [0] => arr1
     [1] => 33
