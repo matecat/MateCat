@@ -5188,3 +5188,2453 @@
     [1] => 33
 )
 
+[2012-06-22 15:57:34 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 15:57:34 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:57:34 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 15:57:35 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:57:35 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:57:37 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:57:37 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:57:37 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:57:37 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:57:38 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:57:38 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:57:38 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:57:38 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:57:38 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:57:38 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:57:38 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:57:38 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:57:39 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:57:39 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:57:39 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:57:39 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:57:39 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:57:39 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:58:01 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 15:58:01 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:58:01 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 15:58:04 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:58:04 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:58:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:58:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:58:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:58:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:58:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:58:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:58:23 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:58:23 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:58:23 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:58:23 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:58:23 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:58:23 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:58:57 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 15:58:57 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:58:57 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 15:59:04 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 15:59:04 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 15:59:04 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 15:59:06 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 15:59:06 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:01:17 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 16:01:17 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:01:17 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 16:03:08 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 16:03:08 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:03:08 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 16:03:10 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:03:10 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:03:15 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:03:15 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:03:15 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:03:15 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:11:48 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 16:11:48 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:11:48 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 16:11:49 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 16:11:49 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:11:49 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 16:11:50 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:11:50 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:11:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:11:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:11:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:11:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:11:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:11:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:12:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:12:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:12:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:12:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:12:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:12:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:12:44 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:12:44 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:12:45 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:12:45 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:12:45 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:12:45 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:12:45 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:12:45 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:12:46 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:12:46 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:12:46 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:12:46 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:12:46 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:12:46 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:12:52 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:12:52 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:12:53 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:12:53 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:12:53 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:12:53 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:12:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:12:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:12:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:12:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:12:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:12:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:12:59 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 16:12:59 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:12:59 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 16:13:00 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:13:00 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:13:04 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:13:04 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:13:04 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:13:04 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:13:04 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:13:04 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:13:14 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:13:14 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:13:14 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:13:14 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:13:14 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:13:14 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:13:15 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:13:15 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:13:15 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:13:15 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:13:15 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:13:15 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:13:17 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:13:17 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:13:17 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:13:17 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:13:18 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:13:18 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:13:18 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:13:18 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:16:47 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:16:47 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:16:47 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:16:47 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:16:48 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:16:48 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:16:55 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:16:55 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:16:55 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:16:55 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:16:55 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:16:55 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:16:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:16:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:16:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:16:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:16:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:16:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:16:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:16:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:17:04 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:17:04 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:17:04 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:17:04 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:17:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:17:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:17:25 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:17:25 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:17:25 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:17:25 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:17:25 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:17:25 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:17:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:17:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:17:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:17:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:17:28 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:17:28 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:17:28 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:17:28 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:17:34 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:17:34 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:17:34 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:17:34 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:17:34 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:17:34 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:21 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:21 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:21 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:23 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:23 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:28 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:28 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:28 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:28 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:28 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:28 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:29 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:29 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:29 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:29 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:29 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:29 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:29 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:29 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:32 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:32 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:32 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:32 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:32 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:32 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:34 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:34 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:34 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:34 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:34 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:34 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:34 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:34 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:37 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:37 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:37 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:37 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:18:37 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:18:37 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:18 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:18 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:18 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:18 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:18 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:18 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:20 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:20 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:20 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:20 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:20 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:20 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:23 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:23 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:23 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:23 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:24 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:24 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:24 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:24 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:24 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:24 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:33 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:19:36 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:15 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:15 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:16 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:17 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:17 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:17 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:17 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:17 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:19 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:19 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:20 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:20 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:20 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:20 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:20 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:20 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:21 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:21 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:21 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:21 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:21 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:21 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:21 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:21 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:24 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:24 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:24 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:24 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:24 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:24 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:24 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:24 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:27 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:27 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:28 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:28 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:28 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:28 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:28 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:28 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:24:28 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:24:28 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:28:18 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:28:18 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:28:18 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:28:18 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:28:18 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:28:18 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 16:43:16 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 16:43:16 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:22:23 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 17:22:23 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:22:23 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 17:22:24 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:22:24 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:36:09 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 17:36:09 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:36:09 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 17:57:55 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:57:55 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:57:55 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:57:55 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:57:55 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:57:55 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:57:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:57:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:57:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:57:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:57:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:57:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:57:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:57:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:57:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:57:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:57:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:57:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:57:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:57:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:00 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:00 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:00 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:00 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:00 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:00 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:00 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:00 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:08 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:08 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:08 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:08 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:08 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:08 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:13 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:13 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:13 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:13 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:13 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:13 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:16 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:16 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:16 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:16 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:16 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:16 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:19 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:19 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:19 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:19 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:19 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:19 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:26 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:26 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:26 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:26 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:26 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:26 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:32 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:32 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:32 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:32 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:58:32 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:58:32 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:59:19 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:59:19 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:59:19 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:59:19 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:59:21 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:59:21 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:59:21 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:59:21 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 17:59:21 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 17:59:21 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:39 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:39 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:39 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:39 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:39 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:39 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:39 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:39 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:42 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:42 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:42 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:42 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:42 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:42 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:48 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:48 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:48 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:48 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:48 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:48 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:50 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:50 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:50 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:50 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:50 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:50 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:51 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:51 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:51 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:51 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:51 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:51 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:51 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:51 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:53 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:53 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:53 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:53 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:53 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:53 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:53 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:53 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:54 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:54 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:54 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:54 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:54 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:54 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:56 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:57 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:57 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:58 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:58 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:58 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:58 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:58 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:58 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:59 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:59 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:59 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:59 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:59 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:59 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:02:59 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:02:59 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:01 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:01 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:01 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:01 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:01 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:01 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:01 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:01 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:02 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:02 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:02 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:02 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:02 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:02 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:03 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:03 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:03 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:03 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:03 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:03 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:04 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:04 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:04 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:04 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:04 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:04 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:04 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:04 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:06 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:06 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:06 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:06 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:06 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:06 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:06 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:06 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:06 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:06 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:06 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:06 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:06 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:06 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:09 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:09 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:09 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:09 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:09 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:09 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:10 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:10 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:10 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:10 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:10 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:10 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:03:10 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:03:10 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:13:12 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 18:13:12 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:13:12 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 18:13:13 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:13:13 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:13:17 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 18:13:17 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:13:17 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 18:13:19 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:13:19 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:20:02 (192.168.1.175)]Log->doLog(line:74) : obtain
+[2012-06-22 18:20:02 (192.168.1.175)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:20:02 (192.168.1.175)]Log->doLog(line:74) : obtain
+[2012-06-22 18:20:03 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:20:03 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:20:06 (192.168.1.175)]Log->doLog(line:74) : obtain
+[2012-06-22 18:20:06 (192.168.1.175)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:20:06 (192.168.1.175)]Log->doLog(line:74) : obtain
+[2012-06-22 18:20:07 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:20:07 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:29:26 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:29:26 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:29:26 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:29:26 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:29:59 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 18:29:59 (192.168.1.78)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:29:59 (192.168.1.78)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:01 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:01 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:03 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:03 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:03 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:03 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:03 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:03 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:06 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:06 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:06 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:06 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:06 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:06 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:13 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:13 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:13 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:13 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:13 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:13 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:15 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:15 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:15 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:15 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:15 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:15 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:17 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:17 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:17 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:17 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:17 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:17 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:17 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:17 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:20 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:20 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:20 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:20 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:20 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:20 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:23 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:23 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:23 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:23 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:30:23 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:30:23 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:35:41 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:35:41 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:45:14 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:45:14 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:45:15 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:45:15 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:45:21 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:45:21 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:45:22 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:45:22 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:46:08 (192.168.1.175)]Log->doLog(line:74) : obtain
+[2012-06-22 18:46:08 (192.168.1.175)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:46:08 (192.168.1.175)]Log->doLog(line:74) : obtain
+[2012-06-22 18:46:10 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:46:10 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:46:12 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:46:12 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:46:12 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:46:12 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:46:15 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:46:15 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:46:15 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:46:15 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:46:16 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:46:16 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:46:16 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:46:16 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:50:30 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:50:30 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:50:31 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:50:31 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:50:31 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:50:31 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:50:47 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:50:47 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:50:47 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:50:47 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:51:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:51:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:51:05 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:51:05 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:51:07 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:51:07 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:51:07 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:51:07 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:53:28 (192.168.1.175)]Log->doLog(line:74) : obtain
+[2012-06-22 18:53:28 (192.168.1.175)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
+[2012-06-22 18:53:28 (192.168.1.175)]Log->doLog(line:74) : obtain
+[2012-06-22 18:53:29 (bohr.translated.home)]Log->doLog(line:74) : obtain
+[2012-06-22 18:53:29 (bohr.translated.home)]Log->doLog(line:58) : __construct - ciao - come va - 1 - Array
+(
+    [0] => arr1
+    [1] => 33
+)
+
