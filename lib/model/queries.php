@@ -2,8 +2,8 @@
 
 include_once 'Database.class.php';
 
-function getCurrentFormalOffer($pid){
-    $query = "select id,id_file, segment from segments where id_file =4  limit 100 ";
+function getCurrentFormalOffer($pid, $start=0){
+    $query = "select id,id_file, segment from segments where id_file =4 limit $start,100 ";
     
     // log::doLog($query);
 

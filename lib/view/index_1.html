@@ -1,0 +1,442 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Translate - Project_Name - Job_ID </title>
+        <link rel="shortcut icon" href="/public/img/favicon.ico" />
+        <link href="/public/css/style.css" rel="stylesheet" type="text/css" />
+        <link rel='stylesheet' media='screen and (min-width: 701px) and (max-width: 1080px)' href='/public/css/test.css' />
+        <!--[if IE ]>
+<link href="/public/css/ieall.css" rel="stylesheet" type="text/css" />
+<![endif]-->
+
+        <!--[if lt IE 8]>
+        <link href="/public/css/ie.css" rel="stylesheet" type="text/css" />
+        <![endif]-->
+
+        <script src="/public/js/loader.js"></script>
+        <script type="text/javascript">
+            $(function(){ 
+                $('a.normalTip').aToolTip();				
+            }); 
+        </script>
+    </head>
+
+    <body>
+        <div class="header">
+            <div class="wrapper">   
+                <a href="" class="notification m-notification" title="click to view notifications">2</a>
+                <span class="text">+ you</span> 
+                <a href="#" class="viewer not-online">
+                    <span class="v-name">
+                        <span class="v-arrow"></span>
+                        Marco Trombetti <br />
+                        (offline)<br />
+                        last edit: 12/06/12 at 06.30 AM
+                    </span>
+                </a> 
+                <a href="#" class="viewer not-online">
+                    <span class="v-name">
+                        <span class="v-arrow"></span>
+                        Antonio Farina <br />
+                        (offline)<br />
+                        last edit: 12/06/12 at 06.30 AM
+                    </span>
+                </a> 
+                <a href="#" class="viewer">
+                    <span class="v-name">
+                        <span class="v-arrow"></span>
+                        Alessandro Cattelan<br />
+                        last edit: 12/06/12 at 06.30 AM
+                    </span>
+                </a>
+                <!-- edit/view notifiche globali -->
+                <div class="notification-box">
+                    <a href="#" class="arrow-notification"></a>
+                    <div class="h-notification">Notifications  </div>
+                    <ul>
+                        <li>
+                            <a href="#">
+                                <b>Luca</b> 
+                                <br/>
+                                "parts" va tradotto con "componenti" e non con "pezzi"
+                            </a>
+                        </li>
+                        <li>
+                            <b>Lucia</b>
+                            <br/>      
+                            questa frase è lunga e risulta illeggibile
+                        </li>
+                        <li>
+                            <b>Antonio</b>
+                            <br/>
+                            attenzione ai doppi spazi
+                        </li>
+                    </ul>
+                </div>
+                <!-- END edit/view notifiche globali -->
+
+                <a href="#">
+                    <img src="/public/img/logo.png" class="logo" />
+                </a>
+                <div class="breadcrumbs">    
+                    <div class="joblist">
+                        <a href="#" class="arrow-notification"></a>
+                        <ul>
+                            <li>
+                                <a href="">
+                                    <b>Job1</b> 
+                                </a>
+                            </li>
+                            <li>
+                                <a href="">
+                                    <b>Another job</b> 
+                                </a>
+                            </li>
+                            <li>
+                                <a href="">
+                                    <b>Eaaasy job</b> 
+                                </a>
+                            </li>
+                        </ul>
+                    </div>  <a href="#" class="joblink"  name="1" >Jobs List</a> > Hotel Shangrilà (112323 - FR)
+                </div>
+                <div class="cl"></div>
+            </div>
+
+            <div class="cl"></div>
+
+            <!-- <div class="tools">
+                 <div class="wrapper">
+                     <a id="back-button" href="#"></a>
+                     <a id="forth-button" href="#"></a>
+                     <a id="search-button" href="" class="search-icon"></a>
+                 </div>
+             </div>-->
+
+            <!--  header search  div (hidden by default) -->
+            <div class="search" id="search" >
+                <a href="#" class="search-on"></a>
+
+                <p>Find:	</p>
+                <input name="" type="text" class="input" />									   
+                <p>Replace with:</p>
+                <input name="" type="text" class="input"/>
+
+                <input name="" type="button" class="btn con-submit" value="SEARCH IN SOURCE"/>
+                <a href="#" class="btn con-menubtn"></a>
+
+                <div class="cl"></div>
+
+                <!-- commento per Luca : racchiudere checkbox e la sua label in un 
+                container comune in modo da poter permettere un più semplice check/uncheck della checkbox 
+                (come per il select language del sito translated
+                -->
+                <input name="" type="checkbox" value="" class="checkbox"/> 
+                <p>Match case</p> 
+
+                <input name="" type="checkbox" value="" class="checkbox"/>    
+                <p>Match whole word</p>        
+
+                <input name="" type="checkbox" value="" class="checkbox"/>    
+                <p>search regular expressions </p>      
+
+                <input name="" type="checkbox" value="" class="checkbox"/>    
+                <p>conditional search   </p>
+
+                <div class="cl"></div>
+            </div>
+        </div>
+        <!--  END header serach  div (hidden by default) -->
+
+        <div class="main">
+            <div class="projectbar">
+                <h2>Hotel-Shangrilà.html</h2>
+                <div class="languages">
+                    <strong>English</strong> > <strong>Italian</strong></div>
+
+                <ul style="float:right;text-align:right;">
+                    <li>Eq. words: <strong>11.223</strong></li>
+                    <li>Translated: <strong>54%</strong></li>
+                    <li style="padding-right:0;">Approved: <strong>21%</strong></li>
+
+                </ul>
+            </div>
+
+            <tal:block tal:define="segment_data php:array()" tal:repeat="segment_data segments_data" >
+            <div title ="" tal:attributes="title segment_item/segment" class="ed" tal:define="segment_item php:array()" tal:repeat="segment_item segment_data">
+
+                <div class="toggle">
+                    <div class="h-editor">
+                        <a href="#" title="Created by Euromed" class="percentuage per-orange">75%</a>
+                        <a href="#" class="x" title="close this segment"></a>
+                        <div class="cl"></div>
+                    </div>
+                    <div class="cl"></div>
+                </div>
+                
+                <ul class="gray " tal:attributes="class string:gray ${segment_item/additional_css_class}">
+                    <li class="number">
+                        <a tal:define="anchor repeat/segment_item/number " href="#1" tal:attributes ="href string:#${anchor}" tal:content="anchor" name="1">1</a>
+                    </li>
+                    <!--li class="source">
+                        
+                        <span class="orangeborder">Collaborative</span> 
+                        <span class="greenborder">
+                            <span class="smart-suggestion-source">Translation Memory</span>
+                            <span class="smart-suggestion-target">Memoria di Traduzione</span>  
+                        </span>   
+                        systems will 
+                        <span class="orangeborder">really</span> 
+                        help your productivity
+                        <span class="qa">.</span>
+                    </li -->
+                    
+                    
+                    <li class="source">
+                        <span tal:replace=" structure segment_item/segment"/>
+                    </li>
+
+                    <li class="target">
+                        <span class="toggle"> <a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a></span>
+                        <textarea class="target-textarea" name="" cols="" rows=""></textarea> 
+                        <p class="cl"></p>
+                    </li>
+                    <li class="color"><a href="#" title="Click to edit the status"  class="status " ></a></li>
+                    <li class="commentballoon">
+                        <div class="h-notification c-close"> <span class="corner"></span>2</div>
+                        <div class="comment-area">
+                            <div class="h-notification"> <span class="corner"></span>2 Comments<a href="#" class="x-com" title="close this comment"></a></div>
+                            <ul>
+                                <li><p> <strong>luca panzarella</strong>
+                                        <span class="date">  6:11 PM Mar 31</span>
+                                        <br />
+                                        Fede, questa modifica riguarda lo sviluppo: molto più facile spiegartela bene a voce.. è banale </p></li>
+                                <li> <p><strong>Federico</strong>
+
+                                        <span class="date"> 12:53 PM Apr 2</span>
+                                        <br />
+                                        Domanda: ma poi l'utente cosa può fare in queste pagine statiche? Ci si arriva solamente da compilazione form? </p></li>
+                                <li> <p><strong>dario</strong>
+
+                                        <span class="date">  2:11 PM Apr 2</span>
+                                        <br />
+                                        si! </p></li>
+                                <li style="background:#c4d3dd; border-bottom:none">
+                                    <textarea name="" cols="" rows="" class="text-c" ></textarea>
+
+                                    <input name="" type="button" class="btn con-submit sugg-submit" value="ADD COMMENT"/>  
+                                    <div class="cl"></div> 
+                                </li>
+                            </ul>
+                        </div>
+                    </li>
+
+                    <ul class="menucolor">
+                        <span class="arrow-mcolor"></span>
+                        <li>
+                            <a href="#" class="f" title="set draft as status">DRAFT</a></li>
+                        <li>
+                            <a href="#" class="d" title="set translated as status">TRANSLATED</a></li>
+                        <li>
+                            <a href="#" class="a" title="set approved as status">APPROVED</a></li>
+                        <li>
+                            <a href="#" class="r" title="set rejected as status">REJECTED</a></li>
+                    </ul>
+                </ul>
+                <div class="cl"></div> 
+
+                <div class="toggle" > <div class="editr_btn">
+                        <div class="buttoned" style="margin-right:-27px"><a href="#" class="approved">APPROVED</a><div class="cl"></div><p>CTRL+3</p></div>
+                        <div class="buttoned"><a href="#" class="Translated">TRANSLATED</a><div class="cl"></div><p>CTRL+ENTER</p></div>
+                        <div class="buttoned"><a href="#" class="draft">DRAFT</a><div class="cl"></div><p>CTRL+2</p></div>
+                        <a href="#" class="btn copysource" title="Copy source to target"></a>
+                        <a href="#" class="btn tagmenu disabled" title=" Insert tags "></a>
+
+                    </div>
+                    <ul  class="sbm submenu">
+                        <li class="active suggestions"><a href="#smsg1">Smart suggestions</a> </li>
+                        <li class="matches"><a href="#tr_ma_1">Translation matches (<span>2</span>)</a></li>
+                        <li class="concordance"><a href="#con_1">Concordance</a></li>
+                        <li class="preview_tab"><a href="#Preview_1" class="preview-link">Preview</a></li>
+                    </ul>
+                    <div class="cl"></div>
+
+                    <div id="smsg1" class="sub-editor">
+
+                        <ul class="graysmall">
+                            <li ><span class="greenborder">Translation Memory</span></li>
+
+                            <li class="b">Memorie di traduzione</li>
+
+                            <ul class="graysmall-details">
+                                <li class="graygreen">   81%</li>
+                                <li>     02/11/2008  </li>
+
+                                <li>Created by Euromed</li>
+                                <li>CTRL+1</li>
+                            </ul>
+                        </ul>
+
+
+                        <ul class="graysmall addline-suggestion">   
+                            <li>            
+                                <input name="" type="text" value="Add a source suggestion"  
+                                       onblur="if(this.value.length == 0) this.value='Add a source suggestion';" onClick="if(this.value == 'Add a source suggestion') this.value='';" class="sugg-input" />
+                            </li>
+                            <li> 
+                                <input name="" type="text" value="Add a target suggestion"  
+                                       onblur="if(this.value.length == 0) this.value='Add a target suggestion';" onClick="if(this.value == 'Add a target suggestion') this.value='';" class="sugg-input second" /><input name="input" type="button" class="btn con-submit sugg-submit" value="ADD SUGGESTION"/>
+                            </li>
+                        </ul>
+                        <ul class="graysmall add-ul">
+                            <li><a href="#" class="addsuggestion">+</a> <span class="provalo">Add suggestion</span>                    </li>
+                        </ul>
+                        <div class="cl"></div>
+                    </div>
+                    <div id="tr_ma_1" class="sub-editor">
+
+                        <div class="overflow">     
+                            <ul class="graysmall">
+                                <li >Translation Memory </li>
+                                <li class="b">Memoria di traduzione</li>
+                            </ul>
+                            <ul class="graysmall-details">
+                                <li>   81%</li>
+                                <li>     02/11/2008  </li>
+
+                                <li>Created by Euromed</li>
+                            </ul>
+                            <ul class="graysmall">
+                                <li >Using MyMemory as a local translation memory</li>
+                                <li class="b">Usare MyMemory come una memoria di traduzione locale  </li>
+                            </ul>
+                            <ul class="graysmall-details">
+                                <li>   81%</li>
+                                <li>     02/11/2008  </li>
+
+                                <li>Created by Euromed</li>
+                            </ul>
+                            <ul class="graysmall">
+                                <li >MyMemory is the world's largest Translation Memory.</li>
+                                <li class="b">MyMemory è la memoria più grande del mondo di traduzione.</li>
+                            </ul>
+                            <ul class="graysmall-details">
+                                <li>   81%</li>
+                                <li>     02/11/2008  </li>
+
+                                <li>Created by Euromed</li>
+                            </ul>
+                            <div class="cl"></div>
+                        </div>
+                    </div>
+                    <div id="con_1" class="sub-editor">                      
+                        <a href="#" class="btn back"></a>
+                        <a href="#" class="btn forward"></a>
+                        <input name="" type="text" value="Enter text to search"  
+                               onblur="if(this.value.length == 0) this.value='Enter text to search';" onClick="if(this.value == 'Enter text to search') this.value='';" class="con-input"/>
+
+                        <div class="submenubutton">    
+                            <input name="" type="button" class="btn con-submit" value="SEARCH IN SOURCE"/>
+                            <a href="#" class="btn con-menubtn"></a>
+                            <ul class="con-menu" id="col-menu">
+                                <li><a href="#">SEARCH IN TARGET</a></li>
+                            </ul>
+                        </div>
+
+                        <div class="cl"></div>
+                    </div>
+                    <div id="Preview_1" class="sub-editor preview" >
+
+                        <!--iframe src="http://mymemory.translated.net/doc/" width="99.5%" scrolling="yes" height="100%" frameborder="0"></iframe-->
+
+                    </div>
+                </div>
+            </div>
+            </tal:block>
+
+        </div>
+        <div class="footer">
+            <div class="wrapper">
+
+                <a href="#" class="statslink">Project Statistics</a> 
+
+                <p >Progress:</p>
+                <div class="meter">
+                    <a href="#" style="width: 45%" class="green" title="Approved 45%"></a>
+                    <a href="#" style="width: 15%" class="blue" title="Done 15%"></a>
+                    <a href="#" style="width: 40%" class="orange" title="Draft 40%"></a>
+                </div>
+                <ul>
+                    <li>Eq. words: <strong>11.223</strong></li>
+                    <li>Translated: <strong>54%</strong></li>
+                    <li>Approved: <strong>21%</strong></li>
+                    <li>Words last hour: <strong>432</strong></li>
+                    <li>Expected completion: <strong>43 Hours</strong></li>
+                </ul>
+                <div class="stats">
+                    <ul class="h-stats">
+                        <div class="header-stats">Project stats (<a href="http://matecat.translated.home/?action=projectStatistics" target="_blank">More...</a>) <a href="#" class="x-stats"></a></div>
+
+                        <li class="first">&nbsp;</li>
+                        <li>Initial</li>
+                        <li>To-do</li>
+                        <li>%</li>
+                        <li>Cost</li>
+                    </ul>
+                    <ul>
+                        <li class="first">New</li>
+                        <li>100.00</li>
+                        <li>90</li>
+                        <li>100</li>
+                        <li>30</li>
+                    </ul>
+                    <ul>
+                        <li class="first">Repetitions</li>
+                        <li>100</li>
+                        <li>90</li>
+                        <li>100</li>
+                        <li>30</li>
+                    </ul>
+                    <ul>
+                        <li class="first">100% match</li>
+                        <li>100</li>
+                        <li>90</li>
+                        <li>100</li>
+                        <li>30</li>
+                    </ul>
+                    <ul>
+                        <li class="first">100% context match</li>
+                        <li>100</li>
+                        <li>90</li>
+                        <li>100</li>
+                        <li>30</li>
+                    </ul>
+                    <ul>
+                        <li class="first">Fuzzy match</li>
+                        <li>100</li>
+                        <li>90</li>
+                        <li>100</li>
+                        <li>30</li>
+                    </ul>
+                    <ul>
+                        <li class="first">Machine translation</li>
+                        <li>100</li>
+                        <li>90</li>
+                        <li>100</li>
+                        <li>30</li>
+                    </ul>
+                    <a href="#" class="arrow-notification"></a>
+                    <div class="cl"></div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="cl"></div>
+        <div class="grayed"></div>
+
+
+
+    </body>
+</html>

@@ -542,5 +542,10 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 .ed {overflow: hidden;}
 */
 
-.hide {display:none}
+.hide {display:none !important}
 .source .original {display:none;}
+
+
+/* TEMPORARY STYLES */
+.white_text{color: white;opacity: 0.0}
+

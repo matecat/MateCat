@@ -1,11 +1,10 @@
 <?php
+include INIT::$ROOT."/lib/utils/mymemory_queries_temp.php";
 
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-define('DEFAULT_NUM_RESULTS', 2);
-
 class getContributionController extends ajaxcontroller {
 
     private $id_segment;
@@ -46,10 +45,10 @@ class getContributionController extends ajaxcontroller {
         //$matches = $fake_matches;
 
         $matches=array();
-        $retMM = $this->getFromMM();
+        $retMM = getFromMM($this->text);
         foreach ($retMM as $r) {
             $matches[] = array("segment" => $this->text, "translation" => $r[0], "quelity" => $r[1], "created_by" => $r[2], "last_update_date" => $r[3], "match" => $r[4]);
-            if (count($matches) > DEFAULT_NUM_RESULTS) {
+            if (count($matches) > INIT::$DEFAULT_NUM_RESULTS_FROM_TM) {
                 break;
             }
         }
