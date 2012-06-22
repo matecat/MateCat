@@ -185,7 +185,9 @@
                     <div class="ed" tal:attributes="id string:segment-${segment_item/id}; class string:ed ${segment_item/css_loaded | nothing}" >
                         <div class="toggle">
                             <div class="h-editor">
-                                <a href="#" title="Created by Euromed" class="percentuage per-orange">75%</a>
+                                <a href="#" tal:attributes="title string:Created by ${segment_item/matches/0/created_by  | nothing}"  title="Created by Euromed" class="percentuage per-orange">
+                                    <span tal:replace="segment_item/matches/0/match  | nothing"> 75</span>%
+                                </a>
                                 <a href="#" class="x" title="close this segment"></a>
                                 <div class="cl"></div>
                             </div>
@@ -211,12 +213,14 @@
                                 <span class="qa">.</span>
                             </li -->
                             <li class="source">
-                                <span tal:content=" structure segment_item/segment" class="original">Collaborative Translation Memory systems will really help your productivity.</span>
-                                <span tal:replace=" structure segment_item/segment"/>
+                                <span tal:content="structure segment_item/segment" class="original">Collaborative Translation Memory systems will really help your productivity.</span>
+                                <span tal:replace="structure segment_item/segment"/>
                             </li>
 
                             <li class="target">
-                                <span class="toggle"> <a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a></span>
+                                <span class="hide toggle"> 
+                                    <a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>
+                                </span>
                                 <textarea class="target-textarea" name="" cols="" rows="" tal:content="segment_item/matches/0/translation | nothing"></textarea> 
                                 <p class="cl"></p>
                             </li>
@@ -279,23 +283,27 @@
 
                             </div>
                             <ul  class="sbm submenu">
-                                <li class="active suggestions">
+                                <li class="hide suggestions">
                                     <a href="#smsg1">Smart suggestions</a> 
                                 </li>
-                                <li class="matches">
-                                    <a  tal:attributes="href string:#tr_ma_${repeat/segment_item/number}" href="#tr_ma_1">Translation matches (<span>2</span>)</a>
+                                <li class="active matches">
+                                    <a  tal:attributes="href string:#tr_ma_${repeat/segment_item/number}" href="#tr_ma_1">
+                                        Translation matches 
+                                        <tal:block tal:condition="exists:segment_item/matches" >
+                                            (<span tal:define="c php:count(segment_item['matches'])" tal:replace="c">2</span>)
+                                        </tal:block> 
+                                    </a>
                                 </li>
-                                <li class="concordance">
+                                <li class="hide concordance">
                                     <a tal:attributes="href string:#con_${repeat/segment_item/number}" href="#con_1">Concordance</a>
                                 </li>
-                                <li class="preview_tab">
+                                <li class="hide preview_tab">
                                     <a tal:attributes="href string:#Preview_${repeat/segment_item/number}" href="#Preview_1" class="preview-link">Preview</a>
                                 </li>
                             </ul>  
                             <div class="cl"></div>
 
-                            <div id="smsg1" class="sub-editor">
-
+                            <div id="smsg1" class="hide sub-editor">
                                 <ul class="graysmall">
                                     <li ><span class="greenborder">Translation Memory</span></li>
 
@@ -330,36 +338,18 @@
 
                             <div tal:attributes="id string:tr_ma_${repeat/segment_item/number}" id="tr_ma_1" class="sub-editor">
                                 <div class="overflow">     
-                                    <ul class="graysmall">
-                                        <li >Translation Memory </li>
-                                        <li class="b">Memoria di traduzione</li>
-                                    </ul>
-                                    <ul class="graysmall-details">
-                                        <li>81%</li>
-                                        <li>02/11/2008</li>
+                                    <tal:block tal:condition="exists:segment_item/matches" >
+                                        <ul class="graysmall" tal:define="suggestion php:array()" tal:repeat="suggestion segment_item/matches">
+                                            <li tal:content="suggestion/segment">Translation Memory </li>
+                                            <li tal:content="suggestion/translation" class="b">Memoria di traduzione</li>
 
-                                        <li>Created by Euromed</li>
-                                    </ul>
-                                    <ul class="graysmall">
-                                        <li >Using MyMemory as a local translation memory</li>
-                                        <li class="b">Usare MyMemory come una memoria di traduzione locale  </li>
-                                    </ul>
-                                    <ul class="graysmall-details">
-                                        <li>   81%</li>
-                                        <li>     02/11/2008  </li>
-
-                                        <li>Created by Euromed</li>
-                                    </ul>
-                                    <ul class="graysmall">
-                                        <li >MyMemory is the world's largest Translation Memory.</li>
-                                        <li class="b">MyMemory è la memoria più grande del mondo di traduzione.</li>
-                                    </ul>
-                                    <ul class="graysmall-details">
-                                        <li>   81%</li>
-                                        <li>     02/11/2008  </li>
-
-                                        <li>Created by Euromed</li>
-                                    </ul>
+                                            <ul class="graysmall-details">
+                                                <li class="graygreen"><span tal:replace="suggestion/match">81</span>%</li>
+                                                <li tal:content="suggestion/last_update_date">02/11/2008</li>
+                                                <li tal:condition="true:suggestion/created_by">Created by <span tal:replace="suggestion/created_by"/></li>
+                                            </ul>
+                                        </ul>
+                                    </tal:block>
                                     <div class="cl"></div>
                                 </div>
                             </div>

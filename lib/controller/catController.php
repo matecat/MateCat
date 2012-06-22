@@ -1,6 +1,7 @@
 <?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
+include INIT::$ROOT . "/lib/utils/mymemory_queries_temp.php";
 
 /**
  * Description of catController
@@ -12,6 +13,7 @@ class catController extends viewcontroller {
     //put your code here
     private $id_file = "";
     private $segments_data = array();
+    private $start_from = 0;
 
     public function __construct() {
         echo ".........\n";
@@ -22,6 +24,10 @@ class catController extends viewcontroller {
           $this->id_file=$_POST['id_file'];
           } */
         $this->id_file = "cc"; // ONLTY FOR TESTING PURPOSE
+        $this->start_from = $this->get_from_get_post("start");
+        if (is_null($this->start_from)) {
+            $this->start_from = 0;
+        }
     }
 
     private function stripTagesFromSource($text) {
@@ -41,8 +47,8 @@ class catController extends viewcontroller {
 //
         $text = preg_replace($pattern_g_c, "", $text);
         // echo "after3  -->  $text \n\n";
-        $text=  html_entity_decode($text);
-        
+        $text = html_entity_decode($text);
+
         return $text;
     }
 
@@ -51,12 +57,20 @@ class catController extends viewcontroller {
             $this->postback("File not specified");
         }
 
-        $data = getCurrentFormalOffer($this->id_file);
+        $data = getCurrentFormalOffer($this->id_file, $this->start_from);
 
         foreach ($data as $i => $seg) {
-            $id_file = $seg['id_file'];
             $seg['segment'] = $this->stripTagesFromSource($seg['segment']);
+            $seg['segment'] = trim($seg['segment']);
+            if (empty($seg['segment'])) {
+                continue;
+            }
+
+            $id_file = $seg['id_file'];
             unset($seg['id_file']);
+
+
+
             if (!isset($this->segments_data["$id_file"])) {
                 $this->segments_data["$id_file"] = array();
             }
@@ -67,19 +81,29 @@ class catController extends viewcontroller {
             if ($i % 2 != 0) {
                 $seg["additional_css_class"] = "light";
             }
-            
-            
-            
-            if ($i==0) { //get matches only for the first segment
-                $fake_matches = array();
-                $fake_matches[] = array("segment" => $seg['segment'], "translation" => "LISTEN > LEARN > LEAD", "quelity" => 74, "created_by" => "Vicky", "last_update_date" => "2011-08-21 14:30", "match" => 1);
-                
-                $matches = $fake_matches;
-                $seg['matches']=$matches;
-                $seg['css_loaded']="loaded";
+
+
+
+            if ($i == 0) { //get matches only for the first segment
+                //  $fake_matches = array();
+                //  $fake_matches[] = array("segment" => $seg['segment'], "translation" => "LISTEN > LEARN > LEAD", "quelity" => 74, "created_by" => "Vicky", "last_update_date" => "2011-08-21 14:30", "match" => 1);
+                // $matches = $fake_matches;
+                $matches = array();
+                $retMM = getFromMM($seg['segment']);
+                foreach ($retMM as $r) {
+                    $matches[] = array("segment" => $seg['segment'], "translation" => $r[0], "quelity" => $r[1], "created_by" => $r[2], "last_update_date" => $r[3], "match" => $r[4]);
+                    if (count($matches) > INIT::$DEFAULT_NUM_RESULTS_FROM_TM) {
+                        break;
+                    }
+                }
+
+//                echo "<pre>";
+//                print_r($matches);
+//                exit;
+
+                $seg['matches'] = $matches;
+                $seg['css_loaded'] = "loaded";
             }
-            
-            
 
             $this->segments_data["$id_file"][] = $seg;
         }

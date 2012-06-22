@@ -16,6 +16,8 @@ class INIT {
     public static $MODEL_ROOT;
     public static $CONTROLLER_ROOT;
     public static $UTILS_ROOT;
+    
+    public static $DEFAULT_NUM_RESULTS_FROM_TM;
 
     public static function obtain() {        
         if (!self::$instance) {
@@ -27,6 +29,9 @@ class INIT {
     private function __construct() {
         $root = getcwd();
         self::$ROOT = $root;
+        
+        self::$DEFAULT_NUM_RESULTS_FROM_TM=2;
+        
         switch ($_SERVER['HTTP_HOST']) {
             case ('matecat.pi'):
             case ('matecat.local'):

@@ -17,7 +17,7 @@ UI = {
 			$(".target-textarea").first().click();
 		});
 
-		$(".target-textarea").bind('keydown','Ctrl+return', function(e){
+                $("body").bind('keydown','Ctrl+return', function(e){ 
 			e.preventDefault();
 			$('.editor .Translated').click();
 		});
@@ -206,7 +206,7 @@ UI = {
 			var anchor2=anchor.find(".number");
 
 			//console.log(anchor2);
-
+                        $(this).removeClass("white_text");
 			var segment = $(this).parents(".ed");
 			if(!$(".target-textarea",segment).val().length) UI.getContribution(segment);
 
@@ -299,7 +299,7 @@ UI = {
 
 		$(".copysource").click(function(){
 			//console.log ("cp");
-			var source_val = $.trim($(this).parents(".ed").find("li.source").html());
+			var source_val = $.trim($(this).parents(".ed").find("li.source > .original").text());
 			//console.log(source_val)
 			$(this).parents(".ed").find("li.target>textarea").val(source_val).keyup().focus();
 			$(this).parents(".ed").find("li.target>textarea").effect("highlight", {}, 1000);
@@ -377,7 +377,7 @@ UI = {
 			dataType: 'json',
 			context: $('#'+id),
 			success: function(d){
-				$('.target-textarea', this).text(d.data.matches.translation);
+				$('.target-textarea', this).text(d.data.matches[0].translation);
 				var tt = this;
 				$(tt).addClass('loaded');
 				$('.sub-editor .overflow',tt).empty();
@@ -409,13 +409,13 @@ UI = {
 			context: $('#'+id),
 			success: function(d){
                             console.log(d.data);
-				$('.target-textarea', this).text(d.data.matches[0].translation);
+				$('.target-textarea', this).text(d.data.matches[0].translation).addClass("white_text");
 				var tt = this;
 				$(tt).addClass('loaded');
 				$('.sub-editor .overflow',tt).empty();
 				$('.submenu li.matches a span', this).text(d.data.matches.length);
 				$.each(d.data.matches, function() {
-					$('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen">'+(this.match*100)+'%</li><li>'+this.last_update_date+'</li><li>Created by '+this.created_by+'</li></ul></ul>');
+					$('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen">'+(this.match)+'%</li><li>'+this.last_update_date+'</li><li>Created by '+this.created_by+'</li></ul></ul>');
 				});
 			}
 		});
