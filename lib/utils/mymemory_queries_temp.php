@@ -6,18 +6,31 @@ function getFromMM($query) {
     $res = file_get_contents($url);
     $res = json_decode($res, true);
 
-    $ret = array();
-    // print_r ($res['matches']);
-    foreach ($res['matches'] as $match) {
-        if ($match['last-update-date']=="0000-00-00 00:00:00"){
-            $match['last-update-date']="";
+    $ret = $res['matches'];
+//print_r ($ret);exit;
+
+    foreach ($ret as &$match) {
+        if ($match['last-update-date'] == "0000-00-00 00:00:00") {
+            $match['last-update-date'] = "";
+        }
+        if (!empty($match['last-update-date'])) {
+            $match['last-update-date'] = date("Y-m-d", strtotime($match['last-update-date']));
+        }
+
+        if (empty($match['created-by'])) {
+            $match['created-by'] = "anonimous";
+        }
+
+        $match['match'] = $match['match'] * 100;
+         
+        if ($match['created-by'] == 'MT!') {
+            $match['match'] = "MT";
+            $match['created-by']="MT";
         }
         
-        $ret[] = array($match['translation'], $match['quality'], $match['created-by'], $match['last-update-date'], $match['match']*100, $match['segment']);
+        
     }
 
-
-    //print_r ($ret);
     return $ret;
 }
 

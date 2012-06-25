@@ -30,7 +30,7 @@ class INIT {
         $root = getcwd();
         self::$ROOT = $root;
         
-        self::$DEFAULT_NUM_RESULTS_FROM_TM=2;
+        self::$DEFAULT_NUM_RESULTS_FROM_TM=3;
         
         switch ($_SERVER['HTTP_HOST']) {
             case ('matecat.pi'):

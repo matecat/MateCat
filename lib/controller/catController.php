@@ -2,6 +2,7 @@
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include INIT::$ROOT . "/lib/utils/mymemory_queries_temp.php";
+include INIT::$ROOT . "/lib/utils/filetype.class.php";
 
 /**
  * Description of catController
@@ -14,9 +15,10 @@ class catController extends viewcontroller {
     private $id_file = "";
     private $segments_data = array();
     private $start_from = 0;
+    private $filetype_handler = null;
 
     public function __construct() {
-        echo ".........\n";
+        //   echo ".........\n";
         parent::__construct();
         parent::makeTemplate("index.html");
         /* $this->id_file=$_GET['id_file'];
@@ -46,9 +48,6 @@ class catController extends viewcontroller {
         //  echo "after2  -->  $text \n";
 //
         $text = preg_replace($pattern_g_c, "", $text);
-        // echo "after3  -->  $text \n\n";
-        $text = html_entity_decode($text);
-
         return $text;
     }
 
@@ -67,13 +66,21 @@ class catController extends viewcontroller {
             }
 
             $id_file = $seg['id_file'];
-            unset($seg['id_file']);
-
-
 
             if (!isset($this->segments_data["$id_file"])) {
-                $this->segments_data["$id_file"] = array();
+                $this->segments_data["$id_file"]['mimetype'] = $seg['mimetype'];
+                $this->segments_data["$id_file"]['filename'] = $seg['filename'];
+
+                $this->segments_data["$id_file"]['segments'] = array();
+                $this->filetype_handler = new filetype($seg['mimetype']);
             }
+            
+            //EXAMPLE : IN CASE OF DOC/DOCX FILES REVOME THE SEQUENCE xC2xA0
+            $seg['segment'] = $this->filetype_handler->parse($seg['segment']);     
+          
+            unset($seg['id_file']);
+            unset($seg['mimetype']);
+            unset($seg['filename']);
 
             //TODO : IMPROVEMENT: FIND A MECHANISM FOR INCLUDE 
             //THIS CSS MANAGEMENT INSIDE THE TEMPLATE
@@ -89,28 +96,19 @@ class catController extends viewcontroller {
                 //  $fake_matches[] = array("segment" => $seg['segment'], "translation" => "LISTEN > LEARN > LEAD", "quality" => 74, "created_by" => "Vicky", "last_update_date" => "2011-08-21 14:30", "match" => 1);
                 // $matches = $fake_matches;
                 $matches = array();
-                $retMM = getFromMM($seg['segment']);
-                foreach ($retMM as $r) {
+                $matches = getFromMM($seg['segment']);
                 
-                    $matches[] = array("segment" => $r[5], "translation" => $r[0], "quality" => $r[1], "created_by" => $r[2], "last_update_date" => $r[3], "match" => $r[4]);
-                    if (count($matches) > INIT::$DEFAULT_NUM_RESULTS_FROM_TM) {
-                        break;
-                    }
-                }
-
-//                echo "<pre>";
-//                print_r($matches);
-//                exit;
-
+                $matches=array_slice ($matches,0,INIT::$DEFAULT_NUM_RESULTS_FROM_TM);              
+               
                 $seg['matches'] = $matches;
                 $seg['css_loaded'] = "loaded";
             }
 
-            $this->segments_data["$id_file"][] = $seg;
+            $this->segments_data["$id_file"]['segments'][] = $seg;
         }
 //        echo "<pre>";
-//        print_r ($this->segments_data);
-//		exit;
+//        print_r($this->segments_data);
+//        exit;
     }
 
     public function setTemplateVars() {
@@ -123,5 +121,4 @@ class catController extends viewcontroller {
     }
 
 }
-
 ?>

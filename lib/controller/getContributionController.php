@@ -18,7 +18,7 @@ class getContributionController extends ajaxcontroller {
         $this->num_results = $this->get_from_get_post('num_results');
         $this->text = $this->get_from_get_post('text');
         
-        $this->text=  str_replace("&nbsp;", " ", $this->text);
+        
     }
 
     public function doAction() {
@@ -30,7 +30,7 @@ class getContributionController extends ajaxcontroller {
         }
 
         if (empty($this->num_results)) {
-            $this->num_results = DEFAULT_NUM_RESULTS;
+            $this->num_results = INIT::$DEFAULT_NUM_RESULTS_FROM_TM;
         }
 
         if (!empty($this->result['error'])) {
@@ -45,8 +45,10 @@ class getContributionController extends ajaxcontroller {
         //$matches = $fake_matches;
 
         $matches=array();
-        $retMM = getFromMM($this->text);
-        foreach ($retMM as $r) {
+        $matches = getFromMM($this->text);
+        
+        $matches=array_slice ($matches,0,INIT::$DEFAULT_NUM_RESULTS_FROM_TM);
+      /*  foreach ($retMM as $r) {
             // Marco: antonio ma che è sta cosa con le posizione degli array invece che le chiavi?
             // Poi perché la stessa funzione sta in lib/utils/mymemory_queries_temp.php e viene effettivamente usata.
             
@@ -56,27 +58,11 @@ class getContributionController extends ajaxcontroller {
                 break;
             }
         }
-
+*/
         
         $this->result['data']['matches'] = $matches;
     }
 
-    private function getFromMM() {
-        $q = urlencode($this->text);
-        $url = "http://mymemory.translated.net/api/get?q=$q&langpair=en|it";
-        $res = file_get_contents($url);
-        $res = json_decode($res, true);
-
-        $ret = array();
-        // print_r ($res['matches']);
-        foreach ($res['matches'] as $match) {
-            $ret[] = array($match['translation'], $match['quality'], $match['created-by'], $match['last-update-date'], $match['match'],  $match['segment']);
-        }
-
-
-        //print_r ($ret);
-        return $ret;
-    }
 
 }
 

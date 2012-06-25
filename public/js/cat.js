@@ -383,7 +383,8 @@ UI = {
 				$('.sub-editor .overflow',tt).empty();
 				$('.submenu li.matches a span', this).text(d.data.matches.length);
 				$.each(d.data.matches, function() {
-					$('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen">'+(this.match*100)+'%</li><li>'+this.last_update_date+'</li><li>Created by '+this.created_by+'</li></ul></ul>');
+                                        cb= this['created-by'];
+					$('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen">'+(this.match)+'%</li><li>'+this['last-update-date']+'</li><li>Created by '+cb+'</li></ul></ul>');
 				});
 			}
 		});
@@ -415,8 +416,9 @@ UI = {
 				$(tt).addClass('loaded');
 				$('.sub-editor .overflow',tt).empty();
 				$('.submenu li.matches a span', this).text(d.data.matches.length);
-				$.each(d.data.matches, function() {
-					$('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen">'+(this.match)+'%</li><li>'+this.last_update_date+'</li><li>Created by '+this.created_by+'</li></ul></ul>');
+				$.each(d.data.matches, function() {                                      
+                                        cb= this['created-by'];
+					$('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen">'+(this.match)+'%</li><li>'+this['last-update-date']+'</li><li>Created by '+cb+'</li></ul></ul>');
 				});
 			}
 		});

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -181,19 +181,19 @@
             </div>
 
             <tal:block tal:define="segment_data php:array()" tal:repeat="segment_data segments_data" >
-                <tal:block tal:define="segment_item php:array()" tal:repeat="segment_item segment_data" >
+                <tal:block tal:define="segment_item php:array()" tal:repeat="segment_item segment_data/segments" >
                     <div class="ed" tal:attributes="id string:segment-${segment_item/id}; class string:ed ${segment_item/css_loaded | nothing}" >
                         <div class="toggle">
                             <div class="h-editor">
                                 <a href="#" tal:attributes="title string:Created by ${segment_item/matches/0/created_by  | nothing}"  title="Created by Euromed" class="percentuage per-orange">
-                                    <span tal:replace="segment_item/matches/0/match  | nothing"> 75</span>%
+                                    <span tal:replace="segment_item/matches/0/match  | default"> 75</span> 
+                                    <tal:block tal:condition="php:segment_item['matches'][0]['created-by'] NE 'MT'">%</tal:block>
                                 </a>
                                 <a href="#" class="x" title="close this segment"></a>
                                 <div class="cl"></div>
                             </div>
                             <div class="cl"></div>
                         </div>
-
                         <ul class="gray " tal:attributes="class string:gray ${segment_item/additional_css_class}">
                             <li class="number">
                                 <a tal:define="anchor repeat/segment_item/number " href="#1" tal:attributes ="href string:#${anchor}" tal:content="anchor" name="1">1</a>
@@ -214,7 +214,7 @@
                             </li -->
                             <li class="source">
                                 <span tal:content="structure segment_item/segment" class="original">Collaborative Translation Memory systems will really help your productivity.</span>
-                                <span tal:replace="structure segment_item/segment"/>
+                                <span tal:replace="structure php:str_replace('&nbsp;',' ',segment_item['segment'])"/>
                             </li>
 
                             <li class="target">
@@ -339,16 +339,19 @@
                             <div tal:attributes="id string:tr_ma_${repeat/segment_item/number}" id="tr_ma_1" class="sub-editor">
                                 <div class="overflow">     
                                     <tal:block tal:condition="exists:segment_item/matches" >
-                                        <ul class="graysmall" tal:define="suggestion php:array()" tal:repeat="suggestion segment_item/matches">
-                                            <li tal:content="suggestion/segment">Translation Memory </li>
-                                            <li tal:content="suggestion/translation" class="b">Memoria di traduzione</li>
+                                        <tal:block tal:define="suggestion php:array()" tal:repeat="suggestion segment_item/matches">
+                                            <ul class="graysmall"  tal:condition="php:suggestion['created-by'] NE 'MT'" >
 
-                                            <ul class="graysmall-details">
-                                                <li class="graygreen"><span tal:replace="suggestion/match">81</span>%</li>
-                                                <li tal:content="suggestion/last_update_date">02/11/2008</li>
-                                                <li tal:condition="true:suggestion/created_by">Created by <span tal:replace="suggestion/created_by"/></li>
+                                                <li tal:content="suggestion/segment">Translation Memory </li>
+                                                <li tal:content="suggestion/translation" class="b">Memoria di traduzione</li>
+
+                                                <ul class="graysmall-details">
+                                                    <li class="graygreen"><span tal:replace="suggestion/match">81</span>%</li>
+                                                    <li tal:content="suggestion/last-update-date">02/11/2008</li>
+                                                    <li tal:condition="true:suggestion/created-by">Created by <span tal:replace="suggestion/created-by"/></li>
+                                                </ul>
                                             </ul>
-                                        </ul>
+                                        </tal:block>
                                     </tal:block>
                                     <div class="cl"></div>
                                 </div>

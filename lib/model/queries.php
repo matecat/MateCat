@@ -3,7 +3,11 @@
 include_once 'Database.class.php';
 
 function getCurrentFormalOffer($pid, $start=0){
-    $query = "select id,id_file, segment from segments where id_file =4 limit $start,100 ";
+    $query = "select s.id,id_file, segment, mimetype ,filename
+        from segments s
+        inner join files f on f.id=s.id_file 
+        where id_file =4 
+        limit $start,100 ";
     
     // log::doLog($query);
 
