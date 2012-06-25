@@ -47,7 +47,7 @@ class INIT {
             case 'www.matecat.com':
                 self::$DEBUG = false;
                 self::$DB_SERVER = "213.215.131.241"; //database server
-                self::$DB_DATABASE = "matecat"; //database name
+                self::$DB_DATABASE = "matecat_sandbox"; //database name
                 self::$DB_USER = "translated"; //database login name
                 self::$DB_PASS = "azerty1"; //database login password
                 break;

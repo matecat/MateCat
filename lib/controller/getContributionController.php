@@ -40,14 +40,18 @@ class getContributionController extends ajaxcontroller {
 
         // UNUSED
         $fake_matches = array();
-        $fake_matches[] = array("segment" => $this->text, "translation" => "$this->text fake translation", "quelity" => 74, "created_by" => "Vicky", "last_update_date" => "2011-08-21 14:30", "match" => 1);
-        $fake_matches[] = array("segment" => $this->text, "translation" => "$this->text fake translation second result", "quelity" => 84, "created_by" => "Don", "last_update_date" => "2010-06-21 14:30", "match" => 0.84);
+        $fake_matches[] = array("segment" => $this->text, "translation" => "$this->text fake translation", "quality" => 74, "created_by" => "Vicky", "last_update_date" => "2011-08-21 14:30", "match" => 1);
+        $fake_matches[] = array("segment" => $this->text, "translation" => "$this->text fake translation second result", "quality" => 84, "created_by" => "Don", "last_update_date" => "2010-06-21 14:30", "match" => 0.84);
         //$matches = $fake_matches;
 
         $matches=array();
         $retMM = getFromMM($this->text);
         foreach ($retMM as $r) {
-            $matches[] = array("segment" => $this->text, "translation" => $r[0], "quelity" => $r[1], "created_by" => $r[2], "last_update_date" => $r[3], "match" => $r[4]);
+            // Marco: antonio ma che è sta cosa con le posizione degli array invece che le chiavi?
+            // Poi perché la stessa funzione sta in lib/utils/mymemory_queries_temp.php e viene effettivamente usata.
+            
+              $matches[] = @array("segment" => $r[5], "translation" => $r[0], "quality" => $r[1], "created_by" => $r[2], "last_update_date" => $r[3], "match" => $r[4]);
+            
             if (count($matches) > INIT::$DEFAULT_NUM_RESULTS_FROM_TM) {
                 break;
             }
@@ -66,7 +70,7 @@ class getContributionController extends ajaxcontroller {
         $ret = array();
         // print_r ($res['matches']);
         foreach ($res['matches'] as $match) {
-            $ret[] = array($match['translation'], $match['quality'], $match['created-by'], $match['last-update-date'], $match['match']);
+            $ret[] = array($match['translation'], $match['quality'], $match['created-by'], $match['last-update-date'], $match['match'],  $match['segment']);
         }
 
 

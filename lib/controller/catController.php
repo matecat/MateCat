@@ -86,12 +86,13 @@ class catController extends viewcontroller {
 
             if ($i == 0) { //get matches only for the first segment
                 //  $fake_matches = array();
-                //  $fake_matches[] = array("segment" => $seg['segment'], "translation" => "LISTEN > LEARN > LEAD", "quelity" => 74, "created_by" => "Vicky", "last_update_date" => "2011-08-21 14:30", "match" => 1);
+                //  $fake_matches[] = array("segment" => $seg['segment'], "translation" => "LISTEN > LEARN > LEAD", "quality" => 74, "created_by" => "Vicky", "last_update_date" => "2011-08-21 14:30", "match" => 1);
                 // $matches = $fake_matches;
                 $matches = array();
                 $retMM = getFromMM($seg['segment']);
                 foreach ($retMM as $r) {
-                    $matches[] = array("segment" => $seg['segment'], "translation" => $r[0], "quelity" => $r[1], "created_by" => $r[2], "last_update_date" => $r[3], "match" => $r[4]);
+                
+                    $matches[] = array("segment" => $r[5], "translation" => $r[0], "quality" => $r[1], "created_by" => $r[2], "last_update_date" => $r[3], "match" => $r[4]);
                     if (count($matches) > INIT::$DEFAULT_NUM_RESULTS_FROM_TM) {
                         break;
                     }
