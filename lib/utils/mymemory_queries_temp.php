@@ -13,7 +13,7 @@ function getFromMM($query) {
             $match['last-update-date']="";
         }
         
-        $ret[] = array($match['translation'], $match['quality'], $match['created-by'], $match['last-update-date'], $match['match']*100);
+        $ret[] = array($match['translation'], $match['quality'], $match['created-by'], $match['last-update-date'], $match['match']*100, $match['segment']);
     }
 
 
