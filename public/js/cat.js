@@ -17,7 +17,7 @@ UI = {
 			$(".target-textarea").first().click();
 		});
 
-                $("body").bind('keydown','Ctrl+return', function(e){ 
+                $("body, .target-textarea").bind('keydown','Ctrl+return', function(e){ 
 			e.preventDefault();
 			$('.editor .Translated').click();
 		});
@@ -144,7 +144,7 @@ UI = {
 
 			var isVisible=$(".notification-box").is(":visible");
 
-			if (isVisible){  $(".notification-box").hide();
+			if (isVisible){$(".notification-box").hide();
 				return null;
 			}
 			$("div.notification-box").toggle();
@@ -410,6 +410,7 @@ UI = {
 			success: function(d){
                             console.log(d.data);
 				$('.target-textarea', this).text(d.data.matches[0].translation).addClass("white_text");
+                                $('.percentuage', this).text(d.data.matches[0].match +"%");
 				var tt = this;
 				$(tt).addClass('loaded');
 				$('.sub-editor .overflow',tt).empty();
@@ -531,7 +532,7 @@ UI = {
 		o.number = $('.number',o);
 		this.segments.push(o);
 */
-	},
+	}
 
 }
 
