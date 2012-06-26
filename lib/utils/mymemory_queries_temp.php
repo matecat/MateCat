@@ -4,11 +4,12 @@ function getFromMM($query) {
     $q = urlencode($query);
     $url = "http://mymemory.translated.net/api/get?q=$q&langpair=en|it";
     $res = file_get_contents($url);
+    //echo $res;
     $res = json_decode($res, true);
 
     $ret = $res['matches'];
    
-//print_r ($ret);exit;
+print_r ($ret);exit;
 
     foreach ($ret as &$match) {
         if ($match['last-update-date'] == "0000-00-00 00:00:00") {

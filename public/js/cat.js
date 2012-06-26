@@ -215,7 +215,10 @@ UI = {
             //console.log(anchor2);
             $(this).removeClass("white_text");
             var segment = $(this).parents(".ed");
-            if(!$(".target-textarea",segment).val().length) UI.getContribution(segment);
+           
+            if(!$(".target-textarea",segment).val().length) {
+                UI.getContribution(segment);
+            }
 
             if ( $(segment).find(".toggle").is(":visible")){
                 return null
@@ -229,10 +232,11 @@ UI = {
             /* console.log ($(this).parents(".ed"));*/
             $(this).parents(".ed").addClass("editor");
             $(this).focus();
-            UI.editStart = new Date();
-            $(this).parents(".ed").find(".toggle").show("blind", {
+            UI.editStart = new Date();          
+            segment.find(".toggle").show("blind", {
                 direction: "vertical"
             }, 250);
+            
             //			UI.getSegmentComments(segment);
             //			if(!$(".target-textarea",segment).val().length) UI.getContribution(segment);
             UI.getNextContribution(segment);
@@ -369,6 +373,8 @@ UI = {
     },
 
     getContribution: function(currentSegment) {
+        $(".ed").mouseout();
+        $(currentSegment).mouseenter();
         var n = $(currentSegment);
         if($(n).hasClass('loaded')) return false;
         var id = n.attr('id');
@@ -385,7 +391,7 @@ UI = {
                 text: txt,
                 num_results: this.numMatchesResults
             },
-            type: 'POST',
+            type: 'POST',            
             dataType: 'json',
             context: $('#'+id),
             success: function(d){
@@ -408,11 +414,14 @@ UI = {
                 }else{
                     $('.submenu li.matches a span', this).text('('+valid+')');
                 }
+                
             }
         });
     },
 
     getNextContribution: function(currentSegment) {
+        $(".ed").mouseout();
+        
         var n = $(currentSegment).nextAll('.ed').first() || $(currentSegment).parents('.main').next().find('.ed').first();
         if(!$(currentSegment).nextAll('.ed').length) {
             n = $(currentSegment).parents('.main').next().find('.ed').first()
