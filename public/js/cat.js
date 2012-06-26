@@ -409,7 +409,7 @@ UI = {
                 var valid=0;
                 $.each(d.data.matches, function() {                    
                     cb= this['created-by'];                    
-                    $('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li>Created by <span class="bold">'+cb+'</span></li></ul></ul>');
+                    $('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li>Source: <span class="bold">'+cb+'</span></li></ul></ul>');
                                       		
                 });
                 if (d.data.matches==0){
@@ -456,7 +456,7 @@ UI = {
                 var valid =0;
                 $.each(d.data.matches, function() {                      
                     cb= this['created-by'];                  
-                    $('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li>Created by <span class="bold">'+cb+'</span></li></ul></ul>');
+                    $('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li>Source: <span class="bold">'+cb+'</span></li></ul></ul>');
                 });
                 if (d.data.matches==0){
                     $(".sbm .matches", tt).hide();
