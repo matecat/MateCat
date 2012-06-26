@@ -9,7 +9,7 @@ function getFromMM($query) {
 
     $ret = $res['matches'];
    
-print_r ($ret);exit;
+//print_r ($ret);exit;
 
     foreach ($ret as &$match) {
         if ($match['last-update-date'] == "0000-00-00 00:00:00") {
@@ -20,7 +20,7 @@ print_r ($ret);exit;
         }
 
         if (empty($match['created-by'])) {
-            $match['created-by'] = "anonimous";
+            $match['created-by'] = "Anonymous";
         }
 
         $match['match'] = $match['match'] * 100;

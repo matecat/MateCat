@@ -167,8 +167,9 @@
 
 
         <div class="main">
+            <tal:block tal:define="segment_data php:array()" tal:repeat="segment_data segments_data" >
             <div class="projectbar">
-                <h2>Hotel-Shangrilà.html</h2>
+                <h2 tal:content="segment_data/filename | nothing">Hotel-Shangrilà.html</h2>
                 <div class="languages">
                     <strong class="source-lang">English</strong> > <strong class="target-lang">Italian</strong></div>
 
@@ -180,13 +181,13 @@
                 </ul>
             </div>
 
-            <tal:block tal:define="segment_data php:array()" tal:repeat="segment_data segments_data" >
+            
                 <tal:block tal:define="segment_item php:array()" tal:repeat="segment_item segment_data/segments" >
                     <div class="ed" tal:attributes="id string:segment-${segment_item/id}; class string:ed ${segment_item/css_loaded | nothing}" >
                         <div class="toggle">
                             <div class="h-editor">
-                                <a href="#" tal:attributes="title string:Created by ${segment_item/matches/0/created_by  | nothing}"  title="Created by Euromed" class="percentuage per-orange hide">
-                                    <span tal:replace="segment_item/matches/0/match  | nothing">75%</span> percentuage
+                                <a href="#" tal:attributes="title string:Created by ${segment_item/matches/0/created_by  | nothing}"  title="Created by Euromed" class="percentuage per-orange">
+                                    <span tal:replace="segment_item/matches/0/match  | nothing">75%</span> 
                                 </a>
                                 <a href="#" class="x" title="close this segment"></a>
                                 <div class="cl"></div>
@@ -217,6 +218,7 @@
                             </li>
 
                             <li class="target">
+                                <span class="loader"></span>
                                 <span class="hide toggle"> 
                                     <a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>
                                 </span>
@@ -291,7 +293,7 @@
                                     <a  tal:attributes="href string:#tr_ma_${repeat/segment_item/number}" href="#tr_ma_1">
                                         Translation matches 
                                         <tal:block tal:condition="exists:segment_item/matches" >
-                                            (<span tal:content="segment_item/matches_no_mt">2</span>)
+                                            (<span tal:content="php:count(segment_item['matches'])">2</span>)
                                         </tal:block> 
                                         
                                          <tal:block tal:condition="not:exists:segment_item/matches" >
@@ -352,12 +354,12 @@
 
                                                 <ul class="graysmall-details">
                                                     <li class="graygreen">
-                                                        <span tal:replace="suggestion/match">81</span>%
+                                                        <span tal:replace="suggestion/match">81</span>
                                                     </li>
                                                     <li tal:content="suggestion/last-update-date">02/11/2008</li>
                                                     <li tal:condition="true:suggestion/created-by">
                                                         Created by 
-                                                        <span tal:replace="suggestion/created-by"/>
+                                                        <span class="bold" tal:content="suggestion/created-by"/>
                                                     </li>
                                                 </ul>
                                             </ul>

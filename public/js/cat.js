@@ -205,8 +205,11 @@ UI = {
             //				scrollTop: (($(this).parents(".ed").offset().top)+200)
             //			}, 200);
 
+            
             e.preventDefault();
             e.stopPropagation();
+            
+            $(this).removeClass("indent");
             $(".menucolor:visible").hide();
 
             var anchor=($(this).parents(".ed")).prev();//.find(".number");
@@ -216,7 +219,7 @@ UI = {
             $(this).removeClass("white_text");
             var segment = $(this).parents(".ed");
            
-            if(!$(".target-textarea",segment).val().length) {
+            if(!$(this).val().length) {
                 UI.getContribution(segment);
             }
 
@@ -373,14 +376,13 @@ UI = {
     },
 
     getContribution: function(currentSegment) {
-        $(".ed").mouseout();
-        $(currentSegment).mouseenter();
-        var n = $(currentSegment);
+        var n = $(currentSegment);        
         if($(n).hasClass('loaded')) return false;
         var id = n.attr('id');
         var id_segment = id.split('-')[1];
         var txt = $('.source .original',n).text();
-		$(".loader").addClass('loader_on');
+        $(".loader",n).addClass('loader_on')
+        $(".percentuage",n).hide();
 		
 		
         $.ajax({
@@ -394,22 +396,23 @@ UI = {
             type: 'POST',            
             dataType: 'json',
             context: $('#'+id),
+            complete: function (d){
+                $(".loader",n).removeClass('loader_on');
+            },
             success: function(d){
-                $('.target-textarea', this).text(d.data.matches[0].translation);
-                $('.percentuage', this).text(d.data.matches[0].match).removeClass("hide");
+                $('.target-textarea', this).text(d.data.matches[0].translation).removeClass("indent");
+                $('.percentuage', this).text(d.data.matches[0].match).show();
                 var tt = this;
                 $(tt).addClass('loaded');
                 $('.sub-editor .overflow',tt).empty();
                 
                 var valid=0;
                 $.each(d.data.matches, function() {                    
-                    cb= this['created-by'];
-                    if (cb!='MT'){
-                        valid=valid+1;
-                        $('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li>Created by '+cb+'</li></ul></ul>');
-                    }                  		
+                    cb= this['created-by'];                    
+                    $('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li>Created by <span class="bold">'+cb+'</span></li></ul></ul>');
+                                      		
                 });
-                if (valid==0){
+                if (d.data.matches==0){
                     $(".sbm > .matches", tt).hide();
                 }else{
                     $('.submenu li.matches a span', this).text('('+valid+')');
@@ -419,9 +422,7 @@ UI = {
         });
     },
 
-    getNextContribution: function(currentSegment) {
-        $(".ed").mouseout();
-        
+    getNextContribution: function(currentSegment) {    
         var n = $(currentSegment).nextAll('.ed').first() || $(currentSegment).parents('.main').next().find('.ed').first();
         if(!$(currentSegment).nextAll('.ed').length) {
             n = $(currentSegment).parents('.main').next().find('.ed').first()
@@ -441,24 +442,23 @@ UI = {
             type: 'POST',
             dataType: 'json',
             context: $('#'+id),
+            complete: function (d){
+            ; // nothing to do here
+            },
             success: function(d){
                 console.log(d.data);
-                $('.target-textarea', this).text(d.data.matches[0].translation).addClass("white_text");
+                $('.target-textarea', this).text(d.data.matches[0].translation).addClass("indent");
                 $('.percentuage', this).text(d.data.matches[0].match).removeClass("hide");
                 var tt = this;
                 $(tt).addClass('loaded');
                 $('.sub-editor .overflow',tt).empty();
                 
                 var valid =0;
-                $.each(d.data.matches, function() {  
-                    
-                    cb= this['created-by'];
-                    if (cb!='MT'){
-                        valid=valid+1;
-                        $('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li>Created by '+cb+'</li></ul></ul>');
-                    }	                    
+                $.each(d.data.matches, function() {                      
+                    cb= this['created-by'];                  
+                    $('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li>Created by <span class="bold">'+cb+'</span></li></ul></ul>');
                 });
-                if (valid==0){
+                if (d.data.matches==0){
                     $(".sbm .matches", tt).hide();
                 }else{
                     $('.submenu li.matches a span', this).text('('+valid+')');

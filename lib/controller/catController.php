@@ -96,12 +96,13 @@ class catController extends viewcontroller {
                 $matches=array_slice ($matches,0,INIT::$DEFAULT_NUM_RESULTS_FROM_TM);              
               
                 $seg['matches'] = $matches;
-                $seg['matches_no_mt']=0;
-                foreach ($matches as $m){
-                    if ($m['created-by']!='MT'){
-                        $seg['matches_no_mt']+=1;
-                    }
-                }
+                
+                //$seg['matches_no_mt']=0;
+                //foreach ($matches as $m){
+                //    if ($m['created-by']!='MT'){
+                //        $seg['matches_no_mt']+=1;
+                //    }
+                //}
 
                 $seg['css_loaded'] = "loaded";
             }
