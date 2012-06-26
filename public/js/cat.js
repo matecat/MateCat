@@ -209,6 +209,11 @@ UI = {
             e.preventDefault();
             e.stopPropagation();
             
+            //move the cursor at the end of the textarea erasing and rewriting his own value
+            v=$(this).val();
+            if (v.lenght){
+                $(this).val("").val(v);
+            }
             $(this).removeClass("indent");
             $(".menucolor:visible").hide();
 
