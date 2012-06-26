@@ -413,7 +413,7 @@ UI = {
                 if (d.data.matches==0){
                     $(".sbm > .matches", tt).hide();
                 }else{
-                    $('.submenu li.matches a span', this).text('('+valid+')');
+                    $('.submenu li.matches a span', this).text('('+d.data.matches.length+')');
                 }
                 
             }
@@ -459,7 +459,7 @@ UI = {
                 if (d.data.matches==0){
                     $(".sbm .matches", tt).hide();
                 }else{
-                    $('.submenu li.matches a span', this).text('('+valid+')');
+                    $('.submenu li.matches a span', this).text('('+d.data.matches.length+')');
                 }
             }
         });
