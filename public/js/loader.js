@@ -16,7 +16,8 @@ Loader = {
 		'jquery.hotkeys',
 //		'smoothscroll',
 		'jquery.autogrow-textarea',
-		'jquery.atooltip'
+		'jquery.atooltip',
+                'jquery.caret'
 	),
 	
 	include: function(f,p,b) {

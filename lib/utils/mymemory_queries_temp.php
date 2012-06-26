@@ -13,9 +13,9 @@ function getFromMM($query) {
 
     foreach ($ret as &$match) {
         if ($match['last-update-date'] == "0000-00-00 00:00:00") {
-            $match['last-update-date'] = "";
+            $match['last-update-date'] = "0000-00-00";
         }
-        if (!empty($match['last-update-date'])) {
+        if (!empty($match['last-update-date']) and  $match['last-update-date']!='0000-00-00') {
             $match['last-update-date'] = date("Y-m-d", strtotime($match['last-update-date']));
         }
 

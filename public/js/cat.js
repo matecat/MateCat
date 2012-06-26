@@ -204,16 +204,8 @@ UI = {
             //			$('body').animate({
             //				scrollTop: (($(this).parents(".ed").offset().top)+200)
             //			}, 200);
-
-            
             e.preventDefault();
-            e.stopPropagation();
-            
-            //move the cursor at the end of the textarea erasing and rewriting his own value
-            v=$(this).val();
-            if (v.lenght){
-                $(this).val("").val(v);
-            }
+            e.stopPropagation();          
             $(this).removeClass("indent");
             $(".menucolor:visible").hide();
 
@@ -240,7 +232,8 @@ UI = {
             /* console.log ($(this).parents(".ed"));*/
             $(this).parents(".ed").addClass("editor");
             $(this).focus();
-            UI.editStart = new Date();          
+            UI.editStart = new Date();     
+            $(this).caretTo(0);
             segment.find(".toggle").show("blind", {
                 direction: "vertical"
             }, 250);
@@ -405,7 +398,7 @@ UI = {
                 $(".loader",n).removeClass('loader_on');
             },
             success: function(d){
-                $('.target-textarea', this).text(d.data.matches[0].translation).removeClass("indent");
+                $('.target-textarea', this).text(d.data.matches[0].translation).removeClass("indent").caretTo(0);;
                 $('.percentuage', this).text(d.data.matches[0].match).show();
                 var tt = this;
                 $(tt).addClass('loaded');
