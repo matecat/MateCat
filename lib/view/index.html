@@ -168,20 +168,22 @@
 
         <div class="main">
             <tal:block tal:define="segment_data php:array()" tal:repeat="segment_data segments_data" >
-            <div class="projectbar">
-                <h2 tal:content="segment_data/filename | nothing">Hotel-Shangrilà.html</h2>
-                <div class="languages">
-                    <strong class="source-lang">English</strong> > <strong class="target-lang">Italian</strong></div>
+                <div class="projectbar">
+                    <h2 tal:content="segment_data/filename | nothing">Hotel-Shangrilà.html</h2>
+                    <div class="languages">
+                        <strong class="source-lang">English</strong> > 
+                        <strong class="target-lang">Italian</strong>
+                    </div>
 
-                <ul style="float:right;text-align:right;">
-                    <li>Eq. words: <strong>11.223</strong></li>
-                    <li>Translated: <strong>54%</strong></li>
-                    <li style="padding-right:0;">Approved: <strong>21%</strong></li>
+                    <ul style="float:right;text-align:right;">
+                        <li>Eq. words: <strong>11.223</strong></li>
+                        <li>Translated: <strong>54%</strong></li>
+                        <li style="padding-right:0;">Approved: <strong>21%</strong></li>
 
-                </ul>
-            </div>
+                    </ul>
+                </div>
 
-            
+
                 <tal:block tal:define="segment_item php:array()" tal:repeat="segment_item segment_data/segments" >
                     <div class="ed" tal:attributes="id string:segment-${segment_item/id}; class string:ed ${segment_item/css_loaded | nothing}" >
                         <div class="toggle">
@@ -295,8 +297,8 @@
                                         <tal:block tal:condition="exists:segment_item/matches" >
                                             (<span tal:content="php:count(segment_item['matches'])">2</span>)
                                         </tal:block> 
-                                        
-                                         <tal:block tal:condition="not:exists:segment_item/matches" >
+
+                                        <tal:block tal:condition="not:exists:segment_item/matches" >
                                             <span></span>
                                         </tal:block> 
                                     </a>
@@ -347,7 +349,7 @@
                                 <div class="overflow">     
                                     <tal:block tal:condition="exists:segment_item/matches" >
                                         <tal:block tal:define="suggestion php:array()" tal:repeat="suggestion segment_item/matches">
-                                            <ul class="graysmall"  tal:condition="php:suggestion['created-by'] NE 'MT'" >
+                                            <ul class="graysmall" >
 
                                                 <li tal:content="suggestion/segment">Translation Memory </li>
                                                 <li tal:content="suggestion/translation" class="b">Memoria di traduzione</li>
