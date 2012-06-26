@@ -34,8 +34,6 @@ class catController extends viewcontroller {
 
     private function stripTagesFromSource($text) {
         //       echo "<pre>";
-
-
         $pattern_g_o = '|(<.*?>)|';
         $pattern_g_c = '|(</.*?>)|';
         $pattern_x = '|(<.*?/>)|';
@@ -91,16 +89,20 @@ class catController extends viewcontroller {
 
 
 
-            if ($i == 0) { //get matches only for the first segment
-                //  $fake_matches = array();
-                //  $fake_matches[] = array("segment" => $seg['segment'], "translation" => "LISTEN > LEARN > LEAD", "quality" => 74, "created_by" => "Vicky", "last_update_date" => "2011-08-21 14:30", "match" => 1);
-                // $matches = $fake_matches;
+            if ($i == 0) { //get matches only for the first segment                
                 $matches = array();
                 $matches = getFromMM($seg['segment']);
                 
                 $matches=array_slice ($matches,0,INIT::$DEFAULT_NUM_RESULTS_FROM_TM);              
-               
+              
                 $seg['matches'] = $matches;
+                $seg['matches_no_mt']=0;
+                foreach ($matches as $m){
+                    if ($m['created-by']!='MT'){
+                        $seg['matches_no_mt']+=1;
+                    }
+                }
+
                 $seg['css_loaded'] = "loaded";
             }
 

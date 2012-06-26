@@ -126,7 +126,7 @@ abstract class viewcontroller extends controller {
     protected function makeTemplate($skeleton_file) {
         try {
             $this->template = new PHPTAL(INIT::$TEMPLATE_ROOT . "/$skeleton_file"); // create a new template object
-            $this->template->setOutputMode(PHPTAL::HTML5);
+            //$this->template->setOutputMode(PHPTAL::HTML5);
 
 		
         } catch (Exception $e) {
@@ -135,6 +135,7 @@ abstract class viewcontroller extends controller {
             echo "\n\n\n";
             print_r($this->template);
             echo "</pre>";
+            exit;
         }
     }
     

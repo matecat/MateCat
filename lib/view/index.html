@@ -185,9 +185,8 @@
                     <div class="ed" tal:attributes="id string:segment-${segment_item/id}; class string:ed ${segment_item/css_loaded | nothing}" >
                         <div class="toggle">
                             <div class="h-editor">
-                                <a href="#" tal:attributes="title string:Created by ${segment_item/matches/0/created_by  | nothing}"  title="Created by Euromed" class="percentuage per-orange">
-                                    <span tal:replace="segment_item/matches/0/match  | default"> 75</span> 
-                                    <tal:block tal:condition="php:segment_item['matches'][0]['created-by'] NE 'MT'">%</tal:block>
+                                <a href="#" tal:attributes="title string:Created by ${segment_item/matches/0/created_by  | nothing}"  title="Created by Euromed" class="percentuage per-orange hide">
+                                    <span tal:replace="segment_item/matches/0/match  | nothing">75%</span> percentuage
                                 </a>
                                 <a href="#" class="x" title="close this segment"></a>
                                 <div class="cl"></div>
@@ -290,7 +289,11 @@
                                     <a  tal:attributes="href string:#tr_ma_${repeat/segment_item/number}" href="#tr_ma_1">
                                         Translation matches 
                                         <tal:block tal:condition="exists:segment_item/matches" >
-                                            (<span tal:define="c php:count(segment_item['matches'])" tal:replace="c">2</span>)
+                                            (<span tal:content="segment_item/matches_no_mt">2</span>)
+                                        </tal:block> 
+                                        
+                                         <tal:block tal:condition="not:exists:segment_item/matches" >
+                                            <span></span>
                                         </tal:block> 
                                     </a>
                                 </li>
@@ -346,9 +349,14 @@
                                                 <li tal:content="suggestion/translation" class="b">Memoria di traduzione</li>
 
                                                 <ul class="graysmall-details">
-                                                    <li class="graygreen"><span tal:replace="suggestion/match">81</span>%</li>
+                                                    <li class="graygreen">
+                                                        <span tal:replace="suggestion/match">81</span>%
+                                                    </li>
                                                     <li tal:content="suggestion/last-update-date">02/11/2008</li>
-                                                    <li tal:condition="true:suggestion/created-by">Created by <span tal:replace="suggestion/created-by"/></li>
+                                                    <li tal:condition="true:suggestion/created-by">
+                                                        Created by 
+                                                        <span tal:replace="suggestion/created-by"/>
+                                                    </li>
                                                 </ul>
                                             </ul>
                                         </tal:block>

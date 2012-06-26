@@ -7,6 +7,7 @@ function getFromMM($query) {
     $res = json_decode($res, true);
 
     $ret = $res['matches'];
+   
 //print_r ($ret);exit;
 
     foreach ($ret as &$match) {
@@ -22,6 +23,7 @@ function getFromMM($query) {
         }
 
         $match['match'] = $match['match'] * 100;
+        $match['match']=$match['match'] ."%";
          
         if ($match['created-by'] == 'MT!') {
             $match['match'] = "MT";
