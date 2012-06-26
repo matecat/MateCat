@@ -545,6 +545,9 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 .hide {display:none !important}
 .source .original {display:none;}
 
+.loader{display:none;width:20px;height:20px;background:url(../img/loader.gif) center center no-repeat;position:absolute;right:-70px;top:8px}
+
+
 
 /* TEMPORARY STYLES */
 .white_text{color: white;opacity: 0.0}

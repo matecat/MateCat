@@ -374,7 +374,7 @@ UI = {
         var id = n.attr('id');
         var id_segment = id.split('-')[1];
         var txt = $('.source .original',n).text();
-		$(loader).addClass('loader_on');
+		$(".loader").addClass('loader_on');
 		
 		
         $.ajax({
