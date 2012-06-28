@@ -2,12 +2,35 @@
 
 include_once 'Database.class.php';
 
-function getCurrentFormalOffer($pid, $start=0){
-    $query = "select s.id,id_file, segment, mimetype ,filename
-        from segments s
-        inner join files f on f.id=s.id_file 
-        where id_file =4 
-        limit $start,100 ";
+function getSegments($pid, $start = 0) {
+    /* $query = "select s.id,id_file, fj.id_job,segment, mimetype ,filename
+      from segments s
+      inner join files f on f.id=s.id_file
+      inner_join files_jobs fj on fj.id_file=f.id
+      inner join projects p on p.id = j.id_project
+
+      where id_file =4
+      limit $start,100 ";
+     */
+
+    $query = "select j.id as jid, j.id_project as pid, p.id_customer as cid, j.id_translator as tid,  
+                p.name as pname, p.create_date , fj.id_file, fj.id_segment_start, fj.id_segment_end, 
+                f.filename, f.mime_type, s.id as sid, s.segment, s.raw_word_count,
+                st.translation
+
+                from jobs j 
+                inner join projects p on p.id=j.id_project
+                inner join files_job fj on fj.id_job=j.id
+                inner join files f on f.id=fj.id_file
+                inner join segments s on s.id_file=f.id
+                left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
+                where p.id=1
+                limit $start,1000
+                
+                
+                
+             ";
+    //limit $start,100
     
     // log::doLog($query);
 
@@ -17,7 +40,54 @@ function getCurrentFormalOffer($pid, $start=0){
 //    echo "<pre>";
 //    echo count($results);
 //    print_r ($results);exit;
-   return $results;
+    return $results;
+}
+
+function setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $translation, $match_type = 'unknown') {
+    $data = array();
+    $data['id_job'] = $id_job;    
+    $data['status'] = $status;
+    $data['time_to_edit'] = $time_to_edit;
+    $data['translation'] = mysql_real_escape_string($translation);
+    $data['translation_date'] = date("Y-m-d H:i:s");
+    $data['match_type'] = $match_type;
+
+    $where = "id_segment=$id_segment and id_job=$id_job";
+
+
+    $db = Database::obtain();
+    $db->update('segment_translations', $data, $where);
+    $err = $db->get_error();
+    $errno = $err['error_code'];
+    if ($errno != 0) {
+        log::doLog($err);
+        return $errno * -1;
+    }
+    // log::doLog($db->affected_rows);
+    return $db->affected_rows;
+}
+
+function setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $translation, $match_type = 'unknown') {
+    $data = array();
+    $data['id_job'] = $id_job;    
+    $data['status'] = $status;
+    $data['time_to_edit'] = $time_to_edit;
+    $data['translation'] = mysql_real_escape_string($translation);
+    $data['translation_date'] = date("Y-m-d H:i:s");
+    $data['match_type'] = $match_type;
+    $data['id_segment'] = $id_segment;
+    $data['id_job'] = $id_job;
+
+    $db = Database::obtain();
+    $db->insert('segment_translations', $data);
+
+    $err = $db->get_error();
+    $errno = $err['error_code'];
+    if ($errno != 0) {
+        log::doLog($err);
+        return $errno * -1;
+    }
+    return $db->affected_rows;
 }
 
 function getAllData($t, $am, $qof_go, $qof_id, $qof_pid, $qof_source, $qof_reqdate, $qof_tdelivdate, $qof_delivdate, $qof_cid, $qof_curroff, $qof_accoff, $qof_faxreq, $qof_status, $qof_am, $qof_limit) {
@@ -26,8 +96,8 @@ function getAllData($t, $am, $qof_go, $qof_id, $qof_pid, $qof_source, $qof_reqda
     $limit = " LIMIT 0,30 ";
 
     if (empty($qof_go)) {
-        $orderBy="status_new_score+status_sent_score+status_hold_score+important_score+status_non_assegnato DESC ,a.current_offer DESC";
-        
+        $orderBy = "status_new_score+status_sent_score+status_hold_score+important_score+status_non_assegnato DESC ,a.current_offer DESC";
+
         if (empty($t)) {
             $where_status = "a.status not in ('closed', 'accepted','refused','cancelled') ";
         } elseif ($t != 'all') {
@@ -92,7 +162,7 @@ function getAllData($t, $am, $qof_go, $qof_id, $qof_pid, $qof_source, $qof_reqda
             }
         }
     } else {
-        $orderBy="a.id DESC";
+        $orderBy = "a.id DESC";
         $where_arr = array();
         if (!empty($qof_id)) {
             $where_arr[] = "a.id=$qof_id";
@@ -200,7 +270,6 @@ function getAllData($t, $am, $qof_go, $qof_id, $qof_pid, $qof_source, $qof_reqda
     $db = Database::obtain();
     $results = $db->fetch_array($query);
     // log::doLog($results);
-    
     //print_r ($results);exit;
     return $results;
 }
@@ -278,7 +347,7 @@ function updateStatus($id_request, $new_status) {
     return $db->affected_rows;
 }
 
-function updateStat($id_request, $id_project, $am, $status, $fax_requested, $offer, $offerAccepted, $t_delivery_date, $request_date, $source, $update_accepted_refused, $update_timestamp=true, $update_delivery=false, $delivery_date="",$important="") {
+function updateStat($id_request, $id_project, $am, $status, $fax_requested, $offer, $offerAccepted, $t_delivery_date, $request_date, $source, $update_accepted_refused, $update_timestamp = true, $update_delivery = false, $delivery_date = "", $important = "") {
 
     $data['am'] = $am;
     $data['status'] = $status;
@@ -289,15 +358,15 @@ function updateStat($id_request, $id_project, $am, $status, $fax_requested, $off
     $data['current_offer'] = $offer;
     $data['accepted_offer'] = $offerAccepted;
     $data['source_channel'] = $source;
-   
+
     if (!empty($update_accepted_refused)) {
         $data['accept_refuse_datetime'] = $update_accepted_refused;
     }
 
-    if (!empty ($important) or $important==0) {
+    if (!empty($important) or $important == 0) {
         $data['important'] = $important;
     }
-    
+
     $now = date("Y-m-d H:i:s");
     if ($update_timestamp) {
         $data['am_fetch_datetime'] = $now;

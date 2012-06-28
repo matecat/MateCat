@@ -36,10 +36,19 @@ class INIT {
             case ('matecat.pi'):
             case ('matecat.local'):
                 self::$DEBUG = true;
-                self::$DB_SERVER = "localhost";
+                
+//                self::$DB_SERVER = "localhost";
+//                self::$DB_DATABASE = "matecat_sandbox"; //database name
+//                self::$DB_USER = "root"; //database login name
+//                self::$DB_PASS = "root"; //database login password
+                
+                
+                self::$DB_SERVER = "213.215.131.241"; //database server
                 self::$DB_DATABASE = "matecat_sandbox"; //database name
-                self::$DB_USER = "root"; //database login name
-                self::$DB_PASS = "root"; //database login password
+                self::$DB_USER = "translated"; //database login name
+                self::$DB_PASS = "azerty1"; //database login password
+                
+                
                 break;
             case 'cattooldemo.matecat.com':
             case 'matecat.translated.home':

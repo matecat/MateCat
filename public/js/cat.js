@@ -14,7 +14,23 @@ UI = {
         this.initSegments();
 
         $(document).ready(function() {
-            $(".target-textarea").first().click();
+            //$(".target-textarea").first().click();
+            var found=false;
+            
+            //$(".ed").find('textarea.target-textarea[text=""]').first().click();
+            
+            $("textarea.target-textarea").each(function(){
+                if ($(this).text()=="" && found==false){
+                    found=true;
+                    $(this).click();
+                    
+                }
+            })
+            
+            //$('textarea.target-textarea').first("[html=''").click();
+            
+            
+           
         });
 
         $("body, .target-textarea").bind('keydown','Ctrl+return', function(e){ 
@@ -208,17 +224,21 @@ UI = {
             e.stopPropagation();          
             $(this).removeClass("indent");
             $(".menucolor:visible").hide();
+            
+             var segment = $(this).parents(".ed");
 
-            var anchor=($(this).parents(".ed")).prev();//.find(".number");
+            var anchor=segment.prev();//.find(".number");
             var anchor2=anchor.find(".number");
 
-            //console.log(anchor2);
+            console.log(segment.find(".sub-editor.matches").find(".graysmall").length);
             $(this).removeClass("white_text");
-            var segment = $(this).parents(".ed");
            
-            if(!$(this).val().length) {
+           if ((segment.find(".sub-editor.matches").find(".graysmall").length)==0){              
+               UI.getContribution(segment);
+           }
+            /*if(!$(this).val().length) {
                 UI.getContribution(segment);
-            }
+            }*/
 
             if ( $(segment).find(".toggle").is(":visible")){
                 return null
@@ -398,10 +418,15 @@ UI = {
                 $(".loader",n).removeClass('loader_on');
             },
             success: function(d){
-                $('.target-textarea', this).text(d.data.matches[0].translation).removeClass("indent").caretTo(0);;
+                var te = $('.target-textarea', this);
+                if (te.val().length==0){
+                    te.text(d.data.matches[0].translation)
+                }
+                te.removeClass("indent").caretTo(0);
+                
                 $('.percentuage', this).text(d.data.matches[0].match).show();
                 var tt = this;
-                $(tt).addClass('loaded');
+                $(tt).removeClass('loaded').addClass('loaded');
                 $('.sub-editor .overflow',tt).empty();
                 
                 var valid=0;
@@ -496,8 +521,9 @@ UI = {
     },
 
     setTranslation: function(segment,status) {
-        var id_segment = $(segment).attr('id').split('-')[1];
-        var id_job = $('.id-job').text();
+        var info=$(segment).attr('id').split('-');
+        var id_segment = info[1];
+        var id_job = info[2];
         var status = status;
         var translation = $('.target-textarea',segment).val();
         var time_to_edit = UI.editTime;

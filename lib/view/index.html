@@ -166,12 +166,13 @@
         <!--  END header serach  div (hidden by default) -->
 
 
-        <div class="main">
-            <tal:block tal:define="segment_data php:array()" tal:repeat="segment_data segments_data" >
+        <div tal:define="file_data php:array()" tal:repeat="file_data data" class="main">
+            
+
                 <div class="projectbar">
-                    <h2 tal:content="segment_data/filename | nothing">Hotel-Shangrilà.html</h2>
+                    <h2 tal:content="file_data/filename | nothing">@@filename@@</h2>
                     <div class="languages">
-                        <strong class="source-lang">English</strong> > 
+                        <strong class="source-lang">English</strong>  
                         <strong class="target-lang">Italian</strong>
                     </div>
 
@@ -181,29 +182,27 @@
                         <li style="padding-right:0;">Approved: <strong>21%</strong></li>
 
                     </ul>
-                </div>
+                </div>      
+                <tal:block tal:define="segment php:array()" tal:repeat="segment file_data/segments" >
+                    <div class="ed" tal:attributes="id string:segment-${segment/sid}-${file_data/jid}; class string:ed ${segment/css_loaded | nothing}" >
 
-
-                <tal:block tal:define="segment_item php:array()" tal:repeat="segment_item segment_data/segments" >
-                    <div class="ed" tal:attributes="id string:segment-${segment_item/id}; class string:ed ${segment_item/css_loaded | nothing}" >
                         <div class="toggle">
                             <div class="h-editor">
-                                <a href="#" tal:attributes="title string:Created by ${segment_item/matches/0/created_by  | nothing}"  title="Created by Euromed" class="percentuage per-orange">
-                                    <span tal:replace="segment_item/matches/0/match  | nothing">75%</span> 
+                                <a href="#" tal:attributes="title string:Created by ${segment/matches/0/created_by  | nothing}"  title="Created by Euromed" class="percentuage per-orange">
+                                    <span tal:replace="segment/matches/0/match  | nothing">75%</span> 
                                 </a>
                                 <a href="#" class="x" title="Close segment"></a>
                                 <div class="cl"></div>
                             </div>
                             <div class="cl"></div>
                         </div>
-                        <ul class="gray " tal:attributes="class string:gray ${segment_item/additional_css_class}">
+                        <ul class="gray " tal:attributes="class string:gray ${segment/additional_css_class}">
                             <li class="number">
-                                <a tal:define="anchor repeat/segment_item/number " href="#1" tal:attributes ="href string:#${anchor}" tal:content="anchor" name="1">1</a>
+                                <a tal:define="anchor repeat/segment/number " href="#1" tal:attributes ="href string:#${anchor}" tal:content="anchor" name="1">1</a>
                             </li>
                             <!--li class="source">
                                 
-                            <span class="original">Collaborative Translation Memory systems will really help your productivity.</span>
-        
+                            <span class="original">Collaborative Translation Memory systems will really help your productivity.</span>    
                                 <span class="orangeborder">Collaborative</span> 
                                 <span class="greenborder">
                                     <span class="smart-suggestion-source">Translation Memory</span>
@@ -215,8 +214,8 @@
                                 <span class="qa">.</span>
                             </li -->
                             <li class="source">
-                                <span tal:content="structure segment_item/segment" class="original">Collaborative Translation Memory systems will really help your productivity.</span>
-                                <span tal:replace="structure php:str_replace('&nbsp;',' ',segment_item['segment'])"/>
+                                <span tal:content="structure segment/segment" class="original">Collaborative Translation Memory systems will really help your productivity.</span>
+                                <span tal:replace="structure php:str_replace('&nbsp;',' ',segment['segment'])"/>
                             </li>
 
                             <li class="target">
@@ -224,7 +223,7 @@
                                 <span class="hide toggle"> 
                                     <a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>
                                 </span>
-                                <textarea class="target-textarea" name="" cols="" rows="" tal:content="segment_item/matches/0/translation | nothing"></textarea> 
+                                <textarea class="target-textarea" name="" cols="" rows="" tal:content="segment/translation | segment/matches/0/translation | nothing"></textarea> 
                                 <span class="loader"></span>
 
                                 <p class="cl"></p>
@@ -292,27 +291,27 @@
                                     <a href="#smsg1">Smart suggestions</a> 
                                 </li>
                                 <li class="active matches">
-                                    <a  tal:attributes="href string:#tr_ma_${repeat/segment_item/number}" href="#tr_ma_1">
+                                    <a  tal:attributes="href string:#tr_ma_${repeat/segment/number}" href="#tr_ma_1">
                                         Translation matches 
-                                        <tal:block tal:condition="exists:segment_item/matches" >
-                                            (<span tal:content="php:count(segment_item['matches'])">2</span>)
+                                        <tal:block tal:condition="exists:segment/matches" >
+                                            (<span tal:content="php:count(segment['matches'])">2</span>)
                                         </tal:block> 
 
-                                        <tal:block tal:condition="not:exists:segment_item/matches" >
+                                        <tal:block tal:condition="not:exists:segment/matches" >
                                             <span></span>
                                         </tal:block> 
                                     </a>
                                 </li>
                                 <li class="hide concordance">
-                                    <a tal:attributes="href string:#con_${repeat/segment_item/number}" href="#con_1">Concordance</a>
+                                    <a tal:attributes="href string:#con_${repeat/segment/number}" href="#con_1">Concordance</a>
                                 </li>
                                 <li class="hide preview_tab">
-                                    <a tal:attributes="href string:#Preview_${repeat/segment_item/number}" href="#Preview_1" class="preview-link">Preview</a>
+                                    <a tal:attributes="href string:#Preview_${repeat/segment/number}" href="#Preview_1" class="preview-link">Preview</a>
                                 </li>
                             </ul>  
                             <div class="cl"></div>
 
-                            <div id="smsg1" class="hide sub-editor">
+                            <div  class="hide smart-suggestion sub-editor">
                                 <ul class="graysmall">
                                     <li ><span class="greenborder">Translation Memory</span></li>
 
@@ -345,12 +344,11 @@
 
                             </div>
 
-                            <div tal:attributes="id string:tr_ma_${repeat/segment_item/number}" id="tr_ma_1" class="sub-editor">
+                            <div class="sub-editor tr-matches">
                                 <div class="overflow">     
-                                    <tal:block tal:condition="exists:segment_item/matches" >
-                                        <tal:block tal:define="suggestion php:array()" tal:repeat="suggestion segment_item/matches">
+                                    <tal:block tal:condition="exists:segment/matches" >
+                                        <tal:block tal:define="suggestion php:array()" tal:repeat="suggestion segment/matches">
                                             <ul class="graysmall" >
-
                                                 <li tal:content="suggestion/segment">Translation Memory </li>
                                                 <li tal:content="suggestion/translation" class="b">Memoria di traduzione</li>
 
@@ -370,7 +368,7 @@
                                     <div class="cl"></div>
                                 </div>
                             </div>
-                            <div tal:attributes="id string:con_${repeat/segment_item/number}" id="con_1" class="sub-editor">                      
+                            <div  class="sub-editor hide">                      
                                 <a href="#" class="btn back"></a>
                                 <a href="#" class="btn forward"></a>
                                 <input name="" type="text" value="Enter text to search"  
@@ -386,15 +384,18 @@
 
                                 <div class="cl"></div>
                             </div>
-                            <div tal:attributes="id string:Preview_${repeat/segment_item/number}" id="Preview_1" class="sub-editor preview" >
+                            <div class="sub-editor preview hide" >
                                 <!--iframe src="http://mymemory.translated.net/doc/" width="99.5%" scrolling="yes" height="100%" frameborder="0"></iframe-->
                             </div>
                         </div>                     
+
                     </div>
+
                     <div class="cl"></div>
                 </tal:block>
 
-            </tal:block>
+
+            
 
             <div class="cl"></div>
         </div>

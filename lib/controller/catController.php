@@ -11,21 +11,20 @@ include INIT::$ROOT . "/lib/utils/filetype.class.php";
  */
 class catController extends viewcontroller {
 
-    //put your code here
-    private $id_file = "";
-    private $segments_data = array();
-    private $start_from = 0;
+    //put your code here    
+    private $data = array();
+    private $cid = "";
+    private $pid = "";
+    private $pname = "";
+    private $create_date = "";
     private $filetype_handler = null;
+    private $start_from = 0;
 
     public function __construct() {
-        //   echo ".........\n";
+        echo ".........\n";
         parent::__construct();
         parent::makeTemplate("index.html");
-        /* $this->id_file=$_GET['id_file'];
-          if (empty($this->id_file)){
-          $this->id_file=$_POST['id_file'];
-          } */
-        $this->id_file = "cc"; // ONLTY FOR TESTING PURPOSE
+        $this->pid = $this->get_from_get_post("pid");
         $this->start_from = $this->get_from_get_post("start");
         if (is_null($this->start_from)) {
             $this->start_from = 0;
@@ -50,72 +49,108 @@ class catController extends viewcontroller {
     }
 
     public function doAction() {
-        if (empty($this->id_file)) {
-            $this->postback("File not specified");
-        }
 
-        $data = getCurrentFormalOffer($this->id_file, $this->start_from);
-
+        $data = getSegments($this->pid, $this->start_from);
+        $first_not_translated_found = false;
         foreach ($data as $i => $seg) {
             $seg['segment'] = $this->stripTagesFromSource($seg['segment']);
             $seg['segment'] = trim($seg['segment']);
+
             if (empty($seg['segment'])) {
                 continue;
             }
 
-            $id_file = $seg['id_file'];
-
-            if (!isset($this->segments_data["$id_file"])) {
-                $this->segments_data["$id_file"]['mimetype'] = $seg['mimetype'];
-                $this->segments_data["$id_file"]['filename'] = $seg['filename'];
-
-                $this->segments_data["$id_file"]['segments'] = array();
-                $this->filetype_handler = new filetype($seg['mimetype']);
+            if (empty($this->pname)) {
+                $this->pname = $seg['pname'];
             }
-            
-            //EXAMPLE : IN CASE OF DOC/DOCX FILES REVOME THE SEQUENCE xC2xA0
-            $seg['segment'] = $this->filetype_handler->parse($seg['segment']);     
-          
-            unset($seg['id_file']);
-            unset($seg['mimetype']);
-            unset($seg['filename']);
 
-            //TODO : IMPROVEMENT: FIND A MECHANISM FOR INCLUDE 
-            //THIS CSS MANAGEMENT INSIDE THE TEMPLATE
+            if (empty($this->cid)) {
+                $this->cid = $seg['cid'];
+            }
+
+            if (empty($this->pid)) {
+                $this->cid = $seg['pid'];
+            }
+
+            if (empty($this->tid)) {
+                $this->cid = $seg['tid'];
+            }
+
+            if (empty($this->create_date)) {
+                $this->create_date = $seg['create_date'];
+            }
+
+            $id_file = $seg['id_file'];
+            if (!isset($this->data["$id_file"])) {
+                
+                $this->data["$id_file"]['jid'] = $seg['jid'];
+                $this->data["$id_file"]["filename"] = $seg['filename'];
+                $this->data["$id_file"]["mime_type"] = $seg['mime_type'];
+                $this->data["$id_file"]['id_segment_start'] = $seg['id_segment_start'];
+                $this->data["$id_file"]['id_segment_end'] = $seg['id_segment_end'];
+                $this->data["$id_file"]['segments'] = array();
+            }
+            if (count($this->data["$id_file"]['segments'])>100){continue;}
+            $this->filetype_handler = new filetype($seg['mime_type']);
+
+
+
+            unset($seg['id_file']);
+            unset($seg['mime_type']);
+            unset($seg['filename']);
+            unset($seg['jid']);
+            unset($seg['pid']);
+            unset($seg['cid']);
+            unset($seg['tid']);
+            unset($seg['pname']);
+            unset($seg['create_date']);
+            unset($seg['id_segment_end']);
+            unset($seg['id_segment_start']);
+
+            $seg['segment'] = $this->filetype_handler->parse($seg['segment']);
             $seg["additional_css_class"] = "";
             if ($i % 2 != 0) {
                 $seg["additional_css_class"] = "light";
             }
 
-
-
-            if ($i == 0) { //get matches only for the first segment                
+         /*   if (!$first_not_translated_found and empty($seg['translation'])) { //get matches only for the first segment                
+                $first_not_translated_found = true;
                 $matches = array();
                 $matches = getFromMM($seg['segment']);
-                
-                $matches=array_slice ($matches,0,INIT::$DEFAULT_NUM_RESULTS_FROM_TM);              
-              
+
+                $matches = array_slice($matches, 0, INIT::$DEFAULT_NUM_RESULTS_FROM_TM);
+
                 $seg['matches'] = $matches;
-                
+
                 //$seg['matches_no_mt']=0;
                 //foreach ($matches as $m){
                 //    if ($m['created-by']!='MT'){
                 //        $seg['matches_no_mt']+=1;
                 //    }
                 //}
-
                 $seg['css_loaded'] = "loaded";
             }
+          * 
+          * 
+          */
 
-            $this->segments_data["$id_file"]['segments'][] = $seg;
+            /*if (!empty($seg['translation'])) {
+                $seg['css_loaded'] = "loaded";
+            }*/
+
+            $this->data["$id_file"]['segments'][] = $seg;
         }
 //        echo "<pre>";
-//        print_r($this->segments_data);
+//        print_r($this->data);
 //        exit;
     }
 
     public function setTemplateVars() {
-        $this->template->segments_data = $this->segments_data;
+        $this->template->data = $this->data;
+        $this->template->cid = $this->cid;
+        $this->template->create_date = $this->create_date;
+        $this->template->pname = $this->pname;
+
 
 //        echo "<pre>";
 //        print_r ($this->template);
@@ -125,3 +160,4 @@ class catController extends viewcontroller {
 
 }
 ?>
+

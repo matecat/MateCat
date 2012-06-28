@@ -19,10 +19,13 @@ class controllerDispatcher {
     }
 
     public function getController() {
-        //Default :  getPanel
-        $action = (isset($_REQUEST['action']) ? $_REQUEST['action'] : 'cat');
+        //Default :  cat
+        $action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'cat';
+        //$action='cat';
+        //echo "action is $action";        
         $postback = (isset($_REQUEST['postback']) ? "postback" : "");
-        $className = $action . $postback . "Controller";
+        //$className = $action . $postback . "Controller";
+        $className = $action."Controller";
         //echo $className ; exit;
         return new $className();
     }
@@ -30,7 +33,6 @@ class controllerDispatcher {
 }
 
 abstract class controller {
-
     abstract function doAction();
     protected function nocache(){
         header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
@@ -50,6 +52,7 @@ abstract class controller {
             echo "\n\n\n";
             //print_r($this->template);
             echo "</pre>";
+            exit;
         }
     }
     

@@ -32,7 +32,7 @@
 class Database {
 
     // debug flag for showing error messages
-    public $debug = true;
+    public $debug = false;
     // Store the single instance of Database
     private static $instance;
     private $server = ""; //database server
@@ -55,7 +55,7 @@ class Database {
 
     private function __construct($server=null, $user=null, $pass=null, $database=null) {
         // error catching if not passed in
-        log::doLog(__FUNCTION__,"ciao","come va",1 ,array("arr1",33));
+        
         if ($server == null || $user == null || $database == null) {
             return $this->oops("Database information must be passed in when the object is first created.");
         }
@@ -71,7 +71,7 @@ class Database {
 # desc: singleton declaration
 
     public static function obtain($server=null, $user=null, $pass=null, $database=null) {
-        log::doLog(__FUNCTION__);
+        
         if (!self::$instance) {
             self::$instance = new Database($server, $user, $pass, $database);
         }
@@ -237,7 +237,7 @@ class Database {
         }
 
         $q = rtrim($q, ', ') . ' WHERE ' . $where . ';';
-        log::doLog($q);
+        //log::doLog($q);
         return $this->query($q);
     }
 
@@ -320,7 +320,7 @@ class Database {
             $this->errno = mysql_errno();
             $msg = "<b>WARNING:</b> No link_id found. Likely not be connected to database.<br />$msg";
         }
-        LOG::doLog("query error : ($this->errno) $this->error - $this->sql");
+        log::doLog("query error : ($this->errno) $this->error - $this->sql");
         // if no debug, done here
         if (!$this->debug) {
             if ($this->errno > 0) {
