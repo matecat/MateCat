@@ -110,21 +110,21 @@ UI = {
                 width: '74%'
             });	
             $(".main").addClass("maincomment");	
-            $(this).parents(".ed").find(".comment-area").addClass("openarea");
-            $(this).parents(".ed").find(".comment-area").show("slide", {
+            $(this).parents(".segment").find(".comment-area").addClass("openarea");
+            $(this).parents(".segment").find(".comment-area").show("slide", {
                 direction: "left"
             }, 400);
             $(".text-c").focus();
-            $(this).parents(".ed").find(".c-close").hide();
+            $(this).parents(".segment").find(".c-close").hide();
         });
 
         $(".x-com").click(function(e) {          
             e.preventDefault();
-            $(this).parents(".ed").find(".comment-area").removeClass("openarea");
-            $(this).parents(".ed").find(".comment-area").hide("slide", {
+            $(this).parents(".segment").find(".comment-area").removeClass("openarea");
+            $(this).parents(".segment").find(".comment-area").hide("slide", {
                 direction: "left"
             }, 400);
-            $(this).parents(".ed").find(".h-notification").show();
+            $(this).parents(".segment").find(".h-notification").show();
             $(".main").removeClass("maincomment");
             $(".main").animate({
                 width: '90.5%'
@@ -152,12 +152,12 @@ UI = {
         $(".status").click(function(e) {         
             e.preventDefault();
             e.stopPropagation();
-            var isVisible=$(this).parents(".ed").find(".menucolor").is(":visible");
+            var isVisible=$(this).parents(".segment").find(".menucolor").is(":visible");
             $(".menucolor:visible").hide();
             if (isVisible){
                 return null;
-            }
-            $(this).parents(".ed").find(".menucolor").toggle();
+            }            
+            $(this).parents(".segment").find(".menucolor").toggle();
         });
 
         $(".m-notification").click(function(e) {          
@@ -309,8 +309,8 @@ UI = {
         })
 
         $(".d, .a, .r, .f").click(function(){
-            $(this).parents(".ed").find(".status").removeClass("col-approved col-notapproved col-done col-draft");
-            $(this).parents(".ed").find(".menucolor").toggle();
+            $(this).parents(".segment").find(".status").removeClass("col-approved col-notapproved col-done col-draft");
+            $(this).parents(".segment").find(".menucolor").toggle();
             return false;
         })
 

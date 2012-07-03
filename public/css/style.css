@@ -148,17 +148,32 @@ z-index:9;
 	overflow: hidden;
 }
 
-/*table*/
+/*table*
+
+/* BAK
 .number{
 	width:10px !important;	position:absolute;	left:-45px;	display:block;	height:10px;
 	color:#999;	font-size:12px;z-index:99
 }
+*/
+.number{
+	width:10px !important;	position:absolute;	top:15px;left:-30px;	display:block;	height:10px;
+		font-size:12px;z-index:99999;
+}
+.number a{color:#999;text-decoration:none; cursor: default}
+
+
+
 .comment{position:absolute;right:0;}
 .color{width:10px !important;float:right !important; }
 .editor .color{display:none;}
+/* BAK
 .commentballoon{position:absolute;right:0;top:0;width:30px !important; margin-right:-57px !important;height:100% !important;font-size:10px;text-align:center !important;z-index:99;}
 .commentballoon a{display:block;padding:16px 0 10px 0px !important;}
-
+*/
+.commentballoon{position:absolute;right:10px;top:20px;width:30px !important; margin-right:-57px !important;height:100% !important;font-size:10px;text-align:center !important;z-index:99;}
+.commentballoon a{display:block;padding:16px 0 10px 0px !important;}
+.segment{position:relative;}
 
 /*projectbar*/
 .languages{position:absolute;top:12px;width:100%;text-align:center !important;text-indent:-80px; }
@@ -406,11 +421,19 @@ width:88.1%;-moz-border-radius-bottomright:2px;	-webkit-border-bottom-right-radi
 .col-draft{background:#fff;}
 .col-notapproved{background:#dc2e34;}
 
+/* BAK
 .menucolor{position:absolute; border:1px solid #ADADAD; margin:35px 0 0 -200px;width:auto;background:#fff; width:140px;z-index:99999999999999;border-bottom:none;right:8px;-moz-border-radius: 2px;border-radius: 2px;-moz-box-shadow: 0 1px 4px #666;-webkit-box-shadow: 0 1px 4px #666;box-shadow: 0 1px 4px #666;font-weight:bold;font-size:14px;}
 .menucolor li{margin:0;padding:0;float:none;width:100%;border-bottom:1px solid #ADADAD;border-top:1px solid #fff}
 .menucolor li a{background: url(../img/status.png) 119px 9px no-repeat;padding:7px 20px 7px 10px;display:block;color:#000; text-decoration:none; }
 
 .menucolor li a:hover, .d:hover{background-color:#f7f7f7}
+*/
+.menucolor{position:absolute; border:1px solid #ADADAD; text-align:left;margin:-90px 0 0 -200px;width:auto;background:#fff; width:140px;z-index:99999999999999;border-bottom:none;right:8px;-moz-border-radius: 2px;border-radius: 2px;-moz-box-shadow: 0 1px 4px #666;-webkit-box-shadow: 0 1px 4px #666;box-shadow: 0 1px 4px #666;font-weight:bold;font-size:14px;}
+.menucolor li{margin:0;padding:0;float:none;width:100%;border-bottom:1px solid #ADADAD;border-top:1px solid #fff}
+.menucolor li a{background: url(../img/status.png) 119px 9px no-repeat;padding:7px 20px 7px 10px;display:block;color:#000; text-decoration:none; }
+
+.menucolor li a:hover, .d:hover{background-color:#f7f7f7}
+
 .arrow-mcolor{display:block;width:20px;height:20px;background:url(../img/arrow-menucolor.png) 0 0 no-repeat;position:absolute;margin:-8px 0 0 120px}
 .a{	background-position: 119px -22px !important;}
 .d{background-position: 119px -79px !important;}

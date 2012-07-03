@@ -1,0 +1,472 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Translate - Project_Name - Job_ID </title>
+        <link rel="shortcut icon" href="/public/img/favicon.ico" />
+        <link href="/public/css/style.css" rel="stylesheet" type="text/css" />
+        <link rel='stylesheet' media='screen and (min-width: 701px) and (max-width: 1080px)' href='/public/css/test.css' />
+        <!--[if IE ]>
+<link href="/public/css/ieall.css" rel="stylesheet" type="text/css" />
+<![endif]-->
+
+        <!--[if lt IE 8]>
+        <link href="/public/css/ie.css" rel="stylesheet" type="text/css" />
+        <![endif]-->
+
+
+        <script type="text/javascript">
+            var config = {
+                basepath: '/',
+                id_translator: "<span tal:replace='id_translator | string:unknown_transltator'/>",
+                private_translator: "<span tal:replace='private_translator | string:0'/>",
+                id_customer: "<span tal:replace='id_customer | string:unknown_customer'/>",
+                private_customer: "<span tal:replace='private_customer | string:0'/>",
+            }
+        </script>
+        <script src="/public/js/loader.js"></script>
+
+
+    </head>
+
+    <body>
+        <div class="header">
+            <div class="wrapper">   
+
+                <!-- viewer icons
+                
+                    <a href="" class="notification m-notification" title="click to view notifications">2</a>
+                    <span class="text">+ you
+                    <span id="id_translator" class="hide">antonio</span>
+                    </span> 
+                    <a href="#" class="viewer not-online">
+                     <span class="v-name">
+                            <span class="v-arrow"></span>
+                            Marco Trombetti <br />
+                            (offline)<br />
+                            last edit: 12/06/12 at 06.30 AM
+                        </span>
+                    </a> 
+                    <a href="#" class="viewer not-online">
+                        <span class="v-name">
+                            <span class="v-arrow"></span>
+                            Antonio Farina <br />
+                            (offline)<br />
+                            last edit: 12/06/12 at 06.30 AM
+                        </span>
+                    </a> 
+                    <a href="#" class="viewer">
+                        <span class="v-name">
+                            <span class="v-arrow"></span>
+                            Alessandro Cattelan<br />
+                            last edit: 12/06/12 at 06.30 AM
+                        </span>
+                    </a>
+                    
+                -->
+
+
+                <!-- edit/view notifiche globali -->
+                <div class="notification-box">
+                    <a href="#" class="arrow-notification"></a>
+                    <div class="h-notification">Notifications  </div>
+                    <ul>
+                        <li>
+                            <a href="#">
+                                <b>Luca</b> 
+                                <br/>
+                                "parts" va tradotto con "componenti" e non con "pezzi"
+                            </a>
+                        </li>
+                        <li>
+                            <b>Lucia</b>
+                            <br/>      
+                            questa frase è lunga e risulta illeggibile
+                        </li>
+                        <li>
+                            <b>Antonio</b>
+                            <br/>
+                            attenzione ai doppi spazi
+                        </li>
+                    </ul>
+                </div>
+                <!-- END edit/view notifiche globali -->
+
+                <a href="#">
+                    <img src="/public/img/logo.png" class="logo" />
+                </a>
+                <div class="breadcrumbs">    
+                    <div class="joblist">
+                        <a href="#" class="arrow-notification"></a>
+                        <ul>
+                            <li>
+                                <a href="">
+                                    <b>Job1</b> 
+                                </a>
+                            </li>
+                            <li>
+                                <a href="">
+                                    <b>Another job</b> 
+                                </a>
+                            </li>
+                            <li>
+                                <a href="">
+                                    <b>Eaaasy job</b> 
+                                </a>
+                            </li>
+                        </ul>
+                    </div>  <a href="#" class="joblink"  name="1" >Jobs List</a> > Hotel Shangrilà (112323 - FR)
+                </div>
+                <div class="cl"></div>
+            </div>   <!-- .wrapper -->
+
+            <div class="cl"></div>
+
+            <!-- <div class="tools">
+                 <div class="wrapper">
+                     <a id="back-button" href="#"></a>
+                     <a id="forth-button" href="#"></a>
+                     <a id="search-button" href="" class="search-icon"></a>
+                 </div>
+             </div>-->
+
+            <!--  header search  div (hidden by default) -->
+            <div class="search" id="search" >
+                <a href="#" class="search-on"></a>
+
+                <p>Find:	</p>
+                <input name="" type="text" class="input" />									   
+                <p>Replace with:</p>
+                <input name="" type="text" class="input"/>
+
+                <input name="" type="button" class="btn con-submit" value="SEARCH IN SOURCE"/>
+                <a href="#" class="btn con-menubtn"></a>
+
+                <div class="cl"></div>
+
+                <!-- commento per Luca : racchiudere checkbox e la sua label in un 
+                container comune in modo da poter permettere un più semplice check/uncheck della checkbox 
+                (come per il select language del sito translated
+                -->
+                <input name="" type="checkbox" value="" class="checkbox"/> 
+                <p>Match case</p> 
+
+                <input name="" type="checkbox" value="" class="checkbox"/>    
+                <p>Match whole word</p>        
+
+                <input name="" type="checkbox" value="" class="checkbox"/>    
+                <p>search regular expressions </p>      
+
+                <input name="" type="checkbox" value="" class="checkbox"/>    
+                <p>conditional search   </p>
+
+                <div class="cl"></div>
+            </div>
+        </div>
+        <!--  END header serach  div (hidden by default) -->
+
+
+        <div tal:define="file_data php:array()" tal:repeat="file_data data" class="main">
+            
+
+                <div class="projectbar">
+                    <h2 tal:content="file_data/filename | nothing">@@filename@@</h2>
+                    <div class="languages">
+                        <strong class="source-lang">English</strong>  
+                        <strong class="target-lang">Italian</strong>
+                    </div>
+
+                    <ul style="float:right;text-align:right;">
+                        <li>Eq. words: <strong>11,223</strong></li>
+                        <li>Translated: <strong>54%</strong></li>
+                        <li style="padding-right:0;">Approved: <strong>21%</strong></li>
+
+                    </ul>
+                </div>      
+                <tal:block tal:define="segment php:array()" tal:repeat="segment file_data/segments" >
+                    <div class="ed" tal:attributes="id string:segment-${segment/sid}-${file_data/jid}; class string:ed ${segment/css_loaded | nothing}" >
+
+                        <div class="toggle">
+                            <div class="h-editor">
+                                <a href="#" tal:attributes="title string:Created by ${segment/matches/0/created_by  | nothing}"  title="Created by Euromed" class="percentuage per-orange">
+                                    <span tal:replace="segment/matches/0/match  | nothing">75%</span> 
+                                </a>
+                                <a href="#" class="x" title="Close segment"></a>
+                                <div class="cl"></div>
+                            </div>
+                            <div class="cl"></div>
+                        </div>
+                        <ul class="gray " tal:attributes="class string:gray ${segment/additional_css_class}">
+                            <li class="number">
+                                <a tal:define="anchor repeat/segment/number " href="#1" tal:attributes ="href string:#${anchor}" tal:content="anchor" name="1">1</a>
+                            </li>
+                            <!--li class="source">
+                                
+                            <span class="original">Collaborative Translation Memory systems will really help your productivity.</span>    
+                                <span class="orangeborder">Collaborative</span> 
+                                <span class="greenborder">
+                                    <span class="smart-suggestion-source">Translation Memory</span>
+                                    <span class="smart-suggestion-target">Memoria di Traduzione</span>  
+                                </span>   
+                                systems will 
+                                <span class="orangeborder">really</span> 
+                                help your productivity
+                                <span class="qa">.</span>
+                            </li -->
+                            <li class="source">
+                                <span tal:content="structure segment/segment" class="original">Collaborative Translation Memory systems will really help your productivity.</span>
+                                <span tal:replace="structure php:str_replace('&nbsp;',' ',segment['segment'])"/>
+                            </li>
+
+                            <li class="target">
+                                <span class="loader"></span>
+                                <span class="hide toggle"> 
+                                    <a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>
+                                </span>
+                                <textarea class="target-textarea" name="" cols="" rows="" tal:content="segment/translation | segment/matches/0/translation | nothing"></textarea> 
+                                <span class="loader"></span>
+
+                                <p class="cl"></p>
+                            </li>
+
+                            <li class="color">
+                                <a href="#" title="Segment status"  class="status " >                                
+                                </a>
+                            </li>
+
+                            <li class="commentballoon">
+                                <div class="h-notification c-close"> <span class="corner"></span>2</div>
+                                <div class="comment-area">
+                                    <div class="h-notification"> <span class="corner"></span>2 Comments<a href="#" class="x-com" title="close this comment"></a></div>
+                                    <ul>
+                                        <li><p> <strong>luca panzarella</strong>
+                                                <span class="date">  6:11 PM Mar 31</span>
+                                                <br />
+                                                Fede, questa modifica riguarda lo sviluppo: molto più facile spiegartela bene a voce.. è banale </p></li>
+                                        <li> <p><strong>Federico</strong>
+
+                                                <span class="date"> 12:53 PM Apr 2</span>
+                                                <br />
+                                                Domanda: ma poi l'utente cosa può fare in queste pagine statiche? Ci si arriva solamente da compilazione form? </p></li>
+                                        <li> <p><strong>dario</strong>
+
+                                                <span class="date">  2:11 PM Apr 2</span>
+                                                <br />
+                                                si! </p></li>
+                                        <li style="background:#c4d3dd; border-bottom:none">
+                                            <textarea name="" cols="" rows="" class="text-c" ></textarea>
+
+                                            <input name="" type="button" class="btn con-submit sugg-submit" value="ADD COMMENT"/>  
+                                            <div class="cl"></div> 
+                                        </li>
+                                    </ul>
+                                </div>
+                            </li>
+
+                            <ul class="menucolor">
+                                <span class="arrow-mcolor"></span>
+                                <li>
+                                    <a href="#" class="f" title="set draft as status">DRAFT</a></li>
+                                <li>
+                                    <a href="#" class="d" title="set translated as status">TRANSLATED</a></li>
+                                <li>
+                                    <a href="#" class="a" title="set approved as status">APPROVED</a></li>
+                                <li>
+                                    <a href="#" class="r" title="set rejected as status">REJECTED</a></li>
+                            </ul>
+                        </ul>
+                        <div class="cl"></div> 
+
+                        <div class="toggle" > 
+                            <div class="editr_btn">
+                                <div class="buttoned" style="margin-right:-27px"><a href="#" class="approved">APPROVED</a><div class="cl"></div><p>CTRL+3</p></div>
+                                <div class="buttoned"><a href="#" class="Translated">TRANSLATED</a><div class="cl"></div><p>CTRL+ENTER</p></div>
+                                <div class="buttoned"><a href="#" class="draft">DRAFT</a><div class="cl"></div><p>CTRL+2</p></div>
+                                <a href="#" class="btn copysource" title="Copy source to target"></a>
+                                <a href="#" class="btn tagmenu disabled" title=" Insert tags "></a>
+
+                            </div>
+                            <ul  class="sbm submenu">
+                                <li class="hide suggestions">
+                                    <a href="#smsg1">Smart suggestions</a> 
+                                </li>
+                                <li class="active matches">
+                                    <a  tal:attributes="href string:#tr_ma_${repeat/segment/number}" href="#tr_ma_1">
+                                        Translation matches 
+                                        <tal:block tal:condition="exists:segment/matches" >
+                                            (<span tal:content="php:count(segment['matches'])">2</span>)
+                                        </tal:block> 
+
+                                        <tal:block tal:condition="not:exists:segment/matches" >
+                                            <span></span>
+                                        </tal:block> 
+                                    </a>
+                                </li>
+                                <li class="hide concordance">
+                                    <a tal:attributes="href string:#con_${repeat/segment/number}" href="#con_1">Concordance</a>
+                                </li>
+                                <li class="hide preview_tab">
+                                    <a tal:attributes="href string:#Preview_${repeat/segment/number}" href="#Preview_1" class="preview-link">Preview</a>
+                                </li>
+                            </ul>  
+                            <div class="cl"></div>
+
+                            <div  class="hide smart-suggestion sub-editor">
+                                <ul class="graysmall">
+                                    <li ><span class="greenborder">Translation Memory</span></li>
+
+                                    <li class="b">Memorie di traduzione</li>
+
+                                    <ul class="graysmall-details">
+                                        <li class="graygreen">   81%</li>
+                                        <li>     02/11/2008  </li>
+
+                                        <li>Created by Euromed</li>
+                                        <li>CTRL+1</li>
+                                    </ul>
+                                </ul>
+
+
+                                <ul class="graysmall addline-suggestion">   
+                                    <li>            
+                                        <input name="" type="text" value="Add a source suggestion"  
+                                               onblur="if(this.value.length == 0) this.value='Add a source suggestion';" onClick="if(this.value == 'Add a source suggestion') this.value='';" class="sugg-input" />
+                                    </li>
+                                    <li> 
+                                        <input name="" type="text" value="Add a target suggestion"  
+                                               onblur="if(this.value.length == 0) this.value='Add a target suggestion';" onClick="if(this.value == 'Add a target suggestion') this.value='';" class="sugg-input second" /><input name="input" type="button" class="btn con-submit sugg-submit" value="ADD SUGGESTION"/>
+                                    </li>
+                                </ul>
+                                <ul class="graysmall add-ul">
+                                    <li><a href="#" class="addsuggestion">+</a> <span class="provalo">Add suggestion</span>                    </li>
+                                </ul>
+                                <div class="cl"></div>
+
+                            </div>
+
+                            <div class="sub-editor tr-matches">
+                                <div class="overflow">     
+                                    <tal:block tal:condition="exists:segment/matches" >
+                                        <tal:block tal:define="suggestion php:array()" tal:repeat="suggestion segment/matches">
+                                            <ul class="graysmall" >
+                                                <li tal:content="suggestion/segment">Translation Memory </li>
+                                                <li tal:content="suggestion/translation" class="b">Memoria di traduzione</li>
+
+                                                <ul class="graysmall-details">
+                                                    <li class="graygreen">
+                                                        <span tal:replace="suggestion/match">81</span>
+                                                    </li>
+                                                    <li tal:content="suggestion/last-update-date">02/11/2008</li>
+                                                    <li tal:condition="true:suggestion/created-by">
+                                                        Source:  
+                                                        <span class="bold" tal:content="suggestion/created-by"/>
+                                                    </li>
+                                                </ul>
+                                            </ul>
+                                        </tal:block>
+                                    </tal:block>
+                                    <div class="cl"></div>
+                                </div>
+                            </div>
+                            <div  class="sub-editor hide">                      
+                                <a href="#" class="btn back"></a>
+                                <a href="#" class="btn forward"></a>
+                                <input name="" type="text" value="Enter text to search"  
+                                       onblur="if(this.value.length == 0) this.value='Enter text to search';" onClick="if(this.value == 'Enter text to search') this.value='';" class="con-input"/>
+
+                                <div class="submenubutton">    
+                                    <input name="" type="button" class="btn con-submit" value="SEARCH IN SOURCE"/>
+                                    <a href="#" class="btn con-menubtn"></a>
+                                    <ul class="con-menu" id="col-menu">
+                                        <li><a href="#">SEARCH IN TARGET</a></li>
+                                    </ul>
+                                </div>
+
+                                <div class="cl"></div>
+                            </div>
+                            <div class="sub-editor preview hide" >
+                                <!--iframe src="http://mymemory.translated.net/doc/" width="99.5%" scrolling="yes" height="100%" frameborder="0"></iframe-->
+                            </div>
+                        </div>                     
+
+                    </div>
+
+                    <div class="cl"></div>
+                </tal:block>
+
+
+            
+
+            <div class="cl"></div>
+        </div>
+        <div class="footer">
+            <div class="wrapper">
+
+                <a href="#" class="statslink">Project Statistics</a> 
+
+                <p >Progress:</p>
+                <div class="meter">
+                    <a href="#" style="width: 45%" class="green" title="Approved 45%"></a>
+                    <a href="#" style="width: 15%" class="blue" title="Done 15%"></a>
+                    <a href="#" style="width: 40%" class="orange" title="Draft 40%"></a>
+                </div>
+                <ul>
+                    <li>Eq. words: <strong>--.---</strong></li>
+                    <li>Translated: <strong>--%</strong></li>
+                    <li>Approved: <strong>--%</strong></li>
+                    <li>Words last hour: <strong>---</strong></li>
+                    <li>Expected completion: <strong>-- Hours</strong></li>
+                </ul>
+                <div class="stats">
+                    <ul class="h-stats">
+                        <div class="header-stats">Project stats (<a href="http://matecat.translated.home/?action=projectStatistics" target="_blank">More...</a>) <a href="#" class="x-stats"></a></div>
+
+                        <li class="first">&nbsp;</li>
+                        <li>Initial</li>
+                        <li>To-do</li>
+                        <li>%</li>
+                        <li>Cost</li>
+                    </ul>
+                    <ul>
+                        <li class="first">New</li>
+                        <li>---.---</li>
+                        <li>--</li> <li>---</li>
+                        <li>--</li>
+                    </ul>
+                    <ul>
+                        <li class="first">Repetitions</li> <li>---</li>
+                        <li>90</li>
+                        <li>100</li>
+                        <li>30</li>
+                    </ul>
+                    <ul>
+                        <li class="first">100% match</li> <li>---</li>
+                        <li>--</li> <li>---</li>
+                        <li>--</li>
+                    </ul>
+                    <ul>
+                        <li class="first">100% context match</li> <li>---</li>
+                        <li>--</li> <li>---</li>
+                        <li>--</li>
+                    </ul>
+                    <ul>
+                        <li class="first">Fuzzy match</li> <li>---</li>
+                        <li>--</li> <li>---</li>
+                        <li>--</li>
+                    </ul>
+                    <ul>
+                        <li class="first">Machine translation</li> <li>---</li>
+                        <li>--</li> <li>---</li>
+                        <li>--</li>
+                    </ul>
+                    <a href="#" class="arrow-notification"></a>
+                    <div class="cl"></div>
+                </div>
+
+            </div>
+        </div>
+
+        <div class="cl"></div>
+        <div class="grayed"></div>
+    </body>
+</html>
