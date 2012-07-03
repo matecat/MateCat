@@ -38,7 +38,7 @@ function getFromMM($query) {
 function addToMM($seg, $tra, $source_lang, $target_lang) {
     $seg = urlencode($seg);
     $tra = urlencode($tra);
-    $url = "http://mymemory.translated.net/api/set?seg=$seg!&tra=$tra!&langpair=$source_lang|$target_lang&de=matecatdeveloper@matecat.com";
+    $url = "http://mymemory.translated.net/api/set?seg=$seg&tra=$tra&langpair=$source_lang|$target_lang&de=matecatdeveloper@matecat.com";
     $res = file_get_contents($url);
     //echo $res;
     $res = json_decode($res, true);

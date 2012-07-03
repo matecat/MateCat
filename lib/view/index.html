@@ -173,7 +173,7 @@
                     <h2 tal:content="file_data/filename | nothing">@@filename@@</h2>
                     <div class="languages">
                         <strong class="source-lang">English</strong>  
-                        <strong class="target-lang">Italian</strong>
+                        > <strong class="target-lang">Italian</strong>
                     </div>
 
                     <ul style="float:right;text-align:right;">
@@ -226,7 +226,6 @@
                                 <textarea class="target-textarea" name="" cols="" rows="" tal:content="segment/translation | segment/matches/0/translation | nothing"></textarea> 
                                 <span class="loader"></span>
 
-                                <p class="cl"></p>
                             </li>
 
                             <li class="color">
@@ -279,8 +278,7 @@
 
                         <div class="toggle" > 
                             <div class="editr_btn">
-                                <div class="buttoned" style="margin-right:-27px"><a href="#" class="approved">APPROVED</a><div class="cl"></div><p>CTRL+3</p></div>
-                                <div class="buttoned"><a href="#" class="Translated">TRANSLATED</a><div class="cl"></div><p>CTRL+ENTER</p></div>
+                                       <div class="buttoned" style="margin-right:-20px"><a href="#" class="Translated">TRANSLATED</a><div class="cl"></div><p>CTRL+ENTER</p></div>
                                 <div class="buttoned"><a href="#" class="draft">DRAFT</a><div class="cl"></div><p>CTRL+2</p></div>
                                 <a href="#" class="btn copysource" title="Copy source to target"></a>
                                 <a href="#" class="btn tagmenu disabled" title=" Insert tags "></a>

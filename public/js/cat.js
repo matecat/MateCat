@@ -60,7 +60,12 @@ UI = {
             e.preventDefault();
             $("div#search").toggle();
         });
-                
+          
+		  
+		
+		  
+		  
+		  
         //overlay
 	
         $(".more").click(function(){
