@@ -19,6 +19,8 @@ class setTranslationController extends ajaxcontroller {
     public function __construct() {
         parent::__construct();
 
+	//print_r ($_REQUEST);exit;
+
         $this->id_job = $this->get_from_get_post('id_job');
         $this->id_segment = $this->get_from_get_post('id_segment');
         $this->id_translator = $this->get_from_get_post('id_translator');

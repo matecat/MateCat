@@ -4,7 +4,10 @@
 .number{left:-40px;	}
 .main{width:90.3%;margin-left:3%;}
 .percentuage{left:44.3%;}
- textarea{width:105% !important;}
+ 
+.editor textarea {width:112% !important;}
+.ed textarea{width:105%;}
+
 .projectbar ul {margin-left:5px}
 .Translated, .draft, .approved{padding:7px 6px;}
 .meter {	width:10%;}
@@ -14,3 +17,4 @@
 .comment-area, .comment-area ul, .comment-area li{width:170px;}
 .comment-area .h-notification{width:160px;}
 .comment-area textarea{width:137px !important}
+.editor .target{margin-left:-10px !important;}

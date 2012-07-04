@@ -5,7 +5,8 @@
         <title>Translate - Project_Name - Job_ID </title>
         <link rel="shortcut icon" href="/public/img/favicon.ico" />
         <link href="/public/css/style.css" rel="stylesheet" type="text/css" />
-        <link rel='stylesheet' media='screen and (min-width: 701px) and (max-width: 1080px)' href='/public/css/test.css' />
+        <link rel='stylesheet' media='screen and (min-width: 701px) and (max-width: 1180px)' href='/public/css/test.css' />
+        
         <!--[if IE ]>
 <link href="/public/css/ieall.css" rel="stylesheet" type="text/css" />
 <![endif]-->
@@ -21,7 +22,7 @@
                 id_translator: "<span tal:replace='id_translator | string:unknown_transltator'/>",
                 private_translator: "<span tal:replace='private_translator | string:0'/>",
                 id_customer: "<span tal:replace='id_customer | string:unknown_customer'/>",
-                private_customer: "<span tal:replace='private_customer | string:0'/>",
+                private_customer: "<span tal:replace='private_customer | string:0'/>"
             }
         </script>
         <script src="/public/js/loader.js"></script>
@@ -184,11 +185,15 @@
                     </ul>
                 </div>      
                 <tal:block tal:define="segment php:array()" tal:repeat="segment file_data/segments" >
-                    <div class="ed" tal:attributes="id string:segment-${segment/sid}-${file_data/jid}; class string:ed ${segment/css_loaded | nothing}" >
+                    <div tal:attributes="id string:segment-${segment/sid}-${file_data/jid}; " class="segment">
+                    <div class="number">
+                                <a tal:define="anchor repeat/segment/number " href="#1" tal:attributes ="href string:#${anchor}" tal:content="anchor" name="1">1</a>
+                     </div>
+                    <div class="ed" tal:attributes="class string:ed ${segment/css_loaded | nothing}" >
 
                         <div class="toggle">
                             <div class="h-editor">
-                                <a href="#" tal:attributes="title string:Created by ${segment/matches/0/created_by  | nothing}"  title="Created by Euromed" class="percentuage per-orange">
+                                <a href="#" tal:attributes="title string:Created by ${segment/matches/0/created_by  | nothing}"  title="Created by Euromed" class="percentuage">
                                     <span tal:replace="segment/matches/0/match  | nothing">75%</span> 
                                 </a>
                                 <a href="#" class="x" title="Close segment"></a>
@@ -197,9 +202,7 @@
                             <div class="cl"></div>
                         </div>
                         <ul class="gray " tal:attributes="class string:gray ${segment/additional_css_class}">
-                            <li class="number">
-                                <a tal:define="anchor repeat/segment/number " href="#1" tal:attributes ="href string:#${anchor}" tal:content="anchor" name="1">1</a>
-                            </li>
+                           
                             <!--li class="source">
                                 
                             <span class="original">Collaborative Translation Memory systems will really help your productivity.</span>    
@@ -227,52 +230,17 @@
                                 <span class="loader"></span>
 
                             </li>
+                                   <li class="color">
+                                <a tal:condition="php:segment['status'] EQ 'TRANSLATED' " tal:attributes="class string:status col-translated" href="#" title="Segment status"  class="status " ></a>                            
+                                <a tal:condition="php:segment['status'] EQ 'APPROVED' " tal:attributes="class string:status col-approved" href="#" title="Segment status"  class="status " ></a>                            
+                                <a tal:condition="php:segment['status'] EQ 'DRAFT' " tal:attributes="class string:status col-draft" href="#" title="Segment status"  class="status " ></a>                            
+                                <a tal:condition="php:segment['status'] EQ '' "  href="#" title="Segment status"  class="status " ></a>                                                           
 
-                            <li class="color">
-                                <a href="#" title="Segment status"  class="status " >                                
-                                </a>
                             </li>
 
-                            <li class="commentballoon">
-                                <div class="h-notification c-close"> <span class="corner"></span>2</div>
-                                <div class="comment-area">
-                                    <div class="h-notification"> <span class="corner"></span>2 Comments<a href="#" class="x-com" title="close this comment"></a></div>
-                                    <ul>
-                                        <li><p> <strong>luca panzarella</strong>
-                                                <span class="date">  6:11 PM Mar 31</span>
-                                                <br />
-                                                Fede, questa modifica riguarda lo sviluppo: molto più facile spiegartela bene a voce.. è banale </p></li>
-                                        <li> <p><strong>Federico</strong>
+                            
 
-                                                <span class="date"> 12:53 PM Apr 2</span>
-                                                <br />
-                                                Domanda: ma poi l'utente cosa può fare in queste pagine statiche? Ci si arriva solamente da compilazione form? </p></li>
-                                        <li> <p><strong>dario</strong>
-
-                                                <span class="date">  2:11 PM Apr 2</span>
-                                                <br />
-                                                si! </p></li>
-                                        <li style="background:#c4d3dd; border-bottom:none">
-                                            <textarea name="" cols="" rows="" class="text-c" ></textarea>
-
-                                            <input name="" type="button" class="btn con-submit sugg-submit" value="ADD COMMENT"/>  
-                                            <div class="cl"></div> 
-                                        </li>
-                                    </ul>
-                                </div>
-                            </li>
-
-                            <ul class="menucolor">
-                                <span class="arrow-mcolor"></span>
-                                <li>
-                                    <a href="#" class="f" title="set draft as status">DRAFT</a></li>
-                                <li>
-                                    <a href="#" class="d" title="set translated as status">TRANSLATED</a></li>
-                                <li>
-                                    <a href="#" class="a" title="set approved as status">APPROVED</a></li>
-                                <li>
-                                    <a href="#" class="r" title="set rejected as status">REJECTED</a></li>
-                            </ul>
+                            
                         </ul>
                         <div class="cl"></div> 
 
@@ -388,7 +356,50 @@
                         </div>                     
 
                     </div>
+                    
+                    
+                    <ul class="menucolor">
+                                <span class="arrow-mcolor"></span>
+                                <li>
+                                    <a href="#" class="f" title="set draft as status">DRAFT</a></li>
+                                <li>
+                                    <a href="#" class="d" title="set translated as status">TRANSLATED</a></li>
+                                <li>
+                                    <a href="#" class="a" title="set approved as status">APPROVED</a></li>
+                                <li>
+                                    <a href="#" class="r" title="set rejected as status">REJECTED</a></li>
+                            </ul>
+                    
+                    
+                    <div class="commentballoon">
+                                <div class="h-notification c-close"> <span class="corner"></span>2</div>
+                                <div class="comment-area">
+                                    <div class="h-notification"> <span class="corner"></span>2 Comments<a href="#" class="x-com" title="close this comment"></a></div>
+                                    <ul>
+                                        <li><p> <strong>luca panzarella</strong>
+                                                <span class="date">  6:11 PM Mar 31</span>
+                                                <br />
+                                                Fede, questa modifica riguarda lo sviluppo: molto più facile spiegartela bene a voce.. è banale </p></li>
+                                        <li> <p><strong>Federico</strong>
 
+                                                <span class="date"> 12:53 PM Apr 2</span>
+                                                <br />
+                                                Domanda: ma poi l'utente cosa può fare in queste pagine statiche? Ci si arriva solamente da compilazione form? </p></li>
+                                        <li> <p><strong>dario</strong>
+
+                                                <span class="date">  2:11 PM Apr 2</span>
+                                                <br />
+                                                si! </p></li>
+                                        <li style="background:#c4d3dd; border-bottom:none">
+                                            <textarea name="" cols="" rows="" class="text-c" ></textarea>
+
+                                            <input name="" type="button" class="btn con-submit sugg-submit" value="ADD COMMENT"/>  
+                                            <div class="cl"></div> 
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                    </div> 
                     <div class="cl"></div>
                 </tal:block>
 
