@@ -153,6 +153,7 @@ UI = {
             e.preventDefault();
             e.stopPropagation();
             var isVisible=$(this).parents(".segment").find(".menucolor").is(":visible");
+
             $(".menucolor:visible").hide();
             if (isVisible){
                 return null;
@@ -214,6 +215,11 @@ UI = {
             })
         });
 
+	$(".number a").click(function(e){
+		e.preventDefault();
+		e.stopPropagation();
+		return false;	
+	})
         $(".target-textarea").click(function(e) {
 
             //			console.log($(this).parents(".ed").offset().top);
@@ -224,14 +230,14 @@ UI = {
             e.stopPropagation();          
             $(this).removeClass("indent");
             $(".menucolor:visible").hide();
-            
+          
             var segment = $(this).parents(".segment");
 
 
             var anchor=segment.prev();//.find(".number");
             var anchor2=segment.find(".number");
 
-            console.log(segment.find(".sub-editor.matches").find(".graysmall").length);
+//            console.log(segment.find(".sub-editor.matches").find(".graysmall").length);
             $(this).removeClass("white_text");
            
            if ((segment.find(".sub-editor.matches").find(".graysmall").length)==0){              
@@ -399,12 +405,12 @@ UI = {
     getPercentuageClass: function (match){
         var cl="";
         m_parse=parseInt(match);
-        console.log ("mp is "+m_parse + " m is "+ match);
+        //console.log ("mp is "+m_parse + " m is "+ match);
         if (!isNaN(m_parse)){
             match=m_parse;
         }
         
-        console.log ("  m2 is "+ match);
+        //console.log ("  m2 is "+ match);
         
         switch (true){
             case (match==100):
@@ -414,7 +420,7 @@ UI = {
                 cl="per-blue";
                 break;
             case(match>0 && match <=99):
-                console.log("ffff");
+               // console.log("ffff");
                 cl="per-orange";
                 break;
             case (match=="MT"):

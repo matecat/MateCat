@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title>Translate - Project_Name - Job_ID </title>
+	<title>Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="pid">Job_ID</span> </title>
         <link rel="shortcut icon" href="/public/img/favicon.ico" />
         <link href="/public/css/style.css" rel="stylesheet" type="text/css" />
         <link rel='stylesheet' media='screen and (min-width: 701px) and (max-width: 1180px)' href='/public/css/test.css' />
@@ -116,7 +116,9 @@
                                 </a>
                             </li>
                         </ul>
-                    </div>  <a href="#" class="joblink"  name="1" >Jobs List</a> > Hotel Shangrilà (112323 - FR)
+                    </div>  
+			<a href="#" class="joblink"  name="1" >Jobs List</a> > 
+		<span tal:replace="pname">Hotel Shangrilà</span> (<span tal:replace="pid">112323</span> - FR)	
                 </div>
                 <div class="cl"></div>
             </div>   <!-- .wrapper -->
@@ -216,19 +218,19 @@
                                 help your productivity
                                 <span class="qa">.</span>
                             </li -->
-                            <li class="source">
+                            <li class="source"> <span class="loader"></span>
+
                                 <span tal:content="structure segment/segment" class="original">Collaborative Translation Memory systems will really help your productivity.</span>
                                 <span tal:replace="structure php:str_replace('&nbsp;',' ',segment['segment'])"/>
                             </li>
 
                             <li class="target">
-                                <span class="loader"></span>
+                              
                                 <span class="hide toggle"> 
                                     <a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>
                                 </span>
                                 <textarea class="target-textarea" name="" cols="" rows="" tal:content="segment/translation | segment/matches/0/translation | nothing"></textarea> 
-                                <span class="loader"></span>
-
+                               
                             </li>
                                    <li class="color">
                                 <a tal:condition="php:segment['status'] EQ 'TRANSLATED' " tal:attributes="class string:status col-translated" href="#" title="Segment status"  class="status " ></a>                            
@@ -371,7 +373,7 @@
                             </ul>
                     
                     
-                    <div class="commentballoon">
+                   <!-- <div class="commentballoon">
                                 <div class="h-notification c-close"> <span class="corner"></span>2</div>
                                 <div class="comment-area">
                                     <div class="h-notification"> <span class="corner"></span>2 Comments<a href="#" class="x-com" title="close this comment"></a></div>
@@ -398,7 +400,7 @@
                                         </li>
                                     </ul>
                                 </div>
-                            </div>
+                            </div> -->
                     </div> 
                     <div class="cl"></div>
                 </tal:block>

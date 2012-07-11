@@ -69,7 +69,7 @@ class catController extends viewcontroller {
             }
 
             if (empty($this->pid)) {
-                $this->cid = $seg['pid'];
+                $this->pid = $seg['pid'];
             }
 
             if (empty($this->tid)) {
@@ -150,6 +150,7 @@ class catController extends viewcontroller {
         $this->template->cid = $this->cid;
         $this->template->create_date = $this->create_date;
         $this->template->pname = $this->pname;
+	$this->template->pid=$this->pid;
 
 
 //        echo "<pre>";
