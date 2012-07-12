@@ -10,6 +10,7 @@ UI = {
 			$(document).find(".editor").find(".Translated").click();
 		});
 */
+        this.initStart = new Date();
         this.numMatchesResults = 2;
         this.initSegments();
 
@@ -400,6 +401,9 @@ UI = {
 		// init Workarea
 		this.workareaInit();
 */
+        this.initEnd = new Date();
+        this.initTime = this.initEnd - this.initStart;
+        console.log('init time: ' + this.initTime);
     },
 
     getPercentuageClass: function (match){
