@@ -50,6 +50,10 @@ class setTranslationController extends ajaxcontroller {
             $this->status = 'DRAFT';
         }
 
+	if (empty ($this->transation)){
+		return 0 ; // won's save empty translation but there is no need to return an error 
+	}
+
         //ONE OR MORE ERRORS OCCURRED : EXITING
         if (!empty($this->result['error'])) {
             return -1;

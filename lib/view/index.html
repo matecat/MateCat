@@ -92,7 +92,7 @@
                     </ul>
                 </div>
                 <!-- END edit/view notifiche globali -->
-
+<div class="release">Release <span id="rel_version">0.1alpha</span> <span id="rel_date">2012-07-12</span></div>
                 <a href="#">
                     <img src="/public/img/logo.png" class="logo" />
                 </a>
@@ -164,6 +164,7 @@
                 <p>conditional search   </p>
 
                 <div class="cl"></div>
+                
             </div>
         </div>
         <!--  END header serach  div (hidden by default) -->
@@ -191,6 +192,7 @@
                                 <a tabindex="-1" tal:define="anchor repeat/segment/number " href="#1" tal:attributes ="href string:#${anchor}" tal:content="anchor" name="1">1</a>
                      </div>
                     <div class="ed" tal:attributes="class string:ed ${segment/css_loaded | nothing}" >
+
                         <div class="toggle">
                             <div class="h-editor">
                                 <a href="#" tal:attributes="title string:Created by ${segment/matches/0/created_by  | nothing}"  title="Created by Euromed" class="percentuage">
@@ -216,13 +218,14 @@
                                 help your productivity
                                 <span class="qa">.</span>
                             </li -->
-                            <li class="source">
+                            <li class="source"> 
+
                                 <span tal:content="structure segment/segment" class="original">Collaborative Translation Memory systems will really help your productivity.</span>
                                 <span tal:replace="structure php:str_replace('&nbsp;',' ',segment['segment'])"/>
                             </li>
 
                             <li class="target">
-                                <span class="loader"></span>
+                              
                                 <span class="hide toggle"> 
                                     <a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>
                                 </span>
@@ -243,7 +246,7 @@
                             
                         </ul>
                         <div class="cl"></div> 
-
+<span class="loader"></span>
                         <div class="toggle" > 
                             <div class="editr_btn">
                                 <div class="buttoned" style="margin-right:-20px">
@@ -384,7 +387,7 @@
                             </ul>
                     
                     
-                    <div class="commentballoon">
+                   <!-- <div class="commentballoon">
                                 <div class="h-notification c-close"> <span class="corner"></span>2</div>
                                 <div class="comment-area">
                                     <div class="h-notification"> <span class="corner"></span>2 Comments<a href="#" class="x-com" title="close this comment"></a></div>
@@ -411,7 +414,7 @@
                                         </li>
                                     </ul>
                                 </div>
-                            </div>
+                            </div> -->
                     </div> 
                     <div class="cl"></div>
                 </tal:block>

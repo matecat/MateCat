@@ -1,0 +1,33 @@
+﻿.translate-box{float:left;margin:40px 20px 20px 0px}
+.wrapper-upload{text-align:left;margin:0 auto;width:92%;min-width:960px;}
+.translate-box a{padding-top:40px;display:block;}
+body{font-family:Calibri, Arial, Helvetica, sans-serif}
+
+
+/* popup lingue */
+.popup-languages{width:960px;position:fixed;top:10%;left:18%;background:#fff;border:1px solid #adadad;-moz-border-radius: 2px;border-radius: 2px;-moz-box-shadow: 0 1px 3px #757575;-webkit-box-shadow: 0 1px 3px #757575;z-index:9999999999999}
+#chooseTargetsButtons{ margin:-50px 0 0px 0;float:right}
+.languages1{ font-family: Calibri, 'Lucida Grande', Arial, Helvetica, sans-serif}
+.titlewindow{ font-size:22px;text-align:left;margin:0px 0 10px 0px;border-bottom:1px solid #ccc;padding:5px 0 8px 11px;
+color:#000; background:#efefef;border-bottom:1px solid #ccc;margin-bottom:5px;-moz-box-shadow: 0 1px 3px #ccc;-webkit-box-shadow: 0 1px 3px #ccc;}
+.languages1 h2{ float:left;font-size:150%;}
+.languages1 h3{ float:left;font-size:150%;margin:0px 0 0px 10px;}
+.listlang li{ height:19px;font-size:14px;width:220px;padding:2px 0 1px 0;border-bottom:1px dotted #ccc;list-style:none;text-align:left}
+.listlang input{float:left;margin-right:10px !important}
+.listlang  {float:left;padding:10px 0 10px 0;margin:0 10px 0 5px;width:220px;font-size:120%;}
+.listlang  label, .label, .OrderWrapper a, .right-engine a, a, .col_picker3 label {cursor:pointer;color:#000}
+.bg_languages{background:#000;position:fixed; left:0;top:0;width:100%;height:100%;display:block;z-index:1;}
+.cl{ clear:both;}
+.sublist li a{ display:block;float:left;border-left:1px solid #ccc;padding:9px 10px}
+.sublist li{float:left;}
+.sublist li a:hover{background:#fbfbfb}
+
+.sublist {margin:0;float:right;font-size:18px;padding:0;}
+.col{ float:left;width:180px;padding:10px;text-align:center;}
+.top20{font-weight:bold;font-size:16px;}
+.listlang input{margin:1px 2px 0px 5px;} 
+.listlang  li:hover, .listlang .on{ background:#e6e7e8; font-weight:bold;cursor:pointer}
+.listlang .on, .listlang .on:hover{ background:#81b951;}
+.col2{ width:600px;}
+.col2 h3{ margin:0 0 10px 0;}
+.translate{ margin:-8px 27px 0px 0px;width:260px;float:left;text-align:right;}

@@ -2,7 +2,7 @@
 input, textarea{font-family:calibri, Arial, Helvetica, sans-serif;font-size:18px !important;}
 /*header*/
 .header{background:#6d6e71;top:0;left:0;width:100%;text-align:left;position:fixed;z-index:999999;-moz-box-shadow: 0 1px 3px #ababaa;-webkit-box-shadow: 0 1px 3px #ababaa}
-
+.release{float:right;color:#ccc;margin:13px 25px 0 0;font-size:11px}
 .viewer{background:url(../img/viewer.png) 0 0 no-repeat;width:22px;height:22px;display:block;float:right;margin:7px 3px 0 0;}
 .not-online{opacity:0.6}
 .v-name{position:absolute;margin:28px 0 0 -50px;z-index:99999;background:#000;color:#fff;text-align:left;display:none;width:auto;padding:3px 5px;width:100px;font-size:11px;-moz-border-radius: 2px;border-radius: 2px;text-decoration:none !important}
@@ -178,7 +178,11 @@ z-index:9;
 /*projectbar*/
 .languages{position:absolute;top:12px;width:100%;text-align:center !important;text-indent:-80px; }
 .projectbar h2{text-align:left;font-size:14px;float:left;}
+<<<<<<< HEAD
 .projectbar{height:40px;text-align:right;color:#333;width:100%;z-index:999999999999;font-size:14px;position:absolute;margin-top:-40px}
+=======
+.projectbar{height:40px;text-align:right;color:#333;width:100%;z-index:9999;font-size:14px;position:absolute;margin-top:-40px}
+>>>>>>> 938ef6d6f5254d4904f2e2111857592b20e63602
 .projectbar a{color:#333;margin:12px 0px 0 0}
 .projectbar .top, .projectbar .down{float:right !Important;margin-right:11px;background: url(../img/updown.gif) 3px 2px no-repeat;display:block;width:12px;height:12px;position:absolute;right:0;border:1px solid #ccc;margin-top:-6px;-moz-box-shadow: 0 1px 3px #ccc;-webkit-box-shadow: 0 1px 3px #ccc;-moz-border-radius: 2px;border-radius: 2px;}
 .projectbar .top:hover, .projectbar .down:hover{border:1px solid #666}
@@ -257,14 +261,17 @@ text-decoration:none;-moz-border-radius: 2px;border-radius: 2px;-webkit-transiti
 
 .gray, .gray2{width:100%;margin:1px 0 0 0;padding:5px 0 0px 0;position:relative;-webkit-transition: all  80ms ease-in;}
 
-.editor .gray, .editor .gray2 {padding:5px 0 0px 0;}
+.editor .gray, .editor .gray2 {padding:5px 0 0px 0;background:#fff url(../img/gray-point.gif) repeat-y 46.5% center !important;}
 
 .gray li, .gray2 li, .white li{width:43%;float:left;margin:2px 1px 1px 0;padding:3px 20px;text-align:left;list-style:none;}
 .gray a, .gray2 a{text-decoration:none;color:#000 }
 .ed .gray:hover, .ed .gray2:hover {background:#fff;}
 .ed .gray:hover textarea, .ed .gray2:hover textarea {border:1px solid #666;-moz-box-shadow: inset 0 1px 2px #888;-webkit-box-shadow: inset 0 1px 2px #888;}
+<<<<<<< HEAD
+=======
 
- 
+>>>>>>> 938ef6d6f5254d4904f2e2111857592b20e63602
+
 .cl{clear:both}
 .disabled, .disabled:hover, .disabled:active{opacity:0.5 !important;cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;border:1px solid #666}
 
@@ -333,9 +340,15 @@ width:88.1%;-moz-border-radius-bottomright:2px;	-webkit-border-bottom-right-radi
 /*editor*/
 .editor{border:1px solid #58595b;width:100%;-moz-box-shadow: 0 1px 3px #666;-webkit-box-shadow: 0 1px 10px #666;position:relative;z-index:999;-moz-border-radius: 2px;border-radius: 2px;}
 .editor, .editor .gray{background:#fff;}
+<<<<<<< HEAD
 .editor .target{border-left:1px solid #ccc;margin-left:10px;}
 
 .loader{display:none;width:20px;height:20px;background:url(../img/loader.gif) center center no-repeat;position:absolute;left:-10px;bottom:-30px}
+=======
+
+
+.loader{display:none;width:20px;height:20px;background:url(../img/loader.gif) center center no-repeat;position:absolute;left:45.7%;bottom:20px}
+>>>>>>> 938ef6d6f5254d4904f2e2111857592b20e63602
 .loader_on{display:block !important}
 .btnmargin {margin-right:-23px !important}
 
@@ -349,7 +362,11 @@ width:88.1%;-moz-border-radius-bottomright:2px;	-webkit-border-bottom-right-radi
 
 .h-text{width:auto;height:20px;display:block;position:absolute;left:10px;top:2px;color:#fff;font-size:12px;text-decoration:none;text-transform:none;}
 .white{background:#fff url(../img/gray-point.gif) repeat-y 46.5% center !important;font-size:16px !important;position:relative;line-height:22px;float:left;width:100%;}
+<<<<<<< HEAD
 .percentuage{background:#FF9900;line-height:180%;height:20px;float:left;width:auto;margin:0px 0 0px 45.2%;color:#fff;font-size:11px;text-decoraton:none;font-weight:bold;text-decoration:none;cursor:default;padding:0 10px;}
+=======
+.percentuage{background:#FF9900;line-height:180%;height:20px;position:absolute;width:auto;margin:0px 0 0px 45.2%;color:#fff;font-size:11px;text-decoraton:none;font-weight:bold;text-decoration:none;cursor:default;padding:0 10px;}
+>>>>>>> 938ef6d6f5254d4904f2e2111857592b20e63602
 .error{background:url(../img/error.gif) 0 bottom repeat-x;}
 .greenborder{border-top:2px solid #00a651; background:url(../img/pointgreen.gif) 0 0px no-repeat;}
 
@@ -363,16 +380,24 @@ width:88.1%;-moz-border-radius-bottomright:2px;	-webkit-border-bottom-right-radi
 
 
 
+<<<<<<< HEAD
 .ed textarea{width:110%;font-size:16px;padding:8px 5px;display:block;border:1px solid transparent;background:none;margin:-2px 0 5px 0;resize: none;overflow:hidden;line-height:36px}
+=======
+.ed textarea{width:110%;font-size:16px;padding:8px 5px;display:block;border:1px solid transparent;background:none;margin:-2px 0 5px 5px;resize: none;overflow:hidden;line-height:36px}
+>>>>>>> 938ef6d6f5254d4904f2e2111857592b20e63602
 .indent {text-indent:-20000px;}
 .ed .charleft {display:none;}
-.ed .target-textarea:hover{border:1px solid #ccc;background:none;resize:auto}
+.ed .textarea:hover{border:1px solid #ccc;background:none;resize:auto}
 .target-textarea{position:relative;z-index:99;}
 .source{line-height:36px}
 .grayed-text{color:#4c4c4c;}
+<<<<<<< HEAD
 .editor .target-textarea{color:#000;width:114.6%;font-size:16px;padding:5px;height:auto;margin:-5px 0 5px 0;border:1px solid #ccc;-moz-box-shadow: inset 0 1px 2px #888;-moz-border-radius: 2px;border-radius: 2px;border:1px solid #727272;line-height:36px;
+=======
+.editor .target-textarea{color:#000;width:114.6%;font-size:16px;padding:5px;height:auto;margin:-5px 0 5px 5px;border:1px solid #ccc;-moz-box-shadow: inset 0 1px 2px #888;-moz-border-radius: 2px;border-radius: 2px;border:1px solid #727272;line-height:36px;
+>>>>>>> 938ef6d6f5254d4904f2e2111857592b20e63602
 -webkit-box-shadow: inset 0 1px 2px #888;}
-.target{position:relative;}
+.target, .source{position:relative;z-index:9999}
 .editor .charleft{display:none}
 .light{background:#f7f8f9 url(../img/point.gif) repeat-y 46.5% center;}
 

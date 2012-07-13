@@ -11,6 +11,7 @@ UI = {
 			$(document).find(".editor").find(".Translated").click();
 		});
 */
+        this.initStart = new Date();
         this.numMatchesResults = 2;
         this.initSegments();
 
@@ -61,7 +62,7 @@ UI = {
             e.preventDefault();
             $("div#search").toggle();
         });
-                
+        	  
         //overlay
 	
         $(".more").click(function(){
@@ -154,6 +155,7 @@ UI = {
             e.preventDefault();
             e.stopPropagation();
             var isVisible=$(this).parents(".segment").find(".menucolor").is(":visible");
+
             $(".menucolor:visible").hide();
             if (isVisible){
                 return null;
@@ -215,6 +217,11 @@ UI = {
             })
         });
 
+	$(".number a").click(function(e){
+		e.preventDefault();
+		e.stopPropagation();
+		return false;	
+	})
         $(".target-textarea").click(function(e) {
 
             //			console.log($(this).parents(".ed").offset().top);
@@ -225,24 +232,40 @@ UI = {
             e.stopPropagation();          
             $(this).removeClass("indent");
             $(".menucolor:visible").hide();
+<<<<<<< HEAD
             
             var segment = $(this).parents(".segment");
             
+=======
+          
+            var segment = $(this).parents(".segment");
+
+>>>>>>> 938ef6d6f5254d4904f2e2111857592b20e63602
 
             var anchor=segment.prev();//.find(".number");
             var anchor2=segment.find(".number");
 
+<<<<<<< HEAD
             //console.log(segment.find(".sub-editor.matches").find(".graysmall").length);
             $(this).removeClass("white_text");
            
             if ((segment.find(".sub-editor.matches").find(".graysmall").length)==0){              
                 UI.getContribution(segment);
             }
+=======
+//            console.log(segment.find(".sub-editor.matches").find(".graysmall").length);
+            $(this).removeClass("white_text");
+           
+           if ((segment.find(".sub-editor.matches").find(".graysmall").length)==0){              
+               UI.getContribution(segment);
+           }
+>>>>>>> 938ef6d6f5254d4904f2e2111857592b20e63602
            
             /*if(!$(this).val().length) {
                 UI.getContribution(segment);
             }*/
             
+
 
             if ( $(segment).find(".toggle").is(":visible")){
                 return null
@@ -411,6 +434,39 @@ UI = {
 		// init Workarea
 		this.workareaInit();
 */
+        this.initEnd = new Date();
+        this.initTime = this.initEnd - this.initStart;
+        console.log('init time: ' + this.initTime);
+    },
+
+    getPercentuageClass: function (match){
+        var cl="";
+        m_parse=parseInt(match);
+        //console.log ("mp is "+m_parse + " m is "+ match);
+        if (!isNaN(m_parse)){
+            match=m_parse;
+        }
+        
+        //console.log ("  m2 is "+ match);
+        
+        switch (true){
+            case (match==100):
+                cl="per-green";
+                break;
+            case (match==101):
+                cl="per-blue";
+                break;
+            case(match>0 && match <=99):
+               // console.log("ffff");
+                cl="per-orange";
+                break;
+            case (match=="MT"):
+                cl="per-yellow";
+                break;
+            default :
+                cl="";
+        }
+        return cl;
     },
     
     getPercentuageClass: function (match){
@@ -485,7 +541,11 @@ UI = {
                 
                 var valid=0;
                 $.each(d.data.matches, function() {                    
+<<<<<<< HEAD
                     cb= this['created-by'];     
+=======
+                    cb= this['created-by'];                    
+>>>>>>> 938ef6d6f5254d4904f2e2111857592b20e63602
                     cl_suggestion=UI.getPercentuageClass(this['match'])
                     $('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen ' + cl_suggestion+'">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li class="graydesc">Source: <span class="bold">'+cb+'</span></li></ul></ul>');
                                       		
@@ -538,7 +598,11 @@ UI = {
                 
                 var valid =0;
                 $.each(d.data.matches, function() {                      
+<<<<<<< HEAD
                     cb= this['created-by'];                    
+=======
+                    cb= this['created-by'];                  
+>>>>>>> 938ef6d6f5254d4904f2e2111857592b20e63602
                     cl_suggestion=UI.getPercentuageClass(this['match']);
                        
                     $('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen ' + cl_suggestion+'">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li>Source: <span class="bold">'+cb+'</span></li></ul></ul>');

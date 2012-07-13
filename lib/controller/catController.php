@@ -148,7 +148,7 @@ class catController extends viewcontroller {
         $this->template->cid = $this->cid;
         $this->template->create_date = $this->create_date;
         $this->template->pname = $this->pname;
-        $this->template->pid = $this->pid;
+	$this->template->pid=$this->pid;
 
 
 //        echo "<pre>";
