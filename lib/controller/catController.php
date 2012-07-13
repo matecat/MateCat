@@ -1,5 +1,4 @@
 <?php
-
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include INIT::$ROOT . "/lib/utils/mymemory_queries_temp.php";
 include INIT::$ROOT . "/lib/utils/filetype.class.php";
@@ -20,8 +19,7 @@ class catController extends viewcontroller {
     private $filetype_handler = null;
     private $start_from = 0;
 
-    public function __construct() {
-        echo ".........\n";
+    public function __construct() {        
         parent::__construct();
         parent::makeTemplate("index.html");
         $this->pid = $this->get_from_get_post("pid");
@@ -69,7 +67,7 @@ class catController extends viewcontroller {
             }
 
             if (empty($this->pid)) {
-                $this->cid = $seg['pid'];
+                $this->pid = $seg['pid'];
             }
 
             if (empty($this->tid)) {
@@ -150,6 +148,7 @@ class catController extends viewcontroller {
         $this->template->cid = $this->cid;
         $this->template->create_date = $this->create_date;
         $this->template->pname = $this->pname;
+        $this->template->pid = $this->pid;
 
 
 //        echo "<pre>";

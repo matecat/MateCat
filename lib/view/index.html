@@ -2,10 +2,11 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title>Translate - Project_Name - Job_ID </title>
+        <title>Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="pid">Job_ID</span> </title>
         <link rel="shortcut icon" href="/public/img/favicon.ico" />
         <link href="/public/css/style.css" rel="stylesheet" type="text/css" />
-        <link rel='stylesheet' media='screen and (min-width: 701px) and (max-width: 1080px)' href='/public/css/test.css' />
+        <link rel='stylesheet' media='screen and (min-width: 701px) and (max-width: 1180px)' href='/public/css/test.css' />
+        
         <!--[if IE ]>
 <link href="/public/css/ieall.css" rel="stylesheet" type="text/css" />
 <![endif]-->
@@ -21,7 +22,7 @@
                 id_translator: "<span tal:replace='id_translator | string:unknown_transltator'/>",
                 private_translator: "<span tal:replace='private_translator | string:0'/>",
                 id_customer: "<span tal:replace='id_customer | string:unknown_customer'/>",
-                private_customer: "<span tal:replace='private_customer | string:0'/>",
+                private_customer: "<span tal:replace='private_customer | string:0'/>"
             }
         </script>
         <script src="/public/js/loader.js"></script>
@@ -115,7 +116,9 @@
                                 </a>
                             </li>
                         </ul>
-                    </div>  <a href="#" class="joblink"  name="1" >Jobs List</a> > Hotel Shangrilà (112323 - FR)
+                    </div>  
+                    <a href="#" class="joblink"  name="1" >Jobs List</a> > 
+                    <span tal:replace="pname">Hotel Shangrilà</span> (<span tal:replace="pid">112323</span> - FR)
                 </div>
                 <div class="cl"></div>
             </div>   <!-- .wrapper -->
@@ -168,12 +171,11 @@
 
         <div tal:define="file_data php:array()" tal:repeat="file_data data" class="main">
             
-
                 <div class="projectbar">
                     <h2 tal:content="file_data/filename | nothing">@@filename@@</h2>
                     <div class="languages">
                         <strong class="source-lang">English</strong>  
-                        <strong class="target-lang">Italian</strong>
+                        > <strong class="target-lang">Italian</strong>
                     </div>
 
                     <ul style="float:right;text-align:right;">
@@ -184,18 +186,17 @@
                     </ul>
                 </div>      
                 <tal:block tal:define="segment php:array()" tal:repeat="segment file_data/segments" >
-                    <div class="segment">
+                    <div tal:attributes="id string:segment-${segment/sid}-${file_data/jid}; " class="segment">
                     <div class="number">
-                                <a tal:define="anchor repeat/segment/number " href="#1" tal:attributes ="href string:#${anchor}" tal:content="anchor" name="1">1</a>
+                                <a tabindex="-1" tal:define="anchor repeat/segment/number " href="#1" tal:attributes ="href string:#${anchor}" tal:content="anchor" name="1">1</a>
                      </div>
-                    <div class="ed" tal:attributes="id string:segment-${segment/sid}-${file_data/jid}; class string:ed ${segment/css_loaded | nothing}" >
-
+                    <div class="ed" tal:attributes="class string:ed ${segment/css_loaded | nothing}" >
                         <div class="toggle">
                             <div class="h-editor">
-                                <a href="#" tal:attributes="title string:Created by ${segment/matches/0/created_by  | nothing}"  title="Created by Euromed" class="percentuage per-orange">
+                                <a href="#" tal:attributes="title string:Created by ${segment/matches/0/created_by  | nothing}"  title="Created by Euromed" class="percentuage">
                                     <span tal:replace="segment/matches/0/match  | nothing">75%</span> 
                                 </a>
-                                <a href="#" class="x" title="Close segment"></a>
+                                <a tabindex="1" href="#" class="x" title="Close segment"></a>
                                 <div class="cl"></div>
                             </div>
                             <div class="cl"></div>
@@ -225,15 +226,16 @@
                                 <span class="hide toggle"> 
                                     <a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>
                                 </span>
-                                <textarea class="target-textarea" name="" cols="" rows="" tal:content="segment/translation | segment/matches/0/translation | nothing"></textarea> 
+                                <textarea tabindex="2" class="target-textarea" name="" cols="" rows="" tal:content="segment/translation | segment/matches/0/translation | nothing"></textarea> 
                                 <span class="loader"></span>
 
-                                <p class="cl"></p>
                             </li>
-
                             <li class="color">
-                                <a href="#" title="Segment status"  class="status " >                                
-                                </a>
+                                <a tabindex="3" tal:condition="php:segment['status'] EQ 'TRANSLATED' " tal:attributes="class string:status col-translated" href="#" title="Segment status"  class="status " ></a>                            
+                                <a tabindex="3" tal:condition="php:segment['status'] EQ 'APPROVED' " tal:attributes="class string:status col-approved" href="#" title="Segment status"  class="status " ></a>                            
+                                <a tabindex="3" tal:condition="php:segment['status'] EQ 'DRAFT' " tal:attributes="class string:status col-draft" href="#" title="Segment status"  class="status " ></a>                            
+                                <a tabindex="3" tal:condition="php:segment['status'] EQ '' "  href="#" title="Segment status"  class="status " ></a>                            
+                                
                             </li>
 
                             
@@ -244,19 +246,24 @@
 
                         <div class="toggle" > 
                             <div class="editr_btn">
-                                <div class="buttoned" style="margin-right:-27px"><a href="#" class="approved">APPROVED</a><div class="cl"></div><p>CTRL+3</p></div>
-                                <div class="buttoned"><a href="#" class="Translated">TRANSLATED</a><div class="cl"></div><p>CTRL+ENTER</p></div>
-                                <div class="buttoned"><a href="#" class="draft">DRAFT</a><div class="cl"></div><p>CTRL+2</p></div>
-                                <a href="#" class="btn copysource" title="Copy source to target"></a>
-                                <a href="#" class="btn tagmenu disabled" title=" Insert tags "></a>
+                                <div class="buttoned" style="margin-right:-20px">
+                                    <a tabindex="5" href="#" class="Translated">TRANSLATED</a>
+                                    <div class="cl"></div><p>CTRL+ENTER</p></div>
+                                <div class="buttoned">
+                                    <a tabindex="4" href="#" class="draft">DRAFT</a>
+                                    <div class="cl"></div>
+                                    <p>CTRL+2</p>
+                                </div>
+                                <a tabindex="-1" href="#" class="btn copysource" title="Copy source to target"></a>
+                                <a tabindex="-1" href="#" class="btn tagmenu disabled" title=" Insert tags "></a>
 
                             </div>
                             <ul  class="sbm submenu">
                                 <li class="hide suggestions">
-                                    <a href="#smsg1">Smart suggestions</a> 
+                                    <a tabindex="-1" href="#smsg1">Smart suggestions</a> 
                                 </li>
                                 <li class="active matches">
-                                    <a  tal:attributes="href string:#tr_ma_${repeat/segment/number}" href="#tr_ma_1">
+                                    <a  tabindex="-1" tal:attributes="href string:#tr_ma_${repeat/segment/number}" href="#tr_ma_1">
                                         Translation matches 
                                         <tal:block tal:condition="exists:segment/matches" >
                                             (<span tal:content="php:count(segment['matches'])">2</span>)
@@ -268,17 +275,19 @@
                                     </a>
                                 </li>
                                 <li class="hide concordance">
-                                    <a tal:attributes="href string:#con_${repeat/segment/number}" href="#con_1">Concordance</a>
+                                    <a tabindex="-1" tal:attributes="href string:#con_${repeat/segment/number}" href="#con_1">Concordance</a>
                                 </li>
                                 <li class="hide preview_tab">
-                                    <a tal:attributes="href string:#Preview_${repeat/segment/number}" href="#Preview_1" class="preview-link">Preview</a>
+                                    <a tabindex="-1" tal:attributes="href string:#Preview_${repeat/segment/number}" href="#Preview_1" class="preview-link">Preview</a>
                                 </li>
                             </ul>  
                             <div class="cl"></div>
 
                             <div  class="hide smart-suggestion sub-editor">
                                 <ul class="graysmall">
-                                    <li ><span class="greenborder">Translation Memory</span></li>
+                                    <li >
+                                        <span class="greenborder">Translation Memory</span>
+                                    </li>
 
                                     <li class="b">Memorie di traduzione</li>
 
@@ -294,16 +303,19 @@
 
                                 <ul class="graysmall addline-suggestion">   
                                     <li>            
-                                        <input name="" type="text" value="Add a source suggestion"  
+                                        <input tabindex="-1" name="" type="text" value="Add a source suggestion"  
                                                onblur="if(this.value.length == 0) this.value='Add a source suggestion';" onClick="if(this.value == 'Add a source suggestion') this.value='';" class="sugg-input" />
                                     </li>
                                     <li> 
-                                        <input name="" type="text" value="Add a target suggestion"  
+                                        <input tabindex="-1" name="" type="text" value="Add a target suggestion"  
                                                onblur="if(this.value.length == 0) this.value='Add a target suggestion';" onClick="if(this.value == 'Add a target suggestion') this.value='';" class="sugg-input second" /><input name="input" type="button" class="btn con-submit sugg-submit" value="ADD SUGGESTION"/>
                                     </li>
                                 </ul>
                                 <ul class="graysmall add-ul">
-                                    <li><a href="#" class="addsuggestion">+</a> <span class="provalo">Add suggestion</span>                    </li>
+                                    <li>
+                                        <a tabindex="-1" href="#" class="addsuggestion">+</a> 
+                                        <span class="provalo">Add suggestion</span>                    
+                                    </li>
                                 </ul>
                                 <div class="cl"></div>
 
@@ -334,16 +346,18 @@
                                 </div>
                             </div>
                             <div  class="sub-editor hide">                      
-                                <a href="#" class="btn back"></a>
-                                <a href="#" class="btn forward"></a>
-                                <input name="" type="text" value="Enter text to search"  
+                                <a tabindex="-1" href="#" class="btn back"></a>
+                                <a tabindex="-1" href="#" class="btn forward"></a>
+                                <input tabindex="-1" name="" type="text" value="Enter text to search"  
                                        onblur="if(this.value.length == 0) this.value='Enter text to search';" onClick="if(this.value == 'Enter text to search') this.value='';" class="con-input"/>
 
                                 <div class="submenubutton">    
-                                    <input name="" type="button" class="btn con-submit" value="SEARCH IN SOURCE"/>
-                                    <a href="#" class="btn con-menubtn"></a>
+                                    <input tabindex="-1" name="" type="button" class="btn con-submit" value="SEARCH IN SOURCE"/>
+                                    <a tabindex="-1" href="#" class="btn con-menubtn"></a>
                                     <ul class="con-menu" id="col-menu">
-                                        <li><a href="#">SEARCH IN TARGET</a></li>
+                                        <li>
+                                            <a tabindex="-1" href="#">SEARCH IN TARGET</a>
+                                        </li>
                                     </ul>
                                 </div>
 
@@ -360,13 +374,13 @@
                     <ul class="menucolor">
                                 <span class="arrow-mcolor"></span>
                                 <li>
-                                    <a href="#" class="f" title="set draft as status">DRAFT</a></li>
+                                    <a tabindex="-1" href="#" class="f" title="set draft as status">DRAFT</a></li>
                                 <li>
-                                    <a href="#" class="d" title="set translated as status">TRANSLATED</a></li>
+                                    <a tabindex="-1" href="#" class="d" title="set translated as status">TRANSLATED</a></li>
                                 <li>
-                                    <a href="#" class="a" title="set approved as status">APPROVED</a></li>
+                                    <a tabindex="-1" href="#" class="a" title="set approved as status">APPROVED</a></li>
                                 <li>
-                                    <a href="#" class="r" title="set rejected as status">REJECTED</a></li>
+                                    <a tabindex="-1" href="#" class="r" title="set rejected as status">REJECTED</a></li>
                             </ul>
                     
                     
@@ -390,9 +404,9 @@
                                                 <br />
                                                 si! </p></li>
                                         <li style="background:#c4d3dd; border-bottom:none">
-                                            <textarea name="" cols="" rows="" class="text-c" ></textarea>
+                                            <textarea tabindex="-1" name="" cols="" rows="" class="text-c" ></textarea>
 
-                                            <input name="" type="button" class="btn con-submit sugg-submit" value="ADD COMMENT"/>  
+                                            <input tabindex="-1" name="" type="button" class="btn con-submit sugg-submit" value="ADD COMMENT"/>  
                                             <div class="cl"></div> 
                                         </li>
                                     </ul>
@@ -410,13 +424,13 @@
         <div class="footer">
             <div class="wrapper">
 
-                <a href="#" class="statslink">Project Statistics</a> 
+                <a tabindex="-1" href="#" class="statslink">Project Statistics</a> 
 
                 <p >Progress:</p>
                 <div class="meter">
-                    <a href="#" style="width: 45%" class="green" title="Approved 45%"></a>
-                    <a href="#" style="width: 15%" class="blue" title="Done 15%"></a>
-                    <a href="#" style="width: 40%" class="orange" title="Draft 40%"></a>
+                    <a tabindex="-1" href="#" style="width: 45%" class="green" title="Approved 45%"></a>
+                    <a tabindex="-1" href="#" style="width: 15%" class="blue" title="Done 15%"></a>
+                    <a tabindex="-1" href="#" style="width: 40%" class="orange" title="Draft 40%"></a>
                 </div>
                 <ul>
                     <li>Eq. words: <strong>--.---</strong></li>
@@ -427,7 +441,7 @@
                 </ul>
                 <div class="stats">
                     <ul class="h-stats">
-                        <div class="header-stats">Project stats (<a href="http://matecat.translated.home/?action=projectStatistics" target="_blank">More...</a>) <a href="#" class="x-stats"></a></div>
+                        <div class="header-stats">Project stats (<a tabindex="-1" href="http://matecat.translated.home/?action=projectStatistics" target="_blank">More...</a>) <a href="#" class="x-stats"></a></div>
 
                         <li class="first">&nbsp;</li>
                         <li>Initial</li>
@@ -467,7 +481,7 @@
                         <li>--</li> <li>---</li>
                         <li>--</li>
                     </ul>
-                    <a href="#" class="arrow-notification"></a>
+                    <a tabindex="-1" href="#" class="arrow-notification"></a>
                     <div class="cl"></div>
                 </div>
 

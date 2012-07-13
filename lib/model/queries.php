@@ -16,7 +16,7 @@ function getSegments($pid, $start = 0) {
     $query = "select j.id as jid, j.id_project as pid, p.id_customer as cid, j.id_translator as tid,  
                 p.name as pname, p.create_date , fj.id_file, fj.id_segment_start, fj.id_segment_end, 
                 f.filename, f.mime_type, s.id as sid, s.segment, s.raw_word_count,
-                st.translation
+                st.translation, st.status
 
                 from jobs j 
                 inner join projects p on p.id=j.id_project
@@ -48,7 +48,7 @@ function setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $tra
     $data['id_job'] = $id_job;    
     $data['status'] = $status;
     $data['time_to_edit'] = $time_to_edit;
-    $data['translation'] = mysql_real_escape_string($translation);
+    $data['translation'] = $translation;
     $data['translation_date'] = date("Y-m-d H:i:s");
     $data['match_type'] = $match_type;
 
@@ -72,7 +72,7 @@ function setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $tra
     $data['id_job'] = $id_job;    
     $data['status'] = $status;
     $data['time_to_edit'] = $time_to_edit;
-    $data['translation'] = mysql_real_escape_string($translation);
+    $data['translation'] = $translation;
     $data['translation_date'] = date("Y-m-d H:i:s");
     $data['match_type'] = $match_type;
     $data['id_segment'] = $id_segment;

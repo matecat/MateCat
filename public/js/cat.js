@@ -4,6 +4,7 @@
  */
 
 UI = {
+    textareaCacheVal:"",
     init: function() {
         /*
 		$(document).bind('keydown','Ctrl+return', function(e){
@@ -19,7 +20,7 @@ UI = {
             
             //$(".ed").find('textarea.target-textarea[text=""]').first().click();
             
-            $("textarea.target-textarea").each(function(){
+            $("textarea.target-textarea").each(function(){           
                 if ($(this).text()=="" && found==false){
                     found=true;
                     $(this).click();
@@ -27,7 +28,7 @@ UI = {
                 }
             })
             
-            //$('textarea.target-textarea').first("[html=''").click();
+        //$('textarea.target-textarea').first("[html=''").click();
             
             
            
@@ -107,7 +108,7 @@ UI = {
             $(".h-notification").show();
 
             $(".main").animate({
-                width: '74%'
+                width: '76%'
             });	
             $(".main").addClass("maincomment");	
             $(this).parents(".segment").find(".comment-area").addClass("openarea");
@@ -225,20 +226,23 @@ UI = {
             $(this).removeClass("indent");
             $(".menucolor:visible").hide();
             
-             var segment = $(this).parents(".ed");
+            var segment = $(this).parents(".segment");
+            
 
             var anchor=segment.prev();//.find(".number");
-            var anchor2=anchor.find(".number");
+            var anchor2=segment.find(".number");
 
-            console.log(segment.find(".sub-editor.matches").find(".graysmall").length);
+            //console.log(segment.find(".sub-editor.matches").find(".graysmall").length);
             $(this).removeClass("white_text");
            
-           if ((segment.find(".sub-editor.matches").find(".graysmall").length)==0){              
-               UI.getContribution(segment);
-           }
+            if ((segment.find(".sub-editor.matches").find(".graysmall").length)==0){              
+                UI.getContribution(segment);
+            }
+           
             /*if(!$(this).val().length) {
                 UI.getContribution(segment);
             }*/
+            
 
             if ( $(segment).find(".toggle").is(":visible")){
                 return null
@@ -265,6 +269,22 @@ UI = {
         //			$(this).parents(".ed").scrollMinimal();
         //  $(this).removeClass("editor-click");
         })
+        
+        
+        $(".target-textarea").keyup(function(e){
+            console.log (e);
+            var keyCode = e.which; 
+
+            if (keyCode == 9) { // On TAB pressing ...... 
+                return 0; // ..... nothing to do            
+            }else{
+                UI.textareaCacheVal=UI.textareaCacheVal+e;
+            }
+            var ed=$(this).parents("ed"); 
+            if (!ed.hasClass("editor")){
+                $(this).click();
+            }
+        });
 
         $(".search-icon").click(function(){
             $(".main").addClass("main-searched");
@@ -276,7 +296,7 @@ UI = {
         $(".draft, .Translated, .approved").click(function(){
             UI.editStop = new Date();
             UI.editTime = UI.editStop - UI.editStart;
-            var s = $(this).parents(".ed");
+            var s = $(this).parents(".segment");
             var st = $(".status",s);
             $(".target-textarea").addClass("grayed-text");
             //			$(this).parents(".ed").find(".x").click();
@@ -288,21 +308,21 @@ UI = {
         })
 
         $(".Translated").click(function(){
-            var s = $(this).parents(".ed");
+            var s = $(this).parents(".segment");
             UI.setContribution(s);
             UI.setTranslation(s,'translated');
             s.find(".status").addClass("col-translated");
         })
 
         $(".draft").click(function(){
-            var s = $(this).parents(".ed");
+            var s = $(this).parents(".segment");
             UI.setContribution(s);
             UI.setTranslation(s,'draft');
             s.find(".status").addClass("col-draft");
         })
 
         $(".approved").click(function(){
-            var s = $(this).parents(".ed");
+            var s = $(this).parents(".segment");
             UI.setContribution(s);
             UI.setTranslation(s,'approved');
             s.find(".status").addClass("col-approved");
@@ -316,19 +336,19 @@ UI = {
 
 
         $(".d").click(function(){
-            $(this).parents(".ed").find(".status").addClass("col-translated");
+            $(this).parents(".segment").find(".status").addClass("col-translated");
         })
 
         $(".a").click(function(){
-            $(this).parents(".ed").find(".status").addClass("col-approved");
+            $(this).parents(".segment").find(".status").addClass("col-approved");
         })
 
         $(".r").click(function(){
-            $(this).parents(".ed").find(".status").addClass("col-notapproved");
+            $(this).parents(".segment").find(".status").addClass("col-notapproved");
         })
 
         $(".f").click(function(){
-            $(this).parents(".ed").find(".status").addClass("col-draft");
+            $(this).parents(".segment").find(".status").addClass("col-draft");
         })
 
         $(".copysource").click(function(){
@@ -392,6 +412,37 @@ UI = {
 		this.workareaInit();
 */
     },
+    
+    getPercentuageClass: function (match){
+        var cl="";
+        m_parse=parseInt(match);
+        //console.log ("mp is "+m_parse + " m is "+ match);
+        if (!isNaN(m_parse)){
+            match=m_parse;
+        }
+        
+        //console.log ("  m2 is "+ match);
+        
+        switch (true){
+            case (match==100):
+                cl="per-green";
+                break;
+            case (match==101):
+                cl="per-blue";
+                break;
+            case(match>0 && match <=99):              
+                cl="per-orange";
+                break;
+            case (match=="MT"):
+                cl="per-yellow";
+                break;
+            default :
+                cl="";
+        }
+        return cl;
+    },
+    
+    
 
     getContribution: function(currentSegment) {
         var n = $(currentSegment);        
@@ -424,15 +475,19 @@ UI = {
                 }
                 te.removeClass("indent").caretTo(0);
                 
-                $('.percentuage', this).text(d.data.matches[0].match).show();
+                var match=d.data.matches[0].match;
+                cl=UI.getPercentuageClass(match);
+                
+                $('.percentuage', this).text(match).addClass(cl).show();
                 var tt = this;
                 $(tt).removeClass('loaded').addClass('loaded');
                 $('.sub-editor .overflow',tt).empty();
                 
                 var valid=0;
                 $.each(d.data.matches, function() {                    
-                    cb= this['created-by'];                    
-                    $('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li>Source: <span class="bold">'+cb+'</span></li></ul></ul>');
+                    cb= this['created-by'];     
+                    cl_suggestion=UI.getPercentuageClass(this['match'])
+                    $('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen ' + cl_suggestion+'">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li class="graydesc">Source: <span class="bold">'+cb+'</span></li></ul></ul>');
                                       		
                 });
                 if (d.data.matches==0){
@@ -444,11 +499,11 @@ UI = {
             }
         });
     },
-
+    
     getNextContribution: function(currentSegment) {    
-        var n = $(currentSegment).nextAll('.ed').first() || $(currentSegment).parents('.main').next().find('.ed').first();
-        if(!$(currentSegment).nextAll('.ed').length) {
-            n = $(currentSegment).parents('.main').next().find('.ed').first()
+        var n = $(currentSegment).nextAll('.segment').first() || $(currentSegment).parents('.main').next().find('.ed').first();
+        if(!$(currentSegment).nextAll('.segment').length) {
+            n = $(currentSegment).parents('.main').next().find('.segment').first()
         };
         if($(n).hasClass('loaded')) return false;
         var id = n.attr('id');
@@ -469,17 +524,24 @@ UI = {
             ; // nothing to do here
             },
             success: function(d){
-                console.log(d.data);
+               // console.log(d.data);
                 $('.target-textarea', this).text(d.data.matches[0].translation).addClass("indent");
-                $('.percentuage', this).text(d.data.matches[0].match).removeClass("hide");
+                
+                var match=d.data.matches[0].match;
+                cl=UI.getPercentuageClass(match);
+                
+                $('.percentuage', this).text(match).addClass(cl).show();//removeClass("hide");
+                
                 var tt = this;
                 $(tt).addClass('loaded');
                 $('.sub-editor .overflow',tt).empty();
                 
                 var valid =0;
                 $.each(d.data.matches, function() {                      
-                    cb= this['created-by'];                  
-                    $('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li>Source: <span class="bold">'+cb+'</span></li></ul></ul>');
+                    cb= this['created-by'];                    
+                    cl_suggestion=UI.getPercentuageClass(this['match']);
+                       
+                    $('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen ' + cl_suggestion+'">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li>Source: <span class="bold">'+cb+'</span></li></ul></ul>');
                 });
                 if (d.data.matches==0){
                     $(".sbm .matches", tt).hide();

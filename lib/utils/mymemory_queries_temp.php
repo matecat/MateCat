@@ -42,7 +42,7 @@ function addToMM($seg, $tra, $source_lang, $target_lang) {
     $res = file_get_contents($url);
     //echo $res;
     $res = json_decode($res, true);
-    print_r($res);
+    // print_r($res);
     
     return $res;
 }
