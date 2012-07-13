@@ -231,37 +231,18 @@ UI = {
             e.preventDefault();
             e.stopPropagation();          
             $(this).removeClass("indent");
-            $(".menucolor:visible").hide();
-<<<<<<< HEAD
-            
+            $(".menucolor:visible").hide();        
             var segment = $(this).parents(".segment");
-            
-=======
-          
-            var segment = $(this).parents(".segment");
-
->>>>>>> 938ef6d6f5254d4904f2e2111857592b20e63602
-
             var anchor=segment.prev();//.find(".number");
             var anchor2=segment.find(".number");
 
-<<<<<<< HEAD
-            //console.log(segment.find(".sub-editor.matches").find(".graysmall").length);
-            $(this).removeClass("white_text");
-           
-            if ((segment.find(".sub-editor.matches").find(".graysmall").length)==0){              
-                UI.getContribution(segment);
-            }
-=======
 //            console.log(segment.find(".sub-editor.matches").find(".graysmall").length);
             $(this).removeClass("white_text");
            
            if ((segment.find(".sub-editor.matches").find(".graysmall").length)==0){              
                UI.getContribution(segment);
            }
->>>>>>> 938ef6d6f5254d4904f2e2111857592b20e63602
-           
-            /*if(!$(this).val().length) {
+           /*if(!$(this).val().length) {
                 UI.getContribution(segment);
             }*/
             
@@ -541,11 +522,8 @@ UI = {
                 
                 var valid=0;
                 $.each(d.data.matches, function() {                    
-<<<<<<< HEAD
-                    cb= this['created-by'];     
-=======
+
                     cb= this['created-by'];                    
->>>>>>> 938ef6d6f5254d4904f2e2111857592b20e63602
                     cl_suggestion=UI.getPercentuageClass(this['match'])
                     $('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen ' + cl_suggestion+'">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li class="graydesc">Source: <span class="bold">'+cb+'</span></li></ul></ul>');
                                       		
@@ -598,11 +576,7 @@ UI = {
                 
                 var valid =0;
                 $.each(d.data.matches, function() {                      
-<<<<<<< HEAD
-                    cb= this['created-by'];                    
-=======
                     cb= this['created-by'];                  
->>>>>>> 938ef6d6f5254d4904f2e2111857592b20e63602
                     cl_suggestion=UI.getPercentuageClass(this['match']);
                        
                     $('.sub-editor .overflow',tt).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="graygreen ' + cl_suggestion+'">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li>Source: <span class="bold">'+cb+'</span></li></ul></ul>');
