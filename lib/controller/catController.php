@@ -46,11 +46,14 @@ class catController extends viewcontroller {
         return $text;
     }
 
-    public function doAction() {
-
+    public function doAction() {       
         $data = getSegments($this->pid, $this->start_from);
+        //echo "<pre>";print_r ($data);exit;
         $first_not_translated_found = false;
         foreach ($data as $i => $seg) {
+//            echo "<pre> $i\n";
+//            var_dump ($i % 2);
+//            echo "</pre>";
             $seg['segment'] = $this->stripTagesFromSource($seg['segment']);
             $seg['segment'] = trim($seg['segment']);
 
@@ -106,10 +109,8 @@ class catController extends viewcontroller {
             unset($seg['id_segment_start']);
 
             $seg['segment'] = $this->filetype_handler->parse($seg['segment']);
-            $seg["additional_css_class"] = "";
-            if ($i % 2 != 0) {
-                $seg["additional_css_class"] = "light";
-            }
+            
+
 
          /*   if (!$first_not_translated_found and empty($seg['translation'])) { //get matches only for the first segment                
                 $first_not_translated_found = true;
@@ -138,6 +139,7 @@ class catController extends viewcontroller {
 
             $this->data["$id_file"]['segments'][] = $seg;
         }
+        
 //        echo "<pre>";
 //        print_r($this->data);
 //        exit;
