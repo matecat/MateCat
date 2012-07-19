@@ -19,6 +19,7 @@ class setTranslationController extends ajaxcontroller {
     public function __construct() {
         parent::__construct();
 
+
 	//print_r ($_REQUEST);exit;
 
         $this->id_job = $this->get_from_get_post('id_job');
@@ -30,6 +31,7 @@ class setTranslationController extends ajaxcontroller {
     }
 
     public function doAction() {
+
         if (empty($this->id_segment)) {
             $this->result['error'][] = array("code" => -1, "message" => "missing id_segment");
         }
@@ -49,18 +51,22 @@ class setTranslationController extends ajaxcontroller {
         if (empty($this->status)) {
             $this->status = 'DRAFT';
         }
-
-	if (empty ($this->transation)){
+log::doLog ("after test");
+	if (empty ($this->translation)){
 		return 0 ; // won's save empty translation but there is no need to return an error 
 	}
 
+
         //ONE OR MORE ERRORS OCCURRED : EXITING
         if (!empty($this->result['error'])) {
-            return -1;
+            log::doLog ("Dffff");
+		return -1;
         }
 
 
         $insertRes = setTranslationInsert($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $this->translation);
+log::doLog("insertRes");
+log::doLog($insertRes);
         log::doLog($insertRes);
         if ($insertRes < 0 and $insertRes != -1062) {
             $this->result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the translation for the segment $this->id_segment - $insertRes");
@@ -69,6 +75,8 @@ class setTranslationController extends ajaxcontroller {
         if ($insertRes == -1062) {
             // the translaion for this segment still exists : update it
             $updateRes = setTranslationUpdate($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $this->translation);            
+log::doLog("updateRes");
+log::doLog($updateRes);
             if ($updateRes < 0) {
                 $this->result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment $this->id_segment");
                 return -1;

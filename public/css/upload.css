@@ -1,20 +1,37 @@
-﻿.translate-box{float:left;margin:40px 20px 20px 0px}
-.wrapper-upload{text-align:left;margin:0 auto;width:92%;min-width:960px;}
-.translate-box a{padding-top:40px;display:block;}
-body{font-family:Calibri, Arial, Helvetica, sans-serif}
+﻿.translate-box{float:left;margin:20px 40px 0px 0px}
+.wrapper-upload{text-align:left;margin:0 auto;width:92%;min-width:460px;}
+.wrapper-upload h1{margin:0;padding:0;font-size:40px}
 
+h2{margin:0;padding:0;font-size:22px}
+
+
+/*button*/
+
+.uploadbtn{background: #09beec;font-weight:bold;padding:4px 36px 6px 36px;margin:20px 0px 25px 0px;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;float:right;font-size:26px !important;cursor:pointer;color:#fff;-moz-box-shadow: 0 1px 2px #ccc;-webkit-box-shadow: 0 1px 2px #ccc;box-shadow: 0 1px 2px #ccc;border:1px solid #666;-moz-border-radius: 2px;border-radius: 2px;}
+.uploadbtn:hover{-moz-box-shadow: 0 1px 2px #666;-webkit-box-shadow: 0 1px 2px #666;box-shadow: 0 1px 2px #666;background:#12b4df}
+.uploadbtn:active{-moz-box-shadow: inset 0 1px 1px #888;-webkit-box-shadow: inset 0 1px 1px #888;}
+.disabled, .disabled:hover, .disabled:active{cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;background:#ccc}
+
+
+a{text-decoration:underline}
+a:hover{text-decoration:none}
+.translate-box a{display:block;}
+body{font-family:Calibri, Arial, Helvetica, sans-serif}
+.popup-languages .close{margin:-10px -12px 0 0}
+.translate-box select{width:300px;padding:5px;font-size:18px;border:1px solid #ccc;margin-bottom:5px}
+.upload-input{width:400px;padding:5px;font-size:22px !important; -moz-border-radius: 2px;border-radius: 2px;border:1px solid #727272;-moz-box-shadow: inset 0 1px 5px #888;-webkit-box-shadow: inset 0 1px 5px #888;}
 
 /* popup lingue */
 .popup-languages{width:960px;position:fixed;top:10%;left:18%;background:#fff;border:1px solid #adadad;-moz-border-radius: 2px;border-radius: 2px;-moz-box-shadow: 0 1px 3px #757575;-webkit-box-shadow: 0 1px 3px #757575;z-index:9999999999999}
 #chooseTargetsButtons{ margin:-50px 0 0px 0;float:right}
 .languages1{ font-family: Calibri, 'Lucida Grande', Arial, Helvetica, sans-serif}
 .titlewindow{ font-size:22px;text-align:left;margin:0px 0 10px 0px;border-bottom:1px solid #ccc;padding:5px 0 8px 11px;
-color:#000; background:#efefef;border-bottom:1px solid #ccc;margin-bottom:5px;-moz-box-shadow: 0 1px 3px #ccc;-webkit-box-shadow: 0 1px 3px #ccc;}
+color:#000; background:#efefef url(../img/point.gif) 0 0 repeat-x;border-bottom:1px solid #ccc;margin-bottom:5px;-moz-box-shadow: 0 1px 3px #ccc;-webkit-box-shadow: 0 1px 3px #ccc;}
 .languages1 h2{ float:left;font-size:150%;}
 .languages1 h3{ float:left;font-size:150%;margin:0px 0 0px 10px;}
 .listlang li{ height:19px;font-size:14px;width:220px;padding:2px 0 1px 0;border-bottom:1px dotted #ccc;list-style:none;text-align:left}
 .listlang input{float:left;margin-right:10px !important}
-.listlang  {float:left;padding:10px 0 10px 0;margin:0 10px 0 5px;width:220px;font-size:120%;}
+.listlang  {float:left;padding:10px 0 10px 5px;margin:0 10px 0 5px;width:220px;font-size:120%;}
 .listlang  label, .label, .OrderWrapper a, .right-engine a, a, .col_picker3 label {cursor:pointer;color:#000}
 .bg_languages{background:#000;position:fixed; left:0;top:0;width:100%;height:100%;display:block;z-index:1;}
 .cl{ clear:both;}
@@ -31,3 +48,29 @@ color:#000; background:#efefef;border-bottom:1px solid #ccc;margin-bottom:5px;-m
 .col2{ width:600px;}
 .col2 h3{ margin:0 0 10px 0;}
 .translate{ margin:-8px 27px 0px 0px;width:260px;float:left;text-align:right;}
+
+
+a{color:#39699a}
+
+
+
+.uploadtext{float:left;width:55%;}
+.uploadtext h2{margin:15px 0 0 0;}
+.linkupload{font-size:22px;font-weight:bold;}
+.upload-analysis{border:1px solid #ccc;float:left;font-size:16px;-moz-box-shadow: 0 1px 3px #ccc;-webkit-box-shadow: 0 1px 3px #ccc;float:left;-moz-border-radius: 2px;border-radius: 2px;width:80%;}
+.upload-analysis th{padding:10px;border-bottom:1px solid #ccc;text-align:left;background:#e2e4e5}
+.upload-analysis td{padding:10px;border-bottom:1px solid #ccc;text-align:left;background:#efefef}
+table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:center;background:#fff;float:left}
+
+
+
+/*upload table*/
+
+
+.upload-files{border:1px dashed #ccc;margin-top:20px;-moz-border-radius: 4px;border-radius: 4px;}
+.upload-files td {height:20px;padding:10px 0;border-bottom:1px dotted #ccc}
+.upload-files tr {background:#fbfbfb;}
+.upload-files th {height:20px;padding:10px 20px;background:#e2e4e5;border-bottom:1px solid #ccc}
+.upload-files img {margin:0 20px}
+
+.drag{text-align:center;font-size:36px;height:300px;line-height:40px}

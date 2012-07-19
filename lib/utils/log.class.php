@@ -18,6 +18,7 @@ class Log {
     public static function doLog() {         
         $trace=debug_backtrace();
 
+
        
         
         if (!file_exists(LOG_REPOSITORY) || !is_dir(LOG_REPOSITORY)) {
@@ -56,7 +57,7 @@ class Log {
         }
         $stringDataInfo = "[$now ($ip)]";
         $stringDataInfo.=$trace[0]['class']."->".$trace[0]['function']."(line:".$trace[0]['line'].")";
-        $stringData = "$stringDataInfo : $string\n";
+        $stringData = "$stringDataInfo : $string\n";//. print_r ($trace,true);
         
        
       //  $stringData.=print_r($trace,true);

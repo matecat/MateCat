@@ -35,16 +35,17 @@ class INIT {
         switch ($_SERVER['HTTP_HOST']) {
             case ('matecat.pi'):
             case ('matecat.local'):
+
                 self::$DEBUG = true;
                 
-//                self::$DB_SERVER = "localhost";
-//                self::$DB_DATABASE = "matecat_sandbox"; //database name
-//                self::$DB_USER = "root"; //database login name
-//                self::$DB_PASS = "root"; //database login password
+//                self::$DB_SERVER = "192.168.1.53";
+ //               self::$DB_DATABASE = "matecat_sandbox"; //database name
+ //               self::$DB_USER = "root"; //database login name
+ //              self::$DB_PASS = "root11"; //database login password
                 
                 
                 self::$DB_SERVER = "213.215.131.241"; //database server
-                self::$DB_DATABASE = "matecat_sandbox"; //database name
+               self::$DB_DATABASE = "matecat_sandbox"; //database name
                 self::$DB_USER = "translated"; //database login name
                 self::$DB_PASS = "azerty1"; //database login password
                 
@@ -52,8 +53,10 @@ class INIT {
                 break;
             case 'cattooldemo.matecat.com':
             case 'matecat.translated.home':
+	    case 'matecatv2.translated.home':
             case 'matecat.com':
             case 'www.matecat.com':
+	    case 'matecatv2.translated.home':
                 self::$DEBUG = false;
                 self::$DB_SERVER = "213.215.131.241"; //database server
                 self::$DB_DATABASE = "matecat_sandbox"; //database name

@@ -24,9 +24,15 @@ function getSegments($pid, $start = 0) {
                 inner join files f on f.id=fj.id_file
                 inner join segments s on s.id_file=f.id
                 left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
-                where p.id=1 
-                limit $start,1000                                              
+                where p.id=$pid 
+                limit $start,1000
+                
+                
+                
              ";
+	if ($pid==2){
+		//echo $query; exit;
+	}
     //limit $start,100
     
     // log::doLog($query);

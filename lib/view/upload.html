@@ -6,140 +6,175 @@
          <link rel="shortcut icon" href="img/favicon.ico" />
         <link href="/public/css/style.css" rel="stylesheet" type="text/css" />
           <link href="/public/css/upload.css" rel="stylesheet" type="text/css" />
-        <script src="/public/js/jquery.js" type="text/javascript"></script>
-<script type="text/javascript" language="javascript" src="/public/js/newproject.js"></script>     
+        <script src="/public/js/lib/jquery.js" type="text/javascript"></script>
+<script type="text/javascript" language="javascript" src="/public/js/new-project.js"></script>     
 
 
-<!-- Bootstrap styles for responsive website layout, supporting different screen sizes -->
-<link rel="stylesheet" href="http://blueimp.github.com/cdn/css/bootstrap-responsive.min.css" />
-
-<!--[if lt IE 7]><link rel="stylesheet" href="http://blueimp.github.com/cdn/css/bootstrap-ie6.min.css"><![endif]-->
-<!-- Bootstrap Image Gallery styles -->
-<link rel="stylesheet" href="http://blueimp.github.com/Bootstrap-Image-Gallery/css/bootstrap-image-gallery.min.css" />
-<!-- CSS to style the file input field as button and adjust the Bootstrap progress bars -->
-<link rel="stylesheet" href="/public/css/jquery.fileupload-ui.css" />
-<!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
-<!--[if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 </head>
 
 <body>
 
-<div class="header">
+<header>
   <div class="wrapper">   
 	    	<a href="#"><img src="/public/img/logo.png" class="logo" /></a>
   </div>
-	</div><!--<img src="/public/img/upload.png" style="float:left;margin:10px 20px "/>-->
-	<div class="wrapper-upload">
-      
-
-               
+	</header>
+    
+  
+    
+<div class="wrapper-upload">
          
-         <h1>Carica un documento per la traduzione</h1>
-	  <h3>Puoi creare una nuova traduzione caricando un file o specificando un URL di una pagina web, di Wikipedia™ o di un articolo.</h3>
-	  <div class="translate-box">
-	    <h3>Project name</h3>
+         <h1>Translate an XLIFF file</h1>
+	 
+     
+     
+         <div class="translate-box">
+	    <h2>Project name</h2>
       <input name="" type="text" class="upload-input"/>
-                      </div>
+      </div>
+                     
 	  <div class="translate-box">
-	    <h3>Traduci da:</h3>
+	    <h2>From:</h2>
       <select>
         <option value="Inglese">Inglese</option>
         <option value="Italiano">Italiano</option>
         <option value="Francese">Francese</option>
         <option value="Tedesco">Tedesco</option>
         </select>
-                      </div>
+  </div>
 	  <div class="translate-box">
-	    <h3>Traduci in:</h3>
-          <select>
+	    <h2>To:</h2>
+      <select>
             <option value="Inglese">Inglese</option>
             <option value="Italiano">Italiano</option>
             <option value="Francese">Francese</option>
             <option value="Tedesco">Tedesco</option>
-            </select>
-          </div>
+        </select><br />
+ <!--<a href="#" id="multiple-link">Multiple languages?</a>-->
+  </div>
           
-           <div class="translate-box">
-	   <a href="#">Multiple langages?</a>
-          </div>
+       
+	  
+    
           
           
-	  <div class="cl"></div>
-	  <h3>Enter your email</h3>
-	  <input name="" type="text" class="upload-input"/>
-      <input name="" type="button" value="get link via email" class="uploadbtn" />
-	  
-      <br />
-	  
-	  
-      <br />
-      <br />
-      <br />
-	  
-	  
-      <div class="cl"></div>
-	  <input name="" type="button" class="uploadbtn" value="Carica"/>
-	  
-	  
-	  
-	  <form id="fileupload" action="server/php/" method="POST" enctype="multipart/form-data">
-	    <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
-	    <div class="row fileupload-buttonbar">
-	      <div class="span7">
-	        <!-- The fileinput-button span is used to style the file input field as button -->
-	        <span class="btn btn-success fileinput-button" style="position:absolute;z-index:99999999999999">
-	          <i class="icon-plus icon-white"></i>
-	          <span>Add files...</span>
-	          <input type="file" name="files[]" multiple="" />
-            </span>
-	        <button type="submit" class="btn btn-primary start">
-	          <i class="icon-upload icon-white"></i>
-	          <span>Start upload</span>            </button>
-            <button type="reset" class="btn btn-warning cancel">
-                <i class="icon-ban-circle icon-white"></i>
-                <span>Cancel upload</span>            </button>
-            <button type="button" class="btn btn-danger delete">
+  <div class="cl"></div>
+	 
+
+	  <table width="100%" border="0" cellpadding="0" cellspacing="0" class="upload-files drag" role="presentation" >
+
+ <tr>
+            <td colspan="6"><br />
+
+
+            <strong>Drag and drop</strong> your XLIFF here. <br />
+            <br />
+             or<br />
+<br />
+<input name="" type="file" />
+<br />
+<br /></td>
+  </tr></table>
+    <input name="" type="button" class="uploadbtn disabled" value="Start Translating" disabled="disabled" />
+	  <br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+<br />
+
+      
+     
+     <table width="100%" border="0" cellpadding="0" cellspacing="0" class="upload-files" role="presentation">
+       <tr class="template-download fade in">
+         <th colspan="6" >Your uploaded files:</th>
+       </tr>
+ <tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery">
+ 
+ <tr class="template-download fade in">
+            <td width="6%" class="preview">
+                <a href="http://jquery-file-upload.appspot.com/AMIfv97y1eROaMwNtxJEzw64rxC9g8NijlD228NSoIvnzm6YtsIarVnYaL4hFJHVy8BwQtPSr4AvYNdffQ0btscRFOJNaNVl2XyR5tpELJGGKQX76gCy1GE_7rjkhciCBnvEnse8X7du8np7FoLZn8s8iEcEaCXardMGXEYsFZyJANJsQryHGaM/symbol.png" title="symbol.png" rel="gallery" download="symbol.png"><img src="../../public/img/img1.jpg" /></a>            </td>
+            <td width="36%" class="name">
+                <a href="http://jquery-file-upload.appspot.com/AMIfv97y1eROaMwNtxJEzw64rxC9g8NijlD228NSoIvnzm6YtsIarVnYaL4hFJHVy8BwQtPSr4AvYNdffQ0btscRFOJNaNVl2XyR5tpELJGGKQX76gCy1GE_7rjkhciCBnvEnse8X7du8np7FoLZn8s8iEcEaCXardMGXEYsFZyJANJsQryHGaM/symbol.png" title="symbol.png" rel="gallery" download="symbol.png">symbol.png</a>            </td>
+            <td width="12%" class="size"><span>41.59 KB</span></td>
+            <td colspan="2"></td>
+        
+        <td width="14%" class="delete">
+            <button class="btn btn-danger" data-type="DELETE" data-url="http://jquery-file-upload.appspot.com/AMIfv97y1eROaMwNtxJEzw64rxC9g8NijlD228NSoIvnzm6YtsIarVnYaL4hFJHVy8BwQtPSr4AvYNdffQ0btscRFOJNaNVl2XyR5tpELJGGKQX76gCy1GE_7rjkhciCBnvEnse8X7du8np7FoLZn8s8iEcEaCXardMGXEYsFZyJANJsQryHGaM/symbol.png">
                 <i class="icon-trash icon-white"></i>
                 <span>Delete</span>            </button>
-            <input type="checkbox" class="toggle" />
-          </div>
-          <!-- The global progress information -->
-	      <div class="span5 fileupload-progress fade">
-	        <!-- The global progress bar -->
-	        <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
-	          <div class="bar" style="width:0%;"></div>
-              </div>
-              <!-- The extended global progress information -->
-	        <div class="progress-extended">&nbsp;</div>
-          </div>
-        </div>
-        <!-- The loading indicator is shown during file processing -->
-	    <div class="fileupload-loading"></div>
-        <br/>
-	    <!-- The table listing the files available for upload/download -->
-	    <table role="presentation" class="table table-striped"><tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
-                    </form>
-	  <br />
-	  
-	  <div class="step2">
-  <a href="#" class="linkupload">http://cattool.matecat.com/translate/id_progetto/id_translator/password</a>
-  <br />
-  <br />
-  <h2>Files analisys:</h2>
-  <ul class="upload-analysis">
-  <li class="first-col">N° files caricati:</li>
-  <li>18</li>
-  <li class="first-col" style="background:#f5f5f5">N° parole:</li>
-  <li style="background:#f5f5f5">112</li>
-  <li class="first-col">Ripetizioni:</li>
-  <li>5%</li>
-  <li class="first-col" style="background:#f5f5f5">100% matches:</li>
-  <li style="background:#f5f5f5">2%</li>
-  <li class="first-col">Fuzzy matches:</li>
-  <li>15%</li>
-  <li class="first-col"  style="border-bottom:none;background:#f5f5f5">N° parole equivalenti:</li>
-  <li style="border-bottom:none;background:#f5f5f5">42</li>
-  </ul>
+            <input type="checkbox" name="delete" value="1"></input>        </td>
+    </tr><tr class="template-upload fade in">
+        <td class="preview"><span class="fade"></span></td>
+        <td class="name"><span>email.txt</span></td>
+        <td class="size"><span>0.21 KB</span></td>
+        
+            <td class="error" colspan="2"><span class="label label-important">Error</span> Filetype not allowed</td>
+        
+        <td class="cancel">
+            <button class="btn btn-warning">
+                <i class="icon-ban-circle icon-white"></i>
+                <span>Cancel</span>            </button>        </td>
+    </tr><tr class="template-upload fade in">
+        <td class="preview"><span class="fade in"><canvas width="80" height="80"></canvas></span></td>
+        <td class="name"><span>meetinglife versions.png</span></td>
+        <td class="size"><span>39.66 KB</span></td>
+        
+            <td width="3%">
+                <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="bar" style="width:0%;"></div></div>            </td>
+            <td width="29%" class="start">
+                <button class="btn btn-primary">
+                    <i class="icon-upload icon-white"></i>
+                    <span>Start</span>                </button>            </td>
+        
+        <td class="cancel">
+            <button class="btn btn-warning">
+                <i class="icon-ban-circle icon-white"></i>
+                <span>Cancel</span>            </button>        </td>
+  </tr></tbody></table> 
+       <input name="" type="button" class="uploadbtn" value="Start Translating"/>
+       <div class="cl"></div>
+  <div class="step2">
+  
+ 
+ 
+ 
+ 
+ <br />
+<br />
+<br />
+<br />
+<br />
+<br />
+
+ 
+ 
+ <h2>Upload almost complete!</h2>
+<!-- <h3>Start <a href="#">working in the meanwhile</a> or <a href="#">send to you a reminder report</a>.</h3>-->
+ 
+ 
+  <table border="0" cellspacing="0" cellpadding="0" class="upload-analysis">
+  <tr>
+    <th width="129" >Target Language</th>
+    <th width="759"> URL</th>
+    </tr>
+  <tr>
+    <td>FR</td>
+    <td><a href="#">http://demo.matecat.com/translate/website-translation/fr-it/8856487-didjIJ89SJIOJNSoowjS </a></td>
+    </tr>
+  <tr>
+    <td>DE</td>
+    <td><a href="#">http://demo.matecat.com/translate/website-translation/fr-it/8856487-didjIJ89SJIOJNSoowjS </a></td>
+    </tr>
+  <tr>
+    <td>IT</td>
+    <td><a href="#">http://demo.matecat.com/translate/website-translation/fr-it/8856487-didjIJ89SJIOJNSoowjS </a></td>
+    </tr>
+</table>
+
+ 
   
 </div>
   <div class="cl"></div>
@@ -152,7 +187,7 @@
 
  <!-- MUST BE HIDDEN -->		
 
-		<div class="popup-languages">
+		<div class="popup-languages" style="display:none">
         <a href="#" class="close"></a>
 <ul class="sublist">
 
@@ -1305,7 +1340,7 @@
 
 </div>
 
-<div class="grayed" style="display:block"></div>
+<div class="grayed"></div>
 
 
 

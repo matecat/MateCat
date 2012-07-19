@@ -1,4 +1,5 @@
 <?php
+
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include INIT::$ROOT . "/lib/utils/mymemory_queries_temp.php";
 include INIT::$ROOT . "/lib/utils/filetype.class.php";
@@ -19,13 +20,17 @@ class catController extends viewcontroller {
     private $filetype_handler = null;
     private $start_from = 0;
 
-    public function __construct() {        
+    public function __construct() {
+        echo ".........\n";
         parent::__construct();
         parent::makeTemplate("index.html");
         $this->pid = $this->get_from_get_post("pid");
         $this->start_from = $this->get_from_get_post("start");
         if (is_null($this->start_from)) {
             $this->start_from = 0;
+        }
+	if (is_null($this->pid)) {
+            $this->pid = 1;
         }
     }
 
@@ -46,14 +51,11 @@ class catController extends viewcontroller {
         return $text;
     }
 
-    public function doAction() {       
+    public function doAction() {
+
         $data = getSegments($this->pid, $this->start_from);
-        //echo "<pre>";print_r ($data);exit;
         $first_not_translated_found = false;
         foreach ($data as $i => $seg) {
-//            echo "<pre> $i\n";
-//            var_dump ($i % 2);
-//            echo "</pre>";
             $seg['segment'] = $this->stripTagesFromSource($seg['segment']);
             $seg['segment'] = trim($seg['segment']);
 
@@ -91,7 +93,7 @@ class catController extends viewcontroller {
                 $this->data["$id_file"]['id_segment_end'] = $seg['id_segment_end'];
                 $this->data["$id_file"]['segments'] = array();
             }
-            if (count($this->data["$id_file"]['segments'])>100){continue;}
+            //if (count($this->data["$id_file"]['segments'])>100){continue;}
             $this->filetype_handler = new filetype($seg['mime_type']);
 
 
@@ -109,8 +111,6 @@ class catController extends viewcontroller {
             unset($seg['id_segment_start']);
 
             $seg['segment'] = $this->filetype_handler->parse($seg['segment']);
-            
-
 
          /*   if (!$first_not_translated_found and empty($seg['translation'])) { //get matches only for the first segment                
                 $first_not_translated_found = true;
@@ -139,10 +139,9 @@ class catController extends viewcontroller {
 
             $this->data["$id_file"]['segments'][] = $seg;
         }
-        
-//        echo "<pre>";
-//        print_r($this->data);
-//        exit;
+        //echo "<pre>";
+        //print_r($this->data);
+        //exit;
     }
 
     public function setTemplateVars() {
