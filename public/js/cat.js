@@ -274,6 +274,11 @@ UI = {
         var id = n.attr('id');
         var id_segment = id.split('-')[1];
         var txt = $('.source .original',n).text();
+        var file = $(currentSegment).parents('article');
+        var id_job = $('div.projectbar',file).data('job').split('-')[1];
+        
+        
+        
         if(!next) {
         	$(".loader",n).addClass('loader_on')
         	$(".percentuage",n).hide();
@@ -285,6 +290,7 @@ UI = {
                 action: 'getContribution',
                 id_segment: id_segment,
                 text: txt,
+                id_job: id_job,
                 num_results: this.numMatchesResults
             },
             type: 'POST',            

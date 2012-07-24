@@ -1,8 +1,8 @@
 <?php
 
-function getFromMM($query) {
+function getFromMM($query,$s,$t) {
     $q = urlencode($query);
-    $url = "http://mymemory.translated.net/api/get?q=$q&langpair=en|it&de=matecatdeveloper@matecat.com";
+    $url = "http://mymemory.translated.net/api/get?q=$q&langpair=$s|$t&de=matecatdeveloper@matecat.com";
     $res = file_get_contents($url);
     //echo $res;
     $res = json_decode($res, true);

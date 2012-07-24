@@ -2,6 +2,17 @@
 
 include_once 'Database.class.php';
 
+function getSourceTargetFromJob($id_job) {
+    $query = "select source, target from jobs where id=$id_job";
+   
+    $db = Database::obtain();
+    $results = $db->fetch_array($query);
+//print_r ($results);
+    return $results[0];
+    
+    
+}
+
 function getSegments($pid, $start = 0) {
     /* $query = "select s.id,id_file, fj.id_job,segment, mimetype ,filename
       from segments s
@@ -30,11 +41,7 @@ function getSegments($pid, $start = 0) {
                 
                 
              ";
-	if ($pid==2){
-		//echo $query; exit;
-	}
     //limit $start,100
-    
     // log::doLog($query);
 
     $db = Database::obtain();
@@ -48,7 +55,7 @@ function getSegments($pid, $start = 0) {
 
 function setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $translation, $match_type = 'unknown') {
     $data = array();
-    $data['id_job'] = $id_job;    
+    $data['id_job'] = $id_job;
     $data['status'] = $status;
     $data['time_to_edit'] = $time_to_edit;
     $data['translation'] = $translation;
@@ -72,7 +79,7 @@ function setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $tra
 
 function setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $translation, $match_type = 'unknown') {
     $data = array();
-    $data['id_job'] = $id_job;    
+    $data['id_job'] = $id_job;
     $data['status'] = $status;
     $data['time_to_edit'] = $time_to_edit;
     $data['translation'] = $translation;

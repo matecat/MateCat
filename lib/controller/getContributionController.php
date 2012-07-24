@@ -1,5 +1,6 @@
 <?php
 include INIT::$ROOT."/lib/utils/mymemory_queries_temp.php";
+include_once INIT::$MODEL_ROOT . "/queries.php";
 
 /*
  * To change this template, choose Tools | Templates
@@ -8,13 +9,18 @@ include INIT::$ROOT."/lib/utils/mymemory_queries_temp.php";
 class getContributionController extends ajaxcontroller {
 
     private $id_segment;
+    private $id_job;
     private $num_results;
     private $text;
+        
+    private $source;
+    private $target;
 
     public function __construct() {
         parent::__construct();
 
         $this->id_segment = $this->get_from_get_post('id_segment');
+        $this->id_job = $this->get_from_get_post('id_job');
         $this->num_results = $this->get_from_get_post('num_results');
         $this->text = $this->get_from_get_post('text');
         
@@ -25,7 +31,7 @@ class getContributionController extends ajaxcontroller {
         if (empty($this->id_segment)) {
             $this->result['error'][] = array("code" => -1, "message" => "missing id_segment");
         }
-        if (empty($this->id_segment)) {
+        if (empty($this->text)) {
             $this->result['error'][] = array("code" => -2, "message" => "missing text");
         }
 
@@ -36,6 +42,11 @@ class getContributionController extends ajaxcontroller {
         if (!empty($this->result['error'])) {
             return -1;
         }
+        
+        $st=getSourceTargetFromJob($this->id_job);
+        
+        $this->source=$st['source'];
+        $this->target=$st['target'];
 
 
         // UNUSED
@@ -45,7 +56,7 @@ class getContributionController extends ajaxcontroller {
         //$matches = $fake_matches;
 
         $matches=array();
-        $matches = getFromMM($this->text);
+        $matches = getFromMM($this->text, $this->source,$this->target);
         
         $matches=array_slice ($matches,0,INIT::$DEFAULT_NUM_RESULTS_FROM_TM);
       /*  foreach ($retMM as $r) {
