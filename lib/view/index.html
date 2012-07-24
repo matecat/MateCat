@@ -177,8 +177,8 @@
                 <div class="projectbar" data-job="" tal:attributes="data-job string:job-${file_data/jid}">
                     <h2 tal:content="file_data/filename | nothing">@@filename@@</h2>
                     <div class="languages">
-                        <strong class="source-lang">English</strong>  
-                        > <strong class="target-lang">Italian</strong>
+                        <strong tal:content="file_data/source" class="source-lang">English</strong>  
+                        > <strong  tal:content="file_data/target" class="target-lang">Italian</strong>
                     </div>
 
                     <ul style="float:right;text-align:right;">

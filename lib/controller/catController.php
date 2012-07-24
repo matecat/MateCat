@@ -1,8 +1,9 @@
 <?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include INIT::$ROOT . "/lib/utils/mymemory_queries_temp.php";
-include INIT::$ROOT . "/lib/utils/filetype.class.php";
+include INIT::$UTILS_ROOT . "/mymemory_queries_temp.php";
+include INIT::$UTILS_ROOT . "/filetype.class.php";
+include INIT::$UTILS_ROOT . "/langs/languages.inc.php";
 
 /**
  * Description of catController
@@ -22,7 +23,7 @@ class catController extends viewcontroller {
     private $start_from = 0;
 
     public function __construct() {
-        echo ".........\n";
+       // echo ".........\n";
         parent::__construct();
         parent::makeTemplate("index.html");
         $this->pid = $this->get_from_get_post("pid");
@@ -53,8 +54,13 @@ class catController extends viewcontroller {
     }
 
     public function doAction() {
+        $lang_handler=languages::getInstance("en");       
 
         $data = getSegments($this->pid, $this->start_from);
+//        echo "<pre>";
+//        print_r ($data);
+//        exit;
+//        
         $first_not_translated_found = false;
         foreach ($data as $i => $seg) {
             $seg['segment'] = $this->stripTagesFromSource($seg['segment']);
@@ -89,14 +95,16 @@ class catController extends viewcontroller {
 		$source=strtoupper($s[0]);
                 $this->source = $source;
             }
-
+            
             $id_file = $seg['id_file'];
             if (!isset($this->data["$id_file"])) {                
                 $this->data["$id_file"]['jid'] = $seg['jid'];		
                 $this->data["$id_file"]["filename"] = $seg['filename'];
                 $this->data["$id_file"]["mime_type"] = $seg['mime_type'];
                 $this->data["$id_file"]['id_segment_start'] = $seg['id_segment_start'];
-                $this->data["$id_file"]['id_segment_end'] = $seg['id_segment_end'];
+                $this->data["$id_file"]['id_segment_end'] = $seg['id_segment_end'];                
+                $this->data["$id_file"]['source']=$lang_handler->iso2Language($seg['source']);
+                $this->data["$id_file"]['target']=$lang_handler->iso2Language($seg['target']);
                 $this->data["$id_file"]['segments'] = array();
             }
             //if (count($this->data["$id_file"]['segments'])>100){continue;}
@@ -106,6 +114,7 @@ class catController extends viewcontroller {
 
             unset($seg['id_file']);
 	    unset($seg['source']);
+            unset($seg['target']);
             unset($seg['mime_type']);
             unset($seg['filename']);
             unset($seg['jid']);
@@ -146,9 +155,9 @@ class catController extends viewcontroller {
 
             $this->data["$id_file"]['segments'][] = $seg;
         }
-      //  echo "<pre>";
-       // print_r($this->data);
-      //  exit;
+    //   echo "<pre>";
+    //   print_r($this->data);
+    //   exit;
     }
 
     public function setTemplateVars() {
