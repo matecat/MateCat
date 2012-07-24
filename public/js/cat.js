@@ -6,24 +6,13 @@
 UI = {
     init: function() {
 	
-	this.fu=function(){};
         this.initStart = new Date();
- 	this.numMatchesResults = 2;
+ 		this.numMatchesResults = 2;
 
-    $(document).ready(function() {
-        UI.findEmptySegment();
+		$(document).ready(function() {
+		    UI.findEmptySegment();
+		})
         
-    })
-
-	$(window).resize(function(){
-		//	UI.setEqualHeight();
-	});
-
-
-
-
-        
-
         $("body, li.target textarea").bind('keydown','Ctrl+return', function(e){ 
             e.preventDefault();
             $('.editor .Translated').click();
@@ -42,11 +31,7 @@ UI = {
             return false
         });
         jQuery('textarea').trigger('update');
- //       $('textarea').autogrow();
-        $("section textarea").bind('keyup', function(e){ 
-            console.log(this);
-        });
-	
+
         $("div.notification-box").mouseup(function() {
             return false;
         });
@@ -71,7 +56,6 @@ UI = {
 
 
  		$("article").on('click','div.comments span.corner',function(e) {          
-//				console.log(this);
             e.preventDefault();
             $(".comment-area").hide();
             $(".h-notification").show();
@@ -142,47 +126,44 @@ UI = {
             e.preventDefault();
             e.stopPropagation();
         }).on('click','li.target textarea',function(e) {
+
+//			alert('click');
 			$(".statusmenu:visible").hide();
 			// da riprendere
 //			if(typeof UI.currentSegmentOb != 'undefined') UI.currentSegmentOb.removeClass('active');
 			UI.currentSegmentOb = segment = $(this).parents("section");
+			UI.scrollSegment(segment);
 			// da riprendere
 //			segment.addClass('active');
 			$(this).removeClass("indent"); // vediamo come rimuoverne la necessità
-//			$(".menucolor:visible").hide(); //?
 
-//			$(this).removeClass("white_text");
-			// questo non mi convince, lo cambierei
-			if (!($(".sub-editor.matches .graysmall",segment).length)){     
+			if (!($("div.sub-editor.matches .graysmall",segment).length)){     
 				UI.getContribution(segment);
 			}
 			if ( $(segment).find(".toggle").is(":visible")){return null}
 
-            $(".editor:visible").find(".close").click();
- //           $(".target-textarea").addClass("grayed-text"); // ?
-
-            $("div.grayed").toggle();	// va fatto in modo diverso, senza il div.grayed, ma con una classe sul body o sul wrapper
+            $("section.editor").find(".close").click();
+            $("div.grayed").toggle();
 
             $(segment).addClass("editor");
             $(this).focus();
-            UI.editStart = new Date();     
+            UI.editStart = new Date();
             $(this).caretTo(0);
             $(".toggle",segment).show("blind", {
                 direction: "vertical"
             }, 250);
-            
             UI.getContribution(segment,1);
+            UI.startTextareaAutoresize(this);
         }).on('click','input.draft, input.Translated, input.approved',function(e) {
             UI.editStop = new Date();
             UI.editTime = UI.editStop - UI.editStart;
   			var segment = $(this).parents("section");
             var statusSwitcher = $("a.status",segment);
-            $("li.target textarea").addClass("grayed-text");
+//            $("li.target textarea").addClass("grayed-text");
             statusSwitcher.removeClass("col-approved col-notapproved col-done col-draft");
             var nextSegment = UI.getNextSegment(segment);
             if(!nextSegment.length) {
-            	UI.findEmptySegment();
-//            	$(".editor:visible").find(".close").click();
+            	$(".editor:visible").find(".close").click();
             	return false;
             };
             $("li.target textarea", nextSegment).click();
@@ -221,7 +202,9 @@ UI = {
                 direction: "vertical"
             },250);
             $("div.grayed").toggle();
-            $("li.target textarea",segment).removeClass("grayed-text");
+            var textarea = $("li.target textarea",segment);
+//            textarea.removeClass("grayed-text");
+            UI.endTextareaAutoresize(textarea);
             $(".toggle",segment).promise().done(function(){
                 $(segment).removeClass("editor").find(".editable_textarea").find("button").click(); // a che serve editable_textarea?
             })
@@ -233,23 +216,17 @@ UI = {
 			$('textarea',segment).text($('li.b',this).text());
         });
 
-//	var worker = new Worker("/public/js/cat_worker.js");
-	//this.initTargetHeight();
-	
+		this.initTargetHeight();
         this.initEnd = new Date();
         this.initTime = this.initEnd - this.initStart;
- //       this.setEqualHeight();
 
         console.log('init time: ' + this.initTime);
 
     },
 
-
-
     getPercentuageClass: function (match){
         var percentageClass="";
         m_parse=parseInt(match);
-//      console.log ("mp is "+m_parse + " m is "+ match);
         if (!isNaN(m_parse)){
             match=m_parse;
         }
@@ -277,22 +254,11 @@ UI = {
         next = (typeof next == 'undefined')? 0 : 1;
         if(next){
         	var n = this.getNextSegment(currentSegment);
-/*
-	        var n = $(currentSegment).nextAll('section').first() || $(currentSegment).parents('article').next().find('section').first();
-			if(typeof n == 'undefined') return false;
-//			console.log($('li.target textarea',n).text());
-	        if(!$(currentSegment).nextAll('section').length) {
-        		n = $(currentSegment).parents('article').next().find('section').first();
-	        };
- */
         } else {
         	var n = $(currentSegment);        
         }
-//		if(($('li.target textarea',n).text()=='')&&(next)) return false;
         if($(n).hasClass('loaded')) return false;
         if((!n.length)&&(next)) return false;
- // da verificare:
- //       if(($('textarea',n).text().length)&&(next)) return false;
 
         var id = n.attr('id');
         var id_segment = id.split('-')[1];
@@ -317,11 +283,11 @@ UI = {
                 $(".loader",n).removeClass('loader_on');
             },
             success: function(d){
- //           	console.log(d.data.matches[0]);
  				var isActiveSegment = $(this).hasClass('editor');
 	  			var textarea = $('li.target textarea', this);
 	  			var translation = d.data.matches[0].translation;
-                if (textarea.val().length==0){
+	  			var textareaLength = textarea.val().length;
+                if (textareaLength==0){
                     if($.trim(translation) != '') {
                     	textarea.text(translation);
                     }
@@ -329,7 +295,7 @@ UI = {
                 if(isActiveSegment) {
 	                textarea.removeClass("indent").caretTo(0);
 	 			} else {
-	 				textarea.addClass("indent");
+	 				if (textareaLength==0) textarea.addClass("indent");
 	 			}
 
                 var match = d.data.matches[0].match;
@@ -359,7 +325,6 @@ UI = {
 	getNextSegment: function(currentSegment) {
         var n = $(currentSegment).nextAll('section').first() || $(currentSegment).parents('article').next().find('section').first();
 		if(typeof n == 'undefined') return false;
-//			console.log($('li.target textarea',n).text());
         if(!$(currentSegment).nextAll('section').length) {
     		n = $(currentSegment).parents('article').next().find('section').first();
         };
@@ -471,7 +436,6 @@ UI = {
 
     changeStatus: function(ob,status) {
         var segment = $(ob).parents("section");
- //       $("a.status",segment).addClass("col-"+status);
         UI.setContribution(segment);
         UI.setTranslation(segment,status);
     },
@@ -484,30 +448,32 @@ UI = {
                 found=true;
 				UI.currentSegmentOb = textarea.parents("section");
                 textarea.click();
+                UI.createTextareaClone();
             }
         })
     },
 
-    /*initTargetHeight: function(id) {
-	
-	$("li.target").each(function(e){
-			var target_li_id=$(this).attr("id");
-			var source_li_id=target_li_id.replace("target","source");
-			var source_height=$("#"+source_li_id).height();
-			$(this).find("textarea").height(source_height);
-
-		})
-	},
-	*/
-
-
-
+    initTargetHeight: function() {
+		var targetHeight = 60;
+    	$('li.source').each(function(){
+    		var sourceHeight = $(this).height();
+			if(sourceHeight > targetHeight) {
+				$('textarea',$(this).next()).css('height',sourceHeight+'px')
+			}
+ 	   	});
 
 /*
-
-    initTargetHeight: function() {
+    	$('section textarea').each(function(){
+    		var textarea = $(this);
+    		var sourceHeight = textarea.parent().prev().height();
+    		if(sourceHeight > targetHeight) {
+    			textarea.css('height',sourceHeight+'px')
+    		}
+ 	   	});
+*/
+/*
         var ta = $('section textarea')[0];
-        var shadow = $('<div></div>').css({
+        var shadow = $('<div id="shadowTextarea"></div>').css({
             position:   'absolute',
             top:        -10000,
             left:       -10000,
@@ -520,102 +486,82 @@ UI = {
     	$('section textarea').each(function(){
      		var tx = $(this).val();
      		shadow.html(tx);
-//     		console.log(tx + ' - ' + shadow.height());
       		var hh = shadow.height();
      		if(hh < 30) hh = 30;
     		$(this).css('height', hh)
-/*
-    		var targetHeight = $(this).height();
-    		var sourceHeight = $(this).prev().height();
-    		if(sourceHeight > targetHeight) {
-    			$(this).css('height',sourceHeight+'px')
-    		} else {
-    			$(this).prev().css('height',targetHeight+'px')
-    		}
- 
-	   	});
 
-    },
-*/
-        
-    setEqualHeight: function() {
-    	$('section ul.text li.target').each(function(e){
-    		var targetHeight = $(this).height();
-    		var sourceHeight = $(this).prev().height();
+    		var targetHeight = hh;
+    		var sourceHeight = $(this).parent().prev().height();
     		if(sourceHeight > targetHeight) {
     			$(this).css('height',sourceHeight+'px')
-    		} else {
-    			$(this).prev().css('height',targetHeight+'px')
     		}
-    	});
-    }
+ 	   	});
+*/
+    },
+
+    createTextareaClone: function() {
+        var ta = $('section.editor textarea');
+        var shadowActive = $('<div id="shadowActiveTextarea"></div>').css({
+            position:   'absolute',
+            top:        -10000,
+            left:       -10000,
+            width:      $(ta).width(),
+            fontSize:   $(ta).css('fontSize'),
+            fontFamily: $(ta).css('fontFamily'),
+            lineHeight: $(ta).css('lineHeight'),
+            resize:     'none'
+        }).appendTo(document.body);
+    },
+
+	startTextareaAutoresize: function(textarea) {
+		$(textarea).bind('keyup.activeTextarea', function() {
+     		var shadow = $('#shadowActiveTextarea');
+     		var tx = $(this).val();
+     		shadow.html(tx);
+      		var hh = shadow.height();
+      		if(hh < 30) hh = 30;
+    		$(this).css('height', hh);
+		});
+	},
+
+	endTextareaAutoresize: function(textarea) {
+		$(textarea).unbind('keyup.activeTextarea');
+	},
+
+	scrollSegment: function(segment) {
+		var spread = 20;
+		var current = $('section.editor');
+		var previousSegment = $(segment).prev('section');
+		if(!previousSegment.length) {
+			previousSegment = $(segment);
+			spread = 30;
+		};
+		var destination = "#"+previousSegment.attr('id');
+		var destinationTop = $(destination).offset().top;
+		if($(current).length){
+			if($(segment).offset().top > $(current).offset().top) {
+				if(!current.is($(segment).prev())) {
+					destinationTop = destinationTop - $('section.editor').height() + $(segment).height() - spread;
+				} else {
+					destinationTop = destinationTop - spread;
+				}
+			} else {
+				destinationTop = destinationTop - spread;
+			}		
+		} else {
+			destinationTop = destinationTop - spread;
+		}	
+		$("html:not(:animated),body:not(:animated)").animate({ scrollTop: destinationTop-20}, 500 );
+	}	        
 
 }
 
 $(document).ready(function(){
     UI.init();
-    var a=this;
-    
-     this.sections=$("section")
-             .map(function() { return this.id; }) //Project Ids
-             .get(); //ToArray
-             
-    this.fu=window.setInterval(function(){
-    		if (a.sections.length==0){
-    			clearInterval(a.fu); 
-    			return false;
-    		}
-    		initTargetHeight(a.sections)},20);
 });
 
-function initTargetHeight (sections) {
-   			section_id=sections.pop();
-   			
-   			console.log ("sec id is " + section_id);
-			var id_segment = section_id.split('-')[1];
-	
-			var source_li_id="segment-"+id_segment+"-source";
-			var target_li_id="segment-"+id_segment+"-target";
 
-			var source_height=$("#"+source_li_id).height();
-			$("#"+target_li_id).find("textarea").height(source_height);
+$(window).resize(function(){
+	UI.initTargetHeight();
+});
 
-		
-	}
-
-
-
-
-
-
-
-
-
-	
-jQuery.fn.scrollMinimal = function(smooth) {
-    var cTop = this.offset().top;
-    var cHeight = this.outerHeight(true);
-    var windowTop = $(window).scrollTop();
-    var visibleHeight = $(window).height();
-
-    if (cTop < windowTop) {	
-
-        if (smooth) {
-            $('body').animate({
-                'scrollTop': cTop
-            }, 'slow', 'swing');
-        } else {
-            $(window).scrollTop(cTop);
-        }
-    } else if (cTop + cHeight > windowTop + visibleHeight) {
-        if (smooth) {
-            $('body').animate({
-                'scrollTop': cTop - visibleHeight + cHeight
-            }, 'slow', 'swing');
-        } else {
-            $(window).scrollTop(cTop - visibleHeight + cHeight);
-        }
-    }
-};
-/*  
-*/

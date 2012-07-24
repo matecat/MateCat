@@ -13,7 +13,7 @@ function getSegments($pid, $start = 0) {
       limit $start,100 ";
      */
 
-    $query = "select j.id as jid, j.id_project as pid, p.id_customer as cid, j.id_translator as tid,  
+    $query = "select j.id as jid, j.id_project as pid,j.source, p.id_customer as cid, j.id_translator as tid,  
                 p.name as pname, p.create_date , fj.id_file, fj.id_segment_start, fj.id_segment_end, 
                 f.filename, f.mime_type, s.id as sid, s.segment, s.raw_word_count,
                 st.translation, st.status

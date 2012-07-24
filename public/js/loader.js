@@ -14,10 +14,8 @@ Loader = {
 		'jquery-ui-1.8.20.custom.min',
 		'jquery.tabify',
 		'jquery.hotkeys',
-//		'smoothscroll',
-		'jquery.autogrow-textarea',
 		'jquery.atooltip',
-                'jquery.caret'
+        'jquery.caret'
 	),
 	
 	include: function(f,p,b) {

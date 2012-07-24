@@ -1,5 +1,6 @@
 <!doctype html>
 <html dir="ltr" lang="it-IT">
+<!-- MateCAT Server : Release 0.1b - 2012-07-19 -->
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title>Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="pid">Job_ID</span> </title>
@@ -93,7 +94,7 @@
                     </ul>
                 </div>
                 <!-- END edit/view notifiche globali -->
-<div class="release">Release <span id="rel_version">0.1b</span> <span id="rel_date">2012-07-15</span></div>
+<!--div class="release">Release <span id="rel_version">0.1b</span> <span id="rel_date">2012-07-15</span></div-->
 
 
 
@@ -121,7 +122,7 @@
                             </li>
                         </ul>
                     </div>  <a href="#" class="joblink">Jobs List</a> > 
-				<span tal:replace="pname">Hotel Shangrilà</span> (<span tal:replace="pid">112323</span> - FR)
+				<span tal:replace="pname">Hotel Shangrilà</span> (<span tal:replace="pid">112323</span> - <span tal:replace="source">112323</span>)
                 </div>
                 <div class="cl"></div>
             </div>   <!-- .wrapper -->
@@ -185,12 +186,13 @@
                         <li>Translated: <strong>--%</strong></li>
                         <li style="padding-right:0;">Approved: <strong>--%</strong></li>
 
+
                     </ul>
                 </div>      
                 <tal:block tal:define="segment php:array()" tal:repeat="segment file_data/segments" >
                     <section tal:attributes="id string:segment-${segment/sid}" id="001" >
-                   
-                                <a tabindex="-1" class="number"  href="#1" tal:attributes ="href string:#${segment/sid}" tal:content="segment/sid | default"></a>
+        
+<a tabindex="-1" class="number"  href="#1" tal:attributes ="href string:#${segment/sid}" tal:content="segment/sid | default"></a>
                      
                   <div class="body" tal:attributes="class string:body ${segment/css_loaded | nothing}" >
 
@@ -298,7 +300,7 @@
 
                             </div>
 <!--tr-matches-->
-                            <div class="tab sub-editor" tal:attributes="id string:segment-${segment/sid}-matches" id="001-tab1">
+                            <div class="tab sub-editor matches" tal:attributes="id string:segment-${segment/sid}-matches" id="001-tab1">
                                 <div class="overflow">     
                                     <tal:block tal:condition="exists:segment/matches" >
                                         <tal:block tal:define="suggestion php:array()" tal:repeat="suggestion segment/matches">
@@ -419,8 +421,9 @@
                     <li>Expected completion: <strong>-- Hours</strong></li>
                 </ul>
                 <div class="stats">
+                 <div class="header-stats">Project stats (<a href="http://matecat.translated.home/?action=projectStatistics" target="_blank">More...</a>) <a href="#" class="x-stats"></a></div>
                     <ul class="h-stats">
-                        <div class="header-stats">Project stats (<a href="http://matecat.translated.home/?action=projectStatistics" target="_blank">More...</a>) <a href="#" class="x-stats"></a></div>
+                       
 
                         <li class="first">&nbsp;</li>
                         <li>Initial</li>

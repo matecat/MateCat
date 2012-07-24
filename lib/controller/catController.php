@@ -15,6 +15,7 @@ class catController extends viewcontroller {
     private $data = array();
     private $cid = "";
     private $pid = "";
+    private $source="";
     private $pname = "";
     private $create_date = "";
     private $filetype_handler = null;
@@ -83,10 +84,15 @@ class catController extends viewcontroller {
                 $this->create_date = $seg['create_date'];
             }
 
+	     if (empty($this->source)) {
+		$s=explode("-", $seg['source']);
+		$source=strtoupper($s[0]);
+                $this->source = $source;
+            }
+
             $id_file = $seg['id_file'];
-            if (!isset($this->data["$id_file"])) {
-                
-                $this->data["$id_file"]['jid'] = $seg['jid'];
+            if (!isset($this->data["$id_file"])) {                
+                $this->data["$id_file"]['jid'] = $seg['jid'];		
                 $this->data["$id_file"]["filename"] = $seg['filename'];
                 $this->data["$id_file"]["mime_type"] = $seg['mime_type'];
                 $this->data["$id_file"]['id_segment_start'] = $seg['id_segment_start'];
@@ -99,6 +105,7 @@ class catController extends viewcontroller {
 
 
             unset($seg['id_file']);
+	    unset($seg['source']);
             unset($seg['mime_type']);
             unset($seg['filename']);
             unset($seg['jid']);
@@ -139,9 +146,9 @@ class catController extends viewcontroller {
 
             $this->data["$id_file"]['segments'][] = $seg;
         }
-        //echo "<pre>";
-        //print_r($this->data);
-        //exit;
+      //  echo "<pre>";
+       // print_r($this->data);
+      //  exit;
     }
 
     public function setTemplateVars() {
@@ -150,6 +157,7 @@ class catController extends viewcontroller {
         $this->template->create_date = $this->create_date;
         $this->template->pname = $this->pname;
 	$this->template->pid=$this->pid;
+	$this->template->source=$this->source;
 
 
 //        echo "<pre>";
