@@ -13,7 +13,7 @@ UI = {
 		    UI.findEmptySegment();
 		})
         
-        $("body, li.target textarea").bind('keydown','Ctrl+return', function(e){ 
+        $("body, li.target textarea").bind('keydown','Ctrl+return', function(e){
             e.preventDefault();
             $('.editor .Translated').click();
         }).bind('keydown','Ctrl+down', function(e){ 
@@ -43,6 +43,17 @@ UI = {
             }
         });	
 
+        $("li.target textarea").mousedown(function(e) {
+            e.preventDefault();
+            return false;
+/*
+            if($(e.target).parent("a.m-notification").length==0) {
+                $(".m-notification").removeClass("menu-open");
+                $("fieldset#signin_menu").hide();
+            }
+*/
+        });
+        
         $(".search-icon, .search-on").click(function(e) {          
             e.preventDefault();
             $("div#search").toggle();
@@ -538,17 +549,17 @@ UI = {
 		};
 		var destination = "#"+previousSegment.attr('id');
 		var destinationTop = $(destination).offset().top;
-		if($(current).length){
-			if($(segment).offset().top > $(current).offset().top) {
-				if(!current.is($(segment).prev())) {
+		if($(current).length){console.log('a');
+			if($(segment).offset().top > $(current).offset().top) {console.log('b');
+				if(!current.is($(segment).prev())) {console.log('c');
 					destinationTop = destinationTop - $('section.editor').height() + $(segment).height() - spread;
-				} else {
+				} else {console.log('d');
 					destinationTop = destinationTop - spread;
 				}
-			} else {
+			} else {console.log('e');
 				destinationTop = destinationTop - spread;
 			}		
-		} else {
+		} else {console.log('f');
 			destinationTop = destinationTop - spread;
 		}	
 		$("html:not(:animated),body:not(:animated)").animate({ scrollTop: destinationTop-20}, 500 );
