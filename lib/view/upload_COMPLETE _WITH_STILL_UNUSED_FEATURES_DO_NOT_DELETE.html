@@ -1,0 +1,1335 @@
+<!doctype html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+        <title>Translate - Project_Name - Job_ID </title>
+        <link rel="shortcut icon" href="/public/img/favicon.ico" />
+        <link href="/public/css/style.css" rel="stylesheet" type="text/css" />
+        <link href="/public/css/upload.css" rel="stylesheet" type="text/css" />
+        <script src="/public/js/lib/jquery.js" type="text/javascript"></script>
+        <script type="text/javascript" language="javascript" src="/public/js/new-project.js"></script>     
+
+
+    </head>
+
+    <body>
+        <header>
+            <div class="wrapper">   
+                <a href="#"><img src="/public/img/logo.png" class="logo" /></a>
+            </div>
+        </header>
+        <div class="wrapper-upload">
+            <h1>Translate an XLIFF file</h1>
+            <div class="translate-box">
+                <h2>Project name</h2>
+                <input name="" type="text" class="upload-input"/>
+            </div>
+
+            <div class="translate-box">
+                <h2>From:</h2>
+                <select name="source-lang">
+                    <option value="en-GB">English</option>
+                    <option value="it-IT">Italian</option>
+                    <option value="fr-FR">French</option>
+                    <option value="de-DE">German</option>
+                </select>
+            </div>
+            
+            <div class="translate-box">
+                <h2>To:</h2>
+                <select name="target-lang">
+                    <option value="en-GB">English</option>
+                    <option value="it-IT">Italian</option>
+                    <option value="fr-FR">French</option>
+                    <option value="de-DE">German</option>
+                </select>
+                <br />
+                <!--<a href="#" id="multiple-link">Multiple languages?</a>-->
+            </div>
+
+            <div class="cl"></div>
+            <table width="100%" border="0" cellpadding="0" cellspacing="0" class="upload-files drag" role="presentation" >
+                <tr>
+                    <td colspan="6">
+                        <br />
+                        <strong>Drag and drop</strong> your XLIFF here. <br />
+                        <br />
+                        or<br />
+                        <br />
+                        <input name="" type="file" />
+                        <br />
+                        <br /></td>
+                </tr>
+            </table>
+            <input name="" type="button" class="uploadbtn disabled" value="Start Translating" disabled="disabled" />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+            <br />
+
+
+
+            <table width="100%" border="0" cellpadding="0" cellspacing="0" class="upload-files" role="presentation">
+                <tr class="template-download fade in">
+                    <th colspan="6" >Your uploaded files:</th>
+                </tr>
+                <tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery">
+
+                    <tr class="template-download fade in">
+                        <td width="6%" class="preview">
+                            <a href="http://jquery-file-upload.appspot.com/AMIfv97y1eROaMwNtxJEzw64rxC9g8NijlD228NSoIvnzm6YtsIarVnYaL4hFJHVy8BwQtPSr4AvYNdffQ0btscRFOJNaNVl2XyR5tpELJGGKQX76gCy1GE_7rjkhciCBnvEnse8X7du8np7FoLZn8s8iEcEaCXardMGXEYsFZyJANJsQryHGaM/symbol.png" title="symbol.png" rel="gallery" download="symbol.png"><img src="../../public/img/img1.jpg" /></a>            </td>
+                        <td width="36%" class="name">
+                            <a href="http://jquery-file-upload.appspot.com/AMIfv97y1eROaMwNtxJEzw64rxC9g8NijlD228NSoIvnzm6YtsIarVnYaL4hFJHVy8BwQtPSr4AvYNdffQ0btscRFOJNaNVl2XyR5tpELJGGKQX76gCy1GE_7rjkhciCBnvEnse8X7du8np7FoLZn8s8iEcEaCXardMGXEYsFZyJANJsQryHGaM/symbol.png" title="symbol.png" rel="gallery" download="symbol.png">symbol.png</a>            </td>
+                        <td width="12%" class="size"><span>41.59 KB</span></td>
+                        <td colspan="2"></td>
+
+                        <td width="14%" class="delete">
+                            <button class="btn btn-danger" data-type="DELETE" data-url="http://jquery-file-upload.appspot.com/AMIfv97y1eROaMwNtxJEzw64rxC9g8NijlD228NSoIvnzm6YtsIarVnYaL4hFJHVy8BwQtPSr4AvYNdffQ0btscRFOJNaNVl2XyR5tpELJGGKQX76gCy1GE_7rjkhciCBnvEnse8X7du8np7FoLZn8s8iEcEaCXardMGXEYsFZyJANJsQryHGaM/symbol.png">
+                                <i class="icon-trash icon-white"></i>
+                                <span>Delete</span>            </button>
+                            <input type="checkbox" name="delete" value="1"></input>        </td>
+                    </tr><tr class="template-upload fade in">
+                        <td class="preview"><span class="fade"></span></td>
+                        <td class="name"><span>email.txt</span></td>
+                        <td class="size"><span>0.21 KB</span></td>
+
+                        <td class="error" colspan="2"><span class="label label-important">Error</span> Filetype not allowed</td>
+
+                        <td class="cancel">
+                            <button class="btn btn-warning">
+                                <i class="icon-ban-circle icon-white"></i>
+                                <span>Cancel</span>            </button>        </td>
+                    </tr><tr class="template-upload fade in">
+                        <td class="preview"><span class="fade in"><canvas width="80" height="80"></canvas></span></td>
+                        <td class="name"><span>meetinglife versions.png</span></td>
+                        <td class="size"><span>39.66 KB</span></td>
+
+                        <td width="3%">
+                            <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="bar" style="width:0%;"></div></div>            </td>
+                        <td width="29%" class="start">
+                            <button class="btn btn-primary">
+                                <i class="icon-upload icon-white"></i>
+                                <span>Start</span>                </button>            </td>
+
+                        <td class="cancel">
+                            <button class="btn btn-warning">
+                                <i class="icon-ban-circle icon-white"></i>
+                                <span>Cancel</span>            </button>        </td>
+                    </tr></tbody></table> 
+            <input name="" type="button" class="uploadbtn" value="Start Translating"/>
+            <div class="cl"></div>
+            <div class="step2">
+
+
+
+
+
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+                <br />
+
+
+
+                <h2>Upload almost complete!</h2>
+                <!-- <h3>Start <a href="#">working in the meanwhile</a> or <a href="#">send to you a reminder report</a>.</h3>-->
+
+
+                <table border="0" cellspacing="0" cellpadding="0" class="upload-analysis">
+                    <tr>
+                        <th width="129" >Target Language</th>
+                        <th width="759"> URL</th>
+                    </tr>
+                    <tr>
+                        <td>FR</td>
+                        <td><a href="#">http://demo.matecat.com/translate/website-translation/fr-it/8856487-didjIJ89SJIOJNSoowjS </a></td>
+                    </tr>
+                    <tr>
+                        <td>DE</td>
+                        <td><a href="#">http://demo.matecat.com/translate/website-translation/fr-it/8856487-didjIJ89SJIOJNSoowjS </a></td>
+                    </tr>
+                    <tr>
+                        <td>IT</td>
+                        <td><a href="#">http://demo.matecat.com/translate/website-translation/fr-it/8856487-didjIJ89SJIOJNSoowjS </a></td>
+                    </tr>
+                </table>
+
+
+
+            </div>
+            <div class="cl"></div>
+        </div>
+
+
+
+
+
+
+        <!-- MUST BE HIDDEN -->		
+
+        <div class="popup-languages" style="display:none">
+            <a href="#" class="close"></a>
+            <ul class="sublist">
+
+
+
+                <li>
+
+                    <a id="top5activator" title="Le lingue più scelte dagli utenti">Top 5</a>
+
+                </li>
+
+                <li>
+
+                    <a id="top10activator" title="Le lingue più scelte dagli utenti">Top 10</a>
+
+                </li>
+
+                <li>
+
+                    <a id="top20activator" title="Le lingue più scelte dagli utenti">Top 20</a>
+
+                </li>
+
+                <li>
+
+                    <a id="noneActivator">Nessuna</a>
+
+                </li>
+
+            </ul>
+
+
+            <h1 class="titlewindow">
+
+                Scegli le lingue di destinazione 
+
+                <span>
+
+                    (<span id="numTargetsSelected">0</span>)		
+
+                </span>	
+
+            </h1>
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <ul class='listlang'>					<li class="  " id="li-Afrikaans">					
+
+                    <input type="checkbox" value="Afrikaans" name="0" id="Afrikaans"/>
+
+                    <label for="Afrikaans" onclick="return false" class="">Afrikaans (boeri)</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Albanian">					
+
+                    <input type="checkbox" value="Albanian" name="0" id="Albanian"/>
+
+                    <label for="Albanian" onclick="return false" class="">Albanese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20 t10 " id="li-Arabic">					
+
+                    <input type="checkbox" value="Arabic" name="1" id="Arabic"/>
+
+                    <label for="Arabic" onclick="return false" class="top20">Arabo</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Armenian">					
+
+                    <input type="checkbox" value="Armenian" name="0" id="Armenian"/>
+
+                    <label for="Armenian" onclick="return false" class="">Armeno</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Basque">					
+
+                    <input type="checkbox" value="Basque" name="0" id="Basque"/>
+
+                    <label for="Basque" onclick="return false" class="">Basco (Euskera)</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Bengali">					
+
+                    <input type="checkbox" value="Bengali" name="0" id="Bengali"/>
+
+                    <label for="Bengali" onclick="return false" class="">Bengali</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Bielarus">					
+
+                    <input type="checkbox" value="Bielarus" name="0" id="Bielarus"/>
+
+                    <label for="Bielarus" onclick="return false" class="">Bielorusso</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Burmese">					
+
+                    <input type="checkbox" value="Burmese" name="0" id="Burmese"/>
+
+                    <label for="Burmese" onclick="return false" class="">Birmano</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Bosnian">					
+
+                    <input type="checkbox" value="Bosnian" name="0" id="Bosnian"/>
+
+                    <label for="Bosnian" onclick="return false" class="">Bosniaco</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Breton">					
+
+                    <input type="checkbox" value="Breton" name="0" id="Breton"/>
+
+                    <label for="Breton" onclick="return false" class="">Bretone</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Bulgarian">					
+
+                    <input type="checkbox" value="Bulgarian" name="0" id="Bulgarian"/>
+
+                    <label for="Bulgarian" onclick="return false" class="">Bulgaro</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Catalan">					
+
+                    <input type="checkbox" value="Catalan" name="0" id="Catalan"/>
+
+                    <label for="Catalan" onclick="return false" class="">Catalano</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Czech">					
+
+                    <input type="checkbox" value="Czech" name="0" id="Czech"/>
+
+                    <label for="Czech" onclick="return false" class="">Ceco</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20 t10 " id="li-Chinese">					
+
+                    <input type="checkbox" value="Chinese" name="1" id="Chinese"/>
+
+                    <label for="Chinese" onclick="return false" class="top20">Cinese semplificato</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20  " id="li-Chinese Traditional">					
+
+                    <input type="checkbox" value="Chinese Traditional" name="1" id="Chinese Traditional"/>
+
+                    <label for="Chinese Traditional" onclick="return false" class="top20">Cinese tradizionale</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Korean">					
+
+                    <input type="checkbox" value="Korean" name="0" id="Korean"/>
+
+                    <label for="Korean" onclick="return false" class="">Coreano</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Croatian">					
+
+                    <input type="checkbox" value="Croatian" name="0" id="Croatian"/>
+
+                    <label for="Croatian" onclick="return false" class="">Croato</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Kurdish">					
+
+                    <input type="checkbox" value="Kurdish" name="0" id="Kurdish"/>
+
+                    <label for="Kurdish" onclick="return false" class="">Curdo kurmanji (latino)</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Kurdish Sorani">					
+
+                    <input type="checkbox" value="Kurdish Sorani" name="0" id="Kurdish Sorani"/>
+
+                    <label for="Kurdish Sorani" onclick="return false" class="">Curdo sorani (arabo)</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20  " id="li-Danish">					
+
+                    <input type="checkbox" value="Danish" name="1" id="Danish"/>
+
+                    <label for="Danish" onclick="return false" class="top20">Danese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Hebrew">					
+
+                    <input type="checkbox" value="Hebrew" name="0" id="Hebrew"/>
+
+                    <label for="Hebrew" onclick="return false" class="">Ebraico</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Esperanto">					
+
+                    <input type="checkbox" value="Esperanto" name="0" id="Esperanto"/>
+
+                    <label for="Esperanto" onclick="return false" class="">Esperanto</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Estonian">					
+
+                    <input type="checkbox" value="Estonian" name="0" id="Estonian"/>
+
+                    <label for="Estonian" onclick="return false" class="">Estone</label>
+
+                </li>	
+
+            </ul>								
+
+
+
+            <ul class='listlang'>					<li class="  " id="li-Faroese">					
+
+                    <input type="checkbox" value="Faroese" name="0" id="Faroese"/>
+
+                    <label for="Faroese" onclick="return false" class="">Faroese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Persian">					
+
+                    <input type="checkbox" value="Persian" name="0" id="Persian"/>
+
+                    <label for="Persian" onclick="return false" class="">Farsi</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20  " id="li-Finnish">					
+
+                    <input type="checkbox" value="Finnish" name="1" id="Finnish"/>
+
+                    <label for="Finnish" onclick="return false" class="top20">Finlandese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20 t10 t5" id="li-French">					
+
+                    <input type="checkbox" value="French" name="1" id="French"/>
+
+                    <label for="French" onclick="return false" class="top20">Francese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Quebecois">					
+
+                    <input type="checkbox" value="Quebecois" name="0" id="Quebecois"/>
+
+                    <label for="Quebecois" onclick="return false" class="">Francese canadese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Galician">					
+
+                    <input type="checkbox" value="Galician" name="0" id="Galician"/>
+
+                    <label for="Galician" onclick="return false" class="">Galiziano</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Welsh">					
+
+                    <input type="checkbox" value="Welsh" name="0" id="Welsh"/>
+
+                    <label for="Welsh" onclick="return false" class="">Gallese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Georgian">					
+
+                    <input type="checkbox" value="Georgian" name="0" id="Georgian"/>
+
+                    <label for="Georgian" onclick="return false" class="">Georgiano</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Jamaican_Creole_English">					
+
+                    <input type="checkbox" value="Jamaican_Creole_English" name="0" id="Jamaican_Creole_English"/>
+
+                    <label for="Jamaican_Creole_English" onclick="return false" class="">Giamaicano Creolo Inglese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20 t10 " id="li-Japanese">					
+
+                    <input type="checkbox" value="Japanese" name="1" id="Japanese"/>
+
+                    <label for="Japanese" onclick="return false" class="top20">Giapponese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Greek">					
+
+                    <input type="checkbox" value="Greek" name="0" id="Greek"/>
+
+                    <label for="Greek" onclick="return false" class="">Greco</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Classical_Greek">					
+
+                    <input type="checkbox" value="Classical_Greek" name="0" id="Classical_Greek"/>
+
+                    <label for="Classical_Greek" onclick="return false" class="">Greco classico</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Haitian_Creole_French">					
+
+                    <input type="checkbox" value="Haitian_Creole_French" name="0" id="Haitian_Creole_French"/>
+
+                    <label for="Haitian_Creole_French" onclick="return false" class="">Haitiano Creolo Francese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Hawaiian">					
+
+                    <input type="checkbox" value="Hawaiian" name="0" id="Hawaiian"/>
+
+                    <label for="Hawaiian" onclick="return false" class="">Hawaiano</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Hindi">					
+
+                    <input type="checkbox" value="Hindi" name="0" id="Hindi"/>
+
+                    <label for="Hindi" onclick="return false" class="">Hindi (indiano)</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Indonesian">					
+
+                    <input type="checkbox" value="Indonesian" name="0" id="Indonesian"/>
+
+                    <label for="Indonesian" onclick="return false" class="">Indonesiano</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20  " id="li-English US">					
+
+                    <input type="checkbox" value="English US" name="1" id="English US"/>
+
+                    <label for="English US" onclick="return false" class="top20">Inglese americano</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20 t10 t5" id="li-English">					
+
+                    <input type="checkbox" value="English" name="1" id="English"/>
+
+                    <label for="English" onclick="return false" class="top20">Inglese britannico</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Irish_Gaelic">					
+
+                    <input type="checkbox" value="Irish_Gaelic" name="0" id="Irish_Gaelic"/>
+
+                    <label for="Irish_Gaelic" onclick="return false" class="">Irlandese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Icelandic">					
+
+                    <input type="checkbox" value="Icelandic" name="0" id="Icelandic"/>
+
+                    <label for="Icelandic" onclick="return false" class="">Islandese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20 t10 t5" id="li-Italian">					
+
+                    <input type="checkbox" value="Italian" name="1" id="Italian"/>
+
+                    <label for="Italian" onclick="return false" class="top20">Italiano</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Javanese">					
+
+                    <input type="checkbox" value="Javanese" name="0" id="Javanese"/>
+
+                    <label for="Javanese" onclick="return false" class="">Javanese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Kazakh">					
+
+                    <input type="checkbox" value="Kazakh" name="0" id="Kazakh"/>
+
+                    <label for="Kazakh" onclick="return false" class="">Kazaco</label>
+
+                </li>	
+
+            </ul>								
+
+
+
+            <ul class='listlang'>					<li class="  " id="li-Khmer">					
+
+                    <input type="checkbox" value="Khmer" name="0" id="Khmer"/>
+
+                    <label for="Khmer" onclick="return false" class="">Khmer</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Kirundi">					
+
+                    <input type="checkbox" value="Kirundi" name="0" id="Kirundi"/>
+
+                    <label for="Kirundi" onclick="return false" class="">Kirundi</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Latin">					
+
+                    <input type="checkbox" value="Latin" name="0" id="Latin"/>
+
+                    <label for="Latin" onclick="return false" class="">Latino</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Latvian">					
+
+                    <input type="checkbox" value="Latvian" name="0" id="Latvian"/>
+
+                    <label for="Latvian" onclick="return false" class="">Lettone</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Lithuanian">					
+
+                    <input type="checkbox" value="Lithuanian" name="0" id="Lithuanian"/>
+
+                    <label for="Lithuanian" onclick="return false" class="">Lituano</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Macedonian">					
+
+                    <input type="checkbox" value="Macedonian" name="0" id="Macedonian"/>
+
+                    <label for="Macedonian" onclick="return false" class="">Macedone</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Malay">					
+
+                    <input type="checkbox" value="Malay" name="0" id="Malay"/>
+
+                    <label for="Malay" onclick="return false" class="">Malese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Maltese">					
+
+                    <input type="checkbox" value="Maltese" name="0" id="Maltese"/>
+
+                    <label for="Maltese" onclick="return false" class="">Maltese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Maori">					
+
+                    <input type="checkbox" value="Maori" name="0" id="Maori"/>
+
+                    <label for="Maori" onclick="return false" class="">Maori</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Mongolian">					
+
+                    <input type="checkbox" value="Mongolian" name="0" id="Mongolian"/>
+
+                    <label for="Mongolian" onclick="return false" class="">Mongolo</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20 t10 " id="li-Dutch">					
+
+                    <input type="checkbox" value="Dutch" name="1" id="Dutch"/>
+
+                    <label for="Dutch" onclick="return false" class="top20">Neerlandese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Flemish">					
+
+                    <input type="checkbox" value="Flemish" name="0" id="Flemish"/>
+
+                    <label for="Flemish" onclick="return false" class="">Neerlandese (Belgio)</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Nepali">					
+
+                    <input type="checkbox" value="Nepali" name="0" id="Nepali"/>
+
+                    <label for="Nepali" onclick="return false" class="">Nepalese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20  " id="li-Norwegian">					
+
+                    <input type="checkbox" value="Norwegian" name="1" id="Norwegian"/>
+
+                    <label for="Norwegian" onclick="return false" class="top20">Norvegese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Pakistani">					
+
+                    <input type="checkbox" value="Pakistani" name="0" id="Pakistani"/>
+
+                    <label for="Pakistani" onclick="return false" class="">Pachistano (urdu)</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Pashto">					
+
+                    <input type="checkbox" value="Pashto" name="0" id="Pashto"/>
+
+                    <label for="Pashto" onclick="return false" class="">Pashtu</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20  " id="li-Polish">					
+
+                    <input type="checkbox" value="Polish" name="1" id="Polish"/>
+
+                    <label for="Polish" onclick="return false" class="top20">Polacco</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20  " id="li-Portuguese Brazil">					
+
+                    <input type="checkbox" value="Portuguese Brazil" name="1" id="Portuguese Brazil"/>
+
+                    <label for="Portuguese Brazil" onclick="return false" class="top20">Portoghese Brasile</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20 t10 " id="li-Portuguese">					
+
+                    <input type="checkbox" value="Portuguese" name="1" id="Portuguese"/>
+
+                    <label for="Portuguese" onclick="return false" class="top20">Portoghese Portogallo</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Panjabi">					
+
+                    <input type="checkbox" value="Panjabi" name="0" id="Panjabi"/>
+
+                    <label for="Panjabi" onclick="return false" class="">Punjabi</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Quechua">					
+
+                    <input type="checkbox" value="Quechua" name="0" id="Quechua"/>
+
+                    <label for="Quechua" onclick="return false" class="">Quechua</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Romanian">					
+
+                    <input type="checkbox" value="Romanian" name="0" id="Romanian"/>
+
+                    <label for="Romanian" onclick="return false" class="">Rumeno</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20  " id="li-Russian">					
+
+                    <input type="checkbox" value="Russian" name="1" id="Russian"/>
+
+                    <label for="Russian" onclick="return false" class="top20">Russo</label>
+
+                </li>	
+
+            </ul>								
+
+
+
+            <ul class='listlang'>					<li class="  " id="li-Scots_Gaelic">					
+
+                    <input type="checkbox" value="Scots_Gaelic" name="0" id="Scots_Gaelic"/>
+
+                    <label for="Scots_Gaelic" onclick="return false" class="">Scozzese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Serbian">					
+
+                    <input type="checkbox" value="Serbian" name="0" id="Serbian"/>
+
+                    <label for="Serbian" onclick="return false" class="">Serbo</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Sinhala">					
+
+                    <input type="checkbox" value="Sinhala" name="0" id="Sinhala"/>
+
+                    <label for="Sinhala" onclick="return false" class="">Singalese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Slovak">					
+
+                    <input type="checkbox" value="Slovak" name="0" id="Slovak"/>
+
+                    <label for="Slovak" onclick="return false" class="">Slovacco</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Slovenian">					
+
+                    <input type="checkbox" value="Slovenian" name="0" id="Slovenian"/>
+
+                    <label for="Slovenian" onclick="return false" class="">Sloveno</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Somali">					
+
+                    <input type="checkbox" value="Somali" name="0" id="Somali"/>
+
+                    <label for="Somali" onclick="return false" class="">Somalo</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20  " id="li-Spanish Latin America">					
+
+                    <input type="checkbox" value="Spanish Latin America" name="1" id="Spanish Latin America"/>
+
+                    <label for="Spanish Latin America" onclick="return false" class="top20">Spagnolo America Latina</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20 t10 t5" id="li-Spanish">					
+
+                    <input type="checkbox" value="Spanish" checked="checked" name="1" id="Spanish"/>
+
+                    <label for="Spanish" onclick="return false" class="top20">Spagnolo Spagna</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20  " id="li-Swedish">					
+
+                    <input type="checkbox" value="Swedish" name="1" id="Swedish"/>
+
+                    <label for="Swedish" onclick="return false" class="top20">Svedese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Swahili">					
+
+                    <input type="checkbox" value="Swahili" name="0" id="Swahili"/>
+
+                    <label for="Swahili" onclick="return false" class="">Swahili</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Tagalog">					
+
+                    <input type="checkbox" value="Tagalog" name="0" id="Tagalog"/>
+
+                    <label for="Tagalog" onclick="return false" class="">Tagalog</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Thai">					
+
+                    <input type="checkbox" value="Thai" name="0" id="Thai"/>
+
+                    <label for="Thai" onclick="return false" class="">Tailandese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Tajik">					
+
+                    <input type="checkbox" value="Tajik" name="0" id="Tajik"/>
+
+                    <label for="Tajik" onclick="return false" class="">Tajik</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Tamil">					
+
+                    <input type="checkbox" value="Tamil" name="0" id="Tamil"/>
+
+                    <label for="Tamil" onclick="return false" class="">Tamil</label>
+
+                </li>	
+
+
+
+
+
+                <li class="t20 t10 t5" id="li-German">					
+
+                    <input type="checkbox" value="German" name="1" id="German"/>
+
+                    <label for="German" onclick="return false" class="top20">Tedesco</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Swiss_German">					
+
+                    <input type="checkbox" value="Swiss_German" name="0" id="Swiss_German"/>
+
+                    <label for="Swiss_German" onclick="return false" class="">Tedesco Svizzero</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Tibetan">					
+
+                    <input type="checkbox" value="Tibetan" name="0" id="Tibetan"/>
+
+                    <label for="Tibetan" onclick="return false" class="">Tibetano</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Tigrinya">					
+
+                    <input type="checkbox" value="Tigrinya" name="0" id="Tigrinya"/>
+
+                    <label for="Tigrinya" onclick="return false" class="">Tigrinya</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Turkish">					
+
+                    <input type="checkbox" value="Turkish" name="0" id="Turkish"/>
+
+                    <label for="Turkish" onclick="return false" class="">Turco</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Ukrainian">					
+
+                    <input type="checkbox" value="Ukrainian" name="0" id="Ukrainian"/>
+
+                    <label for="Ukrainian" onclick="return false" class="">Ucraino</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Hungarian">					
+
+                    <input type="checkbox" value="Hungarian" name="0" id="Hungarian"/>
+
+                    <label for="Hungarian" onclick="return false" class="">Ungherese</label>
+
+                </li>	
+
+
+
+
+
+                <li class="  " id="li-Vietnamese">					
+
+                    <input type="checkbox" value="Vietnamese" name="0" id="Vietnamese"/>
+
+                    <label for="Vietnamese" onclick="return false" class="">Vietnamita</label>
+
+                </li>	
+
+
+
+            </ul>
+
+
+
+        </div>
+
+        <div class="grayed"></div>
+
+
+
+
+    </body>
+</html>
