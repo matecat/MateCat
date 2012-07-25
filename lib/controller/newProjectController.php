@@ -11,10 +11,9 @@
  * @author antonio
  */
 class newProjectController extends viewcontroller {
-    //put your code here
-    private $id_file="";
+    //put your code here    
     public function __construct() {
-	echo ".........\n";
+	
         parent::__construct();
         parent::makeTemplate("upload.html");
         /*$this->id_file=$_GET['id_file'];
@@ -24,12 +23,7 @@ class newProjectController extends viewcontroller {
         $this->id_file="cc"; // ONLTY FOR TESTING PURPOSE
     }
     
-    public function doAction(){
-        if (empty($this->id_file)){
-            $this->postback("File not specified");
-        }
-
-        
+    public function doAction(){       
     }
     
     public function setTemplateVars() {
