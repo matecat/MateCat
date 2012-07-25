@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 define('DEBUG', 1);
 
 if (!defined('LOG_REPOSITORY')) {
-    define('LOG_REPOSITORY', 'log_archive');
+    define('LOG_REPOSITORY', 'storage/log_archive');
 }
 
 if (!defined('LOG_FILENAME')) {
