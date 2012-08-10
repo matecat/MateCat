@@ -13,7 +13,7 @@ function getSourceTargetFromJob($id_job) {
     
 }
 
-function getSegments($pid, $start = 0) {
+function getSegments($jid,$password, $start = 0) {
     /* $query = "select s.id,id_file, fj.id_job,segment, mimetype ,filename
       from segments s
       inner join files f on f.id=s.id_file
@@ -24,7 +24,7 @@ function getSegments($pid, $start = 0) {
       limit $start,100 ";
      */
 
-    $query = "select j.id as jid, j.id_project as pid,j.source,j.target, p.id_customer as cid, j.id_translator as tid,  
+    $query = "select j.id as jid, j.id_project as pid,j.source,j.target, j.last_opened_segment, p.id_customer as cid, j.id_translator as tid,  
                 p.name as pname, p.create_date , fj.id_file, fj.id_segment_start, fj.id_segment_end, 
                 f.filename, f.mime_type, s.id as sid, s.segment, s.raw_word_count,
                 st.translation, st.status
@@ -35,7 +35,7 @@ function getSegments($pid, $start = 0) {
                 inner join files f on f.id=fj.id_file
                 inner join segments s on s.id_file=f.id
                 left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
-                where p.id=$pid 
+                where j.id=$jid and j.password='$password'
                 limit $start,1000
                 
                 
@@ -46,10 +46,13 @@ function getSegments($pid, $start = 0) {
 
     $db = Database::obtain();
     $results = $db->fetch_array($query);
+
     // // log::doLog($results);
-//    echo "<pre>";
-//    echo count($results);
-//    print_r ($results);exit;
+    //echo "<pre>";
+    //echo "$query\n";
+    //echo count($results);
+    //print_r ($results);exit;
+
     return $results;
 }
 
@@ -411,4 +414,56 @@ function getCustomerExists($id_customer) {
     $db = Database::obtain();
     $results = $db->query_first($query);
     return $results;
+}
+
+function insertProject($id_customer, $project_name) {
+    $data = array();
+    $data['id_customer'] = $id_customer;
+    $data['name'] = $project_name;
+    $data['create_date'] = date("Y-m-d H:i:s");
+	$query = "SELECT LAST_INSERT_ID() FROM projects";
+	
+    $db = Database::obtain();
+    $db->insert('projects', $data);
+    $results = $db->query_first($query);
+    return $results['LAST_INSERT_ID()'];
+}
+
+function insertJob($password, $id_project, $id_translator, $source_language, $target_language) {
+    $data = array();
+    $data['password'] = $password;
+    $data['id_project'] = $id_project;
+    $data['id_translator'] = $id_translator;
+    $data['source'] = $source_language;
+    $data['target'] = $target_language;
+    $query = "SELECT LAST_INSERT_ID() FROM jobs";
+	
+    $db = Database::obtain();
+    $db->insert('jobs', $data);
+    $results = $db->query_first($query);
+    return $results['LAST_INSERT_ID()'];	
+}
+
+function insertFile($id_project, $file_name, $source_language, $mime_type, $contents) {
+    $data = array();
+    $data['id_project'] = $id_project;
+    $data['filename'] = $file_name;
+    $data['source_language'] = $source_language;
+    $data['mime_type'] = $mime_type;
+    $data['original_file'] = $contents;
+    $query = "SELECT LAST_INSERT_ID() FROM files";
+	
+    $db = Database::obtain();
+    $db->insert('files', $data);
+    $results = $db->query_first($query);
+    return $results['LAST_INSERT_ID()'];	
+}
+
+function insertFilesJob($id_job, $id_file) {
+    $data = array();
+    $data['id_job'] = $id_job;
+    $data['id_file'] = $id_file;
+	
+    $db = Database::obtain();
+    $db->insert('files_job', $data);
 }

@@ -192,7 +192,8 @@
                 <tal:block tal:define="segment php:array()" tal:repeat="segment file_data/segments" >
                     <section tal:attributes="id string:segment-${segment/sid}" id="001" >
         
-<a tabindex="-1" class="number"  href="#1" tal:attributes ="href string:#${segment/sid}" tal:content="segment/sid | default"></a>
+<a tabindex="-1" href="#1" tal:attributes ="href string:#${segment/sid}"></a> 
+<span class="number" tal:content="segment/sid | default"></span>
                      
                   <div class="body" tal:attributes="class string:body ${segment/css_loaded | nothing}" >
 
@@ -205,24 +206,48 @@
                            
                             
           <li class="source"  id="001-source" tal:attributes="id string:segment-${segment/sid}-source; data-original segment/segment">
-              
+             
                                 <span tal:content="structure segment/segment" class="original"></span>
                                 <span tal:replace="structure php:str_replace('&nbsp;',' ',segment['segment'])"/>
                             </li>
 
                             <li class="target" tal:attributes="id string:segment-${segment/sid}-target" id="001-target">
+                                                  
+             
                                 
+                             
+                                <div class="status" title="Translated" tal:condition="php:segment['status'] EQ 'TRANSLATED' " tal:attributes="class string:status col-translated" ><img src="/public/img/barrow.png" /></div>
+                                
+                                 <div class="status" title="Approved" tal:condition="php:segment['status'] EQ 'APPROVED' " tal:attributes="class string:status col-approved" ><img src="/public/img/barrow.png" /></div>
+                                
+ <div class="status" title="Draft"  tal:condition="php:segment['status'] EQ 'DRAFT' OR segment['status'] EQ ''" tal:attributes="class string:status col-draft" ><img src="/public/img/barrow.png" /></div>
+                                   
+                                     
+                                
+                                
+                                 
                                 <span class="hide toggle"> 
                                     <a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>
                                 </span>
+                                <div class="textarea-container">
                                 <textarea name="" tal:content="segment/translation | segment/matches/0/translation | nothing"></textarea> 
-                            
+                          
+                           <ul class="buttons toggle">
+                                     <li><a href="#" class="btn copysource" title="Copy source to target"></a></li>
+                                      <li><input name="" type="button" class="draft" value="DRAFT"/><p>CTRL+DOWN</p></li>
+                                      <li style="margin-right:-20px"><input name="" type="button" class="Translated" value="TRANSLATED"/>
+                              		 <p>CTRL+ENTER</p></li>
+                                <!-- <li><a href="#" class="btn tagmenu disabled" title="Insert tags"></a><p>CTRL+ENTER</p></li>-->
+                            </ul>
+                          
+                          
+                            </div>
 
                             </li>
                                    <li class="status-container">
-                                <a tal:condition="php:segment['status'] EQ 'TRANSLATED' " tal:attributes="class string:status col-translated" href="#" title="Segment status"  class="status " ></a>                            
-                                <a tal:condition="php:segment['status'] EQ 'APPROVED' " tal:attributes="class string:status col-approved" href="#" title="Change segment status"  class="status " ></a>                            
-                                <a tal:condition="php:segment['status'] EQ 'DRAFT' " tal:attributes="class string:status col-draft" href="#" title="Change segment status"  class="status " ></a>                            
+                                <a tal:condition="php:segment['status'] EQ 'TRANSLATED' " tal:attributes="class string:status col-translated" href="#" title="Translated, click to change it"  class="status " ></a>                            
+                                <a tal:condition="php:segment['status'] EQ 'APPROVED' " tal:attributes="class string:status col-approved" href="#" title="Approved, click to change it"  class="status " ></a>                            
+                                <a tal:condition="php:segment['status'] EQ 'DRAFT' " tal:attributes="class string:status col-draft" href="#" title="Draft, click to change it"  class="status " ></a>                            
                                 <a tal:condition="php:segment['status'] EQ '' "  href="#" title="Change segment status"  class="status " ></a>                                                           
 
                             </li>
@@ -231,13 +256,7 @@
 
 
                         <span class="loader"></span>
-                            <ul class="buttons toggle">
-                                     <li><a href="#" class="btn copysource" title="Copy source to target"></a></li>
-                                      <li><input name="" type="button" class="draft" value="DRAFT"/><p>CTRL+DOWN</p></li>
-                                      <li style="margin-right:-20px"><input name="" type="button" class="Translated" value="TRANSLATED"/>
-                              		 <p>CTRL+ENTER</p></li>
-                                <!-- <li><a href="#" class="btn tagmenu disabled" title="Insert tags"></a><p>CTRL+ENTER</p></li>-->
-                            </ul>
+                           
                             
                             <div class="footer toggle"> 
                             	<ul  class="submenu">

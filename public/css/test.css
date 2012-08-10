@@ -7,9 +7,11 @@
  .number{
 	left:-52px;
 }
-.editor textarea {width:112% !important;margin-left:-5px !important}
- textarea{width:103% !important;margin-left:-5px !important}
+/*.editor textarea {width:112% !important;margin-left:-5px !important}
+ textarea{width:103% !important;margin-left:-5px !important}*/
 
+
+.editor .textarea-container{width:106%;}
 .projectbar ul {margin-left:5px}
 .Translated, .draft, .approved{padding:7px 6px;}
 .meter {	width:10%;}

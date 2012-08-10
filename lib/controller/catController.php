@@ -15,7 +15,8 @@ class catController extends viewcontroller {
     //put your code here    
     private $data = array();
     private $cid = "";
-    private $pid = "";
+    private $jid = "";
+    private $password="";
     private $source="";
     private $pname = "";
     private $create_date = "";
@@ -26,13 +27,16 @@ class catController extends viewcontroller {
        // echo ".........\n";
         parent::__construct();
         parent::makeTemplate("index.html");
-        $this->pid = $this->get_from_get_post("pid");
+        $this->jid = $this->get_from_get_post("jid");
+	$this->password=$this->get_from_get_post("password");
         $this->start_from = $this->get_from_get_post("start");
         if (is_null($this->start_from)) {
             $this->start_from = 0;
         }
-	if (is_null($this->pid)) {
-            $this->pid = 1;
+
+	if (is_null($this->jid) and is_null($this->password)) {
+            header("Location: /translate/pname/src-trg/23-P1Z4c");
+	    exit(0);
         }
     }
 
@@ -56,7 +60,7 @@ class catController extends viewcontroller {
     public function doAction() {
         $lang_handler=languages::getInstance("en");       
 
-        $data = getSegments($this->pid, $this->start_from);
+        $data = getSegments($this->jid, $this->password, $this->start_from);
 //        echo "<pre>";
 //        print_r ($data);
 //        exit;

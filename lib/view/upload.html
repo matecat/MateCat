@@ -1,16 +1,56 @@
-<!doctype html>
-<html xmlns="http://www.w3.org/1999/xhtml">
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title>Translate - Project_Name - Job_ID </title>
-        <link rel="shortcut icon" href="/public/img/favicon.ico" />
-        <link href="/public/css/style.css" rel="stylesheet" type="text/css" />
-        <link href="/public/css/upload.css" rel="stylesheet" type="text/css" />
-        <script src="/public/js/lib/jquery.js" type="text/javascript"></script>
-        <script type="text/javascript" language="javascript" src="/public/js/new-project.js"></script>     
-    </head>
+<!DOCTYPE HTML>
+<!--
+/*
+ * jQuery File Upload Plugin Demo 6.9.1
+ * https://github.com/blueimp/jQuery-File-Upload
+ *
+ * Copyright 2010, Sebastian Tschan
+ * https://blueimp.net
+ *
+ * Licensed under the MIT license:
+ * http://www.opensource.org/licenses/MIT
+ */
+-->
+<html lang="en">
+<head>
+<!-- Force latest IE rendering engine or ChromeFrame if installed -->
+<!--[if IE]><meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
+<meta charset="utf-8"/>
+<title>Translate an XLIFF file with Matecat</title>
+<meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
+<meta name="viewport" content="width=device-width"/>
+<!-- jQuery UI styles -->
+<!--
+<link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/themes/base/jquery-ui.css" id="theme"/>
+-->
+<link rel="stylesheet" href="/public/css/jquery-ui-1.8.20.custom.css"/>
 
-    <body>
+<!-- jQuery Image Gallery styles -->
+<!--
+<link rel="stylesheet" href="http://blueimp.github.com/jQuery-Image-Gallery/css/jquery.image-gallery.min.css"/>
+-->
+<link rel="stylesheet" href="/public/css/jquery.image-gallery.min.css"/>
+
+<!-- CSS to style the file input field as button and adjust the jQuery UI progress bars -->
+<link rel="stylesheet" href="/public/css/jquery.fileupload-ui.css"/>
+
+
+<link rel="stylesheet" href="/public/css/style.css"/>
+<link rel="stylesheet" href="/public/css/upload.css"/>
+<!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
+<!--[if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
+<!--
+    <script type="text/javascript">
+        var config = {
+            uploadSessionId: "<span tal:omit-tag="" tal:replace='upload_session_id | string:unknown_upload_session_id'/>"
+        }
+    </script>
+-->
+
+</head>
+<body>
+
         <header>
             <div class="wrapper">   
                 <a href="#"><img src="/public/img/logo.png" class="logo" /></a>
@@ -18,28 +58,25 @@
         </header>
         <div class="wrapper-upload">
             <h1>Translate an XLIFF file</h1>
+            <h2 class="payoff">MateCat gives you more matches than any other translation tool.</h2>
             <div class="translate-box">
                 <h2>Project name</h2>
-                <input name="" type="text" class="upload-input"/>
+                <input name="" type="text" class="upload-input" id="project-name" autofocus="autofocus"/>
             </div>
 
             <div class="translate-box">
                 <h2>From:</h2>
-                <select name="source-lang">
+                <select name="source-lang" id="source-lang">
                     <option value="en-GB">English</option>
-                    <option value="it-IT">Italian</option>
-                    <option value="fr-FR">French</option>
-                    <option value="de-DE">German</option>
                 </select>
             </div>
 
             <div class="translate-box">
                 <h2>To:</h2>
-                <select name="target-lang">
-                    <option value="en-GB">English</option>
-                    <option value="it-IT">Italian</option>
+                <select name="target-lang" id="target-lang">
                     <option value="fr-FR">French</option>
                     <option value="de-DE">German</option>
+                    <option value="it-IT">Italian</option>
                 </select>
                 <br />
                 <!--<a href="#" id="multiple-link">Multiple languages?</a>-->
@@ -47,21 +84,182 @@
 
 
             <div class="cl"></div>
-            <table width="100%" border="0" cellpadding="0" cellspacing="0" class="upload-files drag" role="presentation" >
-                <tr>
-                    <td colspan="6">
-                        <br />
-                        <strong>Drag and drop</strong> your XLIFF here. <br />
-                        <br />
-                        or<br />
-                        <br />
-                        <input name="" type="file" />
-                        <br />
-                        <br /></td>
-                </tr>
-            </table>
+            
+            <div class="upload-files drag">
+            	<div id="overlay"></div>
+            	<div id="droptest">
+					<form id="fileupload" action="lib/utils/fileupload/" method="POST" enctype="multipart/form-data">
+	            		<p class="file-drag">
+	                        <strong>Drag and drop</strong> your XLIFF here. <br />
+	                        or</p>
+						<p class="file-drop">
+	                        <strong>Drop it</strong> here. 
+	                    </p>
+	
+						<div class="container">
+						    <!-- The file upload form used as target for the file upload widget -->
+						
+					        <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+					        <div class="row fileupload-buttonbar">
+					            <div class="span7">
+					                <!-- The fileinput-button span is used to style the file input field as button -->
+					                <span class="btn btn-success fileinput-button">
+					                    <i class="icon-plus icon-white"></i>
+					                    <span>Add files...</span>
+					                    <input type="file" name="files[]" multiple="multiple" class="multiple-button"/>
+					                </span>
+					<!--
+					                <button type="submit" class="btn btn-primary start">
+					                    <i class="icon-upload icon-white"></i>
+					                    <span>Start upload</span>
+					                </button>
+					                <button type="reset" class="btn btn-warning cancel">
+					                    <i class="icon-ban-circle icon-white"></i>
+					                    <span>Cancel upload</span>
+					                </button>
+					                <button type="button" class="btn btn-danger delete">
+					                    <i class="icon-trash icon-white"></i>
+					                    <span>Delete</span>
+					                </button>
+					                <input type="checkbox" class="toggle"/>
+					-->
+					            </div>
+					            <!-- The global progress information -->
+					            <div class="span5 fileupload-progress fade">
+					                <!-- The global progress bar -->
+					                <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100">
+					                    <div class="bar" style="width:0%;"></div>
+					                </div>
+					                <!-- The extended global progress information -->
+					                <div class="progress-extended">&nbsp;</div>
+					            </div>
+					        </div>
+					        <!-- The loading indicator is shown during file processing -->
+					        <div class="fileupload-loading"></div>
+					        <!-- The table listing the files available for upload/download -->
+					        <table cellpadding="0" cellspacing="0" class="upload-table table-striped"  role="presentation">
+					        <tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
+					       
+						       
+						    <div class="upload-footer">
+								<p>Continue to drag and drop your XLIFF here or    </p>
+						    
+						     	<span class="btn btn-success fileinput-button">
+				                    <i class="icon-plus icon-white"></i>
+				                    <span>Add files...</span>
+				                    <input type="file" name="files[]" multiple="multiple" class="multiple-button"/>
+						        </span> 
+						         
+						        <div class="cl"></div>     
+						    </div>  <!-- .upload-footer -->
+						    
+						    <div class="cl"></div>    
+						    
+						</div> <!-- #container -->
+	
+	    			</form>           
+				</div>
+            </div> <!-- .upload-files -->
             <input name="" type="button" class="uploadbtn disabled" value="Start Translating" disabled="disabled" />
-        </div>
-    </body>
-</html>
 
+       </div>
+
+
+
+
+<!-- The template to display files available for upload -->
+<script id="template-upload" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-upload fade">
+        <td class="preview"><span class="fade"></span></td>
+        <td class="name"><span>{%=file.name%}</span></td>
+        <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
+        {% if (file.error) { %}
+            <td class="error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span> {%=locale.fileupload.errors[file.error] || file.error%}</td>
+        {% } else if (!i) { %}
+            <td>
+                <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><div class="bar" style="width:0%;"></div></div>
+            </td>
+            <td class="start">{% if (!o.options.autoUpload) { %}
+                <button class="btn btn-primary">
+                    <i class="icon-upload icon-white"></i>
+                    <span>{%=locale.fileupload.start%}</span>
+                </button>
+            {% } %}</td>
+        {% } else { %}
+            <td colspan="2"></td>
+        {% } %}
+        <td class="cancel">{% if (!i) { %}
+            <button class="btn btn-warning">
+                <i class="icon-ban-circle icon-white"></i>
+                <span>{%=locale.fileupload.cancel%}</span>
+            </button>
+        {% } %}</td>
+    </tr>
+{% } %}
+</script>
+<!-- The template to display files available for download -->
+<script id="template-download" type="text/x-tmpl">
+{% for (var i=0, file; file=o.files[i]; i++) { %}
+    <tr class="template-download fade">
+        {% if (file.error) { %}
+            <td></td>
+            <td class="name"><span></span></td>
+            <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
+            <td class="error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span> {%=locale.fileupload.errors[file.error] || file.error%}</td>
+        {% } else { %}
+            <td class="preview">
+                <img src="/public/img/xliff-icon.png" />
+            </td>
+            <td class="name">{%=file.name%}</td>
+            <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
+            <td colspan="2"></td>
+        {% } %}
+        <td class="delete">
+            <button class="btn btn-danger" data-type="{%=file.delete_type%}" data-url="{%=file.delete_url%}">
+                <i class="icon-trash icon-white"></i>
+                <span>{%=locale.fileupload.destroy%}</span>
+            </button>
+          
+        </td>
+    </tr>
+{% } %}
+</script>
+<script src="/public/js/lib/jquery.js"></script>
+<script src="/public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
+
+<!-- The Templates plugin is included to render the upload/download listings -->
+<script src="/public/js/lib/fileupload/tmpl.min.js"></script>
+
+<!-- The Load Image plugin is included for the preview images and image resizing functionality -->
+<script src="/public/js/lib/fileupload/load-image.min.js"></script>
+
+<!-- The Canvas to Blob plugin is included for image resizing functionality -->
+<script src="/public/js/lib/fileupload/canvas-to-blob.min.js"></script>
+
+<!-- jQuery Image Gallery -->
+<script src="/public/js/lib/fileupload/jquery.image-gallery.min.js"></script>
+
+<!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
+<script src="/public/js/lib/fileupload/jquery.iframe-transport.js"></script>
+<!-- The basic File Upload plugin -->
+<script src="/public/js/lib/fileupload/jquery.fileupload.js"></script>
+<!-- The File Upload file processing plugin -->
+<script src="/public/js/lib/fileupload/jquery.fileupload-fp.js"></script>
+<!-- The File Upload user interface plugin -->
+<script src="/public/js/lib/fileupload/jquery.fileupload-ui.js"></script>
+<!-- The File Upload jQuery UI plugin -->
+<script src="/public/js/lib/fileupload/jquery.fileupload-jui.js"></script>
+<!-- The localization script -->
+<script src="/public/js/lib/fileupload/locale.js"></script>
+<!-- The main application script -->
+<script src="/public/js/lib/fileupload/main.js"></script>
+<!-- The XDomainRequest Transport is included for cross-domain file deletion for IE8+ -->
+<!--[if gte IE 8]><script src="js/cors/jquery.xdr-transport.js"></script><![endif]-->
+
+<script src="/public/js/lib/jquery.cookie.js"></script>
+<script src="/public/js/new-project.js"></script>
+
+
+</body> 
+</html>

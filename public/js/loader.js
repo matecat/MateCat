@@ -15,15 +15,16 @@ Loader = {
 		'jquery.tabify',
 		'jquery.hotkeys',
 		'jquery.atooltip',
-        'jquery.caret'
+        'jquery.caret',
+        'jquery-fieldselection.min'
 	),
 	
 	include: function(f,p,b) {
-		document.write('<script type="text/javascript" src="' + b + p + f + '"></script>');
+		document.write('<script type="text/javascript" src="/' + b + p + f + '"></script>');
     },
 
 	includeStyle: function(f,p,b) {
-		document.write('<link rel="stylesheet" type="text/css" href="' + b + p + f + '" media="screen" />');
+		document.write('<link rel="stylesheet" type="text/css" href="/' + b + p + f + '" media="screen" />');
     },
 
 	detect: function(a) {

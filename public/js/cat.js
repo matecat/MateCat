@@ -42,18 +42,12 @@ UI = {
                 $("fieldset#signin_menu").hide();
             }
         });	
-
-        $("li.target textarea").mousedown(function(e) {
-            e.preventDefault();
-            return false;
+    
 /*
-            if($(e.target).parent("a.m-notification").length==0) {
-                $(".m-notification").removeClass("menu-open");
-                $("fieldset#signin_menu").hide();
-            }
-*/
-        });
-        
+		var preventTargetModification = $('li.target textarea').bind("keydown.modification", function(e) {
+            e.preventDefault();
+		});
+*/     
         $(".search-icon, .search-on").click(function(e) {          
             e.preventDefault();
             $("div#search").toggle();
@@ -131,15 +125,24 @@ UI = {
         $('html').click(function() {
             $(".menucolor").hide();
         });
-
-
+/*
+ 		$("article").on('select','li.target textarea',function(e) {          
+//            UI.selecting = true;
+            console.log('selecting');
+        })
+*/
  		$("article").on('click','a.percentuage',function(e) {          
             e.preventDefault();
             e.stopPropagation();
         }).on('click','li.target textarea',function(e) {
 
 //			alert('click');
+//			console.log($(this).getSelection().length);
+			if($(this).getSelection().length) return false;
 			$(".statusmenu:visible").hide();
+/*
+			$(this).unbind('keydown.modification');
+*/
 			// da riprendere
 //			if(typeof UI.currentSegmentOb != 'undefined') UI.currentSegmentOb.removeClass('active');
 			UI.currentSegmentOb = segment = $(this).parents("section");
@@ -165,6 +168,8 @@ UI = {
             }, 250);
             UI.getContribution(segment,1);
             UI.startTextareaAutoresize(this);
+            segment.parent().addClass('open');
+            
         }).on('click','input.draft, input.Translated, input.approved',function(e) {
             UI.editStop = new Date();
             UI.editTime = UI.editStop - UI.editStart;
@@ -180,24 +185,24 @@ UI = {
             $("li.target textarea", nextSegment).click();
             return false;
         }).on('click','input.Translated',function(e) {
-        	UI.changeStatus(this,'translated');
+        	UI.changeStatus(this,'translated',0);
         }).on('click','input.draft',function(e) {          
-         	UI.changeStatus(this,'draft');
+         	UI.changeStatus(this,'draft',0);
         }).on('click','input.approved',function(e) {          
-        	UI.changeStatus(this,'approved');
+        	UI.changeStatus(this,'approved',0);
         }).on('click','a.d, a.a, a.r, a.f',function(e) {          
             var segment = $(this).parents("section");
             $("a.status",segment).removeClass("col-approved col-notapproved col-done col-draft");
             $("ul.statusmenu",segment).toggle();
             return false;
         }).on('click','a.d',function(e) {          
-         	UI.changeStatus(this,'translated');
+         	UI.changeStatus(this,'translated',1);
         }).on('click','a.a',function(e) {          
-         	UI.changeStatus(this,'approved');
+         	UI.changeStatus(this,'approved',1);
         }).on('click','a.r',function(e) {          
-        	UI.changeStatus(this,'notapproved');
+        	UI.changeStatus(this,'notapproved',1);
         }).on('click','a.f',function(e) {          
-        	UI.changeStatus(this,'draft');
+        	UI.changeStatus(this,'draft',1);
         }).on('click','a.copysource',function(e) {   
             var segment = $(this).parents("section");
             var source_val = $.trim($("li.source > span.original",segment).text());
@@ -209,11 +214,18 @@ UI = {
         }).on('click','a.close',function(e) {          
             e.preventDefault();
             var segment = $(this).parents("section");
+            segment.parent().removeClass('open');
+
             $(".toggle",segment).hide("blind", {
                 direction: "vertical"
             },250);
             $("div.grayed").toggle();
             var textarea = $("li.target textarea",segment);
+/*
+	 		var preventTargetModification = textarea.bind("keydown.modification", function(e) {
+	            e.preventDefault();
+			});           
+*/
 //            textarea.removeClass("grayed-text");
             UI.endTextareaAutoresize(textarea);
             $(".toggle",segment).promise().done(function(){
@@ -272,6 +284,7 @@ UI = {
         if((!n.length)&&(next)) return false;
 
         var id = n.attr('id');
+//        console.log(id);
         var id_segment = id.split('-')[1];
         var txt = $('.source .original',n).text();
         var file = $(currentSegment).parents('article');
@@ -348,10 +361,11 @@ UI = {
         return n;
  	},
  	
-	setContribution: function(segment) {
+	setContribution: function(segment,byStatus) {
         var source = $('.source .original',segment).text();
         var target = $('li.target textarea',segment).val();
         if(target == '') return false;
+//        if((target == '')&&(!byStatus)) return false;
         var languages = $(segment).parents('article').find('.languages');
         var source_lang = $('.source-lang',languages).text();
         var target_lang = $('.target-lang',languages).text();
@@ -451,9 +465,9 @@ UI = {
         });
     },
 
-    changeStatus: function(ob,status) {
+    changeStatus: function(ob,status,byStatus) {
         var segment = $(ob).parents("section");
-        UI.setContribution(segment);
+        UI.setContribution(segment,byStatus);
         UI.setTranslation(segment,status);
     },
 
@@ -532,8 +546,12 @@ UI = {
 
 	startTextareaAutoresize: function(textarea) {
 		$(textarea).bind('keyup.activeTextarea', function() {
+//			console.log();
      		var shadow = $('#shadowActiveTextarea');
-     		var tx = $(this).val();
+     		var tx = $(this).val().replace(/</g, '&lt;')
+                                .replace(/>/g, '&gt;')
+                                .replace(/&/g, '&amp;')
+                                .replace(/\n/g, '<br/>');
      		shadow.html(tx);
       		var hh = shadow.height();
       		if(hh < 30) hh = 30;
@@ -555,17 +573,17 @@ UI = {
 		};
 		var destination = "#"+previousSegment.attr('id');
 		var destinationTop = $(destination).offset().top;
-		if($(current).length){console.log('a');
-			if($(segment).offset().top > $(current).offset().top) {console.log('b');
-				if(!current.is($(segment).prev())) {console.log('c');
+		if($(current).length){//console.log('a');
+			if($(segment).offset().top > $(current).offset().top) {//console.log('b');
+				if(!current.is($(segment).prev())) {//console.log('c');
 					destinationTop = destinationTop - $('section.editor').height() + $(segment).height() - spread;
-				} else {console.log('d');
+				} else {//console.log('d');
 					destinationTop = destinationTop - spread;
 				}
-			} else {console.log('e');
+			} else {//console.log('e');
 				destinationTop = destinationTop - spread;
 			}		
-		} else {console.log('f');
+		} else {//console.log('f');
 			destinationTop = destinationTop - spread;
 		}	
 		$("html:not(:animated),body:not(:animated)").animate({ scrollTop: destinationTop-20}, 500 );
