@@ -343,14 +343,18 @@ class UploadHandler
             }
             $file->size = $file_size;
             $this->set_file_delete_url($file);
-			
-			$fileContent = file_get_contents($uploaded_file);
+//			$file->prova = $file_path;
+//			$fileContent = file_get_contents('http://www.repubblica.it/');
+
+
+		
+			$fileContent = file_get_contents($file_path);
 			$preg_file_html = '|<file original="(.*?)" source-language="(.*?)" datatype="(.*?)" target-language="(.*?)">|m';
     	    $res = array();
      	    preg_match_all($preg_file_html, $fileContent, $res, PREG_SET_ORDER);
 	        if (!empty($res)) {
-	            $file->$internal_source_lang = mysql_real_escape_string($res[0][2]);
-	            $file->$internal_target_lang = mysql_real_escape_string($res[0][4]);
+	            $file->internal_source_lang = addslashes($res[0][2]);
+	            $file->internal_target_lang = addslashes($res[0][4]);
 	        }
 
         }

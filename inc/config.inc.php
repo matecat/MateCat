@@ -44,13 +44,14 @@ class INIT {
  //              self::$DB_PASS = "root11"; //database login password
                 
                 
-                self::$DB_SERVER = "213.215.131.241"; //database server
+                self::$DB_SERVER = "10.30.1.241"; //database server
                self::$DB_DATABASE = "matecat_sandbox"; //database name
                 self::$DB_USER = "translated"; //database login name
                 self::$DB_PASS = "azerty1"; //database login password
                 
                 
                 break;
+	    case 'demo.matecat.com';
             case 'cattooldemo.matecat.com':
             case 'matecat.translated.home':
 	    case 'matecatv2.translated.home':
@@ -58,7 +59,7 @@ class INIT {
             case 'www.matecat.com':
 	    case 'matecatv2.translated.home':
                 self::$DEBUG = false;
-                self::$DB_SERVER = "213.215.131.241"; //database server
+                self::$DB_SERVER = "10.30.1.241"; //database server
                 self::$DB_DATABASE = "matecat_sandbox"; //database name
                 self::$DB_USER = "translated"; //database login name
                 self::$DB_PASS = "azerty1"; //database login password
@@ -100,7 +101,7 @@ if (!defined('CONST')) {
             case 'matecat.com':
             case 'www.matecat.com':
                 define('DEBUG', false);
-                define('DB_SERVER', "213.215.131.241"); //database server
+                define('DB_SERVER', "10.30.1.241"); //database server
                 define('DB_DATABASE', "matecat"); //database name
                 define('DB_USER', "translated"); //database login name
                 define('DB_PASS', "azerty1"); //database login password

@@ -26,7 +26,7 @@ class createProjectController extends ajaxcontroller {
     public function doAction() {
 
         if (empty($this->file_name)) {
-            $this->result['error'][] = array("code" => -1, "message" => "missing file_name");
+            $this->result['errors'][] = array("code" => -1, "message" => "missing file_name");
         }
 
         if (empty($this->project_name)) {
@@ -34,36 +34,56 @@ class createProjectController extends ajaxcontroller {
         }
 
         if (empty($this->source_language)) {
-            $this->result['error'][] = array("code" => -3, "message" => "missing source_language");
+            $this->result['errors'][] = array("code" => -3, "message" => "missing source_language");
         }
 
         if (empty($this->target_language)) {
-            $this->result['error'][] = array("code" => -4, "message" => "missing target_language");
+            $this->result['errors'][] = array("code" => -4, "message" => "missing target_language");
         }
 
-		$intDir=$_SERVER['DOCUMENT_ROOT'].'/storage/upload/'.$_COOKIE['upload_session'];
-		$filename = $intDir.'/'.$this->file_name;
-		$password = $this->create_password();
-		
-		if (file_exists($filename)) {
-		} else {
-            $this->result['error'][] = array("code" => -4, "message" => "file non trovato");
-		}
-		
-		$pid = insertProject('translated_user', $this->project_name);
-		$jid = insertJob($password, $pid, 'translator_1', $this->source_language, $this->target_language);
+        // project name validation
 
-		$handle = fopen($filename, "r");
-		$contents = fread($handle, filesize($filename));
-		fclose($handle);
-		$fileSplit = split('\.',$this->file_name);
-		$mimeType = $fileSplit[count($fileSplit)-1];
+        $pattern = "/^[\ 0-9a-zA-Z_\.\-]+$/";
+		if(!preg_match($pattern, $this->project_name)) {
+	        $this->result['errors'][] = array("code" => -5, "message" => "Invalid Project Name: it should only contain numbers and letters!");
+//	        $this->result['project_name_error'] = $this->project_name;
+			return false;         	
+		}
+
+
+		$arFiles= split('[/,]', $this->file_name);
 		
-		$fid = insertFile($pid, $this->file_name, $this->source_language, $mimeType, $contents);
+		// create project
+		$pid = insertProject('translated_user', $this->project_name);
+		//create job
+		$password = $this->create_password();
+		$jid = insertJob($password, $pid, 'translator_1', $this->source_language, $this->target_language);
 		
-		insertFilesJob($jid, $fid);
-		
-		$insertSegments = extractSegments($intDir, $pid, $fid);
+		$intDir=$_SERVER['DOCUMENT_ROOT'].'/storage/upload/'.$_COOKIE['upload_session'];
+	    foreach ($arFiles as $file) {
+			$filename = $intDir.'/'.$file;
+			
+			if (file_exists($filename)) {
+			} else {
+	            $this->result['error'][] = array("code" => -4, "message" => "file non trovato");
+			}
+			
+	
+			$handle = fopen($filename, "r");
+			$contents = fread($handle, filesize($filename));
+			fclose($handle);
+			$fileSplit = split('\.',$file);
+			$mimeType = $fileSplit[count($fileSplit)-1];
+			
+			$fid = insertFile($pid, $file, $this->source_language, $mimeType, $contents);
+			
+			insertFilesJob($jid, $fid);
+			
+			$insertSegments = extractSegments($intDir, $pid, $fid);
+	    }
+
+				
+
 
 		$this->deleteDir($intDir);
 			
@@ -75,7 +95,9 @@ class createProjectController extends ajaxcontroller {
 			$this->result['project_name'] = $this->project_name;         	
 	        $this->result['source_language'] = $this->source_language;          	
 	        $this->result['target_language'] = $this->target_language;          	
-        }
+//			$this->result['prova0'] = $arFiles[0];
+			}
+
     }
 
     public function create_project_name($namespace = '') {     

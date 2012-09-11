@@ -1,5 +1,5 @@
-﻿.translate-box{float:left;margin:20px 40px 0px 0px}
-.wrapper-upload{text-align:left;margin:0 auto;width:92%;min-width:460px;}
+﻿.translate-box{float:left;margin:20px 30px 0px 0px}
+.wrapper-upload{text-align:left;margin:0 auto;width:92%;min-width:960px;position:relative;}
 .wrapper-upload h1{margin:0;padding:0;font-size:40px}
 
 h2{margin:0;padding:0;font-size:22px}
@@ -21,7 +21,7 @@ h2.payoff
 .upload-table {width:100%;margin:0;}
 .upload-table td{height:auto;padding:5px 10px;text-align:left;border-bottom:1px dashed #ccc;}
 .upload-table tr{-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;}
-.upload-table tr:hover{background:#fff;}
+
 .preview {border-right:none !Important; width:30px;}
 .preview img{margin-left:10px}
 
@@ -38,15 +38,14 @@ h2.payoff
 
 .fileinput-button:hover{background-color:#12b4df}
 
-.delete button{background:#DC2E34 url(../img/delete.png) 12px center no-repeat!important;padding:0 0 20px 0 !important}
+
 .delete .ui-button-text, .cancel .ui-button-text{color:#fff;text-align:left;margin:0px 0 0 10px !important}
 .delete .btn, .cancel .btn {height:35px !important;font-size: 1.1em;}
-.cancel button{background:#f99c18 url(../img/cancel.png) 12px center no-repeat !important;}
-.delete button:hover{background-color:#ca2a2e !important}
-.cancel button:hover{background-color:#ec951a !important}
+.cancel button{background: url(../img/delete.png) center center no-repeat !important;border:0 !important;text-indent:-999999px}
 
+.delete button{background: url(../img/delete.png) center center no-repeat !important;padding:0 0 20px 0 !important;border:0 !important;text-indent:-999999px}
+.delete button:hover, .cancel button:hover{background:#ca2a2e url(../img/delete00.png) center center no-repeat !important;}
 .cancel .ui-button-text span, .delete .ui-button-text span{margin:-3px 0 0 15px !Important;display:block;float:left;}
-
 
 
 a{text-decoration:underline}
@@ -54,8 +53,8 @@ a:hover{text-decoration:none}
 .translate-box a{display:block;}
 body{font-family:Calibri, Arial, Helvetica, sans-serif}
 .popup-languages .close{margin:-10px -12px 0 0}
-.translate-box select{width:300px;padding:5px;font-size:18px;border:1px solid #ccc;margin-bottom:5px}
-.upload-input{width:100%;padding:4px 5px 3px 5px;font-size:22px !important; -moz-border-radius: 2px;border-radius: 2px;border:1px solid #ccc;}
+.translate-box select{width:280px;padding:5px;font-size:18px;border:1px solid #ccc;margin-bottom:5px}
+.upload-input{width:100%;padding:4px 5px 3px 5px;font-size:22px !important; -moz-border-radius: 2px;border-radius: 2px;border:1px solid #ccc}
 
 
 /* upload footer */
@@ -112,12 +111,12 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 
 /*upload table*/
 
-.file-drop, .upload-footer,  .uploaded .file-drag, .uploaded .file-drop, .uploaded .fileupload-buttonbar, .dragging .file-drag {display:none !important}
+
 
 .dragging .file-drop{display:block !important}
 
 
-.dragging .upload-files, .uploaded .upload-files{height:auto;}
+
 
 .uploaded .upload-footer{display:block !important}
 
@@ -129,6 +128,7 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
     position: relative;
 	border:1px dashed #ccc;
 	margin-top:20px;
+	min-height:250px;
 	-moz-border-radius: 4px;
 	border-radius: 4px;
 	background:#fbfbfb;
@@ -177,4 +177,36 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 	{
 	border-bottom: 0px dashed #ccc !important;
 	}
+	
+	
+.creating .uploadloader{display:block;}
+.uploadloader{background:url(../img/loader.gif) center center no-repeat;display:block;width:20px;height:20px;float:right;right:280px;margin-top:35px;display:none;position:absolute;right:260px}
 
+.error-message{background:#fff;color:#990000;border: 1px dotted #990000;padding:5px;margin:0;float:left;font-weight:bold;width:260px;display:none}
+
+
+
+
+.file-drag{ transition: width 2s; -moz-transition: width 2s; /* Firefox 4 */ -webkit-transition: width 2s; /* Safari and Chrome */ -o-transition: width 2s; /* Opera */ } 
+.file-drag {
+	overflow:hidden;
+	height:100px;
+	margin:10px auto;
+	cursor:pointer;
+	position:relative;
+	transition: all 0.1s linear;
+	-webkit-transition: all 0.1s linear;
+	-moz-transition: all 0.1s linear;
+	-o-transition: all 0.1s linear;
+	-ms-transition: all 0.1s linear;
+}
+/*.dragging .file-drag,*/
+ .uploaded .file-drag{ display:none;}
+
+.file-drop, .upload-footer, .uploaded .btn-success, .dragging .btn-success {display:none !important; }
+
+.progress-extended{display:none}
+
+.upload-table tr, .files tr{border-bottom:1px dashed #ccc !important}
+
+.dragging .file-drag, .uploaded .file-drop, .uploaded .fileupload-buttonbar{height:0;}

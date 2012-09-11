@@ -41,12 +41,17 @@ Loader = {
 		return;
 	},
 
+	isDemo: function() {
+		if(location.host=='cattooldemo.matecat.com'||location.host=='demo.matecat.com') return true;
+    },
+
 	start: function() {
 		var l = this.libraries;
 		var c = this.components;
 		this.basePath = 'public/js/';
 		for (var i = 0; i < l.length; i++) this.include(l[i] + '.js', 'lib/', this.basePath);
 		for (var i = 0; i < c.length; i++) this.include(c[i] + '.js', '', this.basePath);
+		if(this.isDemo()) this.include('clicktale.js', 'lib/', this.basePath);
 	}
 }
 

@@ -8,12 +8,28 @@ UI = {
 	
         this.initStart = new Date();
  		this.numMatchesResults = 2;
+ 		this.numSegments = $('section').length;
+ 		this.heavy = (this.numSegments > 500)? true : false;
 
 		$(document).ready(function() {
-		    UI.findEmptySegment();
+		    if(config.last_opened_segment == '') {
+		    	UI.findEmptySegment();
+		    } else if(config.last_opened_segment == 0) {
+		    	
+		    } else {
+		    	UI.findLastOpenedSegment();
+		    }
+/*
+		    if(config.last_opened_segment != '') {
+		    	UI.findLastOpenedSegment();
+		    } else {
+		    	UI.findEmptySegment();
+		    }
+*/
 		})
-        
-        $("body, li.target textarea").bind('keydown','Ctrl+return', function(e){
+
+      
+        $("body, .target textarea").bind('keydown','Ctrl+return', function(e){
             e.preventDefault();
             $('.editor .Translated').click();
         }).bind('keydown','Ctrl+down', function(e){ 
@@ -125,71 +141,43 @@ UI = {
         $('html').click(function() {
             $(".menucolor").hide();
         });
-/*
- 		$("article").on('select','li.target textarea',function(e) {          
-//            UI.selecting = true;
-            console.log('selecting');
-        })
-*/
+
  		$("article").on('click','a.percentuage',function(e) {          
             e.preventDefault();
             e.stopPropagation();
-        }).on('click','li.target textarea',function(e) {
-
-//			alert('click');
-//			console.log($(this).getSelection().length);
-			if($(this).getSelection().length) return false;
-			$(".statusmenu:visible").hide();
-/*
-			$(this).unbind('keydown.modification');
-*/
-			// da riprendere
-//			if(typeof UI.currentSegmentOb != 'undefined') UI.currentSegmentOb.removeClass('active');
-			UI.currentSegmentOb = segment = $(this).parents("section");
-			UI.scrollSegment(segment);
-			// da riprendere
-//			segment.addClass('active');
-			$(this).removeClass("indent"); // vediamo come rimuoverne la necessità
-
-			if (!($("div.sub-editor.matches .graysmall",segment).length)){     
-				UI.getContribution(segment);
-			}
-			if ( $(segment).find(".toggle").is(":visible")){return null}
-
-            $("section.editor").find(".close").click();
-            $("div.grayed").toggle();
-
-            $(segment).addClass("editor");
-            $(this).focus();
-            UI.editStart = new Date();
-            $(this).caretTo(0);
-            $(".toggle",segment).show("blind", {
-                direction: "vertical"
-            }, 250);
-            UI.getContribution(segment,1);
-            UI.startTextareaAutoresize(this);
-            segment.parent().addClass('open');
-            
+        }).on('click','.target textarea',function(e) {
+            UI.openSegment(this);     
         }).on('click','input.draft, input.Translated, input.approved',function(e) {
             UI.editStop = new Date();
             UI.editTime = UI.editStop - UI.editStart;
   			var segment = $(this).parents("section");
-            var statusSwitcher = $("a.status",segment);
-//            $("li.target textarea").addClass("grayed-text");
+            var statusSwitcher = $(".status",segment);
+
             statusSwitcher.removeClass("col-approved col-notapproved col-done col-draft");
             var nextSegment = UI.getNextSegment(segment);
             if(!nextSegment.length) {
             	$(".editor:visible").find(".close").click();
             	return false;
             };
-            $("li.target textarea", nextSegment).click();
+            UI.buttonClickStop = new Date();
+            UI.clickingButtonOperations = UI.buttonClickStop - UI.editStop;
+            $(".target textarea", nextSegment).click();
+//            console.log('UI.editTime: ' + UI.editTime);
+//            console.log('UI.buttonClickStop: ' + UI.buttonClickStop + '; UI.editStop: ' + UI.editStop);
+//            console.log('operations after clicking a button but before autoclicking on the next textarea: ' + UI.clickingButtonOperations);
             return false;
         }).on('click','input.Translated',function(e) {
         	UI.changeStatus(this,'translated',0);
+            UI.changeStatusStop = new Date();
+            UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
         }).on('click','input.draft',function(e) {          
          	UI.changeStatus(this,'draft',0);
+            UI.changeStatusStop = new Date();
+            UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
         }).on('click','input.approved',function(e) {          
         	UI.changeStatus(this,'approved',0);
+            UI.changeStatusStop = new Date();
+            UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
         }).on('click','a.d, a.a, a.r, a.f',function(e) {          
             var segment = $(this).parents("section");
             $("a.status",segment).removeClass("col-approved col-notapproved col-done col-draft");
@@ -205,44 +193,50 @@ UI = {
         	UI.changeStatus(this,'draft',1);
         }).on('click','a.copysource',function(e) {   
             var segment = $(this).parents("section");
-            var source_val = $.trim($("li.source > span.original",segment).text());
-            $("li.target textarea",segment).val(source_val).keyup().focus();
-            $("li.target textarea",segment).effect("highlight", {}, 1000);
+            var source_val = $.trim($(".source > span.original",segment).text());
+            $(".target textarea",segment).val(source_val).keyup().focus();
+            $(".target textarea",segment).effect("highlight", {}, 1000);
             return false;
         }).on('click','.tagmenu, .warning, .viewer, .notification-box li a',function(e) {          
             return false;
         }).on('click','a.close',function(e) {          
             e.preventDefault();
-            var segment = $(this).parents("section");
-            segment.parent().removeClass('open');
-
-            $(".toggle",segment).hide("blind", {
-                direction: "vertical"
-            },250);
-            $("div.grayed").toggle();
-            var textarea = $("li.target textarea",segment);
-/*
-	 		var preventTargetModification = textarea.bind("keydown.modification", function(e) {
-	            e.preventDefault();
-			});           
-*/
-//            textarea.removeClass("grayed-text");
-            UI.endTextareaAutoresize(textarea);
-            $(".toggle",segment).promise().done(function(){
-                $(segment).removeClass("editor").find(".editable_textarea").find("button").click(); // a che serve editable_textarea?
-            })
+            UI.closeSegment(UI.currentSegmentOb);
         }).on('click','input.con-submit',function(e) {          
             var segment = $(this).parents("section");
             UI.addSegmentComment(segment);
         }).on('dblclick','ul.graysmall',function(e) {
             var segment = $(this).parents("section");
-			$('textarea',segment).text($('li.b',this).text());
+			$('textarea',segment).val($('li.b',this).text()).focus();
         });
 
-		this.initTargetHeight();
+
+		this.checkStatusCompleteness();
+        $('#fileDownload').append('<input type="hidden" name="file_id" value="' + $('article').attr('id').split('-')[1] + '" />');
+ 		$(".downloadtr-button").on('click',function(e) {          
+
+            e.preventDefault();
+        	var id_job = $('div.projectbar').data('job').split('-')[1];
+
+	        $.ajax({
+	            url: config.basepath + '?action=downloadFile',
+	            data: {
+                	action: 'downloadFile',
+	            	id_job: id_job
+	            },
+	            type: 'POST',
+	            success: function(d){
+	            	console.log('success');
+	            }
+	        });
+/**/
+        })
+
+//		this.initTargetHeight();
+//        this.progressiveTargetHeight(0);
         this.initEnd = new Date();
         this.initTime = this.initEnd - this.initStart;
-
+        
         console.log('init time: ' + this.initTime);
 
     },
@@ -314,7 +308,8 @@ UI = {
             },
             success: function(d){
  				var isActiveSegment = $(this).hasClass('editor');
-	  			var textarea = $('li.target textarea', this);
+	  			var textarea = $('.target textarea', this);
+	  			if(!d.data.matches.length) return true;
 	  			var translation = d.data.matches[0].translation;
 	  			var textareaLength = textarea.val().length;
                 if (textareaLength==0){
@@ -340,14 +335,15 @@ UI = {
                 $.each(d.data.matches, function() {                    
                     cb= this['created-by'];                    
                     cl_suggestion=UI.getPercentuageClass(this['match']);
-                    $('.sub-editor .overflow',_this).append('<ul class="graysmall"><li>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="' + cl_suggestion + '">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li class="graydesc">Source: <span class="bold">'+cb+'</span></li></ul></ul>');
+                    $('.sub-editor .overflow',_this).append('<ul class="graysmall"><li><a href="#" class="trash" title="delete this row"></a>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="' + cl_suggestion + '">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li class="graydesc">Source: <span class="bold">'+cb+'</span></li></ul></ul>');
                 });
                 if (d.data.matches==0){
                     $(".sbm > .matches", _this).hide();
                 } else {
                     $('.submenu li.matches a span', this).text('('+d.data.matches.length+')');
                 }
-                
+                $('.Translated',this).removeAttr('disabled');
+                $('.draft',this).removeAttr('disabled');
             }
         });
     },
@@ -363,7 +359,7 @@ UI = {
  	
 	setContribution: function(segment,byStatus) {
         var source = $('.source .original',segment).text();
-        var target = $('li.target textarea',segment).val();
+        var target = $('.target textarea',segment).val();
         if(target == '') return false;
 //        if((target == '')&&(!byStatus)) return false;
         var languages = $(segment).parents('article').find('.languages');
@@ -399,7 +395,7 @@ UI = {
         var file = $(segment).parents('article');
         var id_job = $('div.projectbar',file).data('job').split('-')[1];
         var status = status;
-        var translation = $('li.target textarea',segment).val();
+        var translation = $('.target textarea',segment).val();
         if(translation == '') return false;
         var time_to_edit = UI.editTime;
         var id_translator = config.id_translator;
@@ -418,7 +414,7 @@ UI = {
             dataType: 'json',
             success: function(d){
          		if(d.data == 'OK') {
-					$("a.status",segment).addClass("col-"+status);
+         			UI.setStatus(segment,status);
          		};
             }
         });
@@ -467,13 +463,37 @@ UI = {
 
     changeStatus: function(ob,status,byStatus) {
         var segment = $(ob).parents("section");
-        UI.setContribution(segment,byStatus);
-        UI.setTranslation(segment,status);
+        this.setContribution(segment,byStatus);
+        this.setTranslation(segment,status);
     },
 
+    setStatus: function(segment,status) {
+//		$(".status",segment).addClass("col-"+status);
+		segment.removeClass("status-draft status-translated status-approved status-notapproved").addClass("status-"+status);
+		this.checkStatusCompleteness();
+    },
+    
+    checkStatusCompleteness: function() {
+    	var t = 'draft';
+    	if(!$('section.status-draft').length) t = 'PROJECT';
+    	/*MODIFICA LUCA VALUE STATICO E CAMBIARE COLORE DI BG IN BASE ALLO STATO */
+    },
+    
     findEmptySegment: function() {
+/*
+		$("li.target textarea").each(function(){
+			var textarea = $(this);
+			if (textarea.text()=="") {
+				UI.currentSegmentOb = textarea.parents("section");
+				textarea.click();
+				UI.createTextareaClone();
+				return 0;
+			}
+		})
+*/
+
         var found=false;
-        $("li.target textarea").each(function(){
+        $(".target textarea").each(function(){
             var textarea = $(this);
 			if (textarea.text()=="" && found==false){
                 found=true;
@@ -482,11 +502,20 @@ UI = {
                 UI.createTextareaClone();
             }
         })
+
+    },
+
+    findLastOpenedSegment: function() {
+    	var textarea = $('#segment-' + config.last_opened_segment + ' textarea');
+ 		UI.currentSegmentOb = textarea.parents("section");
+//	   	console.log(textarea);
+    	textarea.click();
+        UI.createTextareaClone();
     },
 
     initTargetHeight: function() {
 		var targetHeight = 60;
-    	$('li.source').each(function(){
+    	$('.source').each(function(){
     		var sourceHeight = $(this).height();
 			if(sourceHeight > targetHeight) {
 				$('textarea',$(this).next()).css('height',sourceHeight+'px')
@@ -530,6 +559,47 @@ UI = {
 */
     },
 
+    progressiveTargetHeight: function(from) {
+		var targetHeight = 60;
+    	var segments = $(".source").length;
+		var numSegments = 1;
+		for(i=from;i<(from+numSegments);i++) {
+			var ss = $(".source")[i];
+			if(typeof ss == 'undefined') {
+				console.log('progressive TargetHeight time: ' + (new Date()-UI.initStart));
+				return false;
+			}
+
+    		var sourceHeight = $(ss).height();
+			if(sourceHeight > targetHeight) {
+				$('textarea',$(ss).next()).css('height',sourceHeight+'px')
+			}
+
+//			console.log($(".source")[i].id + ', from: ' + from);
+		}
+//		if(typeof $(".source")[i] == 'undefined') return false;
+		clearTimeout(UI.timerTest);
+		UI.timerTest = setTimeout("UI.progressiveTargetHeight("+(from+numSegments)+")", 50);
+//		UI.progressiveTargetHeight(from+numSegments);
+		
+/*
+    	$('.source').each(function(){
+    		var sourceHeight = $(this).height();
+			if(sourceHeight > targetHeight) {
+				$('textarea',$(this).next()).css('height',sourceHeight+'px')
+			}
+ 	   	});
+*/
+    },
+
+    setTargetHeight: function(textarea) {
+		var targetHeight = $(textarea).height();
+		var sourceHeight = $(textarea).parents('.target').prev().height();
+		if(sourceHeight > targetHeight) {
+			$(textarea).css('min-height',sourceHeight+'px')
+		}
+ 	},
+ 	
     createTextareaClone: function() {
         var ta = $('section.editor textarea');
         var shadowActive = $('<div id="shadowActiveTextarea"></div>').css({
@@ -545,25 +615,173 @@ UI = {
     },
 
 	startTextareaAutoresize: function(textarea) {
+		this.setTargetHeight(textarea);
+		this.textareaAutoresize(textarea);
 		$(textarea).bind('keyup.activeTextarea', function() {
-//			console.log();
-     		var shadow = $('#shadowActiveTextarea');
-     		var tx = $(this).val().replace(/</g, '&lt;')
-                                .replace(/>/g, '&gt;')
-                                .replace(/&/g, '&amp;')
-                                .replace(/\n/g, '<br/>');
-     		shadow.html(tx);
-      		var hh = shadow.height();
-      		if(hh < 30) hh = 30;
-    		$(this).css('height', hh);
+			UI.textareaAutoresize(this);
 		});
 	},
 
+	textareaAutoresize: function(textarea) {
+ 		var shadow = $('#shadowActiveTextarea');
+ 		var tx = $(textarea).val().replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;')
+                            .replace(/&/g, '&amp;')
+                            .replace(/\n/g, '<br/>');
+ 		shadow.html(tx);
+  		var hh = shadow.height();
+  		if(hh < 30) hh = 30;
+  		if(tx.match("<br/>$")) {
+  			hh = hh + 30;
+  		};
+		$(textarea).css('height', hh);
+	},
+	
 	endTextareaAutoresize: function(textarea) {
 		$(textarea).unbind('keyup.activeTextarea');
 	},
 
+	openSegment: function(textarea) {
+        this.openSegmentStart = new Date();
+
+		if($(textarea).getSelection().length) return false;
+		$(".statusmenu:visible").hide();
+//        console.log('prova1: ' + ((new Date())-this.openSegmentStart));
+
+
+		// da riprendere
+//			if(typeof UI.currentSegmentOb != 'undefined') UI.currentSegmentOb.removeClass('active');
+
+		// current and last opened object reference caching
+		this.lastOpenedSegmentOb = this.currentSegmentOb;
+		this.lastOpenedArticleOb = this.currentArticleOb;
+		this.lastOpenedTextarea = this.textarea;
+		
+		this.currentSegmentOb = segment = $(textarea).parents("section");
+		this.currentArticleOb = segment.parent();
+        this.textarea = $(".target textarea",segment);
+
+		this.scrollSegment(segment);
+//        console.log('prova2: ' + ((new Date())-this.openSegmentStart));
+
+		// da riprendere
+//			segment.addClass('active');
+		$(textarea).removeClass("indent"); // vediamo come rimuoverne la necessità
+
+		if (!($("div.sub-editor.matches .graysmall",segment).length)){     
+			this.getContribution(segment);
+		}
+//        console.log('prova3: ' + ((new Date())-this.openSegmentStart));
+
+		if ( $(segment).find(".toggle").is(":visible")){return null}
+//        console.log('   prova3.1: ' + ((new Date())-this.openSegmentStart));
+
+//            UI.lastOpenedSegmentOb.find(".close").click();
+        UI.opening = true;
+        this.closeSegment(this.lastOpenedSegmentOb);
+        UI.opening = false;
+//        console.log('   prova3.2: ' + ((new Date())-this.openSegmentStart));
+        $("div.grayed").show();
+//        console.log('prova4: ' + ((new Date())-this.openSegmentStart));
+
+        $(segment).addClass("editor");
+        $(textarea).focus();
+        this.editStart = new Date();
+        $(textarea).caretTo(0);
+
+        if(this.heavy) {
+        	$(".toggle",segment).show();
+        } else {
+        	$(".toggle",segment).show();
+/*
+            $(".toggle",segment).show("blind", {
+                direction: "vertical"
+            }, 250);
+*/
+       }
+//        console.log('prova5: ' + ((new Date())-this.openSegmentStart));
+        this.getContribution(segment,1);
+        this.startTextareaAutoresize(textarea);
+        segment.parent().addClass('open');
+        this.openSegmentStop = new Date();
+
+        this.closeOpenSegmentOperations = this.openSegmentStop - this.openSegmentStart;
+        if((typeof this.clickingButtonOperations == 'undefined')||(typeof this.clickingButtonOperations == 'null')) this.clickingButtonOperations = 0;
+//            console.log('clicking button operations: ' + this.clickingButtonOperations);
+        if((typeof this.changeStatusOperations == 'undefined')||(typeof this.changeStatusOperations == 'null')) this.changeStatusOperations = 0;
+//            console.log('change status operations: ' + this.changeStatusOperations);
+        console.log('segment close/open time: ' + this.closeOpenSegmentOperations);
+//            console.log('total time: ' + (this.clickingButtonOperations + this.changeStatusOperations + this.closeOpenSegmentOperations));
+        this.clickingButtonOperations = this.changeStatusOperations = this.closeOpenSegmentOperations =  undefined;
+        this.setCurrentSegment(segment);
+	},
+	
+	closeSegment: function(segment) {
+        if(typeof segment =='undefined') return true;
+        var closeStart = new Date();
+//        var segment = this.lastOpenedSegmentOb;
+        segment.parent().removeClass('open');
+
+        if(this.heavy) {
+        	$(".toggle",segment).hide();
+        } else {
+        	$(".toggle",segment).hide();
+/*
+            $(".toggle",segment).hide("blind", {
+                direction: "vertical"
+            },250);
+*/
+        }
+
+        $("div.grayed").hide();
+        var textarea = this.lastOpenedTextarea;
+        this.endTextareaAutoresize(textarea);
+		$(segment).removeClass("editor");
+		if(!UI.opening) this.setCurrentSegment(segment,1);
+
+
+/*
+        $(".toggle",segment).promise().done(function(){
+            console.log('sto per rimuovere la classe editor al segmento '+segment.attr('id'));
+            $(segment).removeClass("editor");
+//                $(segment).removeClass("editor").find(".editable_textarea").find("button").click(); // a che serve editable_textarea?
+        })
+*/
+//        console.log('tempo di close: ' + ((new Date())-closeStart));
+	},
+	
+	test: function(n) {
+//			$("section.editor").find(".close");
+        var start = new Date();
+        var segment = $('#segment-99560');
+		for(i=0;i<=n-1;i++) {
+			$(".editor").find(".close");
+		}
+        var stop = new Date();
+        console.log($(".editor").find(".close"));
+        console.log(n + ' iterations in ' + (stop-start) + 'ms');
+	},
+
+	setCurrentSegment: function(segment,closed) {
+        var id_segment = segment.attr('id').split('-')[1];
+        if(closed) id_segment = 0;
+        var file = this.currentArticleOb;
+        var id_job = $('div.projectbar',file).data('job').split('-')[1];
+        $.ajax({
+            url: config.basepath + '?action=setCurrentSegment',
+            data: {
+                action: 'setCurrentSegment',
+                id_segment: id_segment,
+                id_job: id_job
+            },
+            type: 'POST',
+            success: function(d){
+            }
+        });
+	},
+	
 	scrollSegment: function(segment) {
+		console.log(segment);
 		var spread = 20;
 		var current = $('section.editor');
 		var previousSegment = $(segment).prev('section');
@@ -586,6 +804,7 @@ UI = {
 		} else {//console.log('f');
 			destinationTop = destinationTop - spread;
 		}	
+//		console.log(segment.position().top + ' - ' + $(window).scrollTop());
 		$("html:not(:animated),body:not(:animated)").animate({ scrollTop: destinationTop-20}, 500 );
 	}	        
 
@@ -597,6 +816,11 @@ $(document).ready(function(){
 
 
 $(window).resize(function(){
-	UI.initTargetHeight();
+//	UI.initTargetHeight();
 });
 
+$('#segment-' + config.last_opened_segment).ready(function() {
+	if((config.last_opened_segment != '')&&(config.last_opened_segment != 0)) {
+    	UI.scrollSegment($('#segment-' + config.last_opened_segment));
+	}
+});

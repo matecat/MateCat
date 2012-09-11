@@ -2,7 +2,7 @@
 
 function extractSegments($files_path, $pid, $fid) {
 	
-	$mysql_hostname = "213.215.131.241";   // Database Server machine
+	$mysql_hostname = "10.30.1.241";   // Database Server machine
 	$mysql_database = "matecat_sandbox";     // Database Name
 	$mysql_username = "translated";   // Database User
 	$mysql_password = "azerty1";   // Database Password

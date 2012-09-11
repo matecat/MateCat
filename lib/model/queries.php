@@ -26,7 +26,7 @@ function getSegments($jid,$password, $start = 0) {
 
     $query = "select j.id as jid, j.id_project as pid,j.source,j.target, j.last_opened_segment, p.id_customer as cid, j.id_translator as tid,  
                 p.name as pname, p.create_date , fj.id_file, fj.id_segment_start, fj.id_segment_end, 
-                f.filename, f.mime_type, s.id as sid, s.segment, s.raw_word_count,
+                f.filename, f.mime_type, s.id as sid, s.segment, s.raw_word_count, s.internal_id,
                 st.translation, st.status
 
                 from jobs j 
@@ -101,6 +101,45 @@ function setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $tra
         return $errno * -1;
     }
     return $db->affected_rows;
+}
+
+function setCurrentSegmentInsert($id_segment, $id_job) {
+    $data = array();
+    $data['last_opened_segment'] = $id_segment;
+
+    $where = "id=$id_job";
+
+
+    $db = Database::obtain();
+    $db->update('jobs', $data, $where);
+    $err = $db->get_error();
+    $errno = $err['error_code'];
+    if ($errno != 0) {
+        log::doLog($err);
+        return $errno * -1;
+    }
+    // log::doLog($db->affected_rows);
+    return $db->affected_rows;
+}
+
+function getFilesForJob($id_job) {
+
+    $query = "select id_file from files_job where id_job=".$id_job;
+
+    $db = Database::obtain();
+    $results = $db->fetch_array($query);
+
+    return $results;
+}
+
+function getOriginalFile($id_file) {
+
+    $query = "select original_file from files where id=".$id_file;
+
+    $db = Database::obtain();
+    $results = $db->fetch_array($query);
+
+    return $results;
 }
 
 function getAllData($t, $am, $qof_go, $qof_id, $qof_pid, $qof_source, $qof_reqdate, $qof_tdelivdate, $qof_delivdate, $qof_cid, $qof_curroff, $qof_accoff, $qof_faxreq, $qof_status, $qof_am, $qof_limit) {

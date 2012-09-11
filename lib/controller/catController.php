@@ -78,6 +78,10 @@ class catController extends viewcontroller {
                 $this->pname = $seg['pname'];
             }
 
+            if (empty($this->last_opened_segment)) {
+                $this->last_opened_segment = $seg['last_opened_segment'];
+            }
+			
             if (empty($this->cid)) {
                 $this->cid = $seg['cid'];
             }
@@ -94,11 +98,11 @@ class catController extends viewcontroller {
                 $this->create_date = $seg['create_date'];
             }
 
-	     if (empty($this->source)) {
-		$s=explode("-", $seg['source']);
-		$source=strtoupper($s[0]);
-                $this->source = $source;
-            }
+		    if (empty($this->source)) {
+				$s=explode("-", $seg['source']);
+				$source=strtoupper($s[0]);
+	            $this->source = $source;
+	        }
             
             $id_file = $seg['id_file'];
             if (!isset($this->data["$id_file"])) {                
@@ -109,7 +113,9 @@ class catController extends viewcontroller {
                 $this->data["$id_file"]['id_segment_end'] = $seg['id_segment_end'];                
                 $this->data["$id_file"]['source']=$lang_handler->iso2Language($seg['source']);
                 $this->data["$id_file"]['target']=$lang_handler->iso2Language($seg['target']);
-                $this->data["$id_file"]['segments'] = array();
+                $this->data["$id_file"]['source_code']=$seg['source'];
+                $this->data["$id_file"]['target_code']=$seg['target'];
+				$this->data["$id_file"]['segments'] = array();
             }
             //if (count($this->data["$id_file"]['segments'])>100){continue;}
             $this->filetype_handler = new filetype($seg['mime_type']);
@@ -117,8 +123,10 @@ class catController extends viewcontroller {
 
 
             unset($seg['id_file']);
-	    unset($seg['source']);
+	    	unset($seg['source']);
             unset($seg['target']);
+	    	unset($seg['source_code']);
+            unset($seg['target_code']);
             unset($seg['mime_type']);
             unset($seg['filename']);
             unset($seg['jid']);
@@ -169,13 +177,16 @@ class catController extends viewcontroller {
         $this->template->cid = $this->cid;
         $this->template->create_date = $this->create_date;
         $this->template->pname = $this->pname;
-	$this->template->pid=$this->pid;
-	$this->template->source=$this->source;
+		$this->template->pid=$this->pid;
+		$this->template->source=$this->source;
+		//$this->template->source_code=$this->source_code;
+		//$this->template->target_code=$this->target_code;
+		$this->template->last_opened_segment=$this->last_opened_segment;
 
 
-//        echo "<pre>";
-//        print_r ($this->template);
-//        exit;
+        //echo "<pre>";
+        //print_r ($this->template);
+        //exit;
         ;
     }
 
