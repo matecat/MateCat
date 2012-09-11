@@ -262,8 +262,8 @@ article{border:1px solid #adadad;border-top:none;margin:20px auto 100px auto;bac
 
 .open .footer{height:100%;}
 
-.text{width:100%;margin:1px 0 0 0;padding:0px 0 0px 0;position:relative;-webkit-transition: all  80ms ease-in;background:#f1f2f2;}
-
+.text{width:100%;margin:1px 0 0 0;padding:0px 0 0px 0;position:relative;-webkit-transition: all  80ms ease-in;background:#f1f2f2;overflow:hidden}
+.editor .text{overflow:visible}
 
 
 .editor .text {padding:5px 0 0px 0;}
@@ -605,6 +605,6 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 
 
 
-.size{background:#000 !important;width:50px}
+
 
 

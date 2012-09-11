@@ -29,11 +29,11 @@
   margin-bottom: 5px;
 }
 .files .progress {
-  width: 300px
+  width: 500px;border:1px solid  #ccc;background:#fff
 }
 .files .progress,
 .fileupload-buttonbar .progress {
-  height: 20px;
+  height: 15px;
 }
 .files .ui-progressbar-value,
 .fileupload-buttonbar .ui-progressbar-value {

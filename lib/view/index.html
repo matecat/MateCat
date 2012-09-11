@@ -38,7 +38,6 @@
             <div class="wrapper">   
 
 				<form id="fileDownload" action="/?action=downloadFile" method="post">
-					<input type="hidden" name="test" value="vediamo" />
 					<input type="hidden" name="filename" tal:attributes ="value string:${pname}-${pid}" />
 					<input name="" type="submit" value="DOWNLOAD PROJECT" class="downloadtr-button approved" />
 				</form>
@@ -213,7 +212,7 @@
 
                 <tal:block tal:define="segment php:array()" tal:repeat="segment file_data/segments" >
 
-                    <section tal:attributes="id string:segment-${segment/sid}" tal:define="coso string:${segment/sid}" id="001" class="">
+                    <section tal:attributes="id string:segment-${segment/sid}; class php:'status-'.((segment['status']=='')?'draft':strtolower(segment['status']))" tal:define="coso string:${segment/sid}" id="001" class="">
 
                     	<!--
 

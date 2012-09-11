@@ -216,6 +216,10 @@ UI = {
  		$(".downloadtr-button").on('click',function(e) {          
 
             e.preventDefault();
+
+			window.open('/?action=downloadFile','mywindow','left=20,top=20,width=500,height=500,toolbar=1,resizable=0');
+
+/*
         	var id_job = $('div.projectbar').data('job').split('-')[1];
 
 	        $.ajax({
@@ -229,7 +233,7 @@ UI = {
 	            	console.log('success');
 	            }
 	        });
-/**/
+*/
         })
 
 //		this.initTargetHeight();
@@ -468,15 +472,15 @@ UI = {
     },
 
     setStatus: function(segment,status) {
-//		$(".status",segment).addClass("col-"+status);
 		segment.removeClass("status-draft status-translated status-approved status-notapproved").addClass("status-"+status);
 		this.checkStatusCompleteness();
     },
     
     checkStatusCompleteness: function() {
-    	var t = 'draft';
-    	if(!$('section.status-draft').length) t = 'PROJECT';
-    	/*MODIFICA LUCA VALUE STATICO E CAMBIARE COLORE DI BG IN BASE ALLO STATO */
+    	var t = 'approved';
+    	if($('section.status-translated').length) t = 'translated';
+    	if($('section.status-draft').length) t = 'draft';
+    	$('.downloadtr-button').removeClass("draft translated approved").addClass(t);
     },
     
     findEmptySegment: function() {
@@ -781,13 +785,13 @@ UI = {
 	},
 	
 	scrollSegment: function(segment) {
-		console.log(segment);
-		var spread = 20;
+//		console.log(segment);
+		var spread = 23;
 		var current = $('section.editor');
 		var previousSegment = $(segment).prev('section');
 		if(!previousSegment.length) {
 			previousSegment = $(segment);
-			spread = 30;
+			spread = 33;
 		};
 		var destination = "#"+previousSegment.attr('id');
 		var destinationTop = $(destination).offset().top;

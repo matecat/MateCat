@@ -19,11 +19,13 @@ h2.payoff
 
 /*upload table*/
 .upload-table {width:100%;margin:0;}
-.upload-table td{height:auto;padding:5px 10px;text-align:left;border-bottom:1px dashed #ccc;}
-.upload-table tr{-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;}
+.upload-table td{height:auto;padding:5px 10px;text-align:left;border-bottom:1px dashed #ccc}
+.upload-table tr{-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;border-bottom:1px dashed #ccc}
+.upload-table tr:hover{background:#fff}
+
 
 .preview {border-right:none !Important; width:30px;}
-.preview img{margin-left:10px}
+.preview img{margin:5px 0 0 10px}
 
 .delete, .cancel{border-right:none !important;}
 .delete .btn, .cancel .btn{float:right;font-weight:bold;}
@@ -173,10 +175,7 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 	display: none !important;
 	}
 
-.upload-files.uploaded .upload-table td
-	{
-	border-bottom: 0px dashed #ccc !important;
-	}
+
 	
 	
 .creating .uploadloader{display:block;}
@@ -207,6 +206,9 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 
 .progress-extended{display:none}
 
-.upload-table tr, .files tr{border-bottom:1px dashed #ccc !important}
+.error{color:#FF3300;text-align:left !Important}
 
 .dragging .file-drag, .uploaded .file-drop, .uploaded .fileupload-buttonbar{height:0;}
+
+.name{width:300px;}
+.size{width:100px}

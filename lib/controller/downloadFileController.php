@@ -5,7 +5,7 @@ include_once INIT::$MODEL_ROOT . "/queries.php";
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-class downloadFileController extends ajaxcontroller {
+class downloadFileController extends viewcontroller {
 
     private $id_job;
 
@@ -21,7 +21,8 @@ class downloadFileController extends ajaxcontroller {
     }
 
     public function doAction() {
-        
+        echo "hghj";
+		exit;
         $files = getFilesForJob($this->id_job);
 		$id_file = $files[0]['id_file'];
 		$originalResult = getOriginalFile($id_file);
@@ -48,7 +49,7 @@ class downloadFileController extends ajaxcontroller {
             $this->password = 'sldfjw322d';
         }
         $data = getSegments($this->id_job, $this->password, $this->start_from);
-		$stringa = "";
+//		$stringa = "";
 
         foreach ($data as $i => $seg) {
 /*
@@ -69,10 +70,17 @@ class downloadFileController extends ajaxcontroller {
 			}
 		
 //        	$stringa .= $i.'/'.$seg['sid'].', ';
-        	$stringa .= $i.'/'.$seg['internal_id'].', ';
+//        	$stringa .= $i.'/'.$seg['internal_id'].', ';
 			
          }
-
+		$buffer = ob_get_contents();
+		ob_clean();
+ 		header("Content-type: text/plain");
+		header("Content-Disposition: attachment; filename=prova");
+		header("Pragma: no-cache");
+		header("Expires: 0");
+		echo $modified;
+		exit;
 		
 /*
 		$buffer = ob_get_contents();
@@ -88,12 +96,15 @@ class downloadFileController extends ajaxcontroller {
 //		return $original_file;
 
 //        log::doLog($insertRes);
-           
+
+/*           
         $this->result['code'] = 1;
         $this->result['data'] = "OK";
         $this->result['original'] = $original;
         $this->result['modified'] = $modified;
-        $this->result['stringa'] = $stringa;
+*/
+
+//        $this->result['stringa'] = $stringa;
         
     }
 
