@@ -23,17 +23,6 @@
 <!--
 <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/themes/base/jquery-ui.css" id="theme"/>
 -->
-<link rel="stylesheet" href="/public/css/jquery-ui-1.8.20.custom.css"/>
-
-<!-- jQuery Image Gallery styles -->
-<!--
-<link rel="stylesheet" href="http://blueimp.github.com/jQuery-Image-Gallery/css/jquery.image-gallery.min.css"/>
--->
-<link rel="stylesheet" href="/public/css/jquery.image-gallery.min.css"/>
-
-<!-- CSS to style the file input field as button and adjust the jQuery UI progress bars -->
-<link rel="stylesheet" href="/public/css/jquery.fileupload-ui.css"/>
-
 
 <link rel="stylesheet" href="/public/css/style.css"/>
 <link rel="stylesheet" href="/public/css/upload.css"/>
@@ -55,12 +44,12 @@
 
         <header>
             <div class="wrapper">   
-                <a href="#"><img src="/public/img/logo.png" class="logo" /></a>
+                <a href="/" class="logo"></a>
             </div>
         </header>
         <div class="wrapper-upload">
             <h1>Translate an XLIFF file</h1>
-            <h2 class="payoff">MateCat gives you more matches than any other translation tool.</h2>
+            <h2 class="payoff">Matecat gives you more matches than any other translation tool.</h2>
             
             
             
@@ -84,7 +73,7 @@
                 </select>
             </div>
 
-            <div class="translate-box" style="margin-right:0;margin-left:0;">
+            <div class="translate-box" style="margin-left:0;">
                 <h2>To</h2>
                 <select name="target-lang" id="target-lang">
                     <option value="en-GB">English</option>
@@ -97,25 +86,41 @@
                 <!--<a href="#" id="multiple-link">Multiple languages?</a>-->
             </div>
 
+            <div class="translate-box" style="margin-right:0 !important">
+                <h2>Machine Translation</h2>
+                    <select style="width:240px" name="mt_engine" id="mt_engine" tal:define="mt_engine php:array()" >                    <option value="" selected="selected">MyMemory (All Pairs)</option>
+                    <tal:block  tal:repeat="mt_engine mt_engines">
+                        <option value="--" tal:attributes="value mt_engine/id" tal:content="mt_engine/name">---</option>
+                    </tal:block>
+                </select>
+            </div>
+            
+            
+<!--            <div class="translate-box">
+                <h2 >TMS Server</h2>
+                <select name="tms_engine" id="tms_engine" tal:define="tms_engine php:array()" >                    
+                    <tal:block  tal:repeat="tms_engine tms_engines">
+                        <option value="- -" tal:attributes="value tms_engine/id" tal:content="tms_engine/name">- - -</option>
+                    </tal:block>
+                </select>
+            </div>
+-->
 
             <div class="cl"></div>
-           <p class="error-message"> Error: bal bla bla dsfdfsdsds
-           ds 
-           dsa
-           ds
-           d
-           s ds
-           dsaddsdsdads kj</p>
+           <p class="error-message"> Error: the errmsg will appear here...</p>
             <div class="cl"></div>
             <div class="upload-files drag">
+            
+            <form id="fileupload" action="lib/utils/fileupload/" method="POST" enctype="multipart/form-data">
+            
             	<div id="overlay"></div>
             	<div id="droptest">
-					<form id="fileupload" action="lib/utils/fileupload/" method="POST" enctype="multipart/form-data">
+					
 	            		<p class="file-drag">
-	                        <strong>Drag and drop</strong> your XLIFF here. <br />
+	                        <strong>Drag and drop</strong> your XLIFF here<br />
 	                        or</p>
 						<p class="file-drop">
-	                        <strong>Drop it</strong> here. 
+	                         <strong>Drop it</strong> here. 
 	                    </p>
 	
 						<div class="container">
@@ -162,7 +167,7 @@
 					        <table cellpadding="0" cellspacing="0" class="upload-table table-striped"  role="presentation">
 					        <tbody class="files" data-toggle="modal-gallery" data-target="#modal-gallery"></tbody></table>
 					       
-						       
+						    <!--   
 						    <div class="upload-footer">
 								<p>Continue to drag and drop your XLIFF here or    </p>
 						    
@@ -173,17 +178,39 @@
 						        </span> 
 						         
 						        <div class="cl"></div>     
-						    </div>  <!-- .upload-footer -->
+						    </div>
+						    -->
+						    
+						     <!-- .upload-footer -->
 						    
 						    <div class="cl"></div>    
 						    
 						</div> <!-- #container -->
+                        
 	
-	    			</form>           
+	    			           
 				</div>
+                
+                
+                
+           <div class="cl"></div> 
+
+<div class="btncontinue"><p><strong>Drag and drop</strong> your XLIFF here or </p>
+<span class="btn fileinput-button">
+<i class="icon-plus icon-white"></i>
+ <span>Add files...</span>
+<input type="file" name="files[]" multiple="multiple" class="multiple-button"/>
+</span> 
+</div>
+</form>
             </div> <!-- .upload-files -->
-            
+       
+       
+       <div class="uploadbtn-box">     
  <span class="uploadloader"></span>  <input name="" type="button" class="uploadbtn disabled" value="Start Translating" disabled="disabled" />
+       <p class="enter">Press Enter</p>
+       </div>
+       
        </div>
 
 
@@ -192,7 +219,7 @@
 <script id="template-upload" type="text/x-tmpl">
 {% for (var i=0, file; file=o.files[i]; i++) { %}
     <tr class="template-upload fade">
-        <td class="preview"> <img src="/public/img/xliff-icon.png" /></td>
+        <td class="preview"> <img src="/public/img/xliff-icon-retina.png" width="30" height="29" /></td>
         <td class="name"><span>{%=file.name%}</span></td>
         <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
         {% if (file.error) { %}
@@ -217,8 +244,21 @@
             </button>
         {% } %}</td>
     </tr>
+	
+
+	
+	
 {% } %}
+
+
+
+
+
+
 </script>
+
+
+
 <!-- The template to display files available for download -->
 <script id="template-download" type="text/x-tmpl">
 {% for (var i=0, file; file=o.files[i]; i++) { %}
@@ -230,7 +270,7 @@
             <td class="error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span> {%=locale.fileupload.errors[file.error] || file.error%}</td>
         {% } else { %}
             <td class="preview">
-                <img src="/public/img/xliff-icon.png" />
+                <img src="/public/img/xliff-icon-retina.png" width="30" height="29" />
             </td>
             <td class="name">{%=file.name%}</td>
             <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
@@ -244,8 +284,13 @@
           
         </td>
     </tr>
+	
+	
+    
 {% } %}
 </script>
+
+	
 <script src="/public/js/lib/jquery.js"></script>
 <script src="/public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
 

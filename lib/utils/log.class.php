@@ -52,9 +52,16 @@ class Log {
         $now = date('Y-m-d H:i:s');
         //$ip = gethostname(); // only for PHP 5.3
         $ip=php_uname('n');
-        if (array_keys($_SERVER, 'REMOTE_ADDR')) {
+        if (array_key_exists('REMOTE_ADDR',$_SERVER)) {
             $ip = $_SERVER['REMOTE_ADDR'];
         }
+
+/*
+if ($ip != "192.168.1.53"){
+	fclose ($fh);
+	return 0;
+}
+*/
         $stringDataInfo = "[$now ($ip)]";
         $stringDataInfo.=$trace[0]['class']."->".$trace[0]['function']."(line:".$trace[0]['line'].")";
         $stringData = "$stringDataInfo : $string\n";//. print_r ($trace,true);

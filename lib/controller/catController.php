@@ -3,6 +3,7 @@
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include INIT::$UTILS_ROOT . "/mymemory_queries_temp.php";
 include INIT::$UTILS_ROOT . "/filetype.class.php";
+include INIT::$UTILS_ROOT . "/cat.class.php";
 include INIT::$UTILS_ROOT . "/langs/languages.inc.php";
 
 /**
@@ -16,22 +17,31 @@ class catController extends viewcontroller {
     private $data = array();
     private $cid = "";
     private $jid = "";
+    private $tid = "";
     private $password="";
     private $source="";
     private $pname = "";
     private $create_date = "";
     private $filetype_handler = null;
     private $start_from = 0;
+    private $page = 0;
 
+    private $job_stats=array();
     public function __construct() {
+//    	log::doLog('provalog');
        // echo ".........\n";
         parent::__construct();
         parent::makeTemplate("index.html");
         $this->jid = $this->get_from_get_post("jid");
-	$this->password=$this->get_from_get_post("password");
+		$this->password=$this->get_from_get_post("password");
         $this->start_from = $this->get_from_get_post("start");
-        if (is_null($this->start_from)) {
-            $this->start_from = 0;
+        $this->page = $this->get_from_get_post("page");
+        $this->step = 200;
+        if (is_null($this->page)) {
+            $this->page = 1;
+        }
+		if (is_null($this->start_from)) {
+            $this->start_from = ($this->page-1)*$this->step;
         }
 
 	if (is_null($this->jid) and is_null($this->password)) {
@@ -40,7 +50,7 @@ class catController extends viewcontroller {
         }
     }
 
-    private function stripTagesFromSource($text) {
+    private function stripTagsFromSource($text) {
         //       echo "<pre>";
         $pattern_g_o = '|(<.*?>)|';
         $pattern_g_c = '|(</.*?>)|';
@@ -54,26 +64,52 @@ class catController extends viewcontroller {
         //  echo "after2  -->  $text \n";
 //
         $text = preg_replace($pattern_g_c, "", $text);
+        $text= str_replace ("&nbsp;", " ", $text);
         return $text;
     }
 
+	private function parse_time_to_edit($ms){
+        if ($ms <= 0) {
+            return array("00", "00", "00", "00");
+        }
+		
+		$usec = $ms % 1000;
+		$ms = floor($ms/ 1000);
+
+		$seconds = str_pad($ms % 60,2,"0",STR_PAD_LEFT);
+		$ms = floor($ms / 60);
+		
+		$minutes = str_pad($ms % 60,2 ,"0", STR_PAD_LEFT);
+		$ms = floor($ms / 60); 
+		
+	        $hours = str_pad($ms % 60,2,"0",STR_PAD_LEFT);
+                $ms = floor($ms / 60); 
+		
+		return array($hours,$minutes,$seconds,$usec);
+	
+	}
     public function doAction() {
         $lang_handler=languages::getInstance("en");       
+//	    $start = ($page-1)*$step;
+        $data = getSegments($this->jid, $this->password, $this->start_from, $this->step);
 
-        $data = getSegments($this->jid, $this->password, $this->start_from);
 //        echo "<pre>";
 //        print_r ($data);
 //        exit;
 //        
         $first_not_translated_found = false;
         foreach ($data as $i => $seg) {
-            $seg['segment'] = $this->stripTagesFromSource($seg['segment']);
-            $seg['segment'] = trim($seg['segment']);
+	  		// remove this when tag management enabled
+        	$seg['segment'] = $this->stripTagsFromSource($seg['segment']);
+			
+/*        	
+//            $seg['segment'] = $this->stripTagsFromSource($seg['segment']);
+//            $seg['segment'] = trim($seg['segment']);
 
             if (empty($seg['segment'])) {
                 continue;
             }
-
+*/
             if (empty($this->pname)) {
                 $this->pname = $seg['pname'];
             }
@@ -91,20 +127,36 @@ class catController extends viewcontroller {
             }
 
             if (empty($this->tid)) {
-                $this->cid = $seg['tid'];
+                $this->tid = $seg['tid'];
             }
 
             if (empty($this->create_date)) {
                 $this->create_date = $seg['create_date'];
             }
 
+            if (empty($this->source_code)) {
+	            $this->source_code = $seg['source'];
+	        }
+
+	        if (empty($this->target_code)) {
+	            $this->target_code = $seg['target'];
+	        }
+
 		    if (empty($this->source)) {
 				$s=explode("-", $seg['source']);
 				$source=strtoupper($s[0]);
 	            $this->source = $source;
 	        }
-            
+
+		    if (empty($this->target)) {
+				$t=explode("-", $seg['target']);
+				$target=strtoupper($t[0]);
+	            $this->target = $target;
+	        }
+
             $id_file = $seg['id_file'];
+			$file_stats =CatUtils::getStatsForFile($id_file);
+			
             if (!isset($this->data["$id_file"])) {                
                 $this->data["$id_file"]['jid'] = $seg['jid'];		
                 $this->data["$id_file"]["filename"] = $seg['filename'];
@@ -115,6 +167,7 @@ class catController extends viewcontroller {
                 $this->data["$id_file"]['target']=$lang_handler->iso2Language($seg['target']);
                 $this->data["$id_file"]['source_code']=$seg['source'];
                 $this->data["$id_file"]['target_code']=$seg['target'];
+                $this->data["$id_file"]['file_stats'] = $file_stats;		
 				$this->data["$id_file"]['segments'] = array();
             }
             //if (count($this->data["$id_file"]['segments'])>100){continue;}
@@ -139,6 +192,8 @@ class catController extends viewcontroller {
             unset($seg['id_segment_start']);
 
             $seg['segment'] = $this->filetype_handler->parse($seg['segment']);
+            $seg['parsed_time_to_edit']=  $this->parse_time_to_edit($seg['time_to_edit']); 
+	    //$seg['time_to_edit']=explode(":", $seg['time_to_edit']); // from DB(time_to_sec function used) HH:MM:SS
 
          /*   if (!$first_not_translated_found and empty($seg['translation'])) { //get matches only for the first segment                
                 $first_not_translated_found = true;
@@ -166,25 +221,45 @@ class catController extends viewcontroller {
             }*/
 
             $this->data["$id_file"]['segments'][] = $seg;
+						//print_r ($this->job_stats); exit;
+
+			//log::doLog('NUM SEGMENTS 2: '.count($this->data["$id_file"]['segments']));
+
+
+
         }
+	        
+        $this->job_stats = CatUtils::getStatsForJob($this->jid);
+
     //   echo "<pre>";
     //   print_r($this->data);
     //   exit;
     }
 
     public function setTemplateVars() {
-        $this->template->data = $this->data;
+        $this->template->jid = $this->jid;
+        $this->template->password=$this->password;
         $this->template->cid = $this->cid;
         $this->template->create_date = $this->create_date;
         $this->template->pname = $this->pname;
 		$this->template->pid=$this->pid;
+        $this->template->tid=$this->tid;
 		$this->template->source=$this->source;
-		//$this->template->source_code=$this->source_code;
-		//$this->template->target_code=$this->target_code;
+		$this->template->target=$this->target;
+	
+	
+//		$this->template->stats=$stats[0]['TOTAL'];
+		
+		$this->template->source_code=$this->source_code;
+		$this->template->target_code=$this->target_code;
+		
 		$this->template->last_opened_segment=$this->last_opened_segment;
+		$this->template->data = $this->data;
+	
+		$this->template->job_stats=$this->job_stats
 
 
-        //echo "<pre>";
+       // echo "<pre>";
         //print_r ($this->template);
         //exit;
         ;

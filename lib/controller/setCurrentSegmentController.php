@@ -34,7 +34,7 @@ class setCurrentSegmentController extends ajaxcontroller {
         
         $insertRes = setCurrentSegmentInsert($this->id_segment, $this->id_job);
 
-        log::doLog($insertRes);
+        // log::doLog($insertRes);
             
         $this->result['code'] = 1;
         $this->result['data'] = "OK";

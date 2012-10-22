@@ -1,7 +1,4 @@
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
+UI = null;
 
 UI = {
     init: function() {
@@ -9,44 +6,85 @@ UI = {
         this.initStart = new Date();
  		this.numMatchesResults = 2;
  		this.numSegments = $('section').length;
- 		this.heavy = (this.numSegments > 500)? true : false;
+        this.body = $('body');
+        this.editarea = '';
 
 		$(document).ready(function() {
-		    if(config.last_opened_segment == '') {
+            var hash=window.location.hash.substr(1);
+            if (hash!="" && $("#segment-"+hash).length>0){
+              UI.gotoSegment(hash);
+            }else if(config.last_opened_segment == '') {
 		    	UI.findEmptySegment();
 		    } else if(config.last_opened_segment == 0) {
 		    	
-		    } else {
+		    } else if($('#segment-' + config.last_opened_segment).length == 0) {
+            	UI.gotoSegment($('section.status-draft, section.status-rejected, section.status-new').first().attr('id').split('-')[1]);
+		    }
+		    else {
 		    	UI.findLastOpenedSegment();
 		    }
-/*
-		    if(config.last_opened_segment != '') {
-		    	UI.findLastOpenedSegment();
-		    } else {
-		    	UI.findEmptySegment();
-		    }
-*/
 		})
-
-      
-        $("body, .target textarea").bind('keydown','Ctrl+return', function(e){
+		
+      	this.reinitMMShortcuts();
+        $("body, .target .editarea").bind('keydown','Ctrl+return', function(e){
             e.preventDefault();
-            $('.editor .Translated').click();
+            $('.editor .translated').click();
+        }).bind('keydown','Meta+return', function(e){ 
+            e.preventDefault();
+            $('.editor .translated').click();
+        }).bind('keydown','Ctrl+pageup', function(e){ 
+            e.preventDefault();
+            alert('pageup');;
         }).bind('keydown','Ctrl+down', function(e){ 
             e.preventDefault();
-            $('.editor .draft').click();
-        });
-
-        $("input.Translated").bind('keydown','tab', function(e){ 
+            e.stopPropagation();
+            UI.gotoNextSegment();
+        }).bind('keydown','Meta+down', function(e){ 
             e.preventDefault();
-            $(this).parents('section').find('textarea').focus();
+            e.stopPropagation();
+            UI.gotoNextSegment();
+        }).bind('keydown','Ctrl+up', function(e){ 
+            e.preventDefault();
+            e.stopPropagation();
+            UI.gotoPreviousSegment();
+        }).bind('keydown','Meta+up', function(e){ 
+            e.preventDefault();
+            e.stopPropagation();
+            UI.gotoPreviousSegment();
+        }).bind('keydown','Ctrl+left', function(e){ 
+            e.preventDefault();
+            UI.gotoOpenSegment();
+        }).bind('keydown','Meta+left', function(e){ 
+            e.preventDefault();
+            UI.gotoOpenSegment();
+        }).bind('keydown','Ctrl+right', function(e){ 
+            e.preventDefault();
+            UI.copySource();
+        }).bind('keydown','Meta+right', function(e){ 
+            e.preventDefault();
+            UI.copySource();
+        })
+
+        $("input.translated").bind('keydown','tab', function(e){ 
+            e.preventDefault();
+            $(this).parents('section').find('.editarea').focus();
+        })      
+
+        $("header .filter").click(function(e){ 
+            e.preventDefault();
+            UI.body.toggleClass('filtering');
+        })      
+
+        $(".target .editarea").bind('keydown','Shift+tab', function(e){ 
+            e.preventDefault();
+            $(this).parents('section').find('input.translated').focus();
         })      
  
         $('.sbm').tabify();
         $(".sbm a").click(function() {
             return false
         });
-        jQuery('textarea').trigger('update');
+        jQuery('.editarea').trigger('update');
 
         $("div.notification-box").mouseup(function() {
             return false;
@@ -59,11 +97,7 @@ UI = {
             }
         });	
     
-/*
-		var preventTargetModification = $('li.target textarea').bind("keydown.modification", function(e) {
-            e.preventDefault();
-		});
-*/     
+  
         $(".search-icon, .search-on").click(function(e) {          
             e.preventDefault();
             $("div#search").toggle();
@@ -75,7 +109,8 @@ UI = {
             $(".stats").toggle();
         });
 
-
+		// for future comments implementation
+/*
  		$("article").on('click','div.comments span.corner',function(e) {          
             e.preventDefault();
             $(".comment-area").hide();
@@ -103,7 +138,9 @@ UI = {
             $("article").removeClass("maincomment").animate({
                 width: '90.5%'
             }).removeClass("maincomment");
-        }).on('click','a.number',function(e) {  
+        })
+*/        
+        $("article").on('click','a.number',function(e) {  
 			e.preventDefault();
 			e.stopPropagation();
 			return false;
@@ -145,28 +182,16 @@ UI = {
  		$("article").on('click','a.percentuage',function(e) {          
             e.preventDefault();
             e.stopPropagation();
-        }).on('click','.target textarea',function(e) {
-            UI.openSegment(this);     
-        }).on('click','input.draft, input.Translated, input.approved',function(e) {
-            UI.editStop = new Date();
-            UI.editTime = UI.editStop - UI.editStart;
-  			var segment = $(this).parents("section");
-            var statusSwitcher = $(".status",segment);
-
-            statusSwitcher.removeClass("col-approved col-notapproved col-done col-draft");
-            var nextSegment = UI.getNextSegment(segment);
-            if(!nextSegment.length) {
-            	$(".editor:visible").find(".close").click();
-            	return false;
-            };
-            UI.buttonClickStop = new Date();
-            UI.clickingButtonOperations = UI.buttonClickStop - UI.editStop;
-            $(".target textarea", nextSegment).click();
-//            console.log('UI.editTime: ' + UI.editTime);
-//            console.log('UI.buttonClickStop: ' + UI.buttonClickStop + '; UI.editStop: ' + UI.editStop);
-//            console.log('operations after clicking a button but before autoclicking on the next textarea: ' + UI.clickingButtonOperations);
+        }).on('click','.target .editarea',function(e) {
+	        if((!$(this).is(UI.editarea))||(UI.editarea == '')||(!UI.body.hasClass('editing'))) {
+	        	UI.openSegment(this); 
+	        }    
+        }).on('click','input.draft, input.translated, input.approved',function(e) {
+        	UI.setStatusButtons(this);
             return false;
-        }).on('click','input.Translated',function(e) {
+/**/
+        }).on('click','input.translated',function(e) {
+//        	UI.copyToNextIfSame();
         	UI.changeStatus(this,'translated',0);
             UI.changeStatusStop = new Date();
             UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
@@ -178,9 +203,10 @@ UI = {
         	UI.changeStatus(this,'approved',0);
             UI.changeStatusStop = new Date();
             UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
+
         }).on('click','a.d, a.a, a.r, a.f',function(e) {          
             var segment = $(this).parents("section");
-            $("a.status",segment).removeClass("col-approved col-notapproved col-done col-draft");
+            $("a.status",segment).removeClass("col-approved col-rejected col-done col-draft");
             $("ul.statusmenu",segment).toggle();
             return false;
         }).on('click','a.d',function(e) {          
@@ -188,61 +214,31 @@ UI = {
         }).on('click','a.a',function(e) {          
          	UI.changeStatus(this,'approved',1);
         }).on('click','a.r',function(e) {          
-        	UI.changeStatus(this,'notapproved',1);
+        	UI.changeStatus(this,'rejected',1);
         }).on('click','a.f',function(e) {          
         	UI.changeStatus(this,'draft',1);
         }).on('click','a.copysource',function(e) {   
-            var segment = $(this).parents("section");
-            var source_val = $.trim($(".source > span.original",segment).text());
-            $(".target textarea",segment).val(source_val).keyup().focus();
-            $(".target textarea",segment).effect("highlight", {}, 1000);
-            return false;
+            e.preventDefault();
+            UI.copySource();
         }).on('click','.tagmenu, .warning, .viewer, .notification-box li a',function(e) {          
             return false;
         }).on('click','a.close',function(e) {          
             e.preventDefault();
-            UI.closeSegment(UI.currentSegmentOb);
-        }).on('click','input.con-submit',function(e) {          
+            UI.closeSegment(UI.currentSegment);
+        });
+/*        
+        $("article").on('click','input.con-submit',function(e) {          
             var segment = $(this).parents("section");
             UI.addSegmentComment(segment);
-        }).on('dblclick','ul.graysmall',function(e) {
-            var segment = $(this).parents("section");
-			$('textarea',segment).val($('li.b',this).text()).focus();
         });
-
-
-		this.checkStatusCompleteness();
-        $('#fileDownload').append('<input type="hidden" name="file_id" value="' + $('article').attr('id').split('-')[1] + '" />');
- 		$(".downloadtr-button").on('click',function(e) {          
-
-            e.preventDefault();
-
-			window.open('/?action=downloadFile','mywindow','left=20,top=20,width=500,height=500,toolbar=1,resizable=0');
-
-/*
-        	var id_job = $('div.projectbar').data('job').split('-')[1];
-
-	        $.ajax({
-	            url: config.basepath + '?action=downloadFile',
-	            data: {
-                	action: 'downloadFile',
-	            	id_job: id_job
-	            },
-	            type: 'POST',
-	            success: function(d){
-	            	console.log('success');
-	            }
-	        });
 */
+ 		$(".end-message-box a.close").on('click',function(e) {          
+            e.preventDefault();
+            UI.body.removeClass('justdone');
         })
 
-//		this.initTargetHeight();
-//        this.progressiveTargetHeight(0);
         this.initEnd = new Date();
         this.initTime = this.initEnd - this.initStart;
-        
-        console.log('init time: ' + this.initTime);
-
     },
 
     getPercentuageClass: function (match){
@@ -271,38 +267,30 @@ UI = {
         return percentageClass;
     },
 
-    getContribution: function(currentSegment,next) {
-        next = (typeof next == 'undefined')? 0 : 1;
-        if(next){
-        	var n = this.getNextSegment(currentSegment);
-        } else {
-        	var n = $(currentSegment);        
-        }
-        if($(n).hasClass('loaded')) return false;
-        if((!n.length)&&(next)) return false;
+    getContribution: function(segment,next) {
+      
+        var n = (next)? this.getNextSegment(segment,'untranslated') : $(segment);
 
+        if($(n).hasClass('loaded')) {
+        	return false;
+        }
+        if((!n.length)&&(next)) return false;
         var id = n.attr('id');
-//        console.log(id);
         var id_segment = id.split('-')[1];
-        var txt = $('.source .original',n).text();
-        var file = $(currentSegment).parents('article');
-        var id_job = $('div.projectbar',file).data('job').split('-')[1];
-        
-        
+        var txt = $('.original',n).text();
         
         if(!next) {
         	$(".loader",n).addClass('loader_on')
-        	$(".percentuage",n).hide();
         }
-		
         $.ajax({
             url: config.basepath + '?action=getContribution',
             data: {
                 action: 'getContribution',
                 id_segment: id_segment,
                 text: txt,
-                id_job: id_job,
-                num_results: this.numMatchesResults
+                id_job: config.job_id,
+                num_results: this.numMatchesResults,
+                id_translator : config.id_translator
             },
             type: 'POST',            
             dataType: 'json',
@@ -312,60 +300,104 @@ UI = {
             },
             success: function(d){
  				var isActiveSegment = $(this).hasClass('editor');
-	  			var textarea = $('.target textarea', this);
-	  			if(!d.data.matches.length) return true;
-	  			var translation = d.data.matches[0].translation;
-	  			var textareaLength = textarea.val().length;
-                if (textareaLength==0){
-                    if($.trim(translation) != '') {
-                    	textarea.text(translation);
-                    }
-                }
-                if(isActiveSegment) {
-	                textarea.removeClass("indent").caretTo(0);
-	 			} else {
-	 				if (textareaLength==0) textarea.addClass("indent");
-	 			}
+	  			var editarea = $('.target .editarea', this);
+	            var _this = this;
 
-                var match = d.data.matches[0].match;
-                percentageClass = UI.getPercentuageClass(match);
-                
-                $('.percentuage', this).text(match).addClass(percentageClass).show();
-                var _this = this;
-                $(_this).removeClass('loaded').addClass('loaded');
-                $('.sub-editor .overflow',_this).empty();
-                
-                var valid=0;
-                $.each(d.data.matches, function() {                    
-                    cb= this['created-by'];                    
-                    cl_suggestion=UI.getPercentuageClass(this['match']);
-                    $('.sub-editor .overflow',_this).append('<ul class="graysmall"><li><a href="#" class="trash" title="delete this row"></a>'+this.segment+'</li><li class="b">'+this.translation+'</li><ul class="graysmall-details"><li class="' + cl_suggestion + '">'+(this.match)+'</li><li>'+this['last-update-date']+'</li><li class="graydesc">Source: <span class="bold">'+cb+'</span></li></ul></ul>');
-                });
+	  			if(d.data.matches.length) {
+		  			var translation = d.data.matches[0].translation;
+					var perc_t=$(".percentuage",_this).attr("title");
+		                        $(".percentuage",_this).attr("title",perc_t + " " + d.data.matches[0].created_by);
+
+	                var match = d.data.matches[0].match;
+		  			var editareaLength = editarea.text().length;
+
+	                if (editareaLength==0){
+	                    UI.copySuggestionInEditarea(this,translation,editarea,match);
+	                }
+	                if(isActiveSegment) {
+		                editarea.removeClass("indent");
+		 			} else {
+		 				if (editareaLength==0) editarea.addClass("indent");
+		 			}
+	
+
+	                var segment_id = _this.attr('id');
+	                $(_this).removeClass('loaded').addClass('loaded');
+	                $('.sub-editor .overflow',_this).empty();
+	                
+	                $.each(d.data.matches, function(index) {
+	                	var disabled = (this.id=='0')? true : false;                 
+                        cb= this['created_by'];   
+	                    cl_suggestion=UI.getPercentuageClass(this['match']);
+                    
+                        $('.sub-editor .overflow',_this).append('<ul class="graysmall" data-item="'+(index+1)+'" data-id="'+this.id+'"><li >'+((disabled)?'':' <a id="'+segment_id+'-tm-'+this.id+'-delete" href="#" class="trash" title="delete this row"></a>')+'<span id="'+segment_id+'-tm-'+this.id+'-source" class="suggestion_source">'+this.segment+'</span></li><li class="b"><span class="graysmall-message">ALT+'+(index+1)+'</span><span id="'+segment_id+'-tm-'+this.id+'-translation" class="translation">'+this.translation+'</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">'+(this.match)+'</li><li>'+this['last_update_date']+'</li><li class="graydesc">Source: <span class="bold">'+cb+'</span></li></ul></ul>');
+	                });
+	                $('.sub-editor .overflow a.trash',_this).click(function(e) {
+	        		    e.preventDefault();
+	        		    var ul = $(this).parents('.graysmall');
+
+             			source = $('.suggestion_source',ul).html();
+	        		    target = $('.translation',ul).html();
+
+	        		    ul.remove();
+						$.ajax({
+						    url: config.basepath,
+						    data: {
+						        action: 'deleteContribution',
+						        source_lang: config.source_lang,
+						        target_lang: config.target_lang,
+						        seg: source,
+                                tra: target,
+                                id_translator : config.id_translator
+						    },
+						    type: 'POST',
+						    dataType: 'json',
+						    complete: function (d){
+						    },
+						    success: function(d){
+						    	console.log('match deleted');
+						    	$(".editor .matches .graysmall").each(function(index){
+						    		$(this).find('.graysmall-message').text('ALT+'+(index+1));
+						    		$(this).attr('data-item',index+1);
+						    		UI.reinitMMShortcuts();
+								})
+						    }
+						});
+	                });
+
+	                $('.translated',this).removeAttr('disabled');
+	                $('.draft',this).removeAttr('disabled');
+	  			} else {
+	  				console.log('no matches');
+	                $(_this).removeClass('loaded').addClass('loaded');
+					$('.sub-editor .overflow',_this).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');  				
+	  			}
+
                 if (d.data.matches==0){
                     $(".sbm > .matches", _this).hide();
                 } else {
                     $('.submenu li.matches a span', this).text('('+d.data.matches.length+')');
                 }
-                $('.Translated',this).removeAttr('disabled');
-                $('.draft',this).removeAttr('disabled');
             }
         });
     },
 
-	getNextSegment: function(currentSegment) {
-        var n = $(currentSegment).nextAll('section').first() || $(currentSegment).parents('article').next().find('section').first();
+	getNextSegment: function(segment,status) {
+		var seg = segment;
+		var addStatus = (typeof status == 'undefined')? '' : (status == 'untranslated')? '.status-draft, section.status-rejected, section.status-new' : '';
+        var n = $(seg).nextAll('section'+addStatus).first() || $(seg).parents('article').next().find('section'+addStatus).first();
 		if(typeof n == 'undefined') return false;
-        if(!$(currentSegment).nextAll('section').length) {
-    		n = $(currentSegment).parents('article').next().find('section').first();
+        if(!$(seg).nextAll('section').length) {
+    		n = $(seg).parents('article').next().find('section'+addStatus).first();
         };
         return n;
  	},
  	
-	setContribution: function(segment,byStatus) {
+	setContribution: function(segment,status,byStatus) {
+		if((status=='draft')||(status=='rejected')) return false;
         var source = $('.source .original',segment).text();
-        var target = $('.target textarea',segment).val();
+        var target = $('.target .editarea',segment).html();
         if(target == '') return false;
-//        if((target == '')&&(!byStatus)) return false;
         var languages = $(segment).parents('article').find('.languages');
         var source_lang = $('.source-lang',languages).text();
         var target_lang = $('.target-lang',languages).text();
@@ -379,8 +411,8 @@ UI = {
                 action: 'setContribution',
                 source: source,
                 target: target,
-                source_lang: source_lang,
-                target_lang: target_lang,
+                source_lang: config.source_lang,
+                target_lang: config.target_lang,
                 id_translator: id_translator,
                 private_translator: private_translator,
                 id_customer: id_customer,
@@ -397,9 +429,9 @@ UI = {
         var info=$(segment).attr('id').split('-');
         var id_segment = info[1];
         var file = $(segment).parents('article');
-        var id_job = $('div.projectbar',file).data('job').split('-')[1];
         var status = status;
-        var translation = $('.target textarea',segment).val();
+        var translation = $('.target .editarea',segment).html();
+
         if(translation == '') return false;
         var time_to_edit = UI.editTime;
         var id_translator = config.id_translator;
@@ -408,7 +440,8 @@ UI = {
             data: {
                 action: 'setTranslation',
                 id_segment: id_segment,
-                id_job: id_job,
+                id_job: config.job_id,
+                id_first_file: file.attr('id').split('-')[1],
                 status: status,
                 translation: translation,
                 time_to_edit: time_to_edit,
@@ -419,10 +452,14 @@ UI = {
             success: function(d){
          		if(d.data == 'OK') {
          			UI.setStatus(segment,status);
+         			UI.setDownloadStatus(d.stats);
+         			UI.setProgress(d.stats);
          		};
             }
         });
     },
+/*
+	// for future implementation
 
     getSegmentComments: function(segment) {
         var id_segment = $(segment).attr('id').split('-')[1];
@@ -464,258 +501,203 @@ UI = {
             }
         });
     },
+*/
 
+    setStatusButtons: function(button) {
+        this.editStop = new Date();
+        this.lastEditTime = this.editStop - this.editStart;
+		var segment = this.currentSegment;
+        var editSec = $('.timetoedit .edit-sec',segment);
+        var editMin = $('.timetoedit .edit-min',segment);
+        this.previousEditTime = $('.timetoedit',segment).data('raw_time_to_edit');
+        this.editTime = this.previousEditTime + this.lastEditTime;
+        var editedTime = this.millisecondsToTime(this.editTime);
+        editMin.text(this.zerofill(editedTime[0],2));
+        editSec.text(this.zerofill(editedTime[1],2));
+        $('.timetoedit',segment).data('raw_time_to_edit', this.editTime)
+        var statusSwitcher = $(".status",segment);
+
+        statusSwitcher.removeClass("col-approved col-rejected col-done col-draft");
+        var statusToGo = ($(button).hasClass('translated'))? 'untranslated' : '';
+        var nextSegment = this.getNextSegment(segment,statusToGo);
+        if(!nextSegment.length) {
+        	$(".editor:visible").find(".close").click();
+        	$('.downloadtr-button').focus();
+        	return false;
+        };
+        this.buttonClickStop = new Date();
+        this.clickingButtonOperations = this.buttonClickStop - this.editStop;
+        this.copyToNextIfSame(nextSegment);
+        $(".target .editarea", nextSegment).click();
+
+/*
+        var s = $(this);
+        var newStatus = (s.hasClass('translated'))? 'translated' : (s.hasClass('draft'))? 'draft' : (s.hasClass('approved'))? 'approved':'';
+
+    	this.changeStatus(this,newStatus,0);
+        this.changeStatusStop = new Date();
+        this.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
+        console.log(this.changeStatusOperations);
+*/
+    },
+    
     changeStatus: function(ob,status,byStatus) {
         var segment = $(ob).parents("section");
-        this.setContribution(segment,byStatus);
+        $('.percentuage',segment).removeClass('visible');
+        this.setContribution(segment,status,byStatus);
         this.setTranslation(segment,status);
     },
 
     setStatus: function(segment,status) {
-		segment.removeClass("status-draft status-translated status-approved status-notapproved").addClass("status-"+status);
-		this.checkStatusCompleteness();
+		segment.removeClass("status-draft status-translated status-approved status-rejected").addClass("status-"+status);
     },
     
-    checkStatusCompleteness: function() {
+    setDownloadStatus: function(stats) {
     	var t = 'approved';
-    	if($('section.status-translated').length) t = 'translated';
-    	if($('section.status-draft').length) t = 'draft';
+    	if(parseFloat(stats.TRANSLATED)) t = 'translated';
+    	if(parseFloat(stats.DRAFT)) t = 'draft';
+    	if(parseFloat(stats.REJECTED)) t = 'draft';
     	$('.downloadtr-button').removeClass("draft translated approved").addClass(t);
     },
-    
-    findEmptySegment: function() {
-/*
-		$("li.target textarea").each(function(){
-			var textarea = $(this);
-			if (textarea.text()=="") {
-				UI.currentSegmentOb = textarea.parents("section");
-				textarea.click();
-				UI.createTextareaClone();
-				return 0;
-			}
-		})
-*/
 
+    setProgress: function(stats) {
+    	var s = stats;
+    	m = $('footer .meter');
+    	var status = 'approved';
+    	var total = s.TOTAL;
+    	var t_perc = s.TRANSLATED_PERC;
+    	var a_perc = s.APPROVED_PERC;
+    	var d_perc = s.DRAFT_PERC;
+    	var r_perc = s.REJECTED_PERC;	
+
+    	var t_perc_formatted = s.TRANSLATED_PERC_FORMATTED;
+    	var a_perc_formatted = s.APPROVED_PERC_FORMATTED;
+    	var d_perc_formatted = s.DRAFT_PERC_FORMATTED;
+    	var r_perc_formatted = s.REJECTED_PERC_FORMATTED;
+    	
+
+    	var d_formatted = s.DRAFT_FORMATTED;
+    	var r_formatted = s.REJECTED_FORMATTED;
+    	var t_formatted = s.TODO_FORMATTED;
+    	
+    	var wph 		= s.WORDS_PER_HOUR;
+    	var completion  = s.ESTIMATED_COMPLETION;
+        var progress_perc = Math.floor(s.APPROVED_PERC + s.TRANSLATED_PERC);
+        if((progress_perc!=this.done_percentage)&&(progress_perc == '100')) {
+        	this.body.addClass('justdone');
+        } else {
+        	this.body.removeClass('justdone');
+        }
+        this.done_percentage = progress_perc;
+
+    	$('.approved-bar',   m).css('width', a_perc + '%').attr('title','Approved ' + a_perc_formatted + '%');
+    	$('.translated-bar', m).css('width', t_perc + '%').attr('title','Translated ' + t_perc_formatted + '%');
+    	$('.draft-bar',      m).css('width', d_perc + '%').attr('title','Draft ' + d_perc_formatted + '%');
+    	$('.rejected-bar',   m).css('width', r_perc + '%').attr('title','Rejected ' + r_perc_formatted + '%');
+    
+	$('#stat-progress').html(progress_perc);
+	
+    	$('#stat-todo strong').html(t_formatted);
+    	$('#stat-wph strong').html(wph);
+    	$('#stat-completion strong').html(completion);
+    },
+
+    setFileProgress: function(stats) {
+    	var s = stats;
+    	var total = s.TOTAL_FORMATTED;
+    	var id_file = s.ID_FILE;
+    	var d_formatted = s.DRAFT_FORMATTED;
+    	var r_formatted = s.REJECTED_FORMATTED;
+		
+		var file = $('#file-'+id_file);
+		$('.file-eqwords strong',file).text(total);
+		$('.file-draft strong',file).text(d_formatted);
+		$('.file-rejected strong',file).text(r_formatted);
+
+    },
+
+    findEmptySegment: function() {
         var found=false;
-        $(".target textarea").each(function(){
-            var textarea = $(this);
-			if (textarea.text()=="" && found==false){
+        $(".target .editarea").each(function(){
+            var editarea = $(this);
+			if (editarea.text()=="" && found==false) {
                 found=true;
-				UI.currentSegmentOb = textarea.parents("section");
-                textarea.click();
-                UI.createTextareaClone();
+				UI.currentSegment = editarea.parents("section");
+                editarea.click();
             }
         })
 
     },
 
     findLastOpenedSegment: function() {
-    	var textarea = $('#segment-' + config.last_opened_segment + ' textarea');
- 		UI.currentSegmentOb = textarea.parents("section");
-//	   	console.log(textarea);
-    	textarea.click();
-        UI.createTextareaClone();
+    	var editarea = $('#segment-' + config.last_opened_segment + ' .editarea');
+ 		UI.currentSegment = editarea.parents("section");
+    	editarea.click();
     },
 
-    initTargetHeight: function() {
-		var targetHeight = 60;
-    	$('.source').each(function(){
-    		var sourceHeight = $(this).height();
-			if(sourceHeight > targetHeight) {
-				$('textarea',$(this).next()).css('height',sourceHeight+'px')
-			}
- 	   	});
+    copySuggestionInEditarea: function(segment,translation,editarea,match) {
+	    percentageClass = this.getPercentuageClass(match);
 
-/*
-    	$('section textarea').each(function(){
-    		var textarea = $(this);
-    		var sourceHeight = textarea.parent().prev().height();
-    		if(sourceHeight > targetHeight) {
-    			textarea.css('height',sourceHeight+'px')
-    		}
- 	   	});
-*/
-/*
-        var ta = $('section textarea')[0];
-        var shadow = $('<div id="shadowTextarea"></div>').css({
-            position:   'absolute',
-            top:        -10000,
-            left:       -10000,
-            width:      $(ta).width(),
-            fontSize:   $(ta).css('fontSize'),
-            fontFamily: $(ta).css('fontFamily'),
-            lineHeight: $(ta).css('lineHeight'),
-            resize:     'none'
-        }).appendTo(document.body);
-    	$('section textarea').each(function(){
-     		var tx = $(this).val();
-     		shadow.html(tx);
-      		var hh = shadow.height();
-     		if(hh < 30) hh = 30;
-    		$(this).css('height', hh)
+        if($.trim(translation) != '') {
+        	editarea.html(translation).addClass('fromSuggestion');
 
-    		var targetHeight = hh;
-    		var sourceHeight = $(this).parent().prev().height();
-    		if(sourceHeight > targetHeight) {
-    			$(this).css('height',sourceHeight+'px')
-    		}
- 	   	});
-*/
-    },
-
-    progressiveTargetHeight: function(from) {
-		var targetHeight = 60;
-    	var segments = $(".source").length;
-		var numSegments = 1;
-		for(i=from;i<(from+numSegments);i++) {
-			var ss = $(".source")[i];
-			if(typeof ss == 'undefined') {
-				console.log('progressive TargetHeight time: ' + (new Date()-UI.initStart));
-				return false;
-			}
-
-    		var sourceHeight = $(ss).height();
-			if(sourceHeight > targetHeight) {
-				$('textarea',$(ss).next()).css('height',sourceHeight+'px')
-			}
-
-//			console.log($(".source")[i].id + ', from: ' + from);
-		}
-//		if(typeof $(".source")[i] == 'undefined') return false;
-		clearTimeout(UI.timerTest);
-		UI.timerTest = setTimeout("UI.progressiveTargetHeight("+(from+numSegments)+")", 50);
-//		UI.progressiveTargetHeight(from+numSegments);
-		
-/*
-    	$('.source').each(function(){
-    		var sourceHeight = $(this).height();
-			if(sourceHeight > targetHeight) {
-				$('textarea',$(this).next()).css('height',sourceHeight+'px')
-			}
- 	   	});
-*/
-    },
-
-    setTargetHeight: function(textarea) {
-		var targetHeight = $(textarea).height();
-		var sourceHeight = $(textarea).parents('.target').prev().height();
-		if(sourceHeight > targetHeight) {
-			$(textarea).css('min-height',sourceHeight+'px')
-		}
+        	$('.percentuage',segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
+        }
  	},
- 	
-    createTextareaClone: function() {
-        var ta = $('section.editor textarea');
-        var shadowActive = $('<div id="shadowActiveTextarea"></div>').css({
-            position:   'absolute',
-            top:        -10000,
-            left:       -10000,
-            width:      $(ta).width(),
-            fontSize:   $(ta).css('fontSize'),
-            fontFamily: $(ta).css('fontFamily'),
-            lineHeight: $(ta).css('lineHeight'),
-            resize:     'none'
-        }).appendTo(document.body);
-    },
 
-	startTextareaAutoresize: function(textarea) {
-		this.setTargetHeight(textarea);
-		this.textareaAutoresize(textarea);
-		$(textarea).bind('keyup.activeTextarea', function() {
-			UI.textareaAutoresize(this);
-		});
+	millisecondsToTime: function(milli) {
+      var milliseconds = milli % 1000;
+      var seconds = Math.round((milli / 1000) % 60);
+      var minutes = Math.floor((milli / (60 * 1000)) % 60);
+      return [minutes, seconds];
 	},
 
-	textareaAutoresize: function(textarea) {
- 		var shadow = $('#shadowActiveTextarea');
- 		var tx = $(textarea).val().replace(/</g, '&lt;')
-                            .replace(/>/g, '&gt;')
-                            .replace(/&/g, '&amp;')
-                            .replace(/\n/g, '<br/>');
- 		shadow.html(tx);
-  		var hh = shadow.height();
-  		if(hh < 30) hh = 30;
-  		if(tx.match("<br/>$")) {
-  			hh = hh + 30;
-  		};
-		$(textarea).css('height', hh);
+	zerofill: function(i,l,s) {
+		var o = i.toString();
+		if (!s) { s = '0'; }
+		while (o.length < l) {
+			o = s + o;
+		}
+		return o;
 	},
 	
-	endTextareaAutoresize: function(textarea) {
-		$(textarea).unbind('keyup.activeTextarea');
-	},
-
-	openSegment: function(textarea) {
+	openSegment: function(editarea) {
         this.openSegmentStart = new Date();
+        this.editarea = $(editarea);
 
-		if($(textarea).getSelection().length) return false;
+		if(!window.getSelection().isCollapsed) return false;
 		$(".statusmenu:visible").hide();
-//        console.log('prova1: ' + ((new Date())-this.openSegmentStart));
-
-
-		// da riprendere
-//			if(typeof UI.currentSegmentOb != 'undefined') UI.currentSegmentOb.removeClass('active');
 
 		// current and last opened object reference caching
-		this.lastOpenedSegmentOb = this.currentSegmentOb;
-		this.lastOpenedArticleOb = this.currentArticleOb;
-		this.lastOpenedTextarea = this.textarea;
+		this.lastOpenedSegment = this.currentSegment;
+		this.lastOpenedEditarea = this.editarea;
 		
-		this.currentSegmentOb = segment = $(textarea).parents("section");
-		this.currentArticleOb = segment.parent();
-        this.textarea = $(".target textarea",segment);
+		this.currentSegment = segment = $(editarea).parents("section");
+        this.currentSegmentId = segment.attr('id').split('-')[1];
+		this.currentArticle = segment.parent();
 
 		this.scrollSegment(segment);
-//        console.log('prova2: ' + ((new Date())-this.openSegmentStart));
+		$(editarea).removeClass("indent");
+		this.getContribution(segment,0);
 
-		// da riprendere
-//			segment.addClass('active');
-		$(textarea).removeClass("indent"); // vediamo come rimuoverne la necessità
+        this.opening = true;
+        this.closeSegment(this.lastOpenedSegment);
+        this.opening = false;
+        this.body.addClass('editing');
 
-		if (!($("div.sub-editor.matches .graysmall",segment).length)){     
-			this.getContribution(segment);
-		}
-//        console.log('prova3: ' + ((new Date())-this.openSegmentStart));
-
-		if ( $(segment).find(".toggle").is(":visible")){return null}
-//        console.log('   prova3.1: ' + ((new Date())-this.openSegmentStart));
-
-//            UI.lastOpenedSegmentOb.find(".close").click();
-        UI.opening = true;
-        this.closeSegment(this.lastOpenedSegmentOb);
-        UI.opening = false;
-//        console.log('   prova3.2: ' + ((new Date())-this.openSegmentStart));
-        $("div.grayed").show();
-//        console.log('prova4: ' + ((new Date())-this.openSegmentStart));
-
-        $(segment).addClass("editor");
-        $(textarea).focus();
+        segment.addClass("editor");
+        this.editarea.focus();
         this.editStart = new Date();
-        $(textarea).caretTo(0);
 
-        if(this.heavy) {
-        	$(".toggle",segment).show();
-        } else {
-        	$(".toggle",segment).show();
-/*
-            $(".toggle",segment).show("blind", {
-                direction: "vertical"
-            }, 250);
-*/
-       }
-//        console.log('prova5: ' + ((new Date())-this.openSegmentStart));
         this.getContribution(segment,1);
-        this.startTextareaAutoresize(textarea);
-        segment.parent().addClass('open');
         this.openSegmentStop = new Date();
 
         this.closeOpenSegmentOperations = this.openSegmentStop - this.openSegmentStart;
+        console.log('close/open time: ' + this.closeOpenSegmentOperations);
+       
+
         if((typeof this.clickingButtonOperations == 'undefined')||(typeof this.clickingButtonOperations == 'null')) this.clickingButtonOperations = 0;
-//            console.log('clicking button operations: ' + this.clickingButtonOperations);
         if((typeof this.changeStatusOperations == 'undefined')||(typeof this.changeStatusOperations == 'null')) this.changeStatusOperations = 0;
-//            console.log('change status operations: ' + this.changeStatusOperations);
-        console.log('segment close/open time: ' + this.closeOpenSegmentOperations);
-//            console.log('total time: ' + (this.clickingButtonOperations + this.changeStatusOperations + this.closeOpenSegmentOperations));
         this.clickingButtonOperations = this.changeStatusOperations = this.closeOpenSegmentOperations =  undefined;
         this.setCurrentSegment(segment);
 	},
@@ -723,69 +705,118 @@ UI = {
 	closeSegment: function(segment) {
         if(typeof segment =='undefined') return true;
         var closeStart = new Date();
-//        var segment = this.lastOpenedSegmentOb;
-        segment.parent().removeClass('open');
-
-        if(this.heavy) {
-        	$(".toggle",segment).hide();
-        } else {
-        	$(".toggle",segment).hide();
-/*
-            $(".toggle",segment).hide("blind", {
-                direction: "vertical"
-            },250);
-*/
-        }
-
-        $("div.grayed").hide();
-        var textarea = this.lastOpenedTextarea;
-        this.endTextareaAutoresize(textarea);
+        this.body.removeClass('editing');
 		$(segment).removeClass("editor");
-		if(!UI.opening) this.setCurrentSegment(segment,1);
-
-
-/*
-        $(".toggle",segment).promise().done(function(){
-            console.log('sto per rimuovere la classe editor al segmento '+segment.attr('id'));
-            $(segment).removeClass("editor");
-//                $(segment).removeClass("editor").find(".editable_textarea").find("button").click(); // a che serve editable_textarea?
-        })
-*/
-//        console.log('tempo di close: ' + ((new Date())-closeStart));
+		if(!this.opening) this.setCurrentSegment(segment,1);
 	},
-	
-	test: function(n) {
-//			$("section.editor").find(".close");
-        var start = new Date();
-        var segment = $('#segment-99560');
-		for(i=0;i<=n-1;i++) {
-			$(".editor").find(".close");
-		}
-        var stop = new Date();
-        console.log($(".editor").find(".close"));
-        console.log(n + ' iterations in ' + (stop-start) + 'ms');
+
+	gotoPreviousSegment: function() {
+        var prev = $('.editor').prev();
+        if(prev.is('section')) {
+        	$('.target .editarea',prev).click();
+        } else {
+        	prev = $('.editor').parents('article').prev().find('section:last');
+        	if(prev.length) {
+        		$('.target .editarea',prev).click();
+        	} else {
+        		this.topReached();
+        	}
+        };
 	},
+
+    gotoSegment: function(id){
+        var el=$("#segment-"+id+"-target").find(".editarea");
+        el.click();
+        
+    },
+	gotoNextSegment: function() {
+        var next = $('.editor').next();
+        console.log(next);
+        if(next.is('section')) {
+        	$('.target .editarea',next).click();
+        } else {
+        	next = $('.editor').parents('article').next().find('section:first');
+        	if(next.length) {
+        		$('.target .editarea',next).click();
+        	} else {
+        	}
+        };
+	},
+
+	gotoOpenSegment: function() {
+		this.scrollSegment(this.currentSegment);
+	},	
 
 	setCurrentSegment: function(segment,closed) {
         var id_segment = segment.attr('id').split('-')[1];
-        if(closed) id_segment = 0;
-        var file = this.currentArticleOb;
-        var id_job = $('div.projectbar',file).data('job').split('-')[1];
+        if(closed) {
+            id_segment = 0;
+        }else{
+            window.location.hash=id_segment;
+        }
+        var file = this.currentArticle;
         $.ajax({
             url: config.basepath + '?action=setCurrentSegment',
             data: {
                 action: 'setCurrentSegment',
                 id_segment: id_segment,
-                id_job: id_job
+                id_job: config.job_id
             },
             type: 'POST',
             success: function(d){
             }
         });
 	},
-	
+
+	reinitMMShortcuts: function(a) {
+		$('body').unbind('keydown');
+		$("body, .target .editarea").bind('keydown','Alt+1', function(e){ 
+            e.preventDefault();
+            UI.chooseSuggestion('1');
+        }).bind('keydown','Alt+2', function(e){ 
+            e.preventDefault();
+            UI.chooseSuggestion('2');
+        }).bind('keydown','Alt+3', function(e){ 
+            e.preventDefault();
+            UI.chooseSuggestion('3');
+        }).bind('keydown','Alt+4', function(e){ 
+            e.preventDefault();
+            UI.chooseSuggestion('4');
+        }).bind('keydown','Alt+5', function(e){ 
+            e.preventDefault();
+            UI.chooseSuggestion('5');
+        })
+	},
+
+	chooseSuggestion: function(w) {
+        UI.copySuggestionInEditarea(UI.currentSegment,$('.editor ul[data-item='+w+'] li.b .translation').text(),$('.editor .target .editarea'),$('.editor ul[data-item='+w+'] ul.graysmall-details .percent').text());
+		UI.editarea.focus().effect("highlight", {}, 1000);		
+	},
+
+	topReached: function() {
+		var jumpto = $(this.currentSegment).offset().top;
+        $("html,body").animate({
+            scrollTop: 0
+        }, 200 ).animate({
+            scrollTop: jumpto-50
+            }, 200 );
+	},
+
+	copySource: function() {
+        var source_val = $.trim($(".source > span.original",this.currentSegment).text());
+        $(".target .editarea",this.currentSegment).text(source_val).keyup().focus();
+        $(".target .editarea",this.currentSegment).effect("highlight", {}, 1000);
+	},
+
+	copyToNextIfSame: function(nextSegment) {
+		if($('.source',this.currentSegment).data('original') == $('.source',nextSegment).data('original')) {
+			if($('.editarea',nextSegment).hasClass('fromSuggestion')) {
+				$('.editarea',nextSegment).text(this.editarea.text());
+			}
+		}
+	},
+				
 	scrollSegment: function(segment) {
-//		console.log(segment);
 		var spread = 23;
 		var current = $('section.editor');
 		var previousSegment = $(segment).prev('section');
@@ -795,21 +826,22 @@ UI = {
 		};
 		var destination = "#"+previousSegment.attr('id');
 		var destinationTop = $(destination).offset().top;
-		if($(current).length){//console.log('a');
-			if($(segment).offset().top > $(current).offset().top) {//console.log('b');
-				if(!current.is($(segment).prev())) {//console.log('c');
+		if($(current).length){
+			if($(segment).offset().top > $(current).offset().top) {
+				if(!current.is($(segment).prev())) {
 					destinationTop = destinationTop - $('section.editor').height() + $(segment).height() - spread;
-				} else {//console.log('d');
+				} else {
 					destinationTop = destinationTop - spread;
 				}
-			} else {//console.log('e');
+			} else {
 				destinationTop = destinationTop - spread;
 			}		
-		} else {//console.log('f');
+		} else {
 			destinationTop = destinationTop - spread;
 		}	
-//		console.log(segment.position().top + ' - ' + $(window).scrollTop());
-		$("html:not(:animated),body:not(:animated)").animate({ scrollTop: destinationTop-20}, 500 );
+        $("html,body").animate({
+	        scrollTop: destinationTop-20
+        }, 500 );
 	}	        
 
 }
@@ -820,11 +852,11 @@ $(document).ready(function(){
 
 
 $(window).resize(function(){
-//	UI.initTargetHeight();
 });
 
 $('#segment-' + config.last_opened_segment).ready(function() {
 	if((config.last_opened_segment != '')&&(config.last_opened_segment != 0)) {
-    	UI.scrollSegment($('#segment-' + config.last_opened_segment));
+    	var target = ($('#segment-' + config.last_opened_segment).length)? $('#segment-' + config.last_opened_segment) : $('section.status-draft, section.status-rejected, section.status-new').first();
+    	UI.scrollSegment(target);
 	}
 });

@@ -1,97 +1,132 @@
 <?
+include_once INIT::$UTILS_ROOT . "/cat.class.php";
+include_once INIT::$UTILS_ROOT . "/xliff.parser.1.2.class.php";
 
-function extractSegments($files_path, $pid, $fid) {
+
+function extractSegments($files_path, $file, $pid, $fid) {
+
+	// Output
+	// true = ok
+	// -1   = Extension not supported
+	// -2   = Parse Error
+	// -3   = DB Error
 	
-	$mysql_hostname = "10.30.1.241";   // Database Server machine
-	$mysql_database = "matecat_sandbox";     // Database Name
-	$mysql_username = "translated";   // Database User
-	$mysql_password = "azerty1";   // Database Password
+	$mysql_hostname = INIT::$DB_SERVER;   // Database Server machine
+	$mysql_database = INIT::$DB_DATABASE;     // Database Name
+	$mysql_username = INIT::$DB_USER;   // Database User
+	$mysql_password = INIT::$DB_PASS;;   // Database Password
 	
 	$mysql_link = mysql_connect($mysql_hostname, $mysql_username, $mysql_password);
 	mysql_select_db($mysql_database, $mysql_link);
+
+	$query_segment = array();
+
+	// Checking Extentions
+	$info = pathinfo($file);
+    if (($info['extension'] == 'xliff')||($info['extension'] == 'sdlxliff')||($info['extension'] == 'xlf')) {
+            $content = file_get_contents("$files_path/$file");            
+    } else {
+	   log::doLog("Xliff Import: Extension ".$info['extension']." not managed");
+	   return false; 
+    }
+
+    $xliff_obj = new Xliff_Parser();
+    $xliff = $xliff_obj->Xliff2Array($content);
+    // log::doLog($xliff);
+    
+    // Checking that parsing went well
+    if (isset($xliff['parser-errors']) or !isset($xliff['files']))
+    	{
+	    	log::doLog("Xliff Import: Error parsing. " . join("\n",$xliff['parser-errors']));
+	    	return false;
+    	}
+   
+    // Creating the Query
+    foreach ($xliff['files'] as $xliff_file) {
+    	
+		foreach ($xliff_file['trans-units'] as $xliff_trans_unit)  { 
+			if (!isset($xliff_trans_unit['attr']['translate'])) {
+				$xliff_trans_unit['attr']['translate']='yes';
+			}
+			if ($xliff_trans_unit['attr']['translate']=="no") {
+			  log::doLog("Xliff Import: Skipping segment marked as non-translatable: ".$xliff_trans_unit['source']['raw-content']);
+			} else {
+			
+			  
+			  // If the XLIFF is already segmented (has <seg-source>)
+			  if (isset($xliff_trans_unit['seg-source'])) {
+	            	
+	  	
+			  
+				foreach ($xliff_trans_unit['seg-source'] as $seg_source) {
+					$tempSeg = stripTagsFromSource2($seg_source['raw-content']);
+			  		$tempSeg = trim($tempSeg);	
+
+		            if (empty($tempSeg)) {
+		                continue;
+		            }	
+		            
+		          $mid		   	   = mysql_real_escape_string($seg_source['mid']);
+				  $ext_tags	   	   = mysql_real_escape_string($seg_source['ext-prec-tags']);
+				  $source		   = mysql_real_escape_string($seg_source['raw-content']);
+		 	  	  $num_words 	   = CatUtils::segment_raw_wordcount($seg_source['raw-content']);
+		 	  	  $trans_unit_id   = mysql_real_escape_string($xliff_trans_unit['attr']['id']);
+		 	  	  $query_segment[] = "('$trans_unit_id',$fid,'$source',$num_words,'$mid','$ext_tags')";
+		 	  	}	  
+			  
+			  } else {
+			  		$tempSeg = stripTagsFromSource2($xliff_trans_unit['source']['raw-content']);
+			  		$tempSeg = trim($tempSeg);	
+			  			
+			  		
+			  	
+			  	
+
+		            if (empty($tempSeg)) {
+		                continue;
+		            }	
+
+			  	  $source		   = mysql_real_escape_string($xliff_trans_unit['source']['raw-content']);
+		 	  	  $num_words 	   = CatUtils::segment_raw_wordcount($xliff_trans_unit['source']['raw-content']);
+		 	  	  $trans_unit_id   = mysql_real_escape_string($xliff_trans_unit['attr']['id']);
+		 	  	  $query_segment[] = "('$trans_unit_id',$fid,'$source',$num_words,NULL,NULL)";
+		      }
+		      
+		    }
+		}	
+    }
+    
+    // Executing the Query
+    $query_segment = "INSERT INTO segments (internal_id,id_file, segment, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags) 
+                             values ". join(",\n",$query_segment);
+    // log::doLog($query_segment); exit;
+    
+    $res = mysql_query($query_segment, $mysql_link);
+    if (!$res) {
+    	log::doLog("File import - DB Error: " . mysql_error() . " - $query_segment\n");
+        return false;
+    }
+    
 	
-	
-	$preg_file_html = '|<file original="(.*?)" source-language="(.*?)" datatype="(.*?)" target-language="(.*?)">|m';
-	$preg_trans_unit = '|<trans-unit id="(.*?)"(.*?)>\s*<source>(.*?)</source>|m';
-	
-	$start_pid = 3;
-	$lang_pid = array();
-	
-	$folder = $files_path;
-	$dir = scandir($folder);
-
-    foreach ($dir as $file) {
-        if ($file == "." or $file == ".." or is_dir("$folder/$file")) {
-            continue;
-        }
-
-        $info = pathinfo($file);
-
-        if (($info['extension'] == 'xliff')||($info['extension'] == 'sdlxliff')) {
-            $content = file_get_contents("$folder/$file");            
-        }
-
-        $res = array();
-        preg_match_all($preg_file_html, $content, $res, PREG_SET_ORDER);
-
-        if (!empty($res)) {
-            $pathinfo = multiFSPathinfo($res[0][1]);
-            $filename = mysql_real_escape_string($pathinfo['filename']);
-            $extension = mysql_real_escape_string($pathinfo['extension']);
-            $source_lang = mysql_real_escape_string($res[0][2]);
-            $datatype = mysql_real_escape_string($res[0][3]);
-            $target_lang = mysql_real_escape_string($res[0][4]);
-            
-//            echo "$filename %% $extension %% $source_lang %% $target_lang %% $datatype \n";
-            $this_pid = $pid;
-        }
-
-//        echo "pid is $this_pid\n\n";
-        
-        $res2 = array();
-        preg_match_all($preg_trans_unit, $content, $res2, PREG_SET_ORDER);
-        foreach ($res2 as $trans_unit) {
-            $id = $trans_unit[1];
-            $no_translate = $trans_unit[2];
-            if (!empty($no_translate) and $no_translate == 'translate="no"') {
-                echo "no translatable segment -----$trans_unit[3]----- ...skipping\n";
-                continue;
-            }
-            $source = mysql_real_escape_string($trans_unit[3]);
-            $num_words = str_word_count($source);
-//        	print_r (' ITEM:'.$id.'|'.$fid.'|'.$source.'|'.$num_words);
-            $query_segment = "INSERT INTO segments (internal_id,id_file, segment, raw_word_count) values ('$id',$fid,'$source',$num_words)";
-            $res = mysql_query($query_segment, $mysql_link);
-            $errno = mysql_errno($mysql_link);
-            if ($errno != 0) {
-                $echo = "error-3 : " . mysql_error($mysql_link) . " - $query_segment\n";
-                die($echo);
-            }
-        }
-	}
 	return true;
 }
 
-function multiFSPathinfo($s) {
-    if (strpos($s, '/') !== false) {
-        $d = '/';
-    } elseif (strpos($s, '\\') !== false) {
-        $d = '\\';
-    } else {
-        throw new Exception('Valid delimiter not found.');
-    }
+    function stripTagsFromSource2($text) {
+        //       echo "<pre>";
+        $pattern_g_o = '|(<.*?>)|';
+        $pattern_g_c = '|(</.*?>)|';
+        $pattern_x = '|(<.*?/>)|';
 
-    $ret = explode($d, $s);
-    $ret_ok = array();
-    $ret_ok['filename'] = array_pop($ret);
-    $ret_ok['extension'] = "";
-    $ret_ok['path'] = implode($d, $ret);
-    $parts = explode('.', $ret_ok['filename']);
-    if (isset($parts[1])) {
-        $ret_ok['extension'] = $parts[1];
-    }
+        // echo "first  -->  $text \n";
+        $text = preg_replace($pattern_x, "", $text);
+        // echo "after1  --> $text\n";
 
-    return $ret_ok;
-}
+        $text = preg_replace($pattern_g_o, "", $text);
+        //  echo "after2  -->  $text \n";
+//
+        $text = preg_replace($pattern_g_c, "", $text);
+        $text= str_replace ("&nbsp;", " ", $text);
+        return $text;
+    }
 
 ?>

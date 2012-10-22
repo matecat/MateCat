@@ -21,3 +21,12 @@
 .comment-area, .comment-area ul, .comment-area li{width:170px;}
 .comment-area .h-notification{width:160px;}
 .comment-area textarea{width:137px !important}
+
+
+.text .target{padding-left:45px;}
+.text .item, .white li{width:43%;}
+.graysmall li{width:43%;}
+.loader{left:-40px;}
+
+section textarea{margin:2px 20px 3px 0px;width:95%;}
+

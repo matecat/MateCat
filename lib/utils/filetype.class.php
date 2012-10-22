@@ -23,13 +23,17 @@ class filetype {
                 $this->type = 'MSWORD_DOCX';
                 break;
             case 'txt':
+            case 'xlf':   // Just until we support tag management
+            case 'xliff': // Just until we support tag management
+            case 'sdlxliff': // Just until we support tag management
                 $this->type = 'PLAINTEXT';
-                break;
+                break;  
             case 'html':
             case 'htm':
             case 'php':
                 $this->type = 'HTML';
                 break;
+            
             default:
                 log::doLog("Unrecognized extension $this->extension : assign default  PLAINTEXT");
                 $this->type = 'PLAINTEXT';

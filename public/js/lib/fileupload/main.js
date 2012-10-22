@@ -40,7 +40,8 @@ $(function () {
 	        autoUpload: true,
 //	        singleFileUploads: false,
 	        overlayClose: true,
-	        acceptFileTypes: /(\.|\/)(xliff|sdlxliff)$/i
+	        fileInput: $('#fileupload .multiple-button, .btncontinue .multiple-button'),
+	        acceptFileTypes: /(\.|\/)(xliff|sdlxliff|xlf)$/i
 	    }
     );
 	$('#fileupload').bind('fileuploaddragover', function (e) {
@@ -60,11 +61,15 @@ $(function () {
 		};
 */
 	}).bind('fileuploadstart', function (e) {
-		if(!$.cookie("upload_session")) $.cookie("upload_session",uploadSessionId);
+//		if(!$.cookie("upload_session")) $.cookie("upload_session",uploadSessionId);
+	}).bind('fileuploadcomplete', function (e) {
+//		if(!$.cookie("upload_session")) $.cookie("upload_session",uploadSessionId);
 	}).bind('fileuploaddrop', function (e) {
+		$('.upload-files').addClass('uploaded');
 		$('.upload-files').removeClass('dragging dnd-hover');
         dropzone.hide();
 	}).bind('fileuploaddone', function (e,data) {
+
 /*
 		$('.upload-files').addClass('uploaded');
 //		console.log(data.result);
@@ -281,11 +286,19 @@ $(function () {
 		} else {
 			$('.upload-files').removeClass('uploaded');
 		}
+	}).bind('fileuploadfail', function (e) {
+		if(!($('.upload-table tr').length > 1)) $('.upload-files').removeClass('uploaded');
 	}).bind('fileuploadcompleted fileuploaddestroyed', function (e) {
 		if($('.upload-table tr').length) {
 			$('.uploadbtn').removeAttr('disabled').removeClass('disabled').focus();
 		} else {
 			$('.uploadbtn').attr('disabled','disabled').addClass('disabled');
+		}
+	}).bind('fileuploadcompleted', function (e) {
+		if($('.upload-table tr').length) {
+			$('.upload-files').addClass('uploaded');
+		} else {
+			$('.upload-files').removeClass('uploaded');
 		}
 	});
 

@@ -1,0 +1,62 @@
+INSTALL.TXT
+===========
+
+Server side requirements
+- Apache 2 + MySql (version >= 5.1) + PHP 5 (version >= 5.2)
+- Apache htaccess enabled
+- PHP magic_quotes off
+
+
+Client side requirements
+- Chrome web browser installed 
+- Javascript enabled
+
+Instructions (based on a Debian distro)
+1) create database using the file matecat.sql in lib/model folder
+2) edit the file inc/config.inc.php with the right parameters for the connection to the database
+    self::$DB_SERVER = "@ip address@"; //database server
+    self::$DB_DATABASE = "matecat_sandbox"; //database name
+    self::$DB_USER = "@username@"; //database login 
+    self::$DB_PASS = "@password@"; //databasepassword
+
+3) create a user matecat and add it a the www-data group
+    useradd -G www-data -p @password@ matecat
+4) enable htaccess on web server 
+    file cat /etc/apache2/apache2.conf --->  AccessFileName .htaccess
+5) create a virtualost in /etc/apache2/sites-available
+    <VirtualHost @your_ip_address@:80>
+        ServerName matecat.@your domain@
+        ServerAdmin webmaster@translated.net
+        DocumentRoot /home/matecat/cattool
+        DirectoryIndex index.php index.php3 index.html index.htm index.shtml
+        <Directory /home/matecat/cattool/>
+            Options All
+            AllowOverride All
+            Order allow,deny
+            allow from all
+
+            ExpiresActive On
+            ExpiresByType text/html "access plus 1 hour"
+            ExpiresByType text/css "access plus 1 week"
+            ExpiresByType text/javascript "access plus 1 week"
+            ExpiresByType image/gif "access plus 1 week"
+            ExpiresByType image/jpeg "access plus 1 week"
+            ExpiresByType image/jpg "access plus 1 week"
+            ExpiresByType image/png "access plus 1 week"
+            ExpiresByType image/vnd.microsoft.icon "access plus 1 week"
+            ExpiresByType image/ico "access plus 1 week"
+            ExpiresByType application/x-shockwave-flash "access plus 1 week"
+        </Directory>
+        php_flag register_globals off
+        php_flag magic_quotes_gpc off
+        LogLevel error
+        ErrorLog /var/log/apache2/matecat.error.log
+        CustomLog /var/log/apache2/matecat.log combined
+        ServerSignature Off
+    </VirtualHost>
+
+6) set php magic quotes off
+	edit /etc/php5/apache2/php.ini --- >magic_quotes_runtime = Off
+7) restart apache
+    apache2ctl restart
+

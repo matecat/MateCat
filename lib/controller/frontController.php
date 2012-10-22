@@ -3,7 +3,7 @@
 
 function __autoload($action) {
     //echo "autoload $action\n";
-    require_once $action . '.php';
+    require_once INIT::$CONTROLLER_ROOT."/$action.php";
 }
 
 class controllerDispatcher {
@@ -18,11 +18,11 @@ class controllerDispatcher {
         return self::$instance;
     }
 
-    public function getController() {
+    public function getController() {//print_r($_REQUEST);exit;
         //Default :  cat
-        $action = (isset($_REQUEST['action'])) ? $_REQUEST['action'] : 'cat';
+        $action = (isset($_POST['action'])) ? $_POST['action'] : (isset($_GET['action'])?$_GET['action']:'cat');
         //$action='cat';
-        //echo "action is $action";        
+
         $postback = (isset($_REQUEST['postback']) ? "postback" : "");
         //$className = $action . $postback . "Controller";
         $className = $action."Controller";
@@ -59,10 +59,53 @@ abstract class controller {
     protected function get_from_get_post($varname){
         $ret=null;
         $ret=isset($_GET[$varname])?$_GET[$varname]:(isset($_POST[$varname])?$_POST[$varname]:null);
+	/*if (!is_null($ret)){
+		$ret=urldecode($ret);	
+	}*/
         return $ret;
+    }
+}
+
+
+
+abstract class downloadController extends controller {
+    protected $content="";
+    protected $filename="unknown";
+    
+    //abstract function setContent();
+
+    public function __construct() {
+        parent::__construct();
+    }
+   
+
+    public function download() {
+        try {
+            $buffer = ob_get_contents();
+            ob_clean();
+            ob_start("ob_gzhandler");  // compress page before sending
+            $this->nocache();
+            header("Content-Type: application/force-download");
+	    header("Content-Type: application/octet-stream");
+        	header("Content-Type: application/download");
+	    header("Content-Disposition: attachment; filename=$this->filename");
+           //header("Pragma: no-cache");
+		header("Expires: 0");
+		echo $this->content;
+		exit;
+            //echo $buffer;
+        } catch (Exception $e) {
+            echo "<pre>";
+            print_r($e);
+            echo "\n\n\n";          
+            echo "</pre>";
+            exit;
+        }
     }
 
 }
+
+
 
 abstract class viewcontroller extends controller {
     protected $template = null;

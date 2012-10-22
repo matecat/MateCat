@@ -35,10 +35,31 @@ function getFromMM($query,$s,$t) {
     return $ret;
 }
 
-function addToMM($seg, $tra, $source_lang, $target_lang) {
+function addToMM($seg, $tra, $source_lang, $target_lang, $id_translator, $key) {
     $seg = urlencode($seg);
     $tra = urlencode($tra);
-    $url = "http://mymemory.translated.net/api/set?seg=$seg&tra=$tra&langpair=$source_lang|$target_lang&de=matecatdeveloper@matecat.com";
+    $private_query = "";
+    if (!empty($id_translator) and !empty($key)) {
+        $id_translator = rawurldecode($id_translator);
+        $key = rawurlencode($key);
+        $private_query = "user=$id_translator&key=$key";
+    }
+    $url = "http://mymemory.translated.net/api/set?seg=$seg&tra=$tra&langpair=$source_lang|$target_lang&de=matecatdeveloper@matecat.com&$private_query";
+log::doLog("set url : $url");
+
+    $res = file_get_contents($url);
+log::doLog("res encoded .$res");
+    $res = json_decode($res, true);
+log::doLog($res);
+    // print_r($res);
+    
+    return $res;
+}
+
+function deleteToMM($source_lang, $target_lang, $source, $target) {
+
+    $url = "http://mymemory.translated.net/api/delete?langpair=$source_lang|$target_lang&seg=$source&tra=$target&de=matecatdeveloper@matecat.com";
+//	log::doLog($url);
     $res = file_get_contents($url);
     //echo $res;
     $res = json_decode($res, true);
@@ -46,7 +67,6 @@ function addToMM($seg, $tra, $source_lang, $target_lang) {
     
     return $res;
 }
-
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.

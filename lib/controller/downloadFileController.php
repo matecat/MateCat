@@ -5,7 +5,7 @@ include_once INIT::$MODEL_ROOT . "/queries.php";
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-class downloadFileController extends viewcontroller {
+class downloadFileController extends downloadController {
 
     private $id_job;
 
@@ -13,6 +13,8 @@ class downloadFileController extends viewcontroller {
     public function __construct() {
         parent::__construct();
 
+        $this->fname = $this->get_from_get_post('filename');
+        $this->id_file = $this->get_from_get_post('id_file');
         $this->id_job = $this->get_from_get_post('id_job');
         if (empty($this->id_job)) {
             $this->id_job="Unknown";
@@ -21,10 +23,10 @@ class downloadFileController extends viewcontroller {
     }
 
     public function doAction() {
-        echo "hghj";
-		exit;
+//		$this->filename = $this->fname.".xliff";
+		$this->filename = $this->fname;
         $files = getFilesForJob($this->id_job);
-		$id_file = $files[0]['id_file'];
+		$id_file = ($this->id_file == "")?$files[0]['id_file']:$this->id_file;
 		$originalResult = getOriginalFile($id_file);
 		$original = $originalResult[0]['original_file'];
 		$modified = $original;
@@ -51,6 +53,7 @@ class downloadFileController extends viewcontroller {
         $data = getSegments($this->id_job, $this->password, $this->start_from);
 //		$stringa = "";
 
+//        $prova = "";
         foreach ($data as $i => $seg) {
 /*
 			$pattern = '|(<trans-unit id="'.$seg['internal_id'].'".*?>\s*<source>)(.*?)(</source>.*?<target>)(.*?)(</target>)|m';
@@ -58,40 +61,36 @@ class downloadFileController extends viewcontroller {
 			$modified = preg_replace($pattern, $replacement, $modified);
 */
 			$translation = ($seg['translation'] == '')? $seg['segment'] : $seg['translation'];
-			$search = '|<trans-unit id="'.$seg['internal_id'].'".*?>\s*<source>.*?</source>.*?<target>.*?</target>.*?</trans-unit>|m';
+ 			$search = '|<trans-unit id="'.$seg['internal_id'].'".*?>\s*<source>.*?</source>\s*<target>.*?</target>\s*</trans-unit>|sim';
+
 			if(preg_match($search,$modified)) {
-				$pattern = '|(<trans-unit id="'.$seg['internal_id'].'".*?>\s*<source>.*?</source><target>)(.*?)(</target>)|m';
-				$replacement = '$1'.$translation.'$3';
+				$pattern = '|(<trans-unit id="'.$seg['internal_id'].'".*?>\s*<source>.*?</source>\s*<target>)(.*?)(</target>\s*)|sim';
+				$replacement = '$1 '.$translation.'$3';
 				$modified = preg_replace($pattern, $replacement, $modified);				
 			} else {
-				$pattern = '|(<trans-unit id="'.$seg['internal_id'].'".*?>\s*<source>.*?</source>)|m';
-				$replacement = '$1<target>'.$translation.'</target>';
+			    // Modified to keep indentation as on the original file 
+			    $pattern = '|(<trans-unit id="'.$seg['internal_id'].'".*?>)(\s*)(<source>\s*.*?\s*</source>)(\s*)|sim';
+				$replacement = '$1$2$3$2<target>'.$translation.'</target>$4';
+//				log::doLog('ECCO: '.$seg['internal_id'].' - '.$translation);
 				$modified = preg_replace($pattern, $replacement, $modified);
+				// log::doLog($modified);
 			}
-		
+//			$GLOBALS['modified'] = $modified;
+//		echo $modified."<br/>";
+
 //        	$stringa .= $i.'/'.$seg['sid'].', ';
 //        	$stringa .= $i.'/'.$seg['internal_id'].', ';
 			
          }
-		$buffer = ob_get_contents();
-		ob_clean();
- 		header("Content-type: text/plain");
-		header("Content-Disposition: attachment; filename=prova");
-		header("Pragma: no-cache");
-		header("Expires: 0");
-		echo $modified;
-		exit;
+
+		// log::doLog('MODIFIED: '.$modified);
+
+		$this->content=$modified;
+//		$this->content=$id_file;
+
 		
-/*
-		$buffer = ob_get_contents();
-		ob_clean();
- 		header("Content-type: text/plain");
-		header("Content-Disposition: attachment; filename=prova");
-		header("Pragma: no-cache");
-		header("Expires: 0");
-		echo 'prova';
-		exit;
-*/
+//		$this->content=$prova;
+		
 		
 //		return $original_file;
 
@@ -105,6 +104,7 @@ class downloadFileController extends viewcontroller {
 */
 
 //        $this->result['stringa'] = $stringa;
+
         
     }
 
@@ -112,7 +112,3 @@ class downloadFileController extends viewcontroller {
 }
 
 ?>
-
-
-
-

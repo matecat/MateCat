@@ -1,10 +1,7 @@
 <?php
 include_once INIT::$MODEL_ROOT . "/queries.php";
+include INIT::$UTILS_ROOT . "/cat.class.php";
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 define('DEFAULT_NUM_RESULTS', 2);
 
 class setTranslationController extends ajaxcontroller {
@@ -15,19 +12,17 @@ class setTranslationController extends ajaxcontroller {
     private $status;
     private $time_to_edit;
     private $translation;
+    private $id_first_file;
 
     public function __construct() {
         parent::__construct();
-
-
-	//print_r ($_REQUEST);exit;
-
         $this->id_job = $this->get_from_get_post('id_job');
         $this->id_segment = $this->get_from_get_post('id_segment');
         $this->id_translator = $this->get_from_get_post('id_translator');
         $this->status = strtoupper($this->get_from_get_post('status'));
         $this->time_to_edit = $this->get_from_get_post('time_to_edit');
         $this->translation = $this->get_from_get_post('translation');
+        $this->id_first_file = $this->get_from_get_post('id_first_file');
     }
 
     public function doAction() {
@@ -40,10 +35,15 @@ class setTranslationController extends ajaxcontroller {
             $this->result['error'][] = array("code" => -2, "message" => "missing id_job");
         }
 
+        if (empty($this->id_first_file)) {
+            $this->result['error'][] = array("code" => -2, "message" => "missing id_job");
+        }
+        
+/*
         if (empty($this->id_translator)) {
             $this->result['error'][] = array("code" => -3, "message" => "missing id_translator");
         }
-
+*/
         if (empty($this->time_to_edit)) {
             $this->time_to_edit = 0;
         }
@@ -51,7 +51,7 @@ class setTranslationController extends ajaxcontroller {
         if (empty($this->status)) {
             $this->status = 'DRAFT';
         }
-log::doLog ("after test");
+
 	if (empty ($this->translation)){
 		return 0 ; // won's save empty translation but there is no need to return an error 
 	}
@@ -59,29 +59,25 @@ log::doLog ("after test");
 
         //ONE OR MORE ERRORS OCCURRED : EXITING
         if (!empty($this->result['error'])) {
-            log::doLog ("Dffff");
+            log::doLog ("Generic Error in SetTranslationController");
 		return -1;
         }
 
-
-        $insertRes = setTranslationInsert($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $this->translation);
-log::doLog("insertRes");
-log::doLog($insertRes);
-        log::doLog($insertRes);
-        if ($insertRes < 0 and $insertRes != -1062) {
-            $this->result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the translation for the segment $this->id_segment - $insertRes");
+        $res=CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $this->translation);
+        if (!empty($res['error'])){
+            $this->result['error']=$res['error'];
             return -1;
         }
-        if ($insertRes == -1062) {
-            // the translaion for this segment still exists : update it
-            $updateRes = setTranslationUpdate($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $this->translation);            
-log::doLog("updateRes");
-log::doLog($updateRes);
-            if ($updateRes < 0) {
-                $this->result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment $this->id_segment");
-                return -1;
-            }
-        }  
+
+           
+        
+		$job_stats =CatUtils::getStatsForJob($this->id_job);
+		$file_stats =CatUtils::getStatsForFile($this->id_first_file);
+
+//		log::doLog($stats);
+		
+        $this->result['stats'] = $job_stats;
+        $this->result['file_stats'] = $file_stats;
         $this->result['code'] = 1;
         $this->result['data'] = "OK";
     }

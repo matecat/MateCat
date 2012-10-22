@@ -20,14 +20,16 @@
 		                file_name: files.substr(1),
 		                project_name: $('#project-name').val(),
 		                source_language: $('#source-lang').val(),
-		                target_language: $('#target-lang').val()
+                target_language: $('#target-lang').val(),
+                tms_engine: $('#tms_engine').val(),
+                mt_engine: $('#mt_engine').val()
 		            },
 		            type: 'POST',            
 		            dataType: 'json',
 //		            context: $('#'+id),
 		            beforeSend: function (){
 			            $('.error-message').hide();
-		            	$('.uploadbtn').attr('value','Analizing...').attr('disabled','disabled');
+		            	$('.uploadbtn').attr('value','Analizing...').attr('disabled','disabled').addClass('disabled');
 		            },
 		            complete: function (){
 		            },
@@ -41,7 +43,7 @@
 			                $('body').removeClass('creating');
 		            		$('.uploadbtn').attr('value','Start Translating').removeAttr('disabled');
 						} else {
-							$.cookie('upload_session', null);
+//							$.cookie('upload_session', null);
 							location.href = '/translate/' + d.project_name + '/' + d.source_language.substring(0,2) + '-' + d.target_language.substring(0,2) + '/' + d.id_job + '-' + d.password;
 						}
 		            }
@@ -61,7 +63,7 @@
 				$("div.grayed").hide();
     		});
     		
-    		uploadSessionId = $.cookie("upload_session");
+//    		uploadSessionId = $.cookie("upload_session");
 
 
 

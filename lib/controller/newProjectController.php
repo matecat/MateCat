@@ -1,6 +1,9 @@
 <?php
+include_once INIT::$MODEL_ROOT . "/queries.php";
 class newProjectController extends viewcontroller {
 	private $guid = '';
+    private $mt_engines;
+    private $tms_engines;
     public function __construct() {
         parent::__construct();
         parent::makeTemplate("upload.html");
@@ -9,14 +12,33 @@ class newProjectController extends viewcontroller {
     
     public function doAction(){
 		if (!isset($_COOKIE['upload_session'])) {
-    		setcookie("upload_session", $this->guid,time()+86400);
-			$intDir=$_SERVER['DOCUMENT_ROOT'].'/storage/upload/'.$this->guid.'/';
-			mkdir($intDir, 0777);
+			// log::doLog("no cookie");
+    			setcookie("upload_session", $this->guid,time()+86400);
+			// log::doLog("after create cookie");
+			// log::doLog($_COOKIE);
+			// $intDir=$_SERVER['DOCUMENT_ROOT'].'/storage/upload/'.$this->guid.'/';
+			// log::doLog ($_SERVER['DOCUMENT_ROOT'].'/storage/upload/'.$this->guid.'/');
+			// log::doLog($intDir);
+			// mkdir($intDir, 0775);
+		}else{
+			$this->guid = $_COOKIE['upload_session'];
+			// log::doLog("cookie set");
+			// log::doLog ($_COOKIE);
 		}
+	
+	$intDir=$_SERVER['DOCUMENT_ROOT'].'/storage/upload/'.$this->guid.'/';
+	if (!is_dir($intDir)) {
+		mkdir($intDir, 0775, true);
+	}
+
+        $this->mt_engines = getEngines('MT');
+        $this->tms_engines = getEngines('TM');
     }
     
     public function setTemplateVars() {
         $this->template->upload_session_id = $this->guid;
+        $this->template->mt_engines = $this->mt_engines;
+        $this->template->tms_engines = $this->tms_engines;
     }
 
     public function create_guid($namespace = '') {     
@@ -25,8 +47,12 @@ class newProjectController extends viewcontroller {
 	   $data = $namespace;
 	   $data .= $_SERVER['REQUEST_TIME'];
 	   $data .= $_SERVER['HTTP_USER_AGENT'];
-	   $data .= $_SERVER['LOCAL_ADDR'];
-	   $data .= $_SERVER['LOCAL_PORT'];
+	   if (isset($_SERVER['LOCAL_ADDR'])) {
+	   	$data .= $_SERVER['LOCAL_ADDR']; // Windows only
+	   }
+	   if (isset($_SERVER['LOCAL_PORT'])) {
+	    $data .= $_SERVER['LOCAL_PORT']; // Windows only
+	   }
 	   $data .= $_SERVER['REMOTE_ADDR'];
 	   $data .= $_SERVER['REMOTE_PORT'];
 	   $hash = strtoupper(hash('ripemd128', $uid . $guid . md5($data)));

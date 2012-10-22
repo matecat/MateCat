@@ -320,7 +320,7 @@ class Database {
             $this->errno = mysql_errno();
             $msg = "<b>WARNING:</b> No link_id found. Likely not be connected to database.<br />$msg";
         }
-        log::doLog("query error : ($this->errno) $this->error - $this->sql");
+        //log::doLog("query error : ($this->errno) $this->error - $this->sql");
         // if no debug, done here
         if (!$this->debug) {
             if ($this->errno > 0) {

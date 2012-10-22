@@ -16,7 +16,7 @@ class projectStatisticsController extends viewcontroller {
     public function __construct() {
 	echo ".........\n";
         parent::__construct();
-        parent::makeTemplate("statistics.html");
+        parent::makeTemplate("fieldtest.html");
         /*$this->id_file=$_GET['id_file'];
         if (empty($this->id_file)){
             $this->id_file=$_POST['id_file'];

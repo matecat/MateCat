@@ -18,6 +18,8 @@ class INIT {
     public static $UTILS_ROOT;
     
     public static $DEFAULT_NUM_RESULTS_FROM_TM;
+    public static $THRESHOLD_MATCH_TM_NOT_TO_SHOW;
+
 
     public static function obtain() {        
         if (!self::$instance) {
@@ -26,47 +28,18 @@ class INIT {
         return self::$instance;
     }
 
-    private function __construct() {
-        $root = getcwd();
+     private function __construct() {
+        $root = isset ($_SERVER['DOCUMENT_ROOT'])?$_SERVER['DOCUMENT_ROOT']:getcwd();	
         self::$ROOT = $root;
         
         self::$DEFAULT_NUM_RESULTS_FROM_TM=3;
-        
-        switch ($_SERVER['HTTP_HOST']) {
-            case ('matecat.pi'):
-            case ('matecat.local'):
+	self::$THRESHOLD_MATCH_TM_NOT_TO_SHOW=50;
 
-                self::$DEBUG = true;
-                
-//                self::$DB_SERVER = "192.168.1.53";
- //               self::$DB_DATABASE = "matecat_sandbox"; //database name
- //               self::$DB_USER = "root"; //database login name
- //              self::$DB_PASS = "root11"; //database login password
-                
-                
-                self::$DB_SERVER = "10.30.1.241"; //database server
+        self::$DB_SERVER = "10.30.1.241"; //database server
                self::$DB_DATABASE = "matecat_sandbox"; //database name
-                self::$DB_USER = "translated"; //database login name
-                self::$DB_PASS = "azerty1"; //database login password
-                
-                
-                break;
-	    case 'demo.matecat.com';
-            case 'cattooldemo.matecat.com':
-            case 'matecat.translated.home':
-	    case 'matecatv2.translated.home':
-            case 'matecat.com':
-            case 'www.matecat.com':
-	    case 'matecatv2.translated.home':
-                self::$DEBUG = false;
-                self::$DB_SERVER = "10.30.1.241"; //database server
-                self::$DB_DATABASE = "matecat_sandbox"; //database name
-                self::$DB_USER = "translated"; //database login name
-                self::$DB_PASS = "azerty1"; //database login password
-                break;
-            default :
-                die(__FILE__ . " " . __LINE__ . " : unrecognided domain. Unable to set ROOT");
-        }
+                self::$DB_USER = "matecat"; //database login 
+                self::$DB_PASS = "matecat01"; //databasepassword
+ 
 
         self::$LOG_REPOSITORY = self::$ROOT . "/log_archive";
         self::$TEMPLATE_ROOT = self::$ROOT . "/lib/view";
@@ -76,51 +49,4 @@ class INIT {
     }
 
 }
-
-
-/*
-if (!defined('CONST')) {
-    define('CONST', 1);
-    define('ROOT_URL', '/index.php');
-
-    if (!defined('ROOT')) {
-        // $root = dirname(getcwd());
-        $root = getcwd();
-        define('ROOT', $root);
-        switch ($_SERVER['HTTP_HOST']) {
-            case ('matecat.pi'):
-            case ('matecat.local'):
-                define('DEBUG', true);
-                define('DB_SERVER', "localhost");
-                define('DB_DATABASE', "matecat_sandbox"); //database name
-                define('DB_USER', "root"); //database login name
-                define('DB_PASS', "root"); //database login password
-                break;
-            case 'cattooldemo.matecat.com':
-            case 'matecat.translated.home':
-            case 'matecat.com':
-            case 'www.matecat.com':
-                define('DEBUG', false);
-                define('DB_SERVER', "10.30.1.241"); //database server
-                define('DB_DATABASE', "matecat"); //database name
-                define('DB_USER', "translated"); //database login name
-                define('DB_PASS', "azerty1"); //database login password
-                break;
-            default :
-                die(__FILE__ . " " . __LINE__ . " : unrecognided domain. Unable to set ROOT");
-        }
-    }
-
-    //     echo "ecco " . ROOT;exit;
-    //print_r ($_SERVER);exit;
-
-    define('LOG_REPOSITORY', ROOT . "/log_archive");
-    define('TEMPLATE_ROOT', ROOT . '/lib/view');
-    define('MODEL_ROOT', ROOT . '/lib/model');
-    define('CONTROLLER_ROOT', ROOT . '/lib/controller');
-    define('UTILS_ROOT', ROOT . '/lib/utils');
-}
- * 
- */
-
 ?>

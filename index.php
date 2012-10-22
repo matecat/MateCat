@@ -29,14 +29,22 @@ $dispatcher= controllerDispatcher::obtain();
 $controller=$dispatcher->getController();
 //var_dump ($controller);
 $controller->doAction();
+$db->close();
 
+$parentController=get_parent_class($controller);
 
-if (get_parent_class($controller)=='ajaxcontroller'){	
-	$controller->echoJSONResult();
-}else{	
-	$controller->executeTemplate();
+switch ($parentController){
+	case 'ajaxcontroller':
+		$controller->echoJSONResult();
+		break;
+	case 'viewcontroller':
+		$controller->executeTemplate();
+		break;
+	case 'downloadController':
+		//echo"here"; exit;
+		$controller->download();
 }
 //var_dump ($controller);exit;
-$db->close();
+
 
 ?>
