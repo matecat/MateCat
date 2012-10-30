@@ -2,13 +2,13 @@ INSTALL.TXT
 ===========
 
 Server side requirements
-- Apache 2 + MySql (version >= 5.1) + PHP 5 (version >= 5.2)
+- Apache2 + MySql (version >= 5.1) + PHP 5 (version >= 5.2)
 - Apache htaccess enabled
 - PHP magic_quotes off
 
 
 Client side requirements
-- Chrome web browser installed 
+- Chrome web browser 
 - Javascript enabled
 
 Instructions (based on a Debian distro)

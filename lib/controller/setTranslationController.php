@@ -39,11 +39,6 @@ class setTranslationController extends ajaxcontroller {
             $this->result['error'][] = array("code" => -2, "message" => "missing id_job");
         }
         
-/*
-        if (empty($this->id_translator)) {
-            $this->result['error'][] = array("code" => -3, "message" => "missing id_translator");
-        }
-*/
         if (empty($this->time_to_edit)) {
             $this->time_to_edit = 0;
         }
@@ -74,7 +69,6 @@ class setTranslationController extends ajaxcontroller {
 		$job_stats =CatUtils::getStatsForJob($this->id_job);
 		$file_stats =CatUtils::getStatsForFile($this->id_first_file);
 
-//		log::doLog($stats);
 		
         $this->result['stats'] = $job_stats;
         $this->result['file_stats'] = $file_stats;

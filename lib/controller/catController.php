@@ -28,8 +28,6 @@ class catController extends viewcontroller {
 
     private $job_stats=array();
     public function __construct() {
-//    	log::doLog('provalog');
-       // echo ".........\n";
         parent::__construct();
         parent::makeTemplate("index.html");
         $this->jid = $this->get_from_get_post("jid");
@@ -44,25 +42,16 @@ class catController extends viewcontroller {
             $this->start_from = ($this->page-1)*$this->step;
         }
 
-	if (is_null($this->jid) and is_null($this->password)) {
-            header("Location: /translate/pname/src-trg/23-P1Z4c");
-	    exit(0);
-        }
     }
 
     private function stripTagsFromSource($text) {
-        //       echo "<pre>";
         $pattern_g_o = '|(<.*?>)|';
         $pattern_g_c = '|(</.*?>)|';
         $pattern_x = '|(<.*?/>)|';
 
-        // echo "first  -->  $text \n";
         $text = preg_replace($pattern_x, "", $text);
-        // echo "after1  --> $text\n";
 
         $text = preg_replace($pattern_g_o, "", $text);
-        //  echo "after2  -->  $text \n";
-//
         $text = preg_replace($pattern_g_c, "", $text);
         $text= str_replace ("&nbsp;", " ", $text);
         return $text;
@@ -90,26 +79,13 @@ class catController extends viewcontroller {
 	}
     public function doAction() {
         $lang_handler=languages::getInstance("en");       
-//	    $start = ($page-1)*$step;
         $data = getSegments($this->jid, $this->password, $this->start_from, $this->step);
 
-//        echo "<pre>";
-//        print_r ($data);
-//        exit;
-//        
         $first_not_translated_found = false;
         foreach ($data as $i => $seg) {
 	  		// remove this when tag management enabled
         	$seg['segment'] = $this->stripTagsFromSource($seg['segment']);
 			
-/*        	
-//            $seg['segment'] = $this->stripTagsFromSource($seg['segment']);
-//            $seg['segment'] = trim($seg['segment']);
-
-            if (empty($seg['segment'])) {
-                continue;
-            }
-*/
             if (empty($this->pname)) {
                 $this->pname = $seg['pname'];
             }
@@ -193,47 +169,14 @@ class catController extends viewcontroller {
 
             $seg['segment'] = $this->filetype_handler->parse($seg['segment']);
             $seg['parsed_time_to_edit']=  $this->parse_time_to_edit($seg['time_to_edit']); 
-	    //$seg['time_to_edit']=explode(":", $seg['time_to_edit']); // from DB(time_to_sec function used) HH:MM:SS
 
-         /*   if (!$first_not_translated_found and empty($seg['translation'])) { //get matches only for the first segment                
-                $first_not_translated_found = true;
-                $matches = array();
-                $matches = getFromMM($seg['segment']);
-
-                $matches = array_slice($matches, 0, INIT::$DEFAULT_NUM_RESULTS_FROM_TM);
-
-                $seg['matches'] = $matches;
-
-                //$seg['matches_no_mt']=0;
-                //foreach ($matches as $m){
-                //    if ($m['created-by']!='MT'){
-                //        $seg['matches_no_mt']+=1;
-                //    }
-                //}
-                $seg['css_loaded'] = "loaded";
-            }
-          * 
-          * 
-          */
-
-            /*if (!empty($seg['translation'])) {
-                $seg['css_loaded'] = "loaded";
-            }*/
 
             $this->data["$id_file"]['segments'][] = $seg;
-						//print_r ($this->job_stats); exit;
-
-			//log::doLog('NUM SEGMENTS 2: '.count($this->data["$id_file"]['segments']));
-
 
 
         }
 	        
         $this->job_stats = CatUtils::getStatsForJob($this->jid);
-
-    //   echo "<pre>";
-    //   print_r($this->data);
-    //   exit;
     }
 
     public function setTemplateVars() {
@@ -246,9 +189,6 @@ class catController extends viewcontroller {
         $this->template->tid=$this->tid;
 		$this->template->source=$this->source;
 		$this->template->target=$this->target;
-	
-	
-//		$this->template->stats=$stats[0]['TOTAL'];
 		
 		$this->template->source_code=$this->source_code;
 		$this->template->target_code=$this->target_code;
@@ -256,13 +196,7 @@ class catController extends viewcontroller {
 		$this->template->last_opened_segment=$this->last_opened_segment;
 		$this->template->data = $this->data;
 	
-		$this->template->job_stats=$this->job_stats
-
-
-       // echo "<pre>";
-        //print_r ($this->template);
-        //exit;
-        ;
+		$this->template->job_stats=$this->job_stats;
     }
 
 }

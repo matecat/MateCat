@@ -26,7 +26,7 @@ UI = {
 		})
 		
       	this.reinitMMShortcuts();
-        $("body, .target .editarea").bind('keydown','Ctrl+return', function(e){
+        $("body").bind('keydown','Ctrl+return', function(e){
             e.preventDefault();
             $('.editor .translated').click();
         }).bind('keydown','Meta+return', function(e){ 
@@ -232,10 +232,12 @@ UI = {
             UI.addSegmentComment(segment);
         });
 */
- 		$(".end-message-box a.close").on('click',function(e) {          
+ 		$(".grayed").on('click',function(e) {          
             e.preventDefault();
             UI.body.removeClass('justdone');
         })
+
+        this.checkIfFinishedFirst();
 
         this.initEnd = new Date();
         this.initTime = this.initEnd - this.initStart;
@@ -582,25 +584,37 @@ UI = {
     	
     	var wph 		= s.WORDS_PER_HOUR;
     	var completion  = s.ESTIMATED_COMPLETION;
-        var progress_perc = Math.floor(s.APPROVED_PERC + s.TRANSLATED_PERC);
-        if((progress_perc!=this.done_percentage)&&(progress_perc == '100')) {
-        	this.body.addClass('justdone');
-        } else {
-        	this.body.removeClass('justdone');
-        }
-        this.done_percentage = progress_perc;
+        UI.progress_perc = Math.floor(s.APPROVED_PERC + s.TRANSLATED_PERC);
+        this.checkIfFinished();
+
+        UI.done_percentage = UI.progress_perc;
 
     	$('.approved-bar',   m).css('width', a_perc + '%').attr('title','Approved ' + a_perc_formatted + '%');
     	$('.translated-bar', m).css('width', t_perc + '%').attr('title','Translated ' + t_perc_formatted + '%');
     	$('.draft-bar',      m).css('width', d_perc + '%').attr('title','Draft ' + d_perc_formatted + '%');
     	$('.rejected-bar',   m).css('width', r_perc + '%').attr('title','Rejected ' + r_perc_formatted + '%');
     
-	$('#stat-progress').html(progress_perc);
+	$('#stat-progress').html(UI.progress_perc);
 	
     	$('#stat-todo strong').html(t_formatted);
     	$('#stat-wph strong').html(wph);
     	$('#stat-completion strong').html(completion);
     },
+
+    checkIfFinished: function(closing) {
+        if(((UI.progress_perc!=UI.done_percentage)&&(UI.progress_perc == '100'))||((closing)&&(UI.progress_perc == '100'))) {
+        	this.body.addClass('justdone');
+        } else {
+        	this.body.removeClass('justdone');
+        }    	
+    },
+
+    checkIfFinishedFirst: function() {
+        if($('section').length == $('section.status-translated, section.status-approved').length) {
+        	this.body.addClass('justdone');
+        }
+    },
+
 
     setFileProgress: function(stats) {
     	var s = stats;
@@ -707,7 +721,10 @@ UI = {
         var closeStart = new Date();
         this.body.removeClass('editing');
 		$(segment).removeClass("editor");
-		if(!this.opening) this.setCurrentSegment(segment,1);
+		if(!this.opening) {
+			this.setCurrentSegment(segment,1);
+			this.checkIfFinished(1);
+		}
 	},
 
 	gotoPreviousSegment: function() {

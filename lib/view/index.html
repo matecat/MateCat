@@ -1,6 +1,6 @@
 <!doctype html>
 <html dir="ltr" lang="it-IT">
-<!-- MateCAT Server : Release 0.21a - 2012-10-22 -->
+<!-- MateCAT Server : Release 0.21 - 2012-10-30 -->
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title>Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
@@ -44,11 +44,12 @@
 					<input type="hidden" name="action" value="downloadFile" />
 					<input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
 					<input type="hidden" name="id_file" value="" />
+					<input type="hidden" name="download_type" value="all" />
 					<input type="hidden" name="filename" tal:attributes ="value string:${pname}.xliff" />
 					<input id="downloadProject" name="submit" type="submit" value="DOWNLOAD PROJECT" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
 				</form>
 
-<a href="#" class="filter"> <span class="arrow-top "></span></a>
+<a href="#" style="display:none" class="filter"> <span class="arrow-top "></span></a>
                 <!-- viewer icons
                 
                     <a href="" class="notification m-notification" title="click to view notifications">2</a>
@@ -159,7 +160,7 @@
        
        <ul>
        <li>
-       <input type="text" style="width:40px !important" value="SEG" onfocus="if (this.value == 'SEG') {this.value = '';}" onblur="if (this.value == '') {this.value = 'SEG';}" class="search-input"/>  			   
+       <input type="text" style="width:40px !important" value="SEG" onFocus="if (this.value == 'SEG') {this.value = '';}" onBlur="if (this.value == '') {this.value = 'SEG';}" class="search-input"/>  			   
        </li>
        <li>
       		<select class="search-select" >
@@ -197,7 +198,11 @@
   <span class="box rj-check" title="show/hide rejected segments"><span class="tick"></span></span>
 </span>
 <p style="margin-left:5px;margin-right:10px;">Rejected</p>
-
+<span class="custom-checkbox">
+  <input type="checkbox" checked="checked"/>
+  <span class="box ap-check" title="show/hide approved segments"><span class="tick"></span></span>
+</span>
+<p style="margin-left:5px;margin-right:10px;">Approved</p>
 </li>
  </ul>
     
@@ -238,7 +243,7 @@
 						<input type="hidden" name="action" value="downloadFile" />
 						<input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
 						<input type="hidden" name="id_file" value="${repeat/file_data/key}" />
-						<input type="hidden" name="filename" tal:attributes ="value string:${pname}-${file_data/filename}" />
+						<input type="hidden" name="filename" tal:attributes ="value string:${file_data/filename}" />
 						<input tal:attributes="id string:file-${repeat/file_data/key}-download" title="Download file" name="submit" type="submit" value="" class="downloadfile" />
 					</form>
 				</li>
@@ -777,14 +782,15 @@
         <div class="cl"></div>
         <div class="grayed" ></div>
         <div class="end-message-box">
-      
-        <div class="header"><p>I still want to review</p><a href="#" class="close" title="Close this segment"></a></div>
         <div class="end-message-col1">
-       <img src="/public/img/towel.png" /> 
+        <h3>Faxová úloha<span>*</span>!</h3>
+       <img src="/public/img/end-message.jpg" /> 
+       <p><span>*</span>Now you know how to say “<strong>Good Job</strong>” in Czech.</p>
        </div>
         <div class="end-message-col2">
-        <h3>Good job, it only took you <br />
-<strong>30 minutes</strong> to finish the translation!</h3><br />
+        
+<h4>It took you only <strong>30 minutes</strong> <br />
+  to finish the translation!</h4>
 
 				<form id="fileDownload" action="" method="post">
 					<input type="hidden" name="action" value="downloadFile" />
@@ -794,9 +800,16 @@
 					<input id="downloadProject" name="submit" type="submit" value="DOWNLOAD PROJECT" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
 				</form>
                 <div class="cl"></div>
-                <p>Or send this link to your client:</p>
-<input name="" type="text" value="http://23-P124#completed" onClick="select()"/>
-                </div>
+               
+
+                
+               <a href="#" class="downloadtr-button" style="background:#f5f5f5;color:#333">START NEW PROJECT</a>
+
+  
+                <a href="#" class="downloadtr-button" style="background:#f5f5f5;color:#333"><strong>NOTIFY YOUR PM</strong> <br />
+<span>that you are available for new work</span></a>
+<!--<input name="" type="text" value="http://23-P124#completed" onClick="select()"/>-->
+              </div>
                 </div>
     </body>
 </html>

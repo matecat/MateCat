@@ -1,5 +1,5 @@
 <?php
-
+//unused file but useful for reference:  will be removed whe the engine classes into engine folder will be ok
 function getFromMM($query,$s,$t) {
     $q = urlencode($query);
     $url = "http://mymemory.translated.net/api/get?q=$q&langpair=$s|$t&de=matecatdeveloper@matecat.com";

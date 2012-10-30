@@ -1,7 +1,4 @@
 <?php
-
-//print_r ($_SERVER['HTTP_HOST']);
-
 class INIT {
     private static $instance;
 
@@ -36,9 +33,9 @@ class INIT {
 	self::$THRESHOLD_MATCH_TM_NOT_TO_SHOW=50;
 
         self::$DB_SERVER = "10.30.1.241"; //database server
-               self::$DB_DATABASE = "matecat_sandbox"; //database name
-                self::$DB_USER = "matecat"; //database login 
-                self::$DB_PASS = "matecat01"; //databasepassword
+        self::$DB_DATABASE = "matecat_sandbox"; //database name
+        self::$DB_USER = "matecat"; //database login 
+        self::$DB_PASS = "matecat01"; //databasepassword
  
 
         self::$LOG_REPOSITORY = self::$ROOT . "/log_archive";
