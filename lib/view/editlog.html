@@ -15,9 +15,10 @@
 		<a href="/" class="logo"></a>
     
     
-    	<form action="" method="post" style="margin-right:-20px">
+    	<form action="/" method="post" style="margin-right:-20px">
                 <input type="hidden" name="action" value="editlogDownload"/>
                 <input type="hidden" name="jid" tal:attributes="value jid" value=""/>
+                <input type="hidden" name="password" tal:attributes="value password" value=""/>
                
 				<input name="submit" class="downloadtr-button" type="submit" value="Export All Data in CSV" />
                  <a tal:attributes="href string:/translate/none/none/${jid}-${password}" style="margin-right:10px" class="downloadtr-button draft" >< Back to Translation</a>

@@ -2,10 +2,6 @@
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$ROOT."/lib/utils/segmentExtractor.php";
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 define('DEFAULT_NUM_RESULTS', 2);
 
 class createProjectController extends ajaxcontroller {
@@ -80,10 +76,8 @@ class createProjectController extends ajaxcontroller {
 			$filename = $intDir.'/'.$file;
 			
 			if (file_exists($filename)) {
-                // log::doLog("filename $filename exists");
 			} else {
 	            $this->result['errors'][] = array("code" => -6, "message" => "File not found on server after upload.");
-                // log::doLog("filename $filename NOT exists");
 			}
 			
 	
@@ -110,7 +104,6 @@ class createProjectController extends ajaxcontroller {
 			$this->result['project_name'] = $this->project_name;         	
 	        $this->result['source_language'] = $this->source_language;          	
 	        $this->result['target_language'] = $this->target_language;          	
-//			$this->result['prova0'] = $arFiles[0];
 		} else {
 			$this->result['errors'][] = array("code" => -7, "message" => "Not able to import this XLIFF file. ($file)");
 		}
@@ -142,10 +135,8 @@ class createProjectController extends ajaxcontroller {
 	}
 
     public function create_password($length=8) {
-    	
-    	// Fixed
-    	// $pwd = 'sldfjw322d';
-    	
+
+
     	// Random
     	$pool = "abcdefghkmnpqrstuvwxyz23456789"; // skipping iljo01 because not easy to distinguish
     	$pool_lenght = strlen($pool);

@@ -1,32 +1,26 @@
 UI = null;
 
 UI = {
+    render: function() {
+		this.initSegNum = 200;
+		this.moreSegNum = 50;
+		UI.getMoreSegments('after', 1);
+    },
+    
     init: function() {
-	
-        this.initStart = new Date();
- 		this.numMatchesResults = 2;
- 		this.numSegments = $('section').length;
-        this.body = $('body');
-        this.editarea = '';
+		this.initStart = new Date();
+		console.log('Render time: ' + (this.initStart - renderStart));
+		this.numMatchesResults = 2;
+		this.numSegments = $('section').length;
+		this.body = $('body');
+		this.editarea = '';
+		this.isWebkit = $.browser.webkit;
+		this.heavy = ($('section').length > 200)? true : false;
 
-		$(document).ready(function() {
-            var hash=window.location.hash.substr(1);
-            if (hash!="" && $("#segment-"+hash).length>0){
-              UI.gotoSegment(hash);
-            }else if(config.last_opened_segment == '') {
-		    	UI.findEmptySegment();
-		    } else if(config.last_opened_segment == 0) {
-		    	
-		    } else if($('#segment-' + config.last_opened_segment).length == 0) {
-            	UI.gotoSegment($('section.status-draft, section.status-rejected, section.status-new').first().attr('id').split('-')[1]);
-		    }
-		    else {
-		    	UI.findLastOpenedSegment();
-		    }
-		})
+
 		
       	this.reinitMMShortcuts();
-        $("body, .target .editarea").bind('keydown','Ctrl+return', function(e){
+        $("body").bind('keydown','Ctrl+return', function(e){
             e.preventDefault();
             $('.editor .translated').click();
         }).bind('keydown','Meta+return', function(e){ 
@@ -75,11 +69,16 @@ UI = {
             UI.body.toggleClass('filtering');
         })      
 
+		 $(".replace").click(function(e){ 
+            e.preventDefault();
+            UI.body.toggleClass('replace-box');
+						
+        }) 
         $(".target .editarea").bind('keydown','Shift+tab', function(e){ 
             e.preventDefault();
             $(this).parents('section').find('input.translated').focus();
         })      
- 
+
         $('.sbm').tabify();
         $(".sbm a").click(function() {
             return false
@@ -146,20 +145,18 @@ UI = {
 			return false;
          });
 
- 		$("article").on('click','a.status',function(e) {          
+ 		$("article").on('click','a.status',function(e) {
             e.preventDefault();
             e.stopPropagation();
   			var segment = $(this).parents("section");
 			var statusMenu = $("ul.statusmenu", segment);
-			var isVisible = statusMenu.is(":visible");
-            $("ul.statusmenu:visible").hide();
-            if (isVisible){
-                return null;
-            }            
-            statusMenu.toggle();
+
+            UI.createStatusMenu(statusMenu);   
+            statusMenu.show();
  			var autoCloseStatusMenu = $('html').bind("click.vediamo", function(event) {
 				$("ul.statusmenu").hide();
 				$('html').unbind('click.vediamo');
+				UI.removeStatusMenu(statusMenu);
 			});
         });
         
@@ -183,19 +180,21 @@ UI = {
             e.preventDefault();
             e.stopPropagation();
         }).on('click','.target .editarea',function(e) {
+        	this.onclickEditarea = new Date();
+
 	        if((!$(this).is(UI.editarea))||(UI.editarea == '')||(!UI.body.hasClass('editing'))) {
 	        	UI.openSegment(this); 
 	        }    
+console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea));
+
         }).on('click','input.draft, input.translated, input.approved',function(e) {
-        	UI.setStatusButtons(this);
-            return false;
-/**/
+       		UI.setStatusButtons(this);
         }).on('click','input.translated',function(e) {
 //        	UI.copyToNextIfSame();
         	UI.changeStatus(this,'translated',0);
             UI.changeStatusStop = new Date();
             UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-        }).on('click','input.draft',function(e) {          
+        }).on('click','input.draft',function(e) {   
          	UI.changeStatus(this,'draft',0);
             UI.changeStatusStop = new Date();
             UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
@@ -224,8 +223,30 @@ UI = {
             return false;
         }).on('click','a.close',function(e) {          
             e.preventDefault();
-            UI.closeSegment(UI.currentSegment);
+            UI.closeSegment(UI.currentSegment,1);
         });
+
+		$(document).ready(function() {
+            var hash=window.location.hash.substr(1);
+            if (hash!="" && $("#segment-"+hash).length>0){
+              UI.gotoSegment(hash);
+            } else if (config.last_opened_segment == '') {
+		    	UI.findEmptySegment();
+		    } else if(config.last_opened_segment == 0) {
+		    	
+		    } else if($('#segment-' + config.last_opened_segment).length == 0) {
+            	UI.gotoSegment($('section.status-draft, section.status-rejected, section.status-new').first().attr('id').split('-')[1]);
+		    }
+		    else {
+		    	UI.findLastOpenedSegment();
+		    }
+		})
+
+
+
+
+
+
 /*        
         $("article").on('click','input.con-submit',function(e) {          
             var segment = $(this).parents("section");
@@ -237,8 +258,22 @@ UI = {
             UI.body.removeClass('justdone');
         })
 
+		$(window).scroll(function() {
+
+		   if($(window).scrollTop() + $(window).height() == $(document).height()) {
+		       UI.getMoreSegments('after');
+		   }
+		   if($(window).scrollTop() == 0) {
+		       UI.getMoreSegments('before');
+		   }
+		});
+
+        this.checkIfFinishedFirst();
+
         this.initEnd = new Date();
         this.initTime = this.initEnd - this.initStart;
+        console.log('Init time: ' + this.initTime);
+
     },
 
     getPercentuageClass: function (match){
@@ -269,7 +304,7 @@ UI = {
 
     getContribution: function(segment,next) {
       
-        var n = (next)? this.getNextSegment(segment,'untranslated') : $(segment);
+        var n = (next)? this.nextSegmentId : $(segment);
 
         if($(n).hasClass('loaded')) {
         	return false;
@@ -283,7 +318,7 @@ UI = {
         	$(".loader",n).addClass('loader_on')
         }
         $.ajax({
-            url: config.basepath + '?action=getContribution',
+            url: config.basepath + '?action=getContribution'+this.appendTime(),
             data: {
                 action: 'getContribution',
                 id_segment: id_segment,
@@ -299,80 +334,9 @@ UI = {
                 $(".loader",n).removeClass('loader_on');
             },
             success: function(d){
- 				var isActiveSegment = $(this).hasClass('editor');
-	  			var editarea = $('.target .editarea', this);
 	            var _this = this;
 
-	  			if(d.data.matches.length) {
-		  			var translation = d.data.matches[0].translation;
-					var perc_t=$(".percentuage",_this).attr("title");
-		                        $(".percentuage",_this).attr("title",perc_t + " " + d.data.matches[0].created_by);
-
-	                var match = d.data.matches[0].match;
-		  			var editareaLength = editarea.text().length;
-
-	                if (editareaLength==0){
-	                    UI.copySuggestionInEditarea(this,translation,editarea,match);
-	                }
-	                if(isActiveSegment) {
-		                editarea.removeClass("indent");
-		 			} else {
-		 				if (editareaLength==0) editarea.addClass("indent");
-		 			}
-	
-
-	                var segment_id = _this.attr('id');
-	                $(_this).removeClass('loaded').addClass('loaded');
-	                $('.sub-editor .overflow',_this).empty();
-	                
-	                $.each(d.data.matches, function(index) {
-	                	var disabled = (this.id=='0')? true : false;                 
-                        cb= this['created_by'];   
-	                    cl_suggestion=UI.getPercentuageClass(this['match']);
-                    
-                        $('.sub-editor .overflow',_this).append('<ul class="graysmall" data-item="'+(index+1)+'" data-id="'+this.id+'"><li >'+((disabled)?'':' <a id="'+segment_id+'-tm-'+this.id+'-delete" href="#" class="trash" title="delete this row"></a>')+'<span id="'+segment_id+'-tm-'+this.id+'-source" class="suggestion_source">'+this.segment+'</span></li><li class="b"><span class="graysmall-message">ALT+'+(index+1)+'</span><span id="'+segment_id+'-tm-'+this.id+'-translation" class="translation">'+this.translation+'</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">'+(this.match)+'</li><li>'+this['last_update_date']+'</li><li class="graydesc">Source: <span class="bold">'+cb+'</span></li></ul></ul>');
-	                });
-	                $('.sub-editor .overflow a.trash',_this).click(function(e) {
-	        		    e.preventDefault();
-	        		    var ul = $(this).parents('.graysmall');
-
-             			source = $('.suggestion_source',ul).html();
-	        		    target = $('.translation',ul).html();
-
-	        		    ul.remove();
-						$.ajax({
-						    url: config.basepath,
-						    data: {
-						        action: 'deleteContribution',
-						        source_lang: config.source_lang,
-						        target_lang: config.target_lang,
-						        seg: source,
-                                tra: target,
-                                id_translator : config.id_translator
-						    },
-						    type: 'POST',
-						    dataType: 'json',
-						    complete: function (d){
-						    },
-						    success: function(d){
-						    	console.log('match deleted');
-						    	$(".editor .matches .graysmall").each(function(index){
-						    		$(this).find('.graysmall-message').text('ALT+'+(index+1));
-						    		$(this).attr('data-item',index+1);
-						    		UI.reinitMMShortcuts();
-								})
-						    }
-						});
-	                });
-
-	                $('.translated',this).removeAttr('disabled');
-	                $('.draft',this).removeAttr('disabled');
-	  			} else {
-	  				console.log('no matches');
-	                $(_this).removeClass('loaded').addClass('loaded');
-					$('.sub-editor .overflow',_this).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');  				
-	  			}
-
+	            UI.renderContributions(d,_this);
                 if (d.data.matches==0){
                     $(".sbm > .matches", _this).hide();
                 } else {
@@ -382,15 +346,104 @@ UI = {
         });
     },
 
+	setDeleteSuggestion: function(segment) {
+        $('.sub-editor .overflow a.trash',segment).click(function(e) {
+		    e.preventDefault();
+		    var ul = $(this).parents('.graysmall');
+
+ 			source = $('.suggestion_source',ul).text();
+		    target = $('.translation',ul).text();
+
+		    ul.remove();
+			$.ajax({
+			    url: config.basepath+'?'+UI.appendTime(),
+			    data: {
+			        action: 'deleteContribution',
+			        source_lang: config.source_lang,
+			        target_lang: config.target_lang,
+			        seg: source,
+                    tra: target,
+                    id_translator : config.id_translator
+			    },
+			    type: 'POST',
+			    dataType: 'json',
+			    complete: function (d){
+			    },
+			    success: function(d){
+			    	console.log('match deleted');
+			    	$(".editor .matches .graysmall").each(function(index){
+			    		$(this).find('.graysmall-message').text('ALT+'+(index+1));
+			    		$(this).attr('data-item',index+1);
+			    		UI.reinitMMShortcuts();
+					})
+			    }
+			});
+        });
+ 	},
+
+	renderContributions: function(d,_this) {
+		var isActiveSegment = $(this).hasClass('editor');
+		var editarea = $('.target .editarea', this);
+		if(d.data.matches.length) {
+  			var translation = d.data.matches[0].translation;
+			var perc_t=$(".percentuage",_this).attr("title");
+            $(".percentuage",_this).attr("title",''+perc_t + "Created by " + d.data.matches[0].created_by);
+            var match = d.data.matches[0].match;
+  			var editareaLength = editarea.text().length;
+
+            if (editareaLength==0){
+                UI.copySuggestionInEditarea(this,translation,editarea,match);
+            }
+            if(isActiveSegment) {
+                editarea.removeClass("indent");
+ 			} else {
+ 				if (editareaLength==0) editarea.addClass("indent");
+ 			}
+
+
+            var segment_id = _this.attr('id');
+            $(_this).removeClass('loaded').addClass('loaded');
+            $('.sub-editor .overflow',_this).empty();
+            
+            $.each(d.data.matches, function(index) {
+            	var disabled = (this.id=='0')? true : false;                 
+                cb= this['created_by'];                    
+                cl_suggestion=UI.getPercentuageClass(this['match']);
+            
+                if(!$('.sub-editor',_this).length) {
+					UI.createFooter(_this);
+                }
+                $('.sub-editor .overflow',_this).append('<ul class="graysmall" data-item="'+(index+1)+'" data-id="'+this.id+'"><li >'+((disabled)?'':' <a id="'+segment_id+'-tm-'+this.id+'-delete" href="#" class="trash" title="delete this row"></a>')+'<span id="'+segment_id+'-tm-'+this.id+'-source" class="suggestion_source">'+this.segment+'</span></li><li class="b"><span class="graysmall-message">ALT+'+(index+1)+'</span><span id="'+segment_id+'-tm-'+this.id+'-translation" class="translation">'+this.translation+'</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">'+(this.match)+'</li><li>'+this['last_update_date']+'</li><li class="graydesc">Source: <span class="bold">'+cb+'</span></li></ul></ul>');
+            });
+            UI.setDeleteSuggestion(_this);
+
+            $('.translated',this).removeAttr('disabled');
+            $('.draft',this).removeAttr('disabled');
+		} else {
+			console.log('no matches');
+            $(_this).removeClass('loaded').addClass('loaded');
+			$('.sub-editor .overflow',_this).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');  				
+		}
+
+ 	},
+ 	
 	getNextSegment: function(segment,status) {
+
 		var seg = segment;
-		var addStatus = (typeof status == 'undefined')? '' : (status == 'untranslated')? '.status-draft, section.status-rejected, section.status-new' : '';
-        var n = $(seg).nextAll('section'+addStatus).first() || $(seg).parents('article').next().find('section'+addStatus).first();
+		var addStatus = (typeof status == 'undefined')? '' : (status == 'untranslated')? '.status-draft, .status-rejected, .status-new' : '';
+
+		var n = this.getNextSibling(seg,addStatus);
 		if(typeof n == 'undefined') return false;
         if(!$(seg).nextAll('section').length) {
     		n = $(seg).parents('article').next().find('section'+addStatus).first();
         };
         return n;
+
+ 	},
+
+	getNextSibling: function(seg,addStatus) {
+		var next = (this.isWebkit)? $('#'+$(seg).attr('id')+' ~ section'+addStatus, $(seg).parents('article')).first() : $(seg).nextAll('section'+addStatus).first();
+		return next;
  	},
  	
 	setContribution: function(segment,status,byStatus) {
@@ -406,7 +459,7 @@ UI = {
         var id_customer = config.id_customer;
         var private_customer = config.private_customer;
         $.ajax({
-            url: config.basepath + '?action=setContribution',
+            url: config.basepath + '?action=setContribution'+this.appendTime(),
             data: {
                 action: 'setContribution',
                 source: source,
@@ -436,7 +489,7 @@ UI = {
         var time_to_edit = UI.editTime;
         var id_translator = config.id_translator;
         $.ajax({
-            url: config.basepath + '?action=setTranslation',
+            url: config.basepath + '?action=setTranslation'+this.appendTime(),
             data: {
                 action: 'setTranslation',
                 id_segment: id_segment,
@@ -519,6 +572,7 @@ UI = {
 
         statusSwitcher.removeClass("col-approved col-rejected col-done col-draft");
         var statusToGo = ($(button).hasClass('translated'))? 'untranslated' : '';
+//        console.log(statusToGo);
         var nextSegment = this.getNextSegment(segment,statusToGo);
         if(!nextSegment.length) {
         	$(".editor:visible").find(".close").click();
@@ -526,7 +580,7 @@ UI = {
         	return false;
         };
         this.buttonClickStop = new Date();
-        this.clickingButtonOperations = this.buttonClickStop - this.editStop;
+//        this.clickingButtonOperations = this.buttonClickStop - this.editStop;
         this.copyToNextIfSame(nextSegment);
         $(".target .editarea", nextSegment).click();
 
@@ -542,7 +596,10 @@ UI = {
     },
     
     changeStatus: function(ob,status,byStatus) {
-        var segment = $(ob).parents("section");
+//    	console.log($(ob).data('segmentid'));
+//    	var segment = $('#'+$(ob).data('segmentid'));
+//        var segment = $(ob).parents("section");
+    	var segment = (byStatus)? $(ob).parents("section") : $('#'+$(ob).data('segmentid'));
         $('.percentuage',segment).removeClass('visible');
         this.setContribution(segment,status,byStatus);
         this.setTranslation(segment,status);
@@ -582,24 +639,35 @@ UI = {
     	
     	var wph 		= s.WORDS_PER_HOUR;
     	var completion  = s.ESTIMATED_COMPLETION;
-        var progress_perc = Math.floor(s.APPROVED_PERC + s.TRANSLATED_PERC);
-        if((progress_perc!=this.done_percentage)&&(progress_perc == '100')) {
-        	this.body.addClass('justdone');
-        } else {
-        	this.body.removeClass('justdone');
-        }
-        this.done_percentage = progress_perc;
+        UI.progress_perc = Math.floor(s.APPROVED_PERC + s.TRANSLATED_PERC);
+        this.checkIfFinished();
+
+        this.UI.done_percentage = UI.progress_perc;
 
     	$('.approved-bar',   m).css('width', a_perc + '%').attr('title','Approved ' + a_perc_formatted + '%');
     	$('.translated-bar', m).css('width', t_perc + '%').attr('title','Translated ' + t_perc_formatted + '%');
     	$('.draft-bar',      m).css('width', d_perc + '%').attr('title','Draft ' + d_perc_formatted + '%');
     	$('.rejected-bar',   m).css('width', r_perc + '%').attr('title','Rejected ' + r_perc_formatted + '%');
     
-	$('#stat-progress').html(progress_perc);
+	$('#stat-progress').html(UI.progress_perc);
 	
     	$('#stat-todo strong').html(t_formatted);
     	$('#stat-wph strong').html(wph);
     	$('#stat-completion strong').html(completion);
+    },
+
+    checkIfFinished: function(closing) {
+        if(((UI.progress_perc!=UI.done_percentage)&&(UI.progress_perc == '100'))||((closing)&&(UI.progress_perc == '100'))) {
+        	this.body.addClass('justdone');
+        } else {
+        	this.body.removeClass('justdone');
+        }    	
+    },
+
+    checkIfFinishedFirst: function() {
+        if($('section').length == $('section.status-translated, section.status-approved').length) {
+        	this.body.addClass('justdone');
+        }
     },
 
     setFileProgress: function(stats) {
@@ -666,48 +734,46 @@ UI = {
         this.editarea = $(editarea);
 
 		if(!window.getSelection().isCollapsed) return false;
-		$(".statusmenu:visible").hide();
 
 		// current and last opened object reference caching
 		this.lastOpenedSegment = this.currentSegment;
 		this.lastOpenedEditarea = this.editarea;
-		
-		this.currentSegment = segment = $(editarea).parents("section");
-        this.currentSegmentId = segment.attr('id').split('-')[1];
+        this.currentSegmentId = this.lastOpenedSegmentId = this.editarea.data('sid');
+		this.currentSegment = segment = $('#segment-'+this.currentSegmentId);
 		this.currentArticle = segment.parent();
 
-		this.scrollSegment(segment);
+		this.activateSegment();
+        this.setCurrentSegment(segment);
+
+		this.focusEditarea = setTimeout(function(){UI.editarea.focus();clearTimeout(UI.focusEditarea)},100);
+
 		$(editarea).removeClass("indent");
 		this.getContribution(segment,0);
 
         this.opening = true;
-        this.closeSegment(this.lastOpenedSegment);
+        this.closeSegment(this.lastOpenedSegment,0);
         this.opening = false;
         this.body.addClass('editing');
 
         segment.addClass("editor");
-        this.editarea.focus();
         this.editStart = new Date();
 
         this.getContribution(segment,1);
-        this.openSegmentStop = new Date();
 
-        this.closeOpenSegmentOperations = this.openSegmentStop - this.openSegmentStart;
-        console.log('close/open time: ' + this.closeOpenSegmentOperations);
-       
-
-        if((typeof this.clickingButtonOperations == 'undefined')||(typeof this.clickingButtonOperations == 'null')) this.clickingButtonOperations = 0;
-        if((typeof this.changeStatusOperations == 'undefined')||(typeof this.changeStatusOperations == 'null')) this.changeStatusOperations = 0;
-        this.clickingButtonOperations = this.changeStatusOperations = this.closeOpenSegmentOperations =  undefined;
-        this.setCurrentSegment(segment);
+		console.log('close/open time: ' + ( (new Date()) - this.openSegmentStart));
 	},
 	
-	closeSegment: function(segment) {
+	closeSegment: function(segment,byButton) {
         if(typeof segment =='undefined') return true;
         var closeStart = new Date();
+		this.deActivateSegment(byButton);
+
         this.body.removeClass('editing');
 		$(segment).removeClass("editor");
-		if(!this.opening) this.setCurrentSegment(segment,1);
+		if(!this.opening) {
+			this.setCurrentSegment(segment,1);
+			this.checkIfFinished(1);
+		}
 	},
 
 	gotoPreviousSegment: function() {
@@ -726,19 +792,17 @@ UI = {
 
     gotoSegment: function(id){
         var el=$("#segment-"+id+"-target").find(".editarea");
-        el.click();
-        
+        $(el).click();
     },
 	gotoNextSegment: function() {
         var next = $('.editor').next();
-        console.log(next);
+//        console.log(next);
         if(next.is('section')) {
-        	$('.target .editarea',next).click();
+        	$('.editarea',next).click();
         } else {
-        	next = $('.editor').parents('article').next().find('section:first');
+        	next = this.currentArticle.next().find('section:first');
         	if(next.length) {
-        		$('.target .editarea',next).click();
-        	} else {
+        		$('.editarea',next).click();
         	}
         };
 	},
@@ -748,15 +812,21 @@ UI = {
 	},	
 
 	setCurrentSegment: function(segment,closed) {
-        var id_segment = segment.attr('id').split('-')[1];
+		this.nextSegmentId = segment.next();
+        var id_segment = this.currentSegmentId;
+//console.log('punto 3.1: ' + ( (new Date()) - this.openSegmentStart));
         if(closed) {
             id_segment = 0;
-        }else{
-            window.location.hash=id_segment;
+            UI.currentSegment = undefined;
+//            console.log(UI.currentSegment);
+        } else {
+			setTimeout(function(){window.location.hash = id_segment},300);
+//            window.location.hash = id_segment;
         }
         var file = this.currentArticle;
+//console.log('punto 3.2: ' + ( (new Date()) - this.openSegmentStart));
         $.ajax({
-            url: config.basepath + '?action=setCurrentSegment',
+            url: config.basepath + '?action=setCurrentSegment'+this.appendTime(),
             data: {
                 action: 'setCurrentSegment',
                 id_segment: id_segment,
@@ -764,6 +834,7 @@ UI = {
             },
             type: 'POST',
             success: function(d){
+            	UI.nextSegmentId = d.nextSegmentId;
             }
         });
 	},
@@ -772,19 +843,29 @@ UI = {
 		$('body').unbind('keydown');
 		$("body, .target .editarea").bind('keydown','Alt+1', function(e){ 
             e.preventDefault();
-            UI.chooseSuggestion('1');
+            if(e.which != 97) {
+            	UI.chooseSuggestion('1');
+            }
         }).bind('keydown','Alt+2', function(e){ 
             e.preventDefault();
-            UI.chooseSuggestion('2');
+            if(e.which != 98) {
+            	UI.chooseSuggestion('2');
+            }
         }).bind('keydown','Alt+3', function(e){ 
             e.preventDefault();
-            UI.chooseSuggestion('3');
+            if(e.which != 99) {
+            	UI.chooseSuggestion('3');
+            }            
         }).bind('keydown','Alt+4', function(e){ 
             e.preventDefault();
-            UI.chooseSuggestion('4');
+            if(e.which != 100) {
+            	UI.chooseSuggestion('4');
+            }            
         }).bind('keydown','Alt+5', function(e){ 
             e.preventDefault();
-            UI.chooseSuggestion('5');
+            if(e.which != 101) {
+            	UI.chooseSuggestion('5');
+            }            
         })
 	},
 
@@ -817,19 +898,24 @@ UI = {
 	},
 				
 	scrollSegment: function(segment) {
+		console.log(segment);
 		var spread = 23;
-		var current = $('section.editor');
+		var current = this.currentSegment;
 		var previousSegment = $(segment).prev('section');
 		if(!previousSegment.length) {
 			previousSegment = $(segment);
 			spread = 33;
 		};
 		var destination = "#"+previousSegment.attr('id');
+//		console.log('segment: ' + $(destination).attr('id'));
+//		console.log($(destination));
+//		var beforeOffset = new Date();
 		var destinationTop = $(destination).offset().top;
+//		console.log('calcolo offset: ' + ( (new Date()) - beforeOffset));
 		if($(current).length){
 			if($(segment).offset().top > $(current).offset().top) {
 				if(!current.is($(segment).prev())) {
-					destinationTop = destinationTop - $('section.editor').height() + $(segment).height() - spread;
+					destinationTop = destinationTop - this.currentSegment.height() + $(segment).height() - spread;
 				} else {
 					destinationTop = destinationTop - spread;
 				}
@@ -842,21 +928,285 @@ UI = {
         $("html,body").animate({
 	        scrollTop: destinationTop-20
         }, 500 );
-	}	        
+	},	        
+
+	activateSegment: function() {
+		this.createFooter(this.currentSegment);
+		this.createButtons();
+		this.createHeader();
+	},
+
+	deActivateSegment: function(byButton) {
+		this.removeButtons(byButton);
+		this.removeHeader(byButton);
+		this.removeFooter(byButton);
+	},
+			     
+	createButtons: function() {
+	    var disabled = (this.currentSegment.hasClass('loaded'))? '' : ' disabled="disabled"';
+		var buttons = '<li><a id="segment-'+this.currentSegmentId+'-copysource" href="#" class="btn copysource" data-segmentid="segment-'+this.currentSegmentId+'" title="Copy source to target"></a><p>CTRL+RIGHT</p></li><li><input id="segment-'+this.currentSegmentId+'-button-draft" data-segmentid="segment-'+this.currentSegmentId+'" name="" type="button" class="draft"'+disabled+' value="DRAFT"/></li><li style="margin-right:-20px"><input id="segment-'+this.currentSegmentId+'-button-translated" data-segmentid="segment-'+this.currentSegmentId+'" name="" type="button" class="translated"'+disabled+' value="TRANSLATED"/><p>CTRL+ENTER</p></li>';
+		$('#segment-'+this.currentSegmentId+'-buttons').html(buttons);
+	},
+
+	removeButtons: function(byButton) {
+		var segment = (byButton)? this.currentSegment : this.lastOpenedSegment;
+		$('#'+segment.attr('id')+'-buttons').empty();
+	},
+
+	createHeader: function() {
+		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="#" id="segment-'+this.currentSegmentId+'-close" class="close" title="Close this segment"></a>';
+		$('#'+this.currentSegment.attr('id')+'-header').html(header);
+	},
+
+	removeHeader: function(byButton) {
+		var segment = (byButton)? this.currentSegment : this.lastOpenedSegment;
+		$('#'+segment.attr('id')+'-header').empty();
+	},
+
+	createFooter: function(segment) {
+		if($('.footer', segment).text() != '') return false;
+		var footer = '<ul class="submenu"><li class="active" id="segment-'+this.currentSegmentId+'-tm"><a tabindex="-1" href="#">Translation matches</a></li></ul><div class="cl"></div><div class="tab sub-editor matches" id="segment-'+this.currentSegmentId+'-matches"><div class="overflow"><div class="cl"></div></div></div>';
+		$('.footer', segment).html(footer);
+	},
+
+	removeFooter: function(byButton) {
+//		$('.footer', this.lastOpenedSegment).empty();
+	},
+
+	createStatusMenu: function(statusMenu) {
+		$("ul.statusmenu").empty().hide();
+		var menu = '<li class="arrow"><span class="arrow-mcolor"></span></li><li><a href="#" class="f" data-sid="segment-'+this.currentSegmentId+'" title="set draft as status">DRAFT</a></li><li><a href="#" class="d" data-sid="segment-'+this.currentSegmentId+'" title="set translated as status">TRANSLATED</a></li><li><a href="#" class="a" data-sid="segment-'+this.currentSegmentId+'" title="set approved as status">APPROVED</a></li><li><a href="#" class="r" data-sid="segment-'+this.currentSegmentId+'" title="set rejected as status">REJECTED</a></li>';
+		statusMenu.html(menu).show();
+	},
+
+	removeStatusMenu: function(statusMenu) {
+		statusMenu.empty().hide();
+	},
+
+
+    getMoreSegments: function(where, starting) {
+/*
+    	if((starting)&&(location.hash)) where = 'center';
+    	var step = (starting)? this.initSegNum : this.moreSegNum;
+    	var seg = (where == 'after')? $('section').last() : (where == 'before')? $('section').first() : (where == 'center')? location.hash.substring(1) : '';
+//    	var center = ((starting)&&(location.hash))? location.hash.substring(1) : '';
+    	var segId = (starting)? 0 : seg.attr('id').split('-')[1];
+    	var articleId = (starting)? $('article').first().attr('id').split('-')[1] : seg.parent().attr('id').split('-')[1];
+*/    	
+
+    	var step = (starting)? this.initSegNum : this.moreSegNum;
+    	var lastSegment = $('section').last();
+    	var center = ((starting)&&(location.hash))? location.hash.substring(1) : '';
+    	var lastLoadedId = (starting)? 0 : lastSegment.attr('id').split('-')[1];
+    	var lastArticleId = (starting)? $('article').first().attr('id').split('-')[1] : lastSegment.parent().attr('id').split('-')[1];
+
+   		$('#outer').addClass('loading');
+
+        $.ajax({
+            url: config.basepath + '?action=getSegments'+this.appendTime(),
+            data: {
+                action: 'getSegments',
+                jid: config.job_id,
+                password: config.password,
+                lid: lastLoadedId,
+                step : step,
+                segment: center
+            },
+            type: 'POST',            
+            dataType: 'json',
+//            context: $('#'+id),
+            complete: function (d){
+//                $(".loader",n).removeClass('loader_on');
+            },
+            success: function(d){
+//            	console.log(typeof d.data[lastArticleId]);
+            	if(typeof d.data[lastArticleId] != 'undefined') UI.renderSegments(d.data[lastArticleId]['segments'],lastArticleId,starting,center);
+   				$('#outer').removeClass('loading');
+            }
+        });
+    },
+
+	renderSegments: function(segments,articleId,starting,center) {
+/*
+        var startIndex = 0;
+        $.each(segments, function(index) {
+        	if(this.sid == center) {
+        		startIndex = index-3;
+//        		restrictedFirstSegment = index-3;
+        	};
+        });
+		if(startIndex < 0) startIndex = 0;
+		this.subsetRender(segments,startIndex,10,articleId);
+*/
+
+
+
+		var newSeg = '';
+		var t = config.time_to_edit_enabled;
+        $.each(segments, function(index) {
+
+		newSeg +=	'<section id="segment-' + this.sid + '" class="status-' + ((!this.status)?'new':this.status.toLowerCase()) + '">'+
+					
+					'	<a tabindex="-1" href="#' + this.sid + '"></a>'+
+					'	<span class="number">' + this.sid + '</span>'+
+					
+					'	<div class="body">'+
+											
+					'		<div class="header toggle" id="segment-' + this.sid + '-header"></div>'+
+					'		<div class="text">'+
+					
+					'			<div class="wrap">'+
+					
+					'				<div class="source item" id="segment-' + this.sid + '-source" data-original="' + this.segment + '">'+
+					'					<span class="original">' + this.segment + '</span>'+
+					'					' + this.segment +
+					'				</div> <!-- .source -->'+
+					
+					'				<div class="target item" id="segment-' + this.sid + '-target">'+
+					
+					'					<div class="status" title="' + ((!this.status)?'new':this.status.toLowerCase()) + '"></div>'+
+					'					<span class="hide toggle"> '+
+					'						<a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>'+
+					'					</span>'+
+					'					<div class="textarea-container">'+
+					'						<span class="loader"></span>'+
+					'						<div class="editarea invisible" contenteditable=true id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation)?'':this.translation) + '</div>'+
+					'						<ul class="buttons toggle" id="segment-' + this.sid + '-buttons"></ul>'+
+					'					</div> <!-- .textarea-container -->'+
+					
+					'				</div> <!-- .target -->'+
+					
+					'			</div> <!-- .wrap -->'+
+					
+					'			<div class="status-container">'+
+					'				<a href=# title="' + ((!this.status)?'Change segment status':this.status.toLowerCase()+', click to change it') + '" class="status" id="segment-' + this.sid + '-changestatus"></a>'+
+					'			</div> <!-- .status-container -->'+
+					
+					'		</div> <!-- .text -->'+
+				((t)?'		<div class="timetoedit" data-raw_time_to_edit="0">':'')+
+				((t)?'			<span class=edit-min>' + this.parsed_time_to_edit[1] + '</span>m:':'')+
+				((t)?'			<span class=edit-sec>' + this.parsed_time_to_edit[2] + '</span>s':'')+
+				((t)?'		</div>':'')+
+/*
+					'		<div class="timetoedit" data-raw_time_to_edit="0">'+
+					'			<span class=edit-min>' + this.parsed_time_to_edit[1] + '</span>m:'+
+					'			<span class=edit-sec>' + this.parsed_time_to_edit[2] + '</span>s'+
+					'		</div>'+
+*/					
+					'		<div class="footer toggle"></div> <!-- .footer -->     '+         
+					
+					'	</div> <!-- .body -->'+
+					
+					'	<ul class="statusmenu"></ul>'+
+					
+					'</section> ';
+
+        });
+        $('#file-'+articleId).append(newSeg);
+//        $('#outer').removeClass('loadmore');
+
+
+
+
+
+        
+//        $('section.new .text').effect("highlight", {}, 3000);
+//        $('section.new').removeClass('new');
+        if(starting) {
+        	this.scroll();
+        	this.init();
+        }
+
+	},
+
+	subsetRender: function(segments,startIndex,num,articleId) {
+		var newSeg = '';
+		for(i=startIndex;i<=startIndex+num;i++) {
+			seg = segments[i];
+			newSeg +=	'<section id="segment-' + seg.sid + '" class="status-' + ((!seg.status)?'new':seg.status.toLowerCase()) + ' new">'+
+						
+						'	<a tabindex="-1" href="#' + seg.sid + '"></a>'+
+						'	<span class="number">' + seg.sid + '</span>'+
+						
+						'	<div class="body">'+
+												
+						'		<div class="header toggle" id="segment-' + seg.sid + '-header"></div>'+
+						'		<div class="text">'+
+						
+						'			<div class="wrap">'+
+						
+						'				<div class="source item" id="segment-' + seg.sid + '-source" data-original="' + seg.segment + '">'+
+						'					<span class="original">' + seg.segment + '</span>'+
+						'					' + seg.segment +
+						'				</div> <!-- .source -->'+
+						
+						'				<div class="target item" id="segment-' + seg.sid + '-target">'+
+						
+						'					<div class="status" title="' + ((!seg.status)?'new':seg.status.toLowerCase()) + '"></div>'+
+						'					<span class="hide toggle"> '+
+						'						<a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>'+
+						'					</span>'+
+						'					<div class="textarea-container">'+
+						'						<span class="loader"></span>'+
+						'						<div class="editarea invisible" contenteditable=true id="segment-' + seg.sid + '-editarea" data-sid="' + seg.sid + '">' + ((!seg.translation)?'':seg.translation) + '</div>'+
+						'						<ul class="buttons toggle" id="segment-' + seg.sid + '-buttons"></ul>'+
+						'					</div> <!-- .textarea-container -->'+
+						
+						'				</div> <!-- .target -->'+
+						
+						'			</div> <!-- .wrap -->'+
+						
+						'			<div class="status-container">'+
+						'				<a href=# title="' + ((!seg.status)?'Change segment status':seg.status.toLowerCase()+', click to change it') + '" class="status" id="segment-' + seg.sid + '-changestatus"></a>'+
+						'			</div> <!-- .status-container -->'+
+						
+						'		</div> <!-- .text -->'+
+						
+						'		<div class="timetoedit" data-raw_time_to_edit="0">'+
+						'			<span class=edit-min>' + seg.parsed_time_to_edit[1] + '</span>m:'+
+						'			<span class=edit-sec>' + seg.parsed_time_to_edit[2] + '</span>s'+
+						'		</div>'+
+						
+						'		<div class="footer toggle"></div> <!-- .footer -->     '+         
+						
+						'	</div> <!-- .body -->'+
+						
+						'	<ul class="statusmenu"></ul>'+
+						
+						'</section> ';			
+		}
+        $('#file-'+articleId).append(newSeg);		
+	},
+	
+	appendTime: function() {
+    	var t = new Date();
+    	return '&time='+t.getTime();
+	},
+
+	scroll: function() {
+	    var scrolltime = new Date();
+		if((config.last_opened_segment != '')&&(config.last_opened_segment != 0)) {
+	    	var target = ($('#segment-' + config.last_opened_segment).length)? $('#segment-' + config.last_opened_segment) : $('section.status-draft, section.status-rejected, section.status-new').first();
+//	    	console.log(config.last_opened_segment);
+	    	this.scrollSegment(target);
+		}
+		console.log('scrolltime: ' + ( (new Date()) - scrolltime));
+	}
 
 }
 
+
+
+
+
+
+
 $(document).ready(function(){
-    UI.init();
+    UI.render();
+//    UI.init();
 });
 
 
 $(window).resize(function(){
 });
 
-$('#segment-' + config.last_opened_segment).ready(function() {
-	if((config.last_opened_segment != '')&&(config.last_opened_segment != 0)) {
-    	var target = ($('#segment-' + config.last_opened_segment).length)? $('#segment-' + config.last_opened_segment) : $('section.status-draft, section.status-rejected, section.status-new').first();
-    	UI.scrollSegment(target);
-	}
-});

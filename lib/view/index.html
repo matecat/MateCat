@@ -26,10 +26,16 @@
                 id_customer: "<span tal:replace='id_customer | string:unknown_customer'/>",
                 private_customer: "<span tal:replace='private_customer | string:0'/>",
                 last_opened_segment: '${last_opened_segment}',
+                server_load_time: '${load_time}',
                 job_id: '${jid}',
+                password: '${password}',
                 source_lang: '${source}',
-                target_lang: '${target}'             
+                target_lang: '${target}',
+                time_to_edit_enabled: false 
+//                time_to_edit_enabled: '${time_to_edit_enabled}'            
             }
+			console.log('Server time: ' + Math.round(config.server_load_time)); 
+			var renderStart = new Date();
         </script>
         <script src="/public/js/loader.js"></script>
         
@@ -47,8 +53,9 @@
 					<input type="hidden" name="filename" tal:attributes ="value string:${pname}.xliff" />
 					<input id="downloadProject" name="submit" type="submit" value="DOWNLOAD PROJECT" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
 				</form>
-
 <a href="#" class="filter"> <span class="arrow-top "></span></a>
+
+
                 <!-- viewer icons
                 
                     <a href="" class="notification m-notification" title="click to view notifications">2</a>
@@ -142,94 +149,138 @@
             </div>   <!-- .wrapper -->
 
             <div class="cl"></div>
-
-
-       
-         
-
         </header>
-        
-        
-     <div class="search"> 
-      
-     <input name="" type="button" class="btn" value="FILTER" />
-      <span class="loader"></span>
-       
+
+        <div class="search">    
        <div class="col1-search">
-       
        <ul>
+       <li style="float:right">
+         <input name="" type="button" class="btn" value="FILTER" />
+       </li>
        <li>
-       <input type="text" style="width:40px !important" value="SEG" onfocus="if (this.value == 'SEG') {this.value = '';}" onblur="if (this.value == '') {this.value = 'SEG';}" class="search-input"/>  			   
+       <input type="text" style="width:40px !important" value="SEG" onFocus="if (this.value == 'SEG') {this.value = '';}" onBlur="if (this.value == '') {this.value = 'SEG';}" class="search-input"/>  			   
        </li>
        <li>
       		<select class="search-select" >
-      
-       
          <option value="prova">FILENAME</option>
        </select>  	
-       
         </li>
       <li>
-       				<div class="editarea " contenteditable="true">SOURCE</div>
+<div class="search-editarea " contenteditable="true" onClick="if ($(this).text()=='SOURCE') $(this).text('')" onBlur="if ($(this).text()=='') $(this).text('SOURCE')">SOURCE</div>
           </li>      
                 
                 
                 <li>
-                				 <div class="editarea " contenteditable="true">TRANSLATION</div>
+                				 <div class="search-editarea" contenteditable="true" onClick="if ($(this).text()=='TRANSLATION') $(this).text('')" onBlur="if ($(this).text()=='') $(this).text('TRANSLATION')">TRANSLATION</div>
                                  
                                  
                                  </li>
-                                 <li>
-                                 						<p>STATUS: </p> 
 
-<span class="custom-checkbox">
+<li>
+
+
+          <span class="custom-checkbox replace">
+  <input type="checkbox" />
+  <span class="box normal-check" title="show/hide draft segments"><span class="tick "></span></span>
+</span> 
+
+<p> REPLACE </p>
+
+</li>
+
+ </ul>
+    
+    
+    <div class="cl"></div>
+         
+      <ul class="r-replace-box">
+  <li style="float:right">
+     <input name="" type="button" class="btn" value="REPLACE" />
+  
+  </li>
+  <li style="margin-left:202px">
+      <div class="search-editarea" contenteditable="true" onClick="if ($(this).text()=='REPLACE SOURCE WITH') $(this).text('')" onBlur="if ($(this).text()=='') $(this).text('REPLACE SOURCE WITH')">REPLACE SOURCE WITH</div>
+    </li>
+    <li>     
+<div class="search-editarea" contenteditable="true" onClick="if ($(this).text()=='REPLACE TRANSLATION WITH') $(this).text('')" onBlur="if ($(this).text()=='') $(this).text('REPLACE TRANSLATION WITH')">REPLACE TRANSLATION WITH</div>
+</li>
+</ul>
+  
+     </div>
+       <div class="cl"></div>
+  
+  
+  
+  
+  <div class="checkbox-box">
+  
+  <ul>
+  
+  <li>
+  
+  
+  
+
+
+  
+  
+  
+ <span class="custom-checkbox" style="margin-left:8px">
+  <input type="checkbox" />
+  <span class="box normal-check" title="show/hide draft segments"><span class="tick"></span></span>       </span>     
+       <p > MATCH WHOLE WORDS</p>
+       <span class="custom-checkbox">
+  <input type="checkbox"/>
+  <span class="box normal-check" title="show/hide draft segments"><span class="tick"></span></span>       </span> 
+       <p> CASE SENSITIVE</p>
+       </li>
+ 
+<li>
+
+<span class="custom-checkbox" style="margin-left:10px;">
   <input type="checkbox" checked="checked"/>
   <span class="box tr-check" title="show/hide translated segments"><span class="tick"></span></span>
-</span> 
-<p style="margin-left:5px;margin-right:10px;">Translated</p>
+</span>
+ 
+<p style="margin-right:5px;">Translated</p>
+</li>
+
+<li>
 <span class="custom-checkbox">
   <input type="checkbox" checked="checked"/>
   <span class="box dr-check" title="show/hide draft segments"><span class="tick"></span></span>
 </span>
-<p style="margin-left:5px;margin-right:10px;">Draft</p>
+<p style="margin-right:5px;">Draft</p>
+</li>
+<li>
 <span class="custom-checkbox">
   <input type="checkbox" checked="checked"/>
   <span class="box rj-check" title="show/hide rejected segments"><span class="tick"></span></span>
 </span>
-<p style="margin-left:5px;margin-right:10px;">Rejected</p>
-
+<p style="margin-right:5px;">Rejected</p>
 </li>
- </ul>
-    
-    
-    
+<li><span class="custom-checkbox">
+  <input type="checkbox" checked="checked"/>
+  <span class="box ap-check" title="show/hide approved segments"><span class="tick"></span></span>
+</span>
+<p style="margin-right:10px;">Approved</p>
+</li>
+
   
-     </div>
-       <div class="cl"></div>
-       <div class="checkbox-box">
-    <span class="custom-checkbox" style="margin-left:8px">
-  <input type="checkbox" checked="checked"/>
-  <span class="box normal-check" title="show/hide draft segments"><span class="tick"></span></span>
-</span>     
-  <p > MATCH WHOLE WORDS</p>
-  	    <span class="custom-checkbox">
-  <input type="checkbox" checked="checked"/>
-  <span class="box normal-check" title="show/hide draft segments"><span class="tick"></span></span>
-</span> 
- <p> CASE SENSITIVE</p>  	
-
-   <span class="custom-checkbox">
-  <input type="checkbox" checked="checked"/>
-  <span class="box normal-check" title="show/hide draft segments"><span class="tick"></span></span>
-</span> 
-  <p > REPLACE 	</p>   	
-     </div>
-     </div>   
+  
+  </ul>
+  
+  </div>
+  
+       
+      
+    </div>   
         
-        <!--  END header serach  div (hidden by default) -->
+        <!--  END header serach  div (hidden by default) -->    
 
 
-		<article tal:define="file_data php:array()" tal:repeat="file_data data" tal:attributes="id string:file-${repeat/file_data/key}" id="001">
+		<div id="outer">
+		<article tal:define="file_data php:array()" tal:repeat="file_data data" tal:attributes="id string:file-${repeat/file_data/key};class string:loading" id="001">
 
 			<ul class="projectbar" data-job="" tal:attributes="data-job string:job-${file_data/jid}">
 				<li>
@@ -238,7 +289,7 @@
 						<input type="hidden" name="action" value="downloadFile" />
 						<input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
 						<input type="hidden" name="id_file" value="${repeat/file_data/key}" />
-						<input type="hidden" name="filename" tal:attributes ="value string:${pname}-${file_data/filename}" />
+						<input type="hidden" name="filename" tal:attributes ="value string:${file_data/filename}" />
 						<input tal:attributes="id string:file-${repeat/file_data/key}-download" title="Download file" name="submit" type="submit" value="" class="downloadfile" />
 					</form>
 				</li>
@@ -265,426 +316,11 @@
 			</div>
 -->                    
                     
-			<tal:block tal:define="segment php:array()" tal:repeat="segment file_data/segments" >
 
-			<section tal:attributes="id string:segment-${segment/sid}; class php:'status-'.((segment['status']=='')?'draft':strtolower(segment['status']))" tal:define="coso string:${segment/sid}" id="001" class="">
-
-				<a tabindex="-1" href="#1" tal:attributes ="href string:#${segment/sid}"></a> 
-				<span class="number" tal:content="segment/sid | default"></span>
-
-				<div class="body" tal:attributes="class string:body ${segment/css_loaded | nothing}" >
-
-					<div class="header toggle">
-
-						<h2 tal:attributes="title string:Created by ${segment/matches/0/created_by  | nothing}"  title="Created by Euromed" class="percentuage"><span></span></h2>
-						<a href="#" tal:attributes="id string:segment-${segment/sid}-close" class="close" title="Close this segment"></a>
-
-					</div>
-
-					<tal:block tal:define="additional_css_class php: repeat.segment.odd ?'light':''">
-
-					<div class="text" tal:attributes="class string:text ${additional_css_class}">
-						<div class="wrap">
-
-							<div class="source item"  id="001-source" tal:attributes="id string:segment-${segment/sid}-source; data-original segment/segment">
- 								<span tal:content="structure segment/segment" class="original"></span>
-<!--							<span tal:replace="structure php:str_replace('&nbsp;',' ',segment['segment'])" /> -->
-								<span tal:replace="structure segment/segment" />
-							</div> <!-- .source -->
-
-
-            <div class="target item" tal:attributes="id string:segment-${segment/sid}-target" id="001-target">
-
-				
-
-                <div class="status" title="Translated" tal:condition="php:segment['status'] EQ 'TRANSLATED' "><!--<img src="/public/img/barrow.png" />--></div>
-
-                                
-
-				<div class="status" title="Approved" tal:condition="php:segment['status'] EQ 'APPROVED' "></div>
-
-
-				<div class="status" title="Rejected" tal:condition="php:segment['status'] EQ 'REJECTED' "></div>
-                                
-				<div class="status" title="Draft"  tal:condition="php:segment['status'] EQ 'DRAFT' OR segment['status'] EQ '' OR segment['status'] EQ 'NEW'"></div>
-
-
-				<span class="hide toggle"> 
-					<a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>
-				</span>
-
-				<div class="textarea-container">
-                <span class="loader"></span>
-
-                              
-					<div tal:attributes="id string:segment-${segment/sid}-editarea" class="editarea invisible" contenteditable="true" tal:content="structure segment/translation | segment/matches/0/translation | nothing"></div>
-
-					<ul class="buttons toggle">
-
-						<li><a tal:attributes="id string:segment-${segment/sid}-copysource" href="#" class="btn copysource" title="Copy source to target"></a><p>CTRL+RIGHT</p></li>
-
-						<li><input tal:attributes="id string:segment-${segment/sid}-button-draft" name="" type="button" class="draft" disabled="disabled" value="DRAFT"/></li>
-
-						<li style="margin-right:-20px"><input tal:attributes="id string:segment-${segment/sid}-button-translated" name="" type="button" class="translated" disabled="disabled" value="TRANSLATED"/>
-
-						<p>CTRL+ENTER</p></li>
-
-						<!-- <li><a href="#" class="btn tagmenu disabled" title="Insert tags"></a><p>CTRL+ENTER</p></li>-->
-
-					</ul>
-
-				</div> <!-- .textarea-container -->
-
-			</div> <!-- .target -->
-			</div> <!-- .wrap -->
-			
-
-
-			<div class="status-container">
-
-				<a tal:attributes="id string:segment-${segment/sid}-menu-translated" tal:condition="php:segment['status'] EQ 'TRANSLATED' " href="#" title="Translated, click to change it"  class="status"></a>                            
-
-				<a tal:attributes="id string:segment-${segment/sid}-menu-approved" tal:condition="php:segment['status'] EQ 'APPROVED' " href="#" title="Approved, click to change it"  class="status"></a>                            
-
-				<a tal:attributes="id string:segment-${segment/sid}-menu-rejected" tal:condition="php:segment['status'] EQ 'REJECTED' " href="#" title="Rejected, click to change it"  class="status"></a>      
-                                
-				<a tal:attributes="id string:segment-${segment/sid}-menu-draft" tal:condition="php:segment['status'] EQ 'DRAFT' " href="#" title="Draft, click to change it"  class="status"></a>                            
-
-				<a tal:attributes="id string:segment-${segment/sid}-changestatus" tal:condition="php:segment['status'] EQ ''  OR segment['status'] EQ 'NEW'"  href="#" title="Change segment status"  class="status " ></a>                                                           
-
-			</div> <!-- .status-container -->
-
-		</div>
-
-
-
-
-<div class="timetoedit" tal:attributes="data-raw_time_to_edit segment/time_to_edit|string:0" >
-	<span class="edit-min">${segment/parsed_time_to_edit/1 | string:00}</span>m:
-	<span class="edit-sec">${segment/parsed_time_to_edit/2 | string:00}</span>s
-	<!--:<span class="edit-sec">${segment/parsed_time_to_edit/3 | string:00}</span>ms -->
-</div>
-
-
-			</tal:block>
-
-
-
-
-
-                        
-
-                           
-
-                            
-
-                            <div class="footer toggle"> 
-
-                            	<ul  class="submenu">
-
-                                	<li class="hide">
-
-                                    	<a href="#smsg1">Smart suggestions</a> 
-
-                                	</li>
-
-                                	<li class="active ">
-
-                                    	<a tabindex="-1" tal:attributes="href string:#tr_ma_${repeat/segment/number}" href="#tr_ma_1">
-
-                                        Translation matches 
-
-                                        <tal:block tal:condition="exists:segment/matches" >
-
-                                            (<span tal:content="php:count(segment['matches'])">2</span>)
-
-                                        </tal:block> 
-
-                                        <tal:block tal:condition="not:exists:segment/matches" >
-
-                                            <span></span>
-
-                                        </tal:block> 
-
-                                    	</a>
-
-                                	</li>
-
-                                	<li class="hide">
-
-                                    	<a tal:attributes="href string:#con_${repeat/segment/number}" href="#con_1">Concordance</a>
-
-                                	</li>
-
-                               		<li class="hide">
-
-                                	    <a tal:attributes="href string:#Preview_${repeat/segment/number}" href="#Preview_1" class=			"preview-link">Preview</a>
-
-                                	</li>
-
-                            	</ul>  
-
-                            <div class="cl"></div>
-
-<!--smart-suggestion--> <!-- <span class="doubleclick">Double click for use it </span>-->
-
-                            <div  class="hide  ">
-
-                          
-
-                                <ul class="graysmall">
-
-                                    <li ><span class="greenborder">Translation Memory</span></li>
-
-
-
-                                    <li class="b">Memorie di traduzione
-
-										<ul class="graysmall-details">
-
-											<li class="graygreen">   81%</li>
-
-											<li>     02/11/2008  </li>
-
-
-
-											<li>Created by Euromed</li>
-
-											<li>CTRL+1</li>
-
-                                            <li>Double click for use it</li>
-
-										</ul>
-
-									</li>
-
-
-
-                                </ul>
-
-
-
-
-
-                                <ul class="graysmall addline-suggestion">   
-
-                                    <li>            
-
-                                        <input name="" type="text" value="Add a source suggestion"  
-
-                                               onblur="if(this.value.length == 0) this.value='Add a source suggestion';" onClick="if(this.value == 'Add a source suggestion') this.value='';" class="sugg-input" />
-
-                                    </li>
-
-                                    <li> 
-
-                                        <input name="" type="text" value="Add a target suggestion"  
-
-                                               onblur="if(this.value.length == 0) this.value='Add a target suggestion';" onClick="if(this.value == 'Add a target suggestion') this.value='';" class="sugg-input second" /><input name="input" type="button" class="btn con-submit sugg-submit" value="ADD SUGGESTION"/>
-
-                                    </li>
-
-                                </ul>
-
-                                <ul class="graysmall add-ul">
-
-                                    <li><a href="#" class="addsuggestion">+</a> <span class="provalo">Add suggestion</span>                    </li>
-
-                                </ul>
-
-                                <div class="cl"></div>
-
-
-
-                            </div>
-
-<!--tr-matches-->
-
-                            <div class="tab sub-editor matches" tal:attributes="id string:segment-${segment/sid}-matches" id="001-tab1">
-
-                                <div class="overflow">     
-
-                                    <tal:block tal:condition="exists:segment/matches" >
-
-                                        <tal:block tal:define="suggestion php:array()" tal:repeat="suggestion segment/matches">
-
-                                            <ul class="graysmall" >
-
-                                                <li tal:content="suggestion/segment">Translation Memory </li>
-
-                                                <li tal:content="suggestion/translation" class="b">Memoria di traduzione</li>
-
-
-
-                                                <ul class="graysmall-details">
-
-                                                    <li class="graygreen">
-
-                                                        <span tal:replace="suggestion/match">81</span>
-
-                                                    </li>
-
-                                                    <li tal:content="suggestion/last-update-date">02/11/2008</li>
-
-                                                    <li tal:condition="true:suggestion/created-by">
-
-                                                        Source:  
-
-                                                        <span class="bold" tal:content="suggestion/created-by"/>
-
-                                                    </li>
-
-                                                </ul>
-
-                                            </ul>
-
-                                        </tal:block>
-
-                                    </tal:block>
-
-                                    <div class="cl"></div>
-
-                                </div>
-
-                            </div>
-
-                            <div class="sub-editor hide">                      
-
-                                <a href="#" class="btn back"></a>
-
-                                <a href="#" class="btn forward"></a>
-
-                                <input name="" type="text" value="Enter text to search"  
-
-                                       onblur="if(this.value.length == 0) this.value='Enter text to search';" onClick="if(this.value == 'Enter text to search') this.value='';" class="con-input"/>
-
-
-
-                                <div class="submenubutton">    
-
-                                    <input name="" type="button" class="btn con-submit" value="SEARCH IN SOURCE"/>
-
-                                    <a href="#" class="btn con-menubtn"></a>
-
-                                    <ul class="con-menu" id="col-menu" tal:attributes="id string:segment-${segment/sid}-col-menu">
-
-                                        <li><a href="#">SEARCH IN TARGET</a></li>
-
-                                    </ul>
-
-                                </div>
-
-
-
-                                <div class="cl"></div>
-
-                            </div>
-
-                            <div class="sub-editor preview hide" >
-
-                                <!--iframe src="http://mymemory.translated.net/doc/" width="99.5%" scrolling="yes" height="100%" frameborder="0"></iframe-->
-
-                            </div>
-
-                        </div>                     
-
-
-
-                    </div>
-
-                    
-
-                    
-
-                    <ul class="statusmenu">
-
-                                <li class="arrow"><span class="arrow-mcolor"></span></li>
-
-                                <li>
-
-                                    <a href="#" class="f" title="set draft as status">DRAFT</a></li>
-
-                                <li>
-
-                                    <a href="#" class="d" title="set translated as status">TRANSLATED</a></li>
-
-                                <li>
-
-                                    <a href="#" class="a" title="set approved as status">APPROVED</a></li>
-
-                                <li>
-
-                                    <a href="#" class="r" title="set rejected as status">REJECTED</a></li>
-
-                            </ul>
-
-                    
-
-                    <!--
-
-                    <div class="comments">
-
-                                <div class="h-notification c-close"> <span class="corner"></span>2</div>
-
-                                <div class="comment-area">
-
-                                    <div class="h-notification"> <span class="corner"></span>2 Comments<a href="#" class="x-com" title="close this comment"></a></div>
-
-                                    <ul>
-
-                                        <li><p> <strong>luca panzarella</strong>
-
-                                                <span class="date">  6:11 PM Mar 31</span>
-
-                                                <br />
-
-                                                Fede, questa modifica riguarda lo sviluppo: molto più facile spiegartela bene a voce.. è banale </p></li>
-
-                                        <li> <p><strong>Federico</strong>
-
-
-
-                                                <span class="date"> 12:53 PM Apr 2</span>
-
-                                                <br />
-
-                                                Domanda: ma poi l'utente cosa può fare in queste pagine statiche? Ci si arriva solamente da compilazione form? </p></li>
-
-                                        <li> <p><strong>dario</strong>
-
-
-
-                                                <span class="date">  2:11 PM Apr 2</span>
-
-                                                <br />
-
-                                                si! </p></li>
-
-                                        <li style="background:#c4d3dd; border-bottom:none">
-
-                                            <textarea name="" class="text-c" ></textarea>
-
-
-
-                                            <input name="" type="button" class="btn con-submit sugg-submit" value="ADD COMMENT"/>  
-
-                                            <div class="cl"></div> 
-
-                                        </li>
-
-                                    </ul>
-
-                                </div>
-
-                            </div>
-
-                            -->
-                    </section> 
-
-                </tal:block>
             <div class="cl"></div>
 
         </article>
+       	</div>
 
 
         
@@ -777,14 +413,14 @@
         <div class="cl"></div>
         <div class="grayed" ></div>
         <div class="end-message-box">
-      
-        <div class="header"><p>I still want to review</p><a href="#" class="close" title="Close this segment"></a></div>
         <div class="end-message-col1">
-       <img src="/public/img/towel.png" /> 
+        <h3>Faxová úloha<span>*</span>!</h3>
+       <img src="/public/img/end-message.jpg" /> 
+       <p><span>*</span>Now you know how to say “<strong>Good Job</strong>” in Czech.</p>
        </div>
         <div class="end-message-col2">
-        <h3>Good job, it only took you <br />
-<strong>30 minutes</strong> to finish the translation!</h3><br />
+<h4>It took you only <strong>30 minutes</strong> <br />
+  to finish the translation!</h4>
 
 				<form id="fileDownload" action="" method="post">
 					<input type="hidden" name="action" value="downloadFile" />
@@ -794,8 +430,12 @@
 					<input id="downloadProject" name="submit" type="submit" value="DOWNLOAD PROJECT" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
 				</form>
                 <div class="cl"></div>
-                <p>Or send this link to your client:</p>
-<input name="" type="text" value="http://23-P124#completed" onClick="select()"/>
+               <a href="#" class="downloadtr-button" style="background:#f5f5f5;color:#333">START NEW PROJECT</a>
+
+  
+                <a href="#" class="downloadtr-button" style="background:#f5f5f5;color:#333"><strong>NOTIFY YOUR PM</strong> <br />
+<span>that you are available for new work</span></a>
+<!--<input name="" type="text" value="http://23-P124#completed" onClick="select()"/>-->
                 </div>
                 </div>
     </body>

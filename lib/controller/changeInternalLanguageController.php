@@ -1,10 +1,6 @@
 <?php
 include_once INIT::$MODEL_ROOT . "/queries.php";
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 define('DEFAULT_NUM_RESULTS', 2);
 
 class changeInternalLanguageController extends ajaxcontroller {

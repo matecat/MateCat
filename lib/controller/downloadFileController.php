@@ -1,14 +1,12 @@
 <?php
+
 include_once INIT::$MODEL_ROOT . "/queries.php";
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 class downloadFileController extends downloadController {
 
     private $id_job;
-
+    private $fname;
+    private $download_type;
 
     public function __construct() {
         parent::__construct();
@@ -16,98 +14,121 @@ class downloadFileController extends downloadController {
         $this->fname = $this->get_from_get_post('filename');
         $this->id_file = $this->get_from_get_post('id_file');
         $this->id_job = $this->get_from_get_post('id_job');
+        $this->download_type = $this->get_from_get_post('download_type');
         if (empty($this->id_job)) {
-            $this->id_job="Unknown";
+            $this->id_job = "Unknown";
         }
-   
     }
 
     public function doAction() {
-//		$this->filename = $this->fname.".xliff";
-		$this->filename = $this->fname;
-        $files = getFilesForJob($this->id_job);
-		$id_file = ($this->id_file == "")?$files[0]['id_file']:$this->id_file;
-		$originalResult = getOriginalFile($id_file);
-		$original = $originalResult[0]['original_file'];
-		$modified = $original;
-/*
-		$preg_trans_unit = '|<trans-unit id="(.*?)"(.*?)>\s*<source>(.*?)</source>.*?<target>(.*?)</target>|m';
-        preg_match_all($preg_trans_unit, $modified, $res2, PREG_SET_ORDER);
 
-        foreach ($res2 as $trans_unit) {
-//            $id = $trans_unit[1];
-//            $no_translate = $trans_unit[2];
+        // specs for filename at the task https://app.asana.com/0/1096066951381/2263196383117
+        $this->filename = $this->fname;
+        if ($this->download_type == 'all') {
+            //in this case fname contains the project name (see html)  
+            $pathinfo = pathinfo($this->fname);
+            //enable when will be supportoed the whole project with multiple file download
+            //NOTICE: the file to be downloaded will have zip extension only if there are more than one 
+            // file in te project        
+            //if ($pathinfo['extension']!="zip"){
+            //    $this->filename=$pathinfo['basename'].".zip"
+            //}
+            //disable when will be supportoed the whole project with multiple file download
+            if ($pathinfo['extension'] != "xliff" and $pathinfo['extension'] != "sdlxliff" and $pathinfo['extension'] != "xlf") {
+                $this->filename = $pathinfo['basename'] . ".xliff";
+            } else {
+                $this->filename = $this->fname;
+            }
         }
-*/
-//		$pattern = '|(<source>)(.*?)(</source>)|';
-//		$modified = preg_replace($pattern, "$1$3", $modified);
 
-		$this->password=$this->get_from_get_post("password");
+        $files = getFilesForJob($this->id_job);
+        $id_file = ($this->id_file == "") ? $files[0]['id_file'] : $this->id_file;
+        $originalResult = getOriginalFile($id_file);
+        $original = $originalResult[0]['original_file'];
+        $working_copy = $original;
+
+        $this->password = $this->get_from_get_post("password");
         $this->start_from = $this->get_from_get_post("start");
         if (is_null($this->start_from)) {
             $this->start_from = 0;
         }
-        if (is_null($this->password)) {
-            $this->password = 'sldfjw322d';
-        }
+
         $data = getSegments($this->id_job, $this->password, $this->start_from);
-//		$stringa = "";
 
-//        $prova = "";
+        $transunit_translation = "";
         foreach ($data as $i => $seg) {
-/*
-			$pattern = '|(<trans-unit id="'.$seg['internal_id'].'".*?>\s*<source>)(.*?)(</source>.*?<target>)(.*?)(</target>)|m';
-			$replacement = '$1$2$3AAAA$5';
-			$modified = preg_replace($pattern, $replacement, $modified);
-*/
-			$translation = ($seg['translation'] == '')? $seg['segment'] : $seg['translation'];
- 			$search = '|<trans-unit id="'.$seg['internal_id'].'".*?>\s*<source>.*?</source>\s*<target>.*?</target>\s*</trans-unit>|sim';
+            $end_tags = "";
+            $translation = empty($seg['translation']) ? $seg['segment'] : $seg['translation'];
 
-			if(preg_match($search,$modified)) {
-				$pattern = '|(<trans-unit id="'.$seg['internal_id'].'".*?>\s*<source>.*?</source>\s*<target>)(.*?)(</target>\s*)|sim';
-				$replacement = '$1 '.$translation.'$3';
-				$modified = preg_replace($pattern, $replacement, $modified);				
-			} else {
-			    // Modified to keep indentation as on the original file 
-			    $pattern = '|(<trans-unit id="'.$seg['internal_id'].'".*?>)(\s*)(<source>\s*.*?\s*</source>)(\s*)|sim';
-				$replacement = '$1$2$3$2<target>'.$translation.'</target>$4';
-//				log::doLog('ECCO: '.$seg['internal_id'].' - '.$translation);
-				$modified = preg_replace($pattern, $replacement, $modified);
-				// log::doLog($modified);
-			}
-//			$GLOBALS['modified'] = $modified;
-//		echo $modified."<br/>";
+            @$xml_valid = simplexml_load_string("<placeholder>$translation</placeholder>");
+            if (!$xml_valid) {
+                $temp = preg_split("|\<|si", $translation);
+                $item = end($temp);
+                if (preg_match('|/.*?>\W*$|si', $item)) {
+                    $end_tags.="<$item";
+                }
+                while ($item = prev($temp)) {
+                    if (preg_match('|/.*?>\W*$|si', $item)) {
+                        $end_tags = "<$item$end_tags"; //insert at the top of the string
+                    }
+                }
+                $translation = str_replace($end_tags, "", $translation);
+            }
 
-//        	$stringa .= $i.'/'.$seg['sid'].', ';
-//        	$stringa .= $i.'/'.$seg['internal_id'].', ';
-			
-         }
+           
+            if (!empty($seg['mrk_id'])) {
+                $translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">$translation</mrk>";
+            }
 
-		// log::doLog('MODIFIED: '.$modified);
+            $transunit_translation.=$seg['prev_tags'] . $translation . $end_tags;
 
-		$this->content=$modified;
-//		$this->content=$id_file;
+            if (isset($data[$i + 1]) and $seg['internal_id'] == $data[$i + 1]['internal_id']) {
+                // current segment and subsequent has the same internal id --> 
+                // they are two mrk of the same source segment  -->
+                // the translation of the subsequentsegment will be queued to the current
+                continue;
+            }
+            
+            //this snipped could be temporary and cover the case if the segment is enclosed into a <g> tag
+            // but the translation, due the tag stripping, does not contain it
+            if (strpos($transunit_translation, "<g") === 0) { // I mean $transunit_translation began with <g tag
+                $endsWith = substr($transunit_translation, -strlen("</g>")) == "</g>";
 
-		
-//		$this->content=$prova;
-		
-		
-//		return $original_file;
+                if (!$endsWith) {
+                    $transunit_translation.="</g>";
+                }
+            }
+            $res_match_2 = false;
+            $res_match_1 = false;
 
-//        log::doLog($insertRes);
+            $pattern = '|(<trans-unit id="' . $seg['internal_id'] . '".*?>.*?)(<source.*?>.*?</source>.*?)(<seg-source.*?>.*?</seg-source>.*?)?(<target.*?>).*?(</target>)(.*?)(</trans-unit>)|si';
 
-/*           
-        $this->result['code'] = 1;
-        $this->result['data'] = "OK";
-        $this->result['original'] = $original;
-        $this->result['modified'] = $modified;
-*/
+            $res_match_1 = preg_match($pattern, $working_copy, $match_target);
+            if (!$res_match_1) {
+                $pattern = '|(<trans-unit id="' . $seg['internal_id'] . '".*?>.*?)(<source.*?>.*?</source>.*?)(<seg-source.*?>.*?</seg-source>.*?)?(.*?</trans-unit>)|si';
+                $res_match_2 = preg_match($pattern, $working_copy, $match_target);
+                if (!$res_match_2) {
+                    ; // exception !!! see the segment format
+                }
+            }
 
-//        $this->result['stringa'] = $stringa;
 
-        
+            if ($res_match_1) { //target esiste
+                $replacement = "$1$2$3$4" . $transunit_translation . "$5$6$7";
+            }
+            if ($res_match_2) { //target non esiste
+                $replacement = "$1$2$3<target>$transunit_translation</target>$4";
+            }
+
+            if (!$res_match_1 and !$res_match_2) {
+                continue; // none of pattern verify the file structure for current segmen t: go to next loop. In the worst case the procedure will return the original file
+            }
+            $working_copy = preg_replace($pattern, $replacement, $working_copy);
+
+            $transunit_translation = ""; // empty the translation before the end of the loop
+        }
+        $this->content = $working_copy;
     }
-
 
 }
 

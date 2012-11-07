@@ -1,5 +1,4 @@
 <?php
-
 include_once 'Database.class.php';
 
 function getJobData($id_job) {
@@ -8,7 +7,6 @@ function getJobData($id_job) {
    
     $db = Database::obtain();
     $results = $db->fetch_array($query);
-//print_r ($results);
     return $results[0];
 }
     
@@ -32,7 +30,7 @@ function getTranslatorPass($id_translator){
        
     $id_translator=  $db->escape($id_translator);
     $query = "select password from translators where username='$id_translator'";
-    //log::doLog($query);
+
     
     $db->query_first($query);
     $results = $db->query_first($query);
@@ -49,7 +47,6 @@ function getTranslatorKey($id_translator){
 
     $id_translator=  $db->escape($id_translator);
     $query = "select mymemory_api_key from translators where username='$id_translator'";
-    //log::doLog($query);
 
     $db->query_first($query);
     $results = $db->query_first($query);
@@ -69,22 +66,11 @@ function getEngines($type = "MT") {
 }
 
 function getSegments($jid,$password, $start = 0, $step = 200) {
-    /* $query = "select s.id,id_file, fj.id_job,segment, mimetype ,filename
-      from segments s
-      inner join files f on f.id=s.id_file
-      inner_join files_jobs fj on fj.id_file=f.id
-      inner join projects p on p.id = j.id_project
-
-      where id_file =4
-      limit $start,100 ";
-     */
-
-	
- 
 	if ($start<0){
 		$start=0;	
 	}
 
+	if (empty($step)){$step=200;}
 
 	
 	
@@ -92,6 +78,7 @@ function getSegments($jid,$password, $start = 0, $step = 200) {
                 p.id_customer as cid, j.id_translator as tid,  
                 p.name as pname, p.create_date , fj.id_file, fj.id_segment_start, fj.id_segment_end, 
                 f.filename, f.mime_type, s.id as sid, s.segment, s.raw_word_count, s.internal_id,
+		s.xliff_mrk_id as mrk_id, s.xliff_ext_prec_tags as prev_tags, 
                 st.translation, st.status, st.time_to_edit
 
                 from jobs j 
@@ -106,17 +93,59 @@ function getSegments($jid,$password, $start = 0, $step = 200) {
                 
                 
              ";
-    //limit $start,100
-    // log::doLog($query);
 
     $db = Database::obtain();
     $results = $db->fetch_array($query);
 
-    // // log::doLog($results);
-    //echo "<pre>";
-    //echo "$query\n";
-    //echo count($results);
-    //print_r ($results);exit;
+    return $results;
+}
+
+
+function getSegmentsInfo($jid,$password) {
+	
+    $query = "select j.id as jid, j.id_project as pid,j.source,j.target, j.last_opened_segment, j.id_translator as tid,
+                p.id_customer as cid, j.id_translator as tid,  
+                p.name as pname, p.create_date , fj.id_file, fj.id_segment_start, fj.id_segment_end, 
+                f.filename, f.mime_type
+
+                from jobs j 
+                inner join projects p on p.id=j.id_project
+                inner join files_job fj on fj.id_job=j.id
+                inner join files f on f.id=fj.id_file
+                where j.id=$jid and j.password='$password'
+                
+                
+                
+                
+             ";
+    $db = Database::obtain();
+    $results = $db->fetch_array($query);
+
+    return $results;
+}
+
+function getMoreSegments($jid,$password, $last_loaded_id, $step = 50, $central_segment = 0) {
+	$start_point = ($central_segment)? ((float) $central_segment) - 100 : $last_loaded_id;
+
+	    $query = "select j.id as jid, j.id_project as pid,j.source,j.target, j.last_opened_segment, j.id_translator as tid,
+                p.id_customer as cid, j.id_translator as tid,  
+                p.name as pname, p.create_date , fj.id_file, fj.id_segment_start, fj.id_segment_end, 
+                f.filename, f.mime_type, s.id as sid, s.segment, s.raw_word_count, s.internal_id,
+                st.translation, st.status, st.time_to_edit
+
+                from jobs j 
+                inner join projects p on p.id=j.id_project
+                inner join files_job fj on fj.id_job=j.id
+                inner join files f on f.id=fj.id_file
+                inner join segments s on s.id_file=f.id
+                left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
+                where j.id=$jid and j.password='$password' and s.id > $start_point
+                order by s.id
+                limit 0,$step
+             ";
+
+    $db = Database::obtain();
+    $results = $db->fetch_array($query);
 
     return $results;
 }
@@ -141,7 +170,6 @@ function setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $tra
         log::doLog($err);
         return $errno * -1;
     }
-    // log::doLog($db->affected_rows);
     return $db->affected_rows;
 }
 
@@ -187,7 +215,6 @@ function setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $sug
         log::doLog($err);
         return $errno * -1;
     }
-    // log::doLog($db->affected_rows);
     return $db->affected_rows;
 }
 
@@ -321,6 +348,21 @@ function getEditLog($jid,$pass) {
 		ORDER BY tte DESC
 		LIMIT 5000";
 
+    $db = Database::obtain();
+    $results = $db->fetch_array($query);
+
+    return $results;
+}
+
+function getNextUntranslatedSegment($sid,$jid) {
+
+	$query = "select id_segment
+				from segment_translations
+				where id_job=$jid and status in ('NEW','DRAFT','REJECTED') and id_segment>$sid
+				order by id_segment
+				limit 1
+			";
+             
     $db = Database::obtain();
     $results = $db->fetch_array($query);
 

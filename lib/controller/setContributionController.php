@@ -2,10 +2,6 @@
 include INIT::$ROOT."/lib/utils/mymemory_queries_temp.php";
 include INIT::$MODEL_ROOT."/queries.php";
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 class setContributionController extends ajaxcontroller {
 
     private $id_customer;
@@ -81,8 +77,6 @@ class setContributionController extends ajaxcontroller {
 
         $set_results = addToMM($this->source,$this->target,$this->source_lang,$this->target_lang,$this->id_translator,$this->key);
 
-        // log::doLog($set_results);
-            
         $this->result['code'] = 1;
         $this->result['data'] = "OK";
         
@@ -93,27 +87,6 @@ class setContributionController extends ajaxcontroller {
         $key = getTranslatorKey($id_translator);
         return $key;
     }
-    /*
-    private function calculateMyMemoryKey($id_translator){
-       
-        $pass=getTranslatorPass($id_translator);
-       
-        //$pass="mm";
-        if (empty($pass)){
-            return null;
-        }
-        $id_translator=  strtolower($id_translator);
-        $pass=  strtolower($pass);
-        
-        $cry1=md5("$id_translator:$pass");
-        $rev_pass=strrev($pass);
-        
-        $key=crypt($cry1,"$rev_pass.translated.$id_translator");
-        //log::doLog("$id_translator --- $key");
-        return $key;
-    }
-*/
-
 }
 
 ?>

@@ -89,7 +89,7 @@ class TMS_RESULT {
         $this->responseDetails = isset($result['responseDetails']) ? $result['responseDetails'] : '';
         $this->responseStatus = $result['responseStatus'];
 
-        if (array_key_exists('matches', $result)) {
+        if (is_array($result) and !empty($result) and array_key_exists('matches', $result)) {         
             $matches = $result['matches'];
             if (is_array($matches) and !empty($matches)) {
                 foreach ($matches as $match) {
@@ -134,12 +134,14 @@ class TMS extends engine {
         $parameters['langpair'] = "$source_lang|$target_lang";
         $parameters['de'] = $email;
         $parameters['mt'] = $mt;
+        //echo "user = $id_user";
         if (!empty($id_user)) {
             $parameters['user'] = $id_user;
             $parameters['key'] = $this->calculateMyMemoryKey($id_user);
         }
 
         $this->doQuery("get", $parameters);
+        //print_r ($this->raw_result);
         $this->result = new TMS_RESULT($this->raw_result);
         if ($this->result->responseStatus != "200") {
             return false;

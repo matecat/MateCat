@@ -1,7 +1,4 @@
 <?php
-
-//print_r ($_SERVER['HTTP_HOST']);
-
 class INIT {
     private static $instance;
 
@@ -19,6 +16,7 @@ class INIT {
     
     public static $DEFAULT_NUM_RESULTS_FROM_TM;
     public static $THRESHOLD_MATCH_TM_NOT_TO_SHOW;
+    public static $TIME_TO_EDIT_ENABLED;
 
 
     public static function obtain() {        
@@ -31,6 +29,9 @@ class INIT {
      private function __construct() {
         $root = isset ($_SERVER['DOCUMENT_ROOT'])?$_SERVER['DOCUMENT_ROOT']:getcwd();	
         self::$ROOT = $root;
+
+        self::$TIME_TO_EDIT_ENABLED = true;
+
         
         self::$DEFAULT_NUM_RESULTS_FROM_TM=3;
 	self::$THRESHOLD_MATCH_TM_NOT_TO_SHOW=50;

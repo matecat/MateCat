@@ -2,10 +2,6 @@
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/cat.class.php";
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 
 /**
  * Description of catController
@@ -13,12 +9,9 @@ include_once INIT::$UTILS_ROOT . "/cat.class.php";
  * @author antonio
  */
 class editlogController extends viewcontroller {
-    //put your code here
-//    private $id_file="";
     private $jid = "";
 
     public function __construct() {
-//		echo ".........\n";
         parent::__construct();
         parent::makeTemplate("editlog.html");
         $this->jid = $this->get_from_get_post("jid");

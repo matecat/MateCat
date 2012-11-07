@@ -1,10 +1,6 @@
 <?php
 include_once INIT::$MODEL_ROOT . "/queries.php";
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 class setCurrentSegmentController extends ajaxcontroller {
 
     private $id_segment;
@@ -33,12 +29,12 @@ class setCurrentSegmentController extends ajaxcontroller {
         }
         
         $insertRes = setCurrentSegmentInsert($this->id_segment, $this->id_job);
+		$nextSegmentId = getNextUntranslatedSegment($this->id_segment, $this->id_job);
 
-        // log::doLog($insertRes);
             
         $this->result['code'] = 1;
         $this->result['data'] = "OK";
-        
+        $this->result['nextSegmentId'] = $nextSegmentId[0]['id_segment'];
         
     }
 

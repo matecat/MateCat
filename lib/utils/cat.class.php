@@ -25,18 +25,13 @@ class CatUtils {
     }
     
      private function stripTagesFromSource($text) {
-        //       echo "<pre>";
         $pattern_g_o = '|(<.*?>)|';
         $pattern_g_c = '|(</.*?>)|';
         $pattern_x = '|(<.*?/>)|';
 
-        // echo "first  -->  $text \n";
         $text = preg_replace($pattern_x, "", $text);
-        // echo "after1  --> $text\n";
 
         $text = preg_replace($pattern_g_o, "", $text);
-        //  echo "after2  -->  $text \n";
-//
         $text = preg_replace($pattern_g_c, "", $text);
         return $text;
     }
@@ -131,11 +126,7 @@ class CatUtils {
             } else { $seg['ss'] = 'Translation Memory'; }
 
            }
-           
-           // echo "<pre>"; print_r($stat_pee); echo "</pre>"; exit;
-           // echo "<pre>"; print_r($stat_mt); exit;
-           // echo "<pre>"; print_r($stat_pee); exit;
-           
+         
            $stats['edited-word-count'] = array_sum($stat_rwc);
            $stats['valid-word-count'] = array_sum($stat_valid_rwc);
            
@@ -243,12 +234,10 @@ class CatUtils {
 		// Calculating words per hour and estimated completion
 		$estimation_temp = getLastSegmentIDs($jid);
 		$estimation_seg_ids = $estimation_temp[0]['estimation_seg_ids'];
-		// log::doLog($estimation_temp);
 		
 		if ($estimation_seg_ids) { 
 		
 		$estimation_temp = getEQWLastHour($jid,$estimation_seg_ids);
-		// log::doLog($estimation_temp);
 			if ($estimation_temp[0]['data_validity']==1) {
 				$job_stats['WORDS_PER_HOUR'] = number_format($estimation_temp[0]['words_per_hour'],0,'.',',');
 				// 7.2 hours
@@ -257,8 +246,7 @@ class CatUtils {
 				// $job_stats['ESTIMATED_COMPLETION'] = date("G",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "h " . date("i",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "m";
 				$job_stats['ESTIMATED_COMPLETION'] = date("G\h i\m",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600-3600);
 			}
-		}
-		 // log::doLog($job_stats);		
+		}	
 		
 		        
 		return $job_stats;

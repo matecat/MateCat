@@ -1,5 +1,6 @@
 <?php
 include_once INIT::$MODEL_ROOT . "/queries.php";
+
 class newProjectController extends viewcontroller {
 	private $guid = '';
     private $mt_engines;
@@ -12,18 +13,9 @@ class newProjectController extends viewcontroller {
     
     public function doAction(){
 		if (!isset($_COOKIE['upload_session'])) {
-			// log::doLog("no cookie");
     			setcookie("upload_session", $this->guid,time()+86400);
-			// log::doLog("after create cookie");
-			// log::doLog($_COOKIE);
-			// $intDir=$_SERVER['DOCUMENT_ROOT'].'/storage/upload/'.$this->guid.'/';
-			// log::doLog ($_SERVER['DOCUMENT_ROOT'].'/storage/upload/'.$this->guid.'/');
-			// log::doLog($intDir);
-			// mkdir($intDir, 0775);
 		}else{
 			$this->guid = $_COOKIE['upload_session'];
-			// log::doLog("cookie set");
-			// log::doLog ($_COOKIE);
 		}
 	
 	$intDir=$_SERVER['DOCUMENT_ROOT'].'/storage/upload/'.$this->guid.'/';

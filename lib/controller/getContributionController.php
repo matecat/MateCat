@@ -1,6 +1,4 @@
 <?php
-
-//include INIT::$ROOT . "/lib/utils/mymemory_queries_temp.php";
 include INIT::$UTILS_ROOT . "/engines/mt.class.php";
 include INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include INIT::$UTILS_ROOT . "/cat.class.php";
@@ -36,12 +34,10 @@ class getContributionController extends ajaxcontroller {
     }
 
     public function doAction() {
-//         log::doLog('getContribution');
         if (empty($this->id_segment)) {
             $this->result['errors'][] = array("code" => -1, "message" => "missing id_segment");
         }
 
-//log::doLog("text is $this->text");
         if (empty($this->text)) {
             $this->result['errors'][] = array("code" => -2, "message" => "missing text");
         }
@@ -54,7 +50,6 @@ class getContributionController extends ajaxcontroller {
             return -1;
         }
         
-        //$st=getSourceTargetFromJob($this->id_job);
         $st = getJobData($this->id_job);
         
         $this->source=$st['source'];
@@ -70,6 +65,7 @@ class getContributionController extends ajaxcontroller {
                 $mt_from_tms = 0;
             }
             $tms = new TMS($this->id_tms);
+
             $tms_match = $tms->get($this->text, $this->source, $this->target, "demo@matecat.com", $mt_from_tms, $this->id_translator);
         }
         // UNUSED
@@ -79,14 +75,9 @@ class getContributionController extends ajaxcontroller {
 
             $mt = new MT($this->id_mt_engine);
             $mt_result = $mt->get($this->text, $this->source, $this->target);
-//	     log::doLog(__CLASS__." - mt engine result");
-//	     log::doLog($mt_result);
-//echo "MT";
-//print_r($mt_result);
 
             if ($mt_result[0] < 0) {
                 $mt_match = '';
-        //$matches = $fake_matches;
             } else {
                 $mt_match = $mt_result[1];
                 $penalty = $mt->getPenalty();
@@ -102,21 +93,15 @@ class getContributionController extends ajaxcontroller {
         if (!empty($tms_match)) {
             $matches = $tms_match;
         }
-// log::doLog ("mt matchpppppppppp");
 
         if (!empty($mt_match)) {
-// log::doLog ("mt CE'");
             $matches[] = $mt_res;
             usort($matches, "compareScore");
         }
         $matches=array_slice ($matches,0,INIT::$DEFAULT_NUM_RESULTS_FROM_TM);
         $res = $this->setSuggestionReport($matches);
         if (is_array($res) and array_key_exists("error", $res)) {
-            // log::doLog("store suggestion report error for segment $this->id_job-$this->id_segment");
         }
-//echo "\n\n";
-//print_r ($matches);
-//echo "\n\n";
         foreach ($matches as &$match) {
             if (strpos($match['created_by'], 'MT') !== false) {
                 $match['match'] = 'MT';
@@ -129,7 +114,6 @@ class getContributionController extends ajaxcontroller {
 			$segTranslation = html_entity_decode($match['translation']);
 			$match['translation'] = htmlspecialchars($segTranslation);			
         }
-// log::doLog('MATCH: '.$matches[0]['match']);
 
         $this->result['data']['matches'] = $matches;
     }
