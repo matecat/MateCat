@@ -39,6 +39,10 @@
     </script>
 -->
 
+
+
+
+   
 </head>
 <body>
 
@@ -50,10 +54,6 @@
         <div class="wrapper-upload">
             <h1>Translate an XLIFF file</h1>
             <h2 class="payoff">Matecat gives you more matches than any other translation tool.</h2>
-            
-            
-            
-            
             
             
             <div class="translate-box">
@@ -85,8 +85,14 @@
                 <br />
                 <!--<a href="#" id="multiple-link">Multiple languages?</a>-->
             </div>
+<div class="cl"></div>
+<a href="#" class="more">More options</a>
 
-            <div class="translate-box" style="margin-right:0 !important">
+
+<div class="cl"></div>
+<div class="advanced-box">
+<div class="cl"></div>
+            <div class="translate-box">
                 <h2>Machine Translation</h2>
                     <select style="width:240px" name="mt_engine" id="mt_engine" tal:define="mt_engine php:array()" >                    <option value="" selected="selected">MyMemory (All Pairs)</option>
                     <tal:block  tal:repeat="mt_engine mt_engines">
@@ -95,16 +101,26 @@
                 </select>
             </div>
             
-            
-<!--            <div class="translate-box">
-                <h2 >TMS Server</h2>
-                <select name="tms_engine" id="tms_engine" tal:define="tms_engine php:array()" >                    
-                    <tal:block  tal:repeat="tms_engine tms_engines">
-                        <option value="- -" tal:attributes="value tms_engine/id" tal:content="tms_engine/name">- - -</option>
-                    </tal:block>
-                </select>
+            <div class="translate-box">
+                <h2>Private TM key</h2> 
+		<input name="private-tm-key" type="text" class="upload-input" id="private-tm-key" />
             </div>
--->
+            
+             <div class="translate-box">
+               
+                    
+                
+                      <span class="btn btn-success fileinput-button" style="width:250px!important">
+					                    <i class="icon-plus icon-white"></i>
+					                    <span>Create a new private TM</span>
+					                    <input type="file" name="files[]" multiple="multiple" class="multiple-button" onClick="alert('hhh');$('#private-tm-key').text('frfgadasfgsdrefw4562tasy5')" />
+					                </span>
+                    
+            </div>
+            
+            
+            </div>
+
 
             <div class="cl"></div>
            <p class="error-message"> Error: the errmsg will appear here...</p>
@@ -326,7 +342,20 @@
 <script src="/public/js/lib/jquery.cookie.js"></script>
 <script src="/public/js/lib/jquery.colorbox-min.js"></script>
 <script src="/public/js/new-project.js"></script>
-
+ <script>
+	$(document).ready(function(){
+		$(".more").click(function(e){
+	    	e.preventDefault();
+  			$(".advanced-box").toggle('fast');
+			$(".more").addClass('minus');
+		});
+		
+	$(".minus").click(function(e){
+			$(".more").removeClass('minus');
+		});
+		
+	});
+	</script>
 		<div style='display:none'>
 
 			<div id='inline_content' style='padding:10px; background:#fff;'>

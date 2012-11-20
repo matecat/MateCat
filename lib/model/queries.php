@@ -32,7 +32,7 @@ function getTranslatorPass($id_translator){
     $query = "select password from translators where username='$id_translator'";
 
     
-    $db->query_first($query);
+    //$db->query_first($query);
     $results = $db->query_first($query);
     
     if ( (is_array($results)) AND (array_key_exists("password", $results)) ) {
@@ -124,6 +124,23 @@ function getSegmentsInfo($jid,$password) {
     return $results;
 }
 
+function getFirstSegmentId($jid,$password) {
+	
+    $query = "select s.id as sid
+                from segments s
+                inner join files_job fj on s.id_file = fj.id_file
+                inner join jobs j on j.id=fj.id_job
+                where fj.id_job=$jid and j.password='$password'
+                order by s.id
+                limit 1
+             ";
+             log::doLog($query);
+    $db = Database::obtain();
+    $results = $db->fetch_array($query);
+
+    return $results;
+}
+
 function getMoreSegments($jid,$password, $last_loaded_id, $step = 50, $central_segment = 0) {
 	$start_point = ($central_segment)? ((float) $central_segment) - 100 : $last_loaded_id;
 
@@ -150,20 +167,59 @@ function getMoreSegments($jid,$password, $last_loaded_id, $step = 50, $central_s
     return $results;
 }
 
-function setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $translation, $match_type = 'unknown') {
-    $data = array();
-    $data['id_job'] = $id_job;
-    $data['status'] = $status;
-    $data['time_to_edit'] = $time_to_edit;
-    $data['translation'] = $translation;
-    $data['translation_date'] = date("Y-m-d H:i:s");
-    $data['match_type'] = $match_type;
+function getMoreSegments1($jid,$password, $step = 50, $ref_segment, $where = 'after') {
+	switch ($where) {
+	    case 'after':
+	        $ref_point = $ref_segment;
+	        break;
+	    case 'before':
+	        $ref_point = $ref_segment - ($step+1);
+	        break;
+	    case 'center':
+	        $ref_point = ((float) $ref_segment) - 100;
+	        break;
+	}
+	
+//	$ref_point = ($where == 'center')? ((float) $ref_segment) - 100 : $ref_segment;
 
-    $where = "id_segment=$id_segment and id_job=$id_job";
+	    $query = "select j.id as jid, j.id_project as pid,j.source,j.target, j.last_opened_segment, j.id_translator as tid,
+                p.id_customer as cid, j.id_translator as tid,  
+                p.name as pname, p.create_date , fj.id_file, fj.id_segment_start, fj.id_segment_end, 
+                f.filename, f.mime_type, s.id as sid, s.segment, s.raw_word_count, s.internal_id,
+                st.translation, st.status, st.time_to_edit
 
+                from jobs j 
+                inner join projects p on p.id=j.id_project
+                inner join files_job fj on fj.id_job=j.id
+                inner join files f on f.id=fj.id_file
+                inner join segments s on s.id_file=f.id
+                left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
+                where j.id=$jid and j.password='$password' and s.id > $ref_point
+                order by s.id
+                limit 0,$step
+             ";
+        log::doLog('QUERY: '.$query);
 
     $db = Database::obtain();
-    $db->update('segment_translations', $data, $where);
+    $results = $db->fetch_array($query);
+
+    return $results;
+}
+
+function setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $translation, $match_type = 'unknown') {
+     // need to use the plain update instead of library function because of the need to update an existent value in db (time_to_edit)
+     $now=date("Y-m-d H:i:s");	
+     $db = Database::obtain();
+
+     $translation=$db->escape($translation);
+     $status=$db->escape($status);
+     $match_type=$db->escape($match_type);
+
+     $q="UPDATE `segment_translations` SET `status`='$status', `time_to_edit`=`time_to_edit` + $time_to_edit, `translation`='$translation', `translation_date`='$now', `match_type`='unknown' WHERE id_segment=$id_segment and id_job=$id_job";
+
+
+   
+    $db->query($q);
     $err = $db->get_error();
     $errno = $err['error_code'];
     if ($errno != 0) {
@@ -424,3 +480,4 @@ function insertFilesJob($id_job, $id_file) {
     $db = Database::obtain();
     $db->insert('files_job', $data);
 }
+

@@ -14,7 +14,7 @@ Loader = {
 		'jquery-ui-1.8.20.custom.min',
 		'jquery.tabify',
 		'jquery.hotkeys',
-		'jquery.atooltip',
+//		'jquery.atooltip',
         'jquery-fieldselection.min'
 	),
 	
@@ -46,7 +46,6 @@ Loader = {
 		this.basePath = 'public/js/';
 		for (var i = 0; i < l.length; i++) this.include(l[i] + '.js', 'lib/', this.basePath);
 		for (var i = 0; i < c.length; i++) this.include(c[i] + '.js', '', this.basePath);
-
 
 		if(this.detect('log')) {
 			this.include('log.js', 'lib/casmacat/', this.basePath);

@@ -27,9 +27,9 @@ class getSegmentsController extends ajaxcontroller {
 
         $this->jid = $this->get_from_get_post("jid");
 		$this->password=$this->get_from_get_post("password");
-        $this->last_loaded_id = $this->get_from_get_post("lid");
         $this->step = $this->get_from_get_post("step");
-        $this->central_segment = $this->get_from_get_post("segment");
+        $this->ref_segment = $this->get_from_get_post("segment");
+        $this->where = $this->get_from_get_post("where");
 
 //		    	log::doLog('LAST LOADED ID - MODIFIED: '.$this->last_loaded_id);
 //		if($this->central_segment) log::doLog('CENTRAL SEGMENT: '.$this->central_segment);
@@ -76,14 +76,29 @@ class getSegmentsController extends ajaxcontroller {
 
     public function doAction() {
         $lang_handler=languages::getInstance("en");       
+//		log::doLog('REF SEGMENT: '.$this->ref_segment);    	
 
-        $data = getMoreSegments($this->jid, $this->password, $this->last_loaded_id, $this->step, $this->central_segment);
-//	log::doLog('SEGMENT: '.count($data));    	
+
+		    if ($this->ref_segment == '') {
+				$this->ref_segment = 0;
+	        }
+
+
+        $data = getMoreSegments1($this->jid, $this->password, $this->step, $this->ref_segment, $this->where);
 
         $first_not_translated_found = false;
+//		print_r($data); exit;
         foreach ($data as $i => $seg) {
+
+			log::doLog('REF SEGMENT: '.$this->ref_segment);    	
+
+	  		if($this->where == 'before') {
+	  			if(((float) $seg['sid']) >= ((float) $this->ref_segment)) return;
+			}
+
 	  		// remove this when tag management enabled
-        	$seg['segment'] = $this->stripTagsFromSource($seg['segment']);
+//        	$seg['segment'] = $this->stripTagsFromSource($seg['segment']);
+
 			
             if (empty($this->pname)) {
                 $this->pname = $seg['pname'];
@@ -131,6 +146,7 @@ class getSegmentsController extends ajaxcontroller {
 
             $id_file = $seg['id_file'];
 			$file_stats =CatUtils::getStatsForFile($id_file);
+            
 			
             if (!isset($this->data["$id_file"])) {                
                 $this->data["$id_file"]['jid'] = $seg['jid'];		
@@ -167,11 +183,15 @@ class getSegmentsController extends ajaxcontroller {
             unset($seg['id_segment_start']);
 
             $seg['segment'] = $this->filetype_handler->parse($seg['segment']);
+	$seg['segment']=addslashes(	$seg['segment']);
             $seg['parsed_time_to_edit']=  $this->parse_time_to_edit($seg['time_to_edit']); 
 
             $this->data["$id_file"]['segments'][] = $seg;
         }
-	$this->result['data'] = $this->data;
+		
+        $this->result['data']['files'] = $this->data;
+        $this->result['data']['where']=$this->where;
+		//print_r($this->results);exit;
     }
 
 
@@ -179,5 +199,6 @@ class getSegmentsController extends ajaxcontroller {
 }
 
 ?>
+
 
 

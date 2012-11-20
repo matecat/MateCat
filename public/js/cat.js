@@ -1,10 +1,16 @@
 UI = null;
 
 UI = {
-    render: function() {
+    render: function(firstLoad) {
+		this.isWebkit = $.browser.webkit;
+		this.firstLoad = firstLoad;
 		this.initSegNum = 200;
 		this.moreSegNum = 50;
-		UI.getMoreSegments('after', 1);
+		this.loadingMore = false;
+		this.infiniteScroll = true;
+		this.fork = (Loader.detect('fork'))? Loader.detect('fork').substring(0,1) : false;
+		UI.detectStartSegment();
+		UI.getSegments();
     },
     
     init: function() {
@@ -14,7 +20,7 @@ UI = {
 		this.numSegments = $('section').length;
 		this.body = $('body');
 		this.editarea = '';
-		this.isWebkit = $.browser.webkit;
+        this.byButton = false;
 		this.heavy = ($('section').length > 200)? true : false;
 
 
@@ -59,11 +65,6 @@ UI = {
             UI.copySource();
         })
 
-        $("input.translated").bind('keydown','tab', function(e){ 
-            e.preventDefault();
-            $(this).parents('section').find('.editarea').focus();
-        })      
-
         $("header .filter").click(function(e){ 
             e.preventDefault();
             UI.body.toggleClass('filtering');
@@ -74,10 +75,6 @@ UI = {
             UI.body.toggleClass('replace-box');
 						
         }) 
-        $(".target .editarea").bind('keydown','Shift+tab', function(e){ 
-            e.preventDefault();
-            $(this).parents('section').find('input.translated').focus();
-        })      
 
         $('.sbm').tabify();
         $(".sbm a").click(function() {
@@ -99,7 +96,7 @@ UI = {
   
         $(".search-icon, .search-on").click(function(e) {          
             e.preventDefault();
-            $("div#search").toggle();
+            $("#search").toggle();
         });
         	  
         //overlay
@@ -181,24 +178,62 @@ UI = {
             e.stopPropagation();
         }).on('click','.target .editarea',function(e) {
         	this.onclickEditarea = new Date();
-
 	        if((!$(this).is(UI.editarea))||(UI.editarea == '')||(!UI.body.hasClass('editing'))) {
 	        	UI.openSegment(this); 
 	        }    
-console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea));
+			console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea));
+/*
+        }).on('click','a.draft, a.translated, a.approved',function(e) {
 
-        }).on('click','input.draft, input.translated, input.approved',function(e) {
+       		console.log('UI.nextSegmentId:');
+       		console.log(UI.nextSegmentId);
+       		if(UI.segmentIsLoaded(UI.nextSegmentId)) {
+       			UI.scrollSegment1($('#segment-'+UI.nextSegmentId));
+       		} else {
+       			var m = confirm('The next untranslated segment is outside the current view.');
+       			var l = location;
+//       			if(m) location.href = l.host+'/'+l.pathname+'/#'+UI.nextSegmentId;
+       			if(m) {
+					config.last_opened_segment = UI.nextSegmentId;
+					$('#outer').empty();
+//					return false;
+					
+
+
+//       				window.location = 'http://matecat.translated.home/translate/Master_File.docx_en-GB_it-IT.sdlxliff/en-fr/1009-7qddvmp2/#582536';
+//       				return true;
+       			}
+       		}
+       		console.log('dopo il return');
        		UI.setStatusButtons(this);
-        }).on('click','input.translated',function(e) {
-//        	UI.copyToNextIfSame();
-        	UI.changeStatus(this,'translated',0);
-            UI.changeStatusStop = new Date();
-            UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-        }).on('click','input.draft',function(e) {   
+*/
+        }).on('click','a.translated',function(e) {
+            e.preventDefault();
+       		if(UI.segmentIsLoaded(UI.nextSegmentId)) {
+       			console.log('next segment is loaded');
+       			UI.scrollSegment($('#segment-'+UI.nextSegmentId));
+	       		UI.setStatusButtons(this);
+	        	UI.changeStatus(this,'translated',0);
+	            UI.changeStatusStop = new Date();
+	            UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
+	        } else {
+       			console.log('next segment is not loaded');
+       			var m = confirm('The next untranslated segment is outside the current view.');
+       			if(m) {
+					UI.infiniteScroll = false;
+					config.last_opened_segment = UI.nextSegmentId;
+					window.location.hash = UI.nextSegmentId;
+					$('#outer').empty();
+					UI.render(false);
+       			}
+       		}
+        }).on('click','a.draft',function(e) {   
+       		UI.setStatusButtons(this);
          	UI.changeStatus(this,'draft',0);
             UI.changeStatusStop = new Date();
             UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-        }).on('click','input.approved',function(e) {          
+        }).on('click','a.approved',function(e) {          
+       		UI.setStatusButtons(this);
         	UI.changeStatus(this,'approved',0);
             UI.changeStatusStop = new Date();
             UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
@@ -226,26 +261,16 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
             UI.closeSegment(UI.currentSegment,1);
         });
 
-		$(document).ready(function() {
-            var hash=window.location.hash.substr(1);
-            if (hash!="" && $("#segment-"+hash).length>0){
-              UI.gotoSegment(hash);
-            } else if (config.last_opened_segment == '') {
-		    	UI.findEmptySegment();
-		    } else if(config.last_opened_segment == 0) {
-		    	
-		    } else if($('#segment-' + config.last_opened_segment).length == 0) {
-            	UI.gotoSegment($('section.status-draft, section.status-rejected, section.status-new').first().attr('id').split('-')[1]);
-		    }
-		    else {
-		    	UI.findLastOpenedSegment();
-		    }
-		})
-
-
-
-
-
+    	UI.toSegment = true;
+	 	UI.gotoSegment(this.startSegmentId);
+/*
+        if(this.startSegmentId) {
+	    	UI.toSegment = true;
+        	UI.gotoSegment(this.startSegmentId);
+        } else {
+	    	UI.gotoSegment($('section').first().attr('id').split('-')[1]);
+        }
+*/
 
 /*        
         $("article").on('click','input.con-submit',function(e) {          
@@ -259,16 +284,27 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
         })
 
 		$(window).scroll(function() {
-
-		   if($(window).scrollTop() + $(window).height() == $(document).height()) {
-		       UI.getMoreSegments('after');
+		   if($(window).scrollTop() + $(window).height() > ($(document).height())*0.95) {
+		       if(UI.infiniteScroll) UI.getMoreSegments('after');
 		   }
 		   if($(window).scrollTop() == 0) {
-		       UI.getMoreSegments('before');
+		       if(UI.infiniteScroll) UI.getMoreSegments('before');
 		   }
 		});
 
         this.checkIfFinishedFirst();
+
+        $("section .close").bind('keydown','Shift+tab', function(e){ 
+            e.preventDefault();
+            $(this).parents('section').find('a.translated').focus();
+        })      
+
+        $("a.translated").bind('keydown','tab', function(e){ 
+            e.preventDefault();
+            $(this).parents('section').find('.close').focus();
+        })      
+
+
 
         this.initEnd = new Date();
         this.initTime = this.initEnd - this.initStart;
@@ -317,6 +353,8 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
         if(!next) {
         	$(".loader",n).addClass('loader_on')
         }
+//        		return false;
+
         $.ajax({
             url: config.basepath + '?action=getContribution'+this.appendTime(),
             data: {
@@ -334,11 +372,10 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
                 $(".loader",n).removeClass('loader_on');
             },
             success: function(d){
-	            var _this = this;
-
-	            UI.renderContributions(d,_this);
+        		return false;
+	            UI.renderContributions(d,this);
                 if (d.data.matches==0){
-                    $(".sbm > .matches", _this).hide();
+                    $(".sbm > .matches", this).hide();
                 } else {
                     $('.submenu li.matches a span', this).text('('+d.data.matches.length+')');
                 }
@@ -381,18 +418,18 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
         });
  	},
 
-	renderContributions: function(d,_this) {
-		var isActiveSegment = $(this).hasClass('editor');
-		var editarea = $('.target .editarea', this);
+	renderContributions: function(d,segment) {
+		var isActiveSegment = $(segment).hasClass('editor');
+		var editarea = $('.target .editarea', segment);
 		if(d.data.matches.length) {
   			var translation = d.data.matches[0].translation;
-			var perc_t=$(".percentuage",_this).attr("title");
-            $(".percentuage",_this).attr("title",''+perc_t + "Created by " + d.data.matches[0].created_by);
+			var perc_t=$(".percentuage",segment).attr("title");
+            $(".percentuage",segment).attr("title",''+perc_t + "Created by " + d.data.matches[0].created_by);
             var match = d.data.matches[0].match;
   			var editareaLength = editarea.text().length;
 
             if (editareaLength==0){
-                UI.copySuggestionInEditarea(this,translation,editarea,match);
+                UI.copySuggestionInEditarea(segment,translation,editarea,match);
             }
             if(isActiveSegment) {
                 editarea.removeClass("indent");
@@ -401,34 +438,34 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
  			}
 
 
-            var segment_id = _this.attr('id');
-            $(_this).removeClass('loaded').addClass('loaded');
-            $('.sub-editor .overflow',_this).empty();
+            var segment_id = segment.attr('id');
+            $(segment).removeClass('loaded').addClass('loaded');
+            $('.sub-editor .overflow',segment).empty();
             
             $.each(d.data.matches, function(index) {
             	var disabled = (this.id=='0')? true : false;                 
                 cb= this['created_by'];                    
                 cl_suggestion=UI.getPercentuageClass(this['match']);
             
-                if(!$('.sub-editor',_this).length) {
-					UI.createFooter(_this);
+                if(!$('.sub-editor',segment).length) {
+					UI.createFooter(segment);
                 }
-                $('.sub-editor .overflow',_this).append('<ul class="graysmall" data-item="'+(index+1)+'" data-id="'+this.id+'"><li >'+((disabled)?'':' <a id="'+segment_id+'-tm-'+this.id+'-delete" href="#" class="trash" title="delete this row"></a>')+'<span id="'+segment_id+'-tm-'+this.id+'-source" class="suggestion_source">'+this.segment+'</span></li><li class="b"><span class="graysmall-message">ALT+'+(index+1)+'</span><span id="'+segment_id+'-tm-'+this.id+'-translation" class="translation">'+this.translation+'</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">'+(this.match)+'</li><li>'+this['last_update_date']+'</li><li class="graydesc">Source: <span class="bold">'+cb+'</span></li></ul></ul>');
+                $('.sub-editor .overflow',segment).append('<ul class="graysmall" data-item="'+(index+1)+'" data-id="'+this.id+'"><li >'+((disabled)?'':' <a id="'+segment_id+'-tm-'+this.id+'-delete" href="#" class="trash" title="delete this row"></a>')+'<span id="'+segment_id+'-tm-'+this.id+'-source" class="suggestion_source">'+this.segment+'</span></li><li class="b"><span class="graysmall-message">ALT+'+(index+1)+'</span><span id="'+segment_id+'-tm-'+this.id+'-translation" class="translation">'+this.translation+'</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">'+(this.match)+'</li><li>'+this['last_update_date']+'</li><li class="graydesc">Source: <span class="bold">'+cb+'</span></li></ul></ul>');
             });
-            UI.setDeleteSuggestion(_this);
-
-            $('.translated',this).removeAttr('disabled');
-            $('.draft',this).removeAttr('disabled');
+            UI.setDeleteSuggestion(segment);
+            $('.translated',segment).removeAttr('disabled');
+            $('.draft',segment).removeAttr('disabled');
 		} else {
 			console.log('no matches');
-            $(_this).removeClass('loaded').addClass('loaded');
-			$('.sub-editor .overflow',_this).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');  				
+            $(segment).removeClass('loaded').addClass('loaded');
+			$('.sub-editor .overflow',segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');  				
 		}
 
  	},
  	
 	getNextSegment: function(segment,status) {
-
+		return $('#segment-'+this.nextSegmentId);
+/*
 		var seg = segment;
 		var addStatus = (typeof status == 'undefined')? '' : (status == 'untranslated')? '.status-draft, .status-rejected, .status-new' : '';
 
@@ -438,11 +475,12 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
     		n = $(seg).parents('article').next().find('section'+addStatus).first();
         };
         return n;
-
+*/
  	},
 
 	getNextSibling: function(seg,addStatus) {
-		var next = (this.isWebkit)? $('#'+$(seg).attr('id')+' ~ section'+addStatus, $(seg).parents('article')).first() : $(seg).nextAll('section'+addStatus).first();
+		var next = $(seg).nextAll('section'+addStatus).first();
+//		var next = (this.isWebkit)? $('#'+$(seg).attr('id')+' ~ section'+addStatus, $(seg).parents('article')).first() : $(seg).nextAll('section'+addStatus).first();
 		return next;
  	},
  	
@@ -558,21 +596,19 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
 
     setStatusButtons: function(button) {
         this.editStop = new Date();
-        this.lastEditTime = this.editStop - this.editStart;
-		var segment = this.currentSegment;
-        var editSec = $('.timetoedit .edit-sec',segment);
-        var editMin = $('.timetoedit .edit-min',segment);
-        this.previousEditTime = $('.timetoedit',segment).data('raw_time_to_edit');
-        this.editTime = this.previousEditTime + this.lastEditTime;
+        this.editTime = this.editStop - this.editStart;
         var editedTime = this.millisecondsToTime(this.editTime);
-        editMin.text(this.zerofill(editedTime[0],2));
-        editSec.text(this.zerofill(editedTime[1],2));
-        $('.timetoedit',segment).data('raw_time_to_edit', this.editTime)
+		var segment = this.currentSegment;
+		if(config.time_to_edit_enabled) {
+	        var editSec = $('.timetoedit .edit-sec',segment);
+	        var editMin = $('.timetoedit .edit-min',segment);
+        	editMin.text(this.zerofill(editedTime[0],2));
+       		editSec.text(this.zerofill(editedTime[1],2));
+			$('.timetoedit',segment).data('raw_time_to_edit', this.editTime);
+   		}
         var statusSwitcher = $(".status",segment);
-
         statusSwitcher.removeClass("col-approved col-rejected col-done col-draft");
         var statusToGo = ($(button).hasClass('translated'))? 'untranslated' : '';
-//        console.log(statusToGo);
         var nextSegment = this.getNextSegment(segment,statusToGo);
         if(!nextSegment.length) {
         	$(".editor:visible").find(".close").click();
@@ -580,25 +616,14 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
         	return false;
         };
         this.buttonClickStop = new Date();
-//        this.clickingButtonOperations = this.buttonClickStop - this.editStop;
         this.copyToNextIfSame(nextSegment);
-        $(".target .editarea", nextSegment).click();
-
-/*
-        var s = $(this);
-        var newStatus = (s.hasClass('translated'))? 'translated' : (s.hasClass('draft'))? 'draft' : (s.hasClass('approved'))? 'approved':'';
-
-    	this.changeStatus(this,newStatus,0);
-        this.changeStatusStop = new Date();
-        this.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-        console.log(this.changeStatusOperations);
-*/
+        this.byButton = true;
+        console.log('NEXT SEGMENT:');
+        console.log(nextSegment);
+        $(".editarea", nextSegment).click();
     },
     
     changeStatus: function(ob,status,byStatus) {
-//    	console.log($(ob).data('segmentid'));
-//    	var segment = $('#'+$(ob).data('segmentid'));
-//        var segment = $(ob).parents("section");
     	var segment = (byStatus)? $(ob).parents("section") : $('#'+$(ob).data('segmentid'));
         $('.percentuage',segment).removeClass('visible');
         this.setContribution(segment,status,byStatus);
@@ -642,14 +667,14 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
         UI.progress_perc = Math.floor(s.APPROVED_PERC + s.TRANSLATED_PERC);
         this.checkIfFinished();
 
-        this.UI.done_percentage = UI.progress_perc;
+        this.done_percentage = this.progress_perc;
 
     	$('.approved-bar',   m).css('width', a_perc + '%').attr('title','Approved ' + a_perc_formatted + '%');
     	$('.translated-bar', m).css('width', t_perc + '%').attr('title','Translated ' + t_perc_formatted + '%');
     	$('.draft-bar',      m).css('width', d_perc + '%').attr('title','Draft ' + d_perc_formatted + '%');
     	$('.rejected-bar',   m).css('width', r_perc + '%').attr('title','Rejected ' + r_perc_formatted + '%');
     
-	$('#stat-progress').html(UI.progress_perc);
+		$('#stat-progress').html(this.progress_perc);
 	
     	$('#stat-todo strong').html(t_formatted);
     	$('#stat-wph strong').html(wph);
@@ -707,7 +732,7 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
 	    percentageClass = this.getPercentuageClass(match);
 
         if($.trim(translation) != '') {
-        	editarea.html(translation).addClass('fromSuggestion');
+        	editarea.text(translation).addClass('fromSuggestion');
 
         	$('.percentuage',segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
         }
@@ -728,26 +753,42 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
 		}
 		return o;
 	},
+
+	justSelecting: function() {
+		if(window.getSelection().isCollapsed) return false;
+		var selContainer = $(window.getSelection().getRangeAt(0).startContainer.parentNode);
+		return ((selContainer.hasClass('editarea'))&&(!selContainer.is(UI.editarea)));
+	},
 	
 	openSegment: function(editarea) {
         this.openSegmentStart = new Date();
+//        console.log('this.byButton:');
+//        console.log(this.byButton);
+        if(!this.byButton) {
+        	if(this.justSelecting()) return;
+        }
+        this.byButton = false;
         this.editarea = $(editarea);
 
-		if(!window.getSelection().isCollapsed) return false;
+//		if(!window.getSelection().isCollapsed) return false;
 
 		// current and last opened object reference caching
 		this.lastOpenedSegment = this.currentSegment;
-		this.lastOpenedEditarea = this.editarea;
+//		this.lastOpenedEditarea = this.editarea;
+		this.lastOpenedEditarea = $('.editarea',this.currentSegment);
+
         this.currentSegmentId = this.lastOpenedSegmentId = this.editarea.data('sid');
+		
 		this.currentSegment = segment = $('#segment-'+this.currentSegmentId);
 		this.currentArticle = segment.parent();
-
 		this.activateSegment();
+//console.log('this.currentSegmentId: '+this.currentSegmentId);
         this.setCurrentSegment(segment);
 
 		this.focusEditarea = setTimeout(function(){UI.editarea.focus();clearTimeout(UI.focusEditarea)},100);
 
 		$(editarea).removeClass("indent");
+
 		this.getContribution(segment,0);
 
         this.opening = true;
@@ -756,6 +797,8 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
         this.body.addClass('editing');
 
         segment.addClass("editor");
+        this.editarea.attr('contenteditable','true');
+
         this.editStart = new Date();
 
         this.getContribution(segment,1);
@@ -764,14 +807,19 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
 	},
 	
 	closeSegment: function(segment,byButton) {
-        if(typeof segment =='undefined') return true;
+        if((typeof segment =='undefined')||(typeof UI.toSegment !='undefined')) {
+        	UI.toSegment = undefined;
+        	return true;
+        }
+
         var closeStart = new Date();
 		this.deActivateSegment(byButton);
 
+        this.lastOpenedEditarea.attr('contenteditable','false');
         this.body.removeClass('editing');
 		$(segment).removeClass("editor");
+		$('#downloadProject').focus();
 		if(!this.opening) {
-			this.setCurrentSegment(segment,1);
 			this.checkIfFinished(1);
 		}
 	},
@@ -794,9 +842,9 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
         var el=$("#segment-"+id+"-target").find(".editarea");
         $(el).click();
     },
+
 	gotoNextSegment: function() {
         var next = $('.editor').next();
-//        console.log(next);
         if(next.is('section')) {
         	$('.editarea',next).click();
         } else {
@@ -814,17 +862,15 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
 	setCurrentSegment: function(segment,closed) {
 		this.nextSegmentId = segment.next();
         var id_segment = this.currentSegmentId;
-//console.log('punto 3.1: ' + ( (new Date()) - this.openSegmentStart));
         if(closed) {
             id_segment = 0;
             UI.currentSegment = undefined;
-//            console.log(UI.currentSegment);
         } else {
-			setTimeout(function(){window.location.hash = id_segment},300);
-//            window.location.hash = id_segment;
-        }
+			setTimeout(function(){
+//				console.log('UI.currentSegmentId:'+UI.currentSegmentId);
+				window.location.hash = UI.currentSegmentId
+			},300);        }
         var file = this.currentArticle;
-//console.log('punto 3.2: ' + ( (new Date()) - this.openSegmentStart));
         $.ajax({
             url: config.basepath + '?action=setCurrentSegment'+this.appendTime(),
             data: {
@@ -898,36 +944,73 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
 	},
 				
 	scrollSegment: function(segment) {
-		console.log(segment);
+console.log('segment:');
+console.log(segment);
 		var spread = 23;
 		var current = this.currentSegment;
 		var previousSegment = $(segment).prev('section');
+		console.log('previousSegment:');
+		console.log(previousSegment);
 		if(!previousSegment.length) {
+			console.log('!previousSegment.length');
 			previousSegment = $(segment);
 			spread = 33;
 		};
+		console.log('previousSegment after:');
+		console.log(previousSegment);
 		var destination = "#"+previousSegment.attr('id');
-//		console.log('segment: ' + $(destination).attr('id'));
-//		console.log($(destination));
-//		var beforeOffset = new Date();
+		console.log('destination:');
+		console.log(destination);
 		var destinationTop = $(destination).offset().top;
-//		console.log('calcolo offset: ' + ( (new Date()) - beforeOffset));
-		if($(current).length){
-			if($(segment).offset().top > $(current).offset().top) {
-				if(!current.is($(segment).prev())) {
-					destinationTop = destinationTop - this.currentSegment.height() + $(segment).height() - spread;
-				} else {
+		console.log('destinationTop:');
+		console.log(destinationTop);
+		console.log('current:');
+		console.log(current);
+		console.log('segment:');
+		console.log(segment);
+		console.log('$(segment).prev():');
+		console.log($(segment).prev());
+		console.log('current.is($(segment).prev()):');
+		if(typeof current != 'undefined') console.log(current.is($(segment).prev()));
+						
+		if($(current).length){ // if there is an open segment
+			if($(segment).offset().top > $(current).offset().top) { // if segment to open is below the current segment
+				if(!current.is($(segment).prev())) { // if segment to open is not the immediate follower of the current segment
+					console.log('segment to open is below but not the immediate follower of the current segment');
+					console.log('destinationTop: '+destinationTop);
+					console.log('$(destination).height(): '+$(destination).height());
+					console.log('$(current).height(): '+$(current).height());
+					console.log(this.firstLoad);
+					var diff = (this.firstLoad)? ($(current).height()-200+120) : 20; 
+//					destinationTop = destinationTop - this.currentSegment.height() + $(segment).height() - spread;
+					console.log('diff: '+diff);
+					destinationTop = destinationTop - diff;
+				} else { // if segment to open is the immediate follower of the current segment
+					console.log('segment to open is the immediate follower of the current segment');
+//					console.log('destinationTop: '+destinationTop);
 					destinationTop = destinationTop - spread;
 				}
-			} else {
+			} else { // if segment to open is above the current segment
+				console.log('segment to open is above the current segment');
+				console.log('destinationTop: '+destinationTop);
 				destinationTop = destinationTop - spread;
 			}		
-		} else {
+		} else { // if no segment is opened
+			console.log('no segment is opened');
+			console.log('destinationTop: '+destinationTop);
+
 			destinationTop = destinationTop - spread;
+			if(UI.isWebkit) {
+				console.log('webkit');
+				console.log('destinationTop: '+destinationTop);
+			}
 		}	
+console.log('SCROLL');
+
         $("html,body").animate({
 	        scrollTop: destinationTop-20
         }, 500 );
+
 	},	        
 
 	activateSegment: function() {
@@ -944,8 +1027,10 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
 			     
 	createButtons: function() {
 	    var disabled = (this.currentSegment.hasClass('loaded'))? '' : ' disabled="disabled"';
-		var buttons = '<li><a id="segment-'+this.currentSegmentId+'-copysource" href="#" class="btn copysource" data-segmentid="segment-'+this.currentSegmentId+'" title="Copy source to target"></a><p>CTRL+RIGHT</p></li><li><input id="segment-'+this.currentSegmentId+'-button-draft" data-segmentid="segment-'+this.currentSegmentId+'" name="" type="button" class="draft"'+disabled+' value="DRAFT"/></li><li style="margin-right:-20px"><input id="segment-'+this.currentSegmentId+'-button-translated" data-segmentid="segment-'+this.currentSegmentId+'" name="" type="button" class="translated"'+disabled+' value="TRANSLATED"/><p>CTRL+ENTER</p></li>';
-		$('#segment-'+this.currentSegmentId+'-buttons').html(buttons);
+		var buttons = '<li><a id="segment-'+this.currentSegmentId+'-copysource" href="#" class="btn copysource" data-segmentid="segment-'+this.currentSegmentId+'" title="Copy source to target"></a><p>CTRL+RIGHT</p></li><li><a id="segment-'+this.currentSegmentId+'-button-draft" data-segmentid="segment-'+this.currentSegmentId+'" href="#" class="draft" '+disabled+' >DRAFT</a></li><li style="margin-right:-20px"><a id="segment-'+this.currentSegmentId+'-button-translated" data-segmentid="segment-'+this.currentSegmentId+'" href="#" class="translated"'+disabled+' >TRANSLATED</a><p>CTRL+ENTER</p></li>';
+//		var buttons = '<li><a id="segment-'+this.currentSegmentId+'-copysource" href="#" class="btn copysource" data-segmentid="segment-'+this.currentSegmentId+'" title="Copy source to target"></a><p>CTRL+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-'+this.currentSegmentId+'-button-translated" data-segmentid="segment-'+this.currentSegmentId+'" href="#" class="translated"'+disabled+' >TRANSLATED</a><p>CTRL+ENTER</p></li>';
+
+		$('#segment-'+this.currentSegmentId+'-buttons').append(buttons);
 	},
 
 	removeButtons: function(byButton) {
@@ -983,214 +1068,201 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
 		statusMenu.empty().hide();
 	},
 
+    detectStartSegment: function() {
+        var hash = window.location.hash.substr(1);
+        console.log('hash: '+hash);
+        console.log('config.last_opened_segment: '+config.last_opened_segment);
+        this.startSegmentId = (hash)? hash : config.last_opened_segment;
+        console.log('this.startSegmentId: '+this.startSegmentId);
+    },
 
-    getMoreSegments: function(where, starting) {
-/*
-    	if((starting)&&(location.hash)) where = 'center';
-    	var step = (starting)? this.initSegNum : this.moreSegNum;
-    	var seg = (where == 'after')? $('section').last() : (where == 'before')? $('section').first() : (where == 'center')? location.hash.substring(1) : '';
-//    	var center = ((starting)&&(location.hash))? location.hash.substring(1) : '';
-    	var segId = (starting)? 0 : seg.attr('id').split('-')[1];
-    	var articleId = (starting)? $('article').first().attr('id').split('-')[1] : seg.parent().attr('id').split('-')[1];
-*/    	
-
-    	var step = (starting)? this.initSegNum : this.moreSegNum;
-    	var lastSegment = $('section').last();
-    	var center = ((starting)&&(location.hash))? location.hash.substring(1) : '';
-    	var lastLoadedId = (starting)? 0 : lastSegment.attr('id').split('-')[1];
-    	var lastArticleId = (starting)? $('article').first().attr('id').split('-')[1] : lastSegment.parent().attr('id').split('-')[1];
-
-   		$('#outer').addClass('loading');
-
+    getSegments: function() {
+    	where = (this.startSegmentId)? 'center' : 'after';
+    	var step = this.initSegNum;
+ 		$('#outer').addClass('loading');
+   		
         $.ajax({
             url: config.basepath + '?action=getSegments'+this.appendTime(),
             data: {
                 action: 'getSegments',
                 jid: config.job_id,
                 password: config.password,
-                lid: lastLoadedId,
                 step : step,
-                segment: center
+                segment: this.startSegmentId,
+                where: where
             },
             type: 'POST',            
             dataType: 'json',
-//            context: $('#'+id),
-            complete: function (d){
-//                $(".loader",n).removeClass('loader_on');
-            },
             success: function(d){
-//            	console.log(typeof d.data[lastArticleId]);
-            	if(typeof d.data[lastArticleId] != 'undefined') UI.renderSegments(d.data[lastArticleId]['segments'],lastArticleId,starting,center);
-   				$('#outer').removeClass('loading');
+            	where = d.data['where'];
+            	$.each(d.data['files'], function() {
+            		startSegmentId = this['segments'][0]['sid'];
+            	})
+            	console.log(startSegmentId) ;
+	           	if(typeof this.startSegmentId == 'undefined') this.startSegmentId = startSegmentId;
+            	if(typeof d.data['files'] != 'undefined') UI.renderSegments(d.data['files'],where,true);
+   				$('#outer').removeClass('loading loadingBefore');
+				UI.loadingMore = false;
             }
         });
     },
 
-	renderSegments: function(segments,articleId,starting,center) {
-/*
-        var startIndex = 0;
-        $.each(segments, function(index) {
-        	if(this.sid == center) {
-        		startIndex = index-3;
-//        		restrictedFirstSegment = index-3;
-        	};
+    getMoreSegments: function(where) {
+    	if(this.loadingMore) {
+    		return;
+    	}
+		this.loadingMore = true;
+		
+//    	if(location.hash) where = 'center';
+    	var step = this.moreSegNum;
+    	var seg = (where == 'after')? $('section').last() : (where == 'before')? $('section').first() : '';
+
+    	var segId = (seg.length)? seg.attr('id').split('-')[1] : 0;
+    	
+   		if(where == 'before') {
+   			$('#outer').addClass('loadingBefore');
+   		} else if(where == 'after') {
+   			$('#outer').addClass('loading');
+   		}
+   		
+        $.ajax({
+            url: config.basepath + '?action=getSegments'+this.appendTime(),
+            data: {
+                action: 'getSegments',
+                jid: config.job_id,
+                password: config.password,
+                step : step,
+                segment: segId,
+                where: where
+            },
+            type: 'POST',            
+            dataType: 'json',
+            success: function(d){
+            	where = d.data['where'];
+            	if(typeof d.data['files'] != 'undefined') {
+            		UI.renderSegments(d.data['files'],where,false);
+            	}
+   				$('#outer').removeClass('loading loadingBefore');
+				UI.loadingMore = false;
+            }
         });
-		if(startIndex < 0) startIndex = 0;
-		this.subsetRender(segments,startIndex,10,articleId);
-*/
+    },
 
+	renderSegments: function(files,where,starting) {
+		var newFile = '';
 
+        $.each(files, function() {
+        	var fs = this['file_stats'];
+        	var fid = fs['ID_FILE'];
+//        	console.log(this);
+			if(where=='center') newFile +=	'<article id="file-' + fid + '" class="loading">'+
+						'	<ul class="projectbar" data-job="job-' + this.jid + '">'+
+						'		<li>'+
+						'			<h2>' + this.filename + '</h2>'+
+						'			<form class="download" action="/" method="post">'+
+						'				<input type=hidden name="action" value="downloadFile">'+
+						'				<input type=hidden name="id_job" value="' + this.jid + '">'+
+						'				<input type=hidden name="id_file" value="' + fid + '">'+
+						'				<input type=hidden name="filename" value="' + this.filename + '">'+
+						'				<input title="Download file" name="submit" type="submit" value="" class="downloadfile" id="file-' + fid + '-download">'+
+						'			</form>'+
+						'		</li>'+
+						'		<li style="text-align:center;text-indent:-50px">'+
+						'			<strong>' + this.source + '</strong> [<span class="source-lang">' + this.source_code + '</span>]&nbsp;>&nbsp;<strong>' + this.target + '</strong> [<span class="target-lang">' + this.target_code + '</span>]'+
+						'		</li>'+
+						'		<li class="wordcounter">'+
+						'			Eq. words: <strong>' + fs['TOTAL_FORMATTED'] + '</strong>'+
+						'			Draft: <strong>' + fs['DRAFT_FORMATTED'] + '</strong>'+
+						'			<span id="rejected" class="hidden">Rejected: <strong>' + fs['REJECTED_FORMATTED'] + '</strong></span>'+
+						'		</li>'+
+						'	</ul>';
 
-		var newSeg = '';
-		var t = config.time_to_edit_enabled;
-        $.each(segments, function(index) {
+			var t = config.time_to_edit_enabled;
+	        $.each(this.segments, function(index) {
+				newFile +=	'<section id="segment-' + this.sid + '" class="status-' + ((!this.status)?'new':this.status.toLowerCase()) + '">'+
+							
+							'	<a tabindex="-1" href="#' + this.sid + '"></a>'+
+							'	<span class="number">' + this.sid + '</span>'+
+							
+							'	<div class="body">'+
+													
+							'		<div class="header toggle" id="segment-' + this.sid + '-header"></div>'+
+							'		<div class="text">'+
+							
+							'			<div class="wrap">'+
+							
+							'				<div class="source item" id="segment-' + this.sid + '-source" data-original="' + this.segment + '">'+
+							'					<span class="original">' + this.segment + '</span>'+
+							'					' + this.segment +
+							'				</div> <!-- .source -->'+
+							
+							'				<div class="target item" id="segment-' + this.sid + '-target">'+
+							
+							'					<div class="status" title="' + ((!this.status)?'new':this.status.toLowerCase()) + '"></div>'+
+							'					<span class="hide toggle"> '+
+							'						<a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>'+
+							'					</span>'+
+							'					<div class="textarea-container">'+
+							'						<span class="loader"></span>'+
+							'						<div class="editarea invisible" contenteditable="false" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation)?'':this.translation) + '</div>'+
+							'						<ul class="buttons toggle provissima" id="segment-' + this.sid + '-buttons"></ul>'+
+							'					</div> <!-- .textarea-container -->'+
+							
+							'				</div> <!-- .target -->'+
+							
+							'			</div> <!-- .wrap -->'+
+							
+							'			<div class="status-container">'+
+							'				<a href=# title="' + ((!this.status)?'Change segment status':this.status.toLowerCase()+', click to change it') + '" class="status" id="segment-' + this.sid + '-changestatus"></a>'+
+							'			</div> <!-- .status-container -->'+
+							
+							'		</div> <!-- .text -->'+
+						((t)?'		<div class="timetoedit" data-raw_time_to_edit="0">':'')+
+						((t)?'			<span class=edit-min>' + this.parsed_time_to_edit[1] + '</span>m:':'')+
+						((t)?'			<span class=edit-sec>' + this.parsed_time_to_edit[2] + '</span>s':'')+
+						((t)?'		</div>':'')+
+							
+							'		<div class="footer toggle"></div> <!-- .footer -->     '+         
+							
+							'	</div> <!-- .body -->'+
+							
+							'	<ul class="statusmenu"></ul>'+
+							
+							'</section> ';
+	        })
 
-		newSeg +=	'<section id="segment-' + this.sid + '" class="status-' + ((!this.status)?'new':this.status.toLowerCase()) + '">'+
-					
-					'	<a tabindex="-1" href="#' + this.sid + '"></a>'+
-					'	<span class="number">' + this.sid + '</span>'+
-					
-					'	<div class="body">'+
-											
-					'		<div class="header toggle" id="segment-' + this.sid + '-header"></div>'+
-					'		<div class="text">'+
-					
-					'			<div class="wrap">'+
-					
-					'				<div class="source item" id="segment-' + this.sid + '-source" data-original="' + this.segment + '">'+
-					'					<span class="original">' + this.segment + '</span>'+
-					'					' + this.segment +
-					'				</div> <!-- .source -->'+
-					
-					'				<div class="target item" id="segment-' + this.sid + '-target">'+
-					
-					'					<div class="status" title="' + ((!this.status)?'new':this.status.toLowerCase()) + '"></div>'+
-					'					<span class="hide toggle"> '+
-					'						<a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>'+
-					'					</span>'+
-					'					<div class="textarea-container">'+
-					'						<span class="loader"></span>'+
-					'						<div class="editarea invisible" contenteditable=true id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation)?'':this.translation) + '</div>'+
-					'						<ul class="buttons toggle" id="segment-' + this.sid + '-buttons"></ul>'+
-					'					</div> <!-- .textarea-container -->'+
-					
-					'				</div> <!-- .target -->'+
-					
-					'			</div> <!-- .wrap -->'+
-					
-					'			<div class="status-container">'+
-					'				<a href=# title="' + ((!this.status)?'Change segment status':this.status.toLowerCase()+', click to change it') + '" class="status" id="segment-' + this.sid + '-changestatus"></a>'+
-					'			</div> <!-- .status-container -->'+
-					
-					'		</div> <!-- .text -->'+
-				((t)?'		<div class="timetoedit" data-raw_time_to_edit="0">':'')+
-				((t)?'			<span class=edit-min>' + this.parsed_time_to_edit[1] + '</span>m:':'')+
-				((t)?'			<span class=edit-sec>' + this.parsed_time_to_edit[2] + '</span>s':'')+
-				((t)?'		</div>':'')+
-/*
-					'		<div class="timetoedit" data-raw_time_to_edit="0">'+
-					'			<span class=edit-min>' + this.parsed_time_to_edit[1] + '</span>m:'+
-					'			<span class=edit-sec>' + this.parsed_time_to_edit[2] + '</span>s'+
-					'		</div>'+
-*/					
-					'		<div class="footer toggle"></div> <!-- .footer -->     '+         
-					
-					'	</div> <!-- .body -->'+
-					
-					'	<ul class="statusmenu"></ul>'+
-					
-					'</section> ';
+						
+			newFile +=	'	<div class="cl"></div>'+
+						'</article>';
+        })
 
-        });
-        $('#file-'+articleId).append(newSeg);
-//        $('#outer').removeClass('loadmore');
+   		if(where == 'before') {
+   			$('article .projectbar').first().after(newFile);
+   		} else if(where == 'after') {
+        	$('article').first().append(newFile);
+   		} else if(where == 'center') {
+        	$('#outer').append(newFile);
+   		}        
 
-
-
-
-
-        
-//        $('section.new .text').effect("highlight", {}, 3000);
-//        $('section.new').removeClass('new');
         if(starting) {
-        	this.scroll();
+	    	console.log('this.startSegmentId: '+this.startSegmentId);
+	    	this.scrollSegment($('#segment-' + this.startSegmentId));
         	this.init();
         }
-
+		
 	},
 
-	subsetRender: function(segments,startIndex,num,articleId) {
-		var newSeg = '';
-		for(i=startIndex;i<=startIndex+num;i++) {
-			seg = segments[i];
-			newSeg +=	'<section id="segment-' + seg.sid + '" class="status-' + ((!seg.status)?'new':seg.status.toLowerCase()) + ' new">'+
-						
-						'	<a tabindex="-1" href="#' + seg.sid + '"></a>'+
-						'	<span class="number">' + seg.sid + '</span>'+
-						
-						'	<div class="body">'+
-												
-						'		<div class="header toggle" id="segment-' + seg.sid + '-header"></div>'+
-						'		<div class="text">'+
-						
-						'			<div class="wrap">'+
-						
-						'				<div class="source item" id="segment-' + seg.sid + '-source" data-original="' + seg.segment + '">'+
-						'					<span class="original">' + seg.segment + '</span>'+
-						'					' + seg.segment +
-						'				</div> <!-- .source -->'+
-						
-						'				<div class="target item" id="segment-' + seg.sid + '-target">'+
-						
-						'					<div class="status" title="' + ((!seg.status)?'new':seg.status.toLowerCase()) + '"></div>'+
-						'					<span class="hide toggle"> '+
-						'						<a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>'+
-						'					</span>'+
-						'					<div class="textarea-container">'+
-						'						<span class="loader"></span>'+
-						'						<div class="editarea invisible" contenteditable=true id="segment-' + seg.sid + '-editarea" data-sid="' + seg.sid + '">' + ((!seg.translation)?'':seg.translation) + '</div>'+
-						'						<ul class="buttons toggle" id="segment-' + seg.sid + '-buttons"></ul>'+
-						'					</div> <!-- .textarea-container -->'+
-						
-						'				</div> <!-- .target -->'+
-						
-						'			</div> <!-- .wrap -->'+
-						
-						'			<div class="status-container">'+
-						'				<a href=# title="' + ((!seg.status)?'Change segment status':seg.status.toLowerCase()+', click to change it') + '" class="status" id="segment-' + seg.sid + '-changestatus"></a>'+
-						'			</div> <!-- .status-container -->'+
-						
-						'		</div> <!-- .text -->'+
-						
-						'		<div class="timetoedit" data-raw_time_to_edit="0">'+
-						'			<span class=edit-min>' + seg.parsed_time_to_edit[1] + '</span>m:'+
-						'			<span class=edit-sec>' + seg.parsed_time_to_edit[2] + '</span>s'+
-						'		</div>'+
-						
-						'		<div class="footer toggle"></div> <!-- .footer -->     '+         
-						
-						'	</div> <!-- .body -->'+
-						
-						'	<ul class="statusmenu"></ul>'+
-						
-						'</section> ';			
+	segmentIsLoaded: function(segmentId) {
+		if($('#segment-'+segmentId).length) {
+			return true;
+		} else {
+			return false;
 		}
-        $('#file-'+articleId).append(newSeg);		
 	},
-	
+
 	appendTime: function() {
     	var t = new Date();
     	return '&time='+t.getTime();
-	},
-
-	scroll: function() {
-	    var scrolltime = new Date();
-		if((config.last_opened_segment != '')&&(config.last_opened_segment != 0)) {
-	    	var target = ($('#segment-' + config.last_opened_segment).length)? $('#segment-' + config.last_opened_segment) : $('section.status-draft, section.status-rejected, section.status-new').first();
-//	    	console.log(config.last_opened_segment);
-	    	this.scrollSegment(target);
-		}
-		console.log('scrolltime: ' + ( (new Date()) - scrolltime));
 	}
 
 }
@@ -1202,7 +1274,7 @@ console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea))
 
 
 $(document).ready(function(){
-    UI.render();
+    UI.render(true);
 //    UI.init();
 });
 

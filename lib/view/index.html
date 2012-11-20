@@ -4,7 +4,7 @@
     <head>
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 	<title>Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
-        <link rel="shortcut icon" href="/public/img/favicon.ico" />
+        <link rel="icon" href="/public/img/favicon.ico" />
         <link href="/public/css/style.css" rel="stylesheet" type="text/css" />
         <link rel='stylesheet' media='screen and (min-width: 701px) and (max-width: 1180px)' href='/public/css/test.css' />
          <link rel='stylesheet' media='screen and (min-width: 1181px) and (max-width: 1680px)' href='/public/css/1300more.css' />
@@ -46,7 +46,7 @@
         <header>
             <div class="wrapper">   
 
-				<form id="fileDownload" action="" method="post">
+				<form id="fileDownload" action="/" method="post">
 					<input type="hidden" name="action" value="downloadFile" />
 					<input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
 					<input type="hidden" name="id_file" value="" />
@@ -280,46 +280,7 @@
 
 
 		<div id="outer">
-		<article tal:define="file_data php:array()" tal:repeat="file_data data" tal:attributes="id string:file-${repeat/file_data/key};class string:loading" id="001">
 
-			<ul class="projectbar" data-job="" tal:attributes="data-job string:job-${file_data/jid}">
-				<li>
-					<h2 tal:content="file_data/filename | nothing">@@filename@@</h2>
-					<form class="download" action="" method="post">
-						<input type="hidden" name="action" value="downloadFile" />
-						<input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
-						<input type="hidden" name="id_file" value="${repeat/file_data/key}" />
-						<input type="hidden" name="filename" tal:attributes ="value string:${file_data/filename}" />
-						<input tal:attributes="id string:file-${repeat/file_data/key}-download" title="Download file" name="submit" type="submit" value="" class="downloadfile" />
-					</form>
-				</li>
-                  
-				<li style="text-align:center;text-indent:-50px">      
-					<strong tal:content="file_data/source">English</strong> [<span tal:content="file_data/source_code" class="source-lang">English</span>]&nbsp;>&nbsp;<strong tal:content="file_data/target">Italian</strong> [<span tal:content="file_data/target_code" class="target-lang">English</span>]
-				</li>
-
-				<li class="wordcounter">
-					Eq. words: <strong>${file_data/file_stats/TOTAL_FORMATTED}</strong>
-					Draft: <strong>${file_data/file_stats/DRAFT_FORMATTED}</strong>
-					Rejected: <strong>${file_data/file_stats/REJECTED_FORMATTED}</strong>
-				</li>
-                        
-			</ul>
-           
-<!--                
-			<div class="languages">
-
-                <span tal:content="file_data/source_code" class="source-lang">English</span>
-                &nbsp;&gt;&nbsp;
-                <span tal:content="file_data/target_code" class="target-lang">Italian</span>
-
-			</div>
--->                    
-                    
-
-            <div class="cl"></div>
-
-        </article>
        	</div>
 
 
@@ -412,6 +373,7 @@
 
         <div class="cl"></div>
         <div class="grayed" ></div>
+<!--
         <div class="end-message-box">
         <div class="end-message-col1">
         <h3>Faxová úloha<span>*</span>!</h3>
@@ -422,7 +384,7 @@
 <h4>It took you only <strong>30 minutes</strong> <br />
   to finish the translation!</h4>
 
-				<form id="fileDownload" action="" method="post">
+				<form id="fileDownload" action="/" method="post">
 					<input type="hidden" name="action" value="downloadFile" />
 					<input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
 					<input type="hidden" name="id_file" value="" />
@@ -435,8 +397,9 @@
   
                 <a href="#" class="downloadtr-button" style="background:#f5f5f5;color:#333"><strong>NOTIFY YOUR PM</strong> <br />
 <span>that you are available for new work</span></a>
-<!--<input name="" type="text" value="http://23-P124#completed" onClick="select()"/>-->
+<input name="" type="text" value="http://23-P124#completed" onClick="select()"/>
                 </div>
                 </div>
+-->
     </body>
 </html>

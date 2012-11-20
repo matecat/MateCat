@@ -116,6 +116,8 @@ class catController extends viewcontroller {
 //        exit;
 //        
         $first_not_translated_found = false;
+//		log::doLog('DATA 0: '.$data[0]['last_opened_segment']);
+
         foreach ($data as $i => $seg) {
 	  		// remove this when tag management enabled
         //	$seg['segment'] = $this->stripTagsFromSource($seg['segment']);
@@ -209,7 +211,7 @@ class catController extends viewcontroller {
             unset($seg['create_date']);
             unset($seg['id_segment_end']);
             unset($seg['id_segment_start']);
-	    unset($seg['last_opened_segment']);
+	    	unset($seg['last_opened_segment']);
 
            // $seg['segment'] = $this->filetype_handler->parse($seg['segment']);
         //    $seg['parsed_time_to_edit']=  $this->parse_time_to_edit($seg['time_to_edit']); 
@@ -248,6 +250,11 @@ class catController extends viewcontroller {
 
 
 
+        }
+
+        if (empty($this->last_opened_segment)) {
+            $this->last_opened_segment = getFirstSegmentId($this->jid, $this->password);
+        	log::doLog($this->last_opened_segment);
         }
 	        
         $this->job_stats = CatUtils::getStatsForJob($this->jid);
