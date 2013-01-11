@@ -48,6 +48,7 @@ class setTranslationController extends ajaxcontroller {
         }
 
 	if (empty ($this->translation)){
+		log::doLog("empty");
 		return 0 ; // won's save empty translation but there is no need to return an error 
 	}
 
@@ -57,7 +58,9 @@ class setTranslationController extends ajaxcontroller {
             log::doLog ("Generic Error in SetTranslationController");
 		return -1;
         }
-
+	
+	$this->translation=CatUtils::view2rawxliff($this->translation);
+	
         $res=CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $this->translation);
         if (!empty($res['error'])){
             $this->result['error']=$res['error'];

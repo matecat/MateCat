@@ -1,5 +1,8 @@
 <?
+error_reporting (E_ALL);
 include_once "engine.class.php";
+include_once ("utils/cat.class.php");
+
 class TMS_GET_MATCHES {
 
     public $id;
@@ -18,6 +21,7 @@ class TMS_GET_MATCHES {
 
     public function __construct() {
         $args = func_get_args();
+	//print_r ($args);exit;
         if (empty($args)) {
             throw new Exception("No args defined for " . __CLASS__ . " constructor");
         }
@@ -49,13 +53,14 @@ class TMS_GET_MATCHES {
         if (count($args) == 5 and !is_array($args[0])) {
             $match['segment'] = $args[0];
             $match['translation'] = $args[1];
-            $match['raw_translation'] = htmlentities($args[1]);
+            // $match['raw_translation'] = htmlentities($args[1]);
+            $match['raw_translation'] = $args[1];
             $match['match'] = $args[2];
             $match['created-by'] = $args[3];
             $match['last-update-date'] = $args[4];
         }
 
-
+//print_r ($match);exit;
         $this->id = array_key_exists('id', $match) ? $match['id'] : '0';
         $this->create_date = array_key_exists('create-date', $match) ? $match['create-date'] : '0000-00-00';
         $this->segment = array_key_exists('segment', $match) ? $match['segment'] : '';
@@ -93,8 +98,9 @@ class TMS_RESULT {
             $matches = $result['matches'];
             if (is_array($matches) and !empty($matches)) {
                 foreach ($matches as $match) {
-			$match['raw_translation']=htmlentities($match['translation']);
-		    
+				$match['segment'] =CatUtils::rawxliff2view($match['segment']);
+				$match['translation'] =CatUtils::rawxliff2view($match['translation']);
+		    		$match['raw_translation'] = $match['translation'];
                     $a = new TMS_GET_MATCHES($match);
                     $this->matches[] = $a;
                 }
@@ -141,7 +147,7 @@ class TMS extends engine {
         }
 
         $this->doQuery("get", $parameters);
-        //print_r ($this->raw_result);
+        //print_r ($this->raw_result);exit;
         $this->result = new TMS_RESULT($this->raw_result);
         if ($this->result->responseStatus != "200") {
             return false;
@@ -205,3 +211,4 @@ print_r($a->get($segment, $source_lang, $target_lang, $email));
 print_r($a->getError());
 //print_r($a->getRawResults());
 */
+

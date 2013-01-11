@@ -65,21 +65,11 @@ function getEngines($type = "MT") {
     return $results;
 }
 
-function getSegments($jid,$password, $start = 0, $step = 200) {
-	if ($start<0){
-		$start=0;	
-	}
-
-	if (empty($step)){$step=200;}
-
-	
-	
-    $query = "select j.id as jid, j.id_project as pid,j.source,j.target, j.last_opened_segment, j.id_translator as tid,
-                p.id_customer as cid, j.id_translator as tid,  
-                p.name as pname, p.create_date , fj.id_file, fj.id_segment_start, fj.id_segment_end, 
-                f.filename, f.mime_type, s.id as sid, s.segment, s.raw_word_count, s.internal_id,
-		s.xliff_mrk_id as mrk_id, s.xliff_ext_prec_tags as prev_tags, 
-                st.translation, st.status, st.time_to_edit
+function getSegmentsDownload($jid,$password,$id_file) {
+    $query = "select                                 
+                f.filename, f.mime_type, s.id as sid, s.segment, s.internal_id,
+		s.xliff_mrk_id as mrk_id, s.xliff_ext_prec_tags as prev_tags, s.xliff_ext_succ_tags as succ_tags,
+                st.translation
 
                 from jobs j 
                 inner join projects p on p.id=j.id_project
@@ -87,19 +77,23 @@ function getSegments($jid,$password, $start = 0, $step = 200) {
                 inner join files f on f.id=fj.id_file
                 inner join segments s on s.id_file=f.id
                 left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
-                where j.id=$jid and j.password='$password'
-                limit $start,$step
+                where j.id=$jid and j.password='$password' and f.id=$id_file
                 
-                
-                
-             ";
 
+             ";
+//echo $query; exit;
     $db = Database::obtain();
     $results = $db->fetch_array($query);
+    $err = $db->get_error();
+    $errno = $err['error_code'];
+    if ($errno != 0) {
+        log::doLog($err);
+        return $errno * -1;
+    }
+log::doLog ($results);
 
     return $results;
 }
-
 
 function getSegmentsInfo($jid,$password) {
 	
@@ -112,14 +106,17 @@ function getSegmentsInfo($jid,$password) {
                 inner join projects p on p.id=j.id_project
                 inner join files_job fj on fj.id_job=j.id
                 inner join files f on f.id=fj.id_file
-                where j.id=$jid and j.password='$password'
+                where j.id=$jid and j.password='$password' ";
                 
-                
-                
-                
-             ";
     $db = Database::obtain();
     $results = $db->fetch_array($query);
+    
+    $err = $db->get_error();
+    $errno = $err['error_code'];
+    if ($errno != 0) {
+        log::doLog($err);
+        return $errno * -1;
+    }
 
     return $results;
 }
@@ -131,6 +128,7 @@ function getFirstSegmentId($jid,$password) {
                 inner join files_job fj on s.id_file = fj.id_file
                 inner join jobs j on j.id=fj.id_job
                 where fj.id_job=$jid and j.password='$password'
+                and s.show_in_cattool=1
                 order by s.id
                 limit 1
              ";
@@ -140,7 +138,7 @@ function getFirstSegmentId($jid,$password) {
 
     return $results;
 }
-
+/*
 function getMoreSegments($jid,$password, $last_loaded_id, $step = 50, $central_segment = 0) {
 	$start_point = ($central_segment)? ((float) $central_segment) - 100 : $last_loaded_id;
 
@@ -166,8 +164,8 @@ function getMoreSegments($jid,$password, $last_loaded_id, $step = 50, $central_s
 
     return $results;
 }
-
-function getMoreSegments1($jid,$password, $step = 50, $ref_segment, $where = 'after') {
+*/
+function getMoreSegments($jid,$password, $step = 50, $ref_segment, $where = 'after') {
 	switch ($where) {
 	    case 'after':
 	        $ref_point = $ref_segment;
@@ -186,7 +184,7 @@ function getMoreSegments1($jid,$password, $step = 50, $ref_segment, $where = 'af
                 p.id_customer as cid, j.id_translator as tid,  
                 p.name as pname, p.create_date , fj.id_file, fj.id_segment_start, fj.id_segment_end, 
                 f.filename, f.mime_type, s.id as sid, s.segment, s.raw_word_count, s.internal_id,
-                st.translation, st.status, st.time_to_edit
+                st.translation, st.status, IF(st.time_to_edit is NULL,0,st.time_to_edit) as time_to_edit, s.xliff_ext_prec_tags,s.xliff_ext_succ_tags
 
                 from jobs j 
                 inner join projects p on p.id=j.id_project
@@ -194,8 +192,7 @@ function getMoreSegments1($jid,$password, $step = 50, $ref_segment, $where = 'af
                 inner join files f on f.id=fj.id_file
                 inner join segments s on s.id_file=f.id
                 left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
-                where j.id=$jid and j.password='$password' and s.id > $ref_point
-                order by s.id
+                where j.id=$jid and j.password='$password' and s.id > $ref_point and s.show_in_cattool=1 
                 limit 0,$step
              ";
         log::doLog('QUERY: '.$query);
@@ -204,6 +201,44 @@ function getMoreSegments1($jid,$password, $step = 50, $ref_segment, $where = 'af
     $results = $db->fetch_array($query);
 
     return $results;
+}
+
+
+
+function getLastSegmentInNextFetchWindow($jid,$password, $step = 50, $ref_segment, $where = 'after') {
+	switch ($where) {
+	    case 'after':
+	        $ref_point = $ref_segment;
+	        break;
+	    case 'before':
+	        $ref_point = $ref_segment - ($step+1);
+	        break;
+	    case 'center':
+	        $ref_point = ((float) $ref_segment) - 100;
+	        break;
+	}
+	
+//	$ref_point = ($where == 'center')? ((float) $ref_segment) - 100 : $ref_segment;
+
+	    $query = "select max(id) as max_id
+                from (select s.id from  jobs j 
+                inner join projects p on p.id=j.id_project
+                inner join files_job fj on fj.id_job=j.id
+                inner join files f on f.id=fj.id_file
+                inner join segments s on s.id_file=f.id
+                left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
+                where j.id=$jid and j.password='$password' and s.id > $ref_point and s.show_in_cattool=1 
+                limit 0,$step) as id
+             ";
+	log::doLog($query);
+       
+
+    $db = Database::obtain();
+    $results = $db->query_first($query);
+ log::doLog($results);
+
+
+    return $results['max_id'];
 }
 
 function setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $translation, $match_type = 'unknown') {
@@ -215,10 +250,10 @@ function setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $tra
      $status=$db->escape($status);
      $match_type=$db->escape($match_type);
 
-     $q="UPDATE `segment_translations` SET `status`='$status', `time_to_edit`=`time_to_edit` + $time_to_edit, `translation`='$translation', `translation_date`='$now', `match_type`='unknown' WHERE id_segment=$id_segment and id_job=$id_job";
+     $q="UPDATE `segment_translations` SET `status`='$status', `time_to_edit`=IF(`time_to_edit` is null,0,`time_to_edit`) + $time_to_edit, `translation`='$translation', `translation_date`='$now', `match_type`='unknown' WHERE id_segment=$id_segment and id_job=$id_job";
 
 
-   
+  log::doLog ("set update : $q"); 
     $db->query($q);
     $err = $db->get_error();
     $errno = $err['error_code'];
@@ -314,9 +349,15 @@ function setCurrentSegmentInsert($id_segment, $id_job) {
     return $db->affected_rows;
 }
 
-function getFilesForJob($id_job) {
 
-    $query = "select id_file from files_job where id_job=".$id_job;
+function getFilesForJob($id_job, $id_file) {
+	$where_id_file="";
+	if (!empty($id_file)){
+		$where_id_file=" and id_file=$id_file";
+	}
+    $query = "select id_file, original_file, filename from files_job fj
+    			inner join files f on f.id=fj.id_file
+    			 where id_job=$id_job $where_id_file";
 
     $db = Database::obtain();
     $results = $db->fetch_array($query);
@@ -324,6 +365,19 @@ function getFilesForJob($id_job) {
     return $results;
 }
 
+/*
+function getFilesForJob($id_job) {
+
+    $query = "select id_file, original_file from files_job fj
+    			inner join files f on f.id=fj.id_file
+    			 where id_job=".$id_job;
+
+    $db = Database::obtain();
+    $results = $db->fetch_array($query);
+
+    return $results;
+}
+*/
 function getStatsForJob($id_job) {
 
     $query = "select SUM(raw_word_count) as TOTAL, SUM(IF(status IS NULL OR status='DRAFT' OR status='NEW',raw_word_count,0)) as DRAFT, SUM(IF(status='REJECTED',raw_word_count,0)) as REJECTED, SUM(IF(status='TRANSLATED',raw_word_count,0)) as TRANSLATED, SUM(IF(status='APPROVED',raw_word_count,0)) as APPROVED from jobs j INNER JOIN files_job fj on j.id=fj.id_job INNER join segments s on fj.id_file=s.id_file LEFT join segment_translations st on s.id=st.id_segment WHERE j.id=".$id_job;
@@ -412,17 +466,46 @@ function getEditLog($jid,$pass) {
 
 function getNextUntranslatedSegment($sid,$jid) {
 
-	$query = "select id_segment
-				from segment_translations
-				where id_job=$jid and status in ('NEW','DRAFT','REJECTED') and id_segment>$sid
-				order by id_segment
+	// Warning this is a LEFT join a little slower...
+	$query = "select s.id
+				from segments s
+				LEFT JOIN segment_translations st on st.id_segment = s.id
+				INNER JOIN files_job fj on fj.id_file=s.id_file 
+				INNER JOIN jobs j on j.id=fj.id_job 
+				where fj.id_job=$jid AND 
+					  (status in ('NEW','DRAFT','REJECTED') OR status IS NULL) and s.id>$sid
+				and s.show_in_cattool=1
+				order by s.id
 				limit 1
 			";
-             
+           
     $db = Database::obtain();
     $results = $db->fetch_array($query);
 
     return $results;
+}
+
+function getNextSegmentId($sid,$jid,$status) {
+	$rules = ($status == 'untranslated')? "'NEW','DRAFT','REJECTED'" : "'$status'";
+	$statusIsNull = ($status == 'untranslated')? " OR status IS NULL" : "";
+	// Warning this is a LEFT join a little slower...
+	$query = "select s.id as sid
+				from segments s
+				LEFT JOIN segment_translations st on st.id_segment = s.id
+				INNER JOIN files_job fj on fj.id_file=s.id_file 
+				INNER JOIN jobs j on j.id=fj.id_job 
+				where fj.id_job=$jid AND 
+					  (status in ($rules)$statusIsNull) and s.id>$sid
+				and s.show_in_cattool=1
+				order by s.id
+				limit 1
+			";
+
+    $db = Database::obtain();
+    $results = $db->query_first($query);
+log::doLog("NEXT");
+log::doLog($results);
+    return $results['sid'];
 }
 
 

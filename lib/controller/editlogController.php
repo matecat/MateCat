@@ -20,6 +20,7 @@ class editlogController extends viewcontroller {
     }
 
     public function doAction() {
+    	
     	 $tmp = CatUtils::getEditingLogData($this->jid,$this->password);
          $this->data = $tmp[0];
          $this->stats = $tmp[1];
@@ -30,6 +31,9 @@ class editlogController extends viewcontroller {
     	$this->template->password = $this->password;
         $this->template->data = $this->data;
         $this->template->stats = $this->stats; 
+
+	//echo "<pre>";
+	//print_r ($this->data); exit;
     }
 
 

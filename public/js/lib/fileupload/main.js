@@ -38,7 +38,7 @@ $(function () {
 	    {
 	        dropZone: $('.drag'),
 	        autoUpload: true,
-//	        singleFileUploads: false,
+	        singleFileUploads: true,
 	        overlayClose: true,
 	        fileInput: $('#fileupload .multiple-button, .btncontinue .multiple-button'),
 	        acceptFileTypes: /(\.|\/)(xliff|sdlxliff|xlf)$/i
@@ -288,9 +288,11 @@ $(function () {
 		}
 	}).bind('fileuploadfail', function (e) {
 		if(!($('.upload-table tr').length > 1)) $('.upload-files').removeClass('uploaded');
-	}).bind('fileuploadcompleted fileuploaddestroyed', function (e) {
+	}).bind('fileuploadcompleted fileuploaddestroyed', function (e,data) {
+//		var err = $.parseJSON(data.jqXHR.responseText)[0].error;
 		if($('.upload-table tr').length) {
 			$('.uploadbtn').removeAttr('disabled').removeClass('disabled').focus();
+//			if(typeof err == 'undefined') $('.uploadbtn').removeAttr('disabled').removeClass('disabled').focus();
 		} else {
 			$('.uploadbtn').attr('disabled','disabled').addClass('disabled');
 		}

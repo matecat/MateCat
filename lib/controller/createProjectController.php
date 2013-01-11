@@ -30,8 +30,12 @@ class createProjectController extends ajaxcontroller {
             $this->result['errors'][] = array("code" => -1, "message" => "Missing file name.");
 		return false;
         }
-        $arFiles = explode('[/,]', $this->file_name);
+        $arFiles = explode(',', $this->file_name);
 	$default_project_name=$arFiles[0];
+	if (count($arFiles)>1){
+		$default_project_name="MATECAT_PROJ-".date("Ymdhi");
+	}
+
 
         if (empty($this->project_name)) {
             $this->project_name = $default_project_name;//'NO_NAME'.$this->create_project_name();
@@ -51,6 +55,9 @@ class createProjectController extends ajaxcontroller {
             $this->tms_engine=1; // default MyMemory
         }
 
+	
+	// add her the cookie mangement for remembere the last 3 choosed languages
+
 	 // project name sanitize
         $this->project_name=preg_replace('/["\' \(\)\[\]\{\}\+\*]/',"_", $this->project_name);
         $this->project_name=preg_replace('/[_]{2,}/', "_",$this->project_name);
@@ -58,7 +65,7 @@ class createProjectController extends ajaxcontroller {
         //echo $this->project_name; 
 
         // project name validation        
-        $pattern = "/^[\ 0-9a-zA-Z_\.\-]+$/";
+        $pattern = "/^[\p{L}\ 0-9a-zA-Z_\.\-]+$/";
 		if(!preg_match($pattern, $this->project_name)) {
 	        $this->result['errors'][] = array("code" => -5, "message" => "Invalid Project Name $this->project_name: it should only contain numbers and letters!");
 //	        $this->result['project_name_error'] = $this->project_name;

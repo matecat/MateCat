@@ -32,7 +32,7 @@ function extractSegments($files_path, $file, $pid, $fid) {
 
     $xliff_obj = new Xliff_Parser();
     $xliff = $xliff_obj->Xliff2Array($content);
-    // log::doLog($xliff);
+     //log::doLog($xliff);
     
     // Checking that parsing went well
     if (isset($xliff['parser-errors']) or !isset($xliff['files']))
@@ -42,62 +42,51 @@ function extractSegments($files_path, $file, $pid, $fid) {
     	}
    
     // Creating the Query
-    foreach ($xliff['files'] as $xliff_file) {
-    	
+	foreach ($xliff['files'] as $xliff_file) {
 		foreach ($xliff_file['trans-units'] as $xliff_trans_unit)  { 
 			if (!isset($xliff_trans_unit['attr']['translate'])) {
 				$xliff_trans_unit['attr']['translate']='yes';
 			}
 			if ($xliff_trans_unit['attr']['translate']=="no") {
-			  log::doLog("Xliff Import: Skipping segment marked as non-translatable: ".$xliff_trans_unit['source']['raw-content']);
+				log::doLog("Xliff Import: Skipping segment marked as non-translatable: ".$xliff_trans_unit['source']['raw-content']);
 			} else {
-			
-			  
-			  // If the XLIFF is already segmented (has <seg-source>)
-			  if (isset($xliff_trans_unit['seg-source'])) {
-	            	
-	  	
-			  
-				foreach ($xliff_trans_unit['seg-source'] as $seg_source) {
-					$tempSeg = stripTagsFromSource2($seg_source['raw-content']);
-			  		$tempSeg = trim($tempSeg);	
+				// If the XLIFF is already segmented (has <seg-source>)
+				if (isset($xliff_trans_unit['seg-source'])) {
+					foreach ($xliff_trans_unit['seg-source'] as $seg_source) {
+						$show_in_cattool=1;
+						$tempSeg = stripTagsFromSource2($seg_source['raw-content']);
+						$tempSeg = trim($tempSeg);	
+						if (empty($tempSeg)) {
+							$show_in_cattool=0;
+						}
+						$mid		   = mysql_real_escape_string($seg_source['mid']);
+						$ext_tags	   = mysql_real_escape_string($seg_source['ext-prec-tags']);
+						$source		   = mysql_real_escape_string($seg_source['raw-content']);
+						$ext_succ_tags	   = mysql_real_escape_string($seg_source['ext-succ-tags']);
+						$num_words 	   = CatUtils::segment_raw_wordcount($seg_source['raw-content']);
+						$trans_unit_id	   = mysql_real_escape_string($xliff_trans_unit['attr']['id']);
+						$query_segment[]   = "('$trans_unit_id',$fid,'$source',$num_words,'$mid','$ext_tags','$ext_succ_tags',$show_in_cattool)";
+					}	
+				
+				} else {
+					$show_in_cattool=1;
+					$tempSeg = stripTagsFromSource2($xliff_trans_unit['source']['raw-content']);
+					$tempSeg = trim($tempSeg);	
 
-		            if (empty($tempSeg)) {
-		                continue;
-		            }	
-		            
-		          $mid		   	   = mysql_real_escape_string($seg_source['mid']);
-				  $ext_tags	   	   = mysql_real_escape_string($seg_source['ext-prec-tags']);
-				  $source		   = mysql_real_escape_string($seg_source['raw-content']);
-		 	  	  $num_words 	   = CatUtils::segment_raw_wordcount($seg_source['raw-content']);
-		 	  	  $trans_unit_id   = mysql_real_escape_string($xliff_trans_unit['attr']['id']);
-		 	  	  $query_segment[] = "('$trans_unit_id',$fid,'$source',$num_words,'$mid','$ext_tags')";
-		 	  	}	  
-			  
-			  } else {
-			  		$tempSeg = stripTagsFromSource2($xliff_trans_unit['source']['raw-content']);
-			  		$tempSeg = trim($tempSeg);	
-			  			
-			  		
-			  	
-			  	
+					if (empty($tempSeg)) {
+						$show_in_cattool=0;
+					}	
 
-		            if (empty($tempSeg)) {
-		                continue;
-		            }	
-
-			  	  $source		   = mysql_real_escape_string($xliff_trans_unit['source']['raw-content']);
-		 	  	  $num_words 	   = CatUtils::segment_raw_wordcount($xliff_trans_unit['source']['raw-content']);
-		 	  	  $trans_unit_id   = mysql_real_escape_string($xliff_trans_unit['attr']['id']);
-		 	  	  $query_segment[] = "('$trans_unit_id',$fid,'$source',$num_words,NULL,NULL)";
-		      }
-		      
-		    }
+					$source		   = mysql_real_escape_string($xliff_trans_unit['source']['raw-content']); 						$num_words 	   = CatUtils::segment_raw_wordcount($xliff_trans_unit['source']['raw-content']);
+					$trans_unit_id     = mysql_real_escape_string($xliff_trans_unit['attr']['id']);
+					$query_segment[]   = "('$trans_unit_id',$fid,'$source',$num_words,NULL,NULL,NULL,$show_in_cattool)";
+				}
+			}
 		}	
-    }
-    
+	}
+
     // Executing the Query
-    $query_segment = "INSERT INTO segments (internal_id,id_file, segment, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags) 
+    $query_segment = "INSERT INTO segments (internal_id,id_file, segment, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool) 
                              values ". join(",\n",$query_segment);
     // log::doLog($query_segment); exit;
     

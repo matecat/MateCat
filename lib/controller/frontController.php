@@ -41,6 +41,7 @@ abstract class controller {
         header("Cache-Control: post-check=0, pre-check=0", false);
         header("Pragma: no-cache");
     }
+
     protected function __construct() {
         try {
             /* $this->localizationInfo=new localizationClass();
@@ -109,15 +110,28 @@ abstract class downloadController extends controller {
 
 abstract class viewcontroller extends controller {
     protected $template = null;
+    protected $supportedBrowser=false;
+   
     //private $localizedUrlMapping;
     abstract function setTemplateVars();
 
     public function __construct() {
         parent::__construct();
         require_once INIT::$ROOT.'/inc/PHPTAL/PHPTAL.php';
+	$this->supportedBrowser=$this->isSupportedWebBrowser();
         
     }
 
+    private function isSupportedWebBrowser(){
+	$browser_info=get_browser(NULL,true);
+//	echo "<pre>"; print_r ($browser_info);exit;
+	$browser_name=strtolower($browser_info['browser']);	
+	if (!in_array($browser_name,INIT::$ENABLED_BROWSERS)){
+		return false;
+	}
+	return true;
+	
+    }
     protected function postback($additionalPostData=array()) {
         $url = $_SERVER['REQUEST_URI'];
         //print_r ($_REQUEST);;
@@ -172,6 +186,8 @@ abstract class viewcontroller extends controller {
     protected function makeTemplate($skeleton_file) {
         try {
             $this->template = new PHPTAL(INIT::$TEMPLATE_ROOT . "/$skeleton_file"); // create a new template object
+            $this->template->basepath  = INIT::$BASEURL;
+	    $this->template->supportedBrowser=$this->supportedBrowser;
             $this->template->setOutputMode(PHPTAL::HTML5);
 
 		

@@ -5,23 +5,28 @@
 <title>Translate an XLIFF file with Matecat</title>
 <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
 <meta name="viewport" content="width=device-width"/>
-<link href="/public/css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="/public/css/fieldtest.css"/>
+<link href="${basepath}public/css/style.css" rel="stylesheet" type="text/css" />
+<link rel="stylesheet" href="${basepath}public/css/fieldtest.css"/>
 </head>
-<body>
+
+<body tal:condition="not:supportedBrowser">
+	<div  metal:use-macro="unsupported_browser.html/unsupported"/>
+</body>
+
+<body tal:condition="supportedBrowser">
 
 <header style="padding-bottom:5px">
     <div class="wrapper">   
-		<a href="/" class="logo"></a>
+		<a href="${basepath}" class="logo"></a>
     
     
-    	<form action="/" method="post" style="margin-right:-20px">
+    	<form action="${basepath}" method="post" style="margin-right:-20px">
                 <input type="hidden" name="action" value="editlogDownload"/>
                 <input type="hidden" name="jid" tal:attributes="value jid" value=""/>
                 <input type="hidden" name="password" tal:attributes="value password" value=""/>
                
 				<input name="submit" class="downloadtr-button" type="submit" value="Export All Data in CSV" />
-                 <a tal:attributes="href string:/translate/none/none/${jid}-${password}" style="margin-right:10px" class="downloadtr-button draft" >< Back to Translation</a>
+                 <a tal:attributes="href string:${basepath}translate/none/none/${jid}-${password}" style="margin-right:10px" class="downloadtr-button draft" >< Back to Translation</a>
 	</form>
     
     </div>
@@ -83,7 +88,7 @@
 			<tr>
 				<td title="A statistically relevant time-to-edit is considered to be beetween 0.25s/word and 30s/word. Red marked segments are excluded from statistics." tal:attributes="style string:background:${file_data/stats-valid-color}" tal:content="file_data/secs-per-word | default">N/A</td>
 				<td tal:content="file_data/jid | default">N/A</td>
-				<td><a tal:attributes="href string:/translate/none/none/${jid}-${password}#${file_data/sid}"><span tal:replace="file_data/sid | default" /></a></td>
+				<td><a tal:attributes="href string:${basepath}translate/none/none/${jid}-${password}#${file_data/sid}"><span tal:replace="file_data/sid | default" /></a></td>
 				<td tal:content="file_data/rwc | default">N/A</td>
 				<td tal:content="file_data/ss | default">N/A</td>
 				<td tal:content="file_data/sm | default">%</td>
@@ -100,11 +105,11 @@
 			</tr>		
 			<tr>
 				<th style="width: 100px">Suggestion</th>
-				<td style="text-align:left;font-size:16px;" tal:content="file_data/sug | default">N/A</td>
+				<td style="text-align:left;font-size:16px;" tal:content="file_data/sug_view | default">N/A</td>
 			</tr>		
 			<tr>
 				<th style="width: 100px">Translation</th>
-				<td style="text-align:left;font-size:16px;" tal:content=" structure file_data/translation | default">N/A</td>
+				<td style="text-align:left;font-size:16px;" tal:content="file_data/translation | default">N/A</td>
 				
 			</tr>
 			<tr>

@@ -23,7 +23,7 @@ class getContributionController extends ajaxcontroller {
         $this->id_segment = $this->get_from_get_post('id_segment');
         $this->id_job = $this->get_from_get_post('id_job');
         $this->num_results = $this->get_from_get_post('num_results');
-        $this->text = $this->get_from_get_post('text');
+        $this->text = trim($this->get_from_get_post('text'));
         $this->id_translator = $this->get_from_get_post('id_translator');
 
 	if ($this->id_translator=='unknown_translator'){
@@ -64,9 +64,15 @@ class getContributionController extends ajaxcontroller {
             if (!empty($this->id_mt_engine)) {
                 $mt_from_tms = 0;
             }
+		//log::doLog("before $this->text");
+	    $this->text=CatUtils::view2rawxliff($this->text);
+	//	log::doLog("after $this->text");
             $tms = new TMS($this->id_tms);
 
+
             $tms_match = $tms->get($this->text, $this->source, $this->target, "demo@matecat.com", $mt_from_tms, $this->id_translator);
+	//	log::doLog ("tms_match");
+		//log::doLog ($tms_match);
         }
         // UNUSED
         $mt_res = array();
@@ -109,11 +115,8 @@ class getContributionController extends ajaxcontroller {
             if ($match['created_by'] == 'MT!') {
                 $match['created_by'] = 'MT'; //MyMemory returns MT!
             }
-			$segSource = html_entity_decode($match['segment']);
-			$match['segment'] = htmlspecialchars($segSource);
-			$segTranslation = html_entity_decode($match['translation']);
-			$match['translation'] = htmlspecialchars($segTranslation);			
         }
+	//$matches=array();
 
         $this->result['data']['matches'] = $matches;
     }

@@ -22,6 +22,8 @@ function getEngineData($id) {
  */
 
 //include "/home/matecat/cattool/lib/model/queries.php";
+//require_once '../../../inc/config.inc.php';
+include_once ("utils/cat.class.php");
 abstract class Engine {
 
     protected $id = "";
@@ -113,10 +115,12 @@ abstract class Engine {
         if (is_array($this->extra_parameters) and !empty($this->extra_parameters)) {
             $parameters = array_merge($parameters, $this->extra_parameters);
         }
+	log::doLog("engine input parameters");
+	log::doLog($parameters);
         $parameters_query_string = http_build_query($parameters);        
         $this->url.=$parameters_query_string;
-       // echo " eurl $this->url";  return 0;
-	log::doLog("\nurl $this->url\n");
+        //echo " eurl $this->url";  exit;
+	log::doLog("\n engine url $this->url\n");
     }
 
     private function existsFunction($type) {

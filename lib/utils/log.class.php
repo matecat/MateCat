@@ -4,7 +4,7 @@ error_reporting(E_ALL);
 define('DEBUG', 1);
 
 if (!defined('LOG_REPOSITORY')) {
-    define('LOG_REPOSITORY', 'storage/log_archive');
+    define('LOG_REPOSITORY', INIT::$LOG_REPOSITORY);
 }
 
 if (!defined('LOG_FILENAME')) {
@@ -15,7 +15,8 @@ class Log {
 
     private static $filename;
 
-    public static function doLog() {         
+    public static function doLog() { 
+
         $trace=debug_backtrace();
 
 

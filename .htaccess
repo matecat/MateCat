@@ -1,5 +1,6 @@
+<IfModule mod_rewrite.c>
 RewriteEngine On
-RewriteRule ^$ index.php?action=newProject [L]
+RewriteRule ^$ index.php?action=newProject [QSA,L]
 RewriteRule ^(translate)[/]?$ index.php?action=cat [L]
 RewriteRule ^(translate)/([^/]*)/([^/]*)/([^/]*)-([^/]*)[/]*([^/]*)[/]*$ index.php?action=cat&jid=$4&password=$5&page=$6 [L]
 RewriteRule ^(translatenew)[/]?$ index.php?action=catnew [L]
@@ -9,7 +10,9 @@ RewriteRule ^(statistics)[/]?$ index.php?action=projectStatistics [L]
 
 RewriteRule ^(manage)/([^/]*)/([^/]*)-([^/]*)$ index.php?action=manage&pid=$3&password=$4&start=$6 [L]
 RewriteRule ^(editlog)/([^/]*)-([^/]*)/?$ index.php?action=editlog&jid=$2&password=$3 [L]
+</IfModule>
 
+<IfModule mod_expires.c>
 ExpiresActive On
 ExpiresByType text/html "access plus 1 day"
 ExpiresByType text/css "access plus 1 week"
@@ -22,11 +25,9 @@ ExpiresByType image/png "access plus 1 month"
 ExpiresByType image/vnd.microsoft.icon "access plus 1 month"
 ExpiresByType image/ico "access plus 1 month"
 ExpiresByType application/x-shockwave-flash "access plus 1 month"
+</IfModule>
 
 <IfModule mod_deflate.c>
-
-
-
 #SetOutputFilter DEFLATE
 
 AddOutputFilterByType DEFLATE text/html text/plain text/xml text/css text/javascript
@@ -34,7 +35,9 @@ AddOutputFilterByType DEFLATE font/truetype
 AddOutputFilterByType DEFLATE application/xml application/xhtml+xml appalication/rss+xml
 AddOutputFilterByType DEFLATE application/javascript application/x-javascript application/json
 #AddOutputFilterByType DEFLATE application/x-httpd-php
-
+</IfModule>
+	
+<IfModule mod_setenvif.c>
 SetEnvIfNoCase Request_URI \.(?:gif|jpe?g|png)$ no-gzip dont-vary
 SetEnvIfNoCase Request_URI \.(?:exe|t?gz|zip|bz2|sit|rar)$ no-gzip dont-vary
 SetEnvIfNoCase Request_URI \.(?:avi|mov|mp3|mp4|rm)$ no-gzip dont-vary
@@ -44,7 +47,9 @@ BrowserMatch ^Mozilla/4 gzip-only-text/html
 BrowserMatch ^Mozilla/4\.0[678] no-gzip
 BrowserMatch \bMSIE !no-gzip !gzip-only-text/html
 BrowserMatch \bMSI[E] !no-gzip !gzip-only-text/html
-
 Header append Vary User-Agent env=!dont-vary
+</IfModule>
 
+<IfModule mod_headers.c>
+Header append Vary User-Agent env=!dont-vary
 </IfModule>

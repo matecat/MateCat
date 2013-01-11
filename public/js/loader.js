@@ -8,22 +8,28 @@ Loader = {
 	components: new Array (
 		'cat'
 	),
-	
+
+	forkComponents: new Array (
+		'cat-fork'
+	),
+		
 	libraries: new Array (
 		'jquery',
 		'jquery-ui-1.8.20.custom.min',
 		'jquery.tabify',
 		'jquery.hotkeys',
 //		'jquery.atooltip',
-        'jquery-fieldselection.min'
+        'jquery-fieldselection.min',
+        'diff_match_patch',
+        'waypoints'
 	),
 	
 	include: function(f,p,b) {
-		document.write('<script type="text/javascript" src="/' + b + p + f + '"></script>');
+		document.write('<script type="text/javascript" src="' + b + p + f + '?build=' + config.build_number + '"></script>');
     },
 
 	includeStyle: function(f,p,b) {
-		document.write('<link rel="stylesheet" type="text/css" href="/' + b + p + f + '" media="screen" />');
+		document.write('<link rel="stylesheet" type="text/css" href="' + b + p + f + '?build=' + config.build_number + '" media="screen" />');
     },
 
 	detect: function(a) {
@@ -42,8 +48,8 @@ Loader = {
 
 	start: function() {
 		var l = this.libraries;
-		var c = this.components;
-		this.basePath = 'public/js/';
+		var c = this.detect('fork')? this.forkComponents : this.components;
+		this.basePath = config.basepath+'public/js/';
 		for (var i = 0; i < l.length; i++) this.include(l[i] + '.js', 'lib/', this.basePath);
 		for (var i = 0; i < c.length; i++) this.include(c[i] + '.js', '', this.basePath);
 

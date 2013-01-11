@@ -24,9 +24,9 @@
 <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/themes/base/jquery-ui.css" id="theme"/>
 -->
 
-<link rel="stylesheet" href="/public/css/style.css"/>
-<link rel="stylesheet" href="/public/css/upload.css"/>
-<link rel="stylesheet" href="/public/js/lib/colorbox/colorbox.css"/>
+<link rel="stylesheet" href="${basepath}public/css/style.css"/>
+<link rel="stylesheet" href="${basepath}public/css/upload.css"/>
+<link rel="stylesheet" href="${basepath}public/js/lib/colorbox/colorbox.css"/>
 
 <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
 <!--[if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
@@ -48,7 +48,7 @@
 
         <header>
             <div class="wrapper">   
-                <a href="/" class="logo"></a>
+                <a href="${basepath}" class="logo"></a>
             </div>
         </header>
         <div class="wrapper-upload">
@@ -64,24 +64,53 @@
             <div class="translate-box">
                 <h2>From</h2>
                 <select name="source-lang" id="source-lang">
+                	 <option value="zh-CN">Chinese</option>
+                    <option value="cs-CZ">Czech</option>
+                    <option value="da-DK">Danish</option>
+                    <option value="nl-NL">Dutch</option>
                     <option value="en-GB" selected="selected">English</option>
-                    <option value="en-US">American English</option>
                     <option value="fr-FR">French</option>
+                    <option value="fi-FI">Finnish</option>
                     <option value="de-DE">German</option>
+                    <option value="el-GR">Greek</option>
+                    <option value="he-IL">Hebrew</option>
+                    <option value="ja-JA">Japanese</option>
+                    <option value="ko-KR">Korean</option>
                     <option value="it-IT">Italian</option>
-                    <option value="es-ES">Espanol</option>
-                </select>
+                    <option value="no-NO">Norwegian</option>
+                    <option value="pl-PL" >Polish</option>
+                    <option value="pt-PT" >Portuguese</option>
+                    <option value="ru-RU">Russian</option>
+                    <option value="es-ES">Spanish</option>
+                    <option value="sw-SE">Swedish</option>
+
+		</select>
             </div>
 
             <div class="translate-box" style="margin-left:0;">
                 <h2>To</h2>
                 <select name="target-lang" id="target-lang">
+                	 <option value="zh-CN">Chinese</option>
+                    <option value="cs-CZ">Czech</option>
+                    <option value="da-DK">Danish</option>
+                    <option value="nl-NL">Dutch</option>
                     <option value="en-GB">English</option>
                     <option value="fr-FR" selected="selected">French</option>
+                    <option value="fi-FI">Finnish</option>
                     <option value="de-DE">German</option>
+                    <option value="el-GR">Greek</option>
+                    <option value="he-IL">Hebrew</option>
+                    <option value="ja-JA">Japanese</option>
+                    <option value="ko-KR">Korean</option>
                     <option value="it-IT">Italian</option>
-                    <option value="es-ES">Espanol</option>
-                </select>
+                    <option value="no-NO">Norwegian</option>
+                    <option value="pl-PL" >Polish</option>
+                    <option value="pt-PT" >Portuguese</option>
+                    <option value="ru-RU">Russian</option>
+                    <option value="es-ES">Spanish</option>
+                    <option value="sw-SE">Swedish</option>
+
+		</select>
                 <br />
                 <!--<a href="#" id="multiple-link">Multiple languages?</a>-->
             </div>
@@ -101,7 +130,7 @@
                 </select>
             </div>
             
-            <div class="translate-box">
+           <!--div class="translate-box">
                 <h2>Private TM key</h2> 
 		<input name="private-tm-key" type="text" class="upload-input" id="private-tm-key" />
             </div>
@@ -116,8 +145,8 @@
 					                    <input type="file" name="files[]" multiple="multiple" class="multiple-button" onClick="alert('hhh');$('#private-tm-key').text('frfgadasfgsdrefw4562tasy5')" />
 					                </span>
                     
-            </div>
-            
+            </div-->
+
             
             </div>
 
@@ -127,7 +156,7 @@
             <div class="cl"></div>
             <div class="upload-files drag">
             
-            <form id="fileupload" action="lib/utils/fileupload/" method="POST" enctype="multipart/form-data">
+            <form id="fileupload" action="${basepath}lib/utils/fileupload/" method="POST" enctype="multipart/form-data">
             
             	<div id="overlay"></div>
             	<div id="droptest">
@@ -235,7 +264,7 @@
 <script id="template-upload" type="text/x-tmpl">
 {% for (var i=0, file; file=o.files[i]; i++) { %}
     <tr class="template-upload fade">
-        <td class="preview"> <img src="/public/img/xliff-icon-retina.png" width="30" height="29" /></td>
+        <td class="preview"> <img src="${basepath}public/img/xliff-icon-retina.png" width="30" height="29" /></td>
         <td class="name"><span>{%=file.name%}</span></td>
         <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
         {% if (file.error) { %}
@@ -286,7 +315,7 @@
             <td class="error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span> {%=locale.fileupload.errors[file.error] || file.error%}</td>
         {% } else { %}
             <td class="preview">
-                <img src="/public/img/xliff-icon-retina.png" width="30" height="29" />
+                <img src="${basepath}public/img/xliff-icon-retina.png" width="30" height="29" />
             </td>
             <td class="name">{%=file.name%}</td>
             <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
@@ -307,55 +336,42 @@
 </script>
 
 	
-<script src="/public/js/lib/jquery.js"></script>
-<script src="/public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
+<script src="${basepath}public/js/lib/jquery.js"></script>
+<script src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
 
 <!-- The Templates plugin is included to render the upload/download listings -->
-<script src="/public/js/lib/fileupload/tmpl.min.js"></script>
+<script src="${basepath}public/js/lib/fileupload/tmpl.min.js"></script>
 
 <!-- The Load Image plugin is included for the preview images and image resizing functionality -->
-<script src="/public/js/lib/fileupload/load-image.min.js"></script>
+<script src="${basepath}public/js/lib/fileupload/load-image.min.js"></script>
 
 <!-- The Canvas to Blob plugin is included for image resizing functionality -->
-<script src="/public/js/lib/fileupload/canvas-to-blob.min.js"></script>
+<script src="${basepath}public/js/lib/fileupload/canvas-to-blob.min.js"></script>
 
 <!-- jQuery Image Gallery -->
-<script src="/public/js/lib/fileupload/jquery.image-gallery.min.js"></script>
+<script src="${basepath}public/js/lib/fileupload/jquery.image-gallery.min.js"></script>
 
 <!-- The Iframe Transport is required for browsers without support for XHR file uploads -->
-<script src="/public/js/lib/fileupload/jquery.iframe-transport.js"></script>
+<script src="${basepath}public/js/lib/fileupload/jquery.iframe-transport.js"></script>
 <!-- The basic File Upload plugin -->
-<script src="/public/js/lib/fileupload/jquery.fileupload.js"></script>
+<script src="${basepath}public/js/lib/fileupload/jquery.fileupload.js"></script>
 <!-- The File Upload file processing plugin -->
-<script src="/public/js/lib/fileupload/jquery.fileupload-fp.js"></script>
+<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-fp.js"></script>
 <!-- The File Upload user interface plugin -->
-<script src="/public/js/lib/fileupload/jquery.fileupload-ui.js"></script>
+<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-ui.js"></script>
 <!-- The File Upload jQuery UI plugin -->
-<script src="/public/js/lib/fileupload/jquery.fileupload-jui.js"></script>
+<script src="${basepath}public/js/lib/fileupload/jquery.fileupload-jui.js"></script>
 <!-- The localization script -->
-<script src="/public/js/lib/fileupload/locale.js"></script>
+<script src="${basepath}public/js/lib/fileupload/locale.js"></script>
 <!-- The main application script -->
-<script src="/public/js/lib/fileupload/main.js"></script>
+<script src="${basepath}public/js/lib/fileupload/main.js"></script>
 <!-- The XDomainRequest Transport is included for cross-domain file deletion for IE8+ -->
 <!--[if gte IE 8]><script src="js/cors/jquery.xdr-transport.js"></script><![endif]-->
 
-<script src="/public/js/lib/jquery.cookie.js"></script>
-<script src="/public/js/lib/jquery.colorbox-min.js"></script>
-<script src="/public/js/new-project.js"></script>
- <script>
-	$(document).ready(function(){
-		$(".more").click(function(e){
-	    	e.preventDefault();
-  			$(".advanced-box").toggle('fast');
-			$(".more").addClass('minus');
-		});
-		
-	$(".minus").click(function(e){
-			$(".more").removeClass('minus');
-		});
-		
-	});
-	</script>
+<script src="${basepath}public/js/lib/jquery.cookie.js"></script>
+<script src="${basepath}public/js/lib/jquery.colorbox-min.js"></script>
+<script src="${basepath}public/js/new-project.js"></script>
+
 		<div style='display:none'>
 
 			<div id='inline_content' style='padding:10px; background:#fff;'>

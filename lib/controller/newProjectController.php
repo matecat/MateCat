@@ -7,7 +7,12 @@ class newProjectController extends viewcontroller {
     private $tms_engines;
     public function __construct() {
         parent::__construct();
-        parent::makeTemplate("upload.html");
+	if (!isset($_REQUEST['fork'])){
+       	 parent::makeTemplate("upload.html");
+	}else{
+		parent::makeTemplate("upload_cloud.html");
+
+	}
 		$this->guid = $this->create_guid();
     }
     

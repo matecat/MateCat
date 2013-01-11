@@ -31,8 +31,10 @@
 //  }
 //}
 
-
+//include_once INIT::$UTILS_ROOT . "/cat.class.php";
 include_once "engine.class.php";
+include_once ("utils/cat.class.php");
+
 
 class MT_ERROR {
 
@@ -61,21 +63,16 @@ class MT_RESULT {
     public $error = "";
 
     public function __construct($result) {
-
-	log::doLog ("fsdfsdfsdfsdfsdfsdfsdfsdf");
-	log::doLog ($result);
         //  print_r($result);
 	$this->error = new MT_ERROR();
         if (is_array($result) and array_key_exists("data", $result)) {
             $this->translatedText = $result['data']['translations'][0]['translatedText'];
-            
+	    $this->translatedText =CatUtils::rawxliff2view($this->translatedText);
         }
 
         if (is_array($result) and array_key_exists("error", $result)) {
             $this->error = new MT_ERROR($result['error']);
         }
-
-log::doLog($this->get_as_array());
     }
 
     public function get_as_array() {
@@ -123,7 +120,6 @@ class MT extends engine {
     }
 
     public function get($segment, $source_lang, $target_lang, $key = "") {
-log::doLog ("gggggg");
         $source_lang = $this->fix_language($source_lang);
         $target_lang = $this->fix_language($target_lang);
 
@@ -138,7 +134,7 @@ log::doLog ("gggggg");
         $this->doQuery("get", $parameters);
         // echo "--- $this->raw_result --";
 
-	log::doLog ("sosssssss");
+	
         $this->result = new MT_RESULT($this->raw_result);
 	log::doLog("--------------------------------------------------------------------------------------");
 	//log::doLog($this->result->error);

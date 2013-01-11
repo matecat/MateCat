@@ -17,10 +17,12 @@ class filetype {
                 $this->type = 'MSWORD_DOCX';
                 break;
             case 'txt':
+            	$this->type = 'PLAINTEXT';
+		break;
             case 'xlf':   // Just until we support tag management
             case 'xliff': // Just until we support tag management
             case 'sdlxliff': // Just until we support tag management
-                $this->type = 'PLAINTEXT';
+                $this->type = 'SDLXLIFF';
                 break;  
             case 'html':
             case 'htm':

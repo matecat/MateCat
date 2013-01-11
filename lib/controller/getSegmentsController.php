@@ -84,16 +84,15 @@ class getSegmentsController extends ajaxcontroller {
 	        }
 
 
-        $data = getMoreSegments1($this->jid, $this->password, $this->step, $this->ref_segment, $this->where);
+        $data = getMoreSegments($this->jid, $this->password, $this->step, $this->ref_segment, $this->where);
 
         $first_not_translated_found = false;
+		//log::doLog('REF SEGMENT: '.$this->ref_segment);    	
 //		print_r($data); exit;
         foreach ($data as $i => $seg) {
 
-			log::doLog('REF SEGMENT: '.$this->ref_segment);    	
-
 	  		if($this->where == 'before') {
-	  			if(((float) $seg['sid']) >= ((float) $this->ref_segment)) return;
+	  			if(((float) $seg['sid']) >= ((float) $this->ref_segment)) {break;}
 			}
 
 	  		// remove this when tag management enabled
@@ -128,19 +127,19 @@ class getSegmentsController extends ajaxcontroller {
 	            $this->source_code = $seg['source'];
 	        }
 
-	        if (empty($this->target_code)) {
-	            $this->target_code = $seg['target'];
-	        }
+	    if (empty($this->target_code)) {
+	        $this->target_code = $seg['target'];
+	    }
 
-		    if (empty($this->source)) {
-				$s=explode("-", $seg['source']);
-				$source=strtoupper($s[0]);
-	            $this->source = $source;
-	        }
+	    if (empty($this->source)) {
+		$s=explode("-", $seg['source']);
+		$source=strtoupper($s[0]);
+	        $this->source = $source;
+	     }
 
 		    if (empty($this->target)) {
-				$t=explode("-", $seg['target']);
-				$target=strtoupper($t[0]);
+			$t=explode("-", $seg['target']);
+			$target=strtoupper($t[0]);
 	            $this->target = $target;
 	        }
 
@@ -181,17 +180,28 @@ class getSegmentsController extends ajaxcontroller {
             unset($seg['create_date']);
             unset($seg['id_segment_end']);
             unset($seg['id_segment_start']);
+//		log::doLog('A');
 
             $seg['segment'] = $this->filetype_handler->parse($seg['segment']);
-	$seg['segment']=addslashes(	$seg['segment']);
-            $seg['parsed_time_to_edit']=  $this->parse_time_to_edit($seg['time_to_edit']); 
 
+           // ASKED. MARCO CONFIRMED: in the web interface do not show xliff_ext_prec_tags and xliff_ext_succ_tags
+	   // $seg['segment'] = $seg['xliff_ext_prec_tags'] . $seg['segment'].$seg['xliff_ext_succ_tags'] ;
+	$seg['segment']=CatUtils::rawxliff2view($seg['segment']);
+	$seg['translation']=CatUtils::rawxliff2view($seg['translation']);
+		
+            $seg['parsed_time_to_edit']=  $this->parse_time_to_edit($seg['time_to_edit']); 
+		
             $this->data["$id_file"]['segments'][] = $seg;
+	
         }
+
+//log::doLog ($this->data);
+		
 		
         $this->result['data']['files'] = $this->data;
+		
         $this->result['data']['where']=$this->where;
-		//print_r($this->results);exit;
+		
     }
 
 

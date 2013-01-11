@@ -29,14 +29,14 @@ class setCurrentSegmentController extends ajaxcontroller {
         }
         
         $insertRes = setCurrentSegmentInsert($this->id_segment, $this->id_job);
-//		log::doLog('ID_SEGMENT: '.$this->id_segment);
 		
-		$nextSegmentId = getNextUntranslatedSegment($this->id_segment, $this->id_job);
-
-            
+//		$nextSegmentId = getNextUntranslatedSegment($this->id_segment, $this->id_job);
+		            
         $this->result['code'] = 1;
         $this->result['data'] = "OK";
-        $this->result['nextSegmentId'] = $nextSegmentId[0]['id_segment'];
+        
+//        $this->result['nextSegmentId'] = isset($nextSegmentId[0]['id'])?$nextSegmentId[0]['id']:'';
+//		log::doLog('NEXTSEGMENTID: '.$nextSegmentId);
         
     }
 

@@ -2,6 +2,11 @@
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
 
+define ("LTPLACEHOLDER", "##LESSTHAN##");
+define ("GTPLACEHOLDER", "##GREATERTHAN##");
+
+
+
 class CatUtils {
 
     private function parse_time_to_edit($ms) {
@@ -35,8 +40,80 @@ class CatUtils {
         $text = preg_replace($pattern_g_c, "", $text);
         return $text;
     }
-    
-    
+
+    	private function placehold_xliff_tags ($segment){
+		$segment=preg_replace('|<(g\s*.*?)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment); 
+		$segment=preg_replace('|<(/g)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);     
+		$segment=preg_replace('|<(x.*?/?)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment); 
+		$segment=preg_replace('|<(bx.*?/?])>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
+		$segment=preg_replace('|<(ex.*?/?)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
+		$segment=preg_replace('|<(bpt\s*.*?)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
+		$segment=preg_replace('|<(/bpt)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
+		$segment=preg_replace('|<(ept\s*.*?)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
+		$segment=preg_replace('|<(/ept)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
+		$segment=preg_replace('|<(ph\s*.*?)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
+		$segment=preg_replace('|<(/ph)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
+		$segment=preg_replace('|<(it\s*.*?)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
+		$segment=preg_replace('|<(/ph)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
+		$segment=preg_replace('|<(it\s*.*?)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
+		$segment=preg_replace('|<(/it)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
+		$segment=preg_replace('|<(mrk\s*.*?)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
+		$segment=preg_replace('|<(/mrk)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
+	return $segment;
+	}
+
+	private function restore_xliff_tags($segment){
+		$segment=str_replace(LTPLACEHOLDER,"<",$segment);
+		$segment=str_replace(GTPLACEHOLDER,">",$segment);
+		return $segment;
+	}
+
+	private function restore_xliff_tags_for_wiew($segment){
+		$segment=str_replace(LTPLACEHOLDER,"&lt;",$segment);
+		$segment=str_replace(GTPLACEHOLDER,"&gt;",$segment);
+		return $segment;
+	}
+
+	public static function view2rawxliff($segment){
+		// input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
+		// output : <g> bang &amp; olufsen are > 555 </g> <x/>
+		// caso controverso <g id="4" x="&lt; dfsd &gt;"> 
+		$segment=self::placehold_xliff_tags ($segment);
+		$segment = htmlspecialchars($segment,ENT_NOQUOTES,'UTF-8',false);
+		$segment=self::restore_xliff_tags($segment);	
+		log::doLog(__FUNCTION__ . " $segment");
+		return $segment;
+	}
+
+
+	public static function rawxliff2view($segment){
+		// input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
+		$segment=self::placehold_xliff_tags ($segment);
+		$segment = html_entity_decode($segment, ENT_NOQUOTES,'UTF-8');
+		// restore < e >
+		$segment=str_replace ("<","&lt",$segment);
+		$segment=str_replace (">","&gt",$segment);
+
+
+		$segment= preg_replace('|<(.*?)>|si', "&lt;$1&gt;",$segment);
+		$segment=self::restore_xliff_tags_for_wiew($segment);		
+		return $segment;
+	}
+
+	public static function rawxliff2rawview($segment){
+		// input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
+		$segment=self::placehold_xliff_tags ($segment);
+		$segment = html_entity_decode($segment, ENT_NOQUOTES,'UTF-8');		
+		$segment=self::restore_xliff_tags_for_wiew($segment);		
+		return $segment;
+	}
+
+
+	// transform any segment format in raw xliff format: raw xliff will be used as starting format for any manipulation
+	public static function toRawXliffNormalizer($segment){
+	;
+	}
+
 
     public static function getEditingLogData($jid,$password) {
         
@@ -58,7 +135,7 @@ class CatUtils {
         
         
         foreach ($data as &$seg) {
-            $seg['source'] = self::stripTagesFromSource($seg['source']);
+            //$seg['source'] = self::stripTagesFromSource($seg['source']);
             $seg['source'] = trim($seg['source']);
             $seg['sm'].="%";
             $seg['jid'] = $jid;
@@ -114,7 +191,7 @@ class CatUtils {
             $stat_pee[] = $seg['pe_effort_perc']*$seg['rwc'];
             
             $seg['pe_effort_perc'] .= "%";
-            
+            $seg['sug_view']=html_entity_decode($seg['sug']);
             if ($seg['sug']<>$seg['translation']) { 
               $seg['diff'] = MyMemory::diff_html($seg['sug'], $seg['translation']);
             } else { $seg['diff']=''; }
@@ -352,3 +429,4 @@ class CatUtils {
 }
 
 ?>
+

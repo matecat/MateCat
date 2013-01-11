@@ -26,8 +26,11 @@ class catController extends viewcontroller {
     private $start_from = 0;
     private $page = 0;
 	private $start_time=0.00;
+    private $downloadFileName;
     private $job_stats=array();
 //    private $seg = '';
+
+	private $job_not_found=false;
 
     public function __construct() {
 		$this->start_time=microtime(1)*1000;    	
@@ -39,13 +42,6 @@ class catController extends viewcontroller {
 		$this->password=$this->get_from_get_post("password");
         $this->start_from = $this->get_from_get_post("start");
         $this->page = $this->get_from_get_post("page");
-
-/*
-		if (isset($_COOKIE['segment'])) {
-			$this->open_segment = $_COOKIE['segment'];
-			setcookie("segment", "", time()-3600);
-		}
-*/
 
 		if (isset($_GET['step'])) { 
         	$this->step = $_GET['step'];
@@ -60,8 +56,10 @@ class catController extends viewcontroller {
             $this->start_from = ($this->page-1)*$this->step;
         }
 
+	$this->downloadFileName="";
+
 	if (is_null($this->jid) and is_null($this->password)) {
-            header("Location: /translatenew/esempio.xliff/en-fr/849-mcfmtvg8");
+            header("Location: /translate/esempio.xliff/en-fr/849-mcfmtvg8");
 	    exit(0);
         }
     }
@@ -106,32 +104,25 @@ class catController extends viewcontroller {
 	}
 
     public function doAction() {
+    	$files_found=array();
         $lang_handler=languages::getInstance("en");       
-//	    $start = ($page-1)*$step;
-        //$data = getSegments($this->jid, $this->password, $this->start_from, $this->step);
-		$data = getSegmentsInfo($this->jid, $this->password);
+
+	$data = getSegmentsInfo($this->jid, $this->password);
+	if (empty($data) or $data<0){
+		$this->job_not_found=true;
+	}
 		
-//        echo "<pre>";
-//        print_r ($data);
-//        exit;
-//        
+      //  echo "<pre>";
+      //  print_r ($data);
+      //  exit;
+        
         $first_not_translated_found = false;
-//		log::doLog('DATA 0: '.$data[0]['last_opened_segment']);
 
         foreach ($data as $i => $seg) {
-	  		// remove this when tag management enabled
-        //	$seg['segment'] = $this->stripTagsFromSource($seg['segment']);
-			
-/*        	
-//            $seg['segment'] = $this->stripTagsFromSource($seg['segment']);
-//            $seg['segment'] = trim($seg['segment']);
 
-            if (empty($seg['segment'])) {
-                continue;
-            }
-*/
             if (empty($this->pname)) {
                 $this->pname = $seg['pname'];
+		$this->downloadFileName= $seg['pname'].".zip";// will be overwritten below in case of one file job
             }
 
             if (empty($this->last_opened_segment)) {
@@ -175,9 +166,11 @@ class catController extends viewcontroller {
 	        }
 
             $id_file = $seg['id_file'];
-			$file_stats =CatUtils::getStatsForFile($id_file);
+	    
 			
-            if (!isset($this->data["$id_file"])) {                
+            if (!isset($this->data["$id_file"])) {
+            	$files_found[]=$seg['filename'];
+            	$file_stats =CatUtils::getStatsForFile($id_file);      
                 $this->data["$id_file"]['jid'] = $seg['jid'];		
                 $this->data["$id_file"]["filename"] = $seg['filename'];
                 $this->data["$id_file"]["mime_type"] = $seg['mime_type'];
@@ -187,7 +180,7 @@ class catController extends viewcontroller {
                 $this->data["$id_file"]['target']=$lang_handler->iso2Language($seg['target']);
                 $this->data["$id_file"]['source_code']=$seg['source'];
                 $this->data["$id_file"]['target_code']=$seg['target'];
-				$this->data["$id_file"]['last_opened_segment'] = $seg['last_opened_segment'];
+		$this->data["$id_file"]['last_opened_segment'] = $seg['last_opened_segment'];
                 $this->data["$id_file"]['file_stats'] = $file_stats;		
 		//$this->data["$id_file"]['segments'] = array();
             }
@@ -212,44 +205,6 @@ class catController extends viewcontroller {
             unset($seg['id_segment_end']);
             unset($seg['id_segment_start']);
 	    	unset($seg['last_opened_segment']);
-
-           // $seg['segment'] = $this->filetype_handler->parse($seg['segment']);
-        //    $seg['parsed_time_to_edit']=  $this->parse_time_to_edit($seg['time_to_edit']); 
-	    //$seg['time_to_edit']=explode(":", $seg['time_to_edit']); // from DB(time_to_sec function used) HH:MM:SS
-
-         /*   if (!$first_not_translated_found and empty($seg['translation'])) { //get matches only for the first segment                
-                $first_not_translated_found = true;
-                $matches = array();
-                $matches = getFromMM($seg['segment']);
-
-                $matches = array_slice($matches, 0, INIT::$DEFAULT_NUM_RESULTS_FROM_TM);
-
-                $seg['matches'] = $matches;
-
-                //$seg['matches_no_mt']=0;
-                //foreach ($matches as $m){
-                //    if ($m['created-by']!='MT'){
-                //        $seg['matches_no_mt']+=1;
-                //    }
-                //}
-                $seg['css_loaded'] = "loaded";
-            }
-          * 
-          * 
-          */
-
-            /*if (!empty($seg['translation'])) {
-                $seg['css_loaded'] = "loaded";
-            }*/
-
-          //  $this->data["$id_file"]['segments'][] = $seg;
-	  
-						//print_r ($this->data); exit;
-
-			//log::doLog('NUM SEGMENTS 2: '.count($this->data["$id_file"]['segments']));
-
-
-
         }
 
         if (empty($this->last_opened_segment)) {
@@ -258,6 +213,9 @@ class catController extends viewcontroller {
         }
 	        
         $this->job_stats = CatUtils::getStatsForJob($this->jid);
+	if (count($files_found)==1){
+		$this->downloadFileName=$files_found[0];
+	}
 
     //   echo "<pre>";
     //   print_r($this->data);
@@ -274,7 +232,7 @@ class catController extends viewcontroller {
         $this->template->tid=$this->tid;
 		$this->template->source=$this->source;
 		$this->template->target=$this->target;
-		$this->template->cucu=$this->open_segment;
+		//$this->template->cucu=$this->open_segment;
 	
 	
 //		$this->template->stats=$stats[0]['TOTAL'];
@@ -290,13 +248,15 @@ class catController extends viewcontroller {
 		$end_time=microtime(true)*1000;
 		$load_time=$end_time-$this->start_time;
 		$this->template->load_time=$load_time;
-		$this->template->time_to_edit_enabled = $TIME_TO_EDIT_ENABLED;
+		$this->template->time_to_edit_enabled = INIT::$TIME_TO_EDIT_ENABLED;
+		$this->template->build_number = INIT::$BUILD_NUMBER;
+		$this->template->downloadFileName=$this->downloadFileName;
+		$this->template->job_not_found=$this->job_not_found;
 
-				log::doLog("TIME_TO_EDIT_ENABLED : $TIME_TO_EDIT_ENABLED"); 
 
        // echo "<pre>";
-        //print_r ($this->template);
-        //exit;
+       // print_r ($this->template);
+       // exit;
 
     }
 

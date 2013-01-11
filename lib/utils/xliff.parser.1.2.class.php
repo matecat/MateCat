@@ -52,7 +52,7 @@ public static function Xliff2Array($file_content) {
 $enc = mb_detect_encoding($file_content);
 if ($enc<>'UTF-8') {
 	$file_content = iconv($enc,'UTF-8',$file_content); 	
-	$xliff['parser-warnings'][] = "Input identified as $enc ans converted UTF-8. May not be a problem is the content is English only";
+	$xliff['parser-warnings'][] = "Input identified as $enc ans converted UTF-8. May not be a problem if the content is English only";
 }
 
 // Checking Requirements (By specs, I know that xliff version is in the first 1KB)
@@ -121,9 +121,15 @@ foreach ($files as $file) {
 			
 			// Getting Source and Target raw content
 			unset($temp);
+			
 			preg_match('|<source.*?>(.*?)</source>|si',$trans_unit,$temp);
-			$temp[1] = self::fix_non_well_formed_xml($temp[1]);
-			$xliff['files'][$i]['trans-units'][$j]['source']['raw-content'] = $temp[1];
+			// just in case of a <source /> 
+			if (!isset($temp[1])) {  
+				$temp[1] = '';
+			}
+				$temp[1] = self::fix_non_well_formed_xml($temp[1]);
+				$xliff['files'][$i]['trans-units'][$j]['source']['raw-content'] = $temp[1];
+			
 			
 			unset($temp);
 			preg_match('|<target.*?>(.*?)</target>|si',$trans_unit,$temp);
@@ -131,6 +137,7 @@ foreach ($files as $file) {
 				$temp[1] = self::fix_non_well_formed_xml($temp[1]);
 				$xliff['files'][$i]['trans-units'][$j]['target']['raw-content'] = $temp[1];
 			}
+			
 			// Add here other trans-unit sub-elements you need, copying and pasting the 3 lines below
 			
 			unset($temp);
@@ -140,23 +147,35 @@ foreach ($files as $file) {
 			if (isset($temp[1])) {
 			$markers = $temp[1];
 			unset($temp);
+			log::doLog("BEFORE");
+			log::doLog($markers);
 			$markers = preg_split('#(<mrk\s.*?type="seg".*?>(.*?)</mrk>)#si',$markers,-1, PREG_SPLIT_DELIM_CAPTURE);
+			log::doLog("AFTER");
+			log::doLog($markers);
+			
 			$mi = 0;
 			$k  = 0;
 			while (isset($markers[$mi+1])) {
+				log::doLog ("mi is $mi - exits \$marckers[\$mi +1]");
 				unset($mid);
 				preg_match('|mid\s?=\s?["\'](.*?)["\']|si', $markers[$mi+1],$mid);
 				
 				// For not loosing info I attach the last external tag to the last seg marker. 
-				if (!isset($markers[$mi+5])) { $last_ext_tags = $markers[$mi+3]; } else { $last_ext_tags = ''; }
+				if (!isset($markers[$mi+5])) { 
+					$last_ext_tags = $markers[$mi+3]; 
+				} else { 
+					$last_ext_tags = ''; 
+				}
 				
 				$xliff['files'][$i]['trans-units'][$j]['seg-source'][$k]['mid'] = $mid[1];
 				$xliff['files'][$i]['trans-units'][$j]['seg-source'][$k]['ext-prec-tags'] = $markers[$mi];
-				$xliff['files'][$i]['trans-units'][$j]['seg-source'][$k]['raw-content'] = $markers[$mi+2] . $last_ext_tags;
+				$xliff['files'][$i]['trans-units'][$j]['seg-source'][$k]['raw-content'] = $markers[$mi+2] ;
+				$xliff['files'][$i]['trans-units'][$j]['seg-source'][$k]['ext-succ-tags'] = $last_ext_tags;
 				// Different from source and target content, I expect that if you used seg-source it is a a well done tool so I don't try to fix.
 				$mi = $mi + 3;		
 				$k++;
 			}
+log::doLog("mi exit $mi \n\n");
 			}
 
 		}
@@ -169,6 +188,8 @@ foreach ($files as $file) {
 	$i++;
 }
 
+//log::doLog ($xliff);
+//echo "<pre>"; print_r ($xliff); exit;
 return $xliff;
 }
 
@@ -205,6 +226,7 @@ public static function fix_non_well_formed_xml($content) {
 	// Performance: I do a quick check before doing many preg	
 	if (preg_match('|<.*?>|si', $content,$tmp)) {
 		$tags = array(); $tmp = array();
+		
 		preg_match_all('|<g\s.*?>|si', $content,$tmp);    $tags = array_merge($tags,(array)$tmp[0]);
 		preg_match_all('|</g>|si', $content,$tmp);        $tags = array_merge($tags,(array)$tmp[0]);
 		preg_match_all('|<x.*?/?>|si', $content,$tmp);    $tags = array_merge($tags,(array)$tmp[0]);
@@ -239,8 +261,9 @@ public static function fix_non_well_formed_xml($content) {
 	
 	// In PHP 5.2.3 this became magically a single line of code with 'double encode'=false! 
 	// Waiting php 5.4 for ENT_SUBSTITUTE, ENT_XML1 or ENT_DISALLOWED
-	$content = htmlentities($content,ENT_QUOTES,'UTF-8',false);
-	
+	// This means that £ will be converted wrongly in &pound;
+	// $content = htmlentities($content,ENT_QUOTES,'UTF-8',false);
+	$content = htmlspecialchars($content,ENT_QUOTES,'UTF-8',false);
 	
 	if (isset($tags[0])) {
 	foreach ($tag_map as $key=>$tag) {

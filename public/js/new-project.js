@@ -1,10 +1,11 @@
-/* 
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-      
+ 
         $(document).ready(function() {
+
+$(".more").click(function(e){
+	    	e.preventDefault();
+  			$(".advanced-box").toggle('fast');
+			$(".more").toggleClass('minus');
+		});
          
 			$("input.uploadbtn").click(function(e) {
 				$('body').addClass('creating');
@@ -62,7 +63,15 @@
 				$("div.popup-languages").hide();
 				$("div.grayed").hide();
     		});
-    		
+
+			$("input, select").change(function(e) {          
+				$('.error-message').hide();
+		        if($('.upload-table tr').length) $('.uploadbtn').removeAttr('disabled').removeClass('disabled');
+    		});
+			$("input").keyup(function(e) {          
+				$('.error-message').hide();
+		        if($('.upload-table tr').length) $('.uploadbtn').removeAttr('disabled').removeClass('disabled');
+    		});
 //    		uploadSessionId = $.cookie("upload_session");
 
 
