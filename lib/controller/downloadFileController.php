@@ -51,12 +51,12 @@ class downloadFileController extends downloadController {
         	$data = getSegmentsDownload($this->id_job, $this->password, $id_file);	
         	//print_r ($data); exit;
         	$transunit_translation = "";
-			echo "<pre>";
+			//echo "<pre>";
 			foreach ($data as $i => $seg) {
-				echo $seg['internal_id']."\n";
+			//	echo $seg['internal_id']."\n";
 				$end_tags = "";
 				$translation = empty($seg['translation']) ? $seg['segment'] : $seg['translation'];
-				echo "t1 : $translation\n";
+			//	echo "t1 : $translation\n";
 	
 				@$xml_valid = simplexml_load_string("<placeholder>$translation</placeholder>");
 				if (!$xml_valid) {
@@ -66,21 +66,21 @@ class downloadFileController extends downloadController {
 						$end_tags.="<$item";
 					}
 					while ($item = prev($temp)) {
-						if (preg_match('|/.*?>\W*$|si', $item)) {
+			if (preg_match('|/.*?>\W*$|si', $item)) {
 							$end_tags = "<$item$end_tags"; //insert at the top of the string
 						}
 					}
 					$translation = str_replace($end_tags, "", $translation);
-					echo "t2 : $translation\n";
+					//echo "t2 : $translation\n";
 				}
 				
 				if (!empty($seg['mrk_id'])) {
 					$translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">$translation</mrk>";
 				}
-	echo "t3 : $translation\n";
-echo "\n\n";
+	//echo "t3 : $translation\n";
+//echo "\n\n";
 				$transunit_translation.=$seg['prev_tags'] . $translation . $end_tags.$seg['succ_tags'];
-	echo "t4 :" .$seg['prev_tags'] . $translation . $end_tags.$seg['succ_tags']."\n";
+	//echo "t4 :" .$seg['prev_tags'] . $translation . $end_tags.$seg['succ_tags']."\n";
 				if (isset($data[$i + 1]) and $seg['internal_id'] == $data[$i + 1]['internal_id']) {
 					// current segment and subsequent has the same internal id --> 
 					// they are two mrk of the same source segment  -->
