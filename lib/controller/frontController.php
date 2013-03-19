@@ -300,7 +300,7 @@ abstract class viewcontroller extends controller {
         $this->setTemplateVars();
         try {
             $buffer = ob_get_contents();
-            ob_clean();
+            ob_get_clean();
             ob_start("ob_gzhandler");  // compress page before sending
             $this->nocache();
             header('Content-Type: text/html; charset=utf-8');
@@ -326,7 +326,7 @@ abstract class ajaxcontroller extends controller {
     protected function __construct() {
         parent::__construct();
         $buffer = ob_get_contents();
-        ob_clean();
+        ob_get_clean();
         // ob_start("ob_gzhandler");		// compress page before sending
         header('Content-Type: application/json; charset=utf-8');
         $this->result = array("errors" => array(), "data" => array());
