@@ -24,13 +24,18 @@
                 source_lang: '${source}',
                 target_lang: '${target}',
                 time_to_edit_enabled: ${time_to_edit_enabled} ,
-                build_number: '${build_number}'
+                build_number: '${build_number}',
+                test: 'test'
 
             }
             //			console.log('Server time: ' + Math.round(config.server_load_time)); 
             var renderStart = new Date();
         </script>
         <script src="${basepath}public/js/loader.js?build=${build_number}"></script>
+
+
+
+
 
 
     </head>
@@ -43,11 +48,13 @@
 
 
 
-    <body tal:condition="supportedBrowser">
+    <body class="cattool" tal:condition="supportedBrowser" define="catpage string:true">
 
-        <header>
+        <header metal:use-macro="header.html/main_header">
             <div class="wrapper">   
-
+                
+              
+                
                 <form id="fileDownload" action="${basepath}" method="post">
                     <input type="hidden" name="action" value="downloadFile" />
                     <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
@@ -55,7 +62,7 @@
                     <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
                     <input type="hidden" name="password" tal:attributes="value password" />
                     <input type="hidden" name="download_type" value="all" />
-                    <input id="downloadProject" name="submit" type="submit" value="DOWNLOAD PROJECT" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
+                    <input id="downloadProject" name="submit" type="submit" value="PREVIEW" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
                 </form>
                 <a href="#" class="filter"> <span class="arrow-top "></span></a>
 
@@ -145,8 +152,7 @@
                             </li>
                         </ul>
                     </div>  
-                    <!-- <a href="#" class="joblink">Jobs List</a> &gt; -->
-                    <span style="float: left"><a href="#">Jobs List</a> &gt;</span>
+
                     <div id="pname" tal:content="pname">Project</div><span style="float: left">&nbsp;(<span tal:replace="jid">---</span>) &gt; <b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></span>
                 </div>
 
@@ -289,6 +295,11 @@
 
 
 
+
+
+
+
+
         <footer>
             <div class="wrapper">
 
@@ -302,7 +313,7 @@
                                     <li><a href="#"> > </a></li>
                                 </ul>
                 -->               
-                <a tal:attributes="href string:${basepath}editlog/${jid}-${password}">Editing Log</a>
+                <a tal:attributes="href string:${basepath}editlog/${jid}-${password}" class="editlog">Editing Log</a>
 
                 <p >Progress:</p>
                 <div class="meter">
@@ -320,8 +331,8 @@
                     <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
                     <li id="stat-rejected">Rejected: <strong tal:content="job_stats/REJECTED_FORMATTED|default">- - -</strong></li>
                     -->
-                    <li id="stat-wph" title="Based on last 10 segments performance">Speed: <strong tal:content="job_stats/WORDS_PER_HOUR|default">---</strong> Words/h</li>
-                    <li id="stat-completion">Completed in: <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">---</strong></li>
+                    <li id="stat-wph" title="Based on last 10 segments performance" style="display: none;">Speed: <strong tal:content="job_stats/WORDS_PER_HOUR|default">---</strong> Words/h</li>
+                    <li id="stat-completion" style="display: none;">Completed in: <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">---</strong></li>
 
                 </ul>
 
@@ -374,7 +385,11 @@
 
             </div>
         </footer>
-
+<div class="download-chrome">
+<a href="#" class="close"></a>
+Your downloaded file will appear on the bar below in a few seconds.<br/>
+<img src="${basepath}public/img/arrowdown.png" width="18px" style="margin-top:5px" /> 
+</div>
 
         <div class="grayed" ></div>
         <!--

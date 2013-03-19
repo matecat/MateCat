@@ -14,7 +14,7 @@
 window.locale = {
     "fileupload": {
         "errors": {
-            "maxFileSize": "File is too big",
+            "maxFileSize": "MateCat beta supports up to 30 MB.",
             "minFileSize": "File is too small",
             "acceptFileTypes": "File format not supported",
             "maxNumberOfFiles": "Max number of files exceeded",

@@ -6,22 +6,23 @@
 Loader = {
 	
 	components: new Array (
-		'cat'
+		'cat',
+		'utils'
 	),
 
 	forkComponents: new Array (
-		'cat-fork'
+//		'cat-fork'
 	),
 		
 	libraries: new Array (
 		'jquery',
 		'jquery-ui-1.8.20.custom.min',
-		'jquery.tabify',
 		'jquery.hotkeys',
-//		'jquery.atooltip',
         'jquery-fieldselection.min',
         'diff_match_patch',
-        'waypoints'
+        'waypoints',
+        'rangy-core',
+        'rangy-selectionsaverestore'
 	),
 	
 	include: function(f,p,b) {

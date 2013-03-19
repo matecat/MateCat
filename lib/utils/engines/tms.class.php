@@ -1,7 +1,7 @@
 <?
 error_reporting (E_ALL);
-include_once "engine.class.php";
-include_once ("utils/cat.class.php");
+include_once INIT::$UTILS_ROOT."/engines/engine.class.php";
+include_once INIT::$UTILS_ROOT."/cat.class.php";
 
 class TMS_GET_MATCHES {
 
@@ -98,9 +98,11 @@ class TMS_RESULT {
             $matches = $result['matches'];
             if (is_array($matches) and !empty($matches)) {
                 foreach ($matches as $match) {
+                                $match['raw_segment'] = $match['segment'];
 				$match['segment'] =CatUtils::rawxliff2view($match['segment']);
+                                $match['raw_translation'] = $match['translation'];
 				$match['translation'] =CatUtils::rawxliff2view($match['translation']);
-		    		$match['raw_translation'] = $match['translation'];
+		    		
                     $a = new TMS_GET_MATCHES($match);
                     $this->matches[] = $a;
                 }
@@ -142,7 +144,6 @@ class TMS extends engine {
         $parameters['mt'] = $mt;
         //echo "user = $id_user";
         if (!empty($id_user)) {
-            $parameters['user'] = $id_user;
             $parameters['key'] = $this->calculateMyMemoryKey($id_user);
         }
 

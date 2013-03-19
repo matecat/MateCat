@@ -81,7 +81,7 @@ class CatUtils {
 		$segment=self::placehold_xliff_tags ($segment);
 		$segment = htmlspecialchars($segment,ENT_NOQUOTES,'UTF-8',false);
 		$segment=self::restore_xliff_tags($segment);	
-		log::doLog(__FUNCTION__ . " $segment");
+		//log::doLog(__FUNCTION__ . " $segment");
 		return $segment;
 	}
 
@@ -232,16 +232,16 @@ class CatUtils {
         return array($data,$stats);
     }
 
-    public static function addSegmentTranslation($id_segment, $id_job, $status, $time_to_edit, $translation) {
-        $insertRes = setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $translation);
-	log::doLog("translation is $translation - encoded ". htmlentities($translation));
+    public static function addSegmentTranslation($id_segment, $id_job, $status, $time_to_edit, $translation, $errors,$chosen_suggestion_index) {
+        $insertRes = setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index);
+	//log::doLog("translation is $translation - encoded ". htmlentities($translation));
         if ($insertRes < 0 and $insertRes != -1062) {
             $result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the translation for the segment $id_segment - $insertRes");
             return $result;
         }
         if ($insertRes == -1062) {
 	
-            $updateRes = setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $translation);
+            $updateRes = setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index);
 	
             if ($updateRes < 0) {
                 $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment $id_segment");
@@ -251,7 +251,9 @@ class CatUtils {
         return 0;
     }
 
-    public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "") {
+    public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "", $match_type="", $eq_words=0, $standard_words=0, $translation="", $tm_status_analysis="UNDONE") {
+        //echo "id_segment, id_job, suggestions_json_array, suggestion , suggestion_match , suggestion_source , match_type, eq_words, translation\n";
+        //print_r (func_get_args());exit;
 	if (!empty($suggestion_source)){
 		if (strpos($suggestion_source,"MT")===false){
 			$suggestion_source='TM';
@@ -260,14 +262,15 @@ class CatUtils {
 		}
 	
 	}
-        $insertRes = setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source);
+        
+        $insertRes = setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type,$eq_words,$standard_words,$translation,$tm_status_analysis);
         if ($insertRes < 0 and $insertRes != -1062) {
             $result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the suggestions for the segment $id_segment - $insertRes");
             return $result;
         }
         if ($insertRes == -1062) {
             // the translaion for this segment still exists : update it
-            $updateRes = setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source);
+            $updateRes = setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source,$match_type,$eq_words,$standard_words,$translation,$tm_status_analysis);
             // log::doLog("updateRes");
             // log::doLog($updateRes);
             if ($updateRes < 0) {

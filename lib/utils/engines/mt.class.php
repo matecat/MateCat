@@ -32,8 +32,8 @@
 //}
 
 //include_once INIT::$UTILS_ROOT . "/cat.class.php";
-include_once "engine.class.php";
-include_once ("utils/cat.class.php");
+include_once INIT::$UTILS_ROOT."/engines/engine.class.php";
+include_once INIT::$UTILS_ROOT."/cat.class.php";
 
 
 class MT_ERROR {
@@ -144,18 +144,24 @@ class MT extends engine {
         return array(0, $this->result->translatedText);
     }
 
-    public function set($segment, $translation, $source_lang, $target_lang, $email = "") {
+    public function set($segment, $translation, $source_lang, $target_lang, $email = '', $extra='') {
+	//if class is uncapable of SET method, exit immediately
+	if(NULL==$this->set_url) return true;
+
         $source_lang = $this->fix_language($source_lang);
         $target_lang = $this->fix_language($target_lang);
 
         $parameters = array();
         $parameters['seg'] = $segment;
         $parameters['tra'] = $translation;
-        $parameters['langpair'] = "$source_lang|$target_lang";
+        //$parameters['langpair'] = "$source_lang|$target_lang";
+	$parameters['source']=$source_lang;
+	$parameters['target']=$target_lang;
         $parameters['de'] = $email;
+	$parameters['extra']=$extra;
 
         $this->doQuery("set", $parameters);
-        $this->result = new TMS_RESULT($this->raw_result);
+        $this->result = new MT_RESULT($this->raw_result);
         if ($this->result->responseStatus != "200") {
             return false;
         }
@@ -173,7 +179,7 @@ class MT extends engine {
         $parameters['de'] = $email;
 
         $this->doQuery("delete", $parameters);
-        $this->result = new TMS_RESULT($this->raw_result);
+        $this->result = new MT_RESULT($this->raw_result);
         if ($this->result->responseStatus != "200") {
             return false;
         }

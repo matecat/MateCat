@@ -1,30 +1,4 @@
-﻿/*!
- * jQuery UI CSS Framework 1.8.20
- *
- * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Theming/API
- */
-
-
-
-
-/*!
- * jQuery UI CSS Framework 1.8.20
- *
- * Copyright 2012, AUTHORS.txt (http://jqueryui.com/about)
- * Dual licensed under the MIT or GPL Version 2 licenses.
- * http://jquery.org/license
- *
- * http://docs.jquery.com/UI/Theming/API
- *
-
-
-/* Component containers
-----------------------------------*/
-
+﻿body {margin:0;padding:0;}
 
 
 
@@ -341,6 +315,15 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
 .ui-progressbar .ui-progressbar-value {margin: -1px; height:100%; }
 
 
+/* files operations */
+
+.operation{color:#666 !important;font-size:12px !important;}
+
+
+.converting .ui-progressbar-value {
+  background: url(../img/progressbar-green.gif) !important;border-right:1px solid #58B551 !important;
+}
+
 
 
 
@@ -421,8 +404,8 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
     width: 50% !Important;
   }
   
-  
-  
+  .cancel-btn{background:#f26522 url(../img/xbtn.gif) 13px 14px no-repeat !Important}
+  .cancel-btn:hover{background:#d1581c url(../img/xbtn.gif) 13px 14px no-repeat !Important}
 /* Fix for IE 6: */
 *html .fileinput-button {
   margin-right: -2px;
@@ -488,10 +471,11 @@ h2.payoff
 .uploadbtn{background: #09beec;width:240px;font-weight:bold;padding:6px 30px 6px 30px;width:auto !Important;min-width:250px; margin:20px 0px 8px 0px;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;font-size:26px !important;cursor:pointer;color:#fff;-moz-box-shadow: 0 1px 2px #ccc;-webkit-box-shadow: 0 1px 2px #ccc;box-shadow: 0 1px 2px #ccc;border:1px solid #666;-moz-border-radius: 2px;border-radius: 2px;}
 .uploadbtn:hover{-moz-box-shadow: 0 1px 2px #666;-webkit-box-shadow: 0 1px 2px #666;box-shadow: 0 1px 2px #666;background:#12b4df}
 .uploadbtn:active{-moz-box-shadow: inset 0 1px 1px #888;-webkit-box-shadow: inset 0 1px 1px #888;}
-.disabled, .disabled:hover, .disabled:active{cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;background:#ccc}
+.disabled, .disabled:hover, .disabled:active{cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;background:#ccc !important}
 .uploadbtn-box{text-align:center;float:right;}
 .uploadbtn-box p{text-align:center;margin:-2px 0 0 5px;font-size:13px;font-weight:normal;color:#999;display:none;text-align:center;}
 .uploadbtn-box:hover p{display:block;}
+
 
 
 /*upload table*/
@@ -596,7 +580,7 @@ a{color:#39699a}
 .upload-analysis td{padding:10px;border-bottom:1px solid #ccc;text-align:left;background:#efefef}
 table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:center;background:#fff;float:left}
 
-
+.supported-files{float:left;font-weight:bold;font-size:14px;color:#666}
 
 /*upload table*/
 
@@ -630,7 +614,7 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 
 .uploaded  .upload-files	{	height:auto !important;}
 
-.drag{text-align:center;padding-bottom:0px}
+.drag{text-align:center;padding-bottom:0px;overflow:hidden;}
 .drag p{ text-align:center;margin:30px 0 10px 0;font-size:36px;line-height:50px;}
 
 #overlay
@@ -696,14 +680,54 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 .dragging .file-drag, .uploaded .file-drop, .uploaded .fileupload-buttonbar{height:0;}
 
 .name{width:230px;}
-.size{width:200px}
+.size {width:200px;}
+.size span{visibility: hidden;}
 
+tr.ready .size span{visibility: visible;}
 
-.advanced-box{display:none;margin:0px 0 10px 0;float:left;}
+.advanced-box{display:none;margin:0px 0 10px 0;float:left;width:900px;}
 .advanced-box h2{margin-top:-20px !important; padding-top:0 !important}
 .more{background: url(../img/+.gif) 0 5px no-repeat;background-size:12px 12px;padding:0 0 10px 18px;float:left}
 .minus{background: url(../img/-.gif) 0 5px no-repeat;background-size:12px 12px;}
-.translate-box .fileinput-button{margin-top:9px;text-align:center;padding:4px 0px}
+.translate-box .fileinput-button{margin-top:8px;text-align:center;padding:4px 0px}
+
+
+@-moz-document url-prefix() {
+	
+	.translate-box .fileinput-button{margin-top:7px;}
+	
+	
+}
+.btn{height:26px;display:block;border:1px solid #848689;text-decoration:none;-moz-border-radius: 2px;border-radius: 2px;}
+
+.tm-button{width: 20px; display:none; float: left; margin-left: -10px; margin-top: 35px;}
+
+.disabled, .disabled:hover, .disabled:active{opacity:0.5 !important;cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;border:1px solid #666}
+header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margin-bottom:20px;height:45px;}
+.wrapper{width:98%;min-width:960px;margin:0px auto 0 auto;padding:5px 0 0 0;width:92%;font-size:14px;position:relative;text-align:left;}
+.logo{float:left;margin-top:5px;border:0;background:url(../img/logo.png) 0px 2px no-repeat;width:145px;height:31px; background-size: 130px 26px;}
+
+/*supported formats*/
+.supported-formats h3{font-size:16px;margin:10px 0 5px 0;color:#333}
+.supported-formats{display:none;height:auto;width:850px;margin:0 auto;position:fixed;padding:0 0 20px 0;top:50%;left:50%;margin:-250px 0 0 -450px;z-index:9999;background:#fff;box-shadow: 0px 0px 25px #000;border-radius:2px;}
 
 
 
+
+
+.supported-formats .header{width:810px; height:20px;float:left;text-align:left;background:#efefef;border-bottom:1px solid #ccc;margin-bottom:5px;-webkit-box-shadow: inset 0 1px 1px 1px #f4f7f9;box-shadow: inset 0 1px 1px 1px #f4f7f9;color:#333; font-size:22px;font-weight:bold;padding:5px 20px 10px 20px;}
+
+.supported-formats ul{margin:0px;padding:0;float:left;width:80px;list-style:none;font-size:14px}
+
+
+.supported-formats ul li{margin:3px 0px 3px 2px;padding:2px 5px;}
+.supported-formats ul li:nth-child(2n+1){background:#efefef}
+
+
+.supported-formats-box{float:left;margin:0 5px;}
+
+.close{background:url(../img/x.png) center 1px no-repeat;width:22px;height:20px;display:block;position:absolute;right:0;top:0;}
+.close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover{background:url(../img/x.png) center -30px no-repeat;}
+.grayed{display:none;background:#000;width:100%;height:100%;position:fixed;top:0;left:0;opacity: 0.2;z-index:9;}
+
+.format-box{float:left;margin:0 10px 0 15px;}

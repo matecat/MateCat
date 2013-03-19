@@ -237,7 +237,7 @@ class Database {
         }
 
         $q = rtrim($q, ', ') . ' WHERE ' . $where . ';';
-        //log::doLog($q);
+        log::doLog($q);
         return $this->query($q);
     }
 

@@ -3,9 +3,10 @@ UI = null;
 UI = {
     render: function(firstLoad) {
         this.isWebkit = $.browser.webkit;
+        this.isChrome = $.browser.webkit && !!window.chrome;
         this.isFirefox = $.browser.mozilla;
+        this.isSafari = $.browser.webkit && !window.chrome;
         this.body = $('body');
-        this.dmp = new diff_match_patch();
         this.firstLoad = firstLoad;
         if(firstLoad) this.startRender = true;
         this.initSegNum = 200;
@@ -17,6 +18,10 @@ UI = {
         this.segmentIdToRestore = false;
         this.blockButtons = false;
         this.blockOpenSegment = false;
+        this.dmp = new diff_match_patch();
+        this.beforeDropEditareaHTML = '';
+        this.droppingInEditarea = false;
+        this.draggingInsideEditarea = false;
 		this.downOpts = {
 			offset: '130%'
 		};
@@ -24,7 +29,9 @@ UI = {
 			offset: '-40%'
 		};
 
-        this.taglockEnabled = (Loader.detect('taglock'))? Loader.detect('taglock') : 0;
+        this.taglockEnabled = true;
+//        this.taglockEnabled = (Loader.detect('taglock'))? Loader.detect('taglock') : 0;
+//        this.tagLock();
         this.debug = Loader.detect('debug');
 	
         UI.detectStartSegment();
@@ -49,6 +56,11 @@ UI = {
 //        this.heavy = ($('section').length > 200)? true : false;
         this.detectFirstLast();
         this.reinitMMShortcuts();
+        rangy.init();
+        this.savedSel = null;
+        this.savedSelActiveElement = null;
+
+        this.markTags();
 	
         // SET EVENTS
         
@@ -97,6 +109,13 @@ UI = {
         }).bind('keydown','Meta+right', function(e){ 
             e.preventDefault();
             UI.copySource();
+        }).bind('keydown','Backspace', function(e){ 
+/*
+            if($('.editor .editarea .locked.selected').length) e.preventDefault();
+//			console.log($('.editor .editarea .locked.selected'));
+            $('.editor .editarea .locked.selected').remove();
+            UI.checkTagMismatch(UI.currentSegment);
+*/
         })
 
         $("header .filter").click(function(e){ 
@@ -109,26 +128,26 @@ UI = {
             UI.body.toggleClass('replace-box');
         }) 
 
-        $('.sbm').tabify();
-        $(".sbm a").click(function() {
-            return false
-        });
         jQuery('.editarea').trigger('update');
 
         $("div.notification-box").mouseup(function() {
             return false;
         });
-
+/*
         $(document).mouseup(function(e) {
             if($(e.target).parent("a.m-notification").length==0) {
                 $(".m-notification").removeClass("menu-open");
                 $("fieldset#signin_menu").hide();
             }
         });	
-  
+*/  
         $(".search-icon, .search-on").click(function(e) {          
             e.preventDefault();
             $("#search").toggle();
+        });
+        $('.download-chrome a.close').bind('click', function (e) {
+            e.preventDefault();
+            $('.download-chrome').removeClass('d-open'); 
         });
         	  
         //overlay
@@ -137,37 +156,6 @@ UI = {
             $(".stats").toggle();
         });
 
-        // for future comments implementation
-        /*
- 		$("article").on('click','div.comments span.corner',function(e) {          
-            e.preventDefault();
-            $(".comment-area").hide();
-            $(".h-notification").show();
-
-            $("article").animate({
-                width: '76%'
-            }).addClass("maincomment");
-			var segment = $(this).parents("section");
-			var commentArea =  $(".comment-area", segment);
-			commentArea.addClass("openarea").show("slide", {
-                direction: "left"
-            }, 400);;
-            $(".text-c").focus();
-            $(".c-close", segment).hide();
-         }).on('click','a.x-com',function(e) {  
-			e.preventDefault();
- 			var segment = $(this).parents("section");
-			var commentArea =  $(".comment-area", segment);
-
-			commentArea.removeClass("openarea").hide("slide", {
-                direction: "left"
-            }, 400);
-            $(".h-notification", segment).show();
-            $("article").removeClass("maincomment").animate({
-                width: '90.5%'
-            }).removeClass("maincomment");
-        })
-*/        
         $("article").on('click','a.number',function(e) {  
             e.preventDefault();
             e.stopPropagation();
@@ -199,8 +187,24 @@ UI = {
             $(".stats").toggle();
         });
 
+        $(".getoriginal").click(function(e) {    
+            e.preventDefault();
+            $('#originalDownload').submit();
+        });
+
         $('html').click(function() {
             $(".menucolor").hide();
+        }).on('click','.alert .close',function(e) {          
+            e.preventDefault();
+            $('.alert').remove();
+        }).on('click','.downloadtr-button',function(e) {          
+            if(UI.isChrome) {
+                $('.download-chrome').addClass('d-open');
+                setTimeout(function(){
+                    $('.download-chrome').removeClass('d-open'); 
+                },7000);
+                
+            }
         });
 
         $("article").on('click','a.percentuage',function(e) {          
@@ -214,9 +218,10 @@ UI = {
                 if(operation == 'moving') {
 					if((UI.lastOperation == 'moving')&&(UI.recentMoving)) {
 						UI.segmentToOpen = segment;
+						console.log('UI.blockOpenSegment: '+UI.blockOpenSegment);
 						UI.blockOpenSegment = true;
 						
-//						console.log('ctrl+down troppo vicini');
+						console.log('ctrl+down troppo vicini');
 //						console.log(UI.segmentToOpen);
 					} else {
 						UI.blockOpenSegment = false;
@@ -232,14 +237,87 @@ UI = {
 					UI.blockOpenSegment = false;
 				}
 				UI.lastOperation = operation;
+
                 UI.openSegment(this);
-//                if(!UI.blockOpenSegment) UI.openSegment(this);
+
                 if(operation != 'moving') UI.scrollSegment($('#segment-'+$(this).data('sid')));
             }
-//            console.log('UI.lastOperation = ' + UI.lastOperation);    
             if(UI.debug) console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea));
+        }).on('keydown','.editor .editarea',function(e) {        
+            if(e.which == 37) {
+//            	console.log('left');
+				var selection = window.getSelection();
+				var range = selection.getRangeAt(0);
+				if(range.startOffset != range.endOffset) {
+					var r = range.startContainer.data;
+					if((r[0] == '<')&&(r[r.length-1] == '>')) {		
+						console.log("spostare il cursore a sinistra della selezione");
+					}
+				};
+            } else if(e.which == 39) {
+				var selection = window.getSelection();
+				var range = selection.getRangeAt(0);
+				if(range.startOffset != range.endOffset) {
+					var r = range.startContainer.data;
+					if((r[0] == '<')&&(r[r.length-1] == '>')) {		
+						console.log("spostare il cursore a destra della selezione");
+					}
+				};
+
+/*
+//            	console.log('right');
+				var selection = window.getSelection();
+				var range = selection.getRangeAt(0);
+				if(range.startOffset != range.endOffset) {
+//					console.log("qualcosa è selezionato nell'editarea");
+					console.log(range);
+					var r = range.startContainer.data;
+					if((r[0] == '<')&&(r[r.length-1] == '>')) {						
+						console.log("c'è un tag selezionato");
+						if(!UI.savedSel) {
+							console.log('niente savedSel');
+							rangy.insertRangeBoundaryMarker(range, false);
+							console.log(UI.editarea.html());
+						}
+					}
+				};
+*/
+            };
+
+        }).on('input','.editarea',function(e) {
+			if(UI.draggingInsideEditarea) {
+				$(UI.tagToDelete).remove();
+				UI.draggingInsideEditarea = false;
+				UI.tagToDelete = null;
+			}
+			if(UI.droppingInEditarea) {
+				UI.cleanDroppedTag();
+			}
+			setTimeout(function(){
+	            UI.lockTags();
+	            UI.checkTagMismatch(UI.currentSegment);
+			},10);
+        }).on('click','.editor .source .locked,.editor .editarea .locked',function(e) {
+			e.preventDefault();
+            selectText(this);
+        }).on('dragstart','.editor .editarea .locked',function(e) {
+			var selection = window.getSelection();
+			var range = selection.getRangeAt(0);
+			if(range.startContainer.data != range.endContainer.data) return false;
+
+        	UI.draggingInsideEditarea = true;
+        	UI.tagToDelete = $(this);
+        }).on('drop','.editor .editarea',function(e) {
+			if (e.stopPropagation) {
+				e.stopPropagation(); // stops the browser from redirecting.
+			}
+			UI.beforeDropEditareaHTML = UI.editarea.html();
+			UI.droppingInEditarea = true;
+        }).on('click','.editor .editarea .locked.selected',function(e) {
+//            $(this).removeClass('selected');
         }).on('click','a.translated',function(e) {
             e.preventDefault();
+            UI.checkHeaviness();
             if(UI.blockButtons) {
                 if(UI.segmentIsLoaded(UI.nextSegmentId) || UI.nextSegmentId=='' ) {
                 } else {
@@ -251,9 +329,13 @@ UI = {
             }
             UI.blockButtons = true;
 
+            UI.unlockTags();
             UI.setStatusButtons(this);
             $(".editarea", UI.nextSegment).click();
             UI.changeStatus(this,'translated',0);
+
+            UI.markTags();
+            UI.lockTags();
             UI.changeStatusStop = new Date();
             UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
             if(UI.segmentIsLoaded(UI.nextSegmentId) || UI.nextSegmentId=='' ) {
@@ -294,83 +376,35 @@ UI = {
             UI.copySource();
         }).on('click','.tagmenu, .warning, .viewer, .notification-box li a',function(e) {          
             return false;
-        }).on('click','.alert .close',function(e) {          
-            e.preventDefault();
-            $('section .alert').remove();
         }).on('paste','.editarea',function(e) {          
+//    		if(UI.taglockEnabled) return false;    	
+
             if(!UI.isWebkit) {
                 $('#temptextarea').remove();
-                //				alert('Paste in this area is temporarily enabled only for Chrome browser');
-                UI.editarea.after('<div class="alert"><a href="#" class="close"></a><strong style="font-size:160%">Sorry!</strong><br /><p>This functionality is not supported on your browser yet.</p></div>');
+                UI.body.append('<div class="alert"><a href="#" class="close"></a><strong style="font-size:160%">Sorry!</strong><br /><p>This functionality is not supported on your browser yet. We are working to enable it on every browser. </p></div>');
                 UI.editarea.after('<textarea style="display: none" id="temptextarea"></textarea>');
                 $('#temptextarea').focus();
                 return false;
             }
+
             $('#placeHolder').remove();
             var node = document.createElement("div");
             node.setAttribute('id','placeHolder');
+            removeSelectedText($(this));
             insertNodeAtCursor(node);
             handlepaste(this, event);
-
-        //			UI.editarea.after('<textarea style="display: none" id="temptextarea"></textarea>');
-			
-
+            UI.lockTags();
+            UI.checkTagMismatch(UI.currentSegment);
 
 
-        /*
-			$('#temptextarea').focus();
-			sanitizePaste = setTimeout(function(){
-				console.log($('#temptextarea').val());
-			},100);
-*/
-        //            e.preventDefault();
-        //            console.log($(this).html());
-        //            console.log($(this).text());
-        //        	UI.currentEditareaContent = $(this).html();
-        //            console.log(UI.currentEditareaContent);
-        //			sanitizePaste = setTimeout(function(){
-
-        //				console.log(UI.currentSegmentId);
-        //				console.log(getCaretCharacterOffsetWithin(document.getElementById("segment-"+UI.currentSegmentId+"-editarea"));
-
-
-        /*
-				var text1 = UI.currentEditareaContent;
-				var text2 = UI.editarea.html();
-				UI.dmp.Diff_Timeout = 1;
-				var ms_start = (new Date()).getTime();
-				var d = UI.dmp.diff_main(text1, text2);
-				var ms_end = (new Date()).getTime();
-				var ds = UI.dmp.diff_prettyHtml(d);
-				console.log('DS: '+ds);
-//				var patt=/\<ins style\=\"background\:\#e6ffe6\;\"\>(.*)\<\/ins\>/;
-				var patt=/<span>(.*)<\/span><ins style\=\"background\:\#e6ffe6\;\">(.*)<\/ins><span>(.*)<\/span>/;
-				var result = patt.exec(ds);
-//				console.log('PRIMA: '+result[1]);
-				console.log('INCOLLATO: '+result[2]);
-//				console.log('DOPO: '+result[3]);
-//				var nuovo = result[1]+htmlEncode(result[2])+result[3];
-				UI.editarea.after('<textarea style="display: none" id="temptextarea"></textarea>');
-				$('#temptextarea').val(result[2]);
-				var nuovo = result[1]+htmlDecode(htmlEncode($('#temptextarea').val()))+result[3];
-
-//				var coso = text2.replace(result[1],'CENSURA');
-				UI.editarea.html(nuovo);
-				$('#temptextarea').remove();
-//document.getElementById('outputdiv').innerHTML = ds + '<BR>Time: ' + (ms_end - ms_start) / 1000 + 's'; 
-*/
-
-
-        //			},100);
-        }).on('keyup paste','.editarea',function(e) {          
-            }).on('click','a.close',function(e) {          
+        }).on('click','a.close',function(e) {          
             e.preventDefault();
             UI.closeSegment(UI.currentSegment,1);
         });
 
         UI.toSegment = true;
         UI.gotoSegment(this.startSegmentId);
-
+        
         $(".end-message-box a.close").on('click',function(e) {          
             e.preventDefault();
             UI.body.removeClass('justdone');
@@ -387,12 +421,27 @@ UI = {
             e.preventDefault();
             $(this).parents('section').find('.close').focus();
         })      
-        //		UI.arrangeFilename(this.currentArticle);
         this.initEnd = new Date();
         this.initTime = this.initEnd - this.initStart;
         if(this.debug) console.log('Init time: ' + this.initTime);
 
     },
+
+	doRequest: function(req) {
+        var setup = {
+                url:      config.basepath + '?action=' + req.data.action + this.appendTime(),
+                data:     req.data,
+                type:     'POST',
+                dataType: 'json'
+        };
+
+        // Callbacks
+        if (typeof req.success === 'function') setup.success = req.success;
+        if (typeof req.complete === 'function') setup.complete = req.complete;
+        if (typeof req.context != 'undefined') setup.context = req.context;
+
+        $.ajax(setup);
+	},
 
     activateSegment: function() {
         this.createFooter(this.currentSegment);
@@ -405,58 +454,29 @@ UI = {
         return '&time='+t.getTime();
     },
 
-    arrangeFilename: function(article,t,tit) {
-    /*
-		var a = article.find(".filename h2");
-		console.log(a);
-		console.log(article.hasClass('loading'));
-		console.log(a.text());
-		console.log(a.height());		
-*/
-    /*
-		console.log(a);
-		console.log(a.text());
-		console.log(a.height());		
-		if(a.height() > 25) {
-			var b = a[0];
-			if(!tit) {b.title = b.innerHTML};
-			var puntini = (tit)? '' : ' ...';
-			a.text(b.innerHTML + puntini);
-			var p = b.innerHTML.split(' ');//alert('ddd');
-			var search = p[p.length-2];
-			var ind = b.innerHTML.lastIndexOf(search);
-			var before = b.innerHTML.substring(0, ind-1);
-			var after = b.innerHTML.substring(ind+search.length);
-			var finished = before + after;
-			a.text(finished);
-			this.riduciTesto(article,1,1);
-		}
-*/
-
-    /*
-		var a = o.find("a");
-		if(a.height() > 25) {
-			var b = a[0];
-			if(!tit) {b.title = b.innerHTML};
-			var puntini = (tit)? '' : ' ...';
-			a.text(b.innerHTML + puntini);
-			var p = b.innerHTML.split(' ');//alert('ddd');
-			var search = p[p.length-2];
-			var ind = b.innerHTML.lastIndexOf(search);
-			var before = b.innerHTML.substring(0, ind-1);
-			var after = b.innerHTML.substring(ind+search.length);
-			var finished = before + after;
-			a.text(finished);
-			this.riduciTesto(o,1,1);
-		}
-*/
+    cacheObjects: function(editarea) {
+        this.editarea = $(editarea);
+        // current and last opened object reference caching
+        this.lastOpenedSegment = this.currentSegment;
+        this.lastOpenedEditarea = $('.editarea',this.currentSegment);
+        this.currentSegmentId = this.lastOpenedSegmentId = this.editarea.data('sid');
+        this.currentSegment = segment = $('#segment-'+this.currentSegmentId);
+        this.currentArticle = segment.parent();
     },
 
     changeStatus: function(ob,status,byStatus) {
         var segment = (byStatus)? $(ob).parents("section") : $('#'+$(ob).data('segmentid'));
+//    	console.log(segment);
         $('.percentuage',segment).removeClass('visible');
         this.setContribution(segment,status,byStatus);
+        this.setContributionMT(segment,status,byStatus);
         this.setTranslation(segment,status);
+    },
+
+    checkHeaviness: function() {
+    	if($('section').length > 500) {
+    		UI.reloadToSegment(UI.nextSegmentId);
+    	}
     },
 
     checkIfFinished: function(closing) {
@@ -473,11 +493,63 @@ UI = {
         }
     },
 
+    checkTagMismatch: function(segment) {
+        var sourceTags = [];
+        $('.source .locked',segment).each(function(){
+        	sourceTags.push($(this).text());
+        })    	
+
+        var targetTags = [];
+        $('.editarea .locked',segment).each(function(){
+        	targetTags.push($(this).text());
+        })
+        
+   
+        if(this.tagCompare(sourceTags,targetTags)) {
+			$(segment).addClass('mismatch');
+        } else {
+			$(segment).removeClass('mismatch');
+        };
+    },
+
     chooseSuggestion: function(w) {
         this.copySuggestionInEditarea(this.currentSegment,$('.editor ul[data-item='+w+'] li.b .translation').text(),$('.editor .editarea'),$('.editor ul[data-item='+w+'] ul.graysmall-details .percent').text());
-        this.editarea.focus().effect("highlight", {}, 1000);		
-		this.placeCaretAtEnd(document.getElementById($(editarea).attr('id')));
+        this.lockTags();
+        this.checkTagMismatch(UI.currentSegment);
+        this.setChosenSuggestion(w);
 
+        this.editarea.focus().effect("highlight", {}, 1000);		
+//		this.placeCaretAtEnd(document.getElementById($(this.editarea).attr('id')));
+
+    },
+
+    cleanDroppedTag: function() {
+		ed = this.editarea;
+		this.droppingInEditarea = false;
+
+        var diff = this.dmp.diff_main(this.beforeDropEditareaHTML, $(ed).html());
+        var draggedText = '';
+        $(diff).each(function(){
+        	if(this[0] == 1) {
+        		draggedText += this[1];
+        		
+        	};
+        })
+		var div = document.createElement("div");
+		div.innerHTML = draggedText;
+        saveSelection();
+        var phcode = $('.rangySelectionBoundary')[0].outerHTML;
+        $('.rangySelectionBoundary').text('[[placeholder]]');
+
+		closeTag = '</' + $(div).text().trim().replace(/\<(.*?)\s.*?\>/gi, "$1") + '>';
+        
+        newTag = $(div).text();
+
+        var newText = this.editarea.text().replace(draggedText,newTag);
+       	this.editarea.text(newText);
+
+        this.editarea.html(this.editarea.html().replace('[[placeholder]]',phcode))
+        restoreSelection();
     },
 
     closeSegment: function(segment,byButton) {
@@ -510,6 +582,9 @@ UI = {
     
         $(".editarea",this.currentSegment).text(source_val).keyup().focus();
         $(".editarea",this.currentSegment).effect("highlight", {}, 1000);
+        this.setChosenSuggestion(0);
+        this.lockTags();
+        this.checkTagMismatch(UI.currentSegment);
     },
 
     copySuggestionInEditarea: function(segment,translation,editarea,match,decode) {
@@ -528,6 +603,9 @@ UI = {
             editarea.text(translation).addClass('fromSuggestion');
             $('.percentuage',segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
         }
+//        console.log('prima del check tag mismatch da copy suggestion in editarea');
+//        console.log(editarea.text());
+
 //		this.placeCaretAtEnd(document.getElementById($(editarea).attr('id')));
     },
 
@@ -542,7 +620,10 @@ UI = {
     createButtons: function() {
         var disabled = (this.currentSegment.hasClass('loaded'))? '' : ' disabled="disabled"';
         var buttons = '<li><a id="segment-'+this.currentSegmentId+'-copysource" href="#" class="btn copysource" data-segmentid="segment-'+this.currentSegmentId+'" title="Copy source to target"></a><p>CTRL+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-'+this.currentSegmentId+'-button-translated" data-segmentid="segment-'+this.currentSegmentId+'" href="#" class="translated"'+disabled+' >TRANSLATED</a><p>CTRL+ENTER</p></li>';
+//        var buttons = '<li class="tag-mismatch" title="Tag Mismatch">Tag Mismatch</li><li><a id="segment-'+this.currentSegmentId+'-copysource" href="#" class="btn copysource" data-segmentid="segment-'+this.currentSegmentId+'" title="Copy source to target"></a><p>CTRL+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-'+this.currentSegmentId+'-button-translated" data-segmentid="segment-'+this.currentSegmentId+'" href="#" class="translated"'+disabled+' >TRANSLATED</a><p>CTRL+ENTER</p></li>';
         $('#segment-'+this.currentSegmentId+'-buttons').append(buttons);
+        $('#segment-'+this.currentSegmentId+'-buttons').before('<p class="warnings">Warning: Tag Mismatch</p>');
+//        $('#segment-'+this.currentSegmentId+'-buttons').append(buttons);
     },
 
     createFooter: function(segment) {
@@ -571,6 +652,32 @@ UI = {
         this.removeFooter(byButton);
     },
 
+    detectAdjacentSegment: function(segment,direction,times) { // currently unused
+		if(!times) times = 1;
+		if(direction == 'down') {
+        	var adjacent = segment.next();
+			if(!adjacent.is('section')) adjacent = this.currentArticle.next().find('section:first');
+		} else {
+	        var adjacent = segment.prev();
+			if(!adjacent.is('section')) adjacent = $('.editor').parents('article').prev().find('section:last');
+		}
+
+        if(adjacent.length) {
+            if(times == 1) {
+            	return adjacent;
+            } else {
+            	this.detectAdjacentSegment(adjacent,direction,times-1);
+            }
+        } else {
+        }
+    },
+
+    detectFirstLast: function() {
+        var s = $('section');
+        this.firstSegment = s.first();
+        this.lastSegment = s.last();
+    },
+
     detectRefSegId: function(where) {
         var step = this.moreSegNum;
         var seg = (where == 'after')? $('section').last() : (where == 'before')? $('section').first() : '';
@@ -584,19 +691,6 @@ UI = {
     },
 
     getContribution: function(segment,next) {
-// prova per anticipare l'indent
-/*
-        var isActiveSegment = $(segment).hasClass('editor');
-        var editarea = $('.editarea', segment);
-        var editareaLength = editarea.text().length;
-        if(isActiveSegment) {
-            editarea.removeClass("indent");
-        } else {
-            if (editareaLength==0) editarea.addClass("indent");
-        }
-*/
-
-
         var n = (next)? $('#segment-'+this.nextSegmentId) : $(segment);
         if($(n).hasClass('loaded')) {
             if(next) {
@@ -622,34 +716,32 @@ UI = {
         if(!next) {
             $(".loader",n).addClass('loader_on')
         }
-     
-        $.ajax({
-            url: config.basepath + '?action=getContribution'+this.appendTime(),
-            data: {
-                action: 'getContribution',
-                id_segment: id_segment,
-                text: txt,
-                id_job: config.job_id,
-                num_results: this.numMatchesResults,
-                id_translator : config.id_translator
-            },
-            type: 'POST',            
-            dataType: 'json',
-            context: $('#'+id),
-            complete: function (d){
-                $(".loader",n).removeClass('loader_on');
-            },
-            success: function(d){
-                UI.renderContributions(d,this);
-                UI.blockButtons = false;
 
-                if (d.data.matches==0){
-                    $(".sbm > .matches", this).hide();
-                } else {
-                    $('.submenu li.matches a span', this).text('('+d.data.matches.length+')');
-                }
-            }
-        });
+		this.doRequest({
+			data: {
+				action:         'getContribution',
+				id_segment:     id_segment,
+				text:           txt,
+				id_job:         config.job_id,
+				num_results:    this.numMatchesResults,
+				id_translator:  config.id_translator
+			},
+			context: $('#'+id),
+			success: function(d){
+				UI.renderContributions(d,this);
+				UI.lockTags();
+
+				UI.blockButtons = false;
+        		if (d.data.matches.length > 0) {
+        			$('.submenu li.matches a span', this).text('('+d.data.matches.length+')');
+				} else {
+        			$(".sbm > .matches", this).hide();
+				}
+			},
+			complete: function(d){
+			    $(".loader", n).removeClass('loader_on');
+			}
+		});
     },
 
     getMoreSegments: function(where) {
@@ -677,19 +769,16 @@ UI = {
             $('#outer').addClass('loading');
         }
 
-        $.ajax({
-            url: config.basepath + '?action=getSegments'+this.appendTime(),
-            data: {
-                action: 'getSegments',
+		this.doRequest({
+			data: {
+				action: 'getSegments',
                 jid: config.job_id,
                 password: config.password,
                 step : 50,
                 segment: segId,
                 where: where
-            },
-            type: 'POST',            
-            dataType: 'json',
-            success: function(d){
+			},
+			success: function(d){
                 where = d.data['where'];
                 if(typeof d.data['files'] != 'undefined') {
                     var numsegToAdd = 0;
@@ -711,6 +800,7 @@ UI = {
                             UI.segmentIdToRestore = false;
                         }
                     }
+                    UI.markTags();
                 }
                 if(where == 'after') {
                 }
@@ -721,9 +811,8 @@ UI = {
                 $('#outer').removeClass('loading loadingBefore');
                 UI.loadingMore = false;
 				UI.setWaypoints();
-
-            }
-        });
+			}
+		});
     },
 
     getNextSegment: function(segment,status) {
@@ -770,57 +859,29 @@ UI = {
         where = (this.startSegmentId)? 'center' : 'after';
         var step = this.initSegNum;
         $('#outer').addClass('loading');
-   		
-        $.ajax({
-            url: config.basepath + '?action=getSegments'+this.appendTime(),
-            data: {
+
+		this.doRequest({
+			data: {
                 action: 'getSegments',
                 jid: config.job_id,
                 password: config.password,
                 step : step,
                 segment: this.startSegmentId,
                 where: where
-            },
-            type: 'POST',            
-            dataType: 'json',
-            success: function(d){
+			},
+			success: function(d){
                 where = d.data['where'];
                 $.each(d.data['files'], function() {
                     startSegmentId = this['segments'][0]['sid'];
                 })
                 if(typeof this.startSegmentId == 'undefined') this.startSegmentId = startSegmentId;
+                UI.body.addClass('loaded');
                 if(typeof d.data['files'] != 'undefined') UI.renderSegments(d.data['files'],where,true);
                 $('#outer').removeClass('loading loadingBefore');
                 UI.loadingMore = false;
                 UI.setWaypoints();
-            }
-        });
-    },
-
-    detectAdjacentSegment: function(segment,direction,times) { // currently unused
-		if(!times) times = 1;
-		if(direction == 'down') {
-        	var adjacent = segment.next();
-			if(!adjacent.is('section')) adjacent = this.currentArticle.next().find('section:first');
-		} else {
-	        var adjacent = segment.prev();
-			if(!adjacent.is('section')) adjacent = $('.editor').parents('article').prev().find('section:last');
-		}
-
-        if(adjacent.length) {
-            if(times == 1) {
-            	return adjacent;
-            } else {
-            	this.detectAdjacentSegment(adjacent,direction,times-1);
-            }
-        } else {
-        }
-    },
-
-    detectFirstLast: function() {
-        var s = $('section');
-        this.firstSegment = s.first();
-        this.lastSegment = s.last();
+			}
+		});
     },
 
     gotoNextSegment: function() {
@@ -867,7 +928,68 @@ UI = {
         var selContainer = $(window.getSelection().getRangeAt(0).startContainer.parentNode);
         return ((selContainer.hasClass('editarea'))&&(!selContainer.is(UI.editarea)));
     },
-	
+
+    lockTags: function() {
+    	if(!this.taglockEnabled) return false;
+
+	    saveSelection();
+//    	console.log('prima: ' + this.editarea.html());
+    	if(checkLockability(this.editarea.text())) {
+	    	console.log('PRIMA   : ' + this.editarea.html());
+	    	this.editarea.html(this.editarea.html().replace(/(&lt;.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+	    	console.log('A   : ' + this.editarea.html());
+	    	console.log('STRINGA: ' + this.editarea.html().replace(/((\<span)( class=\"locked\")( contenteditable=\"false\")(\>))/gi, "$2$4$3$5"));
+	 //   	this.editarea.html(this.editarea.html().replace(/((\<span)( class=\"locked\")( contenteditable=\"false\")(\>))/gi, "$2$4$3$5"));
+//	    	this.editarea.html(this.editarea.html().replace(/(\<span (class=\"locked\") (contenteditable=\"false\")\>)/gi, "<span $3 $2>"));
+	    	console.log('B   : ' + this.editarea.html());
+
+
+
+
+//	    	this.editarea.html(this.editarea.html().replace("<span class=\"locked\" contenteditable=\"false\">", "<>"));
+//	    	this.editarea.html(this.editarea.html().replace("<span class=\"locked\" contenteditable=\"false\">", "<span contenteditable=\"false\" class=\"locked\">"));
+//	    	console.log('STRINGA: ' + this.editarea.html().replace(/(\<span (class=\"locked\") (contenteditable=\"false\")\>)/gi, "<span $3 $2></span>"));
+/*
+	    	console.log('HTML   : ' + this.editarea.html());
+	    	console.log('REGEX 2: ' + this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
+	    	console.log('PROVA: ' + this.editarea.html().replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)|(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)/gi, "PROVA"));
+*/
+	    	this.editarea.html(this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
+	    	this.editarea.html(this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>"));
+	    	this.editarea.html(this.editarea.html().replace(/(\<\/span\>)$(\s){0,}/gi, "</span> "));
+    	} else {
+    		$('.editor .editarea .locked.selected').removeClass('selected');
+    		this.unlockTags();
+    	}
+//    	console.log('dopo: ' + this.editarea.html());
+		restoreSelection();
+    },
+
+	markSuggestionTags: function(segment) {
+    	if(!this.taglockEnabled) return false;    	
+    	$('.footer .suggestion_source',segment).each(function() {
+    		$(this).html($(this).html().replace(/(&lt;.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+    	});
+    	$('.footer .translation').each(function() {
+    		$(this).html($(this).html().replace(/(&lt;.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+    	});    	
+    },
+
+    markTags: function() {
+    	if(!this.taglockEnabled) return false;    	
+    	$('.source').each(function() {
+    		$(this).html($(this).html().replace(/(&lt;.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+	    	$(this).html($(this).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
+    	});
+    	
+    	$('.editarea').each(function() {
+    		if($('#segment-'+$(this).data('sid')).hasClass('mismatch')) return false;    	
+
+    		$(this).html($(this).html().replace(/(&lt;.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+	    	$(this).html($(this).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
+    	});
+    },
+    	
     millisecondsToTime: function(milli) {
         var milliseconds = milli % 1000;
         var seconds = Math.round((milli / 1000) % 60);
@@ -881,20 +1003,12 @@ UI = {
             if(this.justSelecting()) return;
         }
         this.byButton = false;
-        this.editarea = $(editarea);
-
-        // current and last opened object reference caching
-        this.lastOpenedSegment = this.currentSegment;
-        this.lastOpenedEditarea = $('.editarea',this.currentSegment);
-
-        this.currentSegmentId = this.lastOpenedSegmentId = this.editarea.data('sid');
-		
-        this.currentSegment = segment = $('#segment-'+this.currentSegmentId);
-        this.currentArticle = segment.parent();
+        this.cacheObjects(editarea);
         this.activateSegment();
 		
         this.getNextSegment(this.currentSegment,'untranslated');
         this.setCurrentSegment(segment);
+        this.currentSegment.addClass('opened');
 
         this.focusEditarea = setTimeout(function(){
             UI.editarea.focus();
@@ -903,7 +1017,7 @@ UI = {
         this.currentIsLoaded = false;
         this.nextIsLoaded = false;
         this.getContribution(segment,0);
-        this.opening = true;
+        this.opening = true; 
         if(!(this.currentSegment.is(this.lastOpenedSegment))) this.closeSegment(this.lastOpenedSegment,0);
         this.opening = false;
         this.body.addClass('editing');
@@ -912,6 +1026,8 @@ UI = {
         this.editarea.attr('contenteditable','true');
         this.editStart = new Date();
         $(editarea).removeClass("indent");
+        
+        this.lockTags();
         this.getContribution(segment,1);
         if(this.debug) console.log('close/open time: ' + ( (new Date()) - this.openSegmentStart));
     },
@@ -938,26 +1054,31 @@ UI = {
 		$('body').unbind('keydown.alt1').unbind('keydown.alt2').unbind('keydown.alt3').unbind('keydown.alt4').unbind('keydown.alt5');
         $("body, .editarea").bind('keydown.alt1','Alt+1', function(e){ 
             e.preventDefault();
+            e.stopPropagation();
             if(e.which != 97) {
                 UI.chooseSuggestion('1');
             }
         }).bind('keydown.alt2','Alt+2', function(e){ 
             e.preventDefault();
+            e.stopPropagation();
             if(e.which != 98) {
                 UI.chooseSuggestion('2');
             }
         }).bind('keydown.alt3','Alt+3', function(e){ 
             e.preventDefault();
+            e.stopPropagation();
             if(e.which != 99) {
                 UI.chooseSuggestion('3');
             }            
         }).bind('keydown.alt4','Alt+4', function(e){ 
             e.preventDefault();
+            e.stopPropagation();
             if(e.which != 100) {
                 UI.chooseSuggestion('4');
             }            
         }).bind('keydown.alt5','Alt+5', function(e){ 
             e.preventDefault();
+            e.stopPropagation();
             if(e.which != 101) {
                 UI.chooseSuggestion('5');
             }            
@@ -986,6 +1107,7 @@ UI = {
     removeButtons: function(byButton) {
         var segment = (byButton)? this.currentSegment : this.lastOpenedSegment;
         $('#'+segment.attr('id')+'-buttons').empty();
+        $('p.warnings',segment).remove();
     },
 
     removeFooter: function(byButton) {
@@ -1010,21 +1132,24 @@ UI = {
             } else {
                 if (editareaLength==0) editarea.addClass("indent");
             }
-//			console.log('indent: ' + editarea.hasClass('indent'));
             var translation = d.data.matches[0].translation;
             var perc_t=$(".percentuage",segment).attr("title");
             
             $(".percentuage",segment).attr("title",''+perc_t + "Created by " + d.data.matches[0].created_by);
             var match = d.data.matches[0].match;
  
+            var copySuggestionDone = false;
             if (editareaLength==0){
                 UI.copySuggestionInEditarea(segment,translation,editarea,match,true);
+                UI.setChosenSuggestion(1);
+                copySuggestionDone = true;
             }
             var segment_id = segment.attr('id');            
             $(segment).removeClass('loaded').addClass('loaded');
             $('.sub-editor .overflow',segment).empty();
             
             $.each(d.data.matches, function(index) {
+                if((this.segment == '')||(this.translation == '')) return;
                 var disabled = (this.id=='0')? true : false;                 
                 cb= this['created_by'];                    
                 cl_suggestion=UI.getPercentuageClass(this['match']);
@@ -1036,8 +1161,14 @@ UI = {
                 // before doing a enanched view you will need to add a data-original tag
                 $('.sub-editor .overflow',segment).append('<ul class="graysmall" data-item="'+(index+1)+'" data-id="'+this.id+'"><li >'+((disabled)?'':' <a id="'+segment_id+'-tm-'+this.id+'-delete" href="#" class="trash" title="delete this row"></a>')+'<span id="'+segment_id+'-tm-'+this.id+'-source" class="suggestion_source">'+this.segment+'</span></li><li class="b"><span class="graysmall-message">ALT+'+(index+1)+'</span><span id="'+segment_id+'-tm-'+this.id+'-translation" class="translation">'+this.translation+'</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">'+(this.match)+'</li><li>'+this['last_update_date']+'</li><li class="graydesc">Source: <span class="bold">'+cb+'</span></li></ul></ul>');
             });
-            UI.setDeleteSuggestion(segment);	    
-
+            UI.markSuggestionTags(segment);
+            UI.setDeleteSuggestion(segment);
+            UI.lockTags();
+            
+            if(copySuggestionDone) {
+            	this.checkTagMismatch(UI.currentSegment);
+            }
+  
             $('.translated',segment).removeAttr('disabled');
             $('.draft',segment).removeAttr('disabled');
         } else {
@@ -1073,8 +1204,8 @@ UI = {
                 '			<strong>' + this.source + '</strong> [<span class="source-lang">' + this.source_code + '</span>]&nbsp;>&nbsp;<strong>' + this.target + '</strong> [<span class="target-lang">' + this.target_code + '</span>]'+
                 '		</li>'+
                 '		<li class="wordcounter">'+
-                '			Eq. words: <strong>' + fs['TOTAL_FORMATTED'] + '</strong>'+
-                '			Draft: <strong>' + fs['DRAFT_FORMATTED'] + '</strong>'+
+                '			Raw words: <strong>' + fs['TOTAL_FORMATTED'] + '</strong>'+
+//                '			To-do: <strong>' + fs['DRAFT_FORMATTED'] + '</strong>'+
                 '			<span id="rejected" class="hidden">Rejected: <strong>' + fs['REJECTED_FORMATTED'] + '</strong></span>'+
                 '		</li>'+
                 '	</ul>';
@@ -1106,7 +1237,7 @@ UI = {
                 '					</span>'+
                 '					<div class="textarea-container">'+
                 '						<span class="loader"></span>'+
-                '						<div class="editarea invisible" contenteditable="false" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation)?'':this.translation) + '</div>'+
+                '						<div class="editarea invisible" contenteditable="false" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation)?'':this.translation) + '</div>'+
                 '					</div> <!-- .textarea-container -->'+
                 '				</div> <!-- .target -->'+
                 '			</div> <!-- .wrap -->'+
@@ -1158,9 +1289,6 @@ UI = {
                 }   				
             }
             
-            if(articleToAdd) {
-            // fit_text_to_container($('.filenameshow',$('#file-'+fid)));
-            }
         })
 
         if(starting) {
@@ -1169,7 +1297,6 @@ UI = {
     },
 
     scrollSegment: function(segment) {
-//        console.log('scrollSegment');
         var spread = 23;
         var current = this.currentSegment;
         var previousSegment = $(segment).prev('section');
@@ -1200,6 +1327,7 @@ UI = {
             destinationTop = destinationTop - spread;
         }	
 
+        $("html,body").stop();
         $("html,body").animate({
             scrollTop: destinationTop-20
         }, 500 );
@@ -1211,6 +1339,20 @@ UI = {
         } else {
             return false;
         }
+    },
+
+    setChosenSuggestion: function(w) {
+    	this.editarea.data('lastChosenSuggestion',w);
+/*
+		this.doRequest({
+			data: {
+                action: 'chooseSuggestion',
+                id_segment: UI.currentSegmentId,
+                id_job: config.job_id,
+                id_suggestion: w
+			}
+		});
+*/
     },
 	
     setContribution: function(segment,status,byStatus) {
@@ -1233,10 +1375,11 @@ UI = {
         var private_translator = config.private_translator;
         var id_customer = config.id_customer;
         var private_customer = config.private_customer;
-        $.ajax({
-            url: config.basepath + '?action=setContribution'+this.appendTime(),
-            data: {
+
+		this.doRequest({
+			data: {
                 action: 'setContribution',
+                id_job:  config.job_id,
                 source: source,
                 target: target,
                 source_lang: config.source_lang,
@@ -1245,12 +1388,50 @@ UI = {
                 private_translator: private_translator,
                 id_customer: id_customer,
                 private_customer: private_customer
-            },
-            type: 'POST',
-            dataType: 'json',
-            success: function(d){
-            }
-        });
+			}
+		});
+    },
+
+    setContributionMT: function(segment,status,byStatus) {
+        if((status=='draft')||(status=='rejected')) return false;
+        var source = $('.source',segment).text();
+        source = view2rawxliff(source);
+        // Attention: to be modified when we will be able to lock tags.
+        var target = $('.editarea',segment).text();
+        if((target == '')&&(byStatus)) {
+            alert('Cannot change status on an empty segment. Add a translation first!');
+        }
+        if(target == '') {
+            return false;
+        }
+        target = view2rawxliff(target);
+        var languages = $(segment).parents('article').find('.languages');
+        var source_lang = $('.source-lang',languages).text();
+        var target_lang = $('.target-lang',languages).text();
+        var id_translator = config.id_translator;
+        var private_translator = config.private_translator;
+        var id_customer = config.id_customer;
+        var private_customer = config.private_customer;
+
+        var info=$(segment).attr('id').split('-');
+        var id_segment = info[1];
+        var time_to_edit = UI.editTime;
+//        console.log('suggestion: ' + $('.editarea',segment).data('lastChosenSuggestion'));
+        var chosen_suggestion = $('.editarea',segment).data('lastChosenSuggestion');
+
+		this.doRequest({
+			data: {
+                action: 'setContributionMT',
+                id_segment: id_segment,
+                source: source,
+                target: target,
+                source_lang: config.source_lang,
+                target_lang: config.target_lang,
+                time_to_edit: time_to_edit,
+                id_job:  config.job_id,
+                chosen_suggestion_index: chosen_suggestion
+			}
+		});
     },
 
     setCurrentSegment: function(segment,closed) {
@@ -1265,17 +1446,14 @@ UI = {
             },300);
         }
         var file = this.currentArticle;
-        $.ajax({
-            url: config.basepath + '?action=setCurrentSegment'+this.appendTime(),
-            data: {
+
+		this.doRequest({
+			data: {
                 action: 'setCurrentSegment',
                 id_segment: id_segment,
                 id_job: config.job_id
-            },
-            type: 'POST',
-            success: function(d){
-            }
-        });
+			}
+		});
     },
 
     setDeleteSuggestion: function(segment) {
@@ -1288,21 +1466,17 @@ UI = {
             target = $('.translation',ul).text();
             target=view2rawxliff(target);
             ul.remove();
-            $.ajax({
-                url: config.basepath+'?'+UI.appendTime(),
-                data: {
+
+			UI.doRequest({
+				data: {
                     action: 'deleteContribution',
                     source_lang: config.source_lang,
                     target_lang: config.target_lang,
                     seg: source,
                     tra: target,
                     id_translator : config.id_translator
-                },
-                type: 'POST',
-                dataType: 'json',
-                complete: function (d){
-                },
-                success: function(d){
+				},
+				success: function(d){
                     if(UI.debug) console.log('match deleted');
 
                     $(".editor .matches .graysmall").each(function(index){
@@ -1310,9 +1484,8 @@ UI = {
                         $(this).attr('data-item',index+1);
                         UI.reinitMMShortcuts();
                     })
-
-                }
-            });
+				}
+			});
         });
     },
 
@@ -1345,6 +1518,16 @@ UI = {
     	
         var wph 		= s.WORDS_PER_HOUR;
         var completion  = s.ESTIMATED_COMPLETION;
+		if(typeof wph == 'undefined') {
+			$('#stat-wph').hide();
+		} else {
+			$('#stat-wph').show();
+		}
+		if(typeof completion == 'undefined') {
+			$('#stat-completion').hide();
+		} else {
+			$('#stat-completion').show();
+		}
         UI.progress_perc = Math.floor(s.APPROVED_PERC + s.TRANSLATED_PERC);
         this.checkIfFinished();
 
@@ -1395,20 +1578,30 @@ UI = {
         this.byButton = true;
     },
 
+    collectSegmentErrors: function(segment) {
+    	var errors = '';
+    	// tag mismatch
+    	if(segment.hasClass('mismatch')) errors += '01|';
+    	return errors.substring(0, errors.length - 1);
+    },
+
     setTranslation: function(segment,status) {
         var info=$(segment).attr('id').split('-');
         var id_segment = info[1];
         var file = $(segment).parents('article');
         var status = status;
         // Attention, to be modified when we will lock tags
-        var translation = $('.editarea',segment).text();
+        var translation = $('.editarea',segment).text().trim();
 
         if(translation == '') return false;
         var time_to_edit = UI.editTime;
         var id_translator = config.id_translator;
-        $.ajax({
-            url: config.basepath + '?action=setTranslation'+this.appendTime(),
-            data: {
+        var errors = '';
+        errors = this.collectSegmentErrors(segment);
+        var chosen_suggestion = $('.editarea',segment).data('lastChosenSuggestion');
+
+		this.doRequest({
+			data: {
                 action: 'setTranslation',
                 id_segment: id_segment,
                 id_job: config.job_id,
@@ -1416,18 +1609,18 @@ UI = {
                 status: status,
                 translation: translation,
                 time_to_edit: time_to_edit,
-                id_translator: id_translator
-            },
-            type: 'POST',
-            dataType: 'json',
-            success: function(d){
+                id_translator: id_translator,
+                errors: errors,
+                chosen_suggestion_index: chosen_suggestion
+			},
+			success: function(d){
                 if(d.data == 'OK') {
                     UI.setStatus(segment,status);
                     UI.setDownloadStatus(d.stats);
                     UI.setProgress(d.stats);
                 };
-            }
-        });
+			}
+		});
     },
 
     setWaypoints: function() {
@@ -1457,8 +1650,28 @@ UI = {
 		}, UI.upOpts);
     },
 
-    tagLock: function() {
-    //		see http://jsfiddle.net/gxkEz/
+    tagCompare: function(sourceTags,targetTags,prova) {
+		if(!UI.currentSegment.hasClass('loaded')) return false;
+
+//    	console.log(sourceTags);
+//    	console.log(targetTags);
+//		console.log(UI.currentSegment.hasClass('loaded'));
+		var mismatch = false;
+		for (var i=0;i<sourceTags.length;i++) {
+			for (var index=0;index<targetTags.length;index++) { 
+	        	if(sourceTags[i] == targetTags[index]) {
+	        		sourceTags.splice(i,1);
+	        		targetTags.splice(index,1);
+					UI.tagCompare(sourceTags,targetTags,prova++);
+	        	}
+			}
+		}
+		if((!sourceTags.length)&&(!targetTags.length)) {
+			mismatch = false;
+		} else {
+			mismatch = true;
+		};
+		return(mismatch);
     },
 
 
@@ -1516,6 +1729,11 @@ UI = {
         }, 200 );
     },
 
+    unlockTags: function() {
+    	if(!this.taglockEnabled) return false;
+    	this.editarea.html(this.editarea.html().replace(/\<span contenteditable=\"false\" class=\"locked\"\>(.*?)\<\/span\>/gi, "$1"));
+    },
+    
     zerofill: function(i,l,s) {
         var o = i.toString();
         if (!s) {
@@ -1556,31 +1774,16 @@ function b64_to_utf8(str) { // currently unused
 // START Get clipboard data at paste event (SEE http://stackoverflow.com/a/6804718)
 function handlepaste (elem, e) {
     var savedcontent = elem.innerHTML;
-    /*
-    var sel, range;
-
-    if (window.getSelection && document.createRange) {                    
-        range = document.createRange();
-        sel = window.getSelection();
-        sel.removeAllRanges();
-        sel.addRange(range);
-    } else if (document.body.createTextRange) {
-        range = document.body.createTextRange();
-        range.moveToElementText(placeholder);
-        range.select();
-    }
-    console.log('range:');
-    console.log(range);
-*/
 
 
 
     if (e && e.clipboardData && e.clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
+
         if (/text\/html/.test(e.clipboardData.types)) {
-            elem.innerHTML = e.clipboardData.getData('text/plain');
+            elem.innerHTML = htmlEncode(e.clipboardData.getData('text/plain'));
         }
         else if (/text\/plain/.test(e.clipboardData.types)) {
-            elem.innerHTML = e.clipboardData.getData('text/plain');
+            elem.innerHTML = htmlEncode(e.clipboardData.getData('text/plain'));
         }
         else {
             elem.innerHTML = "";
@@ -1593,6 +1796,7 @@ function handlepaste (elem, e) {
         return false;
     }
     else {// Everything else - empty editdiv and allow browser to paste content into it, then cleanup
+
         elem.innerHTML = "";
         waitforpastedata(elem, savedcontent);
         return true;
@@ -1617,10 +1821,9 @@ function waitforpastedata (elem, savedcontent) {
 
 function processpaste (elem, savedcontent) {
     pasteddata = elem.innerHTML;
+
     //^^Alternatively loop through dom (elem.childNodes or elem.getElementsByTagName) here
-    //	console.log(elem.id);
     elem.innerHTML = savedcontent;
-    //	elem.appendChild(savedcontent);
     // Do whatever with gathered data;
     $('#placeHolder').before(pasteddata);
     focusOnPlaceholder();
@@ -1657,64 +1860,6 @@ function truncate_filename(n, len) {
     return filename + '.' + ext;
 }
 
-function fit_text_to_container(container,child){
-    if (typeof(child)!='undefined'){
-        a=$(child,container).text();
-    }else{
-        a=container.text();
-    }
-    w=container.width(); //forse non serve
-
-    first_half=a[0];
-    last_index=a.length-1;
-    last_half=a[last_index];
-
-    if (typeof(child)!='undefined'){
-        $(child,container).text(first_half+"..."+last_half);
-    }else{
-        container.text(first_half+"..."+last_half);
-    }
-    
-    h=container.height();
-    hh=$(child,container).height();
-    
-    for (var i=1 ; i< a.length; i=i+1){
-        old_first_half=first_half;
-        old_last_half=last_half;
-
-        first_half=first_half+ a[i];
-        last_half=a[last_index-i] + last_half;
-
-        if (typeof(child)!='undefined'){
-            $(child,container).text(first_half+"..."+last_half);
-        }else{
-            container.text(first_half+"..."+last_half);
-        }
-        h2=container.height();
-        
-        if (h2>h){
-            if (typeof(child)!='undefined'){
-                $(child,container).text(old_first_half+"..."+last_half);
-            }else{
-                container.text(old_first_half+"..."+last_half);
-            }
-            h2=$(container).height();
-            
-            if (h2>h){ 
-                if (typeof(child)!='undefined'){
-                    $(child,container).text(old_first_half+"..."+old_last_half);
-                }else{
-                    container.text(old_first_half+"..."+old_last_half);
-                }
-            }
-            break;
-        }
-        if ($(child,container).text()==a){
-            break;
-        }
-    }
-}
-
 function insertNodeAtCursor(node) {
     var range, html;
     if (window.getSelection && window.getSelection().getRangeAt) {
@@ -1727,14 +1872,17 @@ function insertNodeAtCursor(node) {
     }
 }
 
-$(document).ready(function(){
-    fit_text_to_container($("#pname"));
-    UI.render(true);
-});
+function removeSelectedText (editarea) {
+    if (window.getSelection || document.getSelection) {
+        var oSelection = (window.getSelection ? window : document).getSelection();
+		oSelection.deleteFromDocument();
+    } else {
+        document.selection.clear();
+    }
+}
 
 
-$(window).resize(function(){
-    });
+
 
 /* FORMATTING FUNCTION  TO TEST */
 
@@ -1790,7 +1938,6 @@ function view2rawxliff(segment){
     return segment;
 }
 
-
 function rawxliff2view(segment){ // currently unused
     // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
     // output : &lt;g id="43"&gt;bang & < 3 olufsen &lt;/g&gt;;  &lt;x id="33"/&gt;
@@ -1809,4 +1956,77 @@ function rawxliff2rawview(segment){ // currently unused
     return segment;
 }
 
+/*
+function checkHTML(html) {
+//	console.log(html);
+	var doc = document.createElement('div');
+	doc.innerHTML = html;
+	console.log('conformance: ' + ( doc.innerHTML === html ));
+	console.log('lockability: ' + checkLockability(html));
+	return ( doc.innerHTML === html );
+}
+*/
 
+function checkLockability(html) {
+	if(UI.editarea.text() == '') return false;
+//	console.log(UI.editarea.text());
+	if(!html.match(/\</gi)) return false;
+//	console.log(html.match(/\</gi)[0]);
+//	if($(html).text() == '') return false;
+//	if((typeof html.match(/\</gi) == 'null')||(typeof html.match(/\>/gi) == 'null')) return false;
+	var lockable = (html.match(/\</gi).length == html.match(/\>/gi).length)? true : false;
+	return lockable;
+}
+
+function saveSelection() {
+    if (UI.savedSel) {
+        rangy.removeMarkers(UI.savedSel);
+    }
+    UI.savedSel = rangy.saveSelection();
+//    console.log(UI.savedSel);
+//    console.log(UI.editarea.html());
+    UI.savedSelActiveElement = document.activeElement;
+}
+
+function restoreSelection() {
+    if (UI.savedSel) {
+        rangy.restoreSelection(UI.savedSel, true);
+        UI.savedSel = null;
+        window.setTimeout(function() {
+//    		console.log(UI.savedSelActiveElement);
+            if (UI.savedSelActiveElement && typeof UI.savedSelActiveElement.focus != "undefined") {
+                UI.savedSelActiveElement.focus();
+            }
+        }, 1);
+    }
+}
+
+function selectText(element) {
+    var doc = document
+        , text = element
+        , range, selection
+    ;    
+    if (doc.body.createTextRange) {
+        range = document.body.createTextRange();
+        range.moveToElementText(text);
+        range.select();
+    } else if (window.getSelection) {
+        selection = window.getSelection();        
+        range = document.createRange();
+        range.selectNodeContents(text);
+        selection.removeAllRanges();
+        selection.addRange(range);
+    }
+}
+
+$(document).ready(function(){
+    fitText($('.breadcrumbs'),$('#pname'),30);
+    $("article").each(function(){
+        fitText($('.filename h2',$(this)),$('.filename h2',$(this)),30);
+    })   
+    UI.render(true);
+});
+
+
+$(window).resize(function(){
+});

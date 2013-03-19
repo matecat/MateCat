@@ -1,6 +1,6 @@
 <?php
 
-function getFromMM($query,$s,$t) {
+function getFromMM($query, $s, $t) {
     $q = urlencode($query);
     $url = "http://mymemory.translated.net/api/get?q=$q&langpair=$s|$t&de=matecatdeveloper@matecat.com";
     $res = file_get_contents($url);
@@ -45,14 +45,14 @@ function addToMM($seg, $tra, $source_lang, $target_lang, $id_translator, $key) {
         $private_query = "user=$id_translator&key=$key";
     }
     $url = "http://mymemory.translated.net/api/set?seg=$seg&tra=$tra&langpair=$source_lang|$target_lang&de=matecatdeveloper@matecat.com&$private_query";
-log::doLog("set url : $url");
+    log::doLog("set url : $url");
 
     $res = file_get_contents($url);
-log::doLog("res encoded .$res");
+    log::doLog("res encoded .$res");
     $res = json_decode($res, true);
-log::doLog($res);
+    log::doLog($res);
     // print_r($res);
-    
+
     return $res;
 }
 
@@ -64,9 +64,10 @@ function deleteToMM($source_lang, $target_lang, $source, $target) {
     //echo $res;
     $res = json_decode($res, true);
     // print_r($res);
-    
+
     return $res;
 }
+
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.

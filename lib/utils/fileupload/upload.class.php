@@ -22,7 +22,7 @@ class UploadHandler
             'param_name' => 'files',
             // Set the following option to 'POST', if your server does not support
             // DELETE requests. This is a parameter sent to the client:
-            'delete_type' => 'DELETE',
+            'delete_type' => "",//'DELETE',
             // The php.ini settings upload_max_filesize and post_max_size
             // take precedence over the following max_file_size setting:
             'max_file_size' => null,

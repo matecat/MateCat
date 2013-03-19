@@ -1,29 +1,5 @@
 <?
-/*
-function getEngineData($id) {
-    $mysql_hostname = "10.30.1.241";            // Database Server machine
-
-    $mysql_database = "matecat_sandbox";     // Database Name
-    $mysql_username = "translated";   // Database User
-    $mysql_password = "azerty1";   // Database Password
-
-    $mysql_link = mysql_connect($mysql_hostname, $mysql_username, $mysql_password);
-    mysql_select_db($mysql_database, $mysql_link);
-
-    $query = "select * from engines where id =$id";
-    $res = mysql_query($query, $mysql_link);
-
-
-    $row = mysql_fetch_assoc($res);
-    return $row;
-}
- * 
- * 
- */
-
-//include "/home/matecat/cattool/lib/model/queries.php";
-//require_once '../../../inc/config.inc.php';
-include_once ("utils/cat.class.php");
+include_once INIT::$UTILS_ROOT."/cat.class.php";
 abstract class Engine {
 
     protected $id = "";
@@ -52,6 +28,8 @@ abstract class Engine {
             $this->error = array(-2, "Engine not found");
             return 0;
         }
+        
+        
 
         $this->name = $data['name'];
         $this->description = $data['description'];
@@ -97,6 +75,7 @@ abstract class Engine {
         }
 
         $this->buildQuery($function, $parameters);
+
         $res=$this->curl($this->url);
     
         $this->raw_result = json_decode($res,true);

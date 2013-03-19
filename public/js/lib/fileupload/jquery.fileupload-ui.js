@@ -97,6 +97,18 @@
                     ](data.context);
                     that._renderPreviews(files, data.context);
                     that._forceReflow(data.context);
+
+// START Customization by Andrea Martines (Translated) 25/01/2013
+                    if(!data.isValidated) {
+                    	$('.cancel button',data.context).click(function() {
+							if(UI.checkAnalyzability()) {
+								UI.enableAnalyze();
+							}
+                    	});
+                    }
+// END Customization by Andrea Martines (Translated) 25/01/2013
+
+
                     that._transition(data.context).done(
                         function () {
                             if ((that._trigger('added', e, data) !== false) &&
@@ -392,6 +404,7 @@
             // only browsers with support for the File API report the type:
             if (!(this.options.acceptFileTypes.test(file.type) ||
                     this.options.acceptFileTypes.test(file.name))) {
+                console.log('file.type: ' + file.type);
                 return 'acceptFileTypes';
             }
             if (this.options.maxFileSize &&
@@ -412,6 +425,18 @@
                 file.error = that._hasError(file);
                 if (file.error) {
                     valid = false;
+// START Customization by Andrea Martines (Translated) 24/01/2013
+                } else {
+                    var extension = file.name.split('.')[file.name.split('.').length-1];
+                    var pf = config.partiallySupported;
+					$.each(pf, function(i, v) {
+						if(v.format==extension) {
+							valid = false;
+							file.error = 'Format not supported. ' + v.message;
+//							console.log($('.upload-table').html());
+						}
+					});		                    
+// END Customization by Andrea Martines (Translated) 24/01/2013
                 }
             });
             return valid;
@@ -500,6 +525,7 @@
             var button = $(this),
                 template = button.closest('.template-upload'),
                 data = template.data('data');
+                console.log(data);
             if (data && data.submit && !data.jqXHR && data.submit()) {
                 button.prop('disabled', true);
             }

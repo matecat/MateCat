@@ -1,129 +1,167 @@
 <!DOCTYPE HTML>
 <html lang="en">
-<head>
-<meta charset="utf-8"/>
-<title>Translate an XLIFF file with Matecat</title>
-<meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
-<meta name="viewport" content="width=device-width"/>
-<link href="${basepath}public/css/style.css" rel="stylesheet" type="text/css" />
-<link rel="stylesheet" href="${basepath}public/css/fieldtest.css"/>
-</head>
+    <head>
+        <meta charset="utf-8"/>
+        <title>Translate an XLIFF file with Matecat</title>
+        <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
+        <meta name="viewport" content="width=device-width"/>
+        <link href="${basepath}public/css/style.css" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" href="${basepath}public/css/fieldtest.css"/>
+        <script type="text/javascript" src="/public/js/lib/jquery.js"></script>
+        <script type="text/javascript" src="/public/js/utils.js"></script>
 
-<body tal:condition="not:supportedBrowser">
-	<div  metal:use-macro="unsupported_browser.html/unsupported"/>
-</body>
+        <script type="text/javascript">
+			$(document).ready(function(){
+			    fitText($('.breadcrumbs'),$('#pname'),30);
+			});
+        </script>
+    </head>
 
-<body tal:condition="supportedBrowser">
+    <body tal:condition="not:supportedBrowser">
+        <div  metal:use-macro="unsupported_browser.html/unsupported"/>
+    </body>
 
-<header style="padding-bottom:5px">
-    <div class="wrapper">   
-		<a href="${basepath}" class="logo"></a>
-    
-    
-    	<form action="${basepath}" method="post" style="margin-right:-20px">
-                <input type="hidden" name="action" value="editlogDownload"/>
-                <input type="hidden" name="jid" tal:attributes="value jid" value=""/>
-                <input type="hidden" name="password" tal:attributes="value password" value=""/>
-               
-				<input name="submit" class="downloadtr-button" type="submit" value="Export All Data in CSV" />
-                 <a tal:attributes="href string:${basepath}translate/none/none/${jid}-${password}" style="margin-right:10px" class="downloadtr-button draft" >< Back to Translation</a>
-	</form>
-    
-    </div>
-</header>
+    <body tal:condition="supportedBrowser">
+<!--metal:use-macro="header.html/main_header"-->
+        <header style="padding-bottom:5px" >
+            <div class="wrapper">   
+                <a href="${basepath}" class="logo"></a>
 
-<div class="wrapper">
+                <div class="breadcrumbs">    
+					<div id="pname" tal:content="pname">Project</div>
+					<span style="float: left">&nbsp;(<span tal:replace="jid">---</span>) &gt; <b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></span>
+                </div>
 
-<!--	<h1>Field test - 1</h1> -->
-	
-<h1 style="margin-bottom:0px">Job <span tal:replace="jid | default"></span> - Editing Log</h1>
-<h3>Slowest 5.000 segments by time-to-edit</h3>
-	
 
-	          
-    
-    <h2 style="margin-top:20px;margin-bottom:10px">Summary</h2>
-    
-    
-    <table class="tablestats continue" width="100%" border="0" cellspacing="0" cellpadding="0">
-		<tr>
-			<th>Words</th>
-			<th>Avg Secs per Word</th>
-			<th>% of MT</th>
-			<th>% of TM</th>
-			<th>Total Time-to-edit</th>
-			<th>Avg PE Effort %</th>
-			<th>% of words in too SLOW edits</th>
-			<th>% of words in too FAST edits</th>
-		</tr>
-		<tr>
-			<td tal:content="stats/edited-word-count | default">N/A</td>
-			<td><span tal:replace="stats/avg-secs-per-word | string:--"></span>s</td>
-			<td><span tal:replace="stats/mt-words | string:--"></span>%</td>
-			<td><span tal:replace="stats/tm-words | string:--"></span>%</td>
-			<td><span tal:replace="stats/total-valid-tte | string:--"></span></td>
-			<td><span tal:replace="stats/avg-pee | string:--"></span></td>
-			<td><span tal:replace="stats/too-slow-words | string:--"></span>%</td>
-			<td><span tal:replace="stats/too-fast-words | string:--"></span>%</td>
-		</tr>
-	</table>
-    
-    <h2 style="margin-top:20px;margin-bottom:10px">Editing Details</h2>
 
-	<div tal:define="file_data php:array()" tal:repeat="file_data data">
-		<span tal:attributes="class string:error-symbol" tal:condition="php:file_data['stats-valid-style'] NE '' "></span>
-		<table class="tablestats continue" width="100%" border="0" cellspacing="0" cellpadding="0" tal:attributes="style string:${file_data/stats-valid-style}">
-	
-	  <tr>
-				<th width="100">Secs/Word</th>
-			  <th>Job ID</th>
-				<th>Segment ID</th>
-				<th>Words</th>
-				<th>Suggestion source</th>
-				<th>Match percentage</th>
-				<th>Time-to-edit</th>
-				<th>Post-editing effort</th>
-			</tr>
-	
-			<tr>
-				<td title="A statistically relevant time-to-edit is considered to be beetween 0.25s/word and 30s/word. Red marked segments are excluded from statistics." tal:attributes="style string:background:${file_data/stats-valid-color}" tal:content="file_data/secs-per-word | default">N/A</td>
-				<td tal:content="file_data/jid | default">N/A</td>
-				<td><a tal:attributes="href string:${basepath}translate/none/none/${jid}-${password}#${file_data/sid}"><span tal:replace="file_data/sid | default" /></a></td>
-				<td tal:content="file_data/rwc | default">N/A</td>
-				<td tal:content="file_data/ss | default">N/A</td>
-				<td tal:content="file_data/sm | default">%</td>
-				<td tal:content="file_data/time_to_edit"></td>
-				<td tal:content="file_data/pe_effort_perc | default">%</td>
-			</tr>
-		</table>
 
-  <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0" tal:attributes="style string:${file_data/stats-valid-style}">
+                <!--tal:block metal:fill-slot="actions"-->
+                    <form action="${basepath}" method="post">
+                        <input type="hidden" name="action" value="editlogDownload"/>
+                        <input type="hidden" name="jid" tal:attributes="value jid" value=""/>
+                        <input type="hidden" name="password" tal:attributes="value password" value=""/>
 
-			<tr>
-				<th style="width: 100px">Segment</th>
-				<td style="text-align:left;font-size:16px;" tal:content=" file_data/source | default">N/A</td>
-			</tr>		
-			<tr>
-				<th style="width: 100px">Suggestion</th>
-				<td style="text-align:left;font-size:16px;" tal:content="file_data/sug_view | default">N/A</td>
-			</tr>		
-			<tr>
-				<th style="width: 100px">Translation</th>
-				<td style="text-align:left;font-size:16px;" tal:content="file_data/translation | default">N/A</td>
-				
-			</tr>
-			<tr>
-				<th style="width: 100px">Diff View</th>
-				<td style="text-align:left;font-size:16px;" tal:content=" structure file_data/diff | default">N/A</td>
-				
-			</tr>					
-		</table>
+                        <input name="submit" class="downloadtr-button" type="submit" value="Export All Data in CSV" />
+                        <a tal:attributes="href string:${basepath}translate/none/none/${jid}-${password}"  class="downloadtr-button backbtn" >< Back to Translation</a>
+                    </form>
+                <!--/tal:block -->
 
-	</div>
+            </div>
+        </header>
 
-</div>
+        <div class="wrapper">
 
-          
+            <!--	<h1>Field test - 1</h1> -->
 
-</body> 
+            <h1 style="margin-bottom:0px">Job <span tal:replace="jid | default"></span> - Editing Log</h1>
+            <h3>Slowest 5.000 segments by time-to-edit</h3>
+
+
+
+
+            <h2 style="margin-top:20px;margin-bottom:10px">Summary</h2>
+
+
+            <table class="tablestats continue" width="100%" border="0" cellspacing="0" cellpadding="0">
+                <tr>
+                    <th>Words</th>
+                    <th>Avg Secs per Word</th>
+                    <th>% of MT</th>
+                    <th>% of TM</th>
+                    <th>Total Time-to-edit</th>
+                    <th>Avg PE Effort %</th>
+                    <th>% of words in too SLOW edits</th>
+                    <th>% of words in too FAST edits</th>
+                </tr>
+                <tr>
+                    <td tal:content="stats/edited-word-count | default">N/A</td>
+                    <td><span tal:replace="stats/avg-secs-per-word | string:--"></span>s</td>
+                    <td><span tal:replace="stats/mt-words | string:--"></span>%</td>
+                    <td><span tal:replace="stats/tm-words | string:--"></span>%</td>
+                    <td><span tal:replace="stats/total-valid-tte | string:--"></span></td>
+                    <td><span tal:replace="stats/avg-pee | string:--"></span></td>
+                    <td><span tal:replace="stats/too-slow-words | string:--"></span>%</td>
+                    <td><span tal:replace="stats/too-fast-words | string:--"></span>%</td>
+                </tr>
+            </table>
+
+            <h2 style="margin-top:20px;margin-bottom:10px">Editing Details</h2>
+
+            <div tal:define="file_data php:array()" tal:repeat="file_data data">
+                <span tal:attributes="class string:error-symbol" tal:condition="php:file_data['stats-valid-style'] NE '' "></span>
+                <table class="tablestats continue" width="100%" border="0" cellspacing="0" cellpadding="0" tal:attributes="style string:${file_data/stats-valid-style}">
+
+                    <tr>
+                        <th width="100">Secs/Word</th>
+                        <th>Job ID</th>
+                        <th>Segment ID</th>
+                        <th>Words</th>
+                        <th>Suggestion source</th>
+                        <th>Match percentage</th>
+                        <th>Time-to-edit</th>
+                        <th>Post-editing effort</th>
+                    </tr>
+
+                    <tr>
+                        <td title="A statistically relevant time-to-edit is considered to be beetween 0.25s/word and 30s/word. Red marked segments are excluded from statistics." tal:attributes="style string:background:${file_data/stats-valid-color}" tal:content="file_data/secs-per-word | default">N/A</td>
+                        <td tal:content="file_data/jid | default">N/A</td>
+                        <td><a tal:attributes="href string:${basepath}translate/none/none/${jid}-${password}#${file_data/sid}"><span tal:replace="file_data/sid | default" /></a></td>
+                        <td tal:content="file_data/rwc | default">N/A</td>
+                        <td tal:content="file_data/ss | default">N/A</td>
+                        <td tal:content="file_data/sm | default">%</td>
+                        <td tal:content="file_data/time_to_edit"></td>
+                        <td tal:content="file_data/pe_effort_perc | default">%</td>
+                    </tr>
+                </table>
+
+                <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0" tal:attributes="style string:${file_data/stats-valid-style}">
+
+                    <tr>
+                        <th style="width: 100px">Segment</th>
+                        <td style="text-align:left;font-size:16px;" tal:content=" file_data/source | default">N/A</td>
+                    </tr>		
+                    <tr>
+                        <th style="width: 100px">Suggestion</th>
+                        <td style="text-align:left;font-size:16px;" tal:content="file_data/sug_view | default">N/A</td>
+                    </tr>		
+                    <tr>
+                        <th style="width: 100px">Translation</th>
+                        <td style="text-align:left;font-size:16px;" tal:content="file_data/translation | default">N/A</td>
+
+                    </tr>
+                    <tr>
+                        <th style="width: 100px">Diff View</th>
+                        <td style="text-align:left;font-size:16px;" tal:content=" structure file_data/diff | default">N/A</td>
+
+                    </tr>					
+                </table>
+
+            </div>
+
+        </div>
+
+
+        <footer>
+            <div class="wrapper">
+
+                <p >Progress:</p>
+                <div class="meter">
+                    <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC}%"></a>
+                    <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/TRANSLATED_PERC}%"></a>
+                    <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job_stats/REJECTED_PERC_FORMATTED}%; style string:width:${job_stats/REJECTED_PERC}%"></a>
+                    <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC}%"></a>
+                </div>
+                <p style="margin-left:-10px;margin-right:10px"><span id="stat-progress">0</span>%</p>
+                <ul>
+                    <li id="stat-eqwords">Total Words: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong></li>
+                    <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
+                </ul>
+
+
+            </div>
+        </footer>
+
+
+
+    </body> 
 </html>

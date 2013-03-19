@@ -43,7 +43,7 @@
         #cboxPrevious:hover{background-position:-51px 0px;}
         #cboxNext{left:27px; background-position:-75px -25px;}
         #cboxNext:hover{background-position:-75px 0px;}
-        #cboxClose{display: none !important; right:0; background-position:-100px -25px;top:0}
+        #cboxClose{right:0; background-position:-100px -25px;top:0}
         #cboxClose:hover{background-position:-100px 0px;}
         
         .cboxSlideshow_on #cboxSlideshow{background-position:-125px 0px; right:27px;}

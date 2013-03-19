@@ -85,15 +85,22 @@ foreach ($files as $file) {
 	// Original
 	unset($temp);
 	preg_match('|original\s?=\s?["\'](.*?)["\']|si',$file_short,$temp);
-	$xliff['files'][$i]['attr']['original'] = $temp[1];
+	if (isset($temp[1])) { $xliff['files'][$i]['attr']['original'] = $temp[1]; } else {
+		$xliff['files'][$i]['attr']['original'] = "no-name";
+	}
 	// Source-language
 	unset($temp);
 	preg_match('|source-language\s?=\s?["\'](.*?)["\']|si',$file_short,$temp);
-	$xliff['files'][$i]['attr']['source-language'] = $temp[1];
+	if (isset($temp[1])) { $xliff['files'][$i]['attr']['source-language'] = $temp[1]; } else {
+		$xliff['files'][$i]['attr']['source-language'] = "en-US";
+		// Todo, we could do auto-detect!
+	}
 	// Data-type
 	unset($temp);
 	preg_match('|datatype\s?=\s?["\'](.*?)["\']|si',$file_short,$temp);
-	$xliff['files'][$i]['attr']['datatype'] = $temp[1];
+	if (isset($temp[1])) { $xliff['files'][$i]['attr']['datatype'] = $temp[1]; } else {
+		$xliff['files'][$i]['attr']['datatype'] = "txt";
+	}
 	// Target-language
 	unset($temp);
 	preg_match('|target-language\s?=\s?["\'](.*?)["\']|si',$file_short,$temp);
@@ -147,16 +154,16 @@ foreach ($files as $file) {
 			if (isset($temp[1])) {
 			$markers = $temp[1];
 			unset($temp);
-			log::doLog("BEFORE");
-			log::doLog($markers);
+			//log::doLog("BEFORE");
+			//log::doLog($markers);
 			$markers = preg_split('#(<mrk\s.*?type="seg".*?>(.*?)</mrk>)#si',$markers,-1, PREG_SPLIT_DELIM_CAPTURE);
-			log::doLog("AFTER");
-			log::doLog($markers);
+			//log::doLog("AFTER");
+			//log::doLog($markers);
 			
 			$mi = 0;
 			$k  = 0;
 			while (isset($markers[$mi+1])) {
-				log::doLog ("mi is $mi - exits \$marckers[\$mi +1]");
+				//log::doLog ("mi is $mi - exits \$marckers[\$mi +1]");
 				unset($mid);
 				preg_match('|mid\s?=\s?["\'](.*?)["\']|si', $markers[$mi+1],$mid);
 				
@@ -175,7 +182,7 @@ foreach ($files as $file) {
 				$mi = $mi + 3;		
 				$k++;
 			}
-log::doLog("mi exit $mi \n\n");
+//log::doLog("mi exit $mi \n\n");
 			}
 
 		}

@@ -6,7 +6,19 @@ Server side requirements
 - Apache htaccess enabled
 - PHP magic_quotes off
 - PHP cURL lib
+- PHP php5_crypt
+- PHP php5_mysql
+- pecl install zip (in php 5.3 compile with --enable-zip instead) and add extension=zip.so to php.ini
+- if you want process file until 100MB use following paramenters 
+   - in /etc/php5/apache2/php.ini
+   --- memory_limit =1024M
+   --- post_max_size = 200M
+   --- upload_max_filesize = 200M 
 
+
+NOTES
+- In PHP >= 5.3 short tag notation ( <? ?>) is disabled by default. Acccess to php.ini and turn on short_open_tag
+- In Fedora and RedHat releases the mbstring module is not installed by default : yum install php-mbstring and restart apache
 
 Client side requirements
 - Chrome web browser installed 

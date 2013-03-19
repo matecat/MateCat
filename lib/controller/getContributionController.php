@@ -1,7 +1,7 @@
 <?php
-include INIT::$UTILS_ROOT . "/engines/mt.class.php";
-include INIT::$UTILS_ROOT . "/engines/tms.class.php";
-include INIT::$UTILS_ROOT . "/cat.class.php";
+include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
+include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
+include_once INIT::$UTILS_ROOT . "/cat.class.php";
 include_once INIT::$MODEL_ROOT . "/queries.php";
 
 class getContributionController extends ajaxcontroller {
@@ -19,7 +19,7 @@ class getContributionController extends ajaxcontroller {
 
     public function __construct() {
         parent::__construct();
-
+//print_r ($_REQUEST); exit;
         $this->id_segment = $this->get_from_get_post('id_segment');
         $this->id_job = $this->get_from_get_post('id_job');
         $this->num_results = $this->get_from_get_post('num_results');
@@ -66,15 +66,15 @@ class getContributionController extends ajaxcontroller {
             }
 		//log::doLog("before $this->text");
 	    $this->text=CatUtils::view2rawxliff($this->text);
-	//	log::doLog("after $this->text");
+//log::doLog("after $this->text");
             $tms = new TMS($this->id_tms);
 
 
             $tms_match = $tms->get($this->text, $this->source, $this->target, "demo@matecat.com", $mt_from_tms, $this->id_translator);
-	//	log::doLog ("tms_match");
+		//log::doLog ("tms_match");
 		//log::doLog ($tms_match);
         }
-        // UNUSED
+        
         $mt_res = array();
         $mt_match = "";
         if (!empty($this->id_mt_engine)) {
@@ -91,7 +91,9 @@ class getContributionController extends ajaxcontroller {
                 $mt_score.="%";
 
                 $mt_match_res = new TMS_GET_MATCHES($this->text, $mt_match, $mt_score, "MT-" . $mt->getName(), date("Y-m-d"));
+
                 $mt_res = $mt_match_res->get_as_array();
+
             }
         }
         $matches=array();
@@ -107,6 +109,7 @@ class getContributionController extends ajaxcontroller {
         $matches=array_slice ($matches,0,INIT::$DEFAULT_NUM_RESULTS_FROM_TM);
         $res = $this->setSuggestionReport($matches);
         if (is_array($res) and array_key_exists("error", $res)) {
+            ; // error occurred
         }
         foreach ($matches as &$match) {
             if (strpos($match['created_by'], 'MT') !== false) {
@@ -117,7 +120,7 @@ class getContributionController extends ajaxcontroller {
             }
         }
 	//$matches=array();
-
+	
         $this->result['data']['matches'] = $matches;
     }
 
