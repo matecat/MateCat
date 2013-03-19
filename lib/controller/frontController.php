@@ -1,14 +1,15 @@
 <?php
-require_once INIT::$ROOT.'/inc/errors.inc.php';
+
+require_once INIT::$ROOT . '/inc/errors.inc.php';
 
 function __autoload($action) {
     //echo "autoload $action\n";
-    if (!file_exists(INIT::$CONTROLLER_ROOT . "/$action.php")){
-        log::doLog("file " . INIT::$CONTROLLER_ROOT . "/$action.php". " not exists. Exiting");
-        die ("file " . INIT::$CONTROLLER_ROOT . "/$action.php". " not exists. Exiting");
-    }/*else {
-        log::doLog("file " . INIT::$CONTROLLER_ROOT . "/$action.php". "  exists. Continue");
-    }*/
+    if (!file_exists(INIT::$CONTROLLER_ROOT . "/$action.php")) {
+        log::doLog("file " . INIT::$CONTROLLER_ROOT . "/$action.php" . " not exists. Exiting");
+        die("file " . INIT::$CONTROLLER_ROOT . "/$action.php" . " not exists. Exiting");
+    }/* else {
+      log::doLog("file " . INIT::$CONTROLLER_ROOT . "/$action.php". "  exists. Continue");
+      } */
     require_once INIT::$CONTROLLER_ROOT . "/$action.php";
 }
 
@@ -43,6 +44,7 @@ class controllerDispatcher {
 }
 
 abstract class controller {
+
     protected $errors;
 
     abstract function doAction();
@@ -60,9 +62,9 @@ abstract class controller {
             /* $this->localizationInfo=new localizationClass();
               $this->localize();
              */
-            
-            $this->errors=  ERRORS::obtain();
-           // print_r ($this->errors->getAllErrors());exit;
+
+            $this->errors = ERRORS::obtain();
+            // print_r ($this->errors->getAllErrors());exit;
         } catch (Exception $e) {
             echo "<pre>";
             print_r($e);
@@ -300,7 +302,7 @@ abstract class viewcontroller extends controller {
         $this->setTemplateVars();
         try {
             $buffer = ob_get_contents();
-            ob_clean();
+            ob_get_clean();
             ob_start("ob_gzhandler");  // compress page before sending
             $this->nocache();
             header('Content-Type: text/html; charset=utf-8');
