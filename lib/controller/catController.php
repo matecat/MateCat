@@ -28,6 +28,8 @@ class catController extends viewcontroller {
 	private $start_time=0.00;
 	private $downloadFileName;
 	private $job_stats=array();
+	private $source_rtl=false;
+	private $target_rtl=false;
 	//    private $seg = '';
 
 	private $job_not_found=false;
@@ -62,6 +64,8 @@ class catController extends viewcontroller {
 			header("Location: /translate/esempio.xliff/en-fr/849-mcfmtvg8");
 			exit(0);
 		}
+		if(in_array($source,INIT::$RTL_LANGUAGES)) $this->source_rtl=true;
+		if(in_array($target,INIT::$RTL_LANGUAGES)) $this->target_rtl=true;
 	}
 	/*
 	   private function stripTagsFromSource($text) {
@@ -232,6 +236,8 @@ public function setTemplateVars() {
 	$this->template->tid=$this->tid;
 	$this->template->source=$this->source;
 	$this->template->target=$this->target;
+	$this->template->source_rtl=$this->source_rtl;
+	$this->template->target_rtl=$this->target_rtl;
 	//$this->template->cucu=$this->open_segment;
 
 

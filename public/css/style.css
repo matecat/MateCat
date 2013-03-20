@@ -1148,8 +1148,10 @@ to {-webkit-transform: translate(0, -0px);    }
 
 .editor .editarea .locked
 {
+/*
     margin-left: 2px !important;
     margin-right: 2px !important;
+*/
 }
 
 .editor .editarea .locked.selected
@@ -1259,8 +1261,13 @@ section.mismatch li.tag-mismatch
     padding-left:60px;
     text-align: left;
     font-size:20px
-
 }
-
 /*RTL language*/
 .editarea.rtl, .search-editarea.rtl, .source.rtl, .graysmall li.rtl {direction: rtl !important; text-align: right !important;}
+
+body.rtl-source section .source,
+body.rtl-target section .editarea
+	{
+	direction: rtl !important;
+	text-align: right !important;
+	}
