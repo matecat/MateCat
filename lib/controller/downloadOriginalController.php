@@ -42,10 +42,11 @@ class downloadOriginalController extends downloadController {
         foreach ($files_job as $file) {
             $id_file = $file['id_file'];
             $output_content[$id_file]['filename'] = $file['filename'];
-            $output_content[$id_file]['content'] = gzinflate($file['original_file']);
-            //echo "<pre>";
-            // print_r ($data); 
-            // exit;
+			$output_content[$id_file]['content'] = @gzinflate($file['original_file']);
+			if(!$output_content[$id_file]['content']){
+				$output_content[$id_file]['content'] = $file['original_file'];
+			}
+            //echo "<pre>";// print_r ($data); // exit;
         }
         //print_r ($output_content);
         //exit;

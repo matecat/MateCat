@@ -1148,8 +1148,10 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 
 .editor .editarea .locked
 	{
+/*
 	margin-left: 2px !important;
 	margin-right: 2px !important;
+*/
 	}
 	
 .editor .editarea .locked.selected
