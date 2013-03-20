@@ -1245,3 +1245,11 @@ section.mismatch li.tag-mismatch
 
 /*RTL language*/
 .editarea.rtl, .search-editarea.rtl, .source.rtl, .graysmall li.rtl {direction: rtl !important; text-align: right !important;}
+
+body.rtl-source section .source,
+body.rtl-target section .editarea
+	{
+	direction: rtl !important;
+	text-align: right !important;
+	}
+	
