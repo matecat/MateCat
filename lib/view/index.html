@@ -7,36 +7,27 @@
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
 
-
-
-
         <script type="text/javascript">
             var config = {
-                basepath: '${basepath | string:/}',
-                id_translator: '${tid | nothing}',
-                private_translator: '${private_translator | string:0}',
-                id_customer: '${id_customer | string:unknown_customer}',
-                private_customer: '${private_customer | string:0}',
-                last_opened_segment: '${last_opened_segment}',
-                server_load_time: '${load_time}',
-                job_id: '${jid}',
-                password: '${password}',
-                source_lang: '${source}',
-                target_lang: '${target}',
-                time_to_edit_enabled: ${time_to_edit_enabled} ,
-                build_number: '${build_number}',
-                test: 'test'
+            basepath: '${basepath | string:/}',
+                    id_translator: '${tid | nothing}',
+                    private_translator: '${private_translator | string:0}',
+                    id_customer: '${id_customer | string:unknown_customer}',
+                    private_customer: '${private_customer | string:0}',
+                    last_opened_segment: '${last_opened_segment}',
+                    server_load_time: '${load_time}',
+                    job_id: '${jid}',
+                    password: '${password}',
+                    source_lang: '${source}',
+                    target_lang: '${target}',
+                    time_to_edit_enabled: ${time_to_edit_enabled},
+                    build_number: '${build_number}',
+                    test: 'test'
 
             }
             //			console.log('Server time: ' + Math.round(config.server_load_time)); 
-            var renderStart = new Date();
-        </script>
+            var renderStart = new Date();</script>
         <script src="${basepath}public/js/loader.js?build=${build_number}"></script>
-
-
-
-
-
 
     </head>
     <body tal:condition="not:supportedBrowser">
@@ -52,9 +43,9 @@
 
         <header metal:use-macro="header.html/main_header">
             <div class="wrapper">   
-                
-              
-                
+
+
+
                 <form id="fileDownload" action="${basepath}" method="post">
                     <input type="hidden" name="action" value="downloadFile" />
                     <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
@@ -385,11 +376,11 @@
 
             </div>
         </footer>
-<div class="download-chrome">
-<a href="#" class="close"></a>
-Your downloaded file will appear on the bar below in a few seconds.<br/>
-<img src="${basepath}public/img/arrowdown.png" width="18px" style="margin-top:5px" /> 
-</div>
+        <div class="download-chrome">
+            <a href="#" class="close"></a>
+            Your downloaded file will appear on the bar below in a few seconds.<br/>
+            <img src="${basepath}public/img/arrowdown.png" width="18px" style="margin-top:5px" /> 
+        </div>
 
         <div class="grayed" ></div>
         <!--
