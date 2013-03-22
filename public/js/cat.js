@@ -113,11 +113,9 @@ UI = {
             UI.copySource();
         }).bind('keydown','Meta+z', function(e){ 
             e.preventDefault();
-            console.log('command-Z');
             UI.undoInSegment(segment);
         }).bind('keydown','Meta+Shift+z', function(e){ 
             e.preventDefault();
-            console.log('command-shift-Z');
             UI.redoInSegment(segment);
         }).bind('keydown','Backspace', function(e){ 
 /*
@@ -323,6 +321,10 @@ UI = {
 			}
 			UI.beforeDropEditareaHTML = UI.editarea.html();
 			UI.droppingInEditarea = true;
+			UI.saveInUndoStack();
+			setTimeout(function(){
+				UI.saveInUndoStack();
+	        },100);
         }).on('click','.editor .editarea .locked.selected',function(e) {
 //            $(this).removeClass('selected');
         }).on('click','a.translated',function(e) {
@@ -571,6 +573,7 @@ UI = {
         }
 
         var closeStart = new Date();
+        this.autoSave = false;
         this.deActivateSegment(byButton);
 
         this.lastOpenedEditarea.attr('contenteditable','false');
@@ -961,11 +964,6 @@ UI = {
 //	    	this.editarea.html(this.editarea.html().replace("<span class=\"locked\" contenteditable=\"false\">", "<>"));
 //	    	this.editarea.html(this.editarea.html().replace("<span class=\"locked\" contenteditable=\"false\">", "<span contenteditable=\"false\" class=\"locked\">"));
 //	    	console.log('STRINGA: ' + this.editarea.html().replace(/(\<span (class=\"locked\") (contenteditable=\"false\")\>)/gi, "<span $3 $2></span>"));
-/*
-	    	console.log('HTML   : ' + this.editarea.html());
-	    	console.log('REGEX 2: ' + this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
-	    	console.log('PROVA: ' + this.editarea.html().replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)|(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)/gi, "PROVA"));
-*/
 	    	this.editarea.html(this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
 	    	this.editarea.html(this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>"));
 	    	this.editarea.html(this.editarea.html().replace(/(\<\/span\>)$(\s){0,}/gi, "</span> "));
@@ -1018,6 +1016,8 @@ UI = {
         this.cacheObjects(editarea);
         this.clearUndoStack();
         this.saveInUndoStack();
+        this.autoSave = true;
+        this.autoSaveInUndo();
         this.activateSegment();
 		
         this.getNextSegment(this.currentSegment,'untranslated');
@@ -1743,19 +1743,48 @@ UI = {
         }, 200 );
     },
 
+    autoSaveInUndo: function() {
+    	if(!this.autoSave) return;
+    	this.saveInUndoStack();
+        setTimeout(function(){
+        	UI.autoSaveInUndo();
+        },10000);    	
+
+    },
     undoInSegment: function() {
+    	this.saveInUndoStack();
+//    	console.log('UNDO');
+//    	console.log(this.undoStack);
+
+//    	console.log(this.undoStack.length);
+//    	console.log("posizione dell'item attuale (dalla fine, 0 è l'ultimo): " + this.undoStackPosition);
+    	var ind = 0;
+//    	console.log('ind 1: ' + ind);
+    	if(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1]) ind = this.undoStack.length-1-this.undoStackPosition-1;
 /*
-    	console.log('undo');
-    	console.log(this.undoStack);
+    	if(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1]) {
     	console.log(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1]);
+    	}
 */
-    	this.editarea.html(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1]);
-    	this.undoStackPosition++;
+    	this.editarea.html(this.undoStack[ind]);
+		this.checkTagMismatch(UI.currentSegment);
+//	    restoreSelection();
+
+//    	this.editarea.html(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1]);
+    	if(this.undoStackPosition < (this.undoStack.length-1)) this.undoStackPosition++;
     },
 
     redoInSegment: function() {
+/*
+    	if(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1+2]) {
+    		console.log(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1+2]);
+    	}
+*/    	
     	this.editarea.html(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1+2]);
-    	this.undoStackPosition--;
+		this.checkTagMismatch(UI.currentSegment);
+
+//	    restoreSelection();
+    	if(this.undoStackPosition > 0) this.undoStackPosition--;
 /*
     	var pos = this.undoStackPosition;
     	if(pos > 0) {
@@ -1767,14 +1796,17 @@ UI = {
     },
 
     saveInUndoStack: function() {
-    	lastItem = this.undoStack[this.undoStack.length-1];
-		if((lastItem == this.editarea.html())||(this.editarea.html() == '')) return;
+    	lastItem = this.undoStack[this.undoStack.length-1-this.undoStackPosition];
+//    	lastItem = this.undoStack[this.undoStack.length-1];
+//    	console.log('last item: ' + lastItem);
+		if(lastItem == this.editarea.html()) return;
+//		if((lastItem == this.editarea.html())&&(this.undoStackPosition == 0)) return;
+		if(this.editarea.html() == '') return;
     	var pos = this.undoStackPosition;
     	if(pos > 0) {
 			this.undoStack.splice(this.undoStack.length-pos, pos);    	
     	}
 	    this.undoStack.push(this.editarea.html());
-	    console.log(this.undoStack);
 //	    this.undoStackPosition = 0;
 
     },
