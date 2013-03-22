@@ -62,7 +62,13 @@ function extractSegments($files_path, $file, $pid, $fid) {
                         $tempSeg = trim($tempSeg);
                         if (empty($tempSeg)) {
                             $show_in_cattool = 0;
+                        } else {
+                            $extract_external = strip_external($seg_source['raw-content']);
+                            $seg_source['ext-prec-tags'].=$extract_external['prec'];
+                            $seg_source['ext-succ-tags'] = $extract_external['succ'] . $seg_source['ext-succ-tags'];
+                            $seg_source['raw-content'] = $extract_external['seg'];
                         }
+
                         $mid = mysql_real_escape_string($seg_source['mid']);
                         $ext_tags = mysql_real_escape_string($seg_source['ext-prec-tags']);
                         $source = mysql_real_escape_string($seg_source['raw-content']);
@@ -76,15 +82,28 @@ function extractSegments($files_path, $file, $pid, $fid) {
                     //$tempSeg = stripTagsFromSource2($xliff_trans_unit['source']['raw-content']);
                     $tempSeg = strip_tags($xliff_trans_unit['source']['raw-content']);
                     $tempSeg = trim($tempSeg);
-
+                    $prec_tags = NULL;
+                    $succ_tags = NULL;
                     if (empty($tempSeg)) {
                         $show_in_cattool = 0;
+                    } else {
+                        $extract_external = strip_external($xliff_trans_unit['source']['raw-content']);
+                        $prec_tags = empty($extract_external['prec']) ? NULL : $extract_external['prec'];
+                        $succ_tags = empty($extract_external['succ']) ? NULL : $extract_external['succ'];
+                        $xliff_trans_unit['source']['raw-content'] = $extract_external['seg'];
                     }
-
                     $source = mysql_real_escape_string($xliff_trans_unit['source']['raw-content']);
                     $num_words = CatUtils::segment_raw_wordcount($xliff_trans_unit['source']['raw-content']);
                     $trans_unit_id = mysql_real_escape_string($xliff_trans_unit['attr']['id']);
-                    $query_segment[] = "('$trans_unit_id',$fid,'$source',$num_words,NULL,NULL,NULL,$show_in_cattool)";
+
+                    if (!is_null($prec_tags)) {
+                        $prec_tags = mysql_real_escape_string($prec_tags);
+                    }
+                    if (!is_null($succ_tags)) {
+                        $succ_tags = mysql_real_escape_string($succ_tags);
+                    }
+
+                    $query_segment[] = "('$trans_unit_id',$fid,'$source',$num_words,NULL,'$prec_tags','$succ_tags',$show_in_cattool)";
                 }
             }
         }
@@ -132,7 +151,7 @@ function strip_external($a) {
     $pattern_x_start = '/^(\s*<x .*?\/>)(.*)/';
     $pattern_x_end = '/(.*)(<x .*?\/>\s*)$/';
     $pattern_g = '/^(\s*<g [^>]*?>)([^<]*?)(<\/g>\s*)$/';
-    //echo "\t$a\n";
+    log::doLog(__FUNCTION__ . " original is $a");
     $found = false;
     $prec = "";
     $succ = "";
@@ -186,7 +205,9 @@ function strip_external($a) {
     //echo "seg is $a\n";
     //echo "succ is $succ\n";
     //print_r ($res);
-    return array('prec' => $prec, 'seg' => $a, 'succ' => $succ);
+    $r = array('prec' => $prec, 'seg' => $a, 'succ' => $succ);
+    log::doLog(__FUNCTION__, $r);
+    return $r;
 }
 
 ?>
