@@ -152,18 +152,21 @@ class MT extends engine {
         $target_lang = $this->fix_language($target_lang);
 
         $parameters = array();
-        $parameters['seg'] = $segment;
-        $parameters['tra'] = $translation;
+        $parameters['segment'] = $segment;
+        $parameters['translation'] = $translation;
         //$parameters['langpair'] = "$source_lang|$target_lang";
 	$parameters['source']=$source_lang;
 	$parameters['target']=$target_lang;
+        $parameters['key']="TESTKEY";
         $parameters['de'] = $email;
 	$parameters['extra']=$extra;
 
         $this->doQuery("set", $parameters);
+        //print_r ($this->raw_result);
         $this->result = new MT_RESULT($this->raw_result);
-        if ($this->result->responseStatus != "200") {
-            return false;
+        //var_dump($this->result);
+        if ($this->result->error->code != "") {            
+            return array("code"=>$this->result->error->code , "message"=>$this->result->error->message);
         }
         return true;
     }
@@ -180,8 +183,8 @@ class MT extends engine {
 
         $this->doQuery("delete", $parameters);
         $this->result = new MT_RESULT($this->raw_result);
-        if ($this->result->responseStatus != "200") {
-            return false;
+        if ($this->result->error->code != "") {            
+            return array("code"=>$this->result->error->code , "message"=>$this->result->error->message);
         }
         return true;
     }

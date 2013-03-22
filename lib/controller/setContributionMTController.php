@@ -88,10 +88,11 @@ class setContributionMTController extends ajaxcontroller {
 			);
 		//send stuff
 		$outcome=$this->mt->set($this->segment, $this->translation, $this->source_lang, $this->target_lang, 'demo@matecat.com', $extra);
+                if (is_array($outcome)){
+                    $this->result['errors']=$outcome;
+                }
 				
 	}
 
 }
 ?>
-
-

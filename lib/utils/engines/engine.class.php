@@ -79,7 +79,7 @@ abstract class Engine {
         $res=$this->curl($this->url);
     
         $this->raw_result = json_decode($res,true);
-	//log::doLog("raw result");
+	log::doLog("raw result", $this->raw_result);
 	//log::doLog($this->raw_result);
 
         /*if (class_exists("log")) {

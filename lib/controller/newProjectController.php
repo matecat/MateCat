@@ -19,7 +19,7 @@ class newProjectController extends viewcontroller {
     }
 
     public function doAction() {
-        if (!isset($_COOKIE['upload_session'])) {
+        if (!isset($_COOKIE['upload_session'])) {            
             setcookie("upload_session", $this->guid, time() + 86400);
         } else {
             $this->guid = $_COOKIE['upload_session'];

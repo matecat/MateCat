@@ -214,6 +214,3 @@ class getSegmentsController extends ajaxcontroller {
 }
 
 ?>
-
-
-
