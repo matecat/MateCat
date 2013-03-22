@@ -89,8 +89,8 @@ function extractSegments($files_path, $file, $pid, $fid) {
             }
         }
     }
-    
-    if (empty($query_segment)){
+
+    if (empty($query_segment)) {
         log::doLog("Segment import - no segments found\n");
         return -1;
     }
@@ -126,6 +126,67 @@ function stripTagsFromSource2($text) {
     $text = preg_replace($pattern_g_c, "", $text);
     $text = str_replace("&nbsp;", " ", $text);
     return $text;
+}
+
+function strip_external($a) {
+    $pattern_x_start = '/^(\s*<x .*?\/>)(.*)/';
+    $pattern_x_end = '/(.*)(<x .*?\/>\s*)$/';
+    $pattern_g = '/^(\s*<g [^>]*?>)([^<]*?)(<\/g>\s*)$/';
+    //echo "\t$a\n";
+    $found = false;
+    $prec = "";
+    $succ = "";
+
+    $c = 0;
+
+    do {
+        $c+=1;
+        //echo "ciclo $c\n";
+        $found = false;
+        do {
+            $r = preg_match_all($pattern_x_start, $a, $res);
+            //print_r ($res);
+            if (isset($res[1][0])) {
+                $prec.=$res[1][0];
+                $a = $res[2][0];
+                $found = true;
+            }
+            //  echo "$c - 1 : $a\n";
+        } while (isset($res[1][0]));
+        //   echo "$c - 1 : $a\n";
+        do {
+            $r = preg_match_all($pattern_x_end, $a, $res);
+            //print_r ($res);
+            if (isset($res[2][0])) {
+                $succ = $res[2][0] . $succ;
+                $a = $res[1][0];
+                $found = true;
+            }
+        } while (isset($res[2][0]));
+        //echo "$c - 2 : --$a--\n";
+
+
+
+        do {
+            $r = preg_match_all($pattern_g, $a, $res);
+            // print_r ($res);
+            if (isset($res[1][0])) {
+                $prec.=$res[1][0];
+                $succ = $res[3][0] . $succ;
+                $a = $res[2][0];
+                $found = true;
+            }
+        } while (isset($res[1][0]));
+        //echo "$c - 3 : $a\n";
+        //echo "prec is $prec\n";
+        //echo "succ is $succ\n";
+        //exit;
+    } while ($found);
+    //echo "prec is $prec\n";
+    //echo "seg is $a\n";
+    //echo "succ is $succ\n";
+    //print_r ($res);
+    return array('prec' => $prec, 'seg' => $a, 'succ' => $succ);
 }
 
 ?>
