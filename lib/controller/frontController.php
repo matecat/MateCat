@@ -1,14 +1,15 @@
 <?php
-require_once INIT::$ROOT.'/inc/errors.inc.php';
+
+require_once INIT::$ROOT . '/inc/errors.inc.php';
 
 function __autoload($action) {
     //echo "autoload $action\n";
-    if (!file_exists(INIT::$CONTROLLER_ROOT . "/$action.php")){
-        log::doLog("file " . INIT::$CONTROLLER_ROOT . "/$action.php". " not exists. Exiting");
-        die ("file " . INIT::$CONTROLLER_ROOT . "/$action.php". " not exists. Exiting");
-    }/*else {
-        log::doLog("file " . INIT::$CONTROLLER_ROOT . "/$action.php". "  exists. Continue");
-    }*/
+    if (!file_exists(INIT::$CONTROLLER_ROOT . "/$action.php")) {
+        log::doLog("file " . INIT::$CONTROLLER_ROOT . "/$action.php" . " not exists. Exiting");
+        die("file " . INIT::$CONTROLLER_ROOT . "/$action.php" . " not exists. Exiting");
+    }/* else {
+      log::doLog("file " . INIT::$CONTROLLER_ROOT . "/$action.php". "  exists. Continue");
+      } */
     require_once INIT::$CONTROLLER_ROOT . "/$action.php";
 }
 
@@ -43,11 +44,13 @@ class controllerDispatcher {
 }
 
 abstract class controller {
+
     protected $errors;
 
     abstract function doAction();
 
     protected function nocache() {
+        //header_remove();
         header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
         header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
         header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
@@ -60,9 +63,9 @@ abstract class controller {
             /* $this->localizationInfo=new localizationClass();
               $this->localize();
              */
-            
-            $this->errors=  ERRORS::obtain();
-           // print_r ($this->errors->getAllErrors());exit;
+
+            $this->errors = ERRORS::obtain();
+            // print_r ($this->errors->getAllErrors());exit;
         } catch (Exception $e) {
             echo "<pre>";
             print_r($e);
@@ -98,9 +101,10 @@ abstract class downloadController extends controller {
     public function download() {
         try {
             $buffer = ob_get_contents();
-            ob_clean();
+            ob_get_clean();
             ob_start("ob_gzhandler");  // compress page before sending
             $this->nocache();
+            //header_remove();
             header("Content-Type: application/force-download");
             header("Content-Type: application/octet-stream");
             header("Content-Type: application/download");
@@ -302,7 +306,9 @@ abstract class viewcontroller extends controller {
             $buffer = ob_get_contents();
             ob_get_clean();
             ob_start("ob_gzhandler");  // compress page before sending
+           // header_remove();
             $this->nocache();
+            
             header('Content-Type: text/html; charset=utf-8');
             echo $this->template->execute();
             //echo $buffer;
@@ -328,6 +334,7 @@ abstract class ajaxcontroller extends controller {
         $buffer = ob_get_contents();
         ob_get_clean();
         // ob_start("ob_gzhandler");		// compress page before sending
+        header_remove();
         header('Content-Type: application/json; charset=utf-8');
         $this->result = array("errors" => array(), "data" => array());
     }
