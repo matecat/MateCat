@@ -416,7 +416,7 @@ function getOriginalFilesForJob($id_job, $id_file, $password) {
 	if (!empty($id_file)) {
 		$where_id_file = " and id_file=$id_file";
 	}
-	$query = "select id_file, original_file, filename from files_job fj
+	$query = "select id_file, if(original_file is null, xliff_file,original_file) as original_file, filename from files_job fj
 		inner join files f on f.id=fj.id_file
                 inner join jobs j on j.id=fj.id_job
 		where id_job=$id_job $where_id_file and j.password='$password'";
