@@ -11,6 +11,7 @@ class INIT {
     public static $DB_USER;
     public static $DB_PASS;
     public static $LOG_REPOSITORY;
+    public static $TMP_DOWNLOAD;
     public static $TEMPLATE_ROOT;
     public static $MODEL_ROOT;
     public static $CONTROLLER_ROOT;
@@ -22,6 +23,7 @@ class INIT {
     public static $BUILD_NUMBER;
     public static $DEFAULT_FILE_TYPES;
     public static $SUPPORTED_FILE_TYPES;
+    public static $UNSUPPORTED_FILE_TYPES;
     public static $CONVERSION_FILE_TYPES;
     public static $CONVERSION_FILE_TYPES_PARTIALLY_SUPPORTED;
     public static $CONVERSION_ENABLED;
@@ -89,6 +91,7 @@ class INIT {
 
 
         self::$LOG_REPOSITORY = self::$ROOT . "/storage/log_archive";
+	self::$TMP_DOWNLOAD=self::$ROOT."/storage/tmp_download";
         self::$TEMPLATE_ROOT = self::$ROOT . "/lib/view";
         self::$MODEL_ROOT = self::$ROOT . '/lib/model';
         self::$CONTROLLER_ROOT = self::$ROOT . '/lib/controller';
@@ -101,7 +104,6 @@ class INIT {
         self::$VOLUME_ANALYSIS_ENABLED = true;
         
         self::$RTL_LANGUAGES=array("he-IL");
-
         self::$SUPPORTED_FILE_TYPES = array(
             'Office' => array(
                 'doc' => array(''),
@@ -151,12 +153,12 @@ class INIT {
                 'xlf' => array('default')
             ),
             "Desktop Publishing" => array(
-                'fm' => array('', "Try converting to MIF"),
+//                'fm' => array('', "Try converting to MIF"),
                 'mif' => array(''),
                 'inx' => array(''),
                 'idml' => array(''),
                 'icml' => array(''),
-                'indd' => array('', "Try converting to INX"),
+//                'indd' => array('', "Try converting to INX"),
                 'xtg' => array(''),
                 'tag' => array(''),
                 'xml' => array(''),
@@ -171,6 +173,10 @@ class INIT {
                 'sgml' => array(''),
                 'sgm' => array('')
             )
+        );
+        self::$UNSUPPORTED_FILE_TYPES = array(
+            'fm' => array('', "Try converting to MIF"),
+            'indd' => array('', "Try converting to INX")
         );
 
         //self::$DEFAULT_FILE_TYPES = 'xliff|sdlxliff|xlf';

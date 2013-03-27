@@ -65,26 +65,7 @@ $(function () {
 		$('.upload-files').addClass('dragging');
         dropzone.show();
 	}).bind('fileuploadadd', function (e, data) {
-/*
-		var extension = data.files[0].name.split('.')[data.files[0].name.split('.').length-1];
-		var pf = partiallySupported();
-		var supported = true;
-		var message = '';
-		$.each(pf, function(i, v) {
-			if(v.format == extension) {
-				supported = false;
-				message = v.message;
-			}
-		});
-		if(!supported) {
-			alert('Format not supported. ' + message);
-//			$('#fileupload').fileupload('destroy');
-			return false;
-		} else {
-			disableAnalyze();
-			$('#fileupload table.upload-table tr').addClass('current');
-		}
-*/
+
 		disableAnalyze();
 		$('#fileupload table.upload-table tr').addClass('current');
 
@@ -460,7 +441,7 @@ $(function () {
 
     $('.btncontinue .cancel-btn').bind('click', function (e) {
     	e.preventDefault();
-    	$('.template-download .delete button').click();
+    	$('.template-download .delete button, .template-upload .cancel button').click();
 	});
 
 
@@ -604,9 +585,18 @@ convertFile = function(fname,filerow,filesize) {
            		var filename = $('.name',filerow).text();
            		var extension = filename.split('.')[filename.split('.').length-1];
 //           		console.log(extension);
+           		var msg = (typeof d.errors[0].message == 'null')? "Converter rebooting. Try again in two minutes" : d.errors[0].message;
            		var message = ((extension == 'pdf')&&(d.errors[0].code == '-2'))? 'No translatable content found: maybe a scanned file?' : d.errors[0].message;
-
-           		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">Error: </span>'+message);
+				errAlert = "Error: ";
+				if(extension == 'docx') {
+					errAlert = "Conversion error. ";
+					message = "Try convert to doc";
+				}
+				if((extension == 'doc')||(extension == 'rtf')) {
+					errAlert = "Conversion error. ";
+					message = "Try convert to docx";
+				}
+           		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">'+errAlert+'</span>'+message);
            		$(filerow).addClass('failed');
            		return false;
            	}
@@ -622,7 +612,7 @@ convertFile = function(fname,filerow,filesize) {
 
 testProgress = function(filerow,filesize,progress) {
 	if(typeof filesize == 'undefined') filesize = 1000000;
-	console.log('filesize: ' + filesize);
+//	console.log('filesize: ' + filesize);
 	var ob = $('.ui-progressbar-value', filerow);
 	if(ob.hasClass('completed')) return;
 //	var step = 50000/filesize;
@@ -729,52 +719,15 @@ checkConversions = function() {
     })
 }
 
-partiallySupported = function() {
-	var jj = $('<div/>').html(config.partiallySupportedFileTypes).text();
+unsupported = function() {
+	var jj = $('<div/>').html(config.unsupportedFileTypes).text();
 	var pf = $.parseJSON(jj);
 	return pf;
 }
-/*
-listSupportedFormats = function() {
-    var jj = $('<div/>').html(config.supportedFileTypes).text();
-    var pf = $.parseJSON(jj);
-    $.each(pf, function(i, v) {
-//        partialList += '<p>' + v.format + ' (' + v.message + ')</p>';
-    });     
 
-    return pf;
-}
-*/
-/*
-viewFormats = function() {
-    return;
-	var formatList = '';
-	var partialList = '';
-	var formats = config.fileTypes.split('|');
-	var pf = config.partiallySupported;
-	$.each(formats, function(index, value) {
-		var ss = true;
-		$.each(pf, function(i, v) {
-			if(v.format==value) ss = false;
-		});		
-		if(ss) formatList += ', ' + value;
-	});
-	$.each(pf, function(i, v) {
-		partialList += '<p>' + v.format + ' (' + v.message + ')</p>';
-	});		
-	var formatsHtml = '<h2>Supported formats:</h2><p>'+formatList.substr(2)+'</p>';
-//	var formatsHtml = '<h2>Supported formats:</h2><p>'+formatList.substr(2)+'</p><h3>Partially supported:</h3>'+partialList;
-	
-
-	$.colorbox({open: true, width:"50%", html:formatsHtml});
-//	alert(formatList.substr(2));
-}
-*/
 
 $(document).ready(function() {
-	config.partiallySupported = partiallySupported();
-//    config.fileFormats = listSupportedFormats();
-//    console.log(config.fileFormats);
+	config.unsupported = unsupported();
 	checkInit();
 });
 

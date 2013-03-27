@@ -404,7 +404,6 @@
             // only browsers with support for the File API report the type:
             if (!(this.options.acceptFileTypes.test(file.type) ||
                     this.options.acceptFileTypes.test(file.name))) {
-                console.log('file.type: ' + file.type);
                 return 'acceptFileTypes';
             }
             if (this.options.maxFileSize &&
@@ -425,18 +424,18 @@
                 file.error = that._hasError(file);
                 if (file.error) {
                     valid = false;
-// START Customization by Andrea Martines (Translated) 24/01/2013
-                } else {
+// START Customization by Andrea Martines (Translated) 25/03/2013
+
                     var extension = file.name.split('.')[file.name.split('.').length-1];
-                    var pf = config.partiallySupported;
-					$.each(pf, function(i, v) {
-						if(v.format==extension) {
-							valid = false;
-							file.error = 'Format not supported. ' + v.message;
-//							console.log($('.upload-table').html());
-						}
-					});		                    
-// END Customization by Andrea Martines (Translated) 24/01/2013
+                	var msg = '';
+	                $.each(config.unsupported, function() {
+	                    if(this.format == extension) msg = this.message+'.';
+	                });     
+					file.error = 'Format not supported. ' + msg;
+// END Customization by Andrea Martines (Translated) 25/03/2013
+
+                } else {
+                	valid = true;
                 }
             });
             return valid;

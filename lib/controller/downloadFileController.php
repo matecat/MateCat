@@ -31,6 +31,9 @@ class downloadFileController extends downloadController {
     }
 
     public function doAction() {
+//2013-03-25 by Massidda: this method contains a lot of debugging code introduced by me. I'll remove it at the end of my current task, so pleas do not touch
+//$debug=array();
+//$debug['total'][]=time();
         // specs for filename at the task https://app.asana.com/0/1096066951381/2263196383117
         /* if ($this->download_type == 'all') {
           //in this case fname contains the project name (see html)
@@ -43,13 +46,14 @@ class downloadFileController extends downloadController {
           }
          */
         $converter = new fileFormatConverter();
+//$debug['get_file'][]=time();
         $files_job = getFilesForJob($this->id_job, $this->id_file);
+//$debug['get_file'][]=time();
         //$nonew=1;
         //if ($this->download_type=='pseudo'){
         //    $nonew=0;
         //}
         $nonew = 0;
-
         //print_r ($data); exit;
         $output_content = array();
         foreach ($files_job as $file) {
@@ -57,12 +61,14 @@ class downloadFileController extends downloadController {
             $id_file = $file['id_file'];
             $current_filename = $file['filename'];
             $original = $file['xliff_file'];
+//$debug['get_segments'][]=time();
             $data = getSegmentsDownload($this->id_job, $this->password, $id_file, $nonew);
-            //echo "<pre>";
-            // print_r ($data); 
-            // exit;
+//$debug['get_segments'][]=time();
+            //echo "<pre>"; print_r ($data); exit;
             $transunit_translation = "";
+//echo "<pre>";echo $original;exit;
 
+//$debug['replace'][]=time();
             foreach ($data as $i => $seg) {
                 //	echo $seg['internal_id']."\n";
                 $end_tags = "";
@@ -113,11 +119,11 @@ class downloadFileController extends downloadController {
                 $res_match_2 = false;
                 $res_match_1 = false;
 
-                $pattern = '|(<trans-unit id="' . $seg['internal_id'] . '".*?>.*?)(<source.*?>.*?</source>.*?)(<seg-source.*?>.*?</seg-source>.*?)?(<target.*?>).*?(</target>)(.*?)(</trans-unit>)|si';
+                $pattern = '|(<trans-unit id=["\']' . $seg['internal_id'] . '["\'].*?>.*?)(<source.*?>.*?</source>.*?)(<seg-source.*?>.*?</seg-source>.*?)?(<target.*?>).*?(</target>)(.*?)(</trans-unit>)|si';
 
                 $res_match_1 = preg_match($pattern, $original, $match_target);
                 if (!$res_match_1) {
-                    $pattern = '|(<trans-unit id="' . $seg['internal_id'] . '".*?>.*?)(<source.*?>.*?</source>.*?)(<seg-source.*?>.*?</seg-source>.*?)?(.*?</trans-unit>)|si';
+                    $pattern = '|(<trans-unit id=[\'"]' . $seg['internal_id'] . '[\'"].*?>.*?)(<source.*?>.*?</source>.*?)(<seg-source.*?>.*?</seg-source>.*?)?(.*?</trans-unit>)|si';
                     $res_match_2 = preg_match($pattern, $original, $match_target);
                     if (!$res_match_2) {
                         ; // exception !!! see the segment format
@@ -135,22 +141,24 @@ class downloadFileController extends downloadController {
                 if (!$res_match_1 and !$res_match_2) {
                     continue; // none of pattern verify the file structure for current segmen t: go to next loop. In the worst case the procedure will return the original file
                 }
+
                 $original = preg_replace($pattern, $replacement, $original);
                 $transunit_translation = ""; // empty the translation before the end of the loop
             }
-            //exit;
+//$debug['replace'][]=time();
             $output_content[$id_file]['content'] = $original;
             $output_content[$id_file]['filename'] = $current_filename;
 
             if (!in_array($mime_type, array("xliff", "sdlxliff", "xlf"))) {
+//$debug['do_conversion'][]=time();
                 //file_put_contents("/home/matecat/test.sdlxliff", $output_content[$id_file]['content']);
                 $convertResult = $converter->convertToOriginal($output_content[$id_file]['content']);
                 $output_content[$id_file]['content'] = $convertResult['documentContent'];
+//$debug['do_conversion'][]=time();
             }
         }
         //print_r ($output_content);
         //exit;
-
 
         $ext = "";
         if ($this->download_type == 'all') {
@@ -202,7 +210,14 @@ class downloadFileController extends downloadController {
 //                $this->content = $oc['content'];
 //            }
         }
+//$debug['total'][]=time();
+/*
+foreach($debug as $k=>$subarr){
+	$debug[$k]=($subarr[1]-$subarr[0])." sec";
     }
+echo "<pre>";print_r($debug);exit;
+*/
+}
 
     private function setContent($output_content) {
         foreach ($output_content as $oc) {

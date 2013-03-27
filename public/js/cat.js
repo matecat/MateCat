@@ -41,7 +41,6 @@ UI = {
     },
 
     init: function() {
-       
         this.initStart = new Date();
         if(this.debug) console.log('Render time: ' + (this.initStart - renderStart));
         this.numMatchesResults = 2;
@@ -955,6 +954,21 @@ UI = {
 //    	console.log('prima: ' + this.editarea.html());
     	if(checkLockability(this.editarea.text())) {
 	    	this.editarea.html(this.editarea.html().replace(/(&lt;.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+/*
+	    	console.log('A: ' + this.editarea.html());
+	    	console.log('B: ' + this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
+	    	var coso = this.editarea.html().replace(/(\<span (class=\"locked\") (contenteditable=\"false\")\>)/gi, "<span $3 $2></span>");
+	    	console.log('STRINGA: ' + coso);
+			this.editarea.html(coso);
+	    	console.log('C: ' + this.editarea.html());
+*/
+			if(UI.isFirefox) {
+	    		this.editarea.html(this.editarea.html().replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
+	    		this.editarea.html(this.editarea.html().replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>"));
+			} else {
+	    		this.editarea.html(this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
+	    		this.editarea.html(this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>"));
+			}
 	 //   	this.editarea.html(this.editarea.html().replace(/((\<span)( class=\"locked\")( contenteditable=\"false\")(\>))/gi, "$2$4$3$5"));
 //	    	this.editarea.html(this.editarea.html().replace(/(\<span (class=\"locked\") (contenteditable=\"false\")\>)/gi, "<span $3 $2>"));
 
@@ -964,8 +978,7 @@ UI = {
 //	    	this.editarea.html(this.editarea.html().replace("<span class=\"locked\" contenteditable=\"false\">", "<>"));
 //	    	this.editarea.html(this.editarea.html().replace("<span class=\"locked\" contenteditable=\"false\">", "<span contenteditable=\"false\" class=\"locked\">"));
 //	    	console.log('STRINGA: ' + this.editarea.html().replace(/(\<span (class=\"locked\") (contenteditable=\"false\")\>)/gi, "<span $3 $2></span>"));
-	    	this.editarea.html(this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
-	    	this.editarea.html(this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>"));
+//	    	this.editarea.html(this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>"));
 	    	this.editarea.html(this.editarea.html().replace(/(\<\/span\>)$(\s){0,}/gi, "</span> "));
     	} else {
     		$('.editor .editarea .locked.selected').removeClass('selected');
@@ -979,9 +992,19 @@ UI = {
     	if(!this.taglockEnabled) return false;    	
     	$('.footer .suggestion_source',segment).each(function() {
     		$(this).html($(this).html().replace(/(&lt;.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+			if(UI.isFirefox) {
+	    		$(this).html($(this).html().replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
+			} else {
+	    		$(this).html($(this).html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
+			}
     	});
     	$('.footer .translation').each(function() {
     		$(this).html($(this).html().replace(/(&lt;.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+			if(UI.isFirefox) {
+	    		$(this).html($(this).html().replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
+			} else {
+	    		$(this).html($(this).html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
+			}
     	});    	
     },
 
@@ -1163,6 +1186,7 @@ UI = {
             $('.sub-editor .overflow',segment).empty();
             
             $.each(d.data.matches, function(index) {
+//            	console.log(this.translation);
                 if((this.segment == '')||(this.translation == '')) return;
                 var disabled = (this.id=='0')? true : false;                 
                 cb= this['created_by'];                    
@@ -1749,10 +1773,11 @@ UI = {
         setTimeout(function(){
         	UI.autoSaveInUndo();
         },10000);    	
-
     },
+    
     undoInSegment: function() {
-    	this.saveInUndoStack();
+//    	console.log('this.undoStackPosition iniziale: ' + this.undoStackPosition);
+    	if(this.undoStackPosition == 0) this.saveInUndoStack();
 //    	console.log('UNDO');
 //    	console.log(this.undoStack);
 
@@ -1766,12 +1791,17 @@ UI = {
     	console.log(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1]);
     	}
 */
+//    	console.log('ind: ' + ind);
+//    	console.log('UNDO: ' + this.undoStack[ind]);
     	this.editarea.html(this.undoStack[ind]);
+    	if(!ind) this.lockTags();
 		this.checkTagMismatch(UI.currentSegment);
 //	    restoreSelection();
 
 //    	this.editarea.html(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1]);
+//    	console.log('this.undoStackPosition prima: ' + this.undoStackPosition);
     	if(this.undoStackPosition < (this.undoStack.length-1)) this.undoStackPosition++;
+//    	console.log('this.undoStackPosition dopo: ' + this.undoStackPosition);
     },
 
     redoInSegment: function() {
@@ -1780,6 +1810,7 @@ UI = {
     		console.log(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1+2]);
     	}
 */    	
+//    	console.log('REDO: ' + this.undoStack[this.undoStack.length-1-this.undoStackPosition-1+2]);
     	this.editarea.html(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1+2]);
 		this.checkTagMismatch(UI.currentSegment);
 
@@ -1796,19 +1827,25 @@ UI = {
     },
 
     saveInUndoStack: function() {
-    	lastItem = this.undoStack[this.undoStack.length-1-this.undoStackPosition];
-//    	lastItem = this.undoStack[this.undoStack.length-1];
-//    	console.log('last item: ' + lastItem);
-		if(lastItem == this.editarea.html()) return;
-//		if((lastItem == this.editarea.html())&&(this.undoStackPosition == 0)) return;
+    	currentItem = this.undoStack[this.undoStack.length-1-this.undoStackPosition];
+//    	currentItem = this.undoStack[this.undoStack.length-1];
+		if(currentItem == this.editarea.html()) return;
+//		if((currentItem == this.editarea.html())&&(this.undoStackPosition == 0)) return;
 		if(this.editarea.html() == '') return;
     	var pos = this.undoStackPosition;
     	if(pos > 0) {
-			this.undoStack.splice(this.undoStack.length-pos, pos);    	
+			this.undoStack.splice(this.undoStack.length-pos+1, pos);    	
     	}
+	    if(this.undoStack.length) {
+			var doc = document.createElement('div');
+			doc.innerHTML = this.undoStack[0];
+			if(this.editarea.text().trim() == $(doc).text().trim()) {
+				return;
+			}
+
+	    }
 	    this.undoStack.push(this.editarea.html());
 //	    this.undoStackPosition = 0;
-
     },
 
     clearUndoStack: function() {

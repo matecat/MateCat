@@ -22,6 +22,7 @@ class convertFileController extends ajaxcontroller {
     }
 
     public function doAction() {
+        
         if (empty($this->file_name)) {
             $this->result['errors'][] = array("code" => -1, "message" => "Missing file name.");
             return false;
