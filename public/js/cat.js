@@ -387,9 +387,10 @@ UI = {
             UI.copySource();
         }).on('click','.tagmenu, .warning, .viewer, .notification-box li a',function(e) {          
             return false;
-        }).on('paste','.editarea',function(e) {          
+        }).on('paste','.editarea',function(e) {
+//        	console.log(e);   
 //    		if(UI.taglockEnabled) return false;    	
-
+/*
             if(!UI.isWebkit) {
                 $('#temptextarea').remove();
                 UI.body.append('<div class="alert"><a href="#" class="close"></a><strong style="font-size:160%">Sorry!</strong><br /><p>This functionality is not supported on your browser yet. We are working to enable it on every browser. </p></div>');
@@ -397,17 +398,23 @@ UI = {
                 $('#temptextarea').focus();
                 return false;
             }
-
+*/
         	UI.saveInUndoStack();
             $('#placeHolder').remove();
             var node = document.createElement("div");
             node.setAttribute('id','placeHolder');
             removeSelectedText($(this));
             insertNodeAtCursor(node);
-            handlepaste(this, event);
+//            console.log('before: ' + UI.editarea.html());
+            var ev = (UI.isFirefox)? e : event;
+            handlepaste(this, ev);
+//            console.log('past: ' + UI.editarea.html());
         	UI.saveInUndoStack();
+//            console.log('1: ' + UI.editarea.html());
             UI.lockTags();
+//            console.log('2: ' + UI.editarea.html());
             UI.checkTagMismatch(UI.currentSegment);
+//            console.log('3: ' + UI.editarea.html());
 
 
         }).on('click','a.close',function(e) {          
@@ -517,7 +524,12 @@ UI = {
         	targetTags.push($(this).text());
         })
         
-   
+/*
+   		console.log(sourceTags);
+   		console.log('numero di sourceTags:'+sourceTags.length);
+   		console.log(targetTags);
+   		console.log($('.editarea .locked',segment));
+*/
         if(this.tagCompare(sourceTags,targetTags)) {
 			$(segment).addClass('mismatch');
         } else {
@@ -1234,7 +1246,7 @@ UI = {
                 '				<input type=hidden name="id_file" value="' + fid + '">'+
                 '				<input type=hidden name="filename" value="' + this.filename + '">'+
                 '				<input type=hidden name="password" value="' + config.password + '">'+
-                '				<input title="Download file" name="submit" type="submit" value="" class="downloadfile" id="file-' + fid + '-download">'+
+                '				<!--input title="Download file" name="submit" type="submit" value="" class="downloadfile" id="file-' + fid + '-download" -->'+
                 '			</form>'+
                 '			<h2 title="' + this.filename + '">' + filenametoshow + '</div>'+
                 '		</li>'+
@@ -1533,6 +1545,8 @@ UI = {
         if(parseFloat(stats.DRAFT)) t = 'draft';
         if(parseFloat(stats.REJECTED)) t = 'draft';
         $('.downloadtr-button').removeClass("draft translated approved").addClass(t);
+        var label = (t == 'translated')? 'DOWNLOAD TRANSLATION' : 'PREVIEW';
+        $('#downloadProject').attr('value',label);
     },
 
     setProgress: function(stats) {
@@ -1833,9 +1847,15 @@ UI = {
 //		if((currentItem == this.editarea.html())&&(this.undoStackPosition == 0)) return;
 		if(this.editarea.html() == '') return;
     	var pos = this.undoStackPosition;
+//    	console.log('this.undoStack 1:');
+//    	console.log(this.undoStack);
+//    	console.log('pos: ' + pos);
     	if(pos > 0) {
-			this.undoStack.splice(this.undoStack.length-pos+1, pos);    	
+			this.undoStack.splice(this.undoStack.length-pos, pos);    	
+//			this.undoStack.splice(this.undoStack.length-pos+1, pos);
     	}
+//    	console.log('this.undoStack 2:');
+//    	console.log(this.undoStack);
 	    if(this.undoStack.length) {
 			var doc = document.createElement('div');
 			doc.innerHTML = this.undoStack[0];
@@ -1845,6 +1865,8 @@ UI = {
 
 	    }
 	    this.undoStack.push(this.editarea.html());
+//    	console.log('this.undoStack 3:');
+//    	console.log(this.undoStack);
 //	    this.undoStackPosition = 0;
     },
 
@@ -1897,10 +1919,7 @@ function b64_to_utf8(str) { // currently unused
 function handlepaste (elem, e) {
     var savedcontent = elem.innerHTML;
 
-
-
     if (e && e.clipboardData && e.clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
-
         if (/text\/html/.test(e.clipboardData.types)) {
             elem.innerHTML = htmlEncode(e.clipboardData.getData('text/plain'));
         }
@@ -1910,6 +1929,8 @@ function handlepaste (elem, e) {
         else {
             elem.innerHTML = "";
         }
+//        console.log('elem.innerHTML 1: ' + elem.innerHTML)
+
         waitforpastedata(elem, savedcontent);
         if (e.preventDefault) {
             e.stopPropagation();
@@ -1918,14 +1939,18 @@ function handlepaste (elem, e) {
         return false;
     }
     else {// Everything else - empty editdiv and allow browser to paste content into it, then cleanup
-
         elem.innerHTML = "";
+//        console.log('elem.innerHTML 2: ' + elem.innerHTML)
         waitforpastedata(elem, savedcontent);
         return true;
     }
 }
 
 function waitforpastedata (elem, savedcontent) {
+
+//    console.log(elem.childNodes);
+//    console.log('elem.childNodes.length:' + elem.childNodes.length);
+
     if (elem.childNodes && elem.childNodes.length > 0) {
         processpaste(elem, savedcontent);
     }
@@ -1942,10 +1967,23 @@ function waitforpastedata (elem, savedcontent) {
 }
 
 function processpaste (elem, savedcontent) {
-    pasteddata = elem.innerHTML;
+	pasteddata = elem.innerHTML;
+
+	if(UI.isFirefox) {
+	//	console.log(elem);
+	//	console.log('savedcontent A: ' + savedcontent);
+	//	console.log(pasteddata);
+	//	console.log(htmlEncode(pasteddata));
+		var div = document.createElement("div");
+		div.innerHTML = pasteddata;
+	//	div.innerHTML = htmlEncode(pasteddata);
+	//	console.log(htmlEncode($(div).text()));
+		savedcontent = htmlEncode($(div).text());
+	}
 
     //^^Alternatively loop through dom (elem.childNodes or elem.getElementsByTagName) here
     elem.innerHTML = savedcontent;
+    if(UI.isFirefox) UI.lockTags();
     // Do whatever with gathered data;
     $('#placeHolder').before(pasteddata);
     focusOnPlaceholder();

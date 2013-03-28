@@ -11,6 +11,10 @@ class INIT {
     public static $DB_USER;
     public static $DB_PASS;
     public static $LOG_REPOSITORY;
+    public static $STORAGE_DIR;
+    public static $UPLOAD_REPOSITORY;
+    public static $CONVERSIONERRORS_REPOSITORY;
+    public static $CONVERSIONERRORS_REPOSITORY_WEB;
     public static $TMP_DOWNLOAD;
     public static $TEMPLATE_ROOT;
     public static $MODEL_ROOT;
@@ -90,12 +94,31 @@ class INIT {
         self::$DB_PASS = "matecat01"; //databasepassword
 
 
-        self::$LOG_REPOSITORY = self::$ROOT . "/storage/log_archive";
+        self::$STORAGE_DIR = self::$ROOT . "/storage";
+        self::$LOG_REPOSITORY = self::$STORAGE_DIR . "/log_archive";
+        self::$UPLOAD_REPOSITORY = self::$STORAGE_DIR . "/upload";
+	self::$CONVERSIONERRORS_REPOSITORY=self::$ROOT."/storage/conversion_errors";
+        self::$CONVERSIONERRORS_REPOSITORY_WEB=self::$BASEURL."storage/conversion_errors";
 	self::$TMP_DOWNLOAD=self::$ROOT."/storage/tmp_download";
         self::$TEMPLATE_ROOT = self::$ROOT . "/lib/view";
         self::$MODEL_ROOT = self::$ROOT . '/lib/model';
         self::$CONTROLLER_ROOT = self::$ROOT . '/lib/controller';
         self::$UTILS_ROOT = self::$ROOT . '/lib/utils';
+
+
+
+        if (!is_dir(self::$STORAGE_DIR)){
+                mkdir (self::$STORAGE_DIR,0755,true);
+        }
+        if (!is_dir(self::$LOG_REPOSITORY)){
+                mkdir (self::$LOG_REPOSITORY,0755,true);
+        }
+        if (!is_dir(self::$UPLOAD_REPOSITORY)){
+                mkdir (self::$UPLOAD_REPOSITORY,0755,true);
+        }
+        if (!is_dir(self::$CONVERSIONERRORS_REPOSITORY)){
+                mkdir (self::$CONVERSIONERRORS_REPOSITORY,0755,true);
+        }
 
         self::$ENABLED_BROWSERS = array('chrome', 'firefox', 'safari');
         self::$CONVERSION_ENABLED = true;
