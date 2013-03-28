@@ -65,13 +65,18 @@ class createProjectController extends ajaxcontroller {
         // aggiungi path file in caricamento al cookie"pending_upload"a
         // add her the cookie mangement for remembere the last 3 choosed languages
         // project name sanitize
-        $this->project_name = preg_replace('/["\' \(\)\&\[\]\{\}\+\*,|#]/', "_", $this->project_name);
+        //$this->project_name = preg_replace('/["\' \(\)\&\[\]\{\}\+\*,:|#]/', "_", $this->project_name);
+        $this->project_name=preg_replace('/[^\p{L}0-9a-zA-Z_\.\-]/',"_",$this->project_name);
         $this->project_name = preg_replace('/[_]{2,}/', "_", $this->project_name);
         $this->project_name = str_replace('_.', ".", $this->project_name);
         //echo $this->project_name; 
         // project name validation        
         $pattern = "/^[\p{L}\ 0-9a-zA-Z_\.\-]+$/";
-        if (!preg_match($pattern, $this->project_name)) {
+        if (!preg_match($pattern, $this->project_name,$rr)) {
+                $kkk=str_split($this->project_name);
+                foreach ($kkk as $kk){
+                log::doLog($kk,ord($kk));
+                }
             $this->result['errors'][] = array("code" => -5, "message" => "Invalid Project Name $this->project_name: it should only contain numbers and letters!");
             //	        $this->result['project_name_error'] = $this->project_name;
             return false;

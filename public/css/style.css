@@ -214,7 +214,11 @@ section{position:relative;float:left;width:100%;-webkit-transition: all  100ms e
 strong:first-child{margin-right:10px !important}
 
 .download{ position:absolute;}
+/*
+ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WILL BE ENABLED 
 .projectbar h2{text-align:left;font-size:14px;float:left !important;margin:0 10px 0 25px !important;}
+*/
+.projectbar h2{text-align:left;font-size:14px;float:left !important;margin:0 10px 0 0 !important;}
 
 
 
