@@ -123,6 +123,7 @@ UI = {
         $('#shortloading').hide();
         $('#longloading').show();
         $('#longloading .approved-bar').css('width',perc*100+'%');
+        $('#longloading .approved-bar').attr('title','Analyzing ' + parseInt(perc*100)+'%');
 //        UI.progressPerc = UI.progressPerc + 3;
     },
     

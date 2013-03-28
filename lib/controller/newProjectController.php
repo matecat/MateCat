@@ -56,15 +56,13 @@ class newProjectController extends viewcontroller {
         return $ext_ret;
     }
 
-    private function getExtensionsPartiallySupported() {
+    private function getExtensionsUnsupported() {
         $ext_ret = array();
-        foreach (INIT::$SUPPORTED_FILE_TYPES as $k => $v) {
-            foreach ($v as $kk => $vv) {
-                if (!isset($vv[1]) or empty($vv[1])) {
-                    continue;
-                }
-                $ext_ret[] = array("format" => "$kk", "message" => "$vv[1]");
+        foreach (INIT::$UNSUPPORTED_FILE_TYPES as $kk => $vv) {
+            if (!isset($vv[1]) or empty($vv[1])) {
+                continue;
             }
+            $ext_ret[] = array("format" => "$kk", "message" => "$vv[1]");
         }
         $json = json_encode($ext_ret);
 
@@ -105,7 +103,7 @@ class newProjectController extends viewcontroller {
 
         $this->template->supported_file_types_array = $this->getCategories();
 
-        $this->template->partially_supported_file_types = $this->getExtensionsPartiallySupported();
+        $this->template->unsupported_file_types = $this->getExtensionsUnsupported();
         $this->template->formats_number = $this->countExtensions(); //count(explode('|', INIT::$CONVERSION_FILE_TYPES));
         $this->template->volume_analysis_enabled = INIT::$VOLUME_ANALYSIS_ENABLED;
         
