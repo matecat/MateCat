@@ -66,7 +66,7 @@ class languages {
         , 'Irish Gaelic' => array('2' => 'ga', '3' => 'gle', 'c' => 'IE', '3066' => 'ga-IE')
         , 'Italian' => array('2' => 'it', '3' => 'ita', 'c' => 'IT', '3066' => 'it-IT')
         , 'Jamaican Creole English' => array('2' => 'xx', '3' => 'jam', 'c' => 'JM', '3066' => 'xx-JM')
-        , 'Japanese' => array('2' => 'ja', '3' => 'jpn', 'c' => 'JA', '3066' => 'ja-JA')
+        , 'Japanese' => array('2' => 'ja', '3' => 'jpn', 'c' => 'JA', '3066' => 'ja-JP')
         , 'Javanese' => array('2' => 'jw', '3' => 'jav', 'c' => 'ID', '3066' => 'jw-ID')
         , 'Kabuverdianu' => array('2' => 'kea', '3' => 'kea', 'c' => '..', '3066' => 'kea-KEA')
         , 'Kabylian' => array('2' => 'kab', '3' => 'kab', 'c' => 'DZ', '3066' => 'kab-DZ')

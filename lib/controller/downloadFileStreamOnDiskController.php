@@ -1,11 +1,12 @@
 <?php
 
 set_time_limit(180);
-include_once INIT::$MODEL_ROOT . "/queries.php";
-include_once INIT::$UTILS_ROOT . "/cat.class.php";
-include_once INIT::$UTILS_ROOT . "/fileFormatConverter.class.php";
+include_once INIT::$MODEL_ROOT."/queries.php";
+include_once INIT::$UTILS_ROOT."/cat.class.php";
+include_once INIT::$UTILS_ROOT."/fileFormatConverter.class.php";
+include_once(INIT::$UTILS_ROOT.'/XliffSAXTranslationReplacer.class.php');
 
-class downloadFileController extends downloadController {
+class downloadFileStreamOnDiskController extends downloadController {
 
 	private $id_job;
 	private $password;
@@ -56,98 +57,58 @@ class downloadFileController extends downloadController {
 		$nonew = 0;
 		//print_r ($data); exit;
 		$output_content = array();
+
+		/*
+		the procedure is now as follows:
+		1)original file is loaded from DB into RAM and the flushed in a temp file on disk; a file handler is obtained 
+		2)RAM gets freed from original content
+		3)the file is read chunk by chunk by a stream parser: for each tran-unit that is encountered, 
+			target is replaced (or added) with the corresponding translation among segments
+			the current string in the buffe is flushed on standard output 
+		4)the temporary file is deleted by another process after some time
+		*/
+
 		foreach ($files_job as $file) {
 			$mime_type = $file['mime_type'];
 			$id_file = $file['id_file'];
 			$current_filename = $file['filename'];
 			$original = $file['xliff_file'];
-			//echo "<pre>";echo $original;exit;
+			
+			//flush file on disk
+			//get path
+			$path=INIT::$TMP_DOWNLOAD.'/'.$this->id_job.'/'.$id_file.'/'.$current_filename.'.xliff';
+			//make dir if doesn't exist
+			if(!file_exists(dirname($path))){
+				mkdir(dirname($path), 0777, true);
+			}
+			//create file
+			$fp=fopen($path,'w+');
+			//flush file to disk
+			fwrite($fp,$original);
+			//free memory, as we can work with file on disk now
+			unset($original);
+			
 			$debug['get_segments'][]=time();
 			$data = getSegmentsDownload($this->id_job, $this->password, $id_file, $nonew);
 			$debug['get_segments'][]=time();
-
+			
+			//create a secondary indexing mechanism on segments' array; this will be useful
+			foreach($data as $i=>$k){
+				$data[$k['internal_id']][]=$i;
+			}
 			//echo "<pre>"; print_r ($data); exit;
-
 			$transunit_translation = "";
 
 			$debug['replace'][]=time();
-			foreach ($data as $i => $seg) {
-				//	echo $seg['internal_id']."\n";
-				$end_tags = "";
-				//echo "t1 : ".$seg['translation']."\n";
-				$translation = empty($seg['translation']) ? $seg['segment'] : $seg['translation'];
-				//echo "t11 : $translation\n\n";
-
-				@$xml_valid = simplexml_load_string("<placeholder>$translation</placeholder>");
-				if (!$xml_valid) {
-					$temp = preg_split("|\<|si", $translation);
-					$item = end($temp);
-					if (preg_match('|/.*?>\W*$|si', $item)) {
-						$end_tags.="<$item";
-					}
-					while ($item = prev($temp)) {
-						if (preg_match('|/.*?>\W*$|si', $item)) {
-							$end_tags = "<$item$end_tags"; //insert at the top of the string
-						}
-					}
-					$translation = str_replace($end_tags, "", $translation);
-					//echo "t2 : $translation\n";
-				}
-
-				if (!empty($seg['mrk_id'])) {
-					$translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">$translation</mrk>";
-				}
-				//echo "t3 : $translation\n";
-				//echo "\n\n";
-				$transunit_translation.=$seg['prev_tags'] . $translation . $end_tags . $seg['succ_tags'];
-				//echo "t4 :" .$seg['prev_tags'] . $translation . $end_tags.$seg['succ_tags']."\n";
-				if (isset($data[$i + 1]) and $seg['internal_id'] == $data[$i + 1]['internal_id']) {
-					// current segment and subsequent has the same internal id --> 
-					// they are two mrk of the same source segment  -->
-					// the translation of the subsequentsegment will be queued to the current
-					continue;
-				}
-
-				//this snippet could be temporary and cover the case if the segment is enclosed into a <g> tag
-				// but the translation, due the tag stripping, does not contain it
-				// ANTONIO :  deleted because it's wrong !! if a segmemnt began by <g> tag its closure tag shoud be in the middle not only at the end of it. Instead we could check if the trans-unit is xml valid.
-				/* if (strpos($transunit_translation, "<g") === 0) { // I mean $transunit_translation began with <g tag
-				   $endsWith = substr($transunit_translation, -strlen("</g>")) == "</g>";
-
-				   if (!$endsWith) {
-				   $transunit_translation.="</g>";
-				   }
-				   } */
-				$res_match_2 = false;
-				$res_match_1 = false;
-
-				$pattern = '|(<trans-unit id=["\']' . $seg['internal_id'] . '["\'].*?>.*?)(<source.*?>.*?</source>.*?)(<seg-source.*?>.*?</seg-source>.*?)?(<target.*?>).*?(</target>)(.*?)(</trans-unit>)|si';
-
-				$res_match_1 = preg_match($pattern, $original, $match_target);
-				if (!$res_match_1) {
-					$pattern = '|(<trans-unit id=[\'"]' . $seg['internal_id'] . '[\'"].*?>.*?)(<source.*?>.*?</source>.*?)(<seg-source.*?>.*?</seg-source>.*?)?(.*?</trans-unit>)|si';
-					$res_match_2 = preg_match($pattern, $original, $match_target);
-					if (!$res_match_2) {
-						; // exception !!! see the segment format
-					}
-				}
-
-
-				if ($res_match_1) { //target esiste
-					$replacement = "$1$2$3$4" . $transunit_translation . "$5$6$7";
-				}
-				if ($res_match_2) { //target non esiste
-					$replacement = "$1$2$3<target>$transunit_translation</target>$4";
-				}
-
-				if (!$res_match_1 and !$res_match_2) {
-					continue; // none of pattern verify the file structure for current segmen t: go to next loop. In the worst case the procedure will return the original file
-				}
-
-				$original = preg_replace($pattern, $replacement, $original);
-				$transunit_translation = ""; // empty the translation before the end of the loop
-			}
+			//instatiate parser
+			$xsp=new XliffSAXTranslationReplacer($path,$data);
+			//run parsing
+			$xsp->replaceTranslation();
+			unset($xsp);
 			$debug['replace'][]=time();
+
+
+			$original=file_get_contents($path.'.out.xliff');
 			$output_content[$id_file]['content'] = $original;
 			$output_content[$id_file]['filename'] = $current_filename;
 

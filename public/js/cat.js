@@ -24,6 +24,7 @@ UI = {
         this.draggingInsideEditarea = false;
         this.undoStack = [];
         this.undoStackPosition = 0;
+        this.tagSelection = false;
 		this.downOpts = {
 			offset: '130%'
 		};
@@ -110,12 +111,22 @@ UI = {
         }).bind('keydown','Meta+right', function(e){ 
             e.preventDefault();
             UI.copySource();
+        }).bind('keydown','Ctrl+z', function(e){ 
+            e.preventDefault();
+            UI.undoInSegment(segment);
         }).bind('keydown','Meta+z', function(e){ 
             e.preventDefault();
             UI.undoInSegment(segment);
+        }).bind('keydown','Ctrl+y', function(e){ 
+            e.preventDefault();
+            UI.redoInSegment(segment);
         }).bind('keydown','Meta+Shift+z', function(e){ 
             e.preventDefault();
             UI.redoInSegment(segment);
+        }).bind('keydown','Ctrl+c', function(e){ 
+            UI.tagSelection = false;
+        }).bind('keydown','Meta+c', function(e){ 
+            UI.tagSelection = false;
         }).bind('keydown','Backspace', function(e){ 
 /*
             if($('.editor .editarea .locked.selected').length) e.preventDefault();
@@ -251,8 +262,37 @@ UI = {
             }
             if(UI.debug) console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea));
         }).on('keydown','.editor .editarea',function(e) {        
-            if(e.which == 37) {
-//            	console.log('left');
+//            console.log(e.which);
+			var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
+			if ((event.metaKey && !event.ctrlKey && special !== "meta")||(event.ctrlKey)) {
+				if(event.which == 88) { // ctrl+x
+					if($('.selected',$(this)).length) {
+						event.preventDefault();
+						UI.tagSelection = getSelectionHtml();
+						$('.selected',$(this)).remove();
+					}
+				};
+			}
+
+            if((e.which == 8)||(e.which == 46)) { // backspace e canc(mac)
+				if($('.selected',$(this)).length) {
+ 		           	e.preventDefault();
+					$('.selected', $(this)).remove();
+					UI.saveInUndoStack('cancel');
+					UI.checkTagMismatch(UI.currentSegment);
+				} else {
+					var numTagsBefore = UI.editarea.text().match(/\<.*?\>/gi).length;
+					var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
+					setTimeout(function(){
+						var numTagsAfter = UI.editarea.text().match(/\<.*?\>/gi).length;
+						var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
+						if(numTagsAfter < numTagsBefore) UI.saveInUndoStack('cancel');
+						if(numSpacesAfter < numSpacesBefore) UI.saveInUndoStack('cancel');
+			        },50);
+				}
+            };
+
+            if(e.which == 37) { // left arrow
 				var selection = window.getSelection();
 				var range = selection.getRangeAt(0);
 				if(range.startOffset != range.endOffset) {
@@ -261,7 +301,8 @@ UI = {
 						console.log("spostare il cursore a sinistra della selezione");
 					}
 				};
-            } else if(e.which == 39) {
+            };
+            if(e.which == 39) { // right arrow
 				var selection = window.getSelection();
 				var range = selection.getRangeAt(0);
 				if(range.startOffset != range.endOffset) {
@@ -270,27 +311,13 @@ UI = {
 						console.log("spostare il cursore a destra della selezione");
 					}
 				};
-
-/*
-//            	console.log('right');
-				var selection = window.getSelection();
-				var range = selection.getRangeAt(0);
-				if(range.startOffset != range.endOffset) {
-//					console.log("qualcosa è selezionato nell'editarea");
-					console.log(range);
-					var r = range.startContainer.data;
-					if((r[0] == '<')&&(r[r.length-1] == '>')) {						
-						console.log("c'è un tag selezionato");
-						if(!UI.savedSel) {
-							console.log('niente savedSel');
-							rangy.insertRangeBoundaryMarker(range, false);
-							console.log(UI.editarea.html());
-						}
-					}
-				};
-*/
             };
 
+            if(e.which == 32) { // space
+				setTimeout(function(){
+					UI.saveInUndoStack('space');
+				},100);
+            };
         }).on('input','.editarea',function(e) {
 			if(UI.draggingInsideEditarea) {
 				$(UI.tagToDelete).remove();
@@ -304,9 +331,15 @@ UI = {
 	            UI.lockTags();
 	            UI.checkTagMismatch(UI.currentSegment);
 			},10);
+        }).on('dblclick','.editarea',function(e) {
+//			console.log('dblclicking');
+//			return false;
         }).on('click','.editor .source .locked,.editor .editarea .locked',function(e) {
 			e.preventDefault();
+        	e.stopPropagation();
             selectText(this);
+//            console.log($(this).hasClass('selected'));
+            $(this).toggleClass('selected');
         }).on('dragstart','.editor .editarea .locked',function(e) {
 			var selection = window.getSelection();
 			var range = selection.getRangeAt(0);
@@ -320,12 +353,19 @@ UI = {
 			}
 			UI.beforeDropEditareaHTML = UI.editarea.html();
 			UI.droppingInEditarea = true;
-			UI.saveInUndoStack();
+			UI.saveInUndoStack('drop');
 			setTimeout(function(){
-				UI.saveInUndoStack();
+				UI.saveInUndoStack('drop');
 	        },100);
         }).on('click','.editor .editarea .locked.selected',function(e) {
-//            $(this).removeClass('selected');
+//        	e.preventDefault();
+//        	console.log('ora dovrei togliere la classe selected');
+/*
+        	e.stopPropagation();
+        	$(this).removeClass('selected');
+*/
+        }).on('click','.editor .editarea',function(e) {
+        	$('.selected',$(this)).removeClass('selected');
         }).on('click','a.translated',function(e) {
             e.preventDefault();
             UI.checkHeaviness();
@@ -399,17 +439,23 @@ UI = {
                 return false;
             }
 */
-        	UI.saveInUndoStack();
+
+        	UI.saveInUndoStack('paste');
             $('#placeHolder').remove();
             var node = document.createElement("div");
             node.setAttribute('id','placeHolder');
+//            if(window.getSelection().type == 'Caret')) removeSelectedText($(this));
             removeSelectedText($(this));
             insertNodeAtCursor(node);
 //            console.log('before: ' + UI.editarea.html());
             var ev = (UI.isFirefox)? e : event;
             handlepaste(this, ev);
 //            console.log('past: ' + UI.editarea.html());
-        	UI.saveInUndoStack();
+
+			setTimeout(function(){
+				UI.saveInUndoStack('paste');
+	        },100);
+//        	UI.saveInUndoStack();
 //            console.log('1: ' + UI.editarea.html());
             UI.lockTags();
 //            console.log('2: ' + UI.editarea.html());
@@ -606,9 +652,9 @@ UI = {
         // Attention I use .text to obtain a entity conversion, by I ignore the quote conversion done before adding to the data-original
         // I hope it still works.
     
-        this.saveInUndoStack();
+        this.saveInUndoStack('copysource');
         $(".editarea",this.currentSegment).text(source_val).keyup().focus();
-        this.saveInUndoStack();
+        this.saveInUndoStack('copysource');
         $(".editarea",this.currentSegment).effect("highlight", {}, 1000);
         this.setChosenSuggestion(0);
         this.lockTags();
@@ -628,9 +674,9 @@ UI = {
             if (decode){
                 translation=htmlDecode(translation);
             }
-        	this.saveInUndoStack();
+        	this.saveInUndoStack('copysuggestion');
             editarea.text(translation).addClass('fromSuggestion');
-        	this.saveInUndoStack();
+        	this.saveInUndoStack('copysuggestion');
             $('.percentuage',segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
         }
 //        console.log('prima del check tag mismatch da copy suggestion in editarea');
@@ -760,6 +806,7 @@ UI = {
 			success: function(d){
 				UI.renderContributions(d,this);
 				UI.lockTags();
+				UI.saveInUndoStack();
 
 				UI.blockButtons = false;
         		if (d.data.matches.length > 0) {
@@ -1050,9 +1097,9 @@ UI = {
         this.byButton = false;
         this.cacheObjects(editarea);
         this.clearUndoStack();
-        this.saveInUndoStack();
+        this.saveInUndoStack('open');
         this.autoSave = true;
-        this.autoSaveInUndo();
+//        this.autoSaveInUndo();
         this.activateSegment();
 		
         this.getNextSegment(this.currentSegment,'untranslated');
@@ -1782,20 +1829,21 @@ UI = {
     },
 
     autoSaveInUndo: function() {
+/*
     	if(!this.autoSave) return;
     	this.saveInUndoStack();
         setTimeout(function(){
         	UI.autoSaveInUndo();
         },10000);    	
+*/
     },
     
     undoInSegment: function() {
 //    	console.log('this.undoStackPosition iniziale: ' + this.undoStackPosition);
-    	if(this.undoStackPosition == 0) this.saveInUndoStack();
-//    	console.log('UNDO');
-//    	console.log(this.undoStack);
+    	if(this.undoStackPosition == 0) this.saveInUndoStack('undo');
+    	console.log('UNDO');
+    	console.log(this.undoStack);
 
-//    	console.log(this.undoStack.length);
 //    	console.log("posizione dell'item attuale (dalla fine, 0 è l'ultimo): " + this.undoStackPosition);
     	var ind = 0;
 //    	console.log('ind 1: ' + ind);
@@ -1805,8 +1853,10 @@ UI = {
     	console.log(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1]);
     	}
 */
-//    	console.log('ind: ' + ind);
-//    	console.log('UNDO: ' + this.undoStack[ind]);
+    	console.log('undoStack.length: ' + this.undoStack.length);
+    	console.log('undoStackPosition: ' + this.undoStackPosition);
+    	console.log('ind: ' + ind);
+    	console.log('UNDO: ' + this.undoStack[ind]);
     	this.editarea.html(this.undoStack[ind]);
     	if(!ind) this.lockTags();
 		this.checkTagMismatch(UI.currentSegment);
@@ -1840,12 +1890,36 @@ UI = {
 */
     },
 
-    saveInUndoStack: function() {
+    saveInUndoStack: function(action) {
+    	console.log('saving');
+//    	console.log('saving');
     	currentItem = this.undoStack[this.undoStack.length-1-this.undoStackPosition];
-//    	currentItem = this.undoStack[this.undoStack.length-1];
+//    	console.log('a');
 		if(currentItem == this.editarea.html()) return;
-//		if((currentItem == this.editarea.html())&&(this.undoStackPosition == 0)) return;
+//    	console.log('b');
 		if(this.editarea.html() == '') return;
+//    	console.log(this.editarea.html());
+
+		var ss = this.editarea.html().match(/\<span.*?contenteditable\="false".*?\>/gi);
+		var tt = this.editarea.html().match(/&lt;/gi);
+		if(tt) {
+			if((tt.length)&&(!ss)) return;			
+		}
+
+		console.log(currentItem);
+		console.log(this.undoStackPosition);
+		var diff = (typeof currentItem != 'undefined')? this.dmp.diff_main(currentItem, this.editarea.html())[1][1] : 'null';
+		if(diff == ' selected') return;
+
+//		console.log(this.editarea.html().replace(/\s?selected\s?/gi, ''));
+//		if((typeof currentItem != 'undefined')&&(currentItem != this.editarea.html())&&(this.editarea.html() == this.editarea.html().replace(/\s?selected\s?/gi, ''))) console.log('differenza nello stack solo per un tag selezionato');
+
+/*
+		if((typeof currentItem != 'undefined')&&(currentItem != this.editarea.html())&&(this.editarea.html() == this.editarea.html().replace(/\s?selected\s?/gi, ''))) return;
+*/
+//		if((typeof currentItem != 'undefined')&&(currentItem != this.editarea.html())&&(this.editarea.html() == this.editarea.html().replace(/\s?selected\s?/gi, ''))) return;
+
+//		console.log('b');
     	var pos = this.undoStackPosition;
 //    	console.log('this.undoStack 1:');
 //    	console.log(this.undoStack);
@@ -1854,19 +1928,24 @@ UI = {
 			this.undoStack.splice(this.undoStack.length-pos, pos);    	
 //			this.undoStack.splice(this.undoStack.length-pos+1, pos);
     	}
+//		console.log('c');
 //    	console.log('this.undoStack 2:');
 //    	console.log(this.undoStack);
+/*
 	    if(this.undoStack.length) {
 			var doc = document.createElement('div');
 			doc.innerHTML = this.undoStack[0];
 			if(this.editarea.text().trim() == $(doc).text().trim()) {
+				console.log('before return;');
+				console.log(this.editarea.text().trim());
+				console.log($(doc).text().trim());
 				return;
 			}
-
 	    }
-	    this.undoStack.push(this.editarea.html());
-//    	console.log('this.undoStack 3:');
-//    	console.log(this.undoStack);
+*/
+	    this.undoStack.push(this.editarea.html().replace(/(\<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
+    	console.log('this.undoStack after saving:');
+    	console.log(this.undoStack);
 //	    this.undoStackPosition = 0;
     },
 
@@ -1918,13 +1997,17 @@ function b64_to_utf8(str) { // currently unused
 // START Get clipboard data at paste event (SEE http://stackoverflow.com/a/6804718)
 function handlepaste (elem, e) {
     var savedcontent = elem.innerHTML;
+    console.log('1: ' + elem.innerHTML);
 
+    console.log(e.clipboardData.getData('text/plain'));
     if (e && e.clipboardData && e.clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
         if (/text\/html/.test(e.clipboardData.types)) {
-            elem.innerHTML = htmlEncode(e.clipboardData.getData('text/plain'));
+            var txt = (UI.tagSelection)? UI.tagSelection : htmlEncode(e.clipboardData.getData('text/plain'));
+            elem.innerHTML = txt;
         }
         else if (/text\/plain/.test(e.clipboardData.types)) {
-            elem.innerHTML = htmlEncode(e.clipboardData.getData('text/plain'));
+            var txt = (UI.tagSelection)? UI.tagSelection : htmlEncode(e.clipboardData.getData('text/plain'));
+            elem.innerHTML = txt;
         }
         else {
             elem.innerHTML = "";
@@ -1932,6 +2015,7 @@ function handlepaste (elem, e) {
 //        console.log('elem.innerHTML 1: ' + elem.innerHTML)
 
         waitforpastedata(elem, savedcontent);
+    console.log('3: ' + elem.innerHTML);
         if (e.preventDefault) {
             e.stopPropagation();
             e.preventDefault();
@@ -1967,6 +2051,7 @@ function waitforpastedata (elem, savedcontent) {
 }
 
 function processpaste (elem, savedcontent) {
+    console.log('2: ' + savedcontent);
 	pasteddata = elem.innerHTML;
 
 	if(UI.isFirefox) {
@@ -2023,8 +2108,13 @@ function truncate_filename(n, len) {
 function insertNodeAtCursor(node) {
     var range, html;
     if (window.getSelection && window.getSelection().getRangeAt) {
-        range = window.getSelection().getRangeAt(0);
-        range.insertNode(node);
+        console.log(window.getSelection().type);
+        if(window.getSelection().type == 'Caret') {
+	        range = window.getSelection().getRangeAt(0);
+	        range.insertNode(node);        	
+        } else {
+        }
+
     } else if (document.selection && document.selection.createRange) {
         range = document.selection.createRange();
         html = (node.nodeType == 3) ? node.data : node.outerHTML;
@@ -2035,7 +2125,11 @@ function insertNodeAtCursor(node) {
 function removeSelectedText (editarea) {
     if (window.getSelection || document.getSelection) {
         var oSelection = (window.getSelection ? window : document).getSelection();
-        if(oSelection.extentOffset != oSelection.baseOffset) oSelection.deleteFromDocument();
+        if(oSelection.type == 'Caret') {
+        	if(oSelection.extentOffset != oSelection.baseOffset) oSelection.deleteFromDocument();
+        } else if(oSelection.type == 'Range') {
+        	oSelection.deleteFromDocument();
+        };
     } else {
         document.selection.clear();
     }
@@ -2135,6 +2229,18 @@ function checkLockability(html) {
 //	if($(html).text() == '') return false;
 //	if((typeof html.match(/\</gi) == 'null')||(typeof html.match(/\>/gi) == 'null')) return false;
 	var lockable = (html.match(/\</gi).length == html.match(/\>/gi).length)? true : false;
+	if(lockable) {
+		if(UI.currentSegment.hasClass('unlockable')) {
+			setTimeout(function(){
+				UI.saveInUndoStack('checklockability');
+	        },100);
+//			UI.saveInUndoStack();
+		}
+		UI.currentSegment.removeClass('unlockable');
+	} else {
+		UI.currentSegment.addClass('unlockable');
+	}
+	
 	return lockable;
 }
 
@@ -2143,8 +2249,6 @@ function saveSelection() {
         rangy.removeMarkers(UI.savedSel);
     }
     UI.savedSel = rangy.saveSelection();
-//    console.log(UI.savedSel);
-//    console.log(UI.editarea.html());
     UI.savedSelActiveElement = document.activeElement;
 }
 
@@ -2153,7 +2257,6 @@ function restoreSelection() {
         rangy.restoreSelection(UI.savedSel, true);
         UI.savedSel = null;
         window.setTimeout(function() {
-//    		console.log(UI.savedSelActiveElement);
             if (UI.savedSelActiveElement && typeof UI.savedSelActiveElement.focus != "undefined") {
                 UI.savedSelActiveElement.focus();
             }
@@ -2179,6 +2282,25 @@ function selectText(element) {
     }
 }
 
+function getSelectionHtml() {
+    var html = "";
+    if (typeof window.getSelection != "undefined") {
+        var sel = window.getSelection();
+        if (sel.rangeCount) {
+            var container = document.createElement("div");
+            for (var i = 0, len = sel.rangeCount; i < len; ++i) {
+                container.appendChild(sel.getRangeAt(i).cloneContents());
+            }
+            html = container.innerHTML;
+        }
+    } else if (typeof document.selection != "undefined") {
+        if (document.selection.type == "Text") {
+            html = document.selection.createRange().htmlText;
+        }
+    }
+    return html;
+}
+
 $(document).ready(function(){
     fitText($('.breadcrumbs'),$('#pname'),30);
     $("article").each(function(){
@@ -2190,3 +2312,4 @@ $(document).ready(function(){
 
 $(window).resize(function(){
 });
+

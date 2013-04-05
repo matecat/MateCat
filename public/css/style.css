@@ -1135,12 +1135,18 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 .source .locked
 	{
 	color: #ddd !important;
+/*
+	cursor: move !important;
+*/
+	}
+.editarea .locked.selected,
+.source .locked.selected
+	{
 	cursor: move !important;
 	}
 
 .editarea .locked
 	{
-	cursor:move !important;
 	}
 	
 .editor .editarea .locked,
@@ -1160,7 +1166,12 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 	
 .editor .editarea .locked.selected
 	{
+	cursor: move !important;
+/*
 	background-color: #fff2d5 !important;
+ */	
+
+*/
 	}
     
 
