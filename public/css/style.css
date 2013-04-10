@@ -756,6 +756,7 @@ section.status-new.opened .editarea
 	word-wrap:break-word;
 	transition:none;
 	-webkit-transition: none;
+	word-break: normal;
 	}
 
 .editarea:hover 
@@ -771,9 +772,14 @@ section.status-new.opened .editarea
 textarea, input, .editarea, .search-editarea, select  {
 outline: none !important
 }
-.source{position:relative;z-index:9999; word-break: break-word;
+.source{position:relative;z-index:9999; word-break: normal;
 }
-
+.suggestion_source,
+.translation
+	{
+	word-break: normal;
+	}
+	
 .wrap {
     display: table;
    float:left;

@@ -33,7 +33,7 @@
           <li>
                
                     <form metal:define-slot="actions" id="fileDownload" action="${basepath}" method="post" style="margin-right:20px">
-                        <input type="hidden" name="action" value="downloadFile" />
+                        <input type="hidden" name="action" value="downloadFileStreamOnDisk" />
                         <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
                         <input type="hidden" name="id_file" value="" />
                         <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />

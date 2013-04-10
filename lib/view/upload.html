@@ -50,7 +50,9 @@
         <script>
             $(document).ready(function(){
 
-		
+		//set 
+		$('#source-lang').val('en-US').attr('selected',true);
+		$('#target-lang').val('fr-FR').attr('selected',true);
 		
                 $(".supported-file-formats").click(function(e){
                     e.preventDefault();
@@ -95,7 +97,7 @@
             <div class="translate-box">
                 <h2>From</h2>
                 <select name="source-lang" id="source-lang">
-                    <option value="zh-CN">Chinese</option>
+                    <!--option value="zh-CN">Chinese</option>
                     <option value="cs-CZ">Czech</option>
                     <option value="da-DK">Danish</option>
                     <option value="nl-NL">Dutch</option>
@@ -110,7 +112,8 @@
                     <option value="ja-JP">Japanese</option>
                     <option value="ko-KR">Korean</option>
                     <option value="it-IT">Italian</option>
-                    <option value="no-NO">Norwegian</option>
+                    <option value="nn-NO">Norwegian Bokmål</option>
+		    <option value="nb-NO">Norwegian Nynorsk</option>
                     <option value="pl-PL" >Polish</option>
                     <option value="pt-PT" >Portuguese</option>
                     <option value="pt-BR" >Portuguese Brazil</option>
@@ -118,7 +121,10 @@
                     <option value="es-ES">Spanish</option>
                     <option value="es-MX">Spanish Latin America</option>
                     <option value="sv-SE">Swedish</option>
-                    <option value="tr-TR">Turkish</option>          
+                    <option value="tr-TR">Turkish</option-->          
+                        <tal:block  tal:repeat="language languages">
+                            <option tal:attributes="value language/rfc" tal:content="language/name"></option>
+                        </tal:block>
 
                 </select>
             </div>
@@ -126,7 +132,7 @@
             <div class="translate-box" style="margin-left:0;">
                 <h2>To</h2>
                 <select name="target-lang" id="target-lang">
-                    <option value="zh-CN">Chinese</option>
+                    <!--option value="zh-CN">Chinese</option>
                     <option value="cs-CZ">Czech</option>
                     <option value="da-DK">Danish</option>
                     <option value="nl-NL">Dutch</option>
@@ -141,7 +147,8 @@
                     <option value="ja-JP">Japanese</option>
                     <option value="ko-KR">Korean</option>
                     <option value="it-IT">Italian</option>
-                    <option value="no-NO">Norwegian</option>
+                    <option value="nn-NO">Norwegian Bokmål</option>
+                    <option value="nb-NO">Norwegian Nynorsk</option>
                     <option value="pl-PL" >Polish</option>
                     <option value="pt-PT" >Portuguese</option>
                     <option value="pt-BR" >Portuguese Brazil</option>
@@ -149,7 +156,10 @@
                     <option value="es-ES">Spanish</option>
                     <option value="es-MX">Spanish Latin America</option>
                     <option value="sv-SE">Swedish</option>
-                    <option value="tr-TR">Turkish</option>
+                    <option value="tr-TR">Turkish</option-->
+                        <tal:block  tal:repeat="language languages">
+                            <option tal:attributes="value language/rfc" tal:content="language/name">---</option>
+                        </tal:block>
 
                 </select>
                 <br />

@@ -4,7 +4,7 @@ include_once INIT::$MODEL_ROOT . "/queries.php";
 include INIT::$UTILS_ROOT . "/mymemory_queries_temp.php";
 include INIT::$UTILS_ROOT . "/filetype.class.php";
 include INIT::$UTILS_ROOT . "/cat.class.php";
-include INIT::$UTILS_ROOT . "/langs/languages.inc.php";
+include INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 /**
  * Description of catController
@@ -88,7 +88,7 @@ class catController extends viewcontroller {
 
     public function doAction() {
         $files_found = array();
-        $lang_handler = languages::getInstance("en");
+        $lang_handler = Languages::getInstance();
 
         $data = getSegmentsInfo($this->jid, $this->password);
         if (empty($data) or $data < 0) {
@@ -140,16 +140,14 @@ class catController extends viewcontroller {
                 $s = explode("-", $seg['source']);
                 $source = strtoupper($s[0]);
                 $this->source = $source;
-                if (in_array($this->source, INIT::$RTL_LANGUAGES))
-                    $this->source_rtl = true;
+		$this->source_rtl=$lang_handler->isRTL($this->source);
             }
 
             if (empty($this->target)) {
                 $t = explode("-", $seg['target']);
                 $target = strtoupper($t[0]);
                 $this->target = $target;
-                if (in_array($this->target, INIT::$RTL_LANGUAGES))
-                    $this->target_rtl = true;
+		$this->target_rtl=$lang_handler->isRTL($this->target);
             }
             //check if language belongs to supported right-to-left languages
 
@@ -165,8 +163,8 @@ class catController extends viewcontroller {
                 $this->data["$id_file"]["mime_type"] = $seg['mime_type'];
                 $this->data["$id_file"]['id_segment_start'] = $seg['id_segment_start'];
                 $this->data["$id_file"]['id_segment_end'] = $seg['id_segment_end'];
-                $this->data["$id_file"]['source'] = $lang_handler->iso2Language($seg['source']);
-                $this->data["$id_file"]['target'] = $lang_handler->iso2Language($seg['target']);
+                $this->data["$id_file"]['source'] = $lang_handler->getLocalizedName($seg['source'],'en');
+                $this->data["$id_file"]['target'] = $lang_handler->getLocalizedName($seg['target'],'en');
                 $this->data["$id_file"]['source_code'] = $seg['source'];
                 $this->data["$id_file"]['target_code'] = $seg['target'];
                 $this->data["$id_file"]['last_opened_segment'] = $seg['last_opened_segment'];

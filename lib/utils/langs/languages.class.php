@@ -9,8 +9,8 @@ class Languages{
 	private static $map_rfc2obj; //internal support map rfc -> language data
 	private static $map_iso2rfc; //associative map iso -> rfc codes
 
-	//getInstance method
-	public static function obtain() {
+	//access singleton
+	public static function getInstance() {
 		if (!self::$instance) {
 			self::$instance = new Languages();
 		}
@@ -20,9 +20,9 @@ class Languages{
 	//constructor
 	private function __construct() {
 		//get languages file
-		$file='../../inc/supported_langs.json';
-		if(!file_exists($file)) die("no language difs found in $file");
-		$string=file_get_contents('../../inc/supported_langs.json');
+		$file=INIT::$UTILS_ROOT.'/langs/supported_langs.json';
+		if(!file_exists($file)) die("no language defs found in $file");
+		$string=file_get_contents($file);
 		//parse to associative array
 		$langs=json_decode($string,true);
 		$langs=$langs['langs'];
@@ -87,10 +87,10 @@ class Languages{
 	}
 
 	//get list of languages, as RFC3066
-	public static function getEnabledLanguages(){
+	public static function getEnabledLanguages($localizationLang){
 		foreach(self::$map_rfc2obj as $rfc=>$lang){
 			//if marked as enabled, add to result
-			if($lang['enabled']) $list[]=$rfc;
+			if($lang['enabled']) $list[]=array('rfc'=>$rfc,'name'=>$lang['localized'][$localizationLang]);
 		}
 		return $list;
 	}

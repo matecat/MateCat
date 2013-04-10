@@ -31,6 +31,7 @@ UI = {
 		this.upOpts = {
 			offset: '-40%'
 		};
+		this.isMac = (navigator.platform == 'MacIntel')? true : false;
 
         this.taglockEnabled = true;
 //        this.taglockEnabled = (Loader.detect('taglock'))? Loader.detect('taglock') : 0;
@@ -61,7 +62,6 @@ UI = {
         rangy.init();
         this.savedSel = null;
         this.savedSelActiveElement = null;
-
         this.markTags();
 	
         // SET EVENTS
@@ -369,9 +369,13 @@ UI = {
         }).on('click','a.translated',function(e) {
             e.preventDefault();
             UI.checkHeaviness();
+            console.log('segment is loaded?: ' + UI.segmentIsLoaded(UI.nextSegmentId));
             if(UI.blockButtons) {
                 if(UI.segmentIsLoaded(UI.nextSegmentId) || UI.nextSegmentId=='' ) {
+                	console.log('segment is already loaded');
                 } else {
+                	console.log('segment is not loaded');
+                	
                     if(!UI.noMoreSegmentsAfter) {
                         UI.reloadWarning();					
                     }
@@ -445,9 +449,11 @@ UI = {
             var node = document.createElement("div");
             node.setAttribute('id','placeHolder');
 //            if(window.getSelection().type == 'Caret')) removeSelectedText($(this));
+            console.log('before remove selected text: ' + UI.editarea.html());
             removeSelectedText($(this));
+            console.log('after remove selected text: ' + UI.editarea.html());
             insertNodeAtCursor(node);
-//            console.log('before: ' + UI.editarea.html());
+            console.log('after insert placeholder: ' + UI.editarea.html());
             var ev = (UI.isFirefox)? e : event;
             handlepaste(this, ev);
 //            console.log('past: ' + UI.editarea.html());
@@ -695,7 +701,7 @@ UI = {
 
     createButtons: function() {
         var disabled = (this.currentSegment.hasClass('loaded'))? '' : ' disabled="disabled"';
-        var buttons = '<li><a id="segment-'+this.currentSegmentId+'-copysource" href="#" class="btn copysource" data-segmentid="segment-'+this.currentSegmentId+'" title="Copy source to target"></a><p>CTRL+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-'+this.currentSegmentId+'-button-translated" data-segmentid="segment-'+this.currentSegmentId+'" href="#" class="translated"'+disabled+' >TRANSLATED</a><p>CTRL+ENTER</p></li>';
+        var buttons = '<li><a id="segment-'+this.currentSegmentId+'-copysource" href="#" class="btn copysource" data-segmentid="segment-'+this.currentSegmentId+'" title="Copy source to target"></a><p>'+((UI.isMac)?'CMD':'CTRL')+'+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-'+this.currentSegmentId+'-button-translated" data-segmentid="segment-'+this.currentSegmentId+'" href="#" class="translated"'+disabled+' >TRANSLATED</a><p>'+((UI.isMac)?'CMD':'CTRL')+'+ENTER</p></li>';
 //        var buttons = '<li class="tag-mismatch" title="Tag Mismatch">Tag Mismatch</li><li><a id="segment-'+this.currentSegmentId+'-copysource" href="#" class="btn copysource" data-segmentid="segment-'+this.currentSegmentId+'" title="Copy source to target"></a><p>CTRL+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-'+this.currentSegmentId+'-button-translated" data-segmentid="segment-'+this.currentSegmentId+'" href="#" class="translated"'+disabled+' >TRANSLATED</a><p>CTRL+ENTER</p></li>';
         $('#segment-'+this.currentSegmentId+'-buttons').append(buttons);
         $('#segment-'+this.currentSegmentId+'-buttons').before('<p class="warnings">Warning: Tag Mismatch</p>');
@@ -893,9 +899,11 @@ UI = {
     },
 
     getNextSegment: function(segment,status) {
+    	console.log('status: '+status);
         var seg = this.currentSegment;
         var rules = (status =='untranslated')? 'section.status-draft, section.status-rejected, section.status-new' : 'section.status-'+status;
         var n = $(seg).nextAll(rules).first();
+        console.log(n);
         if(!n.length) {
             n = $(seg).parents('article').next().find(rules).first();
         }
@@ -1006,11 +1014,25 @@ UI = {
         return ((selContainer.hasClass('editarea'))&&(!selContainer.is(UI.editarea)));
     },
 
+    noTagsInSegment: function(starting) {
+    	if((!this.editarea)&&(typeof starting == 'undefined')) return true;
+    	if(typeof starting != 'undefined') return false;
+
+    	var a = $('.source',this.currentSegment).html().match(/\&lt;.*?\&gt;/gi);
+    	var b = this.editarea.html().match(/\&lt;.*?\&gt;/gi);
+    	if(a||b) {
+    		return false;
+    	} else {
+    		return true;
+    	};
+
+    },
+
     lockTags: function() {
     	if(!this.taglockEnabled) return false;
+    	if(this.noTagsInSegment()) return false;
 
 	    saveSelection();
-//    	console.log('prima: ' + this.editarea.html());
     	if(checkLockability(this.editarea.text())) {
 	    	this.editarea.html(this.editarea.html().replace(/(&lt;.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 /*
@@ -1068,7 +1090,9 @@ UI = {
     },
 
     markTags: function() {
-    	if(!this.taglockEnabled) return false;    	
+    	if(!this.taglockEnabled) return false;
+    	if(this.noTagsInSegment(1)) return false;
+
     	$('.source').each(function() {
     		$(this).html($(this).html().replace(/(&lt;.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 	    	$(this).html($(this).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));

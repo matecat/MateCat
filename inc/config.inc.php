@@ -33,7 +33,6 @@ class INIT {
     public static $CONVERSION_ENABLED;
     public static $ANALYSIS_WORDS_PER_DAYS;
     public static $VOLUME_ANALYSIS_ENABLED;
-    public static $RTL_LANGUAGES;
 
     private function initOK() {
 
@@ -97,9 +96,9 @@ class INIT {
         self::$STORAGE_DIR = self::$ROOT . "/storage";
         self::$LOG_REPOSITORY = self::$STORAGE_DIR . "/log_archive";
         self::$UPLOAD_REPOSITORY = self::$STORAGE_DIR . "/upload";
-	self::$CONVERSIONERRORS_REPOSITORY=self::$ROOT."/storage/conversion_errors";
+	self::$CONVERSIONERRORS_REPOSITORY=self::$STORAGE_DIR."/conversion_errors";
         self::$CONVERSIONERRORS_REPOSITORY_WEB=self::$BASEURL."storage/conversion_errors";
-	self::$TMP_DOWNLOAD=self::$ROOT."/storage/tmp_download";
+	self::$TMP_DOWNLOAD=self::$STORAGE_DIR ."/tmp_download";
         self::$TEMPLATE_ROOT = self::$ROOT . "/lib/view";
         self::$MODEL_ROOT = self::$ROOT . '/lib/model';
         self::$CONTROLLER_ROOT = self::$ROOT . '/lib/controller';
@@ -126,7 +125,6 @@ class INIT {
         self::$BUILD_NUMBER = '0.3.0.1';
         self::$VOLUME_ANALYSIS_ENABLED = true;
         
-        self::$RTL_LANGUAGES=array("he-IL");
         self::$SUPPORTED_FILE_TYPES = array(
             'Office' => array(
                 'doc' => array(''),
