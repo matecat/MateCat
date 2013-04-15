@@ -85,7 +85,9 @@ class createProjectController extends ajaxcontroller {
         // create project
         $analysis_status = (INIT::$VOLUME_ANALYSIS_ENABLED) ? 'NEW' : 'NOT_TO_ANALYZE';
         $ppassword = $this->create_password();
-        $pid = insertProject('translated_user', $this->project_name, $analysis_status, $ppassword);
+        
+        $ip=Utils::getRealIpAddr();
+        $pid = insertProject('translated_user', $this->project_name, $analysis_status, $ppassword,$ip);
         //create user (Massidda 2013-01-24)
         //this is done only if an API key is provided
         if (!empty($this->private_tm_key)) {

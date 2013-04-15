@@ -1,4 +1,5 @@
-<?php 
+<?php
+
 //include_once ("../inc/config.class.php"); // only for testing purpose
 class Utils {
 
@@ -12,11 +13,11 @@ class Utils {
         if (!self::is_assoc($d)) {
             throw new Exception("The input data to " . __FUNCTION__ . "must be an associative array", -1);
         }
-     //  print_r ($d); exit;
+        //  print_r ($d); exit;
         $ch = curl_init();
 
-       // $data = http_build_query($d);
-       // $d = null;
+        // $data = http_build_query($d);
+        // $d = null;
         //echo "2 - " . memory_get_usage(true)/1024/1024;
         //echo "\n";
 
@@ -53,14 +54,25 @@ class Utils {
           } */
 
         //print_r ($info);
-       
+
         return $output;
+    }
+
+    public static function getRealIpAddr() {
+        $ip="";
+        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {   //check ip from share internet              
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+            //log::doLog("ip 1 $ip");
+        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {   //to check ip is pass from proxy
+            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+            //log::doLog("ip 2 $ip");
+        } else {
+            $ip = $_SERVER['REMOTE_ADDR'];
+            //log::doLog("ip 3 $ip");
+        }
+        return $ip;
     }
 
 }
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 ?>

@@ -20,6 +20,7 @@ class newProjectController extends viewcontroller {
 		}
 		$this->guid = $this->create_guid();
 		$this->lang_handler=Languages::getInstance();
+                Utils::getRealIpAddr();
 	}
 
 	public function doAction() {

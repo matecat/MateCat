@@ -572,13 +572,14 @@ function getNextSegmentId($sid, $jid, $status) {
 	return $results['sid'];
 }
 
-function insertProject($id_customer, $project_name, $analysis_status, $password) {
+function insertProject($id_customer, $project_name, $analysis_status, $password, $ip='UNKNOWN') {
 	$data = array();
 	$data['id_customer'] = $id_customer;
 	$data['name'] = $project_name;
 	$data['create_date'] = date("Y-m-d H:i:s");
 	$data['status_analysis'] = $analysis_status;
 	$data['password'] = $password;
+        $data['remote_ip_address'] = empty($ip)?'UNKNOWN':$ip;
 	$query = "SELECT LAST_INSERT_ID() FROM projects";
 
 	$db = Database::obtain();
