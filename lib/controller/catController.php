@@ -140,14 +140,15 @@ class catController extends viewcontroller {
                 $s = explode("-", $seg['source']);
                 $source = strtoupper($s[0]);
                 $this->source = $source;
-		$this->source_rtl=$lang_handler->isRTL($this->source);
+		$this->source_rtl= ($lang_handler->isRTL(strtolower($this->source)))? ' rtl-source' : '';
             }
 
             if (empty($this->target)) {
                 $t = explode("-", $seg['target']);
                 $target = strtoupper($t[0]);
                 $this->target = $target;
-		$this->target_rtl=$lang_handler->isRTL($this->target);
+		$this->target_rtl= ($lang_handler->isRTL(strtolower($this->target)))? ' rtl-target' : '';
+          	//log::doLog("TARGET CLASS for ".$this->target.": " . $lang_handler->isRTL(strtolower($this->target)));
             }
             //check if language belongs to supported right-to-left languages
 
@@ -223,7 +224,7 @@ class catController extends viewcontroller {
         $this->template->target_rtl = $this->target_rtl;
         //$this->template->cucu=$this->open_segment;
         //$this->template->cucu=$this->open_segment;
-        //		$this->template->stats=$stats[0]['TOTAL'];
+        //$this->template->stats=$stats[0]['TOTAL'];
 
         $this->template->source_code = $this->source_code;
         $this->template->target_code = $this->target_code;

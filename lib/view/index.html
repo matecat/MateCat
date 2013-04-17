@@ -48,7 +48,7 @@
 
 
 
-    <body class="cattool" tal:condition="supportedBrowser" define="catpage string:true">
+    <body class="cattool${source_rtl}${target_rtl}" tal:condition="supportedBrowser" define="catpage string:true">
 
         <header metal:use-macro="header.html/main_header">
             <div class="wrapper">   

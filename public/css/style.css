@@ -1164,6 +1164,12 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 
 .editor .editarea .locked
 	{
+	color: #AAAAAA !important;
+	font-size: 70%;
+	font-style: italic;
+	padding-bottom: 3px;
+	vertical-align: middle;
+
 /*
 	margin-left: 2px !important;
 	margin-right: 2px !important;

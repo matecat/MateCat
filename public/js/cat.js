@@ -25,6 +25,7 @@ UI = {
         this.undoStack = [];
         this.undoStackPosition = 0;
         this.tagSelection = false;
+        this.nextSegmentIdByServer = 0;
 		this.downOpts = {
 			offset: '130%'
 		};
@@ -74,7 +75,7 @@ UI = {
             $('.editor .translated').click();
         }).bind('keydown','Ctrl+pageup', function(e){ 
             e.preventDefault();
-            alert('pageup');;
+//            alert('pageup');
         }).bind('keydown','Ctrl+down', function(e){ 
             e.preventDefault();
             e.stopPropagation();
@@ -173,6 +174,11 @@ UI = {
         $(".x-stats").click(function(e) {          
             $(".stats").toggle();
         });
+
+		$(window).on('sourceCopied', function(event) {
+			console.log(event.segment);
+//			console.log(event.status);
+		});
 
         $("article").on('click','a.number',function(e) {  
             e.preventDefault();
@@ -353,6 +359,11 @@ UI = {
 			}
 			UI.beforeDropEditareaHTML = UI.editarea.html();
 			UI.droppingInEditarea = true;
+
+	        $(window).trigger({
+				type:"droppedInEditarea",
+				segment: UI.currentSegment
+			});
 			UI.saveInUndoStack('drop');
 			setTimeout(function(){
 				UI.saveInUndoStack('drop');
@@ -370,6 +381,13 @@ UI = {
             e.preventDefault();
             UI.checkHeaviness();
             console.log('segment is loaded?: ' + UI.segmentIsLoaded(UI.nextSegmentId));
+            console.log(UI.blockButtons);
+/*
+            if(!UI.segmentIsLoaded(UI.nextSegmentId)) {
+				console.log(UI.nextSegmentId);
+				UI.reloadWarning();         	
+            }
+*/
             if(UI.blockButtons) {
                 if(UI.segmentIsLoaded(UI.nextSegmentId) || UI.nextSegmentId=='' ) {
                 	console.log('segment is already loaded');
@@ -449,14 +467,16 @@ UI = {
             var node = document.createElement("div");
             node.setAttribute('id','placeHolder');
 //            if(window.getSelection().type == 'Caret')) removeSelectedText($(this));
-            console.log('before remove selected text: ' + UI.editarea.html());
             removeSelectedText($(this));
-            console.log('after remove selected text: ' + UI.editarea.html());
             insertNodeAtCursor(node);
-            console.log('after insert placeholder: ' + UI.editarea.html());
             var ev = (UI.isFirefox)? e : event;
             handlepaste(this, ev);
 //            console.log('past: ' + UI.editarea.html());
+
+	        $(window).trigger({
+				type:"pastedInEditarea",
+				segment: segment
+			});
 
 			setTimeout(function(){
 				UI.saveInUndoStack('paste');
@@ -501,10 +521,10 @@ UI = {
 
 	doRequest: function(req) {
         var setup = {
-                url:      config.basepath + '?action=' + req.data.action + this.appendTime(),
-                data:     req.data,
-                type:     'POST',
-                dataType: 'json'
+            url:      config.basepath + '?action=' + req.data.action + this.appendTime(),
+            data:     req.data,
+            type:     'POST',
+            dataType: 'json'
         };
 
         // Callbacks
@@ -543,6 +563,11 @@ UI = {
         this.setContribution(segment,status,byStatus);
         this.setContributionMT(segment,status,byStatus);
         this.setTranslation(segment,status);
+        $(window).trigger({
+			type:"statusChanged",
+			segment: segment,
+			status: status
+		});
     },
 
     checkHeaviness: function() {
@@ -590,12 +615,12 @@ UI = {
     },
 
     chooseSuggestion: function(w) {
-        this.copySuggestionInEditarea(this.currentSegment,$('.editor ul[data-item='+w+'] li.b .translation').text(),$('.editor .editarea'),$('.editor ul[data-item='+w+'] ul.graysmall-details .percent').text());
+        this.copySuggestionInEditarea(this.currentSegment,$('.editor ul[data-item='+w+'] li.b .translation').text(),$('.editor .editarea'),$('.editor ul[data-item='+w+'] ul.graysmall-details .percent').text(),false,false,w);
         this.lockTags();
         this.checkTagMismatch(UI.currentSegment);
         this.setChosenSuggestion(w);
 
-        this.editarea.focus().effect("highlight", {}, 1000);		
+        this.editarea.focus().effect("highlight", {}, 1000);
 //		this.placeCaretAtEnd(document.getElementById($(this.editarea).attr('id')));
 
     },
@@ -637,6 +662,11 @@ UI = {
 
         var closeStart = new Date();
         this.autoSave = false;
+
+        $(window).trigger({
+			type:"segmentClosed",
+			segment: segment
+		});
         this.deActivateSegment(byButton);
 
         this.lastOpenedEditarea.attr('contenteditable','false');
@@ -662,12 +692,16 @@ UI = {
         $(".editarea",this.currentSegment).text(source_val).keyup().focus();
         this.saveInUndoStack('copysource');
         $(".editarea",this.currentSegment).effect("highlight", {}, 1000);
+        $(window).trigger({
+			type:"sourceCopied",
+			segment: segment
+		});
         this.setChosenSuggestion(0);
         this.lockTags();
         this.checkTagMismatch(UI.currentSegment);
     },
 
-    copySuggestionInEditarea: function(segment,translation,editarea,match,decode) {
+    copySuggestionInEditarea: function(segment,translation,editarea,match,decode,auto,which) {
         if (typeof(decode)=="undefined"){
             decode=false;
         }
@@ -685,6 +719,18 @@ UI = {
         	this.saveInUndoStack('copysuggestion');
             $('.percentuage',segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
         }
+
+        // a value of 0 for 'which' means the choice has been made by the
+        // program and not by the user
+
+		$(window).trigger({
+			type:"suggestionChosen",
+			segment: UI.currentSegment,
+			element: UI.editarea,
+			which: which,
+			translation: translation
+		});
+
 //        console.log('prima del check tag mismatch da copy suggestion in editarea');
 //        console.log(editarea.text());
 
@@ -810,6 +856,8 @@ UI = {
 			},
 			context: $('#'+id),
 			success: function(d){
+				UI.getContribution_success(d,this);
+/*
 				UI.renderContributions(d,this);
 				UI.lockTags();
 				UI.saveInUndoStack();
@@ -820,13 +868,32 @@ UI = {
 				} else {
         			$(".sbm > .matches", this).hide();
 				}
+*/
 			},
 			complete: function(d){
-			    $(".loader", n).removeClass('loader_on');
+				UI.getContribution_complete(n);
+//			    $(".loader", n).removeClass('loader_on');
 			}
 		});
     },
 
+    getContribution_complete: function(n) {
+	    $(".loader", n).removeClass('loader_on');
+    },
+
+    getContribution_success: function(d,segment) {
+		this.renderContributions(d,segment);
+		this.lockTags();
+		this.saveInUndoStack();
+
+		this.blockButtons = false;
+		if (d.data.matches.length > 0) {
+			$('.submenu li.matches a span', segment).text('('+d.data.matches.length+')');
+		} else {
+			$(".sbm > .matches", segment).hide();
+		}
+    },
+    
     getMoreSegments: function(where) {
         if((where == 'after')&&(this.noMoreSegmentsAfter)) return;
         if((where == 'before')&&(this.noMoreSegmentsBefore)) return;   		
@@ -862,6 +929,8 @@ UI = {
                 where: where
 			},
 			success: function(d){
+                UI.getMoreSegments_success(d);
+/*
                 where = d.data['where'];
                 if(typeof d.data['files'] != 'undefined') {
                     var numsegToAdd = 0;
@@ -894,21 +963,58 @@ UI = {
                 $('#outer').removeClass('loading loadingBefore');
                 UI.loadingMore = false;
 				UI.setWaypoints();
+*/
 			}
 		});
     },
+  
+    getMoreSegments_success: function(d) {
+        where = d.data['where'];
+        if(typeof d.data['files'] != 'undefined') {
+            var numsegToAdd = 0;
+            $.each(d.data['files'], function() {
+                numsegToAdd = numsegToAdd + this.segments.length;
+            });
+            this.renderSegments(d.data['files'],where,false);
+           
+            // if getting segments before, UI points to the segment triggering the event 
+            if((where == 'before')&&(numsegToAdd)) {
+                this.scrollSegment($('#segment-'+this.segMoving));
+            }
+    		
+            // check if there is a segment to restore (to open) in the newly loaded segments
+            if(this.segmentIdToRestore) {
+                if($('#segment-'+this.segmentIdToRestore).length) {
+                    $('#segment-'+this.segmentIdToRestore+' .editarea').trigger('click');
+                    this.body.removeClass('virtualEditing');
+                    this.segmentIdToRestore = false;
+                }
+            }
+            this.markTags();
+        }
+        if(where == 'after') {
+        }
+        if(d.data['files'].length == 0) {
+            if(where == 'after') this.noMoreSegmentsAfter = true;
+            if(where == 'before') this.noMoreSegmentsBefore = true;
+        }
+        $('#outer').removeClass('loading loadingBefore');
+        this.loadingMore = false;
+		this.setWaypoints();
+    },
 
     getNextSegment: function(segment,status) {
-    	console.log('status: '+status);
         var seg = this.currentSegment;
         var rules = (status =='untranslated')? 'section.status-draft, section.status-rejected, section.status-new' : 'section.status-'+status;
         var n = $(seg).nextAll(rules).first();
-        console.log(n);
+        
         if(!n.length) {
             n = $(seg).parents('article').next().find(rules).first();
         }
         if(n.length) {
             this.nextSegmentId = $(n).attr('id').split('-')[1];
+        } else if((UI.nextSegmentIdByServer)&&(!UI.noMoreSegmentsAfter)){
+        	this.nextSegmentId = UI.nextSegmentIdByServer;
         } else {
             this.nextSegmentId = 0;
         }
@@ -955,6 +1061,8 @@ UI = {
                 where: where
 			},
 			success: function(d){
+                UI.getSegments_success(d);
+/*
                 where = d.data['where'];
                 $.each(d.data['files'], function() {
                     startSegmentId = this['segments'][0]['sid'];
@@ -965,8 +1073,22 @@ UI = {
                 $('#outer').removeClass('loading loadingBefore');
                 UI.loadingMore = false;
                 UI.setWaypoints();
+*/
 			}
 		});
+    },
+
+    getSegments_success: function(d) {
+        where = d.data['where'];
+        $.each(d.data['files'], function() {
+            startSegmentId = this['segments'][0]['sid'];
+        })
+        if(typeof this.startSegmentId == 'undefined') this.startSegmentId = startSegmentId;
+        this.body.addClass('loaded');
+        if(typeof d.data['files'] != 'undefined') this.renderSegments(d.data['files'],where,true);
+        $('#outer').removeClass('loading loadingBefore');
+        this.loadingMore = false;
+        this.setWaypoints();
     },
 
     gotoNextSegment: function() {
@@ -986,6 +1108,10 @@ UI = {
 
     gotoOpenSegment: function() {
         this.scrollSegment(this.currentSegment);
+        $(window).trigger({
+			type:"scrolledToOpenSegment",
+			segment: segment
+		});
     },	
 
     gotoPreviousSegment: function() {
@@ -1120,6 +1246,11 @@ UI = {
         }
         this.byButton = false;
         this.cacheObjects(editarea);
+        $(window).trigger({
+			type:"segmentOpened",
+			segment: segment
+		});
+
         this.clearUndoStack();
         this.saveInUndoStack('open');
         this.autoSave = true;
@@ -1224,6 +1355,27 @@ UI = {
         }            	
     },
 
+    pointBackToSegment: function(segmentId) {
+        console.log('this.infiniteScroll:');
+        console.log(this.infiniteScroll);
+        console.log(segmentId);
+        if(!this.infiniteScroll) return;
+        if(segmentId == '') {
+        	this.startSegmentId = config.last_opened_segment;
+            $('#outer').empty();
+            this.render(false);
+        } else {
+	        var m = confirm('The segment requested is outside the current view.');
+	        if(m) {
+//	            segment = $('#segment-' + segmentId);
+	            $('#outer').empty();
+	            this.render(false);
+	        }                	
+        }
+
+    	
+    },
+
     removeButtons: function(byButton) {
         var segment = (byButton)? this.currentSegment : this.lastOpenedSegment;
         $('#'+segment.attr('id')+'-buttons').empty();
@@ -1260,7 +1412,7 @@ UI = {
  
             var copySuggestionDone = false;
             if (editareaLength==0){
-                UI.copySuggestionInEditarea(segment,translation,editarea,match,true);
+                UI.copySuggestionInEditarea(segment,translation,editarea,match,true,true,0);
                 UI.setChosenSuggestion(1);
                 copySuggestionDone = true;
             }
@@ -1573,10 +1725,22 @@ UI = {
                 action: 'setCurrentSegment',
                 id_segment: id_segment,
                 id_job: config.job_id
+			},
+			success: function(d){
+				UI.setCurrentSegment_success(d);
+/*
+                UI.nextSegmentIdByServer = d.nextSegmentId;
+        		UI.getNextSegment(UI.currentSegment,'untranslated');
+*/
 			}
 		});
     },
 
+    setCurrentSegment_success: function(d) {
+        this.nextSegmentIdByServer = d.nextSegmentId;
+		this.getNextSegment(this.currentSegment,'untranslated');
+    },
+    
     setDeleteSuggestion: function(segment) {
         $('.sub-editor .overflow a.trash',segment).click(function(e) {
             e.preventDefault();
@@ -1598,6 +1762,8 @@ UI = {
                     id_translator : config.id_translator
 				},
 				success: function(d){
+					UI.setDeleteSuggestion_success(d);
+/*
                     if(UI.debug) console.log('match deleted');
 
                     $(".editor .matches .graysmall").each(function(index){
@@ -1605,9 +1771,20 @@ UI = {
                         $(this).attr('data-item',index+1);
                         UI.reinitMMShortcuts();
                     })
+*/
 				}
 			});
         });
+    },
+
+    setDeleteSuggestion_success: function(d) {
+	    if(this.debug) console.log('match deleted');
+	
+	    $(".editor .matches .graysmall").each(function(index){
+	        $(this).find('.graysmall-message').text('ALT+'+(index+1));
+	        $(this).attr('data-item',index+1);
+	        UI.reinitMMShortcuts();
+	    })
     },
 
     setDownloadStatus: function(stats) {
@@ -1737,13 +1914,24 @@ UI = {
                 chosen_suggestion_index: chosen_suggestion
 			},
 			success: function(d){
+				UI.setTranslation_success(d,segment,status);
+/*
                 if(d.data == 'OK') {
                     UI.setStatus(segment,status);
                     UI.setDownloadStatus(d.stats);
                     UI.setProgress(d.stats);
                 };
+*/
 			}
 		});
+    },
+
+    setTranslation_success: function(d,segment,status) {
+        if(d.data == 'OK') {
+            this.setStatus(segment,status);
+            this.setDownloadStatus(d.stats);
+            this.setProgress(d.stats);
+        };
     },
 
     setWaypoints: function() {
@@ -1863,66 +2051,31 @@ UI = {
     },
     
     undoInSegment: function() {
-//    	console.log('this.undoStackPosition iniziale: ' + this.undoStackPosition);
     	if(this.undoStackPosition == 0) this.saveInUndoStack('undo');
-    	console.log('UNDO');
-    	console.log(this.undoStack);
-
-//    	console.log("posizione dell'item attuale (dalla fine, 0 è l'ultimo): " + this.undoStackPosition);
     	var ind = 0;
-//    	console.log('ind 1: ' + ind);
     	if(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1]) ind = this.undoStack.length-1-this.undoStackPosition-1;
-/*
-    	if(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1]) {
-    	console.log(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1]);
-    	}
-*/
-    	console.log('undoStack.length: ' + this.undoStack.length);
-    	console.log('undoStackPosition: ' + this.undoStackPosition);
-    	console.log('ind: ' + ind);
-    	console.log('UNDO: ' + this.undoStack[ind]);
+
     	this.editarea.html(this.undoStack[ind]);
     	if(!ind) this.lockTags();
 		this.checkTagMismatch(UI.currentSegment);
-//	    restoreSelection();
 
-//    	this.editarea.html(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1]);
-//    	console.log('this.undoStackPosition prima: ' + this.undoStackPosition);
     	if(this.undoStackPosition < (this.undoStack.length-1)) this.undoStackPosition++;
-//    	console.log('this.undoStackPosition dopo: ' + this.undoStackPosition);
     },
 
     redoInSegment: function() {
-/*
-    	if(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1+2]) {
-    		console.log(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1+2]);
-    	}
-*/    	
-//    	console.log('REDO: ' + this.undoStack[this.undoStack.length-1-this.undoStackPosition-1+2]);
     	this.editarea.html(this.undoStack[this.undoStack.length-1-this.undoStackPosition-1+2]);
 		this.checkTagMismatch(UI.currentSegment);
-
-//	    restoreSelection();
     	if(this.undoStackPosition > 0) this.undoStackPosition--;
-/*
-    	var pos = this.undoStackPosition;
-    	if(pos > 0) {
-			this.undoStack.splice(this.undoStack.length-pos, pos);    	
-    	}
-	    this.undoStack.push(this.editarea.html());
-	    this.undoStackPosition = 0;
-*/
     },
 
     saveInUndoStack: function(action) {
-    	console.log('saving');
-//    	console.log('saving');
     	currentItem = this.undoStack[this.undoStack.length-1-this.undoStackPosition];
-//    	console.log('a');
-		if(currentItem == this.editarea.html()) return;
-//    	console.log('b');
+
+		if(typeof currentItem != 'undefined') {
+			if(currentItem.trim() == this.editarea.html().trim()) return;
+		}
+
 		if(this.editarea.html() == '') return;
-//    	console.log(this.editarea.html());
 
 		var ss = this.editarea.html().match(/\<span.*?contenteditable\="false".*?\>/gi);
 		var tt = this.editarea.html().match(/&lt;/gi);
@@ -1930,47 +2083,15 @@ UI = {
 			if((tt.length)&&(!ss)) return;			
 		}
 
-		console.log(currentItem);
-		console.log(this.undoStackPosition);
 		var diff = (typeof currentItem != 'undefined')? this.dmp.diff_main(currentItem, this.editarea.html())[1][1] : 'null';
 		if(diff == ' selected') return;
 
-//		console.log(this.editarea.html().replace(/\s?selected\s?/gi, ''));
-//		if((typeof currentItem != 'undefined')&&(currentItem != this.editarea.html())&&(this.editarea.html() == this.editarea.html().replace(/\s?selected\s?/gi, ''))) console.log('differenza nello stack solo per un tag selezionato');
-
-/*
-		if((typeof currentItem != 'undefined')&&(currentItem != this.editarea.html())&&(this.editarea.html() == this.editarea.html().replace(/\s?selected\s?/gi, ''))) return;
-*/
-//		if((typeof currentItem != 'undefined')&&(currentItem != this.editarea.html())&&(this.editarea.html() == this.editarea.html().replace(/\s?selected\s?/gi, ''))) return;
-
-//		console.log('b');
     	var pos = this.undoStackPosition;
-//    	console.log('this.undoStack 1:');
-//    	console.log(this.undoStack);
-//    	console.log('pos: ' + pos);
     	if(pos > 0) {
-			this.undoStack.splice(this.undoStack.length-pos, pos);    	
-//			this.undoStack.splice(this.undoStack.length-pos+1, pos);
+			this.undoStack.splice(this.undoStack.length-pos, pos);
+			this.undoStackPosition = 0;    	
     	}
-//		console.log('c');
-//    	console.log('this.undoStack 2:');
-//    	console.log(this.undoStack);
-/*
-	    if(this.undoStack.length) {
-			var doc = document.createElement('div');
-			doc.innerHTML = this.undoStack[0];
-			if(this.editarea.text().trim() == $(doc).text().trim()) {
-				console.log('before return;');
-				console.log(this.editarea.text().trim());
-				console.log($(doc).text().trim());
-				return;
-			}
-	    }
-*/
 	    this.undoStack.push(this.editarea.html().replace(/(\<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
-    	console.log('this.undoStack after saving:');
-    	console.log(this.undoStack);
-//	    this.undoStackPosition = 0;
     },
 
     clearUndoStack: function() {
@@ -2152,7 +2273,12 @@ function removeSelectedText (editarea) {
         if(oSelection.type == 'Caret') {
         	if(oSelection.extentOffset != oSelection.baseOffset) oSelection.deleteFromDocument();
         } else if(oSelection.type == 'Range') {
-        	oSelection.deleteFromDocument();
+    		var ss = $(oSelection.baseNode).parent()[0];
+    		if($(ss).hasClass('selected')) {
+    			$(ss).remove();
+    		} else {
+    			oSelection.deleteFromDocument();
+    		}
         };
     } else {
         document.selection.clear();
@@ -2325,8 +2451,25 @@ function getSelectionHtml() {
     return html;
 }
 
+function setBrowserHistoryBehavior() {
+
+	window.onpopstate = function(event) {
+		segmentId = location.hash.substr(1);
+		if(UI.segmentIsLoaded(segmentId)) {
+			$(".editarea", $('#segment-'+segmentId)).click();
+		} else {
+			if($('section').length)	UI.pointBackToSegment(segmentId);
+		}
+//		console.log(segmentId);
+//	  console.log("location: " + location.hash.substr(1));
+	};
+
+}
+
+
 $(document).ready(function(){
     fitText($('.breadcrumbs'),$('#pname'),30);
+    setBrowserHistoryBehavior();
     $("article").each(function(){
         fitText($('.filename h2',$(this)),$('.filename h2',$(this)),30);
     })   
