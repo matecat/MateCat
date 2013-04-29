@@ -31,6 +31,16 @@ $(document).ready(function() {
         $(".advanced-box").toggle('fast');
         $(".more").toggleClass('minus');
     });
+
+    $("#source-lang").on('change', function(e){
+		console.log('source language changed');
+		if(!$('.template-download').length) return;
+        var m = confirm('Source language changed. File conversion must be restarted');
+        if(m) {
+            UI.restartConversions();
+        }         
+
+    });
          
     $("input.uploadbtn").click(function(e) {
         $('body').addClass('creating');

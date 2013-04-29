@@ -87,11 +87,11 @@ class downloadFileStreamOnDiskController extends downloadController {
 			fwrite($fp,$original);
 			//free memory, as we can work with file on disk now
 			unset($original);
-			
+			//echo $path;exit;
 			$debug['get_segments'][]=time();
 			$data = getSegmentsDownload($this->id_job, $this->password, $id_file, $nonew);
 			$debug['get_segments'][]=time();
-			
+		 //echo "<pre>";print_r ($data); exit;	
 			//create a secondary indexing mechanism on segments' array; this will be useful
 			foreach($data as $i=>$k){
 				$data[$k['internal_id']][]=$i;
@@ -109,12 +109,13 @@ class downloadFileStreamOnDiskController extends downloadController {
 
 
 			$original=file_get_contents($path.'.out.xliff');
+			//echo $original; exit;
 			$output_content[$id_file]['content'] = $original;
 			$output_content[$id_file]['filename'] = $current_filename;
 
 			if (!in_array($mime_type, array("xliff", "sdlxliff", "xlf"))) {
 				$debug['do_conversion'][]=time();
-				//file_put_contents("/home/matecat/test.sdlxliff", $output_content[$id_file]['content']);
+				file_put_contents("/home/matecat/test.sdlxliff", $output_content[$id_file]['content']);
 				$convertResult = $converter->convertToOriginal($output_content[$id_file]['content']);
 				$output_content[$id_file]['content'] = $convertResult['documentContent'];
 				$debug['do_conversion'][]=time();

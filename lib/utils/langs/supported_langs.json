@@ -106,11 +106,18 @@
         "localized": [{"en": "Italian"}]
       },
       {
+        "rfc3066code": "nb-NO",
+        "isocode": "no",
+	"enabled": true,
+	"rtl": false,
+        "localized": [{"en": "Norwegian (Bokmål)"}]
+      },
+      {
         "rfc3066code": "no-NO",
         "isocode": "no",
 	"enabled": true,
 	"rtl": false,
-        "localized": [{"en": "Norwegian"}]
+        "localized": [{"en": "Norwegian (Nynorsk)"}]
       },
       {
         "rfc3066code": "pl-PL",

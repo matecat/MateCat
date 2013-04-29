@@ -97,7 +97,7 @@ class convertFileController extends ajaxcontroller {
                 }
                 return 0;
             } else {
-                if ($convertResult['errorMessage'] == "Error: failed to create SDLXLIFF.") {
+                if (stripos($convertResult['errorMessage'] ,"failed to create SDLXLIFF.")!==false) {
                     $convertResult['errorMessage'] = "Error: failed importing file.";
                 }
                 $this->result['code'] = 0;

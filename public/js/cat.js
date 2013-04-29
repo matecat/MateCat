@@ -35,6 +35,7 @@ UI = {
 		this.isMac = (navigator.platform == 'MacIntel')? true : false;
 
         this.taglockEnabled = true;
+        //if (config.target_lang=='JA'){        this.taglockEnabled = false};
 //        this.taglockEnabled = (Loader.detect('taglock'))? Loader.detect('taglock') : 0;
 //        this.tagLock();
         this.debug = Loader.detect('debug');
@@ -303,6 +304,10 @@ UI = {
 				var range = selection.getRangeAt(0);
 				if(range.startOffset != range.endOffset) {
 					var r = range.startContainer.data;
+					console.log(range);
+					console.log(range.startContainer.previousSibling);
+					if((range.startOffset == 0)&&($(range.startContainer.previousSibling).hasClass('locked'))) console.log('bingo');
+					console.log('range.startOffset: ' + range.startOffset);
 					if((r[0] == '<')&&(r[r.length-1] == '>')) {		
 						console.log("spostare il cursore a sinistra della selezione");
 					}
@@ -715,7 +720,7 @@ UI = {
                 translation=htmlDecode(translation);
             }
         	this.saveInUndoStack('copysuggestion');
-            editarea.text(translation).addClass('fromSuggestion');
+            $(editarea).text(translation).addClass('fromSuggestion');
         	this.saveInUndoStack('copysuggestion');
             $('.percentuage',segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
         }
@@ -816,6 +821,57 @@ UI = {
     detectStartSegment: function() {
         var hash = window.location.hash.substr(1);
         this.startSegmentId = (hash)? hash : config.last_opened_segment;
+    },
+
+    fixLockability: function(html) {
+		if(UI.editarea.text() == '') return false;
+		if(!html.match(/\</gi)) return false;
+		
+		
+//		cerca le sequenze (inizio riga o >)< <... > e trasforma tutti gli < tranne l'ultimo in ST
+//	    this.editarea.html(this.editarea.html().replace(/&lt;(.*?&lt;)/gi, "<span class=\"lt\">[lt]</span>$1"));
+//	    this.editarea.html(this.editarea.html().replace(/(&gt;.*?)&lt;(.*?&lt;)/gi, "$1[LT]$2"));
+	    this.editarea.html(this.editarea.html().replace(/&lt;(.*?&lt;)/gi, "[LT]$1"));
+
+
+
+
+/*		
+		CHECK IF 
+		
+		
+		if there are masked tags {
+			
+		} else {
+			
+		}
+			
+		
+		
+		
+		 
+*/		
+//		var lockable = (html.match(/\</gi).length == html.match(/\>/gi).length)? true : false;
+/*
+		if(lockable) {
+//			controlla se 
+		} else {
+//			converti i tag soprannumerari in fake tags
+		}
+/*
+/*
+		var lockable = (html.match(/\</gi).length == html.match(/\>/gi).length)? true : false;
+		if(lockable) {
+			if(UI.currentSegment.hasClass('unlockable')) {
+				setTimeout(function(){
+					UI.saveInUndoStack('checklockability');
+		        },100);
+			}
+			UI.currentSegment.removeClass('unlockable');
+		} else {
+			UI.currentSegment.addClass('unlockable');
+		}
+*/
     },
 
     getContribution: function(segment,next) {
@@ -1155,20 +1211,106 @@ UI = {
     },
 
     lockTags: function() {
+//    	if(UI.isFirefox) return;
+//    	console.log('lock tagsq');
     	if(!this.taglockEnabled) return false;
     	if(this.noTagsInSegment()) return false;
 
 	    saveSelection();
+
+	    var tx = this.editarea.html();
+//		console.log('1: ' + tx);
+//		console.log(tx);
+//		console.log(tx);
+/*
+		console.log(tx);
+		console.log(tx.match(/&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\s+.*?&gt;/gi));
+		console.log(tx.match(/na.*?^((?!hede).)*$.*?ne/gi));
+		console.log(tx.match(/&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\s+.*?^(?!Andrea)*?.*?&gt;/gi));
+		console.log(tx.match(/&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\s+.*?^((?!&lt;).)*$.*?&gt;/gi));
+*/
+//		console.log(tx.match(/&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\s+[^&lt;]*?.*?(\<span id\=\"selectionBoundary)?.*?&gt;/gi));
+
+//		console.log(tx.match(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\s+[^&lt;]*?.*?&gt;)/gi));
+//	    tx = tx.replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\s+[^&lt;]*?(\<span id\=\"selectionBoundary)?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>");
+//	    tx = tx.replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\s+[^&lt;]*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>");
+	    
+	    // encapsulate tags of opening
+
+
+
+
+
+/*
+		console.log('tx: ' + tx);
+		var coso = tx.replace(/\<span/gi, "<PL");
+		coso = coso.replace(/\<\/span/gi, "</PL");
+		coso = coso.replace(/&lt;/gi, "<");
+		coso = coso.replace(/&gt;/gi, ">");
+	    coso = coso.replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?[^>]*?.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>");
+		console.log('COSO: ' + coso);
+	    tx = tx.replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>");
+*/
+
+		tx = tx.replace(/\<span/gi, "<pl")
+				.replace(/\<\/span/gi, "</pl")
+				.replace(/&lt;/gi, "<")
+//		tx = tx.replace(/&gt;/gi, ">");
+	    		.replace(/(\<(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid[^<]*?&gt;)/gi, "<pl contenteditable=\"false\" class=\"locked\">$1</pl>")
+				.replace(/\</gi, "&lt;")
+//		tx = tx.replace(/\>/gi, "&gt;");
+				.replace(/\&lt;pl/gi, "<span")
+				.replace(/\&lt;\/pl/gi, "</span")
+	    
+				.replace(/\&lt;div\>/gi, "<div>")
+				.replace(/\&lt;\/div\>/gi, "</div>")
+				.replace(/\&lt;br\>/gi, "<br>")
+
+
+//		console.log(tx);
+//		console.log('2: ' + tx);
+	    		// encapsulate tags of closing
+	    		.replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>");
+
+
+		if(UI.isFirefox) {
+			console.log('1: ' + tx);
+    		tx = tx.replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>");
+			console.log('2: ' + tx);
+    		tx = tx.replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>");
+		} else {
+    		// fix nested encapsulation
+    		tx = tx.replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>");  		
+    		tx = tx.replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>");
+		}
+
+    	tx = tx.replace(/(\<\/span\>)$(\s){0,}/gi, "</span> ");
+    	this.editarea.html(tx);
+/*
+	    this.editarea.html(this.editarea.html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\s+[^&lt;]*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+	    this.editarea.html(this.editarea.html().replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+
+
+		if(UI.isFirefox) {
+    		this.editarea.html(this.editarea.html().replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
+    		this.editarea.html(this.editarea.html().replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>"));
+		} else {
+    		this.editarea.html(this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
+    		this.editarea.html(this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>"));
+
+		}
+
+    	this.editarea.html(this.editarea.html().replace(/(\<\/span\>)$(\s){0,}/gi, "</span> "));
+*/
+		restoreSelection();
+
+
+
+/*
     	if(checkLockability(this.editarea.text())) {
 	    	this.editarea.html(this.editarea.html().replace(/(&lt;.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-/*
-	    	console.log('A: ' + this.editarea.html());
-	    	console.log('B: ' + this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
-	    	var coso = this.editarea.html().replace(/(\<span (class=\"locked\") (contenteditable=\"false\")\>)/gi, "<span $3 $2></span>");
-	    	console.log('STRINGA: ' + coso);
-			this.editarea.html(coso);
-	    	console.log('C: ' + this.editarea.html());
-*/
+
+
 			if(UI.isFirefox) {
 	    		this.editarea.html(this.editarea.html().replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
 	    		this.editarea.html(this.editarea.html().replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>"));
@@ -1193,12 +1335,14 @@ UI = {
     	}
 //    	console.log('dopo: ' + this.editarea.html());
 		restoreSelection();
+*/
+
     },
 
 	markSuggestionTags: function(segment) {
     	if(!this.taglockEnabled) return false;    	
     	$('.footer .suggestion_source',segment).each(function() {
-    		$(this).html($(this).html().replace(/(&lt;.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+    		$(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 			if(UI.isFirefox) {
 	    		$(this).html($(this).html().replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
 			} else {
@@ -1206,7 +1350,7 @@ UI = {
 			}
     	});
     	$('.footer .translation').each(function() {
-    		$(this).html($(this).html().replace(/(&lt;.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+    		$(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 			if(UI.isFirefox) {
 	    		$(this).html($(this).html().replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
 			} else {
@@ -1220,14 +1364,16 @@ UI = {
     	if(this.noTagsInSegment(1)) return false;
 
     	$('.source').each(function() {
-    		$(this).html($(this).html().replace(/(&lt;.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+    		$(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+	    	$(this).html($(this).html().replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 	    	$(this).html($(this).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
     	});
     	
     	$('.editarea').each(function() {
     		if($('#segment-'+$(this).data('sid')).hasClass('mismatch')) return false;    	
 
-    		$(this).html($(this).html().replace(/(&lt;.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+    		$(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+	    	$(this).html($(this).html().replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 	    	$(this).html($(this).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
     	});
     },
@@ -1303,31 +1449,31 @@ UI = {
 
     reinitMMShortcuts: function(a) {
 		$('body').unbind('keydown.alt1').unbind('keydown.alt2').unbind('keydown.alt3').unbind('keydown.alt4').unbind('keydown.alt5');
-        $("body, .editarea").bind('keydown.alt1','Alt+1', function(e){ 
+        $("body, .editarea").bind('keydown.alt1','alt+meta+1', function(e){ 
             e.preventDefault();
             e.stopPropagation();
             if(e.which != 97) {
                 UI.chooseSuggestion('1');
             }
-        }).bind('keydown.alt2','Alt+2', function(e){ 
+        }).bind('keydown.alt2','alt+meta+2', function(e){ 
             e.preventDefault();
             e.stopPropagation();
             if(e.which != 98) {
                 UI.chooseSuggestion('2');
             }
-        }).bind('keydown.alt3','Alt+3', function(e){ 
+        }).bind('keydown.alt3','alt+meta+3', function(e){ 
             e.preventDefault();
             e.stopPropagation();
             if(e.which != 99) {
                 UI.chooseSuggestion('3');
             }            
-        }).bind('keydown.alt4','Alt+4', function(e){ 
+        }).bind('keydown.alt4','alt+meta+4', function(e){ 
             e.preventDefault();
             e.stopPropagation();
             if(e.which != 100) {
                 UI.chooseSuggestion('4');
             }            
-        }).bind('keydown.alt5','Alt+5', function(e){ 
+        }).bind('keydown.alt5','alt+meta+5', function(e){ 
             e.preventDefault();
             e.stopPropagation();
             if(e.which != 101) {
@@ -1398,7 +1544,7 @@ UI = {
         var isActiveSegment = $(segment).hasClass('editor');
         var editarea = $('.editarea', segment);
         if(d.data.matches.length) {
-            var editareaLength = editarea.text().length;
+            var editareaLength = editarea.text().trim().length;
             if(isActiveSegment) {
                 editarea.removeClass("indent");
             } else {
@@ -1432,7 +1578,7 @@ UI = {
                 }
                 // Attention Bug: We are mixing the view mode and the raw data mode.
                 // before doing a enanched view you will need to add a data-original tag
-                $('.sub-editor .overflow',segment).append('<ul class="graysmall" data-item="'+(index+1)+'" data-id="'+this.id+'"><li >'+((disabled)?'':' <a id="'+segment_id+'-tm-'+this.id+'-delete" href="#" class="trash" title="delete this row"></a>')+'<span id="'+segment_id+'-tm-'+this.id+'-source" class="suggestion_source">'+this.segment+'</span></li><li class="b"><span class="graysmall-message">ALT+'+(index+1)+'</span><span id="'+segment_id+'-tm-'+this.id+'-translation" class="translation">'+this.translation+'</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">'+(this.match)+'</li><li>'+this['last_update_date']+'</li><li class="graydesc">Source: <span class="bold">'+cb+'</span></li></ul></ul>');
+                $('.sub-editor .overflow',segment).append('<ul class="graysmall" data-item="'+(index+1)+'" data-id="'+this.id+'"><li class="sugg-source">'+((disabled)?'':' <a id="'+segment_id+'-tm-'+this.id+'-delete" href="#" class="trash" title="delete this row"></a>')+'<span id="'+segment_id+'-tm-'+this.id+'-source" class="suggestion_source">'+this.segment+'</span></li><li class="b sugg-target"><span class="graysmall-message">ALT+CMD+'+(index+1)+'</span><span id="'+segment_id+'-tm-'+this.id+'-translation" class="translation">'+this.translation+'</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">'+(this.match)+'</li><li>'+this['last_update_date']+'</li><li class="graydesc">Source: <span class="bold">'+cb+'</span></li></ul></ul>');
             });
             UI.markSuggestionTags(segment);
             UI.setDeleteSuggestion(segment);
@@ -1477,7 +1623,7 @@ UI = {
                 '			<strong>' + this.source + '</strong> [<span class="source-lang">' + this.source_code + '</span>]&nbsp;>&nbsp;<strong>' + this.target + '</strong> [<span class="target-lang">' + this.target_code + '</span>]'+
                 '		</li>'+
                 '		<li class="wordcounter">'+
-                '			Raw words: <strong>' + fs['TOTAL_FORMATTED'] + '</strong>'+
+                '			Payable Words: <strong>' + fs['TOTAL_FORMATTED'] + '</strong>'+
 //                '			To-do: <strong>' + fs['DRAFT_FORMATTED'] + '</strong>'+
                 '			<span id="rejected" class="hidden">Rejected: <strong>' + fs['REJECTED_FORMATTED'] + '</strong></span>'+
                 '		</li>'+
@@ -1510,7 +1656,7 @@ UI = {
                 '					</span>'+
                 '					<div class="textarea-container">'+
                 '						<span class="loader"></span>'+
-                '						<div class="editarea invisible" contenteditable="false" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation)?'':this.translation) + '</div>'+
+                '						<div class="editarea invisible" contenteditable="false" spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation)?'':this.translation) + '</div>'+
                 '					</div> <!-- .textarea-container -->'+
                 '				</div> <!-- .target -->'+
                 '			</div> <!-- .wrap -->'+
@@ -1788,6 +1934,7 @@ UI = {
     },
 
     setDownloadStatus: function(stats) {
+    	console.log('setDownloadStatus');
         var t = 'approved';
         if(parseFloat(stats.TRANSLATED)) t = 'translated';
         if(parseFloat(stats.DRAFT)) t = 'draft';
@@ -2372,6 +2519,9 @@ function checkHTML(html) {
 */
 
 function checkLockability(html) {
+//	UI.fixLockability(html);
+//	return false;
+
 	if(UI.editarea.text() == '') return false;
 //	console.log(UI.editarea.text());
 	if(!html.match(/\</gi)) return false;
@@ -2392,6 +2542,7 @@ function checkLockability(html) {
 	}
 	
 	return lockable;
+
 }
 
 function saveSelection() {

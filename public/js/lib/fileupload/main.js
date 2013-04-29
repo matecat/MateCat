@@ -19,8 +19,39 @@ UI = {
     	enableAnalyze();
     },
 
+    restartConversions: function() {
+    	console.log('restart conversions');
+    	$('.template-download, .template-upload').each(function() {
+			if(config.conversionEnabled) {
+        		var filerow = $(this);
+        		var filename = $('.name',filerow).text();
+        		var filesize =  ($('.size span',filerow).length)? parseFloat($('.size span',filerow).text().split(' ')[0])*1000000 : 0;
+//        		console.log(filename);
+
+//        		var filerow = data.context;
+//        		var filesize = 0;
+				var currentSession = $(filerow).data('session');
+				$.each(UI.conversionRequests, function() {
+					if(this.session == currentSession) {
+						console.log('session: ' + this.session);
+						this.request.abort();
+					}
+				});
+				
+				$(filerow).data('session','');
+				$('.operation',filerow).remove();
+				$('.progress',filerow).remove();
+				convertFile(filename,filerow,filesize);
+			}
+    	});
+    },
+    
     checkAnalyzability: function() {
     	return checkAnalyzability();
+    },
+    
+    checkFailedConversionsNumber: function() {
+    	return checkFailedConversionsNumber();
     }
 }
 
@@ -41,6 +72,7 @@ $(function () {
     );
     var dropzone = $('#overlay');
     var langCorrections = [];
+    UI.conversionRequests = [];
 
 	$(document).bind('drop dragover', function (e) {
 	    e.preventDefault();
@@ -65,11 +97,36 @@ $(function () {
 		$('.upload-files').addClass('dragging');
         dropzone.show();
 	}).bind('fileuploadadd', function (e, data) {
-		if($('.upload-table tr').length > 9) {
-//			console.log(data.files);
-//			alert('passato il limite di 10 file');
-		}
+		console.log('adding');
+		console.log(data);
 
+		if($('.upload-table tr').length >= (config.maxNumberFiles)) {
+			console.log('adding more than 10');
+//			$('.error-message').text('No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).').show();
+			jqXHR = data.submit();
+			jqXHR.abort();
+		}
+/*
+		var maxnum = config.maxNumberFiles;
+		if($('.upload-table tr').length > (maxnum-1)) {
+			console.log('more than 10');
+			$('.error-message').text('No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).').show();
+			jqXHR = data.submit();
+			jqXHR.abort();
+		} else {
+			$('.error-message').empty().hide();
+			
+		}
+*/
+
+/*
+		if($('.upload-table tr').length > (maxnum-1)) {
+			
+			alert(maxnum + ' files already loaded. Limix exceeded');
+			jqXHR = data.submit();
+			jqXHR.abort();
+		}
+*/
 		disableAnalyze();
 		$('#fileupload table.upload-table tr').addClass('current');
 
@@ -88,6 +145,7 @@ $(function () {
 	}).bind('fileuploadprogress', function (e,data) {
 //		console.log(data.loaded);
 	}).bind('fileuploadstart', function (e) {
+		console.log('start');
 //		if(!$.cookie("upload_session")) $.cookie("upload_session",uploadSessionId);
 	}).bind('fileuploaddone', function (e,data) {
 //		$('.size', $(data.context[0])).next().append('<div class="operation">Converting</div>');
@@ -108,9 +166,24 @@ $(function () {
 		}
 	}).bind('fileuploadfail', function (e) {
 		if(!($('.upload-table tr').length > 1)) $('.upload-files').removeClass('uploaded');
+        checkFailedConversionsNumber();
+	}).bind('fileuploadchange', function (e) {
+        console.log('change');
+        checkFailedConversionsNumber();
 	}).bind('fileuploaddestroyed', function (e,data) {
 //		var err = $.parseJSON(data.jqXHR.responseText)[0].error;
-//		console.log('INIZIO CALLBACK DESTROYED');
+        console.log('file deleted');
+        if($('.error-message.no-more').length) {
+
+			if($('.upload-table tr').length < (config.maxNumberFiles)) {
+				$('.error-message').empty().hide();
+		    	$('#fileupload').fileupload('option', 'dropZone', $('.drag'));
+		    	$('#add-files').removeClass('disabled');
+		    	$('#add-files input').removeAttr('disabled');
+			}
+        	
+        }
+        checkFailedConversionsNumber();
 //		console.log('$(\'.upload-table tr\').length: ' + $('.upload-table tr').length);
 //		console.log('checkAnalyzability(): ' + checkAnalyzability());
 		if($('.upload-table tr:not(.failed)').length) {
@@ -131,9 +204,51 @@ $(function () {
 			disableAnalyze();
 		}
 */
+	}).on('click', '.template-upload .cancel button', function (e,data) {
+//		var err = $.parseJSON(data.jqXHR.responseText)[0].error;
+        console.log('file canceled');
+        if($('.error-message.no-more').length) {
+
+			if($('.upload-table tr').length < (config.maxNumberFiles)) {
+				$('.error-message').empty().hide();
+		    	$('#fileupload').fileupload('option', 'dropZone', $('.drag'));
+		    	$('#add-files').removeClass('disabled');
+		    	$('#add-files input').removeAttr('disabled');
+			}
+        	
+        }
+		setTimeout(function(){
+        	checkFailedConversionsNumber();
+        },500);
+//		console.log('$(\'.upload-table tr\').length: ' + $('.upload-table tr').length);
+//		console.log('checkAnalyzability(): ' + checkAnalyzability());
+		if($('.upload-table tr:not(.failed)').length) {
+			if(checkAnalyzability('fileuploaddestroyed')) {
+				enableAnalyze();
+			}
+//			if(typeof err == 'undefined') enableAnalyze();
+		} else {
+			disableAnalyze();
+		}
 	}).bind('fileuploadcompleted', function (e,data) {
 		console.log('completed');
+		var maxnum = config.maxNumberFiles;
+		if($('.upload-table tr').length > (maxnum-1)) {
+			console.log('10 files loaded');
+			$('.error-message').addClass('no-more').text('No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).').show();
+		    $('#fileupload').fileupload('option', 'dropZone', null);
+		    $('#add-files').addClass('disabled');
+		    $('#add-files input').attr('disabled', 'disabled');
 
+//			jqXHR = data.submit();
+//			jqXHR.abort();
+		} else {
+/*
+			$('.error-message').empty().hide();
+			console.log('else');
+		    $('#fileupload').fileupload('option', 'dropZone', $('.drag'));
+*/			
+		}
 /*
 		console.log('completed:');
 		console.log($('.template-download'));
@@ -169,6 +284,11 @@ $(function () {
         if(typeof data.data != 'undefined') {
         	var filename = data.files[0].name;
         	var filerow = data.context;
+
+			if(filesize == 0) {
+				$('.name',filerow).text(filename);
+			}
+
 			if(config.conversionEnabled) {
 /*
 				if((extension=='xliff')||(extension=='sdlxliff')||(extension=='xlf')) {
@@ -232,12 +352,17 @@ $(function () {
         $('.upload-files').removeClass('dnd-hover');
     });
 
-    $('.btncontinue .cancel-btn').bind('click', function (e) {
+    $('#clear-all-files').bind('click', function (e) {
     	e.preventDefault();
     	$('.error-message').hide();
     	$('.template-download .delete button, .template-upload .cancel button').click();
 	});
-	
+
+    $('#delete-failed-conversions').bind('click', function (e) {
+    	e.preventDefault();
+    	$('.template-download.failed .delete button, .template-download.has-errors .delete button, .template-upload.failed .delete button, .template-upload.has-errors .delete button').click();
+	});
+		
     if (window.location.hostname === 'blueimp.github.com') {
         // Demo settings:
         $('#fileupload').fileupload('option', {
@@ -341,10 +466,13 @@ convertFile = function(fname,filerow,filesize) {
 	else {
 		disableAnalyze();
 	}
-	 
-	filerow.removeClass('ready').addClass('converting');
 
-	$.ajax({
+	var ses = new Date();
+	var session = ses.getTime();
+//	console.log(session.getTime());	 
+	filerow.removeClass('ready').addClass('converting').data('session',session);
+
+	var request = $.ajax({
         url: '?action=convertFile',
         data: {
             action: 'convertFile',
@@ -356,7 +484,14 @@ convertFile = function(fname,filerow,filesize) {
         dataType: 'json',
         error: function(d){
 			filerow.removeClass('converting');
+       		console.log($('.progress',filerow));
+			setTimeout(function(){
+       			$('.progress',filerow).remove();
+       			$('.operation',filerow).remove();
+			},50);
+//       		$('.progress',filerow).remove();
        		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">Error: </span>Server error, try again.');
+       		$(filerow).addClass('has-errors');
        		return false;
         },
         success: function(d){
@@ -375,6 +510,7 @@ convertFile = function(fname,filerow,filesize) {
 					// Animation complete.
 				});
            	} else {
+       			console.log('conversion failed');
            		var filename = $('.name',filerow).text();
            		var extension = filename.split('.')[filename.split('.').length-1];
 //           		console.log(extension);
@@ -393,19 +529,30 @@ convertFile = function(fname,filerow,filesize) {
 				}
            		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">'+message+'</span>');
            		$(filerow).addClass('failed');
+           		checkFailedConversionsNumber();
            		return false;
            	}
 
         }
     });
+    var r = {};
+    r.session = session;
+    r.request = request;
+    UI.conversionRequests.push(r);
 	
 	$('.size', filerow).next().append('<div class="operation">Importing</div><div class="converting progress progress-success progress-striped active ui-progressbar ui-widget ui-widget-content ui-corner-all" aria-valuenow="0" aria-valuemax="100" aria-valuemin="0" role="progressbar"><div class="ui-progressbar-value ui-widget-header ui-corner-left" style="width: 0%;"></div></div>');
 //	console.log('filesize: ' + filesize);
-	testProgress(filerow,filesize,0);
+
+
+	testProgress(filerow,filesize,session,0);
 //	progressBar(filerow,0,filesize);
 }
 
-testProgress = function(filerow,filesize,progress) {
+testProgress = function(filerow,filesize,session,progress) {
+//    console.log('session: ' + session);
+//    console.log('data-session: ' + $(filerow).data('session'));
+    if(session != $(filerow).data('session')) return;
+
 	if(typeof filesize == 'undefined') filesize = 1000000;
 //	console.log('filesize: ' + filesize);
 	var ob = $('.ui-progressbar-value', filerow);
@@ -423,7 +570,7 @@ testProgress = function(filerow,filesize,progress) {
 	}
 
 	setTimeout(function(){
-        testProgress(filerow,filesize,progress);
+        testProgress(filerow,filesize,session,progress);
 //        console.log()
     },Math.round(stepWait*1000));
 }
@@ -437,6 +584,15 @@ checkInit = function() {
         	checkInit();
         };
     },100);	
+}
+
+checkFailedConversionsNumber = function() {
+    var n = $('.template-download.failed, .template-upload.failed, .template-download.has-errors, .template-upload.has-errors').length;
+    if(n>1) {
+    	$('#delete-failed-conversions').show();	
+    } else {
+    	$('#delete-failed-conversions').hide();
+    }
 }
 
 checkAnalyzability = function(who) {

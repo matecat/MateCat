@@ -52,9 +52,6 @@
 
         <header metal:use-macro="header.html/main_header">
             <div class="wrapper">   
-                
-              
-                
                 <form id="fileDownload" action="${basepath}" method="post">
                     <input type="hidden" name="action" value="downloadFileStreamOnDisk" />
                     <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
@@ -62,7 +59,7 @@
                     <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
                     <input type="hidden" name="password" tal:attributes="value password" />
                     <input type="hidden" name="download_type" value="all" />
-                    <input id="downloadProject" name="submit" type="submit" value="PREVIEW" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
+                    <!--input id="downloadProject" data-prova="coso" name="submit" type="submit" value="XPREVIEW" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" / -->
                 </form>
                 <a href="#" class="filter"> <span class="arrow-top "></span></a>
 
@@ -325,7 +322,7 @@
                 </div>
                 <p style="margin-left:-10px;margin-right:10px"><span id="stat-progress" tal:content="php:(floor(job_stats['TRANSLATED_PERC']+job_stats['APPROVED_PERC']))">0</span>%</p>
                 <ul>
-                    <li id="stat-eqwords">Total Words: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong></li>
+                    <li id="stat-eqwords">Payable Words: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong></li>
                     <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
                     <!--
                     <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
