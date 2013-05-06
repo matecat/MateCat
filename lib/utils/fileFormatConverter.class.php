@@ -1,6 +1,6 @@
 <?php
-
 set_time_limit(0);
+define ("BOM","\xEF\xBB\xBF");
 
 //include INIT::$UTILS_ROOT . "/cat.class.php";
 
@@ -21,12 +21,20 @@ class fileFormatConverter {
         $this->opt['httpheader'] = array("Content-Type: application/x-www-form-urlencoded;charset=UTF-8");
     }
 
+    private function addBOM($string) {
+        return BOM . $string;
+    }
+
+    private function hasBOM($string) {
+        return (substr($string, 0, 3) == BOM);
+    }
+
     private function extractUidandExt(&$content) {
         $pattern = '|<file original="\w:\\\\.*?\\\\.*?\\\\(.*?)\\\\(.*?)\.(.*?)".*?>|';
         $matches = array();
         preg_match($pattern, $content, $matches);
 
-        //print_r ($matches);exit;
+//print_r ($matches);exit;
         return array($matches[1], $matches[3]);
     }
 
@@ -51,8 +59,8 @@ class fileFormatConverter {
     }
 
     private function curl_post($url, $d, $opt = array()) {
-        //echo "1 - " . memory_get_usage(true)/1024/1024;
-        //echo "\n";
+//echo "1 - " . memory_get_usage(true)/1024/1024;
+//echo "\n";
         if (!$this->is_assoc($d)) {
             throw new Exception("The input data to " . __FUNCTION__ . "must be an associative array", -1);
         }
@@ -67,7 +75,7 @@ class fileFormatConverter {
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_USERAGENT, "Matecat-Cattool/v" . INIT::$BUILD_NUMBER);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        //curl_setopt($ch, CURLOPT_VERBOSE, true);
+//curl_setopt($ch, CURLOPT_VERBOSE, true);
         curl_setopt($ch, CURLOPT_POST, true);
         curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
         if ($this->is_assoc($opt) and !empty($opt)) {
@@ -77,7 +85,7 @@ class fileFormatConverter {
                     $k = "curlopt_$k";
                 }
                 $const_name = strtoupper($k);
-                //echo $const_name;exit;
+//echo $const_name;exit;
                 if (defined($const_name)) {
                     curl_setopt($ch, constant($const_name), $v);
                 }
@@ -91,14 +99,14 @@ class fileFormatConverter {
         $info = curl_getinfo($ch);
 
 //        print_r($info);
-        // Chiude la risorsa curl
+// Chiude la risorsa curl
         curl_close($ch);
         /* if ($output === false || $info != 200) {
           $output = null;
           } */
 
-        //print_r ($info);
-        //echo "$output\n\n";
+//print_r ($info);
+//echo "$output\n\n";
         return $output;
     }
 
@@ -109,6 +117,23 @@ class fileFormatConverter {
         $fileContent = file_get_contents($file_path);
         $extension = pathinfo($file_path, PATHINFO_EXTENSION);
         $filename = pathinfo($file_path, PATHINFO_FILENAME);
+
+        if (strtoupper($extension) == 'TXT') {
+            $encoding=mb_detect_encoding($fileContent);
+            if ($encoding!='UTF-8'){
+                log::doLog("convert from $encoding to UTF8");
+                $fileContent=  iconv($encoding, "UTF-8", $fileContent);
+            }
+            log::doLog("is TXT ");
+
+            if (!$this->hasBOM($fileContent)) {
+                log::doLog("add BOM before");
+                log::doLog($fileContent);
+                $fileContent = $this->addBOM($fileContent);
+                log::doLog("add BOM after");
+                log::doLog($fileContent);
+            }
+        }
 
 
         $data['documentContent'] = base64_encode($fileContent);
@@ -123,8 +148,8 @@ class fileFormatConverter {
         $data['sourceLocale'] = $source_lang;
         $data['targetLocale'] = $target_lang;
 
-        //print_r ($data);
-        //$curl_result = CatUtils::curl_post($url, $data, $this->opt);
+//print_r ($data);
+//$curl_result = CatUtils::curl_post($url, $data, $this->opt);
         $curl_result = $this->curl_post($url, $data, $this->opt);
 //        print_r($curl_result);exit;
         $decode = json_decode($curl_result, true);
@@ -132,20 +157,20 @@ class fileFormatConverter {
         $res = $this->parseOutput($decode);
 
 //        echo "________TO XLIFF________\n";
-        //print_r($res);
+//print_r($res);
 
         return $res;
     }
 
     public function convertToOriginal($xliffContent) {
-        //if (!is_dir($intDir)) {
-        //    throw new Exception("Conversion Error : the folder <$intDir> not exists");
-        //}
+//if (!is_dir($intDir)) {
+//    throw new Exception("Conversion Error : the folder <$intDir> not exists");
+//}
 
         $base64Content = base64_encode($xliffContent);
 
         $url = "$this->ip:$this->port/$this->fromXliffFunction";
-        // echo $url;
+// echo $url;
 
         $uid_ext = $this->extractUidandExt($xliffContent);
         $data['uid'] = $uid_ext[0];
@@ -153,9 +178,9 @@ class fileFormatConverter {
 
 
 
-        // print_r($data);
-        // exit;
-        //$curl_result = CatUtils::curl_post($url, $data, $this->opt);
+// print_r($data);
+// exit;
+//$curl_result = CatUtils::curl_post($url, $data, $this->opt);
         $curl_result = $this->curl_post($url, $data, $this->opt);
 
         $decode = json_decode($curl_result, true);
@@ -164,9 +189,9 @@ class fileFormatConverter {
         unset($decode);
 
 
-        //echo "________TO ORIG________\n";
-        //   print_r($res);
-        //exit;
+//echo "________TO ORIG________\n";
+//   print_r($res);
+//exit;
         return $res;
     }
 

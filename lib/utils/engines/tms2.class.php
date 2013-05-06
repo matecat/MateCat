@@ -94,6 +94,7 @@ class TMS_RESULT {
             if (is_array($matches) and !empty($matches)) {
                 foreach ($matches as $match) {
 			$match['raw_translation']=htmlentities($match['translation']);
+                        $match['raw_translation']= str_replace("&nbsp;", "  ", $match['raw_translation']);
 		    
                     $a = new TMS_GET_MATCHES($match);
                     $this->matches[] = $a;

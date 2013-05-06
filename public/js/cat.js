@@ -1995,7 +1995,11 @@ UI = {
 
 function htmlEncode(value){
     if (value) {
-        return jQuery('<div />').text(value).html();
+        a=jQuery('<div />').text(value).html();
+        //a=a.replace ("&nbsp;", "++");
+        //console.log ("mannaggia");
+        //console.log(a);
+        return a;
     } else {
         return '';
     }
@@ -2204,6 +2208,7 @@ function restore_xliff_tags_for_view(segment){
 }
 
 function view2rawxliff(segment){
+   // return segment+"____";
     // input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
     // output : <g id="43"> bang &amp; olufsen are &gt; 555 </g> <x/>
 
@@ -2211,6 +2216,7 @@ function view2rawxliff(segment){
     //segment=htmlDecode(segment);
     segment = placehold_xliff_tags (segment);
     segment = htmlEncode(segment);
+    
     segment = restore_xliff_tags(segment);	
 
     return segment;

@@ -116,6 +116,7 @@ class downloadFileStreamOnDiskController extends downloadController {
 				$debug['do_conversion'][]=time();
 				//file_put_contents("/home/matecat/test.sdlxliff", $output_content[$id_file]['content']);
 				$convertResult = $converter->convertToOriginal($output_content[$id_file]['content']);
+                                //file_put_contents("/home/antonio/Scrivania/before_reconv.sdlxliff", $output_content[$id_file]['content']);
 				$output_content[$id_file]['content'] = $convertResult['documentContent'];
 				$debug['do_conversion'][]=time();
 			}

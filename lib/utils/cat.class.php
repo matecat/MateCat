@@ -96,7 +96,10 @@ class CatUtils {
 
 
 		$segment= preg_replace('|<(.*?)>|si', "&lt;$1&gt;",$segment);
-		$segment=self::restore_xliff_tags_for_wiew($segment);		
+		$segment=self::restore_xliff_tags_for_wiew($segment);	
+                //$segment=$segment.";;;;";
+                $segment=  str_replace("&nbsp;", "++", $segment);
+                //echo "$segment---"; exit;
 		return $segment;
 	}
 
