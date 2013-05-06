@@ -6,6 +6,7 @@
         <title>Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
+        <link href="${basepath}public/css/jquery-ui.css?build=${build_number}" rel="stylesheet" type="text/css" />
 
 
 
@@ -389,6 +390,11 @@ Your downloaded file will appear on the bar below in a few seconds.<br/>
 </div>
 
         <div class="grayed" ></div>
+
+<div id="dialog" title="Basic dialog">
+  <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>
+  <form action="" style="font-size: 70%"><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>
+</div>
         <!--
                 <div class="end-message-box">
                 <div class="end-message-col1">

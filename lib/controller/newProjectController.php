@@ -29,6 +29,24 @@ class newProjectController extends viewcontroller {
 			$this->guid = $_COOKIE['upload_session'];
 		}
 
+		if (!isset($_COOKIE['sourceLang'])) {   
+			setcookie("sourceLang", "_EMPTY_", time() + (86400 * 365));
+		} else if($_COOKIE["sourceLang"] != "_EMPTY_") {
+			$this->sourceLangHistory = $_COOKIE["sourceLang"];
+ 			log::doLog('SOURCE LANG HISTORY: ' . urldecode($this->sourceLangHistory));
+//			$serSourceLang = $_COOKIE["sourceLang"];
+//			if($serSourceLang == '_EMPTY_') $serSourceLang = "";
+//			$sourceLang = explode('||',urldecode($serSourceLang));			
+		}
+
+		if (!isset($_COOKIE['targetLang'])) {   
+			setcookie("targetLang", "_EMPTY_", time() + (86400 * 365));
+		} else if($_COOKIE["targetLang"] != "_EMPTY_") {
+			$this->targetLangHistory = $_COOKIE["targetLang"];
+//			if($serTargetLang == '_EMPTY_') $serTargetLang = "";
+//			$targetLang = explode('||',urldecode($serTargetLang));			
+		}
+
 		$intDir = $_SERVER['DOCUMENT_ROOT'] . '/storage/upload/'. $this->guid . '/';
 		if (!is_dir($intDir)) {
 			mkdir($intDir, 0775, true);
@@ -111,7 +129,9 @@ class newProjectController extends viewcontroller {
 		$this->template->unsupported_file_types = $this->getExtensionsUnsupported();
 		$this->template->formats_number = $this->countExtensions(); //count(explode('|', INIT::$CONVERSION_FILE_TYPES));
 		$this->template->volume_analysis_enabled = INIT::$VOLUME_ANALYSIS_ENABLED;
-
+		$this->template->sourceLangHistory = $this->sourceLangHistory;
+		$this->template->targetLangHistory = $this->targetLangHistory;
+		
 	}
 
 	public function create_guid($namespace = '') {

@@ -298,7 +298,9 @@ $(function () {
 */
 //				console.log('fileuploadcompleted');
 //				console.log('hasclass converting?: ' + filerow.hasClass('converting'));
-				if(!filerow.hasClass('converting')) convertFile(filename,filerow,filesize);
+				if(!filerow.hasClass('converting')) {
+					convertFile(filename,filerow,filesize);
+				}
 			}
         }
 	
@@ -484,6 +486,7 @@ convertFile = function(fname,filerow,filesize) {
         dataType: 'json',
         error: function(d){
 			filerow.removeClass('converting');
+       		console.log('conversion error');
        		console.log($('.progress',filerow));
 			setTimeout(function(){
        			$('.progress',filerow).remove();
@@ -529,6 +532,11 @@ convertFile = function(fname,filerow,filesize) {
 				}
            		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">'+message+'</span>');
            		$(filerow).addClass('failed');
+           		console.log('after message compiling');
+				setTimeout(function(){
+	       			$('.progress',filerow).remove();
+	       			$('.operation',filerow).remove();
+				},50);
            		checkFailedConversionsNumber();
            		return false;
            	}
@@ -654,6 +662,7 @@ checkConversions = function() {
 			        	var filename = d.file_name;
 			        	var filerow = this;
 			        	if(filerow.hasClass('converting')) return;
+						console.log('eccolo');
 						convertFile(filename,filerow);
 					
 				

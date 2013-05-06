@@ -80,6 +80,7 @@ class downloadFileStreamOnDiskController extends downloadController {
 			//make dir if doesn't exist
 			if(!file_exists(dirname($path))){
 				mkdir(dirname($path), 0777, true);
+				exec ("chmod 666 $path");
 			}
 			//create file
 			$fp=fopen($path,'w+');
@@ -91,7 +92,7 @@ class downloadFileStreamOnDiskController extends downloadController {
 			$debug['get_segments'][]=time();
 			$data = getSegmentsDownload($this->id_job, $this->password, $id_file, $nonew);
 			$debug['get_segments'][]=time();
-		 //echo "<pre>";print_r ($data); exit;	
+		//echo "<pre>";print_r ($data); exit;	
 			//create a secondary indexing mechanism on segments' array; this will be useful
 			foreach($data as $i=>$k){
 				$data[$k['internal_id']][]=$i;

@@ -62,6 +62,47 @@ class createProjectController extends ajaxcontroller {
             $this->tms_engine = 1; // default MyMemory
         }
 
+		$sourceLangHistory = $_COOKIE["sourceLang"];
+		$targetLangHistory = $_COOKIE["targetLang"];
+
+		if($sourceLangHistory == '_EMPTY_') $sourceLangHistory = "";
+		$sourceLangAr = explode('||',urldecode($sourceLangHistory));
+
+		if (($key = array_search($this->source_language, $sourceLangAr)) !== false) {
+		    unset($sourceLangAr[$key]);
+		}
+		array_unshift($sourceLangAr, $this->source_language);
+ 		log::doLog('SERIALIZED: ' . serialize($sourceLangAr));
+		if($sourceLangAr == '_EMPTY_') $sourceLangAr = "";
+		$newCookieVal = "";
+        foreach ($sourceLangAr as $lang) {
+        	if($lang != "") $newCookieVal = $lang."||".$newCookieVal;
+		}
+		
+		setcookie("sourceLang", $newCookieVal, time() + (86400 * 365));
+		
+		
+/*
+		$serializedArLang = $_COOKIE["languages"];
+		if($serializedArLang == '_EMPTY_') $serializedArLang = "";
+		$arLang = explode('||',urldecode($serializedArLang));
+ 
+ 		$prova = array("foo", "bar", "hallo", "world");
+		$provaSerialized = serialize($prova);
+		$provaUnserialized = unserialize($provaSerialized);
+
+ */
+
+/* 
+ 		log::doLog('LANGUAGES COOKIE: ' . $serializedArLang);
+		log::doLog('ARLANG UNSERIALIZED LENGTH: ' . count($arLang));
+		if($serializedArLang == '') {
+//			$newLangValue = 
+		}
+*/		
+
+
+
         // aggiungi path file in caricamento al cookie"pending_upload"a
         // add her the cookie mangement for remembere the last 3 choosed languages
         // project name sanitize
@@ -70,7 +111,8 @@ class createProjectController extends ajaxcontroller {
         $this->project_name = preg_replace('/[_]{2,}/', "_", $this->project_name);
         $this->project_name = str_replace('_.', ".", $this->project_name);
         //echo $this->project_name; 
-        // project name validation        
+        
+	// project name validation        
         $pattern = "/^[\p{L}\ 0-9a-zA-Z_\.\-]+$/";
         if (!preg_match($pattern, $this->project_name,$rr)) {
                 $kkk=str_split($this->project_name);

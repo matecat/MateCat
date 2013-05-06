@@ -37,7 +37,7 @@ class convertFileController extends ajaxcontroller {
        
 
         $ext = pathinfo($this->file_name, PATHINFO_EXTENSION);
-        //log::doLog($ext);
+        log::doLog('FILE NAME: ' . $this->file_name);
         //if ($this->file_name)
 
         $file_path = $this->intDir . '/' . $this->file_name;

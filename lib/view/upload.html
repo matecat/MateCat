@@ -123,10 +123,15 @@
                     <option value="es-MX">Spanish Latin America</option>
                     <option value="sv-SE">Swedish</option>
                     <option value="tr-TR">Turkish</option-->          
+                    <optgroup>
+                        <option value="test">Test</option>
+					</optgroup>
+
+                    <optgroup>
                         <tal:block  tal:repeat="language languages">
                             <option tal:attributes="value language/rfc" tal:content="language/name"></option>
                         </tal:block>
-
+					</optgroup>
                 </select>
             </div>
 

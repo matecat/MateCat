@@ -39,6 +39,7 @@ UI = {
 //        this.taglockEnabled = (Loader.detect('taglock'))? Loader.detect('taglock') : 0;
 //        this.tagLock();
         this.debug = Loader.detect('debug');
+        this.checkTutorialNeed();
 	
         UI.detectStartSegment();
         UI.getSegments();
@@ -153,6 +154,7 @@ UI = {
         $("div.notification-box").mouseup(function() {
             return false;
         });
+
 /*
         $(document).mouseup(function(e) {
             if($(e.target).parent("a.m-notification").length==0) {
@@ -617,6 +619,31 @@ UI = {
         } else {
 			$(segment).removeClass('mismatch');
         };
+    },
+
+    checkTutorialNeed: function() {
+    	if(!Loader.detect('tutorial')) return false;
+		console.log($.cookie('noTutorial'));
+		if(!$.cookie('noTutorial')) {
+			$('#dialog').dialog({
+/*
+				close: function( event, ui ) {
+//					$.cookie('noTutorial',true);
+					console.log('ho chiuso');
+				}
+*/
+			});
+			$('#hideTutorial').bind('change', function(e){ 
+	            if($('#hideTutorial').attr('checked')) {
+	            	$.cookie('noTutorial',true);
+	            } else {
+	            	$.removeCookie('noTutorial');
+	            }
+	        })
+			
+		} else {
+			
+		}
     },
 
     chooseSuggestion: function(w) {

@@ -21,7 +21,10 @@ class Languages{
 	private function __construct() {
 		//get languages file
 		$file=INIT::$UTILS_ROOT.'/langs/supported_langs.json';
-		if(!file_exists($file)) die("no language defs found in $file");
+		if(!file_exists($file)){
+			echo("no language defs found in $file");
+			exit;
+		}
 		$string=file_get_contents($file);
 		//parse to associative array
 		$langs=json_decode($string,true);

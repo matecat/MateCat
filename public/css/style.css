@@ -1280,6 +1280,11 @@ section.mismatch li.tag-mismatch
 	display: block;
 	}
 
+#dialog
+	{
+	display: none;
+	}
+
 /*RTL language*/
 .editarea.rtl, .search-editarea.rtl, .source.rtl, .graysmall li.rtl {direction: rtl !important; text-align: right !important;}
 
