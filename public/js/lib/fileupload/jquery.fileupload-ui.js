@@ -106,6 +106,8 @@
 							}
                     	});
                     }
+                    $(data.context).addClass('has-errors');
+                    UI.checkFailedConversionsNumber();
 // END Customization by Andrea Martines (Translated) 25/01/2013
 
 
@@ -425,13 +427,18 @@
                 if (file.error) {
                     valid = false;
 // START Customization by Andrea Martines (Translated) 25/03/2013
-
+/*
                     var extension = file.name.split('.')[file.name.split('.').length-1];
+                	console.log('extension: ' + extension);
+                	console.log(file.error);
                 	var msg = '';
 	                $.each(config.unsupported, function() {
+	                	console.log(this.format + ' - ' + extension);
 	                    if(this.format == extension) msg = this.message+'.';
 	                });     
-					file.error = 'Format not supported. ' + msg;
+//					file.error = 'Format not supported. ' + msg;
+*/
+					file.error = 'Format not supported.';
 // END Customization by Andrea Martines (Translated) 25/03/2013
 
                 } else {

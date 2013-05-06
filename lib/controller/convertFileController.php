@@ -36,7 +36,7 @@ class convertFileController extends ajaxcontroller {
        
 
         $ext = pathinfo($this->file_name, PATHINFO_EXTENSION);
-        //log::doLog($ext);
+        log::doLog('FILE NAME: ' . $this->file_name);
         //if ($this->file_name)
 
         $file_path = $this->intDir . '/' . $this->file_name;
@@ -97,7 +97,7 @@ class convertFileController extends ajaxcontroller {
                 }
                 return 0;
             } else {
-                if ($convertResult['errorMessage'] == "Error: failed to create SDLXLIFF.") {
+                if (stripos($convertResult['errorMessage'] ,"failed to create SDLXLIFF.")!==false) {
                     $convertResult['errorMessage'] = "Error: failed importing file.";
                 }
                 $this->result['code'] = 0;

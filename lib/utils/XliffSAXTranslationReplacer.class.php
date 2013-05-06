@@ -25,6 +25,7 @@ class XliffSAXTranslationReplacer{
 	   }
 	 */
 
+
 	public function replaceTranslation(){
 		//open file
 		if (!($fp = fopen($this->filename, "r"))) {
@@ -37,7 +38,7 @@ class XliffSAXTranslationReplacer{
 		//create parser
 		$xml_parser = xml_parser_create();
 		//configure parser
-		//pass this object to parser to make callbacks visible
+		//pass this object to parser to make its variables and functions visible inside callbacks 
 		xml_set_object($xml_parser,$this);
 		//avoid uppercasing all tags name
 		xml_parser_set_option($xml_parser, XML_OPTION_CASE_FOLDING, false);
@@ -50,7 +51,12 @@ class XliffSAXTranslationReplacer{
 		while ($this->currentBuffer = fread($fp, 4096)) {
 			//get lenght of chunk
 			$this->len=strlen($this->currentBuffer);
-			//get last char
+
+			/*
+			preprocess file
+			*/
+			$this->currentBuffer = preg_replace("/&(.*?);/", '{escaped_ent{$1}}', $this->currentBuffer);
+
 			//parse chunk of text
 			if (!xml_parse($xml_parser, $this->currentBuffer, feof($fp))) {
 				//if unable, die
@@ -117,7 +123,7 @@ class XliffSAXTranslationReplacer{
 			//add tag ending
 			$tag.=">";
 			//flush to pointer
-			fwrite($this->ofp,$tag);
+			$this->postProcAndflush($this->ofp,$tag);
 		}
 	}
 
@@ -153,7 +159,7 @@ class XliffSAXTranslationReplacer{
 				$this->inTarget=false;
 			}
 			//flush to pointer
-			fwrite($this->ofp,$tag);
+			$this->postProcAndflush($this->ofp,$tag);
 		}
 		else{
 			//ok, nothing to be done; reset flag for next coming tag
@@ -172,16 +178,31 @@ class XliffSAXTranslationReplacer{
 	private function characterData($parser,$data){
 		//don't write <target> data
 		if(!$this->inTarget){
+				
+			/*
+			commented for fix
+
 			//don't know why, but outside translation units stuff is html-encoded
 			if(!$this->inTU){
 				//encode entities
 				$data=htmlentities($data,ENT_NOQUOTES);
 			}
-
+			*/
 			//flush to pointer
-			fwrite($this->ofp,$data);
+			$this->postProcAndflush($this->ofp,$data);
 		}
 	}
+
+	/*
+	postprocess escaped data and write to disk
+	*/
+	private function postProcAndFlush($fp,$data){
+		//postprocess string
+		$data = preg_replace("/\{escaped_ent\{(.*?)\}\}/", '&$1;', $data);
+		//flush to disk
+		fwrite($fp,$data);	
+	}
+
 	/*
 	   prepare segment tagging for xliff insertion
 	 */
@@ -224,5 +245,6 @@ class XliffSAXTranslationReplacer{
 		 */
 		return $transunit_translation;
 	}
+
 }
 ?>

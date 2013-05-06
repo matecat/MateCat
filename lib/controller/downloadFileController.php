@@ -66,7 +66,7 @@ class downloadFileController extends downloadController {
 			$data = getSegmentsDownload($this->id_job, $this->password, $id_file, $nonew);
 			$debug['get_segments'][]=time();
 
-			//echo "<pre>"; print_r ($data); exit;
+			echo "<pre>"; print_r ($data); exit;
 
 			$transunit_translation = "";
 

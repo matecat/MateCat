@@ -6,6 +6,7 @@
         <title>Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
+        <link href="${basepath}public/css/jquery-ui.css?build=${build_number}" rel="stylesheet" type="text/css" />
 
 
 
@@ -48,13 +49,10 @@
 
 
 
-    <body class="cattool" tal:condition="supportedBrowser" define="catpage string:true">
+    <body class="cattool${source_rtl}${target_rtl}" tal:condition="supportedBrowser" define="catpage string:true">
 
         <header metal:use-macro="header.html/main_header">
             <div class="wrapper">   
-                
-              
-                
                 <form id="fileDownload" action="${basepath}" method="post">
                     <input type="hidden" name="action" value="downloadFileStreamOnDisk" />
                     <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
@@ -62,7 +60,7 @@
                     <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
                     <input type="hidden" name="password" tal:attributes="value password" />
                     <input type="hidden" name="download_type" value="all" />
-                    <input id="downloadProject" name="submit" type="submit" value="PREVIEW" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
+                    <!--input id="downloadProject" data-prova="coso" name="submit" type="submit" value="XPREVIEW" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" / -->
                 </form>
                 <a href="#" class="filter"> <span class="arrow-top "></span></a>
 
@@ -325,7 +323,7 @@
                 </div>
                 <p style="margin-left:-10px;margin-right:10px"><span id="stat-progress" tal:content="php:(floor(job_stats['TRANSLATED_PERC']+job_stats['APPROVED_PERC']))">0</span>%</p>
                 <ul>
-                    <li id="stat-eqwords">Total Words: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong></li>
+                    <li id="stat-eqwords">Payable Words: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong></li>
                     <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
                     <!--
                     <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
@@ -392,6 +390,11 @@ Your downloaded file will appear on the bar below in a few seconds.<br/>
 </div>
 
         <div class="grayed" ></div>
+
+<div id="dialog" title="Basic dialog">
+  <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>
+  <form action="" style="font-size: 70%"><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>
+</div>
         <!--
                 <div class="end-message-box">
                 <div class="end-message-col1">

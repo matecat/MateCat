@@ -1141,6 +1141,8 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 .source .locked
 	{
 	color: #ddd !important;
+	font-size: 70%;
+	font-style: italic;
 /*
 	cursor: move !important;
 */
@@ -1159,16 +1161,26 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 .editor .source .locked,
 .editor .footer .locked
 	{
-	color: #ccc;
+	color: #767676;
+	font-style: italic;
 	}
 
-.editor .editarea .locked
+.editor .editarea .locked,
+.editor .source .locked
 	{
+	color: #767676 !important;
+	font-size: 70%;
+	font-style: italic;
+	padding-bottom: 3px;
+	vertical-align: middle;
+
 /*
 	margin-left: 2px !important;
 	margin-right: 2px !important;
 */
 	}
+
+
 	
 .editor .editarea .locked.selected
 	{
@@ -1180,7 +1192,9 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 */
 	}
     
-
+.editarea .locked
+	{
+	}
 
 
 .d-open{bottom:20px !important;}
@@ -1266,11 +1280,18 @@ section.mismatch li.tag-mismatch
 	display: block;
 	}
 
+#dialog
+	{
+	display: none;
+	}
+
 /*RTL language*/
 .editarea.rtl, .search-editarea.rtl, .source.rtl, .graysmall li.rtl {direction: rtl !important; text-align: right !important;}
 
 body.rtl-source section .source,
-body.rtl-target section .editarea
+body.rtl-target section .editarea,
+body.rtl-source .footer .sugg-source,
+body.rtl-target .footer .sugg-target
 	{
 	direction: rtl !important;
 	text-align: right !important;
