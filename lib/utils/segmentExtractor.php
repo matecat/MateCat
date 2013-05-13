@@ -148,10 +148,12 @@ function stripTagsFromSource2($text) {
 }
 
 function strip_external($a) {
-    $pattern_x_start = '/^(\s*<x .*?\/>)(.*)/';
-    $pattern_x_end = '/(.*)(<x .*?\/>\s*)$/';
-    $pattern_g = '/^(\s*<g [^>]*?>)([^<]*?)(<\/g>\s*)$/';
-    log::doLog(__FUNCTION__ . " original is $a");
+	$orig=$a;
+    $pattern_x_start = '/^(\s*<x .*?\/>)(.*)/mis';
+    $pattern_x_end = '/(.*)(<x .*?\/>\s*)$/m';
+    $pattern_g = '/^(\s*<g [^>]*?>)([^<]*?)(<\/g>\s*)$/m';
+ //   if(strpos($orig,'<x id="220"')!==FALSE) 
+	log::doLog(__FUNCTION__ . " original is $a");
     $found = false;
     $prec = "";
     $succ = "";
@@ -164,7 +166,8 @@ function strip_external($a) {
         $found = false;
         do {
             $r = preg_match_all($pattern_x_start, $a, $res);
-            //print_r ($res);
+   /* if(strpos($orig,'<x id="220"')!==FALSE) 
+            log::doLog("a".print_r ($res,true));*/
             if (isset($res[1][0])) {
                 $prec.=$res[1][0];
                 $a = $res[2][0];
@@ -175,7 +178,8 @@ function strip_external($a) {
         //   echo "$c - 1 : $a\n";
         do {
             $r = preg_match_all($pattern_x_end, $a, $res);
-            //print_r ($res);
+/*    if(strpos($orig,'<x id="220"')!==FALSE) 
+            log::doLog("b".print_r ($res,true));*/
             if (isset($res[2][0])) {
                 $succ = $res[2][0] . $succ;
                 $a = $res[1][0];
@@ -188,7 +192,8 @@ function strip_external($a) {
 
         do {
             $r = preg_match_all($pattern_g, $a, $res);
-            // print_r ($res);
+/*    if(strpos($orig,'<x id="220"')!==FALSE) 
+             log::doLog("c".print_r ($res,true));*/
             if (isset($res[1][0])) {
                 $prec.=$res[1][0];
                 $succ = $res[3][0] . $succ;
@@ -206,7 +211,8 @@ function strip_external($a) {
     //echo "succ is $succ\n";
     //print_r ($res);
     $r = array('prec' => $prec, 'seg' => $a, 'succ' => $succ);
-    log::doLog(__FUNCTION__, $r);
+  //  if(strpos($orig,'<x id="220"')!==FALSE) 
+    	log::doLog(__FUNCTION__, $r);
     return $r;
 }
 

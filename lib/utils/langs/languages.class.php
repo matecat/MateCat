@@ -90,10 +90,10 @@ class Languages{
 	}
 
 	//get list of languages, as RFC3066
-	public static function getEnabledLanguages($localizationLang){
+	public static function getEnabledLanguages($localizationLang='en'){
 		foreach(self::$map_rfc2obj as $rfc=>$lang){
 			//if marked as enabled, add to result
-			if($lang['enabled']) $list[]=array('rfc'=>$rfc,'name'=>$lang['localized'][$localizationLang]);
+			if($lang['enabled']) $list[]=array('rfc'=>$rfc,'name'=>$lang['localized'][$localizationLang],'top'=>$lang['top']);
 		}
 		return $list;
 	}

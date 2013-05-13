@@ -56,6 +56,10 @@ UI = {
         this.pendingScroll = 0;
         this.firstScroll = true;
         this.blockGetMoreSegments = true;
+        var bb = $.cookie('noAlertConfirmTranslation');
+        console.log('typeof bb:');
+        console.log(typeof bb);
+        this.alertConfirmTranslationEnabled = (typeof bb == 'undefined')? true : false;
 		setTimeout(function(){
 			UI.blockGetMoreSegments = false;
 		},1000);
@@ -74,7 +78,13 @@ UI = {
             $('.editor .translated').click();
         }).bind('keydown','Meta+return', function(e){ 
             e.preventDefault();
-            $('.editor .translated').click();
+             $('.editor .translated').click();
+/*
+            $('.editor .translated').trigger({
+				type:"click",
+				action:"translated"
+			});
+*/
         }).bind('keydown','Ctrl+pageup', function(e){ 
             e.preventDefault();
 //            alert('pageup');
@@ -238,6 +248,7 @@ UI = {
             e.preventDefault();
             e.stopPropagation();
         }).on('click','.editarea',function(e,operation) {
+        	console.log('operation: ' + operation);
         	if(typeof operation == 'undefined') operation = 'clicking';
             this.onclickEditarea = new Date();
             UI.notYetOpened = false;
@@ -265,7 +276,7 @@ UI = {
 				}
 				UI.lastOperation = operation;
 
-                UI.openSegment(this);
+                UI.openSegment(this,operation);
 
                 if(operation != 'moving') UI.scrollSegment($('#segment-'+$(this).data('sid')));
             }
@@ -332,6 +343,7 @@ UI = {
 				},100);
             };
         }).on('input','.editarea',function(e) {
+        	UI.currentSegment.addClass('modified');
 			if(UI.draggingInsideEditarea) {
 				$(UI.tagToDelete).remove();
 				UI.draggingInsideEditarea = false;
@@ -386,6 +398,11 @@ UI = {
         	$('.selected',$(this)).removeClass('selected');
         }).on('click','a.translated',function(e) {
             e.preventDefault();
+/*
+        	if(typeof e.action != 'undefined') {
+        		if(e.action == 'translated');
+        	}
+*/
             UI.checkHeaviness();
             console.log('segment is loaded?: ' + UI.segmentIsLoaded(UI.nextSegmentId));
             console.log(UI.blockButtons);
@@ -411,7 +428,7 @@ UI = {
 
             UI.unlockTags();
             UI.setStatusButtons(this);
-            $(".editarea", UI.nextSegment).click();
+            $(".editarea", UI.nextSegment).trigger("click","translated");
             UI.changeStatus(this,'translated',0);
 
             UI.markTags();
@@ -500,6 +517,16 @@ UI = {
             e.preventDefault();
             UI.closeSegment(UI.currentSegment,1);
         });
+
+		$('#hideAlertConfirmTranslation').bind('change', function(e){ 
+            if($('#hideAlertConfirmTranslation').attr('checked')) {
+            	UI.alertConfirmTranslationEnabled = false;
+            	$.cookie('noAlertConfirmTranslation',true, { expires: 1000 });
+            } else {
+            	UI.alertConfirmTranslationEnabled = true;
+            	$.removeCookie('noAlertConfirmTranslation');
+            }
+        })
 
         UI.toSegment = true;
         UI.gotoSegment(this.startSegmentId);
@@ -686,7 +713,7 @@ UI = {
         restoreSelection();
     },
 
-    closeSegment: function(segment,byButton) {
+    closeSegment: function(segment,byButton,operation) {
         if((typeof segment =='undefined')||(typeof UI.toSegment !='undefined')) {
             this.toSegment = undefined;
             return true;
@@ -699,6 +726,24 @@ UI = {
 			type:"segmentClosed",
 			segment: segment
 		});
+
+        var saveBrevior = true;
+        if(typeof operation !='undefined') {
+            if(operation == 'translated') saveBrevior = false;
+        }
+        if((segment.hasClass('modified'))&&(saveBrevior)) {
+        	console.log('save brevior');
+        	this.saveSegment(segment);
+			if(UI.alertConfirmTranslationEnabled) {
+				$(".blacked").show();
+				$('#alertConfirmTranslation').dialog({
+					close: function( event, ui ) {
+						$(".blacked").hide();
+					}
+				});        	
+			}
+        }
+        this.currentSegment.removeClass('modified');
         this.deActivateSegment(byButton);
 
         this.lastOpenedEditarea.attr('contenteditable','false');
@@ -728,12 +773,15 @@ UI = {
 			type:"sourceCopied",
 			segment: segment
 		});
+       	this.currentSegment.addClass('modified1');
+
         this.setChosenSuggestion(0);
         this.lockTags();
         this.checkTagMismatch(UI.currentSegment);
     },
 
     copySuggestionInEditarea: function(segment,translation,editarea,match,decode,auto,which) {
+
         if (typeof(decode)=="undefined"){
             decode=false;
         }
@@ -750,6 +798,7 @@ UI = {
             $(editarea).text(translation).addClass('fromSuggestion');
         	this.saveInUndoStack('copysuggestion');
             $('.percentuage',segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
+        	if(which) this.currentSegment.addClass('modified');
         }
 
         // a value of 0 for 'which' means the choice has been made by the
@@ -1412,7 +1461,7 @@ UI = {
         return [minutes, seconds];
     },
 
-    openSegment: function(editarea) {
+    openSegment: function(editarea,operation) {
         this.openSegmentStart = new Date();
         if(!this.byButton) {
             if(this.justSelecting()) return;
@@ -1442,7 +1491,7 @@ UI = {
         this.nextIsLoaded = false;
         this.getContribution(segment,0);
         this.opening = true; 
-        if(!(this.currentSegment.is(this.lastOpenedSegment))) this.closeSegment(this.lastOpenedSegment,0);
+        if(!(this.currentSegment.is(this.lastOpenedSegment))) this.closeSegment(this.lastOpenedSegment,0,operation);
         this.opening = false;
         this.body.addClass('editing');
 
@@ -1740,6 +1789,16 @@ UI = {
         if(starting) {
             this.init();
         }
+    },
+
+    saveSegment: function(segment) {
+    	console.log('save segment');
+//		var segment = this.currentSegment;
+		var status = (segment.hasClass('status-translated'))? 'translated' : (segment.hasClass('status-approved'))? 'approved' : (segment.hasClass('status-rejected'))? 'rejected' : (segment.hasClass('status-new'))? 'new' : 'draft';
+		if(status == 'new') {
+			status = 'draft';
+		}
+		this.setTranslation(segment,status);
     },
 
     scrollSegment: function(segment) {

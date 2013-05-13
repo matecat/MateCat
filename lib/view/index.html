@@ -390,12 +390,17 @@ Your downloaded file will appear on the bar below in a few seconds.<br/>
 </div>
 
         <div class="grayed" ></div>
+        <div class="blacked" ></div>
 
-<div id="dialog" title="Basic dialog">
+<div id="dialog" class="dialog" title="Basic dialog">
   <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>
   <form action="" style="font-size: 70%"><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>
 </div>
-        <!--
+<div id="alertConfirmTranslation" class="dialog" title="Attention">
+  <p>To confirm your translation, please press on Translated or use the shortcut CTRL+Enter.</p>
+  <form action="" style="font-size: 70%"><input id="hideAlertConfirmTranslation" type="checkbox" value="" />Do not display again </form>
+</div>
+<!--
                 <div class="end-message-box">
                 <div class="end-message-col1">
                 <h3>Faxová úloha<span>*</span>!</h3>

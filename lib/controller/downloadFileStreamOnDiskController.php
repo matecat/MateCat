@@ -55,7 +55,6 @@ class downloadFileStreamOnDiskController extends downloadController {
 		//    $nonew=0;
 		//}
 		$nonew = 0;
-		//print_r ($data); exit;
 		$output_content = array();
 
 		/*
@@ -75,6 +74,7 @@ class downloadFileStreamOnDiskController extends downloadController {
 			$original = $file['xliff_file'];
 			
 			//flush file on disk
+			$original=str_replace("\r\n","\n",$original);
 			//get path
 			$path=INIT::$TMP_DOWNLOAD.'/'.$this->id_job.'/'.$id_file.'/'.$current_filename.'.xliff';
 			//make dir if doesn't exist
@@ -88,7 +88,6 @@ class downloadFileStreamOnDiskController extends downloadController {
 			fwrite($fp,$original);
 			//free memory, as we can work with file on disk now
 			unset($original);
-			//echo $path;exit;
 			$debug['get_segments'][]=time();
 			$data = getSegmentsDownload($this->id_job, $this->password, $id_file, $nonew);
 			$debug['get_segments'][]=time();

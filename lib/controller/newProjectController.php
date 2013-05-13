@@ -33,16 +33,43 @@ class newProjectController extends viewcontroller {
 			setcookie("sourceLang", "_EMPTY_", time() + (86400 * 365));
 		} else if($_COOKIE["sourceLang"] != "_EMPTY_") {
 			$this->sourceLangHistory = $_COOKIE["sourceLang"];
- 			log::doLog('SOURCE LANG HISTORY: ' . urldecode($this->sourceLangHistory));
-//			$serSourceLang = $_COOKIE["sourceLang"];
-//			if($serSourceLang == '_EMPTY_') $serSourceLang = "";
-//			$sourceLang = explode('||',urldecode($serSourceLang));			
+ 			$this->sourceLangAr = explode('||',urldecode($this->sourceLangHistory));
+			$tmpSourceAr = array();
+			$tmpSourceArAs = array();
+			foreach($this->sourceLangAr as $key=>$lang) {
+				if($lang != '')	{
+					$tmpSourceAr[$lang] = $this->lang_handler->getLocalizedName($lang,'en');
+
+					$ar = array();
+					$ar['name'] = $this->lang_handler->getLocalizedName($lang,'en');
+					$ar['code'] = $lang;
+					$ar['selected'] = ($key == '0')? 1 : 0;
+					array_push($tmpSourceArAs, $ar);						
+				}
+			}
+			$this->sourceLangAr = $tmpSourceAr;
+			asort($this->sourceLangAr);
+			log::doLog('SOURCE LANG AR: ' , $this->sourceLangAr);
+			log::doLog('SOURCE LANG NEW : ' , $tmpSourceArAs);
+
+//			usort($tmpSourceArAs, 'sortByOrder');
+			$this->array_sort_by_column($tmpSourceArAs, 'name');
+			log::doLog('SOURCE LANG NEW SORTED: ' , $tmpSourceArAs);
+			$this->sourceLangArray = $tmpSourceArAs;
+			
 		}
 
-		if (!isset($_COOKIE['targetLang'])) {   
+		if (!isset($_COOKIE['targetLang'])) {
 			setcookie("targetLang", "_EMPTY_", time() + (86400 * 365));
 		} else if($_COOKIE["targetLang"] != "_EMPTY_") {
 			$this->targetLangHistory = $_COOKIE["targetLang"];
+ 			$this->targetLangAr = explode('||',urldecode($this->targetLangHistory));	
+			$tmpTargetAr = array();
+			foreach($this->targetLangAr as $lang) {
+				$tmpTargetAr[$lang] = $this->lang_handler->getLocalizedName($lang,'en');
+			}
+			$this->targetLangAr = $tmpTargetAr;
+			
 //			if($serTargetLang == '_EMPTY_') $serTargetLang = "";
 //			$targetLang = explode('||',urldecode($serTargetLang));			
 		}
@@ -60,6 +87,22 @@ class newProjectController extends viewcontroller {
 		$this->mt_engines = getEngines('MT');
 		$this->tms_engines = getEngines('TM');
 	}
+
+	public function sortByOrder($a, $b) {
+    	return strcmp($a["name"], $b["name"]);
+
+//    	return $b['name'] - $a['name'];
+	}
+
+	public function array_sort_by_column(&$arr, $col, $dir = SORT_ASC) {
+	    $sort_col = array();
+	    foreach ($arr as $key=> $row) {
+	        $sort_col[$key] = $row[$col];
+	    }
+	
+	    array_multisort($sort_col, $dir, $arr);
+	}
+
 
 	private function getExtensions($default = false) {
 		$ext_ret = "";
@@ -129,8 +172,8 @@ class newProjectController extends viewcontroller {
 		$this->template->unsupported_file_types = $this->getExtensionsUnsupported();
 		$this->template->formats_number = $this->countExtensions(); //count(explode('|', INIT::$CONVERSION_FILE_TYPES));
 		$this->template->volume_analysis_enabled = INIT::$VOLUME_ANALYSIS_ENABLED;
-		$this->template->sourceLangHistory = $this->sourceLangHistory;
-		$this->template->targetLangHistory = $this->targetLangHistory;
+		$this->template->sourceLangHistory = $this->sourceLangArray;
+		$this->template->targetLangHistory = $this->targetLangArray;
 		
 	}
 
@@ -162,6 +205,7 @@ class newProjectController extends viewcontroller {
 			'}';
 		return $guid;
 	}
+
 
 }
 

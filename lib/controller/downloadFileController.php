@@ -66,7 +66,7 @@ class downloadFileController extends downloadController {
 			$data = getSegmentsDownload($this->id_job, $this->password, $id_file, $nonew);
 			$debug['get_segments'][]=time();
 
-			echo "<pre>"; print_r ($data); exit;
+			//echo "<pre>"; print_r ($data); exit;
 
 			$transunit_translation = "";
 
@@ -153,7 +153,7 @@ class downloadFileController extends downloadController {
 
 			if (!in_array($mime_type, array("xliff", "sdlxliff", "xlf"))) {
 				$debug['do_conversion'][]=time();
-				//file_put_contents("/home/matecat/test.sdlxliff", $output_content[$id_file]['content']);
+				file_put_contents("/home/matecat/test.sdlxliff", $output_content[$id_file]['content']);
 				$convertResult = $converter->convertToOriginal($output_content[$id_file]['content']);
 				$output_content[$id_file]['content'] = $convertResult['documentContent'];
 				$debug['do_conversion'][]=time();
