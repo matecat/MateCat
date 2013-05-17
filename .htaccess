@@ -8,7 +8,8 @@ RewriteRule ^(translatenew)/([^/]*)/([^/]*)/([^/]*)-([^/]*)[/]*([^/]*)[/]*$ inde
 RewriteRule ^(analyze)/([^/]*)/([^/]*)-([^/]*)$ index.php?action=analyze&pid=$3&password=$4 [L]
 RewriteRule ^(statistics)[/]?$ index.php?action=projectStatistics [L]
 
-RewriteRule ^(manage)/([^/]*)/([^/]*)-([^/]*)$ index.php?action=manage&pid=$3&password=$4&start=$6 [L]
+RewriteRule ^(manage)/?$ index.php?action=manage&jid=$2&password=$3 [L]
+#RewriteRule ^(manage)/([^/]*)/([^/]*)-([^/]*)$ index.php?action=manage&pid=$3&password=$4&start=$6 [L]
 RewriteRule ^(editlog)/([^/]*)-([^/]*)/?$ index.php?action=editlog&jid=$2&password=$3 [L]
 </IfModule>
 

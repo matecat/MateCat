@@ -2132,6 +2132,7 @@ UI = {
         var errors = '';
         errors = this.collectSegmentErrors(segment);
         var chosen_suggestion = $('.editarea',segment).data('lastChosenSuggestion');
+        console.log('TRANSLATION: ' + translation);
 
 		this.doRequest({
 			data: {

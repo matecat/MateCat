@@ -69,7 +69,7 @@ class convertFileController extends ajaxcontroller {
             //$filename = pathinfo($this->file_name, PATHINFO_FILENAME);
 //log::doLog("fp is $file_path");
             $convertResult = $converter->convertToSdlxliff($file_path, $this->source_lang, $this->target_lang);
-//		log::doLog("CONVERT RESULT : " . $convertResult['isSuccess']);
+	//log::doLog("CONVERT RESULT : " , $convertResult);
 
             if ($convertResult['isSuccess'] == 1) {
                 //$uid = $convertResult['uid']; // va inserito nel database

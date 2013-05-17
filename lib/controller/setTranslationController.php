@@ -64,7 +64,7 @@ class setTranslationController extends ajaxcontroller {
 			log::doLog(__CLASS__ .":".__FUNCTION__." error - ".$this->result['error'] );
 			return -1;
 		}
-
+			log::doLog("translation: " . $this->translation);
 		$this->translation = CatUtils::view2rawxliff($this->translation);
 
 		$res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $this->translation, $this->err,$this->chosen_suggestion_index);

@@ -76,7 +76,7 @@ class downloadFileStreamOnDiskController extends downloadController {
 			//flush file on disk
 			$original=str_replace("\r\n","\n",$original);
 			//get path
-			$path=INIT::$TMP_DOWNLOAD.'/'.$this->id_job.'/'.$id_file.'/'.$current_filename.'.xliff';
+			$path=INIT::$TMP_DOWNLOAD.'/'.$this->id_job.'/'.$id_file.'/'.$current_filename.'.sdlxliff';
 			//make dir if doesn't exist
 			if(!file_exists(dirname($path))){
 				mkdir(dirname($path), 0777, true);
@@ -108,7 +108,7 @@ class downloadFileStreamOnDiskController extends downloadController {
 			$debug['replace'][]=time();
 
 
-			$original=file_get_contents($path.'.out.xliff');
+			$original=file_get_contents($path.'.out.sdlxliff');
 			//echo $original; exit;
 			$output_content[$id_file]['content'] = $original;
 			$output_content[$id_file]['filename'] = $current_filename;

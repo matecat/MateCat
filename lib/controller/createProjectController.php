@@ -158,12 +158,12 @@ class createProjectController extends ajaxcontroller {
         // add her the cookie mangement for remembere the last 3 choosed languages
         // project name sanitize
         //$this->project_name = preg_replace('/["\' \(\)\&\[\]\{\}\+\*,:|#]/', "_", $this->project_name);
-        $this->project_name = preg_replace('/[^\p{L}0-9a-zA-Z_\.\-]/', "_", $this->project_name);
+        $this->project_name = preg_replace('/[^\p{L}0-9a-zA-Z_\.\-]/u', "_", $this->project_name);
         $this->project_name = preg_replace('/[_]{2,}/', "_", $this->project_name);
         $this->project_name = str_replace('_.', ".", $this->project_name);
         //echo $this->project_name; 
         // project name validation        
-        $pattern = "/^[\p{L}\ 0-9a-zA-Z_\.\-]+$/";
+        $pattern = "/^[\p{L}\ 0-9a-zA-Z_\.\-]+$/u";
         if (!preg_match($pattern, $this->project_name, $rr)) {
             $kkk = str_split($this->project_name);
             foreach ($kkk as $kk) {

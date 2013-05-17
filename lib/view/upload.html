@@ -53,11 +53,11 @@
 
 				//set 
 				if(!$('#source-lang option.custom').length) {
-					$('#source-lang').val('en-US').attr('selected',true);
+//					$('#source-lang').val('en-US').attr('selected',true);
 					$('#source-lang option.separator').remove();
 				}
 				if(!$('#target-lang option.custom').length) {
-					$('#target-lang').val('fr-FR').attr('selected',true);
+//					$('#target-lang').val('fr-FR').attr('selected',true);
 					$('#target-lang option.separator').remove();
 				}
 		
@@ -89,8 +89,17 @@
 						vals = vals.substring(0, vals.length - 1);
 						var op = '<option id="extraTarget" selected="selected" value="' + vals + '">' + str + '</option>';
 						$('#extraTarget').remove();
-						if(!$('#target-lang optgroup.custom').length) $('#target-lang').prepend('<optgroup class="custom"></optgroup><optgroup class="separator"><option>---</option></optgroup>');
-						$('#target-lang optgroup.custom').append(op);
+		
+						if($('#target-lang .separator').length) {
+							ob = $('#target-lang .separator').next();
+						} else {
+							ob = $('#target-lang option').first();							
+						}
+						ob.before(op);
+						
+//						if(!$('#target-lang optgroup.custom').length) $('#target-lang').prepend('<optgroup class="custom"></optgroup><optgroup class="separator"><option>---</option></optgroup>');
+//						$('#target-lang optgroup.custom').append(op);
+		
 						$('.translate-box.target h2 .extra').remove();
 						$('.translate-box.target h2').append('<span class="extra">(' + $('.popup-languages li.on').length + ' languages)</span>');
 					}
@@ -139,26 +148,16 @@
                 <h2>From</h2>
                 <select name="source-lang" id="source-lang">
                     <tal:block tal:define="language php:array()" tal:repeat="language sourceLangHistory">
-<!--
-                        <option class="custom" tal:condition="repeat/language/start" selected="selected" tal:attributes="value repeat/language/key" tal:content="language"></option>
-                        <option class="custom" tal:condition="not:repeat/language/start" tal:attributes="value repeat/language/key" tal:content="language"></option>
--->
-<!--
-                        <option class="custom" tal:attributes="value repeat/language/key" tal:content="language"></option>
--->
-
-
 						<option class="custom" tal:condition="language/selected" selected ="selected" tal:attributes="value language/code" tal:content="language/name"></option>
 						<option class="custom" tal:condition="not:language/selected" tal:attributes="value language/code" tal:content="language/name"></option>
-<!--
-						<option class="custom" tal:attributes="value language/code" tal:content="language/name"></option>
--->
                     </tal:block>
 
 					<option class="separator" disabled="disabled">---</option>
 
                     <tal:block  tal:repeat="language languages">
-                        <option tal:attributes="value language/rfc" tal:content="language/name"></option>
+                        <option tal:condition="php: (noSourceLangHistory EQ 'false')&&(language['code'] EQ 'en-US')" selected="selected" tal:attributes="value language/code" tal:content="language/name">---</option>
+                        <option tal:condition="php: (noSourceLangHistory NE 'false')&&(language['code'] EQ 'en-US')" tal:attributes="value language/code" tal:content="language/name">---</option>
+                        <option tal:condition="php: language['code'] NE 'en-US'" tal:attributes="value language/code" tal:content="language/name">---</option>
                     </tal:block>
                 </select>
             </div>
@@ -166,22 +165,18 @@
             <div class="translate-box target" style="margin-left:0;">
                 <h2>To</h2>
                 <select name="target-lang" id="target-lang">
-                    <optgroup class="custom">
-                        <tal:block tal:repeat="language targetLangHistory">
-                            <option tal:condition="repeat/language/start" selected="selected" tal:attributes="value repeat/language/key" tal:content="language"></option>
-                            <option tal:condition="not:repeat/language/start" tal:attributes="value repeat/language/key" tal:content="language"></option>
-                        </tal:block>
-					</optgroup>
+                    <tal:block tal:define="language php:array()" tal:repeat="language targetLangHistory">
+						<option class="custom" tal:condition="language/selected" selected ="selected" tal:attributes="value language/code" tal:content="language/name"></option>
+						<option class="custom" tal:condition="not:language/selected" tal:attributes="value language/code" tal:content="language/name"></option>
+                    </tal:block>
 
-                    <optgroup class="separator">
-						<option>---</option>
-					</optgroup>
+					<option class="separator" disabled="disabled">---</option>
 
-                    <optgroup>
-                        <tal:block  tal:repeat="language languages">
-                            <option tal:attributes="value language/rfc" tal:content="language/name">---</option>
-                        </tal:block>
-					</optgroup>
+                    <tal:block  tal:repeat="language languages">
+                        <option tal:condition="php: (noTargetLangHistory EQ 'false')&&(language['code'] EQ 'fr-FR')" selected="selected" tal:attributes="value language/code" tal:content="language/name">---</option>
+                        <option tal:condition="php: (noTargetLangHistory NE 'false')&&(language['code'] EQ 'fr-FR')" tal:attributes="value language/code" tal:content="language/name">---</option>
+                        <option tal:condition="php: language['code'] NE 'fr-FR'" tal:attributes="value language/code" tal:content="language/name">---</option>
+                    </tal:block>
 
                 </select>
                 <br />
@@ -511,7 +506,7 @@
 
             <tal:block  tal:repeat="language languages">
                 <li tal:attributes="class language/top">
-                	<input type="checkbox" tal:attributes="value language/rfc; id language/rfc" />
+                	<input type="checkbox" tal:attributes="value language/code; id language/code" />
                 	<label tal:attributes="for language/name" tal:content="language/name" onclick="return false">---</label>
                 </li>
             </tal:block>

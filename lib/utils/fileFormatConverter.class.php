@@ -3,6 +3,7 @@
 set_time_limit(0);
 
 //include INIT::$UTILS_ROOT . "/cat.class.php";
+include INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 
 class fileFormatConverter {
@@ -12,6 +13,7 @@ class fileFormatConverter {
     private $toXliffFunction = "AutomationService/original2xliff";
     private $fromXliffFunction = "AutomationService/xliff2original";
     private $opt = array();
+    private $lang_handler;
 
     public function __construct() {
         if (!class_exists("INIT")) {
@@ -19,6 +21,7 @@ class fileFormatConverter {
             INIT::obtain();
         }
         $this->opt['httpheader'] = array("Content-Type: application/x-www-form-urlencoded;charset=UTF-8");
+	$this->lang_handler=Languages::getInstance();
     }
 
     private function extractUidandExt(&$content) {
@@ -99,6 +102,7 @@ class fileFormatConverter {
 
         //print_r ($info);
         //echo "$output\n\n";
+	//log::doLog("CURL CONVERSION OUTPUT " , $output);
         return $output;
     }
 
@@ -117,11 +121,12 @@ class fileFormatConverter {
 //echo "-2 - " . memory_get_usage(true)/1024/1024;
         $url = "$this->ip:$this->port/$this->toXliffFunction";
 //        echo $url;
-
+log::doLog("$file_path, $source_lang, $target_lang");
+log::doLog($this->lang_handler->getSDLStudioCode($source_lang).", ".$this->lang_handler->getSDLStudioCode($target_lang));
         $data['fileExtension'] = $extension;
         $data['fileName'] = "$filename.$extension";
-        $data['sourceLocale'] = $source_lang;
-        $data['targetLocale'] = $target_lang;
+        $data['sourceLocale'] = $this->lang_handler->getSDLStudioCode($source_lang);
+        $data['targetLocale'] = $this->lang_handler->getSDLStudioCode($target_lang);
 
         //print_r ($data);
         //$curl_result = CatUtils::curl_post($url, $data, $this->opt);

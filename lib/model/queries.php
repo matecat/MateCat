@@ -136,8 +136,6 @@ function getSegmentsInfo($jid, $password) {
 	$db = Database::obtain();
 	$results = $db->fetch_array($query);
 
-	//log::doLog($query);
-
 	$err = $db->get_error();
 	$errno = $err['error_code'];
 	if ($errno != 0) {
@@ -228,7 +226,8 @@ function getMoreSegments($jid, $password, $step = 50, $ref_segment, $where = 'af
 
 	$db = Database::obtain();
 	$results = $db->fetch_array($query);
-
+	log::doLog('GET MORE SEGMENTS:', $results);
+	
 	return $results;
 }
 
@@ -777,6 +776,23 @@ function getProjectData($pid, $password) {
 	//echo $query;
 	//print_r ($results); exit;
 	//var_dump(empty($results));exit;
+	return $results;
+}
+
+function getProjects() {
+	$query = "select p.id as pid, p.name, p.id_engine_mt, p.id_engine_tm, group_concat(j.id,'##', j.source,'##',j.target,'##',j.create_date,'##',j.password,'##',e.name,'##',t.mymemory_api_key) as job 
+				from projects p
+				
+				inner join jobs j on j.id_project=p.id 
+				inner join engines e on j.id_mt_engine=e.id 
+				inner join translators t on j.id_translator=t.username
+				group by 1
+				order by pid 
+				desc limit 0,100";
+
+	$db = Database::obtain();
+	$results = $db->fetch_array($query);
+	
 	return $results;
 }
 

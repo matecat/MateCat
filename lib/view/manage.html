@@ -1,0 +1,188 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <title>Manage Projects - Matecat</title>
+        <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
+        <meta name="viewport" content="width=device-width"/>
+        <link href="${basepath}public/css/style.css" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" href="${basepath}public/css/fieldtest.css"/>
+        <link rel="stylesheet" href="${basepath}public/css/tablesorter.css"/>
+        <script type="text/javascript" src="/public/js/lib/jquery.js"></script>
+        <script type="text/javascript" src="/public/js/lib/jquery.clippy.min.js"></script>
+        <script type="text/javascript" src="/public/js/utils.js"></script>
+        <script type="text/javascript" src="/public/js//lib/jquery.tablesorter.min.js"></script>
+
+        <script type="text/javascript">
+			$(document).ready(function(){
+			    fitText($('.breadcrumbs'),$('#pname'),30);
+
+			    $('.delete a').click(function(e) {    
+		            e.preventDefault();
+					$.ajax({
+						url: "http://matecat.translated.home?action=cancelJobs",
+						data: {
+							res: "job",
+							id: "jid"
+						},
+						success: function(d){
+						}
+					})
+		        });
+
+
+			    $('.buttons .change').click(function(e) {    
+		            e.preventDefault();
+					$.ajax({
+						url: "http://matecat.translated.home?action=passwordGenerator",
+						context: $(this).parents('td'),
+						success: function(d){
+							var newPwd = d.password;
+							console.log($('.urls .langs',this).attr('href'));
+							uu = $('.urls .langs',this);
+							uuh = uu.attr('href');
+							uuhs = uuh.split('-');
+							oldPwd = uuhs[uuhs.length-1];
+							console.log(oldPwd);
+							newHref = uuh.replace(oldPwd,newPwd);
+							console.log(newHref);
+							uu.attr('href',newHref);
+							$('.urls .url',this).attr('href',newHref);
+							$('.urls .url',this).text($('.urls .url',this).text().replace(oldPwd,newPwd));
+//							$('.urls .langs',this).attr('href',newUrl)
+						}
+					})
+
+		        });
+			    $('.meter a').click(function(e) {    
+		            e.preventDefault();
+		        });
+			    $(".tablestats").tablesorter();
+
+
+
+
+/*
+			    $('.buttons .copy').clippy({
+			    	clippy_path: '/public/js/lib/clippy.swf',
+			    	text: 'prova'
+			    })
+*/			    
+/*
+			    $(".tablestats").tablesorter({ 
+			        headers: { 
+			            1: { 
+			                sorter: false 
+			            }, 
+			            4: { 
+			                sorter: false 
+			            } 
+			        }
+			    });
+*/
+			});
+
+
+
+        </script>
+    </head>
+
+    <body tal:condition="not:supportedBrowser">
+        <div  metal:use-macro="unsupported_browser.html/unsupported"/>
+    </body>
+
+    <body class="manage" tal:condition="supportedBrowser">
+<!--metal:use-macro="header.html/main_header"-->
+        <header style="padding-bottom:5px" >
+            <div class="wrapper">   
+                <a href="${basepath}" class="logo"></a>
+            </div>
+        </header>
+
+        <div class="wrapper">
+
+            <!--	<h1>Field test - 1</h1> -->
+
+            <h1>Projects</h1>
+
+
+        <tal:block tal:define="project php:array()" tal:repeat="project projects">
+
+            <div class="article" tal:attributes="data-pid string:${project/id}">
+
+	            <h2 tal:content="project/name">[Project name]</h2>
+	
+	            <div class="field">
+	            	<h3>Machine Translation:</h3>
+	            	<span class="value" tal:content="project/id_engine_mt">[MT name]</span>
+	            </div>
+	
+	            <div class="field">
+	            	<h3>Private TM key:</h3>
+	            	<span class="value" tal:content="project/private_tm_key">[TM key]</span>
+	            </div>
+
+	            <table class="tablestats continue" width="100%" border="0" cellspacing="0" cellpadding="0">
+	                <tr>
+	                    <th>Create Date</th>
+	                    <th>Job</th>
+	                    <th>Payable Words</th>
+	                    <th>Progress</th>
+	                    <th>Delete</th>
+	                </tr>
+
+
+        		<tal:block tal:define="job php:array()" tal:repeat="job project/jobs">
+
+	                <tr tal:attributes="data-jid string:${job/id}">
+	                    <td tal:content="job/create_date">29/04/2013</td>
+	                    <td>
+	                    	<span class="urls">
+	                    		<a class="langs" tal:attributes="href string:${basepath}translate/${project/name}/${job/source}-${job/target}/${job/id}-${job/password}" tal:content="string:${job/sourceTxt}-${job/targetTxt}">[Link per aprire il job]</a>
+	                    		<a class="url" tal:attributes="href string:${basepath}translate/${project/name}/${job/source}-${job/target}/${job/id}-${job/password}" tal:content="string:http://matecat.../${job/source}-${job/target}/${job/id}-${job/password}">[URL semplificata del job]</a>
+	                    	</span>
+	                    	<span class="buttons">
+	                    		<a class="copy" href="#" title="Copy URL">Copy</a>
+	                    		<a class="change" href="#" title="Change password" onclick="return false">Change</a>
+	                    	</span>
+	                    </td>
+	                    <td tal:content="job/stats/TOTAL_FORMATTED|default">---</td>
+	                    <td class="progress">
+			                <div class="meter">
+			
+			                    <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job/stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job/stats/APPROVED_PERC}%"></a>
+			                    <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job/stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job/stats/TRANSLATED_PERC}%"></a>
+			                    <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job/stats/REJECTED_PERC_FORMATTED}%; style string:width:${job/stats/REJECTED_PERC}%"></a>
+			                    <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job/stats/DRAFT_PERC_FORMATTED}%; style string:width:${job/stats/DRAFT_PERC}%"></a>
+			                </div>
+	                    </td>
+
+
+
+<!--
+	                    <td class="progress"><div title="20%"><span style="width: 20%"></span></div></td>
+-->
+	                    <td class="delete"><a href="#">Delete</a></td>
+	                </tr>
+
+        		</tal:block>
+
+	            </table>
+	            
+	            <a class="right" href="#" onclick="return false">Show cancelled jobs</a>
+
+            </div> <!-- .article -->	
+
+        </tal:block>
+
+
+
+        </div>
+
+
+
+
+
+    <script src="${basepath}public/js/lib/snapengage.js"></script>
+    </body> 
+</html>

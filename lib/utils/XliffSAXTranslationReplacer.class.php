@@ -17,7 +17,7 @@ class XliffSAXTranslationReplacer{
 
 	public function __construct($filename,$segments){
 		$this->filename=$filename;
-		$this->ofp=fopen($this->filename.'.out.xliff','w');
+		$this->ofp=fopen($this->filename.'.out.sdlxliff','w');
 		$this->segments=$segments;
 	}
 
@@ -60,7 +60,7 @@ class XliffSAXTranslationReplacer{
 			while(strpos($temporary_check_buffer,'&')!==FALSE){
 				//if an entity is still present, fetch some more and repeat the escaping
 				//log::doLog("split entity detected: $uffa");
-				$this->currentBuffer.=fread($fp,512);
+				$this->currentBuffer.=fread($fp,64);
 				$temporary_check_buffer = preg_replace("/&(.*?);/", '#escaped_ent#$1##', $this->currentBuffer);
 			}
 			//free stuff outside the loop
@@ -246,10 +246,21 @@ class XliffSAXTranslationReplacer{
 	   prepare segment tagging for xliff insertion
 	 */
 	private function prepareSegment($seg,$transunit_translation = ""){
+		log::doLog($this->currentId. " INPUT t1 : $transunit_translation\n\n");
 		$end_tags = "";
 		//echo "t1 : ".$seg['translation']."\n";
 		$translation = empty($seg['translation']) ? $seg['segment'] : $seg['translation'];
-	//	log::doLog($this->currentId. "t1 : $translation\n\n");
+		//fix to escape non-html entities
+		log::doLog($this->currentId. " ESCAPE t1 : $translation\n\n");
+		$translation = str_replace("&lt;", '#LT#', $translation);
+		$translation = str_replace("&gt;", '#GT#', $translation);
+		$translation = str_replace("&amp;", '#AMP#', $translation);
+		//$translation=html_entity_decode($translation,ENT_NOQUOTES|ENT_HTML401,"utf-8");
+		$translation=html_entity_decode($translation,ENT_NOQUOTES,"utf-8");
+		$translation = str_replace('#AMP#','&amp;', $translation);
+		$translation = str_replace('#LT#','&lt;', $translation);
+		$translation = str_replace('#GT#','&gt;', $translation);
+		log::doLog($this->currentId. " VALIDATE t1 : $translation\n\n");
 
 		@$xml_valid = simplexml_load_string("<placeholder>$translation</placeholder>");
 		if (!$xml_valid) {
@@ -263,17 +274,18 @@ class XliffSAXTranslationReplacer{
 					$end_tags = "<$item$end_tags"; //insert at the top of the string
 				}
 			}
+			log::doLog($this->currentId. " INVALID ($end_tags) t2 : $translation\n");
 			$translation = str_replace($end_tags, "", $translation);
-	//		log::doLog($this->currentId. "t2 : $translation\n");
+			log::doLog($this->currentId. " FIX t2 : $translation\n");
 		}
 
 		if (!empty($seg['mrk_id'])) {
 			$translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">$translation</mrk>";
 		}
-	//	log::doLog($this->currentId. "t3 : $translation\n");
+		log::doLog($this->currentId. " t3 : $translation\n");
 	//	log::doLog( "\n\n");
 		$transunit_translation.=$seg['prev_tags'] . $translation . $end_tags . $seg['succ_tags'];
-		log::doLog($this->currentId. "t4 : $transunit_translation\n");
+		log::doLog($this->currentId. " OUTPUT t4 : $transunit_translation\n");
 		/*
 		   if (isset($data[$i + 1]) and $seg['internal_id'] == $data[$i + 1]['internal_id']) {
 		// current segment and subsequent has the same internal id --> 
