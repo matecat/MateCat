@@ -61,7 +61,7 @@ class getContributionController extends ajaxcontroller {
         if (!empty($this->id_tms)) {
 
             $mt_from_tms = 1;
-            if (!empty($this->id_mt_engine)) {
+            if (!empty($this->id_mt_engine)and $this->id_mt_engine!=1) {
                 $mt_from_tms = 0;
             }
 		//log::doLog("before $this->text");
@@ -77,7 +77,7 @@ class getContributionController extends ajaxcontroller {
         
         $mt_res = array();
         $mt_match = "";
-        if (!empty($this->id_mt_engine)) {
+        if (!empty($this->id_mt_engine)and $this->id_mt_engine!=1) {
 
             $mt = new MT($this->id_mt_engine);
             $mt_result = $mt->get($this->text, $this->source, $this->target);

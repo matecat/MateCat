@@ -93,6 +93,7 @@ function getSegmentsDownload($jid, $password, $id_file, $no_status_new = 1) {
 	$query = "select                                 
 		f.filename, f.mime_type, s.id as sid, s.segment, s.internal_id,
 		s.xliff_mrk_id as mrk_id, s.xliff_ext_prec_tags as prev_tags, s.xliff_ext_succ_tags as succ_tags,
+		s.xliff_mrk_ext_prec_tags as mrk_prev_tags, s.xliff_mrk_ext_succ_tags as mrk_succ_tags,
 		$select_translation, st.status
 
 			from jobs j 
@@ -123,7 +124,7 @@ function getSegmentsDownload($jid, $password, $id_file, $no_status_new = 1) {
 function getSegmentsInfo($jid, $password) {
 
 	$query = "select j.id as jid, j.id_project as pid,j.source,j.target, j.last_opened_segment, j.id_translator as tid,
-		p.id_customer as cid, j.id_translator as tid,  
+		p.id_customer as cid, j.id_translator as tid, j.status,  
 		p.name as pname, p.create_date , fj.id_file, fj.id_segment_start, fj.id_segment_end, 
 		f.filename, f.mime_type
 
@@ -440,18 +441,76 @@ function getOriginalFilesForJob($id_job, $id_file, $password) {
    }
  */
 
+function getStatsForMultipleJobs($jids) {
+
+	//transform array into comma separated string
+	if(is_array($jids)){
+		$jids=implode(',',$jids);
+	}
+
+	$query = "select SUM(IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(st.status='REJECTED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(st.status='TRANSLATED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(st.status='APPROVED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as APPROVED, j.id 
+
+	from jobs j 
+	INNER JOIN files_job fj on j.id=fj.id_job 
+	INNER join segments s on fj.id_file=s.id_file 
+	LEFT join segment_translations st on s.id=st.id_segment and st.id_job=j.id
+	
+
+	WHERE j.id in ($jids)
+	group by j.id";
+
+	$db = Database::obtain();
+	$results = $db->fetch_array($query);
+
+	return $results;
+}
+
 function getStatsForJob($id_job) {
 
 
-// Old Raw-wordcount
-/*
-	$query = "select SUM(raw_word_count) as TOTAL, SUM(IF(status IS NULL OR status='DRAFT' OR status='NEW',raw_word_count,0)) as DRAFT, SUM(IF(status='REJECTED',raw_word_count,0)) as REJECTED, SUM(IF(status='TRANSLATED',raw_word_count,0)) as TRANSLATED, SUM(IF(status='APPROVED',raw_word_count,0)) as APPROVED from jobs j INNER JOIN files_job fj on j.id=fj.id_job INNER join segments s on fj.id_file=s.id_file LEFT join segment_translations st on s.id=st.id_segment WHERE j.id=" . $id_job;
-*/	
-	
-	$query = "select SUM(IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(status IS NULL OR status='DRAFT' OR status='NEW',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(status='REJECTED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(status='TRANSLATED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(status='APPROVED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as APPROVED from jobs j INNER JOIN files_job fj on j.id=fj.id_job INNER join segments s on fj.id_file=s.id_file LEFT join segment_translations st on s.id=st.id_segment WHERE j.id=" . $id_job;
+	// Old Raw-wordcount
+	/*
+	   $query = "select SUM(raw_word_count) as TOTAL, SUM(IF(status IS NULL OR status='DRAFT' OR status='NEW',raw_word_count,0)) as DRAFT, SUM(IF(status='REJECTED',raw_word_count,0)) as REJECTED, SUM(IF(status='TRANSLATED',raw_word_count,0)) as TRANSLATED, SUM(IF(status='APPROVED',raw_word_count,0)) as APPROVED from jobs j INNER JOIN files_job fj on j.id=fj.id_job INNER join segments s on fj.id_file=s.id_file LEFT join segment_translations st on s.id=st.id_segment WHERE j.id=" . $id_job;
+	 */	
 
-	
-	
+	$query = "
+		select 
+		SUM(
+				IF(st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count)
+		   ) as TOTAL, 
+		SUM(
+				IF(
+					st.status IS NULL OR 
+					st.status='DRAFT' OR 
+					st.status='NEW',
+					IF(st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count),0)
+		   ) as DRAFT,
+		SUM(
+				IF(st.status='REJECTED',
+					IF(st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count),0
+				  )
+		   ) as REJECTED, 
+		SUM(
+				IF(st.status='TRANSLATED',
+					IF(st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count),0
+				  )
+		   ) as TRANSLATED, 
+		SUM(
+				IF(st.status='APPROVED',
+					IF(st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count),0
+				  )
+		   ) as APPROVED 
+
+			from jobs as j 
+			INNER JOIN files_job as fj on j.id=fj.id_job 
+			INNER join segments as s on fj.id_file=s.id_file 
+			LEFT join segment_translations as st on s.id=st.id_segment and st.id_job=j.id
+
+
+			WHERE j.id=$id_job";
+
+
+
 
 	$db = Database::obtain();
 	$results = $db->fetch_array($query);
@@ -461,11 +520,11 @@ function getStatsForJob($id_job) {
 
 function getStatsForFile($id_file) {
 
-// Old raw-wordcount
-/*
-	$query = "select SUM(raw_word_count) as TOTAL, SUM(IF(status IS NULL OR status='DRAFT' OR status='NEW',raw_word_count,0)) as DRAFT, SUM(IF(status='REJECTED',raw_word_count,0)) as REJECTED, SUM(IF(status='TRANSLATED',raw_word_count,0)) as TRANSLATED, SUM(IF(status='APPROVED',raw_word_count,0)) as APPROVED from jobs j INNER JOIN files_job fj on j.id=fj.id_job INNER join segments s on fj.id_file=s.id_file LEFT join segment_translations st on s.id=st.id_segment WHERE s.id_file=" . $id_file;
-*/
-	$query = "select SUM(IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(status IS NULL OR status='DRAFT' OR status='NEW',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(status='REJECTED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(status='TRANSLATED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(status='APPROVED',raw_word_count,0)) as APPROVED from jobs j INNER JOIN files_job fj on j.id=fj.id_job INNER join segments s on fj.id_file=s.id_file LEFT join segment_translations st on s.id=st.id_segment WHERE s.id_file=" . $id_file;
+	// Old raw-wordcount
+	/*
+	   $query = "select SUM(raw_word_count) as TOTAL, SUM(IF(status IS NULL OR status='DRAFT' OR status='NEW',raw_word_count,0)) as DRAFT, SUM(IF(status='REJECTED',raw_word_count,0)) as REJECTED, SUM(IF(status='TRANSLATED',raw_word_count,0)) as TRANSLATED, SUM(IF(status='APPROVED',raw_word_count,0)) as APPROVED from jobs j INNER JOIN files_job fj on j.id=fj.id_job INNER join segments s on fj.id_file=s.id_file LEFT join segment_translations st on s.id=st.id_segment WHERE s.id_file=" . $id_file;
+	 */
+	$query = "select SUM(IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(st.status='REJECTED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(st.status='TRANSLATED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(st.status='APPROVED',raw_word_count,0)) as APPROVED from jobs j INNER JOIN files_job fj on j.id=fj.id_job INNER join segments s on fj.id_file=s.id_file LEFT join segment_translations st on s.id=st.id_segment WHERE s.id_file=" . $id_file;
 
 
 	$db = Database::obtain();
@@ -487,14 +546,14 @@ function getLastSegmentIDs($id_job) {
 function getEQWLastHour($id_job, $estimation_seg_ids) {
 
 
-// Old raw-wordcount
-/*
-	$query = "SELECT SUM(raw_word_count), MIN(translation_date), MAX(translation_date), 
-		IF(UNIX_TIMESTAMP(MAX(translation_date))-UNIX_TIMESTAMP(MIN(translation_date))>3600 OR count(*)<10,0,1) as data_validity, 
-		ROUND(SUM(raw_word_count)/(UNIX_TIMESTAMP(MAX(translation_date))-UNIX_TIMESTAMP(MIN(translation_date)))*3600) as words_per_hour, 
-		count(*) from segment_translations
-			INNER JOIN segments on id=segment_translations.id_segment WHERE status in ('TRANSLATED','APPROVED') and id_job=$id_job and id_segment in ($estimation_seg_ids)";
-*/
+	// Old raw-wordcount
+	/*
+	   $query = "SELECT SUM(raw_word_count), MIN(translation_date), MAX(translation_date), 
+	   IF(UNIX_TIMESTAMP(MAX(translation_date))-UNIX_TIMESTAMP(MIN(translation_date))>3600 OR count(*)<10,0,1) as data_validity, 
+	   ROUND(SUM(raw_word_count)/(UNIX_TIMESTAMP(MAX(translation_date))-UNIX_TIMESTAMP(MIN(translation_date)))*3600) as words_per_hour, 
+	   count(*) from segment_translations
+	   INNER JOIN segments on id=segment_translations.id_segment WHERE status in ('TRANSLATED','APPROVED') and id_job=$id_job and id_segment in ($estimation_seg_ids)";
+	 */
 
 	$query = "SELECT SUM(IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count)), MIN(translation_date), MAX(translation_date), 
 		IF(UNIX_TIMESTAMP(MAX(translation_date))-UNIX_TIMESTAMP(MIN(translation_date))>3600 OR count(*)<10,0,1) as data_validity, 
@@ -533,8 +592,8 @@ function getEditLog($jid, $pass) {
 		st.suggestion_source AS ss,
 		st.suggestion_match AS sm,
 		j.id_translator AS tid,
-	    j.source AS source_lang,
-	    j.target AS target_lang,
+		j.source AS source_lang,
+		j.target AS target_lang,
 		s.raw_word_count rwc, 
 		p.name as pname
 			FROM
@@ -605,7 +664,7 @@ function insertProject($id_customer, $project_name, $analysis_status, $password,
 	$data['create_date'] = date("Y-m-d H:i:s");
 	$data['status_analysis'] = $analysis_status;
 	$data['password'] = $password;
-        $data['remote_ip_address'] = empty($ip)?'UNKNOWN':$ip;
+	$data['remote_ip_address'] = empty($ip)?'UNKNOWN':$ip;
 	$query = "SELECT LAST_INSERT_ID() FROM projects";
 
 	$db = Database::obtain();
@@ -647,6 +706,8 @@ function insertJob($password, $id_project, $id_translator, $source_language, $ta
 	$data['target'] = $target_language;
 	$data['id_tms'] = $tms_engine;
 	$data['id_mt_engine'] = $mt_engine;
+	$data['create_date'] = date("Y-m-d H:i:s");
+
 
 	$query = "SELECT LAST_INSERT_ID() FROM jobs";
 
@@ -708,8 +769,8 @@ function insertFile($id_project, $file_name, $source_language, $mime_type, $cont
 	if (!is_null($sha1_original)) {
 		$data['sha1_original_file'] = $sha1_original;
 	}
-        
-        if (!is_null($original_file) and !empty($original_file)) {
+
+	if (!is_null($original_file) and !empty($original_file)) {
 		$data['original_file'] = $original_file;
 	}
 
@@ -754,7 +815,7 @@ function getPdata($pid) {
 }
 
 function getProjectData($pid, $password) {
-	// per ora lasciamo siasbilitata la verifica della password
+	// per ora lasciamo disabilitata la verifica della password
 
 	$query = "select p.name, j.id as jid, j.password as jpassword, j.source, j.target, f.id,f.filename, p.status_analysis,
 		sum(s.raw_word_count) as file_raw_word_count, sum(st.eq_word_count) as file_eq_word_count, count(s.id) as total_segments,
@@ -768,31 +829,76 @@ function getProjectData($pid, $password) {
 
 			where p.id= '$pid' and p.password='$password'
 
-			group by 6 ";
+			group by 6,2 ";
 
 
 	$db = Database::obtain();
 	$results = $db->fetch_array($query);
-	//echo $query;
+	//echo $query;exit;
 	//print_r ($results); exit;
 	//var_dump(empty($results));exit;
 	return $results;
 }
 
-function getProjects() {
-	$query = "select p.id as pid, p.name, p.id_engine_mt, p.id_engine_tm, group_concat(j.id,'##', j.source,'##',j.target,'##',j.create_date,'##',j.password,'##',e.name,'##',t.mymemory_api_key) as job 
-				from projects p
-				
-				inner join jobs j on j.id_project=p.id 
-				inner join engines e on j.id_mt_engine=e.id 
-				inner join translators t on j.id_translator=t.username
-				group by 1
-				order by pid 
-				desc limit 0,100";
+function getProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_onlycompleted,$search_showarchived,$search_showcancelled) {
+
+	//	$pn = ($search_in_pname)? "where p.name like '%$search_in_pname%'" : "";
+
+	$pn_query = ($search_in_pname)? " p.name like '%$search_in_pname%' and" : "";
+	$ss_query = ($search_source)? " j.source='$search_source' and" : "";
+	$st_query = ($search_target)? " j.target='$search_target' and" : "";
+
+	log::doLog('SEARCH TARGET:',$search_target);		
+
+	log::doLog('SHOWARCHIVED:',$search_showarchived);		
+	log::doLog('SHOWCANCELLED:',$search_showcancelled);		
+
+	$status_query = " (j.status='ongoing'";
+	if(!$search_showarchived && !$search_showcancelled) {
+		$status_query = " (j.status='ongoing' or j.status='cancelled') and";
+	} else {
+		if($search_showarchived) $status_query .= " or j.status='archived'";
+		if($search_showcancelled) $status_query .= " or j.status='cancelled'";
+		$status_query .= ") and";
+	}	
+	//	$status_query = (!$search_showarchived && !$search_showcancelled)? "j.status='ongoing' or j.status='cancelled' and" : "";
+	log::doLog('STATUS QUERY:',$status_query);		
+
+	//	$sa_query = ($search_showarchived)? " j.status='archived' and" : "";
+	//	$sc_query = ($search_showcancelled)? " j.status='cancelled' and" : "";
+
+	$query_tail = $pn_query . $ss_query . $st_query . $status_query;
+	$filter_query = ($query_tail == '')? '': 'where ' . $query_tail;
+	$filter_query = preg_replace('/( and)$/i','',$filter_query);
+
+	$query = "select p.id as pid, p.name, p.id_engine_mt, p.id_engine_tm, 
+		group_concat(j.id,'##', j.source,'##',j.target,'##',j.create_date,'##',j.password,'##',e.name,'##',if (t.mymemory_api_key is NUll,'',t.mymemory_api_key),'##',j.status) as job 
+
+		from projects p
+		inner join jobs j on j.id_project=p.id 
+		inner join engines e on j.id_mt_engine=e.id 
+		left join translators t on j.id_translator=t.username
+		$filter_query
+		group by 1
+		order by pid 
+		desc limit $start,$step";				
+
+						       /*
+							  $query = "select p.id as pid, p.name, p.id_engine_mt, p.id_engine_tm, group_concat(j.id,'##', j.source,'##',j.target,'##',j.create_date,'##',j.password,'##',e.name,'##',t.mymemory_api_key) as job 
+							  from projects p
+
+							  inner join jobs j on j.id_project=p.id 
+							  inner join engines e on j.id_mt_engine=e.id 
+							  inner join translators t
+							  group by 1
+							  order by pid 
+							  desc limit 0,100";					
+							*/
+
 
 	$db = Database::obtain();
 	$results = $db->fetch_array($query);
-	
+
 	return $results;
 }
 
@@ -1130,6 +1236,64 @@ function changeProjectStatus($pid, $status, $if_status_not = array()) {
 		return $errno * -1;
 	}
 	return $db->affected_rows;
+}
+
+function changePassword($res, $id, $password) {
+	//    $new_password = 'changedpassword';
+	$new_password = $password;
+
+	if ($res == "prj") {
+		$query = "update projects set password=\"$new_password\" where id=$id";
+	} else {
+		$query = "update jobs set password=\"$new_password\" where id=$id";
+	}    
+
+	$db = Database::obtain();
+	$db->query($query);
+	return $new_password;
+
+}
+
+function cancelJob($res, $id) {
+
+	if ($res == "prj") {
+		$query = "update jobs set status='cancelled' where id_project=$id";
+	} else {
+		$query = "update jobs set status='cancelled' where id=$id";
+	}
+	/*
+	   if ($res == "prj") {
+	   $query = "update jobs set disabled=1 where id_project=$id";
+	   } else {
+	   $query = "update jobs set disabled=1 where id=$id";
+	   }
+	 */
+	//    $query = "update jobs set disabled=1 where id=$id";
+
+	$db = Database::obtain();
+	$db->query($query);
+
+}
+
+function archiveJob($res, $id) {
+
+	if ($res == "prj") {
+		$query = "update jobs set status='archived' where id_project=$id";
+	} else {
+		$query = "update jobs set status='archived' where id=$id";
+	}
+	/*
+	   if ($res == "prj") {
+	   $query = "update jobs set disabled=1 where id_project=$id";
+	   } else {
+	   $query = "update jobs set disabled=1 where id=$id";
+	   }
+	 */
+	//    $query = "update jobs set disabled=1 where id=$id";
+
+	$db = Database::obtain();
+	$db->query($query);
+
 }
 
 function setSegmentTranslationError($sid, $jid) {

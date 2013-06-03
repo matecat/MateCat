@@ -288,6 +288,7 @@ abstract class viewcontroller extends controller {
         try {
             $this->template = new PHPTAL(INIT::$TEMPLATE_ROOT . "/$skeleton_file"); // create a new template object
             $this->template->basepath = INIT::$BASEURL;
+	    $this->template->hostpath = INIT::$HTTPHOST;
             $this->template->supportedBrowser = $this->supportedBrowser;
             $this->template->setOutputMode(PHPTAL::HTML5);
         } catch (Exception $e) {

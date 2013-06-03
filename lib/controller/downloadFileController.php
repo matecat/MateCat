@@ -95,7 +95,8 @@ class downloadFileController extends downloadController {
 				}
 
 				if (!empty($seg['mrk_id'])) {
-					$translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">$translation</mrk>";
+					//$translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">$translation</mrk>";
+					$translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">".$seg['mrk_prev_tags'].$translation.$seg['mrk_succ_tags']."</mrk>";
 				}
 				//echo "t3 : $translation\n";
 				//echo "\n\n";

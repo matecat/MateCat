@@ -115,8 +115,9 @@ class downloadFileStreamOnDiskController extends downloadController {
 
 			if (!in_array($mime_type, array("xliff", "sdlxliff", "xlf"))) {
 				$debug['do_conversion'][]=time();
-				file_put_contents("/home/matecat/test.sdlxliff", $output_content[$id_file]['content']);
+				//file_put_contents("/home/matecat/test.sdlxliff", $output_content[$id_file]['content']);
 				$convertResult = $converter->convertToOriginal($output_content[$id_file]['content']);
+				//log::doLog(print_r($convertResult,true));
 				$output_content[$id_file]['content'] = $convertResult['documentContent'];
 				$debug['do_conversion'][]=time();
 			}

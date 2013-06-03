@@ -33,6 +33,7 @@ class catController extends viewcontroller {
     //    private $seg = '';
 
     private $job_not_found = false;
+    private $job_disabled = false;
 
     public function __construct() {
         $this->start_time = microtime(1) * 1000;
@@ -152,6 +153,10 @@ class catController extends viewcontroller {
             }
             //check if language belongs to supported right-to-left languages
 
+            
+            if ($seg['status'] == 'cancelled') {
+                $this->job_disabled = true;
+            }
 
             $id_file = $seg['id_file'];
 
@@ -159,6 +164,8 @@ class catController extends viewcontroller {
             if (!isset($this->data["$id_file"])) {
                 $files_found[] = $seg['filename'];
                 $file_stats = CatUtils::getStatsForFile($id_file);
+		 log::doLog('FILE STATS:',$file_stats);		
+
                 $this->data["$id_file"]['jid'] = $seg['jid'];
                 $this->data["$id_file"]["filename"] = $seg['filename'];
                 $this->data["$id_file"]["mime_type"] = $seg['mime_type'];
@@ -241,6 +248,7 @@ class catController extends viewcontroller {
         $this->template->build_number = INIT::$BUILD_NUMBER;
         $this->template->downloadFileName = $this->downloadFileName;
         $this->template->job_not_found = $this->job_not_found;
+        $this->template->job_disabled = ($this->job_disabled)? ' cancelled' : '';
 
 
         // echo "<pre>";

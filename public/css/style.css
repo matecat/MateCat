@@ -1,6 +1,8 @@
 body {min-width:980px;position:relative;text-align:center;margin:0;padding:75px 0 120px 0;font-family:calibri, Arial, Helvetica, sans-serif;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in; }
+/*
 body.cattool{background: url(../img/loading.gif) 47.5% 241px no-repeat;background-size: 20px 20px;}
-
+*/
+body.cattool.editing{background: url(../img/loading.gif) 47.5% 241px no-repeat;background-size: 20px 20px;}
 
 
 input, textarea{font-family:calibri, Arial, Helvetica, sans-serif;font-size:16px;}
@@ -503,7 +505,7 @@ color:#000
 #search, .statusmenu, #col-menu, .c-toggle, .comment-area{display:none;}
 .checkbox{margin:16px -5px 0 10px !important;float:left;}
 .search-icon{margin-left:200px;display:block;width:25px;height:35px;}
-.search .btn{float:right;font-weight:bold;margin:4px 10px 5px 0 ;padding:2px 20px;height:30px;background:#dcdedf;cursor:pointer;font-size:14px;width:120px}
+.search .btn, .searchbox .btn{float:right;font-weight:bold;margin:4px 10px 5px 0 ;padding:2px 20px;height:30px;background:#dcdedf;cursor:pointer;font-size:14px;width:120px}
 
 .checkbox-box .btn{margin:6px 10px 3px 0 ;}
 .checkbox-filter{float:right;width:120px}
@@ -1301,4 +1303,33 @@ body.rtl-target .footer .sugg-target
 	direction: rtl !important;
 	text-align: right !important;
 	}
+
+body.cancelled ul.buttons,
+body.cancelled ul.header-menu,
+body.cancelled .status-container,
+body.cancelled .footer
+	{
+	display: none !important;
+	}
 	
+#segmentPointer
+	{
+	position: fixed;
+	width: 20px;
+	height: 16px;
+	background: url(../img/arrow-menucolor.png) 0 0 no-repeat;
+	display: none;
+	z-index: 9999;
+	}
+
+#segmentPointer.down
+	{
+	margin: 400px 0 0 -10px;
+	background-image: url(../img/arrow-menucolor-down.png) !important;
+	}
+
+#segmentPointer.up
+	{
+	margin: -10px 0 0 -10px;
+	background-image: url(../img/arrow-menucolor.png) !important;
+	}

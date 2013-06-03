@@ -15,33 +15,10 @@ class cancelJobsController extends ajaxcontroller {
       }
 
       public function doAction() {
-            if ($this->res_type == "prj") {
-                  $query = "update jobs set disabled=1 where id_project=$this->res_id";
-            } else {
-                  $query = "update jobs set disabled=1 where id=$this->res_id";
-            }
+        	$canc = cancelJob($this->res_type, $this->res_id);
 
-
-
-/*
-            if (empty($this->file_name)) {
-                  $this->result['errors'][] = array("code" => -1, "message" => "Missing file name.");
-                  return false;
-            }
-            $intDir = $_SERVER['DOCUMENT_ROOT'] . '/storage/upload/' . $_COOKIE['upload_session'] . '_converted';
-
-            $file_path = $intDir . '/' . $this->file_name . '.sdlxliff';
-            
-//    	log::doLog('FILEPATH: ' .$file_path);
-
-            if (file_exists($file_path)) {
-                  $this->result['converted'] = 1;
-            } else {
-                  $this->result['converted'] = 0;
-			}
-            $this->result['file_name'] = $this->file_name;
-*/			
-          
+	        $this->result['code'] = 1;
+	        $this->result['data'] = "OK";
       }
 
 }

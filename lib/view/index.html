@@ -46,10 +46,13 @@
     <body tal:condition="true:job_not_found">
         <div  metal:use-macro="unsupported_browser.html/job_not_found"/>
     </body>
+<!--
+    <body tal:condition="true:job_disabled">
+        <div  metal:use-macro="unsupported_browser.html/job_disabled"/>
+    </body>
+-->
 
-
-
-    <body class="cattool${source_rtl}${target_rtl}" tal:condition="supportedBrowser" define="catpage string:true">
+    <body class="cattool${job_disabled}${source_rtl}${target_rtl}" tal:condition="supportedBrowser" define="catpage string:true">
 
         <header metal:use-macro="header.html/main_header">
             <div class="wrapper">   
@@ -391,6 +394,8 @@ Your downloaded file will appear on the bar below in a few seconds.<br/>
 
         <div class="grayed" ></div>
         <div class="blacked" ></div>
+
+<a id="segmentPointer" href="#" title="Go to the active segment"></a>
 
 <div id="dialog" class="dialog" title="Basic dialog">
   <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>

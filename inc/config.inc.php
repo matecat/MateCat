@@ -5,6 +5,7 @@ class INIT {
     private static $instance;
     public static $ROOT;
     public static $BASEURL;
+    public static $HTTPHOST;
     public static $DEBUG;
     public static $DB_SERVER;
     public static $DB_DATABASE;
@@ -78,6 +79,9 @@ class INIT {
         $root = realpath(dirname(__FILE__) . '/../');
         self::$ROOT = $root;  // Accesible by Apache/PHP
         self::$BASEURL = "/"; // Accesible by the browser
+	
+	$protocol=stripos($_SERVER['SERVER_PROTOCOL'],"https")===FALSE?"http":"https";
+	self::$HTTPHOST="$protocol://$_SERVER[HTTP_HOST]";
 
         set_include_path(get_include_path() . PATH_SEPARATOR . $root);
 

@@ -42,6 +42,7 @@ class analyzeController extends viewcontroller {
 
     public function doAction() {
         $project_data = getProjectData($this->pid, $this->password);
+//echo "<pre>";print_r($project_data);exit;
         $lang_handler = languages::getInstance();
         if (empty($project_data)) {
             //echo "ddddd";exit;

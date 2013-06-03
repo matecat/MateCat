@@ -107,6 +107,7 @@ class Languages{
 
 	//get list of languages, as RFC3066
 	public static function getEnabledLanguages($localizationLang='en'){
+		//print_r (self::$map_rfc2obj); exit;
 		foreach(self::$map_rfc2obj as $rfc=>$lang){
 			//if marked as enabled, add to result
 			if($lang['enabled']){

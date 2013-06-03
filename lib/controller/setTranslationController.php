@@ -73,6 +73,9 @@ class setTranslationController extends ajaxcontroller {
 			return -1;
 		}
 
+//		$query = "select count(*) as tot from segments_translations  st where id_job=<id_job> and status not in ('TRANSLATED','APPROVED')";
+		
+		
 		$job_stats = CatUtils::getStatsForJob($this->id_job);
 		$file_stats = CatUtils::getStatsForFile($this->id_first_file);
 

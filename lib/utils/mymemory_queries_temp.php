@@ -42,7 +42,7 @@ function addToMM($seg, $tra, $source_lang, $target_lang, $id_translator, $key) {
     if (!empty($id_translator) and !empty($key)) {
         $id_translator = rawurldecode($id_translator);
         $key = rawurlencode($key);
-        $private_query = "user=$id_translator&key=$key";
+        $private_query = "key=$key";
     }
     $url = "http://mymemory.translated.net/api/set?seg=$seg&tra=$tra&langpair=$source_lang|$target_lang&de=matecatdeveloper@matecat.com&$private_query";
     log::doLog("set url : $url");
