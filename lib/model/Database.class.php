@@ -237,7 +237,7 @@ class Database {
         }
 
         $q = rtrim($q, ', ') . ' WHERE ' . $where . ';';
-        log::doLog($q);
+        //log::doLog($q);
         return $this->query($q);
     }
 
@@ -270,7 +270,9 @@ class Database {
         }
 
         $q .= "(" . rtrim($n, ', ') . ") VALUES (" . rtrim($v, ', ') . ");";
-        // echo $q; exit;
+ 
+       //log::doLog("INSERT :$q");
+         //echo $q; exit;
         if ($this->query($q)) {
             return $this->last_insert($table, $pk_name, $pk_value); //mysql_insert_id($this->link_id); this->query_first("SELECT LAST_INSERT_ID()");
         } else {

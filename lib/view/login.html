@@ -1,0 +1,55 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Matecat login</title>
+<script type="text/javascript" src="/public/js/lib/jquery.js"></script>
+<script type="text/javascript" src="/public/js/login.js"></script>
+<link href="/public/css/login.css" rel="stylesheet"/>
+</head>
+
+<body>
+<span id='incomingurl' style='visibility:hidden' tal:content='incomingUrl'></span>
+<div class="" >
+<h4>Please log in</h4>
+
+
+ 
+        
+<input tal:attributes='onclick javascript_loader' name="" type="button" class="" value="Login with your Google account" />
+
+
+        <span class=""></span>
+        <p class="">or</p>
+		
+	<form class=""  id='logintranslated' action="formLogin" method='POST'>
+	  <h5>Already a customer?</h5>
+	  <ul class="">
+		<li>
+		<label for="clientiUserid">User </label><br/>
+
+		<input name="login" id="clientiUserid" type="text" class=""/>
+		</li>					  		
+		<li>
+		<label for="clientiPassword">Password</label><br/>
+
+		<input name="pass" id="clientiPassword" type="password" class=""/>
+		<br />
+			
+        <!--a href="#">forgot your password?</a-->		</li>
+		<input id="clientiSubmit" name="clienti.submit" type="submit" class="" value="Sign in" />
+         <div id='loadingspinner' class='loadingspinner'><img src='public/img/loader.gif' alt='Loading...'/></div>
+        <div class=""></div>
+<div id='msg' ></div>
+	  </ul>
+	</form>
+<div>
+<h5>Forgot Password</h5>
+<form id="formReset">
+<input name="passreset" id="emailToReset" type="text" class=""/>
+<input id="passSubmit" name="pass.submit" type="submit" class="" value="Send pass" />
+</form>
+</div>
+</div>
+</body>
+</html>

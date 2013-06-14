@@ -188,7 +188,7 @@ class createProjectController extends ajaxcontroller {
 				$this->private_tm_user = $this->private_tm_key;
 				$this->private_tm_pass = $this->private_tm_key;
 			}
-			$user_id = insertUser($this->private_tm_user, $this->private_tm_pass, $this->private_tm_key);
+			$user_id = insertTranslator($this->private_tm_user, $this->private_tm_pass, $this->private_tm_key);
 			$this->private_tm_user = $user_id;
 		}
 

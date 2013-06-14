@@ -2190,13 +2190,6 @@ UI = {
 			},
 			success: function(d){
 				UI.setTranslation_success(d,segment,status);
-/*
-                if(d.data == 'OK') {
-                    UI.setStatus(segment,status);
-                    UI.setDownloadStatus(d.stats);
-                    UI.setProgress(d.stats);
-                };
-*/
 			}
 		});
     },
@@ -2767,6 +2760,7 @@ $.fn.isOnScreen = function(){
 
 
 $(document).ready(function(){
+
     fitText($('.breadcrumbs'),$('#pname'),30);
     setBrowserHistoryBehavior();
     $("article").each(function(){

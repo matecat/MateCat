@@ -7,9 +7,7 @@
         <meta name="viewport" content="width=device-width"/>
         <link href="${basepath}public/css/style.css" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" href="${basepath}public/css/fieldtest.css"/>
-<!--
-        <link rel="stylesheet" href="${basepath}public/css/tablesorter.css"/>
--->
+
         <script type="text/javascript" src="/public/js/lib/jquery.js"></script>
         <script type="text/javascript" src="/public/js/lib/jquery.tablesorter.min.js"></script>
         <script type="text/javascript" src="/public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
@@ -34,6 +32,7 @@
         <header style="padding-bottom:5px" >
             <div class="wrapper">   
                 <a href="${basepath}" class="logo"></a>
+                <span id="display"></span>
                 <a href="#" class="filter"> <span class="arrow-top "></span></a>
 
 				<div class="message">Message box</div>
@@ -42,16 +41,16 @@
 
       
 		<div tal:attributes="class string:searchbox${filtered_class}">
-
+			<form>
 
 			<div class="block right">
-				<input id="exec-filter" type="button" class="btn" value="FILTER" />			
+				<input id="exec-filter" type="submit" class="btn" value="FILTER" />			
 				<input id="clear-filter" type="button" class="btn" value="CLEAR" />			
 			</div>
 
 			<div class="block">
 				<label for="search-projectname">Project name</label>
-				<input id="search-projectname" tal:attributes="value php: (search_pname)? search_pname : ''" class="search-input" type="text" style="width:170px !important" value=""/>				
+				<input id="search-projectname" class="search-input" type="text" style="width:170px !important" value=""/>				
 			</div>
 			
 			<div class="block">
@@ -59,8 +58,7 @@
 				<select id="select-source" class="search-select" >
 					<option value="" selected="selected"></option>
 					<tal:block tal:repeat="language languages">
-						<option selected="selected" tal:condition="php: language['code'] EQ search_source" tal:attributes="value language/code" tal:content="language/name">---</option>
-						<option tal:condition="php: language['code'] NE search_source" tal:attributes="value language/code" tal:content="language/name">---</option>
+						<option tal:attributes="value language/code" tal:content="language/name">---</option>
 					</tal:block>
 				</select>  	
 			</div>
@@ -70,27 +68,36 @@
 				<select id="select-target" class="search-select" >
 					<option value="" selected="selected"></option>
 					<tal:block tal:repeat="language languages">
-						<option selected="selected" tal:condition="php: language['code'] EQ search_target" tal:attributes="value language/code" tal:content="language/name">---</option>
-						<option tal:condition="php: language['code'] NE search_target" tal:attributes="value language/code" tal:content="language/name">---</option>
+						<option tal:attributes="value language/code" tal:content="language/name">---</option>
 					</tal:block>
 				</select>  	
 			</div>
 
 			<div class="block">
-				<input id="only-completed" tal:attributes="checked php: (search_onlycompleted)? 'checked' : ''" type="checkbox" />
-				<label for="only-completed">Only Completed</label>
+				<label for="select-status">Status</label>
+				<select id="select-status" class="search-select" >
+					<option value="ongoing">Ongoing</option>
+					<option value="archived">Archived</option>
+					<option value="cancelled">Cancelled</option>
+				</select>  	
 			</div>
 
 			<div class="block">
-				<input id="show-archived" tal:attributes="checked php: (search_showarchived)? 'checked' : ''" type="checkbox" />
+				<input id="only-completed" type="checkbox" />
+				<label for="only-completed">Only Completed</label>
+			</div>
+<!--
+			<div class="block">
+				<input id="show-archived" type="checkbox" />
 				<label for="show-archived">Show Archived</label>
 			</div>
 			
 			<div class="block">
-				<input id="show-cancelled" tal:attributes="checked php: (search_showcancelled)? 'checked' : ''" type="checkbox" />
+				<input id="show-cancelled" type="checkbox" />
 				<label for="show-cancelled">Show Cancelled</label>
 			</div>
-			
+-->
+			</form>
 		</div>
 
         <div id="contentBox" class="wrapper">
@@ -98,119 +105,25 @@
             <!--	<h1>Field test - 1</h1> -->
 
             <h1>Projects List</h1>
+            
+            <div id="projects"></div>
 
+<!--
 			<div class="pagination" style="float: right">
 				<a class="previous" tal:condition="prev_page" href="${basepath}manage/${prev_page}/">Previous</a>
 				<a class="next" tal:condition="next_page" href="${basepath}manage/${next_page}/">Next</a>		
 			</div>
+-->
 
-        <tal:block tal:define="project php:array()" tal:repeat="project projects">
-
-            <div tal:attributes="data-pid string:${project/id}; class string:article${project/no_active_jobs}; data-hascancelled string:${project/has_cancelled}">
-
-	            <div class="head">
-		            <h2 tal:content="project/name">[Project name]</h2>
-		            <a href="#" title="Cancel project" class="cancel-project"></a>
-		            <a href="#" title="Archive project" class="archive-project"></a>
-	            </div>
-
-	            <div class="field">
-	            	<h3>Machine Translation:</h3>
-	            	<span class="value" tal:content="project/id_engine_mt">[MT name]</span>
-	            </div>
-	
-	            <div class="field" tal:condition="php: project['private_tm_key'] NE ''">
-	            	<h3>Private TM key:</h3>
-	            	<span class="value" tal:content="project/private_tm_key">[TM key]</span>
-	            </div>
-
-	            <div class="tablefilter">
-
-	            	<div class="project-filter archived">
-		            	<input tal:attributes="id string:filter-archived-${project/id}" type="checkbox" />
-		            	<label tal:attributes="for string:filter-archived-${project/id}" href="#" onclick="return false">Show archived jobs</label>
-	            	</div>
-
-
-	            	<div class="project-filter cancelled">
-		            	<input tal:attributes="id string:filter-cancelled-${project/id}" type="checkbox" />
-		            	<label tal:attributes="for string:filter-cancelled-${project/id}" href="#" onclick="return false">Show cancelled jobs</label>
-	            	</div>
-	            </div>
-
-	            <table tal:attributes="id string:project-${project/id}" class="tablestats continue tablesorter" width="100%" border="0" cellspacing="0" cellpadding="0">
-	                <thead>
-		                <tr>
-		                    <th class="create-date">Create Date</th>
-		                    <th class="job-detail">Job</th>
-		                    <th class="words">Payable Words</th>
-		                    <th class="progress">Progress</th>
-		                    <th class="delete">Cancel</th>
-		                </tr>
-	                </thead>
-
-					<tbody>
-
-	        		<tal:block tal:define="job php:array()" tal:repeat="job project/jobs">
-	
-		                <tr tal:attributes="class string:row ${job/disabled}; data-jid string:${job/id}; data-status string:${job/status}">
-		                    <td class="create-date" tal:content="job/create_date">29/04/2013</td>
-		                    <td class="job-detail">
-		                    	<span class="urls">
-		                    		<div class="langs" tal:content="string:${job/sourceTxt}-${job/targetTxt}">[Lingue]</div>
-		                    		<a class="url" tal:attributes="href string:${basepath}translate/${project/name}/${job/source}-${job/target}/${job/id}-${job/password}" target="_blank" tal:content="string:${hostpath}${basepath}translate/${project/name}/${job/source}-${job/target}/${job/id}-${job/password}">[URL semplificata del job]</a>
-	
-	<!--
-		                    		<a class="langs" tal:attributes="href string:${basepath}translate/${project/name}/${job/source}-${job/target}/${job/id}-${job/password}" tal:content="string:${job/sourceTxt}-${job/targetTxt}">[Link per aprire il job]</a>
-		                    		<a class="url" tal:attributes="href string:${basepath}translate/${project/name}/${job/source}-${job/target}/${job/id}-${job/password}" tal:content="string:http://matecat.../${job/source}-${job/target}/${job/id}-${job/password}">[URL semplificata del job]</a>
-	-->
-	
-		                    	</span>
-		                    	<span class="buttons">
-	<!--
-		                    		<a class="copy" href="#" title="Copy URL">Copy</a>
-	-->
-		                    		<a class="change" href="#" title="Change job password" onclick="return false">Change</a>
-		                    	</span>
-		                    </td>
-		                    <td class="words" tal:content="job/stats/TOTAL_FORMATTED|default">---</td>
-		                    <td class="progress">
-				                <div class="meter">
-				
-				                    <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job/stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job/stats/APPROVED_PERC}%"></a>
-				                    <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job/stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job/stats/TRANSLATED_PERC}%"></a>
-				                    <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job/stats/REJECTED_PERC_FORMATTED}%; style string:width:${job/stats/REJECTED_PERC}%"></a>
-				                    <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job/stats/DRAFT_PERC_FORMATTED}%; style string:width:${job/stats/DRAFT_PERC}%"></a>
-				                </div>
-		                    </td>
-	
-	
-	
-	<!--
-		                    <td class="progress"><div title="20%"><span style="width: 20%"></span></div></td>
-	-->
-		                    <td class="delete"><a href="#">Cancel</a></td>
-		                </tr>
-	
-	        		</tal:block>
-
-					</tbody>
-
-	            </table>
-	            
-
-            </div> <!-- .article -->	
-
-        </tal:block>
-
+<!--
 			<div class="pagination" style="float: right">
 				<a class="previous" tal:condition="prev_page" href="${basepath}manage/${prev_page}/">Previous</a>
 				<a class="next" tal:condition="next_page" href="${basepath}manage/${next_page}/">Next</a>		
 			</div>
-
+-->
         </div>
 
-
+		<img id="spinner" src="${basepath}public/img/loader.gif" />
     <script src="${basepath}public/js/lib/snapengage.js"></script>
     </body> 
 </html>

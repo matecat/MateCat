@@ -13,8 +13,9 @@ body.manage h1
 body.manage h2
 	{
 	float: left;
+	width: 100%;
 	margin-top: 20px;
-	margin-bottom: 10px;
+	margin-bottom: 0;
 	}
 		
 h2{font-size:30px;margin:0;}
@@ -60,6 +61,7 @@ body.manage .head
 	{
 	float: left;
 	width: 100%;
+	margin-bottom: 8px;
 	}
 
 body.manage th
@@ -98,7 +100,7 @@ body.manage a.change
 	margin-top: 24px;
 	text-indent: -10000px;
 	position: absolute;
-	background: url(../img/change.png) 0 0 no-repeat;
+	background: url(../img/change_password.png) 0 0 no-repeat;
 	}
 	body.manage tr.disabled a.change
 		{
@@ -114,7 +116,7 @@ body.manage a.copy
 	background: url(../img/copy_url.gif) 0 0 no-repeat;
 	}
 
-body.manage .delete a
+body.manage .actions a
 	{
 	display: block;
 	width: 18px;
@@ -122,16 +124,60 @@ body.manage .delete a
 	margin: -7px 0 0 16px !important;
 	text-indent: -10000px;
 	position: absolute;
-	background: url(../img/delete.png) 0 0 no-repeat;
 	}
-	body.manage tr.disabled .delete a
+
+	body.manage .actions a.change
+		{
+		margin-left: 5px !important;
+		background: url(../img/change_password.png) 0 0 no-repeat;
+		}
+		
+	body.manage .actions a.cancel
+		{
+		margin-left: 33px !important;
+		background: url(../img/cancel-job.png) 0 0 no-repeat;
+		}
+	body.manage .actions a.archive
+		{
+		margin-left: 61px !important;
+		background: url(../img/archive-job.png) 0 1px no-repeat;
+		}
+	body.manage .actions a.resume
+		{
+		margin-left: 33px !important;
+		background: url(../img/resume-job.png) 0 0px no-repeat;
+		}
+	body.manage .actions a.unarchive
+		{
+		margin-left: 61px !important;
+		background: url(../img/unarchive-job.png) 0 1px no-repeat;
+		}
+
+	body.manage tr[data-status=ongoing] .actions a.resume,
+	body.manage tr[data-status=ongoing] .actions a.unarchive,
+	body.manage tr[data-status=cancelled] .actions a.cancel,
+	body.manage tr[data-status=cancelled] .actions a.archive,
+	body.manage tr[data-status=cancelled] .actions a.unarchive,
+	body.manage tr[data-status=archived] .actions a.archive,
+	body.manage tr[data-status=archived] .actions a.resume
 		{
 		display: none;
 		}
 
-
-body.manage a.cancel-project
+		
+body.manage a.cancel-project,
+body.manage a.archive-project
 	{
+	display: inline-block;
+	position: relative;
+	width: 18px;
+	height: 18px;
+	text-indent: -10000px;
+	margin-left: 10px;
+	top: 5px;
+	background: url(../img/cancel-job.png) 0 0 no-repeat;
+	
+/*
 	width: 18px;
 	height: 18px;
 	margin-left: 40px;
@@ -139,6 +185,7 @@ body.manage a.cancel-project
 	text-indent: -10000px;
 	position: absolute;
 	background: url(../img/icon_delete_02.png) 0 0 no-repeat;
+*/
 	}
 	body.manage .article.allCancelled a.cancel-project
 		{
@@ -147,6 +194,9 @@ body.manage a.cancel-project
 
 body.manage a.archive-project
 	{
+	background: url(../img/archive-job.png) 0 1px no-repeat;
+
+/*
 	width: 18px;
 	height: 16px;
 	margin-left: 80px;
@@ -154,6 +204,7 @@ body.manage a.archive-project
 	text-indent: -10000px;
 	position: absolute;
 	background: url(../img/icon_archive_small.gif) 0 0 no-repeat;
+*/
 	}
 	body.manage .article.allArchived a.archive-project
 		{
@@ -212,12 +263,12 @@ body.manage .meter
 
 body.manage th.create-date
 	{
-	min-width: 130px;
+	min-width: 150px;
 	}
 	
 body.manage th.job-detail
 	{
-	width: 65%;
+	width: 50%;
 	}
 
 body.manage th.words
@@ -227,14 +278,19 @@ body.manage th.words
 	
 body.manage th.progress
 	{
-	width: 10%;
+	width: 15%;
 	}
 
+body.manage th.actions
+	{
+	width: 8%;
+	}
+/*	
 body.manage tr.disabled
 	{
 	display: none;
 	}
-	body.manage div.showDisabled tr.disabled
+	body.manage div.showCancelled tr.disabled
 		{
 		display: table-row;
 		}
@@ -243,22 +299,32 @@ body.manage tr.archived
 	{
 	display: none;
 	}
-
+*/
 body.manage tr[data-status=archived]
 	{
 	color: #C41919;
+	display: none;
 	}
-
+	body.manage .article.showArchived tr[data-status=archived]
+		{
+		display: table-row;
+		}
+		
 body.manage tr[data-status=cancelled]
 	{
 	color: #999;
+	display: none;
 	}
+	body.manage .article.showCancelled tr[data-status=cancelled]
+		{
+		display: table-row;
+		}
 	
 body.manage .article.allCancelled thead th
 	{
 	color: #999;
 	}
-	body.manage .article.showDisabled.allCancelled thead th
+	body.manage .article.showCancelled.allCancelled thead th
 		{
 		color: #000 !important;
 		}
@@ -283,12 +349,27 @@ body.manage .pagination
 	border: none;
 	margin-top: 40px;
 	}
-
-body.manage .pagination a
+	body.manage .pagination.bottom
+		{
+		margin-bottom: 20px;
+		}
+body.manage .pagination a,
+body.manage .pagination strong
 	{
 	border: none;
 	color: #000;
+	padding-left: 7px !important;
+	padding-right: 7px !important;
+	text-decoration: underline;
 	}
+body.manage .pagination strong
+	{
+	color: #999;
+	margin-right: 0 !important;
+	text-decoration: none;
+	}
+
+
 
 body.manage .pagination a:hover
 	{
@@ -304,7 +385,9 @@ body.manage .pagination a:active
 body.manage .pagination a.previous
 	{
 	color: #000;
+/*
 	border-right: 1px solid #999;
+*/
 	}
 	
 body.manage .pagination a:hover
@@ -344,7 +427,7 @@ body.manage .searchbox
 	-webkit-border-bottom-left-radius:2px;
 	z-index:10;
 	}
-	body.manage .searchbox.open
+	body.manage.filterOpen .searchbox
 		{
 		display: block;
 		}
@@ -381,15 +464,16 @@ body.manage.filterOpen #contentBox
 	margin-top: 40px;
 	}
 
-body.manage input[type=button]
+body.manage input[type=button],
+body.manage input[type=submit]
 	{
-	width: 80px;
+	width: 80px !important;
 	}
 
 body.manage .message
 	{
 	display: none;
-	background: #ffd600;
+	background: #ffde33;
 	position: absolute;
 	margin: 50px 35%;
 	width: 30%;
@@ -400,12 +484,29 @@ body.manage .message
 		{
 		margin-top: 90px !important;
 		}
+body.manage .message:hover
+	{
+	background: #ffde33 !important;
+
+	}
 
 body.manage .project-filter
 	{
 	display: inline;
 	margin-left: 20px;
 	}
+
+body.manage.filterActive .project-filter
+	{
+	display: none !important;
+	}
+
+body.manage.filterActive tr[data-status=archived],
+body.manage.filterActive tr[data-status=cancelled]
+	{
+	display: table-row !important;
+	}
+
 
 body.manage .article[data-hascancelled='0'] .project-filter.cancelled
 	{
@@ -416,3 +517,55 @@ body.manage .article[data-hasarchived='0'] .project-filter.archived
 	{
 	display: none;
 	}
+
+body.manage #spinner
+	{
+	display: none;
+	position: fixed;
+	margin: 25px 0 0 50%;
+	}
+
+body.manage.loading #spinner
+	{
+	display: block;
+	}
+
+body.manage .article.msg
+	{
+	width: 100%;
+	margin: 20px auto;
+	font-size: 26px;
+	font-style: italic;
+	color: #999;
+	}
+
+body.manage .project-details
+	{
+	width: 100%;
+	display: inline;
+	height: 30px;
+	}
+body.manage .id-project
+	{
+	color: #999;
+	}
+
+body.manage .urls .langs
+	{
+	font-size: 120%;
+	}
+	
+body.manage #display
+	{
+	display: inline-block;
+	color: #fff;
+	margin-left: 100px;
+	margin-top: 22px;
+	}
+	
+body.manage #display strong
+	{
+	margin: 0 !important;
+	color: yellow;
+	}
+

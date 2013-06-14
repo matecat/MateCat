@@ -285,6 +285,9 @@ class CatUtils {
 	}
 
 	public static function getStatsForMultipleJobs($jids,$estimate_performance=0){
+//log::doLog("JIDS: ",$jids);
+log::doLog("EST PERF: ",$estimate_performance);
+
 		//get stats for all jids
 		$jobs_stats=getStatsForMultipleJobs($jids);
 
@@ -301,13 +304,17 @@ class CatUtils {
 				//if no stats for that job id
 				if(!isset($jobs_stats[$jid])){
 					//add dummy empty stats
-					$jobs_stats[$jid]=array('TOTAL'=>0.00, 'DRAFT'=>0.00, 'REJECTED'=>0.00, 'TRANSLATED'=>0.00, 'APPROVED'=>0.00, 'id'=>$jid);
+					$jobs_stats[$jid]=array('TOTAL'=>1.00, 'DRAFT'=>0.00, 'REJECTED'=>0.00, 'TRANSLATED'=>0.00, 'APPROVED'=>0.00, 'id'=>$jid);
 				}
 			}
 		}
 		//init results
 		$res_job_stats=array();
 		foreach($jobs_stats as $job_stat){
+			// this prevent division by zero error when the jobs contains only segment having untranslatable content	
+			if ($job_stat['TOTAL']==0){
+				$job_stat['TOTAL']=1;
+				} 
 			$job_stat['TOTAL_FORMATTED']=number_format($job_stat['TOTAL'],0,".",",");
 
 			$job_stat['TRANSLATED_FORMATTED'] = number_format($job_stat['TRANSLATED'],0,".",",");

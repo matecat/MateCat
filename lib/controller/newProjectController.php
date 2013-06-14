@@ -12,7 +12,7 @@ class newProjectController extends viewcontroller {
 	private $lang_handler;
 
 	public function __construct() {
-		parent::__construct();
+		parent::__construct(true);
 		if (!isset($_REQUEST['fork'])) {
 			parent::makeTemplate("upload.html");
 		} else {
@@ -221,6 +221,7 @@ class newProjectController extends viewcontroller {
 		$this->template->targetLangHistory = $this->targetLangArray;
 		$this->template->noSourceLangHistory = $this->noSourceLangHistory;
 		$this->template->noTargetLangHistory = $this->noTargetLangHistory;
+		$this->template->logged_user=trim($this->logged_user['first_name']." ".$this->logged_user['last_name']);
 		
 	}
 

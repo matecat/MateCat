@@ -31,7 +31,7 @@ class analyzeController extends viewcontroller {
     private $num_segments_analyzed = 0;
 
     public function __construct() {
-        parent::__construct();
+        parent::__construct(true);
         parent::makeTemplate("analyze.html");
 
 
@@ -239,6 +239,7 @@ class analyzeController extends viewcontroller {
         $this->template->project_status = $this->project_status;
         $this->template->num_segments = $this->num_segments;
         $this->template->num_segments_analyzed = $this->num_segments_analyzed;
+	$this->template->logged_user=trim($this->logged_user['first_name']." ".$this->logged_user['last_name']);
     }
 
 }
