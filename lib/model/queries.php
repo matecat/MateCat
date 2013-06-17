@@ -769,7 +769,7 @@ function getProjectData($pid, $password) {
 
 			where p.id= '$pid' and p.password='$password'
 
-			group by 6 ";
+			group by 2";
 
 
 	$db = Database::obtain();

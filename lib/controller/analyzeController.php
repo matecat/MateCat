@@ -47,6 +47,8 @@ class analyzeController extends viewcontroller {
             //echo "ddddd";exit;
             $this->project_not_found = true;
         }
+        
+        //echo "<pre>";print_r ($project_data);exit;
         foreach ($project_data as &$pdata) {
             // echo "<pre>";   print_r ($pdata);
             //print_r ($pdata); exit;
