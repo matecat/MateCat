@@ -35,6 +35,8 @@ class catController extends viewcontroller {
 	private $job_not_found = false;
 	private $job_disabled = false;
 
+	private $thisUrl;
+
 	public function __construct() {
 		$this->start_time = microtime(1) * 1000;
 
@@ -66,6 +68,7 @@ class catController extends viewcontroller {
 			header("Location: /translate/esempio.xliff/en-fr/849-mcfmtvg8");
 			exit(0);
 		}
+		$this->thisUrl=$_SERVER['REQUEST_URI'];
 
 	}
 
@@ -255,6 +258,7 @@ class catController extends viewcontroller {
 		$this->template->job_not_found = $this->job_not_found;
 		$this->template->job_disabled = ($this->job_disabled)? ' cancelled' : '';
 		$this->template->logged_user=trim($this->logged_user['first_name']." ".$this->logged_user['last_name']);
+		$this->template->incomingUrl = '/login?incomingUrl='.$this->thisUrl;
 		// echo "<pre>";
 		// print_r ($this->template);
 		// exit;

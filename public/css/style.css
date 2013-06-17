@@ -1333,3 +1333,9 @@ body.cancelled .footer
 	margin: -10px 0 0 -10px;
 	background-image: url(../img/arrow-menucolor.png) !important;
 	}
+
+#authentication
+	{
+	float:right; 
+	margin-left:50px;
+	}

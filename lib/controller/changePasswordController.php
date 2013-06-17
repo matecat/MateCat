@@ -5,18 +5,30 @@ include_once INIT::$UTILS_ROOT . "/cat.class.php";
 class changePasswordController extends ajaxcontroller {
       private $res_type;
       private $res_id;
+      private $password;
 	  
       public function __construct() {
             parent::__construct();
             $this->res_type = $this->get_from_get_post('res');
             $this->res_id = $this->get_from_get_post('id');
+log::doLog("PASSWORD 1: ",$this->get_from_get_post('password'));
+if($this->get_from_get_post('password') != '') log::doLog("C'E' UNA PASSWORD");
+			if (isset($_GET['password'])) {
+				$this->password = ($this->get_from_get_post('password')=='')? false : $this->get_from_get_post('password');
+			} else {
+				$this->password = false;
+			};	
+log::doLog("PASSWORD 2: ",$this->password);
+
       }
 
       public function doAction() {
-        	$password = CatUtils::generate_password();
+        		
+        	$pwd = ($this->password)? $this->password : CatUtils::generate_password();
 
-        	$changePass = changePassword($this->res_type, $this->res_id,$password);
-            $this->result['password'] = $password;
+        	$changePass = changePassword($this->res_type, $this->res_id,$pwd);
+            $this->result['password'] = $pwd;
+		    $this->result['undo'] = $this->password;
       }
 
 }

@@ -16,9 +16,9 @@
 
  
         
-<input tal:attributes='onclick javascript_loader' name="" type="button" class="" value="Login with your Google account" />
+<button tal:attributes='onclick javascript_loader' name="" type="button" class="">Login with your Google account</button>
 
-
+<!--
         <span class=""></span>
         <p class="">or</p>
 		
@@ -35,21 +35,22 @@
 
 		<input name="pass" id="clientiPassword" type="password" class=""/>
 		<br />
-			
-        <!--a href="#">forgot your password?</a-->		</li>
+		</li>
 		<input id="clientiSubmit" name="clienti.submit" type="submit" class="" value="Sign in" />
          <div id='loadingspinner' class='loadingspinner'><img src='public/img/loader.gif' alt='Loading...'/></div>
         <div class=""></div>
 <div id='msg' ></div>
 	  </ul>
 	</form>
-<div>
+
+<div id='forgotpass'>
 <h5>Forgot Password</h5>
 <form id="formReset">
 <input name="passreset" id="emailToReset" type="text" class=""/>
 <input id="passSubmit" name="pass.submit" type="submit" class="" value="Send pass" />
 </form>
 </div>
+-->
 </div>
 </body>
 </html>

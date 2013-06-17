@@ -59,17 +59,7 @@ UI = {
         		$('#only-completed').attr('checked','checked');
 
         	};
-/*
-        	if(typeof this.filters.showarchived != 'undefined') {
-        		$('#show-archived').attr('checked','checked');
 
-        	};
-
-        	if(typeof this.filters.showcancelled != 'undefined') {
-        		$('#show-cancelled').attr('checked','checked');
-
-        	};
-*/
         	this.body.addClass('filterOpen');
         } else {
         	this.body.removeClass('filterOpen filterActive');
@@ -111,6 +101,38 @@ UI = {
 
 					break;
 
+				case 'changePassword':
+					$('.message').hide();
+					var res = $(this).data('res');
+					var id = $(this).data('id');
+					var pwd = $(this).data('password');
+					var ob = (res=='job')? $('tr.row[data-jid=' + id + ']') : $('.article[data-pid=' + id + ']');
+					UI.changePassword(res,ob,pwd,1);
+/*
+					var status = $(this).data('status');
+					var res = $(this).data('res');
+					var id = $(this).data('id');
+					var ob = (res=='job')? $('tr.row[data-jid=' + id + ']') : $('.article[data-pid=' + id + ']');
+					
+					UI.doRequest({
+						data: {
+							action:		"changeJobsStatus",
+							status: 	status,
+							res: 		res,
+							id:			id
+						},
+						context: ob,
+						success: function(d){
+							if(d.data == 'OK') {
+								res = ($(this).hasClass('row'))? 'job':'prj';
+								UI.changeJobsStatus_success(res,$(this),d,1);
+
+							}
+						}
+					});
+*/
+					break;
+
 				default:
 				}
 	    })
@@ -135,6 +157,8 @@ UI = {
 	        UI.changeJobsStatus('prj',$(this).parents('.article'),'archived');		
 	    }).on('click','td.actions a.change',function(e) {;
 	        e.preventDefault();
+	        UI.changePassword('job',$(this).parents('tr'),0,0);
+/*
 			var m = confirm('You are changing the password for this job. \nThe current link will not work anymore! \nDo you want to proceed?');
 			if(m) {
 				UI.doRequest({
@@ -158,7 +182,7 @@ UI = {
 					}
 				});
 			}
-	
+*/	
 	    }).on('click','.meter a',function(e) {
 	        e.preventDefault();
 	    }).on('click','.tablefilter label',function(e) {	
@@ -272,49 +296,6 @@ UI = {
 	    });
 	},
 
-    verifyProjectHasCancelled: function(project) {
-		hasCancelled = ($('tr[data-status=cancelled]',project).length)? 1 : 0;
-		$(project).attr('data-hascancelled',hasCancelled);
-    },
-
-    verifyProjectHasArchived: function(project) {
-		hasArchived = ($('tr[data-status=archived]',project).length)? 1 : 0;
-		$(project).attr('data-hasarchived',hasArchived);
-    },
-
-    filters2hash: function() {
-		var hash = '#';
-		$.each(this.filters, function(key,value) {
-			hash += key + '=' + value + ',';
-		})
-		hash = hash.substring(0, hash.length - 1);
-		return hash;
-    },
-
-    emptySearchbox: function() {
-        $('#search-projectname').val('');
-        $('#select-source option[selected=selected]').removeAttr('selected');
-        $('#select-source option').first().attr('selected','selected');
-        $('#select-target option[selected=selected]').removeAttr('selected');
-        $('#select-target option').first().attr('selected','selected');
-    },
-    
-	doRequest: function(req) {
-        var setup = {
-            url:      config.basepath + '?action=' + req.data.action + this.appendTime(),
-            data:     req.data,
-            type:     'POST',
-            dataType: 'json'
-        };
-
-        // Callbacks
-        if (typeof req.success === 'function') setup.success = req.success;
-        if (typeof req.complete === 'function') setup.complete = req.complete;
-        if (typeof req.context != 'undefined') setup.context = req.context;
-
-        $.ajax(setup);
-	},
-
     appendTime: function() {
         var t = new Date();
         return '&time='+t.getTime();
@@ -417,31 +398,150 @@ UI = {
 		this.verifyProjectHasCancelled(project);
 		this.verifyProjectHasArchived(project);
 
+    },
 
+    changePassword: function(res,ob,pwd,undo) {
+        if(typeof pwd == 'undefined') pwd = false;
+        console.log(pwd);
+        if(res=='job') {
+        	id = ob.data('jid');
+        	password = (pwd)? pwd : '';
+        } else {
+        }
+				console.log('ecco');
+
+		UI.doRequest({
+			data: {
+				action:		"changePassword",
+				res: 		res,
+				id: 		id,
+				password: 	password
+			},
+			context: ob,
+			success: function(d){
+				res = ($(this).hasClass('row'))? 'job':'prj';
+				UI.changePassword_success(res,$(this),d,undo);
+			}
+		});
+    },
+
+    changePassword_success: function(res,ob,d,undo) {
+		console.log('dd');
+		var jd = $(ob).find('.job-detail');
+		var newPwd = d.password;
+		uu = $('.urls .url',jd);
+		uuh = uu.attr('href');
+		uuhs = uuh.split('-');
+		oldPwd = uuhs[uuhs.length-1];
+		newHref = uuh.replace(oldPwd,newPwd);
+		uu.attr('href',newHref);
+		newCompressedHref = this.compressUrl(newHref);
+		$('.urls .url',jd).text(newCompressedHref);
+		$(jd).effect("highlight", {}, 1000);
+
+		if(res == 'job') {
+			ob.attr('data-password',d.password);				
+			if(undo) {
+				msg = 'A job password has been restored.';
+			} else {
+				msg = 'A job password has been changed.';	
+			}
+
+		} else {
+		}
+
+		console.log('undo:');
+		console.log(undo);
+		if(!undo) {
+			var token =  new Date();
+			var resData = (res == 'prj')? 'pid':'jid';
+			$('.message').attr('data-token',token.getTime()).html(msg + ' <a href="#" class="undo" data-res="' + res + '" data-id="' + ob.data(resData)+ '" data-operation="changePassword" data-password="' + oldPwd + '">Undo</a>').show();
+			console.log($('.message').html());
+			setTimeout(function(){
+				$('.message[data-token='+token.getTime()+']').hide();
+			},5000);
+		}
 
     },
 
-    setTablesorter: function() {
-	    $(".tablesorter").tablesorter({
-	        textExtraction: function(node) { 
-	            // extract data from markup and return it  
-	            if($(node).hasClass('progress')) {
-	            	var n = $(node).find('.translated-bar').attr('title').split(' ')[1];
-	            	return n.substring(0, n.length - 1);
-	            } else {
-	            	return $(node).text();
-	            }
-	        }, 
-	        headers: { 
-	            1: { 
-	                sorter: false 
-	            }, 
-	            4: { 
-	                sorter: false 
-	            } 
-	        }			    	
-	    });
+    compileDisplay: function() {
+    	var status = (typeof this.filters.status != 'undefined')? this.filters.status : 'ongoing';
+    	var pname = (typeof this.filters.pn != 'undefined')? ' "<strong>' + this.filters.pn + '</strong>" in the name,' : '';
+    	var source = (typeof this.filters.source != 'undefined')? ' <strong>' + $('#select-source option[value='+this.filters.source+']').text() + '</strong> as source language,' : '';
+    	var target = (typeof this.filters.target != 'undefined')? ' <strong>' + $('#select-target option[value='+this.filters.target+']').text() + '</strong> as target language,' : '';
+    	var completed = (typeof this.filters.onlycompleted != 'undefined')? ' <strong>completed</strong>' : '';
+    	var ff = ((pname != '')||(source != '')||(target != ''))? ' having' : '';
+    	var tt = 'showing' + completed + ' <strong class="status">' + status + '</strong> projects' + ff + pname + source + target;
+    	tt = tt.replace(/\,$/, '');
+    	$('#display').html(tt);
+	},
+
+    compressUrl: function(url) {
+		var arr = url.split('/');
+		compressedUrl = config.hostpath + '/translate/.../' + arr[4];
+		return compressedUrl;
+	},
+
+	doRequest: function(req) {
+        var setup = {
+            url:      config.basepath + '?action=' + req.data.action + this.appendTime(),
+            data:     req.data,
+            type:     'POST',
+            dataType: 'json'
+        };
+
+        // Callbacks
+        if (typeof req.success === 'function') setup.success = req.success;
+        if (typeof req.complete === 'function') setup.complete = req.complete;
+        if (typeof req.context != 'undefined') setup.context = req.context;
+
+        $.ajax(setup);
+	},
+
+    emptySearchbox: function() {
+        $('#search-projectname').val('');
+        $('#select-source option[selected=selected]').removeAttr('selected');
+        $('#select-source option').first().attr('selected','selected');
+        $('#select-target option[selected=selected]').removeAttr('selected');
+        $('#select-target option').first().attr('selected','selected');
     },
+
+    filters2hash: function() {
+		var hash = '#';
+		$.each(this.filters, function(key,value) {
+			hash += key + '=' + value + ',';
+		})
+		hash = hash.substring(0, hash.length - 1);
+		return hash;
+    },
+
+    formatDate: function(tt) {
+    	var t = UI.retrieveTime;
+    	var d = new Date(tt);
+    	
+//    	console.log(UI.retrieveTime.toDateString());
+//    	console.log(d.toDateString());
+/*
+		var options = {year: "numeric", month: "short", day: "numeric"};
+    	prova = d.toLocaleDateString("en-US", options);
+    	console.log(prova);
+*/
+    	if(d.getDate() == t.getDate()) {
+    		txtDay = 'Today';
+    	} else if(d.getDate() == t.getDate()-1) {
+    		txtDay = 'Yesterday';
+    	} else if((d.getFullYear()==t.getFullYear())&&(d.getMonth()==t.getMonth())) {
+    		txtDay = monthNames[d.getMonth()] + ' ' + d.getDate() + ' ' + dayNames[d.getDay()];
+    	} else {
+    		txtDay = ((d.getFullYear()==t.getFullYear())? '' : d.getFullYear()) + ' ' + monthNames[d.getMonth()] + ' ' + d.getDate();
+    	}
+    	h = d.getHours();
+     	m = d.getMinutes();
+   		formattedData =  txtDay + ', ' + ((h<10)? '0':'') + h +':' + ((m<10)? '0':'') + m;
+//    	formattedData = d.getFullYear() + ' ' + monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getHours() + ':' + d.getMinutes();
+//    	today = 
+    	return formattedData;
+	},
 
     getProjects: function(what) {
 		UI.body.addClass('loading');
@@ -456,13 +556,13 @@ UI = {
 			success: function(d){
 				UI.body.removeClass('loading');
 				data = $.parseJSON(d.data);
-				if(data.length) {
+				if(d.pnumber > 1) {
 					UI.renderPagination(d.page,1,d.pnumber);
 				} else {
 					$('.pagination').empty();
 				}
 				UI.renderProjects(data);
-				if(data.length) UI.renderPagination(d.page,0,d.pnumber);
+				if(d.pnumber > 1) UI.renderPagination(d.page,0,d.pnumber);
 				UI.setTablesorter();
 				var stateObj = { page: d.page };
 //				history.pushState(stateObj, "page "+d.page, d.page+location.hash);
@@ -477,18 +577,6 @@ UI = {
 				UI.compileDisplay();
 			}
 		});
-	},
-
-    compileDisplay: function() {
-    	var status = (typeof this.filters.status != 'undefined')? this.filters.status : 'ongoing';
-    	var pname = (typeof this.filters.pn != 'undefined')? ' "<strong>' + this.filters.pn + '</strong>" in the name,' : '';
-    	var source = (typeof this.filters.source != 'undefined')? ' <strong>' + $('#select-source option[value='+this.filters.source+']').text() + '</strong> as source language,' : '';
-    	var target = (typeof this.filters.target != 'undefined')? ' <strong>' + $('#select-target option[value='+this.filters.target+']').text() + '</strong> as target language,' : '';
-    	var completed = (typeof this.filters.onlycompleted != 'undefined')? ' <strong>completed</strong>' : '';
-    	var ff = ((pname != '')||(source != '')||(target != ''))? ' having' : '';
-    	var tt = 'showing' + completed + ' <strong class="status">' + status + '</strong> projects' + ff + pname + source + target;
-    	tt = tt.replace(/\,$/, '');
-    	$('#display').html(tt);
 	},
 
     renderPagination: function(page,top,pnumber) {
@@ -518,34 +606,6 @@ UI = {
 
 	},
 
-    formatDate: function(tt) {
-    	var t = UI.retrieveTime;
-    	var d = new Date(tt);
-    	
-//    	console.log(UI.retrieveTime.toDateString());
-//    	console.log(d.toDateString());
-/*
-		var options = {year: "numeric", month: "short", day: "numeric"};
-    	prova = d.toLocaleDateString("en-US", options);
-    	console.log(prova);
-*/
-    	if(d.getDate() == t.getDate()) {
-    		txtDay = 'today';
-    	} else if(d.getDate() == t.getDate()-1) {
-    		txtDay = 'yesterday';
-    	} else if((d.getFullYear()==t.getFullYear())&&(d.getMonth()==t.getMonth())) {
-    		txtDay = monthNames[d.getMonth()] + ' ' + d.getDate() + ' ' + dayNames[d.getDay()];
-    	} else {
-    		txtDay = ((d.getFullYear()==t.getFullYear())? '' : d.getFullYear()) + ' ' + monthNames[d.getMonth()] + ' ' + d.getDate();
-    	}
-    	h = d.getHours();
-     	m = d.getMinutes();
-   		formattedData =  txtDay + ', ' + ((h<10)? '0':'') + h +':' + ((m<10)? '0':'') + m;
-//    	formattedData = d.getFullYear() + ' ' + monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getHours() + ':' + d.getMinutes();
-//    	today = 
-    	return formattedData;
-	},
-
     renderProjects: function(d) {
         this.retrieveTime = new Date();
         var projects = '';
@@ -557,7 +617,7 @@ UI = {
 	            '	<div class="head">'+
 		        '	    <h2>'+this.name+'</h2>'+
 		        '	    <div class="project-details">'+
-		        '			<span class="id-project" title="Project ID">'+this.id+'</span> - <a target="_blank" href="/analyze/'+project.name+'/'+this.id+'-'+this.password+'" title="Volume Analysis">100 words</a>'+
+		        '			<span class="id-project" title="Project ID">'+this.id+'</span> - <a target="_blank" href="/analyze/'+project.name+'/'+this.id+'-'+this.password+'" title="Volume Analysis">'+parseInt(this.tm_analysis)+' Payable words</a>'+
 		        '			<a href="#" title="Cancel project" class="cancel-project"></a>'+
 		        '	    	<a href="#" title="Archive project" class="archive-project"></a>'+
 		        '		</div>'+
@@ -596,7 +656,7 @@ UI = {
         		var newJob = '';
 
 
-		        newJob += '    <tr class="row " data-jid="'+this.id+'" data-status="'+this.status+'">'+
+		        newJob += '    <tr class="row " data-jid="'+this.id+'" data-status="'+this.status+'" data-password="'+this.password+'">'+
 		            '        <td class="create-date" data-date="'+this.create_date+'">'+UI.formatDate(this.create_date)+'</td>'+
 		            '        <td class="job-detail">'+
 		            '        	<span class="urls">'+
@@ -639,13 +699,45 @@ UI = {
 
         $('#projects').html(projects);
 
-    } // renderProjects
+    }, // renderProjects
+	
+    setTablesorter: function() {
+	    $(".tablesorter").tablesorter({
+	        textExtraction: function(node) { 
+	            // extract data from markup and return it  
+	            if($(node).hasClass('progress')) {
+	            	var n = $(node).find('.translated-bar').attr('title').split(' ')[1];
+	            	return n.substring(0, n.length - 1);
+	            } else {
+	            	return $(node).text();
+	            }
+	        }, 
+	        headers: { 
+	            1: { 
+	                sorter: false 
+	            }, 
+	            4: { 
+	                sorter: false 
+	            } 
+	        }			    	
+	    });
+    },
+
+    verifyProjectHasArchived: function(project) {
+		hasArchived = ($('tr[data-status=archived]',project).length)? 1 : 0;
+		$(project).attr('data-hasarchived',hasArchived);
+    },
+
+    verifyProjectHasCancelled: function(project) {
+		hasCancelled = ($('tr[data-status=cancelled]',project).length)? 1 : 0;
+		$(project).attr('data-hascancelled',hasCancelled);
+    }
 
 } // UI
 
 var monthNames = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
 
-var dayNames = [ "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"];
+var dayNames = [ "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 
 function setBrowserHistoryBehavior() {
