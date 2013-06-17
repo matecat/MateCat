@@ -1022,7 +1022,7 @@ function getProjects($start,$step,$search_in_pname,$search_source,$search_target
 	$filter_query = ($query_tail == '')? '': 'where ' . $query_tail;
 	$filter_query = preg_replace('/( and)$/i','',$filter_query);
 
-	$query = "select p.id as pid, p.name, p.password, p.id_engine_mt, p.id_engine_tm, 
+	$query = "select p.id as pid, p.name, p.password, p.id_engine_mt, p.id_engine_tm, p.tm_analysis_wc,
 		group_concat(j.id,'##', j.source,'##',j.target,'##',j.create_date,'##',j.password,'##',e.name,'##',if (t.mymemory_api_key is NUll,'',t.mymemory_api_key),'##',j.status_owner) as job 
 
 		from projects p

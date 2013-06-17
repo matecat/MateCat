@@ -244,6 +244,7 @@ abstract class viewcontroller extends controller {
 		if((!isset($_SESSION['cid']) or empty($_SESSION['cid'])) and $this->isAuthRequired){
 			//take note of url we wanted to go after
 			$_SESSION['incomingUrl']=$_SERVER['REQUEST_URI'];
+
 			//signal redirection
 			$mustRedirectToLogin=true;
 		}

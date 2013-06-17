@@ -13,6 +13,7 @@
         <script type="text/javascript" src="/public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
         <script type="text/javascript" src="/public/js/utils.js"></script>
         <script type="text/javascript" src="/public/js/manage.js"></script>
+    <script type='text/javascript' src="${basepath}public/js/logout.js"></script>
 
         <script type="text/javascript">
             var config = {
@@ -36,6 +37,7 @@
                 <a href="#" class="filter"> <span class="arrow-top "></span></a>
 
 				<div class="message">Message box</div>
+
             </div>
         </header>
 
@@ -122,6 +124,17 @@
 			</div>
 -->
         </div>
+
+		<footer>
+            <div class="wrapper">
+
+			<tal:block tal:condition="php: !empty(logged_user)">
+				<div id='authentication'>
+					<span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)</div>
+			</tal:block>
+
+            </div>
+        </footer>
 
 		<img id="spinner" src="${basepath}public/img/loader.gif" />
     <script src="${basepath}public/js/lib/snapengage.js"></script>

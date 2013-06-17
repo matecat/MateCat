@@ -886,3 +886,14 @@ ul.test li
 	width: 200px;
 	background: yellow;
 	}
+
+footer{background:#6d6e71;height:27px;text-align:right;border-top:1px solid #333;color:#fff;position:fixed;bottom:0;left:0;width:100%;z-index:999999999999;}
+footer a {color:#fff;text-shadow:none;}
+footer a:hover{text-decoration:none}
+
+#authentication
+	{
+	float:right; 
+	margin-left:50px;
+	}
+

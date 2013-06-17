@@ -132,6 +132,7 @@ log::doLog("NUM ITEM: ",count($data));
 			$project['has_cancelled'] = 0;
 			$project['has_archived'] = 0;
 			$project['password'] = $item['password'];
+			$project['tm_analysis'] = $item['tm_analysis_wc'];
 			$jobs_strings = explode(',',$item['job']);
 			foreach ($jobs_strings as $job_string) {
 				$job = array();

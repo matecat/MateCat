@@ -423,16 +423,18 @@ MateCat leverages MyMemory, Professional Machine Translation and internal fuzzy 
         </div>
     </content>
 
-
-
-<script src="${basepath}public/js/lib/snapengage.js"></script>
-        <footer>
-            <div class="wrapper">
+	<footer>
+        <div class="wrapper">
 
 		<tal:block tal:condition="php: !empty(logged_user)">
-		<div style='float:right; margin-left:50px' id='welcomebox'><span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)</div>
+			<div id='authentication'>
+				<span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)</div>
 		</tal:block>
-	</div>
-    	</footer>
+
+        </div>
+    </footer>
+
+<script src="${basepath}public/js/lib/snapengage.js"></script>
+
 </body> 
 </html>
