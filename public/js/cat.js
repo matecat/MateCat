@@ -33,6 +33,8 @@ UI = {
 			offset: '-40%'
 		};
 		this.isMac = (navigator.platform == 'MacIntel')? true : false;
+		this.cancelled = (this.body.hasClass('cancelled'))? true : false;
+		this.shortcutLabel = 'ALT+'+((UI.isMac)?"CMD":"CTRL")+'+';
 
         this.taglockEnabled = true;
         //if (config.target_lang=='JA'){        this.taglockEnabled = false};
@@ -56,6 +58,8 @@ UI = {
         this.pendingScroll = 0;
         this.firstScroll = true;
         this.blockGetMoreSegments = true;
+        var bb = $.cookie('noAlertConfirmTranslation');
+        this.alertConfirmTranslationEnabled = (typeof bb == 'undefined')? true : false;
 		setTimeout(function(){
 			UI.blockGetMoreSegments = false;
 		},1000);
@@ -74,17 +78,25 @@ UI = {
             $('.editor .translated').click();
         }).bind('keydown','Meta+return', function(e){ 
             e.preventDefault();
-            $('.editor .translated').click();
+             $('.editor .translated').click();
+/*
+            $('.editor .translated').trigger({
+				type:"click",
+				action:"translated"
+			});
+*/
         }).bind('keydown','Ctrl+pageup', function(e){ 
             e.preventDefault();
 //            alert('pageup');
         }).bind('keydown','Ctrl+down', function(e){ 
             e.preventDefault();
             e.stopPropagation();
+            console.log('ctrl+down');
             UI.gotoNextSegment();
         }).bind('keydown','Meta+down', function(e){ 
             e.preventDefault();
             e.stopPropagation();
+            console.log('meta+down');
             UI.gotoNextSegment();
         }).bind('keydown','Ctrl+up', function(e){ 
             e.preventDefault();
@@ -96,18 +108,10 @@ UI = {
             UI.gotoPreviousSegment();
         }).bind('keydown','Ctrl+left', function(e){ 
             e.preventDefault();
-            if(UI.segmentIdToRestore) {
-                UI.reloadToSegment(UI.segmentIdToRestore);
-            } else {
-                UI.gotoOpenSegment();
-            }
+            UI.pointToOpenSegment();
         }).bind('keydown','Meta+left', function(e){ 
             e.preventDefault();
-            if(UI.segmentIdToRestore) {
-                UI.reloadToSegment(UI.segmentIdToRestore);
-            } else {
-                UI.gotoOpenSegment();
-            }
+            UI.pointToOpenSegment();
         }).bind('keydown','Ctrl+right', function(e){ 
             e.preventDefault();
             UI.copySource();
@@ -139,10 +143,19 @@ UI = {
 */
         })
 
+        $(window).on('scroll',function(e){ 
+            UI.detectIfSegmentIsVisible();
+        })  
+        
         $("header .filter").click(function(e){ 
             e.preventDefault();
             UI.body.toggleClass('filtering');
         })      
+
+        $("#segmentPointer").click(function(e){ 
+            e.preventDefault();
+            UI.pointToOpenSegment();
+        })
 
         $(".replace").click(function(e){ 
             e.preventDefault();
@@ -238,6 +251,7 @@ UI = {
             e.preventDefault();
             e.stopPropagation();
         }).on('click','.editarea',function(e,operation) {
+//        	console.log('operation: ' + operation);
         	if(typeof operation == 'undefined') operation = 'clicking';
             this.onclickEditarea = new Date();
             UI.notYetOpened = false;
@@ -265,13 +279,12 @@ UI = {
 				}
 				UI.lastOperation = operation;
 
-                UI.openSegment(this);
+                UI.openSegment(this,operation);
 
                 if(operation != 'moving') UI.scrollSegment($('#segment-'+$(this).data('sid')));
             }
             if(UI.debug) console.log('Total onclick Editarea: ' + ( (new Date()) - this.onclickEditarea));
         }).on('keydown','.editor .editarea',function(e) {        
-//            console.log(e.which);
 			var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
 			if ((event.metaKey && !event.ctrlKey && special !== "meta")||(event.ctrlKey)) {
 				if(event.which == 88) { // ctrl+x
@@ -284,15 +297,25 @@ UI = {
 			}
 
             if((e.which == 8)||(e.which == 46)) { // backspace e canc(mac)
+//				e.preventDefault();
+				console.log('ecco');
 				if($('.selected',$(this)).length) {
  		           	e.preventDefault();
 					$('.selected', $(this)).remove();
 					UI.saveInUndoStack('cancel');
 					UI.checkTagMismatch(UI.currentSegment);
 				} else {
+
+//					console.log(UI.editarea.html());
+//				var selection = window.getSelection();
+//				var range = selection.getRangeAt(0);
+//					console.log($(range));
 					var numTagsBefore = UI.editarea.text().match(/\<.*?\>/gi).length;
+					console.log('b');
 					var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
+					console.log('c');
 					setTimeout(function(){
+						console.log('d');
 						var numTagsAfter = UI.editarea.text().match(/\<.*?\>/gi).length;
 						var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
 						if(numTagsAfter < numTagsBefore) UI.saveInUndoStack('cancel');
@@ -332,6 +355,7 @@ UI = {
 				},100);
             };
         }).on('input','.editarea',function(e) {
+        	UI.currentSegment.addClass('modified');
 			if(UI.draggingInsideEditarea) {
 				$(UI.tagToDelete).remove();
 				UI.draggingInsideEditarea = false;
@@ -386,6 +410,11 @@ UI = {
         	$('.selected',$(this)).removeClass('selected');
         }).on('click','a.translated',function(e) {
             e.preventDefault();
+/*
+        	if(typeof e.action != 'undefined') {
+        		if(e.action == 'translated');
+        	}
+*/
             UI.checkHeaviness();
             console.log('segment is loaded?: ' + UI.segmentIsLoaded(UI.nextSegmentId));
             console.log(UI.blockButtons);
@@ -411,7 +440,7 @@ UI = {
 
             UI.unlockTags();
             UI.setStatusButtons(this);
-            $(".editarea", UI.nextSegment).click();
+            $(".editarea", UI.nextSegment).trigger("click","translated");
             UI.changeStatus(this,'translated',0);
 
             UI.markTags();
@@ -500,6 +529,16 @@ UI = {
             e.preventDefault();
             UI.closeSegment(UI.currentSegment,1);
         });
+
+		$('#hideAlertConfirmTranslation').bind('change', function(e){ 
+            if($('#hideAlertConfirmTranslation').attr('checked')) {
+            	UI.alertConfirmTranslationEnabled = false;
+            	$.cookie('noAlertConfirmTranslation',true, { expires: 1000 });
+            } else {
+            	UI.alertConfirmTranslationEnabled = true;
+            	$.removeCookie('noAlertConfirmTranslation');
+            }
+        })
 
         UI.toSegment = true;
         UI.gotoSegment(this.startSegmentId);
@@ -608,17 +647,17 @@ UI = {
         	targetTags.push($(this).text());
         })
         
-/*
-   		console.log(sourceTags);
-   		console.log('numero di sourceTags:'+sourceTags.length);
-   		console.log(targetTags);
-   		console.log($('.editarea .locked',segment));
-*/
-        if(this.tagCompare(sourceTags,targetTags)) {
+        if(sourceTags.length != targetTags.length) {
 			$(segment).addClass('mismatch');
         } else {
-			$(segment).removeClass('mismatch');
-        };
+	        if(this.tagCompare(sourceTags,targetTags)) {
+				$(segment).addClass('mismatch');
+	        } else {
+				$(segment).removeClass('mismatch');
+	        };
+        }
+        
+
     },
 
     checkTutorialNeed: function() {
@@ -686,7 +725,7 @@ UI = {
         restoreSelection();
     },
 
-    closeSegment: function(segment,byButton) {
+    closeSegment: function(segment,byButton,operation) {
         if((typeof segment =='undefined')||(typeof UI.toSegment !='undefined')) {
             this.toSegment = undefined;
             return true;
@@ -699,6 +738,24 @@ UI = {
 			type:"segmentClosed",
 			segment: segment
 		});
+
+        var saveBrevior = true;
+        if(typeof operation !='undefined') {
+            if(operation == 'translated') saveBrevior = false;
+        }
+        if((segment.hasClass('modified'))&&(saveBrevior)) {
+        	console.log('save brevior');
+        	this.saveSegment(segment);
+			if(UI.alertConfirmTranslationEnabled) {
+				$(".blacked").show();
+				$('#alertConfirmTranslation').dialog({
+					close: function( event, ui ) {
+						$(".blacked").hide();
+					}
+				});        	
+			}
+        }
+        this.currentSegment.removeClass('modified');
         this.deActivateSegment(byButton);
 
         this.lastOpenedEditarea.attr('contenteditable','false');
@@ -728,12 +785,15 @@ UI = {
 			type:"sourceCopied",
 			segment: segment
 		});
+       	this.currentSegment.addClass('modified1');
+
         this.setChosenSuggestion(0);
         this.lockTags();
         this.checkTagMismatch(UI.currentSegment);
     },
 
     copySuggestionInEditarea: function(segment,translation,editarea,match,decode,auto,which) {
+
         if (typeof(decode)=="undefined"){
             decode=false;
         }
@@ -750,6 +810,7 @@ UI = {
             $(editarea).text(translation).addClass('fromSuggestion');
         	this.saveInUndoStack('copysuggestion');
             $('.percentuage',segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
+        	if(which) this.currentSegment.addClass('modified');
         }
 
         // a value of 0 for 'which' means the choice has been made by the
@@ -836,6 +897,21 @@ UI = {
         var s = $('section');
         this.firstSegment = s.first();
         this.lastSegment = s.last();
+    },
+
+    detectIfSegmentIsVisible: function() {
+//        console.log('scroll');
+        if($('.editor').isOnScreen()) {
+        	$('#segmentPointer').hide();
+        } else {
+        	if($(window).scrollTop() > $('.editor').offset().top) {
+        		$('#segmentPointer').removeClass('down').css('margin-top','-10px').addClass('up').show();
+        		console.log('il segmento è in alto');
+        	} else {
+        		$('#segmentPointer').removeClass('up').addClass('down').css('margin-top',($(window).height()-140)+'px').show();
+        		console.log('il segmento è in basso');
+        	}
+        };
     },
 
     detectRefSegId: function(where) {
@@ -965,6 +1041,7 @@ UI = {
     },
 
     getContribution_success: function(d,segment) {
+        console.log(segment);
 		this.renderContributions(d,segment);
 		this.lockTags();
 		this.saveInUndoStack();
@@ -999,6 +1076,7 @@ UI = {
         if(where == 'before') {
             $('#outer').addClass('loadingBefore');
         } else if(where == 'after') {
+            console.log('GET MORE SEGMENTS');
             $('#outer').addClass('loading');
         }
 
@@ -1132,6 +1210,7 @@ UI = {
     getSegments: function() {
         where = (this.startSegmentId)? 'center' : 'after';
         var step = this.initSegNum;
+            console.log('GET SEGMENTS');
         $('#outer').addClass('loading');
 
 		this.doRequest({
@@ -1412,7 +1491,7 @@ UI = {
         return [minutes, seconds];
     },
 
-    openSegment: function(editarea) {
+    openSegment: function(editarea,operation) {
         this.openSegmentStart = new Date();
         if(!this.byButton) {
             if(this.justSelecting()) return;
@@ -1440,19 +1519,19 @@ UI = {
         },100);
         this.currentIsLoaded = false;
         this.nextIsLoaded = false;
-        this.getContribution(segment,0);
+        if(!this.cancelled) this.getContribution(segment,0);
         this.opening = true; 
-        if(!(this.currentSegment.is(this.lastOpenedSegment))) this.closeSegment(this.lastOpenedSegment,0);
+        if(!(this.currentSegment.is(this.lastOpenedSegment))) this.closeSegment(this.lastOpenedSegment,0,operation);
         this.opening = false;
         this.body.addClass('editing');
 
         segment.addClass("editor");
-        this.editarea.attr('contenteditable','true');
+        if(!this.cancelled) this.editarea.attr('contenteditable','true');
         this.editStart = new Date();
         $(editarea).removeClass("indent");
         
         this.lockTags();
-        this.getContribution(segment,1);
+        if(!this.cancelled) this.getContribution(segment,1);
         if(this.debug) console.log('close/open time: ' + ( (new Date()) - this.openSegmentStart));
     },
 
@@ -1475,32 +1554,33 @@ UI = {
 	},
 
     reinitMMShortcuts: function(a) {
+		var keys = (this.isMac)? 'alt+meta' : 'alt+ctrl';
 		$('body').unbind('keydown.alt1').unbind('keydown.alt2').unbind('keydown.alt3').unbind('keydown.alt4').unbind('keydown.alt5');
-        $("body, .editarea").bind('keydown.alt1','alt+meta+1', function(e){ 
+        $("body, .editarea").bind('keydown.alt1',keys+'+1', function(e){ 
             e.preventDefault();
             e.stopPropagation();
             if(e.which != 97) {
                 UI.chooseSuggestion('1');
             }
-        }).bind('keydown.alt2','alt+meta+2', function(e){ 
+        }).bind('keydown.alt2',keys+'+2', function(e){ 
             e.preventDefault();
             e.stopPropagation();
             if(e.which != 98) {
                 UI.chooseSuggestion('2');
             }
-        }).bind('keydown.alt3','alt+meta+3', function(e){ 
+        }).bind('keydown.alt3',keys+'+3', function(e){ 
             e.preventDefault();
             e.stopPropagation();
             if(e.which != 99) {
                 UI.chooseSuggestion('3');
             }            
-        }).bind('keydown.alt4','alt+meta+4', function(e){ 
+        }).bind('keydown.alt4',keys+'+4', function(e){ 
             e.preventDefault();
             e.stopPropagation();
             if(e.which != 100) {
                 UI.chooseSuggestion('4');
             }            
-        }).bind('keydown.alt5','alt+meta+5', function(e){ 
+        }).bind('keydown.alt5',keys+'+5', function(e){ 
             e.preventDefault();
             e.stopPropagation();
             if(e.which != 101) {
@@ -1549,6 +1629,15 @@ UI = {
     	
     },
 
+    pointToOpenSegment: function() {
+        if(this.segmentIdToRestore) {
+            this.reloadToSegment(this.segmentIdToRestore);
+        } else {
+            this.gotoOpenSegment();
+        }
+    },
+
+
     removeButtons: function(byButton) {
         var segment = (byButton)? this.currentSegment : this.lastOpenedSegment;
         $('#'+segment.attr('id')+'-buttons').empty();
@@ -1588,9 +1677,11 @@ UI = {
                 UI.copySuggestionInEditarea(segment,translation,editarea,match,true,true,0);
                 UI.setChosenSuggestion(1);
                 copySuggestionDone = true;
+            } else {
+            	this.checkTagMismatch(UI.currentSegment);            	
             }
             var segment_id = segment.attr('id');            
-            $(segment).removeClass('loaded').addClass('loaded');
+            $(segment).addClass('loaded');
             $('.sub-editor .overflow',segment).empty();
             
             $.each(d.data.matches, function(index) {
@@ -1605,21 +1696,20 @@ UI = {
                 }
                 // Attention Bug: We are mixing the view mode and the raw data mode.
                 // before doing a enanched view you will need to add a data-original tag
-                $('.sub-editor .overflow',segment).append('<ul class="graysmall" data-item="'+(index+1)+'" data-id="'+this.id+'"><li class="sugg-source">'+((disabled)?'':' <a id="'+segment_id+'-tm-'+this.id+'-delete" href="#" class="trash" title="delete this row"></a>')+'<span id="'+segment_id+'-tm-'+this.id+'-source" class="suggestion_source">'+this.segment+'</span></li><li class="b sugg-target"><span class="graysmall-message">ALT+CMD+'+(index+1)+'</span><span id="'+segment_id+'-tm-'+this.id+'-translation" class="translation">'+this.translation+'</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">'+(this.match)+'</li><li>'+this['last_update_date']+'</li><li class="graydesc">Source: <span class="bold">'+cb+'</span></li></ul></ul>');
+                $('.sub-editor .overflow',segment).append('<ul class="graysmall" data-item="'+(index+1)+'" data-id="'+this.id+'"><li class="sugg-source">'+((disabled)?'':' <a id="'+segment_id+'-tm-'+this.id+'-delete" href="#" class="trash" title="delete this row"></a>')+'<span id="'+segment_id+'-tm-'+this.id+'-source" class="suggestion_source">'+this.segment+'</span></li><li class="b sugg-target"><span class="graysmall-message">'+ UI.shortcutLabel +(index+1)+'</span><span id="'+segment_id+'-tm-'+this.id+'-translation" class="translation">'+this.translation+'</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">'+(this.match)+'</li><li>'+this['last_update_date']+'</li><li class="graydesc">Source: <span class="bold">'+cb+'</span></li></ul></ul>');
             });
             UI.markSuggestionTags(segment);
             UI.setDeleteSuggestion(segment);
             UI.lockTags();
-            
             if(copySuggestionDone) {
-            	this.checkTagMismatch(UI.currentSegment);
+            	if(isActiveSegment) this.checkTagMismatch(UI.currentSegment);
             }
   
             $('.translated',segment).removeAttr('disabled');
             $('.draft',segment).removeAttr('disabled');
         } else {
             if(UI.debug) console.log('no matches');
-            $(segment).removeClass('loaded').addClass('loaded');
+            $(segment).addClass('loaded');
             $('.sub-editor .overflow',segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');  				
         }
     },
@@ -1740,6 +1830,16 @@ UI = {
         if(starting) {
             this.init();
         }
+    },
+
+    saveSegment: function(segment) {
+    	console.log('save segment');
+//		var segment = this.currentSegment;
+		var status = (segment.hasClass('status-translated'))? 'translated' : (segment.hasClass('status-approved'))? 'approved' : (segment.hasClass('status-rejected'))? 'rejected' : (segment.hasClass('status-new'))? 'new' : 'draft';
+		if(status == 'new') {
+			status = 'draft';
+		}
+		this.setTranslation(segment,status);
     },
 
     scrollSegment: function(segment) {
@@ -1892,7 +1992,7 @@ UI = {
             },300);
         }
         var file = this.currentArticle;
-
+		if(this.cancelled) return;
 		this.doRequest({
 			data: {
                 action: 'setCurrentSegment',
@@ -1954,7 +2054,7 @@ UI = {
 	    if(this.debug) console.log('match deleted');
 	
 	    $(".editor .matches .graysmall").each(function(index){
-	        $(this).find('.graysmall-message').text('ALT+'+(index+1));
+	        $(this).find('.graysmall-message').text(UI.shortcutLabel+(index+1));
 	        $(this).attr('data-item',index+1);
 	        UI.reinitMMShortcuts();
 	    })
@@ -2073,6 +2173,7 @@ UI = {
         var errors = '';
         errors = this.collectSegmentErrors(segment);
         var chosen_suggestion = $('.editarea',segment).data('lastChosenSuggestion');
+        console.log('TRANSLATION: ' + translation);
 
 		this.doRequest({
 			data: {
@@ -2089,13 +2190,6 @@ UI = {
 			},
 			success: function(d){
 				UI.setTranslation_success(d,segment,status);
-/*
-                if(d.data == 'OK') {
-                    UI.setStatus(segment,status);
-                    UI.setDownloadStatus(d.stats);
-                    UI.setProgress(d.stats);
-                };
-*/
 			}
 		});
     },
@@ -2136,11 +2230,10 @@ UI = {
     },
 
     tagCompare: function(sourceTags,targetTags,prova) {
-		if(!UI.currentSegment.hasClass('loaded')) return false;
 
-//    	console.log(sourceTags);
-//    	console.log(targetTags);
-//		console.log(UI.currentSegment.hasClass('loaded'));
+// removed, to be verified
+//		if(!UI.currentSegment.hasClass('loaded')) return false;
+
 		var mismatch = false;
 		for (var i=0;i<sourceTags.length;i++) {
 			for (var index=0;index<targetTags.length;index++) { 
@@ -2650,8 +2743,30 @@ function setBrowserHistoryBehavior() {
 
 }
 
+$.fn.isOnScreen = function(){
+    
+    var win = $(window);
+    
+    var viewport = {
+        top : win.scrollTop(),
+        left : win.scrollLeft()
+    };
+    viewport.right = viewport.left + win.width();
+    viewport.bottom = viewport.top + win.height();
+    
+    var bounds = this.offset();
+    bounds.right = bounds.left + this.outerWidth();
+    bounds.bottom = bounds.top + this.outerHeight();
+
+    
+    return (!(viewport.right < bounds.left || viewport.left > bounds.right || viewport.bottom < bounds.top || viewport.top > bounds.bottom));
+    
+};
+
+
 
 $(document).ready(function(){
+
     fitText($('.breadcrumbs'),$('#pname'),30);
     setBrowserHistoryBehavior();
     $("article").each(function(){

@@ -7,8 +7,14 @@ RewriteRule ^(translatenew)[/]?$ index.php?action=catnew [L]
 RewriteRule ^(translatenew)/([^/]*)/([^/]*)/([^/]*)-([^/]*)[/]*([^/]*)[/]*$ index.php?action=catnew&jid=$4&password=$5&step=$6 [L]
 RewriteRule ^(analyze)/([^/]*)/([^/]*)-([^/]*)$ index.php?action=analyze&pid=$3&password=$4 [L]
 RewriteRule ^(statistics)[/]?$ index.php?action=projectStatistics [L]
+RewriteRule ^(login)[/]?$ index.php?action=loginPage [L]
+RewriteRule ^(ajaxLogin)[/]?$ index.php?action=formLogin [L,QSA]
+RewriteRule ^(oauth)/(request)[/]?$ index.php?action=oauthRequestInitializer [L,QSA]
+RewriteRule ^(oauth)/(response)[/]?$ index.php?action=oauthResponseHandler [L,QSA]
 
-RewriteRule ^(manage)/([^/]*)/([^/]*)-([^/]*)$ index.php?action=manage&pid=$3&password=$4&start=$6 [L]
+#RewriteRule ^(manage)[/]?$ index.php?action=manage [L]
+RewriteRule ^(manage)[/]?$ /manage/1 [R]
+RewriteRule ^(manage)/([^/]*)/?$ index.php?action=manage&page=$2 [QSA,L]
 RewriteRule ^(editlog)/([^/]*)-([^/]*)/?$ index.php?action=editlog&jid=$2&password=$3 [L]
 </IfModule>
 

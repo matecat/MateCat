@@ -25,7 +25,7 @@
 				"en":"Amharic" 
 			}],
 			"isocode":"am",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"am-AM"
 		}
@@ -35,7 +35,7 @@
 				"en":"Antigua and Barbuda Creole English" 
 			}],
 			"isocode":"aig",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"aig-AIG"
 		}
@@ -47,6 +47,7 @@
 			"isocode":"ar",
 			"enabled":true,
 			"rtl":true,
+			"top":"top10 top20",
 			"rfc3066code":"ar-SA"
 		}
 	,
@@ -65,7 +66,7 @@
 				"en":"Azerbaijani"
 			}],
 			"isocode":"az",
-			"enabled":true,
+			"enabled":false,
 			"rtl":true,
 			"rfc3066code":"az-AZ"
 		}
@@ -75,7 +76,7 @@
 				"en":"Bahamas Creole English" 
 			}],
 			"isocode":"bah",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"bah-BAH"
 		}
@@ -85,7 +86,7 @@
 				"en":"Bajan" 
 			}],
 			"isocode":"bjs",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"bjs-BJS"
 		}
@@ -95,7 +96,7 @@
 				"en":"Balkan Gipsy"
 			}],
 			"isocode":"rm",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"rm-RO"
 		}
@@ -115,7 +116,7 @@
 				"en":"Bemba" 
 			}],
 			"isocode":"bem",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"bem-BEM"
 		}
@@ -145,7 +146,7 @@
 				"en":"Bislama" 
 			}],
 			"isocode":"bi",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"bi-BI"
 		}
@@ -157,7 +158,8 @@
 			"isocode":"bs",
 			"enabled":true,
 			"rtl":false,
-			"rfc3066code":"bs-BA"
+			"rfc3066code":"bs-BA",
+			"tradossupportedcode":"bs-Latn-BA"
 		}
 	,
 		{
@@ -185,7 +187,7 @@
 				"en":"Burmese"
 			}],
 			"isocode":"my",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"my-MM"
 		}
@@ -205,7 +207,7 @@
 				"en":"Cebuano" 
 			}],
 			"isocode":"cb",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"cb-PH"
 		}
@@ -215,7 +217,7 @@
 				"en":"Chamorro" 
 			}],
 			"isocode":"ch",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"ch-CH"
 		}
@@ -227,6 +229,7 @@
 			"isocode":"zh",
 			"enabled":true,
 			"rtl":false,
+			"top":"top10 top20",
 			"rfc3066code":"zh-CN"
 		}
 	,
@@ -237,6 +240,7 @@
 			"isocode":"zh",
 			"enabled":true,
 			"rtl":false,
+			"top":"top20",
 			"rfc3066code":"zh-TW"
 		}
 	,
@@ -245,7 +249,7 @@
 				"en":"Classical Greek"
 			}],
 			"isocode":"XNA",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"XN-GR"
 		}
@@ -255,7 +259,7 @@
 				"en":"Comorian Ngazidja" 
 			}],
 			"isocode":"zdj",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"zdj-ZDJ"
 		}
@@ -265,7 +269,7 @@
 				"en":"Coptic" 
 			}],
 			"isocode":"cop",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"cop-XNA"
 		}
@@ -275,7 +279,7 @@
 				"en":"Crioulo Upper Guinea" 
 			}],
 			"isocode":"pov",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"pov-POV"
 		}
@@ -307,6 +311,7 @@
 			"isocode":"da",
 			"enabled":true,
 			"rtl":false,
+			"top":"top20",
 			"rfc3066code":"da-DK"
 		}
 	,
@@ -317,6 +322,7 @@
 			"isocode":"nl",
 			"enabled":true,
 			"rtl":false,
+			"top":"top10 top20",
 			"rfc3066code":"nl-NL"
 		}
 	,
@@ -325,7 +331,7 @@
 				"en":"Dzongkha" 
 			}],
 			"isocode":"dz",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"dz-DZ"
 		}
@@ -337,6 +343,7 @@
 			"isocode":"en",
 			"enabled":true,
 			"rtl":false,
+			"top":"top5 top10 top20",
 			"rfc3066code":"en-GB"
 		}
 	,
@@ -355,7 +362,7 @@
 				"en":"Esperanto"
 			}],
 			"isocode":"eo",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"eo-XN"
 		}
@@ -375,7 +382,7 @@
 				"en":"Fanagalo"
 			}],
 			"isocode":"fn",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"fn-FNG"
 		}
@@ -395,7 +402,7 @@
 				"en":"Filipino"
 			}],
 			"isocode":"fil",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"fil-PH"
 		}
@@ -407,6 +414,7 @@
 			"isocode":"fi",
 			"enabled":true,
 			"rtl":false,
+			"top":"top20",
 			"rfc3066code":"fi-FI"
 		}
 	,
@@ -427,6 +435,7 @@
 			"isocode":"fr",
 			"enabled":true,
 			"rtl":false,
+			"top":"top5 top10 top20",
 			"rfc3066code":"fr-FR"
 		}
 	,
@@ -457,6 +466,7 @@
 			"isocode":"de",
 			"enabled":true,
 			"rtl":false,
+			"top":"top5 top10 top20",
 			"rfc3066code":"de-DE"
 		}
 	,
@@ -475,7 +485,7 @@
 				"en":"Grenadian Creole English" 
 			}],
 			"isocode":"gcl",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"gcl-GCL"
 		}
@@ -495,7 +505,7 @@
 				"en":"Guyanese Creole English" 
 			}],
 			"isocode":"gyn",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"gyn-GYN"
 		}
@@ -505,7 +515,7 @@
 				"en":"Haitian Creole French"
 			}],
 			"isocode":"ht",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"ht-HT"
 		}
@@ -515,7 +525,7 @@
 				"en":"Hausa" 
 			}],
 			"isocode":"ha",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"ha-HA"
 		}
@@ -525,7 +535,7 @@
 				"en":"Hawaiian"
 			}],
 			"isocode":"XNA",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"XN-US"
 		}
@@ -585,7 +595,7 @@
 				"en":"Inuktitut Greenlandic" 
 			}],
 			"isocode":"kl",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"kl-KL"
 		}
@@ -607,6 +617,7 @@
 			"isocode":"it",
 			"enabled":true,
 			"rtl":false,
+			"top":"top5 top10 top20",
 			"rfc3066code":"it-IT"
 		}
 	,
@@ -614,10 +625,10 @@
 			"localized":[{
 				"en":"Jamaican Creole English"
 			}],
-			"isocode":"xx",
-			"enabled":true,
+			"isocode":"en",
+			"enabled":false,
 			"rtl":false,
-			"rfc3066code":"xx-JM"
+			"rfc3066code":"en-JM"
 		}
 	,
 		{
@@ -627,7 +638,8 @@
 			"isocode":"ja",
 			"enabled":true,
 			"rtl":false,
-			"rfc3066code":"ja-JA"
+			"top":"top10 top20",
+			"rfc3066code":"ja-JP"
 		}
 	,
 		{
@@ -635,7 +647,7 @@
 				"en":"Javanese"
 			}],
 			"isocode":"jw",
-			"enabled":true,
+			"enabled":false,
 			"rtl":true,
 			"rfc3066code":"jw-ID"
 		}
@@ -645,7 +657,7 @@
 				"en":"Kabuverdianu" 
 			}],
 			"isocode":"kea",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"kea-KEA"
 		}
@@ -655,7 +667,7 @@
 				"en":"Kabylian" 
 			}],
 			"isocode":"kab",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"kab-DZ"
 		}
@@ -665,7 +677,7 @@
 				"en":"Kannada"
 			}],
 			"isocode":"kn",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"ka-IN"
 		}
@@ -685,7 +697,7 @@
 				"en":"Khmer"
 			}],
 			"isocode":"km",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"km-KM"
 		}
@@ -695,7 +707,7 @@
 				"en":"Kinyarwanda" 
 			}],
 			"isocode":"rw",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"rw-RW"
 		}
@@ -705,7 +717,7 @@
 				"en":"Kirundi"
 			}],
 			"isocode":"rn",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"rn-RN"
 		}
@@ -725,7 +737,7 @@
 				"en":"Kurdish"
 			}],
 			"isocode":"ku",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"ku-TR"
 		}
@@ -735,7 +747,7 @@
 				"en":"Kurdish Sorani"
 			}],
 			"isocode":"ku",
-			"enabled":true,
+			"enabled":false,
 			"rtl":true,
 			"rfc3066code":"ku-TR"
 		}
@@ -745,7 +757,7 @@
 				"en":"Kyrgyz" 
 			}],
 			"isocode":"ky",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"ky-KY"
 		}
@@ -755,7 +767,7 @@
 				"en":"Lao" 
 			}],
 			"isocode":"lo",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"lo-LO"
 		}
@@ -765,7 +777,7 @@
 				"en":"Latin"
 			}],
 			"isocode":"la",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"la-XN"
 		}
@@ -795,7 +807,7 @@
 				"en":"Luxembourgish" 
 			}],
 			"isocode":"lb",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"lb-LB"
 		}
@@ -815,7 +827,7 @@
 				"en":"Malagasy" 
 			}],
 			"isocode":"mg",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"mg-MG"
 		}
@@ -826,7 +838,7 @@
 			}],
 			"isocode":"ms",
 			"enabled":true,
-			"rtl":true,
+			"rtl":false,
 			"rfc3066code":"ms-MY"
 		}
 	,
@@ -835,7 +847,7 @@
 				"en":"Malayalam"
 			}],
 			"isocode":"ml",
-			"enabled":true,
+			"enabled":false,
 			"rtl":true,
 			"rfc3066code":"ml-IN"
 		}
@@ -845,7 +857,7 @@
 				"en":"Maldivian" 
 			}],
 			"isocode":"dv",
-			"enabled":true,
+			"enabled":false,
 			"rtl":true,
 			"rfc3066code":"dv-DV"
 		}
@@ -865,7 +877,7 @@
 				"en":"Manx Gaelic"
 			}],
 			"isocode":"gv",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"gv-IM"
 		}
@@ -885,7 +897,7 @@
 				"en":"Marathi"
 			}],
 			"isocode":"mr",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"mr-IN"
 		}
@@ -895,7 +907,7 @@
 				"en":"Marshallese" 
 			}],
 			"isocode":"mh",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"mh-MH"
 		}
@@ -905,7 +917,7 @@
 				"en":"Mende" 
 			}],
 			"isocode":"men",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"men-MEN"
 		}
@@ -925,7 +937,7 @@
 				"en":"Morisyen" 
 			}],
 			"isocode":"mfe",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"mfe-MFE"
 		}
@@ -945,7 +957,7 @@
 				"en":"Niuean" 
 			}],
 			"isocode":"niu",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"niu-NIU"
 		}
@@ -955,7 +967,7 @@
 				"en":"Norwegian"
 			}],
 			"isocode":"no",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"no-NO"
 		}
@@ -967,6 +979,7 @@
 			"isocode":"nb",
 			"enabled":true,
 			"rtl":false,
+			"top":"top20",
 			"rfc3066code":"nb-NO"
 		}
 	,
@@ -977,6 +990,7 @@
 			"isocode":"nn",
 			"enabled":true,
 			"rtl":false,
+			"top":"top20",
 			"rfc3066code":"nn-NO"
 		}
 	,
@@ -985,7 +999,7 @@
 				"en":"Nyanja" 
 			}],
 			"isocode":"ny",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"ny-NY"
 		}
@@ -1005,7 +1019,7 @@
 				"en":"Palauan" 
 			}],
 			"isocode":"pau",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"pau-PAU"
 		}
@@ -1015,7 +1029,7 @@
 				"en":"Panjabi"
 			}],
 			"isocode":"pa",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"pa-IN"
 		}
@@ -1025,7 +1039,7 @@
 				"en":"Papiamentu"
 			}],
 			"isocode":"x1",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"pap-PAP"
 		}
@@ -1037,6 +1051,7 @@
 			"isocode":"ps",
 			"enabled":true,
 			"rtl":true,
+			"tradossupportedcode":"ps-AF",
 			"rfc3066code":"ps-PK"
 		}
 	,
@@ -1055,7 +1070,7 @@
 				"en":"Pijin" 
 			}],
 			"isocode":"pis",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"pis-PIS"
 		}
@@ -1067,6 +1082,7 @@
 			"isocode":"pl",
 			"enabled":true,
 			"rtl":false,
+			"top":"top20",
 			"rfc3066code":"pl-PL"
 		}
 	,
@@ -1077,6 +1093,7 @@
 			"isocode":"pt",
 			"enabled":true,
 			"rtl":false,
+			"top":"top10 top20",
 			"rfc3066code":"pt-PT"
 		}
 	,
@@ -1087,6 +1104,7 @@
 			"isocode":"pt",
 			"enabled":true,
 			"rtl":false,
+			"top":"top20",
 			"rfc3066code":"pt-BR"
 		}
 	,
@@ -1095,7 +1113,7 @@
 				"en":"Potawatomi"
 			}],
 			"isocode":"pot",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"pot-US"
 		}
@@ -1137,6 +1155,7 @@
 			"isocode":"ru",
 			"enabled":true,
 			"rtl":false,
+			"top":"top20",
 			"rfc3066code":"ru-RU"
 		}
 	,
@@ -1145,7 +1164,7 @@
 				"en":"Saint Lucian Creole French" 
 			}],
 			"isocode":"acf",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"acf-ACF"
 		}
@@ -1155,7 +1174,7 @@
 				"en":"Samoan" 
 			}],
 			"isocode":"sm",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"sm-SM"
 		}
@@ -1165,7 +1184,7 @@
 				"en":"Sango" 
 			}],
 			"isocode":"sg",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"sg-SG"
 		}
@@ -1175,7 +1194,7 @@
 				"en":"Scots Gaelic"
 			}],
 			"isocode":"gd",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"gd-GB"
 		}
@@ -1195,7 +1214,7 @@
 				"en":"Seselwa Creole French" 
 			}],
 			"isocode":"crs",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"crs-CRS"
 		}
@@ -1205,7 +1224,7 @@
 				"en":"Shona" 
 			}],
 			"isocode":"sn",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"sn-SN"
 		}
@@ -1215,7 +1234,7 @@
 				"en":"Sinhala"
 			}],
 			"isocode":"si",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"si-LK"
 		}
@@ -1245,7 +1264,7 @@
 				"en":"Somali"
 			}],
 			"isocode":"so",
-			"enabled":true,
+			"enabled":false,
 			"rtl":true,
 			"rfc3066code":"so-SO"
 		}
@@ -1255,7 +1274,7 @@
 				"en":"Sotho Southern" 
 			}],
 			"isocode":"st",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"st-ST"
 		}
@@ -1267,6 +1286,7 @@
 			"isocode":"es",
 			"enabled":true,
 			"rtl":false,
+			"top":"top5 top10 top20",
 			"rfc3066code":"es-ES"
 		}
 	,
@@ -1277,6 +1297,7 @@
 			"isocode":"es",
 			"enabled":true,
 			"rtl":false,
+			"top":"top20",
 			"rfc3066code":"es-MX"
 		}
 	,
@@ -1285,7 +1306,7 @@
 				"en":"Sranan Tongo" 
 			}],
 			"isocode":"srn",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"srn-SRN"
 		}
@@ -1295,7 +1316,7 @@
 				"en":"Swahili"
 			}],
 			"isocode":"sw",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"sw-SZ"
 		}
@@ -1307,6 +1328,7 @@
 			"isocode":"sv",
 			"enabled":true,
 			"rtl":false,
+			"top":"top20",
 			"rfc3066code":"sv-SE"
 		}
 	,
@@ -1325,7 +1347,7 @@
 				"en":"Syriac (Aramaic)"
 			}],
 			"isocode":"syc",
-			"enabled":true,
+			"enabled":false,
 			"rtl":true,
 			"rfc3066code":"syc-TR"
 		}
@@ -1335,7 +1357,7 @@
 				"en":"Tagalog"
 			}],
 			"isocode":"tl",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"tl-PH"
 		}
@@ -1345,7 +1367,7 @@
 				"en":"Tajik"
 			}],
 			"isocode":"tg",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"tg-TJ"
 		}
@@ -1355,7 +1377,7 @@
 				"en":"Tamashek (Tuareg)"
 			}],
 			"isocode":"tmh",
-			"enabled":true,
+			"enabled":false,
 			"rtl":true,
 			"rfc3066code":"tmh-DZ"
 		}
@@ -1367,6 +1389,7 @@
 			"isocode":"ta",
 			"enabled":true,
 			"rtl":false,
+			"tradossupportedcode":"ta-IN",
 			"rfc3066code":"ta-LK"
 		}
 	,
@@ -1385,7 +1408,7 @@
 				"en":"Tetum" 
 			}],
 			"isocode":"tet",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"tet-TET"
 		}
@@ -1405,7 +1428,7 @@
 				"en":"Tibetan"
 			}],
 			"isocode":"bo",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"bo-CN"
 		}
@@ -1415,7 +1438,7 @@
 				"en":"Tigrinya"
 			}],
 			"isocode":"ti",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"ti-TI"
 		}
@@ -1425,7 +1448,7 @@
 				"en":"Tokelauan" 
 			}],
 			"isocode":"tkl",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"tkl-TKL"
 		}
@@ -1435,7 +1458,7 @@
 				"en":"Tok Pisin" 
 			}],
 			"isocode":"tpi",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"tpi-TPI"
 		}
@@ -1445,7 +1468,7 @@
 				"en":"Tongan" 
 			}],
 			"isocode":"to",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"to-TO"
 		}
@@ -1455,7 +1478,7 @@
 				"en":"Tswana" 
 			}],
 			"isocode":"tn",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"tn-TN"
 		}
@@ -1475,7 +1498,7 @@
 				"en":"Turkmen" 
 			}],
 			"isocode":"tk",
-			"enabled":true,
+			"enabled":false,
 			"rtl":true,
 			"rfc3066code":"tk-TK"
 		}
@@ -1485,7 +1508,7 @@
 				"en":"Tuvaluan" 
 			}],
 			"isocode":"tvl",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"tvl-TVL"
 		}
@@ -1505,7 +1528,7 @@
 				"en":"Uma" 
 			}],
 			"isocode":"ppk",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"ppk-ID"
 		}
@@ -1515,7 +1538,7 @@
 				"en":"Uzbek" 
 			}],
 			"isocode":"uz",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"uz-UZ"
 		}
@@ -1535,7 +1558,7 @@
 				"en":"Vincentian Creole English" 
 			}],
 			"isocode":"svc",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"svc-SVC"
 		}
@@ -1545,7 +1568,7 @@
 				"en":"Virgin Islands Creole English" 
 			}],
 			"isocode":"vic",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"vic-VIC"
 		}
@@ -1555,7 +1578,7 @@
 				"en":"Wallisian" 
 			}],
 			"isocode":"wls",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"wls-WLS"
 		}
@@ -1575,7 +1598,7 @@
 				"en":"Wolof" 
 			}],
 			"isocode":"wo",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"wo-SN"
 		}
@@ -1585,7 +1608,7 @@
 				"en":"Xhosa" 
 			}],
 			"isocode":"xh",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"xh-ZA"
 		}
@@ -1595,7 +1618,7 @@
 				"en":"Yiddish"
 			}],
 			"isocode":"yi",
-			"enabled":true,
+			"enabled":false,
 			"rtl":true,
 			"rfc3066code":"yi-YD"
 		}
@@ -1605,7 +1628,7 @@
 				"en":"Zulu"
 			}],
 			"isocode":"zu",
-			"enabled":true,
+			"enabled":false,
 			"rtl":true,
 			"rfc3066code":"zu-ZU"
 		}

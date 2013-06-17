@@ -75,8 +75,9 @@ class downloadFileStreamOnDiskController extends downloadController {
 			$original = $file['xliff_file'];
 			
 			//flush file on disk
+			$original=str_replace("\r\n","\n",$original);
 			//get path
-			$path=INIT::$TMP_DOWNLOAD.'/'.$this->id_job.'/'.$id_file.'/'.$current_filename.'.xliff';
+			$path=INIT::$TMP_DOWNLOAD.'/'.$this->id_job.'/'.$id_file.'/'.$current_filename.'.sdlxliff';
 			//make dir if doesn't exist
 			if(!file_exists(dirname($path))){
 				mkdir(dirname($path), 0777, true);
@@ -109,16 +110,14 @@ class downloadFileStreamOnDiskController extends downloadController {
 			$debug['replace'][]=time();
 
 
-			$original=file_get_contents($path.'.out.xliff');
+			$original=file_get_contents($path.'.out.sdlxliff');
 			//echo $original; exit;
 			$output_content[$id_file]['content'] = $original;
 			$output_content[$id_file]['filename'] = $current_filename;
 
 			if (!in_array($mime_type, array("xliff", "sdlxliff", "xlf"))) {
 				$debug['do_conversion'][]=time();
-				file_put_contents("/home/matecat/test.sdlxliff", $output_content[$id_file]['content']);
 				$convertResult = $converter->convertToOriginal($output_content[$id_file]['content']);
-                                //file_put_contents("/home/antonio/Scrivania/before_reconv.sdlxliff", $output_content[$id_file]['content']);
 				$output_content[$id_file]['content'] = $convertResult['documentContent'];
 				$debug['do_conversion'][]=time();
 			}

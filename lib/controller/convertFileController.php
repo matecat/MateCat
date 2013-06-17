@@ -1,4 +1,5 @@
 <?php
+
 set_time_limit(0);
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
@@ -15,7 +16,7 @@ class convertFileController extends ajaxcontroller {
 
     private $intDir;
     private $errDir;
-    
+
     public function __construct() {
         parent::__construct();
         $this->file_name = $this->get_from_get_post('file_name');
@@ -40,13 +41,13 @@ class convertFileController extends ajaxcontroller {
         //if ($this->file_name)
 
         $file_path = $this->intDir . '/' . $this->file_name;
-  
+
+
         if (!file_exists($file_path)) {
             $this->result['errors'][] = array("code" => -6, "message" => "Error during upload. Please retry.");
             return -1;
         }
         $original_content = file_get_contents($file_path);
-        // echo $original_content; exit;
         $sha1 = sha1($original_content);
 
         $xliffContent = getXliffBySHA1($sha1, $this->source_lang, $this->target_lang,$this->cache_days);
@@ -67,9 +68,15 @@ class convertFileController extends ajaxcontroller {
             $converter = new fileFormatConverter();
             //$filename = pathinfo($this->file_name, PATHINFO_FILENAME);
 //log::doLog("fp is $file_path");
-            $convertResult = $converter->convertToSdlxliff($file_path, $this->source_lang, $this->target_lang);
-		//log::doLog("CONVERT RESULT : " . $convertResult['isSuccess']);
-                file_put_contents("/home/antonio/Scrivania/conv.sdlxliff", $convertResult);
+			if(strpos($this->target_lang,',')!==FALSE){
+				$single_language=explode(',',$this->target_lang);
+				$single_language=$single_language[0];
+			}else{
+				$single_language=$this->target_lang;
+				
+			}
+			$convertResult = $converter->convertToSdlxliff($file_path, $this->source_lang, $single_language);
+//		log::doLog("CONVERT RESULT : " . $convertResult['isSuccess']);
 
             if ($convertResult['isSuccess'] == 1) {
                 //$uid = $convertResult['uid']; // va inserito nel database

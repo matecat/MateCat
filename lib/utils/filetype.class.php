@@ -31,7 +31,7 @@ class filetype {
                 break;
             
             default:
-                log::doLog("Unrecognized extension $this->extension : assign default  PLAINTEXT");
+                //log::doLog("Unrecognized extension $this->extension : assign default  PLAINTEXT");
                 $this->type = 'PLAINTEXT';
         }
     }

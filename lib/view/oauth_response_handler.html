@@ -1,0 +1,13 @@
+<html>
+<head>
+<script type="text/JavaScript" language="javascript">
+function doload(url){
+        window.opener.location.href = url;
+        self.close();
+}
+</script>
+</head>
+<body tal:attributes="onload javascript_loader" >
+<p id="loader" style="display:none; margin:130px auto 0 auto;text-align:center"><img src="http://www.translated.net/it/pub/images/loading.gif"/></p>
+</body>
+</html>

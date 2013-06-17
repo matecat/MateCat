@@ -33,6 +33,7 @@ UI = {
 				var currentSession = $(filerow).data('session');
 				$.each(UI.conversionRequests, function() {
 					if(this.session == currentSession) {
+						$(filerow).addClass('restarting');
 						console.log('session: ' + this.session);
 						this.request.abort();
 					}
@@ -485,6 +486,10 @@ convertFile = function(fname,filerow,filesize) {
         type: 'POST',
         dataType: 'json',
         error: function(d){
+			if($(filerow).hasClass('restarting')) {
+				$(filerow).removeClass('restarting');
+				return;
+			}
 			filerow.removeClass('converting');
        		console.log('conversion error');
        		console.log($('.progress',filerow));

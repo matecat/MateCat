@@ -1,6 +1,7 @@
 <?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
+include INIT::$UTILS_ROOT . "/cat.class.php";
 include_once INIT::$ROOT . "/lib/utils/segmentExtractor.php";
 
 define('DEFAULT_NUM_RESULTS', 2);
@@ -29,8 +30,6 @@ class createProjectController extends ajaxcontroller {
         $this->private_tm_key = $this->get_from_get_post('private_tm_key');
         $this->private_tm_user = $this->get_from_get_post('private_tm_user');
         $this->private_tm_pass = $this->get_from_get_post('private_tm_pass');
-
-        $this->target_language = explode(",", $this->target_language);
     }
 
     public function doAction() {
@@ -64,47 +63,82 @@ class createProjectController extends ajaxcontroller {
             $this->tms_engine = 1; // default MyMemory
         }
 
-        $sourceLangHistory = $_COOKIE["sourceLang"];
-        $targetLangHistory = $_COOKIE["targetLang"];
+		$sourceLangHistory = $_COOKIE["sourceLang"];
+		$targetLangHistory = $_COOKIE["targetLang"];
 
-        if ($sourceLangHistory == '_EMPTY_')
-            $sourceLangHistory = "";
-        $sourceLangAr = explode('||', urldecode($sourceLangHistory));
+		if ($sourceLangHistory == '_EMPTY_')
+			$sourceLangHistory = "";
+		$sourceLangAr = explode('||',urldecode($sourceLangHistory));
 
-        if (($key = array_search($this->source_language, $sourceLangAr)) !== false) {
-            unset($sourceLangAr[$key]);
-        }
-        array_unshift($sourceLangAr, $this->source_language);
-        log::doLog('SERIALIZED: ' . serialize($sourceLangAr));
-        if ($sourceLangAr == '_EMPTY_')
-            $sourceLangAr = "";
-        $newCookieVal = "";
+		if (($key = array_search($this->source_language, $sourceLangAr)) !== false) {
+		    unset($sourceLangAr[$key]);
+		}
+		array_unshift($sourceLangAr, $this->source_language);
+		if ($sourceLangAr == '_EMPTY_')
+			$sourceLangAr = "";
+		$newCookieVal = "";
+		$sourceLangAr = array_slice($sourceLangAr, 0, 3);
+		$sourceLangAr = array_reverse($sourceLangAr);
+
+		foreach ($sourceLangAr as $key => $link) {
+			if ($sourceLangAr[$key] == '') {
+				unset($sourceLangAr[$key]);
+			}
+		}
         foreach ($sourceLangAr as $lang) {
-            if ($lang != "")
-                $newCookieVal = $lang . "||" . $newCookieVal;
-        }
+			if ($lang != "")
+				$newCookieVal = $lang . "||" . $newCookieVal;
+		}
+		
+		setcookie("sourceLang", $newCookieVal, time() + (86400 * 365));
+		if ($targetLangHistory == '_EMPTY_')
+			$targetLangHistory = "";
+		$targetLangAr = explode('||', urldecode($targetLangHistory));
 
-        setcookie("sourceLang", $newCookieVal, time() + (86400 * 365));
+		if (($key = array_search($this->target_language, $targetLangAr)) !== false) {
+			unset($targetLangAr[$key]);
+		}
+		log::doLog('TARGET LANG AR: ' , $targetLangAr);
+		array_unshift($targetLangAr, $this->target_language);
+		log::doLog('TARGET LANG AR 1: ' , $targetLangAr);
+		if ($targetLangAr == '_EMPTY_')
+			$targetLangAr = "";
+		$newCookieVal = "";
+		$targetLangAr = array_slice($targetLangAr, 0, 3);
+		$targetLangAr = array_reverse($targetLangAr);
 
+		foreach ($targetLangAr as $key => $link) {
+			if ($targetLangAr[$key] == '') {
+				unset($targetLangAr[$key]);
+			}
+		}
 
-        /*
-          $serializedArLang = $_COOKIE["languages"];
-          if($serializedArLang == '_EMPTY_') $serializedArLang = "";
-          $arLang = explode('||',urldecode($serializedArLang));
+		foreach ($targetLangAr as $lang) {
+			if ($lang != "")
+				$newCookieVal = $lang . "||" . $newCookieVal;
+		}
 
-          $prova = array("foo", "bar", "hallo", "world");
-          $provaSerialized = serialize($prova);
-          $provaUnserialized = unserialize($provaSerialized);
+		setcookie("targetLang", $newCookieVal, time() + (86400 * 365));
+		
+		
+/*
+		$serializedArLang = $_COOKIE["languages"];
+		if($serializedArLang == '_EMPTY_') $serializedArLang = "";
+		$arLang = explode('||',urldecode($serializedArLang));
+ 
+ 		$prova = array("foo", "bar", "hallo", "world");
+		$provaSerialized = serialize($prova);
+		$provaUnserialized = unserialize($provaSerialized);
 
-         */
+ */
 
-        /*
-          log::doLog('LANGUAGES COOKIE: ' . $serializedArLang);
-          log::doLog('ARLANG UNSERIALIZED LENGTH: ' . count($arLang));
-          if($serializedArLang == '') {
-          //			$newLangValue =
-          }
-         */
+/* 
+ 		log::doLog('LANGUAGES COOKIE: ' . $serializedArLang);
+		log::doLog('ARLANG UNSERIALIZED LENGTH: ' . count($arLang));
+		if($serializedArLang == '') {
+//			$newLangValue = 
+		}
+*/		
 
 
 
@@ -112,17 +146,18 @@ class createProjectController extends ajaxcontroller {
         // add her the cookie mangement for remembere the last 3 choosed languages
         // project name sanitize
         //$this->project_name = preg_replace('/["\' \(\)\&\[\]\{\}\+\*,:|#]/', "_", $this->project_name);
-        $this->project_name = preg_replace('/[^\p{L}0-9a-zA-Z_\.\-]/', "_", $this->project_name);
+		$this->project_name = preg_replace('/[^\p{L}0-9a-zA-Z_\.\-]/u', "_", $this->project_name);
         $this->project_name = preg_replace('/[_]{2,}/', "_", $this->project_name);
         $this->project_name = str_replace('_.', ".", $this->project_name);
         //echo $this->project_name; 
-        // project name validation        
-        $pattern = "/^[\p{L}\ 0-9a-zA-Z_\.\-]+$/";
-        if (!preg_match($pattern, $this->project_name, $rr)) {
-            $kkk = str_split($this->project_name);
-            foreach ($kkk as $kk) {
-                log::doLog($kk, ord($kk));
-            }
+        
+	// project name validation        
+		$pattern = "/^[\p{L}\ 0-9a-zA-Z_\.\-]+$/u";
+        if (!preg_match($pattern, $this->project_name,$rr)) {
+                $kkk=str_split($this->project_name);
+                foreach ($kkk as $kk){
+                log::doLog($kk,ord($kk));
+                }
             $this->result['errors'][] = array("code" => -5, "message" => "Invalid Project Name $this->project_name: it should only contain numbers and letters!");
             //	        $this->result['project_name_error'] = $this->project_name;
             return false;
@@ -130,10 +165,10 @@ class createProjectController extends ajaxcontroller {
 
         // create project
         $analysis_status = (INIT::$VOLUME_ANALYSIS_ENABLED) ? 'NEW' : 'NOT_TO_ANALYZE';
-        $ppassword = $this->create_password();
-
-        $ip = Utils::getRealIpAddr();
-        $pid = insertProject('translated_user', $this->project_name, $analysis_status, $ppassword, $ip);
+		$ppassword = CatUtils::generate_password();
+        
+        $ip=Utils::getRealIpAddr();
+        $pid = insertProject('translated_user', $this->project_name, $analysis_status, $ppassword,$ip);
         //create user (Massidda 2013-01-24)
         //this is done only if an API key is provided
         if (!empty($this->private_tm_key)) {
@@ -144,22 +179,22 @@ class createProjectController extends ajaxcontroller {
                 $this->private_tm_user = $this->private_tm_key;
                 $this->private_tm_pass = $this->private_tm_key;
             }
-            $user_id = insertUser($this->private_tm_user, $this->private_tm_pass, $this->private_tm_key);
+			$user_id = insertTranslator($this->private_tm_user, $this->private_tm_pass, $this->private_tm_key);
             $this->private_tm_user = $user_id;
         }
-        
+        //create job
 
         $intDir = $_SERVER['DOCUMENT_ROOT'] . '/storage/upload/' . $_COOKIE['upload_session'];
-        $fidList=array();
+		$fidList=array();
         foreach ($arFiles as $file) {
 
 
             $fileSplit = explode('.', $file);
             $mimeType = strtolower($fileSplit[count($fileSplit) - 1]);
-            //echo $mimeType; exit;
+            //echo $mimeType; exit;n
             //        	log::doLog('MIMETYPE: ' . $mimeType);
 
-            $original_content = "";
+            $original_content="";
             if (($mimeType != 'sdlxliff') && ($mimeType != 'xliff') && ($mimeType != 'xlf') && (INIT::$CONVERSION_ENABLED)) {
                 //        		log::doLog('NON XLIFF');
                 $fileDir = $intDir . '_converted';
@@ -169,12 +204,12 @@ class createProjectController extends ajaxcontroller {
                 $sha1_original = sha1($original_content);
                 //unset($original_content);
             } else {
-                $sha1_original = "";
+                $sha1_original="";
                 $fileDir = $intDir;
                 $filename_to_catch = $file;
             }
-
-            if (!empty($original_content)) {
+            
+            if (!empty($original_content)){
                 $original_content = gzdeflate($original_content, 5);
             }
 
@@ -186,22 +221,21 @@ class createProjectController extends ajaxcontroller {
                 $this->result['errors'][] = array("code" => -6, "message" => "File not found on server after upload.");
             }
             $contents = file_get_contents($filename);
-            $fid = insertFile($pid, $file, $this->source_language, $mimeType, $contents, $sha1_original, $original_content);
-            $fidList[]=$fid;
-           
+            $fid = insertFile($pid, $file, $this->source_language, $mimeType, $contents, $sha1_original,$original_content);
+			$fidList[]=$fid;
+
 
             $insertSegments = extractSegments($fileDir, $filename_to_catch, $pid, $fid);
         }
-        
-        //create job
-        
-        foreach ($this->target_language as $target){
-            $password = $this->create_password();
-            $jid = insertJob($password, $pid, $this->private_tm_user, $this->source_language, $target, $this->mt_engine, $this->tms_engine);
-            foreach ($fidList as $fid){
-                 insertFilesJob($jid, $fid);
-            }
-        }
+		$this->target_language = explode(',',$this->target_language);
+
+		foreach ($this->target_language as $target){
+			$password = CatUtils::generate_password();
+			$jid = insertJob($password, $pid, $this->private_tm_user, $this->source_language, $target, $this->mt_engine, $this->tms_engine);
+			foreach ($fidList as $fid){
+				insertFilesJob($jid, $fid);
+			}
+		}
 
         log::doLog('DELETING DIR: ' . $intDir);
         $this->deleteDir($intDir);
@@ -259,19 +293,6 @@ class createProjectController extends ajaxcontroller {
 //        return "-$guid";
 //    }
 
-    public function create_password($length = 8) {
-
-
-        // Random
-        $pool = "abcdefghkmnpqrstuvwxyz23456789"; // skipping iljo01 because not easy to distinguish
-        $pool_lenght = strlen($pool);
-        $pwd = "";
-        for ($index = 0; $index < $length; $index++) {
-            $pwd .= substr($pool, (rand() % ($pool_lenght)), 1);
-        }
-
-        return $pwd;
-    }
 
     public static function deleteDir($dirPath) {
         return true;
