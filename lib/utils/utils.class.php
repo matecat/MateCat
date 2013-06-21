@@ -3,59 +3,6 @@
 //include_once ("../inc/config.class.php"); // only for testing purpose
 class Utils {
 
-	//reconcile tag ids
-	public static function ensureTagConsistency($q,$source_seg,$target_seg){
-		//TODO
-	}
-
-	//check for tag mismatches
-	public static function checkTagConsistency($source_seg,$target_seg){
-		//get tags from words in source and target
-		preg_match_all('/<[^>]+>/',$source_seg,$source_tags);
-		preg_match_all('/<[^>]+>/',$target_seg,$target_tags);
-		$source_tags=$source_tags[0];
-		$target_tags=$target_tags[0];
-
-		//check equal tag count 
-		if(count($source_tags)!=count($target_tags)){
-			return array('outcome'=>1,'debug'=>'tag count mismatch');
-		}       
-
-		//check well formed xml (equal number of opening and closing tags inside each input segment)
-		@$xml_valid=simplexml_load_string("<placeholder>$source_seg</placeholder>");
-		if($xml_valid===FALSE){
-			return array('outcome'=>2,'debug'=>'bad source xml');
-		}       
-		@$xml_valid=simplexml_load_string("<placeholder>$target_seg</placeholder>");
-		if($xml_valid===FALSE){
-			return array('outcome'=>3,'debug'=>'bad target xml');
-		}       
-
-		//check for tags' id mismatching
-		//extract names
-		preg_match_all('/id="(.+?)"/',$source_seg,$source_tags_ids);
-		preg_match_all('/id="(.+?)"/',$target_seg,$target_tags_ids);
-		$source_tags_ids=$source_tags_ids[1];
-		$target_tags_ids=$target_tags_ids[1];
-		//set indexes for lookup purposes ('1' is just a dummy value to set the cell)
-		$tmp=array();
-		foreach($source_tags_ids as $k=>$src_tag) $tmp[$src_tag]=1;
-		$source_tags_ids=$tmp;
-		$tmp=array();
-		foreach($target_tags_ids as $k=>$trg_tag) $tmp[$trg_tag]=1;
-		$target_tags_ids=$tmp;
-		unset($tmp);
-		//for each tag in target
-		foreach($target_tags_ids as $tag=>$v){
-			//if a tag in target is not present in source, error
-			if(!isset($source_tags_ids[$tag])){
-				return array('outcome'=>4,'debug'=>'tag id mismatch');
-			}
-		}
-
-		//all checks passed
-		return array('outcome'=>0,'debug'=>'');
-	}
 
 	public static function is_assoc($array) {
 		return is_array($array) AND (bool) count(array_filter(array_keys($array), 'is_string'));

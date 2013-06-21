@@ -1,23 +1,107 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml">
+<!doctype html>
+<html dir="ltr" lang="en-US">
+
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-<title>Matecat login</title>
-<script type="text/javascript" src="/public/js/lib/jquery.js"></script>
-<script type="text/javascript" src="/public/js/login.js"></script>
-<link href="/public/css/login.css" rel="stylesheet"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Matecat Login</title>
+    <link rel="icon" href="${basepath}public/img/favicon.ico" />
+	<script src="${basepath}public/js/lib/jquery.js"></script>
+	<script src="${basepath}public/js/login.js"></script>
+    <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
+	<style>
+		html,body
+			{
+			min-height:100%;
+			}
+			 		
+		body
+			{
+			width: 100%;
+			height: 100%;
+			background: url(public/img/login_bg_1.jpg) left bottom no-repeat;
+			background-size: cover !important;
+			}
+
+		#loadingspinner
+			{
+			visibility:hidden;
+			}
+
+		h1
+			{
+			display: none !important;
+			}
+
+		h2
+			{
+			font-size: 42px !important;
+			}
+
+		h3
+			{
+			font-weight: normal;
+			font-size: 24px !important;
+			}
+
+		.outer
+			{
+			background: url(public/img/bg_login_button.gif) 0 0 repeat;
+			border-radius: 6px;
+			margin: 0 auto;
+			width: 330px;
+			}
+			.outer:hover
+				{
+				background: url(public/img/bg_login_button_hover.gif) 0 0 repeat;
+				}
+
+		.inner
+			{
+			width: 45px;
+			border-right: 1px solid #003366;
+			background: transparent url(http://d1gwm4cf8hecp4.cloudfront.net/images/home/g.png) 0 5px no-repeat;
+			border-radius: 0 0 0 6px;
+			}
+
+
+		.login-button
+			{
+			width: 330px;
+			font-weight: normal;
+			padding: 8px 0 8px 45px;
+			text-align: center;
+			color: #fff;
+			font-size: 16px !important;
+			text-shadow: 0 -1px 0 #003366;
+			background: transparent;
+			border: none;
+			cursor: pointer;
+			}
+
+	</style>
 </head>
 
+
 <body>
-<span id='incomingurl' style='visibility:hidden' tal:content='incomingUrl'></span>
-<div class="" >
-<h4>Please log in</h4>
+    <header>
+        <div class="wrapper">   
+            <a href="${basepath}" class="logo"></a>
+        </div>
+        <div class="cl"></div>
 
-
- 
-        
-<button tal:attributes='onclick javascript_loader' name="" type="button" class="">Login with your Google account</button>
-
+    </header>
+	<div class="container" style="width:100%; height: 100%"></div>
+	<span id='incomingurl' style='visibility:hidden' tal:content='incomingUrl'></span>
+	<div class="wrap" >
+		<h1>Translated</h1>
+		<h2>Translate your files</h2>
+		<h3>Matecat gives you more matches<br />than any other translation tool.</h3>
+    
+		<div class="outer">
+			<div class="inner">
+				<button tal:attributes='onclick javascript_loader' name="" type="button" class="login-button">Sign in using Google</button>
+			</div>
+		</div>
 <!--
         <span class=""></span>
         <p class="">or</p>
@@ -51,6 +135,6 @@
 </form>
 </div>
 -->
-</div>
+	</div>
 </body>
 </html>

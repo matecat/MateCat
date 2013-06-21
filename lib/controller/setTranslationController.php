@@ -67,14 +67,19 @@ class setTranslationController extends ajaxcontroller {
 			log::doLog("translation: " . $this->translation);
 		$this->translation = CatUtils::view2rawxliff($this->translation);
 
+		//check tag mismatch
+		//get original source segment, first
+		$segment=getSegment($this->id_segment);
+		//compare segment-translation and get results
+		$warning=CatUtils::checkTagConsistency($segment['segment'], $this->translation);
 		
-		$res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $this->translation, $this->err,$this->chosen_suggestion_index);
+		$res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $this->translation, $this->err,$this->chosen_suggestion_index, $warning['outcome']);
+
 		if (!empty($res['error'])) {
 			$this->result['error'] = $res['error'];
 			return -1;
 		}
 
-//		$query = "select count(*) as tot from segments_translations  st where id_job=<id_job> and status not in ('TRANSLATED','APPROVED')";
 		
 		$job_stats = CatUtils::getStatsForJob($this->id_job);
 		$file_stats = CatUtils::getStatsForFile($this->id_first_file);
@@ -87,6 +92,7 @@ class setTranslationController extends ajaxcontroller {
 		$this->result['file_stats'] = $file_stats;
 		$this->result['code'] = 1;
 		$this->result['data'] = "OK";
+		$this->result['warning']=$warning['outcome'];
 	}
 
 }

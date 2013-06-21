@@ -120,7 +120,7 @@ function insertUser($data){
 
 	//insert into db
 	$db = Database::obtain();
-	$results = $db->insert('users',$data,$data['email']);
+	$results = $db->insert('users',$data,'email');
 	return $results;
 }
 
@@ -133,9 +133,9 @@ function tryInsertUserFromOAuth($data){
 	if(0==count($results) or false==$results){
 		//log::doLog("auth for ".$data['email'].", it's a new user");
 		//new client
-		$resutls=insertUser($data);
+		$results=insertUser($data);
 		//check outcome
-		if(false!=$results){
+		if($results){
 			$cid=$data['email'];
 		}else{
 			$cid=false;
@@ -184,6 +184,22 @@ function getEngineData($id) {
 	//print_r($results); 
 
 	return $results[0];
+}
+
+function getSegment($id_segment){
+	$db = Database::obtain();
+	$id_segment = $db->escape($id_segment);
+	$query = "select * from segments where id=$id_segment";
+	$results = $db->query_first($query);
+	return $results;
+}
+
+function getWarning($jid){
+	$db = Database::obtain();
+	$jid = $db->escape($jid);
+	$query="SELECT id_segment, warning  FROM segment_translations WHERE warning>0 and id_job=$jid limit 10";
+	$results = $db->fetch_array($query);
+	return $results;
 }
 
 function getTranslatorPass($id_translator) {
@@ -358,7 +374,7 @@ function getMoreSegments($jid, $password, $step = 50, $ref_segment, $where = 'af
 		p.id_customer as cid, j.id_translator as tid,  
 		p.name as pname, p.create_date , fj.id_file, fj.id_segment_start, fj.id_segment_end, 
 		f.filename, f.mime_type, s.id as sid, s.segment, s.raw_word_count, s.internal_id,
-		if (st.status='NEW',NULL,st.translation) as translation, st.status, IF(st.time_to_edit is NULL,0,st.time_to_edit) as time_to_edit, s.xliff_ext_prec_tags,s.xliff_ext_succ_tags, st.serialized_errors_list
+		if (st.status='NEW',NULL,st.translation) as translation, st.status, IF(st.time_to_edit is NULL,0,st.time_to_edit) as time_to_edit, s.xliff_ext_prec_tags,s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning
 
 			from jobs j 
 				inner join projects p on p.id=j.id_project
@@ -413,7 +429,7 @@ function getLastSegmentInNextFetchWindow($jid, $password, $step = 50, $ref_segme
 	return $results['max_id'];
 }
 
-function setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index) {
+function setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index, $warning=0) {
 	// need to use the plain update instead of library function because of the need to update an existent value in db (time_to_edit)
 	$now = date("Y-m-d H:i:s");
 	$db = Database::obtain();
@@ -422,7 +438,7 @@ function setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $tra
 	$status = $db->escape($status);
 
 
-	$q = "UPDATE segment_translations SET status='$status', suggestion_position='$chosen_suggestion_index', serialized_errors_list='$errors', time_to_edit=IF(time_to_edit is null,0,time_to_edit) + $time_to_edit, translation='$translation', translation_date='$now' WHERE id_segment=$id_segment and id_job=$id_job";
+	$q = "UPDATE segment_translations SET status='$status', suggestion_position='$chosen_suggestion_index', serialized_errors_list='$errors', time_to_edit=IF(time_to_edit is null,0,time_to_edit) + $time_to_edit, translation='$translation', translation_date='$now', warning=$warning WHERE id_segment=$id_segment and id_job=$id_job";
 
 
 	//log::doLog("set update : $q");
@@ -436,7 +452,7 @@ function setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $tra
 	return $db->affected_rows;
 }
 
-function setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $translation, $errors='', $chosen_suggestion_index) {
+function setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $translation, $errors='', $chosen_suggestion_index, $warning=0) {
 	$data = array();
 	$data['id_job'] = $id_job;
 	$data['status'] = $status;
@@ -447,6 +463,7 @@ function setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $tra
 	$data['id_job'] = $id_job;
 	$data['serialized_errors_list']=$errors;
 	$data['suggestion_position']=$chosen_suggestion_index;
+	$data['warning']=$warning;
 	$db = Database::obtain();
 	$db->insert('segment_translations', $data);
 
