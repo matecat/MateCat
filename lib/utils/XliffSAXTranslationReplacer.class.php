@@ -1,5 +1,8 @@
 <?
 
+include INIT::$UTILS_ROOT . "/cat.class.php";
+
+
 class XliffSAXTranslationReplacer{
 
 	private $filename; //source filename
@@ -255,7 +258,7 @@ class XliffSAXTranslationReplacer{
 		//echo "t1 : ".$seg['translation']."\n";
 		//consistency check
 		$tag_mismatch=false;
-		$outcome=Utils::checkTagConsistency($seg['segment'],$seg['translation']);
+		$outcome=CatUtils::checkTagConsistency($seg['segment'],$seg['translation']);
 		if($outcome['outcome']>0){
 			$tag_mismatch=true;
 			log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".$outcome['debug'].")");

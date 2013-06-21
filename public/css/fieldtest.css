@@ -153,8 +153,8 @@ body.manage .actions a
 		background: url(../img/unarchive-job.png) 0 1px no-repeat;
 		}
 
-	body.manage tr[data-status=ongoing] .actions a.resume,
-	body.manage tr[data-status=ongoing] .actions a.unarchive,
+	body.manage tr[data-status=active] .actions a.resume,
+	body.manage tr[data-status=active] .actions a.unarchive,
 	body.manage tr[data-status=cancelled] .actions a.cancel,
 	body.manage tr[data-status=cancelled] .actions a.archive,
 	body.manage tr[data-status=cancelled] .actions a.unarchive,
@@ -166,7 +166,9 @@ body.manage .actions a
 
 		
 body.manage a.cancel-project,
-body.manage a.archive-project
+body.manage a.archive-project,
+body.manage a.resume-project,
+body.manage a.unarchive-project
 	{
 	display: inline-block;
 	position: relative;
@@ -195,23 +197,32 @@ body.manage a.archive-project
 body.manage a.archive-project
 	{
 	background: url(../img/archive-job.png) 0 1px no-repeat;
-
-/*
-	width: 18px;
-	height: 16px;
-	margin-left: 80px;
-	margin-top: 26px;
-	text-indent: -10000px;
-	position: absolute;
-	background: url(../img/icon_archive_small.gif) 0 0 no-repeat;
-*/
 	}
-	body.manage .article.allArchived a.archive-project
+	body.manage .article.allArchived a.archive-project,
+	body.manage[data-filter-status=archived] a.archive-project,
+	body.manage[data-filter-status=cancelled] a.archive-project
+		{
+		display: none;
+		}
+body.manage a.resume-project
+	{
+	background: url(../img/resume-job.png) 0 0 no-repeat;
+	}
+	body.manage[data-filter-status=archived] a.resume-project
 		{
 		display: none;
 		}
 
+body.manage a.unarchive-project
+	{
+	background: url(../img/unarchive-job.png) 0 1px no-repeat;
+	}
+	body.manage[data-filter-status=cancelled] a.unarchive-project
+		{
+		display: none;
+		}
 
+	
 body.manage tr.alt
 	{
 	background: #f8f8f8;
@@ -234,10 +245,15 @@ body.manage .progress div span
 body.manage .article
 	{
 	float: left;
+	display: block;
 	width: 100%;
 	margin-bottom: 20px;
 	}
-
+	body.manage .article.invisible
+		{
+		display: none;
+		}
+/*
 .tablefilter
 	{
 	float: right;
@@ -248,7 +264,7 @@ body.manage .article
 	{
 	color: #666;
 	}
-	
+*/
 body.manage object
 	{
 	margin-bottom: 25px !important;
@@ -285,6 +301,16 @@ body.manage th.actions
 	{
 	width: 8%;
 	}
+
+body.manage tr.row
+	{
+	display: none;
+	}
+	body.manage[data-filter-status=active] tr[data-status=active]
+		{
+		display: table-row;
+		}
+
 /*	
 body.manage tr.disabled
 	{
@@ -305,30 +331,41 @@ body.manage tr[data-status=archived]
 	color: #C41919;
 	display: none;
 	}
+	body.manage[data-filter-status=archived] tr[data-status=archived]
+		{
+		display: table-row;
+		}
+/*
 	body.manage .article.showArchived tr[data-status=archived]
 		{
 		display: table-row;
 		}
-		
+*/		
 body.manage tr[data-status=cancelled]
 	{
 	color: #999;
 	display: none;
 	}
+	body.manage[data-filter-status=cancelled] tr[data-status=cancelled]
+		{
+		display: table-row;
+		}
+/*
 	body.manage .article.showCancelled tr[data-status=cancelled]
 		{
 		display: table-row;
 		}
-	
+*/	
 body.manage .article.allCancelled thead th
 	{
 	color: #999;
 	}
+/*
 	body.manage .article.showCancelled.allCancelled thead th
 		{
 		color: #000 !important;
 		}
-
+*/
 body.manage td.words
 	{
 	text-align: right;
@@ -475,14 +512,14 @@ body.manage .message
 	display: none;
 	background: #ffde33;
 	position: absolute;
-	margin: 50px 35%;
+	margin: 30px 35%;
 	width: 30%;
 	padding: 4px;
 	text-align: center;
 	}
 	body.manage.filterOpen .message
 		{
-		margin-top: 90px !important;
+		margin-top: 60px !important;
 		}
 body.manage .message:hover
 	{
@@ -500,14 +537,14 @@ body.manage.filterActive .project-filter
 	{
 	display: none !important;
 	}
-
+/*
 body.manage.filterActive tr[data-status=archived],
 body.manage.filterActive tr[data-status=cancelled]
 	{
 	display: table-row !important;
 	}
-
-
+*/
+/*
 body.manage .article[data-hascancelled='0'] .project-filter.cancelled
 	{
 	display: none;
@@ -517,7 +554,7 @@ body.manage .article[data-hasarchived='0'] .project-filter.archived
 	{
 	display: none;
 	}
-
+*/
 body.manage #spinner
 	{
 	display: none;

@@ -11,15 +11,11 @@ class changePasswordController extends ajaxcontroller {
             parent::__construct();
             $this->res_type = $this->get_from_get_post('res');
             $this->res_id = $this->get_from_get_post('id');
-log::doLog("PASSWORD 1: ",$this->get_from_get_post('password'));
-if($this->get_from_get_post('password') != '') log::doLog("C'E' UNA PASSWORD");
-			if (isset($_GET['password'])) {
-				$this->password = ($this->get_from_get_post('password')=='')? false : $this->get_from_get_post('password');
+			if($this->get_from_get_post('password') != '') {
+				$this->password = $this->get_from_get_post('password');
 			} else {
 				$this->password = false;
-			};	
-log::doLog("PASSWORD 2: ",$this->password);
-
+			}
       }
 
       public function doAction() {

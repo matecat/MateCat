@@ -9,6 +9,60 @@ define ("GTPLACEHOLDER", "##GREATERTHAN##");
 
 class CatUtils {
 
+	//reconcile tag ids
+	public static function ensureTagConsistency($q,$source_seg,$target_seg){
+		//TODO
+	}
+
+	//check for tag mismatches
+	public static function checkTagConsistency($source_seg,$target_seg){
+		//get tags from words in source and target
+		preg_match_all('/<[^>]+>/',$source_seg,$source_tags);
+		preg_match_all('/<[^>]+>/',$target_seg,$target_tags);
+		$source_tags=$source_tags[0];
+		$target_tags=$target_tags[0];
+
+		//check equal tag count 
+		if(count($source_tags)!=count($target_tags)){
+			return array('outcome'=>1,'debug'=>'tag count mismatch');
+		}       
+
+		//check well formed xml (equal number of opening and closing tags inside each input segment)
+		@$xml_valid=simplexml_load_string("<placeholder>$source_seg</placeholder>");
+		if($xml_valid===FALSE){
+			return array('outcome'=>2,'debug'=>'bad source xml');
+		}       
+		@$xml_valid=simplexml_load_string("<placeholder>$target_seg</placeholder>");
+		if($xml_valid===FALSE){
+			return array('outcome'=>3,'debug'=>'bad target xml');
+		}       
+
+		//check for tags' id mismatching
+		//extract names
+		preg_match_all('/id="(.+?)"/',$source_seg,$source_tags_ids);
+		preg_match_all('/id="(.+?)"/',$target_seg,$target_tags_ids);
+		$source_tags_ids=$source_tags_ids[1];
+		$target_tags_ids=$target_tags_ids[1];
+		//set indexes for lookup purposes ('1' is just a dummy value to set the cell)
+		$tmp=array();
+		foreach($source_tags_ids as $k=>$src_tag) $tmp[$src_tag]=1;
+		$source_tags_ids=$tmp;
+		$tmp=array();
+		foreach($target_tags_ids as $k=>$trg_tag) $tmp[$trg_tag]=1;
+		$target_tags_ids=$tmp;
+		unset($tmp);
+		//for each tag in target
+		foreach($target_tags_ids as $tag=>$v){
+			//if a tag in target is not present in source, error
+			if(!isset($source_tags_ids[$tag])){
+				return array('outcome'=>4,'debug'=>'tag id mismatch');
+			}
+		}
+
+		//all checks passed
+		return array('outcome'=>0,'debug'=>'');
+	}
+
 	private function parse_time_to_edit($ms) {
 		if ($ms <= 0) {
 			return array("00", "00", "00", "00");
@@ -235,8 +289,10 @@ class CatUtils {
 		return array($data,$stats);
 	}
 
-	public static function addSegmentTranslation($id_segment, $id_job, $status, $time_to_edit, $translation, $errors,$chosen_suggestion_index) {
-		$insertRes = setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index);
+	public static function addSegmentTranslation($id_segment, $id_job, $status, $time_to_edit, $translation, $errors,$chosen_suggestion_index,$warning=0) {
+
+
+		$insertRes = setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index, $warning);
 		//log::doLog("translation is $translation - encoded ". htmlentities($translation));
 		if ($insertRes < 0 and $insertRes != -1062) {
 			$result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the translation for the segment $id_segment - $insertRes");
@@ -244,7 +300,7 @@ class CatUtils {
 		}
 		if ($insertRes == -1062) {
 
-			$updateRes = setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index);
+			$updateRes = setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index, $warning);
 
 			if ($updateRes < 0) {
 				$result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment $id_segment");
@@ -285,8 +341,8 @@ class CatUtils {
 	}
 
 	public static function getStatsForMultipleJobs($jids,$estimate_performance=0){
-//log::doLog("JIDS: ",$jids);
-log::doLog("EST PERF: ",$estimate_performance);
+		//log::doLog("JIDS: ",$jids);
+		log::doLog("EST PERF: ",$estimate_performance);
 
 		//get stats for all jids
 		$jobs_stats=getStatsForMultipleJobs($jids);
@@ -314,7 +370,7 @@ log::doLog("EST PERF: ",$estimate_performance);
 			// this prevent division by zero error when the jobs contains only segment having untranslatable content	
 			if ($job_stat['TOTAL']==0){
 				$job_stat['TOTAL']=1;
-				} 
+			} 
 			$job_stat['TOTAL_FORMATTED']=number_format($job_stat['TOTAL'],0,".",",");
 
 			$job_stat['TRANSLATED_FORMATTED'] = number_format($job_stat['TRANSLATED'],0,".",",");
@@ -345,9 +401,9 @@ log::doLog("EST PERF: ",$estimate_performance);
 				// Calculating words per hour and estimated completion
 				$estimation_temp = getLastSegmentIDs($job_stat['id']);
 				$estimation_seg_ids = $estimation_temp[0]['estimation_seg_ids'];
-	
+
 				if ($estimation_seg_ids) { 
-	
+
 					$estimation_temp = getEQWLastHour($job_stat['id'],$estimation_seg_ids);
 					if ($estimation_temp[0]['data_validity']==1) {
 						$job_stat['WORDS_PER_HOUR'] = number_format($estimation_temp[0]['words_per_hour'],0,'.',',');

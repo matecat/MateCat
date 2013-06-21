@@ -16,6 +16,7 @@ UI = {
         
         var page = location.pathname.split('/')[2];
         this.page = ('undefined'==typeof(page)||page == '')? 1 : parseInt(page);
+
         filtersStrings = (location.hash != '')? location.hash.split('#')[1].split(',') : '';
         this.filters = {};
         $.each(filtersStrings, function() {
@@ -35,7 +36,7 @@ UI = {
         				$('#select-source option[selected=selected]').removeAttr('selected');
         				$(this).attr('selected','selected');
         			}
-		        })    	
+		        })
         	};
 
         	if(typeof this.filters.target != 'undefined') {
@@ -52,7 +53,7 @@ UI = {
         		$('#select-status option[value='+this.filters.status+']').attr('selected','selected');
         	} else {
         		$('#select-status option[selected=selected]').removeAttr('selected');
-        		$('#select-status option[value=ongoing]').attr('selected','selected');        		
+        		$('#select-status option[value=active]').attr('selected','selected');        		
         	};
 
         	if(typeof this.filters.onlycompleted != 'undefined') {
@@ -61,80 +62,21 @@ UI = {
         	};
 
         	this.body.addClass('filterOpen');
+
         } else {
         	this.body.removeClass('filterOpen filterActive');
 	        UI.emptySearchbox();
         }
-        this.getProjects('standard');
+		var status = (typeof this.filters.status != 'undefined')? this.filters.status : 'active';
+		this.body.attr('data-filter-status',status);
+		this.getProjects('standard');
     },
     
     init: function() {
 
 		this.body.on('click','.message a.undo',function(e) {  
 	        e.preventDefault();
-			switch($(this).data('operation'))
-				{
-				case 'changeStatus':
-
-					$('.message').hide();
-					var status = $(this).data('status');
-					var res = $(this).data('res');
-					var id = $(this).data('id');
-					var ob = (res=='job')? $('tr.row[data-jid=' + id + ']') : $('.article[data-pid=' + id + ']');
-					
-					UI.doRequest({
-						data: {
-							action:		"changeJobsStatus",
-							status: 	status,
-							res: 		res,
-							id:			id
-						},
-						context: ob,
-						success: function(d){
-							if(d.data == 'OK') {
-								res = ($(this).hasClass('row'))? 'job':'prj';
-								UI.changeJobsStatus_success(res,$(this),d,1);
-
-							}
-						}
-					});
-
-					break;
-
-				case 'changePassword':
-					$('.message').hide();
-					var res = $(this).data('res');
-					var id = $(this).data('id');
-					var pwd = $(this).data('password');
-					var ob = (res=='job')? $('tr.row[data-jid=' + id + ']') : $('.article[data-pid=' + id + ']');
-					UI.changePassword(res,ob,pwd,1);
-/*
-					var status = $(this).data('status');
-					var res = $(this).data('res');
-					var id = $(this).data('id');
-					var ob = (res=='job')? $('tr.row[data-jid=' + id + ']') : $('.article[data-pid=' + id + ']');
-					
-					UI.doRequest({
-						data: {
-							action:		"changeJobsStatus",
-							status: 	status,
-							res: 		res,
-							id:			id
-						},
-						context: ob,
-						success: function(d){
-							if(d.data == 'OK') {
-								res = ($(this).hasClass('row'))? 'job':'prj';
-								UI.changeJobsStatus_success(res,$(this),d,1);
-
-							}
-						}
-					});
-*/
-					break;
-
-				default:
-				}
+			UI.applyUndo();
 	    })
 		
 		$("#contentBox").on('click','td.actions a.cancel',function(e) {  
@@ -145,10 +87,10 @@ UI = {
 	        UI.changeJobsStatus('job',$(this).parents('tr'),'archived');
 	    }).on('click','td.actions a.resume',function(e) {  
 	        e.preventDefault();
-	        UI.changeJobsStatus('job',$(this).parents('tr'),'ongoing');
+	        UI.changeJobsStatus('job',$(this).parents('tr'),'active');
 	    }).on('click','td.actions a.unarchive',function(e) {  
 	        e.preventDefault();
-	        UI.changeJobsStatus('job',$(this).parents('tr'),'ongoing');
+	        UI.changeJobsStatus('job',$(this).parents('tr'),'active');
 	    }).on('click','a.cancel-project',function(e) {    
 	        e.preventDefault();
 	        UI.changeJobsStatus('prj',$(this).parents('.article'),'cancelled');		
@@ -185,23 +127,9 @@ UI = {
 */	
 	    }).on('click','.meter a',function(e) {
 	        e.preventDefault();
+/*
 	    }).on('click','.tablefilter label',function(e) {	
 	        $(this).parent().find('input').click();
-	    }).on('click','.project-filter.cancelled input',function(e) {
-	        var project = $(this).parents('.article');
-	        project.toggleClass('showCancelled');
-	    }).on('click','.project-filter.archived input',function(e) {
-	        var project = $(this).parents('.article');
-	        project.toggleClass('showArchived');
-/*
-	    }).on('click','a.previous',function(e) {
-	        e.preventDefault();
-			UI.page = UI.page-1;
-			UI.getProjects();
-	    }).on('click','a.next',function(e) {
-	        e.preventDefault();
-			UI.page = UI.page+1;
-			UI.getProjects();
 */
 	    }).on('click','.pagination a',function(e) {
 	        e.preventDefault();
@@ -217,67 +145,12 @@ UI = {
 	
 	    $('.searchbox #exec-filter').click(function(e) {    
 	        e.preventDefault();
-
-	        if($('#search-projectname').val() != '') {
-	        	UI.filters['pn'] = $('#search-projectname').val();
-	        } else {
-	        	delete UI.filters['pn'];	        	
-	        }
-
-	        if($('#select-source').val() != '') {
-	        	UI.filters['source'] = $('#select-source').val();
-	        } else {
-	        	delete UI.filters['source'];	        	
-	        }
-
-	        if($('#select-target').val() != '') {
-	        	UI.filters['target'] = $('#select-target').val();
-	        } else {
-	        	delete UI.filters['target'];
-	        }
-
-	        if($('#select-status').val() != '') {
-	        	UI.filters['status'] = $('#select-status').val();
-	        } else {
-	        	delete UI.filters['status'];
-	        }
-
-	        if($('#only-completed').is(':checked')) {
-	        	UI.filters['onlycompleted'] = 1;
-	        } else {
-	        	delete UI.filters['onlycompleted'];
-	        }
-/*
-	        if($('#show-archived').is(':checked')) {
-	        	UI.filters['showarchived'] = 1;
-	        } else {
-	        	delete UI.filters['showarchived'];
-	        }
-
-	        if($('#show-cancelled').is(':checked')) {
-	        	UI.filters['showcancelled'] = 1;
-	        } else {
-	        	delete UI.filters['showcancelled'];
-	        }
-*/
-	        UI.filters['filter'] = 1;
-
-	        UI.page = 1;
-			UI.getProjects('filter');
-			UI.body.addClass('filterActive');
-/*     
-	        if(ff) {
-	        	UI.page = 1;
-	        	UI.getProjects();
-	        } else {
-	        	alert('No filters selected');
-	        }    
-*/
+	        UI.applyFilter();
 	    });
 	
 	    $('.searchbox #clear-filter').click(function(e) {    
 	        e.preventDefault();
-	        $('body').removeClass('filterOpen filterActive');
+	        $('body').removeClass('filterOpen filterActive').attr('data-filter-status','active');
 	        UI.filters = {};
 	        UI.page = 1;
 	        UI.emptySearchbox();
@@ -301,7 +174,115 @@ UI = {
         return '&time='+t.getTime();
     },
 
+    applyFilter: function() {
+        if($('#search-projectname').val() != '') {
+        	this.filters['pn'] = $('#search-projectname').val();
+        } else {
+        	delete this.filters['pn'];	        	
+        }
+
+        if($('#select-source').val() != '') {
+        	this.filters['source'] = $('#select-source').val();
+        } else {
+        	delete this.filters['source'];	        	
+        }
+
+        if($('#select-target').val() != '') {
+        	this.filters['target'] = $('#select-target').val();
+        } else {
+        	delete this.filters['target'];
+        }
+
+        if($('#select-status').val() != '') {
+        	this.filters['status'] = $('#select-status').val();
+        	this.body.attr('data-filter-status', $('#select-status').val());
+        } else {
+        	delete this.filters['status'];
+        }
+
+        if($('#only-completed').is(':checked')) {
+        	this.filters['onlycompleted'] = 1;
+        } else {
+        	delete this.filters['onlycompleted'];
+        }
+
+        this.filters['filter'] = 1;
+
+        this.page = 1;
+		this.getProjects('filter');
+		this.body.addClass('filterActive');
+    },
+
+    applyUndo: function() {
+		var undo = $('.message a.undo');
+		switch($(undo).data('operation')) {
+
+			case 'changeStatus':
+				$('.message').hide();
+				var new_status = $(undo).data('status');
+				var res = $(undo).data('res');
+				var id = $(undo).data('id');
+				var ob = (res=='job')? $('tr.row[data-jid=' + id + ']') : $('.article[data-pid=' + id + ']');
+				var d = {
+						action:		"changeJobsStatus",
+						new_status: new_status,
+						res: 		res,
+						id:			id,
+		                page:		UI.page,
+		                step:		UI.pageStep
+					}
+				ar = $.extend(d,UI.filters);
+				
+				UI.doRequest({
+					data: ar,
+					context: ob,
+					success: function(d){
+						if(d.data == 'OK') {
+							res = ($(this).hasClass('row'))? 'job':'prj';
+							UI.changeJobsStatus_success(res,$(this),d,1);
+						}
+					}
+				});
+
+				break;
+
+			case 'changePassword':
+				$('.message').hide();
+				var res = $(undo).data('res');
+				var id = $(undo).data('id');
+				var pwd = $(undo).data('password');
+				var ob = (res=='job')? $('tr.row[data-jid=' + id + ']') : $('.article[data-pid=' + id + ']');
+				UI.changePassword(res,ob,pwd,1);
+
+				break;
+
+			default:
+		}
+
+
+    },
+    
+    balanceAction: function(res,ob,d,undo,project) {
+    	// check if the project have to be hidden
+    	filterStatus = this.body.attr('data-filter-status');
+    	rowsInFilter = $('.article[data-pid='+project.attr('data-pid')+'] tr.row[data-status='+filterStatus+']').length;
+    	if(!rowsInFilter) {
+    		project.addClass('invisible')
+    	} else {
+    		project.removeClass('invisible');
+    	}
+    	// check if there is need to append or delete items
+    	numItem = $('.article:not(.invisible)').length;
+    	if(numItem < this.pageStep) {
+    		this.renderProjects(d.newItem,1);
+    	} else if(numItem > this.pageStep) {
+    		$('.article:not(.invisible)').last().remove();
+    	}
+
+    },
+
     changeJobsStatus: function(res,ob,status) {
+        console.log('status: '+status);
         if(res=='job') {
         	UI.lastJobStatus = ob.data('status');
         	id = ob.data('jid');
@@ -314,19 +295,24 @@ UI = {
 		    UI.lastJobStatus = arJobs;
 		    id = ob.data('pid');
         }
+		var d = {
+				action:		"changeJobsStatus",
+				new_status: status,
+				res: 		res,
+				id:			id,
+                page:		UI.page,
+                step:		UI.pageStep
+			}
+		ar = $.extend(d,UI.filters);
 
 		UI.doRequest({
-			data: {
-				action:		"changeJobsStatus",
-				status: 	status,
-				res: 		res,
-				id:			id
-			},
+			data: ar,
 			context: ob,
 			success: function(d){
 				if(d.data == 'OK') {
 					res = ($(this).hasClass('row'))? 'job':'prj';
 					UI.changeJobsStatus_success(res,$(this),d,0);
+					UI.setPagination(d);
 				}
 			}
 		});
@@ -334,29 +320,30 @@ UI = {
 
     changeJobsStatus_success: function(res,ob,d,undo) {
 		if(res == 'job') {
+			project = ob.parents('.article');
 			if(undo) {
 				ob.attr('data-status',d.status);				
 			} else {
 				id = ob.data('jid');
 				if(d.status == 'cancelled') {
-					setHas = true;
-					dataName = 'hascancelled';
+//					setHas = true;
+//					dataName = 'hascancelled';
 					msg = 'A job has been cancelled.';
 				} else if(d.status == 'archived') {
-					setHas = true;
-					dataName = 'hasarchived';
+//					setHas = true;
+//					dataName = 'hasarchived';
 					msg = 'A job has been archived.';
-				} else if(d.status == 'ongoing') {
-					setHas = false;
-					dataName = '';
-					msg = 'A job has been resumed as ongoing.';
+				} else if(d.status == 'active') {
+//					setHas = false;
+//					dataName = '';
+					msg = 'A job has been resumed as active.';
 				}
-				project = ob.parents('.article');
 				ob.attr('data-status',d.status);
-				if(setHas) project.attr('data-'+dataName,1);				
+//				if(setHas) project.attr('data-'+dataName,1);
 			}
 
 		} else {
+			project = ob;
 			if(undo) {
 				console.log(d.status);
 				$.each(d.status.split(','), function() {
@@ -366,22 +353,21 @@ UI = {
 			} else {
 				id = ob.data('pid');
 				if(d.status == 'cancelled') {
-					setHas = true;
-					dataName = 'hascancelled';
+//					setHas = true;
+//					dataName = 'hascancelled';
 					msg = 'All the jobs in a project has been cancelled.';
 				} else if(d.status == 'archived') {
-					setHas = true;
-					dataName = 'hasarchived';
+//					setHas = true;
+//					dataName = 'hasarchived';
 					msg = 'All the jobs in a project has been archived.';
-				} else if(d.status == 'ongoing') {
-					setHas = false;
-					dataName = '';
-					msg = 'All the jobs in a project has been resumed as ongoing.';
+				} else if(d.status == 'active') {
+//					setHas = false;
+//					dataName = '';
+					msg = 'All the jobs in a project has been resumed as active.';
 				}	
-				project = ob;
 				$('tr.row',project).each(function(){
 					$(this).attr('data-status',d.status);
-					if(setHas) project.attr('data-'+dataName,1);
+//					if(setHas) project.attr('data-'+dataName,1);
 			    })
 			}
 		}
@@ -394,9 +380,9 @@ UI = {
 				$('.message[data-token='+token.getTime()+']').hide();
 			},5000);
 		}
-
-		this.verifyProjectHasCancelled(project);
-		this.verifyProjectHasArchived(project);
+		this.balanceAction(res,ob,d,undo,project);
+//		this.verifyProjectHasCancelled(project);
+//		this.verifyProjectHasArchived(project);
 
     },
 
@@ -465,7 +451,7 @@ UI = {
     },
 
     compileDisplay: function() {
-    	var status = (typeof this.filters.status != 'undefined')? this.filters.status : 'ongoing';
+    	var status = (typeof this.filters.status != 'undefined')? this.filters.status : 'active';
     	var pname = (typeof this.filters.pn != 'undefined')? ' "<strong>' + this.filters.pn + '</strong>" in the name,' : '';
     	var source = (typeof this.filters.source != 'undefined')? ' <strong>' + $('#select-source option[value='+this.filters.source+']').text() + '</strong> as source language,' : '';
     	var target = (typeof this.filters.target != 'undefined')? ' <strong>' + $('#select-target option[value='+this.filters.target+']').text() + '</strong> as target language,' : '';
@@ -504,6 +490,8 @@ UI = {
         $('#select-source option').first().attr('selected','selected');
         $('#select-target option[selected=selected]').removeAttr('selected');
         $('#select-target option').first().attr('selected','selected');
+        $('#select-status option[selected=selected]').removeAttr('selected');
+        $('#select-status option').first().attr('selected','selected');
     },
 
     filters2hash: function() {
@@ -556,13 +544,9 @@ UI = {
 			success: function(d){
 				UI.body.removeClass('loading');
 				data = $.parseJSON(d.data);
-				if(d.pnumber > 1) {
-					UI.renderPagination(d.page,1,d.pnumber);
-				} else {
-					$('.pagination').empty();
-				}
-				UI.renderProjects(data);
-				if(d.pnumber > 1) UI.renderPagination(d.page,0,d.pnumber);
+				UI.setPagination(d);
+				UI.renderProjects(data,0);
+				if((d.pnumber - UI.pageStep) > 0) UI.renderPagination(d.page,0,d.pnumber);
 				UI.setTablesorter();
 				var stateObj = { page: d.page };
 //				history.pushState(stateObj, "page "+d.page, d.page+location.hash);
@@ -577,6 +561,14 @@ UI = {
 				UI.compileDisplay();
 			}
 		});
+	},
+
+    setPagination: function(d) {
+		if((d.pnumber - UI.pageStep) > 0) {
+			this.renderPagination(d.page,1,d.pnumber);
+		} else {
+			$('.pagination').empty();
+		}
 	},
 
     renderPagination: function(page,top,pnumber) {
@@ -606,27 +598,29 @@ UI = {
 
 	},
 
-    renderProjects: function(d) {
+    renderProjects: function(d,append) {
         this.retrieveTime = new Date();
         var projects = '';
         $.each(d, function() {
             var project = this;
             var newProject = '';
 
-			newProject += '<div data-pid="'+this.id+'" class="article" data-hasarchived="'+this.has_archived+'" data-hascancelled="'+this.has_cancelled+'">'+
+			newProject += '<div data-pid="'+this.id+'" class="article">'+
 	            '	<div class="head">'+
 		        '	    <h2>'+this.name+'</h2>'+
 		        '	    <div class="project-details">'+
 		        '			<span class="id-project" title="Project ID">'+this.id+'</span> - <a target="_blank" href="/analyze/'+project.name+'/'+this.id+'-'+this.password+'" title="Volume Analysis">'+parseInt(this.tm_analysis)+' Payable words</a>'+
 		        '			<a href="#" title="Cancel project" class="cancel-project"></a>'+
 		        '	    	<a href="#" title="Archive project" class="archive-project"></a>'+
+		        '			<a href="#" title="Resume project" class="resume-project"></a>'+
+		        '	    	<a href="#" title="Unarchive project" class="unarchive-project"></a>'+
 		        '		</div>'+
 	            '	</div>'+
 	            '	<div class="field">'+
 	            '		<h3>Machine Translation:</h3>'+
 	            '		<span class="value">MyMemory (All Pairs)</span>'+
 	            '	</div>'+
-	            
+/*	            
 	            '	<div class="tablefilter">'+
 	            '		<div class="project-filter archived">'+
 		        '	    	<input type="checkbox" id="filter-archived-'+this.id+'">'+
@@ -638,7 +632,7 @@ UI = {
 		        '	    	<label href="#" onclick="return false" for="filter-cancelled-'+this.id+'">Show cancelled jobs</label>'+
 	            '		</div>'+
 	            '	</div>'+
-
+*/
 		        '    <table class="tablestats continue tablesorter" width="100%" border="0" cellspacing="0" cellpadding="0" id="project-'+this.id+'">'+
 		        '        <thead>'+
 			    '            <tr>'+
@@ -695,9 +689,13 @@ UI = {
 //			$('#contentBox').append(newProject);
      	
         });
-        if(projects == '') projects = '<p class="article msg">No projects found for these filter parameters.<p>';
+        if(append) {
+	        $('#projects').append(projects);  	
+        } else {
+	        if(projects == '') projects = '<p class="article msg">No projects found for these filter parameters.<p>';
+	        $('#projects').html(projects);        	
+        }
 
-        $('#projects').html(projects);
 
     }, // renderProjects
 	
@@ -721,8 +719,8 @@ UI = {
 	            } 
 	        }			    	
 	    });
-    },
-
+    }
+/*
     verifyProjectHasArchived: function(project) {
 		hasArchived = ($('tr[data-status=archived]',project).length)? 1 : 0;
 		$(project).attr('data-hasarchived',hasArchived);
@@ -732,7 +730,7 @@ UI = {
 		hasCancelled = ($('tr[data-status=cancelled]',project).length)? 1 : 0;
 		$(project).attr('data-hascancelled',hasCancelled);
     }
-
+*/
 } // UI
 
 var monthNames = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];

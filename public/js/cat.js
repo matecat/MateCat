@@ -2159,6 +2159,27 @@ UI = {
     	return errors.substring(0, errors.length - 1);
     },
 
+	//check for segments in warning in the project
+   checkWarnings: function(){
+    $.get('/?action=getWarning',{id_job:config.job_id},function(data){
+		//if any
+	    if(false!=data){
+		//scan array
+		$.each(data,function(key,value){
+			//for now, put only last in the pointer to segment id
+		    $('#point2seg').attr('href','#'+value.id_segment);
+		})
+		//switch to css for warning
+	    $('#notifbox').attr('class','warningbox');
+	    }else{
+		//if everything is ok, switch css to ok
+	    $('#notifbox').attr('class','notific');
+		//reset the pointer to offending segment
+	    $('#point2seg').attr('href','#');
+	    }
+	    });
+    },
+
     setTranslation: function(segment,status) {
         var info=$(segment).attr('id').split('-');
         var id_segment = info[1];
@@ -2199,6 +2220,8 @@ UI = {
             this.setStatus(segment,status);
             this.setDownloadStatus(d.stats);
             this.setProgress(d.stats);
+		//check status of global warnings
+    	this.checkWarnings();
         };
     },
 
@@ -2758,7 +2781,6 @@ $.fn.isOnScreen = function(){
 };
 
 
-
 $(document).ready(function(){
 
     fitText($('.breadcrumbs'),$('#pname'),30);
@@ -2767,9 +2789,13 @@ $(document).ready(function(){
         fitText($('.filename h2',$(this)),$('.filename h2',$(this)),30);
     })   
     UI.render(true);
-});
 
+    //launch segments check on opening
+    UI.checkWarnings();
+    //and on every polling interval
+    setInterval(function(){UI.checkWarnings()},config.warningPollingInterval)	
+});
 
 $(window).resize(function(){
-});
+		});
 

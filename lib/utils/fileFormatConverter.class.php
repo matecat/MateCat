@@ -8,8 +8,7 @@ include INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 class fileFormatConverter {
 
-    #private $ip = "10.30.1.247";
-    private $ip = "149.7.212.128";
+    private $ip = "10.30.1.247";
     private $port = "8732";
     private $toXliffFunction = "AutomationService/original2xliff";
     private $fromXliffFunction = "AutomationService/xliff2original";

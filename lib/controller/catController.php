@@ -259,6 +259,7 @@ class catController extends viewcontroller {
 		$this->template->job_disabled = ($this->job_disabled)? ' cancelled' : '';
 		$this->template->logged_user=trim($this->logged_user['first_name']." ".$this->logged_user['last_name']);
 		$this->template->incomingUrl = '/login?incomingUrl='.$this->thisUrl;
+		$this->template->warningPollingInterval=1000*(INIT::$WARNING_POLLING_INTERVAL);
 		// echo "<pre>";
 		// print_r ($this->template);
 		// exit;
