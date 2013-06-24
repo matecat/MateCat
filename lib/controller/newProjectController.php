@@ -198,6 +198,7 @@ class newProjectController extends viewcontroller {
 
 	public function setTemplateVars() {
 		$this->template->languages=$this->lang_handler->getEnabledLanguages('en');
+		//print_r ($this->lang_handler->getEnabledLanguages('en'));exit;
 		$this->template->upload_session_id = $this->guid;
 		$this->template->mt_engines = $this->mt_engines;
 		$this->template->tms_engines = $this->tms_engines;

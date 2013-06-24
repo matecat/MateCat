@@ -1,6 +1,6 @@
 <?
 
-include INIT::$UTILS_ROOT . "/cat.class.php";
+include_once INIT::$UTILS_ROOT . "/cat.class.php";
 
 
 class XliffSAXTranslationReplacer{

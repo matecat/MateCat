@@ -531,7 +531,8 @@ UI = {
     	return formattedData;
 	},
 
-    getProjects: function(what) {
+    getProjects: function(what,project) {
+    	var singleProject = (typeof project == 'undefined')? false : true;
 		UI.body.addClass('loading');
 		var d = {
                 action: 'getProjects',
