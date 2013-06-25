@@ -284,7 +284,7 @@ function getSegmentsDownload($jid, $password, $id_file, $no_status_new = 1) {
 function getSegmentsInfo($jid, $password) {
 
 	$query = "select j.id as jid, j.id_project as pid,j.source,j.target, j.last_opened_segment, j.id_translator as tid,
-		p.id_customer as cid, j.id_translator as tid, j.status,  
+		p.id_customer as cid, j.id_translator as tid, j.status_owner as status,  
 		p.name as pname, p.create_date , fj.id_file, fj.id_segment_start, fj.id_segment_end, 
 		f.filename, f.mime_type
 
@@ -859,7 +859,7 @@ function insertTranslator($user, $pass, $api_key, $email = '', $first_name = '',
 	return $user_id;
 }
 
-function insertJob($password, $id_project, $id_translator, $source_language, $target_language, $mt_engine, $tms_engine) {
+function insertJob($password, $id_project, $id_translator, $source_language, $target_language, $mt_engine, $tms_engine,$owner) {
 	$data = array();
 	$data['password'] = $password;
 	$data['id_project'] = $id_project;
@@ -869,7 +869,7 @@ function insertJob($password, $id_project, $id_translator, $source_language, $ta
 	$data['id_tms'] = $tms_engine;
 	$data['id_mt_engine'] = $mt_engine;
 	$data['create_date'] = date("Y-m-d H:i:s");
-
+	$data['owner'] = $owner;
 
 	$query = "SELECT LAST_INSERT_ID() FROM jobs";
 
@@ -1002,16 +1002,21 @@ function getProjectData($pid, $password) {
 	return $results;
 }
 
-function getProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filtering) {
+function getProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filtering,$project_id) {
 
-	//	$pn = ($search_in_pname)? "where p.name like '%$search_in_pname%'" : "";
-
+ 	//	$pn = ($search_in_pname)? "where p.name like '%$search_in_pname%'" : "";
+    session_start();
 	$pn_query = ($search_in_pname)? " p.name like '%$search_in_pname%' and" : "";
 	$ss_query = ($search_source)? " j.source='$search_source' and" : "";
 	$st_query = ($search_target)? " j.target='$search_target' and" : "";
 	$sst_query = ($search_status)? " j.status_owner='$search_status' and" : "";
 	$oc_query = ($search_onlycompleted)? " j.completed=1 and" : "";
-	/*
+	$single_query = ($project_id)? " j.id_project=$project_id and" : "";
+	$owner = $_SESSION['cid'];
+	$owner_query = " j.owner='$owner' and";
+//	$owner_query = "";
+		
+			/*
 	   log::doLog('PN QUERY:',$pn_query);		
 	   log::doLog('SEARCH TARGET:',$search_target);		
 
@@ -1034,7 +1039,7 @@ function getProjects($start,$step,$search_in_pname,$search_source,$search_target
 	//	$sa_query = ($search_showarchived)? " j.status='archived' and" : "";
 	//	$sc_query = ($search_showcancelled)? " j.status='cancelled' and" : "";
 	 */
-	$query_tail = $pn_query . $ss_query . $st_query . $sst_query . $oc_query;
+	$query_tail = $pn_query . $ss_query . $st_query . $sst_query . $oc_query . $single_query . $owner_query;
 	//	$query_tail = $pn_query . $ss_query . $st_query . $oc_query . $status_query;
 	$filter_query = ($query_tail == '')? '': 'where ' . $query_tail;
 	$filter_query = preg_replace('/( and)$/i','',$filter_query);
@@ -1069,6 +1074,10 @@ function getProjectsNumber($start,$step,$search_in_pname,$search_source,$search_
 	$st_query = ($search_target)? " j.target='$search_target' and" : "";
 	$sst_query = ($search_status)? " j.status_owner='$search_status' and" : "";
 	$oc_query = ($search_onlycompleted)? " j.completed=1 and" : "";
+	$owner = $_SESSION['cid'];
+	$owner_query = " j.owner='$owner' and";
+//	$owner_query = "";
+	
 	/*
 	   $status_query = " (j.status_owner='ongoing'";
 	//	if(!$search_showarchived && !$search_showcancelled) {
@@ -1085,7 +1094,7 @@ function getProjectsNumber($start,$step,$search_in_pname,$search_source,$search_
 	//	$sa_query = ($search_showarchived)? " j.status='archived' and" : "";
 	//	$sc_query = ($search_showcancelled)? " j.status='cancelled' and" : "";
 	 */
-	$query_tail = $pn_query . $ss_query . $st_query. $sst_query . $oc_query ;
+	$query_tail = $pn_query . $ss_query . $st_query. $sst_query . $oc_query . $owner_query ;
 	$filter_query = ($query_tail == '')? '': 'where ' . $query_tail;
 	$filter_query = preg_replace('/( and)$/i','',$filter_query);
 
@@ -1512,12 +1521,15 @@ function archiveJob($res, $id) {
 
 }
 
-function updateJobsStatus($res, $id, $status) {
+function updateJobsStatus($res, $id, $status, $only_if, $undo) {
 	log::doLog('AA STATUS:' , $status);
 
 	if ($res == "prj") {
+		$status_filter_query = ($only_if)? " and status_owner='$only_if'" : "";
 		$arStatus = explode(',',$status);
-		if(count($arStatus) > 1) {
+	
+		$test = count(explode(':',$arStatus[0]));
+		if(($test > 1) && ($undo == 1)) {
 			$cases = '';
 			$ids = '';
 			foreach ($arStatus as $item) {
@@ -1526,10 +1538,10 @@ function updateJobsStatus($res, $id, $status) {
 				$ids .= "$ss[0],";
 			}
 			$ids = trim($ids,',');
-			$query = "update jobs set status_owner= case $cases end where id in ($ids)";
+			$query = "update jobs set status_owner= case $cases end where id in ($ids)" . $status_filter_query;
 
 		} else {
-			$query = "update jobs set status_owner='$status' where id_project=$id";	
+			$query = "update jobs set status_owner='$status' where id_project=$id" . $status_filter_query;	
 		}
 		//		log::doLog("arstatus: ", count($arStatus)); 
 

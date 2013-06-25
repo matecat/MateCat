@@ -13,11 +13,11 @@ class changeJobsStatusController extends ajaxcontroller {
 
       public function __construct() {
             parent::__construct();
-log::doLog("QQQQQQQ ");
 
             $this->res_type = $this->get_from_get_post('res');
             $this->res_id = $this->get_from_get_post('id');
             $this->new_status = $this->get_from_get_post('new_status');
+            $this->undo = $this->get_from_get_post('undo');
 
 			// parameters to select the first item of the next page, to return
 			$this->lang_handler=Languages::getInstance();
@@ -32,7 +32,19 @@ log::doLog("QQQQQQQ ");
 	        } else {
 	            $this->step = 100;
 	        };
-		
+
+	        if (isset($_POST['project'])) {
+	            $this->project_id = $_POST['project'];
+	        } else {
+	            $this->project_id = false;
+	        };
+
+	        if (isset($_POST['only_if'])) {
+	            $this->only_if = $_POST['only_if'];
+	        } else {
+	            $this->only_if = false;
+	        };	        
+	        				
 	        if (isset($_POST['filter'])) {
 	            $this->filter_enabled = true;
 	        } else {
@@ -84,14 +96,15 @@ log::doLog("QQQQQQQ ");
 				$this->result['old_status'] = $strOld;
 
 			}
+	log::doLog('1 STATUS:' , $this->new_status);
 
-			$st = updateJobsStatus($this->res_type,$this->res_id,$this->new_status);
+			$st = updateJobsStatus($this->res_type,$this->res_id,$this->new_status,$this->only_if,$this->undo);
 
 			// select the first item of the next page, to return 
 
 			$start = (($this->page - 1) * $this->step)+$this->step-1;
 			
-			$projects = ManageUtils::queryProjects($start,1,$this->search_in_pname,$this->search_source,$this->search_target,$this->search_status,$this->search_onlycompleted,$this->filter_enabled,$this->lang_handler);
+			$projects = ManageUtils::queryProjects($start,1,$this->search_in_pname,$this->search_source,$this->search_target,$this->search_status,$this->search_onlycompleted,$this->filter_enabled,$this->lang_handler,$this->project_id);
 
 			$projnum = getProjectsNumber($start,$this->step,$this->search_in_pname,$this->search_source,$this->search_target,$this->search_status,$this->search_onlycompleted,$this->filter_enabled);
 

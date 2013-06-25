@@ -6,9 +6,9 @@ include_once INIT::$UTILS_ROOT . "/cat.class.php";
 
 class ManageUtils {
 
-	public static function queryProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filter_enabled,$lang_handler) {
+	public static function queryProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filter_enabled,$lang_handler,$project_id) {
 
-		$data = getProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filter_enabled);
+		$data = getProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filter_enabled,$project_id);
 log::doLog("DATAAA: ",$data);
 
 		$projects = array();

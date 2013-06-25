@@ -30,6 +30,11 @@ class createProjectController extends ajaxcontroller {
 		$this->private_tm_key = $this->get_from_get_post('private_tm_key');
 		$this->private_tm_user = $this->get_from_get_post('private_tm_user');
 		$this->private_tm_pass = $this->get_from_get_post('private_tm_pass');
+		session_start();
+	}
+
+	public function __destruct(){
+		session_write_close();
 	}
 
 	public function doAction() {
@@ -75,9 +80,9 @@ class createProjectController extends ajaxcontroller {
 		if (($key = array_search($this->source_language, $sourceLangAr)) !== false) {
 			unset($sourceLangAr[$key]);
 		}
-		log::doLog('SOURCE LANG AR: ' , $sourceLangAr);
+		//log::doLog('SOURCE LANG AR: ' , $sourceLangAr);
 		array_unshift($sourceLangAr, $this->source_language);
-		log::doLog('SOURCE LANG AR 1: ' , $sourceLangAr);
+		//log::doLog('SOURCE LANG AR 1: ' , $sourceLangAr);
 		if ($sourceLangAr == '_EMPTY_')
 			$sourceLangAr = "";
 		$newCookieVal = "";
@@ -107,9 +112,9 @@ class createProjectController extends ajaxcontroller {
 		if (($key = array_search($this->target_language, $targetLangAr)) !== false) {
 			unset($targetLangAr[$key]);
 		}
-		log::doLog('TARGET LANG AR: ' , $targetLangAr);
+		//log::doLog('TARGET LANG AR: ' , $targetLangAr);
 		array_unshift($targetLangAr, $this->target_language);
-		log::doLog('TARGET LANG AR 1: ' , $targetLangAr);
+		//log::doLog('TARGET LANG AR 1: ' , $targetLangAr);
 		if ($targetLangAr == '_EMPTY_')
 			$targetLangAr = "";
 		$newCookieVal = "";
@@ -143,9 +148,9 @@ class createProjectController extends ajaxcontroller {
 		 */
 
 		/*
-		   log::doLog('LANGUAGES COOKIE: ' . $serializedArLang);
-		   log::doLog('ARLANG UNSERIALIZED LENGTH: ' . count($arLang));
-		   if($serializedArLang == '') {
+		//log::doLog('LANGUAGES COOKIE: ' . $serializedArLang);
+		//log::doLog('ARLANG UNSERIALIZED LENGTH: ' . count($arLang));
+		if($serializedArLang == '') {
 		//			$newLangValue =
 		}
 		 */
@@ -165,7 +170,7 @@ class createProjectController extends ajaxcontroller {
 		if (!preg_match($pattern, $this->project_name, $rr)) {
 			$kkk = str_split($this->project_name);
 			foreach ($kkk as $kk) {
-				log::doLog($kk, ord($kk));
+				//log::doLog($kk, ord($kk));
 			}
 			$this->result['errors'][] = array("code" => -5, "message" => "Invalid Project Name $this->project_name: it should only contain numbers and letters!");
 			//	        $this->result['project_name_error'] = $this->project_name;
@@ -177,7 +182,10 @@ class createProjectController extends ajaxcontroller {
 		$ppassword = CatUtils::generate_password();
 
 		$ip = Utils::getRealIpAddr();
-		$pid = insertProject('translated_user', $this->project_name, $analysis_status, $ppassword, $ip);
+
+		$id_customer='translated_user';
+
+		$pid = insertProject($id_customer, $this->project_name, $analysis_status, $ppassword, $ip);
 		//create user (Massidda 2013-01-24)
 		//this is done only if an API key is provided
 		if (!empty($this->private_tm_key)) {
@@ -201,11 +209,11 @@ class createProjectController extends ajaxcontroller {
 			$fileSplit = explode('.', $file);
 			$mimeType = strtolower($fileSplit[count($fileSplit) - 1]);
 			//echo $mimeType; exit;
-			//        	log::doLog('MIMETYPE: ' . $mimeType);
+			//log::doLog('MIMETYPE: ' . $mimeType);
 
 			$original_content = "";
 			if (($mimeType != 'sdlxliff') && ($mimeType != 'xliff') && ($mimeType != 'xlf') && (INIT::$CONVERSION_ENABLED)) {
-				//        		log::doLog('NON XLIFF');
+				//log::doLog('NON XLIFF');
 				$fileDir = $intDir . '_converted';
 				$filename_to_catch = $file . '.sdlxliff';
 
@@ -224,7 +232,7 @@ class createProjectController extends ajaxcontroller {
 
 			$filename = $fileDir . '/' . $filename_to_catch;
 			//echo $filename;exit;
-			log::doLog('FILENAME: ' . $filename);
+			//log::doLog('FILENAME: ' . $filename);
 
 			if (!file_exists($filename)) {
 				$this->result['errors'][] = array("code" => -6, "message" => "File not found on server after upload.");
@@ -244,7 +252,15 @@ class createProjectController extends ajaxcontroller {
 
 		foreach ($this->target_language as $target){
 			$password = CatUtils::generate_password();
-			$jid = insertJob($password, $pid, $this->private_tm_user, $this->source_language, $target, $this->mt_engine, $this->tms_engine);
+
+			//if user is logged, create the project on his behalf
+			if(isset($_SESSION['cid']) and !empty($_SESSION['cid'])){
+				$owner=$_SESSION['cid'];
+			}else{
+				//default user
+				$owner='';
+			}
+			$jid = insertJob($password, $pid, $this->private_tm_user, $this->source_language, $target, $this->mt_engine, $this->tms_engine,$owner);
 			foreach ($fidList as $fid){
 				insertFilesJob($jid, $fid);
 			}
@@ -252,7 +268,7 @@ class createProjectController extends ajaxcontroller {
 
 
 
-		log::doLog('DELETING DIR: ' . $intDir);
+		//log::doLog('DELETING DIR: ' . $intDir);
 		$this->deleteDir($intDir);
 		if (is_dir($intDir . '_converted')) {
 			$this->deleteDir($intDir . '_converted');
@@ -279,7 +295,7 @@ class createProjectController extends ajaxcontroller {
 		}
 		// tolgo la path in pending_uploads
 
-		log::doLog($this->result);
+		//log::doLog($this->result);
 
 		// print_r ( $this->result); exit;
 		setcookie("upload_session", "", time() - 10000);
