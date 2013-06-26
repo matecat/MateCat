@@ -122,6 +122,28 @@ UI = {
 	        $('body').toggleClass('filterOpen');
 	        $('#search-projectname').focus();
 	    });
+
+		$('#display').on('click','.status',function(e) {
+	        e.preventDefault();
+	        $('body').addClass('filterOpen');
+	        $('#select-status').focus();
+		}).on('click','.completed',function(e) {
+	        e.preventDefault();
+	        $('body').addClass('filterOpen');
+	        $('#only-completed').focus();
+		}).on('click','.pname',function(e) {
+	        e.preventDefault();
+	        $('body').addClass('filterOpen');
+	        $('#search-projectname').focus();
+		}).on('click','.selected-source',function(e) {
+	        e.preventDefault();
+	        $('body').addClass('filterOpen');
+	        $('#select-source').focus();
+		}).on('click','.selected-target',function(e) {
+	        e.preventDefault();
+	        $('body').addClass('filterOpen');
+	        $('#select-target').focus();
+		});
 	
 	    $('.searchbox #exec-filter').click(function(e) {    
 	        e.preventDefault();
@@ -262,7 +284,6 @@ UI = {
     },
 
     changeJobsStatus: function(res,ob,status,only_if) {
-        console.log('status: '+status);
         if(typeof only_if == 'undefined') only_if = 0;
         if(res=='job') {
         	UI.lastJobStatus = ob.data('status');
@@ -412,12 +433,12 @@ UI = {
 
     compileDisplay: function() {
     	var status = (typeof this.filters.status != 'undefined')? this.filters.status : 'active';
-    	var pname = (typeof this.filters.pn != 'undefined')? ' "<strong>' + this.filters.pn + '</strong>" in the name,' : '';
-    	var source = (typeof this.filters.source != 'undefined')? ' <strong>' + $('#select-source option[value='+this.filters.source+']').text() + '</strong> as source language,' : '';
-    	var target = (typeof this.filters.target != 'undefined')? ' <strong>' + $('#select-target option[value='+this.filters.target+']').text() + '</strong> as target language,' : '';
-    	var completed = (typeof this.filters.onlycompleted != 'undefined')? ' <strong>completed</strong>' : '';
+    	var pname = (typeof this.filters.pn != 'undefined')? ' "<a class="pname" href="#">' + this.filters.pn + '</a>" in the name,' : '';
+    	var source = (typeof this.filters.source != 'undefined')? ' <a class="selected-source" href="#">' + $('#select-source option[value='+this.filters.source+']').text() + '</a> as source language,' : '';
+    	var target = (typeof this.filters.target != 'undefined')? ' <a class="selected-target" href="#">' + $('#select-target option[value='+this.filters.target+']').text() + '</a> as target language,' : '';
+    	var completed = (typeof this.filters.onlycompleted != 'undefined')? ' <a class="completed">completed</a>' : '';
     	var ff = ((pname != '')||(source != '')||(target != ''))? ' having' : '';
-    	var tt = 'showing' + completed + ' <strong class="status">' + status + '</strong> projects' + ff + pname + source + target;
+    	var tt = 'Showing' + completed + ' <a class="status" href="#">' + status + '</a> projects' + ff + pname + source + target;
     	tt = tt.replace(/\,$/, '');
     	$('#display').html(tt);
 	},

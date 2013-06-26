@@ -600,9 +600,11 @@ body.manage #display
 	margin-top: 22px;
 	}
 	
-body.manage #display strong
+body.manage #display a
 	{
 	margin: 0 !important;
 	color: yellow;
+	font-weight: bold;
+	text-decoration: none;
 	}
 
