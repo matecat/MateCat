@@ -9,7 +9,6 @@ UI = {
         this.isSafari = $.browser.webkit && !window.chrome;
         this.body = $('body');
         this.firstLoad = firstLoad;
-//        if(firstLoad) this.startRender = true;
         this.pageStep = 100;
 
 		this.isMac = (navigator.platform == 'MacIntel')? true : false;
@@ -77,7 +76,11 @@ UI = {
 		this.body.on('click','.message a.undo',function(e) {  
 	        e.preventDefault();
 			UI.applyUndo();
-	    })
+	    }).bind('keydown','Meta+f', function(e){ 
+            e.preventDefault();
+	        $('body').addClass('filterOpen');
+	        $('#search-projectname').focus();
+        })
 		
 		$("#contentBox").on('click','td.actions a.cancel',function(e) {  
 	        e.preventDefault();
@@ -106,37 +109,8 @@ UI = {
 	    }).on('click','td.actions a.change',function(e) {;
 	        e.preventDefault();
 	        UI.changePassword('job',$(this).parents('tr'),0,0);
-/*
-			var m = confirm('You are changing the password for this job. \nThe current link will not work anymore! \nDo you want to proceed?');
-			if(m) {
-				UI.doRequest({
-					data: {
-						action:		"changePassword",
-						res: 		"job",
-						id: 		$(this).parents('tr').data('jid')
-					},
-					context: $(this).parents('tr.row').find('.job-detail'),
-					success: function(d){
-						var newPwd = d.password;
-						uu = $('.urls .url',this);
-						uuh = uu.attr('href');
-						uuhs = uuh.split('-');
-						oldPwd = uuhs[uuhs.length-1];
-						newHref = uuh.replace(oldPwd,newPwd);
-						uu.attr('href',newHref);
-						$('.urls .url',this).text(config.hostpath + newHref);
-						$(this).effect("highlight", {}, 1000);
-	
-					}
-				});
-			}
-*/	
 	    }).on('click','.meter a',function(e) {
 	        e.preventDefault();
-/*
-	    }).on('click','.tablefilter label',function(e) {	
-	        $(this).parent().find('input').click();
-*/
 	    }).on('click','.pagination a',function(e) {
 	        e.preventDefault();
 			UI.page = $(this).data('page');
@@ -266,7 +240,6 @@ UI = {
 			default:
 		}
 
-
     },
     
     balanceAction: function(res,ob,d,undo,project) {
@@ -323,15 +296,6 @@ UI = {
 					res = ($(this).hasClass('row'))? 'job':'prj';
 					if(res=='prj') {
 						UI.getProject(this.data('pid'));
-
-/*
-        				filterStatus = (this.body.attr('data-filter-status'));
-        				if(filterStatus=='active') {
-//        					if(status)
-        				} else if(status == UI.filters['status']) {
-							UI.getProject(this.data('pid'))
-						}
-*/
 					}
 					UI.changeJobsStatus_success(res,$(this),d,0);
 					UI.setPagination(d);
@@ -348,26 +312,18 @@ UI = {
 			} else {
 				id = ob.data('jid');
 				if(d.status == 'cancelled') {
-//					setHas = true;
-//					dataName = 'hascancelled';
 					msg = 'A job has been cancelled.';
 				} else if(d.status == 'archived') {
-//					setHas = true;
-//					dataName = 'hasarchived';
 					msg = 'A job has been archived.';
 				} else if(d.status == 'active') {
-//					setHas = false;
-//					dataName = '';
 					msg = 'A job has been resumed as active.';
 				}
 				ob.attr('data-status',d.status);
-//				if(setHas) project.attr('data-'+dataName,1);
 			}
 
 		} else {
 			project = ob;
 			if(undo) {
-				console.log(d.status);
 				$.each(d.status.split(','), function() {
 					var s = this.split(':');
 					$('tr.row[data-jid='+s[0]+']').attr('data-status',s[1]);
@@ -375,21 +331,14 @@ UI = {
 			} else {
 				id = ob.data('pid');
 				if(d.status == 'cancelled') {
-//					setHas = true;
-//					dataName = 'hascancelled';
 					msg = 'All the jobs in a project has been cancelled.';
 				} else if(d.status == 'archived') {
-//					setHas = true;
-//					dataName = 'hasarchived';
 					msg = 'All the jobs in a project has been archived.';
 				} else if(d.status == 'active') {
-//					setHas = false;
-//					dataName = '';
 					msg = 'All the jobs in a project has been resumed as active.';
 				}	
 				$('tr.row',project).each(function(){
 					$(this).attr('data-status',d.status);
-//					if(setHas) project.attr('data-'+dataName,1);
 			    })
 			}
 		}
@@ -397,26 +346,19 @@ UI = {
 			var token =  new Date();
 			var resData = (res == 'prj')? 'pid':'jid';
 			$('.message').attr('data-token',token.getTime()).html(msg + ' <a href="#" class="undo" data-res="' + res + '" data-id="' + ob.data(resData)+ '" data-operation="changeStatus" data-status="' + ((res == 'prj')? d.old_status : this.lastJobStatus) + '">Undo</a>').show();
-			console.log($('.message').html());
 			setTimeout(function(){
 				$('.message[data-token='+token.getTime()+']').hide();
 			},5000);
 		}
 		this.balanceAction(res,ob,d,undo,project);
-//		this.verifyProjectHasCancelled(project);
-//		this.verifyProjectHasArchived(project);
-
     },
 
     changePassword: function(res,ob,pwd,undo) {
         if(typeof pwd == 'undefined') pwd = false;
-        console.log(pwd);
         if(res=='job') {
         	id = ob.data('jid');
         	password = (pwd)? pwd : '';
-        } else {
         }
-				console.log('ecco');
 
 		UI.doRequest({
 			data: {
@@ -434,7 +376,6 @@ UI = {
     },
 
     changePassword_success: function(res,ob,d,undo) {
-		console.log('dd');
 		var jd = $(ob).find('.job-detail');
 		var newPwd = d.password;
 		uu = $('.urls .url',jd);
@@ -458,13 +399,10 @@ UI = {
 		} else {
 		}
 
-		console.log('undo:');
-		console.log(undo);
 		if(!undo) {
 			var token =  new Date();
 			var resData = (res == 'prj')? 'pid':'jid';
 			$('.message').attr('data-token',token.getTime()).html(msg + ' <a href="#" class="undo" data-res="' + res + '" data-id="' + ob.data(resData)+ '" data-operation="changePassword" data-password="' + oldPwd + '">Undo</a>').show();
-			console.log($('.message').html());
 			setTimeout(function(){
 				$('.message[data-token='+token.getTime()+']').hide();
 			},5000);
@@ -525,34 +463,6 @@ UI = {
 		return hash;
     },
 
-    formatDate: function(tt) {
-    	var t = UI.retrieveTime;
-    	var d = new Date(tt);
-    	
-//    	console.log(UI.retrieveTime.toDateString());
-//    	console.log(d.toDateString());
-/*
-		var options = {year: "numeric", month: "short", day: "numeric"};
-    	prova = d.toLocaleDateString("en-US", options);
-    	console.log(prova);
-*/
-    	if(d.getDate() == t.getDate()) {
-    		txtDay = 'Today';
-    	} else if(d.getDate() == t.getDate()-1) {
-    		txtDay = 'Yesterday';
-    	} else if((d.getFullYear()==t.getFullYear())&&(d.getMonth()==t.getMonth())) {
-    		txtDay = monthNames[d.getMonth()] + ' ' + d.getDate() + ' ' + dayNames[d.getDay()];
-    	} else {
-    		txtDay = ((d.getFullYear()==t.getFullYear())? '' : d.getFullYear()) + ' ' + monthNames[d.getMonth()] + ' ' + d.getDate();
-    	}
-    	h = d.getHours();
-     	m = d.getMinutes();
-   		formattedData =  txtDay + ', ' + ((h<10)? '0':'') + h +':' + ((m<10)? '0':'') + m;
-//    	formattedData = d.getFullYear() + ' ' + monthNames[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getHours() + ':' + d.getMinutes();
-//    	today = 
-    	return formattedData;
-	},
-
     getProject: function(id) {
 		var d = {
                 action: 'getProjects',
@@ -589,8 +499,7 @@ UI = {
 				if((d.pnumber - UI.pageStep) > 0) UI.renderPagination(d.page,0,d.pnumber);
 				UI.setTablesorter();
 				var stateObj = { page: d.page };
-//				history.pushState(stateObj, "page "+d.page, d.page+location.hash);
-				// memo: se sto solo facendo un filtro devo usare pushState, altrimenti replaceState
+
 				if(what == 'filter') {
 					history.pushState(stateObj, "page "+d.page, d.page+UI.filters2hash());
 				} else if(what == 'page') {
@@ -601,14 +510,6 @@ UI = {
 				UI.compileDisplay();
 			}
 		});
-	},
-
-    setPagination: function(d) {
-		if((d.pnumber - UI.pageStep) > 0) {
-			this.renderPagination(d.page,1,d.pnumber);
-		} else {
-			$('.pagination').empty();
-		}
 	},
 
     renderPagination: function(page,top,pnumber) {
@@ -673,12 +574,9 @@ UI = {
 	
 				'		<tbody>';
     		$.each(this.jobs, function() {
-//    			console.log(this);
         		var newJob = '';
-
-
 		        newJob += '    <tr class="row " data-jid="'+this.id+'" data-status="'+this.status+'" data-password="'+this.password+'">'+
-		            '        <td class="create-date" data-date="'+this.create_date+'">'+UI.formatDate(this.create_date)+'</td>'+
+		            '        <td class="create-date" data-date="'+this.create_date+'">'+this.formatted_create_date+'</td>'+
 		            '        <td class="job-detail">'+
 		            '        	<span class="urls">'+
 		            '        		<div class="langs">'+this.sourceTxt+'&nbsp;&gt;&nbsp;'+this.targetTxt+'</div>'+
@@ -707,36 +605,37 @@ UI = {
 				newProject += newJob;
     		});
 
-
 			newProject +='		</tbody>'+	
 	        '    </table>'+
             '</div>';
-    		
+
     		projects += newProject;
-//			$('#contentBox').append(newProject);
-     	
         });
-        console.log('action: ' + action);
         if(action == 'append') {
 	        $('#projects').append(projects);  	
         } else if(action == 'single') {
         	$('.article[data-pid='+d[0].id+']').replaceWith(projects);
-//        	console.log(d[0].id);
         } else {
 	        if(projects == '') projects = '<p class="article msg">No projects found for these filter parameters.<p>';
 	        $('#projects').html(projects);        	        	
         }
 
-
     }, // renderProjects
+
+    setPagination: function(d) {
+		if((d.pnumber - UI.pageStep) > 0) {
+			this.renderPagination(d.page,1,d.pnumber);
+		} else {
+			$('.pagination').empty();
+		}
+	},
 	
     setTablesorter: function() {
 	    $(".tablesorter").tablesorter({
 	        textExtraction: function(node) { 
 	            // extract data from markup and return it  
-	            if($(node).hasClass('progress')) {
-	            	var n = $(node).find('.translated-bar').attr('title').split(' ')[1];
-	            	return n.substring(0, n.length - 1);
+	            if($(node).hasClass('create-date')) {
+	            	return $(node).data('date');
 	            } else {
 	            	return $(node).text();
 	            }
@@ -751,17 +650,7 @@ UI = {
 	        }			    	
 	    });
     }
-/*
-    verifyProjectHasArchived: function(project) {
-		hasArchived = ($('tr[data-status=archived]',project).length)? 1 : 0;
-		$(project).attr('data-hasarchived',hasArchived);
-    },
 
-    verifyProjectHasCancelled: function(project) {
-		hasCancelled = ($('tr[data-status=cancelled]',project).length)? 1 : 0;
-		$(project).attr('data-hascancelled',hasCancelled);
-    }
-*/
 } // UI
 
 var monthNames = [ "January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December" ];
@@ -770,7 +659,6 @@ var dayNames = [ "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday
 
 
 function setBrowserHistoryBehavior() {
-
 	window.onpopstate = function(e) {
 		e.preventDefault();
 		if(UI.firstLoad) {
@@ -779,7 +667,6 @@ function setBrowserHistoryBehavior() {
 		}
 		UI.render(false);
 	};
-
 }
 
 $(document).ready(function(){
