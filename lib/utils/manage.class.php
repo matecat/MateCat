@@ -9,7 +9,6 @@ class ManageUtils {
 	public static function queryProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filter_enabled,$lang_handler,$project_id) {
 
 		$data = getProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filter_enabled,$project_id);
-log::doLog("DATAAA: ",$data);
 
 		$projects = array();
 
@@ -54,7 +53,27 @@ log::doLog("DATAAA: ",$data);
 				$job['target']= $job_array[2];
 				$job['sourceTxt'] = $lang_handler->getLocalizedName($job['source'],'en');
 				$job['targetTxt'] = $lang_handler->getLocalizedName($job['target'],'en');
+				//raw
 				$job['create_date']= $job_array[3];
+				//standard
+				$job['create_date']= date('Y D d, H:i',strtotime($job_array[3]));
+				//quest'anno
+				if(date('Y')==date('Y',strtotime($job_array[3]))){
+					$job['create_date']=date('D d, H:i',strtotime($job_array[3]));
+				}
+				//questo mese
+				if(date('Y-m')==date('Y-m',strtotime($job_array[3]))){
+					$job['create_date']=date('F d I, H:i',strtotime($job_array[3]));
+				}
+				//ieri
+				if(date('Y-m-d',strtotime('yesterday'))==date('Y-m-d',strtotime($job_array[3]))){
+					$job['create_date']='Yesterday, '.date('H:i',strtotime($job_array[3]));
+				}
+				//oggi
+				if(date('Y-m-d')==date('Y-m-d',strtotime($job_array[3]))){
+					$job['create_date']='Today, '.date('H:i',strtotime($job_array[3]));
+				}
+
 				$job['password']= $job_array[4];
 			
 				$job['stats']=$statsByJobId[$job['id']];
@@ -75,6 +94,7 @@ log::doLog("DATAAA: ",$data);
 			
 		}
 
+log::doLog("proj: ",print_r($projects,true));
 		return $projects;
 	}
 }
