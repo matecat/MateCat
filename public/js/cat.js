@@ -33,7 +33,7 @@ UI = {
 			offset: '-40%'
 		};
 		this.isMac = (navigator.platform == 'MacIntel')? true : false;
-		this.cancelled = (this.body.hasClass('cancelled'))? true : false;
+		this.readonly = (this.body.hasClass('archived'))? true : false;
 		this.shortcutLabel = 'ALT+'+((UI.isMac)?"CMD":"CTRL")+'+';
 
         this.taglockEnabled = true;
@@ -1519,19 +1519,19 @@ UI = {
         },100);
         this.currentIsLoaded = false;
         this.nextIsLoaded = false;
-        if(!this.cancelled) this.getContribution(segment,0);
+        if(!this.readonly) this.getContribution(segment,0);
         this.opening = true; 
         if(!(this.currentSegment.is(this.lastOpenedSegment))) this.closeSegment(this.lastOpenedSegment,0,operation);
         this.opening = false;
         this.body.addClass('editing');
 
         segment.addClass("editor");
-        if(!this.cancelled) this.editarea.attr('contenteditable','true');
+        if(!this.readonly) this.editarea.attr('contenteditable','true');
         this.editStart = new Date();
         $(editarea).removeClass("indent");
         
         this.lockTags();
-        if(!this.cancelled) this.getContribution(segment,1);
+        if(!this.readonly) this.getContribution(segment,1);
         if(this.debug) console.log('close/open time: ' + ( (new Date()) - this.openSegmentStart));
     },
 
@@ -1992,7 +1992,7 @@ UI = {
             },300);
         }
         var file = this.currentArticle;
-		if(this.cancelled) return;
+		if(this.readonly) return;
 		this.doRequest({
 			data: {
                 action: 'setCurrentSegment',

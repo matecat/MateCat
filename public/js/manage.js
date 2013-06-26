@@ -91,12 +91,18 @@ UI = {
 	    }).on('click','td.actions a.unarchive',function(e) {  
 	        e.preventDefault();
 	        UI.changeJobsStatus('job',$(this).parents('tr'),'active');
-	    }).on('click','a.cancel-project',function(e) {    
+	    }).on('click','a.cancel-project',function(e) { 
 	        e.preventDefault();
 	        UI.changeJobsStatus('prj',$(this).parents('.article'),'cancelled');		
 	    }).on('click','a.archive-project',function(e) {
 	        e.preventDefault();
 	        UI.changeJobsStatus('prj',$(this).parents('.article'),'archived');		
+	    }).on('click','a.resume-project',function(e) { 
+	        e.preventDefault();
+	        UI.changeJobsStatus('prj',$(this).parents('.article'),'active','cancelled');		
+	    }).on('click','a.unarchive-project',function(e) { 
+	        e.preventDefault();
+	        UI.changeJobsStatus('prj',$(this).parents('.article'),'active','archived');
 	    }).on('click','td.actions a.change',function(e) {;
 	        e.preventDefault();
 	        UI.changePassword('job',$(this).parents('tr'),0,0);
@@ -229,7 +235,8 @@ UI = {
 						res: 		res,
 						id:			id,
 		                page:		UI.page,
-		                step:		UI.pageStep
+		                step:		UI.pageStep,
+		                undo:		1
 					}
 				ar = $.extend(d,UI.filters);
 				
@@ -274,15 +281,16 @@ UI = {
     	// check if there is need to append or delete items
     	numItem = $('.article:not(.invisible)').length;
     	if(numItem < this.pageStep) {
-    		this.renderProjects(d.newItem,1);
+    		this.renderProjects(d.newItem,'append');
     	} else if(numItem > this.pageStep) {
     		$('.article:not(.invisible)').last().remove();
     	}
 
     },
 
-    changeJobsStatus: function(res,ob,status) {
+    changeJobsStatus: function(res,ob,status,only_if) {
         console.log('status: '+status);
+        if(typeof only_if == 'undefined') only_if = 0;
         if(res=='job') {
         	UI.lastJobStatus = ob.data('status');
         	id = ob.data('jid');
@@ -301,7 +309,9 @@ UI = {
 				res: 		res,
 				id:			id,
                 page:		UI.page,
-                step:		UI.pageStep
+                step:		UI.pageStep,
+                only_if:	only_if,
+                undo:		0
 			}
 		ar = $.extend(d,UI.filters);
 
@@ -311,6 +321,18 @@ UI = {
 			success: function(d){
 				if(d.data == 'OK') {
 					res = ($(this).hasClass('row'))? 'job':'prj';
+					if(res=='prj') {
+						UI.getProject(this.data('pid'));
+
+/*
+        				filterStatus = (this.body.attr('data-filter-status'));
+        				if(filterStatus=='active') {
+//        					if(status)
+        				} else if(status == UI.filters['status']) {
+							UI.getProject(this.data('pid'))
+						}
+*/
+					}
 					UI.changeJobsStatus_success(res,$(this),d,0);
 					UI.setPagination(d);
 				}
@@ -531,6 +553,24 @@ UI = {
     	return formattedData;
 	},
 
+    getProject: function(id) {
+		var d = {
+                action: 'getProjects',
+                project: id,
+                page:	UI.page
+			}
+		ar = $.extend(d,UI.filters);
+		
+		this.doRequest({
+			data: ar,
+			success: function(d){
+				data = $.parseJSON(d.data);
+				UI.renderProjects(data,'single');
+				UI.setTablesorter();
+			}
+		});
+	},
+
     getProjects: function(what) {
 		UI.body.addClass('loading');
 		var d = {
@@ -545,7 +585,7 @@ UI = {
 				UI.body.removeClass('loading');
 				data = $.parseJSON(d.data);
 				UI.setPagination(d);
-				UI.renderProjects(data,0);
+				UI.renderProjects(data,'all');
 				if((d.pnumber - UI.pageStep) > 0) UI.renderPagination(d.page,0,d.pnumber);
 				UI.setTablesorter();
 				var stateObj = { page: d.page };
@@ -598,7 +638,7 @@ UI = {
 
 	},
 
-    renderProjects: function(d,append) {
+    renderProjects: function(d,action) {
         this.retrieveTime = new Date();
         var projects = '';
         $.each(d, function() {
@@ -620,19 +660,6 @@ UI = {
 	            '		<h3>Machine Translation:</h3>'+
 	            '		<span class="value">MyMemory (All Pairs)</span>'+
 	            '	</div>'+
-/*	            
-	            '	<div class="tablefilter">'+
-	            '		<div class="project-filter archived">'+
-		        '	    	<input type="checkbox" id="filter-archived-'+this.id+'">'+
-		        '	    	<label href="#" onclick="return false" for="filter-archived-'+this.id+'">Show archived jobs</label>'+
-	            '		</div>'+
-
-	            '		<div class="project-filter cancelled">'+
-		        '	    	<input type="checkbox" id="filter-cancelled-'+this.id+'">'+
-		        '	    	<label href="#" onclick="return false" for="filter-cancelled-'+this.id+'">Show cancelled jobs</label>'+
-	            '		</div>'+
-	            '	</div>'+
-*/
 		        '    <table class="tablestats continue tablesorter" width="100%" border="0" cellspacing="0" cellpadding="0" id="project-'+this.id+'">'+
 		        '        <thead>'+
 			    '            <tr>'+
@@ -689,11 +716,15 @@ UI = {
 //			$('#contentBox').append(newProject);
      	
         });
-        if(append) {
+        console.log('action: ' + action);
+        if(action == 'append') {
 	        $('#projects').append(projects);  	
+        } else if(action == 'single') {
+        	$('.article[data-pid='+d[0].id+']').replaceWith(projects);
+//        	console.log(d[0].id);
         } else {
 	        if(projects == '') projects = '<p class="article msg">No projects found for these filter parameters.<p>';
-	        $('#projects').html(projects);        	
+	        $('#projects').html(projects);        	        	
         }
 
 

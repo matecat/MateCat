@@ -10,10 +10,6 @@ class newProjectController extends viewcontroller {
 	private $mt_engines;
 	private $tms_engines;
 	private $lang_handler;
-        
-        
-        private $targetLangArray;
-        private $sourceLangArray;
 
 	public function __construct() {
 		parent::__construct(true);
@@ -120,7 +116,7 @@ class newProjectController extends viewcontroller {
 //			$targetLang = explode('||',urldecode($serTargetLang));			
 		}
 
-		$intDir = INIT::$UPLOAD_REPOSITORY. "/$this->guid/";
+		$intDir = $_SERVER['DOCUMENT_ROOT'] . '/storage/upload/'. $this->guid . '/';
 		if (!is_dir($intDir)) {
 			mkdir($intDir, 0775, true);
 
@@ -202,7 +198,7 @@ class newProjectController extends viewcontroller {
 
 	public function setTemplateVars() {
 		$this->template->languages=$this->lang_handler->getEnabledLanguages('en');
-                //print_r ($this->lang_handler->getEnabledLanguages('en'));exit;
+		//print_r ($this->lang_handler->getEnabledLanguages('en'));exit;
 		$this->template->upload_session_id = $this->guid;
 		$this->template->mt_engines = $this->mt_engines;
 		$this->template->tms_engines = $this->tms_engines;
@@ -220,7 +216,7 @@ class newProjectController extends viewcontroller {
 		$this->template->formats_number = $this->countExtensions(); //count(explode('|', INIT::$CONVERSION_FILE_TYPES));
 		$this->template->volume_analysis_enabled = INIT::$VOLUME_ANALYSIS_ENABLED;
 
-		//	log::doLog('targetLangHistory: ' , $this->targetLangArray);
+			log::doLog('targetLangHistory: ' , $this->targetLangArray);
 
 		$this->template->sourceLangHistory = $this->sourceLangArray;
 		$this->template->targetLangHistory = $this->targetLangArray;

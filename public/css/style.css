@@ -1306,10 +1306,10 @@ body.rtl-target .footer .sugg-target
 	text-align: right !important;
 	}
 
-body.cancelled ul.buttons,
-body.cancelled ul.header-menu,
-body.cancelled .status-container,
-body.cancelled .footer
+body.archived ul.buttons,
+body.archived ul.header-menu,
+body.archived .status-container,
+body.archived .footer
 	{
 	display: none !important;
 	}

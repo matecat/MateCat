@@ -48,13 +48,13 @@
     <body tal:condition="true:job_not_found">
         <div  metal:use-macro="unsupported_browser.html/job_not_found"/>
     </body>
-<!--
-    <body tal:condition="true:job_disabled">
-        <div  metal:use-macro="unsupported_browser.html/job_disabled"/>
-    </body>
--->
 
-    <body class="cattool${job_disabled}${source_rtl}${target_rtl}" tal:condition="supportedBrowser" define="catpage string:true">
+    <body tal:condition="true:job_cancelled">
+        <div  metal:use-macro="unsupported_browser.html/job_cancelled"/>
+    </body>
+
+
+    <body class="cattool${job_archived}${source_rtl}${target_rtl}" tal:condition="php: supportedBrowser && !job_not_found && !job_cancelled" define="catpage string:true">
 
         <header metal:use-macro="header.html/main_header">
             <div class="wrapper">   

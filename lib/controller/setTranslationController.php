@@ -92,7 +92,12 @@ class setTranslationController extends ajaxcontroller {
 		$this->result['file_stats'] = $file_stats;
 		$this->result['code'] = 1;
 		$this->result['data'] = "OK";
-		$this->result['warning']=$warning['outcome'];
+		$this->result['warning']['cod']=$warning['outcome'];
+		if($warning['outcome']>0){
+			$this->result['warning']['id']=$this->id_segment;
+		}else{
+			$this->result['warning']['id']=0;
+		}
 	}
 
 }
