@@ -76,6 +76,7 @@ abstract class Engine {
 
         $this->buildQuery($function, $parameters);
 
+	//log::doLog("engine call: ".$this->url);
         $res=$this->curl($this->url);
     
         $this->raw_result = json_decode($res,true);

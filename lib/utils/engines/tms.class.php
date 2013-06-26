@@ -189,6 +189,7 @@ class TMS extends engine {
         $this->doQuery("delete", $parameters);
         $this->result = new TMS_RESULT($this->raw_result);
         if ($this->result->responseStatus != "200") {
+		log::doLog('failed to delete: '.print_r($parameters,true));
             return false;
         }
         return true;
