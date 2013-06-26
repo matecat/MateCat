@@ -869,7 +869,6 @@ function insertJob($password, $id_project, $id_translator, $source_language, $ta
 	$data['id_tms'] = $tms_engine;
 	$data['id_mt_engine'] = $mt_engine;
 	$data['create_date'] = date("Y-m-d H:i:s");
-
 	$data['owner'] = $owner;
 
 	$query = "SELECT LAST_INSERT_ID() FROM jobs";
@@ -1003,10 +1002,9 @@ function getProjectData($pid, $password) {
 	return $results;
 }
 
-function getProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filtering,$project_id) {
+function getProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filtering,$project_id,$getAll) {
 
-	//	$pn = ($search_in_pname)? "where p.name like '%$search_in_pname%'" : "";
-
+ 	//	$pn = ($search_in_pname)? "where p.name like '%$search_in_pname%'" : "";
     session_start();
 	$pn_query = ($search_in_pname)? " p.name like '%$search_in_pname%' and" : "";
 	$ss_query = ($search_source)? " j.source='$search_source' and" : "";
@@ -1015,8 +1013,10 @@ function getProjects($start,$step,$search_in_pname,$search_source,$search_target
 	$oc_query = ($search_onlycompleted)? " j.completed=1 and" : "";
 	$single_query = ($project_id)? " j.id_project=$project_id and" : "";
 	$owner = $_SESSION['cid'];
-	$owner_query = " j.owner='$owner' and";
-	/*
+	$owner_query = ($getAll)? "" : " j.owner='$owner' and";
+//	$owner_query = "";
+		
+			/*
 	   log::doLog('PN QUERY:',$pn_query);		
 	   log::doLog('SEARCH TARGET:',$search_target);		
 
@@ -1065,7 +1065,7 @@ function getProjects($start,$step,$search_in_pname,$search_source,$search_target
 	return $results;
 }
 
-function getProjectsNumber($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filtering) {
+function getProjectsNumber($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filtering,$getAll) {
 
 	//	$pn = ($search_in_pname)? "where p.name like '%$search_in_pname%'" : "";
 
@@ -1075,7 +1075,9 @@ function getProjectsNumber($start,$step,$search_in_pname,$search_source,$search_
 	$sst_query = ($search_status)? " j.status_owner='$search_status' and" : "";
 	$oc_query = ($search_onlycompleted)? " j.completed=1 and" : "";
 	$owner = $_SESSION['cid'];
-	$owner_query = " j.owner='$owner' and";
+	$owner_query = ($getAll)? "" : " j.owner='$owner' and";
+//	$owner_query = "";
+	
 	/*
 	   $status_query = " (j.status_owner='ongoing'";
 	//	if(!$search_showarchived && !$search_showcancelled) {
@@ -1525,6 +1527,7 @@ function updateJobsStatus($res, $id, $status, $only_if, $undo) {
 	if ($res == "prj") {
 		$status_filter_query = ($only_if)? " and status_owner='$only_if'" : "";
 		$arStatus = explode(',',$status);
+	
 		$test = count(explode(':',$arStatus[0]));
 		if(($test > 1) && ($undo == 1)) {
 			$cases = '';
