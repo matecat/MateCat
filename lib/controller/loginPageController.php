@@ -13,7 +13,7 @@ class loginPageController extends viewcontroller {
         parent::__construct();
         parent::makeTemplate("login.html");
 	//set url forpopup to oauth
-	$this->oauthFormUrl='http://matecat.translated.home/oauth/request';
+	$this->oauthFormUrl=INIT::$HTTPHOST.'/oauth/request';
 
 	//open session
 	session_start();

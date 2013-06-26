@@ -6,6 +6,7 @@ include_once INIT::$UTILS_ROOT."/cat.class.php";
 include_once INIT::$UTILS_ROOT."/fileFormatConverter.class.php";
 include_once(INIT::$UTILS_ROOT.'/XliffSAXTranslationReplacer.class.php');
 
+
 class downloadFileStreamOnDiskController extends downloadController {
 
 	private $id_job;

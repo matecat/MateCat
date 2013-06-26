@@ -184,7 +184,7 @@ class createProjectController extends ajaxcontroller {
         }
         //create job
 
-        $intDir = $_SERVER['DOCUMENT_ROOT'] . '/storage/upload/' . $_COOKIE['upload_session'];
+        $intDir = INIT::$UPLOAD_REPOSITORY."/". $_COOKIE['upload_session'];
 		$fidList=array();
         foreach ($arFiles as $file) {
 
@@ -226,6 +226,7 @@ class createProjectController extends ajaxcontroller {
 
 
             $insertSegments = extractSegments($fileDir, $filename_to_catch, $pid, $fid);
+           // print_r ($insertSegments);exit;
         }
 		$this->target_language = explode(',',$this->target_language);
 

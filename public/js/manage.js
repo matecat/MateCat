@@ -655,7 +655,7 @@ UI = {
 		            '        <td class="job-detail">'+
 		            '        	<span class="urls">'+
 		            '        		<div class="langs">'+this.sourceTxt+'&nbsp;&gt;&nbsp;'+this.targetTxt+'</div>'+
-		            '        		<a class="url" target="_blank" href="/translate/'+project.name+'/'+this.source+'-'+this.target+'/'+this.id+'-'+this.password+'">http://matecat.translated.home/translate/.../'+this.id+'-'+this.password+'</a>'+
+		            '        		<a class="url" target="_blank" href="/translate/'+project.name+'/'+this.source+'-'+this.target+'/'+this.id+'-'+this.password+'">'+config.hostpath+'/translate/.../'+this.id+'-'+this.password+'</a>'+
 		            '        	</span>'+
 		            '        </td>'+
 		            '        <td class="words">'+this.stats.TOTAL_FORMATTED+'</td>'+

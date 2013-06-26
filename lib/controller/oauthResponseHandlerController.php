@@ -17,7 +17,7 @@ class oauthResponseHandlerController extends viewcontroller{
 		parent::makeTemplate("oauth_response_handler.html");
 
 		//instantiate openid client
-		$this->openid = new LightOpenID('matecat.translated.home');
+		$this->openid = new LightOpenID(INIT::$HTTPHOST);
 
 		//get response from third-party
 		$this->openid_mode = $this->get_from_get_post("openid_mode");

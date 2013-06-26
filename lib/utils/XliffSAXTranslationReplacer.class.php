@@ -1,8 +1,4 @@
 <?
-
-include INIT::$UTILS_ROOT . "/cat.class.php";
-
-
 class XliffSAXTranslationReplacer{
 
 	private $filename; //source filename
@@ -263,11 +259,24 @@ class XliffSAXTranslationReplacer{
 			$tag_mismatch=true;
 			log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".$outcome['debug'].")");
 		}
-		if(empty($seg['translation']) or $tag_mismatch){
-			$translation=$seg['segment'];
-		}else{
-			$translation=$seg['translation'];
-		}
+                
+                // IF TAG MISMATCH STRIP TAGS FROM TARGET SEGMENT
+                if(empty($seg['translation'])){
+                    $translation=$seg['segment'];
+                }elseif ($tag_mismatch){
+                    $translation= strip_tags($seg['translation']);
+                }else{
+                    $translation=$seg['translation'];
+                }
+                
+		// IF TAG MISMATCH SUBSTITUTE PLACE SOURCE IN TARGET
+                // if(empty($seg['translation']) or $tag_mismatch){
+//			$translation=$seg['segment'];
+//		}else{
+//			$translation=$seg['translation'];
+//		}
+//		
+//		
 		//fix to escape non-html entities
 		//	log::doLog($this->currentId. " ESCAPE t1 : $translation\n\n");
 		$translation = str_replace("&lt;", '#LT#', $translation);

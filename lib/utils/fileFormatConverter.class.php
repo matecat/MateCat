@@ -22,6 +22,7 @@ class fileFormatConverter {
             INIT::obtain();
         }
         $this->opt['httpheader'] = array("Content-Type: application/x-www-form-urlencoded;charset=UTF-8");
+        $this->lang_handler=  Languages::getInstance();
     }
 
     private function addBOM($string) {
@@ -147,6 +148,7 @@ class fileFormatConverter {
 
         $data['fileExtension'] = $extension;
         $data['fileName'] = "$filename.$extension";
+      //  echo $source_lang; exit;
         $data['sourceLocale'] = $this->lang_handler->getSDLStudioCode($source_lang);
         $data['targetLocale'] = $this->lang_handler->getSDLStudioCode($target_lang);
 

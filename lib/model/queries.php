@@ -1583,7 +1583,7 @@ function getNextSegmentAndLock() {
 	$db = Database::obtain();
 	$q1 = "SET autocommit=0";
 	$q2 = "START TRANSACTION";
-	$q3 = "select id_segment, id_job from segment_translations_analysis_queue where locked=0 for update";
+	$q3 = "select id_segment, id_job from segment_translations_analysis_queue where locked=0 limit 1 for update";
 
 	$q5 = "COMMIT";
 	$q6 = "SET autocommit=1";

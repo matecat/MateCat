@@ -13,7 +13,7 @@ class oauthRequestInitializerController extends helperController{
 		parent::__construct();
 
 		//instantiate openid client
-		$this->openid = new LightOpenID('matecat.translated.home');
+		$this->openid = new LightOpenID(INIT::$HTTPHOST);
 
 		//set user data we want to access
 		$this->openid->required = array(
@@ -23,7 +23,7 @@ class oauthRequestInitializerController extends helperController{
 				'contact/email'
 				);
 		//set return url
-		$this->openid->returnUrl= "http://matecat.translated.home/oauth/response";
+		$this->openid->returnUrl= INIT::$HTTPHOST."/oauth/response";
 		//set identity website for google
 		$this->openid->identity = 'https://www.google.com/accounts/o8/id';
 	}
