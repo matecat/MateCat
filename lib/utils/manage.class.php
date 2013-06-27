@@ -9,7 +9,7 @@ class ManageUtils {
 	public static function queryProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filter_enabled,$lang_handler,$project_id) {
 
 // TEMPORARY HACK TO ACCESS ALL CURRENT PROJECTS Andrea 26/6/2013
-		$pattern = '/^(10.30.1|10.3.14|10.3.15|192.168.94.100)/';
+		$pattern = '/^(127.0.0.1|10.30.1|10.3.14|10.3.15|192.168.94.100)/';
 		$getAll = preg_match($pattern, $_SERVER['REMOTE_ADDR']);
 // END HACK	
 
@@ -48,7 +48,7 @@ class ManageUtils {
 			$project['has_cancelled'] = 0;
 			$project['has_archived'] = 0;
 			$project['password'] = $item['password'];
-			$project['tm_analysis'] = $item['tm_analysis_wc'];
+			$project['tm_analysis'] = number_format($item['tm_analysis_wc'], 0, ".", ",");;
 			$jobs_strings = explode(',',$item['job']);
 			foreach ($jobs_strings as $job_string) {
 				$job = array();

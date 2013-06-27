@@ -571,7 +571,7 @@ UI = {
 	            '	<div class="head">'+
 		        '	    <h2>'+this.name+'</h2>'+
 		        '	    <div class="project-details">'+
-		        '			<span class="id-project" title="Project ID">'+this.id+'</span> - <a target="_blank" href="/analyze/'+project.name+'/'+this.id+'-'+this.password+'" title="Volume Analysis">'+parseInt(this.tm_analysis)+' Payable words</a>'+
+		        '			<span class="id-project" title="Project ID">'+this.id+'</span> - <a target="_blank" href="/analyze/'+project.name+'/'+this.id+'-'+this.password+'" title="Volume Analysis">'+this.tm_analysis+' Payable words</a>'+
 		        '			<a href="#" title="Cancel project" class="cancel-project"></a>'+
 		        '	    	<a href="#" title="Archive project" class="archive-project"></a>'+
 		        '			<a href="#" title="Resume project" class="resume-project"></a>'+

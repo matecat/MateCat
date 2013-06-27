@@ -82,7 +82,7 @@ class getProjectsController extends ajaxcontroller {
 		$start = (($this->page - 1) * $this->step);
 
 // TEMPORARY HACK TO ACCESS ALL CURRENT PROJECTS Andrea 26/6/2013
-		$pattern = '/^(10.30.1|10.3.14|10.3.15|192.168.94.100)/';
+		$pattern = '/^(127.0.0.1|10.30.1|10.3.14|10.3.15|192.168.94.100)/';
 		$getAll = preg_match($pattern, $_SERVER['REMOTE_ADDR']);
 // END HACK	
 
