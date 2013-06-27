@@ -51,7 +51,6 @@ class getContributionController extends ajaxcontroller {
         }
         
         $st = getJobData($this->id_job);
-        print_r ($st);exit;
         $this->source=$st['source'];
         $this->target=$st['target'];
         $this->id_mt_engine = $st['id_mt_engine'];

@@ -223,6 +223,7 @@ class newProjectController extends viewcontroller {
 		$this->template->noSourceLangHistory = $this->noSourceLangHistory;
 		$this->template->noTargetLangHistory = $this->noTargetLangHistory;
 		$this->template->logged_user=trim($this->logged_user['first_name']." ".$this->logged_user['last_name']);
+		$this->template->build_number = INIT::$BUILD_NUMBER;
 		
 	}
 
