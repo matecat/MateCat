@@ -64,7 +64,7 @@ class setTranslationController extends ajaxcontroller {
 			log::doLog(__CLASS__ .":".__FUNCTION__." error - ".$this->result['error'] );
 			return -1;
 		}
-			log::doLog("translation: " . $this->translation);
+			//log::doLog("translation: " . $this->translation);
 		$this->translation = CatUtils::view2rawxliff($this->translation);
 
 		//check tag mismatch

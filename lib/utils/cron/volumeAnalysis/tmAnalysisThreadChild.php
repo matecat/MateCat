@@ -72,7 +72,7 @@ while (1) {
     //print_r ($segment);
     if (empty($segment)) {
         deleteLockSegment($sid, $jid,"unlock");
-        echo "--- (child $my_pid) : no segment ready for tm volume analisys: wait 3 seconds\n";
+        echo "--- (child $my_pid) : empty segment: no segment ready for tm volume analisys: wait 3 seconds\n";
         continue;
     }
 
@@ -113,7 +113,7 @@ while (1) {
     }
     $mt_engine = null;
     $mt_from_tms = 1;
-    if (!empty($id_mt_engine)) {
+   if (!empty($id_mt_engine)and $id_mt_engine!=1) { 
         $mt_engine = new MT($id_mt_engine);
         $mt_from_tms = 0;
     }
@@ -277,120 +277,4 @@ function getNewMatchType($tm_match_type, $fast_match_type, $equivalentWordMappin
 function compareScore($a, $b) {
     return floatval($a['match']) < floatval($b['match']);
 }
-
-// PROCESS CONTROL FUNCTIONS
-//function isRunningProcess($pid) {
-//    if (file_exists("/proc/$pid")) {
-//        return true;
-//    }
-//    return false;
-//}
-//function getPidFromFiles() {
-//    $cwd = getcwd();
-//    chdir(PID_FOLDER);
-//    $files = glob('*'); // get all file names
-//    chdir($cwd);
-//    //echo __FUNCTION__ . "\n";
-//    //print_r($files);
-//    //echo "\n";
-//    return $files;
-//}
-//function launchProcesses($numProcesses = 1,$equivalentWordMapping=array()) {
-//    $processLaunched = 0;
-//    echo __FUNCTION__ . " : parent launching $numProcesses processes - $processLaunched  already launched \n";
-//
-//    while ($processLaunched < $numProcesses) {
-//        echo "launching .....";
-//        $pid = pcntl_fork();
-//        echo "DONE\n";
-//        echo ":::: $pid\n";
-//        if ($pid == -1) {
-//            echo("PARENT FATAL !! cannot fork. Exiting!\n");
-//            return -1;
-//        }
-//        if ($pid) {
-//            // parent process runs what is here
-//            $processLaunched+=1;
-//        } else {
-//            // child process runs what is here
-//            $pid = getmypid();
-//            if (!touch(PID_FOLDER . "/$pid")) {
-//                echo("CHILD $pid FATAL !! cannot create child file. Exiting!\n");
-//                return -2;
-//            } else {
-//                echo "CHILD $pid : file " . PID_FOLDER . "/$pid created !!!\n";
-//            }
-//            doChild($equivalentWordMapping);
-//            exit;
-//        }
-//        sleep(1); // this sleep is for tempt to avoid two fork select the same segment: it will be better found something different. Problem table is MyISAM
-//    }
-//    return 0;
-//}
-//function deletePidFile($pid = "", $num = -1) {
-//    echo __FUNCTION__ . ": pid= $pid, num= $num\n";
-//    $numDeleted = 0;
-//    $pidDeleted = array();
-//    $files = array();
-//    if (empty($pid)) {
-//        $files = getPidFromFiles();
-//    } else {
-//        $files[] = $pid;
-//    }
-//
-//    echo "no pid indicated --> deleting all (or num if \$num > 0) pid files\n";
-//    //$files = getPidFromFiles(); // get all file names
-//    foreach ($files as $file) { // iterate files
-//        if (is_file(PID_FOLDER . "/$file")) {
-//            echo "deleting pid $file ....";
-//            unlink(PID_FOLDER . "/$file"); // delete 
-//            echo "done\n";
-//            $pidDeleted[] = $file;
-//            if ($num > 0) {
-//                $numDeleted+=1;
-//                if ($numDeleted == $num) {
-//                    break;
-//                }
-//            }
-//        } else {
-//            echo "WARNING  2 !!!  file $file not exists\n";
-//        }
-//    }
-//    /* } else {
-//      echo "pid selected  --> deleting pid file $pid\n";
-//      $file = PID_FOLDER . "/$pid";
-//      if (is_file($file)) {
-//      unlink($file); // delete file
-//      $pidDeleted[] = $file;
-//      $numDeleted+=1;
-//      } else {
-//      echo "WARNING !!!  file $pid not exists\n";
-//      }
-//      } */
-//    echo __FUNCTION__ . " exiting : deleted $numDeleted files\n";
-//
-//    return $pidDeleted;
-//}
-//function processFileExists($pid) {
-//    $folder = PID_FOLDER;
-//    echo __FUNCTION__ . " : $folder/$pid ....";
-//    if (file_exists("$folder/$pid")) {
-//        echo "true\n\n";
-//        return true;
-//    }
-//    echo "false\n\n";
-//    return false;
-//}
-//function setNumProcesses() {
-//    // legge quanti processi lanciare
-//    $num_processes = NUM_PROCESSES;
-//    if (file_exists(NUM_PROCESSES_FILE)) {
-//        $num_processes = intval(file_get_contents(NUM_PROCESSES_FILE));
-//    }
-//    if (!is_int($num_processes)) {
-//        echo "WARNING : num processes from file is not numeric. Back to default value NUM_PROCESSES = " . NUM_PROCESSES . "\n";
-//        $num_processes = NUM_PROCESSES;
-//    }
-//    return $num_processes;
-//}
 ?>

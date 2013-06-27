@@ -51,7 +51,7 @@ class getContributionController extends ajaxcontroller {
         }
         
         $st = getJobData($this->id_job);
-        print_r ($st);exit;
+       // print_r ($st);exit;
         $this->source=$st['source'];
         $this->target=$st['target'];
         $this->id_mt_engine = $st['id_mt_engine'];
@@ -69,7 +69,6 @@ class getContributionController extends ajaxcontroller {
 //log::doLog("after $this->text");
             $tms = new TMS($this->id_tms);
 
-
             $tms_match = $tms->get($this->text, $this->source, $this->target, "demo@matecat.com", $mt_from_tms, $this->id_translator);
 		//log::doLog ("tms_match");
 		//log::doLog ($tms_match);
@@ -77,8 +76,7 @@ class getContributionController extends ajaxcontroller {
         
         $mt_res = array();
         $mt_match = "";
-        if (!empty($this->id_mt_engine)and $this->id_mt_engine!=1) {
-
+        if (!empty($this->id_mt_engine) and $this->id_mt_engine!=1) {
             $mt = new MT($this->id_mt_engine);
             $mt_result = $mt->get($this->text, $this->source, $this->target);
 
@@ -120,7 +118,7 @@ class getContributionController extends ajaxcontroller {
             }
         }
 	//$matches=array();
-	
+	//print_r ($matches);
         $this->result['data']['matches'] = $matches;
     }
 
