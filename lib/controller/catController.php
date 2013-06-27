@@ -65,10 +65,6 @@ class catController extends viewcontroller {
 
 		$this->downloadFileName = "";
 
-		if (is_null($this->jid) and is_null($this->password)) {
-			header("Location: /translate/esempio.xliff/en-fr/849-mcfmtvg8");
-			exit(0);
-		}
 		$this->thisUrl=$_SERVER['REQUEST_URI'];
 
 	}

@@ -23,8 +23,8 @@ class convertFileController extends ajaxcontroller {
         $this->source_lang = $this->get_from_get_post("source_lang");
         $this->target_lang = $this->get_from_get_post("target_lang");
 
-        $this->intDir = $_SERVER['DOCUMENT_ROOT'] . '/storage/upload/' . $_COOKIE['upload_session'];
-        $this->errDir = $_SERVER['DOCUMENT_ROOT'] . '/storage/conversion_errors/' . $_COOKIE['upload_session'];
+        $this->intDir = INIT::$UPLOAD_REPOSITORY.'/' . $_COOKIE['upload_session'];
+        $this->errDir = INIT::$STORAGE_DIR.'/conversion_errors/' . $_COOKIE['upload_session'];
 
     }
 
