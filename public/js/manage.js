@@ -529,6 +529,9 @@ UI = {
 					history.replaceState(stateObj, "page "+d.page, d.page+UI.filters2hash());
 				}
 				UI.compileDisplay();
+		        $("html,body").animate({
+		            scrollTop: 0
+		        }, 500 );
 			}
 		});
 	},
