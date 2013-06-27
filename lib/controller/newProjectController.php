@@ -116,7 +116,7 @@ class newProjectController extends viewcontroller {
 //			$targetLang = explode('||',urldecode($serTargetLang));			
 		}
 
-		$intDir = INIT::$UPLOAD_REPOSITORY.'/$this->guid/';
+		$intDir = INIT::$UPLOAD_REPOSITORY.'/'.$this->guid.'/';
 		if (!is_dir($intDir)) {
 			mkdir($intDir, 0775, true);
 
