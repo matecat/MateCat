@@ -47,6 +47,7 @@ class manageController extends viewcontroller {
 		$this->template->filtered = $this->filter_enabled;
 		$this->template->filtered_class = ($this->filter_enabled)? ' open': '';
 		$this->template->logged_user=trim($this->logged_user['first_name']." ".$this->logged_user['last_name']);
+		$this->template->build_number = INIT::$BUILD_NUMBER;
 
 	}
 
