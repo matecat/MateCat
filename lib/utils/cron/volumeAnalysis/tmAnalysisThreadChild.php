@@ -196,11 +196,11 @@ while (1) {
     //if (stripos($suggestion_source, "MT") !== false) {
     //    $tm_match_type = "MT";
    // }
-    
+    $outcome_warning=CatUtils::checkTagConsistency($text,$suggestion);
     
     echo "--- (child $my_pid) : sid=$sid --- \$tm_match_type=$tm_match_type, \$fast_match_type=$fast_match_type, \$new_match_type=$new_match_type, \$equivalentWordMapping[\$new_match_type]=" . $equivalentWordMapping[$new_match_type] . ", \$raw_wc=$raw_wc,\$standard_words=$standard_words,\$eq_words=$eq_words\n";
 
-    $ret = CatUtils::addTranslationSuggestion($sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE");
+    $ret = CatUtils::addTranslationSuggestion($sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", $outcome_warning['warning']);
     //unlock segment
     //$res = lockUnlockSegment($sid, $jid, 0);
     

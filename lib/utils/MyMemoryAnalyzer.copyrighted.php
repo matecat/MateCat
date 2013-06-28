@@ -10,7 +10,7 @@ include_once (INIT::$UTILS_ROOT."/utils.class.php"); //only for testing purpose
   Thank you for keeping is confidential.
  */
 
-class MyMemory2 {
+class MyMemoryAnalyzer {
 
     private $url = "http://mymemory.translated.net";
     private $root_path = "api";
@@ -25,7 +25,7 @@ class MyMemory2 {
             return null;
         }
         $json_segs=json_encode($segs_array);
-//echo $json_segs;exit;
+
         $d['fast'] = "1";
         $d['df'] = "matecat_array";
         $d['segs'] = $json_segs;
@@ -33,13 +33,13 @@ class MyMemory2 {
         
         //echo $countwordReport;
         $reportDecoded=json_decode($countwordReport,true);
-       //print_r($reportDecoded);
+       //log::doLog('FAST ANALYSIS REPORT'.print_r($reportDecoded,true));
         return $reportDecoded;
     }
 
 }
 /*
-$a = new MyMemory2();
+$a = new MyMemoryAnalyzer();
 
 $text = "WordPress Theming
 MenuSkip to content

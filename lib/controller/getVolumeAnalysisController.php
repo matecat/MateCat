@@ -201,7 +201,7 @@ log::doLog(print_r($res,true));
                 continue;
             }
         }
-
+//log::doLog($this->total_wc_standard_analysis.",".$this->total_segments);
 
         if ($this->total_wc_standard_analysis == 0  and $this->status_project == "FAST_OK" ) {
             $this->total_wc_standard_analysis = $this->total_wc_standard_fast_analysis;

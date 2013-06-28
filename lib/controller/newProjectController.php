@@ -53,8 +53,8 @@ class newProjectController extends viewcontroller {
 			}
 			$this->sourceLangAr = $tmpSourceAr;
 			asort($this->sourceLangAr);
-			log::doLog('SOURCE LANG AR: ' , $this->sourceLangAr);
-			log::doLog('SOURCE LANG NEW : ' , $tmpSourceArAs);
+			//log::doLog('SOURCE LANG AR: ' , $this->sourceLangAr);
+			//log::doLog('SOURCE LANG NEW : ' , $tmpSourceArAs);
 
 //			usort($tmpSourceArAs, 'sortByOrder');
 			$this->array_sort_by_column($tmpSourceArAs, 'name');
@@ -216,7 +216,7 @@ class newProjectController extends viewcontroller {
 		$this->template->formats_number = $this->countExtensions(); //count(explode('|', INIT::$CONVERSION_FILE_TYPES));
 		$this->template->volume_analysis_enabled = INIT::$VOLUME_ANALYSIS_ENABLED;
 
-			log::doLog('targetLangHistory: ' , $this->targetLangArray);
+		//log::doLog('targetLangHistory: ' , $this->targetLangArray);
 
 		$this->template->sourceLangHistory = $this->sourceLangArray;
 		$this->template->targetLangHistory = $this->targetLangArray;

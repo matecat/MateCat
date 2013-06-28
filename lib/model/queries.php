@@ -469,13 +469,13 @@ function setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $tra
 	$err = $db->get_error();
 	$errno = $err['error_code'];
 	if ($errno != 0) {
-		log::doLog($err);
+		if($errno!=1062) log::doLog($err);
 		return $errno * -1;
 	}
 	return $db->affected_rows;
 }
 
-function setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis) {
+function setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis,$warning=0) {
 	$data = array();
 	$data['id_job'] = $id_job;
 	$data['suggestions_array'] = $suggestions_json_array;
@@ -487,6 +487,7 @@ function setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $sug
 	$data['standard_word_count'] = $standard_words;
 	$data['translation'] = $translation;
 	$data['tm_analysis_status'] = $tm_status_analysis;
+	$data['warning']=$warning;
 
 	//print_r ($data);exit;
 
@@ -1175,15 +1176,19 @@ function getProjectStatsVolumeAnalysis2($pid, $groupby = "job") {
 }
 
 function getProjectStatsVolumeAnalysis($pid) {
-	$query = "select j.id as jid , s.id as sid,s.id_file  , s.raw_word_count,
+	$query = "select distinct j.id as jid , s.id as sid,s.id_file  , s.raw_word_count,
 		st.suggestion_source, st.suggestion_match, st.eq_word_count, st.standard_word_count, st.match_type,
 		p.status_analysis, p.fast_analysis_wc,p.tm_analysis_wc,p.standard_analysis_wc,
 		st.tm_analysis_status as st_status_analysis
-			from jobs j 
-			inner join projects p on p.id=j.id_project
-			inner join files_job fj on fj.id_job=j.id
-			inner join segments s on s.id_file=fj.id_file
-			left outer join segment_translations st on st.id_segment=s.id 
+			from jobs as j
+ 
+			inner join projects as p on p.id=j.id_project
+
+			inner join files_job as fj on fj.id_job=j.id
+
+			inner join segments as s on s.id_file=fj.id_file
+
+			left outer join segment_translations as st on st.id_segment=s.id 
 
 			where id_project=$pid  and p.status_analysis in ('NEW', 'FAST_OK','DONE') and st.match_type<>''";
 	$db = Database::obtain();
@@ -1232,6 +1237,25 @@ function getProjectForVolumeAnalysis($type, $limit = 1) {
 }
 
 function getSegmentsForFastVolumeAnalysys($pid) {
+	$query = "select concat(s.id,'-',group_concat(j.id)) as jsid,s.segment 
+		from segments as s 
+		inner join files_job as fj on fj.id_file=s.id_file
+		inner join jobs as j on fj.id_job=j.id
+		where j.id_project='$pid' 
+		group by s.id
+		order by s.id";
+	$db = Database::obtain();
+	$results = $db->fetch_array($query);
+	$err = $db->get_error();
+	$errno = $err['error_code'];
+	if ($errno != 0) {
+		log::doLog($err);
+		return $errno * -1;
+	}
+	return $results;
+}
+/*
+function getSegmentsForFastVolumeAnalysys($pid) {
 	$query = "select concat(s.id ,'-', j.id )as jsid,segment from segments s
 		inner join files_job fj on fj.id_file=s.id_file
 		inner join jobs j on fj.id_job=j.id
@@ -1249,7 +1273,7 @@ function getSegmentsForFastVolumeAnalysys($pid) {
 	}
 	return $results;
 }
-
+*/
 function getSegmentsForTMVolumeAnalysys($jid) {
 	$query = "select s.id as sid ,segment ,raw_word_count,st.match_type from segments s 
 		left join segment_translations st on st.id_segment=s.id
@@ -1347,7 +1371,7 @@ function insertFastAnalysis($pid, $fastReport, $equivalentWordMapping) {
 	foreach ($fastReport as $k => $v) {
 		$jid_fid = explode("-", $k);
 		$id_segment = $jid_fid[0];
-		$id_job = $jid_fid[1];
+		$id_jobs = $jid_fid[1];
 
 		$type = strtoupper($v['type']);
 
@@ -1356,10 +1380,10 @@ function insertFastAnalysis($pid, $fastReport, $equivalentWordMapping) {
 			if ($type == "INTERNAL") {
 				log::doLog("INTERNAL : " . $v['wc'] . " - " . $eq_word);
 			}
-			//log::doLog("type : $type ;; old : $total_eq_wc ;; eq_word $eq_word ;; new : " .($total_eq_wc+$eq_word));
+			//log::doLog("$id_segment-$id_jobs: [$type] old tot : $total_eq_wc + eq_word $eq_word (orig_word ".$v['wc'].") -> new tot: " .($total_eq_wc+$eq_word));
 		} else {
 			$eq_word = $v['wc'];
-			//log::doLog("type : NOTYPE ;; old : $total_eq_wc ;; eq_word $eq_word ;; new : " . ($total_eq_wc+$eq_word));
+			//log::doLog("$id_segment-$id_jobs: [NOTYPE] old tot: $total_eq_wc + eq_word $eq_word -> new tot: " . ($total_eq_wc+$eq_word));
 		}
 		$total_eq_wc+=$eq_word;
 		$standard_words = $eq_word;
@@ -1371,57 +1395,58 @@ function insertFastAnalysis($pid, $fastReport, $equivalentWordMapping) {
 		$total_standard_wc+=$standard_words;
 		//log::doLog("total_standard_wc $total_standard_wc");
 
+		$id_jobs=explode(',',$id_jobs);
+		foreach($id_jobs as $id_job){
+			$data['id_segment'] = $id_segment;
+			$data['id_job'] = $id_job;
+			$data['match_type'] = $type;
+			$data['eq_word_count'] = $eq_word;
+			$data['standard_word_count'] = $standard_words;
 
-		$data['id_segment'] = $id_segment;
-		$data['id_job'] = $id_job;
-		$data['match_type'] = $type;
-		$data['eq_word_count'] = $eq_word;
-		$data['standard_word_count'] = $standard_words;
 
 
+			// query for this data is after insert/update
+			$data_innodb['id_job'] = $data['id_job'];
+			$data_innodb['id_segment'] = $data['id_segment'];
 
-		// query for this data is after insert/update
-		$data_innodb['id_job'] = $data['id_job'];
-		$data_innodb['id_segment'] = $data['id_segment'];
-		print_r($data_innodb);
-
-		$db->insert('segment_translations', $data);
-		$err = $db->get_error();
-		$errno = $err['error_code'];
-
-		if ($errno == 1062) {
-			unset($data['id_job']);
-			unset($data['id_segment']);
-			//  log::doLog("updating seg tra : $id_segment");
-			$where = "  id_job=$id_job and id_segment=$id_segment ";
-			$db->update('segment_translations', $data, $where);
+			$db->insert('segment_translations', $data);
 			$err = $db->get_error();
 			$errno = $err['error_code'];
-		}
+
+			if ($errno == 1062) {
+				unset($data['id_job']);
+				unset($data['id_segment']);
+				//  log::doLog("updating seg tra : $id_segment");
+				$where = "  id_job=$id_job and id_segment=$id_segment ";
+				$db->update('segment_translations', $data, $where);
+				$err = $db->get_error();
+				$errno = $err['error_code'];
+			}
 
 
 
-		if ($errno != 0) {
-			log::doLog($err);
-			return $errno * -1;
-		}
-
-		if ($data['eq_word_count'] > 0) {
-			$db->query("SET autocommit=0");
-			$db->query("START TRANSACTION");
-			$db->insert('segment_translations_analysis_queue', $data_innodb);
-			$err = $db->get_error();
-			$errno = $err['error_code'];
-			if ($errno != 0 and $errno != 1062) {
-				//echo ":::::::::::::::::\n";
-				print_r($err);
+			if ($errno != 0) {
 				log::doLog($err);
-				$db->query("ROLLBACK");
-				$db->query("SET autocommit=1");
 				return $errno * -1;
 			}
-			$db->query("COMMIT");
-			$db->query("SET autocommit=1");
+
+			if ($data['eq_word_count'] > 0) {
+				$db->query("SET autocommit=0");
+				$db->query("START TRANSACTION");
+				$db->insert('segment_translations_analysis_queue', $data_innodb);
+				$err = $db->get_error();
+				$errno = $err['error_code'];
+				if ($errno != 0 and $errno != 1062) {
+					//echo ":::::::::::::::::\n";
+					print_r($err);
+					log::doLog($err);
+					$db->query("ROLLBACK");
+					$db->query("SET autocommit=1");
+					return $errno * -1;
+				}
+				$db->query("COMMIT");
+				$db->query("SET autocommit=1");
+			}
 		}
 	}
 
@@ -1527,7 +1552,7 @@ function updateJobsStatus($res, $id, $status, $only_if, $undo) {
 	if ($res == "prj") {
 		$status_filter_query = ($only_if)? " and status_owner='$only_if'" : "";
 		$arStatus = explode(',',$status);
-	
+
 		$test = count(explode(':',$arStatus[0]));
 		if(($test > 1) && ($undo == 1)) {
 			$cases = '';
@@ -1688,7 +1713,7 @@ function getSegmentForTMVolumeAnalysys($id_segment, $id_job) {
 
 			where  
 
-			p.status_analysis='FAST_OK' and 
+			p.status_analysis='FAST_OK' and
 
 			st.id_segment=$id_segment and st.id_job=$id_job
 			limit 1";

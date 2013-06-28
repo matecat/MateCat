@@ -18,6 +18,7 @@ class Log {
     public static function doLog() { 
 
         $trace=debug_backtrace();
+	
 
 
        
