@@ -232,12 +232,14 @@ UI = {
             e.preventDefault();
             $('#originalDownload').submit();
         });
-        
-        $("form#fileDownload").submit(function(){
-            var a=confirm("There are some potential errors (missing tags, numbers etc).\n\
+
+        $("form#fileDownload").submit(function() {
+            if ($("#notifbox").hasClass("warningbox")){
+                var a = confirm("There are some potential errors (missing tags, numbers etc).\n\
  Do you want to continue anyway?");
-            if (!a){
-                return false;
+                if (!a) {
+                    return false;
+                }
             }
             if (UI.isChrome) {
                 $('.download-chrome').addClass('d-open');
