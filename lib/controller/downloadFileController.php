@@ -32,8 +32,8 @@ class downloadFileController extends downloadController {
 
 	public function doAction() {
 		//2013-03-25 by Massidda: this method contains a lot of debugging code introduced by me. I'll remove it at the end of my current task, so pleas do not touch
-		//$debug=array();
-		//$debug['total'][]=time();
+		$debug=array();
+		$debug['total'][]=time();
 		// specs for filename at the task https://app.asana.com/0/1096066951381/2263196383117
 		/* if ($this->download_type == 'all') {
 		//in this case fname contains the project name (see html)
@@ -46,9 +46,9 @@ class downloadFileController extends downloadController {
 		}
 		 */
 		$converter = new fileFormatConverter();
-		//$debug['get_file'][]=time();
+		$debug['get_file'][]=time();
 		$files_job = getFilesForJob($this->id_job, $this->id_file);
-		//$debug['get_file'][]=time();
+		$debug['get_file'][]=time();
 		//$nonew=1;
 		//if ($this->download_type=='pseudo'){
 		//    $nonew=0;
@@ -62,15 +62,15 @@ class downloadFileController extends downloadController {
 			$current_filename = $file['filename'];
 			$original = $file['xliff_file'];
 			//echo "<pre>";echo $original;exit;
-			//$debug['get_segments'][]=time();
+			$debug['get_segments'][]=time();
 			$data = getSegmentsDownload($this->id_job, $this->password, $id_file, $nonew);
-			//$debug['get_segments'][]=time();
+			$debug['get_segments'][]=time();
 
 			//echo "<pre>"; print_r ($data); exit;
 
 			$transunit_translation = "";
 
-			//$debug['replace'][]=time();
+			$debug['replace'][]=time();
 			foreach ($data as $i => $seg) {
 				//	echo $seg['internal_id']."\n";
 				$end_tags = "";
@@ -95,7 +95,8 @@ class downloadFileController extends downloadController {
 				}
 
 				if (!empty($seg['mrk_id'])) {
-					$translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">$translation</mrk>";
+					//$translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">$translation</mrk>";
+					$translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">".$seg['mrk_prev_tags'].$translation.$seg['mrk_succ_tags']."</mrk>";
 				}
 				//echo "t3 : $translation\n";
 				//echo "\n\n";
@@ -147,16 +148,16 @@ class downloadFileController extends downloadController {
 				$original = preg_replace($pattern, $replacement, $original);
 				$transunit_translation = ""; // empty the translation before the end of the loop
 			}
-			//$debug['replace'][]=time();
+			$debug['replace'][]=time();
 			$output_content[$id_file]['content'] = $original;
 			$output_content[$id_file]['filename'] = $current_filename;
 
 			if (!in_array($mime_type, array("xliff", "sdlxliff", "xlf"))) {
-				//$debug['do_conversion'][]=time();
-				//file_put_contents("/home/matecat/test.sdlxliff", $output_content[$id_file]['content']);
+				$debug['do_conversion'][]=time();
+				file_put_contents("/home/matecat/test.sdlxliff", $output_content[$id_file]['content']);
 				$convertResult = $converter->convertToOriginal($output_content[$id_file]['content']);
 				$output_content[$id_file]['content'] = $convertResult['documentContent'];
-				//$debug['do_conversion'][]=time();
+				$debug['do_conversion'][]=time();
 			}
 		}
 		//print_r ($output_content);
@@ -212,7 +213,7 @@ class downloadFileController extends downloadController {
 			//                $this->content = $oc['content'];
 			//            }
 		}
-		//$debug['total'][]=time();
+		$debug['total'][]=time();
 		/*
 		   foreach($debug as $k=>$subarr){
 		   $debug[$k]=($subarr[1]-$subarr[0])." sec";

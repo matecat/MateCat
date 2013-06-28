@@ -60,12 +60,17 @@ function extractSegments($files_path, $file, $pid, $fid) {
                         //$tempSeg = stripTagsFromSource2($seg_source['raw-content']);
                         $tempSeg = strip_tags($seg_source['raw-content']);
                         $tempSeg = trim($tempSeg);
+
+                        //init tags
+                        $seg_source['mrk-ext-prec-tags'] = '';
+                        $seg_source['mrk-ext-succ-tags'] = '';
+                        // echo $seg_source['raw-content']."\n";
                         if (empty($tempSeg)) {
                             $show_in_cattool = 0;
                         } else {
                             $extract_external = strip_external($seg_source['raw-content']);
-                            $seg_source['ext-prec-tags'].=$extract_external['prec'];
-                            $seg_source['ext-succ-tags'] = $extract_external['succ'] . $seg_source['ext-succ-tags'];
+                            $seg_source['mrk-ext-prec-tags'] = $extract_external['prec'];
+                            $seg_source['mrk-ext-succ-tags'] = $extract_external['succ'];
                             $seg_source['raw-content'] = $extract_external['seg'];
                         }
 
@@ -75,7 +80,9 @@ function extractSegments($files_path, $file, $pid, $fid) {
                         $ext_succ_tags = mysql_real_escape_string($seg_source['ext-succ-tags']);
                         $num_words = CatUtils::segment_raw_wordcount($seg_source['raw-content']);
                         $trans_unit_id = mysql_real_escape_string($xliff_trans_unit['attr']['id']);
-                        $query_segment[] = "('$trans_unit_id',$fid,'$source',$num_words,'$mid','$ext_tags','$ext_succ_tags',$show_in_cattool)";
+                        $mrk_ext_prec_tags = mysql_real_escape_string($seg_source['mrk-ext-prec-tags']);
+                        $mrk_ext_succ_tags = mysql_real_escape_string($seg_source['mrk-ext-succ-tags']);
+                        $query_segment[] = "('$trans_unit_id',$fid,'$source',$num_words,'$mid','$ext_tags','$ext_succ_tags',$show_in_cattool,'$mrk_ext_prec_tags','$mrk_ext_succ_tags')";
                     }
                 } else {
                     $show_in_cattool = 1;
@@ -102,8 +109,8 @@ function extractSegments($files_path, $file, $pid, $fid) {
                     if (!is_null($succ_tags)) {
                         $succ_tags = mysql_real_escape_string($succ_tags);
                     }
-
-                    $query_segment[] = "('$trans_unit_id',$fid,'$source',$num_words,NULL,'$prec_tags','$succ_tags',$show_in_cattool)";
+                    // echo "('$trans_unit_id',$fid,'$source',$num_words,NULL,'$prec_tags','$succ_tags',$show_in_cattool,NULL,NULL)\n";
+                    $query_segment[] = "('$trans_unit_id',$fid,'$source',$num_words,NULL,'$prec_tags','$succ_tags',$show_in_cattool,NULL,NULL)";
                 }
             }
         }
@@ -115,8 +122,8 @@ function extractSegments($files_path, $file, $pid, $fid) {
     }
 
     // Executing the Query
-    $query_segment = "INSERT INTO segments (internal_id,id_file, segment, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool) 
-                             values " . join(",\n", $query_segment);
+    $query_segment = "INSERT INTO segments (internal_id,id_file, segment, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) 
+		values " . join(",\n", $query_segment);
     // log::doLog($query_segment); exit;
 
     $res = mysql_query($query_segment, $mysql_link);
@@ -141,17 +148,22 @@ function stripTagsFromSource2($text) {
 
     $text = preg_replace($pattern_g_o, "", $text);
     //  echo "after2  -->  $text \n";
-//
-    $text = preg_replace($pattern_g_c, "", $text);
+    //
+	$text = preg_replace($pattern_g_c, "", $text);
     $text = str_replace("&nbsp;", " ", $text);
     return $text;
 }
 
 function strip_external($a) {
-    $pattern_x_start = '/^(\s*<x .*?\/>)(.*)/';
-    $pattern_x_end = '/(.*)(<x .*?\/>\s*)$/';
-    $pattern_g = '/^(\s*<g [^>]*?>)([^<]*?)(<\/g>\s*)$/';
-    log::doLog(__FUNCTION__ . " original is $a");
+    //$a = preg_replace("/>\s*\n</", ">#NEWLINE#<", $a);
+    //echo "vvvv $a\n";
+    
+    $pattern_x_start = '/^(\s*<x .*?\/>)(.*)/mis';
+    $pattern_x_end = '/(.*)(<x .*?\/>\s*)$/mis';
+    $pattern_g = '/^(\s*<g [^>]*?>)([^<]*?)(<\/g>\s*)$/mis';
+    /*/$pattern_g = '/^(\s*<g .*?>)([^<]*?)(<\/g>\s*)$/mis';*/
+    //   if(strpos($orig,'<x id="220"')!==FALSE) 
+    //log::doLog(__FUNCTION__ . " original is $a");
     $found = false;
     $prec = "";
     $succ = "";
@@ -164,7 +176,8 @@ function strip_external($a) {
         $found = false;
         do {
             $r = preg_match_all($pattern_x_start, $a, $res);
-            //print_r ($res);
+            /* if(strpos($orig,'<x id="220"')!==FALSE) 
+              log::doLog("a".print_r ($res,true)); */
             if (isset($res[1][0])) {
                 $prec.=$res[1][0];
                 $a = $res[2][0];
@@ -175,10 +188,13 @@ function strip_external($a) {
         //   echo "$c - 1 : $a\n";
         do {
             $r = preg_match_all($pattern_x_end, $a, $res);
-            //print_r ($res);
+            /*if(strpos($orig,'<x id="220"')!==FALSE) 
+              log::doLog("b".print_r ($res,true)); */
             if (isset($res[2][0])) {
-                $succ = $res[2][0] . $succ;
+                $succ = $res[2][0] . $succ; 
                 $a = $res[1][0];
+                
+                //$a = implode("\n", $res[1]);              
                 $found = true;
             }
         } while (isset($res[2][0]));
@@ -188,7 +204,9 @@ function strip_external($a) {
 
         do {
             $r = preg_match_all($pattern_g, $a, $res);
-            // print_r ($res);
+            /*    if(strpos($orig,'<x id="220"')!==FALSE) 
+              log::doLog("c".print_r ($res,true)); */
+           // print_r ($res);
             if (isset($res[1][0])) {
                 $prec.=$res[1][0];
                 $succ = $res[3][0] . $succ;
@@ -206,7 +224,9 @@ function strip_external($a) {
     //echo "succ is $succ\n";
     //print_r ($res);
     $r = array('prec' => $prec, 'seg' => $a, 'succ' => $succ);
-    log::doLog(__FUNCTION__, $r);
+    //  if(strpos($orig,'<x id="220"')!==FALSE) 
+    //log::doLog(__FUNCTION__, $r);
+   
     return $r;
 }
 

@@ -9,7 +9,7 @@
  * Licensed under the MIT license:
  * http://www.opensource.org/licenses/MIT
  */
-
+define("DIRSEP","//");
 class UploadHandler
 {
     protected $options;
@@ -238,22 +238,42 @@ class UploadHandler
             1
         );
     }
+	private function my_basename($param, $suffix=null) { 
+	if ( $suffix ) { 
+		$tmpstr = ltrim(substr($param, strrpos($param, DIRSEP) ), DIRSEP); 
+		if ( (strpos($param, $suffix)+strlen($suffix) )  ==  strlen($param) ) { 
+			return str_ireplace( $suffix, '', $tmpstr); 
+		} else { 
+			return ltrim(substr($param, strrpos($param, DIRSEP) ), DIRSEP); 
+		} 
+	} else { 
+		return ltrim(substr($param, strrpos($param, DIRSEP) ), DIRSEP); 
+	} 
+} 
 
     protected function trim_file_name($name, $type, $index) {
         // Remove path information and dots around the filename, to prevent uploading
         // into different directories or replacing hidden system files.
         // Also remove control characters and spaces (\x00..\x20) around the filename:
-        $file_name = trim(basename(stripslashes($name)), ".\x00..\x20");
+        //echo "name0 $name\n";
+	$name=stripslashes($name);
+        //echo "name01 $name\n";
+	$file_name = trim($this->my_basename($name), ".\x00..\x20");
+	//echo "name1 $file_name\n";
         // Add missing file extension for known image types:
         if (strpos($file_name, '.') === false &&
             preg_match('/^image\/(gif|jpe?g|png)/', $type, $matches)) {
             $file_name .= '.'.$matches[1];
         }
+
+	//echo "name2 $file_name\n";
         if ($this->options['discard_aborted_uploads']) {
             while(is_file($this->options['upload_dir'].$file_name)) {
                 $file_name = $this->upcount_name($file_name);
             }
         }
+
+	//echo "name3 $file_name\n";
         return $file_name;
     }
 

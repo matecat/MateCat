@@ -79,7 +79,7 @@ abstract class Engine {
         $res=$this->curl($this->url);
     
         $this->raw_result = json_decode($res,true);
-	log::doLog("raw result", $this->raw_result);
+	//log::doLog("raw result", $this->raw_result);
 	//log::doLog($this->raw_result);
 
         /*if (class_exists("log")) {
@@ -94,12 +94,12 @@ abstract class Engine {
         if (is_array($this->extra_parameters) and !empty($this->extra_parameters)) {
             $parameters = array_merge($parameters, $this->extra_parameters);
         }
-	log::doLog("engine input parameters");
-	log::doLog($parameters);
+	//log::doLog("engine input parameters");
+	//log::doLog($parameters);
         $parameters_query_string = http_build_query($parameters);        
         $this->url.=$parameters_query_string;
         //echo " eurl $this->url";  exit;
-	log::doLog("\n engine url $this->url\n");
+	//log::doLog("\n engine url $this->url\n");
     }
 
     private function existsFunction($type) {

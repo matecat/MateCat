@@ -1,4 +1,5 @@
 <?php
+
 include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
 include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include_once INIT::$UTILS_ROOT . "/cat.class.php";
@@ -10,7 +11,6 @@ class getContributionController extends ajaxcontroller {
     private $id_job;
     private $num_results;
     private $text;
-        
     private $source;
     private $target;
     private $id_mt_engine;
@@ -26,11 +26,9 @@ class getContributionController extends ajaxcontroller {
         $this->text = trim($this->get_from_get_post('text'));
         $this->id_translator = $this->get_from_get_post('id_translator');
 
-	if ($this->id_translator=='unknown_translator'){
-		$this->id_translator="";	
-	}
-        
-        
+        if ($this->id_translator == 'unknown_translator') {
+            $this->id_translator = "";
+        }
     }
 
     public function doAction() {
@@ -49,11 +47,11 @@ class getContributionController extends ajaxcontroller {
         if (!empty($this->result['errors'])) {
             return -1;
         }
-        
+
         $st = getJobData($this->id_job);
-        
-        $this->source=$st['source'];
-        $this->target=$st['target'];
+
+        $this->source = $st['source'];
+        $this->target = $st['target'];
         $this->id_mt_engine = $st['id_mt_engine'];
         $this->id_tms = $st['id_tms'];
 
@@ -61,24 +59,22 @@ class getContributionController extends ajaxcontroller {
         if (!empty($this->id_tms)) {
 
             $mt_from_tms = 1;
-            if (!empty($this->id_mt_engine)) {
+            if (!empty($this->id_mt_engine) and $this->id_mt_engine != 1) {
                 $mt_from_tms = 0;
             }
-		//log::doLog("before $this->text");
-	    $this->text=CatUtils::view2rawxliff($this->text);
+            //log::doLog("before $this->text");
+            $this->text = CatUtils::view2rawxliff($this->text);
 //log::doLog("after $this->text");
             $tms = new TMS($this->id_tms);
 
-
             $tms_match = $tms->get($this->text, $this->source, $this->target, "demo@matecat.com", $mt_from_tms, $this->id_translator);
-		//log::doLog ("tms_match");
-		//log::doLog ($tms_match);
+            //log::doLog ("tms_match");
+            //log::doLog ($tms_match);
         }
-        
+
         $mt_res = array();
         $mt_match = "";
-        if (!empty($this->id_mt_engine)) {
-
+        if (!empty($this->id_mt_engine) and $this->id_mt_engine != 1) {
             $mt = new MT($this->id_mt_engine);
             $mt_result = $mt->get($this->text, $this->source, $this->target);
 
@@ -93,11 +89,10 @@ class getContributionController extends ajaxcontroller {
                 $mt_match_res = new TMS_GET_MATCHES($this->text, $mt_match, $mt_score, "MT-" . $mt->getName(), date("Y-m-d"));
 
                 $mt_res = $mt_match_res->get_as_array();
-
             }
         }
-        $matches=array();
-		
+        $matches = array();
+
         if (!empty($tms_match)) {
             $matches = $tms_match;
         }
@@ -106,7 +101,7 @@ class getContributionController extends ajaxcontroller {
             $matches[] = $mt_res;
             usort($matches, "compareScore");
         }
-        $matches=array_slice ($matches,0,INIT::$DEFAULT_NUM_RESULTS_FROM_TM);
+        $matches = array_slice($matches, 0, INIT::$DEFAULT_NUM_RESULTS_FROM_TM);
         $res = $this->setSuggestionReport($matches);
         if (is_array($res) and array_key_exists("error", $res)) {
             ; // error occurred
@@ -119,23 +114,22 @@ class getContributionController extends ajaxcontroller {
                 $match['created_by'] = 'MT'; //MyMemory returns MT!
             }
         }
-	//$matches=array();
-	
+        //$matches=array();
+        //print_r ($matches);
         $this->result['data']['matches'] = $matches;
     }
 
-	private function setSuggestionReport($matches) {
-		if (count ($matches)>0) {
-		        $suggestions_json_array = json_encode($matches);
-	        	$match = $matches[0];
-	        	$suggestion = $match['translation'];
-	        	$suggestion_match = $match['match'];
-	        	$suggestion_source = $match['created_by'];
-	        	$ret = CatUtils::addTranslationSuggestion($this->id_segment, $this->id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source);
-		        return $ret;
-			}
-		return 0;
-
+    private function setSuggestionReport($matches) {
+        if (count($matches) > 0) {
+            $suggestions_json_array = json_encode($matches);
+            $match = $matches[0];
+            $suggestion = $match['translation'];
+            $suggestion_match = $match['match'];
+            $suggestion_source = $match['created_by'];
+            $ret = CatUtils::addTranslationSuggestion($this->id_segment, $this->id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source);
+            return $ret;
+        }
+        return 0;
     }
 
 }

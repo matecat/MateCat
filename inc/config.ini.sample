@@ -1,0 +1,29 @@
+; Casmacat config file
+; This file should not be pushed to the repository.
+
+[ui]
+baseurl    = "/"
+timetoedit = 0
+
+[db]
+hostname = "10.30.1.241"
+username = "matecat"
+password = "matecat01"
+database = "matecat_sandbox"
+
+[debug]
+displayerrors  = 0
+errorreporting = "E_ALL"
+
+[log]
+directory = "logs"    ; relative to root path
+filename  = "log.txt" ; file to write logs into
+
+[mymemory]
+numresults     = 3
+matchthreshold = 50
+
+[casmacat]
+catserver = "my.cat.server:8080"
+htrserver = "my.htr.server:8080"
+

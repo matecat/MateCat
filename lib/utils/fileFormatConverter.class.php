@@ -1,8 +1,10 @@
 <?php
 
 set_time_limit(0);
+define ("BOM","\xEF\xBB\xBF");
 
 //include INIT::$UTILS_ROOT . "/cat.class.php";
+include INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 
 class fileFormatConverter {
@@ -12,6 +14,7 @@ class fileFormatConverter {
     private $toXliffFunction = "AutomationService/original2xliff";
     private $fromXliffFunction = "AutomationService/xliff2original";
     private $opt = array();
+    private $lang_handler;
 
     public function __construct() {
         if (!class_exists("INIT")) {
@@ -19,6 +22,15 @@ class fileFormatConverter {
             INIT::obtain();
         }
         $this->opt['httpheader'] = array("Content-Type: application/x-www-form-urlencoded;charset=UTF-8");
+        $this->lang_handler=  Languages::getInstance();
+    }
+
+    private function addBOM($string) {
+        return BOM . $string;
+    }
+
+    private function hasBOM($string) {
+        return (substr($string, 0, 3) == BOM);
     }
 
     private function extractUidandExt(&$content) {
@@ -109,6 +121,22 @@ class fileFormatConverter {
         $fileContent = file_get_contents($file_path);
         $extension = pathinfo($file_path, PATHINFO_EXTENSION);
         $filename = pathinfo($file_path, PATHINFO_FILENAME);
+        if (strtoupper($extension) == 'TXT') {
+            $encoding=mb_detect_encoding($fileContent);
+            if ($encoding!='UTF-8'){
+                log::doLog("convert from $encoding to UTF8");
+                $fileContent=  iconv($encoding, "UTF-8", $fileContent);
+            }
+            log::doLog("is TXT ");
+
+            if (!$this->hasBOM($fileContent)) {
+                log::doLog("add BOM before");
+                log::doLog($fileContent);
+                $fileContent = $this->addBOM($fileContent);
+                log::doLog("add BOM after");
+                log::doLog($fileContent);
+            }
+        }
 
 
         $data['documentContent'] = base64_encode($fileContent);
@@ -120,8 +148,9 @@ class fileFormatConverter {
 
         $data['fileExtension'] = $extension;
         $data['fileName'] = "$filename.$extension";
-        $data['sourceLocale'] = $source_lang;
-        $data['targetLocale'] = $target_lang;
+      //  echo $source_lang; exit;
+        $data['sourceLocale'] = $this->lang_handler->getSDLStudioCode($source_lang);
+        $data['targetLocale'] = $this->lang_handler->getSDLStudioCode($target_lang);
 
         //print_r ($data);
         //$curl_result = CatUtils::curl_post($url, $data, $this->opt);

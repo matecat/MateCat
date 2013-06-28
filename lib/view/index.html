@@ -6,32 +6,34 @@
         <title>Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
+        <link href="${basepath}public/css/jquery-ui.css?build=${build_number}" rel="stylesheet" type="text/css" />
 
 
 
 
         <script type="text/javascript">
             var config = {
-                basepath: '${basepath | string:/}',
-                id_translator: '${tid | nothing}',
-                private_translator: '${private_translator | string:0}',
-                id_customer: '${id_customer | string:unknown_customer}',
-                private_customer: '${private_customer | string:0}',
-                last_opened_segment: '${last_opened_segment}',
-                server_load_time: '${load_time}',
-                job_id: '${jid}',
-                password: '${password}',
-                source_lang: '${source}',
-                target_lang: '${target}',
-                time_to_edit_enabled: ${time_to_edit_enabled} ,
-                build_number: '${build_number}',
-                test: 'test'
+            basepath: '${basepath | string:/}',
+                    id_translator: '${tid | nothing}',
+                    private_translator: '${private_translator | string:0}',
+                    id_customer: '${id_customer | string:unknown_customer}',
+                    private_customer: '${private_customer | string:0}',
+                    last_opened_segment: '${last_opened_segment}',
+                    server_load_time: '${load_time}',
+                    job_id: '${jid}',
+                    password: '${password}',
+                    source_lang: '${source}',
+                    target_lang: '${target}',
+                    time_to_edit_enabled: ${time_to_edit_enabled},
+                    build_number: '${build_number}',
+                    test: 'test',
+                    warningPollingInterval:'${warningPollingInterval}'
 
             };
-            //			console.log('Server time: ' + Math.round(config.server_load_time)); 
-            var renderStart = new Date();
-        </script>
+                    //			console.log('Server time: ' + Math.round(config.server_load_time)); 
+                    var renderStart = new Date();        </script>
         <script src="${basepath}public/js/loader.js?build=${build_number}"></script>
+        <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
 
 
@@ -46,23 +48,23 @@
         <div  metal:use-macro="unsupported_browser.html/job_not_found"/>
     </body>
 
+    <body tal:condition="true:job_cancelled">
+        <div  metal:use-macro="unsupported_browser.html/job_cancelled"/>
+    </body>
 
 
-    <body class="cattool" tal:condition="supportedBrowser" define="catpage string:true">
+    <body class="cattool${job_archived}${source_rtl}${target_rtl}" tal:condition="php: supportedBrowser && !job_not_found && !job_cancelled" define="catpage string:true">
 
         <header metal:use-macro="header.html/main_header">
             <div class="wrapper">   
-                
-              
-                
                 <form id="fileDownload" action="${basepath}" method="post">
-                    <input type="hidden" name="action" value="downloadFile" />
+                    <input type="hidden" name="action" value="downloadFileStreamOnDisk" />
                     <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
                     <input type="hidden" name="id_file" value="" />
                     <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
                     <input type="hidden" name="password" tal:attributes="value password" />
                     <input type="hidden" name="download_type" value="all" />
-                    <input id="downloadProject" name="submit" type="submit" value="PREVIEW" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
+                    <!--input id="downloadProject" data-prova="coso" name="submit" type="submit" value="XPREVIEW" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" / -->
                 </form>
                 <a href="#" class="filter"> <span class="arrow-top "></span></a>
 
@@ -314,6 +316,17 @@
                                 </ul>
                 -->               
                 <a tal:attributes="href string:${basepath}editlog/${jid}-${password}" class="editlog">Editing Log</a>
+                <tal:block tal:condition="php: empty(logged_user)">
+                    <div style='float:right; margin-left:50px' id='welcomebox'>
+                        <span>Anonymous</span> (<a id='loginlink' tal:attributes="href incomingUrl">login</a>)
+                    </div>
+                </tal:block>
+
+                <tal:block tal:condition="php: !empty(logged_user)">
+                    <div style='float:right; margin-left:50px' id='welcomebox'>
+                        <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
+                    </div>
+                </tal:block>
 
                 <p >Progress:</p>
                 <div class="meter">
@@ -325,7 +338,7 @@
                 </div>
                 <p style="margin-left:-10px;margin-right:10px"><span id="stat-progress" tal:content="php:(floor(job_stats['TRANSLATED_PERC']+job_stats['APPROVED_PERC']))">0</span>%</p>
                 <ul>
-                    <li id="stat-eqwords">Total Words: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong></li>
+                    <li id="stat-eqwords">Payable Words: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong></li>
                     <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
                     <!--
                     <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
@@ -385,40 +398,52 @@
 
             </div>
         </footer>
-<div class="download-chrome">
-<a href="#" class="close"></a>
-Your downloaded file will appear on the bar below in a few seconds.<br/>
-<img src="${basepath}public/img/arrowdown.png" width="18px" style="margin-top:5px" /> 
-</div>
+        <div class="download-chrome">
+            <a href="#" class="close"></a>
+            Your downloaded file will appear on the bar below in a few seconds.<br/>
+            <img src="${basepath}public/img/arrowdown.png" width="18px" style="margin-top:5px" /> 
+        </div>
 
         <div class="grayed" ></div>
+        <div class="blacked" ></div>
+
+        <a id="segmentPointer" href="#" title="Go to the active segment"></a>
+
+        <div id="dialog" class="dialog" title="Basic dialog">
+            <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>
+            <form action="" style="font-size: 70%"><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>
+        </div>
+        <div id="alertConfirmTranslation" class="dialog" title="Attention">
+            <p>To confirm your translation, please press on Translated or use the shortcut CTRL+Enter.</p>
+            <form action="" style="font-size: 70%"><input id="hideAlertConfirmTranslation" type="checkbox" value="" />Do not display again </form>
+        </div>
         <!--
-                <div class="end-message-box">
-                <div class="end-message-col1">
-                <h3>Faxová úloha<span>*</span>!</h3>
-               <img src="${basepath}public/img/end-message.jpg" /> 
-               <p><span>*</span>Now you know how to say “<strong>Good Job</strong>” in Czech.</p>
-               </div>
-                <div class="end-message-col2">
-        <h4>It took you only <strong>30 minutes</strong> <br />
-          to finish the translation!</h4>
-        
-                                        <form id="fileDownload" action="${basepath}" method="post">
-                                                <input type="hidden" name="action" value="downloadFile" />
-                                                <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
-                                                <input type="hidden" name="id_file" value="" />
-                                                <input type="hidden" name="filename" tal:attributes ="value string:${pname}.xliff" />
-                                                <input id="downloadProject" name="submit" type="submit" value="DOWNLOAD PROJECT" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
-                                        </form>
+                        <div class="end-message-box">
+                        <div class="end-message-col1">
+                        <h3>Faxová úloha<span>*</span>!</h3>
+                       <img src="${basepath}public/img/end-message.jpg" /> 
+                       <p><span>*</span>Now you know how to say “<strong>Good Job</strong>” in Czech.</p>
+                       </div>
+                        <div class="end-message-col2">
+                <h4>It took you only <strong>30 minutes</strong> <br />
+                  to finish the translation!</h4>
                 
-                       <a href="#" class="downloadtr-button" style="background:#f5f5f5;color:#333">START NEW PROJECT</a>
-        
-          
-                        <a href="#" class="downloadtr-button" style="background:#f5f5f5;color:#333"><strong>NOTIFY YOUR PM</strong> <br />
-        <span>that you are available for new work</span></a>
-        <input name="" type="text" value="http://23-P124#completed" onClick="select()"/>
-                        </div>
-                        </div>
+                                                <form id="fileDownload" action="${basepath}" method="post">
+                                                        <input type="hidden" name="action" value="downloadFile" />
+                                                        <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
+                                                        <input type="hidden" name="id_file" value="" />
+                                                        <input type="hidden" name="filename" tal:attributes ="value string:${pname}.xliff" />
+                                                        <input id="downloadProject" name="submit" type="submit" value="DOWNLOAD PROJECT" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
+                                                </form>
+                        
+                               <a href="#" class="downloadtr-button" style="background:#f5f5f5;color:#333">START NEW PROJECT</a>
+                
+                  
+                                <a href="#" class="downloadtr-button" style="background:#f5f5f5;color:#333"><strong>NOTIFY YOUR PM</strong> <br />
+                <span>that you are available for new work</span></a>
+                <input name="" type="text" value="http://23-P124#completed" onClick="select()"/>
+                                </div>
+                                </div>
         -->
         <script src="${basepath}public/js/lib/snapengage.js"></script>
     </body>

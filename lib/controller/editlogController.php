@@ -28,7 +28,7 @@ class editlogController extends viewcontroller {
 
         $this->job_stats = CatUtils::getStatsForJob($this->jid);
         
-
+//echo "<pre>";print_r($this->data);exit;
 
 //    	log::doLog('SOURCE_CODE:');
 //		$coso = $this->data;
@@ -46,7 +46,8 @@ class editlogController extends viewcontroller {
         $this->template->source_code = $this->data[0]['source_lang'];
         $this->template->target_code = $this->data[0]['target_lang'];
         $this->template->job_stats = $this->job_stats;
-
+		$this->template->build_number = INIT::$BUILD_NUMBER;
+        
         //echo "<pre>";
         //print_r ($this->data); exit;
     }

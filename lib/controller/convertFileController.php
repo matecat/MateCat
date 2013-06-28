@@ -23,8 +23,8 @@ class convertFileController extends ajaxcontroller {
         $this->source_lang = $this->get_from_get_post("source_lang");
         $this->target_lang = $this->get_from_get_post("target_lang");
 
-        $this->intDir = $_SERVER['DOCUMENT_ROOT'] . '/storage/upload/' . $_COOKIE['upload_session'];
-        $this->errDir = $_SERVER['DOCUMENT_ROOT'] . '/storage/conversion_errors/' . $_COOKIE['upload_session'];
+        $this->intDir = INIT::$UPLOAD_REPOSITORY.'/' . $_COOKIE['upload_session'];
+        $this->errDir = INIT::$STORAGE_DIR.'/conversion_errors/' . $_COOKIE['upload_session'];
 
     }
 
@@ -37,7 +37,7 @@ class convertFileController extends ajaxcontroller {
        
 
         $ext = pathinfo($this->file_name, PATHINFO_EXTENSION);
-        //log::doLog($ext);
+        log::doLog('FILE NAME: ' . $this->file_name);
         //if ($this->file_name)
 
         $file_path = $this->intDir . '/' . $this->file_name;
@@ -68,7 +68,14 @@ class convertFileController extends ajaxcontroller {
             $converter = new fileFormatConverter();
             //$filename = pathinfo($this->file_name, PATHINFO_FILENAME);
 //log::doLog("fp is $file_path");
-            $convertResult = $converter->convertToSdlxliff($file_path, $this->source_lang, $this->target_lang);
+			if(strpos($this->target_lang,',')!==FALSE){
+				$single_language=explode(',',$this->target_lang);
+				$single_language=$single_language[0];
+			}else{
+				$single_language=$this->target_lang;
+				
+			}
+			$convertResult = $converter->convertToSdlxliff($file_path, $this->source_lang, $single_language);
 //		log::doLog("CONVERT RESULT : " . $convertResult['isSuccess']);
 
             if ($convertResult['isSuccess'] == 1) {
@@ -97,7 +104,7 @@ class convertFileController extends ajaxcontroller {
                 }
                 return 0;
             } else {
-                if ($convertResult['errorMessage'] == "Error: failed to create SDLXLIFF.") {
+                if (stripos($convertResult['errorMessage'] ,"failed to create SDLXLIFF.")!==false) {
                     $convertResult['errorMessage'] = "Error: failed importing file.";
                 }
                 $this->result['code'] = 0;

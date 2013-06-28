@@ -31,6 +31,25 @@ $(document).ready(function() {
         $(".advanced-box").toggle('fast');
         $(".more").toggleClass('minus');
     });
+
+    $("#source-lang").on('change', function(e){
+		console.log('source language changed');
+		var num = 0;
+		$('.template-download .name').each(function(){
+			if($(this).parent('tr').hasClass('failed')) return;
+			if($(this).text().split('.')[$(this).text().split('.').length-1] != 'sdlxliff') num++;
+		});
+//		console.log(num);
+		if(!$('.template-download').length) return;
+        if (num) {
+	        var m = confirm('Source language changed. The files must be reimported.');
+	        if(m) {
+	            UI.restartConversions();
+	        }            	
+        }
+     
+
+    });
          
     $("input.uploadbtn").click(function(e) {
         $('body').addClass('creating');
@@ -90,17 +109,46 @@ $(document).ready(function() {
     });    		
   
     $("#multiple-link").click(function(e) {          
-        $("div.popup-languages").show();
-        $("div.grayed").show();
+        e.preventDefault();
+        $("div.grayed").fadeIn();
+        $("div.popup-languages").fadeIn('fast');
+        var tlAr = $('#target-lang').val().split(',');
+        $.each(tlAr, function() {
+	        var ll = $('.popup-languages .listlang li #'+this);
+	        ll.parent().addClass('on');
+	        ll.attr('checked','checked');
+        });
+        $('.popup-languages .header .number').text($(".popup-languages .listlang li.on").length);
     });
 			
-			
-			
+	$(".popup-languages .listlang li label").click(function(e) {          
+        $(this).parent().toggleClass('on');
+        var c = $(this).parent().find('input');
+        if(c.attr('checked') == 'checked') {
+        	c.removeAttr('checked');        	
+        } else {
+        	c.attr('checked','checked');
+        }
+        $('.popup-languages .header .number').text($(".popup-languages .listlang li.on").length);
+    });
+	$(".popup-languages .listlang li input").click(function(e) {          
+        $(this).parent().toggleClass('on');
+        $('.popup-languages .header .number').text($(".popup-languages .listlang li.on").length);
+    });		
 			
     $(".close").click(function(e) {          
         $("div.popup-languages").hide();
         $("div.grayed").hide();
     });
+
+    $("#target-lang").change(function(e) {          
+        $('.popup-languages li.on').each(function(){
+			$(this).removeClass('on').find('input').removeAttr('checked');
+		});
+		$('.translate-box.target h2 .extra').remove();
+    });
+
+
 
     $("input, select").change(function(e) {          
         $('.error-message').hide();

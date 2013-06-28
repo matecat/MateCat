@@ -31,7 +31,7 @@ class analyzeController extends viewcontroller {
     private $num_segments_analyzed = 0;
 
     public function __construct() {
-        parent::__construct();
+        parent::__construct(true);
         parent::makeTemplate("analyze.html");
 
 
@@ -42,11 +42,14 @@ class analyzeController extends viewcontroller {
 
     public function doAction() {
         $project_data = getProjectData($this->pid, $this->password);
+//echo "<pre>";print_r($project_data);exit;
         $lang_handler = languages::getInstance();
         if (empty($project_data)) {
             //echo "ddddd";exit;
             $this->project_not_found = true;
         }
+        
+        //echo "<pre>";print_r ($project_data);exit;
         foreach ($project_data as &$pdata) {
             // echo "<pre>";   print_r ($pdata);
             //print_r ($pdata); exit;
@@ -238,6 +241,9 @@ class analyzeController extends viewcontroller {
         $this->template->project_status = $this->project_status;
         $this->template->num_segments = $this->num_segments;
         $this->template->num_segments_analyzed = $this->num_segments_analyzed;
+        $this->template->logged_user=trim($this->logged_user['first_name']." ".$this->logged_user['last_name']);
+	$this->template->build_number = INIT::$BUILD_NUMBER;
+
     }
 
 }

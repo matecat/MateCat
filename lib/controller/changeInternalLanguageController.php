@@ -31,7 +31,7 @@ class changeInternalLanguageController extends ajaxcontroller {
             $this->result['error'][] = array("code" => -3, "message" => "missing target_language");
         }
 
-		$intDir=$_SERVER['DOCUMENT_ROOT'].'/storage/upload/'.$_COOKIE['upload_session'];
+		$intDir=INIT::$UPLOAD_REPOSITORY.'/'.$_COOKIE['upload_session'];
 		$filename = $intDir.'/'.$this->file_name;
 		
 		if (file_exists($filename)) {
