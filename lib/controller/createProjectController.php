@@ -80,9 +80,7 @@ class createProjectController extends ajaxcontroller {
 		if (($key = array_search($this->source_language, $sourceLangAr)) !== false) {
 			unset($sourceLangAr[$key]);
 		}
-		//log::doLog('SOURCE LANG AR: ' , $sourceLangAr);
 		array_unshift($sourceLangAr, $this->source_language);
-		//log::doLog('SOURCE LANG AR 1: ' , $sourceLangAr);
 		if ($sourceLangAr == '_EMPTY_')
 			$sourceLangAr = "";
 		$newCookieVal = "";
@@ -112,9 +110,7 @@ class createProjectController extends ajaxcontroller {
 		if (($key = array_search($this->target_language, $targetLangAr)) !== false) {
 			unset($targetLangAr[$key]);
 		}
-		//log::doLog('TARGET LANG AR: ' , $targetLangAr);
 		array_unshift($targetLangAr, $this->target_language);
-		//log::doLog('TARGET LANG AR 1: ' , $targetLangAr);
 		if ($targetLangAr == '_EMPTY_')
 			$targetLangAr = "";
 		$newCookieVal = "";
@@ -133,27 +129,7 @@ class createProjectController extends ajaxcontroller {
 		}
 
 		setcookie("targetLang", $newCookieVal, time() + (86400 * 365));
-
-
-
-		/*
-		   $serializedArLang = $_COOKIE["languages"];
-		   if($serializedArLang == '_EMPTY_') $serializedArLang = "";
-		   $arLang = explode('||',urldecode($serializedArLang));
-
-		   $prova = array("foo", "bar", "hallo", "world");
-		   $provaSerialized = serialize($prova);
-		   $provaUnserialized = unserialize($provaSerialized);
-
-		 */
-
-		/*
-		//log::doLog('LANGUAGES COOKIE: ' . $serializedArLang);
-		//log::doLog('ARLANG UNSERIALIZED LENGTH: ' . count($arLang));
-		if($serializedArLang == '') {
-		//			$newLangValue =
-		}
-		 */
+		
 
 
 
@@ -168,10 +144,6 @@ class createProjectController extends ajaxcontroller {
 		// project name validation        
 		$pattern = "/^[\p{L}\ 0-9a-zA-Z_\.\-]+$/u";
 		if (!preg_match($pattern, $this->project_name, $rr)) {
-			$kkk = str_split($this->project_name);
-			foreach ($kkk as $kk) {
-				//log::doLog($kk, ord($kk));
-			}
 			$this->result['errors'][] = array("code" => -5, "message" => "Invalid Project Name $this->project_name: it should only contain numbers and letters!");
 			//	        $this->result['project_name_error'] = $this->project_name;
 			return false;
@@ -182,7 +154,6 @@ class createProjectController extends ajaxcontroller {
 		$ppassword = CatUtils::generate_password();
 
 		$ip = Utils::getRealIpAddr();
-
 		$id_customer='translated_user';
 
 		$pid = insertProject($id_customer, $this->project_name, $analysis_status, $ppassword, $ip);
@@ -201,7 +172,7 @@ class createProjectController extends ajaxcontroller {
 		}
 
 
-		$intDir = $_SERVER['DOCUMENT_ROOT'] . '/storage/upload/' . $_COOKIE['upload_session'];
+        $intDir = INIT::$UPLOAD_REPOSITORY."/". $_COOKIE['upload_session'];
 		$fidList=array();
 		foreach ($arFiles as $file) {
 
@@ -209,11 +180,11 @@ class createProjectController extends ajaxcontroller {
 			$fileSplit = explode('.', $file);
 			$mimeType = strtolower($fileSplit[count($fileSplit) - 1]);
 			//echo $mimeType; exit;
-			//log::doLog('MIMETYPE: ' . $mimeType);
+			//        	log::doLog('MIMETYPE: ' . $mimeType);
 
 			$original_content = "";
 			if (($mimeType != 'sdlxliff') && ($mimeType != 'xliff') && ($mimeType != 'xlf') && (INIT::$CONVERSION_ENABLED)) {
-				//log::doLog('NON XLIFF');
+				//        		log::doLog('NON XLIFF');
 				$fileDir = $intDir . '_converted';
 				$filename_to_catch = $file . '.sdlxliff';
 
@@ -232,7 +203,6 @@ class createProjectController extends ajaxcontroller {
 
 			$filename = $fileDir . '/' . $filename_to_catch;
 			//echo $filename;exit;
-			//log::doLog('FILENAME: ' . $filename);
 
 			if (!file_exists($filename)) {
 				$this->result['errors'][] = array("code" => -6, "message" => "File not found on server after upload.");
@@ -252,8 +222,6 @@ class createProjectController extends ajaxcontroller {
 
 		foreach ($this->target_language as $target){
 			$password = CatUtils::generate_password();
-
-			//if user is logged, create the project on his behalf
 			if(isset($_SESSION['cid']) and !empty($_SESSION['cid'])){
 				$owner=$_SESSION['cid'];
 			}else{
@@ -268,7 +236,7 @@ class createProjectController extends ajaxcontroller {
 
 
 
-		//log::doLog('DELETING DIR: ' . $intDir);
+		log::doLog('DELETING DIR: ' . $intDir);
 		$this->deleteDir($intDir);
 		if (is_dir($intDir . '_converted')) {
 			$this->deleteDir($intDir . '_converted');
@@ -293,36 +261,11 @@ class createProjectController extends ajaxcontroller {
 				$this->result['errors'][] = array("code" => -7, "message" => "Not able to import this XLIFF file. ($file)");
 			}
 		}
-		// tolgo la path in pending_uploads
 
-		//log::doLog($this->result);
-
-		// print_r ( $this->result); exit;
 		setcookie("upload_session", "", time() - 10000);
 	}
 
-	//    public function create_project_name($namespace = '') {
-	//        return "";
-	//        static $guid = '';
-	//        $uid = uniqid("", true);
-	//        $data = $namespace;
-	//        $data .= $_SERVER['REQUEST_TIME'];
-	//        $data .= $_SERVER['HTTP_USER_AGENT'];
-	//        $data .= $_SERVER['REMOTE_ADDR'];
-	//        $hash = strtoupper(hash('ripemd128', $uid . $guid . md5($data)));
-	//        $guid = '' .
-	//                substr($hash, 0, 2) .
-	//                '' .
-	//                substr($hash, 2, 2) .
-	//                '' .
-	//                substr($hash, 4, 2) .
-	//                '' .
-	//                substr($hash, 6, 2) .
-	//                '' .
-	//                substr($hash, 8, 2) .
-	//                '';
-	//        return "-$guid";
-	//    }
+
 
 
 	public static function deleteDir($dirPath) {

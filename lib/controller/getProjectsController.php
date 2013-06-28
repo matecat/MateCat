@@ -81,9 +81,14 @@ class getProjectsController extends ajaxcontroller {
 		$time_loop=0;
 		$start = (($this->page - 1) * $this->step);
 
-		$projects = ManageUtils::queryProjects($start,$this->step,$this->search_in_pname,$this->search_source,$this->search_target,$this->search_status,$this->search_onlycompleted,$this->filter_enabled,$this->lang_handler,$this->project_id);
+// TEMPORARY HACK TO ACCESS ALL CURRENT PROJECTS Andrea 26/6/2013
+		$pattern = '/^(127.0.0.1|10.30.1|10.3.14|10.3.15|192.168.94.100)/';
+		$getAll = preg_match($pattern, $_SERVER['REMOTE_ADDR']);
+// END HACK	
 
-		$projnum = getProjectsNumber($start,$this->step,$this->search_in_pname,$this->search_source,$this->search_target,$this->search_status,$this->search_onlycompleted,$this->filter_enabled);
+		$projects = ManageUtils::queryProjects($start,$this->step,$this->search_in_pname,$this->search_source,$this->search_target,$this->search_status,$this->search_onlycompleted,$this->filter_enabled,$this->lang_handler,$this->project_id,$getAll);
+
+		$projnum = getProjectsNumber($start,$this->step,$this->search_in_pname,$this->search_source,$this->search_target,$this->search_status,$this->search_onlycompleted,$this->filter_enabled,$getAll);
 
 		$this->result['data'] = json_encode($projects);
 		$this->result['page'] = $this->page;

@@ -527,10 +527,10 @@ convertFile = function(fname,filerow,filesize) {
            		var msg = (!d.errors[0].message)? "Converter rebooting. Try again in two minutes" : d.errors[0].message;
            		var message = ((extension == 'pdf')&&(d.errors[0].code == '-2'))? 'Error: no translatable content found: maybe a scanned file?' : msg;
 				if(extension == 'docx') {
-					message = "Conversion error. Try converting to DOC.";
+					message = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOC.";
 				}
 				if((extension == 'doc')||(extension == 'rtf')) {
-					message = "Conversion error. Try converting to DOCX.";
+					message = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOCX.";
 				}
 				if(extension == 'inx') {
 					message = "Conversion Error. Try to commit changes in InDesign before importing.";

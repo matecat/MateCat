@@ -98,15 +98,20 @@ class changeJobsStatusController extends ajaxcontroller {
 			}
 	log::doLog('1 STATUS:' , $this->new_status);
 
+// TEMPORARY HACK TO ACCESS ALL CURRENT PROJECTS Andrea 26/6/2013
+		$pattern = '/^(10.30.1|10.3.14|10.3.15|192.168.94.100)/';
+		$getAll = preg_match($pattern, $_SERVER['REMOTE_ADDR']);
+// END HACK	
+
 			$st = updateJobsStatus($this->res_type,$this->res_id,$this->new_status,$this->only_if,$this->undo);
 
 			// select the first item of the next page, to return 
 
 			$start = (($this->page - 1) * $this->step)+$this->step-1;
 			
-			$projects = ManageUtils::queryProjects($start,1,$this->search_in_pname,$this->search_source,$this->search_target,$this->search_status,$this->search_onlycompleted,$this->filter_enabled,$this->lang_handler,$this->project_id);
+			$projects = ManageUtils::queryProjects($start,1,$this->search_in_pname,$this->search_source,$this->search_target,$this->search_status,$this->search_onlycompleted,$this->filter_enabled,$this->lang_handler,$this->project_id,$getAll);
 
-			$projnum = getProjectsNumber($start,$this->step,$this->search_in_pname,$this->search_source,$this->search_target,$this->search_status,$this->search_onlycompleted,$this->filter_enabled);
+			$projnum = getProjectsNumber($start,$this->step,$this->search_in_pname,$this->search_source,$this->search_target,$this->search_status,$this->search_onlycompleted,$this->filter_enabled,$getAll);
 
 	        $this->result['code'] = 1;
 	        $this->result['data'] = "OK";

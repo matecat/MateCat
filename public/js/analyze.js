@@ -45,7 +45,7 @@ UI = {
         $(".part3").click(function(e){
             //            console.log('dd');
             e.preventDefault();
-            $(".part3files").toggleClass('open');
+            $(this).parents('table').find(".part3files").toggleClass('open');
         });
         
 

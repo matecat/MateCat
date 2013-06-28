@@ -17,7 +17,7 @@ class checkFileConversionController extends ajaxcontroller {
                   $this->result['errors'][] = array("code" => -1, "message" => "Missing file name.");
                   return false;
             }
-            $intDir = $_SERVER['DOCUMENT_ROOT'] . '/storage/upload/' . $_COOKIE['upload_session'] . '_converted';
+            $intDir = INIT::$UPLOAD_REPOSITORY.'/'. $_COOKIE['upload_session'] . '_converted';
 
             $file_path = $intDir . '/' . $this->file_name . '.sdlxliff';
             

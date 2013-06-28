@@ -5,15 +5,16 @@
         <title>Manage Projects - Matecat</title>
         <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
         <meta name="viewport" content="width=device-width"/>
-        <link href="${basepath}public/css/style.css" rel="stylesheet" type="text/css" />
-        <link rel="stylesheet" href="${basepath}public/css/fieldtest.css"/>
+        <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" href="${basepath}public/css/fieldtest.css?build=${build_number}"/>
 
-        <script type="text/javascript" src="/public/js/lib/jquery.js"></script>
-        <script type="text/javascript" src="/public/js/lib/jquery.tablesorter.min.js"></script>
-        <script type="text/javascript" src="/public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
-        <script type="text/javascript" src="/public/js/utils.js"></script>
-        <script type="text/javascript" src="/public/js/manage.js"></script>
-    <script type='text/javascript' src="${basepath}public/js/logout.js"></script>
+        <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
+        <script type="text/javascript" src="${basepath}public/js/lib/jquery.tablesorter-fork-mottie.js?build=${build_number}"></script>
+        <script type="text/javascript" src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js?build=${build_number}"></script>
+        <script type="text/javascript" src="${basepath}public/js/lib/jquery.hotkeys.js?build=${build_number}"></script>
+        <script type="text/javascript" src="${basepath}public/js/utils.js?build=${build_number}"></script>
+        <script type="text/javascript" src="${basepath}public/js/manage.js?build=${build_number}"></script>
+    <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
         <script type="text/javascript">
             var config = {
@@ -47,7 +48,7 @@
 
 			<div class="block right">
 				<input id="exec-filter" type="submit" class="btn" value="FILTER" />			
-				<input id="clear-filter" type="button" class="btn" value="CLEAR" />			
+				<!--input id="clear-filter" type="button" class="btn" value="CLEAR" /-->			
 			</div>
 
 			<div class="block">

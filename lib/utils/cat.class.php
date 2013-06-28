@@ -83,17 +83,7 @@ class CatUtils {
 		return array($hours, $minutes, $seconds, $usec);
 	}
 
-	private function stripTagesFromSource($text) {
-		$pattern_g_o = '|(<.*?>)|';
-		$pattern_g_c = '|(</.*?>)|';
-		$pattern_x = '|(<.*?/>)|';
-
-		$text = preg_replace($pattern_x, "", $text);
-
-		$text = preg_replace($pattern_g_o, "", $text);
-		$text = preg_replace($pattern_g_c, "", $text);
-		return $text;
-	}
+	
 
 	private function placehold_xliff_tags ($segment){
 		//$segment=preg_replace('|<(g\s*.*?)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
@@ -129,7 +119,20 @@ class CatUtils {
 		$segment=str_replace(GTPLACEHOLDER,"&gt;",$segment);
 		return $segment;
 	}
+        
+        public static function stripTags($text) {
+		$pattern_g_o = '|(<.*?>)|';
+		$pattern_g_c = '|(</.*?>)|';
+		$pattern_x = '|(<.*?/>)|';
 
+		$text = preg_replace($pattern_x, "", $text);
+
+		$text = preg_replace($pattern_g_o, "", $text);
+		$text = preg_replace($pattern_g_c, "", $text);
+		return $text;
+	}
+
+        
 	public static function view2rawxliff($segment){
 		// input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
 		// output : <g> bang &amp; olufsen are > 555 </g> <x/>
@@ -152,7 +155,10 @@ class CatUtils {
 
 
 		$segment= preg_replace('|<(.*?)>|si', "&lt;$1&gt;",$segment);
-		$segment=self::restore_xliff_tags_for_wiew($segment);		
+		$segment=self::restore_xliff_tags_for_wiew($segment);	
+                //$segment=$segment.";;;;";
+                $segment=  str_replace("&nbsp;", "++", $segment);
+                //echo "$segment---"; exit;
 		return $segment;
 	}
 
@@ -249,8 +255,11 @@ class CatUtils {
 			$seg['pe_effort_perc'] .= "%";
 			$seg['sug_view']=html_entity_decode($seg['sug']);
 			if ($seg['sug']<>$seg['translation']) { 
-				//$seg['diff'] = MyMemory::diff_html($seg['sug'], $seg['translation']);
 				$seg['diff'] = MyMemory::diff_tercpp($seg['sug'], $seg['translation']);
+                                if (!$seg['diff']){
+                                    // TER NOT WORKING : fallback to old diff viewer
+                                    $seg['diff'] = MyMemory::diff_html($seg['sug'], $seg['translation']);
+                                }
 			} else { $seg['diff']=''; }
 
 			// BUG: While suggestions source is not correctly set

@@ -1,6 +1,7 @@
 <?php
 
 set_time_limit(0);
+define ("BOM","\xEF\xBB\xBF");
 
 //include INIT::$UTILS_ROOT . "/cat.class.php";
 include INIT::$UTILS_ROOT . "/langs/languages.class.php";
@@ -21,7 +22,15 @@ class fileFormatConverter {
             INIT::obtain();
         }
         $this->opt['httpheader'] = array("Content-Type: application/x-www-form-urlencoded;charset=UTF-8");
-	$this->lang_handler=Languages::getInstance();
+        $this->lang_handler=  Languages::getInstance();
+    }
+
+    private function addBOM($string) {
+        return BOM . $string;
+    }
+
+    private function hasBOM($string) {
+        return (substr($string, 0, 3) == BOM);
     }
 
     private function extractUidandExt(&$content) {
@@ -102,7 +111,6 @@ class fileFormatConverter {
 
         //print_r ($info);
         //echo "$output\n\n";
-	//log::doLog("CURL CONVERSION OUTPUT " , $output);
         return $output;
     }
 
@@ -113,6 +121,22 @@ class fileFormatConverter {
         $fileContent = file_get_contents($file_path);
         $extension = pathinfo($file_path, PATHINFO_EXTENSION);
         $filename = pathinfo($file_path, PATHINFO_FILENAME);
+        if (strtoupper($extension) == 'TXT') {
+            $encoding=mb_detect_encoding($fileContent);
+            if ($encoding!='UTF-8'){
+                log::doLog("convert from $encoding to UTF8");
+                $fileContent=  iconv($encoding, "UTF-8", $fileContent);
+            }
+            log::doLog("is TXT ");
+
+            if (!$this->hasBOM($fileContent)) {
+                log::doLog("add BOM before");
+                log::doLog($fileContent);
+                $fileContent = $this->addBOM($fileContent);
+                log::doLog("add BOM after");
+                log::doLog($fileContent);
+            }
+        }
 
 
         $data['documentContent'] = base64_encode($fileContent);
@@ -121,10 +145,10 @@ class fileFormatConverter {
 //echo "-2 - " . memory_get_usage(true)/1024/1024;
         $url = "$this->ip:$this->port/$this->toXliffFunction";
 //        echo $url;
-log::doLog("$file_path, $source_lang, $target_lang");
-log::doLog($this->lang_handler->getSDLStudioCode($source_lang).", ".$this->lang_handler->getSDLStudioCode($target_lang));
+
         $data['fileExtension'] = $extension;
         $data['fileName'] = "$filename.$extension";
+      //  echo $source_lang; exit;
         $data['sourceLocale'] = $this->lang_handler->getSDLStudioCode($source_lang);
         $data['targetLocale'] = $this->lang_handler->getSDLStudioCode($target_lang);
 

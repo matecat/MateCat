@@ -1,6 +1,5 @@
 <?
 
-include_once INIT::$UTILS_ROOT . "/cat.class.php";
 
 
 class XliffSAXTranslationReplacer{
@@ -263,8 +262,10 @@ class XliffSAXTranslationReplacer{
 			$tag_mismatch=true;
 			log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".$outcome['debug'].")");
 		}
-		if(empty($seg['translation']) or $tag_mismatch){
+                if(empty($seg['translation'])){
 			$translation=$seg['segment'];
+                }elseif ($tag_mismatch){
+                    $translation= strip_tags($seg['translation']);
 		}else{
 			$translation=$seg['translation'];
 		}

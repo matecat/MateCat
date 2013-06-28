@@ -1003,7 +1003,7 @@ function getProjectData($pid, $password) {
 	return $results;
 }
 
-function getProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filtering,$project_id) {
+function getProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filtering,$project_id,$getAll) {
 
  	//	$pn = ($search_in_pname)? "where p.name like '%$search_in_pname%'" : "";
     session_start();
@@ -1014,7 +1014,7 @@ function getProjects($start,$step,$search_in_pname,$search_source,$search_target
 	$oc_query = ($search_onlycompleted)? " j.completed=1 and" : "";
 	$single_query = ($project_id)? " j.id_project=$project_id and" : "";
 	$owner = $_SESSION['cid'];
-	$owner_query = " j.owner='$owner' and";
+	$owner_query = ($getAll)? "" : " j.owner='$owner' and";
 //	$owner_query = "";
 		
 			/*
@@ -1066,7 +1066,7 @@ function getProjects($start,$step,$search_in_pname,$search_source,$search_target
 	return $results;
 }
 
-function getProjectsNumber($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filtering) {
+function getProjectsNumber($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filtering,$getAll) {
 
 	//	$pn = ($search_in_pname)? "where p.name like '%$search_in_pname%'" : "";
 
@@ -1076,7 +1076,7 @@ function getProjectsNumber($start,$step,$search_in_pname,$search_source,$search_
 	$sst_query = ($search_status)? " j.status_owner='$search_status' and" : "";
 	$oc_query = ($search_onlycompleted)? " j.completed=1 and" : "";
 	$owner = $_SESSION['cid'];
-	$owner_query = " j.owner='$owner' and";
+	$owner_query = ($getAll)? "" : " j.owner='$owner' and";
 //	$owner_query = "";
 	
 	/*

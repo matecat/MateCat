@@ -42,12 +42,14 @@ class analyzeController extends viewcontroller {
 
 	public function doAction() {
 		$project_data = getProjectData($this->pid, $this->password);
-		log::doLog(print_r($project_data,true));
+		//echo "<pre>";print_r($project_data);exit;
 		$lang_handler = languages::getInstance();
 		if (empty($project_data)) {
 			//echo "ddddd";exit;
 			$this->project_not_found = true;
 		}
+
+		//echo "<pre>";print_r ($project_data);exit;
 		foreach ($project_data as &$pdata) {
 			// echo "<pre>";   print_r ($pdata);
 			//print_r ($pdata); exit;
@@ -123,11 +125,6 @@ class analyzeController extends viewcontroller {
 			$this->jobs[$jid]['target_short'] = $target_short;
 			$this->jobs[$jid]['password'] = $password;
 			$this->jobs[$jid]['files'][] = $pdata;
-
-			//calculate total word counts per job (summing different files)
-			$this->jobs[$jid]['total_raw_word_count']+=$pdata['file_raw_word_count'];
-			//format the total (yeah, it's ugly doing it every cycle)
-			$this->jobs[$jid]['total_raw_word_count_print']=number_format($this->jobs[$jid]['total_raw_word_count'], 0, ".", ",");
 		}
 		//echo "<pre>";
 		// print_r ($this->jobs);exit;
@@ -245,7 +242,10 @@ class analyzeController extends viewcontroller {
 		$this->template->num_segments = $this->num_segments;
 		$this->template->num_segments_analyzed = $this->num_segments_analyzed;
 		$this->template->logged_user=trim($this->logged_user['first_name']." ".$this->logged_user['last_name']);
+		$this->template->build_number = INIT::$BUILD_NUMBER;
+
 	}
+	>>>>>>> 362b3c1d8c67654b6b23d44d68affc6b0ba10afe
 
 }
 

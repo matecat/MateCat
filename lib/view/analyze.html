@@ -5,7 +5,7 @@
         <title>Volume Analysis - MateCat</title>
         <meta name="description" content="MateCat allows you to get more matches than any other CAT tool."/>
         <meta name="viewport" content="width=device-width"/>
-        <link rel="stylesheet" href="/public/css/analyze.css"/>
+        <link rel="stylesheet" href="${basepath}public/css/analyze.css?build=${build_number}"/>
 
         <script type="text/javascript">
             var config = {
@@ -15,24 +15,20 @@
             }
         </script>
 
-        <script type="text/javascript" src="/public/js/lib/jquery.js"></script>
-        <script type="text/javascript" src="/public/js/lib/jquery-ui.js"></script>
-        <script type="text/javascript" src="/public/js/utils.js"></script>
-        <script type="text/javascript" src="/public/js/analyze.js"></script>
-	<script type='text/javascript' src="/public/js/logout.js"></script>
+        <script type="text/javascript" src="${basepath}public/js/lib/jquery.js"></script>
+        <script type="text/javascript" src="${basepath}public/js/lib/jquery-ui.js"></script>
+        <script type="text/javascript" src="${basepath}public/js/utils.js?build=${build_number}"></script>
+        <script type="text/javascript" src="${basepath}public/js/analyze.js?build=${build_number}"></script>
+        <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
     </head>
 
 
     <body>
-
         <div tal:condition="true:project_not_found" metal:use-macro="unsupported_browser.html/project_not_found"/>
         <header>
             <div class="wrapper"> 
                 <a  href="${basepath}"  class="logo"></a>
             </div>
-<tal:block tal:condition="php: !empty(logged_user)">
-                <div style='float:right; margin-left:50px; color:white;' id='welcomebox'><span tal:content='logged_user'></span> (<a id='logoutlink' href='#' style='color:white'>logout</a>)</div>
-                </tal:block>
         </header>
 
     <content tal:condition="not:project_not_found">
@@ -51,7 +47,7 @@
                     <a href="#" class="approved-bar" title="Analyzing 0.0%" style="width:0%"></a>
                     <a href="#" id="close">close</a>
                 </div>
-               
+
             </div>
         </div>
 
@@ -131,12 +127,12 @@
             <div class="cl"></div>
 
             <p class="short-message"   >MateCat lets you re-use repeated content better. <br/>
-MateCat leverages MyMemory, Professional Machine Translation and internal fuzzy matches to make you save money and have a faster turnaround.
+                MateCat leverages MyMemory, Professional Machine Translation and internal fuzzy matches to make you save money and have a faster turnaround.
                 <br />*Equivalent words is how the industry count words after discounting repetition and matches against a desktop translation memory. Like Trados would have done. <!--<a href="">Learn More</a>.-->
             </p>
 
-<br/>
-<br/>
+            <br/>
+            <br/>
 
 
 
@@ -146,7 +142,7 @@ MateCat leverages MyMemory, Professional Machine Translation and internal fuzzy 
 
             <br/>
 
-    
+
             <br/>
             <div class="cl"></div>
             <!--  
@@ -229,7 +225,7 @@ MateCat leverages MyMemory, Professional Machine Translation and internal fuzzy 
                         <span tal:replace="job/source">English</span> &gt; <span tal:replace="job/target">Italian</span>
                     </h3>       
                     <table tal:attributes="id string:job-${repeat/job/key}" class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
-                  <tr>
+                        <tr>
                             <th style="border-left:1px solid #ccc;"> </th>
                             <th style="border-left:0">Payable</th>
                             <th>Total</th>
@@ -243,16 +239,16 @@ MateCat leverages MyMemory, Professional Machine Translation and internal fuzzy 
                             <th width="60">TM 100% in context</th>
                             <th width="60">Machine Translation</th>
                             <th width="60" class="empty">&nbsp;</th>
-                  </tr>
+                        </tr>
 
                         <tr>
-                           
-                            
+
+
                             <td style="font-style: italic;background:#fff;border-left:1px solid #ccc" colspan="3">
                                 Payable Rate Breakdown
                             </td>
-<!--                            <td >&nbsp;</td>
-                            <td>&nbsp;</td>-->
+                            <!--                            <td >&nbsp;</td>
+                                                        <td>&nbsp;</td>-->
                             <td class="editarea">100%</td>
                             <td class="editarea">30%</td>
                             <td class="editarea">60%</td>
@@ -279,7 +275,7 @@ MateCat leverages MyMemory, Professional Machine Translation and internal fuzzy 
                         <tr class="totaltable">
                             <td class="languages" style="border-left:1px solid #ccc">
                                 <a href="#" class="filedetails part3">File details</a> 
-                                                           </td>
+                            </td>
 
                             <td style="background:#c4df9b;">
                                 <strong class="stat_tot" tal:content="tm_analysis_wc_print">11,500</strong>                            </td>
@@ -323,7 +319,7 @@ MateCat leverages MyMemory, Professional Machine Translation and internal fuzzy 
                             <td class="stat_mt">0</td>
                         </tr -->
                     </table>
-              </tal:block>
+                </tal:block>
 
                 <div class="sendit">
                     <a href="#" class="uploadbtn split" style="float:right">Split / Merge</a>    
@@ -423,18 +419,18 @@ MateCat leverages MyMemory, Professional Machine Translation and internal fuzzy 
         </div>
     </content>
 
-	<footer>
+    <footer>
         <div class="wrapper">
 
-		<tal:block tal:condition="php: !empty(logged_user)">
-			<div id='authentication'>
-				<span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)</div>
-		</tal:block>
+            <tal:block tal:condition="php: !empty(logged_user)">
+                <div id='authentication'>
+                    <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)</div>
+            </tal:block>
 
         </div>
     </footer>
 
-<script src="${basepath}public/js/lib/snapengage.js"></script>
+    <script src="${basepath}public/js/lib/snapengage.js"></script>
 
 </body> 
 </html>

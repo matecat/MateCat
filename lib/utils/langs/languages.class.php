@@ -107,14 +107,18 @@ class Languages{
 
 	//get list of languages, as RFC3066
 	public static function getEnabledLanguages($localizationLang='en'){
-		//print_r (self::$map_rfc2obj); exit;
+		
 		foreach(self::$map_rfc2obj as $rfc=>$lang){
 			//if marked as enabled, add to result
 			if($lang['enabled']){
+                            //print_r ($lang);exit;
 				$code=$rfc;
-				$list[]=array('code'=>$code,'name'=>$lang['localized'][$localizationLang],'top'=>$lang['top']);
+                                $top=isset($lang['top'])?$lang['top']:'';
+				$list[]=array('code'=>$code,'name'=>$lang['localized'][$localizationLang],'top'=>$top);
+                                //$list[]=array('code'=>$code,'name'=>$lang['localized'][$localizationLang]);
 			}
 		}
+               // echo "<pre>";print_r ($list); exit;
 		return $list;
 	}
 }

@@ -52,44 +52,4 @@ while (1) {
 		//sleep(1);
 	}
 }
-
-
-
-/*
-
-   function volumeAnalysis($ws) {
-   while (1) {
-   $pid_list = getProjectForVolumeAnalysys('', 5);
-   if (empty($pid_list)) {
-   echo __FILE__.":".__FUNCTION__ . " no projects ready for volume analisys: wait 10 seconds\n";
-   log::doLog(__FILE__.":".__FUNCTION__ . " no projects ready fon volume analisys: wait 10 seconds");
-   sleep(10);
-   continue;
-   }
-
-   foreach ($pid_list as $pid_res) {
-   $pid = $pid_res['id'];
-
-   $segments = getSegmentsForVolumeAnalysys($pid);
-//print_r ($segments);exit;
-$fastReport = $ws->fastAnalysys($segments);
-
-
-
-$insertReportRes = insertAnalysis($fastReport['data'], $equivalentWordMapping);
-if ($insertReportRes < 0) {
-log::doLog(__FILE__.":".__FUNCTION__ . " insertAnalysis error on pid $pid");
-continue;
-}
-$change_res = changeProjectStatus($pid, "FAST_DONE");
-if ($change_res < 0) {
-log::doLog(__FILE__.":".__FUNCTION__ . " changeProjectStatus error on pid $pid");
-}
-sleep(1);
-}
-}
-}
- * 
- * 
- */
 ?>
