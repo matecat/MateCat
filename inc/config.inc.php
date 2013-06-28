@@ -101,15 +101,9 @@ class INIT {
         self::$STORAGE_DIR = self::$ROOT . "/storage";
         self::$LOG_REPOSITORY = self::$STORAGE_DIR . "/log_archive";
         self::$UPLOAD_REPOSITORY = self::$STORAGE_DIR . "/upload";
-<<<<<<< HEAD
-	self::$CONVERSIONERRORS_REPOSITORY=self::$ROOT."/storage/conversion_errors";
-        self::$CONVERSIONERRORS_REPOSITORY_WEB=self::$BASEURL."storage/conversion_errors";
-	self::$TMP_DOWNLOAD=self::$ROOT."/storage/tmp_download";
-=======
 	self::$CONVERSIONERRORS_REPOSITORY=self::$STORAGE_DIR."/conversion_errors";
         self::$CONVERSIONERRORS_REPOSITORY_WEB=self::$BASEURL."storage/conversion_errors";
 	self::$TMP_DOWNLOAD=self::$STORAGE_DIR ."/tmp_download";
->>>>>>> develop
         self::$TEMPLATE_ROOT = self::$ROOT . "/lib/view";
         self::$MODEL_ROOT = self::$ROOT . '/lib/model';
         self::$CONTROLLER_ROOT = self::$ROOT . '/lib/controller';
@@ -135,14 +129,8 @@ class INIT {
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
         self::$BUILD_NUMBER = '0.3.2';
         self::$VOLUME_ANALYSIS_ENABLED = true;
-<<<<<<< HEAD
-        
-        self::$RTL_LANGUAGES=array("he-IL");
-=======
 
 	self::$WARNING_POLLING_INTERVAL=10;//seconds
-        
->>>>>>> develop
         self::$SUPPORTED_FILE_TYPES = array(
             'Office' => array(
                 'doc' => array(''),
