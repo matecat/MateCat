@@ -255,8 +255,11 @@ class CatUtils {
 			$seg['pe_effort_perc'] .= "%";
 			$seg['sug_view']=html_entity_decode($seg['sug']);
 			if ($seg['sug']<>$seg['translation']) { 
-				//$seg['diff'] = MyMemory::diff_html($seg['sug'], $seg['translation']);
 				$seg['diff'] = MyMemory::diff_tercpp($seg['sug'], $seg['translation']);
+                                if (!$seg['diff']){
+                                    // TER NOT WORKING : fallback to old diff viewer
+                                    $seg['diff'] = MyMemory::diff_html($seg['sug'], $seg['translation']);
+                                }
 			} else { $seg['diff']=''; }
 
 			// BUG: While suggestions source is not correctly set

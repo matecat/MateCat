@@ -34,12 +34,6 @@
                     var renderStart = new Date();        </script>
         <script src="${basepath}public/js/loader.js?build=${build_number}"></script>
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
-
-
-
-
-
-
     </head>
     <body tal:condition="not:supportedBrowser">
         <div  metal:use-macro="unsupported_browser.html/unsupported"/>

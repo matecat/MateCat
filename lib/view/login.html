@@ -18,7 +18,7 @@
 			{
 			width: 100%;
 			height: 100%;
-			background: url(public/img/login_bg_1.jpg) left bottom no-repeat;
+			background: url(${basepath}public/img/login_bg_1.jpg) left bottom no-repeat;
 			background-size: cover !important;
 			}
 
@@ -45,7 +45,7 @@
 
 		.outer
 			{
-			background: url(public/img/bg_login_button.gif) 0 0 repeat;
+			background: url(${basepath}public/img/bg_login_button.gif) 0 0 repeat;
 			border-radius: 6px;
 			margin: 0 auto;
 			width: 330px;
@@ -53,7 +53,7 @@
 			}
 			.outer:hover
 				{
-				background: url(public/img/bg_login_button_hover.gif) 0 0 repeat;
+				background: url(${basepath}public/img/bg_login_button_hover.gif) 0 0 repeat;
 				}
 
 		.inner
@@ -100,7 +100,7 @@
     
 		<div class="outer">
 			<div class="inner">
-				<button tal:attributes='onclick javascript_loader' name="" type="button" class="login-button">Sign in using Google</button>
+                            <button tal:attributes='onclick javascript_loader' name="" type="button" class="login-button">Sign in using Google</button>
 			</div>
 		</div>
 <!--
