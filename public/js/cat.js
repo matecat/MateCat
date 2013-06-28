@@ -235,7 +235,7 @@ UI = {
 
         $("form#fileDownload").submit(function() {
             if ($("#notifbox").hasClass("warningbox")){
-                var a = confirm("There are some potential errors (missing tags, numbers etc).\n\
+                var a = confirm("There are some potential errors\n\(missing tags, numbers etc).\n\
  Do you want to continue anyway?");
                 if (!a) {
                     return false;
