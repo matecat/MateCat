@@ -245,7 +245,6 @@ class analyzeController extends viewcontroller {
 		$this->template->build_number = INIT::$BUILD_NUMBER;
 
 	}
-	>>>>>>> 362b3c1d8c67654b6b23d44d68affc6b0ba10afe
 
 }
 
