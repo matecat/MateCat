@@ -11,6 +11,7 @@ UI = {
         this.firstLoad = firstLoad;
         this.pageStep = 100;
         this.isMac = (navigator.platform == 'MacIntel')? true : false;
+        console.log('develop');
         
         var page = location.pathname.split('/')[2];
         this.page = ('undefined'==typeof(page)||page == '')? 1 : parseInt(page);
