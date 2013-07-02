@@ -35,7 +35,7 @@ class loginPageController extends viewcontroller {
     }
 
     public function setTemplateVars() {
-	$this->template->javascript_loader="javascript:gopopup('".$this->oauthFormUrl."');";
+	$this->template->oauthFormUrl=$this->oauthFormUrl;
 	$this->template->incomingUrl=$this->incomingUrl;
 	$this->template->build_number = INIT::$BUILD_NUMBER;
 	
