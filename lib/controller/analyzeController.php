@@ -125,6 +125,10 @@ class analyzeController extends viewcontroller {
 			$this->jobs[$jid]['target_short'] = $target_short;
 			$this->jobs[$jid]['password'] = $password;
 			$this->jobs[$jid]['files'][] = $pdata;
+
+                        $this->jobs[$jid]['total_raw_word_count']+=$pdata['file_raw_word_count'];
+                        $this->jobs[$jid]['total_raw_word_count_print']=number_format($this->jobs[$jid]['total_raw_word_count'], 0, ".", ",");
+
 		}
 		//echo "<pre>";
 		// print_r ($this->jobs);exit;
