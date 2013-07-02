@@ -149,7 +149,8 @@
                         </ul>
                     </div>  
 
-                    <div id="pname" tal:content="pname">Project</div><span style="float: left">&nbsp;(<span tal:replace="jid">---</span>) &gt; <b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></span>
+                    <div id="pname" tal:content="pname">Project</div>
+                    <span class="details">&nbsp;(<span tal:replace="jid">---</span>) &gt; <b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></span>
                 </div>
 
             </div>   <!-- .wrapper -->
@@ -311,18 +312,18 @@
                 -->               
                 <a tal:attributes="href string:${basepath}editlog/${jid}-${password}" class="editlog">Editing Log</a>
                 <tal:block tal:condition="php: empty(logged_user)">
-                    <div style='float:right; margin-left:50px' id='welcomebox'>
+                    <div id='welcomebox'>
                         <span>Anonymous</span> (<a id='loginlink' tal:attributes="href incomingUrl">login</a>)
                     </div>
                 </tal:block>
 
                 <tal:block tal:condition="php: !empty(logged_user)">
-                    <div style='float:right; margin-left:50px' id='welcomebox'>
+                    <div id='welcomebox'>
                         <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
                     </div>
                 </tal:block>
 
-                <p >Progress:</p>
+                <p>Progress:</p>
                 <div class="meter">
 
                     <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC}%"></a>
