@@ -261,4 +261,3 @@ class catnewController extends viewcontroller {
 
 }
 ?>
-

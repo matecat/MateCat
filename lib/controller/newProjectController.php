@@ -11,6 +11,8 @@ class newProjectController extends viewcontroller {
 	private $tms_engines;
 	private $lang_handler;
 
+        private $sourceLangArray=array();
+        private $targetLangArray=array();
 	public function __construct() {
 		parent::__construct(true);
 		if (!isset($_REQUEST['fork'])) {
@@ -29,7 +31,7 @@ class newProjectController extends viewcontroller {
 			$this->guid = $_COOKIE['upload_session'];
 		}
 
-		if ($_COOKIE["sourceLang"] == "_EMPTY_") {
+		if (isset ($_COOKIE["sourceLang"]) and $_COOKIE["sourceLang"] == "_EMPTY_") {
 			$this->noSourceLangHistory = true;
 		} else if (!isset($_COOKIE['sourceLang'])) {   
 			setcookie("sourceLang", "_EMPTY_", time() + (86400 * 365));
@@ -62,7 +64,7 @@ class newProjectController extends viewcontroller {
 			
 		}
 
-		if ($_COOKIE["targetLang"] == "_EMPTY_") {
+		if (isset($_COOKIE["targetLang"]) and $_COOKIE["targetLang"] == "_EMPTY_") {
 			$this->noTargetLangHistory = true;
 		} else if (!isset($_COOKIE['targetLang'])) {
 			setcookie("targetLang", "_EMPTY_", time() + (86400 * 365));
