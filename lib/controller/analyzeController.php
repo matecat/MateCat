@@ -121,9 +121,10 @@ class analyzeController extends viewcontroller {
 			$this->jobs[$jid]['password'] = $password;
 			$this->jobs[$jid]['files'][] = $pdata;
 
+			//calculate total word counts per job (summing different files)
 			$this->jobs[$jid]['total_raw_word_count']+=$pdata['file_raw_word_count'];
+			//format the total (yeah, it's ugly doing it every cycle)
 			$this->jobs[$jid]['total_raw_word_count_print']=number_format($this->jobs[$jid]['total_raw_word_count'], 0, ".", ",");
-
 		}
 
 
