@@ -42,6 +42,7 @@ class analyzeController extends viewcontroller {
 
 	public function doAction() {
 		$project_data = getProjectData($this->pid, $this->password);
+
 		$lang_handler = languages::getInstance();
 		if (empty($project_data)) {
 			$this->project_not_found = true;
