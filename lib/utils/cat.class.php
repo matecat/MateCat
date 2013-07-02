@@ -16,6 +16,10 @@ class CatUtils {
 
 	//check for tag mismatches
 	public static function checkTagConsistency($source_seg,$target_seg){
+		//ensure there are no entities
+		$source_seg=html_entity_decode($source_seg);
+		$target_seg=html_entity_decode($target_seg);
+
 		//get tags from words in source and target
 		preg_match_all('/<[^>]+>/',$source_seg,$source_tags);
 		preg_match_all('/<[^>]+>/',$target_seg,$target_tags);

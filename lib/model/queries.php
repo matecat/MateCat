@@ -1260,7 +1260,7 @@ function insertSegmentTMAnalysis($id_segment, $id_job, $suggestion, $suggestion_
 	}
 
 	if ($errno != 0) {
-		log::doLog($err);
+		if($errno!=1062) log::doLog($err);
 		return $errno * -1;
 	}
 
@@ -1350,7 +1350,7 @@ function insertFastAnalysis($pid, $fastReport, $equivalentWordMapping) {
 
 
 			if ($errno != 0) {
-				log::doLog($err);
+				if($errno!=1062) log::doLog($err);
 				return $errno * -1;
 			}
 
