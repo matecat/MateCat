@@ -782,6 +782,11 @@ UI = {
                 $('#alertConfirmTranslation').dialog({
                     close: function(event, ui) {
                         $(".blacked").hide();
+                    },
+                    open: function(event, ui) {
+                        $(".blacked").bind('click', function(){
+                            $('#alertConfirmTranslation').dialog('close'); 
+                        });
                     }
                 });
             }

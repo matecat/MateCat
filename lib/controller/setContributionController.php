@@ -99,4 +99,3 @@ class setContributionController extends ajaxcontroller {
 }
 ?>
 
-

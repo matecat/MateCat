@@ -975,7 +975,7 @@ function getProjectData($pid, $password) {
 	return $results;
 }
 
-function getProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filtering,$project_id,$getAll) {
+function getProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filtering,$project_id) {
 
 	session_start();
 	$pn_query = ($search_in_pname)? " p.name like '%$search_in_pname%' and" : "";
@@ -985,10 +985,10 @@ function getProjects($start,$step,$search_in_pname,$search_source,$search_target
 	$oc_query = ($search_onlycompleted)? " j.completed=1 and" : "";
 	$single_query = ($project_id)? " j.id_project=$project_id and" : "";
 	$owner = $_SESSION['cid'];
-	$owner_query = ($getAll)? "" : " j.owner='$owner' and";
-	//	$owner_query = "";
-
-	/*
+    $owner_query = " j.owner='$owner' and"; 
+//	$owner_query = "";
+		
+			/*
 	   log::doLog('PN QUERY:',$pn_query);		
 	   log::doLog('SEARCH TARGET:',$search_target);		
 
@@ -1036,7 +1036,7 @@ function getProjects($start,$step,$search_in_pname,$search_source,$search_target
 	return $results;
 }
 
-function getProjectsNumber($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filtering,$getAll) {
+function getProjectsNumber($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filtering) {
 
 	//	$pn = ($search_in_pname)? "where p.name like '%$search_in_pname%'" : "";
 
@@ -1046,9 +1046,13 @@ function getProjectsNumber($start,$step,$search_in_pname,$search_source,$search_
 	$sst_query = ($search_status)? " j.status_owner='$search_status' and" : "";
 	$oc_query = ($search_onlycompleted)? " j.completed=1 and" : "";
 	$owner = $_SESSION['cid'];
-	$owner_query = ($getAll)? "" : " j.owner='$owner' and";
-	//	$owner_query = "";
+    $owner_query = " j.owner='$owner' and"; 
 
+    log::doLog('OWNER QUERY:',$owner);		
+
+//    $owner_query = $owner;
+//	$owner_query = "";
+	
 	/*
 	   $status_query = " (j.status_owner='ongoing'";
 	//	if(!$search_showarchived && !$search_showcancelled) {
@@ -1076,6 +1080,7 @@ function getProjectsNumber($start,$step,$search_in_pname,$search_source,$search_
 		inner join engines e on j.id_mt_engine=e.id 
 		left join translators t on j.id_translator=t.username
 		$filter_query";				
+
 
 
 		$db = Database::obtain();

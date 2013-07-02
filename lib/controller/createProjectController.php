@@ -281,4 +281,3 @@ class createProjectController extends ajaxcontroller {
 }
 
 ?>
-

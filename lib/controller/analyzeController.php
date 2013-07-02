@@ -239,6 +239,8 @@ class analyzeController extends viewcontroller {
 		$this->template->num_segments_analyzed = $this->num_segments_analyzed;
 		$this->template->logged_user=trim($this->logged_user['first_name']." ".$this->logged_user['last_name']);
 		$this->template->build_number = INIT::$BUILD_NUMBER;
+                
+                //print_r ($this->template); exit;
 
 	}
 
