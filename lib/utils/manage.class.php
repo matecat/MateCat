@@ -8,12 +8,7 @@ class ManageUtils {
 
 	public static function queryProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filter_enabled,$lang_handler,$project_id) {
 
-// TEMPORARY HACK TO ACCESS ALL CURRENT PROJECTS Andrea 26/6/2013
-		$pattern = '/^(127.0.0.1|10.30.1|10.3.14|10.3.15|192.168.94.100)/';
-		$getAll = preg_match($pattern, $_SERVER['REMOTE_ADDR']);
-// END HACK	
-
-		$data = getProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filter_enabled,$project_id,$getAll);
+		$data = getProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filter_enabled,$project_id);
 
 		$projects = array();
 

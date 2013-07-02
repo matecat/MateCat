@@ -10,8 +10,7 @@ UI = {
         this.body = $('body');
         this.firstLoad = firstLoad;
         this.pageStep = 100;
-
-		this.isMac = (navigator.platform == 'MacIntel')? true : false;
+        this.isMac = (navigator.platform == 'MacIntel')? true : false;
         
         var page = location.pathname.split('/')[2];
         this.page = ('undefined'==typeof(page)||page == '')? 1 : parseInt(page);
@@ -19,48 +18,47 @@ UI = {
         filtersStrings = (location.hash != '')? location.hash.split('#')[1].split(',') : '';
         this.filters = {};
         $.each(filtersStrings, function() {
-        	var s = this.split('=');
-        	UI.filters[s[0]] = s[1];
-        });        
+            var s = this.split('=');
+            UI.filters[s[0]] = s[1];
+        });
         this.isFiltered = !$.isEmptyObject(this.filters);
         if(this.isFiltered) {
 
-        	if(typeof this.filters.pn != 'undefined') {
-        		$('#search-projectname').val(this.filters.pn);
-        	};
+            if(typeof this.filters.pn != 'undefined') {
+                $('#search-projectname').val(this.filters.pn);
+            };
         	
-        	if(typeof this.filters.source != 'undefined') {
-        		$('#select-source option').each(function(){
-        			if($(this).attr('value') == UI.filters.source) {
-        				$('#select-source option[selected=selected]').removeAttr('selected');
-        				$(this).attr('selected','selected');
-        			}
-		        })
-        	};
+            if(typeof this.filters.source != 'undefined') {
+                $('#select-source option').each(function(){
+                    if($(this).attr('value') == UI.filters.source) {
+                        $('#select-source option[selected=selected]').removeAttr('selected');
+                        $(this).attr('selected','selected');
+                    }
+                })
+            };
 
-        	if(typeof this.filters.target != 'undefined') {
-        		$('#select-target option').each(function(){
-        			if($(this).attr('value') == UI.filters.target) {
-        				$('#select-target option[selected=selected]').removeAttr('selected');
-        				$(this).attr('selected','selected');
-        			}
-		        })    	
-        	};
+            if(typeof this.filters.target != 'undefined') {
+                $('#select-target option').each(function(){
+                    if($(this).attr('value') == UI.filters.target) {
+                        $('#select-target option[selected=selected]').removeAttr('selected');
+                        $(this).attr('selected','selected');
+                    }
+                })    	
+            };
 
-        	if(typeof this.filters.status != 'undefined') {
-        		$('#select-status option[selected=selected]').removeAttr('selected');
-        		$('#select-status option[value='+this.filters.status+']').attr('selected','selected');
-        	} else {
-        		$('#select-status option[selected=selected]').removeAttr('selected');
-        		$('#select-status option[value=active]').attr('selected','selected');        		
-        	};
+            if(typeof this.filters.status != 'undefined') {
+                $('#select-status option[selected=selected]').removeAttr('selected');
+                $('#select-status option[value='+this.filters.status+']').attr('selected','selected');
+            } else {
+                $('#select-status option[selected=selected]').removeAttr('selected');
+                $('#select-status option[value=active]').attr('selected','selected');        		
+            };
 
-        	if(typeof this.filters.onlycompleted != 'undefined') {
-        		$('#only-completed').attr('checked','checked');
+            if(typeof this.filters.onlycompleted != 'undefined') {
+                $('#only-completed').attr('checked','checked');
+            };
 
-        	};
-
-        	this.body.addClass('filterOpen');
+            this.body.addClass('filterOpen');
 
         } else {
         	this.body.removeClass('filterOpen filterActive');
