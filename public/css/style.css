@@ -1356,3 +1356,19 @@ body.archived .footer
 	float: right;
     margin-left: 50px;
     }
+
+p.percent
+    {
+    margin-left: -10px;
+    margin-right: 10px;
+    }
+
+.dialog form
+    {
+	font-size: 70%;
+    }
+    
+#stat-completion
+    {
+	display: none;
+    }

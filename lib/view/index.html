@@ -331,7 +331,7 @@
                     <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job_stats/REJECTED_PERC_FORMATTED}%; style string:width:${job_stats/REJECTED_PERC}%"></a>
                     <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC}%"></a>
                 </div>
-                <p style="margin-left:-10px;margin-right:10px"><span id="stat-progress" tal:content="php:(floor(job_stats['TRANSLATED_PERC']+job_stats['APPROVED_PERC']))">0</span>%</p>
+                <p class="percent"><span id="stat-progress" tal:content="php:(floor(job_stats['TRANSLATED_PERC']+job_stats['APPROVED_PERC']))">0</span>%</p>
                 <ul>
                     <li id="stat-eqwords">Payable Words: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong></li>
                     <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
@@ -340,7 +340,7 @@
                     <li id="stat-rejected">Rejected: <strong tal:content="job_stats/REJECTED_FORMATTED|default">- - -</strong></li>
                     -->
                     <li id="stat-wph" title="Based on last 10 segments performance" style="display: none;">Speed: <strong tal:content="job_stats/WORDS_PER_HOUR|default">---</strong> Words/h</li>
-                    <li id="stat-completion" style="display: none;">Completed in: <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">---</strong></li>
+                    <li id="stat-completion">Completed in: <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">---</strong></li>
 
                 </ul>
 
@@ -406,11 +406,11 @@
 
         <div id="dialog" class="dialog" title="Basic dialog">
             <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>
-            <form action="" style="font-size: 70%"><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>
+            <form action=""><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>
         </div>
         <div id="alertConfirmTranslation" class="dialog" title="Attention">
             <p>To confirm your translation, please press on Translated or use the shortcut CTRL+Enter.</p>
-            <form action="" style="font-size: 70%"><input id="hideAlertConfirmTranslation" type="checkbox" value="" /><label for="hideAlertConfirmTranslation">Do not display again</label></form>
+            <form action=""><input id="hideAlertConfirmTranslation" type="checkbox" value="" /><label for="hideAlertConfirmTranslation">Do not display again</label></form>
         </div>
         <!--
                         <div class="end-message-box">
