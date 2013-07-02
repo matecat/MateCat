@@ -42,17 +42,12 @@ class analyzeController extends viewcontroller {
 
 	public function doAction() {
 		$project_data = getProjectData($this->pid, $this->password);
-		//echo "<pre>";print_r($project_data);exit;
 		$lang_handler = languages::getInstance();
 		if (empty($project_data)) {
-			//echo "ddddd";exit;
 			$this->project_not_found = true;
 		}
 
-		//echo "<pre>";print_r ($project_data);exit;
 		foreach ($project_data as &$pdata) {
-			// echo "<pre>";   print_r ($pdata);
-			//print_r ($pdata); exit;
 
 			$this->num_segments+=$pdata['total_segments'];
 			if (empty($this->pname)) {
@@ -125,9 +120,12 @@ class analyzeController extends viewcontroller {
 			$this->jobs[$jid]['target_short'] = $target_short;
 			$this->jobs[$jid]['password'] = $password;
 			$this->jobs[$jid]['files'][] = $pdata;
+
+			//calculate total word counts per job (summing different files)
+			$this->jobs[$jid]['total_raw_word_count']+=$pdata['file_raw_word_count'];
+			//format the total (yeah, it's ugly doing it every cycle)
+			$this->jobs[$jid]['total_raw_word_count_print']=number_format($this->jobs[$jid]['total_raw_word_count'], 0, ".", ",");
 		}
-		//echo "<pre>";
-		// print_r ($this->jobs);exit;
 
 
 		$raw_wc_time = $this->total_raw_word_count / INIT::$ANALYSIS_WORDS_PER_DAYS;
@@ -212,9 +210,6 @@ class analyzeController extends viewcontroller {
 		} else {
 			$this->total_raw_word_count_print = number_format($this->total_raw_word_count, 0, ".", ",");
 		}
-		//   [status_analysis] => NEW [jid] => 1939 [jpassword] => p6wcdt3y [source] => en-GB [target] => fr-FR [filename] => 017-DOC-Benchmarking 360 Questionnaire for customers_' personnel v3.doc.sdlxliff [file_raw_word_count] => 1444 ) 
-		// echo $this->total_raw_word_count;
-		//exit;
 	}
 
 	public function setTemplateVars() {

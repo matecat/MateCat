@@ -32,23 +32,16 @@ class getSegmentsController extends ajaxcontroller {
 		$this->ref_segment = $this->get_from_get_post("segment");
 		$this->where = $this->get_from_get_post("where");
 
-		//		    	log::doLog('LAST LOADED ID - MODIFIED: '.$this->last_loaded_id);
-		//		if($this->central_segment) log::doLog('CENTRAL SEGMENT: '.$this->central_segment);
 	}
 
 	private function stripTagsFromSource($text) {
-		//       echo "<pre>";
 		$pattern_g_o = '|(<.*?>)|';
 		$pattern_g_c = '|(</.*?>)|';
 		$pattern_x = '|(<.*?/>)|';
 
-		// echo "first  -->  $text \n";
 		$text = preg_replace($pattern_x, "", $text);
-		// echo "after1  --> $text\n";
 
 		$text = preg_replace($pattern_g_o, "", $text);
-		//  echo "after2  -->  $text \n";
-		//
 		$text = preg_replace($pattern_g_c, "", $text);
 		$text= str_replace ("&nbsp;", " ", $text);
 		return $text;
@@ -77,7 +70,6 @@ class getSegmentsController extends ajaxcontroller {
 
 	public function doAction() {
 		$lang_handler=languages::getInstance("en");       
-		//		log::doLog('REF SEGMENT: '.$this->ref_segment);    	
 
 
 		if ($this->ref_segment == '') {
@@ -88,17 +80,11 @@ class getSegmentsController extends ajaxcontroller {
 		$data = getMoreSegments($this->jid, $this->password, $this->step, $this->ref_segment, $this->where);
 
 		$first_not_translated_found = false;
-		//log::doLog('REF SEGMENT: '.$this->ref_segment);    	
-		//		print_r($data); exit;
 		foreach ($data as $i => $seg) {
 
 			if($this->where == 'before') {
 				if(((float) $seg['sid']) >= ((float) $this->ref_segment)) {break;}
 			}
-
-			// remove this when tag management enabled
-			//        	$seg['segment'] = $this->stripTagsFromSource($seg['segment']);
-
 
 			if (empty($this->pname)) {
 				$this->pname = $seg['pname'];
@@ -165,7 +151,7 @@ class getSegmentsController extends ajaxcontroller {
 				$this->data["$id_file"]['file_stats'] = $file_stats;		
 				$this->data["$id_file"]['segments'] = array();
 			}
-			//if (count($this->data["$id_file"]['segments'])>100){continue;}
+			
 			$this->filetype_handler = new filetype($seg['mime_type']);
 
 
@@ -189,8 +175,6 @@ class getSegmentsController extends ajaxcontroller {
 
 			$seg['segment'] = $this->filetype_handler->parse($seg['segment']);
 
-			// ASKED. MARCO CONFIRMED: in the web interface do not show xliff_ext_prec_tags and xliff_ext_succ_tags
-			// $seg['segment'] = $seg['xliff_ext_prec_tags'] . $seg['segment'].$seg['xliff_ext_succ_tags'] ;
 			$seg['segment']=CatUtils::rawxliff2view($seg['segment']);
 			$seg['translation']=CatUtils::rawxliff2view($seg['translation']);
 
@@ -200,7 +184,6 @@ class getSegmentsController extends ajaxcontroller {
 
 		}
 
-		//log::doLog ($this->data);
 
 
 		$this->result['data']['files'] = $this->data;

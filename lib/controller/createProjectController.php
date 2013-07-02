@@ -136,16 +136,13 @@ class createProjectController extends ajaxcontroller {
 		// aggiungi path file in caricamento al cookie"pending_upload"a
 		// add her the cookie mangement for remembere the last 3 choosed languages
 		// project name sanitize
-		//$this->project_name = preg_replace('/["\' \(\)\&\[\]\{\}\+\*,:|#]/', "_", $this->project_name);
 		$this->project_name = preg_replace('/[^\p{L}0-9a-zA-Z_\.\-]/u', "_", $this->project_name);
 		$this->project_name = preg_replace('/[_]{2,}/', "_", $this->project_name);
 		$this->project_name = str_replace('_.', ".", $this->project_name);
-		//echo $this->project_name; 
 		// project name validation        
 		$pattern = "/^[\p{L}\ 0-9a-zA-Z_\.\-]+$/u";
 		if (!preg_match($pattern, $this->project_name, $rr)) {
 			$this->result['errors'][] = array("code" => -5, "message" => "Invalid Project Name $this->project_name: it should only contain numbers and letters!");
-			//	        $this->result['project_name_error'] = $this->project_name;
 			return false;
 		}
 
@@ -179,18 +176,14 @@ class createProjectController extends ajaxcontroller {
 
 			$fileSplit = explode('.', $file);
 			$mimeType = strtolower($fileSplit[count($fileSplit) - 1]);
-			//echo $mimeType; exit;
-			//        	log::doLog('MIMETYPE: ' . $mimeType);
 
 			$original_content = "";
 			if (($mimeType != 'sdlxliff') && ($mimeType != 'xliff') && ($mimeType != 'xlf') && (INIT::$CONVERSION_ENABLED)) {
-				//        		log::doLog('NON XLIFF');
 				$fileDir = $intDir . '_converted';
 				$filename_to_catch = $file . '.sdlxliff';
 
 				$original_content = file_get_contents("$intDir/$file");
 				$sha1_original = sha1($original_content);
-				//unset($original_content);
 			} else {
 				$sha1_original = "";
 				$fileDir = $intDir;
@@ -202,7 +195,6 @@ class createProjectController extends ajaxcontroller {
 			}
 
 			$filename = $fileDir . '/' . $filename_to_catch;
-			//echo $filename;exit;
 
 			if (!file_exists($filename)) {
 				$this->result['errors'][] = array("code" => -6, "message" => "File not found on server after upload.");
@@ -236,7 +228,6 @@ class createProjectController extends ajaxcontroller {
 
 
 
-		log::doLog('DELETING DIR: ' . $intDir);
 		$this->deleteDir($intDir);
 		if (is_dir($intDir . '_converted')) {
 			$this->deleteDir($intDir . '_converted');

@@ -22,7 +22,7 @@ class Languages{
 		//get languages file
 		$file=INIT::$UTILS_ROOT.'/langs/supported_langs.json';
 		if(!file_exists($file)){
-			echo("no language defs found in $file");
+			log::doLog("no language defs found in $file");
 			exit;
 		}
 		$string=file_get_contents($file);
@@ -111,14 +111,11 @@ class Languages{
 		foreach(self::$map_rfc2obj as $rfc=>$lang){
 			//if marked as enabled, add to result
 			if($lang['enabled']){
-                            //print_r ($lang);exit;
 				$code=$rfc;
                                 $top=isset($lang['top'])?$lang['top']:'';
 				$list[]=array('code'=>$code,'name'=>$lang['localized'][$localizationLang],'top'=>$top);
-                                //$list[]=array('code'=>$code,'name'=>$lang['localized'][$localizationLang]);
 			}
 		}
-               // echo "<pre>";print_r ($list); exit;
 		return $list;
 	}
 }

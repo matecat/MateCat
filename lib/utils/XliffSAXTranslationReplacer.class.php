@@ -53,15 +53,14 @@ class XliffSAXTranslationReplacer{
 		//read a chunk of text
 		while ($this->currentBuffer = fread($fp, 4096)) {
 			/*
-			preprocess file
-			*/
+			   preprocess file
+			 */
 			$temporary_check_buffer = preg_replace("/&(.*?);/", '#escaped_ent#$1##', $this->currentBuffer);
 
 			//avoid cutting entities in half: 
 			//the last fread could have truncated an entity (say, '&lt;' in '&l'), thus invalidating the escaping
 			while(strpos($temporary_check_buffer,'&')!==FALSE){
 				//if an entity is still present, fetch some more and repeat the escaping
-				//log::doLog("split entity detected: $uffa");
 				$this->currentBuffer.=fread($fp,64);
 				$temporary_check_buffer = preg_replace("/&(.*?);/", '#escaped_ent#$1##', $this->currentBuffer);
 			}
@@ -70,19 +69,7 @@ class XliffSAXTranslationReplacer{
 			//get lenght of chunk
 			$this->len=strlen($this->currentBuffer);
 
-			//file_put_contents($this->filename.'escaped.xliff',$uffa,FILE_APPEND);
-			/*
-			if('&'==substr($uffa,0,1)){
-				log::doLog("string $uffa");
-				if($uffa==$this->currentBuffer)log::doLog("failure in escaping, from\n".$this->currentBuffer."\n\nto\n\n$uffa");
-			}
-			*/
 			$this->currentBuffer = preg_replace("/&(.*?);/", '#escaped_ent#$1##', $this->currentBuffer);
-
-			/*		
-					$this->currentBuffer = str_replace("&gt;/", '#escaped_ent#gt##', $this->currentBuffer);
-					$this->currentBuffer = str_replace("&lt;/", '#escaped_ent#lt##', $this->currentBuffer);
-			 */
 
 			//parse chunk of text
 			if (!xml_parse($xml_parser, $this->currentBuffer, feof($fp))) {
@@ -138,25 +125,13 @@ class XliffSAXTranslationReplacer{
 				$tmp_offset=$this->len-1;
 			}
 
-			//avoid getting wrong about closing tags
-			/*
-			while(true){
-				//pick last char before tag closing
-				$currChar=$this->currentBuffer[$tmp_offset];
-				//if it's not a char, slide back of 1 char the pointer
-				if(''==trim($currChar)) $tmp_offset--;
-				//else, proceed
-				else break;
-			}
-			*/
 			//detect empty tag
 			//if last char of tag is a backslash (or it's a well known empty tag), it's an empty tag
-			if(/*'/'==$currChar and*/ (in_array($name,$this->empty_tags) and !in_array($name,$this->regular_tags))){
+			if(in_array($name,$this->empty_tags) and !in_array($name,$this->regular_tags)){
 				$this->isEmpty=true;
 				//add the slash to the tag
 				$tag.='/';
 			}
-			//log::doLog("$name is ".(($this->isEmpty)?'':'not ')."empty");
 
 			//trim last space
 			$tag=rtrim($tag);
@@ -220,15 +195,6 @@ class XliffSAXTranslationReplacer{
 		//don't write <target> data
 		if(!$this->inTarget){
 
-			/*
-			   commented for fix
-
-			//don't know why, but outside translation units stuff is html-encoded
-			if(!$this->inTU){
-			//encode entities
-			$data=htmlentities($data,ENT_NOQUOTES);
-			}
-			 */
 			//flush to pointer
 			$this->postProcAndflush($this->ofp,$data);
 		}
@@ -252,9 +218,7 @@ class XliffSAXTranslationReplacer{
 	   prepare segment tagging for xliff insertion
 	 */
 	private function prepareSegment($seg,$transunit_translation = ""){
-		//log::doLog($this->currentId. " INPUT t1 : $transunit_translation\n\n");
 		$end_tags = "";
-		//echo "t1 : ".$seg['translation']."\n";
 		//consistency check
 		$tag_mismatch=false;
 		$outcome=CatUtils::checkTagConsistency($seg['segment'],$seg['translation']);
@@ -262,24 +226,21 @@ class XliffSAXTranslationReplacer{
 			$tag_mismatch=true;
 			log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".$outcome['debug'].")");
 		}
-                if(empty($seg['translation'])){
+		if(empty($seg['translation'])){
 			$translation=$seg['segment'];
-                }elseif ($tag_mismatch){
-                    $translation= strip_tags($seg['translation']);
+		}elseif ($tag_mismatch){
+			$translation= strip_tags($seg['translation']);
 		}else{
 			$translation=$seg['translation'];
 		}
 		//fix to escape non-html entities
-		//	log::doLog($this->currentId. " ESCAPE t1 : $translation\n\n");
 		$translation = str_replace("&lt;", '#LT#', $translation);
 		$translation = str_replace("&gt;", '#GT#', $translation);
 		$translation = str_replace("&amp;", '#AMP#', $translation);
-		//$translation=html_entity_decode($translation,ENT_NOQUOTES|ENT_HTML401,"utf-8");
 		$translation=html_entity_decode($translation,ENT_NOQUOTES,"utf-8");
 		$translation = str_replace('#AMP#','&amp;', $translation);
 		$translation = str_replace('#LT#','&lt;', $translation);
 		$translation = str_replace('#GT#','&gt;', $translation);
-		//	log::doLog($this->currentId. " VALIDATE t1 : $translation\n\n");
 
 		@$xml_valid = simplexml_load_string("<placeholder>$translation</placeholder>");
 		if (!$xml_valid) {
@@ -293,26 +254,13 @@ class XliffSAXTranslationReplacer{
 					$end_tags = "<$item$end_tags"; //insert at the top of the string
 				}
 			}
-			//log::doLog($this->currentId. " INVALID ($end_tags) t2 : $translation\n");
 			$translation = str_replace($end_tags, "", $translation);
-			//log::doLog($this->currentId. " FIX t2 : $translation\n");
 		}
 
 		if (!empty($seg['mrk_id'])) {
 			$translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">".$seg['mrk_prev_tags'].$translation.$seg['mrk_succ_tags']."</mrk>";
 		}
-		//	log::doLog($this->currentId. " t3 : $translation\n");
-		//	log::doLog( "\n\n");
 		$transunit_translation.=$seg['prev_tags'] . $translation . $end_tags . $seg['succ_tags'];
-		//	log::doLog($this->currentId. " OUTPUT t4 : $transunit_translation\n");
-		/*
-		   if (isset($data[$i + 1]) and $seg['internal_id'] == $data[$i + 1]['internal_id']) {
-		// current segment and subsequent has the same internal id --> 
-		// they are two mrk of the same source segment  -->
-		// the translation of the subsequentsegment will be queued to the current
-		continue;
-		}
-		 */
 		return $transunit_translation;
 	}
 

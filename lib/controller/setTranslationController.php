@@ -64,7 +64,6 @@ class setTranslationController extends ajaxcontroller {
 			log::doLog(__CLASS__ .":".__FUNCTION__." error - ".$this->result['error'] );
 			return -1;
 		}
-			//log::doLog("translation: " . $this->translation);
 		$this->translation = CatUtils::view2rawxliff($this->translation);
 
 		//check tag mismatch
@@ -72,7 +71,7 @@ class setTranslationController extends ajaxcontroller {
 		$segment=getSegment($this->id_segment);
 		//compare segment-translation and get results
 		$warning=CatUtils::checkTagConsistency($segment['segment'], $this->translation);
-		
+
 		$res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $this->translation, $this->err,$this->chosen_suggestion_index, $warning['outcome']);
 
 		if (!empty($res['error'])) {
@@ -80,12 +79,12 @@ class setTranslationController extends ajaxcontroller {
 			return -1;
 		}
 
-		
+
 		$job_stats = CatUtils::getStatsForJob($this->id_job);
 		$file_stats = CatUtils::getStatsForFile($this->id_first_file);
 
 		$is_completed = ($job_stats['TRANSLATED_PERC'] == '100')? 1 : 0;
-		
+
 		$update_completed = setJobCompleteness($this->id_job, $is_completed);
 
 		$this->result['stats'] = $job_stats;

@@ -10,8 +10,7 @@ while (1) {
 
 	$pid_list = getProjectForVolumeAnalysis('fast', 5);
 	if (empty($pid_list)) {
-		echo __FILE__ . ":" . __FUNCTION__ . " no projects ready fon fast volume analisys: wait 3 seconds\n";
-		//log::doLog(__FILE__ . ":" . __FUNCTION__ . " no projects ready fon fast volume analisys: wait 3 seconds");
+		echo __FILE__ . ":" . __FUNCTION__ . " no projects ready for fast volume analisys: wait 3 seconds\n";
 		sleep(3);
 		continue;
 	}
@@ -37,19 +36,14 @@ while (1) {
 			}
 		}
 
-		//log::doLog(":_:_:_:_:_:_:_:_:_:_:_:_");
-		//log::doLog($data);
 
 		$insertReportRes = insertFastAnalysis($pid,$data, $equivalentWordMapping);
 		if ($insertReportRes < 0) {
-			log::doLog(__FILE__ . ":" . __FUNCTION__ . " insertAnalysis error on pid $pid");
 			continue;
 		}
 		$change_res = changeProjectStatus($pid, "FAST_OK");
 		if ($change_res < 0) {
-			log::doLog(__FILE__ . ":" . __FUNCTION__ . " changeProjectStatus error on pid $pid");
 		}
-		//sleep(1);
 	}
 }
 ?>

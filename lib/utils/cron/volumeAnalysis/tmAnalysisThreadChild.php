@@ -27,16 +27,6 @@ function processFileExists($pid) {
     return false;
 }
 
-//doChild();
-
-
-//function isRunningProcess($pid) {
-//    if (file_exists("/proc/$pid")) {
-//        return true;
-//    }
-//    return false;
-//}
-//function doChild() {
 
 
 $my_pid = getmypid();
@@ -56,8 +46,6 @@ while (1) {
         exit (-1);
     }
 
-    //lockUnlockTable("segment_translations","lock","write");
-    //$segment = getNextSegmentForTMVolumeAnalysys();
     $res = getNextSegmentAndLock();
     
     if (empty($res)) {
@@ -69,7 +57,6 @@ while (1) {
     $jid = $res['id_job'];
     echo "--- (child $my_pid) : segment $sid-$jid found \n";
     $segment = getSegmentForTMVolumeAnalysys($sid, $jid);
-    //print_r ($segment);
     if (empty($segment)) {
         deleteLockSegment($sid, $jid,"unlock");
         echo "--- (child $my_pid) : empty segment: no segment ready for tm volume analisys: wait 3 seconds\n";
@@ -83,15 +70,12 @@ while (1) {
         continue;
     }
 
-    //  print_r($segment);
 
     $pid = $segment['pid'];
 
     echo "--- (child $my_pid) : fetched data for segment $sid-$jid. PID is $pid\n";
 
     //lock segment
-    //$res = lockUnlockSegment($sid, $jid, 1);
-    // lockUnlockTable("segment_translations","unlock");
     echo "--- (child $my_pid) :  segment $sid-$jid locked\n";
 
     $source = $segment['source'];
@@ -101,9 +85,7 @@ while (1) {
     $raw_wc = $segment['raw_word_count'];
     $fast_match_type = $segment['match_type'];
     
-    //echo "text before : ". $segment['segment']. "\n";
     $text =$segment['segment']; // CatUtils::view2rawxliff($segment['segment']); // da verificare
-    //echo "text after : $text\n\n";
     
     
     if ($raw_wc == 0) {
@@ -119,14 +101,12 @@ while (1) {
     }
 
     $tms_match = $tms->get($text, $source, $target, "demo@matecat.com", $mt_from_tms, $id_translator);
-    //echo "TMS MATCH\n";print_r($tms_match);
     
 
     if (!$tms_match || !is_array($tms_match)) {
         echo "--- (child $my_pid) : error from mymemory : set error and continue\n"; // ERROR FROM MYMEMORY
         setSegmentTranslationError($sid, $jid); // devo seetarli come done e lasciare il vecchio livello di match
         deleteLockSegment($sid, $jid);
-        //lockUnlockSegment($sid, $jid, 0);
         continue;
     }
 
@@ -183,26 +163,14 @@ while (1) {
 
     if ($new_match_type == 'MT') {
         $standard_words = $equivalentWordMapping["NO_MATCH"] * $raw_wc / 100;
-        //  echo "fff $raw_wc --- \$equivalentWordMapping[\"NO_MATCH\"]=".$equivalentWordMapping["100%"]." --- ". $equivalentWordMapping["100%"] * $raw_wc / 100;
     }
 
-    //echo "suggestion before is : ". $matches['raw_translation'] ."\n";
-   // $suggestion = CatUtils::view2rawxliff($matches['raw_translation']);
-    //echo "suggestion after is :  $suggestion\n\n";
-    
-    //$suggestion_match = $matches['match'];
-    //$suggestion_json = json_encode($matches);
-    //$suggestion_source = $matches['created_by'];
-    //if (stripos($suggestion_source, "MT") !== false) {
-    //    $tm_match_type = "MT";
-   // }
     $outcome_warning=CatUtils::checkTagConsistency($text,$suggestion);
     
     echo "--- (child $my_pid) : sid=$sid --- \$tm_match_type=$tm_match_type, \$fast_match_type=$fast_match_type, \$new_match_type=$new_match_type, \$equivalentWordMapping[\$new_match_type]=" . $equivalentWordMapping[$new_match_type] . ", \$raw_wc=$raw_wc,\$standard_words=$standard_words,\$eq_words=$eq_words\n";
 
     $ret = CatUtils::addTranslationSuggestion($sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", $outcome_warning['warning']);
     //unlock segment
-    //$res = lockUnlockSegment($sid, $jid, 0);
     
     deleteLockSegment($sid, $jid);
     echo "--- (child $my_pid) : segment $sid-$jid unlocked\n";
@@ -214,7 +182,6 @@ while (1) {
     }
     echo "--- (child $my_pid) : count segments in project $pid = $segs_in_project\n";
     $analyzed_report = countSegmentsTranslationAnalyzed($pid);
-    // print_r ($analyzed_report);
     $segs_analyzed = $analyzed_report['num_analyzed'];
     $pid_eq_words = $analyzed_report['eq_wc'];
     $pid_standard_words = $analyzed_report['st_wc'];
