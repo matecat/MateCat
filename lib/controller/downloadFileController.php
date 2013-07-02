@@ -14,7 +14,6 @@ class downloadFileController extends downloadController {
 
 	public function __construct() {
 		parent::__construct();
-		//echo "<pre>";print_r ($_POST);
 
 		$this->fname = $this->get_from_get_post('filename');
 		$this->id_file = $this->get_from_get_post('id_file');
@@ -31,52 +30,34 @@ class downloadFileController extends downloadController {
 	}
 
 	public function doAction() {
-		//2013-03-25 by Massidda: this method contains a lot of debugging code introduced by me. I'll remove it at the end of my current task, so pleas do not touch
 		$debug=array();
 		$debug['total'][]=time();
+
 		// specs for filename at the task https://app.asana.com/0/1096066951381/2263196383117
-		/* if ($this->download_type == 'all') {
-		//in this case fname contains the project name (see html)
-		$pathinfo = pathinfo($this->fname);
-		if ($pathinfo['extension'] != "xliff" and $pathinfo['extension'] != "sdlxliff" and $pathinfo['extension'] != "xlf" and $pathinfo['extension'] != "zip") {
-		$this->filename = $pathinfo['basename'] . ".sdlxliff";
-		} else {
-		$this->filename = $this->fname;
-		}
-		}
-		 */
 		$converter = new fileFormatConverter();
 		$debug['get_file'][]=time();
 		$files_job = getFilesForJob($this->id_job, $this->id_file);
 		$debug['get_file'][]=time();
-		//$nonew=1;
-		//if ($this->download_type=='pseudo'){
-		//    $nonew=0;
-		//}
 		$nonew = 0;
-		//print_r ($data); exit;
+
 		$output_content = array();
 		foreach ($files_job as $file) {
 			$mime_type = $file['mime_type'];
 			$id_file = $file['id_file'];
 			$current_filename = $file['filename'];
 			$original = $file['xliff_file'];
-			//echo "<pre>";echo $original;exit;
+
 			$debug['get_segments'][]=time();
 			$data = getSegmentsDownload($this->id_job, $this->password, $id_file, $nonew);
 			$debug['get_segments'][]=time();
 
-			//echo "<pre>"; print_r ($data); exit;
 
 			$transunit_translation = "";
 
 			$debug['replace'][]=time();
 			foreach ($data as $i => $seg) {
-				//	echo $seg['internal_id']."\n";
 				$end_tags = "";
-				//echo "t1 : ".$seg['translation']."\n";
 				$translation = empty($seg['translation']) ? $seg['segment'] : $seg['translation'];
-				//echo "t11 : $translation\n\n";
 
 				@$xml_valid = simplexml_load_string("<placeholder>$translation</placeholder>");
 				if (!$xml_valid) {
@@ -91,17 +72,12 @@ class downloadFileController extends downloadController {
 						}
 					}
 					$translation = str_replace($end_tags, "", $translation);
-					//echo "t2 : $translation\n";
 				}
 
 				if (!empty($seg['mrk_id'])) {
-					//$translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">$translation</mrk>";
 					$translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">".$seg['mrk_prev_tags'].$translation.$seg['mrk_succ_tags']."</mrk>";
 				}
-				//echo "t3 : $translation\n";
-				//echo "\n\n";
 				$transunit_translation.=$seg['prev_tags'] . $translation . $end_tags . $seg['succ_tags'];
-				//echo "t4 :" .$seg['prev_tags'] . $translation . $end_tags.$seg['succ_tags']."\n";
 				if (isset($data[$i + 1]) and $seg['internal_id'] == $data[$i + 1]['internal_id']) {
 					// current segment and subsequent has the same internal id --> 
 					// they are two mrk of the same source segment  -->
@@ -109,16 +85,6 @@ class downloadFileController extends downloadController {
 					continue;
 				}
 
-				//this snippet could be temporary and cover the case if the segment is enclosed into a <g> tag
-				// but the translation, due the tag stripping, does not contain it
-				// ANTONIO :  deleted because it's wrong !! if a segmemnt began by <g> tag its closure tag shoud be in the middle not only at the end of it. Instead we could check if the trans-unit is xml valid.
-				/* if (strpos($transunit_translation, "<g") === 0) { // I mean $transunit_translation began with <g tag
-				   $endsWith = substr($transunit_translation, -strlen("</g>")) == "</g>";
-
-				   if (!$endsWith) {
-				   $transunit_translation.="</g>";
-				   }
-				   } */
 				$res_match_2 = false;
 				$res_match_1 = false;
 
@@ -160,8 +126,6 @@ class downloadFileController extends downloadController {
 				$debug['do_conversion'][]=time();
 			}
 		}
-		//print_r ($output_content);
-		//exit;
 
 		$ext = "";
 		if ($this->download_type == 'all') {
@@ -174,52 +138,11 @@ class downloadFileController extends downloadController {
 				$this->content = $this->composeZip($output_content); //add zip archive content here;
 			} elseif (count($output_content) == 1) {
 				$this->setContent($output_content);
-				//                foreach ($output_content as $oc) {
-				//                    $pathinfo = pathinfo($oc['filename']);
-				//                    $this->filename = $oc['filename'];
-				//                    $ext = $pathinfo['extension'];
-				//                    if ($ext == 'pdf' or $ext == "PDF") {
-				//                        $this->filename = $pathinfo['basename'] . ".docx";
-				//                    }
-				//                    /*
-				//                      if (!in_array($pathinfo['extension'],array("xliff","sdlxliff","xlf"))){
-				//                      $this->filename = $pathinfo['basename'] . ".sdlxliff";
-				//                      }
-				//                     */
-				//                    /*
-				//                      $converter = new fileFormatConverter();
-				//                      $convertResult = $converter->convertToOriginal($oc['content']);
-				//                      //					print_r($convertResult);exit;
-				//
-				//                      $this->content = $convertResult['documentContent'];
-				//
-				//                     */
-				//                    $this->content = $oc['content'];
-				//                }
 			}
 		} else {
 			$this->setContent($output_content);
-			//            foreach ($output_content as $oc) {
-			//                $pathinfo = pathinfo($oc['filename']);
-			//                $ext = $pathinfo['extension'];
-			//                $this->filename = $oc['filename'];
-			//                //if (!in_array($ext, array("xliff", "sdlxliff", "xlf"))) {
-			//                //    $this->filename = $pathinfo['basename'] . ".sdlxliff";
-			//                //}
-			//
-			//                if ($ext == 'pdf' or $ext == "PDF") {
-			//                    $this->filename = $pathinfo['basename'] . ".docx";
-			//                }
-			//                $this->content = $oc['content'];
-			//            }
 		}
 		$debug['total'][]=time();
-		/*
-		   foreach($debug as $k=>$subarr){
-		   $debug[$k]=($subarr[1]-$subarr[0])." sec";
-		   }
-		   echo "<pre>";print_r($debug);exit;
-		 */
 	}
 
 	private function setContent($output_content) {
@@ -227,9 +150,6 @@ class downloadFileController extends downloadController {
 			$pathinfo = pathinfo($oc['filename']);
 			$ext = $pathinfo['extension'];
 			$this->filename = $oc['filename'];
-			//if (!in_array($ext, array("xliff", "sdlxliff", "xlf"))) {
-			//    $this->filename = $pathinfo['basename'] . ".sdlxliff";
-			//}
 
 			if ($ext == 'pdf' or $ext == "PDF") {
 				$this->filename = $pathinfo['basename'] . ".docx";

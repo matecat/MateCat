@@ -65,10 +65,8 @@ class oauthResponseHandlerController extends viewcontroller{
 	}
 
 	private function sendNotifyMail($data){
-		include_once('/home/translated/public_html/admin/inc/common.inc.php');
-		$ep=enc_psw($data['pass']);
-		$message="Dear ".$data['firstname']."\n\nA Matecat account has been automatically created for you with the following name: ".$data['mail']."\n\nYou can change your automatically generated random password and/or manage your account information by clicking on the link below:\n\nhttps://www.translated.net/int/uci.php?login=".$data['mail']."&ep=".$ep."#changepass\n\n\nRegards\n\n--\n\nTranslated team\nhttp://www.translated.net\nTel. (+39) 06 90 25 40 01\nFax. +39 06 233 200 102\nMail info@translated.net\n";
-		$mail_res=send_mail('Translated.net Team','info@translated.net',$data['name'],$data['mail'],'Welcome to Translated!',$message,'utf-8');
+		$message="Dear ".$data['firstname']."\n\nA Matecat account has been automatically created for you with the following name: ".$data['mail'];
+		$mail_res=mailer('Matecat Team','noreply@'.INIT::$HTTPHOST,$data['name'],$data['mail'],'Welcome to Matecat!',$message);
 	}
 }
 

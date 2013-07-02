@@ -21,8 +21,6 @@ class checkFileConversionController extends ajaxcontroller {
 
             $file_path = $intDir . '/' . $this->file_name . '.sdlxliff';
             
-//    	log::doLog('FILEPATH: ' .$file_path);
-
             if (file_exists($file_path)) {
                   $this->result['converted'] = 1;
             } else {

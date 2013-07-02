@@ -41,10 +41,8 @@ do {
     foreach ($deletedPidList as $k => $pid) {
         // check il process pid ended
         if (!isRunningProcess($pid)) {
-            //if (!file_exists("/proc/$pid")) {
             unset($deletedPidList[$k]);
             echo "(parent $my_pid) : pid $pid unset\n";
-            // print_r($deletedPidList);
         }
     }
 } while (!empty($deletedPidList));
@@ -52,12 +50,6 @@ do {
 resetLockSegment();
 
 echo "(parent $my_pid) : -------------------cleaning old resources DONE-------------------\n\n";
-
-
-//$res = launchProcesses($numProcesses);
-//if ($res < 0) {
-//    die("ERROR OCCURRED :  PARENT EXITING !!");
-//}
 
 
 while (1) {
@@ -116,9 +108,6 @@ function getPidFromFiles() {
     chdir(PID_FOLDER);
     $files = glob('*'); // get all file names
     chdir($cwd);
-    //echo __FUNCTION__ . "\n";
-    //print_r($files);
-    //echo "\n";
     return $files;
 }
 
@@ -167,7 +156,7 @@ function deletePidFile($pid = "", $num = -1) {
     }
 
     echo "no pid indicated --> deleting all (or num if \$num > 0) pid files\n";
-    //$files = getPidFromFiles(); // get all file names
+    
     foreach ($files as $file) { // iterate files
         if (is_file(PID_FOLDER . "/$file")) {
             echo "deleting pid $file ....";
@@ -184,33 +173,10 @@ function deletePidFile($pid = "", $num = -1) {
             echo "WARNING  2 !!!  file $file not exists\n";
         }
     }
-    /* } else {
-      echo "pid selected  --> deleting pid file $pid\n";
-      $file = PID_FOLDER . "/$pid";
-      if (is_file($file)) {
-      unlink($file); // delete file
-      $pidDeleted[] = $file;
-      $numDeleted+=1;
-      } else {
-      echo "WARNING !!!  file $pid not exists\n";
-      }
-      } */
     echo __FUNCTION__ . " exiting : deleted $numDeleted files\n\n";
 
     return $pidDeleted;
 }
-
-//MOVED TO MAIN.php
-//function processFileExists($pid) {
-//    $folder = PID_FOLDER;
-//    echo __FUNCTION__ . " : $folder/$pid ....";
-//    if (file_exists("$folder/$pid")) {
-//        echo "true\n\n";
-//        return true;
-//    }
-//    echo "false\n\n";
-//    return false;
-//}
 
 function setNumProcesses() {
     // legge quanti processi lanciare

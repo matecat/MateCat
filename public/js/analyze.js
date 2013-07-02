@@ -234,11 +234,12 @@ UI = {
                     $('#totalTMWC').text(s.TOTAL_PAYABLE_PRINT);
 
                     $.each(d.data.jobs, function(key,value) {
+	console.log(value);
                         tot = value.totals;
                         context = $('#job-' + key);
                         var s_total = $('.totaltable .stat_tot',context);
                         s_total_txt = s_total.text();
-                        s_total.text(s.TOTAL_PAYABLE_PRINT);
+                        s_total.text(tot.TOTAL_PAYABLE[1]);
                         //if(s_total_txt != s.TOTAL_TM_WC_PRINT) s_total.effect("highlight", {}, 1000);
                         
                         

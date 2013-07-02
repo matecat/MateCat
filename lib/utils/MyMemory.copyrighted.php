@@ -10,16 +10,9 @@
 class MyMemory {
 
 	public static function TMS_MATCH($seg1, $seg2, $penalty_id = 0, $for_semantix = false) {
-		// BUG: "my account" con "account lockout" da un match del ~60%
-		// "my account" con "Account Name" ha un match di 77
-		//BUG: NON SERVE
 		$seg1 = trim($seg1);
 		$seg2 = trim($seg2);
 
-		// Aggiunto 2012-10-05 per milgiorare split parole in diff_html
-		// rimosso perchè non usato
-		// mb_internal_encoding('UTF-8');
-		// mb_regex_encoding('UTF-8');
 
 		$ts1 = $seg1;
 		$ts2 = $seg2;
@@ -28,43 +21,43 @@ class MyMemory {
 		switch ($penalty_id) {
 			case "1": //mt!
 				$penalty = 0.15;
-			break;
+				break;
 
 			case "2": //webalign!
 				$penalty = 0.05;
-			break;
+				break;
 
 			case "3": //align!
 				$penalty = 0.5;
-			break;
+				break;
 
 			case "4": //mtfixed!
 				$penalty = 0.05;
-			break;
+				break;
 
 			case "11": // 1 star (low quality)
 				$penalty = 0.50;
-			break;
+				break;
 
 			case "12": // 1 star (low quality)
 				$penalty = 0.30;
-			break;
+				break;
 
 			case "13": // 1 star (average low quality)
 				$penalty = 0.10;
-			break;
+				break;
 
 			case "14": // 1 star (average high quality)
 				$penalty = 0.00;
-			break;
+				break;
 
 			case "15": // high quality
 				$penalty = -0.01;
-			break;
+				break;
 
 			default:
-			$penalty = 0;
-			break;
+				$penalty = 0;
+				break;
 		}
 
 		//BUG: dovrò inserire livelli di astrazione sui segmenti e calcolare la media
@@ -223,9 +216,9 @@ class MyMemory {
 	public static function diff_tercpp($old,$new){
 		$res=shell_exec("/bin/tercpp.0.6.2 --noTxtIds --printDifferenceToHtmlToSTDO  -s  -rSent \"$old\" -hSent \"$new\" 2>&1");
 		$res=str_replace('DiffView:  ','',$res);
-                if (stripos($res, "/tercpp.0.6.2")!==false){
-                    return null;
-                }
+		if (stripos($res, "/tercpp.0.6.2")!==false){
+			return null;
+		}
 		return $res;
 	}
 

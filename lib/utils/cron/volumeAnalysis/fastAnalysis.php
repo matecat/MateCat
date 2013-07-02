@@ -2,55 +2,48 @@
 
 set_time_limit(0);
 include_once 'main.php';
-include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted2.php";
+include_once INIT::$UTILS_ROOT . "/MyMemoryAnalyzer.copyrighted.php";
 
-$ws = new MyMemory2();
+$ws = new MyMemoryAnalyzer();
 
 while (1) {
 
-    $pid_list = getProjectForVolumeAnalysis('fast', 5);
-    if (empty($pid_list)) {
-        //echo __FILE__ . ":" . __FUNCTION__ . " no projects ready fon fast volume analisys: wait 3 seconds\n";
-        //log::doLog(__FILE__ . ":" . __FUNCTION__ . " no projects ready fon fast volume analisys: wait 3 seconds");
-        sleep(3);
-        continue;
-    }
+	$pid_list = getProjectForVolumeAnalysis('fast', 5);
+	if (empty($pid_list)) {
+		echo __FILE__ . ":" . __FUNCTION__ . " no projects ready for fast volume analisys: wait 3 seconds\n";
+		sleep(3);
+		continue;
+	}
 
-    echo __FILE__ . ":" . __FUNCTION__ . "  projects found";
-    //print_r($pid_list);
+	echo __FILE__ . ":" . __FUNCTION__ . "  projects found\n";
+	print_r($pid_list);
 
-    foreach ($pid_list as $pid_res) {
-        $pid = $pid_res['id'];
+	foreach ($pid_list as $pid_res) {
+		$pid = $pid_res['id'];
 
-        $segments = getSegmentsForFastVolumeAnalysys($pid);
-        //print_r ($segments);exit;
-        $fastReport = $ws->fastAnalysys($segments);
+		$segments=getSegmentsForFastVolumeAnalysys($pid);
 
-        $data=$fastReport['data'];
-        foreach ($data as $k=>$v){
-            if (in_array($v['type'], array("75%-84%","85%-94%","95%-99%"))){
-                $data[$k]['type']="INTERNAL";
-            }
-            
-            if (in_array($v['type'], array("50%-74%"))){
-                $data[$k]['type']="NO_MATCH";
-            }
-        }
-        
-        //log::doLog(":_:_:_:_:_:_:_:_:_:_:_:_");
-        //log::doLog($data);
+		$fastReport = $ws->fastAnalysys($segments);
 
-        $insertReportRes = insertFastAnalysis($pid,$data, $equivalentWordMapping);
-        if ($insertReportRes < 0) {
-            log::doLog(__FILE__ . ":" . __FUNCTION__ . " insertAnalysis error on pid $pid");
-            continue;
-        }
-        $change_res = changeProjectStatus($pid, "FAST_OK");
-        if ($change_res < 0) {
-            log::doLog(__FILE__ . ":" . __FUNCTION__ . " changeProjectStatus error on pid $pid");
-        }
-        //sleep(1);
-    }
+		$data=$fastReport['data'];
+		foreach ($data as $k=>$v){
+			if (in_array($v['type'], array("75%-84%","85%-94%","95%-99%"))){
+				$data[$k]['type']="INTERNAL";
+			}
+
+			if (in_array($v['type'], array("50%-74%"))){
+				$data[$k]['type']="NO_MATCH";
+			}
+		}
+
+
+		$insertReportRes = insertFastAnalysis($pid,$data, $equivalentWordMapping);
+		if ($insertReportRes < 0) {
+			continue;
+		}
+		$change_res = changeProjectStatus($pid, "FAST_OK");
+		if ($change_res < 0) {
+		}
+	}
 }
-
 ?>
