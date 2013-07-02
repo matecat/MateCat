@@ -37,7 +37,7 @@ class newProjectController extends viewcontroller {
 		} else if($_COOKIE["sourceLang"] != "_EMPTY_") {
 			$this->noSourceLangHistory = false;
 			$this->sourceLangHistory = $_COOKIE["sourceLang"];
- 			$this->sourceLangAr = explode('||',urldecode($this->sourceLangHistory));
+			$this->sourceLangAr = explode('||',urldecode($this->sourceLangHistory));
 			$tmpSourceAr = array();
 			$tmpSourceArAs = array();
 			foreach($this->sourceLangAr as $key=>$lang) {
@@ -53,13 +53,10 @@ class newProjectController extends viewcontroller {
 			}
 			$this->sourceLangAr = $tmpSourceAr;
 			asort($this->sourceLangAr);
-			//log::doLog('SOURCE LANG AR: ' , $this->sourceLangAr);
-			//log::doLog('SOURCE LANG NEW : ' , $tmpSourceArAs);
 
-//			usort($tmpSourceArAs, 'sortByOrder');
 			$this->array_sort_by_column($tmpSourceArAs, 'name');
 			$this->sourceLangArray = $tmpSourceArAs;
-			
+
 		}
 
 		if ($_COOKIE["targetLang"] == "_EMPTY_") {
@@ -70,28 +67,25 @@ class newProjectController extends viewcontroller {
 		} else if($_COOKIE["targetLang"] != "_EMPTY_") {
 			$this->noTargetLangHistory = false;
 			$this->targetLangHistory = $_COOKIE["targetLang"];
- 			$this->targetLangAr = explode('||',urldecode($this->targetLangHistory));
-//			log::doLog('TARGET LANG AR: ' , $this->targetLangAr);
+			$this->targetLangAr = explode('||',urldecode($this->targetLangHistory));
 
 			$tmpTargetAr = array();
 			$tmpTargetArAs = array();
-			
+
 			foreach($this->targetLangAr as $key=>$lang) {
 				if($lang != '')	{
 					$prova = explode(',',urldecode($lang));	
-//					log::doLog('NUMBER OF TARGET LANGS: ' , count($prova));
 
 					$cl = "";
 					foreach($prova as $ll) {
 						$cl .= $this->lang_handler->getLocalizedName($ll,'en').',';
 					}
 					$cl = substr_replace($cl ,"",-1);
-//					log::doLog('CL: ' . $cl);
 
 
 					$tmpTargetAr[$lang] = $cl;
-//					$tmpTargetAr[$lang] = $this->lang_handler->getLocalizedName($lang,'en');
-					
+					//					$tmpTargetAr[$lang] = $this->lang_handler->getLocalizedName($lang,'en');
+
 					$ar = array();
 					$ar['name'] = $cl;
 					$ar['code'] = $lang;
@@ -104,16 +98,7 @@ class newProjectController extends viewcontroller {
 
 			$this->array_sort_by_column($tmpTargetArAs, 'name');
 			$this->targetLangArray = $tmpTargetArAs;
-			
-/*
-			foreach($this->targetLangAr as $lang) {
-				$tmpTargetAr[$lang] = $this->lang_handler->getLocalizedName($lang,'en');
-			}
-			$this->targetLangAr = $tmpTargetAr;
-			log::doLog('TARGET tmpTargetAr: ' , $tmpTargetAr);
-*/			
-//			if($serTargetLang == '_EMPTY_') $serTargetLang = "";
-//			$targetLang = explode('||',urldecode($serTargetLang));			
+
 		}
 
 		$intDir = INIT::$UPLOAD_REPOSITORY.'/'.$this->guid.'/';
@@ -131,18 +116,18 @@ class newProjectController extends viewcontroller {
 	}
 
 	public function sortByOrder($a, $b) {
-    	return strcmp($a["name"], $b["name"]);
+		return strcmp($a["name"], $b["name"]);
 
-//    	return $b['name'] - $a['name'];
+		//    	return $b['name'] - $a['name'];
 	}
 
 	public function array_sort_by_column(&$arr, $col, $dir = SORT_ASC) {
-	    $sort_col = array();
-	    foreach ($arr as $key=> $row) {
-	        $sort_col[$key] = $row[$col];
-	    }
-	
-	    array_multisort($sort_col, $dir, $arr);
+		$sort_col = array();
+		foreach ($arr as $key=> $row) {
+			$sort_col[$key] = $row[$col];
+		}
+
+		array_multisort($sort_col, $dir, $arr);
 	}
 
 
@@ -198,7 +183,7 @@ class newProjectController extends viewcontroller {
 
 	public function setTemplateVars() {
 		$this->template->languages=$this->lang_handler->getEnabledLanguages('en');
-		//print_r ($this->lang_handler->getEnabledLanguages('en'));exit;
+
 		$this->template->upload_session_id = $this->guid;
 		$this->template->mt_engines = $this->mt_engines;
 		$this->template->tms_engines = $this->tms_engines;
@@ -213,10 +198,9 @@ class newProjectController extends viewcontroller {
 		$this->template->supported_file_types_array = $this->getCategories();
 
 		$this->template->unsupported_file_types = $this->getExtensionsUnsupported();
-		$this->template->formats_number = $this->countExtensions(); //count(explode('|', INIT::$CONVERSION_FILE_TYPES));
+		$this->template->formats_number = $this->countExtensions(); 
 		$this->template->volume_analysis_enabled = INIT::$VOLUME_ANALYSIS_ENABLED;
 
-		//log::doLog('targetLangHistory: ' , $this->targetLangArray);
 
 		$this->template->sourceLangHistory = $this->sourceLangArray;
 		$this->template->targetLangHistory = $this->targetLangArray;
@@ -224,7 +208,7 @@ class newProjectController extends viewcontroller {
 		$this->template->noTargetLangHistory = $this->noTargetLangHistory;
 		$this->template->logged_user=trim($this->logged_user['first_name']." ".$this->logged_user['last_name']);
 		$this->template->build_number = INIT::$BUILD_NUMBER;
-		
+
 	}
 
 	public function create_guid($namespace = '') {

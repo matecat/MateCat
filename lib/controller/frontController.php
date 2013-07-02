@@ -3,13 +3,10 @@
 require_once INIT::$ROOT . '/inc/errors.inc.php';
 
 function __autoload($action) {
-	//echo "autoload $action\n";
 	if (!file_exists(INIT::$CONTROLLER_ROOT . "/$action.php")) {
 		log::doLog("file " . INIT::$CONTROLLER_ROOT . "/$action.php" . " not exists. Exiting");
 		die("file " . INIT::$CONTROLLER_ROOT . "/$action.php" . " not exists. Exiting");
-	}/* else {
-	    log::doLog("file " . INIT::$CONTROLLER_ROOT . "/$action.php". "  exists. Continue");
-	    } */
+	}
 	require_once INIT::$CONTROLLER_ROOT . "/$action.php";
 }
 
@@ -28,16 +25,12 @@ class controllerDispatcher {
 		return self::$instance;
 	}
 
-	public function getController() {//print_r($_REQUEST);exit;
+	public function getController() {
 		//Default :  cat
 		$action = (isset($_POST['action'])) ? $_POST['action'] : (isset($_GET['action']) ? $_GET['action'] : 'cat');
-		//$action='cat';
 
 		$postback = (isset($_REQUEST['postback']) ? "postback" : "");
-		//$className = $action . $postback . "Controller";
 		$className = $action . "Controller";
-		//log::doLog("ffffff $className");
-		//echo $className ; exit;
 		return new $className();
 	}
 
@@ -50,7 +43,6 @@ abstract class controller {
 	abstract function doAction();
 
 	protected function nocache() {
-		//header_remove();
 		header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
 		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
 		header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
@@ -65,12 +57,10 @@ abstract class controller {
 			 */
 
 			$this->errors = ERRORS::obtain();
-			// print_r ($this->errors->getAllErrors());exit;
 		} catch (Exception $e) {
 			echo "<pre>";
 			print_r($e);
 			echo "\n\n\n";
-			//print_r($this->template);
 			echo "</pre>";
 			exit;
 		}
@@ -79,9 +69,6 @@ abstract class controller {
 	protected function get_from_get_post($varname) {
 		$ret = null;
 		$ret = isset($_GET[$varname]) ? $_GET[$varname] : (isset($_POST[$varname]) ? $_POST[$varname] : null);
-		/* if (!is_null($ret)){
-		   $ret=urldecode($ret);
-		   } */
 		return $ret;
 	}
 
@@ -92,7 +79,6 @@ abstract class downloadController extends controller {
 	protected $content = "";
 	protected $filename = "unknown";
 
-	//abstract function setContent();
 
 	public function __construct() {
 		parent::__construct();
@@ -104,16 +90,13 @@ abstract class downloadController extends controller {
 			ob_get_clean();
 			ob_start("ob_gzhandler");  // compress page before sending
 			$this->nocache();
-			//header_remove();
 			header("Content-Type: application/force-download");
 			header("Content-Type: application/octet-stream");
 			header("Content-Type: application/download");
 			header("Content-Disposition: attachment; filename=\"$this->filename\""); // enclose file name in double quotes in order to avoid duplicate header error. Reference https://github.com/prior/prawnto/pull/16
-			//header("Pragma: no-cache");
 			header("Expires: 0");
 			echo $this->content;
 			exit;
-			//echo $buffer;
 		} catch (Exception $e) {
 			echo "<pre>";
 			print_r($e);
@@ -149,7 +132,6 @@ abstract class viewcontroller extends controller {
 	protected $isAuthRequired;
 	protected $logged_user=false;
 
-	//private $localizedUrlMapping;
 	abstract function setTemplateVars();
 
 	private function getBrowser() {
@@ -263,12 +245,7 @@ abstract class viewcontroller extends controller {
 
 	private function isSupportedWebBrowser() {
 		$browser_info = $this->getBrowser();
-		//echo "<pre>"; print_r ($browser_info);
-		//print_r($_SERVER);
-
 		$browser_name = strtolower($browser_info['name']);
-
-		//log::doLog('BROWSER NAME: '.$browser_name);
 
 		foreach (INIT::$ENABLED_BROWSERS as $enabled_browser) {
 			if (stripos($browser_name, $enabled_browser) !== FALSE) {
@@ -276,16 +253,10 @@ abstract class viewcontroller extends controller {
 			}
 		}
 		return false;
-
-		//if (!in_array($browser_name,INIT::$ENABLED_BROWSERS)){
-		//	return false;
-		//}
-		//return true;
 	}
 
 	protected function postback($additionalPostData = array()) {
 		$url = $_SERVER['REQUEST_URI'];
-		//print_r ($_REQUEST);;
 		if (!is_array($additionalPostData)) {
 			$additionalPostData = array();
 		}
@@ -357,17 +328,14 @@ abstract class viewcontroller extends controller {
 			$buffer = ob_get_contents();
 			ob_get_clean();
 			ob_start("ob_gzhandler");  // compress page before sending
-			// header_remove();
 			$this->nocache();
 
 			header('Content-Type: text/html; charset=utf-8');
 			echo $this->template->execute();
-			//echo $buffer;
 		} catch (Exception $e) {
 			echo "<pre>";
 			print_r($e);
 			echo "\n\n\n";
-			// print_r($this->template);
 			echo "</pre>";
 			exit;
 		}
@@ -379,13 +347,11 @@ abstract class ajaxcontroller extends controller {
 
 	protected $result;
 
-	//abstract function echoJSONResult();
 	protected function __construct() {
 		parent::__construct();
 		$buffer = ob_get_contents();
 		ob_get_clean();
 		// ob_start("ob_gzhandler");		// compress page before sending
-		// header_remove();
 		header('Content-Type: application/json; charset=utf-8');
 		$this->result = array("errors" => array(), "data" => array());
 	}

@@ -13,7 +13,6 @@ include INIT::$UTILS_ROOT . "/langs/languages.class.php";
  */
 class catController extends viewcontroller {
 
-	//put your code here    
 	private $data = array();
 	private $cid = "";
 	private $jid = "";
@@ -30,7 +29,6 @@ class catController extends viewcontroller {
 	private $job_stats = array();
 	private $source_rtl = false;
 	private $target_rtl = false;
-	//    private $seg = '';
 
 	private $job_not_found = false;
 	private $job_archived = false;
@@ -41,8 +39,6 @@ class catController extends viewcontroller {
 	public function __construct() {
 		$this->start_time = microtime(1) * 1000;
 
-		//    	log::doLog('provalog');
-		// echo ".........\n";
 		parent::__construct(false);
 		parent::makeTemplate("index.html");
 		$this->jid = $this->get_from_get_post("jid");
@@ -101,9 +97,6 @@ class catController extends viewcontroller {
 			$this->job_not_found = true;
 		}
 
-		// echo "<pre>";
-		// print_r ($data);
-		// exit;
 
 		$first_not_translated_found = false;
 
@@ -154,7 +147,6 @@ class catController extends viewcontroller {
 				$target = strtoupper($t[0]);
 				$this->target = $target;
 				$this->target_rtl= ($lang_handler->isRTL(strtolower($this->target)))? ' rtl-target' : '';
-				//log::doLog("TARGET CLASS for ".$this->target.": " . $lang_handler->isRTL(strtolower($this->target)));
 			}
 			//check if language belongs to supported right-to-left languages
 
@@ -171,7 +163,6 @@ class catController extends viewcontroller {
 			if (!isset($this->data["$id_file"])) {
 				$files_found[] = $seg['filename'];
 				$file_stats = CatUtils::getStatsForFile($id_file);
-				log::doLog('FILE STATS:',$file_stats);		
 
 				$this->data["$id_file"]['jid'] = $seg['jid'];
 				$this->data["$id_file"]["filename"] = $seg['filename'];
@@ -184,9 +175,7 @@ class catController extends viewcontroller {
 				$this->data["$id_file"]['target_code'] = $seg['target'];
 				$this->data["$id_file"]['last_opened_segment'] = $seg['last_opened_segment'];
 				$this->data["$id_file"]['file_stats'] = $file_stats;
-				//$this->data["$id_file"]['segments'] = array();
 			}
-			//if (count($this->data["$id_file"]['segments'])>100){continue;}
 			$this->filetype_handler = new filetype($seg['mime_type']);
 
 
@@ -211,7 +200,6 @@ class catController extends viewcontroller {
 
 		if (empty($this->last_opened_segment)) {
 			$this->last_opened_segment = getFirstSegmentId($this->jid, $this->password);
-			log::doLog('LAST_OPENED_SEGMENT: ' . $this->last_opened_segment);
 		}
 
 		$this->job_stats = CatUtils::getStatsForJob($this->jid);
@@ -219,9 +207,6 @@ class catController extends viewcontroller {
 			$this->downloadFileName = $files_found[0];
 		}
 
-		//   echo "<pre>";
-		//   print_r($this->data);
-		//   exit;
 	}
 
 	public function setTemplateVars() {
@@ -236,9 +221,6 @@ class catController extends viewcontroller {
 		$this->template->target = $this->target;
 		$this->template->source_rtl = $this->source_rtl;
 		$this->template->target_rtl = $this->target_rtl;
-		//$this->template->cucu=$this->open_segment;
-		//$this->template->cucu=$this->open_segment;
-		//$this->template->stats=$stats[0]['TOTAL'];
 
 		$this->template->source_code = $this->source_code;
 		$this->template->target_code = $this->target_code;
@@ -260,9 +242,6 @@ class catController extends viewcontroller {
 		$this->template->logged_user=trim($this->logged_user['first_name']." ".$this->logged_user['last_name']);
 		$this->template->incomingUrl = '/login?incomingUrl='.$this->thisUrl;
 		$this->template->warningPollingInterval=1000*(INIT::$WARNING_POLLING_INTERVAL);
-		// echo "<pre>";
-		// print_r ($this->template);
-		// exit;
 	}
 
 }

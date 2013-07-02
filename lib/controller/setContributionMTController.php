@@ -63,35 +63,32 @@ class setContributionMTController extends ajaxcontroller {
 			$this->result['error'][] = array("code" => -6, "message" => "missing segment id");
 		}
 
-		/*if (empty($this->chosen_suggestion_index)) {
-			$this->result['error'][] = array("code" => -7, "message" => "missing suggestion index");
-		}*/
 
 		//mt engine to contribute to
 		$job_data=getJobData($this->id_job);
-                if (empty($job_data['id_mt_engine'])){
-                    return false;
-                }
+		if (empty($job_data['id_mt_engine'])){
+			return false;
+		}
 		$this->mt=new MT($job_data['id_mt_engine']);
 
 		//array of storicised suggestions for current segment
 		$this->suggestion_json_array=json_decode(getArrayOfSuggestionsJSON($this->id_segment),true);
-		
+
 		//extra parameters
 		$extra=json_encode(
-			array(
-				'id_segment'=>$this->id_segment,
-				'suggestion_json_array'=>$this->suggestion_json_array,
-				'chosen_suggestion_index'=>$this->chosen_suggestion_index,
-				'time_to_edit'=>$this->time_to_edit
-				)
-			);
+				array(
+					'id_segment'=>$this->id_segment,
+					'suggestion_json_array'=>$this->suggestion_json_array,
+					'chosen_suggestion_index'=>$this->chosen_suggestion_index,
+					'time_to_edit'=>$this->time_to_edit
+				     )
+				);
 		//send stuff
 		$outcome=$this->mt->set($this->segment, $this->translation, $this->source_lang, $this->target_lang, 'demo@matecat.com', $extra);
-                if (is_array($outcome)){
-                    $this->result['errors']=$outcome;
-                }
-				
+		if (is_array($outcome)){
+			$this->result['errors']=$outcome;
+		}
+
 	}
 
 }

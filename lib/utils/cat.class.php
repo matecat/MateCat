@@ -140,7 +140,6 @@ class CatUtils {
 		$segment=self::placehold_xliff_tags ($segment);
 		$segment = htmlspecialchars($segment,ENT_NOQUOTES,'UTF-8',false);
 		$segment=self::restore_xliff_tags($segment);	
-		//log::doLog(__FUNCTION__ . " $segment");
 		return $segment;
 	}
 
@@ -156,9 +155,7 @@ class CatUtils {
 
 		$segment= preg_replace('|<(.*?)>|si', "&lt;$1&gt;",$segment);
 		$segment=self::restore_xliff_tags_for_wiew($segment);	
-                //$segment=$segment.";;;;";
                 $segment=  str_replace("&nbsp;", "++", $segment);
-                //echo "$segment---"; exit;
 		return $segment;
 	}
 
@@ -302,7 +299,6 @@ class CatUtils {
 
 
 		$insertRes = setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index, $warning);
-		//log::doLog("translation is $translation - encoded ". htmlentities($translation));
 		if ($insertRes < 0 and $insertRes != -1062) {
 			$result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the translation for the segment $id_segment - $insertRes");
 			return $result;
@@ -320,8 +316,6 @@ class CatUtils {
 	}
 
 	public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "", $match_type="", $eq_words=0, $standard_words=0, $translation="", $tm_status_analysis="UNDONE", $warning=0) {
-		//echo "id_segment, id_job, suggestions_json_array, suggestion , suggestion_match , suggestion_source , match_type, eq_words, translation\n";
-		//print_r (func_get_args());exit;
 		if (!empty($suggestion_source)){
 			if (strpos($suggestion_source,"MT")===false){
 				$suggestion_source='TM';
@@ -339,8 +333,6 @@ class CatUtils {
 		if ($insertRes == -1062) {
 			// the translaion for this segment still exists : update it
 			$updateRes = setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source,$match_type,$eq_words,$standard_words,$translation,$tm_status_analysis, $warning);
-			// log::doLog("updateRes");
-			// log::doLog($updateRes);
 			if ($updateRes < 0) {
 				$result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the suggestions for the segment $id_segment");
 				return $result;
@@ -350,8 +342,6 @@ class CatUtils {
 	}
 
 	public static function getStatsForMultipleJobs($jids,$estimate_performance=0){
-		//log::doLog("JIDS: ",$jids);
-		log::doLog("EST PERF: ",$estimate_performance);
 
 		//get stats for all jids
 		$jobs_stats=getStatsForMultipleJobs($jids);
@@ -489,18 +479,6 @@ class CatUtils {
 		$file_stats['TOTAL_FORMATTED']=number_format($file_stats['TOTAL'],0,".",",");
 		$file_stats['REJECTED_FORMATTED']=number_format($file_stats['REJECTED'],0,".",",");
 		$file_stats['DRAFT_FORMATTED']=number_format($file_stats['DRAFT'],0,".",",");
-		/*
-		   $file_stats['TRANSLATED_PERC']=($file_stats['TRANSLATED'])/$file_stats['TOTAL']*100;
-		   $file_stats['APPROVED_PERC']=($file_stats['APPROVED'])/$file_stats['TOTAL']*100;
-		   $file_stats['REJECTED_PERC']=($file_stats['REJECTED'])/$file_stats['TOTAL']*100;
-		   $file_stats['DRAFT_PERC']=($file_stats['DRAFT'])/$file_stats['TOTAL']*100;
-
-		   $file_stats['TRANSLATED_PERC_FORMATTED'] = number_format($file_stats['TRANSLATED_PERC'],1,".",",");
-		   $file_stats['APPROVED_PERC_FORMATTED']   = number_format($file_stats['APPROVED_PERC'],1,".",",");
-		   $file_stats['REJECTED_PERC_FORMATTED']   = number_format($file_stats['REJECTED_PERC'],1,".",",");
-		   $file_stats['DRAFT_PERC_FORMATTED']      = number_format($file_stats['DRAFT_PERC'],1,".",",");
-		 */
-		//		 log::doLog('FILE STATS:',$file_stats);		
 
 
 		return $file_stats;
