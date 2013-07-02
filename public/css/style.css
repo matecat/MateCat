@@ -779,7 +779,7 @@ section.status-new.opened .editarea
 textarea, input, .editarea, .search-editarea, select  {
 outline: none !important
 }
-.source{position:relative;z-index:9999; word-break: normal;
+.source{position:relative;z-index:9999; word-break: break-all;
 }
 .suggestion_source,
 .translation
