@@ -9,12 +9,7 @@
         <link rel="stylesheet" href="${basepath}public/css/fieldtest.css?build=${build_number}"/>
         <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
         <script type="text/javascript" src="${basepath}public/js/utils.js?build=${build_number}"></script>
-
-        <script type="text/javascript">
-            $(document).ready(function() {
-                fitText($('.breadcrumbs'), $('#pname'), 30);
-            });
-        </script>
+        <script type="text/javascript" src="${basepath}public/js/editlog.js?build=${build_number}"></script>
     </head>
 
     <body tal:condition="not:supportedBrowser">
@@ -24,7 +19,7 @@
     <body tal:condition="supportedBrowser">
         <!--metal:use-macro="header.html/main_header"-->
         <header style="padding-bottom:5px" >
-            <div class="wrapper">   
+            <div class="wrapper">       
                 <a href="${basepath}" class="logo"></a>
 
                 <div class="breadcrumbs">    

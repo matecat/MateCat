@@ -334,12 +334,14 @@ UI = {
         				$('#analyzedSegmentsReport').text(s.SEGMENTS_ANALYZED_PRINT);
                         setTimeout(function(){
         					$('#longloading .meter').remove();
-        					$('#longloading p').addClass('loaded').text('Done!');
+        					$('#longloading p').addClass('loaded').text('Analysis complete');
                         },1000);   
+/*
                         setTimeout(function(){
             				$('.loadingbar').removeClass('open');
                         },2000);     
-                    }
+*/
+                        }
                    
                 }
             }
