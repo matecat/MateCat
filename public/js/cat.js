@@ -1,7 +1,7 @@
 UI = null;
 
 UI = {
-    render: function(firstLoad) {
+    render: function(firstLoad) {console.log('ecco');
         this.isWebkit = $.browser.webkit;
         this.isChrome = $.browser.webkit && !!window.chrome;
         this.isFirefox = $.browser.mozilla;
