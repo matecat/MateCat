@@ -110,8 +110,16 @@ class changeJobsStatusController extends ajaxcontroller {
             $this->result['newItem'] = $projects;
             $this->result['page'] = $this->page;
             $this->result['pnumber'] = $projnum[0]['c'];
-        }
-    }
+        } else {
+   
+            $st = updateJobsStatus($this->res_type, $this->res_id, $this->new_status, $this->only_if, $this->undo);
+           
+            $this->result['code'] = 1;
+            $this->result['data'] = "OK";            
+            $this->result['status'] = $this->new_status;
+
+            }
+    } 
 
 }
 

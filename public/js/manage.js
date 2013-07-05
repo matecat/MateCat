@@ -11,7 +11,6 @@ UI = {
         this.firstLoad = firstLoad;
         this.pageStep = 100;
         this.isMac = (navigator.platform == 'MacIntel')? true : false;
-        console.log('develop');
         
         var page = location.pathname.split('/')[2];
         this.page = ('undefined'==typeof(page)||page == '')? 1 : parseInt(page);
@@ -284,6 +283,7 @@ UI = {
 
     changeJobsStatus: function(res,ob,status,only_if) {
         if(typeof only_if == 'undefined') only_if = 0;
+
         if(res=='job') {
         	UI.lastJobStatus = ob.data('status');
         	id = ob.data('jid');
@@ -296,7 +296,9 @@ UI = {
 		    UI.lastJobStatus = arJobs;
 		    id = ob.data('pid');
         }
-		var d = {
+            console.log('a');
+
+        var d = {
 				action:		"changeJobsStatus",
 				new_status: status,
 				res: 		res,
@@ -312,7 +314,9 @@ UI = {
 			data: ar,
 			context: ob,
 			success: function(d){
+                console.log('b');
 				if(d.data == 'OK') {
+            console.log('c');
 					res = ($(this).hasClass('row'))? 'job':'prj';
 					if(res=='prj') {
 						UI.getProject(this.data('pid'));
@@ -325,7 +329,7 @@ UI = {
     },
 
     changeJobsStatus_success: function(res,ob,d,undo) {
-		if(res == 'job') {
+        if(res == 'job') {
 			project = ob.parents('.article');
 			if(undo) {
 				ob.attr('data-status',d.status);				
