@@ -39,7 +39,6 @@ $(document).ready(function() {
 			if($(this).parent('tr').hasClass('failed')) return;
 			if($(this).text().split('.')[$(this).text().split('.').length-1] != 'sdlxliff') num++;
 		});
-//		console.log(num);
 		if(!$('.template-download').length) return;
         if (num) {
 	        var m = confirm('Source language changed. The files must be reimported.');
@@ -82,9 +81,7 @@ $(document).ready(function() {
             complete: function (){
             },
             success: function(d){
-                //		            	console.log(d.password + ' - ' + d.job_id);
                 if(d.errors.length) {
-                    console.log('errore');
                     $('.error-message').text('');
                     $.each(d.errors, function() {
                         $('.error-message').append(this.message+'<br />').show();
@@ -160,22 +157,5 @@ $(document).ready(function() {
     });
 //    		uploadSessionId = $.cookie("upload_session");
 
-
-
-/*
-    		var uploadSession = $.cookie("upload_session");
-//    		console.log(window.location);
-
-		    $('#fileupload').fileupload({
-		        uploadDir: window.location.href+'/storage/upload/'+uploadSession+'/'
-		    });				
-*/
 });
 
-
-
- 
-
-
-/*  
-*/

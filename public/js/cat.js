@@ -92,12 +92,10 @@ UI = {
         }).bind('keydown', 'Ctrl+down', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('ctrl+down');
             UI.gotoNextSegment();
         }).bind('keydown', 'Meta+down', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            console.log('meta+down');
             UI.gotoNextSegment();
         }).bind('keydown', 'Ctrl+up', function(e) {
             e.preventDefault();
@@ -193,8 +191,6 @@ UI = {
         });
 
         $(window).on('sourceCopied', function(event) {
-            console.log(event.segment);
-//			console.log(event.status);
         });
 
         $("article").on('click', 'a.number', function(e) {
@@ -270,7 +266,6 @@ UI = {
             e.preventDefault();
             e.stopPropagation();
         }).on('click', '.editarea', function(e, operation) {
-//        	console.log('operation: ' + operation);
             if (typeof operation == 'undefined')
                 operation = 'clicking';
             this.onclickEditarea = new Date();
@@ -279,11 +274,9 @@ UI = {
                 if (operation == 'moving') {
                     if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
                         UI.segmentToOpen = segment;
-                        console.log('UI.blockOpenSegment: ' + UI.blockOpenSegment);
                         UI.blockOpenSegment = true;
 
                         console.log('ctrl+down troppo vicini');
-//						console.log(UI.segmentToOpen);
                     } else {
                         UI.blockOpenSegment = false;
                     }
@@ -321,24 +314,15 @@ UI = {
 
             if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
 //				e.preventDefault();
-                console.log('ecco');
                 if ($('.selected', $(this)).length) {
                     e.preventDefault();
                     $('.selected', $(this)).remove();
                     UI.saveInUndoStack('cancel');
                     UI.checkTagMismatch(UI.currentSegment);
                 } else {
-
-//					console.log(UI.editarea.html());
-//				var selection = window.getSelection();
-//				var range = selection.getRangeAt(0);
-//					console.log($(range));
                     var numTagsBefore = UI.editarea.text().match(/\<.*?\>/gi).length;
-                    console.log('b');
                     var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
-                    console.log('c');
                     setTimeout(function() {
-                        console.log('d');
                         var numTagsAfter = UI.editarea.text().match(/\<.*?\>/gi).length;
                         var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
                         if (numTagsAfter < numTagsBefore)
@@ -347,19 +331,14 @@ UI = {
                             UI.saveInUndoStack('cancel');
                     }, 50);
                 }
-            }
-            ;
+            };
 
             if (e.which == 37) { // left arrow
                 var selection = window.getSelection();
                 var range = selection.getRangeAt(0);
                 if (range.startOffset != range.endOffset) {
                     var r = range.startContainer.data;
-                    console.log(range);
-                    console.log(range.startContainer.previousSibling);
                     if ((range.startOffset == 0) && ($(range.startContainer.previousSibling).hasClass('locked')))
-                        console.log('bingo');
-                    console.log('range.startOffset: ' + range.startOffset);
                     if ((r[0] == '<') && (r[r.length - 1] == '>')) {
                         console.log("spostare il cursore a sinistra della selezione");
                     }
@@ -401,13 +380,10 @@ UI = {
                 UI.checkTagMismatch(UI.currentSegment);
             }, 10);
         }).on('dblclick', '.editarea', function(e) {
-//			console.log('dblclicking');
-//			return false;
         }).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
             e.preventDefault();
             e.stopPropagation();
             selectText(this);
-//            console.log($(this).hasClass('selected'));
             $(this).toggleClass('selected');
         }).on('dragstart', '.editor .editarea .locked', function(e) {
             var selection = window.getSelection();
@@ -433,30 +409,11 @@ UI = {
                 UI.saveInUndoStack('drop');
             }, 100);
         }).on('click', '.editor .editarea .locked.selected', function(e) {
-//        	e.preventDefault();
-//        	console.log('ora dovrei togliere la classe selected');
-            /*
-             e.stopPropagation();
-             $(this).removeClass('selected');
-             */
         }).on('click', '.editor .editarea', function(e) {
             $('.selected', $(this)).removeClass('selected');
         }).on('click', 'a.translated', function(e) {
             e.preventDefault();
-            /*
-             if(typeof e.action != 'undefined') {
-             if(e.action == 'translated');
-             }
-             */
             UI.checkHeaviness();
-            console.log('segment is loaded?: ' + UI.segmentIsLoaded(UI.nextSegmentId));
-            console.log(UI.blockButtons);
-            /*
-             if(!UI.segmentIsLoaded(UI.nextSegmentId)) {
-             console.log(UI.nextSegmentId);
-             UI.reloadWarning();         	
-             }
-             */
             if (UI.blockButtons) {
                 if (UI.segmentIsLoaded(UI.nextSegmentId) || UI.nextSegmentId == '') {
                     console.log('segment is already loaded');
@@ -522,18 +479,6 @@ UI = {
         }).on('click', '.tagmenu, .warning, .viewer, .notification-box li a', function(e) {
             return false;
         }).on('paste', '.editarea', function(e) {
-//        	console.log(e);   
-//    		if(UI.taglockEnabled) return false;    	
-            /*
-             if(!UI.isWebkit) {
-             $('#temptextarea').remove();
-             UI.body.append('<div class="alert"><a href="#" class="close"></a><strong style="font-size:160%">Sorry!</strong><br /><p>This functionality is not supported on your browser yet. We are working to enable it on every browser. </p></div>');
-             UI.editarea.after('<textarea style="display: none" id="temptextarea"></textarea>');
-             $('#temptextarea').focus();
-             return false;
-             }
-             */
-
             UI.saveInUndoStack('paste');
             $('#placeHolder').remove();
             var node = document.createElement("div");
@@ -543,7 +488,6 @@ UI = {
             insertNodeAtCursor(node);
             var ev = (UI.isFirefox) ? e : event;
             handlepaste(this, ev);
-//            console.log('past: ' + UI.editarea.html());
 
             $(window).trigger({
                 type: "pastedInEditarea",
@@ -553,12 +497,8 @@ UI = {
             setTimeout(function() {
                 UI.saveInUndoStack('paste');
             }, 100);
-//        	UI.saveInUndoStack();
-//            console.log('1: ' + UI.editarea.html());
             UI.lockTags();
-//            console.log('2: ' + UI.editarea.html());
             UI.checkTagMismatch(UI.currentSegment);
-//            console.log('3: ' + UI.editarea.html());
 
 
         }).on('click', 'a.close', function(e) {
@@ -639,7 +579,6 @@ UI = {
     },
     changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
-//    	console.log(segment);
         $('.percentuage', segment).removeClass('visible');
         this.setContribution(segment, status, byStatus);
         this.setContributionMT(segment, status, byStatus);
@@ -694,15 +633,8 @@ UI = {
     checkTutorialNeed: function() {
         if (!Loader.detect('tutorial'))
             return false;
-        console.log($.cookie('noTutorial'));
         if (!$.cookie('noTutorial')) {
             $('#dialog').dialog({
-                /*
-                 close: function( event, ui ) {
-                 //					$.cookie('noTutorial',true);
-                 console.log('ho chiuso');
-                 }
-                 */
             });
             $('#hideTutorial').bind('change', function(e) {
                 if ($('#hideTutorial').attr('checked')) {
@@ -739,6 +671,12 @@ UI = {
             }
             ;
         })
+/*
+        console.log('dragged text: "' + draggedText + '"');
+        var prova = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2");
+        console.log('sanitized dragged text: "' + prova + '"');
+*/
+        draggedText = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2");
         var div = document.createElement("div");
         div.innerHTML = draggedText;
         saveSelection();
@@ -775,7 +713,6 @@ UI = {
                 saveBrevior = false;
         }
         if ((segment.hasClass('modified')) && (saveBrevior)) {
-            console.log('save brevior');
             this.saveSegment(segment);
             if (UI.alertConfirmTranslationEnabled) {
                 $(".blacked").show();
@@ -859,8 +796,6 @@ UI = {
             translation: translation
         });
 
-//        console.log('prima del check tag mismatch da copy suggestion in editarea');
-//        console.log(editarea.text());
 
 //		this.placeCaretAtEnd(document.getElementById($(editarea).attr('id')));
     },
@@ -930,16 +865,13 @@ UI = {
         this.lastSegment = s.last();
     },
     detectIfSegmentIsVisible: function() {
-//        console.log('scroll');
         if ($('.editor').isOnScreen()) {
             $('#segmentPointer').hide();
         } else {
             if ($(window).scrollTop() > $('.editor').offset().top) {
                 $('#segmentPointer').removeClass('down').css('margin-top', '-10px').addClass('up').show();
-                console.log('il segmento è in alto');
             } else {
                 $('#segmentPointer').removeClass('up').addClass('down').css('margin-top', ($(window).height() - 140) + 'px').show();
-                console.log('il segmento è in basso');
             }
         }
         ;
@@ -1070,7 +1002,6 @@ UI = {
         $(".loader", n).removeClass('loader_on');
     },
     getContribution_success: function(d, segment) {
-        console.log(segment);
         this.renderContributions(d, segment);
         this.lockTags();
         this.saveInUndoStack();
@@ -1106,7 +1037,6 @@ UI = {
         if (where == 'before') {
             $('#outer').addClass('loadingBefore');
         } else if (where == 'after') {
-            console.log('GET MORE SEGMENTS');
             $('#outer').addClass('loading');
         }
 
@@ -1238,7 +1168,6 @@ UI = {
     getSegments: function() {
         where = (this.startSegmentId) ? 'center' : 'after';
         var step = this.initSegNum;
-        console.log('GET SEGMENTS');
         $('#outer').addClass('loading');
 
         this.doRequest({
@@ -1346,7 +1275,6 @@ UI = {
     },
     lockTags: function() {
 //    	if(UI.isFirefox) return;
-//    	console.log('lock tagsq');
         if (!this.taglockEnabled)
             return false;
         if (this.noTagsInSegment())
@@ -1355,64 +1283,24 @@ UI = {
         saveSelection();
 
         var tx = this.editarea.html();
-//		console.log('1: ' + tx);
-//		console.log(tx);
-//		console.log(tx);
-        /*
-         console.log(tx);
-         console.log(tx.match(/&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\s+.*?&gt;/gi));
-         console.log(tx.match(/na.*?^((?!hede).)*$.*?ne/gi));
-         console.log(tx.match(/&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\s+.*?^(?!Andrea)*?.*?&gt;/gi));
-         console.log(tx.match(/&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\s+.*?^((?!&lt;).)*$.*?&gt;/gi));
-         */
-//		console.log(tx.match(/&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\s+[^&lt;]*?.*?(\<span id\=\"selectionBoundary)?.*?&gt;/gi));
-
-//		console.log(tx.match(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\s+[^&lt;]*?.*?&gt;)/gi));
-//	    tx = tx.replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\s+[^&lt;]*?(\<span id\=\"selectionBoundary)?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>");
-//	    tx = tx.replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\s+[^&lt;]*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>");
-
-        // encapsulate tags of opening
-
-
-
-
-
-        /*
-         console.log('tx: ' + tx);
-         var coso = tx.replace(/\<span/gi, "<PL");
-         coso = coso.replace(/\<\/span/gi, "</PL");
-         coso = coso.replace(/&lt;/gi, "<");
-         coso = coso.replace(/&gt;/gi, ">");
-         coso = coso.replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?[^>]*?.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>");
-         console.log('COSO: ' + coso);
-         tx = tx.replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>");
-         */
 
         tx = tx.replace(/\<span/gi, "<pl")
                 .replace(/\<\/span/gi, "</pl")
                 .replace(/&lt;/gi, "<")
-//		tx = tx.replace(/&gt;/gi, ">");
                 .replace(/(\<(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid[^<]*?&gt;)/gi, "<pl contenteditable=\"false\" class=\"locked\">$1</pl>")
                 .replace(/\</gi, "&lt;")
-//		tx = tx.replace(/\>/gi, "&gt;");
                 .replace(/\&lt;pl/gi, "<span")
                 .replace(/\&lt;\/pl/gi, "</span")
-
                 .replace(/\&lt;div\>/gi, "<div>")
                 .replace(/\&lt;\/div\>/gi, "</div>")
                 .replace(/\&lt;br\>/gi, "<br>")
 
-
-//		console.log(tx);
-//		console.log('2: ' + tx);
                 // encapsulate tags of closing
                 .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>");
 
 
         if (UI.isFirefox) {
-            console.log('1: ' + tx);
             tx = tx.replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>");
-            console.log('2: ' + tx);
             tx = tx.replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>");
         } else {
             // fix nested encapsulation
@@ -1422,57 +1310,7 @@ UI = {
 
         tx = tx.replace(/(\<\/span\>)$(\s){0,}/gi, "</span> ");
         this.editarea.html(tx);
-        /*
-         this.editarea.html(this.editarea.html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\s+[^&lt;]*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-         this.editarea.html(this.editarea.html().replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-         
-         
-         if(UI.isFirefox) {
-         this.editarea.html(this.editarea.html().replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
-         this.editarea.html(this.editarea.html().replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>"));
-         } else {
-         this.editarea.html(this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
-         this.editarea.html(this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>"));
-         
-         }
-         
-         this.editarea.html(this.editarea.html().replace(/(\<\/span\>)$(\s){0,}/gi, "</span> "));
-         */
         restoreSelection();
-
-
-
-        /*
-         if(checkLockability(this.editarea.text())) {
-         this.editarea.html(this.editarea.html().replace(/(&lt;.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-         
-         
-         if(UI.isFirefox) {
-         this.editarea.html(this.editarea.html().replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
-         this.editarea.html(this.editarea.html().replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>"));
-         } else {
-         this.editarea.html(this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
-         this.editarea.html(this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>"));
-         }
-         //   	this.editarea.html(this.editarea.html().replace(/((\<span)( class=\"locked\")( contenteditable=\"false\")(\>))/gi, "$2$4$3$5"));
-         //	    	this.editarea.html(this.editarea.html().replace(/(\<span (class=\"locked\") (contenteditable=\"false\")\>)/gi, "<span $3 $2>"));
-         
-         
-         
-         
-         //	    	this.editarea.html(this.editarea.html().replace("<span class=\"locked\" contenteditable=\"false\">", "<>"));
-         //	    	this.editarea.html(this.editarea.html().replace("<span class=\"locked\" contenteditable=\"false\">", "<span contenteditable=\"false\" class=\"locked\">"));
-         //	    	console.log('STRINGA: ' + this.editarea.html().replace(/(\<span (class=\"locked\") (contenteditable=\"false\")\>)/gi, "<span $3 $2></span>"));
-         //	    	this.editarea.html(this.editarea.html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>"));
-         this.editarea.html(this.editarea.html().replace(/(\<\/span\>)$(\s){0,}/gi, "</span> "));
-         } else {
-         $('.editor .editarea .locked.selected').removeClass('selected');
-         this.unlockTags();
-         }
-         //    	console.log('dopo: ' + this.editarea.html());
-         restoreSelection();
-         */
-
     },
     markSuggestionTags: function(segment) {
         if (!this.taglockEnabled)
@@ -1640,9 +1478,6 @@ UI = {
         }
     },
     pointBackToSegment: function(segmentId) {
-        console.log('this.infiniteScroll:');
-        console.log(this.infiniteScroll);
-        console.log(segmentId);
         if (!this.infiniteScroll)
             return;
         if (segmentId == '') {
@@ -1711,7 +1546,6 @@ UI = {
             $('.sub-editor .overflow', segment).empty();
 
             $.each(d.data.matches, function(index) {
-//            	console.log(this.translation);
                 if ((this.segment == '') || (this.translation == ''))
                     return;
                 var disabled = (this.id == '0') ? true : false;
@@ -1845,8 +1679,6 @@ UI = {
         }
     },
     saveSegment: function(segment) {
-        console.log('save segment');
-//		var segment = this.currentSegment;
         var status = (segment.hasClass('status-translated')) ? 'translated' : (segment.hasClass('status-approved')) ? 'approved' : (segment.hasClass('status-rejected')) ? 'rejected' : (segment.hasClass('status-new')) ? 'new' : 'draft';
         if (status == 'new') {
             status = 'draft';
@@ -1971,7 +1803,6 @@ UI = {
         var info = $(segment).attr('id').split('-');
         var id_segment = info[1];
         var time_to_edit = UI.editTime;
-//        console.log('suggestion: ' + $('.editarea',segment).data('lastChosenSuggestion'));
         var chosen_suggestion = $('.editarea', segment).data('lastChosenSuggestion');
 
         this.doRequest({
@@ -2043,22 +1874,12 @@ UI = {
                 },
                 success: function(d) {
                     UI.setDeleteSuggestion_success(d);
-                    /*
-                     if(UI.debug) console.log('match deleted');
-                     
-                     $(".editor .matches .graysmall").each(function(index){
-                     $(this).find('.graysmall-message').text('ALT+'+(index+1));
-                     $(this).attr('data-item',index+1);
-                     UI.reinitMMShortcuts();
-                     })
-                     */
                 }
             });
         });
     },
     setDeleteSuggestion_success: function(d) {
-        if (this.debug)
-            console.log('match deleted');
+        if (this.debug) console.log('match deleted');
 
         $(".editor .matches .graysmall").each(function(index) {
             $(this).find('.graysmall-message').text(UI.shortcutLabel + (index + 1));
@@ -2067,7 +1888,6 @@ UI = {
         })
     },
     setDownloadStatus: function(stats) {
-        console.log('setDownloadStatus');
         var t = 'approved';
         if (parseFloat(stats.TRANSLATED))
             t = 'translated';
@@ -2200,7 +2020,6 @@ UI = {
         var errors = '';
         errors = this.collectSegmentErrors(segment);
         var chosen_suggestion = $('.editarea', segment).data('lastChosenSuggestion');
-        console.log('TRANSLATION: ' + translation);
 
         this.doRequest({
             data: {
@@ -2414,9 +2233,6 @@ UI = {
 function htmlEncode(value) {
     if (value) {
         a = jQuery('<div />').text(value).html();
-        //a=a.replace ("&nbsp;", "++");
-        //console.log ("mannaggia");
-        //console.log(a);
         return a;
     } else {
         return '';
@@ -2443,9 +2259,7 @@ function b64_to_utf8(str) { // currently unused
 // START Get clipboard data at paste event (SEE http://stackoverflow.com/a/6804718)
 function handlepaste(elem, e) {
     var savedcontent = elem.innerHTML;
-    console.log('1: ' + elem.innerHTML);
 
-    console.log(e.clipboardData.getData('text/plain'));
     if (e && e.clipboardData && e.clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
         if (/text\/html/.test(e.clipboardData.types)) {
             var txt = (UI.tagSelection) ? UI.tagSelection : htmlEncode(e.clipboardData.getData('text/plain'));
@@ -2458,10 +2272,8 @@ function handlepaste(elem, e) {
         else {
             elem.innerHTML = "";
         }
-//        console.log('elem.innerHTML 1: ' + elem.innerHTML)
 
         waitforpastedata(elem, savedcontent);
-        console.log('3: ' + elem.innerHTML);
         if (e.preventDefault) {
             e.stopPropagation();
             e.preventDefault();
@@ -2470,16 +2282,12 @@ function handlepaste(elem, e) {
     }
     else {// Everything else - empty editdiv and allow browser to paste content into it, then cleanup
         elem.innerHTML = "";
-//        console.log('elem.innerHTML 2: ' + elem.innerHTML)
         waitforpastedata(elem, savedcontent);
         return true;
     }
 }
 
 function waitforpastedata(elem, savedcontent) {
-
-//    console.log(elem.childNodes);
-//    console.log('elem.childNodes.length:' + elem.childNodes.length);
 
     if (elem.childNodes && elem.childNodes.length > 0) {
         processpaste(elem, savedcontent);
@@ -2497,18 +2305,11 @@ function waitforpastedata(elem, savedcontent) {
 }
 
 function processpaste(elem, savedcontent) {
-    console.log('2: ' + savedcontent);
     pasteddata = elem.innerHTML;
 
     if (UI.isFirefox) {
-        //	console.log(elem);
-        //	console.log('savedcontent A: ' + savedcontent);
-        //	console.log(pasteddata);
-        //	console.log(htmlEncode(pasteddata));
         var div = document.createElement("div");
         div.innerHTML = pasteddata;
-        //	div.innerHTML = htmlEncode(pasteddata);
-        //	console.log(htmlEncode($(div).text()));
         savedcontent = htmlEncode($(div).text());
     }
 
@@ -2556,7 +2357,6 @@ function truncate_filename(n, len) {
 function insertNodeAtCursor(node) {
     var range, html;
     if (window.getSelection && window.getSelection().getRangeAt) {
-        console.log(window.getSelection().type);
         if (window.getSelection().type == 'Caret') {
             range = window.getSelection().getRangeAt(0);
             range.insertNode(node);
@@ -2667,29 +2467,12 @@ function rawxliff2rawview(segment) { // currently unused
     return segment;
 }
 
-/*
- function checkHTML(html) {
- //	console.log(html);
- var doc = document.createElement('div');
- doc.innerHTML = html;
- console.log('conformance: ' + ( doc.innerHTML === html ));
- console.log('lockability: ' + checkLockability(html));
- return ( doc.innerHTML === html );
- }
- */
-
 function checkLockability(html) {
-//	UI.fixLockability(html);
-//	return false;
 
     if (UI.editarea.text() == '')
         return false;
-//	console.log(UI.editarea.text());
     if (!html.match(/\</gi))
         return false;
-//	console.log(html.match(/\</gi)[0]);
-//	if($(html).text() == '') return false;
-//	if((typeof html.match(/\</gi) == 'null')||(typeof html.match(/\>/gi) == 'null')) return false;
     var lockable = (html.match(/\</gi).length == html.match(/\>/gi).length) ? true : false;
     if (lockable) {
         if (UI.currentSegment.hasClass('unlockable')) {
@@ -2774,8 +2557,6 @@ function setBrowserHistoryBehavior() {
             if ($('section').length)
                 UI.pointBackToSegment(segmentId);
         }
-//		console.log(segmentId);
-//	  console.log("location: " + location.hash.substr(1));
     };
 
 }
