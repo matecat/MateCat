@@ -366,6 +366,8 @@ UI = {
             }
             ;
         }).on('input', '.editarea', function(e) {
+        console.log('input on editarea');    
+        console.log($(this).text());    
             UI.currentSegment.addClass('modified');
             if (UI.draggingInsideEditarea) {
                 $(UI.tagToDelete).remove();
@@ -375,7 +377,9 @@ UI = {
             if (UI.droppingInEditarea) {
                 UI.cleanDroppedTag();
             }
+            console.log('vediamo');
             setTimeout(function() {
+                console.log('al timeout');
                 UI.lockTags();
                 UI.checkTagMismatch(UI.currentSegment);
             }, 10);
@@ -607,6 +611,7 @@ UI = {
         }
     },
     checkTagMismatch: function(segment) {
+console.log('checkTagMismatch');
         var sourceTags = [];
         $('.source .locked', segment).each(function() {
             sourceTags.push($(this).text());
@@ -625,9 +630,7 @@ UI = {
             } else {
                 $(segment).removeClass('mismatch');
             }
-            ;
         }
-
 
     },
     checkTutorialNeed: function() {
@@ -692,6 +695,7 @@ UI = {
 
         this.editarea.html(this.editarea.html().replace('[[placeholder]]', phcode))
         restoreSelection();
+        console.log('fine cleanDroppedTag');
     },
     closeSegment: function(segment, byButton, operation) {
         if ((typeof segment == 'undefined') || (typeof UI.toSegment != 'undefined')) {
@@ -1274,7 +1278,9 @@ UI = {
 
     },
     lockTags: function() {
-//    	if(UI.isFirefox) return;
+console.log('lockTags');
+
+        //    	if(UI.isFirefox) return;
         if (!this.taglockEnabled)
             return false;
         if (this.noTagsInSegment())
