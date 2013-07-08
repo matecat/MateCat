@@ -41,10 +41,10 @@
 
             <div class="cl"></div>
 
-            <div class="wrapper" id="longloading" style="display: none;">
-                <p>Searching for TM matches <span style="font-size:80%">(<span id="analyzedSegmentsReport">0</span> of <span id="totalSegmentsReport">0</span> segments)...</span></p>
+            <div class="wrapper" id="longloading">
+                <p>Searching for TM matches <span class="details">(<span id="analyzedSegmentsReport">0</span> of <span id="totalSegmentsReport">0</span> segments)...</span></p>
                 <div class="meter">
-                    <a href="#" class="approved-bar" title="Analyzing 0.0%" style="width:0%"></a>
+                    <a href="#" class="approved-bar" title="Analyzing 0.0%"></a>
                     <a href="#" id="close">close</a>
                 </div>
 
@@ -54,24 +54,13 @@
 
         <div class="wrapper">
             <h1 id="pid" title="tal:content='pname|nothing'" data-pid="" tal:attributes="data-pid pid" ><span id="pname" tal:content="pname|nothing">Project name</span> - Volume Analysis</h1>
-            <ul class="count">
-                <li style="border-right:1px solid #ccc">
-                    <a href="#">per word</a>
-                </li>
-                <li>
-                    <a href="#">per character</a>
-                </li>
-            </ul>
-
-
-
 
             <h2>Invoicing Tips</h2>
             <ul id="standard-equivalent-words" class="cost-table">
 
                 <li class="box"><span class="word-number loading" tal:content="standard_analysis_wc_print"> </span><br/>
                     Standard equivalent* words<br/>
-                    <span class="days" style="display: none">
+                    <span class="days">
                         <strong>
                             <span class="workDays" tal:content="standard_wc_time">11,5</span> work 
                             <span class="unit" tal:content="standard_wc_unit">days</span>
@@ -86,12 +75,15 @@
 
             </ul>
 
-            <ul id="matecat-equivalent-words" class="cost-table costbig" style="margin:0 20px">
+            <ul id="matecat-equivalent-words" class="cost-table costbig">
 
-                <li class="box payable"><p class="promo-text" style="display: none"><span>16</span>%<br/>
-                        less</p><span class="word-number loading" tal:content="tm_analysis_wc_print"></span><br/>
+                <li class="box payable">
+                    <p class="promo-text">
+                        <span>16</span>%<br/>less
+                    </p>
+                    <span class="word-number loading" tal:content="tm_analysis_wc_print"></span><br/>
                     MateCat equivalent words<br/>
-                    <span class="days" style="display: none">
+                    <span class="days">
                         <strong>
                             <span class="workDays" tal:content="fast_wc_time">9,5</span> work 
                             <span class="unit" tal:content="fast_wc_unit">days</span>
@@ -135,11 +127,11 @@
             <br/>
 
 
-
-            <div class="billed-message" style="background-color: #ffffdd">MateCat usage fee is <strong>$<span id="usageFee">86.25</span></strong> for this project ($<span id="pricePerWord">0.003</span> per word). 
+<!--
+            <div class="billed-message">MateCat usage fee is <strong>$<span id="usageFee">86.25</span></strong> for this project ($<span id="pricePerWord">0.003</span> per word). 
                 <br /><small style="font-size: 10pt">Translate for free. You pay only when you download the completed translation.
                     <br />Using MateCat you are <strong>saving aprox. $<span id="discount">600</span></strong> (<span id="totalFastWC">34,350</span> - <span id="totalTMWC">28,000</span> words at $0.10 per word) thanks to the more matches leveraged.</small></div>
-
+-->
             <br/>
 
 
@@ -155,7 +147,7 @@
             <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
             <!-- The loading indicator is shown during file processing -->
             <!-- The table listing the files available for upload/download -->
-            <table cellpadding="0" cellspacing="0" class="upload-table content-table" role="presentation">
+            <table class="upload-table content-table" role="presentation">
                 <tr>
 
                     <td class="preview">
@@ -224,31 +216,27 @@
                     <h3>
                         <span tal:replace="job/source">English</span> &gt; <span tal:replace="job/target">Italian</span>
                     </h3>       
-                    <table tal:attributes="id string:job-${repeat/job/key}" class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <table tal:attributes="id string:job-${repeat/job/key}" class="tablestats">
                         <tr>
-                            <th style="border-left:1px solid #ccc;"> </th>
-                            <th style="border-left:0">Payable</th>
+                            <th> </th>
+                            <th>Payable</th>
                             <th>Total</th>
-                            <th width="60">New</th>
-                            <th width="60">Repetition</th>
-                            <th width="60">Internal Matches<br/>
+                            <th class="new">New</th>
+                            <th class="repetition">Repetition</th>
+                            <th class="internal-matches">Internal Matches<br/>
                                 (75%-99%)</th>
-                            <th width="60">TM<br/>
+                            <th class="tm-partial">TM<br/>
                                 Partial (75%-99%)</th>
-                            <th width="60">TM 100%</th>
-                            <th width="60">TM 100% in context</th>
-                            <th width="60">Machine Translation</th>
-                            <th width="60" class="empty">&nbsp;</th>
+                            <th class="tm-100">TM 100%</th>
+                            <th class="tm-100-context">TM 100% in context</th>
+                            <th class="mt">Machine Translation</th>
+                            <th class="empty">&nbsp;</th>
                         </tr>
 
                         <tr>
 
 
-                            <td style="font-style: italic;background:#fff;border-left:1px solid #ccc" colspan="3">
-                                Payable Rate Breakdown
-                            </td>
-                            <!--                            <td >&nbsp;</td>
-                                                        <td>&nbsp;</td>-->
+                            <td class="payable-rate-breakdown" colspan="3">Payable Rate Breakdown</td>
                             <td class="editarea">100%</td>
                             <td class="editarea">30%</td>
                             <td class="editarea">60%</td>
@@ -259,27 +247,17 @@
                             <td class="empty">&nbsp;</td>
                         </tr>
 
-                        <tr  class="tablespace">
-                            <td width="247" > </td>
-                            <td width="90" >&nbsp;</td>
-                            <td width="59" >&nbsp;</td> 
-                            <td width="60">&nbsp;</td>
-                            <td width="82">&nbsp;</td>
-                            <td width="71">&nbsp;</td>
-                            <td width="60">&nbsp;</td>
-                            <td width="52">&nbsp;</td>
-                            <td width="65">&nbsp;</td>
-                            <td width="87">&nbsp;</td>
-                            <td width="87" class="empty">&nbsp;</td>
+                        <tr class="tablespace">
+                            <td colspan="10">&nbsp;</td>
                         </tr>
                         <tr class="totaltable">
-                            <td class="languages" style="border-left:1px solid #ccc">
+                            <td class="languages">
                                 <a href="#" class="filedetails part3">File details</a> 
                             </td>
 
-                            <td style="background:#c4df9b;">
+                            <td class="stat-payable">
                                 <strong class="stat_tot" tal:content="tm_analysis_wc_print">11,500</strong>                            </td>
-                            <td style="text-align:right" tal:content="total_raw_word_count_print">13,500</td>
+                            <td class="stat-total" tal:content="total_raw_word_count_print">13,500</td>
                             <td class="stat_new">0</td>
                             <td class="stat_rep">0</td>
                             <td class="stat_int">0</td>
@@ -287,15 +265,16 @@
                             <td class="stat_tm100">0</td>
                             <td class="stat_tmic">0</td>
                             <td class="stat_mt">0</td>
-                            <td class="empty"><a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${repeat/job/key}-${job/password} " href="#" target="_blank" class="uploadbtn" style="padding:5px 15px !Important;margin:-2px 0 -3px 10px !important;float:right;">
-                                    Translate                                </a> </td>
+                            <td class="empty">
+                                <a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${repeat/job/key}-${job/password} " href="#" target="_blank" class="uploadbtn">Translate</a>
+                            </td>
                         </tr>
                         <tal:block tal:define="files job/files; f php:array()" tal:repeat="f files">
                             <tr tal:attributes="id string:file_${repeat/job/key}_${f/id}" id="file_1703" class="subfile part3files">
-                                <td  style="border-left:1px solid #ccc;text-align:left !Important;">
+                                <td class="stat-name">
                                     <p class="filename" tal:content="f/filename" tal:attributes='title f/filename'>filename1.xliff</p> </td>
-                                <td class="stat_total"><strong tal:content="f/file_eq_word_count">6,500</strong></td>
-                                <td style="text-align:right" tal:content="f/file_raw_word_count" >7,500</td>
+                                <td class="stat_payable"><strong tal:content="f/file_eq_word_count">6,500</strong></td>
+                                <td class="stat-total" tal:content="f/file_raw_word_count" >7,500</td>
                                 <td class="stat_new">0</td>
                                 <td class="stat_rep">0</td>
                                 <td class="stat_int">0</td>
@@ -320,7 +299,7 @@
                         </tr -->
                     </table>
                 </tal:block>
-
+<!--
                 <div class="sendit">
                     <a href="#" class="uploadbtn split" style="float:right">Split / Merge</a>    
                     <div class="cl"></div>
@@ -333,7 +312,8 @@
                     </div>
                     <div class="cl"></div>
                 </div>
-            </div> <div class="cl"></div>
+-->
+</div> <div class="cl"></div>
         </div>
 
         <div class="grayed" ></div>

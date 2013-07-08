@@ -27,7 +27,6 @@ class getVolumeAnalysisController extends ajaxcontroller {
 		}
 
 		$res = getProjectStatsVolumeAnalysis($this->id_project);
-		log::doLog(print_r($res,true));
 		$return_data = array('jobs' => array(), 'summary' =>
 				array("STATUS" => "", "TOTAL_SEGMENTS" => 0, "SEGMENTS_ANALYZED" => 0, "TOTAL_SEGMENTS_PRINT" => 0, "SEGMENTS_ANALYZED_PRINT" => 0,
 					"TOTAL_FAST_WC" => 0, "TOTAL_TM_WC" => 0, "TOTAL_FAST_WC_PRINT" => "0", "TOTAL_STANDARD_WC" => 0, "TOTAL_STANDARD_WC_PRINT" => "0", "TOTAL_TM_WC_PRINT" => "0", "STANDARD_WC_TIME" => 0, "FAST_WC_TIME" => 0, "TM_WC_TIME" => 0,
@@ -74,7 +73,6 @@ class getVolumeAnalysisController extends ajaxcontroller {
 				$return_data['jobs'][$jid]['file_details'][$r['id_file']] = $total_init;
 			}
 
-
 			if ($r['match_type'] == "INTERNAL") {
 				$w = $return_data['jobs'][$jid]['file_details'][$r['id_file']]["INTERNAL_MATCHES"][0] + $words;
 				$words_print = number_format($w, 0, ".", ",");
@@ -89,7 +87,6 @@ class getVolumeAnalysisController extends ajaxcontroller {
 				$words_print = number_format($w, 0, ".", ",");
 				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"] = array($w, $words_print);
 
-				continue;
 			}
 
 			if ($r['match_type'] == "MT") {
@@ -106,7 +103,6 @@ class getVolumeAnalysisController extends ajaxcontroller {
 				$words_print = number_format($w, 0, ".", ",");
 				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"] = array($w, $words_print);
 
-				continue;
 			}
 
 			if ($r['match_type'] == "100%") {
@@ -122,7 +118,6 @@ class getVolumeAnalysisController extends ajaxcontroller {
 				$words_print = number_format($w, 0, ".", ",");
 				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"] = array($w, $words_print);
 
-				continue;
 			}
 
 			if ($r['match_type'] == "75%-99%" or $r['match_type'] == "75%-84%" or $r['match_type'] == "85%-94%" or $r['match_type'] == "95%-99%") {
@@ -138,7 +133,6 @@ class getVolumeAnalysisController extends ajaxcontroller {
 				$words_print = number_format($w, 0, ".", ",");
 				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"] = array($w, $words_print);
 
-				continue;
 			}
 
 
@@ -156,7 +150,6 @@ class getVolumeAnalysisController extends ajaxcontroller {
 				$words_print = number_format($w, 0, ".", ",");
 				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"] = array($w, $words_print);
 
-				continue;
 			}
 
 			if ($r['match_type'] == "REPETITIONS") {
@@ -174,8 +167,17 @@ class getVolumeAnalysisController extends ajaxcontroller {
 				$words_print = number_format($w, 0, ".", ",");
 				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"] = array($w, $words_print);
 
-				continue;
 			}
+			//take note of payable words for job/file combination
+			$total_payable[$jid][$r['id_file']]=$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][1];
+		}
+
+		//get sums for each job from all files of each job
+		foreach($total_payable as $k_jid=>$fids){
+			foreach($fids as $fid=>$val){
+				$return_data['jobs'][$k_jid]['totals']["TOTAL_PAYABLE"][1]+=$val;
+			}
+			$return_data['jobs'][$k_jid]['totals']["TOTAL_PAYABLE"][0]=$return_data['jobs'][$k_jid]['totals']["TOTAL_PAYABLE"][1];
 		}
 
 		if ($this->total_wc_standard_analysis == 0  and $this->status_project == "FAST_OK" ) {
@@ -272,12 +274,12 @@ class getVolumeAnalysisController extends ajaxcontroller {
 
 		if ($this->status_project == 'FAST_OK' or $this->status_project == "DONE") {
 			$return_data['summary']['TOTAL_PAYABLE'] = $this->total_wc_tm_analysis;
-			$return_data['summary']['TOTAL_PAYABLE_PRINT'] = number_format($this->total_wc_tm_analysis, 0, ".", ",");
-			$return_data['summary']['PAYABLE_WC_TIME'] = number_format($tm_wc_time, 0, ".", ",");
+			$return_data['summary']['TOTAL_PAYABLE_PRINT'] =  number_format($this->total_wc_tm_analysis, 0, ".", ",");
+			$return_data['summary']['PAYABLE_WC_TIME'] =  number_format($tm_wc_time, 0, ".", ",");
 			$return_data['summary']['PAYABLE_WC_UNIT'] = $tm_wc_unit;
 		} else {
 			$return_data['summary']['TOTAL_PAYABLE'] = $this->total_wc_fast_analysis;
-			$return_data['summary']['TOTAL_PAYABLE_PRINT'] = number_format($this->total_wc_fast_analysis, 0, ".", ",");
+			$return_data['summary']['TOTAL_PAYABLE_PRINT'] =number_format($this->total_wc_fast_analysis, 0, ".", ",");
 			$return_data['summary']['PAYABLE_WC_TIME'] = number_format($fast_wc_time, 0, ".", ",");
 			$return_data['summary']['PAYABLE_WC_UNIT'] = $fast_wc_unit;
 		}

@@ -761,7 +761,8 @@ header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margi
 	.popup-languages .header
 		{
 		width: 96.2%;
-		}
+		}     
+    
 .popup ul
 	{
 	margin:0px;
@@ -770,7 +771,6 @@ header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margi
 	width:80px;
 	list-style:none;
 	font-size:14px;
-
 	}
 	.popup-languages ul
 		{
@@ -897,3 +897,12 @@ footer a:hover{text-decoration:none}
 	margin-left:50px;
 	}
 
+#mt_engine
+	{
+	width: 240px;
+	}
+
+#create_private_tm_btn
+	{
+	width: 250px;
+	}    

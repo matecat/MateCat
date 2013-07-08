@@ -1148,7 +1148,11 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
     65% {-webkit-transform:translate(0, 15px);}
     to {-webkit-transform: translate(0, -0px);    }    
 }
-    
+
+.download-chrome img
+    {
+    margin-top: 5px;
+    }
 .editarea .locked,
 .source .locked
 	{
@@ -1366,7 +1370,22 @@ p.percent
 	font-size: 70%;
     }
     
-#stat-completion
-    {
+#stat-completion,
+#stat-wph
+   {
 	display: none;
     }
+
+#originalDownload,
+#fileDownload
+    {
+	margin-right: 20px;
+    }
+
+    
+    
+    
+    
+    
+    
+    

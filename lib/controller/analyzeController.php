@@ -42,12 +42,14 @@ class analyzeController extends viewcontroller {
 
 	public function doAction() {
 		$project_data = getProjectData($this->pid, $this->password);
+
 		$lang_handler = languages::getInstance();
 		if (empty($project_data)) {
 			$this->project_not_found = true;
 		}
 
 		foreach ($project_data as &$pdata) {
+                    
 
 			$this->num_segments+=$pdata['total_segments'];
 			if (empty($this->pname)) {
@@ -100,6 +102,9 @@ class analyzeController extends viewcontroller {
 			}
 
 			$jid = $pdata['jid'];
+                        
+                       
+                        
 			$source = $lang_handler->iso2Language($pdata['source']);
 			$target = $lang_handler->iso2Language($pdata['target']);
 			$source_short = $pdata['source'];
@@ -120,6 +125,9 @@ class analyzeController extends viewcontroller {
 			$this->jobs[$jid]['target_short'] = $target_short;
 			$this->jobs[$jid]['password'] = $password;
 			$this->jobs[$jid]['files'][] = $pdata;
+                        if (!array_key_exists("total_raw_word_count", $this->jobs[$jid])){
+                            $this->jobs[$jid]['total_raw_word_count']=0;
+                        }
 
 			//calculate total word counts per job (summing different files)
 			$this->jobs[$jid]['total_raw_word_count']+=$pdata['file_raw_word_count'];

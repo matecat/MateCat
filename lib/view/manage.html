@@ -14,7 +14,7 @@
         <script type="text/javascript" src="${basepath}public/js/lib/jquery.hotkeys.js?build=${build_number}"></script>
         <script type="text/javascript" src="${basepath}public/js/utils.js?build=${build_number}"></script>
         <script type="text/javascript" src="${basepath}public/js/manage.js?build=${build_number}"></script>
-    <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
+        <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
         <script type="text/javascript">
             var config = {
@@ -26,12 +26,12 @@
     </head>
 
     <body tal:condition="not:supportedBrowser">
-        <div  metal:use-macro="unsupported_browser.html/unsupported"/>
+        <div metal:use-macro="unsupported_browser.html/unsupported"/>
     </body>
 
     <body tal:condition="supportedBrowser" tal:attributes="class php:(filtered_class EQ ' open')? 'manage filterOpen':'manage'">
 <!--metal:use-macro="header.html/main_header"-->
-        <header style="padding-bottom:5px" >
+        <header>
             <div class="wrapper">   
                 <a href="${basepath}" class="logo"></a>
                 <span id="display"></span>
@@ -53,7 +53,7 @@
 
 			<div class="block">
 				<label for="search-projectname">Project name</label>
-				<input id="search-projectname" class="search-input" type="text" style="width:170px !important" value=""/>				
+				<input id="search-projectname" class="search-input" type="text" value=""/>				
 			</div>
 			
 			<div class="block">

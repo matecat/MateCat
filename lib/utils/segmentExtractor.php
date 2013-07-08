@@ -66,6 +66,7 @@ function extractSegments($files_path, $file, $pid, $fid) {
                             $seg_source['mrk-ext-succ-tags'] = $extract_external['succ'];
                             $seg_source['raw-content'] = $extract_external['seg'];
                         }
+                        $seg_source['raw-content']=  CatUtils::placeholdnbsp($seg_source['raw-content']);
 
                         $mid = mysql_real_escape_string($seg_source['mid']);
                         $ext_tags = mysql_real_escape_string($seg_source['ext-prec-tags']);
@@ -93,6 +94,8 @@ function extractSegments($files_path, $file, $pid, $fid) {
                         $xliff_trans_unit['source']['raw-content'] = $extract_external['seg'];
                     }
                     $source = mysql_real_escape_string($xliff_trans_unit['source']['raw-content']);
+                    $source=  CatUtils::placeholdnbsp($source);
+                    
                     $num_words = CatUtils::segment_raw_wordcount($xliff_trans_unit['source']['raw-content']);
                     $trans_unit_id = mysql_real_escape_string($xliff_trans_unit['attr']['id']);
 

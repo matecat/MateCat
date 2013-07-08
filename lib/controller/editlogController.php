@@ -12,13 +12,16 @@ class editlogController extends viewcontroller {
 
 	private $jid = "";
 	private $pid = "";
+	private $thisUrl;
 
 	public function __construct() {
 		parent::__construct();
 		parent::makeTemplate("editlog.html");
 		$this->jid = $this->get_from_get_post("jid");
 		$this->password = $this->get_from_get_post("password");
-	}
+		$this->thisUrl=$_SERVER['REQUEST_URI'];
+
+    }
 
 	public function doAction() {
 
@@ -40,6 +43,8 @@ class editlogController extends viewcontroller {
 		$this->template->target_code = $this->data[0]['target_lang'];
 		$this->template->job_stats = $this->job_stats;
 		$this->template->build_number = INIT::$BUILD_NUMBER;
+		$this->template->logged_user = trim($this->logged_user['first_name'] . " " . $this->logged_user['last_name']);
+		$this->template->incomingUrl = '/login?incomingUrl='.$this->thisUrl;
 
 	}
 

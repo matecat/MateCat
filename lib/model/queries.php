@@ -517,7 +517,7 @@ function setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $sug
 	$err = $db->get_error();
 	$errno = $err['error_code'];
 	if ($errno != 0) {
-		log::doLog($err);
+		if($errno!=1062) log::doLog($err);
 		return $errno * -1;
 	}
 	return $db->affected_rows;
@@ -1136,21 +1136,18 @@ function getProjectStatsVolumeAnalysis2($pid, $groupby = "job") {
 }
 
 function getProjectStatsVolumeAnalysis($pid) {
-	$query = "select distinct j.id as jid , s.id as sid,s.id_file  , s.raw_word_count,
+
+
+	$query="select st.id_job as jid,st.id_segment as sid, s.id_file, s.raw_word_count,
 		st.suggestion_source, st.suggestion_match, st.eq_word_count, st.standard_word_count, st.match_type,
 		p.status_analysis, p.fast_analysis_wc,p.tm_analysis_wc,p.standard_analysis_wc,
 		st.tm_analysis_status as st_status_analysis
-			from jobs as j
+			from segment_translations as st 
+			join segments as s on st.id_segment=s.id
+			join jobs as j on j.id=st.id_job
+			join projects as p on p.id=j.id_project
+			where p.id=$pid and p.status_analysis in ('NEW', 'FAST_OK','DONE') and st.match_type<>''";
 
-			inner join projects as p on p.id=j.id_project
-
-			inner join files_job as fj on fj.id_job=j.id
-
-			inner join segments as s on s.id_file=fj.id_file
-
-			left outer join segment_translations as st on st.id_segment=s.id 
-
-			where id_project=$pid  and p.status_analysis in ('NEW', 'FAST_OK','DONE') and st.match_type<>''";
 	$db = Database::obtain();
 	$results = $db->fetch_array($query);
 	$err = $db->get_error();
@@ -1263,7 +1260,7 @@ function insertSegmentTMAnalysis($id_segment, $id_job, $suggestion, $suggestion_
 	}
 
 	if ($errno != 0) {
-		log::doLog($err);
+		if($errno!=1062) log::doLog($err);
 		return $errno * -1;
 	}
 
@@ -1353,7 +1350,7 @@ function insertFastAnalysis($pid, $fastReport, $equivalentWordMapping) {
 
 
 			if ($errno != 0) {
-				log::doLog($err);
+				if($errno!=1062) log::doLog($err);
 				return $errno * -1;
 			}
 

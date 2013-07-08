@@ -1,5 +1,5 @@
 ﻿body{padding-top:30px;font-family:Calibri, Arial, Helvetica, sans-serif;text-align:center}
-header{background:#6d6e71;top:0;left:0;text-align:left;width:100%;position:fixed;z-index:999999999;border-bottom:1px solid #333;padding:4px 0 0px 0;height:38px;}
+header{background:#6d6e71;top:0;left:0;text-align:left;width:100%;position:fixed;z-index:999999999;border-bottom:1px solid #333;padding:4px 0 5px 0;height:38px;}
 
 
 h1{font-size:40px}
@@ -608,3 +608,7 @@ body.manage #display a
 	text-decoration: none;
 	}
 
+body.manage #search-projectname
+	{
+	width: 170px !important;
+	}
