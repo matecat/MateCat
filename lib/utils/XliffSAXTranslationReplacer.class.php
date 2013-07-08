@@ -1,7 +1,5 @@
 <?
-
-
-
+include_once INIT::$UTILS_ROOT."/cat.class.php";
 class XliffSAXTranslationReplacer{
 
 	private $filename; //source filename
@@ -221,6 +219,8 @@ class XliffSAXTranslationReplacer{
 		$end_tags = "";
 		//consistency check
 		$tag_mismatch=false;
+                $seg['segment']=  CatUtils::restorenbsp($seg['segment']);
+                $seg['translation']=  CatUtils::restorenbsp($seg['translation']);
 		$outcome=CatUtils::checkTagConsistency($seg['segment'],$seg['translation']);
 		if($outcome['outcome']>0){
 			$tag_mismatch=true;
@@ -237,7 +237,7 @@ class XliffSAXTranslationReplacer{
 		$translation = str_replace("&lt;", '#LT#', $translation);
 		$translation = str_replace("&gt;", '#GT#', $translation);
 		$translation = str_replace("&amp;", '#AMP#', $translation);
-		$translation=html_entity_decode($translation,ENT_NOQUOTES,"utf-8");
+		$translation=  html_entity_decode($translation,ENT_NOQUOTES,"utf-8");
 		$translation = str_replace('#AMP#','&amp;', $translation);
 		$translation = str_replace('#LT#','&lt;', $translation);
 		$translation = str_replace('#GT#','&gt;', $translation);
