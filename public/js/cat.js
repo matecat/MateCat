@@ -27,6 +27,7 @@ UI = {
         this.undoStackPosition = 0;
         this.tagSelection = false;
         this.nextSegmentIdByServer = 0;
+        this.cursorPlaceholder = '[[placeholder]]';
         this.downOpts = {
             offset: '130%'
         };
@@ -366,8 +367,6 @@ UI = {
             }
             ;
         }).on('input', '.editarea', function(e) {
-        console.log('input on editarea');    
-        console.log($(this).text());    
             UI.currentSegment.addClass('modified');
             if (UI.draggingInsideEditarea) {
                 $(UI.tagToDelete).remove();
@@ -377,9 +376,7 @@ UI = {
             if (UI.droppingInEditarea) {
                 UI.cleanDroppedTag();
             }
-            console.log('vediamo');
             setTimeout(function() {
-                console.log('al timeout');
                 UI.lockTags();
                 UI.checkTagMismatch(UI.currentSegment);
             }, 10);
@@ -611,7 +608,6 @@ UI = {
         }
     },
     checkTagMismatch: function(segment) {
-console.log('checkTagMismatch');
         var sourceTags = [];
         $('.source .locked', segment).each(function() {
             sourceTags.push($(this).text());
@@ -684,7 +680,7 @@ console.log('checkTagMismatch');
         div.innerHTML = draggedText;
         saveSelection();
         var phcode = $('.rangySelectionBoundary')[0].outerHTML;
-        $('.rangySelectionBoundary').text('[[placeholder]]');
+        $('.rangySelectionBoundary').text(this.cursorPlaceholder);
 
         closeTag = '</' + $(div).text().trim().replace(/\<(.*?)\s.*?\>/gi, "$1") + '>';
 
@@ -693,9 +689,8 @@ console.log('checkTagMismatch');
         var newText = this.editarea.text().replace(draggedText, newTag);
         this.editarea.text(newText);
 
-        this.editarea.html(this.editarea.html().replace('[[placeholder]]', phcode))
+        this.editarea.html(this.editarea.html().replace(this.cursorPlaceholder, phcode))
         restoreSelection();
-        console.log('fine cleanDroppedTag');
     },
     closeSegment: function(segment, byButton, operation) {
         if ((typeof segment == 'undefined') || (typeof UI.toSegment != 'undefined')) {
@@ -1278,7 +1273,6 @@ console.log('checkTagMismatch');
 
     },
     lockTags: function() {
-console.log('lockTags');
 
         //    	if(UI.isFirefox) return;
         if (!this.taglockEnabled)
@@ -2501,6 +2495,9 @@ function saveSelection() {
         rangy.removeMarkers(UI.savedSel);
     }
     UI.savedSel = rangy.saveSelection();
+    // this is just to prevent the addiction of a couple of placeholders who may sometimes occur for a Rangy bug
+    UI.editarea.html(UI.editarea.html().replace(UI.cursorPlaceholder, ''));
+
     UI.savedSelActiveElement = document.activeElement;
 }
 
