@@ -23,7 +23,6 @@ $(document).ready(function(){
     $("#chooseMultilang").click(function(e){
         $('.popup-languages .close').click();
         if ($('.popup-languages li.on').length) {
-            console.log('ecco');
             var str = '';
             var vals = '';
             $('.popup-languages li.on input').each(function(){

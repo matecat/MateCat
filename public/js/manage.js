@@ -296,7 +296,6 @@ UI = {
 		    UI.lastJobStatus = arJobs;
 		    id = ob.data('pid');
         }
-            console.log('a');
 
         var d = {
 				action:		"changeJobsStatus",
@@ -314,9 +313,7 @@ UI = {
 			data: ar,
 			context: ob,
 			success: function(d){
-                console.log('b');
 				if(d.data == 'OK') {
-            console.log('c');
 					res = ($(this).hasClass('row'))? 'job':'prj';
 					if(res=='prj') {
 						UI.getProject(this.data('pid'));
