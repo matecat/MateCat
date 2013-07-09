@@ -214,11 +214,15 @@ class MyMemory {
 	}
 
 	public static function diff_tercpp($old,$new){
-		$res=shell_exec("/bin/tercpp.0.6.2 --noTxtIds --printDifferenceToHtmlToSTDO  -s  -rSent \"$old\" -hSent \"$new\" 2>&1");
+		//$res=shell_exec("/bin/tercpp.0.6.2 --noTxtIds --printDifferenceToHtmlToSTDO  -s  -rSent \"$old\" -hSent \"$new\" 2>&1");
+                $res=shell_exec(INIT::$ROOT."/third_party/TER/tercpp.0.6.2 --noTxtIds --printDifferenceToHtmlToSTDO  -s  -rSent \"$new\" -hSent \"$old\" 2>&1");
 		$res=str_replace('DiffView:  ','',$res);
 		if (stripos($res, "/tercpp.0.6.2")!==false){
 			return null;
 		}
+//                echo "old is $old\n\nnew is $new\n\n";
+//                echo "res is $res";
+//                exit;
 		return $res;
 	}
 

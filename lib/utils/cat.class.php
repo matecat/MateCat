@@ -166,6 +166,7 @@ class CatUtils {
     public static function rawxliff2view($segment) {
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
         $segment = self::placehold_xliff_tags($segment);
+        
         $segment = html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8');
         // restore < e >
         $segment = str_replace("<", "&lt", $segment);
@@ -267,15 +268,21 @@ class CatUtils {
 
             $seg['pe_effort_perc'] .= "%";
             $seg['sug_view'] = html_entity_decode($seg['sug']);
+            
+            
             if ($seg['sug'] <> $seg['translation']) {
-                $seg['diff'] = MyMemory::diff_tercpp($seg['sug'], $seg['translation']);
+                $sug_for_diff=self::placehold_xliff_tags($seg['sug']);
+                $tra_for_diff=self::placehold_xliff_tags($seg['translation']);
+                $seg['diff'] = MyMemory::diff_tercpp($sug_for_diff, $tra_for_diff);
                 if (!$seg['diff']) {
                     // TER NOT WORKING : fallback to old diff viewer
-                    $seg['diff'] = MyMemory::diff_html($seg['sug'], $seg['translation']);
+                    $seg['diff'] = MyMemory::diff_html($sug_for_diff, $tra_for_diff);
                 }
             } else {
                 $seg['diff'] = '';
             }
+            $seg['diff_view']= self::restore_xliff_tags_for_wiew($seg['diff']);
+            //$seg['diff_view']= CatUtils::rawxliff2rawview($seg['diff']);
 
             // BUG: While suggestions source is not correctly set
             if (($seg['sm'] == "85%") OR ($seg['sm'] == "86%")) {
