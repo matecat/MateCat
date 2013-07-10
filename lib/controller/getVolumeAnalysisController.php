@@ -169,17 +169,11 @@ class getVolumeAnalysisController extends ajaxcontroller {
 
 			}
 			//take note of payable words for job/file combination
-			@$total_payable[$jid][$r['id_file']]=$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][0];
+			$return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][0]=$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][0];
+			//format numbers after summing
+			$return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][1]=number_format($return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][0],0,".",",");
 		}
 
-		//get sums for each job from all files of each job
-		foreach($total_payable as $k_jid=>$fids){
-			foreach($fids as $fid=>$val){
-				$return_data['jobs'][$k_jid]['totals']["TOTAL_PAYABLE"][0]+=$val;
-			}
-			//format numbers after summing
-			$return_data['jobs'][$k_jid]['totals']["TOTAL_PAYABLE"][1]=number_format($return_data['jobs'][$k_jid]['totals']["TOTAL_PAYABLE"][0],0,".",",");
-		}
 
 		if ($this->total_wc_standard_analysis == 0  and $this->status_project == "FAST_OK" ) {
 			$this->total_wc_standard_analysis = $this->total_wc_standard_fast_analysis;
