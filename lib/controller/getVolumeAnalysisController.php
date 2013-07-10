@@ -169,7 +169,7 @@ class getVolumeAnalysisController extends ajaxcontroller {
 
 			}
 			//take note of payable words for job/file combination
-			$total_payable[$jid][$r['id_file']]=$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][0];
+			@$total_payable[$jid][$r['id_file']]=$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][0];
 		}
 
 		//get sums for each job from all files of each job
