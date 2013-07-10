@@ -93,7 +93,7 @@ class INIT {
         self::$DEFAULT_NUM_RESULTS_FROM_TM = 3;
         self::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
 
-        self::$DB_SERVER = "localhost"; //database server
+        self::$DB_SERVER = "10.30.1.241"; //database server
         self::$DB_DATABASE = "matecat_sandbox"; //database name
         self::$DB_USER = "matecat"; //database login 
         self::$DB_PASS = "matecat01"; //databasepassword
