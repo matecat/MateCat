@@ -302,6 +302,7 @@ UI = {
             if (UI.debug)
                 console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea));
         }).on('keydown', '.editor .editarea', function(e) {
+            console.log(e.which);
             var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
             if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
                 if (event.which == 88) { // ctrl+x
@@ -350,8 +351,23 @@ UI = {
                         $('.rangySelectionBoundary', UI.editarea).remove();
                     }
                 }
-            }
-            ;
+            };
+ 
+            if (e.which == 38) { // top arrow
+                var selection = window.getSelection();
+                var range = selection.getRangeAt(0);
+                if (range.startOffset != range.endOffset) {
+                    var r = range.startContainer.data;
+                    if ((r[0] == '<') && (r[r.length - 1] == '>')) {
+                        saveSelection();
+                        var rr = document.createRange();
+                        var referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
+                        rr.setStartAfter(referenceNode);
+                        rr.setEndAfter(referenceNode);
+                        $('.rangySelectionBoundary', UI.editarea).remove();
+                    }
+                };
+            };
             if (e.which == 39) { // right arrow
                 var selection = window.getSelection();
                 var range = selection.getRangeAt(0);
@@ -365,11 +381,25 @@ UI = {
                         rr.setEndAfter(referenceNode);
                         $('.rangySelectionBoundary', UI.editarea).remove();
                     }
-                }
-                ;
-            }
-            ;
+                };
+            };
 
+            if (e.which == 40) { // down arrow
+                var selection = window.getSelection();
+                var range = selection.getRangeAt(0);
+                if (range.startOffset != range.endOffset) {
+                    var r = range.startContainer.data;
+                    if ((r[0] == '<') && (r[r.length - 1] == '>')) {
+                        saveSelection();
+                        var rr = document.createRange();
+                        var referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
+                        rr.setStartAfter(referenceNode);
+                        rr.setEndAfter(referenceNode);
+                        $('.rangySelectionBoundary', UI.editarea).remove();
+                    }
+                };
+            };
+            
             if (e.which == 32) { // space
                 setTimeout(function() {
                     UI.saveInUndoStack('space');

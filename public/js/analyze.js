@@ -43,7 +43,6 @@ UI = {
         });
 */        
         $(".part3").click(function(e){
-            //            console.log('dd');
             e.preventDefault();
             $(this).parents('table').find(".part3files").toggleClass('open');
         });
@@ -103,7 +102,6 @@ UI = {
 	        });
         });
 
-//        console.log('primo pollData');
         this.pollData();
         this.checkSticky();
     },
@@ -119,7 +117,6 @@ UI = {
     progressBar: function(perc) {
         if(perc == 100) return;
         
-//        console.log(perc);
         $('#shortloading').hide();
         $('#longloading').show();
         $('#longloading .approved-bar').css('width',perc*100+'%');
@@ -148,7 +145,6 @@ UI = {
     pollData: function() {
     	if(this.stopPolling) return;
         var pid=$("#pid").attr("data-pid");
-        //        console.log('pollData');
 
         $.ajax({
             url: '?action=getVolumeAnalysis',
@@ -162,7 +158,6 @@ UI = {
                 if(d.data) {
                     var s = d.data.summary;
                     if((s.STATUS == 'NEW')||(s.STATUS == '')) {
-//                        console.log('apri barra');
                         $('.loadingbar').addClass('open');
                     } else if(s.STATUS == 'FAST_OK') {
 //                        UI.progressBar(UI.progressPerc)
@@ -196,8 +191,6 @@ UI = {
                         $('#standard-equivalent-words .days').hide();
                     }                    
                     standard_words.text(newSText);
-                    //                    console.log('old_standard_words: ' + old_standard_words);
-                    //                    console.log('s.TOTAL_FAST_WC_PRINT: ' + s.TOTAL_FAST_WC_PRINT);
                     if((old_standard_words != s.TOTAL_STANDARD_WC_PRINT)&&(old_standard_words != '')) 
                         $('#standard-equivalent-words .box').effect("highlight", {}, 1000);
                     $('#standard-equivalent-words .workDays').text(s.STANDARD_WC_TIME);
@@ -206,7 +199,6 @@ UI = {
                     var matecat_words = $('#matecat-equivalent-words .word-number');
                     old_matecat_words = matecat_words.text();
                     newMText = '';
-//                    console.log('s.TOTAL_PAYABLE_PRINT: ' + s.TOTAL_PAYABLE_PRINT);
                     if(s.TOTAL_PAYABLE > 0) {
                         matecat_words.removeClass('loading');
                         $('#matecat-equivalent-words .days').show();
@@ -234,7 +226,6 @@ UI = {
                     $('#totalTMWC').text(s.TOTAL_PAYABLE_PRINT);
 
                     $.each(d.data.jobs, function(key,value) {
-	console.log(value);
                         tot = value.totals;
                         context = $('#job-' + key);
                         var s_total = $('.totaltable .stat_tot',context);
@@ -279,10 +270,8 @@ UI = {
                         if(s_mt_txt != tot.MT[1]) s_mt.effect("highlight", {}, 1000);
 
                         $.each(value.file_details, function(id_file,fd) {
-//                            console.log(fd.TOTAL_PAYABLE);
                             var row = $('#file_'+ key + '_' + id_file);
-                            
-                            var s_tot = $('.stat_total',row);
+                            var s_tot = $('.stat_payable',row);
                             s_tot_txt = s_tot.text();
                             s_tot.text(fd.TOTAL_PAYABLE[1]);
                             if(s_tot_txt != fd.TOTAL_PAYABLE[1]) s_tot.effect("highlight", {}, 1000);
@@ -326,7 +315,6 @@ UI = {
                     });
                     if(d.data.summary.STATUS != 'DONE') {
                         setTimeout(function(){
-//                            console.log('altro pollData');
                             UI.pollData();
                         },1000);                   
                     } else {
@@ -357,14 +345,12 @@ function fit_text_to_container(container,child){
     }else{
         a=container.text();
     }
-    //    console.log ("a: " + a);
     w=container.width(); //forse non serve
 
     first_half=a[0];
     last_index=a.length-1;
     last_half=a[last_index];
     
-    //    console.log ("1 " + first_half+"..."+last_half);
 
     if (typeof(child)!='undefined'){
         $(child,container).text(first_half+"..."+last_half);
@@ -374,7 +360,6 @@ function fit_text_to_container(container,child){
     
     h=container.height();
     hh=$(child,container).height();
-    //    console.log ("h is " + h);
     
     for (var i=1 ; i< a.length; i=i+1){
         old_first_half=first_half;
@@ -383,7 +368,6 @@ function fit_text_to_container(container,child){
         first_half=first_half+ a[i];
         last_half=a[last_index-i] + last_half;
         
-        //        console.log ("2 " + first_half+"..."+last_half);
 
         if (typeof(child)!='undefined'){
             $(child,container).text(first_half+"..."+last_half);
@@ -391,7 +375,6 @@ function fit_text_to_container(container,child){
             container.text(first_half+"..."+last_half);
         }
         h2=container.height();
-        //        console.log ("h2 is " + h2);
         
         if (h2>h){
             if (typeof(child)!='undefined'){
