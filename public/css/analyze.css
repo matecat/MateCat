@@ -1,7 +1,7 @@
 ﻿body{margin:0;padding-top:30px;font-family:Calibri, Arial, Helvetica, sans-serif;text-align:center}
 th, td { padding: 0px; }
 
-table { border-collapse:collapse; border-spacing: 0; border: 0; width: 100%;} 
+table { border-collapse:separate; border-spacing: 0; border: 0; width: 100%;} 
 header{background:#6d6e71;top:0;left:0;text-align:left;width:100%;position:fixed;z-index:999999999;border-bottom:1px solid #333;padding:2px 0 0px 0;height:45px;}
 .logo{float:left;border:0;background:url(../img/logo.png) 0px 2px no-repeat;width:145px;height:31px; background-size: 130px 26px;margin-top:4px}
 /*.wrapper{width:960px;margin:0 auto;text-align:left}*/
