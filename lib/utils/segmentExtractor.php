@@ -47,6 +47,7 @@ function extractSegments($files_path, $file, $pid, $fid) {
                 $xliff_trans_unit['attr']['translate'] = 'yes';
             }
             if ($xliff_trans_unit['attr']['translate'] == "no") {
+                
             } else {
                 // If the XLIFF is already segmented (has <seg-source>)
                 if (isset($xliff_trans_unit['seg-source'])) {
@@ -66,7 +67,7 @@ function extractSegments($files_path, $file, $pid, $fid) {
                             $seg_source['mrk-ext-succ-tags'] = $extract_external['succ'];
                             $seg_source['raw-content'] = $extract_external['seg'];
                         }
-                        $seg_source['raw-content']=  CatUtils::placeholdnbsp($seg_source['raw-content']);
+                        $seg_source['raw-content'] = CatUtils::placeholdnbsp($seg_source['raw-content']);
 
                         $mid = mysql_real_escape_string($seg_source['mid']);
                         $ext_tags = mysql_real_escape_string($seg_source['ext-prec-tags']);
@@ -94,8 +95,8 @@ function extractSegments($files_path, $file, $pid, $fid) {
                         $xliff_trans_unit['source']['raw-content'] = $extract_external['seg'];
                     }
                     $source = mysql_real_escape_string($xliff_trans_unit['source']['raw-content']);
-                    $source=  CatUtils::placeholdnbsp($source);
-                    
+                    $source = CatUtils::placeholdnbsp($source);
+
                     $num_words = CatUtils::segment_raw_wordcount($xliff_trans_unit['source']['raw-content']);
                     $trans_unit_id = mysql_real_escape_string($xliff_trans_unit['attr']['id']);
 
@@ -139,13 +140,13 @@ function stripTagsFromSource2($text) {
 
     $text = preg_replace($pattern_g_o, "", $text);
     //
-	$text = preg_replace($pattern_g_c, "", $text);
+    $text = preg_replace($pattern_g_c, "", $text);
     $text = str_replace("&nbsp;", " ", $text);
     return $text;
 }
 
 function strip_external($a) {
-    
+    $a=  str_replace("\n", " NL ", $a);
     $pattern_x_start = '/^(\s*<x .*?\/>)(.*)/mis';
     $pattern_x_end = '/(.*)(<x .*?\/>\s*)$/mis';
     $pattern_g = '/^(\s*<g [^>]*?>)([^<]*?)(<\/g>\s*)$/mis';
@@ -169,9 +170,9 @@ function strip_external($a) {
         do {
             $r = preg_match_all($pattern_x_end, $a, $res);
             if (isset($res[2][0])) {
-                $succ = $res[2][0] . $succ; 
+                $succ = $res[2][0] . $succ;
                 $a = $res[1][0];
-                
+
                 $found = true;
             }
         } while (isset($res[2][0]));
@@ -188,8 +189,10 @@ function strip_external($a) {
             }
         } while (isset($res[1][0]));
     } while ($found);
+    $prec=  str_replace(" NL ", "\n", $prec);
+    $succ=  str_replace(" NL ", "\n", $succ);
+    $a =  str_replace(" NL ", "\n", $a);
     $r = array('prec' => $prec, 'seg' => $a, 'succ' => $succ);
-   
     return $r;
 }
 

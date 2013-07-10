@@ -1355,20 +1355,20 @@ function insertFastAnalysis($pid, $fastReport, $equivalentWordMapping) {
 			}
 
 			if ($data['eq_word_count'] > 0) {
-				$db->query("SET autocommit=0");
-				$db->query("START TRANSACTION");
+	//			$db->query("SET autocommit=0");
+	//			$db->query("START TRANSACTION");
 				$db->insert('segment_translations_analysis_queue', $data_innodb);
 				$err = $db->get_error();
 				$errno = $err['error_code'];
 				if ($errno != 0 and $errno != 1062) {
 
 					log::doLog($err);
-					$db->query("ROLLBACK");
-					$db->query("SET autocommit=1");
+	//				$db->query("ROLLBACK");
+	//				$db->query("SET autocommit=1");
 					return $errno * -1;
 				}
-				$db->query("COMMIT");
-				$db->query("SET autocommit=1");
+	//			$db->query("COMMIT");
+	//			$db->query("SET autocommit=1");
 			}
 		}
 	}
