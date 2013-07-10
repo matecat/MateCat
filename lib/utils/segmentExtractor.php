@@ -146,8 +146,7 @@ function stripTagsFromSource2($text) {
 }
 
 function strip_external($a) {
-    log::doLog("--s before--", $a);
-    $a=  str_replace("\n", " ACCAPO ", $a);
+    $a=  str_replace("\n", " NL ", $a);
     $pattern_x_start = '/^(\s*<x .*?\/>)(.*)/mis';
     $pattern_x_end = '/(.*)(<x .*?\/>\s*)$/mis';
     $pattern_g = '/^(\s*<g [^>]*?>)([^<]*?)(<\/g>\s*)$/mis';
@@ -162,7 +161,6 @@ function strip_external($a) {
         $found = false;
         do {
             $r = preg_match_all($pattern_x_start, $a, $res);
-            log::doLog("res 1 -- ", $res);
             if (isset($res[1][0])) {
                 $prec.=$res[1][0];
                 $a = $res[2][0];
@@ -171,7 +169,6 @@ function strip_external($a) {
         } while (isset($res[1][0]));
         do {
             $r = preg_match_all($pattern_x_end, $a, $res);
-            log::doLog("res 2 -- ", $res);
             if (isset($res[2][0])) {
                 $succ = $res[2][0] . $succ;
                 $a = $res[1][0];
@@ -184,7 +181,6 @@ function strip_external($a) {
 
         do {
             $r = preg_match_all($pattern_g, $a, $res);
-            log::doLog("res 3 -- ", $res);
             if (isset($res[1][0])) {
                 $prec.=$res[1][0];
                 $succ = $res[3][0] . $succ;
@@ -193,11 +189,10 @@ function strip_external($a) {
             }
         } while (isset($res[1][0]));
     } while ($found);
-    $prec=  str_replace(" ACCAPO ", "\n", $prec);
-    $succ=  str_replace(" ACCAPO ", "\n", $succ);
-    $a =  str_replace(" ACCAPO ", "\n", $a);
+    $prec=  str_replace(" NL ", "\n", $prec);
+    $succ=  str_replace(" NL ", "\n", $succ);
+    $a =  str_replace(" NL ", "\n", $a);
     $r = array('prec' => $prec, 'seg' => $a, 'succ' => $succ);
-    log::doLog($r);
     return $r;
 }
 
