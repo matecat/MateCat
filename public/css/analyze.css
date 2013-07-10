@@ -84,7 +84,7 @@ box-shadow: 0 1px 1px #888;border:1px solid #ccc}
 .tablestats{font-size:16px;margin-top:5px;}
 .tablestats th, .tablestats td{ background:#fff;padding:10px;text-align:right;border-bottom:1px solid #ccc;border-right:1px solid #ccc;font-weight:normal;}
 .tablestats th{border-top:1px solid #ccc;background:#F6F6F6;text-align:center;font-size:14px;}
-.tablestats th:first-child {border-left:1px solid #ccc;}
+.tablestats th:first-child {width: 35%; border-left:1px solid #ccc;}
 .tablestats th.new,
 .tablestats th.repetition,
 .tablestats th.internal-matches,
@@ -165,17 +165,18 @@ box-shadow: 0 1px 1px #888;border:1px solid #ccc}
 	background: linear-gradient(top,  #09beec,  #119ec4);font-weight:bold;padding:4px 10px;width:auto !Important; margin:0px 3px;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;font-size:16px !important;cursor:pointer;color:#fff;-moz-box-shadow: 0 1px 2px #ccc;-webkit-box-shadow: 0 1px 2px #ccc;box-shadow: 0 1px 2px #ccc;border:1px solid #666;-moz-border-radius: 2px;border-radius: 2px;text-decoration:none;float:left;opacity:0.9;}
 	
 	.subfile{
-		display: table-row;
-		visibility: hidden;
+		display: none;
 /*
+		visibility: hidden;
 		position: absolute;
 		left: -10000px;
 		*/
 	}
 
 	.subfile.open {
-		visibility: visible;
+        display: table-row;
 /*
+		visibility: visible;
 		position: relative;
 		left: 0px;
 */
