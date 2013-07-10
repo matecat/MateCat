@@ -11,14 +11,13 @@ Loader = {
 	),
 
 	forkComponents: new Array (
-//		'cat-fork'
 	),
 		
 	libraries: new Array (
-		'jquery',
-		'jquery-ui-1.8.20.custom.min',
-		'jquery.hotkeys',
-		'jquery.cookie',
+        'jquery',
+        'jquery-ui-1.8.20.custom.min',
+        'jquery.hotkeys',
+        'jquery.cookie',
         'jquery-fieldselection.min',
         'diff_match_patch',
         'waypoints',

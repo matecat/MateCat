@@ -72,7 +72,8 @@ UI = {
         this.savedSel = null;
         this.savedSelActiveElement = null;
         this.markTags();
-
+        $('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');
+        
         // SET EVENTS
 
         $("body").bind('keydown', 'Ctrl+return', function(e) {
@@ -339,12 +340,16 @@ UI = {
                 var range = selection.getRangeAt(0);
                 if (range.startOffset != range.endOffset) {
                     var r = range.startContainer.data;
-                    if ((range.startOffset == 0) && ($(range.startContainer.previousSibling).hasClass('locked')))
+//                    if ((range.startOffset == 0) && ($(range.startContainer.previousSibling).hasClass('locked'))) 
                     if ((r[0] == '<') && (r[r.length - 1] == '>')) {
-                        console.log("spostare il cursore a sinistra della selezione");
+                        saveSelection();
+                        var rr = document.createRange();
+                        var referenceNode = $('.rangySelectionBoundary', UI.editarea).first().get(0);
+                        rr.setStartBefore(referenceNode);
+                        rr.setEndBefore(referenceNode);
+                        $('.rangySelectionBoundary', UI.editarea).remove();
                     }
                 }
-                ;
             }
             ;
             if (e.which == 39) { // right arrow
@@ -353,7 +358,12 @@ UI = {
                 if (range.startOffset != range.endOffset) {
                     var r = range.startContainer.data;
                     if ((r[0] == '<') && (r[r.length - 1] == '>')) {
-                        console.log("spostare il cursore a destra della selezione");
+                        saveSelection();
+                        var rr = document.createRange();
+                        var referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
+                        rr.setStartAfter(referenceNode);
+                        rr.setEndAfter(referenceNode);
+                        $('.rangySelectionBoundary', UI.editarea).remove();
                     }
                 }
                 ;

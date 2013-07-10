@@ -59,9 +59,12 @@ body.manage th.header
 
 body.manage .head
 	{
-	float: left;
+/*
+        float: left;
 	width: 100%;
-	margin-bottom: 8px;
+*/
+display: block;	
+margin-bottom: 8px;
 	}
 
 body.manage th
@@ -578,9 +581,11 @@ body.manage .article.msg
 
 body.manage .project-details
 	{
+	display: block;
+/*    
 	width: 100%;
-	display: inline;
 	height: 30px;
+*/
 	}
 body.manage .id-project
 	{
