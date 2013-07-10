@@ -47,10 +47,8 @@ class analyzeController extends viewcontroller {
 		if (empty($project_data)) {
 			$this->project_not_found = true;
 		}
-
 		foreach ($project_data as &$pdata) {
                     
-
 			$this->num_segments+=$pdata['total_segments'];
 			if (empty($this->pname)) {
 				$this->pname = $pdata['name'];
@@ -92,10 +90,9 @@ class analyzeController extends viewcontroller {
 				$this->tm_analysis_wc_print = "";
 			}
 
-			$pdata['file_eq_word_count'] = number_format($pdata['file_eq_word_count'], 0, ".", ",");
 
 			$this->total_raw_word_count+=$pdata['file_raw_word_count'];
-			$pdata['file_raw_word_count'] = number_format($pdata['file_raw_word_count'], 0, ".", ",");
+			$pdata['file_eq_word_count'] = number_format($pdata['file_eq_word_count'], 0, ".", ",");
 
 			if (!array_key_exists("jid", $pdata)) {
 				$this->jobs[$pdata['jid']] = array("password" => "", "files" => array());
@@ -124,17 +121,20 @@ class analyzeController extends viewcontroller {
 			$this->jobs[$jid]['source_short'] = $source_short;
 			$this->jobs[$jid]['target_short'] = $target_short;
 			$this->jobs[$jid]['password'] = $password;
-			$this->jobs[$jid]['files'][] = $pdata;
+
                         if (!array_key_exists("total_raw_word_count", $this->jobs[$jid])){
                             $this->jobs[$jid]['total_raw_word_count']=0;
                         }
 
+
 			//calculate total word counts per job (summing different files)
 			$this->jobs[$jid]['total_raw_word_count']+=$pdata['file_raw_word_count'];
 			//format the total (yeah, it's ugly doing it every cycle)
-			$this->jobs[$jid]['total_raw_word_count_print']=number_format($this->jobs[$jid]['total_raw_word_count'], 0, ".", ",");
-		}
+			$this->jobs[$jid]['total_raw_word_count_print']=number_format($this->jobs[$jid]['total_raw_word_count'],0,".",",");
 
+			$pdata['file_raw_word_count'] = number_format($pdata['file_raw_word_count'],0,".",",");
+			$this->jobs[$jid]['files'][] = $pdata;
+		}
 
 		$raw_wc_time = $this->total_raw_word_count / INIT::$ANALYSIS_WORDS_PER_DAYS;
 		$tm_wc_time = $this->tm_analysis_wc / INIT::$ANALYSIS_WORDS_PER_DAYS;
