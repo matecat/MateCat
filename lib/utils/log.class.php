@@ -59,9 +59,8 @@ class Log {
 		}
 
 		$stringDataInfo = "[$now ($ip)]";
-		$stringDataInfo.=$trace[0]['class']."->".$trace[0]['function']."(line:".$trace[0]['line'].")";
+		$stringDataInfo.=$trace[1]['class']."->".$trace[1]['function']."(line:".$trace[1]['line'].")";
 		$stringData = "$stringDataInfo : $string\n";
-
 
 		fwrite($fh, $stringData);
 		fclose($fh);
