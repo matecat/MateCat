@@ -101,8 +101,8 @@ class analyzeController extends viewcontroller {
 
 			$jid = $pdata['jid'];
         
-			$source = $lang_handler->getLocalizedName( $pdata['source'],'en' );
-			$target = $lang_handler->getLocalizedName( $pdata['target'],'en' );
+			$source = $lang_handler->getLocalizedName( $pdata['source'] );
+			$target = $lang_handler->getLocalizedName( $pdata['target'] );
 		
 			$source_short = $pdata['source'];
 			$target_short = $pdata['target'];

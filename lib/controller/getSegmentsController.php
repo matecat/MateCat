@@ -144,8 +144,8 @@ class getSegmentsController extends ajaxcontroller {
 				$this->data["$id_file"]["mime_type"] = $seg['mime_type'];
 				$this->data["$id_file"]['id_segment_start'] = $seg['id_segment_start'];
 				$this->data["$id_file"]['id_segment_end'] = $seg['id_segment_end'];                
-				$this->data["$id_file"]['source']=$lang_handler->getLocalizedName( $seg['source'],'en' );
-				$this->data["$id_file"]['target']=$lang_handler->getLocalizedName( $seg['target'],'en' );
+				$this->data["$id_file"]['source']=$lang_handler->getLocalizedName( $seg['source'] );
+				$this->data["$id_file"]['target']=$lang_handler->getLocalizedName( $seg['target'] );
 				$this->data["$id_file"]['source_code']=$seg['source'];
 				$this->data["$id_file"]['target_code']=$seg['target'];
 				$this->data["$id_file"]['file_stats'] = $file_stats;		

@@ -44,10 +44,10 @@ class newProjectController extends viewcontroller {
 			$tmpSourceArAs = array();
 			foreach($this->sourceLangAr as $key=>$lang) {
 				if($lang != '')	{
-					$tmpSourceAr[$lang] = $this->lang_handler->getLocalizedName($lang,'en');
+					$tmpSourceAr[$lang] = $this->lang_handler->getLocalizedName($lang);
 
 					$ar = array();
-					$ar['name'] = $this->lang_handler->getLocalizedName($lang,'en');
+					$ar['name'] = $this->lang_handler->getLocalizedName($lang);
 					$ar['code'] = $lang;
 					$ar['selected'] = ($key == '0')? 1 : 0;
 					array_push($tmpSourceArAs, $ar);						
@@ -80,7 +80,7 @@ class newProjectController extends viewcontroller {
 
 					$cl = "";
 					foreach($prova as $ll) {
-						$cl .= $this->lang_handler->getLocalizedName($ll,'en').',';
+						$cl .= $this->lang_handler->getLocalizedName($ll).',';
 					}
 					$cl = substr_replace($cl ,"",-1);
 
