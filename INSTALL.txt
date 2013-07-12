@@ -34,6 +34,7 @@ Instructions (based on a Debian distro)
     file cat /etc/apache2/apache2.conf --->  AccessFileName .htaccess
 5) enable apache rewrite module
     a2enmod rewrite
+    a2enmod deflate
 6) create a virtualost in /etc/apache2/sites-available
     <VirtualHost @your_ip_address@:@port@>
         ServerName matecat.@your domain@
