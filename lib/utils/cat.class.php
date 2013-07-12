@@ -6,6 +6,7 @@ include_once INIT::$UTILS_ROOT . "/utils.class.php";
 
 define("LTPLACEHOLDER", "##LESSTHAN##");
 define("GTPLACEHOLDER", "##GREATERTHAN##");
+define("AMPPLACEHGOLDER", "##AMPPLACEHGOLDER##");
 define("NBSPPLACEHOLDER", "<x id=\"nbsp\"/>");
 
 class CatUtils {
@@ -17,6 +18,8 @@ class CatUtils {
         $s = preg_replace("/\x{a0}/u", NBSPPLACEHOLDER, $s);
         return $s;
     }
+    
+     
 
     public static function restorenbsp($s) {
         $pattern="#".NBSPPLACEHOLDER."#";
@@ -25,6 +28,17 @@ class CatUtils {
     }
     
     // ----------------------------------------------------------------
+    
+    public static function placeholdamp($s) {        
+        $s = preg_replace("/\&/", AMPPLACEHGOLDER, $s);
+        return $s;
+    }
+    
+      public static function restoreamp($s) {
+        $pattern="#".AMPPLACEHGOLDER."#";
+        $s = preg_replace($pattern, Utils::unicode2chr("&"), $s);
+        return $s;
+    }
 
     //reconcile tag ids
     public static function ensureTagConsistency($q, $source_seg, $target_seg) {
@@ -49,11 +63,14 @@ class CatUtils {
         }
 
         //check well formed xml (equal number of opening and closing tags inside each input segment)
-        @$xml_valid = simplexml_load_string("<placeholder>$source_seg</placeholder>");
+        $seg=self::placeholdamp($source_seg);
+        $tar=self::placeholdamp($target_seg);
+        @$xml_valid = @simplexml_load_string("<placeholder>$seg</placeholder>");
+        log::doLog("<placeholder>$seg</placeholder>");
         if ($xml_valid === FALSE) {
             return array('outcome' => 2, 'debug' => 'bad source xml');
         }
-        @$xml_valid = simplexml_load_string("<placeholder>$target_seg</placeholder>");
+        @$xml_valid = @simplexml_load_string("<placeholder>$tar</placeholder>");
         if ($xml_valid === FALSE) {
             return array('outcome' => 3, 'debug' => 'bad target xml');
         }
