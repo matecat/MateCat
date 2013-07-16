@@ -1328,8 +1328,6 @@ function insertFastAnalysis($pid, $fastReport, $equivalentWordMapping) {
 			$data['eq_word_count'] = $eq_word;
 			$data['standard_word_count'] = $standard_words;
 
-
-
 			// query for this data is after insert/update
 			$data_innodb['id_job'] = $data['id_job'];
 			$data_innodb['id_segment'] = $data['id_segment'];
@@ -1542,42 +1540,59 @@ function setSegmentTranslationError($sid, $jid) {
 
 function getNextSegmentAndLock() {
 
+	//get link
 	$db = Database::obtain();
+
+	//declare statements
+	//begin transaction
 	$q1 = "SET autocommit=0";
 	$q2 = "START TRANSACTION";
+	//lock row
 	$q3 = "select id_segment, id_job from segment_translations_analysis_queue where locked=0 for update";
-
+	//end transaction
+	$q4="ROLLBACK";
 	$q5 = "COMMIT";
 	$q6 = "SET autocommit=1";
 
+	//execute statements
+	//start locking
 	$db->query($q1);
-
 	$db->query($q2);
-
+	//query
 	$res = $db->query_first($q3);
+	//if nothing useful
 	if (empty($res)) {
-		$db->query($q5);
-		return "";
+		//empty result
+		$res="";
+		$db->query($q4);
+	}else{
+		//else
+		//take note of IDs
+		$id_job = $res['id_job'];
+		$id_segment = $res['id_segment'];
+
+		//set lock flag on row
+		$data['locked'] = 1;
+		$where = " id_job=$id_job and id_segment=$id_segment ";
+		//update segment
+		$db->update("segment_translations_analysis_queue", $data, $where);
+		$err = $db->get_error();
+		$errno = $err['error_code'];
+		//if something went wrong
+		if ($errno != 0) {
+			log::doLog($err);
+			$db->query($q4);
+			//return error code
+			$res=-1;
+		}else{
+			//if everything went well, commit
+			$db->query($q5);
+		}
 	}
-	$id_job = $res['id_job'];
-	$id_segment = $res['id_segment'];
-
-
-	//q4
-	$data['locked'] = 1;
-	$where = " id_job=$id_job and id_segment=$id_segment ";
-	$db->update("segment_translations_analysis_queue", $data, $where);
-	$err = $db->get_error();
-	$errno = $err['error_code'];
-	if ($errno != 0) {
-		log::doLog($err);
-		$db->query($q5);
-		return -1;
-	}
-
-	$db->query($q5);
+	//release locks and end transaction
 	$db->query($q6);
 
+	//return stuff
 	return $res;
 }
 

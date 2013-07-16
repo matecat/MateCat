@@ -1,7 +1,7 @@
 <?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include INIT::$UTILS_ROOT . "/langs/languages.inc.php";
+include INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 class analyzeController extends viewcontroller {
 
@@ -43,7 +43,8 @@ class analyzeController extends viewcontroller {
 	public function doAction() {
 		$project_data = getProjectData($this->pid, $this->password);
 
-		$lang_handler = languages::getInstance();
+		$lang_handler = Languages::getInstance();
+
 		if (empty($project_data)) {
 			$this->project_not_found = true;
 		}
@@ -99,11 +100,10 @@ class analyzeController extends viewcontroller {
 			}
 
 			$jid = $pdata['jid'];
-                        
-                       
-                        
-			$source = $lang_handler->iso2Language($pdata['source']);
-			$target = $lang_handler->iso2Language($pdata['target']);
+        
+			$source = $lang_handler->getLocalizedName( $pdata['source'],'en' );
+			$target = $lang_handler->getLocalizedName( $pdata['target'],'en' );
+		
 			$source_short = $pdata['source'];
 			$target_short = $pdata['target'];
 
@@ -113,8 +113,6 @@ class analyzeController extends viewcontroller {
 			unset($pdata['target']);
 			unset($pdata['jid']);
 			unset($pdata['jpassword']);
-
-
 
 			$this->jobs[$jid]['source'] = $source;
 			$this->jobs[$jid]['target'] = $target;
@@ -221,6 +219,7 @@ class analyzeController extends viewcontroller {
 	}
 
 	public function setTemplateVars() {
+				
 		$this->template->jobs = $this->jobs;
 		$this->template->fast_analysis_wc = $this->fast_analysis_wc;
 		$this->template->fast_analysis_wc_print = $this->fast_analysis_wc_print;

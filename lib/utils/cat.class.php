@@ -6,6 +6,7 @@ include_once INIT::$UTILS_ROOT . "/utils.class.php";
 
 define("LTPLACEHOLDER", "##LESSTHAN##");
 define("GTPLACEHOLDER", "##GREATERTHAN##");
+define("AMPPLACEHOLDER", "##AMPPLACEHOLDER##");
 define("NBSPPLACEHOLDER", "<x id=\"nbsp\"/>");
 
 class CatUtils {
@@ -17,6 +18,8 @@ class CatUtils {
         $s = preg_replace("/\x{a0}/u", NBSPPLACEHOLDER, $s);
         return $s;
     }
+    
+     
 
     public static function restorenbsp($s) {
         $pattern="#".NBSPPLACEHOLDER."#";
@@ -25,6 +28,17 @@ class CatUtils {
     }
     
     // ----------------------------------------------------------------
+    
+    public static function placeholdamp($s) {        
+        $s = preg_replace("/\&/", AMPPLACEHOLDER, $s);
+        return $s;
+    }
+    
+      public static function restoreamp($s) {
+        $pattern="#".AMPPLACEHOLDER."#";
+        $s = preg_replace($pattern, Utils::unicode2chr("&"), $s);
+        return $s;
+    }
 
     //reconcile tag ids
     public static function ensureTagConsistency($q, $source_seg, $target_seg) {
@@ -49,11 +63,14 @@ class CatUtils {
         }
 
         //check well formed xml (equal number of opening and closing tags inside each input segment)
-        @$xml_valid = simplexml_load_string("<placeholder>$source_seg</placeholder>");
+        $seg=self::placeholdamp($source_seg);
+        $tra=self::placeholdamp($target_seg);
+        @$xml_valid = @simplexml_load_string("<placeholder>$seg</placeholder>");
+
         if ($xml_valid === FALSE) {
             return array('outcome' => 2, 'debug' => 'bad source xml');
         }
-        @$xml_valid = simplexml_load_string("<placeholder>$target_seg</placeholder>");
+        @$xml_valid = @simplexml_load_string("<placeholder>$tra</placeholder>");
         if ($xml_valid === FALSE) {
             return array('outcome' => 3, 'debug' => 'bad target xml');
         }
@@ -86,7 +103,7 @@ class CatUtils {
         return array('outcome' => 0, 'debug' => '');
     }
 
-    private function parse_time_to_edit($ms) {
+    private static function parse_time_to_edit($ms) {
         if ($ms <= 0) {
             return array("00", "00", "00", "00");
         }
@@ -106,7 +123,7 @@ class CatUtils {
         return array($hours, $minutes, $seconds, $usec);
     }
 
-    private function placehold_xliff_tags($segment) {
+    private static function placehold_xliff_tags($segment) {
         //$segment=preg_replace('|<(g\s*.*?)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
         $segment = preg_replace('|<(g\s*id=".*?"\s*[^<>]*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
 
@@ -129,13 +146,13 @@ class CatUtils {
         return $segment;
     }
 
-    private function restore_xliff_tags($segment) {
+    private static function restore_xliff_tags($segment) {
         $segment = str_replace(LTPLACEHOLDER, "<", $segment);
         $segment = str_replace(GTPLACEHOLDER, ">", $segment);
         return $segment;
     }
 
-    private function restore_xliff_tags_for_wiew($segment) {
+    private static function restore_xliff_tags_for_wiew($segment) {
         $segment = str_replace(LTPLACEHOLDER, "&lt;", $segment);
         $segment = str_replace(GTPLACEHOLDER, "&gt;", $segment);
         return $segment;
@@ -581,7 +598,7 @@ class CatUtils {
         return $res;
     }
 
-    public function generate_password($length = 8) {
+    public static function generate_password($length = 8) {
 
 
         // Random
