@@ -46,62 +46,64 @@ class CatUtils {
     }
 
     //check for tag mismatches
-    public static function checkTagConsistency($source_seg, $target_seg) {
-        //ensure there are no entities
-        $source_seg = html_entity_decode($source_seg);
-        $target_seg = html_entity_decode($target_seg);
-
-        //get tags from words in source and target
-        preg_match_all('/<[^>]+>/', $source_seg, $source_tags);
-        preg_match_all('/<[^>]+>/', $target_seg, $target_tags);
-        $source_tags = $source_tags[0];
-        $target_tags = $target_tags[0];
-
-        //check equal tag count 
-        if (count($source_tags) != count($target_tags)) {
-            return array('outcome' => 1, 'debug' => 'tag count mismatch');
-        }
-
-        //check well formed xml (equal number of opening and closing tags inside each input segment)
-        $seg=self::placeholdamp($source_seg);
-        $tra=self::placeholdamp($target_seg);
-        @$xml_valid = @simplexml_load_string("<placeholder>$seg</placeholder>");
-
-        if ($xml_valid === FALSE) {
-            return array('outcome' => 2, 'debug' => 'bad source xml');
-        }
-        @$xml_valid = @simplexml_load_string("<placeholder>$tra</placeholder>");
-        if ($xml_valid === FALSE) {
-            return array('outcome' => 3, 'debug' => 'bad target xml');
-        }
-
-        //check for tags' id mismatching
-        //extract names
-        preg_match_all('/id="(.+?)"/', $source_seg, $source_tags_ids);
-        preg_match_all('/id="(.+?)"/', $target_seg, $target_tags_ids);
-        $source_tags_ids = $source_tags_ids[1];
-        $target_tags_ids = $target_tags_ids[1];
-        //set indexes for lookup purposes ('1' is just a dummy value to set the cell)
-        $tmp = array();
-        foreach ($source_tags_ids as $k => $src_tag)
-            $tmp[$src_tag] = 1;
-        $source_tags_ids = $tmp;
-        $tmp = array();
-        foreach ($target_tags_ids as $k => $trg_tag)
-            $tmp[$trg_tag] = 1;
-        $target_tags_ids = $tmp;
-        unset($tmp);
-        //for each tag in target
-        foreach ($target_tags_ids as $tag => $v) {
-            //if a tag in target is not present in source, error
-            if (!isset($source_tags_ids[$tag])) {
-                return array('outcome' => 4, 'debug' => 'tag id mismatch');
-            }
-        }
-
-        //all checks passed
-        return array('outcome' => 0, 'debug' => '');
-    }
+    //TODO Rimuovere dopo il 1° agosto 2013
+    //
+//    public static function checkTagConsistency($source_seg, $target_seg) {
+//        //ensure there are no entities
+//        $source_seg = html_entity_decode($source_seg);
+//        $target_seg = html_entity_decode($target_seg);
+//
+//        //get tags from words in source and target
+//        preg_match_all('/<[^>]+>/', $source_seg, $source_tags);
+//        preg_match_all('/<[^>]+>/', $target_seg, $target_tags);
+//        $source_tags = $source_tags[0];
+//        $target_tags = $target_tags[0];
+//
+//        //check equal tag count 
+//        if (count($source_tags) != count($target_tags)) {
+//            return array('outcome' => 1, 'debug' => 'tag count mismatch');
+//        }
+//
+//        //check well formed xml (equal number of opening and closing tags inside each input segment)
+//        $seg=self::placeholdamp($source_seg);
+//        $tra=self::placeholdamp($target_seg);
+//        @$xml_valid = @simplexml_load_string("<placeholder>$seg</placeholder>");
+//
+//        if ($xml_valid === FALSE) {
+//            return array('outcome' => 2, 'debug' => 'bad source xml');
+//        }
+//        @$xml_valid = @simplexml_load_string("<placeholder>$tra</placeholder>");
+//        if ($xml_valid === FALSE) {
+//            return array('outcome' => 3, 'debug' => 'bad target xml');
+//        }
+//
+//        //check for tags' id mismatching
+//        //extract names
+//        preg_match_all('/id="(.+?)"/', $source_seg, $source_tags_ids);
+//        preg_match_all('/id="(.+?)"/', $target_seg, $target_tags_ids);
+//        $source_tags_ids = $source_tags_ids[1];
+//        $target_tags_ids = $target_tags_ids[1];
+//        //set indexes for lookup purposes ('1' is just a dummy value to set the cell)
+//        $tmp = array();
+//        foreach ($source_tags_ids as $k => $src_tag)
+//            $tmp[$src_tag] = 1;
+//        $source_tags_ids = $tmp;
+//        $tmp = array();
+//        foreach ($target_tags_ids as $k => $trg_tag)
+//            $tmp[$trg_tag] = 1;
+//        $target_tags_ids = $tmp;
+//        unset($tmp);
+//        //for each tag in target
+//        foreach ($target_tags_ids as $tag => $v) {
+//            //if a tag in target is not present in source, error
+//            if (!isset($source_tags_ids[$tag])) {
+//                return array('outcome' => 4, 'debug' => 'tag id mismatch');
+//            }
+//        }
+//
+//        //all checks passed
+//        return array('outcome' => 0, 'debug' => '');
+//    }
 
     private static function parse_time_to_edit($ms) {
         if ($ms <= 0) {
@@ -358,7 +360,7 @@ class CatUtils {
         return 0;
     }
 
-    public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "", $match_type = "", $eq_words = 0, $standard_words = 0, $translation = "", $tm_status_analysis = "UNDONE", $warning = 0) {
+    public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "", $match_type = "", $eq_words = 0, $standard_words = 0, $translation = "", $tm_status_analysis = "UNDONE", $warning = 0, $err_json = '' ) {
         if (!empty($suggestion_source)) {
             if (strpos($suggestion_source, "MT") === false) {
                 $suggestion_source = 'TM';
@@ -367,14 +369,14 @@ class CatUtils {
             }
         }
 
-        $insertRes = setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning);
+        $insertRes = setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json);
         if ($insertRes < 0 and $insertRes != -1062) {
             $result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the suggestions for the segment $id_segment - $insertRes");
             return $result;
         }
         if ($insertRes == -1062) {
             // the translaion for this segment still exists : update it
-            $updateRes = setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning);
+            $updateRes = setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json);
             if ($updateRes < 0) {
                 $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the suggestions for the segment $id_segment");
                 return $result;

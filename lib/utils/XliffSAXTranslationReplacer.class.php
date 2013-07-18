@@ -221,10 +221,13 @@ class XliffSAXTranslationReplacer{
 		$tag_mismatch=false;
                 $seg['segment']=  CatUtils::restorenbsp($seg['segment']);
                 $seg['translation']=  CatUtils::restorenbsp($seg['translation']);
-		$outcome=CatUtils::checkTagConsistency($seg['segment'],$seg['translation']);
-		if($outcome['outcome']>0){
+                
+                $check = new QA($seg['segment'],$seg['translation']);
+                $check->performConsistencyCheck();
+
+		if( $check->thereAreErrors() ){
 			$tag_mismatch=true;
-			log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".$outcome['debug'].")");
+			log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".print_r( $check->getErrors(), true ).")");
 		}
 		if(empty($seg['translation'])){
 			$translation=$seg['segment'];
