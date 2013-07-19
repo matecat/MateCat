@@ -1,5 +1,7 @@
 <?php
-
+/**
+* @deprecated
+*/
 class languages {
 
 	private  $languages = array(
@@ -99,8 +101,8 @@ class languages {
 			, 'Morisyen' => array('2' => 'mfe', '3' => 'mfe', 'c' => '..', '3066' => 'mfe-MFE')
 			, 'Nepali' => array('2' => 'ne', '3' => 'nep', 'c' => 'NP', '3066' => 'ne-NP')
 			, 'Niuean' => array('2' => 'niu', '3' => 'niu', 'c' => '..', '3066' => 'niu-NIU')
-			, 'Norwegian Bokmål'=>array('2'=>'nb','3'=>'nno','c'=>'NO','3066'=>'nn-NO')
-			, 'Norwegian Nynorsk'=>array('2'=>'nn','3'=>'nob','c'=>'NO','3066'=>'nb-NO')
+			, 'Norwegian Nynorsk'=>array('2'=>'nb','3'=>'nno','c'=>'NO','3066'=>'nn-NO')
+			, 'Norwegian Bokmål'=>array('2'=>'nn','3'=>'nob','c'=>'NO','3066'=>'nb-NO')
 			, 'Nyanja' => array('2' => 'ny', '3' => 'nya', 'c' => '..', '3066' => 'ny-NY')
 			, 'Pakistani' => array('2' => 'ur', '3' => 'urd', 'c' => 'PK', '3066' => 'ur-PK')
 			, 'Palauan' => array('2' => 'pau', '3' => 'pau', 'c' => '..', '3066' => 'pau-PAU')

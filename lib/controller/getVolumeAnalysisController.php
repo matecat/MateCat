@@ -34,6 +34,11 @@ class getVolumeAnalysisController extends ajaxcontroller {
 		$total_init = array("TOTAL_PAYABLE" => array(0, "0"), "REPETITIONS" => array(0, "0"), "MT" => array(0, "0"), "NEW" => array(0, "0"), "TM_100" => array(0, "0"), "TM_75_99" => array(0, "0"), "INTERNAL_MATCHES" => array(0, "0"), "ICE" => array(0, "0"));
 
 		$this->total_segments = count($res);
+
+		//array of totals per job-file
+		$total_payable=array();
+
+
 		foreach ($res as $r) {
 			if ($r['st_status_analysis'] == 'DONE') {
 				$this->segments_analyzed+=1;
@@ -51,7 +56,6 @@ class getVolumeAnalysisController extends ajaxcontroller {
 				$this->total_wc_standard_fast_analysis = $r['fast_analysis_wc'];
 			}
 
-			//DA VERIFICARE: QUESTO DATO SI DEVE AGGIORNARE
 
 			$jid = $r['jid'];
 			$words = $r['raw_word_count'];
@@ -67,6 +71,11 @@ class getVolumeAnalysisController extends ajaxcontroller {
 				$return_data['jobs'][$jid] = array();
 				$return_data['jobs'][$jid]['totals'] = $total_init;
 				$return_data['jobs'][$jid]['file_details'] = array();
+			}
+
+			//init indexes to avoid notices
+			if (!array_key_exists($jid, $total_payable)) {
+				$total_payable[$jid]=array();
 			}
 
 			if (!array_key_exists($r['id_file'], $return_data['jobs'][$jid]['file_details'])) {
@@ -168,8 +177,16 @@ class getVolumeAnalysisController extends ajaxcontroller {
 				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"] = array($w, $words_print);
 
 			}
+
 			//take note of payable words for job/file combination
-			$return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][0]=$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][0];
+			$total_payable[$jid][$r['id_file']]=$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][0];
+		}
+
+		//sum all totals for each job
+		foreach($total_payable as $jid=>$files){
+			foreach($files as $fid=>$v){
+				$return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][0]+=$v;
+			}
 			//format numbers after summing
 			$return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][1]=number_format($return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][0],0,".",",");
 		}

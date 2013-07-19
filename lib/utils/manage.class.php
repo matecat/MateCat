@@ -2,11 +2,11 @@
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/cat.class.php";
-//include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
+include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 class ManageUtils {
 
-	public static function queryProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filter_enabled,$lang_handler,$project_id) {
+	public static function queryProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filter_enabled,$project_id) {
 
 		$data = getProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filter_enabled,$project_id);
 
@@ -31,6 +31,8 @@ class ManageUtils {
 		$end_time_fetch=microtime(true);
 		$time_fetch=round(1000*($end_time_fetch-$start_time_fetch),0);
 
+		$lang_handler = Languages::getInstance();
+		
 		foreach ($data as $item) {
 
 			$start_time_loop=microtime(true);
@@ -51,8 +53,8 @@ class ManageUtils {
 				$job['id']= $job_array[0];
 				$job['source']= $job_array[1];
 				$job['target']= $job_array[2];
-				$job['sourceTxt'] = $lang_handler->getLocalizedName($job['source'],'en');
-				$job['targetTxt'] = $lang_handler->getLocalizedName($job['target'],'en');
+				$job['sourceTxt'] = $lang_handler->getLocalizedName($job['source']);
+				$job['targetTxt'] = $lang_handler->getLocalizedName($job['target']);
 				//raw
 				$job['create_date']= $job_array[3];
 				//standard

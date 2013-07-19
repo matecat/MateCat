@@ -42,15 +42,25 @@ class Utils {
     }
 
     public static function getRealIpAddr() {
-        $ip = "";
-        if (!empty($_SERVER['HTTP_CLIENT_IP'])) {   //check ip from share internet              
-            $ip = $_SERVER['HTTP_CLIENT_IP'];
-        } elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR'])) {   //to check ip is pass from proxy
-            $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-        } else {
-            $ip = $_SERVER['REMOTE_ADDR'];
+    	
+       foreach ( array(
+            'HTTP_CLIENT_IP',
+            'HTTP_X_FORWARDED_FOR',
+            'HTTP_X_FORWARDED',
+            'HTTP_X_CLUSTER_CLIENT_IP',
+            'HTTP_FORWARDED_FOR',
+            'HTTP_FORWARDED',
+            'REMOTE_ADDR'
+        ) as $key ) {
+            if ( array_key_exists($key, $_SERVER ) === true) {
+                foreach ( explode(',', $_SERVER[$key]) as $ip ) {
+                    if ( filter_var( trim($ip), FILTER_VALIDATE_IP ) !== false) {
+                        return $ip;
+                    }
+                }
+            }
         }
-        return $ip;
+        
     }
     
     // multibyte string manipulation functions

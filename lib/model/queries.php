@@ -168,7 +168,7 @@ function getEngineData($id) {
 	$where_clause = " id IN ($id)";
 
 	$query = "select * from engines where $where_clause";
-
+                
 	$db = Database::obtain();
 
 	$results = $db->fetch_array($query);
@@ -193,7 +193,16 @@ function getSegment($id_segment){
 function getWarning($jid){
 	$db = Database::obtain();
 	$jid = $db->escape($jid);
-	$query="SELECT id_segment, warning  FROM segment_translations WHERE warning>0 and id_job=$jid limit 10";
+	//$query="SELECT id_segment, warning  FROM segment_translations WHERE warning != 0 and id_job = $jid limit 10";
+        
+        $query = "SELECT total, id_segment, serialized_errors_list as warnings FROM (
+                        SELECT Seg1.id_segment, Seg1.serialized_errors_list , SUM(CASE WHEN Seg1.warning != 0 THEN 1 ELSE 0 END) AS total
+                        FROM segment_translations AS Seg1
+                        WHERE Seg1.warning != 0 
+                        AND Seg1.id_job = $jid
+                        GROUP BY Seg1.id_segment WITH ROLLUP
+                  ) AS Seg2 WHERE 1 OR id_segment IS NULL LIMIT 11"; //+1 for RollUp
+
 	$results = $db->fetch_array($query);
 	return $results;
 }
@@ -425,9 +434,7 @@ function setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $tra
 	$translation = $db->escape($translation);
 	$status = $db->escape($status);
 
-
-	$q = "UPDATE segment_translations SET status='$status', suggestion_position='$chosen_suggestion_index', serialized_errors_list='$errors', time_to_edit=IF(time_to_edit is null,0,time_to_edit) + $time_to_edit, translation='$translation', translation_date='$now', warning=$warning WHERE id_segment=$id_segment and id_job=$id_job";
-
+	$q = "UPDATE segment_translations SET status='$status', suggestion_position='$chosen_suggestion_index', serialized_errors_list='$errors', time_to_edit=IF(time_to_edit is null,0,time_to_edit) + $time_to_edit, translation='$translation', translation_date='$now', warning=" . (int)$warning . " WHERE id_segment=$id_segment and id_job=$id_job";
 
 	$db->query($q);
 	$err = $db->get_error();
@@ -450,7 +457,7 @@ function setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $tra
 	$data['id_job'] = $id_job;
 	$data['serialized_errors_list']=$errors;
 	$data['suggestion_position']=$chosen_suggestion_index;
-	$data['warning']=$warning;
+	$data['warning'] = (int)$warning;
 	$db = Database::obtain();
 	$db->insert('segment_translations', $data);
 
@@ -463,7 +470,7 @@ function setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $tra
 	return $db->affected_rows;
 }
 
-function setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis,$warning=0) {
+function setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis,$warning, $err_json_list) {
 	$data = array();
 	$data['id_job'] = $id_job;
 	$data['suggestions_array'] = $suggestions_json_array;
@@ -475,8 +482,9 @@ function setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $sug
 	$data['standard_word_count'] = $standard_words;
 	$data['translation'] = $translation;
 	$data['tm_analysis_status'] = $tm_status_analysis;
-	$data['warning']=$warning;
 
+        $data['warning'] = $warning;
+        $data['serialized_errors_list'] = $err_json_list;
 
 	$and_sugg = "";
 	if ($tm_status_analysis != 'DONE') {
@@ -497,7 +505,7 @@ function setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $sug
 	return $db->affected_rows;
 }
 
-function setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis) {
+function setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list) {
 	$data = array();
 	$data['id_job'] = $id_job;
 	$data['id_segment'] = $id_segment;
@@ -511,6 +519,9 @@ function setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $sug
 	$data['translation'] = $translation;
 	$data['tm_analysis_status'] = $tm_status_analysis;
 
+        $data['warning'] = $warning;
+        $data['serialized_errors_list'] = $err_json_list;
+        
 	$db = Database::obtain();
 	$db->insert('segment_translations', $data);
 
@@ -1328,8 +1339,6 @@ function insertFastAnalysis($pid, $fastReport, $equivalentWordMapping) {
 			$data['eq_word_count'] = $eq_word;
 			$data['standard_word_count'] = $standard_words;
 
-
-
 			// query for this data is after insert/update
 			$data_innodb['id_job'] = $data['id_job'];
 			$data_innodb['id_segment'] = $data['id_segment'];
@@ -1542,42 +1551,59 @@ function setSegmentTranslationError($sid, $jid) {
 
 function getNextSegmentAndLock() {
 
+	//get link
 	$db = Database::obtain();
+
+	//declare statements
+	//begin transaction
 	$q1 = "SET autocommit=0";
 	$q2 = "START TRANSACTION";
+	//lock row
 	$q3 = "select id_segment, id_job from segment_translations_analysis_queue where locked=0 for update";
-
+	//end transaction
+	$q4="ROLLBACK";
 	$q5 = "COMMIT";
 	$q6 = "SET autocommit=1";
 
+	//execute statements
+	//start locking
 	$db->query($q1);
-
 	$db->query($q2);
-
+	//query
 	$res = $db->query_first($q3);
+	//if nothing useful
 	if (empty($res)) {
-		$db->query($q5);
-		return "";
+		//empty result
+		$res="";
+		$db->query($q4);
+	}else{
+		//else
+		//take note of IDs
+		$id_job = $res['id_job'];
+		$id_segment = $res['id_segment'];
+
+		//set lock flag on row
+		$data['locked'] = 1;
+		$where = " id_job=$id_job and id_segment=$id_segment ";
+		//update segment
+		$db->update("segment_translations_analysis_queue", $data, $where);
+		$err = $db->get_error();
+		$errno = $err['error_code'];
+		//if something went wrong
+		if ($errno != 0) {
+			log::doLog($err);
+			$db->query($q4);
+			//return error code
+			$res=-1;
+		}else{
+			//if everything went well, commit
+			$db->query($q5);
+		}
 	}
-	$id_job = $res['id_job'];
-	$id_segment = $res['id_segment'];
-
-
-	//q4
-	$data['locked'] = 1;
-	$where = " id_job=$id_job and id_segment=$id_segment ";
-	$db->update("segment_translations_analysis_queue", $data, $where);
-	$err = $db->get_error();
-	$errno = $err['error_code'];
-	if ($errno != 0) {
-		log::doLog($err);
-		$db->query($q5);
-		return -1;
-	}
-
-	$db->query($q5);
+	//release locks and end transaction
 	$db->query($q6);
 
+	//return stuff
 	return $res;
 }
 
