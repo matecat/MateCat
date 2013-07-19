@@ -28,6 +28,12 @@ UI = {
         this.tagSelection = false;
         this.nextSegmentIdByServer = 0;
         this.cursorPlaceholder = '[[placeholder]]';
+
+        /**
+         * Global Warnings array definition.
+         */
+        this.globalWarnings = [];
+
         this.downOpts = {
             offset: '130%'
         };
@@ -73,7 +79,7 @@ UI = {
         this.savedSelActiveElement = null;
         this.markTags();
         $('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');
-        
+
         // SET EVENTS
 
         $("body").bind('keydown', 'Ctrl+return', function(e) {
@@ -232,7 +238,7 @@ UI = {
         });
 
         $("form#fileDownload").submit(function() {
-            if ($("#notifbox").hasClass("warningbox")){
+            if ($("#notifbox").hasClass("warningbox")) {
                 var a = confirm("There are some potential errors\n\(missing tags, numbers etc).\n\
  Do you want to continue anyway?");
                 if (!a) {
@@ -321,7 +327,7 @@ UI = {
                     e.preventDefault();
                     $('.selected', $(this)).remove();
                     UI.saveInUndoStack('cancel');
-                    UI.checkTagMismatch(UI.currentSegment);
+                    //UI.checkTagMismatch(UI.currentSegment); //no more used. See getWarning
                 } else {
                     var numTagsBefore = UI.editarea.text().match(/\<.*?\>/gi).length;
                     var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
@@ -334,7 +340,8 @@ UI = {
                             UI.saveInUndoStack('cancel');
                     }, 50);
                 }
-            };
+            }
+            ;
 
             if (e.which == 37) { // left arrow
                 var selection = window.getSelection();
@@ -351,8 +358,9 @@ UI = {
                         $('.rangySelectionBoundary', UI.editarea).remove();
                     }
                 }
-            };
- 
+            }
+            ;
+
             if (e.which == 38) { // top arrow
                 var selection = window.getSelection();
                 var range = selection.getRangeAt(0);
@@ -366,8 +374,10 @@ UI = {
                         rr.setEndAfter(referenceNode);
                         $('.rangySelectionBoundary', UI.editarea).remove();
                     }
-                };
-            };
+                }
+                ;
+            }
+            ;
             if (e.which == 39) { // right arrow
                 var selection = window.getSelection();
                 var range = selection.getRangeAt(0);
@@ -381,8 +391,10 @@ UI = {
                         rr.setEndAfter(referenceNode);
                         $('.rangySelectionBoundary', UI.editarea).remove();
                     }
-                };
-            };
+                }
+                ;
+            }
+            ;
 
             if (e.which == 40) { // down arrow
                 var selection = window.getSelection();
@@ -397,9 +409,11 @@ UI = {
                         rr.setEndAfter(referenceNode);
                         $('.rangySelectionBoundary', UI.editarea).remove();
                     }
-                };
-            };
-            
+                }
+                ;
+            }
+            ;
+
             if (e.which == 32) { // space
                 setTimeout(function() {
                     UI.saveInUndoStack('space');
@@ -418,7 +432,7 @@ UI = {
             }
             setTimeout(function() {
                 UI.lockTags();
-                UI.checkTagMismatch(UI.currentSegment);
+                //UI.checkTagMismatch(UI.currentSegment); //no more used. See getWarning
             }, 10);
         }).on('dblclick', '.editarea', function(e) {
         }).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
@@ -539,7 +553,7 @@ UI = {
                 UI.saveInUndoStack('paste');
             }, 100);
             UI.lockTags();
-            UI.checkTagMismatch(UI.currentSegment);
+            //UI.checkTagMismatch(UI.currentSegment); //no more used. See getWarning
 
 
         }).on('click', 'a.close', function(e) {
@@ -647,26 +661,33 @@ UI = {
             this.body.addClass('justdone');
         }
     },
+    /**
+     * @deprecated //no more used. See getWarning
+     * @param {type} segment
+     * @returns {undefined}
+     */
     checkTagMismatch: function(segment) {
-        var sourceTags = [];
-        $('.source .locked', segment).each(function() {
-            sourceTags.push($(this).text());
-        })
+        console.log('@deprecated //no more used. See getWarning');
 
-        var targetTags = [];
-        $('.editarea .locked', segment).each(function() {
-            targetTags.push($(this).text());
-        })
+//        var sourceTags = [];
+//        $('.source .locked', segment).each(function() {
+//            sourceTags.push($(this).text());
+//        })
+//
+//        var targetTags = [];
+//        $('.editarea .locked', segment).each(function() {
+//            targetTags.push($(this).text());
+//        })
 
-        if (sourceTags.length != targetTags.length) {
-            $(segment).addClass('mismatch');
-        } else {
-            if (this.tagCompare(sourceTags, targetTags)) {
-                $(segment).addClass('mismatch');
-            } else {
-                $(segment).removeClass('mismatch');
-            }
-        }
+//        if (sourceTags.length != targetTags.length) {
+//            $(segment).addClass('mismatch');
+//        } else {
+//            if (this.tagCompare(sourceTags, targetTags)) {
+//                $(segment).addClass('mismatch');
+//            } else {
+//                $(segment).removeClass('mismatch');
+//            }
+//        }
 
     },
     checkTutorialNeed: function() {
@@ -690,7 +711,7 @@ UI = {
     chooseSuggestion: function(w) {
         this.copySuggestionInEditarea(this.currentSegment, $('.editor ul[data-item=' + w + '] li.b .translation').text(), $('.editor .editarea'), $('.editor ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
         this.lockTags();
-        this.checkTagMismatch(UI.currentSegment);
+        //this.checkTagMismatch(UI.currentSegment); // non more used. See getWarning.
         this.setChosenSuggestion(w);
 
         this.editarea.focus().effect("highlight", {}, 1000);
@@ -710,11 +731,11 @@ UI = {
             }
             ;
         })
-/*
-        console.log('dragged text: "' + draggedText + '"');
-        var prova = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2");
-        console.log('sanitized dragged text: "' + prova + '"');
-*/
+        /*
+         console.log('dragged text: "' + draggedText + '"');
+         var prova = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2");
+         console.log('sanitized dragged text: "' + prova + '"');
+         */
         draggedText = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2");
         var div = document.createElement("div");
         div.innerHTML = draggedText;
@@ -760,8 +781,8 @@ UI = {
                         $(".blacked").hide();
                     },
                     open: function(event, ui) {
-                        $(".blacked").bind('click', function(){
-                            $('#alertConfirmTranslation').dialog('close'); 
+                        $(".blacked").bind('click', function() {
+                            $('#alertConfirmTranslation').dialog('close');
                         });
                     }
                 });
@@ -800,7 +821,7 @@ UI = {
 
         this.setChosenSuggestion(0);
         this.lockTags();
-        this.checkTagMismatch(UI.currentSegment);
+        //this.checkTagMismatch(UI.currentSegment); // no more used. See fill Warning
     },
     copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
 
@@ -850,8 +871,9 @@ UI = {
         var buttons = '<li><a id="segment-' + this.currentSegmentId + '-copysource" href="#" class="btn copysource" data-segmentid="segment-' + this.currentSegmentId + '" title="Copy source to target"></a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
 //        var buttons = '<li class="tag-mismatch" title="Tag Mismatch">Tag Mismatch</li><li><a id="segment-'+this.currentSegmentId+'-copysource" href="#" class="btn copysource" data-segmentid="segment-'+this.currentSegmentId+'" title="Copy source to target"></a><p>CTRL+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-'+this.currentSegmentId+'-button-translated" data-segmentid="segment-'+this.currentSegmentId+'" href="#" class="translated"'+disabled+' >TRANSLATED</a><p>CTRL+ENTER</p></li>';
         $('#segment-' + this.currentSegmentId + '-buttons').append(buttons);
-        $('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings">Warning: Tag Mismatch</p>');
-//        $('#segment-'+this.currentSegmentId+'-buttons').append(buttons);
+        $('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
+//      $('#segment-'+this.currentSegmentId+'-buttons').append(buttons);
+
     },
     createFooter: function(segment) {
         if ($('.footer', segment).text() != '')
@@ -1422,6 +1444,8 @@ UI = {
         this.setCurrentSegment(segment);
         this.currentSegment.addClass('opened');
 
+        this.fillCurrentSegmentWarnings(this.globalWarnings);
+
         this.focusEditarea = setTimeout(function() {
             UI.editarea.focus();
             clearTimeout(UI.focusEditarea);
@@ -1579,7 +1603,7 @@ UI = {
                 UI.setChosenSuggestion(1);
                 copySuggestionDone = true;
             } else {
-                this.checkTagMismatch(UI.currentSegment);
+                //this.checkTagMismatch(UI.currentSegment); //no more used. See getWarning
             }
             var segment_id = segment.attr('id');
             $(segment).addClass('loaded');
@@ -1603,8 +1627,9 @@ UI = {
             UI.setDeleteSuggestion(segment);
             UI.lockTags();
             if (copySuggestionDone) {
-                if (isActiveSegment)
-                    this.checkTagMismatch(UI.currentSegment);
+                if (isActiveSegment) {
+                    //this.checkTagMismatch(UI.currentSegment); //no more used. See fill Warning
+                }
             }
 
             $('.translated', segment).removeAttr('disabled');
@@ -1867,7 +1892,7 @@ UI = {
         } else {
             setTimeout(function() {
                 var hash_value = window.location.hash;
-                window.location.hash = UI.currentSegmentId
+                window.location.hash = UI.currentSegmentId;
             }, 300);
         }
         var file = this.currentArticle;
@@ -1919,7 +1944,8 @@ UI = {
         });
     },
     setDeleteSuggestion_success: function(d) {
-        if (this.debug) console.log('match deleted');
+        if (this.debug)
+            console.log('match deleted');
 
         $(".editor .matches .graysmall").each(function(index) {
             $(this).find('.graysmall-message').text(UI.shortcutLabel + (index + 1));
@@ -2025,24 +2051,83 @@ UI = {
             errors += '01|';
         return errors.substring(0, errors.length - 1);
     },
+    /**
+     * fill segments with relative errors from polling
+     * 
+     * @param {type} segment
+     * @param {type} warnings
+     * @returns {undefined}
+     */
+    fillWarnings: function(segment, warnings) {
+        //console.log( 'fillWarnings' );
+        //console.log( warnings);
+
+        //add Warnings to current Segment
+        var parentTag = segment.find('p.warnings').parent();
+        var actualWarnings = segment.find('p.warnings');
+
+        $.each(warnings, function(key, value) {
+            //console.log(warnings[key]);
+            parentTag.before(actualWarnings).append('<p class="warnings">' + value.debug + '</p>');
+        });
+        actualWarnings.remove();
+
+    },
+    /**
+     * Walk Warnings to fill right segment
+     * 
+     * @returns {undefined}
+     */
+    fillCurrentSegmentWarnings: function(warningDetails) {
+        //console.log( 'fillCurrentSegmentWarnings' );
+        //console.log( warningDetails );
+        //scan array    
+        try {
+            $.each(warningDetails, function(key, value) {
+                if ('segment-' + value.id_segment === UI.currentSegment[0].id) {
+                    UI.fillWarnings(UI.currentSegment, $.parseJSON(value.warnings));
+                }
+            });
+        } catch (e) {
+            //try to read index 0 of undefined currentSegment when document start
+            //console.log( e.toString() );
+        }
+    },
     //check for segments in warning in the project
     checkWarnings: function() {
+
         $.get('/?action=getWarning', {id_job: config.job_id}, function(data) {
             //if any
-            if (false != data) {
-                //scan array
-                $.each(data, function(key, value) {
-                    //for now, put only last in the pointer to segment id
-                    $('#point2seg').attr('href', '#' + value.id_segment);
-                })
+
+            var warningPosition = '';
+
+            //check for errors
+            if (data.total > 0) {
+
+                //for now, put only last in the pointer to segment id
+                warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
+
+                //$.each(data.details, function(key, value) {
+                UI.fillCurrentSegmentWarnings(data.details);
+
                 //switch to css for warning
                 $('#notifbox').attr('class', 'warningbox').attr("title", "Some translations seems to have TAGS and/or other untraslatables that do not match the source");
+
             } else {
                 //if everything is ok, switch css to ok
                 $('#notifbox').attr('class', 'notific').attr("title", "Well done, no errors found!");
                 //reset the pointer to offending segment
                 $('#point2seg').attr('href', '#');
             }
+
+            /**
+             * Global warning assigment
+             */
+            UI.globalWarnings = data.details;
+            //console.log(UI.globalWarnings);
+
+            $('#point2seg').attr('href', warningPosition);
+
         });
     },
     setTranslation: function(segment, status) {
@@ -2210,14 +2295,14 @@ UI = {
         this.editarea.html(this.undoStack[ind]);
         if (!ind)
             this.lockTags();
-        this.checkTagMismatch(UI.currentSegment);
+        //this.checkTagMismatch(UI.currentSegment); //no more used. See getWarning
 
         if (this.undoStackPosition < (this.undoStack.length - 1))
             this.undoStackPosition++;
     },
     redoInSegment: function() {
         this.editarea.html(this.undoStack[this.undoStack.length - 1 - this.undoStackPosition - 1 + 2]);
-        this.checkTagMismatch(UI.currentSegment);
+        //this.checkTagMismatch(UI.currentSegment); //no more used. See getWarning
         if (this.undoStackPosition > 0)
             this.undoStackPosition--;
     },
@@ -2631,15 +2716,16 @@ $(document).ready(function() {
     setBrowserHistoryBehavior();
     $("article").each(function() {
         fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
-    })
+    });
     UI.render(true);
 
     //launch segments check on opening
     UI.checkWarnings();
     //and on every polling interval
     setInterval(function() {
-        UI.checkWarnings()
-    }, config.warningPollingInterval)
+        UI.checkWarnings();
+    }, config.warningPollingInterval);
+
 });
 
 $(window).resize(function() {

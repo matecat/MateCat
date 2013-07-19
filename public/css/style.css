@@ -33,7 +33,8 @@ header .wrapper{padding:0px 0 0 0;}
 
 .tag-mismatch{float:left !important}
 
-.warnings{color:#D65959;display:none;background:url(../img/red-error-symbol.png) 0px 4px no-repeat;float:left;position:relative;left:52%;margin-top:-12px;padding:2px  0 2px 18px;font-size:14px;background-size:15px;}
+.warnings{clear:left;color:#D65959;background:url(../img/red-error-symbol.png) 0px 4px no-repeat;float:left;position:relative;left:52%;top:-12px;margin-top:-12px;padding:2px  0 2px 18px;font-size:14px;background-size:15px;}
+.warnings:empty{ display:none; }
 .mismatch .warnings{display:block}
 
 

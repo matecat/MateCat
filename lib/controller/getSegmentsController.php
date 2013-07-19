@@ -3,7 +3,7 @@ include_once INIT::$MODEL_ROOT . "/queries.php";
 include INIT::$UTILS_ROOT . "/mymemory_queries_temp.php";
 include INIT::$UTILS_ROOT . "/filetype.class.php";
 include INIT::$UTILS_ROOT . "/cat.class.php";
-include INIT::$UTILS_ROOT . "/langs/languages.inc.php";
+include INIT::$UTILS_ROOT . "/langs/languages.class.php";
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -69,7 +69,7 @@ class getSegmentsController extends ajaxcontroller {
 	}
 
 	public function doAction() {
-		$lang_handler=languages::getInstance("en");       
+		$lang_handler=Languages::getInstance();       
 
 
 		if ($this->ref_segment == '') {
@@ -144,8 +144,8 @@ class getSegmentsController extends ajaxcontroller {
 				$this->data["$id_file"]["mime_type"] = $seg['mime_type'];
 				$this->data["$id_file"]['id_segment_start'] = $seg['id_segment_start'];
 				$this->data["$id_file"]['id_segment_end'] = $seg['id_segment_end'];                
-				$this->data["$id_file"]['source']=$lang_handler->iso2Language($seg['source']);
-				$this->data["$id_file"]['target']=$lang_handler->iso2Language($seg['target']);
+				$this->data["$id_file"]['source']=$lang_handler->getLocalizedName( $seg['source'] );
+				$this->data["$id_file"]['target']=$lang_handler->getLocalizedName( $seg['target'] );
 				$this->data["$id_file"]['source_code']=$seg['source'];
 				$this->data["$id_file"]['target_code']=$seg['target'];
 				$this->data["$id_file"]['file_stats'] = $file_stats;		

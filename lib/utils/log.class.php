@@ -19,17 +19,13 @@ class Log {
 
 		$trace=debug_backtrace();
 
-
-
-
-
 		if (!file_exists(LOG_REPOSITORY) || !is_dir(LOG_REPOSITORY)) {
 			mkdir(LOG_REPOSITORY);
 		}
 
 		if (empty(Log::$filename)) {
 			Log::$filename = LOG_REPOSITORY . "/" . LOG_FILENAME;
-			$fh=@fopen(self::$filename, a);
+			$fh=fopen(self::$filename, 'a');
 			if (!$fh){
 				unlink(self::$filename);      
 			}else{
@@ -59,12 +55,40 @@ class Log {
 		}
 
 		$stringDataInfo = "[$now ($ip)]";
-		$stringDataInfo.=$trace[0]['class']."->".$trace[0]['function']."(line:".$trace[0]['line'].")";
+		$stringDataInfo.= ( isset($trace[1]['class']) ? " " . $trace[1]['class'] ."->" : " " ) . $trace[1]['function']."(line:".$trace[0]['line'].")";
 		$stringData = "$stringDataInfo : $string\n";
-
 
 		fwrite($fh, $stringData);
 		fclose($fh);
 	}
+
+        public static function hexDump($data, $newline = "\n") {
+            
+            static $from = '';
+            static $to = '';
+
+            static $width = 16; # number of bytes per line
+
+            static $pad = '.'; # padding for non-visible characters
+
+            if ($from === '') {
+                for ($i = 0; $i <= 0xFF; $i++) {
+                    $from .= chr($i);
+                    $to .= ($i >= 0x20 && $i <= 0x7E) ? chr($i) : $pad;
+                }
+            }
+
+            $hex = str_split(bin2hex($data), $width * 2);
+            $chars = str_split(strtr($data, $from, $to), $width);
+
+            $offset = 0;
+            foreach ($hex as $i => $line) {
+                //echo sprintf('%6X', $offset) . ' : ' . implode(' ', str_split($line, 2)) . ' [' . $chars[$i] . ']' . $newline;
+                self::doLog( sprintf('%6X', $offset) . ' : ' . implode(' ', str_split($line, 2)) . ' [' . $chars[$i] . ']' . $newline );
+                $offset += $width;
+            }
+            
+            
+         }
 
 }

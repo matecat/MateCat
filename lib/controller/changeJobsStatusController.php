@@ -20,7 +20,6 @@ class changeJobsStatusController extends ajaxcontroller {
         $this->undo = $this->get_from_get_post('undo');
 
         // parameters to select the first item of the next page, to return
-        $this->lang_handler = Languages::getInstance();
         if (isset($_POST['page'])) {
             $this->page = ($_POST['page'] == '') ? 1 : $_POST['page'];
         } else {
@@ -100,7 +99,7 @@ class changeJobsStatusController extends ajaxcontroller {
 
             $start = (($this->page - 1) * $this->step) + $this->step - 1;
 
-            $projects = ManageUtils::queryProjects($start, 1, $this->search_in_pname, $this->search_source, $this->search_target, $this->search_status, $this->search_onlycompleted, $this->filter_enabled, $this->lang_handler, $this->project_id);
+            $projects = ManageUtils::queryProjects($start, 1, $this->search_in_pname, $this->search_source, $this->search_target, $this->search_status, $this->search_onlycompleted, $this->filter_enabled, $this->project_id);
 
             $projnum = getProjectsNumber($start, $this->step, $this->search_in_pname, $this->search_source, $this->search_target, $this->search_status, $this->search_onlycompleted, $this->filter_enabled);
 

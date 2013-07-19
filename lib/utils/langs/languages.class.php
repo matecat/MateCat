@@ -63,7 +63,7 @@ class Languages{
 	}
 
 	//get localized name of a language
-	public function getLocalizedName($code,$lang){
+	public function getLocalizedName($code,$lang = 'en'){
 		//convert ISO code in RFC
 		if(strlen($code)<5)$code=self::$map_iso2rfc[$code];
 
