@@ -242,8 +242,8 @@ class QA {
         $target_seg = mb_convert_encoding( $target_seg, 'UTF-8', $trg_enc );
 
         // ensure there are no entities
-        $this->source_seg = html_entity_decode($source_seg, ENT_HTML401, 'UTF-8');
-        $this->target_seg = html_entity_decode($target_seg, ENT_HTML401, 'UTF-8');
+        $this->source_seg = html_entity_decode($source_seg, 0, 'UTF-8');
+        $this->target_seg = html_entity_decode($target_seg, 0, 'UTF-8');
 
         // ensure that are no ampersand ( & ) and preserve them
         $seg = $this->_placeHoldAmp($this->source_seg);

@@ -135,11 +135,12 @@ class getSegmentsController extends ajaxcontroller {
 			}
 
 			$id_file = $seg['id_file'];
-			$file_stats =CatUtils::getStatsForFile($id_file);
-
 
 			if (!isset($this->data["$id_file"])) {                
-				$this->data["$id_file"]['jid'] = $seg['jid'];		
+                                
+                                $file_stats = CatUtils::getStatsForFile($id_file);
+
+                                $this->data["$id_file"]['jid'] = $seg['jid'];		
 				$this->data["$id_file"]["filename"] = $seg['filename'];
 				$this->data["$id_file"]["mime_type"] = $seg['mime_type'];
 				$this->data["$id_file"]['id_segment_start'] = $seg['id_segment_start'];
@@ -153,8 +154,6 @@ class getSegmentsController extends ajaxcontroller {
 			}
 			
 			$this->filetype_handler = new filetype($seg['mime_type']);
-
-
 
 			unset($seg['id_file']);
 			unset($seg['source']);
@@ -175,10 +174,10 @@ class getSegmentsController extends ajaxcontroller {
 
 			$seg['segment'] = $this->filetype_handler->parse($seg['segment']);
 
-			$seg['segment']=CatUtils::rawxliff2view($seg['segment']);
-			$seg['translation']=CatUtils::rawxliff2view($seg['translation']);
+			$seg['segment'] = CatUtils::rawxliff2view($seg['segment']);
+			$seg['translation'] = CatUtils::rawxliff2view($seg['translation']);
 
-			$seg['parsed_time_to_edit']=  $this->parse_time_to_edit($seg['time_to_edit']); 
+			$seg['parsed_time_to_edit'] = $this->parse_time_to_edit($seg['time_to_edit']); 
 
 			$this->data["$id_file"]['segments'][] = $seg;
 

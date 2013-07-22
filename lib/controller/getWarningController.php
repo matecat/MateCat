@@ -35,20 +35,20 @@ class getWarningController extends ajaxcontroller{
          * (
          * [0] => Array
          *     (
-         *         [total] => 1
-         *         [id_segment] => 2224896
-         *         [serialized_errors_list] => 01
+         *         [total] => 2
+         *         [id_segment] => 
+         *         [serialized_errors_list] => [{"outcome":3,"debug":"bad target xml"}]
          *     ),
          * [1] => Array
          *     (
          *         [total] => 1
-         *         [id_segment] => 2224903
-         *         [serialized_errors_list] => [{"outcome":3,"debug":"bad target xml"}]
+         *         [id_segment] => 2224896
+         *         [serialized_errors_list] => 01
          *     ),
          * [2] => Array
          *     (
-         *         [total] => 2
-         *         [id_segment] => 
+         *         [total] => 1
+         *         [id_segment] => 2224903
          *         [serialized_errors_list] => [{"outcome":3,"debug":"bad target xml"}]
          *     ),
          * )
@@ -56,10 +56,10 @@ class getWarningController extends ajaxcontroller{
          */
 	public function doAction (){
 		$result = getWarning($this->id_job);
-                $_total = array_pop($result);
+                Log::doLog($result);
+                $_total = array_shift($result);
                 $this->result['total'] = (int)$_total['total'];
-                
-
+                Log::doLog($result);
                 array_walk( $result, function( &$item, $key ) {
                     if( $item['warnings'] == '01' ){
                         //backward compatibility
@@ -73,10 +73,9 @@ class getWarningController extends ajaxcontroller{
                 foreach( $result as $item ) {
                     $_keys[] = $item['id_segment'];
                 }
-                $result = array_combine( $_keys , $result );                
+
+                $result = @array_combine( $_keys , $result );                
                 $this->result['details'] = $result;
-                
-                Log::doLog( $this->result );
                 
 	}
 }
