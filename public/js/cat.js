@@ -329,16 +329,22 @@ UI = {
                     UI.saveInUndoStack('cancel');
                     //UI.checkTagMismatch(UI.currentSegment); //no more used. See getWarning
                 } else {
-                    var numTagsBefore = UI.editarea.text().match(/\<.*?\>/gi).length;
-                    var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
-                    setTimeout(function() {
-                        var numTagsAfter = UI.editarea.text().match(/\<.*?\>/gi).length;
-                        var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
-                        if (numTagsAfter < numTagsBefore)
-                            UI.saveInUndoStack('cancel');
-                        if (numSpacesAfter < numSpacesBefore)
-                            UI.saveInUndoStack('cancel');
-                    }, 50);
+                    try {
+                        var numTagsBefore = UI.editarea.text().match(/\<.*?\>/gi).length;
+                        var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
+                        setTimeout(function() {
+                            var numTagsAfter = UI.editarea.text().match(/\<.*?\>/gi).length;
+                            var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
+                            if (numTagsAfter < numTagsBefore)
+                                UI.saveInUndoStack('cancel');
+                            if (numSpacesAfter < numSpacesBefore)
+                                UI.saveInUndoStack('cancel');
+                        }, 50);
+                    }  catch( e ) { 
+                        //Error: Cannot read property 'length' of null 
+                        //when we are on first character position in edit area and try to BACKSPACE
+                        //console.log(e.message); 
+                    }
                 }
             }
             ;
@@ -1965,7 +1971,7 @@ UI = {
         var label = (t == 'translated') ? 'DOWNLOAD TRANSLATION' : 'PREVIEW';
         $('#downloadProject').attr('value', label);
     },
-    setProgress: function(stats) {
+    setProgress: function(stats) { 
         var s = stats;
         m = $('footer .meter');
         var status = 'approved';
@@ -1996,7 +2002,8 @@ UI = {
         } else {
             $('#stat-completion').show();
         }
-        UI.progress_perc = Math.floor(s.APPROVED_PERC + s.TRANSLATED_PERC);
+
+        this.progress_perc = s.PROGRESS_PERC_FORMATTED; 
         this.checkIfFinished();
 
         this.done_percentage = this.progress_perc;
