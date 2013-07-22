@@ -484,7 +484,7 @@ class QA {
 
         if( !$this->thereAreErrors() ){            
             preg_match('/<root>(.*)<\/root>/u', $this->normalizedTrgDOM->saveHTML(), $matches );
-            return html_entity_decode( $matches[1], ENT_HTML401, 'UTF-8' );
+            return html_entity_decode( $matches[1], 0, 'UTF-8' );
         }
         
         throw new LogicException( __METHOD__ . " call when errors found in Source/Target integrity check & comparison.");
