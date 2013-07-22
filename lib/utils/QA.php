@@ -371,19 +371,19 @@ class QA {
     protected function _checkContentConsistency(DOMNodeList $srcNodeList, DOMNodeList $trgNodeList) {
         
         $this->_checkTagCount($srcNodeList->length, $trgNodeList->length);
-                
+                          
         for ($i = 0; $i < $srcNodeList->length; $i++) {
-
-            if( $srcNodeList->item($i) instanceof DOMText ){
-                continue;
-            }
-            
-            if ($srcNodeList->item($i)->getAttribute('id') != $trgNodeList->item($i)->getAttribute('id')) {
-                $this->_addError(self::ERR_TAG_ID);
-            }
 
             $srcNodeContent = $srcNodeList->item($i)->textContent;
             $trgNodeContent = $trgNodeList->item($i)->textContent;
+            
+            if( $srcNodeList->item($i) instanceof DOMText ){
+                continue;
+            } else if( !$srcNodeList->item($i) instanceof DOMText ) { //if it is a Tag node with id and not a textNode
+                if ($srcNodeList->item($i)->getAttribute('id') != $trgNodeList->item($i)->getAttribute('id')) {
+                    $this->_addError(self::ERR_TAG_ID);
+                }
+            }
 
             $this->_checkHeadWhiteSpaces($srcNodeContent, $trgNodeContent, $i);
             $this->_checkTailWhiteSpaces($srcNodeContent, $trgNodeContent, $i);
@@ -424,7 +424,7 @@ class QA {
         
         $srcHasHeadNBSP = $this->_hasHeadNBSP($srcNodeContent);
         $trgHasHeadNBSP = $this->_hasHeadNBSP($trgNodeContent);
-           
+        
         //normalize spaces
         $srcNodeContent = $this->_nbspToSpace($srcNodeContent);
         $trgNodeContent = $this->_nbspToSpace($trgNodeContent);

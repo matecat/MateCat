@@ -62,7 +62,7 @@ class Log {
             }
         }
 
-        self::_writeTo( self::_getHeader() . $string );
+        self::_writeTo( self::_getHeader() . $string . "\n" );
     }
 
     /**

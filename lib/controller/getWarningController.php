@@ -55,27 +55,34 @@ class getWarningController extends ajaxcontroller{
          * </pre>
          */
 	public function doAction (){
-		$result = getWarning($this->id_job);
-                Log::doLog($result);
-                $_total = array_shift($result);
-                $this->result['total'] = (int)$_total['total'];
-                Log::doLog($result);
-                array_walk( $result, function( &$item, $key ) {
-                    if( $item['warnings'] == '01' ){
-                        //backward compatibility
-                        //TODO Remove after some days/month/year of use of QA class. 
-                        $item['debug'] = '[{"outcome":3,"debug":"bad target xml"}]';
-                    }
-                    unset($item['total']);
-                } );
-                
-                $_keys = array();
-                foreach( $result as $item ) {
-                    $_keys[] = $item['id_segment'];
-                }
+		
+            $result = getWarning($this->id_job);
+            $_total = array_shift($result);
+            $this->result['total'] = (int)$_total['total'];
 
-                $result = @array_combine( $_keys , $result );                
-                $this->result['details'] = $result;
+// php 5.2 lacks of lambda functions
+//            array_walk( $result, function( &$item, $key ) {
+//                if( $item['warnings'] == '01' ){
+//                    //backward compatibility
+//                    //TODO Remove after some days/month/year of use of QA class. 
+//                    $item['debug'] = '[{"outcome":3,"debug":"bad target xml"}]';
+//                }
+//                unset($item['total']);
+//            } );
+
+            $_keys = array();
+            foreach( $result as $key => &$item ) {
+                if( $item['warnings'] == '01' ){
+                    //backward compatibility
+                    //TODO Remove after some days/month/year of use of QA class. 
+                    $item['debug'] = '[{"outcome":3,"debug":"bad target xml"}]';
+                }
+                unset($item['total']);
+                $_keys[] = $item['id_segment'];
+            }
+
+            $result = @array_combine( $_keys , $result );                
+            $this->result['details'] = $result;
                 
 	}
 }
