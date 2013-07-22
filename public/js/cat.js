@@ -308,7 +308,6 @@ UI = {
             if (UI.debug)
                 console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea));
         }).on('keydown', '.editor .editarea', function(e) {
-            console.log(e.which);
             var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
             if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
                 if (event.which == 88) { // ctrl+x
@@ -2108,6 +2107,7 @@ UI = {
             //if any
 
             var warningPosition = '';
+            console.log('data:',data);
 
             //check for errors
             if (data.total > 0) {
@@ -2183,7 +2183,6 @@ UI = {
         ;
     },
     setWaypoints: function() {
-console.log('setWaypoints');
         this.firstSegment.waypoint('remove');
         this.lastSegment.waypoint('remove');
         this.detectFirstLast();
@@ -2710,9 +2709,6 @@ $.fn.isOnScreen = function() {
     viewport.bottom = viewport.top + win.height();
 
     var bounds = this.offset();
-    console.log('this:');
-    console.log(this);
-    console.log('bounds',bounds);
     bounds.right = bounds.left + this.outerWidth();
     bounds.bottom = bounds.top + this.outerHeight();
 
