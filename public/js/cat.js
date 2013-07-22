@@ -932,16 +932,17 @@ UI = {
         this.lastSegment = s.last();
     },
     detectIfSegmentIsVisible: function() {
-        if ($('.editor').isOnScreen()) {
-            $('#segmentPointer').hide();
-        } else {
-            if ($(window).scrollTop() > $('.editor').offset().top) {
-                $('#segmentPointer').removeClass('down').css('margin-top', '-10px').addClass('up').show();
+        if($('.editor').length) {
+            if ($('.editor').isOnScreen()) {
+                $('#segmentPointer').hide();
             } else {
-                $('#segmentPointer').removeClass('up').addClass('down').css('margin-top', ($(window).height() - 140) + 'px').show();
-            }
+                if ($(window).scrollTop() > $('.editor').offset().top) {
+                    $('#segmentPointer').removeClass('down').css('margin-top', '-10px').addClass('up').show();
+                } else {
+                    $('#segmentPointer').removeClass('up').addClass('down').css('margin-top', ($(window).height() - 140) + 'px').show();
+                }
+            };
         }
-        ;
     },
     detectRefSegId: function(where) {
         var step = this.moreSegNum;
@@ -2182,6 +2183,7 @@ UI = {
         ;
     },
     setWaypoints: function() {
+console.log('setWaypoints');
         this.firstSegment.waypoint('remove');
         this.lastSegment.waypoint('remove');
         this.detectFirstLast();
@@ -2708,6 +2710,9 @@ $.fn.isOnScreen = function() {
     viewport.bottom = viewport.top + win.height();
 
     var bounds = this.offset();
+    console.log('this:');
+    console.log(this);
+    console.log('bounds',bounds);
     bounds.right = bounds.left + this.outerWidth();
     bounds.bottom = bounds.top + this.outerHeight();
 
