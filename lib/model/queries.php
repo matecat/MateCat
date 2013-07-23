@@ -201,7 +201,7 @@ function getWarning($jid){
                         WHERE Seg1.warning != 0 
                         AND Seg1.id_job = $jid
                         GROUP BY Seg1.id_segment WITH ROLLUP
-                  ) AS Seg2 WHERE 1 OR id_segment IS NULL LIMIT 11"; //+1 for RollUp
+                  ) AS Seg2 WHERE 1 OR id_segment IS NULL ORDER BY total DESC, id_segment ASC LIMIT 11"; //+1 for RollUp
 
 	$results = $db->fetch_array($query);
 	return $results;
@@ -675,15 +675,26 @@ function getStatsForJob($id_job) {
 }
 
 function getStatsForFile($id_file) {
-
+	$db = Database::obtain();
+        
+        //SQL Injection... cast to int 
+        $id_file = intval($id_file);
+        $id_file = $db->escape($id_file);
+        
 	// Old raw-wordcount
 	/*
 	   $query = "select SUM(raw_word_count) as TOTAL, SUM(IF(status IS NULL OR status='DRAFT' OR status='NEW',raw_word_count,0)) as DRAFT, SUM(IF(status='REJECTED',raw_word_count,0)) as REJECTED, SUM(IF(status='TRANSLATED',raw_word_count,0)) as TRANSLATED, SUM(IF(status='APPROVED',raw_word_count,0)) as APPROVED from jobs j INNER JOIN files_job fj on j.id=fj.id_job INNER join segments s on fj.id_file=s.id_file LEFT join segment_translations st on s.id=st.id_segment WHERE s.id_file=" . $id_file;
 	 */
-	$query = "select SUM(IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(st.status='REJECTED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(st.status='TRANSLATED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(st.status='APPROVED',raw_word_count,0)) as APPROVED from jobs j INNER JOIN files_job fj on j.id=fj.id_job INNER join segments s on fj.id_file=s.id_file LEFT join segment_translations st on s.id=st.id_segment WHERE s.id_file=" . $id_file;
+	$query = "SELECT SUM(IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count) ) as TOTAL, 
+                         SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as DRAFT, 
+                         SUM(IF(st.status='REJECTED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as REJECTED, 
+                         SUM(IF(st.status='TRANSLATED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as TRANSLATED, 
+                         SUM(IF(st.status='APPROVED',raw_word_count,0)) as APPROVED from jobs j 
+                   INNER JOIN files_job fj on j.id=fj.id_job 
+                   INNER join segments s on fj.id_file=s.id_file 
+                   LEFT join segment_translations st on s.id=st.id_segment 
+                   WHERE s.id_file=" . $id_file;
 
-
-	$db = Database::obtain();
 	$results = $db->fetch_array($query);
 
 	return $results;

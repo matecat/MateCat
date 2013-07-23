@@ -242,8 +242,8 @@ class QA {
         $target_seg = mb_convert_encoding( $target_seg, 'UTF-8', $trg_enc );
 
         // ensure there are no entities
-        $this->source_seg = html_entity_decode($source_seg, ENT_HTML401, 'UTF-8');
-        $this->target_seg = html_entity_decode($target_seg, ENT_HTML401, 'UTF-8');
+        $this->source_seg = html_entity_decode($source_seg, 0, 'UTF-8');
+        $this->target_seg = html_entity_decode($target_seg, 0, 'UTF-8');
 
         // ensure that are no ampersand ( & ) and preserve them
         $seg = $this->_placeHoldAmp($this->source_seg);
@@ -371,19 +371,19 @@ class QA {
     protected function _checkContentConsistency(DOMNodeList $srcNodeList, DOMNodeList $trgNodeList) {
         
         $this->_checkTagCount($srcNodeList->length, $trgNodeList->length);
-                
+                          
         for ($i = 0; $i < $srcNodeList->length; $i++) {
-
-            if( $srcNodeList->item($i) instanceof DOMText ){
-                continue;
-            }
-            
-            if ($srcNodeList->item($i)->getAttribute('id') != $trgNodeList->item($i)->getAttribute('id')) {
-                $this->_addError(self::ERR_TAG_ID);
-            }
 
             $srcNodeContent = $srcNodeList->item($i)->textContent;
             $trgNodeContent = $trgNodeList->item($i)->textContent;
+            
+            if( $srcNodeList->item($i) instanceof DOMText ){
+                continue;
+            } else if( !$srcNodeList->item($i) instanceof DOMText ) { //if it is a Tag node with id and not a textNode
+                if ($srcNodeList->item($i)->getAttribute('id') != $trgNodeList->item($i)->getAttribute('id')) {
+                    $this->_addError(self::ERR_TAG_ID);
+                }
+            }
 
             $this->_checkHeadWhiteSpaces($srcNodeContent, $trgNodeContent, $i);
             $this->_checkTailWhiteSpaces($srcNodeContent, $trgNodeContent, $i);
@@ -424,7 +424,7 @@ class QA {
         
         $srcHasHeadNBSP = $this->_hasHeadNBSP($srcNodeContent);
         $trgHasHeadNBSP = $this->_hasHeadNBSP($trgNodeContent);
-           
+        
         //normalize spaces
         $srcNodeContent = $this->_nbspToSpace($srcNodeContent);
         $trgNodeContent = $this->_nbspToSpace($trgNodeContent);
@@ -484,7 +484,7 @@ class QA {
 
         if( !$this->thereAreErrors() ){            
             preg_match('/<root>(.*)<\/root>/u', $this->normalizedTrgDOM->saveHTML(), $matches );
-            return html_entity_decode( $matches[1], ENT_HTML401, 'UTF-8' );
+            return stripslashes( html_entity_decode( $matches[1], 0, 'UTF-8' ) );
         }
         
         throw new LogicException( __METHOD__ . " call when errors found in Source/Target integrity check & comparison.");
