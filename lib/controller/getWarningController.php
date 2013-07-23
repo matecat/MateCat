@@ -72,10 +72,10 @@ class getWarningController extends ajaxcontroller{
 
             $_keys = array();
             foreach( $result as $key => &$item ) {
-                if( $item['warnings'] == '01' ){
+                if( $item['warnings'] == '01' || $item['warnings'] == "" ){
                     //backward compatibility
                     //TODO Remove after some days/month/year of use of QA class. 
-                    $item['debug'] = '[{"outcome":3,"debug":"bad target xml"}]';
+                    $item['warnings'] = '[{"outcome":3,"debug":"bad target xml"}]';
                 }
                 unset($item['total']);
                 $_keys[] = $item['id_segment'];

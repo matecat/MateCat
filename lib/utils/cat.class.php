@@ -416,26 +416,32 @@ class CatUtils {
             }
             $job_stat['TOTAL_FORMATTED'] = number_format($job_stat['TOTAL'], 0, ".", ",");
 
-            $job_stat['TRANSLATED_FORMATTED'] = number_format($job_stat['TRANSLATED'], 0, ".", ",");
             $job_stat['APPROVED_FORMATTED'] = number_format($job_stat['APPROVED'], 0, ".", ",");
             $job_stat['REJECTED_FORMATTED'] = number_format($job_stat['REJECTED'], 0, ".", ",");
             $job_stat['DRAFT_FORMATTED'] = number_format($job_stat['DRAFT'], 0, ".", ",");
             $job_stat['TODO_FORMATTED'] = number_format($job_stat['DRAFT'] + $job_stat['REJECTED'], 0, ".", ",");
 
-            $job_stat['TRANSLATED_PERC'] = ($job_stat['TRANSLATED']) / $job_stat['TOTAL'] * 100;
             $job_stat['APPROVED_PERC'] = ($job_stat['APPROVED']) / $job_stat['TOTAL'] * 100;
             $job_stat['REJECTED_PERC'] = ($job_stat['REJECTED']) / $job_stat['TOTAL'] * 100;
             $job_stat['DRAFT_PERC'] = ($job_stat['DRAFT']) / $job_stat['TOTAL'] * 100;
 
-            $job_stat['TRANSLATED_PERC_FORMATTED'] = number_format($job_stat['TRANSLATED_PERC'], 1, ".", ",");
             $job_stat['APPROVED_PERC_FORMATTED'] = number_format($job_stat['APPROVED_PERC'], 1, ".", ",");
             $job_stat['REJECTED_PERC_FORMATTED'] = number_format($job_stat['REJECTED_PERC'], 1, ".", ",");
             $job_stat['DRAFT_PERC_FORMATTED'] = number_format($job_stat['DRAFT_PERC'], 1, ".", ",");
 
+
+            $job_stat['DRAFT_FORMATTED'] = number_format($job_stat['DRAFT'], 0, ".", ",");
+            $job_stat['DRAFT_PERC'] = round( ( $job_stat['DRAFT'] / $job_stat['TOTAL'] * 100 ), 2, PHP_ROUND_HALF_DOWN );
+            $job_stat['DRAFT_PERC_FORMATTED'] = substr( number_format($job_stat['DRAFT_PERC'], 2, ".", ","), 0, -1 ) ;
+            
+            $job_stat['TRANSLATED_FORMATTED'] = number_format($job_stat['TRANSLATED'], 0, ".", ",");
+            $job_stat['TRANSLATED_PERC'] = round( ( $job_stat['TRANSLATED'] / $job_stat['TOTAL'] * 100 ), 2, PHP_ROUND_HALF_DOWN );
+            $job_stat['TRANSLATED_PERC_FORMATTED'] = substr( number_format($job_stat['TRANSLATED_PERC'], 2, ".", ","), 0, -1 ) ;
+            
             $job_stat['PROGRESS'] = ( $job_stat['TRANSLATED'] + $job_stat['APPROVED'] );                   
             $job_stat['PROGRESS_FORMATTED'] = number_format( $job_stat['TRANSLATED'] + $job_stat['APPROVED'], 0, ".", "," );                   
-            $job_stat['PROGRESS_PERC'] = ( $job_stat['PROGRESS'] / $job_stat['TOTAL'] ) * 100;
-            $job_stat['PROGRESS_PERC_FORMATTED'] = number_format($job_stat['PROGRESS_PERC'], 1, ".", ",");
+            $job_stat['PROGRESS_PERC'] = round( ( $job_stat['PROGRESS'] / $job_stat['TOTAL'] ) * 100 , 2, PHP_ROUND_HALF_DOWN );
+            $job_stat['PROGRESS_PERC_FORMATTED'] = substr( number_format( $job_stat['PROGRESS_PERC'], 2, ".", ","), 0, -1 ) ;
 
             $t = 'approved';
             if ($job_stat['TRANSLATED_FORMATTED'] > 0)
@@ -475,29 +481,38 @@ class CatUtils {
         $job_stats = $job_stats[0];
         $job_stats['TOTAL_FORMATTED'] = number_format($job_stats['TOTAL'], 0, ".", ",");
 
-        $job_stats['TRANSLATED_FORMATTED'] = number_format($job_stats['TRANSLATED'], 0, ".", ",");
         $job_stats['APPROVED_FORMATTED'] = number_format($job_stats['APPROVED'], 0, ".", ",");
         $job_stats['REJECTED_FORMATTED'] = number_format($job_stats['REJECTED'], 0, ".", ",");
-        $job_stats['DRAFT_FORMATTED'] = number_format($job_stats['DRAFT'], 0, ".", ",");
         $job_stats['TODO_FORMATTED'] = number_format($job_stats['DRAFT'] + $job_stats['REJECTED'], 0, ".", ",");
 
-
-        $job_stats['TRANSLATED_PERC'] = ($job_stats['TRANSLATED']) / $job_stats['TOTAL'] * 100;
         $job_stats['APPROVED_PERC'] = ($job_stats['APPROVED']) / $job_stats['TOTAL'] * 100;
         $job_stats['REJECTED_PERC'] = ($job_stats['REJECTED']) / $job_stats['TOTAL'] * 100;
-        $job_stats['DRAFT_PERC'] = ($job_stats['DRAFT']) / $job_stats['TOTAL'] * 100;
 
-        $job_stats['TRANSLATED_PERC_FORMATTED'] = number_format($job_stats['TRANSLATED_PERC'], 1, ".", ",");
         $job_stats['APPROVED_PERC_FORMATTED'] = number_format($job_stats['APPROVED_PERC'], 1, ".", ",");
         $job_stats['REJECTED_PERC_FORMATTED'] = number_format($job_stats['REJECTED_PERC'], 1, ".", ",");
-        $job_stats['DRAFT_PERC_FORMATTED'] = number_format($job_stats['DRAFT_PERC'], 1, ".", ",");
 
         
+        $job_stats['DRAFT_FORMATTED'] = number_format($job_stats['DRAFT'], 0, ".", ",");
+        $job_stats['DRAFT_PERC'] = round( ( $job_stats['DRAFT'] / $job_stats['TOTAL'] * 100 ), 2, PHP_ROUND_HALF_UP );
+        $job_stats['DRAFT_PERC_FORMATTED'] = substr( number_format($job_stats['DRAFT_PERC'], 2, ".", ","), 0, -1 ) ;
+           
+        $job_stats['TRANSLATED_FORMATTED'] = number_format($job_stats['TRANSLATED'], 0, ".", ",");
+        $job_stats['TRANSLATED_PERC'] = round( ( $job_stats['TRANSLATED'] / $job_stats['TOTAL'] * 100 ), 2, PHP_ROUND_HALF_DOWN );
+        $job_stats['TRANSLATED_PERC_FORMATTED'] = substr( number_format($job_stats['TRANSLATED_PERC'], 2, ".", ","), 0, -1 ) ;
+                
         $job_stats['PROGRESS'] = ( $job_stats['TRANSLATED'] + $job_stats['APPROVED'] );                   
         $job_stats['PROGRESS_FORMATTED'] = number_format( $job_stats['TRANSLATED'] + $job_stats['APPROVED'], 0, ".", "," );                   
-        $job_stats['PROGRESS_PERC'] = ( $job_stats['PROGRESS'] / $job_stats['TOTAL'] ) * 100;
-        $job_stats['PROGRESS_PERC_FORMATTED'] = number_format($job_stats['PROGRESS_PERC'], 1, ".", ",");
+        $job_stats['PROGRESS_PERC'] = round( ( $job_stats['PROGRESS'] / $job_stats['TOTAL'] ) * 100 , 2, PHP_ROUND_HALF_DOWN );
+        $job_stats['PROGRESS_PERC_FORMATTED'] = substr( number_format( $job_stats['PROGRESS_PERC'], 2, ".", "," ), 0, -1 ) ;
 
+        Log::doLog( $job_stats['DRAFT_FORMATTED'] );
+        Log::doLog( $job_stats['DRAFT_PERC'] );
+        Log::doLog( $job_stats['DRAFT_PERC_FORMATTED'] );
+        
+        Log::doLog( $job_stats['TRANSLATED_FORMATTED'] );
+        Log::doLog( $job_stats['TRANSLATED_PERC'] );
+        Log::doLog( $job_stats['TRANSLATED_PERC_FORMATTED'] );
+        
         $t = 'approved';
         if ($job_stats['TRANSLATED_FORMATTED'] > 0)
             $t = "translated";
