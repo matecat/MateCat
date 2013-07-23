@@ -791,7 +791,7 @@ function getNextUntranslatedSegment($sid, $jid) {
 		INNER JOIN files_job fj on fj.id_file=s.id_file 
 		INNER JOIN jobs j on j.id=fj.id_job 
 		where fj.id_job=$jid AND 
-		(status in ('NEW','DRAFT','REJECTED') OR status IS NULL) and s.id>$sid
+		(st.status in ('NEW','DRAFT','REJECTED') OR st.status IS NULL) and s.id>$sid
 		and s.show_in_cattool=1
 		order by s.id
 		limit 1
@@ -805,7 +805,7 @@ function getNextUntranslatedSegment($sid, $jid) {
 
 function getNextSegmentId($sid, $jid, $status) {
 	$rules = ($status == 'untranslated') ? "'NEW','DRAFT','REJECTED'" : "'$status'";
-	$statusIsNull = ($status == 'untranslated') ? " OR status IS NULL" : "";
+	$statusIsNull = ($status == 'untranslated') ? " OR st.status IS NULL" : "";
 	// Warning this is a LEFT join a little slower...
 	$query = "select s.id as sid
 		from segments s
@@ -813,7 +813,7 @@ function getNextSegmentId($sid, $jid, $status) {
 		INNER JOIN files_job fj on fj.id_file=s.id_file 
 		INNER JOIN jobs j on j.id=fj.id_job 
 		where fj.id_job=$jid AND 
-		(status in ($rules)$statusIsNull) and s.id>$sid
+		(st.status in ($rules)$statusIsNull) and s.id>$sid
 		and s.show_in_cattool=1
 		order by s.id
 		limit 1

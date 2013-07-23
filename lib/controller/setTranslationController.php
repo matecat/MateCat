@@ -55,8 +55,8 @@ class setTranslationController extends ajaxcontroller {
 			$this->status = 'DRAFT';
 		}
 
-		if (empty($this->translation)) {
-			log::doLog("empty translation");
+		if (is_null($this->translation) || $this->translation === '') {
+			//log::doLog("empty translation");
 			return 0; // won's save empty translation but there is no need to return an error 
 		}
 

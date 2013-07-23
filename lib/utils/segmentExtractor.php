@@ -59,7 +59,7 @@ function extractSegments($files_path, $file, $pid, $fid) {
                         //init tags
                         $seg_source['mrk-ext-prec-tags'] = '';
                         $seg_source['mrk-ext-succ-tags'] = '';
-                        if (empty($tempSeg)) {
+                        if ( is_null($tempSeg) || $tempSeg === '' ) {
                             $show_in_cattool = 0;
                         } else {
                             $extract_external = strip_external($seg_source['raw-content']);
