@@ -2144,15 +2144,17 @@ UI = {
         var dd = new Date();
         ts = dd.getTime();
         var token = this.currentSegmentId + '-' + ts.toString();
-        var content = this.editarea.text();        
-        this.checkSegmentsArray[token] = content;
+        var src_content = $('.source', this.currentSegment).attr('data-original');  
+        var trg_content = this.editarea.text();        
+        this.checkSegmentsArray[token] = trg_content;
         
         this.doRequest({
             data: {
                 action: 'getWarning',
                 id: this.currentSegmentId,
                 token: token,
-                content: content
+                src_content: src_content,
+                trg_content: trg_content
             },
             success: function(d) {
                 if(UI.currentSegment.hasClass('waiting_for_check_result')) {
