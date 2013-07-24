@@ -2083,7 +2083,7 @@ UI = {
      */
     fillCurrentSegmentWarnings: function(warningDetails) {
         //console.log( 'fillCurrentSegmentWarnings' );
-//        console.log('warningDetails: ',warningDetails );
+        console.log('warningDetails: ',warningDetails );
         //scan array    
         try {
             $.each(warningDetails, function(key, value) {
@@ -2098,7 +2098,7 @@ UI = {
         }
     },
     //check for segments in warning in the project
-    checkWarnings: function() {
+    checkWarnings: function(openingSegment) {
         var dd = new Date();
         ts = dd.getTime();
         var token = this.currentSegmentId + '-' + ts.toString();
@@ -2120,7 +2120,7 @@ UI = {
                     warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
 
                     //$.each(data.details, function(key, value) {
-                    UI.fillCurrentSegmentWarnings(data.details);
+                    if(openingSegment) UI.fillCurrentSegmentWarnings(data.details);
 
                     //switch to css for warning
                     $('#notifbox').attr('class', 'warningbox').attr("title", "Some translations seems to have TAGS and/or other untraslatables that do not match the source");
@@ -2144,27 +2144,32 @@ UI = {
         var dd = new Date();
         ts = dd.getTime();
         var token = this.currentSegmentId + '-' + ts.toString();
-        var content = this.editarea.text();        
-        this.checkSegmentsArray[token] = content;
+        var src_content = $('.source', this.currentSegment).attr('data-original');  
+        var trg_content = this.editarea.text();        
+        this.checkSegmentsArray[token] = trg_content;
         
         this.doRequest({
             data: {
                 action: 'getWarning',
                 id: this.currentSegmentId,
                 token: token,
-                content: content
+                src_content: src_content,
+                trg_content: trg_content
             },
             success: function(d) {
-//                setTimeout(function() {
-//                    UI.currentSegmentQA();
-//                }, 4000);
                 if(UI.currentSegment.hasClass('waiting_for_check_result')) {
-                    $.each(d.details, function(key, value) {
-                        id_seg = key;
-                        item = value;
-                    });
+                    if(d.details) {
+                        $.each(d.details, function(key, value) {
+                            id_seg = key;
+                            item = value;
+                        });                        
+                    }
+
                     // check conditions for results discard 
-                    if(!d.total) return;
+                    if(!d.total) {
+                        $('p.warnings', UI.currentSegment).empty();
+                        return;
+                    }
                     if(id_seg != UI.currentSegmentId) return;
                     if(UI.editarea.text() != UI.checkSegmentsArray[d.token]) return;
                     
@@ -2216,7 +2221,7 @@ UI = {
             this.setDownloadStatus(d.stats);
             this.setProgress(d.stats);
             //check status of global warnings
-            this.checkWarnings();
+            this.checkWarnings(false);
         }
         ;
     },
@@ -2770,10 +2775,10 @@ $(document).ready(function() {
     UI.render(true);
 
     //launch segments check on opening
-    UI.checkWarnings();
+    UI.checkWarnings(true);
     //and on every polling interval
     setInterval(function() {
-        UI.checkWarnings();
+        UI.checkWarnings(false);
     }, config.warningPollingInterval);
 
 //    setTimeout(function() {

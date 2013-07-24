@@ -1,3 +1,4 @@
+php_value magic_quotes_gpc off
 <IfModule mod_rewrite.c>
 RewriteEngine On
 RewriteRule ^$ index.php?action=newProject [QSA,L]

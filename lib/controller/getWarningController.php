@@ -15,7 +15,9 @@ class getWarningController extends ajaxcontroller{
                     
                     'id'            => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                     'id_job'        => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                    'content'       => array( 'filter' => FILTER_UNSAFE_RAW,
+                    'src_content'   => array( 'filter' => FILTER_UNSAFE_RAW,
+                                              'flags'  => FILTER_FLAG_STRIP_LOW      ),
+                    'trg_content'   => array( 'filter' => FILTER_UNSAFE_RAW,
                                               'flags'  => FILTER_FLAG_STRIP_LOW      ),
                     'token'         => array( 'filter' => FILTER_SANITIZE_STRING,
                                               'flags'  => FILTER_FLAG_STRIP_LOW      ),
@@ -103,14 +105,12 @@ class getWarningController extends ajaxcontroller{
          * 
          */
         private function __segmentWarningsCall(){
-                        
-            $segmentInfo = getSegment($this->__postInput->id);
-
+            
             $this->result['details'] = null;
             $this->result['token'] = $this->__postInput->token;
             $this->result['total'] = 0;
             
-            $QA = new QA($segmentInfo['segment'], $this->__postInput->content);
+            $QA = new QA($this->__postInput->src_content, $this->__postInput->trg_content);
             $QA->performConsistencyCheck();
             if( $QA->thereAreErrors() ){
                 $this->result['details'] = array();
