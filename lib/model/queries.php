@@ -597,11 +597,11 @@ function getOriginalFilesForJob($id_job, $id_file, $password) {
    }
  */
 
-function getStatsForMultipleJobs($jids) {
+function getStatsForMultipleJobs($_jids) {
 
 	//transform array into comma separated string
-	if(is_array($jids)){
-		$jids=implode(',',$jids);
+	if(is_array($_jids)){
+		$jids=implode(',',$_jids);
 	}
 
 	$query = "select SUM(IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(st.status='REJECTED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(st.status='TRANSLATED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(st.status='APPROVED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as APPROVED, j.id 
@@ -616,9 +616,25 @@ function getStatsForMultipleJobs($jids) {
 		group by j.id";
 
 	$db = Database::obtain();
-	$results = $db->fetch_array($query);
+	$jobs_stats = $db->fetch_array($query);
 
-	return $results;
+        //convert result to ID based index
+        foreach ($jobs_stats as $job_stat) {
+            $tmp_jobs_stats[$job_stat['id']] = $job_stat;
+        }
+        $jobs_stats = $tmp_jobs_stats;
+        unset($tmp_jobs_stats);
+        
+        //cycle on results to ensure sanitization
+        foreach ($_jids as $jid) {
+            //if no stats for that job id
+            if (!isset($jobs_stats[$jid])) {
+                //add dummy empty stats
+                $jobs_stats[$jid] = array('TOTAL' => 1.00, 'DRAFT' => 0.00, 'REJECTED' => 0.00, 'TRANSLATED' => 0.00, 'APPROVED' => 0.00, 'id' => $jid);
+            }
+        }
+        
+	return $jobs_stats;
 }
 
 function getStatsForJob($id_job) {
@@ -631,6 +647,7 @@ function getStatsForJob($id_job) {
 
 	$query = "
 		select 
+                j.id,
 		SUM(
 				IF(st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count)
 		   ) as TOTAL, 
@@ -664,9 +681,6 @@ function getStatsForJob($id_job) {
 
 
 			WHERE j.id=$id_job";
-
-
-
 
 	$db = Database::obtain();
 	$results = $db->fetch_array($query);
@@ -1070,7 +1084,7 @@ function getProjectsNumber($start,$step,$search_in_pname,$search_source,$search_
 	$owner = $_SESSION['cid'];
     $owner_query = " j.owner='$owner' and"; 
 
-    log::doLog('OWNER QUERY:',$owner);		
+    //log::doLog('OWNER QUERY:',$owner);		
 
 //    $owner_query = $owner;
 //	$owner_query = "";
