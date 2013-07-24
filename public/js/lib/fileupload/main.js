@@ -283,7 +283,12 @@ $(function () {
 
 //        console.log(data.data);
         if(typeof data.data != 'undefined') {
-        	var filename = data.files[0].name;
+                /*
+                 * BUG FIXED: UTF16 / UTF8 File name conversion
+                 * Use Return String From AJAX RESULT ( safe raw url encoded ) 
+                 *      and NOT data.files[0].name; ( INPUT TAG content )
+                 **/
+        	var filename = data.result[0].name; 
         	var filerow = data.context;
 
 			if(filesize == 0) {

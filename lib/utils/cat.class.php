@@ -385,28 +385,34 @@ class CatUtils {
         return 0;
     }
 
-    public static function getStatsForMultipleJobs($jids, $estimate_performance = 0) {
+    /**
+     * Public interface to multiple Job Stats Info
+     * 
+     * @param array $jids
+     * @param bool $estimate_performance
+     * @return mixed
+     * <pre>
+     *   $res_job_stats = array(
+     *      (int)id => 
+     *          array(
+     *              'id'                           => (int),
+     *              'TOTAL'                        => (int),
+     *              'TRANSLATED'                   => (int),
+     *              'APPROVED'                     => (int),
+     *              'REJECTED'                     => (int),
+     *              'DRAFT'                        => (int),
+     *              'ESTIMATED_COMPLETION'         => (int),
+     *              'WORDS_PER_HOUR'               => (int),
+     *          )
+     *   );
+     * </pre>
+     * 
+     */
+    public static function getStatsForMultipleJobs( array $jids, $estimate_performance = false) {
 
         //get stats for all jids
         $jobs_stats = getStatsForMultipleJobs($jids);
 
-        //convert result to ID based index
-        foreach ($jobs_stats as $job_stat) {
-            $tmp_jobs_stats[$job_stat['id']] = $job_stat;
-        }
-        $jobs_stats = $tmp_jobs_stats;
-        unset($tmp_jobs_stats);
-
-        //if input jids is an array, cycle on results to ensure sanitization
-        if (is_array($jids)) {
-            foreach ($jids as $jid) {
-                //if no stats for that job id
-                if (!isset($jobs_stats[$jid])) {
-                    //add dummy empty stats
-                    $jobs_stats[$jid] = array('TOTAL' => 1.00, 'DRAFT' => 0.00, 'REJECTED' => 0.00, 'TRANSLATED' => 0.00, 'APPROVED' => 0.00, 'id' => $jid);
-                }
-            }
-        }
         //init results
         $res_job_stats = array();
         foreach ($jobs_stats as $job_stat) {
@@ -414,97 +420,55 @@ class CatUtils {
             if ($job_stat['TOTAL'] == 0) {
                 $job_stat['TOTAL'] = 1;
             }
-            $job_stat['TOTAL_FORMATTED'] = number_format($job_stat['TOTAL'], 0, ".", ",");
-
-            $job_stat['TRANSLATED_FORMATTED'] = number_format($job_stat['TRANSLATED'], 0, ".", ",");
-            $job_stat['APPROVED_FORMATTED'] = number_format($job_stat['APPROVED'], 0, ".", ",");
-            $job_stat['REJECTED_FORMATTED'] = number_format($job_stat['REJECTED'], 0, ".", ",");
-            $job_stat['DRAFT_FORMATTED'] = number_format($job_stat['DRAFT'], 0, ".", ",");
-            $job_stat['TODO_FORMATTED'] = number_format($job_stat['DRAFT'] + $job_stat['REJECTED'], 0, ".", ",");
-
-
-            $job_stat['TRANSLATED_PERC'] = ($job_stat['TRANSLATED']) / $job_stat['TOTAL'] * 100;
-            $job_stat['APPROVED_PERC'] = ($job_stat['APPROVED']) / $job_stat['TOTAL'] * 100;
-            $job_stat['REJECTED_PERC'] = ($job_stat['REJECTED']) / $job_stat['TOTAL'] * 100;
-            $job_stat['DRAFT_PERC'] = ($job_stat['DRAFT']) / $job_stat['TOTAL'] * 100;
-
-            $job_stat['TRANSLATED_PERC_FORMATTED'] = number_format($job_stat['TRANSLATED_PERC'], 1, ".", ",");
-            $job_stat['APPROVED_PERC_FORMATTED'] = number_format($job_stat['APPROVED_PERC'], 1, ".", ",");
-            $job_stat['REJECTED_PERC_FORMATTED'] = number_format($job_stat['REJECTED_PERC'], 1, ".", ",");
-            $job_stat['DRAFT_PERC_FORMATTED'] = number_format($job_stat['DRAFT_PERC'], 1, ".", ",");
-
-            $t = 'approved';
-            if ($job_stat['TRANSLATED_FORMATTED'] > 0)
-                $t = "translated";
-            if ($job_stat['DRAFT_FORMATTED'] > 0)
-                $t = "draft";
-            if ($job_stat['REJECTED_FORMATTED'] > 0)
-                $t = "draft";
-            $job_stat['DOWNLOAD_STATUS'] = $t;
-
-
-            if ($estimate_performance) {
-                // Calculating words per hour and estimated completion
-                $estimation_temp = getLastSegmentIDs($job_stat['id']);
-                $estimation_seg_ids = $estimation_temp[0]['estimation_seg_ids'];
-
-                if ($estimation_seg_ids) {
-
-                    $estimation_temp = getEQWLastHour($job_stat['id'], $estimation_seg_ids);
-                    if ($estimation_temp[0]['data_validity'] == 1) {
-                        $job_stat['WORDS_PER_HOUR'] = number_format($estimation_temp[0]['words_per_hour'], 0, '.', ',');
-                        $job_stat['ESTIMATED_COMPLETION'] = date("G\h i\m", ($job_stat['DRAFT'] + $job_stat['REJECTED']) / $estimation_temp[0]['words_per_hour'] * 3600 - 3600);
-                    }
-                }
+            
+            $job_stat = self::_getStatsForJob($job_stat, $estimate_performance);
+            if ($estimate_performance){
+                $job_stat = self::_performanceEstimationTime($job_stat);
             }
+            
             $jid = $job_stat['id'];
             unset($job_stat['id']);
             $res_job_stats[$jid] = $job_stat;
             unset($jid);
         }
+        
         return $res_job_stats;
+        
     }
-
-    public static function getStatsForJob($jid) {
-        $job_stats = getStatsForJob($jid);
-
-        $job_stats = $job_stats[0];
-        $job_stats['TOTAL_FORMATTED'] = number_format($job_stats['TOTAL'], 0, ".", ",");
-
-        $job_stats['TRANSLATED_FORMATTED'] = number_format($job_stats['TRANSLATED'], 0, ".", ",");
-        $job_stats['APPROVED_FORMATTED'] = number_format($job_stats['APPROVED'], 0, ".", ",");
-        $job_stats['REJECTED_FORMATTED'] = number_format($job_stats['REJECTED'], 0, ".", ",");
-        $job_stats['DRAFT_FORMATTED'] = number_format($job_stats['DRAFT'], 0, ".", ",");
-        $job_stats['TODO_FORMATTED'] = number_format($job_stats['DRAFT'] + $job_stats['REJECTED'], 0, ".", ",");
-
-
-        $job_stats['TRANSLATED_PERC'] = ($job_stats['TRANSLATED']) / $job_stats['TOTAL'] * 100;
-        $job_stats['APPROVED_PERC'] = ($job_stats['APPROVED']) / $job_stats['TOTAL'] * 100;
-        $job_stats['REJECTED_PERC'] = ($job_stats['REJECTED']) / $job_stats['TOTAL'] * 100;
-        $job_stats['DRAFT_PERC'] = ($job_stats['DRAFT']) / $job_stats['TOTAL'] * 100;
-
-        $job_stats['TRANSLATED_PERC_FORMATTED'] = number_format($job_stats['TRANSLATED_PERC'], 1, ".", ",");
-        $job_stats['APPROVED_PERC_FORMATTED'] = number_format($job_stats['APPROVED_PERC'], 1, ".", ",");
-        $job_stats['REJECTED_PERC_FORMATTED'] = number_format($job_stats['REJECTED_PERC'], 1, ".", ",");
-        $job_stats['DRAFT_PERC_FORMATTED'] = number_format($job_stats['DRAFT_PERC'], 1, ".", ",");
-
-        $t = 'approved';
-        if ($job_stats['TRANSLATED_FORMATTED'] > 0)
-            $t = "translated";
-        if ($job_stats['DRAFT_FORMATTED'] > 0)
-            $t = "draft";
-        if ($job_stats['REJECTED_FORMATTED'] > 0)
-            $t = "draft";
-        $job_stats['DOWNLOAD_STATUS'] = $t;
-
-
-        // Calculating words per hour and estimated completion
-        $estimation_temp = getLastSegmentIDs($jid);
+    
+    /**
+     * 
+     * Find significant digits from float num.
+     * 
+     * Accepted range are between 0 and 2 ( max approximation )
+     * 
+     * @param float $floatNum
+     * @return int
+     */
+    protected static function _getSignificantDigits( $floatNum ){
+        if( $floatNum == 0 ){
+            return 0;
+        }
+        $decimalNumbers = ceil( log10( $floatNum ) );
+        $decimalNumbers = ( $decimalNumbers >= 0 ? 0 : abs($decimalNumbers) +1 );
+        return ( $decimalNumbers < 2 ? $decimalNumbers : 2 ); //force max to 2 decimal number
+    }
+    
+    /**
+     * Make an estimation on performance
+     * 
+     * @param mixed $job_stats
+     * @return mixed
+     */
+    protected static function _performanceEstimationTime( array $job_stats ){
+        
+        $estimation_temp = getLastSegmentIDs($job_stats['id']);
         $estimation_seg_ids = $estimation_temp[0]['estimation_seg_ids'];
 
         if ($estimation_seg_ids) {
-
-            $estimation_temp = getEQWLastHour($jid, $estimation_seg_ids);
+            //perform check on performance if single segment are set to check or globally Forced
+            // Calculating words per hour and estimated completion
+            $estimation_temp = getEQWLastHour($job_stats['id'], $estimation_seg_ids);
             if ($estimation_temp[0]['data_validity'] == 1) {
                 $job_stats['WORDS_PER_HOUR'] = number_format($estimation_temp[0]['words_per_hour'], 0, '.', ',');
                 // 7.2 hours
@@ -514,8 +478,104 @@ class CatUtils {
                 $job_stats['ESTIMATED_COMPLETION'] = date("G\h i\m", ($job_stats['DRAFT'] + $job_stats['REJECTED']) / $estimation_temp[0]['words_per_hour'] * 3600 - 3600);
             }
         }
+        
+        return $job_stats;
+        
+    }
+    
+    /**
+     * Perform analysis on single Job
+     *  
+     * <pre>
+     *      $job_stats = array(
+     *          'id'                           => (int),
+     *          'TOTAL'                        => (int),
+     *          'TRANSLATED'                   => (int),
+     *          'APPROVED'                     => (int),
+     *          'REJECTED'                     => (int),
+     *          'DRAFT'                        => (int),
+     *          'ESTIMATED_COMPLETION'         => (int),
+     *          'WORDS_PER_HOUR'               => (int),
+     *      );
+     * </pre>
+     *  
+     * @param mixed $job_stats
+     * @param bool $estimate_performance
+     * @return mixed $job_stats
+     */
+    protected static function _getStatsForJob( $job_stats ) {
+        
+        $job_stats['PROGRESS'] = ( $job_stats['TRANSLATED'] + $job_stats['APPROVED'] );                   
+
+        $job_stats['TOTAL_FORMATTED'] = number_format($job_stats['TOTAL'], 0, ".", ",");
+        $job_stats['PROGRESS_FORMATTED'] = number_format( $job_stats['TRANSLATED'] + $job_stats['APPROVED'], 0, ".", "," );                   
+        $job_stats['APPROVED_FORMATTED'] = number_format($job_stats['APPROVED'], 0, ".", ",");
+        $job_stats['REJECTED_FORMATTED'] = number_format($job_stats['REJECTED'], 0, ".", ",");
+        $job_stats['TODO_FORMATTED'] = number_format($job_stats['DRAFT'] + $job_stats['REJECTED'], 0, ".", ",");
+        $job_stats['DRAFT_FORMATTED'] = number_format($job_stats['DRAFT'], 0, ".", ",");
+        $job_stats['TRANSLATED_FORMATTED'] = number_format($job_stats['TRANSLATED'], 0, ".", ",");
+
+        $job_stats['APPROVED_PERC'] = ($job_stats['APPROVED']) / $job_stats['TOTAL'] * 100;
+        $job_stats['REJECTED_PERC'] = ($job_stats['REJECTED']) / $job_stats['TOTAL'] * 100;
+        $job_stats['DRAFT_PERC'] = ( $job_stats['DRAFT'] / $job_stats['TOTAL'] * 100 );
+        $job_stats['TRANSLATED_PERC'] = ( $job_stats['TRANSLATED'] / $job_stats['TOTAL'] * 100 );
+        $job_stats['PROGRESS_PERC'] = ( $job_stats['PROGRESS'] / $job_stats['TOTAL'] ) * 100;
+
+        $significantDigits = array();
+        $significantDigits[] = self::_getSignificantDigits($job_stats['TRANSLATED_PERC']);
+        $significantDigits[] = self::_getSignificantDigits($job_stats['DRAFT_PERC']);
+        $significantDigits[] = self::_getSignificantDigits($job_stats['APPROVED_PERC']);
+        $significantDigits[] = self::_getSignificantDigits($job_stats['REJECTED_PERC']);
+        $significantDigits = max($significantDigits);
+                
+        $job_stats['TRANSLATED_PERC_FORMATTED'] = round($job_stats['TRANSLATED_PERC'], $significantDigits ) ;
+        $job_stats['DRAFT_PERC_FORMATTED'] = round($job_stats['DRAFT_PERC'], $significantDigits ) ;
+        $job_stats['APPROVED_PERC_FORMATTED'] = round($job_stats['APPROVED_PERC'], $significantDigits );
+        $job_stats['REJECTED_PERC_FORMATTED'] = round($job_stats['REJECTED_PERC'], $significantDigits );
+        $job_stats['PROGRESS_PERC_FORMATTED'] = round( $job_stats['PROGRESS_PERC'], $significantDigits ) ;
+        
+        $t = 'approved';
+        if ($job_stats['TRANSLATED_FORMATTED'] > 0)
+            $t = "translated";
+        if ($job_stats['DRAFT_FORMATTED'] > 0)
+            $t = "draft";
+        if ($job_stats['REJECTED_FORMATTED'] > 0)
+            $t = "draft";
+        $job_stats['DOWNLOAD_STATUS'] = $t;            
 
         return $job_stats;
+        
+    }
+    
+    /**
+     * Public interface to single Job Stats Info
+     * 
+     * 
+     * @param int $jid
+     * 
+     * @return $job_stats
+     * <pre>
+     *      $job_stats = array(
+     *          'id'                           => (int),
+     *          'TOTAL'                        => (int),
+     *          'TRANSLATED'                   => (int),
+     *          'APPROVED'                     => (int),
+     *          'REJECTED'                     => (int),
+     *          'DRAFT'                        => (int),
+     *          'ESTIMATED_COMPLETION'         => (int),
+     *          'WORDS_PER_HOUR'               => (int),
+     *      );
+     * </pre>
+     * 
+     */
+    public static function getStatsForJob( $jid ) {
+        
+        $job_stats = getStatsForJob($jid);
+        $job_stats = $job_stats[0];
+
+        $job_stats = self::_getStatsForJob($job_stats, true); //true set estimation check if present
+        return self::_performanceEstimationTime($job_stats);
+        
     }
 
     public static function getStatsForFile($fid) {

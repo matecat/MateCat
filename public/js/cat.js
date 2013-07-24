@@ -329,16 +329,22 @@ UI = {
                     UI.saveInUndoStack('cancel');
                     //UI.checkTagMismatch(UI.currentSegment); //no more used. See getWarning
                 } else {
-                    var numTagsBefore = UI.editarea.text().match(/\<.*?\>/gi).length;
-                    var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
-                    setTimeout(function() {
-                        var numTagsAfter = UI.editarea.text().match(/\<.*?\>/gi).length;
-                        var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
-                        if (numTagsAfter < numTagsBefore)
-                            UI.saveInUndoStack('cancel');
-                        if (numSpacesAfter < numSpacesBefore)
-                            UI.saveInUndoStack('cancel');
-                    }, 50);
+                    try {
+                        var numTagsBefore = UI.editarea.text().match(/\<.*?\>/gi).length;
+                        var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
+                        setTimeout(function() {
+                            var numTagsAfter = UI.editarea.text().match(/\<.*?\>/gi).length;
+                            var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
+                            if (numTagsAfter < numTagsBefore)
+                                UI.saveInUndoStack('cancel');
+                            if (numSpacesAfter < numSpacesBefore)
+                                UI.saveInUndoStack('cancel');
+                        }, 50);
+                    }  catch( e ) { 
+                        //Error: Cannot read property 'length' of null 
+                        //when we are on first character position in edit area and try to BACKSPACE
+                        //console.log(e.message); 
+                    }
                 }
             }
             ;
@@ -926,16 +932,17 @@ UI = {
         this.lastSegment = s.last();
     },
     detectIfSegmentIsVisible: function() {
-        if ($('.editor').isOnScreen()) {
-            $('#segmentPointer').hide();
-        } else {
-            if ($(window).scrollTop() > $('.editor').offset().top) {
-                $('#segmentPointer').removeClass('down').css('margin-top', '-10px').addClass('up').show();
+        if($('.editor').length) {
+            if ($('.editor').isOnScreen()) {
+                $('#segmentPointer').hide();
             } else {
-                $('#segmentPointer').removeClass('up').addClass('down').css('margin-top', ($(window).height() - 140) + 'px').show();
-            }
+                if ($(window).scrollTop() > $('.editor').offset().top) {
+                    $('#segmentPointer').removeClass('down').css('margin-top', '-10px').addClass('up').show();
+                } else {
+                    $('#segmentPointer').removeClass('up').addClass('down').css('margin-top', ($(window).height() - 140) + 'px').show();
+                }
+            };
         }
-        ;
     },
     detectRefSegId: function(where) {
         var step = this.moreSegNum;
@@ -1965,7 +1972,7 @@ UI = {
         var label = (t == 'translated') ? 'DOWNLOAD TRANSLATION' : 'PREVIEW';
         $('#downloadProject').attr('value', label);
     },
-    setProgress: function(stats) {
+    setProgress: function(stats) { 
         var s = stats;
         m = $('footer .meter');
         var status = 'approved';
@@ -1996,7 +2003,8 @@ UI = {
         } else {
             $('#stat-completion').show();
         }
-        UI.progress_perc = Math.floor(s.APPROVED_PERC + s.TRANSLATED_PERC);
+
+        this.progress_perc = s.PROGRESS_PERC_FORMATTED; 
         this.checkIfFinished();
 
         this.done_percentage = this.progress_perc;
@@ -2175,6 +2183,7 @@ UI = {
         ;
     },
     setWaypoints: function() {
+console.log('setWaypoints');
         this.firstSegment.waypoint('remove');
         this.lastSegment.waypoint('remove');
         this.detectFirstLast();
@@ -2701,6 +2710,9 @@ $.fn.isOnScreen = function() {
     viewport.bottom = viewport.top + win.height();
 
     var bounds = this.offset();
+    console.log('this:');
+    console.log(this);
+    console.log('bounds',bounds);
     bounds.right = bounds.left + this.outerWidth();
     bounds.bottom = bounds.top + this.outerHeight();
 

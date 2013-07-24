@@ -40,7 +40,6 @@ class convertFileController extends ajaxcontroller {
 
 		$file_path = $this->intDir . '/' . $this->file_name;
 
-
 		if (!file_exists($file_path)) {
 			$this->result['errors'][] = array("code" => -6, "message" => "Error during upload. Please retry.");
 			return -1;

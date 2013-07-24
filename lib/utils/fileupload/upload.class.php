@@ -449,9 +449,21 @@ class UploadHandler{
 					echo $json;
 				}
 
-				public function delete() {
-					$file_name = isset($_REQUEST['file']) ?
-						basename(stripslashes($_REQUEST['file'])) : null;
+				public function delete() {                                         
+                                        
+                                        /*
+                                         * BUG FIXED: UTF16 / UTF8 File name conversion related
+                                         *
+                                         * $file_name = isset($_REQUEST['file']) ? basename(stripslashes($_REQUEST['file'])) : null;
+                                         * 
+                                         * ----> basename is NOT UTF8 compliant
+                                         */
+                                        $file_name = null;
+                                        if( isset( $_REQUEST['file'] ) ) {
+                                            $raw_file = explode( DIRECTORY_SEPARATOR, $_REQUEST['file'] );
+                                            $file_name = array_pop($raw_file);
+                                        } 
+                                        
 					$file_path = $this->options['upload_dir'].$file_name;
 					$success = is_file($file_path) && $file_name[0] !== '.' && unlink($file_path);
 					if ($success) {

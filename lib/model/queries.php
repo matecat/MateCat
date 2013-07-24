@@ -201,7 +201,7 @@ function getWarning($jid){
                         WHERE Seg1.warning != 0 
                         AND Seg1.id_job = $jid
                         GROUP BY Seg1.id_segment WITH ROLLUP
-                  ) AS Seg2 WHERE 1 OR id_segment IS NULL LIMIT 11"; //+1 for RollUp
+                  ) AS Seg2 WHERE 1 OR id_segment IS NULL ORDER BY total DESC, id_segment ASC LIMIT 11"; //+1 for RollUp
 
 	$results = $db->fetch_array($query);
 	return $results;
@@ -597,11 +597,11 @@ function getOriginalFilesForJob($id_job, $id_file, $password) {
    }
  */
 
-function getStatsForMultipleJobs($jids) {
+function getStatsForMultipleJobs($_jids) {
 
 	//transform array into comma separated string
-	if(is_array($jids)){
-		$jids=implode(',',$jids);
+	if(is_array($_jids)){
+		$jids=implode(',',$_jids);
 	}
 
 	$query = "select SUM(IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(st.status='REJECTED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(st.status='TRANSLATED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(st.status='APPROVED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as APPROVED, j.id 
@@ -616,9 +616,25 @@ function getStatsForMultipleJobs($jids) {
 		group by j.id";
 
 	$db = Database::obtain();
-	$results = $db->fetch_array($query);
+	$jobs_stats = $db->fetch_array($query);
 
-	return $results;
+        //convert result to ID based index
+        foreach ($jobs_stats as $job_stat) {
+            $tmp_jobs_stats[$job_stat['id']] = $job_stat;
+        }
+        $jobs_stats = $tmp_jobs_stats;
+        unset($tmp_jobs_stats);
+        
+        //cycle on results to ensure sanitization
+        foreach ($_jids as $jid) {
+            //if no stats for that job id
+            if (!isset($jobs_stats[$jid])) {
+                //add dummy empty stats
+                $jobs_stats[$jid] = array('TOTAL' => 1.00, 'DRAFT' => 0.00, 'REJECTED' => 0.00, 'TRANSLATED' => 0.00, 'APPROVED' => 0.00, 'id' => $jid);
+            }
+        }
+        
+	return $jobs_stats;
 }
 
 function getStatsForJob($id_job) {
@@ -631,6 +647,7 @@ function getStatsForJob($id_job) {
 
 	$query = "
 		select 
+                j.id,
 		SUM(
 				IF(st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count)
 		   ) as TOTAL, 
@@ -665,9 +682,6 @@ function getStatsForJob($id_job) {
 
 			WHERE j.id=$id_job";
 
-
-
-
 	$db = Database::obtain();
 	$results = $db->fetch_array($query);
 
@@ -675,15 +689,26 @@ function getStatsForJob($id_job) {
 }
 
 function getStatsForFile($id_file) {
-
+	$db = Database::obtain();
+        
+        //SQL Injection... cast to int 
+        $id_file = intval($id_file);
+        $id_file = $db->escape($id_file);
+        
 	// Old raw-wordcount
 	/*
 	   $query = "select SUM(raw_word_count) as TOTAL, SUM(IF(status IS NULL OR status='DRAFT' OR status='NEW',raw_word_count,0)) as DRAFT, SUM(IF(status='REJECTED',raw_word_count,0)) as REJECTED, SUM(IF(status='TRANSLATED',raw_word_count,0)) as TRANSLATED, SUM(IF(status='APPROVED',raw_word_count,0)) as APPROVED from jobs j INNER JOIN files_job fj on j.id=fj.id_job INNER join segments s on fj.id_file=s.id_file LEFT join segment_translations st on s.id=st.id_segment WHERE s.id_file=" . $id_file;
 	 */
-	$query = "select SUM(IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(st.status='REJECTED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(st.status='TRANSLATED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(st.status='APPROVED',raw_word_count,0)) as APPROVED from jobs j INNER JOIN files_job fj on j.id=fj.id_job INNER join segments s on fj.id_file=s.id_file LEFT join segment_translations st on s.id=st.id_segment WHERE s.id_file=" . $id_file;
+	$query = "SELECT SUM(IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count) ) as TOTAL, 
+                         SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as DRAFT, 
+                         SUM(IF(st.status='REJECTED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as REJECTED, 
+                         SUM(IF(st.status='TRANSLATED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as TRANSLATED, 
+                         SUM(IF(st.status='APPROVED',raw_word_count,0)) as APPROVED from jobs j 
+                   INNER JOIN files_job fj on j.id=fj.id_job 
+                   INNER join segments s on fj.id_file=s.id_file 
+                   LEFT join segment_translations st on s.id=st.id_segment 
+                   WHERE s.id_file=" . $id_file;
 
-
-	$db = Database::obtain();
 	$results = $db->fetch_array($query);
 
 	return $results;
@@ -780,7 +805,7 @@ function getNextUntranslatedSegment($sid, $jid) {
 		INNER JOIN files_job fj on fj.id_file=s.id_file 
 		INNER JOIN jobs j on j.id=fj.id_job 
 		where fj.id_job=$jid AND 
-		(status in ('NEW','DRAFT','REJECTED') OR status IS NULL) and s.id>$sid
+		(st.status in ('NEW','DRAFT','REJECTED') OR st.status IS NULL) and s.id>$sid
 		and s.show_in_cattool=1
 		order by s.id
 		limit 1
@@ -794,7 +819,7 @@ function getNextUntranslatedSegment($sid, $jid) {
 
 function getNextSegmentId($sid, $jid, $status) {
 	$rules = ($status == 'untranslated') ? "'NEW','DRAFT','REJECTED'" : "'$status'";
-	$statusIsNull = ($status == 'untranslated') ? " OR status IS NULL" : "";
+	$statusIsNull = ($status == 'untranslated') ? " OR st.status IS NULL" : "";
 	// Warning this is a LEFT join a little slower...
 	$query = "select s.id as sid
 		from segments s
@@ -802,7 +827,7 @@ function getNextSegmentId($sid, $jid, $status) {
 		INNER JOIN files_job fj on fj.id_file=s.id_file 
 		INNER JOIN jobs j on j.id=fj.id_job 
 		where fj.id_job=$jid AND 
-		(status in ($rules)$statusIsNull) and s.id>$sid
+		(st.status in ($rules)$statusIsNull) and s.id>$sid
 		and s.show_in_cattool=1
 		order by s.id
 		limit 1
@@ -1059,7 +1084,7 @@ function getProjectsNumber($start,$step,$search_in_pname,$search_source,$search_
 	$owner = $_SESSION['cid'];
     $owner_query = " j.owner='$owner' and"; 
 
-    log::doLog('OWNER QUERY:',$owner);		
+    //log::doLog('OWNER QUERY:',$owner);		
 
 //    $owner_query = $owner;
 //	$owner_query = "";

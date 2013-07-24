@@ -36,7 +36,7 @@ class getContributionController extends ajaxcontroller {
 			$this->result['errors'][] = array("code" => -1, "message" => "missing id_segment");
 		}
 
-		if (empty($this->text)) {
+		if (is_null($this->text) || $this->text === '' ) {
 			$this->result['errors'][] = array("code" => -2, "message" => "missing text");
 		}
 
