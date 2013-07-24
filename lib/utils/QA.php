@@ -241,10 +241,9 @@ class QA {
         $source_seg = mb_convert_encoding( $source_seg, 'UTF-8', $src_enc );
         $target_seg = mb_convert_encoding( $target_seg, 'UTF-8', $trg_enc );
 
-        // ensure there are no entities
-        $this->source_seg = html_entity_decode($source_seg, 0, 'UTF-8');
-        $this->target_seg = html_entity_decode($target_seg, 0, 'UTF-8');
-
+        $this->source_seg = $source_seg;
+        $this->target_seg = $target_seg;
+        
         // ensure that are no ampersand ( & ) and preserve them
         $seg = $this->_placeHoldAmp($this->source_seg);
         $tra = $this->_placeHoldAmp($this->target_seg);
@@ -260,7 +259,7 @@ class QA {
         if ($trg_xml_valid === FALSE) {
             $this->_addError(self::ERR_TARGET);
         }
-        
+
     }
 
     /**
@@ -294,7 +293,10 @@ class QA {
      * @return string
      */
     protected function _placeHoldAmp($s) {
-        return preg_replace("/\&/", self::AMPPLACEHOLDER, $s);
+        if( !preg_match("/\&([#a-zA-Z0-9]+);/", $s) ){
+            return preg_replace("/\&/", self::AMPPLACEHOLDER, $s);
+        }
+        return $s;
     }
 
     /**
@@ -484,6 +486,7 @@ class QA {
 
         if( !$this->thereAreErrors() ){            
             preg_match('/<root>(.*)<\/root>/u', $this->normalizedTrgDOM->saveHTML(), $matches );
+            return stripslashes( $matches[1] );
             return stripslashes( html_entity_decode( $matches[1], 0, 'UTF-8' ) );
         }
         
