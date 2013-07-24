@@ -36,6 +36,7 @@ class INIT {
     public static $ANALYSIS_WORDS_PER_DAYS;
     public static $VOLUME_ANALYSIS_ENABLED;
     public static $WARNING_POLLING_INTERVAL;
+    public static $SEGMENT_QA_CHECK_INTERVAL;
 
     private function initOK() {
 
@@ -131,7 +132,8 @@ class INIT {
         self::$BUILD_NUMBER = '0.3.2';
         self::$VOLUME_ANALYSIS_ENABLED = true;
 
-	self::$WARNING_POLLING_INTERVAL=10;//seconds
+        self::$WARNING_POLLING_INTERVAL = 10; //seconds
+        self::$SEGMENT_QA_CHECK_INTERVAL = 2; //seconds
         
         self::$SUPPORTED_FILE_TYPES = array(
             'Office' => array(
