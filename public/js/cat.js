@@ -2099,6 +2099,8 @@ UI = {
     },
     //check for segments in warning in the project
     checkWarnings: function() {
+        var dd = new Date();
+        ts = dd.getTime();
         var token = this.currentSegmentId + '-' + ts.toString();
 
         this.doRequest({
