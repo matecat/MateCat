@@ -41,6 +41,3 @@ class setCurrentSegmentController extends ajaxcontroller {
 
 
 }
-
-?>
-
