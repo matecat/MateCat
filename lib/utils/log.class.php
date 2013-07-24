@@ -1,15 +1,14 @@
 <?php
-
 error_reporting(E_ALL);
 
 define('DEBUG', 1);
 
 if (!defined('LOG_REPOSITORY')) {
-    define('LOG_REPOSITORY', INIT::$LOG_REPOSITORY);
+	define('LOG_REPOSITORY', INIT::$LOG_REPOSITORY);
 }
 
 if (!defined('LOG_FILENAME')) {
-    define('LOG_FILENAME', 'log.txt');
+	define('LOG_FILENAME', 'log.txt');
 }
 
 class Log {
@@ -25,25 +24,23 @@ class Log {
     }
 
     protected static function _getHeader() {
-        $trace = debug_backtrace();
+		$trace=debug_backtrace();
 
         $now = date('Y-m-d H:i:s');
         //$ip = gethostname(); // only for PHP 5.3
         $ip = php_uname('n');
         if (array_key_exists('REMOTE_ADDR', $_SERVER)) {
             $ip = $_SERVER['REMOTE_ADDR'];
-        }
+		}
 
         $stringDataInfo = "[$now ($ip)]";
         
         if( isset($trace[2]['class']) ){
             $stringDataInfo .= " " . $trace[2]['class'] . "-> ";
-        } 
-        
+			}
         if( isset( $trace[2]['function'] ) ){
             $stringDataInfo .= $trace[2]['function'] . " ";
-        }
-        
+		}
         $stringDataInfo .= "(line:" . $trace[1]['line'] . ") : ";
         return $stringDataInfo;
         
@@ -51,16 +48,16 @@ class Log {
 
     public static function doLog() {
 
-        $string = "";
-        $ct = func_num_args(); // number of argument passed  
-        for ($i = 0; $i < $ct; $i++) {
-            $curr_arg = func_get_arg($i); // get each argument passed  
-            if (is_array($curr_arg)) {
+		$string="";
+		$ct = func_num_args(); // number of argument passed  
+		for ($i=0; $i<$ct; $i++) {
+			$curr_arg=func_get_arg($i); // get each argument passed  
+			if (is_array($curr_arg)){
                 $string .= print_r($curr_arg, true);
-            } else {
+			}else{
                 $string .= $curr_arg;
-            }
-        }
+			}
+		}  
 
         self::_writeTo( self::_getHeader() . $string . "\n" );
     }
@@ -78,24 +75,24 @@ class Log {
      *
      */
     public static function hexDump( $data, $htmloutput = false, $uppercase = true, $return = false ) {
-        
+		//$ip = gethostname(); // only for PHP 5.3
         if (is_array($data)) {
                 $data = print_r( $data, true );
-        }
+		}
 
-        // Init
+
         $hexi = '';
         $ascii = '';
         $dump = ($htmloutput === true) ? '<pre>' : '';
         $offset = 0;
         $len = strlen($data);
 
-        // Upper or lower case hexadecimal
+            
         $x = ($uppercase === false) ? 'x' : 'X';
 
-        // Iterate string
+
         for ($i = $j = 0; $i < $len; $i++) {
-            // Convert to hexidecimal
+
             $hexi .= sprintf("%02$x ", ord($data[$i]));
 
             // Replace non-viewable bytes with '.'
@@ -105,17 +102,15 @@ class Log {
                         $data[$i];
             } else {
                 $ascii .= '.';
-            }
-
-            // Add extra column spacing
+                }
             if ($j === 7) {
                 $hexi .= ' ';
                 $ascii .= ' ';
             }
 
-            // Add row
+
             if (++$j === 16 || $i === $len - 1) {
-                // Join the hexi / ascii output
+                //echo sprintf('%6X', $offset) . ' : ' . implode(' ', str_split($line, 2)) . ' [' . $chars[$i] . ']' . $newline;
                 $dump .= sprintf("%04$x  %-49s  %s", $offset, $hexi, $ascii);
 
                 // Reset vars
@@ -128,9 +123,9 @@ class Log {
                     $dump .= "\n";
                 }
             }
-        }
-
-        // Finish dump
+            }
+            
+            
         $dump .= $htmloutput === true ?
                 '</pre>' :
                 '';
@@ -142,6 +137,6 @@ class Log {
         } else {
             return $dump;
         }
-    }
+         }
 
 }
