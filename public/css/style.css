@@ -1122,10 +1122,8 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 
 .iepopup{width:800px;margin:0 auto;position:fixed;padding:30px 0 30px 0;display:none;top:50%;left:50%;margin:-230px 0 0 -400px;z-index:999999;background:#fff;box-shadow: 0px 0px 25px #000;border-radius:2px;font-size:18px;border:1px solid #666;}
 .iepopup{display:block;}
-.iepopup ul{height:200px;margin:30px auto 0 auto;width:90%;}
 .iepopup img{border:0}
-.iepopup ul li{float:left;width:33.3%;}
-.iepopup ul a{width:100%;float:left;padding:0px 0 0 0;display:block;color:#39699A}
+.iepopup ul a{padding:0px 0 0 0;color:#39699A;text-decoration:underline}
 .iepopup a:hover{text-decoration:none}
 .logoblack{border:0;background:url(../img/logoblack.png) 0px 2px no-repeat;display:block;width:145px;height:31px; background-size: 130px 28px;clear:both;margin:0 auto 10px auto}
 .nobrowser #outer, .nobrowser header, .nobrowser footer, .nobrowser .wrapper{display:none !important}
