@@ -8,7 +8,7 @@ Server side requirements
 - Apache filter  module installed
 - Apache deflate module installed
 - Apache headers module installed
-- PHP magic_quotes off
+- PHP magic_quotes_gpc off
 - PHP cURL lib
 
 
