@@ -49,11 +49,11 @@ class setContributionController extends ajaxcontroller {
 	}
 
 	public function doAction() {
-		if (empty($this->source)) {
+		if (is_null($this->source) || $this->source === '') {
 			$this->result['error'][] = array("code" => -1, "message" => "missing source segment");
 		}
 
-		if (empty($this->target)) {
+		if ( is_null($this->target) || $this->target === '' ) {
 			$this->result['error'][] = array("code" => -2, "message" => "missing target segment");
 		}
 
