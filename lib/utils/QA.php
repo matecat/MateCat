@@ -166,7 +166,7 @@ class QA {
      * @param int $errCode
      */
     protected function _addError($errCode) {
-        
+        //Log::doLog($this->_errorMap[$errCode]);
         switch( $errCode ) {
             case self::ERR_COUNT:
             case self::ERR_SOURCE:
@@ -234,7 +234,11 @@ class QA {
 
         mb_regex_encoding('UTF-8');
         mb_internal_encoding("UTF-8");
-                
+        
+//         Log::doLog($_GET);
+//         Log::doLog($source_seg);
+//         Log::doLog($target_seg);
+        
         $src_enc = mb_detect_encoding($source_seg);
         $trg_enc = mb_detect_encoding($target_seg);
         
@@ -244,18 +248,14 @@ class QA {
         $this->source_seg = $source_seg;
         $this->target_seg = $target_seg;
         
-        // ensure that are no ampersand ( & ) and preserve them
-        $seg = $this->_placeHoldAmp($this->source_seg);
-        $tra = $this->_placeHoldAmp($this->target_seg);
-        
         $this->srcDom = new DOMDocument('1.0', 'utf-8');
-        $src_xml_valid = $this->srcDom->loadXML("<root>$seg</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
+        $src_xml_valid = $this->srcDom->loadXML("<root>$source_seg</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
         if ($src_xml_valid === FALSE) {
             $this->_addError(self::ERR_SOURCE);
         }
 
         $this->trgDom = new DOMDocument('1.0', 'utf-8');
-        @$trg_xml_valid = $this->trgDom->loadXML("<root>$tra</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
+        $trg_xml_valid = $this->trgDom->loadXML("<root>$target_seg</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
         if ($trg_xml_valid === FALSE) {
             $this->_addError(self::ERR_TARGET);
         }
@@ -380,7 +380,11 @@ class QA {
             $trgNodeContent = $trgNodeList->item($i)->textContent;
             
             if( $srcNodeList->item($i) instanceof DOMText ){
-                continue;
+                
+                if( trim($srcNodeContent) == '' && trim($trgNodeContent) == '' ){
+                    continue;
+                }
+                
             } else if( !$srcNodeList->item($i) instanceof DOMText ) { //if it is a Tag node with id and not a textNode
                 if ($srcNodeList->item($i)->getAttribute('id') != $trgNodeList->item($i)->getAttribute('id')) {
                     $this->_addError(self::ERR_TAG_ID);
@@ -422,7 +426,9 @@ class QA {
         
         //backup and check start string
         $_srcNodeContent = $srcNodeContent;
-        #$_trgNodeContent = $trgNodeContent; //not Used
+        $_trgNodeContent = $trgNodeContent; //not Used
+        
+//         Log::doLog($_trgNodeContent);
         
         $srcHasHeadNBSP = $this->_hasHeadNBSP($srcNodeContent);
         $trgHasHeadNBSP = $this->_hasHeadNBSP($trgNodeContent);
@@ -485,9 +491,8 @@ class QA {
     public function getTrgNormalized(){
 
         if( !$this->thereAreErrors() ){            
-            preg_match('/<root>(.*)<\/root>/u', $this->normalizedTrgDOM->saveHTML(), $matches );
+            preg_match('/<root>(.*)<\/root>/u', $this->normalizedTrgDOM->saveXML(), $matches );
             return stripslashes( $matches[1] );
-            return stripslashes( html_entity_decode( $matches[1], 0, 'UTF-8' ) );
         }
         
         throw new LogicException( __METHOD__ . " call when errors found in Source/Target integrity check & comparison.");
@@ -504,7 +509,7 @@ class QA {
         
         //backup and check start string
         $_srcNodeContent = $srcNodeContent;
-        #$_trgNodeContent = $trgNodeContent; //not used
+        $_trgNodeContent = $trgNodeContent; //not used
         
         $srcHasTailNBSP = $this->_hasTailNBSP($srcNodeContent);
         $trgHasTailNBSP = $this->_hasTailNBSP($trgNodeContent);

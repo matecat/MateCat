@@ -223,10 +223,10 @@ class XliffSAXTranslationReplacer{
                 $seg['segment']=  CatUtils::restorenbsp($seg['segment']);
                 $seg['translation']=  CatUtils::restorenbsp($seg['translation']);
                 
-                if( is_null($seg['translation']) ||$seg['translation'] == '' ){
-                    $translation=$seg['segment'];
+                if( is_null($seg['translation']) || $seg['translation'] == '' ){
+                    $translation = $seg['segment'];
                 } else {
-                    $translation=$seg['translation'];
+                    $translation = $seg['translation'];
                 }
                 
                 $check = new QA($seg['segment'],$translation);
@@ -238,9 +238,9 @@ class XliffSAXTranslationReplacer{
 		}
 		
                 if ($tag_mismatch){
-			$translation= strip_tags($translation);
+			$translation = strip_tags($translation);
 		}
-                
+
 		//fix to escape non-html entities
 		$translation = str_replace("&lt;", '#LT#', $translation);
 		$translation = str_replace("&gt;", '#GT#', $translation);
