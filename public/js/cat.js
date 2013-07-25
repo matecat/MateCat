@@ -2110,30 +2110,28 @@ UI = {
                 token: token
             },
             success: function(data) {
-                //if any
                 var warningPosition = '';
+                console.log('data.total: '+data.total);
 
                 //check for errors
                 if (data.total > 0) {
 
                     //for now, put only last in the pointer to segment id
                     warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
+                    console.log('warningPosition: ' + warningPosition);
 
-                    //$.each(data.details, function(key, value) {
                     if(openingSegment) UI.fillCurrentSegmentWarnings(data.details);
 
                     //switch to css for warning
-                    $('#notifbox').attr('class', 'warningbox').attr("title", "Some translations seems to have TAGS and/or other untraslatables that do not match the source");
+                    $('#notifbox').attr('class', 'warningbox').attr("title", "Some translations seems to have TAGS and/or other untraslatables that do not match the source").find('.numbererror').text(data.total);
 
                 } else {
                     //if everything is ok, switch css to ok
-                    $('#notifbox').attr('class', 'notific').attr("title", "Well done, no errors found!");
+                    $('#notifbox').attr('class', 'notific').attr("title", "Well done, no errors found!").find('.numbererror').text('');
                     //reset the pointer to offending segment
                     $('#point2seg').attr('href', '#');
                 }
-                /**
-                 * Global warning assigment
-                 */
+
                 UI.globalWarnings = data.details;
                 $('#point2seg').attr('href', warningPosition);
             }
