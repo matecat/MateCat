@@ -5,6 +5,7 @@ include INIT::$UTILS_ROOT . "/mymemory_queries_temp.php";
 include INIT::$UTILS_ROOT . "/filetype.class.php";
 include INIT::$UTILS_ROOT . "/cat.class.php";
 include INIT::$UTILS_ROOT . "/langs/languages.class.php";
+include_once INIT::$UTILS_ROOT . '/QA.php';
 
 /**
  * Description of catController
@@ -242,7 +243,8 @@ class catController extends viewcontroller {
 		$this->template->logged_user=trim($this->logged_user['first_name']." ".$this->logged_user['last_name']);
 		$this->template->incomingUrl = '/login?incomingUrl='.$this->thisUrl;
 		$this->template->warningPollingInterval=1000*(INIT::$WARNING_POLLING_INTERVAL);
-	}
+		$this->template->segmentQACheckInterval=1000*(INIT::$SEGMENT_QA_CHECK_INTERVAL);
+}
 
 }
 ?>

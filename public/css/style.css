@@ -12,11 +12,51 @@ header .wrapper{padding:0px 0 0 0;}
 .header-menu{float:right;margin-right:16px}
 .header-menu li{border-left:1px solid #000;float:left;height:37px;padding:5px 0px;}
 .header-menu li a{padding:2px 15px;}
-.notific{border-right:1px solid #000;padding:10px 25px 0 25px !important;background:url(../img/ok-symbol.png) center 15px no-repeat;background-size:24px 20px;opacity:0.9}
-.warningbox{border-right:1px solid #000;padding:10px 10px 0 10px !important;background:url(../img/red-error-symbol.png) center 15px no-repeat;background-size:24px 20px;opacity:0.9}
+#notifbox
+    {
+    border-right:1px solid #000;
+    opacity:0.9;
+    text-align: center;
+    width: 60px;
+    }
+    .notific
+        {
+        background:url(../img/ok-symbol.png) center 15px no-repeat;
+        background-size:24px 20px;
+        }
+    .warningbox
+        {
+        background: url(../img/warning.png) center 10px no-repeat !important;
+        background-size:28px 24px !important;
+        }
+
+#notifbox a
+    {
+    display: block;
+    width: 35px;
+    height: 35px;
+    padding: 0;
+    margin: 0 auto;
+    }
+.numbererror
+    {
+    position: absolute;
+    border:1px solid #fff;
+    font-weight:bold;
+    color:#fff;
+    background:#e20001;
+    padding:0px 4px;
+    margin:18px 5px 0px 0px !important;
+    text-align:right;
+    font-size:11px;
+    -moz-border-radius: 10px;
+    border-radius: 10px;
+    }
 
 
-.notific a{color:#fff;text-decoration:none;height:16px;padding:2px 4px 0 2px !important;background:#FF0000;display:block;margin:-2px 0px 0 2px;font-size:12px;position:absolute;border-radius:2px;-webkit-box-shadow: 0 1px 2px #666;box-shadow: 0 1px 2px #666;display:none;}
+.numbererror:empty{display:none}
+
+.notific a{color:#fff;text-decoration:none;height:16px;padding:2px 4px 0 2px !important;display:block;margin:-2px 0px 0 2px;font-size:12px;position:absolute;border-radius:2px;-webkit-box-shadow: 0 1px 2px #666;box-shadow: 0 1px 2px #666;display:none;}
 
 .notific.error{background:url(../img/warning.png) center 15px no-repeat;background-size:24px 20px;}
 
@@ -30,7 +70,8 @@ header .wrapper{padding:0px 0 0 0;}
 
 .tag-mismatch{float:left !important}
 
-.warnings{color:#D65959;display:none;background:url(../img/red-error-symbol.png) 0px 4px no-repeat;float:left;position:relative;left:52%;margin-top:-12px;padding:2px  0 2px 18px;font-size:14px;background-size:15px;}
+.warnings{clear:left;color:#D65959;background:url(../img/red-error-symbol.png) 0px 4px no-repeat;float:left;position:relative;left:52%;top:-12px;margin-top:-12px;padding:2px  0 2px 18px;font-size:14px;background-size:15px;}
+.warnings:empty{ display:none; }
 .mismatch .warnings{display:block}
 
 
@@ -1118,10 +1159,8 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 
 .iepopup{width:800px;margin:0 auto;position:fixed;padding:30px 0 30px 0;display:none;top:50%;left:50%;margin:-230px 0 0 -400px;z-index:999999;background:#fff;box-shadow: 0px 0px 25px #000;border-radius:2px;font-size:18px;border:1px solid #666;}
 .iepopup{display:block;}
-.iepopup ul{height:200px;margin:30px auto 0 auto;width:90%;}
 .iepopup img{border:0}
-.iepopup ul li{float:left;width:33.3%;}
-.iepopup ul a{width:100%;float:left;padding:0px 0 0 0;display:block;color:#39699A}
+.iepopup ul a{padding:0px 0 0 0;color:#39699A;text-decoration:underline}
 .iepopup a:hover{text-decoration:none}
 .logoblack{border:0;background:url(../img/logoblack.png) 0px 2px no-repeat;display:block;width:145px;height:31px; background-size: 130px 28px;clear:both;margin:0 auto 10px auto}
 .nobrowser #outer, .nobrowser header, .nobrowser footer, .nobrowser .wrapper{display:none !important}
@@ -1382,10 +1421,6 @@ p.percent
 	margin-right: 20px;
     }
 
-    
-    
-    
-    
     
     
     

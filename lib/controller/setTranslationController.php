@@ -2,6 +2,7 @@
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include INIT::$UTILS_ROOT . "/cat.class.php";
+include_once INIT::$UTILS_ROOT . '/QA.php';
 
 define('DEFAULT_NUM_RESULTS', 2);
 
@@ -54,8 +55,8 @@ class setTranslationController extends ajaxcontroller {
 			$this->status = 'DRAFT';
 		}
 
-		if (empty($this->translation)) {
-			log::doLog("empty translation");
+		if (is_null($this->translation) || $this->translation === '') {
+			//log::doLog("empty translation");
 			return 0; // won's save empty translation but there is no need to return an error 
 		}
 
@@ -68,17 +69,25 @@ class setTranslationController extends ajaxcontroller {
 
 		//check tag mismatch
 		//get original source segment, first
-		$segment=getSegment($this->id_segment);
+		$segment=getSegment($this->id_segment);            
+                
+                //Log::doLog( "'" . $this->translation . "'" );
 		//compare segment-translation and get results
-		$warning=CatUtils::checkTagConsistency($segment['segment'], $this->translation);
-
-		$res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $this->translation, $this->err,$this->chosen_suggestion_index, $warning['outcome']);
+                $check = new QA($segment['segment'], $this->translation);
+                $check->performConsistencyCheck();
+                if( $check->thereAreErrors() ){
+                    $err_json = $check->getErrorsJSON();
+                    $translation = $this->translation;
+                } else {
+                    $err_json = '';
+                    $translation = $check->getTrgNormalized();
+                }
+		$res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreErrors() );
 
 		if (!empty($res['error'])) {
 			$this->result['error'] = $res['error'];
 			return -1;
 		}
-
 
 		$job_stats = CatUtils::getStatsForJob($this->id_job);
 		$file_stats = CatUtils::getStatsForFile($this->id_first_file);
@@ -91,10 +100,16 @@ class setTranslationController extends ajaxcontroller {
 		$this->result['file_stats'] = $file_stats;
 		$this->result['code'] = 1;
 		$this->result['data'] = "OK";
-		$this->result['warning']['cod']=$warning['outcome'];
-		if($warning['outcome']>0){
+                
+                /* FIXME: added for code compatibility with front-end. Remove. */
+                $_warn = $check->getErrors();
+                $warning = $_warn[0];
+                /* */
+                
+		$this->result['warning']['cod']=$warning->outcome;
+		if($warning->outcome>0){
 			$this->result['warning']['id']=$this->id_segment;
-		}else{
+		} else {
 			$this->result['warning']['id']=0;
 		}
 	}

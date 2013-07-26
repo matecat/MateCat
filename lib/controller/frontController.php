@@ -311,6 +311,7 @@ abstract class viewcontroller extends controller {
 			$this->template->basepath = INIT::$BASEURL;
 			$this->template->hostpath = INIT::$HTTPHOST;
 			$this->template->supportedBrowser = $this->supportedBrowser;
+			$this->template->enabledBrowsers = INIT::$ENABLED_BROWSERS;
 			$this->template->setOutputMode(PHPTAL::HTML5);
 		} catch (Exception $e) {
 			echo "<pre>";

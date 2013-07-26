@@ -46,62 +46,64 @@ class CatUtils {
     }
 
     //check for tag mismatches
-    public static function checkTagConsistency($source_seg, $target_seg) {
-        //ensure there are no entities
-        $source_seg = html_entity_decode($source_seg);
-        $target_seg = html_entity_decode($target_seg);
-
-        //get tags from words in source and target
-        preg_match_all('/<[^>]+>/', $source_seg, $source_tags);
-        preg_match_all('/<[^>]+>/', $target_seg, $target_tags);
-        $source_tags = $source_tags[0];
-        $target_tags = $target_tags[0];
-
-        //check equal tag count 
-        if (count($source_tags) != count($target_tags)) {
-            return array('outcome' => 1, 'debug' => 'tag count mismatch');
-        }
-
-        //check well formed xml (equal number of opening and closing tags inside each input segment)
-        $seg=self::placeholdamp($source_seg);
-        $tra=self::placeholdamp($target_seg);
-        @$xml_valid = @simplexml_load_string("<placeholder>$seg</placeholder>");
-
-        if ($xml_valid === FALSE) {
-            return array('outcome' => 2, 'debug' => 'bad source xml');
-        }
-        @$xml_valid = @simplexml_load_string("<placeholder>$tra</placeholder>");
-        if ($xml_valid === FALSE) {
-            return array('outcome' => 3, 'debug' => 'bad target xml');
-        }
-
-        //check for tags' id mismatching
-        //extract names
-        preg_match_all('/id="(.+?)"/', $source_seg, $source_tags_ids);
-        preg_match_all('/id="(.+?)"/', $target_seg, $target_tags_ids);
-        $source_tags_ids = $source_tags_ids[1];
-        $target_tags_ids = $target_tags_ids[1];
-        //set indexes for lookup purposes ('1' is just a dummy value to set the cell)
-        $tmp = array();
-        foreach ($source_tags_ids as $k => $src_tag)
-            $tmp[$src_tag] = 1;
-        $source_tags_ids = $tmp;
-        $tmp = array();
-        foreach ($target_tags_ids as $k => $trg_tag)
-            $tmp[$trg_tag] = 1;
-        $target_tags_ids = $tmp;
-        unset($tmp);
-        //for each tag in target
-        foreach ($target_tags_ids as $tag => $v) {
-            //if a tag in target is not present in source, error
-            if (!isset($source_tags_ids[$tag])) {
-                return array('outcome' => 4, 'debug' => 'tag id mismatch');
-            }
-        }
-
-        //all checks passed
-        return array('outcome' => 0, 'debug' => '');
-    }
+    //TODO Rimuovere dopo il 1° agosto 2013
+    //
+//    public static function checkTagConsistency($source_seg, $target_seg) {
+//        //ensure there are no entities
+//        $source_seg = html_entity_decode($source_seg);
+//        $target_seg = html_entity_decode($target_seg);
+//
+//        //get tags from words in source and target
+//        preg_match_all('/<[^>]+>/', $source_seg, $source_tags);
+//        preg_match_all('/<[^>]+>/', $target_seg, $target_tags);
+//        $source_tags = $source_tags[0];
+//        $target_tags = $target_tags[0];
+//
+//        //check equal tag count 
+//        if (count($source_tags) != count($target_tags)) {
+//            return array('outcome' => 1, 'debug' => 'tag count mismatch');
+//        }
+//
+//        //check well formed xml (equal number of opening and closing tags inside each input segment)
+//        $seg=self::placeholdamp($source_seg);
+//        $tra=self::placeholdamp($target_seg);
+//        @$xml_valid = @simplexml_load_string("<placeholder>$seg</placeholder>");
+//
+//        if ($xml_valid === FALSE) {
+//            return array('outcome' => 2, 'debug' => 'bad source xml');
+//        }
+//        @$xml_valid = @simplexml_load_string("<placeholder>$tra</placeholder>");
+//        if ($xml_valid === FALSE) {
+//            return array('outcome' => 3, 'debug' => 'bad target xml');
+//        }
+//
+//        //check for tags' id mismatching
+//        //extract names
+//        preg_match_all('/id="(.+?)"/', $source_seg, $source_tags_ids);
+//        preg_match_all('/id="(.+?)"/', $target_seg, $target_tags_ids);
+//        $source_tags_ids = $source_tags_ids[1];
+//        $target_tags_ids = $target_tags_ids[1];
+//        //set indexes for lookup purposes ('1' is just a dummy value to set the cell)
+//        $tmp = array();
+//        foreach ($source_tags_ids as $k => $src_tag)
+//            $tmp[$src_tag] = 1;
+//        $source_tags_ids = $tmp;
+//        $tmp = array();
+//        foreach ($target_tags_ids as $k => $trg_tag)
+//            $tmp[$trg_tag] = 1;
+//        $target_tags_ids = $tmp;
+//        unset($tmp);
+//        //for each tag in target
+//        foreach ($target_tags_ids as $tag => $v) {
+//            //if a tag in target is not present in source, error
+//            if (!isset($source_tags_ids[$tag])) {
+//                return array('outcome' => 4, 'debug' => 'tag id mismatch');
+//            }
+//        }
+//
+//        //all checks passed
+//        return array('outcome' => 0, 'debug' => '');
+//    }
 
     private static function parse_time_to_edit($ms) {
         if ($ms <= 0) {
@@ -125,7 +127,7 @@ class CatUtils {
 
     private static function placehold_xliff_tags($segment) {
         //$segment=preg_replace('|<(g\s*.*?)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
-        $segment = preg_replace('|<(g\s*id=".*?"\s*[^<>]*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(g\s*id=["\']+.*?["\']+\s*[^<>]*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
 
         $segment = preg_replace('|<(/g)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
         $segment = preg_replace('|<(x.*?/?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
@@ -358,7 +360,7 @@ class CatUtils {
         return 0;
     }
 
-    public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "", $match_type = "", $eq_words = 0, $standard_words = 0, $translation = "", $tm_status_analysis = "UNDONE", $warning = 0) {
+    public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "", $match_type = "", $eq_words = 0, $standard_words = 0, $translation = "", $tm_status_analysis = "UNDONE", $warning = 0, $err_json = '' ) {
         if (!empty($suggestion_source)) {
             if (strpos($suggestion_source, "MT") === false) {
                 $suggestion_source = 'TM';
@@ -367,14 +369,14 @@ class CatUtils {
             }
         }
 
-        $insertRes = setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning);
+        $insertRes = setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json);
         if ($insertRes < 0 and $insertRes != -1062) {
             $result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the suggestions for the segment $id_segment - $insertRes");
             return $result;
         }
         if ($insertRes == -1062) {
             // the translaion for this segment still exists : update it
-            $updateRes = setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning);
+            $updateRes = setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json);
             if ($updateRes < 0) {
                 $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the suggestions for the segment $id_segment");
                 return $result;
@@ -383,28 +385,34 @@ class CatUtils {
         return 0;
     }
 
-    public static function getStatsForMultipleJobs($jids, $estimate_performance = 0) {
+    /**
+     * Public interface to multiple Job Stats Info
+     * 
+     * @param array $jids
+     * @param bool $estimate_performance
+     * @return mixed
+     * <pre>
+     *   $res_job_stats = array(
+     *      (int)id => 
+     *          array(
+     *              'id'                           => (int),
+     *              'TOTAL'                        => (int),
+     *              'TRANSLATED'                   => (int),
+     *              'APPROVED'                     => (int),
+     *              'REJECTED'                     => (int),
+     *              'DRAFT'                        => (int),
+     *              'ESTIMATED_COMPLETION'         => (int),
+     *              'WORDS_PER_HOUR'               => (int),
+     *          )
+     *   );
+     * </pre>
+     * 
+     */
+    public static function getStatsForMultipleJobs( array $jids, $estimate_performance = false) {
 
         //get stats for all jids
         $jobs_stats = getStatsForMultipleJobs($jids);
 
-        //convert result to ID based index
-        foreach ($jobs_stats as $job_stat) {
-            $tmp_jobs_stats[$job_stat['id']] = $job_stat;
-        }
-        $jobs_stats = $tmp_jobs_stats;
-        unset($tmp_jobs_stats);
-
-        //if input jids is an array, cycle on results to ensure sanitization
-        if (is_array($jids)) {
-            foreach ($jids as $jid) {
-                //if no stats for that job id
-                if (!isset($jobs_stats[$jid])) {
-                    //add dummy empty stats
-                    $jobs_stats[$jid] = array('TOTAL' => 1.00, 'DRAFT' => 0.00, 'REJECTED' => 0.00, 'TRANSLATED' => 0.00, 'APPROVED' => 0.00, 'id' => $jid);
-                }
-            }
-        }
         //init results
         $res_job_stats = array();
         foreach ($jobs_stats as $job_stat) {
@@ -412,97 +420,55 @@ class CatUtils {
             if ($job_stat['TOTAL'] == 0) {
                 $job_stat['TOTAL'] = 1;
             }
-            $job_stat['TOTAL_FORMATTED'] = number_format($job_stat['TOTAL'], 0, ".", ",");
-
-            $job_stat['TRANSLATED_FORMATTED'] = number_format($job_stat['TRANSLATED'], 0, ".", ",");
-            $job_stat['APPROVED_FORMATTED'] = number_format($job_stat['APPROVED'], 0, ".", ",");
-            $job_stat['REJECTED_FORMATTED'] = number_format($job_stat['REJECTED'], 0, ".", ",");
-            $job_stat['DRAFT_FORMATTED'] = number_format($job_stat['DRAFT'], 0, ".", ",");
-            $job_stat['TODO_FORMATTED'] = number_format($job_stat['DRAFT'] + $job_stat['REJECTED'], 0, ".", ",");
-
-
-            $job_stat['TRANSLATED_PERC'] = ($job_stat['TRANSLATED']) / $job_stat['TOTAL'] * 100;
-            $job_stat['APPROVED_PERC'] = ($job_stat['APPROVED']) / $job_stat['TOTAL'] * 100;
-            $job_stat['REJECTED_PERC'] = ($job_stat['REJECTED']) / $job_stat['TOTAL'] * 100;
-            $job_stat['DRAFT_PERC'] = ($job_stat['DRAFT']) / $job_stat['TOTAL'] * 100;
-
-            $job_stat['TRANSLATED_PERC_FORMATTED'] = number_format($job_stat['TRANSLATED_PERC'], 1, ".", ",");
-            $job_stat['APPROVED_PERC_FORMATTED'] = number_format($job_stat['APPROVED_PERC'], 1, ".", ",");
-            $job_stat['REJECTED_PERC_FORMATTED'] = number_format($job_stat['REJECTED_PERC'], 1, ".", ",");
-            $job_stat['DRAFT_PERC_FORMATTED'] = number_format($job_stat['DRAFT_PERC'], 1, ".", ",");
-
-            $t = 'approved';
-            if ($job_stat['TRANSLATED_FORMATTED'] > 0)
-                $t = "translated";
-            if ($job_stat['DRAFT_FORMATTED'] > 0)
-                $t = "draft";
-            if ($job_stat['REJECTED_FORMATTED'] > 0)
-                $t = "draft";
-            $job_stat['DOWNLOAD_STATUS'] = $t;
-
-
-            if ($estimate_performance) {
-                // Calculating words per hour and estimated completion
-                $estimation_temp = getLastSegmentIDs($job_stat['id']);
-                $estimation_seg_ids = $estimation_temp[0]['estimation_seg_ids'];
-
-                if ($estimation_seg_ids) {
-
-                    $estimation_temp = getEQWLastHour($job_stat['id'], $estimation_seg_ids);
-                    if ($estimation_temp[0]['data_validity'] == 1) {
-                        $job_stat['WORDS_PER_HOUR'] = number_format($estimation_temp[0]['words_per_hour'], 0, '.', ',');
-                        $job_stat['ESTIMATED_COMPLETION'] = date("G\h i\m", ($job_stat['DRAFT'] + $job_stat['REJECTED']) / $estimation_temp[0]['words_per_hour'] * 3600 - 3600);
-                    }
-                }
+            
+            $job_stat = self::_getStatsForJob($job_stat, $estimate_performance);
+            if ($estimate_performance){
+                $job_stat = self::_performanceEstimationTime($job_stat);
             }
+            
             $jid = $job_stat['id'];
             unset($job_stat['id']);
             $res_job_stats[$jid] = $job_stat;
             unset($jid);
         }
+        
         return $res_job_stats;
+        
     }
-
-    public static function getStatsForJob($jid) {
-        $job_stats = getStatsForJob($jid);
-
-        $job_stats = $job_stats[0];
-        $job_stats['TOTAL_FORMATTED'] = number_format($job_stats['TOTAL'], 0, ".", ",");
-
-        $job_stats['TRANSLATED_FORMATTED'] = number_format($job_stats['TRANSLATED'], 0, ".", ",");
-        $job_stats['APPROVED_FORMATTED'] = number_format($job_stats['APPROVED'], 0, ".", ",");
-        $job_stats['REJECTED_FORMATTED'] = number_format($job_stats['REJECTED'], 0, ".", ",");
-        $job_stats['DRAFT_FORMATTED'] = number_format($job_stats['DRAFT'], 0, ".", ",");
-        $job_stats['TODO_FORMATTED'] = number_format($job_stats['DRAFT'] + $job_stats['REJECTED'], 0, ".", ",");
-
-
-        $job_stats['TRANSLATED_PERC'] = ($job_stats['TRANSLATED']) / $job_stats['TOTAL'] * 100;
-        $job_stats['APPROVED_PERC'] = ($job_stats['APPROVED']) / $job_stats['TOTAL'] * 100;
-        $job_stats['REJECTED_PERC'] = ($job_stats['REJECTED']) / $job_stats['TOTAL'] * 100;
-        $job_stats['DRAFT_PERC'] = ($job_stats['DRAFT']) / $job_stats['TOTAL'] * 100;
-
-        $job_stats['TRANSLATED_PERC_FORMATTED'] = number_format($job_stats['TRANSLATED_PERC'], 1, ".", ",");
-        $job_stats['APPROVED_PERC_FORMATTED'] = number_format($job_stats['APPROVED_PERC'], 1, ".", ",");
-        $job_stats['REJECTED_PERC_FORMATTED'] = number_format($job_stats['REJECTED_PERC'], 1, ".", ",");
-        $job_stats['DRAFT_PERC_FORMATTED'] = number_format($job_stats['DRAFT_PERC'], 1, ".", ",");
-
-        $t = 'approved';
-        if ($job_stats['TRANSLATED_FORMATTED'] > 0)
-            $t = "translated";
-        if ($job_stats['DRAFT_FORMATTED'] > 0)
-            $t = "draft";
-        if ($job_stats['REJECTED_FORMATTED'] > 0)
-            $t = "draft";
-        $job_stats['DOWNLOAD_STATUS'] = $t;
-
-
-        // Calculating words per hour and estimated completion
-        $estimation_temp = getLastSegmentIDs($jid);
+    
+    /**
+     * 
+     * Find significant digits from float num.
+     * 
+     * Accepted range are between 0 and 2 ( max approximation )
+     * 
+     * @param float $floatNum
+     * @return int
+     */
+    protected static function _getSignificantDigits( $floatNum ){
+        if( $floatNum == 0 ){
+            return 0;
+        }
+        $decimalNumbers = ceil( log10( $floatNum ) );
+        $decimalNumbers = ( $decimalNumbers >= 0 ? 0 : abs($decimalNumbers) +1 );
+        return ( $decimalNumbers < 2 ? $decimalNumbers : 2 ); //force max to 2 decimal number
+    }
+    
+    /**
+     * Make an estimation on performance
+     * 
+     * @param mixed $job_stats
+     * @return mixed
+     */
+    protected static function _performanceEstimationTime( array $job_stats ){
+        
+        $estimation_temp = getLastSegmentIDs($job_stats['id']);
         $estimation_seg_ids = $estimation_temp[0]['estimation_seg_ids'];
 
         if ($estimation_seg_ids) {
-
-            $estimation_temp = getEQWLastHour($jid, $estimation_seg_ids);
+            //perform check on performance if single segment are set to check or globally Forced
+            // Calculating words per hour and estimated completion
+            $estimation_temp = getEQWLastHour($job_stats['id'], $estimation_seg_ids);
             if ($estimation_temp[0]['data_validity'] == 1) {
                 $job_stats['WORDS_PER_HOUR'] = number_format($estimation_temp[0]['words_per_hour'], 0, '.', ',');
                 // 7.2 hours
@@ -512,8 +478,104 @@ class CatUtils {
                 $job_stats['ESTIMATED_COMPLETION'] = date("G\h i\m", ($job_stats['DRAFT'] + $job_stats['REJECTED']) / $estimation_temp[0]['words_per_hour'] * 3600 - 3600);
             }
         }
+        
+        return $job_stats;
+        
+    }
+    
+    /**
+     * Perform analysis on single Job
+     *  
+     * <pre>
+     *      $job_stats = array(
+     *          'id'                           => (int),
+     *          'TOTAL'                        => (int),
+     *          'TRANSLATED'                   => (int),
+     *          'APPROVED'                     => (int),
+     *          'REJECTED'                     => (int),
+     *          'DRAFT'                        => (int),
+     *          'ESTIMATED_COMPLETION'         => (int),
+     *          'WORDS_PER_HOUR'               => (int),
+     *      );
+     * </pre>
+     *  
+     * @param mixed $job_stats
+     * @param bool $estimate_performance
+     * @return mixed $job_stats
+     */
+    protected static function _getStatsForJob( $job_stats ) {
+        
+        $job_stats['PROGRESS'] = ( $job_stats['TRANSLATED'] + $job_stats['APPROVED'] );                   
+
+        $job_stats['TOTAL_FORMATTED'] = number_format($job_stats['TOTAL'], 0, ".", ",");
+        $job_stats['PROGRESS_FORMATTED'] = number_format( $job_stats['TRANSLATED'] + $job_stats['APPROVED'], 0, ".", "," );                   
+        $job_stats['APPROVED_FORMATTED'] = number_format($job_stats['APPROVED'], 0, ".", ",");
+        $job_stats['REJECTED_FORMATTED'] = number_format($job_stats['REJECTED'], 0, ".", ",");
+        $job_stats['TODO_FORMATTED'] = number_format($job_stats['DRAFT'] + $job_stats['REJECTED'], 0, ".", ",");
+        $job_stats['DRAFT_FORMATTED'] = number_format($job_stats['DRAFT'], 0, ".", ",");
+        $job_stats['TRANSLATED_FORMATTED'] = number_format($job_stats['TRANSLATED'], 0, ".", ",");
+
+        $job_stats['APPROVED_PERC'] = ($job_stats['APPROVED']) / $job_stats['TOTAL'] * 100;
+        $job_stats['REJECTED_PERC'] = ($job_stats['REJECTED']) / $job_stats['TOTAL'] * 100;
+        $job_stats['DRAFT_PERC'] = ( $job_stats['DRAFT'] / $job_stats['TOTAL'] * 100 );
+        $job_stats['TRANSLATED_PERC'] = ( $job_stats['TRANSLATED'] / $job_stats['TOTAL'] * 100 );
+        $job_stats['PROGRESS_PERC'] = ( $job_stats['PROGRESS'] / $job_stats['TOTAL'] ) * 100;
+
+        $significantDigits = array();
+        $significantDigits[] = self::_getSignificantDigits($job_stats['TRANSLATED_PERC']);
+        $significantDigits[] = self::_getSignificantDigits($job_stats['DRAFT_PERC']);
+        $significantDigits[] = self::_getSignificantDigits($job_stats['APPROVED_PERC']);
+        $significantDigits[] = self::_getSignificantDigits($job_stats['REJECTED_PERC']);
+        $significantDigits = max($significantDigits);
+                
+        $job_stats['TRANSLATED_PERC_FORMATTED'] = round($job_stats['TRANSLATED_PERC'], $significantDigits ) ;
+        $job_stats['DRAFT_PERC_FORMATTED'] = round($job_stats['DRAFT_PERC'], $significantDigits ) ;
+        $job_stats['APPROVED_PERC_FORMATTED'] = round($job_stats['APPROVED_PERC'], $significantDigits );
+        $job_stats['REJECTED_PERC_FORMATTED'] = round($job_stats['REJECTED_PERC'], $significantDigits );
+        $job_stats['PROGRESS_PERC_FORMATTED'] = round( $job_stats['PROGRESS_PERC'], $significantDigits ) ;
+        
+        $t = 'approved';
+        if ($job_stats['TRANSLATED_FORMATTED'] > 0)
+            $t = "translated";
+        if ($job_stats['DRAFT_FORMATTED'] > 0)
+            $t = "draft";
+        if ($job_stats['REJECTED_FORMATTED'] > 0)
+            $t = "draft";
+        $job_stats['DOWNLOAD_STATUS'] = $t;            
 
         return $job_stats;
+        
+    }
+    
+    /**
+     * Public interface to single Job Stats Info
+     * 
+     * 
+     * @param int $jid
+     * 
+     * @return $job_stats
+     * <pre>
+     *      $job_stats = array(
+     *          'id'                           => (int),
+     *          'TOTAL'                        => (int),
+     *          'TRANSLATED'                   => (int),
+     *          'APPROVED'                     => (int),
+     *          'REJECTED'                     => (int),
+     *          'DRAFT'                        => (int),
+     *          'ESTIMATED_COMPLETION'         => (int),
+     *          'WORDS_PER_HOUR'               => (int),
+     *      );
+     * </pre>
+     * 
+     */
+    public static function getStatsForJob( $jid ) {
+        
+        $job_stats = getStatsForJob($jid);
+        $job_stats = $job_stats[0];
+
+        $job_stats = self::_getStatsForJob($job_stats, true); //true set estimation check if present
+        return self::_performanceEstimationTime($job_stats);
+        
     }
 
     public static function getStatsForFile($fid) {

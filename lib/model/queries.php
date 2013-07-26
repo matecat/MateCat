@@ -168,7 +168,7 @@ function getEngineData($id) {
 	$where_clause = " id IN ($id)";
 
 	$query = "select * from engines where $where_clause";
-
+                
 	$db = Database::obtain();
 
 	$results = $db->fetch_array($query);
@@ -193,7 +193,16 @@ function getSegment($id_segment){
 function getWarning($jid){
 	$db = Database::obtain();
 	$jid = $db->escape($jid);
-	$query="SELECT id_segment, warning  FROM segment_translations WHERE warning>0 and id_job=$jid limit 10";
+	//$query="SELECT id_segment, warning  FROM segment_translations WHERE warning != 0 and id_job = $jid limit 10";
+        
+        $query = "SELECT total, id_segment, serialized_errors_list as warnings FROM (
+                        SELECT Seg1.id_segment, Seg1.serialized_errors_list , SUM(CASE WHEN Seg1.warning != 0 THEN 1 ELSE 0 END) AS total
+                        FROM segment_translations AS Seg1
+                        WHERE Seg1.warning != 0 
+                        AND Seg1.id_job = $jid
+                        GROUP BY Seg1.id_segment WITH ROLLUP
+                  ) AS Seg2 WHERE 1 OR id_segment IS NULL ORDER BY total DESC, id_segment ASC LIMIT 11"; //+1 for RollUp
+
 	$results = $db->fetch_array($query);
 	return $results;
 }
@@ -425,9 +434,7 @@ function setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $tra
 	$translation = $db->escape($translation);
 	$status = $db->escape($status);
 
-
-	$q = "UPDATE segment_translations SET status='$status', suggestion_position='$chosen_suggestion_index', serialized_errors_list='$errors', time_to_edit=IF(time_to_edit is null,0,time_to_edit) + $time_to_edit, translation='$translation', translation_date='$now', warning=$warning WHERE id_segment=$id_segment and id_job=$id_job";
-
+	$q = "UPDATE segment_translations SET status='$status', suggestion_position='$chosen_suggestion_index', serialized_errors_list='$errors', time_to_edit=IF(time_to_edit is null,0,time_to_edit) + $time_to_edit, translation='$translation', translation_date='$now', warning=" . (int)$warning . " WHERE id_segment=$id_segment and id_job=$id_job";
 
 	$db->query($q);
 	$err = $db->get_error();
@@ -450,7 +457,7 @@ function setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $tra
 	$data['id_job'] = $id_job;
 	$data['serialized_errors_list']=$errors;
 	$data['suggestion_position']=$chosen_suggestion_index;
-	$data['warning']=$warning;
+	$data['warning'] = (int)$warning;
 	$db = Database::obtain();
 	$db->insert('segment_translations', $data);
 
@@ -463,7 +470,7 @@ function setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $tra
 	return $db->affected_rows;
 }
 
-function setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis,$warning=0) {
+function setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis,$warning, $err_json_list) {
 	$data = array();
 	$data['id_job'] = $id_job;
 	$data['suggestions_array'] = $suggestions_json_array;
@@ -475,8 +482,9 @@ function setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $sug
 	$data['standard_word_count'] = $standard_words;
 	$data['translation'] = $translation;
 	$data['tm_analysis_status'] = $tm_status_analysis;
-	$data['warning']=$warning;
 
+        $data['warning'] = $warning;
+        $data['serialized_errors_list'] = $err_json_list;
 
 	$and_sugg = "";
 	if ($tm_status_analysis != 'DONE') {
@@ -497,7 +505,7 @@ function setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $sug
 	return $db->affected_rows;
 }
 
-function setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis) {
+function setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list) {
 	$data = array();
 	$data['id_job'] = $id_job;
 	$data['id_segment'] = $id_segment;
@@ -511,6 +519,9 @@ function setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $sug
 	$data['translation'] = $translation;
 	$data['tm_analysis_status'] = $tm_status_analysis;
 
+        $data['warning'] = $warning;
+        $data['serialized_errors_list'] = $err_json_list;
+        
 	$db = Database::obtain();
 	$db->insert('segment_translations', $data);
 
@@ -586,11 +597,11 @@ function getOriginalFilesForJob($id_job, $id_file, $password) {
    }
  */
 
-function getStatsForMultipleJobs($jids) {
+function getStatsForMultipleJobs($_jids) {
 
 	//transform array into comma separated string
-	if(is_array($jids)){
-		$jids=implode(',',$jids);
+	if(is_array($_jids)){
+		$jids=implode(',',$_jids);
 	}
 
 	$query = "select SUM(IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(st.status='REJECTED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(st.status='TRANSLATED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(st.status='APPROVED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as APPROVED, j.id 
@@ -605,9 +616,25 @@ function getStatsForMultipleJobs($jids) {
 		group by j.id";
 
 	$db = Database::obtain();
-	$results = $db->fetch_array($query);
+	$jobs_stats = $db->fetch_array($query);
 
-	return $results;
+        //convert result to ID based index
+        foreach ($jobs_stats as $job_stat) {
+            $tmp_jobs_stats[$job_stat['id']] = $job_stat;
+        }
+        $jobs_stats = $tmp_jobs_stats;
+        unset($tmp_jobs_stats);
+        
+        //cycle on results to ensure sanitization
+        foreach ($_jids as $jid) {
+            //if no stats for that job id
+            if (!isset($jobs_stats[$jid])) {
+                //add dummy empty stats
+                $jobs_stats[$jid] = array('TOTAL' => 1.00, 'DRAFT' => 0.00, 'REJECTED' => 0.00, 'TRANSLATED' => 0.00, 'APPROVED' => 0.00, 'id' => $jid);
+            }
+        }
+        
+	return $jobs_stats;
 }
 
 function getStatsForJob($id_job) {
@@ -620,6 +647,7 @@ function getStatsForJob($id_job) {
 
 	$query = "
 		select 
+                j.id,
 		SUM(
 				IF(st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count)
 		   ) as TOTAL, 
@@ -654,9 +682,6 @@ function getStatsForJob($id_job) {
 
 			WHERE j.id=$id_job";
 
-
-
-
 	$db = Database::obtain();
 	$results = $db->fetch_array($query);
 
@@ -664,15 +689,26 @@ function getStatsForJob($id_job) {
 }
 
 function getStatsForFile($id_file) {
-
+	$db = Database::obtain();
+        
+        //SQL Injection... cast to int 
+        $id_file = intval($id_file);
+        $id_file = $db->escape($id_file);
+        
 	// Old raw-wordcount
 	/*
 	   $query = "select SUM(raw_word_count) as TOTAL, SUM(IF(status IS NULL OR status='DRAFT' OR status='NEW',raw_word_count,0)) as DRAFT, SUM(IF(status='REJECTED',raw_word_count,0)) as REJECTED, SUM(IF(status='TRANSLATED',raw_word_count,0)) as TRANSLATED, SUM(IF(status='APPROVED',raw_word_count,0)) as APPROVED from jobs j INNER JOIN files_job fj on j.id=fj.id_job INNER join segments s on fj.id_file=s.id_file LEFT join segment_translations st on s.id=st.id_segment WHERE s.id_file=" . $id_file;
 	 */
-	$query = "select SUM(IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(st.status='REJECTED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(st.status='TRANSLATED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(st.status='APPROVED',raw_word_count,0)) as APPROVED from jobs j INNER JOIN files_job fj on j.id=fj.id_job INNER join segments s on fj.id_file=s.id_file LEFT join segment_translations st on s.id=st.id_segment WHERE s.id_file=" . $id_file;
+	$query = "SELECT SUM(IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count) ) as TOTAL, 
+                         SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as DRAFT, 
+                         SUM(IF(st.status='REJECTED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as REJECTED, 
+                         SUM(IF(st.status='TRANSLATED',IF(st.eq_word_count IS NULL, raw_word_count, st.eq_word_count),0)) as TRANSLATED, 
+                         SUM(IF(st.status='APPROVED',raw_word_count,0)) as APPROVED from jobs j 
+                   INNER JOIN files_job fj on j.id=fj.id_job 
+                   INNER join segments s on fj.id_file=s.id_file 
+                   LEFT join segment_translations st on s.id=st.id_segment 
+                   WHERE s.id_file=" . $id_file;
 
-
-	$db = Database::obtain();
 	$results = $db->fetch_array($query);
 
 	return $results;
@@ -769,7 +805,7 @@ function getNextUntranslatedSegment($sid, $jid) {
 		INNER JOIN files_job fj on fj.id_file=s.id_file 
 		INNER JOIN jobs j on j.id=fj.id_job 
 		where fj.id_job=$jid AND 
-		(status in ('NEW','DRAFT','REJECTED') OR status IS NULL) and s.id>$sid
+		(st.status in ('NEW','DRAFT','REJECTED') OR st.status IS NULL) and s.id>$sid
 		and s.show_in_cattool=1
 		order by s.id
 		limit 1
@@ -783,7 +819,7 @@ function getNextUntranslatedSegment($sid, $jid) {
 
 function getNextSegmentId($sid, $jid, $status) {
 	$rules = ($status == 'untranslated') ? "'NEW','DRAFT','REJECTED'" : "'$status'";
-	$statusIsNull = ($status == 'untranslated') ? " OR status IS NULL" : "";
+	$statusIsNull = ($status == 'untranslated') ? " OR st.status IS NULL" : "";
 	// Warning this is a LEFT join a little slower...
 	$query = "select s.id as sid
 		from segments s
@@ -791,7 +827,7 @@ function getNextSegmentId($sid, $jid, $status) {
 		INNER JOIN files_job fj on fj.id_file=s.id_file 
 		INNER JOIN jobs j on j.id=fj.id_job 
 		where fj.id_job=$jid AND 
-		(status in ($rules)$statusIsNull) and s.id>$sid
+		(st.status in ($rules)$statusIsNull) and s.id>$sid
 		and s.show_in_cattool=1
 		order by s.id
 		limit 1
@@ -1048,7 +1084,7 @@ function getProjectsNumber($start,$step,$search_in_pname,$search_source,$search_
 	$owner = $_SESSION['cid'];
     $owner_query = " j.owner='$owner' and"; 
 
-    log::doLog('OWNER QUERY:',$owner);		
+    //log::doLog('OWNER QUERY:',$owner);		
 
 //    $owner_query = $owner;
 //	$owner_query = "";

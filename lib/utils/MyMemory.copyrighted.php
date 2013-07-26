@@ -130,7 +130,7 @@ class MyMemory {
 		return $result;
 	}
 
-	function TMS_ARRAY_MATCH($array1, $array2, $for_semantix = false) {
+	public static function TMS_ARRAY_MATCH($array1, $array2, $for_semantix = false) {
 
 		// No Longer symmetric
 		// Important:
@@ -183,17 +183,17 @@ class MyMemory {
 	}
 
 	// I expect this to be in PHP in the future...
-	function my_array_xor($array_a, $array_b) {
+	public static function my_array_xor($array_a, $array_b) {
 		$union_array = array_merge($array_a, $array_b);
 		$intersect_array = array_intersect($array_a, $array_b);
 		return array_diff($union_array, $intersect_array);
 	}
 
-	function unichr($u) {
+	public static function unichr($u) {
 		return mb_convert_encoding('&#' . intval($u) . ';', 'UTF-8', 'HTML-ENTITIES');
 	}
 
-	function diff($old, $new) {
+	public static function diff($old, $new) {
 		$maxlen = 0;
 		foreach ($old as $oindex => $ovalue) {
 			$nkeys = array_keys($new, $ovalue);

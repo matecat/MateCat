@@ -5,39 +5,47 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     </head>
     <body>
-
+        
 
         <header metal:define-macro="main_header">
-            <div class="wrapper">   	              
-                <ul class="header-menu">
-                    <li>
-                        <form metal:define-slot="actions" id="originalDownload" action="${basepath}" method="post">
-                            <input type="hidden" name="action" value="downloadOriginal" />
-                            <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
-                            <input type="hidden" name="id_file" value="" />
-                            <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
-                            <input type="hidden" name="password" tal:attributes="value password" />
-                            <input type="hidden" name="download_type" value="all" />
-                            <input name="submit" type="submit" value="ORIGINAL" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
-                        </form>
-                    </li>
-                    <li>
+            <div class="wrapper">   
 
-                        <form metal:define-slot="actions" id="fileDownload" action="${basepath}" method="post">
-                            <input type="hidden" name="action" value="downloadFileStreamOnDisk" />
-                            <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
-                            <input type="hidden" name="id_file" value="" />
-                            <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
-                            <input type="hidden" name="password" tal:attributes="value password" />
-                            <input type="hidden" name="download_type" value="all" />
-                            <input id="downloadProject" name="submit" type="submit" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0)? 'DOWNLOAD TRANSLATION' : 'PREVIEW'" />
-                        </form>
-                    </li>
-
-                    <li id='notifbox' class="notific" title="Well done, no errors found!">
-                        <a id='point2seg' href="#"></a>
-                    </li>
-                </ul> 
+              
+              
+	              
+          <ul class="header-menu">
+            <li>
+            
+            
+            
+          	
+                <form metal:define-slot="actions" id="originalDownload" action="${basepath}" method="post">
+                    <input type="hidden" name="action" value="downloadOriginal" />
+                    <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
+                    <input type="hidden" name="id_file" value="" />
+                    <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
+                    <input type="hidden" name="password" tal:attributes="value password" />
+                    <input type="hidden" name="download_type" value="all" />
+                     <input name="submit" type="submit" value="ORIGINAL" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
+                </form>
+          </li>
+          <li>
+               
+                <form metal:define-slot="actions" id="fileDownload" action="${basepath}" method="post">
+                    <input type="hidden" name="action" value="downloadFileStreamOnDisk" />
+                    <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
+                    <input type="hidden" name="id_file" value="" />
+                    <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
+                    <input type="hidden" name="password" tal:attributes="value password" />
+                    <input type="hidden" name="download_type" value="all" />
+                    <input id="downloadProject" name="submit" type="submit" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0)? 'DOWNLOAD TRANSLATION' : 'PREVIEW'" />
+                </form>
+          </li>
+        
+          <li id='notifbox' class="notific" title="Well done, no errors found!">
+          	<a id='point2seg' href="#"><span class="numbererror"></span></a>
+          </li>
+              </ul> 
 
                 <!-- viewer icons
                 

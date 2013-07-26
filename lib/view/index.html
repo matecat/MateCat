@@ -7,7 +7,7 @@
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/jquery-ui.css?build=${build_number}" rel="stylesheet" type="text/css" />
-
+<link href="${basepath}public/css/popup.css?build=${build_number}" rel="stylesheet" type="text/css" />
 
 
 
@@ -27,8 +27,8 @@
                     time_to_edit_enabled: ${time_to_edit_enabled},
                     build_number: '${build_number}',
                     test: 'test',
-                    warningPollingInterval:'${warningPollingInterval}'
-
+                    warningPollingInterval:'${warningPollingInterval}',
+                    segmentQACheckInterval: '${segmentQACheckInterval}'
             };
                     //			console.log('Server time: ' + Math.round(config.server_load_time)); 
                     var renderStart = new Date();        </script>
@@ -326,12 +326,12 @@
                 <p>Progress:</p>
                 <div class="meter">
 
-                    <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC}%"></a>
-                    <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/TRANSLATED_PERC}%"></a>
-                    <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job_stats/REJECTED_PERC_FORMATTED}%; style string:width:${job_stats/REJECTED_PERC}%"></a>
-                    <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC}%"></a>
+                    <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
+                    <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/TRANSLATED_PERC_FORMATTED}%"></a>
+                    <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job_stats/REJECTED_PERC_FORMATTED}%; style string:width:${job_stats/REJECTED_PERC_FORMATTED}%"></a>
+                    <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC_FORMATTED}%"></a>
                 </div>
-                <p class="percent"><span id="stat-progress" tal:content="php:(floor(job_stats['TRANSLATED_PERC']+job_stats['APPROVED_PERC']))">0</span>%</p>
+                <p class="percent"><span id="stat-progress" tal:content="php:(job_stats['PROGRESS_PERC_FORMATTED'])">0</span>%</p>
                 <ul>
                     <li id="stat-eqwords">Payable Words: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong></li>
                     <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
@@ -393,6 +393,64 @@
 
             </div>
         </footer>
+
+
+
+<!-- POPUP LOGIN -->
+<!--
+<div class="popup-outer"></div>
+<div class="popup">
+
+<a href="#" class="x-popup"></a>
+<h1>Login</h1>
+
+<h2>Login to add the project <br/>to  your Management Panel</h2>
+
+ <div class="outer">
+            <div class="inner">
+               <button id="sign-in" name="" type="button" class="login-button" data-oauth="http://matecat.translated.home/oauth/request">Sign in using Google</button>
+            </div>
+        </div>
+
+
+ 
+
+<br/>
+
+Or <br/>
+
+
+<a href="#">
+Stay anonymous</a>
+
+</div>
+-->
+<!-- FINE POPUP LOGIN -->
+
+
+
+
+<!-- POPUP PREVIEW WARNING -->
+<!--
+<div class="popup-outer"></div>
+<div class="popup">
+
+<a href="#" class="x-popup"></a>
+<h1>Warning</h1>
+
+<p>There are some potential errors (missing tags, numbers, etc). <br/>
+Do you want to continue anyway?</p>
+
+<a href="#" class="btn-ok">Ok</a>
+<a href="#" class="btn-cancel">Ops!</a>
+
+</div>
+-->
+<!-- FINE PREVIEW WARNING -->
+
+
+
+
         <div class="download-chrome">
             <a href="#" class="close"></a>
             Your downloaded file will appear on the bar below in a few seconds.<br/>
@@ -441,5 +499,11 @@
                                 </div>
         -->
         <script src="${basepath}public/js/lib/snapengage.js"></script>
+
+
+
+
+
+
     </body>
 </html>

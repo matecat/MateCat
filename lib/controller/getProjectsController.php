@@ -81,11 +81,11 @@ class getProjectsController extends ajaxcontroller {
 		$time_loop=0;
 		$start = (($this->page - 1) * $this->step);
 
-		$projects = ManageUtils::queryProjects($start,$this->step,$this->search_in_pname,$this->search_source,$this->search_target,$this->search_status,$this->search_onlycompleted,$this->filter_enabled,$this->lang_handler,$this->project_id);
+		$projects = ManageUtils::queryProjects($start,$this->step,$this->search_in_pname,$this->search_source,$this->search_target,$this->search_status,$this->search_onlycompleted,$this->filter_enabled,$this->project_id);
 
 		$projnum = getProjectsNumber($start,$this->step,$this->search_in_pname,$this->search_source,$this->search_target,$this->search_status,$this->search_onlycompleted,$this->filter_enabled);
 
-        	log::doLog('PNUMBER:',$projnum);		
+        	//log::doLog('PNUMBER:',$projnum);		
 
 		$this->result['data'] = json_encode($projects);
 		$this->result['page'] = $this->page;

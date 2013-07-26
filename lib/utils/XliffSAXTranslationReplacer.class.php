@@ -1,5 +1,6 @@
 <?
 include_once INIT::$UTILS_ROOT."/cat.class.php";
+include_once INIT::$UTILS_ROOT . '/QA.php';
 class XliffSAXTranslationReplacer{
 
 	private $filename; //source filename
@@ -221,18 +222,25 @@ class XliffSAXTranslationReplacer{
 		$tag_mismatch=false;
                 $seg['segment']=  CatUtils::restorenbsp($seg['segment']);
                 $seg['translation']=  CatUtils::restorenbsp($seg['translation']);
-		$outcome=CatUtils::checkTagConsistency($seg['segment'],$seg['translation']);
-		if($outcome['outcome']>0){
+                
+                if( is_null($seg['translation']) || $seg['translation'] == '' ){
+                    $translation = $seg['segment'];
+                } else {
+                    $translation = $seg['translation'];
+                }
+                
+                $check = new QA($seg['segment'],$translation);
+                $check->performConsistencyCheck();
+
+		if( $check->thereAreErrors() ){
 			$tag_mismatch=true;
-			log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".$outcome['debug'].")");
+			log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".print_r( $check->getErrors(), true ).")");
 		}
-		if(empty($seg['translation'])){
-			$translation=$seg['segment'];
-		}elseif ($tag_mismatch){
-			$translation= strip_tags($seg['translation']);
-		}else{
-			$translation=$seg['translation'];
+		
+                if ($tag_mismatch){
+			$translation = strip_tags($translation);
 		}
+
 		//fix to escape non-html entities
 		$translation = str_replace("&lt;", '#LT#', $translation);
 		$translation = str_replace("&gt;", '#GT#', $translation);
