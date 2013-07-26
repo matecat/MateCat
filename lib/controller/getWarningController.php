@@ -1,5 +1,6 @@
 <?
 include_once INIT::$MODEL_ROOT . "/queries.php";
+include_once INIT::$UTILS_ROOT . "/cat.class.php";
 include_once INIT::$UTILS_ROOT . "/QA.php";
 
 class getWarningController extends ajaxcontroller{	
@@ -48,10 +49,11 @@ class getWarningController extends ajaxcontroller{
          * 
          */
 	public function doAction (){
-            
             if( empty( $this->__postInput->id ) ){
                 $this->__globalWarningsCall();
             } else {
+                $this->__postInput->src_content = CatUtils::view2rawxliff($this->__postInput->src_content);
+                $this->__postInput->trg_content = CatUtils::view2rawxliff($this->__postInput->trg_content);
                 $this->__segmentWarningsCall();
             }
  
