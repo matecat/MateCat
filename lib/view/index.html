@@ -326,10 +326,10 @@
                 <p>Progress:</p>
                 <div class="meter">
 
-                    <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC}%"></a>
-                    <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/PROGRESS_PERC}%"></a>
-                    <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job_stats/REJECTED_PERC_FORMATTED}%; style string:width:${job_stats/REJECTED_PERC}%"></a>
-                    <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC}%"></a>
+                    <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
+                    <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/TRANSLATED_PERC_FORMATTED}%"></a>
+                    <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job_stats/REJECTED_PERC_FORMATTED}%; style string:width:${job_stats/REJECTED_PERC_FORMATTED}%"></a>
+                    <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC_FORMATTED}%"></a>
                 </div>
                 <p class="percent"><span id="stat-progress" tal:content="php:(job_stats['PROGRESS_PERC_FORMATTED'])">0</span>%</p>
                 <ul>
