@@ -1267,6 +1267,14 @@ UI = {
         this.loadingMore = false;
         this.setWaypoints();
     },
+    getSegmentSource: function(seg) {
+        segment = (typeof seg == 'undefined')? this.currentSegment : seg;
+        return $('.source', segment).text();
+    },
+    getSegmentTarget: function(seg) {
+        editarea = (typeof seg == 'undefined')? this.editarea : $('.editarea', seg);
+        return editarea.text();
+    },
     gotoNextSegment: function() {
         var next = $('.editor').next();
         if (next.is('section')) {
@@ -2142,12 +2150,12 @@ UI = {
         var dd = new Date();
         ts = dd.getTime();
         var token = this.currentSegmentId + '-' + ts.toString();
-        //var src_content = $('.source', this.currentSegment).attr('data-original');  
-        var src_content = $('.source', this.currentSegment).text();  
-        var trg_content = this.editarea.text();        
+        var src_content = this.getSegmentSource(); 
+//        var src_content = $('.source', this.currentSegment).attr('data-original');  
+        var trg_content = this.getSegmentTarget();        
+//        var trg_content = this.editarea.text();        
         this.checkSegmentsArray[token] = trg_content;
-        console.log("#" + src_content + "#");
-        console.log("#" + trg_content + "#");
+        
         this.doRequest({
             data: {
                 action: 'getWarning',
