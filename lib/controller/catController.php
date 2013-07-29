@@ -98,6 +98,7 @@ class catController extends viewcontroller {
 			$this->job_not_found = true;
 		}
 
+		log::doLog('DATA: ' , $data);
 
 		$first_not_translated_found = false;
 
@@ -112,6 +113,10 @@ class catController extends viewcontroller {
 				$this->last_opened_segment = $seg['last_opened_segment'];
 			}
 
+			if (empty($this->first_job_segment)) {
+				$this->first_job_segment = $seg['id_segment_start'];
+			}
+            
 			if (empty($this->cid)) {
 				$this->cid = $seg['cid'];
 			}
@@ -226,6 +231,7 @@ class catController extends viewcontroller {
 		$this->template->source_code = $this->source_code;
 		$this->template->target_code = $this->target_code;
 
+		$this->template->first_job_segment = $this->first_job_segment;
 		$this->template->last_opened_segment = $this->last_opened_segment;
 		$this->template->data = $this->data;
 
