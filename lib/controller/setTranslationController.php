@@ -71,17 +71,18 @@ class setTranslationController extends ajaxcontroller {
 		//get original source segment, first
 		$segment=getSegment($this->id_segment);            
                 
-                //Log::doLog( "'" . $this->translation . "'" );
 		//compare segment-translation and get results
-                $check = new QA($segment['segment'], $this->translation);
-                $check->performConsistencyCheck();
-                if( $check->thereAreErrors() ){
-                    $err_json = $check->getErrorsJSON();
-                    $translation = $this->translation;
-                } else {
-                    $err_json = '';
-                    $translation = $check->getTrgNormalized();
-                }
+        $check = new QA($segment['segment'], $this->translation);
+        $check->performConsistencyCheck();
+        
+        if( $check->thereAreErrors() ){
+              $err_json = $check->getErrorsJSON();
+              $translation = $this->translation;
+        } else {
+              $err_json = '';
+              $translation = $check->getTrgNormalized();
+        }
+        
 		$res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreErrors() );
 
 		if (!empty($res['error'])) {

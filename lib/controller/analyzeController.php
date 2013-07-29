@@ -31,9 +31,8 @@ class analyzeController extends viewcontroller {
 	private $num_segments_analyzed = 0;
 
 	public function __construct() {
-		parent::__construct(true);
+		parent::__construct(false);				
 		parent::makeTemplate("analyze.html");
-
 
 		$this->pid = $this->get_from_get_post("pid");
 		$this->password = $this->get_from_get_post("password");
@@ -245,7 +244,8 @@ class analyzeController extends viewcontroller {
 		$this->template->num_segments_analyzed = $this->num_segments_analyzed;
 		$this->template->logged_user=trim($this->logged_user['first_name']." ".$this->logged_user['last_name']);
 		$this->template->build_number = INIT::$BUILD_NUMBER;
-                
+        
+		$this->template->isLoggedIn = $this->isLoggedIn();
                 //print_r ($this->template); exit;
 
 	}
