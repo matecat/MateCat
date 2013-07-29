@@ -45,7 +45,7 @@ class errObject {
  * NOTE:
  * If a not well formed XML source/target is provided, all integrity checks are skipped returning a 
  * 'bad source xml/bad target xml' error.
- *  
+ *
  * Use Example:
  * <br />
  * <pre>
@@ -197,12 +197,12 @@ class QA {
     protected $exceptionList = array();
 
     /**
-     * List of warnings from check analysis 
-     * 
+     * List of warnings from check analysis
+     *
      * @var array(errObject(number,string))
      */
     protected $warningList = array();
-    
+
     /**
      * Add an error to error List.
      * Internal CodeMap
@@ -238,23 +238,23 @@ class QA {
     
     /**
      * Check For Warnings
-     * 
+     *
      * return bool
      */
     public function thereAreWarnings(){
     	$warnings = array_merge( $this->exceptionList, $this->warningList );
     	return !empty($warnings);
     }
-    
+
 	/**
-	 * Get Warning level errors 
-	 * 
+	 * Get Warning level errors
+	 *
 	 * @return errObject[]
 	 */
     public function getWarnings(){
     	return $this->checkErrorNone( array_merge( $this->warningList, $this->exceptionList ) );
     }
-    
+
     /**
      * Display an ERR_NONE if array is empty
      *
@@ -308,12 +308,12 @@ class QA {
     
     /**
      * Export Error List
-     * 
+     *
      */
     public function getErrors() {
-        return $this->checkErrorNone($this->exceptionList);        
+        return $this->checkErrorNone($this->exceptionList);
     }
-    
+
     /**
      * Get error list in json format
      * 
@@ -331,7 +331,7 @@ class QA {
     public function getWarningsJSON() {
     	return json_encode( $this->checkErrorNone( array_merge( $this->warningList, $this->exceptionList ), true ) );
     }
-    
+
     /**
      * Class constructor
      * 
@@ -514,7 +514,7 @@ class QA {
 
         //so, if we found a last char mismatch, and if it is in the source: add to the target else trim it
         if( ( count($source_tags) != count($target_tags) ) && !empty( $source_tags ) ){
-        	
+
         	//Append a space to target for normalization.
             $this->target_seg .= " ";
 
@@ -806,27 +806,27 @@ class QA {
      * @param $trgTagReference
      */
     protected function _checkTailWhiteSpaces($srcNodeContent, $trgNodeContent, $trgTagReference ) {
-    
+
     	//backup and check start string
     	$_srcNodeContent = $srcNodeContent;
     	$_trgNodeContent = $trgNodeContent; //not used
-    
+
     	$srcHasTailNBSP = $this->_hasTailNBSP($srcNodeContent);
     	$trgHasTailNBSP = $this->_hasTailNBSP($trgNodeContent);
-    
+
     	//normalize spaces
     	$srcNodeContent = $this->_nbspToSpace($srcNodeContent);
     	$trgNodeContent = $this->_nbspToSpace($trgNodeContent);
-    
+
     	$srcLen = mb_strlen($srcNodeContent);
     	$trgLen = mb_strlen($trgNodeContent);
-    
+
     	$trailingSrcChar = mb_substr($srcNodeContent, $srcLen - 1, 1, 'utf-8');
     	$trailingTrgChar = mb_substr($trgNodeContent, $trgLen - 1, 1, 'utf-8');
     	if ( ( $trailingSrcChar == " " || $trailingTrgChar == " " ) && $trailingSrcChar != $trailingTrgChar) {
     		$this->_addError(self::ERR_WS_TAIL);
     	}
-    
+
     	//normalize the target first space according to the source type
     	if( $srcHasTailNBSP != $trgHasTailNBSP && !$this->thereAreErrors() ){
 
@@ -850,11 +850,11 @@ class QA {
     		}
 
             $_nodeNormalized->nodeValue = $_trgNodeContent;
-    
+
     	}
-    
+
     }
-        
+
     /**
      * Check if head character is a non-breaking space
      * 

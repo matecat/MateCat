@@ -31,7 +31,7 @@ class analyzeController extends viewcontroller {
 	private $num_segments_analyzed = 0;
 
 	public function __construct() {
-		parent::__construct(false);				
+		parent::__construct(false);
 		parent::makeTemplate("analyze.html");
 
 		$this->pid = $this->get_from_get_post("pid");
