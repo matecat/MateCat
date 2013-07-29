@@ -2150,16 +2150,9 @@ UI = {
         var dd = new Date();
         ts = dd.getTime();
         var token = this.currentSegmentId + '-' + ts.toString();
-<<<<<<< HEAD
-        var src_content = this.getSegmentSource(); 
-//        var src_content = $('.source', this.currentSegment).attr('data-original');  
-        var trg_content = this.getSegmentTarget();        
-//        var trg_content = this.editarea.text();        
-=======
         //var src_content = $('.source', this.currentSegment).attr('data-original');  
         var src_content = $('.source', this.currentSegment).text();  
         var trg_content = this.editarea.text();        
->>>>>>> First change of login position.
         this.checkSegmentsArray[token] = trg_content;
         console.log("#" + src_content + "#");
         console.log("#" + trg_content + "#");
