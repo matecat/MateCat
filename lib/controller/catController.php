@@ -98,7 +98,6 @@ class catController extends viewcontroller {
 			$this->job_not_found = true;
 		}
 
-		log::doLog('DATA: ' , $data);
 
 		$first_not_translated_found = false;
 
