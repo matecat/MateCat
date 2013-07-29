@@ -2,7 +2,7 @@
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include INIT::$UTILS_ROOT . "/cat.class.php";
-include INIT::$UTILS_ROOT . '/QA.php';
+include_once INIT::$UTILS_ROOT . '/QA.php';
 
 define('DEFAULT_NUM_RESULTS', 2);
 
