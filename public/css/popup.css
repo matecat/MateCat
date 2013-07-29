@@ -1,27 +1,22 @@
 /*popup*/
-
-
+#popupWrapper{display:none;}
 .popup-outer{background:#000;position:fixed;top:0;left:0;width:100%;height:100%;z-index:99999999999999;opacity:0.6;}
-
 .popup{overflow:hidden;line-height:30px;border-radius: 7px;-webkit-box-shadow: 0 1px 20px #000;box-shadow: 0 1px 20px #000;width:500px;background:#fff;margin:-200px 0 0 -250px; padding:0 0px 20px 0px;position:fixed;top:50%;left:50%;z-index:999999999999999999999999999;}
-
-
 .popup p{font-size:18px}
+.popup h1{overflow:visible;max-height:inherit;background-size:35px 25px !important;font-size:24px;background:#6d6e71 url(../img/matecat-logosmall.png) 12px center no-repeat;padding:7px 10px 7px 58px;border-bottom:1px solid #000;color:#fff;margin:0 !important;text-align:left;}
+.popup h2{font-weight:normal;font-size:24px;color:black;display:block;margin:20px 0 20px 0;}
 
-.popup h1{background-size:35px 25px !important;font-size:24px;background:#6d6e71 url(../img/matecat-logosmall.png) 12px center no-repeat;padding:7px 10px 7px 58px;border-bottom:1px solid #000;color:#fff;margin:0 !important;text-align:left;}
-    
-.popup h2{font-weight:normal;font-size:24px;}
+.popup a.anonymous{font-size:12px;}
+.popup a.anonymous:visited, .popup a.anonymous:active {color:black;}
 
-
-.outer
-    {
+.outer {
     background: url(../img/bg_login_button.gif) 0 0 repeat;
     border-radius: 6px;
     margin: 0 auto -10px auto;
     width: 330px;
     border: 1px solid #222;
-    }
-    .outer:hover
+}
+.outer:hover
         {
         background: url(../img/bg_login_button_hover.gif) 0 0 repeat;
         }
@@ -93,31 +88,4 @@ box-shadow: inset 0 0 1px 1px #888;
 
 
 
-
-
-
-
-
-.browsers{
-float:right;
-position:relative;
-left:-50%;
-text-align:left;
-}
-.browsers ul{
-list-style:none; 
-position:relative;
-left:50%;
-}
-
-.browsers a{
-margin:20px;
-float:left;
-padding:2px 5px;
-text-align:center;
-white-space:nowrap;
-
-}
-
-#content{overflow:hidden}/* hide horizontal scrollbar*/
 

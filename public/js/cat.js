@@ -2142,10 +2142,12 @@ UI = {
         var dd = new Date();
         ts = dd.getTime();
         var token = this.currentSegmentId + '-' + ts.toString();
-        var src_content = $('.source', this.currentSegment).attr('data-original');  
+        //var src_content = $('.source', this.currentSegment).attr('data-original');  
+        var src_content = $('.source', this.currentSegment).text();  
         var trg_content = this.editarea.text();        
         this.checkSegmentsArray[token] = trg_content;
-        
+        console.log("#" + src_content + "#");
+        console.log("#" + trg_content + "#");
         this.doRequest({
             data: {
                 action: 'getWarning',
@@ -2185,7 +2187,7 @@ UI = {
         var file = $(segment).parents('article');
         var status = status;
         // Attention, to be modified when we will lock tags
-        var translation = $('.editarea', segment).text().trim();
+        var translation = $('.editarea', segment).text();
 
         if (translation == '')
             return false;
