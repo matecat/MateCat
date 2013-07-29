@@ -603,9 +603,10 @@ UI = {
             console.log('Init time: ' + this.initTime);
 
     },
-    doRequest: function(req) {
+    doRequest: function(req,log) {
+        logTxt = (typeof log == 'undefined')? '' : '&type=' + log;
         var setup = {
-            url: config.basepath + '?action=' + req.data.action + this.appendTime(),
+            url: config.basepath + '?action=' + req.data.action + logTxt + this.appendTime(),
             data: req.data,
             type: 'POST',
             dataType: 'json'
@@ -1473,6 +1474,7 @@ UI = {
         this.lockTags();
         if (!this.readonly)
             this.getContribution(segment, 1);
+        this.currentSegmentQA();
         if (this.debug)
             console.log('close/open time: ' + ((new Date()) - this.openSegmentStart));
     },
@@ -1792,6 +1794,7 @@ UI = {
         }
 
         $("html,body").stop();
+        console.log('destinationTop: ' + destinationTop);
         $("html,body").animate({
             scrollTop: destinationTop - 20
         }, 500);
@@ -2091,7 +2094,7 @@ UI = {
      */
     fillCurrentSegmentWarnings: function(warningDetails) {
         //console.log( 'fillCurrentSegmentWarnings' );
-        console.log('warningDetails: ',warningDetails );
+//        console.log('warningDetails: ',warningDetails );
         //scan array    
         try {
             $.each(warningDetails, function(key, value) {
@@ -2119,14 +2122,14 @@ UI = {
             },
             success: function(data) {
                 var warningPosition = '';
-                console.log('data.total: '+data.total);
+//                console.log('data.total: '+data.total);
 
                 //check for errors
                 if (data.total > 0) {
 
                     //for now, put only last in the pointer to segment id
                     warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
-                    console.log('warningPosition: ' + warningPosition);
+//                    console.log('warningPosition: ' + warningPosition);
 
                     if(openingSegment) UI.fillCurrentSegmentWarnings(data.details);
 
@@ -2151,11 +2154,9 @@ UI = {
         ts = dd.getTime();
         var token = this.currentSegmentId + '-' + ts.toString();
         //var src_content = $('.source', this.currentSegment).attr('data-original');  
-        var src_content = $('.source', this.currentSegment).text();  
-        var trg_content = this.editarea.text();        
+        var src_content = this.getSegmentSource();  
+        var trg_content = this.getSegmentTarget();        
         this.checkSegmentsArray[token] = trg_content;
-        console.log("#" + src_content + "#");
-        console.log("#" + trg_content + "#");
         this.doRequest({
             data: {
                 action: 'getWarning',
@@ -2187,7 +2188,7 @@ UI = {
                     UI.currentSegment.removeClass('waiting_for_check_result');
                 }
             }
-        });
+        }, 'local');
     },
     setTranslation: function(segment, status) {
         var info = $(segment).attr('id').split('-');
