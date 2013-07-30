@@ -1568,8 +1568,6 @@ UI = {
                 this.render(false);
             }
         }
-
-
     },
     pointToOpenSegment: function() {
         if (this.segmentIdToRestore) {
@@ -1748,9 +1746,7 @@ UI = {
                     $('#file-' + fid).append(newFile);
                 }
             }
-
         })
-
         if (starting) {
             this.init();
         }
@@ -1794,7 +1790,7 @@ UI = {
         }
 
         $("html,body").stop();
-        console.log('destinationTop: ' + destinationTop);
+//        console.log('destinationTop: ' + destinationTop);
         $("html,body").animate({
             scrollTop: destinationTop - 20
         }, 500);
@@ -1808,16 +1804,6 @@ UI = {
     },
     setChosenSuggestion: function(w) {
         this.editarea.data('lastChosenSuggestion', w);
-        /*
-         this.doRequest({
-         data: {
-         action: 'chooseSuggestion',
-         id_segment: UI.currentSegmentId,
-         id_job: config.job_id,
-         id_suggestion: w
-         }
-         });
-         */
     },
     setContribution: function(segment, status, byStatus) {
         if ((status == 'draft') || (status == 'rejected'))
@@ -1919,10 +1905,6 @@ UI = {
             },
             success: function(d) {
                 UI.setCurrentSegment_success(d);
-                /*
-                 UI.nextSegmentIdByServer = d.nextSegmentId;
-                 UI.getNextSegment(UI.currentSegment,'untranslated');
-                 */
             }
         });
     },
@@ -2052,8 +2034,7 @@ UI = {
             $(".editor:visible").find(".close").click();
             $('.downloadtr-button').focus();
             return false;
-        }
-        ;
+        };
         this.buttonClickStop = new Date();
         this.copyToNextIfSame(nextSegment);
         this.byButton = true;
