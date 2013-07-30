@@ -77,6 +77,11 @@ UI = {
         rangy.init();
         this.savedSel = null;
         this.savedSelActiveElement = null;
+        this.firstOpenedSegment = false;
+        this.autoscrollCorrectionEnabled = true;
+        setTimeout(function() {
+            UI.autoscrollCorrectionEnabled = false;
+        }, 2000);
         this.checkSegmentsArray = {};
         this.markTags();
         $('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');
@@ -152,7 +157,8 @@ UI = {
         })
 
         $(window).on('scroll', function(e) {
-            UI.detectIfSegmentIsVisible();
+            UI.browserScrollPositionRestoreCorrection();
+            UI.setSegmentPointer();
         })
 
         $("header .filter").click(function(e) {
@@ -933,7 +939,7 @@ UI = {
         this.firstSegment = s.first();
         this.lastSegment = s.last();
     },
-    detectIfSegmentIsVisible: function() {
+    setSegmentPointer: function() {
         if($('.editor').length) {
             if ($('.editor').isOnScreen()) {
                 $('#segmentPointer').hide();
@@ -1432,6 +1438,7 @@ UI = {
             if (this.justSelecting())
                 return;
         }
+        this.firstOpenedSegment = (this.firstOpenedSegment == 0)? 1 : 2;
         this.byButton = false;
         this.cacheObjects(editarea);
         $(window).trigger({
@@ -2326,6 +2333,17 @@ UI = {
          },10000);    	
          */
     },
+    browserScrollPositionRestoreCorrection: function() {
+        // detect if the scroll is a browser generated scroll position restore, and if this is the case rescroll to the segment 
+        if(this.firstOpenedSegment == 1) { // if the current segment is the first opened in the current UI  
+            if(!$('.editor').isOnScreen()) { // if the current segment is out of the current viewport 
+                if(this.autoscrollCorrectionEnabled) { // if this is the first correction and we are in the initial 2 seconds since page init 
+                    this.scrollSegment(this.currentSegment);
+                    this.autoscrollCorrectionEnabled = false;
+                }
+            }
+        }
+    },
     undoInSegment: function() {
         if (this.undoStackPosition == 0)
             this.saveInUndoStack('undo');
@@ -2742,6 +2760,7 @@ $.fn.isOnScreen = function() {
         top: win.scrollTop(),
         left: win.scrollLeft()
     };
+//    console.log('viewport: ', viewport);
     viewport.right = viewport.left + win.width();
     viewport.bottom = viewport.top + win.height();
 
