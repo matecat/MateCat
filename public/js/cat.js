@@ -6,17 +6,17 @@ UI = {
         this.isChrome = $.browser.webkit && !!window.chrome;
         this.isFirefox = $.browser.mozilla;
         this.isSafari = $.browser.webkit && !window.chrome;
+        this.isMac = (navigator.platform == 'MacIntel') ? true : false;
         this.body = $('body');
-        this.firstLoad = firstLoad;
-        if (firstLoad)
-            this.startRender = true;
-        this.initSegNum = 200;
+        this.firstLoad = firstLoad; 
+//        if (firstLoad)
+//            this.startRender = true;
+        this.initSegNum = 200; // number of segments initially loaded
         this.moreSegNum = 50;
         this.loadingMore = false;
         this.infiniteScroll = true;
         this.noMoreSegmentsAfter = false;
         this.noMoreSegmentsBefore = false;
-        this.segmentIdToRestore = false;
         this.blockButtons = false;
         this.blockOpenSegment = false;
         this.dmp = new diff_match_patch();
@@ -34,20 +34,12 @@ UI = {
          */
         this.globalWarnings = [];
 
-        this.downOpts = {
-            offset: '130%'
-        };
-        this.upOpts = {
-            offset: '-40%'
-        };
-        this.isMac = (navigator.platform == 'MacIntel') ? true : false;
+        this.downOpts = { offset: '130%' };
+        this.upOpts = { offset: '-40%' };
         this.readonly = (this.body.hasClass('archived')) ? true : false;
-        this.shortcutLabel = 'ALT+' + ((UI.isMac) ? "CMD" : "CTRL") + '+';
+        this.suggestionShortcutLabel = 'ALT+' + ((UI.isMac) ? "CMD" : "CTRL") + '+';
 
         this.taglockEnabled = true;
-        //if (config.target_lang=='JA'){        this.taglockEnabled = false};
-//        this.taglockEnabled = (Loader.detect('taglock'))? Loader.detect('taglock') : 0;
-//        this.tagLock();
         this.debug = Loader.detect('debug');
         this.checkTutorialNeed();
 
@@ -94,12 +86,6 @@ UI = {
         }).bind('keydown', 'Meta+return', function(e) {
             e.preventDefault();
             $('.editor .translated').click();
-            /*
-             $('.editor .translated').trigger({
-             type:"click",
-             action:"translated"
-             });
-             */
         }).bind('keydown', 'Ctrl+pageup', function(e) {
             e.preventDefault();
 //            alert('pageup');
@@ -148,12 +134,6 @@ UI = {
         }).bind('keydown', 'Meta+c', function(e) {
             UI.tagSelection = false;
         }).bind('keydown', 'Backspace', function(e) {
-            /*
-             if($('.editor .editarea .locked.selected').length) e.preventDefault();
-             //			console.log($('.editor .editarea .locked.selected'));
-             $('.editor .editarea .locked.selected').remove();
-             UI.checkTagMismatch(UI.currentSegment);
-             */
         })
 
         $(window).on('scroll', function(e) {
@@ -333,7 +313,6 @@ UI = {
                     e.preventDefault();
                     $('.selected', $(this)).remove();
                     UI.saveInUndoStack('cancel');
-                    //UI.checkTagMismatch(UI.currentSegment); //no more used. See getWarning
                 } else {
                     try {
                         var numTagsBefore = UI.editarea.text().match(/\<.*?\>/gi).length;
@@ -444,7 +423,6 @@ UI = {
             }
             setTimeout(function() {
                 UI.lockTags();
-                //UI.checkTagMismatch(UI.currentSegment); //no more used. See getWarning
             }, 10);
             UI.registerQACheck();        
         }).on('dblclick', '.editarea', function(e) {
@@ -522,7 +500,6 @@ UI = {
         }).on('click', 'a.approved', function(e) {
             UI.setStatusButtons(this);
             $(".editarea", UI.nextSegment).click();
-            //	        if(!UI.blockButtons) $(".editarea", UI.nextSegment).click();
 
             UI.changeStatus(this, 'approved', 0);
             UI.changeStatusStop = new Date();
@@ -566,9 +543,6 @@ UI = {
                 UI.saveInUndoStack('paste');
             }, 100);
             UI.lockTags();
-            //UI.checkTagMismatch(UI.currentSegment); //no more used. See getWarning
-
-
         }).on('click', 'a.close', function(e) {
             e.preventDefault();
             UI.closeSegment(UI.currentSegment, 1);
@@ -644,7 +618,7 @@ UI = {
         this.lastOpenedEditarea = $('.editarea', this.currentSegment);
         this.currentSegmentId = this.lastOpenedSegmentId = this.editarea.data('sid');
         this.currentSegment = segment = $('#segment-' + this.currentSegmentId);
-        this.currentArticle = segment.parent();
+        this.currentFile = segment.parent();
     },
     changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
@@ -675,35 +649,6 @@ UI = {
             this.body.addClass('justdone');
         }
     },
-    /**
-     * @deprecated //no more used. See getWarning
-     * @param {type} segment
-     * @returns {undefined}
-     */
-    checkTagMismatch: function(segment) {
-        console.log('@deprecated //no more used. See getWarning');
-
-//        var sourceTags = [];
-//        $('.source .locked', segment).each(function() {
-//            sourceTags.push($(this).text());
-//        })
-//
-//        var targetTags = [];
-//        $('.editarea .locked', segment).each(function() {
-//            targetTags.push($(this).text());
-//        })
-
-//        if (sourceTags.length != targetTags.length) {
-//            $(segment).addClass('mismatch');
-//        } else {
-//            if (this.tagCompare(sourceTags, targetTags)) {
-//                $(segment).addClass('mismatch');
-//            } else {
-//                $(segment).removeClass('mismatch');
-//            }
-//        }
-
-    },
     checkTutorialNeed: function() {
         if (!Loader.detect('tutorial'))
             return false;
@@ -725,7 +670,6 @@ UI = {
     chooseSuggestion: function(w) {
         this.copySuggestionInEditarea(this.currentSegment, $('.editor ul[data-item=' + w + '] li.b .translation').text(), $('.editor .editarea'), $('.editor ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
         this.lockTags();
-        //this.checkTagMismatch(UI.currentSegment); // non more used. See getWarning.
         this.setChosenSuggestion(w);
 
         this.editarea.focus().effect("highlight", {}, 1000);
@@ -835,7 +779,6 @@ UI = {
 
         this.setChosenSuggestion(0);
         this.lockTags();
-        //this.checkTagMismatch(UI.currentSegment); // no more used. See fill Warning
     },
     copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
 
@@ -918,7 +861,7 @@ UI = {
         if (direction == 'down') {
             var adjacent = segment.next();
             if (!adjacent.is('section'))
-                adjacent = this.currentArticle.next().find('section:first');
+                adjacent = this.currentFile.next().find('section:first');
         } else {
             var adjacent = segment.prev();
             if (!adjacent.is('section'))
@@ -962,58 +905,6 @@ UI = {
         var hash = window.location.hash.substr(1);
         this.startSegmentId = (hash) ? hash : config.last_opened_segment;
     },
-    fixLockability: function(html) {
-        if (UI.editarea.text() == '')
-            return false;
-        if (!html.match(/\</gi))
-            return false;
-
-
-//		cerca le sequenze (inizio riga o >)< <... > e trasforma tutti gli < tranne l'ultimo in ST
-//	    this.editarea.html(this.editarea.html().replace(/&lt;(.*?&lt;)/gi, "<span class=\"lt\">[lt]</span>$1"));
-//	    this.editarea.html(this.editarea.html().replace(/(&gt;.*?)&lt;(.*?&lt;)/gi, "$1[LT]$2"));
-        this.editarea.html(this.editarea.html().replace(/&lt;(.*?&lt;)/gi, "[LT]$1"));
-
-
-
-
-        /*		
-         CHECK IF 
-         
-         
-         if there are masked tags {
-         
-         } else {
-         
-         }
-         
-         
-         
-         
-         
-         */
-//		var lockable = (html.match(/\</gi).length == html.match(/\>/gi).length)? true : false;
-        /*
-         if(lockable) {
-         //			controlla se 
-         } else {
-         //			converti i tag soprannumerari in fake tags
-         }
-         /*
-         /*
-         var lockable = (html.match(/\</gi).length == html.match(/\>/gi).length)? true : false;
-         if(lockable) {
-         if(UI.currentSegment.hasClass('unlockable')) {
-         setTimeout(function(){
-         UI.saveInUndoStack('checklockability');
-         },100);
-         }
-         UI.currentSegment.removeClass('unlockable');
-         } else {
-         UI.currentSegment.addClass('unlockable');
-         }
-         */
-    },
     getContribution: function(segment, next) {
         var n = (next) ? $('#segment-' + this.nextSegmentId) : $(segment);
         if ($(n).hasClass('loaded')) {
@@ -1026,6 +917,7 @@ UI = {
                 this.blockButtons = false;
             if (this.currentSegmentId == this.nextSegmentId)
                 this.blockButtons = false;
+            if(!next) this.currentSegmentQA();
             return false;
         }
         if ((!n.length) && (next)) {
@@ -1055,22 +947,9 @@ UI = {
             context: $('#' + id),
             success: function(d) {
                 UI.getContribution_success(d, this);
-                /*
-                 UI.renderContributions(d,this);
-                 UI.lockTags();
-                 UI.saveInUndoStack();
-                 
-                 UI.blockButtons = false;
-                 if (d.data.matches.length > 0) {
-                 $('.submenu li.matches a span', this).text('('+d.data.matches.length+')');
-                 } else {
-                 $(".sbm > .matches", this).hide();
-                 }
-                 */
             },
             complete: function(d) {
                 UI.getContribution_complete(n);
-//			    $(".loader", n).removeClass('loader_on');
             }
         });
     },
@@ -1079,6 +958,7 @@ UI = {
     },
     getContribution_success: function(d, segment) {
         this.renderContributions(d, segment);
+        if($(segment).attr('id').split('-')[1] == UI.currentSegmentId) this.currentSegmentQA();
         this.lockTags();
         this.saveInUndoStack();
 
@@ -1127,40 +1007,6 @@ UI = {
             },
             success: function(d) {
                 UI.getMoreSegments_success(d);
-                /*
-                 where = d.data['where'];
-                 if(typeof d.data['files'] != 'undefined') {
-                 var numsegToAdd = 0;
-                 $.each(d.data['files'], function() {
-                 numsegToAdd = numsegToAdd + this.segments.length;
-                 });
-                 UI.renderSegments(d.data['files'],where,false);
-                 
-                 // if getting segments before, UI points to the segment triggering the event 
-                 if((where == 'before')&&(numsegToAdd)) {
-                 UI.scrollSegment($('#segment-'+UI.segMoving));
-                 }
-                 
-                 // check if there is a segment to restore (to open) in the newly loaded segments
-                 if(UI.segmentIdToRestore) {
-                 if($('#segment-'+UI.segmentIdToRestore).length) {
-                 $('#segment-'+UI.segmentIdToRestore+' .editarea').trigger('click');
-                 UI.body.removeClass('virtualEditing');
-                 UI.segmentIdToRestore = false;
-                 }
-                 }
-                 UI.markTags();
-                 }
-                 if(where == 'after') {
-                 }
-                 if(d.data['files'].length == 0) {
-                 if(where == 'after') UI.noMoreSegmentsAfter = true;
-                 if(where == 'before') UI.noMoreSegmentsBefore = true;
-                 }
-                 $('#outer').removeClass('loading loadingBefore');
-                 UI.loadingMore = false;
-                 UI.setWaypoints();
-                 */
             }
         });
     },
@@ -1178,14 +1024,6 @@ UI = {
                 this.scrollSegment($('#segment-' + this.segMoving));
             }
 
-            // check if there is a segment to restore (to open) in the newly loaded segments
-            if (this.segmentIdToRestore) {
-                if ($('#segment-' + this.segmentIdToRestore).length) {
-                    $('#segment-' + this.segmentIdToRestore + ' .editarea').trigger('click');
-                    this.body.removeClass('virtualEditing');
-                    this.segmentIdToRestore = false;
-                }
-            }
             this.markTags();
         }
         if (where == 'after') {
@@ -1288,14 +1126,12 @@ UI = {
             this.scrollSegment(next);
             $('.editarea', next).trigger("click", "moving");
         } else {
-            next = this.currentArticle.next().find('section:first');
+            next = this.currentFile.next().find('section:first');
             if (next.length) {
                 this.scrollSegment(next);
                 $('.editarea', next).trigger("click", "moving");
             }
-        }
-        ;
-//        this.scrollSegment(next);
+        };
     },
     gotoOpenSegment: function() {
         this.scrollSegment(this.currentSegment);
@@ -1449,7 +1285,6 @@ UI = {
         this.clearUndoStack();
         this.saveInUndoStack('open');
         this.autoSave = true;
-//        this.autoSaveInUndo();
         this.activateSegment();
 
         this.getNextSegment(this.currentSegment, 'untranslated');
@@ -1481,7 +1316,6 @@ UI = {
         this.lockTags();
         if (!this.readonly)
             this.getContribution(segment, 1);
-        this.currentSegmentQA();
         if (this.debug)
             console.log('close/open time: ' + ((new Date()) - this.openSegmentStart));
     },
@@ -1577,11 +1411,7 @@ UI = {
         }
     },
     pointToOpenSegment: function() {
-        if (this.segmentIdToRestore) {
-            this.reloadToSegment(this.segmentIdToRestore);
-        } else {
-            this.gotoOpenSegment();
-        }
+        this.gotoOpenSegment();
     },
     removeButtons: function(byButton) {
         var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
@@ -1620,7 +1450,6 @@ UI = {
                 UI.setChosenSuggestion(1);
                 copySuggestionDone = true;
             } else {
-                //this.checkTagMismatch(UI.currentSegment); //no more used. See getWarning
             }
             var segment_id = segment.attr('id');
             $(segment).addClass('loaded');
@@ -1638,14 +1467,13 @@ UI = {
                 }
                 // Attention Bug: We are mixing the view mode and the raw data mode.
                 // before doing a enanched view you will need to add a data-original tag
-                $('.sub-editor .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + this.segment + '</span></li><li class="b sugg-target"><span class="graysmall-message">' + UI.shortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + this.translation + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+                $('.sub-editor .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + this.segment + '</span></li><li class="b sugg-target"><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + this.translation + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
             });
             UI.markSuggestionTags(segment);
             UI.setDeleteSuggestion(segment);
             UI.lockTags();
             if (copySuggestionDone) {
                 if (isActiveSegment) {
-                    //this.checkTagMismatch(UI.currentSegment); //no more used. See fill Warning
                 }
             }
 
@@ -1901,7 +1729,7 @@ UI = {
                 window.location.hash = UI.currentSegmentId;
             }, 300);
         }
-        var file = this.currentArticle;
+        var file = this.currentFile;
         if (this.readonly)
             return;
         this.doRequest({
@@ -1950,7 +1778,7 @@ UI = {
             console.log('match deleted');
 
         $(".editor .matches .graysmall").each(function(index) {
-            $(this).find('.graysmall-message').text(UI.shortcutLabel + (index + 1));
+            $(this).find('.graysmall-message').text(UI.suggestionShortcutLabel + (index + 1));
             $(this).attr('data-item', index + 1);
             UI.reinitMMShortcuts();
         })
@@ -2219,8 +2047,7 @@ UI = {
             this.setProgress(d.stats);
             //check status of global warnings
             this.checkWarnings(false);
-        }
-        ;
+        };
     },
     setWaypoints: function() {
         this.firstSegment.waypoint('remove');
@@ -2324,15 +2151,6 @@ UI = {
             scrollTop: jumpto - 50
         }, 200);
     },
-    autoSaveInUndo: function() {
-        /*
-         if(!this.autoSave) return;
-         this.saveInUndoStack();
-         setTimeout(function(){
-         UI.autoSaveInUndo();
-         },10000);    	
-         */
-    },
     browserScrollPositionRestoreCorrection: function() {
         // detect if the scroll is a browser generated scroll position restore, and if this is the case rescroll to the segment 
         if(this.firstOpenedSegment == 1) { // if the current segment is the first opened in the current UI  
@@ -2354,7 +2172,6 @@ UI = {
         this.editarea.html(this.undoStack[ind]);
         if (!ind)
             this.lockTags();
-        //this.checkTagMismatch(UI.currentSegment); //no more used. See getWarning
 
         if (this.undoStackPosition < (this.undoStack.length - 1))
             this.undoStackPosition++;
@@ -2363,7 +2180,6 @@ UI = {
     },
     redoInSegment: function() {
         this.editarea.html(this.undoStack[this.undoStack.length - 1 - this.undoStackPosition - 1 + 2]);
-        //this.checkTagMismatch(UI.currentSegment); //no more used. See getWarning
         if (this.undoStackPosition > 0)
             this.undoStackPosition--;
         this.currentSegment.removeClass('waiting_for_check_result');
@@ -2789,10 +2605,6 @@ $(document).ready(function() {
     setInterval(function() {
         UI.checkWarnings(false);
     }, config.warningPollingInterval);
-
-//    setTimeout(function() {
-//        UI.currentSegmentQA();
-//    }, 4000);
 });
 
 $(window).resize(function() {
