@@ -218,6 +218,9 @@ class createProjectController extends ajaxcontroller {
             if (isset($_SESSION['cid']) and !empty($_SESSION['cid'])) {
                 $owner = $_SESSION['cid'];
             } else {
+
+                $_SESSION['_anonym_pid'] = $pid;
+
                 //default user
                 $owner = '';
             }

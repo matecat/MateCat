@@ -1,14 +1,51 @@
 <?php include_once INIT::$UTILS_ROOT . '/log.class.php';
+
+/**
+ * Class errObject
+ * Object vector for error reporting.
+ * json_encode facilities of public properties.
+ *
+ * __toString method are used for array_count_values and array_unique over container
+ *
+ */
+class errObject {
+
+    public $outcome;
+    public $debug;
+
+    /**
+     * Static instance constructor
+     *
+     * @param array $errors
+     * @return errObject
+     */
+    public static function get( array $errors ) {
+        $errObj = new self();
+        $errObj->outcome = $errors['outcome'];
+        $errObj->debug = $errors['debug'];
+        return $errObj;
+    }
+
+    /**
+     * Return string id
+     * @return string
+     */
+    public function __toString(){
+        return (string)$this->outcome;
+    }
+
+}
+
 /**
  * Translation string quality assurance.
  * 
  * Used for integrity comparison of strings. <br />
- * Add errors to a list every time it found a mismatch between strings.
+ * Add errors/warnings to a list every time it found a mismatch between strings.
  * 
  * NOTE:
  * If a not well formed XML source/target is provided, all integrity checks are skipped returning a 
  * 'bad source xml/bad target xml' error.
- * 
+ *
  * Use Example:
  * <br />
  * <pre>
@@ -133,7 +170,7 @@ class QA {
         1 =>  'Tag count mismatch',
         2 =>  'bad source xml',
         3 =>  'bad target xml',
-        4 =>  'Tag id mismatch',
+        4 =>  'Tag ID mismatch',
         5 =>  'Heading whitespaces mismatch',
         6 =>  'Tail whitespaces mismatch',
         7 =>  'Heading tab mismatch',
@@ -155,17 +192,17 @@ class QA {
     /**
      * List of Errors from  check analysis
      * 
-     * @var array(stdClass(number:string)) 
+     * @var array(errObject(number:string))
      */
     protected $exceptionList = array();
 
     /**
-     * List of warnings from check analysis 
-     * 
-     * @var array(stdClass(number,string))
+     * List of warnings from check analysis
+     *
+     * @var array(errObject(number,string))
      */
     protected $warningList = array();
-    
+
     /**
      * Add an error to error List.
      * Internal CodeMap
@@ -173,20 +210,21 @@ class QA {
      * @param int $errCode
      */
     protected function _addError($errCode) {
-        Log::doLog($this->_errorMap[$errCode]);
+        //Log::doLog($this->_errorMap[$errCode]);
         switch( $errCode ) {
             case self::ERR_COUNT:
             case self::ERR_SOURCE:
             case self::ERR_TARGET:
-                $this->exceptionList[] = (object)array( 'outcome' => self::ERR_TAG_MISMATCH, 'debug' => $this->_errorMap[self::ERR_TAG_MISMATCH] );
+                $this->exceptionList[] = errObject::get( array( 'outcome' => self::ERR_TAG_MISMATCH, 'debug' => $this->_errorMap[self::ERR_TAG_MISMATCH] ) );
             break;
             case self::ERR_TAG_ID:
-            	$this->exceptionList[] = (object)array( 'outcome' => self::ERR_TAG_ID, 'debug' => $this->_errorMap[self::ERR_TAG_ID] );
+            	$this->exceptionList[] = errObject::get( array( 'outcome' => self::ERR_TAG_ID, 'debug' => $this->_errorMap[self::ERR_TAG_ID] ) );
+            break;
             default:
-                $this->warningList[] = (object)array( 'outcome' => $errCode, 'debug' => $this->_errorMap[$errCode] );
+                $this->warningList[] = errObject::get( array( 'outcome' => $errCode, 'debug' => $this->_errorMap[$errCode] ) );
             break;
         }
-        
+
     }
 
     /**
@@ -200,50 +238,100 @@ class QA {
     
     /**
      * Check For Warnings
-     * 
+     *
      * return bool
      */
     public function thereAreWarnings(){
     	$warnings = array_merge( $this->exceptionList, $this->warningList );
     	return !empty($warnings);
     }
-    
+
+	/**
+	 * Get Warning level errors
+	 *
+	 * @return errObject[]
+	 */
     public function getWarnings(){
-    	
+    	return $this->checkErrorNone( array_merge( $this->warningList, $this->exceptionList ) );
+    }
+
+    /**
+     * Display an ERR_NONE if array is empty
+     *
+     * <pre>
+     * Array
+     * (
+     *     [0] => errObject Object
+     *         (
+     *             [outcome] => 0
+     *             [debug] =>
+     *         ),
+     * )
+     * </pre>
+     *
+     * @param errObject[] $list
+     * @param bool $count
+     * @return errObject[]
+     */
+    protected function checkErrorNone( array $list, $count = false ){
+    	if( empty( $list ) ){
+    		return array( errObject::get( array( 'outcome' => self::ERR_NONE, 'debug' => $this->_errorMap[self::ERR_NONE] . " [ 1 ]" ) ) );
+    	}
+
+        if ($count) {
+            /**
+             * count same values in array of errors.
+             * we use array_map with strval callback function because array_count_values can count only strings or int
+             * so:
+             * __toString was made internally in errObject class
+             *
+             * @see http://www.php.net/manual/en/function.array-count-values.php
+             **/
+            $errorCount = array_count_values(array_map('strval', $list));
+
+            /**
+             * array_unique remove duplicated values in array,
+             * Two elements are considered equal if and only if (string) $elem1 === (string) $elem2
+             * so:
+             * __toString was made internally in errObject class
+             *
+             * @see http://www.php.net/manual/en/function.array-unique.php
+             */
+            $list = array_unique($list);
+            foreach ($list as $errObj) {
+                $errObj->debug = $errObj->debug . " ( " . $errorCount[$errObj->outcome] . " )";
+            }
+        }
+        return $list;
+
     }
     
     /**
      * Export Error List
-     * @param bool $show_ERR_NONE Display or not an ERR_NONE
-     * @return stdClass(array(number:string))
-     * <pre>
-     * Array
-     * (
-     *     [0] => stdClass Object
-     *         (
-     *             [outcome] => 0
-     *             [debug] => 
-     *         ),
-     * )
-     * </pre>
+     *
      */
-    public function getErrors( $show_ERR_NONE = true ) {
-        if( empty( $this->exceptionList ) && $show_ERR_NONE ){
-            return array( (object)array( 'outcome' => self::ERR_NONE, 'debug' => $this->_errorMap[self::ERR_NONE] ) );
-        }
-        return $this->exceptionList;        
+    public function getErrors() {
+        return $this->checkErrorNone($this->exceptionList);
     }
-    
+
     /**
      * Get error list in json format
      * 
-     * @param bool $show_ERR_NONE Display or not an ERR_NONE
      * @return string Json
      */
-    public function getErrorsJSON( $show_ERR_NONE = true ) {
-        return json_encode( $this->getErrors( $show_ERR_NONE ) );
+    public function getErrorsJSON() {
+        return json_encode( $this->checkErrorNone($this->exceptionList, true) );
     }
     
+    /**
+     * Get warning list in json format
+     *
+     * @return string Json
+     */
+    public function getWarningsJSON() {
+    	return json_encode( $this->checkErrorNone( array_merge( $this->warningList, $this->exceptionList ), true ) );
+    }
+
     /**
      * Class constructor
      * 
@@ -336,66 +424,146 @@ class QA {
     /**
      * Perform all integrity check and comparisons on source and target string
      * 
-     * @return array(array(number:string))
+     * @return errObject[]
      * 
      */
     public function performConsistencyCheck() {
 
-        $srcNodeList = @$this->srcDom->getElementsByTagName('root')->item(0)->childNodes;
-        $trgNodeList = @$this->trgDom->getElementsByTagName('root')->item(0)->childNodes;
-        
-        if( ! $srcNodeList instanceof DOMNodeList || ! $trgNodeList instanceof DOMNodeList ){
+
+        $srcNodeList = @$this->srcDom->getElementsByTagName( 'root' )->item( 0 )->childNodes;
+        $trgNodeList = @$this->trgDom->getElementsByTagName( 'root' )->item( 0 )->childNodes;
+
+        if ( !$srcNodeList instanceof DOMNodeList || !$trgNodeList instanceof DOMNodeList ) {
             return $this->getErrors();
         }
-        
+
         //Save normalized dom Element
         $this->normalizedTrgDOM = clone $this->trgDom;
-        
+
         //Save normalized Dom Node list
-        $this->normalizedTrgDOMNodeList = @$this->normalizedTrgDOM->getElementsByTagName('root')->item(0)->childNodes;
-        
+        $this->normalizedTrgDOMNodeList = @$this->normalizedTrgDOM->getElementsByTagName( 'root' )->item( 0 )->childNodes;
+
+        $this->_checkContentConsistency( $srcNodeList, $trgNodeList );
         $this->_checkTagsBoundary();
-        $this->_checkContentConsistency($srcNodeList, $trgNodeList);
 
         // all checks completed
         return $this->getErrors();
+
     }
 
     /**
-     * Performs a check for differences on tags boundaries
+     * Perform integrity check only for tag mismatch
+     *
+     * @return errObject[]
+     */
+    public function performTagCheckOnly() {
+
+        $srcNodeList = @$this->srcDom->getElementsByTagName( 'root' )->item( 0 )->childNodes;
+        $trgNodeList = @$this->trgDom->getElementsByTagName( 'root' )->item( 0 )->childNodes;
+
+        if ( !$srcNodeList instanceof DOMNodeList || !$trgNodeList instanceof DOMNodeList ) {
+            return $this->getErrors();
+        }
+
+        $this->_checkTagMismatch( $srcNodeList, $trgNodeList );
+
+        // all checks completed
+        return $this->getErrors();
+
+    }
+
+    /**
+     * Performs a check for differences on first and last tags boundaries
      * All withespaces, tabs, carriage return, new lines between tags are checked
      * 
      */
     protected function _checkTagsBoundary() {
-        
+
+        //perform first char Line check if tags are not presents
+        preg_match_all('#^[\s\t\r\n]+[^<]+#u', $this->source_seg, $source_tags);
+        preg_match_all('#^[\s\t\r\n]+[^<]+#u', $this->target_seg, $target_tags);
+        $source_tags = $source_tags[0];
+        $target_tags = $target_tags[0];
+        if( count($source_tags) != count($target_tags) ){
+            $this->_addError(self::ERR_WS_HEAD);
+        }
+
         //get all special chars before a tag
-        preg_match_all('/[\s\t\r\n]+<[^\/>]+>/', $this->source_seg, $source_tags);
-        preg_match_all('/[\s\t\r\n]+<[^\/>]+>/', $this->target_seg, $target_tags);
+        preg_match_all('#[\s\t\r\n]+<[^/>]+>#u', $this->source_seg, $source_tags);
+        preg_match_all('#[\s\t\r\n]+<[^/>]+>#u', $this->target_seg, $target_tags);
         $source_tags = $source_tags[0];
         $target_tags = $target_tags[0];
         if( count($source_tags) != count($target_tags) ){
             $this->_addError(self::ERR_BOUNDARY_HEAD);
         }
-        
-        preg_match_all('/<[^>]+>[\s\t\r\n]+$/', $this->source_seg, $source_tags);
-        preg_match_all('/<[^>]+>[\s\t\r\n]+$/', $this->target_seg, $target_tags);
 
-        Log::hexDump($this->source_seg);
-        Log::hexDump($this->target_seg);
-        
+        //get All special chars between TAGS before first char occurrence
+        preg_match_all('#</[^>]+>[\s\t\r\n]+.*<[^/>]+>#u', $this->source_seg, $source_tags);
+        preg_match_all('#</[^>]+>[\s\t\r\n]+.*<[^/>]+>#u', $this->target_seg, $target_tags);
         $source_tags = $source_tags[0];
         $target_tags = $target_tags[0];
-        
-        Log::doLog( var_export( count($source_tags) != count($target_tags), true ) );
-        Log::doLog($source_tags);
-        Log::doLog($target_tags);
-        
-        if( count($source_tags) != count($target_tags) ){
-            $this->_addError(self::ERR_BOUNDARY_TAIL);
+        if( ( count($source_tags) != count($target_tags) ) ){
+            $this->_addError(self::ERR_BOUNDARY_HEAD);
+        }
+
+        //get All special chars after LAST tag at the end of line if there are
+        preg_match_all('/<[^>]+>[\s\t\r\n]+$/u', $this->source_seg, $source_tags);
+        preg_match_all('/<[^>]+>[\s\t\r\n]+$/u', $this->target_seg, $target_tags);
+        $source_tags = $source_tags[0];
+        $target_tags = $target_tags[0];
+
+        //so, if we found a last char mismatch, and if it is in the source: add to the target else trim it
+        if( ( count($source_tags) != count($target_tags) ) && !empty( $source_tags ) ){
+
+        	//Append a space to target for normalization.
+            $this->target_seg .= " ";
+
+            //Suppress Warning
+            //$this->_addError(self::ERR_BOUNDARY_TAIL);
+
+        } else {
+            $this->target_seg = preg_replace( '|[\s\t\r\n]+$|u', "", $this->target_seg );
+        }
+
+        //reload Target after normalization
+        $trg_xml_valid = @$this->trgDom->loadXML("<root>" . $this->target_seg . "</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
+        if ($trg_xml_valid === FALSE) {
+            $this->_addError(self::ERR_TARGET);
         }
 
     }
-    
+
+    protected function _checkTagMismatch( DOMNodeList $srcNodeList, DOMNodeList $trgNodeList ){
+
+        if( !function_exists( 'domIDCompare' ) ){
+            function domIDCompare( $a, $b ){
+                if( $a['id'] == $b['id'] ) return 0;
+                return ( $a['id'] < $b['id'] ? -1 : 1 );
+            }
+        }
+
+        $srcDomElements = array();
+        $trgDomElements = array();
+
+        $this->_mapElements( $srcNodeList, $srcDomElements );
+        $this->_mapElements( $trgNodeList, $trgDomElements );
+
+//        Log::doLog( $srcDomElements );
+//        Log::doLog( $trgDomElements );
+
+        $this->_checkTagCountMismatch( count($srcDomElements), count($trgDomElements) );
+
+        //check for Tag ID MISMATCH
+        $diffArray = array_udiff(  $srcDomElements, $trgDomElements, 'domIDCompare' );
+        if( !empty($diffArray) ){
+            $this->_addError(self::ERR_TAG_ID);
+            //Log::doLog($diffArray);
+        }
+
+        return array( $srcDomElements, $trgDomElements );
+
+    }
+
     /**
      * Perform all consistency contents check Internally
      *  
@@ -403,46 +571,158 @@ class QA {
      * @param DOMNodeList $trgNodeList
      */
     protected function _checkContentConsistency(DOMNodeList $srcNodeList, DOMNodeList $trgNodeList) {
-        
-        $this->_checkTagCount($srcNodeList->length, $trgNodeList->length);
-                          
-        for ($i = 0; $i < $srcNodeList->length; $i++) {
 
-			Log::doLog( var_export($srcNodeList->item($i), true) );
-        	
-            $srcNodeContent = $srcNodeList->item($i)->textContent;
-            $trgNodeContent = $trgNodeList->item($i)->textContent;
+        $result = $this->_checkTagMismatch( $srcNodeList, $trgNodeList );
 
-            Log::doLog($trgNodeContent);
-            
-            if( $srcNodeList->item($i) instanceof DOMText ){
-                
-                if( trim($srcNodeContent) == '' && trim($trgNodeContent) == '' ){
-                    continue;
-                }
-                
-            } else if( !( $srcNodeList->item($i) instanceof DOMText ) ) { //&& $trgNodeList->item($i)->hasAttributes() ) { //if it is a Tag node with id and not a textNode
-                
-            	Log::doLog( var_export( get_class( $trgNodeList->item($i) ), true ) );
-            	Log::doLog( var_export( $trgNodeList->item($i)->hasAttributes() , true ) );
-            	
-            	if ($srcNodeList->item($i)->getAttribute('id') != $trgNodeList->item($i)->getAttribute('id')) {
-                    $this->_addError(self::ERR_TAG_ID);
-                }
-                
-                Log::doLog( var_export( 'DONE', true ) );
-                
+        $srcDomElements = $result[0];
+        $trgDomElements = $result[1];
+
+        foreach( $srcDomElements as $srcTagID ){
+
+            if( $srcTagID['name'] == 'x' ){
+                continue;
             }
 
-            $this->_checkHeadWhiteSpaces($srcNodeContent, $trgNodeContent, $i);
-            $this->_checkTailWhiteSpaces($srcNodeContent, $trgNodeContent, $i);
+            if( !is_null( $srcTagID['parent_id'] ) ){
+
+                $srcNodeContent = $this->_queryDOMElement( $this->srcDom, $srcTagID )->textContent;
+
+                foreach( $trgDomElements as $k => $elements ){
+                    if( $elements['id'] == $srcTagID['id'] ){
+                        $trgTagReference = $trgDomElements[$k];
+                    }
+                }
+
+                $trgNodeContent = $this->_queryDOMElement( $this->trgDom, $trgTagReference )->textContent;
+
+            } else {
+
+                $srcNodeContent = $srcNodeList->item($srcTagID['node_idx'])->textContent;
+
+                foreach( $trgDomElements as $k => $elements ){
+                    if( $elements['id'] == $srcTagID['id'] ){
+                        $trgTagReference = $trgDomElements[$k];
+                    }
+                }
+
+                $trgTagPos = $trgTagReference['node_idx'];
+                $trgNodeContent = $trgNodeList->item( $trgTagPos )->textContent;
+
+            }
+
+
+            $this->_checkHeadWhiteSpaces($srcNodeContent, $trgNodeContent, $trgTagReference);
+            $this->_checkTailWhiteSpaces($srcNodeContent, $trgNodeContent, $trgTagReference);
             $this->_checkHeadTabs($srcNodeContent, $trgNodeContent);
             $this->_checkTailTabs($srcNodeContent, $trgNodeContent);
             $this->_checkHeadCRNL($srcNodeContent, $trgNodeContent);
             $this->_checkTailCRNL($srcNodeContent, $trgNodeContent);
-            
+
         }
-                
+
+    }
+
+    /**
+     * Find in a DOMDocument an Element by its Reference
+     *
+     * @param DOMDocument $domDoc
+     * @param $TagReference
+     * @return DOMElement
+     */
+    protected function _queryDOMElement( DOMDocument $domDoc, $TagReference ){
+
+        $Node = new DOMElement('g');
+
+        $availableParentList = $domDoc->getElementsByTagName($TagReference['name']);
+        for ($i = 0; $i < $availableParentList->length; $i++) {
+            if( $availableParentList->item($i)->getAttribute('id') == $TagReference['id'] ){
+
+                /**
+                 * @var DOMElement $Node
+                 */
+                $Node = $availableParentList->item($i);
+
+                //Log::doLog( 'Found: ' . $availableParentList->item($i)->textContent );
+            }
+        }
+
+        return $Node;
+
+    }
+
+    /**
+     * Create a map of NodeTree
+     * <pre>
+     * array (
+     *   0 => array (
+     *     'type' => 'DOMElement',
+     *     'name' => 'g',
+     *     'parent_id' => NULL,
+     *     'id' => '557',
+     *     'node_idx' => 0,
+     *   ),
+     *   1 => array (
+     *     'type' => 'DOMElement',
+     *     'name' => 'g',
+     *     'parent_id' => NULL,
+     *     'id' => '558',
+     *     'node_idx' => 1,
+     *   ),
+     *   2 => array (
+     *     'type' => 'DOMElement',
+     *     'name' => 'g',
+     *     'parent_id' => '558',
+     *     'id' => '559',
+     *     'node_idx' => 1,
+     *   ),
+     *   3 => array (
+     *     'type' => 'DOMElement',
+     *     'name' => 'g',
+     *     'parent_id' => '558',
+     *     'id' => '560',
+     *     'node_idx' => 3,
+     *   ),
+     *   4 => array (
+     *     'type' => 'DOMElement',
+     *     'name' => 'x',
+     *     'parent_id' => '560',
+     *     'id' => '125',
+     *     'node_idx' => 0,
+     *  )
+     * )
+     * </pre>
+     * @param DOMNodeList $elementList
+     * @param array $srcDomElements
+     * @param int $depth
+     * @param null $parentID
+     */
+    protected function _mapElements( DOMNodeList $elementList, array &$srcDomElements = array(), $depth = 0, $parentID = null ) {
+
+        for ( $i = 0; $i < $elementList->length; $i++ ) {
+
+            if ( $elementList->item( $i ) instanceof DOMElement ) {
+
+                $plainRef = array(
+                    'type'      => 'DOMElement',
+                    'name'      => $elementList->item( $i )->tagName,
+                    'parent_id' => $parentID,
+                    'id'        => $elementList->item( $i )->getAttribute( 'id' ),
+                    'node_idx'  => $i
+                );
+
+                $srcDomElements[ $depth++ ] = $plainRef;
+
+                if ( $elementList->item( $i )->hasChildNodes() ) {
+                    $this->_mapElements( $elementList->item( $i )->childNodes, $srcDomElements, $depth, $elementList->item( $i )->getAttribute( 'id' ) );
+                }
+
+            } else {
+                //$srcDomElements[$depth++] = array( 'type' => 'DOMText', 'content' => $elementList->item($i)->textContent );
+                //Log::doLog( "Found DOMText in Source " . $elementList->item($i)->textContent );
+            }
+
+        }
+        //Log::doLog($srcDomElements);
     }
 
     /**
@@ -452,27 +732,29 @@ class QA {
      * @param int $trgNodeCount
      *
      */
-    protected function _checkTagCount( $srcNodeCount, $trgNodeCount) {
+    protected function _checkTagCountMismatch( $srcNodeCount, $trgNodeCount) {
         if ($srcNodeCount != $trgNodeCount) {
             $this->_addError(self::ERR_COUNT);
         }
     }
-    
+
     /**
      * Search for head whitespaces ( comparison of strings )
-     * 
-     * @param string $srcNodeContent
-     * @param string $trgNodeContent
-     * @param int $nodeDepth
+     *
+     * @param $srcNodeContent
+     * @param $trgNodeContent
+     * @param $trgTagReference
      */
-    protected function _checkHeadWhiteSpaces($srcNodeContent, $trgNodeContent, $nodeDepth) {
-        
+    protected function _checkHeadWhiteSpaces($srcNodeContent, $trgNodeContent, $trgTagReference ) {
+
         //backup and check start string
         $_srcNodeContent = $srcNodeContent;
         $_trgNodeContent = $trgNodeContent; //not Used
-        
-//         Log::doLog($_trgNodeContent);
-        
+
+//                Log::doLog($srcNodeContent);
+//                Log::doLog($trgNodeContent);
+
+
         $srcHasHeadNBSP = $this->_hasHeadNBSP($srcNodeContent);
         $trgHasHeadNBSP = $this->_hasHeadNBSP($trgNodeContent);
         
@@ -483,6 +765,7 @@ class QA {
         $headSrcWhiteSpaces = mb_stripos($srcNodeContent, " ", 0, 'utf-8');
         $headTrgWhiteSpaces = mb_stripos($trgNodeContent, " ", 0, 'utf-8');      
         
+        //if source or target has a space at beginning and their relative positions are different
         if ( ( $headSrcWhiteSpaces === 0 || $headTrgWhiteSpaces === 0 ) && $headSrcWhiteSpaces !== $headTrgWhiteSpaces) {
             $this->_addError(self::ERR_WS_HEAD);
         }
@@ -491,18 +774,85 @@ class QA {
         if( $srcHasHeadNBSP != $trgHasHeadNBSP && !$this->thereAreErrors() ){
 
             //get the string from normalized string
-            $_trgNodeContent = $this->normalizedTrgDOMNodeList->item( $nodeDepth )->nodeValue;
-            
+            if( is_null($trgTagReference['parent_id']) ){
+                //get the string from normalized string
+                $_nodeNormalized = $this->normalizedTrgDOMNodeList->item( $trgTagReference['node_idx'] );
+                $_trgNodeContent = $_nodeNormalized->nodeValue;
+
+            } else {
+
+                $_nodeNormalized = $this->_queryDOMElement( $this->normalizedTrgDOM, $trgTagReference );
+                $_trgNodeContent = $_nodeNormalized->nodeValue;
+
+            }
+
             if( $srcHasHeadNBSP ) {
                 $_trgNodeContent = preg_replace( "/^\x{20}{1}/u", Utils::unicode2chr(0Xa0), $_trgNodeContent );
             } else {
                 $_trgNodeContent = preg_replace( "/^\x{a0}{1}/u", Utils::unicode2chr(0X20), $_trgNodeContent );
             }
-            
-            $this->normalizedTrgDOMNodeList->item( $nodeDepth )->nodeValue = $_trgNodeContent;
+
+            $_nodeNormalized->nodeValue = $_trgNodeContent;
 
         }
  
+    }
+
+    /**
+     * Search for trailing whitespaces ( comparison of strings )
+     *
+     * @param $srcNodeContent
+     * @param $trgNodeContent
+     * @param $trgTagReference
+     */
+    protected function _checkTailWhiteSpaces($srcNodeContent, $trgNodeContent, $trgTagReference ) {
+
+    	//backup and check start string
+    	$_srcNodeContent = $srcNodeContent;
+    	$_trgNodeContent = $trgNodeContent; //not used
+
+    	$srcHasTailNBSP = $this->_hasTailNBSP($srcNodeContent);
+    	$trgHasTailNBSP = $this->_hasTailNBSP($trgNodeContent);
+
+    	//normalize spaces
+    	$srcNodeContent = $this->_nbspToSpace($srcNodeContent);
+    	$trgNodeContent = $this->_nbspToSpace($trgNodeContent);
+
+    	$srcLen = mb_strlen($srcNodeContent);
+    	$trgLen = mb_strlen($trgNodeContent);
+
+    	$trailingSrcChar = mb_substr($srcNodeContent, $srcLen - 1, 1, 'utf-8');
+    	$trailingTrgChar = mb_substr($trgNodeContent, $trgLen - 1, 1, 'utf-8');
+    	if ( ( $trailingSrcChar == " " || $trailingTrgChar == " " ) && $trailingSrcChar != $trailingTrgChar) {
+    		$this->_addError(self::ERR_WS_TAIL);
+    	}
+
+    	//normalize the target first space according to the source type
+    	if( $srcHasTailNBSP != $trgHasTailNBSP && !$this->thereAreErrors() ){
+
+            //get the string from normalized string
+            if( is_null($trgTagReference['parent_id']) ){
+                //get the string from normalized string
+                $_nodeNormalized = $this->normalizedTrgDOMNodeList->item( $trgTagReference['node_idx'] );
+                $_trgNodeContent = $_nodeNormalized->nodeValue;
+
+            } else {
+
+                $_nodeNormalized = $this->_queryDOMElement( $this->normalizedTrgDOM, $trgTagReference );
+                $_trgNodeContent = $_nodeNormalized->nodeValue;
+
+            }
+
+    		if( $srcHasTailNBSP ) {
+    			$_trgNodeContent = preg_replace( "/\x{20}{1}$/u", Utils::unicode2chr(0Xa0), $_trgNodeContent );
+    		} else {
+    			$_trgNodeContent = preg_replace( "/\x{a0}{1}$/u", Utils::unicode2chr(0X20), $_trgNodeContent );
+    		}
+
+            $_nodeNormalized->nodeValue = $_trgNodeContent;
+
+    	}
+
     }
 
     /**
@@ -539,53 +889,6 @@ class QA {
         }
         
         throw new LogicException( __METHOD__ . " call when errors found in Source/Target integrity check & comparison.");
-    }
-        
-    /**
-     * Search for trailing whitespaces ( comparison of strings )
-     * 
-     * @param string $srcNodeContent
-     * @param string $trgNodeContent
-     * @param int $nodeDepth
-     */
-    protected function _checkTailWhiteSpaces($srcNodeContent, $trgNodeContent, $nodeDepth) {
-        
-        //backup and check start string
-        $_srcNodeContent = $srcNodeContent;
-        $_trgNodeContent = $trgNodeContent; //not used
-        
-        $srcHasTailNBSP = $this->_hasTailNBSP($srcNodeContent);
-        $trgHasTailNBSP = $this->_hasTailNBSP($trgNodeContent);
-        
-        //normalize spaces
-        $srcNodeContent = $this->_nbspToSpace($srcNodeContent);
-        $trgNodeContent = $this->_nbspToSpace($trgNodeContent);
-        
-        $srcLen = mb_strlen($srcNodeContent);
-        $trgLen = mb_strlen($trgNodeContent);
-        
-        $trailingSrcChar = mb_substr($srcNodeContent, $srcLen - 1, 1, 'utf-8');
-        $trailingTrgChar = mb_substr($trgNodeContent, $trgLen - 1, 1, 'utf-8');
-        if ( ( $trailingSrcChar == " " || $trailingTrgChar == " " ) && $trailingSrcChar != $trailingTrgChar) {
-            $this->_addError(self::ERR_WS_TAIL);
-        }
-        
-        //normalize the target first space according to the source type
-        if( $srcHasTailNBSP != $trgHasTailNBSP && !$this->thereAreErrors() ){
-
-            //get the string from normalized string
-            $_trgNodeContent = $this->normalizedTrgDOMNodeList->item( $nodeDepth )->nodeValue;
-
-            if( $srcHasTailNBSP ) {
-                $_trgNodeContent = preg_replace( "/\x{20}{1}$/u", Utils::unicode2chr(0Xa0), $_trgNodeContent );
-            } else {
-                $_trgNodeContent = preg_replace( "/\x{a0}{1}$/u", Utils::unicode2chr(0X20), $_trgNodeContent );
-            }
-            
-            $this->normalizedTrgDOMNodeList->item( $nodeDepth )->nodeValue = $_trgNodeContent;
-
-        }
-        
     }
 
     /**

@@ -53,7 +53,7 @@ class Log {
 		for ($i=0; $i<$ct; $i++) {
 			$curr_arg=func_get_arg($i); // get each argument passed  
 			if (is_array($curr_arg)){
-                $string .= print_r($curr_arg, true);
+                $string .= var_export($curr_arg, true);
 			}else{
                 $string .= $curr_arg;
 			}

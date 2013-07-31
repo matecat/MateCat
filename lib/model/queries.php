@@ -1503,6 +1503,15 @@ function archiveJob($res, $id) {
 
 }
 
+function updateProjectOwner( $ownerEmail, $project_id ){
+    $db = Database::obtain();
+    $data = array();
+    $data['owner'] = $ownerEmail;
+    $where = sprintf( " id_project = %u ", $project_id );
+    $result = $db->update('jobs', $data, $where);
+    return $result;
+}
+
 function updateJobsStatus($res, $id, $status, $only_if, $undo) {
 
 	if ($res == "prj") {

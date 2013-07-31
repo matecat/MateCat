@@ -72,8 +72,22 @@ UI = {
 
         $(".x-popup, .popup-outer, .popup a.anonymous").click(function(e){
             e.preventDefault();
-            $(".popup-outer").fadeOut();
-            $(".popup").fadeOut('fast');
+
+            $.ajax({
+                url: '?action=ajaxUtils',
+                data: {
+                    action: 'ajaxUtils',
+                    exec: 'stayAnonymous'
+                },
+                type: 'POST',
+                dataType: 'json',
+                success: function(d){
+                    $(".popup-outer").fadeOut();
+                    $(".popup").fadeOut('fast');
+                }
+
+            });
+
         });
         
         $(".stopbtn").click(function(e){

@@ -1,6 +1,7 @@
 <?php
 
 require_once INIT::$ROOT . '/inc/errors.inc.php';
+require_once INIT::$MODEL_ROOT . '/queries.php';
 
 function __autoload($action) {
 	if (!file_exists(INIT::$CONTROLLER_ROOT . "/$action.php")) {

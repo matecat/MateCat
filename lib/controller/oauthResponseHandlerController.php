@@ -27,11 +27,16 @@ class oauthResponseHandlerController extends viewcontroller{
 
 		//get url to redirect to
 		session_start();
+
 		//add default if not set
 		if(!isset($_SESSION['incomingUrl']) or empty($_SESSION['incomingUrl'])){
-			$_SESSION['incomingUrl']='/';	
+			$_SESSION['incomingUrl']='/';
 		}
-		$this->redirectUrl=$_SESSION['incomingUrl'];
+
+		$this->redirectUrl = $_SESSION['incomingUrl'];
+
+        //remove no more used var
+        unset($_SESSION['incomingUrl']);
 	}
 
 	public function __destruct(){
@@ -55,9 +60,25 @@ class oauthResponseHandlerController extends viewcontroller{
 				//$this->sendNotifyMail($this->userdata);
 
 				//ok mail sent, set stuff
-				$_SESSION['cid']=$this->userdata['email'];
+				$_SESSION['cid'] = $this->userdata['email'];
+
+                if( isset($_SESSION['_anonym_pid']) && !empty($_SESSION['_anonym_pid']) ){
+                    //update anonymous project with user credentials
+                    $result = updateProjectOwner( $this->userdata['email'], $_SESSION['_anonym_pid'] );
+                }
+
 			}
 		}
+
+        include_once '/var/www/cattool/lib/utils/log.class.php';
+        Log::doLog( var_export( $_SESSION , true ) );
+
+        //destroy session info of last anonymous project
+        unset($_SESSION['_anonym_pid']);
+
+        Log::doLog( var_export( $_SESSION , true ) );
+
+
 	}
 
 	public function setTemplateVars() {

@@ -12,6 +12,8 @@ class oauthRequestInitializerController extends helperController{
 	public function __construct(){
 		parent::__construct();
 
+        session_start();
+
 		//instantiate openid client
 		$this->openid = new LightOpenID(INIT::$HTTPHOST);
 
@@ -22,17 +24,17 @@ class oauthRequestInitializerController extends helperController{
 				'namePerson/last',
 				'contact/email'
 				);
-		//set return url
-		$this->openid->returnUrl= INIT::$HTTPHOST."/oauth/response";
-		
-		var_dump(); die();
-		
+
+        //set return url
+        $this->openid->returnUrl = INIT::$HTTPHOST."/oauth/response";
+
 		//set identity website for google
 		$this->openid->identity = 'https://www.google.com/accounts/o8/id';
 	}
 
 	public function doAction(){
-		try {
+
+        try {
 			if(!$this->openid->mode) {
 				//go to Google page
 				$this->redirect($this->openid->authUrl());
