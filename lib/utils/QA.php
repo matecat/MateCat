@@ -1,4 +1,4 @@
-<?php
+<?php include_once INIT::$UTILS_ROOT . '/log.class.php';
 /**
  * Translation string quality assurance.
  * 
@@ -160,21 +160,30 @@ class QA {
     protected $exceptionList = array();
 
     /**
+     * List of warnings from check analysis 
+     * 
+     * @var array(stdClass(number,string))
+     */
+    protected $warningList = array();
+    
+    /**
      * Add an error to error List.
      * Internal CodeMap
      * 
      * @param int $errCode
      */
     protected function _addError($errCode) {
-        //Log::doLog($this->_errorMap[$errCode]);
+        Log::doLog($this->_errorMap[$errCode]);
         switch( $errCode ) {
             case self::ERR_COUNT:
             case self::ERR_SOURCE:
             case self::ERR_TARGET:
                 $this->exceptionList[] = (object)array( 'outcome' => self::ERR_TAG_MISMATCH, 'debug' => $this->_errorMap[self::ERR_TAG_MISMATCH] );
             break;
+            case self::ERR_TAG_ID:
+            	$this->exceptionList[] = (object)array( 'outcome' => self::ERR_TAG_ID, 'debug' => $this->_errorMap[self::ERR_TAG_ID] );
             default:
-                $this->exceptionList[] = (object)array( 'outcome' => $errCode, 'debug' => $this->_errorMap[$errCode] );
+                $this->warningList[] = (object)array( 'outcome' => $errCode, 'debug' => $this->_errorMap[$errCode] );
             break;
         }
         
@@ -187,6 +196,20 @@ class QA {
      */
     public function thereAreErrors(){
         return !empty($this->exceptionList);
+    }
+    
+    /**
+     * Check For Warnings
+     * 
+     * return bool
+     */
+    public function thereAreWarnings(){
+    	$warnings = array_merge( $this->exceptionList, $this->warningList );
+    	return !empty($warnings);
+    }
+    
+    public function getWarnings(){
+    	
     }
     
     /**
@@ -249,13 +272,13 @@ class QA {
         $this->target_seg = $target_seg;
         
         $this->srcDom = new DOMDocument('1.0', 'utf-8');
-        $src_xml_valid = $this->srcDom->loadXML("<root>$source_seg</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
+        $src_xml_valid = @$this->srcDom->loadXML("<root>$source_seg</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
         if ($src_xml_valid === FALSE) {
             $this->_addError(self::ERR_SOURCE);
         }
 
         $this->trgDom = new DOMDocument('1.0', 'utf-8');
-        $trg_xml_valid = $this->trgDom->loadXML("<root>$target_seg</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
+        $trg_xml_valid = @$this->trgDom->loadXML("<root>$target_seg</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
         if ($trg_xml_valid === FALSE) {
             $this->_addError(self::ERR_TARGET);
         }
@@ -356,8 +379,17 @@ class QA {
         
         preg_match_all('/<[^>]+>[\s\t\r\n]+$/', $this->source_seg, $source_tags);
         preg_match_all('/<[^>]+>[\s\t\r\n]+$/', $this->target_seg, $target_tags);
+
+        Log::hexDump($this->source_seg);
+        Log::hexDump($this->target_seg);
+        
         $source_tags = $source_tags[0];
         $target_tags = $target_tags[0];
+        
+        Log::doLog( var_export( count($source_tags) != count($target_tags), true ) );
+        Log::doLog($source_tags);
+        Log::doLog($target_tags);
+        
         if( count($source_tags) != count($target_tags) ){
             $this->_addError(self::ERR_BOUNDARY_TAIL);
         }
@@ -376,8 +408,12 @@ class QA {
                           
         for ($i = 0; $i < $srcNodeList->length; $i++) {
 
+			Log::doLog( var_export($srcNodeList->item($i), true) );
+        	
             $srcNodeContent = $srcNodeList->item($i)->textContent;
             $trgNodeContent = $trgNodeList->item($i)->textContent;
+
+            Log::doLog($trgNodeContent);
             
             if( $srcNodeList->item($i) instanceof DOMText ){
                 
@@ -385,10 +421,17 @@ class QA {
                     continue;
                 }
                 
-            } else if( !$srcNodeList->item($i) instanceof DOMText ) { //if it is a Tag node with id and not a textNode
-                if ($srcNodeList->item($i)->getAttribute('id') != $trgNodeList->item($i)->getAttribute('id')) {
+            } else if( !( $srcNodeList->item($i) instanceof DOMText ) ) { //&& $trgNodeList->item($i)->hasAttributes() ) { //if it is a Tag node with id and not a textNode
+                
+            	Log::doLog( var_export( get_class( $trgNodeList->item($i) ), true ) );
+            	Log::doLog( var_export( $trgNodeList->item($i)->hasAttributes() , true ) );
+            	
+            	if ($srcNodeList->item($i)->getAttribute('id') != $trgNodeList->item($i)->getAttribute('id')) {
                     $this->_addError(self::ERR_TAG_ID);
                 }
+                
+                Log::doLog( var_export( 'DONE', true ) );
+                
             }
 
             $this->_checkHeadWhiteSpaces($srcNodeContent, $trgNodeContent, $i);

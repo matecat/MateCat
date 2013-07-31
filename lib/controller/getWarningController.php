@@ -26,7 +26,7 @@ class getWarningController extends ajaxcontroller{
                  );
 
                 $this->__postInput = (object)filter_input_array( INPUT_POST, $filterArgs );
-                                
+                
 	}
 
         /**

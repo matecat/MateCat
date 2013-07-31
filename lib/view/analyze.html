@@ -6,12 +6,14 @@
         <meta name="description" content="MateCat allows you to get more matches than any other CAT tool."/>
         <meta name="viewport" content="width=device-width"/>
         <link rel="stylesheet" href="${basepath}public/css/analyze.css?build=${build_number}"/>
+        <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
 
         <script type="text/javascript">
             var config = {
                 status: '${project_status}',
                 totalSegments: '${num_segments}',
-                totalAnalyzed: '${num_segments_analyzed}'
+                totalAnalyzed: '${num_segments_analyzed}',
+                isLoggedIn: '${isLoggedIn}'
             }
         </script>
 
@@ -19,7 +21,9 @@
         <script type="text/javascript" src="${basepath}public/js/lib/jquery-ui.js"></script>
         <script type="text/javascript" src="${basepath}public/js/utils.js?build=${build_number}"></script>
         <script type="text/javascript" src="${basepath}public/js/analyze.js?build=${build_number}"></script>
+        <script type='text/javascript' src="${basepath}public/js/login.js?build=${build_number}"></script>
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
+        
     </head>
 
 
@@ -410,7 +414,33 @@
         </div>
     </footer>
 
-    <script src="${basepath}public/js/lib/snapengage.js"></script>
+	<!-- POPUP LOGIN -->
+	<div id='popupWrapper' >
+		<div class="popup-outer"></div>
+		<div class="popup">
+	
+			<a href="#" class="x-popup"></a>
+			<h1>Login</h1>
+	
+			<h2>
+				Login to add the project<br />to your Management Panel
+			</h2>
+	
+			<div class="outer">
+				<div class="inner">
+					<button id="sign-in" name="" type="button" class="login-button"
+						data-oauth="http://matecat.translated.home/oauth/request?v2">Sign
+						in using Google</button>
+				</div>
+			</div>
+			<br /> Or <br />
+			<a href="#" class="anonymous"> Stay anonymous</a>
+	
+		</div>
+	</div>
+	<!-- FINE POPUP LOGIN -->
+
+	<script src="${basepath}public/js/lib/snapengage.js"></script>
 
 </body> 
 </html>

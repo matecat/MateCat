@@ -77,6 +77,11 @@ UI = {
         rangy.init();
         this.savedSel = null;
         this.savedSelActiveElement = null;
+        this.firstOpenedSegment = false;
+        this.autoscrollCorrectionEnabled = true;
+        setTimeout(function() {
+            UI.autoscrollCorrectionEnabled = false;
+        }, 2000);
         this.checkSegmentsArray = {};
         this.markTags();
         $('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');
@@ -152,7 +157,8 @@ UI = {
         })
 
         $(window).on('scroll', function(e) {
-            UI.detectIfSegmentIsVisible();
+            UI.browserScrollPositionRestoreCorrection();
+            UI.setSegmentPointer();
         })
 
         $("header .filter").click(function(e) {
@@ -603,9 +609,10 @@ UI = {
             console.log('Init time: ' + this.initTime);
 
     },
-    doRequest: function(req) {
+    doRequest: function(req,log) {
+        logTxt = (typeof log == 'undefined')? '' : '&type=' + log;
         var setup = {
-            url: config.basepath + '?action=' + req.data.action + this.appendTime(),
+            url: config.basepath + '?action=' + req.data.action + logTxt + this.appendTime(),
             data: req.data,
             type: 'POST',
             dataType: 'json'
@@ -932,7 +939,7 @@ UI = {
         this.firstSegment = s.first();
         this.lastSegment = s.last();
     },
-    detectIfSegmentIsVisible: function() {
+    setSegmentPointer: function() {
         if($('.editor').length) {
             if ($('.editor').isOnScreen()) {
                 $('#segmentPointer').hide();
@@ -1267,6 +1274,14 @@ UI = {
         this.loadingMore = false;
         this.setWaypoints();
     },
+    getSegmentSource: function(seg) {
+        segment = (typeof seg == 'undefined')? this.currentSegment : seg;
+        return $('.source', segment).text();
+    },
+    getSegmentTarget: function(seg) {
+        editarea = (typeof seg == 'undefined')? this.editarea : $('.editarea', seg);
+        return editarea.text();
+    },
     gotoNextSegment: function() {
         var next = $('.editor').next();
         if (next.is('section')) {
@@ -1423,6 +1438,7 @@ UI = {
             if (this.justSelecting())
                 return;
         }
+        this.firstOpenedSegment = (this.firstOpenedSegment == 0)? 1 : 2;
         this.byButton = false;
         this.cacheObjects(editarea);
         $(window).trigger({
@@ -1465,6 +1481,7 @@ UI = {
         this.lockTags();
         if (!this.readonly)
             this.getContribution(segment, 1);
+        this.currentSegmentQA();
         if (this.debug)
             console.log('close/open time: ' + ((new Date()) - this.openSegmentStart));
     },
@@ -1558,8 +1575,6 @@ UI = {
                 this.render(false);
             }
         }
-
-
     },
     pointToOpenSegment: function() {
         if (this.segmentIdToRestore) {
@@ -1738,9 +1753,7 @@ UI = {
                     $('#file-' + fid).append(newFile);
                 }
             }
-
         })
-
         if (starting) {
             this.init();
         }
@@ -1784,6 +1797,7 @@ UI = {
         }
 
         $("html,body").stop();
+//        console.log('destinationTop: ' + destinationTop);
         $("html,body").animate({
             scrollTop: destinationTop - 20
         }, 500);
@@ -1797,16 +1811,6 @@ UI = {
     },
     setChosenSuggestion: function(w) {
         this.editarea.data('lastChosenSuggestion', w);
-        /*
-         this.doRequest({
-         data: {
-         action: 'chooseSuggestion',
-         id_segment: UI.currentSegmentId,
-         id_job: config.job_id,
-         id_suggestion: w
-         }
-         });
-         */
     },
     setContribution: function(segment, status, byStatus) {
         if ((status == 'draft') || (status == 'rejected'))
@@ -1908,10 +1912,6 @@ UI = {
             },
             success: function(d) {
                 UI.setCurrentSegment_success(d);
-                /*
-                 UI.nextSegmentIdByServer = d.nextSegmentId;
-                 UI.getNextSegment(UI.currentSegment,'untranslated');
-                 */
             }
         });
     },
@@ -2041,8 +2041,7 @@ UI = {
             $(".editor:visible").find(".close").click();
             $('.downloadtr-button').focus();
             return false;
-        }
-        ;
+        };
         this.buttonClickStop = new Date();
         this.copyToNextIfSame(nextSegment);
         this.byButton = true;
@@ -2083,7 +2082,7 @@ UI = {
      */
     fillCurrentSegmentWarnings: function(warningDetails) {
         //console.log( 'fillCurrentSegmentWarnings' );
-        console.log('warningDetails: ',warningDetails );
+//        console.log('warningDetails: ',warningDetails );
         //scan array    
         try {
             $.each(warningDetails, function(key, value) {
@@ -2111,14 +2110,14 @@ UI = {
             },
             success: function(data) {
                 var warningPosition = '';
-                console.log('data.total: '+data.total);
+//                console.log('data.total: '+data.total);
 
                 //check for errors
                 if (data.total > 0) {
 
                     //for now, put only last in the pointer to segment id
                     warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
-                    console.log('warningPosition: ' + warningPosition);
+//                    console.log('warningPosition: ' + warningPosition);
 
                     if(openingSegment) UI.fillCurrentSegmentWarnings(data.details);
 
@@ -2142,10 +2141,10 @@ UI = {
         var dd = new Date();
         ts = dd.getTime();
         var token = this.currentSegmentId + '-' + ts.toString();
-        var src_content = $('.source', this.currentSegment).attr('data-original');  
-        var trg_content = this.editarea.text();        
+        //var src_content = $('.source', this.currentSegment).attr('data-original');  
+        var src_content = this.getSegmentSource();  
+        var trg_content = this.getSegmentTarget();        
         this.checkSegmentsArray[token] = trg_content;
-        
         this.doRequest({
             data: {
                 action: 'getWarning',
@@ -2177,7 +2176,7 @@ UI = {
                     UI.currentSegment.removeClass('waiting_for_check_result');
                 }
             }
-        });
+        }, 'local');
     },
     setTranslation: function(segment, status) {
         var info = $(segment).attr('id').split('-');
@@ -2185,7 +2184,7 @@ UI = {
         var file = $(segment).parents('article');
         var status = status;
         // Attention, to be modified when we will lock tags
-        var translation = $('.editarea', segment).text().trim();
+        var translation = $('.editarea', segment).text();
 
         if (translation == '')
             return false;
@@ -2333,6 +2332,17 @@ UI = {
          UI.autoSaveInUndo();
          },10000);    	
          */
+    },
+    browserScrollPositionRestoreCorrection: function() {
+        // detect if the scroll is a browser generated scroll position restore, and if this is the case rescroll to the segment 
+        if(this.firstOpenedSegment == 1) { // if the current segment is the first opened in the current UI  
+            if(!$('.editor').isOnScreen()) { // if the current segment is out of the current viewport 
+                if(this.autoscrollCorrectionEnabled) { // if this is the first correction and we are in the initial 2 seconds since page init 
+                    this.scrollSegment(this.currentSegment);
+                    this.autoscrollCorrectionEnabled = false;
+                }
+            }
+        }
     },
     undoInSegment: function() {
         if (this.undoStackPosition == 0)
@@ -2750,6 +2760,7 @@ $.fn.isOnScreen = function() {
         top: win.scrollTop(),
         left: win.scrollLeft()
     };
+//    console.log('viewport: ', viewport);
     viewport.right = viewport.left + win.width();
     viewport.bottom = viewport.top + win.height();
 

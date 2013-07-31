@@ -42,6 +42,8 @@ abstract class controller {
 
 	abstract function doAction();
 
+	abstract function finalize();
+	
 	protected function nocache() {
 		header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
 		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
@@ -84,7 +86,7 @@ abstract class downloadController extends controller {
 		parent::__construct();
 	}
 
-	public function download() {
+	public function finalize() {
 		try {
 			$buffer = ob_get_contents();
 			ob_get_clean();
@@ -113,7 +115,9 @@ abstract class helperController extends controller{
 
 	//this lets the helper issue all the checks which are required before redirecting
 	//abstract public performValidation();
-
+	
+	//implement abstract finalize empty
+	public function finalize(){}
 
 	public function __construct() {
 		parent::__construct();
@@ -220,18 +224,18 @@ abstract class viewcontroller extends controller {
 		//access session data
 		session_start();
 		//prepare redirect flag
-		$mustRedirectToLogin=false;
+		$mustRedirectToLogin = false;
 
 		//if no login set and login is required
-		if((!isset($_SESSION['cid']) or empty($_SESSION['cid'])) and $this->isAuthRequired){
+		if( !$this->isLoggedIn() and $this->isAuthRequired){
 			//take note of url we wanted to go after
-			$_SESSION['incomingUrl']=$_SERVER['REQUEST_URI'];
+			$_SESSION['incomingUrl'] = $_SERVER['REQUEST_URI'];
 
 			//signal redirection
-			$mustRedirectToLogin=true;
+			$mustRedirectToLogin = true;
 		}
 		//even if no login in required, if user data is present, pull it out 
-		if(!empty($_SESSION['cid'])) $this->logged_user=getUserData($_SESSION['cid']);
+		if(!empty($_SESSION['cid'])) $this->logged_user = getUserData($_SESSION['cid']);
 		//write session
 		session_write_close();
 
@@ -243,6 +247,10 @@ abstract class viewcontroller extends controller {
 		return true;
 	}
 
+	public function isLoggedIn(){
+		return ( isset($_SESSION['cid']) && !empty($_SESSION['cid']) );
+	}
+	
 	private function isSupportedWebBrowser() {
 		$browser_info = $this->getBrowser();
 		$browser_name = strtolower($browser_info['name']);
@@ -323,7 +331,7 @@ abstract class viewcontroller extends controller {
 		}
 	}
 
-	public function executeTemplate() {
+	public function finalize() {
 		$this->setTemplateVars();
 		try {
 			$buffer = ob_get_contents();
@@ -357,7 +365,7 @@ abstract class ajaxcontroller extends controller {
 		$this->result = array("errors" => array(), "data" => array());
 	}
 
-	public function echoJSONResult() {
+	public function finalize() {
 		$toJson = json_encode($this->result);
 		echo $toJson;
 	}

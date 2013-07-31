@@ -24,6 +24,9 @@ class oauthRequestInitializerController extends helperController{
 				);
 		//set return url
 		$this->openid->returnUrl= INIT::$HTTPHOST."/oauth/response";
+		
+		var_dump(); die();
+		
 		//set identity website for google
 		$this->openid->identity = 'https://www.google.com/accounts/o8/id';
 	}
