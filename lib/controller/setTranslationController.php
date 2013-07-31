@@ -75,8 +75,8 @@ class setTranslationController extends ajaxcontroller {
         $check = new QA($segment['segment'], $this->translation);
         $check->performConsistencyCheck();
         
-        if( $check->thereAreErrors() ){
-              $err_json = $check->getErrorsJSON();
+        if( $check->thereAreWarnings() ){
+              $err_json = $check->getWarningsJSON();
               $translation = $this->translation;
         } else {
               $err_json = '';
@@ -103,7 +103,7 @@ class setTranslationController extends ajaxcontroller {
 		$this->result['data'] = "OK";
                 
                 /* FIXME: added for code compatibility with front-end. Remove. */
-                $_warn = $check->getErrors();
+                $_warn = $check->getWarnings();
                 $warning = $_warn[0];
                 /* */
                 

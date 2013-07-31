@@ -55,9 +55,18 @@ class oauthResponseHandlerController extends viewcontroller{
 				//$this->sendNotifyMail($this->userdata);
 
 				//ok mail sent, set stuff
-				$_SESSION['cid']=$this->userdata['email'];
+				$_SESSION['cid'] = $this->userdata['email'];
+
+                //update anonymous project with user credentials
+                $result = updateProjectOwner( $this->userdata['email'], $_SESSION['_anonym_pid'] );
+
+
 			}
 		}
+
+        //destroy session info of last anonymous project
+        unset($_SESSION['_anonym_pid']);
+
 	}
 
 	public function setTemplateVars() {

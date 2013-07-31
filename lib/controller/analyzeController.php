@@ -119,10 +119,9 @@ class analyzeController extends viewcontroller {
 			$this->jobs[$jid]['target_short'] = $target_short;
 			$this->jobs[$jid]['password'] = $password;
 
-                        if (!array_key_exists("total_raw_word_count", $this->jobs[$jid])){
-                            $this->jobs[$jid]['total_raw_word_count']=0;
-                        }
-
+            if (!array_key_exists("total_raw_word_count", $this->jobs[$jid])){
+                $this->jobs[$jid]['total_raw_word_count']=0;
+            }
 
 			//calculate total word counts per job (summing different files)
 			$this->jobs[$jid]['total_raw_word_count']+=$pdata['file_raw_word_count'];
@@ -217,38 +216,38 @@ class analyzeController extends viewcontroller {
 		}
 	}
 
-	public function setTemplateVars() {
-				
-		$this->template->jobs = $this->jobs;
-		$this->template->fast_analysis_wc = $this->fast_analysis_wc;
-		$this->template->fast_analysis_wc_print = $this->fast_analysis_wc_print;
-		$this->template->tm_analysis_wc = $this->tm_analysis_wc;
-		$this->template->tm_analysis_wc_print = $this->tm_analysis_wc_print;
-		$this->template->standard_analysis_wc = $this->standard_analysis_wc;
-		$this->template->standard_analysis_wc_print = $this->standard_analysis_wc_print;
-		$this->template->total_raw_word_count = $this->total_raw_word_count;
-		$this->template->total_raw_word_count_print = $this->total_raw_word_count_print;
-		$this->template->pname = $this->pname;
-		$this->template->pid = $this->pid;
-		$this->template->project_not_found = $this->project_not_found;
-		$this->template->fast_wc_time = $this->fast_wc_time;
-		$this->template->tm_wc_time = $this->tm_wc_time;
-		$this->template->tm_wc_unit = $this->tm_wc_unit;
-		$this->template->fast_wc_unit = $this->fast_wc_unit;
-		$this->template->standard_wc_unit = $this->standard_wc_unit;
-		$this->template->raw_wc_time = $this->raw_wc_time;
-		$this->template->standard_wc_time = $this->standard_wc_time;
-		$this->template->raw_wc_unit = $this->raw_wc_unit;
-		$this->template->project_status = $this->project_status;
-		$this->template->num_segments = $this->num_segments;
-		$this->template->num_segments_analyzed = $this->num_segments_analyzed;
-		$this->template->logged_user=trim($this->logged_user['first_name']." ".$this->logged_user['last_name']);
-		$this->template->build_number = INIT::$BUILD_NUMBER;
-        
-		$this->template->isLoggedIn = $this->isLoggedIn();
-                //print_r ($this->template); exit;
+    public function setTemplateVars() {
 
-	}
+        $this->template->jobs                       = $this->jobs;
+        $this->template->fast_analysis_wc           = $this->fast_analysis_wc;
+        $this->template->fast_analysis_wc_print     = $this->fast_analysis_wc_print;
+        $this->template->tm_analysis_wc             = $this->tm_analysis_wc;
+        $this->template->tm_analysis_wc_print       = $this->tm_analysis_wc_print;
+        $this->template->standard_analysis_wc       = $this->standard_analysis_wc;
+        $this->template->standard_analysis_wc_print = $this->standard_analysis_wc_print;
+        $this->template->total_raw_word_count       = $this->total_raw_word_count;
+        $this->template->total_raw_word_count_print = $this->total_raw_word_count_print;
+        $this->template->pname                      = $this->pname;
+        $this->template->pid                        = $this->pid;
+        $this->template->project_not_found          = $this->project_not_found;
+        $this->template->fast_wc_time               = $this->fast_wc_time;
+        $this->template->tm_wc_time                 = $this->tm_wc_time;
+        $this->template->tm_wc_unit                 = $this->tm_wc_unit;
+        $this->template->fast_wc_unit               = $this->fast_wc_unit;
+        $this->template->standard_wc_unit           = $this->standard_wc_unit;
+        $this->template->raw_wc_time                = $this->raw_wc_time;
+        $this->template->standard_wc_time           = $this->standard_wc_time;
+        $this->template->raw_wc_unit                = $this->raw_wc_unit;
+        $this->template->project_status             = $this->project_status;
+        $this->template->num_segments               = $this->num_segments;
+        $this->template->num_segments_analyzed      = $this->num_segments_analyzed;
+        $this->template->logged_user                = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
+        $this->template->build_number               = INIT::$BUILD_NUMBER;
+
+        $this->template->isLoggedIn                 = $this->isLoggedIn();
+        //print_r ($this->template); exit;
+
+    }
 
 }
 
