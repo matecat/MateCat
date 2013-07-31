@@ -27,11 +27,16 @@ class oauthResponseHandlerController extends viewcontroller{
 
 		//get url to redirect to
 		session_start();
+
 		//add default if not set
 		if(!isset($_SESSION['incomingUrl']) or empty($_SESSION['incomingUrl'])){
-			$_SESSION['incomingUrl']='/';	
+			$_SESSION['incomingUrl']='/';
 		}
-		$this->redirectUrl=$_SESSION['incomingUrl'];
+
+		$this->redirectUrl = $_SESSION['incomingUrl'];
+
+        //remove no more used var
+        unset($_SESSION['incomingUrl']);
 	}
 
 	public function __destruct(){
@@ -57,9 +62,10 @@ class oauthResponseHandlerController extends viewcontroller{
 				//ok mail sent, set stuff
 				$_SESSION['cid'] = $this->userdata['email'];
 
-                //update anonymous project with user credentials
-                $result = updateProjectOwner( $this->userdata['email'], $_SESSION['_anonym_pid'] );
-
+                if( isset($_SESSION['_anonym_pid']) && !empty($_SESSION['_anonym_pid']) ){
+                    //update anonymous project with user credentials
+                    $result = updateProjectOwner( $this->userdata['email'], $_SESSION['_anonym_pid'] );
+                }
 
 			}
 		}

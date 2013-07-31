@@ -214,6 +214,10 @@ class analyzeController extends viewcontroller {
 		} else {
 			$this->total_raw_word_count_print = number_format($this->total_raw_word_count, 0, ".", ",");
 		}
+
+        session_start();
+        $_SESSION['incomingUrl'] = INIT::$HTTPHOST . $_SERVER['REQUEST_URI'];
+
 	}
 
     public function setTemplateVars() {
