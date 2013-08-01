@@ -15,10 +15,6 @@ class controllerDispatcher {
 
 	private static $instance;
 
-	private function __construct() {
-
-	}
-
 	public static function obtain() {
 		if (!self::$instance) {
 			self::$instance = new controllerDispatcher();
@@ -55,9 +51,6 @@ abstract class controller {
 
 	protected function __construct() {
 
-        //access session data
-        @session_start();
-
 		try {
 			/* $this->localizationInfo=new localizationClass();
 			   $this->localize();
@@ -72,10 +65,6 @@ abstract class controller {
 			exit;
 		}
 	}
-
-    public function __destruct(){
-        @session_write_close();
-    }
 
 	protected function get_from_get_post($varname) {
 		$ret = null;
