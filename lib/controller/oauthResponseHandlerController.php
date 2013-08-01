@@ -70,14 +70,8 @@ class oauthResponseHandlerController extends viewcontroller{
 			}
 		}
 
-        include_once '/var/www/cattool/lib/utils/log.class.php';
-        Log::doLog( var_export( $_SESSION , true ) );
-
         //destroy session info of last anonymous project
         unset($_SESSION['_anonym_pid']);
-
-        Log::doLog( var_export( $_SESSION , true ) );
-
 
 	}
 

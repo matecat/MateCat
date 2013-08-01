@@ -234,7 +234,7 @@ class XliffSAXTranslationReplacer{
 
 		if( $check->thereAreErrors() ){
 			$severe_mismatch = true;
-			log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".print_r( $check->getErrors(), true ).")");
+			//log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".print_r( $check->getErrors(), true ).")");
 		}
 		
         if ($severe_mismatch){
