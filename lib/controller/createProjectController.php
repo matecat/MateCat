@@ -30,11 +30,7 @@ class createProjectController extends ajaxcontroller {
         $this->private_tm_key = $this->get_from_get_post('private_tm_key');
         $this->private_tm_user = $this->get_from_get_post('private_tm_user');
         $this->private_tm_pass = $this->get_from_get_post('private_tm_pass');
-        session_start();
-    }
 
-    public function __destruct() {
-        session_write_close();
     }
 
     public function doAction() {
@@ -218,6 +214,9 @@ class createProjectController extends ajaxcontroller {
             if (isset($_SESSION['cid']) and !empty($_SESSION['cid'])) {
                 $owner = $_SESSION['cid'];
             } else {
+
+                $_SESSION['_anonym_pid'] = $pid;
+
                 //default user
                 $owner = '';
             }

@@ -1013,8 +1013,9 @@ function getProjectData($pid, $password) {
 
 function getProjects($start,$step,$search_in_pname,$search_source,$search_target,$search_status,$search_onlycompleted,$filtering,$project_id) {
 
-	session_start();
-	$pn_query = ($search_in_pname)? " p.name like '%$search_in_pname%' and" : "";
+	#session_start();
+
+    $pn_query = ($search_in_pname)? " p.name like '%$search_in_pname%' and" : "";
 	$ss_query = ($search_source)? " j.source='$search_source' and" : "";
 	$st_query = ($search_target)? " j.target='$search_target' and" : "";
 	$sst_query = ($search_status)? " j.status_owner='$search_status' and" : "";
@@ -1501,6 +1502,15 @@ function archiveJob($res, $id) {
 	$db = Database::obtain();
 	$db->query($query);
 
+}
+
+function updateProjectOwner( $ownerEmail, $project_id ){
+    $db = Database::obtain();
+    $data = array();
+    $data['owner'] = $ownerEmail;
+    $where = sprintf( " id_project = %u ", $project_id );
+    $result = $db->update('jobs', $data, $where);
+    return $result;
 }
 
 function updateJobsStatus($res, $id, $status, $only_if, $undo) {

@@ -14,7 +14,7 @@ class newProjectController extends viewcontroller {
         private $sourceLangArray=array();
         private $targetLangArray=array();
 	public function __construct() {
-		parent::__construct(true);
+		parent::__construct(false);
 		if (!isset($_REQUEST['fork'])) {
 			parent::makeTemplate("upload.html");
 		} else {
