@@ -83,7 +83,7 @@ class setTranslationController extends ajaxcontroller {
               $translation = $check->getTrgNormalized();
         }
         
-		$res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreErrors() );
+		$res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreWarnings() );
 
 		if (!empty($res['error'])) {
 			$this->result['error'] = $res['error'];
