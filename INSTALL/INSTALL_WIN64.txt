@@ -40,7 +40,7 @@ Wamp setup:
 
 Casmacat/Matecat setup:
 1) Create the database using phpmyadmin.
-- Open "http://localhost/phpmyadmin/"
+- Open "http://localhost:8080/phpmyadmin/"
 - Click on "Databases"
 - Type your desired database name (lets say "matecat_sandbox") and select "utf8_general_ci" in the drop down box for
   "Collation", then click the "Create" button

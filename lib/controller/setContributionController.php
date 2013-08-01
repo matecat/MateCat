@@ -1,7 +1,6 @@
 <?php
 
 include INIT::$ROOT . "/lib/utils/mymemory_queries_temp.php";
-include INIT::$MODEL_ROOT . "/queries.php";
 
 class setContributionController extends ajaxcontroller {
 

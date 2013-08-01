@@ -43,6 +43,7 @@ function addToMM($seg, $tra, $source_lang, $target_lang, $id_translator, $key) {
 	}
 	$url = "http://mymemory.translated.net/api/set?seg=$seg&tra=$tra&langpair=$source_lang|$target_lang&de=matecatdeveloper@matecat.com&$private_query";
 
+	log::doLog($url);
 	$res = file_get_contents($url);
 	$res = json_decode($res, true);
 
