@@ -143,7 +143,7 @@ class INIT {
         self::$VOLUME_ANALYSIS_ENABLED = true;
 
         self::$WARNING_POLLING_INTERVAL = 10; //seconds
-        self::$SEGMENT_QA_CHECK_INTERVAL = 2; //seconds
+        self::$SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
         
         self::$SUPPORTED_FILE_TYPES = array(
             'Office' => array(
