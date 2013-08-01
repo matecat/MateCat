@@ -16,15 +16,16 @@ class ajaxUtilsController extends ajaxcontroller {
         parent::__construct();
 
 //        $gets = $_GET;
-//        array_walk_recursive( $gets , function( &$value, $item ){
+//        foreach ( $gets as $key => &$value ) {
 //            $value = filter_var( $value, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW ) );
-//        });
+//        }
 //        $this->__getInput = $gets;
 
         $posts = $_POST;
-        array_walk_recursive( $posts , function( &$value, $item ){
+        foreach ( $posts as $key => &$value ) {
             $value = filter_var( $value, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW ) );
-        });
+        }
+
         $this->__postInput = $posts;
 
     }
