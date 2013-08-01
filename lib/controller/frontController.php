@@ -54,6 +54,10 @@ abstract class controller {
 	}
 
 	protected function __construct() {
+
+        //access session data
+        @session_start();
+
 		try {
 			/* $this->localizationInfo=new localizationClass();
 			   $this->localize();
@@ -69,6 +73,10 @@ abstract class controller {
 		}
 	}
 
+    public function __destruct(){
+        @session_write_close();
+    }
+
 	protected function get_from_get_post($varname) {
 		$ret = null;
 		$ret = isset($_GET[$varname]) ? $_GET[$varname] : (isset($_POST[$varname]) ? $_POST[$varname] : null);
@@ -81,11 +89,6 @@ abstract class downloadController extends controller {
 
 	protected $content = "";
 	protected $filename = "unknown";
-
-
-	public function __construct() {
-		parent::__construct();
-	}
 
 	public function finalize() {
 		try {
@@ -111,7 +114,7 @@ abstract class downloadController extends controller {
 
 }
 
-abstract class helperController extends controller{
+abstract class helperController extends controller {
 
 
 	//this lets the helper issue all the checks which are required before redirecting
@@ -120,14 +123,11 @@ abstract class helperController extends controller{
 	//implement abstract finalize empty
 	public function finalize(){}
 
-	public function __construct() {
-		parent::__construct();
-	}
-
 	//redirect the page
 	public function redirect($url){
 		header('Location: '.$url);
 	}
+
 }
 
 abstract class viewcontroller extends controller {
@@ -222,8 +222,7 @@ abstract class viewcontroller extends controller {
 	}
 
 	private function doAuth(){
-		//access session data
-		session_start();
+
 		//prepare redirect flag
 		$mustRedirectToLogin = false;
 
@@ -237,8 +236,6 @@ abstract class viewcontroller extends controller {
 		}
 		//even if no login in required, if user data is present, pull it out 
 		if(!empty($_SESSION['cid'])) $this->logged_user = getUserData($_SESSION['cid']);
-		//write session
-		session_write_close();
 
 		if($mustRedirectToLogin){
 			//redirect to login page

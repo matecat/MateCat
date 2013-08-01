@@ -12,8 +12,6 @@ class oauthRequestInitializerController extends helperController{
 	public function __construct(){
 		parent::__construct();
 
-        session_start();
-
 		//instantiate openid client
 		$this->openid = new LightOpenID(INIT::$HTTPHOST);
 
