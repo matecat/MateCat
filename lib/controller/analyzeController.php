@@ -215,9 +215,6 @@ class analyzeController extends viewcontroller {
 			$this->total_raw_word_count_print = number_format($this->total_raw_word_count, 0, ".", ",");
 		}
 
-        session_start();
-        $_SESSION['incomingUrl'] = INIT::$HTTPHOST . $_SERVER['REQUEST_URI'];
-
 	}
 
     public function setTemplateVars() {
@@ -249,6 +246,14 @@ class analyzeController extends viewcontroller {
         $this->template->build_number               = INIT::$BUILD_NUMBER;
 
         $this->template->isLoggedIn                 = $this->isLoggedIn();
+
+        if( isset($_SESSION['_anonym_pid']) && ! empty($_SESSION['_anonym_pid'])  ){
+            $_SESSION['incomingUrl'] = INIT::$HTTPHOST . $_SERVER['REQUEST_URI'];
+            $this->template->showModalBoxLogin      = true;
+        } else {
+            $this->template->showModalBoxLogin      = false;
+        }
+
         //print_r ($this->template); exit;
 
     }

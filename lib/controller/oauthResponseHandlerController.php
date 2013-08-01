@@ -26,8 +26,6 @@ class oauthResponseHandlerController extends viewcontroller{
 		$this->userdata['last_name'] = $this->get_from_get_post("openid_ext1_value_namePerson_last");
 
 		//get url to redirect to
-		session_start();
-
 		//add default if not set
 		if(!isset($_SESSION['incomingUrl']) or empty($_SESSION['incomingUrl'])){
 			$_SESSION['incomingUrl']='/';
@@ -37,10 +35,6 @@ class oauthResponseHandlerController extends viewcontroller{
 
         //remove no more used var
         unset($_SESSION['incomingUrl']);
-	}
-
-	public function __destruct(){
-		session_write_close();
 	}
 
 	public function doAction(){
