@@ -1,6 +1,7 @@
 <?php
 
 require_once INIT::$ROOT . '/inc/errors.inc.php';
+require_once INIT::$MODEL_ROOT . '/queries.php';
 
 function __autoload($action) {
 	if (!file_exists(INIT::$CONTROLLER_ROOT . "/$action.php")) {
@@ -13,10 +14,6 @@ function __autoload($action) {
 class controllerDispatcher {
 
 	private static $instance;
-
-	private function __construct() {
-
-	}
 
 	public static function obtain() {
 		if (!self::$instance) {
@@ -42,6 +39,8 @@ abstract class controller {
 
 	abstract function doAction();
 
+	abstract function finalize();
+	
 	protected function nocache() {
 		header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
 		header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
@@ -51,6 +50,7 @@ abstract class controller {
 	}
 
 	protected function __construct() {
+
 		try {
 			/* $this->localizationInfo=new localizationClass();
 			   $this->localize();
@@ -79,12 +79,7 @@ abstract class downloadController extends controller {
 	protected $content = "";
 	protected $filename = "unknown";
 
-
-	public function __construct() {
-		parent::__construct();
-	}
-
-	public function download() {
+	public function finalize() {
 		try {
 			$buffer = ob_get_contents();
 			ob_get_clean();
@@ -108,21 +103,20 @@ abstract class downloadController extends controller {
 
 }
 
-abstract class helperController extends controller{
+abstract class helperController extends controller {
 
 
 	//this lets the helper issue all the checks which are required before redirecting
 	//abstract public performValidation();
-
-
-	public function __construct() {
-		parent::__construct();
-	}
+	
+	//implement abstract finalize empty
+	public function finalize(){}
 
 	//redirect the page
 	public function redirect($url){
 		header('Location: '.$url);
 	}
+
 }
 
 abstract class viewcontroller extends controller {
@@ -217,23 +211,20 @@ abstract class viewcontroller extends controller {
 	}
 
 	private function doAuth(){
-		//access session data
-		session_start();
+
 		//prepare redirect flag
-		$mustRedirectToLogin=false;
+		$mustRedirectToLogin = false;
 
 		//if no login set and login is required
-		if((!isset($_SESSION['cid']) or empty($_SESSION['cid'])) and $this->isAuthRequired){
+		if( !$this->isLoggedIn() and $this->isAuthRequired){
 			//take note of url we wanted to go after
-			$_SESSION['incomingUrl']=$_SERVER['REQUEST_URI'];
+			$_SESSION['incomingUrl'] = $_SERVER['REQUEST_URI'];
 
 			//signal redirection
-			$mustRedirectToLogin=true;
+			$mustRedirectToLogin = true;
 		}
 		//even if no login in required, if user data is present, pull it out 
-		if(!empty($_SESSION['cid'])) $this->logged_user=getUserData($_SESSION['cid']);
-		//write session
-		session_write_close();
+		if(!empty($_SESSION['cid'])) $this->logged_user = getUserData($_SESSION['cid']);
 
 		if($mustRedirectToLogin){
 			//redirect to login page
@@ -243,6 +234,10 @@ abstract class viewcontroller extends controller {
 		return true;
 	}
 
+	public function isLoggedIn(){
+		return ( isset($_SESSION['cid']) && !empty($_SESSION['cid']) );
+	}
+	
 	private function isSupportedWebBrowser() {
 		$browser_info = $this->getBrowser();
 		$browser_name = strtolower($browser_info['name']);
@@ -323,7 +318,7 @@ abstract class viewcontroller extends controller {
 		}
 	}
 
-	public function executeTemplate() {
+	public function finalize() {
 		$this->setTemplateVars();
 		try {
 			$buffer = ob_get_contents();
@@ -357,7 +352,7 @@ abstract class ajaxcontroller extends controller {
 		$this->result = array("errors" => array(), "data" => array());
 	}
 
-	public function echoJSONResult() {
+	public function finalize() {
 		$toJson = json_encode($this->result);
 		echo $toJson;
 	}

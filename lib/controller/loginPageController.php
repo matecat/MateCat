@@ -12,22 +12,21 @@ class loginPageController extends viewcontroller {
     public function __construct() {
         parent::__construct();
         parent::makeTemplate("login.html");
-	//set url forpopup to oauth
-	$this->oauthFormUrl=INIT::$HTTPHOST.'/oauth/request';
 
-	//open session
-	session_start();
-	//try to see if user specified some url
-	$this->incomingUrl =$this->get_from_get_post("incomingUrl");
-	//if nothing is specified by user 
-	if(empty($this->incomingUrl)){
-		//open session to pull put information about incoming url
-		$this->incomingUrl=$_SESSION['incomingUrl'];
-	}else{
-		//else, update session
-		$_SESSION['incomingUrl']=$this->incomingUrl;
-	}
-	session_write_close();
+        //set url forpopup to oauth
+        $this->oauthFormUrl=INIT::$HTTPHOST.'/oauth/request';
+
+        //try to see if user specified some url
+        $this->incomingUrl =$this->get_from_get_post("incomingUrl");
+        //if nothing is specified by user
+        if(empty($this->incomingUrl)){
+            //open session to pull put information about incoming url
+            $this->incomingUrl=$_SESSION['incomingUrl'];
+        }else{
+            //else, update session
+            $_SESSION['incomingUrl']=$this->incomingUrl;
+        }
+
     }
 
     public function doAction() {

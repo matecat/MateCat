@@ -219,25 +219,25 @@ class XliffSAXTranslationReplacer{
 	private function prepareSegment($seg,$transunit_translation = ""){
 		$end_tags = "";
 		//consistency check
-		$tag_mismatch=false;
-                $seg['segment']=  CatUtils::restorenbsp($seg['segment']);
-                $seg['translation']=  CatUtils::restorenbsp($seg['translation']);
-                
-                if( is_null($seg['translation']) || $seg['translation'] == '' ){
-                    $translation = $seg['segment'];
-                } else {
-                    $translation = $seg['translation'];
-                }
-                
-                $check = new QA($seg['segment'],$translation);
-                $check->performConsistencyCheck();
-
-		if( $check->thereAreErrors() ){
-			$tag_mismatch=true;
-			log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".print_r( $check->getErrors(), true ).")");
+		$severe_mismatch = false;
+		$seg ['segment'] = CatUtils::restorenbsp ( $seg ['segment'] );
+		$seg ['translation'] = CatUtils::restorenbsp ( $seg ['translation'] );
+		
+		if (is_null ( $seg ['translation'] ) || $seg ['translation'] == '') {
+			$translation = $seg ['segment'];
+		} else {
+			$translation = $seg ['translation'];
 		}
 		
-                if ($tag_mismatch){
+		$check = new QA ( $seg ['segment'], $translation );
+		$check->performConsistencyCheck ();
+
+		if( $check->thereAreErrors() ){
+			$severe_mismatch = true;
+			//log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".print_r( $check->getErrors(), true ).")");
+		}
+		
+        if ($severe_mismatch){
 			$translation = strip_tags($translation);
 		}
 

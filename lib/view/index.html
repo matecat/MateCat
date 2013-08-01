@@ -7,9 +7,7 @@
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/jquery-ui.css?build=${build_number}" rel="stylesheet" type="text/css" />
-<link href="${basepath}public/css/popup.css?build=${build_number}" rel="stylesheet" type="text/css" />
-
-
+		<link href="${basepath}public/css/popup.css?build=${build_number}" rel="stylesheet" type="text/css" />
 
         <script type="text/javascript">
             var config = {
@@ -19,6 +17,7 @@
                     id_customer: '${id_customer | string:unknown_customer}',
                     private_customer: '${private_customer | string:0}',
                     last_opened_segment: '${last_opened_segment}',
+                    first_job_segment: '${first_job_segment}',
                     server_load_time: '${load_time}',
                     job_id: '${jid}',
                     password: '${password}',
@@ -499,11 +498,6 @@ Do you want to continue anyway?</p>
                                 </div>
         -->
         <script src="${basepath}public/js/lib/snapengage.js"></script>
-
-
-
-
-
 
     </body>
 </html>

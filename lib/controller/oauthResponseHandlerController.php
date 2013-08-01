@@ -26,16 +26,15 @@ class oauthResponseHandlerController extends viewcontroller{
 		$this->userdata['last_name'] = $this->get_from_get_post("openid_ext1_value_namePerson_last");
 
 		//get url to redirect to
-		session_start();
 		//add default if not set
 		if(!isset($_SESSION['incomingUrl']) or empty($_SESSION['incomingUrl'])){
-			$_SESSION['incomingUrl']='/';	
+			$_SESSION['incomingUrl']='/';
 		}
-		$this->redirectUrl=$_SESSION['incomingUrl'];
-	}
 
-	public function __destruct(){
-		session_write_close();
+		$this->redirectUrl = $_SESSION['incomingUrl'];
+
+        //remove no more used var
+        unset($_SESSION['incomingUrl']);
 	}
 
 	public function doAction(){
@@ -55,9 +54,19 @@ class oauthResponseHandlerController extends viewcontroller{
 				//$this->sendNotifyMail($this->userdata);
 
 				//ok mail sent, set stuff
-				$_SESSION['cid']=$this->userdata['email'];
+				$_SESSION['cid'] = $this->userdata['email'];
+
+                if( isset($_SESSION['_anonym_pid']) && !empty($_SESSION['_anonym_pid']) ){
+                    //update anonymous project with user credentials
+                    $result = updateProjectOwner( $this->userdata['email'], $_SESSION['_anonym_pid'] );
+                }
+
 			}
 		}
+
+        //destroy session info of last anonymous project
+        unset($_SESSION['_anonym_pid']);
+
 	}
 
 	public function setTemplateVars() {

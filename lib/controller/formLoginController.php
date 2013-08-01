@@ -5,13 +5,8 @@ class formLoginController extends ajaxcontroller{
 	private $login='';
 	private $pass='';	
 
-	public function __destruct(){
-		session_write_close();
-	}
-
 	public function  __construct() {
-		parent::__construct();	
-		session_start();			
+		parent::__construct();
 
 		//set parameters
 		if(isset($_POST['login']) and !empty($_POST['login'])){

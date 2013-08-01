@@ -78,7 +78,16 @@ class INIT {
         return self::$instance;
     }
 
+    public static function sessionClose(){
+        @session_write_close();
+    }
+
     private function __construct() {
+
+        //access session data
+        @session_start();
+        register_shutdown_function( 'INIT::sessionClose' );
+
         $root = realpath(dirname(__FILE__) . '/../');
         self::$ROOT = $root;  // Accesible by Apache/PHP
         self::$BASEURL = "/"; // Accesible by the browser

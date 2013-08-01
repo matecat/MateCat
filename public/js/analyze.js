@@ -70,6 +70,26 @@ UI = {
             $(".loadingbar").addClass("closebar");
         });
 
+        $(".x-popup, .popup-outer, .popup a.anonymous").click(function(e){
+            e.preventDefault();
+
+            $.ajax({
+                url: '?action=ajaxUtils',
+                data: {
+                    action: 'ajaxUtils',
+                    exec: 'stayAnonymous'
+                },
+                type: 'POST',
+                dataType: 'json',
+                success: function(d){
+                    $(".popup-outer").fadeOut();
+                    $(".popup").fadeOut('fast');
+                }
+
+            });
+
+        });
+        
         $(".stopbtn").click(function(e){
             e.preventDefault();
 	    	$(this).toggleClass('stopped');
@@ -400,6 +420,13 @@ function fit_text_to_container(container,child){
 }
 
 $(document).ready(function(){
+    if( config.showModalBoxLogin == 1 ){
+        $('#popupWrapper').fadeToggle();
+    }
+    $('#sign-in').click(function(e){
+        e.preventDefault();
+        gopopup($(e.target).data('oauth'));
+    });
     UI.init();
 });
 
