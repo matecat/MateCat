@@ -32,8 +32,6 @@ class ajaxUtilsController extends ajaxcontroller {
 
     public function doAction() {
 
-        session_start();
-
         switch ( $this->__postInput['exec'] ) {
             case 'stayAnonymous':
                 unset( $_SESSION['_anonym_pid'] );

@@ -66,9 +66,6 @@ class catController extends viewcontroller {
 
 	}
 
-	public function __destruct(){
-	}
-
 	private function parse_time_to_edit($ms) {
 		if ($ms <= 0) {
 			return array("00", "00", "00", "00");

@@ -420,7 +420,7 @@ function fit_text_to_container(container,child){
 }
 
 $(document).ready(function(){
-    if( config.isLoggedIn == 0 ){
+    if( config.showModalBoxLogin == 1 ){
         $('#popupWrapper').fadeToggle();
     }
     $('#sign-in').click(function(e){
