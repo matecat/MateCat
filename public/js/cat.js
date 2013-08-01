@@ -1996,7 +1996,7 @@ UI = {
                         return;
                     }
                     if(id_seg != UI.currentSegmentId) return;
-                    if(UI.editarea.text() != UI.checkSegmentsArray[d.token]) return;
+                    if(UI.editarea.text().trim() != UI.checkSegmentsArray[d.token].trim()) return;
                     
                     
                     UI.fillCurrentSegmentWarnings(d.details); // update warnings
