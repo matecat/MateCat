@@ -232,7 +232,9 @@ class CatUtils {
 
         foreach ($data as &$seg) {
             //$seg['source'] = self::stripTagesFromSource($seg['source']);
-            $seg['source'] = trim($seg['source']);
+            $seg['source'] = trim(htmlspecialchars_decode( $seg['source'], ENT_QUOTES ));
+            $seg['translation'] = trim(htmlspecialchars_decode( $seg['source'], ENT_QUOTES ));
+
             $seg['sm'].="%";
             $seg['jid'] = $jid;
             $tte = self::parse_time_to_edit($seg['tte']);
@@ -334,6 +336,8 @@ class CatUtils {
         // Last minute formatting (after calculations)
         $temp = self::parse_time_to_edit(round(array_sum($stat_valid_tte)));
         $stats['total-valid-tte'] = "$temp[0]h:$temp[1]m:$temp[2]s";
+
+        //$seg['translation'] = trim(htmlspecialchars_decode( $seg['translation'], ENT_QUOTES ));
 
 
 
