@@ -358,19 +358,27 @@ class QA {
 
         $this->source_seg = $source_seg;
         $this->target_seg = $target_seg;
-        
-        $this->srcDom = new DOMDocument('1.0', 'utf-8');
-        $src_xml_valid = @$this->srcDom->loadXML("<root>$source_seg</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
-        if ($src_xml_valid === FALSE) {
-            $this->_addError(self::ERR_SOURCE);
-        }
 
-        $this->trgDom = new DOMDocument('1.0', 'utf-8');
-        $trg_xml_valid = @$this->trgDom->loadXML("<root>$target_seg</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
+        $this->srcDom = $this->_loadDom($source_seg, self::ERR_SOURCE);
+        $this->trgDom = $this->_loadDom($target_seg, self::ERR_TARGET);
+
+    }
+
+    /**
+     * Load an XML String into DomObject and add a global Error if not valid
+     *
+     * @param $xmlString
+     * @param int $targetErrorType
+     *
+     * @return DOMDocument
+     */
+    protected function _loadDom( $xmlString, $targetErrorType ){
+        $dom = new DOMDocument('1.0', 'utf-8');
+        $trg_xml_valid = @$dom->loadXML("<root>$xmlString</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
         if ($trg_xml_valid === FALSE) {
-            $this->_addError(self::ERR_TARGET);
+            $this->_addError($targetErrorType);
         }
-
+        return $dom;
     }
 
     /**
@@ -428,7 +436,6 @@ class QA {
      * 
      */
     public function performConsistencyCheck() {
-
 
         $srcNodeList = @$this->srcDom->getElementsByTagName( 'root' )->item( 0 )->childNodes;
         $trgNodeList = @$this->trgDom->getElementsByTagName( 'root' )->item( 0 )->childNodes;
@@ -525,11 +532,7 @@ class QA {
             $this->target_seg = preg_replace( '|[\s\t\r\n]+$|u', "", $this->target_seg );
         }
 
-        //reload Target after normalization
-        $trg_xml_valid = @$this->trgDom->loadXML("<root>" . $this->target_seg . "</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
-        if ($trg_xml_valid === FALSE) {
-            $this->_addError(self::ERR_TARGET);
-        }
+        $this->trgDom = $this->_loadDom( $this->target_seg, self::ERR_TARGET );
 
     }
 
@@ -629,18 +632,22 @@ class QA {
      * @param $TagReference
      * @return DOMElement
      */
-    protected function _queryDOMElement( DOMDocument $domDoc, $TagReference ){
+    protected function _queryDOMElement( DOMDocument $domDoc, $TagReference ) {
 
-        $Node = new DOMElement('g');
+        $Node = new DOMElement( 'g' );
 
-        $availableParentList = $domDoc->getElementsByTagName($TagReference['name']);
-        for ($i = 0; $i < $availableParentList->length; $i++) {
-            if( $availableParentList->item($i)->getAttribute('id') == $TagReference['id'] ){
+        $availableParentList = $domDoc->getElementsByTagName( $TagReference[ 'name' ] );
+        $availableParentsLen = $availableParentList->length;
+
+        for ( $i = 0; $i < $availableParentsLen; $i++ ) {
+
+            $element = $availableParentList->item( $i );
+            if ( $element->getAttribute( 'id' ) == $TagReference[ 'id' ] ) {
 
                 /**
                  * @var DOMElement $Node
                  */
-                $Node = $availableParentList->item($i);
+                $Node = $element;
 
                 //Log::doLog( 'Found: ' . $availableParentList->item($i)->textContent );
             }
@@ -692,28 +699,34 @@ class QA {
      * )
      * </pre>
      * @param DOMNodeList $elementList
-     * @param array $srcDomElements
+     * @param array &$srcDomElements
      * @param int $depth
      * @param null $parentID
      */
     protected function _mapElements( DOMNodeList $elementList, array &$srcDomElements = array(), $depth = 0, $parentID = null ) {
 
-        for ( $i = 0; $i < $elementList->length; $i++ ) {
+        $elementsListLen = $elementList->length;
 
-            if ( $elementList->item( $i ) instanceof DOMElement ) {
+        for ( $i = 0; $i < $elementsListLen; $i++ ) {
+
+            $element = $elementList->item( $i );
+
+            if ( $element instanceof DOMElement ) {
+
+                $elementID = $element->getAttribute( 'id' );
 
                 $plainRef = array(
                     'type'      => 'DOMElement',
-                    'name'      => $elementList->item( $i )->tagName,
+                    'name'      => $element->tagName,
                     'parent_id' => $parentID,
-                    'id'        => $elementList->item( $i )->getAttribute( 'id' ),
+                    'id'        => $elementID,
                     'node_idx'  => $i
                 );
 
                 $srcDomElements[ $depth++ ] = $plainRef;
 
-                if ( $elementList->item( $i )->hasChildNodes() ) {
-                    $this->_mapElements( $elementList->item( $i )->childNodes, $srcDomElements, $depth, $elementList->item( $i )->getAttribute( 'id' ) );
+                if ( $element->hasChildNodes() ) {
+                    $this->_mapElements( $element->childNodes, $srcDomElements, $depth, $elementID );
                 }
 
             } else {

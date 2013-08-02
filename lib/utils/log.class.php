@@ -52,11 +52,11 @@ class Log {
 		$ct = func_num_args(); // number of argument passed  
 		for ($i=0; $i<$ct; $i++) {
 			$curr_arg=func_get_arg($i); // get each argument passed  
-			if (is_array($curr_arg)){
-                $string .= var_export($curr_arg, true);
-			}else{
+			if ( is_string($curr_arg) ) {
                 $string .= $curr_arg;
-			}
+			} else {
+                $string .= var_export($curr_arg, true);
+            }
 		}  
 
         self::_writeTo( self::_getHeader() . $string . "\n" );
