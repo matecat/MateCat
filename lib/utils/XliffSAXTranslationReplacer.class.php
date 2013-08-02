@@ -238,7 +238,8 @@ class XliffSAXTranslationReplacer{
 		}
 		
         if ($severe_mismatch){
-			$translation = strip_tags($translation);
+            $translation = '|||UNTRANSLATED_CONTENT_START|||' . $seg ['segment'] . '|||UNTRANSLATED_CONTENT_END|||';
+			//$translation = strip_tags($translation);
 		}
 
 		//fix to escape non-html entities
