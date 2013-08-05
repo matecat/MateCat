@@ -231,14 +231,11 @@ class CatUtils {
 
 
         foreach ($data as &$seg) {
-            //$seg['source'] = self::stripTagesFromSource($seg['source']);
-            $seg['source'] = trim($seg['source']);
+
             $seg['sm'].="%";
             $seg['jid'] = $jid;
             $tte = self::parse_time_to_edit($seg['tte']);
             $seg['time_to_edit'] = "$tte[1]m:$tte[2]s";
-
-
 
             $stat_rwc[] = $seg['rwc'];
 
@@ -286,9 +283,8 @@ class CatUtils {
             $stat_pee[] = $seg['pe_effort_perc'] * $seg['rwc'];
 
             $seg['pe_effort_perc'] .= "%";
-            $seg['sug_view'] = html_entity_decode($seg['sug']);
-            
-            
+
+
             if ($seg['sug'] <> $seg['translation']) {
                 $sug_for_diff=self::placehold_xliff_tags($seg['sug']);
                 $tra_for_diff=self::placehold_xliff_tags($seg['translation']);
@@ -310,6 +306,11 @@ class CatUtils {
             } else {
                 $seg['ss'] = 'Translation Memory';
             }
+
+            $seg['sug_view'] = trim( CatUtils::rawxliff2view($seg['sug']) );
+            $seg['source'] = trim( CatUtils::rawxliff2view( $seg['source'] ) );
+            $seg['translation'] = trim( CatUtils::rawxliff2view( $seg['translation'] ) );
+
         }
 
         $stats['edited-word-count'] = array_sum($stat_rwc);
@@ -334,8 +335,6 @@ class CatUtils {
         // Last minute formatting (after calculations)
         $temp = self::parse_time_to_edit(round(array_sum($stat_valid_tte)));
         $stats['total-valid-tte'] = "$temp[0]h:$temp[1]m:$temp[2]s";
-
-
 
         return array($data, $stats);
     }

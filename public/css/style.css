@@ -38,6 +38,12 @@ header .wrapper{padding:0px 0 0 0;}
     padding: 0;
     margin: 0 auto;
     }
+
+#notifbox.notific a
+    {
+    display: none !important;
+    }
+    
 .numbererror
     {
     position: absolute;
