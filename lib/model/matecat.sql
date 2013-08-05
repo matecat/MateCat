@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.5.32, for debian-linux-gnu (x86_64)
 --
--- Host: 10.30.1.241    Database: matecat_sandbox
+-- Host: 10.30.1.241    Database: matecat
 -- ------------------------------------------------------
 -- Server version	5.5.31-0+wheezy1-log
 
@@ -16,12 +16,12 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Current Database: `matecat_sandbox`
+-- Current Database: `matecat`
 --
 
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `matecat_sandbox` /*!40100 DEFAULT CHARACTER SET utf8 */;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `matecat` /*!40100 DEFAULT CHARACTER SET utf8 */;
 
-USE `matecat_sandbox`;
+USE `matecat`;
 
 --
 -- Table structure for table `engines`
@@ -346,7 +346,7 @@ CREATE TABLE `users` (
 -- Dump completed on 2013-08-01 18:20:10
 -- MySQL dump 10.13  Distrib 5.5.32, for debian-linux-gnu (x86_64)
 --
--- Host: 10.30.1.241    Database: matecat_sandbox
+-- Host: 10.30.1.241    Database: matecat
 -- ------------------------------------------------------
 -- Server version	5.5.31-0+wheezy1-log
 
@@ -409,5 +409,5 @@ UNLOCK TABLES;
 
 -- Dump completed on 2013-08-01 18:20:10
 CREATE USER 'matecat'@'localhost' IDENTIFIED BY 'matecat01';
-GRANT ALL ON matecat_sandbox.* TO 'matecat'@'localhost';
+GRANT ALL ON matecat.* TO 'matecat'@'localhost' IDENTIFIED BY 'matecat01';
 FLUSH PRIVILEGES;
