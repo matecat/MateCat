@@ -35,13 +35,34 @@ class setTranslationController extends ajaxcontroller {
 
 	public function doAction() {
 
+        switch( $this->status ) {
+            case 'TRANSLATED':
+            case 'APPROVED':
+            case 'REJECTED':
+            case 'DRAFT':
+                break;
+            default:
+                //NO debug and NO-actions for un-mapped status
+                $this->result['code'] = 1;
+                $this->result['data'] = "OK";
+                return;
+                break;
+        }
+
 		if (empty($this->id_segment)) {
 			$this->result['error'][] = array("code" => -1, "message" => "missing id_segment");
 		}
 
 		if (empty($this->id_job)) {
 			$this->result['error'][] = array("code" => -2, "message" => "missing id_job");
-		}
+		} else {
+            //add check for job status archived.
+            $job_data = getJobData( (int) $this->id_job );
+            if( strtolower( $job_data['status'] ) == 'archived' ){
+                $this->result['error'][] = array("code" => -3, "message" => "job archived");
+                //Log::doLog($this->result);
+            }
+        }
 
 		if (empty($this->id_first_file)) {
 			$this->result['error'][] = array("code" => -2, "message" => "missing id_job");
@@ -62,15 +83,15 @@ class setTranslationController extends ajaxcontroller {
 
 		//ONE OR MORE ERRORS OCCURRED : EXITING
 		if (!empty($this->result['error'])) {
-			log::doLog(__CLASS__ .":".__FUNCTION__." error - ".$this->result['error'] );
+			log::doLog(__CLASS__ .":".__FUNCTION__." error - " . var_export( $this->result['error'], true ) );
 			return -1;
 		}
 		$this->translation = CatUtils::view2rawxliff($this->translation);
 
 		//check tag mismatch
 		//get original source segment, first
-		$segment=getSegment($this->id_segment);            
-                
+		$segment = getSegment($this->id_segment);
+
 		//compare segment-translation and get results
         $check = new QA($segment['segment'], $this->translation);
         $check->performConsistencyCheck();

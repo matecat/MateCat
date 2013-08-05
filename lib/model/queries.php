@@ -153,7 +153,7 @@ function getArrayOfSuggestionsJSON($id_segment){
 }
 
 function getJobData($id_job) {
-	$query = "select source, target,id_mt_engine,id_tms,id_translator
+	$query = "select source, target,id_mt_engine,id_tms,id_translator, status_owner as status
 		from jobs where id=$id_job";
 
 	$db = Database::obtain();
@@ -270,7 +270,8 @@ function getSegmentsDownload($jid, $password, $id_file, $no_status_new = 1) {
 			where j.id=$jid and j.password='$password' and f.id=$id_file 
 
 			";
-
+include_once '/var/www/cattool/lib/utils/log.class.php';
+Log::doLog($query);
 	$db = Database::obtain();
 	$results = $db->fetch_array($query);
 	$err = $db->get_error();
