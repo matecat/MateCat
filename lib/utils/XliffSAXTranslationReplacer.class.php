@@ -116,7 +116,7 @@ class XliffSAXTranslationReplacer{
                 if( $name == 'file' && $k == 'target-language' && !empty($this->target_lang) ){
                     //replace Target language with job language provided from constructor
 				    $tag.="$k=\"$this->target_lang\" ";
-                    Log::doLog($k . " => " . $this->target_lang);
+                    //Log::doLog($k . " => " . $this->target_lang);
                 } else {
                     //put attributes in it
                     $tag.="$k=\"$v\" ";
