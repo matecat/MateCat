@@ -1208,15 +1208,22 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 	cursor: move !important;
 */
 	}
+.editarea .locked:hover,
+.source .locked:hover
+	{
+	cursor: pointer;
+	}
 .editarea .locked.selected,
 .source .locked.selected
 	{
 	cursor: move !important;
 	}
 
-.editarea .locked
+/*.source ::selection
 	{
-	}
+     color:#ff0000;
+     cursor: move !important;
+	}*/
 	
 .editor .editarea .locked,
 .editor .source .locked,

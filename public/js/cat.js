@@ -227,6 +227,7 @@ UI = {
         $("form#fileDownload").submit(function() {
             if ($("#notifbox").hasClass("warningbox")) {
                 var a = confirm("There are some potential errors\n\(missing tags, numbers etc).\n\
+ If you continue some of the content could be untranslated.\n\
  Do you want to continue anyway?");
                 if (!a) {
                     return false;
@@ -455,7 +456,7 @@ UI = {
                 UI.saveInUndoStack('drop');
             }, 100);
         }).on('click', '.editor .editarea .locked.selected', function(e) {
-        }).on('click', '.editor .editarea', function(e) {
+        }).on('click', '.editor .editarea, .editor .source', function(e) {
             $('.selected', $(this)).removeClass('selected');
         }).on('click', 'a.translated', function(e) {
             e.preventDefault();
@@ -543,9 +544,9 @@ UI = {
                 UI.saveInUndoStack('paste');
             }, 100);
             UI.lockTags();
-        }).on('click', 'a.close', function(e) {
+        }).on('click', 'a.close', function(e,param) {
             e.preventDefault();
-            UI.closeSegment(UI.currentSegment, 1);
+            UI.closeSegment(UI.currentSegment, 1, 'noSave');
         });
 
         $('#hideAlertConfirmTranslation').bind('change', function(e) {
@@ -726,12 +727,13 @@ UI = {
         });
 
         var saveBrevior = true;
-        if (typeof operation != 'undefined') {
+        if (operation != 'noSave') {
+//        if (typeof operation != 'undefined') {
             if (operation == 'translated')
                 saveBrevior = false;
         }
         if ((segment.hasClass('modified')) && (saveBrevior)) {
-            this.saveSegment(segment);
+            if(operation != 'noSave') this.saveSegment(segment);
             if (UI.alertConfirmTranslationEnabled) {
                 $(".blacked").show();
                 $('#alertConfirmTranslation').dialog({
@@ -775,8 +777,8 @@ UI = {
             type: "sourceCopied",
             segment: segment
         });
-        this.currentSegment.addClass('modified1');
-
+        this.currentSegment.addClass('modified');
+        this.currentSegmentQA();
         this.setChosenSuggestion(0);
         this.lockTags();
     },
@@ -1866,7 +1868,8 @@ UI = {
         var nextSegment = $('#segment-' + this.nextSegmentId);
         this.nextSegment = nextSegment;
         if (!nextSegment.length) {
-            $(".editor:visible").find(".close").click();
+//            $(".editor:visible").find(".close").click();
+            $(".editor:visible").find(".close").trigger('click','noSave');
             $('.downloadtr-button').focus();
             return false;
         };

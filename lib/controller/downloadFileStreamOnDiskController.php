@@ -76,6 +76,10 @@ class downloadFileStreamOnDiskController extends downloadController {
 
 			$debug['get_segments'][]=time();
 			$data = getSegmentsDownload($this->id_job, $this->password, $id_file, $nonew);
+
+            //get job language and data
+            $jobData = getJobData($this->id_job);
+
 			$debug['get_segments'][]=time();
 			//create a secondary indexing mechanism on segments' array; this will be useful
 			foreach($data as $i=>$k){
@@ -83,13 +87,13 @@ class downloadFileStreamOnDiskController extends downloadController {
 			}
 			$transunit_translation = "";
 
-			$debug['replace'][]=time();
+			$debug['replace'][] = time();
 			//instatiate parser
-			$xsp=new XliffSAXTranslationReplacer($path,$data);
+			$xsp = new XliffSAXTranslationReplacer( $path, $data, $jobData['target'] );
 			//run parsing
 			$xsp->replaceTranslation();
 			unset($xsp);
-			$debug['replace'][]=time();
+			$debug['replace'][] = time();
 
 
 			$original=file_get_contents($path.'.out.sdlxliff');
