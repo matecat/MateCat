@@ -1672,6 +1672,7 @@ UI = {
                 target: target,
                 source_lang: config.source_lang,
                 target_lang: config.target_lang,
+                password: config.password,
                 id_translator: id_translator,
                 private_translator: private_translator,
                 id_customer: id_customer,
@@ -1714,6 +1715,7 @@ UI = {
                 target: target,
                 source_lang: config.source_lang,
                 target_lang: config.target_lang,
+                password: config.password,
                 time_to_edit: time_to_edit,
                 id_job: config.job_id,
                 chosen_suggestion_index: chosen_suggestion
@@ -1737,6 +1739,7 @@ UI = {
         this.doRequest({
             data: {
                 action: 'setCurrentSegment',
+                password: config.password,
                 id_segment: id_segment,
                 id_job: config.job_id
             },
@@ -1765,6 +1768,7 @@ UI = {
                     action: 'deleteContribution',
                     source_lang: config.source_lang,
                     target_lang: config.target_lang,
+                    password: config.password,
                     seg: source,
                     tra: target,
                     id_translator: config.id_translator
@@ -2031,6 +2035,7 @@ UI = {
                 id_segment: id_segment,
                 id_job: config.job_id,
                 id_first_file: file.attr('id').split('-')[1],
+                password: config.password,
                 status: status,
                 translation: translation,
                 time_to_edit: time_to_edit,
