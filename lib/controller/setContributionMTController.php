@@ -2,10 +2,12 @@
 
 include INIT::$ROOT . "/lib/utils/mymemory_queries_temp.php";
 include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
+include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
 class setContributionMTController extends ajaxcontroller {
 
 	private $segment;
+    PRIVATE $password;
 	private $translation;
 	private $source_lang;
 	private $target_lang;
@@ -18,23 +20,26 @@ class setContributionMTController extends ajaxcontroller {
 
 	public function __construct() {
 		parent::__construct();
-		//segment
-		$this->segment = $this->get_from_get_post('source');
-		//translation
-		$this->translation = $this->get_from_get_post('target');
-		//source
-		$this->source_lang = $this->get_from_get_post('source_lang');
-		//target
-		$this->target_lang = $this->get_from_get_post('target_lang');
-		//id of translation unit in workbench
-		$this->id_segment=$this->get_from_get_post('id_segment');
-		//id job
-		$this->id_job=$this->get_from_get_post('id_job');
-		//index of suggestions from which the translator drafted the contribution
-		$this->chosen_suggestion_index=$this->get_from_get_post('chosen_suggestion_index');
-		//how much time it needed to translate this segment
-		$this->time_to_edit=$this->get_from_get_post('time_to_edit');
-	}
+        //segment
+        $this->segment = $this->get_from_get_post( 'source' );
+        //translation
+        $this->translation = $this->get_from_get_post( 'target' );
+        //source
+        $this->source_lang = $this->get_from_get_post( 'source_lang' );
+        //target
+        $this->target_lang = $this->get_from_get_post( 'target_lang' );
+        //id of translation unit in workbench
+        $this->id_segment = $this->get_from_get_post( 'id_segment' );
+        //id job
+        $this->id_job = $this->get_from_get_post( 'id_job' );
+        //index of suggestions from which the translator drafted the contribution
+        $this->chosen_suggestion_index = $this->get_from_get_post( 'chosen_suggestion_index' );
+        //how much time it needed to translate this segment
+        $this->time_to_edit = $this->get_from_get_post( 'time_to_edit' );
+
+        $this->password = $this->get_from_get_post( 'password' );
+
+    }
 
 	public function doAction() {
 		if (empty($this->segment)) {
@@ -62,13 +67,22 @@ class setContributionMTController extends ajaxcontroller {
 			$this->result['error'][] = array("code" => -6, "message" => "missing segment id");
 		}
 
+        //get Job Infos
+        $job_data = getJobData( (int) $this->id_job );
+
+        $pCheck = new AjaxPasswordCheck();
+        //check for Password correctness
+        if( !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ){
+            $this->result['error'][] = array( "code" => -7, "message" => "wrong password" );
+            return;
+        }
 
 		//mt engine to contribute to
-		$job_data=getJobData($this->id_job);
 		if (empty($job_data['id_mt_engine'])){
 			return false;
 		}
-		$this->mt=new MT($job_data['id_mt_engine']);
+
+		$this->mt = new MT($job_data['id_mt_engine']);
 
 		//array of storicised suggestions for current segment
 		$this->suggestion_json_array=json_decode(getArrayOfSuggestionsJSON($this->id_segment),true);

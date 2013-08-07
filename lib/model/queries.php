@@ -152,10 +152,29 @@ function getArrayOfSuggestionsJSON($id_segment){
 	return $results['suggestions_array'];
 }
 
+/**
+ * Get job data structure
+ *
+ * <pre>
+ * $jobData = array(
+ *      'source'        => 'it-IT',
+ *      'target'        => 'en-US',
+ *      'id_mt_engine'  => 1,
+ *      'id_tms'        => 1,
+ *      'id_translator' => '',
+ *      'status'        => 'active',
+ *      'password'      => 'GfgJ6h'
+ * );
+ * </pre>
+ *
+ * @param $id_job
+ * @return array $jobData
+ */
 function getJobData($id_job) {
-	$query = "select source, target,id_mt_engine,id_tms,id_translator, status_owner as status, target
-		from jobs where id=$id_job";
-
+	$query = "select source, target, id_mt_engine, id_tms, id_translator, status_owner as status, password
+		      from jobs
+		      where id = %u";
+    $query = sprintf( $query, $id_job );
 	$db = Database::obtain();
 	$results = $db->fetch_array($query);
 	return $results[0];
@@ -206,15 +225,14 @@ function getFirstSegmentOfFilesInJob($jid){
 function getWarning($jid){
 	$db = Database::obtain();
 	$jid = $db->escape($jid);
-	//$query="SELECT id_segment, warning  FROM segment_translations WHERE warning != 0 and id_job = $jid limit 10";
-        
-        $query = "SELECT total, id_segment, serialized_errors_list as warnings FROM (
-                        SELECT Seg1.id_segment, Seg1.serialized_errors_list , SUM(CASE WHEN Seg1.warning != 0 THEN 1 ELSE 0 END) AS total
-                        FROM segment_translations AS Seg1
-                        WHERE Seg1.id_job = $jid
-                        AND Seg1.warning != 0
-                        GROUP BY Seg1.id_segment WITH ROLLUP
-                    ) AS Seg2 ORDER BY total DESC, id_segment ASC LIMIT 11"; //+1 for RollUp
+
+    $query = "SELECT total, id_segment, serialized_errors_list as warnings FROM (
+                    SELECT Seg1.id_segment, Seg1.serialized_errors_list , SUM(CASE WHEN Seg1.warning != 0 THEN 1 ELSE 0 END) AS total
+                    FROM segment_translations AS Seg1
+                    WHERE Seg1.id_job = $jid
+                    AND Seg1.warning != 0
+                    GROUP BY Seg1.id_segment WITH ROLLUP
+                ) AS Seg2 ORDER BY total DESC, id_segment ASC LIMIT 11"; //+1 for RollUp
 
 	$results = $db->fetch_array($query);
 	return $results;
