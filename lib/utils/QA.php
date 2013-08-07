@@ -529,10 +529,12 @@ class QA {
             //$this->_addError(self::ERR_BOUNDARY_TAIL);
 
         } else {
-            $this->target_seg = preg_replace( '|[\s\t\r\n]+$|u', "", $this->target_seg );
+            $this->target_seg = preg_replace( '#[\s\t\r\n]+$#u', "", $this->target_seg );
         }
 
         $this->trgDom = $this->_loadDom( $this->target_seg, self::ERR_TARGET );
+        //Save normalized dom Element
+        $this->normalizedTrgDOM = clone $this->trgDom;
 
     }
 
@@ -558,7 +560,7 @@ class QA {
 
         //check for Tag ID MISMATCH
         $diffArray = array_udiff(  $srcDomElements, $trgDomElements, 'domIDCompare' );
-        if( !empty($diffArray) ){
+        if( !empty($diffArray) && !empty($trgDomElements) ){
             $this->_addError(self::ERR_TAG_ID);
             //Log::doLog($diffArray);
         }
