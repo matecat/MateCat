@@ -5,11 +5,13 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
+        <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/jquery-ui.css?build=${build_number}" rel="stylesheet" type="text/css" />
-		<link href="${basepath}public/css/popup.css?build=${build_number}" rel="stylesheet" type="text/css" />
+        <link href="${basepath}public/css/popup.css?build=${build_number}" rel="stylesheet" type="text/css" />
 
         <script type="text/javascript">
+            /*<![CDATA[*/
             var config = {
             basepath: '${basepath | string:/}',
                     id_translator: '${tid | nothing}',
@@ -27,10 +29,12 @@
                     build_number: '${build_number}',
                     test: 'test',
                     warningPollingInterval:'${warningPollingInterval}',
-                    segmentQACheckInterval: '${segmentQACheckInterval}'
+                    segmentQACheckInterval: '${segmentQACheckInterval}',
+                    firstSegmentOfFiles: ${structure php: firstSegmentOfFiles}
             };
-                    //			console.log('Server time: ' + Math.round(config.server_load_time)); 
-                    var renderStart = new Date();        </script>
+                    var renderStart = new Date();
+            /*]]>*/
+        </script>
         <script src="${basepath}public/js/loader.js?build=${build_number}"></script>
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
     </head>
@@ -298,99 +302,99 @@
 
         <footer>
             <div class="wrapper">
+     
+                <nav>
+                    <ul>
+                        <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
+                        <li><a tal:attributes="href string:${basepath}editlog/${jid}-${password}">Editing Log</a></li>
+                    </ul>
 
-                <!-- <a tal:attributes="href string:/editlog/23/" class="statslink">Project Statistics</a> -->
+                    <tal:block tal:condition="php: empty(logged_user)">
+                        <div id='welcomebox'>
+                            <span>Anonymous</span> (<a id='loginlink' tal:attributes="href incomingUrl">login</a>)
+                        </div>
+                    </tal:block>
+
+                    <tal:block tal:condition="php: !empty(logged_user)">
+                        <div id='welcomebox'>
+                            <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
+                        </div>
+                    </tal:block>
+                </nav>
 
 
-                <!--               
-                               <ul class="pagination">
-                                    <li><a href="#"> < </a></li>
-                                    <li style="padding:5px 10px !important"> Seg 1 to 200 </li>
-                                    <li><a href="#"> > </a></li>
-                                </ul>
-                -->               
-                <a tal:attributes="href string:${basepath}editlog/${jid}-${password}" class="editlog">Editing Log</a>
-                <tal:block tal:condition="php: empty(logged_user)">
-                    <div id='welcomebox'>
-                        <span>Anonymous</span> (<a id='loginlink' tal:attributes="href incomingUrl">login</a>)
+                <div id="statistics">
+                    <p>Progress:</p>
+                    <div class="meter">
+
+                        <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
+                        <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/TRANSLATED_PERC_FORMATTED}%"></a>
+                        <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job_stats/REJECTED_PERC_FORMATTED}%; style string:width:${job_stats/REJECTED_PERC_FORMATTED}%"></a>
+                        <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC_FORMATTED}%"></a>
                     </div>
-                </tal:block>
+                    <p class="percent"><span id="stat-progress" tal:content="php:(job_stats['PROGRESS_PERC_FORMATTED'])">0</span>%</p>
+                    <ul>
+                        <li id="stat-eqwords">Payable Words: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong></li>
+                        <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
+                        <!--
+                        <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
+                        <li id="stat-rejected">Rejected: <strong tal:content="job_stats/REJECTED_FORMATTED|default">- - -</strong></li>
+                        -->
+                        <li id="stat-wph" title="Based on last 10 segments performance">Speed: <strong tal:content="job_stats/WORDS_PER_HOUR|default">---</strong> Words/h</li>
+                        <li id="stat-completion">Completed in: <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">---</strong></li>
 
-                <tal:block tal:condition="php: !empty(logged_user)">
-                    <div id='welcomebox'>
-                        <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
+                    </ul>
+
+                    <div class="stats">
+                        <div class="header-stats">Project stats (<a href="${basepath}?action=projectStatistics" target="_blank">More...</a>) <a href="#" class="x-stats"></a></div>
+                        <ul class="h-stats">
+
+
+                            <li class="first">&nbsp;</li>
+                            <li>Initial</li>
+                            <li>To-do</li>
+                            <li>%</li>
+                            <li>Cost</li>
+                        </ul>
+                        <ul>
+                            <li class="first">New</li>
+                            <li>---.---</li>
+                            <li>--</li> <li>---</li>
+                            <li>--</li>
+                        </ul>
+                        <ul>
+                            <li class="first">Repetitions</li> <li>---</li>
+                            <li>90</li>
+                            <li>100</li>
+                            <li>30</li>
+                        </ul>
+                        <ul>
+                            <li class="first">100% match</li> <li>---</li>
+                            <li>--</li> <li>---</li>
+                            <li>--</li>
+                        </ul>
+                        <ul>
+                            <li class="first">100% context match</li> <li>---</li>
+                            <li>--</li> <li>---</li>
+                            <li>--</li>
+                        </ul>
+                        <ul>
+                            <li class="first">Fuzzy match</li> <li>---</li>
+                            <li>--</li> <li>---</li>
+                            <li>--</li>
+                        </ul>
+                        <ul>
+                            <li class="first">Machine translation</li> <li>---</li>
+                            <li>--</li> <li>---</li>
+                            <li>--</li>
+                        </ul>
+                        <a href="#" class="arrow-notification"></a>
+
                     </div>
-                </tal:block>
-
-                <p>Progress:</p>
-                <div class="meter">
-
-                    <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
-                    <a href="#"  class="translated-bar" tal:attributes="title string:Translated ${job_stats/TRANSLATED_PERC_FORMATTED}%; style string:width:${job_stats/TRANSLATED_PERC_FORMATTED}%"></a>
-                    <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job_stats/REJECTED_PERC_FORMATTED}%; style string:width:${job_stats/REJECTED_PERC_FORMATTED}%"></a>
-                    <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC_FORMATTED}%"></a>
-                </div>
-                <p class="percent"><span id="stat-progress" tal:content="php:(job_stats['PROGRESS_PERC_FORMATTED'])">0</span>%</p>
-                <ul>
-                    <li id="stat-eqwords">Payable Words: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong></li>
-                    <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
-                    <!--
-                    <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
-                    <li id="stat-rejected">Rejected: <strong tal:content="job_stats/REJECTED_FORMATTED|default">- - -</strong></li>
-                    -->
-                    <li id="stat-wph" title="Based on last 10 segments performance">Speed: <strong tal:content="job_stats/WORDS_PER_HOUR|default">---</strong> Words/h</li>
-                    <li id="stat-completion">Completed in: <strong tal:content="job_stats/ESTIMATED_COMPLETION|default">---</strong></li>
-
-                </ul>
-
-                <div class="stats">
-                    <div class="header-stats">Project stats (<a href="${basepath}?action=projectStatistics" target="_blank">More...</a>) <a href="#" class="x-stats"></a></div>
-                    <ul class="h-stats">
-
-
-                        <li class="first">&nbsp;</li>
-                        <li>Initial</li>
-                        <li>To-do</li>
-                        <li>%</li>
-                        <li>Cost</li>
-                    </ul>
-                    <ul>
-                        <li class="first">New</li>
-                        <li>---.---</li>
-                        <li>--</li> <li>---</li>
-                        <li>--</li>
-                    </ul>
-                    <ul>
-                        <li class="first">Repetitions</li> <li>---</li>
-                        <li>90</li>
-                        <li>100</li>
-                        <li>30</li>
-                    </ul>
-                    <ul>
-                        <li class="first">100% match</li> <li>---</li>
-                        <li>--</li> <li>---</li>
-                        <li>--</li>
-                    </ul>
-                    <ul>
-                        <li class="first">100% context match</li> <li>---</li>
-                        <li>--</li> <li>---</li>
-                        <li>--</li>
-                    </ul>
-                    <ul>
-                        <li class="first">Fuzzy match</li> <li>---</li>
-                        <li>--</li> <li>---</li>
-                        <li>--</li>
-                    </ul>
-                    <ul>
-                        <li class="first">Machine translation</li> <li>---</li>
-                        <li>--</li> <li>---</li>
-                        <li>--</li>
-                    </ul>
-                    <a href="#" class="arrow-notification"></a>
 
                 </div>
 
-            </div>
+            </div> <!-- .wrapper -->
         </footer>
 
 

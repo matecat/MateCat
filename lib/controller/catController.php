@@ -35,6 +35,8 @@ class catController extends viewcontroller {
 	private $job_archived = false;
 	private $job_cancelled = false;
 
+    private $firstSegmentOfFiles = '[]';
+
 	private $thisUrl;
 
 	public function __construct() {
@@ -93,10 +95,15 @@ class catController extends viewcontroller {
 		$data = getSegmentsInfo($this->jid, $this->password);
 		if (empty($data) or $data < 0) {
 			$this->job_not_found = true;
+            //stop execution
+            return;
 		}
 
-
-		$first_not_translated_found = false;
+        if ($data[0]['status'] == 'cancelled') {
+            $this->job_cancelled = true;
+            //stop execution
+            return;
+        }
 
 		foreach ($data as $i => $seg) {
 
@@ -156,9 +163,7 @@ class catController extends viewcontroller {
 			if ($seg['status'] == 'archived') {
 				$this->job_archived = true;
 			}
-			if ($seg['status'] == 'cancelled') {
-				$this->job_cancelled = true;
-			}
+
 			$id_file = $seg['id_file'];
 
 
@@ -209,44 +214,59 @@ class catController extends viewcontroller {
 			$this->downloadFileName = $files_found[0];
 		}
 
+        /**
+         * get first segment of every file
+         */
+         $this->firstSegmentOfFiles = json_encode( getFirstSegmentOfFilesInJob( $this->jid ) );
+
 	}
 
 	public function setTemplateVars() {
-		$this->template->jid = $this->jid;
-		$this->template->password = $this->password;
-		$this->template->cid = $this->cid;
-		$this->template->create_date = $this->create_date;
-		$this->template->pname = $this->pname;
-		$this->template->pid = $this->pid;
-		$this->template->tid = $this->tid;
-		$this->template->source = $this->source;
-		$this->template->target = $this->target;
-		$this->template->source_rtl = $this->source_rtl;
-		$this->template->target_rtl = $this->target_rtl;
 
-		$this->template->source_code = $this->source_code;
-		$this->template->target_code = $this->target_code;
+        if ( $this->job_not_found || $this->job_cancelled ) {
+            $this->template->pid                 = null;
+            $this->template->target              = null;
+            $this->template->source_code         = null;
+            $this->template->target_code         = null;
+            $this->template->firstSegmentOfFiles = null;
+        } else {
+            $this->template->pid                 = $this->pid;
+            $this->template->target              = $this->target;
+            $this->template->source_code         = $this->source_code;
+            $this->template->target_code         = $this->target_code;
+            $this->template->firstSegmentOfFiles = $this->firstSegmentOfFiles;
+        }
 
-		$this->template->first_job_segment = $this->first_job_segment;
-		$this->template->last_opened_segment = $this->last_opened_segment;
-		$this->template->data = $this->data;
+        $this->template->jid         = $this->jid;
+        $this->template->password    = $this->password;
+        $this->template->cid         = $this->cid;
+        $this->template->create_date = $this->create_date;
+        $this->template->pname       = $this->pname;
+        $this->template->tid         = $this->tid;
+        $this->template->source      = $this->source;
+        $this->template->source_rtl  = $this->source_rtl;
+        $this->template->target_rtl  = $this->target_rtl;
 
-		$this->template->job_stats = $this->job_stats;
+        $this->template->first_job_segment   = $this->first_job_segment;
+        $this->template->last_opened_segment = $this->last_opened_segment;
+        $this->template->data                = $this->data;
 
-		$end_time = microtime(true) * 1000;
-		$load_time = $end_time - $this->start_time;
-		$this->template->load_time = $load_time;
-		$this->template->time_to_edit_enabled = INIT::$TIME_TO_EDIT_ENABLED;
-		$this->template->build_number = INIT::$BUILD_NUMBER;
-		$this->template->downloadFileName = $this->downloadFileName;
-		$this->template->job_not_found = $this->job_not_found;
-		$this->template->job_archived = ($this->job_archived)? ' archived' : '';
-		$this->template->job_cancelled = $this->job_cancelled;
-		$this->template->logged_user=trim($this->logged_user['first_name']." ".$this->logged_user['last_name']);
-		$this->template->incomingUrl = '/login?incomingUrl='.$this->thisUrl;
-		$this->template->warningPollingInterval=1000*(INIT::$WARNING_POLLING_INTERVAL);
-		$this->template->segmentQACheckInterval=1000*(INIT::$SEGMENT_QA_CHECK_INTERVAL);
+        $this->template->job_stats = $this->job_stats;
+
+        $end_time                               = microtime( true ) * 1000;
+        $load_time                              = $end_time - $this->start_time;
+        $this->template->load_time              = $load_time;
+        $this->template->time_to_edit_enabled   = INIT::$TIME_TO_EDIT_ENABLED;
+        $this->template->build_number           = INIT::$BUILD_NUMBER;
+        $this->template->downloadFileName       = $this->downloadFileName;
+        $this->template->job_not_found          = $this->job_not_found;
+        $this->template->job_archived           = ( $this->job_archived ) ? ' archived' : '';
+        $this->template->job_cancelled          = $this->job_cancelled;
+        $this->template->logged_user            = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
+        $this->template->incomingUrl            = '/login?incomingUrl=' . $this->thisUrl;
+        $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
+        $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
+
+    }
+
 }
-
-}
-?>
