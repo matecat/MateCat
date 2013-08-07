@@ -190,6 +190,19 @@ function getSegment($id_segment){
 	return $results;
 }
 
+function getFirstSegmentOfFilesInJob($jid){
+    $db = Database::obtain();
+    $jid = intval($jid);
+    $query = "select id_file, min( segments.id ) as first_segment
+                from files_job
+                join segments using( id_file )
+                where files_job.id_job = $jid
+                and segments.show_in_cattool = 1
+                group by id_file";
+    $results = $db->fetch_array($query);
+    return $results;
+}
+
 function getWarning($jid){
 	$db = Database::obtain();
 	$jid = $db->escape($jid);
@@ -198,10 +211,10 @@ function getWarning($jid){
         $query = "SELECT total, id_segment, serialized_errors_list as warnings FROM (
                         SELECT Seg1.id_segment, Seg1.serialized_errors_list , SUM(CASE WHEN Seg1.warning != 0 THEN 1 ELSE 0 END) AS total
                         FROM segment_translations AS Seg1
-                        WHERE Seg1.warning != 0 
-                        AND Seg1.id_job = $jid
+                        WHERE Seg1.id_job = $jid
+                        AND Seg1.warning != 0
                         GROUP BY Seg1.id_segment WITH ROLLUP
-                  ) AS Seg2 WHERE 1 OR id_segment IS NULL ORDER BY total DESC, id_segment ASC LIMIT 11"; //+1 for RollUp
+                    ) AS Seg2 ORDER BY total DESC, id_segment ASC LIMIT 11"; //+1 for RollUp
 
 	$results = $db->fetch_array($query);
 	return $results;

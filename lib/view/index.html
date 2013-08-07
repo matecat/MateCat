@@ -11,6 +11,7 @@
         <link href="${basepath}public/css/popup.css?build=${build_number}" rel="stylesheet" type="text/css" />
 
         <script type="text/javascript">
+            /*<![CDATA[*/
             var config = {
             basepath: '${basepath | string:/}',
                     id_translator: '${tid | nothing}',
@@ -28,10 +29,12 @@
                     build_number: '${build_number}',
                     test: 'test',
                     warningPollingInterval:'${warningPollingInterval}',
-                    segmentQACheckInterval: '${segmentQACheckInterval}'
+                    segmentQACheckInterval: '${segmentQACheckInterval}',
+                    firstSegmentOfFiles: ${structure php: firstSegmentOfFiles}
             };
-                    //			console.log('Server time: ' + Math.round(config.server_load_time)); 
-                    var renderStart = new Date();        </script>
+                    var renderStart = new Date();
+            /*]]>*/
+        </script>
         <script src="${basepath}public/js/loader.js?build=${build_number}"></script>
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
     </head>
