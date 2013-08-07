@@ -1768,6 +1768,7 @@ UI = {
                     action: 'deleteContribution',
                     source_lang: config.source_lang,
                     target_lang: config.target_lang,
+                    id_job: config.job_id,
                     password: config.password,
                     seg: source,
                     tra: target,

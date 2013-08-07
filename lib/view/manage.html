@@ -5,6 +5,7 @@
         <title>Manage Projects - Matecat</title>
         <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
         <meta name="viewport" content="width=device-width"/>
+        <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" href="${basepath}public/css/fieldtest.css?build=${build_number}"/>
 
@@ -129,10 +130,13 @@
 		<footer>
             <div class="wrapper">
 
-			<tal:block tal:condition="php: !empty(logged_user)">
-				<div id='authentication'>
-					<span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)</div>
-			</tal:block>
+                <nav>
+                    <tal:block tal:condition="php: !empty(logged_user)">
+                        <div id='welcomebox'>
+                            <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
+                        </div>
+                    </tal:block>
+                </nav>                
 
             </div>
         </footer>
