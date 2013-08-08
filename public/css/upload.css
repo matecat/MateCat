@@ -793,7 +793,14 @@ header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margi
 		display: inline;
 		margin: 0px 0px 1px 2px;
 		}
-
+#deselectMultilang
+    {
+    margin-left: 30px;
+    font-size: 70%;
+    font-weight: normal;
+    color: #333;
+    }
+        
 .supported-formats ul li:nth-child(2n+1)
 	{
 	background:#efefef;
