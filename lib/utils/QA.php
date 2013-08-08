@@ -210,7 +210,7 @@ class QA {
      * @param int $errCode
      */
     protected function _addError($errCode) {
-        //Log::doLog($this->_errorMap[$errCode]);
+        //Log::doLog( $errCode . " :: " . $this->_errorMap[$errCode]);
         switch( $errCode ) {
             case self::ERR_COUNT:
             case self::ERR_SOURCE:

@@ -4,6 +4,7 @@ include INIT::$UTILS_ROOT . "/mymemory_queries_temp.php";
 include INIT::$UTILS_ROOT . "/filetype.class.php";
 include INIT::$UTILS_ROOT . "/cat.class.php";
 include INIT::$UTILS_ROOT . "/langs/languages.class.php";
+include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
@@ -69,13 +70,22 @@ class getSegmentsController extends ajaxcontroller {
 	}
 
 	public function doAction() {
-		$lang_handler=Languages::getInstance();       
 
+        //get Job Infos
+        $job_data = getJobData( (int) $this->jid );
+
+        $pCheck = new AjaxPasswordCheck();
+        //check for Password correctness
+        if( !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ){
+            $this->result['error'][] = array("code" => -4, "message" => "wrong password");
+            return;
+        }
+
+		$lang_handler = Languages::getInstance();
 
 		if ($this->ref_segment == '') {
 			$this->ref_segment = 0;
 		}
-
 
 		$data = getMoreSegments($this->jid, $this->password, $this->step, $this->ref_segment, $this->where);
 
@@ -138,9 +148,9 @@ class getSegmentsController extends ajaxcontroller {
 
 			if (!isset($this->data["$id_file"])) {                
                                 
-                                $file_stats = CatUtils::getStatsForFile($id_file);
+                $file_stats = CatUtils::getStatsForFile($id_file);
 
-                                $this->data["$id_file"]['jid'] = $seg['jid'];		
+                $this->data["$id_file"]['jid'] = $seg['jid'];
 				$this->data["$id_file"]["filename"] = $seg['filename'];
 				$this->data["$id_file"]["mime_type"] = $seg['mime_type'];
 				$this->data["$id_file"]['id_segment_start'] = $seg['id_segment_start'];
@@ -194,5 +204,3 @@ class getSegmentsController extends ajaxcontroller {
 
 
 }
-
-?>
