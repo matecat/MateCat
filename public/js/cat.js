@@ -28,6 +28,7 @@ UI = {
         this.tagSelection = false;
         this.nextSegmentIdByServer = 0;
         this.cursorPlaceholder = '[[placeholder]]';
+        this.tempViewPoint = '';
 
         /**
          * Global Warnings array definition.
@@ -66,6 +67,7 @@ UI = {
 //        this.heavy = ($('section').length > 200)? true : false;
         this.detectFirstLast();
         this.reinitMMShortcuts();
+        this.initSegmentNavBar();
         rangy.init();
         this.savedSel = null;
         this.savedSelActiveElement = null;
@@ -138,7 +140,7 @@ UI = {
 
         $(window).on('scroll', function(e) {
             UI.browserScrollPositionRestoreCorrection();
-            UI.setSegmentPointer();
+//            UI.setSegmentPointer();
         })
 
         $("header .filter").click(function(e) {
@@ -577,6 +579,41 @@ UI = {
         $("a.translated").bind('keydown', 'tab', function(e) {
             e.preventDefault();
             $(this).parents('section').find('.close').focus();
+        })
+
+        $("#navSwitcher").on('click', function(e) {
+            e.preventDefault();
+            if($('#jobNav').hasClass('open')) {
+                $('#jobNav').animate({bottom: "-=300px"}, 500).removeClass('open');
+            } else {
+                $('#jobNav').animate({bottom: "+=300px"}, 300).addClass('open');
+            }
+        })
+        $("#jobNav .jobstart").on('click', function(e) {
+            e.preventDefault();
+            UI.scrollSegment($('#segment-'+config.firstSegmentOfFiles[0].first_segment));
+        })
+        $("#jobNav prevfile").on('click', function(e) {
+            e.preventDefault();
+        })
+        $("#jobNav .currseg").on('click', function(e) {
+            e.preventDefault();
+            UI.scrollSegment(UI.currentSegment);
+        })
+        $("#jobNav .nextfile").on('click', function(e) {
+            e.preventDefault();
+            if(UI.tempViewPoint == '') { // the user have not used yet the Job Nav
+                // go to current file first segment
+                currFileFirstSegmentId = $(UI.currentFile).attr('id').split('-')[1]
+                $.each(config.firstSegmentOfFiles, function() {
+                    if(this.id_file == currFileFirstSegmentId) firstSegId = this.first_segment;
+                });        
+                UI.scrollSegment($('#segment-'+firstSegId));
+                UI.tempViewPoint = $(UI.currentFile).attr('id').split('-')[1];
+            }
+            $.each(config.firstSegmentOfFiles, function() {
+                console.log(this.id_file);
+            });
         })
         this.initEnd = new Date();
         this.initTime = this.initEnd - this.initStart;
@@ -1165,6 +1202,11 @@ UI = {
     gotoSegment: function(id) {
         var el = $("#segment-" + id + "-target").find(".editarea");
         $(el).click();
+    },
+    initSegmentNavBar: function() {
+        if(config.firstSegmentOfFiles.length == 1) {
+            $('#segmentNavBar .prevfile, #segmentNavBar .nextfile').addClass('disabled');
+        }
     },
     justSelecting: function() {
         if (window.getSelection().isCollapsed)
