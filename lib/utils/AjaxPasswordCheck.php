@@ -26,6 +26,10 @@ class AjaxPasswordCheck {
             'password'      => null
     );
 
+    public function getData(){
+        return $this->jobData;
+    }
+
     /**
      * Check password with jobData array
      * <pre>
