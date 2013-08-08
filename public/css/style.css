@@ -1435,6 +1435,32 @@ p.percent
 	margin-right: 20px;
     }
 
+#navSwitcher
+    {
+    float: right;
+    display: block;
+    width: 30px;
+    height: 30px;
+    margin-right: 2px;
+    text-indent: -9999px;
+    text-align: center;
+    background: transparent url(../img/nav-icons.png) -10px -10px no-repeat;
+    }
+
+#segmentNavBar .jobstart
+    {
+    background-position: -60px -10px;
+    }
     
-    
-    
+#segmentNavBar .prevfile
+    {
+    background-position: -60px -60px;
+    }
+#segmentNavBar .currseg
+    {
+    background-position: -10px -60px;
+    }
+#segmentNavBar .nextfile
+    {
+    background-position: -60px -210px;
+    }

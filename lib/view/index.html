@@ -294,20 +294,19 @@
        	</div>
 
 
-<!--
         <nav id="jobNav" class="slideMenu">
-            <ul id="segmentNavBar">
-                <li><a href="#" class="jobstart">Job start</a></li>
-                <li><a href="#" class="jobstart">This/Previous file start</a></li>
-                <li><a href="#" class="jobstart">Current segment</a></li>
-                <li><a href="#" class="jobstart">Next file start</a></li>                
+            <ul id="segmentNavBar" class="bar">
+                <li class="jobstart"><a href="#" title="Go to job start">Job start</a></li>
+                <li class="prevfile"><a href="#" title="Go to previous file header">This/Previous file start</a></li>
+                <li class="currseg"><a href="#" title="Go to the current opened segment">Current segment</a></li>
+                <li class="nextfile"><a href="#" title="Go to next file header">Next file start</a></li>                
             </ul>
         </nav>
--->
 
 
 
         <footer>
+            <a href="#" id="navSwitcher" title="Open Navigation Bar">Open Navigation Bar</a>
             <div class="wrapper">
      
                 <nav>
@@ -327,6 +326,7 @@
                             <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
                         </div>
                     </tal:block>
+
                 </nav>
 
 

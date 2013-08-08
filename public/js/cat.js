@@ -28,6 +28,7 @@ UI = {
         this.tagSelection = false;
         this.nextSegmentIdByServer = 0;
         this.cursorPlaceholder = '[[placeholder]]';
+        this.tempViewPoint = '';
 
         /**
          * Global Warnings array definition.
@@ -66,6 +67,7 @@ UI = {
 //        this.heavy = ($('section').length > 200)? true : false;
         this.detectFirstLast();
         this.reinitMMShortcuts();
+        this.initSegmentNavBar();
         rangy.init();
         this.savedSel = null;
         this.savedSelActiveElement = null;
@@ -138,7 +140,7 @@ UI = {
 
         $(window).on('scroll', function(e) {
             UI.browserScrollPositionRestoreCorrection();
-            UI.setSegmentPointer();
+//            UI.setSegmentPointer();
         })
 
         $("header .filter").click(function(e) {
@@ -578,6 +580,41 @@ UI = {
             e.preventDefault();
             $(this).parents('section').find('.close').focus();
         })
+
+        $("#navSwitcher").on('click', function(e) {
+            e.preventDefault();
+            if($('#jobNav').hasClass('open')) {
+                $('#jobNav').animate({bottom: "-=300px"}, 500).removeClass('open');
+            } else {
+                $('#jobNav').animate({bottom: "+=300px"}, 300).addClass('open');
+            }
+        })
+        $("#jobNav .jobstart").on('click', function(e) {
+            e.preventDefault();
+            UI.scrollSegment($('#segment-'+config.firstSegmentOfFiles[0].first_segment));
+        })
+        $("#jobNav prevfile").on('click', function(e) {
+            e.preventDefault();
+        })
+        $("#jobNav .currseg").on('click', function(e) {
+            e.preventDefault();
+            UI.scrollSegment(UI.currentSegment);
+        })
+        $("#jobNav .nextfile").on('click', function(e) {
+            e.preventDefault();
+            if(UI.tempViewPoint == '') { // the user have not used yet the Job Nav
+                // go to current file first segment
+                currFileFirstSegmentId = $(UI.currentFile).attr('id').split('-')[1]
+                $.each(config.firstSegmentOfFiles, function() {
+                    if(this.id_file == currFileFirstSegmentId) firstSegId = this.first_segment;
+                });        
+                UI.scrollSegment($('#segment-'+firstSegId));
+                UI.tempViewPoint = $(UI.currentFile).attr('id').split('-')[1];
+            }
+            $.each(config.firstSegmentOfFiles, function() {
+                console.log(this.id_file);
+            });
+        })
         this.initEnd = new Date();
         this.initTime = this.initEnd - this.initStart;
         if (this.debug)
@@ -600,7 +637,8 @@ UI = {
             setup.complete = req.complete;
         if (typeof req.context != 'undefined')
             setup.context = req.context;
-
+        if (typeof req.error === 'function')
+            setup.error = req.error;
         $.ajax(setup);
     },
     activateSegment: function() {
@@ -1013,6 +1051,8 @@ UI = {
         });
     },
     getMoreSegments_success: function(d) {
+        if(d.error.length) 
+            this.processErrors(d.error);
         where = d.data['where'];
         if (typeof d.data['files'] != 'undefined') {
             var numsegToAdd = 0;
@@ -1101,6 +1141,8 @@ UI = {
         });
     },
     getSegments_success: function(d) {
+        if(d.error.length) 
+            this.processErrors(d.error);
         where = d.data['where'];
         $.each(d.data['files'], function() {
             startSegmentId = this['segments'][0]['sid'];
@@ -1160,6 +1202,11 @@ UI = {
     gotoSegment: function(id) {
         var el = $("#segment-" + id + "-target").find(".editarea");
         $(el).click();
+    },
+    initSegmentNavBar: function() {
+        if(config.firstSegmentOfFiles.length == 1) {
+            $('#segmentNavBar .prevfile, #segmentNavBar .nextfile').addClass('disabled');
+        }
     },
     justSelecting: function() {
         if (window.getSelection().isCollapsed)
@@ -1677,6 +1724,10 @@ UI = {
                 private_translator: private_translator,
                 id_customer: id_customer,
                 private_customer: private_customer
+            },
+            success: function(d) {
+                if(d.error.length) 
+                    UI.processErrors(d.error);
             }
         });
     },
@@ -1719,6 +1770,10 @@ UI = {
                 time_to_edit: time_to_edit,
                 id_job: config.job_id,
                 chosen_suggestion_index: chosen_suggestion
+            },
+            success: function(d) {
+                if(d.error.length) 
+                    UI.processErrors(d.error);
             }
         });
     },
@@ -1749,6 +1804,8 @@ UI = {
         });
     },
     setCurrentSegment_success: function(d) {
+        if(d.error.length) 
+            this.processErrors(d.error);
         this.nextSegmentIdByServer = d.nextSegmentId;
         this.getNextSegment(this.currentSegment, 'untranslated');
     },
@@ -1781,6 +1838,8 @@ UI = {
         });
     },
     setDeleteSuggestion_success: function(d) {
+        if(d.error.length) 
+            this.processErrors(d.error);
         if (this.debug)
             console.log('match deleted');
 
@@ -2049,7 +2108,17 @@ UI = {
             }
         });
     },
+    processErrors: function(err) {
+        $.each(err, function() {
+            if(this['code'] == '-10') {
+                alert("Job canceled or assigned to another translator");
+                location.reload();
+            }
+        });        
+    },
     setTranslation_success: function(d, segment, status) {
+        if(d.error.length) 
+            this.processErrors(d.error);
         if (d.data == 'OK') {
             this.setStatus(segment, status);
             this.setDownloadStatus(d.stats);
