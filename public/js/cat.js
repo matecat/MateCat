@@ -600,7 +600,8 @@ UI = {
             setup.complete = req.complete;
         if (typeof req.context != 'undefined')
             setup.context = req.context;
-
+        if (typeof req.error === 'function')
+            setup.error = req.error;
         $.ajax(setup);
     },
     activateSegment: function() {
@@ -1013,6 +1014,8 @@ UI = {
         });
     },
     getMoreSegments_success: function(d) {
+        if(d.error.length) 
+            this.processErrors(d.error);
         where = d.data['where'];
         if (typeof d.data['files'] != 'undefined') {
             var numsegToAdd = 0;
@@ -1101,6 +1104,8 @@ UI = {
         });
     },
     getSegments_success: function(d) {
+        if(d.error.length) 
+            this.processErrors(d.error);
         where = d.data['where'];
         $.each(d.data['files'], function() {
             startSegmentId = this['segments'][0]['sid'];
@@ -1677,6 +1682,10 @@ UI = {
                 private_translator: private_translator,
                 id_customer: id_customer,
                 private_customer: private_customer
+            },
+            success: function(d) {
+                if(d.error.length) 
+                    UI.processErrors(d.error);
             }
         });
     },
@@ -1719,6 +1728,10 @@ UI = {
                 time_to_edit: time_to_edit,
                 id_job: config.job_id,
                 chosen_suggestion_index: chosen_suggestion
+            },
+            success: function(d) {
+                if(d.error.length) 
+                    UI.processErrors(d.error);
             }
         });
     },
@@ -1749,6 +1762,8 @@ UI = {
         });
     },
     setCurrentSegment_success: function(d) {
+        if(d.error.length) 
+            this.processErrors(d.error);
         this.nextSegmentIdByServer = d.nextSegmentId;
         this.getNextSegment(this.currentSegment, 'untranslated');
     },
@@ -1781,6 +1796,8 @@ UI = {
         });
     },
     setDeleteSuggestion_success: function(d) {
+        if(d.error.length) 
+            this.processErrors(d.error);
         if (this.debug)
             console.log('match deleted');
 
@@ -2049,7 +2066,17 @@ UI = {
             }
         });
     },
+    processErrors: function(err) {
+        $.each(err, function() {
+            if(this['code'] == '-10') {
+                alert("Job canceled or assigned to another translator");
+                location.reload();
+            }
+        });        
+    },
     setTranslation_success: function(d, segment, status) {
+        if(d.error.length) 
+            this.processErrors(d.error);
         if (d.data == 'OK') {
             this.setStatus(segment, status);
             this.setDownloadStatus(d.stats);
