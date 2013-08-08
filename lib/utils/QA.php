@@ -139,7 +139,9 @@ class QA {
     const ERR_CR_TAIL        = 10;
     const ERR_BOUNDARY_HEAD  = 11;
     const ERR_BOUNDARY_TAIL  = 12;
-    
+
+    const ERR_UNCLOSED_X_TAG = 13;
+
     const ERR_TAG_MISMATCH   = 1000;
     
     /**
@@ -179,7 +181,8 @@ class QA {
         10 => 'Tail carriage return mismatch',
         11 => 'Char mismatch between tags',
         12 => 'End line char mismatch',
-        
+        13 => 'Self-closing X element not properly ended',
+
         /*
          * grouping
          *  1 =>  'Tag count mismatch',
@@ -373,10 +376,21 @@ class QA {
      * @return DOMDocument
      */
     protected function _loadDom( $xmlString, $targetErrorType ){
-        //libxml_use_internal_errors
+        libxml_use_internal_errors(true);
         $dom = new DOMDocument('1.0', 'utf-8');
         $trg_xml_valid = @$dom->loadXML("<root>$xmlString</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
         if ($trg_xml_valid === FALSE) {
+
+            $rrorList = libxml_get_errors();
+            foreach( $rrorList as $error ){
+                if( $error->code == 76 /* libxml _xmlerror XML_ERR_TAG_NOT_FINISHED */ ){
+                    if( preg_match( '#<x[^/>]+>#', $xmlString  ) ){
+                        $this->_addError(self::ERR_UNCLOSED_X_TAG);
+                    }
+                }
+
+            }
+
             $this->_addError($targetErrorType);
         }
         return $dom;
