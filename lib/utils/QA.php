@@ -373,6 +373,7 @@ class QA {
      * @return DOMDocument
      */
     protected function _loadDom( $xmlString, $targetErrorType ){
+        //libxml_use_internal_errors
         $dom = new DOMDocument('1.0', 'utf-8');
         $trg_xml_valid = @$dom->loadXML("<root>$xmlString</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
         if ($trg_xml_valid === FALSE) {
