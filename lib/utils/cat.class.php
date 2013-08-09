@@ -126,6 +126,10 @@ class CatUtils {
     }
 
     private static function placehold_xliff_tags($segment) {
+
+        //remove not existent </x> tags
+        $segment = preg_replace('|(</x>)|si', "", $segment);
+
         //$segment=preg_replace('|<(g\s*.*?)>|si', LTPLACEHOLDER."$1".GTPLACEHOLDER,$segment);
         $segment = preg_replace('|<(g\s*id=["\']+.*?["\']+\s*[^<>]*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
 
