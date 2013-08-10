@@ -96,7 +96,7 @@ class setTranslationController extends ajaxcontroller {
 
 		//ONE OR MORE ERRORS OCCURRED : EXITING
 		if (!empty($this->result['error'])) {
-			log::doLog(__CLASS__ .":".__FUNCTION__." error - " . var_export( $this->result['error'], true ) );
+			//log::doLog(__CLASS__ .":".__FUNCTION__." error - " . var_export( $this->result['error'], true ) );
 			return -1;
 		}
 		$this->translation = CatUtils::view2rawxliff($this->translation);

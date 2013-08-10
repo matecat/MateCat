@@ -242,7 +242,7 @@ class XliffSAXTranslationReplacer{
 
             //consistency check
             $check = new QA ( $seg ['segment'], $translation );
-            $check->performConsistencyCheck ();
+            $check->performTagCheckOnly ();
             if( $check->thereAreErrors() ){
                 $translation = '|||UNTRANSLATED_CONTENT_START|||' . $seg ['segment'] . '|||UNTRANSLATED_CONTENT_END|||';
                 //log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".print_r( $check->getErrors(), true ).")");
