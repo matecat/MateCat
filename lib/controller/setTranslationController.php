@@ -3,6 +3,7 @@
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include INIT::$UTILS_ROOT . "/cat.class.php";
 include_once INIT::$UTILS_ROOT . '/QA.php';
+include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
 define('DEFAULT_NUM_RESULTS', 2);
 
@@ -20,20 +21,36 @@ class setTranslationController extends ajaxcontroller {
 
 	public function __construct() {
 		parent::__construct();
-		$this->id_job = $this->get_from_get_post('id_job');
-		$this->id_segment = $this->get_from_get_post('id_segment');
-		$this->id_translator = $this->get_from_get_post('id_translator');
-		$this->status = strtoupper($this->get_from_get_post('status'));
-		$this->time_to_edit = $this->get_from_get_post('time_to_edit');
-		$this->translation = $this->get_from_get_post('translation');
-		$this->id_first_file = $this->get_from_get_post('id_first_file');
-		$this->err = $this->get_from_get_post('errors');
-		//index of suggestions from which the translator drafted the contribution
-		$this->chosen_suggestion_index=$this->get_from_get_post('chosen_suggestion_index');
+        $this->id_job        = $this->get_from_get_post( 'id_job' );
+        $this->id_segment    = $this->get_from_get_post( 'id_segment' );
+        $this->id_translator = $this->get_from_get_post( 'id_translator' );
+        $this->status        = strtoupper( $this->get_from_get_post( 'status' ) );
+        $this->time_to_edit  = $this->get_from_get_post( 'time_to_edit' );
+        $this->translation   = $this->get_from_get_post( 'translation' );
+        $this->id_first_file = $this->get_from_get_post( 'id_first_file' );
+        $this->err           = $this->get_from_get_post( 'errors' );
+        $this->password      = $this->get_from_get_post( 'password' );
+
+        //index of suggestions from which the translator drafted the contribution
+        $this->chosen_suggestion_index = $this->get_from_get_post( 'chosen_suggestion_index' );
 
 	}
 
 	public function doAction() {
+
+        switch( $this->status ) {
+            case 'TRANSLATED':
+            case 'APPROVED':
+            case 'REJECTED':
+            case 'DRAFT':
+                break;
+            default:
+                //NO debug and NO-actions for un-mapped status
+                $this->result['code'] = 1;
+                $this->result['data'] = "OK";
+                return;
+                break;
+        }
 
 		if (empty($this->id_segment)) {
 			$this->result['error'][] = array("code" => -1, "message" => "missing id_segment");
@@ -41,10 +58,27 @@ class setTranslationController extends ajaxcontroller {
 
 		if (empty($this->id_job)) {
 			$this->result['error'][] = array("code" => -2, "message" => "missing id_job");
-		}
+		} else {
+
+            //get Job Infos
+            $job_data = getJobData( (int) $this->id_job );
+
+            //add check for job status archived.
+            if( strtolower( $job_data['status'] ) == 'archived' ){
+                $this->result['error'][] = array("code" => -3, "message" => "job archived");
+                //Log::doLog($this->result);
+            }
+
+            $pCheck = new AjaxPasswordCheck();
+            //check for Password correctness
+            if( !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ){
+                $this->result['error'][] = array("code" => -10, "message" => "wrong password");
+            }
+
+        }
 
 		if (empty($this->id_first_file)) {
-			$this->result['error'][] = array("code" => -2, "message" => "missing id_job");
+			$this->result['error'][] = array("code" => -5, "message" => "missing id_first_file");
 		}
 
 		if (empty($this->time_to_edit)) {
@@ -62,15 +96,15 @@ class setTranslationController extends ajaxcontroller {
 
 		//ONE OR MORE ERRORS OCCURRED : EXITING
 		if (!empty($this->result['error'])) {
-			log::doLog(__CLASS__ .":".__FUNCTION__." error - ".$this->result['error'] );
+			//log::doLog(__CLASS__ .":".__FUNCTION__." error - " . var_export( $this->result['error'], true ) );
 			return -1;
 		}
 		$this->translation = CatUtils::view2rawxliff($this->translation);
 
 		//check tag mismatch
 		//get original source segment, first
-		$segment=getSegment($this->id_segment);            
-                
+		$segment = getSegment($this->id_segment);
+
 		//compare segment-translation and get results
         $check = new QA($segment['segment'], $this->translation);
         $check->performConsistencyCheck();
@@ -83,7 +117,7 @@ class setTranslationController extends ajaxcontroller {
               $translation = $check->getTrgNormalized();
         }
         
-		$res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreErrors() );
+		$res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreWarnings() );
 
 		if (!empty($res['error'])) {
 			$this->result['error'] = $res['error'];

@@ -81,9 +81,9 @@ $(document).ready(function() {
             complete: function (){
             },
             success: function(d){
-                if(d.errors.length) {
+                if(d.error.length) {
                     $('.error-message').text('');
-                    $.each(d.errors, function() {
+                    $.each(d.error, function() {
                         $('.error-message').append(this.message+'<br />').show();
                     });
                     $('body').removeClass('creating');

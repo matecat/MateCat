@@ -1,6 +1,7 @@
 <?php
 
 include INIT::$ROOT . "/lib/utils/mymemory_queries_temp.php";
+include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
 class setContributionController extends ajaxcontroller {
 
@@ -14,6 +15,8 @@ class setContributionController extends ajaxcontroller {
 	private $source_lang;
 	private $target_lang;
 	private $id_job;
+
+    private $password;
 
 	public function __construct() {
 		parent::__construct();
@@ -41,6 +44,8 @@ class setContributionController extends ajaxcontroller {
 			$this->private_translator = 0;
 		}
 
+		$this->password = $this->get_from_get_post('password');
+
 		$this->source = $this->get_from_get_post('source');
 		$this->target = $this->get_from_get_post('target');
 		$this->source_lang = $this->get_from_get_post('source_lang');
@@ -65,6 +70,15 @@ class setContributionController extends ajaxcontroller {
 			$this->result['error'][] = array("code" => -2, "message" => "missing target lang");
 		}
 
+        //get Job Infos
+        $job_data = getJobData( (int) $this->id_job );
+
+        $pCheck = new AjaxPasswordCheck();
+        //check for Password correctness
+        if( !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ){
+            $this->result['error'][] = array("code" => -10, "message" => "wrong password");
+        }
+
 		if (!empty($this->result['error'])) {
 			return -1;
 		}
@@ -73,11 +87,11 @@ class setContributionController extends ajaxcontroller {
 			$this->key = $this->calculateMyMemoryKey($this->id_translator);
 		}
 
-		$id_tms = 1;
-		if (!empty($this->id_job)) { //PER COMPATIBILITa: IL BLOCCO IF PUO ESSERE ELIMINATO DOPO
-			$st = getJobData($this->id_job);
-			$id_tms = $st['id_tms'];
-		}
+        $id_tms = 1;
+        if ( !empty( $this->id_job ) ) { //PER COMPATIBILITa: IL BLOCCO IF PUO ESSERE ELIMINATO DOPO ?? dopo cosa???
+            $st     = $job_data; //getJobData($this->id_job);
+            $id_tms = $st[ 'id_tms' ];
+        }
 
 
 		if ($id_tms != 0) {

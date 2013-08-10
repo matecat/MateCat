@@ -20,6 +20,11 @@ $(document).ready(function(){
         $(".grayed").fadeOut();
         $(".popup").fadeOut('fast');
     });
+    $("#deselectMultilang").click(function(e){
+        e.preventDefault();
+        $('.listlang li.on input[type=checkbox]').click();
+    });
+
     $("#chooseMultilang").click(function(e){
         $('.popup-languages .close').click();
         if ($('.popup-languages li.on').length) {

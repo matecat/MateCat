@@ -16,10 +16,13 @@ class XliffSAXTranslationReplacer{
 	private $empty_tags=array('detected-source-lang','fmt','sdl:cxt','cxt','sdl:node','sdl:ref-file','ref-file','sdl:seg','seg','x');
 	private $regular_tags=array('body','bpt','bpt-props','cxt-def','cxt-defs','ept','sdl:filetype-id','filetype-id','file','file-info','fmt-def','fmt-defs','g','group','header','internal-file','mrk','ph','props','reference','sdl:cxts','cxts','sdl:filetype','filetype','sdl:filetype-info','filetype-info','sdl:ref-files','ref-files','sdl:seg-defs','seg-defs','seg-source','sniff-info','source','st','tag','tag-defs','target','trans-unit','value','xliff');
 
-	public function __construct($filename,$segments){
+    private $target_lang;
+
+	public function __construct( $filename,$segments, $trg_lang = null ){
 		$this->filename=$filename;
 		$this->ofp=fopen($this->filename.'.out.sdlxliff','w');
 		$this->segments=$segments;
+        $this->target_lang = $trg_lang;
 	}
 
 	/*
@@ -108,8 +111,17 @@ class XliffSAXTranslationReplacer{
 			//costruct tag
 			$tag="<$name ";
 			foreach($attr as $k=>$v){
-				//put attributes in it
-				$tag.="$k=\"$v\" ";
+
+                //if tag name is file, we must replace the target-language attribute
+                if( $name == 'file' && $k == 'target-language' && !empty($this->target_lang) ){
+                    //replace Target language with job language provided from constructor
+				    $tag.="$k=\"$this->target_lang\" ";
+                    //Log::doLog($k . " => " . $this->target_lang);
+                } else {
+                    //put attributes in it
+                    $tag.="$k=\"$v\" ";
+                }
+
 			}
 
 			//this logic helps detecting empty tags
@@ -218,34 +230,31 @@ class XliffSAXTranslationReplacer{
 	 */
 	private function prepareSegment($seg,$transunit_translation = ""){
 		$end_tags = "";
-		//consistency check
-		$severe_mismatch = false;
+
 		$seg ['segment'] = CatUtils::restorenbsp ( $seg ['segment'] );
 		$seg ['translation'] = CatUtils::restorenbsp ( $seg ['translation'] );
-		
+
+        //QA non sense for source/source check until source can be changed. For now SKIP
 		if (is_null ( $seg ['translation'] ) || $seg ['translation'] == '') {
 			$translation = $seg ['segment'];
 		} else {
 			$translation = $seg ['translation'];
-		}
-		
-		$check = new QA ( $seg ['segment'], $translation );
-		$check->performConsistencyCheck ();
 
-		if( $check->thereAreErrors() ){
-			$severe_mismatch = true;
-			//log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".print_r( $check->getErrors(), true ).")");
-		}
-		
-        if ($severe_mismatch){
-			$translation = strip_tags($translation);
+            //consistency check
+            $check = new QA ( $seg ['segment'], $translation );
+            $check->performTagCheckOnly ();
+            if( $check->thereAreErrors() ){
+                $translation = '|||UNTRANSLATED_CONTENT_START|||' . $seg ['segment'] . '|||UNTRANSLATED_CONTENT_END|||';
+                //log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".print_r( $check->getErrors(), true ).")");
+            }
+
 		}
 
 		//fix to escape non-html entities
 		$translation = str_replace("&lt;", '#LT#', $translation);
 		$translation = str_replace("&gt;", '#GT#', $translation);
 		$translation = str_replace("&amp;", '#AMP#', $translation);
-		$translation=  html_entity_decode($translation,ENT_NOQUOTES,"utf-8");
+		$translation = html_entity_decode($translation,ENT_NOQUOTES,"utf-8");
 		$translation = str_replace('#AMP#','&amp;', $translation);
 		$translation = str_replace('#LT#','&lt;', $translation);
 		$translation = str_replace('#GT#','&gt;', $translation);
