@@ -349,7 +349,7 @@ abstract class ajaxcontroller extends controller {
 		ob_get_clean();
 		// ob_start("ob_gzhandler");		// compress page before sending
 		header('Content-Type: application/json; charset=utf-8');
-		$this->result = array("errors" => array(), "data" => array());
+		$this->result = array("error" => array(), "data" => array());
 	}
 
 	public function finalize() {

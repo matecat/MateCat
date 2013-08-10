@@ -5,20 +5,13 @@
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
     </head>
     <body>
-        
 
         <header metal:define-macro="main_header">
             <div class="wrapper">   
 
-              
-              
-	              
-          <ul class="header-menu">
+          <ul class="header-menu" tal:condition="php: !job_archived ">
             <li>
-            
-            
-            
-          	
+
                 <form metal:define-slot="actions" id="originalDownload" action="${basepath}" method="post">
                     <input type="hidden" name="action" value="downloadOriginal" />
                     <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
@@ -45,7 +38,7 @@
           <li id='notifbox' class="notific" title="Well done, no errors found!">
           	<a id='point2seg' href="#"><span class="numbererror"></span></a>
           </li>
-              </ul> 
+          </ul>
 
                 <!-- viewer icons
                 

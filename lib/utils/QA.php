@@ -44,7 +44,7 @@ class errObject {
  * 
  * NOTE:
  * If a not well formed XML source/target is provided, all integrity checks are skipped returning a 
- * 'bad source xml/bad target xml' error.
+ * 'bad source xml/bad target xml/Tag mismatch' error.
  *
  * Use Example:
  * <br />
@@ -71,7 +71,7 @@ class errObject {
  * 1) Bad source xml <br />
  * 2) Bad target xml <br />
  * 3) Tag count mismatch <br />
- * 4) Tag id corrispondence mismatch <br />
+ * 4) Tag id mismatch <br />
  * 5) Tag content: Head whitespaces mismatch ( if a beginning withespace is present only in one of them ) <br />
  * 6) Tag content: Tail whitespaces mismatch ( if a trailing withespace is present only in one of them ) <br />
  * 7) Tag content: Head TAB mismatch ( if a beginning TAB is present only in one of them ) <br />
@@ -80,7 +80,7 @@ class errObject {
  * 10) Tag content: Tail carriage return / new line mismatch ( if a trailing carriage return / new line is present only in one of them ) <br />
  * 11) Tag boundary: Head characters mismatch ( if beetween tags there are different characters [\s\t\r\n] ) <br />
  * 12) Tag boundary: Tail characters mismatch ( if at the end of last tag there are different characters [\s\t\r\n] ) <br />
- * 
+ * 13) Tag X is self-closing tag, not properly ended should be <x .... /> <br />
  */
 class QA {
 
@@ -126,22 +126,26 @@ class QA {
     
     const AMPPLACEHOLDER = "##AMPPLACEHOLDER##";
 
-    const ERR_NONE           = 0;
-    const ERR_COUNT          = 1;
-    const ERR_SOURCE         = 2;
-    const ERR_TARGET         = 3;
-    const ERR_TAG_ID         = 4;
-    const ERR_WS_HEAD        = 5;
-    const ERR_WS_TAIL        = 6;
-    const ERR_TAB_HEAD       = 7;
-    const ERR_TAB_TAIL       = 8;
-    const ERR_CR_HEAD        = 9;
-    const ERR_CR_TAIL        = 10;
-    const ERR_BOUNDARY_HEAD  = 11;
-    const ERR_BOUNDARY_TAIL  = 12;
-    
-    const ERR_TAG_MISMATCH   = 1000;
-    
+    const ERR_NONE               = 0;
+    const ERR_COUNT              = 1;
+    const ERR_SOURCE             = 2;
+    const ERR_TARGET             = 3;
+    const ERR_TAG_ID             = 4;
+    const ERR_WS_HEAD            = 5;
+    const ERR_WS_TAIL            = 6;
+    const ERR_TAB_HEAD           = 7;
+    const ERR_TAB_TAIL           = 8;
+    const ERR_CR_HEAD            = 9;
+    const ERR_CR_TAIL            = 10;
+    const ERR_BOUNDARY_HEAD      = 11;
+    const ERR_BOUNDARY_TAIL      = 12;
+    const ERR_UNCLOSED_X_TAG     = 13;
+    const ERR_BOUNDARY_HEAD_TEXT = 14;
+
+    const ERR_TAG_MISMATCH       = 1000;
+
+    const ERR_SPACE_MISMATCH     = 1100;
+
     /**
      * Human Readable error map.
      * Created accordly with Error constants
@@ -161,6 +165,7 @@ class QA {
      *     ERR_CR_TAIL         =>  'Tail carriage return mismatch',
      *     ERR_BOUNDARY_HEAD   =>  'Char mismatch between tags',
      *     ERR_BOUNDARY_TAIL   =>  'End line char mismatch',
+     *     ERR_UNCLOSED_X_TAG  =>  'Wrong format for x tag.Should be <x .... />'
      * );
      * </pre>
      * @var array(string) 
@@ -170,7 +175,7 @@ class QA {
         1 =>  'Tag count mismatch',
         2 =>  'bad source xml',
         3 =>  'bad target xml',
-        4 =>  'Tag ID mismatch',
+        4 =>  'Tag ID mismatch: Check and edit tags with differing IDs.',
         5 =>  'Heading whitespaces mismatch',
         6 =>  'Tail whitespaces mismatch',
         7 =>  'Heading tab mismatch',
@@ -179,7 +184,9 @@ class QA {
         10 => 'Tail carriage return mismatch',
         11 => 'Char mismatch between tags',
         12 => 'End line char mismatch',
-        
+        13 => 'Wrong format for x tag. Should be < x .... />',
+        14 => 'Char mismatch before a tag',
+
         /*
          * grouping
          *  1 =>  'Tag count mismatch',
@@ -187,6 +194,19 @@ class QA {
          *  3 =>  'bad target xml',
          */
         1000 => 'Tag mismatch',
+
+        /*
+         * grouping
+         *  5 =>  'Heading whitespaces mismatch',
+         *  6 =>  'Tail whitespaces mismatch',
+         *  7 =>  'Heading tab mismatch',
+         *  8 =>  'Tail tab mismatch',
+         *  9 =>  'Heading carriage return mismatch',
+         *  11 => 'Char mismatch between tags',
+         *  12 => 'End line char mismatch',
+         *  14 => 'Char mismatch before a tag',
+         */
+        1100 => 'More/fewer whitespaces found next to the tags.',
     );
     
     /**
@@ -210,7 +230,10 @@ class QA {
      * @param int $errCode
      */
     protected function _addError($errCode) {
-        //Log::doLog($this->_errorMap[$errCode]);
+
+        //Real error Code log
+        //Log::doLog( $errCode . " :: " . $this->_errorMap[$errCode]);
+
         switch( $errCode ) {
             case self::ERR_COUNT:
             case self::ERR_SOURCE:
@@ -220,6 +243,17 @@ class QA {
             case self::ERR_TAG_ID:
             	$this->exceptionList[] = errObject::get( array( 'outcome' => self::ERR_TAG_ID, 'debug' => $this->_errorMap[self::ERR_TAG_ID] ) );
             break;
+
+            case self::ERR_WS_HEAD:
+            case self::ERR_WS_TAIL:
+            case self::ERR_TAB_HEAD:
+            case self::ERR_TAB_TAIL:
+            case self::ERR_BOUNDARY_HEAD:
+            case self::ERR_BOUNDARY_TAIL:
+            case self::ERR_UNCLOSED_X_TAG:
+            case self::ERR_BOUNDARY_HEAD_TEXT:
+                $this->warningList[] = errObject::get( array( 'outcome' => self::ERR_SPACE_MISMATCH, 'debug' => $this->_errorMap[self::ERR_SPACE_MISMATCH] ) );
+                break;
             default:
                 $this->warningList[] = errObject::get( array( 'outcome' => $errCode, 'debug' => $this->_errorMap[$errCode] ) );
             break;
@@ -358,19 +392,39 @@ class QA {
 
         $this->source_seg = $source_seg;
         $this->target_seg = $target_seg;
-        
-        $this->srcDom = new DOMDocument('1.0', 'utf-8');
-        $src_xml_valid = @$this->srcDom->loadXML("<root>$source_seg</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
-        if ($src_xml_valid === FALSE) {
-            $this->_addError(self::ERR_SOURCE);
-        }
 
-        $this->trgDom = new DOMDocument('1.0', 'utf-8');
-        $trg_xml_valid = @$this->trgDom->loadXML("<root>$target_seg</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
+        $this->srcDom = $this->_loadDom($source_seg, self::ERR_SOURCE);
+        $this->trgDom = $this->_loadDom($target_seg, self::ERR_TARGET);
+
+    }
+
+    /**
+     * Load an XML String into DomObject and add a global Error if not valid
+     *
+     * @param $xmlString
+     * @param int $targetErrorType
+     *
+     * @return DOMDocument
+     */
+    protected function _loadDom( $xmlString, $targetErrorType ){
+        libxml_use_internal_errors(true);
+        $dom = new DOMDocument('1.0', 'utf-8');
+        $trg_xml_valid = @$dom->loadXML("<root>$xmlString</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
         if ($trg_xml_valid === FALSE) {
-            $this->_addError(self::ERR_TARGET);
-        }
 
+            $rrorList = libxml_get_errors();
+            foreach( $rrorList as $error ){
+                if( $error->code == 76 /* libxml _xmlerror XML_ERR_TAG_NOT_FINISHED */ ){
+                    if( preg_match( '#<x[^/>]+>#', $xmlString  ) ){
+                        $this->_addError(self::ERR_UNCLOSED_X_TAG);
+                    }
+                }
+
+            }
+
+            $this->_addError($targetErrorType);
+        }
+        return $dom;
     }
 
     /**
@@ -429,7 +483,6 @@ class QA {
      */
     public function performConsistencyCheck() {
 
-
         $srcNodeList = @$this->srcDom->getElementsByTagName( 'root' )->item( 0 )->childNodes;
         $trgNodeList = @$this->trgDom->getElementsByTagName( 'root' )->item( 0 )->childNodes;
 
@@ -480,35 +533,48 @@ class QA {
     protected function _checkTagsBoundary() {
 
         //perform first char Line check if tags are not presents
-        preg_match_all('#^[\s\t\r\n]+[^<]+#u', $this->source_seg, $source_tags);
-        preg_match_all('#^[\s\t\r\n]+[^<]+#u', $this->target_seg, $target_tags);
+        preg_match_all('#^[\s\t\x{a0}\r\n]+[^<]+#u', $this->source_seg, $source_tags);
+        preg_match_all('#^[\s\t\x{a0}\r\n]+[^<]+#u', $this->target_seg, $target_tags);
         $source_tags = $source_tags[0];
         $target_tags = $target_tags[0];
         if( count($source_tags) != count($target_tags) ){
-            $this->_addError(self::ERR_WS_HEAD);
+            $num = abs( count($source_tags) - count($target_tags) );
+            for( $i=0; $i<$num ; $i++ ){
+                $this->_addError(self::ERR_WS_HEAD);
+            }
         }
 
-        //get all special chars before a tag
-        preg_match_all('#[\s\t\r\n]+<[^/>]+>#u', $this->source_seg, $source_tags);
-        preg_match_all('#[\s\t\r\n]+<[^/>]+>#u', $this->target_seg, $target_tags);
+        //get all special chars ( and spaces ) before a tag or after a closing g tag
+        //</g> ...
+        // <g ... >
+        // <x ... />
+        preg_match_all('#</g>[\s\t\x{a0}\r\n]+|[\s\t\x{a0}\r\n]+<(?:x[^>]+|[^/>]+)>#u', $this->source_seg, $source_tags);
+        preg_match_all('#</g>[\s\t\x{a0}\r\n]+|[\s\t\x{a0}\r\n]+<(?:x[^>]+|[^/>]+)>#u', $this->target_seg, $target_tags);
         $source_tags = $source_tags[0];
         $target_tags = $target_tags[0];
         if( count($source_tags) != count($target_tags) ){
-            $this->_addError(self::ERR_BOUNDARY_HEAD);
+            $num = abs( count($source_tags) - count($target_tags) );
+            for( $i=0; $i<$num ; $i++ ){
+                $this->_addError(self::ERR_BOUNDARY_HEAD_TEXT);
+            }
         }
 
-        //get All special chars between TAGS before first char occurrence
-        preg_match_all('#</[^>]+>[\s\t\r\n]+.*<[^/>]+>#u', $this->source_seg, $source_tags);
-        preg_match_all('#</[^>]+>[\s\t\r\n]+.*<[^/>]+>#u', $this->target_seg, $target_tags);
+        //get All special chars between G TAGS before first char occurrence
+        //</g> nnn<g ...>
+        preg_match_all('#</[^>]+>[\s\t\x{a0}\r\n]+.*<[^/>]+>#u', $this->source_seg, $source_tags);
+        preg_match_all('#</[^>]+>[\s\t\x{a0}\r\n]+.*<[^/>]+>#u', $this->target_seg, $target_tags);
         $source_tags = $source_tags[0];
         $target_tags = $target_tags[0];
         if( ( count($source_tags) != count($target_tags) ) ){
-            $this->_addError(self::ERR_BOUNDARY_HEAD);
+            $num = abs( count($source_tags) - count($target_tags) );
+            for( $i=0; $i<$num ; $i++ ){
+                $this->_addError(self::ERR_BOUNDARY_HEAD);
+            }
         }
 
         //get All special chars after LAST tag at the end of line if there are
-        preg_match_all('/<[^>]+>[\s\t\r\n]+$/u', $this->source_seg, $source_tags);
-        preg_match_all('/<[^>]+>[\s\t\r\n]+$/u', $this->target_seg, $target_tags);
+        preg_match_all('/<[^>]+>[\s\t\x{a0}\r\n]+$/u', $this->source_seg, $source_tags);
+        preg_match_all('/<[^>]+>[\s\t\x{a0}\r\n]+$/u', $this->target_seg, $target_tags);
         $source_tags = $source_tags[0];
         $target_tags = $target_tags[0];
 
@@ -522,14 +588,12 @@ class QA {
             //$this->_addError(self::ERR_BOUNDARY_TAIL);
 
         } else {
-            $this->target_seg = preg_replace( '|[\s\t\r\n]+$|u', "", $this->target_seg );
+            $this->target_seg = preg_replace( '#[\s\t\r\n]+$#u', "", $this->target_seg );
         }
 
-        //reload Target after normalization
-        $trg_xml_valid = @$this->trgDom->loadXML("<root>" . $this->target_seg . "</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
-        if ($trg_xml_valid === FALSE) {
-            $this->_addError(self::ERR_TARGET);
-        }
+        $this->trgDom = $this->_loadDom( $this->target_seg, self::ERR_TARGET );
+        //Save normalized dom Element
+        $this->normalizedTrgDOM = clone $this->trgDom;
 
     }
 
@@ -555,7 +619,7 @@ class QA {
 
         //check for Tag ID MISMATCH
         $diffArray = array_udiff(  $srcDomElements, $trgDomElements, 'domIDCompare' );
-        if( !empty($diffArray) ){
+        if( !empty($diffArray) && !empty($trgDomElements) ){
             $this->_addError(self::ERR_TAG_ID);
             //Log::doLog($diffArray);
         }
@@ -629,18 +693,22 @@ class QA {
      * @param $TagReference
      * @return DOMElement
      */
-    protected function _queryDOMElement( DOMDocument $domDoc, $TagReference ){
+    protected function _queryDOMElement( DOMDocument $domDoc, $TagReference ) {
 
-        $Node = new DOMElement('g');
+        $Node = new DOMElement( 'g' );
 
-        $availableParentList = $domDoc->getElementsByTagName($TagReference['name']);
-        for ($i = 0; $i < $availableParentList->length; $i++) {
-            if( $availableParentList->item($i)->getAttribute('id') == $TagReference['id'] ){
+        $availableParentList = $domDoc->getElementsByTagName( $TagReference[ 'name' ] );
+        $availableParentsLen = $availableParentList->length;
+
+        for ( $i = 0; $i < $availableParentsLen; $i++ ) {
+
+            $element = $availableParentList->item( $i );
+            if ( $element->getAttribute( 'id' ) == $TagReference[ 'id' ] ) {
 
                 /**
                  * @var DOMElement $Node
                  */
-                $Node = $availableParentList->item($i);
+                $Node = $element;
 
                 //Log::doLog( 'Found: ' . $availableParentList->item($i)->textContent );
             }
@@ -692,28 +760,34 @@ class QA {
      * )
      * </pre>
      * @param DOMNodeList $elementList
-     * @param array $srcDomElements
+     * @param array &$srcDomElements
      * @param int $depth
      * @param null $parentID
      */
     protected function _mapElements( DOMNodeList $elementList, array &$srcDomElements = array(), $depth = 0, $parentID = null ) {
 
-        for ( $i = 0; $i < $elementList->length; $i++ ) {
+        $elementsListLen = $elementList->length;
 
-            if ( $elementList->item( $i ) instanceof DOMElement ) {
+        for ( $i = 0; $i < $elementsListLen; $i++ ) {
+
+            $element = $elementList->item( $i );
+
+            if ( $element instanceof DOMElement ) {
+
+                $elementID = $element->getAttribute( 'id' );
 
                 $plainRef = array(
                     'type'      => 'DOMElement',
-                    'name'      => $elementList->item( $i )->tagName,
+                    'name'      => $element->tagName,
                     'parent_id' => $parentID,
-                    'id'        => $elementList->item( $i )->getAttribute( 'id' ),
+                    'id'        => $elementID,
                     'node_idx'  => $i
                 );
 
                 $srcDomElements[ $depth++ ] = $plainRef;
 
-                if ( $elementList->item( $i )->hasChildNodes() ) {
-                    $this->_mapElements( $elementList->item( $i )->childNodes, $srcDomElements, $depth, $elementList->item( $i )->getAttribute( 'id' ) );
+                if ( $element->hasChildNodes() ) {
+                    $this->_mapElements( $element->childNodes, $srcDomElements, $depth, $elementID );
                 }
 
             } else {

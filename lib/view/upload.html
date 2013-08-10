@@ -29,6 +29,7 @@
         -->
 
 
+        <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link rel="stylesheet" href="${basepath}public/css/upload.css?build=${build_number}"/>
         <link rel="stylesheet" href="${basepath}public/js/lib/colorbox/colorbox.css?build=${build_number}"/>
 
@@ -427,6 +428,7 @@
                 <input id="cancelMultilang" type="button" value="Cancel" />
                 <a href="#" class="close"></a>
                 Choose Multiple Languages (<span class="number">1</span>)
+                <a href="#" id="deselectMultilang">Deselect all</a>
             </div>
 
             <div class="popup-box">
@@ -447,10 +449,17 @@
         <footer>
             <div class="wrapper">
 
-                <tal:block tal:condition="php: !empty(logged_user)">
-                    <div id='authentication'>
-                        <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)</div>
-                </tal:block>
+                <nav>
+                    <ul>
+                        <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
+                    </ul>
+
+                    <tal:block tal:condition="php: !empty(logged_user)">
+                        <div id='welcomebox'>
+                            <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
+                        </div>
+                    </tal:block>
+                </nav>
 
             </div>
         </footer>

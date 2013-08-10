@@ -104,7 +104,7 @@ class INIT {
         self::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
 
         self::$DB_SERVER = "localhost"; //database server
-        self::$DB_DATABASE = "matecat_sandbox"; //database name
+        self::$DB_DATABASE = "matecat"; //database name
         self::$DB_USER = "matecat"; //database login 
         self::$DB_PASS = "matecat01"; //databasepassword
 
@@ -141,8 +141,8 @@ class INIT {
         self::$BUILD_NUMBER = '0.3.2';
         self::$VOLUME_ANALYSIS_ENABLED = true;
 
-	self::$WARNING_POLLING_INTERVAL=10;//seconds
-        self::$SEGMENT_QA_CHECK_INTERVAL = 2; //seconds
+        self::$WARNING_POLLING_INTERVAL = 10; //seconds
+        self::$SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
         
         self::$SUPPORTED_FILE_TYPES = array(
             'Office' => array(

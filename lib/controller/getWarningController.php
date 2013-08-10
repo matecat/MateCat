@@ -17,16 +17,17 @@ class getWarningController extends ajaxcontroller {
 
             'id'          => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'id_job'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'src_content' => array( 'filter' => FILTER_UNSAFE_RAW,
-                                    'flags'  => FILTER_FLAG_ENCODE_LOW ),
-            'trg_content' => array( 'filter' => FILTER_UNSAFE_RAW,
-                                    'flags'  => FILTER_FLAG_ENCODE_LOW ),
+            'src_content' => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'trg_content' => array( 'filter' => FILTER_UNSAFE_RAW ),
             'token'       => array( 'filter' => FILTER_SANITIZE_STRING,
                                     'flags'  => FILTER_FLAG_STRIP_LOW ),
 
         );
 
         $this->__postInput = (object)filter_input_array( INPUT_POST, $filterArgs );
+
+        $this->__postInput->src_content = CatUtils::view2rawxliff( $this->__postInput->src_content );
+        $this->__postInput->trg_content = CatUtils::view2rawxliff( $this->__postInput->trg_content );
 
     }
 
