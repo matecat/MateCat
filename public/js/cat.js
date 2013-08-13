@@ -597,8 +597,13 @@ UI = {
             e.preventDefault();
             UI.scrollSegment($('#segment-'+config.firstSegmentOfFiles[0].first_segment));           
         })
-        $("#jobNav prevfile").on('click', function(e) {
+        $("#jobNav .prevfile").on('click', function(e) {
             e.preventDefault();
+            currArtId = $(UI.currentFile).attr('id').split('-')[1];
+            $.each(config.firstSegmentOfFiles, function() {
+                if(currArtId == this.id_file) firstSegmentOfCurrentFile = this.first_segment;
+            });
+            UI.scrollSegment($('#segment-' + firstSegmentOfCurrentFile));           
         })
         $("#jobNav .currseg").on('click', function(e) {
             e.preventDefault();
