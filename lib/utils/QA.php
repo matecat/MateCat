@@ -250,10 +250,10 @@ class QA {
             case self::ERR_TAB_TAIL:
             case self::ERR_BOUNDARY_HEAD:
             case self::ERR_BOUNDARY_TAIL:
-            case self::ERR_UNCLOSED_X_TAG:
             case self::ERR_BOUNDARY_HEAD_TEXT:
                 $this->warningList[] = errObject::get( array( 'outcome' => self::ERR_SPACE_MISMATCH, 'debug' => $this->_errorMap[self::ERR_SPACE_MISMATCH] ) );
                 break;
+            case self::ERR_UNCLOSED_X_TAG:
             default:
                 $this->warningList[] = errObject::get( array( 'outcome' => $errCode, 'debug' => $this->_errorMap[$errCode] ) );
             break;
