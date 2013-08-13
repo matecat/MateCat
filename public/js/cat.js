@@ -1,7 +1,9 @@
 UI = null;
 
 UI = {
-    render: function(firstLoad) {
+    render: function(firstLoad, segment_id) {
+        seg = (segment_id || false);
+        this.segmentToScrollAtRender = (seg)? seg : false;        
         this.isWebkit = $.browser.webkit;
         this.isChrome = $.browser.webkit && !!window.chrome;
         this.isFirefox = $.browser.mozilla;
@@ -45,7 +47,9 @@ UI = {
         this.checkTutorialNeed();
 
         UI.detectStartSegment();
-        UI.getSegments();
+        var openCurrentSegmentAfter = ((!seg)&&(!this.firstLoad))? true : false;
+//        if((!seg)&&(!this.firstLoad)) this.gotoSegment(this.currentSegmentId);
+        UI.getSegments(openCurrentSegmentAfter);
     },
     init: function() {
         this.initStart = new Date();
@@ -190,7 +194,7 @@ UI = {
         $(window).on('sourceCopied', function(event) {
         });
 
-        $("article").on('click', 'a.number', function(e) {
+        $("#outer").on('click', 'a.number', function(e) {
             e.preventDefault();
             e.stopPropagation();
             return false;
@@ -260,7 +264,7 @@ UI = {
             }
         });
 
-        $("article").on('click', 'a.percentuage', function(e) {
+        $("#outer").on('click', 'a.percentuage', function(e) {
             e.preventDefault();
             e.stopPropagation();
         }).on('click', '.editarea', function(e, operation) {
@@ -562,7 +566,7 @@ UI = {
         })
 
         UI.toSegment = true;
-        UI.gotoSegment(this.startSegmentId);
+        if(!this.segmentToScrollAtRender) UI.gotoSegment(this.startSegmentId);
 
         $(".end-message-box a.close").on('click', function(e) {
             e.preventDefault();
@@ -591,14 +595,28 @@ UI = {
         })
         $("#jobNav .jobstart").on('click', function(e) {
             e.preventDefault();
-            UI.scrollSegment($('#segment-'+config.firstSegmentOfFiles[0].first_segment));
+            UI.scrollSegment($('#segment-'+config.firstSegmentOfFiles[0].first_segment));           
         })
-        $("#jobNav prevfile").on('click', function(e) {
+        $("#jobNav .prevfile").on('click', function(e) {
             e.preventDefault();
+            currArtId = $(UI.currentFile).attr('id').split('-')[1];
+            $.each(config.firstSegmentOfFiles, function() {
+                if(currArtId == this.id_file) firstSegmentOfCurrentFile = this.first_segment;
+            });
+            UI.scrollSegment($('#segment-' + firstSegmentOfCurrentFile));           
         })
         $("#jobNav .currseg").on('click', function(e) {
             e.preventDefault();
-            UI.scrollSegment(UI.currentSegment);
+            
+            if(!($('#segment-'+UI.currentSegmentId).length)) {
+                var m = confirm('The segment requested is outside the current view.');
+                if (m) {
+                    $('#outer').empty();
+                    UI.render(false);
+                }
+            } else {
+                UI.scrollSegment(UI.currentSegment);
+            }
         })
         $("#jobNav .nextfile").on('click', function(e) {
             e.preventDefault();
@@ -942,8 +960,12 @@ UI = {
         return segId;
     },
     detectStartSegment: function() {
-        var hash = window.location.hash.substr(1);
-        this.startSegmentId = (hash) ? hash : config.last_opened_segment;
+        if(this.segmentToScrollAtRender) {
+            this.startSegmentId = this.segmentToScrollAtRender;
+        } else {
+            var hash = window.location.hash.substr(1);
+            this.startSegmentId = (hash) ? hash : config.last_opened_segment;            
+        }
     },
     getContribution: function(segment, next) {
         var n = (next) ? $('#segment-' + this.nextSegmentId) : $(segment);
@@ -1121,7 +1143,7 @@ UI = {
         }
         return percentageClass;
     },
-    getSegments: function() {
+    getSegments: function(openCurrentSegmentAfter) {
         where = (this.startSegmentId) ? 'center' : 'after';
         var step = this.initSegNum;
         $('#outer').addClass('loading');
@@ -1136,11 +1158,11 @@ UI = {
                 where: where
             },
             success: function(d) {
-                UI.getSegments_success(d);
+                UI.getSegments_success(d,openCurrentSegmentAfter);
             }
         });
     },
-    getSegments_success: function(d) {
+    getSegments_success: function(d,openCurrentSegmentAfter) {
         if(d.error.length) 
             this.processErrors(d.error);
         where = d.data['where'];
@@ -1150,8 +1172,10 @@ UI = {
         if (typeof this.startSegmentId == 'undefined')
             this.startSegmentId = startSegmentId;
         this.body.addClass('loaded');
-        if (typeof d.data['files'] != 'undefined')
-            this.renderSegments(d.data['files'], where, true);
+        if (typeof d.data['files'] != 'undefined') {
+            this.renderSegments(d.data['files'], where, this.firstLoad);
+            if(openCurrentSegmentAfter) this.gotoSegment(this.currentSegmentId);
+        }
         $('#outer').removeClass('loading loadingBefore');
         this.loadingMore = false;
         this.setWaypoints();
@@ -1195,8 +1219,7 @@ UI = {
             } else {
                 this.topReached();
             }
-        }
-        ;
+        };
         this.scrollSegment(prev);
     },
     gotoSegment: function(id) {
@@ -1351,8 +1374,11 @@ UI = {
         if (!this.readonly)
             this.getContribution(segment, 0);
         this.opening = true;
-        if (!(this.currentSegment.is(this.lastOpenedSegment)))
-            this.closeSegment(this.lastOpenedSegment, 0, operation);
+        if (!(this.currentSegment.is(this.lastOpenedSegment))) {
+            var lastOpened = $(this.lastOpenedSegment).attr('id');
+            if(lastOpened != 'segment-'+this.currentSegmentId)
+                this.closeSegment(this.lastOpenedSegment, 0, operation);
+        }
         this.opening = false;
         this.body.addClass('editing');
 
@@ -1643,6 +1669,13 @@ UI = {
         this.setTranslation(segment, status);
     },
     scrollSegment: function(segment) {
+        if(!segment.length) {
+            var m = confirm('The segment requested is outside the current view.');
+            if (m) {
+                $('#outer').empty();
+                this.render(false, segment.selector.split('-')[1]);
+            }
+        };
         var spread = 23;
         var current = this.currentSegment;
         var previousSegment = $(segment).prev('section');
@@ -1674,7 +1707,6 @@ UI = {
         }
 
         $("html,body").stop();
-//        console.log('destinationTop: ' + destinationTop);
         $("html,body").animate({
             scrollTop: destinationTop - 20
         }, 500);

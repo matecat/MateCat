@@ -167,7 +167,7 @@ while (1) {
     }
 
     $check = new QA($text, $suggestion);
-    $check->performConsistencyCheck();
+    $check->performTagCheckOnly();
     
     //$outcome_warning=CatUtils::checkTagConsistency($text,$suggestion);
 
@@ -189,7 +189,7 @@ while (1) {
 
     $segs_in_project = countSegments($pid);
     if ($segs_in_project < 0) {
-        echo "--- (child $my_pid) : WARNING !!! erro while counting segments in projects $pid skipping and continure \n";
+        echo "--- (child $my_pid) : WARNING !!! error while counting segments in projects $pid skipping and continue \n";
         continue;
     }
     echo "--- (child $my_pid) : count segments in project $pid = $segs_in_project\n";

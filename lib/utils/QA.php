@@ -250,10 +250,10 @@ class QA {
             case self::ERR_TAB_TAIL:
             case self::ERR_BOUNDARY_HEAD:
             case self::ERR_BOUNDARY_TAIL:
-            case self::ERR_UNCLOSED_X_TAG:
             case self::ERR_BOUNDARY_HEAD_TEXT:
                 $this->warningList[] = errObject::get( array( 'outcome' => self::ERR_SPACE_MISMATCH, 'debug' => $this->_errorMap[self::ERR_SPACE_MISMATCH] ) );
                 break;
+            case self::ERR_UNCLOSED_X_TAG:
             default:
                 $this->warningList[] = errObject::get( array( 'outcome' => $errCode, 'debug' => $this->_errorMap[$errCode] ) );
             break;
@@ -379,16 +379,22 @@ class QA {
 
         mb_regex_encoding('UTF-8');
         mb_internal_encoding("UTF-8");
-        
-//         Log::doLog($_GET);
-//         Log::doLog($source_seg);
-//         Log::doLog($target_seg);
-        
+
         $src_enc = mb_detect_encoding($source_seg);
         $trg_enc = mb_detect_encoding($target_seg);
-        
+
         $source_seg = mb_convert_encoding( $source_seg, 'UTF-8', $src_enc );
         $target_seg = mb_convert_encoding( $target_seg, 'UTF-8', $trg_enc );
+
+        $source_seg = preg_replace( '#\n#u', chr( 0xc2 ) . chr( 0xa0 ), $source_seg );
+
+
+        //Log::doLog($_GET);
+//        Log::doLog($source_seg);
+//        Log::doLog($target_seg);
+//        Log::hexDump($source_seg);
+//        Log::hexDump($target_seg);
+
 
         $this->source_seg = $source_seg;
         $this->target_seg = $target_seg;
@@ -548,12 +554,16 @@ class QA {
         //</g> ...
         // <g ... >
         // <x ... />
-        preg_match_all('#</g>[\s\t\x{a0}\r\n]+|[\s\t\x{a0}\r\n]+<(?:x[^>]+|[^/>]+)>#u', $this->source_seg, $source_tags);
-        preg_match_all('#</g>[\s\t\x{a0}\r\n]+|[\s\t\x{a0}\r\n]+<(?:x[^>]+|[^/>]+)>#u', $this->target_seg, $target_tags);
+        preg_match_all('#</g>[\s\t\x{a0}\r\n]+|[\s\t\x{a0}\r\n]+<(?:x[^>]+|[^/>]+)>#u', rtrim($this->source_seg), $source_tags);
+        preg_match_all('#</g>[\s\t\x{a0}\r\n]+|[\s\t\x{a0}\r\n]+<(?:x[^>]+|[^/>]+)>#u', rtrim($this->target_seg), $target_tags);
         $source_tags = $source_tags[0];
         $target_tags = $target_tags[0];
         if( count($source_tags) != count($target_tags) ){
             $num = abs( count($source_tags) - count($target_tags) );
+//            Log::doLog($source_tags);
+//            Log::doLog($target_tags);
+//            Log::hexDump($this->source_seg);
+//            Log::hexDump($this->target_seg);
             for( $i=0; $i<$num ; $i++ ){
                 $this->_addError(self::ERR_BOUNDARY_HEAD_TEXT);
             }
@@ -567,6 +577,14 @@ class QA {
         $target_tags = $target_tags[0];
         if( ( count($source_tags) != count($target_tags) ) ){
             $num = abs( count($source_tags) - count($target_tags) );
+
+//            Log::doLog($this->source_seg);
+//            Log::doLog($this->target_seg);
+//            Log::hexDump($this->source_seg);
+//            Log::hexDump($this->target_seg);
+//            Log::doLog($source_tags);
+//            Log::doLog($target_tags);
+
             for( $i=0; $i<$num ; $i++ ){
                 $this->_addError(self::ERR_BOUNDARY_HEAD);
             }
