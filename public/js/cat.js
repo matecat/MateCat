@@ -55,7 +55,7 @@ UI = {
         this.initStart = new Date();
         if (this.debug)
             console.log('Render time: ' + (this.initStart - renderStart));
-        this.numMatchesResults = 2;
+        this.numMatchesResults = 3;
         this.numSegments = $('section').length;
         this.editarea = '';
         this.byButton = false;
