@@ -547,13 +547,25 @@ padding:1px 6px !important;margin:5px 10px 0 -10px;text-shadow:none !important;}
         display: block;
         }
 
+.sub-editor .cc-search
+    {
+    background: none;
+    }       
+.sub-editor .cc-search.loading
+    {
+    background: url(../img/loading.gif) 47% 20px no-repeat;
+    float: left;
+    width: 100%;
+    background-size: 20px 20px;
+    }          
+        
 .sub-editor .cc-search input
     {
     float: left;
     width: 37%;
     margin: 20px 5%;
     border: 1px solid #333;
-    border-radius: 10px;
+/*    border-radius: 10px;*/
     }           
         
 .content { float: left; clear: both; border: 1px solid #ccf; border-top: none; border-left: none; background: #eef; padding: 10px 20px 20px; width: 400px; }

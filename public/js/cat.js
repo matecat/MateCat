@@ -266,9 +266,9 @@ UI = {
             $('#contextMenu').hide();
             $('.editor .submenu .tab-switcher-cc a').click();
             $('.editor .cc-search input').val('');
-            var searchField = (UI.currentSearchInSource)? $('.editor .cc-search input.search-source') : $('.editor .cc-search input.search-target');
+            var searchField = (UI.currentSearchInTarget)? $('.editor .cc-search input.search-target') : $('.editor .cc-search input.search-source');
             searchField.val(UI.currentSelectedText);
-            UI.getConcordance(UI.currentSelectedText, UI.currentSearchInSource);
+            UI.getConcordance(UI.currentSelectedText, UI.currentSearchInTarget);
         });
 
         $("#outer").on('click', 'a.percentuage', function(e) {
@@ -454,7 +454,7 @@ UI = {
                         var str = selection.toString().trim();
                         if(str.length) { // the trimmed string is not empty
                             UI.currentSelectedText = str;
-                            UI.currentSearchInSource = ($(this).hasClass('source'))? 1 : 0;
+                            UI.currentSearchInTarget = ($(this).hasClass('source'))? 0 : 1;
                             UI.showContextMenu(str, e.pageY, e.pageX);
                         };
                     }; 
@@ -488,7 +488,7 @@ UI = {
         }).on('click', '.editor .editarea, .editor .source', function(e) {
             $('.selected', $(this)).removeClass('selected');
             UI.currentSelectedText = false;
-            UI.currentSearchInSource = false;
+            UI.currentSearchInTarget = false;
             $('#contextMenu').hide();
         }).on('click', 'a.translated', function(e) {
             e.preventDefault();
@@ -571,6 +571,10 @@ UI = {
             $(this).addClass('active');
             $('.editor .sub-editor').hide();
             $('.editor .sub-editor.concordances').show();
+        }).on('click', '.sub-editor .cc-search .search-source', function(e) {
+            $('.editor .sub-editor .cc-search .search-target').val('');
+        }).on('click', '.sub-editor .cc-search .search-target', function(e) {
+            $('.editor .sub-editor .cc-search .search-source').val('');
         }).on('paste', '.editarea', function(e) {
             UI.saveInUndoStack('paste');
             $('#placeHolder').remove();
@@ -1009,13 +1013,14 @@ UI = {
             this.startSegmentId = (hash) ? hash : config.last_opened_segment;            
         }
     },
-    getConcordance: function(txt, in_source) {
+    getConcordance: function(txt, in_target) {
+        $('.cc-search', UI.currentSegment).addClass('loading');
         txt = view2rawxliff(txt);
         this.doRequest({
             data: {
                 action: 'getContribution',
                 is_concordance: 1,
-                from_target: in_source,
+                from_target: in_target,
                 id_segment: UI.currentSegmentId,
                 text: txt,
                 id_job: config.job_id,
@@ -1024,7 +1029,7 @@ UI = {
             },
 //            context: $('#' + id),
             success: function(d) {
-                UI.renderConcordances(d);
+                UI.renderConcordances(d, in_target);
             }
         });
     },  
@@ -1564,8 +1569,26 @@ UI = {
     removeStatusMenu: function(statusMenu) {
         statusMenu.empty().hide();
     },
-    renderConcordances: function(d) {
-        console.log('data: ', d);
+    renderConcordances: function(d, in_target) {
+        segment = UI.currentSegment;
+        segment_id = UI.currentSegmentId;
+        $('.sub-editor.concordances .overflow .results', segment).empty();        
+        $.each(d.data.matches, function(index) {
+            if ((this.segment == '') || (this.translation == ''))
+                return;
+            var disabled = (this.id == '0') ? true : false;
+            cb = this['created_by'];
+            cl_suggestion = UI.getPercentuageClass(this['match']);
+            var leftTxt = (in_target)? this.translation : this.segment;
+            leftTxt = leftTxt.replace(/\#start\#/gi, "<mark>");
+            leftTxt = leftTxt.replace(/\#end\#/gi, "</mark>");
+            var rightTxt = (in_target)? this.segment : this.translation;
+            rightTxt = rightTxt.replace(/\#start\#/gi, "<mark>");
+            rightTxt = rightTxt.replace(/\#end\#/gi, "</mark>");
+            $('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+        });
+        $('.cc-search', UI.currentSegment).removeClass('loading');
+
     },
     renderContributions: function(d, segment) {
         var isActiveSegment = $(segment).hasClass('editor');
