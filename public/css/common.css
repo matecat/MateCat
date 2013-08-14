@@ -312,3 +312,29 @@ footer nav
         {
         visibility: hidden;
         }
+
+#contextMenu
+    {
+    position: absolute;
+    display: none;
+    background: white;
+    z-index: 999;
+    border: 1px solid #999;
+    width: 200px;
+    padding: 3px;
+    }
+#contextMenu li
+    {
+    text-align: left;
+    padding: 3px;
+    font-size: 80%;
+    }
+    #contextMenu li:hover
+        {
+        background: #eee;
+        cursor: pointer;
+        }
+#contextMenu .shortcut
+    {
+    float: right;
+    }

@@ -512,7 +512,14 @@ section.loaded .submenu {display: block;}
 .loaded{overflow:visible !important}
 
 
-.submenu li{float:left;width:auto !important;background:#efefef  url(../img/point.gif) 0 0 repeat-x;}
+.submenu li
+    {
+    float: left;
+    position: relative;
+    width: auto !important;
+    background: #efefef url(../img/point.gif) 0 0 repeat-x;
+    z-index: 9999999999999;
+    }
 .submenu a{-webkit-transition: all  100ms ease-in;-moz-transition: all  100ms ease-in;padding:4px 20px;display:block;color:#939598;font-size:16px; float:left;font-weight:bold;text-decoration:none;border-right:1px solid #666;border-top:1px solid #666;
 -webkit-box-shadow: inset 0 -1px 4px #ccc;}
 .submenu .notification{margin:-1px 5px 0px 0px;background:url(../img/header-bg.jpg) 0 0 repeat-x;color:#fff !important}
@@ -522,7 +529,33 @@ section.loaded .submenu {display: block;}
 .submenu .on{background: #fff;color:#000;font-size:14px; text-shadow: none;}
 .notification{background:#f5f5f5 url(../img/point.gif) 0 0 repeat-x;-moz-border-radius: 2px;border-radius: 2px;display:block;float:left; color:#333 !important;height:16px; 
 padding:1px 6px !important;margin:5px 10px 0 -10px;text-shadow:none !important;}
-.submenu li.active a { background: #fbfbfb;color:#666;text-shadow:none;-moz-box-shadow:none;-webkit-box-shadow:none;margin:1px 0 -1px 0;position:relative;z-index:9999999999999; }
+.submenu li.active a
+    {
+    background: #fbfbfb;
+    color: #666;
+    text-shadow: none;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    margin: 1px 0 -1px 0;
+    }
+.sub-editor
+    {
+    display: none;
+    }   
+    .sub-editor.matches
+        {
+        display: block;
+        }
+
+.sub-editor .cc-search input
+    {
+    float: left;
+    width: 37%;
+    margin: 20px 5%;
+    border: 1px solid #333;
+    border-radius: 10px;
+    }           
+        
 .content { float: left; clear: both; border: 1px solid #ccf; border-top: none; border-left: none; background: #eef; padding: 10px 20px 20px; width: 400px; }
 
 .preview{font-family:Cambria, Arial, Helvetica, sans-serif !important; height:300px}
