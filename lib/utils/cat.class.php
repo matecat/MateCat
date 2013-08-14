@@ -372,6 +372,16 @@ class CatUtils {
             }
         }
 
+        /**
+         * For future refactory, with this SQL construct we halve the number of insert/update queries
+         *
+         * mysql support this:
+         *
+         *  INSERT INTO example (id,suggestions_array) VALUES (1,'["key":"we don\'t want this update because of tm_analysis_status is not DONE"]')
+         *      ON DUPLICATE KEY UPDATE
+         *          suggestions_array = IF( tm_analysis_status = 'DONE' , VALUES(suggestions_array) , suggestions_array );
+         *
+         */
         $insertRes = setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json);
         if ($insertRes < 0 and $insertRes != -1062) {
             $result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the suggestions for the segment $id_segment - $insertRes");
