@@ -490,6 +490,9 @@ UI = {
             UI.lockTags();
             UI.changeStatusStop = new Date();
             UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
+//            if(UI.segmentIsLoaded(UI.nextSegmentId)) console.log('UI.segmentIsLoaded(UI.nextSegmentId): ', UI.segmentIsLoaded(UI.nextSegmentId));
+//            if(UI.nextSegmentId) console.log('UI.nextSegmentId: ', UI.nextSegmentId);
+            
             if (UI.segmentIsLoaded(UI.nextSegmentId) || UI.nextSegmentId == '') {
                 if (UI.debug)
                     console.log('next segment is loaded');
@@ -552,7 +555,8 @@ UI = {
             UI.lockTags();
         }).on('click', 'a.close', function(e,param) {
             e.preventDefault();
-            UI.closeSegment(UI.currentSegment, 1, 'noSave');
+            var save = (typeof param == 'undefined')? 'noSave' : param;
+            UI.closeSegment(UI.currentSegment, 1, save);
         });
 
         $('#hideAlertConfirmTranslation').bind('change', function(e) {
@@ -785,7 +789,7 @@ UI = {
         var saveBrevior = true;
         if (operation != 'noSave') {
 //        if (typeof operation != 'undefined') {
-            if (operation == 'translated')
+            if ((operation == 'translated')||(operation == 'Save'))
                 saveBrevior = false;
         }
         if ((segment.hasClass('modified')) && (saveBrevior)) {
@@ -1964,8 +1968,7 @@ UI = {
         var nextSegment = $('#segment-' + this.nextSegmentId);
         this.nextSegment = nextSegment;
         if (!nextSegment.length) {
-//            $(".editor:visible").find(".close").click();
-            $(".editor:visible").find(".close").trigger('click','noSave');
+            $(".editor:visible").find(".close").trigger('click','Save');
             $('.downloadtr-button').focus();
             return false;
         };
