@@ -32,10 +32,20 @@ class downloadFileController extends downloadController {
     
     // temporary hack. will be unuseful with the new release
     private  function restorenbsp($s) {
-        $pattern="#".NBSPPLACEHOLDER."#";
-        $s = preg_replace($pattern, Utils::unicode2chr(0Xa0), $s);
+        $pattern="#<x id=\"nbsp\"/>#";
+        $s = preg_replace($pattern, $this->unicode2chr(0Xa0), $s);
         return $s;
     }
+    
+    // get the char from unicode code
+    private function unicode2chr($o) {
+        if (function_exists('mb_convert_encoding')) {
+            return mb_convert_encoding('&#' . intval($o) . ';', 'UTF-8', 'HTML-ENTITIES');
+        } else {
+            return chr(intval($o));
+        }
+    }
+
 
     public function doAction() {
         // specs for filename at the task https://app.asana.com/0/1096066951381/2263196383117
