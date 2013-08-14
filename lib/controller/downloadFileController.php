@@ -29,6 +29,13 @@ class downloadFileController extends downloadController {
             $this->id_job = "Unknown";
         }
     }
+    
+    // temporary hack. will be unuseful with the new release
+    private  function restorenbsp($s) {
+        $pattern="#".NBSPPLACEHOLDER."#";
+        $s = preg_replace($pattern, Utils::unicode2chr(0Xa0), $s);
+        return $s;
+    }
 
     public function doAction() {
         // specs for filename at the task https://app.asana.com/0/1096066951381/2263196383117
@@ -67,7 +74,9 @@ class downloadFileController extends downloadController {
                 //	echo $seg['internal_id']."\n";
                 $end_tags = "";
                 //echo "t1 : ".$seg['translation']."\n";
+                $seg['segment']=$this->restorenbsp($seg['segment']);                
                 $translation = empty($seg['translation']) ? $seg['segment'] : $seg['translation'];
+                $translation=$this->restorenbsp($translation);
                 //echo "t11 : $translation\n\n";
 
                 @$xml_valid = simplexml_load_string("<placeholder>$translation</placeholder>");
