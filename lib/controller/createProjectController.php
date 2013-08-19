@@ -1,6 +1,7 @@
 <?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
+include INIT::$UTILS_ROOT . "/cat.class.php";
 include_once INIT::$ROOT . "/lib/utils/segmentExtractor.php";
 
 define('DEFAULT_NUM_RESULTS', 2);
@@ -29,6 +30,7 @@ class createProjectController extends ajaxcontroller {
         $this->private_tm_key = $this->get_from_get_post('private_tm_key');
         $this->private_tm_user = $this->get_from_get_post('private_tm_user');
         $this->private_tm_pass = $this->get_from_get_post('private_tm_pass');
+
     }
 
     public function doAction() {
@@ -62,25 +64,91 @@ class createProjectController extends ajaxcontroller {
             $this->tms_engine = 1; // default MyMemory
         }
 
+        $sourceLangHistory = $_COOKIE["sourceLang"];
+        $targetLangHistory = $_COOKIE["targetLang"];
+
+        // SET SOURCE COOKIE
+
+        if ($sourceLangHistory == '_EMPTY_')
+            $sourceLangHistory = "";
+        $sourceLangAr = explode('||', urldecode($sourceLangHistory));
+
+        if (($key = array_search($this->source_language, $sourceLangAr)) !== false) {
+            unset($sourceLangAr[$key]);
+        }
+        array_unshift($sourceLangAr, $this->source_language);
+        if ($sourceLangAr == '_EMPTY_')
+            $sourceLangAr = "";
+        $newCookieVal = "";
+        $sourceLangAr = array_slice($sourceLangAr, 0, 3);
+        $sourceLangAr = array_reverse($sourceLangAr);
+
+        foreach ($sourceLangAr as $key => $link) {
+            if ($sourceLangAr[$key] == '') {
+                unset($sourceLangAr[$key]);
+            }
+        }
+
+        foreach ($sourceLangAr as $lang) {
+            if ($lang != "")
+                $newCookieVal = $lang . "||" . $newCookieVal;
+        }
+
+        setcookie("sourceLang", $newCookieVal, time() + (86400 * 365));
+
+
+        // SET TARGET COOKIE
+
+        if ($targetLangHistory == '_EMPTY_')
+            $targetLangHistory = "";
+        $targetLangAr = explode('||', urldecode($targetLangHistory));
+
+        if (($key = array_search($this->target_language, $targetLangAr)) !== false) {
+            unset($targetLangAr[$key]);
+        }
+        array_unshift($targetLangAr, $this->target_language);
+        if ($targetLangAr == '_EMPTY_')
+            $targetLangAr = "";
+        $newCookieVal = "";
+        $targetLangAr = array_slice($targetLangAr, 0, 3);
+        $targetLangAr = array_reverse($targetLangAr);
+
+        foreach ($targetLangAr as $key => $link) {
+            if ($targetLangAr[$key] == '') {
+                unset($targetLangAr[$key]);
+            }
+        }
+
+        foreach ($targetLangAr as $lang) {
+            if ($lang != "")
+                $newCookieVal = $lang . "||" . $newCookieVal;
+        }
+
+        setcookie("targetLang", $newCookieVal, time() + (86400 * 365));
+
+
+
+
         // aggiungi path file in caricamento al cookie"pending_upload"a
         // add her the cookie mangement for remembere the last 3 choosed languages
         // project name sanitize
-        $this->project_name = preg_replace('/["\' \(\)\&\[\]\{\}\+\*,|#]/', "_", $this->project_name);
+        $this->project_name = preg_replace('/[^\p{L}0-9a-zA-Z_\.\-]/u', "_", $this->project_name);
         $this->project_name = preg_replace('/[_]{2,}/', "_", $this->project_name);
         $this->project_name = str_replace('_.', ".", $this->project_name);
-        //echo $this->project_name; 
         // project name validation        
-        $pattern = "/^[\p{L}\ 0-9a-zA-Z_\.\-]+$/";
-        if (!preg_match($pattern, $this->project_name)) {
+        $pattern = "/^[\p{L}\ 0-9a-zA-Z_\.\-]+$/u";
+        if (!preg_match($pattern, $this->project_name, $rr)) {
             $this->result['errors'][] = array("code" => -5, "message" => "Invalid Project Name $this->project_name: it should only contain numbers and letters!");
-            //	        $this->result['project_name_error'] = $this->project_name;
             return false;
         }
 
         // create project
-        $analysis_status = (INIT::$VOLUME_ANALYSIS_ENABLED) ? 'NEW' : 'NOT_TO_ANALYZE';
-        $ppassword = $this->create_password();
-        $pid = insertProject('translated_user', $this->project_name, $analysis_status, $ppassword);
+        $ppassword = CatUtils::generate_password();
+
+        $ip = Utils::getRealIpAddr();
+        $id_customer = 'translated_user';
+
+        $pid = insertProject($id_customer, $this->project_name, 'NOT_READY_FOR_ANALYSIS', $ppassword, $ip);
         //create user (Massidda 2013-01-24)
         //this is done only if an API key is provided
         if (!empty($this->private_tm_key)) {
@@ -91,57 +159,74 @@ class createProjectController extends ajaxcontroller {
                 $this->private_tm_user = $this->private_tm_key;
                 $this->private_tm_pass = $this->private_tm_key;
             }
-            $user_id = insertUser($this->private_tm_user, $this->private_tm_pass, $this->private_tm_key);
+            $user_id = insertTranslator($this->private_tm_user, $this->private_tm_pass, $this->private_tm_key);
             $this->private_tm_user = $user_id;
         }
-        //create job
-        $password = $this->create_password();
-        $jid = insertJob($password, $pid, $this->private_tm_user, $this->source_language, $this->target_language, $this->mt_engine, $this->tms_engine);
 
-        $intDir = $_SERVER['DOCUMENT_ROOT'] . '/storage/upload/' . $_COOKIE['upload_session'];
+
+        $intDir = INIT::$UPLOAD_REPOSITORY . "/" . $_COOKIE['upload_session'];
+        $fidList = array();
         foreach ($arFiles as $file) {
 
 
             $fileSplit = explode('.', $file);
             $mimeType = strtolower($fileSplit[count($fileSplit) - 1]);
-            //echo $mimeType; exit;
-            //        	log::doLog('MIMETYPE: ' . $mimeType);
 
-            $original_content="";
+            $original_content = "";
             if (($mimeType != 'sdlxliff') && ($mimeType != 'xliff') && ($mimeType != 'xlf') && (INIT::$CONVERSION_ENABLED)) {
-                //        		log::doLog('NON XLIFF');
                 $fileDir = $intDir . '_converted';
                 $filename_to_catch = $file . '.sdlxliff';
 
                 $original_content = file_get_contents("$intDir/$file");
                 $sha1_original = sha1($original_content);
-                //unset($original_content);
             } else {
-                $sha1_original="";
+                $sha1_original = "";
                 $fileDir = $intDir;
                 $filename_to_catch = $file;
             }
-            
-            if (!empty($original_content)){
+
+            if (!empty($original_content)) {
                 $original_content = gzdeflate($original_content, 5);
             }
 
             $filename = $fileDir . '/' . $filename_to_catch;
-            //echo $filename;exit;
-            log::doLog('FILENAME: ' . $filename);
 
             if (!file_exists($filename)) {
                 $this->result['errors'][] = array("code" => -6, "message" => "File not found on server after upload.");
             }
             $contents = file_get_contents($filename);
-            $fid = insertFile($pid, $file, $this->source_language, $mimeType, $contents, $sha1_original,$original_content);
+            $fid = insertFile($pid, $file, $this->source_language, $mimeType, $contents, $sha1_original, $original_content);
+            $fidList[] = $fid;
 
-            insertFilesJob($jid, $fid);
 
             $insertSegments = extractSegments($fileDir, $filename_to_catch, $pid, $fid);
+            //exit;
         }
 
-        log::doLog('DELETING DIR: ' . $intDir);
+        //create job
+
+
+        $this->target_language = explode(',', $this->target_language);
+
+        foreach ($this->target_language as $target) {
+            $password = CatUtils::generate_password();
+            if (isset($_SESSION['cid']) and !empty($_SESSION['cid'])) {
+                $owner = $_SESSION['cid'];
+            } else {
+
+                $_SESSION['_anonym_pid'] = $pid;
+
+                //default user
+                $owner = '';
+            }
+            $jid = insertJob($password, $pid, $this->private_tm_user, $this->source_language, $target, $this->mt_engine, $this->tms_engine, $owner);
+            foreach ($fidList as $fid) {
+                insertFilesJob($jid, $fid);
+            }
+        }
+
+
+
         $this->deleteDir($intDir);
         if (is_dir($intDir . '_converted')) {
             $this->deleteDir($intDir . '_converted');
@@ -149,7 +234,8 @@ class createProjectController extends ajaxcontroller {
 
 
         if ($insertSegments == 1) {
-            changeProjectStatus($pid, "NEW");
+            $analysis_status = (INIT::$VOLUME_ANALYSIS_ENABLED) ? 'NEW' : 'NOT_TO_ANALYZE';
+            changeProjectStatus($pid, $analysis_status);
             $this->result['code'] = 1;
             $this->result['data'] = "OK";
             $this->result['password'] = $password;
@@ -166,49 +252,8 @@ class createProjectController extends ajaxcontroller {
                 $this->result['errors'][] = array("code" => -7, "message" => "Not able to import this XLIFF file. ($file)");
             }
         }
-        // tolgo la path in pending_uploads
 
-        log::doLog($this->result);
-
-        // print_r ( $this->result); exit;
         setcookie("upload_session", "", time() - 10000);
-    }
-
-//    public function create_project_name($namespace = '') {
-//        return "";
-//        static $guid = '';
-//        $uid = uniqid("", true);
-//        $data = $namespace;
-//        $data .= $_SERVER['REQUEST_TIME'];
-//        $data .= $_SERVER['HTTP_USER_AGENT'];
-//        $data .= $_SERVER['REMOTE_ADDR'];
-//        $hash = strtoupper(hash('ripemd128', $uid . $guid . md5($data)));
-//        $guid = '' .
-//                substr($hash, 0, 2) .
-//                '' .
-//                substr($hash, 2, 2) .
-//                '' .
-//                substr($hash, 4, 2) .
-//                '' .
-//                substr($hash, 6, 2) .
-//                '' .
-//                substr($hash, 8, 2) .
-//                '';
-//        return "-$guid";
-//    }
-
-    public function create_password($length = 8) {
-
-
-        // Random
-        $pool = "abcdefghkmnpqrstuvwxyz23456789"; // skipping iljo01 because not easy to distinguish
-        $pool_lenght = strlen($pool);
-        $pwd = "";
-        for ($index = 0; $index < $length; $index++) {
-            $pwd .= substr($pool, (rand() % ($pool_lenght)), 1);
-        }
-
-        return $pwd;
     }
 
     public static function deleteDir($dirPath) {

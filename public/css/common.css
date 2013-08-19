@@ -1,0 +1,340 @@
+/* 
+    Document   : common
+    Created on : 7-ago-2013, 14.49.42
+    Author     : andreamartines
+    Description:
+        Common CSS rules.
+*/
+
+body
+    {
+    min-width: 980px;
+    position: relative;
+    text-align: center;
+    margin: 0;
+    padding: 75px 0 120px 0;
+    font-family: calibri, Arial, Helvetica, sans-serif;
+    -webkit-transition: all 100ms ease-in;
+    -moz-transition: all 100ms ease-in;
+    }
+
+ul
+    {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    }
+    
+.wrapper
+    {
+    width: 98%;
+    min-width: 960px;
+    margin: 0px auto 0 auto;
+    padding: 5px 0 0 0;
+    width: 92%;
+    font-size: 14px;
+    position: relative;
+    text-align: left;
+    }
+
+.logo
+    {
+    float: left;
+    border: 0;
+    margin-top: 10px;
+    background: url(../img/logo.png) 0px 2px no-repeat;
+    width: 145px;
+    height: 31px;
+    background-size: 130px 26px;
+    }
+    
+    
+footer
+    {
+    background: #6d6e71;
+    height: 27px;
+    text-align: right;
+    border-top: 1px solid #333;
+    color: #fff;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    z-index: 999999999;
+    }
+
+footer p
+    {
+    margin: 0 5px 0 0;
+    padding: 0;
+    float: left;
+    }
+
+footer ul
+    {
+    margin: -5px 0 0 0;
+    padding: 0;
+    float: left;
+    border-right: 1px solid #333;
+    }
+    footer nav ul
+        {
+        border-right: none;
+        }
+        
+footer li
+    {
+    margin: 0 0px 0 0;
+    padding: 5px 10px;
+    float: left;
+    border-left: 1px solid #333;
+    }
+    footer nav li
+        {
+        height: 12px;
+        padding-top: 0px;
+        border-left: 1px solid #fff;
+        margin-top: 5px;
+        }
+        footer nav li:first-child
+            {
+            border-left: none;
+            }
+        
+footer a
+    {
+    color: #fff;
+    text-shadow: none;
+    }
+
+footer a:hover
+    {
+    text-decoration: none;
+    }
+
+footer .wrapper
+    {
+    text-align: right;
+    }
+
+.editlog
+    {
+    margin-right: 23px;
+    }
+
+    
+/*stats*/
+footer #statistics
+    {
+    }
+
+footer nav
+    {
+    float: right;
+    }
+.stats
+    {
+    display: none;
+    width: 460px;
+    height: 220px;
+    background-color: #FFF;
+    z-index: 99999999; 
+    position: fixed; 
+    bottom: 33px;
+    right: 60px;
+    -moz-border-radius: 2px;
+    -webkit-border-radius: 2px;
+    border: 1px solid #000;
+    text-align: left;
+    padding: 0;
+    text-shadow: none;
+    font-size: 14px;
+    -moz-box-shadow: 0 0 5px #888;
+    -webkit-box-shadow: 0 0 5px #000;
+    box-shadow: 0 0 5px #000;
+    color: #000;
+    }
+    
+.stats ul
+    {
+    margin: 0;
+    }
+
+.statslink:hover .stats
+    {
+    display: block !important;
+    }
+    
+.stats .first
+    {
+    width: 220px;
+    text-align: left;
+    }
+
+.stats li
+    {
+    border-left: none;
+    text-align: right;
+    border-bottom: 1px solid #666;
+    width: 35px;
+    }
+    
+.h-stats
+    {
+    color: #000;
+    font-weight: bold;
+    }
+    
+.h-stats a
+    {
+    color: #000;
+    font-weight: normal;
+    }
+    
+.stats .arrow-notification
+    {
+    margin: 220px 0 0 432px;
+    background: url(../img/arrow-stats.png) 0 0 no-repeat;
+    }
+    
+.statslink:hover .stats
+    {
+    display: block;
+    }
+    
+.header-stats
+    {
+    background: #efefef;
+    border-bottom: 1px solid #ccc;
+    font-size: 12px;
+    padding: 5px 10px;
+    font-weight: bold;
+    }
+    
+.x-stats
+    {
+    margin-top: -17px;
+    }
+
+#welcomebox
+    {
+	float: right;
+    margin-left: 50px;
+    }
+    
+/*browser supported box */
+
+.iepopup
+    {
+    width: 800px;
+    margin: 0 auto;
+    position: fixed;
+    padding: 30px 0 30px 0;
+    display: block;
+    top: 50%;
+    left: 50%;
+    margin: -230px 0 0 -400px;
+    z-index: 999999;
+    background: #fff;
+    box-shadow: 0px 0px 25px #000;
+    border-radius: 2px;
+    font-size: 18px;
+    border: 1px solid #666;
+    }
+    
+.iepopup img
+    {
+    border: 0;
+    }
+    
+.iepopup ul a
+    {
+    padding: 0px 0 0 0;
+    color: #39699A;
+    text-decoration: underline;
+    }
+
+.iepopup a:hover
+    {
+    text-decoration: none;
+    }
+
+.logoblack
+    {
+    border: 0;
+    background: url(../img/logoblack.png) 0px 2px no-repeat;
+    display: block;
+    width: 145px;
+    height: 31px;
+    background-size: 130px 28px;
+    clear: both;
+    margin: 0 auto 10px auto;
+    }
+
+.nobrowser #outer,
+.nobrowser header,
+.nobrowser footer,
+.nobrowser .wrapper
+    {
+    display: none !important;
+    }
+
+.iepopup p
+    {
+    line-height: 27px;
+    }
+
+.slideMenu
+    {
+    position: fixed;
+    right: 0;
+    bottom: -273px;
+    width: 30px;
+    background: #6d6e71;
+    border-top: 1px solid #333;
+    border-right: 1px solid #333;
+    border-left: 1px solid #333;
+    z-index: 999999999;
+    }
+.slideMenu ul.bar li
+    {
+    background: transparent url(../img/nav-icons.png) -10px -10px no-repeat;
+    }
+.slideMenu ul.bar li a
+    {
+    display: block;
+    width: 30px;
+    height: 30px;
+    text-indent: -9999px;
+    margin-bottom: 5px;
+    }
+    .slideMenu ul.bar li.disabled a
+        {
+        visibility: hidden;
+        }
+
+#contextMenu
+    {
+    position: absolute;
+    display: none;
+    background: white;
+    z-index: 999;
+    border: 1px solid #999;
+    width: 200px;
+    padding: 3px;
+    }
+#contextMenu li
+    {
+    text-align: left;
+    padding: 3px;
+    font-size: 80%;
+    }
+    #contextMenu li:hover
+        {
+        background: #eee;
+        cursor: pointer;
+        }
+#contextMenu .shortcut
+    {
+    float: right;
+    }

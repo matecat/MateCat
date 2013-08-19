@@ -1,76 +1,143 @@
 <?php
-error_reporting(E_ALL);
+error_reporting( E_ALL );
 
-define('DEBUG', 1);
+define( 'DEBUG', 1 );
 
-if (!defined('LOG_REPOSITORY')) {
-    define('LOG_REPOSITORY', INIT::$LOG_REPOSITORY);
+if ( !defined( 'LOG_REPOSITORY' ) ) {
+    define( 'LOG_REPOSITORY', INIT::$LOG_REPOSITORY );
 }
 
-if (!defined('LOG_FILENAME')) {
-    define('LOG_FILENAME', 'log.txt');
+if ( !defined( 'LOG_FILENAME' ) ) {
+    define( 'LOG_FILENAME', 'log.txt' );
 }
 
 class Log {
 
-    private static $filename;
+    protected static $filename;
 
-    public static function doLog() { 
-
-        $trace=debug_backtrace();
-
-
-       
-        
-        if (!file_exists(LOG_REPOSITORY) || !is_dir(LOG_REPOSITORY)) {
-            mkdir(LOG_REPOSITORY);
+    protected static function _writeTo( $stringData ) {
+        if ( !file_exists( LOG_REPOSITORY ) || !is_dir( LOG_REPOSITORY ) ) {
+            mkdir( LOG_REPOSITORY );
         }
+        self::$filename = LOG_REPOSITORY . "/" . LOG_FILENAME;
+        file_put_contents( self::$filename, $stringData, FILE_APPEND );
+    }
 
-        if (empty(Log::$filename)) {
-            Log::$filename = LOG_REPOSITORY . "/" . LOG_FILENAME;
-            $fh=@fopen(self::$filename, a);
-            if (!$fh){
-                unlink(self::$filename);      
-            }else{
-                fclose($fh);
-            }
-        }
-      
-        $string="";
-        $ct = func_num_args(); // number of argument passed  
-        for ($i=0; $i<$ct; $i++) {
-            $curr_arg=func_get_arg($i); // get each argument passed  
-            if (is_array($curr_arg)){
-                $string.=print_r($curr_arg,true)." - ";
-            }else{
-                $string.="$curr_arg - ";
-            }
-        }  
-        
-        $string=rtrim($string, " -");//elimina l'ultimo -
-        
-        $fh = @fopen(self::$filename, 'a') or die("can't open file");
-        $now = date('Y-m-d H:i:s');
+    protected static function _getHeader() {
+        $trace = debug_backtrace();
+
+        $now = date( 'Y-m-d H:i:s' );
         //$ip = gethostname(); // only for PHP 5.3
-        $ip=php_uname('n');
-        if (array_key_exists('REMOTE_ADDR',$_SERVER)) {
-            $ip = $_SERVER['REMOTE_ADDR'];
+        $ip = php_uname( 'n' );
+        if ( array_key_exists( 'REMOTE_ADDR', $_SERVER ) ) {
+            $ip = $_SERVER[ 'REMOTE_ADDR' ];
         }
 
-/*
-if ($ip != "192.168.1.53"){
-	fclose ($fh);
-	return 0;
-}
-*/
         $stringDataInfo = "[$now ($ip)]";
-        $stringDataInfo.=$trace[0]['class']."->".$trace[0]['function']."(line:".$trace[0]['line'].")";
-        $stringData = "$stringDataInfo : $string\n";//. print_r ($trace,true);
-        
-       
-      //  $stringData.=print_r($trace,true);
-        fwrite($fh, $stringData);
-        fclose($fh);
+
+        if ( isset( $trace[ 2 ][ 'class' ] ) ) {
+            $stringDataInfo .= " " . $trace[ 2 ][ 'class' ] . "-> ";
+        }
+        if ( isset( $trace[ 2 ][ 'function' ] ) ) {
+            $stringDataInfo .= $trace[ 2 ][ 'function' ] . " ";
+        }
+        $stringDataInfo .= "(line:" . $trace[ 1 ][ 'line' ] . ") : ";
+
+        return $stringDataInfo;
+
+    }
+
+    public static function doLog() {
+
+        $string = "";
+        $ct     = func_num_args(); // number of argument passed
+        for ( $i = 0; $i < $ct; $i++ ) {
+            $curr_arg = func_get_arg( $i ); // get each argument passed
+            if ( is_string( $curr_arg ) ) {
+                $string .= $curr_arg;
+            } else {
+                $string .= var_export( $curr_arg, true );
+            }
+        }
+
+        self::_writeTo( self::_getHeader() . $string . "\n" );
+    }
+
+    /**
+     * Based on http://aidanlister.com/2004/04/viewing-binary-data-as-a-hexdump-in-php/
+     * @author      Aidan Lister <aidan@php.net>
+     * @author      Peter Waller <iridum@php.net>
+     *
+     * View any string as a hexdump.
+     *
+     * This is most commonly used to view binary data from streams
+     * or sockets while debugging, but can be used to view any string
+     * with non-viewable characters.
+     *
+     */
+    public static function hexDump( $data, $htmloutput = false, $uppercase = true, $return = false ) {
+        //$ip = gethostname(); // only for PHP 5.3
+        if ( is_array( $data ) ) {
+            $data = print_r( $data, true );
+        }
+
+
+        $hexi   = '';
+        $ascii  = '';
+        $dump   = ( $htmloutput === true ) ? '<pre>' : '';
+        $offset = 0;
+        $len    = strlen( $data );
+
+
+        $x = ( $uppercase === false ) ? 'x' : 'X';
+
+
+        for ( $i = $j = 0; $i < $len; $i++ ) {
+
+            $hexi .= sprintf( "%02$x ", ord( $data[ $i ] ) );
+
+            // Replace non-viewable bytes with '.'
+            if ( ord( $data[ $i ] ) >= 32 ) {
+                $ascii .= ( $htmloutput === true ) ?
+                    htmlentities( $data[ $i ] ) :
+                    $data[ $i ];
+            } else {
+                $ascii .= '.';
+            }
+            if ( $j === 7 ) {
+                $hexi .= ' ';
+                $ascii .= ' ';
+            }
+
+
+            if ( ++$j === 16 || $i === $len - 1 ) {
+                //echo sprintf('%6X', $offset) . ' : ' . implode(' ', str_split($line, 2)) . ' [' . $chars[$i] . ']' . $newline;
+                $dump .= sprintf( "%04$x  %-49s  %s", $offset, $hexi, $ascii );
+
+                // Reset vars
+                $hexi = $ascii = '';
+                $offset += 16;
+                $j = 0;
+
+                // Add newline            
+                if ( $i !== $len - 1 ) {
+                    $dump .= "\n";
+                }
+            }
+        }
+
+
+        $dump .= $htmloutput === true ?
+            '</pre>' :
+            '';
+        $dump .= "\n";
+
+        // Output method
+        if ( $return === false ) {
+            self::_writeTo( self::_getHeader() . "\n" . $dump . "\n" );
+        } else {
+            return $dump;
+        }
     }
 
 }

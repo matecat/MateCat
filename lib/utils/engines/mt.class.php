@@ -1,35 +1,5 @@
 <?
 
-//{"error": 
-//  {
-//  "code": 400, 
-//  "message": "Required parameter: key", 
-//  "errors": 
-//      [
-//          {
-//          "locationType": "parameter", 
-//          "domain": "global", 
-//          "message": "Required parameter: key", 
-//          "reason": "required", 
-//          "location": "key"
-//          }, 
-//          {
-//          "locationType": "parameter", 
-//          "domain": "global", 
-//          "message": "Required parameter: source", 
-//          "reason": "required", 
-//          "location": "source"
-//          }
-//      ]
-//  }
-//}
-//{"data": 
-//  {"translations": 
-//      [
-//          {"translatedText": "ciao a tutti"}
-//       ]
-//  }
-//}
 
 //include_once INIT::$UTILS_ROOT . "/cat.class.php";
 include_once INIT::$UTILS_ROOT."/engines/engine.class.php";
@@ -38,169 +8,145 @@ include_once INIT::$UTILS_ROOT."/cat.class.php";
 
 class MT_ERROR {
 
-    public $code=0;
-    public $message="";
+	public $code=0;
+	public $message="";
 
-    //public $errors;
+	public function __construct($result = array()) {
+		if (!empty($result)) {
+			$this->code = $result['code'];
+			$this->message = $result['message'];
+		}
+	}
 
-
-    public function __construct($result = array()) {
-        if (!empty($result)) {
-            $this->code = $result['code'];
-            $this->message = $result['message'];
-        }
-    }
-
-    public function get_as_array() {
-        return (array) $this;
-    }
+	public function get_as_array() {
+		return (array) $this;
+	}
 
 }
 
 class MT_RESULT {
 
-    public $translatedText = "";
-    public $error = "";
+	public $translatedText = "";
+	public $error = "";
 
-    public function __construct($result) {
-        //  print_r($result);
-	$this->error = new MT_ERROR();
-        if (is_array($result) and array_key_exists("data", $result)) {
-            $this->translatedText = $result['data']['translations'][0]['translatedText'];
-	    $this->translatedText =CatUtils::rawxliff2view($this->translatedText);
-        }
+	public function __construct($result) {
+		$this->error = new MT_ERROR();
+		if (is_array($result) and array_key_exists("data", $result)) {
+			$this->translatedText = $result['data']['translations'][0]['translatedText'];
+			$this->translatedText =CatUtils::rawxliff2view($this->translatedText);
+		}
 
-        if (is_array($result) and array_key_exists("error", $result)) {
-            $this->error = new MT_ERROR($result['error']);
-        }
-    }
+		if (is_array($result) and array_key_exists("error", $result)) {
+			$this->error = new MT_ERROR($result['error']);
+		}
+	}
 
-    public function get_as_array() {
-        return (array) $this;
-    }
+	public function get_as_array() {
+		return (array) $this;
+	}
 
 }
 
 class MT extends engine {
 
-    private $result = array();
+	private $result = array();
 
-    public function __construct($id) {
-        parent::__construct($id);
-        if ($this->type != "MT") {
-            throw new Exception("not a MT engine");
-        }
-    }
+	public function __construct($id) {
+		parent::__construct($id);
+		try{
+		if ($this->type != "MT") {
+			throw new Exception("not a MT engine");
+		}
+		}catch(Exception $e){
+			//do nothing?
+		}
+	}
 
-    private function fix_language($lang) {
+	private function fix_language($lang) {
 
-        if (empty($lang) or strlen($lang) == 2) {
-            return strtolower(trim($lang));
-        }
+		if (empty($lang) or strlen($lang) == 2) {
+			return strtolower(trim($lang));
+		}
 
-        $l = strtolower(trim($lang));
+		$l = strtolower(trim($lang));
 
-        if (strpos($l, "en") !== false) {
-            $l = 'en';
-        }
+		if (strpos($l, "en") !== false) {
+			$l = 'en';
+		}
 
-        if (strpos($l, "it") !== false) {
-            $l = 'it';
-        }
+		if (strpos($l, "it") !== false) {
+			$l = 'it';
+		}
 
-        if (strpos($l, "de") !== false) {
-            $l = 'de';
-        }
+		if (strpos($l, "de") !== false) {
+			$l = 'de';
+		}
 
-        if (strpos($l, "fr") !== false) {
-            $l = 'fr';
-        }
+		if (strpos($l, "fr") !== false) {
+			$l = 'fr';
+		}
 
-        return $l;
-    }
+		return $l;
+	}
 
-    public function get($segment, $source_lang, $target_lang, $key = "") {
-        $source_lang = $this->fix_language($source_lang);
-        $target_lang = $this->fix_language($target_lang);
-
-
-        $parameters = array();
-        $parameters['q'] = $segment;
-        $parameters['source'] = $source_lang;
-        $parameters['target'] = $target_lang;
-        $parameters['key'] = $key;
+	public function get($segment, $source_lang, $target_lang, $key = "") {
+		$source_lang = $this->fix_language($source_lang);
+		$target_lang = $this->fix_language($target_lang);
 
 
-        $this->doQuery("get", $parameters);
-        // echo "--- $this->raw_result --";
+		$parameters = array();
+		$parameters['q'] = $segment;
+		$parameters['source'] = $source_lang;
+		$parameters['target'] = $target_lang;
+		$parameters['key'] = $key;
 
-	
-        $this->result = new MT_RESULT($this->raw_result);
-	log::doLog("--------------------------------------------------------------------------------------");
-	//log::doLog($this->result->error);
-       /* if (!empty($this->result->error->code) and $this->result->error->code != "200") {
-            return array(-1, $this->result->error->message);
-        }*/
-        return array(0, $this->result->translatedText);
-    }
 
-    public function set($segment, $translation, $source_lang, $target_lang, $email = '', $extra='') {
-	//if class is uncapable of SET method, exit immediately
-	if(NULL==$this->set_url) return true;
+		$this->doQuery("get", $parameters);
 
-        $source_lang = $this->fix_language($source_lang);
-        $target_lang = $this->fix_language($target_lang);
+		$this->result = new MT_RESULT($this->raw_result);
+		return array(0, $this->result->translatedText);
+	}
 
-        $parameters = array();
-        $parameters['segment'] = $segment;
-        $parameters['translation'] = $translation;
-        //$parameters['langpair'] = "$source_lang|$target_lang";
-	$parameters['source']=$source_lang;
-	$parameters['target']=$target_lang;
-        $parameters['key']="TESTKEY";
-        $parameters['de'] = $email;
-	$parameters['extra']=$extra;
+	public function set($segment, $translation, $source_lang, $target_lang, $email = '', $extra='') {
+		//if class is uncapable of SET method, exit immediately
+		if(NULL==$this->set_url) return true;
 
-        $this->doQuery("set", $parameters);
-        //print_r ($this->raw_result);
-        $this->result = new MT_RESULT($this->raw_result);
-        //var_dump($this->result);
-        if ($this->result->error->code != "") {            
-            return array("code"=>$this->result->error->code , "message"=>$this->result->error->message);
-        }
-        return true;
-    }
+		$source_lang = $this->fix_language($source_lang);
+		$target_lang = $this->fix_language($target_lang);
 
-    public function delete($segment, $translation, $source_lang, $target_lang, $email = "") {
-        $source_lang = $this->fix_language($source_lang);
-        $target_lang = $this->fix_language($target_lang);
+		$parameters = array();
+		$parameters['segment'] = $segment;
+		$parameters['translation'] = $translation;
+		$parameters['source']=$source_lang;
+		$parameters['target']=$target_lang;
+		$parameters['key']="TESTKEY";
+		$parameters['de'] = $email;
+		$parameters['extra']=$extra;
 
-        $parameters = array();
-        $parameters['seg'] = $segment;
-        $parameters['tra'] = $translation;
-        $parameters['langpair'] = "$source_lang|$target_lang";
-        $parameters['de'] = $email;
+		$this->doQuery("set", $parameters);
+		$this->result = new MT_RESULT($this->raw_result);
+		if ($this->result->error->code != "") {            
+			return array("code"=>$this->result->error->code , "message"=>$this->result->error->message);
+		}
+		return true;
+	}
 
-        $this->doQuery("delete", $parameters);
-        $this->result = new MT_RESULT($this->raw_result);
-        if ($this->result->error->code != "") {            
-            return array("code"=>$this->result->error->code , "message"=>$this->result->error->message);
-        }
-        return true;
-    }
+	public function delete($segment, $translation, $source_lang, $target_lang, $email = "") {
+		$source_lang = $this->fix_language($source_lang);
+		$target_lang = $this->fix_language($target_lang);
+
+		$parameters = array();
+		$parameters['seg'] = $segment;
+		$parameters['tra'] = $translation;
+		$parameters['langpair'] = "$source_lang|$target_lang";
+		$parameters['de'] = $email;
+
+		$this->doQuery("delete", $parameters);
+		$this->result = new MT_RESULT($this->raw_result);
+		if ($this->result->error->code != "") {            
+			return array("code"=>$this->result->error->code , "message"=>$this->result->error->message);
+		}
+		return true;
+	}
 
 }
-
-/*
-$segment = "Control panel";
-$translation = "pannello di controllo ooooooo";
-$source_lang = "en";
-$target_lang = "it";
-$email = "antonio@translated.net";
-
-
-$a = new MT(2);
-print_r($a->get($segment, $source_lang, $target_lang, $email));
-print_r($a->getError());
-//print_r($a->getRawResults());
-*/

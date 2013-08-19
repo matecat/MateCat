@@ -19,8 +19,40 @@ UI = {
     	enableAnalyze();
     },
 
+    restartConversions: function() {
+    	console.log('restart conversions');
+    	$('.template-download, .template-upload').each(function() {
+			if(config.conversionEnabled) {
+        		var filerow = $(this);
+        		var filename = $('.name',filerow).text();
+        		var filesize =  ($('.size span',filerow).length)? parseFloat($('.size span',filerow).text().split(' ')[0])*1000000 : 0;
+//        		console.log(filename);
+
+//        		var filerow = data.context;
+//        		var filesize = 0;
+				var currentSession = $(filerow).data('session');
+				$.each(UI.conversionRequests, function() {
+					if(this.session == currentSession) {
+						$(filerow).addClass('restarting');
+						console.log('session: ' + this.session);
+						this.request.abort();
+					}
+				});
+				
+				$(filerow).data('session','');
+				$('.operation',filerow).remove();
+				$('.progress',filerow).remove();
+				convertFile(filename,filerow,filesize);
+			}
+    	});
+    },
+    
     checkAnalyzability: function() {
     	return checkAnalyzability();
+    },
+    
+    checkFailedConversionsNumber: function() {
+    	return checkFailedConversionsNumber();
     }
 }
 
@@ -41,6 +73,7 @@ $(function () {
     );
     var dropzone = $('#overlay');
     var langCorrections = [];
+    UI.conversionRequests = [];
 
 	$(document).bind('drop dragover', function (e) {
 	    e.preventDefault();
@@ -65,24 +98,34 @@ $(function () {
 		$('.upload-files').addClass('dragging');
         dropzone.show();
 	}).bind('fileuploadadd', function (e, data) {
+		console.log('adding');
+		console.log(data);
+
+		if($('.upload-table tr').length >= (config.maxNumberFiles)) {
+			console.log('adding more than 10');
+//			$('.error-message').text('No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).').show();
+			jqXHR = data.submit();
+			jqXHR.abort();
+		}
 /*
-		var extension = data.files[0].name.split('.')[data.files[0].name.split('.').length-1];
-		var pf = partiallySupported();
-		var supported = true;
-		var message = '';
-		$.each(pf, function(i, v) {
-			if(v.format == extension) {
-				supported = false;
-				message = v.message;
-			}
-		});
-		if(!supported) {
-			alert('Format not supported. ' + message);
-//			$('#fileupload').fileupload('destroy');
-			return false;
+		var maxnum = config.maxNumberFiles;
+		if($('.upload-table tr').length > (maxnum-1)) {
+			console.log('more than 10');
+			$('.error-message').text('No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).').show();
+			jqXHR = data.submit();
+			jqXHR.abort();
 		} else {
-			disableAnalyze();
-			$('#fileupload table.upload-table tr').addClass('current');
+			$('.error-message').empty().hide();
+			
+		}
+*/
+
+/*
+		if($('.upload-table tr').length > (maxnum-1)) {
+			
+			alert(maxnum + ' files already loaded. Limix exceeded');
+			jqXHR = data.submit();
+			jqXHR.abort();
 		}
 */
 		disableAnalyze();
@@ -103,6 +146,7 @@ $(function () {
 	}).bind('fileuploadprogress', function (e,data) {
 //		console.log(data.loaded);
 	}).bind('fileuploadstart', function (e) {
+		console.log('start');
 //		if(!$.cookie("upload_session")) $.cookie("upload_session",uploadSessionId);
 	}).bind('fileuploaddone', function (e,data) {
 //		$('.size', $(data.context[0])).next().append('<div class="operation">Converting</div>');
@@ -114,218 +158,7 @@ $(function () {
 		$('.upload-files').removeClass('dragging dnd-hover');
         dropzone.hide();
 	}).bind('fileuploaddone', function (e,data) {
-	
-
-/*
-		$('.upload-files').addClass('uploaded');
-		console.log(data.result);
-
-		var userSourceLang = $('#source-lang').val();
-		var userTargetLang = $('#target-lang').val();
-		var sourceMismatch = [];
-		var targetMismatch = [];
-
-		$.each(data.result, function () {
-			if(this.internal_source_lang != userSourceLang) {
-				sourceMismatch.push({name: this.name, source_lang: this.internal_source_lang});
-			};
-			if(this.internal_target_lang != userTargetLang) {
-				targetMismatch.push({name: this.name, target_lang: this.internal_target_lang});
-			};
-        });
-
-        if((sourceMismatch.length)||(targetMismatch.length)) {
-	        var mismatchResponse = '<form action=""><h2>Language mismatch. Please select the correct language pair.</h2>';
-
-	        if(sourceMismatch.length) {
-	        	mismatchResponse += '<div class="sourceColumn"><h3 class="sourcemessage">Source</h3><div class="sourcelist"><div class="lang user selected"><input type="radio" checked="checked" name="sourcelang"><span class="title">' + userLangName('source', userSourceLang) + ' <span class="code">(' + userSourceLang + ')</span></span><ul><li>User defined</li></ul></div>';
-	        	
-//	        	mismatchResponse += '<h2>Language mismatch. Please select the correct language pair.</h2><div class="sourceColumn"><h3 class="sourcemessage">Source</h3><ul class="sourcelist"><li><a class="user lang" href="#" data-type="source">' + userSourceLang + '</a>, as you specified?</li>';
-
-	        	$.each(sourceMismatch, function () {
-	        		mismatchResponse += '<div class="lang" data-langcode="' + this.source_lang + '"><input type="radio" name="sourcelang"><span class="title">' + userLangName('source', this.source_lang) + ' <span class="code">(' + this.source_lang + ')</span></span><ul><li>' + this.name + '</li></ul></div>';
-	        	});
-
-//	        	$.each(sourceMismatch, function () {
-//	        		mismatchResponse += '<li><a class="file" href="#" data-type="source" data-file="' + this.name + '">' + this.source_lang + '</a>, as internally reported in the file <strong>'+ this.name + '</strong>?</li>';
-//	        	});
-
-	        	mismatchResponse += '</div></div>';
-	        }
-
-	        if(targetMismatch.length) {
-	        	mismatchResponse += '<div class="targetColumn"><h3 class="targetmessage">Target</h3><div class="targetlist"><div class="lang user selected"><input type="radio" checked="checked" name="targetlang"><span class="title">' + userLangName('target', userTargetLang) + ' <span class="code">(' + userTargetLang + ')</span></span><ul><li>User defined</li></ul></div>';       	
-//	        	mismatchResponse += '<div class="targetColumn"><h3 class="targetmessage">Target</h3><ul class="targetlist"><li><a class="user" href="#" data-type="target">' + userTargetLang + '</a>, as you specified?</li>';
-
-	        	$.each(targetMismatch, function () {
-	        		mismatchResponse += '<div class="lang" data-langcode="' + this.target_lang + '"><input type="radio" name="targetlang"><span class="title">' + userLangName('target', this.target_lang) + ' <span class="code">(' + this.target_lang + ')</span></span><ul><li>' + this.name + '</li></ul></div>';
-	        	});
-
-//	        	$.each(targetMismatch, function () {
-//	        		mismatchResponse += '<li><a class="file" href="#" data-type="target" data-file="' + this.name + '">' + this.target_lang + '</a>, as internally reported in the file <strong>'+ this.name + '</strong>?</li>';
-//	        	});
-
-
-	        	mismatchResponse += '</ul></div>';
-	        }
-
-	        mismatchResponse += '<p><input id="changeLanguage" type="button" value="Apply" name=""></p></form>';
-
-	        $.colorbox({open: true, width:"50%", html:mismatchResponse});
-
-	        $('#cboxLoadedContent .sourcelist input[name=sourcelang]:radio').bind('change', function () {
-		        	$('#cboxLoadedContent .sourcelist .selected').removeClass('selected');
-		        	$(this).parents('div.lang').addClass('selected');
-	        });
-
-	        $('#cboxLoadedContent .targetlist input[name=targetlang]:radio').bind('change', function () {
-		        	$('#cboxLoadedContent .targetlist .selected').removeClass('selected');
-		        	$(this).parents('div.lang').addClass('selected');
-	        });
-
-	        $('#cboxLoadedContent a').bind('click', function (e) {
-            	e.preventDefault();
-            	if($(this).hasClass('user')) {
-            		if($(this).data('type') == 'source') {
-	            		// aggiungi in coda di modifica tutti i file elencati nel mismatch di source, se non sono già presenti
-	            		$('#cboxLoadedContent .sourcelist a.file').each(function () {
-	            			if($.inArray($(this).data('file'),langCorrections) < 0) {
-	            				langCorrections.push($(this).data('file'));
-	            			};
-				        });
-	            		$('#cboxLoadedContent .sourcelist').remove();
-	            		$('#cboxLoadedContent .sourcemessage').after('<p>The Source Language is now set to <strong>' + $(this).text() + '</strong><p>');
-            		} else if ($(this).data('type') == 'target') {
-
-	            		// aggiungi in coda di modifica tutti i file elencati nel mismatch di target, se non sono già presenti
-	            		$('#cboxLoadedContent .targetlist a.file').each(function () {
-	            			if($.inArray($(this).data('file'),langCorrections) < 0) {
-	            				langCorrections.push($(this).data('file'));
-	            			};
-				        });
-				        $('#cboxLoadedContent .targetlist').remove();
-	            		$('#cboxLoadedContent .targetmessage').after('<p>The Target Language is now set to <strong>' + $(this).text() + '</strong><p>');
-            		}
-            	} else {
-            		if($(this).data('type') == 'source') {
-	            		// modifica il valore della select di source
-	            		$('#source-lang').val($(this).text());
-	            		// aggiungi in coda di modifica tutti gli altri file elencati nel mismatch di source, se non sono già presenti
-	            		var clickedLang = $(this).text();
-	            		var clickedFile = $(this).data('file');
-	            		$('#cboxLoadedContent .sourcelist a.file').each(function () {
-	            			if($(this).text() != clickedLang) {
-		            			if($.inArray($(this).data('file'),langCorrections) < 0) {
-		            				langCorrections.push($(this).data('file'));
-		            			};
-	            			};
-				        });
-	            		// aggiungi in coda di modifica tutti gli altri file eventualmente caricati in precedenza, se non sono già presenti	
-	            		$('#fileupload table.upload-table tr:not(.current) td.name').each(function () {
-	            			if($(this).text() != clickedFile) {
-		            			if($.inArray($(this).text(),langCorrections) < 0) {
-		            				langCorrections.push($(this).text());
-		            			};
-	            			};
-				        });
-
-	            		$('#cboxLoadedContent .sourcelist').remove();
-	            		$('#cboxLoadedContent .sourcemessage').after('<p>The Source Language is now set to <strong>' + $(this).text() + '</strong><p>');
-
-            		} else if ($(this).data('type') == 'target') {
-	            		// modifica il valore della select di target
-	            		$('#target-lang').val($(this).text());
-	            		// aggiungi in coda di modifica tutti gli altri file elencati nel mismatch di target, se non sono già presenti
-	            		var clickedLang = $(this).text();
-	            		$('#cboxLoadedContent .targetlist a.file').each(function () {
-	            			if($(this).text() != clickedLang) {
-		            			if($.inArray($(this).data('file'),langCorrections) < 0) {
-		            				langCorrections.push($(this).data('file'));
-		            			};
-		            		};
-				        });
-	            		// aggiungi in coda di modifica tutti gli altri file eventualmente caricati in precedenza, se non sono già presenti
-	            		$('#fileupload table.upload-table tr:not(.current) td.name').each(function () {
-	            			if($(this).text() != clickedFile) {
-		            			if($.inArray($(this).text(),langCorrections) < 0) {
-		            				langCorrections.push($(this).text());
-		            			};
-	            			};
-				        });
-
-	            		$('#cboxLoadedContent .targetlist').remove();
-	            		$('#cboxLoadedContent .targetmessage').after('<p>The Target Language is now set to <strong>' + $(this).text() + '</strong><p>');
-            		}
-            	}
-            	console.log(langCorrections);
-            	$('#fileupload table.upload-table tr.current').removeClass('current');
-            	// applica la coda di modifiche
-
-
-
-
-			})
-
-			$('#changeLanguage').bind('click', function (e) {
-            	$.each(langCorrections, function () {
-			        $.ajax({
-			            url: window.location.href,
-			            data: {
-			                action: 'changeInternalLanguage',
-			                file_name: this,
-			                source_language: $('#source-lang').val(),
-			                target_language: $('#target-lang').val()
-			            },
-			            type: 'POST',            
-			            dataType: 'json',
-			            beforeSend: function (){
-//			            	$('.uploadbtn').attr('value','Analizing...').attr('disabled','disabled');
-			            },
-			            complete: function (){
-			            },
-			            success: function(d){
-			         		if(d.data == 'OK') {
-			            		$.colorbox.close();
-			            		langCorrections = [];
-			         		};
-
-//			            	if(d.code == 1) {
-//			            		$.colorbox.close();
-//			            	}
-
-//			            	console.log(d);
-//		            		console.log(d.password + ' - ' + d.job_id);
-			            }
-			        });
-
-		        });
-			})
-
-        }
-
-*/
-/*        
-        if((sourceMismatch.length)||(targetMismatch.length)) {
-	        var mismatchResponse = '<p>The uploaded files have the following language mismatches:</p>';
-	        if(sourceMismatch.length) {
-	        	mismatchResponse += '<br><p>You specified "' + userSourceLang + '" as Source language, while:</p><ul>';
-	        	$.each(sourceMismatch, function () {
-	        		mismatchResponse += '<li>The file '+ this.name + ' has internally set "' + this.source_lang + '" as its source language</li>';
-	        	});
-	        	mismatchResponse += '</ul>';
-	        }
-	        if(targetMismatch.length) {
-	        	mismatchResponse += '<br><p>You specified "' + userTargetLang + '" as Source language, while:</p><ul>';
-	        	$.each(sourceMismatch, function () {
-	        		mismatchResponse += '<li>The file '+ this.name + ' has internally set "' + this.target_lang + '" as its source language</li>';
-	        	});
-	        	mismatchResponse += '</ul>';
-	        }
-	        $.colorbox({open: true, width:"50%", html:mismatchResponse});        	
-        }
-*/
-
-
+		
 	}).bind('fileuploadadded fileuploaddestroyed', function (e,data) {
 		if($('.upload-table tr').length) {
 			$('.upload-files').addClass('uploaded');
@@ -334,9 +167,24 @@ $(function () {
 		}
 	}).bind('fileuploadfail', function (e) {
 		if(!($('.upload-table tr').length > 1)) $('.upload-files').removeClass('uploaded');
+        checkFailedConversionsNumber();
+	}).bind('fileuploadchange', function (e) {
+        console.log('change');
+        checkFailedConversionsNumber();
 	}).bind('fileuploaddestroyed', function (e,data) {
 //		var err = $.parseJSON(data.jqXHR.responseText)[0].error;
-//		console.log('INIZIO CALLBACK DESTROYED');
+        console.log('file deleted');
+        if($('.error-message.no-more').length) {
+
+			if($('.upload-table tr').length < (config.maxNumberFiles)) {
+				$('.error-message').empty().hide();
+		    	$('#fileupload').fileupload('option', 'dropZone', $('.drag'));
+		    	$('#add-files').removeClass('disabled');
+		    	$('#add-files input').removeAttr('disabled');
+			}
+        	
+        }
+        checkFailedConversionsNumber();
 //		console.log('$(\'.upload-table tr\').length: ' + $('.upload-table tr').length);
 //		console.log('checkAnalyzability(): ' + checkAnalyzability());
 		if($('.upload-table tr:not(.failed)').length) {
@@ -357,9 +205,51 @@ $(function () {
 			disableAnalyze();
 		}
 */
+	}).on('click', '.template-upload .cancel button', function (e,data) {
+//		var err = $.parseJSON(data.jqXHR.responseText)[0].error;
+        console.log('file canceled');
+        if($('.error-message.no-more').length) {
+
+			if($('.upload-table tr').length < (config.maxNumberFiles)) {
+				$('.error-message').empty().hide();
+		    	$('#fileupload').fileupload('option', 'dropZone', $('.drag'));
+		    	$('#add-files').removeClass('disabled');
+		    	$('#add-files input').removeAttr('disabled');
+			}
+        	
+        }
+		setTimeout(function(){
+        	checkFailedConversionsNumber();
+        },500);
+//		console.log('$(\'.upload-table tr\').length: ' + $('.upload-table tr').length);
+//		console.log('checkAnalyzability(): ' + checkAnalyzability());
+		if($('.upload-table tr:not(.failed)').length) {
+			if(checkAnalyzability('fileuploaddestroyed')) {
+				enableAnalyze();
+			}
+//			if(typeof err == 'undefined') enableAnalyze();
+		} else {
+			disableAnalyze();
+		}
 	}).bind('fileuploadcompleted', function (e,data) {
 		console.log('completed');
+		var maxnum = config.maxNumberFiles;
+		if($('.upload-table tr').length > (maxnum-1)) {
+			console.log('10 files loaded');
+			$('.error-message').addClass('no-more').text('No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).').show();
+		    $('#fileupload').fileupload('option', 'dropZone', null);
+		    $('#add-files').addClass('disabled');
+		    $('#add-files input').attr('disabled', 'disabled');
 
+//			jqXHR = data.submit();
+//			jqXHR.abort();
+		} else {
+/*
+			$('.error-message').empty().hide();
+			console.log('else');
+		    $('#fileupload').fileupload('option', 'dropZone', $('.drag'));
+*/			
+		}
 /*
 		console.log('completed:');
 		console.log($('.template-download'));
@@ -393,8 +283,18 @@ $(function () {
 
 //        console.log(data.data);
         if(typeof data.data != 'undefined') {
-        	var filename = data.files[0].name;
+                /*
+                 * BUG FIXED: UTF16 / UTF8 File name conversion
+                 * Use Return String From AJAX RESULT ( safe raw url encoded ) 
+                 *      and NOT data.files[0].name; ( INPUT TAG content )
+                 **/
+        	var filename = data.result[0].name; 
         	var filerow = data.context;
+
+			if(filesize == 0) {
+				$('.name',filerow).text(filename);
+			}
+
 			if(config.conversionEnabled) {
 /*
 				if((extension=='xliff')||(extension=='sdlxliff')||(extension=='xlf')) {
@@ -404,7 +304,9 @@ $(function () {
 */
 //				console.log('fileuploadcompleted');
 //				console.log('hasclass converting?: ' + filerow.hasClass('converting'));
-				if(!filerow.hasClass('converting')) convertFile(filename,filerow,filesize);
+				if(!filerow.hasClass('converting')) {
+					convertFile(filename,filerow,filesize);
+				}
 			}
         }
 	
@@ -458,12 +360,17 @@ $(function () {
         $('.upload-files').removeClass('dnd-hover');
     });
 
-    $('.btncontinue .cancel-btn').bind('click', function (e) {
+    $('#clear-all-files').bind('click', function (e) {
     	e.preventDefault();
-    	$('.template-download .delete button').click();
+    	$('.error-message').hide();
+    	$('.template-download .delete button, .template-upload .cancel button').click();
 	});
 
-
+    $('#delete-failed-conversions').bind('click', function (e) {
+    	e.preventDefault();
+    	$('.template-download.failed .delete button, .template-download.has-errors .delete button, .template-upload.failed .delete button, .template-upload.has-errors .delete button').click();
+	});
+		
     if (window.location.hostname === 'blueimp.github.com') {
         // Demo settings:
         $('#fileupload').fileupload('option', {
@@ -567,10 +474,13 @@ convertFile = function(fname,filerow,filesize) {
 	else {
 		disableAnalyze();
 	}
-	 
-	filerow.removeClass('ready').addClass('converting');
 
-	$.ajax({
+	var ses = new Date();
+	var session = ses.getTime();
+//	console.log(session.getTime());	 
+	filerow.removeClass('ready').addClass('converting').data('session',session);
+
+	var request = $.ajax({
         url: '?action=convertFile',
         data: {
             action: 'convertFile',
@@ -581,8 +491,20 @@ convertFile = function(fname,filerow,filesize) {
         type: 'POST',
         dataType: 'json',
         error: function(d){
+			if($(filerow).hasClass('restarting')) {
+				$(filerow).removeClass('restarting');
+				return;
+			}
 			filerow.removeClass('converting');
+       		console.log('conversion error');
+       		console.log($('.progress',filerow));
+			setTimeout(function(){
+       			$('.progress',filerow).remove();
+       			$('.operation',filerow).remove();
+			},50);
+//       		$('.progress',filerow).remove();
        		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">Error: </span>Server error, try again.');
+       		$(filerow).addClass('has-errors');
        		return false;
         },
         success: function(d){
@@ -601,28 +523,56 @@ convertFile = function(fname,filerow,filesize) {
 					// Animation complete.
 				});
            	} else {
+       			console.log('conversion failed');
            		var filename = $('.name',filerow).text();
            		var extension = filename.split('.')[filename.split('.').length-1];
 //           		console.log(extension);
-           		var message = ((extension == 'pdf')&&(d.errors[0].code == '-2'))? 'No translatable content found: maybe a scanned file?' : d.errors[0].message;
-
-           		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">Error: </span>'+message);
+//           		console.log(d.errors[0].message);
+//           		if(!d.errors[0].message) console.log('msg is null');
+           		var msg = (!d.errors[0].message)? "Converter rebooting. Try again in two minutes" : d.errors[0].message;
+           		var message = ((extension == 'pdf')&&(d.errors[0].code == '-2'))? 'Error: no translatable content found: maybe a scanned file?' : msg;
+				if(extension == 'docx') {
+					message = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOC.";
+				}
+				if((extension == 'doc')||(extension == 'rtf')) {
+					message = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOCX.";
+				}
+				if(extension == 'inx') {
+					message = "Conversion Error. Try to commit changes in InDesign before importing.";
+				}
+           		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">'+message+'</span>');
            		$(filerow).addClass('failed');
+           		console.log('after message compiling');
+				setTimeout(function(){
+	       			$('.progress',filerow).remove();
+	       			$('.operation',filerow).remove();
+				},50);
+           		checkFailedConversionsNumber();
            		return false;
            	}
 
         }
     });
+    var r = {};
+    r.session = session;
+    r.request = request;
+    UI.conversionRequests.push(r);
 	
 	$('.size', filerow).next().append('<div class="operation">Importing</div><div class="converting progress progress-success progress-striped active ui-progressbar ui-widget ui-widget-content ui-corner-all" aria-valuenow="0" aria-valuemax="100" aria-valuemin="0" role="progressbar"><div class="ui-progressbar-value ui-widget-header ui-corner-left" style="width: 0%;"></div></div>');
 //	console.log('filesize: ' + filesize);
-	testProgress(filerow,filesize,0);
+
+
+	testProgress(filerow,filesize,session,0);
 //	progressBar(filerow,0,filesize);
 }
 
-testProgress = function(filerow,filesize,progress) {
+testProgress = function(filerow,filesize,session,progress) {
+//    console.log('session: ' + session);
+//    console.log('data-session: ' + $(filerow).data('session'));
+    if(session != $(filerow).data('session')) return;
+
 	if(typeof filesize == 'undefined') filesize = 1000000;
-	console.log('filesize: ' + filesize);
+//	console.log('filesize: ' + filesize);
 	var ob = $('.ui-progressbar-value', filerow);
 	if(ob.hasClass('completed')) return;
 //	var step = 50000/filesize;
@@ -638,7 +588,7 @@ testProgress = function(filerow,filesize,progress) {
 	}
 
 	setTimeout(function(){
-        testProgress(filerow,filesize,progress);
+        testProgress(filerow,filesize,session,progress);
 //        console.log()
     },Math.round(stepWait*1000));
 }
@@ -652,6 +602,15 @@ checkInit = function() {
         	checkInit();
         };
     },100);	
+}
+
+checkFailedConversionsNumber = function() {
+    var n = $('.template-download.failed, .template-upload.failed, .template-download.has-errors, .template-upload.has-errors').length;
+    if(n>1) {
+    	$('#delete-failed-conversions').show();	
+    } else {
+    	$('#delete-failed-conversions').hide();
+    }
 }
 
 checkAnalyzability = function(who) {
@@ -713,6 +672,7 @@ checkConversions = function() {
 			        	var filename = d.file_name;
 			        	var filerow = this;
 			        	if(filerow.hasClass('converting')) return;
+						console.log('eccolo');
 						convertFile(filename,filerow);
 					
 				
@@ -729,52 +689,15 @@ checkConversions = function() {
     })
 }
 
-partiallySupported = function() {
-	var jj = $('<div/>').html(config.partiallySupportedFileTypes).text();
+unsupported = function() {
+	var jj = $('<div/>').html(config.unsupportedFileTypes).text();
 	var pf = $.parseJSON(jj);
 	return pf;
 }
-/*
-listSupportedFormats = function() {
-    var jj = $('<div/>').html(config.supportedFileTypes).text();
-    var pf = $.parseJSON(jj);
-    $.each(pf, function(i, v) {
-//        partialList += '<p>' + v.format + ' (' + v.message + ')</p>';
-    });     
 
-    return pf;
-}
-*/
-/*
-viewFormats = function() {
-    return;
-	var formatList = '';
-	var partialList = '';
-	var formats = config.fileTypes.split('|');
-	var pf = config.partiallySupported;
-	$.each(formats, function(index, value) {
-		var ss = true;
-		$.each(pf, function(i, v) {
-			if(v.format==value) ss = false;
-		});		
-		if(ss) formatList += ', ' + value;
-	});
-	$.each(pf, function(i, v) {
-		partialList += '<p>' + v.format + ' (' + v.message + ')</p>';
-	});		
-	var formatsHtml = '<h2>Supported formats:</h2><p>'+formatList.substr(2)+'</p>';
-//	var formatsHtml = '<h2>Supported formats:</h2><p>'+formatList.substr(2)+'</p><h3>Partially supported:</h3>'+partialList;
-	
-
-	$.colorbox({open: true, width:"50%", html:formatsHtml});
-//	alert(formatList.substr(2));
-}
-*/
 
 $(document).ready(function() {
-	config.partiallySupported = partiallySupported();
-//    config.fileFormats = listSupportedFormats();
-//    console.log(config.fileFormats);
+	config.unsupported = unsupported();
 	checkInit();
 });
 

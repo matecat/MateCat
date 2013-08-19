@@ -1,0 +1,60 @@
+INSTALL_WIN64.TXT
+=================
+
+
+Requirements:
+- WampServer 2.2E x64 (wampserver2.2e-php5.4.3-httpd-2.4.2-mysql5.5.24-x64.exe)
+
+
+Wamp installation:
+1) Install WampServer as usual but don't tell the setup program to launch Wamp directly.
+
+2) Download the fixed cURL version from: "http://www.mediafire.com/?3ay381k3cq59cm2" and/or have a look at
+   "http://www.anindya.com/php-5-4-3-and-php-5-3-13-x64-64-bit-for-windows/"
+- Open the downloaded zip file and copy the "php_curl.dll" to "C:\wamp\bin\php\php5.4.3\ext", overwriting the
+  existing file.
+
+
+Wamp setup:
+1) Open "C:\wamp\bin\apache\apache2.4.2\conf\httpd.conf" with an editor
+- Change "Listen 80" to "Listen 8080"
+- Enable module mod_deflate (uncomment "LoadModule deflate_module modules/mod_deflate.so")
+- Enable module mod_expires (uncomment "LoadModule expires_module modules/mod_expires.so")
+- Enable module mod_filter (uncomment "LoadModule filter_module modules/mod_filter.so")
+- Enable module mod_headers (uncomment "LoadModule headers_module modules/mod_headers.so")
+- Enable module mod_rewrite (uncomment "LoadModule rewrite_module modules/mod_rewrite.so")
+- Enable module mod_vhost_alias (uncomment "LoadModule vhost_alias_module modules/mod_vhost_alias.so")
+- Change "ServerName localhost:80" to "ServerName localhost:8080"
+- Enable virtual hosts (uncomment "Include conf/extra/httpd-vhosts.conf")
+- Change "LogLevel warn" to "LogLevel info" (or debug)
+
+
+2) Open "C:\wamp\bin\apache\apache2.4.2\bin\php.ini" with an editor
+- Change "short_open_tag = Off" to "short_open_tag = On"
+- Check that the option "magic_quotes_runtime" is off (should be the default setting)
+- Enable cURL (uncomment "extension=php_curl.dll")
+
+3) Start WampServer and check the logs of everything is fine. Also ensure that Wamp is allowed to access the network
+   (just click "yes" when Windows prompts you).
+
+
+Casmacat/Matecat setup:
+1) Create the database using phpmyadmin.
+- Open "http://localhost:8080/phpmyadmin/"
+- Click on "Databases"
+- Type your desired database name (lets say "matecat_sandbox") and select "utf8_general_ci" in the drop down box for
+  "Collation", then click the "Create" button
+- Click on "Users" on the top of the screen
+- You'll see different users there. Two of those entries are red and allow everyone without a username and password to
+  connect from every host. They must be deleted, otherwise you'll get an error.
+- On the left, click now on your new database ("matecat_sandbox")
+- Now click on "Privileges" on the top of the screen
+- Click "Add user" in the middle
+- Type in the username and password
+- Select the option "Grant all privileges on database "matecat_sandbox"" in the "Database for user" box
+- Click "Add user" at the bottom
+- Click on "Import" on the top of the screen
+- Select the matecat.sql file and click ok.
+
+
+That's all folks! Hopefully :-)

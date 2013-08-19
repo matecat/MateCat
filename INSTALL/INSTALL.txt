@@ -4,45 +4,49 @@ INSTALL.TXT
 Server side requirements
 - Apache 2 + MySql (version >= 5.1) + PHP 5 (version >= 5.2)
 - Apache htaccess enabled
-- PHP magic_quotes off
+- Apache rewrite module installed
+- Apache filter  module installed
+- Apache deflate module installed
+- Apache headers module installed
+- PHP magic_quotes_gpc off
 - PHP cURL lib
-- PHP php5_crypt
-- PHP php5_mysql
-- pecl install zip (in php 5.3 compile with --enable-zip instead) and add extension=zip.so to php.ini
-- if you want process file until 100MB use following paramenters 
-   - in /etc/php5/apache2/php.ini
-   --- memory_limit =1024M
-   --- post_max_size = 200M
-   --- upload_max_filesize = 200M 
 
-
-NOTES
-- In PHP >= 5.3 short tag notation ( <? ?>) is disabled by default. Acccess to php.ini and turn on short_open_tag
-- In Fedora and RedHat releases the mbstring module is not installed by default : yum install php-mbstring and restart apache
 
 Client side requirements
-- Chrome web browser installed 
+- Chrome or Firefox web browser installed 
 - Javascript enabled
 
 Instructions (based on a Debian distro)
 1) create database using the file matecat.sql in lib/model folder
-2) edit the file inc/config.inc.php with the right parameters for the connection to the database
-    self::$DB_SERVER = "@ip address@"; //database server
-    self::$DB_DATABASE = "matecat_sandbox"; //database name
-    self::$DB_USER = "@username@"; //database login 
-    self::$DB_PASS = "@password@"; //databasepassword
+2) edit the file inc/config.ini.sample with 
+    - the right parameters for the connection to the database
+      [db]
+      hostname = "@ip address or hostname of the database" 
+      username = "@db_username@"
+      password = "@db_password@"
+      database = "matecat_sandbox"
+    - the right basepath
+      if your url is http://www.yourhost.com/matecat --> baseurl="/matecat/"
+      if your url is http://matecat.yourhost.com/ --> baseurl="/"
+   save and rename to config.ini
+
 
 3) create a user matecat and add it a the www-data group
     useradd -G www-data -p @password@ matecat
 4) enable htaccess on web server 
     file cat /etc/apache2/apache2.conf --->  AccessFileName .htaccess
-5) create a virtualost in /etc/apache2/sites-available
-    <VirtualHost @your_ip_address@:80>
+5) enable apache modules
+	a2enmod rewrite
+    a2enmod filter
+    a2enmod deflate
+    a2enmod headers
+6) create a virtualost in /etc/apache2/sites-available
+    <VirtualHost @your_ip_address@:@port@>
         ServerName matecat.@your domain@
         ServerAdmin webmaster@translated.net
-        DocumentRoot /home/matecat/cattool
+        DocumentRoot @full/path/to/matecat/source/files@
         DirectoryIndex index.php index.php3 index.html index.htm index.shtml
-        <Directory /home/matecat/cattool/>
+        <Directory @full/path/to/matecat/source/files/@>
             Options All
             AllowOverride All
             Order allow,deny
@@ -68,8 +72,8 @@ Instructions (based on a Debian distro)
         ServerSignature Off
     </VirtualHost>
 
-6) set php magic quotes off
+7) set php magic quotes off
 	edit /etc/php5/apache2/php.ini --- >magic_quotes_runtime = Off
-7) restart apache
+8) restart apache
     apache2ctl restart
 

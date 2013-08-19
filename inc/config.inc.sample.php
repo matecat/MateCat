@@ -1,16 +1,23 @@
 <?php
+date_default_timezone_set("Europe/Rome");
 
 class INIT {
 
     private static $instance;
     public static $ROOT;
     public static $BASEURL;
+    public static $HTTPHOST;
     public static $DEBUG;
     public static $DB_SERVER;
     public static $DB_DATABASE;
     public static $DB_USER;
     public static $DB_PASS;
     public static $LOG_REPOSITORY;
+    public static $STORAGE_DIR;
+    public static $UPLOAD_REPOSITORY;
+    public static $CONVERSIONERRORS_REPOSITORY;
+    public static $CONVERSIONERRORS_REPOSITORY_WEB;
+    public static $TMP_DOWNLOAD;
     public static $TEMPLATE_ROOT;
     public static $MODEL_ROOT;
     public static $CONTROLLER_ROOT;
@@ -22,12 +29,14 @@ class INIT {
     public static $BUILD_NUMBER;
     public static $DEFAULT_FILE_TYPES;
     public static $SUPPORTED_FILE_TYPES;
+    public static $UNSUPPORTED_FILE_TYPES;
     public static $CONVERSION_FILE_TYPES;
     public static $CONVERSION_FILE_TYPES_PARTIALLY_SUPPORTED;
     public static $CONVERSION_ENABLED;
     public static $ANALYSIS_WORDS_PER_DAYS;
     public static $VOLUME_ANALYSIS_ENABLED;
-    public static $RTL_LANGUAGES;
+    public static $WARNING_POLLING_INTERVAL;
+    public static $SEGMENT_QA_CHECK_INTERVAL;
 
     private function initOK() {
 
@@ -69,10 +78,22 @@ class INIT {
         return self::$instance;
     }
 
+    public static function sessionClose(){
+        @session_write_close();
+    }
+
     private function __construct() {
+
+        //access session data
+        @session_start();
+        register_shutdown_function( 'INIT::sessionClose' );
+
         $root = realpath(dirname(__FILE__) . '/../');
         self::$ROOT = $root;  // Accesible by Apache/PHP
         self::$BASEURL = "/"; // Accesible by the browser
+	
+	$protocol=stripos($_SERVER['SERVER_PROTOCOL'],"https")===FALSE?"http":"https";
+	self::$HTTPHOST="$protocol://$_SERVER[HTTP_HOST]";
 
         set_include_path(get_include_path() . PATH_SEPARATOR . $root);
 
@@ -82,26 +103,48 @@ class INIT {
         self::$DEFAULT_NUM_RESULTS_FROM_TM = 3;
         self::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
 
-        self::$DB_SERVER = "10.30.1.241"; //database server
-        self::$DB_DATABASE = "matecat_sandbox"; //database name
+        self::$DB_SERVER = "localhost"; //database server
+        self::$DB_DATABASE = "matecat"; //database name
         self::$DB_USER = "matecat"; //database login 
         self::$DB_PASS = "matecat01"; //databasepassword
 
 
-        self::$LOG_REPOSITORY = self::$ROOT . "/storage/log_archive";
+        self::$STORAGE_DIR = self::$ROOT . "/storage";
+        self::$LOG_REPOSITORY = self::$STORAGE_DIR . "/log_archive";
+        self::$UPLOAD_REPOSITORY = self::$STORAGE_DIR . "/upload";
+	self::$CONVERSIONERRORS_REPOSITORY=self::$STORAGE_DIR."/conversion_errors";
+        self::$CONVERSIONERRORS_REPOSITORY_WEB=self::$BASEURL."storage/conversion_errors";
+	self::$TMP_DOWNLOAD=self::$STORAGE_DIR ."/tmp_download";
         self::$TEMPLATE_ROOT = self::$ROOT . "/lib/view";
         self::$MODEL_ROOT = self::$ROOT . '/lib/model';
         self::$CONTROLLER_ROOT = self::$ROOT . '/lib/controller';
         self::$UTILS_ROOT = self::$ROOT . '/lib/utils';
 
-        self::$ENABLED_BROWSERS = array('chrome', 'firefox', 'safari');
-        self::$CONVERSION_ENABLED = false;
-        self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-        self::$BUILD_NUMBER = '0.3.0.1';
-        self::$VOLUME_ANALYSIS_ENABLED = false;
-        
-        self::$RTL_LANGUAGES=array("he-IL");
 
+
+        if (!is_dir(self::$STORAGE_DIR)){
+                mkdir (self::$STORAGE_DIR,0755,true);
+        }
+        if (!is_dir(self::$LOG_REPOSITORY)){
+                mkdir (self::$LOG_REPOSITORY,0755,true);
+        }
+        if (!is_dir(self::$UPLOAD_REPOSITORY)){
+                mkdir (self::$UPLOAD_REPOSITORY,0755,true);
+        }
+        if (!is_dir(self::$CONVERSIONERRORS_REPOSITORY)){
+                mkdir (self::$CONVERSIONERRORS_REPOSITORY,0755,true);
+        }
+
+        self::$ENABLED_BROWSERS = array('chrome', 'safari');
+//        self::$ENABLED_BROWSERS = array('chrome', 'firefox', 'safari');
+        self::$CONVERSION_ENABLED = true;
+        self::$ANALYSIS_WORDS_PER_DAYS = 3000;
+        self::$BUILD_NUMBER = '0.3.2';
+        self::$VOLUME_ANALYSIS_ENABLED = true;
+
+        self::$WARNING_POLLING_INTERVAL = 10; //seconds
+        self::$SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
+        
         self::$SUPPORTED_FILE_TYPES = array(
             'Office' => array(
                 'doc' => array(''),
@@ -151,12 +194,12 @@ class INIT {
                 'xlf' => array('default')
             ),
             "Desktop Publishing" => array(
-                'fm' => array('', "Try converting to MIF"),
+//                'fm' => array('', "Try converting to MIF"),
                 'mif' => array(''),
                 'inx' => array(''),
                 'idml' => array(''),
                 'icml' => array(''),
-                'indd' => array('', "Try converting to INX"),
+//                'indd' => array('', "Try converting to INX"),
                 'xtg' => array(''),
                 'tag' => array(''),
                 'xml' => array(''),
@@ -171,6 +214,10 @@ class INIT {
                 'sgml' => array(''),
                 'sgm' => array('')
             )
+        );
+        self::$UNSUPPORTED_FILE_TYPES = array(
+            'fm' => array('', "Try converting to MIF"),
+            'indd' => array('', "Try converting to INX")
         );
 
         //self::$DEFAULT_FILE_TYPES = 'xliff|sdlxliff|xlf';

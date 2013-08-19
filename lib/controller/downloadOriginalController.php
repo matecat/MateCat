@@ -13,11 +13,9 @@ class downloadOriginalController extends downloadController {
     private $download_type;
     private $id_file;
    
-    //[filename] => 041-HTML-default_definitions.htm
 
     public function __construct() {
         parent::__construct();
-        //echo "<pre>";print_r ($_POST);//exit;
 
         $this->fname = $this->get_from_get_post('filename');
         $this->id_file = $this->get_from_get_post('id_file');
@@ -25,8 +23,6 @@ class downloadOriginalController extends downloadController {
         $this->password = $this->get_from_get_post("password");
         $this->filename = $this->fname;
         $this->download_type=$this->get_from_get_post("download_type");
-        
-        //$this->download_type = $this->get_from_get_post("download_type");
 
         if (empty($this->id_job)) {
             $this->id_job = "Unknown";
@@ -37,7 +33,6 @@ class downloadOriginalController extends downloadController {
         $files_job = getOriginalFilesForJob($this->id_job, $this->id_file, $this->password);
 
 
-        //print_r ($files_job); exit;
         $output_content = array();
         foreach ($files_job as $file) {
             $id_file = $file['id_file'];
@@ -46,13 +41,7 @@ class downloadOriginalController extends downloadController {
 			if(!$output_content[$id_file]['content']){
 				$output_content[$id_file]['content'] = $file['original_file'];
 			}
-            //echo "<pre>";
-            // print_r ($data); 
-            // exit;
         }
-        //print_r ($output_content);
-        //exit;
-        //echo $this->download_type; exit;
         if ($this->download_type == 'all') {
             if (count($output_content) > 1) {
                 $this->filename = $this->fname;
@@ -74,13 +63,6 @@ class downloadOriginalController extends downloadController {
             $pathinfo = pathinfo($oc['filename']);
             $ext = $pathinfo['extension'];
             $this->filename = $oc['filename'];
-            //if (!in_array($ext, array("xliff", "sdlxliff", "xlf"))) {
-            //    $this->filename = $pathinfo['basename'] . ".sdlxliff";
-            //}
-
-            /*if ($ext == 'pdf' or $ext == "PDF") {
-                $this->filename = $pathinfo['basename'] . ".docx";
-            }*/
             $this->content = $oc['content'];
         }
     }

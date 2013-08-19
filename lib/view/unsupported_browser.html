@@ -9,13 +9,21 @@
 	<strong style="font-size:180%">Sorry, <script>document.write(browser);</script> is not supported yet.</strong><br />
 	Currently MateCat works great with the following browsers:
 	<ul>
+        <tal:block tal:condition="php: in_array('firefox', enabledBrowsers)">
 		<li><a href="http://www.mozilla.org/en-US/firefox/new/" target="_blank"><img src="${basepath}public/img/ff.jpg" width="140" /><br />
 Firefox</a></li>
+        </tal:block>
+
+        <tal:block tal:condition="php: in_array('chrome', enabledBrowsers)">
 		<li><a href="https://www.google.com/intl/en/chrome/browser/" target="_blank"><img src="${basepath}public/img/chrome.jpg" width="140" /><br />
 Chrome</a></li>
+        </tal:block>
+
+        <tal:block tal:condition="php: in_array('safari', enabledBrowsers)">
 		<li><a href="http://appldnld.apple.com/Safari5/041-5487.20120509.INU8B/SafariSetup.exe"><img src="${basepath}public/img/safari.jpg" width="140" /><br />
 Safari</a></li>
-	</ul>
+        </tal:block>
+    </ul>
 </div>
 
 
@@ -41,7 +49,15 @@ Safari</a></li>
  If you continue to get this page, email us at <a href="mailto:info@matecat.com">info@matecat.com</a>.</p>
 </div>
 
+<div class="iepopup" metal:define-macro="job_cancelled">
+    <a href="${basepath}" class="logoblack"></a><br />
 
+
+    <strong style="font-size:160%">Sorry, the job you asked for is cancelled.</strong><br />
+
+    <p>Double check the URL or contact your PM.<br />
+ If you continue to get this page, email us at <a href="mailto:info@matecat.com">info@matecat.com</a>.</p>
+</div>
 
 
 
