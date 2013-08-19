@@ -34,8 +34,8 @@ class getContributionController extends ajaxcontroller {
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        //NOTE: delete and use last commented row. This is only for debug purpose only,
-        //NOTE: Global $_POST Overriding from CLI
+        //NOTE: This is only for debug purpose only,
+        //NOTE: Global $_POST Overriding from CLI Test scripts
         //$this->__postInput = filter_var_array( $_POST, $filterArgs );
 
         $this->id_segment         = $this->__postInput[ 'id_segment' ];
@@ -161,8 +161,8 @@ class getContributionController extends ajaxcontroller {
 			}
 
 			$tms = new TMS($this->id_tms);
-
 			$tms_match = $tms->get($this->text, $this->source, $this->target, "demo@matecat.com", $mt_from_tms, $this->id_translator);
+
 		}
 
 		$mt_res = array();
