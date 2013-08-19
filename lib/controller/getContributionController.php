@@ -111,6 +111,8 @@ class getContributionController extends ajaxcontroller {
              * \x{BB} => »
              */
             $tmp_text = preg_replace( '#[\x{BB}\x{AB}\x{B7}\x{84}\x{82}\x{91}\x{92}\x{93}\x{94}\.\(\)\{\}\[\];:,\"\'\#\+\-\*]+#u', chr( 0x20 ), $this->text );
+
+            //remove double spaces derived from replacements
             $tmp_text = preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $tmp_text );
 
             $tokenizedBySpaces  = explode( " ", $tmp_text );
@@ -119,7 +121,7 @@ class getContributionController extends ajaxcontroller {
             foreach ( $tokenizedBySpaces as $key => $token ) {
                 $token = trim( $token );
                 if ( $token != '' ) {
-                    $regularExpressions[ $key ] = '|' . addslashes( $token ) . '|u';
+                    $regularExpressions[ $key ] = '|' . addslashes( $token ) . '|ui'; /* unicode insensitive */
                     $replacements[ $key ]       = '#start#' . $token . '#end#';
                 }
             }
