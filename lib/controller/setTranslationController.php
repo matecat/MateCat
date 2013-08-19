@@ -50,7 +50,7 @@ class setTranslationController extends ajaxcontroller {
                 $this->result['code'] = 1;
                 $this->result['data'] = "OK";
 
-                Log::doLog( "Error Hack Status | id_job: " . $this->id_job . " | id_segment: " . $this->id_segment . "| status: " . $this->status . " " . var_export( $this->result['error'],true ));
+                //log::doLog( "Error Hack Status | id_job: " . $this->id_job . " | id_segment: " . $this->id_segment . "| status: " . $this->status . " " . var_export( $this->result['error'],true ));
 
                 return;
                 break;
@@ -58,12 +58,12 @@ class setTranslationController extends ajaxcontroller {
 
 		if (empty($this->id_segment)) {
 			$this->result['error'][] = array("code" => -1, "message" => "missing id_segment");
-            Log::doLog( "id_job: " . $this->id_job . " | id_segment: " . $this->id_segment . "| status: " . $this->status . " " . var_export( $this->result['error'],true ));
+            //log::doLog( "id_job: " . $this->id_job . " | id_segment: " . $this->id_segment . "| status: " . $this->status . " " . var_export( $this->result['error'],true ));
 		}
 
 		if (empty($this->id_job)) {
 			$this->result['error'][] = array("code" => -2, "message" => "missing id_job");
-            Log::doLog( "id_job: " . $this->id_job . " | id_segment: " . $this->id_segment . "| status: " . $this->status . " " . var_export( $this->result['error'],true ));
+            //log::doLog( "id_job: " . $this->id_job . " | id_segment: " . $this->id_segment . "| status: " . $this->status . " " . var_export( $this->result['error'],true ));
 		} else {
 
             //get Job Infos
@@ -72,21 +72,21 @@ class setTranslationController extends ajaxcontroller {
             //add check for job status archived.
             if( strtolower( $job_data['status'] ) == 'archived' ){
                 $this->result['error'][] = array("code" => -3, "message" => "job archived");
-                Log::doLog( "id_job: " . $this->id_job . " | id_segment: " . $this->id_segment . "| status: " . $this->status . " " . var_export( $this->result['error'],true ));
+                //log::doLog( "id_job: " . $this->id_job . " | id_segment: " . $this->id_segment . "| status: " . $this->status . " " . var_export( $this->result['error'],true ));
             }
 
             $pCheck = new AjaxPasswordCheck();
             //check for Password correctness
             if( !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ){
                 $this->result['error'][] = array("code" => -10, "message" => "wrong password");
-                Log::doLog( "id_job: " . $this->id_job . " | id_segment: " . $this->id_segment . "| status: " . $this->status . " " . var_export( $this->result['error'],true ));
+                //log::doLog( "id_job: " . $this->id_job . " | id_segment: " . $this->id_segment . "| status: " . $this->status . " " . var_export( $this->result['error'],true ));
             }
 
         }
 
 		if (empty($this->id_first_file)) {
 			$this->result['error'][] = array("code" => -5, "message" => "missing id_first_file");
-            Log::doLog( "id_job: " . $this->id_job . " | id_segment: " . $this->id_segment . "| status: " . $this->status . " " . var_export( $this->result['error'],true ));
+            //log::doLog( "id_job: " . $this->id_job . " | id_segment: " . $this->id_segment . "| status: " . $this->status . " " . var_export( $this->result['error'],true ));
 		}
 
 		if (empty($this->time_to_edit)) {
@@ -98,13 +98,13 @@ class setTranslationController extends ajaxcontroller {
 		}
 
 		if (is_null($this->translation) || $this->translation === '') {
-            log::doLog("empty translation");
+            ////log::doLog("empty translation");
 			return 0; // won's save empty translation but there is no need to return an error
 		}
 
 		//ONE OR MORE ERRORS OCCURRED : EXITING
 		if (!empty($this->result['error'])) {
-            Log::doLog( "id_job: " . $this->id_job . " | id_segment: " . $this->id_segment . "| status: " . $this->status . " " . var_export( $this->result['error'],true ));
+            //log::doLog( "id_job: " . $this->id_job . " | id_segment: " . $this->id_segment . "| status: " . $this->status . " " . var_export( $this->result['error'],true ));
 			return -1;
 		}
 		$this->translation = CatUtils::view2rawxliff($this->translation);
@@ -127,11 +127,11 @@ class setTranslationController extends ajaxcontroller {
 
 		$res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreWarnings() );
 
-        Log::doLog( "id_job: " . $this->id_job . " | id_segment: " . $this->id_segment . "| status: " . $this->status . " " . var_export($res, true) );
+        //log::doLog( "id_job: " . $this->id_job . " | id_segment: " . $this->id_segment . "| status: " . $this->status . " " . var_export($res, true) );
 
 		if (!empty($res['error'])) {
 			$this->result['error'] = $res['error'];
-            Log::doLog( "id_job: " . $this->id_job . " | id_segment: " . $this->id_segment . "| status: " . $this->status . " " . var_export($res, true) );
+            //log::doLog( "id_job: " . $this->id_job . " | id_segment: " . $this->id_segment . "| status: " . $this->status . " " . var_export($res, true) );
 			return -1;
 		}
 
