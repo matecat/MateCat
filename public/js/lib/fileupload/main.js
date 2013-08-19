@@ -146,7 +146,6 @@ $(function () {
 	}).bind('fileuploadprogress', function (e,data) {
 //		console.log(data.loaded);
 	}).bind('fileuploadstart', function (e) {
-		console.log('start');
 //		if(!$.cookie("upload_session")) $.cookie("upload_session",uploadSessionId);
 	}).bind('fileuploaddone', function (e,data) {
 //		$('.size', $(data.context[0])).next().append('<div class="operation">Converting</div>');
@@ -523,7 +522,6 @@ convertFile = function(fname,filerow,filesize) {
 					// Animation complete.
 				});
            	} else {
-       			console.log('conversion failed');
            		var filename = $('.name',filerow).text();
            		var extension = filename.split('.')[filename.split('.').length-1];
 //           		console.log(extension);
@@ -672,7 +670,6 @@ checkConversions = function() {
 			        	var filename = d.file_name;
 			        	var filerow = this;
 			        	if(filerow.hasClass('converting')) return;
-						console.log('eccolo');
 						convertFile(filename,filerow);
 					
 				

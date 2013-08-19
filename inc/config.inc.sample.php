@@ -136,7 +136,6 @@ class INIT {
         }
 
         self::$ENABLED_BROWSERS = array('chrome', 'safari');
-//        self::$ENABLED_BROWSERS = array('chrome', 'firefox', 'safari');
         self::$CONVERSION_ENABLED = true;
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
         self::$BUILD_NUMBER = '0.3.2';
