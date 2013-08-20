@@ -1277,7 +1277,10 @@ UI = {
         this.body.addClass('loaded');
         if (typeof d.data['files'] != 'undefined') {
             this.renderSegments(d.data['files'], where, this.firstLoad);
-            if(openCurrentSegmentAfter) this.gotoSegment(this.currentSegmentId);
+            if(openCurrentSegmentAfter) {
+                seg = (UI.firstLoad)? this.currentSegmentId : UI.startSegmentId;
+                this.gotoSegment(seg);
+            }
         }
         $('#outer').removeClass('loading loadingBefore');
         this.loadingMore = false;
@@ -1475,7 +1478,8 @@ UI = {
         this.currentSegment.addClass('opened');
 
         this.fillCurrentSegmentWarnings(this.globalWarnings);
-
+        this.setNextWarnedSegment();
+        
         this.focusEditarea = setTimeout(function() {
             UI.editarea.focus();
             clearTimeout(UI.focusEditarea);
@@ -2118,6 +2122,34 @@ console.log('a');
      * @param {type} warnings
      * @returns {undefined}
      */
+    setNextWarnedSegment: function(segment_id) {
+        segment_id = segment_id || UI.currentSegmentId;
+//        UI.globalWarnings = (Loader.detect('test'))? fakeArr : UI.globalWarnings;
+        idList = UI.globalWarnings;
+        $.each(idList, function(index) {
+            if(this > segment_id) {
+                $('#point2seg').attr('href', '#'+this);
+                return false;
+            }
+            if(this == idList[idList.length - 1]) {
+                $('#point2seg').attr('href', '#'+idList[0]);                
+            };
+        });        
+/*
+        counter = 0;
+        $.each(UI.globalWarnings, function(key, value) {
+            counter++;
+            if(counter== 1) UI.firstWarnedSegment = key;
+            if(key > segment_id) {
+                $('#point2seg').attr('href', '#'+key);
+                return false;
+            }
+            if(counter == Object.keys(UI.globalWarnings).length) {
+                $('#point2seg').attr('href', '#'+UI.firstWarnedSegment);                
+            };
+        });
+*/        
+    },     
     fillWarnings: function(segment, warnings) {
         //console.log( 'fillWarnings' );
         //console.log( warnings);
@@ -2158,7 +2190,8 @@ console.log('a');
     checkWarnings: function(openingSegment) {
         var dd = new Date();
         ts = dd.getTime();
-        var token = this.currentSegmentId + '-' + ts.toString();
+        var seg = (typeof this.currentSegmentId == 'undefined')? this.startSegmentId : this.currentSegmentId;
+        var token = seg + '-' + ts.toString();
 
         this.doRequest({
             data: {
@@ -2169,9 +2202,10 @@ console.log('a');
             success: function(data) {
                 var warningPosition = '';
 //                console.log('data.total: '+data.total);
+                UI.globalWarnings = data.details;
 
                 //check for errors
-                if (data.total > 0) {
+                if (UI.globalWarnings.length > 0) {
 
                     //for now, put only last in the pointer to segment id
                     warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
@@ -2180,7 +2214,7 @@ console.log('a');
                     if(openingSegment) UI.fillCurrentSegmentWarnings(data.details);
 
                     //switch to css for warning
-                    $('#notifbox').attr('class', 'warningbox').attr("title", "Some translations seems to have TAGS and/or other untraslatables that do not match the source").find('.numbererror').text(data.total);
+                    $('#notifbox').attr('class', 'warningbox').attr("title", "Some translations seems to have TAGS and/or other untraslatables that do not match the source").find('.numbererror').text(UI.globalWarnings.length);
 
                 } else {
                     //if everything is ok, switch css to ok
@@ -2189,8 +2223,8 @@ console.log('a');
                     $('#point2seg').attr('href', '#');
                 }
 
-                UI.globalWarnings = data.details;
-                $('#point2seg').attr('href', warningPosition);
+                UI.setNextWarnedSegment();
+//                $('#point2seg').attr('href', warningPosition);
             }
         });
     },
@@ -2828,6 +2862,7 @@ $.fn.isOnScreen = function() {
     viewport.bottom = viewport.top + win.height();
 
     var bounds = this.offset();
+//    console.log('bounds: ', bounds);
     bounds.right = bounds.left + this.outerWidth();
     bounds.bottom = bounds.top + this.outerHeight();
 
