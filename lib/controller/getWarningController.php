@@ -85,7 +85,7 @@ class getWarningController extends ajaxcontroller {
      */
     private function __globalWarningsCall() {
         $result                  = getWarning( $this->__postInput->id_job );
-        //$_total                  = array_shift( $result );
+        $_total                  = array_shift( $result );
         //$this->result[ 'total' ] = (int)$_total[ 'total' ];
 
         $_keys = array();
