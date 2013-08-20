@@ -90,16 +90,27 @@ $(document).ready(function() {
 //                    var btnTxt = (config.analysisEnabled)? 'Analyze' : 'Translate';
 //                    $('.uploadbtn').attr('value',btnTxt).removeClass('disabled').removeAttr('disabled');
                 } else {
-                    var btnTxt = (config.analysisEnabled)? 'Analyze' : 'Translate';
-                    $('.uploadbtn').attr('value',btnTxt).removeClass('disabled').removeAttr('disabled');
                     //							$.cookie('upload_session', null);
                     if(config.analysisEnabled) {
                         location.href = '/analyze/' + d.project_name + '/' + d.id_project + '-' + d.ppassword;
                     } else {
-                        location.href = '/translate/' + d.project_name + '/' + d.source_language.substring(0,2) + '-' + d.target_language.substring(0,2) + '/' + d.id_job + '-' + d.password;
-                    //                    	$('.uploadbtn').attr('value','Analyze')
+
+                        if( d.target_language.length > 1 ){ //if multiple language selected show a job list
+                            d.files = [];
+                            $.each( d.target_language, function( idx, val ){
+                                d.files.push({ href: config.hostpath + config.basepath + 'translate/' + d.project_name + '/' + d.source_language.substring(0,2) + '-' + val.substring(0,2) + '/' + d.id_job[idx] + '-' + d.password[idx] });
+                            } );
+
+                            $('.uploadbtn-box').fadeOut('slow', function(){
+                                $('.uploadbtn-box').replaceWith( tmpl("job-links-list", d));
+                                $('#project-' + d.id_project).fadeIn(1000);
+                            });
+
+                        } else {
+                            location.href = config.hostpath + config.basepath + 'translate/' + d.project_name + '/' + d.source_language.substring(0,2) + '-' + d.target_language[0].substring(0,2) + '/' + d.id_job[0] + '-' + d.password[0];
+                        }
+
                     }
-                //					location.href = '/translate/' + d.project_name + '/' + d.source_language.substring(0,2) + '-' + d.target_language.substring(0,2) + '/' + d.id_job + '-' + d.password;
                 }
             }
         });

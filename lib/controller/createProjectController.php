@@ -208,6 +208,8 @@ class createProjectController extends ajaxcontroller {
 
         $this->target_language = explode(',', $this->target_language);
 
+        $_jobList = array();
+        $_passwordList = array();
         foreach ($this->target_language as $target) {
             $password = CatUtils::generate_password();
             if (isset($_SESSION['cid']) and !empty($_SESSION['cid'])) {
@@ -223,6 +225,10 @@ class createProjectController extends ajaxcontroller {
             foreach ($fidList as $fid) {
                 insertFilesJob($jid, $fid);
             }
+
+            $_jobList[] = $jid;
+            $_passwordList[] = $password;
+
         }
 
 
@@ -238,9 +244,9 @@ class createProjectController extends ajaxcontroller {
             changeProjectStatus($pid, $analysis_status);
             $this->result['code'] = 1;
             $this->result['data'] = "OK";
-            $this->result['password'] = $password;
+            $this->result['password'] = $_passwordList;
             $this->result['ppassword'] = $ppassword;
-            $this->result['id_job'] = $jid;
+            $this->result['id_job'] = $_jobList;
             $this->result['id_project'] = $pid;
             $this->result['project_name'] = $this->project_name;
             $this->result['source_language'] = $this->source_language;

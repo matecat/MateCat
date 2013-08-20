@@ -3,7 +3,6 @@
 set_time_limit(180);
 include_once INIT::$MODEL_ROOT."/queries.php";
 include_once INIT::$UTILS_ROOT."/cat.class.php";
-include_once INIT::$UTILS_ROOT."/fileFormatConverter.class.php";
 include_once(INIT::$UTILS_ROOT.'/XliffSAXTranslationReplacer.class.php');
 
 
@@ -24,8 +23,6 @@ class downloadFileStreamOnDiskController extends downloadController {
 		$this->filename = $this->fname;
 		$this->password = $this->get_from_get_post("password");
 
-		$this->download_type = $this->get_from_get_post("download_type");
-
 		if (empty($this->id_job)) {
 			$this->id_job = "Unknown";
 		}
@@ -34,8 +31,6 @@ class downloadFileStreamOnDiskController extends downloadController {
 	public function doAction() {
 		$debug=array();
 		$debug['total'][]=time();
-		// specs for filename at the task https://app.asana.com/0/1096066951381/2263196383117
-		$converter = new fileFormatConverter();
 		$debug['get_file'][]=time();
 		$files_job = getFilesForJob($this->id_job, $this->id_file);
 		$debug['get_file'][]=time();
@@ -101,12 +96,6 @@ class downloadFileStreamOnDiskController extends downloadController {
 			$output_content[$id_file]['content'] = $original;
 			$output_content[$id_file]['filename'] = $current_filename;
 
-			if (!in_array($mime_type, array("xliff", "sdlxliff", "xlf"))) {
-				$debug['do_conversion'][]=time();
-				$convertResult = $converter->convertToOriginal($output_content[$id_file]['content']);
-				$output_content[$id_file]['content'] = $convertResult['documentContent'];
-				$debug['do_conversion'][]=time();
-			}
 		}
 
 		$ext = "";
@@ -130,12 +119,7 @@ class downloadFileStreamOnDiskController extends downloadController {
 	private function setContent($output_content) {
 		foreach ($output_content as $oc) {
 			$pathinfo = pathinfo($oc['filename']);
-			$ext = $pathinfo['extension'];
-			$this->filename = $oc['filename'];
-
-			if ($ext == 'pdf' or $ext == "PDF") {
-				$this->filename = $pathinfo['basename'] . ".docx";
-			}
+            $this->filename = $pathinfo['basename'] . ".sdlxliff";
 			$this->content = $oc['content'];
 		}
 	}
@@ -148,10 +132,7 @@ class downloadFileStreamOnDiskController extends downloadController {
 		// Staff with content
 		foreach ($output_content as $f) {
 			$pathinfo = pathinfo($f['filename']);
-			$ext = $pathinfo['extension'];
-			if ($ext == 'pdf' or $ext == "PDF") {
-				$f['filename'] = $pathinfo['basename'] . ".docx";
-			}
+            $f['filename'] = $pathinfo['basename'] . ".sdlxliff";
 			$zip->addFromString($f['filename'], $f['content']);
 		}
 

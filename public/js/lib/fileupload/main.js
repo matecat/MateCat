@@ -510,7 +510,7 @@ convertFile = function(fname,filerow,filesize) {
         success: function(d){
 			filerow.removeClass('converting');
 			filerow.addClass('ready');
-           	if(d.code) {
+           	if(d.code == 1) {
 				$('.ui-progressbar-value', filerow).addClass('completed').css('width', '100%');
 //				console.log('checkAnalyzability(): '+checkAnalyzability());
 				if(checkAnalyzability('convertfile on success')) {
@@ -522,7 +522,11 @@ convertFile = function(fname,filerow,filesize) {
 				$('.progress',filerow).fadeOut('slow', function() {
 					// Animation complete.
 				});
-           	} else {
+           	} else if( d.code == -100 ){
+                $('td.size',filerow).next().addClass('error').empty().attr('colspan','2').css({'font-size':'14px'}).append('<span class="label label-important">'+d.errors[0].message+'</span>');
+                $(filerow).addClass('failed');
+                return false;
+            } else {
        			console.log('conversion failed');
            		var filename = $('.name',filerow).text();
            		var extension = filename.split('.')[filename.split('.').length-1];
