@@ -1,6 +1,4 @@
 <?php
-include INIT::$ROOT."/lib/utils/mymemory_queries_temp.php";
-include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
 include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';

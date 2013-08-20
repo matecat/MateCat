@@ -1,7 +1,6 @@
 <?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include INIT::$UTILS_ROOT . "/mymemory_queries_temp.php";
 include INIT::$UTILS_ROOT . "/filetype.class.php";
 include INIT::$UTILS_ROOT . "/cat.class.php";
 include INIT::$UTILS_ROOT . "/langs/languages.class.php";
