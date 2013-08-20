@@ -26,8 +26,8 @@ class setContributionController extends ajaxcontroller {
 
         $filterArgs = array(
             'id_job'              => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'id_translator'       => array( 'filter' => FILTER_SANITIZE_EMAIL ),
-            'id_customer'         => array( 'filter' => FILTER_SANITIZE_EMAIL ),
+            'id_translator'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+            'id_customer'         => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
             'private_customer'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'private_translator'  => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'password'            => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
