@@ -436,7 +436,16 @@ UI = {
                 UI.lockTags();
             }, 10);
             UI.registerQACheck();        
-        }).on('dblclick', '.editarea', function(e) {
+        }).on('input', '.editor .cc-search .input', function(e) {
+            UI.markTagsInSearch();
+        }).on('dblclick', '.source', function(e) {
+//            console.log(window.getSelection());
+//            console.log(window.getSelection().extentOffset);
+//            var selection = window.getSelection();
+//            range = selection.getRangeAt(0);
+//            selection.removeAllRanges();
+//            selection.addRange(range);
+//            selection.modify("extend", "left", "character");
         }).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
             e.preventDefault();
             e.stopPropagation();
@@ -1426,18 +1435,27 @@ UI = {
             return false;
 
         $('.source').each(function() {
-            $(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-            $(this).html($(this).html().replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-            $(this).html($(this).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
+            UI.detectTags(this);
         });
 
         $('.editarea').each(function() {
             if ($('#segment-' + $(this).data('sid')).hasClass('mismatch'))
                 return false;
-
-            $(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-            $(this).html($(this).html().replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-            $(this).html($(this).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
+            UI.detectTags(this);
+        });
+    },
+    detectTags: function(area) {
+            $(area).html($(area).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+            $(area).html($(area).html().replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+            $(area).html($(area).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
+    },
+    markTagsInSearch: function() {
+        if (!this.taglockEnabled)
+            return false;
+        if (this.noTagsInSegment(1))
+            return false;
+        $('.editor .cc-search .input').each(function() {
+            UI.detectTags(this);
         });
     },
     millisecondsToTime: function(milli) {
@@ -1452,6 +1470,8 @@ UI = {
         $('.editor .cc-search .input').text('');
         var searchField = (this.currentSearchInTarget)? $('.editor .cc-search .search-target') : $('.editor .cc-search .search-source');
         $(searchField).text(this.currentSelectedText);
+        this.markTagsInSearch();
+
         this.getConcordance(this.currentSelectedText, this.currentSearchInTarget);
     },
     openSegment: function(editarea, operation) {

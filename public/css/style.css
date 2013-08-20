@@ -1315,13 +1315,11 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 	font-style: italic;
 	padding-bottom: 3px;
 	vertical-align: middle;
-
-/*
-	margin-left: 2px !important;
-	margin-right: 2px !important;
-*/
 	}
-
+.editor .cc-search .input .locked
+	{
+	font-size: 70%;
+	}
 
 	
 .editor .editarea .locked.selected
