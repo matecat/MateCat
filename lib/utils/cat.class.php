@@ -163,6 +163,41 @@ class CatUtils {
         $segment = str_replace(GTPLACEHOLDER, "&gt;", $segment);
         return $segment;
     }
+    
+    
+    
+     private static function get_xliff_tags($segment) {
+
+        //remove not existent </x> tags
+        $segment = preg_replace('|(</x>)|si', "", $segment);
+        
+        $matches=array();
+        $match=array();
+
+        
+        $res=preg_match('|(<g\s*id=["\']+.*?["\']+\s*[^<>]*?>)|si',$segment, $match);
+        if ($res and isset($match[0])){
+            $matches[]=$match[0];
+        }
+
+        $segment = preg_replace('|<(/g)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(x.*?/?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(bx.*?/?])>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(ex.*?/?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(bpt\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(/bpt)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(ept\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(/ept)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(ph\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(/ph)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(it\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(/ph)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(it\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(/it)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(mrk\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(/mrk)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        return $segment;
+    }
 
     public static function stripTags($text) {
         $pattern_g_o = '|(<.*?>)|';
@@ -291,9 +326,10 @@ class CatUtils {
 
             if ($seg['sug'] <> $seg['translation']) {
                 $sug_for_diff=self::placehold_xliff_tags($seg['sug']);
+             //  echo $sug_for_diff; exit;
                 $tra_for_diff=self::placehold_xliff_tags($seg['translation']);
                 $seg['diff'] = MyMemory::diff_tercpp($sug_for_diff, $tra_for_diff);
-                if (!$seg['diff']) {
+                if (!$seg['diff']   or 1 ) {
                     // TER NOT WORKING : fallback to old diff viewer
                     $seg['diff'] = MyMemory::diff_html($sug_for_diff, $tra_for_diff);
                 }
