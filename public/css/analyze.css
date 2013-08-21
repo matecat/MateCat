@@ -611,3 +611,7 @@ footer a:hover{text-decoration:none}
     background: #fff;
     border-left: 1px solid #ccc;
     }         
+.numfiles
+    {
+    margin-left: 10px;
+    }         
