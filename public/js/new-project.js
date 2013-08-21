@@ -92,7 +92,7 @@ $(document).ready(function() {
                 } else {
                     //							$.cookie('upload_session', null);
                     if(config.analysisEnabled) {
-                        location.href = '/analyze/' + d.project_name + '/' + d.id_project + '-' + d.ppassword;
+                        location.href = config.hostpath + config.basepath + 'analyze/' + d.project_name + '/' + d.id_project + '-' + d.ppassword;
                     } else {
 
                         if( d.target_language.length > 1 ){ //if multiple language selected show a job list
@@ -103,7 +103,22 @@ $(document).ready(function() {
 
                             $('.uploadbtn-box').fadeOut('slow', function(){
                                 $('.uploadbtn-box').replaceWith( tmpl("job-links-list", d));
+
+                                var btnContainer = $('.btncontinue');
+                                var btnNew = $('#add-files').clone();
+                                btnContainer.fadeOut('slow', function(){
+                                    btnContainer.html('');
+                                    btnNew.children('span').text('New Project');
+                                    btnNew.children('i').remove();
+                                    btnNew.children('input').remove();
+                                    btnNew.attr({id:'new-project'}).on('click', function(){
+                                        location.href = config.hostpath + config.basepath;
+                                    }).css({margin:'auto 0'});
+                                    btnNew.appendTo(btnContainer).show();
+                                }).css({height:'50px'}).fadeIn(1000);
+
                                 $('#project-' + d.id_project).fadeIn(1000);
+
                             });
 
                         } else {
