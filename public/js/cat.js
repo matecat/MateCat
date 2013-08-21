@@ -1186,7 +1186,7 @@ UI = {
     },
     getMoreSegments_success: function(d) {
         if(d.error.length) 
-            this.processErrors(d.error);
+            this.processErrors(d.error, 'getMoreSegments');
         where = d.data['where'];
         if (typeof d.data['files'] != 'undefined') {
             var numsegToAdd = 0;
@@ -1276,7 +1276,7 @@ UI = {
     },
     getSegments_success: function(d,openCurrentSegmentAfter) {
         if(d.error.length) 
-            this.processErrors(d.error);
+            this.processErrors(d.error, 'getSegments');
         where = d.data['where'];
         $.each(d.data['files'], function() {
             startSegmentId = this['segments'][0]['sid'];
@@ -1915,7 +1915,7 @@ UI = {
             },
             success: function(d) {
                 if(d.error.length) 
-                    UI.processErrors(d.error);
+                    UI.processErrors(d.error, 'setContribution');
             }
         });
     },
@@ -1961,7 +1961,7 @@ UI = {
             },
             success: function(d) {
                 if(d.error.length) 
-                    UI.processErrors(d.error);
+                    UI.processErrors(d.error, 'setContributionMT');
             }
         });
     },
@@ -1993,7 +1993,7 @@ UI = {
     },
     setCurrentSegment_success: function(d) {
         if(d.error.length) 
-            this.processErrors(d.error);
+            this.processErrors(d.error, 'setCurrentSegment');
         this.nextSegmentIdByServer = d.nextSegmentId;
         this.getNextSegment(this.currentSegment, 'untranslated');
     },
@@ -2027,7 +2027,7 @@ console.log('a');
     },
     setDeleteSuggestion_success: function(d) {
         if(d.error.length) 
-            this.processErrors(d.error);
+            this.processErrors(d.error, 'setDeleteSuggestion');
         if (this.debug)
             console.log('match deleted');
 
@@ -2325,13 +2325,19 @@ console.log('a');
             }
         });
     },
-    processErrors: function(err) {
+    processErrors: function(err, operation) {
         $.each(err, function() {
+            if((operation == 'setTranslation')||(operation == 'setContribution')) {
+                if(this['code'] != '-10') {
+                    alert("Error in saving the translation. Try the following: \n1) Refresh the page (Ctrl+F5 twice) \n2) Clear the cache in the browser \nIf the solutions above does not resolve the issue, please stop the translation and report the problem to alessandro@translated.net");
+                }
+            }
             if(this['code'] == '-10') {
                 alert("Job canceled or assigned to another translator");
                 location.reload();
             }
-        });        
+
+        });
     },
     setTranslation_success: function(d, segment, status) {
         if(d.error.length) 
