@@ -816,7 +816,11 @@ section.status-new.opened .editarea
 	}
 
 .source{line-height:30px;padding-top:9px !important;}
-.editor .source{padding-top:4px !important;font-size:18px;   }
+.editor .source
+    {
+    padding-top: 4px !important;
+    font-size: 18px;
+    }
 .grayed-text{color:#4c4c4c;}
 .textarea-container{height: inherit;table-layout: fixed;}
 .editor .textarea-container{position:relative;width:100%;float:left;padding-bottom:5px;}

@@ -1762,7 +1762,7 @@ UI = {
                         '               </div>' +
                         '		<div class="text">' +
                         '			<div class="wrap">' +
-                        '				<div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + this.segment + '</div> <!-- .source -->' +
+                        '				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + this.segment + '</div></div>' +
                         '				<div class="target item" id="segment-' + this.sid + '-target">' +
                         '					<span class="hide toggle"> ' +
                         '						<a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>' +
