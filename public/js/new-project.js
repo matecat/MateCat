@@ -97,6 +97,9 @@ $(document).ready(function() {
 
                         if( d.target_language.length > 1 ){ //if multiple language selected show a job list
                             d.files = [];
+                            d.trgLangHumanReadable = $('#target-lang option:selected').text().split(',');
+                            d.srcLangHumanReadable = $('#source-lang option:selected').text();
+                            //console.log(d);
                             $.each( d.target_language, function( idx, val ){
                                 d.files.push({ href: config.hostpath + config.basepath + 'translate/' + d.project_name + '/' + d.source_language.substring(0,2) + '-' + val.substring(0,2) + '/' + d.id_job[idx] + '-' + d.password[idx] });
                             } );
@@ -106,17 +109,23 @@ $(document).ready(function() {
 
                                 var btnContainer = $('.btncontinue');
                                 var btnNew = $('#add-files').clone();
-                                btnContainer.fadeOut('slow', function(){
-                                    btnContainer.html('');
+                                btnContainer.fadeOut('slow',function () {
+                                    btnContainer.html('').addClass('newProject');
                                     btnNew.children('span').text('New Project');
                                     btnNew.children('i').remove();
                                     btnNew.children('input').remove();
-                                    btnNew.attr({id:'new-project'}).on('click', function(){
+                                    btnNew.attr({id: 'new-project'}).on('click',function () {
                                         location.href = config.hostpath + config.basepath;
-                                    }).css({margin:'auto 0'});
-                                    btnNew.appendTo(btnContainer).show();
-                                }).css({height:'50px'}).fadeIn(1000);
+                                    }).css({margin: 'auto 0'});
+                                    btnNew.appendTo(btnContainer);
+                                }).css({height: '50px'}).fadeIn(1000);
 
+                                $('.translate-box input, .translate-box select').attr({disabled:'disabled'});
+                                $(".more, #multiple-link").unbind('click').on('click',function(e){
+                                    e.preventDefault();
+                                }).addClass('disabledLink');
+                                $('td.delete').empty();
+                                $('#info-login').fadeIn(1000);
                                 $('#project-' + d.id_project).fadeIn(1000);
 
                             });

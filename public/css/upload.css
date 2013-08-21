@@ -915,7 +915,10 @@ footer a:hover{text-decoration:none}
 	}
 
 /* job list table when analyze page is not available */
-.tablestats {display:none;border-right: 1px solid #ccc; -moz-border-radius: 4px;border-radius: 4px;margin-bottom: 4px !important;margin-top: 20px !important;width:auto;float:right;}
+.tablestats {display:none;border-right: 1px solid #ccc; -moz-border-radius: 4px;border-radius: 4px;margin-bottom: 4px !important;margin-top: 20px !important;float:right;}
 .tablestats th {background-color: #efefef;font-size: 16px;border-top: 1px solid #ccc;}
-.tablestats th, .tablestats td {border-bottom: 1px solid #ccc;border-left: 1px solid #ccc;padding: 8px;margin: 1px 0;text-align: center;}
+.tablestats th, .tablestats td {border-bottom: 1px solid #ccc;border-left: 1px solid #ccc;padding: 8px;margin: 1px 0;text-align: left;}
 .tablestats td {font-size: 14px;}
+.newProject{right:20px;float:right;}
+.tablestats a.url{font-size: 14px;}
+.disabledLink{color:gray;text-decoration:none;background:none;cursor: default;}

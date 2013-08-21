@@ -307,7 +307,10 @@ $(function () {
 				if(!filerow.hasClass('converting')) {
 					convertFile(filename,filerow,filesize);
 				}
-			}
+			} else {
+                enableAnalyze();
+            }
+
         }
 	
 
