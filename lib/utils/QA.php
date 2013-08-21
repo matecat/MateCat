@@ -659,6 +659,9 @@ class QA {
         $srcDomElements = $result[0];
         $trgDomElements = $result[1];
 
+        //* Fix error undefined variable trgTagReference when source target contains tags and target not
+        $trgTagReference = array('node_idx' => null);
+
         foreach( $srcDomElements as $srcTagID ){
 
             if( $srcTagID['name'] == 'x' ){
