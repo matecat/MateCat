@@ -42,6 +42,8 @@
 
         <script type="text/javascript">
             var config = {
+                basepath: '${basepath | string:/}',
+                hostpath: '${hostpath | string:/}',
                 unsupportedFileTypes: '${unsupported_file_types}',
                 allowedFileTypes: /(\.|\/)(${allowed_file_types})$/i,
                 conversionEnabled: ${conversion_enabled},
@@ -357,6 +359,39 @@
             {% } %}
         </script>
 
+        <script tal:condition="not:volume_analysis_enabled" id="job-links-list" type="text/x-tmpl">
+        <!-- The template to display links for every language in the job when multi-language selected and no analysis page is available-->
+            <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0" id="info-login">
+                <thead>
+                    <tr>
+                        <th class="job-detail">
+                            <a tal:attributes="href string:${basepath}manage/?new=1">Login</a> to add the jobs to your management panel.
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0" id="project-{%=o.id_project%}">
+                <thead>
+                <tr>
+                    <th class="job-detail">Jobs</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for (var i=0, file; file=o.files[i]; i++) { %}
+                <tr class="row">
+                    <td class="job-detail">
+                	<span class="urls">
+                        <div class="langs">{%=o.srcLangHumanReadable%}&nbsp;&gt;&nbsp;{%=o.trgLangHumanReadable[i]%}</div>
+                		<a class="url" target="_blank" href="{%=file.href%}">{%=file.href%}</a>
+	        	    </span>
+                    </td>
+                </tr>
+                {% } %}
+                </tbody>
+            </table>
+        </script>
 
         <script src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
 
@@ -451,7 +486,7 @@
 
                 <nav>
                     <ul>
-                        <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
+                        <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
                     </ul>
 
                     <tal:block tal:condition="php: !empty(logged_user)">

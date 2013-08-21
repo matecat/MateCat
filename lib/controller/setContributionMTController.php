@@ -5,7 +5,7 @@ include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 class setContributionMTController extends ajaxcontroller {
 
 	private $segment;
-    PRIVATE $password;
+    private $password;
 	private $translation;
 	private $source_lang;
 	private $target_lang;

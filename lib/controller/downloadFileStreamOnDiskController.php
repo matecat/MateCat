@@ -24,8 +24,6 @@ class downloadFileStreamOnDiskController extends downloadController {
 		$this->filename = $this->fname;
 		$this->password = $this->get_from_get_post("password");
 
-		$this->download_type = $this->get_from_get_post("download_type");
-
 		if (empty($this->id_job)) {
 			$this->id_job = "Unknown";
 		}
