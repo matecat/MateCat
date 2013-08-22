@@ -14,7 +14,7 @@ class fileFormatConverter {
 	private $fromXliffFunction = "AutomationService/xliff2original";
 	private $opt = array();
 	private $lang_handler;
-	private $converters=array('10.11.0.10'=>1,'10.11.0.18'=>1,'10.11.0.26'=>1,'10.11.0.34'=>1);
+	private $converters=array('10.11.0.10'=>1,'10.11.0.18'=>1,'10.11.0.26'=>1,'10.11.0.34'=>1,'10.11.0.42'=>1,'10.30.1.247'=>1);
 
 	public function __construct() {
 		if (!class_exists("INIT")) {
@@ -25,9 +25,7 @@ class fileFormatConverter {
 		$this->lang_handler=  Languages::getInstance();
 
 		//assign converter
-		//$this->ip=$this->pickRandConverter();
-		$this->ip="10.30.1.247";
-		//$this->ip="10.11.0.10";
+		$this->ip=$this->pickRandConverter();
 	}
 
 	private function addBOM($string) {
@@ -165,11 +163,16 @@ class fileFormatConverter {
 		$data['sourceLocale'] = $this->lang_handler->getSDLStudioCode($source_lang);
 		$data['targetLocale'] = $this->lang_handler->getSDLStudioCode($target_lang);
 
+log::doLog($this->ip." start conversion");
+$start_time=time();
 		$curl_result = $this->curl_post($url, $data, $this->opt);
+$end_time=time();
+$time_diff=$end_time-$start_time;
+log::doLog($this->ip." took $time_diff secs");
+
 		$decode = json_decode($curl_result, true);
 		$curl_result = null;
 		$res = $this->parseOutput($decode);
-
 
 		return $res;
 	}
@@ -184,9 +187,12 @@ class fileFormatConverter {
 		$data['uid'] = $uid_ext[0];
 		$data['xliffContent'] = $xliffContent;
 
-
-
+log::doLog($this->ip." start conversion");
+$start_time=time();
 		$curl_result = $this->curl_post($url, $data, $this->opt);
+$end_time=time();
+$time_diff=$end_time-$start_time;
+log::doLog($this->ip." took $time_diff secs");
 
 		$decode = json_decode($curl_result, true);
 		unset($curl_result);
