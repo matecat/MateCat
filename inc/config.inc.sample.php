@@ -137,10 +137,10 @@ class INIT {
 
         self::$ENABLED_BROWSERS = array('chrome', 'safari');
 //        self::$ENABLED_BROWSERS = array('chrome', 'firefox', 'safari');
-        self::$CONVERSION_ENABLED = true;
+        self::$CONVERSION_ENABLED = false;
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
         self::$BUILD_NUMBER = '0.3.2';
-        self::$VOLUME_ANALYSIS_ENABLED = true;
+        self::$VOLUME_ANALYSIS_ENABLED = false;
 
         self::$WARNING_POLLING_INTERVAL = 10; //seconds
         self::$SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
