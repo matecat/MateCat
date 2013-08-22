@@ -26,6 +26,7 @@ class fileFormatConverter {
 
 		//assign converter
 		$this->ip=$this->pickRandConverter();
+		//$this->ip='10.30.1.247';
 	}
 
 	private function addBOM($string) {
