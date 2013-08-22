@@ -121,7 +121,7 @@ class TMS_RESULT {
 
 }
 
-class TMS extends engine {
+class TMS extends Engine {
 
     private $result = array();
 

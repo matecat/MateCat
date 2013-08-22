@@ -680,7 +680,6 @@ checkConversions = function() {
 			        	var filename = d.file_name;
 			        	var filerow = this;
 			        	if(filerow.hasClass('converting')) return;
-						console.log('eccolo');
 						convertFile(filename,filerow);
 					
 				
