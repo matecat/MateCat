@@ -78,7 +78,7 @@
                 <input name="project-name" type="text" class="upload-input" id="project-name" autofocus="autofocus"/>
             </div>
 
-            <div class="translate-box">
+            <div class="translate-box source">
                 <h2>From</h2>
                 <select name="source-lang" id="source-lang">
                     <tal:block tal:define="language php:array()" tal:repeat="language sourceLangHistory">
@@ -95,6 +95,8 @@
                     </tal:block>
                 </select>
             </div>
+            
+            <a id="swaplang" title="Swap languages" href="#">Swap languages</a>
 
             <div class="translate-box target">
                 <h2>To</h2>

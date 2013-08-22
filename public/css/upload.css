@@ -456,6 +456,8 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
 
 
 .translate-box{float:left;margin:20px 30px 0px 0px}
+.translate-box.source{margin-right:0px}
+
 .wrapper-upload{text-align:left;margin:0 auto;width:92%;min-width:960px;position:relative;}
 .wrapper-upload h1{margin:0;padding:0;font-size:40px}
 
@@ -916,3 +918,19 @@ footer a:hover{text-decoration:none}
 	{
 	width: 250px;
 	}    
+
+#swaplang
+    {
+    float: left;
+    text-indent: -9999px;
+    display: block;
+    width: 15px;
+    height: 18px;
+    margin: 56px 10px 0 10px;
+    background: url(../img/swap.png) 0 0px no-repeat;
+    opacity: 0.5;
+    }
+    #swaplang:hover
+        {
+        opacity: 1;
+        }

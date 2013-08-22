@@ -24,7 +24,13 @@ $(document).ready(function(){
         e.preventDefault();
         $('.listlang li.on input[type=checkbox]').click();
     });
-
+    $("#swaplang").click(function(e){
+        e.preventDefault();
+        var src = $('#source-lang').val();
+        var trg = $('#target-lang').val();
+        $('#source-lang').val(trg);
+        $('#target-lang').val(src);
+    });
     $("#chooseMultilang").click(function(e){
         $('.popup-languages .close').click();
         if ($('.popup-languages li.on').length) {
