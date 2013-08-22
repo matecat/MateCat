@@ -57,10 +57,9 @@ $(document).ready(function() {
             files += '@@SEP@@' + $(this).text();
         });
 
-        $.ajax({
-            url: window.location.href,
+        APP.doRequest({
             data: {
-                action: 'createProject',
+                action:	 "createProject",
                 file_name: files.substr(7),
                 project_name: $('#project-name').val(),
                 source_language: $('#source-lang').val(),
@@ -71,14 +70,10 @@ $(document).ready(function() {
                 private_tm_user: $('#private-tm-user').val(),
                 private_tm_pass: $('#private-tm-pass').val()
             },
-            type: 'POST',            
-            dataType: 'json',
-            //		            context: $('#'+id),
+            context: ob,
             beforeSend: function (){
                 $('.error-message').hide();
                 $('.uploadbtn').attr('value','Analyzing...').attr('disabled','disabled').addClass('disabled');
-            },
-            complete: function (){
             },
             success: function(d){
                 if(d.error.length) {
@@ -101,6 +96,7 @@ $(document).ready(function() {
                     }
                 //					location.href = '/translate/' + d.project_name + '/' + d.source_language.substring(0,2) + '-' + d.target_language.substring(0,2) + '/' + d.id_job + '-' + d.password;
                 }
+
             }
         });
     });    		

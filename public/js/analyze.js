@@ -6,9 +6,9 @@ UI = {
         this.noProgressTail = 0;
         this.lastProgressSegments = 0;
 
-        fitText($('#pid'),$('#pname'),50);
+        APP.fitText($('#pid'),$('#pname'),50);
         $(".subfile .filename").each(function(){
-            fitText($(this),$(this),50);
+            APP.fitText($(this),$(this),50);
         })    
        
         this.checkStatus('FAST_OK');
@@ -47,9 +47,6 @@ UI = {
             $(this).parents('table').find(".part3files").toggleClass('open');
         });
         
-
-        
-        
         $(".split").click(function(e){
             e.preventDefault();
             $(".grayed").toggle();
@@ -72,54 +69,45 @@ UI = {
 
         $(".x-popup, .popup-outer, .popup a.anonymous").click(function(e){
             e.preventDefault();
-
-            $.ajax({
-                url: '?action=ajaxUtils',
+            APP.doRequest({
                 data: {
                     action: 'ajaxUtils',
                     exec: 'stayAnonymous'
                 },
-                type: 'POST',
-                dataType: 'json',
-                success: function(d){
+                success: function(d) {
                     $(".popup-outer").fadeOut();
                     $(".popup").fadeOut('fast');
                 }
-
             });
-
         });
         
         $(".stopbtn").click(function(e){
             e.preventDefault();
-	    	$(this).toggleClass('stopped');
-	    	if($(this).hasClass('stopped')) {
-	    		tt = 'Restart';
-	    		act = 'cancel';
-	    		UI.stopPolling = true;
-	    	} else {
-	    		tt = 'Cancel';
-	    		act = 'restart';
-	    		UI.stopPolling = false;
-	    		UI.pollData();
-	    	}
+            $(this).toggleClass('stopped');
+            if($(this).hasClass('stopped')) {
+                tt = 'Restart';
+                act = 'cancel';
+                UI.stopPolling = true;
+            } else {
+                tt = 'Cancel';
+                act = 'restart';
+                UI.stopPolling = false;
+                UI.pollData();
+            }
 	    	
-//	    	tt = ($(this).hasClass('stopped'))? 'Restart' : 'Cancel';
-//	    	act = ($(this).hasClass('stopped'))? 'cancel' : 'restart';
-	    	$(this).text(tt);
+    //	    	tt = ($(this).hasClass('stopped'))? 'Restart' : 'Cancel';
+    //	    	act = ($(this).hasClass('stopped'))? 'cancel' : 'restart';
+            $(this).text(tt);
+            APP.doRequest({
+                data: {
+                    action: 'pauseResume',
+                    pid: $('#pid').data('pid'),
+                    act: act
+                },
+                success: function(d) {
+                }
+            });
 
-	        $.ajax({
-	            url: '?action=pauseResume',
-	            data: {
-	                action: 'pauseResume',
-	                pid: $('#pid').data('pid'),
-	                act: act
-	            },
-	            type: 'POST',            
-	            dataType: 'json',
-	            success: function(d){
-	            }
-	        });
         });
 
         this.pollData();
@@ -163,18 +151,15 @@ UI = {
     },
 
     pollData: function() {
-    	if(this.stopPolling) return;
+        if(this.stopPolling) return;
         var pid=$("#pid").attr("data-pid");
 
-        $.ajax({
-            url: '?action=getVolumeAnalysis',
+        APP.doRequest({
             data: {
                 action: 'getVolumeAnalysis',
-                pid:pid
+                pid: pid
             },
-            type: 'POST',            
-            dataType: 'json',
-            success: function(d){
+            success: function(d) {
                 if(d.data) {
                     var s = d.data.summary;
                     if((s.STATUS == 'NEW')||(s.STATUS == '')) {
@@ -354,7 +339,6 @@ UI = {
                 }
             }
         });
-
 
     }
 }

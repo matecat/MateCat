@@ -27,6 +27,10 @@ UI = {
         this.draggingInsideEditarea = false;
         this.undoStack = [];
         this.undoStackPosition = 0;
+        this.ccSourceUndoStack = [];
+        this.ccSourceUndoStackPosition = 0;
+        this.ccTargetUndoStack = [];
+        this.ccTargetUndoStackPosition = 0;
         this.tagSelection = false;
         this.nextSegmentIdByServer = 0;
         this.cursorPlaceholder = '[[placeholder]]';
@@ -728,34 +732,10 @@ UI = {
             console.log('Init time: ' + this.initTime);
 
     },
-    doRequest: function(req,log) {
-        logTxt = (typeof log == 'undefined')? '' : '&type=' + log;
-        var setup = {
-            url: config.basepath + '?action=' + req.data.action + logTxt + this.appendTime(),
-            data: req.data,
-            type: 'POST',
-            dataType: 'json'
-        };
-
-        // Callbacks
-        if (typeof req.success === 'function')
-            setup.success = req.success;
-        if (typeof req.complete === 'function')
-            setup.complete = req.complete;
-        if (typeof req.context != 'undefined')
-            setup.context = req.context;
-        if (typeof req.error === 'function')
-            setup.error = req.error;
-        $.ajax(setup);
-    },
     activateSegment: function() {
         this.createFooter(this.currentSegment);
         this.createButtons();
         this.createHeader();
-    },
-    appendTime: function() {
-        var t = new Date();
-        return '&time=' + t.getTime();
     },
     cacheObjects: function(editarea) {
         this.editarea = $(editarea);
@@ -1062,7 +1042,7 @@ UI = {
         $('.cc-search', UI.currentSegment).addClass('loading');
         $('.sub-editor.concordances .overflow .results', this.currentSegment).empty();
         txt = view2rawxliff(txt);
-        this.doRequest({
+        APP.doRequest({
             data: {
                 action: 'getContribution',
                 is_concordance: 1,
@@ -1109,7 +1089,7 @@ UI = {
             $(".loader", n).addClass('loader_on')
         }
 
-        this.doRequest({
+        APP.doRequest({
             data: {
                 action: 'getContribution',
                 is_concordance: 0,
@@ -1171,7 +1151,7 @@ UI = {
             $('#outer').addClass('loading');
         }
 
-        this.doRequest({
+        APP.doRequest({
             data: {
                 action: 'getSegments',
                 jid: config.job_id,
@@ -1261,7 +1241,7 @@ UI = {
         var step = this.initSegNum;
         $('#outer').addClass('loading');
 
-        this.doRequest({
+        APP.doRequest({
             data: {
                 action: 'getSegments',
                 jid: config.job_id,
@@ -1900,7 +1880,7 @@ UI = {
         var id_customer = config.id_customer;
         var private_customer = config.private_customer;
 
-        this.doRequest({
+        APP.doRequest({
             data: {
                 action: 'setContribution',
                 id_job: config.job_id,
@@ -1947,7 +1927,7 @@ UI = {
         var time_to_edit = UI.editTime;
         var chosen_suggestion = $('.editarea', segment).data('lastChosenSuggestion');
 
-        this.doRequest({
+        APP.doRequest({
             data: {
                 action: 'setContributionMT',
                 id_segment: id_segment,
@@ -1980,7 +1960,7 @@ UI = {
         var file = this.currentFile;
         if (this.readonly)
             return;
-        this.doRequest({
+        APP.doRequest({
             data: {
                 action: 'setCurrentSegment',
                 password: config.password,
@@ -2009,7 +1989,7 @@ console.log('a');
             target = view2rawxliff(target);
             ul.remove();
 
-            UI.doRequest({
+            APP.doRequest({
                 data: {
                     action: 'deleteContribution',
                     source_lang: config.source_lang,
@@ -2214,7 +2194,7 @@ console.log('a');
         var seg = (typeof this.currentSegmentId == 'undefined')? this.startSegmentId : this.currentSegmentId;
         var token = seg + '-' + ts.toString();
 
-        this.doRequest({
+        APP.doRequest({
             data: {
                 action: 'getWarning',
                 id_job: config.job_id,
@@ -2258,7 +2238,7 @@ console.log('a');
         var src_content = this.getSegmentSource();  
         var trg_content = this.getSegmentTarget();        
         this.checkSegmentsArray[token] = trg_content;
-        this.doRequest({
+        APP.doRequest({
             data: {
                 action: 'getWarning',
                 id: this.currentSegmentId,
@@ -2307,7 +2287,7 @@ console.log('a');
         errors = this.collectSegmentErrors(segment);
         var chosen_suggestion = $('.editarea', segment).data('lastChosenSuggestion');
 
-        this.doRequest({
+        APP.doRequest({
             data: {
                 action: 'setTranslation',
                 id_segment: id_segment,
@@ -2902,10 +2882,10 @@ $.fn.isOnScreen = function() {
 
 $(document).ready(function() {
 
-    fitText($('.breadcrumbs'), $('#pname'), 30);
+    APP.fitText($('.breadcrumbs'), $('#pname'), 30);
     setBrowserHistoryBehavior();
     $("article").each(function() {
-        fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
+        APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
     });
     UI.render(true);
 
