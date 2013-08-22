@@ -445,8 +445,6 @@ UI = {
             e.stopPropagation();
             selectText(this);
             $(this).toggleClass('selected');
-        }).on('contextmenu', '.editor .source,.editor .editarea', function(e) {
-            e.preventDefault();
         }).on('mousedown', '.editor .source,.editor .editarea', function(e) {
             if(e.button == 2) { 
                 var selection = window.getSelection();
@@ -570,7 +568,6 @@ UI = {
             $('.editor .submenu .active').removeClass('active');
             $(this).addClass('active');
             $('.editor .sub-editor').hide();
-            $('.editor .sub-editor.concordances').show();
         }).on('click', '.sub-editor .cc-search .search-source', function(e) {
             $('.editor .sub-editor .cc-search .search-target').val('');
         }).on('click', '.sub-editor .cc-search .search-target', function(e) {
@@ -939,7 +936,7 @@ UI = {
     createFooter: function(segment) {
         if ($('.footer', segment).text() != '')
             return false;
-        var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li><li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc"><a tabindex="-1" href="#">Concordance</a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div><div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances"><div class="overflow"><div class="cc-search"><input type="text" value="Source" class="search-source" /><input type="text" value="Target" class="search-target" /></div><div class="results"></div></div></div>';
+        var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div>';
         $('.footer', segment).html(footer);
     },
     createHeader: function() {
@@ -1013,26 +1010,6 @@ UI = {
             this.startSegmentId = (hash) ? hash : config.last_opened_segment;            
         }
     },
-    getConcordance: function(txt, in_target) {
-        $('.cc-search', UI.currentSegment).addClass('loading');
-        txt = view2rawxliff(txt);
-        this.doRequest({
-            data: {
-                action: 'getContribution',
-                is_concordance: 1,
-                from_target: in_target,
-                id_segment: UI.currentSegmentId,
-                text: txt,
-                id_job: config.job_id,
-                num_results: 10,
-                id_translator: config.id_translator
-            },
-//            context: $('#' + id),
-            success: function(d) {
-                UI.renderConcordances(d, in_target);
-            }
-        });
-    },  
     getContribution: function(segment, next) {
         var n = (next) ? $('#segment-' + this.nextSegmentId) : $(segment);
         if ($(n).hasClass('loaded')) {
@@ -1569,27 +1546,7 @@ UI = {
     removeStatusMenu: function(statusMenu) {
         statusMenu.empty().hide();
     },
-    renderConcordances: function(d, in_target) {
-        segment = UI.currentSegment;
-        segment_id = UI.currentSegmentId;
-        $('.sub-editor.concordances .overflow .results', segment).empty();        
-        $.each(d.data.matches, function(index) {
-            if ((this.segment == '') || (this.translation == ''))
-                return;
-            var disabled = (this.id == '0') ? true : false;
-            cb = this['created_by'];
-            cl_suggestion = UI.getPercentuageClass(this['match']);
-            var leftTxt = (in_target)? this.translation : this.segment;
-            leftTxt = leftTxt.replace(/\#start\#/gi, "<mark>");
-            leftTxt = leftTxt.replace(/\#end\#/gi, "</mark>");
-            var rightTxt = (in_target)? this.segment : this.translation;
-            rightTxt = rightTxt.replace(/\#start\#/gi, "<mark>");
-            rightTxt = rightTxt.replace(/\#end\#/gi, "</mark>");
-            $('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
-        });
-        $('.cc-search', UI.currentSegment).removeClass('loading');
-
-    },
+            
     renderContributions: function(d, segment) {
         var isActiveSegment = $(segment).hasClass('editor');
         var editarea = $('.editarea', segment);
