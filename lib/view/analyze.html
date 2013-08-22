@@ -258,7 +258,8 @@
                         </tr>
                         <tr class="totaltable">
                             <td class="languages">
-                                <a href="#" class="filedetails part3">File details</a> 
+                                <a href="#" class="filedetails part3">File details</a>
+                                <span class="numfiles">(<span tal:define="files job/files; f php:array()" tal:content="php:count(files)">0</span>)</span>
                             </td>
 
                             <td class="stat-payable">

@@ -86,21 +86,22 @@ class getWarningController extends ajaxcontroller {
     private function __globalWarningsCall() {
         $result                  = getWarning( $this->__postInput->id_job );
         $_total                  = array_shift( $result );
-        $this->result[ 'total' ] = (int)$_total[ 'total' ];
+        //$this->result[ 'total' ] = (int)$_total[ 'total' ];
 
         $_keys = array();
         foreach ( $result as $key => &$item ) {
-            if ( $item[ 'warnings' ] == '01' || $item[ 'warnings' ] == "" ) {
+            /*if ( $item[ 'warnings' ] == '01' || $item[ 'warnings' ] == "" ) {
                 //backward compatibility
                 //TODO Remove after some days/month/year of use of QA class.
                 $item[ 'warnings' ] = '[{"outcome":3,"debug":"bad target xml"}]';
             }
-            unset( $item[ 'total' ] );
+            unset( $item[ 'total' ] );*/
             $_keys[ ] = $item[ 'id_segment' ];
         }
 
-        $result                    = @array_combine( $_keys, $result );
-        $this->result[ 'details' ] = $result;
+//        $result                    = @array_combine( $_keys, $result );
+        //$this->result[ 'details' ] = $result;
+        $this->result[ 'details' ] = $_keys;
         $this->result[ 'token' ]   = $this->__postInput->token;
     }
 

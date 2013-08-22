@@ -242,7 +242,7 @@ function getWarning( $jid ) {
                     WHERE Seg1.id_job = $jid
                     AND Seg1.warning != 0
                     GROUP BY Seg1.id_segment WITH ROLLUP
-                ) AS Seg2 ORDER BY total DESC, id_segment ASC LIMIT 11"; //+1 for RollUp
+                ) AS Seg2 ORDER BY total DESC, id_segment ASC "; //+1 for RollUp
 
     $results = $db->fetch_array( $query );
 
