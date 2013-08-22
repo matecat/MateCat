@@ -125,7 +125,18 @@ class CatUtils {
         return array($hours, $minutes, $seconds, $usec);
     }
 
-    private static function placehold_xliff_tags($segment) {
+    
+    private static function placehold_xml_entities($segment) {
+        $pattern ="|&#(.*?);|";
+        $res=preg_replace($pattern,"<x id=\"XMLENT$1\"/>",$segment);
+        return $res;
+    }
+    
+    public static function restore_xml_entities($segment) {
+        return preg_replace ("|<x id=\"XMLENT(.*?)\"/>|","&#$1",$segment);
+    }
+    
+    public static function placehold_xliff_tags($segment) {
 
         //remove not existent </x> tags
         $segment = preg_replace('|(</x>)|si', "", $segment);
@@ -223,9 +234,12 @@ class CatUtils {
 
     public static function rawxliff2view($segment) {
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
+        $segment=self::placehold_xml_entities($segment);
         $segment = self::placehold_xliff_tags($segment);
+        //if (strpos($segment, "Haematology" )===0) echo "1 - $segment\n";
         
-        $segment = html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8');
+        
+        $segment = html_entity_decode($segment, ENT_NOQUOTES |16, 'UTF-8');
         // restore < e >
         $segment = str_replace("<", "&lt", $segment);
         $segment = str_replace(">", "&gt", $segment);
@@ -233,6 +247,8 @@ class CatUtils {
 
         $segment = preg_replace('|<(.*?)>|si', "&lt;$1&gt;", $segment);
         $segment = self::restore_xliff_tags_for_wiew($segment);
+        //$segment=self::restore_xml_entities($segment);
+      //  if (strpos($segment, "Haematology" )===0) echo "2 - $segment\n";
         $segment = str_replace("&nbsp;", "++", $segment);
         return $segment;
     }
