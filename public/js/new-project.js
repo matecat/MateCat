@@ -70,7 +70,6 @@ $(document).ready(function() {
                 private_tm_user: $('#private-tm-user').val(),
                 private_tm_pass: $('#private-tm-pass').val()
             },
-            context: ob,
             beforeSend: function (){
                 $('.error-message').hide();
                 $('.uploadbtn').attr('value','Analyzing...').attr('disabled','disabled').addClass('disabled');
