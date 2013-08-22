@@ -584,7 +584,8 @@ UI = {
         }).on('keydown', '.sub-editor .cc-search .search-source', 'return', function(e) {
             if($(this).text().length > 2) UI.getConcordance($(this).text(), 0);
         }).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
-            if(e.which == 13) {
+            if(e.which == 13) { // enter
+                e.preventDefault();
                 var txt = $(this).text();
                 if(txt.length > 2) UI.getConcordance(txt, 0);
             } else if(e.which == 9) {
@@ -1762,7 +1763,7 @@ UI = {
                         '               </div>' +
                         '		<div class="text">' +
                         '			<div class="wrap">' +
-                        '				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + this.segment + '</div></div>' +
+                        '				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + this.segment + '</div>' +
                         '				<div class="target item" id="segment-' + this.sid + '-target">' +
                         '					<span class="hide toggle"> ' +
                         '						<a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>' +
@@ -1772,7 +1773,7 @@ UI = {
                         '						<div class="editarea invisible" contenteditable="false" spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : this.translation) + '</div>' +
                         '					</div> <!-- .textarea-container -->' +
                         '				</div> <!-- .target -->' +
-                        '			</div> <!-- .wrap -->' +
+                        '			</div></div> <!-- .wrap -->' +
                         '						<ul class="buttons toggle provissima" id="segment-' + this.sid + '-buttons"></ul>' +
                         '			<div class="status-container">' +
                         '				<a href=# title="' + ((!this.status) ? 'Change segment status' : this.status.toLowerCase() + ', click to change it') + '" class="status" id="segment-' + this.sid + '-changestatus"></a>' +
@@ -2376,10 +2377,11 @@ console.log('a');
             }
         }, UI.upOpts);
     },
-    showContextMenu: function(str, xpos, ypos) {
+    showContextMenu: function(str, ypos, xpos) {
+        if(($('#contextMenu').width() + xpos) > $(window).width()) xpos = $(window).width() - $('#contextMenu').width() - 30;
         $('#contextMenu').css({
-            "top" : (xpos+13)+"px",
-            "left" : ypos+"px"
+            "top" : (ypos+13)+"px",
+            "left" : xpos+"px"
         }).show();
     },
     tagCompare: function(sourceTags, targetTags, prova) {
