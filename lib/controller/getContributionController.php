@@ -119,11 +119,39 @@ class getContributionController extends ajaxcontroller {
             foreach ( $tokenizedBySpaces as $key => $token ) {
                 $token = trim( $token );
                 if ( $token != '' ) {
-                    $regularExpressions[ $key ] = '|' . addslashes( $token ) . '|ui'; /* unicode insensitive */
-                    $replacements[ $key ]       = '#start#' . $token . '#end#';
+                    $regularExp = '|(\s{1})?' . addslashes( $token ) . '(\s{1})?|ui'; /* unicode insensitive */
+                    $regularExpressions[ $regularExp ] = '$1#{' . $token . '}#$2'; /* unicode insensitive */
                 }
             }
 
+            //sort by the len of the Keys ( regular expressions ) in desc ordering
+            /*
+             *
+
+                Normal Ordering:
+                array(
+                    '|(\s{1})?a(\s{1})?|ui'         => '$1#{a}#$2',
+                    '|(\s{1})?beautiful(\s{1})?|ui' => '$1#{beautiful}#$2',
+                );
+                Obtained Result:
+                preg_replace result => Be#{a}#utiful //WRONG
+
+                With reverse ordering:
+                array(
+                    '|(\s{1})?beautiful(\s{1})?|ui' => '$1#{beautiful}#$2',
+                    '|(\s{1})?a(\s{1})?|ui'         => '$1#{a}$2#',
+                );
+                Obtained Result:
+                preg_replace result => #{be#{a}#utiful}#
+
+             */
+            if( !defined('_sortByLenDesc') ){
+                function _sortByLenDesc($a, $b) {
+                    if ( strlen($a) == strlen($b) ) return 0;
+                    return ( strlen($b) < strlen($a) ) ? -1 : 1;
+                }
+            }
+            uksort( $regularExpressions, '_sortByLenDesc' );
 
             if ( $this->switch_languages ) {
                 /*
@@ -217,12 +245,17 @@ class getContributionController extends ajaxcontroller {
                 $match['segment'] = preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $match['segment'] );
 
                 //Do something with &$match, tokenize strings and send to client
-                $match['segment'] = preg_replace( $regularExpressions, $replacements, $match['segment'], 1 );
+                $match['segment'] = preg_replace( array_keys( $regularExpressions ), array_values( $regularExpressions ), $match['segment'] );
                 $match['translation'] = strip_tags( html_entity_decode( $match['translation'] ) );
 
             }
 
+            include_once '/var/www/cattool/lib/utils/log.class.php';
+            Log::doLog($match['segment']);
+
 		}
+
+
 
         $this->result['data']['matches'] = $matches;
 

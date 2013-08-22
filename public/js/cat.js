@@ -1648,11 +1648,11 @@ UI = {
             cb = this['created_by'];
             cl_suggestion = UI.getPercentuageClass(this['match']);
             var leftTxt = (in_target)? this.translation : this.segment;
-            leftTxt = leftTxt.replace(/\#start\#/gi, "<mark>");
-            leftTxt = leftTxt.replace(/\#end\#/gi, "</mark>");
+            leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");
+            leftTxt = leftTxt.replace(/\}\#/gi, "</mark>");
             var rightTxt = (in_target)? this.segment : this.translation;
-            rightTxt = rightTxt.replace(/\#start\#/gi, "<mark>");
-            rightTxt = rightTxt.replace(/\#end\#/gi, "</mark>");
+            rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
+            rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
             $('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
         });
         $('.cc-search', this.currentSegment).removeClass('loading');
