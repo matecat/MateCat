@@ -37,6 +37,7 @@
         <!--[if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
         <script src="${basepath}public/js/lib/jquery.js"></script>
+        <script src="${basepath}public/js/common.js"></script>
         <script src="${basepath}public/js/upload.js"></script>
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
@@ -49,7 +50,7 @@
                 conversionEnabled: ${conversion_enabled},
                 analysisEnabled: ${volume_analysis_enabled},
                 maxNumberFiles: 25
-            }
+            };
         </script>
 
 
@@ -78,7 +79,7 @@
                 <input name="project-name" type="text" class="upload-input" id="project-name" autofocus="autofocus"/>
             </div>
 
-            <div class="translate-box">
+            <div class="translate-box source">
                 <h2>From</h2>
                 <select name="source-lang" id="source-lang">
                     <tal:block tal:define="language php:array()" tal:repeat="language sourceLangHistory">
@@ -95,6 +96,8 @@
                     </tal:block>
                 </select>
             </div>
+            
+            <a id="swaplang" title="Swap languages" href="#">Swap languages</a>
 
             <div class="translate-box target">
                 <h2>To</h2>

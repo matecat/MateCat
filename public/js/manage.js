@@ -234,7 +234,7 @@ UI = {
 					}
 				ar = $.extend(d,UI.filters);
 				
-				UI.doRequest({
+				APP.doRequest({
 					data: ar,
 					context: ob,
 					success: function(d){
@@ -309,7 +309,7 @@ UI = {
 			}
 		ar = $.extend(d,UI.filters);
 
-		UI.doRequest({
+		APP.doRequest({
 			data: ar,
 			context: ob,
 			success: function(d){
@@ -381,19 +381,19 @@ UI = {
         	password = (pwd)? pwd : '';
         }
 
-		UI.doRequest({
-			data: {
-				action:		"changePassword",
-				res: 		res,
-				id: 		id,
-				password: 	password
-			},
-			context: ob,
-			success: function(d){
-				res = ($(this).hasClass('row'))? 'job':'prj';
-				UI.changePassword_success(res,$(this),d,undo);
-			}
-		});
+        APP.doRequest({
+            data: {
+                action:		"changePassword",
+                res: 		res,
+                id: 		id,
+                password: 	password
+            },
+            context: ob,
+            success: function(d){
+                res = ($(this).hasClass('row'))? 'job':'prj';
+                UI.changePassword_success(res,$(this),d,undo);
+            }
+        });
     },
 
     changePassword_success: function(res,ob,d,undo) {
@@ -449,22 +449,6 @@ UI = {
 		return compressedUrl;
 	},
 
-	doRequest: function(req) {
-        var setup = {
-            url:      config.basepath + '?action=' + req.data.action + this.appendTime(),
-            data:     req.data,
-            type:     'POST',
-            dataType: 'json'
-        };
-
-        // Callbacks
-        if (typeof req.success === 'function') setup.success = req.success;
-        if (typeof req.complete === 'function') setup.complete = req.complete;
-        if (typeof req.context != 'undefined') setup.context = req.context;
-
-        $.ajax(setup);
-	},
-
     emptySearchbox: function() {
         $('#search-projectname').val('');
         $('#select-source option[selected=selected]').removeAttr('selected');
@@ -492,7 +476,7 @@ UI = {
 			}
 		ar = $.extend(d,UI.filters);
 		
-		this.doRequest({
+		APP.doRequest({
 			data: ar,
 			success: function(d){
 				data = $.parseJSON(d.data);
@@ -510,7 +494,7 @@ UI = {
 			}
 		ar = $.extend(d,UI.filters);
 		
-		this.doRequest({
+		APP.doRequest({
 			data: ar,
 			success: function(d){
 				UI.body.removeClass('loading');

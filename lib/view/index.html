@@ -13,26 +13,26 @@
         <script type="text/javascript">
             /*<![CDATA[*/
             var config = {
-            basepath: '${basepath | string:/}',
-                    id_translator: '${tid | nothing}',
-                    private_translator: '${private_translator | string:0}',
-                    id_customer: '${id_customer | string:unknown_customer}',
-                    private_customer: '${private_customer | string:0}',
-                    last_opened_segment: '${last_opened_segment}',
-                    first_job_segment: '${first_job_segment}',
-                    server_load_time: '${load_time}',
-                    job_id: '${jid}',
-                    password: '${password}',
-                    source_lang: '${source}',
-                    target_lang: '${target}',
-                    time_to_edit_enabled: ${time_to_edit_enabled},
-                    build_number: '${build_number}',
-                    test: 'test',
-                    warningPollingInterval:'${warningPollingInterval}',
-                    segmentQACheckInterval: '${segmentQACheckInterval}',
-                    firstSegmentOfFiles: ${structure php: firstSegmentOfFiles}
+                basepath: '${basepath | string:/}',
+                id_translator: '${tid | nothing}',
+                private_translator: '${private_translator | string:0}',
+                id_customer: '${id_customer | string:unknown_customer}',
+                private_customer: '${private_customer | string:0}',
+                last_opened_segment: '${last_opened_segment}',
+                first_job_segment: '${first_job_segment}',
+                server_load_time: '${load_time}',
+                job_id: '${jid}',
+                password: '${password}',
+                source_lang: '${source}',
+                target_lang: '${target}',
+                time_to_edit_enabled: ${time_to_edit_enabled},
+                build_number: '${build_number}',
+                test: 'test',
+                warningPollingInterval:'${warningPollingInterval}',
+                segmentQACheckInterval: '${segmentQACheckInterval}',
+                firstSegmentOfFiles: ${structure php: firstSegmentOfFiles}
             };
-                    var renderStart = new Date();
+            var renderStart = new Date();
             /*]]>*/
         </script>
         <script src="${basepath}public/js/loader.js?build=${build_number}"></script>
