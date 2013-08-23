@@ -858,7 +858,7 @@ function getNextUntranslatedSegment( $sid, $jid ) {
                where st.id_job=$jid and
                (st.status in ('NEW','DRAFT','REJECTED') OR st.status IS NULL) and
                s.show_in_cattool=1 and
-               s.id>$sid
+               s.id <> $sid
                limit 0,1";
 
     $db      = Database::obtain();

@@ -48,7 +48,9 @@ class setTranslationController extends ajaxcontroller {
                 $this->result['code'] = 1;
                 $this->result['data'] = "OK";
 
-                Log::doLog( "Error Hack Status | " . var_export( $_POST, true ) );
+                $msg = "Error Hack Status \n\n " . var_export( $_POST, true ) ;
+                Log::doLog( $msg );
+                Utils::sendErrMailReport( $msg );
 
                 return;
                 break;
@@ -91,13 +93,15 @@ class setTranslationController extends ajaxcontroller {
 		}
 
 		if ( is_null($this->translation) || $this->translation === '' ) {
-            Log::doLog( "Empty Translation | " . var_export( $_POST, true ) );
+            Log::doLog( "Empty Translation \n\n" . var_export( $_POST, true ) );
 			return 0; // won's save empty translation but there is no need to return an error
 		}
 
 		//ONE OR MORE ERRORS OCCURRED : EXITING
 		if ( !empty($this->result['error']) ) {
-            Log::doLog( "Error | " . var_export( array_merge( $this->result, $_POST ), true ) );
+            $msg = "Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
+            Log::doLog( $msg );
+            Utils::sendErrMailReport( $msg );
 			return -1;
 		}
 		$this->translation = CatUtils::view2rawxliff($this->translation);
@@ -120,19 +124,28 @@ class setTranslationController extends ajaxcontroller {
 
 		$res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreWarnings() );
 
-		if (!empty($res['error'])) {
+        if (!empty($res['error'])) {
 			$this->result['error'] = $res['error'];
-            Log::doLog( "Error | " . var_export( array_merge( $this->result, $_POST ), true ) );
-            //TODO Send a mail
+
+            $msg = "\n\n Error addSegmentTranslation \n\n Database Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
+            Log::doLog( $msg );
+            Utils::sendErrMailReport( $msg );
+
 			return -1;
 		}
 
 		$job_stats = CatUtils::getStatsForJob($this->id_job);
 		$file_stats = CatUtils::getStatsForFile($this->id_first_file);
 
-		$is_completed = ($job_stats['TRANSLATED_PERC'] == '100')? 1 : 0;
+		$is_completed = ($job_stats['TRANSLATED_PERC'] == '100') ? 1 : 0;
 
 		$update_completed = setJobCompleteness($this->id_job, $is_completed);
+
+        if ( $update_completed < 0 ) {
+            $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
+            Log::doLog( $msg );
+            Utils::sendErrMailReport( $msg );
+        }
 
 		$this->result['stats'] = $job_stats;
 		$this->result['file_stats'] = $file_stats;

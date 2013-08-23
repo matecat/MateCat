@@ -82,7 +82,11 @@ class setContributionController extends ajaxcontroller {
 
         if( empty($this->id_job) ){
             $this->result['error'][] = array("code" => -4, "message" => "id_job not valid");
-            Log::doLog( "Critical. Quit. | " . var_export( array_merge( $this->result, $_POST ), true ) );
+
+            $msg = "\n\n Critical. Quit. \n\n " . var_export( array_merge( $this->result, $_POST ), true );
+            Log::doLog( $msg );
+            Utils::sendErrMailReport( $msg );
+
             // critical. Quit.
             return -1;
         }
@@ -97,7 +101,9 @@ class setContributionController extends ajaxcontroller {
         }
 
 		if (!empty($this->result['error'])) {
-            Log::doLog( "Error | " . var_export( array_merge( $this->result, $_POST ), true ) );
+            $msg = "\n\n Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
+            Log::doLog( $msg );
+            Utils::sendErrMailReport( $msg );
 			return -1;
 		}
 
