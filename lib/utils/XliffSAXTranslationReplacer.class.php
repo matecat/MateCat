@@ -164,13 +164,13 @@ class XliffSAXTranslationReplacer{
 			if(!$this->inTarget){
 				//add ending tag
 				$tag="</$name>";
-			}
+			} //Log::doLog($this->segments); Log::doLog($this->currentId); die();
 			//if it's a source and there is a translation available, append the target to it
 			if('target'==$name){
-				if(isset($this->segments[$this->currentId])){
+				if(isset($this->segments[ 'matecat|' . $this->currentId ] )){
 					//get translation of current segment, by indirect indexing: id -> positional index -> segment
 					//actually there may be more that one segment to that ID if there are two mrk of the same source segment
-					$id_list=$this->segments[$this->currentId];
+					$id_list=$this->segments[ 'matecat|' . $this->currentId ];
 
 					//init translation
 					$translation='';

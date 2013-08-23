@@ -250,9 +250,6 @@ class getContributionController extends ajaxcontroller {
 
             }
 
-            include_once '/var/www/cattool/lib/utils/log.class.php';
-            Log::doLog($match['segment']);
-
 		}
 
 

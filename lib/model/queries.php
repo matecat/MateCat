@@ -236,13 +236,10 @@ function getWarning( $jid ) {
     $db  = Database::obtain();
     $jid = $db->escape( $jid );
 
-    $query = "SELECT total, id_segment, serialized_errors_list as warnings FROM (
-                    SELECT Seg1.id_segment, Seg1.serialized_errors_list , SUM(CASE WHEN Seg1.warning != 0 THEN 1 ELSE 0 END) AS total
-                    FROM segment_translations AS Seg1
-                    WHERE Seg1.id_job = $jid
-                    AND Seg1.warning != 0
-                    GROUP BY Seg1.id_segment WITH ROLLUP
-                ) AS Seg2 ORDER BY total DESC, id_segment ASC "; //+1 for RollUp
+    $query = "SELECT id_segment
+                FROM segment_translations
+                WHERE id_job = $jid
+                AND warning != 0";
 
     $results = $db->fetch_array( $query );
 
@@ -486,7 +483,7 @@ function setTranslationUpdate( $id_segment, $id_job, $status, $time_to_edit, $tr
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        log::doLog( "$errno: $err" );
 
         return $errno * -1;
     }
@@ -513,7 +510,7 @@ function setTranslationInsert( $id_segment, $id_job, $status, $time_to_edit, $tr
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
         if ( $errno != 1062 ) {
-            log::doLog( $err );
+            log::doLog( "$errno: $err" );
         }
 
         return $errno * -1;
@@ -1913,7 +1910,7 @@ function countSegmentsTranslationAnalyzed( $pid ) {
     $errno   = $err[ 'error_code' ];
 
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        log::doLog( "$errno: $err" );
 
         return $errno * -1;
     }
@@ -1931,7 +1928,7 @@ function setJobCompleteness( $jid, $is_completed ) {
     $errno   = $err[ 'error_code' ];
 
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        log::doLog( "$errno: $err" );
 
         return $errno * -1;
     }

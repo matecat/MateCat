@@ -36,6 +36,9 @@ class catController extends viewcontroller {
 
     private $firstSegmentOfFiles = '[]';
 
+    private $first_job_segment;
+    private $last_opened_segment;
+
 	private $thisUrl;
 
 	public function __construct() {

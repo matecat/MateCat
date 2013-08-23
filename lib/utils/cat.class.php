@@ -348,7 +348,7 @@ class CatUtils {
 
         $insertRes = setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index, $warning);
         if ($insertRes < 0 and $insertRes != -1062) {
-            $result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the translation for the segment $id_segment - $insertRes");
+            $result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the translation for the segment $id_segment - Error: $insertRes");
             return $result;
         }
         if ($insertRes == -1062) {
@@ -356,7 +356,7 @@ class CatUtils {
             $updateRes = setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index, $warning);
 
             if ($updateRes < 0) {
-                $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment $id_segment");
+                $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment $id_segment - Error: $updateRes");
                 return $result;
             }
         }

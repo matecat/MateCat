@@ -70,38 +70,23 @@ class getWarningController extends ajaxcontroller {
      * (
      * [0] => Array
      *     (
-     *         [total] => 1
-     *         [id_segment] =>
-     *         [serialized_errors_list] => [{"outcome":1000,"debug":"Tag mismatch"}]
+     *         [id_segment] => 2224900
      *     ),
      * [1] => Array
      *     (
-     *         [total] => 1
      *         [id_segment] => 2224903
-     *         [serialized_errors_list] => [{"outcome":1000,"debug":"Tag mismatch"}]
      *     ),
      * )
      * </pre>
      */
     private function __globalWarningsCall() {
         $result                  = getWarning( $this->__postInput->id_job );
-        $_total                  = array_shift( $result );
-        //$this->result[ 'total' ] = (int)$_total[ 'total' ];
 
-        $_keys = array();
-        foreach ( $result as $key => &$item ) {
-            /*if ( $item[ 'warnings' ] == '01' || $item[ 'warnings' ] == "" ) {
-                //backward compatibility
-                //TODO Remove after some days/month/year of use of QA class.
-                $item[ 'warnings' ] = '[{"outcome":3,"debug":"bad target xml"}]';
-            }
-            unset( $item[ 'total' ] );*/
-            $_keys[ ] = $item[ 'id_segment' ];
+        foreach ( $result as &$item ) {
+            $item = $item[ 'id_segment' ];
         }
 
-//        $result                    = @array_combine( $_keys, $result );
-        //$this->result[ 'details' ] = $result;
-        $this->result[ 'details' ] = $_keys;
+        $this->result[ 'details' ] = array_values($result);
         $this->result[ 'token' ]   = $this->__postInput->token;
     }
 
