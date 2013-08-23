@@ -427,11 +427,7 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
-<<<<<<< HEAD:lib/model/matecat.sql
--- Dump completed on 2013-07-26 13:30:28
-=======
 -- Dump completed on 2013-08-01 18:20:10
 CREATE USER 'matecat'@'localhost' IDENTIFIED BY 'matecat01';
 GRANT ALL ON matecat.* TO 'matecat'@'localhost' IDENTIFIED BY 'matecat01';
 FLUSH PRIVILEGES;
->>>>>>> 0f7bcb93469beed2af09a8951e9ca91eec8ee503:lib/model/matecat.sql
