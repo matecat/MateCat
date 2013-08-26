@@ -59,6 +59,7 @@ UI = {
         this.initStart = new Date();
         if (this.debug)
             console.log('Render time: ' + (this.initStart - renderStart));
+        this.numContributionMatchesResults = 3;
         this.numMatchesResults = 10;
         this.numSegments = $('section').length;
         this.editarea = '';
@@ -1096,7 +1097,7 @@ UI = {
                 id_segment: id_segment,
                 text: txt,
                 id_job: config.job_id,
-                num_results: this.numMatchesResults,
+                num_results: this.numContributionMatchesResults,
                 id_translator: config.id_translator
             },
             context: $('#' + id),
