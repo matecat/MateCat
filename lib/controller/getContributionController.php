@@ -4,6 +4,7 @@ include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
 include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include_once INIT::$UTILS_ROOT . "/cat.class.php";
 include_once INIT::$MODEL_ROOT . "/queries.php";
+include_once INIT::$UTILS_ROOT . "/QA.php";
 
 class getContributionController extends ajaxcontroller {
 
@@ -34,7 +35,7 @@ class getContributionController extends ajaxcontroller {
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        //NOTE: delete and use last commented row. This is only for debug purpose only,
+        //NOTE: This is only for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
         //$this->__postInput = filter_var_array( $_POST, $filterArgs );
 
@@ -143,7 +144,44 @@ class getContributionController extends ajaxcontroller {
 			$matches[] = $mt_res;
 			usort( $matches, array( "getContributionController", "__compareScore" ) );
 		}
-		$matches = array_slice($matches, 0, $this->num_results );
+		$matches = array_slice( $matches, 0, $this->num_results );
+
+        $matchVal = floatval( $matches[0]['match'] );
+        if( isset( $matches[0] ) && $matchVal >= 90 && $matchVal < 100 ){
+
+            $srcSearch = strip_tags($this->text);
+            $segmentFound = strip_tags($matches[0]['raw_segment']);
+            $srcSearch = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $srcSearch ) );
+            $segmentFound = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $segmentFound ) );
+
+            $fuzzy = levenshtein($srcSearch, $segmentFound) / log10( mb_strlen( $srcSearch . $segmentFound ) +1 );
+
+            if( $srcSearch == $segmentFound || $fuzzy < 2.5 ){
+
+                $qaRealign = new QA( $this->text, html_entity_decode( $matches[0]['raw_translation'] ) );
+                $qaRealign->tryRealignTagID();
+
+                $log_prepend = "CLIENT REALIGN IDS PROCEDURE | ";
+                if( !$qaRealign->thereAreErrors() ){
+
+                    Log::doLog( $log_prepend . " - Requested Segment: " . var_export( $this->__postInput, true) );
+                    Log::doLog( $log_prepend . "Fuzzy: " . $fuzzy .  " - Try to Execute Tag ID Realignment." );
+                    Log::doLog( $log_prepend . "TMS RAW RESULT:" );
+                    Log::doLog( $log_prepend . var_export($matches[0], true) );
+
+                    Log::doLog( $log_prepend . "Realignment Success:");
+                    $matches[0]['segment'] = CatUtils::rawxliff2view( $this->text );
+                    $matches[0]['translation'] = CatUtils::rawxliff2view( $qaRealign->getTrgNormalized() );
+                    $matches[0]['match'] = ( $fuzzy == 0 ? '100%' : '99%' );
+                    Log::doLog( $log_prepend . var_export($matches[0], true) );
+
+                } else {
+                    //Log::doLog( $log_prepend . 'Realignment Failed. Skip.' );
+                }
+
+            }
+
+        }
 
         if( !$this->concordance_search ){
             //execute these lines only in segment contribution search,
@@ -176,8 +214,6 @@ class getContributionController extends ajaxcontroller {
 
 		}
 
-
-
         $this->result['data']['matches'] = $matches;
 
 	}
@@ -196,7 +232,8 @@ class getContributionController extends ajaxcontroller {
 	}
 
     private static function __compareScore($a, $b) {
-        return floatval($a['match']) < floatval($b['match']);
+        if( floatval($a['match']) == floatval($b['match']) ){ return 0; }
+        return ( floatval($a['match']) < floatval($b['match']) ? -1 : 1);
     }
 
     /**

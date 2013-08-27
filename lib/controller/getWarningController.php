@@ -102,12 +102,13 @@ class getWarningController extends ajaxcontroller {
 
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
         $QA->performConsistencyCheck();
-        if ( $QA->thereAreWarnings() ) {
+        //if ( $QA->thereAreWarnings() ) {
+        if ( $QA->thereAreErrors() ) {
             $this->result[ 'details' ]                                           = array();
             $this->result[ 'details' ][ $this->__postInput->id ]                 = array();
             $this->result[ 'details' ][ $this->__postInput->id ][ 'id_segment' ] = $this->__postInput->id;
-            $this->result[ 'details' ][ $this->__postInput->id ][ 'warnings' ]   = $QA->getWarningsJSON();
-            $this->result[ 'total' ]                                             = count( $QA->getWarnings() );
+            $this->result[ 'details' ][ $this->__postInput->id ][ 'warnings' ]   = $QA->getErrorsJSON();
+            $this->result[ 'total' ]                                             = count( $QA->getErrors() );
         }
 
     }
