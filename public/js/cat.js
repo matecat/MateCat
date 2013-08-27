@@ -145,6 +145,17 @@ UI = {
         }).bind('keydown', 'Meta+c', function(e) {
             UI.tagSelection = false;
         }).bind('keydown', 'Backspace', function(e) {
+        }).on('change', '#hideAlertConfirmTranslation', function(e) {
+            console.log($(this).prop('checked'));
+            if ($(this).prop('checked')) {
+                console.log('checked');
+                UI.alertConfirmTranslationEnabled = false;
+                $.cookie('noAlertConfirmTranslation', true, {expires: 1000});
+            } else {
+                console.log('unchecked');
+                UI.alertConfirmTranslationEnabled = true;
+                $.removeCookie('noAlertConfirmTranslation');
+            }
         })
 
         $(window).on('scroll', function(e) {
@@ -237,21 +248,21 @@ UI = {
 
         $("form#fileDownload").submit(function() {
             if ($("#notifbox").hasClass("warningbox")) {
-                var a = confirm("There are some potential errors\n\(missing tags, numbers etc).\n\
+                var a = APP.confirm("There are some potential errors\n\(missing tags, numbers etc).\n\
  If you continue some of the content could be untranslated.\n\
- Do you want to continue anyway?");
-                if (!a) {
-                    return false;
-                }
+ Do you want to continue anyway?","confirmDownload");
+//                if (!a) {
+//                    return false;
+//                }
             }
-            if (UI.isChrome) {
-                $('.download-chrome').addClass('d-open');
-                setTimeout(function() {
-                    $('.download-chrome').removeClass('d-open');
-                }, 7000);
-
-            }
-            return true;
+//            if (UI.isChrome) {
+//                $('.download-chrome').addClass('d-open');
+//                setTimeout(function() {
+//                    $('.download-chrome').removeClass('d-open');
+//                }, 7000);
+//
+//            }
+//            return true;
         })
 
         $('html').click(function() {
@@ -648,7 +659,7 @@ UI = {
             var save = (typeof param == 'undefined')? 'noSave' : param;
             UI.closeSegment(UI.currentSegment, 1, save);
         });
-
+/*
         $('#hideAlertConfirmTranslation').bind('change', function(e) {
             if ($('#hideAlertConfirmTranslation').attr('checked')) {
                 UI.alertConfirmTranslationEnabled = false;
@@ -658,7 +669,7 @@ UI = {
                 $.removeCookie('noAlertConfirmTranslation');
             }
         })
-
+*/
         UI.toSegment = true;
         if(!this.segmentToScrollAtRender) UI.gotoSegment(this.startSegmentId);
 
@@ -703,11 +714,8 @@ UI = {
             e.preventDefault();
             
             if(!($('#segment-'+UI.currentSegmentId).length)) {
-                var m = confirm('The segment requested is outside the current view.');
-                if (m) {
-                    $('#outer').empty();
-                    UI.render(false);
-                }
+                $('#outer').empty();
+                UI.render(false);
             } else {
                 UI.scrollSegment(UI.currentSegment);
             }
@@ -863,17 +871,20 @@ UI = {
         if ((segment.hasClass('modified')) && (saveBrevior)) {
             if(operation != 'noSave') this.saveSegment(segment);
             if (UI.alertConfirmTranslationEnabled) {
-                $(".blacked").show();
-                $('#alertConfirmTranslation').dialog({
-                    close: function(event, ui) {
-                        $(".blacked").hide();
-                    },
-                    open: function(event, ui) {
-                        $(".blacked").bind('click', function() {
-                            $('#alertConfirmTranslation').dialog('close');
-                        });
-                    }
-                });
+                APP.alert('To confirm your translation, please press on Translated or use the shortcut CMD+Enter.<form><input id="hideAlertConfirmTranslation" type="checkbox"><span>Do not display again</span></form>');
+//                APP.alert('<div id="alertConfirmTranslation" class="dialog ui-dialog-content ui-widget-content" style="display: block; width: auto; min-height: 91.03125px; height: auto;" scrolltop="0" scrollleft="0"><p>To confirm your translation, please press on Translated or use the shortcut CMD+Enter.</p><form action=""><input id="hideAlertConfirmTranslation" type="checkbox" value=""><label for="hideAlertConfirmTranslation">Do not display again</label></form></div>');
+//                $(".blacked").show();
+//                $('#alertConfirmTranslation').dialog({
+//                    close: function(event, ui) {
+//                        $(".blacked").hide();
+//                    },
+//                    open: function(event, ui) {
+//                        $(".blacked").bind('click', function() {
+//                            $('#alertConfirmTranslation').dialog('close');
+//                        });
+//                    }
+//                });
+                
             }
         }
         this.currentSegment.removeClass('modified');
@@ -945,6 +956,17 @@ UI = {
 
 
 //		this.placeCaretAtEnd(document.getElementById($(editarea).attr('id')));
+    },
+    confirmDownload: function(res) {
+        if (res) {
+            if (UI.isChrome) {
+                $('.download-chrome').addClass('d-open');
+                setTimeout(function() {
+                    $('.download-chrome').removeClass('d-open');
+                }, 7000);
+
+            }
+        }
     },
     copyToNextIfSame: function(nextSegment) {
         if ($('.source', this.currentSegment).data('original') == $('.source', nextSegment).data('original')) {
@@ -1285,6 +1307,10 @@ UI = {
         editarea = (typeof seg == 'undefined')? this.editarea : $('.editarea', seg);
         return editarea.text();
     },
+    test: function(params) {
+        console.log('params: ', params);
+        console.log('giusto');
+    },
     gotoNextSegment: function() {
         var next = $('.editor').next();
         if (next.is('section')) {
@@ -1594,12 +1620,8 @@ UI = {
             $('#outer').empty();
             this.render(false);
         } else {
-            var m = confirm('The segment requested is outside the current view.');
-            if (m) {
-//	            segment = $('#segment-' + segmentId);
-                $('#outer').empty();
-                this.render(false);
-            }
+            $('#outer').empty();
+            this.render(false);
         }
     },
     pointToOpenSegment: function() {
@@ -1808,11 +1830,8 @@ UI = {
     },
     scrollSegment: function(segment) {
         if(!segment.length) {
-            var m = confirm('The segment requested is outside the current view.');
-            if (m) {
-                $('#outer').empty();
-                this.render(false, segment.selector.split('-')[1]);
-            }
+            $('#outer').empty();
+            this.render(false, segment.selector.split('-')[1]);
         };
         var spread = 23;
         var current = this.currentSegment;
@@ -1867,7 +1886,7 @@ UI = {
         // Attention: to be modified when we will be able to lock tags.
         var target = $('.editarea', segment).text();
         if ((target == '') && (byStatus)) {
-            alert('Cannot change status on an empty segment. Add a translation first!');
+            APP.alert('Cannot change status on an empty segment. Add a translation first!');
         }
         if (target == '') {
             return false;
@@ -1909,7 +1928,7 @@ UI = {
         // Attention: to be modified when we will be able to lock tags.
         var target = $('.editarea', segment).text();
         if ((target == '') && (byStatus)) {
-            alert('Cannot change status on an empty segment. Add a translation first!');
+            APP.alert('Cannot change status on an empty segment. Add a translation first!');
         }
         if (target == '') {
             return false;
@@ -2311,11 +2330,11 @@ console.log('a');
         $.each(err, function() {
             if((operation == 'setTranslation')||(operation == 'setContribution')) {
                 if(this['code'] != '-10') {
-                    alert("Error in saving the translation. Try the following: \n1) Refresh the page (Ctrl+F5 twice) \n2) Clear the cache in the browser \nIf the solutions above does not resolve the issue, please stop the translation and report the problem to alessandro@translated.net");
+                    APP.alert("Error in saving the translation. Try the following: \n1) Refresh the page (Ctrl+F5 twice) \n2) Clear the cache in the browser \nIf the solutions above does not resolve the issue, please stop the translation and report the problem to alessandro@translated.net");
                 }
             }
             if(this['code'] == '-10') {
-                alert("Job canceled or assigned to another translator");
+                APP.alert("Job canceled or assigned to another translator");
                 location.reload();
             }
 
@@ -2883,6 +2902,7 @@ $.fn.isOnScreen = function() {
 
 $(document).ready(function() {
 
+    APP.init();
     APP.fitText($('.breadcrumbs'), $('#pname'), 30);
     setBrowserHistoryBehavior();
     $("article").each(function() {

@@ -1,4 +1,6 @@
+
 $(document).ready(function(){
+    APP.init();
 
     //set 
     if (!$('#source-lang option.custom').length) {
@@ -12,8 +14,7 @@ $(document).ready(function(){
 
     $(".supported-file-formats").click(function(e){
         e.preventDefault();
-        $(".grayed").fadeIn();
-        $(".supported-formats").fadeIn('fast');
+        $(".supported-formats").show();
     });
     $(".close, .grayed").click(function(e){
         e.preventDefault();
@@ -32,7 +33,10 @@ $(document).ready(function(){
         $('#target-lang').val(src);
     });
     $("#chooseMultilang").click(function(e){
-        $('.popup-languages .close').click();
+        e.preventDefault();
+        APP.closePopup();
+
+//        $('.popup-languages .close').click();
         if ($('.popup-languages li.on').length) {
             var str = '';
             var vals = '';
@@ -56,7 +60,10 @@ $(document).ready(function(){
         }
     });
     $("#cancelMultilang").click(function(e){
-        $('.popup-languages .close').click();
+        e.preventDefault();
+        APP.closePopup();
+
+//        $('.popup-languages .close').click();
         $('.popup-languages li.on').each(function(){
             $(this).removeClass('on').find('input').removeAttr('checked');
         });
