@@ -340,7 +340,11 @@ footer nav
 
     
 /*popup*/
-
+.modal[data-type=view]
+    {
+    display: none;
+    }
+    
 #popupWrapper
     {
     display: none;
@@ -356,11 +360,13 @@ footer nav
     z-index: 99999999999999;
     opacity: 0.6;
     }
+
 .popup
     {
     overflow: hidden;
     line-height: 30px;
     border-radius: 7px;
+    color: #000 !important;
     -webkit-box-shadow: 0 1px 20px #000;
     box-shadow: 0 1px 20px #000;
     width: 500px;
@@ -372,6 +378,10 @@ footer nav
     left: 50%;
     z-index: 999999999999999999999999999;
     }
+    .popup.popup-alert:hover
+        {
+        background-color: #fff;
+        }
 .popup p
     {
     font-size: 18px;
@@ -467,12 +477,18 @@ footer nav
     font-weight: bold;
     text-decoration: none;
     padding: 8px 18px;
+    margin: 0 5px;
     border-radius: 2px;
     font-size: 18px;
     background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
     background: -moz-linear-gradient(top,  #09beec,  #119ec4);
     background: linear-gradient(top,  #09beec,  #119ec4);
 }
+.popup h1 .btn-ok,
+.popup h1 .btn-cancel 
+    {
+    padding: 1px 18px;
+    }
 .popup .btn-cancel 
     {
     color: #333;
@@ -497,3 +513,12 @@ footer nav
     -webkit-box-shadow: inset 0 0 1px 1px #888;
     box-shadow: inset 0 0 1px 1px #888;
     }
+
+.popup .btn-ok.right,
+.popup .btn-cancel.right
+    {
+    float: right;
+    }    
+    
+    
+    

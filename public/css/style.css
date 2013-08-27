@@ -859,8 +859,10 @@ section.status-new.opened .editarea
 	border:1px solid transparent;
 	-moz-border-radius: 2px;
 	border-radius: 2px;
-	word-break: break-all;
- 	hyphens: auto;
+/*
+    word-break: break-all;
+*/
+    hyphens: auto;
   	-moz-hyphens: auto;
 	transition: all  50ms ease-in;
 	-webkit-transition: all  50ms ease-in;
@@ -892,11 +894,12 @@ section.status-new.opened .editarea
 	border:1px solid #727272;
 	box-shadow: inset 0 1px 2px #ccc;
 	-webkit-box-shadow: inset 0 1px 2px #ccc;
-	word-wrap:break-word;
 	transition:none;
 	-webkit-transition: none;
-	word-break: break-all;
-	}
+/*
+    word-break: break-all;
+*/
+}
 
 .editarea:hover 
 	{
@@ -921,7 +924,9 @@ outline: none !important
 .suggestion_source,
 .translation
 	{
-	word-break: break-all;
+/*
+        word-break: break-all;
+*/
 	}
 	
 .wrap {
@@ -1391,7 +1396,7 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 .number{left:-40px;	}
 .main{width:90.3%;margin-left:3%;}
 .number{left:-52px;}
-.editarea, .source{ word-break: break-all}
+.editarea, .source{ /* word-break: break-all */}
 .projectbar ul {margin-left:5px}
 .Translated, .draft, .approved{padding:7px 6px;}
 .meter {	width:10%;}
