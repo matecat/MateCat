@@ -147,6 +147,7 @@ while (1) {
         usort($matches, "compareScore");
     }
 
+    /* New Feature
     $matchVal = floatval( $matches[ 0 ][ 'match' ] );
     if ( isset( $matches[ 0 ] ) && $matchVal >= 90 && $matchVal < 100 ) {
 
@@ -182,7 +183,8 @@ while (1) {
         }
 
     }
-
+    */
+    
     //Log::doLog( $text );
     //Log::doLog( $matches[ 0 ][ 'raw_segment' ] );
 
