@@ -31,6 +31,10 @@ $(document).ready(function(){
         var trg = $('#target-lang').val();
         $('#source-lang').val(trg);
         $('#target-lang').val(src);
+        if(!$('.template-download').length) return;
+        if (UI.conversionsAreToRestart()) {
+            APP.confirm('Source language changed. The files must be reimported.', 'confirmRestartConversions');
+        }        
     });
     $("#chooseMultilang").click(function(e){
         e.preventDefault();

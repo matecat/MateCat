@@ -33,21 +33,11 @@ $(document).ready(function() {
     });
 
     $("#source-lang").on('change', function(e){
-		console.log('source language changed');
-		var num = 0;
-		$('.template-download .name').each(function(){
-			if($(this).parent('tr').hasClass('failed')) return;
-			if($(this).text().split('.')[$(this).text().split('.').length-1] != 'sdlxliff') num++;
-		});
-		if(!$('.template-download').length) return;
-        if (num) {
-	        var m = confirm('Source language changed. The files must be reimported.');
-	        if(m) {
-	            UI.restartConversions();
-	        }            	
+        console.log('source language changed');
+        if(!$('.template-download').length) return;
+        if (UI.conversionsAreToRestart()) {
+            APP.confirm('Source language changed. The files must be reimported.', 'confirmRestartConversions');
         }
-     
-
     });
          
     $("input.uploadbtn").click(function(e) {

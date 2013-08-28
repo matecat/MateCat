@@ -820,6 +820,7 @@ section.status-new.opened .editarea
     {
     padding-top: 4px !important;
     font-size: 18px;
+    word-break: normal;
     }
 .grayed-text{color:#4c4c4c;}
 .textarea-container{height: inherit;table-layout: fixed;}
@@ -896,9 +897,8 @@ section.status-new.opened .editarea
 	-webkit-box-shadow: inset 0 1px 2px #ccc;
 	transition:none;
 	-webkit-transition: none;
-/*
-    word-break: break-all;
-*/
+    word-break: normal;
+
 }
 
 .editarea:hover 
