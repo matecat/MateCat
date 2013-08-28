@@ -413,8 +413,8 @@ class QA {
         //Log::doLog($_GET);
 //        Log::doLog($source_seg);
 //        Log::doLog($target_seg);
-        Log::hexDump($source_seg);
-        Log::hexDump($target_seg);
+//        Log::hexDump($source_seg);
+//        Log::hexDump($target_seg);
 
 
         $this->source_seg = $source_seg;
@@ -632,7 +632,7 @@ class QA {
         $trg_xml_valid = @$dom->loadXML("<root>$xmlString</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
         if ($trg_xml_valid === FALSE) {
 
-            $rrorList = libxml_get_errors();Log::doLog($rrorList);
+            $rrorList = libxml_get_errors();
             foreach( $rrorList as $error ){
                 if( $error->code == 76 /* libxml _xmlerror XML_ERR_TAG_NOT_FINISHED */ ){
                     if( preg_match( '#<x[^/>]+>#', $xmlString  ) ){
