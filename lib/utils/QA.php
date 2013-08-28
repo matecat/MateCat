@@ -257,6 +257,9 @@ class QA {
             case self::ERR_TAG_ID:
             	$this->exceptionList[] = errObject::get( array( 'outcome' => self::ERR_TAG_ID, 'debug' => $this->_errorMap[self::ERR_TAG_ID] ) );
             break;
+            case self::ERR_UNCLOSED_X_TAG:
+                $this->exceptionList[] = errObject::get( array( 'outcome' => $errCode, 'debug' => $this->_errorMap[$errCode] ) );
+            break;
 
             case self::ERR_WS_HEAD:
             case self::ERR_WS_TAIL:
@@ -266,8 +269,7 @@ class QA {
             case self::ERR_BOUNDARY_TAIL:
             case self::ERR_BOUNDARY_HEAD_TEXT:
                 $this->warningList[] = errObject::get( array( 'outcome' => self::ERR_SPACE_MISMATCH, 'debug' => $this->_errorMap[self::ERR_SPACE_MISMATCH] ) );
-                break;
-            case self::ERR_UNCLOSED_X_TAG:
+            break;
             default:
                 $this->warningList[] = errObject::get( array( 'outcome' => $errCode, 'debug' => $this->_errorMap[$errCode] ) );
             break;
@@ -323,7 +325,7 @@ class QA {
      */
     protected function checkErrorNone( array $list, $count = false ){
     	if( empty( $list ) ){
-    		return array( errObject::get( array( 'outcome' => self::ERR_NONE, 'debug' => $this->_errorMap[self::ERR_NONE] . " [ 1 ]" ) ) );
+    		return array( errObject::get( array( 'outcome' => self::ERR_NONE, 'debug' => $this->_errorMap[self::ERR_NONE] . " [ 0 ]" ) ) );
     	}
 
         if ($count) {

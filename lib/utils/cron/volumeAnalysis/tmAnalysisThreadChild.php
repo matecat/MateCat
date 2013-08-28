@@ -173,22 +173,22 @@ while (1) {
                 Log::doLog( $log_prepend . "Realignment Success:" );
                 $matches[0]['raw_translation'] = $qaRealign->getTrgNormalized();
                 $matches[0]['match'] = ( $fuzzy == 0 ? '100%' : '99%' );
-                Log::doLog( $log_prepend . var_export( $matches[ 0 ], true ) );
+                Log::doLog( $log_prepend . "Raw Translation: " . var_export( $matches[ 0 ]['raw_translation'], true ) );
 
             } else {
-                //Log::doLog( $log_prepend . 'Realignment Failed. Skip.' );
+                Log::doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $segment['sid'] );
             }
 
         }
 
     }
 
-    Log::doLog( $text );
-    Log::doLog( $matches[ 0 ][ 'raw_segment' ] );
+    //Log::doLog( $text );
+    //Log::doLog( $matches[ 0 ][ 'raw_segment' ] );
 
-    Log::doLog( $matches[0]['raw_translation'] );
+    //Log::doLog( $matches[0]['raw_translation'] );
     $suggestion = CatUtils::view2rawxliff($matches[0]['raw_translation']);
-    Log::doLog( $suggestion );
+    //Log::doLog( $suggestion );
 
     $suggestion_match = $matches[0]['match'];
     $suggestion_json = json_encode($matches);

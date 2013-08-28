@@ -236,7 +236,7 @@ function getWarning( $jid ) {
     $db  = Database::obtain();
     $jid = $db->escape( $jid );
 
-    $query = "SELECT id_segment
+    $query = "SELECT id_segment, serialized_errors_list
                 FROM segment_translations
                 WHERE id_job = $jid
                 AND warning != 0";
