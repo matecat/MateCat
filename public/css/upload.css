@@ -834,17 +834,18 @@ header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margi
 		}		
 
 .listlang label
-	{
-	float: left;
+    {
+    float: right;
     text-align: left;
-	cursor: pointer;
-	width: 85%;
-    padding-left: 3%;
-	}
+    cursor: pointer;
+    width: 88%;
+    padding-left: 0%;
+    }
 
 .listlang input
 	{
 	float: left;
+    margin-top: 8px;
 	}
 .popup .header input
 	{

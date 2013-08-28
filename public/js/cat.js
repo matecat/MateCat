@@ -601,11 +601,7 @@ UI = {
             $(this).addClass('active');
             $('.editor .sub-editor').hide();
             $('.editor .sub-editor.concordances').show();
-        }).on('focus', '.sub-editor .cc-search .search-source', function(e) {
-//            $('.editor .sub-editor .cc-search .search-target').val('');
-        }).on('focus', '.sub-editor .cc-search .search-target', function(e) {
-//            $('.editor .sub-editor .cc-search .search-source').val('');
-        }).on('keydown', '.sub-editor .cc-search .search-source', 'return', function(e) {
+        }).on('keydown', '.sub-editor .cc-search .input', 'return', function(e) {
             if($(this).text().length > 2) UI.getConcordance($(this).text(), 0);
         }).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
             if(e.which == 13) { // enter
@@ -628,6 +624,7 @@ UI = {
             };
         }).on('keydown', '.sub-editor .cc-search .search-target', function(e) {
             if(e.which == 13) {
+                e.preventDefault();
                 var txt = $(this).text();
                 if(txt.length > 2) UI.getConcordance(txt, 1);
             } else {
