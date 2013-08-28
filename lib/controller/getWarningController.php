@@ -82,8 +82,31 @@ class getWarningController extends ajaxcontroller {
     private function __globalWarningsCall() {
         $result                  = getWarning( $this->__postInput->id_job );
 
-        foreach ( $result as &$item ) {
-            $item = $item[ 'id_segment' ];
+        foreach ( $result as $position => &$item ) {
+
+            //PATCH - REMOVE WHITESPACES FROM GLOBAL WARNING ( Backward compatibility )
+            $serialized_err = json_decode( $item['serialized_errors_list'] );
+
+            $foundTagMismatch = false;
+            foreach( $serialized_err as $k => $error ){
+
+                switch ( $error->outcome ) {
+                    case QA::ERR_TAG_MISMATCH:
+                    case QA::ERR_TAG_ID:
+                    case QA::ERR_UNCLOSED_X_TAG:
+                        $foundTagMismatch = true;
+                        break;
+                }
+
+            }
+
+            if( !$foundTagMismatch ){
+                unset( $result[$position] );
+            } else {
+                $item = $item[ 'id_segment' ];
+            }
+            //PATCH - REMOVE WHITESPACES FROM GLOBAL WARNING ( Backward compatibility )
+
         }
 
         $this->result[ 'details' ] = array_values($result);
@@ -103,11 +126,15 @@ class getWarningController extends ajaxcontroller {
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
         $QA->performConsistencyCheck();
         if ( $QA->thereAreWarnings() ) {
+//        if ( $QA->thereAreErrors() ) {
             $this->result[ 'details' ]                                           = array();
             $this->result[ 'details' ][ $this->__postInput->id ]                 = array();
             $this->result[ 'details' ][ $this->__postInput->id ][ 'id_segment' ] = $this->__postInput->id;
+//            $this->result[ 'details' ][ $this->__postInput->id ][ 'warnings' ]   = $QA->getErrorsJSON();
+//            $this->result[ 'total' ]                                             = count( $QA->getErrors() );
             $this->result[ 'details' ][ $this->__postInput->id ][ 'warnings' ]   = $QA->getWarningsJSON();
             $this->result[ 'total' ]                                             = count( $QA->getWarnings() );
+
         }
 
     }
