@@ -282,13 +282,17 @@ UI = {
 
             }
         }).on('click', '#contextMenu #searchConcordance', function(e) {
-            UI.openConcordance();
+            if($('#contextMenu').attr('data-sid') == UI.currentSegmentId) {
+                UI.openConcordance();
+            } else {
+                $('#segment-' + $('#contextMenu').attr('data-sid') + ' .editarea').trigger('click', ['clicking', 'openConcordance']);
+            }
         });
 
         $("#outer").on('click', 'a.percentuage', function(e) {
             e.preventDefault();
             e.stopPropagation();
-        }).on('click', '.editarea', function(e, operation) {
+        }).on('click', '.editarea', function(e, operation, action) {
             if (typeof operation == 'undefined')
                 operation = 'clicking';
             this.onclickEditarea = new Date();
@@ -316,6 +320,7 @@ UI = {
                 UI.lastOperation = operation;
 
                 UI.openSegment(this, operation);
+                if(action == 'openConcordance') UI.openConcordance();
 
                 if (operation != 'moving')
                     UI.scrollSegment($('#segment-' + $(this).data('sid')));
@@ -331,7 +336,6 @@ UI = {
                     UI.currentSelectedText = str;
                     UI.currentSearchInTarget = ($(this).hasClass('source'))? 0 : 1;
                     UI.openConcordance();
-//                        UI.showContextMenu(str, e.pageY, e.pageX);
                 };
             }; 
         }).on('keydown', '.editor .editarea', function(e) {
@@ -470,9 +474,9 @@ UI = {
             e.stopPropagation();
             selectText(this);
             $(this).toggleClass('selected');
-        }).on('contextmenu', '.editor .source,.editor .editarea', function(e) {
+        }).on('contextmenu', '.source,.editarea', function(e) {
             e.preventDefault();
-        }).on('mousedown', '.editor .source,.editor .editarea', function(e) {
+        }).on('mousedown', '.source, .editarea', function(e) {
             if(e.button == 2) {
                 var selection = window.getSelection();
                     if(selection.type == 'Range') { // something is selected
@@ -480,6 +484,7 @@ UI = {
                         if(str.length) { // the trimmed string is not empty
                             UI.currentSelectedText = str;
                             UI.currentSearchInTarget = ($(this).hasClass('source'))? 0 : 1;
+                            $('#contextMenu').attr('data-sid', $(this).parents('section').attr('id').split('-')[1]);
                             UI.showContextMenu(str, e.pageY, e.pageX);
                         };
                     }; 
@@ -1475,6 +1480,7 @@ UI = {
         $('#contextMenu').hide();
         $('.editor .submenu .tab-switcher-cc a').click();
         $('.editor .cc-search .input').text('');
+        $('.editor .concordances .results').empty();
         var searchField = (this.currentSearchInTarget)? $('.editor .cc-search .search-target') : $('.editor .cc-search .search-source');
         $(searchField).text(this.currentSelectedText);
         this.markTagsInSearch();
