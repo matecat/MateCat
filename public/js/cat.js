@@ -23,6 +23,8 @@ UI = {
         this.blockOpenSegment = false;
         this.dmp = new diff_match_patch();
         this.beforeDropEditareaHTML = '';
+        this.beforeDropSearchSourceHTML = '';
+        this.currentConcordanceField = null;
         this.droppingInEditarea = false;
         this.draggingInsideEditarea = false;
         this.undoStack = [];
@@ -446,7 +448,7 @@ UI = {
                 UI.tagToDelete = null;
             }
             if (UI.droppingInEditarea) {
-                UI.cleanDroppedTag();
+                UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
             }
             setTimeout(function() {
                 UI.lockTags();
@@ -505,6 +507,12 @@ UI = {
             UI.saveInUndoStack('drop');
             setTimeout(function() {
                 UI.saveInUndoStack('drop');
+            }, 100);
+        }).on('drop paste', '.editor .cc-search .input', function(e) {
+            UI.beforeDropSearchSourceHTML = UI.editarea.html();
+            UI.currentConcordanceField = $(this);
+            setTimeout(function() {
+                UI.cleanDroppedTag(UI.currentConcordanceField, UI.beforeDropSearchSourceHTML);
             }, 100);
         }).on('click', '.editor .editarea .locked.selected', function(e) {
         }).on('click', '.editor .editarea, .editor .source', function(e) {
@@ -593,11 +601,7 @@ UI = {
             $(this).addClass('active');
             $('.editor .sub-editor').hide();
             $('.editor .sub-editor.concordances').show();
-        }).on('focus', '.sub-editor .cc-search .search-source', function(e) {
-//            $('.editor .sub-editor .cc-search .search-target').val('');
-        }).on('focus', '.sub-editor .cc-search .search-target', function(e) {
-//            $('.editor .sub-editor .cc-search .search-source').val('');
-        }).on('keydown', '.sub-editor .cc-search .search-source', 'return', function(e) {
+        }).on('keydown', '.sub-editor .cc-search .input', 'return', function(e) {
             if($(this).text().length > 2) UI.getConcordance($(this).text(), 0);
         }).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
             if(e.which == 13) { // enter
@@ -620,6 +624,7 @@ UI = {
             };
         }).on('keydown', '.sub-editor .cc-search .search-target', function(e) {
             if(e.which == 13) {
+                e.preventDefault();
                 var txt = $(this).text();
                 if(txt.length > 2) UI.getConcordance(txt, 1);
             } else {
@@ -811,24 +816,18 @@ UI = {
 //		this.placeCaretAtEnd(document.getElementById($(this.editarea).attr('id')));
 
     },
-    cleanDroppedTag: function() {
-        ed = this.editarea;
-        this.droppingInEditarea = false;
+    cleanDroppedTag: function(area,beforeDropHTML) {
 
-        var diff = this.dmp.diff_main(this.beforeDropEditareaHTML, $(ed).html());
+        if(area == this.editarea) this.droppingInEditarea = false;
+
+        var diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
         var draggedText = '';
         $(diff).each(function() {
             if (this[0] == 1) {
                 draggedText += this[1];
-
             }
-            ;
         })
-        /*
-         console.log('dragged text: "' + draggedText + '"');
-         var prova = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2");
-         console.log('sanitized dragged text: "' + prova + '"');
-         */
+
         draggedText = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2");
         var div = document.createElement("div");
         div.innerHTML = draggedText;
@@ -837,13 +836,12 @@ UI = {
         $('.rangySelectionBoundary').text(this.cursorPlaceholder);
 
         closeTag = '</' + $(div).text().trim().replace(/\<(.*?)\s.*?\>/gi, "$1") + '>';
-
         newTag = $(div).text();
 
-        var newText = this.editarea.text().replace(draggedText, newTag);
-        this.editarea.text(newText);
+        var newText = area.text().replace(draggedText, newTag);
+        area.text(newText);
 
-        this.editarea.html(this.editarea.html().replace(this.cursorPlaceholder, phcode))
+        area.html(area.html().replace(this.cursorPlaceholder, phcode))
         restoreSelection();
     },
     closeSegment: function(segment, byButton, operation) {
