@@ -89,6 +89,7 @@ UI = {
         }, 2000);
         this.checkSegmentsArray = {};
         this.markTags();
+        this.setContextMenu();
         $('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');
 
         // SET EVENTS
@@ -2337,6 +2338,12 @@ console.log('a');
             }
 
         });
+    },
+    setContextMenu: function() {
+        var alt = (this.isMac)? '&#x2325;' : 'Alt ';
+        var cmd = (this.isMac)? '&#8984;' : 'Ctrl ';
+        $('#contextMenu .shortcut .alt').html(alt);
+        $('#contextMenu .shortcut .cmd').html(cmd);
     },
     setTranslation_success: function(d, segment, status) {
         if(d.error.length) 
