@@ -221,9 +221,10 @@ function getSegment( $id_segment ) {
 function getFirstSegmentOfFilesInJob( $jid ) {
     $db      = Database::obtain();
     $jid     = intval( $jid );
-    $query   = "select id_file, min( segments.id ) as first_segment
+    $query   = "select id_file, min( segments.id ) as first_segment, filename as file_name
                 from files_job
                 join segments using( id_file )
+                join files on files.id = id_file
                 where files_job.id_job = $jid
                 and segments.show_in_cattool = 1
                 group by id_file";
