@@ -90,6 +90,7 @@ UI = {
         this.checkSegmentsArray = {};
         this.markTags();
         this.setContextMenu();
+        this.createJobMenu();
         $('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');
 
         // SET EVENTS
@@ -875,20 +876,7 @@ UI = {
         if ((segment.hasClass('modified')) && (saveBrevior)) {
             if(operation != 'noSave') this.saveSegment(segment);
             if (UI.alertConfirmTranslationEnabled) {
-                APP.alert('To confirm your translation, please press on Translated or use the shortcut CMD+Enter.<form><input id="hideAlertConfirmTranslation" type="checkbox"><span>Do not display again</span></form>');
-//                APP.alert('<div id="alertConfirmTranslation" class="dialog ui-dialog-content ui-widget-content" style="display: block; width: auto; min-height: 91.03125px; height: auto;" scrolltop="0" scrollleft="0"><p>To confirm your translation, please press on Translated or use the shortcut CMD+Enter.</p><form action=""><input id="hideAlertConfirmTranslation" type="checkbox" value=""><label for="hideAlertConfirmTranslation">Do not display again</label></form></div>');
-//                $(".blacked").show();
-//                $('#alertConfirmTranslation').dialog({
-//                    close: function(event, ui) {
-//                        $(".blacked").hide();
-//                    },
-//                    open: function(event, ui) {
-//                        $(".blacked").bind('click', function() {
-//                            $('#alertConfirmTranslation').dialog('close');
-//                        });
-//                    }
-//                });
-                
+                APP.alert('To confirm your translation, please press on Translated or use the shortcut CMD+Enter.<form><input id="hideAlertConfirmTranslation" type="checkbox"><span>Do not display again</span></form>');                
             }
         }
         this.currentSegment.removeClass('modified');
@@ -1000,6 +988,18 @@ UI = {
         }
         var header = '<h2 title="" class="percentuage"><span></span></h2><a href="#" id="segment-' + this.currentSegmentId + '-close" class="close" title="Close this segment"></a>';
         $('#' + this.currentSegment.attr('id') + '-header').html(header);
+    },
+    createJobMenu: function() {
+        var menu = '<nav id="jobMenu" class="topMenu">' +
+                    '    <ul>';
+        $.each(config.firstSegmentOfFiles, function(index) {
+            menu += '<li><a href="#' + this.first_segment + '" title="' + (this.name_file||'file_name ' + (index+1)) + '">' + (this.name_file||'file_name ' + (index+1)) + '</a></li>';
+        });
+
+ 
+        menu +=    '    </ul>' +
+                    '</nav>';
+        console.log(menu);
     },
     createStatusMenu: function(statusMenu) {
         $("ul.statusmenu").empty().hide();
@@ -1571,33 +1571,33 @@ UI = {
         $("body, .editarea").bind('keydown.alt1', keys + '+1', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            if (e.which != 97) {
+//            if (e.which != 97) {
                 UI.chooseSuggestion('1');
-            }
+//            }
         }).bind('keydown.alt2', keys + '+2', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            if (e.which != 98) {
+//            if (e.which != 98) {
                 UI.chooseSuggestion('2');
-            }
+//            }
         }).bind('keydown.alt3', keys + '+3', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            if (e.which != 99) {
+//            if (e.which != 99) {
                 UI.chooseSuggestion('3');
-            }
+//            }
         }).bind('keydown.alt4', keys + '+4', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            if (e.which != 100) {
+//            if (e.which != 100) {
                 UI.chooseSuggestion('4');
-            }
+//            }
         }).bind('keydown.alt5', keys + '+5', function(e) {
             e.preventDefault();
             e.stopPropagation();
-            if (e.which != 101) {
+//            if (e.which != 101) {
                 UI.chooseSuggestion('5');
-            }
+//            }
         })
     },
     reloadToSegment: function(segmentId) {
