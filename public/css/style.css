@@ -820,7 +820,8 @@ section.status-new.opened .editarea
     {
     padding-top: 4px !important;
     font-size: 18px;
-    word-break: normal;
+    /*word-wrap: break-word;*/
+    /*word-break: normal;*/
     }
 .grayed-text{color:#4c4c4c;}
 .textarea-container{height: inherit;table-layout: fixed;}
@@ -839,6 +840,8 @@ section.status-new.opened .editarea
     list-style: none;
     height: 95%;
     outline: none;
+    word-wrap: break-word;
+    word-break: break-word;
     }
 .text a{text-decoration:none;color:#000 }
 
@@ -897,7 +900,8 @@ section.status-new.opened .editarea
 	-webkit-box-shadow: inset 0 1px 2px #ccc;
 	transition:none;
 	-webkit-transition: none;
-    word-break: normal;
+
+    /*word-break: normal;*/
 
 }
 
@@ -919,14 +923,17 @@ body.rtl-target .editor .editarea span
 textarea, input, .editarea, .search-editarea, select  {
 outline: none !important
 }
-.source{position:relative;z-index:999; word-break: break-all;
-}
+.source
+    {
+    position:relative;
+    z-index:999; 
+    /*word-break: break-all;*/
+    }
 .suggestion_source,
 .translation
 	{
-/*
-        word-break: break-all;
-*/
+    word-wrap: break-word;
+    word-break: break-word;
 	}
 	
 .wrap {
