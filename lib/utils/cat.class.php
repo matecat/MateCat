@@ -121,7 +121,10 @@ class CatUtils {
         // output : <g> bang &amp; olufsen are > 555 </g> <x/>
         // caso controverso <g id="4" x="&lt; dfsd &gt;"> 
         $segment = self::placehold_xliff_tags($segment);
-        $segment = htmlspecialchars($segment, ENT_NOQUOTES, 'UTF-8', false);
+        $segment = htmlspecialchars(
+            html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8'),
+            ENT_NOQUOTES, 'UTF-8', false
+        );
         $segment = self::restore_xliff_tags($segment);
         return $segment;
     }
@@ -142,6 +145,14 @@ class CatUtils {
         return $segment;
     }
 
+    /**
+     * No more used
+     * @deprecated
+     *
+     * @param $segment
+     *
+     * @return mixed
+     */
     public static function rawxliff2rawview($segment) {
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
         $segment = self::placehold_xliff_tags($segment);
@@ -453,7 +464,6 @@ class CatUtils {
      * </pre>
      *  
      * @param mixed $job_stats
-     * @param bool $estimate_performance
      * @return mixed $job_stats
      */
     protected static function _getStatsForJob( $job_stats ) {
@@ -506,7 +516,8 @@ class CatUtils {
      * 
      * @param int $jid
      * 
-     * @return $job_stats
+     * @return mixed $job_stats
+     *
      * <pre>
      *      $job_stats = array(
      *          'id'                           => (int),

@@ -251,7 +251,7 @@ class QA {
     protected function _addError($errCode) {
 
         //Real error Code log
-        Log::doLog( $errCode . " :: " . $this->_errorMap[$errCode]);
+        //Log::doLog( $errCode . " :: " . $this->_errorMap[$errCode]);
 
         switch( $errCode ) {
             case self::ERR_COUNT:
