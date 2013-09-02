@@ -694,13 +694,7 @@ function getStatsForMultipleJobs( $_jids ) {
     return $jobs_stats;
 }
 
-function getStatsForJob( $id_job ) {
-
-
-    // Old Raw-wordcount
-    /*
-       $query = "select SUM(raw_word_count) as TOTAL, SUM(IF(status IS NULL OR status='DRAFT' OR status='NEW',raw_word_count,0)) as DRAFT, SUM(IF(status='REJECTED',raw_word_count,0)) as REJECTED, SUM(IF(status='TRANSLATED',raw_word_count,0)) as TRANSLATED, SUM(IF(status='APPROVED',raw_word_count,0)) as APPROVED from jobs j INNER JOIN files_job fj on j.id=fj.id_job INNER join segments s on fj.id_file=s.id_file LEFT join segment_translations st on s.id=st.id_segment WHERE j.id=" . $id_job;
-     */
+function getStatsForJob( $id_job, $id_file = null ) {
 
     $query = "
 		select 
@@ -738,6 +732,10 @@ function getStatsForJob( $id_job ) {
 
 
 			WHERE j.id=$id_job";
+
+    if( !empty($id_file) ){
+        $query .= " and fj.id_file = " . intval($id_file);
+    }
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
