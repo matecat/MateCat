@@ -146,7 +146,6 @@ class getContributionController extends ajaxcontroller {
 		}
 		$matches = array_slice( $matches, 0, $this->num_results );
 
-        /*
         $matchVal = floatval( $matches[0]['match'] );
         if( isset( $matches[0] ) && $matchVal >= 90 && $matchVal < 100 ){
 
@@ -184,7 +183,6 @@ class getContributionController extends ajaxcontroller {
             }
 
         }
-        */
 
         if( !$this->concordance_search ){
             //execute these lines only in segment contribution search,
