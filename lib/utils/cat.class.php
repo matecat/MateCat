@@ -532,9 +532,9 @@ class CatUtils {
      * </pre>
      * 
      */
-    public static function getStatsForJob( $jid ) {
+    public static function getStatsForJob( $jid, $fid = null ) {
         
-        $job_stats = getStatsForJob($jid);
+        $job_stats = getStatsForJob($jid, $fid);
         $job_stats = $job_stats[0];
 
         $job_stats = self::_getStatsForJob($job_stats, true); //true set estimation check if present
