@@ -224,9 +224,15 @@ class getContributionController extends ajaxcontroller {
 
     private function setSuggestionReport($matches) {
         if (count($matches) > 0) {
+            log::dolog($matches);
+            foreach ($matches as $k => $m){
+                $matches[$k]['raw_translation']=  CatUtils::view2rawxliff($matches[$k]['raw_translation']);
+            }
+          
             $suggestions_json_array = json_encode($matches);
+            //
             $match = $matches[0];
-            $suggestion = $match['translation'];
+            $suggestion = $match['raw_translation'];
             $suggestion_match = $match['match'];
             $suggestion_source = $match['created_by'];
             $ret = CatUtils::addTranslationSuggestion($this->id_segment, $this->id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source);

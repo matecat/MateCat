@@ -976,7 +976,8 @@ class QA {
     public function getTrgNormalized(){
 
         if( !$this->thereAreErrors() ){            
-            preg_match('/<root>(.*)<\/root>/u', $this->normalizedTrgDOM->saveXML(), $matches );
+            //IMPORTANT NOTE : SEE http://www.php.net/manual/en/domdocument.savexml.php#88525
+            preg_match('/<root>(.*)<\/root>/u', $this->normalizedTrgDOM->saveXML($this->normalizedTrgDOM->documentElement), $matches );
             return stripslashes( $matches[1] );
         }
         
