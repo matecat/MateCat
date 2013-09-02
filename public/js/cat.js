@@ -990,16 +990,23 @@ UI = {
         $('#' + this.currentSegment.attr('id') + '-header').html(header);
     },
     createJobMenu: function() {
-        var menu = '<nav id="jobMenu" class="topMenu">' +
+        var menu = '<nav id="jobMenu" class="topMenu" style="width: ' + $('.breadcrumbs').width() + 'px;">' +
                     '    <ul>';
         $.each(config.firstSegmentOfFiles, function(index) {
-            menu += '<li><a href="#' + this.first_segment + '" title="' + (this.name_file||'file_name ' + (index+1)) + '">' + (this.name_file||'file_name ' + (index+1)) + '</a></li>';
+            menu += '<li><a href="#' + this.first_segment + '" title="' + this.file_name + '">' + this.file_name + '</a></li>';
         });
 
- 
         menu +=    '    </ul>' +
                     '</nav>';
-        console.log(menu);
+        this.body.append(menu);
+        console.log($('#jobMenu').width());
+        console.log($($('#jobMenu li a')[0]).width());
+        console.log($($('#jobMenu li a')[0]));
+//        APP.fitText($('#jobMenu'), $($('#jobMenu li a')[0]), 20);
+//        $('#jobMenu li').each(function() {
+//            APP.fitText($('#jobMenu ul'), $(this), 20);
+//        });
+        
     },
     createStatusMenu: function(statusMenu) {
         $("ul.statusmenu").empty().hide();
