@@ -14,28 +14,26 @@ class CatUtils {
     //following functions are useful for manage the consistency of non braking spaces
     // chars coming, expecially,from MS Word
     // ref nbsp code https://en.wikipedia.org/wiki/Non-breaking_space
-    public static function placeholdnbsp($s) {        
+    public static function placeholdnbsp($s) {
         $s = preg_replace("/\x{a0}/u", NBSPPLACEHOLDER, $s);
         return $s;
     }
-    
-     
 
     public static function restorenbsp($s) {
-        $pattern="#".NBSPPLACEHOLDER."#";
+        $pattern = "#" . NBSPPLACEHOLDER . "#";
         $s = preg_replace($pattern, Utils::unicode2chr(0Xa0), $s);
         return $s;
     }
-    
+
     // ----------------------------------------------------------------
-    
-    public static function placeholdamp($s) {        
+
+    public static function placeholdamp($s) {
         $s = preg_replace("/\&/", AMPPLACEHOLDER, $s);
         return $s;
     }
-    
-      public static function restoreamp($s) {
-        $pattern="#".AMPPLACEHOLDER."#";
+
+    public static function restoreamp($s) {
+        $pattern = "#" . AMPPLACEHOLDER . "#";
         $s = preg_replace($pattern, Utils::unicode2chr("&"), $s);
         return $s;
     }
@@ -189,7 +187,7 @@ class CatUtils {
     public static function rawxliff2view($segment) {
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
         $segment = self::placehold_xliff_tags($segment);
-        
+
         $segment = html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8');
         // restore < e >
         $segment = str_replace("<", "&lt", $segment);
@@ -289,20 +287,28 @@ class CatUtils {
             $seg['pe_effort_perc'] .= "%";
 
 
+
+            $sug_for_diff = self::placehold_xliff_tags($seg['sug']);
+            $tra_for_diff = self::placehold_xliff_tags($seg['translation']);
+            $ter = MyMemory::diff_tercpp($sug_for_diff, $tra_for_diff);
+            $seg['ter'] = $ter[1] * 100;
+            $stat_ter[] = $seg['ter'] * $seg['rwc'];
+            $seg['ter'] = round($ter[1] * 100) . "%";
+            $diff_ter = $ter[0];
+
             if ($seg['sug'] <> $seg['translation']) {
-                $sug_for_diff=self::placehold_xliff_tags($seg['sug']);
-                $tra_for_diff=self::placehold_xliff_tags($seg['translation']);
-                $seg['diff'] = MyMemory::diff_tercpp($sug_for_diff, $tra_for_diff);
-                if (!$seg['diff']) {
-                    // TER NOT WORKING : fallback to old diff viewer
-                    $seg['diff'] = MyMemory::diff_html($sug_for_diff, $tra_for_diff);
-                }
+                
+                $diff_PE = MyMemory::diff_html($sug_for_diff, $tra_for_diff);
+
+                // we will use diff_PE until ter_diff will not work properly
+                $seg['diff'] = $diff_PE;
+                //$seg['diff'] = $diff_ter;
             } else {
                 $seg['diff'] = '';
             }
-            $seg['diff_view']= self::restore_xliff_tags_for_wiew($seg['diff']);
+            $seg['diff'] = self::restore_xliff_tags_for_wiew($seg['diff']);
+            //     echo $seg['diff']; exit;
             //$seg['diff_view']= CatUtils::rawxliff2rawview($seg['diff']);
-
             // BUG: While suggestions source is not correctly set
             if (($seg['sm'] == "85%") OR ($seg['sm'] == "86%")) {
                 $seg['ss'] = 'Machine Translation';
@@ -311,10 +317,9 @@ class CatUtils {
                 $seg['ss'] = 'Translation Memory';
             }
 
-            $seg['sug_view'] = trim( CatUtils::rawxliff2view($seg['sug']) );
-            $seg['source'] = trim( CatUtils::rawxliff2view( $seg['source'] ) );
-            $seg['translation'] = trim( CatUtils::rawxliff2view( $seg['translation'] ) );
-
+            $seg['sug_view'] = trim(CatUtils::rawxliff2view($seg['sug']));
+            $seg['source'] = trim(CatUtils::rawxliff2view($seg['source']));
+            $seg['translation'] = trim(CatUtils::rawxliff2view($seg['translation']));
         }
 
         $stats['edited-word-count'] = array_sum($stat_rwc);
@@ -324,7 +329,12 @@ class CatUtils {
             $stats['too-slow-words'] = round(array_sum($stat_too_slow) / $stats['edited-word-count'], 2) * 100;
             $stats['too-fast-words'] = round(array_sum($stat_too_fast) / $stats['edited-word-count'], 2) * 100;
             $stats['avg-pee'] = round(array_sum($stat_pee) / array_sum($stat_rwc)) . "%";
+            $stats['avg-ter'] = round(array_sum($stat_ter) / array_sum($stat_rwc)) . "%";
         }
+//        echo array_sum($stat_ter);
+//        echo "@@@";
+//        echo array_sum($stat_rwc);
+//        exit;
 
         $stats['mt-words'] = round(array_sum($stat_mt) / $stats['edited-word-count'], 2) * 100;
         $stats['tm-words'] = 100 - $stats['mt-words'];
@@ -363,7 +373,7 @@ class CatUtils {
         return 0;
     }
 
-    public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "", $match_type = "", $eq_words = 0, $standard_words = 0, $translation = "", $tm_status_analysis = "UNDONE", $warning = 0, $err_json = '' ) {
+    public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "", $match_type = "", $eq_words = 0, $standard_words = 0, $translation = "", $tm_status_analysis = "UNDONE", $warning = 0, $err_json = '') {
         if (!empty($suggestion_source)) {
             if (strpos($suggestion_source, "MT") === false) {
                 $suggestion_source = 'TM';
@@ -421,7 +431,7 @@ class CatUtils {
      * </pre>
      * 
      */
-    public static function getStatsForMultipleJobs( array $jids, $estimate_performance = false) {
+    public static function getStatsForMultipleJobs(array $jids, $estimate_performance = false) {
 
         //get stats for all jids
         $jobs_stats = getStatsForMultipleJobs($jids);
@@ -433,22 +443,21 @@ class CatUtils {
             if ($job_stat['TOTAL'] == 0) {
                 $job_stat['TOTAL'] = 1;
             }
-            
+
             $job_stat = self::_getStatsForJob($job_stat, $estimate_performance);
-            if ($estimate_performance){
+            if ($estimate_performance) {
                 $job_stat = self::_performanceEstimationTime($job_stat);
             }
-            
+
             $jid = $job_stat['id'];
             unset($job_stat['id']);
             $res_job_stats[$jid] = $job_stat;
             unset($jid);
         }
-        
+
         return $res_job_stats;
-        
     }
-    
+
     /**
      * 
      * Find significant digits from float num.
@@ -458,23 +467,23 @@ class CatUtils {
      * @param float $floatNum
      * @return int
      */
-    protected static function _getSignificantDigits( $floatNum ){
-        if( $floatNum == 0 ){
+    protected static function _getSignificantDigits($floatNum) {
+        if ($floatNum == 0) {
             return 0;
         }
-        $decimalNumbers = ceil( log10( $floatNum ) );
-        $decimalNumbers = ( $decimalNumbers >= 0 ? 0 : abs($decimalNumbers) +1 );
+        $decimalNumbers = ceil(log10($floatNum));
+        $decimalNumbers = ( $decimalNumbers >= 0 ? 0 : abs($decimalNumbers) + 1 );
         return ( $decimalNumbers < 2 ? $decimalNumbers : 2 ); //force max to 2 decimal number
     }
-    
+
     /**
      * Make an estimation on performance
      * 
      * @param mixed $job_stats
      * @return mixed
      */
-    protected static function _performanceEstimationTime( array $job_stats ){
-        
+    protected static function _performanceEstimationTime(array $job_stats) {
+
         $estimation_temp = getLastSegmentIDs($job_stats['id']);
         $estimation_seg_ids = $estimation_temp[0]['estimation_seg_ids'];
 
@@ -491,11 +500,10 @@ class CatUtils {
                 $job_stats['ESTIMATED_COMPLETION'] = date("G\h i\m", ($job_stats['DRAFT'] + $job_stats['REJECTED']) / $estimation_temp[0]['words_per_hour'] * 3600 - 3600);
             }
         }
-        
+
         return $job_stats;
-        
     }
-    
+
     /**
      * Perform analysis on single Job
      *  
@@ -516,12 +524,12 @@ class CatUtils {
      * @param bool $estimate_performance
      * @return mixed $job_stats
      */
-    protected static function _getStatsForJob( $job_stats ) {
-        
-        $job_stats['PROGRESS'] = ( $job_stats['TRANSLATED'] + $job_stats['APPROVED'] );                   
+    protected static function _getStatsForJob($job_stats) {
+
+        $job_stats['PROGRESS'] = ( $job_stats['TRANSLATED'] + $job_stats['APPROVED'] );
 
         $job_stats['TOTAL_FORMATTED'] = number_format($job_stats['TOTAL'], 0, ".", ",");
-        $job_stats['PROGRESS_FORMATTED'] = number_format( $job_stats['TRANSLATED'] + $job_stats['APPROVED'], 0, ".", "," );                   
+        $job_stats['PROGRESS_FORMATTED'] = number_format($job_stats['TRANSLATED'] + $job_stats['APPROVED'], 0, ".", ",");
         $job_stats['APPROVED_FORMATTED'] = number_format($job_stats['APPROVED'], 0, ".", ",");
         $job_stats['REJECTED_FORMATTED'] = number_format($job_stats['REJECTED'], 0, ".", ",");
         $job_stats['TODO_FORMATTED'] = number_format($job_stats['DRAFT'] + $job_stats['REJECTED'], 0, ".", ",");
@@ -540,13 +548,13 @@ class CatUtils {
         $significantDigits[] = self::_getSignificantDigits($job_stats['APPROVED_PERC']);
         $significantDigits[] = self::_getSignificantDigits($job_stats['REJECTED_PERC']);
         $significantDigits = max($significantDigits);
-                
-        $job_stats['TRANSLATED_PERC_FORMATTED'] = round($job_stats['TRANSLATED_PERC'], $significantDigits ) ;
-        $job_stats['DRAFT_PERC_FORMATTED'] = round($job_stats['DRAFT_PERC'], $significantDigits ) ;
-        $job_stats['APPROVED_PERC_FORMATTED'] = round($job_stats['APPROVED_PERC'], $significantDigits );
-        $job_stats['REJECTED_PERC_FORMATTED'] = round($job_stats['REJECTED_PERC'], $significantDigits );
-        $job_stats['PROGRESS_PERC_FORMATTED'] = round( $job_stats['PROGRESS_PERC'], $significantDigits ) ;
-        
+
+        $job_stats['TRANSLATED_PERC_FORMATTED'] = round($job_stats['TRANSLATED_PERC'], $significantDigits);
+        $job_stats['DRAFT_PERC_FORMATTED'] = round($job_stats['DRAFT_PERC'], $significantDigits);
+        $job_stats['APPROVED_PERC_FORMATTED'] = round($job_stats['APPROVED_PERC'], $significantDigits);
+        $job_stats['REJECTED_PERC_FORMATTED'] = round($job_stats['REJECTED_PERC'], $significantDigits);
+        $job_stats['PROGRESS_PERC_FORMATTED'] = round($job_stats['PROGRESS_PERC'], $significantDigits);
+
         $t = 'approved';
         if ($job_stats['TRANSLATED_FORMATTED'] > 0)
             $t = "translated";
@@ -554,12 +562,11 @@ class CatUtils {
             $t = "draft";
         if ($job_stats['REJECTED_FORMATTED'] > 0)
             $t = "draft";
-        $job_stats['DOWNLOAD_STATUS'] = $t;            
+        $job_stats['DOWNLOAD_STATUS'] = $t;
 
         return $job_stats;
-        
     }
-    
+
     /**
      * Public interface to single Job Stats Info
      * 
@@ -581,14 +588,13 @@ class CatUtils {
      * </pre>
      * 
      */
-    public static function getStatsForJob( $jid ) {
-        
+    public static function getStatsForJob($jid) {
+
         $job_stats = getStatsForJob($jid);
         $job_stats = $job_stats[0];
 
         $job_stats = self::_getStatsForJob($job_stats, true); //true set estimation check if present
         return self::_performanceEstimationTime($job_stats);
-        
     }
 
     public static function getStatsForFile($fid) {
