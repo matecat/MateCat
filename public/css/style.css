@@ -820,6 +820,8 @@ section.status-new.opened .editarea
     {
     padding-top: 4px !important;
     font-size: 18px;
+    /*word-wrap: break-word;*/
+    /*word-break: normal;*/
     }
 .grayed-text{color:#4c4c4c;}
 .textarea-container{height: inherit;table-layout: fixed;}
@@ -831,13 +833,15 @@ section.status-new.opened .editarea
     {
     width: 45.5%;
     table-layout: fixed;
-    float: none;
+    float: left;
     margin: 0px 1px 0px 0;
     padding: 3px 20px;
     text-align: left;
     list-style: none;
     height: 95%;
     outline: none;
+    word-wrap: break-word;
+    word-break: break-word;
     }
 .text a{text-decoration:none;color:#000 }
 
@@ -859,8 +863,10 @@ section.status-new.opened .editarea
 	border:1px solid transparent;
 	-moz-border-radius: 2px;
 	border-radius: 2px;
-	word-break: break-all;
- 	hyphens: auto;
+/*
+    word-break: break-all;
+*/
+    hyphens: auto;
   	-moz-hyphens: auto;
 	transition: all  50ms ease-in;
 	-webkit-transition: all  50ms ease-in;
@@ -892,11 +898,12 @@ section.status-new.opened .editarea
 	border:1px solid #727272;
 	box-shadow: inset 0 1px 2px #ccc;
 	-webkit-box-shadow: inset 0 1px 2px #ccc;
-	word-wrap:break-word;
 	transition:none;
 	-webkit-transition: none;
-	word-break: break-all;
-	}
+
+    /*word-break: normal;*/
+
+}
 
 .editarea:hover 
 	{
@@ -916,12 +923,17 @@ body.rtl-target .editor .editarea span
 textarea, input, .editarea, .search-editarea, select  {
 outline: none !important
 }
-.source{position:relative;z-index:999; word-break: break-all;
-}
+.source
+    {
+    position:relative;
+    z-index:999; 
+    /*word-break: break-all;*/
+    }
 .suggestion_source,
 .translation
 	{
-	word-break: break-all;
+    word-wrap: break-word;
+    word-break: break-word;
 	}
 	
 .wrap {
@@ -1391,7 +1403,7 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 .number{left:-40px;	}
 .main{width:90.3%;margin-left:3%;}
 .number{left:-52px;}
-.editarea, .source{ word-break: break-all}
+.editarea, .source{ /* word-break: break-all */}
 .projectbar ul {margin-left:5px}
 .Translated, .draft, .approved{padding:7px 6px;}
 .meter {	width:10%;}
@@ -1535,3 +1547,4 @@ p.percent
     {
     background-position: -60px -210px;
     }
+

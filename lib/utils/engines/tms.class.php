@@ -7,6 +7,7 @@ include_once INIT::$UTILS_ROOT . "/cat.class.php";
 class TMS_GET_MATCHES {
 
     public $id;
+    public $raw_segment;
     public $segment;
     public $translation;
     public $raw_translation;
@@ -60,6 +61,7 @@ class TMS_GET_MATCHES {
         $this->id = array_key_exists('id', $match) ? $match['id'] : '0';
         $this->create_date = array_key_exists('create-date', $match) ? $match['create-date'] : '0000-00-00';
         $this->segment = array_key_exists('segment', $match) ? $match['segment'] : '';
+        $this->raw_segment = array_key_exists('raw_segment', $match) ? $match['raw_segment'] : '';
         $this->translation = array_key_exists('translation', $match) ? $match['translation'] : '';
         $this->raw_translation = array_key_exists('raw_translation', $match) ? $match['raw_translation'] : '';
         $this->quality = array_key_exists('quality', $match) ? $match['quality'] : 0;
@@ -121,7 +123,7 @@ class TMS_RESULT {
 
 }
 
-class TMS extends engine {
+class TMS extends Engine {
 
     private $result = array();
 

@@ -34,8 +34,9 @@ class ajaxUtilsController extends ajaxcontroller {
 
         switch ( $this->__postInput['exec'] ) {
             case 'stayAnonymous':
-                unset( $_SESSION['_anonym_pid'] );
-                unset( $_SESSION['incomingUrl'] );
+                unset( $_SESSION[ '_anonym_pid' ] );
+                unset( $_SESSION[ 'incomingUrl' ] );
+                unset( $_SESSION[ '_newProject' ] );
                 break;
 
         }

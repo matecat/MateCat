@@ -234,7 +234,7 @@ UI = {
 					}
 				ar = $.extend(d,UI.filters);
 				
-				UI.doRequest({
+				APP.doRequest({
 					data: ar,
 					context: ob,
 					success: function(d){
@@ -309,7 +309,7 @@ UI = {
 			}
 		ar = $.extend(d,UI.filters);
 
-		UI.doRequest({
+		APP.doRequest({
 			data: ar,
 			context: ob,
 			success: function(d){
@@ -381,19 +381,19 @@ UI = {
         	password = (pwd)? pwd : '';
         }
 
-		UI.doRequest({
-			data: {
-				action:		"changePassword",
-				res: 		res,
-				id: 		id,
-				password: 	password
-			},
-			context: ob,
-			success: function(d){
-				res = ($(this).hasClass('row'))? 'job':'prj';
-				UI.changePassword_success(res,$(this),d,undo);
-			}
-		});
+        APP.doRequest({
+            data: {
+                action:		"changePassword",
+                res: 		res,
+                id: 		id,
+                password: 	password
+            },
+            context: ob,
+            success: function(d){
+                res = ($(this).hasClass('row'))? 'job':'prj';
+                UI.changePassword_success(res,$(this),d,undo);
+            }
+        });
     },
 
     changePassword_success: function(res,ob,d,undo) {
@@ -449,22 +449,6 @@ UI = {
 		return compressedUrl;
 	},
 
-	doRequest: function(req) {
-        var setup = {
-            url:      config.basepath + '?action=' + req.data.action + this.appendTime(),
-            data:     req.data,
-            type:     'POST',
-            dataType: 'json'
-        };
-
-        // Callbacks
-        if (typeof req.success === 'function') setup.success = req.success;
-        if (typeof req.complete === 'function') setup.complete = req.complete;
-        if (typeof req.context != 'undefined') setup.context = req.context;
-
-        $.ajax(setup);
-	},
-
     emptySearchbox: function() {
         $('#search-projectname').val('');
         $('#select-source option[selected=selected]').removeAttr('selected');
@@ -492,7 +476,7 @@ UI = {
 			}
 		ar = $.extend(d,UI.filters);
 		
-		this.doRequest({
+		APP.doRequest({
 			data: ar,
 			success: function(d){
 				data = $.parseJSON(d.data);
@@ -510,7 +494,7 @@ UI = {
 			}
 		ar = $.extend(d,UI.filters);
 		
-		this.doRequest({
+		APP.doRequest({
 			data: ar,
 			success: function(d){
 				UI.body.removeClass('loading');
@@ -573,9 +557,13 @@ UI = {
 			newProject += '<div data-pid="'+this.id+'" class="article">'+
 	            '	<div class="head">'+
 		        '	    <h2>'+this.name+'</h2>'+
-		        '	    <div class="project-details">'+
-		        '			<span class="id-project" title="Project ID">'+this.id+'</span> - <a target="_blank" href="/analyze/'+project.name+'/'+this.id+'-'+this.password+'" title="Volume Analysis">'+this.tm_analysis+' Payable words</a>'+
-		        '			<a href="#" title="Cancel project" class="cancel-project"></a>'+
+		        '	    <div class="project-details">';
+
+            if(config.v_analysis){
+                newProject += '			<span class="id-project" title="Project ID">'+this.id+'</span> - <a target="_blank" href="/analyze/'+project.name+'/'+this.id+'-'+this.password+'" title="Volume Analysis">'+this.tm_analysis+' Payable words</a>';
+            }
+
+            newProject += '			<a href="#" title="Cancel project" class="cancel-project"></a>'+
 		        '	    	<a href="#" title="Archive project" class="archive-project"></a>'+
 		        '			<a href="#" title="Resume project" class="resume-project"></a>'+
 		        '	    	<a href="#" title="Unarchive project" class="unarchive-project"></a>'+
@@ -589,28 +577,35 @@ UI = {
 		        '        <thead>'+
 			    '            <tr>'+
 			    '                <th class="create-date header">Create Date</th>'+
-			    '                <th class="job-detail">Job</th>'+
-			    '                <th class="words header">Payable Words</th>'+
-			    '                <th class="progress header">Progress</th>'+
+			    '                <th class="job-detail">Job</th>';
+
+            if(config.v_analysis){
+                newProject += '                <th class="words header">Payable Words</th>';
+            }
+
+            newProject += '                <th class="progress header">Progress</th>'+
 			    '                <th class="actions">Actions</th>'+
 			    '            </tr>'+
 		        '        </thead>'+
-	
 				'		<tbody>';
+
     		$.each(this.jobs, function() {
-        		var newJob = '';
-		        newJob += '    <tr class="row " data-jid="'+this.id+'" data-status="'+this.status+'" data-password="'+this.password+'">'+
+
+		        var newJob = '    <tr class="row " data-jid="'+this.id+'" data-status="'+this.status+'" data-password="'+this.password+'">'+
 		            '        <td class="create-date" data-date="'+this.create_date+'">'+this.formatted_create_date+'</td>'+
 		            '        <td class="job-detail">'+
 		            '        	<span class="urls">'+
 		            '        		<div class="langs">'+this.sourceTxt+'&nbsp;&gt;&nbsp;'+this.targetTxt+'</div>'+
 		            '        		<a class="url" target="_blank" href="/translate/'+project.name+'/'+this.source+'-'+this.target+'/'+this.id+'-'+this.password+'">'+config.hostpath+'/translate/.../'+this.id+'-'+this.password+'</a>'+
 		            '        	</span>'+
-		            '        </td>'+
-		            '        <td class="words">'+this.stats.TOTAL_FORMATTED+'</td>'+
-		            '        <td class="progress">'+
+		            '        </td>';
+
+                if(config.v_analysis){
+                    newJob += '        <td class="words">'+this.stats.TOTAL_FORMATTED+'</td>';
+                }
+
+                newJob += '        <td class="progress">'+
 				    '            <div class="meter">'+
-				
 				    '                <a href="#" class="approved-bar" title="Approved '+this.stats.APPROVED_PERC_FORMATTED+'%" style="width:'+this.stats.APPROVED_PERC+'%"></a>'+
 				    '                <a href="#" class="translated-bar" title="Translated '+this.stats.TRANSLATED_PERC_FORMATTED+'%" style="width:'+this.stats.TRANSLATED_PERC+'%"></a>'+
 				    '                <a href="#" class="rejected-bar" title="Rejected '+this.stats.REJECTED_PERC_FORMATTED+'%" style="width:'+this.stats.REJECTED_PERC+'%"></a>'+

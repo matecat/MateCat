@@ -89,11 +89,11 @@ class INIT {
         register_shutdown_function( 'INIT::sessionClose' );
 
         $root = realpath(dirname(__FILE__) . '/../');
-        self::$ROOT = $root;  // Accesible by Apache/PHP
+        self::$ROOT    = $root; // Accesible by Apache/PHP
         self::$BASEURL = "/"; // Accesible by the browser
-	
-	$protocol=stripos($_SERVER['SERVER_PROTOCOL'],"https")===FALSE?"http":"https";
-	self::$HTTPHOST="$protocol://$_SERVER[HTTP_HOST]";
+
+        $protocol       = stripos( $_SERVER[ 'SERVER_PROTOCOL' ], "https" ) === false ? "http" : "https";
+        self::$HTTPHOST = "$protocol://$_SERVER[HTTP_HOST]";
 
         set_include_path(get_include_path() . PATH_SEPARATOR . $root);
 
@@ -103,23 +103,22 @@ class INIT {
         self::$DEFAULT_NUM_RESULTS_FROM_TM = 3;
         self::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
 
-        self::$DB_SERVER = "localhost"; //database server
+        self::$DB_SERVER   = "localhost"; //database server
         self::$DB_DATABASE = "matecat"; //database name
-        self::$DB_USER = "matecat"; //database login 
-        self::$DB_PASS = "matecat01"; //databasepassword
+        self::$DB_USER     = "matecat"; //database login
+        self::$DB_PASS     = "matecat01"; //databasepassword
 
 
-        self::$STORAGE_DIR = self::$ROOT . "/storage";
-        self::$LOG_REPOSITORY = self::$STORAGE_DIR . "/log_archive";
-        self::$UPLOAD_REPOSITORY = self::$STORAGE_DIR . "/upload";
-	self::$CONVERSIONERRORS_REPOSITORY=self::$STORAGE_DIR."/conversion_errors";
-        self::$CONVERSIONERRORS_REPOSITORY_WEB=self::$BASEURL."storage/conversion_errors";
-	self::$TMP_DOWNLOAD=self::$STORAGE_DIR ."/tmp_download";
-        self::$TEMPLATE_ROOT = self::$ROOT . "/lib/view";
-        self::$MODEL_ROOT = self::$ROOT . '/lib/model';
-        self::$CONTROLLER_ROOT = self::$ROOT . '/lib/controller';
-        self::$UTILS_ROOT = self::$ROOT . '/lib/utils';
-
+        self::$STORAGE_DIR                     = self::$ROOT . "/storage";
+        self::$LOG_REPOSITORY                  = self::$STORAGE_DIR . "/log_archive";
+        self::$UPLOAD_REPOSITORY               = self::$STORAGE_DIR . "/upload";
+        self::$CONVERSIONERRORS_REPOSITORY     = self::$STORAGE_DIR . "/conversion_errors";
+        self::$CONVERSIONERRORS_REPOSITORY_WEB = self::$BASEURL . "storage/conversion_errors";
+        self::$TMP_DOWNLOAD                    = self::$STORAGE_DIR . "/tmp_download";
+        self::$TEMPLATE_ROOT                   = self::$ROOT . "/lib/view";
+        self::$MODEL_ROOT                      = self::$ROOT . '/lib/model';
+        self::$CONTROLLER_ROOT                 = self::$ROOT . '/lib/controller';
+        self::$UTILS_ROOT                      = self::$ROOT . '/lib/utils';
 
 
         if (!is_dir(self::$STORAGE_DIR)){
@@ -136,7 +135,6 @@ class INIT {
         }
 
         self::$ENABLED_BROWSERS = array('chrome', 'safari');
-//        self::$ENABLED_BROWSERS = array('chrome', 'firefox', 'safari');
         self::$CONVERSION_ENABLED = true;
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
         self::$BUILD_NUMBER = '0.3.2';

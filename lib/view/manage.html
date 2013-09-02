@@ -13,14 +13,15 @@
         <script type="text/javascript" src="${basepath}public/js/lib/jquery.tablesorter-fork-mottie.js?build=${build_number}"></script>
         <script type="text/javascript" src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js?build=${build_number}"></script>
         <script type="text/javascript" src="${basepath}public/js/lib/jquery.hotkeys.js?build=${build_number}"></script>
-        <script type="text/javascript" src="${basepath}public/js/utils.js?build=${build_number}"></script>
+        <script type="text/javascript" src="${basepath}public/js/common.js?build=${build_number}"></script>
         <script type="text/javascript" src="${basepath}public/js/manage.js?build=${build_number}"></script>
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
         <script type="text/javascript">
             var config = {
                 basepath: '${basepath | string:/}',
-                hostpath: '${hostpath | string:/}'
+                hostpath: '${hostpath | string:/}',
+                v_analysis: ${v_analysis}
             };
         </script>
 

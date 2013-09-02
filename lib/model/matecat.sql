@@ -69,11 +69,7 @@ CREATE TABLE `files` (
   PRIMARY KEY (`id`),
   KEY `id_project` (`id_project`),
   KEY `sha1` (`sha1_original_file`) USING HASH
-<<<<<<< HEAD:lib/model/matecat.sql
-) ENGINE=MyISAM AUTO_INCREMENT=5027 DEFAULT CHARSET=utf8;
-=======
 ) ENGINE=MyISAM AUTO_INCREMENT=5300 DEFAULT CHARSET=utf8;
->>>>>>> 0f7bcb93469beed2af09a8951e9ca91eec8ee503:lib/model/matecat.sql
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -130,11 +126,7 @@ CREATE TABLE `jobs` (
   KEY `id_project` (`id_project`) USING BTREE,
   KEY `owner` (`owner`),
   KEY `id_translator` (`id_translator`)
-<<<<<<< HEAD:lib/model/matecat.sql
-) ENGINE=MyISAM AUTO_INCREMENT=4759 DEFAULT CHARSET=utf8;
-=======
 ) ENGINE=MyISAM AUTO_INCREMENT=4992 DEFAULT CHARSET=utf8;
->>>>>>> 0f7bcb93469beed2af09a8951e9ca91eec8ee503:lib/model/matecat.sql
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -197,11 +189,7 @@ CREATE TABLE `projects` (
   KEY `id_customer` (`id_customer`),
   KEY `status_analysis` (`status_analysis`),
   KEY `for_debug` (`for_debug`)
-<<<<<<< HEAD:lib/model/matecat.sql
-) ENGINE=MyISAM AUTO_INCREMENT=4516 DEFAULT CHARSET=utf8;
-=======
 ) ENGINE=MyISAM AUTO_INCREMENT=4719 DEFAULT CHARSET=utf8;
->>>>>>> 0f7bcb93469beed2af09a8951e9ca91eec8ee503:lib/model/matecat.sql
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -286,11 +274,7 @@ CREATE TABLE `segments` (
   KEY `show_in_cat` (`show_in_cattool`) USING BTREE,
   KEY `raw_word_count` (`raw_word_count`) USING BTREE,
   FULLTEXT KEY `segment` (`segment`)
-<<<<<<< HEAD:lib/model/matecat.sql
-) ENGINE=MyISAM AUTO_INCREMENT=2303872 DEFAULT CHARSET=utf8;
-=======
 ) ENGINE=MyISAM AUTO_INCREMENT=2356805 DEFAULT CHARSET=utf8;
->>>>>>> 0f7bcb93469beed2af09a8951e9ca91eec8ee503:lib/model/matecat.sql
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -359,11 +343,7 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
-<<<<<<< HEAD:lib/model/matecat.sql
--- Dump completed on 2013-07-26 13:30:28
-=======
 -- Dump completed on 2013-08-01 18:20:10
->>>>>>> 0f7bcb93469beed2af09a8951e9ca91eec8ee503:lib/model/matecat.sql
 -- MySQL dump 10.13  Distrib 5.5.32, for debian-linux-gnu (x86_64)
 --
 -- Host: 10.30.1.241    Database: matecat

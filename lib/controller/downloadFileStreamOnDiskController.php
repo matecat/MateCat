@@ -24,8 +24,6 @@ class downloadFileStreamOnDiskController extends downloadController {
 		$this->filename = $this->fname;
 		$this->password = $this->get_from_get_post("password");
 
-		$this->download_type = $this->get_from_get_post("download_type");
-
 		if (empty($this->id_job)) {
 			$this->id_job = "Unknown";
 		}
@@ -82,8 +80,9 @@ class downloadFileStreamOnDiskController extends downloadController {
 
 			$debug['get_segments'][]=time();
 			//create a secondary indexing mechanism on segments' array; this will be useful
+            //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
 			foreach($data as $i=>$k){
-				$data[$k['internal_id']][]=$i;
+				$data[ 'matecat|' . $k['internal_id'] ][]=$i;
 			}
 			$transunit_translation = "";
 

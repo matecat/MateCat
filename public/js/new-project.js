@@ -33,21 +33,11 @@ $(document).ready(function() {
     });
 
     $("#source-lang").on('change', function(e){
-		console.log('source language changed');
-		var num = 0;
-		$('.template-download .name').each(function(){
-			if($(this).parent('tr').hasClass('failed')) return;
-			if($(this).text().split('.')[$(this).text().split('.').length-1] != 'sdlxliff') num++;
-		});
-		if(!$('.template-download').length) return;
-        if (num) {
-	        var m = confirm('Source language changed. The files must be reimported.');
-	        if(m) {
-	            UI.restartConversions();
-	        }            	
+        console.log('source language changed');
+        if(!$('.template-download').length) return;
+        if (UI.conversionsAreToRestart()) {
+            APP.confirm('Source language changed. The files must be reimported.', 'confirmRestartConversions');
         }
-     
-
     });
          
     $("input.uploadbtn").click(function(e) {
@@ -57,10 +47,9 @@ $(document).ready(function() {
             files += '@@SEP@@' + $(this).text();
         });
 
-        $.ajax({
-            url: window.location.href,
+        APP.doRequest({
             data: {
-                action: 'createProject',
+                action:	 "createProject",
                 file_name: files.substr(7),
                 project_name: $('#project-name').val(),
                 source_language: $('#source-lang').val(),
@@ -71,14 +60,9 @@ $(document).ready(function() {
                 private_tm_user: $('#private-tm-user').val(),
                 private_tm_pass: $('#private-tm-pass').val()
             },
-            type: 'POST',            
-            dataType: 'json',
-            //		            context: $('#'+id),
             beforeSend: function (){
                 $('.error-message').hide();
                 $('.uploadbtn').attr('value','Analyzing...').attr('disabled','disabled').addClass('disabled');
-            },
-            complete: function (){
             },
             success: function(d){
                 if(d.error.length) {
@@ -90,32 +74,70 @@ $(document).ready(function() {
 //                    var btnTxt = (config.analysisEnabled)? 'Analyze' : 'Translate';
 //                    $('.uploadbtn').attr('value',btnTxt).removeClass('disabled').removeAttr('disabled');
                 } else {
-                    var btnTxt = (config.analysisEnabled)? 'Analyze' : 'Translate';
-                    $('.uploadbtn').attr('value',btnTxt).removeClass('disabled').removeAttr('disabled');
                     //							$.cookie('upload_session', null);
                     if(config.analysisEnabled) {
-                        location.href = '/analyze/' + d.project_name + '/' + d.id_project + '-' + d.ppassword;
+                        location.href = config.hostpath + config.basepath + 'analyze/' + d.project_name + '/' + d.id_project + '-' + d.ppassword;
                     } else {
-                        location.href = '/translate/' + d.project_name + '/' + d.source_language.substring(0,2) + '-' + d.target_language.substring(0,2) + '/' + d.id_job + '-' + d.password;
-                    //                    	$('.uploadbtn').attr('value','Analyze')
+
+                        if( d.target_language.length > 1 ){ //if multiple language selected show a job list
+                            d.files = [];
+                            d.trgLangHumanReadable = $('#target-lang option:selected').text().split(',');
+                            d.srcLangHumanReadable = $('#source-lang option:selected').text();
+                            //console.log(d);
+                            $.each( d.target_language, function( idx, val ){
+                                d.files.push({ href: config.hostpath + config.basepath + 'translate/' + d.project_name + '/' + d.source_language.substring(0,2) + '-' + val.substring(0,2) + '/' + d.id_job[idx] + '-' + d.password[idx] });
+                            } );
+
+                            $('.uploadbtn-box').fadeOut('slow', function(){
+                                $('.uploadbtn-box').replaceWith( tmpl("job-links-list", d));
+
+                                var btnContainer = $('.btncontinue');
+                                var btnNew = $('#add-files').clone();
+                                btnContainer.fadeOut('slow',function () {
+                                    btnContainer.html('').addClass('newProject');
+                                    btnNew.children('span').text('New Project');
+                                    btnNew.children('i').remove();
+                                    btnNew.children('input').remove();
+                                    btnNew.attr({id: 'new-project'}).on('click',function () {
+                                        location.href = config.hostpath + config.basepath;
+                                    }).css({margin: 'auto 0'});
+                                    btnNew.appendTo(btnContainer);
+                                }).css({height: '50px'}).fadeIn(1000);
+
+                                $('.translate-box input, .translate-box select').attr({disabled:'disabled'});
+                                $(".more, #multiple-link").unbind('click').on('click',function(e){
+                                    e.preventDefault();
+                                }).addClass('disabledLink');
+                                $('td.delete').empty();
+                                $('#info-login').fadeIn(1000);
+                                $('#project-' + d.id_project).fadeIn(1000);
+
+                            });
+
+                        } else {
+                            location.href = config.hostpath + config.basepath + 'translate/' + d.project_name + '/' + d.source_language.substring(0,2) + '-' + d.target_language[0].substring(0,2) + '/' + d.id_job[0] + '-' + d.password[0];
+                        }
+
                     }
-                //					location.href = '/translate/' + d.project_name + '/' + d.source_language.substring(0,2) + '-' + d.target_language.substring(0,2) + '/' + d.id_job + '-' + d.password;
                 }
+
             }
         });
     });    		
   
     $("#multiple-link").click(function(e) {          
         e.preventDefault();
-        $("div.grayed").fadeIn();
-        $("div.popup-languages").fadeIn('fast');
+//        $("div.grayed").fadeIn();
+//        $("div.popup-languages").fadeIn('fast');
+        $(".popup-languages").show();
+
         var tlAr = $('#target-lang').val().split(',');
         $.each(tlAr, function() {
 	        var ll = $('.popup-languages .listlang li #'+this);
 	        ll.parent().addClass('on');
 	        ll.attr('checked','checked');
         });
-        $('.popup-languages .header .number').text($(".popup-languages .listlang li.on").length);
+        $('.popup-languages h1 .number').text($(".popup-languages .listlang li.on").length);
     });
 			
 	$(".popup-languages .listlang li label").click(function(e) {          
@@ -126,11 +148,11 @@ $(document).ready(function() {
         } else {
         	c.attr('checked','checked');
         }
-        $('.popup-languages .header .number').text($(".popup-languages .listlang li.on").length);
+        $('.popup-languages h1 .number').text($(".popup-languages .listlang li.on").length);
     });
 	$(".popup-languages .listlang li input").click(function(e) {          
         $(this).parent().toggleClass('on');
-        $('.popup-languages .header .number').text($(".popup-languages .listlang li.on").length);
+        $('.popup-languages h1 .number').text($(".popup-languages .listlang li.on").length);
     });		
 			
     $(".close").click(function(e) {          
