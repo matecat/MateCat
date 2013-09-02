@@ -286,24 +286,38 @@ footer nav
 .topMenu
     {
     position: fixed;
-    top: 47px;
+/*    top: -500px;*/
+    top: -1000px;
     left: 195px;
+    width: 300px;
     /*max-width: 300px;*/
     background: #6d6e71;
     border-bottom: 1px solid #333;
     border-right: 1px solid #333;
     border-left: 1px solid #333;
-    z-index: 999999999;
+    z-index: 99999999;
     text-align: left;
-    padding: 0 10px 4px 20px;
+    padding: 0 10px 4px 24px;
     }
+
 
 .topMenu ul li a
     {
     font-size: 80%;
     text-decoration: none;
-    color: #ccc;
-    font-style: italic;
+    color: #fff;
+/*    font-style: italic;*/
+    }
+.topMenu ul li.current
+    {
+    list-style-type: disc;
+    list-style-position:inside;
+    color: #fff;
+    margin-left: -15px;
+    }
+.topMenu ul li.currSegment
+    {
+    text-align: right;
     }
     .topMenu ul li a:hover
         {

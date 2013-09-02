@@ -704,15 +704,35 @@ UI = {
 
         $("#navSwitcher").on('click', function(e) {
             e.preventDefault();
+/*
             if($('#jobNav').hasClass('open')) {
                 $('#jobNav').animate({bottom: "-=300px"}, 500).removeClass('open');
             } else {
                 $('#jobNav').animate({bottom: "+=300px"}, 300).addClass('open');
             }
+*/
+        })
+        $("#pname").on('click', function(e) {
+            e.preventDefault();
+//            console.log($('#jobMenu').height());
+            var menuHeight = $('#jobMenu').height();
+            var startTop = 47 - menuHeight;
+//            console.log('startTop: ', startTop);
+            $('#jobMenu').css('top', (47 - menuHeight) + "px");
+           
+            if($('#jobMenu').hasClass('open')) {
+                $('#jobMenu').animate({top: "-=" + menuHeight + "px"}, 500).removeClass('open');
+            } else {
+                $('#jobMenu').animate({top: "+=" + menuHeight + "px"}, 300).addClass('open');
+            }
         })
         $("#jobNav .jobstart").on('click', function(e) {
             e.preventDefault();
             UI.scrollSegment($('#segment-'+config.firstSegmentOfFiles[0].first_segment));           
+        })
+        $("#jobMenu").on('click', 'li', function(e) {
+            e.preventDefault();
+            UI.scrollSegment($('#segment-' + $(this).attr('data-segment')));
         })
         $("#jobNav .prevfile").on('click', function(e) {
             e.preventDefault();
@@ -766,6 +786,7 @@ UI = {
         this.currentSegmentId = this.lastOpenedSegmentId = this.editarea.data('sid');
         this.currentSegment = segment = $('#segment-' + this.currentSegmentId);
         this.currentFile = segment.parent();
+        this.currentFileId = this.currentFile.attr('id').split('-')[1];
     },
     changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
@@ -990,23 +1011,19 @@ UI = {
         $('#' + this.currentSegment.attr('id') + '-header').html(header);
     },
     createJobMenu: function() {
-        var menu = '<nav id="jobMenu" class="topMenu" style="width: ' + $('.breadcrumbs').width() + 'px;">' +
+        var menu = '<nav id="jobMenu" class="topMenu">' +
                     '    <ul>';
         $.each(config.firstSegmentOfFiles, function(index) {
-            menu += '<li><a href="#' + this.first_segment + '" title="' + this.file_name + '">' + this.file_name + '</a></li>';
+            menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><a href="#" title="' + this.file_name + '">' + this.file_name + '</a></li>';
         });
-
+        menu += '<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a href="#">Go to current segment</a></li>';
+        
         menu +=    '    </ul>' +
                     '</nav>';
         this.body.append(menu);
-        console.log($('#jobMenu').width());
-        console.log($($('#jobMenu li a')[0]).width());
-        console.log($($('#jobMenu li a')[0]));
-//        APP.fitText($('#jobMenu'), $($('#jobMenu li a')[0]), 20);
-//        $('#jobMenu li').each(function() {
-//            APP.fitText($('#jobMenu ul'), $(this), 20);
-//        });
-        
+        $('#jobMenu li').each(function() {
+            APP.fitText($(this), $('a',$(this)), 20);
+        });
     },
     createStatusMenu: function(statusMenu) {
         $("ul.statusmenu").empty().hide();
@@ -1503,6 +1520,7 @@ UI = {
         this.firstOpenedSegment = (this.firstOpenedSegment == 0)? 1 : 2;
         this.byButton = false;
         this.cacheObjects(editarea);
+        this.updateJobMenu();
         $(window).trigger({
             type: "segmentOpened",
             segment: segment
@@ -2548,6 +2566,13 @@ console.log('a');
         if (!this.taglockEnabled)
             return false;
         this.editarea.html(this.editarea.html().replace(/\<span contenteditable=\"false\" class=\"locked\"\>(.*?)\<\/span\>/gi, "$1"));
+    },
+    updateJobMenu: function() {
+        $('#jobMenu li.current').removeClass('current');
+        $('#jobMenu li:not(.currSegment)').each(function(index) {
+            if($(this).attr('data-file') == UI.currentFileId) $(this).addClass('current');
+        });
+        $('#jobMenu li.currSegment').attr('data-segment',UI.currentSegmentId);
     },
     zerofill: function(i, l, s) {
         var o = i.toString();

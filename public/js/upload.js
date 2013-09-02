@@ -29,6 +29,10 @@ $(document).ready(function(){
         e.preventDefault();
         var src = $('#source-lang').val();
         var trg = $('#target-lang').val();
+        if($('#target-lang').val().split(',').length > 1) {
+            APP.alert('Cannot swap languages when <br>multiple target languages are selected!');
+            return false;
+        }
         $('#source-lang').val(trg);
         $('#target-lang').val(src);
         if(!$('.template-download').length) return;
