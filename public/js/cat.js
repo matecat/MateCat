@@ -446,21 +446,21 @@ UI = {
             selectText(this);
             $(this).toggleClass('selected');
         }).on('contextmenu', '.editor .source,.editor .editarea', function(e) {
-            e.preventDefault();
+//            e.preventDefault();
         }).on('mousedown', '.editor .source,.editor .editarea', function(e) {
-            if(e.button == 2) { 
-                var selection = window.getSelection();
-                    if(selection.type == 'Range') { // something is selected
-                        var str = selection.toString().trim();
-                        if(str.length) { // the trimmed string is not empty
-                            UI.currentSelectedText = str;
-                            UI.currentSearchInTarget = ($(this).hasClass('source'))? 0 : 1;
-                            UI.showContextMenu(str, e.pageY, e.pageX);
-                        };
-                    }; 
-                return false; 
-            } 
-            return true; 
+//            if(e.button == 2) { 
+//                var selection = window.getSelection();
+//                    if(selection.type == 'Range') { // something is selected
+//                        var str = selection.toString().trim();
+//                        if(str.length) { // the trimmed string is not empty
+//                            UI.currentSelectedText = str;
+//                            UI.currentSearchInTarget = ($(this).hasClass('source'))? 0 : 1;
+//                            UI.showContextMenu(str, e.pageY, e.pageX);
+//                        };
+//                    }; 
+//                return false; 
+//            } 
+//            return true; 
         }).on('dragstart', '.editor .editarea .locked', function(e) {
             var selection = window.getSelection();
             var range = selection.getRangeAt(0);
