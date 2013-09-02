@@ -1,7 +1,6 @@
 <?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include INIT::$UTILS_ROOT . "/mymemory_queries_temp.php";
 include INIT::$UTILS_ROOT . "/filetype.class.php";
 include INIT::$UTILS_ROOT . "/cat.class.php";
 include INIT::$UTILS_ROOT . "/langs/languages.class.php";
@@ -36,6 +35,9 @@ class catController extends viewcontroller {
 	private $job_cancelled = false;
 
     private $firstSegmentOfFiles = '[]';
+
+    private $first_job_segment;
+    private $last_opened_segment;
 
 	private $thisUrl;
 

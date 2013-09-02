@@ -1,6 +1,5 @@
 <?php
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include INIT::$UTILS_ROOT . "/mymemory_queries_temp.php";
 include INIT::$UTILS_ROOT . "/filetype.class.php";
 include INIT::$UTILS_ROOT . "/cat.class.php";
 include INIT::$UTILS_ROOT . "/langs/languages.class.php";
@@ -159,7 +158,7 @@ class getSegmentsController extends ajaxcontroller {
 				$this->data["$id_file"]['target']=$lang_handler->getLocalizedName( $seg['target'] );
 				$this->data["$id_file"]['source_code']=$seg['source'];
 				$this->data["$id_file"]['target_code']=$seg['target'];
-				$this->data["$id_file"]['file_stats'] = $file_stats;		
+				$this->data["$id_file"]['file_stats'] = CatUtils::getStatsForJob($seg['jid'], $id_file );
 				$this->data["$id_file"]['segments'] = array();
 			}
 			
