@@ -486,7 +486,7 @@ function setTranslationUpdate( $id_segment, $id_job, $status, $time_to_edit, $tr
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        log::doLog( "$errno: $err" );
 
         return $errno * -1;
     }
@@ -513,7 +513,7 @@ function setTranslationInsert( $id_segment, $id_job, $status, $time_to_edit, $tr
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
         if ( $errno != 1062 ) {
-            log::doLog( $err );
+            log::doLog( "$errno: $err" );
         }
 
         return $errno * -1;
@@ -696,13 +696,7 @@ function getStatsForMultipleJobs( $_jids ) {
     return $jobs_stats;
 }
 
-function getStatsForJob( $id_job ) {
-
-
-    // Old Raw-wordcount
-    /*
-       $query = "select SUM(raw_word_count) as TOTAL, SUM(IF(status IS NULL OR status='DRAFT' OR status='NEW',raw_word_count,0)) as DRAFT, SUM(IF(status='REJECTED',raw_word_count,0)) as REJECTED, SUM(IF(status='TRANSLATED',raw_word_count,0)) as TRANSLATED, SUM(IF(status='APPROVED',raw_word_count,0)) as APPROVED from jobs j INNER JOIN files_job fj on j.id=fj.id_job INNER join segments s on fj.id_file=s.id_file LEFT join segment_translations st on s.id=st.id_segment WHERE j.id=" . $id_job;
-     */
+function getStatsForJob( $id_job, $id_file = null ) {
 
     $query = "
 		select 
@@ -740,6 +734,10 @@ function getStatsForJob( $id_job ) {
 
 
 			WHERE j.id=$id_job";
+
+    if( !empty($id_file) ){
+        $query .= " and fj.id_file = " . intval($id_file);
+    }
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
@@ -861,7 +859,7 @@ function getNextUntranslatedSegment( $sid, $jid ) {
                where st.id_job=$jid and
                (st.status in ('NEW','DRAFT','REJECTED') OR st.status IS NULL) and
                s.show_in_cattool=1 and
-               s.id>$sid
+               s.id <> $sid
                limit 0,1";
 
     $db      = Database::obtain();
@@ -1913,7 +1911,7 @@ function countSegmentsTranslationAnalyzed( $pid ) {
     $errno   = $err[ 'error_code' ];
 
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        log::doLog( "$errno: $err" );
 
         return $errno * -1;
     }
@@ -1931,7 +1929,7 @@ function setJobCompleteness( $jid, $is_completed ) {
     $errno   = $err[ 'error_code' ];
 
     if ( $errno != 0 ) {
-        log::doLog( $err );
+        log::doLog( "$errno: $err" );
 
         return $errno * -1;
     }
