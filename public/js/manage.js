@@ -588,8 +588,17 @@ UI = {
 	            '	<div class="field">'+
 	            '		<h3>Machine Translation:</h3>'+
 	            '		<span class="value">MyMemory (All Pairs)</span>'+
-	            '	</div>'+
-		        '    <table class="tablestats continue tablesorter" width="100%" border="0" cellspacing="0" cellpadding="0" id="project-'+this.id+'">'+
+	            '	</div>';
+            
+            if (this.private_tm_key!==''){
+                    
+                     newProject += '	<div class="field">'+
+	            '		<h3>Private TM Key:</h3>'+
+	            '		<span class="value">'+this.private_tm_key+'</span>'+
+	            '	</div>';
+            }
+                    
+		      newProject += '    <table class="tablestats continue tablesorter" width="100%" border="0" cellspacing="0" cellpadding="0" id="project-'+this.id+'">'+
 		        '        <thead>'+
 			    '            <tr>'+
 			    '                <th class="create-date header">Create Date</th>'+
