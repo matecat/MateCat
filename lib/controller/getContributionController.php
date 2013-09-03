@@ -35,7 +35,7 @@ class getContributionController extends ajaxcontroller {
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        //NOTE: This is only for debug purpose only,
+        //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
         //$this->__postInput = filter_var_array( $_POST, $filterArgs );
 
@@ -146,8 +146,8 @@ class getContributionController extends ajaxcontroller {
 		}
 		$matches = array_slice( $matches, 0, $this->num_results );
 
-        $matchVal = floatval( $matches[0]['match'] );
-        if( isset( $matches[0] ) && $matchVal >= 90 && $matchVal < 100 ){
+        ( isset($matches[0]['match']) ? $firstMatchVal = floatval( $matches[0]['match'] ) : null );
+        if( isset( $firstMatchVal ) && $firstMatchVal >= 90 && $firstMatchVal < 100 ){
 
             $srcSearch = strip_tags($this->text);
             $segmentFound = strip_tags($matches[0]['raw_segment']);
@@ -221,14 +221,21 @@ class getContributionController extends ajaxcontroller {
 
 	private function setSuggestionReport($matches) {
 		if (count($matches) > 0) {
-			$suggestions_json_array = json_encode($matches);
-			$match = $matches[0];
-			$suggestion = $match['translation'];
-			$suggestion_match = $match['match'];
-			$suggestion_source = $match['created_by'];
-			$ret = CatUtils::addTranslationSuggestion($this->id_segment, $this->id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source);
-			return $ret;
+
+            foreach ( $matches as $k => $m ) {
+                $matches[ $k ][ 'raw_translation' ] = CatUtils::view2rawxliff( $matches[ $k ][ 'raw_translation' ] );
+            }
+
+            $suggestions_json_array = json_encode( $matches );
+            $match = $matches[ 0 ];
+
+            $suggestion        = $match[ 'raw_translation' ];
+            $suggestion_match  = $match[ 'match' ];
+            $suggestion_source = $match[ 'created_by' ];
+            $ret               = CatUtils::addTranslationSuggestion( $this->id_segment, $this->id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source );
+            return $ret;
 		}
+
 		return 0;
 	}
 

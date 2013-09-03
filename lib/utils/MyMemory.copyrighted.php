@@ -215,15 +215,31 @@ class MyMemory {
 
 	public static function diff_tercpp($old,$new){
 		//$res=shell_exec("/bin/tercpp.0.6.2 --noTxtIds --printDifferenceToHtmlToSTDO  -s  -rSent \"$old\" -hSent \"$new\" 2>&1");
-                $res=shell_exec(INIT::$ROOT."/third_party/TER/tercpp.0.6.2 --noTxtIds --printDifferenceToHtmlToSTDO  -s  -rSent \"$new\" -hSent \"$old\" 2>&1");
-		$res=str_replace('DiffView:  ','',$res);
-		if (stripos($res, "/tercpp.0.6.2")!==false){
+                $res=shell_exec(INIT::$ROOT."/third_party/TER/tercpp.0.6.2 --noTxtIds --printDifferenceToHtmlToSTDO  -s  --HTER -rSent \"$new\" -hSent \"$old\" 2>&1");
+                // typical result 
+//                DiffView:  ##LESSTHAN##g id=2##GREATERTHAN## Cette mÃ©moire de traduction dÃ©finition coÃ¯ncide littÃ©ralement avec <strike><span style="color:red;">l&#39</span></strike> <strike><span style="color:red;">;</span></strike> <strike><span style="color:red;">une</span></strike> <span style="color:blue">l'une</span> des dÃ©finitions les plus acceptÃ©es ##LESSTHAN##/g##GREATERTHAN####LESSTHAN##g id=4 xid=0b5ae0d9-a917-4f7c-9cba-ac7788d73fab
+//                HTER: 0.157895 (3/19)
+                $res_explode=explode ("\n",$res);
+                if (empty($res_explode)){
 			return null;
 		}
+                //EXPECTED  AFTER EXPLODE 
+                // Array
+//                (
+//                [0] => DiffView:  ##LESSTHAN##g id=2##GREATERTHAN## Cette mÃ©moire de traduction dÃ©finition coÃ¯ncide littÃ©ralement avec <strike><span style="color:red;">l&#39</span></strike> <strike><span style="color:red;">;</span></strike> <strike><span style="color:red;">une</span></strike> <span style="color:blue">l'une</span> des dÃ©finitions les plus acceptÃ©es ##LESSTHAN##/g##GREATERTHAN####LESSTHAN##g id=4 xid=0b5ae0d9-a917-4f7c-9cba-ac7788d73fab
+//                [1] => HTER: 0.157895 (3/19)
+//                [2] =>
+//                )
+		$view=str_replace('DiffView:  ','',$res_explode[0]);
+                $hter=str_replace('HTER:','',$res_explode[1]);
+                $hter=  preg_replace("/(\(.*?\))/", "", $hter);
+                 $hter=  floatval($hter);
+		
 //                echo "old is $old\n\nnew is $new\n\n";
 //                echo "res is $res";
 //                exit;
-		return $res;
+          //      print_r (array($view,$hter)); exit;
+		return array($view,$hter);
 	}
 
 	public static function diff_html($old, $new, $by_word = true) {
