@@ -1,6 +1,4 @@
 <?php
-
-include INIT::$ROOT . "/lib/utils/mymemory_queries_temp.php";
 include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
@@ -74,6 +72,11 @@ class setContributionMTController extends ajaxcontroller {
         //check for Password correctness
         if( !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ){
             $this->result['error'][] = array( "code" => -10, "message" => "wrong password" );
+
+            $msg = "\n\n Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
+            Log::doLog( $msg );
+            Utils::sendErrMailReport( $msg );
+
             return;
         }
 

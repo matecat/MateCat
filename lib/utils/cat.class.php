@@ -41,69 +41,9 @@ class CatUtils {
     }
 
     //reconcile tag ids
-    public static function ensureTagConsistency($q, $source_seg, $target_seg) {
+    public static function ensureTagConsistency( $q, $source_seg, $target_seg ) {
         //TODO
     }
-
-    //check for tag mismatches
-    //TODO Rimuovere dopo il 1° agosto 2013
-    //
-//    public static function checkTagConsistency($source_seg, $target_seg) {
-//        //ensure there are no entities
-//        $source_seg = html_entity_decode($source_seg);
-//        $target_seg = html_entity_decode($target_seg);
-//
-//        //get tags from words in source and target
-//        preg_match_all('/<[^>]+>/', $source_seg, $source_tags);
-//        preg_match_all('/<[^>]+>/', $target_seg, $target_tags);
-//        $source_tags = $source_tags[0];
-//        $target_tags = $target_tags[0];
-//
-//        //check equal tag count 
-//        if (count($source_tags) != count($target_tags)) {
-//            return array('outcome' => 1, 'debug' => 'tag count mismatch');
-//        }
-//
-//        //check well formed xml (equal number of opening and closing tags inside each input segment)
-//        $seg=self::placeholdamp($source_seg);
-//        $tra=self::placeholdamp($target_seg);
-//        @$xml_valid = @simplexml_load_string("<placeholder>$seg</placeholder>");
-//
-//        if ($xml_valid === FALSE) {
-//            return array('outcome' => 2, 'debug' => 'bad source xml');
-//        }
-//        @$xml_valid = @simplexml_load_string("<placeholder>$tra</placeholder>");
-//        if ($xml_valid === FALSE) {
-//            return array('outcome' => 3, 'debug' => 'bad target xml');
-//        }
-//
-//        //check for tags' id mismatching
-//        //extract names
-//        preg_match_all('/id="(.+?)"/', $source_seg, $source_tags_ids);
-//        preg_match_all('/id="(.+?)"/', $target_seg, $target_tags_ids);
-//        $source_tags_ids = $source_tags_ids[1];
-//        $target_tags_ids = $target_tags_ids[1];
-//        //set indexes for lookup purposes ('1' is just a dummy value to set the cell)
-//        $tmp = array();
-//        foreach ($source_tags_ids as $k => $src_tag)
-//            $tmp[$src_tag] = 1;
-//        $source_tags_ids = $tmp;
-//        $tmp = array();
-//        foreach ($target_tags_ids as $k => $trg_tag)
-//            $tmp[$trg_tag] = 1;
-//        $target_tags_ids = $tmp;
-//        unset($tmp);
-//        //for each tag in target
-//        foreach ($target_tags_ids as $tag => $v) {
-//            //if a tag in target is not present in source, error
-//            if (!isset($source_tags_ids[$tag])) {
-//                return array('outcome' => 4, 'debug' => 'tag id mismatch');
-//            }
-//        }
-//
-//        //all checks passed
-//        return array('outcome' => 0, 'debug' => '');
-//    }
 
     private static function parse_time_to_edit($ms) {
         if ($ms <= 0) {
@@ -125,7 +65,18 @@ class CatUtils {
         return array($hours, $minutes, $seconds, $usec);
     }
 
-    private static function placehold_xliff_tags($segment) {
+    
+    private static function placehold_xml_entities($segment) {
+        $pattern ="|&#(.*?);|";
+        $res=preg_replace($pattern,"<x id=\"XMLENT$1\"/>",$segment);
+        return $res;
+    }
+    
+    public static function restore_xml_entities($segment) {
+        return preg_replace ("|<x id=\"XMLENT(.*?)\"/>|","&#$1",$segment);
+    }
+    
+    public static function placehold_xliff_tags($segment) {
 
         //remove not existent </x> tags
         $segment = preg_replace('|(</x>)|si', "", $segment);
@@ -163,6 +114,41 @@ class CatUtils {
         $segment = str_replace(GTPLACEHOLDER, "&gt;", $segment);
         return $segment;
     }
+    
+    
+    
+     private static function get_xliff_tags($segment) {
+
+        //remove not existent </x> tags
+        $segment = preg_replace('|(</x>)|si', "", $segment);
+        
+        $matches=array();
+        $match=array();
+
+        
+        $res=preg_match('|(<g\s*id=["\']+.*?["\']+\s*[^<>]*?>)|si',$segment, $match);
+        if ($res and isset($match[0])){
+            $matches[]=$match[0];
+        }
+
+        $segment = preg_replace('|<(/g)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(x.*?/?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(bx.*?/?])>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(ex.*?/?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(bpt\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(/bpt)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(ept\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(/ept)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(ph\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(/ph)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(it\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(/ph)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(it\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(/it)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(mrk\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(/mrk)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        return $segment;
+    }
 
     public static function stripTags($text) {
         $pattern_g_o = '|(<.*?>)|';
@@ -181,16 +167,21 @@ class CatUtils {
         // output : <g> bang &amp; olufsen are > 555 </g> <x/>
         // caso controverso <g id="4" x="&lt; dfsd &gt;"> 
         $segment = self::placehold_xliff_tags($segment);
-        $segment = htmlspecialchars($segment, ENT_NOQUOTES, 'UTF-8', false);
+        $segment = htmlspecialchars(
+            html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8'),
+            ENT_NOQUOTES, 'UTF-8', false
+        );
         $segment = self::restore_xliff_tags($segment);
         return $segment;
     }
 
     public static function rawxliff2view($segment) {
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
+        $segment=self::placehold_xml_entities($segment);
         $segment = self::placehold_xliff_tags($segment);
         
-        $segment = html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8');
+        
+        $segment = html_entity_decode($segment, ENT_NOQUOTES |16, 'UTF-8');
         // restore < e >
         $segment = str_replace("<", "&lt", $segment);
         $segment = str_replace(">", "&gt", $segment);
@@ -202,6 +193,14 @@ class CatUtils {
         return $segment;
     }
 
+    /**
+     * No more used
+     * @deprecated
+     *
+     * @param $segment
+     *
+     * @return mixed
+     */
     public static function rawxliff2rawview($segment) {
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
         $segment = self::placehold_xliff_tags($segment);
@@ -348,7 +347,7 @@ class CatUtils {
 
         $insertRes = setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index, $warning);
         if ($insertRes < 0 and $insertRes != -1062) {
-            $result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the translation for the segment $id_segment - $insertRes");
+            $result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the translation for the segment $id_segment - Error: $insertRes");
             return $result;
         }
         if ($insertRes == -1062) {
@@ -356,7 +355,7 @@ class CatUtils {
             $updateRes = setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index, $warning);
 
             if ($updateRes < 0) {
-                $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment $id_segment");
+                $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment $id_segment - Error: $updateRes");
                 return $result;
             }
         }
@@ -513,7 +512,6 @@ class CatUtils {
      * </pre>
      *  
      * @param mixed $job_stats
-     * @param bool $estimate_performance
      * @return mixed $job_stats
      */
     protected static function _getStatsForJob( $job_stats ) {
@@ -566,7 +564,8 @@ class CatUtils {
      * 
      * @param int $jid
      * 
-     * @return $job_stats
+     * @return mixed $job_stats
+     *
      * <pre>
      *      $job_stats = array(
      *          'id'                           => (int),
@@ -581,9 +580,9 @@ class CatUtils {
      * </pre>
      * 
      */
-    public static function getStatsForJob( $jid ) {
+    public static function getStatsForJob( $jid, $fid = null ) {
         
-        $job_stats = getStatsForJob($jid);
+        $job_stats = getStatsForJob($jid, $fid);
         $job_stats = $job_stats[0];
 
         $job_stats = self::_getStatsForJob($job_stats, true); //true set estimation check if present

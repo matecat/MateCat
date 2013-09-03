@@ -18,7 +18,19 @@ UI = {
     enableAnalyze: function() {
     	enableAnalyze();
     },
-
+    conversionsAreToRestart: function() {
+        var num = 0;
+		$('.template-download .name').each(function(){
+			if($(this).parent('tr').hasClass('failed')) return;
+			if($(this).text().split('.')[$(this).text().split('.').length-1] != 'sdlxliff') num++;
+		});
+        return num
+    },
+    confirmRestartConversions: function(res) {
+        if(res) {
+            UI.restartConversions();
+        }            	
+    },
     restartConversions: function() {
     	console.log('restart conversions');
     	$('.template-download, .template-upload').each(function() {
@@ -680,7 +692,6 @@ checkConversions = function() {
 			        	var filename = d.file_name;
 			        	var filerow = this;
 			        	if(filerow.hasClass('converting')) return;
-						console.log('eccolo');
 						convertFile(filename,filerow);
 					
 				

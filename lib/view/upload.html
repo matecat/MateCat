@@ -37,6 +37,7 @@
         <!--[if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
         <script src="${basepath}public/js/lib/jquery.js"></script>
+        <script src="${basepath}public/js/common.js"></script>
         <script src="${basepath}public/js/upload.js"></script>
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
@@ -49,7 +50,7 @@
                 conversionEnabled: ${conversion_enabled},
                 analysisEnabled: ${volume_analysis_enabled},
                 maxNumberFiles: 25
-            }
+            };
         </script>
 
 
@@ -78,7 +79,7 @@
                 <input name="project-name" type="text" class="upload-input" id="project-name" autofocus="autofocus"/>
             </div>
 
-            <div class="translate-box">
+            <div class="translate-box source">
                 <h2>From</h2>
                 <select name="source-lang" id="source-lang">
                     <tal:block tal:define="language php:array()" tal:repeat="language sourceLangHistory">
@@ -95,6 +96,8 @@
                     </tal:block>
                 </select>
             </div>
+            
+            <a id="swaplang" title="Swap languages" href="#">Swap languages</a>
 
             <div class="translate-box target">
                 <h2>To</h2>
@@ -426,6 +429,7 @@
 
         <script src="${basepath}public/js/lib/jquery.cookie.js"></script>
         <script src="${basepath}public/js/lib/jquery.colorbox-min.js"></script>
+
         <script src="${basepath}public/js/new-project.js"></script>
 <!--
         <div style='display:none'>
@@ -434,49 +438,50 @@
 -->
 
 
+        <div class="modal supported-formats" data-type="view">
+            <div class="popup-outer"></div>
+            <div class="popup">
+                <a href="#" class="x-popup"></a>
 
-        <div class="grayed"></div>
-        <div class="popup supported-formats">
-
-            <div class="header">
-                <a href="#" class="close"></a>
-                Supported file formats
-            </div>
+                <h1>Supported file formats</h1>
 
 
-            <div class="popup-box">
-                <div tal:define="supported php:array()" tal:repeat="supported supported_file_types_array"  class="format-box">
-                    <h3 tal:content="repeat/supported/key" ></h3>
-                    <ul tal:define="ext php:array()" tal:repeat="ext supported">
-                        <li tal:define="item php:array()" tal:repeat="item ext" tal:content="item">
+                <div class="popup-box">
+                    <div tal:define="supported php:array()" tal:repeat="supported supported_file_types_array"  class="format-box">
+                        <h3 tal:content="repeat/supported/key" ></h3>
+                        <ul tal:define="ext php:array()" tal:repeat="ext supported">
+                            <li tal:define="item php:array()" tal:repeat="item ext" tal:content="item">
 
-                        </li>
-                    </ul>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="popup popup-languages">
+        <div class="modal popup-languages" data-type="view">
+            <div class="popup-outer"></div>
+            <div class="popup">
+                <a href="#" class="x-popup"></a>
+                <h1>
+                    <a id="chooseMultilang" href="#" class="btn-ok right">Continue</a>
+                    <a id="cancelMultilang" href="#" class="btn-cancel right">Cancel</a>
+                    Choose Multiple Languages (<span class="number">1</span>)
+                    <a href="#" id="deselectMultilang">Deselect all</a>
+                </h1>
 
-            <div class="header">
-                <input id="chooseMultilang" type="button" value="Continue" />
-                <input id="cancelMultilang" type="button" value="Cancel" />
-                <a href="#" class="close"></a>
-                Choose Multiple Languages (<span class="number">1</span>)
-                <a href="#" id="deselectMultilang">Deselect all</a>
-            </div>
+                <div class="popup-box">
+                    <ul class="listlang">
 
-            <div class="popup-box">
-                <ul class="listlang">
+                        <tal:block  tal:repeat="language languages">
+                            <li tal:attributes="class language/top">
+                                <input type="checkbox" tal:attributes="value language/code; id language/code" />
+                                <label tal:attributes="for language/name" tal:content="language/name" onclick="return false">---</label>
+                            </li>
+                        </tal:block>
 
-                    <tal:block  tal:repeat="language languages">
-                        <li tal:attributes="class language/top">
-                            <input type="checkbox" tal:attributes="value language/code; id language/code" />
-                            <label tal:attributes="for language/name" tal:content="language/name" onclick="return false">---</label>
-                        </li>
-                    </tal:block>
-
-                </ul>
+                    </ul>
+                </div>
             </div>
         </div>
 

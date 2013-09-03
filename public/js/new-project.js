@@ -33,21 +33,11 @@ $(document).ready(function() {
     });
 
     $("#source-lang").on('change', function(e){
-		console.log('source language changed');
-		var num = 0;
-		$('.template-download .name').each(function(){
-			if($(this).parent('tr').hasClass('failed')) return;
-			if($(this).text().split('.')[$(this).text().split('.').length-1] != 'sdlxliff') num++;
-		});
-		if(!$('.template-download').length) return;
-        if (num) {
-	        var m = confirm('Source language changed. The files must be reimported.');
-	        if(m) {
-	            UI.restartConversions();
-	        }            	
+        console.log('source language changed');
+        if(!$('.template-download').length) return;
+        if (UI.conversionsAreToRestart()) {
+            APP.confirm('Source language changed. The files must be reimported.', 'confirmRestartConversions');
         }
-     
-
     });
          
     $("input.uploadbtn").click(function(e) {
@@ -57,10 +47,9 @@ $(document).ready(function() {
             files += '@@SEP@@' + $(this).text();
         });
 
-        $.ajax({
-            url: window.location.href,
+        APP.doRequest({
             data: {
-                action: 'createProject',
+                action:	 "createProject",
                 file_name: files.substr(7),
                 project_name: $('#project-name').val(),
                 source_language: $('#source-lang').val(),
@@ -71,14 +60,9 @@ $(document).ready(function() {
                 private_tm_user: $('#private-tm-user').val(),
                 private_tm_pass: $('#private-tm-pass').val()
             },
-            type: 'POST',            
-            dataType: 'json',
-            //		            context: $('#'+id),
             beforeSend: function (){
                 $('.error-message').hide();
                 $('.uploadbtn').attr('value','Analyzing...').attr('disabled','disabled').addClass('disabled');
-            },
-            complete: function (){
             },
             success: function(d){
                 if(d.error.length) {
@@ -136,21 +120,24 @@ $(document).ready(function() {
 
                     }
                 }
+
             }
         });
     });    		
   
     $("#multiple-link").click(function(e) {          
         e.preventDefault();
-        $("div.grayed").fadeIn();
-        $("div.popup-languages").fadeIn('fast');
+//        $("div.grayed").fadeIn();
+//        $("div.popup-languages").fadeIn('fast');
+        $(".popup-languages").show();
+
         var tlAr = $('#target-lang').val().split(',');
         $.each(tlAr, function() {
 	        var ll = $('.popup-languages .listlang li #'+this);
 	        ll.parent().addClass('on');
 	        ll.attr('checked','checked');
         });
-        $('.popup-languages .header .number').text($(".popup-languages .listlang li.on").length);
+        $('.popup-languages h1 .number').text($(".popup-languages .listlang li.on").length);
     });
 			
 	$(".popup-languages .listlang li label").click(function(e) {          
@@ -161,11 +148,11 @@ $(document).ready(function() {
         } else {
         	c.attr('checked','checked');
         }
-        $('.popup-languages .header .number').text($(".popup-languages .listlang li.on").length);
+        $('.popup-languages h1 .number').text($(".popup-languages .listlang li.on").length);
     });
 	$(".popup-languages .listlang li input").click(function(e) {          
         $(this).parent().toggleClass('on');
-        $('.popup-languages .header .number').text($(".popup-languages .listlang li.on").length);
+        $('.popup-languages h1 .number').text($(".popup-languages .listlang li.on").length);
     });		
 			
     $(".close").click(function(e) {          

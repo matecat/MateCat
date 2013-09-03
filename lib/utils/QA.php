@@ -39,9 +39,14 @@ class errObject {
 /**
  * Translation string quality assurance.
  * 
- * Used for integrity comparison of strings. <br />
+ * Used for integrity comparison of XML ( xliff ) strings. <br />
  * Add errors/warnings to a list every time it found a mismatch between strings.
- * 
+ *
+ * Only <g> and <x/> are for now allowed.
+ *
+ * It use DOMDocument ( libxml ) for input, traversing and output of well formed XML strings.
+ * Also use regular expressions to check for characters between tags
+ *
  * NOTE:
  * If a not well formed XML source/target is provided, all integrity checks are skipped returning a 
  * 'bad source xml/bad target xml/Tag mismatch' error.
@@ -78,9 +83,10 @@ class errObject {
  * 8) Tag content: Tail tab mismatch ( if a trailing TAB is present only in one of them ) <br />
  * 9) Tag content: Head carriage return / new line mismatch ( if a beginning carriage return / new line is present only in one of them ) <br />
  * 10) Tag content: Tail carriage return / new line mismatch ( if a trailing carriage return / new line is present only in one of them ) <br />
- * 11) Tag boundary: Head characters mismatch ( if beetween tags there are different characters [\s\t\r\n] ) <br />
+ * 11) Tag boundary: Head characters mismatch ( if between tags there are different special characters [\s\t\r\n] before first normal char occurrence ) <br />
  * 12) Tag boundary: Tail characters mismatch ( if at the end of last tag there are different characters [\s\t\r\n] ) <br />
  * 13) Tag X is self-closing tag, not properly ended should be <x .... /> <br />
+ * 14) Mismatch of Special chars ( and spaces ) before a tag or after a closing g tag
  */
 class QA {
 
@@ -123,8 +129,20 @@ class QA {
      * @var DOMNodeList
      */
     protected $normalizedTrgDOMNodeList;
-    
-    const AMPPLACEHOLDER = "##AMPPLACEHOLDER##";
+
+    /**
+     * Class reference to the Map of source DOM
+     *
+     * @var array
+     */
+    protected $srcDomMap;// = array( 'elemCount' => 0, 'x' => array(), 'g' => array(), 'refID' => array(), 'DOMElement' => array(), 'DOMText' => array() );
+
+    /**
+     * Class reference to the Map of target DOM
+     *
+     * @var array
+     */
+    protected $trgDomMap; // = array( 'elemCount' => 0, 'x' => array(), 'g' => array(), 'refID' => array(), 'DOMElement' => array(), 'DOMText' => array() );
 
     const ERR_NONE               = 0;
     const ERR_COUNT              = 1;
@@ -152,20 +170,21 @@ class QA {
      * 
      * <pre>
      * array (
-     *     ERR_NONE            =>  '',
-     *     ERR_COUNT           =>  'Tag count mismatch',
-     *     ERR_SOURCE          =>  'bad source xml',
-     *     ERR_TARGET          =>  'bad target xml',
-     *     ERR_TAG_ID          =>  'Tag id mismatch',
-     *     ERR_WS_HEAD         =>  'Heading whitespaces mismatch',
-     *     ERR_WS_TAIL         =>  'Tail whitespaces mismatch',
-     *     ERR_TAB_HEAD        =>  'Heading tab mismatch',
-     *     ERR_TAB_TAIL        =>  'Tail tab mismatch',
-     *     ERR_CR_HEAD         =>  'Heading carriage return mismatch',
-     *     ERR_CR_TAIL         =>  'Tail carriage return mismatch',
-     *     ERR_BOUNDARY_HEAD   =>  'Char mismatch between tags',
-     *     ERR_BOUNDARY_TAIL   =>  'End line char mismatch',
-     *     ERR_UNCLOSED_X_TAG  =>  'Wrong format for x tag.Should be <x .... />'
+     *     ERR_NONE                =>  '',
+     *     ERR_COUNT               =>  'Tag count mismatch',
+     *     ERR_SOURCE              =>  'bad source xml',
+     *     ERR_TARGET              =>  'bad target xml',
+     *     ERR_TAG_ID              =>  'Tag id mismatch',
+     *     ERR_WS_HEAD             =>  'Heading whitespaces mismatch',
+     *     ERR_WS_TAIL             =>  'Tail whitespaces mismatch',
+     *     ERR_TAB_HEAD            =>  'Heading tab mismatch',
+     *     ERR_TAB_TAIL            =>  'Tail tab mismatch',
+     *     ERR_CR_HEAD             =>  'Heading carriage return mismatch',
+     *     ERR_CR_TAIL             =>  'Tail carriage return mismatch',
+     *     ERR_BOUNDARY_HEAD       =>  'Mismatch of special chars between G TAGS before first char occurrence',
+     *     ERR_BOUNDARY_TAIL       =>  'End line char mismatch',
+     *     ERR_UNCLOSED_X_TAG      =>  'Wrong format for x tag.Should be <x .... />'
+     *     ERR_BOUNDARY_HEAD_TEXT  =>  'Mismatch of Special chars ( and spaces ) before a tag or after a closing G tag'
      * );
      * </pre>
      * @var array(string) 
@@ -243,6 +262,9 @@ class QA {
             case self::ERR_TAG_ID:
             	$this->exceptionList[] = errObject::get( array( 'outcome' => self::ERR_TAG_ID, 'debug' => $this->_errorMap[self::ERR_TAG_ID] ) );
             break;
+            case self::ERR_UNCLOSED_X_TAG:
+                $this->exceptionList[] = errObject::get( array( 'outcome' => $errCode, 'debug' => $this->_errorMap[$errCode] ) );
+            break;
 
             case self::ERR_WS_HEAD:
             case self::ERR_WS_TAIL:
@@ -252,8 +274,7 @@ class QA {
             case self::ERR_BOUNDARY_TAIL:
             case self::ERR_BOUNDARY_HEAD_TEXT:
                 $this->warningList[] = errObject::get( array( 'outcome' => self::ERR_SPACE_MISMATCH, 'debug' => $this->_errorMap[self::ERR_SPACE_MISMATCH] ) );
-                break;
-            case self::ERR_UNCLOSED_X_TAG:
+            break;
             default:
                 $this->warningList[] = errObject::get( array( 'outcome' => $errCode, 'debug' => $this->_errorMap[$errCode] ) );
             break;
@@ -309,7 +330,7 @@ class QA {
      */
     protected function checkErrorNone( array $list, $count = false ){
     	if( empty( $list ) ){
-    		return array( errObject::get( array( 'outcome' => self::ERR_NONE, 'debug' => $this->_errorMap[self::ERR_NONE] . " [ 1 ]" ) ) );
+    		return array( errObject::get( array( 'outcome' => self::ERR_NONE, 'debug' => $this->_errorMap[self::ERR_NONE] . " [ 0 ]" ) ) );
     	}
 
         if ($count) {
@@ -369,7 +390,7 @@ class QA {
     /**
      * Class constructor
      * 
-     * Arguments: raw source string and raw target string
+     * Arguments: raw XML source string and raw XML target string
      * 
      * @param string $source_seg
      * @param string $target_seg
@@ -402,10 +423,203 @@ class QA {
         $this->srcDom = $this->_loadDom($source_seg, self::ERR_SOURCE);
         $this->trgDom = $this->_loadDom($target_seg, self::ERR_TARGET);
 
+        $this->_resetDOMMaps();
+
     }
 
     /**
-     * Load an XML String into DomObject and add a global Error if not valid
+     * After initialization by Constructor, the dom is parsed and map structures are built
+     *
+     * @throws Exception
+     */
+    protected function _prepareDOMStructures(){
+
+        $srcNodeList = @$this->srcDom->getElementsByTagName( 'root' )->item( 0 )->childNodes;
+        $trgNodeList = @$this->trgDom->getElementsByTagName( 'root' )->item( 0 )->childNodes;
+
+        if ( !$srcNodeList instanceof DOMNodeList || !$trgNodeList instanceof DOMNodeList ) {
+            throw new DOMException('Bad DOMNodeList');
+        }
+
+        //Create a dom node map
+        $this->_mapDom( $srcNodeList, $trgNodeList );
+
+        //Save normalized dom Element
+        $this->normalizedTrgDOM = clone $this->trgDom;
+
+        //Save normalized Dom Node list
+        $this->normalizedTrgDOMNodeList = @$this->normalizedTrgDOM->getElementsByTagName( 'root' )->item( 0 )->childNodes;
+
+        return array( $srcNodeList, $trgNodeList );
+
+    }
+
+    /**
+     *
+     * Build a node map tree of XML source and XML target
+     * parsing the node list instances.
+     *
+     * @param DOMNodeList $srcNodeList
+     * @param DOMNodeList $trgNodeList
+     *
+     * @return array
+     */
+    protected function _mapDom( DOMNodeList $srcNodeList, DOMNodeList $trgNodeList ){
+
+        if( empty($this->srcDomMap['elemCount']) || empty($this->trgDomMap['elemCount']) ){
+            $this->_mapElements( $srcNodeList, $this->srcDomMap );
+            $this->_mapElements( $trgNodeList, $this->trgDomMap );
+        }
+
+        return array( $this->srcDomMap, $this->trgDomMap );
+    }
+
+    /**
+     * Create a map of NodeTree walking recursively a DOMNodeList
+     *
+     * <pre>
+     * EX:
+     * <g id="23e"><g id="pt26">what is that</g><g id="pt27">?</g></g>
+     *
+     * array (
+     *   'elemCount' => 5,
+     *   'x' =>
+     *       array (
+     *       ),
+     *   'g' =>
+     *       array (
+     *         0 => '23e',
+     *         1 => 'pt26',
+     *         2 => 'pt27',
+     *       ),
+     *   'refID' =>
+     *       array (
+     *         '23e' => 'g',
+     *         'pt26' => 'g',
+     *         'pt27' => 'g',
+     *       ),
+     *   'DOMElement' =>
+     *   array (
+     *     0 =>
+     *         array (
+     *           'type' => 'DOMElement',
+     *           'name' => 'g',
+     *           'id' => '23e',
+     *           'parent_id' => NULL,
+     *           'node_idx' => 0,
+     *         ),
+     *     1 =>
+     *         array (
+     *           'type' => 'DOMElement',
+     *           'name' => 'g',
+     *           'id' => 'pt26',
+     *           'parent_id' => '23e',
+     *           'node_idx' => 0,
+     *         ),
+     *     2 =>
+     *         array (
+     *           'type' => 'DOMElement',
+     *           'name' => 'g',
+     *           'id' => 'pt27',
+     *           'parent_id' => '23e',
+     *           'node_idx' => 1,
+     *         ),
+     *   ),
+     *   'DOMText' =>
+     *   array (
+     *     2 =>
+     *         array (
+     *           'type' => 'DOMText',
+     *           'name' => NULL,
+     *           'id' => NULL,
+     *           'parent_id' => 'pt26',
+     *           'node_idx' => 0,
+     *           'content' => 'what is that',
+     *         ),
+     *     3 =>
+     *         array (
+     *           'type' => 'DOMText',
+     *           'name' => NULL,
+     *           'id' => NULL,
+     *           'parent_id' => 'pt27',
+     *           'node_idx' => 0,
+     *           'content' => '?',
+     *         ),
+     *   ),
+     * )
+     * </pre>
+     * @param DOMNodeList $elementList
+     * @param array &$srcDomElements
+     * @param int $depth
+     * @param null $parentID
+     */
+    protected function _mapElements( DOMNodeList $elementList, array &$srcDomElements = array(), $depth = 0, $parentID = null ) {
+
+        $elementsListLen = $elementList->length;
+
+        for ( $i = 0; $i < $elementsListLen; $i++ ) {
+
+            $element = $elementList->item( $i );
+
+            if ( $element instanceof DOMElement ) {
+
+                $elementID = $element->getAttribute( 'id' );
+
+                $plainRef = array(
+                    'type'      => 'DOMElement',
+                    'name'      => $element->tagName,
+                    'id'        => $elementID,
+                    'parent_id' => $parentID,
+                    'node_idx'  => $i,
+                );
+
+                //set depth and increment for next occurrence
+                $srcDomElements['DOMElement'][ $depth++ ] = $plainRef;
+
+                //count occurrences of this tag name when needed, also transport id reference.
+                @$srcDomElements[$element->tagName][] = $elementID;
+
+                //reverse Lookup, from id to tag name
+                @$srcDomElements['refID'][$elementID] = $element->tagName;
+
+                if ( $element->hasChildNodes() ) {
+                    $this->_mapElements( $element->childNodes, $srcDomElements, $depth, $elementID );
+                }
+
+            } else {
+
+                $plainRef = array(
+                    'type'      => 'DOMText',
+                    'name'      => null,
+                    'id'        => null,
+                    'parent_id' => $parentID,
+                    'node_idx'  => $i,
+                    'content'   => $elementList->item( $i )->textContent,
+                );
+
+                //set depth and increment for next occurrence
+                $srcDomElements['DOMText'][$depth++] = $plainRef;
+                //Log::doLog( "Found DOMText in Source " . var_export($plainRef,TRUE) );
+            }
+
+            $srcDomElements['elemCount']++;
+
+        }
+        //Log::doLog($srcDomElements);
+    }
+
+    /**
+     * Method to reset the target DOM Map
+     * when an internal substitution ( Tag ID Realign ) is made
+     *
+     */
+    protected function _resetDOMMaps(){
+        $this->srcDomMap = array( 'elemCount' => 0, 'x' => array(), 'g' => array(), 'refID' => array(), 'DOMElement' => array(), 'DOMText' => array() );
+        $this->trgDomMap = array( 'elemCount' => 0, 'x' => array(), 'g' => array(), 'refID' => array(), 'DOMElement' => array(), 'DOMText' => array() );
+    }
+
+    /**
+     * Load an XML String into DOMDocument Object and add a global Error if not valid
      *
      * @param $xmlString
      * @param int $targetErrorType
@@ -450,35 +664,11 @@ class QA {
     /**
      * Perform a replacement of all simple space chars with non-breaking spaces
      * 
-     * @param type $s
+     * @param string $s
      * @return string
      */
     protected function _spaceToNonBreakingSpace($s) {
         return preg_replace("/\x{20}/u", chr(0xa0), $s);
-    }
-    
-    /**
-     * Replace Ampersand with a placeHolder
-     * 
-     * @param string $s
-     * @return string
-     */
-    protected function _placeHoldAmp($s) {
-        if( !preg_match("/\&([#a-zA-Z0-9]+);/", $s) ){
-            return preg_replace("/\&/", self::AMPPLACEHOLDER, $s);
-        }
-        return $s;
-    }
-
-    /**
-     * Restore Ampersand From placeHolder
-     * 
-     * @param string $s
-     * @return string
-     */
-    protected function _restoreamp($s) {
-        $pattern = "#" . self::AMPPLACEHOLDER . "#";
-        return preg_replace($pattern, Utils::unicode2chr("&"), $s);
     }
 
     /**
@@ -489,18 +679,11 @@ class QA {
      */
     public function performConsistencyCheck() {
 
-        $srcNodeList = @$this->srcDom->getElementsByTagName( 'root' )->item( 0 )->childNodes;
-        $trgNodeList = @$this->trgDom->getElementsByTagName( 'root' )->item( 0 )->childNodes;
-
-        if ( !$srcNodeList instanceof DOMNodeList || !$trgNodeList instanceof DOMNodeList ) {
+        try {
+            list( $srcNodeList, $trgNodeList ) = $this->_prepareDOMStructures();
+        } catch ( DOMException $ex ) {
             return $this->getErrors();
         }
-
-        //Save normalized dom Element
-        $this->normalizedTrgDOM = clone $this->trgDom;
-
-        //Save normalized Dom Node list
-        $this->normalizedTrgDOMNodeList = @$this->normalizedTrgDOM->getElementsByTagName( 'root' )->item( 0 )->childNodes;
 
         $this->_checkContentConsistency( $srcNodeList, $trgNodeList );
         $this->_checkTagsBoundary();
@@ -517,14 +700,13 @@ class QA {
      */
     public function performTagCheckOnly() {
 
-        $srcNodeList = @$this->srcDom->getElementsByTagName( 'root' )->item( 0 )->childNodes;
-        $trgNodeList = @$this->trgDom->getElementsByTagName( 'root' )->item( 0 )->childNodes;
-
-        if ( !$srcNodeList instanceof DOMNodeList || !$trgNodeList instanceof DOMNodeList ) {
+        try {
+            list( $srcNodeList, $trgNodeList ) = $this->_prepareDOMStructures();
+        } catch ( DOMException $ex ) {
             return $this->getErrors();
         }
 
-        $this->_checkTagMismatch( $srcNodeList, $trgNodeList );
+        $this->_checkTagMismatch();
 
         // all checks completed
         return $this->getErrors();
@@ -615,63 +797,133 @@ class QA {
 
     }
 
-    protected function _checkTagMismatch( DOMNodeList $srcNodeList, DOMNodeList $trgNodeList ){
+    //
+    /**
+     * Try to perform an heuristic re-align of tags id by position.
+     *
+     * Two XML strings are analyzed. They must have the same number of tags,
+     * the same number of tag G, the same number of tag X.
+     *
+     * After realignment a Tag consistency check is performed ( QA::performTagCheckOnly() )
+     * if no errors where found the dom is reloaded and tags map are updated.
+     *
+     *
+     *
+     * @return errObject[]
+     */
+    public function tryRealignTagID() {
 
-        if( !function_exists( 'domIDCompare' ) ){
-            function domIDCompare( $a, $b ){
-                if( $a['id'] == $b['id'] ) return 0;
-                return ( $a['id'] < $b['id'] ? -1 : 1 );
+        try {
+            $this->_prepareDOMStructures();
+        } catch ( DOMException $ex ) {
+            return $this->getErrors();
+        }
+
+        $targetNumDiff = count($this->trgDomMap['DOMElement']) - count($this->srcDomMap['DOMElement']);
+        $diffTagG  = count(@$this->trgDomMap['g']) - count(@$this->srcDomMap['g']);
+        $diffTagX  = count(@$this->trgDomMap['x']) - count(@$this->srcDomMap['x']);
+
+        //there are the same number of tags in source and target
+        if( $targetNumDiff == 0 && !empty($this->srcDomMap['refID']) ){
+
+            //if tags are in exact number
+            if( $diffTagG == 0 && $diffTagX == 0  ){
+
+                //Steps:
+
+                //- re-align ids
+                foreach( $this->trgDomMap['g'] as $pos => $tagID ){
+                    $pattern[] = '|<g id=["\']{1}(' . $tagID . ')["\']{1}>|ui';
+                    $replacement[] = '<g id="###' . $this->srcDomMap['g'][$pos] . '###">';
+                }
+
+                foreach( $this->trgDomMap['x'] as $pos => $tagID ){
+                    $pattern[] = '|<x id=["\']{1}(' . $tagID . ')["\']{1} />|ui';
+                    $replacement[] = '<x id="###' . $this->srcDomMap['x'][$pos] . '###" />';
+                }
+
+                $result = preg_replace( $pattern, $replacement, $this->target_seg, 1 );
+
+                $result = str_replace( "###", "", $result);
+
+                //- re-import in the dom target after regular expression
+                //- perform check again ( recursive over the entire class )
+                $qaCheck = new self( $this->source_seg, $result );
+                $qaCheck->performTagCheckOnly();
+                if ( !$qaCheck->thereAreErrors() ) {
+                    $this->target_seg = $result;
+                    $this->trgDom     = $this->_loadDom( $result, self::ERR_TARGET );
+                    $this->_resetDOMMaps();
+                    $this->_prepareDOMStructures();
+                    return; //ALL RIGHT
+                }
+
+//                Log::doLog($result);
+//                Log::doLog($pattern);
+//                Log::doLog($replacement);
+
             }
+
+        } else if ( $targetNumDiff < 0 ) { // the target has fewer tags than source
+
+        } else { // the target has more tags than source
+
         }
 
-        $srcDomElements = array();
-        $trgDomElements = array();
-
-        $this->_mapElements( $srcNodeList, $srcDomElements );
-        $this->_mapElements( $trgNodeList, $trgDomElements );
-
-//        Log::doLog( $srcDomElements );
-//        Log::doLog( $trgDomElements );
-
-        $this->_checkTagCountMismatch( count($srcDomElements), count($trgDomElements) );
-
-        //check for Tag ID MISMATCH
-        $diffArray = array_udiff(  $srcDomElements, $trgDomElements, 'domIDCompare' );
-        if( !empty($diffArray) && !empty($trgDomElements) ){
-            $this->_addError(self::ERR_TAG_ID);
-            //Log::doLog($diffArray);
-        }
-
-        return array( $srcDomElements, $trgDomElements );
+        $this->_addError( self::ERR_COUNT );
 
     }
 
     /**
+     * This method checks for tag mismatch,
+     * it analyzes the tag count number ( by srcDomMap contents )
+     * and check for id correspondence.
+     *
+     */
+    protected function _checkTagMismatch(){
+
+        $targetNumDiff = $this->_checkTagCountMismatch( count($this->srcDomMap['DOMElement']), count($this->trgDomMap['DOMElement']) );
+        if( $targetNumDiff == 0 ){
+            $deepDiffTagG  = $this->_checkTagCountMismatch( count(@$this->srcDomMap['g']), count(@$this->trgDomMap['g']) );
+        }
+
+        //check for Tag ID MISMATCH
+        $diffArray = array_diff_assoc($this->srcDomMap['refID'], $this->trgDomMap['refID']);
+        if( !empty($diffArray) && !empty($this->trgDomMap['DOMElement']) ){
+            $this->_addError(self::ERR_TAG_ID);
+            //Log::doLog($diffArray);
+        }
+
+    }
+
+    /**
+     * Wrapper
+     *
      * Perform all consistency contents check Internally
      *  
      * @param DOMNodeList $srcNodeList
      * @param DOMNodeList $trgNodeList
      */
-    protected function _checkContentConsistency(DOMNodeList $srcNodeList, DOMNodeList $trgNodeList) {
+    protected function _checkContentConsistency( DOMNodeList $srcNodeList, DOMNodeList $trgNodeList ) {
 
-        $result = $this->_checkTagMismatch( $srcNodeList, $trgNodeList );
+        $this->_checkTagMismatch( $srcNodeList, $trgNodeList );
 
-        $srcDomElements = $result[0];
-        $trgDomElements = $result[1];
+        //* Fix error undefined variable trgTagReference when source target contains tags and target not
+        $trgTagReference = array('node_idx' => null);
 
-        foreach( $srcDomElements as $srcTagID ){
+        foreach( $this->srcDomMap['DOMElement'] as $srcTagReference ){
 
-            if( $srcTagID['name'] == 'x' ){
+            if( $srcTagReference['name'] == 'x' ){
                 continue;
             }
 
-            if( !is_null( $srcTagID['parent_id'] ) ){
+            if( !is_null( $srcTagReference['parent_id'] ) ){
 
-                $srcNodeContent = $this->_queryDOMElement( $this->srcDom, $srcTagID )->textContent;
+                $srcNodeContent = $this->_queryDOMElement( $this->srcDom, $srcTagReference )->textContent;
 
-                foreach( $trgDomElements as $k => $elements ){
-                    if( $elements['id'] == $srcTagID['id'] ){
-                        $trgTagReference = $trgDomElements[$k];
+                foreach( $this->trgDomMap['DOMElement'] as $k => $elements ){
+                    if( $elements['id'] == $srcTagReference['id'] ){
+                        $trgTagReference = $this->trgDomMap['DOMElement'][$k];
                     }
                 }
 
@@ -679,11 +931,11 @@ class QA {
 
             } else {
 
-                $srcNodeContent = $srcNodeList->item($srcTagID['node_idx'])->textContent;
+                $srcNodeContent = $srcNodeList->item($srcTagReference['node_idx'])->textContent;
 
-                foreach( $trgDomElements as $k => $elements ){
-                    if( $elements['id'] == $srcTagID['id'] ){
-                        $trgTagReference = $trgDomElements[$k];
+                foreach( $this->trgDomMap['DOMElement'] as $k => $elements ){
+                    if( $elements['id'] == $srcTagReference['id'] ){
+                        $trgTagReference = $this->trgDomMap['DOMElement'][$k];
                     }
                 }
 
@@ -691,7 +943,6 @@ class QA {
                 $trgNodeContent = $trgNodeList->item( $trgTagPos )->textContent;
 
             }
-
 
             $this->_checkHeadWhiteSpaces($srcNodeContent, $trgNodeContent, $trgTagReference);
             $this->_checkTailWhiteSpaces($srcNodeContent, $trgNodeContent, $trgTagReference);
@@ -713,108 +964,31 @@ class QA {
      */
     protected function _queryDOMElement( DOMDocument $domDoc, $TagReference ) {
 
-        $Node = new DOMElement( 'g' );
+        //Old implementation
+        //        $Node = new DOMElement( 'g' );
+        //
+        //        $availableParentList = $domDoc->getElementsByTagName( $TagReference[ 'name' ] );
+        //        $availableParentsLen = $availableParentList->length;
+        //
+        //        for ( $i = 0; $i < $availableParentsLen; $i++ ) {
+        //
+        //            $element = $availableParentList->item( $i );
+        //            if ( $element->getAttribute( 'id' ) == $TagReference[ 'id' ] ) {
+        //
+        //                /**
+        //                 * @var DOMElement $Node
+        //                 */
+        //                $Node = $element;
+        //
+        //                //Log::doLog( 'Found: ' . $availableParentList->item($i)->textContent );
+        //            }
+        //        }
 
-        $availableParentList = $domDoc->getElementsByTagName( $TagReference[ 'name' ] );
-        $availableParentsLen = $availableParentList->length;
-
-        for ( $i = 0; $i < $availableParentsLen; $i++ ) {
-
-            $element = $availableParentList->item( $i );
-            if ( $element->getAttribute( 'id' ) == $TagReference[ 'id' ] ) {
-
-                /**
-                 * @var DOMElement $Node
-                 */
-                $Node = $element;
-
-                //Log::doLog( 'Found: ' . $availableParentList->item($i)->textContent );
-            }
-        }
+        $Node = $domDoc->getElementById( $TagReference['id'] );
+        return ( !is_null($Node) ? $Node : new DOMElement( 'g' ) );
 
         return $Node;
 
-    }
-
-    /**
-     * Create a map of NodeTree
-     * <pre>
-     * array (
-     *   0 => array (
-     *     'type' => 'DOMElement',
-     *     'name' => 'g',
-     *     'parent_id' => NULL,
-     *     'id' => '557',
-     *     'node_idx' => 0,
-     *   ),
-     *   1 => array (
-     *     'type' => 'DOMElement',
-     *     'name' => 'g',
-     *     'parent_id' => NULL,
-     *     'id' => '558',
-     *     'node_idx' => 1,
-     *   ),
-     *   2 => array (
-     *     'type' => 'DOMElement',
-     *     'name' => 'g',
-     *     'parent_id' => '558',
-     *     'id' => '559',
-     *     'node_idx' => 1,
-     *   ),
-     *   3 => array (
-     *     'type' => 'DOMElement',
-     *     'name' => 'g',
-     *     'parent_id' => '558',
-     *     'id' => '560',
-     *     'node_idx' => 3,
-     *   ),
-     *   4 => array (
-     *     'type' => 'DOMElement',
-     *     'name' => 'x',
-     *     'parent_id' => '560',
-     *     'id' => '125',
-     *     'node_idx' => 0,
-     *  )
-     * )
-     * </pre>
-     * @param DOMNodeList $elementList
-     * @param array &$srcDomElements
-     * @param int $depth
-     * @param null $parentID
-     */
-    protected function _mapElements( DOMNodeList $elementList, array &$srcDomElements = array(), $depth = 0, $parentID = null ) {
-
-        $elementsListLen = $elementList->length;
-
-        for ( $i = 0; $i < $elementsListLen; $i++ ) {
-
-            $element = $elementList->item( $i );
-
-            if ( $element instanceof DOMElement ) {
-
-                $elementID = $element->getAttribute( 'id' );
-
-                $plainRef = array(
-                    'type'      => 'DOMElement',
-                    'name'      => $element->tagName,
-                    'parent_id' => $parentID,
-                    'id'        => $elementID,
-                    'node_idx'  => $i
-                );
-
-                $srcDomElements[ $depth++ ] = $plainRef;
-
-                if ( $element->hasChildNodes() ) {
-                    $this->_mapElements( $element->childNodes, $srcDomElements, $depth, $elementID );
-                }
-
-            } else {
-                //$srcDomElements[$depth++] = array( 'type' => 'DOMText', 'content' => $elementList->item($i)->textContent );
-                //Log::doLog( "Found DOMText in Source " . $elementList->item($i)->textContent );
-            }
-
-        }
-        //Log::doLog($srcDomElements);
     }
 
     /**
@@ -823,11 +997,13 @@ class QA {
      * @param int $srcNodeCount
      * @param int $trgNodeCount
      *
+     * @return int
      */
     protected function _checkTagCountMismatch( $srcNodeCount, $trgNodeCount) {
         if ($srcNodeCount != $trgNodeCount) {
             $this->_addError(self::ERR_COUNT);
         }
+        return $trgNodeCount - $srcNodeCount;
     }
 
     /**
@@ -975,8 +1151,10 @@ class QA {
      */
     public function getTrgNormalized(){
 
-        if( !$this->thereAreErrors() ){            
-            preg_match('/<root>(.*)<\/root>/u', $this->normalizedTrgDOM->saveXML(), $matches );
+        if( !$this->thereAreErrors() ){
+            //IMPORTANT NOTE :
+            //SEE http://www.php.net/manual/en/domdocument.savexml.php#88525
+            preg_match('/<root>(.*)<\/root>/u', $this->normalizedTrgDOM->saveXML($this->normalizedTrgDOM->documentElement), $matches );
             return stripslashes( $matches[1] );
         }
         

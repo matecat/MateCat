@@ -221,9 +221,10 @@ function getSegment( $id_segment ) {
 function getFirstSegmentOfFilesInJob( $jid ) {
     $db      = Database::obtain();
     $jid     = intval( $jid );
-    $query   = "select id_file, min( segments.id ) as first_segment
+    $query   = "select id_file, min( segments.id ) as first_segment, filename as file_name
                 from files_job
                 join segments using( id_file )
+                join files on files.id = id_file
                 where files_job.id_job = $jid
                 and segments.show_in_cattool = 1
                 group by id_file";
@@ -236,13 +237,10 @@ function getWarning( $jid ) {
     $db  = Database::obtain();
     $jid = $db->escape( $jid );
 
-    $query = "SELECT total, id_segment, serialized_errors_list as warnings FROM (
-                    SELECT Seg1.id_segment, Seg1.serialized_errors_list , SUM(CASE WHEN Seg1.warning != 0 THEN 1 ELSE 0 END) AS total
-                    FROM segment_translations AS Seg1
-                    WHERE Seg1.id_job = $jid
-                    AND Seg1.warning != 0
-                    GROUP BY Seg1.id_segment WITH ROLLUP
-                ) AS Seg2 ORDER BY total DESC, id_segment ASC LIMIT 11"; //+1 for RollUp
+    $query = "SELECT id_segment, serialized_errors_list
+                FROM segment_translations
+                WHERE id_job = $jid
+                AND warning != 0";
 
     $results = $db->fetch_array( $query );
 
@@ -702,28 +700,28 @@ function getStatsForJob( $id_job, $id_file = null ) {
 		select 
                 j.id,
 		SUM(
-				IF(st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count)
+				IF( st.eq_word_count IS NULL OR st.eq_word_count = 0 , s.raw_word_count, st.eq_word_count)
 		   ) as TOTAL, 
 		SUM(
 				IF(
 					st.status IS NULL OR 
 					st.status='DRAFT' OR 
 					st.status='NEW',
-					IF(st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count),0)
+					IF( st.eq_word_count IS NULL OR st.eq_word_count = 0 , s.raw_word_count, st.eq_word_count),0)
 		   ) as DRAFT,
 		SUM(
 				IF(st.status='REJECTED',
-					IF(st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count),0
+					IF( st.eq_word_count IS NULL OR st.eq_word_count = 0 , s.raw_word_count, st.eq_word_count),0
 				  )
 		   ) as REJECTED, 
 		SUM(
 				IF(st.status='TRANSLATED',
-					IF(st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count),0
+					IF( st.eq_word_count IS NULL OR st.eq_word_count = 0 , s.raw_word_count, st.eq_word_count),0
 				  )
 		   ) as TRANSLATED, 
 		SUM(
 				IF(st.status='APPROVED',
-					IF(st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count),0
+					IF( st.eq_word_count IS NULL OR st.eq_word_count = 0 , s.raw_word_count, st.eq_word_count),0
 				  )
 		   ) as APPROVED 
 
@@ -731,8 +729,6 @@ function getStatsForJob( $id_job, $id_file = null ) {
 			INNER JOIN files_job as fj on j.id=fj.id_job 
 			INNER join segments as s on fj.id_file=s.id_file 
 			LEFT join segment_translations as st on s.id=st.id_segment and st.id_job=j.id
-
-
 			WHERE j.id=$id_job";
 
     if( !empty($id_file) ){

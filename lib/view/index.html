@@ -8,31 +8,30 @@
         <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/jquery-ui.css?build=${build_number}" rel="stylesheet" type="text/css" />
-        <link href="${basepath}public/css/popup.css?build=${build_number}" rel="stylesheet" type="text/css" />
 
         <script type="text/javascript">
             /*<![CDATA[*/
             var config = {
-            basepath: '${basepath | string:/}',
-                    id_translator: '${tid | nothing}',
-                    private_translator: '${private_translator | string:0}',
-                    id_customer: '${id_customer | string:unknown_customer}',
-                    private_customer: '${private_customer | string:0}',
-                    last_opened_segment: '${last_opened_segment}',
-                    first_job_segment: '${first_job_segment}',
-                    server_load_time: '${load_time}',
-                    job_id: '${jid}',
-                    password: '${password}',
-                    source_lang: '${source}',
-                    target_lang: '${target}',
-                    time_to_edit_enabled: ${time_to_edit_enabled},
-                    build_number: '${build_number}',
-                    test: 'test',
-                    warningPollingInterval:'${warningPollingInterval}',
-                    segmentQACheckInterval: '${segmentQACheckInterval}',
-                    firstSegmentOfFiles: ${structure php: firstSegmentOfFiles}
+                basepath: '${basepath | string:/}',
+                id_translator: '${tid | nothing}',
+                private_translator: '${private_translator | string:0}',
+                id_customer: '${id_customer | string:unknown_customer}',
+                private_customer: '${private_customer | string:0}',
+                last_opened_segment: '${last_opened_segment}',
+                first_job_segment: '${first_job_segment}',
+                server_load_time: '${load_time}',
+                job_id: '${jid}',
+                password: '${password}',
+                source_lang: '${source}',
+                target_lang: '${target}',
+                time_to_edit_enabled: ${time_to_edit_enabled},
+                build_number: '${build_number}',
+                test: 'test',
+                warningPollingInterval:'${warningPollingInterval}',
+                segmentQACheckInterval: '${segmentQACheckInterval}',
+                firstSegmentOfFiles: ${structure php: firstSegmentOfFiles}
             };
-                    var renderStart = new Date();
+            var renderStart = new Date();
             /*]]>*/
         </script>
         <script src="${basepath}public/js/loader.js?build=${build_number}"></script>
@@ -444,16 +443,14 @@ Stay anonymous</a>
 <!--
 <div class="popup-outer"></div>
 <div class="popup">
+    <a href="#" class="x-popup"></a>
+    <h1>Warning</h1>
 
-<a href="#" class="x-popup"></a>
-<h1>Warning</h1>
+    <p>There are some potential errors (missing tags, numbers, etc). <br/>
+    Do you want to continue anyway?</p>
 
-<p>There are some potential errors (missing tags, numbers, etc). <br/>
-Do you want to continue anyway?</p>
-
-<a href="#" class="btn-ok">Ok</a>
-<a href="#" class="btn-cancel">Ops!</a>
-
+    <a href="#" class="btn-ok">Ok</a>
+    <a href="#" class="btn-cancel">Ops!</a>
 </div>
 -->
 <!-- FINE PREVIEW WARNING -->
@@ -469,6 +466,13 @@ Do you want to continue anyway?</p>
 
         <div class="grayed" ></div>
         <div class="blacked" ></div>
+
+        <ul id="contextMenu">
+            <li id="searchConcordance">
+                <span class="label">Concordance</span>
+                <span class="shortcut"><span class="alt">&#x2325;</span><span class="cmd">&#8984;</span> C</span>
+            </li>
+        </ul>
 
         <a id="segmentPointer" href="#" title="Go to the active segment"></a>
 

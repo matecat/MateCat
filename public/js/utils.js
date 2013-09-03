@@ -15,3 +15,46 @@ function fitText(container,child,limitHeight){
         child.text(child.text().replace(/(.)\[\.\.\.\](.)/,'[...]'));
     }
 }
+
+function popup(conf){
+/*
+        // 
+        {
+            type: '', // ?
+            width: '30%', // (optional) default is 500px in the css rule
+            title: '', // (optional)
+            nearTitleContent: [ // (optional) list of items, from left
+                                {
+                                    content: '',
+                                    callback: ''
+                                },
+                                ...
+                            ],
+            nearCloseContent: [ // (optional) list of items, from left
+                                {
+                                    content: '',
+                                    callback: ''
+                                },
+                                ...
+                            ],
+            content: '', // html
+            buttons:    [ // (optional) list from left
+                                {
+                                    type: '', // "ok" (default) or "cancel"
+                                    text: '', 
+                                    callback: '', // name of a UI function to execute
+                                    params: '' // (optional) parameters to pass at the callback function
+                                },
+                                ...                        
+                        ]
+        }
+ */
+        newPopup = '<div class="popup-outer"></div>' +
+                    '<div class="popup">' +
+                    '   <a href="#" class="x-popup"></a>' +
+                    '   <h1>' + title + '</h1>' +
+                    content;
+        $.each(buttons, function() {
+
+        });            
+}

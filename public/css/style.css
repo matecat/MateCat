@@ -529,6 +529,11 @@ section.loaded .submenu {display: block;}
 .submenu .on{background: #fff;color:#000;font-size:14px; text-shadow: none;}
 .notification{background:#f5f5f5 url(../img/point.gif) 0 0 repeat-x;-moz-border-radius: 2px;border-radius: 2px;display:block;float:left; color:#333 !important;height:16px; 
 padding:1px 6px !important;margin:5px 10px 0 -10px;text-shadow:none !important;}
+.submenu li a
+    {
+    outline: none;
+    }
+
 .submenu li.active a
     {
     background: #fbfbfb;
@@ -537,7 +542,9 @@ padding:1px 6px !important;margin:5px 10px 0 -10px;text-shadow:none !important;}
     -moz-box-shadow: none;
     -webkit-box-shadow: none;
     margin: 1px 0 -1px 0;
+    outline: none;
     }
+
 .sub-editor
     {
     display: none;
@@ -553,19 +560,24 @@ padding:1px 6px !important;margin:5px 10px 0 -10px;text-shadow:none !important;}
     }       
 .sub-editor .cc-search.loading
     {
-    background: url(../img/loading.gif) 47% 20px no-repeat;
+    background: url(../img/loading.gif) 49.7% 20px no-repeat;
     float: left;
     width: 100%;
     background-size: 20px 20px;
     }          
         
-.sub-editor .cc-search input
+.sub-editor .cc-search .search-target,
+.sub-editor .cc-search .search-source
     {
     float: left;
-    width: 37%;
-    margin: 20px 5%;
-    border: 1px solid #333;
-/*    border-radius: 10px;*/
+    width: 45.8%;
+    margin: 20px 1.5%;
+    border: 1px solid #aaa;
+    padding: 2px 0.4%;
+    border-radius: 2px;
+    box-shadow: inset 0 1px 2px #ddd;
+    -webkit-box-shadow: inset 0 1px 2px #ddd;
+    text-align: left;
     }           
         
 .content { float: left; clear: both; border: 1px solid #ccf; border-top: none; border-left: none; background: #eef; padding: 10px 20px 20px; width: 400px; }
@@ -804,13 +816,33 @@ section.status-new.opened .editarea
 	}
 
 .source{line-height:30px;padding-top:9px !important;}
-.editor .source{padding-top:4px !important;font-size:18px;   }
+.editor .source
+    {
+    padding-top: 4px !important;
+    font-size: 18px;
+    /*word-wrap: break-word;*/
+    /*word-break: normal;*/
+    }
 .grayed-text{color:#4c4c4c;}
 .textarea-container{height: inherit;table-layout: fixed;}
 .editor .textarea-container{position:relative;width:100%;float:left;padding-bottom:5px;}
 
 
-.text .item, .white li{width:45.5%;table-layout: fixed;float:none;margin:0px 1px 0px 0;padding:3px 20px;text-align:left;list-style:none;height:95%; word-wrap: break-word; word-break: break-word;}
+.text .item,
+.white li
+    {
+    width: 45.5%;
+    table-layout: fixed;
+    float: left;
+    margin: 0px 1px 0px 0;
+    padding: 3px 20px;
+    text-align: left;
+    list-style: none;
+    height: 95%;
+    outline: none;
+    word-wrap: break-word;
+    word-break: break-word;
+    }
 .text a{text-decoration:none;color:#000 }
 
 
@@ -831,9 +863,10 @@ section.status-new.opened .editarea
 	border:1px solid transparent;
 	-moz-border-radius: 2px;
 	border-radius: 2px;
-    word-wrap: break-word;
-    word-break: break-word;
- 	hyphens: auto;
+/*
+    word-break: break-all;
+*/
+    hyphens: auto;
   	-moz-hyphens: auto;
 	transition: all  50ms ease-in;
 	-webkit-transition: all  50ms ease-in;
@@ -865,11 +898,12 @@ section.status-new.opened .editarea
 	border:1px solid #727272;
 	box-shadow: inset 0 1px 2px #ccc;
 	-webkit-box-shadow: inset 0 1px 2px #ccc;
-	/*word-wrap:break-word;*/
 	transition:none;
 	-webkit-transition: none;
-	/*word-break: break-all;*/
-	}
+
+    /*word-break: normal;*/
+
+}
 
 .editarea:hover 
 	{
@@ -889,14 +923,18 @@ body.rtl-target .editor .editarea span
 textarea, input, .editarea, .search-editarea, select  {
 outline: none !important
 }
-.source{position:relative;z-index:999; word-wrap: break-word; word-break: break-word;
-}
+.source
+    {
+    position:relative;
+    z-index:999; 
+    /*word-break: break-all;*/
+    }
 .suggestion_source,
 .translation
 	{
     word-wrap: break-word;
     word-break: break-word;
-    }
+	}
 	
 .wrap {
     display: table;
@@ -1293,13 +1331,11 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 	font-style: italic;
 	padding-bottom: 3px;
 	vertical-align: middle;
-
-/*
-	margin-left: 2px !important;
-	margin-right: 2px !important;
-*/
 	}
-
+.editor .cc-search .input .locked
+	{
+	font-size: 70%;
+	}
 
 	
 .editor .editarea .locked.selected
@@ -1367,8 +1403,7 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 .number{left:-40px;	}
 .main{width:90.3%;margin-left:3%;}
 .number{left:-52px;}
-.editarea, .source{     word-wrap: break-word;
-    word-break: break-word;}
+.editarea, .source{ /* word-break: break-all */}
 .projectbar ul {margin-left:5px}
 .Translated, .draft, .approved{padding:7px 6px;}
 .meter {	width:10%;}
@@ -1512,3 +1547,4 @@ p.percent
     {
     background-position: -60px -210px;
     }
+

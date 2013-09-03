@@ -29,9 +29,8 @@ class Log {
         $now = date( 'Y-m-d H:i:s' );
         //$ip = gethostname(); // only for PHP 5.3
         $ip = php_uname( 'n' );
-        if ( array_key_exists( 'REMOTE_ADDR', $_SERVER ) ) {
-            $ip = $_SERVER[ 'REMOTE_ADDR' ];
-        }
+
+        $ip = Utils::getRealIpAddr();
 
         $stringDataInfo = "[$now ($ip)]";
 

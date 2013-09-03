@@ -456,6 +456,8 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
 
 
 .translate-box{float:left;margin:20px 30px 0px 0px}
+.translate-box.source{margin-right:0px}
+
 .wrapper-upload{text-align:left;margin:0 auto;width:92%;min-width:960px;position:relative;}
 .wrapper-upload h1{margin:0;padding:0;font-size:40px}
 
@@ -472,7 +474,7 @@ h2.payoff
 .uploadbtn:hover{-moz-box-shadow: 0 1px 2px #666;-webkit-box-shadow: 0 1px 2px #666;box-shadow: 0 1px 2px #666;background:#12b4df}
 .uploadbtn:active{-moz-box-shadow: inset 0 1px 1px #888;-webkit-box-shadow: inset 0 1px 1px #888;}
 .disabled, .disabled:hover, .disabled:active{cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;background:#ccc !important}
-.uploadbtn-box{text-align:center;float:right; margin-bottom: 40px;}
+.uploadbtn-box{text-align:center;float:right;}
 .uploadbtn-box p{text-align:center;margin:-2px 0 0 5px;font-size:13px;font-weight:normal;color:#999;display:none;text-align:center;}
 .uploadbtn-box:hover p{display:block;}
 
@@ -711,30 +713,19 @@ header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margi
 .logo{float:left;margin-top:5px;border:0;background:url(../img/logo.png) 0px 2px no-repeat;width:145px;height:31px; background-size: 130px 26px;}
 
 /*supported formats*/
-.popup
-	{
-	display:none;
-	height:auto;
-	width:850px;
-	margin:0 auto;
-	position:fixed;
-	padding:0 0 20px 0;
-	top:50%;
-	left:50%;
-	margin:-250px 0 0 -450px;
-	z-index:9999;
-	background:#fff;
-	box-shadow: 0px 0px 25px #000;
-	border-radius:2px;
-	}
-	.popup-languages
-		{
-		top: 37%;
-		left: 31%;
-		width: auto !important;
-		margin: -200px 6% 0 -25%;
-		overflow: visible;
-		}
+.supported-formats .popup
+    {
+    top: 41%;
+    left: 38%;
+    width: 850px;
+    }
+.popup-languages .popup
+    {
+    width: 90% !important;
+    margin: 0 !important;
+    left: 5% !important;
+    top: 10%;
+    }
 
 .popup h3
 	{
@@ -745,18 +736,19 @@ header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margi
 
 .popup .header
 	{
-	width:100%; 
-	height:20px;
-	float:left;
-	text-align:left;
-	background:#efefef;
-	border-bottom:1px solid #ccc;
-	margin-bottom:5px;
+	width: 96.2%; 
+	height: 20px;
+	float: left;
+	text-align: left;
+	background: #efefef;
+	border-bottom: 1px solid #ccc;
+	margin-bottom: 5px;
 	-webkit-box-shadow: inset 0 1px 1px 1px #f4f7f9;
 	box-shadow: inset 0 1px 1px 1px #f4f7f9;
-	color:#333;
-	font-size:22px;
-	font-weight:bold;padding:5px 2.5% 10px 1.3%;
+	color: #333;
+	font-size: 22px;
+	font-weight: bold;
+    padding: 5px 2.5% 10px 1.3%;
 	}
 	.popup-languages .header
 		{
@@ -784,8 +776,8 @@ header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margi
 
 .popup ul li
 	{
-	margin:3px 0px 3px 2px;
-	padding:2px 5px;
+	margin: 3px 0px 3px 2px;
+	padding: 1px 5px;
 	}
 	.popup-languages ul li
 		{
@@ -798,7 +790,7 @@ header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margi
     margin-left: 30px;
     font-size: 70%;
     font-weight: normal;
-    color: #333;
+    color: #fff;
     }
         
 .supported-formats ul li:nth-child(2n+1)
@@ -841,17 +833,19 @@ header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margi
 		background: #ccc;
 		}		
 
-.listlang  label
-	{
-	float: right;
+.listlang label
+    {
+    float: right;
     text-align: left;
-	cursor:pointer;
-	width: 88%;
-	}
+    cursor: pointer;
+    width: 88%;
+    padding-left: 0%;
+    }
 
 .listlang input
 	{
 	float: left;
+    margin-top: 8px;
 	}
 .popup .header input
 	{
@@ -913,13 +907,29 @@ footer a:hover{text-decoration:none}
 #create_private_tm_btn
 	{
 	width: 250px;
-	}
+	}    
+
+#swaplang
+    {
+    float: left;
+    text-indent: -9999px;
+    display: block;
+    width: 15px;
+    height: 18px;
+    margin: 56px 10px 0 10px;
+    background: url(../img/swap.png) 0 0px no-repeat;
+    opacity: 0.5;
+    }
+    #swaplang:hover {
+        opacity: 1;
+    }
 
 /* job list table when analyze page is not available */
-.tablestats {display:none;border-right: 1px solid #ccc; -moz-border-radius: 4px;border-radius: 4px;margin-bottom: 40px !important;margin-top: 20px !important;float:right;}
+.tablestats {display:none;border-right: 1px solid #ccc; -moz-border-radius: 4px;border-radius: 4px;margin-bottom: 4px !important;margin-top: 20px !important;float:right;}
 .tablestats th {background-color: #efefef;font-size: 16px;border-top: 1px solid #ccc;}
 .tablestats th, .tablestats td {border-bottom: 1px solid #ccc;border-left: 1px solid #ccc;padding: 8px;margin: 1px 0;text-align: left;}
 .tablestats td {font-size: 14px;}
 .newProject{right:20px;float:right;}
 .tablestats a.url{font-size: 14px;}
 .disabledLink{color:gray;text-decoration:none;background:none;cursor: default;}
+
