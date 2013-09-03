@@ -224,7 +224,7 @@ class getContributionController extends ajaxcontroller {
 
     private function setSuggestionReport($matches) {
         if (count($matches) > 0) {
-            log::dolog($matches);
+
             foreach ($matches as $k => $m){
                 $matches[$k]['raw_translation']=  CatUtils::view2rawxliff($matches[$k]['raw_translation']);
             }

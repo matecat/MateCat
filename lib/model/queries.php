@@ -702,28 +702,28 @@ function getStatsForJob( $id_job, $id_file = null ) {
 		select 
                 j.id,
 		SUM(
-				IF(st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count)
+				IF( st.eq_word_count IN (NULL,0,'') , s.raw_word_count, st.eq_word_count)
 		   ) as TOTAL, 
 		SUM(
 				IF(
 					st.status IS NULL OR 
 					st.status='DRAFT' OR 
 					st.status='NEW',
-					IF(st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count),0)
+					IF( st.eq_word_count IN (NULL,0,'') , s.raw_word_count, st.eq_word_count),0)
 		   ) as DRAFT,
 		SUM(
 				IF(st.status='REJECTED',
-					IF(st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count),0
+					IF( st.eq_word_count IN (NULL,0,'') , s.raw_word_count, st.eq_word_count),0
 				  )
 		   ) as REJECTED, 
 		SUM(
 				IF(st.status='TRANSLATED',
-					IF(st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count),0
+					IF( st.eq_word_count IN (NULL,0,'') , s.raw_word_count, st.eq_word_count),0
 				  )
 		   ) as TRANSLATED, 
 		SUM(
 				IF(st.status='APPROVED',
-					IF(st.eq_word_count IS NULL, s.raw_word_count, st.eq_word_count),0
+					IF( st.eq_word_count IN (NULL,0,'') , s.raw_word_count, st.eq_word_count),0
 				  )
 		   ) as APPROVED 
 
