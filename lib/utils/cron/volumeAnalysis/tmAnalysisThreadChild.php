@@ -148,8 +148,8 @@ while (1) {
     }
 
     /* New Feature */
-    $matchVal = floatval( $matches[ 0 ][ 'match' ] );
-    if ( isset( $matches[ 0 ] ) && $matchVal >= 90 && $matchVal < 100 ) {
+    ( isset($matches[ 0 ]['match']) ? $firstMatchVal = floatval( $matches[ 0 ]['match'] ) : null );
+    if( isset( $firstMatchVal ) && $firstMatchVal >= 90 && $firstMatchVal < 100 ){
 
         $srcSearch    = strip_tags( $text );
         $segmentFound = strip_tags( $matches[ 0 ][ 'raw_segment' ] );
