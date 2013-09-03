@@ -72,7 +72,8 @@
                     <th>% of MT</th>
                     <th>% of TM</th>
                     <th>Total Time-to-edit</th>
-                    <th>Avg PE Effort %</th>
+                    <th>Avg PEE %</th>
+                    <th>Avg TER %</th>
                     <th>% of words in too SLOW edits</th>
                     <th>% of words in too FAST edits</th>
                 </tr>
@@ -83,6 +84,7 @@
                     <td><span tal:replace="stats/tm-words | string:--"></span>%</td>
                     <td><span tal:replace="stats/total-valid-tte | string:--"></span></td>
                     <td><span tal:replace="stats/avg-pee | string:--"></span></td>
+                    <td><span tal:replace="stats/avg-ter | string:--"></span></td>
                     <td><span tal:replace="stats/too-slow-words | string:--"></span>%</td>
                     <td><span tal:replace="stats/too-fast-words | string:--"></span>%</td>
                 </tr>
@@ -102,7 +104,8 @@
                         <th>Suggestion source</th>
                         <th>Match percentage</th>
                         <th>Time-to-edit</th>
-                        <th>Post-editing effort</th>
+                        <th>PE Effort</th>
+                        <th>TER <span style="font-size: 80%">(Beta)</span></th>
                     </tr>
 
                     <tr>
@@ -114,6 +117,7 @@
                         <td tal:content="file_data/sm | default">%</td>
                         <td tal:content="file_data/time_to_edit"></td>
                         <td tal:content="file_data/pe_effort_perc | default">%</td>
+                        <td tal:content="file_data/ter | default">%</td>
                     </tr>
                 </table>
 
@@ -134,7 +138,7 @@
                     </tr>
                     <tr>
                         <th style="width: 100px">Diff View</th>
-                        <td style="text-align:left;font-size:16px;" tal:content="structure file_data/diff_view | default">N/A</td>
+                        <td style="text-align:left;font-size:16px;" tal:content="structure file_data/diff | default">N/A</td>
 
                     </tr>					
                 </table>

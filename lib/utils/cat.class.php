@@ -14,28 +14,26 @@ class CatUtils {
     //following functions are useful for manage the consistency of non braking spaces
     // chars coming, expecially,from MS Word
     // ref nbsp code https://en.wikipedia.org/wiki/Non-breaking_space
-    public static function placeholdnbsp($s) {        
+    public static function placeholdnbsp($s) {
         $s = preg_replace("/\x{a0}/u", NBSPPLACEHOLDER, $s);
         return $s;
     }
-    
-     
 
     public static function restorenbsp($s) {
-        $pattern="#".NBSPPLACEHOLDER."#";
+        $pattern = "#" . NBSPPLACEHOLDER . "#";
         $s = preg_replace($pattern, Utils::unicode2chr(0Xa0), $s);
         return $s;
     }
-    
+
     // ----------------------------------------------------------------
-    
-    public static function placeholdamp($s) {        
+
+    public static function placeholdamp($s) {
         $s = preg_replace("/\&/", AMPPLACEHOLDER, $s);
         return $s;
     }
-    
-      public static function restoreamp($s) {
-        $pattern="#".AMPPLACEHOLDER."#";
+
+    public static function restoreamp($s) {
+        $pattern = "#" . AMPPLACEHOLDER . "#";
         $s = preg_replace($pattern, Utils::unicode2chr("&"), $s);
         return $s;
     }
@@ -177,11 +175,11 @@ class CatUtils {
 
     public static function rawxliff2view($segment) {
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
-        $segment=self::placehold_xml_entities($segment);
+        $segment = self::placehold_xml_entities($segment);
         $segment = self::placehold_xliff_tags($segment);
         
         
-        $segment = html_entity_decode($segment, ENT_NOQUOTES |16, 'UTF-8');
+        $segment = html_entity_decode($segment, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8');
         // restore < e >
         $segment = str_replace("<", "&lt", $segment);
         $segment = str_replace(">", "&gt", $segment);
@@ -288,20 +286,28 @@ class CatUtils {
             $seg['pe_effort_perc'] .= "%";
 
 
+
+            $sug_for_diff = self::placehold_xliff_tags($seg['sug']);
+            $tra_for_diff = self::placehold_xliff_tags($seg['translation']);
+            $ter = MyMemory::diff_tercpp($sug_for_diff, $tra_for_diff);
+            $seg['ter'] = $ter[1] * 100;
+            $stat_ter[] = $seg['ter'] * $seg['rwc'];
+            $seg['ter'] = round($ter[1] * 100) . "%";
+            $diff_ter = $ter[0];
+
             if ($seg['sug'] <> $seg['translation']) {
-                $sug_for_diff=self::placehold_xliff_tags($seg['sug']);
-                $tra_for_diff=self::placehold_xliff_tags($seg['translation']);
-                $seg['diff'] = MyMemory::diff_tercpp($sug_for_diff, $tra_for_diff);
-                if (!$seg['diff']) {
-                    // TER NOT WORKING : fallback to old diff viewer
-                    $seg['diff'] = MyMemory::diff_html($sug_for_diff, $tra_for_diff);
-                }
+                
+                $diff_PE = MyMemory::diff_html($sug_for_diff, $tra_for_diff);
+
+                // we will use diff_PE until ter_diff will not work properly
+                $seg['diff'] = $diff_PE;
+                //$seg['diff'] = $diff_ter;
             } else {
                 $seg['diff'] = '';
             }
-            $seg['diff_view']= self::restore_xliff_tags_for_wiew($seg['diff']);
+            $seg['diff'] = self::restore_xliff_tags_for_wiew($seg['diff']);
+            //     echo $seg['diff']; exit;
             //$seg['diff_view']= CatUtils::rawxliff2rawview($seg['diff']);
-
             // BUG: While suggestions source is not correctly set
             if (($seg['sm'] == "85%") OR ($seg['sm'] == "86%")) {
                 $seg['ss'] = 'Machine Translation';
@@ -310,10 +316,9 @@ class CatUtils {
                 $seg['ss'] = 'Translation Memory';
             }
 
-            $seg['sug_view'] = trim( CatUtils::rawxliff2view($seg['sug']) );
-            $seg['source'] = trim( CatUtils::rawxliff2view( $seg['source'] ) );
-            $seg['translation'] = trim( CatUtils::rawxliff2view( $seg['translation'] ) );
-
+            $seg['sug_view'] = trim(CatUtils::rawxliff2view($seg['sug']));
+            $seg['source'] = trim(CatUtils::rawxliff2view($seg['source']));
+            $seg['translation'] = trim(CatUtils::rawxliff2view($seg['translation']));
         }
 
         $stats['edited-word-count'] = array_sum($stat_rwc);
@@ -323,7 +328,12 @@ class CatUtils {
             $stats['too-slow-words'] = round(array_sum($stat_too_slow) / $stats['edited-word-count'], 2) * 100;
             $stats['too-fast-words'] = round(array_sum($stat_too_fast) / $stats['edited-word-count'], 2) * 100;
             $stats['avg-pee'] = round(array_sum($stat_pee) / array_sum($stat_rwc)) . "%";
+            $stats['avg-ter'] = round(array_sum($stat_ter) / array_sum($stat_rwc)) . "%";
         }
+//        echo array_sum($stat_ter);
+//        echo "@@@";
+//        echo array_sum($stat_rwc);
+//        exit;
 
         $stats['mt-words'] = round(array_sum($stat_mt) / $stats['edited-word-count'], 2) * 100;
         $stats['tm-words'] = 100 - $stats['mt-words'];
@@ -445,7 +455,6 @@ class CatUtils {
         }
         
         return $res_job_stats;
-        
     }
     
     /**
@@ -563,7 +572,7 @@ class CatUtils {
      * 
      * 
      * @param int $jid
-     * 
+     * @param int $fid
      * @return mixed $job_stats
      *
      * <pre>

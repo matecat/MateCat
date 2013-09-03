@@ -50,7 +50,6 @@ class getContributionController extends ajaxcontroller {
 		if ($this->id_translator == 'unknown_translator') {
 			$this->id_translator = "";
 		}
-
 	}
 
 	public function doAction() {
