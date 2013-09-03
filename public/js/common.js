@@ -83,11 +83,6 @@ APP = {
         return '&time=' + t.getTime();
     },
     popup: function(conf) {
-        this.closePopup();
-//        $('.modal[data-type=view]').hide();
-//        $('.modal:not([data-type=view])').remove();
-//        $('.popup.hide, .popup-outer.hide').hide();
-//        $('.popup:not(.hide), .popup-outer:not(.hide)').remove();
 
 /*
         // 
@@ -97,20 +92,6 @@ APP = {
             width: '30%', // (optional) default is 500px in the css rule
             title: '', // (optional)
             onConfirm: 'functionName' // (optional) UI function to call after confirmation. Confirm value is anyway stored in APP.confirmValue, but a UI function can be automatically called when the user confirm true or false (checks are done every 0.2 seconds)
-            nearTitleContent: [ // (optional) list of items, from left
-                                {
-                                    content: '',
-                                    callback: ''
-                                },
-                                ...
-                            ],
-            nearCloseContent: [ // (optional) list of items, from left
-                                {
-                                    content: '',
-                                    callback: ''
-                                },
-                                ...
-                            ],
             content: '', // html
             buttons:    [ // (optional) list from left
                                 {
@@ -123,6 +104,8 @@ APP = {
                         ]
         }
  */
+        this.closePopup();
+
         newPopup = '<div class="modal"' + ((conf.type == 'alert')? ' data-type="alert"' : (conf.type == 'confirm')? ' data-type="confirm"' : '') + '>' +
                     '   <div class="popup-outer"></div>' +
                     '   <div class="popup' + ((conf.type == 'alert')? ' popup-alert' : (conf.type == 'confirm')? ' popup-confirm' : '') + '">' +

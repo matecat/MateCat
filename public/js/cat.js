@@ -457,11 +457,11 @@ UI = {
                 UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
             }
             setTimeout(function() {
-                UI.lockTags();
+                UI.lockTags(UI.editarea);
             }, 10);
             UI.registerQACheck();        
         }).on('input', '.editor .cc-search .input', function(e) {
-            UI.markTagsInSearch();
+            UI.markTagsInSearch($(this));
         }).on('dblclick', '.source', function(e) {
 //            console.log(window.getSelection());
 //            console.log(window.getSelection().extentOffset);
@@ -550,7 +550,7 @@ UI = {
             UI.changeStatus(this, 'translated', 0);
 
             UI.markTags();
-            UI.lockTags();
+            UI.lockTags(UI.editarea);
             UI.changeStatusStop = new Date();
             UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
 //            if(UI.segmentIsLoaded(UI.nextSegmentId)) console.log('UI.segmentIsLoaded(UI.nextSegmentId): ', UI.segmentIsLoaded(UI.nextSegmentId));
@@ -665,7 +665,7 @@ UI = {
             setTimeout(function() {
                 UI.saveInUndoStack('paste');
             }, 100);
-            UI.lockTags();
+            UI.lockTags(UI.editarea);
         }).on('click', 'a.close', function(e,param) {
             e.preventDefault();
             var save = (typeof param == 'undefined')? 'noSave' : param;
@@ -837,7 +837,7 @@ UI = {
     },
     chooseSuggestion: function(w) {
         this.copySuggestionInEditarea(this.currentSegment, $('.editor ul[data-item=' + w + '] li.b .translation').text(), $('.editor .editarea'), $('.editor ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
-        this.lockTags();
+        this.lockTags(this.editarea);
         this.setChosenSuggestion(w);
 
         this.editarea.focus().effect("highlight", {}, 1000);
@@ -932,7 +932,7 @@ UI = {
         this.currentSegment.addClass('modified');
         this.currentSegmentQA();
         this.setChosenSuggestion(0);
-        this.lockTags();
+        this.lockTags(this.editarea);
     },
     copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
 
@@ -1165,7 +1165,7 @@ UI = {
     getContribution_success: function(d, segment) {
         this.renderContributions(d, segment);
         if($(segment).attr('id').split('-')[1] == UI.currentSegmentId) this.currentSegmentQA();
-        this.lockTags();
+        this.lockTags(this.editarea);
         this.saveInUndoStack();
 
         this.blockButtons = false;
@@ -1401,48 +1401,47 @@ UI = {
         } else {
             return true;
         }
-        ;
-
     },
-    lockTags: function() {
-
-        //    	if(UI.isFirefox) return;
+    lockTags: function(el) {
+        editarea = (typeof el == 'undefined')? UI.editarea : el;
         if (!this.taglockEnabled)
             return false;
         if (this.noTagsInSegment())
             return false;
+        $(editarea).each(function(index) {
+            saveSelection();
 
-        saveSelection();
+            var tx = $(this).html();
 
-        var tx = this.editarea.html();
+            tx = tx.replace(/\<span/gi, "<pl")
+                    .replace(/\<\/span/gi, "</pl")
+                    .replace(/&lt;/gi, "<")
+                    .replace(/(\<(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid[^<]*?&gt;)/gi, "<pl contenteditable=\"false\" class=\"locked\">$1</pl>")
+                    .replace(/\</gi, "&lt;")
+                    .replace(/\&lt;pl/gi, "<span")
+                    .replace(/\&lt;\/pl/gi, "</span")
+                    .replace(/\&lt;div\>/gi, "<div>")
+                    .replace(/\&lt;\/div\>/gi, "</div>")
+                    .replace(/\&lt;br\>/gi, "<br>")
 
-        tx = tx.replace(/\<span/gi, "<pl")
-                .replace(/\<\/span/gi, "</pl")
-                .replace(/&lt;/gi, "<")
-                .replace(/(\<(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid[^<]*?&gt;)/gi, "<pl contenteditable=\"false\" class=\"locked\">$1</pl>")
-                .replace(/\</gi, "&lt;")
-                .replace(/\&lt;pl/gi, "<span")
-                .replace(/\&lt;\/pl/gi, "</span")
-                .replace(/\&lt;div\>/gi, "<div>")
-                .replace(/\&lt;\/div\>/gi, "</div>")
-                .replace(/\&lt;br\>/gi, "<br>")
-
-                // encapsulate tags of closing
-                .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>");
+                    // encapsulate tags of closing
+                    .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>");
 
 
-        if (UI.isFirefox) {
-            tx = tx.replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>");
-            tx = tx.replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>");
-        } else {
-            // fix nested encapsulation
-            tx = tx.replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>");
-            tx = tx.replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>");
-        }
+            if (UI.isFirefox) {
+                tx = tx.replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>");
+                tx = tx.replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>");
+            } else {
+                // fix nested encapsulation
+                tx = tx.replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>");
+                tx = tx.replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>");
+            }
 
-        tx = tx.replace(/(\<\/span\>)$(\s){0,}/gi, "</span> ");
-        this.editarea.html(tx);
-        restoreSelection();
+            tx = tx.replace(/(\<\/span\>)$(\s){0,}/gi, "</span> ");
+            $(this).html(tx);
+            restoreSelection();
+        })        
+
     },
     markSuggestionTags: function(segment) {
         if (!this.taglockEnabled)
@@ -1485,12 +1484,11 @@ UI = {
             $(area).html($(area).html().replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
             $(area).html($(area).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
     },
-    markTagsInSearch: function() {
+    markTagsInSearch: function(el) {
         if (!this.taglockEnabled)
             return false;
-        if (this.noTagsInSegment(1))
-            return false;
-        $('.editor .cc-search .input').each(function() {
+        var elements = (typeof el == 'undefined')? $('.editor .cc-search .input') : el;
+        elements.each(function() {
             UI.detectTags(this);
         });
     },
@@ -1633,7 +1631,7 @@ UI = {
         this.render(false);
     },
     reloadWarning: function() {
-        var m = confirm('The next untranslated segment is outside the current view.');
+        var m = APP.confirm('The next untranslated segment is outside the current view.');
         if (m) {
             this.infiniteScroll = false;
             config.last_opened_segment = this.nextSegmentId;
@@ -2822,7 +2820,7 @@ function rawxliff2rawview(segment) { // currently unused
     segment = restore_xliff_tags_for_view(segment);
     return segment;
 }
-
+/*
 function checkLockability(html) {
 
     if (UI.editarea.text() == '')
@@ -2845,19 +2843,22 @@ function checkLockability(html) {
     return lockable;
 
 }
-
-function saveSelection() {
+*/
+function saveSelection(el) {
+    console.log('UI.savedSel 1: ', UI.savedSel);
+    var editarea = (typeof editarea == 'undefined')? UI.editarea : el;
     if (UI.savedSel) {
         rangy.removeMarkers(UI.savedSel);
     }
     UI.savedSel = rangy.saveSelection();
     // this is just to prevent the addiction of a couple of placeholders who may sometimes occur for a Rangy bug
-    UI.editarea.html(UI.editarea.html().replace(UI.cursorPlaceholder, ''));
+    editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
 
     UI.savedSelActiveElement = document.activeElement;
 }
 
 function restoreSelection() {
+    console.log('UI.savedSel 2: ', UI.savedSel);
     if (UI.savedSel) {
         rangy.restoreSelection(UI.savedSel, true);
         UI.savedSel = null;
