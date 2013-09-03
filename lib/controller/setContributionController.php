@@ -39,7 +39,7 @@ class setContributionController extends ajaxcontroller {
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        //NOTE: This is only for debug purpose only,
+        //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI Test scripts
         //$this->__postInput = filter_var_array( $_POST, $filterArgs );
 

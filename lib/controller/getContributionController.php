@@ -35,7 +35,7 @@ class getContributionController extends ajaxcontroller {
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        //NOTE: This is only for debug purpose only,
+        //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
         //$this->__postInput = filter_var_array( $_POST, $filterArgs );
 
@@ -146,11 +146,12 @@ class getContributionController extends ajaxcontroller {
 		}
 		$matches = array_slice( $matches, 0, $this->num_results );
 
-        $matchVal = floatval( $matches[0]['match'] );
-        if( isset( $matches[0] ) && $matchVal >= 90 && $matchVal < 100 ){
+        $firstMatch = ( isset($matches[0]) ? $matches[0] : array() );
+        $matchVal = floatval( @$firstMatch['match'] );
+        if( isset( $firstMatch ) && $matchVal >= 90 && $matchVal < 100 ){
 
             $srcSearch = strip_tags($this->text);
-            $segmentFound = strip_tags($matches[0]['raw_segment']);
+            $segmentFound = strip_tags($firstMatch['raw_segment']);
             $srcSearch = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $srcSearch ) );
             $segmentFound = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $segmentFound ) );
 
@@ -158,7 +159,7 @@ class getContributionController extends ajaxcontroller {
 
             if( $srcSearch == $segmentFound || $fuzzy < 2.5 ){
 
-                $qaRealign = new QA( $this->text, html_entity_decode( $matches[0]['raw_translation'] ) );
+                $qaRealign = new QA( $this->text, html_entity_decode( $firstMatch['raw_translation'] ) );
                 $qaRealign->tryRealignTagID();
 
                 $log_prepend = "CLIENT REALIGN IDS PROCEDURE | ";
@@ -167,14 +168,14 @@ class getContributionController extends ajaxcontroller {
                     Log::doLog( $log_prepend . " - Requested Segment: " . var_export( $this->__postInput, true) );
                     Log::doLog( $log_prepend . "Fuzzy: " . $fuzzy .  " - Try to Execute Tag ID Realignment." );
                     Log::doLog( $log_prepend . "TMS RAW RESULT:" );
-                    Log::doLog( $log_prepend . var_export($matches[0], true) );
+                    Log::doLog( $log_prepend . var_export($firstMatch, true) );
 
                     Log::doLog( $log_prepend . "Realignment Success:");
-                    $matches[0]['segment'] = CatUtils::rawxliff2view( $this->text );
-                    $matches[0]['translation'] = CatUtils::rawxliff2view( $qaRealign->getTrgNormalized() );
-                    $matches[0]['match'] = ( $fuzzy == 0 ? '100%' : '99%' );
-                    Log::doLog( $log_prepend . "View Segment:     " . var_export($matches[0]['segment'], true) );
-                    Log::doLog( $log_prepend . "View Translation: " . var_export($matches[0]['translation'], true) );
+                    $firstMatch['segment'] = CatUtils::rawxliff2view( $this->text );
+                    $firstMatch['translation'] = CatUtils::rawxliff2view( $qaRealign->getTrgNormalized() );
+                    $firstMatch['match'] = ( $fuzzy == 0 ? '100%' : '99%' );
+                    Log::doLog( $log_prepend . "View Segment:     " . var_export($firstMatch['segment'], true) );
+                    Log::doLog( $log_prepend . "View Translation: " . var_export($firstMatch['translation'], true) );
 
                 } else {
                     Log::doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $this->__postInput['id_segment'] );
@@ -221,14 +222,21 @@ class getContributionController extends ajaxcontroller {
 
 	private function setSuggestionReport($matches) {
 		if (count($matches) > 0) {
-			$suggestions_json_array = json_encode($matches);
-			$match = $matches[0];
-			$suggestion = $match['translation'];
-			$suggestion_match = $match['match'];
-			$suggestion_source = $match['created_by'];
-			$ret = CatUtils::addTranslationSuggestion($this->id_segment, $this->id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source);
-			return $ret;
+
+            foreach ( $matches as $k => $m ) {
+                $matches[ $k ][ 'raw_translation' ] = CatUtils::view2rawxliff( $matches[ $k ][ 'raw_translation' ] );
+            }
+
+            $suggestions_json_array = json_encode( $matches );
+            $match = $matches[ 0 ];
+
+            $suggestion        = $match[ 'raw_translation' ];
+            $suggestion_match  = $match[ 'match' ];
+            $suggestion_source = $match[ 'created_by' ];
+            $ret               = CatUtils::addTranslationSuggestion( $this->id_segment, $this->id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source );
+            return $ret;
 		}
+
 		return 0;
 	}
 

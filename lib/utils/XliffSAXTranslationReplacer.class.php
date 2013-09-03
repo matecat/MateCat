@@ -164,7 +164,7 @@ class XliffSAXTranslationReplacer{
 			if(!$this->inTarget){
 				//add ending tag
 				$tag="</$name>";
-			} //Log::doLog($this->segments); Log::doLog($this->currentId); die();
+			}
 			//if it's a source and there is a translation available, append the target to it
 			if('target'==$name){
 				if(isset($this->segments[ 'matecat|' . $this->currentId ] )){
