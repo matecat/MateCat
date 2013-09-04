@@ -151,7 +151,6 @@ class INIT {
                 'dotx' => array(''),
                 'docm' => array(''),
                 'dotm' => array(''),
-//                'rtf' => array(''),
                 'pdf' => array(''),
                 'xls' => array(''),
                 'xlt' => array(''),
