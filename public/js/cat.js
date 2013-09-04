@@ -231,8 +231,28 @@ UI = {
                 $('html').unbind('click.vediamo');
                 UI.removeStatusMenu(statusMenu);
             });
+        }).on('blur', '.graysmall .translation', function(e) {
+            e.preventDefault();
+            UI.closeInplaceEditor($(this));
+        }).on('click', '.graysmall .switch-editing', function(e) {
+            e.preventDefault();
+            ed = $(this).parent().find('.translation');
+            if(ed.hasClass('editing')) {
+                UI.closeInplaceEditor(ed);
+            } else {
+                UI.openInplaceEditor(ed);
+            }
+        }).on('click', '.graysmall .edit-buttons .cancel', function(e) {
+            e.preventDefault();
+            UI.closeInplaceEditor($(this).parents('.graysmall').find('.translation'));
+        }).on('click', '.graysmall .edit-buttons .save', function(e) {
+            e.preventDefault();
+            console.log('save');
+            ed = $(this).parents('.graysmall').find('.translation');
+            UI.editContribution(UI.currentSegment, $(this).parents('.graysmall'));
+            UI.closeInplaceEditor(ed);
         });
-
+  
         $(".joblink").click(function(e) {
             e.preventDefault();
             $(".joblist").toggle();
@@ -1479,6 +1499,18 @@ UI = {
             UI.detectTags(this);
         });
     },
+    closeInplaceEditor: function(ed) {
+        $(ed).removeClass('editing');
+        $(ed).attr('contenteditable', false);
+        $('.graysmall .edit-buttons').remove();
+    },
+    openInplaceEditor: function(ed) {
+        $('.graysmall .translation.editing').each(function() {
+            UI.closeInplaceEditor($(this));
+        });
+        $(ed).addClass('editing').attr('contenteditable', true).after('<span class="edit-buttons"><button class="cancel">Cancel</button><button class="save">Save</button></span>');
+        $(ed).focus();
+    },
     detectTags: function(area) {
             $(area).html($(area).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
             $(area).html($(area).html().replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
@@ -1685,7 +1717,7 @@ UI = {
             var rightTxt = (in_target)? this.segment : this.translation;
             rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
             rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
-            $('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+            $('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><span class="switch-editing">Edit</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
         });
         $('.cc-search', this.currentSegment).removeClass('loading');
         this.setDeleteSuggestion(segment);
@@ -1730,7 +1762,7 @@ UI = {
                 }
                 // Attention Bug: We are mixing the view mode and the raw data mode.
                 // before doing a enanched view you will need to add a data-original tag
-                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + this.segment + '</span></li><li class="b sugg-target"><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + this.translation + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + this.segment + '</span></li><li class="b sugg-target"><span class="switch-editing">Edit</span><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + this.translation + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
             });
             UI.markSuggestionTags(segment);
             UI.setDeleteSuggestion(segment);
@@ -1910,7 +1942,6 @@ UI = {
         if ((status == 'draft') || (status == 'rejected'))
             return false;
         var source = $('.source', segment).text();
-        source = view2rawxliff(source);
         // Attention: to be modified when we will be able to lock tags.
         var target = $('.editarea', segment).text();
         if ((target == '') && (byStatus)) {
@@ -1918,16 +1949,17 @@ UI = {
         }
         if (target == '') {
             return false;
-        }
+        }            
+        this.updateContribution(source, target);
+    },
+    editContribution: function(segment, contribution) {
+        source = $('.suggestion_source',contribution).text();
+        target = $('.translation',contribution).text();
+        this.updateContribution(source, target);
+    },
+    updateContribution: function(source, target) {
+        source = view2rawxliff(source);
         target = view2rawxliff(target);
-        var languages = $(segment).parents('article').find('.languages');
-        var source_lang = $('.source-lang', languages).text();
-        var target_lang = $('.target-lang', languages).text();
-        var id_translator = config.id_translator;
-        var private_translator = config.private_translator;
-        var id_customer = config.id_customer;
-        var private_customer = config.private_customer;
-
         APP.doRequest({
             data: {
                 action: 'setContribution',
@@ -1937,10 +1969,10 @@ UI = {
                 source_lang: config.source_lang,
                 target_lang: config.target_lang,
                 password: config.password,
-                id_translator: id_translator,
-                private_translator: private_translator,
-                id_customer: id_customer,
-                private_customer: private_customer
+                id_translator: config.id_translator,
+                private_translator: config.private_translator,
+                id_customer: config.id_customer,
+                private_customer: config.private_customer
             },
             success: function(d) {
                 if(d.error.length) 
@@ -2845,7 +2877,7 @@ function checkLockability(html) {
 }
 */
 function saveSelection(el) {
-    console.log('UI.savedSel 1: ', UI.savedSel);
+//    console.log('UI.savedSel 1: ', UI.savedSel);
     var editarea = (typeof editarea == 'undefined')? UI.editarea : el;
     if (UI.savedSel) {
         rangy.removeMarkers(UI.savedSel);
@@ -2858,7 +2890,7 @@ function saveSelection(el) {
 }
 
 function restoreSelection() {
-    console.log('UI.savedSel 2: ', UI.savedSel);
+//    console.log('UI.savedSel 2: ', UI.savedSel);
     if (UI.savedSel) {
         rangy.restoreSelection(UI.savedSel, true);
         UI.savedSel = null;

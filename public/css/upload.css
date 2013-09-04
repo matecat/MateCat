@@ -717,7 +717,7 @@ header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margi
     {
     top: 41%;
     left: 38%;
-    width: 850px;
+    width: auto;
     }
 .popup-languages .popup
     {
