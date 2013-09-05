@@ -24,6 +24,8 @@ class downloadFileStreamOnDiskController extends downloadController {
 		$this->filename = $this->fname;
 		$this->password = $this->get_from_get_post("password");
 
+		$this->download_type = $this->get_from_get_post("download_type");
+
 		if (empty($this->id_job)) {
 			$this->id_job = "Unknown";
 		}
@@ -80,9 +82,8 @@ class downloadFileStreamOnDiskController extends downloadController {
 
 			$debug['get_segments'][]=time();
 			//create a secondary indexing mechanism on segments' array; this will be useful
-            //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
 			foreach($data as $i=>$k){
-				$data[ 'matecat|' . $k['internal_id'] ][]=$i;
+				$data[$k['internal_id']][]=$i;
 			}
 			$transunit_translation = "";
 
@@ -94,6 +95,36 @@ class downloadFileStreamOnDiskController extends downloadController {
 			unset($xsp);
 			$debug['replace'][] = time();
 
+			/*
+			   TEMPORARY HACK
+			   read header of file (guess first 500B) and detect if it was an old file created on VM TradosAPI (10.30.1.247)
+			   if so, point the conversion explicitly to this VM and not to the cloud, otherwise conversion will fail
+			 */
+			//get first 500B
+			$header_of_file_for_hack=file_get_contents($path.'.out.sdlxliff',false,NULL,-1,500);
+
+			//extract file tag
+			preg_match('/<file .*?>/s',$header_of_file_for_hack,$res_header_of_file_for_hack);
+
+			//make it a regular tag
+			$file_tag=$res_header_of_file_for_hack[0].'</file>';
+
+			//objectify
+			$tag=simplexml_load_string($file_tag);
+
+			//get "original" attribute
+			$original_uri=trim($tag['original']);
+
+			$chosen_machine=false;
+			if(strpos($original_uri,'C:\automation')!==FALSE){
+				$chosen_machine='10.30.1.247';
+				log::doLog('Old project detected, falling back to old VM');
+			}
+
+			unset($header_of_file_for_hack,$file_tag,$tag,$original_uri);
+			/*
+			   END OF HACK
+			 */
 
 			$original=file_get_contents($path.'.out.sdlxliff');
 
@@ -102,7 +133,7 @@ class downloadFileStreamOnDiskController extends downloadController {
 
 			if (!in_array($mime_type, array("xliff", "sdlxliff", "xlf"))) {
 				$debug['do_conversion'][]=time();
-				$convertResult = $converter->convertToOriginal($output_content[$id_file]['content']);
+				$convertResult = $converter->convertToOriginal($output_content[$id_file]['content'],$chosen_machine);
 				$output_content[$id_file]['content'] = $convertResult['documentContent'];
 				$debug['do_conversion'][]=time();
 			}
