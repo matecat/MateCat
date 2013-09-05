@@ -1614,5 +1614,35 @@ p.percent
 
 .misspelled
     {
-    border-bottom: 1px dotted red;
+    border-bottom: 1px dashed red;
+    }
+#spellCheck
+    {
+    border-bottom: 1px dotted #ccc;
+    }
+#spellCheck .label
+    {
+    color: #888;
+    font-style: italic;
+    }
+#spellCheck .words
+    {
+    display: block;
+    color: #000;
+    font-weight: bold;
+    margin-left: 10px;
+    text-decoration: none;
+    margin-top: 5px;
+    }
+    #spellCheck .words:hover
+        {
+        text-decoration: underline;
+        }
+#spellCheck .add
+    {
+    display: block;
+    color: #000;
+    text-decoration: none;
+    margin-top: 5px;
+    border-top: 1px dotted #ccc;
     }
