@@ -144,6 +144,9 @@ class getContributionController extends ajaxcontroller {
 			$matches[] = $mt_res;
 			usort( $matches, array( "getContributionController", "__compareScore" ) );
 		}
+		//this is necessary since usort sorts is ascending order, thus inverting the ranking
+		$matches=array_reverse($matches);
+
 		$matches = array_slice( $matches, 0, $this->num_results );
 
         ( isset($matches[0]['match']) ? $firstMatchVal = floatval( $matches[0]['match'] ) : null );
