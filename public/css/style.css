@@ -1612,3 +1612,7 @@ p.percent
     background-position: -60px -210px;
     }
 
+.misspelled
+    {
+    border-bottom: 1px dotted red;
+    }

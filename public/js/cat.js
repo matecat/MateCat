@@ -498,7 +498,7 @@ UI = {
         }).on('contextmenu', '.source,.editarea', function(e) {
             e.preventDefault();
         }).on('mousedown', '.source, .editarea', function(e) {
-            if(e.button == 2) {
+            if(e.button == 2) { // right click
                 var selection = window.getSelection();
                     if(selection.type == 'Range') { // something is selected
                         var str = selection.toString().trim();
@@ -1833,7 +1833,7 @@ UI = {
                         '					</span>' +
                         '					<div class="textarea-container">' +
                         '						<span class="loader"></span>' +
-                        '						<div class="editarea invisible" contenteditable="false" spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : this.translation) + '</div>' +
+                        '						<div class="editarea invisible" contenteditable="false" spellcheck="false" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : this.translation) + '</div>' +
                         '					</div> <!-- .textarea-container -->' +
                         '				</div> <!-- .target -->' +
                         '			</div></div> <!-- .wrap -->' +
@@ -1952,10 +1952,57 @@ UI = {
         }            
         this.updateContribution(source, target);
     },
-    editContribution: function(segment, contribution) {
-        source = $('.suggestion_source',contribution).text();
-        target = $('.translation',contribution).text();
+    setContribution: function(segment, status, byStatus) {
+        if ((status == 'draft') || (status == 'rejected'))
+            return false;
+        var source = $('.source', segment).text();
+        // Attention: to be modified when we will be able to lock tags.
+        var target = $('.editarea', segment).text();
+        if ((target == '') && (byStatus)) {
+            APP.alert('Cannot change status on an empty segment. Add a translation first!');
+        }
+        if (target == '') {
+            return false;
+        }            
         this.updateContribution(source, target);
+    },
+    spellCheck: function() {
+//        var ar = '[{"chiave1":["primo","secondo","terzo"]},{"chiave2":"valore2"},{"chiave3":"valore3"}]';
+//        console.log($.parseJSON(ar)[0].chiave1);
+//        var i = 0;
+//        $.each($.parseJSON(ar), function(key, value) {
+//            i = key;
+//            console.log('value: ',value );
+//        });
+//        console.log(i);
+        APP.doRequest({
+            data: {
+                action: 'getSpellcheck_fake',
+                lang: config.target_lang,
+                sentence: UI.editarea.text()
+            },
+            context: UI.editarea,
+            success: function(data) {
+                ed = this;
+                var ar = $.parseJSON('[{"informations":["primo","secondo","terzo"]},{"english":["first","second"]},{"personnalis":["premier"]}]');
+                var i = 0;
+                $.each(ar, function(key, value) {
+                    i = key;
+                    console.log('value: ',value );
+                    $.each(value, function(k, v) {
+                        var replacements = '';
+                        $.each(value, function(kk, vv) {
+                            replacements += vv + ',';
+                        });
+                        replacements = replacements.substring(0, replacements.length - 1);
+
+                        var re = new RegExp("(\\b" + k + "\\b)","gi"); 
+                        $(ed).html($(ed).html().replace(re, "<span class=\"misspelled\" data-replacements=\"" + replacements + "\">$1</span>"));
+                    });
+                });
+                console.log(i);
+            }
+        });
     },
     updateContribution: function(source, target) {
         source = view2rawxliff(source);
