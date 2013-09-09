@@ -12,7 +12,7 @@ class setSpellcheckController extends ajaxcontroller {
 
         $filterArgs = array(
             'word'     => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'lang'     => array( 'filter' => FILTER_SANITIZE_STRING,
+            'slang'     => array( 'filter' => FILTER_SANITIZE_STRING,
                                  'flags'  => FILTER_FLAG_STRIP_LOW ),
             'password' => array( 'filter' => FILTER_SANITIZE_STRING,
                                  'flags'  => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
@@ -27,7 +27,7 @@ class setSpellcheckController extends ajaxcontroller {
     public function doAction() {
 
         $spellCheck = SpellCheckFactory::getInstance();
-        $spellCheck->setLanguageCode( $this->__postInput->lang );
+        $spellCheck->setLanguageCode( $this->__postInput->slang );
 
         $this->result['error'] = $spellCheck->dictAddWord( $this->__postInput->word );
 

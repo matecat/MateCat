@@ -99,7 +99,7 @@ class Process {
 
                         //log Errors
                         if( $desc == 2 ){
-                            //Log::doLog($data);
+                            Log::doLog($data);
                         } else {
                             //append to data
                             $this->_data .= $data;

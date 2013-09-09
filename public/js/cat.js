@@ -2034,28 +2034,23 @@ UI = {
 
         APP.doRequest({
             data: {
-                action: 'getSpellcheck_fake',
-                lang: config.target_lang,
+                action: 'getSpellcheck',
+                lang: config.target_rfc,
                 sentence: UI.editarea.text()
             },
             context: editarea,
             success: function(data) {
                 ed = this;
-                // temp, waiting for API data
-                var ar = $.parseJSON('[{"informations":["primo","secondo","terzo"]},{"pour":[]},{"personnalis":["premier"]}]');
+                $.each(data.result, function(key, value) {
 
-                var i = 0;
-                $.each(ar, function(key, value) {
-                    i = key;
                     $.each(value, function(k, v) {
-                        var replacements = '';
-                        $.each(value, function(kk, vv) {
-                            replacements += vv + ',';
-                        });
-                        replacements = replacements.substring(0, replacements.length - 1);
+
+                        //alias join
+                        replacements = value[k].join(",");
+                        //console.log(replacements);
 
                         var re = new RegExp("(\\b" + k + "\\b)","gi"); 
-                        $(ed).html($(ed).html().replace(re, "<span class=\"misspelled\" data-replacements=\"" + replacements + "\">$1</span>"));
+                        $(ed).html($(ed).html().replace(re, '<span class="misspelled" data-replacements="' + replacements + '">$1</span>' ));
                         // fix nested encapsulation
                         $(ed).html($(ed).html().replace(/(\<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(\<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
 
@@ -2068,7 +2063,7 @@ UI = {
         APP.doRequest({
             data: {
                 action: 'setSpellcheck',
-                slang: config.target_lang,
+                slang: config.target_rfc,
                 word: word
             },
             success: function(data) {

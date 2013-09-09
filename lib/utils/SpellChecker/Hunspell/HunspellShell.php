@@ -16,7 +16,7 @@ class HunspellShell extends AbstractHunspell {
             return $this->_output( array() );
         }
 
-        $command = "hunspell -i utf-8 -d '" . escapeshellcmd( $this->_globalDictionary ) . "' -p '" . escapeshellcmd( $this->_personalDictionaryPath ) . "'";
+        $command = "hunspell -i 'utf-8' -d '" . escapeshellcmd( $this->_globalDictionary ) . "' -p '" . escapeshellcmd( $this->_personalDictionaryPath ) . "'";
 
         $this->_sendCommand( $command , $string );
 
@@ -37,7 +37,7 @@ class HunspellShell extends AbstractHunspell {
             return $this->_output( array() );
         }
 
-        $command = "hunspell -i utf-8 -d " . escapeshellcmd( $this->_globalDictionary ) . " -p " . escapeshellcmd( $this->_personalDictionaryPath ) . " -l ";
+        $command = "hunspell -i 'utf-8' -d " . escapeshellcmd( $this->_globalDictionary ) . " -p " . escapeshellcmd( $this->_personalDictionaryPath ) . " -l ";
 
         $this->_sendCommand( $command, $string );
 
@@ -61,7 +61,6 @@ class HunspellShell extends AbstractHunspell {
         //Load custom dictionaries does not work from php shell_exec environment, so add to general dictionary
         //$res = file_put_contents( $this->_personalDictionaryPath, ( $word . "\n" ), FILE_APPEND );
         $res = file_put_contents( $this->_globalDictionary . ".dic", ( $word . "\n" ), FILE_APPEND );
-
         return $this->_output( 'OK' );
 
     }

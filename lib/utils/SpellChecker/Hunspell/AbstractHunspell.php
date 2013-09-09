@@ -18,7 +18,7 @@ abstract class AbstractHunspell {
     protected $_suggestions = array();
 
     // Identify a 'miss'. See [man hunspell]
-    protected $_matcher = '/^(?P<type>[&#]{1})\s(?P<original>\w+)\s(?P<count>\d+)(\s(?P<offset>\d+):\s(?P<misses>.*))?$/u';
+    protected $_matcher = '/^(?P<type>[&#]{1})\s(?P<original>[\w\.]+)\s(?P<count>\d+)(\s(?P<offset>\d+):\s(?P<misses>.*))?$/u';
 
     protected $_response = array();
 
