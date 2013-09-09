@@ -56,6 +56,7 @@ class Process {
     }
 
     public function write( $string ){
+        Log::doLog(trim($string) . "\n");
         fwrite( $this->pipes[0], trim($string) . "\n" );
     }
 
@@ -118,7 +119,7 @@ class Process {
 
         }
 
-        //Log::doLog($this->_data);
+        Log::doLog($this->_data);
 
         return $this->_data;
 

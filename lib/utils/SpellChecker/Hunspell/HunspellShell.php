@@ -72,8 +72,6 @@ class HunspellShell extends AbstractHunspell {
      */
     protected function _sendCommand( $command, $string ) {
 
-        $command = "hunspell -i utf-8 -d '" . escapeshellcmd( $this->_globalDictionary ) . "' -p '" . escapeshellcmd( $this->_personalDictionaryPath ) . "' -a";
-
         $process = new Process( $command, $this->_globalDictionary );
         $process->write( $string );
         $this->_raw = $process->read();
