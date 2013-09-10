@@ -25,7 +25,7 @@ class fileFormatConverter {
 		$this->lang_handler=  Languages::getInstance();
 
 		$this->converters=array('10.11.0.10'=>1,'10.11.0.18'=>1,'10.11.0.26'=>1,'10.11.0.34'=>1,'10.11.0.42'=>1);
-		$this->converters=array('10.30.1.247'=>1);//forcing a particular VM just for debugging purposes
+		//$this->converters=array('10.11.0.18'=>1);//forcing a particular VM just for debugging purposes
 	}
 
 	private function addBOM($string) {
@@ -135,7 +135,7 @@ class fileFormatConverter {
 		return $output;
 	}
 
-	public function convertToSdlxliff($file_path, $source_lang, $target_lang) {
+	public function convertToSdlxliff($file_path, $source_lang, $target_lang, $chosen_by_user_machine=false) {
 		if (!file_exists($file_path)) {
 			throw new Exception("Conversion Error : the file <$file_path> not exists");
 		}
@@ -157,7 +157,11 @@ class fileFormatConverter {
 		$data['documentContent'] = base64_encode($fileContent);
 		$fileContent = null;
 		//assign converter
-		$this->ip=$this->pickRandConverter();
+		if(!$chosen_by_user_machine){
+			$this->ip=$this->pickRandConverter();
+		}else{
+			$this->ip=$chosen_by_user_machine;
+		}
 
 		$url = "$this->ip:$this->port/$this->toXliffFunction";
 
@@ -166,12 +170,12 @@ class fileFormatConverter {
 		$data['sourceLocale'] = $this->lang_handler->getSDLStudioCode($source_lang);
 		$data['targetLocale'] = $this->lang_handler->getSDLStudioCode($target_lang);
 
-log::doLog($this->ip." start conversion to xliff of $file_path");
-$start_time=time();
+		log::doLog($this->ip." start conversion to xliff of $file_path");
+		$start_time=time();
 		$curl_result = $this->curl_post($url, $data, $this->opt);
-$end_time=time();
-$time_diff=$end_time-$start_time;
-log::doLog($this->ip." took $time_diff secs for $file_path");
+		$end_time=time();
+		$time_diff=$end_time-$start_time;
+		log::doLog($this->ip." took $time_diff secs for $file_path");
 
 		$decode = json_decode($curl_result, true);
 		$curl_result = null;
@@ -180,12 +184,16 @@ log::doLog($this->ip." took $time_diff secs for $file_path");
 		return $res;
 	}
 
-	public function convertToOriginal($xliffContent) {
+	public function convertToOriginal($xliffContent, $chosen_by_user_machine=false) {
 
 		$base64Content = base64_encode($xliffContent);
 
 		//assign converter
-		$this->ip=$this->pickRandConverter();
+		if(!$chosen_by_user_machine){
+			$this->ip=$this->pickRandConverter();
+		}else{
+			$this->ip=$chosen_by_user_machine;
+		}
 
 		$url = "$this->ip:$this->port/$this->fromXliffFunction";
 
@@ -193,12 +201,12 @@ log::doLog($this->ip." took $time_diff secs for $file_path");
 		$data['uid'] = $uid_ext[0];
 		$data['xliffContent'] = $xliffContent;
 
-log::doLog($this->ip." start conversion back to original");
-$start_time=time();
+		log::doLog($this->ip." start conversion back to original");
+		$start_time=time();
 		$curl_result = $this->curl_post($url, $data, $this->opt);
-$end_time=time();
-$time_diff=$end_time-$start_time;
-log::doLog($this->ip." took $time_diff secs");
+		$end_time=time();
+		$time_diff=$end_time-$start_time;
+		log::doLog($this->ip." took $time_diff secs");
 
 		$decode = json_decode($curl_result, true);
 		unset($curl_result);
