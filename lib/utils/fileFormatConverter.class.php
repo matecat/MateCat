@@ -25,7 +25,7 @@ class fileFormatConverter {
 		$this->lang_handler=  Languages::getInstance();
 
 		$this->converters=array('10.11.0.10'=>1,'10.11.0.18'=>1,'10.11.0.26'=>1,'10.11.0.34'=>1,'10.11.0.42'=>1);
-		$this->converters=array('10.30.1.247'=>1);//forcing a particular VM just for debugging purposes
+		//$this->converters=array('10.11.0.18'=>1);//forcing a particular VM just for debugging purposes
 	}
 
 	private function addBOM($string) {
