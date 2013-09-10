@@ -83,7 +83,7 @@ class downloadFileStreamOnDiskController extends downloadController {
 			$debug['get_segments'][]=time();
 			//create a secondary indexing mechanism on segments' array; this will be useful
 			foreach($data as $i=>$k){
-				$data[$k['internal_id']][]=$i;
+				$data[ 'matecat|' . $k['internal_id'] ][]=$i;
 			}
 			$transunit_translation = "";
 
