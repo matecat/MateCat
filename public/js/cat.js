@@ -734,17 +734,7 @@ UI = {
         })
         $("#pname").on('click', function(e) {
             e.preventDefault();
-//            console.log($('#jobMenu').height());
-            var menuHeight = $('#jobMenu').height();
-            var startTop = 47 - menuHeight;
-//            console.log('startTop: ', startTop);
-            $('#jobMenu').css('top', (47 - menuHeight) + "px");
-           
-            if($('#jobMenu').hasClass('open')) {
-                $('#jobMenu').animate({top: "-=" + menuHeight + "px"}, 500).removeClass('open');
-            } else {
-                $('#jobMenu').animate({top: "+=" + menuHeight + "px"}, 300).addClass('open');
-            }
+            UI.toggleFileMenu();
         })
         $("#jobNav .jobstart").on('click', function(e) {
             e.preventDefault();
@@ -791,6 +781,28 @@ UI = {
         this.initTime = this.initEnd - this.initStart;
         if (this.debug)
             console.log('Init time: ' + this.initTime);
+    },
+    toggleFileMenu: function(){
+
+        if( $('#jobMenu').is(':animated') ) {
+            return false;
+        }
+        
+        var menuHeight = $('#jobMenu').height();
+        var startTop = 47 - menuHeight;
+        $('#jobMenu').css('top', (47 - menuHeight) + "px");
+
+        if( $('#jobMenu').hasClass('open') ){
+                $('#jobMenu').animate({top: "-=" + menuHeight + "px"}, 500).removeClass('open');
+        } else {
+            $('#jobMenu').animate({top: "+=" + menuHeight + "px"}, 300, function(){
+                $('body').on('click', function(e){
+                    if( $('#jobMenu').hasClass('open') ){
+                        UI.toggleFileMenu();
+                    }
+                });
+            }).addClass('open');
+        }
 
     },
     activateSegment: function() {
@@ -915,10 +927,11 @@ UI = {
                 saveBrevior = false;
         }
         if ((segment.hasClass('modified')) && (saveBrevior)) {
-            if(operation != 'noSave') this.saveSegment(segment);
-            if (UI.alertConfirmTranslationEnabled) {
-                APP.alert('To confirm your translation, please press on Translated or use the shortcut CMD+Enter.<form><input id="hideAlertConfirmTranslation" type="checkbox"><span>Do not display again</span></form>');                
-            }
+//            if(operation != 'noSave') 
+		 this.saveSegment(segment);
+//            if (UI.alertConfirmTranslationEnabled) {
+//                APP.alert('To confirm your translation, please press on Translated or use the shortcut CMD+Enter.<form><input id="hideAlertConfirmTranslation" type="checkbox"><span>Do not display again</span></form>');                
+//            }
         }
         this.currentSegment.removeClass('modified');
         this.deActivateSegment(byButton);

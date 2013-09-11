@@ -258,7 +258,7 @@ class XliffSAXTranslationReplacer{
 		$translation = str_replace("&lt;", '#LT#', $translation);
 		$translation = str_replace("&gt;", '#GT#', $translation);
 		$translation = str_replace("&amp;", '#AMP#', $translation);
-		$translation = html_entity_decode($translation,ENT_NOQUOTES,"utf-8");
+//		$translation = html_entity_decode($translation,ENT_NOQUOTES,"utf-8");
 		$translation = str_replace('#AMP#','&amp;', $translation);
 		$translation = str_replace('#LT#','&lt;', $translation);
 		$translation = str_replace('#GT#','&gt;', $translation);
