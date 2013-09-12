@@ -725,11 +725,11 @@ function getStatsForJob( $id_job, $id_file = null ) {
 				  )
 		   ) as APPROVED
 
-			from jobs as j
-			INNER JOIN files_job as fj on j.id=fj.id_job
-			INNER join segments as s on fj.id_file=s.id_file
-			LEFT join segment_translations as st on s.id=st.id_segment and st.id_job=j.id
-			WHERE j.id=$id_job";
+        FROM jobs AS j
+        INNER JOIN files_job as fj on j.id=fj.id_job
+        INNER join segments as s on fj.id_file=s.id_file
+        LEFT join segment_translations as st on s.id=st.id_segment and st.id_job=j.id
+        WHERE j.id=$id_job";
 
     if( !empty($id_file) ){
         $query .= " and fj.id_file = " . intval($id_file);
@@ -1232,12 +1232,11 @@ function getProjectStatsVolumeAnalysis2( $pid, $groupby = "job" ) {
 
 function getProjectStatsVolumeAnalysis( $pid ) {
 
-
     $query = "select st.id_job as jid,st.id_segment as sid, s.id_file, s.raw_word_count,
 		st.suggestion_source, st.suggestion_match, st.eq_word_count, st.standard_word_count, st.match_type,
 		p.status_analysis, p.fast_analysis_wc,p.tm_analysis_wc,p.standard_analysis_wc,
 		st.tm_analysis_status as st_status_analysis
-			from segment_translations as st 
+			from segment_translations as st
 			join segments as s on st.id_segment=s.id
 			join jobs as j on j.id=st.id_job
 			join projects as p on p.id=j.id_project

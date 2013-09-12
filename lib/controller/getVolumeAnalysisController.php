@@ -82,115 +82,40 @@ class getVolumeAnalysisController extends ajaxcontroller {
 				$return_data['jobs'][$jid]['file_details'][$r['id_file']] = $total_init;
 			}
 
-			if ($r['match_type'] == "INTERNAL") {
-				$w = $return_data['jobs'][$jid]['file_details'][$r['id_file']]["INTERNAL_MATCHES"][0] + $words;
-				$words_print = number_format($w, 0, ".", ",");
-				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["INTERNAL_MATCHES"] = array($w, $words_print);
+            if ( $r[ 'match_type' ] == "INTERNAL" ) {
+                $keyValue = 'INTERNAL_MATCHES';
+            } elseif ( $r[ 'match_type' ] == "MT" ) {
+                $keyValue = 'MT';
+            } elseif ( $r[ 'match_type' ] == "100%" ) {
+                $keyValue = 'TM_100';
+            } elseif ( $r[ 'match_type' ] == "75%-99%" or $r[ 'match_type' ] == "75%-84%" or $r[ 'match_type' ] == "85%-94%" or $r[ 'match_type' ] == "95%-99%" ) {
+                $keyValue = 'TM_75_99';
+            } elseif ( $r[ 'match_type' ] == "50%-74%" or $r[ 'match_type' ] == "NO_MATCH" or $r[ 'match_type' ] == "NEW" ) {
+                $keyValue = 'NEW';
+            } elseif ( $r[ 'match_type' ] == "REPETITIONS" ) {
+                $keyValue = 'REPETITIONS';
+            }
 
+            $w = $return_data['jobs'][$jid]['file_details'][$r['id_file']][$keyValue][0] + $words;
+            $words_print = number_format($w, 0, ".", ",");
+            $return_data['jobs'][$jid]['file_details'][$r['id_file']][$keyValue] = array($w, $words_print);
 
-				$w = $return_data['jobs'][$jid]['totals']["INTERNAL_MATCHES"][0] + $words;
-				$words_print = number_format($w, 0, ".", ",");
-				$return_data['jobs'][$jid]['totals']["INTERNAL_MATCHES"] = array($w, $words_print);
+            $w = $return_data['jobs'][$jid]['totals'][$keyValue][0] + $words;
+            $words_print = number_format($w, 0, ".", ",");
+            $return_data['jobs'][$jid]['totals'][$keyValue] = array($w, $words_print);
 
-				$w = $return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][0] + $eq_words;
-				$words_print = number_format($w, 0, ".", ",");
-				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"] = array($w, $words_print);
-
-			}
-
-			if ($r['match_type'] == "MT") {
-				$w = $return_data['jobs'][$jid]['file_details'][$r['id_file']]["MT"][0] + $words;
-				$words_print = number_format($w, 0, ".", ",");
-				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["MT"] = array($w, $words_print);
-
-
-				$w = $return_data['jobs'][$jid]['totals']["MT"][0] + $words;
-				$words_print = number_format($w, 0, ".", ",");
-				$return_data['jobs'][$jid]['totals']["MT"] = array($w, $words_print);
-
-				$w = $return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][0] + $eq_words;
-				$words_print = number_format($w, 0, ".", ",");
-				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"] = array($w, $words_print);
-
-			}
-
-			if ($r['match_type'] == "100%") {
-				$w = $return_data['jobs'][$jid]['file_details'][$r['id_file']]["TM_100"][0] + $words;
-				$words_print = number_format($w, 0, ".", ",");
-				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TM_100"] = array($w, $words_print);
-
-				$w = $return_data['jobs'][$jid]['totals']["TM_100"][0] + $words;
-				$words_print = number_format($w, 0, ".", ",");
-				$return_data['jobs'][$jid]['totals']["TM_100"] = array($w, $words_print);
-
-				$w = $return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][0] + $eq_words;
-				$words_print = number_format($w, 0, ".", ",");
-				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"] = array($w, $words_print);
-
-			}
-
-			if ($r['match_type'] == "75%-99%" or $r['match_type'] == "75%-84%" or $r['match_type'] == "85%-94%" or $r['match_type'] == "95%-99%") {
-				$w = $return_data ['jobs'][$jid]['file_details'][$r['id_file']]["TM_75_99"][0] + $words;
-				$words_print = number_format($w, 0, ".", ",");
-				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TM_75_99"] = array($w, $words_print);
-
-				$w = $return_data['jobs'][$jid]['totals']["TM_75_99"][0] + $words;
-				$words_print = number_format($w, 0, ".", ",");
-				$return_data['jobs'][$jid]['totals']["TM_75_99"] = array($w, $words_print);
-
-				$w = $return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][0] + $eq_words;
-				$words_print = number_format($w, 0, ".", ",");
-				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"] = array($w, $words_print);
-
-			}
-
-
-			if ($r['match_type'] == "50%-74%" or $r['match_type'] == "NO_MATCH" or $r['match_type'] == "NEW") {
-
-				$w = $return_data ['jobs'][$jid]['file_details'][$r['id_file']]["NEW"][0] + $words;
-				$words_print = number_format($w, 0, ".", ",");
-				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["NEW"] = array($w, $words_print);
-
-				$w = $return_data['jobs'][$jid]['totals']["NEW"][0] + $words;
-				$words_print = number_format($w, 0, ".", ",");
-				$return_data['jobs'][$jid]['totals']["NEW"] = array($w, $words_print);
-
-				$w = $return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][0] + $eq_words;
-				$words_print = number_format($w, 0, ".", ",");
-				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"] = array($w, $words_print);
-
-			}
-
-			if ($r['match_type'] == "REPETITIONS") {
-
-				$w = $return_data['jobs'][$jid]['file_details'][$r['id_file']]["REPETITIONS"][0] + $words;
-				$words_print = number_format($w, 0, ".", ",");
-				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["REPETITIONS"] = array($w, $words_print);
-
-
-				$w = $return_data['jobs'][$jid]['totals']["REPETITIONS"][0] + $words;
-				$words_print = number_format($w, 0, ".", ",");
-				$return_data['jobs'][$jid]['totals']["REPETITIONS"] = array($w, $words_print);
-
-				$w = $return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][0] + $eq_words;
-				$words_print = number_format($w, 0, ".", ",");
-				$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"] = array($w, $words_print);
-
-			}
+            $w = $return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][0] + $eq_words;
+            $words_print = number_format($w, 0, ".", ",");
+            $return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"] = array($w, $words_print);
 
 			//take note of payable words for job/file combination
-			$total_payable[$jid][$r['id_file']]=$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][0];
+            //sum all totals for each job
+            $return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][0] = $return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][0];
+
 		}
 
-		//sum all totals for each job
-		foreach($total_payable as $jid=>$files){
-			foreach($files as $fid=>$v){
-				$return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][0]+=$v;
-			}
-			//format numbers after summing
-			$return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][1]=number_format($return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][0],0,".",",");
-		}
-
+        //format numbers after summing
+        $return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][1] = number_format( $return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][0],0,".",",");
 
 		if ($this->total_wc_standard_analysis == 0  and $this->status_project == "FAST_OK" ) {
 			$this->total_wc_standard_analysis = $this->total_wc_standard_fast_analysis;
@@ -283,18 +208,16 @@ class getVolumeAnalysisController extends ajaxcontroller {
 		$return_data['summary']['TOTAL_TM_WC_PRINT'] = number_format($this->total_wc_tm_analysis, 0, ".", ",");
 
 
+        $return_data[ 'summary' ][ 'TOTAL_PAYABLE' ]           = $this->total_wc_tm_analysis;
+        $return_data[ 'summary' ][ 'TOTAL_PAYABLE_PRINT' ]     = number_format( $this->total_wc_tm_analysis, 0, ".", "," );
 
-		if ($this->status_project == 'FAST_OK' or $this->status_project == "DONE") {
-			$return_data['summary']['TOTAL_PAYABLE'] = $this->total_wc_tm_analysis;
-			$return_data['summary']['TOTAL_PAYABLE_PRINT'] =  number_format($this->total_wc_tm_analysis, 0, ".", ",");
-			$return_data['summary']['PAYABLE_WC_TIME'] =  number_format($tm_wc_time, 0, ".", ",");
-			$return_data['summary']['PAYABLE_WC_UNIT'] = $tm_wc_unit;
-		} else {
-			$return_data['summary']['TOTAL_PAYABLE'] = $this->total_wc_fast_analysis;
-			$return_data['summary']['TOTAL_PAYABLE_PRINT'] =number_format($this->total_wc_fast_analysis, 0, ".", ",");
-			$return_data['summary']['PAYABLE_WC_TIME'] = number_format($fast_wc_time, 0, ".", ",");
-			$return_data['summary']['PAYABLE_WC_UNIT'] = $fast_wc_unit;
-		}
+        if ( $this->status_project == 'FAST_OK' or $this->status_project == "DONE" ) {
+            $return_data[ 'summary' ][ 'PAYABLE_WC_TIME' ]     = number_format( $tm_wc_time, 0, ".", "," );
+            $return_data[ 'summary' ][ 'PAYABLE_WC_UNIT' ]     = $tm_wc_unit;
+        } else {
+            $return_data[ 'summary' ][ 'PAYABLE_WC_TIME' ]     = number_format( $fast_wc_time, 0, ".", "," );
+            $return_data[ 'summary' ][ 'PAYABLE_WC_UNIT' ]     = $fast_wc_unit;
+        }
 
 		$return_data['summary']['FAST_WC_TIME'] = number_format($fast_wc_time, 0, ".", ",");
 		$return_data['summary']['FAST_WC_UNIT'] = $fast_wc_unit;
