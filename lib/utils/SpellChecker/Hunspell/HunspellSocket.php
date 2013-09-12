@@ -28,7 +28,7 @@ class HunspellSocket extends AbstractHunspell {
         return 'OK';
     }
 
-    protected function _sendCommand( $command ) {
+    protected function _sendCommand( $command, $string ) {
         // TODO: Implement _sendCommand() method.
     }
 

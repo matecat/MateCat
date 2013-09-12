@@ -175,7 +175,7 @@ class CatUtils {
 
     public static function rawxliff2view($segment) {
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
-        $segment = self::placehold_xml_entities($segment);
+        //$segment = self::placehold_xml_entities($segment);
         $segment = self::placehold_xliff_tags($segment);
         
         

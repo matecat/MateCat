@@ -30,11 +30,11 @@ class getSpellcheckController extends ajaxcontroller {
         $spellCheck = SpellCheckFactory::getInstance();
         $spellCheck->setLanguageCode( $this->__postInput->lang );
 
+        //$this->__postInput->sentence = strip_tags( $this->__postInput->sentence );
+
         $specials = array('/\+/', '/\*/', '/#/', '/~/', '/@/', '/\^/');
         $replace_specials = array('\+', '\*', '\#', '\~', '\@', '\^');
         $sentence = preg_replace( $specials, $replace_specials, $this->__postInput->sentence );
-
-
 
         $this->result['result'] = $spellCheck->getSuggestions( $sentence );
 

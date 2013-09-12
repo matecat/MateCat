@@ -158,7 +158,7 @@ abstract class AbstractHunspell {
 
                 $this->_response[ $matches[ 'original' ] ] = array(
                     //"original" => $matches[ 'original' ],
-                    "count"    => $matches[ 'count' ],
+                    //"count"    => $matches[ 'count' ],
                     "offset"   => $matches[ 'offset' ],
                     "misses"   => explode( ", ", $matches[ 'misses' ] )
                 );
@@ -177,12 +177,12 @@ abstract class AbstractHunspell {
         foreach ( $this->_response as $_original => $word ) {
             if ( isset( $this->_response[ $_original ][ 'misses' ] ) ) {
                 //unrecognized word
-                //$this->_suggestions[][$_original] = $this->_response[ $_original ];
-                $this->_suggestions[][$_original] = $this->_response[ $_original ][ 'misses' ];
+                $this->_suggestions[][$_original] = $this->_response[ $_original ];
+                //$this->_suggestions[][$_original] = $this->_response[ $_original ][ 'misses' ];
             } else if ( !isset( $this->_response[ $_original ][ 'misses' ] ) ) {
                 //unrecognized word and no suggestions
-                //$this->_suggestions[][$_original] = $this->_response[ $_original ];
-                $this->_suggestions[][$_original] = array();
+                $this->_suggestions[][$_original] = $this->_response[ $_original ];
+                //$this->_suggestions[][$_original] = array();
             } else {
                 //NO OP
                 //Correct word

@@ -684,7 +684,7 @@ UI = {
             $('.editor .sub-editor').hide();
             $('.editor .sub-editor.concordances').show();
         }).on('keydown', '.sub-editor .cc-search .input', 'return', function(e) {
-            if($(this).text().length > 2) UI.getConcordance($(this).text(), 0);
+            //if($(this).text().length > 2) UI.getConcordance($(this).text(), 0);
         }).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
             if(e.which == 13) { // enter
                 e.preventDefault();
@@ -718,7 +718,7 @@ UI = {
                 UI.liveConcordanceSearchReq = setTimeout(function() {
                     var txt = $('.editor .sub-editor .cc-search .search-target').text();
                     if(txt.length > 2) UI.getConcordance(txt, 1);
-                }, 1000);       
+                }, 1000);
 //                $('.editor .sub-editor.concordances .results').empty();
             };
         }).on('paste', '.editarea', function(e) {
@@ -789,17 +789,7 @@ UI = {
         })
         $("#pname").on('click', function(e) {
             e.preventDefault();
-//            console.log($('#jobMenu').height());
-            var menuHeight = $('#jobMenu').height();
-            var startTop = 47 - menuHeight;
-//            console.log('startTop: ', startTop);
-            $('#jobMenu').css('top', (47 - menuHeight) + "px");
-           
-            if($('#jobMenu').hasClass('open')) {
-                $('#jobMenu').animate({top: "-=" + menuHeight + "px"}, 500).removeClass('open');
-            } else {
-                $('#jobMenu').animate({top: "+=" + menuHeight + "px"}, 300).addClass('open');
-            }
+            UI.toggleFileMenu();
         })
         $("#jobNav .jobstart").on('click', function(e) {
             e.preventDefault();
@@ -846,6 +836,29 @@ UI = {
         this.initTime = this.initEnd - this.initStart;
         if (this.debug)
             console.log('Init time: ' + this.initTime);
+
+    },
+    toggleFileMenu: function(){
+
+        if( $('#jobMenu').is(':animated') ) {
+            return false;
+        }
+
+        var menuHeight = $('#jobMenu').height();
+        var startTop = 47 - menuHeight;
+        $('#jobMenu').css('top', (47 - menuHeight) + "px");
+
+        if( $('#jobMenu').hasClass('open') ){
+                $('#jobMenu').animate({top: "-=" + menuHeight + "px"}, 500).removeClass('open');
+        } else {
+            $('#jobMenu').animate({top: "+=" + menuHeight + "px"}, 300, function(){
+                $('body').on('click', function(e){
+                    if( $('#jobMenu').hasClass('open') ){
+                        UI.toggleFileMenu();
+                    }
+                });
+            }).addClass('open');
+        }
 
     },
     activateSegment: function() {
@@ -970,10 +983,11 @@ UI = {
                 saveBrevior = false;
         }
         if ((segment.hasClass('modified')) && (saveBrevior)) {
-            if(operation != 'noSave') this.saveSegment(segment);
-            if (UI.alertConfirmTranslationEnabled) {
-                APP.alert('To confirm your translation, please press on Translated or use the shortcut CMD+Enter.<form><input id="hideAlertConfirmTranslation" type="checkbox"><span>Do not display again</span></form>');                
-            }
+//            if(operation != 'noSave')
+                this.saveSegment(segment);
+//            if (UI.alertConfirmTranslationEnabled) {
+//                APP.alert('To confirm your translation, please press on Translated or use the shortcut CMD+Enter.<form><input id="hideAlertConfirmTranslation" type="checkbox"><span>Do not display again</span></form>');
+//            }
         }
         this.currentSegment.removeClass('modified');
         this.deActivateSegment(byButton);
@@ -2041,20 +2055,36 @@ UI = {
             context: editarea,
             success: function(data) {
                 ed = this;
-                $.each(data.result, function(key, value) {
+                $.each(data.result, function(key, value) { //key --> 0: { 'word': { 'offset':20, 'misses':['word1','word2'] } }
 
-                    $.each(value, function(k, v) {
+                    var word = Object.keys( value )[0];
+                    replacements = value[word]['misses'].join(",");
 
-                        //alias join
-                        replacements = value[k].join(",");
-                        //console.log(replacements);
+                    var Position = [
+                        parseInt( value[word]['offset'] ),
+                        parseInt( value[word]['offset'] ) + parseInt( word.length )
+                    ];
 
-                        var re = new RegExp("(\\b" + k + "\\b)","gi"); 
+                    var sentTextInPosition = ed.text().substring( Position[0], Position[1] );
+                    //console.log(sentTextInPosition);
+
+//                    $.each(value, function(k, v) { // k
+//
+//                        //alias join
+//                        replacements = value[k]['misses'].join(",");
+//                        //console.log(replacements);
+//
+//                        var sentTextInPosition = ed.text().substring( value[k]['offset'], k.length  );
+//                        console.log(k);
+//                        //console.log(sentTextInPosition);
+//
+//                        var re = new RegExp("(\\b" + k + "\\b)","gi");
+                        var re = new RegExp("(\\b" + word + "\\b)","gi");
                         $(ed).html($(ed).html().replace(re, '<span class="misspelled" data-replacements="' + replacements + '">$1</span>' ));
                         // fix nested encapsulation
                         $(ed).html($(ed).html().replace(/(\<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(\<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
-
-                    });
+//
+//                    });
                 });
             }
         });
