@@ -2068,17 +2068,6 @@ UI = {
                     var sentTextInPosition = ed.text().substring( Position[0], Position[1] );
                     //console.log(sentTextInPosition);
 
-//                    $.each(value, function(k, v) { // k
-//
-//                        //alias join
-//                        replacements = value[k]['misses'].join(",");
-//                        //console.log(replacements);
-//
-//                        var sentTextInPosition = ed.text().substring( value[k]['offset'], k.length  );
-//                        console.log(k);
-//                        //console.log(sentTextInPosition);
-//
-//                        var re = new RegExp("(\\b" + k + "\\b)","gi");
                         var re = new RegExp("(\\b" + word + "\\b)","gi");
                         $(ed).html($(ed).html().replace(re, '<span class="misspelled" data-replacements="' + replacements + '">$1</span>' ));
                         // fix nested encapsulation
