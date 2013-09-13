@@ -496,7 +496,7 @@ UI = {
             selectText(this);
             $(this).toggleClass('selected');
         }).on('contextmenu', '.source,.editarea', function(e) {
-           // e.preventDefault(); // ANTONIO : DISABLED CUSTOM CONTEXT MENU
+           // e.preventDefault();
         }).on('mousedown', '.source, .editarea', function(e) {
             if(e.button == 2) {
                 var selection = window.getSelection();
@@ -663,7 +663,7 @@ UI = {
                 UI.liveConcordanceSearchReq = setTimeout(function() {
                     var txt = $('.editor .sub-editor .cc-search .search-target').text();
                     if(txt.length > 2) UI.getConcordance(txt, 1);
-                }, 1000);       
+                }, 1000);
 //                $('.editor .sub-editor.concordances .results').empty();
             };
         }).on('paste', '.editarea', function(e) {
@@ -927,10 +927,10 @@ UI = {
                 saveBrevior = false;
         }
         if ((segment.hasClass('modified')) && (saveBrevior)) {
-//            if(operation != 'noSave') 
-		 this.saveSegment(segment);
+//            if(operation != 'noSave')
+                this.saveSegment(segment);
 //            if (UI.alertConfirmTranslationEnabled) {
-//                APP.alert('To confirm your translation, please press on Translated or use the shortcut CMD+Enter.<form><input id="hideAlertConfirmTranslation" type="checkbox"><span>Do not display again</span></form>');                
+//                APP.alert('To confirm your translation, please press on Translated or use the shortcut CMD+Enter.<form><input id="hideAlertConfirmTranslation" type="checkbox"><span>Do not display again</span></form>');
 //            }
         }
         this.currentSegment.removeClass('modified');

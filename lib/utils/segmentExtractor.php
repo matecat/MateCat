@@ -94,10 +94,16 @@ function extractSegments($files_path, $file, $pid, $fid) {
                         $succ_tags = empty($extract_external['succ']) ? NULL : $extract_external['succ'];
                         $xliff_trans_unit['source']['raw-content'] = $extract_external['seg'];
                     }
-                    $source = mysql_real_escape_string($xliff_trans_unit['source']['raw-content']);
-                    $source = CatUtils::placeholdnbsp($source);
 
-                    $num_words = CatUtils::segment_raw_wordcount($xliff_trans_unit['source']['raw-content']);
+                    $source = CatUtils::placeholdnbsp( $xliff_trans_unit['source']['raw-content'] );
+
+                    //we do the word count after the place-holding with <x id="nbsp"/>
+                    //so &nbsp; are now not recognized as word and not counted as payable
+                    $num_words = CatUtils::segment_raw_wordcount($source);
+
+                    //appliying escaping after raw count
+                    $source = mysql_real_escape_string($source);
+
                     $trans_unit_id = mysql_real_escape_string($xliff_trans_unit['attr']['id']);
 
                     if (!is_null($prec_tags)) {
