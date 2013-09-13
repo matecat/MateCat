@@ -181,8 +181,8 @@ class CatUtils {
         
         $segment = html_entity_decode($segment, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8');
         // restore < e >
-        $segment = str_replace("<", "&lt", $segment);
-        $segment = str_replace(">", "&gt", $segment);
+        $segment = str_replace("<", "&lt;", $segment);
+        $segment = str_replace(">", "&gt;", $segment);
 
 
         $segment = preg_replace('|<(.*?)>|si', "&lt;$1&gt;", $segment);

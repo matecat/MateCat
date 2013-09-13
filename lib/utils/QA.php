@@ -251,7 +251,7 @@ class QA {
     protected function _addError($errCode) {
 
         //Real error Code log
-        //Log::doLog( $errCode . " :: " . $this->_errorMap[$errCode]);
+        Log::doLog( $errCode . " :: " . $this->_errorMap[$errCode]);
 
         switch( $errCode ) {
             case self::ERR_COUNT:
@@ -685,8 +685,8 @@ class QA {
             return $this->getErrors();
         }
 
-        $this->_checkContentConsistency( $srcNodeList, $trgNodeList );
         $this->_checkTagsBoundary();
+        $this->_checkContentConsistency( $srcNodeList, $trgNodeList );
 
         // all checks completed
         return $this->getErrors();
@@ -1059,11 +1059,20 @@ class QA {
             } else {
                 $_trgNodeContent = preg_replace( "/^\x{a0}{1}/u", Utils::unicode2chr(0X20), $_trgNodeContent );
             }
-
             $_nodeNormalized->nodeValue = $_trgNodeContent;
 
+            $xpath = new DOMXPath( $this->normalizedTrgDOM );
+            $query = '//*[@id="' . $trgTagReference['id'] . '"]';
+
+            $node = $xpath->query($query);
+
+            foreach( $node as $n ){
+                $this->normalizedTrgDOM->firstChild->replaceChild( $this->normalizedTrgDOM->importNode( $_nodeNormalized, true ), $n );
+            }
+
         }
- 
+
+Log::hexDump( $this->getTrgNormalized() );
     }
 
     /**
@@ -1119,7 +1128,16 @@ class QA {
 
             $_nodeNormalized->nodeValue = $_trgNodeContent;
 
-    	}
+            $xpath = new DOMXPath( $this->normalizedTrgDOM );
+            $query = '//*[@id="' . $trgTagReference['id'] . '"]';
+
+            $node = $xpath->query($query);
+
+            foreach( $node as $n ){
+                $this->normalizedTrgDOM->firstChild->replaceChild( $this->normalizedTrgDOM->importNode( $_nodeNormalized, true ), $n );
+            }
+
+        }
 
     }
 

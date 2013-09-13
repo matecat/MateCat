@@ -42,20 +42,72 @@ class QATest extends PHPUnit_Framework_TestCase {
         echo " " . str_pad( $this->getName(false) , 35, " ", STR_PAD_RIGHT ). " - Did in " . $resultTime . " seconds.\n";
     }
     
-    public function testWitespaces1() {
+    public function testView2RawXliff() {
+
         $source_seg = <<<SRC
-<g id="pt8">\rNegli \r\n</g>	<g id="pt9">anni 80</g> <g id="pt10"> si comprende il & processo di rapido sviluppo della moderna distribuzione con la sua esigenza di un’efficiente organizzazione industriale e logistica.</g>
+<g id="43">bang & olufsen < 3 ' > 1</g> <x id="33"/>
+SRC;
+        $source_expected = <<<SRC
+<g id="43">bang &amp; olufsen &lt; 3 ' &gt; 1</g> <x id="33"/>
 SRC;
 
+        $source_seg = CatUtils::view2rawxliff( $source_seg );
+        $this->assertEquals( $source_seg, $source_expected );
+
+
+    }
+
+    public function testRawXliff2View(){
+
+        $source_seg = <<<SRC
+<g id="43">bang &amp; olufsen &lt; 3 ' &gt; 1</g> <x id="33"/>
+SRC;
+
+        $source_expected = <<<SRC
+&lt;g id="43"&gt;bang & olufsen &lt; 3 ' &gt; 1&lt;/g&gt; &lt;x id="33"/&gt;
+SRC;
+
+        $source_seg = CatUtils::rawxliff2view( $source_seg );
+        $this->assertEquals( $source_seg, $source_expected );
+
+    }
+
+    public function testSpaces1(){
+
+        //" 1 " -> 20 31 20
+        $source_seg = <<<SRC
+<g id="6"> 1 </g><g id="7">st  </g><g id="8">&nbsp;Section of Tokyo, Osaka</g>
+SRC;
+
+        //" 1 " -> C2 A0 31 C2 A0
         $target_seg = <<<TRG
-<g id="pt8">In </g><g id="pt9">	the 80ies</g><g id="pt10"> they understood the process of rapid development of the modern distribution system and the need for an efficient industrial and logistics organization.</g>
+<g id="6"> 1 </g><g id="7">st  </g><g id="8">&nbsp;Section of Tokyo, Osaka</g>
 TRG;
+
+        $source_seg = CatUtils::view2rawxliff( $source_seg );
+        $target_seg = CatUtils::view2rawxliff( $target_seg );
 
         $check = new QA($source_seg, $target_seg);
         $check->performConsistencyCheck();
-        print_r( $check->getWarnings() );
+
+        $warnings = $check->getWarnings();
+        $errors   = $check->getErrors();
+
+        $this->assertEquals( count( $warnings ), 1 );
+        $this->assertEquals( 0, $warnings[0]->outcome );
+
+        $this->assertEquals( count( $errors ), 1 );
+        $this->assertEquals( 0, $errors[0]->outcome );
+
+        $normalized = $check->getTrgNormalized();
+
+        //" 1 " -> 20 31 C2 A0
+        $this->assertEquals( '<g id="6"> 1 </g><g id="7">st  </g><g id="8"> Section of Tokyo, Osaka</g>', $normalized );
+
 
     }
+
+
 
 
 }
