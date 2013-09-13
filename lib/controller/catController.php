@@ -211,7 +211,7 @@ class catController extends viewcontroller {
 			$this->last_opened_segment = getFirstSegmentId($this->jid, $this->password);
 		}
 
-		$this->job_stats = CatUtils::getStatsForJob($this->jid, $id_file);
+		$this->job_stats = CatUtils::getStatsForJob($this->jid );
 		if (count($files_found) == 1) {
 			$this->downloadFileName = $files_found[0];
 		}

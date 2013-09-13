@@ -541,7 +541,7 @@ padding:1px 6px !important;margin:5px 10px 0 -10px;text-shadow:none !important;}
     text-shadow: none;
     -moz-box-shadow: none;
     -webkit-box-shadow: none;
-    margin: 1px 0 -1px 0;
+    margin: 0px 0 -1px 0;
     outline: none;
     }
 
@@ -1122,13 +1122,13 @@ padding-bottom:8px
 
 section.status-translated .status{background:#0798bc !important}
 section.status-approved .status{background:#639d5e !important;}
-section.status-draft .status{background:#dddedf !important;}
+/* section.status-draft .status{background:#dddedf !important;} */
 section.status-rejected .status{background:#b02429 !important;}
 
 
 section.editor.status-translated .status{background:#09beec !important}
 section.editor.status-approved .status{background:#7cc576 !important;}
-section.editor.status-draft .status{background:#dddedf !important;}
+/*section.editor.status-draft .status{background:#dddedf !important;}*/
 section.editor.status-rejected .status{background:#dc2e34 !important;}
 
 
@@ -1612,3 +1612,37 @@ p.percent
     background-position: -60px -210px;
     }
 
+.misspelled
+    {
+    border-bottom: 1px dashed red;
+    }
+#spellCheck
+    {
+    border-bottom: 1px dotted #ccc;
+    }
+#spellCheck .label
+    {
+    color: #888;
+    font-style: italic;
+    }
+#spellCheck .words
+    {
+    display: block;
+    color: #000;
+    font-weight: bold;
+    margin-left: 10px;
+    text-decoration: none;
+    margin-top: 5px;
+    }
+    #spellCheck .words:hover
+        {
+        text-decoration: underline;
+        }
+#spellCheck .add
+    {
+    display: block;
+    color: #000;
+    text-decoration: none;
+    margin-top: 5px;
+    border-top: 1px dotted #ccc;
+    }
