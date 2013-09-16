@@ -840,7 +840,11 @@ UI = {
         if( $('#jobMenu').is(':animated') ) {
             return false;
         }
-
+        if(this.body.hasClass('editing')) {
+            $('#jobMenu .currSegment').show();
+        } else {
+            $('#jobMenu .currSegment').hide();            
+        }
         var menuHeight = $('#jobMenu').height();
         var startTop = 47 - menuHeight;
         $('#jobMenu').css('top', (47 - menuHeight) + "px");
