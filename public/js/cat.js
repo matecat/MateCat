@@ -72,6 +72,7 @@ UI = {
         this.blockGetMoreSegments = true;
         var bb = $.cookie('noAlertConfirmTranslation');
         this.alertConfirmTranslationEnabled = (typeof bb == 'undefined') ? true : false;
+        this.customSpellcheck = false;
         setTimeout(function() {
             UI.blockGetMoreSegments = false;
         }, 1000);
@@ -535,32 +536,28 @@ UI = {
                             UI.currentSearchInTarget = ($(this).hasClass('source'))? 0 : 1;
                             $('#contextMenu').attr('data-sid', $(this).parents('section').attr('id').split('-')[1]);
                             
-//                            console.log(selection);
-                            var range = selection.getRangeAt(0);
-                            var tag = range.startContainer.parentElement;
-                            if(($(tag).hasClass('misspelled'))&&(tag === range.endContainer.parentElement)) { // the selected element is in a misspelled element
-                                UI.selectedMisspelledElement = $(tag);
-                                var replacements = '';
-                                var words = $(tag).attr('data-replacements').split(',');
-//                                console.log(words.length);
-//                                console.log(words[0]);
-                                $.each(words, function(item) {
-//                                    console.log(item);
-                                    replacements += '<a class="words" href="#">' + this + '</a>';
-                                });
-                                if((words.length == 1)&&(words[0] == '')) {
-                                    $('#spellCheck .label').hide();
+                            if(UI.customSpellcheck) {
+                                var range = selection.getRangeAt(0);
+                                var tag = range.startContainer.parentElement;
+                                if(($(tag).hasClass('misspelled'))&&(tag === range.endContainer.parentElement)) { // the selected element is in a misspelled element
+                                    UI.selectedMisspelledElement = $(tag);
+                                    var replacements = '';
+                                    var words = $(tag).attr('data-replacements').split(',');
+                                    $.each(words, function(item) {
+                                        replacements += '<a class="words" href="#">' + this + '</a>';
+                                    });
+                                    if((words.length == 1)&&(words[0] == '')) {
+                                        $('#spellCheck .label').hide();
+                                    } else {
+                                        $('#spellCheck .label').show();                                   
+                                    }
+                                    $('#spellCheck .words').remove();
+                                    $('#spellCheck').show().find('.label').after(replacements);                                    
                                 } else {
-                                    $('#spellCheck .label').show();                                   
-                                }
-                                $('#spellCheck .words').remove();
-                                $('#spellCheck').show().find('.label').after(replacements);                                    
-//                                console.log('il menu contestuale è aperto? ' + $('#contextMenu').css('display'));
-
-//                                console.log(replacements);
-                            } else {
-                                $('#spellCheck').hide();
+                                    $('#spellCheck').hide();
+                                }                                
                             }
+
                             UI.showContextMenu(str, e.pageY, e.pageX);
                         };
                     }; 
@@ -1909,7 +1906,7 @@ UI = {
                         '					</span>' +
                         '					<div class="textarea-container">' +
                         '						<span class="loader"></span>' +
-                        '						<div class="editarea invisible" contenteditable="false" spellcheck="false" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : this.translation) + '</div>' +
+                        '						<div class="editarea invisible" contenteditable="false" spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : this.translation) + '</div>' +
                         '					</div> <!-- .textarea-container -->' +
                         '				</div> <!-- .target -->' +
                         '			</div></div> <!-- .wrap -->' +
@@ -2043,6 +2040,7 @@ UI = {
         this.updateContribution(source, target);
     },
     spellCheck: function(ed) {
+        if(!UI.customSpellcheck) return false;
         editarea = (typeof ed == 'undefined')? UI.editarea : $(ed);
         if($('#contextMenu').css('display') == 'block') return true;
 
