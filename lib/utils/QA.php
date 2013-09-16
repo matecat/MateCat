@@ -1072,7 +1072,6 @@ class QA {
 
         }
 
-Log::hexDump( $this->getTrgNormalized() );
     }
 
     /**
