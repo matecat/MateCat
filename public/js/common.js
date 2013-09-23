@@ -19,6 +19,7 @@ APP = {
             e.preventDefault();
             APP.closePopup();
             APP.confirmValue = false;
+            APP.cancelValue = false;
             APP.waitingConfirm = false;
         }).on('click', '.popup-outer.closeClickingOutside', function(e) {
             e.preventDefault();
@@ -33,13 +34,16 @@ APP = {
             content: msg
         });
     },
-    confirm: function(msg, callback) {
+    confirm: function(options) {
         this.waitingConfirm = true;
         this.popup({
             type: 'confirm',
-            onConfirm: callback,
+            onConfirm: options.callback,
+            onCancel: options.onCancel,
             title: 'Confirmation required',
-            content: msg
+            cancelTxt: options.cancelTxt,
+            okTxt: options.okTxt,
+            content: options.msg
         });
         this.checkConfirmation();
     },
@@ -53,6 +57,11 @@ APP = {
                 UI[this.confirmCallbackFunction](this.confirmValue);
                 this.confirmValue = null;
                 this.confirmCallbackFunction = null;
+            }
+            if(this.cancelCallbackFunction) {
+                UI[this.cancelCallbackFunction](this.cancelValue);
+                this.cancelValue = null;
+                this.cancelCallbackFunction = null;
             }
         }
     },
@@ -115,9 +124,10 @@ APP = {
         if(conf.type == 'alert') {
             newPopup += '<a href="#" class="btn-ok">ok<\a>';          
         } else if(conf.type == 'confirm') {
-            newPopup +=     '<a href="#" class="btn-cancel">Cancel<\a>' +          
-                             '<a href="#" class="btn-ok">Ok<\a>';    
+            newPopup +=     '<a href="#" class="btn-cancel">' + ((conf.cancelTxt)? conf.cancelTxt : 'Cancel') + '<\a>' +          
+                             '<a href="#" class="btn-ok">' + ((conf.okTxt)? conf.okTxt : 'Ok') + '<\a>';    
             this.confirmCallbackFunction = (conf.onConfirm)? conf.onConfirm : null;
+            this.cancelCallbackFunction = (conf.onCancel)? conf.onCancel : null;
         } else {
             $.each(conf.buttons, function(index) {
                 var cl = (this.type == 'ok')? 'btn-ok' : (this.type == 'cancel')? 'btn-cancel' : '';

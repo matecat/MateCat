@@ -36,7 +36,7 @@ $(document).ready(function() {
         console.log('source language changed');
         if(!$('.template-download').length) return;
         if (UI.conversionsAreToRestart()) {
-            APP.confirm('Source language changed. The files must be reimported.', 'confirmRestartConversions');
+            APP.confirm({msg: 'Source language changed. The files must be reimported.', callback: 'confirmRestartConversions'});
         }
     });
          
