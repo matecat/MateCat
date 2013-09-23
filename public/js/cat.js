@@ -297,9 +297,7 @@ UI = {
 
         $("form#fileDownload").submit(function() {
             if ($("#notifbox").hasClass("warningbox")) {
-                var a = APP.confirm("There are some potential errors\n\(missing tags, numbers etc).\n\
- If you continue some of the content could be untranslated.\n\
- Do you want to continue anyway?","confirmDownload");
+                var a = APP.confirm({cancelTxt:'Fix errors', onCancel: 'goToFirstError', okTxt: 'Continue', msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"});
 //                if (!a) {
 //                    return false;
 //                }
@@ -1751,7 +1749,7 @@ UI = {
         this.render(false);
     },
     reloadWarning: function() {
-        var m = APP.confirm('The next untranslated segment is outside the current view.');
+        var m = APP.confirm({msg: 'The next untranslated segment is outside the current view.'});
         if (m) {
             this.infiniteScroll = false;
             config.last_opened_segment = this.nextSegmentId;
@@ -2342,6 +2340,9 @@ console.log('a');
             errors += '01|';
         return errors.substring(0, errors.length - 1);
     },
+    goToFirstError: function() {
+        location.href = $('#point2seg').attr('href');
+    },            
     /**
      * fill segments with relative errors from polling
      * 
