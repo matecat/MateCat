@@ -1071,8 +1071,6 @@ function getProjectData( $pid, $password, $jid = null ) {
     
 	$query = $query ." group by 6,2 ";
 
-    Log::doLog($query);
-    
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
 

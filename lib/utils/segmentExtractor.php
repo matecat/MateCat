@@ -82,9 +82,6 @@ function extractSegments($files_path, $file, $pid, $fid) {
 
                                 if( $src != $trg ){
 
-                                    Log::doLog( strip_tags( html_entity_decode( $extract_external['seg'], ENT_QUOTES, 'UTF-8' ) ) );
-                                    Log::doLog( strip_tags( html_entity_decode( $target_extract_external['seg'], ENT_QUOTES, 'UTF-8' ) ) );
-
                                     $target = CatUtils::placeholdnbsp($target_extract_external['seg']);
                                     $target = mysql_real_escape_string($target);
 
@@ -228,12 +225,12 @@ function insertPreTranslations( & $SegmentTranslations, $jid ) {
     $mysql_link = mysql_connect($mysql_hostname, $mysql_username, $mysql_password);
     mysql_select_db($mysql_database, $mysql_link);
 
-    Log::doLog( array_shift( array_chunk( $SegmentTranslations, 5, true ) ) );
+//    Log::doLog( array_shift( array_chunk( $SegmentTranslations, 5, true ) ) );
 
     foreach ( $SegmentTranslations as $internal_id => $struct ){
 
         if( empty($struct) ) {
-            Log::doLog( $internal_id . " : " . var_export( $struct, true ) );
+//            Log::doLog( $internal_id . " : " . var_export( $struct, true ) );
             continue;
         }
 
@@ -247,7 +244,7 @@ function insertPreTranslations( & $SegmentTranslations, $jid ) {
         $query_translations = "INSERT INTO segment_translations (id_segment, id_job, status, translation, translation_date, tm_analysis_status, locked)
             values " . join(",\n", $query_translations);
 
-        Log::doLog( print_r( $query_translations,true ) );
+//        Log::doLog( print_r( $query_translations,true ) );
 
         $res = mysql_query($query_translations, $mysql_link);
 
