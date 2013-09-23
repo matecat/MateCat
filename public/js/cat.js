@@ -72,6 +72,7 @@ UI = {
         this.blockGetMoreSegments = true;
         var bb = $.cookie('noAlertConfirmTranslation');
         this.alertConfirmTranslationEnabled = (typeof bb == 'undefined') ? true : false;
+        this.customSpellcheck = false;
         setTimeout(function() {
             UI.blockGetMoreSegments = false;
         }, 1000);
@@ -153,6 +154,10 @@ UI = {
         }).bind('keydown', 'Meta+c', function(e) {
             UI.tagSelection = false;
         }).bind('keydown', 'Backspace', function(e) {
+        }).bind('keydown','Meta+f', function(e){ 
+            e.preventDefault();
+            $('body').addClass('filterOpen');
+            $('#search-source').focus();
         }).on('change', '#hideAlertConfirmTranslation', function(e) {
             console.log($(this).prop('checked'));
             if ($(this).prop('checked')) {
@@ -178,12 +183,20 @@ UI = {
             UI.browserScrollPositionRestoreCorrection();
 //            UI.setSegmentPointer();
         })
-
+// no more used:
         $("header .filter").click(function(e) {
             e.preventDefault();
             UI.body.toggleClass('filtering');
         })
-
+        $("#filterSwitch").bind('click', function(e){ 
+            e.preventDefault();
+            if($('body').hasClass('filterOpen')) {
+                $('body').removeClass('filterOpen');
+            } else {
+                $('body').addClass('filterOpen');
+                $('#search-source').focus();
+            }
+        })
         $("#segmentPointer").click(function(e) {
             e.preventDefault();
             UI.pointToOpenSegment();
@@ -284,9 +297,7 @@ UI = {
 
         $("form#fileDownload").submit(function() {
             if ($("#notifbox").hasClass("warningbox")) {
-                var a = APP.confirm("There are some potential errors\n\(missing tags, numbers etc).\n\
- If you continue some of the content could be untranslated.\n\
- Do you want to continue anyway?","confirmDownload");
+                var a = APP.confirm({cancelTxt:'Fix errors', onCancel: 'goToFirstError', okTxt: 'Continue', msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"});
 //                if (!a) {
 //                    return false;
 //                }
@@ -535,32 +546,28 @@ UI = {
                             UI.currentSearchInTarget = ($(this).hasClass('source'))? 0 : 1;
                             $('#contextMenu').attr('data-sid', $(this).parents('section').attr('id').split('-')[1]);
                             
-//                            console.log(selection);
-                            var range = selection.getRangeAt(0);
-                            var tag = range.startContainer.parentElement;
-                            if(($(tag).hasClass('misspelled'))&&(tag === range.endContainer.parentElement)) { // the selected element is in a misspelled element
-                                UI.selectedMisspelledElement = $(tag);
-                                var replacements = '';
-                                var words = $(tag).attr('data-replacements').split(',');
-//                                console.log(words.length);
-//                                console.log(words[0]);
-                                $.each(words, function(item) {
-//                                    console.log(item);
-                                    replacements += '<a class="words" href="#">' + this + '</a>';
-                                });
-                                if((words.length == 1)&&(words[0] == '')) {
-                                    $('#spellCheck .label').hide();
+                            if(UI.customSpellcheck) {
+                                var range = selection.getRangeAt(0);
+                                var tag = range.startContainer.parentElement;
+                                if(($(tag).hasClass('misspelled'))&&(tag === range.endContainer.parentElement)) { // the selected element is in a misspelled element
+                                    UI.selectedMisspelledElement = $(tag);
+                                    var replacements = '';
+                                    var words = $(tag).attr('data-replacements').split(',');
+                                    $.each(words, function(item) {
+                                        replacements += '<a class="words" href="#">' + this + '</a>';
+                                    });
+                                    if((words.length == 1)&&(words[0] == '')) {
+                                        $('#spellCheck .label').hide();
+                                    } else {
+                                        $('#spellCheck .label').show();                                   
+                                    }
+                                    $('#spellCheck .words').remove();
+                                    $('#spellCheck').show().find('.label').after(replacements);                                    
                                 } else {
-                                    $('#spellCheck .label').show();                                   
-                                }
-                                $('#spellCheck .words').remove();
-                                $('#spellCheck').show().find('.label').after(replacements);                                    
-//                                console.log('il menu contestuale è aperto? ' + $('#contextMenu').css('display'));
-
-//                                console.log(replacements);
-                            } else {
-                                $('#spellCheck').hide();
+                                    $('#spellCheck').hide();
+                                }                                
                             }
+
                             UI.showContextMenu(str, e.pageY, e.pageX);
                         };
                     }; 
@@ -843,7 +850,11 @@ UI = {
         if( $('#jobMenu').is(':animated') ) {
             return false;
         }
-
+        if(this.body.hasClass('editing')) {
+            $('#jobMenu .currSegment').show();
+        } else {
+            $('#jobMenu .currSegment').hide();            
+        }
         var menuHeight = $('#jobMenu').height();
         var startTop = 47 - menuHeight;
         $('#jobMenu').css('top', (47 - menuHeight) + "px");
@@ -859,7 +870,6 @@ UI = {
                 });
             }).addClass('open');
         }
-
     },
     activateSegment: function() {
         this.createFooter(this.currentSegment);
@@ -1739,7 +1749,7 @@ UI = {
         this.render(false);
     },
     reloadWarning: function() {
-        var m = APP.confirm('The next untranslated segment is outside the current view.');
+        var m = APP.confirm({msg: 'The next untranslated segment is outside the current view.'});
         if (m) {
             this.infiniteScroll = false;
             config.last_opened_segment = this.nextSegmentId;
@@ -1909,7 +1919,7 @@ UI = {
                         '					</span>' +
                         '					<div class="textarea-container">' +
                         '						<span class="loader"></span>' +
-                        '						<div class="editarea invisible" contenteditable="false" spellcheck="false" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : this.translation) + '</div>' +
+                        '						<div class="editarea invisible" contenteditable="false" spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : this.translation) + '</div>' +
                         '					</div> <!-- .textarea-container -->' +
                         '				</div> <!-- .target -->' +
                         '			</div></div> <!-- .wrap -->' +
@@ -2043,6 +2053,7 @@ UI = {
         this.updateContribution(source, target);
     },
     spellCheck: function(ed) {
+        if(!UI.customSpellcheck) return false;
         editarea = (typeof ed == 'undefined')? UI.editarea : $(ed);
         if($('#contextMenu').css('display') == 'block') return true;
 
@@ -2329,6 +2340,9 @@ console.log('a');
             errors += '01|';
         return errors.substring(0, errors.length - 1);
     },
+    goToFirstError: function() {
+        location.href = $('#point2seg').attr('href');
+    },            
     /**
      * fill segments with relative errors from polling
      * 
