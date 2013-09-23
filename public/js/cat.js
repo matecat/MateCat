@@ -154,6 +154,10 @@ UI = {
         }).bind('keydown', 'Meta+c', function(e) {
             UI.tagSelection = false;
         }).bind('keydown', 'Backspace', function(e) {
+        }).bind('keydown','Meta+f', function(e){ 
+            e.preventDefault();
+            $('body').addClass('filterOpen');
+            $('#search-source').focus();
         }).on('change', '#hideAlertConfirmTranslation', function(e) {
             console.log($(this).prop('checked'));
             if ($(this).prop('checked')) {
@@ -179,12 +183,20 @@ UI = {
             UI.browserScrollPositionRestoreCorrection();
 //            UI.setSegmentPointer();
         })
-
+// no more used:
         $("header .filter").click(function(e) {
             e.preventDefault();
             UI.body.toggleClass('filtering');
         })
-
+        $("#filterSwitch").bind('click', function(e){ 
+            e.preventDefault();
+            if($('body').hasClass('filterOpen')) {
+                $('body').removeClass('filterOpen');
+            } else {
+                $('body').addClass('filterOpen');
+                $('#search-source').focus();
+            }
+        })
         $("#segmentPointer").click(function(e) {
             e.preventDefault();
             UI.pointToOpenSegment();
@@ -860,7 +872,6 @@ UI = {
                 });
             }).addClass('open');
         }
-
     },
     activateSegment: function() {
         this.createFooter(this.currentSegment);
