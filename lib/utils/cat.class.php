@@ -63,6 +63,12 @@ class CatUtils {
         return array($hours, $minutes, $seconds, $usec);
     }
 
+    public static function dos2unix( $dosString ){
+        $dosString = str_replace( "\r\n","\r", $dosString );
+        $dosString = str_replace( "\n","\r", $dosString );
+        $dosString = str_replace( "\r","\n", $dosString );
+        return $dosString;
+    }
     
     private static function placehold_xml_entities($segment) {
         $pattern ="|&#(.*?);|";
