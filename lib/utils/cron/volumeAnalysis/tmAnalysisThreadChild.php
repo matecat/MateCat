@@ -184,13 +184,10 @@ while (1) {
 
     }
 
-    
-    //Log::doLog( $text );
-    //Log::doLog( $matches[ 0 ][ 'raw_segment' ] );
-
-    //Log::doLog( $matches[0]['raw_translation'] );
     $suggestion = CatUtils::view2rawxliff($matches[0]['raw_translation']);
-    //Log::doLog( $suggestion );
+
+    //preg_replace all x tags <x not closed > inside suggestions with correctly closed
+    $suggestion = preg_replace( '|<x([^/]*?)>|', '<x\1/>', $suggestion );
 
     $suggestion_match = $matches[0]['match'];
     $suggestion_json = json_encode($matches);
@@ -208,7 +205,7 @@ while (1) {
     $check = new QA( $text, $suggestion );
     $check->performTagCheckOnly();
 
-    log::doLog($check->getErrors(true));
+    //log::doLog($check->getErrors(true));
 
     echo "--- (child $my_pid) : sid=$sid --- \$tm_match_type=$tm_match_type, \$fast_match_type=$fast_match_type, \$new_match_type=$new_match_type, \$equivalentWordMapping[\$new_match_type]=" . $equivalentWordMapping[$new_match_type] . ", \$raw_wc=$raw_wc,\$standard_words=$standard_words,\$eq_words=$eq_words\n";
 

@@ -13,8 +13,10 @@ class XliffSAXTranslationReplacer{
 	private $len;//length of the currentBuffer
 	private $segments; //array of translations
 	private $currentId;//id of current <trans-unit>
-	private $empty_tags=array('detected-source-lang','fmt','sdl:cxt','cxt','sdl:node','sdl:ref-file','ref-file','sdl:seg','seg','x');
-	private $regular_tags=array('body','bpt','bpt-props','cxt-def','cxt-defs','ept','sdl:filetype-id','filetype-id','file','file-info','fmt-def','fmt-defs','g','group','header','internal-file','mrk','ph','props','reference','sdl:cxts','cxts','sdl:filetype','filetype','sdl:filetype-info','filetype-info','sdl:ref-files','ref-files','sdl:seg-defs','seg-defs','seg-source','sniff-info','source','st','tag','tag-defs','target','trans-unit','value','xliff');
+	private $empty_tags=array('detected-encoding','detected-source-lang','detected-target-lang','fmt','sdl:cxt','cxt','sdl:node','sdl:ref-file','ref-file','sdl:seg','seg','x');
+	private $regular_tags=array('body','bpt','bpt-props','node-def','cxt-defs','ept','sdl:filetype-id','filetype-id','file','file-info','fmt-def','fmt-defs','g','group','header','internal-file','mrk','ph','props','reference','sdl:cxts','cxts','sdl:filetype','filetype','sdl:filetype-info','filetype-info','sdl:ref-files','ref-files','sdl:seg-defs','seg-defs','seg-source','sniff-info','source','st','tag','tag-defs','target','trans-unit','value','xliff');
+
+    //'cxt-def',
 
     private $target_lang;
 
@@ -187,6 +189,46 @@ class XliffSAXTranslationReplacer{
 			}
 			//flush to pointer
 			$this->postProcAndflush($this->ofp,$tag);
+
+            //HACK
+            if( $name == "cxt-defs" ){
+
+                $fp_original = fopen( $this->filename, "r" );
+
+                if ( is_resource( $fp_original ) ) {
+
+                    //temp close pointer to rewrite on
+                    fclose( $this->ofp );
+
+                    $idx = xml_get_current_byte_index($parser);
+
+                    fseek( $fp_original, $idx -2048 );
+                    $partial_orig_xliff = fread( $fp_original, 2048 );
+                    preg_match( '/(<cxt-defs.*<\/cxt-defs>)/si', $partial_orig_xliff, $matches );
+                    fclose($fp_original);
+
+                    //open in read/write mode and place pointer at the end of file
+                    $fp_this_manipulated = fopen( $this->filename.'.out.sdlxliff', "r+" );
+
+                    //go to the -2048 bytes of file
+                    fseek( $fp_this_manipulated, -2048, SEEK_END );
+                    //read more than needed, there should be some changes in files
+                    $partial_output_xliff = fread( $fp_this_manipulated, 3072 );
+                    fseek( $fp_this_manipulated, -2048, SEEK_END );
+
+                    $output_matches = preg_replace( '/<cxt-defs.*<\/cxt-defs>/si', $matches[1], $partial_output_xliff );
+
+                    fwrite( $fp_this_manipulated, $output_matches );
+
+                    //re-attach the global file-pointer
+                    $this->ofp = $fp_this_manipulated;
+
+                } else {
+                    Log::doLog( "could not open some XML input" );
+                }
+
+            }
+
 		}
 		else{
 			//ok, nothing to be done; reset flag for next coming tag
@@ -234,22 +276,23 @@ class XliffSAXTranslationReplacer{
 		$seg ['segment'] = CatUtils::restorenbsp ( $seg ['segment'] );
 		$seg ['translation'] = CatUtils::restorenbsp ( $seg ['translation'] );
                 
-                $seg ['segment'] = CatUtils::restore_xml_entities ( $seg ['segment'] );
+        $seg ['segment'] = CatUtils::restore_xml_entities ( $seg ['segment'] );
 		$seg ['translation'] = CatUtils::restore_xml_entities ( $seg ['translation'] );
-
 
         //QA non sense for source/source check until source can be changed. For now SKIP
 		if (is_null ( $seg ['translation'] ) || $seg ['translation'] == '') {
 			$translation = $seg ['segment'];
 		} else {
-			$translation = $seg ['translation'];
 
-            //consistency check
-            $check = new QA ( $seg ['segment'], $translation );
-            $check->performTagCheckOnly ();
-            if( $check->thereAreErrors() ){
-                $translation = '|||UNTRANSLATED_CONTENT_START|||' . $seg ['segment'] . '|||UNTRANSLATED_CONTENT_END|||';
-                //log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".print_r( $check->getErrors(), true ).")");
+			$translation = $seg ['translation'];
+            if( empty($seg['locked']) ){
+                //consistency check
+                $check = new QA ( $seg ['segment'], $translation );
+                $check->performTagCheckOnly ();
+                if( $check->thereAreErrors() ){
+                    $translation = '|||UNTRANSLATED_CONTENT_START|||' . $seg ['segment'] . '|||UNTRANSLATED_CONTENT_END|||';
+                    Log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".print_r( $check->getErrors(), true ).")");
+                }
             }
 
 		}

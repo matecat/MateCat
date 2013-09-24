@@ -42,7 +42,6 @@ class jobAnalysisController extends viewcontroller {
 
 	public function doAction() {
 		$project_data = getJobAnalysisData($this->pid, $this->password, $this->jid );
-         log::doLog( "PROJECT DATA: ", $project_data);
 
 		$lang_handler = Languages::getInstance();
 

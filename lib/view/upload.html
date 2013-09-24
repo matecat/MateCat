@@ -291,7 +291,13 @@
         <script id="template-upload" type="text/x-tmpl">
             {% for (var i=0, file; file=o.files[i]; i++) { %}
             <tr class="template-upload fade">
-            <td class="preview"> <img src="${basepath}public/img/xliff-icon-retina.png" width="30" height="29" /></td>
+            <td class="preview">
+            {% if ( o.files[i].type == "application/msword" || /doc[x]/.test( o.files[i].name.split('.').pop() ) ) { %}
+                <img src="${basepath}public/img/word-icon-retina.png" width="30" height="29" />
+            {% } else { %}
+                <img src="${basepath}public/img/xliff-icon-retina.png" width="30" height="29" />
+            {% } %}
+            </td>
             <td class="name"><span>{%=file.name%}</span></td>
             <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
             {% if (file.error) { %}
@@ -317,15 +323,7 @@
             {% } %}</td>
             </tr>
 
-
-
-
             {% } %}
-
-
-
-
-
 
         </script>
 
@@ -342,7 +340,11 @@
             <td class="error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span> {%=locale.fileupload.errors[file.error] || file.error%}</td>
             {% } else { %}
             <td class="preview">
-            <img src="${basepath}public/img/xliff-icon-retina.png" width="30" height="29" />
+            {% if (o.files[i].type == "application/msword" || /doc[x]/.test( file.name.split('.').pop() ) ) { %}
+                <img src="${basepath}public/img/word-icon-retina.png" width="30" height="29" />
+            {% } else { %}
+                <img src="${basepath}public/img/xliff-icon-retina.png" width="30" height="29" />
+            {% } %}
             </td>
             <td class="name">{%=file.name%}</td>
             <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>

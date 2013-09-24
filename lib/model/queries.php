@@ -302,7 +302,7 @@ function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
 		f.filename, f.mime_type, s.id as sid, s.segment, s.internal_id,
 		s.xliff_mrk_id as mrk_id, s.xliff_ext_prec_tags as prev_tags, s.xliff_ext_succ_tags as succ_tags,
 		s.xliff_mrk_ext_prec_tags as mrk_prev_tags, s.xliff_mrk_ext_succ_tags as mrk_succ_tags,
-		$select_translation, st.status
+		$select_translation, st.status, st.locked
 
 			from jobs j 
 			inner join projects p on p.id=j.id_project
@@ -530,8 +530,9 @@ function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $su
     $data[ 'match_type' ]          = $match_type;
     $data[ 'eq_word_count' ]       = $eq_words;
     $data[ 'standard_word_count' ] = $standard_words;
-    $data[ 'translation' ]         = $translation;
-    $data[ 'tm_analysis_status' ]  = $tm_status_analysis;
+
+    ( !empty( $translation ) ? $data[ 'translation' ] = $translation : null );
+    ( $tm_status_analysis != 'UNDONE' ? $data[ 'tm_analysis_status' ] = $tm_status_analysis : null );
 
     $data[ 'warning' ]                = $warning;
     $data[ 'serialized_errors_list' ] = $err_json_list;
@@ -617,6 +618,10 @@ function getFilesForJob( $id_job, $id_file ) {
     $query = "select id_file, xliff_file, filename,mime_type from files_job fj
 		inner join files f on f.id=fj.id_file
 		where id_job=$id_job $where_id_file";
+
+    $query = "select id_file, xliff_file, original_file, filename,mime_type from files_job fj
+        inner join files f on f.id=fj.id_file
+        where id_job=$id_job $where_id_file";
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
@@ -1066,8 +1071,6 @@ function getProjectData( $pid, $password, $jid = null ) {
     
 	$query = $query ." group by 6,2 ";
 
-    Log::doLog($query);
-    
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
 
@@ -1351,7 +1354,9 @@ function getSegmentsForFastVolumeAnalysys( $pid ) {
 		from segments as s 
 		inner join files_job as fj on fj.id_file=s.id_file
 		inner join jobs as j on fj.id_job=j.id
-		where j.id_project='$pid' 
+		left join segment_translations as st on st.id_segment = s.id
+		where j.id_project='$pid'
+        and IFNULL( st.locked, 0 ) = 0
 		group by s.id
 		order by s.id";
     $db      = Database::obtain();
@@ -1852,6 +1857,11 @@ function getSegmentForTMVolumeAnalysys( $id_segment, $id_job ) {
     return $results;
 }
 
+/**
+ * @deprecated Not Used Anywhere
+ *
+ * @return array|bool
+ */
 function getNextSegmentForTMVolumeAnalysys() {
     $query = "select s.id as sid ,s.segment ,raw_word_count,
 		st.match_type, j.source, j.target, j.id as jid, j.id_translator,

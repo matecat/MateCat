@@ -11,7 +11,12 @@
  */
 error_reporting(E_ALL | E_STRICT);
 
+require $_SERVER["DOCUMENT_ROOT"] . '/inc/config.inc.php';
+@INIT::obtain();
+require INIT::$UTILS_ROOT . '/utils.class.php';
+require INIT::$UTILS_ROOT . '/log.class.php';
 require('upload.class.php');
+require( INIT::$UTILS_ROOT . '/xliff.parser.1.2.class.php' );
 
 
 $upload_handler = new UploadHandler();
