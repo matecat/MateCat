@@ -446,7 +446,7 @@ body.manage .search
 	position: absolute;
 	left: -99999px;
 	}
-
+/*
 body.manage .searchbox
 	{
 	display: none;
@@ -498,7 +498,11 @@ body.manage .searchbox .block.right
 	margin-right: 8% !important;
 	margin-top: -5px !important;
 	}
-
+*/
+.searchbox
+	{
+	margin-top: 18px !important;
+	}
 body.manage.filterOpen #contentBox
 	{
 	margin-top: 40px;

@@ -93,6 +93,9 @@ TRG;
         $warnings = $check->getWarnings();
         $errors   = $check->getErrors();
 
+        $this->assertFalse( $check->thereAreErrors() );
+        $this->assertFalse( $check->thereAreWarnings() );
+
         $this->assertEquals( count( $warnings ), 1 );
         $this->assertEquals( 0, $warnings[0]->outcome );
 
@@ -101,13 +104,37 @@ TRG;
 
         $normalized = $check->getTrgNormalized();
 
-        //" 1 " -> 20 31 C2 A0
-        $this->assertEquals( '<g id="6"> 1 </g><g id="7">st  </g><g id="8"> Section of Tokyo, Osaka</g>', $normalized );
+        //" 1 " -> 20 31 20
+        $this->assertEquals( '<g id="6"> 1 </g><g id="7">st  </g><g id="8"> Section of Tokyo, Osaka</g>', $normalized );
 
 
     }
 
+    public function testAnalysisRecursive(){
 
+        //Strings already converted to raw xliff
+
+        $source_seg = <<<SRC
+<g id="pt231"><g id="pt232">APPARTEMENT ELSA ET JOY </g><g id="pt233">&lt;&lt;1.0&gt;&gt;</g></g> <g id="pt235"><g id="pt236"> </g></g> <g id="pt238"><g id="pt239">Elsa sur son ordinateur tape des lignes de code quand sa colocataire, Joy, entre dans sa chambre.</g></g>
+SRC;
+
+//<g id="6">1</g><g id="7">st  </g><g id="8">Section of Tokyo, Osaka</g>
+        $target_seg = <<<TRG
+ <g id="pt231"><g id="pt232">ELSA AND JOY'S APARTMENT </g><g id="pt233"> &lt;&lt;1.0&gt;&gt;</g></g> <g id="pt235"><g id="pt236"> </g></g> <g id="pt238"><g id="pt239">Elsa's on her computer typing lines of code when her roommate, Joy, enters the room.</g></g>
+TRG;
+
+        $check = new QA($source_seg, $target_seg);
+        $check->performConsistencyCheck();
+
+        $this->assertFalse( $check->thereAreWarnings() );
+
+        //$normalized = $check->getTrgNormalized();
+
+        //var_dump($normalized);
+
+
+
+    }
 
 
 }

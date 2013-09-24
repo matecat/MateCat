@@ -38,7 +38,6 @@ class getVolumeAnalysisController extends ajaxcontroller {
 		//array of totals per job-file
 		$total_payable=array();
 
-
 		foreach ($res as $r) {
 			if ($r['st_status_analysis'] == 'DONE') {
 				$this->segments_analyzed+=1;
@@ -110,12 +109,26 @@ class getVolumeAnalysisController extends ajaxcontroller {
 
 			//take note of payable words for job/file combination
             //sum all totals for each job
-            $return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][0] = $return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][0];
+            //$return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][0] = $return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][0];
+
+
+            //take note of payable words for job/file combination
+            $total_payable[$jid][$r['id_file']]=$return_data['jobs'][$jid]['file_details'][$r['id_file']]["TOTAL_PAYABLE"][0];
 
 		}
 
-        //format numbers after summing
-        $return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][1] = number_format( $return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][0],0,".",",");
+        //sum all totals for each job
+        foreach($total_payable as $jid=>$files){
+            foreach($files as $fid=>$v){
+                $return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][0]+=$v;
+            }
+            //format numbers after summing
+            $return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][1]=number_format($return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][0],0,".",",");
+        }
+
+        //format numbers after sum
+        //$return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][1] = number_format( $return_data['jobs'][$jid]['totals']["TOTAL_PAYABLE"][0],0,".",",");
+
 
 		if ($this->total_wc_standard_analysis == 0  and $this->status_project == "FAST_OK" ) {
 			$this->total_wc_standard_analysis = $this->total_wc_standard_fast_analysis;

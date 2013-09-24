@@ -251,7 +251,7 @@ class QA {
     protected function _addError($errCode) {
 
         //Real error Code log
-        Log::doLog( $errCode . " :: " . $this->_errorMap[$errCode]);
+        //Log::doLog( $errCode . " :: " . $this->_errorMap[$errCode]);
 
         switch( $errCode ) {
             case self::ERR_COUNT:
@@ -574,7 +574,7 @@ class QA {
                 );
 
                 //set depth and increment for next occurrence
-                $srcDomElements['DOMElement'][ $depth++ ] = $plainRef;
+                $srcDomElements['DOMElement'][] = $plainRef;
 
                 //count occurrences of this tag name when needed, also transport id reference.
                 @$srcDomElements[$element->tagName][] = $elementID;
@@ -639,8 +639,8 @@ class QA {
                         $this->_addError(self::ERR_UNCLOSED_X_TAG);
                     }
                 }
-
             }
+            //Log::doLog($rrorList);
 
             $this->_addError($targetErrorType);
         }
@@ -1072,7 +1072,6 @@ class QA {
 
         }
 
-Log::hexDump( $this->getTrgNormalized() );
     }
 
     /**

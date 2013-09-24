@@ -312,7 +312,7 @@ class UploadHandler{
 				protected function handle_file_upload($uploaded_file, $name, $size, $type, $error, $index = null) {
 					$file = new stdClass();
 					$file->name = $this->trim_file_name($name, $type, $index);
-					$file->size = intval($size);
+                    $file->size = intval($size);
 					$file->type = $type;
 					if ($this->validate($uploaded_file, $file, $error, $index)) {
 						$this->handle_form_data($file, $index);
@@ -325,9 +325,8 @@ class UploadHandler{
 							if ($append_file) {
 								file_put_contents(
 										$file_path,
-										fopen($uploaded_file, 'r'),
-										FILE_APPEND
-										);
+										fopen($uploaded_file, 'r'), FILE_APPEND
+								);
 							} else {
 								move_uploaded_file($uploaded_file, $file_path);
 							}
@@ -377,7 +376,27 @@ class UploadHandler{
 						}
 
 					}
-					return $file;
+
+                    /**
+                     * Conversion Enforce
+                     *
+                     * Check on extensions no more sufficient, we want check content
+                     * if this is an idiom.inc xlf file type, enforce conversion
+                     * $file->convert = true;
+                     */
+                    try {
+                        $fileType = DetectProprietaryXliff::getInfo( $file_path );
+                        if ( $fileType[ 'proprietary' ] && INIT::$CONVERSION_ENABLED ) {
+                            if ( $fileType[ 'proprietary_name' ] == 'idiom world server' ) {
+                                $file->convert = true;
+                            }
+                        } else if ( $fileType[ 'proprietary' ] && ! INIT::$CONVERSION_ENABLED ) {
+                            unlink($file_path);
+                            $file->error = 'Matecat Open-Source does not support ' . ucwords( $fileType[ 'proprietary_name' ] ) . '. Use MatecatPro.';
+                        }
+                    } catch ( Exception $e ) { Log::doLog( $e->getMessage() ); }
+
+                    return $file;
 				}
 
 				public function get() {

@@ -31,12 +31,15 @@
                     <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
                     <input type="hidden" name="password" tal:attributes="value password" />
                     <input type="hidden" name="download_type" value="all" />
-                    <input id="downloadProject" name="submit" type="submit" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0)? 'DOWNLOAD TRANSLATION' : 'PREVIEW'" />
+                    <input id="downloadProject" name="submit1" type="submit" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0)? 'DOWNLOAD TRANSLATION' : 'PREVIEW'" />
                 </form>
           </li>
         
-          <li id='notifbox' class="notific" title="Well done, no errors found!">
-          	<a id='point2seg' href="#"><span class="numbererror"></span></a>
+          <li id="notifbox" class="notific" title="Well done, no errors found!">
+          	<a id="point2seg" href="#"><span class="numbererror"></span></a>
+          </li>
+          <li id='filterSwitch' title="Search or Filter results">
+          	Search or Filter results
           </li>
           </ul>
 
