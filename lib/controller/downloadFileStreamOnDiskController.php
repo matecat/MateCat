@@ -5,6 +5,7 @@ include_once INIT::$MODEL_ROOT."/queries.php";
 include_once INIT::$UTILS_ROOT."/cat.class.php";
 include_once INIT::$UTILS_ROOT."/fileFormatConverter.class.php";
 include_once(INIT::$UTILS_ROOT.'/XliffSAXTranslationReplacer.class.php');
+include_once(INIT::$UTILS_ROOT.'/xliff.parser.1.2.class.php');
 
 
 class downloadFileStreamOnDiskController extends downloadController {
@@ -131,12 +132,58 @@ class downloadFileStreamOnDiskController extends downloadController {
 			$output_content[$id_file]['content'] = $original;
 			$output_content[$id_file]['filename'] = $current_filename;
 
-			if (!in_array($mime_type, array("xliff", "sdlxliff", "xlf"))) {
+
+            //TODO set a flag in database when file uploaded to know if this file is a proprietary xlf converted
+            //TODO so we can load from database the original file blob ONLY when needed
+            /**
+             * Conversion Enforce
+             *
+             * Check Extentions no more sufficient, we want check content
+             * if this is an idiom xlf file type, conversion are enforced
+             * $enforcedConversion = true; //( if conversion is enabled )
+             *
+             * dos2unix must be enabled for xliff forced conversions
+             *
+             */
+            $enforcedConversion = false;
+            try {
+
+                $file['original_file'] = @gzinflate($file['original_file']);
+
+                $fileType = DetectProprietaryXliff::getInfoByStringData( $file['original_file'] );
+                Log::doLog( 'Proprietary detection: ' . var_export( $fileType, true ) );
+
+                if( $fileType['proprietary'] == true  ){
+
+                    if( INIT::$CONVERSION_ENABLED && $fileType['proprietary_name'] == 'idiom world server' ){
+                        $enforcedConversion = true;
+
+                        //force unix type files
+                        $output_content[$id_file]['content'] = CatUtils::dos2unix( $output_content[$id_file]['content'] );
+
+                        Log::doLog( 'Idiom found, conversion Enforced: ' . var_export( $enforcedConversion, true ) );
+
+                    } else {
+                        /**
+                         * Application misconfiguration.
+                         * upload should not be happened, but if we are here, raise an error.
+                         * @see upload.class.php
+                         * */
+                        Log::doLog( "Application misconfiguration. Upload should not be happened, but if we are here, raise an error." );
+                        return;
+                        //stop execution
+                    }
+                }
+            } catch ( Exception $e ) { Log::doLog( $e->getMessage() ); }
+
+
+			if (!in_array($mime_type, array("xliff", "sdlxliff", "xlf")) || $enforcedConversion ) {
 				$debug['do_conversion'][]=time();
 				$convertResult = $converter->convertToOriginal($output_content[$id_file]['content'],$chosen_machine);
 				$output_content[$id_file]['content'] = $convertResult['documentContent'];
 				$debug['do_conversion'][]=time();
 			}
+
 		}
 
 		$ext = "";
@@ -182,7 +229,9 @@ class downloadFileStreamOnDiskController extends downloadController {
 			if ($ext == 'pdf' or $ext == "PDF") {
 				$f['filename'] = $pathinfo['basename'] . ".docx";
 			}
-			$zip->addFromString($f['filename'], $f['content']);
+
+            //Php Zip bug, utf-8 not supported
+			$zip->addFromString( iconv( "UTF-8", 'ASCII//TRANSLIT//IGNORE', $f['filename'] ), $f['content']);
 		}
 
 		// Close and send to users

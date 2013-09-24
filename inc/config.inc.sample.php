@@ -89,11 +89,16 @@ class INIT {
         register_shutdown_function( 'INIT::sessionClose' );
 
         $root = realpath(dirname(__FILE__) . '/../');
-        self::$ROOT    = $root; // Accesible by Apache/PHP
+        self::$ROOT = $root;  // Accesible by Apache/PHP
         self::$BASEURL = "/"; // Accesible by the browser
 
-        $protocol       = stripos( $_SERVER[ 'SERVER_PROTOCOL' ], "https" ) === false ? "http" : "https";
-        self::$HTTPHOST = "$protocol://$_SERVER[HTTP_HOST]";
+        if( stripos( PHP_SAPI, 'cli' ) === false ){
+            $protocol=stripos($_SERVER['SERVER_PROTOCOL'],"https")===FALSE?"http":"https";
+            self::$HTTPHOST="$protocol://$_SERVER[HTTP_HOST]";
+        } else {
+            echo "\nPHP Running in CLI mode.\n\n";
+            //Possible CLI configurations
+        }
 
         set_include_path(get_include_path() . PATH_SEPARATOR . $root);
 

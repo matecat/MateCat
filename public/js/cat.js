@@ -522,9 +522,12 @@ UI = {
             selectText(this);
             $(this).toggleClass('selected');
         }).on('contextmenu', '.source', function(e) {
-            if(UI.viewConcordanceInContextMenu||UI.viewSpellCheckInContextMenu) e.preventDefault();
+            // temporarily disabled
+//            if(UI.viewConcordanceInContextMenu||UI.viewSpellCheckInContextMenu) e.preventDefault();
         }).on('mousedown', '.source', function(e) {
             if(e.button == 2) { // right click
+                // temporarily disabled
+                return true;
                 if($('#contextMenu').css('display') == 'block') return true;
 
                 var selection = window.getSelection();
