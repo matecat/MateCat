@@ -294,26 +294,17 @@ UI = {
             e.preventDefault();
             $('#originalDownload').submit();
         });
-
-        $("form#fileDownload").submit(function() {
-            if ($("#notifbox").hasClass("warningbox")) {
-                var a = APP.confirm({cancelTxt:'Fix errors', onCancel: 'goToFirstError', okTxt: 'Continue', msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"});
-//                if (!a) {
-//                    return false;
-//                }
-            }
-//            if (UI.isChrome) {
-//                $('.download-chrome').addClass('d-open');
-//                setTimeout(function() {
-//                    $('.download-chrome').removeClass('d-open');
-//                }, 7000);
-//
-//            }
-//            return true;
-        })
-
+        $("form#fileDownload").bind('submit', function(e) {
+            e.preventDefault();
+        });
+            
         $('html').click(function() {
             $(".menucolor").hide();
+        }).on('click', '#downloadProject', function(e) {
+            e.preventDefault();
+            if ($("#notifbox").hasClass("warningbox")) {
+                var a = APP.confirm({name: 'confirmDownload', cancelTxt:'Fix errors', onCancel: 'goToFirstError', callback: 'continueDownload', okTxt: 'Continue', msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"});
+            }     
         }).on('click', '.alert .close', function(e) {
             e.preventDefault();
             $('.alert').remove();
@@ -323,7 +314,6 @@ UI = {
                 setTimeout(function() {
                     $('.download-chrome').removeClass('d-open');
                 }, 7000);
-
             }
         }).on('click', '#contextMenu #searchConcordance', function(e) {
             if($('#contextMenu').attr('data-sid') == UI.currentSegmentId) {
@@ -531,9 +521,9 @@ UI = {
             e.stopPropagation();
             selectText(this);
             $(this).toggleClass('selected');
-        }).on('contextmenu', '.source,.editarea', function(e) {
+        }).on('contextmenu', '.source', function(e) {
             if(UI.viewConcordanceInContextMenu||UI.viewSpellCheckInContextMenu) e.preventDefault();
-        }).on('mousedown', '.source, .editarea', function(e) {
+        }).on('mousedown', '.source', function(e) {
             if(e.button == 2) { // right click
                 if($('#contextMenu').css('display') == 'block') return true;
 
@@ -1885,7 +1875,7 @@ UI = {
                         '				<input type=hidden name="id_file" value="' + fid + '">' +
                         '				<input type=hidden name="filename" value="' + this.filename + '">' +
                         '				<input type=hidden name="password" value="' + config.password + '">' +
-                        '				<!--input title="Download file" name="submit" type="submit" value="" class="downloadfile" id="file-' + fid + '-download" -->' +
+                        '				<!--input title="Download file" type="submit" value="" class="downloadfile" id="file-' + fid + '-download" -->' +
                         '			</form>' +
                         '			<h2 title="' + this.filename + '">' + filenametoshow + '</div>' +
                         '		</li>' +
@@ -2343,7 +2333,12 @@ console.log('a');
     goToFirstError: function() {
         location.href = $('#point2seg').attr('href');
     },            
-    /**
+    continueDownload: function() {
+        $("form#fileDownload").unbind().submit().bind('submit', function(e) {
+                e.preventDefault();
+        });
+    },     
+   /**
      * fill segments with relative errors from polling
      * 
      * @param {type} segment
