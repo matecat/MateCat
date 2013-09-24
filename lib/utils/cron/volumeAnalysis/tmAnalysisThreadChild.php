@@ -184,16 +184,10 @@ while (1) {
 
     }
 
-    
-    //Log::doLog( $text );
-    //Log::doLog( $matches[ 0 ][ 'raw_segment' ] );
-
-    //Log::doLog( $matches[0]['raw_translation'] );
     $suggestion = CatUtils::view2rawxliff($matches[0]['raw_translation']);
 
-    //TODO preg_replace di tutti i tag <x non chiusi > nelle suggestion
-
-    //Log::doLog( $suggestion );
+    //preg_replace all x tags <x not closed > inside suggestions with correctly closed
+    $suggestion = preg_replace( '|<x([^/]*?)>|', '<x\1/>', $suggestion );
 
     $suggestion_match = $matches[0]['match'];
     $suggestion_json = json_encode($matches);
