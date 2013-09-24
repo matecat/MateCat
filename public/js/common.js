@@ -2,8 +2,8 @@ APP = null;
 
 APP = {
     init: function() {
-        this.waitingConfirm = false;
-        this.confirmValue = null;
+//        this.waitingConfirm = false;
+//        this.confirmValue = null;
         $("body").on('click', '.modal .x-popup', function(e) {
             e.preventDefault();
             APP.closePopup();
@@ -13,14 +13,21 @@ APP = {
         }).on('click', '.modal[data-type=confirm] .btn-ok', function(e) {
             e.preventDefault();
             APP.closePopup();
-            APP.confirmValue = true;
-            APP.waitingConfirm = false;
+            if($(this).attr('data-callback')) {
+                UI[$(this).attr('data-callback')]();
+            };
+//            APP.confirmValue = true;
+//            APP.waitingConfirm = false;
         }).on('click', '.modal[data-type=confirm] .btn-cancel, .modal[data-type=confirm] .x-popup', function(e) {
             e.preventDefault();
             APP.closePopup();
-            APP.confirmValue = false;
-            APP.cancelValue = false;
-            APP.waitingConfirm = false;
+            el = $(this).parents('.modal').find('.btn-cancel');
+            if($(el).attr('data-callback')) {
+                UI[$(el).attr('data-callback')]();
+            };
+//            APP.confirmValue = false;
+//            APP.cancelValue = false;
+//            APP.waitingConfirm = false;
         }).on('click', '.popup-outer.closeClickingOutside', function(e) {
             e.preventDefault();
             APP.closePopup();
@@ -38,6 +45,7 @@ APP = {
         this.waitingConfirm = true;
         this.popup({
             type: 'confirm',
+            name: options.name,
             onConfirm: options.callback,
             onCancel: options.onCancel,
             title: 'Confirmation required',
@@ -48,22 +56,24 @@ APP = {
         this.checkConfirmation();
     },
     checkConfirmation: function() {
-        if(this.waitingConfirm) {
-            setTimeout(function() {
-                APP.checkConfirmation();
-            }, 200);            
-        } else {
-            if(this.confirmCallbackFunction) {
-                UI[this.confirmCallbackFunction](this.confirmValue);
-                this.confirmValue = null;
-                this.confirmCallbackFunction = null;
-            }
-            if(this.cancelCallbackFunction) {
-                UI[this.cancelCallbackFunction](this.cancelValue);
-                this.cancelValue = null;
-                this.cancelCallbackFunction = null;
-            }
-        }
+//        if(this.waitingConfirm) {
+//            setTimeout(function() {
+//                APP.checkConfirmation();
+//            }, 200);            
+//        } else {
+//            console.log('this.confirmCallbackFunction: ' + this.confirmCallbackFunction);
+//            console.log('this.cancelCallbackFunction: ' + this.cancelCallbackFunction);
+//            if(this.confirmCallbackFunction) {
+//                UI[this.confirmCallbackFunction](this.confirmValue);
+//                this.confirmValue = null;
+//                this.confirmCallbackFunction = null;
+//            }
+//            if(this.cancelCallbackFunction) {
+//                UI[this.cancelCallbackFunction](this.cancelValue);
+//                this.cancelValue = null;
+//                this.cancelCallbackFunction = null;
+//            }
+//        }
     },
     doRequest: function(req,log) {
         logTxt = (typeof log == 'undefined')? '' : '&type=' + log;
@@ -115,7 +125,7 @@ APP = {
  */
         this.closePopup();
 
-        newPopup = '<div class="modal"' + ((conf.type == 'alert')? ' data-type="alert"' : (conf.type == 'confirm')? ' data-type="confirm"' : '') + '>' +
+        newPopup = '<div class="modal" data-name="' + ((conf.name)? conf.name : '') + '"' + ((conf.type == 'alert')? ' data-type="alert"' : (conf.type == 'confirm')? ' data-type="confirm"' : '') + '>' +
                     '   <div class="popup-outer"></div>' +
                     '   <div class="popup' + ((conf.type == 'alert')? ' popup-alert' : (conf.type == 'confirm')? ' popup-confirm' : '') + '">' +
                     '       <a href="#" class="x-popup remove"></a>' +
@@ -124,8 +134,8 @@ APP = {
         if(conf.type == 'alert') {
             newPopup += '<a href="#" class="btn-ok">ok<\a>';          
         } else if(conf.type == 'confirm') {
-            newPopup +=     '<a href="#" class="btn-cancel">' + ((conf.cancelTxt)? conf.cancelTxt : 'Cancel') + '<\a>' +          
-                             '<a href="#" class="btn-ok">' + ((conf.okTxt)? conf.okTxt : 'Ok') + '<\a>';    
+            newPopup +=     '<a href="#" class="btn-cancel"' + ((conf.onCancel)? ' data-callback="' + conf.onCancel + '"' : '') + '>' + ((conf.cancelTxt)? conf.cancelTxt : 'Cancel') + '<\a>' +          
+                             '<a href="#" class="btn-ok"' + ((conf.onConfirm)? ' data-callback="' + conf.onConfirm + '"' : '') + '>' + ((conf.okTxt)? conf.okTxt : 'Ok') + '<\a>';    
             this.confirmCallbackFunction = (conf.onConfirm)? conf.onConfirm : null;
             this.cancelCallbackFunction = (conf.onCancel)? conf.onCancel : null;
         } else {
