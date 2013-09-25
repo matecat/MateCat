@@ -303,8 +303,10 @@ UI = {
         }).on('click', '#downloadProject', function(e) {
             e.preventDefault();
             if ($("#notifbox").hasClass("warningbox")) {
-                var a = APP.confirm({name: 'confirmDownload', cancelTxt:'Fix errors', onCancel: 'goToFirstError', callback: 'continueDownload', okTxt: 'Continue', msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"});
-            }     
+                APP.confirm({name: 'confirmDownload', cancelTxt:'Fix errors', onCancel: 'goToFirstError', callback: 'continueDownload', okTxt: 'Continue', msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"});
+            } else {
+                UI.continueDownload();
+            }   
         }).on('click', '.alert .close', function(e) {
             e.preventDefault();
             $('.alert').remove();
