@@ -190,35 +190,53 @@ class XliffSAXTranslationReplacer{
 			//flush to pointer
 			$this->postProcAndflush($this->ofp,$tag);
 
-            //HACK
+            /**
+             *
+             * ctx-def tags can be either empty and not empty,
+             * we can't determine which type it is a runtime,
+             *
+             * Because they can be only at beginning of trados file ( after the base64 encoded original file )
+             * we patch the content with the original one
+             *
+             */
             if( $name == "cxt-defs" ){
 
                 $fp_original = fopen( $this->filename, "r" );
 
                 if ( is_resource( $fp_original ) ) {
 
-                    //temp close pointer to rewrite on
+                    //temp close pointer to rewrite on file
                     fclose( $this->ofp );
 
                     $idx = xml_get_current_byte_index($parser);
 
-                    fseek( $fp_original, $idx -2048 );
-                    $partial_orig_xliff = fread( $fp_original, 2048 );
+                    $fp_this_manipulated = null; //initialize file pointer
+                    $partial_orig_xliff = fread( $fp_original, $idx );
                     preg_match( '/(<cxt-defs.*<\/cxt-defs>)/si', $partial_orig_xliff, $matches );
                     fclose($fp_original);
+                    if( isset( $matches[1] ) && !empty($matches[1]) ){
 
-                    //open in read/write mode and place pointer at the end of file
-                    $fp_this_manipulated = fopen( $this->filename.'.out.sdlxliff', "r+" );
+                        //open in read/write mode and place pointer at the begin of file
+                        $fp_this_manipulated = fopen( $this->filename.'.out.sdlxliff', "r+" );
+                        //read needed, there should be some changes in files
+                        //temporary file are ALWAYS shorter than original so $idx it's enough
+                        $partial_output_xliff = fread( $fp_this_manipulated, $idx );
 
-                    //go to the -2048 bytes of file
-                    fseek( $fp_this_manipulated, -2048, SEEK_END );
-                    //read more than needed, there should be some changes in files
-                    $partial_output_xliff = fread( $fp_this_manipulated, 3072 );
-                    fseek( $fp_this_manipulated, -2048, SEEK_END );
+                        //REWIND
+                        rewind( $fp_this_manipulated );
 
-                    $output_matches = preg_replace( '/<cxt-defs.*<\/cxt-defs>/si', $matches[1], $partial_output_xliff );
+                        //rewrite cxt-defs content
+                        $output_patched = preg_replace( '/<cxt-defs.*$/si', $matches[1], $partial_output_xliff );
 
-                    fwrite( $fp_this_manipulated, $output_matches );
+                        //OVERWRITE with the manipulated AND patched content
+                        fwrite( $fp_this_manipulated, $output_patched );
+                        unset($partial_output_xliff); //free mem
+                        unset($output_patched); //free mem
+                        unset($partial_orig_xliff); //free mem
+
+                    } else {
+                        Log::doLog( "failed retrieve ctx-defs content ?!?" );
+                    }
 
                     //re-attach the global file-pointer
                     $this->ofp = $fp_this_manipulated;

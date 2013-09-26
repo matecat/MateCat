@@ -1115,9 +1115,9 @@ UI = {
         menu +=    '    </ul>' +
                     '</nav>';
         this.body.append(menu);
-        $('#jobMenu li').each(function() {
+      /*  $('#jobMenu li').each(function() {
             APP.fitText($(this), $('a',$(this)), 20);
-        });
+        });*/
     },
     createStatusMenu: function(statusMenu) {
         $("ul.statusmenu").empty().hide();
