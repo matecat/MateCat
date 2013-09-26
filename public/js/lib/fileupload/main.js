@@ -15,8 +15,11 @@
 UI = null;
 
 UI = {
+    init: function() {
+        UI.conversionBlocked = false;
+    },
     enableAnalyze: function() {
-    	enableAnalyze();
+        enableAnalyze();
     },
     conversionsAreToRestart: function() {
         var num = 0;
@@ -26,13 +29,12 @@ UI = {
 		});
         return num
     },
-    confirmRestartConversions: function(res) {
-        if(res) {
-            UI.restartConversions();
-        }            	
+    confirmRestartConversions: function() {
+        UI.restartConversions();
     },
     restartConversions: function() {
     	console.log('restart conversions');
+    this.conversionBlocked = true;
     	$('.template-download, .template-upload').each(function() {
 			if(config.conversionEnabled) {
         		var filerow = $(this);
@@ -468,10 +470,15 @@ progressBar = function(filerow,start,filesize) {
 //		$('.progress',filerow).remove();
 		return;
 	}
-	setTimeout(function(){
-        progressBar(filerow,start+1,filesize);
-//        console.log()
-    },200);
+	if(!UI.conversionBlocked) {
+        setTimeout(function(){
+            progressBar(filerow,start+1,filesize);
+    //        console.log()
+        },200);        
+    } else {
+        UI.conversionBlocked = false;
+    }
+
 }
 
 convertFile = function(fname,filerow,filesize, enforceConversion) {
@@ -724,5 +731,6 @@ unsupported = function() {
 $(document).ready(function() {
 	config.unsupported = unsupported();
 	checkInit();
+    UI.init();
 });
 
