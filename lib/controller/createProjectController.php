@@ -172,8 +172,42 @@ class createProjectController extends ajaxcontroller {
             $fileSplit = explode('.', $file);
             $mimeType = strtolower($fileSplit[count($fileSplit) - 1]);
 
+
+            /**
+             * Conversion Enforce
+             *
+             * Check Extension no more sufficient, we want check content
+             * if this is an idiom xlf file type, conversion are enforced
+             * $enforcedConversion = true; //( if conversion is enabled )
+             */
+            $enforcedConversion = false;
+            try {
+
+                $fileType = DetectProprietaryXliff::getInfo( INIT::$UPLOAD_REPOSITORY. '/' .$_COOKIE['upload_session'].'/' . $file );
+                //Log::doLog( 'Proprietary detection: ' . var_export( $fileType, true ) );
+
+                if( $fileType['proprietary'] == true  ){
+
+                    if( INIT::$CONVERSION_ENABLED && $fileType['proprietary_name'] == 'idiom world server' ){
+                        $enforcedConversion = true;
+                        Log::doLog( 'Idiom found, conversion Enforced: ' . var_export( $enforcedConversion, true ) );
+
+                    } else {
+                        /**
+                         * Application misconfiguration.
+                         * upload should not be happened, but if we are here, raise an error.
+                         * @see upload.class.php
+                         * */
+                        $this->result['errors'][] = array("code" => -8, "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($file)");
+                        setcookie("upload_session", "", time() - 10000);
+                        return;
+                        //stop execution
+                    }
+                }
+            } catch ( Exception $e ) { Log::doLog( $e->getMessage() ); }
+
             $original_content = "";
-            if (($mimeType != 'sdlxliff') && ($mimeType != 'xliff') && ($mimeType != 'xlf') && (INIT::$CONVERSION_ENABLED)) {
+            if ( ( ( $mimeType != 'sdlxliff' && $mimeType != 'xliff' && $mimeType != 'xlf' ) || $enforcedConversion ) && INIT::$CONVERSION_ENABLED ) {
                 $fileDir = $intDir . '_converted';
                 $filename_to_catch = $file . '.sdlxliff';
 
@@ -198,13 +232,25 @@ class createProjectController extends ajaxcontroller {
             $fid = insertFile($pid, $file, $this->source_language, $mimeType, $contents, $sha1_original, $original_content);
             $fidList[] = $fid;
 
+            try{
+                //return by reference, could be large
+                $SegmentTranslations[$fid] = & extractSegments($fileDir, $filename_to_catch, $pid, $fid);
+            } catch ( Exception $e ){
 
-            $insertSegments = extractSegments($fileDir, $filename_to_catch, $pid, $fid);
+                if ( $e->getCode() == -1 ) {
+                    $this->result['errors'][] = array("code" => -7, "message" => "No segments found in your XLIFF file. ($file)");
+                } else if( $e->getCode() == -2 ) {
+                    $this->result['errors'][] = array("code" => -7, "message" => "Not able to import this XLIFF file. ($file)");
+                }
+
+                return false;
+
+            }
             //exit;
         }
 
+        //Log::doLog( array_pop( array_chunk( $SegmentTranslations[$fid], 25, true ) ) );
         //create job
-
 
         $this->target_language = explode(',', $this->target_language);
 
@@ -223,6 +269,17 @@ class createProjectController extends ajaxcontroller {
             }
             $jid = insertJob($password, $pid, $this->private_tm_user, $this->source_language, $target, $this->mt_engine, $this->tms_engine, $owner);
             foreach ($fidList as $fid) {
+
+                try {
+                    //prepare pre-translated segments queries
+                    if( !empty( $SegmentTranslations ) ){
+                        insertPreTranslations( $SegmentTranslations[$fid], $jid );
+                    }
+                } catch ( Exception $e ) {
+                    $msg = "\n\n Error, pre-translations lost, project should be re-created. \n\n " . var_export( $e->getMessage(), true );
+                    Utils::sendErrMailReport($msg);
+                }
+
                 insertFilesJob($jid, $fid);
             }
 
@@ -231,35 +288,25 @@ class createProjectController extends ajaxcontroller {
 
         }
 
-
-
-        $this->deleteDir($intDir);
-        if (is_dir($intDir . '_converted')) {
-            $this->deleteDir($intDir . '_converted');
+        $this->deleteDir( $intDir );
+        if ( is_dir( $intDir . '_converted' ) ) {
+            $this->deleteDir( $intDir . '_converted' );
         }
 
+        $analysis_status = ( INIT::$VOLUME_ANALYSIS_ENABLED ) ? 'NEW' : 'NOT_TO_ANALYZE';
+        changeProjectStatus( $pid, $analysis_status );
+        $this->result[ 'code' ]            = 1;
+        $this->result[ 'data' ]            = "OK";
+        $this->result[ 'password' ]        = $_passwordList;
+        $this->result[ 'ppassword' ]       = $ppassword;
+        $this->result[ 'id_job' ]          = $_jobList;
+        $this->result[ 'id_project' ]      = $pid;
+        $this->result[ 'project_name' ]    = $this->project_name;
+        $this->result[ 'source_language' ] = $this->source_language;
+        $this->result[ 'target_language' ] = $this->target_language;
 
-        if ($insertSegments == 1) {
-            $analysis_status = (INIT::$VOLUME_ANALYSIS_ENABLED) ? 'NEW' : 'NOT_TO_ANALYZE';
-            changeProjectStatus($pid, $analysis_status);
-            $this->result['code'] = 1;
-            $this->result['data'] = "OK";
-            $this->result['password'] = $_passwordList;
-            $this->result['ppassword'] = $ppassword;
-            $this->result['id_job'] = $_jobList;
-            $this->result['id_project'] = $pid;
-            $this->result['project_name'] = $this->project_name;
-            $this->result['source_language'] = $this->source_language;
-            $this->result['target_language'] = $this->target_language;
-        } else {
-            if ($insertSegments == -1) {
-                $this->result['errors'][] = array("code" => -7, "message" => "No segments found in your XLIFF file. ($file)");
-            } else {
-                $this->result['errors'][] = array("code" => -7, "message" => "Not able to import this XLIFF file. ($file)");
-            }
-        }
+        setcookie( "upload_session", "", time() - 10000 );
 
-        setcookie("upload_session", "", time() - 10000);
     }
 
     public static function deleteDir($dirPath) {

@@ -172,7 +172,7 @@ class TMS extends Engine {
         return true;
     }
 
-    public function delete($segment, $translation, $source_lang, $target_lang, $email = "", $id_user = "") {
+    public function delete($segment, $translation, $source_lang, $target_lang,  $id_user = "",$email = "") {
         $parameters = array();
         $parameters['seg'] = $segment;
         $parameters['tra'] = $translation;
@@ -182,7 +182,6 @@ class TMS extends Engine {
             $parameters['user'] = $id_user;
             $parameters['key'] = $this->calculateMyMemoryKey($id_user);
         }
-
         $this->doQuery("delete", $parameters);
         $this->result = new TMS_RESULT($this->raw_result);
         if ($this->result->responseStatus != "200") {

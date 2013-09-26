@@ -22,6 +22,8 @@
                 server_load_time: '${load_time}',
                 job_id: '${jid}',
                 password: '${password}',
+                source_rfc: '${source_code}',
+                target_rfc: '${target_code}',
                 source_lang: '${source}',
                 target_lang: '${target}',
                 time_to_edit_enabled: ${time_to_edit_enabled},
@@ -60,7 +62,6 @@
                     <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
                     <input type="hidden" name="password" tal:attributes="value password" />
                     <input type="hidden" name="download_type" value="all" />
-                    <!--input id="downloadProject" data-prova="coso" name="submit" type="submit" value="XPREVIEW" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" / -->
                 </form>
                 <a href="#" class="filter"> <span class="arrow-top "></span></a>
 
@@ -159,6 +160,51 @@
 
 
         </header>
+        
+		<div tal:attributes="class string:searchbox${filtered_class}">
+			<form>
+
+			<div class="block right">
+				<input id="exec-filter" type="submit" class="btn" value="FILTER" />			
+				<!--input id="clear-filter" type="button" class="btn" value="CLEAR" /-->			
+			</div>
+
+			<div class="block">
+				<label for="search-projectname">Text in source</label>
+				<input id="search-source" class="search-input" type="text" value=""/>				
+			</div>
+
+             <div class="block">
+				<label for="search-projectname">Text in target</label>
+				<input id="search-target" class="search-input" type="text" value=""/>				
+			</div>
+			<div class="block">
+				<label for="select-status">Status</label>
+				<select id="select-status" class="search-select" >
+					<option value="active">Active</option>
+					<option value="archived">Archived</option>
+					<option value="cancelled">Cancelled</option>
+				</select>  	
+			</div>
+<!--
+			<div class="block">
+				<input id="only-completed" type="checkbox" />
+				<label for="only-completed">Only Completed</label>
+			</div>
+
+			<div class="block">
+				<input id="show-archived" type="checkbox" />
+				<label for="show-archived">Show Archived</label>
+			</div>
+			
+			<div class="block">
+				<input id="show-cancelled" type="checkbox" />
+				<label for="show-cancelled">Show Cancelled</label>
+			</div>
+-->
+			</form>
+		</div>
+        
         <!--
                 <div class="search">    
                <div class="col1-search">
@@ -342,7 +388,7 @@
                     </div>
                     <p class="percent"><span id="stat-progress" tal:content="php:(job_stats['PROGRESS_PERC_FORMATTED'])">0</span>%</p>
                     <ul>
-                        <li id="stat-eqwords">Payable Words: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong></li>
+                        <li id="stat-eqwords"><a target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Payable Words</a>: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong></li>
                         <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
                         <!--
                         <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
@@ -470,6 +516,12 @@ Stay anonymous</a>
         <div class="blacked" ></div>
 
         <ul id="contextMenu">
+<!--
+            <li id="spellCheck">
+                <span class="label">Maybe you were searching for:</span>
+                <a class="add" href="#">Add word</a>
+            </li>
+-->
             <li id="searchConcordance">
                 <span class="label">Concordance</span>
                 <span class="shortcut"><span class="alt">&#x2325;</span><span class="cmd">&#8984;</span> C</span>

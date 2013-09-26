@@ -438,7 +438,12 @@
 	                });     
 //					file.error = 'Format not supported. ' + msg;
 */
-					file.error = 'Format not supported.';
+                    if( config.conversionEnabled ){
+					    file.error = 'Format not supported. Convert to DOCX and upload the file again.';
+                    } else {
+                        file.error = 'Format not supported.';
+                    }
+
 // END Customization by Andrea Martines (Translated) 25/03/2013
 
                 } else {

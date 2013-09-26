@@ -8,13 +8,14 @@ include INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 class fileFormatConverter {
 
-	private $ip;
-	private $port = "8732";
-	private $toXliffFunction = "AutomationService/original2xliff";
-	private $fromXliffFunction = "AutomationService/xliff2original";
-	private $opt = array();
-	private $lang_handler;
-	private $converters;
+	private $ip; //current converter chosen for this job
+	private $port = "8732"; //port the convertrs listen to
+	private $toXliffFunction = "AutomationService/original2xliff"; //action string for the converters to convert to XLIFF
+	private $fromXliffFunction = "AutomationService/xliff2original";//action string for the converters to convert to original
+	private $opt = array(); //curl options
+	private $lang_handler; //object that exposes language utilities
+	private $converters; //list of available converters
+	private $storage_lookup_map;
 
 	public function __construct() {
 		if (!class_exists("INIT")) {
@@ -24,18 +25,24 @@ class fileFormatConverter {
 		$this->opt['httpheader'] = array("Content-Type: application/x-www-form-urlencoded;charset=UTF-8");
 		$this->lang_handler=  Languages::getInstance();
 
-		$this->converters=array('10.11.0.10'=>1,'10.11.0.18'=>1,'10.11.0.26'=>1,'10.11.0.34'=>1,'10.11.0.42'=>1);
-		$this->converters=array('10.30.1.247'=>1);//forcing a particular VM just for debugging purposes
+		$this->converters = self::$Converters_IP;
+		//$this->converters=array('10.30.1.247'=>1);//forcing a particular VM just for debugging purposes
+
+		$this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
+
 	}
 
+	//add UTF-8 BOM
 	private function addBOM($string) {
 		return BOM . $string;
 	}
 
+	//check if it has BOM
 	private function hasBOM($string) {
 		return (substr($string, 0, 3) == BOM);
 	}
 
+	//get a converter at random, weighted on number of CPUs per node
 	private function pickRandConverter(){
 		//get total cpu count
 		$cpus=array_values($this->converters);
@@ -66,6 +73,55 @@ class fileFormatConverter {
 		}
 
 		return $picked_node;
+	}
+
+	private function checkNodeLoad($ip){
+		//connect
+		$ch=curl_init("$ip:8082");
+		curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+		//execute
+		$res="";
+		//since sometimes it can fail, try again util we get something meaningful
+		while(strlen($res)==0){
+			$res=curl_exec($ch);
+		}
+		//close
+		curl_close($ch);
+		//parse response
+		$processes=json_decode($res,true);
+		//sum up total machine load
+		foreach($processes as $process){
+			$top+=$process[0];
+		}
+
+		//zero load is impossible (at least, there should be the java monitor); try again
+		if(0==$top){
+			log::doLog("suspicious zero load for $ip, recursive call");
+			usleep(500*1000); //200ms
+			$top=$this->checkNodeLoad($ip);
+		}
+
+		return $top;
+	}
+
+	private function pickIdlestConverter(){
+		//scan each server load
+		foreach($this->converters as $ip=>$weight){
+			$load=$this->checkNodeLoad($ip);
+			log::doLog("load for $ip is $load");
+			//add load as numeric index to an array
+			$loadList["".(10*(float)$load)]=$ip;
+		}
+		//sort to pick lowest
+		ksort($loadList,SORT_NUMERIC);
+
+		//pick lowest
+		$ip=array_shift($loadList);
+		return $ip;
+	}
+
+	private function getValidStorage(){
+		return $this->storage_lookup_map[$this->ip];
 	}
 
 	private function extractUidandExt(&$content) {
@@ -135,7 +191,7 @@ class fileFormatConverter {
 		return $output;
 	}
 
-	public function convertToSdlxliff($file_path, $source_lang, $target_lang) {
+	public function convertToSdlxliff($file_path, $source_lang, $target_lang, $chosen_by_user_machine=false) {
 		if (!file_exists($file_path)) {
 			throw new Exception("Conversion Error : the file <$file_path> not exists");
 		}
@@ -157,7 +213,11 @@ class fileFormatConverter {
 		$data['documentContent'] = base64_encode($fileContent);
 		$fileContent = null;
 		//assign converter
-		$this->ip=$this->pickRandConverter();
+		if(!$chosen_by_user_machine){
+			$this->ip=$this->pickIdlestConverter();
+		}else{
+			$this->ip=$chosen_by_user_machine;
+		}
 
 		$url = "$this->ip:$this->port/$this->toXliffFunction";
 
@@ -166,12 +226,12 @@ class fileFormatConverter {
 		$data['sourceLocale'] = $this->lang_handler->getSDLStudioCode($source_lang);
 		$data['targetLocale'] = $this->lang_handler->getSDLStudioCode($target_lang);
 
-log::doLog($this->ip." start conversion to xliff of $file_path");
-$start_time=time();
+		log::doLog($this->ip." start conversion to xliff of $file_path");
+		$start_time=time();
 		$curl_result = $this->curl_post($url, $data, $this->opt);
-$end_time=time();
-$time_diff=$end_time-$start_time;
-log::doLog($this->ip." took $time_diff secs for $file_path");
+		$end_time=time();
+		$time_diff=$end_time-$start_time;
+		log::doLog($this->ip." took $time_diff secs for $file_path");
 
 		$decode = json_decode($curl_result, true);
 		$curl_result = null;
@@ -180,12 +240,19 @@ log::doLog($this->ip." took $time_diff secs for $file_path");
 		return $res;
 	}
 
-	public function convertToOriginal($xliffContent) {
-
-		$base64Content = base64_encode($xliffContent);
+	public function convertToOriginal($xliffContent, $chosen_by_user_machine=false) {
 
 		//assign converter
-		$this->ip=$this->pickRandConverter();
+		if(!$chosen_by_user_machine){
+			$this->ip=$this->pickIdlestConverter();
+			$storage      = $this->getValidStorage();
+
+			//add trados to replace/regexp pattern because whe have more than 1 replacement
+			//http://stackoverflow.com/questions/2222643/php-preg-replace
+			$xliffContent = self::replacedAddress( $storage, $xliffContent );
+		}else{
+			$this->ip=$chosen_by_user_machine;
+		}
 
 		$url = "$this->ip:$this->port/$this->fromXliffFunction";
 
@@ -193,12 +260,12 @@ log::doLog($this->ip." took $time_diff secs for $file_path");
 		$data['uid'] = $uid_ext[0];
 		$data['xliffContent'] = $xliffContent;
 
-log::doLog($this->ip." start conversion back to original");
-$start_time=time();
+		log::doLog($this->ip." start conversion back to original");
+		$start_time=time();
 		$curl_result = $this->curl_post($url, $data, $this->opt);
-$end_time=time();
-$time_diff=$end_time-$start_time;
-log::doLog($this->ip." took $time_diff secs");
+		$end_time=time();
+		$time_diff=$end_time-$start_time;
+		log::doLog($this->ip." took $time_diff secs");
 
 		$decode = json_decode($curl_result, true);
 		unset($curl_result);
@@ -207,6 +274,38 @@ log::doLog($this->ip." took $time_diff secs");
 
 
 		return $res;
+	}
+
+
+	private static $Storage_Lookup_IP_Map = array(
+			'10.11.0.10' => '10.11.0.11',
+			'10.11.0.18' => '10.11.0.19',
+			'10.11.0.26' => '10.11.0.27',
+			'10.11.0.34' => '10.11.0.35',
+			'10.11.0.42' => '10.11.0.43',
+			);
+
+	private static $Converters_IP = array(
+			'10.11.0.10' => 1,
+			'10.11.0.18' => 1,
+			'10.11.0.26' => 1,
+			'10.11.0.34' => 1,
+			'10.11.0.42' => 1
+			);
+
+	//http://stackoverflow.com/questions/2222643/php-preg-replace
+	private static $Converter_Regexp = '/=\"\\\\\\\\10\.11\.0\.[1-9][13579]{1,2}\\\\tr/';
+
+	/**
+	 * Replace the storage address in xliff content with the right associated storage ip
+	 *
+	 * @param $storageIP string
+	 * @param $xliffContent string
+	 *
+	 * @return string
+	 */
+	public static function replacedAddress( $storageIP, $xliffContent ){
+		return preg_replace( self::$Converter_Regexp, '="\\\\\\\\' . $storageIP . '\\\\tr', $xliffContent );
 	}
 
 }

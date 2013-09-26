@@ -631,5 +631,55 @@ background:#fff url(../img/sublevel.png) 15px 18px no-repeat;
     float: right;
     }    
     
-    
+.searchbox
+	{
+	display: none;
+	position: fixed;
+	float: left;
+	width: 100%;
+	min-height: 20px;
+	font-size:12px;
+	border-bottom: 1px solid #666;
+	background:#efefef url(../img/point.gif) 0 0 repeat-x;
+	margin-top: -27px;
+	padding:5px 4% 0px 4%;
+	-moz-box-shadow: 0 1px 3px #666;
+	-webkit-box-shadow: 0 1px 10px #666;
+	-moz-border-radius-bottom-right:2px;
+	-webkit-border-bottom-right-radius:2px;
+	-moz-border-radius-bottomleft:2px;
+	-webkit-border-bottom-left-radius:2px;
+	z-index: 9999;
+	}
+	body.filterOpen .searchbox
+		{
+		display: block;
+		}
+	
+.searchbox label
+	{
+	display: inline;
+	width: auto !important;
+	margin-right: 5px;
+	text-transform: uppercase;
+	}
+
+.searchbox #exec-filter
+	{
+	float: right;
+	}
+
+.searchbox .block
+	{
+	float: left;
+	margin-right: 20px;
+	text-align: left;
+	margin-top: 2px;
+	}
+.searchbox .block.right
+	{
+	float: right !important;
+	margin-right: 8% !important;
+	margin-top: -5px !important;
+	}    
     

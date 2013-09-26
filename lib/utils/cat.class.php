@@ -63,6 +63,12 @@ class CatUtils {
         return array($hours, $minutes, $seconds, $usec);
     }
 
+    public static function dos2unix( $dosString ){
+        $dosString = str_replace( "\r\n","\r", $dosString );
+        $dosString = str_replace( "\n","\r", $dosString );
+        $dosString = str_replace( "\r","\n", $dosString );
+        return $dosString;
+    }
     
     private static function placehold_xml_entities($segment) {
         $pattern ="|&#(.*?);|";
@@ -175,14 +181,14 @@ class CatUtils {
 
     public static function rawxliff2view($segment) {
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
-        $segment = self::placehold_xml_entities($segment);
+        //$segment = self::placehold_xml_entities($segment);
         $segment = self::placehold_xliff_tags($segment);
         
         
         $segment = html_entity_decode($segment, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8');
         // restore < e >
-        $segment = str_replace("<", "&lt", $segment);
-        $segment = str_replace(">", "&gt", $segment);
+        $segment = str_replace("<", "&lt;", $segment);
+        $segment = str_replace(">", "&gt;", $segment);
 
 
         $segment = preg_replace('|<(.*?)>|si', "&lt;$1&gt;", $segment);
@@ -526,35 +532,34 @@ class CatUtils {
      * @return mixed $job_stats
      */
     protected static function _getStatsForJob( $job_stats ) {
-        
-        $job_stats['PROGRESS'] = ( $job_stats['TRANSLATED'] + $job_stats['APPROVED'] );                   
 
-        $job_stats['TOTAL_FORMATTED'] = number_format($job_stats['TOTAL'], 0, ".", ",");
-        $job_stats['PROGRESS_FORMATTED'] = number_format( $job_stats['TRANSLATED'] + $job_stats['APPROVED'], 0, ".", "," );                   
-        $job_stats['APPROVED_FORMATTED'] = number_format($job_stats['APPROVED'], 0, ".", ",");
-        $job_stats['REJECTED_FORMATTED'] = number_format($job_stats['REJECTED'], 0, ".", ",");
-        $job_stats['TODO_FORMATTED'] = number_format($job_stats['DRAFT'] + $job_stats['REJECTED'], 0, ".", ",");
-        $job_stats['DRAFT_FORMATTED'] = number_format($job_stats['DRAFT'], 0, ".", ",");
-        $job_stats['TRANSLATED_FORMATTED'] = number_format($job_stats['TRANSLATED'], 0, ".", ",");
+        $job_stats[ 'PROGRESS' ]             = ( $job_stats[ 'TRANSLATED' ] + $job_stats[ 'APPROVED' ] );
+        $job_stats[ 'TOTAL_FORMATTED' ]      = number_format( $job_stats[ 'TOTAL' ], 0, ".", "," );
+        $job_stats[ 'PROGRESS_FORMATTED' ]   = number_format( $job_stats[ 'TRANSLATED' ] + $job_stats[ 'APPROVED' ], 0, ".", "," );
+        $job_stats[ 'APPROVED_FORMATTED' ]   = number_format( $job_stats[ 'APPROVED' ], 0, ".", "," );
+        $job_stats[ 'REJECTED_FORMATTED' ]   = number_format( $job_stats[ 'REJECTED' ], 0, ".", "," );
+        $job_stats[ 'TODO_FORMATTED' ]       = number_format( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ], 0, ".", "," );
+        $job_stats[ 'DRAFT_FORMATTED' ]      = number_format( $job_stats[ 'DRAFT' ], 0, ".", "," );
+        $job_stats[ 'TRANSLATED_FORMATTED' ] = number_format( $job_stats[ 'TRANSLATED' ], 0, ".", "," );
 
-        $job_stats['APPROVED_PERC'] = ($job_stats['APPROVED']) / $job_stats['TOTAL'] * 100;
-        $job_stats['REJECTED_PERC'] = ($job_stats['REJECTED']) / $job_stats['TOTAL'] * 100;
-        $job_stats['DRAFT_PERC'] = ( $job_stats['DRAFT'] / $job_stats['TOTAL'] * 100 );
-        $job_stats['TRANSLATED_PERC'] = ( $job_stats['TRANSLATED'] / $job_stats['TOTAL'] * 100 );
-        $job_stats['PROGRESS_PERC'] = ( $job_stats['PROGRESS'] / $job_stats['TOTAL'] ) * 100;
+        $job_stats[ 'APPROVED_PERC' ]   = ( $job_stats[ 'APPROVED' ] ) / $job_stats[ 'TOTAL' ] * 100;
+        $job_stats[ 'REJECTED_PERC' ]   = ( $job_stats[ 'REJECTED' ] ) / $job_stats[ 'TOTAL' ] * 100;
+        $job_stats[ 'DRAFT_PERC' ]      = ( $job_stats[ 'DRAFT' ] / $job_stats[ 'TOTAL' ] * 100 );
+        $job_stats[ 'TRANSLATED_PERC' ] = ( $job_stats[ 'TRANSLATED' ] / $job_stats[ 'TOTAL' ] * 100 );
+        $job_stats[ 'PROGRESS_PERC' ]   = ( $job_stats[ 'PROGRESS' ] / $job_stats[ 'TOTAL' ] ) * 100;
 
-        $significantDigits = array();
-        $significantDigits[] = self::_getSignificantDigits($job_stats['TRANSLATED_PERC']);
-        $significantDigits[] = self::_getSignificantDigits($job_stats['DRAFT_PERC']);
-        $significantDigits[] = self::_getSignificantDigits($job_stats['APPROVED_PERC']);
-        $significantDigits[] = self::_getSignificantDigits($job_stats['REJECTED_PERC']);
-        $significantDigits = max($significantDigits);
-                
-        $job_stats['TRANSLATED_PERC_FORMATTED'] = round($job_stats['TRANSLATED_PERC'], $significantDigits ) ;
-        $job_stats['DRAFT_PERC_FORMATTED'] = round($job_stats['DRAFT_PERC'], $significantDigits ) ;
-        $job_stats['APPROVED_PERC_FORMATTED'] = round($job_stats['APPROVED_PERC'], $significantDigits );
-        $job_stats['REJECTED_PERC_FORMATTED'] = round($job_stats['REJECTED_PERC'], $significantDigits );
-        $job_stats['PROGRESS_PERC_FORMATTED'] = round( $job_stats['PROGRESS_PERC'], $significantDigits ) ;
+        $significantDigits    = array();
+        $significantDigits[ ] = self::_getSignificantDigits( $job_stats[ 'TRANSLATED_PERC' ] );
+        $significantDigits[ ] = self::_getSignificantDigits( $job_stats[ 'DRAFT_PERC' ] );
+        $significantDigits[ ] = self::_getSignificantDigits( $job_stats[ 'APPROVED_PERC' ] );
+        $significantDigits[ ] = self::_getSignificantDigits( $job_stats[ 'REJECTED_PERC' ] );
+        $significantDigits    = max( $significantDigits );
+
+        $job_stats[ 'TRANSLATED_PERC_FORMATTED' ] = round( $job_stats[ 'TRANSLATED_PERC' ], $significantDigits );
+        $job_stats[ 'DRAFT_PERC_FORMATTED' ]      = round( $job_stats[ 'DRAFT_PERC' ], $significantDigits );
+        $job_stats[ 'APPROVED_PERC_FORMATTED' ]   = round( $job_stats[ 'APPROVED_PERC' ], $significantDigits );
+        $job_stats[ 'REJECTED_PERC_FORMATTED' ]   = round( $job_stats[ 'REJECTED_PERC' ], $significantDigits );
+        $job_stats[ 'PROGRESS_PERC_FORMATTED' ]   = round( $job_stats[ 'PROGRESS_PERC' ], $significantDigits );
         
         $t = 'approved';
         if ($job_stats['TRANSLATED_FORMATTED'] > 0)
