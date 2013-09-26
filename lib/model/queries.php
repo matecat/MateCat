@@ -1097,39 +1097,12 @@ function getJobAnalysisData( $pid, $password, $jid = null ) {
     
 	$query = $query ." group by 6,2 ";
 
-    Log::doLog($query);
-    
-    $db      = Database::obtain();
-    $results = $db->fetch_array( $query );
-
-    return $results;
-}
-/*
-function getJobAnalysisData( $jid, $password ) {
-    // per ora lasciamo disabilitata la verifica della password
-
-    $query = "select p.name, j.id as jid, j.password as jpassword, j.source, j.target, f.id,f.filename, p.status_analysis,
-		sum(s.raw_word_count) as file_raw_word_count, sum(st.eq_word_count) as file_eq_word_count, count(s.id) as total_segments,
-		p.fast_analysis_wc,p.tm_analysis_wc, p.standard_analysis_wc
-
-			from projects p 
-			inner join jobs j on p.id=j.id_project
-			inner join files f on p.id=f.id_project
-			inner join segments s on s.id_file=f.id
-			left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
-
-			where j.id= '$jid' and p.password='$password'
-
-			group by 6,2 ";
-
-
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
 
     return $results;
 }
 
- */
 function getProjects( $start, $step, $search_in_pname, $search_source, $search_target, $search_status, $search_onlycompleted, $filtering, $project_id ) {
 
     #session_start();

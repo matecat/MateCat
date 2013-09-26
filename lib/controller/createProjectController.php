@@ -184,7 +184,7 @@ class createProjectController extends ajaxcontroller {
             try {
 
                 $fileType = DetectProprietaryXliff::getInfo( INIT::$UPLOAD_REPOSITORY. '/' .$_COOKIE['upload_session'].'/' . $file );
-                Log::doLog( 'Proprietary detection: ' . var_export( $fileType, true ) );
+                //Log::doLog( 'Proprietary detection: ' . var_export( $fileType, true ) );
 
                 if( $fileType['proprietary'] == true  ){
 

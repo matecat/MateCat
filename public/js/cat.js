@@ -155,9 +155,9 @@ UI = {
             UI.tagSelection = false;
         }).bind('keydown', 'Backspace', function(e) {
         }).bind('keydown','Meta+f', function(e){ 
-            e.preventDefault();
-            $('body').addClass('filterOpen');
-            $('#search-source').focus();
+//            e.preventDefault();
+//            $('body').addClass('filterOpen');
+//            $('#search-source').focus();
         }).on('change', '#hideAlertConfirmTranslation', function(e) {
             console.log($(this).prop('checked'));
             if ($(this).prop('checked')) {
