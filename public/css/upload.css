@@ -1,4 +1,4 @@
-﻿body {margin:0;padding:0;}
+body {margin:0;padding:0;}
 
 
 
@@ -772,6 +772,8 @@ header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margi
 	    column-count: 6;	
 	    -moz-column-count: 6;
 		width:100% !important;
+height:442px;
+margin-top:20px;
 		}
 
 .popup ul li
@@ -830,7 +832,10 @@ header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margi
 	}
 	.listlang li.on
 		{
-		background: #ccc;
+		font-weight:bold;
+font-size:18px;
+line-height:28px;
+padding-bottom:3px;
 		}		
 
 .listlang label
