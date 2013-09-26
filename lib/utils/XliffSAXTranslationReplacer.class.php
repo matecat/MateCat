@@ -205,7 +205,7 @@ class XliffSAXTranslationReplacer{
 
                 if ( is_resource( $fp_original ) ) {
 
-                    //temp close pointer to rewrite on
+                    //temp close pointer to rewrite on file
                     fclose( $this->ofp );
 
                     $idx = xml_get_current_byte_index($parser);
@@ -215,7 +215,7 @@ class XliffSAXTranslationReplacer{
                     preg_match( '/(<cxt-defs.*<\/cxt-defs>)/si', $partial_orig_xliff, $matches );
                     fclose($fp_original);
                     if( isset( $matches[1] ) && !empty($matches[1]) ){
-                        
+
                         //open in read/write mode and place pointer at the begin of file
                         $fp_this_manipulated = fopen( $this->filename.'.out.sdlxliff', "r+" );
                         //read needed, there should be some changes in files
