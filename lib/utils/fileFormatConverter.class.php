@@ -8,13 +8,13 @@ include INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 class fileFormatConverter {
 
-	private $ip;
-	private $port = "8732";
-	private $toXliffFunction = "AutomationService/original2xliff";
-	private $fromXliffFunction = "AutomationService/xliff2original";
-	private $opt = array();
-	private $lang_handler;
-	private $converters;
+	private $ip; //current converter chosen for this job
+	private $port = "8732"; //port the convertrs listen to
+	private $toXliffFunction = "AutomationService/original2xliff"; //action string for the converters to convert to XLIFF
+	private $fromXliffFunction = "AutomationService/xliff2original";//action string for the converters to convert to original
+	private $opt = array(); //curl options
+	private $lang_handler; //object that exposes language utilities
+	private $converters; //list of available converters
 
 	public function __construct() {
 		if (!class_exists("INIT")) {
@@ -25,17 +25,20 @@ class fileFormatConverter {
 		$this->lang_handler=  Languages::getInstance();
 
 		$this->converters=array('10.11.0.10'=>1,'10.11.0.18'=>1,'10.11.0.26'=>1,'10.11.0.34'=>1,'10.11.0.42'=>1);
-		$this->converters=array('10.30.1.247'=>1);//forcing a particular VM just for debugging purposes
+	//	$this->converters=array('10.30.1.247'=>1);//forcing a particular VM just for debugging purposes
 	}
 
+	//add UTF-8 BOM
 	private function addBOM($string) {
 		return BOM . $string;
 	}
 
+	//check if it has BOM
 	private function hasBOM($string) {
 		return (substr($string, 0, 3) == BOM);
 	}
 
+	//get a converter at random, weighted on number of CPUs per node
 	private function pickRandConverter(){
 		//get total cpu count
 		$cpus=array_values($this->converters);
@@ -66,6 +69,51 @@ class fileFormatConverter {
 		}
 
 		return $picked_node;
+	}
+
+	private function checkNodeLoad($ip){
+		//connect
+		$ch=curl_init("$ip:8082");
+		curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+		//execute
+		$res="";
+		//since sometimes it can fail, try again util we get something meaningful
+		while(strlen($res)==0){
+		$res=curl_exec($ch);
+		}
+		//close
+		curl_close($ch);
+		//parse response
+		$processes=json_decode($res,true);
+		//sum up total machine load
+		foreach($processes as $process){
+			$top+=$process[0];
+		}
+
+		//zero load is impossible (at least, there should be the java monitor); try again
+		if(0==$top){
+			log::doLog("suspicious zero load for $ip, recursive call");
+			usleep(500*1000); //200ms
+			$top=$this->checkNodeLoad($ip);
+		}
+		
+		return $top;
+	}
+
+	private function pickIdlestConverter(){
+		//scan each server load
+		foreach($this->converters as $ip=>$weight){
+			$load=$this->checkNodeLoad($ip);
+			log::doLog("load for $ip is $load");
+			//add load as numeric index to an array
+			$loadList["".(10*(float)$load)]=$ip;
+		}
+		//sort to pick lowest
+		ksort($loadList,SORT_NUMERIC);
+
+		//pick lowest
+		$ip=array_shift($loadList);
+		return $ip;
 	}
 
 	private function extractUidandExt(&$content) {
@@ -158,7 +206,7 @@ class fileFormatConverter {
 		$fileContent = null;
 		//assign converter
 		if(!$chosen_by_user_machine){
-			$this->ip=$this->pickRandConverter();
+			$this->ip=$this->pickIdlestConverter();
 		}else{
 			$this->ip=$chosen_by_user_machine;
 		}
@@ -190,7 +238,7 @@ class fileFormatConverter {
 
 		//assign converter
 		if(!$chosen_by_user_machine){
-			$this->ip=$this->pickRandConverter();
+			$this->ip=$this->pickIdlestConverter();
 		}else{
 			$this->ip=$chosen_by_user_machine;
 		}
