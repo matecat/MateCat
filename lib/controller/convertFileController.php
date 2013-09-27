@@ -87,7 +87,9 @@ class convertFileController extends ajaxcontroller {
 				   file_put_contents("$this->intDir" . "_converted/$this->file_name.sdlxliff", $xliffContent);
 				 * 
 				 */
-				$res_insert = insertFileIntoMap($sha1, $this->source_lang, $this->target_lang, $original_content_zipped, $xliffContentZipped);
+                if( INIT::$SAVE_SHASUM_FOR_FILES_LOADED ){
+				    $res_insert = insertFileIntoMap($sha1, $this->source_lang, $this->target_lang, $original_content_zipped, $xliffContentZipped);
+                }
 				unset ($xliffContentZipped);
 				$res = $this->put_xliff_on_file($xliffContent, $this->intDir);
 				if ($res == -1) {
