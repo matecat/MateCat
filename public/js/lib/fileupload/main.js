@@ -15,12 +15,26 @@
 UI = null;
 
 UI = {
-    enableAnalyze: function() {
-    	enableAnalyze();
+    init: function() {
+        UI.conversionBlocked = false;
     },
-
+    enableAnalyze: function() {
+        enableAnalyze();
+    },
+    conversionsAreToRestart: function() {
+        var num = 0;
+		$('.template-download .name').each(function(){
+			if($(this).parent('tr').hasClass('failed')) return;
+			if($(this).text().split('.')[$(this).text().split('.').length-1] != 'sdlxliff') num++;
+		});
+        return num
+    },
+    confirmRestartConversions: function() {
+        UI.restartConversions();
+    },
     restartConversions: function() {
     	console.log('restart conversions');
+    this.conversionBlocked = true;
     	$('.template-download, .template-upload').each(function() {
 			if(config.conversionEnabled) {
         		var filerow = $(this);
@@ -146,6 +160,7 @@ $(function () {
 	}).bind('fileuploadprogress', function (e,data) {
 //		console.log(data.loaded);
 	}).bind('fileuploadstart', function (e) {
+		console.log('start');
 //		if(!$.cookie("upload_session")) $.cookie("upload_session",uploadSessionId);
 	}).bind('fileuploaddone', function (e,data) {
 //		$('.size', $(data.context[0])).next().append('<div class="operation">Converting</div>');
@@ -259,10 +274,24 @@ $(function () {
 //		console.log(data.context.attr('class'));
 //		console.log(data.files[0].name);
 		$('body').addClass('initialized');
-		var fname = data.result[0].name;
-		var filesize = data.result[0].size;
-		var extension = fname.split('.')[fname.split('.').length-1];
-		if((extension=='xliff')||(extension=='sdlxliff')||(extension=='xlf')) {
+            /*
+             * BUG FIXED: UTF16 / UTF8 File name conversion
+             * Use Return String From AJAX RESULT ( safe raw url encoded )
+             *      and NOT data.files[0].name; ( INPUT TAG content )
+             *
+             *      fname: data.result[0].name,
+             *
+             **/
+        var fileSpecs = {
+            fname: data.result[0].name,
+            filesize: data.result[0].size,
+            filerow: data.context,
+            extension: data.result[0].name.split('.')[data.result[0].name.split('.').length-1],
+            enforceConversion: ( typeof data.result[0].convert !== "undefined" ) ? true : false
+        };
+
+        //check for specific xlf file type, someone needs forced conversion /** @see upload.class.php */
+		if( ( fileSpecs.extension=='xliff' || fileSpecs.extension=='sdlxliff' || fileSpecs.extension=='xlf' ) && !fileSpecs.enforceConversion ) {
 //			console.log('checkAnalyzability(): '+checkAnalyzability());
 			if(checkAnalyzability('file upload completed')) {
 				enableAnalyze();
@@ -275,38 +304,28 @@ $(function () {
 			}
 		}
 		$('body').removeClass('started');
-		
 
-//		enableAnalyze();
+        //console.log(data.data);
 
-
-//        console.log(data.data);
         if(typeof data.data != 'undefined') {
-                /*
-                 * BUG FIXED: UTF16 / UTF8 File name conversion
-                 * Use Return String From AJAX RESULT ( safe raw url encoded ) 
-                 *      and NOT data.files[0].name; ( INPUT TAG content )
-                 **/
-        	var filename = data.result[0].name; 
-        	var filerow = data.context;
 
-			if(filesize == 0) {
-				$('.name',filerow).text(filename);
+			if(fileSpecs.filesize == 0) {
+				$('.name',fileSpecs.filerow).text(fileSpecs.fname);
 			}
 
 			if(config.conversionEnabled) {
-/*
-				if((extension=='xliff')||(extension=='sdlxliff')||(extension=='xlf')) {
-				} else {
-					filerow.addClass('convertible');
-				}
-*/
+
 //				console.log('fileuploadcompleted');
-//				console.log('hasclass converting?: ' + filerow.hasClass('converting'));
-				if(!filerow.hasClass('converting')) {
-					convertFile(filename,filerow,filesize);
+//				console.log('hasclass converting?: ' + fileSpecs.filerow.hasClass('converting'));
+
+				if(!fileSpecs.filerow.hasClass('converting')) {
+                    //console.log( filerow );
+					convertFile( fileSpecs.fname,fileSpecs.filerow,fileSpecs.filesize, fileSpecs.enforceConversion );
 				}
-			}
+			} else {
+                enableAnalyze();
+            }
+
         }
 	
 
@@ -451,18 +470,28 @@ progressBar = function(filerow,start,filesize) {
 //		$('.progress',filerow).remove();
 		return;
 	}
-	setTimeout(function(){
-        progressBar(filerow,start+1,filesize);
-//        console.log()
-    },200);
+	if(!UI.conversionBlocked) {
+        setTimeout(function(){
+            progressBar(filerow,start+1,filesize);
+    //        console.log()
+        },200);        
+    } else {
+        UI.conversionBlocked = false;
+    }
+
 }
 
-convertFile = function(fname,filerow,filesize) {
+convertFile = function(fname,filerow,filesize, enforceConversion) {
+
+    console.log( 'Enforce conversion: ' + enforceConversion );
+
+    enforceConversion = (typeof enforceConversion === "undefined") ? false : enforceConversion;
+
 //	filerow = data.context;
 //	var fname = data.files[0].name;
 	var extension = fname.split('.')[fname.split('.').length-1];
 
-	if((extension=='xliff')||(extension=='sdlxliff')||(extension=='xlf')) {
+	if( ( extension=='xliff' || extension=='sdlxliff' || extension=='xlf' ) && enforceConversion === false ) {
 		filerow.addClass('ready');
 			if(checkAnalyzability('convert file')) {
 				enableAnalyze();
@@ -509,7 +538,7 @@ convertFile = function(fname,filerow,filesize) {
         success: function(d){
 			filerow.removeClass('converting');
 			filerow.addClass('ready');
-           	if(d.code) {
+           	if(d.code == 1) {
 				$('.ui-progressbar-value', filerow).addClass('completed').css('width', '100%');
 //				console.log('checkAnalyzability(): '+checkAnalyzability());
 				if(checkAnalyzability('convertfile on success')) {
@@ -521,7 +550,13 @@ convertFile = function(fname,filerow,filesize) {
 				$('.progress',filerow).fadeOut('slow', function() {
 					// Animation complete.
 				});
-           	} else {
+           	} else if( d.code == -100 ){
+                console.log(d.errors[0].message);
+                $('td.size',filerow).next().addClass('error').empty().attr('colspan','2').css({'font-size':'14px'}).append('<span class="label label-important">'+d.errors[0].message+'</span>');
+                $(filerow).addClass('failed');
+                return false;
+            } else {
+       			console.log('conversion failed');
            		var filename = $('.name',filerow).text();
            		var extension = filename.split('.')[filename.split('.').length-1];
 //           		console.log(extension);
@@ -696,5 +731,6 @@ unsupported = function() {
 $(document).ready(function() {
 	config.unsupported = unsupported();
 	checkInit();
+    UI.init();
 });
 

@@ -9,6 +9,7 @@ RewriteRule ^(translatenew)[/]?$ index.php?action=catnew [L]
 RewriteRule ^(translatenew)/([^/]*)/([^/]*)/([^/]*)-([^/]*)[/]*([^/]*)[/]*$ index.php?action=catnew&jid=$4&password=$5&step=$6 [L]
 
 RewriteRule ^(analyze)/([^/]*)/([^/]*)-([^/]*)$ index.php?action=analyze&pid=$3&password=$4 [L]
+RewriteRule ^(jobanalysis)/([^/]*)-([^/]*)-([^/]*)/?$ index.php?action=jobAnalysis&pid=$2&jid=$3&password=$4 [L]
 RewriteRule ^(statistics)[/]?$ index.php?action=projectStatistics [L]
 
 RewriteRule ^(login)[/]?$ index.php?action=loginPage [L,QSA]
@@ -26,10 +27,10 @@ RewriteRule ^(editlog)/([^/]*)-([^/]*)/?$ index.php?action=editlog&jid=$2&passwo
 
 <IfModule mod_expires.c>
 ExpiresActive On
-ExpiresByType text/html "access plus 1 day"
-ExpiresByType text/css "access plus 1 week"
-ExpiresByType text/javascript "access plus 1 month"
-ExpiresByType application/javascript "access plus 1 month"
+ExpiresByType text/html "access plus 1 hour"
+ExpiresByType text/css "access plus 1 hour"
+ExpiresByType text/javascript "access plus 1 hour"
+ExpiresByType application/javascript "access plus 1 hour"
 ExpiresByType image/gif "access plus 1 month"
 ExpiresByType image/jpeg "access plus 1 month"
 ExpiresByType image/jpg "access plus 1 month"
@@ -65,3 +66,7 @@ Header append Vary User-Agent env=!dont-vary
 <IfModule mod_headers.c>
 Header append Vary User-Agent env=!dont-vary
 </IfModule>
+
+php_value display_errors 0
+php_value log_errors 1
+php_value error_log storage/log_archive/php_errors.txt

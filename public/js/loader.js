@@ -6,8 +6,8 @@
 Loader = {
 	
 	components: new Array (
-		'cat',
-		'utils'
+		'common',
+		'cat'
 	),
 
 	forkComponents: new Array (

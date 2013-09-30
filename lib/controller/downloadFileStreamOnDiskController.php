@@ -5,6 +5,7 @@ include_once INIT::$MODEL_ROOT."/queries.php";
 include_once INIT::$UTILS_ROOT."/cat.class.php";
 include_once INIT::$UTILS_ROOT."/fileFormatConverter.class.php";
 include_once(INIT::$UTILS_ROOT.'/XliffSAXTranslationReplacer.class.php');
+include_once(INIT::$UTILS_ROOT.'/xliff.parser.1.2.class.php');
 
 
 class downloadFileStreamOnDiskController extends downloadController {
@@ -34,8 +35,7 @@ class downloadFileStreamOnDiskController extends downloadController {
 	public function doAction() {
 		$debug=array();
 		$debug['total'][]=time();
-		// specs for filename at the task https://app.asana.com/0/1096066951381/2263196383117
-		$converter = new fileFormatConverter();
+
 		$debug['get_file'][]=time();
 		$files_job = getFilesForJob($this->id_job, $this->id_file);
 		$debug['get_file'][]=time();
@@ -82,11 +82,11 @@ class downloadFileStreamOnDiskController extends downloadController {
 
 			$debug['get_segments'][]=time();
 			//create a secondary indexing mechanism on segments' array; this will be useful
+                        //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
 			foreach($data as $i=>$k){
-				$data[$k['internal_id']][]=$i;
-			}
+                           $data[ 'matecat|' . $k['internal_id'] ][]=$i;
+                        }
 			$transunit_translation = "";
-
 			$debug['replace'][] = time();
 			//instatiate parser
 			$xsp = new XliffSAXTranslationReplacer( $path, $data, $jobData['target'] );
@@ -95,18 +95,98 @@ class downloadFileStreamOnDiskController extends downloadController {
 			unset($xsp);
 			$debug['replace'][] = time();
 
+			/*
+			   TEMPORARY HACK
+			   read header of file (guess first 500B) and detect if it was an old file created on VM TradosAPI (10.30.1.247)
+			   if so, point the conversion explicitly to this VM and not to the cloud, otherwise conversion will fail
+			 */
+			//get first 500B
+			$header_of_file_for_hack=file_get_contents($path.'.out.sdlxliff',false,NULL,-1,500);
+
+			//extract file tag
+			preg_match('/<file .*?>/s',$header_of_file_for_hack,$res_header_of_file_for_hack);
+
+			//make it a regular tag
+			$file_tag=$res_header_of_file_for_hack[0].'</file>';
+
+			//objectify
+			$tag=simplexml_load_string($file_tag);
+
+			//get "original" attribute
+			$original_uri=trim($tag['original']);
+
+			$chosen_machine=false;
+			if(strpos($original_uri,'C:\automation')!==FALSE){
+				$chosen_machine='10.30.1.247';
+				log::doLog('Old project detected, falling back to old VM');
+			}
+
+			unset($header_of_file_for_hack,$file_tag,$tag,$original_uri);
+			/*
+			   END OF HACK
+			 */
 
 			$original=file_get_contents($path.'.out.sdlxliff');
 
 			$output_content[$id_file]['content'] = $original;
 			$output_content[$id_file]['filename'] = $current_filename;
 
-			if (!in_array($mime_type, array("xliff", "sdlxliff", "xlf"))) {
-				$debug['do_conversion'][]=time();
-				$convertResult = $converter->convertToOriginal($output_content[$id_file]['content']);
-				$output_content[$id_file]['content'] = $convertResult['documentContent'];
-				$debug['do_conversion'][]=time();
+
+            //TODO set a flag in database when file uploaded to know if this file is a proprietary xlf converted
+            //TODO so we can load from database the original file blob ONLY when needed
+            /**
+             * Conversion Enforce
+             *
+             * Check Extentions no more sufficient, we want check content
+             * if this is an idiom xlf file type, conversion are enforced
+             * $enforcedConversion = true; //( if conversion is enabled )
+             *
+             * dos2unix must be enabled for xliff forced conversions
+             *
+             */
+            $enforcedConversion = false;
+            try {
+
+                $file['original_file'] = @gzinflate($file['original_file']);
+
+                $fileType = DetectProprietaryXliff::getInfoByStringData( $file['original_file'] );
+                //Log::doLog( 'Proprietary detection: ' . var_export( $fileType, true ) );
+
+                if( $fileType['proprietary'] == true  ){
+
+                    if( INIT::$CONVERSION_ENABLED && $fileType['proprietary_name'] == 'idiom world server' ){
+                        $enforcedConversion = true;
+
+                        //force unix type files
+                        $output_content[$id_file]['content'] = CatUtils::dos2unix( $output_content[$id_file]['content'] );
+
+                        Log::doLog( 'Idiom found, conversion Enforced: ' . var_export( $enforcedConversion, true ) );
+
+                    } else {
+                        /**
+                         * Application misconfiguration.
+                         * upload should not be happened, but if we are here, raise an error.
+                         * @see upload.class.php
+                         * */
+                        Log::doLog( "Application misconfiguration. Upload should not be happened, but if we are here, raise an error." );
+                        return;
+                        //stop execution
+                    }
+                }
+            } catch ( Exception $e ) { Log::doLog( $e->getMessage() ); }
+
+
+			if (!in_array($mime_type, array("xliff", "sdlxliff", "xlf")) || $enforcedConversion ) {
+
+                    // specs for filename at the task https://app.asana.com/0/1096066951381/2263196383117
+                    $converter = new fileFormatConverter();
+                    $debug['do_conversion'][]=time();
+                    $convertResult = $converter->convertToOriginal($output_content[$id_file]['content'],$chosen_machine);
+                    $output_content[$id_file]['content'] = $convertResult['documentContent'];
+                    $debug['do_conversion'][]=time();
+
 			}
+
 		}
 
 		$ext = "";
@@ -152,7 +232,9 @@ class downloadFileStreamOnDiskController extends downloadController {
 			if ($ext == 'pdf' or $ext == "PDF") {
 				$f['filename'] = $pathinfo['basename'] . ".docx";
 			}
-			$zip->addFromString($f['filename'], $f['content']);
+
+            //Php Zip bug, utf-8 not supported
+			$zip->addFromString( iconv( "UTF-8", 'ASCII//TRANSLIT//IGNORE', $f['filename'] ), $f['content']);
 		}
 
 		// Close and send to users

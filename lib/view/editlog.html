@@ -7,9 +7,15 @@
         <meta name="viewport" content="width=device-width"/>
         <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
-        <link rel="stylesheet" href="${basepath}public/css/fieldtest.css?build=${build_number}"/>
+        <link rel="stylesheet" href="${basepath}public/css/manage.css?build=${build_number}"/>
+        
+        <script type="text/javascript">
+            var config = {
+                basepath: '${basepath | string:/}'
+            };
+        </script>
         <script type="text/javascript" src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
-        <script type="text/javascript" src="${basepath}public/js/utils.js?build=${build_number}"></script>
+        <script type="text/javascript" src="${basepath}public/js/common.js?build=${build_number}"></script>
         <script type="text/javascript" src="${basepath}public/js/editlog.js?build=${build_number}"></script>
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
     </head>
@@ -66,7 +72,8 @@
                     <th>% of MT</th>
                     <th>% of TM</th>
                     <th>Total Time-to-edit</th>
-                    <th>Avg PE Effort %</th>
+                    <th>Avg PEE %</th>
+                    <th>Avg TER %</th>
                     <th>% of words in too SLOW edits</th>
                     <th>% of words in too FAST edits</th>
                 </tr>
@@ -77,6 +84,7 @@
                     <td><span tal:replace="stats/tm-words | string:--"></span>%</td>
                     <td><span tal:replace="stats/total-valid-tte | string:--"></span></td>
                     <td><span tal:replace="stats/avg-pee | string:--"></span></td>
+                    <td><span tal:replace="stats/avg-ter | string:--"></span></td>
                     <td><span tal:replace="stats/too-slow-words | string:--"></span>%</td>
                     <td><span tal:replace="stats/too-fast-words | string:--"></span>%</td>
                 </tr>
@@ -96,7 +104,8 @@
                         <th>Suggestion source</th>
                         <th>Match percentage</th>
                         <th>Time-to-edit</th>
-                        <th>Post-editing effort</th>
+                        <th>PE Effort</th>
+                        <th>TER <span style="font-size: 80%">(Beta)</span></th>
                     </tr>
 
                     <tr>
@@ -108,6 +117,7 @@
                         <td tal:content="file_data/sm | default">%</td>
                         <td tal:content="file_data/time_to_edit"></td>
                         <td tal:content="file_data/pe_effort_perc | default">%</td>
+                        <td tal:content="file_data/ter | default">%</td>
                     </tr>
                 </table>
 
@@ -128,7 +138,7 @@
                     </tr>
                     <tr>
                         <th style="width: 100px">Diff View</th>
-                        <td style="text-align:left;font-size:16px;" tal:content="structure file_data/diff_view | default">N/A</td>
+                        <td style="text-align:left;font-size:16px;" tal:content="structure file_data/diff | default">N/A</td>
 
                     </tr>					
                 </table>

@@ -28,7 +28,7 @@ function processFileExists($pid) {
     return false;
 }
 
-
+$UNIQUID = uniqid('', true);
 
 $my_pid = getmypid();
 $parent_pid = posix_getppid();
@@ -96,42 +96,32 @@ while (1) {
     }
     $mt_engine = null;
     $mt_from_tms = 1;
-   if (!empty($id_mt_engine)and $id_mt_engine!=1) { 
-        $mt_engine = new MT($id_mt_engine);
+   if ( !empty( $id_mt_engine ) and $id_mt_engine != 1 ) {
         $mt_from_tms = 0;
     }
 
     $tms_match = $tms->get($text, $source, $target, "demo@matecat.com", $mt_from_tms, $id_translator);
-    
 
     if (!$tms_match || !is_array($tms_match)) {
         echo "--- (child $my_pid) : error from mymemory : set error and continue\n"; // ERROR FROM MYMEMORY
-        setSegmentTranslationError($sid, $jid); // devo seetarli come done e lasciare il vecchio livello di match
+        setSegmentTranslationError($sid, $jid); // devo settarli come done e lasciare il vecchio livello di match
         deleteLockSegment($sid, $jid);
         continue;
     }
 
-    $first_match = $tms_match[0];
-
-    $suggestion = CatUtils::view2rawxliff($first_match['raw_translation']);
-    $suggestion_match = $first_match['match'];
-    $suggestion_json = json_encode($tms_match);
-    $suggestion_source = $first_match['created_by'];
-
-    $tm_match_type = $first_match['match'];
-    if (stripos($suggestion_source, "MT") !== false) {
+    $tm_match_type = $tms_match[0]['match'];
+    if (stripos($tms_match[0]['created_by'], "MT") !== false) {
         $tm_match_type = "MT";
     }
 
     $mt_res = array();
     $mt_match = "";
 
-
     //CODICE DUPLICATO da getContributionController::doAction . Da fattorizzare
     if (!empty($id_mt_engine)) {
 
         $mt = new MT($id_mt_engine);
-        $mt_result = $mt->get($text, $this->source, $this->target);
+        $mt_result = $mt->get($text, $source, $target);
 
         if ($mt_result[0] < 0) {
             $mt_match = '';
@@ -148,15 +138,61 @@ while (1) {
 
     $matches = array();
 
-    if (!empty($first_match)) {
-        $matches = $first_match;
+    if (!empty($tms_match)) {
+        $matches = $tms_match;
     }
 
     if (!empty($mt_match)) {
         $matches[] = $mt_res;
         usort($matches, "compareScore");
     }
-    
+
+    /* New Feature */
+    ( isset($matches[ 0 ]['match']) ? $firstMatchVal = floatval( $matches[ 0 ]['match'] ) : null );
+    if( isset( $firstMatchVal ) && $firstMatchVal >= 90 && $firstMatchVal < 100 ){
+
+        $srcSearch    = strip_tags( $text );
+        $segmentFound = strip_tags( $matches[ 0 ][ 'raw_segment' ] );
+        $srcSearch    = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $srcSearch ) );
+        $segmentFound = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $segmentFound ) );
+
+        $fuzzy = levenshtein( $srcSearch, $segmentFound ) / log10( mb_strlen( $srcSearch . $segmentFound ) + 1 );
+
+        if ( $srcSearch == $segmentFound || $fuzzy < 2.5 ) {
+
+            $qaRealign = new QA( $text, html_entity_decode( $matches[ 0 ][ 'raw_translation' ] ) );
+            $qaRealign->tryRealignTagID();
+
+            $log_prepend = $UNIQUID . " - SERVER REALIGN IDS PROCEDURE | ";
+            if ( !$qaRealign->thereAreErrors() ) {
+
+                Log::doLog( $log_prepend . " - Requested Segment: " . var_export( $segment, true ) );
+                Log::doLog( $log_prepend . "Fuzzy: " . $fuzzy . " - Try to Execute Tag ID Realignment." );
+                Log::doLog( $log_prepend . "TMS RAW RESULT:" );
+                Log::doLog( $log_prepend . var_export( $matches[ 0 ], true ) );
+
+                Log::doLog( $log_prepend . "Realignment Success:" );
+                $matches[0]['raw_translation'] = $qaRealign->getTrgNormalized();
+                $matches[0]['match'] = ( $fuzzy == 0 ? '100%' : '99%' );
+                Log::doLog( $log_prepend . "Raw Translation: " . var_export( $matches[ 0 ]['raw_translation'], true ) );
+
+            } else {
+                Log::doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $segment['sid'] );
+            }
+
+        }
+
+    }
+
+    $suggestion = CatUtils::view2rawxliff($matches[0]['raw_translation']);
+
+    //preg_replace all x tags <x not closed > inside suggestions with correctly closed
+    $suggestion = preg_replace( '|<x([^/]*?)>|', '<x\1/>', $suggestion );
+
+    $suggestion_match = $matches[0]['match'];
+    $suggestion_json = json_encode($matches);
+    $suggestion_source = $matches[0]['created_by'];
+
     $new_match_type = getNewMatchType($tm_match_type, $fast_match_type, $equivalentWordMapping);
     //echo "sid is $sid ";
     $eq_words = $equivalentWordMapping[$new_match_type] * $raw_wc / 100;
@@ -166,12 +202,10 @@ while (1) {
         $standard_words = $equivalentWordMapping["NO_MATCH"] * $raw_wc / 100;
     }
 
-    $check = new QA($text, $suggestion);
-    $check->performConsistencyCheck();
-    
-    //$outcome_warning=CatUtils::checkTagConsistency($text,$suggestion);
+    $check = new QA( $text, $suggestion );
+    $check->performTagCheckOnly();
 
-    log::doLog($check->getErrors(true));
+    //log::doLog($check->getErrors(true));
 
     echo "--- (child $my_pid) : sid=$sid --- \$tm_match_type=$tm_match_type, \$fast_match_type=$fast_match_type, \$new_match_type=$new_match_type, \$equivalentWordMapping[\$new_match_type]=" . $equivalentWordMapping[$new_match_type] . ", \$raw_wc=$raw_wc,\$standard_words=$standard_words,\$eq_words=$eq_words\n";
 
@@ -189,7 +223,7 @@ while (1) {
 
     $segs_in_project = countSegments($pid);
     if ($segs_in_project < 0) {
-        echo "--- (child $my_pid) : WARNING !!! erro while counting segments in projects $pid skipping and continure \n";
+        echo "--- (child $my_pid) : WARNING !!! error while counting segments in projects $pid skipping and continue \n";
         continue;
     }
     echo "--- (child $my_pid) : count segments in project $pid = $segs_in_project\n";
@@ -254,6 +288,7 @@ function getNewMatchType($tm_match_type, $fast_match_type, $equivalentWordMappin
 }
 
 function compareScore($a, $b) {
-    return floatval($a['match']) < floatval($b['match']);
+    if( floatval($a['match']) == floatval($b['match']) ){ return 0; }
+    return ( floatval($a['match']) < floatval($b['match']) ? -1 : 1);
 }
 ?>

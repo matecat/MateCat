@@ -1,4 +1,6 @@
+
 $(document).ready(function(){
+    APP.init();
 
     //set 
     if (!$('#source-lang option.custom').length) {
@@ -12,8 +14,7 @@ $(document).ready(function(){
 
     $(".supported-file-formats").click(function(e){
         e.preventDefault();
-        $(".grayed").fadeIn();
-        $(".supported-formats").fadeIn('fast');
+        $(".supported-formats").show();
     });
     $(".close, .grayed").click(function(e){
         e.preventDefault();
@@ -24,9 +25,26 @@ $(document).ready(function(){
         e.preventDefault();
         $('.listlang li.on input[type=checkbox]').click();
     });
-
+    $("#swaplang").click(function(e){
+        e.preventDefault();
+        var src = $('#source-lang').val();
+        var trg = $('#target-lang').val();
+        if($('#target-lang').val().split(',').length > 1) {
+            APP.alert('Cannot swap languages when <br>multiple target languages are selected!');
+            return false;
+        }
+        $('#source-lang').val(trg);
+        $('#target-lang').val(src);
+        if(!$('.template-download').length) return;
+        if (UI.conversionsAreToRestart()) {
+            APP.confirm({msg: 'Source language changed. The files must be reimported.', callback: 'confirmRestartConversions'});
+        }        
+    });
     $("#chooseMultilang").click(function(e){
-        $('.popup-languages .close').click();
+        e.preventDefault();
+        APP.closePopup();
+
+//        $('.popup-languages .close').click();
         if ($('.popup-languages li.on').length) {
             var str = '';
             var vals = '';
@@ -50,7 +68,10 @@ $(document).ready(function(){
         }
     });
     $("#cancelMultilang").click(function(e){
-        $('.popup-languages .close').click();
+        e.preventDefault();
+        APP.closePopup();
+
+//        $('.popup-languages .close').click();
         $('.popup-languages li.on').each(function(){
             $(this).removeClass('on').find('input').removeAttr('checked');
         });

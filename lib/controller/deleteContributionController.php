@@ -1,6 +1,10 @@
 <?php
-include INIT::$ROOT."/lib/utils/mymemory_queries_temp.php";
-include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
+/**
+ * Class engine already included in tms.class.php
+ * BUT Not remove include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
+ * Some PHP Version ( Ex: Debian 5.2.6-1+lenny13 does not work )
+ */
+include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
 include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';

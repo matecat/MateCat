@@ -47,7 +47,7 @@ class MT_RESULT {
 
 }
 
-class MT extends engine {
+class MT extends Engine {
 
 	private $result = array();
 

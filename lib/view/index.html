@@ -8,31 +8,32 @@
         <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/jquery-ui.css?build=${build_number}" rel="stylesheet" type="text/css" />
-        <link href="${basepath}public/css/popup.css?build=${build_number}" rel="stylesheet" type="text/css" />
 
         <script type="text/javascript">
             /*<![CDATA[*/
             var config = {
-            basepath: '${basepath | string:/}',
-                    id_translator: '${tid | nothing}',
-                    private_translator: '${private_translator | string:0}',
-                    id_customer: '${id_customer | string:unknown_customer}',
-                    private_customer: '${private_customer | string:0}',
-                    last_opened_segment: '${last_opened_segment}',
-                    first_job_segment: '${first_job_segment}',
-                    server_load_time: '${load_time}',
-                    job_id: '${jid}',
-                    password: '${password}',
-                    source_lang: '${source}',
-                    target_lang: '${target}',
-                    time_to_edit_enabled: ${time_to_edit_enabled},
-                    build_number: '${build_number}',
-                    test: 'test',
-                    warningPollingInterval:'${warningPollingInterval}',
-                    segmentQACheckInterval: '${segmentQACheckInterval}',
-                    firstSegmentOfFiles: ${structure php: firstSegmentOfFiles}
+                basepath: '${basepath | string:/}',
+                id_translator: '${tid | nothing}',
+                private_translator: '${private_translator | string:0}',
+                id_customer: '${id_customer | string:unknown_customer}',
+                private_customer: '${private_customer | string:0}',
+                last_opened_segment: '${last_opened_segment}',
+                first_job_segment: '${first_job_segment}',
+                server_load_time: '${load_time}',
+                job_id: '${jid}',
+                password: '${password}',
+                source_rfc: '${source_code}',
+                target_rfc: '${target_code}',
+                source_lang: '${source}',
+                target_lang: '${target}',
+                time_to_edit_enabled: ${time_to_edit_enabled},
+                build_number: '${build_number}',
+                test: 'test',
+                warningPollingInterval:'${warningPollingInterval}',
+                segmentQACheckInterval: '${segmentQACheckInterval}',
+                firstSegmentOfFiles: ${structure php: firstSegmentOfFiles}
             };
-                    var renderStart = new Date();
+            var renderStart = new Date();
             /*]]>*/
         </script>
         <script src="${basepath}public/js/loader.js?build=${build_number}"></script>
@@ -61,7 +62,6 @@
                     <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
                     <input type="hidden" name="password" tal:attributes="value password" />
                     <input type="hidden" name="download_type" value="all" />
-                    <!--input id="downloadProject" data-prova="coso" name="submit" type="submit" value="XPREVIEW" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" / -->
                 </form>
                 <a href="#" class="filter"> <span class="arrow-top "></span></a>
 
@@ -152,7 +152,7 @@
                         </ul>
                     </div>  
 
-                    <div id="pname" tal:content="pname">Project</div>
+                    <a href="#" id="pname" tal:content="pname">Project</a>
                     <span class="details">&nbsp;(<span tal:replace="jid">---</span>) &gt; <b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></span>
                 </div>
 
@@ -160,6 +160,51 @@
 
 
         </header>
+        
+		<div tal:attributes="class string:searchbox${filtered_class}">
+			<form>
+
+			<div class="block right">
+				<input id="exec-filter" type="submit" class="btn" value="FILTER" />			
+				<!--input id="clear-filter" type="button" class="btn" value="CLEAR" /-->			
+			</div>
+
+			<div class="block">
+				<label for="search-projectname">Text in source</label>
+				<input id="search-source" class="search-input" type="text" value=""/>				
+			</div>
+
+             <div class="block">
+				<label for="search-projectname">Text in target</label>
+				<input id="search-target" class="search-input" type="text" value=""/>				
+			</div>
+			<div class="block">
+				<label for="select-status">Status</label>
+				<select id="select-status" class="search-select" >
+					<option value="active">Active</option>
+					<option value="archived">Archived</option>
+					<option value="cancelled">Cancelled</option>
+				</select>  	
+			</div>
+<!--
+			<div class="block">
+				<input id="only-completed" type="checkbox" />
+				<label for="only-completed">Only Completed</label>
+			</div>
+
+			<div class="block">
+				<input id="show-archived" type="checkbox" />
+				<label for="show-archived">Show Archived</label>
+			</div>
+			
+			<div class="block">
+				<input id="show-cancelled" type="checkbox" />
+				<label for="show-cancelled">Show Cancelled</label>
+			</div>
+-->
+			</form>
+		</div>
+        
         <!--
                 <div class="search">    
                <div class="col1-search">
@@ -297,16 +342,18 @@
         <nav id="jobNav" class="slideMenu">
             <ul id="segmentNavBar" class="bar">
                 <li class="jobstart"><a href="#" title="Go to job start">Job start</a></li>
-                <li class="prevfile"><a href="#" title="Go to previous file header">This/Previous file start</a></li>
+                <li class="prevfile"><a href="#" title="Go to the current file header">This/Previous file start</a></li>
                 <li class="currseg"><a href="#" title="Go to the current opened segment">Current segment</a></li>
-                <li class="nextfile"><a href="#" title="Go to next file header">Next file start</a></li>                
+<!--                <li class="nextfile"><a href="#" title="Go to next file header">Next file start</a></li>   -->             
             </ul>
         </nav>
 
 
 
         <footer>
+<!--
             <a href="#" id="navSwitcher" title="Open Navigation Bar">Open Navigation Bar</a>
+-->
             <div class="wrapper">
      
                 <nav>
@@ -331,7 +378,7 @@
 
 
                 <div id="statistics">
-                    <p>Progress:</p>
+                    <p class="progress">Progress:</p>
                     <div class="meter">
 
                         <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
@@ -341,7 +388,7 @@
                     </div>
                     <p class="percent"><span id="stat-progress" tal:content="php:(job_stats['PROGRESS_PERC_FORMATTED'])">0</span>%</p>
                     <ul>
-                        <li id="stat-eqwords">Payable Words: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong></li>
+                        <li id="stat-eqwords"><a target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Payable Words</a>: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong></li>
                         <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
                         <!--
                         <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
@@ -444,16 +491,14 @@ Stay anonymous</a>
 <!--
 <div class="popup-outer"></div>
 <div class="popup">
+    <a href="#" class="x-popup"></a>
+    <h1>Warning</h1>
 
-<a href="#" class="x-popup"></a>
-<h1>Warning</h1>
+    <p>There are some potential errors (missing tags, numbers, etc). <br/>
+    Do you want to continue anyway?</p>
 
-<p>There are some potential errors (missing tags, numbers, etc). <br/>
-Do you want to continue anyway?</p>
-
-<a href="#" class="btn-ok">Ok</a>
-<a href="#" class="btn-cancel">Ops!</a>
-
+    <a href="#" class="btn-ok">Ok</a>
+    <a href="#" class="btn-cancel">Ops!</a>
 </div>
 -->
 <!-- FINE PREVIEW WARNING -->
@@ -469,6 +514,19 @@ Do you want to continue anyway?</p>
 
         <div class="grayed" ></div>
         <div class="blacked" ></div>
+
+        <ul id="contextMenu">
+<!--
+            <li id="spellCheck">
+                <span class="label">Maybe you were searching for:</span>
+                <a class="add" href="#">Add word</a>
+            </li>
+-->
+            <li id="searchConcordance">
+                <span class="label">Concordance</span>
+                <span class="shortcut"><span class="alt">&#x2325;</span><span class="cmd">&#8984;</span> C</span>
+            </li>
+        </ul>
 
         <a id="segmentPointer" href="#" title="Go to the active segment"></a>
 

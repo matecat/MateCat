@@ -1,7 +1,6 @@
 <?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include INIT::$UTILS_ROOT . "/mymemory_queries_temp.php";
 include INIT::$UTILS_ROOT . "/filetype.class.php";
 include INIT::$UTILS_ROOT . "/cat.class.php";
 include INIT::$UTILS_ROOT . "/langs/languages.class.php";
@@ -37,6 +36,9 @@ class catController extends viewcontroller {
 
     private $firstSegmentOfFiles = '[]';
 
+    private $first_job_segment;
+    private $last_opened_segment;
+
 	private $thisUrl;
 
 	public function __construct() {
@@ -62,6 +64,12 @@ class catController extends viewcontroller {
 			$this->start_from = ($this->page - 1) * $this->step;
 		}
 
+        if (isset($_GET['filter'])) {
+			$this->filter_enabled = true;
+		} else {
+			$this->filter_enabled = false;
+		};
+        
 		$this->downloadFileName = "";
 
 		$this->thisUrl=$_SERVER['REQUEST_URI'];
@@ -209,7 +217,7 @@ class catController extends viewcontroller {
 			$this->last_opened_segment = getFirstSegmentId($this->jid, $this->password);
 		}
 
-		$this->job_stats = CatUtils::getStatsForJob($this->jid);
+		$this->job_stats = CatUtils::getStatsForJob($this->jid );
 		if (count($files_found) == 1) {
 			$this->downloadFileName = $files_found[0];
 		}
@@ -266,7 +274,8 @@ class catController extends viewcontroller {
         $this->template->incomingUrl            = '/login?incomingUrl=' . $this->thisUrl;
         $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
         $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
-
+		$this->template->filtered = $this->filter_enabled;
+		$this->template->filtered_class = ($this->filter_enabled) ? ' open' : '';
     }
 
 }

@@ -56,7 +56,10 @@ class oauthResponseHandlerController extends viewcontroller{
 				//ok mail sent, set stuff
 				$_SESSION['cid'] = $this->userdata['email'];
 
-                if( isset($_SESSION['_anonym_pid']) && !empty($_SESSION['_anonym_pid']) ){
+                $_theresAnonymousProject = ( isset($_SESSION['_anonym_pid']) && !empty($_SESSION['_anonym_pid']) );
+                $_incomingFromNewProject = ( isset($_SESSION['_newProject']) && !empty($_SESSION['_newProject']) );
+
+                if( $_theresAnonymousProject && $_incomingFromNewProject ){
                     //update anonymous project with user credentials
                     $result = updateProjectOwner( $this->userdata['email'], $_SESSION['_anonym_pid'] );
                 }
@@ -66,6 +69,7 @@ class oauthResponseHandlerController extends viewcontroller{
 
         //destroy session info of last anonymous project
         unset($_SESSION['_anonym_pid']);
+        unset($_SESSION['_newProject']);
 
 	}
 

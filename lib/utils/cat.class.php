@@ -14,96 +14,34 @@ class CatUtils {
     //following functions are useful for manage the consistency of non braking spaces
     // chars coming, expecially,from MS Word
     // ref nbsp code https://en.wikipedia.org/wiki/Non-breaking_space
-    public static function placeholdnbsp($s) {        
+    public static function placeholdnbsp($s) {
         $s = preg_replace("/\x{a0}/u", NBSPPLACEHOLDER, $s);
         return $s;
     }
-    
-     
 
     public static function restorenbsp($s) {
-        $pattern="#".NBSPPLACEHOLDER."#";
+        $pattern = "#" . NBSPPLACEHOLDER . "#";
         $s = preg_replace($pattern, Utils::unicode2chr(0Xa0), $s);
         return $s;
     }
-    
+
     // ----------------------------------------------------------------
-    
-    public static function placeholdamp($s) {        
+
+    public static function placeholdamp($s) {
         $s = preg_replace("/\&/", AMPPLACEHOLDER, $s);
         return $s;
     }
-    
-      public static function restoreamp($s) {
-        $pattern="#".AMPPLACEHOLDER."#";
+
+    public static function restoreamp($s) {
+        $pattern = "#" . AMPPLACEHOLDER . "#";
         $s = preg_replace($pattern, Utils::unicode2chr("&"), $s);
         return $s;
     }
 
     //reconcile tag ids
-    public static function ensureTagConsistency($q, $source_seg, $target_seg) {
+    public static function ensureTagConsistency( $q, $source_seg, $target_seg ) {
         //TODO
     }
-
-    //check for tag mismatches
-    //TODO Rimuovere dopo il 1° agosto 2013
-    //
-//    public static function checkTagConsistency($source_seg, $target_seg) {
-//        //ensure there are no entities
-//        $source_seg = html_entity_decode($source_seg);
-//        $target_seg = html_entity_decode($target_seg);
-//
-//        //get tags from words in source and target
-//        preg_match_all('/<[^>]+>/', $source_seg, $source_tags);
-//        preg_match_all('/<[^>]+>/', $target_seg, $target_tags);
-//        $source_tags = $source_tags[0];
-//        $target_tags = $target_tags[0];
-//
-//        //check equal tag count 
-//        if (count($source_tags) != count($target_tags)) {
-//            return array('outcome' => 1, 'debug' => 'tag count mismatch');
-//        }
-//
-//        //check well formed xml (equal number of opening and closing tags inside each input segment)
-//        $seg=self::placeholdamp($source_seg);
-//        $tra=self::placeholdamp($target_seg);
-//        @$xml_valid = @simplexml_load_string("<placeholder>$seg</placeholder>");
-//
-//        if ($xml_valid === FALSE) {
-//            return array('outcome' => 2, 'debug' => 'bad source xml');
-//        }
-//        @$xml_valid = @simplexml_load_string("<placeholder>$tra</placeholder>");
-//        if ($xml_valid === FALSE) {
-//            return array('outcome' => 3, 'debug' => 'bad target xml');
-//        }
-//
-//        //check for tags' id mismatching
-//        //extract names
-//        preg_match_all('/id="(.+?)"/', $source_seg, $source_tags_ids);
-//        preg_match_all('/id="(.+?)"/', $target_seg, $target_tags_ids);
-//        $source_tags_ids = $source_tags_ids[1];
-//        $target_tags_ids = $target_tags_ids[1];
-//        //set indexes for lookup purposes ('1' is just a dummy value to set the cell)
-//        $tmp = array();
-//        foreach ($source_tags_ids as $k => $src_tag)
-//            $tmp[$src_tag] = 1;
-//        $source_tags_ids = $tmp;
-//        $tmp = array();
-//        foreach ($target_tags_ids as $k => $trg_tag)
-//            $tmp[$trg_tag] = 1;
-//        $target_tags_ids = $tmp;
-//        unset($tmp);
-//        //for each tag in target
-//        foreach ($target_tags_ids as $tag => $v) {
-//            //if a tag in target is not present in source, error
-//            if (!isset($source_tags_ids[$tag])) {
-//                return array('outcome' => 4, 'debug' => 'tag id mismatch');
-//            }
-//        }
-//
-//        //all checks passed
-//        return array('outcome' => 0, 'debug' => '');
-//    }
 
     private static function parse_time_to_edit($ms) {
         if ($ms <= 0) {
@@ -125,7 +63,24 @@ class CatUtils {
         return array($hours, $minutes, $seconds, $usec);
     }
 
-    private static function placehold_xliff_tags($segment) {
+    public static function dos2unix( $dosString ){
+        $dosString = str_replace( "\r\n","\r", $dosString );
+        $dosString = str_replace( "\n","\r", $dosString );
+        $dosString = str_replace( "\r","\n", $dosString );
+        return $dosString;
+    }
+    
+    private static function placehold_xml_entities($segment) {
+        $pattern ="|&#(.*?);|";
+        $res=preg_replace($pattern,"<x id=\"XMLENT$1\"/>",$segment);
+        return $res;
+    }
+    
+    public static function restore_xml_entities($segment) {
+        return preg_replace ("|<x id=\"XMLENT(.*?)\"/>|","&#$1",$segment);
+    }
+    
+    public static function placehold_xliff_tags($segment) {
 
         //remove not existent </x> tags
         $segment = preg_replace('|(</x>)|si', "", $segment);
@@ -163,6 +118,41 @@ class CatUtils {
         $segment = str_replace(GTPLACEHOLDER, "&gt;", $segment);
         return $segment;
     }
+    
+    
+    
+     private static function get_xliff_tags($segment) {
+
+        //remove not existent </x> tags
+        $segment = preg_replace('|(</x>)|si', "", $segment);
+        
+        $matches=array();
+        $match=array();
+
+        
+        $res=preg_match('|(<g\s*id=["\']+.*?["\']+\s*[^<>]*?>)|si',$segment, $match);
+        if ($res and isset($match[0])){
+            $matches[]=$match[0];
+        }
+
+        $segment = preg_replace('|<(/g)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(x.*?/?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(bx.*?/?])>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(ex.*?/?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(bpt\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(/bpt)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(ept\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(/ept)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(ph\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(/ph)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(it\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(/ph)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(it\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(/it)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(mrk\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(/mrk)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        return $segment;
+    }
 
     public static function stripTags($text) {
         $pattern_g_o = '|(<.*?>)|';
@@ -181,19 +171,24 @@ class CatUtils {
         // output : <g> bang &amp; olufsen are > 555 </g> <x/>
         // caso controverso <g id="4" x="&lt; dfsd &gt;"> 
         $segment = self::placehold_xliff_tags($segment);
-        $segment = htmlspecialchars($segment, ENT_NOQUOTES, 'UTF-8', false);
+        $segment = htmlspecialchars(
+            html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8'),
+            ENT_NOQUOTES, 'UTF-8', false
+        );
         $segment = self::restore_xliff_tags($segment);
         return $segment;
     }
 
     public static function rawxliff2view($segment) {
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
+        //$segment = self::placehold_xml_entities($segment);
         $segment = self::placehold_xliff_tags($segment);
         
-        $segment = html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8');
+        
+        $segment = html_entity_decode($segment, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8');
         // restore < e >
-        $segment = str_replace("<", "&lt", $segment);
-        $segment = str_replace(">", "&gt", $segment);
+        $segment = str_replace("<", "&lt;", $segment);
+        $segment = str_replace(">", "&gt;", $segment);
 
 
         $segment = preg_replace('|<(.*?)>|si', "&lt;$1&gt;", $segment);
@@ -202,6 +197,14 @@ class CatUtils {
         return $segment;
     }
 
+    /**
+     * No more used
+     * @deprecated
+     *
+     * @param $segment
+     *
+     * @return mixed
+     */
     public static function rawxliff2rawview($segment) {
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
         $segment = self::placehold_xliff_tags($segment);
@@ -289,20 +292,28 @@ class CatUtils {
             $seg['pe_effort_perc'] .= "%";
 
 
+
+            $sug_for_diff = self::placehold_xliff_tags($seg['sug']);
+            $tra_for_diff = self::placehold_xliff_tags($seg['translation']);
+            $ter = MyMemory::diff_tercpp($sug_for_diff, $tra_for_diff);
+            $seg['ter'] = $ter[1] * 100;
+            $stat_ter[] = $seg['ter'] * $seg['rwc'];
+            $seg['ter'] = round($ter[1] * 100) . "%";
+            $diff_ter = $ter[0];
+
             if ($seg['sug'] <> $seg['translation']) {
-                $sug_for_diff=self::placehold_xliff_tags($seg['sug']);
-                $tra_for_diff=self::placehold_xliff_tags($seg['translation']);
-                $seg['diff'] = MyMemory::diff_tercpp($sug_for_diff, $tra_for_diff);
-                if (!$seg['diff']) {
-                    // TER NOT WORKING : fallback to old diff viewer
-                    $seg['diff'] = MyMemory::diff_html($sug_for_diff, $tra_for_diff);
-                }
+                
+                $diff_PE = MyMemory::diff_html($sug_for_diff, $tra_for_diff);
+
+                // we will use diff_PE until ter_diff will not work properly
+                $seg['diff'] = $diff_PE;
+                //$seg['diff'] = $diff_ter;
             } else {
                 $seg['diff'] = '';
             }
-            $seg['diff_view']= self::restore_xliff_tags_for_wiew($seg['diff']);
+            $seg['diff'] = self::restore_xliff_tags_for_wiew($seg['diff']);
+            //     echo $seg['diff']; exit;
             //$seg['diff_view']= CatUtils::rawxliff2rawview($seg['diff']);
-
             // BUG: While suggestions source is not correctly set
             if (($seg['sm'] == "85%") OR ($seg['sm'] == "86%")) {
                 $seg['ss'] = 'Machine Translation';
@@ -324,7 +335,12 @@ class CatUtils {
             $stats['too-slow-words'] = round(array_sum($stat_too_slow) / $stats['edited-word-count'], 2) * 100;
             $stats['too-fast-words'] = round(array_sum($stat_too_fast) / $stats['edited-word-count'], 2) * 100;
             $stats['avg-pee'] = round(array_sum($stat_pee) / array_sum($stat_rwc)) . "%";
+            $stats['avg-ter'] = round(array_sum($stat_ter) / array_sum($stat_rwc)) . "%";
         }
+//        echo array_sum($stat_ter);
+//        echo "@@@";
+//        echo array_sum($stat_rwc);
+//        exit;
 
         $stats['mt-words'] = round(array_sum($stat_mt) / $stats['edited-word-count'], 2) * 100;
         $stats['tm-words'] = 100 - $stats['mt-words'];
@@ -348,7 +364,7 @@ class CatUtils {
 
         $insertRes = setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index, $warning);
         if ($insertRes < 0 and $insertRes != -1062) {
-            $result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the translation for the segment $id_segment - $insertRes");
+            $result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the translation for the segment $id_segment - Error: $insertRes");
             return $result;
         }
         if ($insertRes == -1062) {
@@ -356,7 +372,7 @@ class CatUtils {
             $updateRes = setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index, $warning);
 
             if ($updateRes < 0) {
-                $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment $id_segment");
+                $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment $id_segment - Error: $updateRes");
                 return $result;
             }
         }
@@ -372,6 +388,16 @@ class CatUtils {
             }
         }
 
+        /**
+         * For future refactory, with this SQL construct we halve the number of insert/update queries
+         *
+         * mysql support this:
+         *
+         *  INSERT INTO example (id,suggestions_array) VALUES (1,'["key":"we don\'t want this update because of tm_analysis_status is not DONE"]')
+         *      ON DUPLICATE KEY UPDATE
+         *          suggestions_array = IF( tm_analysis_status = 'DONE' , VALUES(suggestions_array) , suggestions_array );
+         *
+         */
         $insertRes = setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json);
         if ($insertRes < 0 and $insertRes != -1062) {
             $result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the suggestions for the segment $id_segment - $insertRes");
@@ -436,7 +462,7 @@ class CatUtils {
         }
         
         return $res_job_stats;
-        
+
     }
     
     /**
@@ -503,39 +529,37 @@ class CatUtils {
      * </pre>
      *  
      * @param mixed $job_stats
-     * @param bool $estimate_performance
      * @return mixed $job_stats
      */
     protected static function _getStatsForJob( $job_stats ) {
-        
-        $job_stats['PROGRESS'] = ( $job_stats['TRANSLATED'] + $job_stats['APPROVED'] );                   
 
-        $job_stats['TOTAL_FORMATTED'] = number_format($job_stats['TOTAL'], 0, ".", ",");
-        $job_stats['PROGRESS_FORMATTED'] = number_format( $job_stats['TRANSLATED'] + $job_stats['APPROVED'], 0, ".", "," );                   
-        $job_stats['APPROVED_FORMATTED'] = number_format($job_stats['APPROVED'], 0, ".", ",");
-        $job_stats['REJECTED_FORMATTED'] = number_format($job_stats['REJECTED'], 0, ".", ",");
-        $job_stats['TODO_FORMATTED'] = number_format($job_stats['DRAFT'] + $job_stats['REJECTED'], 0, ".", ",");
-        $job_stats['DRAFT_FORMATTED'] = number_format($job_stats['DRAFT'], 0, ".", ",");
-        $job_stats['TRANSLATED_FORMATTED'] = number_format($job_stats['TRANSLATED'], 0, ".", ",");
+        $job_stats[ 'PROGRESS' ]             = ( $job_stats[ 'TRANSLATED' ] + $job_stats[ 'APPROVED' ] );
+        $job_stats[ 'TOTAL_FORMATTED' ]      = number_format( $job_stats[ 'TOTAL' ], 0, ".", "," );
+        $job_stats[ 'PROGRESS_FORMATTED' ]   = number_format( $job_stats[ 'TRANSLATED' ] + $job_stats[ 'APPROVED' ], 0, ".", "," );
+        $job_stats[ 'APPROVED_FORMATTED' ]   = number_format( $job_stats[ 'APPROVED' ], 0, ".", "," );
+        $job_stats[ 'REJECTED_FORMATTED' ]   = number_format( $job_stats[ 'REJECTED' ], 0, ".", "," );
+        $job_stats[ 'TODO_FORMATTED' ]       = number_format( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ], 0, ".", "," );
+        $job_stats[ 'DRAFT_FORMATTED' ]      = number_format( $job_stats[ 'DRAFT' ], 0, ".", "," );
+        $job_stats[ 'TRANSLATED_FORMATTED' ] = number_format( $job_stats[ 'TRANSLATED' ], 0, ".", "," );
 
-        $job_stats['APPROVED_PERC'] = ($job_stats['APPROVED']) / $job_stats['TOTAL'] * 100;
-        $job_stats['REJECTED_PERC'] = ($job_stats['REJECTED']) / $job_stats['TOTAL'] * 100;
-        $job_stats['DRAFT_PERC'] = ( $job_stats['DRAFT'] / $job_stats['TOTAL'] * 100 );
-        $job_stats['TRANSLATED_PERC'] = ( $job_stats['TRANSLATED'] / $job_stats['TOTAL'] * 100 );
-        $job_stats['PROGRESS_PERC'] = ( $job_stats['PROGRESS'] / $job_stats['TOTAL'] ) * 100;
+        $job_stats[ 'APPROVED_PERC' ]   = ( $job_stats[ 'APPROVED' ] ) / $job_stats[ 'TOTAL' ] * 100;
+        $job_stats[ 'REJECTED_PERC' ]   = ( $job_stats[ 'REJECTED' ] ) / $job_stats[ 'TOTAL' ] * 100;
+        $job_stats[ 'DRAFT_PERC' ]      = ( $job_stats[ 'DRAFT' ] / $job_stats[ 'TOTAL' ] * 100 );
+        $job_stats[ 'TRANSLATED_PERC' ] = ( $job_stats[ 'TRANSLATED' ] / $job_stats[ 'TOTAL' ] * 100 );
+        $job_stats[ 'PROGRESS_PERC' ]   = ( $job_stats[ 'PROGRESS' ] / $job_stats[ 'TOTAL' ] ) * 100;
 
-        $significantDigits = array();
-        $significantDigits[] = self::_getSignificantDigits($job_stats['TRANSLATED_PERC']);
-        $significantDigits[] = self::_getSignificantDigits($job_stats['DRAFT_PERC']);
-        $significantDigits[] = self::_getSignificantDigits($job_stats['APPROVED_PERC']);
-        $significantDigits[] = self::_getSignificantDigits($job_stats['REJECTED_PERC']);
-        $significantDigits = max($significantDigits);
-                
-        $job_stats['TRANSLATED_PERC_FORMATTED'] = round($job_stats['TRANSLATED_PERC'], $significantDigits ) ;
-        $job_stats['DRAFT_PERC_FORMATTED'] = round($job_stats['DRAFT_PERC'], $significantDigits ) ;
-        $job_stats['APPROVED_PERC_FORMATTED'] = round($job_stats['APPROVED_PERC'], $significantDigits );
-        $job_stats['REJECTED_PERC_FORMATTED'] = round($job_stats['REJECTED_PERC'], $significantDigits );
-        $job_stats['PROGRESS_PERC_FORMATTED'] = round( $job_stats['PROGRESS_PERC'], $significantDigits ) ;
+        $significantDigits    = array();
+        $significantDigits[ ] = self::_getSignificantDigits( $job_stats[ 'TRANSLATED_PERC' ] );
+        $significantDigits[ ] = self::_getSignificantDigits( $job_stats[ 'DRAFT_PERC' ] );
+        $significantDigits[ ] = self::_getSignificantDigits( $job_stats[ 'APPROVED_PERC' ] );
+        $significantDigits[ ] = self::_getSignificantDigits( $job_stats[ 'REJECTED_PERC' ] );
+        $significantDigits    = max( $significantDigits );
+
+        $job_stats[ 'TRANSLATED_PERC_FORMATTED' ] = round( $job_stats[ 'TRANSLATED_PERC' ], $significantDigits );
+        $job_stats[ 'DRAFT_PERC_FORMATTED' ]      = round( $job_stats[ 'DRAFT_PERC' ], $significantDigits );
+        $job_stats[ 'APPROVED_PERC_FORMATTED' ]   = round( $job_stats[ 'APPROVED_PERC' ], $significantDigits );
+        $job_stats[ 'REJECTED_PERC_FORMATTED' ]   = round( $job_stats[ 'REJECTED_PERC' ], $significantDigits );
+        $job_stats[ 'PROGRESS_PERC_FORMATTED' ]   = round( $job_stats[ 'PROGRESS_PERC' ], $significantDigits );
         
         $t = 'approved';
         if ($job_stats['TRANSLATED_FORMATTED'] > 0)
@@ -555,8 +579,9 @@ class CatUtils {
      * 
      * 
      * @param int $jid
-     * 
-     * @return $job_stats
+     * @param int $fid
+     * @return mixed $job_stats
+     *
      * <pre>
      *      $job_stats = array(
      *          'id'                           => (int),
@@ -571,9 +596,9 @@ class CatUtils {
      * </pre>
      * 
      */
-    public static function getStatsForJob( $jid ) {
+    public static function getStatsForJob( $jid, $fid = null ) {
         
-        $job_stats = getStatsForJob($jid);
+        $job_stats = getStatsForJob($jid, $fid);
         $job_stats = $job_stats[0];
 
         $job_stats = self::_getStatsForJob($job_stats, true); //true set estimation check if present

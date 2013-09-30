@@ -37,17 +37,20 @@
         <!--[if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
         <script src="${basepath}public/js/lib/jquery.js"></script>
+        <script src="${basepath}public/js/common.js"></script>
         <script src="${basepath}public/js/upload.js"></script>
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
         <script type="text/javascript">
             var config = {
+                basepath: '${basepath | string:/}',
+                hostpath: '${hostpath | string:/}',
                 unsupportedFileTypes: '${unsupported_file_types}',
                 allowedFileTypes: /(\.|\/)(${allowed_file_types})$/i,
                 conversionEnabled: ${conversion_enabled},
                 analysisEnabled: ${volume_analysis_enabled},
-                maxNumberFiles: 10
-            }
+                maxNumberFiles: 25
+            };
         </script>
 
 
@@ -76,7 +79,7 @@
                 <input name="project-name" type="text" class="upload-input" id="project-name" autofocus="autofocus"/>
             </div>
 
-            <div class="translate-box">
+            <div class="translate-box source">
                 <h2>From</h2>
                 <select name="source-lang" id="source-lang">
                     <tal:block tal:define="language php:array()" tal:repeat="language sourceLangHistory">
@@ -93,6 +96,8 @@
                     </tal:block>
                 </select>
             </div>
+            
+            <a id="swaplang" title="Swap languages" href="#">Swap languages</a>
 
             <div class="translate-box target">
                 <h2>To</h2>
@@ -286,7 +291,13 @@
         <script id="template-upload" type="text/x-tmpl">
             {% for (var i=0, file; file=o.files[i]; i++) { %}
             <tr class="template-upload fade">
-            <td class="preview"> <img src="${basepath}public/img/xliff-icon-retina.png" width="30" height="29" /></td>
+            <td class="preview">
+            {% if ( o.files[i].type == "application/msword" || /doc[x]/.test( o.files[i].name.split('.').pop() ) ) { %}
+                <img src="${basepath}public/img/word-icon-retina.png" width="30" height="29" />
+            {% } else { %}
+                <img src="${basepath}public/img/xliff-icon-retina.png" width="30" height="29" />
+            {% } %}
+            </td>
             <td class="name"><span>{%=file.name%}</span></td>
             <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
             {% if (file.error) { %}
@@ -312,15 +323,7 @@
             {% } %}</td>
             </tr>
 
-
-
-
             {% } %}
-
-
-
-
-
 
         </script>
 
@@ -337,7 +340,11 @@
             <td class="error" colspan="2"><span class="label label-important">{%=locale.fileupload.error%}</span> {%=locale.fileupload.errors[file.error] || file.error%}</td>
             {% } else { %}
             <td class="preview">
-            <img src="${basepath}public/img/xliff-icon-retina.png" width="30" height="29" />
+            {% if (o.files[i].type == "application/msword" || /doc[x]/.test( file.name.split('.').pop() ) ) { %}
+                <img src="${basepath}public/img/word-icon-retina.png" width="30" height="29" />
+            {% } else { %}
+                <img src="${basepath}public/img/xliff-icon-retina.png" width="30" height="29" />
+            {% } %}
             </td>
             <td class="name">{%=file.name%}</td>
             <td class="size"><span>{%=o.formatFileSize(file.size)%}</span></td>
@@ -357,6 +364,39 @@
             {% } %}
         </script>
 
+        <script tal:condition="not:volume_analysis_enabled" id="job-links-list" type="text/x-tmpl">
+        <!-- The template to display links for every language in the job when multi-language selected and no analysis page is available-->
+            <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0" id="info-login">
+                <thead>
+                    <tr>
+                        <th class="job-detail">
+                            <a tal:attributes="href string:${basepath}manage/?new=1">Login</a> to add the jobs to your management panel.
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                </tbody>
+            </table>
+            <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0" id="project-{%=o.id_project%}">
+                <thead>
+                <tr>
+                    <th class="job-detail">Jobs</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for (var i=0, file; file=o.files[i]; i++) { %}
+                <tr class="row">
+                    <td class="job-detail">
+                	<span class="urls">
+                        <div class="langs">{%=o.srcLangHumanReadable%}&nbsp;&gt;&nbsp;{%=o.trgLangHumanReadable[i]%}</div>
+                		<a class="url" target="_blank" href="{%=file.href%}">{%=file.href%}</a>
+	        	    </span>
+                    </td>
+                </tr>
+                {% } %}
+                </tbody>
+            </table>
+        </script>
 
         <script src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
 
@@ -391,6 +431,7 @@
 
         <script src="${basepath}public/js/lib/jquery.cookie.js"></script>
         <script src="${basepath}public/js/lib/jquery.colorbox-min.js"></script>
+
         <script src="${basepath}public/js/new-project.js"></script>
 <!--
         <div style='display:none'>
@@ -399,49 +440,50 @@
 -->
 
 
+        <div class="modal supported-formats" data-type="view">
+            <div class="popup-outer"></div>
+            <div class="popup">
+                <a href="#" class="x-popup"></a>
 
-        <div class="grayed"></div>
-        <div class="popup supported-formats">
-
-            <div class="header">
-                <a href="#" class="close"></a>
-                Supported file formats
-            </div>
+                <h1>Supported file formats</h1>
 
 
-            <div class="popup-box">
-                <div tal:define="supported php:array()" tal:repeat="supported supported_file_types_array"  class="format-box">
-                    <h3 tal:content="repeat/supported/key" ></h3>
-                    <ul tal:define="ext php:array()" tal:repeat="ext supported">
-                        <li tal:define="item php:array()" tal:repeat="item ext" tal:content="item">
+                <div class="popup-box">
+                    <div tal:define="supported php:array()" tal:repeat="supported supported_file_types_array"  class="format-box">
+                        <h3 tal:content="repeat/supported/key" ></h3>
+                        <ul tal:define="ext php:array()" tal:repeat="ext supported">
+                            <li tal:define="item php:array()" tal:repeat="item ext" tal:content="item">
 
-                        </li>
-                    </ul>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="popup popup-languages">
+        <div class="modal popup-languages" data-type="view">
+            <div class="popup-outer"></div>
+            <div class="popup">
+                <a href="#" class="x-popup"></a>
+                <h1>
+                    <a id="chooseMultilang" href="#" class="btn-ok right">Continue</a>
+                    <a id="cancelMultilang" href="#" class="btn-cancel right">Cancel</a>
+                    Choose Multiple Languages (<span class="number">1</span>)
+                    <a href="#" id="deselectMultilang">Deselect all</a>
+                </h1>
 
-            <div class="header">
-                <input id="chooseMultilang" type="button" value="Continue" />
-                <input id="cancelMultilang" type="button" value="Cancel" />
-                <a href="#" class="close"></a>
-                Choose Multiple Languages (<span class="number">1</span>)
-                <a href="#" id="deselectMultilang">Deselect all</a>
-            </div>
+                <div class="popup-box">
+                    <ul class="listlang">
 
-            <div class="popup-box">
-                <ul class="listlang">
+                        <tal:block  tal:repeat="language languages">
+                            <li tal:attributes="class language/top">
+                                <input type="checkbox" tal:attributes="value language/code; id language/code" />
+                                <label tal:attributes="for language/name" tal:content="language/name" onclick="return false">---</label>
+                            </li>
+                        </tal:block>
 
-                    <tal:block  tal:repeat="language languages">
-                        <li tal:attributes="class language/top">
-                            <input type="checkbox" tal:attributes="value language/code; id language/code" />
-                            <label tal:attributes="for language/name" tal:content="language/name" onclick="return false">---</label>
-                        </li>
-                    </tal:block>
-
-                </ul>
+                    </ul>
+                </div>
             </div>
         </div>
 
@@ -451,7 +493,7 @@
 
                 <nav>
                     <ul>
-                        <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
+                        <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
                     </ul>
 
                     <tal:block tal:condition="php: !empty(logged_user)">

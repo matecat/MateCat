@@ -249,6 +249,7 @@ class analyzeController extends viewcontroller {
 
         if( isset($_SESSION['_anonym_pid']) && ! empty($_SESSION['_anonym_pid'])  ){
             $_SESSION['incomingUrl'] = INIT::$HTTPHOST . $_SERVER['REQUEST_URI'];
+            $_SESSION['_newProject'] = 1;
             $this->template->showModalBoxLogin      = true;
         } else {
             $this->template->showModalBoxLogin      = false;

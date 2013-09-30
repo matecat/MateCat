@@ -43,7 +43,7 @@
 class Xliff_Parser {
 
 	public static function Xliff2Array($file_content) {
-		// Pre-Processing. 
+		// Pre-Processing.
 		// Fixing non UTF-8 encoding (often I get Unicode UTF-16)
 		$enc = mb_detect_encoding($file_content);
 		if ($enc <> 'UTF-8') {
@@ -63,7 +63,7 @@ class Xliff_Parser {
 		}
 
 
-		// Getting the Files 
+		// Getting the Files
 
 		$files = preg_split('|<file[\s>]|si', $file_content, -1, PREG_SPLIT_NO_EMPTY);
 
@@ -132,7 +132,7 @@ class Xliff_Parser {
 						unset($temp);
 
 						preg_match('|<source.*?>(.*?)</source>|si', $trans_unit, $temp);
-						// just in case of a <source /> 
+						// just in case of a <source />
 						if (!isset($temp[1])) {
 							$temp[1] = '';
 						}
@@ -156,13 +156,20 @@ class Xliff_Parser {
 							unset($temp);
 							$markers = preg_split('#(<mrk\s.*?type="seg".*?>(.*?)</mrk>)#si', $markers, -1, PREG_SPLIT_DELIM_CAPTURE);
 
+                            //same markers are in the target tag if it is present with pre-translations, because seg-target does not exists
+                            //in XLIFF standard definition
+                            //so, we split for the same markers and use same positional indexes
+                            if( isset( $xliff['files'][$i]['trans-units'][$j]['target']['raw-content'] ) ){
+                                $target_markers = preg_split('#(<mrk\s.*?type="seg".*?>(.*?)</mrk>)#si', $xliff['files'][$i]['trans-units'][$j]['target']['raw-content'], -1, PREG_SPLIT_DELIM_CAPTURE);
+                            }
+
 							$mi = 0;
 							$k = 0;
 							while (isset($markers[$mi + 1])) {
 								unset($mid);
 								preg_match('|mid\s?=\s?["\'](.*?)["\']|si', $markers[$mi + 1], $mid);
 
-								// For not loosing info I attach the last external tag to the last seg marker. 
+								// For not loosing info I attach the last external tag to the last seg marker.
 								if (!isset($markers[$mi + 5])) {
 									$last_ext_tags = $markers[$mi + 3];
 								} else {
@@ -173,8 +180,32 @@ class Xliff_Parser {
 								$xliff['files'][$i]['trans-units'][$j]['seg-source'][$k]['ext-prec-tags'] = $markers[$mi];
 								$xliff['files'][$i]['trans-units'][$j]['seg-source'][$k]['raw-content'] = $markers[$mi + 2];
 								$xliff['files'][$i]['trans-units'][$j]['seg-source'][$k]['ext-succ-tags'] = $last_ext_tags;
+
 								// Different from source and target content, I expect that if you used seg-source it is a a well done tool so I don't try to fix.
-								$mi = $mi + 3;
+                                if( isset( $xliff['files'][$i]['trans-units'][$j]['target']['raw-content'] ) && !empty( $xliff['files'][$i]['trans-units'][$j]['target']['raw-content'] ) ){
+
+                                    unset($mt_id);
+
+                                    //target and seg-source can have different mark id, so i store the target mid
+                                    //with same rules
+                                    preg_match('|mid\s?=\s?["\'](.*?)["\']|si', $target_markers[$mi + 1], $mt_id);
+
+                                    // For not loosing info I attach the last external tag to the last seg marker.
+                                    if (!isset($target_markers[$mi + 5])) {
+                                        $last_ext_tags = $target_markers[$mi + 3];
+                                    } else {
+                                        $last_ext_tags = '';
+                                    }
+
+                                    //use seg-target to store segmented translations and use the same positional indexes in source
+                                    $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['mid'] = $mt_id[1];
+                                    $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['ext-prec-tags'] = $target_markers[$mi];
+                                    $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['raw-content'] = $target_markers[$mi + 2];
+                                    $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['ext-succ-tags'] = $last_ext_tags;
+
+                                }
+
+                                $mi = $mi + 3;
 								$k++;
 							}
 						}
@@ -219,7 +250,7 @@ class Xliff_Parser {
 		 */
 
 
-		// Performance: I do a quick check before doing many preg	
+		// Performance: I do a quick check before doing many preg
 		if (preg_match('|<.*?>|si', $content, $tmp)) {
 			$tags = array();
 			$tmp = array();
@@ -271,7 +302,7 @@ class Xliff_Parser {
 				$i++;
 			}
 		}
-		// In PHP 5.2.3 this became magically a single line of code with 'double encode'=false! 
+		// In PHP 5.2.3 this became magically a single line of code with 'double encode'=false!
 		// Waiting php 5.4 for ENT_SUBSTITUTE, ENT_XML1 or ENT_DISALLOWED
 		// This means that £ will be converted wrongly in &pound;
 		// $content = htmlentities($content,ENT_QUOTES,'UTF-8',false);
@@ -286,5 +317,66 @@ class Xliff_Parser {
 
 		return $content;
 	}
+
+}
+
+class DetectProprietaryXliff {
+
+    protected static $fileType = array(
+        'info'             => array(),
+        'proprietary'      => false,
+        'proprietary_name' => null
+    );
+
+    public static function getInfo( $fullPathToFile ) {
+
+        /**
+         * Conversion Enforce
+         *
+         * Check extensions no more sufficient, we want check content
+         * if this is a proprietary file
+         *
+         */
+        $info = pathinfo( $fullPathToFile );
+        if ( ( $info[ 'extension' ] == 'xliff' ) || ( $info[ 'extension' ] == 'sdlxliff' ) || ( $info[ 'extension' ] == 'xlf' ) ) {
+
+
+            if ( !file_exists( $fullPathToFile ) ) {
+                throw new Exception( "File " . $fullPathToFile . " not found..." );
+            }
+
+            $file_pointer = fopen("$fullPathToFile", 'r');
+            // Checking Requirements (By specs, I know that xliff version is in the first 1KB)
+            $file_content = fread($file_pointer, 1024);
+            fclose($file_pointer);
+            preg_match('|<xliff\s.*?version\s?=\s?["\'](.*?)["\'](.*?)>|si', $file_content, $tmp);
+
+            //idiom Check
+            if ( isset($tmp[2]) && stripos( $tmp[2], 'idiominc.com' ) !== false ) {
+                self::$fileType['proprietary'] = true;
+                self::$fileType['proprietary_name'] = 'idiom world server';
+            }
+
+        }
+        self::$fileType['info'] = $info;
+        return self::$fileType;
+
+    }
+
+    public static function getInfoByStringData( $stringData ) {
+
+        $stringData = substr( $stringData, 0, 1024 );
+
+        preg_match('|<xliff\s.*?version\s?=\s?["\'](.*?)["\'](.*?)>|si', $stringData, $tmp);
+
+        //idiom Check
+        if ( isset($tmp[2]) && stripos( $tmp[2], 'idiominc.com' ) !== false ) {
+            self::$fileType['proprietary'] = true;
+            self::$fileType['proprietary_name'] = 'idiom world server';
+        }
+
+        return self::$fileType;
+
+    }
 
 }
