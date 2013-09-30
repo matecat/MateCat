@@ -220,13 +220,13 @@ class XliffSAXTranslationReplacer{
                         $fp_this_manipulated = fopen( $this->filename.'.out.sdlxliff', "r+" );
                         //read needed, there should be some changes in files
                         //temporary file are ALWAYS shorter than original so $idx it's enough
-                        $partial_output_xliff = fread( $fp_this_manipulated, $idx );
+                        $partial_output_xliff = fread( $fp_this_manipulated, filesize( $this->filename.'.out.sdlxliff' )  );
 
                         //REWIND
                         rewind( $fp_this_manipulated );
 
                         //rewrite cxt-defs content
-                        $output_patched = preg_replace( '/<cxt-defs.*$/si', $matches[1], $partial_output_xliff );
+                        $output_patched = preg_replace( '/<cxt-defs.*<\/cxt-defs>/si', $matches[1], $partial_output_xliff );
 
                         //OVERWRITE with the manipulated AND patched content
                         fwrite( $fp_this_manipulated, $output_patched );
