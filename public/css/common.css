@@ -597,7 +597,11 @@ footer nav
 	{
 	float: right;
 	}
-
+.searchbox input[type=button],
+.searchbox input[type=submit]
+	{
+	text-transform: uppercase;
+	}
 .searchbox .block
 	{
 	float: left;
@@ -611,4 +615,17 @@ footer nav
 	margin-right: 8% !important;
 	margin-top: -5px !important;
 	}    
-    
+.searchbox .block.right .block
+	{
+	margin-right: 0px;
+	margin-left: 20px;
+	}
+.searchbox .block.right .block .btn
+	{
+	margin-right: 0px;
+	margin-left: 10px;
+	}
+.searchbox .block.vcentered
+	{
+	padding-top: 7px !important;
+	}        

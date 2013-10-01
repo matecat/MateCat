@@ -161,49 +161,101 @@
 
         </header>
         
-		<div tal:attributes="class string:searchbox${filtered_class}">
-			<form>
+        <div tal:attributes="class string:searchbox${filtered_class}">
+            <form>
+                <div class="search-inputs">
 
-			<div class="block right">
-				<input id="exec-filter" type="submit" class="btn" value="FILTER" />			
-				<!--input id="clear-filter" type="button" class="btn" value="CLEAR" /-->			
-			</div>
+                    <div class="block">
+                        <label for="search-source">Find in source</label>
+                        <input id="search-source" class="search-input" type="text" value=""/>				
+                    </div>
 
-			<div class="block">
-				<label for="search-projectname">Text in source</label>
-				<input id="search-source" class="search-input" type="text" value=""/>				
-			</div>
+                    <div class="block">
+                       <label for="search-target">Find in target</label>
+                       <input id="search-target" class="search-input" type="text" value=""/>				
+                    </div>
+                    <div class="block">
+                        <label for="select-status">Status</label>
+                        <select id="select-status" class="search-select" >
+                            <option value="active">Active</option>
+                            <option value="archived">Archived</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>  	
+                    </div>
 
-             <div class="block">
-				<label for="search-projectname">Text in target</label>
-				<input id="search-target" class="search-input" type="text" value=""/>				
-			</div>
-			<div class="block">
-				<label for="select-status">Status</label>
-				<select id="select-status" class="search-select" >
-					<option value="active">Active</option>
-					<option value="archived">Archived</option>
-					<option value="cancelled">Cancelled</option>
-				</select>  	
-			</div>
-<!--
-			<div class="block">
-				<input id="only-completed" type="checkbox" />
-				<label for="only-completed">Only Completed</label>
-			</div>
+                    <div class="block right">
+                       <label for="replace-target">Replace in target</label>
+                       <input id="replace-target" class="search-input" type="text" value=""/>				
+                    </div>                    
+                    <!--
+                    <div class="block">
+                        <input id="only-completed" type="checkbox" />
+                        <label for="only-completed">Only Completed</label>
+                    </div>
 
-			<div class="block">
-				<input id="show-archived" type="checkbox" />
-				<label for="show-archived">Show Archived</label>
-			</div>
-			
-			<div class="block">
-				<input id="show-cancelled" type="checkbox" />
-				<label for="show-cancelled">Show Cancelled</label>
-			</div>
--->
-			</form>
-		</div>
+                    <div class="block">
+                        <input id="show-archived" type="checkbox" />
+                        <label for="show-archived">Show Archived</label>
+                    </div>
+
+                    <div class="block">
+                        <input id="show-cancelled" type="checkbox" />
+                        <label for="show-cancelled">Show Cancelled</label>
+                    </div>
+                    -->
+                </div>
+                <div class="search-buttons">
+                    <div class="block">
+                        <input id="exec-find" type="button" class="btn" value="Find" />			
+                    </div>
+                    <div class="block">
+                        <input id="exec-cancel" type="button" class="btn" value="Cancel" />			
+                    </div>
+                    <div class="block vcentered">
+                        <input id="only-matching-segments" type="checkbox" checked="checked"/>
+                        <label for="only-matching-segments">View matching segments only</label>
+                    </div>
+                    <div class="block right">
+                        <div class="block">
+                            <input id="exec-replace" type="button" class="btn" value="Replace" />			
+                        </div>
+                        <div class="block">
+                            <input id="exec-skip" type="button" class="btn" value="Skip" />			
+                        </div>
+                        <div class="block">
+                            <input id="exec-replaceall" type="button" class="btn" value="Replace all" />			
+                        </div>
+                        <div class="block">
+                            <input id="exec-undo" type="button" class="btn" value="Undo last" />			
+                        </div>
+                    </div>
+                </div>
+                <div class="search-options">
+                    <div class="block">
+                        <input id="search-match-case" type="checkbox" />
+                        <label for="search-match-case">Match case</label>
+                    </div>
+
+                    <div class="block">
+                        <input id="search-whole-word" type="checkbox" />
+                        <label for="search-whole-word">Whole word</label>
+                    </div>
+
+                    <div class="block">
+                        <input id="search-wild-card" type="checkbox" />
+                        <label for="search-wild-card">Wild card</label>
+                    </div>                    
+
+                    <div class="block">
+                        <input id="search-regex" type="checkbox" />
+                        <label for="search-regex">Regular expression</label>
+                    </div>           
+                </div>
+            </form>
+            <div class="search-display">
+                <p>Found <span class="results">13</span> results in <span class="segments">10</span> segments for: [search expression]</p>
+            </div>
+        </div>
         
         <!--
                 <div class="search">    
