@@ -134,13 +134,16 @@ class TMS extends Engine {
         }
     }
 
-    public function get($segment, $source_lang, $target_lang, $email = "", $mt = 1, $id_user = "", $num_results=3) {
+    public function get($segment, $source_lang, $target_lang, $email = "", $mt = 1, $id_user = "", $num_results=3, $isConcordance = false ) {
         $parameters = array();
         $parameters['q'] = $segment;
         $parameters['langpair'] = "$source_lang|$target_lang";
         $parameters['de'] = $email;
         $parameters['mt'] = $mt;
         $parameters['numres'] = $num_results;
+
+        ( $isConcordance ? $parameters['conc'] = 'true' : null );
+
         if (!empty($id_user)) {
             $parameters['key'] = $this->calculateMyMemoryKey($id_user);
         }
