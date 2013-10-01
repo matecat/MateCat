@@ -42,56 +42,79 @@ class fileFormatConverter {
 		return (substr($string, 0, 3) == BOM);
 	}
 
-	//get a converter at random, weighted on number of CPUs per node
-	private function pickRandConverter(){
-		//get total cpu count
-		$cpus=array_values($this->converters);
-		$tot_cpu=0;
-		foreach($cpus as $cpu){
-			$tot_cpu+=$cpu;
-		}
-		unset($cpus);
+    //get a converter at random, weighted on number of CPUs per node
+    private function pickRandConverter() {
+        //get total cpu count
+        $cpus    = array_values( $this->converters );
+        $tot_cpu = 0;
+        foreach ( $cpus as $cpu ) {
+            $tot_cpu += $cpu;
+        }
+        unset( $cpus );
 
-		//pick random
-		$num=rand(0,$tot_cpu-1);
+        //pick random
+        $num = rand( 0, $tot_cpu - 1 );
 
-		//scroll in a roulette fashion through node->#cpu list until you stop on a cpu
-		/*
-		   imagine an array: each node has a number of cells on it equivalent to # of cpus; the random number is the cell on which to stop
-		   scroll the list_of_nodes, decrementing the random number with number of cpus; 
-		   if any time the random is 0, pick that node; 
-		   otherwise, keep scrolling
-		 */
-		$picked_node='';
-		foreach($this->converters as $node=>$cpus){
-			$num-=$cpus;
-			if($num<=0){
-				//current node is the one; break
-				$picked_node=$node;
-				break;
-			}
-		}
+        //scroll in a roulette fashion through node->#cpu list until you stop on a cpu
+        /*
+           imagine an array: each node has a number of cells on it equivalent to # of cpus; the random number is the cell on which to stop
+           scroll the list_of_nodes, decrementing the random number with number of cpus;
+           if any time the random is 0, pick that node;
+           otherwise, keep scrolling
+         */
+        $picked_node = '';
+        foreach ( $this->converters as $node => $cpus ) {
+            $num -= $cpus;
+            if ( $num <= 0 ) {
+                //current node is the one; break
+                $picked_node = $node;
+                break;
+            }
+        }
 
-		return $picked_node;
-	}
+        return $picked_node;
+    }
 
-	private function checkNodeLoad($ip){
-		//connect
-		$ch=curl_init("$ip:8082");
-		curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
-		//execute
-		$res="";
+    /**
+     * Get the ip value by reference
+     *
+     * @param $ip
+     *
+     * @return mixed
+     */
+    private function checkNodeLoad( &$ip ){
+
+        $top = 0;
+        $result = "";
+        $processes = array();
+
 		//since sometimes it can fail, try again util we get something meaningful
-		while(strlen($res)==0){
-			$res=curl_exec($ch);
+        $ch = curl_init("$ip:8082");
+        curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+        curl_setopt($ch,CURLOPT_TIMEOUT,2); //we can wait max 2 seconds
+
+		while( empty( $result ) || empty( $processes ) ){
+
+            $result = curl_exec($ch);
+            $curl_errno = curl_errno($ch);
+            $curl_error = curl_error($ch);
+
+            $processes = json_decode($result,true);
+
+            //$curl_errno == 28 /* CURLE_OPERATION_TIMEDOUT */
+            if( $curl_errno > 0 ){
+                $top = 200; //exclude current converter by set it's top to an extreme large value
+                break;
+            }
+
 		}
-		//close
-		curl_close($ch);
-		//parse response
-		$processes=json_decode($res,true);
+
+        //close
+        curl_close($ch);
+
 		//sum up total machine load
 		foreach($processes as $process){
-			$top+=$process[0];
+			$top += @$process[0];
 		}
 
 		//zero load is impossible (at least, there should be the java monitor); try again
@@ -278,19 +301,19 @@ class fileFormatConverter {
 
 
 	private static $Storage_Lookup_IP_Map = array(
-			'10.11.0.10' => '10.11.0.11',
-			'10.11.0.18' => '10.11.0.19',
-			'10.11.0.26' => '10.11.0.27',
-			'10.11.0.34' => '10.11.0.35',
-			'10.11.0.42' => '10.11.0.43',
+                '10.11.0.10' => '10.11.0.11',
+                '10.11.0.18' => '10.11.0.19',
+                '10.11.0.26' => '10.11.0.27',
+                '10.11.0.34' => '10.11.0.35',
+                '10.11.0.42' => '10.11.0.43',
 			);
 
 	private static $Converters_IP = array(
-			'10.11.0.10' => 1,
-			'10.11.0.18' => 1,
-			'10.11.0.26' => 1,
-			'10.11.0.34' => 1,
-			'10.11.0.42' => 1
+                '10.11.0.10' => 1,
+                '10.11.0.18' => 1,
+                '10.11.0.26' => 1,
+                '10.11.0.34' => 1,
+                '10.11.0.42' => 1
 			);
 
 	//http://stackoverflow.com/questions/2222643/php-preg-replace

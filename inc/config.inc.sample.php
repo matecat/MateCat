@@ -37,6 +37,10 @@ class INIT {
     public static $VOLUME_ANALYSIS_ENABLED;
     public static $WARNING_POLLING_INTERVAL;
     public static $SEGMENT_QA_CHECK_INTERVAL;
+    public static $SAVE_SHASUM_FOR_FILES_LOADED;
+
+    public static $SPELL_CHECK_TRANSPORT_TYPE;
+    public static $SPELL_CHECK_ENABLED;
 
     private function initOK() {
 
@@ -142,12 +146,17 @@ class INIT {
         self::$ENABLED_BROWSERS = array('chrome', 'safari');
         self::$CONVERSION_ENABLED = true;
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-        self::$BUILD_NUMBER = '0.3.2';
+        self::$BUILD_NUMBER = '0.3.3.2';
         self::$VOLUME_ANALYSIS_ENABLED = true;
 
         self::$WARNING_POLLING_INTERVAL = 10; //seconds
         self::$SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
-        
+
+        self::$SPELL_CHECK_TRANSPORT_TYPE = 'shell';
+        self::$SPELL_CHECK_ENABLED = false;
+
+        self::$SAVE_SHASUM_FOR_FILES_LOADED = true;
+
         self::$SUPPORTED_FILE_TYPES = array(
             'Office' => array(
                 'doc' => array(''),
