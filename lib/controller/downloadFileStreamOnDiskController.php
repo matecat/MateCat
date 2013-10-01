@@ -35,8 +35,7 @@ class downloadFileStreamOnDiskController extends downloadController {
 	public function doAction() {
 		$debug=array();
 		$debug['total'][]=time();
-		// specs for filename at the task https://app.asana.com/0/1096066951381/2263196383117
-		$converter = new fileFormatConverter();
+
 		$debug['get_file'][]=time();
 		$files_job = getFilesForJob($this->id_job, $this->id_file);
 		$debug['get_file'][]=time();
@@ -84,11 +83,10 @@ class downloadFileStreamOnDiskController extends downloadController {
 			$debug['get_segments'][]=time();
 			//create a secondary indexing mechanism on segments' array; this will be useful
             //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
- 			foreach($data as $i=>$k){
+			foreach($data as $i=>$k){
                 $data[ 'matecat|' . $k['internal_id'] ][]=$i;
             }
- 			$transunit_translation = "";
-
+			$transunit_translation = "";
 			$debug['replace'][] = time();
 			//instatiate parser
 			$xsp = new XliffSAXTranslationReplacer( $path, $data, $jobData['target'] );
@@ -152,7 +150,7 @@ class downloadFileStreamOnDiskController extends downloadController {
                 $file['original_file'] = @gzinflate($file['original_file']);
 
                 $fileType = DetectProprietaryXliff::getInfoByStringData( $file['original_file'] );
-                Log::doLog( 'Proprietary detection: ' . var_export( $fileType, true ) );
+                //Log::doLog( 'Proprietary detection: ' . var_export( $fileType, true ) );
 
                 if( $fileType['proprietary'] == true  ){
 
@@ -179,10 +177,14 @@ class downloadFileStreamOnDiskController extends downloadController {
 
 
 			if (!in_array($mime_type, array("xliff", "sdlxliff", "xlf")) || $enforcedConversion ) {
-				$debug['do_conversion'][]=time();
-				$convertResult = $converter->convertToOriginal($output_content[$id_file]['content'],$chosen_machine);
-				$output_content[$id_file]['content'] = $convertResult['documentContent'];
-				$debug['do_conversion'][]=time();
+
+                    // specs for filename at the task https://app.asana.com/0/1096066951381/2263196383117
+                    $converter = new fileFormatConverter();
+                    $debug['do_conversion'][]=time();
+                    $convertResult = $converter->convertToOriginal($output_content[$id_file]['content'],$chosen_machine);
+                    $output_content[$id_file]['content'] = $convertResult['documentContent'];
+                    $debug['do_conversion'][]=time();
+
 			}
 
 		}
