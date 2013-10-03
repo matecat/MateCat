@@ -88,7 +88,7 @@ UI = {
         this.savedSelActiveElement = null;
         this.firstOpenedSegment = false;
         this.autoscrollCorrectionEnabled = true;
-        this.searchEnabled = true;
+        this.searchEnabled = false;
         if(this.searchEnabled) $('#filterSwitch').show();
         this.viewConcordanceInContextMenu = true;
         if(!this.viewConcordanceInContextMenu) $('#searchConcordance').hide();
