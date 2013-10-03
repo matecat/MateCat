@@ -48,6 +48,9 @@ UI = {
         this.readonly = (this.body.hasClass('archived')) ? true : false;
         this.suggestionShortcutLabel = 'ALT+' + ((UI.isMac) ? "CMD" : "CTRL") + '+';
 
+        this.searchParams = {};
+        this.searchParams['search'] = 0;
+        
         this.taglockEnabled = true;
         this.debug = Loader.detect('debug');
         this.checkTutorialNeed();
@@ -85,6 +88,8 @@ UI = {
         this.savedSelActiveElement = null;
         this.firstOpenedSegment = false;
         this.autoscrollCorrectionEnabled = true;
+        this.searchEnabled = true;
+        if(this.searchEnabled) $('#filterSwitch').show();
         this.viewConcordanceInContextMenu = true;
         if(!this.viewConcordanceInContextMenu) $('#searchConcordance').hide();
         this.viewSpellCheckInContextMenu = true;
@@ -154,10 +159,8 @@ UI = {
         }).bind('keydown', 'Meta+c', function(e) {
             UI.tagSelection = false;
         }).bind('keydown', 'Backspace', function(e) {
-        }).bind('keydown','Meta+f', function(e){ 
-//            e.preventDefault();
-//            $('body').addClass('filterOpen');
-//            $('#search-source').focus();
+        }).bind('keydown','Meta+f', function(e){
+            UI.toggleSearch(e);
         }).on('change', '#hideAlertConfirmTranslation', function(e) {
             console.log($(this).prop('checked'));
             if ($(this).prop('checked')) {
@@ -188,14 +191,8 @@ UI = {
             e.preventDefault();
             UI.body.toggleClass('filtering');
         })
-        $("#filterSwitch").bind('click', function(e){ 
-            e.preventDefault();
-            if($('body').hasClass('filterOpen')) {
-                $('body').removeClass('filterOpen');
-            } else {
-                $('body').addClass('filterOpen');
-                $('#search-source').focus();
-            }
+        $("#filterSwitch").bind('click', function(e){
+            UI.toggleSearch(e);
         })
         $("#segmentPointer").click(function(e) {
             e.preventDefault();
@@ -839,6 +836,37 @@ UI = {
                 console.log(this.id_file);
             });
         })
+
+// Search and replace
+
+//        $("#searchbox").on('click', "#exec-find[data-func='find']", function(e) {
+//            console.log('find');
+//            e.preventDefault();
+//            UI.execFind();
+//        });
+//        $("#searchbox").on('click', "#exec-find[data-func='next']", function(e) {
+//            console.log('next');
+//        });
+        $("#exec-find").click(function(e) {
+            e.preventDefault();
+            if($(this).attr('data-func') == 'find') {
+                UI.execFind();
+            } else {
+                UI.execNext();
+            }
+        });
+        $("#search-source").focus(function(e) {
+            $("#search-target").val('');
+        });
+        $("#search-target").focus(function(e) {
+            $("#search-source").val('');
+        });
+        $("#search-source, #search-target").on('input', function(e) {
+            if(UI.checkSearchChanges()) {
+                UI.setFindFunction('find');
+            };
+        });
+
         this.initEnd = new Date();
         this.initTime = this.initEnd - this.initStart;
         if (this.debug)
@@ -1182,6 +1210,105 @@ UI = {
         } else {
             var hash = window.location.hash.substr(1);
             this.startSegmentId = (hash) ? hash : config.last_opened_segment;            
+        }
+    },
+// temp
+    enableSearch: function() {
+        $('#filterSwitch').show();
+        this.searchEnabled = true;
+    },            
+    execFind: function() {
+        if($('#search-source').val() != '') {
+            this.searchParams['source'] = $('#search-source').val();
+        } else {
+            delete this.searchParams['source'];    	
+        }
+
+        if($('#search-target').val() != '') {
+            this.searchParams['target'] = $('#search-target').val();
+        } else {
+            delete this.searchParams['target'];
+        }
+
+        if($('#select-status').val() != '') {
+            this.searchParams['status'] = $('#select-status').val();
+            this.body.attr('data-filter-status', $('#select-status').val());
+        } else {
+            delete this.searchParams['status'];
+        }
+
+        this.searchParams['search'] = 1;
+        this.body.addClass('searchActive');
+
+        this.numSearchResults = 20; // make an ajax request for this
+        
+        this.markSearchResults();
+        this.gotoSearchResultAfter('segment-' + this.currentSegmentId);
+        this.setFindFunction('next');
+    },
+    execNext: function() {
+        this.gotoSearchResultAfter($('section.currSearchItem').attr('id'));
+    },
+    markSearchResults: function() {
+        this.clearSearchMarkers();
+        var p = this.searchParams;
+        var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
+        if(typeof p['source'] != 'undefined') {
+            what = ' .source';
+            txt = p['source'];
+        } else if(typeof p['target'] != 'undefined') {
+            what = ' .editarea';
+            txt = p['target'];
+        } else {
+            what = '';
+            txt = '';
+        }
+        var what = (typeof p['source'] != 'undefined')? ' .source' : (typeof p['target'] != 'undefined')? ' .editarea' : '';
+        q = "section" + status + what;
+        console.log("$('section" + status + what + "')");
+        $(q + ":contains('"+txt+"')").each(function() {
+            $(this).html($(this).html().replace(txt,'<mark class="searchMarker">'+txt+'</mark>'));
+        });
+    },
+    clearSearchMarkers: function() {
+        $('mark.searchMarker').each(function() {
+            $(this).replaceWith($(this).text());
+        });
+    },
+    gotoSearchResultAfter: function(el) {
+//        console.log($(UI.currentSegment).nextAll('mark.searchMarker'));
+        seg = $('section').has("mark.searchMarker");
+        ss = el;
+        $.each(seg, function(index) {
+            if($(this).attr('id') > ss) {
+                $("html,body").animate({
+                    scrollTop: $(this).offset().top - 200
+                }, 500);
+                $('section.currSearchItem').removeClass('currSearchItem');
+                $(this).addClass('currSearchItem');
+                return false;
+            };
+        });
+    },
+    checkSearchChanges: function() {
+        changes = false;
+        var p = this.searchParams;
+        console.log("p['source']: " + p['source']);
+        console.log("$('#search-source').val(): " + $('#search-source').val());
+        if(p['source'] != $('#search-source').val()) {
+            if(!((typeof p['source'] == 'undefined')&&($('#search-source').val() == ''))) changes = true;
+        }
+        if(p['target'] != $('#search-target').val()) {
+            if(!((typeof p['target'] == 'undefined')&&($('#search-target').val() == ''))) changes = true;
+        }
+        return changes;
+    },
+    setFindFunction: function(func) {
+        var b = $('#exec-find');
+        if(func == 'next') {
+            b.attr('data-func', 'next').attr('value', 'Next');
+        } else {
+            b.attr('data-func', 'find').attr('value', 'Find');       
         }
     },
     getConcordance: function(txt, in_target) {
@@ -2665,6 +2792,18 @@ console.log('a');
      },
      */
 
+    toggleSearch: function(e) {
+        if(!this.searchEnabled) return;
+        e.preventDefault();
+        if($('body').hasClass('filterOpen')) {
+            $('body').removeClass('filterOpen');
+            $("body").scrollTop($("body").scrollTop()+$('.searchbox').height());
+        } else {
+            $('body').addClass('filterOpen');
+            $("body").scrollTop($("body").scrollTop()-$('.searchbox').height());
+            $('#search-source').focus();
+        }
+    },
     topReached: function() {
         var jumpto = $(this.currentSegment).offset().top;
         $("html,body").animate({

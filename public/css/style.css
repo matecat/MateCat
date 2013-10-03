@@ -51,11 +51,12 @@ header .wrapper{padding:0px 0 0 0;}
     display: none;
     text-align: center;
     width: 60px;
-    background: url(../img/filter.png) center 14px no-repeat !important;
+    background: url(../img/search.png) center 14px no-repeat !important;
     background-size: 20px 20px !important;
     cursor: pointer;
     text-indent: -9999px;
     }
+
 #filterSwitch:hover
     {
     opacity: 0.7;
@@ -612,7 +613,47 @@ padding-top:5px !important;
 /*search*/
 .search{border:1px solid #666;background:#efefef url(../img/point.gif) 0 0 repeat-x;margin-left:4%;-moz-box-shadow: 0 1px 3px #666;-webkit-box-shadow: 0 1px 10px #666;width:90.6%;-moz-border-radius-bottom-right:2px;	-webkit-border-bottom-right-radius:2px;-moz-border-radius-bottomleft:2px;-webkit-border-bottom-left-radius:2px;position:fixed;z-index:999999999;top:40px;font-size:12px;display:none;padding:5px 0 0px 0;min-width:890px}
 
-.search-input{width:250px;font-size:12px !important;height:23px;padding:0 5px;border:1px solid #abadb3;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;color:#999}
+.searchbox
+    {
+    padding: 0 !important;
+    }
+.searchbox form
+    {
+    width: 100%;
+    padding: 10px 4% 0 4% !important;
+    }
+.search-inputs,
+.search-buttons,
+.search-options
+    {
+    float: left;
+    width: 90.7%;
+    margin-bottom: 5px;
+    }
+    .search-options
+        {
+        margin-top: 3px;
+        padding-top: 3px;
+        padding-bottom: 3px;
+        border-top: 1px dotted #aaa;
+        }
+.search-display
+    {
+    float: left;
+    display: none;
+    width: 100%;
+    background: #a5a5a5;
+    color: #fff;
+    text-align: left;
+    padding: 5px 4%;
+    font-style: italic;
+    border-top: 1px solid #666;
+    }
+.search-display p
+    {
+    margin: 0;
+    }
+.search-input{width:200px;font-size:12px !important;height:23px;padding:0 5px;border:1px solid #abadb3;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;color:#999}
 .search-input:hover, .search-editarea:hover{
 -moz-box-shadow: inset 0 1px 1px #e6e7e8;
 -webkit-box-shadow: inset 0 1px 1px #e6e7e8;
@@ -622,12 +663,30 @@ padding-top:5px !important;
 -webkit-box-shadow: inset 0 1px 2px #ccc;
 color:#000
 }
+.searchbox input[type=button]:hover {
+    border-width: 2px;
+}
 .search .h-editor{padding:2px 0 0 10px;text-shadow: #333 0px 1px 2px;font-size:14px;font-weight:bold;width:auto !important}
 .search .con-submit, .search .con-menubtn{margin-top:9px}
 .search-select{padding:3px 2px;width:130px;border:1px solid #abadb3;}
 .search .loader{ display:block !important;position:absolute !important;left:auto !important;right:100px;top:12px;background: url(../img/loading-black.gif) 0 0 no-repeat !important}
 
 
+body.cattool .searchbox .block.right
+    {
+    margin-top: 0 !important;
+    margin-right: 0 !important;
+    }    
+.searchbox .block.buttons
+    {
+    margin-top: -4px !important;
+    }    
+    
+.searchbox #exec-filter
+	{
+	float: right;
+	}
+    
 .filtering .search{display:block}
 .filtering {padding-top:140px}
 .replace-box{padding-top:180px}
