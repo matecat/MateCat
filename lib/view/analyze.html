@@ -38,7 +38,7 @@
             </div>
         </header>
 
-    <content tal:condition="not:project_not_found">
+    <content tal:condition="not:project_not_found"  >
         <div class="loadingbar">
 
             <div class="wrapper" id="shortloading">
@@ -58,8 +58,8 @@
             </div>
         </div>
 
-
-        <div class="wrapper">
+<div class="wrapper-container">
+        <div class="wrapper" >
             <h1 id="pid" title="tal:content='pname|nothing'" data-pid="" tal:attributes="data-pid pid" ><span id="pname" tal:content="pname|nothing">Project name</span> - Volume Analysis</h1>
 
             <h2>Invoicing Tips</h2>
@@ -213,7 +213,7 @@
 
 
 
-
+</div>
 
         <div class="body">
             <div class="wrapper">
