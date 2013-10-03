@@ -88,6 +88,8 @@ UI = {
         this.savedSelActiveElement = null;
         this.firstOpenedSegment = false;
         this.autoscrollCorrectionEnabled = true;
+        this.searchEnabled = true;
+        if(this.searchEnabled) $('#filterSwitch').show();
         this.viewConcordanceInContextMenu = true;
         if(!this.viewConcordanceInContextMenu) $('#searchConcordance').hide();
         this.viewSpellCheckInContextMenu = true;
@@ -1209,6 +1211,11 @@ UI = {
             this.startSegmentId = (hash) ? hash : config.last_opened_segment;            
         }
     },
+// temp
+    enableSearch: function() {
+        $('#filterSwitch').show();
+        this.searchEnabled = true;
+    },            
     execFind: function() {
         if($('#search-source').val() != '') {
             this.searchParams['source'] = $('#search-source').val();
@@ -2786,6 +2793,7 @@ console.log('a');
      */
 
     toggleSearch: function(e) {
+        if(!this.searchEnabled) return;
         e.preventDefault();
         if($('body').hasClass('filterOpen')) {
             $('body').removeClass('filterOpen');
