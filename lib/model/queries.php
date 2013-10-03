@@ -703,7 +703,7 @@ function getStatsForJob( $id_job, $id_file = null ) {
 
     $query = "
 		select
-                j.id,
+                j.id, fj.id_file,
 		SUM(
 				IF( IFNULL( st.eq_word_count, 0 ) = 0, s.raw_word_count, st.eq_word_count)
 		   ) as TOTAL,
