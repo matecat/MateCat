@@ -539,32 +539,28 @@ UI = {
                             UI.currentSearchInTarget = ($(this).hasClass('source'))? 0 : 1;
                             $('#contextMenu').attr('data-sid', $(this).parents('section').attr('id').split('-')[1]);
                             
-//                            console.log(selection);
-                            var range = selection.getRangeAt(0);
-                            var tag = range.startContainer.parentElement;
-                            if(($(tag).hasClass('misspelled'))&&(tag === range.endContainer.parentElement)) { // the selected element is in a misspelled element
-                                UI.selectedMisspelledElement = $(tag);
-                                var replacements = '';
-                                var words = $(tag).attr('data-replacements').split(',');
-//                                console.log(words.length);
-//                                console.log(words[0]);
-                                $.each(words, function(item) {
-//                                    console.log(item);
-                                    replacements += '<a class="words" href="#">' + this + '</a>';
-                                });
-                                if((words.length == 1)&&(words[0] == '')) {
-                                    $('#spellCheck .label').hide();
+                            if(UI.customSpellcheck) {
+                                var range = selection.getRangeAt(0);
+                                var tag = range.startContainer.parentElement;
+                                if(($(tag).hasClass('misspelled'))&&(tag === range.endContainer.parentElement)) { // the selected element is in a misspelled element
+                                    UI.selectedMisspelledElement = $(tag);
+                                    var replacements = '';
+                                    var words = $(tag).attr('data-replacements').split(',');
+                                    $.each(words, function(item) {
+                                        replacements += '<a class="words" href="#">' + this + '</a>';
+                                    });
+                                    if((words.length == 1)&&(words[0] == '')) {
+                                        $('#spellCheck .label').hide();
+                                    } else {
+                                        $('#spellCheck .label').show();                                   
+                                    }
+                                    $('#spellCheck .words').remove();
+                                    $('#spellCheck').show().find('.label').after(replacements);                                    
                                 } else {
-                                    $('#spellCheck .label').show();                                   
-                                }
-                                $('#spellCheck .words').remove();
-                                $('#spellCheck').show().find('.label').after(replacements);                                    
-//                                console.log('il menu contestuale è aperto? ' + $('#contextMenu').css('display'));
-
-//                                console.log(replacements);
-                            } else {
-                                $('#spellCheck').hide();
+                                    $('#spellCheck').hide();
+                                }                                
                             }
+
                             UI.showContextMenu(str, e.pageY, e.pageX);
                         };
                     }; 
@@ -878,7 +874,11 @@ UI = {
         if( $('#jobMenu').is(':animated') ) {
             return false;
         }
-
+        if(this.body.hasClass('editing')) {
+            $('#jobMenu .currSegment').show();
+        } else {
+            $('#jobMenu .currSegment').hide();            
+        }
         var menuHeight = $('#jobMenu').height();
         var startTop = 47 - menuHeight;
         $('#jobMenu').css('top', (47 - menuHeight) + "px");
@@ -2176,6 +2176,7 @@ UI = {
         this.updateContribution(source, target);
     },
     spellCheck: function(ed) {
+        if(!UI.customSpellcheck) return false;
         editarea = (typeof ed == 'undefined')? UI.editarea : $(ed);
         if($('#contextMenu').css('display') == 'block') return true;
 
