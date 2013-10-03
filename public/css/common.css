@@ -664,10 +664,7 @@ background:#fff url(../img/sublevel.png) 15px 18px no-repeat;
 	text-transform: uppercase;
 	}
 
-.searchbox #exec-filter
-	{
-	float: right;
-	}
+
 .searchbox input[type=button],
 .searchbox input[type=submit]
 	{
@@ -679,6 +676,12 @@ background:#fff url(../img/sublevel.png) 15px 18px no-repeat;
 	margin-right: 20px;
 	text-align: left;
 	margin-top: 2px;
+	}
+.searchbox .block .field
+	{
+        width: 100%;
+        text-align: right;
+        margin-bottom: 5px;
 	}
 .searchbox .block.right
 	{
@@ -700,3 +703,7 @@ background:#fff url(../img/sublevel.png) 15px 18px no-repeat;
 	{
 	padding-top: 7px !important;
 	}        
+.searchbox #exec-replace
+	{
+	float: none;
+	}
