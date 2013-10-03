@@ -33,13 +33,14 @@
     <body>
         <div tal:condition="true:project_not_found" metal:use-macro="unsupported_browser.html/project_not_found"/>
         <header>
+
             <div class="wrapper"> 
                 <a  href="${basepath}"  class="logo"></a>
             </div>
         </header>
 
     <content tal:condition="not:project_not_found">
-
+<div class="wrapper-container">
         <div class="wrapper">
             <h1 id="pid" title="tal:content='pname|nothing'" data-pid="" tal:attributes="data-pid pid" ><span id="pname" tal:content="pname|nothing">Project name</span> - Volume Analysis</h1>
 
@@ -129,7 +130,7 @@
         </div> 
 
 
-
+</div>
 
 
         <div class="body">
