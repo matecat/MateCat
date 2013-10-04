@@ -180,6 +180,43 @@ TRG;
 
     }
 
+    public function testSpaces3(){
+
+        //" 1 " -> C2 A0 31 C2 A0
+        $source_seg = <<<TRG
+<g id="6"> 1 </g><g id="7">st  </g><g id="8">&nbsp;Section of Tokyo, Osaka</g>
+TRG;
+
+        //" 1 " -> 20 31 20
+        $target_seg = <<<SRC
+<g id="6"> 1 </g><g id="7">st  </g><g id="8">&nbsp;Section of Tokyo, Osaka</g>
+SRC;
+
+        $source_seg = CatUtils::view2rawxliff( $source_seg );
+        $target_seg = CatUtils::view2rawxliff( $target_seg );
+
+        $check = new QA($source_seg, $target_seg);
+        $check->performConsistencyCheck();
+
+        $warnings = $check->getWarnings();
+        $errors   = $check->getErrors();
+
+        $this->assertFalse( $check->thereAreErrors() );
+        $this->assertFalse( $check->thereAreWarnings() );
+
+        $this->assertEquals( count( $warnings ), 1 );
+        $this->assertEquals( 0, $warnings[0]->outcome );
+
+        $this->assertEquals( count( $errors ), 1 );
+        $this->assertEquals( 0, $errors[0]->outcome );
+
+        $normalized = $check->getTrgNormalized();
+
+        //" 1 " -> 20 31 20
+        $this->assertEquals( '<g id="6"> 1 </g><g id="7">st  </g><g id="8"> Section of Tokyo, Osaka</g>', $normalized );
+
+    }
+
     public function testRecursiveSpaces2(){
 
         $source_seg = <<<SRC
@@ -244,6 +281,11 @@ TRG;
         $this->assertEquals('[{"outcome":1100,"debug":"More\/fewer whitespaces found next to the tags. ( 2 )"}]', $check->getWarningsJSON() );
 
 
+        $check = new QA($source_seg, $target_seg);
+        $check->performTagCheckOnly();
+        $this->assertFalse( $check->thereAreErrors() );
+
+
         //PHASE 2 check for errors
         $source_seg = <<<SRC
 <g id="pt231"><g id="pt232">APPARTEMENT ELSA ET JOY </g><g id="pt233">&lt;&lt;1.0&gt;&gt;</g></g> <g id="pt235"><g id="pt236"> </g></g> <g id="pt238"><g id="pt239">Elsa sur son ordinateur tape des lignes de code quand sa colocataire, Joy, entre dans sa chambre.</g></g>
@@ -270,6 +312,43 @@ TRG;
 
         $this->assertRegExp( '/ 1 /', $check->getWarningsJSON() );
         $this->assertRegExp( '/ 1 /', $check->getErrorsJSON() );
+
+
+
+        $check = new QA($source_seg, $target_seg);
+        $check->performTagCheckOnly();
+        $this->assertTrue( $check->thereAreErrors() );
+        $errors = $check->getErrors();
+        $this->assertCount( 1, $errors );
+        $this->assertAttributeEquals( 1000, 'outcome', $errors[0] );
+        $this->assertRegExp( '/ 1 /', $check->getErrorsJSON() );
+
+
+        //CHECK TAG ID MISMATCH
+        $source_seg = <<<SRC
+<g id="6"> <g id="7">st<x id="231"/></g><g id="8">&nbsp;Section of Tokyo <g id="9"><g id="10">Station</g></g>, Osaka </g></g>
+SRC;
+
+        $target_seg = <<<TRG
+<g id="6"> <g id="7">st<x id="232"/></g><g id="8">&nbsp;Section of Tokyo <g id="9"> <g id="10">Station </g></g>, Osaka </g></g>
+TRG;
+
+        $check = new QA($source_seg, $target_seg);
+        $check->performConsistencyCheck();
+        $this->assertTrue( $check->thereAreWarnings() ); //
+        $this->assertTrue( $check->thereAreErrors() );   //mismatch <x id="231"/> -> <x id="232"/>
+        $errors = $check->getErrors();
+        $warnings = $check->getWarnings();
+
+        var_dump( $errors );
+
+        $this->assertCount( 1, $errors );
+        $this->assertCount( 1, $warnings ); // warnings are not checked because of tag mismatch,
+                                            // analysis on space warnings skipped de facto
+
+        $this->assertAttributeEquals( 1000, 'outcome', $errors[0] );
+
+
 
         //PHASE 3 check for particular tag mismatch: unclosed x tag <x id="231">
         $source_seg = <<<SRC
@@ -373,6 +452,30 @@ SRC;
         $this->setExpectedException( 'LogicException' );
         $qaRealign->getTrgNormalized();
 
+
+    }
+
+    public function testBadXml(){
+
+        //PHASE 3 check for particular tag mismatch: unclosed x tag <x id="231">
+        $source_seg = <<<SRC
+<g id="pt235"><g id="pt236"> <x id="abc/></g></g> <g id="pt238"><g id="pt239">Elsa sur son ordinateur tape des lignes de code quand sa colocataire, Joy, entre dans sa chambre.</g></g>
+SRC;
+
+        $target_seg = <<<TRG
+<g id="pt235"><g id="pt236"> </g></g> <g id="pt238"><g id="pt239">Elsa's on her computer typing lines of code when her roommate, Joy, enters the room.</g></g>
+TRG;
+
+        $check = new QA($source_seg, $target_seg);
+        $check->performTagCheckOnly();
+        $this->assertTrue( $check->thereAreErrors() );
+        $errors = $check->getErrors();
+        $this->assertCount( 1, $errors );
+        $this->assertAttributeEquals( 1000, 'outcome', $errors[0] );;
+        $this->assertRegExp( '/ 1 /', $check->getErrorsJSON() );
+
+        $this->assertEquals( '[{"outcome":1000,"debug":"Tag mismatch ( 1 )"}]', $check->getWarningsJSON() );
+        $this->assertEquals( '[{"outcome":1000,"debug":"Tag mismatch ( 1 )"}]', $check->getErrorsJSON() );
 
     }
 
