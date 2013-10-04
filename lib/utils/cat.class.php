@@ -3,6 +3,7 @@
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
 include_once INIT::$UTILS_ROOT . "/utils.class.php";
+include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 define("LTPLACEHOLDER", "##LESSTHAN##");
 define("GTPLACEHOLDER", "##GREATERTHAN##");
@@ -291,27 +292,38 @@ class CatUtils {
 
             $seg['pe_effort_perc'] .= "%";
 
+            $lh = Languages::getInstance();
+            $lang = $lh->getIsoCode( $lh->getLocalizedName( $seg['target_lang'] ) );
 
+            $sug_for_diff = self::placehold_xliff_tags( $seg[ 'sug' ] );
+            $tra_for_diff = self::placehold_xliff_tags( $seg[ 'translation' ] );
 
-            $sug_for_diff = self::placehold_xliff_tags($seg['sug']);
-            $tra_for_diff = self::placehold_xliff_tags($seg['translation']);
-            $ter = MyMemory::diff_tercpp($sug_for_diff, $tra_for_diff);
-            $seg['ter'] = $ter[1] * 100;
-            $stat_ter[] = $seg['ter'] * $seg['rwc'];
-            $seg['ter'] = round($ter[1] * 100) . "%";
-            $diff_ter = $ter[0];
+//            possible patch
+//            $sug_for_diff = html_entity_decode($sug_for_diff, ENT_NOQUOTES, 'UTF-8');
+//            $tra_for_diff = html_entity_decode($tra_for_diff, ENT_NOQUOTES, 'UTF-8');
 
-            if ($seg['sug'] <> $seg['translation']) {
-                
-                $diff_PE = MyMemory::diff_html($sug_for_diff, $tra_for_diff);
+            $ter          = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
+            $seg[ 'ter' ] = $ter[ 1 ] * 100;
+            $stat_ter[ ]  = $seg[ 'ter' ] * $seg[ 'rwc' ];
+            $seg[ 'ter' ] = round( $ter[ 1 ] * 100 ) . "%";
+            $diff_ter     = $ter[ 0 ];
+
+            if ( $seg[ 'sug' ] <> $seg[ 'translation' ] ) {
+
+                $diff_PE = MyMemory::diff_html( $sug_for_diff, $tra_for_diff );
 
                 // we will use diff_PE until ter_diff will not work properly
-                $seg['diff'] = $diff_PE;
-                //$seg['diff'] = $diff_ter;
+                $seg[ 'diff' ]     = $diff_PE;
+                $seg[ 'diff_ter' ] = $diff_ter;
+
             } else {
-                $seg['diff'] = '';
+                $seg[ 'diff' ]     = '';
+                $seg[ 'diff_ter' ] = '';
             }
-            $seg['diff'] = self::restore_xliff_tags_for_wiew($seg['diff']);
+
+            $seg['diff']     = self::restore_xliff_tags_for_wiew($seg['diff']);
+            $seg['diff_ter'] = self::restore_xliff_tags_for_wiew($seg['diff_ter']);
+
             //     echo $seg['diff']; exit;
             //$seg['diff_view']= CatUtils::rawxliff2rawview($seg['diff']);
             // BUG: While suggestions source is not correctly set
