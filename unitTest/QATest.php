@@ -72,6 +72,32 @@ SRC;
 
     }
 
+    public function testPlainTextSpaces(){
+        $source_seg = <<<SRC
+La città in fiamme
+SRC;
+
+        $target_seg = <<<TRG
+ The city in flames
+TRG;
+
+        $check = new QA($source_seg, $target_seg);
+        $check->performConsistencyCheck();
+
+        $warnings = $check->getWarnings();
+        $errors   = $check->getErrors();
+
+        $this->assertFalse( $check->thereAreErrors() );
+        $this->assertTrue( $check->thereAreWarnings() );
+
+        $this->assertEquals( count( $warnings ), 1 );
+        $this->assertEquals( 1100, $warnings[0]->outcome );
+
+        $this->assertEquals( count( $errors ), 1 );
+        $this->assertEquals( 0, $errors[0]->outcome );
+
+    }
+
     public function testSpaces1(){
 
         //" 1 " -> 20 31 20
@@ -326,12 +352,15 @@ TRG;
 
         //CHECK TAG ID MISMATCH
         $source_seg = <<<SRC
-<g id="6"> <g id="7">st<x id="231"/></g><g id="8">&nbsp;Section of Tokyo <g id="9"><g id="10">Station</g></g>, Osaka </g></g>
+<g id="6"> <g id="7">st<x id="1234"/></g><g id="8">&nbsp;Section of Tokyo <g id="9"> <g id="10">Station </g></g>, Osaka </g></g>
 SRC;
 
         $target_seg = <<<TRG
-<g id="6"> <g id="7">st<x id="232"/></g><g id="8">&nbsp;Section of Tokyo <g id="9"> <g id="10">Station </g></g>, Osaka </g></g>
+<g id="6"> <g id="7">st<x id="1236"/></g><g id="8">&nbsp;Section of Tokyo <g id="9"> <g id="10">Station </g></g>, Osaka </g></g>
 TRG;
+
+        $source_seg = CatUtils::view2rawxliff( $source_seg );
+        $target_seg = CatUtils::view2rawxliff( $target_seg );
 
         $check = new QA($source_seg, $target_seg);
         $check->performConsistencyCheck();
@@ -340,15 +369,10 @@ TRG;
         $errors = $check->getErrors();
         $warnings = $check->getWarnings();
 
-        var_dump( $errors );
-
         $this->assertCount( 1, $errors );
         $this->assertCount( 1, $warnings ); // warnings are not checked because of tag mismatch,
                                             // analysis on space warnings skipped de facto
-
-        $this->assertAttributeEquals( 1000, 'outcome', $errors[0] );
-
-
+        $this->assertAttributeEquals( 4, 'outcome', $errors[0] );
 
         //PHASE 3 check for particular tag mismatch: unclosed x tag <x id="231">
         $source_seg = <<<SRC
