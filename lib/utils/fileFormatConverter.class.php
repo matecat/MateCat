@@ -14,8 +14,25 @@ class fileFormatConverter {
 	private $fromXliffFunction = "AutomationService/xliff2original";//action string for the converters to convert to original
 	private $opt = array(); //curl options
 	private $lang_handler; //object that exposes language utilities
-	private $converters; //list of available converters
 	private $storage_lookup_map;
+
+	private static $Storage_Lookup_IP_Map = array(
+			'10.11.0.10' => '10.11.0.11',
+			'10.11.0.18' => '10.11.0.19',
+			'10.11.0.26' => '10.11.0.27',
+			'10.11.0.34' => '10.11.0.35',
+			'10.11.0.42' => '10.11.0.43',
+			);
+
+	public static $converters = array(
+			'10.11.0.10' => 1,
+			'10.11.0.18' => 1,
+			'10.11.0.26' => 1,
+			'10.11.0.34' => 1,
+			'10.11.0.42' => 1
+			);
+
+	//public static $converters = array('10.11.0.10' => 1);//for debugging purposes
 
 	public function __construct() {
 		if (!class_exists("INIT")) {
@@ -25,10 +42,7 @@ class fileFormatConverter {
 		$this->opt['httpheader'] = array("Content-Type: application/x-www-form-urlencoded;charset=UTF-8");
 		$this->lang_handler=  Languages::getInstance();
 
-		$this->converters = self::$Converters_IP;
-		//$this->converters=array('10.30.1.247'=>1);//forcing a particular VM just for debugging purposes
-
-                $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
+		$this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
 
 	}
 
@@ -42,75 +56,75 @@ class fileFormatConverter {
 		return (substr($string, 0, 3) == BOM);
 	}
 
-    //get a converter at random, weighted on number of CPUs per node
-    private function pickRandConverter() {
-        //get total cpu count
-        $cpus    = array_values( $this->converters );
-        $tot_cpu = 0;
-        foreach ( $cpus as $cpu ) {
-            $tot_cpu += $cpu;
-        }
-        unset( $cpus );
+	//get a converter at random, weighted on number of CPUs per node
+	private function pickRandConverter() {
+		//get total cpu count
+		$cpus    = array_values( self::$converters );
+		$tot_cpu = 0;
+		foreach ( $cpus as $cpu ) {
+			$tot_cpu += $cpu;
+		}
+		unset( $cpus );
 
-        //pick random
-        $num = rand( 0, $tot_cpu - 1 );
+		//pick random
+		$num = rand( 0, $tot_cpu - 1 );
 
-        //scroll in a roulette fashion through node->#cpu list until you stop on a cpu
-        /*
-           imagine an array: each node has a number of cells on it equivalent to # of cpus; the random number is the cell on which to stop
-           scroll the list_of_nodes, decrementing the random number with number of cpus;
-           if any time the random is 0, pick that node;
-           otherwise, keep scrolling
-         */
-        $picked_node = '';
-        foreach ( $this->converters as $node => $cpus ) {
-            $num -= $cpus;
-            if ( $num <= 0 ) {
-                //current node is the one; break
-                $picked_node = $node;
-                break;
-            }
-        }
+		//scroll in a roulette fashion through node->#cpu list until you stop on a cpu
+		/*
+		   imagine an array: each node has a number of cells on it equivalent to # of cpus; the random number is the cell on which to stop
+		   scroll the list_of_nodes, decrementing the random number with number of cpus;
+		   if any time the random is 0, pick that node;
+		   otherwise, keep scrolling
+		 */
+		$picked_node = '';
+		foreach ( self::$converters as $node => $cpus ) {
+			$num -= $cpus;
+			if ( $num <= 0 ) {
+				//current node is the one; break
+				$picked_node = $node;
+				break;
+			}
+		}
 
-        return $picked_node;
-    }
+		return $picked_node;
+	}
 
-    /**
-     * Get the ip value by reference
-     *
-     * @param $ip
-     *
-     * @return mixed
-     */
-    private function checkNodeLoad( &$ip ){
+	/**
+	 * check top of a single node by ip
+	 *
+	 * @param $ip
+	 *
+	 * @return mixed
+	 */
+	public static function checkNodeLoad( &$ip ){
 
-        $top = 0;
-        $result = "";
-        $processes = array();
+		$top = 0;
+		$result = "";
+		$processes = array();
 
 		//since sometimes it can fail, try again util we get something meaningful
-        $ch = curl_init("$ip:8082");
-        curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
-        curl_setopt($ch,CURLOPT_TIMEOUT,2); //we can wait max 2 seconds
+		$ch = curl_init("$ip:8082");
+		curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+		curl_setopt($ch,CURLOPT_TIMEOUT,2); //we can wait max 2 seconds
 
 		while( empty( $result ) || empty( $processes ) ){
 
-            $result = curl_exec($ch);
-            $curl_errno = curl_errno($ch);
-            $curl_error = curl_error($ch);
+			$result = curl_exec($ch);
+			$curl_errno = curl_errno($ch);
+			$curl_error = curl_error($ch);
 
-            $processes = json_decode($result,true);
+			$processes = json_decode($result,true);
 
-            //$curl_errno == 28 /* CURLE_OPERATION_TIMEDOUT */
-            if( $curl_errno > 0 ){
-                $top = 200; //exclude current converter by set it's top to an extreme large value
-                break;
-            }
+			//$curl_errno == 28 /* CURLE_OPERATION_TIMEDOUT */
+			if( $curl_errno > 0 ){
+				$top = 200; //exclude current converter by set it's top to an extreme large value
+				break;
+			}
 
 		}
 
-        //close
-        curl_close($ch);
+		//close
+		curl_close($ch);
 
 		//sum up total machine load
 		foreach($processes as $process){
@@ -121,16 +135,55 @@ class fileFormatConverter {
 		if(0==$top){
 			log::doLog("suspicious zero load for $ip, recursive call");
 			usleep(500*1000); //200ms
-			$top=$this->checkNodeLoad($ip);
+			$top=self::checkNodeLoad($ip);
 		}
 
 		return $top;
 	}
+	/**
+	 * check process list of a single node by ip
+	 *
+	 * @param $ip
+	 *
+	 * @return mixed
+	 */
+	public static function checkNodeProcesses( &$ip ){
+
+		$result = "";
+		$processes = array();
+
+		//since sometimes it can fail, try again util we get something meaningful
+		$ch = curl_init("$ip:8082");
+		curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
+		curl_setopt($ch,CURLOPT_TIMEOUT,2); //we can wait max 2 seconds
+
+		$trials=0;
+		while($trials<3 ){
+
+			$result = curl_exec($ch);
+			$curl_errno = curl_errno($ch);
+			$curl_error = curl_error($ch);
+
+			$processes = json_decode($result,true);
+
+			if( empty( $result ) || empty( $processes ) ){
+				$trials++;
+				sleep(1);
+			}else{
+				break;
+			}
+		}
+
+		//close
+		curl_close($ch);
+
+		return $processes;
+	}
 
 	private function pickIdlestConverter(){
 		//scan each server load
-		foreach($this->converters as $ip=>$weight){
-			$load=$this->checkNodeLoad($ip);
+		foreach(self::$converters as $ip=>$weight){
+			$load=self::checkNodeLoad($ip);
 			log::doLog("load for $ip is $load");
 			//add load as numeric index to an array
 			$loadList["".(10*(float)$load)]=$ip;
@@ -143,7 +196,7 @@ class fileFormatConverter {
 		return $ip;
 	}
 
-	private function getValidStorage(){
+	public function getValidStorage(){
 		return $this->storage_lookup_map[$this->ip];
 	}
 
@@ -179,38 +232,45 @@ class fileFormatConverter {
 		if (!$this->is_assoc($d)) {
 			throw new Exception("The input data to " . __FUNCTION__ . "must be an associative array", -1);
 		}
-		$ch = curl_init();
 
-		$data = http_build_query($d);
-		$d = null;
+		if($this->checkOpenService($url)){
 
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_HEADER, 0);
-		curl_setopt($ch, CURLOPT_USERAGENT, "Matecat-Cattool/v" . INIT::$BUILD_NUMBER);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		//curl_setopt($ch, CURLOPT_VERBOSE, true);
-		curl_setopt($ch, CURLOPT_POST, true);
-		curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-		if ($this->is_assoc($opt) and !empty($opt)) {
-			foreach ($opt as $k => $v) {
+			$ch = curl_init();
 
-				if (stripos($k, "curlopt_") === false or stripos($k, "curlopt_") !== 0) {
-					$k = "curlopt_$k";
-				}
-				$const_name = strtoupper($k);
-				if (defined($const_name)) {
-					curl_setopt($ch, constant($const_name), $v);
+			$data = http_build_query($d);
+			$d = null;
+
+			curl_setopt($ch, CURLOPT_URL, $url);
+			curl_setopt($ch, CURLOPT_HEADER, 0);
+			curl_setopt($ch, CURLOPT_USERAGENT, "Matecat-Cattool/v" . INIT::$BUILD_NUMBER);
+			curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+			//curl_setopt($ch, CURLOPT_VERBOSE, true);
+			curl_setopt($ch, CURLOPT_POST, true);
+			curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+			if ($this->is_assoc($opt) and !empty($opt)) {
+				foreach ($opt as $k => $v) {
+
+					if (stripos($k, "curlopt_") === false or stripos($k, "curlopt_") !== 0) {
+						$k = "curlopt_$k";
+					}
+					$const_name = strtoupper($k);
+					if (defined($const_name)) {
+						curl_setopt($ch, constant($const_name), $v);
+					}
 				}
 			}
+
+
+			$output = curl_exec($ch);
+
+			$info = curl_getinfo($ch);
+
+			// Chiude la risorsa curl
+			curl_close($ch);
+
+		}else{
+			$output=json_encode(array("isSuccess"=>false,"errorMessage"=>"port closed"));
 		}
-
-
-		$output = curl_exec($ch);
-
-		$info = curl_getinfo($ch);
-
-		// Chiude la risorsa curl
-		curl_close($ch);
 		return $output;
 	}
 
@@ -263,6 +323,24 @@ class fileFormatConverter {
 		return $res;
 	}
 
+	private function checkOpenService($url){
+		//default is failure
+		$open=false;
+
+		//get address only
+		$url=substr($url,0,strpos($url,':'));
+
+		//attempt to connect
+		$connection = @fsockopen($url, $this->port);
+		if ($connection) {
+			//success
+			$open=true;
+			//close port
+			fclose($connection);
+		} 
+		return $open;
+	}
+
 	public function convertToOriginal($xliffContent, $chosen_by_user_machine=false) {
 
 		//assign converter
@@ -299,22 +377,6 @@ class fileFormatConverter {
 		return $res;
 	}
 
-
-	private static $Storage_Lookup_IP_Map = array(
-                '10.11.0.10' => '10.11.0.11',
-                '10.11.0.18' => '10.11.0.19',
-                '10.11.0.26' => '10.11.0.27',
-                '10.11.0.34' => '10.11.0.35',
-                '10.11.0.42' => '10.11.0.43',
-			);
-
-	private static $Converters_IP = array(
-                '10.11.0.10' => 1,
-                '10.11.0.18' => 1,
-                '10.11.0.26' => 1,
-                '10.11.0.34' => 1,
-                '10.11.0.42' => 1
-			);
 
 	//http://stackoverflow.com/questions/2222643/php-preg-replace
 	private static $Converter_Regexp = '/=\"\\\\\\\\10\.11\.0\.[1-9][13579]{1,2}\\\\tr/';

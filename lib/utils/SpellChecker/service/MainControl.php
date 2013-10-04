@@ -308,10 +308,10 @@ class SpellCheckerServer {
         $fileName = self::$PID_PATH . DIRECTORY_SEPARATOR . "MainControl_" . self::$tHandlerPID . ".pid";
         $_fileHandle = @fopen( $fileName, 'wb' );
         if ( $_fileHandle === false ) {
-            throw new \Exception( "Can Not Open File '" . $fileName . "' . Error on: " . __METHOD__ . " in line: " . __LINE__ );
+            throw new Exception( "Can Not Open File '" . $fileName . "' . Error on: " . __METHOD__ . " in line: " . __LINE__ );
         }
         if ( fwrite( $_fileHandle, $this->getPid() ) === false ) {
-            throw new \Exception( "Can Not Write to File '" . $fileName . "' . Error on: " . __METHOD__ . " in line: " . __LINE__ );
+            throw new Exception( "Can Not Write to File '" . $fileName . "' . Error on: " . __METHOD__ . " in line: " . __LINE__ );
         }
         fclose( $_fileHandle );
         return true;

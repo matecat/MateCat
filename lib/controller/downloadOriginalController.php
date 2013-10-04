@@ -3,7 +3,6 @@
 set_time_limit(180);
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/cat.class.php";
-include_once INIT::$UTILS_ROOT . "/fileFormatConverter.class.php";
 
 class downloadOriginalController extends downloadController {
 
