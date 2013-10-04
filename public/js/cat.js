@@ -1,9 +1,13 @@
 UI = null;
 
 UI = {
-    render: function(firstLoad, segment_id) {
-        seg = (segment_id || false);
-        this.segmentToScrollAtRender = (seg)? seg : false;        
+    render: function(options) {
+        firstLoad = (options.firstLoad || false);
+        segmentToOpen = (options.segmentToOpen || false);
+        segmentToScroll = (options.segmentToScroll || false);
+        scrollToFile = (options.scrollToFile || false);
+        seg = (segmentToOpen || false);
+        this.segmentToScrollAtRender = (seg)? seg : false;
         this.isWebkit = $.browser.webkit;
         this.isChrome = $.browser.webkit && !!window.chrome;
         this.isFirefox = $.browser.mozilla;
@@ -48,14 +52,19 @@ UI = {
         this.readonly = (this.body.hasClass('archived')) ? true : false;
         this.suggestionShortcutLabel = 'ALT+' + ((UI.isMac) ? "CMD" : "CTRL") + '+';
 
+        this.searchParams = {};
+        this.searchParams['search'] = 0;
+        
         this.taglockEnabled = true;
         this.debug = Loader.detect('debug');
         this.checkTutorialNeed();
 
         UI.detectStartSegment();
-        var openCurrentSegmentAfter = ((!seg)&&(!this.firstLoad))? true : false;
+        options['openCurrentSegmentAfter'] = ((!seg)&&(!this.firstLoad))? true : false;
+//        var openCurrentSegmentAfter = ((!seg)&&(!this.firstLoad))? true : false;
 //        if((!seg)&&(!this.firstLoad)) this.gotoSegment(this.currentSegmentId);
-        UI.getSegments(openCurrentSegmentAfter);
+        UI.getSegments(options);
+//        UI.getSegments(openCurrentSegmentAfter);
     },
     init: function() {
         this.initStart = new Date();
@@ -85,6 +94,8 @@ UI = {
         this.savedSelActiveElement = null;
         this.firstOpenedSegment = false;
         this.autoscrollCorrectionEnabled = true;
+        this.searchEnabled = true;
+        if(this.searchEnabled) $('#filterSwitch').show();
         this.viewConcordanceInContextMenu = true;
         if(!this.viewConcordanceInContextMenu) $('#searchConcordance').hide();
         this.viewSpellCheckInContextMenu = true;
@@ -154,10 +165,8 @@ UI = {
         }).bind('keydown', 'Meta+c', function(e) {
             UI.tagSelection = false;
         }).bind('keydown', 'Backspace', function(e) {
-        }).bind('keydown','Meta+f', function(e){ 
-//            e.preventDefault();
-//            $('body').addClass('filterOpen');
-//            $('#search-source').focus();
+        }).bind('keydown','Meta+f', function(e){
+            UI.toggleSearch(e);
         }).on('change', '#hideAlertConfirmTranslation', function(e) {
             console.log($(this).prop('checked'));
             if ($(this).prop('checked')) {
@@ -188,14 +197,8 @@ UI = {
             e.preventDefault();
             UI.body.toggleClass('filtering');
         })
-        $("#filterSwitch").bind('click', function(e){ 
-            e.preventDefault();
-            if($('body').hasClass('filterOpen')) {
-                $('body').removeClass('filterOpen');
-            } else {
-                $('body').addClass('filterOpen');
-                $('#search-source').focus();
-            }
+        $("#filterSwitch").bind('click', function(e){
+            UI.toggleSearch(e);
         })
         $("#segmentPointer").click(function(e) {
             e.preventDefault();
@@ -797,9 +800,15 @@ UI = {
             e.preventDefault();
             UI.scrollSegment($('#segment-'+config.firstSegmentOfFiles[0].first_segment));           
         })
-        $("#jobMenu").on('click', 'li', function(e) {
+        $("#jobMenu").on('click', 'li:not(.currSegment)', function(e) {
             e.preventDefault();
-            UI.scrollSegment($('#segment-' + $(this).attr('data-segment')));
+//            UI.scrollSegment($('#segment-' + $(this).attr('data-segment')), true);
+//            UI.scrollSegment($(this).attr('data-segment'), true);
+            UI.renderAndScrollToSegment($(this).attr('data-segment'), true);
+        })
+        $("#jobMenu").on('click', 'li.currSegment', function(e) {
+            e.preventDefault();
+            UI.pointToOpenSegment();
         })
         $("#jobNav .prevfile").on('click', function(e) {
             e.preventDefault();
@@ -814,7 +823,9 @@ UI = {
             
             if(!($('#segment-'+UI.currentSegmentId).length)) {
                 $('#outer').empty();
-                UI.render(false);
+                UI.render({
+                    firstLoad: false
+                })
             } else {
                 UI.scrollSegment(UI.currentSegment);
             }
@@ -834,6 +845,37 @@ UI = {
                 console.log(this.id_file);
             });
         })
+
+// Search and replace
+
+//        $("#searchbox").on('click', "#exec-find[data-func='find']", function(e) {
+//            console.log('find');
+//            e.preventDefault();
+//            UI.execFind();
+//        });
+//        $("#searchbox").on('click', "#exec-find[data-func='next']", function(e) {
+//            console.log('next');
+//        });
+        $("#exec-find").click(function(e) {
+            e.preventDefault();
+            if($(this).attr('data-func') == 'find') {
+                UI.execFind();
+            } else {
+                UI.execNext();
+            }
+        });
+        $("#search-source").focus(function(e) {
+            $("#search-target").val('');
+        });
+        $("#search-target").focus(function(e) {
+            $("#search-source").val('');
+        });
+        $("#search-source, #search-target").on('input', function(e) {
+            if(UI.checkSearchChanges()) {
+                UI.setFindFunction('find');
+            };
+        });
+
         this.initEnd = new Date();
         this.initTime = this.initEnd - this.initStart;
         if (this.debug)
@@ -1183,6 +1225,105 @@ UI = {
             this.startSegmentId = (hash) ? hash : config.last_opened_segment;            
         }
     },
+// temp
+    enableSearch: function() {
+        $('#filterSwitch').show();
+        this.searchEnabled = true;
+    },            
+    execFind: function() {
+        if($('#search-source').val() != '') {
+            this.searchParams['source'] = $('#search-source').val();
+        } else {
+            delete this.searchParams['source'];    	
+        }
+
+        if($('#search-target').val() != '') {
+            this.searchParams['target'] = $('#search-target').val();
+        } else {
+            delete this.searchParams['target'];
+        }
+
+        if($('#select-status').val() != '') {
+            this.searchParams['status'] = $('#select-status').val();
+            this.body.attr('data-filter-status', $('#select-status').val());
+        } else {
+            delete this.searchParams['status'];
+        }
+
+        this.searchParams['search'] = 1;
+        this.body.addClass('searchActive');
+
+        this.numSearchResults = 20; // make an ajax request for this
+        
+        this.markSearchResults();
+        this.gotoSearchResultAfter('segment-' + this.currentSegmentId);
+        this.setFindFunction('next');
+    },
+    execNext: function() {
+        this.gotoSearchResultAfter($('section.currSearchItem').attr('id'));
+    },
+    markSearchResults: function() {
+        this.clearSearchMarkers();
+        var p = this.searchParams;
+        var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
+        if(typeof p['source'] != 'undefined') {
+            what = ' .source';
+            txt = p['source'];
+        } else if(typeof p['target'] != 'undefined') {
+            what = ' .editarea';
+            txt = p['target'];
+        } else {
+            what = '';
+            txt = '';
+        }
+        var what = (typeof p['source'] != 'undefined')? ' .source' : (typeof p['target'] != 'undefined')? ' .editarea' : '';
+        q = "section" + status + what;
+        console.log("$('section" + status + what + "')");
+        $(q + ":contains('"+txt+"')").each(function() {
+            $(this).html($(this).html().replace(txt,'<mark class="searchMarker">'+txt+'</mark>'));
+        });
+    },
+    clearSearchMarkers: function() {
+        $('mark.searchMarker').each(function() {
+            $(this).replaceWith($(this).text());
+        });
+    },
+    gotoSearchResultAfter: function(el) {
+//        console.log($(UI.currentSegment).nextAll('mark.searchMarker'));
+        seg = $('section').has("mark.searchMarker");
+        ss = el;
+        $.each(seg, function(index) {
+            if($(this).attr('id') > ss) {
+                $("html,body").animate({
+                    scrollTop: $(this).offset().top - 200
+                }, 500);
+                $('section.currSearchItem').removeClass('currSearchItem');
+                $(this).addClass('currSearchItem');
+                return false;
+            };
+        });
+    },
+    checkSearchChanges: function() {
+        changes = false;
+        var p = this.searchParams;
+        console.log("p['source']: " + p['source']);
+        console.log("$('#search-source').val(): " + $('#search-source').val());
+        if(p['source'] != $('#search-source').val()) {
+            if(!((typeof p['source'] == 'undefined')&&($('#search-source').val() == ''))) changes = true;
+        }
+        if(p['target'] != $('#search-target').val()) {
+            if(!((typeof p['target'] == 'undefined')&&($('#search-target').val() == ''))) changes = true;
+        }
+        return changes;
+    },
+    setFindFunction: function(func) {
+        var b = $('#exec-find');
+        if(func == 'next') {
+            b.attr('data-func', 'next').attr('value', 'Next');
+        } else {
+            b.attr('data-func', 'find').attr('value', 'Find');       
+        }
+    },
     getConcordance: function(txt, in_target) {
         $('.cc-search', UI.currentSegment).addClass('loading');
         $('.sub-editor.concordances .overflow .results', this.currentSegment).empty();
@@ -1384,10 +1525,11 @@ UI = {
         }
         return percentageClass;
     },
-    getSegments: function(openCurrentSegmentAfter) {
+    getSegments: function(options) {
         where = (this.startSegmentId) ? 'center' : 'after';
         var step = this.initSegNum;
         $('#outer').addClass('loading');
+        var seg = (options.segmentToScroll)? options.segmentToScroll : this.startSegmentId;
 
         APP.doRequest({
             data: {
@@ -1395,15 +1537,15 @@ UI = {
                 jid: config.job_id,
                 password: config.password,
                 step: step,
-                segment: this.startSegmentId,
+                segment: seg,
                 where: where
             },
             success: function(d) {
-                UI.getSegments_success(d,openCurrentSegmentAfter);
+                UI.getSegments_success(d,options);
             }
         });
     },
-    getSegments_success: function(d,openCurrentSegmentAfter) {
+    getSegments_success: function(d,options) {
         if(d.error.length) 
             this.processErrors(d.error, 'getSegments');
         where = d.data['where'];
@@ -1415,10 +1557,17 @@ UI = {
         this.body.addClass('loaded');
         if (typeof d.data['files'] != 'undefined') {
             this.renderSegments(d.data['files'], where, this.firstLoad);
-            if(openCurrentSegmentAfter) {
+            if((options.openCurrentSegmentAfter)&&(!options.segmentToScroll)&&(!options.segmentToOpen)) {
                 seg = (UI.firstLoad)? this.currentSegmentId : UI.startSegmentId;
                 this.gotoSegment(seg);
             }
+            if(options.segmentToScroll) {
+//                seg = (UI.firstLoad)? this.currentSegmentId : UI.startSegmentId;
+                this.scrollSegment($('#segment-' + options.segmentToScroll));
+            }
+            if(options.segmentToOpen) {
+                $('#segment-'+options.segmentToOpen+' .editarea').click();
+            }            
         }
         $('#outer').removeClass('loading loadingBefore');
         this.loadingMore = false;
@@ -1450,7 +1599,15 @@ UI = {
         };
     },
     gotoOpenSegment: function() {
-        this.scrollSegment(this.currentSegment);
+        if($('#segment-' +this.currentSegmentId).length) {
+            this.scrollSegment(this.currentSegment);
+        } else {
+            $('#outer').empty();
+            this.render({
+                firstLoad: false,
+                segmentToOpen: this.currentSegmentId
+            })
+        }
         $(window).trigger({
             type: "scrolledToOpenSegment",
             segment: segment
@@ -1741,7 +1898,9 @@ UI = {
         config.last_opened_segment = segmentId;
         window.location.hash = segmentId;
         $('#outer').empty();
-        this.render(false);
+        this.render({
+            firstLoad: false
+        })
     },
     reloadWarning: function() {
         var m = APP.confirm({msg: 'The next untranslated segment is outside the current view.'});
@@ -1750,7 +1909,9 @@ UI = {
             config.last_opened_segment = this.nextSegmentId;
             window.location.hash = this.nextSegmentId;
             $('#outer').empty();
-            this.render(false);
+            this.render({
+                firstLoad: false
+            })       
         }
     },
     pointBackToSegment: function(segmentId) {
@@ -1759,10 +1920,14 @@ UI = {
         if (segmentId == '') {
             this.startSegmentId = config.last_opened_segment;
             $('#outer').empty();
-            this.render(false);
+            this.render({
+                firstLoad: false
+            })
         } else {
             $('#outer').empty();
-            this.render(false);
+            this.render({
+                firstLoad: false
+            })
         }
     },
     pointToOpenSegment: function() {
@@ -1863,10 +2028,11 @@ UI = {
         }
     },
     renderSegments: function(files, where, starting) {
-        $.each(files, function() {
+        $.each(files, function(k,v) {
             var newFile = '';
             var fs = this['file_stats'];
-            var fid = fs['ID_FILE'];
+//            var fid = fs['ID_FILE'];
+            var fid = k;
             var articleToAdd = ((where == 'center') || (!$('#file-' + fid).length)) ? true : false;
 
             if (articleToAdd) {
@@ -1969,10 +2135,24 @@ UI = {
         }
         this.setTranslation(segment, status);
     },
+    renderAndScrollToSegment: function(sid, file) {
+        $('#outer').empty();
+        this.render({
+            firstLoad: false,
+            segmentToScroll: sid,
+            scrollToFile: true
+        })
+//        this.render(false, segment.selector.split('-')[1]);
+    },
     scrollSegment: function(segment) {
+//        segment = (noOpen)? $('#segment-'+segment) : segment;
+//        noOpen = (typeof noOpen == 'undefined')? false : noOpen;
         if(!segment.length) {
             $('#outer').empty();
-            this.render(false, segment.selector.split('-')[1]);
+            this.render({
+                firstLoad: false,
+                segmentToOpen: segment.selector.split('-')[1]
+            })            
         };
         var spread = 23;
         var current = this.currentSegment;
@@ -2665,6 +2845,18 @@ console.log('a');
      },
      */
 
+    toggleSearch: function(e) {
+        if(!this.searchEnabled) return;
+        e.preventDefault();
+        if($('body').hasClass('filterOpen')) {
+            $('body').removeClass('filterOpen');
+            $("body").scrollTop($("body").scrollTop()+$('.searchbox').height());
+        } else {
+            $('body').addClass('filterOpen');
+            $("body").scrollTop($("body").scrollTop()-$('.searchbox').height());
+            $('#search-source').focus();
+        }
+    },
     topReached: function() {
         var jumpto = $(this.currentSegment).offset().top;
         $("html,body").animate({
@@ -3131,8 +3323,9 @@ $(document).ready(function() {
     $("article").each(function() {
         APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
     });
-    UI.render(true);
-
+    UI.render({
+        firstLoad: true
+    })
     //launch segments check on opening
     UI.checkWarnings(true);
     //and on every polling interval

@@ -161,49 +161,52 @@
 
         </header>
         
-		<div tal:attributes="class string:searchbox${filtered_class}">
-			<form>
+        <div tal:attributes="class string:searchbox${filtered_class}">
+            <form>
 
-			<div class="block right">
-				<input id="exec-filter" type="submit" class="btn" value="FILTER" />			
-				<!--input id="clear-filter" type="button" class="btn" value="CLEAR" /-->			
-			</div>
+                <div class="search-inputs">
 
-			<div class="block">
-				<label for="search-projectname">Text in source</label>
-				<input id="search-source" class="search-input" type="text" value=""/>				
-			</div>
-
-             <div class="block">
-				<label for="search-projectname">Text in target</label>
-				<input id="search-target" class="search-input" type="text" value=""/>				
-			</div>
-			<div class="block">
-				<label for="select-status">Status</label>
-				<select id="select-status" class="search-select" >
-					<option value="active">Active</option>
-					<option value="archived">Archived</option>
-					<option value="cancelled">Cancelled</option>
-				</select>  	
-			</div>
-<!--
-			<div class="block">
-				<input id="only-completed" type="checkbox" />
-				<label for="only-completed">Only Completed</label>
-			</div>
-
-			<div class="block">
-				<input id="show-archived" type="checkbox" />
-				<label for="show-archived">Show Archived</label>
-			</div>
-			
-			<div class="block">
-				<input id="show-cancelled" type="checkbox" />
-				<label for="show-cancelled">Show Cancelled</label>
-			</div>
--->
-			</form>
-		</div>
+                    <div class="block">
+                        <label for="search-source">Find in source</label>
+                        <input id="search-source" class="search-input" type="text" value=""/>				
+                    </div>
+                    <div class="block">
+                        <div class="field">
+                            <label for="search-target">Find in target</label>
+                            <input id="search-target" class="search-input" type="text" value=""/>
+                        </div>
+                        <div class="field">
+                            <label for="replace-target">Replace with</label>
+                            <input id="replace-target" class="search-input" type="text" value=""/>
+                        </div>
+                    </div>                    
+                    <div class="block">
+                        <label for="select-status">Status</label>
+                        <select id="select-status" class="search-select" >
+                            <option value="all" selected="selected">All</option>
+                            <option value="new">New</option>
+                            <option value="draft">Draft</option>
+                            <option value="translated">Translated</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>  	
+                    </div>
+                    <div class="block right buttons">
+                        <div class="field">
+                            <input id="exec-cancel" type="button" class="btn" value="Cancel" />			
+                            <input id="exec-find" type="button" class="btn" data-func="find" value="Find" />			
+                        </div>
+                        <div class="field">
+                            <input id="exec-replace" type="button" class="btn" value="Replace" />			
+                        </div>
+                    </div>          
+                </div>
+                
+            </form>
+            <div class="search-display">
+                <p>Found <span class="results">13</span> results in <span class="segments">10</span> segments for: [search expression]</p>
+            </div>
+        </div>
         
         <!--
                 <div class="search">    

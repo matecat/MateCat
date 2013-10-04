@@ -568,7 +568,7 @@ class CatUtils {
             $t = "draft";
         if ($job_stats['REJECTED_FORMATTED'] > 0)
             $t = "draft";
-        $job_stats['DOWNLOAD_STATUS'] = $t;            
+        $job_stats['DOWNLOAD_STATUS'] = $t;
 
         return $job_stats;
         

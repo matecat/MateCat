@@ -255,6 +255,8 @@ class analyzeController extends viewcontroller {
             $this->template->showModalBoxLogin      = false;
         }
 
+        $this->template->incomingUrl                = '/login?incomingUrl=' . $_SERVER['REQUEST_URI'];
+
         //print_r ($this->template); exit;
 
     }
