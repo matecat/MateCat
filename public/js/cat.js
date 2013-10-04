@@ -1,9 +1,13 @@
 UI = null;
 
 UI = {
-    render: function(firstLoad, segment_id) {
-        seg = (segment_id || false);
-        this.segmentToScrollAtRender = (seg)? seg : false;        
+    render: function(options) {
+        firstLoad = (options.firstLoad || false);
+        segmentToOpen = (options.segmentToOpen || false);
+        segmentToScroll = (options.segmentToScroll || false);
+        scrollToFile = (options.scrollToFile || false);
+        seg = (segmentToOpen || false);
+        this.segmentToScrollAtRender = (seg)? seg : false;
         this.isWebkit = $.browser.webkit;
         this.isChrome = $.browser.webkit && !!window.chrome;
         this.isFirefox = $.browser.mozilla;
@@ -56,9 +60,11 @@ UI = {
         this.checkTutorialNeed();
 
         UI.detectStartSegment();
-        var openCurrentSegmentAfter = ((!seg)&&(!this.firstLoad))? true : false;
+        options['openCurrentSegmentAfter'] = ((!seg)&&(!this.firstLoad))? true : false;
+//        var openCurrentSegmentAfter = ((!seg)&&(!this.firstLoad))? true : false;
 //        if((!seg)&&(!this.firstLoad)) this.gotoSegment(this.currentSegmentId);
-        UI.getSegments(openCurrentSegmentAfter);
+        UI.getSegments(options);
+//        UI.getSegments(openCurrentSegmentAfter);
     },
     init: function() {
         this.initStart = new Date();
@@ -795,9 +801,15 @@ UI = {
             e.preventDefault();
             UI.scrollSegment($('#segment-'+config.firstSegmentOfFiles[0].first_segment));           
         })
-        $("#jobMenu").on('click', 'li', function(e) {
+        $("#jobMenu").on('click', 'li:not(.currSegment)', function(e) {
             e.preventDefault();
-            UI.scrollSegment($('#segment-' + $(this).attr('data-segment')));
+//            UI.scrollSegment($('#segment-' + $(this).attr('data-segment')), true);
+//            UI.scrollSegment($(this).attr('data-segment'), true);
+            UI.renderAndScrollToSegment($(this).attr('data-segment'), true);
+        })
+        $("#jobMenu").on('click', 'li.currSegment', function(e) {
+            e.preventDefault();
+            UI.pointToOpenSegment();
         })
         $("#jobNav .prevfile").on('click', function(e) {
             e.preventDefault();
@@ -812,7 +824,9 @@ UI = {
             
             if(!($('#segment-'+UI.currentSegmentId).length)) {
                 $('#outer').empty();
-                UI.render(false);
+                UI.render({
+                    firstLoad: false
+                })
             } else {
                 UI.scrollSegment(UI.currentSegment);
             }
@@ -1512,10 +1526,11 @@ UI = {
         }
         return percentageClass;
     },
-    getSegments: function(openCurrentSegmentAfter) {
+    getSegments: function(options) {
         where = (this.startSegmentId) ? 'center' : 'after';
         var step = this.initSegNum;
         $('#outer').addClass('loading');
+        var seg = (options.segmentToScroll)? options.segmentToScroll : this.startSegmentId;
 
         APP.doRequest({
             data: {
@@ -1523,15 +1538,15 @@ UI = {
                 jid: config.job_id,
                 password: config.password,
                 step: step,
-                segment: this.startSegmentId,
+                segment: seg,
                 where: where
             },
             success: function(d) {
-                UI.getSegments_success(d,openCurrentSegmentAfter);
+                UI.getSegments_success(d,options);
             }
         });
     },
-    getSegments_success: function(d,openCurrentSegmentAfter) {
+    getSegments_success: function(d,options) {
         if(d.error.length) 
             this.processErrors(d.error, 'getSegments');
         where = d.data['where'];
@@ -1543,10 +1558,17 @@ UI = {
         this.body.addClass('loaded');
         if (typeof d.data['files'] != 'undefined') {
             this.renderSegments(d.data['files'], where, this.firstLoad);
-            if(openCurrentSegmentAfter) {
+            if((options.openCurrentSegmentAfter)&&(!options.segmentToScroll)&&(!options.segmentToOpen)) {
                 seg = (UI.firstLoad)? this.currentSegmentId : UI.startSegmentId;
                 this.gotoSegment(seg);
             }
+            if(options.segmentToScroll) {
+//                seg = (UI.firstLoad)? this.currentSegmentId : UI.startSegmentId;
+                this.scrollSegment($('#segment-' + options.segmentToScroll));
+            }
+            if(options.segmentToOpen) {
+                $('#segment-'+options.segmentToOpen+' .editarea').click();
+            }            
         }
         $('#outer').removeClass('loading loadingBefore');
         this.loadingMore = false;
@@ -1578,7 +1600,15 @@ UI = {
         };
     },
     gotoOpenSegment: function() {
-        this.scrollSegment(this.currentSegment);
+        if($('#segment-' +this.currentSegmentId).length) {
+            this.scrollSegment(this.currentSegment);
+        } else {
+            $('#outer').empty();
+            this.render({
+                firstLoad: false,
+                segmentToOpen: this.currentSegmentId
+            })
+        }
         $(window).trigger({
             type: "scrolledToOpenSegment",
             segment: segment
@@ -1869,7 +1899,9 @@ UI = {
         config.last_opened_segment = segmentId;
         window.location.hash = segmentId;
         $('#outer').empty();
-        this.render(false);
+        this.render({
+            firstLoad: false
+        })
     },
     reloadWarning: function() {
         var m = APP.confirm({msg: 'The next untranslated segment is outside the current view.'});
@@ -1878,7 +1910,9 @@ UI = {
             config.last_opened_segment = this.nextSegmentId;
             window.location.hash = this.nextSegmentId;
             $('#outer').empty();
-            this.render(false);
+            this.render({
+                firstLoad: false
+            })       
         }
     },
     pointBackToSegment: function(segmentId) {
@@ -1887,10 +1921,14 @@ UI = {
         if (segmentId == '') {
             this.startSegmentId = config.last_opened_segment;
             $('#outer').empty();
-            this.render(false);
+            this.render({
+                firstLoad: false
+            })
         } else {
             $('#outer').empty();
-            this.render(false);
+            this.render({
+                firstLoad: false
+            })
         }
     },
     pointToOpenSegment: function() {
@@ -1991,10 +2029,11 @@ UI = {
         }
     },
     renderSegments: function(files, where, starting) {
-        $.each(files, function() {
+        $.each(files, function(k,v) {
             var newFile = '';
             var fs = this['file_stats'];
-            var fid = fs['ID_FILE'];
+//            var fid = fs['ID_FILE'];
+            var fid = k;
             var articleToAdd = ((where == 'center') || (!$('#file-' + fid).length)) ? true : false;
 
             if (articleToAdd) {
@@ -2097,10 +2136,24 @@ UI = {
         }
         this.setTranslation(segment, status);
     },
+    renderAndScrollToSegment: function(sid, file) {
+        $('#outer').empty();
+        this.render({
+            firstLoad: false,
+            segmentToScroll: sid,
+            scrollToFile: true
+        })
+//        this.render(false, segment.selector.split('-')[1]);
+    },
     scrollSegment: function(segment) {
+//        segment = (noOpen)? $('#segment-'+segment) : segment;
+//        noOpen = (typeof noOpen == 'undefined')? false : noOpen;
         if(!segment.length) {
             $('#outer').empty();
-            this.render(false, segment.selector.split('-')[1]);
+            this.render({
+                firstLoad: false,
+                segmentToOpen: segment.selector.split('-')[1]
+            })            
         };
         var spread = 23;
         var current = this.currentSegment;
@@ -3271,8 +3324,9 @@ $(document).ready(function() {
     $("article").each(function() {
         APP.fitText($('.filename h2', $(this)), $('.filename h2', $(this)), 30);
     });
-    UI.render(true);
-
+    UI.render({
+        firstLoad: true
+    })
     //launch segments check on opening
     UI.checkWarnings(true);
     //and on every polling interval
