@@ -1532,10 +1532,6 @@ filter: �alpha(opacity=50)�; /*per Internet Explorer 8*/
 .buttons{margin:-15px 43px 0 0 !important;}
 .graysmall li{width:42.5%;}
 .header-menu{margin-right:18px}
-.progress{display:none;}
-
-
-
 }
 @media screen and (max-width: 1280px){
 .buttons{margin:-15px 42px 0 0 !important;}
