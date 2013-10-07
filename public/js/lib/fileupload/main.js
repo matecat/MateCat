@@ -247,6 +247,7 @@ $(function () {
 		}
 	}).bind('fileuploadcompleted', function (e,data) {
 		console.log('completed');
+        if(!$('body').hasClass('initialized')) $('.upload-table tr').remove();
 		var maxnum = config.maxNumberFiles;
 		if($('.upload-table tr').length > (maxnum-1)) {
 			console.log('10 files loaded');
