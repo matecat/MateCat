@@ -94,7 +94,7 @@ UI = {
         this.savedSelActiveElement = null;
         this.firstOpenedSegment = false;
         this.autoscrollCorrectionEnabled = true;
-        this.searchEnabled = true;
+        this.searchEnabled = false;
         if(this.searchEnabled) $('#filterSwitch').show();
         this.viewConcordanceInContextMenu = true;
         if(!this.viewConcordanceInContextMenu) $('#searchConcordance').hide();
@@ -2007,9 +2007,7 @@ UI = {
                 var disabled = (this.id == '0') ? true : false;
                 cb = this['created_by'];
 
-                if( "sentence_confidence" in this ){
-                    var sentence_confidence = "Quality: " + this['sentence_confidence'];
-                }
+                sentence_confidence = ("sentence_confidence" in this)? "Quality: " + this['sentence_confidence'] : false;
 
                 cl_suggestion = UI.getPercentuageClass(this['match']);
 
@@ -2018,7 +2016,7 @@ UI = {
                 }
                 // Attention Bug: We are mixing the view mode and the raw data mode.
                 // before doing a enanched view you will need to add a data-original tag
-                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + this.segment + '</span></li><li class="b sugg-target"><span class="switch-editing">Edit</span><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + this.translation + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+                $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + this.segment + '</span></li><li class="b sugg-target"><span class="switch-editing">Edit</span><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + this.translation + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + (sentence_confidence || this['last_update_date']) + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
             });
             UI.markSuggestionTags(segment);
             UI.setDeleteSuggestion(segment);
