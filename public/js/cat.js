@@ -1567,7 +1567,12 @@ UI = {
             }
             if(options.segmentToOpen) {
                 $('#segment-'+options.segmentToOpen+' .editarea').click();
-            }            
+            }
+            if(options.caller == 'link2file') {
+                if(UI.segmentIsLoaded(UI.currentSegmentId)) {
+                    UI.openSegment(UI.editarea);
+                };
+            };
         }
         $('#outer').removeClass('loading loadingBefore');
         this.loadingMore = false;
@@ -2144,6 +2149,7 @@ UI = {
         $('#outer').empty();
         this.render({
             firstLoad: false,
+            caller: 'link2file',
             segmentToScroll: sid,
             scrollToFile: true
         })
