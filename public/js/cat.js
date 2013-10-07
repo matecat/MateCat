@@ -2006,6 +2006,11 @@ UI = {
                     return;
                 var disabled = (this.id == '0') ? true : false;
                 cb = this['created_by'];
+
+                if( "sentence_confidence" in this ){
+                    var sentence_confidence = "Quality: " + this['sentence_confidence'];
+                }
+
                 cl_suggestion = UI.getPercentuageClass(this['match']);
 
                 if (!$('.sub-editor.matches', segment).length) {
