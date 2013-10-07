@@ -1,14 +1,17 @@
 <?php
 
 set_time_limit(0);
+
+$ROOT = realpath( '../../../' );
+
 //imports
-require "/home/matecat/cattool/inc/config.inc.php";
+require_once $ROOT . '/inc/config.inc.php';
 INIT::obtain();
+
 require_once INIT::$UTILS_ROOT . "/log.class.php";
 require_once INIT::$UTILS_ROOT . "/utils.class.php";
 require_once INIT::$UTILS_ROOT . "/fileFormatConverter.class.php";
-
-require_once("/home/translated/public_html/admin/inc/converter_checker.inc.php");
+require_once ( 'converter_checker.inc.php' );
 
 //init params
 $source_lang = "en-US";
@@ -16,7 +19,7 @@ $target_language = "it-IT";
 $original_dir ='original' ;
 $converted_dir ='converted' ;
 $teamplate_dir ='expected' ;
-$path='/home/matecat/cattool/lib/utils/converter_checker';
+$path = $ROOT. '/lib/utils/converter_checker';
 
 //get an isntance of available converters to scan on
 $active_converters=fileFormatConverter::$converters;

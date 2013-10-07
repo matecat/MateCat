@@ -3,7 +3,7 @@
 set_time_limit(0);
 define ("BOM","\xEF\xBB\xBF");
 
-include INIT::$UTILS_ROOT . "/langs/languages.class.php";
+include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 
 class fileFormatConverter {

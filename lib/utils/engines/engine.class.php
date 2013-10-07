@@ -69,9 +69,7 @@ abstract class Engine {
 		}
 
 		$this->buildQuery($function, $parameters);
-
 		$res=$this->curl($this->url);
-
 		$this->raw_result = json_decode($res,true);
 	}
 

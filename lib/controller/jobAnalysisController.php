@@ -1,7 +1,7 @@
 <?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include INIT::$UTILS_ROOT . "/langs/languages.class.php";
+include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 class jobAnalysisController extends viewcontroller {
 
