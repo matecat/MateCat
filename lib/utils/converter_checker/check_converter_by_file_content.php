@@ -11,12 +11,7 @@ INIT::obtain();
 require_once INIT::$UTILS_ROOT . "/log.class.php";
 require_once INIT::$UTILS_ROOT . "/utils.class.php";
 require_once INIT::$UTILS_ROOT . "/fileFormatConverter.class.php";
-
-$tmpfname = tempnam( "/tmp", uniqid('',true) );
-$externalSource = file_get_contents( 'http://bohr.translated.home/admin/inc/matecat_converter_checker.include' );
-file_put_contents( $tmpfname, $externalSource );
-require_once($tmpfname);
-unlink($tmpfname); // this removes the file
+require_once ( 'converter_checker.inc.php' );
 
 //init params
 $source_lang = "en-US";
