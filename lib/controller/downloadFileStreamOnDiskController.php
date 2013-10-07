@@ -82,10 +82,10 @@ class downloadFileStreamOnDiskController extends downloadController {
 
 			$debug['get_segments'][]=time();
 			//create a secondary indexing mechanism on segments' array; this will be useful
-            //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
+                        //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
 			foreach($data as $i=>$k){
-                $data[ 'matecat|' . $k['internal_id'] ][]=$i;
-            }
+                           $data[ 'matecat|' . $k['internal_id'] ][]=$i;
+                        }
 			$transunit_translation = "";
 			$debug['replace'][] = time();
 			//instatiate parser
