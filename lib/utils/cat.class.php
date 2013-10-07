@@ -219,7 +219,7 @@ class CatUtils {
         ;
     }
 
-    public static function getEditingLogData($jid, $password) {
+    public static function getEditingLogData($jid, $password, $use_ter_diff = false ) {
 
         $data = getEditLog($jid, $password);
 
@@ -310,22 +310,25 @@ class CatUtils {
 
             if ( $seg[ 'sug' ] <> $seg[ 'translation' ] ) {
 
-                $diff_PE = MyMemory::diff_html( $sug_for_diff, $tra_for_diff );
+                //force use of third party ter diff
+                if( $use_ter_diff ){
+                    $seg[ 'diff' ] = $diff_ter;
+                } else {
+                    $diff_PE = MyMemory::diff_html( $sug_for_diff, $tra_for_diff );
+                    // we will use diff_PE until ter_diff will not work properly
+                    $seg[ 'diff' ]     = $diff_PE;
+                }
 
-                // we will use diff_PE until ter_diff will not work properly
-                $seg[ 'diff' ]     = $diff_PE;
-                $seg[ 'diff_ter' ] = $diff_ter;
+                //$seg[ 'diff_ter' ] = $diff_ter;
 
             } else {
                 $seg[ 'diff' ]     = '';
-                $seg[ 'diff_ter' ] = '';
+                //$seg[ 'diff_ter' ] = '';
             }
 
             $seg['diff']     = self::restore_xliff_tags_for_wiew($seg['diff']);
-            $seg['diff_ter'] = self::restore_xliff_tags_for_wiew($seg['diff_ter']);
+            //$seg['diff_ter'] = self::restore_xliff_tags_for_wiew($seg['diff_ter']);
 
-            //     echo $seg['diff']; exit;
-            //$seg['diff_view']= CatUtils::rawxliff2rawview($seg['diff']);
             // BUG: While suggestions source is not correctly set
             if (($seg['sm'] == "85%") OR ($seg['sm'] == "86%")) {
                 $seg['ss'] = 'Machine Translation';
