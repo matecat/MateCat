@@ -86,7 +86,7 @@ footer li
     margin: 0 0px 0 0;
     padding: 5px 10px;
     float: left;
-    border-left: 1px solid #333;
+    /*border-left: 1px solid #333;*/
     }
     footer nav li
         {
