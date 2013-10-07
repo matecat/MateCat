@@ -27,6 +27,7 @@ class MT_ERROR {
 class MT_RESULT {
 
 	public $translatedText = "";
+    public $sentence_confidence;
 	public $error = "";
 
 	public function __construct($result) {
@@ -34,6 +35,9 @@ class MT_RESULT {
 		if (is_array($result) and array_key_exists("data", $result)) {
 			$this->translatedText = $result['data']['translations'][0]['translatedText'];
 			$this->translatedText =CatUtils::rawxliff2view($this->translatedText);
+            if( isset( $result['data']['translations'][0]['sentence_confidence'] ) ) {
+                $this->sentence_confidence = $result['data']['translations'][0]['sentence_confidence'];
+            }
 		}
 
 		if (is_array($result) and array_key_exists("error", $result)) {
@@ -104,7 +108,7 @@ class MT extends Engine {
 		$this->doQuery("get", $parameters);
 
 		$this->result = new MT_RESULT($this->raw_result);
-		return array(0, $this->result->translatedText);
+		return array(0, $this->result->translatedText, $this->result->sentence_confidence);
 	}
 
 	public function set($segment, $translation, $source_lang, $target_lang, $email = '', $extra='') {
