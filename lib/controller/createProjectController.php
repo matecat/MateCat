@@ -13,7 +13,7 @@ class createProjectController extends ajaxcontroller {
     private $source_language;
     private $target_language;
     private $mt_engine;
-    private $tms_engine;
+    private $no_tms_engine;
     private $private_tm_key;
     private $private_tm_user;
     private $private_tm_pass;
@@ -26,10 +26,14 @@ class createProjectController extends ajaxcontroller {
         $this->source_language = $this->get_from_get_post('source_language');
         $this->target_language = $this->get_from_get_post('target_language');
         $this->mt_engine = $this->get_from_get_post('mt_engine'); // null è ammesso
-        $this->tms_engine = $this->get_from_get_post('tms_engine'); // se empty allora MyMemory
+        $this->no_tms_engine = $this->get_from_get_post('no_tms_engine'); // se empty allora MyMemory
         $this->private_tm_key = $this->get_from_get_post('private_tm_key');
         $this->private_tm_user = $this->get_from_get_post('private_tm_user');
         $this->private_tm_pass = $this->get_from_get_post('private_tm_pass');
+
+//        Log::doLog( $_POST );
+//        Log::doLog( $this );
+//        die();
 
     }
 
@@ -60,8 +64,8 @@ class createProjectController extends ajaxcontroller {
             return false;
         }
 
-        if (empty($this->tms_engine)) {
-            $this->tms_engine = 1; // default MyMemory
+        if (empty($this->no_tms_engine)) {
+            $this->no_tms_engine = 1; // default MyMemory
         }
 
         $sourceLangHistory = $_COOKIE["sourceLang"];
@@ -267,7 +271,7 @@ class createProjectController extends ajaxcontroller {
                 //default user
                 $owner = '';
             }
-            $jid = insertJob($password, $pid, $this->private_tm_user, $this->source_language, $target, $this->mt_engine, $this->tms_engine, $owner);
+            $jid = insertJob($password, $pid, $this->private_tm_user, $this->source_language, $target, $this->mt_engine, $this->no_tms_engine, $owner);
             foreach ($fidList as $fid) {
 
                 try {

@@ -116,6 +116,7 @@ class getContributionController extends ajaxcontroller {
 		}
 
 		$mt_res = array();
+        $sentence_confidence = null;
 		$mt_match = "";
 		if (!empty($this->id_mt_engine) and $this->id_mt_engine != 1) {
 			$mt = new MT($this->id_mt_engine);
@@ -129,11 +130,11 @@ class getContributionController extends ajaxcontroller {
 				$mt_score = 100 - $penalty;
 				$mt_score.="%";
 
-                $sentence_confidence = $mt_result[2]; //can be null
-
 				$mt_match_res = new TMS_GET_MATCHES($this->text, $mt_match, $mt_score, "MT-" . $mt->getName(), date("Y-m-d"));
 
 				$mt_res = $mt_match_res->get_as_array();
+                $mt_res['sentence_confidence'] = $mt_result[2]; //can be null
+
 			}
 		}
 		$matches = array();
@@ -207,8 +208,8 @@ class getContributionController extends ajaxcontroller {
 				$match['created_by'] = 'MT'; //MyMemory returns MT!
 			}
 
-            if( isset($sentence_confidence) && !empty($sentence_confidence) ){
-                $match['sentence_confidence'] = round( $sentence_confidence, 0 ) . "%";
+            if( !empty($match['sentence_confidence']) ){
+                $match['sentence_confidence'] = round( $match['sentence_confidence'], 0 ) . "%";
             }
 
             if( $this->concordance_search ){
