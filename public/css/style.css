@@ -56,7 +56,11 @@ header .wrapper{padding:0px 0 0 0;}
     cursor: pointer;
     text-indent: -9999px;
     }
-
+body.searchActive #filterSwitch
+    {
+    background-image: url(../img/search-active.png) !important;
+    }
+    
 #filterSwitch:hover
     {
     opacity: 0.7;
@@ -649,9 +653,19 @@ padding-top:5px !important;
     font-style: italic;
     border-top: 1px solid #666;
     }
+    body.searchActive .search-display
+        {
+        display: block;
+        }
 .search-display p
     {
     margin: 0;
+    font-size: 13px;
+    }
+.search-display span.param
+    {
+    font-weight: bold;
+    color: yellow;
     }
 .search-input{width:200px;font-size:12px !important;height:23px;padding:0 5px;border:1px solid #abadb3;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;color:#999}
 .search-input:hover, .search-editarea:hover{

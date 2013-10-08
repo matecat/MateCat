@@ -857,6 +857,11 @@ UI = {
 //        $("#searchbox").on('click', "#exec-find[data-func='next']", function(e) {
 //            console.log('next');
 //        });
+        $(".searchbox input, .searchbox select").bind('keydown', 'return', function(e) {
+            e.preventDefault();
+            $("#exec-find").click();
+        })
+
         $("#exec-find").click(function(e) {
             e.preventDefault();
             if($(this).attr('data-func') == 'find') {
@@ -865,18 +870,38 @@ UI = {
                 UI.execNext();
             }
         });
-        $("#search-source").focus(function(e) {
+        $("#exec-cancel").click(function(e) {
+            e.preventDefault();
+            $("#filterSwitch").click();
+            UI.body.removeClass('searchActive');
+            if(UI.segmentIsLoaded(UI.currentSegmentId)) {
+                UI.gotoOpenSegment();
+            } else {
+                UI.render({
+                    firstLoad: false,
+                    segmentToOpen: UI.currentSegmentId
+                })                
+            };
+
+        });        
+        $("#search-source").on('input', function(e) {
             $("#search-target").val('');
+            UI.setFindFunction('find');
         });
-        $("#search-target").focus(function(e) {
+        $("#search-target").on('input', function(e) {
             $("#search-source").val('');
+            UI.setFindFunction('find');
         });
         $("#search-source, #search-target").on('input', function(e) {
             if(UI.checkSearchChanges()) {
                 UI.setFindFunction('find');
             };
         });
-
+        $("#select-status").on('change', function(e) {
+            if(UI.checkSearchChanges()) {
+                UI.setFindFunction('find');
+            };
+        });
         this.initEnd = new Date();
         this.initTime = this.initEnd - this.initStart;
         if (this.debug)
@@ -1251,14 +1276,68 @@ UI = {
             delete this.searchParams['status'];
         }
 
+        if($('#replace-target').val() != '') {
+            this.searchParams['replace'] = $('#replace-target').val();
+        } else {
+            delete this.searchParams['replace'];
+        }
         this.searchParams['search'] = 1;
-        this.body.addClass('searchActive');
-
-        this.numSearchResults = 20; // make an ajax request for this
-        
+        var source = (this.searchParams['source'])? this.searchParams['source'] : '';
+        var target = (this.searchParams['target'])? this.searchParams['target'] : '';
+        var replace = (this.searchParams['replace'])? this.searchParams['replace'] : '';
+                
         this.markSearchResults();
         this.gotoSearchResultAfter('segment-' + this.currentSegmentId);
         this.setFindFunction('next');
+        this.body.addClass('searchActive');
+
+        APP.doRequest({
+            data: {
+                action: 'getSearch_fake',
+                function: 'find',
+                job: config.job_id,
+                token: 'zsxdcfgghvbh',
+                password: config.password,
+                source: source,
+                target: target,
+                status: this.searchParams['status'],
+                replace: replace
+            },
+//            context: $('#' + id),
+            success: function(d) {
+                UI.execFind_success(d);
+            }
+        });
+        
+    },
+    execFind_success: function(d) {
+        console.log(d);
+        this.numSearchResultsItem = d.total;
+//        this.searchResultsSegments = d.segments;
+// temp
+        var ar = [];
+        $('mark.searchMarker').each(function() {
+            var id = $(this).parents('section').attr('id').split('-')[1];
+            if(ar.indexOf(id) == -1) ar.push(parseInt(id));
+        });
+
+        ar.push(parseInt(ar[ar.length-1])+400);
+        console.log(ar[ar.length-1]);
+        this.searchResultsSegments = ar;
+// end temp        
+        this.numSearchResultsSegments = d.segments.length;
+        this.updateSearchDisplay();
+    },
+    updateSearchDisplay: function() {
+        $('.search-display .results').text(this.numSearchResultsItem);
+        $('.search-display .segments').text(this.numSearchResultsSegments);
+        query = '';
+        if(this.searchParams['source']) query += ' <span class="param">' + this.searchParams['source'] + '</span> in source';
+        if(this.searchParams['target']) query += ' <span class="param">' + this.searchParams['target'] + '</span> in target';
+        
+        if(this.searchParams['status']) query += (((this.searchParams['source'])||(this.searchParams['target']))? ' and' : '') + ' status <span class="param">' + this.searchParams['status'] + '</span>';
+        $('.search-display .query').html(query);
+//        $('.search-display').show();
     },
     execNext: function() {
         this.gotoSearchResultAfter($('section.currSearchItem').attr('id'));
@@ -1293,8 +1372,10 @@ UI = {
 //        console.log($(UI.currentSegment).nextAll('mark.searchMarker'));
         seg = $('section').has("mark.searchMarker");
         ss = el;
+        found = false;
         $.each(seg, function(index) {
             if($(this).attr('id') > ss) {
+                found = true;
                 $("html,body").animate({
                     scrollTop: $(this).offset().top - 200
                 }, 500);
@@ -1303,6 +1384,16 @@ UI = {
                 return false;
             };
         });
+        if(!found) {
+            // load new segments
+            console.log('load new segments!');
+            this.render({
+                firstLoad: false,
+                applySearch: true,
+                segmentToScroll: this.searchResultsSegments[this.searchResultsSegments.length - 1]
+//                scrollToFile: true
+            })            
+        };
     },
     checkSearchChanges: function() {
         changes = false;
@@ -1314,6 +1405,9 @@ UI = {
         }
         if(p['target'] != $('#search-target').val()) {
             if(!((typeof p['target'] == 'undefined')&&($('#search-target').val() == ''))) changes = true;
+        }
+        if(p['status'] != $('#select-status').val()) {
+            if(!(typeof p['status'] == 'undefined')) changes = true;
         }
         return changes;
     },
