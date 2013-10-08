@@ -114,6 +114,8 @@ $(function () {
 	}).bind('fileuploadadd', function (e, data) {
 		console.log('adding');
 		console.log(data);
+         $('body').addClass('initialized');
+
 
 		if($('.upload-table tr').length >= (config.maxNumberFiles)) {
 			console.log('adding more than 10');
