@@ -2102,7 +2102,7 @@ UI = {
                 var disabled = (this.id == '0') ? true : false;
                 cb = this['created_by'];
 
-                sentence_confidence = ("sentence_confidence" in this)? "Quality: " + this['sentence_confidence'] : false;
+                sentence_confidence = ("sentence_confidence" in this)? "Quality: <b>" + this['sentence_confidence'] + "</b>" : false;
 
                 cl_suggestion = UI.getPercentuageClass(this['match']);
 
