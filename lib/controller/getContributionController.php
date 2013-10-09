@@ -104,21 +104,36 @@ class getContributionController extends ajaxcontroller {
 		$this->id_tms = $st['id_tms'];
 
 		$tms_match = array();
-		if (!empty($this->id_tms)) {
-
+		if ( $this->id_tms == 1 ) {
+            /**
+             * MyMemory Enabled
+             */
 			$mt_from_tms = 1;
-			if (!empty($this->id_mt_engine) and $this->id_mt_engine != 1) {
+            $mt_only = false;
+			if ( $this->id_mt_engine != 1 ) {
+                /**
+                 * Don't get MT contribution from MyMemory ( Custom MT )
+                 */
 				$mt_from_tms = 0;
 			}
+			$tms = new TMS( $this->id_tms );
+			$tms_match = $tms->get($this->text, $this->source, $this->target, "demo@matecat.com", $mt_from_tms, $this->id_translator, $this->num_results, $mt_only, $this->concordance_search );
 
-			$tms = new TMS($this->id_tms);
-			$tms_match = $tms->get($this->text, $this->source, $this->target, "demo@matecat.com", $mt_from_tms, $this->id_translator, $this->num_results, $this->concordance_search );
+        } else if( $this->id_tms == 0 && $this->id_mt_engine == 1 ){
+            /**
+             * MyMemory disabled but MT Enabled and it is NOT a Custom one
+             * So tell to MyMemory to get MT only
+            */
+            $mt_only = true;
+            $mt_from_tms = 1;
+            $tms = new TMS( 1 /* MyMemory */ );
+            $tms_match = $tms->get($this->text, $this->source, $this->target, "demo@matecat.com", $mt_from_tms, $this->id_translator, $this->num_results, $mt_only, $this->concordance_search );
+
 		}
 
 		$mt_res = array();
-        $sentence_confidence = null;
 		$mt_match = "";
-		if (!empty($this->id_mt_engine) and $this->id_mt_engine != 1) {
+		if ( $this->id_mt_engine > 1 /* Request MT Directly */ ) {
 			$mt = new MT($this->id_mt_engine);
 			$mt_result = $mt->get($this->text, $this->source, $this->target);
 

@@ -18,7 +18,7 @@ abstract class Engine {
 
 	protected function __construct($id) {
 		$this->id = $id;
-		if (empty($this->id)) {
+		if ( is_null($this->id) || $this->id == '' ) {
 			$this->error = array(-1, "Missing id engine");
 			return 0;
 		}
@@ -71,8 +71,6 @@ abstract class Engine {
 		$this->buildQuery($function, $parameters);
 		$res=$this->curl($this->url);
 		$this->raw_result = json_decode($res,true);
-//        Log::doLog($this->url);
-//        Log::doLog($res);
 	}
 
 	private function buildQuery($function, $parameters) {

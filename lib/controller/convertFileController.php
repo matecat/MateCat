@@ -34,8 +34,6 @@ class convertFileController extends ajaxcontroller {
 			return false;
 		}
 
-
-
 		$ext = pathinfo($this->file_name, PATHINFO_EXTENSION);
 
 		$file_path = $this->intDir . '/' . $this->file_name;
@@ -50,7 +48,7 @@ class convertFileController extends ajaxcontroller {
 		if( INIT::$SAVE_SHASUM_FOR_FILES_LOADED ){
 		$xliffContent = getXliffBySHA1($sha1, $this->source_lang, $this->target_lang,$this->cache_days);
 		}
-		if (!empty($xliffContent)) {
+		if ( isset($xliffContent) && !empty($xliffContent)) {
 			$xliffContent=  gzinflate($xliffContent);
 			$res = $this->put_xliff_on_file($xliffContent, $this->intDir);
 			if ($res == -1) {
