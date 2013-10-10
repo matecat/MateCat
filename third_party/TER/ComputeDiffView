@@ -5,9 +5,10 @@
 #sh ComputeDiffView en 'I love my dog!!!' 'I love Marco'\''s dog'
 
 #TO BE SET
-
-TER=/var/www/cattool/third_party/TER/tercpp.0.6.2
-PREPROC=/var/www/cattool/third_party/TER
+pwd=`pwd`
+pwd=$pwd"/third_party/TER"
+TER=${pwd}/tercpp.0.6.2
+PREPROC=${pwd}
 
 #INPUT PARAMETERS
 
@@ -30,5 +31,5 @@ TokHyp=$($PREPROC/preprocSentence.sh $PREPROC $Lang $HypSentence) #&
 
 # Computation of the DiffView
 
-$TER --noTxtIds --TokenizedText --printDifferenceToHtmlToSTDO -s -rSent "$TokRef" -hSent "$TokHyp"
+$TER --noTxtIds --TokenizedText --printDifferenceToHtmlToSTDO -s --HTER -rSent "$TokRef" -hSent "$TokHyp"
 
