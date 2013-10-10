@@ -1313,7 +1313,7 @@ console.log ("execFind");
         
     },
     execFind_success: function(d) {
-        console.log(d.segments.length);
+        console.log(d.segments);
         this.numSearchResultsItem = d.total;
         this.searchResultsSegments = d.segments;
 // temp
