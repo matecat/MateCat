@@ -43,11 +43,11 @@ function doSearchQuery($jid, $key, $val, $status = "") {
                    ) AS count
                    FROM segment_translations st "; 
      
-        $query.=" w here st.id_job=$jid
+        $query.=" where st.id_job=$jid
                     and st.translation like '%$val%' 
                     $where_status ";
 
-        $query .= "GROUP BY s.id_segment WITH ROLLUP";
+        $query .= "GROUP BY st.id_segment WITH ROLLUP";
 
 //          $query.=" w here st.id_job=$jid
 //                    -- and MATCH (s.segment) AGAINST ('*$val*' IN BOOLEAN MODE)
