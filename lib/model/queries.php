@@ -70,7 +70,7 @@ function doSearchQuery($jid, $key, $val, $status = "") {
     foreach($results as $occurrence ){
         $vector['sidlist'][] = $occurrence['id'];
     }
-    $vector['sidlist'] = implode( ",", $vector['sidlist'] );
+    $vector['sidlist'] = $vector['sidlist'];
     $vector['count']   = $rollup['count'];
 
     //log::doLog ($vector);
