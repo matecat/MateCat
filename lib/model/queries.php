@@ -17,19 +17,13 @@ function doSearchQuery($jid, $key, $val, $status = "") {
     
     $query="";
     if ($key == "source") {
-        $query = "SELECT group_concat(s.id) as sidlist ,
-                    sum(
-                     ROUND (   
-                      (
-                        LENGTH(s.segment)-
-                        LENGTH( REPLACE ( segment, '$val', ''))
-                      ) / LENGTH('$val')
-                     )
-                     )AS count  
-
-
-                FROM segments s 
-                    inner join files_job fj on s.id_file=fj.id_file ";
+        $query = "SELECT s.id, sum(
+                    ROUND (
+                    ( LENGTH( s.segment ) - LENGTH( REPLACE ( LOWER( segment ), '$val', '') ) ) / LENGTH('$val') )
+                    ) AS count
+                    FROM segments s
+                    inner join files_job fj on s.id_file=fj.id_file
+                  ";
         if (!empty($where_status)) {
             $query.= " left join segment_translations st on st.id_segment=s.id ";
         }
@@ -38,47 +32,49 @@ function doSearchQuery($jid, $key, $val, $status = "") {
                     and s.segment like '%$val%' 
                     $where_status";
         
-//        $query.=" where fj.id_job=$jid
-//                    -- and MATCH (s.segment) AGAINST ('*$val*' IN BOOLEAN MODE)
-//                    $where_status";
+        $query .= "GROUP BY s.id WITH ROLLUP";
+
     }
 
     if ($key == "target") {
-       $query = "SELECT  group_concat(st.id_segment) as sidlist ,
-                    sum(
-                      ROUND (   
-                      (
-                        LENGTH(st.translation)-
-                        LENGTH( REPLACE ( st.translation, '$val', ''))
-                      ) / LENGTH('$val')
-                     ) 
-                     ) AS count  
-
-
+       $query = "SELECT  st.id_segment, sum(
+                      ROUND (
+                      ( LENGTH( st.translation ) - LENGTH( REPLACE ( LOWER( st.translation ), '$val', '') ) ) / LENGTH('$val') )
+                   ) AS count
                    FROM segment_translations st "; 
      
         $query.=" w here st.id_job=$jid
                     and st.translation like '%$val%' 
                     $where_status ";
-        
+
+        $query .= "GROUP BY s.id_segment WITH ROLLUP";
+
 //          $query.=" w here st.id_job=$jid
 //                    -- and MATCH (s.segment) AGAINST ('*$val*' IN BOOLEAN MODE)
 //                    $where_status ";
        
     }
-    log::doLog( $query);
+
     $results=$db->fetch_array($query);
     $err = $db->get_error();
     //print_r ($err);
     $errno = $err['error_code'];
     if ($errno != 0) {
         log::doLog($err);
-
         return $errno * -1;
     }
-  
-    log::doLog ($results);
-    return $results[0];
+
+    $rollup = array_pop( $results );
+
+    $vector = array();
+    foreach($results as $occurrence ){
+        $vector['sidlist'][] = $occurrence['id'];
+    }
+    $vector['sidlist'] = implode( ",", $vector['sidlist'] );
+    $vector['count']   = $rollup['count'];
+
+    //log::doLog ($vector);
+    return $vector;
 }
 
 function getUserData($id) {
