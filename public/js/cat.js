@@ -1375,8 +1375,6 @@ console.log ("execFind");
                 $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>'));
             });            
         }
-        
-
     },
     clearSearchMarkers: function() {
         $('mark.searchMarker').each(function() {
@@ -1396,13 +1394,19 @@ console.log ("execFind");
             }
         } else {
             var m = $("mark.currSearchItem");
-            if($(m).nextAll().length) {
+            if($(m).nextAll('mark.searchMarker').length) {
     //            console.log('altri item nel segmento');
                 $(m).removeClass('currSearchItem');
                 $(m).nextAll().first().addClass('currSearchItem');
             } else {
-//                console.log(m);
-                this.gotoSearchResultAfter('segment-' + $(m).parents('section').attr('id').split('-')[1]);
+                seg = (m.length)? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
+                if(seg.length) {
+                    this.gotoSearchResultAfter('segment-' + $(seg).attr('id').split('-')[1]);
+                } else {
+                    setTimeout(function() {
+                        UI.gotoNextResultItem();
+                    }, 500);                    
+                }
             }
         }
     },
@@ -1471,8 +1475,6 @@ console.log ("execFind");
     checkSearchChanges: function() {
         changes = false;
         var p = this.searchParams;
-        console.log("p['source']: " + p['source']);
-        console.log("$('#search-source').val(): " + $('#search-source').val());
         if(p['source'] != $('#search-source').val()) {
             if(!((typeof p['source'] == 'undefined')&&($('#search-source').val() == ''))) changes = true;
         }
