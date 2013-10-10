@@ -102,8 +102,8 @@ class getSearchController extends ajaxcontroller {
             $this->result['error'][] = array("code" => -1000, "message" => "internal error: see the log");
             return;
         }
-        $this->result['total'] = $res['num_res'];
-        if ($res['num_res'] == 0) {
+        $this->result['total'] = $res['count'];
+        if ($res['count'] == 0) {
             $res['sidlist'] = '';
         }
         $this->result['segments'] = $res['sidlist'];

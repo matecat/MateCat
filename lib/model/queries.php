@@ -17,7 +17,18 @@ function doSearchQuery($jid, $key, $val, $status = "") {
     
     $query="";
     if ($key == "source") {
-        $query = "SELECT count(*)  as num_res,group_concat(s.id) as sidlist FROM segments s 
+        $query = "SELECT group_concat(s.id) as sidlist ,
+                    sum(
+                     ROUND (   
+                      (
+                        LENGTH(s.segment)-
+                        LENGTH( REPLACE ( segment, '$val', ''))
+                      ) / LENGTH('$val')
+                     )
+                     )AS count  
+
+
+                FROM segments s 
                     inner join files_job fj on s.id_file=fj.id_file ";
         if (!empty($where_status)) {
             $query.= " left join segment_translations st on st.id_segment=s.id ";
@@ -33,7 +44,18 @@ function doSearchQuery($jid, $key, $val, $status = "") {
     }
 
     if ($key == "target") {
-       $query = "SELECT  count(*)  as num_res,group_concat(st.id_segment) as sidlist FROM segment_translations st "; 
+       $query = "SELECT  group_concat(st.id_segment) as sidlist ,
+                    sum(
+                      ROUND (   
+                      (
+                        LENGTH(st.translation)-
+                        LENGTH( REPLACE ( st.translation, '$val', ''))
+                      ) / LENGTH('$val')
+                     ) 
+                     ) AS count  
+
+
+                   FROM segment_translations st "; 
      
         $query.=" w here st.id_job=$jid
                     and st.translation like '%$val%' 
@@ -44,7 +66,7 @@ function doSearchQuery($jid, $key, $val, $status = "") {
 //                    $where_status ";
        
     }
-    
+    log::doLog( $query);
     $results=$db->fetch_array($query);
     $err = $db->get_error();
     //print_r ($err);
@@ -55,7 +77,7 @@ function doSearchQuery($jid, $key, $val, $status = "") {
         return $errno * -1;
     }
   
-    //print_r ($results);
+    log::doLog ($results);
     return $results[0];
 }
 
