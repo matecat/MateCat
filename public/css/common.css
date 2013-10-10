@@ -708,7 +708,7 @@ background:#fff url(../img/sublevel.png) 15px 18px no-repeat;
 	float: none;
 	}
 
-section.currSearchItem mark.searchMarker
+section mark.searchMarker.currSearchItem
 	{
 	background: orange;
 	}
