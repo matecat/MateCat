@@ -1256,6 +1256,7 @@ UI = {
         this.searchEnabled = true;
     },            
     execFind: function() {
+console.log ("execFind");
         if($('#search-source').val() != '') {
             this.searchParams['source'] = $('#search-source').val();
         } else {
@@ -1292,7 +1293,7 @@ UI = {
 
         APP.doRequest({
             data: {
-                action: 'getSearch_fake',
+                action: 'getSearch',
                 function: 'find',
                 job: config.job_id,
                 token: 'zsxdcfgghvbh',

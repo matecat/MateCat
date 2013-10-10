@@ -17,7 +17,7 @@ class fileFormatConverter {
 	private $storage_lookup_map;
 
 	private static $Storage_Lookup_IP_Map = array(
-			'10.11.0.10' => '10.11.0.11',
+			//'10.11.0.10' => '10.11.0.11',
 			'10.11.0.18' => '10.11.0.19',
 			'10.11.0.26' => '10.11.0.27',
 			'10.11.0.34' => '10.11.0.35',
@@ -25,7 +25,7 @@ class fileFormatConverter {
 			);
 
 	public static $converters = array(
-			'10.11.0.10' => 1,
+			//'10.11.0.10' => 1,
 			'10.11.0.18' => 1,
 			'10.11.0.26' => 1,
 			'10.11.0.34' => 1,
