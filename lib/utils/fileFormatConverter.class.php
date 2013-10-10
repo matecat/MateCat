@@ -25,7 +25,7 @@ class fileFormatConverter {
 			);
 
 	public static $converters = array(
-			'10.11.0.10' => 1,
+			//'10.11.0.10' => 1,
 			'10.11.0.18' => 1,
 			'10.11.0.26' => 1,
 			'10.11.0.34' => 1,
