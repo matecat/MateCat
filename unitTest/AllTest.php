@@ -6,13 +6,6 @@
  * Time: 10.46
  *
  */
-include '/var/www/cattool/inc/config.inc.php';
-@INIT::obtain();
-include '/var/www/cattool/lib/utils/log.class.php';
-include '/var/www/cattool/lib/utils/utils.class.php';
-include '/var/www/cattool/lib/utils/cat.class.php';
-include '/var/www/cattool/lib/utils/QA.php';
-
 require_once "PHPUnit/Autoload.php";
 
 class Framework_AllTests {
@@ -36,7 +29,8 @@ class Framework_AllTests {
 
         $suite = new PHPUnit_Framework_TestSuite('PHPUnit Suite');
 
-        $suite->addTestSuite('QATest');
+        $suite->addTestSuite('Tests_QATest');
+        $suite->addTestSuite('Tests_EnginesTest');
         // ...
 
         return $suite;

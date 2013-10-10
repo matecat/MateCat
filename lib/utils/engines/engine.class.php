@@ -42,7 +42,7 @@ abstract class Engine {
 		$this->default_penalty = empty($data['penalty']) ? 0 : $data['penalty'];
 	}
 
-	private function curl($url) {
+	protected function curl($url) {
 		$ch = curl_init();
 
 		curl_setopt($ch, CURLOPT_URL, $url);
@@ -71,6 +71,8 @@ abstract class Engine {
 		$this->buildQuery($function, $parameters);
 		$res=$this->curl($this->url);
 		$this->raw_result = json_decode($res,true);
+        //Log::doLog($this->url);
+        //Log::doLog($res);
 	}
 
 	private function buildQuery($function, $parameters) {

@@ -57,13 +57,9 @@ class MT extends Engine {
 
 	public function __construct($id) {
 		parent::__construct($id);
-		try{
-		if ($this->type != "MT") {
-			throw new Exception("not a MT engine");
-		}
-		}catch(Exception $e){
-			//do nothing?
-		}
+        if ($this->type != "MT") {
+            throw new Exception("not a MT engine");
+        }
 	}
 
 	private function fix_language($lang) {

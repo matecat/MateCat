@@ -281,7 +281,7 @@ function getEngineData( $id ) {
         return $errno * -1;
     }
 
-    return $results[ 0 ];
+    return @$results[ 0 ];
 }
 
 function getSegment( $id_segment ) {

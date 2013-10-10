@@ -1,47 +1,15 @@
 <?php
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-if( !class_exists('INIT', false )){
-    include '/var/www/cattool/inc/config.inc.php';
-    @INIT::obtain();
-    include '/var/www/cattool/lib/utils/log.class.php';
-    include '/var/www/cattool/lib/utils/utils.class.php';
-    include '/var/www/cattool/lib/utils/cat.class.php';
-    include '/var/www/cattool/lib/utils/QA.php';
-    require_once "PHPUnit/Autoload.php";
-}
-
 /**
  * Description of QATest
  *
  * @author domenico
  */
-class QATest extends PHPUnit_Framework_TestCase {
-    
-    public $reflected;
-    public $method;
-    
-    //put your code here
-    public function setUp() {
-        parent::setUp();
-        $this->thisTest = microtime(true);
+include_once("AbstractTest.php");
+include_once INIT::$UTILS_ROOT . '/cat.class.php';
+include_once INIT::$UTILS_ROOT . '/QA.php';
+class Tests_QATest extends Tests_AbstractTest {
 
-        $this->reflected = new ReflectionClass( 'QA' );
-        $this->method = $this->reflected->getMethod('_checkContentConsistency');
-        $this->method->setAccessible(true);
-
-    }
-
-    public function tearDown() {
-        parent::tearDown();
-        $resultTime = microtime(true) - $this->thisTest;
-        echo " " . str_pad( $this->getName(false) , 35, " ", STR_PAD_RIGHT ). " - Did in " . $resultTime . " seconds.\n";
-    }
-    
     public function testView2RawXliff() {
 
         $source_seg = <<<SRC

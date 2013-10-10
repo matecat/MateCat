@@ -81,7 +81,7 @@ class setContributionMTController extends ajaxcontroller {
         }
 
 		//mt engine to contribute to
-		if (empty($job_data['id_mt_engine'])){
+		if ( $job_data['id_mt_engine'] <= 1 ){
 			return false;
 		}
 
