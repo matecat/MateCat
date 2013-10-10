@@ -93,7 +93,7 @@ UI = {
         this.savedSelActiveElement = null;
         this.firstOpenedSegment = false;
         this.autoscrollCorrectionEnabled = true;
-        this.searchEnabled = false;
+        this.searchEnabled = true;
         if(this.searchEnabled) $('#filterSwitch').show();
         this.viewConcordanceInContextMenu = true;
         if(!this.viewConcordanceInContextMenu) $('#searchConcordance').hide();
@@ -1369,13 +1369,9 @@ UI = {
             }
             var what = (typeof p['source'] != 'undefined')? ' .source' : (typeof p['target'] != 'undefined')? ' .editarea' : '';
             q = "section" + status + what;
-    //        console.log("$('section" + s(tatus + what + "')");
-            var reg = new RegExp(txt, "gi");
-            $(q + ":contains('"+txt+"')").each(function() {
-    //            console.log('prima: ',$(this).html());
-                $(this).html($(this).html().replace(reg,'<mark class="searchMarker">'+txt+'</mark>'));
-    //            $(this).html($(this).html().replace(txt,'<mark class="searchMarker">'+txt+'</mark>'));
-    //            console.log('dopo: ',$(this).html());
+            var reg = new RegExp('('+txt+')', "gi");
+            $(q + ":containsNC('"+txt+"')").each(function() {
+                $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>'));
             });            
         }
         
@@ -3518,6 +3514,12 @@ $(document).ready(function() {
     setInterval(function() {
         UI.checkWarnings(false);
     }, config.warningPollingInterval);
+});
+
+$.extend($.expr[":"], {
+    "containsNC": function(elem, i, match, array) {
+        return (elem.textContent || elem.innerText || "").toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
+    }
 });
 
 $(window).resize(function() {
