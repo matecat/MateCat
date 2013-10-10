@@ -1256,7 +1256,8 @@ UI = {
         this.searchEnabled = true;
     },            
     execFind: function() {
-console.log ("execFind");
+        $('.search-display').removeClass('displaying');
+        
         if($('#search-source').val() != '') {
             this.searchParams['source'] = $('#search-source').val();
         } else {
@@ -1313,7 +1314,6 @@ console.log ("execFind");
         
     },
     execFind_success: function(d) {
-        console.log(d.segments);
         this.numSearchResultsItem = d.total;
         this.searchResultsSegments = d.segments;
 // temp
@@ -1348,14 +1348,14 @@ console.log ("execFind");
         
         if(this.searchParams['status']) query += (((this.searchParams['source'])||(this.searchParams['target']))? ' and' : '') + ' status <span class="param">' + this.searchParams['status'] + '</span>';
         $('.search-display .query').html(query);
-//        $('.search-display').show();
+        $('.search-display').addClass('displaying');
     },
     execNext: function() {
         this.gotoNextResultItem();
 //        this.gotoSearchResultAfter($('section.currSearchItem').attr('id'));
     },
-    markSearchResults: function() {
-        this.clearSearchMarkers();
+    markSearchResults: function(where, seg) { // if where is specified mark only the range of segment before or after seg (no previous clear)
+        if(typeof where == 'undefined') this.clearSearchMarkers();
         var p = this.searchParams;
         if((typeof p['source'] == 'undefined')&&(typeof p['target'] == 'undefined')) {
             console.log('solo status');
@@ -1374,9 +1374,32 @@ console.log ("execFind");
             var what = (typeof p['source'] != 'undefined')? ' .source' : (typeof p['target'] != 'undefined')? ' .editarea' : '';
             q = "section" + status + what;
             var reg = new RegExp('('+txt+')', "gi");
-            $(q + ":containsNC('"+txt+"')").each(function() {
-                $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>'));
-            });            
+            if(typeof where == 'undefined') {
+                $(q + ":containsNC('"+txt+"')").each(function() {
+                    $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>'));
+                });                    
+            } else {
+                sid = $(seg).attr('id');
+                if(where == 'before') {
+                    $('section').each(function(index) {
+                        if($(this).attr('id') < sid) {
+                            $(this).addClass('justAdded');
+                        }
+                    })
+                } else {
+                    $('section').each(function(index) {
+                        if($(this).attr('id') > sid) {
+                            $(this).addClass('justAdded');
+                        }
+                    })                    
+                }
+                $("section" + status + ".justAdded" + what + ":containsNC('"+txt+"')").each(function() {
+//                $(q + ".justAdded:containsNC('"+txt+"')").each(function() {
+                    $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>'));
+                });
+                $('section.justAdded').removeClass('justAdded');
+            }
+        
         }
     },
     clearSearchMarkers: function() {
@@ -1632,6 +1655,8 @@ console.log ("execFind");
             this.processErrors(d.error, 'getMoreSegments');
         where = d.data['where'];
         if (typeof d.data['files'] != 'undefined') {
+            firstSeg = $('section').first();
+            lastSeg = $('section').last();
             var numsegToAdd = 0;
             $.each(d.data['files'], function() {
                 numsegToAdd = numsegToAdd + this.segments.length;
@@ -1641,6 +1666,10 @@ console.log ("execFind");
             // if getting segments before, UI points to the segment triggering the event 
             if ((where == 'before') && (numsegToAdd)) {
                 this.scrollSegment($('#segment-' + this.segMoving));
+            }
+            if(this.body.hasClass('searchActive')) {
+                segLimit = (where == 'before')? firstSeg : lastSeg;
+                this.markSearchResults(where, segLimit);                 
             }
 
             this.markTags();

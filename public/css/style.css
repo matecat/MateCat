@@ -662,6 +662,23 @@ padding-top:5px !important;
     margin: 0;
     font-size: 13px;
     }
+.search-display p.found
+    {
+    display: none;
+    }
+    .search-display.displaying p.found
+        {
+        display: block;
+        }
+        
+.search-display p.searching
+    {
+    display: block;
+    }
+    .search-display.displaying p.searching
+        {
+        display: none;
+        }
 .search-display span.param
     {
     font-weight: bold;
