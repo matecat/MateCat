@@ -1315,8 +1315,9 @@ console.log ("execFind");
     execFind_success: function(d) {
 //        console.log(d);
         this.numSearchResultsItem = d.total;
-//        this.searchResultsSegments = d.segments;
+        this.searchResultsSegments = d.segments;
 // temp
+/*
         var ar = [];
         $('mark.searchMarker').each(function() {
             var id = $(this).parents('section').attr('id').split('-')[1];
@@ -1324,8 +1325,10 @@ console.log ("execFind");
         });
 
         ar.push(parseInt(ar[ar.length-1])+400);
+
 //        console.log(ar[ar.length-1]);
         this.searchResultsSegments = ar;
+*/
 // end temp        
         this.numSearchResultsSegments = d.segments.length;
         this.updateSearchDisplay();
