@@ -13,6 +13,16 @@ class errObject {
     public $outcome;
     public $debug;
 
+    private $orig_debug;
+
+    /**
+     * Output externally the original debug string, needed for occurrence count
+     * @return string
+     */
+    public function getOrigDebug(){
+        return $this->orig_debug;
+    }
+
     /**
      * Static instance constructor
      *
@@ -22,6 +32,7 @@ class errObject {
     public static function get( array $errors ) {
         $errObj = new self();
         $errObj->outcome = $errors['outcome'];
+        $errObj->orig_debug = $errors['debug'];
         $errObj->debug = $errors['debug'];
         return $errObj;
     }
@@ -251,7 +262,13 @@ class QA {
     protected function _addError($errCode) {
 
         //Real error Code log
-        //Log::doLog( $errCode . " :: " . $this->_errorMap[$errCode]);
+//        try {
+//            throw new Exception('');
+//        } catch( Exception $e ){
+//            Log::doLog( $errCode . " :: " . $this->_errorMap[$errCode]);
+//            $trace = $e->getTrace();
+//            Log::doLog( $trace[1] );
+//        }
 
         switch( $errCode ) {
             case self::ERR_COUNT:
@@ -353,8 +370,12 @@ class QA {
              * @see http://www.php.net/manual/en/function.array-unique.php
              */
             $list = array_unique($list);
+
+            /**
+             * @param $errObj errObject
+             */
             foreach ($list as $errObj) {
-                $errObj->debug = $errObj->debug . " ( " . $errorCount[$errObj->outcome] . " )";
+                $errObj->debug = $errObj->getOrigDebug() . " ( " . $errorCount[$errObj->outcome] . " )";
             }
         }
         return $list;
@@ -574,7 +595,7 @@ class QA {
                 );
 
                 //set depth and increment for next occurrence
-                $srcDomElements['DOMElement'][ $depth++ ] = $plainRef;
+                $srcDomElements['DOMElement'][] = $plainRef;
 
                 //count occurrences of this tag name when needed, also transport id reference.
                 @$srcDomElements[$element->tagName][] = $elementID;
@@ -635,12 +656,12 @@ class QA {
             $rrorList = libxml_get_errors();
             foreach( $rrorList as $error ){
                 if( $error->code == 76 /* libxml _xmlerror XML_ERR_TAG_NOT_FINISHED */ ){
-                    if( preg_match( '#<x[^/>]+>#', $xmlString  ) ){
+                    if( preg_match( '#<x[^/>]+>#', $xmlString  ) && preg_match( '# x #', $error->message ) ){
                         $this->_addError(self::ERR_UNCLOSED_X_TAG);
                     }
                 }
-
             }
+            //Log::doLog($rrorList);
 
             $this->_addError($targetErrorType);
         }
@@ -685,8 +706,8 @@ class QA {
             return $this->getErrors();
         }
 
-        $this->_checkContentConsistency( $srcNodeList, $trgNodeList );
         $this->_checkTagsBoundary();
+        $this->_checkContentConsistency( $srcNodeList, $trgNodeList );
 
         // all checks completed
         return $this->getErrors();
@@ -738,6 +759,8 @@ class QA {
         // <x ... />
         preg_match_all('#</g>[\s\t\x{a0}\r\n]+|[\s\t\x{a0}\r\n]+<(?:x[^>]+|[^/>]+)>#u', rtrim($this->source_seg), $source_tags);
         preg_match_all('#</g>[\s\t\x{a0}\r\n]+|[\s\t\x{a0}\r\n]+<(?:x[^>]+|[^/>]+)>#u', rtrim($this->target_seg), $target_tags);
+//        preg_match_all('#[\s\t\x{a0}\r\n]+<(?:x[^>]+|[^/>]+)>#u', rtrim($this->source_seg), $source_tags);
+//        preg_match_all('#[\s\t\x{a0}\r\n]+<(?:x[^>]+|[^/>]+)>#u', rtrim($this->target_seg), $target_tags);
         $source_tags = $source_tags[0];
         $target_tags = $target_tags[0];
         if( count($source_tags) != count($target_tags) ){
@@ -807,15 +830,14 @@ class QA {
      * After realignment a Tag consistency check is performed ( QA::performTagCheckOnly() )
      * if no errors where found the dom is reloaded and tags map are updated.
      *
-     *
-     *
-     * @return errObject[]
+     * @return errObject[]|null
      */
     public function tryRealignTagID() {
 
         try {
             $this->_prepareDOMStructures();
         } catch ( DOMException $ex ) {
+            Log::doLog( $ex->getMessage() );
             return $this->getErrors();
         }
 
@@ -919,7 +941,8 @@ class QA {
 
             if( !is_null( $srcTagReference['parent_id'] ) ){
 
-                $srcNodeContent = $this->_queryDOMElement( $this->srcDom, $srcTagReference )->textContent;
+                $srcNode = $this->_queryDOMElement( $this->srcDom, $srcTagReference );
+                $srcNodeContent = $srcNode->textContent;
 
                 foreach( $this->trgDomMap['DOMElement'] as $k => $elements ){
                     if( $elements['id'] == $srcTagReference['id'] ){
@@ -927,11 +950,13 @@ class QA {
                     }
                 }
 
-                $trgNodeContent = $this->_queryDOMElement( $this->trgDom, $trgTagReference )->textContent;
+                $trgNode = $this->_queryDOMElement( $this->trgDom, $trgTagReference );
+                $trgNodeContent = $trgNode->textContent;
 
             } else {
 
-                $srcNodeContent = $srcNodeList->item($srcTagReference['node_idx'])->textContent;
+                $srcNode = $srcNodeList->item($srcTagReference['node_idx']);
+                $srcNodeContent = $srcNode->textContent;
 
                 foreach( $this->trgDomMap['DOMElement'] as $k => $elements ){
                     if( $elements['id'] == $srcTagReference['id'] ){
@@ -940,11 +965,40 @@ class QA {
                 }
 
                 $trgTagPos = $trgTagReference['node_idx'];
-                $trgNodeContent = $trgNodeList->item( $trgTagPos )->textContent;
+                $trgNode =  $trgNodeList->item( $trgTagPos );
+                $trgNodeContent = $trgNode->textContent;
 
             }
 
-            $this->_checkHeadWhiteSpaces($srcNodeContent, $trgNodeContent, $trgTagReference);
+            /**
+             * Skip double check for first whitespace if there are child nodes.
+             * Since this check is performed over ALL elements ( parent and childes )
+             * Avoid to count 2 times a first space for nodeValue when nested
+             *
+             * @See: http://www.php.net/manual/en/class.domnode.php#domnode.props.nodevalue
+             *
+             * nodeValue
+             *   The value of this node, depending on its type
+             *
+             * @See: http://www.php.net/manual/en/class.domnode.php#domnode.props.textcontent
+             * textContent
+             *   This attribute returns the text content of this node and its descendants.
+             *
+             * @example '<g id="pt231"><g id="pt232"> ELSA AND JOY'S APARTMENT </g></g>'
+             * <code>
+             *
+             * // The space before ELSA was checked two times because:
+             *
+             *  ( DOMElement id pt231 )->nodeValue == ( DOMElement id pt232 )->nodeValue
+             *
+             * </code>
+             *
+            */
+            $domSrcNodeString = $srcNode->ownerDocument->saveXML( $srcNode );
+            if( !preg_match( '/^<g[^>]+></', $domSrcNodeString ) ){
+                $this->_checkHeadWhiteSpaces($srcNodeContent, $trgNodeContent, $trgTagReference);
+            }
+
             $this->_checkTailWhiteSpaces($srcNodeContent, $trgNodeContent, $trgTagReference);
             $this->_checkHeadTabs($srcNodeContent, $trgNodeContent);
             $this->_checkTailTabs($srcNodeContent, $trgNodeContent);
@@ -960,34 +1014,33 @@ class QA {
      *
      * @param DOMDocument $domDoc
      * @param $TagReference
-     * @return DOMElement
+     * @return DOMNode
      */
     protected function _queryDOMElement( DOMDocument $domDoc, $TagReference ) {
 
         //Old implementation
-        //        $Node = new DOMElement( 'g' );
-        //
-        //        $availableParentList = $domDoc->getElementsByTagName( $TagReference[ 'name' ] );
-        //        $availableParentsLen = $availableParentList->length;
-        //
-        //        for ( $i = 0; $i < $availableParentsLen; $i++ ) {
-        //
-        //            $element = $availableParentList->item( $i );
-        //            if ( $element->getAttribute( 'id' ) == $TagReference[ 'id' ] ) {
-        //
-        //                /**
-        //                 * @var DOMElement $Node
-        //                 */
-        //                $Node = $element;
-        //
-        //                //Log::doLog( 'Found: ' . $availableParentList->item($i)->textContent );
-        //            }
-        //        }
+//        $availableParentList = $domDoc->getElementsByTagName( $TagReference[ 'name' ] );
+//        $availableParentsLen = $availableParentList->length;
+//
+//        for ( $i = 0; $i < $availableParentsLen; $i++ ) {
+//
+//            $element = $availableParentList->item( $i );
+//            if ( $element->getAttribute( 'id' ) == $TagReference[ 'id' ] ) {
+//
+//                /**
+//                 * @var DOMElement $Node
+//                 */
+//                $Node = $element;
+//
+//                Log::doLog( 'Found: ' . $availableParentList->item($i)->textContent );
+//            }
+//        }
 
-        $Node = $domDoc->getElementById( $TagReference['id'] );
-        return ( !is_null($Node) ? $Node : new DOMElement( 'g' ) );
+        $xpath = new DOMXPath( $domDoc );
+        $query = '//*[@id="' . $TagReference['id'] . '"]';
 
-        return $Node;
+        $Node = $xpath->query($query);
+        return ( ( $Node->length == 0 || $Node == false ) ? new DOMNode( 'g' ) : $Node->item(0) );
 
     }
 
@@ -1059,11 +1112,20 @@ class QA {
             } else {
                 $_trgNodeContent = preg_replace( "/^\x{a0}{1}/u", Utils::unicode2chr(0X20), $_trgNodeContent );
             }
-
             $_nodeNormalized->nodeValue = $_trgNodeContent;
 
+            $xpath = new DOMXPath( $this->normalizedTrgDOM );
+            $query = '//*[@id="' . $trgTagReference['id'] . '"]';
+
+            $node = $xpath->query($query);
+
+            foreach( $node as $n ){
+                //only a parent node can replace it's child
+                $n->parentNode->replaceChild( $this->normalizedTrgDOM->importNode( $_nodeNormalized, true ), $n );
+            }
+
         }
- 
+
     }
 
     /**
@@ -1095,6 +1157,17 @@ class QA {
     		$this->_addError(self::ERR_WS_TAIL);
     	}
 
+//        //add another check for nested tag with ending spaces
+//        $trailingSrcChar = mb_substr($srcNodeContent, $srcLen - 2, 2, 'utf-8');
+//        $trailingTrgChar = mb_substr($trgNodeContent, $trgLen - 2, 2, 'utf-8');
+//        Log::doLog('"'.$srcNodeContent.'"');
+//        Log::doLog('"'.$trgNodeContent.'"');
+//        Log::doLog('"'.$trailingSrcChar.'"');
+//        Log::doLog('"'.$trailingTrgChar.'"');
+//        if ( ( $trailingSrcChar == "  " || $trailingTrgChar == "  " ) && $trailingSrcChar != $trailingTrgChar) {
+//            $this->_addError(self::ERR_WS_TAIL);
+//        }
+
     	//normalize the target first space according to the source type
     	if( $srcHasTailNBSP != $trgHasTailNBSP && !$this->thereAreErrors() ){
 
@@ -1119,7 +1192,17 @@ class QA {
 
             $_nodeNormalized->nodeValue = $_trgNodeContent;
 
-    	}
+            $xpath = new DOMXPath( $this->normalizedTrgDOM );
+            $query = '//*[@id="' . $trgTagReference['id'] . '"]';
+
+            $node = $xpath->query($query);
+
+            foreach( $node as $n ){
+                //only a parent node can replace it's child
+                $n->parentNode->replaceChild( $this->normalizedTrgDOM->importNode( $_nodeNormalized, true ), $n );
+            }
+
+        }
 
     }
 

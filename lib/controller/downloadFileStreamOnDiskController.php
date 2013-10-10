@@ -31,6 +31,7 @@ class downloadFileStreamOnDiskController extends downloadController {
 	public function doAction() {
 		$debug=array();
 		$debug['total'][]=time();
+
 		$debug['get_file'][]=time();
 		$files_job = getFilesForJob($this->id_job, $this->id_file);
 		$debug['get_file'][]=time();
@@ -77,12 +78,11 @@ class downloadFileStreamOnDiskController extends downloadController {
 
 			$debug['get_segments'][]=time();
 			//create a secondary indexing mechanism on segments' array; this will be useful
-            //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
+                        //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
 			foreach($data as $i=>$k){
-				$data[ 'matecat|' . $k['internal_id'] ][]=$i;
-			}
+                           $data[ 'matecat|' . $k['internal_id'] ][]=$i;
+                        }
 			$transunit_translation = "";
-
 			$debug['replace'][] = time();
 			//instatiate parser
 			$xsp = new XliffSAXTranslationReplacer( $path, $data, $jobData['target'] );
@@ -134,7 +134,8 @@ class downloadFileStreamOnDiskController extends downloadController {
 		foreach ($output_content as $f) {
 			$pathinfo = pathinfo($f['filename']);
             $f['filename'] = $pathinfo['basename'] . ".sdlxliff";
-			$zip->addFromString($f['filename'], $f['content']);
+            //Php Zip bug, utf-8 not supported
+			$zip->addFromString( iconv( "UTF-8", 'ASCII//TRANSLIT//IGNORE', $f['filename'] ), $f['content']);
 		}
 
 		// Close and send to users

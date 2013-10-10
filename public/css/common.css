@@ -86,13 +86,13 @@ footer li
     margin: 0 0px 0 0;
     padding: 5px 10px;
     float: left;
-    border-left: 1px solid #333;
+    /*border-left: 1px solid #333;*/
     }
     footer nav li
         {
         height: 12px;
         padding-top: 0px;
-        border-left: 1px solid #fff;
+        border-right: 1px solid #fff;
         margin-top: 5px;
         }
         footer nav li:first-child
@@ -218,7 +218,7 @@ footer nav
 #welcomebox
     {
 	float: right;
-    margin-left: 50px;
+    margin-left: 8px;
     }
     
 /*browser supported box */
@@ -283,6 +283,117 @@ footer nav
     line-height: 27px;
     }
 
+
+
+
+/*.breadcrumbs{background:#efefef;width:400px;    border-top: 2px solid #333;
+    border-right: 2px solid #333;
+    border-left: 2px solid #333;color:#333 !important ;margin:10px 0 -1px 0;padding:10px 0 10px 0 !important}
+*/
+.topMenu
+    {
+    position: fixed;
+/*    top: -500px;*/
+
+
+    top: -1000px;
+    left: 208px;
+    width: 400px;
+    background: #fff;
+    border: 1px solid #333;
+    z-index: 99999999;
+    text-align: left;
+    padding: 0;
+font-size:14px;
+box-shadow: 0px 0px 10px #888888;
+
+    }
+
+.topMenu ul 
+    {
+
+margin:0px 0 0 0;padding:0;float:left;width:100%;
+background:#efefef;
+box-shadow: inset 0 2px 3px 1px #c3c2c1;
+    }
+
+
+
+
+
+.topMenu ul li a
+    {
+  
+    text-decoration: none;
+    color: #333;
+padding:10px 10px 10px 30px;
+background: url(../img/sublevel.png) 15px 18px no-repeat;
+display:block;
+ -webkit-transition: all 100ms ease-in;
+    -moz-transition: all 100ms ease-in;
+
+    }
+
+.topMenu ul li 
+    {
+
+
+
+border-bottom:1px solid #333;
+
+    }
+
+
+
+
+
+.topMenu ul li:last-child
+    {
+border-bottom:0;
+
+    }
+
+.topMenu ul li.current a
+    {
+background:#efefef url(../img/currentsegment.png) 15px 18px no-repeat 
+    }
+
+
+
+.currSegment a
+
+ {
+background:#efefef url(../img/currentsegment.png) 14px 18px no-repeat !important
+    }
+
+
+
+
+
+.currSegment a:hover
+ {
+background:#fff url(../img/currentsegment.png) 14px 18px no-repeat !important
+    }
+
+
+    .topMenu ul li a:hover
+        {
+        text-decoration: underline;
+
+
+
+
+background:#fff url(../img/sublevel.png) 15px 18px no-repeat;
+
+
+        }  
+
+
+
+
+
+
+  
 .slideMenu
     {
     position: fixed;
@@ -520,5 +631,84 @@ footer nav
     float: right;
     }    
     
-    
-    
+.searchbox
+	{
+	display: none;
+	position: fixed;
+	float: left;
+	width: 100%;
+	min-height: 20px;
+	font-size:12px;
+	border-bottom: 1px solid #666;
+	background:#efefef url(../img/point.gif) 0 0 repeat-x;
+	margin-top: -27px;
+	padding:5px 4% 0px 4%;
+	-moz-box-shadow: 0 1px 3px #666;
+	-webkit-box-shadow: 0 1px 10px #666;
+	-moz-border-radius-bottom-right:2px;
+	-webkit-border-bottom-right-radius:2px;
+	-moz-border-radius-bottomleft:2px;
+	-webkit-border-bottom-left-radius:2px;
+	z-index: 9999;
+	}
+	body.filterOpen .searchbox
+		{
+		display: block;
+		}
+	
+.searchbox label
+	{
+	display: inline;
+	width: auto !important;
+	margin-right: 5px;
+	text-transform: uppercase;
+	}
+
+
+.searchbox input[type=button],
+.searchbox input[type=submit]
+	{
+	text-transform: uppercase;
+	}
+.searchbox .block
+	{
+	float: left;
+	margin-right: 20px;
+	text-align: left;
+	margin-top: 2px;
+	}
+.searchbox .block .field
+	{
+        width: 100%;
+        text-align: right;
+        margin-bottom: 5px;
+	}
+.searchbox .block.right
+	{
+	float: right !important;
+	margin-right: 8% !important;
+	margin-top: -5px !important;
+	}    
+.searchbox .block.right .block
+	{
+	margin-right: 0px;
+	margin-left: 20px;
+	}
+.searchbox .block.right .block .btn
+	{
+	margin-right: 0px;
+	margin-left: 10px;
+	}
+.searchbox .block.vcentered
+	{
+	padding-top: 7px !important;
+	}        
+.searchbox #exec-replace
+	{
+	float: none;
+	}
+
+section mark.searchMarker.currSearchItem
+	{
+	background: orange;
+	}

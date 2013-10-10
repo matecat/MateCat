@@ -37,6 +37,10 @@ class INIT {
     public static $VOLUME_ANALYSIS_ENABLED;
     public static $WARNING_POLLING_INTERVAL;
     public static $SEGMENT_QA_CHECK_INTERVAL;
+    public static $SAVE_SHASUM_FOR_FILES_LOADED;
+
+    public static $SPELL_CHECK_TRANSPORT_TYPE;
+    public static $SPELL_CHECK_ENABLED;
 
     private function initOK() {
 
@@ -89,11 +93,16 @@ class INIT {
         register_shutdown_function( 'INIT::sessionClose' );
 
         $root = realpath(dirname(__FILE__) . '/../');
-        self::$ROOT    = $root; // Accesible by Apache/PHP
+        self::$ROOT = $root;  // Accesible by Apache/PHP
         self::$BASEURL = "/"; // Accesible by the browser
 
-        $protocol       = stripos( $_SERVER[ 'SERVER_PROTOCOL' ], "https" ) === false ? "http" : "https";
-        self::$HTTPHOST = "$protocol://$_SERVER[HTTP_HOST]";
+        if( stripos( PHP_SAPI, 'cli' ) === false ){
+            $protocol=stripos($_SERVER['SERVER_PROTOCOL'],"https")===FALSE?"http":"https";
+            self::$HTTPHOST="$protocol://$_SERVER[HTTP_HOST]";
+        } else {
+            echo "\nPHP Running in CLI mode.\n\n";
+            //Possible CLI configurations
+        }
 
         set_include_path(get_include_path() . PATH_SEPARATOR . $root);
 
@@ -135,15 +144,19 @@ class INIT {
         }
 
         self::$ENABLED_BROWSERS = array('chrome', 'safari');
-//        self::$ENABLED_BROWSERS = array('chrome', 'firefox', 'safari');
-        self::$CONVERSION_ENABLED = false;
+        self::$CONVERSION_ENABLED = true;
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-        self::$BUILD_NUMBER = '0.3.2';
-        self::$VOLUME_ANALYSIS_ENABLED = false;
+        self::$BUILD_NUMBER = '0.3.3.2';
+        self::$VOLUME_ANALYSIS_ENABLED = true;
 
         self::$WARNING_POLLING_INTERVAL = 10; //seconds
         self::$SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
-        
+
+        self::$SPELL_CHECK_TRANSPORT_TYPE = 'shell';
+        self::$SPELL_CHECK_ENABLED = false;
+
+        self::$SAVE_SHASUM_FOR_FILES_LOADED = true;
+
         self::$SUPPORTED_FILE_TYPES = array(
             'Office' => array(
                 'doc' => array(''),
@@ -152,7 +165,6 @@ class INIT {
                 'dotx' => array(''),
                 'docm' => array(''),
                 'dotm' => array(''),
-                'rtf' => array(''),
                 'pdf' => array(''),
                 'xls' => array(''),
                 'xlt' => array(''),

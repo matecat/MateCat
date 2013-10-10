@@ -1,4 +1,4 @@
-﻿body {margin:0;padding:0;}
+body {margin:0;padding:0;}
 
 
 
@@ -474,7 +474,7 @@ h2.payoff
 .uploadbtn:hover{-moz-box-shadow: 0 1px 2px #666;-webkit-box-shadow: 0 1px 2px #666;box-shadow: 0 1px 2px #666;background:#12b4df}
 .uploadbtn:active{-moz-box-shadow: inset 0 1px 1px #888;-webkit-box-shadow: inset 0 1px 1px #888;}
 .disabled, .disabled:hover, .disabled:active{cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;background:#ccc !important}
-.uploadbtn-box{text-align:center;float:right;}
+.uploadbtn-box{text-align:center;float:right; margin-bottom: 30px;}
 .uploadbtn-box p{text-align:center;margin:-2px 0 0 5px;font-size:13px;font-weight:normal;color:#999;display:none;text-align:center;}
 .uploadbtn-box:hover p{display:block;}
 
@@ -717,7 +717,7 @@ header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margi
     {
     top: 41%;
     left: 38%;
-    width: 850px;
+    width: auto;
     }
 .popup-languages .popup
     {
@@ -772,6 +772,8 @@ header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margi
 	    column-count: 6;	
 	    -moz-column-count: 6;
 		width:100% !important;
+height:442px;
+margin-top:20px;
 		}
 
 .popup ul li
@@ -830,7 +832,10 @@ header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margi
 	}
 	.listlang li.on
 		{
-		background: #ccc;
+		font-weight:bold;
+font-size:18px;
+line-height:28px;
+padding-bottom:3px;
 		}		
 
 .listlang label

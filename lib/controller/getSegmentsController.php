@@ -1,15 +1,13 @@
 <?php
-
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include INIT::$UTILS_ROOT . "/filetype.class.php";
 include INIT::$UTILS_ROOT . "/cat.class.php";
-include INIT::$UTILS_ROOT . "/langs/languages.class.php";
+include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-
 class getSegmentsController extends ajaxcontroller {
 
     private $data = array();
@@ -71,25 +69,25 @@ class getSegmentsController extends ajaxcontroller {
     public function doAction() {
 
         //get Job Infos
-        $job_data = getJobData((int) $this->jid);
+        $job_data = getJobData( (int) $this->jid );
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
-        if (!$pCheck->grantJobAccessByJobData($job_data, $this->password)) {
+        if( !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ){
             $this->result['error'][] = array("code" => -10, "message" => "wrong password");
             return;
         }
 
-        $lang_handler = Languages::getInstance();
+		$lang_handler = Languages::getInstance();
 
-        if ($this->ref_segment == '') {
-            $this->ref_segment = 0;
-        }
+		if ($this->ref_segment == '') {
+			$this->ref_segment = 0;
+		}
 
-        $data = getMoreSegments($this->jid, $this->password, $this->step, $this->ref_segment, $this->where);
+		$data = getMoreSegments($this->jid, $this->password, $this->step, $this->ref_segment, $this->where);
 
-        $first_not_translated_found = false;
-        foreach ($data as $i => $seg) {
+		$first_not_translated_found = false;
+		foreach ($data as $i => $seg) {
 
             if ($this->where == 'before') {
                 if (((float) $seg['sid']) >= ((float) $this->ref_segment)) {
@@ -97,37 +95,37 @@ class getSegmentsController extends ajaxcontroller {
                 }
             }
 
-            if (empty($this->pname)) {
-                $this->pname = $seg['pname'];
-            }
+			if (empty($this->pname)) {
+				$this->pname = $seg['pname'];
+			}
 
-            if (empty($this->last_opened_segment)) {
-                $this->last_opened_segment = $seg['last_opened_segment'];
-            }
+			if (empty($this->last_opened_segment)) {
+				$this->last_opened_segment = $seg['last_opened_segment'];
+			}
 
-            if (empty($this->cid)) {
-                $this->cid = $seg['cid'];
-            }
+			if (empty($this->cid)) {
+				$this->cid = $seg['cid'];
+			}
 
-            if (empty($this->pid)) {
-                $this->pid = $seg['pid'];
-            }
+			if (empty($this->pid)) {
+				$this->pid = $seg['pid'];
+			}
 
-            if (empty($this->tid)) {
-                $this->tid = $seg['tid'];
-            }
+			if (empty($this->tid)) {
+				$this->tid = $seg['tid'];
+			}
 
-            if (empty($this->create_date)) {
-                $this->create_date = $seg['create_date'];
-            }
+			if (empty($this->create_date)) {
+				$this->create_date = $seg['create_date'];
+			}
 
-            if (empty($this->source_code)) {
-                $this->source_code = $seg['source'];
-            }
+			if (empty($this->source_code)) {
+				$this->source_code = $seg['source'];
+			}
 
-            if (empty($this->target_code)) {
-                $this->target_code = $seg['target'];
-            }
+			if (empty($this->target_code)) {
+				$this->target_code = $seg['target'];
+			}
 
             if (empty($this->source)) {
                 $s = explode("-", $seg['source']);
@@ -145,10 +143,10 @@ class getSegmentsController extends ajaxcontroller {
                 $this->err = $seg['serialized_errors_list'];
             }
 
-            $id_file = $seg['id_file'];
+			$id_file = $seg['id_file'];
 
-            if (!isset($this->data["$id_file"])) {
-
+			if (!isset($this->data["$id_file"])) {                
+                                
                 $file_stats = CatUtils::getStatsForFile($id_file);
 
                 $this->data["$id_file"]['jid'] = $seg['jid'];
@@ -186,11 +184,8 @@ class getSegmentsController extends ajaxcontroller {
             
             $seg['segment'] = $this->filetype_handler->parse($seg['segment']);
             
-            
-
             $seg['segment'] = CatUtils::rawxliff2view($seg['segment']);
-            
-            
+
             //log::doLog( "1 - ".$seg['translation']);
             $seg['translation'] = CatUtils::rawxliff2view($seg['translation']);
             //log::doLog( "2 - ".$seg['translation']);

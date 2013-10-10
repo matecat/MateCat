@@ -13,8 +13,10 @@ class XliffSAXTranslationReplacer{
 	private $len;//length of the currentBuffer
 	private $segments; //array of translations
 	private $currentId;//id of current <trans-unit>
-	private $empty_tags=array('detected-source-lang','fmt','sdl:cxt','cxt','sdl:node','sdl:ref-file','ref-file','sdl:seg','seg','x');
-	private $regular_tags=array('body','bpt','bpt-props','cxt-def','cxt-defs','ept','sdl:filetype-id','filetype-id','file','file-info','fmt-def','fmt-defs','g','group','header','internal-file','mrk','ph','props','reference','sdl:cxts','cxts','sdl:filetype','filetype','sdl:filetype-info','filetype-info','sdl:ref-files','ref-files','sdl:seg-defs','seg-defs','seg-source','sniff-info','source','st','tag','tag-defs','target','trans-unit','value','xliff');
+	private $empty_tags=array('detected-encoding','detected-source-lang','detected-target-lang','fmt','sdl:cxt','cxt','sdl:node','sdl:ref-file','ref-file','sdl:seg','seg','x');
+	private $regular_tags=array('body','bpt','bpt-props','node-def','cxt-defs','ept','sdl:filetype-id','filetype-id','file','file-info','fmt-def','fmt-defs','g','group','header','internal-file','mrk','ph','props','reference','sdl:cxts','cxts','sdl:filetype','filetype','sdl:filetype-info','filetype-info','sdl:ref-files','ref-files','sdl:seg-defs','seg-defs','seg-source','sniff-info','source','st','tag','tag-defs','target','trans-unit','value','xliff');
+
+    //'cxt-def',
 
     private $target_lang;
 
@@ -187,6 +189,64 @@ class XliffSAXTranslationReplacer{
 			}
 			//flush to pointer
 			$this->postProcAndflush($this->ofp,$tag);
+
+            /**
+             *
+             * ctx-def tags can be either empty and not empty,
+             * we can't determine which type it is a runtime,
+             *
+             * Because they can be only at beginning of trados file ( after the base64 encoded original file )
+             * we patch the content with the original one
+             *
+             */
+            if( $name == "cxt-defs" ){
+
+                $fp_original = fopen( $this->filename, "r" );
+
+                if ( is_resource( $fp_original ) ) {
+
+                    //temp close pointer to rewrite on file
+                    fclose( $this->ofp );
+
+                    $idx = xml_get_current_byte_index($parser);
+
+                    $fp_this_manipulated = null; //initialize file pointer
+                    $partial_orig_xliff = fread( $fp_original, $idx );
+                    preg_match( '/(<cxt-defs.*<\/cxt-defs>)/si', $partial_orig_xliff, $matches );
+                    fclose($fp_original);
+                    if( isset( $matches[1] ) && !empty($matches[1]) ){
+
+                        //open in read/write mode and place pointer at the begin of file
+                        $fp_this_manipulated = fopen( $this->filename.'.out.sdlxliff', "r+" );
+                        //read needed, there should be some changes in files
+                        //temporary file are ALWAYS shorter than original so $idx it's enough
+                        $partial_output_xliff = fread( $fp_this_manipulated, filesize( $this->filename.'.out.sdlxliff' )  );
+
+                        //REWIND
+                        rewind( $fp_this_manipulated );
+
+                        //rewrite cxt-defs content
+                        $output_patched = preg_replace( '/<cxt-defs.*<\/cxt-defs>/si', $matches[1], $partial_output_xliff );
+
+                        //OVERWRITE with the manipulated AND patched content
+                        fwrite( $fp_this_manipulated, $output_patched );
+                        unset($partial_output_xliff); //free mem
+                        unset($output_patched); //free mem
+                        unset($partial_orig_xliff); //free mem
+
+                    } else {
+                        Log::doLog( "failed retrieve ctx-defs content ?!?" );
+                    }
+
+                    //re-attach the global file-pointer
+                    $this->ofp = $fp_this_manipulated;
+
+                } else {
+                    Log::doLog( "could not open some XML input" );
+                }
+
+            }
+
 		}
 		else{
 			//ok, nothing to be done; reset flag for next coming tag
@@ -234,34 +294,35 @@ class XliffSAXTranslationReplacer{
 		$seg ['segment'] = CatUtils::restorenbsp ( $seg ['segment'] );
 		$seg ['translation'] = CatUtils::restorenbsp ( $seg ['translation'] );
                 
-                $seg ['segment'] = CatUtils::restore_xml_entities ( $seg ['segment'] );
+        $seg ['segment'] = CatUtils::restore_xml_entities ( $seg ['segment'] );
 		$seg ['translation'] = CatUtils::restore_xml_entities ( $seg ['translation'] );
-
 
         //QA non sense for source/source check until source can be changed. For now SKIP
 		if (is_null ( $seg ['translation'] ) || $seg ['translation'] == '') {
 			$translation = $seg ['segment'];
 		} else {
-			$translation = $seg ['translation'];
 
-            //consistency check
-            $check = new QA ( $seg ['segment'], $translation );
-            $check->performTagCheckOnly ();
-            if( $check->thereAreErrors() ){
-                $translation = '|||UNTRANSLATED_CONTENT_START|||' . $seg ['segment'] . '|||UNTRANSLATED_CONTENT_END|||';
-                //log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".print_r( $check->getErrors(), true ).")");
+			$translation = $seg ['translation'];
+            if( empty($seg['locked']) ){
+                //consistency check
+                $check = new QA ( $seg ['segment'], $translation );
+                $check->performTagCheckOnly ();
+                if( $check->thereAreErrors() ){
+                    $translation = '|||UNTRANSLATED_CONTENT_START|||' . $seg ['segment'] . '|||UNTRANSLATED_CONTENT_END|||';
+                    Log::doLog("tag mismatch on\n".print_r($seg,true)."\n(because of: ".print_r( $check->getErrors(), true ).")");
+                }
             }
 
 		}
 
 		//fix to escape non-html entities
-		$translation = str_replace("&lt;", '#LT#', $translation);
-		$translation = str_replace("&gt;", '#GT#', $translation);
-		$translation = str_replace("&amp;", '#AMP#', $translation);
-		$translation = html_entity_decode($translation,ENT_NOQUOTES,"utf-8");
-		$translation = str_replace('#AMP#','&amp;', $translation);
-		$translation = str_replace('#LT#','&lt;', $translation);
-		$translation = str_replace('#GT#','&gt;', $translation);
+//		$translation = str_replace("&lt;", '#LT#', $translation);
+//		$translation = str_replace("&gt;", '#GT#', $translation);
+//		$translation = str_replace("&amp;", '#AMP#', $translation);
+//		$translation = html_entity_decode($translation,ENT_NOQUOTES,"utf-8");
+//		$translation = str_replace('#AMP#','&amp;', $translation);
+//		$translation = str_replace('#LT#','&lt;', $translation);
+//		$translation = str_replace('#GT#','&gt;', $translation);
 
 		@$xml_valid = simplexml_load_string("<placeholder>$translation</placeholder>");
 		if (!$xml_valid) {

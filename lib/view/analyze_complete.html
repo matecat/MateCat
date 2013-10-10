@@ -1,0 +1,1397 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <title>Volume Analysis - Matecat</title>
+        <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
+        <meta name="viewport" content="width=device-width"/>
+        <link rel="stylesheet" href="/public/css/analyze.css"/>
+
+        <script type="text/javascript">
+            var config = {
+                status: '${project_status}',
+                totalSegments: '${num_segments}',
+                totalAnalyzed: '${num_segments_analyzed}'
+            }
+        </script>
+
+        <script type="text/javascript" src="/public/js/lib/jquery.js"></script>
+        <script type="text/javascript" src="/public/js/lib/jquery-ui.js"></script>
+
+        <script type="text/javascript" src="/public/js/analyze.js"></script>
+    </head>
+
+
+    <body>
+
+        <div tal:condition="true:project_not_found" metal:use-macro="unsupported_browser.html/project_not_found"/>
+
+        <header>
+            <div class="wrapper"> 
+                <a href="http://matecat.translated.home" class="logo"></a>
+            </div>
+        </header>
+
+    <content tal:condition="not:project_not_found">
+        <div class="loadingbar">
+
+            <div class="wrapper" id="shortloading">
+                <p>Fast word counting...</p>
+
+            </div>
+
+            <div class="cl"></div>
+
+            <div class="wrapper" id="longloading" style="display: none;">
+                <p>TM matching</p>
+                <div class="meter">
+                    <a href="#" class="approved-bar" title="Analyzing 0.0%" style="width:0%"></a>
+                    <a href="#" id="close">close</a>
+                </div>
+            </div>
+        </div>
+
+
+        <div class="wrapper">
+            <h1 id="pid" title="tal:content='pname|nothing'" data-pid="" tal:attributes="data-pid pid" ><span id="pname" tal:content="pname|nothing">Project name</span> - Volume Analysis</h1>
+            <ul class="count">
+                <li style="border-right:1px solid #ccc">
+                    <a href="#">per word</a>
+                </li>
+                <li>
+                    <a href="#">per character</a>
+                </li>
+            </ul>
+
+
+
+
+            <h2>Invoicing Tips</h2>
+            <ul id="standard-equivalent-words" class="cost-table">
+
+                <li class="box"><span class="word-number loading" tal:content="fast_analysis_wc_print"> </span><br/>
+                    Standard equivalent* words<br/>
+                    <span class="days">
+                        <strong>
+                            <span class="workDays" tal:content="tm_wc_time">11,5</span> work 
+                            <span class="unit" tal:content="tm_wc_unit">days</span>
+                        </strong> at 
+                        <span class="wordPerDay">3.000 w/day</span>
+                    </span>
+                </li>
+                <!--<li class="desc">Trados analysis does not handle internal partial matches, machine translation, collaborative TMs like MyMemory and 100% in-context matches. 
+              
+              </li>
+                -->
+
+            </ul>
+
+            <ul id="matecat-equivalent-words" class="cost-table" style="margin:0 20px">
+
+                <li class="box payable"><p class="promo-text" style="display: none"><span>16</span>%<br/>
+                        less</p><span class="word-number loading" tal:content="tm_analysis_wc_print"></span><br/>
+                    Matecat equivalent words<br/>
+                    <span class="days">
+                        <strong>
+                            <span class="workDays" tal:content="fast_wc_time">9,5</span> work 
+                            <span class="unit" tal:content="fast_wc_unit">days</span>
+                        </strong> at 
+                        <span class="wordPerDay">3.000 w/day</span>
+                    </span>
+                </li>
+                <!-- <li class="desc">This is what Matecat reccomends you to use to estimate costs and delivery dates. 
+               Payable words reppresent an estimation of the real effort required for the project. <a href="#" id="more" class="more">+</a>
+               <div class="content">
+               
+               This is what Matecat reccomends you to use to estimate costs and delivery dates. Payable words reppresent an estimation of the real effort required for the project. eg. 100 repeated words are more like 30 new words to translate. To estimate fair payable %, Matecat use aggregated statistics on translator performance and/or industry accepted discount levels. MT payable % strictly depends on the language pair.											
+               
+               </div></li>-->
+            </ul>
+
+            <ul id="raw-words" class="cost-table">
+                <li class="box"><span class="word-number" tal:content="total_raw_word_count_print">40,500</span><br/>
+                    Raw words<br/>
+                     <span class="days">
+                        <strong>
+                            <span class="workDays" tal:content="raw_wc_time">11,5</span> work 
+                            <span class="unit" tal:content="raw_wc_unit">days</span>
+                        </strong> at 
+                        <span class="wordPerDay">3.000 w/day</span>
+                    </span>
+                </li>
+
+                <!--
+                <li class="desc">The total words without any repetition discount.</li>
+                -->
+            </ul>
+            <div class="cl"></div>
+
+            <p class="short-message" style="text-align:center">MateCat let you re-use repeated translations better. Matecat leverages MyMemory, Professional Machine Translation and internal fuzzy matches to make you save money and a faster turnaround.
+                <br />*Equivalent words is how the industry count words after discounting repetition and matches against a desktop translation memory. Like Trados would have done. <a href="">Learn More</a>.
+            </p>
+
+
+
+
+            <div class="billed-message" style="background-color: #ffffdd">Matecat usage fee is <strong>$<span id="usageFee">86.25</span></strong> for this project ($<span id="pricePerWord">0.003</span> per word). 
+                <br /><small style="font-size: 10pt">Translate for free. You pay only when you download the completed translation.
+                    <br />Using Matecat you are <strong>saving aprox. $<span id="discount">600</span></strong> (<span id="totalFastWC">34,350</span> - <span id="totalTMWC">28,000</span> words at $0.10 per word) thanks to the more matches leveraged.</small></div>
+
+            <br/>
+
+            <br/>
+            <br/>
+            <div class="cl"></div>
+            <!--  
+            <a href="#" class="details more-table">Warning: 5 of 17 files analysed are missing</a>
+            -->
+
+
+            <!-- The file upload form used as target for the file upload widget -->
+
+            <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+            <!-- The loading indicator is shown during file processing -->
+            <!-- The table listing the files available for upload/download -->
+            <table cellpadding="0" cellspacing="0" class="upload-table content-table" role="presentation">
+                <tr>
+
+                    <td class="preview">
+                        <img src="/public/img/xliff-icon-retina.png" width="30" height="29"/>        </td>
+                    <td class="name">esempio.xliff</td>
+                    <td class="size"><span>0.90 KB</span></td>
+                    <td colspan="2">0 word found</td>
+
+                    <td>          </td>
+                </tr>
+                <tr>
+
+                    <td class="preview">
+                        <img src="/public/img/xliff-icon-retina.png" width="30" height="29"/>        </td>
+                    <td class="name">esempio.xliff</td>
+                    <td class="size"><span>0.90 KB</span></td>
+                    <td colspan="2">0 word found</td>
+
+                    <td>          </td>
+                </tr>
+                <tr>
+
+                    <td class="preview">
+                        <img src="/public/img/xliff-icon-retina.png" width="30" height="29" />        </td>
+                    <td class="name">esempio.xliff</td>
+                    <td class="size"><span>0.90 KB</span></td>
+                    <td colspan="2">0 word found</td>
+
+                    <td>          </td>
+                </tr>
+                <tr>
+
+                    <td class="preview">
+                        <img src="/public/img/xliff-icon-retina.png" width="30" height="29" />        </td>
+                    <td class="name">esempio.xliff</td>
+                    <td class="size"><span>0.90 KB</span></td>
+                    <td colspan="2">0 word found</td>
+
+                    <td>          </td>
+                </tr>
+                <tr>
+
+                    <td class="preview">
+                        <img src="/public/img/xliff-icon-retina.png" width="30" height="29"/>        </td>
+                    <td class="name">esempio.xliff</td>
+                    <td class="size"><span>0.90 KB</span></td>
+                    <td colspan="2">0 word found</td>
+
+                    <td>          </td>
+                </tr>
+            </table>
+            <!-- .upload-footer -->
+
+            <div class="cl"></div>
+
+
+            <!--
+            <div class="sticky">
+            <div class="wrapper">
+           <table class="tablestats " width="697px" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                          <th width="116" style="border-left:0">Payable</th>
+                          <th width="89">Total</th>
+                          <th width="68">New</th>
+                          <th width="78">Repetition</th>
+                          <th width="72">Internal Matches</th>
+                          <th width="58">TM<br/> 
+                          Partial (75%-99%)</th>
+                          <th width="71">TM 100%</th>
+                          <th width="68">TM 100% in context</th>
+                          <th width="98">Machine Translation</th>
+                        </tr>
+                        <tr>
+                          <td></td>
+                          <td>&nbsp;</td>
+                          <td class="editarea">100%</td>
+                          <td class="editarea">30%</td>
+                          <td class="editarea">60%</td>
+                          <td class="editarea">60%</td>
+                          <td class="editarea">30%</td>
+                          <td class="editarea">0%</td>
+                          <td class="editarea">85%</td>
+                        </tr>
+           </table>
+           <div class="cl"></div>
+           </div>
+           </div>
+            -->
+        </div> 
+
+
+
+
+
+        <div class="body">
+
+            <div class="wrapper">
+
+
+                <h2>Job details</h2>      
+                <!--
+                    <h3>English > French</h3>       
+                
+                
+                    <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+                           
+                
+                           <tr>
+                               <th width="247" style="border-left:1px solid #ccc;"> </th>    
+                               <th width="116" style="border-left:0">Payable</th>
+                               <th width="89">Total</th>
+                               <th width="68">New</th>
+                               <th width="78">Repetition</th>
+                               <th width="72">Internal Matches</th>
+                               <th width="58">TM<br/> 
+                               Partial (75%-99%)</th>
+                               <th width="71">TM 100%</th>
+                               <th width="68">TM 100% in context</th>
+                               <th width="98">Machine Translation</th>
+                             </tr>
+                             <tr>
+                               <td style="background:#fff;border-left:1px solid #ccc"></td>
+                               <td >&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td class="editarea">100%</td>
+                               <td class="editarea">30%</td>
+                               <td class="editarea">60%</td>
+                               <td class="editarea">60%</td>
+                               <td class="editarea">30%</td>
+                               <td class="editarea">0%</td>
+                               <td class="editarea">85%</td>
+                             </tr>
+                
+                             
+                             
+                             <tr>
+                               <td width="60" class="languages" style="border-left:1px solid #ccc"><a href="#" class="filedetails part1">Part 1</a> <a href="http://matecat.translated.home/translate/100-Match-test-10.xliff/en-fr/1660-zvsn53ce#1218219" target="_blank" class="uploadbtn" style="padding:5px !Important;margin:-2px 0 -3px 10px !important;float:right;">Translate</a> </td>
+                               <td ><strong>11,500</strong></td>
+                               <td style="text-align:right">13,500</td>
+                               <td>0</td>
+                               <td>1,000</td>
+                               <td>1,000</td>
+                               <td>2,000</td>
+                               <td>1,500</td>
+                               <td>1,000</td>
+                               <td>7,000</td>
+                             </tr>
+                             <tr class="subfile part1files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename1.xliff</p> </td>
+                               <td ><strong>6,500</strong></td>
+                               <td style="text-align:right">7,500</td>
+                               <td>0</td>
+                               <td>500</td>
+                               <td>600</td>
+                               <td>1,000</td>
+                               <td>1,200</td>
+                               <td>700</td>
+                               <td>3,000</td>
+                             </tr>
+                             <tr class="subfile part1files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filenamsdsd se2.xliff</p> </td>
+                               <td ><strong>4,500</strong></td>
+                               <td style="text-align:right">5,500</td>
+                               <td>0</td>
+                               <td>300</td>
+                               <td>400</td>
+                               <td>700</td>
+                               <td>1,000</td>
+                               <td>700</td>
+                               <td>2,000</td>
+                             </tr>
+                             <tr  class="tablespace">
+                               <td ></td>
+                               <td >&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                             </tr>
+                             <tr>
+                               <td class="languages" style="border-left:1px solid #ccc"><a href="#" class="filedetails part2">Part 2</a> <a href="http://matecat.translated.home/translate/100-Match-test-10.xliff/en-fr/1660-zvsn53ce#1218219" class="uploadbtn" style="padding:5px !Important;margin:-2px 0 -3px 10px !important;float:right;" target="_blank" >Translate</a></td>
+                               <td ><strong>11,500</strong></td>
+                               <td style="text-align:right">13,500</td>
+                               <td>0</td>
+                               <td>1,000</td>
+                               <td>1,000</td>
+                               <td>2,000</td>
+                               <td>1,500</td>
+                               <td>1,000</td>
+                               <td>7,000</td>
+                             </tr>
+                             <tr class="subfile part2files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename3.xliff</p></td>
+                               <td ><strong>6,500</strong></td>
+                               <td style="text-align:right">7,500</td>
+                               <td>0</td>
+                               <td>500</td>
+                               <td>600</td>
+                               <td>1,000</td>
+                               <td>1,200</td>
+                               <td>700</td>
+                               <td>3,000</td>
+                             </tr>
+                             <tr class="subfile part2files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename4.xliff</p></td>
+                               <td ><strong>4,500</strong></td>
+                               <td style="text-align:right">5,500</td>
+                               <td>0</td>
+                               <td>300</td>
+                               <td>400</td>
+                               <td>700</td>
+                               <td>1,000</td>
+                               <td>700</td>
+                               <td>2,000</td>
+                             </tr>
+                             <tr  class="tablespace">
+                               <td></td>
+                               <td >&nbsp;</td>
+                               <td >&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                             </tr>
+                             <tr class="totaltable">
+                               <td class="languages" style="border-left:1px solid #ccc"><strong>Total</strong></td>
+                               <td style="background:#c4df9b;"><strong>11,500</strong></td>
+                               <td style="text-align:right"><strong>13,500</strong></td>
+                               <td><strong>0</strong></td>
+                               <td><strong>1,000</strong></td>
+                               <td><strong>1,000</strong></td>
+                               <td><strong>2,000</strong></td>
+                               <td><strong>1,500</strong></td>
+                               <td><strong>1,000</strong></td>
+                               <td><strong>7,000</strong></td>
+                             </tr>
+                </table>
+                
+                <div class="cl"></div>
+                <div class="sendit">
+                
+                  <a href="#" class="uploadbtn split" style="float:right">Split / Merge</a> 
+                
+                
+                
+                <div class="cl"></div>
+                
+                <div class="job">
+                
+                <p> Job #1 link:</p>  
+                <input name="" type="text" class="input" value="mat.ly/IUrHPU "/> 
+                <input type="text" class="input" value="200" size="2"/> 
+                <p>words</p> <a href="#" class="uploadbtn add" title="split more">+</a> 
+                </div>
+                <div class="cl"></div>
+                
+                
+                
+                
+                 
+                
+                
+                
+                
+                
+                </div>
+                
+                <div class="cl"></div>
+                
+                
+                -->
+
+
+                <!--
+                  <h3>English > French</h3>       
+                           <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+                           
+                                    <tr>
+                                      <th style="border-left:1px solid #ccc;"> </th>
+                                      <th style="border-left:0">Payable</th>
+                                      <th>Total</th>
+                                      <th>New</th>
+                                      <th>Repetition</th>
+                                      <th>Internal Matches</th>
+                                      <th>TM<br/>
+                                        Partial (75%-99%)</th>
+                                      <th>TM 100%</th>
+                                      <th>TM 100% in context</th>
+                                      <th>Machine Translation</th>
+                                    </tr>
+                                    <tr>
+                                      <td style="background:#fff;border-left:1px solid #ccc"></td>
+                                      <td >&nbsp;</td>
+                                      <td>&nbsp;</td>
+                                      <td class="editarea">100%</td>
+                                      <td class="editarea">30%</td>
+                                      <td class="editarea">60%</td>
+                                      <td class="editarea">60%</td>
+                                      <td class="editarea">30%</td>
+                                      <td class="editarea">0%</td>
+                                      <td class="editarea">85%</td>
+                                    </tr>
+                             
+                
+                             
+                             
+                             <tr>
+                               <td width="247" class="languages" style="border-left:1px solid #ccc"><a href="#" class="filedetails part1">Part 1</a> <a href="http://matecat.translated.home/translate/100-Match-test-10.xliff/en-fr/1660-zvsn53ce#1218219" target="_blank" class="uploadbtn" style="padding:5px !Important;margin:-2px 0 -3px 10px !important;float:right;">Translate</a> </td>
+                               <td width="116" ><strong>11,500</strong></td>
+                               <td width="89" style="text-align:right">13,500</td>
+                               <td width="68">0</td>
+                               <td width="78">1,000</td>
+                               <td width="72">1,000</td>
+                               <td width="58">2,000</td>
+                               <td width="71">1,500</td>
+                               <td width="68">1,000</td>
+                               <td width="98">7,000</td>
+                             </tr>
+                             <tr class="subfile part1files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename1.xliff</p> </td>
+                               <td ><strong>6,500</strong></td>
+                               <td style="text-align:right">7,500</td>
+                               <td>0</td>
+                               <td>500</td>
+                               <td>600</td>
+                               <td>1,000</td>
+                               <td>1,200</td>
+                               <td>700</td>
+                               <td>3,000</td>
+                             </tr>
+                             <tr class="subfile part1files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filenamsdsd se2.xliff</p> </td>
+                               <td ><strong>4,500</strong></td>
+                               <td style="text-align:right">5,500</td>
+                               <td>0</td>
+                               <td>300</td>
+                               <td>400</td>
+                               <td>700</td>
+                               <td>1,000</td>
+                               <td>700</td>
+                               <td>2,000</td>
+                             </tr>
+                             <tr  class="tablespace">
+                               <td ></td>
+                               <td >&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                             </tr>
+                             <tr>
+                               <td class="languages" style="border-left:1px solid #ccc"><a href="#" class="filedetails part2">Part 2</a> <a href="http://matecat.translated.home/translate/100-Match-test-10.xliff/en-fr/1660-zvsn53ce#1218219" class="uploadbtn" style="padding:5px !Important;margin:-2px 0 -3px 10px !important;float:right;" target="_blank" >Translate</a></td>
+                               <td ><strong>11,500</strong></td>
+                               <td style="text-align:right">13,500</td>
+                               <td>0</td>
+                               <td>1,000</td>
+                               <td>1,000</td>
+                               <td>2,000</td>
+                               <td>1,500</td>
+                               <td>1,000</td>
+                               <td>7,000</td>
+                             </tr>
+                             <tr class="subfile part2files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename3.xliff</p></td>
+                               <td ><strong>6,500</strong></td>
+                               <td style="text-align:right">7,500</td>
+                               <td>0</td>
+                               <td>500</td>
+                               <td>600</td>
+                               <td>1,000</td>
+                               <td>1,200</td>
+                               <td>700</td>
+                               <td>3,000</td>
+                             </tr>
+                             <tr class="subfile part2files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename4.xliff</p></td>
+                               <td ><strong>4,500</strong></td>
+                               <td style="text-align:right">5,500</td>
+                               <td>0</td>
+                               <td>300</td>
+                               <td>400</td>
+                               <td>700</td>
+                               <td>1,000</td>
+                               <td>700</td>
+                               <td>2,000</td>
+                             </tr>
+                             <tr  class="tablespace">
+                               <td></td>
+                               <td >&nbsp;</td>
+                               <td >&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                             </tr>
+                             <tr class="totaltable">
+                               <td class="languages" style="border-left:1px solid #ccc"><strong>Total</strong></td>
+                               <td style="background:#c4df9b;"><strong>11,500</strong></td>
+                               <td style="text-align:right"><strong>13,500</strong></td>
+                               <td><strong>0</strong></td>
+                               <td><strong>1,000</strong></td>
+                               <td><strong>1,000</strong></td>
+                               <td><strong>2,000</strong></td>
+                               <td><strong>1,500</strong></td>
+                               <td><strong>1,000</strong></td>
+                               <td><strong>7,000</strong></td>
+                             </tr>
+                </table>
+                
+                <div class="cl"></div>
+                <div class="sendit">
+                
+                  <a href="#" class="uploadbtn split" style="float:right">Split / Merge</a> 
+                
+                
+                
+                <div class="cl"></div>
+                <div class="job">
+                
+                <p> Job #1 link:</p>  
+                <input name="" type="text" class="input" value="mat.ly/IUrHPU "/> 
+                <input type="text" class="input" value="200" size="2"/> 
+                <p>words</p> <a href="#" class="uploadbtn add" title="split more">+</a> 
+                </div>
+                <div class="cl"></div>
+                
+                
+                
+                
+                 
+                
+                
+                
+                
+                
+                </div>
+                
+                <div class="cl"></div>
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                
+                <h3>English &gt; Italian</h3>       
+                <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <th style="border-left:1px solid #ccc;"> </th>
+                    <th style="border-left:0">Payable</th>
+                    <th>Total</th>
+                    <th>New</th>
+                    <th>Repetition</th>
+                    <th>Internal Matches</th>
+                    <th>TM<br/>
+                      Partial (75%-99%)</th>
+                    <th>TM 100%</th>
+                    <th>TM 100% in context</th>
+                    <th>Machine Translation</th>
+                  </tr>
+                  <tr>
+                    <td style="background:#fff;border-left:1px solid #ccc"></td>
+                    <td >&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td class="editarea">100%</td>
+                    <td class="editarea">30%</td>
+                    <td class="editarea">60%</td>
+                    <td class="editarea">60%</td>
+                    <td class="editarea">30%</td>
+                    <td class="editarea">0%</td>
+                    <td class="editarea">85%</td>
+                  </tr>
+                             <tr  class="tablespace">
+                               <td width="247" > </td>
+                               <td width="90" >&nbsp;</td>
+                               <td width="59" style="text-align:right">&nbsp;</td> <td width="60">&nbsp;</td>
+                               <td width="82">&nbsp;</td>
+                               <td width="71">&nbsp;</td>
+                               <td width="60">&nbsp;</td>
+                               <td width="52">&nbsp;</td>
+                               <td width="65">&nbsp;</td>
+                               <td width="87">&nbsp;</td>
+                             </tr>
+                             <tr class="totaltable">
+                               <td class="languages" style="border-left:1px solid #ccc"><a href="#" class="filedetails part3">File details</a> <a href="http://matecat.translated.home/translate/100-Match-test-10.xliff/en-fr/1660-zvsn53ce#1218219" target="_blank" class="uploadbtn" style="padding:5px !Important;margin:-2px 0 -3px 10px !important;float:right;">Translate</a> </td>
+                               <td style="background:#c4df9b;"><strong>11,500</strong></td>
+                               <td style="text-align:right">13,500</td>
+                               <td>0</td>
+                               <td>1,000</td>
+                               <td>1,000</td>
+                               <td>2,000</td>
+                               <td>1,500</td>
+                               <td>1,000</td>
+                               <td>7,000</td>
+                             </tr>
+                             
+                             <tr class="subfile part3files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename1.xliff</p> </td>
+                               <td ><strong>6,500</strong></td>
+                               <td style="text-align:right">7,500</td>
+                               <td>0</td>
+                               <td>500</td>
+                               <td>600</td>
+                               <td>1,000</td>
+                               <td>1,200</td>
+                               <td>700</td>
+                               <td>3,000</td>
+                             </tr>
+                </table>
+                
+                <div class="cl"></div>
+                
+                
+                
+                
+                
+                   <h3>English > French</h3>       
+                <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <th style="border-left:1px solid #ccc;"> </th>
+                    <th style="border-left:0">Payable</th>
+                    <th>Total</th>
+                    <th>New</th>
+                    <th>Repetition</th>
+                    <th>Internal Matches</th>
+                    <th>TM<br/>
+                      Partial (75%-99%)</th>
+                    <th>TM 100%</th>
+                    <th>TM 100% in context</th>
+                    <th>Machine Translation</th>
+                  </tr>
+                  <tr>
+                    <td style="background:#fff;border-left:1px solid #ccc"></td>
+                    <td >&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td class="editarea">100%</td>
+                    <td class="editarea">30%</td>
+                    <td class="editarea">60%</td>
+                    <td class="editarea">60%</td>
+                    <td class="editarea">30%</td>
+                    <td class="editarea">0%</td>
+                    <td class="editarea">85%</td>
+                  </tr>
+                             <tr  class="tablespace">
+                               <td width="247" > </td>
+                               <td width="90" >&nbsp;</td>
+                               <td width="59" style="text-align:right">&nbsp;</td> <td width="60">&nbsp;</td>
+                               <td width="82">&nbsp;</td>
+                               <td width="71">&nbsp;</td>
+                               <td width="60">&nbsp;</td>
+                               <td width="52">&nbsp;</td>
+                               <td width="65">&nbsp;</td>
+                               <td width="87">&nbsp;</td>
+                             </tr>
+                      <tr>
+                               <td class="languages" style="border-left:1px solid #ccc"><a href="#" class="filedetails part1">Part 1</a> <a href="http://matecat.translated.home/translate/100-Match-test-10.xliff/en-fr/1660-zvsn53ce#1218219" target="_blank" class="uploadbtn" style="padding:5px !Important;margin:-2px 0 -3px 10px !important;float:right;">Translate</a> </td>
+                        <td ><strong>11,500</strong></td>
+                               <td style="text-align:right">13,500</td>
+                               <td>0</td>
+                               <td>1,000</td>
+                               <td>1,000</td>
+                               <td>2,000</td>
+                               <td>1,500</td>
+                               <td>1,000</td>
+                               <td>7,000</td>
+                      </tr>
+                             <tr class="subfile part1files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename1.xliff</p> </td>
+                               <td ><strong>6,500</strong></td>
+                               <td style="text-align:right">7,500</td>
+                               <td>0</td>
+                               <td>500</td>
+                               <td>600</td>
+                               <td>1,000</td>
+                               <td>1,200</td>
+                               <td>700</td>
+                               <td>3,000</td>
+                             </tr>
+                             <tr class="subfile part1files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filenamsdsd se2.xliff</p> </td>
+                               <td ><strong>4,500</strong></td>
+                               <td style="text-align:right">5,500</td>
+                               <td>0</td>
+                               <td>300</td>
+                               <td>400</td>
+                               <td>700</td>
+                               <td>1,000</td>
+                               <td>700</td>
+                               <td>2,000</td>
+                             </tr>
+                             <tr  class="tablespace">
+                               <td ></td>
+                               <td >&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                             </tr>
+                             <tr>
+                               <td class="languages" style="border-left:1px solid #ccc"><a href="#" class="filedetails part2">Part 2</a> <a href="http://matecat.translated.home/translate/100-Match-test-10.xliff/en-fr/1660-zvsn53ce#1218219" class="uploadbtn" style="padding:5px !Important;margin:-2px 0 -3px 10px !important;float:right;" target="_blank" >Translate</a></td>
+                               <td ><strong>11,500</strong></td>
+                               <td style="text-align:right">13,500</td>
+                               <td>0</td>
+                               <td>1,000</td>
+                               <td>1,000</td>
+                               <td>2,000</td>
+                               <td>1,500</td>
+                               <td>1,000</td>
+                               <td>7,000</td>
+                             </tr>
+                             <tr class="subfile part2files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename3.xliff</p></td>
+                               <td ><strong>6,500</strong></td>
+                               <td style="text-align:right">7,500</td>
+                               <td>0</td>
+                               <td>500</td>
+                               <td>600</td>
+                               <td>1,000</td>
+                               <td>1,200</td>
+                               <td>700</td>
+                               <td>3,000</td>
+                             </tr>
+                             <tr class="subfile part2files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename4.xliff</p></td>
+                               <td ><strong>4,500</strong></td>
+                               <td style="text-align:right">5,500</td>
+                               <td>0</td>
+                               <td>300</td>
+                               <td>400</td>
+                               <td>700</td>
+                               <td>1,000</td>
+                               <td>700</td>
+                               <td>2,000</td>
+                             </tr>
+                             <tr  class="tablespace">
+                               <td></td>
+                               <td >&nbsp;</td>
+                               <td >&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                             </tr>
+                      <tr class="totaltable">
+                        <td class="languages" style="border-left:1px solid #ccc"><strong>Total</strong></td>
+                               <td style="background:#c4df9b;"><strong>11,500</strong></td>
+                               <td style="text-align:right"><strong>13,500</strong></td>
+                               <td><strong>0</strong></td>
+                               <td><strong>1,000</strong></td>
+                               <td><strong>1,000</strong></td>
+                               <td><strong>2,000</strong></td>
+                               <td><strong>1,500</strong></td>
+                               <td><strong>1,000</strong></td>
+                               <td><strong>7,000</strong></td>
+                      </tr>
+                </table>
+                
+                
+                   <h3>English > Italian</h3>       
+                <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <th style="border-left:1px solid #ccc;"> </th>
+                    <th style="border-left:0">Payable</th>
+                    <th>Total</th>
+                    <th>New</th>
+                    <th>Repetition</th>
+                    <th>Internal Matches</th>
+                    <th>TM<br/>
+                      Partial (75%-99%)</th>
+                    <th>TM 100%</th>
+                    <th>TM 100% in context</th>
+                    <th>Machine Translation</th>
+                  </tr>
+                  <tr>
+                    <td style="background:#fff;border-left:1px solid #ccc"></td>
+                    <td >&nbsp;</td>
+                    <td>&nbsp;</td>
+                    <td class="editarea">100%</td>
+                    <td class="editarea">30%</td>
+                    <td class="editarea">60%</td>
+                    <td class="editarea">60%</td>
+                    <td class="editarea">30%</td>
+                    <td class="editarea">0%</td>
+                    <td class="editarea">85%</td>
+                  </tr>
+                             <tr  class="tablespace">
+                               <td width="247" > </td>
+                               <td width="90" >&nbsp;</td>
+                               <td width="59" style="text-align:right">&nbsp;</td> <td width="60">&nbsp;</td>
+                               <td width="82">&nbsp;</td>
+                               <td width="71">&nbsp;</td>
+                               <td width="60">&nbsp;</td>
+                               <td width="52">&nbsp;</td>
+                               <td width="65">&nbsp;</td>
+                               <td width="87">&nbsp;</td>
+                             </tr>
+                             <tr>
+                               <td class="languages" style="border-left:1px solid #ccc"><a href="#" class="filedetails part1">Part 1</a> <a href="http://matecat.translated.home/translate/100-Match-test-10.xliff/en-fr/1660-zvsn53ce#1218219" target="_blank" class="uploadbtn" style="padding:5px !Important;margin:-2px 0 -3px 10px !important;float:right;">Translate</a> </td>
+                               <td ><strong>11,500</strong></td>
+                               <td style="text-align:right">13,500</td>
+                               <td>0</td>
+                               <td>1,000</td>
+                               <td>1,000</td>
+                               <td>2,000</td>
+                               <td>1,500</td>
+                               <td>1,000</td>
+                               <td>7,000</td>
+                             </tr>
+                             <tr class="subfile part1files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename1.xliff</p> </td>
+                               <td ><strong>6,500</strong></td>
+                               <td style="text-align:right">7,500</td>
+                               <td>0</td>
+                               <td>500</td>
+                               <td>600</td>
+                               <td>1,000</td>
+                               <td>1,200</td>
+                               <td>700</td>
+                               <td>3,000</td>
+                             </tr>
+                             <tr class="subfile part1files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filenamsdsd se2.xliff</p> </td>
+                               <td ><strong>4,500</strong></td>
+                               <td style="text-align:right">5,500</td>
+                               <td>0</td>
+                               <td>300</td>
+                               <td>400</td>
+                               <td>700</td>
+                               <td>1,000</td>
+                               <td>700</td>
+                               <td>2,000</td>
+                             </tr>
+                             <tr  class="tablespace">
+                               <td ></td>
+                               <td >&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                             </tr>
+                             <tr>
+                               <td class="languages" style="border-left:1px solid #ccc"><a href="#" class="filedetails part2">Part 2</a> <a href="http://matecat.translated.home/translate/100-Match-test-10.xliff/en-fr/1660-zvsn53ce#1218219" class="uploadbtn" style="padding:5px !Important;margin:-2px 0 -3px 10px !important;float:right;" target="_blank" >Translate</a></td>
+                               <td ><strong>11,500</strong></td>
+                               <td style="text-align:right">13,500</td>
+                               <td>0</td>
+                               <td>1,000</td>
+                               <td>1,000</td>
+                               <td>2,000</td>
+                               <td>1,500</td>
+                               <td>1,000</td>
+                               <td>7,000</td>
+                             </tr>
+                             <tr class="subfile part2files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename3.xliff</p></td>
+                               <td ><strong>6,500</strong></td>
+                               <td style="text-align:right">7,500</td>
+                               <td>0</td>
+                               <td>500</td>
+                               <td>600</td>
+                               <td>1,000</td>
+                               <td>1,200</td>
+                               <td>700</td>
+                               <td>3,000</td>
+                             </tr>
+                             <tr class="subfile part2files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename4.xliff</p></td>
+                               <td ><strong>4,500</strong></td>
+                               <td style="text-align:right">5,500</td>
+                               <td>0</td>
+                               <td>300</td>
+                               <td>400</td>
+                               <td>700</td>
+                               <td>1,000</td>
+                               <td>700</td>
+                               <td>2,000</td>
+                             </tr>
+                             <tr  class="tablespace">
+                               <td></td>
+                               <td >&nbsp;</td>
+                               <td >&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                             </tr>
+                             <tr class="totaltable">
+                               <td class="languages" style="border-left:1px solid #ccc"><strong>Total</strong></td>
+                               <td style="background:#c4df9b;"><strong>11,500</strong></td>
+                               <td style="text-align:right"><strong>13,500</strong></td>
+                               <td><strong>0</strong></td>
+                               <td><strong>1,000</strong></td>
+                               <td><strong>1,000</strong></td>
+                               <td><strong>2,000</strong></td>
+                               <td><strong>1,500</strong></td>
+                               <td><strong>1,000</strong></td>
+                               <td><strong>7,000</strong></td>
+                             </tr>
+                </table>
+                
+                
+                   <h3>English > French</h3>       
+                           <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+                             <tr>
+                               <th style="border-left:1px solid #ccc;"> </th>
+                               <th style="border-left:0">Payable</th>
+                               <th>Total</th>
+                               <th>New</th>
+                               <th>Repetition</th>
+                               <th>Internal Matches</th>
+                               <th>TM<br/>
+                                 Partial (75%-99%)</th>
+                               <th>TM 100%</th>
+                               <th>TM 100% in context</th>
+                               <th>Machine Translation</th>
+                             </tr>
+                             <tr>
+                               <td style="background:#fff;border-left:1px solid #ccc"></td>
+                               <td >&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td class="editarea">100%</td>
+                               <td class="editarea">30%</td>
+                               <td class="editarea">60%</td>
+                               <td class="editarea">60%</td>
+                               <td class="editarea">30%</td>
+                               <td class="editarea">0%</td>
+                               <td class="editarea">85%</td>
+                             </tr>
+                             <tr  class="tablespace">
+                               <td width="247" > </td>
+                               <td width="90" >&nbsp;</td>
+                               <td width="59" style="text-align:right">&nbsp;</td> <td width="60">&nbsp;</td>
+                               <td width="82">&nbsp;</td>
+                               <td width="71">&nbsp;</td>
+                               <td width="60">&nbsp;</td>
+                               <td width="52">&nbsp;</td>
+                               <td width="65">&nbsp;</td>
+                               <td width="87">&nbsp;</td>
+                             </tr>
+                             <tr>
+                               <td class="languages" style="border-left:1px solid #ccc"><a href="#" class="filedetails part1">Part 1</a> <a href="http://matecat.translated.home/translate/100-Match-test-10.xliff/en-fr/1660-zvsn53ce#1218219" target="_blank" class="uploadbtn" style="padding:5px !Important;margin:-2px 0 -3px 10px !important;float:right;">Translate</a> </td>
+                               <td ><strong>11,500</strong></td>
+                               <td style="text-align:right">13,500</td>
+                               <td>0</td>
+                               <td>1,000</td>
+                               <td>1,000</td>
+                               <td>2,000</td>
+                               <td>1,500</td>
+                               <td>1,000</td>
+                               <td>7,000</td>
+                             </tr>
+                             <tr class="subfile part1files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename1.xliff</p> </td>
+                               <td ><strong>6,500</strong></td>
+                               <td style="text-align:right">7,500</td>
+                               <td>0</td>
+                               <td>500</td>
+                               <td>600</td>
+                               <td>1,000</td>
+                               <td>1,200</td>
+                               <td>700</td>
+                               <td>3,000</td>
+                             </tr>
+                             <tr class="subfile part1files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filenamsdsd se2.xliff</p> </td>
+                               <td ><strong>4,500</strong></td>
+                               <td style="text-align:right">5,500</td>
+                               <td>0</td>
+                               <td>300</td>
+                               <td>400</td>
+                               <td>700</td>
+                               <td>1,000</td>
+                               <td>700</td>
+                               <td>2,000</td>
+                             </tr>
+                             <tr  class="tablespace">
+                               <td ></td>
+                               <td >&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                             </tr>
+                             <tr>
+                               <td class="languages" style="border-left:1px solid #ccc"><a href="#" class="filedetails part2">Part 2</a> <a href="http://matecat.translated.home/translate/100-Match-test-10.xliff/en-fr/1660-zvsn53ce#1218219" class="uploadbtn" style="padding:5px !Important;margin:-2px 0 -3px 10px !important;float:right;" target="_blank" >Translate</a></td>
+                               <td ><strong>11,500</strong></td>
+                               <td style="text-align:right">13,500</td>
+                               <td>0</td>
+                               <td>1,000</td>
+                               <td>1,000</td>
+                               <td>2,000</td>
+                               <td>1,500</td>
+                               <td>1,000</td>
+                               <td>7,000</td>
+                             </tr>
+                             <tr class="subfile part2files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename3.xliff</p></td>
+                               <td ><strong>6,500</strong></td>
+                               <td style="text-align:right">7,500</td>
+                               <td>0</td>
+                               <td>500</td>
+                               <td>600</td>
+                               <td>1,000</td>
+                               <td>1,200</td>
+                               <td>700</td>
+                               <td>3,000</td>
+                             </tr>
+                             <tr class="subfile part2files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename4.xliff</p></td>
+                               <td ><strong>4,500</strong></td>
+                               <td style="text-align:right">5,500</td>
+                               <td>0</td>
+                               <td>300</td>
+                               <td>400</td>
+                               <td>700</td>
+                               <td>1,000</td>
+                               <td>700</td>
+                               <td>2,000</td>
+                             </tr>
+                             <tr  class="tablespace">
+                               <td></td>
+                               <td >&nbsp;</td>
+                               <td >&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td>&nbsp;</td>
+                             </tr>
+                             <tr class="totaltable">
+                               <td class="languages" style="border-left:1px solid #ccc"><strong>Total</strong></td>
+                               <td style="background:#c4df9b;"><strong>11,500</strong></td>
+                               <td style="text-align:right"><strong>13,500</strong></td>
+                               <td><strong>0</strong></td>
+                               <td><strong>1,000</strong></td>
+                               <td><strong>1,000</strong></td>
+                               <td><strong>2,000</strong></td>
+                               <td><strong>1,500</strong></td>
+                               <td><strong>1,000</strong></td>
+                               <td><strong>7,000</strong></td>
+                             </tr>
+                </table>
+                
+                
+                
+                
+                <h3>English &gt; Italian</h3>       
+                           <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+                             <tr>
+                               <th style="border-left:1px solid #ccc;"> </th>
+                               <th style="border-left:0">Payable</th>
+                               <th>Total</th>
+                               <th>New</th>
+                               <th>Repetition</th>
+                               <th>Internal Matches</th>
+                               <th>TM<br/>
+                                 Partial (75%-99%)</th>
+                               <th>TM 100%</th>
+                               <th>TM 100% in context</th>
+                               <th>Machine Translation</th>
+                             </tr>
+                             <tr>
+                               <td style="background:#fff;border-left:1px solid #ccc"></td>
+                               <td >&nbsp;</td>
+                               <td>&nbsp;</td>
+                               <td class="editarea">100%</td>
+                               <td class="editarea">30%</td>
+                               <td class="editarea">60%</td>
+                               <td class="editarea">60%</td>
+                               <td class="editarea">30%</td>
+                               <td class="editarea">0%</td>
+                               <td class="editarea">85%</td>
+                             </tr>
+                             <tr  class="tablespace">
+                               <td width="247" > </td>
+                               <td width="90" >&nbsp;</td>
+                               <td width="59" style="text-align:right">&nbsp;</td> <td width="60">&nbsp;</td>
+                               <td width="82">&nbsp;</td>
+                               <td width="71">&nbsp;</td>
+                               <td width="60">&nbsp;</td>
+                               <td width="52">&nbsp;</td>
+                               <td width="65">&nbsp;</td>
+                               <td width="87">&nbsp;</td>
+                             </tr>
+                             <tr class="totaltable">
+                               <td class="languages" style="border-left:1px solid #ccc"><a href="#" class="filedetails part3">File details</a> <a href="http://matecat.translated.home/translate/100-Match-test-10.xliff/en-fr/1660-zvsn53ce#1218219" target="_blank" class="uploadbtn" style="padding:5px !Important;margin:-2px 0 -3px 10px !important;float:right;">Translate</a> </td>
+                               <td style="background:#c4df9b;"><strong>11,500</strong></td>
+                               <td style="text-align:right">13,500</td>
+                               <td>0</td>
+                               <td>1,000</td>
+                               <td>1,000</td>
+                               <td>2,000</td>
+                               <td>1,500</td>
+                               <td>1,000</td>
+                               <td>7,000</td>
+                             </tr>
+                             
+                             <tr class="subfile part3files">
+                               <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename1.xliff</p> </td>
+                               <td ><strong>6,500</strong></td>
+                               <td style="text-align:right">7,500</td>
+                               <td>0</td>
+                               <td>500</td>
+                               <td>600</td>
+                               <td>1,000</td>
+                               <td>1,200</td>
+                               <td>700</td>
+                               <td>3,000</td>
+                             </tr>
+                </table>
+                
+                <div class="cl"></div>
+                -->
+
+                <tal:block tal:define="job php:array()" tal:repeat="job jobs">
+                    <h3>
+                        <span tal:replace="job/source">English</span> &gt; <span tal:replace="job/target">Italian</span>
+                    </h3>       
+                    <table id="" tal:attributes="id string:job-${repeat/job/key}" class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+                        <tr>
+                            <th style="border-left:1px solid #ccc;"> </th>
+                            <th style="border-left:0">Payable</th>
+                            <th>Total</th>
+                            <th width="60">New</th>
+                            <th width="60">Repetition</th>
+                            <th width="60">Internal Matches<br/>
+                                (75%-99%)</th>
+                            <th width="60">TM<br/>
+                                Partial (75%-99%)</th>
+                            <th width="60">TM 100%</th>
+                            <th width="60">TM 100% in context</th>
+                            <th width="60">Machine Translation</th>
+                        </tr>
+                        <tr>
+                            <td style="background:#fff;border-left:1px solid #ccc"></td>
+                            <td >&nbsp;</td>
+                            <td>&nbsp;</td>
+                            <td class="editarea">100%</td>
+                            <td class="editarea">30%</td>
+                            <td class="editarea">60%</td>
+                            <td class="editarea">60%</td>
+                            <td class="editarea">30%</td>
+                            <td class="editarea">0%</td>
+                            <td class="editarea">85%</td>
+                        </tr>
+                        <tr  class="tablespace">
+                            <td width="247" > </td>
+                            <td width="90" >&nbsp;</td>
+                            <td width="59" style="text-align:right">&nbsp;</td> <td width="60">&nbsp;</td>
+                            <td width="82">&nbsp;</td>
+                            <td width="71">&nbsp;</td>
+                            <td width="60">&nbsp;</td>
+                            <td width="52">&nbsp;</td>
+                            <td width="65">&nbsp;</td>
+                            <td width="87">&nbsp;</td>
+                        </tr>
+                        <tr class="totaltable">
+                            <td class="languages" style="border-left:1px solid #ccc">
+                                <a href="#" class="filedetails part3">File details</a> 
+                                <a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${repeat/job/key}-${job/password} " href="#" target="_blank" class="uploadbtn" style="padding:5px !Important;margin:-2px 0 -3px 10px !important;float:right;">
+                                    Translate
+                                </a> 
+                            </td>
+
+                            <td style="background:#c4df9b;"><strong tal:content="tm_analysis_wc_print">11,500</strong></td>
+                            <td style="text-align:right" tal:content="total_raw_word_count_print">13,500</td>
+                            <td class="stat_new">0</td>
+                            <td class="stat_rep">0</td>
+                            <td class="stat_int">0</td>
+                            <td class="stat_tm75">0</td>
+                            <td class="stat_tm100">0</td>
+                            <td class="stat_tmic">0</td>
+                            <td class="stat_mt">0</td>
+                        </tr>
+                        <tal:block tal:define="files job/files; f php:array()" tal:repeat="f files">
+                            <tr tal:attributes="id string:file_${repeat/job/key}_${f/id}" id="file_1703" class="subfile part3files">
+                                <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p tal:content="f/filename">filename1.xliff</p> </td>
+                                <td ><strong tal:content="f/file_eq_word_count">6,500</strong></td>
+                                <td style="text-align:right" tal:content="f/file_raw_word_count" >7,500</td>
+                                <td class="stat_new">0</td>
+                                <td class="stat_rep">0</td>
+                                <td class="stat_int">0</td>
+                                <td class="stat_tm75">0</td>
+                                <td class="stat_tm100">0</td>
+                                <td class="stat_tmic">0</td>
+                                <td class="stat_mt">0</td>
+                            </tr>
+                        </tal:block>
+                        <!--tr id="file_1704" class="subfile part3files">
+                            <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename2.xliff</p> </td>
+                            <td ><strong>6,500</strong></td>
+                            <td style="text-align:right">7,500</td>
+                            <td class="stat_new">0</td>
+                            <td class="stat_rep">0</td>
+                            <td class="stat_int">0</td>
+                            <td class="stat_tm75">0</td>
+                            <td class="stat_tm100">0</td>
+                            <td class="stat_tmic">0</td>
+                            <td class="stat_mt">0</td>
+                        </tr -->
+                    </table>
+                </tal:block>
+
+                <div class="sendit">
+                    <a href="#" class="uploadbtn split" style="float:right">Split / Merge</a>    
+                    <div class="cl"></div>
+                    <div class="job">
+
+                        <p> Job #1 link:</p>  
+                        <input name="" type="text" class="input" value="mat.ly/IUrHPU "/> 
+                        <input type="text" class="input" value="200" size="2"/> 
+                        <p>words</p> <a href="#" class="uploadbtn add" title="split more">+</a> 
+                    </div>
+                    <div class="cl"></div>
+                </div>
+            </div> <div class="cl"></div>
+        </div>
+
+        <div class="grayed"></div>
+        <div class="split-box">
+            <div class="header"><a href="#" class="close"></a></div>
+            <h2>English &gt; French</h2>
+            <h3>How many job do you want to split into?</h3>
+
+            <a href="#" class="operation-btn">-</a><input type="text" value="2" class="input" /><a href="#" class="operation-btn">+</a>
+            <!--   <a href="#" class="operation-btn splitmore">+ split into 1 more</a>  -->
+            <div class="cl"></div>
+            <ul class="jobs">
+                <li>
+                    <div><h4>Part 1</h4></div>
+
+                    <div class="job-details">
+                        <div class="job-perc"><p>Aprox. words:</p>
+                            <input type="text" class="input-small" value="50.000" /> 
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div><h4>Part 2</h4></div>
+                    <div class="job-details">
+                        <div class="job-perc"><p>Aprox. words:</p>
+                            <input type="text" class="input-small" value="50.000" /> 
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div><h4>Part 3</h4></div>
+
+                    <div class="job-details">
+                        <div class="job-perc"><p>Aprox. words:</p>
+                            <input type="text" class="input-small" value="200.000" />  
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div ><h4>Part 4</h4></div>
+
+                    <div class="job-details">
+                        <div class="job-perc"><p>Aprox. words:</p>
+                            <input type="text" class="input-small" value="200.000" />  
+                        </div>
+                    </div>
+                </li>
+
+                <li>
+                    <div>
+                        <h4>Part 5</h4>
+                    </div>
+
+                    <div class="job-details">
+                        <div class="job-perc">
+                            <input type="text" class="input-small" value="50" />  
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
+
+
+
+            <a href="#" class="operation-btn total-btn" style="float:left;margin-left:20px;">+</a>
+
+            <div class="total">
+                <p>Total payable words: <strong>200.000</strong></p>
+            </div>
+
+
+
+
+
+            <div class="cl"></div>
+
+
+
+            <input name="" type="button" class="uploadbtn" value="Split / Merge" />
+
+
+        </div>
+    </content>
+
+
+
+
+</body> 
+</html>

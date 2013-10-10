@@ -15,8 +15,11 @@
 UI = null;
 
 UI = {
+    init: function() {
+        UI.conversionBlocked = false;
+    },
     enableAnalyze: function() {
-    	enableAnalyze();
+        enableAnalyze();
     },
     conversionsAreToRestart: function() {
         var num = 0;
@@ -26,13 +29,12 @@ UI = {
 		});
         return num
     },
-    confirmRestartConversions: function(res) {
-        if(res) {
-            UI.restartConversions();
-        }            	
+    confirmRestartConversions: function() {
+        UI.restartConversions();
     },
     restartConversions: function() {
     	console.log('restart conversions');
+    this.conversionBlocked = true;
     	$('.template-download, .template-upload').each(function() {
 			if(config.conversionEnabled) {
         		var filerow = $(this);
@@ -112,6 +114,8 @@ $(function () {
 	}).bind('fileuploadadd', function (e, data) {
 		console.log('adding');
 		console.log(data);
+         $('body').addClass('initialized');
+
 
 		if($('.upload-table tr').length >= (config.maxNumberFiles)) {
 			console.log('adding more than 10');
@@ -245,6 +249,11 @@ $(function () {
 		}
 	}).bind('fileuploadcompleted', function (e,data) {
 		console.log('completed');
+         if(!$('body').hasClass('initialized')) {
+             console.log($('#clear-all-files').length);
+             $('#clear-all-files').click();
+//             $('.upload-table tr').remove();
+         }
 		var maxnum = config.maxNumberFiles;
 		if($('.upload-table tr').length > (maxnum-1)) {
 			console.log('10 files loaded');
@@ -272,10 +281,24 @@ $(function () {
 //		console.log(data.context.attr('class'));
 //		console.log(data.files[0].name);
 		$('body').addClass('initialized');
-		var fname = data.result[0].name;
-		var filesize = data.result[0].size;
-		var extension = fname.split('.')[fname.split('.').length-1];
-		if((extension=='xliff')||(extension=='sdlxliff')||(extension=='xlf')) {
+            /*
+             * BUG FIXED: UTF16 / UTF8 File name conversion
+             * Use Return String From AJAX RESULT ( safe raw url encoded )
+             *      and NOT data.files[0].name; ( INPUT TAG content )
+             *
+             *      fname: data.result[0].name,
+             *
+             **/
+        var fileSpecs = {
+            fname: data.result[0].name,
+            filesize: data.result[0].size,
+            filerow: data.context,
+            extension: data.result[0].name.split('.')[data.result[0].name.split('.').length-1],
+            enforceConversion: ( typeof data.result[0].convert !== "undefined" ) ? true : false
+        };
+
+        //check for specific xlf file type, someone needs forced conversion /** @see upload.class.php */
+		if( ( fileSpecs.extension=='xliff' || fileSpecs.extension=='sdlxliff' || fileSpecs.extension=='xlf' ) && !fileSpecs.enforceConversion ) {
 //			console.log('checkAnalyzability(): '+checkAnalyzability());
 			if(checkAnalyzability('file upload completed')) {
 				enableAnalyze();
@@ -288,36 +311,23 @@ $(function () {
 			}
 		}
 		$('body').removeClass('started');
-		
 
-//		enableAnalyze();
+        //console.log(data.data);
 
-
-//        console.log(data.data);
         if(typeof data.data != 'undefined') {
-                /*
-                 * BUG FIXED: UTF16 / UTF8 File name conversion
-                 * Use Return String From AJAX RESULT ( safe raw url encoded ) 
-                 *      and NOT data.files[0].name; ( INPUT TAG content )
-                 **/
-        	var filename = data.result[0].name; 
-        	var filerow = data.context;
 
-			if(filesize == 0) {
-				$('.name',filerow).text(filename);
+			if(fileSpecs.filesize == 0) {
+				$('.name',fileSpecs.filerow).text(fileSpecs.fname);
 			}
 
 			if(config.conversionEnabled) {
-/*
-				if((extension=='xliff')||(extension=='sdlxliff')||(extension=='xlf')) {
-				} else {
-					filerow.addClass('convertible');
-				}
-*/
+
 //				console.log('fileuploadcompleted');
-//				console.log('hasclass converting?: ' + filerow.hasClass('converting'));
-				if(!filerow.hasClass('converting')) {
-					convertFile(filename,filerow,filesize);
+//				console.log('hasclass converting?: ' + fileSpecs.filerow.hasClass('converting'));
+
+				if(!fileSpecs.filerow.hasClass('converting')) {
+                    //console.log( filerow );
+					convertFile( fileSpecs.fname,fileSpecs.filerow,fileSpecs.filesize, fileSpecs.enforceConversion );
 				}
 			} else {
                 enableAnalyze();
@@ -467,18 +477,28 @@ progressBar = function(filerow,start,filesize) {
 //		$('.progress',filerow).remove();
 		return;
 	}
-	setTimeout(function(){
-        progressBar(filerow,start+1,filesize);
-//        console.log()
-    },200);
+	if(!UI.conversionBlocked) {
+        setTimeout(function(){
+            progressBar(filerow,start+1,filesize);
+    //        console.log()
+        },200);        
+    } else {
+        UI.conversionBlocked = false;
+    }
+
 }
 
-convertFile = function(fname,filerow,filesize) {
+convertFile = function(fname,filerow,filesize, enforceConversion) {
+
+    console.log( 'Enforce conversion: ' + enforceConversion );
+
+    enforceConversion = (typeof enforceConversion === "undefined") ? false : enforceConversion;
+
 //	filerow = data.context;
 //	var fname = data.files[0].name;
 	var extension = fname.split('.')[fname.split('.').length-1];
 
-	if((extension=='xliff')||(extension=='sdlxliff')||(extension=='xlf')) {
+	if( ( extension=='xliff' || extension=='sdlxliff' || extension=='xlf' ) && enforceConversion === false ) {
 		filerow.addClass('ready');
 			if(checkAnalyzability('convert file')) {
 				enableAnalyze();
@@ -718,5 +738,6 @@ unsupported = function() {
 $(document).ready(function() {
 	config.unsupported = unsupported();
 	checkInit();
+    UI.init();
 });
 

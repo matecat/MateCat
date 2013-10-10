@@ -36,7 +36,7 @@ $(document).ready(function() {
         console.log('source language changed');
         if(!$('.template-download').length) return;
         if (UI.conversionsAreToRestart()) {
-            APP.confirm('Source language changed. The files must be reimported.', 'confirmRestartConversions');
+            APP.confirm({msg: 'Source language changed. The files must be reimported.', callback: 'confirmRestartConversions'});
         }
     });
          
@@ -56,6 +56,7 @@ $(document).ready(function() {
                 target_language: $('#target-lang').val(),
                 tms_engine: $('#tms_engine').val(),
                 mt_engine: $('#mt_engine').val(),
+                //no_tms_engine: $('#no_tms_engine').val(),
                 private_tm_key: $('#private-tm-key').val(),
                 private_tm_user: $('#private-tm-user').val(),
                 private_tm_pass: $('#private-tm-pass').val()

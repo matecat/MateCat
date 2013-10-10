@@ -5,8 +5,11 @@ require_once INIT::$MODEL_ROOT . '/queries.php';
 
 function __autoload($action) {
 	if (!file_exists(INIT::$CONTROLLER_ROOT . "/$action.php")) {
-		log::doLog("file " . INIT::$CONTROLLER_ROOT . "/$action.php" . " not exists. Exiting");
-		die("file " . INIT::$CONTROLLER_ROOT . "/$action.php" . " not exists. Exiting");
+		Log::doLog("file " . INIT::$CONTROLLER_ROOT . "/$action.php" . " not exists. Exiting");
+                echo "<!-- ";
+		debug_print_backtrace(); 
+                echo " -->";
+		die();
 	}
 	require_once INIT::$CONTROLLER_ROOT . "/$action.php";
 }

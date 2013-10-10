@@ -21,11 +21,18 @@ class editlogController extends viewcontroller {
 		$this->password = $this->get_from_get_post("password");
 		$this->thisUrl=$_SERVER['REQUEST_URI'];
 
+        /**
+         * Temporary hack to Test TER Versions
+         */
+        if( isset($_GET['v']) ){
+            $this->ter_test = (bool)$_GET['v'];
+        }
+
     }
 
 	public function doAction() {
 
-		$tmp = CatUtils::getEditingLogData($this->jid, $this->password);
+		$tmp = CatUtils::getEditingLogData($this->jid, $this->password, $this->ter_test);
 		$this->data = $tmp[0];
 		$this->stats = $tmp[1];
 

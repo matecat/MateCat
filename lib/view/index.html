@@ -22,6 +22,8 @@
                 server_load_time: '${load_time}',
                 job_id: '${jid}',
                 password: '${password}',
+                source_rfc: '${source_code}',
+                target_rfc: '${target_code}',
                 source_lang: '${source}',
                 target_lang: '${target}',
                 time_to_edit_enabled: ${time_to_edit_enabled},
@@ -60,7 +62,6 @@
                     <input type="hidden" name="filename" tal:attributes ="value string:${downloadFileName}" />
                     <input type="hidden" name="password" tal:attributes="value password" />
                     <input type="hidden" name="download_type" value="all" />
-                    <!--input id="downloadProject" data-prova="coso" name="submit" type="submit" value="XPREVIEW" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" / -->
                 </form>
                 <a href="#" class="filter"> <span class="arrow-top "></span></a>
 
@@ -151,7 +152,7 @@
                         </ul>
                     </div>  
 
-                    <div id="pname" tal:content="pname">Project</div>
+                    <a href="#" id="pname" tal:content="pname">Project</a>
                     <span class="details">&nbsp;(<span tal:replace="jid">---</span>) &gt; <b><span tal:replace="source_code">---</span> </b> &gt; <b><span tal:replace="target_code">---</span></b></span>
                 </div>
 
@@ -159,6 +160,54 @@
 
 
         </header>
+        
+        <div tal:attributes="class string:searchbox${filtered_class}">
+            <form>
+
+                <div class="search-inputs">
+
+                    <div class="block">
+                        <label for="search-source">Find in source</label>
+                        <input id="search-source" class="search-input" type="text" value=""/>				
+                    </div>
+                    <div class="block">
+                        <div class="field">
+                            <label for="search-target">Find in target</label>
+                            <input id="search-target" class="search-input" type="text" value=""/>
+                        </div>
+                        <div class="field">
+                            <label for="replace-target">Replace with</label>
+                            <input id="replace-target" class="search-input" type="text" value=""/>
+                        </div>
+                    </div>                    
+                    <div class="block">
+                        <label for="select-status">Status</label>
+                        <select id="select-status" class="search-select" >
+                            <option value="all" selected="selected">All</option>
+                            <option value="new">New</option>
+                            <option value="draft">Draft</option>
+                            <option value="translated">Translated</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>  	
+                    </div>
+                    <div class="block right buttons">
+                        <div class="field">
+                            <input id="exec-cancel" type="button" class="btn" value="Cancel" />			
+                            <input id="exec-find" type="button" class="btn" data-func="find" value="Find" />			
+                        </div>
+                        <div class="field">
+                            <input id="exec-replace" type="button" class="btn" value="Replace" />			
+                        </div>
+                    </div>          
+                </div>
+                
+            </form>
+            <div class="search-display">
+                <p>Found <span class="results">13</span> results in <span class="segments">10</span> segments having<span class="query"></span></p>
+            </div>
+        </div>
+        
         <!--
                 <div class="search">    
                <div class="col1-search">
@@ -305,7 +354,9 @@
 
 
         <footer>
+<!--
             <a href="#" id="navSwitcher" title="Open Navigation Bar">Open Navigation Bar</a>
+-->
             <div class="wrapper">
      
                 <nav>
@@ -330,7 +381,7 @@
 
 
                 <div id="statistics">
-                    <p>Progress:</p>
+                    <p class="progress">Progress:</p>
                     <div class="meter">
 
                         <a href="#"  class="approved-bar" tal:attributes="title string:Approved ${job_stats/APPROVED_PERC_FORMATTED}% ;style string:width:${job_stats/APPROVED_PERC_FORMATTED}%"></a>
@@ -340,7 +391,13 @@
                     </div>
                     <p class="percent"><span id="stat-progress" tal:content="php:(job_stats['PROGRESS_PERC_FORMATTED'])">0</span>%</p>
                     <ul>
-                        <li id="stat-eqwords">Payable Words: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong></li>
+                        <li id="stat-eqwords">
+                            <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Payable Words</a>
+                            <tal:block tal:condition="php: empty(analysis_enabled)">
+                                Payable Words
+                            </tal:block>
+                            : <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong>
+                        </li>
                         <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
                         <!--
                         <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
@@ -468,6 +525,12 @@ Stay anonymous</a>
         <div class="blacked" ></div>
 
         <ul id="contextMenu">
+<!--
+            <li id="spellCheck">
+                <span class="label">Maybe you were searching for:</span>
+                <a class="add" href="#">Add word</a>
+            </li>
+-->
             <li id="searchConcordance">
                 <span class="label">Concordance</span>
                 <span class="shortcut"><span class="alt">&#x2325;</span><span class="cmd">&#8984;</span> C</span>

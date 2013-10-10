@@ -3,6 +3,7 @@
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
 include_once INIT::$UTILS_ROOT . "/utils.class.php";
+include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 define("LTPLACEHOLDER", "##LESSTHAN##");
 define("GTPLACEHOLDER", "##GREATERTHAN##");
@@ -63,6 +64,12 @@ class CatUtils {
         return array($hours, $minutes, $seconds, $usec);
     }
 
+    public static function dos2unix( $dosString ){
+        $dosString = str_replace( "\r\n","\r", $dosString );
+        $dosString = str_replace( "\n","\r", $dosString );
+        $dosString = str_replace( "\r","\n", $dosString );
+        return $dosString;
+    }
     
     private static function placehold_xml_entities($segment) {
         $pattern ="|&#(.*?);|";
@@ -175,14 +182,14 @@ class CatUtils {
 
     public static function rawxliff2view($segment) {
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
-        $segment = self::placehold_xml_entities($segment);
+        //$segment = self::placehold_xml_entities($segment);
         $segment = self::placehold_xliff_tags($segment);
         
         
         $segment = html_entity_decode($segment, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8');
         // restore < e >
-        $segment = str_replace("<", "&lt", $segment);
-        $segment = str_replace(">", "&gt", $segment);
+        $segment = str_replace("<", "&lt;", $segment);
+        $segment = str_replace(">", "&gt;", $segment);
 
 
         $segment = preg_replace('|<(.*?)>|si', "&lt;$1&gt;", $segment);
@@ -212,7 +219,7 @@ class CatUtils {
         ;
     }
 
-    public static function getEditingLogData($jid, $password) {
+    public static function getEditingLogData($jid, $password, $use_ter_diff = false ) {
 
         $data = getEditLog($jid, $password);
 
@@ -285,29 +292,43 @@ class CatUtils {
 
             $seg['pe_effort_perc'] .= "%";
 
+            $lh = Languages::getInstance();
+            $lang = $lh->getIsoCode( $lh->getLocalizedName( $seg['target_lang'] ) );
 
+            $sug_for_diff = self::placehold_xliff_tags( $seg[ 'sug' ] );
+            $tra_for_diff = self::placehold_xliff_tags( $seg[ 'translation' ] );
 
-            $sug_for_diff = self::placehold_xliff_tags($seg['sug']);
-            $tra_for_diff = self::placehold_xliff_tags($seg['translation']);
-            $ter = MyMemory::diff_tercpp($sug_for_diff, $tra_for_diff);
-            $seg['ter'] = $ter[1] * 100;
-            $stat_ter[] = $seg['ter'] * $seg['rwc'];
-            $seg['ter'] = round($ter[1] * 100) . "%";
-            $diff_ter = $ter[0];
+//            possible patch
+//            $sug_for_diff = html_entity_decode($sug_for_diff, ENT_NOQUOTES, 'UTF-8');
+//            $tra_for_diff = html_entity_decode($tra_for_diff, ENT_NOQUOTES, 'UTF-8');
 
-            if ($seg['sug'] <> $seg['translation']) {
-                
-                $diff_PE = MyMemory::diff_html($sug_for_diff, $tra_for_diff);
+            $ter          = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
+            $seg[ 'ter' ] = $ter[ 1 ] * 100;
+            $stat_ter[ ]  = $seg[ 'ter' ] * $seg[ 'rwc' ];
+            $seg[ 'ter' ] = round( $ter[ 1 ] * 100 ) . "%";
+            $diff_ter     = $ter[ 0 ];
 
-                // we will use diff_PE until ter_diff will not work properly
-                $seg['diff'] = $diff_PE;
-                //$seg['diff'] = $diff_ter;
+            if ( $seg[ 'sug' ] <> $seg[ 'translation' ] ) {
+
+                //force use of third party ter diff
+                if( $use_ter_diff ){
+                    $seg[ 'diff' ] = $diff_ter;
+                } else {
+                    $diff_PE = MyMemory::diff_html( $sug_for_diff, $tra_for_diff );
+                    // we will use diff_PE until ter_diff will not work properly
+                    $seg[ 'diff' ]     = $diff_PE;
+                }
+
+                //$seg[ 'diff_ter' ] = $diff_ter;
+
             } else {
-                $seg['diff'] = '';
+                $seg[ 'diff' ]     = '';
+                //$seg[ 'diff_ter' ] = '';
             }
-            $seg['diff'] = self::restore_xliff_tags_for_wiew($seg['diff']);
-            //     echo $seg['diff']; exit;
-            //$seg['diff_view']= CatUtils::rawxliff2rawview($seg['diff']);
+
+            $seg['diff']     = self::restore_xliff_tags_for_wiew($seg['diff']);
+            //$seg['diff_ter'] = self::restore_xliff_tags_for_wiew($seg['diff_ter']);
+
             // BUG: While suggestions source is not correctly set
             if (($seg['sm'] == "85%") OR ($seg['sm'] == "86%")) {
                 $seg['ss'] = 'Machine Translation';
@@ -316,9 +337,10 @@ class CatUtils {
                 $seg['ss'] = 'Translation Memory';
             }
 
-            $seg['sug_view'] = trim(CatUtils::rawxliff2view($seg['sug']));
-            $seg['source'] = trim(CatUtils::rawxliff2view($seg['source']));
-            $seg['translation'] = trim(CatUtils::rawxliff2view($seg['translation']));
+            $seg['sug_view'] = trim( CatUtils::rawxliff2view($seg['sug']) );
+            $seg['source'] = trim( CatUtils::rawxliff2view( $seg['source'] ) );
+            $seg['translation'] = trim( CatUtils::rawxliff2view( $seg['translation'] ) );
+
         }
 
         $stats['edited-word-count'] = array_sum($stat_rwc);
@@ -455,6 +477,7 @@ class CatUtils {
         }
         
         return $res_job_stats;
+
     }
     
     /**
@@ -524,35 +547,34 @@ class CatUtils {
      * @return mixed $job_stats
      */
     protected static function _getStatsForJob( $job_stats ) {
-        
-        $job_stats['PROGRESS'] = ( $job_stats['TRANSLATED'] + $job_stats['APPROVED'] );                   
 
-        $job_stats['TOTAL_FORMATTED'] = number_format($job_stats['TOTAL'], 0, ".", ",");
-        $job_stats['PROGRESS_FORMATTED'] = number_format( $job_stats['TRANSLATED'] + $job_stats['APPROVED'], 0, ".", "," );                   
-        $job_stats['APPROVED_FORMATTED'] = number_format($job_stats['APPROVED'], 0, ".", ",");
-        $job_stats['REJECTED_FORMATTED'] = number_format($job_stats['REJECTED'], 0, ".", ",");
-        $job_stats['TODO_FORMATTED'] = number_format($job_stats['DRAFT'] + $job_stats['REJECTED'], 0, ".", ",");
-        $job_stats['DRAFT_FORMATTED'] = number_format($job_stats['DRAFT'], 0, ".", ",");
-        $job_stats['TRANSLATED_FORMATTED'] = number_format($job_stats['TRANSLATED'], 0, ".", ",");
+        $job_stats[ 'PROGRESS' ]             = ( $job_stats[ 'TRANSLATED' ] + $job_stats[ 'APPROVED' ] );
+        $job_stats[ 'TOTAL_FORMATTED' ]      = number_format( $job_stats[ 'TOTAL' ], 0, ".", "," );
+        $job_stats[ 'PROGRESS_FORMATTED' ]   = number_format( $job_stats[ 'TRANSLATED' ] + $job_stats[ 'APPROVED' ], 0, ".", "," );
+        $job_stats[ 'APPROVED_FORMATTED' ]   = number_format( $job_stats[ 'APPROVED' ], 0, ".", "," );
+        $job_stats[ 'REJECTED_FORMATTED' ]   = number_format( $job_stats[ 'REJECTED' ], 0, ".", "," );
+        $job_stats[ 'TODO_FORMATTED' ]       = number_format( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ], 0, ".", "," );
+        $job_stats[ 'DRAFT_FORMATTED' ]      = number_format( $job_stats[ 'DRAFT' ], 0, ".", "," );
+        $job_stats[ 'TRANSLATED_FORMATTED' ] = number_format( $job_stats[ 'TRANSLATED' ], 0, ".", "," );
 
-        $job_stats['APPROVED_PERC'] = ($job_stats['APPROVED']) / $job_stats['TOTAL'] * 100;
-        $job_stats['REJECTED_PERC'] = ($job_stats['REJECTED']) / $job_stats['TOTAL'] * 100;
-        $job_stats['DRAFT_PERC'] = ( $job_stats['DRAFT'] / $job_stats['TOTAL'] * 100 );
-        $job_stats['TRANSLATED_PERC'] = ( $job_stats['TRANSLATED'] / $job_stats['TOTAL'] * 100 );
-        $job_stats['PROGRESS_PERC'] = ( $job_stats['PROGRESS'] / $job_stats['TOTAL'] ) * 100;
+        $job_stats[ 'APPROVED_PERC' ]   = ( $job_stats[ 'APPROVED' ] ) / $job_stats[ 'TOTAL' ] * 100;
+        $job_stats[ 'REJECTED_PERC' ]   = ( $job_stats[ 'REJECTED' ] ) / $job_stats[ 'TOTAL' ] * 100;
+        $job_stats[ 'DRAFT_PERC' ]      = ( $job_stats[ 'DRAFT' ] / $job_stats[ 'TOTAL' ] * 100 );
+        $job_stats[ 'TRANSLATED_PERC' ] = ( $job_stats[ 'TRANSLATED' ] / $job_stats[ 'TOTAL' ] * 100 );
+        $job_stats[ 'PROGRESS_PERC' ]   = ( $job_stats[ 'PROGRESS' ] / $job_stats[ 'TOTAL' ] ) * 100;
 
-        $significantDigits = array();
-        $significantDigits[] = self::_getSignificantDigits($job_stats['TRANSLATED_PERC']);
-        $significantDigits[] = self::_getSignificantDigits($job_stats['DRAFT_PERC']);
-        $significantDigits[] = self::_getSignificantDigits($job_stats['APPROVED_PERC']);
-        $significantDigits[] = self::_getSignificantDigits($job_stats['REJECTED_PERC']);
-        $significantDigits = max($significantDigits);
-                
-        $job_stats['TRANSLATED_PERC_FORMATTED'] = round($job_stats['TRANSLATED_PERC'], $significantDigits ) ;
-        $job_stats['DRAFT_PERC_FORMATTED'] = round($job_stats['DRAFT_PERC'], $significantDigits ) ;
-        $job_stats['APPROVED_PERC_FORMATTED'] = round($job_stats['APPROVED_PERC'], $significantDigits );
-        $job_stats['REJECTED_PERC_FORMATTED'] = round($job_stats['REJECTED_PERC'], $significantDigits );
-        $job_stats['PROGRESS_PERC_FORMATTED'] = round( $job_stats['PROGRESS_PERC'], $significantDigits ) ;
+        $significantDigits    = array();
+        $significantDigits[ ] = self::_getSignificantDigits( $job_stats[ 'TRANSLATED_PERC' ] );
+        $significantDigits[ ] = self::_getSignificantDigits( $job_stats[ 'DRAFT_PERC' ] );
+        $significantDigits[ ] = self::_getSignificantDigits( $job_stats[ 'APPROVED_PERC' ] );
+        $significantDigits[ ] = self::_getSignificantDigits( $job_stats[ 'REJECTED_PERC' ] );
+        $significantDigits    = max( $significantDigits );
+
+        $job_stats[ 'TRANSLATED_PERC_FORMATTED' ] = round( $job_stats[ 'TRANSLATED_PERC' ], $significantDigits );
+        $job_stats[ 'DRAFT_PERC_FORMATTED' ]      = round( $job_stats[ 'DRAFT_PERC' ], $significantDigits );
+        $job_stats[ 'APPROVED_PERC_FORMATTED' ]   = round( $job_stats[ 'APPROVED_PERC' ], $significantDigits );
+        $job_stats[ 'REJECTED_PERC_FORMATTED' ]   = round( $job_stats[ 'REJECTED_PERC' ], $significantDigits );
+        $job_stats[ 'PROGRESS_PERC_FORMATTED' ]   = round( $job_stats[ 'PROGRESS_PERC' ], $significantDigits );
         
         $t = 'approved';
         if ($job_stats['TRANSLATED_FORMATTED'] > 0)
@@ -561,7 +583,7 @@ class CatUtils {
             $t = "draft";
         if ($job_stats['REJECTED_FORMATTED'] > 0)
             $t = "draft";
-        $job_stats['DOWNLOAD_STATUS'] = $t;            
+        $job_stats['DOWNLOAD_STATUS'] = $t;
 
         return $job_stats;
         

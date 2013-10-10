@@ -50,6 +50,7 @@ class getContributionController extends ajaxcontroller {
 		if ($this->id_translator == 'unknown_translator') {
 			$this->id_translator = "";
 		}
+
 	}
 
 	public function doAction() {
@@ -115,6 +116,7 @@ class getContributionController extends ajaxcontroller {
 		}
 
 		$mt_res = array();
+        $sentence_confidence = null;
 		$mt_match = "";
 		if (!empty($this->id_mt_engine) and $this->id_mt_engine != 1) {
 			$mt = new MT($this->id_mt_engine);
@@ -131,6 +133,8 @@ class getContributionController extends ajaxcontroller {
 				$mt_match_res = new TMS_GET_MATCHES($this->text, $mt_match, $mt_score, "MT-" . $mt->getName(), date("Y-m-d"));
 
 				$mt_res = $mt_match_res->get_as_array();
+                $mt_res['sentence_confidence'] = $mt_result[2]; //can be null
+
 			}
 		}
 		$matches = array();
@@ -142,47 +146,49 @@ class getContributionController extends ajaxcontroller {
 		if (!empty($mt_match)) {
 			$matches[] = $mt_res;
 			usort( $matches, array( "getContributionController", "__compareScore" ) );
+			//this is necessary since usort sorts is ascending order, thus inverting the ranking
+			$matches=array_reverse($matches);
 		}
+
 		$matches = array_slice( $matches, 0, $this->num_results );
 
-//        $firstMatch = ( isset($matches[0]) ? $matches[0] : array() );
-//        $matchVal = floatval( @$firstMatch['match'] );
-//        if( isset( $firstMatch ) && $matchVal >= 90 && $matchVal < 100 ){
-//
-//            $srcSearch = strip_tags($this->text);
-//            $segmentFound = strip_tags($firstMatch['raw_segment']);
-//            $srcSearch = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $srcSearch ) );
-//            $segmentFound = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $segmentFound ) );
-//
-//            $fuzzy = levenshtein($srcSearch, $segmentFound) / log10( mb_strlen( $srcSearch . $segmentFound ) +1 );
-//
-//            if( $srcSearch == $segmentFound || $fuzzy < 2.5 ){
-//
-//                $qaRealign = new QA( $this->text, html_entity_decode( $firstMatch['raw_translation'] ) );
-//                $qaRealign->tryRealignTagID();
-//
-//                $log_prepend = "CLIENT REALIGN IDS PROCEDURE | ";
-//                if( !$qaRealign->thereAreErrors() ){
-//
-//                    Log::doLog( $log_prepend . " - Requested Segment: " . var_export( $this->__postInput, true) );
-//                    Log::doLog( $log_prepend . "Fuzzy: " . $fuzzy .  " - Try to Execute Tag ID Realignment." );
-//                    Log::doLog( $log_prepend . "TMS RAW RESULT:" );
-//                    Log::doLog( $log_prepend . var_export($firstMatch, true) );
-//
-//                    Log::doLog( $log_prepend . "Realignment Success:");
-//                    $firstMatch['segment'] = CatUtils::rawxliff2view( $this->text );
-//                    $firstMatch['translation'] = CatUtils::rawxliff2view( $qaRealign->getTrgNormalized() );
-//                    $firstMatch['match'] = ( $fuzzy == 0 ? '100%' : '99%' );
-//                    Log::doLog( $log_prepend . "View Segment:     " . var_export($firstMatch['segment'], true) );
-//                    Log::doLog( $log_prepend . "View Translation: " . var_export($firstMatch['translation'], true) );
-//
-//                } else {
-//                    Log::doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $this->__postInput['id_segment'] );
-//                }
-//
-//            }
-//
-//        }
+        ( isset($matches[0]['match']) ? $firstMatchVal = floatval( $matches[0]['match'] ) : null );
+        if( isset( $firstMatchVal ) && $firstMatchVal >= 90 && $firstMatchVal < 100 ){
+
+            $srcSearch = strip_tags($this->text);
+            $segmentFound = strip_tags($matches[0]['raw_segment']);
+            $srcSearch = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $srcSearch ) );
+            $segmentFound = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $segmentFound ) );
+
+            $fuzzy = levenshtein($srcSearch, $segmentFound) / log10( mb_strlen( $srcSearch . $segmentFound ) +1 );
+
+            if( $srcSearch == $segmentFound || $fuzzy < 2.5 ){
+
+                $qaRealign = new QA( $this->text, html_entity_decode( $matches[0]['raw_translation'] ) );
+                $qaRealign->tryRealignTagID();
+
+                $log_prepend = "CLIENT REALIGN IDS PROCEDURE | ";
+                if( !$qaRealign->thereAreErrors() ){
+
+                    Log::doLog( $log_prepend . " - Requested Segment: " . var_export( $this->__postInput, true) );
+                    Log::doLog( $log_prepend . "Fuzzy: " . $fuzzy .  " - Try to Execute Tag ID Realignment." );
+                    Log::doLog( $log_prepend . "TMS RAW RESULT:" );
+                    Log::doLog( $log_prepend . var_export($matches[0], true) );
+
+                    Log::doLog( $log_prepend . "Realignment Success:");
+                    $matches[0]['segment'] = CatUtils::rawxliff2view( $this->text );
+                    $matches[0]['translation'] = CatUtils::rawxliff2view( $qaRealign->getTrgNormalized() );
+                    $matches[0]['match'] = ( $fuzzy == 0 ? '100%' : '99%' );
+                    Log::doLog( $log_prepend . "View Segment:     " . var_export($matches[0]['segment'], true) );
+                    Log::doLog( $log_prepend . "View Translation: " . var_export($matches[0]['translation'], true) );
+
+                } else {
+                    Log::doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $this->__postInput['id_segment'] );
+                }
+
+            }
+
+        }
 
         if( !$this->concordance_search ){
             //execute these lines only in segment contribution search,
@@ -201,6 +207,10 @@ class getContributionController extends ajaxcontroller {
 			if ($match['created_by'] == 'MT!') {
 				$match['created_by'] = 'MT'; //MyMemory returns MT!
 			}
+
+            if( !empty($match['sentence_confidence']) ){
+                $match['sentence_confidence'] = round( $match['sentence_confidence'], 0 ) . "%";
+            }
 
             if( $this->concordance_search ){
 

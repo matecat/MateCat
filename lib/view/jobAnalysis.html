@@ -1,0 +1,383 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8"/>
+        <title>Volume Analysis - MateCat</title>
+        <meta name="description" content="MateCat allows you to get more matches than any other CAT tool."/>
+        <meta name="viewport" content="width=device-width"/>
+        <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
+        <link rel="stylesheet" href="${basepath}public/css/analyze.css?build=${build_number}"/>
+        <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
+
+        <script type="text/javascript">
+            var config = {
+                basepath: '${basepath | string:/}',
+                status: '${project_status}',
+                totalSegments: '${num_segments}',
+                totalAnalyzed: '${num_segments_analyzed}',
+                isLoggedIn: '${isLoggedIn}',
+                showModalBoxLogin: '${showModalBoxLogin}'
+            };
+        </script>
+
+        <script type="text/javascript" src="${basepath}public/js/lib/jquery.js"></script>
+        <script type="text/javascript" src="${basepath}public/js/lib/jquery-ui.js"></script>
+        <script type="text/javascript" src="${basepath}public/js/common.js?build=${build_number}"></script>
+        <script type="text/javascript" src="${basepath}public/js/analyze.js?build=${build_number}"></script>
+        <script type='text/javascript' src="${basepath}public/js/login.js?build=${build_number}"></script>
+        <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
+        
+    </head>
+
+
+    <body>
+        <div tal:condition="true:project_not_found" metal:use-macro="unsupported_browser.html/project_not_found"/>
+        <header>
+
+            <div class="wrapper"> 
+                <a  href="${basepath}"  class="logo"></a>
+            </div>
+        </header>
+
+    <content tal:condition="not:project_not_found">
+<div class="wrapper-container">
+        <div class="wrapper">
+            <h1 id="pid" title="tal:content='pname|nothing'" data-pid="" tal:attributes="data-pid pid" ><span id="pname" tal:content="pname|nothing">Project name</span> - Volume Analysis</h1>
+
+            <h2>Invoicing Tips</h2>
+
+            <div class="cl"></div>
+
+            <br/>
+            <br/>
+
+
+<!--
+            <div class="billed-message">MateCat usage fee is <strong>$<span id="usageFee">86.25</span></strong> for this project ($<span id="pricePerWord">0.003</span> per word). 
+                <br /><small style="font-size: 10pt">Translate for free. You pay only when you download the completed translation.
+                    <br />Using MateCat you are <strong>saving aprox. $<span id="discount">600</span></strong> (<span id="totalFastWC">34,350</span> - <span id="totalTMWC">28,000</span> words at $0.10 per word) thanks to the more matches leveraged.</small></div>
+-->
+            <br/>
+
+
+            <br/>
+            <div class="cl"></div>
+            <!--  
+            <a href="#" class="details more-table">Warning: 5 of 17 files analysed are missing</a>
+            -->
+
+
+            <!-- The file upload form used as target for the file upload widget -->
+
+            <!-- The fileupload-buttonbar contains buttons to add/delete files and start/cancel the upload -->
+            <!-- The loading indicator is shown during file processing -->
+            <!-- The table listing the files available for upload/download -->
+            <table class="upload-table content-table" role="presentation">
+                <tr>
+
+                    <td class="preview">
+                        <img src="/public/img/xliff-icon-retina.png" width="30" height="29"/>        </td>
+                    <td class="name">esempio.xliff</td>
+                    <td class="size"><span>0.90 KB</span></td>
+                    <td colspan="2">0 word found</td>
+
+                    <td>          </td>
+                </tr>
+                <tr>
+
+                    <td class="preview">
+                        <img src="/public/img/xliff-icon-retina.png" width="30" height="29"/>        </td>
+                    <td class="name">esempio.xliff</td>
+                    <td class="size"><span>0.90 KB</span></td>
+                    <td colspan="2">0 word found</td>
+
+                    <td>          </td>
+                </tr>
+                <tr>
+
+                    <td class="preview">
+                        <img src="/public/img/xliff-icon-retina.png" width="30" height="29" />        </td>
+                    <td class="name">esempio.xliff</td>
+                    <td class="size"><span>0.90 KB</span></td>
+                    <td colspan="2">0 word found</td>
+
+                    <td>          </td>
+                </tr>
+                <tr>
+
+                    <td class="preview">
+                        <img src="/public/img/xliff-icon-retina.png" width="30" height="29" />        </td>
+                    <td class="name">esempio.xliff</td>
+                    <td class="size"><span>0.90 KB</span></td>
+                    <td colspan="2">0 word found</td>
+
+                    <td>          </td>
+                </tr>
+                <tr>
+
+                    <td class="preview">
+                        <img src="/public/img/xliff-icon-retina.png" width="30" height="29"/>        </td>
+                    <td class="name">esempio.xliff</td>
+                    <td class="size"><span>0.90 KB</span></td>
+                    <td colspan="2">0 word found</td>
+
+                    <td>          </td>
+                </tr>
+            </table>
+            <!-- .upload-footer -->
+
+            <div class="cl"></div>
+        </div> 
+
+
+</div>
+
+
+        <div class="body">
+            <div class="wrapper">
+                <h2>Job details</h2>      
+
+                <tal:block tal:define="job php:array()" tal:repeat="job jobs">
+                    <h3>
+                        <span tal:replace="job/source">English</span> &gt; <span tal:replace="job/target">Italian</span>
+                    </h3>       
+                    <table tal:attributes="id string:job-${repeat/job/key}" class="tablestats">
+                        <tr>
+                            <th> </th>
+                            <th>Payable</th>
+                            <th>Total</th>
+                            <th class="new">New</th>
+                            <th class="repetition">Repetition</th>
+                            <th class="internal-matches">Internal Matches<br/>
+                                (75%-99%)</th>
+                            <th class="tm-partial">TM<br/>
+                                Partial (75%-99%)</th>
+                            <th class="tm-100">TM 100%</th>
+                            <th class="tm-100-context">TM 100% in context</th>
+                            <th class="mt">Machine Translation</th>
+                            <th class="empty">&nbsp;</th>
+                        </tr>
+
+                        <tr>
+
+
+                            <td class="payable-rate-breakdown" colspan="3">Payable Rate Breakdown</td>
+                            <td class="editarea">100%</td>
+                            <td class="editarea">30%</td>
+                            <td class="editarea">60%</td>
+                            <td class="editarea">60%</td>
+                            <td class="editarea">30%</td>
+                            <td class="editarea">0%</td>
+                            <td class="editarea">85%</td>
+                            <td class="empty">&nbsp;</td>
+                        </tr>
+
+                        <tr class="tablespace">
+                            <td colspan="10">&nbsp;</td>
+                        </tr>
+                        <tr class="totaltable">
+                            <td class="languages">
+                                <a href="#" class="filedetails part3">File details</a>
+                                <span class="numfiles">(<span tal:define="files job/files; f php:array()" tal:content="php:count(files)">0</span>)</span>
+                            </td>
+
+                            <td class="stat-payable">
+                                <strong class="stat_tot" tal:content="tm_analysis_wc_print">11,500</strong>                            </td>
+                            <td class="stat-total" tal:content="job/total_raw_word_count_print">13,500</td>
+                            <td class="stat_new">0</td>
+                            <td class="stat_rep">0</td>
+                            <td class="stat_int">0</td>
+                            <td class="stat_tm75">0</td>
+                            <td class="stat_tm100">0</td>
+                            <td class="stat_tmic">0</td>
+                            <td class="stat_mt">0</td>
+                            <td class="empty">
+                                <a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${repeat/job/key}-${job/password} " href="#" target="_blank" class="uploadbtn">Translate</a>
+                            </td>
+                        </tr>
+                        <tal:block tal:define="files job/files; f php:array()" tal:repeat="f files">
+                            <tr tal:attributes="id string:file_${repeat/job/key}_${f/id}" id="file_1703" class="subfile part3files">
+                                <td class="stat-name">
+                                    <p class="filename" tal:content="f/filename" tal:attributes='title f/filename'>filename1.xliff</p> </td>
+                                <td class="stat_payable"><strong tal:content="f/file_eq_word_count">6,500</strong></td>
+                                <td class="stat-total" tal:content="f/file_raw_word_count" >7,500</td>
+                                <td class="stat_new">0</td>
+                                <td class="stat_rep">0</td>
+                                <td class="stat_int">0</td>
+                                <td class="stat_tm75">0</td>
+                                <td class="stat_tm100">0</td>
+                                <td class="stat_tmic">0</td>
+                                <td class="stat_mt">0</td>
+                                <td class="empty"></td>
+                            </tr>
+                        </tal:block>
+                        <!--tr id="file_1704" class="subfile part3files">
+                            <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename2.xliff</p> </td>
+                            <td ><strong>6,500</strong></td>
+                            <td style="text-align:right">7,500</td>
+                            <td class="stat_new">0</td>
+                            <td class="stat_rep">0</td>
+                            <td class="stat_int">0</td>
+                            <td class="stat_tm75">0</td>
+                            <td class="stat_tm100">0</td>
+                            <td class="stat_tmic">0</td>
+                            <td class="stat_mt">0</td>
+                        </tr -->
+                    </table>
+                </tal:block>
+<!--
+                <div class="sendit">
+                    <a href="#" class="uploadbtn split" style="float:right">Split / Merge</a>    
+                    <div class="cl"></div>
+                    <div class="job">
+
+                        <p> Job #1 link:</p>  
+                        <input name="" type="text" class="input" value="mat.ly/IUrHPU "/> 
+                        <input type="text" class="input" value="200" size="2"/> 
+                        <p>words</p> <a href="#" class="uploadbtn add" title="split more">+</a> 
+                    </div>
+                    <div class="cl"></div>
+                </div>
+-->
+</div> <div class="cl"></div>
+        </div>
+
+        <div class="grayed" ></div>
+        <div class="split-box">
+            <div class="header"><a href="#" class="close"></a></div>
+            <h2>English &gt; French</h2>
+            <h3>How many job do you want to split into?</h3>
+
+            <a href="#" class="operation-btn">-</a><input type="text" value="2" class="input" /><a href="#" class="operation-btn">+</a>
+            <!--   <a href="#" class="operation-btn splitmore">+ split into 1 more</a>  -->
+            <div class="cl"></div>
+            <ul class="jobs">
+                <li>
+                    <div><h4>Part 1</h4></div>
+
+                    <div class="job-details">
+                        <div class="job-perc"><p>Aprox. words:</p>
+                            <input type="text" class="input-small" value="50.000" /> 
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div><h4>Part 2</h4></div>
+                    <div class="job-details">
+                        <div class="job-perc"><p>Aprox. words:</p>
+                            <input type="text" class="input-small" value="50.000" /> 
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div><h4>Part 3</h4></div>
+
+                    <div class="job-details">
+                        <div class="job-perc"><p>Aprox. words:</p>
+                            <input type="text" class="input-small" value="200.000" />  
+                        </div>
+                    </div>
+                </li>
+                <li>
+                    <div ><h4>Part 4</h4></div>
+
+                    <div class="job-details">
+                        <div class="job-perc"><p>Aprox. words:</p>
+                            <input type="text" class="input-small" value="200.000" />  
+                        </div>
+                    </div>
+                </li>
+
+                <li>
+                    <div>
+                        <h4>Part 5</h4>
+                    </div>
+
+                    <div class="job-details">
+                        <div class="job-perc">
+                            <input type="text" class="input-small" value="50" />  
+                        </div>
+                    </div>
+                </li>
+            </ul>
+
+
+
+
+            <a href="#" class="operation-btn total-btn" style="float:left;margin-left:20px;">+</a>
+
+            <div class="total">
+                <p>Total payable words: <strong>200.000</strong></p>
+            </div>
+
+
+
+
+
+            <div class="cl"></div>
+
+
+
+            <input name="" type="button" class="uploadbtn" value="Split / Merge" />
+
+
+
+        </div>
+    </content>
+
+    <footer>
+        <div class="wrapper">
+
+            <nav>
+                <ul>
+                    <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
+                </ul>
+
+                <tal:block tal:condition="php: empty(logged_user)">
+                    <div id='welcomebox'>
+                        <span>Anonymous</span> (<a id='loginlink' tal:attributes="href incomingUrl">login</a>)
+                    </div>
+                </tal:block>
+
+                <tal:block tal:condition="php: !empty(logged_user)">
+                    <div id='welcomebox'>
+                        <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
+                    </div>
+                </tal:block>
+
+            </nav>
+
+        </div>
+    </footer>
+
+	<!-- POPUP LOGIN -->
+	<div id='popupWrapper' >
+		<div class="popup-outer"></div>
+		<div class="popup">
+	
+			<a href="#" class="x-popup"></a>
+			<h1>Login</h1>
+	
+			<h2>
+                Log in to add the project to your management panel.<br />If the project is not added, you will not be able to retrieve the URL.
+			</h2>
+	
+			<div class="outer">
+				<div class="inner">
+					<button id="sign-in" name="" type="button" class="login-button"
+						data-oauth="${hostpath}/oauth/request?v2">Sign
+						in using Google</button>
+				</div>
+			</div>
+			<br /> Or <br />
+			<a href="#" class="anonymous"> Stay anonymous</a>
+	
+		</div>
+	</div>
+	<!-- FINE POPUP LOGIN -->
+
+	<script src="${basepath}public/js/lib/snapengage.js"></script>
+
+</body> 
+</html>
+
