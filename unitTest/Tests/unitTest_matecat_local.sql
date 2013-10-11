@@ -58,7 +58,7 @@ CREATE TABLE `engines` (
 LOCK TABLES `engines` WRITE;
 /*!40000 ALTER TABLE `engines` DISABLE KEYS */;
 INSERT INTO `engines` VALUES
-(0, 'NONE', 'NONE', 'No MT', '', '', NULL, NULL, NULL, NULL, 100),
+('0', 'NONE - PLACEHOLDER', 'NONE', 'No MT', '', '', NULL, NULL, NULL, NULL, 100),
 (1, 'MyMemory (All Pairs)', 'TM', 'MyMemory: next generation Translation Memory technology', 'http://api.mymemory.translated.net', 'get', 'set', 'delete', NULL, '1', 0),
 (2, 'FBK-IT (EN->IT)', 'MT', 'FBK (EN->IT) Moses Information Technology engine', 'http://hlt-services2.fbk.eu:8601', 'translate', 'update', NULL, NULL, '2', 14),
 (3, 'LIUM-IT (EN->DE)', 'MT', 'Lium (EN->FR) Moses Information Technology engine', 'http://193.52.29.52:8001', 'translate', NULL, NULL, NULL, '2', 14),

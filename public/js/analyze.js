@@ -326,7 +326,9 @@ UI = {
         				$('#longloading .approved-bar').css('width','100%');
         				$('#analyzedSegmentsReport').text(s.SEGMENTS_ANALYZED_PRINT);
                         setTimeout(function(){
+                            $('#shortloading').remove();
         					$('#longloading .meter').remove();
+                            $('#longloading').show();
         					$('#longloading p').addClass('loaded').text('Analysis complete');
                         },1000);   
 /*

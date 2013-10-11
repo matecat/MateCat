@@ -37,6 +37,7 @@ while (1) {
 		}
 
         $perform_Tms_Analysis = true;
+        $status = "FAST_OK";
         if( $pid_res['id_tms'] == 0 && $pid_res['id_mt_engine'] == 0 ){
 
             /**
@@ -45,6 +46,7 @@ while (1) {
              */
 
             $perform_Tms_Analysis = false;
+            $status = "DONE";
             Log::doLog( 'Perform Analysis ' . var_export( $perform_Tms_Analysis, true ) );
         }
 
@@ -52,7 +54,7 @@ while (1) {
 		if ($insertReportRes < 0) {
 			continue;
 		}
-		$change_res = changeProjectStatus($pid, "FAST_OK");
+		$change_res = changeProjectStatus($pid, $status);
 		if ($change_res < 0) {
 		}
 	}
