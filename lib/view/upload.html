@@ -144,6 +144,7 @@
     <div class="translate-box">
         <h2>Machine Translation</h2>
         <select name="mt_engine" id="mt_engine" tal:define="mt_engine php:array()">
+            <option value="0" >NONE</option>
             <option value="1" selected="selected">MyMemory (All Pairs)</option>
             <tal:block tal:repeat="mt_engine mt_engines">
                 <option value="--" tal:attributes="value mt_engine/id" tal:content="mt_engine/name">---</option>
