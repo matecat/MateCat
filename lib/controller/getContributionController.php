@@ -177,7 +177,8 @@ class getContributionController extends ajaxcontroller {
 
             $fuzzy = levenshtein($srcSearch, $segmentFound) / log10( mb_strlen( $srcSearch . $segmentFound ) +1 );
 
-            if( $srcSearch == $segmentFound || $fuzzy < 2.5 ){
+            //levenshtein handle max 255 chars per string and returns -1, so fuzzy var can be less than 0 !!
+            if ( $srcSearch == $segmentFound || ( $fuzzy < 2.5 && $fuzzy > 0 ) ) {
 
                 $qaRealign = new QA( $this->text, html_entity_decode( $matches[0]['raw_translation'] ) );
                 $qaRealign->tryRealignTagID();

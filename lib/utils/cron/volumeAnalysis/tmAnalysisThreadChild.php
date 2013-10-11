@@ -94,6 +94,9 @@ while (1) {
     $id_mt_engine    = $segment[ 'id_mt_engine' ];
     $id_tms          = $segment[ 'id_tms' ];
 
+    /**
+     * Call Memory Server for matches if it's enabled
+     */
     $tms_enabled = false;
     if( $id_tms == 1 ){
         /**
@@ -126,20 +129,8 @@ while (1) {
     }
 
     /**
-     * Only if MyMemory is set up
+     * Call External MT engine if it is a custom one ( mt not requested from MyMemory )
      */
-    if ( $tms_enabled && ( !$tms_match || !is_array($tms_match) ) ) {
-        echo "--- (child $my_pid) : error from mymemory : set error and continue\n"; // ERROR FROM MYMEMORY
-        setSegmentTranslationError($sid, $jid); // devo settarli come done e lasciare il vecchio livello di match
-        deleteLockSegment($sid, $jid);
-        continue;
-    } else {
-        $tm_match_type = $tms_match[0]['match'];
-        if (stripos($tms_match[0]['created_by'], "MT") !== false) {
-            $tm_match_type = "MT";
-        }
-    }
-
     $mt_res = array();
     $mt_match = "";
     if ( $id_mt_engine > 1 /* Request MT Directly */ ) {
@@ -173,6 +164,21 @@ while (1) {
         usort($matches, "compareScore");
     }
 
+    /**
+     * Only if No results found
+     */
+    if ( !$matches || !is_array($matches) ) {
+        echo "--- (child $my_pid) : error from mymemory : set error and continue\n"; // ERROR FROM MYMEMORY
+        setSegmentTranslationError($sid, $jid); // devo settarli come done e lasciare il vecchio livello di match
+        deleteLockSegment($sid, $jid);
+        continue;
+    }
+
+    $tm_match_type = $matches[0]['match'];
+    if ( stripos($matches[0]['created_by'], "MT") !== false) {
+        $tm_match_type = "MT";
+    }
+
     /* New Feature */
     ( isset($matches[ 0 ]['match']) ? $firstMatchVal = floatval( $matches[ 0 ]['match'] ) : null );
     if( isset( $firstMatchVal ) && $firstMatchVal >= 90 && $firstMatchVal < 100 ){
@@ -184,7 +190,8 @@ while (1) {
 
         $fuzzy = levenshtein( $srcSearch, $segmentFound ) / log10( mb_strlen( $srcSearch . $segmentFound ) + 1 );
 
-        if ( $srcSearch == $segmentFound || $fuzzy < 2.5 ) {
+        //levenshtein handle max 255 chars per string and returns -1, so fuzzy var can be less than 0 !!
+        if ( $srcSearch == $segmentFound || ( $fuzzy < 2.5 && $fuzzy > 0 ) ) {
 
             $qaRealign = new QA( $text, html_entity_decode( $matches[ 0 ][ 'raw_translation' ] ) );
             $qaRealign->tryRealignTagID();
@@ -315,6 +322,7 @@ function getNewMatchType($tm_match_type, $fast_match_type, $equivalentWordMappin
 
 function compareScore($a, $b) {
     if( floatval($a['match']) == floatval($b['match']) ){ return 0; }
-    return ( floatval($a['match']) < floatval($b['match']) ? -1 : 1);
+    return ( floatval($a['match']) < floatval($b['match']) ? 1 : -1); //SORT DESC !!!!!!! INVERT MINUS SIGN
+    //this is necessary since usort sorts is ascending order, thus inverting the ranking
 }
 ?>
