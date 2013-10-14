@@ -85,13 +85,13 @@ class editlogDownloadController extends downloadController {
                 $s1_translation = str_replace("';", "\'\;", $sar[0]->translation);
                 $s1_match = str_replace("';", "\'\;", $sar[0]->match);
 
-                if (isset ($ar[1])) {
+                if (isset ($sar[1])) {
                     $s2_source = str_replace("';", "\'\;", $sar[1]->segment);
                     $s2_translation = str_replace("';", "\'\;", $sar[1]->translation);
                     $s2_match = str_replace("';", "\'\;", $sar[1]->match);
                 }
 
-                if (isset ($ar[2])) {
+                if (isset ($sar[2])) {
                     $s3_source = str_replace("';", "\'\;", $sar[2]->segment);
                     $s3_translation = str_replace("';", "\'\;", $sar[2]->translation);
                     $s3_match = str_replace("';", "\'\;", $sar[2]->match);
