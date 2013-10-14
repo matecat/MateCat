@@ -162,7 +162,8 @@ class getContributionController extends ajaxcontroller {
 
             $fuzzy = levenshtein($srcSearch, $segmentFound) / log10( mb_strlen( $srcSearch . $segmentFound ) +1 );
 
-            if( $srcSearch == $segmentFound || $fuzzy < 2.5 ){
+            //levenshtein handle max 255 chars per string and returns -1, so fuzzy var can be less than 0 !!
+            if ( $srcSearch == $segmentFound || ( $fuzzy < 2.5 && $fuzzy > 0 ) ) {
 
                 $qaRealign = new QA( $this->text, html_entity_decode( $matches[0]['raw_translation'] ) );
                 $qaRealign->tryRealignTagID();
@@ -239,10 +240,37 @@ class getContributionController extends ajaxcontroller {
             $suggestions_json_array = json_encode( $matches );
             $match = $matches[ 0 ];
 
+            ( !empty( $match['sentence_confidence'] ) ? $mt_qe = floatval( $match['sentence_confidence'] ) : $mt_qe = null );
+
             $suggestion        = $match[ 'raw_translation' ];
             $suggestion_match  = $match[ 'match' ];
             $suggestion_source = $match[ 'created_by' ];
-            $ret               = CatUtils::addTranslationSuggestion( $this->id_segment, $this->id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source );
+            $ret               = CatUtils::addTranslationSuggestion(
+
+                $this->id_segment,
+                $this->id_job,
+                $suggestions_json_array,
+                $suggestion,
+                $suggestion_match,
+                $suggestion_source,
+
+                /* $match_type = */
+                "",
+                /* $eq_words = */
+                0,
+                /* $standard_words = */
+                0,
+                /* $translation = */
+                "",
+                /* $tm_status_analysis = */
+                "UNDONE",
+                /* $warning = */
+                0,
+                /* $err_json = */
+                '',
+                $mt_qe
+
+            );
             return $ret;
 		}
 
