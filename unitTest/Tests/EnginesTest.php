@@ -15,11 +15,17 @@ include_once INIT::$UTILS_ROOT . '/engines/mt.class.php';
 
 //Mock Objects for Mute the curl
 class MUTE_TMS extends TMS {
-    protected function curl($url) {}
+    public $fakeRes = '{"responseData":{"translatedText":"Totale"},"responseDetails":"","responseStatus":200,"matches":[{"id":"2851897","segment":"Total","translation":"Totale","quality":"0","reference":"","usage-count":43,"subject":"Marketing","created-by":"","last-updated-by":"sistemi_informativi","create-date":"2007-07-24 16:57:41","last-update-date":"2007-07-24 16:57:41","match":1},{"id":"390646","segment":"Total","translation":"Totali","quality":"0","reference":"","usage-count":1,"subject":"Chemical","created-by":"","last-updated-by":"autel","create-date":"2005-07-06 16:18:14","last-update-date":"2005-07-06 16:18:14","match":0.99},{"id":"912583","segment":"Total:","translation":"Formula:","quality":"0","reference":"","usage-count":1,"subject":"Computer_Science","created-by":"","last-updated-by":"demo","create-date":"2006-12-15 15:26:01","last-update-date":"2006-12-15 15:26:01","match":0.97}]}';
+    protected function curl($url) {
+        return $this->fakeRes;
+    }
 }
 //Mock Objects for Mute the curl
 class MUTE_MT extends MT {
-    protected function curl($url) {}
+    public $fakeRes = '{"data": {"translations": [{"segmentID": "0000", "translatedText": "Per raccolte commenti e suggerimenti adesso, Treasury e ufficio imposte sono fornendo tutte le parti interessate opportunit\u00e0 per l\'input prima proposta normative sono emessi in un secondo momento.", "sentence_confidence": "76.12714937913083", "systemName": "SYSTEM_baseline", "wordAlignment": [[[0], [0]], [[1], [1]], [[2], [2]], [[3], [3]], [[4], [4]], [[5], [5]], [[6], [6]], [[7], [7]], [[8], [8]], [[9], [9]], [[9], [10]], [[10], [11]], [[11], [12]], [[12], [13]], [[15], [14]], [[14], [15]], [[13], [16]], [[16], [17]], [[17], [18]], [[18], [19]], [[18], [20]], [[19], [21]], [[20], [22]], [[21], [23]], [[22], [24]], [[23], [25]], [[26], [26]], [[25], [27]], [[26], [28]], [[26], [29]], [[28], [30]]], "phraseAlignment": [[[0], [0]], [[1], [1]], [[2], [2]], [[3], [3]], [[4], [4]], [[5], [5]], [[6], [6]], [[7], [7]], [[8], [8]], [[9], [9, 10]], [[10], [11]], [[11], [12]], [[12], [13]], [[15], [14]], [[13, 14], [15, 16]], [[16], [17]], [[17, 18], [18, 19, 20]], [[19], [21]], [[20], [22]], [[21, 22], [23, 24]], [[23], [25]], [[24, 25, 26, 27], [26, 27, 28, 29]], [[28], [30]]]}]}}';
+    protected function curl($url) {
+        return $this->fakeRes;
+    }
 }
 
 class Tests_EnginesTest extends Tests_AbstractTest {
