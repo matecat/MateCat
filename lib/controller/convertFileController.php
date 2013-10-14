@@ -96,6 +96,7 @@ class convertFileController extends ajaxcontroller {
 					return -1;
 				}
 				return 0;
+
 			} else {
 
 				if (
@@ -104,18 +105,14 @@ class convertFileController extends ajaxcontroller {
                 ) {
 					$convertResult['errorMessage'] = "Error: failed importing file.";
 				} else if( stripos($convertResult['errorMessage'] ,"Unable to open Excel file - it may be password protected") !== false ) {
-                    // Error: Unable to open Excel file - it may be password protected.
-                    $convertResult['errorMessage'] = "Error: Unable to open Excel file, it may be password protected. Remove protection using the Unprotect Sheet command on Windows Excel.";
+                    $convertResult['errorMessage'] = $convertResult['errorMessage'] . " Try to remove protection using the Unprotect Sheet command on Windows Excel.";
                 }
 
 				$this->result['code'] = 0;
 				$this->result['errors'][] = array("code" => -1, "message" => $convertResult['errorMessage']);
 				log::doLog("ERROR MESSAGE : " . $convertResult['errorMessage']);
 
-
 				$this->notifyError();
-
-
 
 				return -1;
 			}

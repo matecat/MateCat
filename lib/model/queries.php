@@ -595,7 +595,7 @@ function setTranslationInsert( $id_segment, $id_job, $status, $time_to_edit, $tr
     return $db->affected_rows;
 }
 
-function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list ) {
+function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list, $mt_qe ) {
     $data                          = array();
     $data[ 'id_job' ]              = $id_job;
     $data[ 'suggestions_array' ]   = $suggestions_json_array;
@@ -605,6 +605,7 @@ function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $su
     $data[ 'match_type' ]          = $match_type;
     $data[ 'eq_word_count' ]       = $eq_words;
     $data[ 'standard_word_count' ] = $standard_words;
+    $data[ 'mt_qe' ]               = $mt_qe;
 
     ( !empty( $translation ) ? $data[ 'translation' ] = $translation : null );
     ( $tm_status_analysis != 'UNDONE' ? $data[ 'tm_analysis_status' ] = $tm_status_analysis : null );
@@ -632,7 +633,7 @@ function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $su
     return $db->affected_rows;
 }
 
-function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list ) {
+function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list, $mt_qe ) {
     $data                          = array();
     $data[ 'id_job' ]              = $id_job;
     $data[ 'id_segment' ]          = $id_segment;
@@ -648,6 +649,8 @@ function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $su
 
     $data[ 'warning' ]                = $warning;
     $data[ 'serialized_errors_list' ] = $err_json_list;
+
+    $data[ 'mt_qe' ]                  = $mt_qe;
 
     $db = Database::obtain();
     $db->insert( 'segment_translations', $data );
@@ -903,6 +906,7 @@ function getEditLog( $jid, $pass ) {
 		st.suggestions_array AS sar,
 		st.suggestion_source AS ss,
 		st.suggestion_match AS sm,
+		st.mt_qe,
 		j.id_translator AS tid,
 		j.source AS source_lang,
 		j.target AS target_lang,

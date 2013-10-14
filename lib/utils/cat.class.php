@@ -341,6 +341,10 @@ class CatUtils {
             $seg['source'] = trim( CatUtils::rawxliff2view( $seg['source'] ) );
             $seg['translation'] = trim( CatUtils::rawxliff2view( $seg['translation'] ) );
 
+            if( $seg['mt_qe'] == 0 ){
+                $seg['mt_qe'] = 'N/A';
+            }
+
         }
 
         $stats['edited-word-count'] = array_sum($stat_rwc);
@@ -394,7 +398,7 @@ class CatUtils {
         return 0;
     }
 
-    public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "", $match_type = "", $eq_words = 0, $standard_words = 0, $translation = "", $tm_status_analysis = "UNDONE", $warning = 0, $err_json = '' ) {
+    public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "", $match_type = "", $eq_words = 0, $standard_words = 0, $translation = "", $tm_status_analysis = "UNDONE", $warning = 0, $err_json = '', $mt_qe = 0 ) {
         if (!empty($suggestion_source)) {
             if (strpos($suggestion_source, "MT") === false) {
                 $suggestion_source = 'TM';
@@ -413,14 +417,14 @@ class CatUtils {
          *          suggestions_array = IF( tm_analysis_status = 'DONE' , VALUES(suggestions_array) , suggestions_array );
          *
          */
-        $insertRes = setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json);
+        $insertRes = setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json, $mt_qe);
         if ($insertRes < 0 and $insertRes != -1062) {
             $result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the suggestions for the segment $id_segment - $insertRes");
             return $result;
         }
         if ($insertRes == -1062) {
             // the translaion for this segment still exists : update it
-            $updateRes = setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json);
+            $updateRes = setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json, $mt_qe);
             if ($updateRes < 0) {
                 $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the suggestions for the segment $id_segment");
                 return $result;

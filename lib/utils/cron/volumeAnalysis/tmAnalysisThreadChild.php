@@ -148,7 +148,7 @@ while (1) {
             $mt_match_res = new TMS_GET_MATCHES($text, $mt_match, $mt_score, "MT-" . $mt->getName(), date("Y-m-d"));
 
             $mt_res = $mt_match_res->get_as_array();
-            //$mt_res['sentence_confidence'] = $mt_result[2]; //can be null
+            $mt_res['sentence_confidence'] = $mt_result[2]; //can be null
 
         }
     }
@@ -235,6 +235,8 @@ while (1) {
         $standard_words = $equivalentWordMapping["NO_MATCH"] * $raw_wc / 100;
     }
 
+    ( !empty( $matches[0]['sentence_confidence'] ) ? $mt_qe = floatval( $matches[0]['sentence_confidence'] ) : $mt_qe = null );
+
     $check = new QA( $text, $suggestion );
     $check->performTagCheckOnly();
 
@@ -247,8 +249,8 @@ while (1) {
     } else {
         $err_json = '';
     }
-    
-    $ret = CatUtils::addTranslationSuggestion($sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json );
+
+    $ret = CatUtils::addTranslationSuggestion($sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json, $mt_qe );
     //unlock segment
     
     deleteLockSegment($sid, $jid);
