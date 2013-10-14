@@ -144,7 +144,7 @@ UI = {
         }).bind('keydown', 'Ctrl+right', function(e) {
             e.preventDefault();
             UI.copySource();
-        }).bind('keydown', 'Meta+right', function(e) {
+        }).bind('keydown', 'Ctrl+shift+major', function(e) {
             e.preventDefault();
             UI.copySource();
         }).bind('keydown', 'Ctrl+z', function(e) {
@@ -378,6 +378,7 @@ UI = {
                 };
             }; 
         }).on('keydown', '.editor .editarea', function(e) {
+            console.log(e.which);
             var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
             if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
                 if (event.which == 88) { // ctrl+x
