@@ -1772,3 +1772,8 @@ p.percent
     margin-top: 5px;
     border-top: 1px dotted #ccc;
     }
+
+body.filterOpen #outer
+    {
+    margin-top: 95px;
+    }
