@@ -32,7 +32,7 @@ class ManageUtils {
 		$time_fetch=round(1000*($end_time_fetch-$start_time_fetch),0);
 
 		$lang_handler = Languages::getInstance();
-		
+
 		foreach ($data as $item) {
 
 			$start_time_loop=microtime(true);
@@ -45,7 +45,12 @@ class ManageUtils {
 			$project['has_cancelled'] = 0;
 			$project['has_archived'] = 0;
 			$project['password'] = $item['password'];
-			$project['tm_analysis'] = number_format($item['tm_analysis_wc'], 0, ".", ",");;
+			$project['tm_analysis'] = number_format($item['tm_analysis_wc'], 0, ".", ",");
+
+            $project[ 'id_mt_engine' ]   = $item[ 'id_mt_engine' ];
+            $project[ 'id_tms' ]         = $item[ 'id_tms' ];
+            $project[ 'mt_engine_name' ] = $item[ 'mt_engine_name' ];
+
 			$jobs_strings = explode(',',$item['job']);
 			foreach ($jobs_strings as $job_string) {
 				$job = array();

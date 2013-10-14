@@ -571,9 +571,9 @@ UI = {
 	            '	</div>'+
 	            '	<div class="field">'+
 	            '		<h3>Machine Translation:</h3>'+
-	            '		<span class="value">MyMemory (All Pairs)</span>'+
+	            '		<span class="value">' + this.mt_engine_name + '</span>'+
 	            '	</div>';
-            
+
             if (this.private_tm_key!==''){
                     
                      newProject += '	<div class="field">'+
