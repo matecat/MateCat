@@ -873,6 +873,8 @@ UI = {
             e.preventDefault();
             $("#filterSwitch").click();
             UI.body.removeClass('searchActive');
+            UI.clearSearchMarkers();
+            UI.clearSearchFields();
             if(UI.segmentIsLoaded(UI.currentSegmentId)) {
                 UI.gotoOpenSegment();
             } else {
@@ -1401,6 +1403,9 @@ UI = {
             }
         
         }
+    },
+    clearSearchFields: function() {
+        $('.searchbox form')[0].reset();
     },
     clearSearchMarkers: function() {
         $('mark.searchMarker').each(function() {
@@ -3067,10 +3072,10 @@ console.log('a');
         e.preventDefault();
         if($('body').hasClass('filterOpen')) {
             $('body').removeClass('filterOpen');
-            $("body").scrollTop($("body").scrollTop()+$('.searchbox').height());
+//            $("body").scrollTop($("body").scrollTop()+$('.searchbox').height());
         } else {
             $('body').addClass('filterOpen');
-            $("body").scrollTop($("body").scrollTop()-$('.searchbox').height());
+//            $("body").scrollTop($("body").scrollTop()-$('.searchbox').height());
             $('#search-source').focus();
         }
     },
