@@ -15,14 +15,20 @@ include_once INIT::$UTILS_ROOT . '/engines/mt.class.php';
 
 //Mock Objects for Mute the curl
 class MUTE_TMS extends TMS {
-    public $fakeRes = '{"responseData":{"translatedText":"Totale"},"responseDetails":"","responseStatus":200,"matches":[{"id":"2851897","segment":"Total","translation":"Totale","quality":"0","reference":"","usage-count":43,"subject":"Marketing","created-by":"","last-updated-by":"sistemi_informativi","create-date":"2007-07-24 16:57:41","last-update-date":"2007-07-24 16:57:41","match":1},{"id":"390646","segment":"Total","translation":"Totali","quality":"0","reference":"","usage-count":1,"subject":"Chemical","created-by":"","last-updated-by":"autel","create-date":"2005-07-06 16:18:14","last-update-date":"2005-07-06 16:18:14","match":0.99},{"id":"912583","segment":"Total:","translation":"Formula:","quality":"0","reference":"","usage-count":1,"subject":"Computer_Science","created-by":"","last-updated-by":"demo","create-date":"2006-12-15 15:26:01","last-update-date":"2006-12-15 15:26:01","match":0.97}]}';
+
+    public $fakeUrl = 'http://api.mymemory.translated.net/get?q=The+law+specifically+exempts+small+firms+that+have+fewer+than+50+full-time+employees.&langpair=en-US%7Cit-IT&de=demo%40matecat.com&mt=1&numres=3';
+    public $fakeRes = '{"responseData":{"translatedText":"La legge esenta espressamente le piccole imprese con meno di 50 dipendenti a tempo pieno."},"responseDetails":"","responseStatus":200,"matches":[{"id":"0","segment":"The law specifically exempts small firms that have fewer than 50 full-time employees.","translation":"La legge esenta espressamente le piccole imprese con meno di 50 dipendenti a tempo pieno.","quality":"70","reference":"Machine Translation provided by Google, Microsoft, Worldlingo or MyMemory customized engine.","usage-count":1,"subject":"All","created-by":"MT!","last-updated-by":"MT!","create-date":"2013-10-14","last-update-date":"2013-10-14","match":0.85},{"id":"440094133","segment":"full-time employee","translation":"dipendente a tempo pieno","quality":"74","reference":"","usage-count":1,"subject":"General","created-by":"","last-updated-by":"","create-date":"2013-10-10 18:59:39","last-update-date":"2013-10-10 18:59:39","match":0.15},{"id":"440008758","segment":"5 full-time fundraisers.","translation":"5 dialogatori dedicati.","quality":"74","reference":"","usage-count":2,"subject":"All","created-by":"anonymous","last-updated-by":"anonymous","create-date":"2013-09-12 22:12:55","last-update-date":"2013-09-12 22:12:55","match":0.15}]}';
+
     protected function curl($url) {
         return $this->fakeRes;
     }
 }
 //Mock Objects for Mute the curl
 class MUTE_MT extends MT {
-    public $fakeRes = '{"data": {"translations": [{"segmentID": "0000", "translatedText": "Per raccolte commenti e suggerimenti adesso, Treasury e ufficio imposte sono fornendo tutte le parti interessate opportunit\u00e0 per l\'input prima proposta normative sono emessi in un secondo momento.", "sentence_confidence": "76.12714937913083", "systemName": "SYSTEM_baseline", "wordAlignment": [[[0], [0]], [[1], [1]], [[2], [2]], [[3], [3]], [[4], [4]], [[5], [5]], [[6], [6]], [[7], [7]], [[8], [8]], [[9], [9]], [[9], [10]], [[10], [11]], [[11], [12]], [[12], [13]], [[15], [14]], [[14], [15]], [[13], [16]], [[16], [17]], [[17], [18]], [[18], [19]], [[18], [20]], [[19], [21]], [[20], [22]], [[21], [23]], [[22], [24]], [[23], [25]], [[26], [26]], [[25], [27]], [[26], [28]], [[26], [29]], [[28], [30]]], "phraseAlignment": [[[0], [0]], [[1], [1]], [[2], [2]], [[3], [3]], [[4], [4]], [[5], [5]], [[6], [6]], [[7], [7]], [[8], [8]], [[9], [9, 10]], [[10], [11]], [[11], [12]], [[12], [13]], [[15], [14]], [[13, 14], [15, 16]], [[16], [17]], [[17, 18], [18, 19, 20]], [[19], [21]], [[20], [22]], [[21, 22], [23, 24]], [[23], [25]], [[24, 25, 26, 27], [26, 27, 28, 29]], [[28], [30]]]}]}}';
+
+    public $fakeUrl = 'http://hlt-services2.fbk.eu:8601/translate?q=Consistent+with+the+coordinated+approach+the+Departments+of+Treasury%2C+Labor%2C+and+Health+and+Human+Services+are+taking+in+developing+the+regulations+and+other+guidance+under+the+Affordable+Care+Act%2C+the+notice+also+solicits+input+on+how+the+three+Departments+should+interpret+and+apply+the+Act%E2%80%99s+provisions+limiting+the+ability+of+plans+and+issuers+to+impose+a+waiting+period+for+health+coverage+of+longer+than+90+days+starting+in+2014.&source=en&target=it&key=';
+    public $fakeRes = '{"data": {"translations": [{"segmentID": "0000", "translatedText": "congruente con l\'approccio coordinato il distretti di Tesoreria, Labor, e Health e Human Services sta svolgendo in sviluppo delle normative e altre istruzioni sotto il economiche Care Act, la notifica anche sollecita l\'immissione su come le tre Reparti deve interpretare ed applicare i privilegi Agisci\' s disposizioni limitando la possibilit\u00e0 di piani ed emittenti di imporre un periodo di attesa dello stato di copertura per pi\u00f9 di 90 giorni a partire dalla 2014.", "sentence_confidence": "50.35047642150528", "systemName": "SYSTEM_baseline", "wordAlignment": [[[0], [0]], [[1], [1]], [[2], [2]], [[4], [3]], [[3], [4]], [[5], [5]], [[6], [6]], [[7], [7]], [[8], [8]], [[9], [9]], [[10], [10]], [[11], [11]], [[12], [12]], [[13], [13]], [[14], [14]], [[15], [15]], [[16], [16]], [[17], [17]], [[18], [18]], [[19], [19]], [[20], [20]], [[21], [21]], [[22], [22]], [[23], [23]], [[24], [24]], [[25], [25]], [[26], [26]], [[27], [27]], [[28], [28]], [[29], [29]], [[30], [30]], [[31], [31]], [[32], [32]], [[33], [33]], [[34], [34]], [[35], [35]], [[35], [36]], [[36], [37]], [[37], [38]], [[38], [39]], [[39], [40]], [[40], [41]], [[41], [42]], [[42], [43]], [[43], [44]], [[44], [45]], [[45], [46]], [[46], [47]], [[47], [48]], [[47], [49]], [[48], [50]], [[49], [51]], [[50], [52]], [[51], [53]], [[52], [54]], [[53], [55]], [[54], [56]], [[55], [57]], [[56], [58]], [[57], [59]], [[58], [60]], [[59], [61]], [[60], [62]], [[62], [63]], [[61], [64]], [[61], [65]], [[64], [66]], [[64], [67]], [[66], [68]], [[65], [69]], [[63], [70]], [[67], [71]], [[68], [72]], [[69], [73]], [[70], [74]], [[71], [75]], [[71], [76]], [[72], [77]], [[73], [78]], [[74], [79]]], "phraseAlignment": [[[0], [0]], [[1], [1]], [[2], [2]], [[4], [3]], [[3], [4]], [[5], [5]], [[6], [6]], [[7], [7]], [[8], [8]], [[9], [9]], [[10], [10]], [[11], [11]], [[12], [12]], [[13], [13]], [[14], [14]], [[15], [15]], [[16], [16]], [[17], [17]], [[18], [18]], [[19], [19]], [[20, 21], [20, 21]], [[22], [22]], [[23], [23]], [[24], [24]], [[25], [25]], [[26], [26]], [[27], [27]], [[28], [28]], [[29], [29]], [[30], [30]], [[31], [31]], [[32], [32]], [[33], [33]], [[34], [34]], [[35, 36], [35, 36, 37]], [[37, 38, 39], [38, 39, 40]], [[40], [41]], [[41], [42]], [[42], [43]], [[43], [44]], [[44, 45], [45, 46]], [[46, 47], [47, 48, 49]], [[48], [50]], [[49], [51]], [[50], [52]], [[51], [53]], [[52, 53], [54, 55]], [[54], [56]], [[55], [57]], [[56], [58]], [[57], [59]], [[58, 59], [60, 61]], [[60], [62]], [[61, 62], [63, 64, 65]], [[64], [66, 67]], [[66], [68]], [[65], [69]], [[63], [70]], [[67, 68], [71, 72]], [[69], [73]], [[70], [74]], [[71, 72], [75, 76, 77]], [[73], [78]], [[74], [79]]]}]}}';
+
     protected function curl($url) {
         return $this->fakeRes;
     }
@@ -180,6 +186,55 @@ class Tests_EnginesTest extends Tests_AbstractTest {
         $prop = $class->getProperty('url');
         $prop->setAccessible(true);
         $this->assertEquals( $domains[7] . $expected_url, $prop->getValue($mt) );
+
+    }
+
+    public function test_TMS_GET_MATCHES_Struct(){
+
+        $mt = new MUTE_MT( 2 );
+
+        $urls = parse_url( $mt->fakeUrl );
+        parse_str( $urls['query'] );
+        $text = $q;
+        $source = "en-US";
+        $target = "it-IT";
+        $key  = "";
+
+        $mt_result = $mt->get( $text, $source, $target, $key );
+
+        $mt_match = $mt_result[ 1 ];
+        $penalty  = $mt->getPenalty();
+        $mt_score = 100 - $penalty;
+        $mt_score .= "%";
+
+        $mt_match_res = new TMS_GET_MATCHES( $text, $mt_match, $mt_score, "MT-" . $mt->getName(), date("Y-m-d") );
+
+        $mt_res = $mt_match_res->get_as_array();
+        $mt_res['sentence_confidence'] = $mt_result[2]; //can be null
+
+        $this->assertArrayHasKey( 'id', $mt_res );
+        $this->assertArrayHasKey( 'raw_segment', $mt_res );
+        $this->assertArrayHasKey( 'segment', $mt_res );
+        $this->assertArrayHasKey( 'translation', $mt_res );
+        $this->assertArrayHasKey( 'raw_translation', $mt_res );
+        $this->assertArrayHasKey( 'quality', $mt_res );
+        $this->assertArrayHasKey( 'reference', $mt_res );
+        $this->assertArrayHasKey( 'usage_count', $mt_res );
+        $this->assertArrayHasKey( 'subject', $mt_res );
+        $this->assertArrayHasKey( 'created_by', $mt_res );
+        $this->assertArrayHasKey( 'last_updated_by', $mt_res );
+        $this->assertArrayHasKey( 'create_date', $mt_res );
+        $this->assertArrayHasKey( 'last_update_date', $mt_res );
+        $this->assertArrayHasKey( 'match', $mt_res );
+        $this->assertArrayHasKey( 'sentence_confidence', $mt_res );
+        $this->assertEquals( '50.35047642150528',  $mt_res['sentence_confidence'] );
+        $this->assertEquals( 'MT-FBK-IT (EN->IT)', $mt_res['created_by'] );
+        $this->assertEquals(
+            "congruente con l'approccio coordinato il distretti di Tesoreria, Labor, e Health e Human Services sta svolgendo in sviluppo delle normative e altre istruzioni sotto il economiche Care Act, la notifica anche sollecita l'immissione su come le tre Reparti deve interpretare ed applicare i privilegi Agisci' s disposizioni limitando la possibilità di piani ed emittenti di imporre un periodo di attesa dello stato di copertura per più di 90 giorni a partire dalla 2014.",
+            $mt_res['raw_translation']
+        );
+        $this->assertEquals( $text, $mt_res['segment'] );
+        $this->assertEquals( $mt_score, '86%' );
 
     }
 
