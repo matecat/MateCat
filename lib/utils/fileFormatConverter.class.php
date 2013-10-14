@@ -264,6 +264,7 @@ class fileFormatConverter {
 			$output = curl_exec($ch);
 
 			$info = curl_getinfo($ch);
+//            Log::doLog($info);
 
 			// Chiude la risorsa curl
 			curl_close($ch);
