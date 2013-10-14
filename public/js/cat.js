@@ -144,7 +144,7 @@ UI = {
         }).bind('keydown', 'Ctrl+right', function(e) {
             e.preventDefault();
             UI.copySource();
-        }).bind('keydown', 'Meta+right', function(e) {
+        }).bind('keydown', 'Ctrl+shift+major', function(e) {
             e.preventDefault();
             UI.copySource();
         }).bind('keydown', 'Ctrl+z', function(e) {
@@ -378,6 +378,7 @@ UI = {
                 };
             }; 
         }).on('keydown', '.editor .editarea', function(e) {
+            console.log(e.which);
             var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
             if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
                 if (event.which == 88) { // ctrl+x
@@ -1030,9 +1031,10 @@ UI = {
 
         var newText = area.text().replace(draggedText, newTag);
         area.text(newText);
-
-        area.html(area.html().replace(this.cursorPlaceholder, phcode))
+        area.html(area.html().replace(this.cursorPlaceholder, phcode));
         restoreSelection();
+        area.html(area.html().replace(this.cursorPlaceholder, ''));
+        
     },
     closeSegment: function(segment, byButton, operation) {
         if ((typeof segment == 'undefined') || (typeof UI.toSegment != 'undefined')) {
@@ -1161,10 +1163,16 @@ UI = {
 
     },
     createFooter: function(segment) {
+        if($('.matches .overflow',segment).text() != '')
+            return false;
         if ($('.footer', segment).text() != '')
             return false;
+        
         var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li><li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc"><a tabindex="-1" href="#">Concordance</a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div><div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances"><div class="overflow"><div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div><div class="results"></div></div></div>';
         $('.footer', segment).html(footer);
+        if(($(segment).hasClass('loaded'))&&($(segment).find('.matches .overflow').text() == '')) {
+            $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');            
+        };
     },
     createHeader: function() {
         if ($('h2.percentuage', this.currentSegment).length) {
