@@ -429,7 +429,7 @@ class CatUtils {
                 $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the suggestions for the segment $id_segment");
                 return $result;
             }
-        }  Log::doLog($mt_qe);
+        }
         return 0;
     }
 
