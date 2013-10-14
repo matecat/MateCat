@@ -1378,7 +1378,24 @@ UI = {
             var reg = new RegExp('('+txt+')', "gi");
             if(typeof where == 'undefined') {
                 $(q + ":containsNC('"+txt+"')").each(function() {
-                    $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>'));
+//                    if($(this).attr('id') == 'segment-3126794-source') {
+//                        console.log($(this).html());
+//                        prova = $(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5");
+//                        console.log(prova);
+//                    };
+
+                    $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5"));
+//                    if($(this).attr('id') == 'segment-3126794-source') console.log($(this).html());
+//                    $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>'));
+
+//                    $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace(/(\<span class=\".*?locked.*?\" contenteditable=\"false\"\>.*?)(\<mark class=\"searchMarker\"\>)(.*?)(\<\/mark\>)/gi, "$1$23</span>"));
+/*
+                    if($(this).attr('id') == 'segment-3126794-source') {
+                        console.log($(this).html().replace(/\<span.*?\<mark.*?\>le\<.*?\<\/span\>/gi, "COSO"));
+//                        console.log($(this).html().replace(/\<span.*?\<mark class=\"searchMarker\">(.*?)<\/mark>.*?\<\/span\>/gi, "COSO"));
+//                        console.log($(this).html().replace(/(\<span.*?)(\<mark class=\"searchMarker\"\>)(.*?)(\<\/mark\>)/gi, "COSO"));
+                    };
+*/
                 });                    
             } else {
                 sid = $(seg).attr('id');
@@ -1415,7 +1432,6 @@ UI = {
     },
     gotoNextResultItem: function() {
         var p = this.searchParams;
-        
         if((typeof p['source'] == 'undefined')&&(typeof p['target'] == 'undefined')) {
             var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
             if(p['status'] == 'all') {
@@ -1428,7 +1444,7 @@ UI = {
             if($(m).nextAll('mark.searchMarker').length) {
     //            console.log('altri item nel segmento');
                 $(m).removeClass('currSearchItem');
-                $(m).nextAll().first().addClass('currSearchItem');
+                $(m).nextAll('mark.searchMarker').first().addClass('currSearchItem');
             } else {
                 seg = (m.length)? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
                 if(seg.length) {
