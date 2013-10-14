@@ -112,7 +112,7 @@ class getContributionController extends ajaxcontroller {
 			}
 
 			$tms = new TMS($this->id_tms);
-			$tms_match = $tms->get($this->text, $this->source, $this->target, "demo@matecat.com", $mt_from_tms, $this->id_translator, $this->num_results );
+			$tms_match = $tms->get($this->text, $this->source, $this->target, "demo@matecat.com", $mt_from_tms, $this->id_translator, $this->num_results, $this->concordance_search );
 		}
 
 		$mt_res = array();
