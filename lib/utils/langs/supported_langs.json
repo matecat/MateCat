@@ -1201,14 +1201,27 @@
 	,
 		{
 			"localized":[{
-				"en":"Serbian"
+				"en":"Serbian Latin"
 			}],
 			"isocode":"sr",
 			"enabled":true,
 			"rtl":false,
-			"rfc3066code":"sr-RS"
+			"rfc3066code":"sr-Latn-RS",
+                        "tradossupportedcode":"sr-Latn-RS"
 		}
 	,
+        {
+			"localized":[{
+				"en":"Serbian Cyrillic"
+			}],
+			"isocode":"sr",
+			"enabled":true,
+			"rtl":false,
+			"rfc3066code":"sr-Cyrl-RS",
+                        "tradossupportedcode":"sr-Cyrl-RS"
+		}
+	,
+        
 		{
 			"localized":[{
 				"en":"Seselwa Creole French" 
