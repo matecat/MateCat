@@ -52,7 +52,7 @@ class Utils {
             'HTTP_FORWARDED',
             'REMOTE_ADDR'
         ) as $key ) {
-            if ( array_key_exists($key, $_SERVER ) === true) {
+            if ( array_key_exists( $key, $_SERVER ) === true) {
                 foreach ( explode(',', $_SERVER[$key]) as $ip ) {
                     if ( filter_var( trim($ip), FILTER_VALIDATE_IP ) !== false) {
                         return $ip;

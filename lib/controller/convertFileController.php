@@ -132,11 +132,15 @@ class convertFileController extends ajaxcontroller {
 		$message="Details:
 			- source : $this->source_lang
 			- target : $this->target_lang
-			- client ip : ".$_SERVER['REMOTE_ADDR']."
+			- client ip : ". Utils::getRealIpAddr() ."
 			- client user (if any used) : $remote_user
 
 						       Download file clicking to $link_file
 							       ";
+
+        //Utils::sendErrMailReport( $message );
+
+
 		$this->send_mail("Matecat Alert System", "webmanager@translated.net", "Antonio Farina", "antonio@translated.net", $subject, $message);
 		$this->send_mail("Matecat Alert System", "webmanager@translated.net", "Alessandro Cattelan", "alessandro@translated.net", $subject, $message);
 		$this->send_mail("Matecat Alert System", "webmanager@translated.net", "Marco Trombetti", "marco@translated.net", $subject, $message);

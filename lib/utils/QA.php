@@ -1238,7 +1238,12 @@ class QA {
             //IMPORTANT NOTE :
             //SEE http://www.php.net/manual/en/domdocument.savexml.php#88525
             preg_match('/<root>(.*)<\/root>/u', $this->normalizedTrgDOM->saveXML($this->normalizedTrgDOM->documentElement), $matches );
-            return stripslashes( $matches[1] );
+
+            /*
+             * BUG on windows Paths: C:\\Users\\user\\Downloads\\File per field test\\1\\gui_plancompression.html
+             * return stripslashes( $matches[1] );
+             */
+            return $matches[1];
         }
         
         throw new LogicException( __METHOD__ . " call when errors found in Source/Target integrity check & comparison.");
