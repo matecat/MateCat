@@ -378,7 +378,6 @@ UI = {
                 };
             }; 
         }).on('keydown', '.editor .editarea', function(e) {
-            console.log(e.which);
             var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
             if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
                 if (event.which == 88) { // ctrl+x
@@ -886,14 +885,14 @@ UI = {
             };
 
         });        
-        $("#search-source").on('input', function(e) {
-            $("#search-target").val('');
-            UI.setFindFunction('find');
-        });
-        $("#search-target").on('input', function(e) {
-            $("#search-source").val('');
-            UI.setFindFunction('find');
-        });
+//        $("#search-source").on('input', function(e) {
+//            $("#search-target").val('');
+//            UI.setFindFunction('find');
+//        });
+//        $("#search-target").on('input', function(e) {
+//            $("#search-source").val('');
+//            UI.setFindFunction('find');
+//        });
         $("#search-source, #search-target").on('input', function(e) {
             if(UI.checkSearchChanges()) {
                 UI.setFindFunction('find');
@@ -1266,6 +1265,7 @@ UI = {
         this.searchEnabled = true;
     },            
     execFind: function() {
+        this.searchResultsSegments = false;
         $('.search-display').removeClass('displaying');
         
         if($('#search-source').val() != '') {
@@ -1315,10 +1315,7 @@ UI = {
                 replace: replace
             },
             success: function(d) {
-//                    setTimeout(function() {
-//                        UI.execFind_success(d);
-//                    }, 2000);        
-                    UI.execFind_success(d);
+                UI.execFind_success(d);
             }
         });
         
@@ -1326,20 +1323,6 @@ UI = {
     execFind_success: function(d) {
         this.numSearchResultsItem = d.total;
         this.searchResultsSegments = d.segments;
-// temp
-/*
-        var ar = [];
-        $('mark.searchMarker').each(function() {
-            var id = $(this).parents('section').attr('id').split('-')[1];
-            if(ar.indexOf(id) == -1) ar.push(parseInt(id));
-        });
-
-        ar.push(parseInt(ar[ar.length-1])+400);
-
-//        console.log(ar[ar.length-1]);
-        this.searchResultsSegments = ar;
-*/
-// end temp        
         this.numSearchResultsSegments = d.segments.length;
         this.updateSearchDisplay();
         if(this.pendingRender) {
@@ -1362,7 +1345,6 @@ UI = {
     },
     execNext: function() {
         this.gotoNextResultItem();
-//        this.gotoSearchResultAfter($('section.currSearchItem').attr('id'));
     },
     markSearchResults: function(where, seg) { // if where is specified mark only the range of segment before or after seg (no previous clear)
         if(typeof where == 'undefined') this.clearSearchMarkers();
@@ -1466,7 +1448,6 @@ UI = {
         }
     },
     gotoSearchResultAfter: function(el) {
-//        console.log($(UI.currentSegment).nextAll('mark.searchMarker'));
         var p = this.searchParams;
         if((typeof p['source'] == 'undefined')&&(typeof p['target'] == 'undefined')) {
             var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
@@ -1492,7 +1473,7 @@ UI = {
             });
             if(!found) {
                 // load new segments
-                if(typeof this.searchResultsSegments == 'undefined') {
+                if(!this.searchResultsSegments) {
                     this.pendingRender = {
                         firstLoad: false,
                         applySearch: true,
@@ -1503,7 +1484,6 @@ UI = {
                         firstLoad: false,
                         applySearch: true,
                         segmentToScroll: this.nextUnloadedResultSegment()
-    //                    segmentToScroll: this.searchResultsSegments[this.searchResultsSegments.length - 1]
                     });                  
                 }
 
