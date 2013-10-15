@@ -7,7 +7,6 @@
  * 
  */
 include_once("AbstractTest.php");
-include_once INIT::$MODEL_ROOT . '/Database.class.php';
 include_once INIT::$MODEL_ROOT . '/queries.php';
 include_once INIT::$UTILS_ROOT . '/engines/engine.class.php';
 include_once INIT::$UTILS_ROOT . '/engines/tms.class.php';

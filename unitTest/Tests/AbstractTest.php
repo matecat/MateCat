@@ -12,6 +12,7 @@ if( !class_exists('INIT', false )){
     @INIT::obtain();
     include_once INIT::$UTILS_ROOT . '/utils.class.php';
     include_once INIT::$UTILS_ROOT . '/log.class.php';
+    include_once INIT::$MODEL_ROOT . '/Database.class.php';
     require_once "PHPUnit/Autoload.php";
 }
 
