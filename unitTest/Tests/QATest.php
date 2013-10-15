@@ -463,11 +463,48 @@ TRG;
         $this->assertTrue( $check->thereAreErrors() );
         $errors = $check->getErrors();
         $this->assertCount( 1, $errors );
-        $this->assertAttributeEquals( 1000, 'outcome', $errors[0] );;
+        $this->assertAttributeEquals( 1000, 'outcome', $errors[0] );
         $this->assertRegExp( '/ 1 /', $check->getErrorsJSON() );
 
         $this->assertEquals( '[{"outcome":1000,"debug":"Tag mismatch ( 1 )"}]', $check->getWarningsJSON() );
         $this->assertEquals( '[{"outcome":1000,"debug":"Tag mismatch ( 1 )"}]', $check->getErrorsJSON() );
+
+    }
+
+    public function testBugWindowsPaths(){
+
+        //Source from post raw
+
+        $source_seg = <<<SRC
+C:\\Users\\user\\Downloads\\File per campo test\\1\\gui_plancompression.html
+SRC;
+
+        $check = new QA($source_seg, $source_seg);
+        $check->performConsistencyCheck();
+
+        $errors = $check->getErrors();
+        $this->assertFalse( $check->thereAreErrors() );
+        $this->assertCount( 1, $errors );
+        $this->assertAttributeEquals( 0, 'outcome', $errors[0] );;
+
+        $new_target = $check->getTrgNormalized();
+        $this->assertEquals( $source_seg, $new_target );
+
+
+        $source_seg = <<<SRC
+C:\\ Users\\ user\\ Downloads\\ File per campo test\\ 1\\ gui_plancompression.html
+SRC;
+
+        $check = new QA($source_seg, $source_seg);
+        $check->performConsistencyCheck();
+
+        $errors = $check->getErrors();
+        $this->assertFalse( $check->thereAreErrors() );
+        $this->assertCount( 1, $errors );
+        $this->assertAttributeEquals( 0, 'outcome', $errors[0] );;
+
+        $new_target = $check->getTrgNormalized();
+        $this->assertEquals( $source_seg, $new_target );
 
     }
 

@@ -1224,8 +1224,10 @@ log::doLog('STATUS QUERY:',$status_query);
     $filter_query = ( $query_tail == '' ) ? '' : 'where ' . $query_tail;
     $filter_query = preg_replace( '/( and)$/i', '', $filter_query );
 
-    $query = "select p.id as pid, p.name, p.password, p.id_engine_mt, p.id_engine_tm, p.tm_analysis_wc,
+    $query = "select p.id as pid, p.name, p.password, j.id_mt_engine, j.id_tms, p.tm_analysis_wc,
 		group_concat(j.id,'##', j.source,'##',j.target,'##',j.create_date,'##',j.password,'##',e.name,'##',if (t.mymemory_api_key is NUll,'',t.mymemory_api_key),'##',j.status_owner) as job 
+
+            , e.name as mt_engine_name
 
 			from projects p
 			inner join jobs j on j.id_project=p.id 

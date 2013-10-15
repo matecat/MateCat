@@ -65,7 +65,8 @@ INSERT INTO `engines` VALUES
 (4, 'FBK-LEGAL (EN>IT)', 'MT', 'FBK (EN->IT) Moses Legal engine', 'http://hlt-services2.fbk.eu:8701', 'translate', NULL, NULL, NULL, '2', 14),
 (5, 'LIUM-LEGAL (EN->DE)', 'MT', 'Lium (EN->FR) Moses Legal engine', 'http://193.52.29.52:8002', 'translate', NULL, NULL, NULL, NULL, 14),
 (6, 'TEST PURPOSE FBK (EN->IT)', 'MT', 'TEST PURPOSE ONLY  - FBK (EN->IT)', 'http://hlt-services2.fbk.eu:8482', 'translate', 'update', NULL, NULL, '2', 14),
-(7, 'FBK-LEGAL Online (EN->IT)', 'MT', 'FBK (EN->IT) Online learning. Moses Legal engine.', 'http://hlt-services2.fbk.eu:8702', 'translate', 'update', NULL, NULL, '2', 14);
+(7, 'FBK-LEGAL Online (EN->IT)', 'MT', 'FBK (EN->IT) Online learning. Moses Legal engine.', 'http://hlt-services2.fbk.eu:8702', 'translate', 'update', NULL, NULL, '2', 14),
+(8, 'FBK-IT (EN>FR)','MT','FBK (EN->FR) Moses Information Technology engine','http://hlt-services2.fbk.eu:8401','translate',NULL,NULL,NULL,'2',14);
 /*!40000 ALTER TABLE `engines` ENABLE KEYS */;
 UNLOCK TABLES;
 
