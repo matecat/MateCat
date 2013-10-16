@@ -16,6 +16,8 @@ class fileFormatConverter {
 	private $lang_handler; //object that exposes language utilities
 	private $storage_lookup_map;
 
+    private $conversionObject;
+
 	private static $Storage_Lookup_IP_Map = array(
 			//'10.11.0.10' => '10.11.0.11',
 			'10.11.0.18' => '10.11.0.19',
@@ -43,6 +45,18 @@ class fileFormatConverter {
 		$this->lang_handler=  Languages::getInstance();
 
 		$this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
+
+        $this->conversionObject = new ArrayObject( array(
+            'ip_machine'    => null,
+            'ip_client'     => null,
+            'path_name'     => null,
+            'file_name'     => null,
+            'path_backup'   => null,
+            'direction'     => null,
+            'error_message' => null,
+            'src_lang'      => null,
+            'trg_lang'      => null,
+        ), ArrayObject::ARRAY_AS_PROPS );
 
 	}
 
@@ -216,8 +230,23 @@ class fileFormatConverter {
 		$ret = array();
 		$ret['isSuccess'] = $res['isSuccess'];
 		$is_success = $res['isSuccess'];
+
 		if (!$is_success) {
+
 			$ret['errorMessage'] = $res['errorMessage'];
+            $this->conversionObject->error_message = $res['errorMessage'];
+
+            $backUp_dir = INIT::$STORAGE_DIR.'/conversion_errors/' . $_COOKIE['upload_session'];
+            $this->conversionObject->path_backup = $backUp_dir . "/" . $this->conversionObject->file_name;
+
+            if ( !is_dir( $backUp_dir ) ) {
+                mkdir( $backUp_dir, 0755, true );
+            }
+
+            rename( $this->conversionObject->path_name , $this->conversionObject->path_backup );
+            saveConversionErrorLog( $this->conversionObject );
+            $this->__notifyError();
+
 			return $ret;
 		}
 		if (array_key_exists("documentContent", $res)) {
@@ -260,16 +289,13 @@ class fileFormatConverter {
 				}
 			}
 
-
 			$output = curl_exec($ch);
-
 			$info = curl_getinfo($ch);
-//            Log::doLog($info);
 
 			// Chiude la risorsa curl
 			curl_close($ch);
 
-		}else{
+		} else {
 			$output=json_encode(array("isSuccess"=>false,"errorMessage"=>"port closed"));
 		}
 		return $output;
@@ -293,7 +319,6 @@ class fileFormatConverter {
 			}
 		}
 
-
 		$data['documentContent'] = base64_encode($fileContent);
 		$fileContent = null;
 		//assign converter
@@ -312,6 +337,15 @@ class fileFormatConverter {
 
 		log::doLog($this->ip." start conversion to xliff of $file_path");
 		$start_time=time();
+
+        $this->conversionObject->ip_machine = $this->ip;
+        $this->conversionObject->ip_client  = Utils::getRealIpAddr();
+        $this->conversionObject->path_name  = $file_path;
+        $this->conversionObject->file_name  = $data['fileName'];
+        $this->conversionObject->direction  = 'fw';
+        $this->conversionObject->src_lang   = $data['sourceLocale'];
+        $this->conversionObject->trg_lang   = $data['targetLocale'];
+
 		$curl_result = $this->curl_post($url, $data, $this->opt);
 		$end_time=time();
 		$time_diff=$end_time-$start_time;
@@ -342,7 +376,12 @@ class fileFormatConverter {
 		return $open;
 	}
 
-	public function convertToOriginal($xliffContent, $chosen_by_user_machine=false) {
+	public function convertToOriginal($xliffVector, $chosen_by_user_machine=false) {
+
+        $xliffContent = $xliffVector['content'];
+        $xliffName    = $xliffVector['out_xliff_name'];
+
+        Log::dolog( $xliffName );
 
 		//assign converter
 		if(!$chosen_by_user_machine){
@@ -361,6 +400,14 @@ class fileFormatConverter {
 		$uid_ext = $this->extractUidandExt($xliffContent);
 		$data['uid'] = $uid_ext[0];
 		$data['xliffContent'] = $xliffContent;
+
+        $this->conversionObject->ip_machine = $this->ip;
+        $this->conversionObject->ip_client  = Utils::getRealIpAddr();
+        $this->conversionObject->path_name  = $xliffVector['out_xliff_name'];
+        $this->conversionObject->file_name  = pathinfo( $xliffVector['out_xliff_name'], PATHINFO_BASENAME );
+        $this->conversionObject->direction  = 'bw';
+        $this->conversionObject->src_lang   = $xliffVector['source'];
+        $this->conversionObject->trg_lang   = $xliffVector['target'];
 
 		log::doLog($this->ip." start conversion back to original");
 		$start_time=time();
@@ -393,6 +440,24 @@ class fileFormatConverter {
 	public static function replacedAddress( $storageIP, $xliffContent ){
 		return preg_replace( self::$Converter_Regexp, '="\\\\\\\\' . $storageIP . '\\\\tr', $xliffContent );
 	}
+
+    private function __notifyError(){
+
+        $remote_user = ( isset( $_SERVER[ 'REMOTE_USER' ] ) ) ? $_SERVER[ 'REMOTE_USER' ] : "N/A";
+        $link_file   = "http://" . $_SERVER[ 'SERVER_NAME' ] . "/" . INIT::$CONVERSIONERRORS_REPOSITORY_WEB . "/" . $_COOKIE[ 'upload_session' ] . "/" . rawurlencode( $this->conversionObject->file_name );
+        $message     = "MATECAT : conversion error notifier\n\nDetails:
+    - machine_ip : " . $this->conversionObject->ip_machine . "
+    - client ip :  " . $this->conversionObject->ip_client . "
+    - source :     " . $this->conversionObject->src_lang . "
+    - target :     " . $this->conversionObject->trg_lang . "
+    - client user (if any used) : $remote_user
+    - direction : " . $this->conversionObject->direction . "
+    Download file clicking to $link_file
+	";
+
+        Utils::sendErrMailReport( $message );
+
+    }
 
 }
 

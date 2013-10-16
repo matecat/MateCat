@@ -2,6 +2,20 @@
 
 include_once 'Database.class.php';
 
+function saveConversionErrorLog( ArrayObject $errorObject ){
+
+    $db = Database::obtain();
+    $data = $errorObject->getArrayCopy();
+
+    unset ( $data['path_name'] );
+    unset ( $data['file_name'] );
+
+    $db->insert( 'failed_conversions_log', $data );
+
+    Log::doLog( $errorObject );
+
+}
+
 function doSearchQuery( ArrayObject $queryParams ) {
     $db = Database::obtain();
     
