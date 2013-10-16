@@ -31,42 +31,35 @@ function doSearchQuery( ArrayObject $queryParams ) {
                         ( LENGTH( s.segment ) - LENGTH( REPLACE ( $SQL_MOD( segment ), '$src', '') ) ) / LENGTH('$src') )
                     ) AS count
                     FROM segments s
-                    inner join files_job fj on s.id_file=fj.id_file
+                    INNER JOIN files_job fj on s.id_file=fj.id_file
                     WHERE fj.id_job = {$queryParams['job']}
-                    AND $SQL_MOD( s.segment ) like '%$src%'
-                    $where_status";
-
-        $query .= "GROUP BY s.id WITH ROLLUP";
+                    AND $SQL_MOD( s.segment ) LIKE '%$src%'
+                    $where_status
+                    GROUP BY s.id WITH ROLLUP";
 
     } elseif ( $key == "target" ) {
 
         $query = "SELECT  st.id_segment as id, sum(
-                   ROUND (
+                    ROUND (
                       ( LENGTH( st.translation ) - LENGTH( REPLACE ( $SQL_MOD( st.translation ), '$trg', '') ) ) / LENGTH('$trg') )
-                   ) AS count
-                   FROM segment_translations st
+                    ) AS count
+                    FROM segment_translations st
                     WHERE st.id_job = {$queryParams['job']}
                     AND $SQL_MOD( st.translation ) like '%$trg%'
-                    $where_status ";
-
-        $query .= "GROUP BY st.id_segment WITH ROLLUP";
+                    $where_status
+                    GROUP BY st.id_segment WITH ROLLUP";
 
     } elseif ( $key == 'coupled' ) {
 
-        $query = "select st.id_segment as id
+        $query = "SELECT st.id_segment as id
 
                     FROM segment_translations as st
                     JOIN segments as s on id = id_segment
                     WHERE st.id_job = {$queryParams['job']}
                     AND $SQL_MOD( st.translation ) LIKE '%$trg%'
                     AND $SQL_MOD( s.segment ) LIKE '%$src%'
-                    AND ROUND (
-                              ( LENGTH( s.segment ) - LENGTH( REPLACE ( $SQL_MOD( segment ), '$src', '') ) ) / LENGTH('$src')
-                        ) != 0
-                    AND ROUND (
-                              ( LENGTH( st.translation ) - LENGTH( REPLACE ( $SQL_MOD( st.translation ), '$trg', '') ) ) / LENGTH('$trg')
-                        ) != 0
-
+                    AND LENGTH( REPLACE ( $SQL_MOD( segment ), '$src', '') != ( LENGTH( s.segment )
+                    AND LENGTH( REPLACE ( $SQL_MOD( st.translation ), '$trg', '') != ( LENGTH( st.translation )
                     $where_status ";
 
     }
