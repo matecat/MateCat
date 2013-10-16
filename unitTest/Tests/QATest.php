@@ -471,7 +471,7 @@ TRG;
 
     }
 
-    public function testBugWindowsPaths(){
+    public function testBugWindowsPathsFromPost(){
 
         //Source from post raw
 
@@ -492,7 +492,7 @@ SRC;
 
 
         $source_seg = <<<SRC
-C:\\ Users\\ user\\ Downloads\\ File per campo test\\ 1\\ gui_plancompression.html
+C:\\Users\\user\\Downloads\\File per campo test\\1\\gui_email.html \\\' \' \\\\\' \\\\\\
 SRC;
 
         $check = new QA($source_seg, $source_seg);
@@ -501,6 +501,35 @@ SRC;
         $errors = $check->getErrors();
         $this->assertFalse( $check->thereAreErrors() );
         $this->assertCount( 1, $errors );
+        $this->assertAttributeEquals( 0, 'outcome', $errors[0] );;
+
+        $new_target = $check->getTrgNormalized();
+        $this->assertEquals( $source_seg, $new_target );
+
+    }
+
+    public function testBugWindowsPathFromDB(){
+
+        $DB_SERVER   = "localhost"; //database server
+        $DB_DATABASE = "unittest_matecat_local"; //database name
+        $DB_USER     = "unt_matecat_user"; //database login
+        $DB_PASS     = "unt_matecat_user"; //databasepassword
+        $db = Database::obtain ( $DB_SERVER, $DB_USER, $DB_PASS, $DB_DATABASE );
+        $db->connect ();
+
+        $query = "select * from segment_translations where id_segment = 1";
+        $results = $db->query_first( $query );
+
+        $source_seg = $results['translation'];
+
+        $check = new QA($source_seg, $source_seg);
+        $check->performConsistencyCheck();
+
+        $errors = $check->getErrors();
+        $this->assertFalse( $check->thereAreErrors() );
+        $this->assertCount( 1, $errors );
+
+
         $this->assertAttributeEquals( 0, 'outcome', $errors[0] );;
 
         $new_target = $check->getTrgNormalized();

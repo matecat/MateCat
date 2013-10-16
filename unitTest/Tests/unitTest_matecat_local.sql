@@ -294,6 +294,7 @@ CREATE TABLE `segment_translations` (
   `suggestion_match` int(11) DEFAULT NULL,
   `suggestion_source` varchar(45) DEFAULT NULL,
   `suggestion_position` int(11) DEFAULT NULL,
+  `mt_qe` float(19,14) NOT NULL DEFAULT '0.00000000000000',
   `tm_analysis_status` varchar(50) DEFAULT 'UNDONE',
   `locked` tinyint(4) DEFAULT '0',
   `warning` tinyint(4) NOT NULL DEFAULT '0',
@@ -315,8 +316,10 @@ CREATE TABLE `segment_translations` (
 
 LOCK TABLES `segment_translations` WRITE;
 /*!40000 ALTER TABLE `segment_translations` DISABLE KEYS */;
+INSERT INTO `segment_translations` VALUES (1,1,'TRANSLATED','C:\\Users\\user\\Downloads\\File per campo test\\1\\gui_email.html \\\' \' \\\\\' \\\\\\','2013-10-15 12:14:33',37564,'',NULL,0.00,0.00,'[{\"id\":\"0\",\"raw_segment\":\"\",\"segment\":\"C:\\\\Users\\\\user\\\\Downloads\\\\File per field test\\\\1\\\\gui_email.html\",\"translation\":\"C:\\\\ Users\\\\ user\\\\ Downloads\\\\ File per campo test\\\\ 1\\\\ gui_email.html\",\"raw_translation\":\"C:\\\\ Users\\\\ user\\\\ Downloads\\\\ File per campo test\\\\ 1\\\\ gui_email.html\",\"quality\":0,\"reference\":\"\",\"usage_count\":0,\"subject\":\"\",\"created_by\":\"MT-FBK-IT (EN->IT)\",\"last_updated_by\":\"\",\"create_date\":\"0000-00-00\",\"last_update_date\":\"2013-10-15\",\"match\":\"86%\",\"sentence_confidence\":\"71.49164987426263\"}]','C:\\ Users\\ user\\ Downloads\\ File per campo test\\ 1\\ gui_email.html',86,'MT',1,71.49165344238281,'UNDONE',0,0,'');
 /*!40000 ALTER TABLE `segment_translations` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 --
 -- Table structure for table `segment_translations_analysis_queue`

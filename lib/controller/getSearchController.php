@@ -16,34 +16,61 @@ class getSearchController extends ajaxcontroller {
     private $function; //can be search, replace
     private $matchCase;
 
+    private $queryParams = array();
+
     public function __construct() {
         parent::__construct();
 
+        $filterArgs = array(
+            'function'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+            'job'         => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'token'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+            'source'      => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'target'      => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'status'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'replace'     => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'password'    => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'matchCase'   => array( 'filter' => FILTER_VALIDATE_BOOLEAN )
+        );
 
-        $this->function = $this->get_from_get_post('function');
+        $__postInput     = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->job = $this->get_from_get_post('job');
-        
+        $this->function  = $__postInput[ 'function' ];      //can be: search / replace
+        $this->job       = $__postInput[ 'job' ];
+        $this->token     = $__postInput[ 'token' ];
+        $this->source    = $__postInput[ 'source' ];
+        $this->target    = $__postInput[ 'target' ];
+        $this->status    = strtolower( $__postInput[ 'status' ] );
+        $this->replace   = $__postInput[ 'replace' ];
+        $this->password  = $__postInput[ 'password' ];
+        $this->matchCase = $__postInput[ 'matchCase' ];
 
-        $this->token = $this->get_from_get_post('token');
-
-        $this->source = $this->get_from_get_post('source');
-
-        $this->target = $this->get_from_get_post('target');
-
-        $this->status = $this->get_from_get_post('status');
         if (empty($this->status)) {
             $this->status = "all";
         }
 
-        $this->replace = $this->get_from_get_post('replace');
-
-        $this->password = $this->get_from_get_post("password");
-
-        $this->matchCase = $this->get_from_get_post('matchCase');
-        if (empty($this->matchCase)) {
-            $this->matchCase = false;
+        switch( $this->status ) {
+            case 'translated':
+            case 'approved':
+            case 'rejected':
+            case 'draft':
+            case 'new':
+                break;
+            default:
+                $this->status = "all";
+                break;
         }
+
+        $this->queryParams = new ArrayObject( array(
+            'job'         => $this->job,
+            'key'         => null,
+            'src'         => null,
+            'trg'         => null,
+            'status'      => $this->status,
+            'replacement' => null,
+            'matchCase'  => $this->matchCase,
+        ) );
+
     }
 
     public function doAction() {
@@ -75,37 +102,31 @@ class getSearchController extends ajaxcontroller {
     }
 
     private function doSearch() {
+
         if (empty($this->source) and empty($this->target)) {
             $this->result['error'][] = array("code" => -11, "message" => "missing search string");
             return;
         }
 
         if (!empty($this->source) and !empty($this->target)) {
-            $this->result['error'][] = array("code" => -3, "message" => "specify only one between source and target");
-            return;
+            $this->queryParams['key'] = 'coupled';
+            $this->queryParams['src'] =  $this->source;
+            $this->queryParams['trg'] =  $this->target;
+        } else if (!empty($this->source)) {
+            $this->queryParams['key'] = 'source';
+            $this->queryParams['src'] = $this->source;
+        } else if (!empty($this->target)) {
+            $this->queryParams['key'] = 'target';
+            $this->queryParams['trg'] =  $this->target;
         }
 
-        $key = "";
-        if (!empty($this->source)) {
-            $key = "source";
-            $val = $this->source;
-        }
+        $res = doSearchQuery( $this->queryParams );
 
-        if (!empty($this->target)) {
-            $key = "target";
-            $val = $this->target;
-        }
-
-
-        $res = doSearchQuery($this->job, $key, $val, $this->status);
         if (is_numeric($res) and $res < 0) {
             $this->result['error'][] = array("code" => -1000, "message" => "internal error: see the log");
             return;
         }
-        $this->result['total'] = $res['count'];
-        if ($res['count'] == 0) {
-            $res['sidlist'] = '';
-        }
+        $this->result['total']    = $res['count'];
         $this->result['segments'] = $res['sidlist'];
     }
 
