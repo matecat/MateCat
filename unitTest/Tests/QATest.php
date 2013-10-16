@@ -520,17 +520,12 @@ SRC;
         $query = "select * from segment_translations where id_segment = 1";
         $results = $db->query_first( $query );
 
-        var_dump($results);
-        die();
-        $source_seg = <<<SRC
-C:\Users\user\Downloads\File per campo test\1\gui_email.html \' ' \\' \\\
-SRC;
+        $source_seg = $results['translation'];
 
         $check = new QA($source_seg, $source_seg);
         $check->performConsistencyCheck();
 
         $errors = $check->getErrors();
-        var_dump($check->getErrors());
         $this->assertFalse( $check->thereAreErrors() );
         $this->assertCount( 1, $errors );
 

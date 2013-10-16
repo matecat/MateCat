@@ -68,7 +68,7 @@ class getSearchController extends ajaxcontroller {
             'trg'         => null,
             'status'      => $this->status,
             'replacement' => null,
-            'match_case'  => $this->matchCase,
+            'matchCase'  => $this->matchCase,
         ) );
 
     }

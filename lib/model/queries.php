@@ -15,7 +15,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
         $where_status = " AND status = '$status'";
     }
 
-    if( $queryParams['match_case'] ) {
+    if( $queryParams['matchCase'] ) {
         $SQL_MOD = "";
     } else {
         $SQL_MOD = "LOWER ";
@@ -28,12 +28,12 @@ function doSearchQuery( ArrayObject $queryParams ) {
 
         $query = "SELECT s.id, sum(
                     ROUND (
-                        ( LENGTH( s.segment ) - LENGTH( REPLACE ( $SQL_MOD( segment ), '$src', '') ) ) / LENGTH('$src') )
+                        ( LENGTH( s.segment ) - LENGTH( REPLACE ( $SQL_MOD( segment ), $SQL_MOD( '$src' ), '') ) ) / LENGTH('$src') )
                     ) AS count
                     FROM segments s
                     INNER JOIN files_job fj on s.id_file=fj.id_file
                     WHERE fj.id_job = {$queryParams['job']}
-                    AND $SQL_MOD( s.segment ) LIKE '%$src%'
+                    AND s.segment LIKE '%$src%'
                     $where_status
                     GROUP BY s.id WITH ROLLUP";
 
@@ -41,11 +41,11 @@ function doSearchQuery( ArrayObject $queryParams ) {
 
         $query = "SELECT  st.id_segment as id, sum(
                     ROUND (
-                      ( LENGTH( st.translation ) - LENGTH( REPLACE ( $SQL_MOD( st.translation ), '$trg', '') ) ) / LENGTH('$trg') )
+                      ( LENGTH( st.translation ) - LENGTH( REPLACE ( $SQL_MOD( st.translation ), $SQL_MOD( '$trg' ), '') ) ) / LENGTH('$trg') )
                     ) AS count
                     FROM segment_translations st
                     WHERE st.id_job = {$queryParams['job']}
-                    AND $SQL_MOD( st.translation ) like '%$trg%'
+                    AND st.translation like '%$trg%'
                     $where_status
                     GROUP BY st.id_segment WITH ROLLUP";
 
@@ -56,18 +56,20 @@ function doSearchQuery( ArrayObject $queryParams ) {
                     FROM segment_translations as st
                     JOIN segments as s on id = id_segment
                     WHERE st.id_job = {$queryParams['job']}
-                    AND $SQL_MOD( st.translation ) LIKE '%$trg%'
-                    AND $SQL_MOD( s.segment ) LIKE '%$src%'
-                    AND LENGTH( REPLACE ( $SQL_MOD( segment ), '$src', '') ) != LENGTH( s.segment )
-                    AND LENGTH( REPLACE ( $SQL_MOD( st.translation ), '$trg', '') ) != LENGTH( st.translation )
+                    AND st.translation LIKE '%$trg%'
+                    AND s.segment LIKE '%$src%'
+                    AND LENGTH( REPLACE ( $SQL_MOD( segment ), $SQL_MOD( '$src' ), '') ) != LENGTH( s.segment )
+                    AND LENGTH( REPLACE ( $SQL_MOD( st.translation ), $SQL_MOD( '$trg' ), '') ) != LENGTH( st.translation )
                     $where_status ";
 
     }
 
-    $results=$db->fetch_array($query);
-    $err = $db->get_error();
+    Log::doLog($query);
 
-    $errno = $err['error_code'];
+    $results = $db->fetch_array( $query );
+    $err     = $db->get_error();
+
+    $errno   = $err[ 'error_code' ];
 
     if ( $errno != 0 ) {
         log::doLog( $err );
@@ -83,7 +85,6 @@ function doSearchQuery( ArrayObject $queryParams ) {
         $vector['sidlist'][] = $occurrence['id'];
     }
 
-    $vector['sidlist'] = $vector['sidlist'];
     $vector['count']   = @$rollup['count']; //can be null, suppress warning
 
     if( $key != 'coupled' ){ //there is the ROLLUP
@@ -92,7 +93,8 @@ function doSearchQuery( ArrayObject $queryParams ) {
         //empty search values removed
         //ROLLUP counter rules!
         if ($vector['count'] == 0) {
-            $vector['sidlist'] = '';
+            $vector[ 'sidlist' ] = null;
+            $vector[ 'count' ]   = null;
         }
     }
 
