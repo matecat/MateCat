@@ -58,8 +58,8 @@ function doSearchQuery( ArrayObject $queryParams ) {
                     WHERE st.id_job = {$queryParams['job']}
                     AND $SQL_MOD( st.translation ) LIKE '%$trg%'
                     AND $SQL_MOD( s.segment ) LIKE '%$src%'
-                    AND LENGTH( REPLACE ( $SQL_MOD( segment ), '$src', '') != ( LENGTH( s.segment )
-                    AND LENGTH( REPLACE ( $SQL_MOD( st.translation ), '$trg', '') != ( LENGTH( st.translation )
+                    AND LENGTH( REPLACE ( $SQL_MOD( segment ), '$src', '') ) != LENGTH( s.segment )
+                    AND LENGTH( REPLACE ( $SQL_MOD( st.translation ), '$trg', '') ) != LENGTH( st.translation )
                     $where_status ";
 
     }

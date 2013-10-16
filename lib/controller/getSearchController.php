@@ -54,6 +54,7 @@ class getSearchController extends ajaxcontroller {
             case 'approved':
             case 'rejected':
             case 'draft':
+            case 'new':
                 break;
             default:
                 $this->status = "all";
