@@ -177,7 +177,7 @@
                         <a href="#" class="rejected-bar" tal:attributes="title string:Rejected ${job_stats/REJECTED_PERC_FORMATTED}%; style string:width:${job_stats/REJECTED_PERC}%"></a>
                         <a href="#" class="draft-bar"  tal:attributes="title string:Draft ${job_stats/DRAFT_PERC_FORMATTED}%; style string:width:${job_stats/DRAFT_PERC}%"></a>
                     </div>
-                    <p style="margin-left:-10px;margin-right:10px"><span id="stat-progress">0</span>%</p>
+                    <p style="margin-left:-10px;margin-right:10px"><span tal:content="job_stats/PROGRESS_PERC_FORMATTED|default" id="stat-progress">0</span>%</p>
                     <ul>
                         <li id="stat-eqwords">Total Words: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong></li>
                         <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
