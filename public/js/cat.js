@@ -368,15 +368,10 @@ UI = {
                 console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea));
         }).on('keydown', '.editor .source, .editor .editarea', 'alt+meta+c', function(e) {
             e.preventDefault();
-            var selection = window.getSelection();
-            if(selection.type == 'Range') { // something is selected
-                var str = selection.toString().trim();
-                if(str.length) { // the trimmed string is not empty
-                    UI.currentSelectedText = str;
-                    UI.currentSearchInTarget = ($(this).hasClass('source'))? 0 : 1;
-                    UI.openConcordance();
-                };
-            }; 
+            UI.preOpenConcordance();
+        }).on('keydown', '.editor .source, .editor .editarea', 'alt+ctrl+c', function(e) {
+            e.preventDefault();
+            UI.preOpenConcordance();
         }).on('keydown', '.editor .editarea', function(e) {
             var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
             if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
@@ -1328,12 +1323,15 @@ UI = {
         if(this.pendingRender) {
             if(this.pendingRender['detectSegmentToScroll']) this.pendingRender['segmentToScroll'] = this.nextUnloadedResultSegment();
 //            console.log(this.pendingRender);
+            $('#outer').empty();
+
             this.render(this.pendingRender);
             this.pendingRender = false;
         }
     },
     updateSearchDisplay: function() {
-        $('.search-display .results').text(this.numSearchResultsItem);
+        res = (this.numSearchResultsItem)? this.numSearchResultsItem : 0;
+        $('.search-display .results').text(res);
         $('.search-display .segments').text(this.numSearchResultsSegments);
         query = '';
         if(this.searchParams['source']) query += ' <span class="param">' + this.searchParams['source'] + '</span> in source';
@@ -1363,9 +1361,13 @@ UI = {
                 what = '';
                 txt = '';
             }
+//            console.log(txt);
+//            console.log(rawxliff2view(txt));
+//            console.log(htmlEncode(txt));
+//            txt = htmlEncode(txt);
             var what = (typeof p['source'] != 'undefined')? ' .source' : (typeof p['target'] != 'undefined')? ' .editarea' : '';
             q = "section" + status + what;
-            var reg = new RegExp('('+txt+')', "gi");
+            var reg = new RegExp('('+htmlEncode(txt)+')', "gi");
             if(typeof where == 'undefined') {
                 $(q + ":containsNC('"+txt+"')").each(function() {
 //                    if($(this).attr('id') == 'segment-3126794-source') {
@@ -1373,8 +1375,11 @@ UI = {
 //                        prova = $(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5");
 //                        console.log(prova);
 //                    };
-
+                    console.log($(this).html());
+                    console.log($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5"));
                     $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5"));
+
+
 //                    if($(this).attr('id') == 'segment-3126794-source') console.log($(this).html());
 //                    $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>'));
 
@@ -1480,10 +1485,12 @@ UI = {
                         detectSegmentToScroll: true
                     };
                 } else {
+                    seg2scroll = this.nextUnloadedResultSegment();
+                    $('#outer').empty();
                     this.render({
                         firstLoad: false,
                         applySearch: true,
-                        segmentToScroll: this.nextUnloadedResultSegment()
+                        segmentToScroll: seg2scroll
                     });                  
                 }
 
@@ -1491,6 +1498,17 @@ UI = {
             
         }        
 
+    },
+    preOpenConcordance: function() {
+        var selection = window.getSelection();
+        if(selection.type == 'Range') { // something is selected
+            var str = selection.toString().trim();
+            if(str.length) { // the trimmed string is not empty
+                this.currentSelectedText = str;
+                this.currentSearchInTarget = ($(this).hasClass('source'))? 0 : 1;
+                this.openConcordance();
+            };
+        }; 
     },
     nextUnloadedResultSegment: function() {
         var found = '';
@@ -1502,7 +1520,7 @@ UI = {
             };
         });
         if(found=='') {
-            console.log("bisogna ricominciare dall'inizio");
+//            console.log("bisogna ricominciare dall'inizio");
             found = this.searchResultsSegments[0];
         }
         return found;
