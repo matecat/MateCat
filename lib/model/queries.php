@@ -4,13 +4,31 @@ include_once 'Database.class.php';
 
 function saveConversionErrorLog( ArrayObject $errorObject ){
 
-    $db = Database::obtain();
+    try {
+        $_connection = new PDO('mysql:dbname=conversions_log;host=' . INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS,
+            array(
+                PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\'',
+                PDO::ATTR_EMULATE_PREPARES   => false,
+                PDO::ATTR_ORACLE_NULLS => true
+            ) );
+    } catch ( Exception $ex ){
+        Log::doLog('Unable to open database connection');
+        Log::doLog($ex->getMessage());
+        return;
+    }
+
     $data = $errorObject->getArrayCopy();
 
     unset ( $data['path_name'] );
     unset ( $data['file_name'] );
 
-    $db->insert( 'failed_conversions_log', $data );
+    $data_keys = implode( ", ", array_keys( $data ) );
+    $data_values = array_values( $data );
+    $data_placeholders = implode( ", ", array_fill( 0, count($data), "?" ) );
+    $query = "INSERT INTO failed_conversions_log ($data_keys) VALUES ( $data_placeholders );";
+
+    $sttmnt = $_connection->prepare( $query );
+    $sttmnt->execute($data_values);
 
     Log::doLog( $errorObject );
 
