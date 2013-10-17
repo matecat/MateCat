@@ -244,7 +244,7 @@ class fileFormatConverter {
             }
 
             rename( $this->conversionObject->path_name , $this->conversionObject->path_backup );
-            saveConversionErrorLog( $this->conversionObject );
+            $this->__saveConversionErrorLog();
             $this->__notifyError();
 
 			return $ret;
@@ -456,6 +456,38 @@ class fileFormatConverter {
 	";
 
         Utils::sendErrMailReport( $message );
+
+    }
+
+    private function __saveConversionErrorLog(){
+
+        try {
+            $_connection = new PDO('mysql:dbname=matecat_conversions_log;host=' . INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS,
+                array(
+                    PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\'',
+                    PDO::ATTR_EMULATE_PREPARES   => false,
+                    PDO::ATTR_ORACLE_NULLS => true
+                ) );
+        } catch ( Exception $ex ){
+            Log::doLog('Unable to open database connection');
+            Log::doLog($ex->getMessage());
+            return;
+        }
+
+        $data = $this->conversionObject->getArrayCopy();
+
+        unset ( $data['path_name'] );
+        unset ( $data['file_name'] );
+
+        $data_keys = implode( ", ", array_keys( $data ) );
+        $data_values = array_values( $data );
+        $data_placeholders = implode( ", ", array_fill( 0, count($data), "?" ) );
+        $query = "INSERT INTO failed_conversions_log ($data_keys) VALUES ( $data_placeholders );";
+
+        $sttmnt = $_connection->prepare( $query );
+        $sttmnt->execute($data_values);
+
+        Log::doLog( $this->conversionObject );
 
     }
 
