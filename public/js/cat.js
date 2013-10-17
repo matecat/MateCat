@@ -870,6 +870,8 @@ UI = {
             UI.body.removeClass('searchActive');
             UI.clearSearchMarkers();
             UI.clearSearchFields();
+            UI.setFindFunction('find');
+            $('#exec-find').removeAttr('disabled');
             UI.enableTagMark();
             if(UI.segmentIsLoaded(UI.currentSegmentId)) {
                 UI.gotoOpenSegment();
@@ -1263,6 +1265,7 @@ UI = {
     execFind: function() {
         this.searchResultsSegments = false;
         $('.search-display').removeClass('displaying');
+        $('section.currSearchSegment').removeClass('currSearchSegment');
         
         if($('#search-source').val() != '') {
             this.searchParams['source'] = $('#search-source').val();
@@ -1293,10 +1296,18 @@ UI = {
         this.disableTagMark();
         
 //        UI.checkSearchStrings();
+        var p = this.searchParams;
 
-        var source = (this.searchParams['source'])? this.searchParams['source'] : '';
-        var target = (this.searchParams['target'])? this.searchParams['target'] : '';
-        var replace = (this.searchParams['replace'])? this.searchParams['replace'] : '';
+        this.searchMode = ((typeof p['source'] == 'undefined')&&(typeof p['target'] == 'undefined'))? 'onlyStatus' :
+                ((typeof p['source'] != 'undefined')&&(typeof p['target'] != 'undefined'))? 'source&target' : 'normal';
+        if(this.searchMode == 'onlyStatus') {
+            APP.alert('Status only search is temporarily disabled');
+            return false;
+        }
+
+        var source = (p['source'])? p['source'] : '';
+        var target = (p['target'])? p['target'] : '';
+        var replace = (p['replace'])? p['replace'] : '';
         this.markSearchResults();
         this.gotoSearchResultAfter('segment-' + this.currentSegmentId);
         
@@ -1358,9 +1369,12 @@ UI = {
     },
     updateSearchDisplay: function() {
         res = (this.numSearchResultsItem)? this.numSearchResultsItem : 0;
-        numbers = (res)? 'Found <span class="results">...</span> results in <span class="segments">...</span> segments' : 'No segments found';
+//        res = (this.numSearchResultsItem)? this.numSearchResultsItem : (this.searchMode == 'source&target')? this.numSearchResultsSegments : 0;
+        numbers = (this.searchMode == 'source&target')? 'Found <span class="segments">...</span> segments' : (res)? 'Found <span class="results">...</span> results in <span class="segments">...</span> segments' : 'No segments found';
         $('.search-display .numbers').html(numbers);
-        if(res) {
+        if(this.searchMode == 'source&target') {
+            $('.search-display .segments').text(this.numSearchResultsSegments);                        
+        } else if(res) {
             $('.search-display .results').text(res);
             $('.search-display .segments').text(this.numSearchResultsSegments);            
         }
@@ -1372,7 +1386,8 @@ UI = {
         if(this.searchParams['status']) query += (((this.searchParams['source'])||(this.searchParams['target']))? ' and' : '') + ' status <span class="param">' + this.searchParams['status'] + '</span>';
         $('.search-display .query').html(query);
         $('.search-display').addClass('displaying');
-        if(this.numSearchResultsItem < 2) $('#exec-find[data-func=next]').attr('disabled', 'disabled');
+        if((this.searchMode != 'source&target')&&(this.numSearchResultsItem < 2)) $('#exec-find[data-func=next]').attr('disabled', 'disabled');
+        if((this.searchMode == 'source&target')&&(this.numSearchResultsSegments < 2)) $('#exec-find[data-func=next]').attr('disabled', 'disabled');
     },
     execNext: function() {
         this.gotoNextResultItem();
@@ -1380,8 +1395,57 @@ UI = {
     markSearchResults: function(where, seg) { // if where is specified mark only the range of segment before or after seg (no previous clear)
         if(typeof where == 'undefined') this.clearSearchMarkers();
         var p = this.searchParams;
-        if((typeof p['source'] == 'undefined')&&(typeof p['target'] == 'undefined')) {
-            console.log('solo status');
+//        console.log('mode: ' + mode + ' - coso: ' + coso);
+
+        if(this.searchMode == 'onlyStatus') {
+            console.log('solo status');            
+        } else if(this.searchMode == 'source&target') {
+//            console.log('source & target');
+            var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
+            q = "section" + status;
+            var regSource = new RegExp('('+htmlEncode(p['source'])+')', "gi");
+            var regTarget = new RegExp('('+htmlEncode(p['target'])+')', "gi");
+
+            if(typeof where == 'undefined') {
+                $(q + " .source:containsNC('"+p['source']+"')").each(function() {
+                    $(this).html($(this).html().replace(regSource,'<mark class="searchPreMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));                    
+                });                    
+                $(q + " .editarea:containsNC('"+p['target']+"')").each(function() {
+                    $(this).html($(this).html().replace(regTarget,'<mark class="searchPreMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));                    
+                });
+//                console.log($('section:has(".source mark.searchMarker, .editarea mark.searchMarker")'));
+                $('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
+                $('mark.searchPreMarker').removeClass('searchPreMarker');
+            } else {
+
+                sid = $(seg).attr('id');
+                if(where == 'before') {
+                    $('section').each(function(index) {
+                        if($(this).attr('id') < sid) {
+                            $(this).addClass('justAdded');
+                        }
+                    })
+                } else {
+                    $('section').each(function(index) {
+                        if($(this).attr('id') > sid) {
+                            $(this).addClass('justAdded');
+                        }
+                    })                    
+                }
+
+                $(q + ".justAdded .source:containsNC('"+p['source']+"')").each(function() {
+                    $(this).html($(this).html().replace(regSource,'<mark class="searchPreMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));                    
+                });                    
+                $(q + ".justAdded .editarea:containsNC('"+p['target']+"')").each(function() {
+                    $(this).html($(this).html().replace(regTarget,'<mark class="searchPreMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));                    
+                });
+//                console.log($('section:has(".source mark.searchMarker, .editarea mark.searchMarker")'));
+                $('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
+                $('mark.searchPreMarker').removeClass('searchPreMarker');
+                $('section.justAdded').removeClass('justAdded');
+                
+            }
+            
         } else {
             var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
             if(typeof p['source'] != 'undefined') {
@@ -1394,60 +1458,12 @@ UI = {
                 what = '';
                 txt = '';
             }
-//            console.log(txt);
-//            console.log(rawxliff2view(txt));
-//            console.log(htmlEncode(txt));
-//            txt = htmlEncode(txt);
             var what = (typeof p['source'] != 'undefined')? ' .source' : (typeof p['target'] != 'undefined')? ' .editarea' : '';
             q = "section" + status + what;
             var reg = new RegExp('('+htmlEncode(txt)+')', "gi");
             if(typeof where == 'undefined') {
                 $(q + ":containsNC('"+txt+"')").each(function() {
-//                    if($(this).attr('id') == 'segment-3126794-source') {
-//                        console.log($(this).html());
-//                        prova = $(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5");
-//                        console.log(prova);
-//                    };
-//                    console.log($(this).html());
-//                    console.log($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5"));
-//                    $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>'));
-//                    console.log($(this).html());
-//                    $(this).html($(this).html().replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5"));
-//                    console.log($(this).html());
-            if($(this).attr('id') == 'segment-595422-source') {
-//                console.log($(this).html());
-                $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5").replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));
-//                $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));
-//                console.log($(this).html());
-//                console.log($(this).html().replace(/(<span.*>?)(.*?)(<\/span>)/gi, "$2"));
-//                               
-//                        console.log($(this).html().match( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi ));
-//                        console.log($(this).html().replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));
-
-            } else {
-                $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5"));                
-            }
-
-
-                    
-                    
-                    
-//                    console.log($(this).html());
-//                    UI.markTags();
-//                    console.log($(this).html());
-
-
-//                    if($(this).attr('id') == 'segment-3126794-source') console.log($(this).html());
-//                    $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>'));
-
-//                    $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace(/(\<span class=\".*?locked.*?\" contenteditable=\"false\"\>.*?)(\<mark class=\"searchMarker\"\>)(.*?)(\<\/mark\>)/gi, "$1$23</span>"));
-/*
-                    if($(this).attr('id') == 'segment-3126794-source') {
-                        console.log($(this).html().replace(/\<span.*?\<mark.*?\>le\<.*?\<\/span\>/gi, "COSO"));
-//                        console.log($(this).html().replace(/\<span.*?\<mark class=\"searchMarker\">(.*?)<\/mark>.*?\<\/span\>/gi, "COSO"));
-//                        console.log($(this).html().replace(/(\<span.*?)(\<mark class=\"searchMarker\"\>)(.*?)(\<\/mark\>)/gi, "COSO"));
-                    };
-*/
+                    $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));                    
                 });                    
             } else {
                 sid = $(seg).attr('id');
@@ -1466,12 +1482,12 @@ UI = {
                 }
                 $("section" + status + ".justAdded" + what + ":containsNC('"+txt+"')").each(function() {
 //                $(q + ".justAdded:containsNC('"+txt+"')").each(function() {
-                    $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>'));
+                    $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));
                 });
                 $('section.justAdded').removeClass('justAdded');
-            }
-        
+            }            
         }
+        
     },
     clearSearchFields: function() {
         $('.searchbox form')[0].reset();
@@ -1484,13 +1500,24 @@ UI = {
     },
     gotoNextResultItem: function() {
         var p = this.searchParams;
-        if((typeof p['source'] == 'undefined')&&(typeof p['target'] == 'undefined')) {
+
+
+        if(this.searchMode == 'onlyStatus') {
             var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
             if(p['status'] == 'all') {
                 this.scrollSegment($('#'+el).next());
             } else {
                 this.scrollSegment($('#'+el).nextUntil('section'+status).last().next());
             }
+        } else if(this.searchMode == 'source&target') {
+            var seg = $("section.currSearchSegment");
+//            var m = $("section.currSearchSegment mark.searchMarker");
+//            seg = (m.length)? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
+            if(seg.length) {
+                $(seg).removeClass('currSearchSegment');
+//                $(m).nextAll('mark.searchMarker').first().addClass('currSearchItem');
+                this.gotoSearchResultAfter('segment-' + $(seg).attr('id').split('-')[1]);
+            }       
         } else {
             var m = $("mark.currSearchItem");
             if($(m).nextAll('mark.searchMarker').length) {
@@ -1506,18 +1533,47 @@ UI = {
                         UI.gotoNextResultItem();
                     }, 500);                    
                 }
-            }
+            }            
         }
+
     },
     gotoSearchResultAfter: function(el) {
         var p = this.searchParams;
-        if((typeof p['source'] == 'undefined')&&(typeof p['target'] == 'undefined')) {
+
+        if(this.searchMode == 'onlyStatus') {
             var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
             if(p['status'] == 'all') {
                 this.scrollSegment($('#'+el).next());
             } else {
                 this.scrollSegment($('#'+el).nextUntil('section'+status).last().next());
             }
+        } else if(this.searchMode == 'source&target') {
+            var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
+            destination = $('#'+el).nextAll(status + ":has(mark.searchMarker)").first();
+//            console.log(destination);
+            if($(destination).length) {
+                $(destination).addClass('currSearchSegment');
+                this.scrollSegment(destination);                
+            } else {
+                // load new segments
+                if(!this.searchResultsSegments) {
+                    this.pendingRender = {
+                        firstLoad: false,
+                        applySearch: true,
+                        detectSegmentToScroll: true
+                    };
+                } else {
+                    seg2scroll = this.nextUnloadedResultSegment();
+                    $('#outer').empty();
+                    this.render({
+                        firstLoad: false,
+                        applySearch: true,
+                        segmentToScroll: seg2scroll
+                    });                  
+                }
+            }
+
+            
         } else {
             seg = $('section').has("mark.searchMarker");
             ss = el;
@@ -1551,7 +1607,19 @@ UI = {
                     });                  
                 }
 
-            };
+            };            
+        }
+            
+            
+        if((typeof p['source'] == 'undefined')&&(typeof p['target'] == 'undefined')) {
+            var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
+            if(p['status'] == 'all') {
+                this.scrollSegment($('#'+el).next());
+            } else {
+                this.scrollSegment($('#'+el).nextUntil('section'+status).last().next());
+            }
+        } else {
+
             
         }        
 
@@ -1864,7 +1932,13 @@ UI = {
             if(options.applySearch) {
                 $('mark.currSearchItem').removeClass('currSearchItem');
                 this.markSearchResults();
-                $('#segment-' + options.segmentToScroll + ' mark.searchMarker').first().addClass('currSearchItem');
+                if(this.searchMode == 'normal') {
+                    $('#segment-' + options.segmentToScroll + ' mark.searchMarker').first().addClass('currSearchItem');
+                } else if(this.searchMode == 'source&target') {
+                    $('#segment-' + options.segmentToScroll).addClass('currSearchSegment');                    
+                } else {
+                    
+                }
             }
         }
         $('#outer').removeClass('loading loadingBefore');

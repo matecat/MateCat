@@ -732,12 +732,16 @@ background:#fff url(../img/sublevel.png) 15px 18px no-repeat;
 	{
 	float: none;
 	}
-
+section mark
+	{
+	background: transparent;
+	}
 section mark.searchMarker
 	{
 	background: #9ef5f5;
 	}
-section mark.searchMarker.currSearchItem
+section mark.searchMarker.currSearchItem,
+section.currSearchSegment mark.searchMarker
 	{
 	background: #00c1e6;
 	}
