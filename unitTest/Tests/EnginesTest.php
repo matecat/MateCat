@@ -194,7 +194,10 @@ class Tests_EnginesTest extends Tests_AbstractTest {
 
         $urls = parse_url( $mt->fakeUrl );
         parse_str( $urls['query'] );
+
+        /** @var $q string  */
         $text = $q;
+
         $source = "en-US";
         $target = "it-IT";
         $key  = "";
