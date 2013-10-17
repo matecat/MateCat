@@ -120,7 +120,7 @@ class getContributionController extends ajaxcontroller {
 		$mt_match = "";
 		if (!empty($this->id_mt_engine) and $this->id_mt_engine != 1) {
 			$mt = new MT($this->id_mt_engine);
-			$mt_result = $mt->get($this->text, $this->source, $this->target);
+			$mt_result = $mt->get($this->text, $this->source, $this->target, "demo@matecat.com", $this->id_segment );
 
 			if ($mt_result[0] < 0) {
 				$mt_match = '';
