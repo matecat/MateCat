@@ -853,7 +853,7 @@ UI = {
 //        });
         $(".searchbox input, .searchbox select").bind('keydown', 'return', function(e) {
             e.preventDefault();
-            $("#exec-find").click();
+            if($("#exec-find").attr('disabled') != 'disabled') $("#exec-find").click();
         })
 
         $("#exec-find").click(function(e) {
@@ -870,6 +870,7 @@ UI = {
             UI.body.removeClass('searchActive');
             UI.clearSearchMarkers();
             UI.clearSearchFields();
+            UI.enableTagMark();
             if(UI.segmentIsLoaded(UI.currentSegmentId)) {
                 UI.gotoOpenSegment();
             } else {
@@ -1288,12 +1289,17 @@ UI = {
             delete this.searchParams['replace'];
         }
         this.searchParams['search'] = 1;
+
+        this.disableTagMark();
+        
+//        UI.checkSearchStrings();
+
         var source = (this.searchParams['source'])? this.searchParams['source'] : '';
         var target = (this.searchParams['target'])? this.searchParams['target'] : '';
         var replace = (this.searchParams['replace'])? this.searchParams['replace'] : '';
-                
         this.markSearchResults();
         this.gotoSearchResultAfter('segment-' + this.currentSegmentId);
+        
         this.setFindFunction('next');
         this.body.addClass('searchActive');
 
@@ -1318,7 +1324,7 @@ UI = {
     execFind_success: function(d) {
         this.numSearchResultsItem = d.total;
         this.searchResultsSegments = d.segments;
-        this.numSearchResultsSegments = d.segments.length;
+        this.numSearchResultsSegments = (d.segments)? d.segments.length : 0;
         this.updateSearchDisplay();
         if(this.pendingRender) {
             if(this.pendingRender['detectSegmentToScroll']) this.pendingRender['segmentToScroll'] = this.nextUnloadedResultSegment();
@@ -1329,10 +1335,36 @@ UI = {
             this.pendingRender = false;
         }
     },
+    checkSearchStrings: function() {
+        s = this.searchParams['source'];
+        if(s.match(/[\<\>]/gi)) { // there is a tag in source
+            this.disableTagMark();
+        } else {
+            this.enableTagMark();
+        };
+    },
+    enableTagMark: function() {
+        this.body.removeClass('tagmarkDisabled');
+        this.markTags();
+    },
+    disableTagMark: function() {
+        this.body.addClass('tagmarkDisabled');
+        $('.source span.locked').each(function(index) {
+            $(this).replaceWith($(this).html());
+        });
+        $('.editarea span.locked').each(function(index) {
+            $(this).replaceWith($(this).html());
+        });
+    },
     updateSearchDisplay: function() {
         res = (this.numSearchResultsItem)? this.numSearchResultsItem : 0;
-        $('.search-display .results').text(res);
-        $('.search-display .segments').text(this.numSearchResultsSegments);
+        numbers = (res)? 'Found <span class="results">...</span> results in <span class="segments">...</span> segments' : 'No segments found';
+        $('.search-display .numbers').html(numbers);
+        if(res) {
+            $('.search-display .results').text(res);
+            $('.search-display .segments').text(this.numSearchResultsSegments);            
+        }
+
         query = '';
         if(this.searchParams['source']) query += ' <span class="param">' + this.searchParams['source'] + '</span> in source';
         if(this.searchParams['target']) query += ' <span class="param">' + this.searchParams['target'] + '</span> in target';
@@ -1340,6 +1372,7 @@ UI = {
         if(this.searchParams['status']) query += (((this.searchParams['source'])||(this.searchParams['target']))? ' and' : '') + ' status <span class="param">' + this.searchParams['status'] + '</span>';
         $('.search-display .query').html(query);
         $('.search-display').addClass('displaying');
+        if(this.numSearchResultsItem < 2) $('#exec-find[data-func=next]').attr('disabled', 'disabled');
     },
     execNext: function() {
         this.gotoNextResultItem();
@@ -1375,9 +1408,33 @@ UI = {
 //                        prova = $(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5");
 //                        console.log(prova);
 //                    };
-                    console.log($(this).html());
-                    console.log($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5"));
-                    $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5"));
+//                    console.log($(this).html());
+//                    console.log($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5"));
+//                    $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>'));
+//                    console.log($(this).html());
+//                    $(this).html($(this).html().replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5"));
+//                    console.log($(this).html());
+            if($(this).attr('id') == 'segment-595422-source') {
+//                console.log($(this).html());
+                $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5").replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));
+//                $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));
+//                console.log($(this).html());
+//                console.log($(this).html().replace(/(<span.*>?)(.*?)(<\/span>)/gi, "$2"));
+//                               
+//                        console.log($(this).html().match( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi ));
+//                        console.log($(this).html().replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));
+
+            } else {
+                $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5"));                
+            }
+
+
+                    
+                    
+                    
+//                    console.log($(this).html());
+//                    UI.markTags();
+//                    console.log($(this).html());
 
 
 //                    if($(this).attr('id') == 'segment-3126794-source') console.log($(this).html());
@@ -1546,6 +1603,7 @@ UI = {
         } else {
             b.attr('data-func', 'find').attr('value', 'Find');       
         }
+        b.removeAttr('disabled');
     },
     getConcordance: function(txt, in_target) {
         $('.cc-search', UI.currentSegment).addClass('loading');
@@ -1986,6 +2044,12 @@ UI = {
         $(ed).focus();
     },
     detectTags: function(area) {
+//            if($(area).attr('id') == 'segment-595422-source') {
+//                console.log($(area).html());
+//                $(area).html($(area).html().replace(/(<span.*?)(.*?)(<\/span>)/gi, "\2"));
+//                console.log($(area).html());            
+//            }
+//            $(area).html($(area).html().replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5"));
             $(area).html($(area).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
             $(area).html($(area).html().replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
             $(area).html($(area).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
@@ -2640,7 +2704,7 @@ UI = {
         $('.sub-editor .overflow a.trash', segment).click(function(e) {
             e.preventDefault();
             var ul = $(this).parents('.graysmall');
-console.log('a');
+//console.log('a');
             source = $('.suggestion_source', ul).text();
             source = view2rawxliff(source);
             target = $('.translation', ul).text();
