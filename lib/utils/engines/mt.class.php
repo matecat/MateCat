@@ -89,7 +89,7 @@ class MT extends Engine {
 		return $l;
 	}
 
-	public function get($segment, $source_lang, $target_lang, $key = "") {
+	public function get($segment, $source_lang, $target_lang, $key = "", $segId = null ) {
 		$source_lang = $this->fix_language($source_lang);
 		$target_lang = $this->fix_language($target_lang);
 
@@ -99,6 +99,7 @@ class MT extends Engine {
 		$parameters['source'] = $source_lang;
 		$parameters['target'] = $target_lang;
 		$parameters['key'] = $key;
+        ( is_numeric($segId) ? $parameters['segid'] = $segId : null );
 
 
 		$this->doQuery("get", $parameters);
@@ -107,7 +108,7 @@ class MT extends Engine {
 		return array(0, $this->result->translatedText, $this->result->sentence_confidence);
 	}
 
-	public function set($segment, $translation, $source_lang, $target_lang, $email = '', $extra='') {
+	public function set($segment, $translation, $source_lang, $target_lang, $email = '', $extra='', $segId = null) {
 		//if class is uncapable of SET method, exit immediately
 		if(NULL==$this->set_url) return true;
 
@@ -122,6 +123,7 @@ class MT extends Engine {
 		$parameters['key']="TESTKEY";
 		$parameters['de'] = $email;
 		$parameters['extra']=$extra;
+        ( is_numeric($segId) ? $parameters['segid'] = $segId : null );
 
 		$this->doQuery("set", $parameters);
 		$this->result = new MT_RESULT($this->raw_result);

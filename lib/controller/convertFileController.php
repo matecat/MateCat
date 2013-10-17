@@ -110,44 +110,11 @@ class convertFileController extends ajaxcontroller {
 
 				$this->result['code'] = 0;
 				$this->result['errors'][] = array("code" => -1, "message" => $convertResult['errorMessage']);
-				log::doLog("ERROR MESSAGE : " . $convertResult['errorMessage']);
-
-				$this->notifyError();
+//				log::doLog("ERROR MESSAGE : " . $convertResult['errorMessage']);
 
 				return -1;
 			}
 		}
-	}
-
-
-	private function notifyError(){
-		if (!is_dir($this->errDir)){
-			mkdir ($this->errDir,0755,true);
-		}
-		rename("$this->intDir/$this->file_name", "$this->errDir/$this->file_name");
-
-		$remote_user=(isset($_SERVER['REMOTE_USER']))?$_SERVER['REMOTE_USER']:"N/A";
-		$link_file="http://".$_SERVER['SERVER_NAME']."/".INIT::$CONVERSIONERRORS_REPOSITORY_WEB."/".$_COOKIE['upload_session']."/". rawurlencode($this->file_name);    
-		$subject="MATECAT : conversion error notifier";
-		$message="Details:
-			- source : $this->source_lang
-			- target : $this->target_lang
-			- client ip : ". Utils::getRealIpAddr() ."
-			- client user (if any used) : $remote_user
-
-						       Download file clicking to $link_file
-							       ";
-
-        //Utils::sendErrMailReport( $message );
-
-
-		$this->send_mail("Matecat Alert System", "webmanager@translated.net", "Antonio Farina", "antonio@translated.net", $subject, $message);
-		$this->send_mail("Matecat Alert System", "webmanager@translated.net", "Alessandro Cattelan", "alessandro@translated.net", $subject, $message);
-		$this->send_mail("Matecat Alert System", "webmanager@translated.net", "Marco Trombetti", "marco@translated.net", $subject, $message);
-
-
-
-
 	}
 
 	private function put_xliff_on_file($xliffContent) {
@@ -175,63 +142,6 @@ class convertFileController extends ajaxcontroller {
 		}
 		return 1; //segnaposto
 	}
-
-
-
-
-
-
-
-
-	// TEMPORARY LOCATION
-	/* move to a class dedicated to the email sending*/
-
-	private function send_mail($from_name, $from_email, $to_name, $to_email, $subject, $message, $charset = "utf-8") {  //my mails are not spam!!
-		$all_emails = split("[ \,]", trim($to_email));
-		$all_emails = array_filter($all_emails, 'trim');
-
-		$from_name = str_replace(',', ' ', $from_name);
-
-		$from_email_temp = split("[ \,]", trim($from_email));
-		$from_email = $from_email_temp[0];
-
-		// per garantire questi 10 traduttori che hanno due email
-		foreach ($all_emails as $to_email) {
-			$headers = "MIME-Version: 1.0\r\n";
-			$headers .= "Content-type: text/plain; charset=" . $charset . "\r\n";
-			$headers .= "X-Mailer: Translated Mailer\r\n";
-			$headers .= "X-Sender: <" . $from_email . ">\r\n";
-			$headers .= "Return-Path: <" . $from_email . ">\r\n";
-			$headers .= "From: " . $from_name . " <" . $from_email . ">\r\n";
-			$headers .= "To: " . $to_name . " <" . $to_email . ">\r\n";
-			//              $headers .= "Bcc: $from_email\r\n";
-			$result = $this->mailfrom($from_email, $to_email, $subject, $message, $headers, "ONLY_HEADERS");
-			if (!$result) {
-				return false;
-			}   // SE ANCHE UN SOLO INDIRIZZO DA ERRORE DO ERRORE!
-		}
-		// BUG: BISOGNA LEGGERE LE SPECS SENDMAIL PER SAPERE SE E' ANDATO....
-		return $result;
-	}
-
-	private function mailfrom($fromaddress, $toaddress, $subject, $body, $headers, $add_headers = "ADD_HEADERS") {
-		$fp = popen('/usr/sbin/sendmail -f' . $fromaddress . ' ' . $toaddress, "w");
-		if (!$fp)
-			return false;
-
-		if ($add_headers <> "ONLY_HEADERS") { // se headers contiene il to:
-			fputs($fp, "To: $toaddress\n");
-		}
-		fputs($fp, "Subject: $subject\n");
-		fputs($fp, $headers . "\n\n");
-		fputs($fp, $body);
-		fputs($fp, "\n");
-		pclose($fp);
-		return true;
-	}
-
-
-	// END
 
 }
 

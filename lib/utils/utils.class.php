@@ -189,7 +189,7 @@ class Utils {
         if ( isset( $trace[ 2 ][ 'function' ] ) ) {
             $stringDataInfo .= $trace[ 2 ][ 'function' ] . " ";
         }
-        $stringDataInfo .= "(line:" . $trace[ 1 ][ 'line' ] . ") : ";
+        $stringDataInfo .= "(line:" . $trace[ 1 ][ 'line' ] . ")";
 
         return $stringDataInfo;
 
