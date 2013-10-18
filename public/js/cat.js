@@ -1642,12 +1642,12 @@ UI = {
         var found = '';
         var last = $('section').last().attr('id').split('-')[1];
         $.each(this.searchResultsSegments, function() {
-//            console.log(( !$('#segment-'+this).length ) && ( parseInt(this) > parseInt(last) ));
-//            console.log($('#segment-'+this).length);
-//            console.log(parseInt(this));
-//            console.log(parseInt(last));
-//            console.log(parseInt(this) > parseInt(last));
-//            console.log("----");
+            console.log(( !$('#segment-'+this).length ) && ( parseInt(this) > parseInt(last) ));
+            console.log($('#segment-'+this).length);
+            console.log(parseInt(this));
+            console.log(parseInt(last));
+            console.log(parseInt(this) > parseInt(last));
+            console.log("----");
 //
 //            var start = new Date().getTime();
 //            for (var i = 0; i < 1e7; i++) {
