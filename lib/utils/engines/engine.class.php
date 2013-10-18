@@ -62,7 +62,7 @@ abstract class Engine {
         //$curl_errno == 28 /* CURLE_OPERATION_TIMEDOUT */
         if( $curl_errno > 0 ){
             Log::doLog('Curl Error: ' . $curl_errno . " - " . $curl_error );
-            $output[] = - $curl_errno; //return negative number
+            $output = json_encode( array( 'error' => - $curl_errno . " Server Not Available" ) ); //return negative number
         }
 
         // Chiude la risorsa curl
