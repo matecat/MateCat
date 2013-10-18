@@ -50,16 +50,24 @@ abstract class Engine {
 		curl_setopt($ch, CURLOPT_USERAGENT, "user agent");
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		//        curl_setopt($ch, CURLOPT_VERBOSE, true);
-		curl_setopt($ch, CURLOPT_HTTPGET, true);
+        curl_setopt($ch, CURLOPT_HTTPGET, true);
 
+        curl_setopt($ch,CURLOPT_TIMEOUT,10); //we can wait max 10 seconds
 
-		// Scarica l'URL e lo passa al browser
+        $output = curl_exec($ch);
+        $curl_errno = curl_errno($ch);
+        $curl_error = curl_error($ch);
+//		$info = curl_getinfo($ch);
 
-		$output = curl_exec($ch);
-		$info = curl_getinfo($ch);
-		// Chiude la risorsa curl
-		curl_close($ch);
-		return $output;
+        //$curl_errno == 28 /* CURLE_OPERATION_TIMEDOUT */
+        if( $curl_errno > 0 ){
+            Log::doLog('Curl Error: ' . $curl_errno . " - " . $curl_error );
+            $output[] = - $curl_errno; //return negative number
+        }
+
+        // Chiude la risorsa curl
+        curl_close($ch);
+        return $output;
 	}
 
 	protected function doQuery($function, $parameters = array()) {
