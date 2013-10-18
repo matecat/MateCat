@@ -52,6 +52,7 @@ abstract class Engine {
 		//        curl_setopt($ch, CURLOPT_VERBOSE, true);
 		curl_setopt($ch, CURLOPT_HTTPGET, true);
 
+        //TODO set timeout
 
 		// Scarica l'URL e lo passa al browser
 
@@ -69,10 +70,10 @@ abstract class Engine {
 		}
 
 		$this->buildQuery($function, $parameters);
+//        Log::doLog($this->url);
 		$res=$this->curl($this->url);
 		$this->raw_result = json_decode($res,true);
-        Log::doLog($this->url);
-        Log::doLog($res);
+//        Log::doLog($res);
 	}
 
 	private function buildQuery($function, $parameters) {

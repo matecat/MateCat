@@ -1303,6 +1303,9 @@ UI = {
         if(this.searchMode == 'onlyStatus') {
             APP.alert('Status only search is temporarily disabled');
             return false;
+        } else if(this.searchMode == 'source&target') {
+            APP.alert('Combined search is temporarily disabled');
+            return false;
         }
 
         var source = (p['source'])? p['source'] : '';
@@ -1639,13 +1642,28 @@ UI = {
         var found = '';
         var last = $('section').last().attr('id').split('-')[1];
         $.each(this.searchResultsSegments, function() {
-            if((!$('#segment-'+this).length) && (parseInt(this) > last)) {
+//            console.log(( !$('#segment-'+this).length ) && ( parseInt(this) > parseInt(last) ));
+//            console.log($('#segment-'+this).length);
+//            console.log(parseInt(this));
+//            console.log(parseInt(last));
+//            console.log(parseInt(this) > parseInt(last));
+//            console.log("----");
+//
+//            var start = new Date().getTime();
+//            for (var i = 0; i < 1e7; i++) {
+//                if ((new Date().getTime() - start) > 2000 ){
+//                    break;
+//                }
+//            }
+
+            //controlla che il segmento non sia nell'area visualizzata?
+            if( ( !$( '#segment-' + this ).length ) && ( parseInt(this) > parseInt(last) ) ) {
                 found = parseInt(this);
                 return false;
             };
         });
         if(found=='') {
-            console.log("go to start");
+//            console.log("bisogna ricominciare dall'inizio");
             found = this.searchResultsSegments[0];
         }
         return found;

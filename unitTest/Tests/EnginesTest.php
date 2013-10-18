@@ -240,5 +240,30 @@ class Tests_EnginesTest extends Tests_AbstractTest {
 
     }
 
+    public function testMTConnection(){
+//
+//        $text = "CAST(<value tocast>, <expected class>)";
+//        $source = "en-US";
+//        $target = "it-IT";
+//        $key  = "demo@matecat.com";
+//
+//        var_dump( getEngineData(15) );
+
+
+//        $mt = new MT( 15 );
+//
+//        $data = getEngineData($id);
+
+//
+//        $result = $mt->get( $text, $source, $target, $key );
+//        $class = new \ReflectionObject($mt);
+//        $prop = $class->getProperty('url');
+//        $prop->setAccessible(true);
+//
+//        Log::doLog( $prop->getValue($mt) );
+//        Log::doLog($result);
+
+    }
+
 }
 
