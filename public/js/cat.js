@@ -1645,7 +1645,7 @@ UI = {
             };
         });
         if(found=='') {
-//            console.log("bisogna ricominciare dall'inizio");
+            console.log("go to start");
             found = this.searchResultsSegments[0];
         }
         return found;
