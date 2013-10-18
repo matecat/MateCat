@@ -1303,10 +1303,11 @@ UI = {
         if(this.searchMode == 'onlyStatus') {
             APP.alert('Status only search is temporarily disabled');
             return false;
-        } else if(this.searchMode == 'source&target') {
-            APP.alert('Combined search is temporarily disabled');
-            return false;
         }
+//        else if(this.searchMode == 'source&target') {
+//            APP.alert('Combined search is temporarily disabled');
+//            return false;
+//        }
 
         var source = (p['source'])? p['source'] : '';
         var target = (p['target'])? p['target'] : '';
@@ -1648,7 +1649,7 @@ UI = {
             console.log(parseInt(last));
             console.log(parseInt(this) > parseInt(last));
             console.log("----");
-//
+
 //            var start = new Date().getTime();
 //            for (var i = 0; i < 1e7; i++) {
 //                if ((new Date().getTime() - start) > 2000 ){
