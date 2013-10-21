@@ -381,7 +381,7 @@ class fileFormatConverter {
         $xliffContent = $xliffVector['content'];
         $xliffName    = $xliffVector['out_xliff_name'];
 
-        Log::dolog( $xliffName );
+//        Log::dolog( $xliffName );
 
 		//assign converter
 		if(!$chosen_by_user_machine){
