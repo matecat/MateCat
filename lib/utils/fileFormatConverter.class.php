@@ -466,7 +466,8 @@ class fileFormatConverter {
                 array(
                     PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\'',
                     PDO::ATTR_EMULATE_PREPARES   => false,
-                    PDO::ATTR_ORACLE_NULLS => true
+                    PDO::ATTR_ORACLE_NULLS => true,
+                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
                 ) );
         } catch ( Exception $ex ){
             Log::doLog('Unable to open database connection');
@@ -475,6 +476,7 @@ class fileFormatConverter {
         }
 
         $data = $this->conversionObject->getArrayCopy();
+        Log::doLog( $this->conversionObject );
 
         unset ( $data['path_name'] );
         unset ( $data['file_name'] );
@@ -484,10 +486,13 @@ class fileFormatConverter {
         $data_placeholders = implode( ", ", array_fill( 0, count($data), "?" ) );
         $query = "INSERT INTO failed_conversions_log ($data_keys) VALUES ( $data_placeholders );";
 
-        $sttmnt = $_connection->prepare( $query );
-        $sttmnt->execute($data_values);
+        try {
+            $sttmnt = $_connection->prepare( $query );
+            $sttmnt->execute($data_values);
+        } catch ( PDOException $ex ) {
+            Log::doLog( $ex->getMessage() );
+        }
 
-        Log::doLog( $this->conversionObject );
 
     }
 
