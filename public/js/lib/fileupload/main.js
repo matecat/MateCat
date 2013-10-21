@@ -114,6 +114,8 @@ $(function () {
 	}).bind('fileuploadadd', function (e, data) {
 		console.log('adding');
 		console.log(data);
+         $('body').addClass('initialized');
+
 
 		if($('.upload-table tr').length >= (config.maxNumberFiles)) {
 			console.log('adding more than 10');
@@ -247,6 +249,11 @@ $(function () {
 		}
 	}).bind('fileuploadcompleted', function (e,data) {
 		console.log('completed');
+         if(!$('body').hasClass('initialized')) {
+             console.log($('#clear-all-files').length);
+             $('#clear-all-files').click();
+//             $('.upload-table tr').remove();
+         }
 		var maxnum = config.maxNumberFiles;
 		if($('.upload-table tr').length > (maxnum-1)) {
 			console.log('10 files loaded');

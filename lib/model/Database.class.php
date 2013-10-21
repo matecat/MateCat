@@ -101,10 +101,10 @@ class Database {
 		}
 
 		// unset the data so it can't be dumped
-		$this->server = '';
-		$this->user = '';
-		$this->pass = '';
-		$this->database = '';
+//		$this->server = '';
+//		$this->user = '';
+//		$this->pass = '';
+//		$this->database = '';
 	}
 
 #-#connect()

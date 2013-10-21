@@ -27,6 +27,7 @@ class MT_ERROR {
 class MT_RESULT {
 
 	public $translatedText = "";
+    public $sentence_confidence;
 	public $error = "";
 
 	public function __construct($result) {
@@ -34,6 +35,9 @@ class MT_RESULT {
 		if (is_array($result) and array_key_exists("data", $result)) {
 			$this->translatedText = $result['data']['translations'][0]['translatedText'];
 			$this->translatedText =CatUtils::rawxliff2view($this->translatedText);
+            if( isset( $result['data']['translations'][0]['sentence_confidence'] ) ) {
+                $this->sentence_confidence = $result['data']['translations'][0]['sentence_confidence'];
+            }
 		}
 
 		if (is_array($result) and array_key_exists("error", $result)) {
@@ -53,13 +57,9 @@ class MT extends Engine {
 
 	public function __construct($id) {
 		parent::__construct($id);
-		try{
-		if ($this->type != "MT") {
-			throw new Exception("not a MT engine");
-		}
-		}catch(Exception $e){
-			//do nothing?
-		}
+        if ($this->type != "MT") {
+            throw new Exception("not a MT engine");
+        }
 	}
 
 	private function fix_language($lang) {
@@ -89,7 +89,7 @@ class MT extends Engine {
 		return $l;
 	}
 
-	public function get($segment, $source_lang, $target_lang, $key = "") {
+	public function get($segment, $source_lang, $target_lang, $key = "", $segId = null ) {
 		$source_lang = $this->fix_language($source_lang);
 		$target_lang = $this->fix_language($target_lang);
 
@@ -99,15 +99,16 @@ class MT extends Engine {
 		$parameters['source'] = $source_lang;
 		$parameters['target'] = $target_lang;
 		$parameters['key'] = $key;
+        ( is_numeric($segId) ? $parameters['segid'] = $segId : null );
 
 
 		$this->doQuery("get", $parameters);
 
 		$this->result = new MT_RESULT($this->raw_result);
-		return array(0, $this->result->translatedText);
+		return array(0, $this->result->translatedText, $this->result->sentence_confidence);
 	}
 
-	public function set($segment, $translation, $source_lang, $target_lang, $email = '', $extra='') {
+	public function set($segment, $translation, $source_lang, $target_lang, $email = '', $extra='', $segId = null) {
 		//if class is uncapable of SET method, exit immediately
 		if(NULL==$this->set_url) return true;
 
@@ -122,6 +123,7 @@ class MT extends Engine {
 		$parameters['key']="TESTKEY";
 		$parameters['de'] = $email;
 		$parameters['extra']=$extra;
+        ( is_numeric($segId) ? $parameters['segid'] = $segId : null );
 
 		$this->doQuery("set", $parameters);
 		$this->result = new MT_RESULT($this->raw_result);

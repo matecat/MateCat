@@ -213,10 +213,16 @@ class MyMemory {
 				self::diff(array_slice($old, 0, $omax), array_slice($new, 0, $nmax)), array_slice($new, $nmax, $maxlen), self::diff(array_slice($old, $omax + $maxlen), array_slice($new, $nmax + $maxlen)));
 	}
 
-	public static function diff_tercpp($old,$new){
+	public static function diff_tercpp($old,$new,$lang = 'en' ){
 		//$res=shell_exec("/bin/tercpp.0.6.2 --noTxtIds --printDifferenceToHtmlToSTDO  -s  -rSent \"$old\" -hSent \"$new\" 2>&1");
-                $res=shell_exec(INIT::$ROOT."/third_party/TER/tercpp.0.6.2 --noTxtIds --printDifferenceToHtmlToSTDO  -s  --HTER -rSent \"$new\" -hSent \"$old\" 2>&1");
-                // typical result 
+                //$res=shell_exec(INIT::$ROOT."/third_party/TER/tercpp.0.6.2 --noTxtIds --printDifferenceToHtmlToSTDO  -s  --HTER -rSent \"$new\" -hSent \"$old\" 2>&1");
+                $res=shell_exec(INIT::$ROOT."/third_party/TER/ComputeDiffView $lang \"$new\" \"$old\" 2>&1");
+
+                Log::doLog( $old );
+                Log::doLog( $new );
+                Log::doLog($res);
+
+                // typical result
 //                DiffView:  ##LESSTHAN##g id=2##GREATERTHAN## Cette mÃ©moire de traduction dÃ©finition coÃ¯ncide littÃ©ralement avec <strike><span style="color:red;">l&#39</span></strike> <strike><span style="color:red;">;</span></strike> <strike><span style="color:red;">une</span></strike> <span style="color:blue">l'une</span> des dÃ©finitions les plus acceptÃ©es ##LESSTHAN##/g##GREATERTHAN####LESSTHAN##g id=4 xid=0b5ae0d9-a917-4f7c-9cba-ac7788d73fab
 //                HTER: 0.157895 (3/19)
                 $res_explode=explode ("\n",$res);

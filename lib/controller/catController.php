@@ -3,7 +3,7 @@
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include INIT::$UTILS_ROOT . "/filetype.class.php";
 include INIT::$UTILS_ROOT . "/cat.class.php";
-include INIT::$UTILS_ROOT . "/langs/languages.class.php";
+include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 include_once INIT::$UTILS_ROOT . '/QA.php';
 
 /**
@@ -276,6 +276,9 @@ class catController extends viewcontroller {
         $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
 		$this->template->filtered = $this->filter_enabled;
 		$this->template->filtered_class = ($this->filter_enabled) ? ' open' : '';
+
+        ( INIT::$VOLUME_ANALYSIS_ENABLED        ? $this->template->analysis_enabled = true : null );
+
     }
 
 }

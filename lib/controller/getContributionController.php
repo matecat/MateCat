@@ -104,22 +104,38 @@ class getContributionController extends ajaxcontroller {
 		$this->id_tms = $st['id_tms'];
 
 		$tms_match = array();
-		if (!empty($this->id_tms)) {
-
+		if ( $this->id_tms == 1 ) {
+            /**
+             * MyMemory Enabled
+             */
 			$mt_from_tms = 1;
-			if (!empty($this->id_mt_engine) and $this->id_mt_engine != 1) {
+            $mt_only = false;
+			if ( $this->id_mt_engine != 1 ) {
+                /**
+                 * Don't get MT contribution from MyMemory ( Custom MT )
+                 */
 				$mt_from_tms = 0;
 			}
+			$tms = new TMS( $this->id_tms );
+			$tms_match = $tms->get($this->text, $this->source, $this->target, "demo@matecat.com", $mt_from_tms, $this->id_translator, $this->num_results, $mt_only, $this->concordance_search );
 
-			$tms = new TMS($this->id_tms);
-			$tms_match = $tms->get($this->text, $this->source, $this->target, "demo@matecat.com", $mt_from_tms, $this->id_translator, $this->num_results );
+        } else if( $this->id_tms == 0 && $this->id_mt_engine == 1 ){
+            /**
+             * MyMemory disabled but MT Enabled and it is NOT a Custom one
+             * So tell to MyMemory to get MT only
+            */
+            $mt_only = true;
+            $mt_from_tms = 1;
+            $tms = new TMS( 1 /* MyMemory */ );
+            $tms_match = $tms->get($this->text, $this->source, $this->target, "demo@matecat.com", $mt_from_tms, $this->id_translator, $this->num_results, $mt_only, $this->concordance_search );
+
 		}
 
 		$mt_res = array();
 		$mt_match = "";
-		if (!empty($this->id_mt_engine) and $this->id_mt_engine != 1) {
+		if ( $this->id_mt_engine > 1 /* Request MT Directly */ ) {
 			$mt = new MT($this->id_mt_engine);
-			$mt_result = $mt->get($this->text, $this->source, $this->target);
+			$mt_result = $mt->get($this->text, $this->source, $this->target, "demo@matecat.com", $this->id_segment );
 
 			if ($mt_result[0] < 0) {
 				$mt_match = '';
@@ -132,6 +148,8 @@ class getContributionController extends ajaxcontroller {
 				$mt_match_res = new TMS_GET_MATCHES($this->text, $mt_match, $mt_score, "MT-" . $mt->getName(), date("Y-m-d"));
 
 				$mt_res = $mt_match_res->get_as_array();
+                $mt_res['sentence_confidence'] = $mt_result[2]; //can be null
+
 			}
 		}
 		$matches = array();
@@ -159,7 +177,8 @@ class getContributionController extends ajaxcontroller {
 
             $fuzzy = levenshtein($srcSearch, $segmentFound) / log10( mb_strlen( $srcSearch . $segmentFound ) +1 );
 
-            if( $srcSearch == $segmentFound || $fuzzy < 2.5 ){
+            //levenshtein handle max 255 chars per string and returns -1, so fuzzy var can be less than 0 !!
+            if ( $srcSearch == $segmentFound || ( $fuzzy < 2.5 && $fuzzy > 0 ) ) {
 
                 $qaRealign = new QA( $this->text, html_entity_decode( $matches[0]['raw_translation'] ) );
                 $qaRealign->tryRealignTagID();
@@ -205,6 +224,10 @@ class getContributionController extends ajaxcontroller {
 				$match['created_by'] = 'MT'; //MyMemory returns MT!
 			}
 
+            if( !empty($match['sentence_confidence']) ){
+                $match['sentence_confidence'] = round( $match['sentence_confidence'], 0 ) . "%";
+            }
+
             if( $this->concordance_search ){
 
                 $match['segment'] = strip_tags( html_entity_decode( $match['segment'] ) );
@@ -232,10 +255,37 @@ class getContributionController extends ajaxcontroller {
             $suggestions_json_array = json_encode( $matches );
             $match = $matches[ 0 ];
 
+            ( !empty( $match['sentence_confidence'] ) ? $mt_qe = floatval( $match['sentence_confidence'] ) : $mt_qe = null );
+
             $suggestion        = $match[ 'raw_translation' ];
             $suggestion_match  = $match[ 'match' ];
             $suggestion_source = $match[ 'created_by' ];
-            $ret               = CatUtils::addTranslationSuggestion( $this->id_segment, $this->id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source );
+            $ret               = CatUtils::addTranslationSuggestion(
+
+                $this->id_segment,
+                $this->id_job,
+                $suggestions_json_array,
+                $suggestion,
+                $suggestion_match,
+                $suggestion_source,
+
+                /* $match_type = */
+                "",
+                /* $eq_words = */
+                0,
+                /* $standard_words = */
+                0,
+                /* $translation = */
+                "",
+                /* $tm_status_analysis = */
+                "UNDONE",
+                /* $warning = */
+                0,
+                /* $err_json = */
+                '',
+                $mt_qe
+
+            );
             return $ret;
 		}
 

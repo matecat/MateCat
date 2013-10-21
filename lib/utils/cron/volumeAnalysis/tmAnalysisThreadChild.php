@@ -33,8 +33,6 @@ $UNIQUID = uniqid('', true);
 $my_pid = getmypid();
 $parent_pid = posix_getppid();
 echo "--- (child $my_pid) : parent pid is $parent_pid\n";
-$tms = new TMS(1); //1 is the id related to mymemor
-$mt = null;
 
 while (1) {
     if (!processFileExists($my_pid)) {
@@ -79,47 +77,63 @@ while (1) {
     //lock segment
     echo "--- (child $my_pid) :  segment $sid-$jid locked\n";
 
-    $source = $segment['source'];
-    $target = $segment['target'];
-    $id_mt_engine = $segment['id_engine_mt'];
-    $id_translator = $segment['id_translator'];
-    $raw_wc = $segment['raw_word_count'];
-    $fast_match_type = $segment['match_type'];
-    
-    $text =$segment['segment']; // CatUtils::view2rawxliff($segment['segment']); // da verificare
-    
-    
+    $source          = $segment[ 'source' ];
+    $target          = $segment[ 'target' ];
+    $id_translator   = $segment[ 'id_translator' ];
+    $raw_wc          = $segment[ 'raw_word_count' ];
+    $fast_match_type = $segment[ 'match_type' ];
+
+    $text            = $segment[ 'segment' ]; // CatUtils::view2rawxliff($segment['segment']); // da verificare
+
     if ($raw_wc == 0) {
         echo "--- (child $my_pid) : empty segment. deleting lock and continue\n";
         deleteLockSegment($sid, $jid);
         continue;
     }
-    $mt_engine = null;
-    $mt_from_tms = 1;
-   if ( !empty( $id_mt_engine ) and $id_mt_engine != 1 ) {
-        $mt_from_tms = 0;
+
+    $id_mt_engine    = $segment[ 'id_mt_engine' ];
+    $id_tms          = $segment[ 'id_tms' ];
+
+    /**
+     * Call Memory Server for matches if it's enabled
+     */
+    $tms_enabled = false;
+    if( $id_tms == 1 ){
+        /**
+         * MyMemory Enabled
+         */
+        $mt_from_tms = 1;
+        if( $id_mt_engine != 1 ){
+            /**
+             * Don't get MT contribution from MyMemory ( Custom MT )
+             */
+            $mt_from_tms = 0;
+        }
+        $tms = new TMS($id_tms);
+        $tms_match = $tms->get($text, $source, $target, "demo@matecat.com", $mt_from_tms, $id_translator, 3 );
+
+        $tms_enabled = true;
+
+    } else if ( $id_tms == 0 && $id_mt_engine == 1 ) {
+        /**
+         * MyMemory disabled but MT Enabled and it is NOT a Custom one
+         * So tell to MyMemory to get MT only
+         */
+        $mt_only = true;
+        $mt_from_tms = 1;
+        $tms = new TMS( 1 /* MyMemory */ );
+        $tms_match = $tms->get($text, $source, $target, "demo@matecat.com", $mt_from_tms, $id_translator, 3, $mt_only );
+
+        $tms_enabled = true;
+
     }
 
-    $tms_match = $tms->get($text, $source, $target, "demo@matecat.com", $mt_from_tms, $id_translator);
-
-    if (!$tms_match || !is_array($tms_match)) {
-        echo "--- (child $my_pid) : error from mymemory : set error and continue\n"; // ERROR FROM MYMEMORY
-        setSegmentTranslationError($sid, $jid); // devo settarli come done e lasciare il vecchio livello di match
-        deleteLockSegment($sid, $jid);
-        continue;
-    }
-
-    $tm_match_type = $tms_match[0]['match'];
-    if (stripos($tms_match[0]['created_by'], "MT") !== false) {
-        $tm_match_type = "MT";
-    }
-
+    /**
+     * Call External MT engine if it is a custom one ( mt not requested from MyMemory )
+     */
     $mt_res = array();
     $mt_match = "";
-
-    //CODICE DUPLICATO da getContributionController::doAction . Da fattorizzare
-    if (!empty($id_mt_engine)) {
-
+    if ( $id_mt_engine > 1 /* Request MT Directly */ ) {
         $mt = new MT($id_mt_engine);
         $mt_result = $mt->get($text, $source, $target);
 
@@ -132,7 +146,10 @@ while (1) {
             $mt_score.="%";
 
             $mt_match_res = new TMS_GET_MATCHES($text, $mt_match, $mt_score, "MT-" . $mt->getName(), date("Y-m-d"));
+
             $mt_res = $mt_match_res->get_as_array();
+            $mt_res['sentence_confidence'] = $mt_result[2]; //can be null
+
         }
     }
 
@@ -147,6 +164,21 @@ while (1) {
         usort($matches, "compareScore");
     }
 
+    /**
+     * Only if No results found
+     */
+    if ( !$matches || !is_array($matches) ) {
+        echo "--- (child $my_pid) : error from mymemory : set error and continue\n"; // ERROR FROM MYMEMORY
+        setSegmentTranslationError($sid, $jid); // devo settarli come done e lasciare il vecchio livello di match
+        deleteLockSegment($sid, $jid);
+        continue;
+    }
+
+    $tm_match_type = $matches[0]['match'];
+    if ( stripos($matches[0]['created_by'], "MT") !== false) {
+        $tm_match_type = "MT";
+    }
+
     /* New Feature */
     ( isset($matches[ 0 ]['match']) ? $firstMatchVal = floatval( $matches[ 0 ]['match'] ) : null );
     if( isset( $firstMatchVal ) && $firstMatchVal >= 90 && $firstMatchVal < 100 ){
@@ -158,7 +190,8 @@ while (1) {
 
         $fuzzy = levenshtein( $srcSearch, $segmentFound ) / log10( mb_strlen( $srcSearch . $segmentFound ) + 1 );
 
-        if ( $srcSearch == $segmentFound || $fuzzy < 2.5 ) {
+        //levenshtein handle max 255 chars per string and returns -1, so fuzzy var can be less than 0 !!
+        if ( $srcSearch == $segmentFound || ( $fuzzy < 2.5 && $fuzzy > 0 ) ) {
 
             $qaRealign = new QA( $text, html_entity_decode( $matches[ 0 ][ 'raw_translation' ] ) );
             $qaRealign->tryRealignTagID();
@@ -202,6 +235,8 @@ while (1) {
         $standard_words = $equivalentWordMapping["NO_MATCH"] * $raw_wc / 100;
     }
 
+    ( !empty( $matches[0]['sentence_confidence'] ) ? $mt_qe = floatval( $matches[0]['sentence_confidence'] ) : $mt_qe = null );
+
     $check = new QA( $text, $suggestion );
     $check->performTagCheckOnly();
 
@@ -214,8 +249,8 @@ while (1) {
     } else {
         $err_json = '';
     }
-    
-    $ret = CatUtils::addTranslationSuggestion($sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json );
+
+    $ret = CatUtils::addTranslationSuggestion($sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json, $mt_qe );
     //unlock segment
     
     deleteLockSegment($sid, $jid);
@@ -289,6 +324,7 @@ function getNewMatchType($tm_match_type, $fast_match_type, $equivalentWordMappin
 
 function compareScore($a, $b) {
     if( floatval($a['match']) == floatval($b['match']) ){ return 0; }
-    return ( floatval($a['match']) < floatval($b['match']) ? -1 : 1);
+    return ( floatval($a['match']) < floatval($b['match']) ? 1 : -1); //SORT DESC !!!!!!! INVERT MINUS SIGN
+    //this is necessary since usort sorts is ascending order, thus inverting the ranking
 }
 ?>

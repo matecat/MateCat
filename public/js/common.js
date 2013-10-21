@@ -82,6 +82,7 @@ APP = {
             data: req.data,
             type: 'POST',
             dataType: 'json'
+            //TODO set timeout longer than server curl for TM/MT
         };
 
         // Callbacks

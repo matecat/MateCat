@@ -21,7 +21,7 @@ class editlogDownloadController extends downloadController {
 
     public function doAction() {
 
-        $csv = "Job ID;Segment ID;Suggestion Source;Words;Match percentage;Time-to-edit;Post-editing effort;Segment;Suggestion;Translation;ID translator;Suggestion1-source;Suggestion1-translation;Suggestion1-match;Suggestion1-origin;Suggestion2-source;Suggestion2-translation;Suggestion2-match;Suggestion2-origin;Suggestion3-source;Suggestion3-translation;Suggestion3-match;Suggestion3-origin\n";
+        $csv = "Job ID;Segment ID;Suggestion Source;Words;Match percentage;Time-to-edit;Post-editing effort;Segment;Suggestion;Translation;MT QE;ID translator;Suggestion1-source;Suggestion1-translation;Suggestion1-match;Suggestion1-origin;Suggestion2-source;Suggestion2-translation;Suggestion2-match;Suggestion2-origin;Suggestion3-source;Suggestion3-translation;Suggestion3-match;Suggestion3-origin\n";
         $data = CatUtils::getEditingLogData($this->jid, $this->password);
         $data = $data[0];
 
@@ -64,7 +64,7 @@ class editlogDownloadController extends downloadController {
             $s2_origin = "";
             $s3_origin = "";
 
-
+            $mt_qe = $d['mt_qe'];
 
             if (!empty($d['sar'])) {
 
@@ -85,13 +85,13 @@ class editlogDownloadController extends downloadController {
                 $s1_translation = str_replace("';", "\'\;", $sar[0]->translation);
                 $s1_match = str_replace("';", "\'\;", $sar[0]->match);
 
-                if (isset ($ar[1])) {
+                if (isset ($sar[1])) {
                     $s2_source = str_replace("';", "\'\;", $sar[1]->segment);
                     $s2_translation = str_replace("';", "\'\;", $sar[1]->translation);
                     $s2_match = str_replace("';", "\'\;", $sar[1]->match);
                 }
 
-                if (isset ($ar[2])) {
+                if (isset ($sar[2])) {
                     $s3_source = str_replace("';", "\'\;", $sar[2]->segment);
                     $s3_translation = str_replace("';", "\'\;", $sar[2]->translation);
                     $s3_match = str_replace("';", "\'\;", $sar[2]->match);
@@ -119,7 +119,7 @@ class editlogDownloadController extends downloadController {
                 $s3_origin = (substr($sar[2]->created_by, 0, 2) == 'MT') ? 'MT' : 'TM';
             }
 
-            $csv.="$this->jid;$sid;\"$sugg_source\";$rwc;\"$sugg_match\";\"$sugg_tte\";\"$pe_effort_perc\";\"$segment\";\"$suggestion\";\"$translation\";\"$id_translator\";\"$s1_source\";\"$s1_translation\";\"$s1_match\";\"$s1_origin\";\"$s2_source\";\"$s2_translation\";\"$s2_match\";\"$s2_origin\";\"$s3_source\";\"$s3_translation\";\"$s3_match\";\"$s3_origin\"\n";
+            $csv.="$this->jid;$sid;\"$sugg_source\";$rwc;\"$sugg_match\";\"$sugg_tte\";\"$pe_effort_perc\";\"$segment\";\"$suggestion\";\"$translation\";\"$mt_qe\";\"$id_translator\";\"$s1_source\";\"$s1_translation\";\"$s1_match\";\"$s1_origin\";\"$s2_source\";\"$s2_translation\";\"$s2_match\";\"$s2_origin\";\"$s3_source\";\"$s3_translation\";\"$s3_match\";\"$s3_origin\"\n";
         }
         $this->content = $csv;
     }

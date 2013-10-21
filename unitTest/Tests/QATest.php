@@ -1,47 +1,15 @@
 <?php
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-if( !class_exists('INIT', false )){
-    include '/var/www/cattool/inc/config.inc.php';
-    @INIT::obtain();
-    include '/var/www/cattool/lib/utils/log.class.php';
-    include '/var/www/cattool/lib/utils/utils.class.php';
-    include '/var/www/cattool/lib/utils/cat.class.php';
-    include '/var/www/cattool/lib/utils/QA.php';
-    require_once "PHPUnit/Autoload.php";
-}
-
 /**
  * Description of QATest
  *
  * @author domenico
  */
-class QATest extends PHPUnit_Framework_TestCase {
-    
-    public $reflected;
-    public $method;
-    
-    //put your code here
-    public function setUp() {
-        parent::setUp();
-        $this->thisTest = microtime(true);
+include_once("AbstractTest.php");
+include_once INIT::$UTILS_ROOT . '/cat.class.php';
+include_once INIT::$UTILS_ROOT . '/QA.php';
+class Tests_QATest extends Tests_AbstractTest {
 
-        $this->reflected = new ReflectionClass( 'QA' );
-        $this->method = $this->reflected->getMethod('_checkContentConsistency');
-        $this->method->setAccessible(true);
-
-    }
-
-    public function tearDown() {
-        parent::tearDown();
-        $resultTime = microtime(true) - $this->thisTest;
-        echo " " . str_pad( $this->getName(false) , 35, " ", STR_PAD_RIGHT ). " - Did in " . $resultTime . " seconds.\n";
-    }
-    
     public function testView2RawXliff() {
 
         $source_seg = <<<SRC
@@ -495,11 +463,77 @@ TRG;
         $this->assertTrue( $check->thereAreErrors() );
         $errors = $check->getErrors();
         $this->assertCount( 1, $errors );
-        $this->assertAttributeEquals( 1000, 'outcome', $errors[0] );;
+        $this->assertAttributeEquals( 1000, 'outcome', $errors[0] );
         $this->assertRegExp( '/ 1 /', $check->getErrorsJSON() );
 
         $this->assertEquals( '[{"outcome":1000,"debug":"Tag mismatch ( 1 )"}]', $check->getWarningsJSON() );
         $this->assertEquals( '[{"outcome":1000,"debug":"Tag mismatch ( 1 )"}]', $check->getErrorsJSON() );
+
+    }
+
+    public function testBugWindowsPathsFromPost(){
+
+        //Source from post raw
+
+        $source_seg = <<<SRC
+C:\\Users\\user\\Downloads\\File per campo test\\1\\gui_plancompression.html
+SRC;
+
+        $check = new QA($source_seg, $source_seg);
+        $check->performConsistencyCheck();
+
+        $errors = $check->getErrors();
+        $this->assertFalse( $check->thereAreErrors() );
+        $this->assertCount( 1, $errors );
+        $this->assertAttributeEquals( 0, 'outcome', $errors[0] );;
+
+        $new_target = $check->getTrgNormalized();
+        $this->assertEquals( $source_seg, $new_target );
+
+
+        $source_seg = <<<SRC
+C:\\Users\\user\\Downloads\\File per campo test\\1\\gui_email.html \\\' \' \\\\\' \\\\\\
+SRC;
+
+        $check = new QA($source_seg, $source_seg);
+        $check->performConsistencyCheck();
+
+        $errors = $check->getErrors();
+        $this->assertFalse( $check->thereAreErrors() );
+        $this->assertCount( 1, $errors );
+        $this->assertAttributeEquals( 0, 'outcome', $errors[0] );;
+
+        $new_target = $check->getTrgNormalized();
+        $this->assertEquals( $source_seg, $new_target );
+
+    }
+
+    public function testBugWindowsPathFromDB(){
+
+        $DB_SERVER   = "localhost"; //database server
+        $DB_DATABASE = "unittest_matecat_local"; //database name
+        $DB_USER     = "unt_matecat_user"; //database login
+        $DB_PASS     = "unt_matecat_user"; //databasepassword
+        $db = Database::obtain ( $DB_SERVER, $DB_USER, $DB_PASS, $DB_DATABASE );
+        $db->connect ();
+
+        $query = "select * from segment_translations where id_segment = 1";
+        $results = $db->query_first( $query );
+
+        $source_seg = $results['translation'];
+
+        $check = new QA($source_seg, $source_seg);
+        $check->performConsistencyCheck();
+
+        $errors = $check->getErrors();
+        $this->assertFalse( $check->thereAreErrors() );
+        $this->assertCount( 1, $errors );
+
+
+        $this->assertAttributeEquals( 0, 'outcome', $errors[0] );;
+
+        $new_target = $check->getTrgNormalized();
+        $this->assertEquals( $source_seg, $new_target );
 
     }
 

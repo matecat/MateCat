@@ -131,7 +131,6 @@ class downloadFileStreamOnDiskController extends downloadController {
 			$output_content[$id_file]['content'] = $original;
 			$output_content[$id_file]['filename'] = $current_filename;
 
-
             //TODO set a flag in database when file uploaded to know if this file is a proprietary xlf converted
             //TODO so we can load from database the original file blob ONLY when needed
             /**
@@ -178,12 +177,16 @@ class downloadFileStreamOnDiskController extends downloadController {
 
 			if (!in_array($mime_type, array("xliff", "sdlxliff", "xlf")) || $enforcedConversion ) {
 
-                    // specs for filename at the task https://app.asana.com/0/1096066951381/2263196383117
-                    $converter = new fileFormatConverter();
-                    $debug['do_conversion'][]=time();
-                    $convertResult = $converter->convertToOriginal($output_content[$id_file]['content'],$chosen_machine);
-                    $output_content[$id_file]['content'] = $convertResult['documentContent'];
-                    $debug['do_conversion'][]=time();
+                $output_content[$id_file]['out_xliff_name'] = $path.'.out.sdlxliff';
+                $output_content[$id_file]['source'] = $jobData['source'];
+                $output_content[$id_file]['target'] = $jobData['target'];
+
+                // specs for filename at the task https://app.asana.com/0/1096066951381/2263196383117
+                $converter = new fileFormatConverter();
+                $debug[ 'do_conversion' ][ ] = time();
+                $convertResult = $converter->convertToOriginal( $output_content[ $id_file ], $chosen_machine );
+                $output_content[ $id_file ][ 'content' ] = $convertResult[ 'documentContent' ];
+                $debug[ 'do_conversion' ][ ] = time();
 
 			}
 

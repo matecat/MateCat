@@ -2,7 +2,7 @@
 
 set_time_limit(0);
 
-$ROOT = realpath( '../../../' );
+$ROOT = realpath( dirname(__FILE__) . '/../../../' );
 
 //imports
 require_once $ROOT . '/inc/config.inc.php';

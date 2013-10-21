@@ -54,11 +54,11 @@ $(document).ready(function() {
                 project_name: $('#project-name').val(),
                 source_language: $('#source-lang').val(),
                 target_language: $('#target-lang').val(),
-                tms_engine: $('#tms_engine').val(),
+                disable_tms_engine: ( $('#disable_tms_engine').prop('checked') ) ? $('#disable_tms_engine').val() : false,
                 mt_engine: $('#mt_engine').val(),
-                private_tm_key: $('#private-tm-key').val(),
-                private_tm_user: $('#private-tm-user').val(),
-                private_tm_pass: $('#private-tm-pass').val()
+                private_tm_key: ( !$('#private-tm-key').prop('disabled') ? $('#private-tm-key').val() : "" ),
+                private_tm_user: ( !$('#private-tm-user').prop('disabled') ? $('#private-tm-user').val() : "" ),
+                private_tm_pass: ( !$('#private-tm-pass').prop('disabled') ? $('#private-tm-pass').val() : "" )
             },
             beforeSend: function (){
                 $('.error-message').hide();
@@ -167,7 +167,15 @@ $(document).ready(function() {
 		$('.translate-box.target h2 .extra').remove();
     });
 
-
+    $("#disable_tms_engine").change(function(e){
+        if(this.checked){
+            $("input[id^='private-tm-']").prop("disabled", true);
+            $("#create_private_tm_btn").addClass("disabled", true);
+        } else {
+            $("input[id^='private-tm-']").prop("disabled", false);
+            $("#create_private_tm_btn").removeClass("disabled");
+        }
+    });
 
     $("input, select").change(function(e) {          
         $('.error-message').hide();

@@ -18,7 +18,7 @@ abstract class Engine {
 
 	protected function __construct($id) {
 		$this->id = $id;
-		if (empty($this->id)) {
+		if ( is_null($this->id) || $this->id == '' ) {
 			$this->error = array(-1, "Missing id engine");
 			return 0;
 		}
@@ -42,24 +42,32 @@ abstract class Engine {
 		$this->default_penalty = empty($data['penalty']) ? 0 : $data['penalty'];
 	}
 
-	private function curl($url) {
+	protected function curl($url) {
 		$ch = curl_init();
 
-		curl_setopt($ch, CURLOPT_URL, $url);
-		curl_setopt($ch, CURLOPT_HEADER, 0);
-		curl_setopt($ch, CURLOPT_USERAGENT, "user agent");
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		//        curl_setopt($ch, CURLOPT_VERBOSE, true);
-		curl_setopt($ch, CURLOPT_HTTPGET, true);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        curl_setopt($ch, CURLOPT_USERAGENT, "user agent");
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        //        curl_setopt($ch, CURLOPT_VERBOSE, true);
+        curl_setopt($ch, CURLOPT_HTTPGET, true);
 
+        curl_setopt($ch,CURLOPT_TIMEOUT,10); //we can wait max 10 seconds
 
-		// Scarica l'URL e lo passa al browser
+        $output = curl_exec($ch);
+        $curl_errno = curl_errno($ch);
+        $curl_error = curl_error($ch);
+//		$info = curl_getinfo($ch);
 
-		$output = curl_exec($ch);
-		$info = curl_getinfo($ch);
-		// Chiude la risorsa curl
-		curl_close($ch);
-		return $output;
+        //$curl_errno == 28 /* CURLE_OPERATION_TIMEDOUT */
+        if( $curl_errno > 0 ){
+            Log::doLog('Curl Error: ' . $curl_errno . " - " . $curl_error . " " . var_export( parse_url( $url ) ,true) );
+            $output = json_encode( array( 'error' => - $curl_errno . " Server Not Available" ) ); //return negative number
+        }
+
+        // Chiude la risorsa curl
+        curl_close($ch);
+        return $output;
 	}
 
 	protected function doQuery($function, $parameters = array()) {
@@ -69,10 +77,10 @@ abstract class Engine {
 		}
 
 		$this->buildQuery($function, $parameters);
-
+//        Log::doLog($this->url);
 		$res=$this->curl($this->url);
-
 		$this->raw_result = json_decode($res,true);
+//        Log::doLog($res);
 	}
 
 	private function buildQuery($function, $parameters) {

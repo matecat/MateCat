@@ -36,12 +36,25 @@ while (1) {
 			}
 		}
 
+        $perform_Tms_Analysis = true;
+        $status = "FAST_OK";
+        if( $pid_res['id_tms'] == 0 && $pid_res['id_mt_engine'] == 0 ){
 
-		$insertReportRes = insertFastAnalysis($pid,$data, $equivalentWordMapping);
+            /**
+             * MyMemory disabled and MT Disabled Too
+             * So don't perform TMS Analysis
+             */
+
+            $perform_Tms_Analysis = false;
+            $status = "DONE";
+            Log::doLog( 'Perform Analysis ' . var_export( $perform_Tms_Analysis, true ) );
+        }
+
+		$insertReportRes = insertFastAnalysis($pid,$data, $equivalentWordMapping, $perform_Tms_Analysis);
 		if ($insertReportRes < 0) {
 			continue;
 		}
-		$change_res = changeProjectStatus($pid, "FAST_OK");
+		$change_res = changeProjectStatus($pid, $status);
 		if ($change_res < 0) {
 		}
 	}

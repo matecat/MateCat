@@ -13,23 +13,48 @@ class createProjectController extends ajaxcontroller {
     private $source_language;
     private $target_language;
     private $mt_engine;
-    private $tms_engine;
+    private $tms_engine = 1;  //1 default MyMemory
     private $private_tm_key;
     private $private_tm_user;
     private $private_tm_pass;
     private $analysis_status;
 
+    private $disable_tms_engine_flag;
+
     public function __construct() {
         parent::__construct();
-        $this->file_name = $this->get_from_get_post('file_name'); // da cambiare
-        $this->project_name = $this->get_from_get_post('project_name');
-        $this->source_language = $this->get_from_get_post('source_language');
-        $this->target_language = $this->get_from_get_post('target_language');
-        $this->mt_engine = $this->get_from_get_post('mt_engine'); // null è ammesso
-        $this->tms_engine = $this->get_from_get_post('tms_engine'); // se empty allora MyMemory
-        $this->private_tm_key = $this->get_from_get_post('private_tm_key');
-        $this->private_tm_user = $this->get_from_get_post('private_tm_user');
-        $this->private_tm_pass = $this->get_from_get_post('private_tm_pass');
+
+        $filterArgs = array(
+            'file_name'          => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+            'project_name'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+            'source_language'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+            'target_language'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+            'mt_engine'          => array( 'filter' => FILTER_VALIDATE_INT ),
+            'disable_tms_engine' => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+            'private_tm_key'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+            'private_tm_user'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+            'private_tm_pass'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+        );
+
+        $__postInput = filter_input_array( INPUT_POST, $filterArgs );
+
+        //NOTE: This is for debug purpose only,
+        //NOTE: Global $_POST Overriding from CLI
+        //$__postInput = filter_var_array( $_POST, $filterArgs );
+
+        $this->file_name               = $__postInput[ 'file_name' ]; // da cambiare
+        $this->project_name            = $__postInput[ 'project_name' ];
+        $this->source_language         = $__postInput[ 'source_language' ];
+        $this->target_language         = $__postInput[ 'target_language' ];
+        $this->mt_engine               = $__postInput[ 'mt_engine' ]; // null è ammesso
+        $this->disable_tms_engine_flag = $__postInput[ 'disable_tms_engine' ]; // se false allora MyMemory
+        $this->private_tm_key          = $__postInput[ 'private_tm_key' ];
+        $this->private_tm_user         = $__postInput[ 'private_tm_user' ];
+        $this->private_tm_pass         = $__postInput[ 'private_tm_pass' ];
+
+        if ( $this->disable_tms_engine_flag ) {
+            $this->tms_engine = 0; //remove default MyMemory
+        }
 
     }
 
@@ -58,10 +83,6 @@ class createProjectController extends ajaxcontroller {
         if (empty($this->target_language)) {
             $this->result['errors'][] = array("code" => -4, "message" => "Missing target language.");
             return false;
-        }
-
-        if (empty($this->tms_engine)) {
-            $this->tms_engine = 1; // default MyMemory
         }
 
         $sourceLangHistory = $_COOKIE["sourceLang"];
@@ -125,9 +146,6 @@ class createProjectController extends ajaxcontroller {
         }
 
         setcookie("targetLang", $newCookieVal, time() + (86400 * 365));
-
-
-
 
         // aggiungi path file in caricamento al cookie"pending_upload"a
         // add her the cookie mangement for remembere the last 3 choosed languages
@@ -234,6 +252,8 @@ class createProjectController extends ajaxcontroller {
 
             try{
                 //return by reference, could be large
+                //deprecated: PHP Strict standards:  Only variables should be assigned by reference
+                //TODO: segment Extractor should be a class
                 $SegmentTranslations[$fid] = & extractSegments($fileDir, $filename_to_catch, $pid, $fid);
             } catch ( Exception $e ){
 

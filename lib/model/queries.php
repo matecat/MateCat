@@ -2,12 +2,111 @@
 
 include_once 'Database.class.php';
 
-function getUserData( $id ) {
+function doSearchQuery( ArrayObject $queryParams ) {
+    $db = Database::obtain();
+    
+    $key = $queryParams['key'];                 //no escape: not related with Database
+    $src = $db->escape( $queryParams['src'] );
+    $trg = $db->escape( $queryParams['trg'] );
+
+    $where_status = "";
+    if ( $queryParams[ 'status' ] != 'all' ) {
+        $status       = $queryParams[ 'status' ]; //no escape: hardcoded
+        $where_status = " AND status = '$status'";
+    }
+
+    if( $queryParams['matchCase'] ) {
+        $SQL_MOD = "";
+    } else {
+        $SQL_MOD = "LOWER ";
+        $src = strtolower( $src );
+        $trg = strtolower( $trg );
+    }
+
+    $query = "";
+    if ( $key == "source" ) {
+
+        $query = "SELECT s.id, sum(
+                    ROUND (
+                        ( LENGTH( s.segment ) - LENGTH( REPLACE ( $SQL_MOD( segment ), $SQL_MOD( '$src' ), '') ) ) / LENGTH('$src') )
+                    ) AS count
+                    FROM segments s
+                    INNER JOIN files_job fj on s.id_file=fj.id_file
+                    WHERE fj.id_job = {$queryParams['job']}
+                    AND s.segment LIKE '%$src%'
+                    $where_status
+                    GROUP BY s.id WITH ROLLUP";
+
+    } elseif ( $key == "target" ) {
+
+        $query = "SELECT  st.id_segment as id, sum(
+                    ROUND (
+                      ( LENGTH( st.translation ) - LENGTH( REPLACE ( $SQL_MOD( st.translation ), $SQL_MOD( '$trg' ), '') ) ) / LENGTH('$trg') )
+                    ) AS count
+                    FROM segment_translations st
+                    WHERE st.id_job = {$queryParams['job']}
+                    AND st.translation like '%$trg%'
+                    $where_status
+                    GROUP BY st.id_segment WITH ROLLUP";
+
+    } elseif ( $key == 'coupled' ) {
+
+        $query = "SELECT st.id_segment as id
+
+                    FROM segment_translations as st
+                    JOIN segments as s on id = id_segment
+                    WHERE st.id_job = {$queryParams['job']}
+                    AND st.translation LIKE '%$trg%'
+                    AND s.segment LIKE '%$src%'
+                    AND LENGTH( REPLACE ( $SQL_MOD( segment ), $SQL_MOD( '$src' ), '') ) != LENGTH( s.segment )
+                    AND LENGTH( REPLACE ( $SQL_MOD( st.translation ), $SQL_MOD( '$trg' ), '') ) != LENGTH( st.translation )
+                    $where_status ";
+
+    }
+
+    Log::doLog($query);
+
+    $results = $db->fetch_array( $query );
+    $err     = $db->get_error();
+
+    $errno   = $err[ 'error_code' ];
+
+    if ( $errno != 0 ) {
+        log::doLog( $err );
+        return $errno * -1;
+    }
+
+    if( $key != 'coupled' ){ //there is the ROLLUP
+        $rollup = array_pop( $results );
+    }
+
+    $vector = array();
+    foreach($results as $occurrence ){
+        $vector['sidlist'][] = $occurrence['id'];
+    }
+
+    $vector['count']   = @$rollup['count']; //can be null, suppress warning
+
+    if( $key != 'coupled' ){ //there is the ROLLUP
+        //there should be empty values because of Sensitive search
+        //LIKE is case INSENSITIVE, REPLACE IS NOT
+        //empty search values removed
+        //ROLLUP counter rules!
+        if ($vector['count'] == 0) {
+            $vector[ 'sidlist' ] = null;
+            $vector[ 'count' ]   = null;
+        }
+    }
+
+    return $vector;
+}
+
+function getUserData($id) {
 
     $db = Database::obtain();
 
-    $id    = $db->escape( $id );
-    $query = "select * from users where email='$id'";
+    $id = $db->escape($id);
+    $query = "select * from users where email = '$id'";
 
     $results = $db->query_first( $query );
 
@@ -206,7 +305,7 @@ function getEngineData( $id ) {
         return $errno * -1;
     }
 
-    return $results[ 0 ];
+    return @$results[ 0 ];
 }
 
 function getSegment( $id_segment ) {
@@ -520,7 +619,7 @@ function setTranslationInsert( $id_segment, $id_job, $status, $time_to_edit, $tr
     return $db->affected_rows;
 }
 
-function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list ) {
+function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list, $mt_qe ) {
     $data                          = array();
     $data[ 'id_job' ]              = $id_job;
     $data[ 'suggestions_array' ]   = $suggestions_json_array;
@@ -530,6 +629,7 @@ function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $su
     $data[ 'match_type' ]          = $match_type;
     $data[ 'eq_word_count' ]       = $eq_words;
     $data[ 'standard_word_count' ] = $standard_words;
+    $data[ 'mt_qe' ]               = $mt_qe;
 
     ( !empty( $translation ) ? $data[ 'translation' ] = $translation : null );
     ( $tm_status_analysis != 'UNDONE' ? $data[ 'tm_analysis_status' ] = $tm_status_analysis : null );
@@ -557,7 +657,7 @@ function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $su
     return $db->affected_rows;
 }
 
-function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list ) {
+function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list, $mt_qe ) {
     $data                          = array();
     $data[ 'id_job' ]              = $id_job;
     $data[ 'id_segment' ]          = $id_segment;
@@ -573,6 +673,8 @@ function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $su
 
     $data[ 'warning' ]                = $warning;
     $data[ 'serialized_errors_list' ] = $err_json_list;
+
+    $data[ 'mt_qe' ]                  = $mt_qe;
 
     $db = Database::obtain();
     $db->insert( 'segment_translations', $data );
@@ -774,7 +876,7 @@ function getStatsForFile( $id_file ) {
 
 function getLastSegmentIDs( $id_job ) {
 
-    $query = "SELECT group_concat(c.id_segment) as estimation_seg_ids from (SELECT id_segment from segment_translations WHERE id_job=$id_job AND status in ('TRANSLATED','APPROVED') ORDER by translation_date DESC LIMIT 0,10) as c";
+    $query   = "SELECT group_concat(c.id_segment) as estimation_seg_ids from (SELECT id_segment from segment_translations WHERE id_job=$id_job AND status in ('TRANSLATED','APPROVED') ORDER by translation_date DESC LIMIT 0,10) as c";
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
@@ -828,6 +930,7 @@ function getEditLog( $jid, $pass ) {
 		st.suggestions_array AS sar,
 		st.suggestion_source AS ss,
 		st.suggestion_match AS sm,
+		st.mt_qe,
 		j.id_translator AS tid,
 		j.source AS source_lang,
 		j.target AS target_lang,
@@ -1145,8 +1248,10 @@ log::doLog('STATUS QUERY:',$status_query);
     $filter_query = ( $query_tail == '' ) ? '' : 'where ' . $query_tail;
     $filter_query = preg_replace( '/( and)$/i', '', $filter_query );
 
-    $query = "select p.id as pid, p.name, p.password, p.id_engine_mt, p.id_engine_tm, p.tm_analysis_wc,
+    $query = "select p.id as pid, p.name, p.password, j.id_mt_engine, j.id_tms, p.tm_analysis_wc,
 		group_concat(j.id,'##', j.source,'##',j.target,'##',j.create_date,'##',j.password,'##',e.name,'##',if (t.mymemory_api_key is NUll,'',t.mymemory_api_key),'##',j.status_owner) as job 
+
+            , e.name as mt_engine_name
 
 			from projects p
 			inner join jobs j on j.id_project=p.id 
@@ -1300,7 +1405,7 @@ function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
     } else {
         $status_search = "FAST_OK";
     }
-    $query = "select p.id, group_concat(j.id) as jid_list
+    $query = "select p.id, id_tms, id_mt_engine, group_concat(j.id) as jid_list
 		from projects p
 		inner join jobs j on j.id_project=p.id
 		where status_analysis = '$status_search'
@@ -1437,7 +1542,7 @@ function changeTmWc( $pid, $pid_eq_words, $pid_standard_words ) {
     return $db->affected_rows;
 }
 
-function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping ) {
+function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform_Tms_Analysis = true ) {
     $db   = Database::obtain();
     $data = array();
 
@@ -1498,7 +1603,7 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping ) {
                 return $errno * -1;
             }
 
-            if ( $data[ 'eq_word_count' ] > 0 ) {
+            if ( $data[ 'eq_word_count' ] > 0 && $perform_Tms_Analysis ) {
                 //			$db->query("SET autocommit=0");
                 //			$db->query("START TRANSACTION");
                 $db->insert( 'segment_translations_analysis_queue', $data_innodb );
@@ -1803,16 +1908,13 @@ function deleteLockSegment( $id_segment, $id_job, $mode = "delete" ) {
 function getSegmentForTMVolumeAnalysys( $id_segment, $id_job ) {
     $query = "select s.id as sid ,s.segment ,raw_word_count,
 		st.match_type, j.source, j.target, j.id as jid, j.id_translator,
-		p.id_engine_mt,p.id as pid
+		j.id_tms, j.id_mt_engine, p.id as pid
 			from segments s
 			inner join segment_translations st on st.id_segment=s.id
 			inner join jobs j on j.id=st.id_job
 			inner join projects p on p.id=j.id_project
-
-			where  
-
+			where
 			p.status_analysis='FAST_OK' and
-
 			st.id_segment=$id_segment and st.id_job=$id_job
 			limit 1";
 

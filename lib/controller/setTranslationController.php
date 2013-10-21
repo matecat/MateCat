@@ -33,6 +33,16 @@ class setTranslationController extends ajaxcontroller {
         //index of suggestions from which the translator drafted the contribution
         $this->chosen_suggestion_index = $this->get_from_get_post( 'chosen_suggestion_index' );
 
+
+//        $filterArgs = array(
+//            'translation'              => array( 'filter' => FILTER_UNSAFE_RAW ),
+//        );
+//
+//        $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
+//
+//        Log::doLog( $_POST );
+//        Log::doLog( $this->__postInput );
+
 	}
 
 	public function doAction() {

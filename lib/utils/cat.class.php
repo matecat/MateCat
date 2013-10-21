@@ -3,6 +3,7 @@
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
 include_once INIT::$UTILS_ROOT . "/utils.class.php";
+include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 define("LTPLACEHOLDER", "##LESSTHAN##");
 define("GTPLACEHOLDER", "##GREATERTHAN##");
@@ -218,7 +219,7 @@ class CatUtils {
         ;
     }
 
-    public static function getEditingLogData($jid, $password) {
+    public static function getEditingLogData($jid, $password, $use_ter_diff = false ) {
 
         $data = getEditLog($jid, $password);
 
@@ -291,29 +292,43 @@ class CatUtils {
 
             $seg['pe_effort_perc'] .= "%";
 
+            $lh = Languages::getInstance();
+            $lang = $lh->getIsoCode( $lh->getLocalizedName( $seg['target_lang'] ) );
 
+            $sug_for_diff = self::placehold_xliff_tags( $seg[ 'sug' ] );
+            $tra_for_diff = self::placehold_xliff_tags( $seg[ 'translation' ] );
 
-            $sug_for_diff = self::placehold_xliff_tags($seg['sug']);
-            $tra_for_diff = self::placehold_xliff_tags($seg['translation']);
-            $ter = MyMemory::diff_tercpp($sug_for_diff, $tra_for_diff);
-            $seg['ter'] = $ter[1] * 100;
-            $stat_ter[] = $seg['ter'] * $seg['rwc'];
-            $seg['ter'] = round($ter[1] * 100) . "%";
-            $diff_ter = $ter[0];
+//            possible patch
+//            $sug_for_diff = html_entity_decode($sug_for_diff, ENT_NOQUOTES, 'UTF-8');
+//            $tra_for_diff = html_entity_decode($tra_for_diff, ENT_NOQUOTES, 'UTF-8');
 
-            if ($seg['sug'] <> $seg['translation']) {
-                
-                $diff_PE = MyMemory::diff_html($sug_for_diff, $tra_for_diff);
+            $ter          = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
+            $seg[ 'ter' ] = $ter[ 1 ] * 100;
+            $stat_ter[ ]  = $seg[ 'ter' ] * $seg[ 'rwc' ];
+            $seg[ 'ter' ] = round( $ter[ 1 ] * 100 ) . "%";
+            $diff_ter     = $ter[ 0 ];
 
-                // we will use diff_PE until ter_diff will not work properly
-                $seg['diff'] = $diff_PE;
-                //$seg['diff'] = $diff_ter;
+            if ( $seg[ 'sug' ] <> $seg[ 'translation' ] ) {
+
+                //force use of third party ter diff
+                if( $use_ter_diff ){
+                    $seg[ 'diff' ] = $diff_ter;
+                } else {
+                    $diff_PE = MyMemory::diff_html( $sug_for_diff, $tra_for_diff );
+                    // we will use diff_PE until ter_diff will not work properly
+                    $seg[ 'diff' ]     = $diff_PE;
+                }
+
+                //$seg[ 'diff_ter' ] = $diff_ter;
+
             } else {
-                $seg['diff'] = '';
+                $seg[ 'diff' ]     = '';
+                //$seg[ 'diff_ter' ] = '';
             }
-            $seg['diff'] = self::restore_xliff_tags_for_wiew($seg['diff']);
-            //     echo $seg['diff']; exit;
-            //$seg['diff_view']= CatUtils::rawxliff2rawview($seg['diff']);
+
+            $seg['diff']     = self::restore_xliff_tags_for_wiew($seg['diff']);
+            //$seg['diff_ter'] = self::restore_xliff_tags_for_wiew($seg['diff_ter']);
+
             // BUG: While suggestions source is not correctly set
             if (($seg['sm'] == "85%") OR ($seg['sm'] == "86%")) {
                 $seg['ss'] = 'Machine Translation';
@@ -325,6 +340,10 @@ class CatUtils {
             $seg['sug_view'] = trim( CatUtils::rawxliff2view($seg['sug']) );
             $seg['source'] = trim( CatUtils::rawxliff2view( $seg['source'] ) );
             $seg['translation'] = trim( CatUtils::rawxliff2view( $seg['translation'] ) );
+
+            if( $seg['mt_qe'] == 0 ){
+                $seg['mt_qe'] = 'N/A';
+            }
 
         }
 
@@ -379,7 +398,7 @@ class CatUtils {
         return 0;
     }
 
-    public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "", $match_type = "", $eq_words = 0, $standard_words = 0, $translation = "", $tm_status_analysis = "UNDONE", $warning = 0, $err_json = '' ) {
+    public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "", $match_type = "", $eq_words = 0, $standard_words = 0, $translation = "", $tm_status_analysis = "UNDONE", $warning = 0, $err_json = '', $mt_qe = 0 ) {
         if (!empty($suggestion_source)) {
             if (strpos($suggestion_source, "MT") === false) {
                 $suggestion_source = 'TM';
@@ -398,14 +417,14 @@ class CatUtils {
          *          suggestions_array = IF( tm_analysis_status = 'DONE' , VALUES(suggestions_array) , suggestions_array );
          *
          */
-        $insertRes = setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json);
+        $insertRes = setSuggestionInsert($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json, $mt_qe);
         if ($insertRes < 0 and $insertRes != -1062) {
             $result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the suggestions for the segment $id_segment - $insertRes");
             return $result;
         }
         if ($insertRes == -1062) {
             // the translaion for this segment still exists : update it
-            $updateRes = setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json);
+            $updateRes = setSuggestionUpdate($id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json, $mt_qe);
             if ($updateRes < 0) {
                 $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the suggestions for the segment $id_segment");
                 return $result;
