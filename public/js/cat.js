@@ -1304,10 +1304,10 @@ UI = {
             APP.alert('Status only search is temporarily disabled');
             return false;
         }
-//        else if(this.searchMode == 'source&target') {
-//            APP.alert('Combined search is temporarily disabled');
-//            return false;
-//        }
+        else if(this.searchMode == 'source&target') {
+            APP.alert('Combined search is temporarily disabled');
+            return false;
+        }
 
         var source = (p['source'])? p['source'] : '';
         var target = (p['target'])? p['target'] : '';
