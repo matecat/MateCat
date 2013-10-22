@@ -14,20 +14,29 @@ APP = {
             e.preventDefault();
             APP.closePopup();
             if($(this).attr('data-callback')) {
-                UI[$(this).attr('data-callback')]();
-            };
-//            APP.confirmValue = true;
-//            APP.waitingConfirm = false;
+                if( typeof UI[$(this).attr('data-callback')] === 'function' ){
+                    UI[$(this).attr('data-callback')]();
+                    APP.confirmValue = true;
+                } else {
+                    APP.confirmValue = APP.confirmCallbackFunction();
+                }
+            }
+            APP.waitingConfirm = false;
+            APP.cancelValue = false;
         }).on('click', '.modal[data-type=confirm] .btn-cancel, .modal[data-type=confirm] .x-popup', function(e) {
             e.preventDefault();
             APP.closePopup();
             el = $(this).parents('.modal').find('.btn-cancel');
             if($(el).attr('data-callback')) {
-                UI[$(el).attr('data-callback')]();
-            };
-//            APP.confirmValue = false;
-//            APP.cancelValue = false;
-//            APP.waitingConfirm = false;
+                if( typeof UI[$(el).attr('data-callback')] === 'function' ){
+                    UI[$(this).attr('data-callback')]();
+                } else {
+                    APP.cancelValue = APP.cancelCallbackFunction();
+                }
+            }
+            APP.confirmValue = false;
+            APP.waitingConfirm = false;
+            APP.cancelValue = true;
         }).on('click', '.popup-outer.closeClickingOutside', function(e) {
             e.preventDefault();
             APP.closePopup();
@@ -54,15 +63,16 @@ APP = {
             content: options.msg
         });
         this.checkConfirmation();
+        return APP.confirmValue;
     },
     checkConfirmation: function() {
 //        if(this.waitingConfirm) {
 //            setTimeout(function() {
 //                APP.checkConfirmation();
-//            }, 200);            
+//            }, 200);
 //        } else {
-//            console.log('this.confirmCallbackFunction: ' + this.confirmCallbackFunction);
-//            console.log('this.cancelCallbackFunction: ' + this.cancelCallbackFunction);
+//        console.log('this.confirmCallbackFunction: ' + this.confirmCallbackFunction);
+//        console.log('this.cancelCallbackFunction: ' + this.cancelCallbackFunction);
 //            if(this.confirmCallbackFunction) {
 //                UI[this.confirmCallbackFunction](this.confirmValue);
 //                this.confirmValue = null;
@@ -137,8 +147,8 @@ APP = {
         } else if(conf.type == 'confirm') {
             newPopup +=     '<a href="#" class="btn-cancel"' + ((conf.onCancel)? ' data-callback="' + conf.onCancel + '"' : '') + '>' + ((conf.cancelTxt)? conf.cancelTxt : 'Cancel') + '<\a>' +          
                              '<a href="#" class="btn-ok"' + ((conf.onConfirm)? ' data-callback="' + conf.onConfirm + '"' : '') + '>' + ((conf.okTxt)? conf.okTxt : 'Ok') + '<\a>';    
-            this.confirmCallbackFunction = (conf.onConfirm)? conf.onConfirm : null;
-            this.cancelCallbackFunction = (conf.onCancel)? conf.onCancel : null;
+            APP.confirmCallbackFunction = (conf.onConfirm)? conf.onConfirm : null;
+            APP.cancelCallbackFunction = (conf.onCancel)? conf.onCancel : null;
         } else {
             $.each(conf.buttons, function(index) {
                 var cl = (this.type == 'ok')? 'btn-ok' : (this.type == 'cancel')? 'btn-cancel' : '';
