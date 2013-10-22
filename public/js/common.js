@@ -43,6 +43,9 @@ APP = {
         })
     },
     alert: function(msg) {
+        //FIXME
+        // Alert message, NEVER displayed if there are a redirect after it because html div popups are no-blocking
+        // Transform alert to a function like confirm with a callable function passed as callback
         this.popup({
             type: 'alert',
             closeClickingOutside: true,
