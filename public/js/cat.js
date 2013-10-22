@@ -2080,17 +2080,17 @@ UI = {
             firstLoad: false
         })
     },
+    renderUntranslatedOutOfView: function(){
+        this.infiniteScroll = false;
+        config.last_opened_segment = this.nextSegmentId;
+        window.location.hash = this.nextSegmentId;
+        $('#outer').empty();
+        this.render({
+            firstLoad: false
+        })
+    },
     reloadWarning: function() {
-        var m = APP.confirm({msg: 'The next untranslated segment is outside the current view.'});
-        if (m) {
-            this.infiniteScroll = false;
-            config.last_opened_segment = this.nextSegmentId;
-            window.location.hash = this.nextSegmentId;
-            $('#outer').empty();
-            this.render({
-                firstLoad: false
-            })       
-        }
+        APP.confirm({msg: 'The next untranslated segment is outside the current view.', callback: 'renderUntranslatedOutOfView' });
     },
     pointBackToSegment: function(segmentId) {
         if (!this.infiniteScroll)

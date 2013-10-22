@@ -216,7 +216,10 @@ class MyMemory {
 	public static function diff_tercpp($old,$new,$lang = 'en' ){
 		//$res=shell_exec("/bin/tercpp.0.6.2 --noTxtIds --printDifferenceToHtmlToSTDO  -s  -rSent \"$old\" -hSent \"$new\" 2>&1");
                 //$res=shell_exec(INIT::$ROOT."/third_party/TER/tercpp.0.6.2 --noTxtIds --printDifferenceToHtmlToSTDO  -s  --HTER -rSent \"$new\" -hSent \"$old\" 2>&1");
-                $res=shell_exec(INIT::$ROOT."/third_party/TER/ComputeDiffView $lang \"$new\" \"$old\" 2>&1");
+
+                $new_escape=escapeshellarg($new);
+                $old_escape=escapeshellarg($old);
+                $res=shell_exec(INIT::$ROOT."/third_party/TER/ComputeDiffView $lang \"$new_escape\" \"$old_escape\" 2>&1");
 
 //                Log::doLog( $old );
 //                Log::doLog( $new );
