@@ -69,7 +69,7 @@ class getSegmentsController extends ajaxcontroller {
     public function doAction() {
 
         //get Job Infos
-        $job_data = getJobData( (int) $this->jid );
+        $job_data = getJobData( (int) $this->jid, $this->password );
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
