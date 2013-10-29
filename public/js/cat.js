@@ -1747,6 +1747,7 @@ UI = {
         APP.doRequest({
             data: {
                 action: 'getContribution',
+                password: config.password,
                 is_concordance: 0,
                 id_segment: id_segment,
                 text: txt,
