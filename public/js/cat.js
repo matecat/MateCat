@@ -251,9 +251,11 @@ UI = {
             e.preventDefault();
             e.stopPropagation();
             return false;
-        }).on('click', 'section:not(.writable) a.status', function(e) {
+        }).on('click', 'a.status', function(e) {
             e.preventDefault();
-            e.stopPropagation();
+            e.stopPropagation();        
+        }).on('click', 'section:not(.writable) a.status', function(e) {
+
             var segment = $(this).parents("section");
             var statusMenu = $("ul.statusmenu", segment);
 
