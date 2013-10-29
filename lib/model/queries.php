@@ -496,26 +496,27 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 
     //	$ref_point = ($where == 'center')? ((float) $ref_segment) - 100 : $ref_segment;
 
-    $query = "select j.id as jid, j.id_project as pid,j.source,j.target, j.last_opened_segment, j.id_translator as tid,
-		p.id_customer as cid, j.id_translator as tid,  
-		p.name as pname, p.create_date , fj.id_file,
-		f.filename, f.mime_type, s.id as sid, s.segment, s.raw_word_count, s.internal_id,
-		if (st.status='NEW',NULL,st.translation) as translation, st.status, IF(st.time_to_edit is NULL,0,st.time_to_edit) as time_to_edit, s.xliff_ext_prec_tags,s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
+    $query = "SELECT j.id AS jid, j.id_project AS pid,j.source,j.target, j.last_opened_segment, j.id_translator AS tid,
+                p.id_customer AS cid, j.id_translator AS tid,
+                p.name AS pname, p.create_date , fj.id_file,
+                f.filename, f.mime_type, s.id AS sid, s.segment, s.raw_word_count, s.internal_id,
+                IF (st.status='NEW',NULL,st.translation) AS translation,
+                st.status, IF(st.time_to_edit IS NULL,0,st.time_to_edit) AS time_to_edit,
+                s.xliff_ext_prec_tags, s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
 
-        if( j.password='$password', 'false', 'true' ) as forbidden
+                IF( j.password='$password' AND ( s.id BETWEEN j.job_first_segment AND j.job_last_segment) , 'false', 'true' ) AS forbidden
 
-			from jobs j 
-				inner join projects p on p.id=j.id_project
-				inner join files_job fj on fj.id_job=j.id
-				inner join files f on f.id=fj.id_file
-				inner join segments s on s.id_file=f.id
-				left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
-				where j.id=$jid
-				-- and j.password='$password'
-				and s.id > $ref_point and s.show_in_cattool=1
-				limit 0,$step
-				";
-Log::doLog($query);
+             FROM jobs j
+                INNER JOIN projects p ON p.id=j.id_project
+                INNER JOIN files_job fj ON fj.id_job=j.id
+                INNER JOIN files f ON f.id=fj.id_file
+                INNER JOIN segments s ON s.id_file=f.id
+                LEFT JOIN segment_translations st ON st.id_segment=s.id AND st.id_job=j.id
+                WHERE j.id = $jid
+                AND s.id > $ref_point AND s.show_in_cattool = 1
+                LIMIT 0,$step ";
+
+    
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
 
