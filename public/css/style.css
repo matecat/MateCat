@@ -993,7 +993,7 @@ section.forbidden .text
 
 section.forbidden .status-container
     {
-    display: none;
+    /*display: none;*/
     }
 
 
