@@ -16,7 +16,7 @@ require $_SERVER["DOCUMENT_ROOT"] . '/inc/config.inc.php';
 require INIT::$UTILS_ROOT . '/utils.class.php';
 require INIT::$UTILS_ROOT . '/log.class.php';
 require('upload.class.php');
-require( INIT::$UTILS_ROOT . '/xliff.parser.1.2.class.php' );
+require( INIT::$UTILS_ROOT . '/DetectProprietaryXliff.php' );
 
 
 $upload_handler = new UploadHandler();

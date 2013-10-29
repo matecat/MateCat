@@ -125,7 +125,7 @@ class catController extends viewcontroller {
 			}
 
 			if (empty($this->first_job_segment)) {
-				$this->first_job_segment = $seg['id_segment_start'];
+//				$this->first_job_segment = @$seg['id_segment_start'];
 			}
             
 			if (empty($this->cid)) {
@@ -182,8 +182,8 @@ class catController extends viewcontroller {
 				$this->data["$id_file"]['jid'] = $seg['jid'];
 				$this->data["$id_file"]["filename"] = $seg['filename'];
 				$this->data["$id_file"]["mime_type"] = $seg['mime_type'];
-				$this->data["$id_file"]['id_segment_start'] = $seg['id_segment_start'];
-				$this->data["$id_file"]['id_segment_end'] = $seg['id_segment_end'];
+//				$this->data["$id_file"]['id_segment_start'] = @$seg['id_segment_start'];
+//				$this->data["$id_file"]['id_segment_end'] = @$seg['id_segment_end'];
 				$this->data["$id_file"]['source'] = $lang_handler->getLocalizedName($seg['source'],'en');
 				$this->data["$id_file"]['target'] = $lang_handler->getLocalizedName($seg['target'],'en');
 				$this->data["$id_file"]['source_code'] = $seg['source'];
@@ -208,8 +208,8 @@ class catController extends viewcontroller {
 			unset($seg['tid']);
 			unset($seg['pname']);
 			unset($seg['create_date']);
-			unset($seg['id_segment_end']);
-			unset($seg['id_segment_start']);
+//			unset($seg['id_segment_end']);
+//			unset($seg['id_segment_start']);
 			unset($seg['last_opened_segment']);
 		}
 

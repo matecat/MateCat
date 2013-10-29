@@ -523,7 +523,7 @@ class CatUtils {
                 // $job_stats['ESTIMATED_COMPLETION'] = number_format( ($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour'],1);
                 // 1 h 32 m
                 // $job_stats['ESTIMATED_COMPLETION'] = date("G",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "h " . date("i",($job_stats['DRAFT']+$job_stats['REJECTED'])/$estimation_temp[0]['words_per_hour']*3600) . "m";
-                $job_stats['ESTIMATED_COMPLETION'] = date("G\h i\m", ($job_stats['DRAFT'] + $job_stats['REJECTED']) / $estimation_temp[0]['words_per_hour'] * 3600 - 3600);
+                $job_stats['ESTIMATED_COMPLETION'] = date("G\h i\m", ($job_stats['DRAFT'] + $job_stats['REJECTED']) / ( !empty( $estimation_temp[0]['words_per_hour'] ) ? $estimation_temp[0]['words_per_hour'] : 1 )* 3600 - 3600);
             }
         }
         
@@ -707,15 +707,26 @@ class CatUtils {
         return $res;
     }
 
-    public static function generate_password($length = 8) {
+    /**
+     * Generate 128bit password with real uniqueness over single process instance
+     *   N.B. Concurrent requests can collide ( Ex: fork )
+     *
+     * Minimum Password Length 24 Characters
+     *
+     */
+    public static function generate_password( $length = 16 ) {
 
+        //base64: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
+        //remove unwanted characters +/ these chars create unwanted behaviours in uri
 
-        // Random
-        $pool = "abcdefghkmnpqrstuvwxyz23456789"; // skipping iljo01 because not easy to distinguish
-        $pool_lenght = strlen($pool);
-        $pwd = "";
-        for ($index = 0; $index < $length; $index++) {
-            $pwd .= substr($pool, (rand() % ($pool_lenght)), 1);
+        $uniqid = uniqid('',true);
+        $pwd = str_replace( array( "/", '+' ), array( "@", "!" ), base64_encode( pack( "H*", str_replace(".","20",$uniqid) ) ) );
+
+        if( $length > 16 ){
+            while( strlen($pwd) < $length ){
+                $pwd .= md5( self::generate_password() );
+            }
+            $pwd = substr( $pwd, 0, $length );
         }
 
         return $pwd;

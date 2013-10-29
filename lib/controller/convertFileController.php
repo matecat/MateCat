@@ -104,12 +104,14 @@ class convertFileController extends ajaxcontroller {
                     stripos($convertResult['errorMessage'] ,"COM target does not implement IDispatch") !== false
                 ) {
 					$convertResult['errorMessage'] = "Error: failed importing file.";
-				} else if( stripos($convertResult['errorMessage'] ,"Unable to open Excel file - it may be password protected") !== false ) {
+				} elseif( stripos($convertResult['errorMessage'] ,"Unable to open Excel file - it may be password protected") !== false ) {
                     $convertResult['errorMessage'] = $convertResult['errorMessage'] . " Try to remove protection using the Unprotect Sheet command on Windows Excel.";
+                } elseif ( stripos( $convertResult['errorMessage'] ,"The document contains unaccepted changes" ) !== false ) {
+                    $convertResult['errorMessage'] = "The document contains track changes. Accept all changes before uploading it.";
                 }
 
-				$this->result['code'] = 0;
-				$this->result['errors'][] = array("code" => -1, "message" => $convertResult['errorMessage']);
+				$this->result['code'] = -100;
+				$this->result['errors'][] = array("code" => -100, "message" => $convertResult['errorMessage']);
 //				log::doLog("ERROR MESSAGE : " . $convertResult['errorMessage']);
 
 				return -1;

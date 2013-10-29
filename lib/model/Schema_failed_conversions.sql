@@ -26,6 +26,6 @@ GRANT ALL ON matecat_conversions_log.* TO 'matecat'@'10.3%' IDENTIFIED BY 'matec
 FLUSH PRIVILEGES;
 
 
--- GRANT ALL ON matecat_conversions_log.* TO 'matecat'@'localhost' IDENTIFIED BY 'matecat_user';
--- GRANT ALL ON matecat_conversions_log.* TO 'matecat'@'10.3%' IDENTIFIED BY 'matecat01';
+-- GRANT ALL ON matecat_conversions_log.* TO 'matecat_user'@'localhost' IDENTIFIED BY 'matecat_user';
+-- GRANT ALL ON matecat_conversions_log.* TO 'matecat_user'@'10.3%' IDENTIFIED BY 'matecat_user';
 -- FLUSH PRIVILEGES;

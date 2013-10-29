@@ -124,15 +124,15 @@ class setTranslationController extends ajaxcontroller {
         $check = new QA($segment['segment'], $this->translation);
         $check->performConsistencyCheck();
 
-        if( $check->thereAreWarnings() ){
-            $err_json = $check->getWarningsJSON();
+        if( $check->thereAreErrors() ){
+            $err_json = $check->getErrorsJSON();
             $translation = $this->translation;
         } else {
             $err_json = '';
             $translation = $check->getTrgNormalized();
         }
 
-		$res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreWarnings() );
+		$res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreErrors() );
 
         if (!empty($res['error'])) {
 			$this->result['error'] = $res['error'];

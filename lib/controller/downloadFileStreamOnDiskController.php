@@ -5,7 +5,7 @@ include_once INIT::$MODEL_ROOT."/queries.php";
 include_once INIT::$UTILS_ROOT."/cat.class.php";
 include_once INIT::$UTILS_ROOT."/fileFormatConverter.class.php";
 include_once(INIT::$UTILS_ROOT.'/XliffSAXTranslationReplacer.class.php');
-include_once(INIT::$UTILS_ROOT.'/xliff.parser.1.2.class.php');
+include_once(INIT::$UTILS_ROOT.'/DetectProprietaryXliff.php');
 
 
 class downloadFileStreamOnDiskController extends downloadController {

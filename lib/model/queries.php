@@ -272,14 +272,21 @@ function getArrayOfSuggestionsJSON( $id_segment ) {
  * </pre>
  *
  * @param $id_job
+ * @param $password
  *
  * @return array $jobData
  */
-function getJobData( $id_job ) {
+function getJobData( $id_job, $password = null ) {
+
     $query   = "select source, target, id_mt_engine, id_tms, id_translator, status_owner as status, password
 		      from jobs
 		      where id = %u";
-    $query   = sprintf( $query, $id_job );
+
+    if( !empty($password) ){
+        $query .= " and password = '%s' ";
+    }
+
+    $query   = sprintf( $query, $id_job, $password );
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
 
@@ -430,7 +437,7 @@ function getSegmentsInfo( $jid, $password ) {
 
     $query = "select j.id as jid, j.id_project as pid,j.source,j.target, j.last_opened_segment, j.id_translator as tid,
 		p.id_customer as cid, j.id_translator as tid, j.status_owner as status,  
-		p.name as pname, p.create_date , fj.id_file, fj.id_segment_start, fj.id_segment_end, 
+		p.name as pname, p.create_date , fj.id_file,
 		f.filename, f.mime_type
 
 			from jobs j 
@@ -470,34 +477,6 @@ function getFirstSegmentId( $jid, $password ) {
     return $results;
 }
 
-/*
-   function getMoreSegments($jid,$password, $last_loaded_id, $step = 50, $central_segment = 0) {
-   $start_point = ($central_segment)? ((float) $central_segment) - 100 : $last_loaded_id;
-
-   $query = "select j.id as jid, j.id_project as pid,j.source,j.target, j.last_opened_segment, j.id_translator as tid,
-   p.id_customer as cid, j.id_translator as tid,
-   p.name as pname, p.create_date , fj.id_file, fj.id_segment_start, fj.id_segment_end,
-   f.filename, f.mime_type, s.id as sid, s.segment, s.raw_word_count, s.internal_id,
-   st.translation, st.status, st.time_to_edit
-
-   from jobs j
-   inner join projects p on p.id=j.id_project
-   inner join files_job fj on fj.id_job=j.id
-   inner join files f on f.id=fj.id_file
-   inner join segments s on s.id_file=f.id
-   left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
-   where j.id=$jid and j.password='$password' and s.id > $start_point
-   order by s.id
-   limit 0,$step
-   ";
-
-   $db = Database::obtain();
-   $results = $db->fetch_array($query);
-
-   return $results;
-   }
- */
-
 function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'after' ) {
     switch ( $where ) {
         case 'after':
@@ -515,7 +494,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 
     $query = "select j.id as jid, j.id_project as pid,j.source,j.target, j.last_opened_segment, j.id_translator as tid,
 		p.id_customer as cid, j.id_translator as tid,  
-		p.name as pname, p.create_date , fj.id_file, fj.id_segment_start, fj.id_segment_end, 
+		p.name as pname, p.create_date , fj.id_file,
 		f.filename, f.mime_type, s.id as sid, s.segment, s.raw_word_count, s.internal_id,
 		if (st.status='NEW',NULL,st.translation) as translation, st.status, IF(st.time_to_edit is NULL,0,st.time_to_edit) as time_to_edit, s.xliff_ext_prec_tags,s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning
 
@@ -579,6 +558,12 @@ function setTranslationUpdate( $id_segment, $id_job, $status, $time_to_edit, $tr
 
     $q = "UPDATE segment_translations SET status='$status', suggestion_position='$chosen_suggestion_index', serialized_errors_list='$errors', time_to_edit=IF(time_to_edit is null,0,time_to_edit) + $time_to_edit, translation='$translation', translation_date='$now', warning=" . (int)$warning . " WHERE id_segment=$id_segment and id_job=$id_job";
 
+    if( empty( $translation ) ){
+        $msg = "\n\n Error setTranslationUpdate \n\n Empty translation found: \n\n " . var_export( array_merge( array( 'db_query' => $q ), $_POST ), true );
+        Log::doLog( $msg );
+        Utils::sendErrMailReport( $msg );
+    }
+
     $db->query( $q );
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
@@ -603,6 +588,13 @@ function setTranslationInsert( $id_segment, $id_job, $status, $time_to_edit, $tr
     $data[ 'serialized_errors_list' ] = $errors;
     $data[ 'suggestion_position' ]    = $chosen_suggestion_index;
     $data[ 'warning' ]                = (int)$warning;
+
+    if( empty( $translation ) ){
+        $msg = "\n\n Error setTranslationUpdate \n\n Empty translation found: \n\n " . var_export( $_POST, true ) . " \n\n " . var_export( $data, true );
+        Log::doLog( $msg );
+        Utils::sendErrMailReport( $msg );
+    }
+
     $db                               = Database::obtain();
     $db->insert( 'segment_translations', $data );
 
@@ -994,14 +986,15 @@ function getNextSegmentId( $sid, $jid, $status ) {
     return $results[ 'sid' ];
 }
 
-function insertProject( $id_customer, $project_name, $analysis_status, $password, $ip = 'UNKNOWN' ) {
+//function insertProject( $id_customer, $project_name, $analysis_status, $password, $ip = 'UNKNOWN' ) {
+function insertProject( ArrayObject $projectStructure ) {
     $data                        = array();
-    $data[ 'id_customer' ]       = $id_customer;
-    $data[ 'name' ]              = $project_name;
+    $data[ 'id_customer' ]       = $projectStructure['id_customer'];
+    $data[ 'name' ]              = $projectStructure['project_name'];
     $data[ 'create_date' ]       = date( "Y-m-d H:i:s" );
-    $data[ 'status_analysis' ]   = $analysis_status;
-    $data[ 'password' ]          = $password;
-    $data[ 'remote_ip_address' ] = empty( $ip ) ? 'UNKNOWN' : $ip;
+    $data[ 'status_analysis' ]   = $projectStructure['status'];
+    $data[ 'password' ]          = $projectStructure['ppassword'];
+    $data[ 'remote_ip_address' ] = empty( $projectStructure['user_ip'] ) ? 'UNKNOWN' : $projectStructure['user_ip'];
     $query                       = "SELECT LAST_INSERT_ID() FROM projects";
 
     $db = Database::obtain();
@@ -1011,42 +1004,45 @@ function insertProject( $id_customer, $project_name, $analysis_status, $password
     return $results[ 'LAST_INSERT_ID()' ];
 }
 
-function insertTranslator( $user, $pass, $api_key, $email = '', $first_name = '', $last_name = '' ) {
+//never used email , first_name and last_name
+//function insertTranslator( $user, $pass, $api_key, $email = '', $first_name = '', $last_name = '' ) {
+function insertTranslator( ArrayObject $projectStructure ) {
     //get link
     $db = Database::obtain();
-    //if this user already exists, return it without inserting again
+    //if this user already exists, return without inserting again ( do nothing )
     //this is because we allow to start a project with the bare key
-    $query   = "select username from translators where mymemory_api_key='" . $db->escape( $api_key ) . "'";
+    $query   = "select username from translators where mymemory_api_key='" . $db->escape( $projectStructure['private_tm_key'] ) . "'";
     $user_id = $db->query_first( $query );
     $user_id = $user_id[ 'username' ];
+
     if ( empty( $user_id ) ) {
         $data                       = array();
-        $data[ 'username' ]         = $user;
-        $data[ 'email' ]            = $email;
-        $data[ 'password' ]         = $pass;
-        $data[ 'first_name' ]       = $first_name;
-        $data[ 'last_name' ]        = $last_name;
-        $data[ 'mymemory_api_key' ] = $api_key;
+        $data[ 'username' ]         = $projectStructure['private_tm_user'];
+        $data[ 'email' ]            = '';
+        $data[ 'password' ]         = $projectStructure['private_tm_pass'];
+        $data[ 'first_name' ]       = '';
+        $data[ 'last_name' ]        = '';
+        $data[ 'mymemory_api_key' ] = $projectStructure['private_tm_key'];
 
         $db->insert( 'translators', $data );
-
-        $user_id = $user;
     }
 
-    return $user_id;
 }
 
-function insertJob( $password, $id_project, $id_translator, $source_language, $target_language, $mt_engine, $tms_engine, $owner ) {
-    $data                    = array();
-    $data[ 'password' ]      = $password;
-    $data[ 'id_project' ]    = $id_project;
-    $data[ 'id_translator' ] = $id_translator;
-    $data[ 'source' ]        = $source_language;
-    $data[ 'target' ]        = $target_language;
-    $data[ 'id_tms' ]        = $tms_engine;
-    $data[ 'id_mt_engine' ]  = $mt_engine;
-    $data[ 'create_date' ]   = date( "Y-m-d H:i:s" );
-    $data[ 'owner' ]         = $owner;
+//function insertJob( $password, $id_project, $id_translator, $source_language, $target_language, $mt_engine, $tms_engine, $owner ) {
+function insertJob( ArrayObject $projectStructure, $password, $target_language, $job_segments, $owner ) {
+    $data                        = array();
+    $data[ 'password' ]          = $password;
+    $data[ 'id_project' ]        = $projectStructure[ 'id_project' ];
+    $data[ 'id_translator' ]     = $projectStructure[ 'private_tm_user' ];
+    $data[ 'source' ]            = $projectStructure[ 'source_language' ];
+    $data[ 'target' ]            = $target_language;
+    $data[ 'id_tms' ]            = $projectStructure[ 'tms_engine' ];
+    $data[ 'id_mt_engine' ]      = $projectStructure[ 'mt_engine' ];
+    $data[ 'create_date' ]       = date( "Y-m-d H:i:s" );
+    $data[ 'owner' ]             = $owner;
+    $data[ 'job_first_segment' ] = $job_segments[ 'job_first_segment' ];
+    $data[ 'job_last_segment' ]  = $job_segments[ 'job_last_segment' ];
 
     $query = "SELECT LAST_INSERT_ID() FROM jobs";
 
@@ -1098,11 +1094,12 @@ function getXliffBySHA1( $sha1, $source, $target, $not_older_than_days = 0 ) {
     return $res[ 'deflated_xliff' ];
 }
 
-function insertFile( $id_project, $file_name, $source_language, $mime_type, $contents, $sha1_original = null, $original_file = null ) {
+//function insertFile( $id_project, $file_name, $source_language, $mime_type, $contents, $sha1_original = null, $original_file = null ) {
+function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $contents, $sha1_original = null, $original_file = null ) {
     $data                      = array();
-    $data[ 'id_project' ]      = $id_project;
+    $data[ 'id_project' ]      = $projectStructure[ 'id_project' ];
     $data[ 'filename' ]        = $file_name;
-    $data[ 'source_language' ] = $source_language;
+    $data[ 'source_language' ] = $projectStructure[ 'source_language' ];
     $data[ 'mime_type' ]       = $mime_type;
     $data[ 'xliff_file' ]      = $contents;
     if ( !is_null( $sha1_original ) ) {
@@ -1112,7 +1109,6 @@ function insertFile( $id_project, $file_name, $source_language, $mime_type, $con
     if ( !is_null( $original_file ) and !empty( $original_file ) ) {
         $data[ 'original_file' ] = $original_file;
     }
-
 
     $query = "SELECT LAST_INSERT_ID() FROM files";
 
@@ -1125,12 +1121,18 @@ function insertFile( $id_project, $file_name, $source_language, $mime_type, $con
         log::doLog( "file too large for mysql packet: increase max_allowed_packed_size" );
 
         $maxp = $db->query_first( 'SELECT @@global.max_allowed_packet' );
-        log::doLog( $maxp );
+        log::doLog( "max_allowed_packet: " . $maxp . " > try Upgrade to 500MB" );
         // to set the max_allowed_packet to 500MB
+        //FIXME User matecat han no superuser privileges
+        //ERROR 1227 (42000): Access denied; you need (at least one of) the SUPER privilege(s) for this operation
         $db->query( 'SET @@global.max_allowed_packet = ' . 500 * 1024 * 1024 );
         $db->insert( 'files', $data );
         $db->query( 'SET @@global.max_allowed_packet = ' . 32 * 1024 * 1024 ); //restore to 32 MB
+    } elseif ( $errno > 0 ) {
+        log::doLog( "Database insert Large file error: $errno " );
+        throw new Exception( "Database insert Large file error: $errno ", -$errno );
     }
+
     $results = $db->query_first( $query );
 
     return $results[ 'LAST_INSERT_ID()' ];
@@ -1153,10 +1155,16 @@ function getPdata( $pid ) {
     return $res[ 'id' ];
 }
 
-function getProjectData( $pid, $password, $jid = null ) {
-    // per ora lasciamo disabilitata la verifica della password
+/**
+ * @param      $pid
+ * @param null $project_password
+ * @param null $jid
+ *
+ * @return array
+ */
+function getProjectData( $pid, $project_password = null, $jid = null ) {
 
-    $query = "select p.name, j.id as jid, j.password as jpassword, j.source, j.target, f.id,f.filename, p.status_analysis,
+    $query = "select p.name, j.id as jid, j.password as jpassword, j.source, j.target, f.id, f.id as id_file,f.filename, p.status_analysis,
 		sum(s.raw_word_count) as file_raw_word_count, sum(st.eq_word_count) as file_eq_word_count, count(s.id) as total_segments,
 		p.fast_analysis_wc,p.tm_analysis_wc, p.standard_analysis_wc
 
@@ -1166,21 +1174,32 @@ function getProjectData( $pid, $password, $jid = null ) {
 			inner join segments s on s.id_file=f.id
 			left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
 
-			where p.id= '$pid' and p.password='$password' ";
-    
+			where p.id= '$pid' ";
+
+    if( !empty( $project_password ) ){
+        $query .= " and p.password='$project_password' ";
+    }
+
     if( !empty($jid) ){
         $query = $query . " and j.id = " . intval($jid);
     }
     
-	$query = $query ." group by 6,2 ";
+	$query = $query ." group by f.id, j.id ";
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
 
     return $results;
 }
-function getJobAnalysisData( $pid, $password, $jid = null ) {
-    // per ora lasciamo disabilitata la verifica della password
+
+/**
+ * @param      $pid
+ * @param      $job_password
+ * @param null $jid
+ *
+ * @return array
+ */
+function getJobAnalysisData( $pid, $job_password, $jid = null ) {
 
     $query = "select p.name, j.id as jid, j.password as jpassword, j.source, j.target, f.id,f.filename, p.status_analysis,
 		sum(s.raw_word_count) as file_raw_word_count, sum(st.eq_word_count) as file_eq_word_count, count(s.id) as total_segments,
@@ -1192,7 +1211,7 @@ function getJobAnalysisData( $pid, $password, $jid = null ) {
 			inner join segments s on s.id_file=f.id
 			left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
 
-			where p.id= '$pid' and j.password='$password' ";
+			where p.id= '$pid' and j.password='$job_password' ";
     
     if( !empty($jid) ){
         $query = $query . " and j.id = " . intval($jid);
@@ -1471,57 +1490,57 @@ function getSegmentsForTMVolumeAnalysys( $jid ) {
     return $results;
 }
 
-function insertSegmentTMAnalysis( $id_segment, $id_job, $suggestion, $suggestion_json, $suggestion_source, $match_type, $eq_word ) {
-    $db   = Database::obtain();
-    $data = array();
-    //$data['id_segment'] = $id_segment;
-    //$data['id_job'] = $id_job;
-    $data[ 'match_type' ]        = $match_type;
-    $data[ 'eq_word_count' ]     = $eq_word;
-    $data[ 'suggestion' ]        = $suggestion;
-    $data[ 'translation' ]       = $suggestion;
-    $data[ 'suggestions_array' ] = $suggestion_json;
-    $data[ 'suggestion_source' ] = $suggestion_source;
-
-
-    $where = "  id_job=$id_job and id_segment=$id_segment ";
-    $db->update( 'segment_translations', $data, $where );
-
-
-    $db->insert( 'segment_translations', $data );
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-
-    if ( $errno == 1062 ) {
-        unset( $data[ 'id_job' ] );
-        unset( $data[ 'id_segment' ] );
-        $where = "  id_job=$id_job and id_segment=$id_segment ";
-        $db->update( 'segment_translations', $data, $where );
-        $err   = $db->get_error();
-        $errno = $err[ 'error_code' ];
-    }
-
-    if ( $errno != 0 ) {
-        if ( $errno != 1062 ) {
-            log::doLog( $err );
-        }
-
-        return $errno * -1;
-    }
-
-    $data2[ 'fast_analysis_wc' ] = $total_eq_wc;
-    $where                       = " id = $pid";
-    $db->update( 'projects', $data2, $where );
-    $err   = $db->get_error();
-    $errno = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        log::doLog( $err );
-
-        return $errno * -1;
-    }
-
-    return $db->affected_rows;
-}
+//function insertSegmentTMAnalysis( $id_segment, $id_job, $suggestion, $suggestion_json, $suggestion_source, $match_type, $eq_word ) {
+//    $db   = Database::obtain();
+//    $data = array();
+//    //$data['id_segment'] = $id_segment;
+//    //$data['id_job'] = $id_job;
+//    $data[ 'match_type' ]        = $match_type;
+//    $data[ 'eq_word_count' ]     = $eq_word;
+//    $data[ 'suggestion' ]        = $suggestion;
+//    $data[ 'translation' ]       = $suggestion;
+//    $data[ 'suggestions_array' ] = $suggestion_json;
+//    $data[ 'suggestion_source' ] = $suggestion_source;
+//
+//
+//    $where = "  id_job=$id_job and id_segment=$id_segment ";
+//    $db->update( 'segment_translations', $data, $where );
+//
+//
+//    $db->insert( 'segment_translations', $data );
+//    $err   = $db->get_error();
+//    $errno = $err[ 'error_code' ];
+//
+//    if ( $errno == 1062 ) {
+//        unset( $data[ 'id_job' ] );
+//        unset( $data[ 'id_segment' ] );
+//        $where = "  id_job=$id_job and id_segment=$id_segment ";
+//        $db->update( 'segment_translations', $data, $where );
+//        $err   = $db->get_error();
+//        $errno = $err[ 'error_code' ];
+//    }
+//
+//    if ( $errno != 0 ) {
+//        if ( $errno != 1062 ) {
+//            log::doLog( $err );
+//        }
+//
+//        return $errno * -1;
+//    }
+//
+//    $data2[ 'fast_analysis_wc' ] = $total_eq_wc;
+//    $where                       = " id = $pid";
+//    $db->update( 'projects', $data2, $where );
+//    $err   = $db->get_error();
+//    $errno = $err[ 'error_code' ];
+//    if ( $errno != 0 ) {
+//        log::doLog( $err );
+//
+//        return $errno * -1;
+//    }
+//
+//    return $db->affected_rows;
+//}
 
 function changeTmWc( $pid, $pid_eq_words, $pid_standard_words ) {
     // query  da incorporare nella changeProjectStatus

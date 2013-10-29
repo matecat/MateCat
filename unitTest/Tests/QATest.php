@@ -537,6 +537,27 @@ SRC;
 
     }
 
+    public function testMultilineStringInput(){
+
+        $source_seg = <<<SRC
+The National Security Authority ( NSA ) , the Designated Security Authority ( DSA ) or any other competent authority of each Member State shall ensure , to the extent possible under national laws and regulations , that contractors and subcontractors registered in their territory take all appropriate measures to protect EUCI in pre-contract negotiations and when performing a classified contract
+SRC;
+
+        $target_seg = urldecode('L%27Autorit%C3%A0+di+Sicurezza+Nazionale+%28NSA%29%2C+l%27Autorit%C3%A0+di+Sicurezza+Designata+%28DSA%29+o+qualsiasi+altra+autorit%C3%A0+nazionale+competente+di+ciascuno+Stato+membro+assicura%2C+per+quanto+possibile%0Aai+sensi+delle+disposizioni+legislative+e+regolamentari+nazionali%2C%0Ache+i+contraenti+e+i+subcontraenti+registrati+nel+suo+territorio%0Aadottino+le+misure+adeguate+per+proteggere+le+ICUE+nelle+trattative+precontrattuali+e+nell%27esecuzione+di+un+contratto+classificato.');
+
+        $segment = CatUtils::view2rawxliff( $source_seg );
+        $translation = CatUtils::view2rawxliff( $target_seg );
+
+        $check = new QA($segment, $translation);
+        $check->performConsistencyCheck();
+
+        $this->assertFalse( $check->thereAreErrors() );
+        $this->assertFalse( $check->thereAreWarnings() );
+
+        $this->assertNotEmpty( $check->getTrgNormalized() );
+
+    }
+
 }
 
 ?>

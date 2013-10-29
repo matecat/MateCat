@@ -452,6 +452,7 @@ class fileFormatConverter {
     - target :     " . $this->conversionObject->trg_lang . "
     - client user (if any used) : $remote_user
     - direction : " . $this->conversionObject->direction . "
+    - error : " . $this->conversionObject->error_message . "
     Download file clicking to $link_file
 	";
 
