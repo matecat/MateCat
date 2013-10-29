@@ -282,7 +282,7 @@ function getJobData( $id_job, $password = null ) {
 		      from jobs
 		      where id = %u";
 
-    if( !empty($password) ){
+    if( !empty( $password ) ){
         $query .= " and password = '%s' ";
     }
 
@@ -478,6 +478,7 @@ function getFirstSegmentId( $jid, $password ) {
 }
 
 function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'after' ) {
+
     switch ( $where ) {
         case 'after':
             $ref_point = $ref_segment;
@@ -496,7 +497,9 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 		p.id_customer as cid, j.id_translator as tid,  
 		p.name as pname, p.create_date , fj.id_file,
 		f.filename, f.mime_type, s.id as sid, s.segment, s.raw_word_count, s.internal_id,
-		if (st.status='NEW',NULL,st.translation) as translation, st.status, IF(st.time_to_edit is NULL,0,st.time_to_edit) as time_to_edit, s.xliff_ext_prec_tags,s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning
+		if (st.status='NEW',NULL,st.translation) as translation, st.status, IF(st.time_to_edit is NULL,0,st.time_to_edit) as time_to_edit, s.xliff_ext_prec_tags,s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
+
+        if( j.password='$password', 'false', 'true' ) as forbidden
 
 			from jobs j 
 				inner join projects p on p.id=j.id_project
@@ -504,10 +507,12 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 				inner join files f on f.id=fj.id_file
 				inner join segments s on s.id_file=f.id
 				left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
-				where j.id=$jid and j.password='$password' and s.id > $ref_point and s.show_in_cattool=1 
+				where j.id=$jid
+				-- and j.password='$password'
+				and s.id > $ref_point and s.show_in_cattool=1
 				limit 0,$step
 				";
-
+Log::doLog($query);
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
 
