@@ -2513,8 +2513,9 @@ UI = {
             var t = config.time_to_edit_enabled;
             $.each(this.segments, function(index) {
 //                this.forbidden = true;
+                var forbidden = (this.forbidden == 'true')? true : false;
                 var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
-                newFile += '<section id="segment-' + this.sid + '" class="' + ((this.forbidden)? 'forbidden ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + '">' +
+                newFile += '<section id="segment-' + this.sid + '" class="' + ((forbidden)? 'forbidden ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + '">' +
                         '	<a tabindex="-1" href="#' + this.sid + '"></a>' +
                         '	<span class="number">' + this.sid + '</span>' +
                         '	<div class="body">' +
@@ -2530,7 +2531,7 @@ UI = {
                         '					</span>' +
                         '					<div class="textarea-container">' +
                         '						<span class="loader"></span>' +
-                        '						<div class="' + ((this.forbidden)? 'area' : 'editarea') + ' invisible" ' + ((this.forbidden)? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : this.translation) + '</div>' +
+                        '						<div class="' + ((forbidden)? 'area' : 'editarea') + ' invisible" ' + ((forbidden)? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : this.translation) + '</div>' +
                         '					</div> <!-- .textarea-container -->' +
                         '				</div> <!-- .target -->' +
                         '			</div></div> <!-- .wrap -->' +
