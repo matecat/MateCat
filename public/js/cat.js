@@ -689,6 +689,7 @@ UI = {
             $(this).addClass('active');
             $('.editor .sub-editor').hide();
             $('.editor .sub-editor.concordances').show();
+            $('.cc-search .search-source').focus();
         }).on('keydown', '.sub-editor .cc-search .input', 'return', function(e) {
             //if($(this).text().length > 2) UI.getConcordance($(this).text(), 0);
         }).on('keydown', '.sub-editor .cc-search .search-source', function(e) {

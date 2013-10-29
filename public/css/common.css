@@ -736,6 +736,10 @@ section mark
 	{
 	background: transparent;
 	}
+section .graysmall mark
+	{
+	background: yellow !important;
+	}
 section mark.searchMarker
 	{
 	background: #9ef5f5;
