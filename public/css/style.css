@@ -960,7 +960,7 @@ section.status-new.opened .editarea
 
 
 
-.editarea, .search-editarea
+.editarea, .search-editarea, .textarea-container .area
 	{
 	display: block; 
 	float:right;
@@ -985,9 +985,16 @@ section.status-new.opened .editarea
 	-webkit-transition: all  50ms ease-in;
   	}
 
+section.forbidden .text
+    {
+    background: #bbb;
+    /*color: #fff;*/
+    }
 
-
-
+section.forbidden .status-container
+    {
+    display: none;
+    }
 
 
 
