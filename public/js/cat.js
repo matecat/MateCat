@@ -2479,6 +2479,7 @@ UI = {
 
             var t = config.time_to_edit_enabled;
             $.each(this.segments, function(index) {
+                console.log(this);
                 var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
                 newFile += '<section id="segment-' + this.sid + '" class="status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + '">' +
                         '	<a tabindex="-1" href="#' + this.sid + '"></a>' +
