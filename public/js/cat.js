@@ -57,6 +57,12 @@ UI = {
         this.checkTutorialNeed();
 
         UI.detectStartSegment();
+//        console.log(UI.currentSegmentId);
+////        console.log("$('#segment-'"+UI.currentSegmentId);
+//        console.log(UI.currentSegment);
+//        console.log('#segment-'+UI.currentSegmentId);
+//        console.log($('#segment-'+UI.currentSegmentId).length);
+//        console.log($('#segment-3013543'));
         options['openCurrentSegmentAfter'] = ((!seg)&&(!this.firstLoad))? true : false;
 //        var openCurrentSegmentAfter = ((!seg)&&(!this.firstLoad))? true : false;
 //        if((!seg)&&(!this.firstLoad)) this.gotoSegment(this.currentSegmentId);
@@ -492,7 +498,7 @@ UI = {
                 UI.spellCheck();
             }
 
-        }).on('input', '.editarea', function(e) {
+        }).on('input', '.editarea', function(e) {console.log('input');
             UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
             if (UI.draggingInsideEditarea) {
                 $(UI.tagToDelete).remove();
@@ -502,7 +508,7 @@ UI = {
             if (UI.droppingInEditarea) {
                 UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
             }
-            setTimeout(function() {
+            if(!UI.body.hasClass('searchActive')) setTimeout(function() {
                 UI.lockTags(UI.editarea);
             }, 10);
             UI.registerQACheck();        
@@ -683,6 +689,7 @@ UI = {
             $(this).addClass('active');
             $('.editor .sub-editor').hide();
             $('.editor .sub-editor.concordances').show();
+            $('.cc-search .search-source').focus();
         }).on('keydown', '.sub-editor .cc-search .input', 'return', function(e) {
             //if($(this).text().length > 2) UI.getConcordance($(this).text(), 0);
         }).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
@@ -948,12 +955,20 @@ UI = {
         this.currentFile = segment.parent();
         this.currentFileId = this.currentFile.attr('id').split('-')[1];
     },
+    applySearch: function(segment) {
+        console.log("quanti result c'erano nel segmento prima di salvarlo: ", $(segment).find('mark.searchMarker').length);
+        if(this.body.hasClass('searchActive')) this.markSearchResults({
+            singleSegment: segment
+        })
+        console.log("quanti result ci sono dopo nel segmento che ho appena salvato: ", $(segment).find('mark.searchMarker').length);
+    },
     changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
         $('.percentuage', segment).removeClass('visible');
         this.setContribution(segment, status, byStatus);
         this.setContributionMT(segment, status, byStatus);
         this.setTranslation(segment, status);
+        this.applySearch(segment);
         $(window).trigger({
             type: "statusChanged",
             segment: segment,
@@ -1305,8 +1320,8 @@ UI = {
             return false;
         }
         else if(this.searchMode == 'source&target') {
-            APP.alert('Combined search is temporarily disabled');
-            return false;
+//            APP.alert('Combined search is temporarily disabled');
+//            return false;
         }
 
         var source = (p['source'])? p['source'] : '';
@@ -1372,16 +1387,19 @@ UI = {
         });
     },
     updateSearchDisplay: function() {
-        res = (this.numSearchResultsItem)? this.numSearchResultsItem : 0;
-//        res = (this.numSearchResultsItem)? this.numSearchResultsItem : (this.searchMode == 'source&target')? this.numSearchResultsSegments : 0;
-        numbers = (this.searchMode == 'source&target')? 'Found <span class="segments">...</span> segments' : (res)? 'Found <span class="results">...</span> results in <span class="segments">...</span> segments' : 'No segments found';
-        $('.search-display .numbers').html(numbers);
-        if(this.searchMode == 'source&target') {
-            $('.search-display .segments').text(this.numSearchResultsSegments);                        
-        } else if(res) {
+        if((this.searchMode == 'source&target')) {
+            res = (this.numSearchResultsSegments)? this.numSearchResultsSegments : 0;
+            resNumString = (res == 1)? '': 's';
+            numbers = (res)? 'Found <span class="segments">...</span> segment' + resNumString : 'No segments found';       
+            $('.search-display .numbers').html(numbers);
+        } else {
+            res = (this.numSearchResultsItem)? this.numSearchResultsItem : 0;
+            resNumString = (res == 1)? '': 's';
+            numbers = (res)? 'Found <span class="results">...</span> result' + resNumString + ' in <span class="segments">...</span> segment' + resNumString : 'No segments found'; 
+            $('.search-display .numbers').html(numbers);
             $('.search-display .results').text(res);
-            $('.search-display .segments').text(this.numSearchResultsSegments);            
         }
+        $('.search-display .segments').text(this.numSearchResultsSegments); 
 
         query = '';
         if(this.searchParams['source']) query += ' <span class="param">' + this.searchParams['source'] + '</span> in source';
@@ -1396,17 +1414,21 @@ UI = {
     execNext: function() {
         this.gotoNextResultItem();
     },
-    markSearchResults: function(where, seg) { // if where is specified mark only the range of segment before or after seg (no previous clear)
+    markSearchResults: function(options) { // if where is specified mark only the range of segment before or after seg (no previous clear)
+        options = options || {};
+        where = options.where;
+        seg = options.seg;
+        singleSegment = options.singleSegment || false;
         if(typeof where == 'undefined') this.clearSearchMarkers();
         var p = this.searchParams;
 //        console.log('mode: ' + mode + ' - coso: ' + coso);
-
+        var targetToo = typeof p['target'] != 'undefined';
         if(this.searchMode == 'onlyStatus') {
             console.log('solo status');            
         } else if(this.searchMode == 'source&target') {
 //            console.log('source & target');
             var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
-            q = "section" + status;
+            q = (singleSegment)? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
             var regSource = new RegExp('('+htmlEncode(p['source'])+')', "gi");
             var regTarget = new RegExp('('+htmlEncode(p['target'])+')', "gi");
 
@@ -1437,10 +1459,10 @@ UI = {
                     })                    
                 }
 
-                $(q + ".justAdded .source:containsNC('"+p['source']+"')").each(function() {
+                $(q + ".justAdded:not(.status-new) .source:containsNC('"+p['source']+"')").each(function() {
                     $(this).html($(this).html().replace(regSource,'<mark class="searchPreMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));                    
                 });                    
-                $(q + ".justAdded .editarea:containsNC('"+p['target']+"')").each(function() {
+                $(q + ".justAdded:not(.status-new) .editarea:containsNC('"+p['target']+"')").each(function() {
                     $(this).html($(this).html().replace(regTarget,'<mark class="searchPreMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));                    
                 });
 //                console.log($('section:has(".source mark.searchMarker, .editarea mark.searchMarker")'));
@@ -1449,7 +1471,6 @@ UI = {
                 $('section.justAdded').removeClass('justAdded');
                 
             }
-            
         } else {
             var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
             if(typeof p['source'] != 'undefined') {
@@ -1462,8 +1483,10 @@ UI = {
                 what = '';
                 txt = '';
             }
-            var what = (typeof p['source'] != 'undefined')? ' .source' : (typeof p['target'] != 'undefined')? ' .editarea' : '';
-            q = "section" + status + what;
+            var what = (typeof p['source'] != 'undefined')? ' .source' : (typeof p['target'] != 'undefined')? ':not(.status-new) .editarea' : '';
+            q = (singleSegment)? '#' + $(singleSegment).attr('id') : "section" + status + what;
+
+//            q = "section" + status + what;
             var reg = new RegExp('('+htmlEncode(txt)+')', "gi");
             if(typeof where == 'undefined') {
                 $(q + ":containsNC('"+txt+"')").each(function() {
@@ -1491,7 +1514,10 @@ UI = {
                 $('section.justAdded').removeClass('justAdded');
             }            
         }
-        
+        if(!singleSegment) {
+            UI.unmarkNumItemsInSegments();
+            UI.markNumItemsInSegments();            
+        }        
     },
     clearSearchFields: function() {
         $('.searchbox form')[0].reset();
@@ -1643,13 +1669,6 @@ UI = {
         var found = '';
         var last = $('section').last().attr('id').split('-')[1];
         $.each(this.searchResultsSegments, function() {
-            console.log(( !$('#segment-'+this).length ) && ( parseInt(this) > parseInt(last) ));
-            console.log($('#segment-'+this).length);
-            console.log(parseInt(this));
-            console.log(parseInt(last));
-            console.log(parseInt(this) > parseInt(last));
-            console.log("----");
-
 //            var start = new Date().getTime();
 //            for (var i = 0; i < 1e7; i++) {
 //                if ((new Date().getTime() - start) > 2000 ){
@@ -1842,7 +1861,10 @@ UI = {
             }
             if(this.body.hasClass('searchActive')) {
                 segLimit = (where == 'before')? firstSeg : lastSeg;
-                this.markSearchResults(where, segLimit);                 
+                this.markSearchResults({
+                    where: where,
+                    seg: segLimit
+                });                 
             }
 
             this.markTags();
@@ -1944,6 +1966,9 @@ UI = {
             if(options.segmentToOpen) {
                 $('#segment-'+options.segmentToOpen+' .editarea').click();
             }
+            if(($('#segment-'+UI.currentSegmentId).length)&&(!$('section.editor').length)) {
+                UI.openSegment(UI.editarea);
+            };
             if(options.caller == 'link2file') {
                 if(UI.segmentIsLoaded(UI.currentSegmentId)) {
                     UI.openSegment(UI.editarea);
@@ -2165,6 +2190,14 @@ UI = {
     closeContextMenu: function() {
         $('#contextMenu').hide();
         $('#spellCheck .words').remove();
+    },
+    unmarkNumItemsInSegments: function() {
+        $('section[data-searchItems]').removeAttr("data-searchItems");
+    },
+    markNumItemsInSegments: function() {
+        $('section').has("mark.searchMarker").each(function() {
+            $(this).attr('data-searchItems', $('mark.searchMarker',this).length);
+        });
     },
     openConcordance: function() {
         this.closeContextMenu();
