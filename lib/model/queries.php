@@ -12,7 +12,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
     $where_status = "";
     if ( $queryParams[ 'status' ] != 'all' ) {
         $status       = $queryParams[ 'status' ]; //no escape: hardcoded
-        $where_status = " AND status = '$status'";
+        $where_status = " AND st.status = '$status'";
     }
 
     if( $queryParams['matchCase'] ) {
@@ -31,6 +31,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
                         ( LENGTH( s.segment ) - LENGTH( REPLACE ( $SQL_MOD( segment ), $SQL_MOD( '$src' ), '') ) ) / LENGTH('$src') )
                     ) AS count
                     FROM segments s
+                    LEFT JOIN segment_translations st on st.id_segment = s.id
                     INNER JOIN files_job fj on s.id_file=fj.id_file
                     WHERE fj.id_job = {$queryParams['job']}
                     AND s.segment LIKE '%$src%'
@@ -46,6 +47,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
                     FROM segment_translations st
                     WHERE st.id_job = {$queryParams['job']}
                     AND st.translation like '%$trg%'
+                    AND st.status != 'NEW'
                     $where_status
                     GROUP BY st.id_segment WITH ROLLUP";
 
@@ -60,6 +62,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
                     AND s.segment LIKE '%$src%'
                     AND LENGTH( REPLACE ( $SQL_MOD( segment ), $SQL_MOD( '$src' ), '') ) != LENGTH( s.segment )
                     AND LENGTH( REPLACE ( $SQL_MOD( st.translation ), $SQL_MOD( '$trg' ), '') ) != LENGTH( st.translation )
+                    AND st.status != 'NEW'
                     $where_status ";
 
     }
