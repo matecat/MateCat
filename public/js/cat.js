@@ -2,6 +2,8 @@ UI = null;
 
 UI = {
     render: function(options) {
+        console.log('render');
+        console.log(options);
         firstLoad = (options.firstLoad || false);
         segmentToOpen = (options.segmentToOpen || false);
         segmentToScroll = (options.segmentToScroll || false);
@@ -631,6 +633,7 @@ UI = {
 
             UI.unlockTags();
             UI.setStatusButtons(this);
+//            console.log(UI.nextSegment);
             $(".editarea", UI.nextSegment).trigger("click", "translated");
             UI.changeStatus(this, 'translated', 0);
 
@@ -650,6 +653,7 @@ UI = {
                         console.log('next segment is not loaded');
                     if (typeof UI.nextSegmentId == 'undefined')
                         return false;
+                    console.log('questo');
                     UI.reloadWarning();
                 } else {
                     return false;
@@ -693,7 +697,8 @@ UI = {
             $(this).addClass('active');
             $('.editor .sub-editor').hide();
             $('.editor .sub-editor.concordances').show();
-            $('.cc-search .search-source').focus();
+            $('.editor .cc-search .search-source').focus();
+//            UI.placeCaretAtEnd($('.editor .cc-search .search-source').get());
         }).on('keydown', '.sub-editor .cc-search .input', 'return', function(e) {
             //if($(this).text().length > 2) UI.getConcordance($(this).text(), 0);
         }).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
@@ -961,11 +966,11 @@ UI = {
         this.currentFileId = this.currentFile.attr('id').split('-')[1];
     },
     applySearch: function(segment) {
-        console.log("quanti result c'erano nel segmento prima di salvarlo: ", $(segment).find('mark.searchMarker').length);
+//        console.log("quanti result c'erano nel segmento prima di salvarlo: ", $(segment).find('mark.searchMarker').length);
         if(this.body.hasClass('searchActive')) this.markSearchResults({
             singleSegment: segment
         })
-        console.log("quanti result ci sono dopo nel segmento che ho appena salvato: ", $(segment).find('mark.searchMarker').length);
+//        console.log("quanti result ci sono dopo nel segmento che ho appena salvato: ", $(segment).find('mark.searchMarker').length);
     },
     changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
@@ -974,6 +979,8 @@ UI = {
         this.setContributionMT(segment, status, byStatus);
         this.setTranslation(segment, status);
         this.applySearch(segment);
+        this.getNextSegment(this.currentSegment, 'untranslated');
+
         $(window).trigger({
             type: "statusChanged",
             segment: segment,
@@ -1174,8 +1181,8 @@ UI = {
         var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
         var buttons = '<li><a id="segment-' + this.currentSegmentId + '-copysource" href="#" class="btn copysource" data-segmentid="segment-' + this.currentSegmentId + '" title="Copy source to target"></a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
 //        var buttons = '<li class="tag-mismatch" title="Tag Mismatch">Tag Mismatch</li><li><a id="segment-'+this.currentSegmentId+'-copysource" href="#" class="btn copysource" data-segmentid="segment-'+this.currentSegmentId+'" title="Copy source to target"></a><p>CTRL+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-'+this.currentSegmentId+'-button-translated" data-segmentid="segment-'+this.currentSegmentId+'" href="#" class="translated"'+disabled+' >TRANSLATED</a><p>CTRL+ENTER</p></li>';
-        $('#segment-' + this.currentSegmentId + '-buttons').append(buttons);
-        $('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
+        $('#segment-' + this.currentSegmentId + '-buttons').empty().append(buttons);
+        if(!$('#segment-' + this.currentSegmentId + ' .text .warnings').length) $('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
 //      $('#segment-'+this.currentSegmentId+'-buttons').append(buttons);
 
     },
@@ -1888,8 +1895,9 @@ UI = {
     },
     getNextSegment: function(segment, status) {
         var seg = this.currentSegment;
-        var rules = (status == 'untranslated') ? 'section.status-draft, section.status-rejected, section.status-new' : 'section.status-' + status;
+        var rules = (status == 'untranslated') ? 'section.status-draft:not(.readonly), section.status-rejected:not(.readonly), section.status-new:not(.readonly)' : 'section.status-' + status + ':not(.readonly)';
         var n = $(seg).nextAll(rules).first();
+        console.log('n is: ', n);
 
         if (!n.length) {
             n = $(seg).parents('article').next().find(rules).first();
@@ -1901,6 +1909,8 @@ UI = {
         } else {
             this.nextSegmentId = 0;
         }
+//        UI.nextSegment = $('#segment-' + this.nextSegmentId);
+        console.log('next segment is now ' + this.nextSegmentId);
     },
     getPercentuageClass: function(match) {
         var percentageClass = "";
@@ -1971,7 +1981,6 @@ UI = {
             if(options.segmentToOpen) {
                 $('#segment-'+options.segmentToOpen+' .editarea').click();
             }
-            console.log(UI.currentSegmentId);
             if(($('#segment-'+UI.currentSegmentId).length)&&(!$('section.editor').length)) {
                 console.log('a');
                 UI.openSegment(UI.editarea);
@@ -1981,6 +1990,11 @@ UI = {
                     UI.openSegment(UI.editarea);
                 };
             };
+
+            if($('#segment-' + UI.startSegmentId).hasClass('readonly')) {
+                this.scrollSegment($('#segment-' + UI.startSegmentId));                
+            }
+
             if(options.applySearch) {
                 $('mark.currSearchItem').removeClass('currSearchItem');
                 this.markSearchResults();
@@ -2009,7 +2023,7 @@ UI = {
         console.log('params: ', params);
         console.log('giusto');
     },
-    gotoNextSegment: function() {
+    gotoNextSegment: function() {console.log('next');
         var next = $('.editor').next();
         if (next.is('section')) {
             this.scrollSegment(next);
@@ -2274,11 +2288,19 @@ UI = {
             console.log('close/open time: ' + ((new Date()) - this.openSegmentStart));
     },
     placeCaretAtEnd: function(el) {
+        var range = document.createRange();
+        var sel = window.getSelection();
+        range.setStart(el, 1);
+        range.collapse(true);
+        sel.removeAllRanges();
+        sel.addRange(range);
         el.focus();
+/*
+        $(el).focus();
         if (typeof window.getSelection != "undefined"
                 && typeof document.createRange != "undefined") {
             var range = document.createRange();
-            range.selectNodeContents(el);
+            range.selectNodeContents($(el));
             range.collapse(false);
             var sel = window.getSelection();
             sel.removeAllRanges();
@@ -2289,6 +2311,7 @@ UI = {
             textRange.collapse(false);
             textRange.select();
         }
+*/        
     },
     registerQACheck: function() {
         clearTimeout(UI.pendingQACheck);
@@ -2350,7 +2373,8 @@ UI = {
         })
     },
     reloadWarning: function() {
-        APP.confirm({msg: 'The next untranslated segment is outside the current view.', callback: 'renderUntranslatedOutOfView' });
+        this.renderUntranslatedOutOfView();
+//        APP.confirm({msg: 'The next untranslated segment is outside the current view.', callback: 'renderUntranslatedOutOfView' });
     },
     pointBackToSegment: function(segmentId) {
         if (!this.infiniteScroll)
