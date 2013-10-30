@@ -504,7 +504,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                 st.status, IF(st.time_to_edit IS NULL,0,st.time_to_edit) AS time_to_edit,
                 s.xliff_ext_prec_tags, s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
 
-                IF( j.password='$password' AND ( s.id BETWEEN j.job_first_segment AND j.job_last_segment) , 'false', 'true' ) AS writable
+                IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'true', 'false' ) AS writable
 
              FROM jobs j
                 INNER JOIN projects p ON p.id=j.id_project
@@ -513,11 +513,10 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                 INNER JOIN segments s ON s.id_file=f.id
                 LEFT JOIN segment_translations st ON st.id_segment=s.id AND st.id_job=j.id
                 WHERE j.id = $jid
+                AND j.password = '$password'
                 AND s.id > $ref_point AND s.show_in_cattool = 1
-                GROUP BY s.id
-                LIMIT 0,$step ";
+                LIMIT 0, $step ";
 
-    
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
 
