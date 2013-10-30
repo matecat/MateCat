@@ -2,8 +2,6 @@ UI = null;
 
 UI = {
     render: function(options) {
-        console.log('render');
-        console.log(options);
         firstLoad = (options.firstLoad || false);
         segmentToOpen = (options.segmentToOpen || false);
         segmentToScroll = (options.segmentToScroll || false);
@@ -616,6 +614,10 @@ UI = {
             $('#contextMenu').hide();
         }).on('click', 'a.translated', function(e) {
             e.preventDefault();
+            if(!UI.segmentIsLoaded(UI.nextSegmentId)) {
+                UI.changeStatus(this, 'translated', 0);
+                UI.reloadWarning();
+            };
             UI.checkHeaviness();
             if (UI.blockButtons) {
                 if (UI.segmentIsLoaded(UI.nextSegmentId) || UI.nextSegmentId == '') {
@@ -643,7 +645,7 @@ UI = {
             UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
 //            if(UI.segmentIsLoaded(UI.nextSegmentId)) console.log('UI.segmentIsLoaded(UI.nextSegmentId): ', UI.segmentIsLoaded(UI.nextSegmentId));
 //            if(UI.nextSegmentId) console.log('UI.nextSegmentId: ', UI.nextSegmentId);
-            
+/*            
             if (UI.segmentIsLoaded(UI.nextSegmentId) || UI.nextSegmentId == '') {
                 if (UI.debug)
                     console.log('next segment is loaded');
@@ -654,11 +656,12 @@ UI = {
                     if (typeof UI.nextSegmentId == 'undefined')
                         return false;
                     console.log('questo');
-                    UI.reloadWarning();
+//                    UI.reloadWarning();
                 } else {
                     return false;
                 }
             }
+*/            
         }).on('click', 'a.approved', function(e) {
             UI.setStatusButtons(this);
             $(".editarea", UI.nextSegment).click();
@@ -960,7 +963,6 @@ UI = {
         this.lastOpenedSegment = this.currentSegment;
         this.lastOpenedEditarea = $('.editarea', this.currentSegment);
         this.currentSegmentId = this.lastOpenedSegmentId = this.editarea.data('sid');
-        console.log(this.currentSegmentId);
         this.currentSegment = segment = $('#segment-' + this.currentSegmentId);
         this.currentFile = segment.parent();
         this.currentFileId = this.currentFile.attr('id').split('-')[1];
@@ -1897,7 +1899,6 @@ UI = {
         var seg = this.currentSegment;
         var rules = (status == 'untranslated') ? 'section.status-draft:not(.readonly), section.status-rejected:not(.readonly), section.status-new:not(.readonly)' : 'section.status-' + status + ':not(.readonly)';
         var n = $(seg).nextAll(rules).first();
-        console.log('n is: ', n);
 
         if (!n.length) {
             n = $(seg).parents('article').next().find(rules).first();
@@ -1910,7 +1911,6 @@ UI = {
             this.nextSegmentId = 0;
         }
 //        UI.nextSegment = $('#segment-' + this.nextSegmentId);
-        console.log('next segment is now ' + this.nextSegmentId);
     },
     getPercentuageClass: function(match) {
         var percentageClass = "";
