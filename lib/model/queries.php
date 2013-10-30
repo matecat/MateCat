@@ -504,7 +504,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                 st.status, IF(st.time_to_edit IS NULL,0,st.time_to_edit) AS time_to_edit,
                 s.xliff_ext_prec_tags, s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
 
-                IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'true', 'false' ) AS writable
+                IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'true', 'false' ) AS readonly
 
              FROM jobs j
                 INNER JOIN projects p ON p.id=j.id_project
