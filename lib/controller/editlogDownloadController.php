@@ -21,7 +21,7 @@ class editlogDownloadController extends downloadController {
 
     public function doAction() {
 
-        $csv = "Job ID;Segment ID;Suggestion Source;Words;Match percentage;Time-to-edit;Post-editing effort;Segment;Suggestion;Translation;MT QE;ID translator;Suggestion1-source;Suggestion1-translation;Suggestion1-match;Suggestion1-origin;Suggestion2-source;Suggestion2-translation;Suggestion2-match;Suggestion2-origin;Suggestion3-source;Suggestion3-translation;Suggestion3-match;Suggestion3-origin\n";
+        $csv = "Job ID;Segment ID;Suggestion Source;Words;Match percentage;Time-to-edit;Post-editing effort;HTER;Segment;Suggestion;Translation;MT QE;ID translator;Suggestion1-source;Suggestion1-translation;Suggestion1-match;Suggestion1-origin;Suggestion2-source;Suggestion2-translation;Suggestion2-match;Suggestion2-origin;Suggestion3-source;Suggestion3-translation;Suggestion3-match;Suggestion3-origin\n";
         $data = CatUtils::getEditingLogData($this->jid, $this->password);
         $data = $data[0];
 
@@ -33,6 +33,7 @@ class editlogDownloadController extends downloadController {
             $sugg_tte = $d['tte'];
 
             $pe_effort_perc = $d['pe_effort_perc'];
+	    $hter=$d['ter'];
 
             $segment = str_replace("\r\n", " ", $d['source']);
             $suggestion = str_replace("\r\n", " ", $d['sug']);
@@ -119,7 +120,7 @@ class editlogDownloadController extends downloadController {
                 $s3_origin = (substr($sar[2]->created_by, 0, 2) == 'MT') ? 'MT' : 'TM';
             }
 
-            $csv.="$this->jid;$sid;\"$sugg_source\";$rwc;\"$sugg_match\";\"$sugg_tte\";\"$pe_effort_perc\";\"$segment\";\"$suggestion\";\"$translation\";\"$mt_qe\";\"$id_translator\";\"$s1_source\";\"$s1_translation\";\"$s1_match\";\"$s1_origin\";\"$s2_source\";\"$s2_translation\";\"$s2_match\";\"$s2_origin\";\"$s3_source\";\"$s3_translation\";\"$s3_match\";\"$s3_origin\"\n";
+            $csv.="$this->jid;$sid;\"$sugg_source\";$rwc;\"$sugg_match\";\"$sugg_tte\";\"$pe_effort_perc\";\"$hter\";\"$segment\";\"$suggestion\";\"$translation\";\"$mt_qe\";\"$id_translator\";\"$s1_source\";\"$s1_translation\";\"$s1_match\";\"$s1_origin\";\"$s2_source\";\"$s2_translation\";\"$s2_match\";\"$s2_origin\";\"$s3_source\";\"$s3_translation\";\"$s3_match\";\"$s3_origin\"\n";
         }
         $this->content = $csv;
     }

@@ -31,8 +31,8 @@ function doSearchQuery( ArrayObject $queryParams ) {
                         ( LENGTH( s.segment ) - LENGTH( REPLACE ( $SQL_MOD( segment ), $SQL_MOD( '$src' ), '') ) ) / LENGTH('$src') )
                     ) AS count
                     FROM segments s
-                    LEFT JOIN segment_translations st on st.id_segment = s.id
                     INNER JOIN files_job fj on s.id_file=fj.id_file
+                    LEFT JOIN segment_translations st on st.id_segment = s.id AND st.id_job = fj.id_job
                     WHERE fj.id_job = {$queryParams['job']}
                     AND s.segment LIKE '%$src%'
                     $where_status
@@ -54,7 +54,6 @@ function doSearchQuery( ArrayObject $queryParams ) {
     } elseif ( $key == 'coupled' ) {
 
         $query = "SELECT st.id_segment as id
-
                     FROM segment_translations as st
                     JOIN segments as s on id = id_segment
                     WHERE st.id_job = {$queryParams['job']}
@@ -272,12 +271,12 @@ function getArrayOfSuggestionsJSON( $id_segment ) {
  *      'id_tms'        => 1,
  *      'id_translator' => '',
  *      'status'        => 'active',
- *      'password'      => 'GfgJ6h'
+ *      'password'      => 'UnDvBUXMiSBGNjSV'
  * );
  * </pre>
  *
- * @param $id_job
- * @param $password
+ * @param int $id_job
+ * @param null|string $password
  *
  * @return array $jobData
  */
@@ -295,7 +294,11 @@ function getJobData( $id_job, $password = null ) {
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
 
-    return $results[ 0 ];
+    if( empty( $password ) ){
+        return $results;
+    }
+
+    return $results[0];
 }
 
 function getEngineData( $id ) {
@@ -519,8 +522,6 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                 AND s.id > $ref_point AND s.show_in_cattool = 1
                 LIMIT 0, $step ";
 
-    Log::doLog($query);
-
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
 
@@ -718,16 +719,14 @@ function setCurrentSegmentInsert( $id_segment, $id_job, $password ) {
 
 function getFilesForJob( $id_job, $id_file ) {
     $where_id_file = "";
+
     if ( !empty( $id_file ) ) {
         $where_id_file = " and id_file=$id_file";
     }
-    $query = "select id_file, xliff_file, filename,mime_type from files_job fj
-		inner join files f on f.id=fj.id_file
-		where id_job=$id_job $where_id_file";
 
     $query = "select id_file, xliff_file, original_file, filename,mime_type from files_job fj
         inner join files f on f.id=fj.id_file
-        where id_job=$id_job $where_id_file";
+        where id_job = $id_job $where_id_file";
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );

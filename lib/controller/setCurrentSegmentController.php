@@ -59,10 +59,20 @@ class setCurrentSegmentController extends ajaxcontroller {
         $this->result[ 'code' ] = 1;
         $this->result[ 'data' ] = "OK";
 
-        //check for next id
-        $this->result[ 'nextSegmentId' ] = isset( $nextSegmentId[ 0 ][ 'id' ] ) ? $nextSegmentId[ 0 ][ 'id' ] : '';
+        $nSegment = array( 'id' => null );
+        if( isset( $nextSegmentId[ 0 ][ 'id' ] ) ){
+            //if there are results check for next id,
+            //otherwise get the first one in the list
+            $nSegment = $nextSegmentId[0];
+            foreach( $nextSegmentId as $seg ){
+                if( $seg['id'] > $this->id_segment ){
+                    $nSegment = $seg;
+                    break;
+                }
+            }
+        }
 
-
+        $this->result[ 'nextSegmentId' ] = $nSegment[ 'id' ];
 
     }
 
