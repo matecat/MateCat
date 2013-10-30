@@ -26,11 +26,26 @@ class getSegmentsController extends ajaxcontroller {
     public function __construct() {
         parent::__construct();
 
-        $this->jid = $this->get_from_get_post("jid");
-        $this->password = $this->get_from_get_post("password");
-        $this->step = $this->get_from_get_post("step");
-        $this->ref_segment = $this->get_from_get_post("segment");
-        $this->where = $this->get_from_get_post("where");
+        $filterArgs = array(
+            'jid'         => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'step'        => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'segment' => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'password'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'where'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+        );
+
+        $__postInput = filter_input_array( INPUT_POST, $filterArgs );
+
+        //NOTE: This is for debug purpose only,
+        //NOTE: Global $_POST Overriding from CLI Test scripts
+        //$__postInput = filter_var_array( $_POST, $filterArgs );
+
+        $this->jid         = (int)$__postInput[ 'jid' ];
+        $this->step        = $__postInput[ 'step' ];
+        $this->ref_segment = $__postInput[ 'segment' ];
+        $this->password    = $__postInput[ 'password' ];
+        $this->where       = $__postInput[ 'where' ];
+
     }
 
     private function stripTagsFromSource($text) {
@@ -69,7 +84,7 @@ class getSegmentsController extends ajaxcontroller {
     public function doAction() {
 
         //get Job Infos
-        $job_data = getJobData( (int) $this->jid, $this->password );
+        $job_data = getJobData( (int) $this->jid );
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness

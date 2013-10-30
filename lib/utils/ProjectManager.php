@@ -6,6 +6,8 @@
  * Time: 17.25
  *
  */
+include_once INIT::$UTILS_ROOT . "/xliff.parser.1.2.class.php";
+include_once INIT::$UTILS_ROOT . "/DetectProprietaryXliff.php";
 
 class ProjectManager {
 
@@ -249,7 +251,7 @@ class ProjectManager {
             $job_segments = mysql_fetch_assoc( $res );
 
             $password = $this->_generatePassword();
-            $jid = insertJob( $projectStructure, null, $password, $target, $job_segments, $owner );
+            $jid = insertJob( $projectStructure, $password, $target, $job_segments, $owner );
             $projectStructure['array_jobs']['job_list']->append( $jid );
             $projectStructure['array_jobs']['job_pass']->append( $password );
             $projectStructure['array_jobs']['job_segments']->offsetSet( $jid . "-" . $password, $job_segments );
