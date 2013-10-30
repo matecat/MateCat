@@ -96,8 +96,8 @@ class setContributionController extends ajaxcontroller {
             return -1;
         }
 
-        //get Job Infos
-        $job_data = getJobData( (int) $this->id_job );
+        //get Job Infos, we need only a row of jobs ( split )
+        $job_data = getJobData( (int) $this->id_job, $this->password );
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness

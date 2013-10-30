@@ -1335,12 +1335,13 @@ UI = {
         this.setFindFunction('next');
         this.body.addClass('searchActive');
 
+        var dd = new Date();
         APP.doRequest({
             data: {
                 action: 'getSearch',
                 function: 'find',
                 job: config.job_id,
-                token: 'zsxdcfgghvbh',
+                token: dd.getTime(),
                 password: config.password,
                 source: source,
                 target: target,
@@ -1726,7 +1727,8 @@ UI = {
                 text: txt,
                 id_job: config.job_id,
                 num_results: UI.numMatchesResults,
-                id_translator: config.id_translator
+                id_translator: config.id_translator,
+                password: config.password
             },
 //            context: $('#' + id),
             success: function(d) {
@@ -1774,7 +1776,8 @@ UI = {
                 text: txt,
                 id_job: config.job_id,
                 num_results: this.numContributionMatchesResults,
-                id_translator: config.id_translator
+                id_translator: config.id_translator,
+                password: config.password
             },
             context: $('#' + id),
             success: function(d) {

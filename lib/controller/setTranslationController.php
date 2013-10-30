@@ -74,8 +74,8 @@ class setTranslationController extends ajaxcontroller {
 			$this->result['error'][] = array("code" => -2, "message" => "missing id_job");
 		} else {
 
-            //get Job Infos
-            $job_data = getJobData( (int) $this->id_job );
+            //get Job Infos, we need only a row of jobs ( split )
+            $job_data = getJobData( (int) $this->id_job, $this->password );
 
             //add check for job status archived.
             if( strtolower( $job_data['status'] ) == 'archived' ){

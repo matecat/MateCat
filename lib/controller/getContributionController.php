@@ -4,6 +4,7 @@ include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
 include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include_once INIT::$UTILS_ROOT . "/cat.class.php";
 include_once INIT::$MODEL_ROOT . "/queries.php";
+include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 include_once INIT::$UTILS_ROOT . "/QA.php";
 
 class getContributionController extends ajaxcontroller {
@@ -17,6 +18,7 @@ class getContributionController extends ajaxcontroller {
 	private $id_mt_engine;
 	private $id_tms;
 	private $id_translator;
+    private $password;
 
     private $__postInput = array();
 
@@ -29,6 +31,7 @@ class getContributionController extends ajaxcontroller {
             'num_results'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'text'           => array( 'filter' => FILTER_UNSAFE_RAW ),
             'id_translator'  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+            'password'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
             'is_concordance' => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
             'from_target'    => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
         );
@@ -46,6 +49,7 @@ class getContributionController extends ajaxcontroller {
         $this->id_translator      = $this->__postInput[ 'id_translator' ];
         $this->concordance_search = $this->__postInput[ 'is_concordance' ];
         $this->switch_languages   = $this->__postInput[ 'from_target' ];
+        $this->password           = $this->__postInput[ 'password' ];
 
 		if ($this->id_translator == 'unknown_translator') {
 			$this->id_translator = "";
@@ -81,8 +85,15 @@ class getContributionController extends ajaxcontroller {
 			return -1;
 		}
 
-		$st = getJobData($this->id_job);
+        //get Job Infos, we need only a row of jobs ( split )
+		$st = getJobData( $this->id_job, $this->password );
 
+        $pCheck = new AjaxPasswordCheck();
+        //check for Password correctness
+        if( !$pCheck->grantJobAccessByJobData( $st, $this->password ) ){
+            $this->result['error'][] = array( "code" => -10, "message" => "wrong password" );
+            return -1;
+        }
 
         /*
          * string manipulation strategy
