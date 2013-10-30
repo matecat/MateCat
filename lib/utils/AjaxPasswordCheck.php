@@ -51,7 +51,16 @@ class AjaxPasswordCheck {
      */
     public function grantJobAccessByJobData( array $jobData, $password ){
         $this->jobData = $jobData;
-        return $this->_grantJobAccess( $jobData['password'], $password );
+        if( isset( $this->jobData[0] ) && is_array( $this->jobData[0] ) ){
+            foreach( $this->jobData as $jD ){
+                $res = $this->_grantJobAccess( $jD['password'], $password );
+                if( $res == true ) return $res;
+            }
+        } else {
+            return $this->_grantJobAccess( $this->jobData['password'], $password );
+        }
+
+        return false;
     }
 
     /**

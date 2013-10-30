@@ -260,7 +260,9 @@ function getArrayOfSuggestionsJSON( $id_segment ) {
 }
 
 /**
- * Get job data structure
+ * Get job data structure,
+ * this can return a list of jobs if the job is split into chunks and
+ * no password is provided for search
  *
  * <pre>
  * $jobData = array(
@@ -517,6 +519,8 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
                 AND s.id > $ref_point AND s.show_in_cattool = 1
                 LIMIT 0, $step ";
 
+    Log::doLog($query);
+
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
 
@@ -693,12 +697,11 @@ function setSuggestionInsert( $id_segment, $id_job, $suggestions_json_array, $su
     return $db->affected_rows;
 }
 
-function setCurrentSegmentInsert( $id_segment, $id_job ) {
+function setCurrentSegmentInsert( $id_segment, $id_job, $password ) {
     $data                          = array();
     $data[ 'last_opened_segment' ] = $id_segment;
 
-    $where = "id=$id_job";
-
+    $where = "id = $id_job AND password = '$password'" ;
 
     $db = Database::obtain();
     $db->update( 'jobs', $data, $where );
@@ -956,16 +959,20 @@ function getEditLog( $jid, $pass ) {
     return $results;
 }
 
-function getNextUntranslatedSegment( $sid, $jid ) {
+function getNextUntranslatedSegment( $sid, $jid, $password ) {
 
-    // Warning this is a LEFT join a little slower...
-    $query = "select id, st.`status` from segments s
-               left join segment_translations st on st.id_segment=s.id
-               where st.id_job=$jid and
-               (st.status in ('NEW','DRAFT','REJECTED') OR st.status IS NULL) and
-               s.show_in_cattool=1 and
-               s.id <> $sid
-               limit 0,1";
+    $query = "SELECT s.id, st.`status`
+                    FROM segments AS s
+                    JOIN files_job fj USING (id_file)
+                    JOIN jobs ON jobs.id = fj.id_job
+                    JOIN files f ON f.id = fj.id_file
+                    LEFT JOIN segment_translations st ON st.id_segment = s.id
+                    WHERE jobs.id = $jid AND jobs.password = '$password'
+                    AND ( st.status IN ( 'NEW', 'DRAFT', 'REJECTED' ) OR st.status IS NULL )
+                    AND s.show_in_cattool = 1
+                    AND s.id <> $sid
+                    AND s.id BETWEEN jobs.job_first_segment AND jobs.job_last_segment
+             ";
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
