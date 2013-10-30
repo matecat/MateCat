@@ -254,7 +254,7 @@ UI = {
         }).on('click', 'a.status', function(e) {
             e.preventDefault();
             e.stopPropagation();        
-        }).on('click', 'section:not(.writable) a.status', function(e) {
+        }).on('click', 'section:not(.readonly) a.status', function(e) {
 
             var segment = $(this).parents("section");
             var statusMenu = $("ul.statusmenu", segment);
@@ -2514,10 +2514,10 @@ UI = {
 
             var t = config.time_to_edit_enabled;
             $.each(this.segments, function(index) {
-//                this.writable = true;
-                var writable = (this.writable == 'true')? true : false;
+//                this.readonly = true;
+                var readonly = (this.readonly == 'true')? true : false;
                 var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
-                newFile += '<section id="segment-' + this.sid + '" class="' + ((writable)? 'writable ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + '">' +
+                newFile += '<section id="segment-' + this.sid + '" class="' + ((readonly)? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + '">' +
                         '	<a tabindex="-1" href="#' + this.sid + '"></a>' +
                         '	<span class="number">' + this.sid + '</span>' +
                         '	<div class="body">' +
@@ -2533,7 +2533,7 @@ UI = {
                         '					</span>' +
                         '					<div class="textarea-container">' +
                         '						<span class="loader"></span>' +
-                        '						<div class="' + ((writable)? 'area' : 'editarea') + ' invisible" ' + ((writable)? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : this.translation) + '</div>' +
+                        '						<div class="' + ((readonly)? 'area' : 'editarea') + ' invisible" ' + ((readonly)? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : this.translation) + '</div>' +
                         '					</div> <!-- .textarea-container -->' +
                         '				</div> <!-- .target -->' +
                         '			</div></div> <!-- .wrap -->' +

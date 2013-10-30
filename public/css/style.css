@@ -985,13 +985,13 @@ section.status-new.opened .editarea
 	-webkit-transition: all  50ms ease-in;
   	}
 
-section.writable .text
+section.readonly .text
     {
     background: #bbb;
     /*color: #fff;*/
     }
 
-section.writable .status-container
+section.readonly .status-container
     {
     /*display: none;*/
     }
