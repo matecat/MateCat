@@ -266,6 +266,8 @@ UI = {
                 $('html').unbind('click.vediamo');
                 UI.removeStatusMenu(statusMenu);
             });
+        }).on('click', 'section.readonly', function(e) {
+            APP.alert('This part has not been assigned to you.');
         }).on('blur', '.graysmall .translation', function(e) {
             e.preventDefault();
             UI.closeInplaceEditor($(this));
@@ -953,6 +955,7 @@ UI = {
         this.lastOpenedSegment = this.currentSegment;
         this.lastOpenedEditarea = $('.editarea', this.currentSegment);
         this.currentSegmentId = this.lastOpenedSegmentId = this.editarea.data('sid');
+        console.log(this.currentSegmentId);
         this.currentSegment = segment = $('#segment-' + this.currentSegmentId);
         this.currentFile = segment.parent();
         this.currentFileId = this.currentFile.attr('id').split('-')[1];
@@ -1968,7 +1971,9 @@ UI = {
             if(options.segmentToOpen) {
                 $('#segment-'+options.segmentToOpen+' .editarea').click();
             }
+            console.log(UI.currentSegmentId);
             if(($('#segment-'+UI.currentSegmentId).length)&&(!$('section.editor').length)) {
+                console.log('a');
                 UI.openSegment(UI.editarea);
             };
             if(options.caller == 'link2file') {

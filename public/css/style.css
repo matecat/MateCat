@@ -985,9 +985,15 @@ section.status-new.opened .editarea
 	-webkit-transition: all  50ms ease-in;
   	}
 
+section.readonly
+    {
+    z-index: 999999998;
+    background: transparent;
+    }
+    
 section.readonly .text
     {
-    background: #bbb;
+    background: #969696 !important;
     /*color: #fff;*/
     }
 
