@@ -267,7 +267,11 @@ UI = {
                 UI.removeStatusMenu(statusMenu);
             });
         }).on('click', 'section.readonly', function(e) {
+            if (UI.justSelecting('readonly')) return;
+            
             APP.alert('This part has not been assigned to you.');
+//        }).on('dblclick', 'section.readonly', function(e) {
+//            alert('dblclick');         
         }).on('blur', '.graysmall .translation', function(e) {
             e.preventDefault();
             UI.closeInplaceEditor($(this));
@@ -2087,11 +2091,16 @@ UI = {
             $('#segmentNavBar .prevfile, #segmentNavBar .nextfile').addClass('disabled');
         }
     },
-    justSelecting: function() {
+    justSelecting: function(what) {
         if (window.getSelection().isCollapsed)
             return false;
         var selContainer = $(window.getSelection().getRangeAt(0).startContainer.parentNode);
-        return ((selContainer.hasClass('editarea')) && (!selContainer.is(UI.editarea)));
+        console.log(selContainer);
+        if(what == 'editarea') {
+            return ((selContainer.hasClass('editarea')) && (!selContainer.is(UI.editarea)));
+        } else if(what == 'readonly') {
+            return ((selContainer.hasClass('area'))||(selContainer.hasClass('source')));
+        }
     },
     noTagsInSegment: function(starting) {
         if ((!this.editarea) && (typeof starting == 'undefined'))
@@ -2247,7 +2256,7 @@ UI = {
     openSegment: function(editarea, operation) {
         this.openSegmentStart = new Date();
         if (!this.byButton) {
-            if (this.justSelecting())
+            if (this.justSelecting('editarea'))
                 return;
         }
         this.firstOpenedSegment = (this.firstOpenedSegment == 0)? 1 : 2;
