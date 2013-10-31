@@ -636,7 +636,7 @@
 				"en":"Japanese"
 			}],
 			"isocode":"ja",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"top":"top10 top20",
 			"rfc3066code":"ja-JP"
