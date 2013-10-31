@@ -987,7 +987,7 @@ section.status-new.opened .editarea
 
 section.readonly
     {
-    z-index: 999999998;
+    z-index: 9998;
     background: transparent;
     }
     
