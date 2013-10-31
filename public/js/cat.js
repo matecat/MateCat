@@ -266,7 +266,7 @@ UI = {
                 $('html').unbind('click.vediamo');
                 UI.removeStatusMenu(statusMenu);
             });
-        }).on('click', 'section.readonly', function(e) {
+        }).on('click', 'section.readonly, section.readonly a.status', function(e) {
             if (UI.justSelecting('readonly')) return;
             
             APP.alert('This part has not been assigned to you.');
