@@ -266,8 +266,12 @@ UI = {
                 $('html').unbind('click.vediamo');
                 UI.removeStatusMenu(statusMenu);
             });
-        }).on('click', 'section.readonly', function(e) {
+        }).on('click', 'section.readonly, section.readonly a.status', function(e) {
+            if (UI.justSelecting('readonly')) return;
+            
             APP.alert('This part has not been assigned to you.');
+//        }).on('dblclick', 'section.readonly', function(e) {
+//            alert('dblclick');         
         }).on('blur', '.graysmall .translation', function(e) {
             e.preventDefault();
             UI.closeInplaceEditor($(this));
@@ -1559,20 +1563,23 @@ UI = {
 //            var m = $("section.currSearchSegment mark.searchMarker");
 //            seg = (m.length)? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
             if(seg.length) {
-                $(seg).removeClass('currSearchSegment');
+//                $(seg).removeClass('currSearchSegment');
 //                $(m).nextAll('mark.searchMarker').first().addClass('currSearchItem');
                 this.gotoSearchResultAfter('segment-' + $(seg).attr('id').split('-')[1]);
             }       
         } else {
             var m = $("mark.currSearchItem");
+//            console.log($(m).nextAll('mark.searchMarker').length);
             if($(m).nextAll('mark.searchMarker').length) {
     //            console.log('altri item nel segmento');
                 $(m).removeClass('currSearchItem');
                 $(m).nextAll('mark.searchMarker').first().addClass('currSearchItem');
             } else {
+//                console.log(m.length);
                 seg = (m.length)? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
                 if(seg.length) {
-                    this.gotoSearchResultAfter('segment-' + $(seg).attr('id').split('-')[1]);
+                    skipCurrent = $(seg).has("mark.currSearchItem").length;
+                    this.gotoSearchResultAfter('segment-' + $(seg).attr('id').split('-')[1], skipCurrent);
                 } else {
                     setTimeout(function() {
                         UI.gotoNextResultItem();
@@ -1582,8 +1589,9 @@ UI = {
         }
 
     },
-    gotoSearchResultAfter: function(el) {
+    gotoSearchResultAfter: function(el, skipCurrent) {
         var p = this.searchParams;
+//        console.log($('#' + el + ":has(mark.searchMarker)").length);
 
         if(this.searchMode == 'onlyStatus') {
             var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
@@ -1594,9 +1602,11 @@ UI = {
             }
         } else if(this.searchMode == 'source&target') {
             var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
-            destination = $('#'+el).nextAll(status + ":has(mark.searchMarker)").first();
+            destination = (($('#' + el + ":has(mark.searchMarker)").length)&&(!$('#'+el).hasClass('currSearchSegment')))? $('#'+el) : $('#'+el).nextAll(status + ":has(mark.searchMarker)").first();
+//            destination = $('#'+el).nextAll(status + ":has(mark.searchMarker)").first();            
 //            console.log(destination);
             if($(destination).length) {
+                $('section.currSearchSegment').removeClass('currSearchSegment');
                 $(destination).addClass('currSearchSegment');
                 this.scrollSegment(destination);                
             } else {
@@ -1624,14 +1634,18 @@ UI = {
             ss = el;
             found = false;
             $.each(seg, function(index) {
-                if($(this).attr('id') > ss) {
-                    found = true;
-                    $("html,body").animate({
-                        scrollTop: $(this).offset().top - 200
-                    }, 500);
-                    $('mark.currSearchItem').removeClass('currSearchItem');
-                    $(this).find('mark.searchMarker').first().addClass('currSearchItem');
-                    return false;
+                if($(this).attr('id') >= ss) {
+                    if(($(this).attr('id') == ss)&&(typeof skipCurrent != 'undefined')) {
+                    } else {
+                        found = true;
+                        $("html,body").animate({
+                            scrollTop: $(this).offset().top - 200
+                        }, 500);
+                        $('mark.currSearchItem').removeClass('currSearchItem');
+                        $(this).find('mark.searchMarker').first().addClass('currSearchItem');
+                        return false;                        
+                    }
+
                 };
             });
             if(!found) {
@@ -2077,11 +2091,16 @@ UI = {
             $('#segmentNavBar .prevfile, #segmentNavBar .nextfile').addClass('disabled');
         }
     },
-    justSelecting: function() {
+    justSelecting: function(what) {
         if (window.getSelection().isCollapsed)
             return false;
         var selContainer = $(window.getSelection().getRangeAt(0).startContainer.parentNode);
-        return ((selContainer.hasClass('editarea')) && (!selContainer.is(UI.editarea)));
+        console.log(selContainer);
+        if(what == 'editarea') {
+            return ((selContainer.hasClass('editarea')) && (!selContainer.is(UI.editarea)));
+        } else if(what == 'readonly') {
+            return ((selContainer.hasClass('area'))||(selContainer.hasClass('source')));
+        }
     },
     noTagsInSegment: function(starting) {
         if ((!this.editarea) && (typeof starting == 'undefined'))
@@ -2237,7 +2256,7 @@ UI = {
     openSegment: function(editarea, operation) {
         this.openSegmentStart = new Date();
         if (!this.byButton) {
-            if (this.justSelecting())
+            if (this.justSelecting('editarea'))
                 return;
         }
         this.firstOpenedSegment = (this.firstOpenedSegment == 0)? 1 : 2;
@@ -2415,21 +2434,28 @@ UI = {
     renderConcordances: function(d, in_target) {
         segment = this.currentSegment;
         segment_id = this.currentSegmentId;
-        $('.sub-editor.concordances .overflow .results', segment).empty();        
-        $.each(d.data.matches, function(index) {
-            if ((this.segment == '') || (this.translation == ''))
-                return;
-            var disabled = (this.id == '0') ? true : false;
-            cb = this['created_by'];
-            cl_suggestion = UI.getPercentuageClass(this['match']);
-            var leftTxt = (in_target)? this.translation : this.segment;
-            leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");
-            leftTxt = leftTxt.replace(/\}\#/gi, "</mark>");
-            var rightTxt = (in_target)? this.segment : this.translation;
-            rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
-            rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
-            $('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
-        });
+        $('.sub-editor.concordances .overflow .results', segment).empty();
+        if(d.data.matches.length) {
+            $('.sub-editor.concordances .overflow .message', segment).remove();
+            $.each(d.data.matches, function(index) {
+                if ((this.segment == '') || (this.translation == ''))
+                    return;
+                var disabled = (this.id == '0') ? true : false;
+                cb = this['created_by'];
+                cl_suggestion = UI.getPercentuageClass(this['match']);
+                var leftTxt = (in_target)? this.translation : this.segment;
+                leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");
+                leftTxt = leftTxt.replace(/\}\#/gi, "</mark>");
+                var rightTxt = (in_target)? this.segment : this.translation;
+                rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
+                rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
+                $('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+            });
+        } else {
+            console.log('no matches');
+            $('.sub-editor.concordances .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');
+        }
+
         $('.cc-search', this.currentSegment).removeClass('loading');
         this.setDeleteSuggestion(segment);
     },
