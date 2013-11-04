@@ -475,8 +475,10 @@ class CatUtils {
             }
             
             $jid = $job_stat['id'];
+            $jpass = $job_stat['password'];
             unset($job_stat['id']);
-            $res_job_stats[$jid] = $job_stat;
+            unset($job_stat['password']);
+            $res_job_stats[ $jid . "-" . $jpass ] = $job_stat;
             unset($jid);
         }
         
@@ -599,6 +601,7 @@ class CatUtils {
      * 
      * @param int $jid
      * @param int $fid
+     * @param string $jPassword
      * @return mixed $job_stats
      *
      * <pre>
@@ -615,9 +618,9 @@ class CatUtils {
      * </pre>
      * 
      */
-    public static function getStatsForJob( $jid, $fid = null ) {
+    public static function getStatsForJob( $jid, $fid = null, $jPassword = null ) {
         
-        $job_stats = getStatsForJob($jid, $fid);
+        $job_stats = getStatsForJob($jid, $fid, $jPassword);
         $job_stats = $job_stats[0];
 
         $job_stats = self::_getStatsForJob($job_stats, true); //true set estimation check if present

@@ -16,13 +16,24 @@ ALTER TABLE `matecat_local`.`segment_translations`
     CHANGE COLUMN `id_segment` `id_segment` BIGINT NOT NULL, 
     CHANGE COLUMN `id_job` `id_job` BIGINT NOT NULL;
 
-UPDATE jobs, files_job
-  SET 
-  jobs.job_first_segment = files_job.id_segment_start,
-  jobs.job_last_segment = files_job.id_segment_end
-  WHERE files_job.id_job = jobs.id;
+UPDATE  jobs AS job1
+  INNER JOIN
+  (
+    SELECT MIN( segments.id ) as min, MAX(segments.id) as max, _job_.id
+      FROM jobs _job_
+      JOIN files_job ON files_job.id_job = _job_.id
+      JOIN segments ON segments.id_file = files_job.id_file
+      WHERE files_job.id_file IN ( 
+        SELECT id_file FROM files_job WHERE id_job = _job_.id
+      )
+      group by _job_.id
+  ) AS job2 ON job1.id = job2.id
+SET 
+  job1.job_first_segment = job2.min,
+  job1.job_last_segment = job2.max
 
 
+-- 
 -- ALTER TABLE `segment_translations`
 -- ADD COLUMN `mt_qe` FLOAT(19,14) NOT NULL DEFAULT 0
 -- AFTER `suggestion_position` ;

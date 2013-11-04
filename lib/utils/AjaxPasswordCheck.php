@@ -34,30 +34,35 @@ class AjaxPasswordCheck {
      * Check password with jobData array
      * <pre>
      * jobData = array(
-     *      'source'        => 'it-IT',
-     *      'target'        => 'en-US',
-     *      'id_mt_engine'  => 1,
-     *      'id_tms'        => 1,
-     *      'id_translator' => '',
-     *      'status'        => 'active',
-     *      'password'      => 'GfgJ6h'
+     *      'source'                => 'it-IT',
+     *      'target'                => 'en-US',
+     *      'id_mt_engine'          => 1,
+     *      'id_tms'                => 1,
+     *      'id_translator'         => '',
+     *      'status'                => 'active',
+     *      'password'              => 'GfgJ6h'
+     *      'job_first_segment'     => '2138134'
+     *      'job_last_segment'      => '2140000'
      * );
      * </pre>
      *
-     * @param array $jobData
-     * @param       $password
+     * @param array    $jobData
+     * @param string   $password
+     * @param null|int $segmentID
      *
      * @return bool
      */
-    public function grantJobAccessByJobData( array $jobData, $password ){
+    public function grantJobAccessByJobData( array $jobData, $password, $segmentID = null ){
         $this->jobData = $jobData;
         if( isset( $this->jobData[0] ) && is_array( $this->jobData[0] ) ){
+            $result = array();
             foreach( $this->jobData as $jD ){
-                $res = $this->_grantJobAccess( $jD['password'], $password );
-                if( $res == true ) return $res;
+                $result[] = ( $this->_grantJobAccess( $jD['password'], $password ) && $this->_grantSegmentPermission( $jD, $segmentID ) );
             }
+            if ( array_search( true, $result, true ) !== false ) return true;
+
         } else {
-            return $this->_grantJobAccess( $this->jobData['password'], $password );
+            return ( $this->_grantJobAccess( $this->jobData['password'], $password ) && $this->_grantSegmentPermission( $this->jobData, $segmentID ) );
         }
 
         return false;
@@ -74,6 +79,14 @@ class AjaxPasswordCheck {
     protected function _grantJobAccess( $dbPass, $password ){
         $password = filter_var( $password, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ) );
         if( $dbPass === $password ){
+            return true;
+        }
+        return false;
+    }
+
+    protected function _grantSegmentPermission( $jobData, $segmentID ){
+        //if segmentID is null no request of check was made
+        if( is_null( $segmentID ) || ( $segmentID >= $jobData['job_first_segment'] && $segmentID <= $jobData['job_last_segment'] ) ){
             return true;
         }
         return false;

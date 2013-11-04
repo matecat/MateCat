@@ -203,7 +203,7 @@ class ProjectManager {
             $owner = '';
         }
 
-        //TODO Throws exception
+        //Throws exception
         try {
             $this->_createJobs( $this->projectStructure, $owner );
         } catch ( Exception $ex ){

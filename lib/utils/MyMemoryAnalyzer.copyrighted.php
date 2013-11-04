@@ -25,10 +25,10 @@ class MyMemoryAnalyzer {
         }
         $json_segs=json_encode($segs_array);
 
-        $d['fast'] = "1";
-        $d['df'] = "matecat_array";
-        $d['segs'] = $json_segs;
-        $countwordReport = Utils::curl_post("$this->url/$this->root_path/analyze", $d);
+        $d[ 'fast' ]     = "1";
+        $d[ 'df' ]       = "matecat_array";
+        $d[ 'segs' ]     = $json_segs;
+        $countwordReport = Utils::curl_post( "$this->url/$this->root_path/analyze", $d );
         
         $reportDecoded=json_decode($countwordReport,true);
         return $reportDecoded;

@@ -282,7 +282,8 @@ function getArrayOfSuggestionsJSON( $id_segment ) {
  */
 function getJobData( $id_job, $password = null ) {
 
-    $query   = "select source, target, id_mt_engine, id_tms, id_translator, status_owner as status, password
+    $query   = "select source, target, id_mt_engine, id_tms, id_translator, status_owner as status, password,
+              job_first_segment, job_last_segment
 		      from jobs
 		      where id = %u";
 
@@ -766,28 +767,34 @@ function getOriginalFilesForJob( $id_job, $id_file, $password ) {
 
 function getStatsForMultipleJobs( $_jids ) {
 
+    //remove chunk jobs id
+    $_jids = array_unique( $_jids );
+
     //transform array into comma separated string
     if ( is_array( $_jids ) ) {
         $jids = implode( ',', $_jids );
     }
 
-    $query = "select SUM(IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(st.status='REJECTED',IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(st.status='TRANSLATED',IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(st.status='APPROVED',IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count),0)) as APPROVED, j.id
+    $query = "select SUM(IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(st.status='REJECTED',IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(st.status='TRANSLATED',IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(st.status='APPROVED',IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count),0)) as APPROVED, j.id, j.password
 
 		from jobs j
 		INNER JOIN files_job fj on j.id=fj.id_job
 		INNER join segments s on fj.id_file=s.id_file
 		LEFT join segment_translations st on s.id=st.id_segment and st.id_job=j.id
 
-
 		WHERE j.id in ($jids)
-		group by j.id";
+
+		AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
+		group by j.id, j.password
+		";
 
     $db         = Database::obtain();
     $jobs_stats = $db->fetch_array( $query );
 
     //convert result to ID based index
     foreach ( $jobs_stats as $job_stat ) {
-        $tmp_jobs_stats[ $job_stat[ 'id' ] ] = $job_stat;
+        $tmp_jobs_stats[ $job_stat[ 'id' ] . "-" . $job_stat[ 'password' ] ] = $job_stat;
+        $tmp_jobs_found[ $job_stat[ 'id' ] ] = true;
     }
     $jobs_stats = $tmp_jobs_stats;
     unset( $tmp_jobs_stats );
@@ -795,16 +802,17 @@ function getStatsForMultipleJobs( $_jids ) {
     //cycle on results to ensure sanitization
     foreach ( $_jids as $jid ) {
         //if no stats for that job id
-        if ( !isset( $jobs_stats[ $jid ] ) ) {
+        if ( !isset( $tmp_jobs_found[ $jid ] ) ) {
+            $res = $db->query_first( "SELECT password FROM jobs where id = $jid" );
             //add dummy empty stats
-            $jobs_stats[ $jid ] = array( 'TOTAL' => 1.00, 'DRAFT' => 0.00, 'REJECTED' => 0.00, 'TRANSLATED' => 0.00, 'APPROVED' => 0.00, 'id' => $jid );
+            $jobs_stats[ $jid . "-" . $res['password'] ] = array( 'TOTAL' => 1.00, 'DRAFT' => 0.00, 'REJECTED' => 0.00, 'TRANSLATED' => 0.00, 'APPROVED' => 0.00, 'id' => $jid, 'password' => $res['password'] );
         }
     }
 
     return $jobs_stats;
 }
 
-function getStatsForJob( $id_job, $id_file = null ) {
+function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
 
     $query = "
 		select
@@ -839,13 +847,18 @@ function getStatsForJob( $id_job, $id_file = null ) {
         INNER JOIN files_job as fj on j.id=fj.id_job
         INNER join segments as s on fj.id_file=s.id_file
         LEFT join segment_translations as st on s.id=st.id_segment and st.id_job=j.id
-        WHERE j.id=$id_job";
+        WHERE j.id = $id_job";
+
+    $db      = Database::obtain();
+
+    if( !empty($jPassword) ){
+        $query .= " and j.password = '" . $db->escape($jPassword) . "'";
+    }
 
     if( !empty($id_file) ){
         $query .= " and fj.id_file = " . intval($id_file);
     }
 
-    $db      = Database::obtain();
     $results = $db->fetch_array( $query );
 
     return $results;
@@ -965,7 +978,7 @@ function getNextUntranslatedSegment( $sid, $jid, $password ) {
                     JOIN files_job fj USING (id_file)
                     JOIN jobs ON jobs.id = fj.id_job
                     JOIN files f ON f.id = fj.id_file
-                    LEFT JOIN segment_translations st ON st.id_segment = s.id
+                    LEFT JOIN segment_translations st ON st.id_segment = s.id AND fj.id_job = st.id_job
                     WHERE jobs.id = $jid AND jobs.password = '$password'
                     AND ( st.status IN ( 'NEW', 'DRAFT', 'REJECTED' ) OR st.status IS NULL )
                     AND s.show_in_cattool = 1
@@ -1179,27 +1192,46 @@ function getPdata( $pid ) {
  */
 function getProjectData( $pid, $project_password = null, $jid = null ) {
 
-    $query = "select p.name, j.id as jid, j.password as jpassword, j.source, j.target, f.id, f.id as id_file,f.filename, p.status_analysis,
-		sum(s.raw_word_count) as file_raw_word_count, sum(st.eq_word_count) as file_eq_word_count, count(s.id) as total_segments,
-		p.fast_analysis_wc,p.tm_analysis_wc, p.standard_analysis_wc
+    $query = "
+    SELECT * FROM (
 
-			from projects p 
-			inner join jobs j on p.id=j.id_project
-			inner join files f on p.id=f.id_project
-			inner join segments s on s.id_file=f.id
-			left join segment_translations st on st.id_segment=s.id and st.id_job=j.id
+            SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, f.id, f.id AS id_file,f.filename, p.status_analysis,
 
-			where p.id= '$pid' ";
+                    SUM(s.raw_word_count) AS file_raw_word_count,
+                    SUM(st.eq_word_count) AS file_eq_word_count,
+                    COUNT(s.id) AS total_segments,
+
+                    p.fast_analysis_wc,
+                    p.tm_analysis_wc,
+                    p.standard_analysis_wc
+
+                    FROM projects p
+                    INNER JOIN jobs j ON p.id=j.id_project
+                    INNER JOIN files f ON p.id=f.id_project
+                    INNER JOIN segments s ON s.id_file=f.id
+                    LEFT JOIN segment_translations st ON st.id_segment=s.id AND st.id_job=j.id
+                    WHERE p.id= '$pid'
+
+                    %s
+                    %s
+
+                    GROUP BY f.id, j.id, j.password
+
+    ) AS res GROUP BY jid, id_file";
+
+    $and_1 = $and_2 = null;
 
     if( !empty( $project_password ) ){
-        $query .= " and p.password='$project_password' ";
+        $and_1 = " and p.password = '$project_password' ";
     }
 
     if( !empty($jid) ){
-        $query = $query . " and j.id = " . intval($jid);
+        $and_2 = " and j.id = " . intval($jid);
     }
-    
-	$query = $query ." group by f.id, j.id ";
+
+    $query = sprintf( $query, $and_1, $and_2 );
+
+    Log::doLog( $query );
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
@@ -1439,7 +1471,7 @@ function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
     } else {
         $status_search = "FAST_OK";
     }
-    $query = "select p.id, id_tms, id_mt_engine, group_concat(j.id) as jid_list
+    $query = "select p.id, id_tms, id_mt_engine, group_concat( distinct j.id ) as jid_list
 		from projects p
 		inner join jobs j on j.id_project=p.id
 		where status_analysis = '$status_search'
@@ -1462,7 +1494,7 @@ function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
 }
 
 function getSegmentsForFastVolumeAnalysys( $pid ) {
-    $query   = "select concat(s.id,'-',group_concat(j.id)) as jsid,s.segment
+    $query   = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment
 		from segments as s 
 		inner join files_job as fj on fj.id_file=s.id_file
 		inner join jobs as j on fj.id_job=j.id
@@ -1484,6 +1516,16 @@ function getSegmentsForFastVolumeAnalysys( $pid ) {
     return $results;
 }
 
+/**
+ *
+ * Not used
+ *
+ * @deprecated
+ *
+ * @param $jid
+ *
+ * @return array
+ */
 function getSegmentsForTMVolumeAnalysys( $jid ) {
     $query = "select s.id as sid ,segment ,raw_word_count,st.match_type from segments s
 		left join segment_translations st on st.id_segment=s.id

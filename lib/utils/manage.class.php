@@ -81,9 +81,9 @@ class ManageUtils {
 					$job['formatted_create_date']='Today, '.date('H:i',strtotime($job_array[3]));
 				}
 
-				$job['password']= $job_array[4];
-			
-				$job['stats']=$statsByJobId[$job['id']];
+				$job['password'] = $job_array[4];
+
+				$job['stats'] = $statsByJobId[ $job['id'] . "-" . $job['password'] ];
 
 				$project['id_engine_mt']= $job_array[5];
 				$project['private_tm_key']= $job_array[6];
