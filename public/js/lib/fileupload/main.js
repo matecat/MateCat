@@ -546,7 +546,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
        		return false;
         },
         success: function(d){
-              console.log(this);
+              console.log(this.context);
 			filerow.removeClass('converting');
 			filerow.addClass('ready');
            	if(d.code == 1) {
