@@ -56,6 +56,7 @@ UI = {
 				$(filerow).data('session','');
 				$('.operation',filerow).remove();
 				$('.progress',filerow).remove();
+				  console.log('ACTION: restartConversions');
 				convertFile(filename,filerow,filesize);
 			}
     	});
@@ -327,7 +328,8 @@ $(function () {
 
 				if(!fileSpecs.filerow.hasClass('converting')) {
                     //console.log( filerow );
-					convertFile( fileSpecs.fname,fileSpecs.filerow,fileSpecs.filesize, fileSpecs.enforceConversion );
+				  console.log('ACTION: bind fileuploadcompleted');
+                    convertFile( fileSpecs.fname,fileSpecs.filerow,fileSpecs.filesize, fileSpecs.enforceConversion );
 				}
 			} else {
                 enableAnalyze();
@@ -714,6 +716,7 @@ checkConversions = function() {
 			        	var filename = d.file_name;
 			        	var filerow = this;
 			        	if(filerow.hasClass('converting')) return;
+                           console.log('ACTION: success of checkConversions');
 						convertFile(filename,filerow);
 					
 				
