@@ -84,7 +84,7 @@ class setTranslationController extends ajaxcontroller {
 
             $pCheck = new AjaxPasswordCheck();
             //check for Password correctness
-            if( !$pCheck->grantJobAccessByJobData( $job_data, $this->password, $this->id_job ) ){
+            if( !$pCheck->grantJobAccessByJobData( $job_data, $this->password, $this->id_segment ) ){
                 $this->result['error'][] = array("code" => -10, "message" => "wrong password");
             }
 
@@ -144,7 +144,7 @@ class setTranslationController extends ajaxcontroller {
 			return -1;
 		}
 
-		$job_stats = CatUtils::getStatsForJob($this->id_job);
+		$job_stats = CatUtils::getStatsForJob($this->id_job, null, $this->password);
 		$file_stats = CatUtils::getStatsForFile($this->id_first_file);
 
 		$is_completed = ($job_stats['TRANSLATED_PERC'] == '100') ? 1 : 0;
