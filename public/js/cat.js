@@ -692,7 +692,7 @@ UI = {
             $('.cc-search .search-source').focus();
         }).on('keydown', '.sub-editor .cc-search .input', 'return', function(e) {
             //if($(this).text().length > 2) UI.getConcordance($(this).text(), 0);
-        }).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
+//        }).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
             if(e.which == 13) { // enter
                 e.preventDefault();
                 var txt = $(this).text();
@@ -1167,7 +1167,7 @@ UI = {
     },
     createButtons: function() {
         var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
-        var buttons = '<li><a id="segment-' + this.currentSegmentId + '-copysource" href="#" class="btn copysource" data-segmentid="segment-' + this.currentSegmentId + '" title="Copy source to target"></a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+        var buttons = '<li><a id="segment-' + this.currentSegmentId + '-copysource" href="#" class="btn copysource" data-segmentid="segment-' + this.currentSegmentId + '" title="Copy source to target"></a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p></li><li><a id="segment-' + this.currentSegmentId + '-copysource" href="#" class="btn copysource" data-segmentid="segment-' + this.currentSegmentId + '" title="Copy source to target"></a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
 //        var buttons = '<li class="tag-mismatch" title="Tag Mismatch">Tag Mismatch</li><li><a id="segment-'+this.currentSegmentId+'-copysource" href="#" class="btn copysource" data-segmentid="segment-'+this.currentSegmentId+'" title="Copy source to target"></a><p>CTRL+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-'+this.currentSegmentId+'-button-translated" data-segmentid="segment-'+this.currentSegmentId+'" href="#" class="translated"'+disabled+' >TRANSLATED</a><p>CTRL+ENTER</p></li>';
         $('#segment-' + this.currentSegmentId + '-buttons').append(buttons);
         $('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
