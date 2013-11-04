@@ -122,6 +122,12 @@ UI = {
         }).bind('keydown', 'Meta+return', function(e) {
             e.preventDefault();
             $('.editor .translated').click();
+        }).bind('keydown', 'Ctrl+shift+return', function(e) {
+            e.preventDefault();
+            $('.editor .next-untranslated').click();
+        }).bind('keydown', 'Meta+shift+return', function(e) {
+            e.preventDefault();
+            $('.editor .next-untranslated').click();
         }).bind('keydown', 'Ctrl+pageup', function(e) {
             e.preventDefault();
 //            alert('pageup');
@@ -608,7 +614,8 @@ UI = {
             UI.currentSelectedText = false;
             UI.currentSearchInTarget = false;
             $('#contextMenu').hide();
-        }).on('click', 'a.translated', function(e) {
+        }).on('click', 'a.translated, a.next-untranslated', function(e) {
+            var w = ($(this).hasClass('translated'))? 'translated' : 'next-untranslated';
             e.preventDefault();
             UI.checkHeaviness();
             if (UI.blockButtons) {
@@ -627,7 +634,11 @@ UI = {
 
             UI.unlockTags();
             UI.setStatusButtons(this);
-            $(".editarea", UI.nextSegment).trigger("click", "translated");
+            if(w == 'translated') {
+                UI.gotoNextSegment();
+            } else {
+                $(".editarea", UI.nextSegment).trigger("click", "translated");
+            }
             UI.changeStatus(this, 'translated', 0);
 
             UI.markTags();
@@ -1167,7 +1178,7 @@ UI = {
     },
     createButtons: function() {
         var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
-        var buttons = '<li><a id="segment-' + this.currentSegmentId + '-copysource" href="#" class="btn copysource" data-segmentid="segment-' + this.currentSegmentId + '" title="Copy source to target"></a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p></li><li><a id="segment-' + this.currentSegmentId + '-copysource" href="#" class="btn copysource" data-segmentid="segment-' + this.currentSegmentId + '" title="Copy source to target"></a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+        var buttons = '<li><a id="segment-' + this.currentSegmentId + '-copysource" href="#" class="btn copysource" data-segmentid="segment-' + this.currentSegmentId + '" title="Copy source to target"></a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p></li><li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li><li style="margin-right:-20px"><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
 //        var buttons = '<li class="tag-mismatch" title="Tag Mismatch">Tag Mismatch</li><li><a id="segment-'+this.currentSegmentId+'-copysource" href="#" class="btn copysource" data-segmentid="segment-'+this.currentSegmentId+'" title="Copy source to target"></a><p>CTRL+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-'+this.currentSegmentId+'-button-translated" data-segmentid="segment-'+this.currentSegmentId+'" href="#" class="translated"'+disabled+' >TRANSLATED</a><p>CTRL+ENTER</p></li>';
         $('#segment-' + this.currentSegmentId + '-buttons').append(buttons);
         $('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');

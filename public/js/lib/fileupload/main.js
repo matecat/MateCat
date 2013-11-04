@@ -581,7 +581,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 					message = "Conversion Error. Try to commit changes in InDesign before importing.";
 				}
                 // temp
-                message = 'Conversion Error. Try to commit changes in InDesign before importing.';
+                message = 'Conversion Error. Try opening and saving the document with a new name.';
            		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">'+message+'</span>');
            		$(filerow).addClass('failed');
            		console.log('after message compiling');
