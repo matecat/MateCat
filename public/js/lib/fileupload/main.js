@@ -493,7 +493,7 @@ progressBar = function(filerow,start,filesize) {
 convertFile = function(fname,filerow,filesize, enforceConversion) {
 
     console.log( 'Enforce conversion: ' + enforceConversion );
-
+    firstEnforceConversion = (typeof enforceConversion === "undefined") ? false : true;
     enforceConversion = (typeof enforceConversion === "undefined") ? false : enforceConversion;
 
 //	filerow = data.context;
@@ -527,7 +527,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
         },
         type: 'POST',
         dataType: 'json',
-        context: enforceConversion,
+        context: firstEnforceConversion,
         error: function(d){
 			if($(filerow).hasClass('restarting')) {
 				$(filerow).removeClass('restarting');
