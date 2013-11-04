@@ -584,6 +584,8 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 				}
                 // temp
                 message = 'Conversion Error. Try opening and saving the document with a new name.';
+                console.log(enforceConversion);
+                console.log(typeof enforceConversion);
            		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">'+message+'</span>');
            		$(filerow).addClass('failed');
            		console.log('after message compiling');
