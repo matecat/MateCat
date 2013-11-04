@@ -527,6 +527,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
         },
         type: 'POST',
         dataType: 'json',
+        context: enforceConversion,
         error: function(d){
 			if($(filerow).hasClass('restarting')) {
 				$(filerow).removeClass('restarting');
@@ -545,6 +546,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
        		return false;
         },
         success: function(d){
+              console.log(this);
 			filerow.removeClass('converting');
 			filerow.addClass('ready');
            	if(d.code == 1) {
