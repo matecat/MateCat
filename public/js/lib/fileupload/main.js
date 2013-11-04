@@ -547,7 +547,8 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
         },
         success: function(d){
               console.log(this.context);
-			filerow.removeClass('converting');
+			falsePositive = (typeof this.context == 'undefined')? false : true;
+              filerow.removeClass('converting');
 			filerow.addClass('ready');
            	if(d.code == 1) {
 				$('.ui-progressbar-value', filerow).addClass('completed').css('width', '100%');
@@ -585,7 +586,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 					message = "Conversion Error. Try to commit changes in InDesign before importing.";
 				}
                 // temp
-                message = 'Conversion Error. Try opening and saving the document with a new name.';
+                message = (falsePositive)? '' : 'Conversion Error. Try opening and saving the document with a new name.';
                 console.log(enforceConversion);
                 console.log(typeof enforceConversion);
            		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">'+message+'</span>');
