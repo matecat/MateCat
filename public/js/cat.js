@@ -3193,8 +3193,11 @@ UI = {
         });
     },
     processErrors: function(err, operation) {
+        console.log(err);
         $.each(err, function() {
-            if((operation == 'setTranslation')||(operation == 'setContribution')) {
+            if(operation == 'setTranslation') {
+//            if((operation == 'setTranslation')||(operation == 'setContribution')) {
+                console.log(this['code']);
                 if(this['code'] != '-10') {
                     APP.alert("Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>");
                 }
