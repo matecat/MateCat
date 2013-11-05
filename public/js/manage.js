@@ -599,6 +599,8 @@ UI = {
 				'		<tbody>';
 
     		$.each(this.jobs, function() {
+            $.each(this, function() {
+
 
 		        var newJob = '    <tr class="row " data-jid="'+this.id+'" data-status="'+this.status+'" data-password="'+this.password+'">'+
 		            '        <td class="create-date" data-date="'+this.create_date+'">'+this.formatted_create_date+'</td>'+
@@ -631,7 +633,8 @@ UI = {
 		            '    </tr>';
 
 				newProject += newJob;
-    		});
+            })
+        });
 
 			newProject +='		</tbody>'+	
 	        '    </table>'+
