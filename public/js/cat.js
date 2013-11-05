@@ -701,9 +701,9 @@ UI = {
             $('.editor .sub-editor').hide();
             $('.editor .sub-editor.concordances').show();
             $('.cc-search .search-source').focus();
-        }).on('keydown', '.sub-editor .cc-search .input', 'return', function(e) {
+//        }).on('keydown', '.sub-editor .cc-search .search-source', 'return', function(e) {
             //if($(this).text().length > 2) UI.getConcordance($(this).text(), 0);
-//        }).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
+        }).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
             if(e.which == 13) { // enter
                 e.preventDefault();
                 var txt = $(this).text();
@@ -722,6 +722,7 @@ UI = {
                 }, 1000);                
 //                $('.editor .sub-editor.concordances .results').empty();
             };
+//        }).on('keydown', '.sub-editor .cc-search .search-target', 'return', function(e) {
         }).on('keydown', '.sub-editor .cc-search .search-target', function(e) {
             if(e.which == 13) {
                 e.preventDefault();
@@ -967,11 +968,11 @@ UI = {
         this.currentFileId = this.currentFile.attr('id').split('-')[1];
     },
     applySearch: function(segment) {
-        console.log("quanti result c'erano nel segmento prima di salvarlo: ", $(segment).find('mark.searchMarker').length);
+//        console.log("quanti result c'erano nel segmento prima di salvarlo: ", $(segment).find('mark.searchMarker').length);
         if(this.body.hasClass('searchActive')) this.markSearchResults({
             singleSegment: segment
         })
-        console.log("quanti result ci sono dopo nel segmento che ho appena salvato: ", $(segment).find('mark.searchMarker').length);
+//        console.log("quanti result ci sono dopo nel segmento che ho appena salvato: ", $(segment).find('mark.searchMarker').length);
     },
     changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
@@ -1180,7 +1181,7 @@ UI = {
         var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
         var buttons = '<li><a id="segment-' + this.currentSegmentId + '-copysource" href="#" class="btn copysource" data-segmentid="segment-' + this.currentSegmentId + '" title="Copy source to target"></a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p></li><li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li><li style="margin-right:-20px"><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
 //        var buttons = '<li class="tag-mismatch" title="Tag Mismatch">Tag Mismatch</li><li><a id="segment-'+this.currentSegmentId+'-copysource" href="#" class="btn copysource" data-segmentid="segment-'+this.currentSegmentId+'" title="Copy source to target"></a><p>CTRL+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-'+this.currentSegmentId+'-button-translated" data-segmentid="segment-'+this.currentSegmentId+'" href="#" class="translated"'+disabled+' >TRANSLATED</a><p>CTRL+ENTER</p></li>';
-        $('#segment-' + this.currentSegmentId + '-buttons').append(buttons);
+        $('#segment-' + this.currentSegmentId + '-buttons').empty().append(buttons);
         $('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
 //      $('#segment-'+this.currentSegmentId+'-buttons').append(buttons);
 
@@ -1194,6 +1195,7 @@ UI = {
         var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li><li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc"><a tabindex="-1" href="#">Concordance</a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div><div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances"><div class="overflow"><div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div><div class="results"></div></div></div>';
         $('.footer', segment).html(footer);
         if(($(segment).hasClass('loaded'))&&($(segment).find('.matches .overflow').text() == '')) {
+            $('.sub-editor.matches .overflow .graysmall.message', segment).remove();
             $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');            
         };
     },
@@ -2403,8 +2405,8 @@ UI = {
         segment = this.currentSegment;
         segment_id = this.currentSegmentId;
         $('.sub-editor.concordances .overflow .results', segment).empty();
+        $('.sub-editor.concordances .overflow .message', segment).remove();
         if(d.data.matches.length) {
-            $('.sub-editor.concordances .overflow .message', segment).remove();
             $.each(d.data.matches, function(index) {
                 if ((this.segment == '') || (this.translation == ''))
                     return;
