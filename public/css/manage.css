@@ -597,10 +597,19 @@ body.manage .id-project
 	}
 
 body.manage .urls .langs
-	{
-	font-size: 120%;
-	}
-	
+    {
+    font-size: 120%;
+    display: inline;
+    }
+body.manage .urls .jobdata
+    {
+    float: left;
+    font-size: 120%;
+    font-weight: bold;
+    width: 70px;
+    margin-top: 2px;
+    
+    }	
 body.manage #display
 	{
 	display: inline-block;
