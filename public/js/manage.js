@@ -599,15 +599,18 @@ UI = {
 				'		<tbody>';
 
     		$.each(this.jobs, function() {
+            var prefix = (APP.objectSize(this) > 1)? true : false;
+            var ind = 0;
             $.each(this, function() {
-
+                ind++;
 
 		        var newJob = '    <tr class="row " data-jid="'+this.id+'" data-status="'+this.status+'" data-password="'+this.password+'">'+
 		            '        <td class="create-date" data-date="'+this.create_date+'">'+this.formatted_create_date+'</td>'+
 		            '        <td class="job-detail">'+
 		            '        	<span class="urls">'+
+		            '        		<div class="jobdata">'+this.id+((prefix)? '-'+ind : '')+'</div>'+
 		            '        		<div class="langs">'+this.sourceTxt+'&nbsp;&gt;&nbsp;'+this.targetTxt+'</div>'+
-		            '        		<a class="url" target="_blank" href="/translate/'+project.name+'/'+this.source+'-'+this.target+'/'+this.id+'-'+this.password+'">'+config.hostpath+'/translate/.../'+this.id+'-'+this.password+'</a>'+
+		            '        		<a class="url" target="_blank" href="/translate/'+project.name+'/'+this.source+'-'+this.target+'/'+this.id+((prefix)? '-'+ind : '')+'-'+this.password+'">'+config.hostpath+'/translate/.../'+this.id+((prefix)? '-'+ind : '')+'-'+this.password+'</a>'+
 		            '        	</span>'+
 		            '        </td>';
 
@@ -703,6 +706,6 @@ function setBrowserHistoryBehavior() {
 $(document).ready(function(){
     setBrowserHistoryBehavior();
     UI.render(true);
-	UI.init();
+    UI.init();
 });
 
