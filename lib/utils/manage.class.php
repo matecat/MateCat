@@ -52,10 +52,19 @@ class ManageUtils {
             $project[ 'mt_engine_name' ] = $item[ 'mt_engine_name' ];
 
 			$jobs_strings = explode(',',$item['job']);
+
+            $tmp_job_4_ordering = array();
+
 			foreach ($jobs_strings as $job_string) {
 				$job = array();
 				$job_array = explode('##',$job_string);
+
 				$job['id']= $job_array[0];
+
+                if( !isset( $tmp_job_4_ordering ) ){
+                    $tmp_job_4_ordering[ $job['id'] ] = array();
+                }
+
 				$job['source']= $job_array[1];
 				$job['target']= $job_array[2];
 				$job['sourceTxt'] = $lang_handler->getLocalizedName($job['source']);
@@ -81,6 +90,9 @@ class ManageUtils {
 					$job['formatted_create_date']='Today, '.date('H:i',strtotime($job_array[3]));
 				}
 
+                $job['job_first_segment'] = $job_array[8];
+                $job['job_last_segment']  = $job_array[9];
+
 				$job['password'] = $job_array[4];
 
 				$job['stats'] = $statsByJobId[ $job['id'] . "-" . $job['password'] ];
@@ -93,14 +105,23 @@ class ManageUtils {
 				$project['has_cancelled']=($job['status'] == 'cancelled')? 1 : $project['has_cancelled'];
 				$project['has_archived']=($job['status'] == 'archived')? 1 : $project['has_archived'];
 
-				$project['jobs'][]=$job;
+                $tmp_job_4_ordering[ $job['id'] ][ $job['job_first_segment'] ] = $job;
+
 			}
-//			usort($project['jobs'], "cmp");
+
+            /**
+             * @var $tmp_j &array
+             */
+            foreach( $tmp_job_4_ordering as &$tmp_j ){
+                ksort( $tmp_j );
+            }
+
+            $project['jobs'] = $tmp_job_4_ordering;
+
 			$project['no_active_jobs'] = ($project['no_active_jobs'])? ' allCancelled' : '';
 			$projects[]=$project;
-			
-		}
 
+		}
 		return $projects;
 	}
 }

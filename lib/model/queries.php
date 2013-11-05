@@ -799,16 +799,6 @@ function getStatsForMultipleJobs( $_jids ) {
     $jobs_stats = $tmp_jobs_stats;
     unset( $tmp_jobs_stats );
 
-    //cycle on results to ensure sanitization
-    foreach ( $_jids as $jid ) {
-        //if no stats for that job id
-        if ( !isset( $tmp_jobs_found[ $jid ] ) ) {
-            $res = $db->query_first( "SELECT password FROM jobs where id = $jid" );
-            //add dummy empty stats
-            $jobs_stats[ $jid . "-" . $res['password'] ] = array( 'TOTAL' => 1.00, 'DRAFT' => 0.00, 'REJECTED' => 0.00, 'TRANSLATED' => 0.00, 'APPROVED' => 0.00, 'id' => $jid, 'password' => $res['password'] );
-        }
-    }
-
     return $jobs_stats;
 }
 
@@ -1317,7 +1307,7 @@ log::doLog('STATUS QUERY:',$status_query);
     $filter_query = preg_replace( '/( and)$/i', '', $filter_query );
 
     $query = "select p.id as pid, p.name, p.password, j.id_mt_engine, j.id_tms, p.tm_analysis_wc,
-		group_concat(j.id,'##', j.source,'##',j.target,'##',j.create_date,'##',j.password,'##',e.name,'##',if (t.mymemory_api_key is NUll,'',t.mymemory_api_key),'##',j.status_owner) as job 
+		group_concat(j.id,'##', j.source,'##',j.target,'##',j.create_date,'##',j.password,'##',e.name,'##',if (t.mymemory_api_key is NUll,'',t.mymemory_api_key),'##',j.status_owner,'##',j.job_first_segment,'##',j.job_last_segment) as job
 
             , e.name as mt_engine_name
 
