@@ -701,9 +701,9 @@ UI = {
             $('.editor .sub-editor').hide();
             $('.editor .sub-editor.concordances').show();
             $('.cc-search .search-source').focus();
-        }).on('keydown', '.sub-editor .cc-search .input', 'return', function(e) {
+//        }).on('keydown', '.sub-editor .cc-search .search-source', 'return', function(e) {
             //if($(this).text().length > 2) UI.getConcordance($(this).text(), 0);
-//        }).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
+        }).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
             if(e.which == 13) { // enter
                 e.preventDefault();
                 var txt = $(this).text();
@@ -722,6 +722,7 @@ UI = {
                 }, 1000);                
 //                $('.editor .sub-editor.concordances .results').empty();
             };
+//        }).on('keydown', '.sub-editor .cc-search .search-target', 'return', function(e) {
         }).on('keydown', '.sub-editor .cc-search .search-target', function(e) {
             if(e.which == 13) {
                 e.preventDefault();
