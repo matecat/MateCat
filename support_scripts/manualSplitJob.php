@@ -1,8 +1,8 @@
 <?php
-$r=dirname( dirname(__FILE__) ); 
+$r=dirname( dirname(__FILE__) );
 include "$r/inc/config.inc.php";
 if (isset($argv[1]) && $argv[1]!="--apply"){
-	die ("Usage $argv[0] [--apply]");
+    die ("Usage $argv[0] [--apply]");
 }
 $apply_split=isset($argv[1]) && $argv[1]=="--apply";
 
@@ -31,7 +31,7 @@ $pStruct[ 'job_to_split_pass' ]           = '526a7bbdf026952043998601';
 $pm->getSplitData( $pStruct, 5 );
 
 if ($apply_script){
-	$pm->applySplit($pStruct);
+    $pm->applySplit($pStruct);
 }
 
 

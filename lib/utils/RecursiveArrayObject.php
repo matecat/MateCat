@@ -18,7 +18,7 @@ class RecursiveArrayObject extends ArrayObject {
      * @param int  $flag
      * @param string  $iteratorClass
      */
-    public function __construct( Array $array, $flag = 0, $iteratorClass = 'ArrayIterator' ) {
+    public function __construct( Array $array = array(), $flag = 0, $iteratorClass = 'ArrayIterator' ) {
         foreach ( $array as $key => $value ) {
             if ( is_array( $value ) ) {
                 $value = new static( $value, $flag, $iteratorClass );
