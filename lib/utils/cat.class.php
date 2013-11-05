@@ -719,20 +719,18 @@ class CatUtils {
      */
     public static function generate_password( $length = 16 ) {
 
-        //base64: "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/=",
-        //remove unwanted characters +/ these chars create unwanted behaviours in uri
+        $pwd = md5( uniqid('',true) );
+        $pwd = substr( $pwd, 0, 6 ) . substr( $pwd, -6, 6 );
 
-        $uniqid = uniqid('',true);
-        $pwd = str_replace( array( "/", '+' ), array( "@", "!" ), base64_encode( pack( "H*", str_replace(".","20",$uniqid) ) ) );
-
-        if( $length > 16 ){
+        if( $length > 12 ){
             while( strlen($pwd) < $length ){
-                $pwd .= md5( self::generate_password() );
+                $pwd .= self::generate_password();
             }
             $pwd = substr( $pwd, 0, $length );
         }
 
         return $pwd;
+
     }
 
 }

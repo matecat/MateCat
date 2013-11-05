@@ -954,6 +954,7 @@ function getEditLog( $jid, $pass ) {
 			j.password = '$pass' AND
 			translation IS NOT NULL AND
 			st.status<>'NEW'
+			AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
 			ORDER BY tte DESC
 			LIMIT 5000";
 
