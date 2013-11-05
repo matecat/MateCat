@@ -164,7 +164,7 @@ class TMS extends Engine {
         $parameters['langpair'] = "$source_lang|$target_lang";
         $parameters['de'] = $email;
         if (!empty($id_user)) {
-            $parameters['user'] = $id_user;
+         //   $parameters['user'] = $id_user;
             $parameters['key'] = $this->calculateMyMemoryKey($id_user);
         }
 

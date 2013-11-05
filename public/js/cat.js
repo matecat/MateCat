@@ -122,6 +122,12 @@ UI = {
         }).bind('keydown', 'Meta+return', function(e) {
             e.preventDefault();
             $('.editor .translated').click();
+        }).bind('keydown', 'Ctrl+shift+return', function(e) {
+            e.preventDefault();
+            $('.editor .next-untranslated').click();
+        }).bind('keydown', 'Meta+shift+return', function(e) {
+            e.preventDefault();
+            $('.editor .next-untranslated').click();
         }).bind('keydown', 'Ctrl+pageup', function(e) {
             e.preventDefault();
 //            alert('pageup');
@@ -616,7 +622,8 @@ UI = {
             UI.currentSelectedText = false;
             UI.currentSearchInTarget = false;
             $('#contextMenu').hide();
-        }).on('click', 'a.translated', function(e) {
+        }).on('click', 'a.translated, a.next-untranslated', function(e) {
+            var w = ($(this).hasClass('translated'))? 'translated' : 'next-untranslated';
             e.preventDefault();
             if(!UI.segmentIsLoaded(UI.nextSegmentId)) {
                 UI.changeStatus(this, 'translated', 0);
@@ -639,8 +646,11 @@ UI = {
 
             UI.unlockTags();
             UI.setStatusButtons(this);
-//            console.log(UI.nextSegment);
-            $(".editarea", UI.nextSegment).trigger("click", "translated");
+            if(w == 'translated') {
+                UI.gotoNextSegment();
+            } else {
+                $(".editarea", UI.nextSegment).trigger("click", "translated");
+            }
             UI.changeStatus(this, 'translated', 0);
 
             UI.markTags();
@@ -708,7 +718,7 @@ UI = {
 //            UI.placeCaretAtEnd($('.editor .cc-search .search-source').get());
         }).on('keydown', '.sub-editor .cc-search .input', 'return', function(e) {
             //if($(this).text().length > 2) UI.getConcordance($(this).text(), 0);
-        }).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
+//        }).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
             if(e.which == 13) { // enter
                 e.preventDefault();
                 var txt = $(this).text();
@@ -1185,7 +1195,7 @@ UI = {
     },
     createButtons: function() {
         var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
-        var buttons = '<li><a id="segment-' + this.currentSegmentId + '-copysource" href="#" class="btn copysource" data-segmentid="segment-' + this.currentSegmentId + '" title="Copy source to target"></a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+        var buttons = '<li><a id="segment-' + this.currentSegmentId + '-copysource" href="#" class="btn copysource" data-segmentid="segment-' + this.currentSegmentId + '" title="Copy source to target"></a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p></li><li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li><li style="margin-right:-20px"><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
 //        var buttons = '<li class="tag-mismatch" title="Tag Mismatch">Tag Mismatch</li><li><a id="segment-'+this.currentSegmentId+'-copysource" href="#" class="btn copysource" data-segmentid="segment-'+this.currentSegmentId+'" title="Copy source to target"></a><p>CTRL+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-'+this.currentSegmentId+'-button-translated" data-segmentid="segment-'+this.currentSegmentId+'" href="#" class="translated"'+disabled+' >TRANSLATED</a><p>CTRL+ENTER</p></li>';
         $('#segment-' + this.currentSegmentId + '-buttons').empty().append(buttons);
         if(!$('#segment-' + this.currentSegmentId + ' .text .warnings').length) $('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
@@ -2434,28 +2444,21 @@ UI = {
     renderConcordances: function(d, in_target) {
         segment = this.currentSegment;
         segment_id = this.currentSegmentId;
-        $('.sub-editor.concordances .overflow .results', segment).empty();
-        if(d.data.matches.length) {
-            $('.sub-editor.concordances .overflow .message', segment).remove();
-            $.each(d.data.matches, function(index) {
-                if ((this.segment == '') || (this.translation == ''))
-                    return;
-                var disabled = (this.id == '0') ? true : false;
-                cb = this['created_by'];
-                cl_suggestion = UI.getPercentuageClass(this['match']);
-                var leftTxt = (in_target)? this.translation : this.segment;
-                leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");
-                leftTxt = leftTxt.replace(/\}\#/gi, "</mark>");
-                var rightTxt = (in_target)? this.segment : this.translation;
-                rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
-                rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
-                $('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
-            });
-        } else {
-            console.log('no matches');
-            $('.sub-editor.concordances .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');
-        }
-
+        $('.sub-editor.concordances .overflow .results', segment).empty();        
+        $.each(d.data.matches, function(index) {
+            if ((this.segment == '') || (this.translation == ''))
+                return;
+            var disabled = (this.id == '0') ? true : false;
+            cb = this['created_by'];
+            cl_suggestion = UI.getPercentuageClass(this['match']);
+            var leftTxt = (in_target)? this.translation : this.segment;
+            leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");
+            leftTxt = leftTxt.replace(/\}\#/gi, "</mark>");
+            var rightTxt = (in_target)? this.segment : this.translation;
+            rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
+            rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
+            $('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+        });
         $('.cc-search', this.currentSegment).removeClass('loading');
         this.setDeleteSuggestion(segment);
     },
@@ -3226,8 +3229,11 @@ UI = {
         });
     },
     processErrors: function(err, operation) {
+        console.log(err);
         $.each(err, function() {
-            if((operation == 'setTranslation')||(operation == 'setContribution')) {
+            if(operation == 'setTranslation') {
+//            if((operation == 'setTranslation')||(operation == 'setContribution')) {
+                console.log(this['code']);
                 if(this['code'] != '-10') {
                     APP.alert("Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>");
                 }
