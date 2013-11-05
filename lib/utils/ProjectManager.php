@@ -398,7 +398,7 @@ class ProjectManager {
 
     }
 
-    protected function _cloneJob( ArrayObject $projectStructure ){
+    protected function _splitJob( ArrayObject $projectStructure ){
 
         $query_job = "SELECT * FROM jobs WHERE id = %u AND password = '%s'";
         $query_job = sprintf( $query_job, $projectStructure[ 'job_to_split' ], $projectStructure[ 'job_to_split_pass' ] );
@@ -411,7 +411,7 @@ class ProjectManager {
 
         foreach( $projectStructure['split_result']['chunks'] as $chunk => $contents ){
 
-            //IF THIS IS NOT the original job
+            //IF THIS IS NOT the original job, DELETE relevant fields
             if( $contents['segment_start'] != $projectStructure['split_result']['job_first_segment'] ){
                 //next insert
                 $jobInfo['password'] =  $this->_generatePassword();
@@ -453,7 +453,7 @@ class ProjectManager {
     }
 
     public function applySplit( ArrayObject $projectStructure ){
-        $this->_cloneJob( $projectStructure );
+        $this->_splitJob( $projectStructure );
     }
 
     protected function _extractSegments( $files_path_name, $fid ){
