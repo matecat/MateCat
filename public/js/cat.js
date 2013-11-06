@@ -714,11 +714,10 @@ UI = {
             $(this).addClass('active');
             $('.editor .sub-editor').hide();
             $('.editor .sub-editor.concordances').show();
-            $('.editor .cc-search .search-source').focus();
-//            UI.placeCaretAtEnd($('.editor .cc-search .search-source').get());
-        }).on('keydown', '.sub-editor .cc-search .input', 'return', function(e) {
+            $('.cc-search .search-source').focus();
+//        }).on('keydown', '.sub-editor .cc-search .search-source', 'return', function(e) {
             //if($(this).text().length > 2) UI.getConcordance($(this).text(), 0);
-//        }).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
+        }).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
             if(e.which == 13) { // enter
                 e.preventDefault();
                 var txt = $(this).text();
@@ -737,6 +736,7 @@ UI = {
                 }, 1000);                
 //                $('.editor .sub-editor.concordances .results').empty();
             };
+//        }).on('keydown', '.sub-editor .cc-search .search-target', 'return', function(e) {
         }).on('keydown', '.sub-editor .cc-search .search-target', function(e) {
             if(e.which == 13) {
                 e.preventDefault();
@@ -1198,7 +1198,7 @@ UI = {
         var buttons = '<li><a id="segment-' + this.currentSegmentId + '-copysource" href="#" class="btn copysource" data-segmentid="segment-' + this.currentSegmentId + '" title="Copy source to target"></a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p></li><li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li><li style="margin-right:-20px"><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
 //        var buttons = '<li class="tag-mismatch" title="Tag Mismatch">Tag Mismatch</li><li><a id="segment-'+this.currentSegmentId+'-copysource" href="#" class="btn copysource" data-segmentid="segment-'+this.currentSegmentId+'" title="Copy source to target"></a><p>CTRL+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-'+this.currentSegmentId+'-button-translated" data-segmentid="segment-'+this.currentSegmentId+'" href="#" class="translated"'+disabled+' >TRANSLATED</a><p>CTRL+ENTER</p></li>';
         $('#segment-' + this.currentSegmentId + '-buttons').empty().append(buttons);
-        if(!$('#segment-' + this.currentSegmentId + ' .text .warnings').length) $('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
+        $('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
 //      $('#segment-'+this.currentSegmentId+'-buttons').append(buttons);
 
     },
@@ -1211,6 +1211,7 @@ UI = {
         var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li><li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc"><a tabindex="-1" href="#">Concordance</a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div><div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances"><div class="overflow"><div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div><div class="results"></div></div></div>';
         $('.footer', segment).html(footer);
         if(($(segment).hasClass('loaded'))&&($(segment).find('.matches .overflow').text() == '')) {
+            $('.sub-editor.matches .overflow .graysmall.message', segment).remove();
             $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');            
         };
     },
@@ -2444,21 +2445,28 @@ UI = {
     renderConcordances: function(d, in_target) {
         segment = this.currentSegment;
         segment_id = this.currentSegmentId;
-        $('.sub-editor.concordances .overflow .results', segment).empty();        
-        $.each(d.data.matches, function(index) {
-            if ((this.segment == '') || (this.translation == ''))
-                return;
-            var disabled = (this.id == '0') ? true : false;
-            cb = this['created_by'];
-            cl_suggestion = UI.getPercentuageClass(this['match']);
-            var leftTxt = (in_target)? this.translation : this.segment;
-            leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");
-            leftTxt = leftTxt.replace(/\}\#/gi, "</mark>");
-            var rightTxt = (in_target)? this.segment : this.translation;
-            rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
-            rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
-            $('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
-        });
+        $('.sub-editor.concordances .overflow .results', segment).empty();
+        $('.sub-editor.concordances .overflow .message', segment).remove();
+        if(d.data.matches.length) {
+            $.each(d.data.matches, function(index) {
+                if ((this.segment == '') || (this.translation == ''))
+                    return;
+                var disabled = (this.id == '0') ? true : false;
+                cb = this['created_by'];
+                cl_suggestion = UI.getPercentuageClass(this['match']);
+                var leftTxt = (in_target)? this.translation : this.segment;
+                leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");
+                leftTxt = leftTxt.replace(/\}\#/gi, "</mark>");
+                var rightTxt = (in_target)? this.segment : this.translation;
+                rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
+                rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
+                $('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+            });
+        } else {
+            console.log('no matches');
+            $('.sub-editor.concordances .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');
+        }
+
         $('.cc-search', this.currentSegment).removeClass('loading');
         this.setDeleteSuggestion(segment);
     },
@@ -3120,6 +3128,7 @@ UI = {
             data: {
                 action: 'getWarning',
                 id_job: config.job_id,
+                password: config.password,
                 token: token
             },
             success: function(data) {
@@ -3165,6 +3174,7 @@ UI = {
                 action: 'getWarning',
                 id: this.currentSegmentId,
                 token: token,
+                password: config.password,
                 src_content: src_content,
                 trg_content: trg_content
             },

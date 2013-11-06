@@ -19,6 +19,7 @@ class getWarningController extends ajaxcontroller {
             'id_job'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'src_content' => array( 'filter' => FILTER_UNSAFE_RAW ),
             'trg_content' => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'password'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'token'       => array( 'filter' => FILTER_SANITIZE_STRING,
                                     'flags'  => FILTER_FLAG_STRIP_LOW ),
 
@@ -80,7 +81,7 @@ class getWarningController extends ajaxcontroller {
      * </pre>
      */
     private function __globalWarningsCall() {
-        $result                  = getWarning( $this->__postInput->id_job );
+        $result                  = getWarning( $this->__postInput->id_job, $this->__postInput->password );
 
         foreach ( $result as $position => &$item ) {
 
