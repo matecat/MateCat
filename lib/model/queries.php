@@ -925,8 +925,11 @@ function getOriginalFile($id_file) {
     return $results;
 }
 
-function getUpdatedTranslations($timestamp, $first_segment, $last_segment, $ref_segment) {
-    $query = "select id_segment as sid, status,translation from segment_translations where translation_date > '$timestamp'";
+function getUpdatedTranslations($timestamp, $first_segment, $last_segment) {
+    $query = "SELECT id_segment as sid, status,translation from segment_translations 
+                WHERE 
+                id_segment in ($first_segment,$last_segment) AND
+                translation_date > FROM_UNIXTIME($timestamp)";
     $db = Database::obtain();
     $results = $db->fetch_array($query);
 
