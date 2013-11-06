@@ -348,13 +348,14 @@ function getFirstSegmentOfFilesInJob( $jid ) {
     return $results;
 }
 
-function getWarning( $jid ) {
+function getWarning( $jid, $jpassword ) {
     $db  = Database::obtain();
     $jid = $db->escape( $jid );
 
     $query = "SELECT id_segment, serialized_errors_list
                 FROM segment_translations
                 WHERE id_job = $jid
+                AND password = '$jpassword'
                 AND warning != 0";
 
     $results = $db->fetch_array( $query );
@@ -794,7 +795,7 @@ function getStatsForMultipleJobs( $_jids ) {
     //convert result to ID based index
     foreach ( $jobs_stats as $job_stat ) {
         $tmp_jobs_stats[ $job_stat[ 'id' ] . "-" . $job_stat[ 'password' ] ] = $job_stat;
-        $tmp_jobs_found[ $job_stat[ 'id' ] ] = true;
+        //$tmp_jobs_found[ $job_stat[ 'id' ] ] = true;
     }
     $jobs_stats = $tmp_jobs_stats;
     unset( $tmp_jobs_stats );
@@ -1144,7 +1145,7 @@ function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $con
         $maxp = $db->query_first( 'SELECT @@global.max_allowed_packet' );
         log::doLog( "max_allowed_packet: " . $maxp . " > try Upgrade to 500MB" );
         // to set the max_allowed_packet to 500MB
-        //FIXME User matecat han no superuser privileges
+        //FIXME User matecat has no superuser privileges
         //ERROR 1227 (42000): Access denied; you need (at least one of) the SUPER privilege(s) for this operation
         $db->query( 'SET @@global.max_allowed_packet = ' . 500 * 1024 * 1024 );
         $db->insert( 'files', $data );

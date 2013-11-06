@@ -15,13 +15,13 @@ class ManageUtils {
 		//fetching stats
 		//harvest IDs
 		foreach ($data as $item) {
-			$tmp_jobs_strings = explode(',',$item['job']);
-			foreach ($tmp_jobs_strings as $job_string) {
-				$tmp_job_array = explode('##',$job_string);
-				$jobById[]= $tmp_job_array[0];
+			$tmp_jobs_strings = explode( ',',$item['job'] );
+			foreach ( $tmp_jobs_strings as $job_string ) {
+				$tmp_job_array = explode( '##', $job_string );
+				$jobById[] = $tmp_job_array[0];
 			}
 		}
-		unset($tmp_job_array,$tmp_jobs_strings,$job_string);
+		unset( $tmp_job_array, $tmp_jobs_strings, $job_string );
 
 		//fetch id_job -> stats map
 
@@ -35,7 +35,7 @@ class ManageUtils {
 
 		foreach ($data as $item) {
 
-			$start_time_loop=microtime(true);
+            $start_time_loop=microtime(true);
 			$project = array();
 			$project['id'] = $item['pid'];
 			$project['name'] = $item['name'];
@@ -58,6 +58,15 @@ class ManageUtils {
 			foreach ($jobs_strings as $job_string) {
 				$job = array();
 				$job_array = explode('##',$job_string);
+
+
+                /**
+                 *
+                 * Skip projects/jobs without segments... failed imports/extractions
+                 */
+                if( !isset( $statsByJobId[ $job_array[0] . "-" . $job_array[4] ] ) ){
+                    continue 2;
+                }
 
 				$job['id']= $job_array[0];
 
