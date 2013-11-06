@@ -708,6 +708,17 @@ UI = {
                 e.preventDefault();
                 var txt = $(this).text();
                 if(txt.length > 2) UI.getConcordance(txt, 0);
+            } else {
+                if($('.editor .sub-editor .cc-search .search-target').text().length > 0) {
+                    $('.editor .sub-editor .cc-search .search-target').text('');
+                    $('.editor .sub-editor.concordances .results').empty();
+                };
+            };
+/*
+            if(e.which == 13) { // enter
+                e.preventDefault();
+                var txt = $(this).text();
+                if(txt.length > 2) UI.getConcordance(txt, 0);
             } else if(e.which == 9) {
             } else {
                 if($('.editor .sub-editor .cc-search .search-target').text().length > 0) {
@@ -722,8 +733,20 @@ UI = {
                 }, 1000);                
 //                $('.editor .sub-editor.concordances .results').empty();
             };
+*/
 //        }).on('keydown', '.sub-editor .cc-search .search-target', 'return', function(e) {
         }).on('keydown', '.sub-editor .cc-search .search-target', function(e) {
+            if(e.which == 13) {
+                e.preventDefault();
+                var txt = $(this).text();
+                if(txt.length > 2) UI.getConcordance(txt, 1);
+            } else {
+                if($('.editor .sub-editor .cc-search .search-source').text().length > 0) {
+                    $('.editor .sub-editor .cc-search .search-source').text('');
+                    $('.editor .sub-editor.concordances .results').empty();
+                };
+            };
+/*
             if(e.which == 13) {
                 e.preventDefault();
                 var txt = $(this).text();
@@ -740,6 +763,7 @@ UI = {
                 }, 1000);
 //                $('.editor .sub-editor.concordances .results').empty();
             };
+*/
         }).on('paste', '.editarea', function(e) {
             UI.saveInUndoStack('paste');
             $('#placeHolder').remove();
