@@ -41,6 +41,8 @@ UI = {
         this.nextSegmentIdByServer = 0;
         this.cursorPlaceholder = '[[placeholder]]';
         this.tempViewPoint = '';
+        this.checkUpdatesEvery = 180000;
+        this.autoUpdateEnabled = true;
 
         /**
          * Global Warnings array definition.
@@ -67,6 +69,13 @@ UI = {
 //        var openCurrentSegmentAfter = ((!seg)&&(!this.firstLoad))? true : false;
 //        if((!seg)&&(!this.firstLoad)) this.gotoSegment(this.currentSegmentId);
         UI.getSegments(options);
+        if(this.firstLoad&&this.autoUpdateEnabled) {
+            this.lastUpdateRequested = new Date();
+            setTimeout(function() {
+                UI.getUpdates();
+            }, UI.checkUpdatesEvery);         
+        }
+
 //        UI.getSegments(openCurrentSegmentAfter);
     },
     init: function() {
@@ -1988,7 +1997,6 @@ UI = {
     getSegments_success: function(d,options) {
         if(d.error.length) 
             this.processErrors(d.error, 'getSegments');
-        
         where = d.data['where'];
         $.each(d.data['files'], function() {
             startSegmentId = this['segments'][0]['sid'];
@@ -2046,6 +2054,39 @@ UI = {
     getSegmentTarget: function(seg) {
         editarea = (typeof seg == 'undefined')? this.editarea : $('.editarea', seg);
         return editarea.text();
+    },
+    getUpdates: function() {
+        if(UI.chunkedSegmentsLoaded()) {
+            lastUpdateRequested = UI.lastUpdateRequested;
+            UI.lastUpdateRequested = new Date();
+            APP.doRequest({
+                data: {
+                    action: 'getUpdatedTranslations',
+                    last_timestamp: lastUpdateRequested.getTime(),
+                    first_segment: $('section').first().attr('id').split('-')[1],
+                    last_segment: $('section').last().attr('id').split('-')[1]
+                },
+                success: function(d) {
+                UI.lastUpdateRequested = new Date();
+                    UI.updateSegments(d.data);
+                }
+            });                    
+        }
+
+        setTimeout(function() {
+            UI.getUpdates();
+        }, UI.checkUpdatesEvery);   
+    },
+    updateSegments: function(segments) {
+        $.each(segments, function() {
+            seg = $('#segment-'+this.sid);
+            $('.editarea, .area', seg).text(this.translation);
+            if(UI.body.hasClass('searchActive')) UI.markSearchResults({
+                singleSegment: segment
+            })
+            status = (this.status == 'DRAFT')? 'draft' : (this.status == 'TRANSLATED')? 'translated' : (this.status == 'APPROVED')? 'approved' : (this.status == 'REJECTED')? 'rejected' : '';
+            UI.setStatus(seg, status);
+        });         
     },
     test: function(params) {
         console.log('params: ', params);
@@ -2999,6 +3040,9 @@ UI = {
         $('#stat-todo strong').html(t_formatted);
         $('#stat-wph strong').html(wph);
         $('#stat-completion strong').html(completion);
+    },
+    chunkedSegmentsLoaded: function() {
+        return $('section.readonly').length;
     },
     setStatus: function(segment, status) {
         segment.removeClass("status-draft status-translated status-approved status-rejected status-new").addClass("status-" + status);

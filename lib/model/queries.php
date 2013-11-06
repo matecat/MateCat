@@ -930,7 +930,20 @@ function getOriginalFile( $id_file ) {
     return $results;
 }
 
-function getEditLog( $jid, $pass ) {
+function getUpdatedTranslations($timestamp, $first_segment, $last_segment) {
+    $query = "SELECT id_segment as sid, status,translation from segment_translations 
+                WHERE
+                id_segment BETWEEN $first_segment AND $last_segment
+                AND translation_date > FROM_UNIXTIME($timestamp)";
+    
+    log::doLog($query);
+    $db = Database::obtain();
+    $results = $db->fetch_array($query);
+
+    return $results;
+}
+
+function getEditLog($jid, $pass) {
 
     $query = "SELECT
 		s.id as sid,
