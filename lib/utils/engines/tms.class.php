@@ -134,9 +134,18 @@ class TMS extends Engine {
         }
     }
 
-    public function get($segment, $source_lang, $target_lang, $email = "", $mt = 1, $id_user = "", $num_results=3, $mt_only = false, $isConcordance = false ) {
+    public function get($segment, $source_lang, $target_lang, $email = "", $mt = 1, $id_user = "", $num_results = 3, $mt_only = false, $isConcordance = false) {
         $parameters = array();
         $parameters['q'] = $segment;
+
+        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance FIX : it 
+        //does not handle properly iso code (en-US)-- COMMIT BUT MUST BE FIXED IN MYMEMORY
+        if ($isConcordance) {
+            list( $source_lang, $trash ) = explode('-', $source_lang);
+            list( $target_lang, $trash ) = explode('-', $target_lang);
+        }
+        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance FIX -- 
+        
         $parameters['langpair'] = "$source_lang|$target_lang";
         $parameters['de'] = $email;
         $parameters['mt'] = $mt;
@@ -164,7 +173,7 @@ class TMS extends Engine {
         $parameters['langpair'] = "$source_lang|$target_lang";
         $parameters['de'] = $email;
         if (!empty($id_user)) {
-         //   $parameters['user'] = $id_user;
+            //   $parameters['user'] = $id_user;
             $parameters['key'] = $this->calculateMyMemoryKey($id_user);
         }
 
@@ -176,7 +185,7 @@ class TMS extends Engine {
         return true;
     }
 
-    public function delete($segment, $translation, $source_lang, $target_lang,  $id_user = "",$email = "") {
+    public function delete($segment, $translation, $source_lang, $target_lang, $id_user = "", $email = "") {
         $parameters = array();
         $parameters['seg'] = $segment;
         $parameters['tra'] = $translation;
