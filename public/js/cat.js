@@ -41,6 +41,8 @@ UI = {
         this.nextSegmentIdByServer = 0;
         this.cursorPlaceholder = '[[placeholder]]';
         this.tempViewPoint = '';
+        this.checkUpdatesEvery = 5000;
+        this.autoUpdateEnabled = true;
 
         /**
          * Global Warnings array definition.
@@ -67,11 +69,11 @@ UI = {
 //        var openCurrentSegmentAfter = ((!seg)&&(!this.firstLoad))? true : false;
 //        if((!seg)&&(!this.firstLoad)) this.gotoSegment(this.currentSegmentId);
         UI.getSegments(options);
-        if(this.firstLoad) {
+        if(this.firstLoad&&this.autoUpdateEnabled) {
             this.lastUpdateRequested = new Date();
             setTimeout(function() {
                 UI.getUpdates();
-            }, 5000);         
+            }, UI.checkUpdatesEvery);         
         }
 
 //        UI.getSegments(openCurrentSegmentAfter);
@@ -2054,30 +2056,37 @@ UI = {
         return editarea.text();
     },
     getUpdates: function() {
-//        console.log(UI.lastUpdateRequested.getTime());
-//        console.log($.datepicker.formatDate('yyyy-mm-dd hh:mm:ss', UI.lastUpdateRequested));
-//        console.log(UI.lastUpdateRequested.format("yyyy-mm-dd"));
-        // simulated call to getUpdatedTranslations
-        APP.doRequest({
-            data: {
-                action: 'getUpdatedTranslations',
-                last_timestamp: UI.lastUpdateRequested.getTime(),
-                first_segment: $('section').first().attr('id').split('-')[1],
-                last_segment: $('section').last().attr('id').split('-')[1]
-            },
-            success: function(d) {
-                UI.updateSegments(d);
-            }
-        });        
-        
-        setTimeout(function() {
+        if(UI.chunkedSegmentsLoaded()) {
+            lastUpdateRequested = UI.lastUpdateRequested;
             UI.lastUpdateRequested = new Date();
-            UI.getUpdates();
-        }, 5000);   
-    },
-    updateSegments: function(d) {
-                console.log(d);
+            APP.doRequest({
+                data: {
+                    action: 'getUpdatedTranslations',
+                    last_timestamp: lastUpdateRequested.getTime(),
+                    first_segment: $('section').first().attr('id').split('-')[1],
+                    last_segment: $('section').last().attr('id').split('-')[1]
+                },
+                success: function(d) {
+                UI.lastUpdateRequested = new Date();
+                    UI.updateSegments(d.data);
+                }
+            });                    
+        }
 
+        setTimeout(function() {
+            UI.getUpdates();
+        }, UI.checkUpdatesEvery);   
+    },
+    updateSegments: function(segments) {
+        $.each(segments, function() {
+            seg = $('#segment-'+this.sid);
+            $('.editarea, .area', seg).text(this.translation);
+            if(UI.body.hasClass('searchActive')) UI.markSearchResults({
+                singleSegment: segment
+            })
+            status = (this.status == 'DRAFT')? 'draft' : (this.status == 'TRANSLATED')? 'translated' : (this.status == 'APPROVED')? 'approved' : (this.status == 'REJECTED')? 'rejected' : '';
+            UI.setStatus(seg, status);
+        });         
     },
     test: function(params) {
         console.log('params: ', params);
@@ -3031,6 +3040,9 @@ UI = {
         $('#stat-todo strong').html(t_formatted);
         $('#stat-wph strong').html(wph);
         $('#stat-completion strong').html(completion);
+    },
+    chunkedSegmentsLoaded: function() {
+        return $('section.readonly').length;
     },
     setStatus: function(segment, status) {
         segment.removeClass("status-draft status-translated status-approved status-rejected status-new").addClass("status-" + status);
