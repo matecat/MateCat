@@ -2054,7 +2054,9 @@ UI = {
         return editarea.text();
     },
     getUpdates: function() {
-        console.log(UI.lastUpdateRequested.getTime());
+//        console.log(UI.lastUpdateRequested.getTime());
+//        console.log($.datepicker.formatDate('yyyy-mm-dd hh:mm:ss', UI.lastUpdateRequested));
+//        console.log(UI.lastUpdateRequested.format("yyyy-mm-dd"));
         // simulated call to getUpdatedTranslations
         APP.doRequest({
             data: {
@@ -2064,28 +2066,7 @@ UI = {
                 last_segment: $('section').last().attr('id').split('-')[1]
             },
             success: function(d) {
-            },
-            error: function(d) {
-                console.log('error');
-                d = [
-                        {
-                         "sid":123145,
-                         "translation":"ciao mondo",
-                         "status":"TRANSLATED"
-                        },
-                        {
-                         "sid":23425,
-                         "translation":"ciao mondo2",
-                         "status":"DRAFT"
-                        },
-                        {
-                         "sid":234256,
-                         "translation":"ciao ciao",
-                         "status":"TRANSLATED"
-                        }
-                   ];
-                   console.log(d);
-                
+                UI.updateSegments(d);
             }
         });        
         
@@ -2093,6 +2074,10 @@ UI = {
             UI.lastUpdateRequested = new Date();
             UI.getUpdates();
         }, 5000);   
+    },
+    updateSegments: function(d) {
+                console.log(d);
+
     },
     test: function(params) {
         console.log('params: ', params);
