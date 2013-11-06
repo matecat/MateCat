@@ -3128,6 +3128,7 @@ UI = {
             data: {
                 action: 'getWarning',
                 id_job: config.job_id,
+                password: config.password,
                 token: token
             },
             success: function(data) {
@@ -3173,6 +3174,7 @@ UI = {
                 action: 'getWarning',
                 id: this.currentSegmentId,
                 token: token,
+                password: config.password,
                 src_content: src_content,
                 trg_content: trg_content
             },
