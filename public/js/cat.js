@@ -67,6 +67,13 @@ UI = {
 //        var openCurrentSegmentAfter = ((!seg)&&(!this.firstLoad))? true : false;
 //        if((!seg)&&(!this.firstLoad)) this.gotoSegment(this.currentSegmentId);
         UI.getSegments(options);
+        if(this.firstLoad) {
+            this.lastUpdateRequested = new Date();
+            setTimeout(function() {
+                UI.getUpdates();
+            }, 5000);         
+        }
+
 //        UI.getSegments(openCurrentSegmentAfter);
     },
     init: function() {
@@ -1988,7 +1995,6 @@ UI = {
     getSegments_success: function(d,options) {
         if(d.error.length) 
             this.processErrors(d.error, 'getSegments');
-        
         where = d.data['where'];
         $.each(d.data['files'], function() {
             startSegmentId = this['segments'][0]['sid'];
@@ -2046,6 +2052,47 @@ UI = {
     getSegmentTarget: function(seg) {
         editarea = (typeof seg == 'undefined')? this.editarea : $('.editarea', seg);
         return editarea.text();
+    },
+    getUpdates: function() {
+        console.log(UI.lastUpdateRequested.getTime());
+        // simulated call to getUpdatedTranslations
+        APP.doRequest({
+            data: {
+                action: 'getUpdatedTranslations',
+                last_timestamp: UI.lastUpdateRequested.getTime(),
+                first_segment: $('section').first().attr('id').split('-')[1],
+                last_segment: $('section').last().attr('id').split('-')[1]
+            },
+            success: function(d) {
+            },
+            error: function(d) {
+                console.log('error');
+                d = [
+                        {
+                         "sid":123145,
+                         "translation":"ciao mondo",
+                         "status":"TRANSLATED"
+                        },
+                        {
+                         "sid":23425,
+                         "translation":"ciao mondo2",
+                         "status":"DRAFT"
+                        },
+                        {
+                         "sid":234256,
+                         "translation":"ciao ciao",
+                         "status":"TRANSLATED"
+                        }
+                   ];
+                   console.log(d);
+                
+            }
+        });        
+        
+        setTimeout(function() {
+            UI.lastUpdateRequested = new Date();
+            UI.getUpdates();
+        }, 5000);   
     },
     test: function(params) {
         console.log('params: ', params);
