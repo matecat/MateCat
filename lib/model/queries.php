@@ -354,8 +354,10 @@ function getWarning( $jid, $jpassword ) {
 
     $query = "SELECT id_segment, serialized_errors_list
                 FROM segment_translations
-                WHERE id_job = $jid
-                AND password = '$jpassword'
+                JOIN jobs ON jobs.id = id_job
+                WHERE jobs.id = $jid
+                AND jobs.password = '$jpassword'
+                AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
                 AND warning != 0";
 
     $results = $db->fetch_array( $query );
@@ -1225,7 +1227,7 @@ function getProjectData( $pid, $project_password = null, $jid = null ) {
 
     $query = sprintf( $query, $and_1, $and_2 );
 
-    Log::doLog( $query );
+    //Log::doLog( $query );
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );

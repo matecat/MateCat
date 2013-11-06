@@ -22,15 +22,18 @@ include INIT::$UTILS_ROOT . '/ProjectManager.php';
 $pm = new ProjectManager();
 
 
+/*
+ http://matecat.local/translate/EN_2_segments.txt/en-US-it-IT/5163-4d960596548e
+ */
 
 $pStruct                                  = $pm->getProjectStructure();
-$pStruct[ 'job_to_split' ]                = 5104;
-$pStruct[ 'job_to_split_pass' ]           = '526a7bbdf026952043998601';
+$pStruct[ 'job_to_split' ]                = 5163;
+$pStruct[ 'job_to_split_pass' ]           = '4d960596548e';
 
 
-$pm->getSplitData( $pStruct, 5 );
+$pm->getSplitData( $pStruct, 3 );
 
-if ($apply_script){
+if ($apply_split){
     $pm->applySplit($pStruct);
 }
 

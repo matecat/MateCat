@@ -607,7 +607,7 @@ body.manage .urls .jobdata
     font-size: 120%;
     font-weight: bold;
     width: 70px;
-    margin-top: 2px;
+   /* margin-top: 2px; */
     
     }	
 body.manage #display

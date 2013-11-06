@@ -717,10 +717,10 @@ class CatUtils {
      * Minimum Password Length 24 Characters
      *
      */
-    public static function generate_password( $length = 16 ) {
+    public static function generate_password( $length = 12 ) {
 
-        $pwd = md5( uniqid('',true) );
-        $pwd = substr( $pwd, 0, 6 ) . substr( $pwd, -6, 6 );
+        $_pwd = md5( uniqid('',true) );
+        $pwd = substr( $_pwd, 0, 6 ) . substr( $_pwd, -6, 6 );
 
         if( $length > 12 ){
             while( strlen($pwd) < $length ){

@@ -415,18 +415,18 @@ class ProjectManager {
             if( $contents['segment_start'] != $projectStructure['split_result']['job_first_segment'] ){
                 //next insert
                 $jobInfo['password'] =  $this->_generatePassword();
-                $jobInfo['last_opened_segment'] = null;
                 $jobInfo['create_date']  = date('Y-m-d H:i:s');
             }
 
+            $jobInfo['last_opened_segment'] = $contents['segment_start'];
             $jobInfo['job_first_segment'] = $contents['segment_start'];
             $jobInfo['job_last_segment']  = $contents['segment_end'];
 
             $query = "INSERT INTO jobs ( " . implode( ", ", array_keys( $jobInfo ) ) . " )
                         VALUES ( '" . implode( "', '", array_values( $jobInfo ) ) . "' )
                         ON DUPLICATE KEY UPDATE
-                            job_first_segment = '{$jobInfo['job_first_segment']}',
-                            job_last_segment = '{$jobInfo['job_last_segment']}' ";
+                        job_first_segment = '{$jobInfo['job_first_segment']}',
+                        job_last_segment = '{$jobInfo['job_last_segment']}'";
 
 
             //add here job id to list
@@ -718,7 +718,7 @@ class ProjectManager {
 
     }
 
-    protected function _generatePassword( $length = 16 ){
+    protected function _generatePassword( $length = 12 ){
         return CatUtils::generate_password( $length );
     }
 
