@@ -458,7 +458,7 @@ background: -webkit-gradient(linear, left top, left bottom, from(#f5f5f5), to(#d
 }
 .next-untranslated
     {
-    width: 35px !important;
+    width: 50px !important;
     height: 27px !important;
     background: #09beec;
     border:1px solid #848689;
