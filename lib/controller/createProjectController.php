@@ -172,6 +172,8 @@ class createProjectController extends ajaxcontroller {
                 'query_translations' => array(),
                 'status'             => 'NOT_READY_FOR_ANALYSIS',
                 'job_to_split'       => null,
+                'job_to_split_pass'  => null,
+                'split_result'       => null,
             ) );
 
         $projectManager = new ProjectManager( $projectStructure );

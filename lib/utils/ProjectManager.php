@@ -42,6 +42,7 @@ class ProjectManager {
                     'query_translations' => array(),
                     'status'             => 'NOT_READY_FOR_ANALYSIS',
                     'job_to_split'       => null,
+                    'job_to_split_pass'  => null,
                     'split_result'       => null,
                 ) );
         }
@@ -282,17 +283,26 @@ class ProjectManager {
      *
      * @param ArrayObject $projectStructure
      * @param int         $num_split
+     * @param array       $requestedWordsPerSplit Matecat Equivalent Words ( Only valid for Pro Version )
      *
      * @return RecursiveArrayObject
      *
      * @throws Exception
      */
-    public function getSplitData( ArrayObject $projectStructure, $num_split = 2 ) {
+    public function getSplitData( ArrayObject $projectStructure, $num_split = 2, $requestedWordsPerSplit = array() ) {
 
         $num_split = (int)$num_split;
 
         if( $num_split < 2 ){
             throw new Exception( 'Minimum Chunk number for split is 2.' );
+        }
+
+        if( !empty( $requestedWordsPerSplit ) && count($requestedWordsPerSplit) != $num_split ){
+            throw new Exception( "Requested words per chunk and Number of chunks not consistent." );
+        }
+
+        if( !empty( $requestedWordsPerSplit ) && !INIT::$VOLUME_ANALYSIS_ENABLED ){
+            throw new Exception( "Requested words per chunk available only for Matecat PRO version" );
         }
 
         /**
@@ -307,45 +317,35 @@ class ProjectManager {
          * +----------------+-------------------+---------+-------------------+------------------+
          * | raw_word_count | eq_word_count     | id      | job_first_segment | job_last_segment |
          * +----------------+-------------------+---------+-------------------+------------------+
-         * |             10 |               8.5 | 2386093 |              NULL |             NULL |
-         * |              4 |               1.2 | 2386094 |              NULL |             NULL |
-         * |              0 |                 0 | 2386095 |              NULL |             NULL |
-         * |              0 |                 0 | 2386096 |              NULL |             NULL |
-         * |             14 |     9.70000000002 |    NULL |              NULL |             NULL |  ---- ROLLUP ROW
-         * |           NULL |              NULL |    NULL |           2386093 |          2386096 |  ---- UNION  ROW
+         * |          26.00 |             22.10 | 2390662 |           2390418 |          2390665 |
+         * |          30.00 |             25.50 | 2390663 |           2390418 |          2390665 |
+         * |          48.00 |             40.80 | 2390664 |           2390418 |          2390665 |
+         * |          45.00 |             38.25 | 2390665 |           2390418 |          2390665 |
+         * |        3196.00 |           2697.25 |    NULL |           2390418 |          2390665 |  -- ROLLUP ROW
          * +----------------+-------------------+---------+-------------------+------------------+
          *
          */
         $query = "SELECT * FROM (
 
                         SELECT
-                            SUM(raw_word_count) AS raw_word_count,
+                            SUM( raw_word_count ) AS raw_word_count,
                             SUM(eq_word_count) AS eq_word_count,
-                            seg.id,
-                            NULL AS job_first_segment, NULL AS job_last_segment
-                        FROM segments AS seg
-                        JOIN files_job USING (id_file)
-                        JOIN jobs ON jobs.id = files_job.id_job
-                        LEFT JOIN segment_translations AS ts
-                                ON seg.id = ts.id_segment
-                                AND jobs.id = ts.id_job
-                        WHERE jobs.id = %u
-                        GROUP BY seg.id WITH ROLLUP
-
-                        UNION
-
-                        SELECT NULL, NULL, NULL, job_first_segment, job_last_segment
-                        FROM jobs
-                        WHERE jobs.id = %u
-                        AND jobs.password = '%s'
+                            job_first_segment, job_last_segment, s.id
+                        FROM segments s
+                        LEFT  JOIN segment_translations st ON st.id_segment = s.id
+                        INNER JOIN jobs j ON j.id = st.id_job
+                        WHERE s.id BETWEEN j.job_first_segment AND j.job_last_segment
+                        AND j.id = %u
+                        AND j.password = '%s'
+                        GROUP BY s.id WITH ROLLUP
 
                   ) AS results";
 
         $query = sprintf( $query,
                             $projectStructure[ 'job_to_split' ],
-                            $projectStructure[ 'job_to_split' ],
                             $projectStructure[ 'job_to_split_pass' ]
         );
+
         $res   = mysql_query( $query, $this->mysql_link );
 
         //assignment in condition is often dangerous, deprecated
@@ -356,15 +356,28 @@ class ProjectManager {
             throw new Exception( 'No segments found for job ' . $projectStructure[ 'job_to_split' ] );
         }
 
-        $row_union     = array_slice( array_pop( $rows ), 3, null, true ); //get the last row ( UNION )
-        $row_totals    = array_slice( array_pop( $rows ), 0, 2, true    ); //get the last row ( ROLLUP )
-        $row_pivot     = array_merge( $row_totals, $row_union );
+        $row_totals     = array_pop( $rows ); //get the last row ( ROLLUP )
+        unset($row_totals['id']);
+
+        if( empty($row_totals['job_first_segment']) || empty($row_totals['job_last_segment']) ){
+            throw new Exception('Wrong job id or password. Job segment range not found.');
+        }
 
         //if fast analysis with equivalent word count is present
         $count_type    = ( !empty( $row_totals[ 'eq_word_count' ] ) ? 'eq_word_count' : 'raw_word_count' );
         $total_words   = $row_totals[ $count_type ];
 
-        $words_per_job = round( $total_words / $num_split, 0, PHP_ROUND_HALF_DOWN );
+        if( empty( $requestedWordsPerSplit ) ){
+            /*
+             * Simple Split with pretty equivalent number of words per chunk
+             */
+            $words_per_job = array_fill( 0, count($rows), round( $total_words / $num_split, 0, PHP_ROUND_HALF_DOWN ) );
+        } else {
+            /*
+             * User defined words per chunk, needs some checks and control structures
+             */
+            $words_per_job = $requestedWordsPerSplit;
+        }
 
         $counter = array();
         $chunk   = 0;
@@ -384,13 +397,22 @@ class ProjectManager {
             $counter[$chunk][ 'segment_end' ]     = $row[ 'id' ];
 
             //check for wanted words per job
-            if( $counter[$chunk][ $count_type ] >= $words_per_job ){
+            //create a chunk when reach the requested number of words
+            //and we are below the requested number of splits
+            //so we add to the last chunk all rests
+            if( $counter[$chunk][ $count_type ] >= $words_per_job[$chunk] && $chunk < $num_split -1 /* chunk is zero based */ ){
+                $counter[$chunk][ 'eq_word_count' ]  = (int)$counter[$chunk][ 'eq_word_count' ];
+                $counter[$chunk][ 'raw_word_count' ] = (int)$counter[$chunk][ 'raw_word_count' ];
                 $chunk++;
             }
 
         }
 
-        $result = array_merge( $row_pivot, array( 'chunks' => $counter ) );
+        if( count( $counter ) < 2 ){
+            throw new Exception( 'The requested number of words for the first chunk is too large. I cannot create 2 chunks.' );
+        }
+
+        $result = array_merge( $row_totals, array( 'chunks' => $counter ) );
 
         $projectStructure['split_result'] = new RecursiveArrayObject( $result );
 
