@@ -636,7 +636,12 @@ UI = {
             e.preventDefault();
             if(!UI.segmentIsLoaded(UI.nextSegmentId)) {
                 UI.changeStatus(this, 'translated', 0);
-                UI.reloadWarning();
+                if(!UI.nextSegmentId) {
+                    $('#' + $(this).attr('data-segmentid') + '-close').click();
+                } else {
+                    UI.reloadWarning();                    
+                }
+
             };
             UI.checkHeaviness();
             if (UI.blockButtons) {
