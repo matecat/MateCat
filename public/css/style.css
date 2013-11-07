@@ -746,7 +746,7 @@ padding-top:5px !important;
     font-weight: bold;
     color: yellow;
     }
-.search-input{width:200px;font-size:12px !important;height:23px;padding:0 5px;border:1px solid #abadb3;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;color:#999}
+.search-input{width:200px;font-size:12px !important;height:23px;padding:0 5px;border:1px solid #abadb3;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;}
 .search-input:hover, .search-editarea:hover{
 -moz-box-shadow: inset 0 1px 1px #e6e7e8;
 -webkit-box-shadow: inset 0 1px 1px #e6e7e8;
