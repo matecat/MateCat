@@ -325,21 +325,17 @@ class ProjectManager {
          * +----------------+-------------------+---------+-------------------+------------------+
          *
          */
-        $query = "SELECT * FROM (
-
-                        SELECT
-                            SUM( raw_word_count ) AS raw_word_count,
-                            SUM(eq_word_count) AS eq_word_count,
-                            job_first_segment, job_last_segment, s.id
-                        FROM segments s
-                        LEFT  JOIN segment_translations st ON st.id_segment = s.id
-                        INNER JOIN jobs j ON j.id = st.id_job
-                        WHERE s.id BETWEEN j.job_first_segment AND j.job_last_segment
-                        AND j.id = %u
-                        AND j.password = '%s'
-                        GROUP BY s.id WITH ROLLUP
-
-                  ) AS results";
+        $query = "SELECT
+                        SUM( raw_word_count ) AS raw_word_count,
+                        SUM(eq_word_count) AS eq_word_count,
+                        job_first_segment, job_last_segment, s.id
+                    FROM segments s
+                    LEFT  JOIN segment_translations st ON st.id_segment = s.id
+                    INNER JOIN jobs j ON j.id = st.id_job
+                    WHERE s.id BETWEEN j.job_first_segment AND j.job_last_segment
+                    AND j.id = %u
+                    AND j.password = '%s'
+                    GROUP BY s.id WITH ROLLUP";
 
         $query = sprintf( $query,
                             $projectStructure[ 'job_to_split' ],
