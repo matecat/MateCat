@@ -308,11 +308,7 @@ class ProjectManager {
         /**
          * Select all rows raw_word_count and eq_word_count
          * and their totals ( ROLLUP )
-         * reserve also two columns for job_first_segment and job_last_segment as NULL values
-         * Economize bytes by returning placeholders with null values
-         *
-         * The UNION add a select with the same number of columns as the previous query
-         * but with first 3 columns as null
+         * reserve also two columns for job_first_segment and job_last_segment
          *
          * +----------------+-------------------+---------+-------------------+------------------+
          * | raw_word_count | eq_word_count     | id      | job_first_segment | job_last_segment |
@@ -416,6 +412,16 @@ class ProjectManager {
 
     }
 
+    /**
+     * Do the split based on previous getSplitData analysis
+     * It clone the original job in the right number of chunks and fill these rows with:
+     * first/last segments of every chunk, last opened segment as first segment of new job
+     * and the timestamp of creation
+     *
+     * @param ArrayObject $projectStructure
+     *
+     * @throws Exception
+     */
     protected function _splitJob( ArrayObject $projectStructure ){
 
         $query_job = "SELECT * FROM jobs WHERE id = %u AND password = '%s'";
@@ -470,6 +476,11 @@ class ProjectManager {
 
     }
 
+    /**
+     * Apply new structure of job
+     *
+     * @param ArrayObject $projectStructure
+     */
     public function applySplit( ArrayObject $projectStructure ){
         $this->_splitJob( $projectStructure );
     }
