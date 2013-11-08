@@ -65,7 +65,7 @@ class createProjectController extends ajaxcontroller {
             $this->result['errors'][] = array("code" => -1, "message" => "Missing file name.");
             return false;
         }
-        $arFiles = explode('@@SEP@@', $this->file_name);
+        $arFiles = explode('@@SEP@@',  html_entity_decode( $this->file_name, ENT_QUOTES, 'UTF-8' ) );
         $default_project_name = $arFiles[0];
         if (count($arFiles) > 1) {
             $default_project_name = "MATECAT_PROJ-" . date("Ymdhi");
