@@ -363,7 +363,7 @@ class ProjectManager {
             /*
              * Simple Split with pretty equivalent number of words per chunk
              */
-            $words_per_job = array_fill( 0, count($rows), round( $total_words / $num_split, 0, PHP_ROUND_HALF_DOWN ) );
+            $words_per_job = array_fill( 0, count($rows), round( $total_words / $num_split, 0 ) );
         } else {
             /*
              * User defined words per chunk, needs some checks and control structures
@@ -406,7 +406,7 @@ class ProjectManager {
 
         $result = array_merge( $row_totals, array( 'chunks' => $counter ) );
 
-        $projectStructure['split_result'] = new RecursiveArrayObject( $result );
+        $projectStructure['split_result'] = new ArrayObject( $result );
 
         return $projectStructure['split_result'];
 
