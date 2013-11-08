@@ -4,7 +4,11 @@ include "$r/inc/config.inc.php";
 if (isset($argv[1]) && $argv[1]!="--apply"){
     die ("Usage $argv[0] [--apply]");
 }
-$apply_split=isset($argv[1]) && $argv[1]=="--apply";
+
+$job_num=(int)$argv[1];
+$job_pass= $argv[2];
+$num_split = $argv[3];
+$apply_split=isset($argv[4]) && $argv[4]=="--apply";
 
 @INIT::obtain();
 include_once INIT::$UTILS_ROOT . '/cat.class.php';
@@ -27,11 +31,11 @@ $pm = new ProjectManager();
  */
 
 $pStruct                                  = $pm->getProjectStructure();
-$pStruct[ 'job_to_split' ]                = 5163;
-$pStruct[ 'job_to_split_pass' ]           = '4d960596548e';
+$pStruct[ 'job_to_split' ]                = $job_num;
+$pStruct[ 'job_to_split_pass' ]           = $job_pass;
 
 
-$pm->getSplitData( $pStruct, 3 );
+$pm->getSplitData( $pStruct, $num_split );
 
 if ($apply_split){
     $pm->applySplit($pStruct);
