@@ -1248,10 +1248,13 @@ UI = {
         
         var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li><li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc"><a tabindex="-1" href="#">Concordance</a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div><div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances"><div class="overflow"><div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div><div class="results"></div></div></div>';
         $('.footer', segment).html(footer);
-        if(($(segment).hasClass('loaded'))&&($(segment).find('.matches .overflow').text() == '')) {
-            $('.sub-editor.matches .overflow .graysmall.message', segment).remove();
-            $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');            
-        };
+
+
+        //FIXME
+//        if(($(segment).hasClass('.loaded'))&&($(segment).find('.matches .overflow').text() == '')) {
+//            $('.sub-editor.matches .overflow .graysmall.message', segment).remove();
+//            $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');
+//        };
     },
     createHeader: function() {
         if ($('h2.percentuage', this.currentSegment).length) {
@@ -2543,6 +2546,12 @@ UI = {
     renderContributions: function(d, segment) {
         var isActiveSegment = $(segment).hasClass('editor');
         var editarea = $('.editarea', segment);
+
+
+
+        console.log(d.data.matches.length);
+
+
         if (d.data.matches.length) {
             var editareaLength = editarea.text().trim().length;
             if (isActiveSegment) {
