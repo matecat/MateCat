@@ -31,9 +31,6 @@ class Utils {
             }
         }
 
-Log::doLog($url);
-Log::doLog($d);
-
         $output = curl_exec($ch);
 
         $info = curl_getinfo($ch);
