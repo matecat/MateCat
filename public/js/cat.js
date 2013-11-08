@@ -1251,7 +1251,7 @@ UI = {
 
 
         //FIXME
-//        if(($(segment).hasClass('.loaded'))&&($(segment).find('.matches .overflow').text() == '')) {
+//        if(($(segment).hasClass('loaded'))&&($(segment).find('.matches .overflow').text() == '')) {
 //            $('.sub-editor.matches .overflow .graysmall.message', segment).remove();
 //            $('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');
 //        };
