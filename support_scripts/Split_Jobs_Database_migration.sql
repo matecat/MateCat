@@ -4,6 +4,7 @@ ALTER TABLE `matecat_local`.`jobs`
     ADD COLUMN `job_first_segment` BIGINT UNSIGNED NOT NULL  AFTER `id_project` , 
     ADD COLUMN `job_last_segment` BIGINT UNSIGNED NOT NULL  AFTER `job_first_segment` 
     , ADD UNIQUE INDEX `primary_id_pass` (`id` ASC, `password` ASC) 
+    , ADD INDEX `first_last_segment_idx` (`job_first_segment` ASC, `job_last_segment` ASC)
     , DROP PRIMARY KEY ;
 
 ALTER TABLE `matecat_local`.`files` 
