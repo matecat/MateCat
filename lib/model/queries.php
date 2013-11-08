@@ -1656,6 +1656,9 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
         $id_jobs = explode( ',', $id_jobs );
         foreach ( $id_jobs as $id_job ) {
+
+            list($id_job, $job_pass) = explode( ":", $id_job );
+
             $data[ 'id_segment' ]          = $id_segment;
             $data[ 'id_job' ]              = $id_job;
             $data[ 'match_type' ]          = $type;
