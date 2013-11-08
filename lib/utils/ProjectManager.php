@@ -657,17 +657,17 @@ class ProjectManager {
 
         $baseQuery = "INSERT INTO segments ( internal_id, id_file, segment, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values ";
 
-        Log::doLog( "Total Rows to insert: " . count( $this->projectStructure['segments'][$fid] ) );
+        Log::doLog( "Segments: Total Rows to insert: " . count( $this->projectStructure['segments'][$fid] ) );
         //split the query in to chunks if there are too much segments
         $this->projectStructure['segments'][$fid]->exchangeArray( array_chunk( $this->projectStructure['segments'][$fid]->getArrayCopy(), 1000 ) );
 
-        Log::doLog( "Total Queries to execute: " . count( $this->projectStructure['segments'][$fid] ) );
+        Log::doLog( "Segments: Total Queries to execute: " . count( $this->projectStructure['segments'][$fid] ) );
 
 
         foreach( $this->projectStructure['segments'][$fid] as $i => $chunk ){
 
             $res = mysql_query( $baseQuery . join(",\n", $chunk ) , $this->mysql_link);
-            Log::doLog( "Executed Query " . ( $i+1 ) );
+            Log::doLog( "Segments: Executed Query " . ( $i+1 ) );
             if (!$res) {
                 Log::doLog("Segment import - DB Error: " . mysql_error() . " - \n");
                 throw new Exception( "Segment import - DB Error: " . mysql_error() . " - $chunk", -2 );
@@ -720,18 +720,18 @@ class ProjectManager {
             $baseQuery = "INSERT INTO segment_translations (id_segment, id_job, status, translation, translation_date, tm_analysis_status, locked)
             values ";
 
-            Log::doLog( "Total Rows to insert: " . count( $this->projectStructure['query_translations'] ) );
+            Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $this->projectStructure['query_translations'] ) );
             //split the query in to chunks if there are too much segments
             $this->projectStructure['query_translations']->exchangeArray( array_chunk( $this->projectStructure['query_translations']->getArrayCopy(), 1000 ) );
 
-            Log::doLog( "Total Queries to execute: " . count( $this->projectStructure['query_translations'] ) );
+            Log::doLog( "Pre-Translations: Total Queries to execute: " . count( $this->projectStructure['query_translations'] ) );
 
 //        Log::doLog( print_r( $query_translations,true ) );
 
             foreach( $this->projectStructure['query_translations'] as $i => $chunk ){
 
                 $res = mysql_query( $baseQuery . join(",\n", $chunk ) , $this->mysql_link);
-                Log::doLog( "Executed Query " . ( $i+1 ) );
+                Log::doLog( "Pre-Translations: Executed Query " . ( $i+1 ) );
                 if (!$res) {
                     Log::doLog("Segment import - DB Error: " . mysql_error() . " - \n");
                     throw new Exception( "Translations Segment import - DB Error: " . mysql_error() . " - $chunk", -2 );
