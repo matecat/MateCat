@@ -35,6 +35,9 @@ class Utils {
 
         $info = curl_getinfo($ch);
 
+Log::doLog($d);
+Log::doLog($output);
+
         curl_close($ch);
 
         return $output;
