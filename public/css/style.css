@@ -380,7 +380,7 @@ ENABLE FOLLOWING RULE AND DELETE SUBSEQUENT WHEN DOWNLOAD OF THE SINGLE FILE WIL
     background: -moz-linear-gradient(top,  #09beec,  #119ec4);
     background: linear-gradient(top,  #09beec,  #119ec4);
 }
-article .translated, article .draft, article .approved{margin:0 0 5px 5px}
+article .translated, article .draft, article .approved{margin:0 -1px 5px 5px}
 
 
 .buttons{float:right;padding:0;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;margin:-15px 39px 0 0;position:absolute;right:0;}
