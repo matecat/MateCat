@@ -972,6 +972,9 @@ UI = {
                 UI.setFindFunction('find');
             };
         });
+        $("#match-case, #exact-match").on('change', function(e) {
+            UI.setFindFunction('find');
+        });
         this.initEnd = new Date();
         this.initTime = this.initEnd - this.initStart;
         if (this.debug)
@@ -1376,6 +1379,8 @@ UI = {
         } else {
             delete this.searchParams['replace'];
         }
+        this.searchParams['match-case'] = $('#match-case').is(':checked');        
+        this.searchParams['exact-match'] = $('#exact-match').is(':checked');        
         this.searchParams['search'] = 1;
 
         this.disableTagMark();
@@ -1414,6 +1419,8 @@ UI = {
                 source: source,
                 target: target,
                 status: this.searchParams['status'],
+                matchcase: this.searchParams['match-case'],
+                exactmatch: this.searchParams['exact-match'],
                 replace: replace
             },
             success: function(d) {
@@ -1473,10 +1480,12 @@ UI = {
         $('.search-display .segments').text(this.numSearchResultsSegments); 
 
         query = '';
+        if(this.searchParams['exact-match']) query += ' exactly';
         if(this.searchParams['source']) query += ' <span class="param">' + this.searchParams['source'] + '</span> in source';
         if(this.searchParams['target']) query += ' <span class="param">' + this.searchParams['target'] + '</span> in target';
         
         if(this.searchParams['status']) query += (((this.searchParams['source'])||(this.searchParams['target']))? ' and' : '') + ' status <span class="param">' + this.searchParams['status'] + '</span>';
+        query += ' (' + ((this.searchParams['match-case'])? 'case sensitive' : 'case insensitive') + ')';
         $('.search-display .query').html(query);
         $('.search-display').addClass('displaying');
         if((this.searchMode != 'source&target')&&(this.numSearchResultsItem < 2)) $('#exec-find[data-func=next]').attr('disabled', 'disabled');
@@ -1490,29 +1499,42 @@ UI = {
         where = options.where;
         seg = options.seg;
         singleSegment = options.singleSegment || false;
-        if(typeof where == 'undefined') this.clearSearchMarkers();
+        if(typeof where == 'undefined') {
+            this.clearSearchMarkers();
+        }
         var p = this.searchParams;
 //        console.log('mode: ' + mode + ' - coso: ' + coso);
         var targetToo = typeof p['target'] != 'undefined';
+        var containsFunc = (p['match-case'])? 'contains' : 'containsNC';
+        var ignoreCase = (p['match-case'])? '' : 'i';
+        
         if(this.searchMode == 'onlyStatus') {
             console.log('solo status');            
         } else if(this.searchMode == 'source&target') {
 //            console.log('source & target');
             var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
             q = (singleSegment)? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
-            var regSource = new RegExp('('+htmlEncode(p['source'])+')', "gi");
-            var regTarget = new RegExp('('+htmlEncode(p['target'])+')', "gi");
+            var regSource = new RegExp('('+htmlEncode(p['source'])+')', "g" + ignoreCase);
+            var regTarget = new RegExp('('+htmlEncode(p['target'])+')', "g" + ignoreCase);
 
             if(typeof where == 'undefined') {
-                $(q + " .source:containsNC('"+p['source']+"')").each(function() {
+                $(q + " .source:" + containsFunc + "('"+p['source']+"')").each(function() {
                     $(this).html($(this).html().replace(regSource,'<mark class="searchPreMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));                    
                 });                    
-                $(q + " .editarea:containsNC('"+p['target']+"')").each(function() {
-                    $(this).html($(this).html().replace(regTarget,'<mark class="searchPreMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));                    
+                $(q + " .editarea:" + containsFunc + "('"+p['target']+"')").each(function() {
+                    $(this).html($(this).html().replace(regTarget,'<mark class="searchPreMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));      
                 });
 //                console.log($('section:has(".source mark.searchMarker, .editarea mark.searchMarker")'));
                 $('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
-                $('mark.searchPreMarker').removeClass('searchPreMarker');
+                $('mark.searchPreMarker:not(.searchMarker)').each(function() {
+                    var a = $(this).text();
+                    $(this).replaceWith(a);
+//                    if($(this).parents('section').attr('id') == 'segment-595407') $(this).replaceWith($(this).text());
+//                    console.log($(this).text());
+//                    $(this).replaceWith($(this).text());
+                });
+//                $('mark.searchPreMarker').removeClass('searchPreMarker');
+//                console.log($('#segment-595407-editarea').html());
             } else {
 
                 sid = $(seg).attr('id');
@@ -1530,10 +1552,10 @@ UI = {
                     })                    
                 }
 
-                $(q + ".justAdded:not(.status-new) .source:containsNC('"+p['source']+"')").each(function() {
+                $(q + ".justAdded:not(.status-new) .source:" + containsFunc + "('"+p['source']+"')").each(function() {
                     $(this).html($(this).html().replace(regSource,'<mark class="searchPreMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));                    
                 });                    
-                $(q + ".justAdded:not(.status-new) .editarea:containsNC('"+p['target']+"')").each(function() {
+                $(q + ".justAdded:not(.status-new) .editarea:" + containsFunc + "('"+p['target']+"')").each(function() {
                     $(this).html($(this).html().replace(regTarget,'<mark class="searchPreMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));                    
                 });
 //                console.log($('section:has(".source mark.searchMarker, .editarea mark.searchMarker")'));
@@ -1558,9 +1580,9 @@ UI = {
             q = (singleSegment)? '#' + $(singleSegment).attr('id') : "section" + status + what;
 
 //            q = "section" + status + what;
-            var reg = new RegExp('('+htmlEncode(txt)+')', "gi");
+            var reg = new RegExp('('+htmlEncode(txt)+')', "g" + ignoreCase);
             if(typeof where == 'undefined') {
-                $(q + ":containsNC('"+txt+"')").each(function() {
+                $(q + ":" + containsFunc + "('"+txt+"')").each(function() {
                     $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));                    
                 });                    
             } else {
@@ -1578,8 +1600,8 @@ UI = {
                         }
                     })                    
                 }
-                $("section" + status + ".justAdded" + what + ":containsNC('"+txt+"')").each(function() {
-//                $(q + ".justAdded:containsNC('"+txt+"')").each(function() {
+                $("section" + status + ".justAdded" + what + ":" + containsFunc + "('"+txt+"')").each(function() {
+//                $(q + ".justAdded:" + containsFunc + "('"+txt+"')").each(function() {
                     $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));
                 });
                 $('section.justAdded').removeClass('justAdded');
@@ -1781,6 +1803,12 @@ UI = {
         if(p['status'] != $('#select-status').val()) {
             if(!(typeof p['status'] == 'undefined')) changes = true;
         }
+        if(p['match-case'] != $('#match-case').is(':checked')) {
+            changes = true;
+        }
+        if(p['exact-match'] != $('#exact-match').is(':checked')) {
+            changes = true;
+        }
         return changes;
     },
     setFindFunction: function(func) {
@@ -1834,7 +1862,6 @@ UI = {
         if ((!n.length) && (next)) {
             return false;
         }
-        console.log('c');
         var id = n.attr('id');
         var id_segment = id.split('-')[1];
 
@@ -1842,12 +1869,10 @@ UI = {
         txt = view2rawxliff(txt);
         // Attention: As for copysource, what is the correct file format in attributes? I am assuming html encoded and "=>&quot;
         //txt = txt.replace(/&quot;/g,'"');
-        console.log('c');
 
         if (!next) {
             $(".loader", n).addClass('loader_on')
         }
-        console.log('c');
 
         APP.doRequest({
             data: {
@@ -2401,8 +2426,6 @@ UI = {
         $(editarea).removeClass("indent");
 
         this.lockTags();
-        console.log('a');
-        console.log(this.readonly);
         if (!this.readonly) {
             this.getContribution(segment, 1);            
             this.getContribution(segment, 2);            
@@ -3338,7 +3361,6 @@ UI = {
         });
     },
     processErrors: function(err, operation) {
-        console.log(err);
         $.each(err, function() {
             if(operation == 'setTranslation') {
 //            if((operation == 'setTranslation')||(operation == 'setContribution')) {
