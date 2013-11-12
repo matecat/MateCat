@@ -215,6 +215,7 @@ CREATE TABLE `segment_translations` (
   `suggestion_match` int(11) DEFAULT NULL,
   `suggestion_source` varchar(45) DEFAULT NULL,
   `suggestion_position` int(11) DEFAULT NULL,
+  `mt_qe` float(19,14) NOT NULL DEFAULT 0,
   `tm_analysis_status` varchar(50) DEFAULT 'UNDONE',
   `locked` tinyint(4) DEFAULT '0',
   `warning` tinyint(4) NOT NULL DEFAULT '0',
