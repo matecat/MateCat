@@ -137,6 +137,14 @@ class TMS extends Engine {
     public function get($segment, $source_lang, $target_lang, $email = "", $mt = 1, $id_user = "", $num_results=3, $isConcordance = false ) {
         $parameters = array();
         $parameters['q'] = $segment;
+
+        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance FIX -- DO NOT COMMIT
+        if( $isConcordance ){
+           list( $source_lang, $trash ) = explode( '-', $source_lang );
+           list( $target_lang, $trash ) = explode( '-', $target_lang );
+        }
+        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance FIX -- DO NOT COMMIT
+
         $parameters['langpair'] = "$source_lang|$target_lang";
         $parameters['de'] = $email;
         $parameters['mt'] = $mt;

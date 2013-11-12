@@ -1237,7 +1237,7 @@ class QA {
         if( !$this->thereAreErrors() ){
             //IMPORTANT NOTE :
             //SEE http://www.php.net/manual/en/domdocument.savexml.php#88525
-            preg_match('/<root>(.*)<\/root>/u', $this->normalizedTrgDOM->saveXML($this->normalizedTrgDOM->documentElement), $matches );
+            preg_match('/<root>(.*)<\/root>/us', $this->normalizedTrgDOM->saveXML($this->normalizedTrgDOM->documentElement), $matches );
 
             /*
              * BUG on windows Paths: C:\\Users\\user\\Downloads\\File per field test\\1\\gui_plancompression.html

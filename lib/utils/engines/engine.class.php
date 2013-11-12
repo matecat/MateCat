@@ -50,24 +50,24 @@ abstract class Engine {
 		curl_setopt($ch, CURLOPT_USERAGENT, "user agent");
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		//        curl_setopt($ch, CURLOPT_VERBOSE, true);
-        curl_setopt($ch, CURLOPT_HTTPGET, true);
+		curl_setopt($ch, CURLOPT_HTTPGET, true);
 
-        curl_setopt($ch,CURLOPT_TIMEOUT,10); //we can wait max 10 seconds
+		curl_setopt($ch,CURLOPT_TIMEOUT,10); //we can wait max 10 seconds
 
-        $output = curl_exec($ch);
-        $curl_errno = curl_errno($ch);
-        $curl_error = curl_error($ch);
-//		$info = curl_getinfo($ch);
+		$output = curl_exec($ch);
+		$curl_errno = curl_errno($ch);
+		$curl_error = curl_error($ch);
+		//		$info = curl_getinfo($ch);
 
-        //$curl_errno == 28 /* CURLE_OPERATION_TIMEDOUT */
-        if( $curl_errno > 0 ){
-            Log::doLog('Curl Error: ' . $curl_errno . " - " . $curl_error . " " . var_export( parse_url( $url ) ,true) );
-            $output = json_encode( array( 'error' => - $curl_errno . " Server Not Available" ) ); //return negative number
-        }
+		//$curl_errno == 28 /* CURLE_OPERATION_TIMEDOUT */
+		if( $curl_errno > 0 ){
+			Log::doLog('Curl Error: ' . $curl_errno . " - " . $curl_error . " " . var_export( parse_url( $url ) ,true) );
+			$output = json_encode( array( 'error' => - $curl_errno . " Server Not Available" ) ); //return negative number
+		}
 
-        // Chiude la risorsa curl
-        curl_close($ch);
-        return $output;
+		// Chiude la risorsa curl
+		curl_close($ch);
+		return $output;
 	}
 
 	protected function doQuery($function, $parameters = array()) {
@@ -77,7 +77,7 @@ abstract class Engine {
 		}
 
 		$this->buildQuery($function, $parameters);
-        Log::doLog( $this->url );
+		Log::doLog( $this->url );
 		$res=$this->curl($this->url);
 		$this->raw_result = json_decode($res,true);
 	}
@@ -90,6 +90,7 @@ abstract class Engine {
 		}
 		$parameters_query_string = http_build_query($parameters);        
 		$this->url.=$parameters_query_string;
+			Log::doLog("engine query : $this->url");
 	}
 
 	private function existsFunction($type) {
