@@ -130,9 +130,35 @@ class setTranslationController extends ajaxcontroller {
         } else {
             $err_json = '';
             $translation = $check->getTrgNormalized();
+
+
+            /**
+             * PATCH to discover troubles about string normalization
+             * Some strange behaviours occurred about getTrgNormalized method
+             * TODO remove after it has collected data
+             */
+            $postCheck = new QA( $segment['segment'], $translation );
+            $postCheck->performConsistencyCheck();
+            if( $postCheck->thereAreErrors() ){
+
+                $msg = "\n\n Error setTranslationController \n\n Consistency failure: \n\n Used original Translation. \n\n
+                        - job id            : " . $this->id_job . "
+                        - segment id        : " . $this->id_segment . "
+                        - original source   : " . $segment['segment'] . "
+                        - original target   : " . $this->translation . "
+                        - normalized target : " . $translation;
+
+                Log::doLog( $msg );
+                Utils::sendErrMailReport( $msg );
+
+                $translation = $this->translation;
+                
+            }
+
+
         }
 
-		$res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreErrors() );
+        $res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreErrors() );
 
         if (!empty($res['error'])) {
 			$this->result['error'] = $res['error'];
