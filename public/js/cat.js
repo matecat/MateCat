@@ -38,7 +38,7 @@ UI = {
         this.ccTargetUndoStack = [];
         this.ccTargetUndoStackPosition = 0;
         this.tagSelection = false;
-        this.nextSegmentIdByServer = 0;
+        this.nextUntranslatedSegmentIdByServer = 0;
         this.cursorPlaceholder = '[[placeholder]]';
         this.tempViewPoint = '';
         this.checkUpdatesEvery = 180000;
@@ -634,9 +634,9 @@ UI = {
         }).on('click', 'a.translated, a.next-untranslated', function(e) {
             var w = ($(this).hasClass('translated'))? 'translated' : 'next-untranslated';
             e.preventDefault();
-            if(!UI.segmentIsLoaded(UI.nextSegmentId)) {
+            if(!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
                 UI.changeStatus(this, 'translated', 0);
-                if(!UI.nextSegmentId) {
+                if(!UI.nextUntranslatedSegmentId) {
                     $('#' + $(this).attr('data-segmentid') + '-close').click();
                 } else {
                     UI.reloadWarning();                    
@@ -645,7 +645,7 @@ UI = {
             };
             UI.checkHeaviness();
             if (UI.blockButtons) {
-                if (UI.segmentIsLoaded(UI.nextSegmentId) || UI.nextSegmentId == '') {
+                if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId == '') {
                     console.log('segment is already loaded');
                 } else {
                     console.log('segment is not loaded');
@@ -663,7 +663,7 @@ UI = {
             if(w == 'translated') {
                 UI.gotoNextSegment();
             } else {
-                $(".editarea", UI.nextSegment).trigger("click", "translated");
+                $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated");
             }
             UI.changeStatus(this, 'translated', 0);
 
@@ -671,17 +671,17 @@ UI = {
             UI.lockTags(UI.editarea);
             UI.changeStatusStop = new Date();
             UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-//            if(UI.segmentIsLoaded(UI.nextSegmentId)) console.log('UI.segmentIsLoaded(UI.nextSegmentId): ', UI.segmentIsLoaded(UI.nextSegmentId));
-//            if(UI.nextSegmentId) console.log('UI.nextSegmentId: ', UI.nextSegmentId);
+//            if(UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) console.log('UI.segmentIsLoaded(UI.nextUntranslatedSegmentId): ', UI.segmentIsLoaded(UI.nextUntranslatedSegmentId));
+//            if(UI.nextUntranslatedSegmentId) console.log('UI.nextUntranslatedSegmentId: ', UI.nextUntranslatedSegmentId);
 /*            
-            if (UI.segmentIsLoaded(UI.nextSegmentId) || UI.nextSegmentId == '') {
+            if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId == '') {
                 if (UI.debug)
                     console.log('next segment is loaded');
             } else {
                 if (!UI.noMoreSegmentsAfter) {
                     if (UI.debug)
                         console.log('next segment is not loaded');
-                    if (typeof UI.nextSegmentId == 'undefined')
+                    if (typeof UI.nextUntranslatedSegmentId == 'undefined')
                         return false;
                     console.log('questo');
 //                    UI.reloadWarning();
@@ -692,7 +692,7 @@ UI = {
 */            
         }).on('click', 'a.approved', function(e) {
             UI.setStatusButtons(this);
-            $(".editarea", UI.nextSegment).click();
+            $(".editarea", UI.nextUntranslatedSegment).click();
 
             UI.changeStatus(this, 'approved', 0);
             UI.changeStatusStop = new Date();
@@ -972,6 +972,9 @@ UI = {
                 UI.setFindFunction('find');
             };
         });
+        $("#match-case, #exact-match").on('change', function(e) {
+            UI.setFindFunction('find');
+        });
         this.initEnd = new Date();
         this.initTime = this.initEnd - this.initStart;
         if (this.debug)
@@ -1043,7 +1046,7 @@ UI = {
     },
     checkHeaviness: function() {
         if ($('section').length > 500) {
-            UI.reloadToSegment(UI.nextSegmentId);
+            UI.reloadToSegment(UI.nextUntranslatedSegmentId);
         }
     },
     checkIfFinished: function(closing) {
@@ -1224,10 +1227,10 @@ UI = {
             }
         }
     },
-    copyToNextIfSame: function(nextSegment) {
-        if ($('.source', this.currentSegment).data('original') == $('.source', nextSegment).data('original')) {
-            if ($('.editarea', nextSegment).hasClass('fromSuggestion')) {
-                $('.editarea', nextSegment).text(this.editarea.text());
+    copyToNextIfSame: function(nextUntranslatedSegment) {
+        if ($('.source', this.currentSegment).data('original') == $('.source', nextUntranslatedSegment).data('original')) {
+            if ($('.editarea', nextUntranslatedSegment).hasClass('fromSuggestion')) {
+                $('.editarea', nextUntranslatedSegment).text(this.editarea.text());
             }
         }
     },
@@ -1376,6 +1379,8 @@ UI = {
         } else {
             delete this.searchParams['replace'];
         }
+        this.searchParams['match-case'] = $('#match-case').is(':checked');        
+        this.searchParams['exact-match'] = $('#exact-match').is(':checked');        
         this.searchParams['search'] = 1;
 
         this.disableTagMark();
@@ -1414,6 +1419,8 @@ UI = {
                 source: source,
                 target: target,
                 status: this.searchParams['status'],
+                matchcase: this.searchParams['match-case'],
+                exactmatch: this.searchParams['exact-match'],
                 replace: replace
             },
             success: function(d) {
@@ -1473,10 +1480,12 @@ UI = {
         $('.search-display .segments').text(this.numSearchResultsSegments); 
 
         query = '';
+        if(this.searchParams['exact-match']) query += ' exactly';
         if(this.searchParams['source']) query += ' <span class="param">' + this.searchParams['source'] + '</span> in source';
         if(this.searchParams['target']) query += ' <span class="param">' + this.searchParams['target'] + '</span> in target';
         
         if(this.searchParams['status']) query += (((this.searchParams['source'])||(this.searchParams['target']))? ' and' : '') + ' status <span class="param">' + this.searchParams['status'] + '</span>';
+        query += ' (' + ((this.searchParams['match-case'])? 'case sensitive' : 'case insensitive') + ')';
         $('.search-display .query').html(query);
         $('.search-display').addClass('displaying');
         if((this.searchMode != 'source&target')&&(this.numSearchResultsItem < 2)) $('#exec-find[data-func=next]').attr('disabled', 'disabled');
@@ -1490,29 +1499,42 @@ UI = {
         where = options.where;
         seg = options.seg;
         singleSegment = options.singleSegment || false;
-        if(typeof where == 'undefined') this.clearSearchMarkers();
+        if(typeof where == 'undefined') {
+            this.clearSearchMarkers();
+        }
         var p = this.searchParams;
 //        console.log('mode: ' + mode + ' - coso: ' + coso);
         var targetToo = typeof p['target'] != 'undefined';
+        var containsFunc = (p['match-case'])? 'contains' : 'containsNC';
+        var ignoreCase = (p['match-case'])? '' : 'i';
+        
         if(this.searchMode == 'onlyStatus') {
             console.log('solo status');            
         } else if(this.searchMode == 'source&target') {
 //            console.log('source & target');
             var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
             q = (singleSegment)? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
-            var regSource = new RegExp('('+htmlEncode(p['source'])+')', "gi");
-            var regTarget = new RegExp('('+htmlEncode(p['target'])+')', "gi");
+            var regSource = new RegExp('('+htmlEncode(p['source'])+')', "g" + ignoreCase);
+            var regTarget = new RegExp('('+htmlEncode(p['target'])+')', "g" + ignoreCase);
 
             if(typeof where == 'undefined') {
-                $(q + " .source:containsNC('"+p['source']+"')").each(function() {
+                $(q + " .source:" + containsFunc + "('"+p['source']+"')").each(function() {
                     $(this).html($(this).html().replace(regSource,'<mark class="searchPreMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));                    
                 });                    
-                $(q + " .editarea:containsNC('"+p['target']+"')").each(function() {
-                    $(this).html($(this).html().replace(regTarget,'<mark class="searchPreMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));                    
+                $(q + " .editarea:" + containsFunc + "('"+p['target']+"')").each(function() {
+                    $(this).html($(this).html().replace(regTarget,'<mark class="searchPreMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));      
                 });
 //                console.log($('section:has(".source mark.searchMarker, .editarea mark.searchMarker")'));
                 $('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
-                $('mark.searchPreMarker').removeClass('searchPreMarker');
+                $('mark.searchPreMarker:not(.searchMarker)').each(function() {
+                    var a = $(this).text();
+                    $(this).replaceWith(a);
+//                    if($(this).parents('section').attr('id') == 'segment-595407') $(this).replaceWith($(this).text());
+//                    console.log($(this).text());
+//                    $(this).replaceWith($(this).text());
+                });
+//                $('mark.searchPreMarker').removeClass('searchPreMarker');
+//                console.log($('#segment-595407-editarea').html());
             } else {
 
                 sid = $(seg).attr('id');
@@ -1530,10 +1552,10 @@ UI = {
                     })                    
                 }
 
-                $(q + ".justAdded:not(.status-new) .source:containsNC('"+p['source']+"')").each(function() {
+                $(q + ".justAdded:not(.status-new) .source:" + containsFunc + "('"+p['source']+"')").each(function() {
                     $(this).html($(this).html().replace(regSource,'<mark class="searchPreMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));                    
                 });                    
-                $(q + ".justAdded:not(.status-new) .editarea:containsNC('"+p['target']+"')").each(function() {
+                $(q + ".justAdded:not(.status-new) .editarea:" + containsFunc + "('"+p['target']+"')").each(function() {
                     $(this).html($(this).html().replace(regTarget,'<mark class="searchPreMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));                    
                 });
 //                console.log($('section:has(".source mark.searchMarker, .editarea mark.searchMarker")'));
@@ -1558,9 +1580,9 @@ UI = {
             q = (singleSegment)? '#' + $(singleSegment).attr('id') : "section" + status + what;
 
 //            q = "section" + status + what;
-            var reg = new RegExp('('+htmlEncode(txt)+')', "gi");
+            var reg = new RegExp('('+htmlEncode(txt)+')', "g" + ignoreCase);
             if(typeof where == 'undefined') {
-                $(q + ":containsNC('"+txt+"')").each(function() {
+                $(q + ":" + containsFunc + "('"+txt+"')").each(function() {
                     $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));                    
                 });                    
             } else {
@@ -1578,8 +1600,8 @@ UI = {
                         }
                     })                    
                 }
-                $("section" + status + ".justAdded" + what + ":containsNC('"+txt+"')").each(function() {
-//                $(q + ".justAdded:containsNC('"+txt+"')").each(function() {
+                $("section" + status + ".justAdded" + what + ":" + containsFunc + "('"+txt+"')").each(function() {
+//                $(q + ".justAdded:" + containsFunc + "('"+txt+"')").each(function() {
                     $(this).html($(this).html().replace(reg,'<mark class="searchMarker">$1</mark>').replace( /(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi , "$1$3$4"));
                 });
                 $('section.justAdded').removeClass('justAdded');
@@ -1781,6 +1803,12 @@ UI = {
         if(p['status'] != $('#select-status').val()) {
             if(!(typeof p['status'] == 'undefined')) changes = true;
         }
+        if(p['match-case'] != $('#match-case').is(':checked')) {
+            changes = true;
+        }
+        if(p['exact-match'] != $('#exact-match').is(':checked')) {
+            changes = true;
+        }
         return changes;
     },
     setFindFunction: function(func) {
@@ -1815,7 +1843,7 @@ UI = {
         });
     },  
     getContribution: function(segment, next) {
-        var n = (next) ? $('#segment-' + this.nextSegmentId) : $(segment);
+        var n = (next == 0) ? $(segment) : (next == 1)? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
         if ($(n).hasClass('loaded')) {
             this.spellCheck();
             if (next) {
@@ -1825,11 +1853,12 @@ UI = {
             }
             if (this.currentIsLoaded)
                 this.blockButtons = false;
-            if (this.currentSegmentId == this.nextSegmentId)
+            if (this.currentSegmentId == this.nextUntranslatedSegmentId)
                 this.blockButtons = false;
             if(!next) this.currentSegmentQA();
             return false;
         }
+
         if ((!n.length) && (next)) {
             return false;
         }
@@ -1966,20 +1995,29 @@ UI = {
     },
     getNextSegment: function(segment, status) {
         var seg = this.currentSegment;
+        
         var rules = (status == 'untranslated') ? 'section.status-draft:not(.readonly), section.status-rejected:not(.readonly), section.status-new:not(.readonly)' : 'section.status-' + status + ':not(.readonly)';
         var n = $(seg).nextAll(rules).first();
-
         if (!n.length) {
             n = $(seg).parents('article').next().find(rules).first();
         }
         if (n.length) {
-            this.nextSegmentId = $(n).attr('id').split('-')[1];
-        } else if ((UI.nextSegmentIdByServer) && (!UI.noMoreSegmentsAfter)) {
-            this.nextSegmentId = UI.nextSegmentIdByServer;
+            this.nextUntranslatedSegmentId = $(n).attr('id').split('-')[1];
+        } else if ((UI.nextUntranslatedSegmentIdByServer) && (!UI.noMoreSegmentsAfter)) {
+            this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
+        } else {
+            this.nextUntranslatedSegmentId = 0;
+        }
+
+        var i = $(seg).next();
+        if (!i.length) {
+            i = $(seg).parents('article').next().find('section').first();
+        }
+        if (i.length) {
+            this.nextSegmentId = $(i).attr('id').split('-')[1];
         } else {
             this.nextSegmentId = 0;
         }
-//        UI.nextSegment = $('#segment-' + this.nextSegmentId);
     },
     getPercentuageClass: function(match) {
         var percentageClass = "";
@@ -2388,8 +2426,10 @@ UI = {
         $(editarea).removeClass("indent");
 
         this.lockTags();
-        if (!this.readonly)
-            this.getContribution(segment, 1);
+        if (!this.readonly) {
+            this.getContribution(segment, 1);            
+            this.getContribution(segment, 2);            
+        }
         if (this.debug)
             console.log('close/open time: ' + ((new Date()) - this.openSegmentStart));
     },
@@ -2471,8 +2511,8 @@ UI = {
     },
     renderUntranslatedOutOfView: function(){
         this.infiniteScroll = false;
-        config.last_opened_segment = this.nextSegmentId;
-        window.location.hash = this.nextSegmentId;
+        config.last_opened_segment = this.nextUntranslatedSegmentId;
+        window.location.hash = this.nextUntranslatedSegmentId;
         $('#outer').empty();
         this.render({
             firstLoad: false
@@ -2549,7 +2589,7 @@ UI = {
 
 
 
-        console.log(d.data.matches.length);
+//        console.log(d.data.matches.length);
 
 
         if (d.data.matches.length) {
@@ -2685,7 +2725,7 @@ UI = {
                         '					</div> <!-- .textarea-container -->' +
                         '				</div> <!-- .target -->' +
                         '			</div></div> <!-- .wrap -->' +
-                        '						<ul class="buttons toggle provissima" id="segment-' + this.sid + '-buttons"></ul>' +
+                        '						<ul class="buttons toggle" id="segment-' + this.sid + '-buttons"></ul>' +
                         '			<div class="status-container">' +
                         '				<a href=# title="' + ((!this.status) ? 'Change segment status' : this.status.toLowerCase() + ', click to change it') + '" class="status" id="segment-' + this.sid + '-changestatus"></a>' +
                         '			</div> <!-- .status-container -->' +
@@ -2976,7 +3016,7 @@ UI = {
     setCurrentSegment_success: function(d) {
         if(d.error.length) 
             this.processErrors(d.error, 'setCurrentSegment');
-        this.nextSegmentIdByServer = d.nextSegmentId;
+        this.nextUntranslatedSegmentIdByServer = d.nextUntranslatedSegmentId;
         this.getNextSegment(this.currentSegment, 'untranslated');
     },
     setDeleteSuggestion: function(segment) {
@@ -3102,15 +3142,15 @@ UI = {
         var statusSwitcher = $(".status", segment);
         statusSwitcher.removeClass("col-approved col-rejected col-done col-draft");
         var statusToGo = ($(button).hasClass('translated')) ? 'untranslated' : '';
-        var nextSegment = $('#segment-' + this.nextSegmentId);
-        this.nextSegment = nextSegment;
-        if (!nextSegment.length) {
+        var nextUntranslatedSegment = $('#segment-' + this.nextUntranslatedSegmentId);
+        this.nextUntranslatedSegment = nextUntranslatedSegment;
+        if (!nextUntranslatedSegment.length) {
             $(".editor:visible").find(".close").trigger('click','Save');
             $('.downloadtr-button').focus();
             return false;
         };
         this.buttonClickStop = new Date();
-        this.copyToNextIfSame(nextSegment);
+        this.copyToNextIfSame(nextUntranslatedSegment);
         this.byButton = true;
     },
     collectSegmentErrors: function(segment) {
@@ -3321,7 +3361,6 @@ UI = {
         });
     },
     processErrors: function(err, operation) {
-        console.log(err);
         $.each(err, function() {
             if(operation == 'setTranslation') {
 //            if((operation == 'setTranslation')||(operation == 'setContribution')) {
