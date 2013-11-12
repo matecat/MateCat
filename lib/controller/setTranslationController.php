@@ -152,7 +152,7 @@ class setTranslationController extends ajaxcontroller {
                 Utils::sendErrMailReport( $msg );
 
                 $translation = $this->translation;
-                
+
             }
 
 
