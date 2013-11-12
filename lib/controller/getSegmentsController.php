@@ -99,9 +99,8 @@ class getSegmentsController extends ajaxcontroller {
 			$this->ref_segment = 0;
 		}
 
-		$data = getMoreSegments($this->jid, $this->password, $this->step, $this->ref_segment, $this->where);
+        $data = getMoreSegments($this->jid, $this->password, $this->step, $this->ref_segment, $this->where);
 
-		$first_not_translated_found = false;
 		foreach ($data as $i => $seg) {
 
             if ($this->where == 'before') {
@@ -160,10 +159,7 @@ class getSegmentsController extends ajaxcontroller {
 
 			$id_file = $seg['id_file'];
 
-			if (!isset($this->data["$id_file"])) {                
-                                
-                $file_stats = CatUtils::getStatsForFile($id_file);
-
+			if ( !isset($this->data["$id_file"]) ) {
                 $this->data["$id_file"]['jid'] = $seg['jid'];
                 $this->data["$id_file"]["filename"] = $seg['filename'];
                 $this->data["$id_file"]["mime_type"] = $seg['mime_type'];
@@ -196,9 +192,8 @@ class getSegmentsController extends ajaxcontroller {
             unset($seg['id_segment_start']);
             unset($seg['serialized_errors_list']);
 
-            
             $seg['segment'] = $this->filetype_handler->parse($seg['segment']);
-            
+
             $seg['segment'] = CatUtils::rawxliff2view($seg['segment']);
 
             //log::doLog( "1 - ".$seg['translation']);
@@ -210,7 +205,6 @@ class getSegmentsController extends ajaxcontroller {
 
             $this->data["$id_file"]['segments'][] = $seg;
         }
-
 
 
         $this->result['data']['files'] = $this->data;

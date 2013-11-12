@@ -854,7 +854,10 @@ function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
         $query .= " and fj.id_file = " . intval($id_file);
     }
 
+    $start = microtime(true);
+
     $results = $db->fetch_array( $query );
+    Log::doLog(microtime(true) - $start);
 
     return $results;
 }
@@ -887,7 +890,15 @@ function getStatsForFile( $id_file ) {
 
 function getLastSegmentIDs( $id_job ) {
 
-    $query   = "SELECT group_concat(c.id_segment) as estimation_seg_ids from (SELECT id_segment from segment_translations WHERE id_job=$id_job AND status in ('TRANSLATED','APPROVED') ORDER by translation_date DESC LIMIT 0,10) as c";
+    $query   = "
+            SELECT id_segment FROM (
+                SELECT id_segment
+                    FROM segment_translations AS st
+                    WHERE id_job = $id_job
+                    AND `status` IN ( 'TRANSLATED', 'APPROVED' )
+                    ORDER BY translation_date DESC
+            ) AS c LIMIT 10
+    ";
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
@@ -913,6 +924,8 @@ function getEQWLastHour( $id_job, $estimation_seg_ids ) {
 		count(*) from segment_translations st
 			INNER JOIN segments on id=st.id_segment WHERE status in ('TRANSLATED','APPROVED') and id_job=$id_job and id_segment in ($estimation_seg_ids)";
 
+
+    Log::doLog( $query );
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
@@ -1503,7 +1516,7 @@ function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
 }
 
 function getSegmentsForFastVolumeAnalysys( $pid ) {
-    $query   = "select concat( s.id, '-', group_concat( distinct j.id ) ) as jsid, s.segment
+    $query   = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment
 		from segments as s 
 		inner join files_job as fj on fj.id_file=s.id_file
 		inner join jobs as j on fj.id_job=j.id

@@ -511,9 +511,14 @@ class CatUtils {
      * @return mixed
      */
     protected static function _performanceEstimationTime( array $job_stats ){
-        
+
         $estimation_temp = getLastSegmentIDs($job_stats['id']);
-        $estimation_seg_ids = $estimation_temp[0]['estimation_seg_ids'];
+
+        $estimation_concat = array();
+        foreach( $estimation_temp as $sid ){
+            $estimation_concat[] = $sid['id_segment'];
+        }
+        $estimation_seg_ids = implode( ",",$estimation_concat );
 
         if ($estimation_seg_ids) {
             //perform check on performance if single segment are set to check or globally Forced

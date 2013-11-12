@@ -35,7 +35,8 @@ class Utils {
 
         $info = curl_getinfo($ch);
 
-Log::doLog($d);
+//Log::doLog($d);
+file_put_contents("/var/www/cattool/storage/log_archive/log.txt", print_r( $d, true ) , FILE_APPEND );
 Log::doLog($output);
 
         curl_close($ch);
