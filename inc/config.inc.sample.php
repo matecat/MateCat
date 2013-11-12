@@ -111,6 +111,7 @@ class INIT {
 
         self::$DEFAULT_NUM_RESULTS_FROM_TM = 3;
         self::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
+        self::$LOGIN_COOKIE_NAME = "matecat_remember_cookie";
 
         self::$DB_SERVER   = "localhost"; //database server
         self::$DB_DATABASE = "matecat"; //database name
