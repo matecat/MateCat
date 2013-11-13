@@ -1760,10 +1760,12 @@ UI = {
     preOpenConcordance: function() {
         var selection = window.getSelection();
         if(selection.type == 'Range') { // something is selected
+            var isSource = $(selection.baseNode.parentElement).hasClass('source');
             var str = selection.toString().trim();
             if(str.length) { // the trimmed string is not empty
                 this.currentSelectedText = str;
-                this.currentSearchInTarget = ($(this).hasClass('source'))? 0 : 1;
+                this.currentSearchInTarget = (isSource)? 0 : 1;
+//                this.currentSearchInTarget = ($(this).hasClass('source'))? 0 : 1;
                 this.openConcordance();
             };
         }; 
