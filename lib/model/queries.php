@@ -2049,7 +2049,7 @@ function getNumSegmentsInQueue( $currentPid ) {
     $num_segments=0;
     if ((int)$results['num_segments']>0){
         $num_segments=(int)$results['num_segments'];
-    }C
+    }
 
     return $num_segments;
 }
