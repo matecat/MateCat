@@ -2046,8 +2046,12 @@ function getNumSegmentsInQueue( $currentPid ) {
 
         return $errno * -1;
     }
+    $num_segments=0;
+    if ((int)$results['num_segments']>0){
+        $num_segments=(int)$results['num_segments'];
+    }C
 
-    return $results;
+    return $num_segments;
 }
 
 /**
