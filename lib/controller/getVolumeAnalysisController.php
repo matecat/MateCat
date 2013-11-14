@@ -28,7 +28,7 @@ class getVolumeAnalysisController extends ajaxcontroller {
 
         $res = getProjectStatsVolumeAnalysis($this->id_project);
         $numSegmentsInQueue = getNumSegmentsInQueue($this->id_project);
-        log::doLog('NUM SEGMENTS IN QUEUE: ', $numSegmentsInQueue );
+//        log::doLog('NUM SEGMENTS IN QUEUE: ', $numSegmentsInQueue );
 
         //FAKE VALUE FOR TESITNG PURPOSE: REMOVE IT BEFORE THE RELEASE
         if ($numSegmentsInQueue==0){

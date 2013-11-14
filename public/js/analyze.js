@@ -164,6 +164,13 @@ UI = {
                     var s = d.data.summary;
                     if((s.STATUS == 'NEW')||(s.STATUS == '')) {
                         $('.loadingbar').addClass('open');
+                        if(s.IN_QUEUE_BEFORE > 0) {
+                            if(!$('#shortloading .queue').length) {
+                                $('#shortloading').append('<p class="queue">There are still <span class="number">' + s.IN_QUEUE_BEFORE_PRINT + '</span> segments in queue. Please wait...</p>');
+                            } else {
+                                $('#shortloading .queue .number').text(s.IN_QUEUE_BEFORE_PRINT);                            
+                            }                            
+                        }
                     } else if(s.STATUS == 'FAST_OK') {
 //                        UI.progressBar(UI.progressPerc)
                         if(UI.lastProgressSegments != s.SEGMENTS_ANALYZED) {
