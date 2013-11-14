@@ -634,15 +634,21 @@ UI = {
         }).on('click', 'a.translated, a.next-untranslated', function(e) {
             var w = ($(this).hasClass('translated'))? 'translated' : 'next-untranslated';
             e.preventDefault();
-            if(!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
-                UI.changeStatus(this, 'translated', 0);
-                if(!UI.nextUntranslatedSegmentId) {
-                    $('#' + $(this).attr('data-segmentid') + '-close').click();
-                } else {
-                    UI.reloadWarning();                    
-                }
+            var skipChange = false;
+            if(w == 'next-untranslated') {
+                console.log('entra');
+                if(!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
+                    UI.changeStatus(this, 'translated', 0);
+                    skipChange = true;
+                    if(!UI.nextUntranslatedSegmentId) {
+                        $('#' + $(this).attr('data-segmentid') + '-close').click();
+                    } else {
+                        UI.reloadWarning();                    
+                    }
 
-            };
+                };
+            }
+
             UI.checkHeaviness();
             if (UI.blockButtons) {
                 if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId == '') {
@@ -665,31 +671,12 @@ UI = {
             } else {
                 $(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated");
             }
-            UI.changeStatus(this, 'translated', 0);
+            if(!skipChange) UI.changeStatus(this, 'translated', 0);
 
             UI.markTags();
             UI.lockTags(UI.editarea);
             UI.changeStatusStop = new Date();
             UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-//            if(UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) console.log('UI.segmentIsLoaded(UI.nextUntranslatedSegmentId): ', UI.segmentIsLoaded(UI.nextUntranslatedSegmentId));
-//            if(UI.nextUntranslatedSegmentId) console.log('UI.nextUntranslatedSegmentId: ', UI.nextUntranslatedSegmentId);
-/*            
-            if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId == '') {
-                if (UI.debug)
-                    console.log('next segment is loaded');
-            } else {
-                if (!UI.noMoreSegmentsAfter) {
-                    if (UI.debug)
-                        console.log('next segment is not loaded');
-                    if (typeof UI.nextUntranslatedSegmentId == 'undefined')
-                        return false;
-                    console.log('questo');
-//                    UI.reloadWarning();
-                } else {
-                    return false;
-                }
-            }
-*/            
         }).on('click', 'a.approved', function(e) {
             UI.setStatusButtons(this);
             $(".editarea", UI.nextUntranslatedSegment).click();
@@ -954,6 +941,53 @@ UI = {
             };
 
         });        
+        $("#exec-replace").click(function(e) {
+            e.preventDefault();
+//            APP.alert('lo rimpiazzo');
+            if(UI.searchMode == 'onlyStatus') {
+//                var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
+//                if(p['status'] == 'all') {
+//                    this.scrollSegment($('#'+el).next());
+//                } else {
+//                    this.scrollSegment($('#'+el).nextUntil('section'+status).last().next());
+//                }
+            } else if(UI.searchMode == 'source&target') {
+//                var seg = $("section.currSearchSegment");
+//                if(seg.length) {
+//                    this.gotoSearchResultAfter('segment-' + $(seg).attr('id').split('-')[1]);
+//                }       
+            } else {
+                txt = $('#replace-target').val();
+                // todo: rifai il marksearchresults sul target
+                $("mark.currSearchItem").text(txt);
+                segment = $("mark.currSearchItem").parents('section');
+                UI.setTranslation(segment, UI.getStatus(segment));
+
+                UI.gotoNextResultItem(true);
+                
+//                var m = $("mark.currSearchItem");
+//                if($(m).nextAll('mark.searchMarker').length) {
+//                    $(m).removeClass('currSearchItem');
+//                    $(m).nextAll('mark.searchMarker').first().addClass('currSearchItem');
+//                } else {
+//                    seg = (m.length)? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
+//                    if(seg.length) {
+//                        skipCurrent = $(seg).has("mark.currSearchItem").length;
+//                        this.gotoSearchResultAfter('segment-' + $(seg).attr('id').split('-')[1], skipCurrent);
+//                    } else {
+//                        setTimeout(function() {
+//                            UI.gotoNextResultItem(false);
+//                        }, 500);                    
+//                    }
+//                }  
+            }
+            
+            // replace in segment
+            
+            // set translation & friends
+            
+            // goto next result
+        });
 //        $("#search-source").on('input', function(e) {
 //            $("#search-target").val('');
 //            UI.setFindFunction('find');
@@ -1032,9 +1066,9 @@ UI = {
     changeStatus: function(ob, status, byStatus) {
         var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
         $('.percentuage', segment).removeClass('visible');
+        this.setTranslation(segment, status);
         this.setContribution(segment, status, byStatus);
         this.setContributionMT(segment, status, byStatus);
-        this.setTranslation(segment, status);
         this.applySearch(segment);
         this.getNextSegment(this.currentSegment, 'untranslated');
 
@@ -1363,8 +1397,10 @@ UI = {
 
         if($('#search-target').val() != '') {
             this.searchParams['target'] = $('#search-target').val();
+            $('#exec-replace').removeAttr('disabled');
         } else {
             delete this.searchParams['target'];
+            $('#exec-replace').attr('disabled', 'disabled');
         }
 
         if($('#select-status').val() != '') {
@@ -1403,7 +1439,9 @@ UI = {
         var target = (p['target'])? p['target'] : '';
         var replace = (p['replace'])? p['replace'] : '';
         this.markSearchResults();
-        this.gotoSearchResultAfter('segment-' + this.currentSegmentId);
+        this.gotoSearchResultAfter({
+            el: 'segment-' + this.currentSegmentId
+        });
         
         this.setFindFunction('next');
         this.body.addClass('searchActive');
@@ -1492,7 +1530,7 @@ UI = {
         if((this.searchMode == 'source&target')&&(this.numSearchResultsSegments < 2)) $('#exec-find[data-func=next]').attr('disabled', 'disabled');
     },
     execNext: function() {
-        this.gotoNextResultItem();
+        this.gotoNextResultItem(false);
     },
     markSearchResults: function(options) { // if where is specified mark only the range of segment before or after seg (no previous clear)
         options = options || {};
@@ -1647,9 +1685,8 @@ UI = {
         });
         $('section.currSearchResultSegment').removeClass('currSearchResultSegment');    
     },
-    gotoNextResultItem: function() {
+    gotoNextResultItem: function(unmark) {
         var p = this.searchParams;
-
 
         if(this.searchMode == 'onlyStatus') {
             var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
@@ -1665,42 +1702,53 @@ UI = {
             if(seg.length) {
 //                $(seg).removeClass('currSearchSegment');
 //                $(m).nextAll('mark.searchMarker').first().addClass('currSearchItem');
-                this.gotoSearchResultAfter('segment-' + $(seg).attr('id').split('-')[1]);
+                this.gotoSearchResultAfter({
+                    el: 'segment-' + $(seg).attr('id').split('-')[1]
+                });
             }       
         } else {
             var m = $("mark.currSearchItem");
 //            console.log($(m).nextAll('mark.searchMarker').length);
-            if($(m).nextAll('mark.searchMarker').length) {
+            if($(m).nextAll('mark.searchMarker').length) { // there are other subsequent results in the segment
     //            console.log('altri item nel segmento');
                 $(m).removeClass('currSearchItem');
                 $(m).nextAll('mark.searchMarker').first().addClass('currSearchItem');
-            } else {
+                if(unmark) $(m).replaceWith($(m).text());
+            } else { // jump to results in subsequents segments
 //                console.log(m.length);
                 seg = (m.length)? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
                 if(seg.length) {
                     skipCurrent = $(seg).has("mark.currSearchItem").length;
-                    this.gotoSearchResultAfter('segment-' + $(seg).attr('id').split('-')[1], skipCurrent);
+                    this.gotoSearchResultAfter({
+                        el: 'segment-' + $(seg).attr('id').split('-')[1],
+                        skipCurrent: skipCurrent,
+                        unmark: unmark
+                    });
                 } else {
                     setTimeout(function() {
-                        UI.gotoNextResultItem();
+                        UI.gotoNextResultItem(false);
                     }, 500);                    
                 }
             }            
         }
 
     },
-    gotoSearchResultAfter: function(el, skipCurrent) {
+    gotoSearchResultAfter: function(options) {
+        el = options.el;
+        skipCurrent = (options.skipCurrent || false);
+        unmark = (options.unmark || false);
+        
         var p = this.searchParams;
 //        console.log($('#' + el + ":has(mark.searchMarker)").length);
 
-        if(this.searchMode == 'onlyStatus') {
+        if(this.searchMode == 'onlyStatus') { // searchMode: onlyStatus
             var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
             if(p['status'] == 'all') {
                 this.scrollSegment($('#'+el).next());
             } else {
                 this.scrollSegment($('#'+el).nextUntil('section'+status).last().next());
             }
-        } else if(this.searchMode == 'source&target') {
+        } else if(this.searchMode == 'source&target') { // searchMode: source&target
             var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
             destination = (($('#' + el + ":has(mark.searchMarker)").length)&&(!$('#'+el).hasClass('currSearchSegment')))? $('#'+el) : $('#'+el).nextAll(status + ":has(mark.searchMarker)").first();
 //            destination = $('#'+el).nextAll(status + ":has(mark.searchMarker)").first();            
@@ -1729,20 +1777,22 @@ UI = {
             }
 
             
-        } else {
+        } else { // searchMode: normal
             seg = $('section').has("mark.searchMarker");
             ss = el;
             found = false;
             $.each(seg, function(index) {
                 if($(this).attr('id') >= ss) {
-                    if(($(this).attr('id') == ss)&&(typeof skipCurrent != 'undefined')) {
+                    if(($(this).attr('id') == ss)&&(skipCurrent)) {
                     } else {
                         found = true;
                         $("html,body").animate({
                             scrollTop: $(this).offset().top - 200
                         }, 500);
-                        $('mark.currSearchItem').removeClass('currSearchItem');
+                        var m = $("mark.currSearchItem");
+                        $(m).removeClass('currSearchItem');
                         $(this).find('mark.searchMarker').first().addClass('currSearchItem');
+                        if(unmark) $(m).replaceWith($(m).text());
                         return false;                        
                     }
 
@@ -2149,6 +2199,10 @@ UI = {
         segment = (typeof seg == 'undefined')? this.currentSegment : seg;
         return $('.source', segment).text();
     },
+    getStatus: function(segment) {
+        status = ($(segment).hasClass('status-new')? 'new' : $(segment).hasClass('status-draft')? 'draft' : $(segment).hasClass('status-translated')? 'translated' : $(segment).hasClass('status-approved')? 'approved' : 'rejected');
+        return status;
+    },            
     getSegmentTarget: function(seg) {
         editarea = (typeof seg == 'undefined')? this.editarea : $('.editarea', seg);
         return editarea.text();
@@ -2190,7 +2244,7 @@ UI = {
         console.log('params: ', params);
         console.log('giusto');
     },
-    gotoNextSegment: function() {console.log('next');
+    gotoNextSegment: function() {
         var next = $('.editor').next();
         if (next.is('section')) {
             this.scrollSegment(next);
@@ -3154,6 +3208,7 @@ UI = {
         segment.removeClass("status-draft status-translated status-approved status-rejected status-new").addClass("status-" + status);
     },
     setStatusButtons: function(button) {
+        isTranslatedButton = ($(button).hasClass('translated'))? true : false;
         this.editStop = new Date();
         var segment = this.currentSegment;
         tte = $('.timetoedit', segment);
@@ -3169,10 +3224,11 @@ UI = {
         tte.data('raw_time_to_edit', this.totalTime);
         var statusSwitcher = $(".status", segment);
         statusSwitcher.removeClass("col-approved col-rejected col-done col-draft");
-        var statusToGo = ($(button).hasClass('translated')) ? 'untranslated' : '';
+        
+        var statusToGo = (isTranslatedButton) ? 'untranslated' : '';
         var nextUntranslatedSegment = $('#segment-' + this.nextUntranslatedSegmentId);
         this.nextUntranslatedSegment = nextUntranslatedSegment;
-        if (!nextUntranslatedSegment.length) {
+        if ((!isTranslatedButton)&&(!nextUntranslatedSegment.length)) {
             $(".editor:visible").find(".close").trigger('click','Save');
             $('.downloadtr-button').focus();
             return false;
