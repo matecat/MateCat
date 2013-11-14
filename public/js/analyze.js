@@ -171,6 +171,8 @@ UI = {
                                 $('#shortloading .queue .number').text(s.IN_QUEUE_BEFORE_PRINT);                            
                             }                            
                         }
+                    } else if(s.STATUS == 'EMPTY') {
+                        $('#longloading p').html('This project contains 0 segments. Nothing to analyze and translate. May be scanned file?');                        
                     } else if(s.STATUS == 'FAST_OK') {
 //                        UI.progressBar(UI.progressPerc)
                         if(UI.lastProgressSegments != s.SEGMENTS_ANALYZED) {
