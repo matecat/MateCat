@@ -2033,6 +2033,27 @@ function getSegmentForTMVolumeAnalysys( $id_segment, $id_job ) {
     return $results;
 }
 
+function getNumSegmentsInQueue( $currentPid ) {
+    $query = "select count(*) as num_segments from segment_translations_analysis_queue where pid <$currentPid";
+
+    $db      = Database::obtain();
+    $results = $db->query_first( $query );
+
+    $err   = $db->get_error();
+    $errno = $err[ 'error_code' ];
+    if ( $errno != 0 ) {
+        log::doLog( $err );
+
+        return $errno * -1;
+    }
+    $num_segments=0;
+    if ((int)$results['num_segments']>0){
+        $num_segments=(int)$results['num_segments'];
+    }
+
+    return $num_segments;
+}
+
 /**
  * @deprecated Not Used Anywhere
  *
