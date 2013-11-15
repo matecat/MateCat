@@ -18,25 +18,27 @@ class fileFormatConverter {
 
     private $conversionObject;
 
-	private static $Storage_Lookup_IP_Map = array(
-			//'10.11.0.10' => '10.11.0.11',
-			'10.11.0.18' => '10.11.0.19',
-			'10.11.0.26' => '10.11.0.27',
-			'10.11.0.34' => '10.11.0.35',
-			'10.11.0.42' => '10.11.0.43',
-			);
+    /**
+     * Set to true to send conversion failures report
+     *
+     * @var bool
+     */
+    public $sendErrorReport = true;
 
-	public static $converters = array(
-			//'10.11.0.10' => 1,
-			'10.11.0.18' => 1,
-			'10.11.0.26' => 1,
-			'10.11.0.34' => 1,
-			'10.11.0.42' => 1
-			);
+	public static $Storage_Lookup_IP_Map = array();
+	public static $converters = array();
 
-	//public static $converters = array('10.11.0.10' => 1);//for debugging purposes
+    /**
+     * Set more curl option for conversion call ( fw/bw )
+     *
+     * @param array $options
+     */
+    public function setCurlOpt( $options = array() ){
+        $this->opt = array_merge( $this->opt, $options );
+    }
 
 	public function __construct() {
+
 		if (!class_exists("INIT")) {
 			include_once ("../../inc/config.inc.php");
 			INIT::obtain();
@@ -56,7 +58,19 @@ class fileFormatConverter {
             'error_message' => null,
             'src_lang'      => null,
             'trg_lang'      => null,
+            'status'        => 'ok',
         ), ArrayObject::ARRAY_AS_PROPS );
+
+        $db = Database::obtain();
+        $converters = $db->fetch_array( "SELECT ip_converter, ip_storage FROM converters WHERE status_active = 1 AND status_offline = 0" );
+
+        foreach( $converters as $converter_storage ){
+            self::$converters[ $converter_storage['ip_converter'] ] = 1;
+            self::$Storage_Lookup_IP_Map[ $converter_storage['ip_converter'] ] = $converter_storage['ip_storage'];
+        }
+
+        //self::$converters = array('10.11.0.10' => 1);//for debugging purposes
+        //self::$Storage_Lookup_IP_Map = array('10.11.0.10' => '10.11.0.11');//for debugging purposes
 
 	}
 
@@ -72,35 +86,20 @@ class fileFormatConverter {
 
 	//get a converter at random, weighted on number of CPUs per node
 	private function pickRandConverter() {
-		//get total cpu count
-		$cpus    = array_values( self::$converters );
+
+        $converters_map = array();
+
 		$tot_cpu = 0;
-		foreach ( $cpus as $cpu ) {
+		foreach ( self::$converters as $ip => $cpu ) {
 			$tot_cpu += $cpu;
+            $converters_map = array_merge( $converters_map, array_fill( 0, $cpu, $ip ) );
 		}
-		unset( $cpus );
 
 		//pick random
 		$num = rand( 0, $tot_cpu - 1 );
 
-		//scroll in a roulette fashion through node->#cpu list until you stop on a cpu
-		/*
-		   imagine an array: each node has a number of cells on it equivalent to # of cpus; the random number is the cell on which to stop
-		   scroll the list_of_nodes, decrementing the random number with number of cpus;
-		   if any time the random is 0, pick that node;
-		   otherwise, keep scrolling
-		 */
-		$picked_node = '';
-		foreach ( self::$converters as $node => $cpus ) {
-			$num -= $cpus;
-			if ( $num <= 0 ) {
-				//current node is the one; break
-				$picked_node = $node;
-				break;
-			}
-		}
+        return $converters_map[ $num ];
 
-		return $picked_node;
 	}
 
 	/**
@@ -154,45 +153,6 @@ class fileFormatConverter {
 
 		return $top;
 	}
-	/**
-	 * check process list of a single node by ip
-	 *
-	 * @param $ip
-	 *
-	 * @return mixed
-	 */
-	public static function checkNodeProcesses( &$ip ){
-
-		$result = "";
-		$processes = array();
-
-		//since sometimes it can fail, try again util we get something meaningful
-		$ch = curl_init("$ip:8082");
-		curl_setopt($ch,CURLOPT_RETURNTRANSFER,1);
-		curl_setopt($ch,CURLOPT_TIMEOUT,2); //we can wait max 2 seconds
-
-		$trials=0;
-		while($trials<3 ){
-
-			$result = curl_exec($ch);
-			$curl_errno = curl_errno($ch);
-			$curl_error = curl_error($ch);
-
-			$processes = json_decode($result,true);
-
-			if( empty( $result ) || empty( $processes ) ){
-				$trials++;
-				sleep(1);
-			}else{
-				break;
-			}
-		}
-
-		//close
-		curl_close($ch);
-
-		return $processes;
-	}
 
 	private function pickIdlestConverter(){
 		//scan each server load
@@ -226,7 +186,7 @@ class fileFormatConverter {
 		return is_array($array) AND (bool) count(array_filter(array_keys($array), 'is_string'));
 	}
 
-	private function parseOutput($res) {
+	private function __parseOutput($res) {
 		$ret = array();
 		$ret['isSuccess'] = $res['isSuccess'];
 		$is_success = $res['isSuccess'];
@@ -236,19 +196,29 @@ class fileFormatConverter {
 			$ret['errorMessage'] = $res['errorMessage'];
             $this->conversionObject->error_message = $res['errorMessage'];
 
-            $backUp_dir = INIT::$STORAGE_DIR.'/conversion_errors/' . $_COOKIE['upload_session'];
+            $backUp_dir = INIT::$STORAGE_DIR.'/conversion_errors/' . @$_COOKIE['upload_session'];
             $this->conversionObject->path_backup = $backUp_dir . "/" . $this->conversionObject->file_name;
 
             if ( !is_dir( $backUp_dir ) ) {
                 mkdir( $backUp_dir, 0755, true );
             }
 
-            rename( $this->conversionObject->path_name , $this->conversionObject->path_backup );
-            $this->__saveConversionErrorLog();
-            $this->__notifyError();
+            $this->conversionObject->status = 'ko';
+
+            //when Launched by CRON Script send Error Report is disabled
+            if( $this->sendErrorReport ) {
+                rename( $this->conversionObject->path_name , $this->conversionObject->path_backup );
+                $this->__saveConversionErrorLog();
+                $this->__notifyError();
+            }
 
 			return $ret;
-		}
+
+		} else {
+            $this->conversionObject->path_backup = $this->conversionObject->path_name;
+            $this->__saveConversionErrorLog();
+        }
+
 		if (array_key_exists("documentContent", $res)) {
 			$res['documentContent'] = base64_decode($res['documentContent']);
 		}
@@ -262,7 +232,7 @@ class fileFormatConverter {
 			throw new Exception("The input data to " . __FUNCTION__ . "must be an associative array", -1);
 		}
 
-		if($this->checkOpenService($url)){
+        if ( $this->checkOpenService( $url ) ) {
 
 			$ch = curl_init();
 
@@ -290,13 +260,19 @@ class fileFormatConverter {
 			}
 
 			$output = curl_exec($ch);
+            $curl_errno = curl_errno($ch);
+            $curl_error = curl_error($ch);
 			$info = curl_getinfo($ch);
 
 			// Chiude la risorsa curl
 			curl_close($ch);
 
+            if( $curl_errno > 0 ){
+                $output = json_encode( array( "isSuccess" => false, "errorMessage" => $curl_error ) );
+            }
+
 		} else {
-			$output=json_encode(array("isSuccess"=>false,"errorMessage"=>"port closed"));
+            $output = json_encode( array( "isSuccess" => false, "errorMessage" => "port closed" ) );
 		}
 		return $output;
 	}
@@ -323,7 +299,7 @@ class fileFormatConverter {
 		$fileContent = null;
 		//assign converter
 		if(!$chosen_by_user_machine){
-			$this->ip=$this->pickIdlestConverter();
+			$this->ip=$this->pickRandConverter();
 		}else{
 			$this->ip=$chosen_by_user_machine;
 		}
@@ -353,7 +329,7 @@ class fileFormatConverter {
 
 		$decode = json_decode($curl_result, true);
 		$curl_result = null;
-		$res = $this->parseOutput($decode);
+		$res = $this->__parseOutput($decode);
 
 		return $res;
 	}
@@ -385,7 +361,7 @@ class fileFormatConverter {
 
 		//assign converter
 		if(!$chosen_by_user_machine){
-			$this->ip=$this->pickIdlestConverter();
+			$this->ip=$this->pickRandConverter();
 			$storage      = $this->getValidStorage();
 
 			//add trados to replace/regexp pattern because whe have more than 1 replacement
@@ -418,7 +394,7 @@ class fileFormatConverter {
 
 		$decode = json_decode($curl_result, true);
 		unset($curl_result);
-		$res = $this->parseOutput($decode);
+		$res = $this->__parseOutput($decode);
 		unset($decode);
 
 
