@@ -176,6 +176,8 @@ class ProjectManager {
 
                 $this->_extractSegments( $filePathName, $fid );
 
+                Log::doLog( $this->projectStructure['segments'] );
+
             } catch ( Exception $e ){
 
                 if ( $e->getCode() == -1 ) {
@@ -204,9 +206,28 @@ class ProjectManager {
             $owner = '';
         }
 
+
+        $isEmptyProject = false;
         //Throws exception
         try {
             $this->_createJobs( $this->projectStructure, $owner );
+
+            //FIXME for project with pre translation this query is not enough,
+            //we need compare the number of segments with translations, but take an eye to the opensource
+
+            $query_visible_segments = "SELECT count(*) as cattool_segments
+                                       FROM segments WHERE id_file IN ( %s ) and show_in_cattool = 1";
+
+            $string_file_list = implode( "," , $this->projectStructure['file_id_list']->getArrayCopy() );
+            $query_visible_segments = sprintf( $query_visible_segments, $string_file_list );
+            $res = mysql_query( $query_visible_segments, $this->mysql_link );
+
+            if ( !$res || mysql_num_rows( $res ) == 0 ) {
+                Log::doLog("Segment Search: No segments in this project - \n");
+                $isEmptyProject = true;
+            }
+
+
         } catch ( Exception $ex ){
             $this->projectStructure['result']['errors'][] = array( "code" => -9, "message" => "Fail to create Job. ( {$ex->getMessage()} )" );
             return false;
@@ -218,6 +239,10 @@ class ProjectManager {
         }
 
         $this->projectStructure['status'] = ( INIT::$VOLUME_ANALYSIS_ENABLED ) ? 'NEW' : 'NOT_TO_ANALYZE';
+        if( $isEmptyProject ){
+            $this->projectStructure['status'] = 'EMPTY';
+        }
+
         changeProjectStatus( $this->projectStructure['id_project'], $this->projectStructure['status'] );
         $this->projectStructure['result'][ 'code' ]            = 1;
         $this->projectStructure['result'][ 'data' ]            = "OK";
@@ -243,7 +268,7 @@ class ProjectManager {
             $last_segments_query = sprintf( $query_min_max, $string_file_list );
             $res = mysql_query( $last_segments_query, $this->mysql_link );
 
-            if (!$res) {
+            if ( !$res || mysql_num_rows( $res ) == 0 ) {
                 Log::doLog("Segment Search: Failed Retrieve min_segment/max_segment for files ( $string_file_list ) - DB Error: " . mysql_error() . " - \n");
                 throw new Exception( "Segment import - DB Error: " . mysql_error(), -5);
             }
