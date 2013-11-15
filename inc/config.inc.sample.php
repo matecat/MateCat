@@ -38,7 +38,9 @@ class INIT {
     public static $WARNING_POLLING_INTERVAL;
     public static $SEGMENT_QA_CHECK_INTERVAL;
     public static $SAVE_SHASUM_FOR_FILES_LOADED;
-
+    public static $AUTHSECRET;
+    public static $AUTHCOOKIENAME;
+    public static $AUTHCOOKIEDURATION;
     public static $SPELL_CHECK_TRANSPORT_TYPE;
     public static $SPELL_CHECK_ENABLED;
 
@@ -108,10 +110,12 @@ class INIT {
 
         self::$TIME_TO_EDIT_ENABLED = false;
 
+	self::$AUTHSECRET='ScavengerOfHumanSorrow';
+	self::$AUTHCOOKIENAME='matecat_login';
+	self::$AUTHCOOKIEDURATION=86400*60;
 
         self::$DEFAULT_NUM_RESULTS_FROM_TM = 3;
         self::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
-        self::$LOGIN_COOKIE_NAME = "matecat_remember_cookie";
 
         self::$DB_SERVER   = "localhost"; //database server
         self::$DB_DATABASE = "matecat"; //database name

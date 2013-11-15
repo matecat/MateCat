@@ -33,8 +33,8 @@ class oauthResponseHandlerController extends viewcontroller{
 
 		$this->redirectUrl = $_SESSION['incomingUrl'];
 
-        //remove no more used var
-        unset($_SESSION['incomingUrl']);
+		//remove no more used var
+		unset($_SESSION['incomingUrl']);
 	}
 
 	public function doAction(){
@@ -54,22 +54,23 @@ class oauthResponseHandlerController extends viewcontroller{
 				//$this->sendNotifyMail($this->userdata);
 
 				//ok mail sent, set stuff
-				$_SESSION['cid'] = $this->userdata['email'];
+				AuthCookie::setCredentials($this->userdata['email'],INIT::$AUTHCOOKIEDURATION);
+				//$_SESSION['cid'] = $this->userdata['email'];
 
-                $_theresAnonymousProject = ( isset($_SESSION['_anonym_pid']) && !empty($_SESSION['_anonym_pid']) );
-                $_incomingFromNewProject = ( isset($_SESSION['_newProject']) && !empty($_SESSION['_newProject']) );
+				$_theresAnonymousProject = ( isset($_SESSION['_anonym_pid']) && !empty($_SESSION['_anonym_pid']) );
+				$_incomingFromNewProject = ( isset($_SESSION['_newProject']) && !empty($_SESSION['_newProject']) );
 
-                if( $_theresAnonymousProject && $_incomingFromNewProject ){
-                    //update anonymous project with user credentials
-                    $result = updateProjectOwner( $this->userdata['email'], $_SESSION['_anonym_pid'] );
-                }
+				if( $_theresAnonymousProject && $_incomingFromNewProject ){
+					//update anonymous project with user credentials
+					$result = updateProjectOwner( $this->userdata['email'], $_SESSION['_anonym_pid'] );
+				}
 
 			}
 		}
 
-        //destroy session info of last anonymous project
-        unset($_SESSION['_anonym_pid']);
-        unset($_SESSION['_newProject']);
+		//destroy session info of last anonymous project
+		unset($_SESSION['_anonym_pid']);
+		unset($_SESSION['_newProject']);
 
 	}
 
