@@ -220,13 +220,20 @@ class ProjectManager {
 
             $string_file_list = implode( "," , $this->projectStructure['file_id_list']->getArrayCopy() );
             $query_visible_segments = sprintf( $query_visible_segments, $string_file_list );
+
             $res = mysql_query( $query_visible_segments, $this->mysql_link );
 
-            if ( !$res || mysql_num_rows( $res ) == 0 ) {
+            if ( !$res ) {
+                Log::doLog("Segment Search: Failed Retrieve min_segment/max_segment for files ( $string_file_list ) - DB Error: " . mysql_error() . " - \n");
+                throw new Exception( "Segment import - DB Error: " . mysql_error(), -5);
+            }
+
+            $rows = mysql_fetch_assoc( $res );
+
+            if ( $rows['cattool_segments'] == 0  ) {
                 Log::doLog("Segment Search: No segments in this project - \n");
                 $isEmptyProject = true;
             }
-
 
         } catch ( Exception $ex ){
             $this->projectStructure['result']['errors'][] = array( "code" => -9, "message" => "Fail to create Job. ( {$ex->getMessage()} )" );
