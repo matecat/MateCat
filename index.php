@@ -1,6 +1,5 @@
 <?php
 
-ini_set('session.gc_maxlifetime',3600*24*60);
 require_once 'inc/config.inc.php';
 
 INIT::obtain();
