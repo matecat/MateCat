@@ -154,9 +154,8 @@ class INIT {
 			self::$AUTHSECRET=file_get_contents(self::$AUTHSECRET_PATH);
 		}else{
 			//try creating the file and the fetch it
-			include_once INIT::$UTILS_ROOT . "/cat.class.php";
 			//generate pass
-			$secret=CatUtils::generate_password(512);
+			$secret=self::generate_password(512);
 			//put file
 			file_put_contents(self::$AUTHSECRET_PATH,$secret);
 			//if put succeed
@@ -266,6 +265,21 @@ class INIT {
 		//if (!$this->initOK()) {
 		//    throw new Exception("ERROR");
 		//}
+
+	private static function generate_password( $length = 12 ) {
+
+		$_pwd = md5( uniqid('',true) );
+		$pwd = substr( $_pwd, 0, 6 ) . substr( $_pwd, -6, 6 );
+
+		if( $length > 12 ){
+			while( strlen($pwd) < $length ){
+				$pwd .= self::generate_password();
+			}
+			$pwd = substr( $pwd, 0, $length );
+		}
+
+		return $pwd;
+
 	}
 
 }
