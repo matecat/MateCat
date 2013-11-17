@@ -265,6 +265,7 @@ class INIT {
 		//if (!$this->initOK()) {
 		//    throw new Exception("ERROR");
 		//}
+	}
 
 	private static function generate_password( $length = 12 ) {
 
