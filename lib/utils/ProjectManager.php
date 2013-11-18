@@ -176,7 +176,7 @@ class ProjectManager {
 
                 $this->_extractSegments( $filePathName, $fid );
 
-                Log::doLog( $this->projectStructure['segments'] );
+                //Log::doLog( $this->projectStructure['segments'] );
 
             } catch ( Exception $e ){
 
@@ -261,6 +261,7 @@ class ProjectManager {
         $this->projectStructure['result'][ 'project_name' ]    = $this->projectStructure['project_name'];
         $this->projectStructure['result'][ 'source_language' ] = $this->projectStructure['source_language'];
         $this->projectStructure['result'][ 'target_language' ] = $this->projectStructure['target_language'];
+        $this->projectStructure['result'][ 'status' ]          = $this->projectStructure['status'];
 
     }
 
