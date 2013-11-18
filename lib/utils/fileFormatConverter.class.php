@@ -216,7 +216,12 @@ class fileFormatConverter {
 
 		} else {
             $this->conversionObject->path_backup = $this->conversionObject->path_name;
-            $this->__saveConversionErrorLog();
+
+            //when Launched by CRON Script send Error Report is disabled
+            if( $this->sendErrorReport ) {
+                $this->__saveConversionErrorLog();
+            }
+
         }
 
 		if (array_key_exists("documentContent", $res)) {
