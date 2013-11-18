@@ -101,7 +101,7 @@ $(function () {
 	        autoUpload: true,
 	        singleFileUploads: true,
 	        overlayClose: true,
-	        maxFileSize: 100000000, // 30MB
+	        maxFileSize: 30000000, // 30MB
 //	        maxChunkSize: 1000000,
 //	        multipart: false,
 	        fileInput: $('#fileupload .multiple-button, .btncontinue .multiple-button'),
@@ -589,6 +589,8 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 				}
                 // temp
                 message = (falsePositive)? '' : 'Conversion Error. Try opening and saving the document with a new name.';
+                console.log(d.errors[0].code);
+                if(d.errors[0].code == -6) message = 'Error during upload. The uploaded file may exceed the file size limit of 100M';
                 console.log(enforceConversion);
                 console.log(typeof enforceConversion);
            		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">'+message+'</span>');
