@@ -147,7 +147,7 @@ class INIT {
 		}
 
 		//auth sections
-		self::$AUTHSECRET_PATH='lib/utils/openid/login_secret.dat';
+        self::$AUTHSECRET_PATH=  self::$ROOT . '/lib/utils/openid/login_secret.dat';
 		//if secret is set in file
 		if(file_exists(self::$AUTHSECRET_PATH)){
 			//fetch it

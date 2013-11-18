@@ -184,6 +184,8 @@ class createProjectController extends ajaxcontroller {
 
         setcookie( "upload_session", "", time() - 10000 );
 
+        Log::doLog( $this->result );
+
     }
 
 }
