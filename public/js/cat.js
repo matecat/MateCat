@@ -2284,7 +2284,7 @@ UI = {
                 this.topReached();
             }
         };
-        this.scrollSegment(prev);
+        if(prev.length) this.scrollSegment(prev);
     },
     gotoSegment: function(id) {
         var el = $("#segment-" + id + "-target").find(".editarea");
@@ -3594,12 +3594,12 @@ UI = {
         }
     },
     topReached: function() {
-        var jumpto = $(this.currentSegment).offset().top;
-        $("html,body").animate({
-            scrollTop: 0
-        }, 200).animate({
-            scrollTop: jumpto - 50
-        }, 200);
+//        var jumpto = $(this.currentSegment).offset().top;
+//        $("html,body").animate({
+//            scrollTop: 0
+//        }, 200).animate({
+//            scrollTop: jumpto - 50
+//        }, 200);
     },
     browserScrollPositionRestoreCorrection: function() {
         // detect if the scroll is a browser generated scroll position restore, and if this is the case rescroll to the segment 
