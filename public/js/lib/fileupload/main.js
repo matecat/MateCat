@@ -13,7 +13,7 @@
 /*global $, window, document */
 
 UI = null;
-config.maxFileSize = 30000000;
+//config.maxFileSize = 30000000;
 config.maxFileSizePrint = (config.maxFileSize/1000000) + ' MB';
 
 UI = {
