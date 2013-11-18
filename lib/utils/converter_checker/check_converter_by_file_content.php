@@ -519,7 +519,9 @@ class ConvertersMonitor {
             $t_start = microtime( true );
 
             //get extension
-            $ext = $fileInfo->getExtension();
+            //PHP 5.2 LACK THIS METHOD .... ADDED IN PHP 5.3.6 ....
+            //$ext = $fileInfo->getExtension();
+            $ext = pathinfo( $fileInfo->getFilename(), PATHINFO_EXTENSION );
 
             //get path
             $file_path = $fileInfo->getPathname();
