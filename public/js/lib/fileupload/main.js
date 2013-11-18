@@ -101,7 +101,7 @@ $(function () {
 	        autoUpload: true,
 	        singleFileUploads: true,
 	        overlayClose: true,
-	        maxFileSize: 30000000, // 30MB
+	        maxFileSize: 100000000, // 30MB
 //	        maxChunkSize: 1000000,
 //	        multipart: false,
 	        fileInput: $('#fileupload .multiple-button, .btncontinue .multiple-button'),
