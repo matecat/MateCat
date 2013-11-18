@@ -101,7 +101,7 @@ $(function () {
 	        autoUpload: true,
 	        singleFileUploads: true,
 	        overlayClose: true,
-	        maxFileSize: 30000000, // 30MB
+	        maxFileSize: 100000000, // 30MB
 //	        maxChunkSize: 1000000,
 //	        multipart: false,
 	        fileInput: $('#fileupload .multiple-button, .btncontinue .multiple-button'),
@@ -494,6 +494,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 
     console.log( 'Enforce conversion: ' + enforceConversion );
     firstEnforceConversion = (typeof enforceConversion === "undefined") ? false : true;
+    console.log(firstEnforceConversion);
     enforceConversion = (typeof enforceConversion === "undefined") ? false : enforceConversion;
 
 //	filerow = data.context;
@@ -547,7 +548,8 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
         },
         success: function(d){
               console.log(this.context);
-			falsePositive = (typeof this.context == 'undefined')? false : true;
+			falsePositive = ((typeof this.context == 'undefined')||(!this.context))? false : true; // suggested solution
+//			falsePositive = (typeof this.context == 'undefined')? false : true; // old solution
               filerow.removeClass('converting');
 			filerow.addClass('ready');
            	if(d.code == 1) {
