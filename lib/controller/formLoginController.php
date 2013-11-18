@@ -26,7 +26,7 @@ class formLoginController extends ajaxcontroller{
 		}
 		if(isset($_POST['logout'])){
 			unset($_SESSION['cid']);
-			session_destroy();
+			AuthCookie::destroyAuthentication();
 			$this->result='unlogged';
 		}
 		if(isset($_POST['reset'])){
