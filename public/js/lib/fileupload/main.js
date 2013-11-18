@@ -13,6 +13,8 @@
 /*global $, window, document */
 
 UI = null;
+config.maxFileSize = 30000000;
+config.maxFileSizePrint = (config.maxFileSize/1000000) + ' MB';
 
 UI = {
     init: function() {
@@ -101,7 +103,7 @@ $(function () {
 	        autoUpload: true,
 	        singleFileUploads: true,
 	        overlayClose: true,
-	        maxFileSize: 100000000, // 30MB
+	        maxFileSize: config.maxFileSize, // 30MB
 //	        maxChunkSize: 1000000,
 //	        multipart: false,
 	        fileInput: $('#fileupload .multiple-button, .btncontinue .multiple-button'),
@@ -114,7 +116,14 @@ $(function () {
         dropzone.show();
 	}).bind('fileuploadadd', function (e, data) {
 		console.log('adding');
+//        console.log($('.upload-table tr'));
 		console.log(data);
+        console.log(data.files[0].size);
+        console.log(config.maxFileSize);
+        if(data.files[0].size > config.maxFileSize) {
+//            jqXHR = data.submit();
+//            jqXHR.abort();            
+        }
          $('body').addClass('initialized');
 
 
@@ -159,6 +168,7 @@ $(function () {
 		};
 */
 	}).bind('fileuploadsend', function (e,data) {
+        console.log(data.files);
 		$('.progress', $(data.context[0])).before('<div class="operation">Uploading</div>');
 	}).bind('fileuploadprogress', function (e,data) {
 //		console.log(data.loaded);
@@ -494,7 +504,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 
     console.log( 'Enforce conversion: ' + enforceConversion );
     firstEnforceConversion = (typeof enforceConversion === "undefined") ? false : true;
-    console.log(firstEnforceConversion);
+//    console.log(firstEnforceConversion);
     enforceConversion = (typeof enforceConversion === "undefined") ? false : enforceConversion;
 
 //	filerow = data.context;
@@ -547,7 +557,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
        		return false;
         },
         success: function(d){
-              console.log(this.context);
+//              console.log(this.context);
 //			falsePositive = ((typeof this.context == 'undefined')||(!this.context))? false : true; // suggested solution
 			falsePositive = (typeof this.context == 'undefined')? false : true; // old solution
               filerow.removeClass('converting');
@@ -589,10 +599,10 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 				}
                 // temp
                 message = (falsePositive)? '' : 'Conversion Error. Try opening and saving the document with a new name.';
-                console.log(d.errors[0].code);
-//                if(d.errors[0].code == -6) message = 'Error during upload. The uploaded file may exceed the file size limit of 100M';
-                console.log(enforceConversion);
-                console.log(typeof enforceConversion);
+//                console.log(d.errors[0].code);
+                if(d.errors[0].code == -6) message = 'Error during upload. The uploaded file may exceed the file size limit of ' + config.maxFileSizePrint;
+//                console.log(enforceConversion);
+//                console.log(typeof enforceConversion);
            		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">'+message+'</span>');
            		$(filerow).addClass('failed');
            		console.log('after message compiling');
@@ -649,7 +659,15 @@ testProgress = function(filerow,filesize,session,progress) {
 checkInit = function() {
 	setTimeout(function(){
         if($('body').hasClass('initialized')) {
-        	checkConversions();
+            $('.template-upload').each(function () {
+                sizeTxt = $('.size',$(this)).text();
+                size = parseFloat(sizeTxt.split(' ')[0]);
+                multiplier = (sizeTxt.split(' ')[1] == 'KB')? 1000 : 1000000;
+                if((size*multiplier) > config.maxFileSize) {
+//                    console.log('ss');
+                }
+            });
+            checkConversions();
         	return;
         } else {
         	checkInit();
@@ -701,7 +719,7 @@ setFileReadiness = function() {
 	})	
 }
 
-checkConversions = function() {
+checkConversions = function() {console.log('check conversions');
 	if(!config.conversionEnabled) return;
 	$('.upload-table tr').each(function(){
 		var name = $('.name',this).text();
