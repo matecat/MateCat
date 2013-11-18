@@ -548,8 +548,8 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
         },
         success: function(d){
               console.log(this.context);
-			falsePositive = ((typeof this.context == 'undefined')||(!this.context))? false : true; // suggested solution
-//			falsePositive = (typeof this.context == 'undefined')? false : true; // old solution
+//			falsePositive = ((typeof this.context == 'undefined')||(!this.context))? false : true; // suggested solution
+			falsePositive = (typeof this.context == 'undefined')? false : true; // old solution
               filerow.removeClass('converting');
 			filerow.addClass('ready');
            	if(d.code == 1) {
