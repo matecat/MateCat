@@ -103,7 +103,7 @@ class ProjectManager {
 
 
         $uploadDir = INIT::$UPLOAD_REPOSITORY . "/" . $_COOKIE['upload_session'];
-        foreach ( $this->projectStructure['array_files'] as $fileName) {
+        foreach ( $this->projectStructure['array_files'] as $fileName ) {
 
             /**
              * Conversion Enforce
@@ -169,7 +169,7 @@ class ProjectManager {
 
             $contents = file_get_contents($filePathName);
 
-            try{
+            try {
 
                 $fid = insertFile( $this->projectStructure, $fileName, $mimeType, $contents, $sha1_original, $original_content );
                 $this->projectStructure[ 'file_id_list' ]->append( $fid );
@@ -181,18 +181,27 @@ class ProjectManager {
             } catch ( Exception $e ){
 
                 if ( $e->getCode() == -1 ) {
-                    $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "No segments found in your XLIFF file. ($fileName)");
-                } else if( $e->getCode() == -2 ) {
-                    $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "Not able to import this XLIFF file. ($fileName)");
+                    $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "No segments found in $fileName");
+                } elseif( $e->getCode() == -2 ) {
+                    $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "Failed to store segments in database for $fileName");
+                } elseif( $e->getCode() == -3 ) {
+                    $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "File $fileName not found. Failed to save XLIFF conversion on disk");
+                } elseif( $e->getCode() == -4 ) {
+                    $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "Internal Error. Xliff Import: Error parsing. ( $fileName )");
                 } else {
                     //mysql insert Blob Error
-                    $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "Not able to import this XLIFF file. ($fileName)");
+                    $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "Not able to import this Binary file. File is Too large. ( $fileName )");
                 }
 
-                return false;
-
             }
+
             //exit;
+        }
+
+        if( !empty( $this->projectStructure['result']['errors'] ) ){
+            Log::doLog( "Project Creation Failed. Sent to Output all errors." );
+            Log::doLog( $this->projectStructure['result']['errors'] );
+            return false;
         }
 
         //Log::doLog( array_pop( array_chunk( $SegmentTranslations[$fid], 25, true ) ) );
@@ -225,7 +234,7 @@ class ProjectManager {
 
             if ( !$res ) {
                 Log::doLog("Segment Search: Failed Retrieve min_segment/max_segment for files ( $string_file_list ) - DB Error: " . mysql_error() . " - \n");
-                throw new Exception( "Segment import - DB Error: " . mysql_error(), -5);
+                throw new Exception( "Segment Search: Failed Retrieve min_segment/max_segment for job", -5);
             }
 
             $rows = mysql_fetch_assoc( $res );
