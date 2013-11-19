@@ -423,6 +423,7 @@
             var that = this,
                 valid = !!files.length;
             $.each(files, function (index, file) {
+                console.log('FILE: ', file);
                 file.error = that._hasError(file);
                 if (file.error) {
                     valid = false;
@@ -439,7 +440,8 @@
 //					file.error = 'Format not supported. ' + msg;
 */
                     if( config.conversionEnabled ){
-					    file.error = 'Format not supported. Convert to DOCX and upload the file again.';
+                        file.error = UI.errorsBeforeUpload(file);
+//					 file.error = 'Format not supported. Convert to DOCX and upload the file again.';
                     } else {
                         file.error = 'Format not supported.';
                     }
