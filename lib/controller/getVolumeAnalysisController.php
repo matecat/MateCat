@@ -28,12 +28,8 @@ class getVolumeAnalysisController extends ajaxcontroller {
 
         $res = getProjectStatsVolumeAnalysis($this->id_project);
         $numSegmentsInQueue = getNumSegmentsInQueue($this->id_project);
-//        log::doLog('NUM SEGMENTS IN QUEUE: ', $numSegmentsInQueue );
+        //Log::doLog($numSegmentsInQueue);
 
-        //FAKE VALUE FOR TESITNG PURPOSE: REMOVE IT BEFORE THE RELEASE
-        if ($numSegmentsInQueue==0){
-            $numSegmentsInQueue=rand(1,5000);
-        }
         $return_data = array('jobs' => array(), 'summary' =>
         array("IN_QUEUE_BEFORE"=>0,"IN_QUEUE_BEFORE_PRINT"=>"0","STATUS" => "", "TOTAL_SEGMENTS" => 0, "SEGMENTS_ANALYZED" => 0, "TOTAL_SEGMENTS_PRINT" => 0, "SEGMENTS_ANALYZED_PRINT" => 0,
             "TOTAL_FAST_WC" => 0, "TOTAL_TM_WC" => 0, "TOTAL_FAST_WC_PRINT" => "0", "TOTAL_STANDARD_WC" => 0, "TOTAL_STANDARD_WC_PRINT" => "0", "TOTAL_TM_WC_PRINT" => "0", "STANDARD_WC_TIME" => 0, "FAST_WC_TIME" => 0, "TM_WC_TIME" => 0,

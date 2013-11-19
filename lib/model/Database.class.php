@@ -151,7 +151,7 @@ class Database {
 		$this->query_id = @mysql_query($sql, $this->link_id);
 
 		if (!$this->query_id) {
-			return $this->oops("<b>MySQL Query fail:</b> $sql");
+			return $this->oops("<b>MySQL Query fail:</b>" . ( strlen( $sql ) > 2048 ? substr( $sql ,0, 2048 ) : $sql ) );
 		}
 		$this->affected_rows = @mysql_affected_rows($this->link_id);
 

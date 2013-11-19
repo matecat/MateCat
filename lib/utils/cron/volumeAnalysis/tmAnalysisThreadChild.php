@@ -252,7 +252,7 @@ while (1) {
 
     $ret = CatUtils::addTranslationSuggestion($sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json, $mt_qe );
     //unlock segment
-    
+
     deleteLockSegment($sid, $jid);
     echo "--- (child $my_pid) : segment $sid-$jid unlocked\n";
 

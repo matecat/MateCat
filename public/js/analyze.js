@@ -168,7 +168,7 @@ UI = {
             success: function(d) {
                 if(d.data) {
                     var s = d.data.summary;
-                    if((s.STATUS == 'NEW')||(s.STATUS == '')) {
+                    if( (s.STATUS == 'NEW') || (s.STATUS == '') || s.IN_QUEUE_BEFORE > 0 ) {
                         $('.loadingbar').addClass('open');
                         if(s.IN_QUEUE_BEFORE > 0) {
                             if(!$('#shortloading .queue').length) {
@@ -185,7 +185,7 @@ UI = {
 //                        return false;
 //                    }
 
-                    else if(s.STATUS == 'FAST_OK') {
+                    else if ( s.STATUS == 'FAST_OK' && s.IN_QUEUE_BEFORE == 0 ) {
 //                        UI.progressBar(UI.progressPerc)
                         if(UI.lastProgressSegments != s.SEGMENTS_ANALYZED) {
                         	UI.lastProgressSegments = s.SEGMENTS_ANALYZED;
