@@ -190,7 +190,7 @@ class ProjectManager {
                     $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "Internal Error. Xliff Import: Error parsing. ( $fileName )");
                 } else {
                     //mysql insert Blob Error
-                    $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "Not able to import this Binary file. File is Too large. ( $fileName )");
+                    $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "File is Too large. ( $fileName )");
                 }
 
             }
