@@ -103,7 +103,7 @@ class ProjectManager {
 
 
         $uploadDir = INIT::$UPLOAD_REPOSITORY . "/" . $_COOKIE['upload_session'];
-        foreach ( $this->projectStructure['array_files'] as $fileName) {
+        foreach ( $this->projectStructure['array_files'] as $fileName ) {
 
             /**
              * Conversion Enforce
@@ -169,28 +169,39 @@ class ProjectManager {
 
             $contents = file_get_contents($filePathName);
 
-            try{
+            try {
 
                 $fid = insertFile( $this->projectStructure, $fileName, $mimeType, $contents, $sha1_original, $original_content );
                 $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
                 $this->_extractSegments( $filePathName, $fid );
 
+                //Log::doLog( $this->projectStructure['segments'] );
+
             } catch ( Exception $e ){
 
                 if ( $e->getCode() == -1 ) {
-                    $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "No segments found in your XLIFF file. ($fileName)");
-                } else if( $e->getCode() == -2 ) {
-                    $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "Not able to import this XLIFF file. ($fileName)");
+                    $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "No segments found in $fileName");
+                } elseif( $e->getCode() == -2 ) {
+                    $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "Failed to store segments in database for $fileName");
+                } elseif( $e->getCode() == -3 ) {
+                    $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "File $fileName not found. Failed to save XLIFF conversion on disk");
+                } elseif( $e->getCode() == -4 ) {
+                    $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "Internal Error. Xliff Import: Error parsing. ( $fileName )");
                 } else {
                     //mysql insert Blob Error
-                    $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "Not able to import this XLIFF file. ($fileName)");
+                    $this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "Not able to import this Binary file. File is Too large. ( $fileName )");
                 }
 
-                return false;
-
             }
+
             //exit;
+        }
+
+        if( !empty( $this->projectStructure['result']['errors'] ) ){
+            Log::doLog( "Project Creation Failed. Sent to Output all errors." );
+            Log::doLog( $this->projectStructure['result']['errors'] );
+            return false;
         }
 
         //Log::doLog( array_pop( array_chunk( $SegmentTranslations[$fid], 25, true ) ) );
@@ -204,9 +215,35 @@ class ProjectManager {
             $owner = '';
         }
 
+
+        $isEmptyProject = false;
         //Throws exception
         try {
             $this->_createJobs( $this->projectStructure, $owner );
+
+            //FIXME for project with pre translation this query is not enough,
+            //we need compare the number of segments with translations, but take an eye to the opensource
+
+            $query_visible_segments = "SELECT count(*) as cattool_segments
+                                       FROM segments WHERE id_file IN ( %s ) and show_in_cattool = 1";
+
+            $string_file_list = implode( "," , $this->projectStructure['file_id_list']->getArrayCopy() );
+            $query_visible_segments = sprintf( $query_visible_segments, $string_file_list );
+
+            $res = mysql_query( $query_visible_segments, $this->mysql_link );
+
+            if ( !$res ) {
+                Log::doLog("Segment Search: Failed Retrieve min_segment/max_segment for files ( $string_file_list ) - DB Error: " . mysql_error() . " - \n");
+                throw new Exception( "Segment Search: Failed Retrieve min_segment/max_segment for job", -5);
+            }
+
+            $rows = mysql_fetch_assoc( $res );
+
+            if ( $rows['cattool_segments'] == 0  ) {
+                Log::doLog("Segment Search: No segments in this project - \n");
+                $isEmptyProject = true;
+            }
+
         } catch ( Exception $ex ){
             $this->projectStructure['result']['errors'][] = array( "code" => -9, "message" => "Fail to create Job. ( {$ex->getMessage()} )" );
             return false;
@@ -218,6 +255,10 @@ class ProjectManager {
         }
 
         $this->projectStructure['status'] = ( INIT::$VOLUME_ANALYSIS_ENABLED ) ? 'NEW' : 'NOT_TO_ANALYZE';
+        if( $isEmptyProject ){
+            $this->projectStructure['status'] = 'EMPTY';
+        }
+
         changeProjectStatus( $this->projectStructure['id_project'], $this->projectStructure['status'] );
         $this->projectStructure['result'][ 'code' ]            = 1;
         $this->projectStructure['result'][ 'data' ]            = "OK";
@@ -229,6 +270,7 @@ class ProjectManager {
         $this->projectStructure['result'][ 'project_name' ]    = $this->projectStructure['project_name'];
         $this->projectStructure['result'][ 'source_language' ] = $this->projectStructure['source_language'];
         $this->projectStructure['result'][ 'target_language' ] = $this->projectStructure['target_language'];
+        $this->projectStructure['result'][ 'status' ]          = $this->projectStructure['status'];
 
     }
 
@@ -243,7 +285,7 @@ class ProjectManager {
             $last_segments_query = sprintf( $query_min_max, $string_file_list );
             $res = mysql_query( $last_segments_query, $this->mysql_link );
 
-            if (!$res) {
+            if ( !$res || mysql_num_rows( $res ) == 0 ) {
                 Log::doLog("Segment Search: Failed Retrieve min_segment/max_segment for files ( $string_file_list ) - DB Error: " . mysql_error() . " - \n");
                 throw new Exception( "Segment import - DB Error: " . mysql_error(), -5);
             }

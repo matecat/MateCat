@@ -135,7 +135,7 @@ class setTranslationController extends ajaxcontroller {
             /**
              * PATCH to discover troubles about string normalization
              * Some strange behaviours occurred about getTrgNormalized method
-             * TODO remove after it has collected data
+             * TODO remove after it has collected data??
              */
             $postCheck = new QA( $segment['segment'], $translation );
             $postCheck->performConsistencyCheck();
@@ -155,8 +155,16 @@ class setTranslationController extends ajaxcontroller {
 
             }
 
-
         }
+
+        $msg = "\n\n setTranslationController \n Consistency Log:
+- job id            : " . $this->id_job . "
+- segment id        : " . $this->id_segment . "
+- firstCheckErrors  : " . var_export( $check->getErrors(), true ) . "
+- postCheckErrors   : " . ( isset($postCheck) ? var_export( $postCheck->getErrors(), true ) : 'null' );
+
+        Log::doLog( $msg . "\n" );
+
 
         $res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreErrors() );
 

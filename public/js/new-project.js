@@ -65,10 +65,10 @@ $(document).ready(function() {
                 $('.uploadbtn').attr('value','Analyzing...').attr('disabled','disabled').addClass('disabled');
             },
             success: function(d){
-                if(d.error.length) {
+                if( typeof d.errors != 'undefined' ) {
                     $('.error-message').text('');
-                    $.each(d.error, function() {
-                        $('.error-message').append(this.message+'<br />').show();
+                    $.each(d.errors, function() {
+                        $('.error-message').append( '<div>' + this.message + '<br /></div>' ).show();
                     });
                     $('body').removeClass('creating');
 //                    var btnTxt = (config.analysisEnabled)? 'Analyze' : 'Translate';
@@ -76,7 +76,14 @@ $(document).ready(function() {
                 } else {
                     //							$.cookie('upload_session', null);
                     if(config.analysisEnabled) {
-                        location.href = config.hostpath + config.basepath + 'analyze/' + d.project_name + '/' + d.id_project + '-' + d.ppassword;
+
+                        if( d.status == 'EMPTY' ){
+                            $('body').removeClass('creating');
+                            APP.alert('This project contains 0 segments. Nothing to analyze and translate. May be scanned file?');
+                        } else {
+                            location.href = config.hostpath + config.basepath + 'analyze/' + d.project_name + '/' + d.id_project + '-' + d.ppassword;
+                        }
+
                     } else {
 
                         if( d.target_language.length > 1 ){ //if multiple language selected show a job list

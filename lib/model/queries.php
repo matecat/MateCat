@@ -1177,7 +1177,16 @@ function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $con
         //ERROR 1227 (42000): Access denied; you need (at least one of) the SUPER privilege(s) for this operation
         $db->query( 'SET @@global.max_allowed_packet = ' . 500 * 1024 * 1024 );
         $db->insert( 'files', $data );
+
+        $err   = $db->get_error();
+        $errno = $err[ 'error_code' ];
+
         $db->query( 'SET @@global.max_allowed_packet = ' . 32 * 1024 * 1024 ); //restore to 32 MB
+
+        if( $errno > 0 ){
+            throw new Exception( "Database insert Large file error: $errno ", -$errno );
+        }
+
     } elseif ( $errno > 0 ) {
         log::doLog( "Database insert Large file error: $errno " );
         throw new Exception( "Database insert Large file error: $errno ", -$errno );
@@ -1679,8 +1688,10 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
             $data[ 'standard_word_count' ] = $standard_words;
 
             // query for this data is after insert/update
-            $data_innodb[ 'id_job' ]     = $data[ 'id_job' ];
-            $data_innodb[ 'id_segment' ] = $data[ 'id_segment' ];
+            $data_innodb[ 'id_job' ]      = $data[ 'id_job' ];
+            $data_innodb[ 'id_segment' ]  = $data[ 'id_segment' ];
+            $data_innodb[ 'pid' ]         = $pid;
+            $data_innodb[ 'date_insert' ] = 'NOW()';
 
             $db->insert( 'segment_translations', $data );
             $err   = $db->get_error();
@@ -2031,6 +2042,27 @@ function getSegmentForTMVolumeAnalysys( $id_segment, $id_job ) {
     }
 
     return $results;
+}
+
+function getNumSegmentsInQueue( $currentPid ) {
+    $query = "select count(*) as num_segments from segment_translations_analysis_queue where pid <$currentPid";
+
+    $db      = Database::obtain();
+    $results = $db->query_first( $query );
+
+    $err   = $db->get_error();
+    $errno = $err[ 'error_code' ];
+    if ( $errno != 0 ) {
+        log::doLog( $err );
+
+        return $errno * -1;
+    }
+    $num_segments=0;
+    if ((int)$results['num_segments']>0){
+        $num_segments=(int)$results['num_segments'];
+    }
+
+    return $num_segments;
 }
 
 /**

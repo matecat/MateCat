@@ -13,6 +13,8 @@
 /*global $, window, document */
 
 UI = null;
+//config.maxFileSize = 30000000;
+config.maxFileSizePrint = (config.maxFileSize/1000000) + ' MB';
 
 UI = {
     init: function() {
@@ -31,6 +33,26 @@ UI = {
     },
     confirmRestartConversions: function() {
         UI.restartConversions();
+    },
+    errorsBeforeUpload: function(file) {
+//        console.log(file);
+        ext = file.name.split('.')[file.name.split('.').length - 1];
+//        console.log(ext);
+        msg = 'Format not supported. Convert to DOCX and upload the file again.';
+//        msg = 'Format not supported. Convert to DOCX and upload the file again...';
+        if(file.type.match(/^image/)) {
+            msg = 'Images not allowed in MateCat';
+        } else if(
+                (file.type == 'application/zip'||'application/x-gzip'||'application/x-tar'||'application/x-gtar'||'application/x-7z-compressed') ||
+                (ext == 'tgz')
+            ) {
+            msg = 'ZIP archives not yet supported. Coming soon.';
+        }
+        console.log(file.size);
+        if((file.size) > config.maxFileSize) {
+            msg = 'Error during upload. The uploaded file exceed the file size limit of ' + config.maxFileSizePrint;
+        }
+        return msg;
     },
     restartConversions: function() {
     	console.log('restart conversions');
@@ -101,7 +123,7 @@ $(function () {
 	        autoUpload: true,
 	        singleFileUploads: true,
 	        overlayClose: true,
-	        maxFileSize: 30000000, // 30MB
+	        maxFileSize: config.maxFileSize, // 30MB
 //	        maxChunkSize: 1000000,
 //	        multipart: false,
 	        fileInput: $('#fileupload .multiple-button, .btncontinue .multiple-button'),
@@ -113,8 +135,22 @@ $(function () {
 		$('.upload-files').addClass('dragging');
         dropzone.show();
 	}).bind('fileuploadadd', function (e, data) {
-		console.log('adding');
+		console.log('FIRE fileuploadadd');
+//        console.log($('.upload-table tr'));
 		console.log(data);
+        console.log(data.files[0].size);
+        console.log(config.maxFileSize);
+        console.log(data.files[0].type);
+        
+//        if(!isValidFileExtension(data.files[0].name)) {
+//            alert($('.upload-table tr').length);
+//			jqXHR = data.submit();
+//			jqXHR.abort();
+//        }
+        if(data.files[0].size > config.maxFileSize) {
+//            jqXHR = data.submit();
+//            jqXHR.abort();            
+        }
          $('body').addClass('initialized');
 
 
@@ -159,11 +195,13 @@ $(function () {
 		};
 */
 	}).bind('fileuploadsend', function (e,data) {
+        console.log('FIRE fileuploadsend');
+        console.log(data.files);
 		$('.progress', $(data.context[0])).before('<div class="operation">Uploading</div>');
 	}).bind('fileuploadprogress', function (e,data) {
 //		console.log(data.loaded);
 	}).bind('fileuploadstart', function (e) {
-		console.log('start');
+		console.log('FIRE fileuploadstart');
 //		if(!$.cookie("upload_session")) $.cookie("upload_session",uploadSessionId);
 	}).bind('fileuploaddone', function (e,data) {
 //		$('.size', $(data.context[0])).next().append('<div class="operation">Converting</div>');
@@ -186,7 +224,7 @@ $(function () {
 		if(!($('.upload-table tr').length > 1)) $('.upload-files').removeClass('uploaded');
         checkFailedConversionsNumber();
 	}).bind('fileuploadchange', function (e) {
-        console.log('change');
+        console.log('FIRE fileuploadchange');
         checkFailedConversionsNumber();
 	}).bind('fileuploaddestroyed', function (e,data) {
 //		var err = $.parseJSON(data.jqXHR.responseText)[0].error;
@@ -249,7 +287,7 @@ $(function () {
 			disableAnalyze();
 		}
 	}).bind('fileuploadcompleted', function (e,data) {
-		console.log('completed');
+		console.log('FIRE fileuploadcompleted');
          if(!$('body').hasClass('initialized')) {
              console.log($('#clear-all-files').length);
              $('#clear-all-files').click();
@@ -388,14 +426,15 @@ $(function () {
     });
 
     $('#clear-all-files').bind('click', function (e) {
-    	e.preventDefault();
-    	$('.error-message').hide();
-    	$('.template-download .delete button, .template-upload .cancel button').click();
+        e.preventDefault();
+        $('.error-message').hide();
+        $('.template-download .delete button, .template-upload .cancel button').click();
 	});
 
     $('#delete-failed-conversions').bind('click', function (e) {
     	e.preventDefault();
-    	$('.template-download.failed .delete button, .template-download.has-errors .delete button, .template-upload.failed .delete button, .template-upload.has-errors .delete button').click();
+        console.log($('.template-download.failed .delete button, .template-download.has-errors .delete button, .template-upload.failed .cancel button, .template-upload.has-errors .cancel button'));
+    	$('.template-download.failed .delete button, .template-download.has-errors .delete button, .template-upload.failed .cancel button, .template-upload.has-errors .cancel button').click();
 	});
 		
     if (window.location.hostname === 'blueimp.github.com') {
@@ -494,6 +533,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 
     console.log( 'Enforce conversion: ' + enforceConversion );
     firstEnforceConversion = (typeof enforceConversion === "undefined") ? false : true;
+//    console.log(firstEnforceConversion);
     enforceConversion = (typeof enforceConversion === "undefined") ? false : enforceConversion;
 
 //	filerow = data.context;
@@ -546,8 +586,9 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
        		return false;
         },
         success: function(d){
-              console.log(this.context);
-			falsePositive = (typeof this.context == 'undefined')? false : true;
+//              console.log(this.context);
+//			falsePositive = ((typeof this.context == 'undefined')||(!this.context))? false : true; // suggested solution
+			falsePositive = (typeof this.context == 'undefined')? false : true; // old solution
               filerow.removeClass('converting');
 			filerow.addClass('ready');
            	if(d.code == 1) {
@@ -587,8 +628,10 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 				}
                 // temp
                 message = (falsePositive)? '' : 'Conversion Error. Try opening and saving the document with a new name.';
-                console.log(enforceConversion);
-                console.log(typeof enforceConversion);
+//                console.log(d.errors[0].code);
+//                if(d.errors[0].code == -6) message = 'Error during upload. The uploaded file may exceed the file size limit of ' + config.maxFileSizePrint;
+//                console.log(enforceConversion);
+//                console.log(typeof enforceConversion);
            		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">'+message+'</span>');
            		$(filerow).addClass('failed');
            		console.log('after message compiling');
@@ -645,7 +688,18 @@ testProgress = function(filerow,filesize,session,progress) {
 checkInit = function() {
 	setTimeout(function(){
         if($('body').hasClass('initialized')) {
-        	checkConversions();
+            $('.template-upload').each(function () {
+                console.log($(this).hasClass('has-errors'));
+                console.log($('.name',$(this)).text());
+//                sizeTxt = $('.size',$(this)).text();
+//                console.log($(this).text());
+//                size = parseFloat(sizeTxt.split(' ')[0]);
+//                multiplier = (sizeTxt.split(' ')[1] == 'KB')? 1000 : 1000000;
+//                if((size*multiplier) > config.maxFileSize) {
+//                }
+            });
+            
+            checkConversions();
         	return;
         } else {
         	checkInit();
@@ -683,6 +737,30 @@ checkAnalyzability = function(who) {
 	};
 }
 
+isValidFileExtension = function(filename) {
+//    res = false;
+    console.log('filename: ' + filename);
+    ext = filename.split('.')[filename.split('.').length - 1];
+    res = (!filename.match(config.allowedFileTypes))? false : true;
+
+/*    
+    console.log(filename.match(config.allowedFileTypes) == 'null')? false : true;
+    console.log(filename.match(config.allowedFileTypes));
+
+    console.log(filename.match(config.allowedFileTypes));
+    console.log(filename.match(!config.allowedFileTypes));
+    console.log(filename.match(config.allowedFileTypes).length);
+    */
+//    console.log(typeof filename.match(config.allowedFileTypes));
+//    console.log(typeof filename.match(config.allowedFileTypes) == 'null')? false : true;
+//    $.each(config.allowedFileTypes.split('|'), function(item) {
+//        console.log(this + ' - ' + ext);
+//        if(this == ext) res = true;
+//    });
+    console.log(res);
+    return res;
+}
+
 enableAnalyze = function() {
 	$('.uploadbtn').removeAttr('disabled').removeClass('disabled').focus();
 }
@@ -697,9 +775,10 @@ setFileReadiness = function() {
 	})	
 }
 
-checkConversions = function() {
+checkConversions = function() {console.log('check conversions');
 	if(!config.conversionEnabled) return;
-	$('.upload-table tr').each(function(){
+	$('.upload-table tr:not(.has-errors)').each(function(){
+        
 		var name = $('.name',this).text();
 		var extension = name.split('.')[name.split('.').length-1];
 		if((extension=='xliff')||(extension=='sdlxliff')||(extension=='xlf')) {

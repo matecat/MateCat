@@ -730,7 +730,7 @@ background:#fff url(../img/sublevel.png) 15px 18px no-repeat;
 	}        
 .searchbox #exec-replace
 	{
-	float: none;
+	/*float: none;*/
 	}
 section mark
 	{

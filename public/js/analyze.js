@@ -131,7 +131,13 @@ UI = {
         $('#longloading .approved-bar').attr('title','Analyzing ' + parseInt(perc*100)+'%');
 //        UI.progressPerc = UI.progressPerc + 3;
     },
-    
+    displayError: function ( error ) {
+        $('#shortloading').hide();
+        $('.loadingbar').addClass('open');
+        $('#longloading .meter').hide();
+        $('#longloading p').html( error );
+        $('#longloading').show();
+    },
     checkSticky: function() {
         if (!!$('.sticky').offset()) { // make sure ".sticky" element exists
             var stickyTop = $('.sticky').offset().top; // returns number 
@@ -162,9 +168,24 @@ UI = {
             success: function(d) {
                 if(d.data) {
                     var s = d.data.summary;
-                    if((s.STATUS == 'NEW')||(s.STATUS == '')) {
+                    if( (s.STATUS == 'NEW') || (s.STATUS == '') || s.IN_QUEUE_BEFORE > 0 ) {
                         $('.loadingbar').addClass('open');
-                    } else if(s.STATUS == 'FAST_OK') {
+                        if(s.IN_QUEUE_BEFORE > 0) {
+                            if(!$('#shortloading .queue').length) {
+                                $('#shortloading').append('<p class="queue">There are still <span class="number">' + s.IN_QUEUE_BEFORE_PRINT + '</span> segments in queue. Please wait...</p>');
+                            } else {
+                                $('#shortloading .queue .number').text(s.IN_QUEUE_BEFORE_PRINT);                            
+                            }                            
+                        }
+                    }
+
+//                    this is not used, for now we never get an empty status from controller
+//                    else if(s.STATUS == 'EMPTY') {
+//                        UI.displayError('This project contains 0 segments. Nothing to analyze and translate. May be scanned file?');
+//                        return false;
+//                    }
+
+                    else if ( s.STATUS == 'FAST_OK' && s.IN_QUEUE_BEFORE == 0 ) {
 //                        UI.progressBar(UI.progressPerc)
                         if(UI.lastProgressSegments != s.SEGMENTS_ANALYZED) {
                         	UI.lastProgressSegments = s.SEGMENTS_ANALYZED;
@@ -172,9 +193,10 @@ UI = {
                         } else {
                         	UI.noProgressTail++;
                         	if(UI.noProgressTail > 9) {
-                        		$('#longloading .meter').hide();
-	                        	$('#longloading p').html('The analyzer seems to have a problem. Contact <a href="mailto:antonio@translated.net">antonio@translated.net</a> or try refreshing the page.');
-	                        	return false;                        		
+                        		//$('#longloading .meter').hide();
+	                        	//$('#longloading p').html('The analyzer seems to have a problem. Contact <a href="mailto:antonio@translated.net">antonio@translated.net</a> or try refreshing the page.');
+	                        	UI.displayError('The analyzer seems to have a problem. Contact <a href="mailto:antonio@translated.net">antonio@translated.net</a> or try refreshing the page.');
+	                        	return false;
                         	}
                         }
                         UI.progressBar(s.SEGMENTS_ANALYZED/s.TOTAL_SEGMENTS);
