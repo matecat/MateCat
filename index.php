@@ -1,5 +1,4 @@
 <?php
-
 require_once 'inc/config.inc.php';
 
 INIT::obtain();

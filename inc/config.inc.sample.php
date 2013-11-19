@@ -44,6 +44,7 @@ class INIT {
 	public static $AUTHCOOKIEDURATION;
 	public static $SPELL_CHECK_TRANSPORT_TYPE;
 	public static $SPELL_CHECK_ENABLED;
+	public static $MAX_UPLOAD_FILE_SIZE;
 
 	private function initOK() {
 
@@ -183,6 +184,7 @@ class INIT {
 		self::$SPELL_CHECK_ENABLED = false;
 
 		self::$SAVE_SHASUM_FOR_FILES_LOADED = true;
+         self::$MAX_UPLOAD_FILE_SIZE = 30000000; // bites
 
 		self::$SUPPORTED_FILE_TYPES = array(
 				'Office' => array(
