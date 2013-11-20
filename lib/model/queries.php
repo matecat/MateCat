@@ -401,7 +401,7 @@ function getTranslatorKey( $id_translator ) {
 }
 
 function getEngines( $type = "MT" ) {
-    $query = "select id,name from engines where type='$type'";
+    $query = "select id,name from engines where type='$type' and active=1";
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
