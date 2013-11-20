@@ -55,12 +55,23 @@ UI = {
             
         });
         
+        // still used?
         $(".split-box .uploadbtn, .close, .grayed").click(function(e){
             e.preventDefault();
             $(".grayed").toggle();
             $(".split-box").toggle();
             $("body").removeClass("popup-opened");
         });
+
+        $("body").on('click', '.splitbtn', function(e) {
+            e.preventDefault();
+            $('.grayed').addClass('visible');
+            $('.popup-split').addClass('visible');
+        }).on('click', '.popup-split .btn-cancel', function(e) {
+            e.preventDefault();
+            $('.popup-split .x-popup').click();
+        });
+
         
         $("#close").click(function(e){
             e.preventDefault();
