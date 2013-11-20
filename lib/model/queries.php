@@ -576,7 +576,7 @@ function setTranslationUpdate( $id_segment, $id_job, $status, $time_to_edit, $tr
 
     $q = "UPDATE segment_translations SET status='$status', suggestion_position='$chosen_suggestion_index', serialized_errors_list='$errors', time_to_edit=IF(time_to_edit is null,0,time_to_edit) + $time_to_edit, translation='$translation', translation_date='$now', warning=" . (int)$warning . " WHERE id_segment=$id_segment and id_job=$id_job";
 
-    if( empty( $translation ) ){
+    if( empty( $translation ) && !is_numeric( $translation ) ){
         $msg = "\n\n Error setTranslationUpdate \n\n Empty translation found: \n\n " . var_export( array_merge( array( 'db_query' => $q ), $_POST ), true );
         Log::doLog( $msg );
         Utils::sendErrMailReport( $msg );
@@ -585,9 +585,9 @@ function setTranslationUpdate( $id_segment, $id_job, $status, $time_to_edit, $tr
     $db->query( $q );
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
+
     if ( $errno != 0 ) {
         log::doLog( "$errno: $err" );
-
         return $errno * -1;
     }
 
@@ -607,7 +607,7 @@ function setTranslationInsert( $id_segment, $id_job, $status, $time_to_edit, $tr
     $data[ 'suggestion_position' ]    = $chosen_suggestion_index;
     $data[ 'warning' ]                = (int)$warning;
 
-    if( empty( $translation ) ){
+    if( empty( $translation ) && !is_numeric( $translation ) ){
         $msg = "\n\n Error setTranslationUpdate \n\n Empty translation found: \n\n " . var_export( $_POST, true ) . " \n\n " . var_export( $data, true );
         Log::doLog( $msg );
         Utils::sendErrMailReport( $msg );
@@ -618,11 +618,11 @@ function setTranslationInsert( $id_segment, $id_job, $status, $time_to_edit, $tr
 
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
+
     if ( $errno != 0 ) {
         if ( $errno != 1062 ) {
             log::doLog( "$errno: $err" );
         }
-
         return $errno * -1;
     }
 
@@ -924,9 +924,6 @@ function getEQWLastHour( $id_job, $estimation_seg_ids ) {
 		ROUND(SUM(IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count))/(UNIX_TIMESTAMP(MAX(translation_date))-UNIX_TIMESTAMP(MIN(translation_date)))*3600) as words_per_hour,
 		count(*) from segment_translations st
 			INNER JOIN segments on id=st.id_segment WHERE status in ('TRANSLATED','APPROVED') and id_job=$id_job and id_segment in ($estimation_seg_ids)";
-
-
-    Log::doLog( $query );
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
