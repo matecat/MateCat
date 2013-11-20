@@ -857,7 +857,7 @@ function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
 //    $start = microtime(true);
 
     $results = $db->fetch_array( $query );
-    
+
 //    Log::doLog(microtime(true) - $start);
 
     return $results;
