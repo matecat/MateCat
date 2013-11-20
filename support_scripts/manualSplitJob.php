@@ -23,11 +23,13 @@ $db->connect ();
 include INIT::$UTILS_ROOT . '/RecursiveArrayObject.php';
 include INIT::$UTILS_ROOT . '/ProjectManager.php';
 
+error_reporting(E_ALL &~ E_DEPRECATED);
+
 $pm = new ProjectManager();
 
 
 /*
- http://matecat.local/translate/EN_2_segments.txt/en-US-it-IT/5163-4d960596548e
+ http://matecat.local/translate/ESPANOL_VERY_BIG_2900_segs.sdlxliff/en-US-fr-FR/5294-e01e940bdca8
  */
 
 $pStruct                                  = $pm->getProjectStructure();
@@ -42,4 +44,8 @@ if ($apply_split){
 }
 
 
-var_export( $pStruct );
+var_export( json_encode($pStruct['split_result']) );
+echo "\n";
+echo "\n";
+echo "\n";
+var_export( $pStruct['split_result']->getArrayCopy() );

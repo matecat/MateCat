@@ -6,7 +6,7 @@
  * Time: 17.25
  *
  */
-include_once INIT::$UTILS_ROOT . "/xliff.parser.1.2.class.php";
+include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 include_once INIT::$UTILS_ROOT . "/DetectProprietaryXliff.php";
 
 class ProjectManager {
@@ -336,15 +336,15 @@ class ProjectManager {
         $num_split = (int)$num_split;
 
         if( $num_split < 2 ){
-            throw new Exception( 'Minimum Chunk number for split is 2.' );
+            throw new Exception( 'Minimum Chunk number for split is 2.', -2 );
         }
 
         if( !empty( $requestedWordsPerSplit ) && count($requestedWordsPerSplit) != $num_split ){
-            throw new Exception( "Requested words per chunk and Number of chunks not consistent." );
+            throw new Exception( "Requested words per chunk and Number of chunks not consistent.", -3 );
         }
 
         if( !empty( $requestedWordsPerSplit ) && !INIT::$VOLUME_ANALYSIS_ENABLED ){
-            throw new Exception( "Requested words per chunk available only for Matecat PRO version" );
+            throw new Exception( "Requested words per chunk available only for Matecat PRO version", -4 );
         }
 
         /**
@@ -387,14 +387,14 @@ class ProjectManager {
         array_pop( $rows ); //destroy last assignment row ( every time === false )
 
         if( empty( $rows ) ){
-            throw new Exception( 'No segments found for job ' . $projectStructure[ 'job_to_split' ] );
+            throw new Exception( 'No segments found for job ' . $projectStructure[ 'job_to_split' ], -5 );
         }
 
         $row_totals     = array_pop( $rows ); //get the last row ( ROLLUP )
         unset($row_totals['id']);
 
         if( empty($row_totals['job_first_segment']) || empty($row_totals['job_last_segment']) ){
-            throw new Exception('Wrong job id or password. Job segment range not found.');
+            throw new Exception('Wrong job id or password. Job segment range not found.', -6);
         }
 
         //if fast analysis with equivalent word count is present
@@ -443,7 +443,7 @@ class ProjectManager {
         }
 
         if( count( $counter ) < 2 ){
-            throw new Exception( 'The requested number of words for the first chunk is too large. I cannot create 2 chunks.' );
+            throw new Exception( 'The requested number of words for the first chunk is too large. I cannot create 2 chunks.', -7 );
         }
 
         $result = array_merge( $row_totals, array( 'chunks' => $counter ) );
@@ -512,7 +512,7 @@ class ProjectManager {
                 $msg .= "Tried to perform SQL: \n" . print_r(  $data ,true ) . " \n\n";
                 $msg .= "Failed Statement is: \n" . print_r( $query, true ) . "\n";
                 Utils::sendErrMailReport( $msg );
-                throw new Exception( 'Failed to insert job chunk, project damaged.' );
+                throw new Exception( 'Failed to insert job chunk, project damaged.', -8 );
             }
         }
 

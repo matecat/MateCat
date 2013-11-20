@@ -854,10 +854,11 @@ function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
         $query .= " and fj.id_file = " . intval($id_file);
     }
 
-    $start = microtime(true);
+//    $start = microtime(true);
 
     $results = $db->fetch_array( $query );
-    Log::doLog(microtime(true) - $start);
+    
+//    Log::doLog(microtime(true) - $start);
 
     return $results;
 }
@@ -1206,12 +1207,20 @@ function insertFilesJob( $id_job, $id_file ) {
     $db->insert( 'files_job', $data );
 }
 
-function getPdata( $pid ) {
-    $db    = Database::obtain();
-    $query = "select pid from projects where id =$pid";
-    $res   = $db->query_first( $query );
+function getProjectJobData( $pid ) {
 
-    return $res[ 'id' ];
+    $db    = Database::obtain();
+
+    $query   = "SELECT projects.id AS pid, projects.password AS ppassword, jobs.id as jid, jobs.password as jpassword, job_first_segment, job_last_segment
+                FROM jobs
+                JOIN projects ON jobs.id_project = projects.id
+                WHERE projects.id = %u
+    ";
+
+    $query = sprintf( $query, $pid );
+    $res   = $db->fetch_array( $query );
+
+    return $res;
 }
 
 /**
