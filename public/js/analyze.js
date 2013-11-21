@@ -46,7 +46,7 @@ UI = {
             e.preventDefault();
             $(this).parents('table').find(".part3files").toggleClass('open');
         });
-        
+/*        
         $(".split").click(function(e){
             e.preventDefault();
             $(".grayed").toggle();
@@ -54,20 +54,97 @@ UI = {
             $("body").addClass("popup-opened");
             
         });
-        
+       
+        // still used?
         $(".split-box .uploadbtn, .close, .grayed").click(function(e){
             e.preventDefault();
             $(".grayed").toggle();
             $(".split-box").toggle();
             $("body").removeClass("popup-opened");
         });
+*/ 
+        $("body").on('click', '.splitbtn:not(.disabled)', function(e) {
+            // temp
+//            APP.alert('work in progress');
+//            return false;
+            
+            e.preventDefault();
+            var job = $(this).parents('.jobcontainer');
+            jid = job.attr('data-jid');
+            total = $('.stat-total', job).first().text().replace(",", "");
+            numsplit = $('.splitselect', job).first().val();
+            wordsXjob = total / numsplit;
+            wordsXjob = Math.floor(wordsXjob);
+            diff = total - (wordsXjob*numsplit);
+            $('.popup-split .popup-box .jobs').empty();
+            $('.popup-split h1 .jid').attr('data-jid', jid);
+            $('.popup-split h1 .jid').attr('data-pwd', $(job).attr('data-pwd'));
+            $('.popup-split').removeClass('error-number');
+            $('.popup-split #exec-split').removeClass('disabled');
+            $('.popup-split h1 .chunks').text(numsplit);
+            for (var i=0; i<numsplit; i++) {
+                numw = wordsXjob;
+                if(i < diff) numw++;
+                item =  '<li>' +
+                        '   <div><h4>Chunk ' + (i+1) + '</h4></div>' +
+                        '   <div class="job-details">' +
+                        '       <div class="job-perc">' +
+                        '           <p><span class="aprox">Aprox. words:</span><span class="correct none">Words:</span></p>' + 
+                        '<!-- A: la classe Aprox scompare se viene effettuato il calcolo -->' +
+                        '           <input type="text" class="input-small" value="' + numw + '">' +                        
+//                        '           <input type="text" class="input-small" data-val="' + numw + '" value="' + APP.addCommas(numw) + '">' +
+                        '       </div>' +
+                        '   </div>' +
+                        '</li>';
+                $('.popup-split .popup-box .jobs').append(item);
+            }
+            $('.popup-split .total .total-w').attr('data-val', total).text(APP.addCommas(total));
+            
+            $('.popup-split').show();
+        }).on('click', '.popup-split .btn-cancel', function(e) {
+            e.preventDefault();
+            $('.popup-split .x-popup').click();
+        }).on('click', '.modal .x-popup', function(e) {
+            e.preventDefault();
+            APP.closePopup();
+        }).on('input', '.popup-split .jobs .input-small', function(e) {
+            e.preventDefault();
+            $(this).attr('value', $(this).val().replace(/[^0-9\.]/g,''));
+            ss = 0;
+            $('.popup-split .jobs .input-small').each(function() {
+                ss += parseInt($(this).val());
+            });
+            diff = ss - parseInt($('.popup-split .total .total-w').attr('data-val'));
+            if(diff != 0) {
+                $('.popup-split #exec-split').addClass('disabled');
+                $('.popup-split .error-count .curr-w').text(ss);
+                $('.popup-split .error-count .diff-w').text(diff);
+                $('.popup-split').addClass('error-number');
+            } else {
+                $('.popup-split #exec-split').removeClass('disabled');
+                $('.popup-split').removeClass('error-number');                
+            }
+        }).on('click', '.popup-split #exec-split', function(e) {
+            e.preventDefault();
+//            timer = setTimeout(function(){
+//                $('.popup-split .text').text('Confirm');
+//                $('.popup-split .loader').toggleClass('none');
+//                $('.popup-split .done').removeClass('none');
+//                $('.popup-split .aprox').toggleClass('none');
+//                $('.popup-split .correct').removeClass('none');
+//                $('.popup-split .error-message').toggleClass('none');
+//                $('.popup-split .error-count').toggleClass('none');
+//            }, 2000);
+            UI.checkSplit();
+        });
+
         
         $("#close").click(function(e){
             e.preventDefault();
             $(".loadingbar").addClass("closebar");
         });
 
-        $(".x-popup, .popup-outer, .popup a.anonymous").click(function(e){
+        $("#popupWrapper .x-popup, #popupWrapper .popup-outer, #popupWrapper .popup a.anonymous").click(function(e){
             e.preventDefault();
             APP.doRequest({
                 data: {
@@ -80,7 +157,6 @@ UI = {
                 }
             });
         });
-        
         $(".stopbtn").click(function(e){
             e.preventDefault();
             $(this).toggleClass('stopped');
@@ -122,6 +198,34 @@ UI = {
         }
     },
 
+    checkSplit: function(job) {
+        console.log('split');
+        ar = '[';
+        $('.popup-split ul.jobs li .input-small').each(function() {
+            ar += $(this).val() + ','
+        });
+        ar = ar.substring(0, ar.length - 1) + ']';
+//        console.log(ar);
+            
+        APP.doRequest({
+            data: {
+                action: "splitJob",
+                exec: "check",
+                project_id: $('#pid').attr('data-pid'),
+                project_pass: $('#pid').attr('data-pwd'),
+                job_id: $('.popup-split h1 .jid').attr('data-jid'),
+                job_pass: $('.popup-split h1 .jid').attr('data-jid'),
+                num_split: $('.popup-split h1 .chunks').text(),
+                split_values: ar
+
+            },
+            success: function(d) {
+//                $(".popup-outer").fadeOut();
+//                $(".popup").fadeOut('fast');
+            }
+        });
+    },
+            
     progressBar: function(perc) {
         if(perc == 100) return;
         
@@ -341,10 +445,12 @@ UI = {
                         });
                     });
                     if(d.data.summary.STATUS != 'DONE') {
+                        $('.splitbtn').addClass('disabled');
                         setTimeout(function(){
                             UI.pollData();
                         },1000);                   
                     } else {
+                        $('.splitbtn').removeClass('disabled');
         				$('#longloading .approved-bar').css('width','100%');
         				$('#analyzedSegmentsReport').text(s.SEGMENTS_ANALYZED_PRINT);
                         setTimeout(function(){

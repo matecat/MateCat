@@ -230,6 +230,7 @@ class analyzeController extends viewcontroller {
         $this->template->total_raw_word_count_print = $this->total_raw_word_count_print;
         $this->template->pname                      = $this->pname;
         $this->template->pid                        = $this->pid;
+        $this->template->project_password           = $this->password;
         $this->template->project_not_found          = $this->project_not_found;
         $this->template->fast_wc_time               = $this->fast_wc_time;
         $this->template->tm_wc_time                 = $this->tm_wc_time;
