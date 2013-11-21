@@ -226,7 +226,7 @@ box-shadow: 0 1px 2px #666;}
 -webkit-box-shadow: inset 0 0 1px 1px #888;
 box-shadow: inset 0 0 1px 1px #888;}
 	
-	#splitselect { float: left;
+	.splitselect { float: left;
     width: 48px;  height: 37px;  
     padding: 4px;   color:#666;
     font-size: 18px;  border: 1px solid #ccc;  
@@ -234,7 +234,7 @@ box-shadow: inset 0 0 1px 1px #888;}
    
    .splitmsg {display:none;color:#666;margin-top:5px;}
    div.disabled .splitmsg, div.disabled .mergebtn {display:block!important; float:left;}
-   div.disabled .label, div.disabled #splitselect, div.disabled .splitbtn, .mergebtn {display:none;}
+   div.disabled .label, div.disabled .splitselect, div.disabled .splitbtn, .mergebtn {display:none;}
 	
 	  .cancel-btn{background:#f26522 url(../img/xbtn.gif) 13px 14px no-repeat !Important}
   .cancel-btn:hover{background:#d1581c url(../img/xbtn.gif) 13px 14px no-repeat !Important}
@@ -297,7 +297,7 @@ width:670px;margin:0 auto;position:fixed;padding:0px 0 0px 0;top:50%;left:50%;ma
 
 /* split box */
 
-.grayed{display:none;background:#000;width:100%;height:100%;position:fixed;top:0;left:0;opacity: 0.2;z-index:9;}
+/*.grayed{display:none;background:#000;width:100%;height:100%;position:fixed;top:0;left:0;opacity: 0.2;z-index:9;}*/
 .split-box, .split-box2{display:none;width:670px;margin:0 auto;position:fixed;padding:0px 0 0px 0;top:50%;left:50%;margin:-300px 0 0 -350px;z-index:999999;background:#fff;box-shadow: 0px 0px 25px #000;border-radius:2px;text-align:left;font-size:18px;border:1px solid #666;}
 .split-box .input, .split-box3 .input, .split-box2 .input{font-size:16px;width:20px;margin-top:-1px;text-align:center;}
 .split-box3 {margin: 5px 15px;}
@@ -354,17 +354,24 @@ text-indent: 40px;
 	
 	.visible {display:block!important;}
 	
-.btnsplit .disabled {margin: 0 0 0 35px !important;}
-	
-	.disabled, .disabled:hover, .disabled:active {
-opacity: 0.5 !important;
-cursor: default;
--moz-box-shadow: none;
--webkit-box-shadow: none;
-border: 1px solid #666;
-background: #ccc;
-}
+.btnsplit .disabled
+    {
+    margin: 0 0 0 35px !important;
+    }
 
+.disabled,
+.disabled:hover,
+.disabled:active 
+    {
+    opacity: 0.5 !important;
+    cursor: default;
+    -moz-box-shadow: none;
+    -webkit-box-shadow: none;
+    border: 1px solid #666;
+    background: #ccc;
+    }
+
+    
 	.splitmore{float:right;margin:0px 20px 0 0}
 	
 	.short-message{color:#999;font-size:12px;text-align:center;line-height:16px}
@@ -372,7 +379,15 @@ background: #ccc;
 	
 	.total strong{display: inline-block;width: 80px;}
 	
-	.total p{font-size:20px;color:#000;text-align:right;margin-right:15px; margin-top:10px;/*margin:0 45px 0 0;padding:0px 20px 0 20px;*/}
+	.total .wordsum{font-size:20px;color:#000;text-align:right;margin-right:15px; margin-top:10px;/*margin:0 45px 0 0;padding:0px 20px 0 20px;*/}
+	.popup-split.error-number .total .wordsum .total-w {
+        text-decoration: line-through;
+    }
+    
+	.total .wordsum .total-w
+        {
+        font-weight: bold;
+        }    
 .total-btn{float:right;margin:0 50px 10px 0}
 	
 
@@ -422,7 +437,19 @@ box-shadow: inset 0 1px 2px 2px #a7a9ac;background:#ccc}
 .upload-table tr{-webkit-transition: all  200ms ease-in; -moz-transition: all  100ms ease-in;}
 
 
-.error-count {color:#d65757!important; margin-top:-20px!important;}
+.error-count
+    {
+    display: none;
+    margin-right: 15px;
+    font-size: 20px;
+    text-align: right;
+    color: #d65757!important;
+    margin-top: -20px!important;
+    }
+.popup-split.error-number .error-count
+    {
+    display: block;
+    }
 
 .preview{width:40px;}
 .name{width:230px;}
