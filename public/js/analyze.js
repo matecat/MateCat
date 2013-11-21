@@ -92,8 +92,10 @@ UI = {
                         '   <div><h4>Part ' + (i+1) + '</h4></div>' +
                         '   <div class="job-details">' +
                         '       <div class="job-perc">' +
-                        '           <p><span class="aprox">Aprox. words:</span><span class="correct none">Words:</span></p>' +
-                        '           <input type="text" class="input-small" value="' + numw + '">' +
+                        '           <p><span class="aprox">Aprox. words:</span><span class="correct none">Words:</span></p>' + 
+                        '<!-- A: la classe Aprox scompare se viene effettuato il calcolo -->' +
+                        '           <input type="text" class="input-small" value="' + numw + '">' +                        
+//                        '           <input type="text" class="input-small" data-val="' + numw + '" value="' + APP.addCommas(numw) + '">' +
                         '       </div>' +
                         '   </div>' +
                         '</li>';
@@ -113,21 +115,21 @@ UI = {
             UI.resetSplitPopup();
         }).on('blur', '.popup-split .jobs .input-small', function(e) {
             e.preventDefault();
-            UI.performPreCheckSplitComputation();
-        }).on('focus', '.popup-split .jobs .input-small', function(e) {
-            e.preventDefault();
-
-            //if input area is focused we need to check again
-            $('.popup-split .text').text('Check');
-            $('.popup-split #exec-split').removeAttr('disabled').removeClass('disabled').removeClass('none');
-            $('.popup-split #exec-split-confirm').addClass('none');
-            $('span.correct').addClass('none');
-            $('span.aprox').removeClass('none');
-
-            UI.performPreCheckSplitComputation(false);
-
-        }).on('mouseover', '.popup-split .wordsum', function(){
-            UI.performPreCheckSplitComputation();
+            $(this).attr('value', $(this).val().replace(/[^0-9\.]/g,''));
+            ss = 0;
+            $('.popup-split .jobs .input-small').each(function() {
+                ss += parseInt($(this).val());
+            });
+            diff = ss - parseInt($('.popup-split .total .total-w').attr('data-val'));
+            if(diff != 0) {
+                $('.popup-split #exec-split').addClass('disabled');
+                $('.popup-split .error-count .curr-w').text(ss);
+                $('.popup-split .error-count .diff-w').text(diff);
+                $('.popup-split').addClass('error-number');
+            } else {
+                $('.popup-split #exec-split').removeClass('disabled');
+                $('.popup-split').removeClass('error-number');                
+            }
         }).on('click', '.popup-split #exec-split', function(e) {
             e.preventDefault();
 
@@ -243,7 +245,9 @@ UI = {
         $('.popup-split ul.jobs li .input-small').each(function() {
             ar.push( parseInt( $(this).val() ) );
         });
-
+        ar = ar.substring(0, ar.length - 1) + ']';
+//        console.log(ar);
+            
         APP.doRequest({
             data: {
                 action: "splitJob",
@@ -294,47 +298,7 @@ UI = {
             }
         });
     },
-
-    confirmSplit: function(job) {
-//        console.log('confirm split');
-
-        var ar = new Array();
-        $('.popup-split ul.jobs li .input-small').each(function() {
-            ar.push( parseInt( $(this).val() ) );
-        });
-        
-        APP.doRequest({
-            data: {
-                action: "splitJob",
-                exec: "apply",
-                project_id: $('#pid').attr('data-pid'),
-                project_pass: $('#pid').attr('data-pwd'),
-                job_id: $('.popup-split h1 .jid').attr('data-jid'),
-                job_pass: $('.popup-split h1 .jid').attr('data-pwd'),
-                num_split: $('.popup-split h1 .chunks').text(),
-                split_values: ar
-            },
-            success: function(d) {
-//                setTimeout(function(){
-                    location.reload();
-//                },8000);                         
-            }
-        });        
-    },
-
-    resetSplitPopup: function() {
-        var t =    '<a id="exec-split" class="uploadbtn loader">'+
-                  '    <span class="uploadloader"></span>'+
-                  '    <span class="text">Check</span>'+
-                  '</a>'+
-                  '<a id="exec-split-confirm" class="splitbtn done none">'+
-                  '    <span class="text">Confirm</span>'+
-                  '</a>'+
-                '<span class="btn fileinput-button btn-cancel right">'+
-                '    <span>Cancel</span>'+
-                '</span>';
-        $('.popup-split .btnsplit').html(t);
-    },
+            
     progressBar: function(perc) {
         if(perc == 100) return;
         
@@ -360,7 +324,7 @@ UI = {
                     $('.sticky').css({
                         position: 'fixed', 
                         top: 50, 
-                        left: 0
+                        left: 0,
                     });
                 } else {
                     $('.sticky').css('position','static');
@@ -383,22 +347,13 @@ UI = {
                     var s = d.data.summary;
                     if( (s.STATUS == 'NEW') || (s.STATUS == '') || s.IN_QUEUE_BEFORE > 0 ) {
                         $('.loadingbar').addClass('open');
-                        if( s.IN_QUEUE_BEFORE > 0 ) {
-
-                            //increasing number of segments ( fast analysis on another project )
-                            if( UI.previousQueueSize < s.IN_QUEUE_BEFORE ) {
-                                $('#shortloading').children().replaceWith('<p class="label">There are another project in queue. Please wait...</p>');
-                            } else { //decreasing ( TM analysis on another project )
-
-                                if( !$('#shortloading .queue').length ) {
-                                    $('#shortloading').children().replaceWith('<p class="label">Fast word counting...</p><p class="queue">There are still <span class="number">' + s.IN_QUEUE_BEFORE_PRINT + '</span> segments in queue. Please wait...</p>');
-                                } else {
-                                    $('#shortloading .queue .number').text(s.IN_QUEUE_BEFORE_PRINT);
-                                }
-                            }
-
+                        if(s.IN_QUEUE_BEFORE > 0) {
+                            if(!$('#shortloading .queue').length) {
+                                $('#shortloading').append('<p class="queue">There are still <span class="number">' + s.IN_QUEUE_BEFORE_PRINT + '</span> segments in queue. Please wait...</p>');
+                            } else {
+                                $('#shortloading .queue .number').text(s.IN_QUEUE_BEFORE_PRINT);                            
+                            }                            
                         }
-                        UI.previousQueueSize = s.IN_QUEUE_BEFORE;
                     }
 
 //                    this is not used, for now we never get an empty status from controller
@@ -577,107 +532,6 @@ UI = {
 
                     });
 
-/*
-
-                    $.each(d.data.jobs, function(key,value) {
-                        tot = value.totals;
-
-                        context = $('#job-' + key);
-                        var s_total = $('.totaltable .stat_tot',context);
-                        s_total_txt = s_total.text();
-                        s_total.text(tot.TOTAL_PAYABLE[1]);
-                        //if(s_total_txt != s.TOTAL_TM_WC_PRINT) s_total.effect("highlight", {}, 1000);
-                        
-                        
-                        var s_new = $('.totaltable .stat_new',context);
-                        s_new_txt = s_new.text();
-                        s_new.text(tot.NEW[1]);
-                        if(s_new_txt != tot.NEW[1]) s_new.effect("highlight", {}, 1000);
-
-                        var s_rep = $('.totaltable .stat_rep',context);
-                        s_rep_txt = s_rep.text();
-                        s_rep.text(tot.REPETITIONS[1]);
-                        if(s_rep_txt != tot.REPETITIONS[1]) s_rep.effect("highlight", {}, 1000);
-
-                        var s_int = $('.totaltable .stat_int',context);
-                        s_int_txt = s_int.text();
-                        s_int.text(tot.INTERNAL_MATCHES[1]);
-                        if(s_int_txt != tot.INTERNAL_MATCHES[1]) s_int.effect("highlight", {}, 1000);
-
-                        var s_tm75 = $('.totaltable .stat_tm75',context);
-                        s_tm75_txt = s_tm75.text();
-                        s_tm75.text(tot.TM_75_99[1]);
-                        if(s_tm75_txt != tot.TM_75_99[1]) s_tm75.effect("highlight", {}, 1000);
-
-                        var s_tm100 = $('.totaltable .stat_tm100',context);
-                        s_tm100_txt = s_tm100.text();
-                        s_tm100.text(tot.TM_100[1]);
-                        if(s_tm100_txt != tot.TM_100[1]) s_tm100.effect("highlight", {}, 1000);
-
-                        var s_tmic = $('.totaltable .stat_tmic',context);
-                        s_tmic_txt = s_tmic.text();
-                        s_tmic.text(tot.ICE[1]);
-                        if(s_tmic_txt != tot.ICE[1]) s_tmic.effect("highlight", {}, 1000);
-
-                        var s_mt = $('.totaltable .stat_mt',context);
-                        s_mt_txt = s_mt.text();
-                        s_mt.text(tot.MT[1]);
-                        if(s_mt_txt != tot.MT[1]) s_mt.effect("highlight", {}, 1000);
-
-                        //FIXME now 2 cycles are needed, DOM is changed
-                        //each( value.chunks, function( jobpassword, files_object ){
-                        //      each( files_object, function( id_file, file_details ){
-                        //          var row = $('#file_' + key + '_' + jobpassword +'_' + id_file);
-                        //      }
-                        //}
-
-                        $.each(value.file_details, function (id_file, fd) {
-                            var row = $('#file_' + key + '_' + id_file);
-                            var s_tot = $('.stat_payable', row);
-                            s_tot_txt = s_tot.text();
-                            s_tot.text(fd.TOTAL_PAYABLE[1]);
-                            if (s_tot_txt != fd.TOTAL_PAYABLE[1]) s_tot.effect("highlight", {}, 1000);
-
-                            var s_new = $('.stat_new', row);
-                            s_new_txt = s_new.text();
-                            s_new.text(fd.NEW[1]);
-                            if (s_new_txt != fd.NEW[1]) s_new.effect("highlight", {}, 1000);
-
-                            var s_rep = $('.stat_rep', row);
-                            s_rep_txt = s_rep.text();
-                            s_rep.text(fd.REPETITIONS[1]);
-                            if (s_rep_txt != fd.REPETITIONS[1]) s_rep.effect("highlight", {}, 1000);
-
-                            var s_int = $('.stat_int', row);
-                            s_int_txt = s_int.text();
-                            s_int.text(fd.INTERNAL_MATCHES[1]);
-                            if (s_int_txt != fd.INTERNAL_MATCHES[1]) s_int.effect("highlight", {}, 1000);
-
-                            var s_tm75 = $('.stat_tm75', row);
-                            s_tm75_txt = s_tm75.text();
-                            s_tm75.text(fd.TM_75_99[1]);
-                            if (s_tm75_txt != fd.TM_75_99[1]) s_tm75.effect("highlight", {}, 1000);
-
-                            var s_tm100 = $('.stat_tm100', row);
-                            s_tm100_txt = s_tm100.text();
-                            s_tm100.text(fd.TM_100[1]);
-                            if (s_tm100_txt != fd.TM_100[1]) s_tm100.effect("highlight", {}, 1000);
-
-                            var s_tmic = $('.stat_tmic', row);
-                            s_tmic_txt = s_tmic.text();
-                            s_tmic.text(fd.ICE[1]);
-                            if (s_tmic_txt != fd.ICE[1]) s_tmic.effect("highlight", {}, 1000);
-
-                            var s_mt = $('.stat_mt', row);
-                            s_mt_txt = s_mt.text();
-                            s_mt.text(fd.MT[1]);
-                            if (s_mt_txt != fd.MT[1]) s_mt.effect("highlight", {}, 1000);
-
-                        });
-                    });
-
-                    */
-
                     if(d.data.summary.STATUS != 'DONE') {
                         $('.dosplit').addClass('disabled');
                         setTimeout(function(){
@@ -777,3 +631,4 @@ $(document).ready(function(){
     });
     UI.init();
 });
+
