@@ -44,9 +44,10 @@ class ConvertersMonitor {
                                                     ORDER BY check_time DESC
                                                     LIMIT 9
                                                  ";
-    const selectLogs_afterLastUpdate         = "SELECT test_passed FROM converters_log
+    const selectLogs_afterLastUpdate         = "SELECT test_passed, check_time FROM converters_log
                                                     WHERE id_converter = '%s'
                                                     AND check_time > '%s'
+                                                    ORDER BY check_time DESC
                                                ";
 
 
@@ -78,7 +79,7 @@ class ConvertersMonitor {
 
         foreach ( $resultSet as $conv ) {
 
-            self::$ipLog = $conv[ 'ip_converter' ];
+//            self::$ipLog = $conv[ 'ip_converter' ];
 
             $this->resultSet[ $conv[ 'ip_converter' ] ] = $conv;
 
@@ -98,7 +99,6 @@ class ConvertersMonitor {
 //                );
 //            }
 
-
         }
 
         $this->converterFactory = new fileFormatConverter();
@@ -106,7 +106,7 @@ class ConvertersMonitor {
     }
 
     protected static function _prettyEcho( $msg, $pad = 0 ) {
-        echo "[ " . date( DATE_RFC822 ) . " | " . self::$ipLog . " ] - " . str_pad( "", $pad, " ", STR_PAD_LEFT ) . $msg . "\n";
+        echo "[ " . date( DATE_RFC822 ) . " | " . str_pad( self::$ipLog, 14, " ", STR_PAD_BOTH ) . " ] - " . str_pad( "", $pad, " ", STR_PAD_LEFT ) . $msg . "\n";
     }
 
     public function performCheck() {
@@ -380,15 +380,16 @@ class ConvertersMonitor {
                 $this->resultSet[ $ip_converter ][ 'last_update' ]
             );
 
-            $lastTenLogs = $this->db->fetch_array( $selectLastTenLogs_beforeLastUpdate );
+            $_lastTenLogs = $this->db->fetch_array( $selectLastTenLogs_beforeLastUpdate );
 
-            foreach ( $lastTenLogs as $conversions ) {
+            $lastTenLogs = array();
+            foreach ( $_lastTenLogs as $conversions ) {
                 $lastTenLogs[ 'history' ][ ] = $conversions[ 'test_passed' ];
             }
             $lastTenLogs = array_unique( $lastTenLogs[ 'history' ] );
 
             //there are only failures
-            if ( count( $lastTenLogs ) == 1 && $lastTenLogs[ 0 ] == 0 ) {
+            if ( count( $lastTenLogs ) == 1 && $lastTenLogs[ 0 ] == 0 && count( $_lastTenLogs ) == 10 ) {
                 //set Reboot status and set for reboot
                 $this->resultSet[ $ip_converter ][ 'status_reboot' ] = 1;
                 $this->setForReboot[ ]                               = $ip_converter;
@@ -441,25 +442,37 @@ class ConvertersMonitor {
 
         $failedConversionsAfterRebootLogs = $this->db->fetch_array( $selectLogs_afterLastUpdate );
 
-        if ( count( $failedConversionsAfterRebootLogs ) > 1 ) {
-            self::_prettyEcho( "> *** FAILED REBOOT FOUND....", 4 );
+        //if there are failed conversions test after the reboot time ( long reboot )
+        if( count( $failedConversionsAfterRebootLogs ) != 0 ){
 
-            $msg = "\n\n *** FAILED REBOOT STATUS FOUND FOR CONVERTER $ip_converter -> " . $this->host_machine_map[ $ip_converter ][ 'instance_name' ]
-                    . "\n         - instance_name:   " . $this->host_machine_map[ $ip_converter ][ 'instance_name' ]
-                    . "\n         - ip_machine_host: " . $this->host_machine_map[ $ip_converter ][ 'ip_machine_host' ]
-                    . "\n"
-                    . "\n"
-                    . "\n *** WARNING: THIS MACHINE ARE SET AS OFFLINE, NEVER PUT BACK IN POOL ***";
+            $rebootTime             = new DateTime( $this->resultSet[ $ip_converter ][ 'last_update' ] );
+            $thisTimeFailure = new DateTime();
 
-            //send Alert report
-            Utils::sendErrMailReport( $msg );
+            //if this failure happened 5 minutes after reboot time
+            if( $thisTimeFailure->modify('-5 minutes') >= $rebootTime ){
 
-            $this->resultSet[ $ip_converter ][ 'status_active' ]  = 0;
-            $this->resultSet[ $ip_converter ][ 'status_reboot' ]  = 0;
-            $this->resultSet[ $ip_converter ][ 'status_offline' ] = 1;
-            $this->db->update( 'converters', $this->resultSet[ $ip_converter ], " ip_converter = '$ip_converter' LIMIT 1" );
+                self::_prettyEcho( "> *** FAILED REBOOT FOUND....", 4 );
 
-            return $ip_converter;
+                $msg = "\n\n *** FAILED REBOOT STATUS FOUND FOR CONVERTER $ip_converter -> " . $this->host_machine_map[ $ip_converter ][ 'instance_name' ]
+                        . "\n         - instance_name:   " . $this->host_machine_map[ $ip_converter ][ 'instance_name' ]
+                        . "\n         - ip_machine_host: " . $this->host_machine_map[ $ip_converter ][ 'ip_machine_host' ]
+                        . "\n"
+                        . "\n"
+                        . "\n *** WARNING: THIS MACHINE ARE SET AS OFFLINE, NEVER PUT BACK IN POOL ***";
+
+                //send Alert report
+                Utils::sendErrMailReport( $msg );
+
+                self::_prettyEcho( "> *** MESSAGE SENT....", 4 );
+
+                $this->resultSet[ $ip_converter ][ 'status_active' ]  = 0;
+                $this->resultSet[ $ip_converter ][ 'status_reboot' ]  = 0;
+                $this->resultSet[ $ip_converter ][ 'status_offline' ] = 1;
+                $this->db->update( 'converters', $this->resultSet[ $ip_converter ], " ip_converter = '$ip_converter' LIMIT 1" );
+
+                return $ip_converter;
+
+            }
 
         }
 

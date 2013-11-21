@@ -174,7 +174,7 @@ class INIT {
 		self::$ENABLED_BROWSERS = array('chrome', 'safari');
 		self::$CONVERSION_ENABLED = true;
 		self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-		self::$BUILD_NUMBER = '0.3.3.4';
+		self::$BUILD_NUMBER = '0.3.3.5';
 		self::$VOLUME_ANALYSIS_ENABLED = true;
 
 		self::$WARNING_POLLING_INTERVAL = 10; //seconds
@@ -184,7 +184,7 @@ class INIT {
 		self::$SPELL_CHECK_ENABLED = false;
 
 		self::$SAVE_SHASUM_FOR_FILES_LOADED = true;
-         self::$MAX_UPLOAD_FILE_SIZE = 30000000; // bites
+         self::$MAX_UPLOAD_FILE_SIZE = 30000000; // bytes
 
 		self::$SUPPORTED_FILE_TYPES = array(
 				'Office' => array(
