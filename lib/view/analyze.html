@@ -60,7 +60,7 @@
 
 <div class="wrapper-container">
         <div class="wrapper" >
-            <h1 id="pid" title=""  data-pid="" tal:attributes="title pname|default; data-pid pid" ><span id="pname" tal:content="pname|nothing">Project name</span> - Volume Analysis</h1>
+            <h1 id="pid" title=""  data-pid="" data-pwd="" tal:attributes="title pname|default; data-pid pid; data-pwd project_password"><span id="pname" tal:content="pname|nothing">Project name</span> - Volume Analysis</h1>
 
             <h2>Invoicing Tips</h2>
             <ul id="standard-equivalent-words" class="cost-table">
@@ -219,7 +219,7 @@
             <div class="wrapper">
                 <h2>Job details</h2>      
                 <tal:block tal:define="job php:array()" tal:repeat="job jobs">
-                    <div class="jobcontainer" tal:attributes="data-jid string:${repeat/job/key}">
+                    <div class="jobcontainer" tal:attributes="data-jid string:${repeat/job/key}; data-pwd string:${job/password}">
 <!--                    <div class="job" tal:attributes="data-jid string:${repeat/job/key}"> -->
                     <h3>
                         <span tal:replace="job/source">English</span> &gt; <span tal:replace="job/target">Italian</span>
@@ -342,9 +342,9 @@
     <div class="popup">
         <a href="#" class="x-popup"></a>
 
-        <h1>Split Job in <span class="chunks">x</span> chunks</h1>
+        <h1>Split <span class="jid" data-jid="">Job</span> in <span class="chunks">x</span> chunks</h1>
         <div class="popup-box split-box3">
-				<ul class="jobs">
+            <ul class="jobs">
                 <li>
                     <div><h4>Part 1</h4></div>
 
@@ -379,8 +379,8 @@
            
 				<a id="exec-split" class="uploadbtn loader">
 <!-- A: se il conteggio delle parole non è corretto, bisogna appendere la classe 'disabled' al bottone qui sopra -->
-                   <span class="uploadloader"></span>
-                    <span id="text" onClick="conteggio()">Check</span>
+                    <span class="uploadloader"></span>
+                    <span class="text">Check</span>
 <!-- A:  la funzione conteggio adesso funziona in timeout, va sostituita con i controlli -->
 				</a>
                 <a class="splitbtn done none">
@@ -463,7 +463,7 @@ $(function(){
     $('.loader').click(function() {
         $(this).toggleClass('disabled');
 		 $('.uploadloader').toggleClass('visible');
-		$('#text').text('Checking');
+		$('.text').text('Checking');
     });
 	
 	
@@ -475,7 +475,7 @@ $(function(){
 });
 
 <!-- A: funziona da sostituire con i controlli  -->
-
+/*
 var timer;
 
 function conteggio(){
@@ -490,7 +490,7 @@ $('.error-count').toggleClass('none');
 },2000);
 
  }
-
+*/
 $('.btn-cancel').click(function(){
     // Clear the timeout
     clearTimeout(timer);

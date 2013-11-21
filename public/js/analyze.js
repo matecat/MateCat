@@ -65,8 +65,8 @@ UI = {
 */ 
         $("body").on('click', '.splitbtn:not(.disabled)', function(e) {
             // temp
-            APP.alert('work in progress');
-            return false;
+//            APP.alert('work in progress');
+//            return false;
             
             e.preventDefault();
             var job = $(this).parents('.jobcontainer');
@@ -77,6 +77,8 @@ UI = {
             wordsXjob = Math.floor(wordsXjob);
             diff = total - (wordsXjob*numsplit);
             $('.popup-split .popup-box .jobs').empty();
+            $('.popup-split h1 .jid').attr('data-jid', jid);
+            $('.popup-split h1 .jid').attr('data-pwd', $(job).attr('data-pwd'));
             $('.popup-split').removeClass('error-number');
             $('.popup-split #exec-split').removeClass('disabled');
             $('.popup-split h1 .chunks').text(numsplit);
@@ -122,8 +124,18 @@ UI = {
                 $('.popup-split #exec-split').removeClass('disabled');
                 $('.popup-split').removeClass('error-number');                
             }
-            console.log(ss);
-            console.log($(this).val());
+        }).on('click', '.popup-split #exec-split', function(e) {
+            e.preventDefault();
+//            timer = setTimeout(function(){
+//                $('.popup-split .text').text('Confirm');
+//                $('.popup-split .loader').toggleClass('none');
+//                $('.popup-split .done').removeClass('none');
+//                $('.popup-split .aprox').toggleClass('none');
+//                $('.popup-split .correct').removeClass('none');
+//                $('.popup-split .error-message').toggleClass('none');
+//                $('.popup-split .error-count').toggleClass('none');
+//            }, 2000);
+            UI.checkSplit();
         });
 
         
@@ -186,6 +198,34 @@ UI = {
         }
     },
 
+    checkSplit: function(job) {
+        console.log('split');
+        ar = '[';
+        $('.popup-split ul.jobs li .input-small').each(function() {
+            ar += $(this).val() + ','
+        });
+        ar = ar.substring(0, ar.length - 1) + ']';
+//        console.log(ar);
+            
+        APP.doRequest({
+            data: {
+                action: "splitJob",
+                exec: "check",
+                project_id: $('#pid').attr('data-pid'),
+                project_pass: $('#pid').attr('data-pwd'),
+                job_id: $('.popup-split h1 .jid').attr('data-jid'),
+                job_pass: $('.popup-split h1 .jid').attr('data-jid'),
+                num_split: $('.popup-split h1 .chunks').text(),
+                split_values: ar
+
+            },
+            success: function(d) {
+//                $(".popup-outer").fadeOut();
+//                $(".popup").fadeOut('fast');
+            }
+        });
+    },
+            
     progressBar: function(perc) {
         if(perc == 100) return;
         
