@@ -63,7 +63,7 @@ UI = {
             $("body").removeClass("popup-opened");
         });
 */ 
-        $("body").on('click', '.splitbtn:not(.disabled)', function(e) {
+        $("body").on('click', '.dosplit:not(.disabled)', function(e) {
             // temp
 //            APP.alert('work in progress');
 //            return false;
@@ -71,11 +71,12 @@ UI = {
             e.preventDefault();
             var job = $(this).parents('.jobcontainer');
             jid = job.attr('data-jid');
-            total = $('.stat-total', job).first().text().replace(",", "");
+            total = $('.stat-payable .stat_tot', job).first().text().replace(",", "");
             numsplit = $('.splitselect', job).first().val();
             wordsXjob = total / numsplit;
             wordsXjob = Math.floor(wordsXjob);
             diff = total - (wordsXjob*numsplit);
+            $('.popup-split .error-message').addClass('none');
             $('.popup-split .popup-box .jobs').empty();
             $('.popup-split h1 .jid').attr('data-jid', jid);
             $('.popup-split h1 .jid').attr('data-pwd', $(job).attr('data-pwd'));
@@ -107,6 +108,8 @@ UI = {
         }).on('click', '.modal .x-popup', function(e) {
             e.preventDefault();
             APP.closePopup();
+        }).on('click', '.popup-split .x-popup', function(e) {
+            UI.resetSplitPopup();
         }).on('input', '.popup-split .jobs .input-small', function(e) {
             e.preventDefault();
             $(this).attr('value', $(this).val().replace(/[^0-9\.]/g,''));
@@ -116,7 +119,9 @@ UI = {
             });
             diff = ss - parseInt($('.popup-split .total .total-w').attr('data-val'));
             if(diff != 0) {
-                $('.popup-split #exec-split').addClass('disabled');
+                $('.popup-split .btnsplit .done').addClass('none');
+                $('.popup-split #exec-split').removeClass('none').addClass('disabled').attr('disabled', 'disabled');
+                $('.popup-split #exec-split .text').text('Check');
                 $('.popup-split .error-count .curr-w').text(ss);
                 $('.popup-split .error-count .diff-w').text(diff);
                 $('.popup-split').addClass('error-number');
@@ -126,16 +131,14 @@ UI = {
             }
         }).on('click', '.popup-split #exec-split', function(e) {
             e.preventDefault();
-//            timer = setTimeout(function(){
-//                $('.popup-split .text').text('Confirm');
-//                $('.popup-split .loader').toggleClass('none');
-//                $('.popup-split .done').removeClass('none');
-//                $('.popup-split .aprox').toggleClass('none');
-//                $('.popup-split .correct').removeClass('none');
-//                $('.popup-split .error-message').toggleClass('none');
-//                $('.popup-split .error-count').toggleClass('none');
-//            }, 2000);
+            $('.popup-split .error-message').addClass('none');
+            $(this).addClass('disabled');
+            $('.uploadloader').addClass('visible');
+            $('.text').text('Checking');
             UI.checkSplit();
+        }).on('click', '.popup-split #exec-split-confirm', function(e) {
+            e.preventDefault();
+            UI.confirmSplit();
         });
 
         
@@ -200,6 +203,7 @@ UI = {
 
     checkSplit: function(job) {
         console.log('split');
+        
         ar = '[';
         $('.popup-split ul.jobs li .input-small').each(function() {
             ar += $(this).val() + ','
@@ -213,19 +217,96 @@ UI = {
                 exec: "check",
                 project_id: $('#pid').attr('data-pid'),
                 project_pass: $('#pid').attr('data-pwd'),
+//                project_pass: 'd',
                 job_id: $('.popup-split h1 .jid').attr('data-jid'),
-                job_pass: $('.popup-split h1 .jid').attr('data-jid'),
+                job_pass: $('.popup-split h1 .jid').attr('data-pwd'),
                 num_split: $('.popup-split h1 .chunks').text(),
                 split_values: ar
 
             },
-            success: function(d) {
+            success: function(d) {console.log('success');
+                var total = $('.popup-split .wordsum .total-w').attr('data-val');
+                var prog = 0;
+                if(!$.isEmptyObject(d.data)) {
+                    $.each(d.data.chunks, function(item) {
+                        val = this.eq_word_count;
+                        if(item == (d.data.chunks.length-1)) { //last chunk
+                            val = total - prog;
+                        } else {
+                            prog += this.eq_word_count;
+                        }
+                        $($('.popup-split ul.jobs li .input-small')[item]).attr('value', val);
+                    })
+                    $('.popup-split .uploadloader').removeClass('visible');
+                    $('.popup-split .text').text('Confirm');
+                    $('.popup-split .loader').addClass('none');
+                    $('.popup-split .done').removeClass('none');
+                    $('.popup-split .aprox').toggleClass('none');
+                    $('.popup-split .correct').removeClass('none');
+                };
+                if((typeof d.errors != 'undefined')&&(d.errors.length)) {
+//                    $('.popup-split .loader').addClass('none');
+//                    $('.popup-split .done').removeClass('none');
+                    $('.popup-split .uploadloader').removeClass('visible');
+                    $('.popup-split .text').text('Check');
+                    $('.popup-split #exec-split').removeAttr('disabled').removeClass('disabled').removeClass('none');
+                    $('.popup-split .error-message p').text(d.errors[0].message);
+                    $('.popup-split .error-message').removeClass('none');
+//                    $('.popup-split .error-count').toggleClass('none');                    
+                    }
+
+//                console.log(d);
+
+//                                
+//                console.log(d.data.chunks);
 //                $(".popup-outer").fadeOut();
 //                $(".popup").fadeOut('fast');
             }
         });
     },
-            
+
+    confirmSplit: function(job) {
+        console.log('confirm split');
+        ar = '[';
+        $('.popup-split ul.jobs li .input-small').each(function() {
+            ar += $(this).val() + ','
+        });
+        ar = ar.substring(0, ar.length - 1) + ']';
+        
+        APP.doRequest({
+            data: {
+                action: "splitJob",
+                exec: "apply",
+                project_id: $('#pid').attr('data-pid'),
+                project_pass: $('#pid').attr('data-pwd'),
+//                project_pass: 'd',
+                job_id: $('.popup-split h1 .jid').attr('data-jid'),
+                job_pass: $('.popup-split h1 .jid').attr('data-pwd'),
+                num_split: $('.popup-split h1 .chunks').text(),
+                split_values: ar
+
+            },
+            success: function(d) {
+//                setTimeout(function(){
+                    location.reload();
+//                },8000);                         
+            }
+        });        
+    },
+
+    resetSplitPopup: function() {
+        var t =    '<a id="exec-split" class="uploadbtn loader">'+
+                  '    <span class="uploadloader"></span>'+
+                  '    <span class="text">Check</span>'+
+                  '</a>'+
+                  '<a id="exec-split-confirm" class="splitbtn done none">'+
+                  '    <span class="text">Confirm</span>'+
+                  '</a>'+
+                '<span class="btn fileinput-button btn-cancel right">'+
+                '    <span>Cancel</span>'+
+                '</span>';
+        $('.popup-split .btnsplit').html(t);
+    },
     progressBar: function(perc) {
         if(perc == 100) return;
         
@@ -445,12 +526,12 @@ UI = {
                         });
                     });
                     if(d.data.summary.STATUS != 'DONE') {
-                        $('.splitbtn').addClass('disabled');
+                        $('.dosplit').addClass('disabled');
                         setTimeout(function(){
                             UI.pollData();
                         },1000);                   
                     } else {
-                        $('.splitbtn').removeClass('disabled');
+                        $('.dosplit').removeClass('disabled');
         				$('#longloading .approved-bar').css('width','100%');
         				$('#analyzedSegmentsReport').text(s.SEGMENTS_ANALYZED_PRINT);
                         setTimeout(function(){

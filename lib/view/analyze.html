@@ -239,7 +239,7 @@
                             <option value="10">10</option>
                          </select>
      				 	<span class="label left">Jobs</span>
-                        <a tal:attributes="" href="#" class="splitbtn">Split</a>
+                        <a tal:attributes="" href="#" class="dosplit splitbtn">Split</a>
 						<a tal:attributes="" href="#" class="mergebtn">Merge</a><!-- A: questo compare quando il job è già stato splittato  -->
                     </div>    <!-- END CONTAINER SPLIT JOBS BUTTONS  -->
                     <table tal:attributes="id string:job-${repeat/job/key}" class="tablestats">
@@ -278,7 +278,7 @@
                         </tr>
                         <tr class="totaltable">
                             <td class="languages">
-                             <span class="splitnum left">${repeat/job/key}-1</span>
+                             <span class="splitnum left">${repeat/job/key}</span>
 <!-- A: occorre inserire sempre l'ID del job; se è splittato bisogna anche accompagnarlo con il numero progressivo di split  -->
                                 <a href="#" class="filedetails part3">File details</a>
                                 <span class="numfiles">(<span tal:define="files job/files; f php:array()" tal:content="php:count(files)">0</span>)</span>
@@ -370,25 +370,20 @@
                 <p class="error-count">Current count: <span class="curr-w">x</span></p>
                 <p class="error-count">Difference: <span class="diff-w">x</span></p>
 <!-- A:  il p error appare solo se i valori inseriti negli input dei singoli split job non restituiscono la somma totale -->       
-          </div>
-          <div class="error-message none">
-                <p>Cannot split in # chunks, do this</p>
-          </div>
-          <div class="cl"></div>
-          <div class="btnsplit">
-           
-				<a id="exec-split" class="uploadbtn loader">
-<!-- A: se il conteggio delle parole non è corretto, bisogna appendere la classe 'disabled' al bottone qui sopra -->
-                    <span class="uploadloader"></span>
-                    <span class="text">Check</span>
-<!-- A:  la funzione conteggio adesso funziona in timeout, va sostituita con i controlli -->
-				</a>
-                <a class="splitbtn done none">
-                    <span id="text">Confirm</span>
-                </a>
+                </div>
+                <div class="error-message none">
+                      <p>Cannot split in # chunks, do this</p>
+                </div>
+                <div class="cl"></div>
+                <div class="btnsplit">
 
-
-
+                  <a id="exec-split" class="uploadbtn loader">
+                      <span class="uploadloader"></span>
+                      <span class="text">Check</span>
+                  </a>
+                  <a id="exec-split-confirm" class="splitbtn done none">
+                      <span class="text">Confirm</span>
+                  </a>
                 <span class="btn fileinput-button btn-cancel right">
                     <span>Cancel</span>
                 </span>
@@ -456,60 +451,6 @@
 <!-- JS SPLIT JOB  -->
 <script type="text/javascript">
 
-
-    <!-- A: fa apparire il bottone loading  -->
-
-$(function(){
-    $('.loader').click(function() {
-        $(this).toggleClass('disabled');
-		 $('.uploadloader').toggleClass('visible');
-		$('.text').text('Checking');
-    });
-
-    <!-- A: funziona da sostituire con i controlli  -->
-
-    var timer;
-
-    function conteggio(){
-        timer = setTimeout(function(){
-            $('#text').text('Confirm');
-            $('.loader').toggleClass('none');
-            $('.done').removeClass('none');
-            $('.aprox').toggleClass('none');
-            $('.correct').removeClass('none');
-            $('.error-message').toggleClass('none');
-            $('.error-count').toggleClass('none');
-        },2000);
-
-    }
-
-    $('.btn-cancel').click(function(){
-        // Clear the timeout
-        clearTimeout(timer);
-    });
-});
-
-<!-- A: funziona da sostituire con i controlli  -->
-/*
-var timer;
-
-function conteggio(){
-    timer = setTimeout(function(){
-      $('#text').text('Confirm');
-$('.loader').toggleClass('none');
-$('.done').removeClass('none');
-$('.aprox').toggleClass('none');
-$('.correct').removeClass('none');
-$('.error-message').toggleClass('none');
-$('.error-count').toggleClass('none');
-},2000);
-
- }
-*/
-$('.btn-cancel').click(function(){
-    // Clear the timeout
-    clearTimeout(timer);
-});
 </script>
 
 <!-- FINE JS SPLIT JOB -->
