@@ -184,7 +184,7 @@ class INIT {
 		self::$SPELL_CHECK_ENABLED = false;
 
 		self::$SAVE_SHASUM_FOR_FILES_LOADED = true;
-         self::$MAX_UPLOAD_FILE_SIZE = 30000000; // bites
+         self::$MAX_UPLOAD_FILE_SIZE = 30000000; // bytes
 
 		self::$SUPPORTED_FILE_TYPES = array(
 				'Office' => array(

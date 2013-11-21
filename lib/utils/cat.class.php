@@ -719,7 +719,7 @@ class CatUtils {
      * Generate 128bit password with real uniqueness over single process instance
      *   N.B. Concurrent requests can collide ( Ex: fork )
      *
-     * Minimum Password Length 24 Characters
+     * Minimum Password Length 12 Characters
      *
      */
     public static function generate_password( $length = 12 ) {
