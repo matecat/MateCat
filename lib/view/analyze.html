@@ -60,7 +60,7 @@
 
 <div class="wrapper-container">
     <div class="wrapper" >
-        <h1 id="pid" title=""  data-pid="" data-pwd="" tal:attributes="title pname|default; data-pid pid; data-pwd project_password"><span id="pname" tal:content="pname|nothing">Project name</span> - Volume Analysis</h1>
+        <h1 id="pid" title=""  data-pid="" tal:attributes="title pname|default; data-pid pid" ><span id="pname" tal:content="pname|nothing">Project name</span> - Volume Analysis</h1>
 
         <h2>Invoicing Tips</h2>
         <ul id="standard-equivalent-words" class="cost-table">
@@ -216,133 +216,248 @@
 </div>
 
 <div class="body">
-    <div class="wrapper">
-        <h2>Job details</h2>
-        <tal:block tal:define="job php:array()" tal:repeat="job jobs">
-            <div class="jobcontainer" tal:attributes="data-jid string:${repeat/job/key}; data-pwd string:${job/password}">
-                <!--                    <div class="job" tal:attributes="data-jid string:${repeat/job/key}"> -->
-                <h3>
-                    <span tal:replace="job/source">English</span> &gt; <span tal:replace="job/target">Italian</span>
-                </h3>
-                <div class="splitbtn-cont">
-                    <span class="splitmsg">Splitted in 2 parts</span><!-- A: questo compare quando il job è già stato splittato  -->
-                    <span class="label left">Split in</span>
-                    <select name="" class="splitselect">
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                        <option value="5">5</option>
-                        <option value="6">6</option>
-                        <option value="7">7</option>
-                        <option value="8">8</option>
-                        <option value="9">3</option>
-                        <option value="10">10</option>
-                    </select>
-                    <span class="label left">Jobs</span>
-                    <a tal:attributes="" href="#" class="splitbtn">Split</a>
-                    <a tal:attributes="" href="#" class="mergebtn">Merge</a><!-- A: questo compare quando il job è già stato splittato  -->
-                </div>    <!-- END CONTAINER SPLIT JOBS BUTTONS  -->
-                <table tal:attributes="id string:job-${repeat/job/key}" class="tablestats">
-                    <tr>
-                        <th> </th>
-                        <th>Payable</th>
-                        <th>Total</th>
-                        <th class="new" width="100">New</th>
-                        <th class="repetition">Repetition</th>
-                        <th class="internal-matches">Internal Matches<br/>
-                            (75%-99%)</th>
-                        <th class="tm-partial">TM<br/>
-                            Partial (75%-99%)</th>
-                        <th class="tm-100">TM 100%</th>
-                        <th class="tm-100-context">TM 100% in context</th>
-                        <th class="mt">Machine Translation</th>
-                        <th class="empty">&nbsp;</th>
-                    </tr>
+<div class="wrapper">
+<h2>Job details</h2>
+<tal:block tal:define="job php:array()" tal:repeat="job jobs">
+<h3>
+    <span tal:replace="job/source">English</span> &gt; <span tal:replace="job/target">Italian</span>
+</h3>
+<div class="splitbtn-cont">
+    <span class="splitmsg">Splitted in 2 parts</span><!-- A: questo compare quando il job è già stato splittato  -->
+    <span class="label left">Split in</span>
+    <select name="" id="splitselect">
+        <option value="2">2</option>
+        <option value="3">3</option>
+        <option value="4">4</option>
+        <option value="5">5</option>
+        <option value="6">6</option>
+        <option value="7">7</option>
+        <option value="8">8</option>
+        <option value="9">3</option>
+        <option value="10">10</option>
+    </select>
+    <span class="label left">Jobs</span>
+    <a tal:attributes="" href="#" class="splitbtn">Split</a>
+    <a tal:attributes="" href="#" class="mergebtn">Merge</a><!-- A: questo compare quando il job è già stato splittato  -->
+</div>    <!-- END CONTAINER SPLIT JOBS BUTTONS  -->
+<table tal:attributes="id string:job-${repeat/job/key}" class="tablestats">
+    <tr>
+        <th> </th>
+        <th>Payable</th>
+        <th>Total</th>
+        <th class="new" width="100">New</th>
+        <th class="repetition">Repetition</th>
+        <th class="internal-matches">Internal Matches<br/>
+            (75%-99%)</th>
+        <th class="tm-partial">TM<br/>
+            Partial (75%-99%)</th>
+        <th class="tm-100">TM 100%</th>
+        <th class="tm-100-context">TM 100% in context</th>
+        <th class="mt">Machine Translation</th>
+        <th class="empty">&nbsp;</th>
+    </tr>
 
-                    <tr>
+    <tr>
 
 
-                        <td class="payable-rate-breakdown" colspan="3">Payable Rate Breakdown</td>
-                        <td class="editarea">100%</td>
-                        <td class="editarea">30%</td>
-                        <td class="editarea">60%</td>
-                        <td class="editarea">60%</td>
-                        <td class="editarea">30%</td>
-                        <td class="editarea">0%</td>
-                        <td class="editarea">85%</td>
-                        <td class="empty">&nbsp;</td>
-                    </tr>
+        <td class="payable-rate-breakdown" colspan="3">Payable Rate Breakdown</td>
+        <td class="editarea">100%</td>
+        <td class="editarea">30%</td>
+        <td class="editarea">60%</td>
+        <td class="editarea">60%</td>
+        <td class="editarea">30%</td>
+        <td class="editarea">0%</td>
+        <td class="editarea">85%</td>
+        <td class="empty">&nbsp;</td>
+    </tr>
 
-                    <tr class="tablespace">
-                        <td colspan="10">&nbsp;</td>
-                    </tr>
-                    <tr class="totaltable">
-                        <td class="languages">
-                            <span class="splitnum left">${repeat/job/key}-1</span>
-                            <!-- A: occorre inserire sempre l'ID del job; se è splittato bisogna anche accompagnarlo con il numero progressivo di split  -->
-                            <a href="#" class="filedetails part3">File details</a>
-                            <span class="numfiles">(<span tal:define="files job/files; f php:array()" tal:content="php:count(files)">0</span>)</span>
-                        </td>
-                        <td class="stat-payable">
-                            <strong class="stat_tot" tal:content="tm_analysis_wc_print">11,500</strong>                            </td>
-                        <td class="stat-total" tal:content="job/total_raw_word_count_print">13,500</td>
-                        <td class="stat_new">0</td>
-                        <td class="stat_rep">0</td>
-                        <td class="stat_int">0</td>
-                        <td class="stat_tm75">0</td>
-                        <td class="stat_tm100">0</td>
-                        <td class="stat_tmic">0</td>
-                        <td class="stat_mt">0</td>
-                        <td class="empty">
+    <tr class="tablespace">
+        <td colspan="10">&nbsp;</td>
+    </tr>
+    <tr class="totaltable">
+        <td class="languages">
+            <span class="splitnum left">${repeat/job/key}-1</span>
+            <!-- A: occorre inserire sempre l'ID del job; se è splittato bisogna anche accompagnarlo con il numero progressivo di split  -->
+            <a href="#" class="filedetails part3">File details</a>
+            <span class="numfiles">(<span tal:define="files job/files; f php:array()" tal:content="php:count(files)">0</span>)</span>
+        </td>
+        <td class="stat-payable">
+            <strong class="stat_tot" tal:content="tm_analysis_wc_print">11,500</strong>                            </td>
+        <td class="stat-total" tal:content="job/total_raw_word_count_print">13,500</td>
+        <td class="stat_new">0</td>
+        <td class="stat_rep">0</td>
+        <td class="stat_int">0</td>
+        <td class="stat_tm75">0</td>
+        <td class="stat_tm100">0</td>
+        <td class="stat_tmic">0</td>
+        <td class="stat_mt">0</td>
+        <td class="empty">
 
 
 
-                            <a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${repeat/job/key}-${job/password} " href="#" target="_blank" class="uploadbtn">Translate</a>
-                        </td>
-                    </tr>
-                    <tal:block tal:define="files job/files; f php:array()" tal:repeat="f files">
-                        <tr tal:attributes="id string:file_${repeat/job/key}_${f/id}" id="file_1703" class="subfile part3files">
-                            <td class="stat-name">
-                                <p class="filename" tal:content="f/filename" tal:attributes='title f/filename'>filename1.xliff</p> </td>
-                            <td class="stat_payable"><strong tal:content="f/file_eq_word_count">6,500</strong></td>
-                            <td class="stat-total" tal:content="f/file_raw_word_count" >7,500</td>
-                            <td class="stat_new">0</td>
-                            <td class="stat_rep">0</td>
-                            <td class="stat_int">0</td>
-                            <td class="stat_tm75">0</td>
-                            <td class="stat_tm100">0</td>
-                            <td class="stat_tmic">0</td>
-                            <td class="stat_mt">0</td>
-                            <td class="empty"></td>
-                        </tr>
-                    </tal:block>
+            <a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${repeat/job/key}-${job/password} " href="#" target="_blank" class="uploadbtn">Translate</a>
+        </td>
+    </tr>
+    <tal:block tal:define="files job/files; f php:array()" tal:repeat="f files">
+        <tr tal:attributes="id string:file_${repeat/job/key}_${f/id}" id="file_1703" class="subfile part3files">
+            <td class="stat-name">
+                <p class="filename" tal:content="f/filename" tal:attributes='title f/filename'>filename1.xliff</p> </td>
+            <td class="stat_payable"><strong tal:content="f/file_eq_word_count">6,500</strong></td>
+            <td class="stat-total" tal:content="f/file_raw_word_count" >7,500</td>
+            <td class="stat_new">0</td>
+            <td class="stat_rep">0</td>
+            <td class="stat_int">0</td>
+            <td class="stat_tm75">0</td>
+            <td class="stat_tm100">0</td>
+            <td class="stat_tmic">0</td>
+            <td class="stat_mt">0</td>
+            <td class="empty"></td>
+        </tr>
+    </tal:block>
+    <!--tr id="file_1704" class="subfile part3files">
+        <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename2.xliff</p> </td>
+        <td ><strong>6,500</strong></td>
+        <td style="text-align:right">7,500</td>
+        <td class="stat_new">0</td>
+        <td class="stat_rep">0</td>
+        <td class="stat_int">0</td>
+        <td class="stat_tm75">0</td>
+        <td class="stat_tm100">0</td>
+        <td class="stat_tmic">0</td>
+        <td class="stat_mt">0</td>
+    </tr -->
+    <tr class="totaltable">
+        <td class="languages">
+            <span class="splitnum left">${repeat/job/key}-2</span>
+            <a href="#" class="filedetails part3">File details</a>
+            <span class="numfiles">(<span tal:define="files job/files; f php:array()" tal:content="php:count(files)">0</span>)</span>
+        </td>
 
-                </table>
-            </div>
-        </tal:block>
-        <!--
-                        <div class="sendit">
-                            <a href="#" class="uploadbtn split" style="float:right">Split / Merge</a>
-                            <div class="cl"></div>
-                            <div class="job">
+        <td class="stat-payable">
+            <strong class="stat_tot" tal:content="tm_analysis_wc_print">11,500</strong>                            </td>
+        <td class="stat-total" tal:content="job/total_raw_word_count_print">13,500</td>
+        <td class="stat_new">0</td>
+        <td class="stat_rep">0</td>
+        <td class="stat_int">0</td>
+        <td class="stat_tm75">0</td>
+        <td class="stat_tm100">0</td>
+        <td class="stat_tmic">0</td>
+        <td class="stat_mt">0</td>
+        <td class="empty">
 
-                                <p> Job #1 link:</p>
-                                <input name="" type="text" class="input" value="mat.ly/IUrHPU "/>
-                                <input type="text" class="input" value="200" size="2"/>
-                                <p>words</p> <a href="#" class="uploadbtn add" title="split more">+</a>
-                            </div>
-                            <div class="cl"></div>
-                        </div>
-        -->
-    </div> <div class="cl"></div>
+
+
+            <a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${repeat/job/key}-${job/password} " href="#" target="_blank" class="uploadbtn">Translate</a>
+        </td>
+    </tr>
+    <tal:block tal:define="files job/files; f php:array()" tal:repeat="f files">
+        <tr tal:attributes="id string:file_${repeat/job/key}_${f/id}" id="file_1703" class="subfile part3files">
+            <td class="stat-name">
+                <p class="filename" tal:content="f/filename" tal:attributes='title f/filename'>filename1.xliff</p> </td>
+            <td class="stat_payable"><strong tal:content="f/file_eq_word_count">6,500</strong></td>
+            <td class="stat-total" tal:content="f/file_raw_word_count" >7,500</td>
+            <td class="stat_new">0</td>
+            <td class="stat_rep">0</td>
+            <td class="stat_int">0</td>
+            <td class="stat_tm75">0</td>
+            <td class="stat_tm100">0</td>
+            <td class="stat_tmic">0</td>
+            <td class="stat_mt">0</td>
+            <td class="empty"></td>
+        </tr>
+    </tal:block>
+    <!--tr id="file_1704" class="subfile part3files">
+        <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename2.xliff</p> </td>
+        <td ><strong>6,500</strong></td>
+        <td style="text-align:right">7,500</td>
+        <td class="stat_new">0</td>
+        <td class="stat_rep">0</td>
+        <td class="stat_int">0</td>
+        <td class="stat_tm75">0</td>
+        <td class="stat_tm100">0</td>
+        <td class="stat_tmic">0</td>
+        <td class="stat_mt">0</td>
+    </tr -->
+    <tr class="totaltable">
+        <td class="languages">
+            <span class="splitnum left">${repeat/job/key}-3</span>
+            <a href="#" class="filedetails part3">File details</a>
+            <span class="numfiles">(<span tal:define="files job/files; f php:array()" tal:content="php:count(files)">0</span>)</span>
+        </td>
+
+        <td class="stat-payable">
+            <strong class="stat_tot" tal:content="tm_analysis_wc_print">11,500</strong>                            </td>
+        <td class="stat-total" tal:content="job/total_raw_word_count_print">13,500</td>
+        <td class="stat_new">0</td>
+        <td class="stat_rep">0</td>
+        <td class="stat_int">0</td>
+        <td class="stat_tm75">0</td>
+        <td class="stat_tm100">0</td>
+        <td class="stat_tmic">0</td>
+        <td class="stat_mt">0</td>
+        <td class="empty">
+
+
+
+            <a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${repeat/job/key}-${job/password} " href="#" target="_blank" class="uploadbtn">Translate</a>
+        </td>
+    </tr>
+    <tal:block tal:define="files job/files; f php:array()" tal:repeat="f files">
+        <tr tal:attributes="id string:file_${repeat/job/key}_${f/id}" id="file_1703" class="subfile part3files">
+            <td class="stat-name">
+                <p class="filename" tal:content="f/filename" tal:attributes='title f/filename'>filename1.xliff</p> </td>
+            <td class="stat_payable"><strong tal:content="f/file_eq_word_count">6,500</strong></td>
+            <td class="stat-total" tal:content="f/file_raw_word_count" >7,500</td>
+            <td class="stat_new">0</td>
+            <td class="stat_rep">0</td>
+            <td class="stat_int">0</td>
+            <td class="stat_tm75">0</td>
+            <td class="stat_tm100">0</td>
+            <td class="stat_tmic">0</td>
+            <td class="stat_mt">0</td>
+            <td class="empty"></td>
+        </tr>
+    </tal:block>
+    <!--tr id="file_1704" class="subfile part3files">
+        <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename2.xliff</p> </td>
+        <td ><strong>6,500</strong></td>
+        <td style="text-align:right">7,500</td>
+        <td class="stat_new">0</td>
+        <td class="stat_rep">0</td>
+        <td class="stat_int">0</td>
+        <td class="stat_tm75">0</td>
+        <td class="stat_tm100">0</td>
+        <td class="stat_tmic">0</td>
+        <td class="stat_mt">0</td>
+    </tr -->
+</table>
+
+</tal:block>
+<!--
+                <div class="sendit">
+                    <a href="#" class="uploadbtn split" style="float:right">Split / Merge</a>    
+                    <div class="cl"></div>
+                    <div class="job">
+
+                        <p> Job #1 link:</p>  
+                        <input name="" type="text" class="input" value="mat.ly/IUrHPU "/> 
+                        <input type="text" class="input" value="200" size="2"/> 
+                        <p>words</p> <a href="#" class="uploadbtn add" title="split more">+</a> 
+                    </div>
+                    <div class="cl"></div>
+                </div>
+-->
+</div> <div class="cl"></div>
 </div>
+
+<div class="grayed"></div>
 
 <div class="modal popup-split" data-type="view">
     <div class="popup-outer"></div>
     <div class="popup">
         <a href="#" class="x-popup"></a>
 
-        <h1>Split <span class="jid" data-jid="">Job</span> in <span class="chunks">x</span> chunks</h1>
+        <h1>Split Job</h1>
         <div class="popup-box split-box3">
             <ul class="jobs">
                 <li>
@@ -366,9 +481,9 @@
                 </li>
             </ul>
             <div class="total">
-                <p class="wordsum">Total payable words: <span class="total-w">x</span></p>
-                <p class="error-count">Current count: <span class="curr-w">x</span></p>
-                <p class="error-count">Difference: <span class="diff-w">x</span></p>
+                <p class="wordsum">Total payable words:<strong>200.000</strong></p>
+                <p class="error-count minus none">Words remaining:<strong>20.000</strong></p>
+                <p class="error-count plus none">Words exceeding:<strong>20.000</strong></p>
                 <!-- A:  il p error appare solo se i valori inseriti negli input dei singoli split job non restituiscono la somma totale -->
             </div>
             <div class="error-message none">
@@ -377,10 +492,10 @@
             <div class="cl"></div>
             <div class="btnsplit">
 
-                <a id="exec-split" class="uploadbtn loader">
+                <a class="uploadbtn loader">
                     <!-- A: se il conteggio delle parole non è corretto, bisogna appendere la classe 'disabled' al bottone qui sopra -->
                     <span class="uploadloader"></span>
-                    <span class="text">Check</span>
+                    <span id="text" onClick="conteggio()">Check</span>
                     <!-- A:  la funzione conteggio adesso funziona in timeout, va sostituita con i controlli -->
                 </a>
                 <a class="splitbtn done none">
@@ -455,7 +570,29 @@
 <!-- FINE POPUP LOGIN -->
 <!-- JS SPLIT JOB  -->
 <script type="text/javascript">
+    <!-- A: fa apparire la modale  -->
+    $(function(){
+        $('.splitbtn').click(function() {
+            $('.grayed').toggleClass('visible');
+            $('.popup-split').toggleClass('visible');
 
+        });
+    });
+    <!-- A: fa scomparire la modale  -->
+    $(function(){
+        $('.x-popup').click(function() {
+            $('.grayed').removeClass('visible');
+            $('.popup-split').removeClass('visible');
+        });
+        $('.popup-outer').click(function() {
+            $('.grayed').removeClass('visible');
+            $('.popup-split').removeClass('visible');
+        });
+        $('.btn-cancel').click(function() {
+            $('.grayed').removeClass('visible');
+            $('.popup-split').removeClass('visible');
+        });
+    });
 
     <!-- A: fa apparire il bottone loading  -->
 
@@ -463,49 +600,34 @@
         $('.loader').click(function() {
             $(this).toggleClass('disabled');
             $('.uploadloader').toggleClass('visible');
-            $('.text').text('Checking');
+            $('#text').text('Checking');
         });
 
-        <!-- A: funziona da sostituire con i controlli  -->
 
-        var timer;
+        <!-- A: fa scomparire il bottone loading  -->
 
-        function conteggio(){
-            timer = setTimeout(function(){
-                $('#text').text('Confirm');
-                $('.loader').toggleClass('none');
-                $('.done').removeClass('none');
-                $('.aprox').toggleClass('none');
-                $('.correct').removeClass('none');
-                $('.error-message').toggleClass('none');
-                $('.error-count').toggleClass('none');
-            },2000);
-
-        }
-
-        $('.btn-cancel').click(function(){
-            // Clear the timeout
-            clearTimeout(timer);
+        $('input').onChange(function() {
+            $('this').prop('disabled', true);
         });
     });
 
     <!-- A: funziona da sostituire con i controlli  -->
-    /*
-     var timer;
 
-     function conteggio(){
-     timer = setTimeout(function(){
-     $('#text').text('Confirm');
-     $('.loader').toggleClass('none');
-     $('.done').removeClass('none');
-     $('.aprox').toggleClass('none');
-     $('.correct').removeClass('none');
-     $('.error-message').toggleClass('none');
-     $('.error-count').toggleClass('none');
-     },2000);
+    var timer;
 
-     }
-     */
+    function conteggio(){
+        timer = setTimeout(function(){
+            $('#text').text('Confirm');
+            $('.loader').toggleClass('none');
+            $('.done').removeClass('none');
+            $('.aprox').toggleClass('none');
+            $('.correct').removeClass('none');
+            $('.error-message').toggleClass('none');
+            $('.error-count').toggleClass('none');
+        },2000);
+
+    }
+
     $('.btn-cancel').click(function(){
         // Clear the timeout
         clearTimeout(timer);
