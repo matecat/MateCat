@@ -401,7 +401,7 @@ function getTranslatorKey( $id_translator ) {
 }
 
 function getEngines( $type = "MT" ) {
-    $query = "select id,name from engines where type='$type'";
+    $query = "select id,name from engines where type='$type' and active=1";
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
@@ -576,7 +576,7 @@ function setTranslationUpdate( $id_segment, $id_job, $status, $time_to_edit, $tr
 
     $q = "UPDATE segment_translations SET status='$status', suggestion_position='$chosen_suggestion_index', serialized_errors_list='$errors', time_to_edit=IF(time_to_edit is null,0,time_to_edit) + $time_to_edit, translation='$translation', translation_date='$now', warning=" . (int)$warning . " WHERE id_segment=$id_segment and id_job=$id_job";
 
-    if( empty( $translation ) ){
+    if( empty( $translation ) && !is_numeric( $translation ) ){
         $msg = "\n\n Error setTranslationUpdate \n\n Empty translation found: \n\n " . var_export( array_merge( array( 'db_query' => $q ), $_POST ), true );
         Log::doLog( $msg );
         Utils::sendErrMailReport( $msg );
@@ -585,9 +585,9 @@ function setTranslationUpdate( $id_segment, $id_job, $status, $time_to_edit, $tr
     $db->query( $q );
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
+
     if ( $errno != 0 ) {
         log::doLog( "$errno: $err" );
-
         return $errno * -1;
     }
 
@@ -607,7 +607,7 @@ function setTranslationInsert( $id_segment, $id_job, $status, $time_to_edit, $tr
     $data[ 'suggestion_position' ]    = $chosen_suggestion_index;
     $data[ 'warning' ]                = (int)$warning;
 
-    if( empty( $translation ) ){
+    if( empty( $translation ) && !is_numeric( $translation ) ){
         $msg = "\n\n Error setTranslationUpdate \n\n Empty translation found: \n\n " . var_export( $_POST, true ) . " \n\n " . var_export( $data, true );
         Log::doLog( $msg );
         Utils::sendErrMailReport( $msg );
@@ -618,11 +618,11 @@ function setTranslationInsert( $id_segment, $id_job, $status, $time_to_edit, $tr
 
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
+
     if ( $errno != 0 ) {
         if ( $errno != 1062 ) {
             log::doLog( "$errno: $err" );
         }
-
         return $errno * -1;
     }
 
@@ -854,10 +854,11 @@ function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
         $query .= " and fj.id_file = " . intval($id_file);
     }
 
-    $start = microtime(true);
+//    $start = microtime(true);
 
     $results = $db->fetch_array( $query );
-    Log::doLog(microtime(true) - $start);
+
+//    Log::doLog(microtime(true) - $start);
 
     return $results;
 }
@@ -923,9 +924,6 @@ function getEQWLastHour( $id_job, $estimation_seg_ids ) {
 		ROUND(SUM(IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count))/(UNIX_TIMESTAMP(MAX(translation_date))-UNIX_TIMESTAMP(MIN(translation_date)))*3600) as words_per_hour,
 		count(*) from segment_translations st
 			INNER JOIN segments on id=st.id_segment WHERE status in ('TRANSLATED','APPROVED') and id_job=$id_job and id_segment in ($estimation_seg_ids)";
-
-
-    Log::doLog( $query );
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
@@ -1206,12 +1204,20 @@ function insertFilesJob( $id_job, $id_file ) {
     $db->insert( 'files_job', $data );
 }
 
-function getPdata( $pid ) {
-    $db    = Database::obtain();
-    $query = "select pid from projects where id =$pid";
-    $res   = $db->query_first( $query );
+function getProjectJobData( $pid ) {
 
-    return $res[ 'id' ];
+    $db    = Database::obtain();
+
+    $query   = "SELECT projects.id AS pid, projects.password AS ppassword, jobs.id as jid, jobs.password as jpassword, job_first_segment, job_last_segment
+                FROM jobs
+                JOIN projects ON jobs.id_project = projects.id
+                WHERE projects.id = %u
+    ";
+
+    $query = sprintf( $query, $pid );
+    $res   = $db->fetch_array( $query );
+
+    return $res;
 }
 
 /**

@@ -2,7 +2,7 @@
 
 /*
 
-   Basic and Pretty Tollerant Xliff 1.0, 1.1 and 1.2 into Array converter
+   Basic and Pretty Tollerant Xliff 1.0, 1.1, 1.2 and 1.3 into Array converter
 
    Developed by Translated s.r.l. distributed in LGPL.
 
@@ -186,22 +186,27 @@ class Xliff_Parser {
 
                                     unset($mt_id);
 
-                                    //target and seg-source can have different mark id, so i store the target mid
-                                    //with same rules
-                                    preg_match('|mid\s?=\s?["\'](.*?)["\']|si', $target_markers[$mi + 1], $mt_id);
+                                    //if mark tags are present in target ( target segmentation )
+                                    if( isset( $target_markers[$mi + 1] ) ){
 
-                                    // For not loosing info I attach the last external tag to the last seg marker.
-                                    if (!isset($target_markers[$mi + 5])) {
-                                        $last_ext_tags = $target_markers[$mi + 3];
-                                    } else {
-                                        $last_ext_tags = '';
+                                        //target and seg-source can have different mark id, so i store the target mid
+                                        //with same rules
+                                        preg_match('|mid\s?=\s?["\'](.*?)["\']|si', $target_markers[$mi + 1], $mt_id);
+
+                                        // For not loosing info I attach the last external tag to the last seg marker.
+                                        if (!isset($target_markers[$mi + 5])) {
+                                            $last_ext_tags = $target_markers[$mi + 3];
+                                        } else {
+                                            $last_ext_tags = '';
+                                        }
+
+                                        //use seg-target to store segmented translations and use the same positional indexes in source
+                                        $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['mid'] = $mt_id[1];
+                                        $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['ext-prec-tags'] = $target_markers[$mi];
+                                        $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['raw-content'] = $target_markers[$mi + 2];
+                                        $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['ext-succ-tags'] = $last_ext_tags;
+
                                     }
-
-                                    //use seg-target to store segmented translations and use the same positional indexes in source
-                                    $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['mid'] = $mt_id[1];
-                                    $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['ext-prec-tags'] = $target_markers[$mi];
-                                    $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['raw-content'] = $target_markers[$mi + 2];
-                                    $xliff['files'][$i]['trans-units'][$j]['seg-target'][$k]['ext-succ-tags'] = $last_ext_tags;
 
                                 }
 

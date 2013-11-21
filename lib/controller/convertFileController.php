@@ -88,7 +88,14 @@ class convertFileController extends ajaxcontroller {
 
 				if( INIT::$SAVE_SHASUM_FOR_FILES_LOADED ){
 					$res_insert = insertFileIntoMap($sha1, $this->source_lang, $this->target_lang, $original_content_zipped, $xliffContentZipped);
-				}
+                    if ( $res_insert < 0 ) {
+                        //custom error message passed directly to javascript client and displayed as is
+                        $convertResult['errorMessage'] = "Error: File too large";
+                        $this->result['code'] = -100;
+                        $this->result['errors'][] = array( "code" => -100, "message" => $convertResult['errorMessage'] );
+                        return;
+                    }
+                }
 
 				unset ($xliffContentZipped);
 
@@ -96,7 +103,7 @@ class convertFileController extends ajaxcontroller {
 				if ( !$res ) {
 
                     //custom error message passed directly to javascript client and displayed as is
-                    $convertResult['errorMessage'] = "Error: failed to save converted file on disk";
+                    $convertResult['errorMessage'] = "Error: failed to save file on disk";
                     $this->result['code'] = -100;
                     $this->result['errors'][] = array( "code" => -100, "message" => $convertResult['errorMessage'] );
                     //return false

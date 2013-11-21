@@ -57,12 +57,12 @@ class AjaxPasswordCheck {
         if( isset( $this->jobData[0] ) && is_array( $this->jobData[0] ) ){
             $result = array();
             foreach( $this->jobData as $jD ){
-                $result[] = ( $this->_grantJobAccess( $jD['password'], $password ) && $this->_grantSegmentPermission( $jD, $segmentID ) );
+                $result[] = ( $this->_grantAccess( $jD['password'], $password ) && $this->_grantSegmentPermission( $jD, $segmentID ) );
             }
             if ( array_search( true, $result, true ) !== false ) return true;
 
         } else {
-            return ( $this->_grantJobAccess( $this->jobData['password'], $password ) && $this->_grantSegmentPermission( $this->jobData, $segmentID ) );
+            return ( $this->_grantAccess( $this->jobData['password'], $password ) && $this->_grantSegmentPermission( $this->jobData, $segmentID ) );
         }
 
         return false;
@@ -76,7 +76,7 @@ class AjaxPasswordCheck {
      *
      * @return bool
      */
-    protected function _grantJobAccess( $dbPass, $password ){
+    protected function _grantAccess( $dbPass, $password ){
         $password = filter_var( $password, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW ) );
         if( $dbPass === $password ){
             return true;
@@ -90,6 +90,17 @@ class AjaxPasswordCheck {
             return true;
         }
         return false;
+    }
+
+    public function grantProjectAccess( array $projectJobData, $ppassword, $jpassword ){
+
+        foreach( $projectJobData as $pJD ){
+            $result[] = $this->_grantAccess( $pJD['ppassword'], $ppassword ) && $this->_grantAccess( $pJD['jpassword'], $jpassword ) ;
+        }
+
+        if ( array_search( true, $result, true ) !== false ) return true;
+        return false;
+
     }
 
 }
