@@ -222,24 +222,6 @@
                     <h3>
                         <span tal:replace="job/source">English</span> &gt; <span tal:replace="job/target">Italian</span>
                     </h3>   
-                    <div class="splitbtn-cont">
-                      	<span class="splitmsg">Splitted in 2 parts</span><!-- A: questo compare quando il job è già stato splittato  -->
-                        <span class="label left">Split in</span>
-                         <select name="" id="splitselect">
-                            <option value="2">2</option>
-                            <option value="3">3</option>
-                            <option value="4">4</option>
-                            <option value="5">5</option>
-                            <option value="6">6</option>
-                            <option value="7">7</option>
-                            <option value="8">8</option>
-                            <option value="9">3</option>
-                            <option value="10">10</option>
-                         </select>
-     				 	<span class="label left">Jobs</span>
-                        <a tal:attributes="" href="#" class="splitbtn">Split</a>
-						<a tal:attributes="" href="#" class="mergebtn">Merge</a><!-- A: questo compare quando il job è già stato splittato  -->
-                    </div>    <!-- END CONTAINER SPLIT JOBS BUTTONS  -->
                     <table tal:attributes="id string:job-${repeat/job/key}" class="tablestats">
                         <tr>
                             <th> </th>
@@ -326,110 +308,7 @@
                             <td class="stat_tmic">0</td>
                             <td class="stat_mt">0</td>
                         </tr -->
-                                                <tr class="totaltable">
-                            <td class="languages">
-                            <span class="splitnum left">${repeat/job/key}-2</span>
-                                <a href="#" class="filedetails part3">File details</a>
-                                <span class="numfiles">(<span tal:define="files job/files; f php:array()" tal:content="php:count(files)">0</span>)</span>
-                            </td>
 
-                            <td class="stat-payable">
-                                <strong class="stat_tot" tal:content="tm_analysis_wc_print">11,500</strong>                            </td>
-                            <td class="stat-total" tal:content="job/total_raw_word_count_print">13,500</td>
-                            <td class="stat_new">0</td>
-                            <td class="stat_rep">0</td>
-                            <td class="stat_int">0</td>
-                            <td class="stat_tm75">0</td>
-                            <td class="stat_tm100">0</td>
-                            <td class="stat_tmic">0</td>
-                            <td class="stat_mt">0</td>
-                            <td class="empty">
-                          
-   
-  
-                                <a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${repeat/job/key}-${job/password} " href="#" target="_blank" class="uploadbtn">Translate</a>
-                            </td>
-                        </tr>
-                        <tal:block tal:define="files job/files; f php:array()" tal:repeat="f files">
-                            <tr tal:attributes="id string:file_${repeat/job/key}_${f/id}" id="file_1703" class="subfile part3files">
-                                <td class="stat-name">
-                                    <p class="filename" tal:content="f/filename" tal:attributes='title f/filename'>filename1.xliff</p> </td>
-                                <td class="stat_payable"><strong tal:content="f/file_eq_word_count">6,500</strong></td>
-                                <td class="stat-total" tal:content="f/file_raw_word_count" >7,500</td>
-                                <td class="stat_new">0</td>
-                                <td class="stat_rep">0</td>
-                                <td class="stat_int">0</td>
-                                <td class="stat_tm75">0</td>
-                                <td class="stat_tm100">0</td>
-                                <td class="stat_tmic">0</td>
-                                <td class="stat_mt">0</td>
-                                <td class="empty"></td>
-                            </tr>
-                        </tal:block>
-                        <!--tr id="file_1704" class="subfile part3files">
-                            <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename2.xliff</p> </td>
-                            <td ><strong>6,500</strong></td>
-                            <td style="text-align:right">7,500</td>
-                            <td class="stat_new">0</td>
-                            <td class="stat_rep">0</td>
-                            <td class="stat_int">0</td>
-                            <td class="stat_tm75">0</td>
-                            <td class="stat_tm100">0</td>
-                            <td class="stat_tmic">0</td>
-                            <td class="stat_mt">0</td>
-                        </tr -->
-                                                <tr class="totaltable">
-                            <td class="languages">
-                             <span class="splitnum left">${repeat/job/key}-3</span>
-                                <a href="#" class="filedetails part3">File details</a>
-                                <span class="numfiles">(<span tal:define="files job/files; f php:array()" tal:content="php:count(files)">0</span>)</span>
-                            </td>
-
-                            <td class="stat-payable">
-                                <strong class="stat_tot" tal:content="tm_analysis_wc_print">11,500</strong>                            </td>
-                            <td class="stat-total" tal:content="job/total_raw_word_count_print">13,500</td>
-                            <td class="stat_new">0</td>
-                            <td class="stat_rep">0</td>
-                            <td class="stat_int">0</td>
-                            <td class="stat_tm75">0</td>
-                            <td class="stat_tm100">0</td>
-                            <td class="stat_tmic">0</td>
-                            <td class="stat_mt">0</td>
-                            <td class="empty">
-                          
-   
-  
-                                <a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${repeat/job/key}-${job/password} " href="#" target="_blank" class="uploadbtn">Translate</a>
-                            </td>
-                        </tr>
-                        <tal:block tal:define="files job/files; f php:array()" tal:repeat="f files">
-                            <tr tal:attributes="id string:file_${repeat/job/key}_${f/id}" id="file_1703" class="subfile part3files">
-                                <td class="stat-name">
-                                    <p class="filename" tal:content="f/filename" tal:attributes='title f/filename'>filename1.xliff</p> </td>
-                                <td class="stat_payable"><strong tal:content="f/file_eq_word_count">6,500</strong></td>
-                                <td class="stat-total" tal:content="f/file_raw_word_count" >7,500</td>
-                                <td class="stat_new">0</td>
-                                <td class="stat_rep">0</td>
-                                <td class="stat_int">0</td>
-                                <td class="stat_tm75">0</td>
-                                <td class="stat_tm100">0</td>
-                                <td class="stat_tmic">0</td>
-                                <td class="stat_mt">0</td>
-                                <td class="empty"></td>
-                            </tr>
-                        </tal:block>
-                        <!--tr id="file_1704" class="subfile part3files">
-                            <td  style="border-left:1px solid #ccc;text-align:left !Important;"><p>filename2.xliff</p> </td>
-                            <td ><strong>6,500</strong></td>
-                            <td style="text-align:right">7,500</td>
-                            <td class="stat_new">0</td>
-                            <td class="stat_rep">0</td>
-                            <td class="stat_int">0</td>
-                            <td class="stat_tm75">0</td>
-                            <td class="stat_tm100">0</td>
-                            <td class="stat_tmic">0</td>
-                            <td class="stat_mt">0</td>
-                        </tr -->
                     </table>
                   
                 </tal:block>
