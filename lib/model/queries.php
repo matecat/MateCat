@@ -1936,7 +1936,8 @@ function getNextSegmentAndLock() {
     $q1 = "SET autocommit=0";
     $q2 = "START TRANSACTION";
     //lock row
-    $q3 = "select id_segment, id_job from segment_translations_analysis_queue where locked=0 for update";
+    $rnd = mt_rand(0,25);
+    $q3 = "select id_segment, id_job from segment_translations_analysis_queue where locked=0 limit $rnd,1 for update";
     //end transaction
     $q4 = "ROLLBACK";
     $q5 = "COMMIT";
