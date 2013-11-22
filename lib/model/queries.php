@@ -1208,7 +1208,7 @@ function getProjectJobData( $pid ) {
 
     $db    = Database::obtain();
 
-    $query   = "SELECT projects.id AS pid, projects.password AS ppassword, jobs.id as jid, jobs.password as jpassword, job_first_segment, job_last_segment
+    $query   = "SELECT projects.id AS pid, projects.password AS ppassword, jobs.id as jid, jobs.password as jpassword, job_first_segment, job_last_segment, status_owner
                 FROM jobs
                 JOIN projects ON jobs.id_project = projects.id
                 WHERE projects.id = %u
@@ -1852,7 +1852,7 @@ function updateProjectOwner( $ownerEmail, $project_id ) {
     return $result;
 }
 
-function updateJobsStatus( $res, $id, $status, $only_if, $undo ) {
+function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = null ) {
 
     if ( $res == "prj" ) {
         $status_filter_query = ( $only_if ) ? " and status_owner='$only_if'" : "";
@@ -1876,7 +1876,7 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo ) {
 
 
     } else {
-        $query = "update jobs set status_owner='$status' where id=$id";
+        $query = "update jobs set status_owner='$status' where id=$id and password = '$jPassword' ";
     }
     /*
        if ($res == "prj") {

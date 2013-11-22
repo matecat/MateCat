@@ -286,7 +286,8 @@ UI = {
 
         if(res=='job') {
         	UI.lastJobStatus = ob.data('status');
-        	id = ob.data('jid');
+        	id        = ob.data('jid');
+        	jpassword = ob.data('password');
         } else {
 		    var arJobs = '';
 		    $("tr.row",ob).each(function(){
@@ -295,6 +296,7 @@ UI = {
 		    arJobs = arJobs.substring(0, arJobs.length - 1);
 		    UI.lastJobStatus = arJobs;
 		    id = ob.data('pid');
+            jpassword = null;
         }
 
         var d = {
@@ -302,6 +304,7 @@ UI = {
 				new_status: status,
 				res: 		res,
 				id:			id,
+                jpassword:  jpassword,
                 page:		UI.page,
                 step:		UI.pageStep,
                 only_if:	only_if,
