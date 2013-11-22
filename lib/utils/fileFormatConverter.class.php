@@ -292,7 +292,7 @@ class fileFormatConverter {
 		if (strtoupper($extension) == 'TXT') {
 			$encoding=mb_detect_encoding($fileContent);
 			if ($encoding!='UTF-8'){
-				$fileContent=  iconv($encoding, "UTF-8", $fileContent);
+				$fileContent=  iconv($encoding, "UTF-8//IGNORE", $fileContent);
 			}
 
 			if (!$this->hasBOM($fileContent)) {
