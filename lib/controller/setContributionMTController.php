@@ -88,22 +88,23 @@ class setContributionMTController extends ajaxcontroller {
 		$this->mt = new MT($job_data['id_mt_engine']);
 
 		//array of storicised suggestions for current segment
-		$this->suggestion_json_array=json_decode(getArrayOfSuggestionsJSON($this->id_segment),true);
+        $this->suggestion_json_array = json_decode( getArrayOfSuggestionsJSON( $this->id_segment ), true );
 
-		//extra parameters
-		$extra=json_encode(
-				array(
-					'id_segment'=>$this->id_segment,
-					'suggestion_json_array'=>$this->suggestion_json_array,
-					'chosen_suggestion_index'=>$this->chosen_suggestion_index,
-					'time_to_edit'=>$this->time_to_edit
-				     )
-				);
-		//send stuff
-		$outcome=$this->mt->set($this->segment, $this->translation, $this->source_lang, $this->target_lang, 'demo@matecat.com', $extra, $this->id_segment);
-		if (is_array($outcome)){
-			$this->result['errors']=$outcome;
-		}
+        //extra parameters
+        $extra = json_encode(
+                    array(
+                        'id_segment'              => $this->id_segment,
+                        'suggestion_json_array'   => $this->suggestion_json_array,
+                        'chosen_suggestion_index' => $this->chosen_suggestion_index,
+                        'time_to_edit'            => $this->time_to_edit
+                    )
+        );
+        //send stuff
+        $outcome = $this->mt->set( $this->segment, $this->translation, $this->source_lang, $this->target_lang, 'demo@matecat.com', $extra, $this->id_segment );
+
+        if ( $outcome->error->code < 0 ) {
+            $this->result[ 'errors' ] = $outcome->error->get_as_array();
+        }
 
 	}
 

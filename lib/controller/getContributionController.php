@@ -129,6 +129,7 @@ class getContributionController extends ajaxcontroller {
 			}
 			$tms = new TMS( $this->id_tms );
 			$tms_match = $tms->get($this->text, $this->source, $this->target, "demo@matecat.com", $mt_from_tms, $this->id_translator, $this->num_results, $mt_only, $this->concordance_search );
+            $tms_match = $tms_match->get_matches_as_array();
 
         } else if( $this->id_tms == 0 && $this->id_mt_engine == 1 ){
             /**
@@ -139,7 +140,7 @@ class getContributionController extends ajaxcontroller {
             $mt_from_tms = 1;
             $tms = new TMS( 1 /* MyMemory */ );
             $tms_match = $tms->get($this->text, $this->source, $this->target, "demo@matecat.com", $mt_from_tms, $this->id_translator, $this->num_results, $mt_only, $this->concordance_search );
-
+            $tms_match = $tms_match->get_matches_as_array();
 		}
 
 		$mt_res = array();
@@ -148,10 +149,10 @@ class getContributionController extends ajaxcontroller {
 			$mt = new MT($this->id_mt_engine);
 			$mt_result = $mt->get($this->text, $this->source, $this->target, "demo@matecat.com", $this->id_segment );
 
-			if ($mt_result[0] < 0) {
+			if ($mt_result->error->code < 0) {
 				$mt_match = '';
 			} else {
-				$mt_match = $mt_result[1];
+				$mt_match = $mt_result->translatedText;
 				$penalty = $mt->getPenalty();
 				$mt_score = 100 - $penalty;
 				$mt_score.="%";
@@ -159,7 +160,7 @@ class getContributionController extends ajaxcontroller {
 				$mt_match_res = new TMS_GET_MATCHES($this->text, $mt_match, $mt_score, "MT-" . $mt->getName(), date("Y-m-d"));
 
 				$mt_res = $mt_match_res->get_as_array();
-                $mt_res['sentence_confidence'] = $mt_result[2]; //can be null
+                $mt_res['sentence_confidence'] = $mt_result->sentence_confidence; //can be null
 
 			}
 		}

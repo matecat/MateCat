@@ -112,6 +112,8 @@ while (1) {
         $tms = new TMS($id_tms);
         $tms_match = $tms->get($text, $source, $target, "demo@matecat.com", $mt_from_tms, $id_translator, 3 );
 
+        $tms_match = $tms_match->get_matches_as_array();
+
         $tms_enabled = true;
 
     } else if ( $id_tms == 0 && $id_mt_engine == 1 ) {
@@ -123,6 +125,8 @@ while (1) {
         $mt_from_tms = 1;
         $tms = new TMS( 1 /* MyMemory */ );
         $tms_match = $tms->get($text, $source, $target, "demo@matecat.com", $mt_from_tms, $id_translator, 3, $mt_only );
+
+        $tms_match = $tms_match->get_matches_as_array();
 
         $tms_enabled = true;
 
@@ -137,10 +141,10 @@ while (1) {
         $mt = new MT($id_mt_engine);
         $mt_result = $mt->get($text, $source, $target);
 
-        if ($mt_result[0] < 0) {
+        if ( $mt_result->error->code < 0) {
             $mt_match = '';
         } else {
-            $mt_match = $mt_result[1];
+            $mt_match = $mt_result->translatedText;
             $penalty = $mt->getPenalty();
             $mt_score = 100 - $penalty;
             $mt_score.="%";
@@ -148,7 +152,7 @@ while (1) {
             $mt_match_res = new TMS_GET_MATCHES($text, $mt_match, $mt_score, "MT-" . $mt->getName(), date("Y-m-d"));
 
             $mt_res = $mt_match_res->get_as_array();
-            $mt_res['sentence_confidence'] = $mt_result[2]; //can be null
+            $mt_res['sentence_confidence'] = $mt_result->sentence_confidence; //can be null
 
         }
     }
