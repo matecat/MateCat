@@ -225,12 +225,17 @@ box-shadow: 0 1px 2px #666;}
 .splitbtn:active, .mergebtn:active, .btn-cancel:active {-moz-box-shadow: inset 0 0 1px 1px #888;
 -webkit-box-shadow: inset 0 0 1px 1px #888;
 box-shadow: inset 0 0 1px 1px #888;}
-	
-	.splitselect { float: left;
-    width: 48px;  height: 37px;  
-    padding: 4px;   color:#666;
-    font-size: 18px;  border: 1px solid #ccc;  
-   }
+
+.splitselect
+    {
+    float: left;
+    width: auto;  
+    height: 37px;  
+    padding: 4px;   
+    color:#666;
+    font-size: 18px;  
+    border: 1px solid #ccc;  
+    }
    
    .splitmsg {display:none;color:#666;margin-top:5px;}
    div.disabled .splitmsg, div.disabled .mergebtn {display:block!important; float:left;}
