@@ -6,25 +6,46 @@ class changePasswordController extends ajaxcontroller {
 	private $res_type;
 	private $res_id;
 	private $password;
+	private $undo;
 
 	public function __construct() {
 		parent::__construct();
-		$this->res_type = $this->get_from_get_post('res');
-		$this->res_id = $this->get_from_get_post('id');
-		if($this->get_from_get_post('password') != '') {
-			$this->password = $this->get_from_get_post('password');
-		} else {
-			$this->password = false;
-		}
-	}
+
+        $filterArgs = array(
+            'res'          => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'id'           => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'password'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'old_password' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'undo'         => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+        );
+
+        $__postInput        = filter_input_array( INPUT_POST, $filterArgs );
+
+
+        Log::doLog( $__postInput );
+
+        $this->res_type     = $__postInput[ 'res' ];
+        $this->res_id       = $__postInput[ 'id' ];
+        $this->password     = $__postInput[ 'password' ];
+        $this->old_password = $__postInput[ 'old_password' ];
+        $this->undo         = $__postInput[ 'undo' ];
+
+    }
 
 	public function doAction() {
 
-		$pwd = ($this->password)? $this->password : CatUtils::generate_password();
+        if ( $this->undo ){
+            $new_pwd    = $this->old_password;
+            $actual_pwd = $this->password;
+        } else {
+            $new_pwd    = CatUtils::generate_password();
+            $actual_pwd = $this->password;
+        }
 
-		$changePass = changePassword($this->res_type, $this->res_id,$pwd);
-		$this->result['password'] = $pwd;
-		$this->result['undo'] = $this->password;
+        $changePass                 = changePassword( $this->res_type, $this->res_id, $actual_pwd, $new_pwd );
+        $this->result[ 'password' ] = $new_pwd;
+        $this->result[ 'undo' ]     = $this->password;
+
 	}
 
 }

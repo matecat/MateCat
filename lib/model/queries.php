@@ -1783,14 +1783,14 @@ function changeProjectStatus( $pid, $status, $if_status_not = array() ) {
     return $db->affected_rows;
 }
 
-function changePassword( $res, $id, $password ) {
+function changePassword( $res, $id, $password, $new_password ) {
     //    $new_password = 'changedpassword';
-    $new_password = $password;
+    //$new_password = $password;
 
     if ( $res == "prj" ) {
         $query = "update projects set password=\"$new_password\" where id=$id";
     } else {
-        $query = "update jobs set password=\"$new_password\" where id=$id";
+        $query = "update jobs set password=\"$new_password\" where id=$id and password = \"$password\" ";
     }
 
     $db = Database::obtain();

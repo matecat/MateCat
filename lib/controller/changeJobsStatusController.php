@@ -9,6 +9,7 @@ class changeJobsStatusController extends ajaxcontroller {
     private $res_type;
     private $res_id;
     private $new_status;
+    private $undo;
 
     public function __construct() {
         parent::__construct();
@@ -57,6 +58,12 @@ class changeJobsStatusController extends ajaxcontroller {
             $this->project_id = $__postInput['project'];
         } else {
             $this->project_id = false;
+        };
+
+        if (isset($_POST['jpassword'])) {
+            $this->job_password = $__postInput['jpassword'];
+        } else {
+            $this->job_password = null;
         };
 
         if (isset($_POST['only_if'])) {
@@ -132,7 +139,7 @@ class changeJobsStatusController extends ajaxcontroller {
             $this->result['pnumber'] = $projnum[0]['c'];
         } else {
    
-            $st = updateJobsStatus($this->res_type, $this->res_id, $this->new_status, $this->only_if, $this->undo);
+            $st = updateJobsStatus($this->res_type, $this->res_id, $this->new_status, $this->only_if, $this->undo, $this->job_password );
            
             $this->result['code'] = 1;
             $this->result['data'] = "OK";            
