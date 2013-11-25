@@ -456,6 +456,19 @@ background: -webkit-gradient(linear, left top, left bottom, from(#f5f5f5), to(#d
     -webkit-transition: all 100ms ease-in;
     background-size: 18px 11px;
 }
+.outersource .copy
+    {
+    float: left;
+    
+    width: 35px !important;
+    background: #f6f6f6 url(../img/freccia.png) center center no-repeat;
+    opacity: 0.4;
+    /*margin-left: 45%;*/
+    /*margin: -8px 15px -8px 15px;*/
+    -webkit-transition: all 100ms ease-in;
+    background-size: 18px 11px;
+}
+
 .next-untranslated
     {
     width: 50px !important;

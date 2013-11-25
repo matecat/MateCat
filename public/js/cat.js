@@ -2797,6 +2797,10 @@ UI = {
                         '		<div class="text">' +
                         '			<div class="wrap">' +
                         '				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + this.segment + '</div>' +
+                        '				<div class="copy">' +
+                        '                   <a href="#"></a>' +
+                        '                   <p>CMD+RIGHT</p>' +
+                        '				</div>' +
                         '				<div class="target item" id="segment-' + this.sid + '-target">' +
                         '					<span class="hide toggle"> ' +
                         '						<a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>' +
