@@ -282,11 +282,18 @@ UI = {
                 UI.removeStatusMenu(statusMenu);
             });
         }).on('click', 'section.readonly, section.readonly a.status', function(e) {
+            e.preventDefault();
             if (UI.justSelecting('readonly')) return;
-            
-            APP.alert('This part has not been assigned to you.');
-//        }).on('dblclick', 'section.readonly', function(e) {
-//            alert('dblclick');         
+            if (UI.someUserSelection) return;
+
+			UI.selectingReadonly = setTimeout(function() {
+				APP.alert('This part has not been assigned to you.');
+			}, 200);
+        }).on('mousedown', 'section.readonly, section.readonly a.status', function(e) {
+			sel = window.getSelection();
+			UI.someUserSelection = (sel.type == 'Range')? true : false;
+        }).on('dblclick', 'section.readonly', function(e) {
+            clearTimeout(UI.selectingReadonly);         
         }).on('blur', '.graysmall .translation', function(e) {
             e.preventDefault();
             UI.closeInplaceEditor($(this));

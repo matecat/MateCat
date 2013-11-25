@@ -57,6 +57,8 @@ UI = {
         if((file.size) > config.maxFileSize) {
             msg = 'Error during upload. The uploaded file exceed the file size limit of ' + config.maxFileSizePrint;
         }
+		UI.checkFailedConversionsNumber();
+		
         return msg;
     },
     restartConversions: function() {
@@ -588,6 +590,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 //       		$('.progress',filerow).remove();
        		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">Error: </span>Server error, try again.');
        		$(filerow).addClass('has-errors');
+			UI.checkFailedConversionsNumber();
        		return false;
         },
         success: function(d){
@@ -703,6 +706,7 @@ checkInit = function() {
 //                if((size*multiplier) > config.maxFileSize) {
 //                }
             });
+			UI.checkFailedConversionsNumber();
             
             checkConversions();
         	return;
