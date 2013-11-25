@@ -698,7 +698,8 @@ UI = {
             UI.changeStatus(this, 'rejected', 1);
         }).on('click', 'a.f', function(e) {
             UI.changeStatus(this, 'draft', 1);
-        }).on('click', 'a.copysource', function(e) {
+        }).on('click', '.editor .outersource .copy', function(e) {
+//        }).on('click', 'a.copysource', function(e) {
             e.preventDefault();
             UI.copySource();
         }).on('click', '.tagmenu, .warning, .viewer, .notification-box li a', function(e) {
@@ -1270,8 +1271,9 @@ UI = {
     },
     createButtons: function() {
         var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
-        var buttons = '<li><a id="segment-' + this.currentSegmentId + '-copysource" href="#" class="btn copysource" data-segmentid="segment-' + this.currentSegmentId + '" title="Copy source to target"></a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p></li><li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+&gt;&gt;</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li><li style="margin-right:-20px"><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
-//        var buttons = '<li class="tag-mismatch" title="Tag Mismatch">Tag Mismatch</li><li><a id="segment-'+this.currentSegmentId+'-copysource" href="#" class="btn copysource" data-segmentid="segment-'+this.currentSegmentId+'" title="Copy source to target"></a><p>CTRL+RIGHT</p></li><li style="margin-right:-20px"><a id="segment-'+this.currentSegmentId+'-button-translated" data-segmentid="segment-'+this.currentSegmentId+'" href="#" class="translated"'+disabled+' >TRANSLATED</a><p>CTRL+ENTER</p></li>';
+        var buttons = '<li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+&gt;&gt;</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li><li style="margin-right:-20px"><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+//        var buttons = '<li><a id="segment-' + this.currentSegmentId + '-copysource" href="#" class="btn copysource" data-segmentid="segment-' + this.currentSegmentId + '" title="Copy source to target"></a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p></li><li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+&gt;&gt;</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li><li style="margin-right:-20px"><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+
         $('#segment-' + this.currentSegmentId + '-buttons').empty().append(buttons);
         $('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
 //      $('#segment-'+this.currentSegmentId+'-buttons').append(buttons);
@@ -2797,9 +2799,9 @@ UI = {
                         '		<div class="text">' +
                         '			<div class="wrap">' +
                         '				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + this.segment + '</div>' +
-                        '				<div class="copy">' +
+                        '				<div class="copy" title="Copy source to target">' +
                         '                   <a href="#"></a>' +
-                        '                   <p>CMD+RIGHT</p>' +
+                        '                   <p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p>' +
                         '				</div>' +
                         '				<div class="target item" id="segment-' + this.sid + '-target">' +
                         '					<span class="hide toggle"> ' +
