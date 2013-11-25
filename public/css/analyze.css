@@ -79,8 +79,9 @@ background: #09beec; font-weight: bold;
     padding: 3px 20px;
     margin: 12px 10px 20px 10px;
     float: left;
-*/
-width: auto !Important;
+
+width: auto !Important;*/
+width:88px;
 -webkit-transition: all  100ms ease-in;
 -moz-transition: all  100ms ease-in;
 font-size: 20px !important;
@@ -94,7 +95,8 @@ border: 1px solid #666;
 border-radius: 2px;
 text-decoration: none;
 opacity: 0.9;
-padding: 5px 15px !Important;
+text-align:center;
+padding: 5px 10px !Important;
 margin: 0 0 -3px 10px !important;
 float: right;
 }
