@@ -13,6 +13,9 @@ $db->connect ();
 // var_dump (get_include_path());exit;
 // var_dump (INIT::$ROOT);exit;
 
+//print_r( $_REQUEST );
+//die();
+
 $dispatcher = controllerDispatcher::obtain ();
 $controller = $dispatcher->getController ();
 $controller->doAction ();

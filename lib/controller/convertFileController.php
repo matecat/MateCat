@@ -127,6 +127,16 @@ class convertFileController extends ajaxcontroller {
 				$this->result['code'] = -100;
 				$this->result['errors'][] = array("code" => -100, "message" => $convertResult['errorMessage']);
 
+
+                if( stripos($convertResult['errorMessage'] ,"Error: Could not find file") !== false ||
+                        stripos($convertResult['errorMessage'] ,"tw4winMark") !== false ) {
+                    //TODO refactoring
+                    //we have to move the error management on conversions to server side
+                    //main.js force to check the extension
+                    $this->result['code'] = -101;
+                }
+
+
                 //return false
 
 			}

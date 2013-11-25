@@ -253,7 +253,7 @@ UI = {
 				var id = $(undo).data('id');
 				var pwd = $(undo).data('password');
 				var ob = (res=='job')? $('tr.row[data-jid=' + id + ']') : $('.article[data-pid=' + id + ']');
-				UI.changePassword(res,ob,pwd,1);
+				UI.changePassword( res, ob, pwd, undo );
 
 				break;
 
@@ -286,7 +286,8 @@ UI = {
 
         if(res=='job') {
         	UI.lastJobStatus = ob.data('status');
-        	id = ob.data('jid');
+        	id        = ob.data('jid');
+        	jpassword = ob.data('password');
         } else {
 		    var arJobs = '';
 		    $("tr.row",ob).each(function(){
@@ -295,6 +296,7 @@ UI = {
 		    arJobs = arJobs.substring(0, arJobs.length - 1);
 		    UI.lastJobStatus = arJobs;
 		    id = ob.data('pid');
+            jpassword = null;
         }
 
         var d = {
@@ -302,6 +304,7 @@ UI = {
 				new_status: status,
 				res: 		res,
 				id:			id,
+                jpassword:  jpassword,
                 page:		UI.page,
                 step:		UI.pageStep,
                 only_if:	only_if,
@@ -366,7 +369,7 @@ UI = {
 		if(!undo) {
 			var token =  new Date();
 			var resData = (res == 'prj')? 'pid':'jid';
-			$('.message').attr('data-token',token.getTime()).html(msg + ' <a href="#" class="undo" data-res="' + res + '" data-id="' + ob.data(resData)+ '" data-operation="changeStatus" data-status="' + ((res == 'prj')? d.old_status : this.lastJobStatus) + '">Undo</a>').show();
+			$('.message').attr('data-token',token.getTime()).html(msg + ' <a href="#" class="undo" data-res="' + res + '" data-id="' + ob.data(resData)+ '" data-password="' + ob.data('password') + '" data-operation="changeStatus" data-status="' + ((res == 'prj')? d.old_status : this.lastJobStatus) + '">Undo</a>').show();
 			setTimeout(function(){
 				$('.message[data-token='+token.getTime()+']').hide();
 			},5000);
@@ -378,15 +381,23 @@ UI = {
         if(typeof pwd == 'undefined') pwd = false;
         if(res=='job') {
         	id = ob.data('jid');
-        	password = (pwd)? pwd : '';
+        	password = (pwd)? pwd : ob.data('password');
+        }
+
+        if( undo ){
+            old_password = $(undo).data('old_password');
+        } else {
+            old_password = null;
         }
 
         APP.doRequest({
             data: {
-                action:		"changePassword",
-                res: 		res,
-                id: 		id,
-                password: 	password
+                action:		    "changePassword",
+                res: 		    res,
+                id: 		    id,
+                password: 	    password,
+                old_password: 	old_password,
+                undo:           ( typeof undo == 'object' )
             },
             context: ob,
             success: function(d){
@@ -421,9 +432,17 @@ UI = {
 		}
 
 		if(!undo) {
+
+            console.log(res);
+            console.log(ob);
+            console.log(d);
+            console.log(undo);
+            console.log(newPwd);
+            console.log(oldPwd);
+
 			var token =  new Date();
 			var resData = (res == 'prj')? 'pid':'jid';
-			$('.message').attr('data-token',token.getTime()).html(msg + ' <a href="#" class="undo" data-res="' + res + '" data-id="' + ob.data(resData)+ '" data-operation="changePassword" data-password="' + oldPwd + '">Undo</a>').show();
+			$('.message').attr('data-token',token.getTime()).html(msg + ' <a href="#" class="undo" data-res="' + res + '" data-id="' + ob.data(resData)+ '" data-operation="changePassword" data-password="' + newPwd + '" data-old_password="' + oldPwd + '">Undo</a>').show();
 			setTimeout(function(){
 				$('.message[data-token='+token.getTime()+']').hide();
 			},5000);

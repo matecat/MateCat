@@ -43,11 +43,16 @@ UI = {
         if(file.type.match(/^image/)) {
             msg = 'Images not allowed in MateCat';
         } else if(
-                (file.type == 'application/zip'||'application/x-gzip'||'application/x-tar'||'application/x-gtar'||'application/x-7z-compressed') ||
-                (ext == 'tgz')
-            ) {
-            msg = 'ZIP archives not yet supported. Coming soon.';
+                (file.type == 'application/zip'||
+                        file.type == 'application/x-gzip' ||
+                        file.type == 'application/x-tar' ||
+                        file.type == 'application/x-gtar' ||
+                        file.type == 'application/x-7z-compressed') ||
+                        ( ext == 'tgz' )
+        ) {
+                msg = 'ZIP archives not yet supported. Coming soon.';
         }
+
         console.log(file.size);
         if((file.size) > config.maxFileSize) {
             msg = 'Error during upload. The uploaded file exceed the file size limit of ' + config.maxFileSizePrint;
@@ -630,7 +635,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 					message = "Conversion Error. Try to commit changes in InDesign before importing.";
 				}
                 // temp
-                message = (falsePositive)? '' : 'Conversion Error. Try opening and saving the document with a new name.';
+                //message = (falsePositive)? '' : 'Conversion Error. Try opening and saving the document with a new name.';
 //                console.log(d.errors[0].code);
 //                if(d.errors[0].code == -6) message = 'Error during upload. The uploaded file may exceed the file size limit of ' + config.maxFileSizePrint;
 //                console.log(enforceConversion);
