@@ -400,7 +400,9 @@ div.wrapper div:last-child {border:none;}
     
 	.total .wordsum .total-w
         {
-        font-weight: bold;
+		float: right;
+		width: 83px;
+		font-weight: bold;
         }    
 .total-btn{float:right;margin:0 50px 10px 0}
 	
