@@ -136,6 +136,10 @@ right: 130px;
 background-size: 20px 20px;
 }
 
+.dosplit.splitbtn.disabled {
+background: #ccc url(/public/img/split.png) 10px no-repeat;
+}
+
 .splitbtn-cont {
 margin: 0 auto;
 overflow: hidden;
