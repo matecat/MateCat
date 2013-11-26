@@ -124,8 +124,10 @@ UI = {
                 $('.popup-split .btnsplit .done').addClass('none');
                 $('.popup-split #exec-split').removeClass('none').addClass('disabled').attr('disabled', 'disabled');
                 $('.popup-split #exec-split .text').text('Check');
-                $('.popup-split .error-count .curr-w').text(ss);
-                $('.popup-split .error-count .diff-w').text(diff);
+                $('.popup-split .error-count .curr-w').text(APP.addCommas(ss));
+				var dm = (diff < 0)? 'Words remaining' : 'Words exceeding';
+                $('.popup-split .error-count .txt').text(dm);
+                $('.popup-split .error-count .diff-w').text(Math.abs(APP.addCommas(diff)));
                 $('.popup-split').addClass('error-number');
             } else {
                 $('.popup-split #exec-split').removeClass('disabled');

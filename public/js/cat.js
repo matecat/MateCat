@@ -952,7 +952,7 @@ UI = {
 				UI.execFind();
 			} else {
 //				console.log(UI.goingToNext);
-				if(!UI.goingToNext) {
+				if (!UI.goingToNext) {
 					UI.goingToNext = true;
 					UI.execNext();
 				}
@@ -1038,13 +1038,19 @@ UI = {
 			if (UI.checkSearchChanges()) {
 				UI.setFindFunction('find');
 			}
-			;
+		});
+		$("#search-target").on('input', function(e) {
+//			if($(this).val() != '') {
+//				$('#exec-replace').removeAttr('disabled');
+//			} else {
+//				$('#exec-replace').attr('disabled', 'disabled');				
+//			};
+
 		});
 		$("#select-status").on('change', function(e) {
 			if (UI.checkSearchChanges()) {
 				UI.setFindFunction('find');
 			}
-			;
 		});
 		$("#match-case, #exact-match").on('change', function(e) {
 			UI.setFindFunction('find');
@@ -1745,7 +1751,6 @@ UI = {
 		$('section.currSearchResultSegment').removeClass('currSearchResultSegment');
 	},
 	gotoNextResultItem: function(unmark) {
-//		console.log('start');
 //        if(UI.goingToNext) {
 //			console.log('already going to next');
 //			return false;
@@ -1774,13 +1779,13 @@ UI = {
 			var m = $("mark.currSearchItem");
 //            console.log($(m).nextAll('mark.searchMarker').length);
 			if ($(m).nextAll('mark.searchMarker').length) { // there are other subsequent results in the segment
-				//            console.log('altri item nel segmento');
+				console.log('altri item nel segmento');
 				$(m).removeClass('currSearchItem');
 				$(m).nextAll('mark.searchMarker').first().addClass('currSearchItem');
 				if (unmark)
 					$(m).replaceWith($(m).text());
+				UI.goingToNext = false;
 			} else { // jump to results in subsequents segments
-//                console.log('ss');
 				seg = (m.length) ? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
 				if (seg.length) {//console.log('a');
 					skipCurrent = $(seg).has("mark.currSearchItem").length;
@@ -3005,7 +3010,7 @@ UI = {
 		}, 500);
 		setTimeout(function() {
 			UI.goingToNext = false;
-		}, 500);		
+		}, 500);
 	},
 	segmentIsLoaded: function(segmentId) {
 		if ($('#segment-' + segmentId).length) {
