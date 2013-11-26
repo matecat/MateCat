@@ -150,9 +150,23 @@ background: #ccc url(/public/img/split.png) 10px no-repeat;
 	font-size: 20px;
 	color:#666;
 }
-
+	.jobcontainer.splitted .splitbtn-cont {
+		display: none;
+	}
 .splitbtn-cont .label {padding:5px 10px;}
 
+.nosplit
+{
+	float: right;
+	font-size: 20px;
+	color: #666;
+	display: none;
+	margin: 45px 100px 0 0;
+}
+	.jobcontainer.splitted .nosplit
+	{
+		display: block;
+	}
 .btnsplit {
 	width: 300px;
 	float: right;
