@@ -218,12 +218,15 @@
         <div class="body">
             <div class="wrapper">
                 <h2>Job details</h2>      
-                <tal:block tal:define="job php:array()" tal:repeat="job jobs">
-                    <div class="jobcontainer" tal:attributes="data-jid string:${repeat/job/key}; data-pwd string:${job/password}">
-<!--                    <div class="job" tal:attributes="data-jid string:${repeat/job/key}"> -->
+                <tal:block tal:define="id_for_job php:array()" tal:repeat="id_for_job jobs">
+
+                    <div tal:attributes="data-jid string:${repeat/id_for_job/key}; class string:jobcontainer ${id_for_job/splitted}" >
+                    <div tal:define="splitted id_for_job/splitted" >
+
                     <h3>
-                        <span tal:replace="job/source">English</span> &gt; <span tal:replace="job/target">Italian</span>
-                    </h3>   
+                        <span tal:replace="id_for_job/source">English</span> &gt; <span tal:replace="id_for_job/target">Italian</span>
+                    </h3>
+
                     <div class="splitbtn-cont">
                       	<span class="splitmsg">Splitted in 2 parts</span><!-- A: questo compare quando il job è già stato splittato  -->
                         <span class="label left">Split in</span>
@@ -242,7 +245,8 @@
                         <a tal:attributes="" href="#" class="dosplit splitbtn">Split</a>
 						<a tal:attributes="" href="#" class="mergebtn">Merge</a><!-- A: questo compare quando il job è già stato splittato  -->
                     </div>    <!-- END CONTAINER SPLIT JOBS BUTTONS  -->
-                    <table tal:attributes="id string:job-${repeat/job/key}" class="tablestats">
+
+                    <table  tal:attributes="id string:job-${id_for_job/jid}" class="tablestats">
                         <tr>
                             <th> </th>
                             <th>Payable</th>
@@ -259,27 +263,28 @@
                             <th class="empty">&nbsp;</th>
                         </tr>
 
-    <tr>
-
-
-        <td class="payable-rate-breakdown" colspan="3">Payable Rate Breakdown</td>
-        <td class="editarea">100%</td>
-        <td class="editarea">30%</td>
-        <td class="editarea">60%</td>
-        <td class="editarea">60%</td>
-        <td class="editarea">30%</td>
-        <td class="editarea">0%</td>
-        <td class="editarea">85%</td>
-        <td class="empty">&nbsp;</td>
-    </tr>
+                        <tr>
+                            <td class="payable-rate-breakdown" colspan="3">Payable Rate Breakdown</td>
+                            <td class="editarea">100%</td>
+                            <td class="editarea">30%</td>
+                            <td class="editarea">60%</td>
+                            <td class="editarea">60%</td>
+                            <td class="editarea">30%</td>
+                            <td class="editarea">0%</td>
+                            <td class="editarea">85%</td>
+                            <td class="empty">&nbsp;</td>
+                        </tr>
 
                         <tr class="tablespace">
                             <td colspan="10">&nbsp;</td>
                         </tr>
+                    </table>
+                        <tal:block tal:define="job php:array()" tal:repeat="job id_for_job/chunk">
+                        <table class="come_ti_pare">
                         <tr class="totaltable">
                             <td class="languages">
-                             <span class="splitnum left">${repeat/job/key}</span>
-<!-- A: occorre inserire sempre l'ID del job; se è splittato bisogna anche accompagnarlo con il numero progressivo di split  -->
+                             <span tal:condition="splitted" class="splitnum left">${job/jid}-${repeat/job/number}</span>
+                             <span tal:condition="not:splitted" class="splitnum left">${job/jid}</span>
                                 <a href="#" class="filedetails part3">File details</a>
                                 <span class="numfiles">(<span tal:define="files job/files; f php:array()" tal:content="php:count(files)">0</span>)</span>
                             </td>
@@ -294,10 +299,7 @@
                             <td class="stat_tmic">0</td>
                             <td class="stat_mt">0</td>
                             <td class="empty">
-                          
-   
-  
-                                <a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${repeat/job/key}-${job/password} " href="#" target="_blank" class="uploadbtn">Translate</a>
+                                <a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${job/jid}-${job/jpassword} " href="#" target="_blank" class="uploadbtn">Translate</a>
                             </td>
                         </tr>
                         <tal:block tal:define="files job/files; f php:array()" tal:repeat="f files">
@@ -316,24 +318,28 @@
                                 <td class="empty"></td>
                             </tr>
                         </tal:block>
+                        </table>
+                        </tal:block>
 
-                    </table>
                     </div>
+                        </div>
+
                 </tal:block>
-<!--
-                <div class="sendit">
-                    <a href="#" class="uploadbtn split" style="float:right">Split / Merge</a>    
-                    <div class="cl"></div>
-                    <div class="job">
 
-                        <p> Job #1 link:</p>  
-                        <input name="" type="text" class="input" value="mat.ly/IUrHPU "/> 
-                        <input type="text" class="input" value="200" size="2"/> 
-                        <p>words</p> <a href="#" class="uploadbtn add" title="split more">+</a> 
+                <!--
+                    <div class="sendit">
+                        <a href="#" class="uploadbtn split" style="float:right">Split / Merge</a>
+                        <div class="cl"></div>
+                        <div class="job">
+
+                            <p> Job #1 link:</p>
+                            <input name="" type="text" class="input" value="mat.ly/IUrHPU "/>
+                            <input type="text" class="input" value="200" size="2"/>
+                            <p>words</p> <a href="#" class="uploadbtn add" title="split more">+</a>
+                        </div>
+                        <div class="cl"></div>
                     </div>
-                    <div class="cl"></div>
-                </div>
--->
+                -->
 </div> <div class="cl"></div>
 </div>
 

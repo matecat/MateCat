@@ -1230,9 +1230,7 @@ function getProjectJobData( $pid ) {
 function getProjectData( $pid, $project_password = null, $jid = null ) {
 
     $query = "
-    SELECT * FROM (
-
-            SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, f.id, f.id AS id_file,f.filename, p.status_analysis,
+              SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, f.id, f.id AS id_file,f.filename, p.status_analysis,
 
                     SUM(s.raw_word_count) AS file_raw_word_count,
                     SUM(st.eq_word_count) AS file_eq_word_count,
@@ -1253,8 +1251,8 @@ function getProjectData( $pid, $project_password = null, $jid = null ) {
                     %s
 
                     GROUP BY f.id, j.id, j.password
-
-    ) AS res GROUP BY jid, id_file";
+                    ORDER BY j.create_date
+             ";
 
     $and_1 = $and_2 = null;
 
@@ -1268,7 +1266,7 @@ function getProjectData( $pid, $project_password = null, $jid = null ) {
 
     $query = sprintf( $query, $and_1, $and_2 );
 
-    //Log::doLog( $query );
+    Log::doLog( $query );
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
