@@ -143,7 +143,6 @@ class analyzeController extends viewcontroller {
         }
 
         $this->jobs[$pdata[ 'jid' ]][ 'splitted'] = count($this->jobs[$pdata[ 'jid' ]]['chunks']>1) ? 'splitted':'';
-        unset( $pdata[ 'jid' ] );
 
         $raw_wc_time  = $this->total_raw_word_count / INIT::$ANALYSIS_WORDS_PER_DAYS;
         $tm_wc_time   = $this->tm_analysis_wc / INIT::$ANALYSIS_WORDS_PER_DAYS;
