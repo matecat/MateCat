@@ -3559,11 +3559,16 @@ UI = {
 					APP.alert("Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>");
 				}
 			}
+
+            if( operation == 'setContribution' && this['code'] != '-10' ){
+                   APP.alert( "Error in saving the translation memory.<br />Try the to save again the segment.<br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>" );
+            }
+
 			if (this['code'] == '-10') {
 				APP.alert("Job canceled or assigned to another translator");
 				//FIXME
-				// Alert, NEVER displayed because are no-blocking
-				// Transform location.reload(); to a callable function passed as callback
+                // This Alert, will be NEVER displayed because are no-blocking
+                // Transform location.reload(); to a callable function passed as callback to alert
 				location.reload();
 			}
 
