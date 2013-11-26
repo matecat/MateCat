@@ -40,7 +40,7 @@ class MT_RESULT {
             }
 		}
 
-		if (is_array($result) and array_key_exists("error", $result)) {
+		if ( is_array($result) and array_key_exists("error", $result) ) {
 			$this->error = new MT_ERROR($result['error']);
 		}
 	}
@@ -101,11 +101,12 @@ class MT extends Engine {
 		$parameters['key'] = $key;
         ( is_numeric($segId) ? $parameters['segid'] = $segId : null );
 
-
 		$this->doQuery("get", $parameters);
 
-		$this->result = new MT_RESULT($this->raw_result);
-		return array(0, $this->result->translatedText, $this->result->sentence_confidence);
+		$this->result = new MT_RESULT( $this->raw_result );
+
+        return $this->result;
+
 	}
 
 	public function set($segment, $translation, $source_lang, $target_lang, $email = '', $extra='', $segId = null) {
@@ -127,10 +128,9 @@ class MT extends Engine {
 
 		$this->doQuery("set", $parameters);
 		$this->result = new MT_RESULT($this->raw_result);
-		if ($this->result->error->code != "") {            
-			return array("code"=>$this->result->error->code , "message"=>$this->result->error->message);
-		}
-		return true;
+
+        return $this->result;
+
 	}
 
 	public function delete($segment, $translation, $source_lang, $target_lang, $email = "") {

@@ -160,10 +160,9 @@ class TMS extends Engine {
 
         $this->doQuery("get", $parameters);
         $this->result = new TMS_RESULT($this->raw_result);
-        if ($this->result->responseStatus != "200") {
-            return false;
-        }
-        return $this->result->get_matches_as_array();
+
+        return $this->result;
+
     }
 
     public function set($segment, $translation, $source_lang, $target_lang, $email = "", $id_user = "") {
