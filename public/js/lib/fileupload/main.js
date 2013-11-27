@@ -55,10 +55,6 @@ UI = {
 
         console.log(file.size);
         if((file.size) > config.maxFileSize) {
-			setTimeout(function(){
-				console.log($('tr.template-upload:has(.error)').length);
-				UI.checkFailedConversionsNumber();
-			},500);
             msg = 'Error during upload. The uploaded file exceed the file size limit of ' + config.maxFileSizePrint;
         }
 		UI.checkFailedConversionsNumber();
@@ -100,8 +96,6 @@ UI = {
     },
     
     checkFailedConversionsNumber: function() {
-		console.log('checkFailedConversionsNumber');
-		console.log($('tr.has-errors'));
     	return checkFailedConversionsNumber();
     }
 }
@@ -150,10 +144,10 @@ $(function () {
 	}).bind('fileuploadadd', function (e, data) {
 		console.log('FIRE fileuploadadd');
 //        console.log($('.upload-table tr'));
-//		console.log(data);
-//        console.log(data.files[0].size);
-//        console.log(config.maxFileSize);
-//        console.log(data.files[0].type);
+		console.log(data);
+        console.log(data.files[0].size);
+        console.log(config.maxFileSize);
+        console.log(data.files[0].type);
         
 //        if(!isValidFileExtension(data.files[0].name)) {
 //            alert($('.upload-table tr').length);
@@ -196,7 +190,6 @@ $(function () {
 */
 		disableAnalyze();
 		$('#fileupload table.upload-table tr').addClass('current');
-		console.log('end FIRE fileuploadadd');
 
 /*
 		if(data.files.length > 1) {
@@ -210,12 +203,17 @@ $(function () {
 */
 	}).bind('fileuploadsend', function (e,data) {
         console.log('FIRE fileuploadsend');
-//        console.log(data.files);
+        console.log(data.files);
 		$('.progress', $(data.context[0])).before('<div class="operation">Uploading</div>');
 	}).bind('fileuploadprogress', function (e,data) {
 //		console.log(data.loaded);
 	}).bind('fileuploadstart', function (e) {
 		console.log('FIRE fileuploadstart');
+//		if(!$.cookie("upload_session")) $.cookie("upload_session",uploadSessionId);
+	}).bind('fileuploaddone', function (e,data) {
+//		$('.size', $(data.context[0])).next().append('<div class="operation">Converting</div>');
+
+//		console.log($(data.context[0]));
 //		if(!$.cookie("upload_session")) $.cookie("upload_session",uploadSessionId);
 	}).bind('fileuploaddrop', function (e) {
 		$('.upload-files').addClass('uploaded');
@@ -230,7 +228,6 @@ $(function () {
 			$('.upload-files').removeClass('uploaded');
 		}
 	}).bind('fileuploadfail', function (e) {
-		console.log('FIRE fileuploadfail');
 		if(!($('.upload-table tr').length > 1)) $('.upload-files').removeClass('uploaded');
         checkFailedConversionsNumber();
 	}).bind('fileuploadchange', function (e) {

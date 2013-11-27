@@ -122,7 +122,9 @@ UI = {
 			UI.autoscrollCorrectionEnabled = false;
 		}, 2000);
 		this.checkSegmentsArray = {};
+		this.firstMarking = true;
 		this.markTags();
+		this.firstMarking = false;
 		this.setContextMenu();
 		this.createJobMenu();
 		$('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');
@@ -2477,7 +2479,7 @@ UI = {
 			return false;
 		if (this.noTagsInSegment(1))
 			return false;
-
+console.log('markTags');
 		$('.source').each(function() {
 			UI.detectTags(this);
 		});
@@ -2501,15 +2503,13 @@ UI = {
 		$(ed).focus();
 	},
 	detectTags: function(area) {
-//            if($(area).attr('id') == 'segment-595422-source') {
-//                console.log($(area).html());
-//                $(area).html($(area).html().replace(/(<span.*?)(.*?)(<\/span>)/gi, "\2"));
-//                console.log($(area).html());            
-//            }
-//            $(area).html($(area).html().replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5"));
-		$(area).html($(area).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-		$(area).html($(area).html().replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-		$(area).html($(area).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
+		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+		//$(area).html($(area).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+		//$(area).html($(area).html().replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+		if(!this.firstMarking) {
+			$(area).html($(area).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));			
+		}
+
 	},
 	markTagsInSearch: function(el) {
 		if (!this.taglockEnabled)
@@ -3036,59 +3036,46 @@ UI = {
 		}
 		this.updateContribution(source, target);
 	},
-	setContribution: function(segment, status, byStatus) {
-		if ((status == 'draft') || (status == 'rejected'))
+
+	spellCheck: function(ed) {
+		if (!UI.customSpellcheck)
 			return false;
-		var source = $('.source', segment).text();
-		// Attention: to be modified when we will be able to lock tags.
-		var target = $('.editarea', segment).text();
-		if ((target == '') && (byStatus)) {
-			APP.alert('Cannot change status on an empty segment. Add a translation first!');
-		}
-		if (target == '') {
-			return false;
-		}
-		this.updateContribution(source, target);
-	},
-			spellCheck: function(ed) {
-				if (!UI.customSpellcheck)
-					return false;
-				editarea = (typeof ed == 'undefined') ? UI.editarea : $(ed);
-				if ($('#contextMenu').css('display') == 'block')
-					return true;
+		editarea = (typeof ed == 'undefined') ? UI.editarea : $(ed);
+		if ($('#contextMenu').css('display') == 'block')
+			return true;
 
-				APP.doRequest({
-					data: {
-						action: 'getSpellcheck',
-						lang: config.target_rfc,
-						sentence: UI.editarea.text()
-					},
-					context: editarea,
-					success: function(data) {
-						ed = this;
-						$.each(data.result, function(key, value) { //key --> 0: { 'word': { 'offset':20, 'misses':['word1','word2'] } }
+		APP.doRequest({
+			data: {
+				action: 'getSpellcheck',
+				lang: config.target_rfc,
+				sentence: UI.editarea.text()
+			},
+			context: editarea,
+			success: function(data) {
+				ed = this;
+				$.each(data.result, function(key, value) { //key --> 0: { 'word': { 'offset':20, 'misses':['word1','word2'] } }
 
-							var word = Object.keys(value)[0];
-							replacements = value[word]['misses'].join(",");
+					var word = Object.keys(value)[0];
+					replacements = value[word]['misses'].join(",");
 
-							var Position = [
-								parseInt(value[word]['offset']),
-								parseInt(value[word]['offset']) + parseInt(word.length)
-							];
+					var Position = [
+						parseInt(value[word]['offset']),
+						parseInt(value[word]['offset']) + parseInt(word.length)
+					];
 
-							var sentTextInPosition = ed.text().substring(Position[0], Position[1]);
-							//console.log(sentTextInPosition);
+					var sentTextInPosition = ed.text().substring(Position[0], Position[1]);
+					//console.log(sentTextInPosition);
 
-							var re = new RegExp("(\\b" + word + "\\b)", "gi");
-							$(ed).html($(ed).html().replace(re, '<span class="misspelled" data-replacements="' + replacements + '">$1</span>'));
-							// fix nested encapsulation
-							$(ed).html($(ed).html().replace(/(\<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(\<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
+					var re = new RegExp("(\\b" + word + "\\b)", "gi");
+					$(ed).html($(ed).html().replace(re, '<span class="misspelled" data-replacements="' + replacements + '">$1</span>'));
+					// fix nested encapsulation
+					$(ed).html($(ed).html().replace(/(\<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(\<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
 //
 //                    });
-						});
-					}
 				});
-			},
+			}
+		});
+	},
 	addWord: function(word) {
 		APP.doRequest({
 			data: {
