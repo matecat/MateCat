@@ -623,7 +623,7 @@ section.readonly .text:hover
 
 
 /*submenu*/
-.submenu {background:#fff;text-align:left;width:100%;border-bottom:1px solid #666;margin-top:0px;}
+.submenu {background:#fff;text-align:left;width:100%;border-bottom:1px solid #666;margin-top: 1px;}
 .submenu {display: none;}
 
 
@@ -662,7 +662,7 @@ padding:1px 6px !important;margin:5px 10px 0 -10px;text-shadow:none !important;}
 
 .submenu li.active a
     {
-    background: #fbfbfb;
+    background: #fff;
     color: #666;
     text-shadow: none;
     -moz-box-shadow: none;

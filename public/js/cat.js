@@ -753,9 +753,7 @@ UI = {
 					$('.editor .sub-editor .cc-search .search-target').text('');
 					$('.editor .sub-editor.concordances .results').empty();
 				}
-				;
 			}
-			;
 			/*
 			 if(e.which == 13) { // enter
 			 e.preventDefault();
@@ -788,9 +786,7 @@ UI = {
 					$('.editor .sub-editor .cc-search .search-source').text('');
 					$('.editor .sub-editor.concordances .results').empty();
 				}
-				;
 			}
-			;
 			/*
 			 if(e.which == 13) {
 			 e.preventDefault();
@@ -1696,7 +1692,7 @@ UI = {
 
 //            q = "section" + status + what;
 			var reg = new RegExp('(' + htmlEncode(txt) + ')', "g" + ignoreCase);
-			if (typeof where == 'undefined') {
+			if (typeof where == 'undefined') {console.log('aaa');
 				items = $(q + ":" + containsFunc + "('" + txt + "')");
 				filteredItems = UI.filterExactMatch(items, txt);
 //                filteredItems = (p['exact-match'])? items.filter(function() { return $(this).text() == txt; }) : items;
@@ -1735,6 +1731,7 @@ UI = {
 		}
 	},
 	filterExactMatch: function(items, txt) {
+		console.log(items);
 		return (this.searchParams['exact-match']) ? items.filter(function() {
 			if (UI.searchParams['match-case']) {
 				return $(this).text() == txt;
