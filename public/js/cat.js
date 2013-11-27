@@ -276,7 +276,7 @@ UI = {
 			e.preventDefault();
 			e.stopPropagation();
 		}).on('click', 'section:not(.readonly) a.status', function(e) {
-
+			console.log('status');
 			var segment = $(this).parents("section");
 			var statusMenu = $("ul.statusmenu", segment);
 
@@ -687,6 +687,7 @@ UI = {
 			UI.blockButtons = true;
 
 			UI.unlockTags();
+//			console.log('eccomi'); return false;
 			UI.setStatusButtons(this);
 			if (w == 'translated') {
 				UI.gotoNextSegment();
@@ -998,8 +999,9 @@ UI = {
 				$("mark.currSearchItem").text(txt);
 				segment = $("mark.currSearchItem").parents('section');
 				UI.setTranslation(segment, UI.getStatus(segment));
-
+				UI.updateSearchDisplayCount(segment);
 				UI.gotoNextResultItem(true);
+				
 
 //                var m = $("mark.currSearchItem");
 //                if($(m).nextAll('mark.searchMarker').length) {
@@ -1101,12 +1103,12 @@ UI = {
 		this.currentFileId = this.currentFile.attr('id').split('-')[1];
 	},
 	applySearch: function(segment) {
-//        console.log("quanti result c'erano nel segmento prima di salvarlo: ", $(segment).find('mark.searchMarker').length);
 		if (this.body.hasClass('searchActive'))
-			this.markSearchResults({
-				singleSegment: segment
-			})
-//        console.log("quanti result ci sono dopo nel segmento che ho appena salvato: ", $(segment).find('mark.searchMarker').length);
+			if(!$('mark.searchMarker', segment).length) {
+				this.markSearchResults({
+					singleSegment: segment
+				})				
+			}
 	},
 	changeStatus: function(ob, status, byStatus) {
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
@@ -1316,8 +1318,8 @@ UI = {
 	},
 	createButtons: function() {
 		var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
-		var buttons = '<li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+&gt;&gt;</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li><li style="margin-right:-20px"><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
-//        var buttons = '<li><a id="segment-' + this.currentSegmentId + '-copysource" href="#" class="btn copysource" data-segmentid="segment-' + this.currentSegmentId + '" title="Copy source to target"></a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p></li><li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+&gt;&gt;</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li><li style="margin-right:-20px"><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+		var buttons = '<li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+&gt;&gt;</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li><li><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
+//        var buttons = '<li><a id="segment-' + this.currentSegmentId + '-copysource" href="#" class="btn copysource" data-segmentid="segment-' + this.currentSegmentId + '" title="Copy source to target"></a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p></li><li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+&gt;&gt;</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li><li><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
 
 		$('#segment-' + this.currentSegmentId + '-buttons').empty().append(buttons);
 		$('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
@@ -1586,6 +1588,14 @@ UI = {
 		if ((this.searchMode == 'source&target') && (this.numSearchResultsSegments < 2))
 			$('#exec-find[data-func=next]').attr('disabled', 'disabled');
 	},
+	updateSearchDisplayCount: function(segment) {
+		numRes = $('.search-display .numbers .results');
+		numRes.text(parseInt(numRes.text()) - 1);
+		if(($('.editarea mark.searchMarker',segment).length-1) == 0) {
+			numSeg = $('.search-display .numbers .segments');
+			numSeg.text(parseInt(numSeg.text()) - 1);
+		}
+	},
 	execNext: function() {
 		this.gotoNextResultItem(false);
 	},
@@ -1687,12 +1697,13 @@ UI = {
 				what = '';
 				txt = '';
 			}
+//			var what = (typeof p['source'] != 'undefined') ? ' .source' : (typeof p['target'] != 'undefined') ? ' .editarea' : '';
 			var what = (typeof p['source'] != 'undefined') ? ' .source' : (typeof p['target'] != 'undefined') ? ':not(.status-new) .editarea' : '';
 			q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + what;
 
 //            q = "section" + status + what;
 			var reg = new RegExp('(' + htmlEncode(txt) + ')', "g" + ignoreCase);
-			if (typeof where == 'undefined') {console.log('aaa');
+			if (typeof where == 'undefined') {
 				items = $(q + ":" + containsFunc + "('" + txt + "')");
 				filteredItems = UI.filterExactMatch(items, txt);
 //                filteredItems = (p['exact-match'])? items.filter(function() { return $(this).text() == txt; }) : items;
@@ -1731,7 +1742,6 @@ UI = {
 		}
 	},
 	filterExactMatch: function(items, txt) {
-		console.log(items);
 		return (this.searchParams['exact-match']) ? items.filter(function() {
 			if (UI.searchParams['match-case']) {
 				return $(this).text() == txt;
@@ -2476,7 +2486,6 @@ UI = {
 			return false;
 		if (this.noTagsInSegment(1))
 			return false;
-console.log('markTags');
 		$('.source').each(function() {
 			UI.detectTags(this);
 		});
