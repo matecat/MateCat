@@ -56,19 +56,19 @@ a:hover{text-decoration:none}
 .cl{clear:both}
 
 /* TABELLA */
-.tablestats{font-size:16px;margin-top:5px;padding-bottom: 50px;}
+.tablestats{font-size:16px;/*margin-top:5px;padding-bottom: 50px;*/}
 .tablestats th, .tablestats td{ background:#fff;padding:10px;text-align:right;border-bottom:1px solid #ccc;border-right:1px solid #ccc;font-weight:normal;}
 .tablestats th{border-top:1px solid #ccc;background:#F6F6F6;text-align:center;font-size:14px;}
 .tablestats th:first-child {width: 35%; border-left:1px solid #ccc;}
-.tablestats th.new,
-.tablestats th.repetition,
-.tablestats th.internal-matches,
-.tablestats th.tm-partial,
-.tablestats th.tm-100,
-.tablestats th.tm-100-context,
-.tablestats th.mt,
-.tablestats th.empty {width: 60px;}
-.languages{font-weight:bold;font-size:18px;text-align:left !important;}
+.tablestats td:first-child {width: 35%; border-left:1px solid #ccc;}
+.tablestats th.new, .tablestats td.stat_new,
+.tablestats th.repetition, .tablestats td.repetition,
+.tablestats th.internal-matches, .tablestats td.internal-matches,
+.tablestats th.tm-partial, .tablestats td.tm-partial,
+.tablestats th.tm-100, .tablestats td.tm-100,
+.tablestats th.tm-100-context, .tablestats td.tm-100-context,
+.tablestats th.mt, .tablestats td.mt {width: 60px;}
+.languages{font-weight:bold;font-size:18px;text-align:left !important; width:35%;}
 
 /* SPLIT JOB */
 .uploadbtn {
@@ -161,7 +161,7 @@ background: #ccc url(/public/img/split.png) 10px no-repeat;
 	font-size: 20px;
 	color: #666;
 	display: none;
-	margin: 45px 100px 0 0;
+	margin: 45px 140px 0 0;
 }
 	.jobcontainer.splitted .nosplit
 	{
@@ -310,7 +310,8 @@ table tr.totaltable td.total
 	text-align: right;
 }
 .tablespace td{background:#F0F0F0 !important;padding:0 !important;border-left:0 !Important; border-right:0 !Important;height:0px !Important;line-height:5px !Important}
-.empty{border:0 !Important;background:#F0F0F0 !important;}
+.empty{border:0 !Important;background:#F0F0F0 !important;width: 120px;
+}
 
 .operation-btn:hover{opacity:1;}
 
@@ -356,6 +357,7 @@ table tr.totaltable td.total
 }
 
 .jobcontainer {
+padding-bottom:50px;
 	border-bottom: 1px dashed #ccc;
 }
 

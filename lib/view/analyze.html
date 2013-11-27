@@ -255,42 +255,45 @@
                     <!-- END CONTAINER SPLIT JOBS BUTTONS  -->
 
                     <table tal:attributes="id string:job-${id_for_job/jid}" class="tablestats">
-                        <tr>
-                            <th></th>
-                            <th>Payable</th>
-                            <th>Total</th>
-                            <th class="new" width="100">New</th>
-                            <th class="repetition">Repetition</th>
-                            <th class="internal-matches">Internal Matches<br/>
-                                (75%-99%)
-                            </th>
-                            <th class="tm-partial">TM<br/>
-                                Partial (75%-99%)
-                            </th>
-                            <th class="tm-100">TM 100%</th>
-                            <th class="tm-100-context">TM 100% in context</th>
-                            <th class="mt">Machine Translation</th>
-                            <th class="empty">&nbsp;</th>
-                        </tr>
-
-                        <tr>
-                            <td class="payable-rate-breakdown" colspan="3">Payable Rate Breakdown</td>
-                            <td class="editarea">100%</td>
-                            <td class="editarea">30%</td>
-                            <td class="editarea">60%</td>
-                            <td class="editarea">60%</td>
-                            <td class="editarea">30%</td>
-                            <td class="editarea">0%</td>
-                            <td class="editarea">85%</td>
-                            <td class="empty">&nbsp;</td>
-                        </tr>
-
-                        <tr class="tablespace">
-                            <td colspan="10">&nbsp;</td>
-                        </tr>
-                    </table>
-                    <tal:block tal:define="job php:array()" tal:repeat="job id_for_job/chunk">
-                        <table class="come_ti_pare">
+                    	<thead>
+                            <tr>
+                                <th></th>
+                                <th>Payable</th>
+                                <th>Total</th>
+                                <th class="new" width="100">New</th>
+                                <th class="repetition">Repetition</th>
+                                <th class="internal-matches">Internal Matches<br/>
+                                    (75%-99%)
+                                </th>
+                                <th class="tm-partial">TM<br/>
+                                    Partial (75%-99%)
+                                </th>
+                                <th class="tm-100">TM 100%</th>
+                                <th class="tm-100-context">TM 100% in context</th>
+                                <th class="mt">Machine Translation</th>
+                                <th class="empty">&nbsp;</th>
+                            </tr>
+                    	</thead>
+                        <tbody>
+                            <tr>
+                                <td class="payable-rate-breakdown" colspan="3">Payable Rate Breakdown</td>
+                                <td class="editarea">100%</td>
+                                <td class="editarea">30%</td>
+                                <td class="editarea">60%</td>
+                                <td class="editarea">60%</td>
+                                <td class="editarea">30%</td>
+                                <td class="editarea">0%</td>
+                                <td class="editarea">85%</td>
+                                <td class="empty">&nbsp;</td>
+                            </tr>
+    
+                            <tr class="tablespace">
+                                <td colspan="10">&nbsp;</td>
+                            </tr>
+                        </tbody>
+                   
+                    <tal:block tal:define="job php:array()" tal:repeat="job id_for_job/chunks">
+                        <tbody class="tablestats">
                             <tr class="totaltable">
                                 <td class="languages">
                                     <span tal:condition="splitted" class="splitnum left">${job/jid}-${repeat/job/number}</span>
@@ -299,7 +302,7 @@
                                     <span class="numfiles">(<span tal:define="files job/files; f php:array()" tal:content="php:count(files)">0</span>)</span>
                                 </td>
                                 <td class="stat-payable">
-                                    <strong class="stat_tot" tal:content="tm_analysis_wc_print">11,500</strong></td>
+                                    <strong class="stat_tot" tal:content="job/total_eq_word_count_print">11,500</strong></td>
                                 <td class="stat-total" tal:content="job/total_raw_word_count_print">13,500</td>
                                 <td class="stat_new">0</td>
                                 <td class="stat_rep">0</td>
@@ -329,10 +332,13 @@
                                     <td class="stat_mt">0</td>
                                     <td class="empty"></td>
                                 </tr>
+                              
                             </tal:block>
-                        </table>
+                            
+                       </tbody>
                     </tal:block>
-
+                     
+  </table>
                 </div>
             </div>
 

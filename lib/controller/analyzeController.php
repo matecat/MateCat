@@ -40,40 +40,40 @@ class analyzeController extends viewcontroller {
     }
 
     public function doAction() {
-        $project_data = getProjectData( $this->pid, $this->password );
+
+        $project_by_jobs_data = getProjectData( $this->pid, $this->password );
 
         $lang_handler = Languages::getInstance();
 
-        if ( empty( $project_data ) ) {
+        if ( empty( $project_by_jobs_data ) ) {
             $this->project_not_found = true;
         }
-        foreach ( $project_data as &$pdata ) {
 
-            $this->num_segments += $pdata[ 'total_segments' ];
+        foreach ( $project_by_jobs_data as &$p_jdata ) {
+
+            $this->num_segments += $p_jdata[ 'total_segments' ];
             if ( empty( $this->pname ) ) {
-                $this->pname = $pdata[ 'name' ];
+                $this->pname = $p_jdata[ 'name' ];
             }
 
             if ( empty( $this->project_status ) ) {
-                $this->project_status = $pdata[ 'status_analysis' ];
+                $this->project_status = $p_jdata[ 'status_analysis' ];
+                if ( $this->standard_analysis_wc == 0 ) {
+                    $this->standard_analysis_wc = $p_jdata[ 'standard_analysis_wc' ];
+                }
             }
 
+            //equivalent word count global
             if ( $this->tm_analysis_wc == 0 ) {
-                $this->tm_analysis_wc = $pdata[ 'tm_analysis_wc' ];
+                $this->tm_analysis_wc = $p_jdata[ 'tm_analysis_wc' ];
             }
-
-            if ( $this->standard_analysis_wc == 0 ) {
-                $this->standard_analysis_wc = $pdata[ 'standard_analysis_wc' ];
-            }
-
             if ( $this->tm_analysis_wc == 0 ) {
-                $this->tm_analysis_wc = $pdata[ 'fast_analysis_wc' ];
+                $this->tm_analysis_wc = $p_jdata[ 'fast_analysis_wc' ];
             }
-
             $this->tm_analysis_wc_print = number_format( $this->tm_analysis_wc, 0, ".", "," );
 
             if ( $this->fast_analysis_wc == 0 ) {
-                $this->fast_analysis_wc       = $pdata[ 'fast_analysis_wc' ];
+                $this->fast_analysis_wc       = $p_jdata[ 'fast_analysis_wc' ];
                 $this->fast_analysis_wc_print = number_format( $this->fast_analysis_wc, 0, ".", "," );
             }
 
@@ -90,59 +90,69 @@ class analyzeController extends viewcontroller {
                 $this->tm_analysis_wc_print = "";
             }
 
+            $this->total_raw_word_count += $p_jdata[ 'file_raw_word_count' ];
 
-            $this->total_raw_word_count += $pdata[ 'file_raw_word_count' ];
-            $pdata[ 'file_eq_word_count' ] = number_format( $pdata[ 'file_eq_word_count' ], 0, ".", "," );
+            $source = $lang_handler->getLocalizedName( $p_jdata[ 'source' ] );
+            $target = $lang_handler->getLocalizedName( $p_jdata[ 'target' ] );
 
-            if ( !array_key_exists( "jid", $pdata ) ) {
-                $this->jobs[ $pdata[ 'jid' ] ] = array( "password" => array(), "files" => array() );
+            if ( !isset( $this->jobs[ $p_jdata[ 'jid' ] ] ) ) {
+
+                if ( !isset( $this->jobs[ $p_jdata[ 'jid' ] ][ 'splitted' ] ) ) {
+                    $this->jobs[ $p_jdata[ 'jid' ] ][ 'splitted' ] = '';
+                }
+
+                $this->jobs[ $p_jdata[ 'jid' ] ][ 'jid' ]    = $p_jdata[ 'jid' ];
+                $this->jobs[ $p_jdata[ 'jid' ] ][ 'source' ] = $source;
+                $this->jobs[ $p_jdata[ 'jid' ] ][ 'target' ] = $target;
+
             }
 
-            $jid = $pdata[ 'jid' ];
+            $source_short = $p_jdata[ 'source' ];
+            $target_short = $p_jdata[ 'target' ];
+            $password     = $p_jdata[ 'jpassword' ];
 
-            $source = $lang_handler->getLocalizedName( $pdata[ 'source' ] );
-            $target = $lang_handler->getLocalizedName( $pdata[ 'target' ] );
+            unset( $p_jdata[ 'name' ] );
+            unset( $p_jdata[ 'source' ] );
+            unset( $p_jdata[ 'target' ] );
+            unset( $p_jdata[ 'jpassword' ] );
 
-            $source_short = $pdata[ 'source' ];
-            $target_short = $pdata[ 'target' ];
 
-            $password = $pdata[ 'jpassword' ];
-            unset( $pdata[ 'name' ] );
-            unset( $pdata[ 'source' ] );
-            unset( $pdata[ 'target' ] );
+            unset( $p_jdata[ 'fast_analysis_wc' ] );
+            unset( $p_jdata[ 'tm_analysis_wc' ] );
+            unset( $p_jdata[ 'standard_analysis_wc' ] );
 
-            unset( $pdata[ 'jpassword' ] );
 
-            if( !isset( $this->jobs[ $jid ][ 'splitted' ] ) ){
-                $this->jobs[ $jid ][ 'splitted'] = '';
-            }
+            if ( !isset( $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ] ) ) {
+                $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ]                   = array();
+                $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'jid' ]          = $p_jdata[ 'jid' ];
+                $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'source' ]       = $source;
+                $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'target' ]       = $target;
+                $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'jpassword' ]    = $password;
+                $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'source_short' ] = $source_short;
+                $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'target_short' ] = $target_short;
 
-            $this->jobs[ $jid ][ 'jid' ]          = $jid;
-            $this->jobs[ $jid ][ 'source' ]       = $source;
-            $this->jobs[ $jid ][ 'target' ]       = $target;
+                if ( !array_key_exists( "total_raw_word_count", $this->jobs[ $p_jdata[ 'jid' ] ] ) ) {
+                    $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_raw_word_count' ] = 0;
+                }
 
-            $this->jobs[ $jid ]['chunk'][$password] = array();
-            $this->jobs[ $jid ]['chunk'][$password][ 'jid' ]          = $jid;
-            $this->jobs[ $jid ][ 'chunk' ][$password][ 'source' ]       = $source;
-            $this->jobs[ $jid ][ 'chunk' ][$password][ 'target' ]       = $target;
-            $this->jobs[ $jid ][ 'chunk' ][$password][ 'jpassword' ]    = $password;
-            $this->jobs[ $jid ][ 'chunk' ][$password][ 'source_short' ] = $source_short;
-            $this->jobs[ $jid ][ 'chunk' ][$password][ 'target_short' ] = $target_short;
-
-            if ( !array_key_exists( "total_raw_word_count", $this->jobs[ $jid ] ) ) {
-                $this->jobs[ $jid ][ 'chunk' ][$password][ 'total_raw_word_count' ] = 0;
             }
 
             //calculate total word counts per job (summing different files)
-            $this->jobs[ $jid ][ 'chunk' ][$password][ 'total_raw_word_count' ] += $pdata[ 'file_raw_word_count' ];
+            $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_raw_word_count' ] += $p_jdata[ 'file_raw_word_count' ];
             //format the total (yeah, it's ugly doing it every cycle)
-            $this->jobs[ $jid ][ 'chunk' ][$password][ 'total_raw_word_count_print' ] = number_format( $this->jobs[ $jid ][ 'chunk' ][$password][ 'total_raw_word_count' ], 0, ".", "," );
+            $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_raw_word_count_print' ] = number_format( $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_raw_word_count' ], 0, ".", "," );
 
-            $pdata[ 'file_raw_word_count' ]                = number_format( $pdata[ 'file_raw_word_count' ], 0, ".", "," );
-            $this->jobs[ $jid ][ 'chunk' ][$password][ 'files' ][ ] = $pdata;
+            $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count' ] += $p_jdata[ 'file_eq_word_count' ];
+            $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count_print' ] = number_format( $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count' ], 0, ".", "," );
+
+            $p_jdata[ 'file_eq_word_count' ] = number_format( $p_jdata[ 'file_eq_word_count' ], 0, ".", "," );
+            $p_jdata[ 'file_raw_word_count' ] = number_format( $p_jdata[ 'file_raw_word_count' ], 0, ".", "," );
+
+            $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'files' ][ $p_jdata[ 'id_file' ] ] = $p_jdata;
+
         }
 
-        $this->jobs[$pdata[ 'jid' ]][ 'splitted'] = count($this->jobs[$pdata[ 'jid' ]]['chunks']>1) ? 'splitted':'';
+        $this->jobs[ $p_jdata[ 'jid' ] ][ 'splitted' ] = ( count( $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ] ) > 1 ? 'splitted' : '' );
 
         $raw_wc_time  = $this->total_raw_word_count / INIT::$ANALYSIS_WORDS_PER_DAYS;
         $tm_wc_time   = $this->tm_analysis_wc / INIT::$ANALYSIS_WORDS_PER_DAYS;
