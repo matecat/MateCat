@@ -122,7 +122,9 @@ UI = {
 			UI.autoscrollCorrectionEnabled = false;
 		}, 2000);
 		this.checkSegmentsArray = {};
+		this.firstMarking = true;
 		this.markTags();
+		this.firstMarking = false;
 		this.setContextMenu();
 		this.createJobMenu();
 		$('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');
@@ -2477,7 +2479,7 @@ UI = {
 			return false;
 		if (this.noTagsInSegment(1))
 			return false;
-
+console.log('markTags');
 		$('.source').each(function() {
 			UI.detectTags(this);
 		});
@@ -2501,15 +2503,13 @@ UI = {
 		$(ed).focus();
 	},
 	detectTags: function(area) {
-//            if($(area).attr('id') == 'segment-595422-source') {
-//                console.log($(area).html());
-//                $(area).html($(area).html().replace(/(<span.*?)(.*?)(<\/span>)/gi, "\2"));
-//                console.log($(area).html());            
-//            }
-//            $(area).html($(area).html().replace(/(\<span.*?)(\<mark.*?\>)(.*?)(\<\/mark\>)(.*?\<\/span\>)/gi, "$1$3$5"));
-		$(area).html($(area).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-		$(area).html($(area).html().replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-		$(area).html($(area).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
+		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+		//$(area).html($(area).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+		//$(area).html($(area).html().replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+		if(!this.firstMarking) {
+			$(area).html($(area).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));			
+		}
+
 	},
 	markTagsInSearch: function(el) {
 		if (!this.taglockEnabled)
