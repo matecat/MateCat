@@ -3036,59 +3036,46 @@ UI = {
 		}
 		this.updateContribution(source, target);
 	},
-	setContribution: function(segment, status, byStatus) {
-		if ((status == 'draft') || (status == 'rejected'))
+
+	spellCheck: function(ed) {
+		if (!UI.customSpellcheck)
 			return false;
-		var source = $('.source', segment).text();
-		// Attention: to be modified when we will be able to lock tags.
-		var target = $('.editarea', segment).text();
-		if ((target == '') && (byStatus)) {
-			APP.alert('Cannot change status on an empty segment. Add a translation first!');
-		}
-		if (target == '') {
-			return false;
-		}
-		this.updateContribution(source, target);
-	},
-			spellCheck: function(ed) {
-				if (!UI.customSpellcheck)
-					return false;
-				editarea = (typeof ed == 'undefined') ? UI.editarea : $(ed);
-				if ($('#contextMenu').css('display') == 'block')
-					return true;
+		editarea = (typeof ed == 'undefined') ? UI.editarea : $(ed);
+		if ($('#contextMenu').css('display') == 'block')
+			return true;
 
-				APP.doRequest({
-					data: {
-						action: 'getSpellcheck',
-						lang: config.target_rfc,
-						sentence: UI.editarea.text()
-					},
-					context: editarea,
-					success: function(data) {
-						ed = this;
-						$.each(data.result, function(key, value) { //key --> 0: { 'word': { 'offset':20, 'misses':['word1','word2'] } }
+		APP.doRequest({
+			data: {
+				action: 'getSpellcheck',
+				lang: config.target_rfc,
+				sentence: UI.editarea.text()
+			},
+			context: editarea,
+			success: function(data) {
+				ed = this;
+				$.each(data.result, function(key, value) { //key --> 0: { 'word': { 'offset':20, 'misses':['word1','word2'] } }
 
-							var word = Object.keys(value)[0];
-							replacements = value[word]['misses'].join(",");
+					var word = Object.keys(value)[0];
+					replacements = value[word]['misses'].join(",");
 
-							var Position = [
-								parseInt(value[word]['offset']),
-								parseInt(value[word]['offset']) + parseInt(word.length)
-							];
+					var Position = [
+						parseInt(value[word]['offset']),
+						parseInt(value[word]['offset']) + parseInt(word.length)
+					];
 
-							var sentTextInPosition = ed.text().substring(Position[0], Position[1]);
-							//console.log(sentTextInPosition);
+					var sentTextInPosition = ed.text().substring(Position[0], Position[1]);
+					//console.log(sentTextInPosition);
 
-							var re = new RegExp("(\\b" + word + "\\b)", "gi");
-							$(ed).html($(ed).html().replace(re, '<span class="misspelled" data-replacements="' + replacements + '">$1</span>'));
-							// fix nested encapsulation
-							$(ed).html($(ed).html().replace(/(\<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(\<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
+					var re = new RegExp("(\\b" + word + "\\b)", "gi");
+					$(ed).html($(ed).html().replace(re, '<span class="misspelled" data-replacements="' + replacements + '">$1</span>'));
+					// fix nested encapsulation
+					$(ed).html($(ed).html().replace(/(\<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(\<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
 //
 //                    });
-						});
-					}
 				});
-			},
+			}
+		});
+	},
 	addWord: function(word) {
 		APP.doRequest({
 			data: {

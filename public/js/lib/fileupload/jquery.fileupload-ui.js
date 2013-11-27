@@ -106,8 +106,8 @@
 							}
                     	});
                     }
-//                    $(data.context).addClass('has-errors');
-//                    UI.checkFailedConversionsNumber();
+                    $(data.context).addClass('has-errors');
+                    UI.checkFailedConversionsNumber();
 // END Customization by Andrea Martines (Translated) 25/01/2013
 
 
