@@ -1248,6 +1248,7 @@ function getProjectData( $pid, $project_password = null, $jid = null ) {
                     WHERE p.id= '$pid'
 
                     %s
+                    AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
                     %s
 
                     GROUP BY f.id, j.id, j.password
@@ -1270,6 +1271,8 @@ function getProjectData( $pid, $project_password = null, $jid = null ) {
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
+
+    //echo "<pre>" .var_export( $results , true ) . "</pre>";
 
     return $results;
 }
@@ -1472,15 +1475,36 @@ function getProjectStatsVolumeAnalysis2( $pid, $groupby = "job" ) {
 
 function getProjectStatsVolumeAnalysis( $pid ) {
 
-    $query = "select st.id_job as jid,st.id_segment as sid, s.id_file, s.raw_word_count,
-		st.suggestion_source, st.suggestion_match, st.eq_word_count, st.standard_word_count, st.match_type,
-		p.status_analysis, p.fast_analysis_wc,p.tm_analysis_wc,p.standard_analysis_wc,
-		st.tm_analysis_status as st_status_analysis
-			from segment_translations as st
-			join segments as s on st.id_segment=s.id
-			join jobs as j on j.id=st.id_job
-			join projects as p on p.id=j.id_project
-			where p.id=$pid and p.status_analysis in ('NEW', 'FAST_OK','DONE') and st.match_type<>''";
+    $query = "SELECT
+                st.id_job AS jid,
+                st.id_segment AS sid,
+                s.id_file,
+                s.raw_word_count,
+                st.suggestion_source,
+                st.suggestion_match,
+                st.eq_word_count,
+                st.standard_word_count,
+                st.match_type,
+                p.status_analysis,
+                p.fast_analysis_wc,
+                p.tm_analysis_wc,
+                p.standard_analysis_wc,
+                st.tm_analysis_status AS st_status_analysis
+            FROM
+                segment_translations AS st
+                    JOIN
+                segments AS s ON st.id_segment = s.id
+                    JOIN
+                jobs AS j ON j.id = st.id_job
+                    JOIN
+                projects AS p ON p.id = j.id_project
+            WHERE
+                p.id = $pid
+                    AND p.status_analysis IN ('NEW' , 'FAST_OK', 'DONE')
+                    AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
+                    AND st.match_type <> ''";
+
+    Log::doLog($query);
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
