@@ -1103,17 +1103,17 @@ UI = {
 		this.currentFileId = this.currentFile.attr('id').split('-')[1];
 	},
 	applySearch: function(segment) {
-		console.log('apply search');
 		if (this.body.hasClass('searchActive'))
-			if(!$('mark.searchMarker', segment).length) {
+//			if(!$('mark.searchMarker', segment).length) {
 				this.markSearchResults({
 					singleSegment: segment
 				})				
-			}
+//			}
 	},
 	changeStatus: function(ob, status, byStatus) {
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
 		$('.percentuage', segment).removeClass('visible');
+		console.log('CHANGE STATUS');
 		this.setTranslation(segment, status);
 		this.setContribution(segment, status, byStatus);
 		this.setContributionMT(segment, status, byStatus);
@@ -1688,7 +1688,6 @@ UI = {
 
 		} else { // search mode: normal
 			console.log('search mode: normal');
-			console.log(UI.editarea.html());
 			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
 			if (typeof p['source'] != 'undefined') {
 				what = ' .source';
@@ -1702,18 +1701,17 @@ UI = {
 			}
 //			var what = (typeof p['source'] != 'undefined') ? ' .source' : (typeof p['target'] != 'undefined') ? ' .editarea' : '';
 			var what = (typeof p['source'] != 'undefined') ? ' .source' : (typeof p['target'] != 'undefined') ? ':not(.status-new) .editarea' : '';
-			q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + what;
+			q = (singleSegment) ? '#' + $(singleSegment).attr('id') + what : "section" + status + what;
 
 //            q = "section" + status + what;
 			var reg = new RegExp('(' + htmlEncode(txt) + ')', "g" + ignoreCase);
 			if (typeof where == 'undefined') {
 //				if(UI.body.hasClass('searchActive')) return false;
 				items = $(q + ":" + containsFunc + "('" + txt + "')");
+				console.log(items);
 				filteredItems = UI.filterExactMatch(items, txt);
 //                filteredItems = (p['exact-match'])? items.filter(function() { return $(this).text() == txt; }) : items;
 				$(filteredItems).each(function() {
-					console.log(reg);
-					console.log($(this));
 //                $(q + ":" + containsFunc + "('"+txt+"')").each(function() {
 					$(this).html($(this).html().replace(reg, '<mark class="searchMarker">$1</mark>').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4"));
 				});
@@ -2967,6 +2965,7 @@ UI = {
 		if (status == 'new') {
 			status = 'draft';
 		}
+		console.log('SAVE SEGMENT');
 		this.setTranslation(segment, status);
 	},
 	renderAndScrollToSegment: function(sid, file) {
@@ -3519,6 +3518,7 @@ UI = {
 		}, 'local');
 	},
 	setTranslation: function(segment, status) {
+		console.log('SET TRANSLATION');
 		var info = $(segment).attr('id').split('-');
 		var id_segment = info[1];
 		var file = $(segment).parents('article');
@@ -3533,6 +3533,19 @@ UI = {
 		var errors = '';
 		errors = this.collectSegmentErrors(segment);
 		var chosen_suggestion = $('.editarea', segment).data('lastChosenSuggestion');
+		
+		if(this.body.hasClass('searchActive')) {
+			this.applySearch(segment);
+			oldNum = parseInt($(segment).attr('data-searchitems'));
+			newNum = parseInt($('mark.searchMarker', segment).length);
+			console.log(segment);
+			console.log(oldNum);
+			console.log(newNum);
+			numRes = $('.search-display .numbers .results');
+			numRes.text(parseInt(numRes.text()) - oldNum + newNum);
+//			$(segment).removeAttr('data-searchitems');			
+		}
+
 
 		APP.doRequest({
 			data: {
@@ -3582,9 +3595,6 @@ UI = {
 		$('#contextMenu .shortcut .cmd').html(cmd);
 	},
 	setTranslation_success: function(d, segment, status) {
-		console.log(d);
-		console.log(segment);
-		console.log(status);
 		if (d.error.length)
 			this.processErrors(d.error, 'setTranslation');
 		if (d.data == 'OK') {
