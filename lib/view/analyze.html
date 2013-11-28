@@ -234,7 +234,7 @@
                     </h3>
 
                     <div class="splitbtn-cont">
-                        <span class="splitmsg">Splitted in 2 parts</span><!-- A: questo compare quando il job è già stato splittato  -->
+                        <span class="splitmsg">Splitted in 2 parts</span>
                         <span class="label left">Split in</span>
                         <select name="" class="splitselect">
                             <option value="2">2</option>
@@ -246,10 +246,30 @@
                             <option value="8">8</option>
                             <option value="9">9</option>
                             <option value="10">10</option>
+                            <option value="11">11</option>
+                            <option value="12">12</option>
+                            <option value="13">13</option>
+                            <option value="14">14</option>
+                            <option value="15">15</option>
+                            <option value="16">16</option>
+                            <option value="17">17</option>
+                            <option value="18">18</option>
+                            <option value="19">19</option>
+                            <option value="20">20</option>
+                            <option value="21">21</option>
+                            <option value="22">22</option>
+                            <option value="23">23</option>
+                            <option value="24">24</option>
+                            <option value="25">25</option>
+                            <option value="26">26</option>
+                            <option value="27">27</option>
+                            <option value="28">28</option>
+                            <option value="29">29</option>
+                            <option value="30">30</option>
                         </select>
                         <span class="label left">Jobs</span>
                         <a tal:attributes="" href="#" class="dosplit splitbtn">Split</a>
-                        <a tal:attributes="" href="#" class="mergebtn">Merge</a><!-- A: questo compare quando il job è già stato splittato  -->
+                        <a tal:attributes="" href="#" class="mergebtn">Merge</a>
                     </div>
                     <div class="nosplit">Job already splitted</div>
                     <!-- END CONTAINER SPLIT JOBS BUTTONS  -->
@@ -293,7 +313,7 @@
                         </tbody>
                    
                     <tal:block tal:define="job php:array()" tal:repeat="job id_for_job/chunks">
-                        <tbody class="tablestats">
+                        <tbody class="tablestats" data-jid="${job/jid}" data-pwd="${job/jpassword}">
                             <tr class="totaltable">
                                 <td class="languages">
                                     <span tal:condition="splitted" class="splitnum left">${job/jid}-${repeat/job/number}</span>
@@ -312,11 +332,11 @@
                                 <td class="stat_tmic">0</td>
                                 <td class="stat_mt">0</td>
                                 <td class="empty">
-                                    <a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${job/jid}-${job/jpassword} " href="#" target="_blank" class="uploadbtn">Translate</a>
+                                    <a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${job/jid}-${job/jpassword}" href="#" target="_blank" class="uploadbtn">Translate</a>
                                 </td>
                             </tr>
                             <tal:block tal:define="files job/files; f php:array()" tal:repeat="f files">
-                                <tr tal:attributes="id string:file_${repeat/job/key}_${f/id}" id="file_1703" class="subfile part3files">
+                                <tr tal:attributes="id string:file_${job/jid}_${job/jpassword}_${f/id}" id="file_1703" class="subfile part3files">
                                     <td class="stat-name">
                                         <p class="filename" tal:content="f/filename" tal:attributes='title f/filename'>
                                             filename1.xliff</p></td>

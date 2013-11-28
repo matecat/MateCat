@@ -1477,6 +1477,7 @@ function getProjectStatsVolumeAnalysis( $pid ) {
 
     $query = "SELECT
                 st.id_job AS jid,
+                j.password as jpassword,
                 st.id_segment AS sid,
                 s.id_file,
                 s.raw_word_count,
@@ -2074,7 +2075,7 @@ function getSegmentForTMVolumeAnalysys( $id_segment, $id_job ) {
 }
 
 function getNumSegmentsInQueue( $currentPid ) {
-    $query = "select count(*) as num_segments from segment_translations_analysis_queue where pid <$currentPid";
+    $query = "select count(*) as num_segments from segment_translations_analysis_queue where pid < $currentPid ";
 
     $db      = Database::obtain();
     $results = $db->query_first( $query );

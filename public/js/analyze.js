@@ -46,7 +46,7 @@ UI = {
 */        
         $(".part3").click(function(e){
             e.preventDefault();
-            $(this).parents('table').find(".part3files").toggleClass('open');
+            $(this).parents('tbody').find(".part3files").toggleClass('open');
         });
 /*        
         $(".split").click(function(e){
@@ -71,10 +71,11 @@ UI = {
 //            return false;
             
             e.preventDefault();
-            var job = $(this).parents('.jobcontainer');
+            var jobContainer = $(this).parents('.jobcontainer' );
+            var job = jobContainer.find( 'tbody.tablestats' );
             jid = job.attr('data-jid');
             total = $('.stat-payable .stat_tot', job).first().text().replace(",", "");
-            numsplit = $('.splitselect', job).first().val();
+            numsplit = $('.splitselect', jobContainer).first().val();
             wordsXjob = total / numsplit;
             wordsXjob = Math.floor(wordsXjob);
             diff = total - (wordsXjob*numsplit);
@@ -127,7 +128,7 @@ UI = {
                 $('.popup-split .error-count .curr-w').text(APP.addCommas(ss));
 				var dm = (diff < 0)? 'Words remaining' : 'Words exceeding';
                 $('.popup-split .error-count .txt').text(dm);
-                $('.popup-split .error-count .diff-w').text(Math.abs(APP.addCommas(diff)));
+                $('.popup-split .error-count .diff-w').text(APP.addCommas(Math.abs(diff)));
                 $('.popup-split').addClass('error-number');
             } else {
                 $('.popup-split #exec-split').removeClass('disabled');
@@ -206,29 +207,25 @@ UI = {
     },
 
     checkSplit: function(job) {
-        console.log('split');
+//        console.log('split');
         
-        ar = '[';
+        var ar = new Array();
         $('.popup-split ul.jobs li .input-small').each(function() {
-            ar += $(this).val() + ','
+            ar.push( parseInt( $(this).val() ) );
         });
-        ar = ar.substring(0, ar.length - 1) + ']';
-//        console.log(ar);
-            
+
         APP.doRequest({
             data: {
                 action: "splitJob",
                 exec: "check",
                 project_id: $('#pid').attr('data-pid'),
                 project_pass: $('#pid').attr('data-pwd'),
-//                project_pass: 'd',
                 job_id: $('.popup-split h1 .jid').attr('data-jid'),
                 job_pass: $('.popup-split h1 .jid').attr('data-pwd'),
                 num_split: $('.popup-split h1 .chunks').text(),
                 split_values: ar
-
             },
-            success: function(d) {console.log('success');
+            success: function(d) {
                 var total = $('.popup-split .wordsum .total-w').attr('data-val');
                 var prog = 0;
                 if(!$.isEmptyObject(d.data)) {
@@ -245,7 +242,7 @@ UI = {
                     $('.popup-split .text').text('Confirm');
                     $('.popup-split .loader').addClass('none');
                     $('.popup-split .done').removeClass('none');
-                    $('.popup-split .aprox').toggleClass('none');
+                    $('.popup-split .aprox').addClass('none');
                     $('.popup-split .correct').removeClass('none');
                 };
                 if((typeof d.errors != 'undefined')&&(d.errors.length)) {
@@ -261,7 +258,6 @@ UI = {
 
 //                console.log(d);
 
-//                                
 //                console.log(d.data.chunks);
 //                $(".popup-outer").fadeOut();
 //                $(".popup").fadeOut('fast');
@@ -270,12 +266,12 @@ UI = {
     },
 
     confirmSplit: function(job) {
-        console.log('confirm split');
-        ar = '[';
+//        console.log('confirm split');
+        
+        var ar = new Array();
         $('.popup-split ul.jobs li .input-small').each(function() {
-            ar += $(this).val() + ','
+            ar.push( parseInt( $(this).val() ) );
         });
-        ar = ar.substring(0, ar.length - 1) + ']';
         
         APP.doRequest({
             data: {
@@ -283,12 +279,10 @@ UI = {
                 exec: "apply",
                 project_id: $('#pid').attr('data-pid'),
                 project_pass: $('#pid').attr('data-pwd'),
-//                project_pass: 'd',
                 job_id: $('.popup-split h1 .jid').attr('data-jid'),
                 job_pass: $('.popup-split h1 .jid').attr('data-pwd'),
                 num_split: $('.popup-split h1 .chunks').text(),
                 split_values: ar
-
             },
             success: function(d) {
 //                setTimeout(function(){
@@ -336,7 +330,7 @@ UI = {
                     $('.sticky').css({
                         position: 'fixed', 
                         top: 50, 
-                        left: 0,
+                        left: 0
                     });
                 } else {
                     $('.sticky').css('position','static');
@@ -452,6 +446,10 @@ UI = {
 
                     $.each(d.data.jobs, function(key,value) {
                         tot = value.totals;
+
+                        //FIXME
+                        //here you can get the dom by
+
                         context = $('#job-' + key);
                         var s_total = $('.totaltable .stat_tot',context);
                         s_total_txt = s_total.text();
@@ -494,47 +492,54 @@ UI = {
                         s_mt.text(tot.MT[1]);
                         if(s_mt_txt != tot.MT[1]) s_mt.effect("highlight", {}, 1000);
 
-                        $.each(value.file_details, function(id_file,fd) {
-                            var row = $('#file_'+ key + '_' + id_file);
-                            var s_tot = $('.stat_payable',row);
+                        //FIXME now 2 cycles are needed, DOM is changed
+                        //each( value.chunks, function( jobpassword, files_object ){
+                        //      each( files_object, function( id_file, file_details ){
+                        //          var row = $('#file_' + key + '_' + jobpassword +'_' + id_file);
+                        //      }
+                        //}
+
+                        $.each(value.file_details, function (id_file, fd) {
+                            var row = $('#file_' + key + '_' + id_file);
+                            var s_tot = $('.stat_payable', row);
                             s_tot_txt = s_tot.text();
                             s_tot.text(fd.TOTAL_PAYABLE[1]);
-                            if(s_tot_txt != fd.TOTAL_PAYABLE[1]) s_tot.effect("highlight", {}, 1000);
+                            if (s_tot_txt != fd.TOTAL_PAYABLE[1]) s_tot.effect("highlight", {}, 1000);
 
-                            var s_new = $('.stat_new',row);
+                            var s_new = $('.stat_new', row);
                             s_new_txt = s_new.text();
                             s_new.text(fd.NEW[1]);
-                            if(s_new_txt != fd.NEW[1]) s_new.effect("highlight", {}, 1000);
-    
-                            var s_rep = $('.stat_rep',row);
+                            if (s_new_txt != fd.NEW[1]) s_new.effect("highlight", {}, 1000);
+
+                            var s_rep = $('.stat_rep', row);
                             s_rep_txt = s_rep.text();
                             s_rep.text(fd.REPETITIONS[1]);
-                            if(s_rep_txt != fd.REPETITIONS[1]) s_rep.effect("highlight", {}, 1000);
-    
-                            var s_int = $('.stat_int',row);
+                            if (s_rep_txt != fd.REPETITIONS[1]) s_rep.effect("highlight", {}, 1000);
+
+                            var s_int = $('.stat_int', row);
                             s_int_txt = s_int.text();
                             s_int.text(fd.INTERNAL_MATCHES[1]);
-                            if(s_int_txt != fd.INTERNAL_MATCHES[1]) s_int.effect("highlight", {}, 1000);
-    
-                            var s_tm75 = $('.stat_tm75',row);
+                            if (s_int_txt != fd.INTERNAL_MATCHES[1]) s_int.effect("highlight", {}, 1000);
+
+                            var s_tm75 = $('.stat_tm75', row);
                             s_tm75_txt = s_tm75.text();
                             s_tm75.text(fd.TM_75_99[1]);
-                            if(s_tm75_txt != fd.TM_75_99[1]) s_tm75.effect("highlight", {}, 1000);
-    
-                            var s_tm100 = $('.stat_tm100',row);
+                            if (s_tm75_txt != fd.TM_75_99[1]) s_tm75.effect("highlight", {}, 1000);
+
+                            var s_tm100 = $('.stat_tm100', row);
                             s_tm100_txt = s_tm100.text();
                             s_tm100.text(fd.TM_100[1]);
-                            if(s_tm100_txt != fd.TM_100[1]) s_tm100.effect("highlight", {}, 1000);
-    
-                            var s_tmic = $('.stat_tmic',row);
+                            if (s_tm100_txt != fd.TM_100[1]) s_tm100.effect("highlight", {}, 1000);
+
+                            var s_tmic = $('.stat_tmic', row);
                             s_tmic_txt = s_tmic.text();
                             s_tmic.text(fd.ICE[1]);
-                            if(s_tmic_txt != fd.ICE[1]) s_tmic.effect("highlight", {}, 1000);
-    
-                            var s_mt = $('.stat_mt',row);
+                            if (s_tmic_txt != fd.ICE[1]) s_tmic.effect("highlight", {}, 1000);
+
+                            var s_mt = $('.stat_mt', row);
                             s_mt_txt = s_mt.text();
                             s_mt.text(fd.MT[1]);
-                            if(s_mt_txt != fd.MT[1]) s_mt.effect("highlight", {}, 1000);
+                            if (s_mt_txt != fd.MT[1]) s_mt.effect("highlight", {}, 1000);
 
                         });
                     });

@@ -17,6 +17,7 @@ ALTER TABLE `matecat_local`.`segment_translations`
     CHANGE COLUMN `id_segment` `id_segment` BIGINT NOT NULL, 
     CHANGE COLUMN `id_job` `id_job` BIGINT NOT NULL;
 
+
 UPDATE  jobs AS job1
   INNER JOIN
   (
@@ -32,7 +33,7 @@ UPDATE  jobs AS job1
 SET 
   job1.job_first_segment = job2.min,
   job1.job_last_segment = job2.max
-
+WHERE job1.job_last_segment = 0 OR job1.job_last_segment IS NULL
 
 -- 
 -- ALTER TABLE `segment_translations`
