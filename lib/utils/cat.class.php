@@ -434,7 +434,7 @@ class CatUtils {
     }
 
     /**
-     * Public interface to multiple Job Stats Info
+     * Public method to access to multiple Job Stats Info
      * 
      * @param array $jids
      * @param bool $estimate_performance
