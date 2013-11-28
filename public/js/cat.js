@@ -1103,6 +1103,7 @@ UI = {
 		this.currentFileId = this.currentFile.attr('id').split('-')[1];
 	},
 	applySearch: function(segment) {
+		console.log('apply search');
 		if (this.body.hasClass('searchActive'))
 			if(!$('mark.searchMarker', segment).length) {
 				this.markSearchResults({
@@ -1616,7 +1617,7 @@ UI = {
 		if (this.searchMode == 'onlyStatus') { // search mode: onlyStatus
 			console.log('solo status');
 		} else if (this.searchMode == 'source&target') { // search mode: source&target
-//            console.log('source & target');
+            console.log('source & target');
 			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
 			q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
 			var regSource = new RegExp('(' + htmlEncode(p['source']) + ')', "g" + ignoreCase);
@@ -1686,6 +1687,8 @@ UI = {
 			}
 
 		} else { // search mode: normal
+			console.log('search mode: normal');
+			console.log(UI.editarea.html());
 			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
 			if (typeof p['source'] != 'undefined') {
 				what = ' .source';
@@ -1704,10 +1707,13 @@ UI = {
 //            q = "section" + status + what;
 			var reg = new RegExp('(' + htmlEncode(txt) + ')', "g" + ignoreCase);
 			if (typeof where == 'undefined') {
+//				if(UI.body.hasClass('searchActive')) return false;
 				items = $(q + ":" + containsFunc + "('" + txt + "')");
 				filteredItems = UI.filterExactMatch(items, txt);
 //                filteredItems = (p['exact-match'])? items.filter(function() { return $(this).text() == txt; }) : items;
 				$(filteredItems).each(function() {
+					console.log(reg);
+					console.log($(this));
 //                $(q + ":" + containsFunc + "('"+txt+"')").each(function() {
 					$(this).html($(this).html().replace(reg, '<mark class="searchMarker">$1</mark>').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4"));
 				});
@@ -1735,6 +1741,8 @@ UI = {
 				});
 				$('section.justAdded').removeClass('justAdded');
 			}
+			console.log(UI.editarea.html());
+
 		}
 		if (!singleSegment) {
 			UI.unmarkNumItemsInSegments();
@@ -2577,6 +2585,8 @@ UI = {
 		this.getNextSegment(this.currentSegment, 'untranslated');
 		this.setCurrentSegment(segment);
 		this.currentSegment.addClass('opened');
+
+		this.currentSegment.attr('data-searchItems', ($('mark.searchMarker', this.editarea).length));
 
 		this.fillCurrentSegmentWarnings(this.globalWarnings);
 		this.setNextWarnedSegment();
@@ -3572,6 +3582,9 @@ UI = {
 		$('#contextMenu .shortcut .cmd').html(cmd);
 	},
 	setTranslation_success: function(d, segment, status) {
+		console.log(d);
+		console.log(segment);
+		console.log(status);
 		if (d.error.length)
 			this.processErrors(d.error, 'setTranslation');
 		if (d.data == 'OK') {
