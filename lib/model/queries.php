@@ -1267,8 +1267,6 @@ function getProjectData( $pid, $project_password = null, $jid = null ) {
 
     $query = sprintf( $query, $and_1, $and_2 );
 
-    Log::doLog( $query );
-
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
 
@@ -1504,8 +1502,6 @@ function getProjectStatsVolumeAnalysis( $pid ) {
                     AND p.status_analysis IN ('NEW' , 'FAST_OK', 'DONE')
                     AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
                     AND st.match_type <> ''";
-
-    Log::doLog($query);
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );

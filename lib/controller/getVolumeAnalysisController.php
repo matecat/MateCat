@@ -69,23 +69,21 @@ class getVolumeAnalysisController extends ajaxcontroller {
             $this->total_wc_tm_analysis += $eq_words;
             $this->total_wc_standard_analysis += $st_word_count;
 
-
             //init indexes to avoid notices
             if ( !array_key_exists( $jid, $return_data[ 'jobs' ] ) ) {
                 $return_data[ 'jobs' ][ $jid ]             = array();
                 $return_data[ 'jobs' ][ $jid ][ 'chunks' ] = array();
                 $return_data[ 'jobs' ][ $jid ][ 'totals' ] = array();
-
                 $total_payable[ $jid ]                     = array();
-
             }
 
-            if ( !array_key_exists( $jpassword, $return_data[ 'jobs' ][$jid]['chunks'] )  ) {
-                $return_data[ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ] = $total_init;
+            if ( !array_key_exists( $jpassword, $return_data[ 'jobs' ][$jid]['chunks'] ) ) {
                 $return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ] = array();
-
                 $total_payable[ $jid ][ $jpassword ] = array();
+            }
 
+            if( !array_key_exists( $jpassword, $return_data[ 'jobs' ][ $jid ][ 'totals' ] ) ){
+                $return_data[ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ] = $total_init;
             }
 
             if ( !isset( $return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ] ) ) {
@@ -116,7 +114,12 @@ class getVolumeAnalysisController extends ajaxcontroller {
             $w           = $return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ $keyValue ][ 0 ] + $words;
             $words_print = number_format( $w, 0, ".", "," );
 
-            $return_data[ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ] = array( $w, $words_print );
+
+            $tmp_tot = $return_data[ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ][0];
+            $tmp_tot += $words;
+            $words_print = number_format( $tmp_tot, 0, ".", "," );
+            $return_data[ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ] = array( $tmp_tot, $words_print );
+
 
             //SUM WITH PREVIOUS ( Accumulator )
             $eq_words    = $return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ "TOTAL_PAYABLE" ][ 0 ] + $eq_words;
