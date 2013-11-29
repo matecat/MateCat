@@ -45,6 +45,7 @@ class INIT {
 	public static $SPELL_CHECK_TRANSPORT_TYPE;
 	public static $SPELL_CHECK_ENABLED;
 	public static $MAX_UPLOAD_FILE_SIZE;
+    public static $MAX_NUM_FILES;
 
 	private function initOK() {
 
