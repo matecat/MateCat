@@ -90,7 +90,7 @@ UI = {
                 numw = wordsXjob;
                 if(i < diff) numw++;
                 item =  '<li>' +
-                        '   <div><h4>Chunk ' + (i+1) + '</h4></div>' +
+                        '   <div><h4>Part ' + (i+1) + '</h4></div>' +
                         '   <div class="job-details">' +
                         '       <div class="job-perc">' +
                         '           <p><span class="aprox">Aprox. words:</span><span class="correct none">Words:</span></p>' + 
@@ -113,29 +113,29 @@ UI = {
             APP.closePopup();
         }).on('click', '.popup-split .x-popup', function(e) {
             UI.resetSplitPopup();
-        }).on('input', '.popup-split .jobs .input-small', function(e) {
+        }).on('blur', '.popup-split .jobs .input-small', function(e) {
             e.preventDefault();
-            $(this).attr('value', $(this).val().replace(/[^0-9\.]/g,''));
-            ss = 0;
-            $('.popup-split .jobs .input-small').each(function() {
-                ss += parseInt($(this).val());
-            });
-            diff = ss - parseInt($('.popup-split .total .total-w').attr('data-val'));
-            if(diff != 0) {
-                $('.popup-split .btnsplit .done').addClass('none');
-                $('.popup-split #exec-split').removeClass('none').addClass('disabled').attr('disabled', 'disabled');
-                $('.popup-split #exec-split .text').text('Check');
-                $('.popup-split .error-count .curr-w').text(APP.addCommas(ss));
-				var dm = (diff < 0)? 'Words remaining' : 'Words exceeding';
-                $('.popup-split .error-count .txt').text(dm);
-                $('.popup-split .error-count .diff-w').text(APP.addCommas(Math.abs(diff)));
-                $('.popup-split').addClass('error-number');
-            } else {
-                $('.popup-split #exec-split').removeClass('disabled');
-                $('.popup-split').removeClass('error-number');                
-            }
+            UI.performPreCheckSplitComputation();
+        }).on('focus', '.popup-split .jobs .input-small', function(e) {
+            e.preventDefault();
+
+            //if input area is focused we need to check again
+            $('.popup-split .text').text('Check');
+            $('.popup-split #exec-split').removeAttr('disabled').removeClass('disabled').removeClass('none');
+            $('.popup-split #exec-split-confirm').addClass('none');
+            $('span.correct').addClass('none');
+            $('span.aprox').removeClass('none');
+
+            UI.performPreCheckSplitComputation(false);
+
+        }).on('mouseover', '.popup-split .wordsum', function(){
+            UI.performPreCheckSplitComputation();
         }).on('click', '.popup-split #exec-split', function(e) {
             e.preventDefault();
+
+            //disable check Button if there are an error
+            if ( $(this).hasClass( 'disabled' ) ) return false;
+
             $('.popup-split .error-message').addClass('none');
             $(this).addClass('disabled');
             $('.uploadloader').addClass('visible');
@@ -196,6 +196,38 @@ UI = {
 
         this.pollData();
         this.checkSticky();
+    },
+
+    performPreCheckSplitComputation: function( doStringSanitization ){
+
+        ss = 0;
+        $('.popup-split .jobs .input-small').each(function() {
+
+            if( doStringSanitization === false ){
+                //remove dot or commas from input area and sum them
+                //this place the cursor at the right end of input area so, in focus we want that not happens
+                //string is already sanitized
+                $(this).attr( 'value', $(this).val().replace(/[^0-9\.,]/g,'') );
+            }
+
+            ss += parseInt($(this).val());
+        });
+
+        diff = ss - parseInt($('.popup-split .total .total-w').attr('data-val'));
+        if(diff != 0) {
+            $('.popup-split .btnsplit .done').addClass('none');
+            $('.popup-split #exec-split').removeClass('none').addClass('disabled').attr('disabled', 'disabled');
+            $('.popup-split #exec-split').removeClass('none').addClass('disabled').attr('disabled', 'disabled');
+            $('.popup-split #exec-split .text').text('Check');
+            $('.popup-split .error-count .curr-w').text(APP.addCommas(ss));
+            var dm = (diff < 0)? 'Words remaining' : 'Words exceeding';
+            $('.popup-split .error-count .txt').text(dm);
+            $('.popup-split .error-count .diff-w').text(APP.addCommas(Math.abs(diff)));
+            $('.popup-split').addClass('error-number');
+        } else {
+            $('.popup-split #exec-split').removeClass('disabled');
+            $('.popup-split').removeClass('error-number');
+        }
     },
 
     checkStatus: function(status) {
@@ -267,7 +299,7 @@ UI = {
 
     confirmSplit: function(job) {
 //        console.log('confirm split');
-        
+
         var ar = new Array();
         $('.popup-split ul.jobs li .input-small').each(function() {
             ar.push( parseInt( $(this).val() ) );
@@ -643,3 +675,26 @@ $(document).ready(function(){
     UI.init();
 });
 
+//Add these to jquery handler
+//jQuery.fn.setSelection = function(selectionStart, selectionEnd) {
+//    if(this.length == 0) return this;
+//    input = this[0];
+//
+//    if (input.createTextRange) {
+//        var range = input.createTextRange();
+//        range.collapse(true);
+//        range.moveEnd('character', selectionEnd);
+//        range.moveStart('character', selectionStart);
+//        range.select();
+//    } else if (input.setSelectionRange) {
+//        input.focus();
+//        input.setSelectionRange(selectionStart, selectionEnd);
+//    }
+//
+//    return this;
+//};
+//
+//jQuery.fn.setCursorPosition = function(position){
+//    if(this.length == 0) return this;
+//    return $(this).setSelection(position, position);
+//};

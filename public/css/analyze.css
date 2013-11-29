@@ -490,6 +490,9 @@ a:hover{text-decoration:none}
 {
     display: block;
 }
+.popup-split.error-number .error-count.current{
+    color: black !important;
+}
 
 .preview{width:40px;}
 .name{width:230px;}
