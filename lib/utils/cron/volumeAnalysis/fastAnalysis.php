@@ -23,7 +23,7 @@ while (1) {
 
 		$segments=getSegmentsForFastVolumeAnalysys($pid);
 
-		$fastReport = $ws->fastAnalysys($segments);
+		$fastReport = $ws->fastAnalysis($segments);
 
 		$data=$fastReport['data'];
 		foreach ($data as $k=>$v){

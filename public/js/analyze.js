@@ -406,7 +406,7 @@ UI = {
 
                             //increasing number of segments ( fast analysis on another project )
                             if( UI.previousQueueSize < s.IN_QUEUE_BEFORE ) {
-                                $('#shortloading').children().replaceWith('<p class="label">There are another project in queue. Please wait...</p>');
+                                $('#shortloading').children().replaceWith('<p class="label">There are other projects in queue. Please wait...</p>');
                             } else { //decreasing ( TM analysis on another project )
 
                                 if( !$('#shortloading .queue').length ) {

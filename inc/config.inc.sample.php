@@ -45,7 +45,7 @@ class INIT {
 	public static $SPELL_CHECK_TRANSPORT_TYPE;
 	public static $SPELL_CHECK_ENABLED;
 	public static $MAX_UPLOAD_FILE_SIZE;
-    public static $MAX_NUM_FILES;
+	public static $MAX_NUM_FILES;
 
 	private function initOK() {
 
@@ -149,7 +149,7 @@ class INIT {
 		}
 
 		//auth sections
-        self::$AUTHSECRET_PATH=  self::$ROOT . '/lib/utils/openid/login_secret.dat';
+		self::$AUTHSECRET_PATH=  self::$ROOT . '/lib/utils/openid/login_secret.dat';
 		//if secret is set in file
 		if(file_exists(self::$AUTHSECRET_PATH)){
 			//fetch it
@@ -185,8 +185,8 @@ class INIT {
 		self::$SPELL_CHECK_ENABLED = false;
 
 		self::$SAVE_SHASUM_FOR_FILES_LOADED = true;
-        self::$MAX_UPLOAD_FILE_SIZE = 60 * 1024 * 1024; // bytes
-        self::$MAX_NUM_FILES = 100;
+		self::$MAX_UPLOAD_FILE_SIZE = 60 * 1024 * 1024; // bytes
+		self::$MAX_NUM_FILES = 100;
 
 		self::$SUPPORTED_FILE_TYPES = array(
 				'Office' => array(
