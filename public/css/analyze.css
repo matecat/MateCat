@@ -258,7 +258,7 @@ div.popup-split .uploadbtn {padding:2px 15px!important;}
 
 .splitmsg {display:none;color:#666;margin-top:5px;}
 div.disabled .splitmsg, div.disabled .mergebtn {display:block!important; float:left;}
-div.disabled .label, div.disabled .splitselect, div.disabled .splitbtn, .mergebtn {display:none;}
+div.disabled .label, div.disabled .splitselect, div.disabled .splitbtn {display:none;}
 
 .cancel-btn{background:#f26522 url(../img/xbtn.gif) 13px 14px no-repeat !Important}
 .cancel-btn:hover{background:#d1581c url(../img/xbtn.gif) 13px 14px no-repeat !Important}

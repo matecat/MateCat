@@ -139,9 +139,28 @@ UI = {
             $('.uploadloader').addClass('visible');
             $('.text').text('Checking');
             UI.checkSplit();
+
         }).on('click', '.popup-split #exec-split-confirm', function(e) {
             e.preventDefault();
             UI.confirmSplit();
+        }).on('click', '.mergebtn:not(.disabled)', function(e) {
+                e.preventDefault();
+                $(this).addClass('disabled');
+                var jobContainer = $(this).parents('.jobcontainer');
+                var job = jobContainer.find('tbody.tablestats');
+                jid = job.attr('data-jid');
+                APP.doRequest({
+                    data: {
+                        action: "splitJob",
+                        exec: "merge",
+                        project_id: $('#pid').attr('data-pid'),
+                        project_pass: $('#pid').attr('data-pwd'),
+                        job_id: jid
+                    },
+                    complete: function(d) {
+                        $('.mergebtn.disabled').removeClass('disabled');
+                    }
+                });
         });
 
         
