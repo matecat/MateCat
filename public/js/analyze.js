@@ -68,9 +68,9 @@ UI = {
         $("body").on('click', '.dosplit:not(.disabled)', function(e) {
 
             e.preventDefault();
-            var jobContainer = $(this).parents('.jobcontainer' ); console.log( jobContainer );
-            var job = jobContainer.find( 'tbody.tablestats' );    console.log( job );
-            jid = job.attr('data-jid');                           console.log( jid );
+            var jobContainer = $(this).parents('.jobcontainer' );
+            var job = jobContainer.find( 'tbody.tablestats' );
+            jid = job.attr('data-jid');
             total = $('.stat-payable', job).first().text().replace(",", "");
             numsplit = $('.splitselect', jobContainer).first().val();
             wordsXjob = total / numsplit;
