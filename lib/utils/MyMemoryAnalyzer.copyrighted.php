@@ -11,8 +11,7 @@ include_once (INIT::$UTILS_ROOT."/utils.class.php"); //only for testing purpose
 
 class MyMemoryAnalyzer {
 
-	private $url = "http://mymemory.translated.net";
-	private $root_path = "api";
+	private $url = "http://api-proxied.mymemory.translated.net";
 
 	public function __construct() {
 
@@ -29,7 +28,7 @@ class MyMemoryAnalyzer {
 		$d[ 'df' ]       = "matecat_array";
 		$d[ 'segs' ]     = $json_segs;
 
-		$countwordReport = Utils::curl_post( "$this->url/$this->root_path/analyze", $d );
+		$countwordReport = Utils::curl_post( "$this->url/analyze", $d );
 
 		$reportDecoded=json_decode($countwordReport,true);
 
