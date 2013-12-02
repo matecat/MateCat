@@ -655,6 +655,8 @@ UI = {
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
 			var w = ($(this).hasClass('translated')) ? 'translated' : 'next-untranslated';
 			e.preventDefault();
+			UI.currentSegment.removeClass('modified');
+
 			var skipChange = false;
 			if (w == 'next-untranslated') {
 				console.log('entra');
@@ -996,6 +998,8 @@ UI = {
 			} else {
 				txt = $('#replace-target').val();
 				// todo: rifai il marksearchresults sul target
+				console.log($("mark.currSearchItem"));
+				console.log($("mark.searchMarker").length);
 				$("mark.currSearchItem").text(txt);
 				segment = $("mark.currSearchItem").parents('section');
 				UI.setTranslation(segment, UI.getStatus(segment));
@@ -1106,7 +1110,8 @@ UI = {
 		if (this.body.hasClass('searchActive'))
 //			if(!$('mark.searchMarker', segment).length) {
 				this.markSearchResults({
-					singleSegment: segment
+					singleSegment: segment,
+					where: 'no'
 				})				
 //			}
 	},
@@ -1114,7 +1119,8 @@ UI = {
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
 		$('.percentuage', segment).removeClass('visible');
 		console.log('CHANGE STATUS');
-		this.setTranslation(segment, status);
+		if(!segment.hasClass('saved')) this.setTranslation(segment, status);
+		segment.removeClass('saved');
 		this.setContribution(segment, status, byStatus);
 		this.setContributionMT(segment, status, byStatus);
 		this.applySearch(segment);
@@ -1229,7 +1235,7 @@ UI = {
 //                APP.alert('To confirm your translation, please press on Translated or use the shortcut CMD+Enter.<form><input id="hideAlertConfirmTranslation" type="checkbox"><span>Do not display again</span></form>');
 //            }
 		}
-		this.currentSegment.removeClass('modified');
+//		this.currentSegment.removeClass('modified');
 		this.deActivateSegment(byButton);
 
 		this.lastOpenedEditarea.attr('contenteditable', 'false');
@@ -1588,6 +1594,7 @@ UI = {
 			$('#exec-find[data-func=next]').attr('disabled', 'disabled');
 		if ((this.searchMode == 'source&target') && (this.numSearchResultsSegments < 2))
 			$('#exec-find[data-func=next]').attr('disabled', 'disabled');
+		this.updateSearchItemsCount();
 	},
 	updateSearchDisplayCount: function(segment) {
 		numRes = $('.search-display .numbers .results');
@@ -1596,6 +1603,16 @@ UI = {
 			numSeg = $('.search-display .numbers .segments');
 			numSeg.text(parseInt(numSeg.text()) - 1);
 		}
+		this.updateSearchItemsCount();
+	},
+	updateSearchItemsCount: function() {
+		c = parseInt($('.search-display .numbers .results').text());
+		console.log(c);
+		if (c > 0) {
+			$('#filterSwitch .numbererror').text(c).attr('title', $('.search-display .found').text());
+			
+		} else {
+		}		
 	},
 	execNext: function() {
 		this.gotoNextResultItem(false);
@@ -1605,6 +1622,7 @@ UI = {
 		where = options.where;
 		seg = options.seg;
 		singleSegment = options.singleSegment || false;
+//		console.log(where);
 		if (typeof where == 'undefined') {
 			this.clearSearchMarkers();
 		}
@@ -1708,7 +1726,7 @@ UI = {
 			if (typeof where == 'undefined') {
 //				if(UI.body.hasClass('searchActive')) return false;
 				items = $(q + ":" + containsFunc + "('" + txt + "')");
-				console.log(items);
+//				console.log(items);
 				filteredItems = UI.filterExactMatch(items, txt);
 //                filteredItems = (p['exact-match'])? items.filter(function() { return $(this).text() == txt; }) : items;
 				$(filteredItems).each(function() {
@@ -1739,7 +1757,7 @@ UI = {
 				});
 				$('section.justAdded').removeClass('justAdded');
 			}
-			console.log(UI.editarea.html());
+//			console.log(UI.editarea.html());
 
 		}
 		if (!singleSegment) {
@@ -2265,17 +2283,14 @@ UI = {
 				$('#segment-' + options.segmentToOpen + ' .editarea').click();
 			}
 			if (($('#segment-' + UI.currentSegmentId).length) && (!$('section.editor').length)) {
-				console.log('a');
+//				console.log('a');
 				UI.openSegment(UI.editarea);
 			}
-			;
 			if (options.caller == 'link2file') {
 				if (UI.segmentIsLoaded(UI.currentSegmentId)) {
 					UI.openSegment(UI.editarea);
 				}
-				;
 			}
-			;
 
 			if ($('#segment-' + UI.startSegmentId).hasClass('readonly')) {
 				this.scrollSegment($('#segment-' + UI.startSegmentId));
@@ -2337,7 +2352,8 @@ UI = {
 			$('.editarea, .area', seg).text(this.translation);
 			if (UI.body.hasClass('searchActive'))
 				UI.markSearchResults({
-					singleSegment: segment
+					singleSegment: segment,
+					where: 'no'
 				})
 			status = (this.status == 'DRAFT') ? 'draft' : (this.status == 'TRANSLATED') ? 'translated' : (this.status == 'APPROVED') ? 'approved' : (this.status == 'REJECTED') ? 'rejected' : '';
 			UI.setStatus(seg, status);
@@ -2913,6 +2929,7 @@ UI = {
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
 						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : this.translation) + '</div>' +
+						'						<p class="save-warning" title="Segment modified but not saved"></p>' +
 						'					</div> <!-- .textarea-container -->' +
 						'				</div> <!-- .target -->' +
 						'			</div></div> <!-- .wrap -->' +
@@ -2967,6 +2984,7 @@ UI = {
 		}
 		console.log('SAVE SEGMENT');
 		this.setTranslation(segment, status);
+		segment.addClass('saved');
 	},
 	renderAndScrollToSegment: function(sid, file) {
 		$('#outer').empty();

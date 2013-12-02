@@ -1900,3 +1900,27 @@ body.filterOpen #outer
     {
     margin-top: 95px;
     }
+
+.save-warning
+    {
+	display: none;
+	width: 6px;
+	height: 6px;
+	margin-top: 0;
+	margin-left: 101%;
+	background: red;
+    }
+section.modified .save-warning
+    {
+	display: block;
+    }
+
+#filterSwitch .numbererror
+	{
+	display: none;
+	margin: 0 0 0 30px !important;
+	}
+body.searchActive:not(.filterOpen) #filterSwitch .numbererror
+	{
+	display: block;
+	}

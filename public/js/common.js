@@ -59,6 +59,7 @@ APP = {
             type: 'confirm',
             name: options.name,
             onConfirm: options.callback,
+			caller: options.caller,
             onCancel: options.onCancel,
             title: 'Confirmation required',
             cancelTxt: options.cancelTxt,
@@ -152,6 +153,7 @@ APP = {
                              '<a href="#" class="btn-ok"' + ((conf.onConfirm)? ' data-callback="' + conf.onConfirm + '"' : '') + '>' + ((conf.okTxt)? conf.okTxt : 'Ok') + '<\a>';    
             APP.confirmCallbackFunction = (conf.onConfirm)? conf.onConfirm : null;
             APP.cancelCallbackFunction = (conf.onCancel)? conf.onCancel : null;
+            APP.callerObject = (conf.caller)? conf.caller : null;
         } else {
             $.each(conf.buttons, function(index) {
                 var cl = (this.type == 'ok')? 'btn-ok' : (this.type == 'cancel')? 'btn-cancel' : '';
