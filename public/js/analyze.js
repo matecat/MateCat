@@ -92,7 +92,7 @@ UI = {
                         '   <div><h4>Part ' + (i+1) + '</h4></div>' +
                         '   <div class="job-details">' +
                         '       <div class="job-perc">' +
-                        '           <p><span class="aprox">Aprox. words:</span><span class="correct none">Words:</span></p>' +
+                        '           <p><span class="aprox">Approx. words:</span><span class="correct none">Words:</span></p>' +
                         '           <input type="text" class="input-small" value="' + numw + '">' +
                         '       </div>' +
                         '   </div>' +
