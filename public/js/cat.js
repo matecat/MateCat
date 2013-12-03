@@ -193,6 +193,8 @@ UI = {
 		}).bind('keydown', 'Backspace', function(e) {
 		}).bind('keydown', 'Meta+f', function(e) {
 			UI.toggleSearch(e);
+		}).bind('keydown', 'Ctrl+f', function(e) {
+			UI.toggleSearch(e);
 		}).on('change', '#hideAlertConfirmTranslation', function(e) {
 			console.log($(this).prop('checked'));
 			if ($(this).prop('checked')) {
@@ -519,6 +521,9 @@ UI = {
 				}
 			}
 
+			if (!((e.which == 37)||(e.which == 38)||(e.which == 39)||(e.which == 40))) { // arrow
+				if(UI.body.hasClass('searchActive')) UI.resetSearch();
+			}
 			if (e.which == 32) { // space
 				setTimeout(function() {
 					UI.saveInUndoStack('space');
@@ -539,6 +544,7 @@ UI = {
 
 		}).on('input', '.editarea', function(e) {
 			console.log('input');
+			if(UI.body.hasClass('searchActive')) UI.resetSearch();
 			UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
 			if (UI.draggingInsideEditarea) {
 				$(UI.tagToDelete).remove();
@@ -977,7 +983,6 @@ UI = {
 					segmentToOpen: UI.currentSegmentId
 				})
 			}
-			;
 
 		});
 		$("#exec-replace").click(function(e) {
@@ -998,12 +1003,18 @@ UI = {
 			} else {
 				txt = $('#replace-target').val();
 				// todo: rifai il marksearchresults sul target
-				console.log($("mark.currSearchItem"));
-				console.log($("mark.searchMarker").length);
+//				console.log($("mark.currSearchItem"));
+//				console.log($("mark.searchMarker").length);
 				$("mark.currSearchItem").text(txt);
 				segment = $("mark.currSearchItem").parents('section');
-				UI.setTranslation(segment, UI.getStatus(segment));
+				UI.setTranslation(segment, UI.getStatus(segment), 'replace');
+//				console.log($("mark.searchMarker", segment).length);
+//				console.log($(segment).attr('data-searchItems'));
 				UI.updateSearchDisplayCount(segment);
+//				console.log($(segment).attr('data-searchItems'));
+//				console.log($("mark.searchMarker", segment).length);
+				$(segment).attr('data-searchItems', $('mark.searchMarker', segment).length);
+
 				UI.gotoNextResultItem(true);
 				
 
@@ -1108,12 +1119,20 @@ UI = {
 	},
 	applySearch: function(segment) {
 		if (this.body.hasClass('searchActive'))
+//			console.log(segment);
 //			if(!$('mark.searchMarker', segment).length) {
 				this.markSearchResults({
 					singleSegment: segment,
 					where: 'no'
 				})				
 //			}
+	},
+	resetSearch: function() {
+		this.body.removeClass('searchActive');
+		this.clearSearchMarkers();
+		this.setFindFunction('find');
+		$('#exec-find').removeAttr('disabled');
+		this.enableTagMark();
 	},
 	changeStatus: function(ob, status, byStatus) {
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
@@ -1607,22 +1626,20 @@ UI = {
 	},
 	updateSearchItemsCount: function() {
 		c = parseInt($('.search-display .numbers .results').text());
-		console.log(c);
 		if (c > 0) {
 			$('#filterSwitch .numbererror').text(c).attr('title', $('.search-display .found').text());
-			
 		} else {
 		}		
 	},
 	execNext: function() {
 		this.gotoNextResultItem(false);
 	},
-	markSearchResults: function(options) { // if where is specified mark only the range of segment before or after seg (no previous clear)
+	markSearchResults: function(options) { // if where is specified mark only the range of segment before or after seg (no previous clear)		
 		options = options || {};
-		where = options.where;
+		where = options.where; console.log(where);
 		seg = options.seg;
 		singleSegment = options.singleSegment || false;
-//		console.log(where);
+		console.log('singleSegment: ', singleSegment);
 		if (typeof where == 'undefined') {
 			this.clearSearchMarkers();
 		}
@@ -1718,14 +1735,30 @@ UI = {
 				txt = '';
 			}
 //			var what = (typeof p['source'] != 'undefined') ? ' .source' : (typeof p['target'] != 'undefined') ? ' .editarea' : '';
-			var what = (typeof p['source'] != 'undefined') ? ' .source' : (typeof p['target'] != 'undefined') ? ':not(.status-new) .editarea' : '';
-			q = (singleSegment) ? '#' + $(singleSegment).attr('id') + what : "section" + status + what;
+			if(singleSegment) {
+				var what = (typeof p['source'] != 'undefined') ? ' .source' : (typeof p['target'] != 'undefined') ? ' .editarea' : '';
+				q = '#' + $(singleSegment).attr('id') + what;
+				
+			} else {
+				var what = (typeof p['source'] != 'undefined') ? ' .source' : (typeof p['target'] != 'undefined') ? ':not(.status-new) .editarea' : '';
+				q = "section" + status + what;
+				
+			}
+			
+//			var what = (typeof p['source'] != 'undefined') ? ' .source' : (typeof p['target'] != 'undefined') ? ':not(.status-new) .editarea' : '';
+//			q = (singleSegment) ? '#' + $(singleSegment).attr('id') + what : "section" + status + what;
+			console.log(q);
+//			console.log($(singleSegment).attr('class'));
 
 //            q = "section" + status + what;
 			var reg = new RegExp('(' + htmlEncode(txt) + ')', "g" + ignoreCase);
-			if (typeof where == 'undefined') {
+			if ((typeof where == 'undefined')||(where == 'no')) {
+				console.log('aa');
+				console.log('$(' + q + ':' + containsFunc + "('" + txt + "')");
+
 //				if(UI.body.hasClass('searchActive')) return false;
 				items = $(q + ":" + containsFunc + "('" + txt + "')");
+				console.log(items);
 //				console.log(items);
 				filteredItems = UI.filterExactMatch(items, txt);
 //                filteredItems = (p['exact-match'])? items.filter(function() { return $(this).text() == txt; }) : items;
@@ -3219,7 +3252,8 @@ UI = {
 	setCurrentSegment_success: function(d) {
 		if (d.error.length)
 			this.processErrors(d.error, 'setCurrentSegment');
-		this.nextUntranslatedSegmentIdByServer = d.nextUntranslatedSegmentId;
+		this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
+//		this.nextUntranslatedSegmentIdByServer = d.nextUntranslatedSegmentId;
 		this.getNextSegment(this.currentSegment, 'untranslated');
 	},
 	setDeleteSuggestion: function(segment) {
@@ -3535,7 +3569,8 @@ UI = {
 			}
 		}, 'local');
 	},
-	setTranslation: function(segment, status) {
+	setTranslation: function(segment, status, caller) {
+		caller = (typeof caller == 'undefined')? false : caller;
 		console.log('SET TRANSLATION');
 		var info = $(segment).attr('id').split('-');
 		var id_segment = info[1];
@@ -3551,18 +3586,18 @@ UI = {
 		var errors = '';
 		errors = this.collectSegmentErrors(segment);
 		var chosen_suggestion = $('.editarea', segment).data('lastChosenSuggestion');
-		
-		if(this.body.hasClass('searchActive')) {
-			this.applySearch(segment);
-			oldNum = parseInt($(segment).attr('data-searchitems'));
-			newNum = parseInt($('mark.searchMarker', segment).length);
-			console.log(segment);
-			console.log(oldNum);
-			console.log(newNum);
-			numRes = $('.search-display .numbers .results');
-			numRes.text(parseInt(numRes.text()) - oldNum + newNum);
-//			$(segment).removeAttr('data-searchitems');			
+		if(caller != 'replace') {
+			if(this.body.hasClass('searchActive')) {
+				console.log('aaa');
+				console.log(segment);
+				this.applySearch(segment);
+				oldNum = parseInt($(segment).attr('data-searchitems'));
+				newNum = parseInt($('mark.searchMarker', segment).length);
+				numRes = $('.search-display .numbers .results');
+				numRes.text(parseInt(numRes.text()) - oldNum + newNum);
+			}
 		}
+
 
 
 		APP.doRequest({
