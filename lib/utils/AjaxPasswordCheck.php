@@ -54,14 +54,22 @@ class AjaxPasswordCheck {
      */
     public function grantJobAccessByJobData( array $jobData, $password, $segmentID = null ){
         $this->jobData = $jobData;
+
+        //array of jobs permitted because of job split
         if( isset( $this->jobData[0] ) && is_array( $this->jobData[0] ) ){
+
+            //we have to find at least one job with the correct password inside the job array
             $result = array();
             foreach( $this->jobData as $jD ){
                 $result[] = ( $this->_grantAccess( $jD['password'], $password ) && $this->_grantSegmentPermission( $jD, $segmentID ) );
             }
+
+            //One must be true, else deny access
             if ( array_search( true, $result, true ) !== false ) return true;
 
         } else {
+
+            //simple job request
             return ( $this->_grantAccess( $this->jobData['password'], $password ) && $this->_grantSegmentPermission( $this->jobData, $segmentID ) );
         }
 
@@ -92,14 +100,38 @@ class AjaxPasswordCheck {
         return false;
     }
 
-    public function grantProjectAccess( array $projectJobData, $ppassword, $jpassword ){
+    protected function _grantProjectJobAccess( array $projectJobData, $ppassword, $jpassword = null ){
 
+        $result = array();
         foreach( $projectJobData as $pJD ){
-            $result[] = $this->_grantAccess( $pJD['ppassword'], $ppassword ) && $this->_grantAccess( $pJD['jpassword'], $jpassword ) ;
+
+            //if password is null no request of job check was made
+            $_check_job = ( is_null( $jpassword ) ? true : $this->_grantAccess( $pJD['jpassword'], $jpassword ) );
+
+            $result[] = $this->_grantAccess( $pJD['ppassword'], $ppassword ) && $_check_job ;
         }
 
         if ( array_search( true, $result, true ) !== false ) return true;
         return false;
+
+    }
+
+    public function grantProjectJobAccess( array $projectJobData, $ppassword, $jpassword ){
+        return $this->_grantProjectJobAccess( $projectJobData, $ppassword, $jpassword );
+    }
+
+
+    public function grantProjectAccess( array $projectJobData, $ppassword, $jobID ){
+
+        $job_list = array();
+        foreach( $projectJobData as $pJD ){
+            $job_list[] = $pJD['jid'];
+        }
+
+        //no job id provided, deny access
+        if( array_search( $jobID, $job_list, true ) === false ) return false;
+
+        return $this->_grantProjectJobAccess( $projectJobData, $ppassword );
 
     }
 

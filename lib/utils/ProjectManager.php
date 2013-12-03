@@ -44,6 +44,7 @@ class ProjectManager {
                     'job_to_split'       => null,
                     'job_to_split_pass'  => null,
                     'split_result'       => null,
+                    'job_to_merge'       => null,
                 ) );
         }
 
@@ -405,7 +406,7 @@ class ProjectManager {
             /*
              * Simple Split with pretty equivalent number of words per chunk
              */
-            $words_per_job = array_fill( 0, count($rows), round( $total_words / $num_split, 0 ) );
+            $words_per_job = array_fill( 0, $num_split, round( $total_words / $num_split, 0 ) );
         } else {
             /*
              * User defined words per chunk, needs some checks and control structures
@@ -415,6 +416,9 @@ class ProjectManager {
 
         $counter = array();
         $chunk   = 0;
+
+        $reverse_count = array( 'eq_word_count' => 0, 'raw_word_count' => 0 );
+
         foreach( $rows as $row ) {
 
             if( !array_key_exists( $chunk, $counter ) ){
@@ -437,9 +441,18 @@ class ProjectManager {
             if( $counter[$chunk][ $count_type ] >= $words_per_job[$chunk] && $chunk < $num_split -1 /* chunk is zero based */ ){
                 $counter[$chunk][ 'eq_word_count' ]  = (int)$counter[$chunk][ 'eq_word_count' ];
                 $counter[$chunk][ 'raw_word_count' ] = (int)$counter[$chunk][ 'raw_word_count' ];
+
+                $reverse_count[ 'eq_word_count' ]   += (int)$counter[$chunk][ 'eq_word_count' ];
+                $reverse_count[ 'raw_word_count' ]  += (int)$counter[$chunk][ 'raw_word_count' ];
+
                 $chunk++;
             }
 
+        }
+
+        if( $total_words > $reverse_count[ $count_type ] ){
+            $counter[$chunk][ 'eq_word_count' ]  = round( $row_totals[ 'eq_word_count' ] - $reverse_count[ 'eq_word_count' ] );
+            $counter[$chunk][ 'raw_word_count' ] = round( $row_totals[ 'raw_word_count' ] - $reverse_count['raw_word_count'] );
         }
 
         if( count( $counter ) < 2 ){
@@ -525,6 +538,69 @@ class ProjectManager {
      */
     public function applySplit( ArrayObject $projectStructure ){
         $this->_splitJob( $projectStructure );
+    }
+
+    public function mergeALL( ArrayObject $projectStructure, $renewPassword = false ){
+
+        $query_job = "SELECT *
+                        FROM jobs
+                        WHERE id = %u
+                        ORDER BY job_first_segment";
+
+        $query_job = sprintf( $query_job, $projectStructure[ 'job_to_merge' ] );
+        //$projectStructure[ 'job_to_split' ]
+
+        $jobInfo = mysql_query( $query_job, $this->mysql_link );
+
+        //assignment in condition is often dangerous, deprecated
+        while ( ( $rows[] = mysql_fetch_assoc( $jobInfo ) ) != false );
+        array_pop( $rows ); //destroy last assignment row ( every time === false )
+
+        //get the min and
+        $first_job = reset( $rows );
+        $job_first_segment = $first_job['job_first_segment'];
+
+        //the max segment from job list
+        $last_job = end( $rows );
+        $job_last_segment = $last_job['job_last_segment'];
+
+        //change values of first job
+        $first_job['job_first_segment'] = $job_first_segment; // redundant
+        $first_job['job_last_segment']  = $job_last_segment;
+
+        $oldPassword = $first_job['password'];
+        if ( $renewPassword ){
+            $first_job['password'] = self::_generatePassword();
+        }
+
+        $_data = array();
+        foreach( $first_job as $field => $value ){
+            $_data[] = "`$field`='$value'";
+        }
+
+        //----------------------------------------------------
+
+        $queries = array();
+
+        $queries[] = "UPDATE jobs SET " . implode( ", \n", $_data ) .
+                     " WHERE id = {$first_job['id']} AND password = '{$oldPassword}'"; //ose old password
+
+        //delete all old jobs
+        $queries[] = "DELETE FROM jobs WHERE id = {$first_job['id']} AND password != '{$first_job['password']}' "; //use new password
+
+
+        foreach( $queries as $query ){
+            $res = mysql_query( $query, $this->mysql_link );
+            if( $res !== true ){
+                $msg = "Failed to merge job  " . $rows[0]['id'] . " from " . count($rows) .  " chunks\n";
+                $msg .= "Tried to perform SQL: \n" . print_r(  $queries ,true ) . " \n\n";
+                $msg .= "Failed Statement is: \n" . print_r( $query, true ) . "\n";
+                $msg .= "Original Status for rebuild job and project was: \n" . print_r( $rows, true ) . "\n";
+                Utils::sendErrMailReport( $msg );
+                throw new Exception( 'Failed to merge jobs, project damaged. Contact Matecat Support to rebuild project.', -8 );
+            }
+        }
+
     }
 
     protected function _extractSegments( $files_path_name, $fid ){

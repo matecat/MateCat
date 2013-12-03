@@ -272,15 +272,36 @@ UI = {
 				var total = $('.popup-split .wordsum .total-w').attr('data-val');
 				var prog = 0;
 				if (!$.isEmptyObject(d.data)) {
-					$.each(d.data.chunks, function(item) {
-						val = this.eq_word_count;
-						if (item == (d.data.chunks.length - 1)) { //last chunk
+
+                    var editAreaList = $( '.popup-split ul.jobs li .input-small' );
+
+                    editAreaList.each( function(key) {
+
+                        if( typeof d.data.chunks[key] == 'undefined' ) {
+//                            var lastEditAreaVal = parseInt( $( editAreaList[ key - 1 ] ).attr( 'value' ) );
+//
+//
+//                            console.log( $( editAreaList[ key - 1 ] ).attr( 'value' ) );
+//                            console.log( total - prog );
+//                            console.log(  lastEditAreaVal + parseInt( total - prog ) );
+
+
+                            //get last edit area value
+                            val = 0;
+                            //$( editAreaList[ key - 1 ] ).attr( 'value', parseInt( lastEditAreaVal + ( total - prog ) ) );
+
+
+                        } else if ( key == ( editAreaList.length - 1 ) ) { //last edit area
 							val = total - prog;
 						} else {
-							prog += this.eq_word_count;
+                            val = parseInt( d.data.chunks[key].eq_word_count ); //this is d.data.chunks[ index ]
+							prog += d.data.chunks[key].eq_word_count;
 						}
-						$($('.popup-split ul.jobs li .input-small')[item]).attr('value', val);
-					})
+
+                        $( editAreaList[key] ).attr( 'value', val );
+
+					});
+
 					$('.popup-split .uploadloader').removeClass('visible');
 					$('.popup-split .text').text('Confirm');
 					$('.popup-split .loader').addClass('none');
@@ -288,23 +309,19 @@ UI = {
 					$('.popup-split .aprox').addClass('none');
 					$('.popup-split .correct').removeClass('none');
 				}
-				;
-				if ((typeof d.errors != 'undefined') && (d.errors.length)) {
-//                    $('.popup-split .loader').addClass('none');
-//                    $('.popup-split .done').removeClass('none');
+
+                UI.performPreCheckSplitComputation();
+
+                if ( (typeof d.errors != 'undefined') && (d.errors.length) ) {
+
 					$('.popup-split .uploadloader').removeClass('visible');
 					$('.popup-split .text').text('Check');
 					$('.popup-split #exec-split').removeAttr('disabled').removeClass('disabled').removeClass('none');
 					$('.popup-split .error-message p').text(d.errors[0].message);
 					$('.popup-split .error-message').removeClass('none');
-//                    $('.popup-split .error-count').toggleClass('none');                    
+
 				}
 
-//                console.log(d);
-
-//                console.log(d.data.chunks);
-//                $(".popup-outer").fadeOut();
-//                $(".popup").fadeOut('fast');
 			}
 		});
 	},
