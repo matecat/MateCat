@@ -23,6 +23,8 @@ class splitJobController extends ajaxcontroller {
     private $num_split;
     private $split_values;
 
+    private $project_data;
+
     public function __construct() {
         parent::__construct();
 
@@ -33,7 +35,7 @@ class splitJobController extends ajaxcontroller {
             'job_id'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'job_pass'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'num_split'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'split_values' => array( 'filter' => FILTER_CALLBACK, 'options' => 'self::valuesToInt' ),
+            'split_values' => array( 'filter' => FILTER_CALLBACK, array( 'options' => 'self::valuesToInt' ) ),
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -58,32 +60,37 @@ class splitJobController extends ajaxcontroller {
 
     public function doAction() {
 
-        $pd = getProjectJobData( $this->project_id );
+        $this->project_data = getProjectJobData( $this->project_id );
 
         try {
 
-            if( empty( $pd ) ){
+            if( empty( $this->project_data ) ){
                 throw new Exception( "No Project Found.", -1 );
-            }
-
-            $passCheck = new AjaxPasswordCheck();
-            $access = $passCheck->grantProjectAccess( $pd, $this->project_pass, $this->job_pass );
-
-            if( !$access ){
-                throw new Exception( "Wrong Password. Access denied", -10 );
             }
 
             $pManager = new ProjectManager();
             $pStruct  = $pManager->getProjectStructure();
 
-            $pStruct[ 'job_to_split' ]      = $this->job_id;
-            $pStruct[ 'job_to_split_pass' ] = $this->job_pass;
-
             switch ( $this->exec ) {
+                case 'merge':
+                    $this->checkMergeAccess();
+                    $pStruct[ 'job_to_merge' ]      = $this->job_id;
+                    $pManager->mergeALL( $pStruct );
+                    break;
                 case 'check':
+                    $this->checkSplitAccess();
+
+                    $pStruct[ 'job_to_split' ]      = $this->job_id;
+                    $pStruct[ 'job_to_split_pass' ] = $this->job_pass;
+
                     $pManager->getSplitData( $pStruct, $this->num_split, $this->split_values );
                     break;
                 case 'apply':
+                    $this->checkSplitAccess();
+
+                    $pStruct[ 'job_to_split' ]      = $this->job_id;
+                    $pStruct[ 'job_to_split_pass' ] = $this->job_pass;
+
                     $pManager->getSplitData( $pStruct, $this->num_split, $this->split_values );
                     $pManager->applySplit( $pStruct );
                     break;
@@ -98,4 +105,27 @@ class splitJobController extends ajaxcontroller {
 
 
     }
+
+    protected function checkMergeAccess(){
+
+        $passCheck = new AjaxPasswordCheck();
+        $access = $passCheck->grantProjectAccess( $this->project_data, $this->project_pass, $this->job_id );
+
+        if( !$access ){
+            throw new Exception( "Access denied", -10 );
+        }
+
+    }
+
+    protected function checkSplitAccess(){
+
+        $passCheck = new AjaxPasswordCheck();
+        $access = $passCheck->grantProjectJobAccess( $this->project_data, $this->project_pass, $this->job_pass );
+
+        if( !$access ){
+            throw new Exception( "Wrong Password. Access denied", -10 );
+        }
+
+    }
+
 }
