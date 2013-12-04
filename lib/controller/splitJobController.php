@@ -35,7 +35,7 @@ class splitJobController extends ajaxcontroller {
             'job_id'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'job_pass'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'num_split'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'split_values' => array( 'filter' => FILTER_CALLBACK, 'options' => 'self::valuesToInt' ),
+            'split_values' => array( 'filter' => FILTER_CALLBACK, array( 'options' => 'self::valuesToInt' ) ),
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
