@@ -318,7 +318,7 @@ footer nav
 
 
     top: -1000px;
-    left: 208px;
+    left: 210px;
     width: 400px;
     background: #fff;
     border: 1px solid #333;
@@ -335,26 +335,42 @@ box-shadow: 0px 0px 10px #888888;
     margin: 0;
     padding: 0;
     float: left;
-    width: 101%;
-    max-height: 500px;
+    width: 100%;
+    max-height: 200px;
     overflow: auto;
-    background: #efefef;
+/*    background: #efefef;
     box-shadow: inset 0 2px 3px 1px #c3c2c1;
-    }
+  */  }
 
 
+/*scrollbar*/
+
+.topMenu ::-webkit-scrollbar {
+    width: 16px;
+}
+
+.topMenu ::-webkit-scrollbar-track {
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
 
 
+}
+
+.topMenu ::-webkit-scrollbar-thumb {
+
+	background:#ccc url(../img/bgscrollbar.png) center center no-repeat;
+    -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
+}
+/*end-scrollbar*/
 
 .topMenu ul li a
     {
   
     text-decoration: none;
     color: #333;
-padding:10px 10px 10px 30px;
-background: url(../img/sublevel.png) 15px 18px no-repeat;
-display:block;
- -webkit-transition: all 100ms ease-in;
+padding: 12px 10px 10px 48px;
+background: url(../img/xliff-icon.png) 12px 8px no-repeat;
+display: block;
+background-size: 24px; -webkit-transition: all 100ms ease-in;
     -moz-transition: all 100ms ease-in;
 
     }
@@ -364,13 +380,16 @@ display:block;
 
 
 
-border-bottom:1px solid #333;
+border-bottom:1px solid #ccc;
 
     }
 
 
 
-
+.currSegment a {box-shadow: inset 0px 1px #fff, 0px 1px #fff;
+box-shadow: inset 0px 1px #fff, 0px 1px #fff;
+-moz-box-shadow: inset 0px 1px #fff, 0px 1px #fff;
+-webkit-box-shadow: inset 0px 1px #fff, 0px 1px #fff;}
 
 .topMenu ul li:last-child
     {
@@ -380,7 +399,8 @@ border-bottom:0;
 
 .topMenu ul li.current a
     {
-background:#efefef url(../img/currentsegment.png) 15px 18px no-repeat 
+font-weight: bold;
+border-left: 3px solid #333;
     }
 
 
@@ -388,8 +408,8 @@ background:#efefef url(../img/currentsegment.png) 15px 18px no-repeat
 .currSegment a
 
  {
-background:#efefef url(../img/currentsegment.png) 14px 18px no-repeat !important
-    }
+background: #efefef url(../img/backto.png) 20px 12px no-repeat !important;
+background-size: 15px!important;    }
 
 
 
@@ -397,20 +417,14 @@ background:#efefef url(../img/currentsegment.png) 14px 18px no-repeat !important
 
 .currSegment a:hover
  {
-background:#fff url(../img/currentsegment.png) 14px 18px no-repeat !important
+background: #e4e4e4 url(../img/backto.png) 20px 12px no-repeat !important;
+background-size: 15px!important;
     }
 
 
     .topMenu ul li a:hover
         {
         text-decoration: underline;
-
-
-
-
-background:#fff url(../img/sublevel.png) 15px 18px no-repeat;
-
-
         }  
 
 
