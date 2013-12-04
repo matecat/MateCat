@@ -340,6 +340,7 @@ table tr.totaltable td.total
 
 .popup-split .btn-cancel {padding:2px 15px!important;}
 
+.split-box3 .jobs li.void{ border:1px solid red !important; }
 
 .error-perc{float:left;width:82%;margin:25px 0 -20px 20px;text-align:right;color:#FF0000;font-size:12px}
 
