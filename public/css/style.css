@@ -54,7 +54,7 @@ header .wrapper{padding:0px 0 0 0;}
     background: url(../img/search.png) center 14px no-repeat !important;
     background-size: 20px 20px !important;
     cursor: pointer;
-    text-indent: -9999px;
+/*    text-indent: -9999px;*/
     }
 body.searchActive #filterSwitch
     {
@@ -74,7 +74,8 @@ body.searchActive #filterSwitch
     color:#fff;
     background:#e20001;
     padding:0px 4px;
-    margin:18px 5px 0px 0px !important;
+ /*   margin:18px 5px 0px 0px !important;*/
+ margin-left: -1px;
     text-align:right;
     font-size:11px;
     -moz-border-radius: 10px;
@@ -111,7 +112,7 @@ body.searchActive #filterSwitch
 
 
 
-.cattool .breadcrumbs{padding:22px 0 4px 0px;}
+.cattool .breadcrumbs{padding:22px 0 4px 15px;}
 
 .cattool .downloadtr-button{margin:2px -10px 0px 10px !important;}
 
@@ -122,6 +123,8 @@ body.searchActive #filterSwitch
 	{
 
 	float: left;
+	padding-left: 22px;
+	background:url(../img/arrow-down.png) center left no-repeat;
     max-width: 300px;
     overflow: hidden;
     margin-left:2px
@@ -591,10 +594,6 @@ background-size: 30px 30px !important;
 .text{width:100%;margin:1px 0 0 0;padding:0px 0 0px 0;position:relative;-webkit-transition: all  50ms ease-in;background:#f1f2f2 url(../img/freccia-light.png) 49% 10px  no-repeat;overflow:hidden;float:left;transition: all  50ms ease-in;-webkit-box-shadow: inset 0 1px 1px 1px #f7f8f9;box-shadow: inset 0 1px 1px 1px #f7f8f9;color:#4d4d4f}
 
 .text:hover{background:#ecedeb url(../img/freccia-light.png) 49% 10px  no-repeat;color:#000}
-section.readonly .text:hover
-    {
-    color: #4D4D4F;
-    }
 
 /*
 .text:hover .editarea{color:#000}
@@ -1103,9 +1102,18 @@ section.readonly
     
 section.readonly .text
     {
-    background: #969696 !important;
+   background: rgba(250,250,250,0.1);
+text-shadow: 0 1px 0 #ccc;
+color: #474747;
+cursor: not-allowed;
+-webkit-box-shadow: inset 0 1px 1px -1px #ccc;
+box-shadow: inset 0 1px 1px -1px #ccc;
     /*color: #fff;*/
     }
+	
+section.readonly .text:hover { background: rgba(250,250,250,0.2);color: #333;
+}
+	
 
 section.readonly .status-container
     {
