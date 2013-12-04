@@ -1384,9 +1384,11 @@ UI = {
 		$.each(config.firstSegmentOfFiles, function(index) {
 			menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><a href="#" title="' + this.file_name + '">' + this.file_name + '</a></li>';
 		});
-		menu += '<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a href="#">Go to current segment</a></li>';
 
 		menu += '    </ul>' +
+				'	<ul>'+
+				'		<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a href="#">Go to current segment</a></li>' +
+				'    </ul>' +
 				'</nav>';
 		this.body.append(menu);
 		/*  $('#jobMenu li').each(function() {
