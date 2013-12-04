@@ -35,11 +35,9 @@ class convertFileController extends ajaxcontroller {
 			return false;
 		}
 
-		$ext = pathinfo($this->file_name, PATHINFO_EXTENSION);
-
 		$file_path = $this->intDir . '/' . $this->file_name;
 
-		if (!file_exists($file_path)) {
+		if ( !file_exists( $file_path ) ) {
 			$this->result['errors'][] = array("code" => -6, "message" => "Error during upload. Please retry.");
 			return -1;
 		}
@@ -112,32 +110,57 @@ class convertFileController extends ajaxcontroller {
 
 			} else {
 
+                $file = pathinfo( $this->file_name );
+
+                switch ( $file['extension'] ){
+                    case 'docx':
+                        $defaultError = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOC.";
+                        break;
+                    case 'doc':
+                    case 'rtf':
+                        $defaultError = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOCX.";
+                        break;
+                    case 'inx':
+                        $defaultError = "Conversion Error. Try to commit changes in InDesign before importing.";
+                        break;
+                    default:
+                        $defaultError = "Conversion error. Try opening and saving the document with a new name.";
+                        break;
+                }
+
 				if (
                     stripos($convertResult['errorMessage'] ,"failed to create SDLXLIFF.") !== false ||
                     stripos($convertResult['errorMessage'] ,"COM target does not implement IDispatch") !== false
                 ) {
 					$convertResult['errorMessage'] = "Error: failed importing file.";
+
 				} elseif( stripos($convertResult['errorMessage'] ,"Unable to open Excel file - it may be password protected") !== false ) {
                     $convertResult['errorMessage'] = $convertResult['errorMessage'] . " Try to remove protection using the Unprotect Sheet command on Windows Excel.";
+
                 } elseif ( stripos( $convertResult['errorMessage'] ,"The document contains unaccepted changes" ) !== false ) {
                     $convertResult['errorMessage'] = "The document contains track changes. Accept all changes before uploading it.";
+
+                } elseif( stripos($convertResult['errorMessage'] ,"Error: Could not find file") !== false ||
+                        stripos($convertResult['errorMessage'] ,"tw4winMark") !== false ) {
+                    $convertResult['errorMessage'] = $defaultError;
+
+                } elseif ( stripos( $convertResult['errorMessage'] ,"Attempted to read or write protected memory" ) !== false ) {
+                    $convertResult['errorMessage'] = $defaultError;
+
+                } elseif( stripos( $convertResult['errorMessage'], "The document was created in Microsoft Word 97 or earlier" ) ){
+                    $convertResult['errorMessage'] = $defaultError;
+
+                } elseif( $file['extension'] == 'csv' && empty( $convertResult['errorMessage']  ) ){
+                    $convertResult['errorMessage'] = "This CSV file is not eligible to be imported due internal wrong format. Try to convert in TXT using UTF8 encoding";
+
+                } elseif( empty( $convertResult['errorMessage'] ) ){
+                    $convertResult['errorMessage'] = "Failed to convert file. Internal error. Please Try again.";
+
                 }
 
                 //custom error message passed directly to javascript client and displayed as is
 				$this->result['code'] = -100;
 				$this->result['errors'][] = array("code" => -100, "message" => $convertResult['errorMessage']);
-
-
-                if( stripos($convertResult['errorMessage'] ,"Error: Could not find file") !== false ||
-                        stripos($convertResult['errorMessage'] ,"tw4winMark") !== false ) {
-                    //TODO refactoring
-                    //we have to move the error management on conversions to server side
-                    //main.js force to check the extension
-                    $this->result['code'] = -101;
-                }
-
-
-                //return false
 
 			}
 
