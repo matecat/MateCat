@@ -1100,15 +1100,13 @@ section.readonly .text
     {
    background: rgba(250,250,250,0.1);
 text-shadow: 0 1px 0 #ccc;
-color: #474747;
+color: #525252;
 cursor: not-allowed;
 -webkit-box-shadow: inset 0 1px 1px -1px #ccc;
 box-shadow: inset 0 1px 1px -1px #ccc;
     /*color: #fff;*/
     }
 	
-section.readonly .text:hover { background: rgba(250,250,250,0.2);color: #333;
-}
 	
 
 section.readonly .status-container
