@@ -278,25 +278,15 @@ UI = {
                     editAreaList.each( function(key) {
 
                         if( typeof d.data.chunks[key] == 'undefined' ) {
-//                            var lastEditAreaVal = parseInt( $( editAreaList[ key - 1 ] ).attr( 'value' ) );
-//
-//
-//                            console.log( $( editAreaList[ key - 1 ] ).attr( 'value' ) );
-//                            console.log( total - prog );
-//                            console.log(  lastEditAreaVal + parseInt( total - prog ) );
-
 
                             //get last edit area value
                             val = 0;
-                            //$( editAreaList[ key - 1 ] ).attr( 'value', parseInt( lastEditAreaVal + ( total - prog ) ) );
+                            $( editAreaList[key] ).parents('li').addClass( 'void' );
+                            $( editAreaList[key] ).addClass( 'empty' );
 
-
-                        } else if ( key == ( editAreaList.length - 1 ) ) { //last edit area
-							val = total - prog;
-						} else {
+                        } else {
                             val = parseInt( d.data.chunks[key].eq_word_count ); //this is d.data.chunks[ index ]
-							prog += d.data.chunks[key].eq_word_count;
-						}
+                        }
 
                         $( editAreaList[key] ).attr( 'value', val );
 
