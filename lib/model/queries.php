@@ -10,7 +10,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
     $src = $db->escape( $queryParams['src'] );
     $trg = $db->escape( $queryParams['trg'] );
 
-    Log::doLog( $queryParams );
+//    Log::doLog( $queryParams );
 
     $where_status = "";
     if ( $queryParams[ 'status' ] != 'all' ) {
