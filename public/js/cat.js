@@ -1137,12 +1137,14 @@ UI = {
 	changeStatus: function(ob, status, byStatus) {
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
 		$('.percentuage', segment).removeClass('visible');
-		console.log('CHANGE STATUS');
+//		console.log('CHANGE STATUS');
 		if(!segment.hasClass('saved')) this.setTranslation(segment, status);
 		segment.removeClass('saved');
 		this.setContribution(segment, status, byStatus);
 		this.setContributionMT(segment, status, byStatus);
-		this.applySearch(segment);
+//		console.log($('#segment-3690034 .editarea').html());
+//		this.applySearch(segment);
+//		console.log($('#segment-3690034 .editarea').html());
 		this.getNextSegment(this.currentSegment, 'untranslated');
 
 		$(window).trigger({
@@ -1614,6 +1616,12 @@ UI = {
 		if ((this.searchMode == 'source&target') && (this.numSearchResultsSegments < 2))
 			$('#exec-find[data-func=next]').attr('disabled', 'disabled');
 		this.updateSearchItemsCount();
+		if(this.someSegmentToSave()) {
+			if(!$('.search-display .found .warning').length) $('.search-display .found').append('<span class="warning"></span>');
+			$('.search-display .found .warning').text(' (maybe some results in segments modified but not saved)');
+		} else {
+			$('.search-display .found .warning').remove();
+		}
 	},
 	updateSearchDisplayCount: function(segment) {
 		numRes = $('.search-display .numbers .results');
@@ -1636,10 +1644,10 @@ UI = {
 	},
 	markSearchResults: function(options) { // if where is specified mark only the range of segment before or after seg (no previous clear)		
 		options = options || {};
-		where = options.where; console.log(where);
+		where = options.where; 
 		seg = options.seg;
 		singleSegment = options.singleSegment || false;
-		console.log('singleSegment: ', singleSegment);
+//		console.log('singleSegment: ', singleSegment);
 		if (typeof where == 'undefined') {
 			this.clearSearchMarkers();
 		}
@@ -1747,18 +1755,18 @@ UI = {
 			
 //			var what = (typeof p['source'] != 'undefined') ? ' .source' : (typeof p['target'] != 'undefined') ? ':not(.status-new) .editarea' : '';
 //			q = (singleSegment) ? '#' + $(singleSegment).attr('id') + what : "section" + status + what;
-			console.log(q);
+//			console.log(q);
 //			console.log($(singleSegment).attr('class'));
 
 //            q = "section" + status + what;
 			var reg = new RegExp('(' + htmlEncode(txt) + ')', "g" + ignoreCase);
 			if ((typeof where == 'undefined')||(where == 'no')) {
-				console.log('aa');
-				console.log('$(' + q + ':' + containsFunc + "('" + txt + "')");
+//				console.log('aa');
+//				console.log('$(' + q + ':' + containsFunc + "('" + txt + "')");
 
 //				if(UI.body.hasClass('searchActive')) return false;
 				items = $(q + ":" + containsFunc + "('" + txt + "')");
-				console.log(items);
+//				console.log(items);
 //				console.log(items);
 				filteredItems = UI.filterExactMatch(items, txt);
 //                filteredItems = (p['exact-match'])? items.filter(function() { return $(this).text() == txt; }) : items;
@@ -2383,11 +2391,11 @@ UI = {
 		$.each(segments, function() {
 			seg = $('#segment-' + this.sid);
 			$('.editarea, .area', seg).text(this.translation);
-			if (UI.body.hasClass('searchActive'))
-				UI.markSearchResults({
-					singleSegment: segment,
-					where: 'no'
-				})
+//			if (UI.body.hasClass('searchActive'))
+//				UI.markSearchResults({
+//					singleSegment: segment,
+//					where: 'no'
+//				})
 			status = (this.status == 'DRAFT') ? 'draft' : (this.status == 'TRANSLATED') ? 'translated' : (this.status == 'APPROVED') ? 'approved' : (this.status == 'REJECTED') ? 'rejected' : '';
 			UI.setStatus(seg, status);
 		});
@@ -3016,7 +3024,7 @@ UI = {
 			status = 'draft';
 		}
 		console.log('SAVE SEGMENT');
-		this.setTranslation(segment, status);
+		this.setTranslation(segment, status, 'autosave');
 		segment.addClass('saved');
 	},
 	renderAndScrollToSegment: function(sid, file) {
@@ -3571,7 +3579,7 @@ UI = {
 	},
 	setTranslation: function(segment, status, caller) {
 		caller = (typeof caller == 'undefined')? false : caller;
-		console.log('SET TRANSLATION');
+//		console.log('SET TRANSLATION');
 		var info = $(segment).attr('id').split('-');
 		var id_segment = info[1];
 		var file = $(segment).parents('article');
@@ -3586,18 +3594,18 @@ UI = {
 		var errors = '';
 		errors = this.collectSegmentErrors(segment);
 		var chosen_suggestion = $('.editarea', segment).data('lastChosenSuggestion');
-		if(caller != 'replace') {
-			if(this.body.hasClass('searchActive')) {
-				console.log('aaa');
-				console.log(segment);
-				this.applySearch(segment);
-				oldNum = parseInt($(segment).attr('data-searchitems'));
-				newNum = parseInt($('mark.searchMarker', segment).length);
-				numRes = $('.search-display .numbers .results');
-				numRes.text(parseInt(numRes.text()) - oldNum + newNum);
-			}
-		}
-
+//		if(caller != 'replace') {
+//			if(this.body.hasClass('searchActive')) {
+//				console.log('aaa');
+//				console.log(segment);
+//				this.applySearch(segment);
+//				oldNum = parseInt($(segment).attr('data-searchitems'));
+//				newNum = parseInt($('mark.searchMarker', segment).length);
+//				numRes = $('.search-display .numbers .results');
+//				numRes.text(parseInt(numRes.text()) - oldNum + newNum);
+//			}
+//		}
+		autosave = (caller == 'autosave')? true : false;
 
 
 		APP.doRequest({
@@ -3612,7 +3620,8 @@ UI = {
 				time_to_edit: time_to_edit,
 				id_translator: id_translator,
 				errors: errors,
-				chosen_suggestion_index: chosen_suggestion
+				chosen_suggestion_index: chosen_suggestion,
+				autosave: autosave
 			},
 			success: function(d) {
 				UI.setTranslation_success(d, segment, status);
@@ -3640,6 +3649,10 @@ UI = {
 			}
 
 		});
+	},
+	someSegmentToSave: function() {
+		res = ($('section.modified').length)? true : false;
+		return res;
 	},
 	setContextMenu: function() {
 		var alt = (this.isMac) ? '&#x2325;' : 'Alt ';
