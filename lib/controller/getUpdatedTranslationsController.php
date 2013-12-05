@@ -23,7 +23,7 @@ class getUpdatedTranslationsController extends ajaxcontroller {
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI Test scripts
         //$__postInput = filter_var_array( $_POST, $filterArgs );
-        Log::doLog($__postInput);
+
         $this->last_timestamp = $__postInput['last_timestamp']/1000;
         $this->first_segment = $__postInput['first_segment'];
         $this->last_segment = $__postInput['last_segment'];

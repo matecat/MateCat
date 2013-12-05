@@ -13,8 +13,10 @@
 /*global $, window, document */
 
 UI = null;
-//config.maxFileSize = 30000000;
-config.maxFileSizePrint = (config.maxFileSize/1000000) + ' MB';
+
+var base = Math.log( config.maxFileSize ) / Math.log( 1024 );
+delete window.base;
+config.maxFileSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) ) + ' MB';
 
 UI = {
     init: function() {
@@ -63,7 +65,7 @@ UI = {
     },
     restartConversions: function() {
     	console.log('restart conversions');
-    this.conversionBlocked = true;
+        this.conversionBlocked = true;
     	$('.template-download, .template-upload').each(function() {
 			if(config.conversionEnabled) {
         		var filerow = $(this);
@@ -599,7 +601,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 			falsePositive = (typeof this.context == 'undefined')? false : true; // old solution
               filerow.removeClass('converting');
 			filerow.addClass('ready');
-           	if(d.code == 1) {
+           	if( d.code == 1 ) {
 				$('.ui-progressbar-value', filerow).addClass('completed').css('width', '100%');
 //				console.log('checkAnalyzability(): '+checkAnalyzability());
 				if(checkAnalyzability('convertfile on success')) {
@@ -611,44 +613,50 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 				$('.progress',filerow).fadeOut('slow', function() {
 					// Animation complete.
 				});
-           	} else if( d.code == -100 ){
+           	} else if( d.code < 0 ){
                 console.log(d.errors[0].message);
                 $('td.size',filerow).next().addClass('error').empty().attr('colspan','2').css({'font-size':'14px'}).append('<span class="label label-important">'+d.errors[0].message+'</span>');
                 $(filerow).addClass('failed');
+                setTimeout(function(){
+                    $('.progress',filerow).remove();
+                    $('.operation',filerow).remove();
+                },50);
+                checkFailedConversionsNumber();
                 return false;
             } else {
-       			console.log('conversion failed');
-           		var filename = $('.name',filerow).text();
-           		var extension = filename.split('.')[filename.split('.').length-1];
-//           		console.log(extension);
-//           		console.log(d.errors[0].message);
-//           		if(!d.errors[0].message) console.log('msg is null');
-           		var msg = (!d.errors[0].message)? "Converter rebooting. Try again in two minutes" : d.errors[0].message;
-           		var message = ((extension == 'pdf')&&(d.errors[0].code == '-2'))? 'Error: no translatable content found: maybe a scanned file?' : msg;
-				if(extension == 'docx') {
-					message = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOC.";
-				}
-				if((extension == 'doc')||(extension == 'rtf')) {
-					message = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOCX.";
-				}
-				if(extension == 'inx') {
-					message = "Conversion Error. Try to commit changes in InDesign before importing.";
-				}
-                // temp
-                //message = (falsePositive)? '' : 'Conversion Error. Try opening and saving the document with a new name.';
-//                console.log(d.errors[0].code);
-//                if(d.errors[0].code == -6) message = 'Error during upload. The uploaded file may exceed the file size limit of ' + config.maxFileSizePrint;
-//                console.log(enforceConversion);
-//                console.log(typeof enforceConversion);
-           		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">'+message+'</span>');
-           		$(filerow).addClass('failed');
-           		console.log('after message compiling');
-				setTimeout(function(){
-	       			$('.progress',filerow).remove();
-	       			$('.operation',filerow).remove();
-				},50);
-           		checkFailedConversionsNumber();
-           		return false;
+//       			console.log('conversion failed');
+//           		var filename = $('.name',filerow).text();
+//           		var extension = filename.split('.')[filename.split('.').length-1];
+////           		console.log(extension);
+////           		console.log(d.errors[0].message);
+////           		if(!d.errors[0].message) console.log('msg is null');
+//           		var msg = (!d.errors[0].message)? "Converter rebooting. Try again in two minutes" : d.errors[0].message;
+//
+//                var message = ((extension == 'pdf')&&(d.errors[0].code == '-2'))? 'Error: no translatable content found: maybe a scanned file?' : msg;
+//				if(extension == 'docx') {
+//					message = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOC.";
+//				}
+//				if((extension == 'doc')||(extension == 'rtf')) {
+//					message = "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOCX.";
+//				}
+//				if(extension == 'inx') {
+//					message = "Conversion Error. Try to commit changes in InDesign before importing.";
+//				}
+//                // temp
+//                //message = (falsePositive)? '' : 'Conversion Error. Try opening and saving the document with a new name.';
+////                console.log(d.errors[0].code);
+////                if(d.errors[0].code == -6) message = 'Error during upload. The uploaded file may exceed the file size limit of ' + config.maxFileSizePrint;
+////                console.log(enforceConversion);
+////                console.log(typeof enforceConversion);
+//           		$('td.size',filerow).next().addClass('error').empty().attr('colspan','2').append('<span class="label label-important">'+message+'</span>');
+//           		$(filerow).addClass('failed');
+//           		console.log('after message compiling');
+//				setTimeout(function(){
+//	       			$('.progress',filerow).remove();
+//	       			$('.operation',filerow).remove();
+//				},50);
+//           		checkFailedConversionsNumber();
+//           		return false;
            	}
 
         }

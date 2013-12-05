@@ -1390,7 +1390,7 @@ UI = {
 		//FIXME
 		if (($(segment).hasClass('loaded')) && ($(segment).find('.matches .overflow').text() == '')) {
 			$('.sub-editor.matches .overflow .graysmall.message', segment).remove();
-			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');
+			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry, we can\'t help you this time. Check if the language pair is correct. If not, create the project again.</li></ul>');
 		}
 		;
 	},

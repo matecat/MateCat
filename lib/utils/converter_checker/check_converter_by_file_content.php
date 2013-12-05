@@ -458,7 +458,7 @@ class ConvertersMonitor {
                         . "\n         - ip_machine_host: " . $this->host_machine_map[ $ip_converter ][ 'ip_machine_host' ]
                         . "\n"
                         . "\n"
-                        . "\n *** WARNING: THIS MACHINE ARE SET AS OFFLINE, NEVER PUT BACK IN POOL ***";
+                        . "\n *** WARNING: THIS MACHINE IS SET AS OFFLINE, WILL NEVER PUT BACK IN POOL ***";
 
                 //send Alert report
                 Utils::sendErrMailReport( $msg );

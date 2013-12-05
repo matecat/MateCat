@@ -4,10 +4,13 @@ include_once 'Database.class.php';
 
 function doSearchQuery( ArrayObject $queryParams ) {
     $db = Database::obtain();
-    
+
+
     $key = $queryParams['key'];                 //no escape: not related with Database
     $src = $db->escape( $queryParams['src'] );
     $trg = $db->escape( $queryParams['trg'] );
+
+//    Log::doLog( $queryParams );
 
     $where_status = "";
     if ( $queryParams[ 'status' ] != 'all' ) {
@@ -23,6 +26,12 @@ function doSearchQuery( ArrayObject $queryParams ) {
         $trg = strtolower( $trg );
     }
 
+    if( $queryParams['exactMatch'] ) {
+        $LIKE = "";
+    } else {
+        $LIKE = "%";
+    }
+
     $query = "";
     if ( $key == "source" ) {
 
@@ -34,7 +43,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
                     INNER JOIN files_job fj on s.id_file=fj.id_file
                     LEFT JOIN segment_translations st on st.id_segment = s.id AND st.id_job = fj.id_job
                     WHERE fj.id_job = {$queryParams['job']}
-                    AND s.segment LIKE '%$src%'
+                    AND s.segment LIKE '" . $LIKE . $src . $LIKE . "'
                     $where_status
                     GROUP BY s.id WITH ROLLUP";
 
@@ -46,9 +55,12 @@ function doSearchQuery( ArrayObject $queryParams ) {
                     ) AS count
                     FROM segment_translations st
                     WHERE st.id_job = {$queryParams['job']}
-                    AND st.translation like '%$trg%'
+                    AND st.translation LIKE '" . $LIKE . $trg . $LIKE . "'
                     AND st.status != 'NEW'
                     $where_status
+                    AND ROUND (
+                      ( LENGTH( st.translation ) - LENGTH( REPLACE ( $SQL_MOD ( st.translation ), $SQL_MOD ( '$trg' ), '') ) ) / LENGTH('$trg') )
+                     > 0
                     GROUP BY st.id_segment WITH ROLLUP";
 
     } elseif ( $key == 'coupled' ) {
@@ -57,8 +69,8 @@ function doSearchQuery( ArrayObject $queryParams ) {
                     FROM segment_translations as st
                     JOIN segments as s on id = id_segment
                     WHERE st.id_job = {$queryParams['job']}
-                    AND st.translation LIKE '%$trg%'
-                    AND s.segment LIKE '%$src%'
+                    AND st.translation LIKE '" . $LIKE . $trg . $LIKE . "'
+                    AND s.segment LIKE '" . $LIKE . $src . $LIKE . "'
                     AND LENGTH( REPLACE ( $SQL_MOD( segment ), $SQL_MOD( '$src' ), '') ) != LENGTH( s.segment )
                     AND LENGTH( REPLACE ( $SQL_MOD( st.translation ), $SQL_MOD( '$trg' ), '') ) != LENGTH( st.translation )
                     AND st.status != 'NEW'
@@ -947,7 +959,7 @@ function getUpdatedTranslations($timestamp, $first_segment, $last_segment) {
                 id_segment BETWEEN $first_segment AND $last_segment
                 AND translation_date > FROM_UNIXTIME($timestamp)";
     
-    log::doLog($query);
+    //log::doLog($query);
     $db = Database::obtain();
     $results = $db->fetch_array($query);
 

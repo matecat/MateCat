@@ -15,6 +15,7 @@ class getSearchController extends ajaxcontroller {
     private $replace;
     private $function; //can be search, replace
     private $matchCase;
+    private $exactMatch;
 
     private $queryParams = array();
 
@@ -30,20 +31,22 @@ class getSearchController extends ajaxcontroller {
             'status'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'replace'     => array( 'filter' => FILTER_UNSAFE_RAW ),
             'password'    => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'matchCase'   => array( 'filter' => FILTER_VALIDATE_BOOLEAN )
+            'matchcase'   => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+            'exactmatch'  => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
         );
 
         $__postInput     = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->function  = $__postInput[ 'function' ];      //can be: search / replace
-        $this->job       = $__postInput[ 'job' ];
-        $this->token     = $__postInput[ 'token' ];
-        $this->source    = $__postInput[ 'source' ];
-        $this->target    = $__postInput[ 'target' ];
-        $this->status    = strtolower( $__postInput[ 'status' ] );
-        $this->replace   = $__postInput[ 'replace' ];
-        $this->password  = $__postInput[ 'password' ];
-        $this->matchCase = $__postInput[ 'matchCase' ];
+        $this->function   = $__postInput[ 'function' ]; //can be: search / replace
+        $this->job        = $__postInput[ 'job' ];
+        $this->token      = $__postInput[ 'token' ];
+        $this->source     = $__postInput[ 'source' ];
+        $this->target     = $__postInput[ 'target' ];
+        $this->status     = strtolower( $__postInput[ 'status' ] );
+        $this->replace    = $__postInput[ 'replace' ];
+        $this->password   = $__postInput[ 'password' ];
+        $this->matchCase  = $__postInput[ 'matchcase' ];
+        $this->exactMatch = $__postInput[ 'exactmatch' ];
 
         if (empty($this->status)) {
             $this->status = "all";
@@ -69,6 +72,7 @@ class getSearchController extends ajaxcontroller {
             'status'      => $this->status,
             'replacement' => null,
             'matchCase'   => $this->matchCase,
+            'exactMatch'  => $this->exactMatch,
         ) );
 
     }
