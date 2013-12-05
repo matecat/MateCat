@@ -44,6 +44,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
                     LEFT JOIN segment_translations st on st.id_segment = s.id AND st.id_job = fj.id_job
                     WHERE fj.id_job = {$queryParams['job']}
                     AND s.segment LIKE '" . $LIKE . $src . $LIKE . "'
+                    AND st.status != 'NEW'
                     $where_status
                     GROUP BY s.id WITH ROLLUP";
 
@@ -76,9 +77,17 @@ function doSearchQuery( ArrayObject $queryParams ) {
                     AND st.status != 'NEW'
                     $where_status ";
 
+    } elseif( $key = 'status_only' ){
+
+        $query = "SELECT st.id_segment as id
+                    FROM segment_translations as st
+                    WHERE st.id_job = {$queryParams['job']}
+                    AND st.status != 'NEW'
+                    $where_status ";
+
     }
 
-    //Log::doLog($query);
+//    Log::doLog($query);
 
     $results = $db->fetch_array( $query );
     $err     = $db->get_error();
@@ -90,18 +99,23 @@ function doSearchQuery( ArrayObject $queryParams ) {
         return $errno * -1;
     }
 
-    if( $key != 'coupled' ){ //there is the ROLLUP
+    if( $key != 'coupled' && $key != 'status_only' ){ //there is the ROLLUP
         $rollup = array_pop( $results );
     }
+
+//    Log::doLog($results);
 
     $vector = array();
     foreach($results as $occurrence ){
         $vector['sidlist'][] = $occurrence['id'];
     }
 
+
     $vector['count']   = @$rollup['count']; //can be null, suppress warning
 
-    if( $key != 'coupled' ){ //there is the ROLLUP
+//    Log::doLog($vector);
+
+    if( $key != 'coupled' && $key != 'status_only' ){ //there is the ROLLUP
         //there should be empty values because of Sensitive search
         //LIKE is case INSENSITIVE, REPLACE IS NOT
         //empty search values removed
