@@ -107,11 +107,6 @@ class getSearchController extends ajaxcontroller {
 
     private function doSearch() {
 
-        if (empty($this->source) and empty($this->target)) {
-            $this->result['error'][] = array("code" => -11, "message" => "missing search string");
-            return;
-        }
-
         if (!empty($this->source) and !empty($this->target)) {
             $this->queryParams['key'] = 'coupled';
             $this->queryParams['src'] =  $this->source;
@@ -122,6 +117,8 @@ class getSearchController extends ajaxcontroller {
         } else if (!empty($this->target)) {
             $this->queryParams['key'] = 'target';
             $this->queryParams['trg'] =  $this->target;
+        } elseif( empty($this->source) and empty($this->target) ){
+            $this->queryParams['key'] = 'status_only';
         }
 
         $res = doSearchQuery( $this->queryParams );
