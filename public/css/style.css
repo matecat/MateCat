@@ -1360,18 +1360,27 @@ section.readonly .status-container a.status:hover
 .status-container{width:10px !important;float:right;margin:0 0px 0 0 !important;}
 
 
-section.status-translated .status{background:#0798bc !important}
-section.status-approved .status{background:#639d5e !important;}
-/* section.status-draft .status{background:#dddedf !important;} */
-section.status-rejected .status{background:#b02429 !important;}
+section.status-translated .status{background-color:#0798bc !important}
+section.status-approved .status{background-color:#639d5e !important;}
+/* section.status-draft .status{background-color:#dddedf !important;} */
+section.status-rejected .status{background-color:#b02429 !important;}
 
 
-section.editor.status-translated .status{background:#09beec !important}
-section.editor.status-approved .status{background:#7cc576 !important;}
-/*section.editor.status-draft .status{background:#dddedf !important;}*/
-section.editor.status-rejected .status{background:#dc2e34 !important;}
+section.editor.status-translated .status{background-color:#09beec !important}
+section.editor.status-approved .status{background-color:#7cc576 !important;}
+/*section.editor.status-draft .status{background-color:#dddedf !important;}*/
+section.editor.status-rejected .status{background-color:#dc2e34 !important;}
 
-
+section.modified .status
+	{
+	background-image: url(../img/stripes.png) !important;
+	background-repeat: repeat !important;
+	background-size: 140% !important;
+	}
+section.modified.editor .status
+	{
+	background-size: 200% !important;
+	}
 
 
 
@@ -1922,7 +1931,7 @@ body.filterOpen #outer
     }
 section.modified .save-warning
     {
-	display: block;
+	display: none;
     }
 
 #filterSwitch .numbererror
