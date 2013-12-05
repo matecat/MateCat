@@ -1522,9 +1522,6 @@ UI = {
 		this.searchParams['match-case'] = $('#match-case').is(':checked');
 		this.searchParams['exact-match'] = $('#exact-match').is(':checked');
 		this.searchParams['search'] = 1;
-		console.log(this.searchParams['source']);
-		console.log(this.searchParams['target']);
-		console.log(this.searchParams['status']);
 		if((typeof this.searchParams['source'] == 'undefined')&&(typeof this.searchParams['target'] == 'undefined')&&(this.searchParams['status'] == 'all')) {
 			APP.alert('You must specify at least one between source and target<br>or choose a status');
 			return false;
@@ -1553,11 +1550,8 @@ UI = {
 		this.gotoSearchResultAfter({
 			el: 'segment-' + this.currentSegmentId
 		});
-		console.log('a');
 		this.setFindFunction('next');
-		console.log('a');
 		this.body.addClass('searchActive');
-		console.log('a');
 
 		var dd = new Date();
 		APP.doRequest({
@@ -1588,7 +1582,6 @@ UI = {
 		if (this.pendingRender) {
 			if (this.pendingRender['detectSegmentToScroll'])
 				this.pendingRender['segmentToScroll'] = this.nextUnloadedResultSegment();
-//            console.log(this.pendingRender);
 			$('#outer').empty();
 
 			this.render(this.pendingRender);
@@ -1596,7 +1589,7 @@ UI = {
 		}
 	},
 	execReplaceAll: function() {
-		console.log('replace all');
+//		console.log('replace all');
 		$('.search-display .numbers').text('No segments found');
 		$('.editarea mark.searchMarker').remove();
 		this.applySearch();
@@ -1647,7 +1640,12 @@ UI = {
 		});
 	},
 	updateSearchDisplay: function() {
-		if ((this.searchMode == 'source&target')) {
+		if ((this.searchMode == 'onlyStatus')) {
+			res = (this.numSearchResultsSegments) ? this.numSearchResultsSegments : 0;
+			resNumString = (res == 1) ? '' : 's';
+			numbers = (res) ? 'Found <span class="segments">...</span> segment' + resNumString : 'No segments found';
+			$('.search-display .numbers').html(numbers);		
+		} else if ((this.searchMode == 'source&target')) {
 			res = (this.numSearchResultsSegments) ? this.numSearchResultsSegments : 0;
 			resNumString = (res == 1) ? '' : 's';
 			numbers = (res) ? 'Found <span class="segments">...</span> segment' + resNumString : 'No segments found';
@@ -1674,10 +1672,12 @@ UI = {
 		query += ' (' + ((this.searchParams['match-case']) ? 'case sensitive' : 'case insensitive') + ')';
 		$('.search-display .query').html(query);
 		$('.search-display').addClass('displaying');
-		if ((this.searchMode != 'source&target') && (this.numSearchResultsItem < 2))
-			$('#exec-find[data-func=next]').attr('disabled', 'disabled');
-		if ((this.searchMode == 'source&target') && (this.numSearchResultsSegments < 2))
-			$('#exec-find[data-func=next]').attr('disabled', 'disabled');
+		if ((this.searchMode == 'normal') && (this.numSearchResultsItem < 2)) {
+			$('#exec-find[data-func=next]').attr('disabled', 'disabled');			
+		}
+		if ((this.searchMode == 'source&target') && (this.numSearchResultsSegments < 2)) {
+			$('#exec-find[data-func=next]').attr('disabled', 'disabled');			
+		}
 		this.updateSearchItemsCount();
 		if(this.someSegmentToSave()) {
 			if(!$('.search-display .found .warning').length) $('.search-display .found').append('<span class="warning"></span>');
@@ -1721,7 +1721,7 @@ UI = {
 		var ignoreCase = (p['match-case']) ? '' : 'i';
 
 		if (this.searchMode == 'onlyStatus') { // search mode: onlyStatus
-			console.log('solo status');
+
 		} else if (this.searchMode == 'source&target') { // search mode: source&target
             console.log('source & target');
 			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
@@ -1901,16 +1901,23 @@ UI = {
 			if (p['status'] == 'all') {
 				this.scrollSegment($(el).next());
 			} else {
-//				console.log(el);
-//				console.log(el.nextAll(status).first().attr('id'));
-//				console.log($(el).nextUntil('section'));
-				nextToGo = el.nextAll(status).first();
-//				nextToGo = $(el).nextUntil('section' + status).last().next();
-//				console.log(status);
-				console.log(nextToGo);
-				$(el).removeClass('currSearchSegment');
-				nextToGo.addClass('currSearchSegment');
-				this.scrollSegment(nextToGo);
+				if(el.nextAll(status).length) {
+					nextToGo = el.nextAll(status).first();
+					$(el).removeClass('currSearchSegment');
+					nextToGo.addClass('currSearchSegment');
+					this.scrollSegment(nextToGo);					
+				} else {
+					this.pendingRender = {
+						firstLoad: false,
+						applySearch: true,
+						detectSegmentToScroll: true,
+						segmentToScroll: this.nextUnloadedResultSegment()
+					};
+					$('#outer').empty();
+					this.render(this.pendingRender);
+					this.pendingRender = false;								
+				}
+
 			}
 		} else if (this.searchMode == 'source&target') {
 			var seg = $("section.currSearchSegment");
@@ -1963,14 +1970,35 @@ UI = {
 
 		if (this.searchMode == 'onlyStatus') { // searchMode: onlyStatus
 			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
+			
 			if (p['status'] == 'all') {
 				this.scrollSegment($('#' + el).next());
 			} else {
-				nextToGo = $('#' + el).nextAll(status).first();
-//				nextToGo = $('#' + el).nextUntil('section' + status).last().next();
-//				$('section.currSearchSegment').removeClass('currSearchSegment');
-				nextToGo.addClass('currSearchSegment');
-				this.scrollSegment(nextToGo);
+//				console.log($('#' + el));
+//				console.log($('#' + el).nextAll(status).length);
+				if($('#' + el).nextAll(status).length) { // there is at least one next result loaded after the currently selected
+					nextToGo = $('#' + el).nextAll(status).first();
+					nextToGo.addClass('currSearchSegment');
+					this.scrollSegment(nextToGo);					
+				} else {
+					// load new segments
+					if (!this.searchResultsSegments) {
+						this.pendingRender = {
+							firstLoad: false,
+							applySearch: true,
+							detectSegmentToScroll: true
+						};
+					} else {
+						seg2scroll = this.nextUnloadedResultSegment();
+						$('#outer').empty();
+						this.render({
+							firstLoad: false,
+							applySearch: true,
+							segmentToScroll: seg2scroll
+						});
+					}					
+				}
+
 				
 			}
 		} else if (this.searchMode == 'source&target') { // searchMode: source&target
@@ -2422,10 +2450,10 @@ UI = {
 				this.markSearchResults();
 				if (this.searchMode == 'normal') {
 					$('#segment-' + options.segmentToScroll + ' mark.searchMarker').first().addClass('currSearchItem');
-				} else if (this.searchMode == 'source&target') {
-					$('#segment-' + options.segmentToScroll).addClass('currSearchSegment');
+//				} else if (this.searchMode == 'source&target') {
+//					$('#segment-' + options.segmentToScroll).addClass('currSearchSegment');
 				} else {
-
+					$('#segment-' + options.segmentToScroll).addClass('currSearchSegment');
 				}
 			}
 		}
@@ -3118,7 +3146,7 @@ UI = {
 //        this.render(false, segment.selector.split('-')[1]);
 	},
 	scrollSegment: function(segment) {
-		console.log(segment);
+//		console.log(segment);
 //        segment = (noOpen)? $('#segment-'+segment) : segment;
 //        noOpen = (typeof noOpen == 'undefined')? false : noOpen;
 		if (!segment.length) {
@@ -3128,10 +3156,10 @@ UI = {
 				segmentToOpen: segment.selector.split('-')[1]
 			})
 		}
-		;
 		var spread = 23;
 		var current = this.currentSegment;
 		var previousSegment = $(segment).prev('section');
+//		console.log(previousSegment);
 
 		if (!previousSegment.length) {
 			previousSegment = $(segment);
