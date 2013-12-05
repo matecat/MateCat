@@ -184,11 +184,18 @@
 						<input id="replace-target" disabled="disabled" class="search-input" type="text" value=""/>
                         </div>
 
+                        <!--div class="field">
+                            <label for="replace-target">Replace with</label>
+                            <input id="replace-target" class="search-input" type="text" value=""/>
+                        </div-->
+
+
                     </div>                    
                     <div class="block">
                         <label for="select-status">Status</label>
                         <select id="select-status" class="search-select" >
                             <option value="all" selected="selected">All</option>
+                            <option value="new">New</option>
                             <option value="draft">Draft</option>
                             <option value="translated">Translated</option>
                             <option value="approved">Approved</option>
@@ -410,13 +417,15 @@
                     </div>
                     <p class="percent"><span id="stat-progress" tal:content="php:(job_stats['PROGRESS_PERC_FORMATTED'])">0</span>%</p>
                     <ul>
+
                         <li id="stat-eqwords">
-                            <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Payable Words</a>
-						<tal:block tal:condition="php: empty(analysis_enabled)">
-							Payable Words
-						</tal:block>
-						: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong>
+                            <a tal:condition="php: !empty(analysis_enabled) AND 0" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Payable Words</a>
+                            <tal:block tal:condition="php: empty(analysis_enabled) OR 1">
+                                Payable Words
+                            </tal:block>
+                            : <strong tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
                         </li>
+
                         <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
                         <!--
                         <li id="stat-draft">Draft: <strong tal:content="job_stats/DRAFT_FORMATTED|default">- - -</strong></li>
