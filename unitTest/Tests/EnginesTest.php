@@ -104,7 +104,9 @@ class Tests_EnginesTest extends Tests_AbstractTest {
 
     public function testRightUrlForTMS(){
 
+        //PATCHED FIXME
         $expected_String = "http://api.mymemory.translated.net/get?q=This+provision+takes+effect+in+2014.&langpair=en-US%7Cit-IT&de=demo%40matecat.com&mt=1&numres=3&conc=true&mtonly=1";
+        $expected_String = "http://api.mymemory.translated.net/get?q=This+provision+takes+effect+in+2014.&langpair=en%7Cit&de=demo%40matecat.com&mt=1&numres=3&conc=true&mtonly=1";
 
         $text = "This provision takes effect in 2014.";
         $source = "en-US";
@@ -204,7 +206,7 @@ class Tests_EnginesTest extends Tests_AbstractTest {
 
         $mt_result = $mt->get( $text, $source, $target, $key );
 
-        $mt_match = $mt_result[ 1 ];
+        $mt_match = $mt_result->translatedText;
         $penalty  = $mt->getPenalty();
         $mt_score = 100 - $penalty;
         $mt_score .= "%";
@@ -212,7 +214,7 @@ class Tests_EnginesTest extends Tests_AbstractTest {
         $mt_match_res = new TMS_GET_MATCHES( $text, $mt_match, $mt_score, "MT-" . $mt->getName(), date("Y-m-d") );
 
         $mt_res = $mt_match_res->get_as_array();
-        $mt_res['sentence_confidence'] = $mt_result[2]; //can be null
+        $mt_res['sentence_confidence'] = $mt_result->sentence_confidence; //can be null
 
         $this->assertArrayHasKey( 'id', $mt_res );
         $this->assertArrayHasKey( 'raw_segment', $mt_res );
