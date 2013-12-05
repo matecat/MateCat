@@ -1387,11 +1387,14 @@ log::doLog('STATUS QUERY:',$status_query);
 			left join translators t on j.id_translator=t.username
 			$filter_query
 			group by 1
-			order by pid desc, j.id
+			order by pid desc, j.id, j.job_first_segment
 			limit $start,$step";
 
 
+    //Log::doLog( $query );
+
     $db      = Database::obtain();
+    $results = $db->query( "SET SESSION group_concat_max_len = 10000000;" );
     $results = $db->fetch_array( $query );
 
     return $results;
