@@ -16,6 +16,10 @@ abstract class Engine {
 	protected $error = array('code' => 0, 'description' => '');
 	protected $raw_result = array();
 
+    protected $gloss_get_relative_url;
+    protected $gloss_set_relative_url;
+    protected $gloss_delete_relative_url;
+
 	protected function __construct($id) {
 		$this->id = $id;
 		if ( is_null($this->id) || $this->id == '' ) {
@@ -29,18 +33,21 @@ abstract class Engine {
 			return 0;
 		}
 
+        $this->name             = $data[ 'name' ];
+        $this->description      = $data[ 'description' ];
+        $this->base_url         = $data[ 'base_url' ];
+        $this->get_url          = $data[ 'translate_relative_url' ];
+        $this->set_url          = $data[ 'contribute_relative_url' ];
+        $this->delete_url       = $data[ 'delete_relative_url' ];
+        $this->extra_parameters = json_decode( $data[ 'extra_parameters' ] );
+        $this->type             = $data[ 'type' ];
+        $this->default_penalty  = empty( $data[ 'penalty' ] ) ? 0 : $data[ 'penalty' ];
 
+        $this->gloss_get_url    = $data[ 'gloss_get_relative_url' ];
+        $this->gloss_set_url    = $data[ 'gloss_set_relative_url' ];
+        $this->gloss_delete_url = $data[ 'gloss_delete_relative_url' ];
 
-		$this->name = $data['name'];
-		$this->description = $data['description'];
-		$this->base_url = $data['base_url'];
-		$this->get_url = $data['translate_relative_url'];
-		$this->set_url = $data['contribute_relative_url'];
-		$this->delete_url = $data['delete_relative_url'];
-		$this->extra_parameters = json_decode($data['extra_parameters']);
-		$this->type = $data['type'];
-		$this->default_penalty = empty($data['penalty']) ? 0 : $data['penalty'];
-	}
+    }
 
 	protected function curl($url) {
 		$ch = curl_init();
@@ -77,11 +84,11 @@ abstract class Engine {
 		}
 
 		$this->buildQuery($function, $parameters);
-//        $uniquid = uniqid('',true);
-//        Log::doLog( $uniquid . " ... " . $this->url);
+        $uniquid = uniqid('',true);
+        Log::doLog( $uniquid . " ... " . $this->url);
 		$res=$this->curl($this->url);
 		$this->raw_result = json_decode($res,true);
-//        Log::doLog( $uniquid . " ... Received... " . $res );
+        Log::doLog( $uniquid . " ... Received... " . $res );
 	}
 
 	private function buildQuery($function, $parameters) {
@@ -102,7 +109,7 @@ abstract class Engine {
 			return false;
 		}
 
-		$ret = (isset($this->{$type . "_url"}) and !empty($this->{$type . "_url"}));
+        $ret = ( isset( $this->{$type . "_url"} ) and !empty( $this->{$type . "_url"} ) );
 		if (!$ret) {
 			$this->error['code'] = -2;
 			$this->error['description'] = "operation $type not defined for this engine";

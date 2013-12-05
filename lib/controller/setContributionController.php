@@ -112,6 +112,16 @@ class setContributionController extends ajaxcontroller {
 			return -1;
 		}
 
+
+        $config = TMS::getConfigStruct();
+
+        $config[ 'segment' ]       = $this->source;
+        $config[ 'translation' ]   = $this->target;
+        $config[ 'source_lang' ]   = $this->source_lang;
+        $config[ 'target_lang' ]   = $this->target_lang;
+        $config[ 'email' ]         = "demo@matecat.com";
+        $config[ 'id_user' ]       = $this->translator_username;
+
         $id_tms = $job_data[ 'id_tms' ];
 
 		if ($id_tms != 0) {
@@ -119,7 +129,7 @@ class setContributionController extends ajaxcontroller {
             //if translator_username is empty no key is added to MyMemory api SET query string, so, anonymous by default
 
             $tms = new TMS( $id_tms );
-            $result = $tms->set( $this->source, $this->target, $this->source_lang, $this->target_lang, "demo@matecat.com", $this->translator_username );
+            $result = $tms->set( $config );
 
             if( !$result ){
                 $this->result['error'][] = array("code" => -5, "message" => "Connection Error.");

@@ -26,14 +26,15 @@ class getContributionController extends ajaxcontroller {
 		parent::__construct();
 
         $filterArgs = array(
-            'id_segment'     => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'id_job'         => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'num_results'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'text'           => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'id_translator'  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-            'password'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-            'is_concordance' => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-            'from_target'    => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+            'id_segment'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'id_job'          => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'num_results'     => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'text'            => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'id_translator'   => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+            'password'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+            'is_concordance'  => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+            'is_glossary'     => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
+            'from_target'     => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
         );
 
         $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -42,14 +43,15 @@ class getContributionController extends ajaxcontroller {
         //NOTE: Global $_POST Overriding from CLI
         //$this->__postInput = filter_var_array( $_POST, $filterArgs );
 
-        $this->id_segment         = $this->__postInput[ 'id_segment' ];
-        $this->id_job             = $this->__postInput[ 'id_job' ];
-        $this->num_results        = $this->__postInput[ 'num_results' ];
-        $this->text               = trim( $this->__postInput[ 'text' ] );
-        $this->id_translator      = $this->__postInput[ 'id_translator' ];
-        $this->concordance_search = $this->__postInput[ 'is_concordance' ];
-        $this->switch_languages   = $this->__postInput[ 'from_target' ];
-        $this->password           = $this->__postInput[ 'password' ];
+        $this->id_segment          = $this->__postInput[ 'id_segment' ];
+        $this->id_job              = $this->__postInput[ 'id_job' ];
+        $this->num_results         = $this->__postInput[ 'num_results' ];
+        $this->text                = trim( $this->__postInput[ 'text' ] );
+        $this->id_translator       = $this->__postInput[ 'id_translator' ];
+        $this->concordance_search  = $this->__postInput[ 'is_concordance' ];
+        $this->glossary_search     = $this->__postInput[ 'is_glossary' ];
+        $this->switch_languages    = $this->__postInput[ 'from_target' ];
+        $this->password            = $this->__postInput[ 'password' ];
 
 		if ($this->id_translator == 'unknown_translator') {
 			$this->id_translator = "";
@@ -107,45 +109,83 @@ class getContributionController extends ajaxcontroller {
 
         } else {
 
-            $regularExpressions = $this->tokenizeSourceSearch( $st );
+            $regularExpressions = $this->tokenizeSourceSearch();
+
+            if ( $this->switch_languages ) {
+                /*
+                 *
+                 * switch languages from user concordances search on the target language value
+                 * Example:
+                 * Job is in
+                 *      source: it_IT,
+                 *      target: de_DE
+                 *
+                 * user perform a right click for concordance help on a german word or phrase
+                 * we want result in italian from german source
+                 *
+                 */
+                $this->source = $st[ 'target' ];
+                $this->target = $st[ 'source' ];
+            } else {
+                $this->source = $st[ 'source' ];
+                $this->target = $st[ 'target' ];
+            }
 
         }
 
 		$this->id_mt_engine = $st['id_mt_engine'];
 		$this->id_tms = $st['id_tms'];
 
-		$tms_match = array();
+        $config = TMS::getConfigStruct();
+
+        $config[ 'segment' ]       = $this->text;
+        $config[ 'source_lang' ]   = $this->source;
+        $config[ 'target_lang' ]   = $this->target;
+        $config[ 'email' ]         = "demo@matecat.com";
+        $config[ 'id_user' ]       = $this->id_translator;
+        $config[ 'num_result' ]    = $this->num_results;
+        $config[ 'isConcordance' ] = $this->concordance_search;
+        $config[ 'isGlossary' ]    = false;
+
+        $_TMS = $this->id_tms; //request
+
 		if ( $this->id_tms == 1 ) {
             /**
              * MyMemory Enabled
              */
-			$mt_from_tms = 1;
-            $mt_only = false;
-			if ( $this->id_mt_engine != 1 ) {
+
+            $config[ 'get_mt' ]  = true;
+            $config[ 'mt_only' ] = false;
+            if ( $this->id_mt_engine != 1 ) {
                 /**
                  * Don't get MT contribution from MyMemory ( Custom MT )
                  */
-				$mt_from_tms = 0;
-			}
-			$tms = new TMS( $this->id_tms );
-			$tms_match = $tms->get($this->text, $this->source, $this->target, "demo@matecat.com", $mt_from_tms, $this->id_translator, $this->num_results, $mt_only, $this->concordance_search );
-            $tms_match = $tms_match->get_matches_as_array();
+                $config[ 'get_mt' ] = false;
+            }
+
+            $_TMS = $this->id_tms;
 
         } else if( $this->id_tms == 0 && $this->id_mt_engine == 1 ){
+
             /**
              * MyMemory disabled but MT Enabled and it is NOT a Custom one
              * So tell to MyMemory to get MT only
             */
-            $mt_only = true;
-            $mt_from_tms = 1;
-            $tms = new TMS( 1 /* MyMemory */ );
-            $tms_match = $tms->get($this->text, $this->source, $this->target, "demo@matecat.com", $mt_from_tms, $this->id_translator, $this->num_results, $mt_only, $this->concordance_search );
-            $tms_match = $tms_match->get_matches_as_array();
+            $config[ 'get_mt' ]  = true;
+            $config[ 'mt_only' ] = true;
+
+            $_TMS = 1; /* MyMemory */
+
 		}
+
+        $tms = new TMS( $_TMS );
+        $tms_match = $tms->get( $config );
+        $tms_match = $tms_match->get_matches_as_array();
 
 		$mt_res = array();
 		$mt_match = "";
 		if ( $this->id_mt_engine > 1 /* Request MT Directly */ ) {
+
 			$mt = new MT($this->id_mt_engine);
 			$mt_result = $mt->get($this->text, $this->source, $this->target, "demo@matecat.com", $this->id_segment );
 
@@ -163,6 +203,7 @@ class getContributionController extends ajaxcontroller {
                 $mt_res['sentence_confidence'] = $mt_result->sentence_confidence; //can be null
 
 			}
+
 		}
 		$matches = array();
 
@@ -313,11 +354,10 @@ class getContributionController extends ajaxcontroller {
      * Build tokens to mark with highlight placeholders
      * the source RESULTS occurrences ( correspondences ) with text search incoming from ajax
      *
-     * @param $sourceStringSearch
      * @return array[string => string] $regularExpressions Pattern is in the key and replacement in the value of the array
      *
      */
-    protected function tokenizeSourceSearch( $sourceStringSearch ) {
+    protected function tokenizeSourceSearch() {
 
         $this->text = strip_tags( html_entity_decode( $this->text ) );
 
@@ -375,26 +415,6 @@ class getContributionController extends ajaxcontroller {
             }
         }
         uksort( $regularExpressions, '_sortByLenDesc' );
-
-        if ( $this->switch_languages ) {
-            /*
-             *
-             * switch languages from user concordances search on the target language value
-             * Example:
-             * Job is in
-             *      source: it_IT,
-             *      target: de_DE
-             *
-             * user perform a right click for concordance help on a german word or phrase
-             * we want result in italian from german source
-             *
-             */
-            $this->source = $sourceStringSearch[ 'target' ];
-            $this->target = $sourceStringSearch[ 'source' ];
-        } else {
-            $this->source = $sourceStringSearch[ 'source' ];
-            $this->target = $sourceStringSearch[ 'target' ];
-        }
 
         return $regularExpressions;
 

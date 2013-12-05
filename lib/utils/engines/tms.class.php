@@ -127,6 +127,24 @@ class TMS extends Engine {
 
     private $result = array();
 
+    protected static $_config = array(
+        'segment'       => null,
+        'translation'   => null,
+        'source_lang'   => null,
+        'target_lang'   => null,
+        'email'         => null,
+        'get_mt'        => 1,
+        'id_user'       => null,
+        'num_result'    => 3,
+        'mt_only'       => false,
+        'isConcordance' => false,
+        'isGlossary'    => false,
+    );
+
+    public static function getConfigStruct(){
+        return self::$_config;
+    }
+
     public function __construct($id) {
         parent::__construct($id);
         if ($this->type != "TM") {
@@ -134,68 +152,119 @@ class TMS extends Engine {
         }
     }
 
-    public function get($segment, $source_lang, $target_lang, $email = "", $mt = 1, $id_user = "", $num_results = 3, $mt_only = false, $isConcordance = false) {
+    //refactory on method sign
+
+    /**
+     * @param $_config = array(
+     *            'segment'         => null,
+     *            'translation'     => null,
+     *            'source_lang'     => null,
+     *            'target_lang'     => null,
+     *            'email'           => null,
+     *            'get_mt'          => 1,
+     *            'id_user'         => null,
+     *            'num_result'      => 3,
+     *            'mt_only'         => false,
+     *            'isConcordance'   => false,
+     *            'isGlossary'      => false,
+     *        );
+     *
+     * @return TMS_RESULT
+     */
+    public function get( array $_config ) {
+
         $parameters = array();
-        $parameters['q'] = $segment;
+        $parameters['q'] =  $_config['segment'] ;
 
-        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance FIX : it 
+        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX : it
         //does not handle properly iso code (en-US)-- COMMIT BUT MUST BE FIXED IN MYMEMORY
-        if ($isConcordance) {
-            list( $source_lang, $trash ) = explode('-', $source_lang);
-            list( $target_lang, $trash ) = explode('-', $target_lang);
+        if ( $_config['isConcordance'] || $_config['isGlossary'] ) {
+            list( $_config['source_lang'], $trash ) = explode('-', $_config['source_lang'] );
+            list( $_config['target_lang'], $trash ) = explode('-', $_config['target_lang'] );
         }
-        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance FIX -- 
-        
-        $parameters['langpair'] = "$source_lang|$target_lang";
-        $parameters['de'] = $email;
-        $parameters['mt'] = $mt;
-        $parameters['numres'] = $num_results;
+        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX --
 
-        ( $isConcordance ? $parameters['conc'] = 'true' : null );
-        ( $mt_only ? $parameters['mtonly'] = '1' : null );
+        $parameters[ 'langpair' ] = $_config['source_lang'] . "|" . $_config['target_lang'];
+        $parameters[ 'de' ]       = $_config[ 'email' ];
+        $parameters[ 'mt' ]       = $_config[ 'get_mt' ];
+        $parameters[ 'numres' ]   = $_config[ 'num_result' ];
 
-        if (!empty($id_user)) {
-            $parameters['key'] = $this->calculateMyMemoryKey($id_user);
+        ( $_config['isConcordance'] ? $parameters['conc']   = 'true' : null );
+        ( $_config['mt_only']       ? $parameters['mtonly'] = '1' : null );
+
+        if ( !empty( $_config['id_user'] ) ) {
+            $parameters['key'] = $this->calculateMyMemoryKey( $_config['id_user'] );
         }
 
-        $this->doQuery("get", $parameters);
+        ( !$_config['isGlossary']   ? $apply = "get" : $apply = "gloss_get" );
+
+        $this->doQuery( $apply, $parameters );
         $this->result = new TMS_RESULT($this->raw_result);
 
         return $this->result;
 
     }
 
-    public function set($segment, $translation, $source_lang, $target_lang, $email = "", $id_user = "") {
-        $parameters = array();
-        $parameters['seg'] = $segment;
-        $parameters['tra'] = $translation;
-        $parameters['langpair'] = "$source_lang|$target_lang";
-        $parameters['de'] = $email;
-        if (!empty($id_user)) {
-            //   $parameters['user'] = $id_user;
-            $parameters['key'] = $this->calculateMyMemoryKey($id_user);
+    public function set( array $_config ) {
+
+        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX : it
+        //does not handle properly iso code (en-US)-- COMMIT BUT MUST BE FIXED IN MYMEMORY
+        if ( $_config['isGlossary'] ) {
+            list( $_config['source_lang'], $trash ) = explode('-', $_config['source_lang'] );
+            list( $_config['target_lang'], $trash ) = explode('-', $_config['target_lang'] );
+        }
+        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX --
+
+        $parameters               = array();
+        $parameters[ 'seg' ]      = $_config[ 'segment' ];
+        $parameters[ 'tra' ]      = $_config[ 'translation' ];
+        $parameters[ 'langpair' ] = $_config[ 'source_lang' ] . "|" . $_config[ 'target_lang' ];
+        $parameters[ 'de' ]       = $_config[ 'email' ];
+
+        if ( !empty( $_config[ 'id_user' ] ) ) {
+            //$parameters['user'] = $id_user;
+            $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
         }
 
-        $this->doQuery("set", $parameters);
-        $this->result = new TMS_RESULT($this->raw_result);
-        if ($this->result->responseStatus != "200") {
+        ( !$_config['isGlossary']   ? $apply = "set" : $apply = "gloss_set" );
+
+        $this->doQuery( $apply, $parameters );
+
+        $this->result = new TMS_RESULT( $this->raw_result );
+
+        if ( $this->result->responseStatus != "200" ) {
             return false;
         }
         return true;
     }
 
-    public function delete($segment, $translation, $source_lang, $target_lang, $id_user = "", $email = "") {
-        $parameters = array();
-        $parameters['seg'] = $segment;
-        $parameters['tra'] = $translation;
-        $parameters['langpair'] = "$source_lang|$target_lang";
-        $parameters['de'] = $email;
-        if (!empty($id_user)) {
-            $parameters['user'] = $id_user;
-            $parameters['key'] = $this->calculateMyMemoryKey($id_user);
+    public function delete( array $_config ) {
+
+        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX : it
+        //does not handle properly iso code (en-US)-- COMMIT BUT MUST BE FIXED IN MYMEMORY
+        if ( $_config['isGlossary'] ) {
+            list( $_config['source_lang'], $trash ) = explode('-', $_config['source_lang'] );
+            list( $_config['target_lang'], $trash ) = explode('-', $_config['target_lang'] );
         }
-        $this->doQuery("delete", $parameters);
+        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX --
+
+        $parameters               = array();
+        $parameters[ 'seg' ]      = $_config[ 'segment' ];
+        $parameters[ 'tra' ]      = $_config[ 'translation' ];
+        $parameters[ 'langpair' ] = $_config[ 'source_lang' ] . "|" . $_config[ 'target_lang' ];
+        $parameters[ 'de' ]       = $_config[ 'email' ];
+
+        if ( !empty( $_config[ 'id_user' ] ) ) {
+            //$parameters['user'] = $id_user;
+            $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
+        }
+
+        ( !$_config['isGlossary']   ? $apply = "set" : $apply = "gloss_set" );
+
+        $this->doQuery( $apply, $parameters);
+
         $this->result = new TMS_RESULT($this->raw_result);
+
         if ($this->result->responseStatus != "200") {
             return false;
         }

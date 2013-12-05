@@ -147,7 +147,7 @@ APP = {
                     '       <h1>' + conf.title + '</h1>' +
                     '       <p>' + conf.content + '</p>';
         if(conf.type == 'alert') {
-            newPopup += '<a href="#" class="btn-ok">ok<\a>';          
+            newPopup += '<a href="#" class="btn-ok">Ok<\a>';
         } else if(conf.type == 'confirm') {
             newPopup +=     '<a href="#" class="btn-cancel"' + ((conf.onCancel)? ' data-callback="' + conf.onCancel + '"' : '') + '>' + ((conf.cancelTxt)? conf.cancelTxt : 'Cancel') + '<\a>' +          
                              '<a href="#" class="btn-ok"' + ((conf.onConfirm)? ' data-callback="' + conf.onConfirm + '"' : '') + '>' + ((conf.okTxt)? conf.okTxt : 'Ok') + '<\a>';    

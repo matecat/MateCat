@@ -1101,6 +1101,8 @@ function insertTranslator( ArrayObject $projectStructure ) {
         $db->insert( 'translators', $data );
     }
 
+    $projectStructure['private_tm_user'] = $user_id;
+
 }
 
 //function insertJob( $password, $id_project, $id_translator, $source_language, $target_language, $mt_engine, $tms_engine, $owner ) {
@@ -1278,7 +1280,7 @@ function getProjectData( $pid, $project_password = null, $jid = null ) {
                     %s
 
                     GROUP BY f.id, j.id, j.password
-                    ORDER BY j.create_date
+                    ORDER BY j.create_date, j.job_first_segment
              ";
 
     $and_1 = $and_2 = null;

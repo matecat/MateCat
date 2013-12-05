@@ -91,8 +91,18 @@ while (1) {
         continue;
     }
 
+    $config = TMS::getConfigStruct();
+    $config[ 'segment' ]       = $text;
+    $config[ 'source_lang' ]   = $source;
+    $config[ 'target_lang' ]   = $target;
+    $config[ 'email' ]         = "demo@matecat.com";
+    $config[ 'id_user' ]       = $id_translator;
+    $config[ 'num_result' ]    = 3;
+
     $id_mt_engine    = $segment[ 'id_mt_engine' ];
     $id_tms          = $segment[ 'id_tms' ];
+
+    $_TMS = $id_tms; //request
 
     /**
      * Call Memory Server for matches if it's enabled
@@ -102,17 +112,16 @@ while (1) {
         /**
          * MyMemory Enabled
          */
-        $mt_from_tms = 1;
+        $config[ 'get_mt' ]  = true;
+        $config[ 'mt_only' ] = false;
         if( $id_mt_engine != 1 ){
             /**
              * Don't get MT contribution from MyMemory ( Custom MT )
              */
-            $mt_from_tms = 0;
+            $config[ 'get_mt' ] = false;
         }
-        $tms = new TMS($id_tms);
-        $tms_match = $tms->get($text, $source, $target, "demo@matecat.com", $mt_from_tms, $id_translator, 3 );
 
-        $tms_match = $tms_match->get_matches_as_array();
+        $_TMS = $id_tms;
 
         $tms_enabled = true;
 
@@ -121,16 +130,26 @@ while (1) {
          * MyMemory disabled but MT Enabled and it is NOT a Custom one
          * So tell to MyMemory to get MT only
          */
-        $mt_only = true;
-        $mt_from_tms = 1;
-        $tms = new TMS( 1 /* MyMemory */ );
-        $tms_match = $tms->get($text, $source, $target, "demo@matecat.com", $mt_from_tms, $id_translator, 3, $mt_only );
+        $config[ 'get_mt' ]  = true;
+        $config[ 'mt_only' ] = true;
 
-        $tms_match = $tms_match->get_matches_as_array();
+        $_TMS = 1; /* MyMemory */
 
         $tms_enabled = true;
 
     }
+
+    /*
+     * This will be ever executed without damages because
+     * fastAnalysis set Project as DONE when
+     * MyMemory is disabled and MT is Disabled Too
+     *
+     * So don't worry, perform TMS Analysis
+     *
+     */
+    $tms = new TMS( $_TMS );
+    $tms_match = $tms->get( $config );
+    $tms_match = $tms_match->get_matches_as_array();
 
     /**
      * Call External MT engine if it is a custom one ( mt not requested from MyMemory )
