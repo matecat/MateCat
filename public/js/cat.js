@@ -352,7 +352,14 @@ UI = {
 		}).on('click', '#downloadProject', function(e) {
 			e.preventDefault();
 			if ($("#notifbox").hasClass("warningbox")) {
-				APP.confirm({name: 'confirmDownload', cancelTxt: 'Fix errors', onCancel: 'goToFirstError', callback: 'continueDownload', okTxt: 'Continue', msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"});
+				APP.confirm({
+					name: 'confirmDownload', 
+					cancelTxt: 'Fix errors', 
+					onCancel: 'goToFirstError', 
+					callback: 'continueDownload', 
+					okTxt: 'Continue', 
+					msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"
+				});
 			} else {
 				UI.continueDownload();
 			}
@@ -974,6 +981,7 @@ UI = {
 			UI.clearSearchFields();
 			UI.setFindFunction('find');
 			$('#exec-find').removeAttr('disabled');
+			$('#exec-replace, #exec-replaceall').attr('disabled', 'disabled');				
 			UI.enableTagMark();
 			if (UI.segmentIsLoaded(UI.currentSegmentId)) {
 				UI.gotoOpenSegment();
@@ -985,8 +993,23 @@ UI = {
 			}
 
 		});
+		$("#exec-replaceall").click(function(e) {
+			e.preventDefault();
+			APP.confirm({
+				name: 'confirmReplaceAll', 
+				cancelTxt: 'Cancel', 
+				callback: 'execReplaceAll', 
+				okTxt: 'Continue', 
+				msg: "Do you really want to replace this text in all search results?"
+			});
+		});
 		$("#exec-replace").click(function(e) {
 			e.preventDefault();
+			if($('#search-target').val() == $('#replace-target').val()) {
+				APP.alert('Attention: you are replacing the same text!');	
+				return false;
+			}
+				
 //            APP.alert('lo rimpiazzo');
 			if (UI.searchMode == 'onlyStatus') {
 //                var status = (p['status'] == 'all')? '' : '.status-' + p['status'];
@@ -1478,10 +1501,10 @@ UI = {
 
 		if ($('#search-target').val() != '') {
 			this.searchParams['target'] = $('#search-target').val();
-			$('#exec-replace').removeAttr('disabled');
+			$('#exec-replace, #exec-replaceall').removeAttr('disabled');
 		} else {
 			delete this.searchParams['target'];
-			$('#exec-replace').attr('disabled', 'disabled');
+			$('#exec-replace, #exec-replaceall').attr('disabled', 'disabled');
 		}
 
 		if ($('#select-status').val() != '') {
@@ -1562,6 +1585,35 @@ UI = {
 			this.render(this.pendingRender);
 			this.pendingRender = false;
 		}
+	},
+	execReplaceAll: function() {
+		console.log('replace all');
+		$('.search-display .numbers').text('No segments found');
+		$('.editarea mark.searchMarker').remove();
+		this.applySearch();
+//		$('.modal[data-name=confirmReplaceAll] .btn-ok').addClass('disabled').text('Replacing...').attr('disabled', 'disabled');
+		var p = this.searchParams;
+		var source = (p['source']) ? p['source'] : '';
+		var target = (p['target']) ? p['target'] : '';
+		var replace = (p['replace']) ? p['replace'] : '';
+		var dd = new Date();
+		APP.doRequest({
+			data: {
+				action: 'replaceAll',
+				job: config.job_id,
+				token: dd.getTime(),
+				password: config.password,
+				source: source,
+				target: target,
+				status: p['status'],
+				matchcase: p['match-case'],
+				exactmatch: p['exact-match'],
+				replace: replace
+			},
+			success: function(d) {
+				console.log('success replace all');
+			}
+		});		
 	},
 	checkSearchStrings: function() {
 		s = this.searchParams['source'];
