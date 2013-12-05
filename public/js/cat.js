@@ -1531,8 +1531,9 @@ UI = {
 		this.searchMode = ((typeof p['source'] == 'undefined') && (typeof p['target'] == 'undefined')) ? 'onlyStatus' :
 				((typeof p['source'] != 'undefined') && (typeof p['target'] != 'undefined')) ? 'source&target' : 'normal';
 		if (this.searchMode == 'onlyStatus') {
-			APP.alert('Status only search is temporarily disabled');
-			return false;
+			
+//			APP.alert('Status only search is temporarily disabled');
+//			return false;
 		}
 		else if (this.searchMode == 'source&target') {
 //            APP.alert('Combined search is temporarily disabled');
@@ -1546,9 +1547,11 @@ UI = {
 		this.gotoSearchResultAfter({
 			el: 'segment-' + this.currentSegmentId
 		});
-
+		console.log('a');
 		this.setFindFunction('next');
+		console.log('a');
 		this.body.addClass('searchActive');
+		console.log('a');
 
 		var dd = new Date();
 		APP.doRequest({
@@ -1886,11 +1889,22 @@ UI = {
 		var p = this.searchParams;
 
 		if (this.searchMode == 'onlyStatus') {
+			console.log('only status');
 			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
+			el = $('section.currSearchSegment');
 			if (p['status'] == 'all') {
-				this.scrollSegment($('#' + el).next());
+				this.scrollSegment($(el).next());
 			} else {
-				this.scrollSegment($('#' + el).nextUntil('section' + status).last().next());
+//				console.log(el);
+//				console.log(el.nextAll(status).first().attr('id'));
+//				console.log($(el).nextUntil('section'));
+				nextToGo = el.nextAll(status).first();
+//				nextToGo = $(el).nextUntil('section' + status).last().next();
+//				console.log(status);
+				console.log(nextToGo);
+				$(el).removeClass('currSearchSegment');
+				nextToGo.addClass('currSearchSegment');
+				this.scrollSegment(nextToGo);
 			}
 		} else if (this.searchMode == 'source&target') {
 			var seg = $("section.currSearchSegment");
@@ -1946,7 +1960,12 @@ UI = {
 			if (p['status'] == 'all') {
 				this.scrollSegment($('#' + el).next());
 			} else {
-				this.scrollSegment($('#' + el).nextUntil('section' + status).last().next());
+				nextToGo = $('#' + el).nextAll(status).first();
+//				nextToGo = $('#' + el).nextUntil('section' + status).last().next();
+//				$('section.currSearchSegment').removeClass('currSearchSegment');
+				nextToGo.addClass('currSearchSegment');
+				this.scrollSegment(nextToGo);
+				
 			}
 		} else if (this.searchMode == 'source&target') { // searchMode: source&target
 			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
@@ -2024,6 +2043,7 @@ UI = {
 		}
 
 
+/*
 		if ((typeof p['source'] == 'undefined') && (typeof p['target'] == 'undefined')) {
 			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
 			if (p['status'] == 'all') {
@@ -2035,7 +2055,7 @@ UI = {
 
 
 		}
-
+*/
 	},
 	preOpenConcordance: function() {
 		var selection = window.getSelection();
@@ -3092,6 +3112,7 @@ UI = {
 //        this.render(false, segment.selector.split('-')[1]);
 	},
 	scrollSegment: function(segment) {
+		console.log(segment);
 //        segment = (noOpen)? $('#segment-'+segment) : segment;
 //        noOpen = (typeof noOpen == 'undefined')? false : noOpen;
 		if (!segment.length) {

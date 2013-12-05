@@ -10,31 +10,31 @@
         <link href="${basepath}public/css/jquery-ui.css?build=${build_number}" rel="stylesheet" type="text/css" />
 
         <script type="text/javascript">
-            /*<![CDATA[*/
-            var config = {
-                basepath: '${basepath | string:/}',
-                id_translator: '${tid | nothing}',
-                private_translator: '${private_translator | string:0}',
-                id_customer: '${id_customer | string:unknown_customer}',
-                private_customer: '${private_customer | string:0}',
-                last_opened_segment: '${last_opened_segment}',
-                first_job_segment: '${first_job_segment}',
-                server_load_time: '${load_time}',
-                job_id: '${jid}',
-                password: '${password}',
-                source_rfc: '${source_code}',
-                target_rfc: '${target_code}',
-                source_lang: '${source}',
-                target_lang: '${target}',
-                time_to_edit_enabled: ${time_to_edit_enabled},
-                build_number: '${build_number}',
-                test: 'test',
-                warningPollingInterval:'${warningPollingInterval}',
-                segmentQACheckInterval: '${segmentQACheckInterval}',
-                firstSegmentOfFiles: ${structure php: firstSegmentOfFiles}
-            };
-            var renderStart = new Date();
-            /*]]>*/
+			/*<![CDATA[*/
+			var config = {
+			basepath: '${basepath | string:/}',
+					id_translator: '${tid | nothing}',
+					private_translator: '${private_translator | string:0}',
+					id_customer: '${id_customer | string:unknown_customer}',
+					private_customer: '${private_customer | string:0}',
+					last_opened_segment: '${last_opened_segment}',
+					first_job_segment: '${first_job_segment}',
+					server_load_time: '${load_time}',
+					job_id: '${jid}',
+					password: '${password}',
+					source_rfc: '${source_code}',
+					target_rfc: '${target_code}',
+					source_lang: '${source}',
+					target_lang: '${target}',
+					time_to_edit_enabled: ${time_to_edit_enabled},
+					build_number: '${build_number}',
+					test: 'test',
+					warningPollingInterval:'${warningPollingInterval}',
+					segmentQACheckInterval: '${segmentQACheckInterval}',
+					firstSegmentOfFiles: ${structure php: firstSegmentOfFiles}
+			};
+					var renderStart = new Date();
+					/*]]>*/
         </script>
         <script src="${basepath}public/js/loader.js?build=${build_number}"></script>
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
@@ -67,7 +67,7 @@
 
 
                 <!-- viewer icons
-                
+				
                     <a href="#" class="notification m-notification" title="click to view notifications">2</a>
                     <span class="text">+ you
                     <span id="id_translator" class="hide">antonio</span>
@@ -95,7 +95,7 @@
                             last edit: 12/06/12 at 06.30 AM
                         </span>
                     </a>
-                    
+					
                 -->
 
 
@@ -160,7 +160,7 @@
 
 
         </header>
-        
+
         <div tal:attributes="class string:searchbox${filtered_class}">
             <form>
 
@@ -176,12 +176,11 @@
                             <input id="search-target" class="search-input" type="text" value=""/>
                         </div>
 
-
                         <div class="field">
-                            <label for="replace-target">Replace with</label>
-                            <input id="replace-target" class="search-input" type="text" value=""/>
+						<input id="enable-replace" type="checkbox" />
+						<label for="enable-replace">Replace with</label>
+						<input id="replace-target" disabled="disabled" class="search-input" type="text" value=""/>
                         </div>
-
 
                     </div>                    
                     <div class="block">
@@ -208,7 +207,7 @@
 
                     </div>          
                 </div>
-                
+
                 <div class="search-options">
                     <div class="block">
                         <input id="match-case" type="checkbox" />
@@ -219,14 +218,14 @@
                         <label for="exact-match">Exact match</label>
                     </div>                    
                 </div>
-                
+
             </form>
             <div class="search-display">
                 <p class="searching">Searching ...</p>
                 <p class="found"><span class="numbers">Found <span class="results">...</span> results in <span class="segments">...</span> segments</span> having<span class="query">...</span></p>
             </div>
         </div>
-        
+
         <!--
                 <div class="search">    
                <div class="col1-search">
@@ -245,35 +244,35 @@
               <li>
         <div class="search-editarea " contenteditable="true" onClick="if ($(this).text()=='SOURCE') $(this).text('')" onBlur="if ($(this).text()=='') $(this).text('SOURCE')">SOURCE</div>
                   </li>      
-                        
-                        
+						
+						
                         <li>
                                                          <div class="search-editarea" contenteditable="true" onClick="if ($(this).text()=='TRANSLATION') $(this).text('')" onBlur="if ($(this).text()=='') $(this).text('TRANSLATION')">TRANSLATION</div>
-                                         
-                                         
+										 
+										 
                                          </li>
-        
+		
         <li>
-        
-        
+		
+		
                   <span class="custom-checkbox replace">
           <input type="checkbox" />
           <span class="box normal-check" title="show/hide draft segments"><span class="tick "></span></span>
         </span> 
-        
+		
         <p> REPLACE </p>
-        
+		
         </li>
-        
+		
          </ul>
-            
-            
-        
-                 
+			
+			
+		
+				 
               <ul class="r-replace-box">
           <li style="float:right">
              <input name="" type="button" class="btn" value="REPLACE" />
-          
+		  
           </li>
           <li style="margin-left:202px">
               <div class="search-editarea" contenteditable="true" onClick="if ($(this).text()=='REPLACE SOURCE WITH') $(this).text('')" onBlur="if ($(this).text()=='') $(this).text('REPLACE SOURCE WITH')">REPLACE SOURCE WITH</div>
@@ -282,26 +281,26 @@
         <div class="search-editarea" contenteditable="true" onClick="if ($(this).text()=='REPLACE TRANSLATION WITH') $(this).text('')" onBlur="if ($(this).text()=='') $(this).text('REPLACE TRANSLATION WITH')">REPLACE TRANSLATION WITH</div>
         </li>
         </ul>
-          
+		  
              </div>
-             
-          
-          
-          
-          
+			 
+		  
+		  
+		  
+		  
           <div class="checkbox-box">
-          
+		  
           <ul>
-          
+		  
           <li>
-          
-          
-          
-        
-        
-          
-          
-          
+		  
+		  
+		  
+		
+		
+		  
+		  
+		  
          <span class="custom-checkbox" style="margin-left:8px">
           <input type="checkbox" />
           <span class="box normal-check" title="show/hide draft segments"><span class="tick"></span></span>       </span>     
@@ -311,17 +310,17 @@
           <span class="box normal-check" title="show/hide draft segments"><span class="tick"></span></span>       </span> 
                <p> CASE SENSITIVE</p>
                </li>
-         
+		 
         <li>
-        
+		
         <span class="custom-checkbox" style="margin-left:10px;">
           <input type="checkbox" checked="checked"/>
           <span class="box tr-check" title="show/hide translated segments"><span class="tick"></span></span>
         </span>
-         
+		 
         <p style="margin-right:5px;">Translated</p>
         </li>
-        
+		
         <li>
         <span class="custom-checkbox">
           <input type="checkbox" checked="checked"/>
@@ -342,15 +341,15 @@
         </span>
         <p style="margin-right:10px;">Approved</p>
         </li>
-        
-          
-          
+		
+		  
+		  
           </ul>
-          
+		  
           </div>
-          
-               
-              
+		  
+			   
+			  
             </div>   
         -->
         <!--  END header serach  div (hidden by default) -->    
@@ -366,18 +365,18 @@
                 <li class="jobstart"><a href="#" title="Go to job start">Job start</a></li>
                 <li class="prevfile"><a href="#" title="Go to the current file header">This/Previous file start</a></li>
                 <li class="currseg"><a href="#" title="Go to the current opened segment">Current segment</a></li>
-<!--                <li class="nextfile"><a href="#" title="Go to next file header">Next file start</a></li>   -->             
+				<!--                <li class="nextfile"><a href="#" title="Go to next file header">Next file start</a></li>   -->             
             </ul>
         </nav>
 
 
 
         <footer>
-<!--
-            <a href="#" id="navSwitcher" title="Open Navigation Bar">Open Navigation Bar</a>
--->
+			<!--
+						<a href="#" id="navSwitcher" title="Open Navigation Bar">Open Navigation Bar</a>
+			-->
             <div class="wrapper">
-     
+
                 <nav>
                     <ul>
                         <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
@@ -412,10 +411,10 @@
                     <ul>
                         <li id="stat-eqwords">
                             <a tal:condition="php: !empty(analysis_enabled)" target="_blank" tal:attributes="href string:${basepath}jobanalysis/${pid}-${jid}-${password}">Payable Words</a>
-                            <tal:block tal:condition="php: empty(analysis_enabled)">
-                                Payable Words
-                            </tal:block>
-                            : <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong>
+						<tal:block tal:condition="php: empty(analysis_enabled)">
+							Payable Words
+						</tal:block>
+						: <strong tal:content="job_stats/TOTAL_FORMATTED|default">--.---</strong>
                         </li>
                         <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
                         <!--
@@ -481,55 +480,55 @@
 
 
 
-<!-- POPUP LOGIN -->
-<!--
-<div class="popup-outer"></div>
-<div class="popup">
-
-<a href="#" class="x-popup"></a>
-<h1>Login</h1>
-
-<h2>Login to add the project <br/>to  your Management Panel</h2>
-
- <div class="outer">
-            <div class="inner">
-               <button id="sign-in" name="" type="button" class="login-button" data-oauth="http://matecat.translated.home/oauth/request">Sign in using Google</button>
-            </div>
-        </div>
-
-
- 
-
-<br/>
-
-Or <br/>
-
-
-<a href="#">
-Stay anonymous</a>
-
-</div>
--->
-<!-- FINE POPUP LOGIN -->
-
-
+		<!-- POPUP LOGIN -->
+		<!--
+		<div class="popup-outer"></div>
+		<div class="popup">
+		
+		<a href="#" class="x-popup"></a>
+		<h1>Login</h1>
+		
+		<h2>Login to add the project <br/>to  your Management Panel</h2>
+		
+		 <div class="outer">
+					<div class="inner">
+					   <button id="sign-in" name="" type="button" class="login-button" data-oauth="http://matecat.translated.home/oauth/request">Sign in using Google</button>
+					</div>
+				</div>
+		
+		
+		 
+		
+		<br/>
+		
+		Or <br/>
+		
+		
+		<a href="#">
+		Stay anonymous</a>
+		
+		</div>
+		-->
+		<!-- FINE POPUP LOGIN -->
 
 
-<!-- POPUP PREVIEW WARNING -->
-<!--
-<div class="popup-outer"></div>
-<div class="popup">
-    <a href="#" class="x-popup"></a>
-    <h1>Warning</h1>
 
-    <p>There are some potential errors (missing tags, numbers, etc). <br/>
-    Do you want to continue anyway?</p>
 
-    <a href="#" class="btn-ok">Ok</a>
-    <a href="#" class="btn-cancel">Ops!</a>
-</div>
--->
-<!-- FINE PREVIEW WARNING -->
+		<!-- POPUP PREVIEW WARNING -->
+		<!--
+		<div class="popup-outer"></div>
+		<div class="popup">
+			<a href="#" class="x-popup"></a>
+			<h1>Warning</h1>
+		
+			<p>There are some potential errors (missing tags, numbers, etc). <br/>
+			Do you want to continue anyway?</p>
+		
+			<a href="#" class="btn-ok">Ok</a>
+			<a href="#" class="btn-cancel">Ops!</a>
+		</div>
+		-->
+		<!-- FINE PREVIEW WARNING -->
 
 
 
@@ -544,12 +543,12 @@ Stay anonymous</a>
         <div class="blacked" ></div>
 
         <ul id="contextMenu">
-<!--
-            <li id="spellCheck">
-                <span class="label">Maybe you were searching for:</span>
-                <a class="add" href="#">Add word</a>
-            </li>
--->
+			<!--
+						<li id="spellCheck">
+							<span class="label">Maybe you were searching for:</span>
+							<a class="add" href="#">Add word</a>
+						</li>
+			-->
             <li id="searchConcordance">
                 <span class="label">Concordance</span>
                 <span class="shortcut"><span class="alt">&#x2325;</span><span class="cmd">&#8984;</span> C</span>
@@ -576,7 +575,7 @@ Stay anonymous</a>
                         <div class="end-message-col2">
                 <h4>It took you only <strong>30 minutes</strong> <br />
                   to finish the translation!</h4>
-                
+				
                                                 <form id="fileDownload" action="${basepath}" method="post">
                                                         <input type="hidden" name="action" value="downloadFile" />
                                                         <input type="hidden" name="id_job" value="" tal:attributes="value jid | nothing" />
@@ -584,10 +583,10 @@ Stay anonymous</a>
                                                         <input type="hidden" name="filename" tal:attributes ="value string:${pname}.xliff" />
                                                         <input id="downloadProject" name="submit" type="submit" value="DOWNLOAD PROJECT" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS}" />
                                                 </form>
-                        
+						
                                <a href="#" class="downloadtr-button" style="background:#f5f5f5;color:#333">START NEW PROJECT</a>
-                
-                  
+				
+				  
                                 <a href="#" class="downloadtr-button" style="background:#f5f5f5;color:#333"><strong>NOTIFY YOUR PM</strong> <br />
                 <span>that you are available for new work</span></a>
                 <input name="" type="text" value="http://23-P124#completed" onClick="select()"/>
