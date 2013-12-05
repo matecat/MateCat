@@ -302,7 +302,8 @@ class CatUtils {
 //            $sug_for_diff = html_entity_decode($sug_for_diff, ENT_NOQUOTES, 'UTF-8');
 //            $tra_for_diff = html_entity_decode($tra_for_diff, ENT_NOQUOTES, 'UTF-8');
 
-            $ter          = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
+            //$ter          = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
+		$ter=array();
             $seg[ 'ter' ] = $ter[ 1 ] * 100;
             $stat_ter[ ]  = $seg[ 'ter' ] * $seg[ 'rwc' ];
             $seg[ 'ter' ] = round( $ter[ 1 ] * 100 ) . "%";
