@@ -695,11 +695,11 @@ section.loaded .submenu {display: block;}
 	display: block;
 }
 
-.sub-editor .cc-search
+.sub-editor .cc-search, .sub-editor .gl-search
 {
     background: none;
 }       
-.sub-editor .cc-search.loading
+.sub-editor .cc-search.loading, .sub-editor .gl-search.loading
 {
     background: url(../img/loading.gif) 49.7% 20px no-repeat;
     float: left;
@@ -708,7 +708,8 @@ section.loaded .submenu {display: block;}
 }          
 
 .sub-editor .cc-search .search-target,
-.sub-editor .cc-search .search-source
+.sub-editor .cc-search .search-source,
+.sub-editor .gl-search .search-source
 {
     float: left;
     width: 45.8%;

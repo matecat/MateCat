@@ -14,6 +14,8 @@ include_once INIT::$MODEL_ROOT . "/queries.php";
 class glossaryController extends ajaxcontroller {
 
     private $exec;
+    private $id_job;
+    private $password;
     private $segment;
     private $translation;
     private $source_lang;
@@ -25,11 +27,10 @@ class glossaryController extends ajaxcontroller {
 
         $filterArgs = array(
             'exec'          => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'id_job'        => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'password'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'segment'       => array( 'filter' => FILTER_UNSAFE_RAW ),
             'translation'   => array( 'filter' => FILTER_UNSAFE_RAW ),
-            'source_lang'   => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'target_lang'   => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'id_translator' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
 
         //$__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -39,32 +40,31 @@ class glossaryController extends ajaxcontroller {
         $__postInput = filter_var_array( $_POST, $filterArgs );
 
         $this->exec          = $__postInput[ 'exec' ];
+        $this->id_job        = $__postInput[ 'id_job' ];
+        $this->password      = $__postInput[ 'password' ];
         $this->segment       = $__postInput[ 'segment' ];
         $this->translation   = $__postInput[ 'translation' ];
-        $this->source_lang   = $__postInput[ 'source_lang' ];
-        $this->target_lang   = $__postInput[ 'target_lang' ];
-        $this->id_translator = $__postInput[ 'id_translator' ];
 
     }
 
     public function doAction() {
 
-
+        $st = getJobData( $this->id_job, $this->password );
 
         try {
 
-            if ( empty( $this->id_translator ) ) {
-                throw new Exception( "No Private Glossary Key provided.", -1 );
+            if ( empty( $st['id_translator'] ) ) {
+                throw new Exception( "No Private Glossary Key provided for Job.", -1 );
             }
 
             $config = TMS::getConfigStruct();
 
             $config[ 'segment' ]       = $this->segment;
             $config[ 'translation' ]   = $this->translation;
-            $config[ 'source_lang' ]   = $this->source_lang;
-            $config[ 'target_lang' ]   = $this->target_lang;
+            $config[ 'source_lang' ]   = $st['source'];
+            $config[ 'target_lang' ]   = $st['target'];
             $config[ 'email' ]         = "demo@matecat.com";
-            $config[ 'id_user' ]       = $this->id_translator;
+            $config[ 'id_user' ]       = $st['id_translator'];
             $config[ 'isGlossary' ]    = true;
 
             /**

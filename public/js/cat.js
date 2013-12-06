@@ -758,7 +758,14 @@ UI = {
 			$('.cc-search .search-source').focus();
 //        }).on('keydown', '.sub-editor .cc-search .search-source', 'return', function(e) {
 			//if($(this).text().length > 2) UI.getConcordance($(this).text(), 0);
-		}).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
+		}).on('click', '.tab-switcher-gl', function(e) {
+            e.preventDefault();
+            $('.editor .submenu .active').removeClass('active');
+            $(this).addClass('active');
+            $('.editor .sub-editor').hide();
+            $('.editor .sub-editor.glossary').show();
+            $('.gl-search .search-source').focus();
+        }).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
 			if (e.which == 13) { // enter
 				e.preventDefault();
 				var txt = $(this).text();
@@ -821,7 +828,19 @@ UI = {
 			 //                $('.editor .sub-editor.concordances .results').empty();
 			 };
 			 */
-		}).on('paste', '.editarea', function(e) {
+		})
+
+        .on('keydown', '.sub-editor .gl-search .search-source', function(e) {
+            if (e.which == 13) {
+                e.preventDefault();
+                var txt = $(this).text();
+                if (txt.length > 2){
+                    UI.execGlossary('get',txt);
+                }
+            }
+        })
+
+        .on('paste', '.editarea', function(e) {
 			UI.saveInUndoStack('paste');
 			$('#placeHolder').remove();
 			var node = document.createElement("div");
@@ -1383,7 +1402,7 @@ UI = {
 		if ($('.footer', segment).text() != '')
 			return false;
 
-		var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li><li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc"><a tabindex="-1" href="#">Concordance</a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div><div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances"><div class="overflow"><div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div><div class="results"></div></div></div>';
+        var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li><li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc"><a tabindex="-1" href="#">Concordance</a></li><li class="tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl"><a tabindex="-1" href="#">Glossary</a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div><div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances"><div class="overflow"><div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div><div class="results"></div></div></div><div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary"><div class="overflow"><div class="gl-search"><div class="input search-source" contenteditable="true" /></div><div class="results"></div></div></div>';
 		$('.footer', segment).html(footer);
 
 
@@ -2184,6 +2203,58 @@ UI = {
 			}
 		});
 	},
+    execGlossary: function(exec, txt, translation) {
+
+        $('.gl-search', UI.currentSegment).addClass('loading');
+        $('.sub-editor.glossary .overflow .results', this.currentSegment).empty();
+        txt = view2rawxliff(txt);
+
+        if( typeof translation != 'undefined' ){
+            translation = view2rawxliff(translation);
+        } else {
+            translation = null;
+        }
+
+        APP.doRequest({
+            data: {
+                action: 'glossary',
+                exec: exec,
+                segment: txt,
+                translation: translation,
+                id_job: config.job_id,
+                password: config.password
+            },
+            success: function(d) {
+
+                switch( exec ){
+                    case 'set':
+                            //do something after set, append data?
+                            var d = {data:{matches:{ segment: txt, translation: translation }}};
+                            UI.renderGlossary(d);
+                        break;
+                    case 'get':
+                        UI.renderGlossary(d);
+                        $( '.sub-editor.glossary .overflow a.trash', segment ).click( function ( e ) {
+                                e.preventDefault();
+                                UI.execGlossary( 'delete', d.data.matches[0].segment, d.data.matches[0].translation );
+                            }
+                        );
+                        break;
+                    case 'delete':
+                            //do something after delete, add success response?
+                        $('.sub-editor.glossary .overflow .results', this.currentSegment).text( 'OK!!!' );
+                        break;
+                }
+
+                console.log( d );
+
+            },
+            complete: function() {
+                $('.gl-search', this.currentSegment).removeClass('loading');
+            }
+        })
+
+    },
 	getContribution: function(segment, next) {
 		var n = (next == 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
 		if ($(n).hasClass('loaded')) {
@@ -2935,6 +3006,22 @@ UI = {
 		$('.cc-search', this.currentSegment).removeClass('loading');
 		this.setDeleteSuggestion(segment);
 	},
+    renderGlossary: function( d ) {
+
+        segment = this.currentSegment;
+        segment_id = this.currentSegmentId;
+        $('.sub-editor.concordances .overflow .results', segment).empty();
+        $('.sub-editor.concordances .overflow .message', segment).remove();
+        if (d.data.matches.length) {
+            $.each(d.data.matches, function(index) {
+                $('.sub-editor.glossary .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source"><a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + d.data.matches[index]['segment'] + '</span></li><li class="b sugg-target"><span class="switch-editing">Edit</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + d.data.matches[index]['translation'] + '</span></li></ul>');
+            });
+        } else {
+            console.log('no matches');
+            $('.sub-editor.glossary .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');
+        }
+
+    },
 	renderContributions: function(d, segment) {
 		var isActiveSegment = $(segment).hasClass('editor');
 		var editarea = $('.editarea', segment);
