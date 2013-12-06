@@ -2228,6 +2228,7 @@ UI = {
 
                 switch( exec ){
                     case 'set':
+                            //now this is not called because of lack of set button
                             //do something after set, append data?
                             var d = {data:{matches:{ segment: txt, translation: translation }}};
                             UI.renderGlossary(d);
