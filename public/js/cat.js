@@ -2207,6 +2207,7 @@ UI = {
 
         $('.gl-search', UI.currentSegment).addClass('loading');
         $('.sub-editor.glossary .overflow .results', this.currentSegment).empty();
+        $('.sub-editor.glossary .overflow .graysmall.message', this.currentSegment).empty();
         txt = view2rawxliff(txt);
 
         if( typeof translation != 'undefined' ){
