@@ -51,7 +51,7 @@ class deleteContributionController extends ajaxcontroller {
         }
 
         //get Job Infos
-        $job_data = getJobData( (int) $this->id_job );
+        $job_data = getJobData( (int) $this->id_job, $this->password );
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
@@ -60,9 +60,18 @@ class deleteContributionController extends ajaxcontroller {
             return;
         }
 
-        $tms = new TMS( 1 );
+        $config = TMS::getConfigStruct();
 
-        $result = $tms->delete( $this->source, $this->target, $this->source_lang, $this->target_lang, $this->id_translator );
+        $config[ 'segment' ]       = $this->source;
+        $config[ 'translation' ]   = $this->target;
+        $config[ 'source_lang' ]   = $this->source_lang;
+        $config[ 'target_lang' ]   = $this->target_lang;
+        $config[ 'email' ]         = "demo@matecat.com";
+        $config[ 'id_user' ]       = $this->id_translator;
+
+        $tms = new TMS( $job_data['id_tms'] );
+
+        $result = $tms->delete( $config );
 
         $this->result[ 'code' ] = $result;
         $this->result[ 'data' ] = "OK";

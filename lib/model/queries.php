@@ -1090,6 +1090,7 @@ function insertTranslator( ArrayObject $projectStructure ) {
     $user_id = $user_id[ 'username' ];
 
     if ( empty( $user_id ) ) {
+
         $data                       = array();
         $data[ 'username' ]         = $projectStructure['private_tm_user'];
         $data[ 'email' ]            = '';
@@ -1099,6 +1100,9 @@ function insertTranslator( ArrayObject $projectStructure ) {
         $data[ 'mymemory_api_key' ] = $projectStructure['private_tm_key'];
 
         $db->insert( 'translators', $data );
+
+        $user_id = $projectStructure['private_tm_user'];
+
     }
 
     $projectStructure['private_tm_user'] = $user_id;

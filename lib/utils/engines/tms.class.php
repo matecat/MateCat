@@ -259,7 +259,7 @@ class TMS extends Engine {
             $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
         }
 
-        ( !$_config['isGlossary']   ? $apply = "set" : $apply = "gloss_set" );
+        ( !$_config['isGlossary']   ? $apply = "delete" : $apply = "gloss_delete" );
 
         $this->doQuery( $apply, $parameters);
 

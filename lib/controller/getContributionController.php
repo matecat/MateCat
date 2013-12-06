@@ -33,7 +33,6 @@ class getContributionController extends ajaxcontroller {
             'id_translator'   => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
             'password'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
             'is_concordance'  => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-            'is_glossary'     => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
             'from_target'     => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
         );
 
@@ -49,7 +48,6 @@ class getContributionController extends ajaxcontroller {
         $this->text                = trim( $this->__postInput[ 'text' ] );
         $this->id_translator       = $this->__postInput[ 'id_translator' ];
         $this->concordance_search  = $this->__postInput[ 'is_concordance' ];
-        $this->glossary_search     = $this->__postInput[ 'is_glossary' ];
         $this->switch_languages    = $this->__postInput[ 'from_target' ];
         $this->password            = $this->__postInput[ 'password' ];
 
@@ -138,17 +136,6 @@ class getContributionController extends ajaxcontroller {
 
         $config = TMS::getConfigStruct();
 
-        $config[ 'segment' ]       = $this->text;
-        $config[ 'source_lang' ]   = $this->source;
-        $config[ 'target_lang' ]   = $this->target;
-        $config[ 'email' ]         = "demo@matecat.com";
-        $config[ 'id_user' ]       = $this->id_translator;
-        $config[ 'num_result' ]    = $this->num_results;
-        $config[ 'isConcordance' ] = $this->concordance_search;
-        $config[ 'isGlossary' ]    = false;
-
-        $_TMS = $this->id_tms; //request
-
 		if ( $this->id_tms == 1 ) {
             /**
              * MyMemory Enabled
@@ -178,9 +165,26 @@ class getContributionController extends ajaxcontroller {
 
 		}
 
-        $tms = new TMS( $_TMS );
-        $tms_match = $tms->get( $config );
-        $tms_match = $tms_match->get_matches_as_array();
+        /**
+         * if No TM server and No MT selected $_TMS is not defined
+         * so we want not to perform TMS Call
+         *
+         */
+        if( isset( $_TMS ) ){
+
+            $config[ 'segment' ]       = $this->text;
+            $config[ 'source_lang' ]   = $this->source;
+            $config[ 'target_lang' ]   = $this->target;
+            $config[ 'email' ]         = "demo@matecat.com";
+            $config[ 'id_user' ]       = $this->id_translator;
+            $config[ 'num_result' ]    = $this->num_results;
+            $config[ 'isConcordance' ] = $this->concordance_search;
+
+            $tms = new TMS( $_TMS );
+            $tms_match = $tms->get( $config );
+            $tms_match = $tms_match->get_matches_as_array();
+
+        }
 
 		$mt_res = array();
 		$mt_match = "";
