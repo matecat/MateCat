@@ -1022,8 +1022,17 @@ body.cattool .searchbox .block.right
 /*
 .editor .percentuage{display:block !important;}
 */
-
-
+section .header .context
+{
+	float: left;
+	color: #666;
+	text-decoration: none;
+	margin: 3px 0 0 10px;
+}
+	section .header .context:hover
+	{
+		color: #000;
+	}
 .percentuage.visible{display:block !Important}
 
 

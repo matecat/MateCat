@@ -683,7 +683,12 @@ UI = {
 					}
 
 				}
-				;
+			} else {
+				if (!$(UI.currentSegment).nextAll('section').length) {
+					UI.changeStatus(this, 'translated', 0);
+					skipChange = true;
+					$('#' + $(this).attr('data-segmentid') + '-close').click();
+				}
 			}
 
 			UI.checkHeaviness();
@@ -1414,10 +1419,11 @@ UI = {
 		;
 	},
 	createHeader: function() {
+//		console.log($('h2.percentuage', this.currentSegment));
 		if ($('h2.percentuage', this.currentSegment).length) {
 			return;
 		}
-		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="#" id="segment-' + this.currentSegmentId + '-close" class="close" title="Close this segment"></a>';
+		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="#" id="segment-' + this.currentSegmentId + '-close" class="close" title="Close this segment"></a><a href="#" id="segment-' + this.currentSegmentId + '-context" class="context" title="Open context" target="_blank">Context</a>';
 		$('#' + this.currentSegment.attr('id') + '-header').html(header);
 	},
 	createJobMenu: function() {
@@ -3151,8 +3157,10 @@ UI = {
 						'	<span class="number">' + this.sid + '</span>' +
 						'	<div class="body">' +
 						'		<div class="header toggle" id="segment-' + this.sid + '-header">' +
-						'                 <h2 title="" class="percentuage"><span></span></h2><a href="#" id="segment-' + this.sid + '-close" class="close" title="Close this segment"></a>' +
-						'               </div>' +
+//						'			<h2 title="" class="percentuage"><span></span></h2>' + 
+//						'			<a href="#" id="segment-' + this.sid + '-close" class="close" title="Close this segment"></a>' +
+//						'			<a href="#" id="segment-' + this.sid + '-context" class="context" title="Open context" target="_blank">Context</a>' +
+						'		</div>' +
 						'		<div class="text">' +
 						'			<div class="wrap">' +
 						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + this.segment + '</div>' +
