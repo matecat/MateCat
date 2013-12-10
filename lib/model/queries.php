@@ -44,7 +44,6 @@ function doSearchQuery( ArrayObject $queryParams ) {
                     LEFT JOIN segment_translations st on st.id_segment = s.id AND st.id_job = fj.id_job
                     WHERE fj.id_job = {$queryParams['job']}
                     AND s.segment LIKE '" . $LIKE . $src . $LIKE . "'
-                    AND st.status != 'NEW'
                     $where_status
                     GROUP BY s.id WITH ROLLUP";
 
