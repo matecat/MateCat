@@ -107,6 +107,15 @@ class Xliff_Parser {
 				if (isset($temp[1]))
 					$xliff['files'][$i]['attr']['target-language'] = $temp[1];
 
+                //get External reference for sub-files
+                //maybe error for potential exhausting of memory when a file base64 are very large
+                preg_match_all( '|<internal-file[^>]form\s?=\s?["\'](.*?)["\'][^>]*>(.*?)</internal-file>|si', $file, $temp, PREG_SET_ORDER );
+                foreach( $temp as $_order => $internal ){
+                    $xliff['files'][$i]['reference'][$_order]['form-type'] = $internal[1];
+                    $xliff['files'][$i]['reference'][$_order]['base64']    = $internal[2];
+                }
+                unset($internal);
+                unset($temp);
 
 				// Getting Trans-units
 				$trans_units = preg_split('|<trans-unit[\s>]|si', $file, -1, PREG_SPLIT_NO_EMPTY);

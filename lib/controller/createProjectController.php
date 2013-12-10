@@ -160,6 +160,7 @@ class createProjectController extends ajaxcontroller {
                 'private_tm_pass'    => $this->private_tm_pass,
                 'array_files'        => $arFiles, //list of file names
                 'file_id_list'       => array(),
+                'file_references'    => array(),
                 'source_language'    => $this->source_language,
                 'target_language'    => explode( ',', $this->target_language ),
                 'mt_engine'          => $this->mt_engine,

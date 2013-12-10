@@ -46,6 +46,7 @@ class INIT {
 	public static $SPELL_CHECK_ENABLED;
 	public static $MAX_UPLOAD_FILE_SIZE;
 	public static $MAX_NUM_FILES;
+    public static $REFERENCE_REPOSITORY;
 
 	private function initOK() {
 
@@ -129,6 +130,7 @@ class INIT {
 		self::$CONVERSIONERRORS_REPOSITORY     = self::$STORAGE_DIR . "/conversion_errors";
 		self::$CONVERSIONERRORS_REPOSITORY_WEB = self::$BASEURL . "storage/conversion_errors";
 		self::$TMP_DOWNLOAD                    = self::$STORAGE_DIR . "/tmp_download";
+        self::$REFERENCE_REPOSITORY            = self::$STORAGE_DIR . "/reference_files";
 		self::$TEMPLATE_ROOT                   = self::$ROOT . "/lib/view";
 		self::$MODEL_ROOT                      = self::$ROOT . '/lib/model';
 		self::$CONTROLLER_ROOT                 = self::$ROOT . '/lib/controller';

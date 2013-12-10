@@ -135,6 +135,10 @@ class setContributionController extends ajaxcontroller {
                 $this->result['error'][] = array("code" => -5, "message" => "Connection Error.");
                 $this->result['code'] = -1;
                 $this->result['data'] = "KO";
+
+                Log::doLog( "Set Contribution Failed." );
+                Log::doLog( var_export( $_POST, true ) );
+
                 return -1;
             }
 
