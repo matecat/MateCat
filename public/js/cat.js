@@ -1768,40 +1768,23 @@ UI = {
 			q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
 			var regSource = new RegExp('(' + htmlEncode(p['source']) + ')', "g" + ignoreCase);
 			var regTarget = new RegExp('(' + htmlEncode(p['target']) + ')', "g" + ignoreCase);
+			txtSrc = p['source'];
+			txtTrg = p['target'];
+			srcHasTags = (txtSrc.match(/\<.*?\>/gi) != null)? true : false;
+			trgHasTags = (txtTrg.match(/\<.*?\>/gi) != null)? true : false;
 
 			if (typeof where == 'undefined') {
-				txtSrc = p['source'];
-				itemsSrc = $(q + " .source:" + containsFunc + "('" + txtSrc + "')");
-				filteredItemsSrc = UI.filterExactMatch(itemsSrc, txtSrc);
-				$(filteredItemsSrc).each(function() {
-//                $(q + " .source:" + containsFunc + "('"+p['source']+"')").each(function() {
-					var ttS = $(this).html().replace(/&lt;/g, UI.openTagPlaceholder).replace(/&gt;/g, UI.closeTagPlaceholder).replace(regSource, '<mark class="searchMarker">$1</mark>').replace(openTagReg, '&lt;').replace(closeTagReg, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
-//					var ttS = $(this).html().replace(/&lt;/g, '[[').replace(/&gt;/g, ']]').replace(regSource, '<mark class="searchPreMarker">$1</mark>').replace(/\[\[/g, '&lt;').replace(/\]\]/g, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
-					$(this).html(ttS);
-//					$(this).html($(this).html().replace(regSource, '<mark class="searchPreMarker">$1</mark>').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4"));
-				});
-				txtTrg = p['target'];
-				itemsTrg = $(q + " .editarea:" + containsFunc + "('" + txtTrg + "')");
-				filteredItemsTrg = UI.filterExactMatch(itemsTrg, txtTrg);
-				$(filteredItemsTrg).each(function() {
-					var ttT = $(this).html().replace(/&lt;/g, UI.openTagPlaceholder).replace(/&gt;/g, UI.closeTagPlaceholder).replace(regTarget, '<mark class="searchMarker">$1</mark>').replace(openTagReg, '&lt;').replace(closeTagReg, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
-					$(this).html(ttT);					
-//                $(q + " .editarea:" + containsFunc + "('"+p['target']+"')").each(function() {
-//					$(this).html($(this).html().replace(regTarget, '<mark class="searchPreMarker">$1</mark>').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4"));
-				});
-//                console.log($('section:has(".source mark.searchMarker, .editarea mark.searchMarker")'));
+				UI.doMarkSearchResults(srcHasTags, $(q + " .source:" + containsFunc + "('" + txtSrc + "')"), regSource, q, txtSrc, ignoreCase);
+				UI.doMarkSearchResults(trgHasTags, $(q + " .editarea:" + containsFunc + "('" + txtTrg + "')"), regTarget, q, txtTrg, ignoreCase);
+//				UI.execSearchResultsMarking(UI.filterExactMatch($(q + " .source:" + containsFunc + "('" + txtSrc + "')"), txtSrc), regSource, false);
+//				UI.execSearchResultsMarking(UI.filterExactMatch($(q + " .editarea:" + containsFunc + "('" + txtTrg + "')"), txtTrg), regTarget, false);
+
 				$('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
 				$('mark.searchPreMarker:not(.searchMarker)').each(function() {
 					var a = $(this).text();
 					$(this).replaceWith(a);
-//                    if($(this).parents('section').attr('id') == 'segment-595407') $(this).replaceWith($(this).text());
-//                    console.log($(this).text());
-//                    $(this).replaceWith($(this).text());
 				});
-//                $('mark.searchPreMarker').removeClass('searchPreMarker');
-//                console.log($('#segment-595407-editarea').html());
 			} else {
-
 				sid = $(seg).attr('id');
 				if (where == 'before') {
 					$('section').each(function(index) {
@@ -1816,78 +1799,30 @@ UI = {
 						}
 					})
 				}
-				txtSrc = p['source'];
-				itemsSrc = $(q + ".justAdded:not(.status-new) .source:" + containsFunc + "('" + txtSrc + "')");
-				filteredItemsSrc = UI.filterExactMatch(itemsSrc, txtSrc);
-				$(filteredItemsSrc).each(function() {
-					var ttS = $(this).html().replace(/&lt;/g, UI.openTagPlaceholder).replace(/&gt;/g, UI.closeTagPlaceholder).replace(regSource, '<mark class="searchMarker">$1</mark>').replace(openTagReg, '&lt;').replace(closeTagReg, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
-//					var ttS = $(this).html().replace(/&lt;/g, '[[').replace(/&gt;/g, ']]').replace(regSource, '<mark class="searchPreMarker">$1</mark>').replace(/\[\[/g, '&lt;').replace(/\]\]/g, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
-					$(this).html(ttS);
-//	                $(q + ".justAdded:not(.status-new) .source:" + containsFunc + "('"+p['source']+"')").each(function() {
-//					$(this).html($(this).html().replace(regSource, '<mark class="searchPreMarker">$1</mark>').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4"));
-				});
-				txtTrg = p['target'];
-				itemsTrg = $(q + ".justAdded:not(.status-new) .editarea:" + containsFunc + "('" + txtTrg + "')");
-				filteredItemsTrg = UI.filterExactMatch(itemsTrg, txtTrg);
-				$(filteredItemsTrg).each(function() {
-					var ttT = $(this).html().replace(/&lt;/g, UI.openTagPlaceholder).replace(/&gt;/g, UI.closeTagPlaceholder).replace(regTarget, '<mark class="searchMarker">$1</mark>').replace(openTagReg, '&lt;').replace(closeTagReg, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
-//					var ttT = $(this).html().replace(/&lt;/g, '[[').replace(/&gt;/g, ']]').replace(regTarget, '<mark class="searchPreMarker">$1</mark>').replace(/\[\[/g, '&lt;').replace(/\]\]/g, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
-					$(this).html(ttT);
-//	                $(q + ".justAdded:not(.status-new) .editarea:" + containsFunc + "('"+p['target']+"')").each(function() {
-//					$(this).html($(this).html().replace(regTarget, '<mark class="searchPreMarker">$1</mark>').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4"));
-				});
-//                console.log($('section:has(".source mark.searchMarker, .editarea mark.searchMarker")'));
+				UI.execSearchResultsMarking(UI.filterExactMatch($(q + ".justAdded:not(.status-new) .source:" + containsFunc + "('" + txtSrc + "')"), txtSrc), regSource, false);
+				UI.execSearchResultsMarking(UI.filterExactMatch($(q + ".justAdded:not(.status-new) .editarea:" + containsFunc + "('" + txtTrg + "')"), txtTrg), regTarget, false);
+
 				$('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
 				$('mark.searchPreMarker').removeClass('searchPreMarker');
 				$('section.justAdded').removeClass('justAdded');
-
 			}
-
 		} else { // search mode: normal
 			console.log('search mode: normal');
 			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
-			if (typeof p['source'] != 'undefined') {
-				what = ' .source';
-				txt = p['source'];
-			} else if (typeof p['target'] != 'undefined') {
-				what = ' .editarea';
-				txt = p['target'];
-			} else {
-				what = '';
-				txt = '';
-			}
-//			var what = (typeof p['source'] != 'undefined') ? ' .source' : (typeof p['target'] != 'undefined') ? ' .editarea' : '';
+			var txt = (typeof p['source'] != 'undefined') ? p['source'] : (typeof p['target'] != 'undefined') ? p['target'] : '';
 			if(singleSegment) {
 				var what = (typeof p['source'] != 'undefined') ? ' .source' : (typeof p['target'] != 'undefined') ? ' .editarea' : '';
 				q = '#' + $(singleSegment).attr('id') + what;
-				
 			} else {
 				var what = (typeof p['source'] != 'undefined') ? ' .source' : (typeof p['target'] != 'undefined') ? ':not(.status-new) .editarea' : '';
 				q = "section" + status + what;
-				
 			}
 			hasTags = (txt.match(/\<.*?\>/gi) != null)? true : false;
-			
-			
-//			var what = (typeof p['source'] != 'undefined') ? ' .source' : (typeof p['target'] != 'undefined') ? ':not(.status-new) .editarea' : '';
-//			q = (singleSegment) ? '#' + $(singleSegment).attr('id') + what : "section" + status + what;
-//			console.log(q);
-//			console.log($(singleSegment).attr('class'));
-
-//            q = "section" + status + what;
-//			console.log(txt);
 			var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder);
-//			var regTxt = txt.replace('<', '\\[\\[').replace('>', '\\]\\]');
-//			console.log(regTxt);
 			var reg = new RegExp('(' + htmlEncode(regTxt) + ')', "g" + ignoreCase);
 
 			if ((typeof where == 'undefined')||(where == 'no')) {
-				if(!hasTags) {
-					UI.execSearchResultsMarking(UI.filterExactMatch($(q + ":" + containsFunc + "('" + txt + "')"), txt), reg, false);	
-				} else {
-					inputReg = new RegExp(txt, "g" + ignoreCase);
-					UI.execSearchResultsMarking($(q), reg, inputReg);
-				}
+				UI.doMarkSearchResults(hasTags, $(q + ":" + containsFunc + "('" + txt + "')"), reg, q, txt, ignoreCase);
 			} else {
 				sid = $(seg).attr('id');
 				if (where == 'before') {
@@ -1903,37 +1838,25 @@ UI = {
 						}
 					})
 				}
-
-				if(!hasTags) {
-					UI.execSearchResultsMarking(UI.filterExactMatch($("section" + status + ".justAdded" + what + ":" + containsFunc + "('" + txt + "')"), txt), reg, false);	
-				} else {
-					inputReg = new RegExp(txt, "g" + ignoreCase);
-					UI.execSearchResultsMarking($(q), reg, inputReg);
-				}
-
-/*
-				items = $("section" + status + ".justAdded" + what + ":" + containsFunc + "('" + txt + "')");
-				filteredItems = UI.filterExactMatch(items, txt);
-//				console.log(filteredItems);
-				$(filteredItems).each(function() {
-					var tt = $(this).html().replace(/&lt;/g, UI.openTagPlaceholder).replace(/&gt;/g, UI.closeTagPlaceholder).replace(reg, '<mark class="searchMarker">$1</mark>').replace(openTagReg, '&lt;').replace(closeTagReg, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
-					$(this).html(tt);
-//                $(q + ".justAdded:" + containsFunc + "('"+txt+"')").each(function() {
-//					$(this).html($(this).html().replace(reg, '<mark class="searchMarker">$1</mark>').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4"));
-				});
-*/				
+				UI.doMarkSearchResults(hasTags, $("section" + status + ".justAdded" + what + ":" + containsFunc + "('" + txt + "')"), reg, q, txt, ignoreCase);
 				$('section.justAdded').removeClass('justAdded');
 			}
-//			console.log(UI.editarea.html());
-
 		}
 		if (!singleSegment) {
 			UI.unmarkNumItemsInSegments();
 			UI.markNumItemsInSegments();
 		}
 	},
+	doMarkSearchResults: function(hasTags, items, regex, q, txt, ignoreCase) {
+		if(!hasTags) {
+			this.execSearchResultsMarking(UI.filterExactMatch(items, txt), regex, false);	
+		} else {
+			inputReg = new RegExp(txt, "g" + ignoreCase);
+			this.execSearchResultsMarking($(q), regex, inputReg);
+		}
+	},
 	execSearchResultsMarking: function(areas, regex, testRegex) {
-		$(areas).each(function() {
+		$(areas).each(function() {console.log($(this));
 			if(!testRegex || ($(this).text().match(testRegex) != null)) {
 				var tt = $(this).html().replace(/&lt;/g, UI.openTagPlaceholder).replace(/&gt;/g, UI.closeTagPlaceholder).replace(regex, '<mark class="searchMarker">$1</mark>').replace(openTagReg, '&lt;').replace(closeTagReg, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
 				$(this).html(tt);				
@@ -2719,7 +2642,7 @@ UI = {
 	},
 	lockTags: function(el) {
 		if(this.body.hasClass('tagmarkDisabled')) return false;
-		console.log('LOCK TAGS');
+//		console.log('LOCK TAGS');
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
 		if (!this.taglockEnabled)
 			return false;
@@ -2781,7 +2704,7 @@ UI = {
 		});
 	},
 	markTags: function() {
-		console.log('MARK TAGS');
+//		console.log('MARK TAGS');
 		if (!this.taglockEnabled)
 			return false;
 		if (this.noTagsInSegment(1))
