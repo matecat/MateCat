@@ -1,7 +1,7 @@
 ALTER TABLE `matecat_local`.`segments`
 ADD COLUMN  `id_file_part` BIGINT(20) NULL DEFAULT NULL  AFTER `id_file` ;
 
-CREATE  TABLE `matecat_local`.`file_parts` (
+CREATE  TABLE `matecat_local`.`file_references` (
   `id` BIGINT NOT NULL AUTO_INCREMENT ,
   `id_project` BIGINT NOT NULL ,
   `id_file` BIGINT NOT NULL ,
