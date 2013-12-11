@@ -111,6 +111,9 @@ UI = {
 		this.savedSelActiveElement = null;
 		this.firstOpenedSegment = false;
 		this.autoscrollCorrectionEnabled = true;
+		this.translationPlaceholdersEnabled = true;
+//		this.brPlaceholderRegex = new RegExp(config.brPlaceholder, "g");
+//		console.log(this.brPlaceholderRegex);
 		this.searchEnabled = true;
 		if (this.searchEnabled)
 			$('#filterSwitch').show();
@@ -3148,7 +3151,7 @@ UI = {
 						'					</span>' +
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
-						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : this.translation) + '</div>' +
+						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholders(this.translation)) + '</div>' +
 						'						<p class="save-warning" title="Segment modified but not saved"></p>' +
 						'					</div> <!-- .textarea-container -->' +
 						'				</div> <!-- .target -->' +
@@ -3765,7 +3768,9 @@ UI = {
 		var file = $(segment).parents('article');
 		var status = status;
 		// Attention, to be modified when we will lock tags
+		if(this.translationPlaceholdersEnabled) this.addPlaceHolders(segment);
 		var translation = $('.editarea', segment).text();
+		if(this.translationPlaceholdersEnabled) this.removePlaceholders(segment);
 
 		if (translation == '')
 			return false;
@@ -3807,6 +3812,22 @@ UI = {
 				UI.setTranslation_success(d, segment, status);
 			}
 		});
+	},
+	addPlaceHolders: function(segment) {
+		area = $('.editarea', segment);
+		$('div', area).each(function() {
+			$(this).prepend('<span class="placeholder">' + config.brPlaceholder + '</span>');
+		});
+		$('br', area).each(function() {
+			$(this).after('<span class="placeholder">' + config.brPlaceholder + '</span>');
+		});
+		//		console.log(area.html());
+	},
+	removePlaceholders: function(segment) {
+		$('.editarea span.placeholder', segment).remove();
+	},
+	decodePlaceholders: function(str) {
+		return str.replace(config.brPlaceholderRegex, '<br>');
 	},
 	processErrors: function(err, operation) {
 		$.each(err, function() {

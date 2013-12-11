@@ -1538,6 +1538,10 @@ footer nav
 {
 	display: none;
 }
+.editarea span.placeholder
+{
+	display: none;
+}
 /* We should check if we have the rights di distribute Calibri in an open-source project... */
 
 @font-face {
