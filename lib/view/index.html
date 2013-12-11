@@ -31,7 +31,9 @@
 					test: 'test',
 					warningPollingInterval:'${warningPollingInterval}',
 					segmentQACheckInterval: '${segmentQACheckInterval}',
-					firstSegmentOfFiles: ${structure php: firstSegmentOfFiles}
+					firstSegmentOfFiles: ${structure php: firstSegmentOfFiles},
+					brPlaceholder: '##$br$##',
+					brPlaceholderRegex: /\#\#\$br\$\#\#/g
 			};
 					var renderStart = new Date();
 					/*]]>*/
