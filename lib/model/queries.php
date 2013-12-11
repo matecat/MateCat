@@ -128,6 +128,32 @@ function doSearchQuery( ArrayObject $queryParams ) {
     return $vector;
 }
 
+function getReferenceSegment( $jid, $jpass, $sid, $binaries = null ){
+
+    $db = Database::obtain();
+
+    $jpass = $db->escape( $jpass );
+    $sid = (int)$sid;
+    $jid = (int)$jid;
+
+    if( $binaries != null ){
+        $binaries = ', serialized_reference_binaries';
+    }
+
+    $query = "SELECT serialized_reference_meta $binaries
+                    FROM segments s
+                    JOIN files_job using ( id_file )
+                    JOIN jobs on files_job.id_job = jobs.id
+                    LEFT JOIN file_references fr ON s.id_file_part = fr.id
+                    WHERE s.id  = $sid
+                    AND jobs.id = $jid
+                    AND jobs.password = '$jpass'
+             ";
+
+    return $db->query_first( $query );
+
+}
+
 function getUserData($id) {
 
     $db = Database::obtain();
@@ -540,12 +566,15 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 
                 IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
 
+                ,IF( fr.id IS NULL, 'false', 'true' ) as has_reference
+
              FROM jobs j
                 INNER JOIN projects p ON p.id=j.id_project
                 INNER JOIN files_job fj ON fj.id_job=j.id
                 INNER JOIN files f ON f.id=fj.id_file
                 INNER JOIN segments s ON s.id_file=f.id
                 LEFT JOIN segment_translations st ON st.id_segment=s.id AND st.id_job=j.id
+                LEFT JOIN file_references fr ON s.id_file_part = fr.id
                 WHERE j.id = $jid
                 AND j.password = '$password'
                 AND s.id > $ref_point AND s.show_in_cattool = 1

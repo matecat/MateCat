@@ -4272,19 +4272,28 @@ class ProjectManager {
      * Extract internal reference base64 files
      * and store their index in $this->projectStructure
      *
-     * @param $conteiner_file_id
+     * @param $project_file_id
      * @param $xliff_file_array
      *
      * @return null|int $file_reference_id
      *
      * @throws Exception
      */
-    protected function _extractFileReferences( $conteiner_file_id, $xliff_file_array ){
+    protected function _extractFileReferences( $project_file_id, $xliff_file_array ){
 
-        $fName = mysql_real_escape_string( $xliff_file_array['attr']['original'], $this->mysql_link );
+        $fName = $this->_sanitizeName( $xliff_file_array['attr']['original'] );
 
-        $serialized_reference = array();
+        if( $fName != false ){
+            $fName = mysql_real_escape_string( $fName, $this->mysql_link );
+        } else {
+            $fName = '';
+        }
+
+        $serialized_reference_meta     = array();
+        $serialized_reference_binaries = array();
         foreach( $xliff_file_array['reference'] as $pos => $ref ){
+
+            $found_ref = true;
 
             $_ext = $this->_getExtensionFromMimeType( $ref['form-type'] );
             if( $_ext !== null ){
@@ -4292,28 +4301,28 @@ class ProjectManager {
                 //insert in database if exists extension
                 //and add the id_file_part to the segments insert statement
 
-                $refName = date( 'Ymd_' ) . $this->projectStructure['id_project'] . "-" . $pos . "_" . $fName . "." . $_ext;
+                $refName = $this->projectStructure['id_project'] . "-" . $pos . "-" . $fName . "." . $_ext;
 
-                $serialized_reference[$pos]['filename']  = $refName;
-                $serialized_reference[$pos]['mime_type'] = mysql_real_escape_string( $ref['form-type'], $this->mysql_link );
-                $serialized_reference[$pos]['base64']    = $ref['base64'];
+                $serialized_reference_meta[$pos]['filename']  = $refName;
+                $serialized_reference_meta[$pos]['mime_type'] = mysql_real_escape_string( $ref['form-type'], $this->mysql_link );
+                $serialized_reference_binaries[$pos]['base64']    = $ref['base64'];
 
                 $wBytes = file_put_contents( INIT::$REFERENCE_REPOSITORY . "/$refName", base64_decode( $ref['base64'] ) );
 
                 if( !$wBytes ){
-                    throw new Exception ( "Failed to import references. $wBytes Bites written.   ", -11 );
+                    throw new Exception ( "Failed to import references. $wBytes Bytes written.", -11 );
                 }
 
             }
 
         }
 
-        if( !empty($serialized_reference) ){
+        if( isset( $found_ref ) && !empty($serialized_reference_meta) ){
 
-            $serialized_reference = serialize( $serialized_reference );
-            $queries = "INSERT INTO file_references ( id_project, id_file, part_filename, serialized_reference ) VALUES ( " . $this->projectStructure['id_project'] . ", $conteiner_file_id, '$fName', '$serialized_reference' )";
+            $serialized_reference_meta     = serialize( $serialized_reference_meta );
+            $serialized_reference_binaries = serialize( $serialized_reference_binaries );
+            $queries = "INSERT INTO file_references ( id_project, id_file, part_filename, serialized_reference_meta, serialized_reference_binaries ) VALUES ( " . $this->projectStructure['id_project'] . ", $project_file_id, '$fName', '$serialized_reference_meta', '$serialized_reference_binaries' )";
             mysql_query( $queries, $this->mysql_link );
-
 
             $affected          = mysql_affected_rows( $this->mysql_link );
             $last_id           = "SELECT LAST_INSERT_ID() as fpID";
@@ -4322,7 +4331,7 @@ class ProjectManager {
 
             //last Insert id
             $file_reference_id = $result[ 'fpID' ];
-            $this->projectStructure[ 'file_references' ]->offsetSet( $conteiner_file_id, $file_reference_id );
+            $this->projectStructure[ 'file_references' ]->offsetSet( $project_file_id, $file_reference_id );
 
             if( !$affected || !$file_reference_id ){
                 throw new Exception ( "Failed to import references.", -12 );
