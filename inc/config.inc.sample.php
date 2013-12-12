@@ -313,6 +313,7 @@ class INIT {
 
                 Log::$fileName = 'fatal_errors.txt';
                 Log::doLog( $output );
+                Utils::sendErrMailReport( $output );
 
                 header( "HTTP/1.1 200 OK" );
 
