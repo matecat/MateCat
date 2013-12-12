@@ -135,6 +135,10 @@ class analyzeController extends viewcontroller {
                     $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_raw_word_count' ] = 0;
                 }
 
+                if ( !array_key_exists( "total_eq_word_count", $this->jobs[ $p_jdata[ 'jid' ] ] ) ) {
+                    $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count' ] = 0;
+                }
+
             }
 
             //calculate total word counts per job (summing different files)

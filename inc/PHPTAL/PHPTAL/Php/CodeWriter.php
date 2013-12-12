@@ -35,6 +35,16 @@ class PHPTAL_Php_CodeWriter
      */
     private $known_functions = array();
 
+    /**
+     * ( Domenico Lupinetti )
+     *
+     * Fix Bug
+     *
+     * Undefined property: PHPTAL_Php_CodeWriter::$_indentation in PHPTAL/PHPTAL/Php/CodeWriter.php on line 143
+     *
+     * @var int
+     */
+    public $_indentation = 0;
 
     public function __construct(PHPTAL_Php_State $state)
     {

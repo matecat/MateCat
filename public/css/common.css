@@ -400,7 +400,7 @@ border-bottom:0;
 .topMenu ul li.current a
     {
 font-weight: bold;
-border-left: 3px solid #333;
+border-left: 3px solid #ffcc00;
     }
 
 
@@ -409,7 +409,13 @@ border-left: 3px solid #333;
 
  {
 background: #efefef url(../img/backto.png) 20px 12px no-repeat !important;
-background-size: 15px!important;    }
+background-size: 15px!important;  
+border-top: 1px solid #ccc;
+box-shadow: inset 0px 1px #fff;
+-moz-box-shadow: inset 0px 1px #fff;
+-webkit-box-shadow: inset 0px 1px #fff;
+
+  }
 
 
 

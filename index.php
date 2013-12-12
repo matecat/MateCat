@@ -16,9 +16,8 @@ $db->connect ();
 $dispatcher = controllerDispatcher::obtain ();
 $controller = $dispatcher->getController ();
 $controller->doAction ();
-$db->close ();
-
 $controller->finalize ();
+$db->close ();
 
 
 ?>

@@ -365,14 +365,18 @@ class UploadHandler {
                 $file->internal_target_lang = addslashes($res[0][4]);
             }
 
-            // FORMAT ERROR MESSAGE
-            switch ($file->error) {
-                case 'abort':
-                    $file->error = "Unable to upload the file.\n 
-                    Please contact support@matecat.com";
-                    break;
-                default: null;
+            //As opposed with isset(), property_exists() returns TRUE even if the property has the value NULL.
+            if( property_exists( $file, 'error' ) ) {
+                // FORMAT ERROR MESSAGE
+                switch ($file->error) {
+                    case 'abort':
+                        $file->error = "Unable to upload the file.\n
+                        Please contact support@matecat.com";
+                        break;
+                    default: null;
+                }
             }
+
         }
 
         /**
