@@ -297,25 +297,32 @@ class INIT {
             case E_RECOVERABLE_ERROR:
 
                 if( !ob_end_clean() ) ob_start();
-                # Here we handle the error, displaying HTML, logging, ...
-                echo "[ {$errorType[$error['type']]} ]\n<br />";
-                echo "{$error['message']}\n<br />";
-                echo "Not Recoverable Error on line {$error['line']} in file " . $error['file'];
-                echo " - PHP " . PHP_VERSION . " (" . PHP_OS . ")\n<br />";
                 debug_print_backtrace();
-                echo "\n<br />";
-                echo "Aborting...\n<br />";
-                $output = ob_get_flush();
+                $output = ob_get_contents();
+                ob_end_clean();
+
+                # Here we handle the error, displaying HTML, logging, ...
+                $output .= "<pre>";
+                $output .= "[ {$errorType[$error['type']]} ]\n\t";
+                $output .= "{$error['message']}\n\t";
+                $output .=  "Not Recoverable Error on line {$error['line']} in file " . $error['file'];
+                $output .=  " - PHP " . PHP_VERSION . " (" . PHP_OS . ")\n";
+                $output .=  "\n\t";
+                $output .=  "Aborting...\n";
+                $output .= "</pre>";
+
                 Log::$fileName = 'fatal_errors.txt';
                 Log::doLog( $output );
 
-                if( ( isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) ) {
+                header( "HTTP/1.1 200 OK" );
+
+                if( ( isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) || $_SERVER['REQUEST_METHOD'] == 'POST' ) {
 
                     //json_rersponse
                     if( INIT::$DEBUG ){
-                        echo json_encode( array("error" => array( "code" => -1000, "message" => $output ), "data" => array()) );
+                        echo json_encode( array("errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array() ) );
                     } else {
-                        echo json_encode( array("error" => array( "code" => -1000, "message" => "Internal Server Error" ), "data" => array()) );
+                        echo json_encode( array("errors" => array( array( "code" => -1000, "message" => "Oops we got an Error. Contact <a href='mailto:support@matecat.com'>support@matecat.com</a>" ) ), "data" => array() ) ) ;
                     }
 
                 } elseif( INIT::$DEBUG ){
