@@ -4307,6 +4307,8 @@ class ProjectManager {
                 $serialized_reference_meta[$pos]['mime_type'] = mysql_real_escape_string( $ref['form-type'], $this->mysql_link );
                 $serialized_reference_binaries[$pos]['base64']    = $ref['base64'];
 
+                if( !is_dir( INIT::$REFERENCE_REPOSITORY ) ) mkdir( INIT::$REFERENCE_REPOSITORY, 0755 );
+
                 $wBytes = file_put_contents( INIT::$REFERENCE_REPOSITORY . "/$refName", base64_decode( $ref['base64'] ) );
 
                 if( !$wBytes ){

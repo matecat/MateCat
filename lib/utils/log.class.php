@@ -13,14 +13,22 @@ if ( !defined( 'LOG_FILENAME' ) ) {
 
 class Log {
 
-    protected static $filename;
+    protected static $fileNamePath;
+
+    public static $fileName;
 
     protected static function _writeTo( $stringData ) {
         if ( !file_exists( LOG_REPOSITORY ) || !is_dir( LOG_REPOSITORY ) ) {
             mkdir( LOG_REPOSITORY );
         }
-        self::$filename = LOG_REPOSITORY . "/" . LOG_FILENAME;
-        file_put_contents( self::$filename, $stringData, FILE_APPEND );
+
+        if( !empty( self::$fileName ) ){
+            self::$fileNamePath = LOG_REPOSITORY . "/" . self::$fileName;
+        } else {
+            self::$fileNamePath = LOG_REPOSITORY . "/" . LOG_FILENAME;
+        }
+
+        file_put_contents( self::$fileNamePath, $stringData, FILE_APPEND );
     }
 
     protected static function _getHeader() {
