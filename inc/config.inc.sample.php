@@ -97,6 +97,7 @@ class INIT {
 		//access session data
 		@session_start();
 		register_shutdown_function( 'INIT::sessionClose' );
+        register_shutdown_function( 'INIT::fatalErrorHandler' );
 
 		$root = realpath(dirname(__FILE__) . '/../');
 		self::$ROOT = $root;  // Accesible by Apache/PHP
@@ -130,7 +131,7 @@ class INIT {
 		self::$CONVERSIONERRORS_REPOSITORY     = self::$STORAGE_DIR . "/conversion_errors";
 		self::$CONVERSIONERRORS_REPOSITORY_WEB = self::$BASEURL . "storage/conversion_errors";
 		self::$TMP_DOWNLOAD                    = self::$STORAGE_DIR . "/tmp_download";
-        self::$REFERENCE_REPOSITORY            = self::$STORAGE_DIR . "/reference_files";
+		self::$REFERENCE_REPOSITORY            = self::$STORAGE_DIR . "/reference_files";
 		self::$TEMPLATE_ROOT                   = self::$ROOT . "/lib/view";
 		self::$MODEL_ROOT                      = self::$ROOT . '/lib/model';
 		self::$CONTROLLER_ROOT                 = self::$ROOT . '/lib/controller';
@@ -151,7 +152,7 @@ class INIT {
 		}
 
 		//auth sections
-		self::$AUTHSECRET_PATH=  self::$ROOT . '/lib/utils/openid/login_secret.dat';
+        self::$AUTHSECRET_PATH=  self::$ROOT . '/lib/utils/openid/login_secret.dat';
 		//if secret is set in file
 		if(file_exists(self::$AUTHSECRET_PATH)){
 			//fetch it
@@ -187,8 +188,8 @@ class INIT {
 		self::$SPELL_CHECK_ENABLED = false;
 
 		self::$SAVE_SHASUM_FOR_FILES_LOADED = true;
-		self::$MAX_UPLOAD_FILE_SIZE = 60 * 1024 * 1024; // bytes
-		self::$MAX_NUM_FILES = 100;
+        self::$MAX_UPLOAD_FILE_SIZE = 60 * 1024 * 1024; // bytes
+        self::$MAX_NUM_FILES = 100;
 
 		self::$SUPPORTED_FILE_TYPES = array(
 				'Office' => array(
@@ -272,6 +273,59 @@ class INIT {
 		//    throw new Exception("ERROR");
 		//}
 	}
+
+    public static function fatalErrorHandler() {
+
+        $errorType = array (
+            E_CORE_ERROR        => 'E_CORE_ERROR',
+            E_COMPILE_ERROR     => 'E_COMPILE_ERROR',
+            E_ERROR             => 'E_ERROR',
+            E_USER_ERROR        => 'E_USER_ERROR',
+            E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
+            E_DEPRECATED        => 'DEPRECATION_NOTICE',
+        );
+
+        # Getting last error
+        $error = error_get_last();
+
+        # Checking if last error is a fatal error
+        switch ( $error['type'] ){
+            case E_CORE_ERROR:
+            case E_COMPILE_ERROR:
+            case E_ERROR:
+            case E_USER_ERROR:
+            case E_RECOVERABLE_ERROR:
+
+                if( !ob_end_clean() ) ob_start();
+                # Here we handle the error, displaying HTML, logging, ...
+                echo "[ {$errorType[$error['type']]} ]\n<br />";
+                echo "{$error['message']}\n<br />";
+                echo "Not Recoverable Error on line {$error['line']} in file " . $error['file'];
+                echo " - PHP " . PHP_VERSION . " (" . PHP_OS . ")\n<br />";
+                debug_print_backtrace();
+                echo "\n<br />";
+                echo "Aborting...\n<br />";
+                $output = ob_get_flush();
+                Log::$fileName = 'fatal_errors.txt';
+                Log::doLog( $output );
+
+                if( ( isset($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest' ) ) {
+
+                    //json_rersponse
+                    if( INIT::$DEBUG ){
+                        echo json_encode( array("error" => array( "code" => -1000, "message" => $output ), "data" => array()) );
+                    } else {
+                        echo json_encode( array("error" => array( "code" => -1000, "message" => "Internal Server Error" ), "data" => array()) );
+                    }
+
+                } elseif( INIT::$DEBUG ){
+                    echo $output;
+                }
+
+                break;
+        }
+
+    }
 
 	private static function generate_password( $length = 12 ) {
 
