@@ -1101,17 +1101,25 @@ UI = {
 //            $("#search-source").val('');
 //            UI.setFindFunction('find');
 //        });
+		$("#enable-replace").on('change', function(e) {
+			if(($('#enable-replace').is(':checked'))&&($('#search-target').val() != '')) {
+				$('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');
+			} else {
+				$('#replace-target, #exec-replace, #exec-replaceall').attr('disabled', 'disabled');				
+			}
+		});
 		$("#search-source, #search-target").on('input', function(e) {
 			if (UI.checkSearchChanges()) {
 				UI.setFindFunction('find');
 			}
 		});
 		$("#search-target").on('input', function(e) {
-//			if($(this).val() != '') {
-//				$('#exec-replace').removeAttr('disabled');
-//			} else {
-//				$('#exec-replace').attr('disabled', 'disabled');				
-//			};
+			if($(this).val() == '') {
+				console.log('a');
+				$('#replace-target, #exec-replace, #exec-replaceall').attr('disabled', 'disabled');				
+			} else {
+				if($('#enable-replace').is(':checked')) $('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');
+			};
 
 		});
 		$("#select-status").on('change', function(e) {
@@ -1533,10 +1541,10 @@ UI = {
 
 		if ($('#search-target').val() != '') {
 			this.searchParams['target'] = $('#search-target').val();
-			$('#exec-replace, #exec-replaceall').removeAttr('disabled');
+			if($('#enable-replace').is(':checked')) $('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');
 		} else {
 			delete this.searchParams['target'];
-			$('#exec-replace, #exec-replaceall').attr('disabled', 'disabled');
+			$('#replace-target, #exec-replace, #exec-replaceall').attr('disabled', 'disabled');
 		}
 
 		if ($('#select-status').val() != '') {
@@ -1571,8 +1579,8 @@ UI = {
 //			return false;
 		}
 		else if (this.searchMode == 'source&target') {
-//            APP.alert('Combined search is temporarily disabled');
-//            return false;
+            APP.alert('Combined search is temporarily disabled');
+            return false;
 		}
 
 		var source = (p['source']) ? p['source'] : '';
@@ -1859,7 +1867,7 @@ UI = {
 		}
 	},
 	execSearchResultsMarking: function(areas, regex, testRegex) {
-		$(areas).each(function() {console.log($(this));
+		$(areas).each(function() {
 			if(!testRegex || ($(this).text().match(testRegex) != null)) {
 				var tt = $(this).html().replace(/&lt;/g, UI.openTagPlaceholder).replace(/&gt;/g, UI.closeTagPlaceholder).replace(regex, '<mark class="searchMarker">$1</mark>').replace(openTagReg, '&lt;').replace(closeTagReg, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
 				$(this).html(tt);				
