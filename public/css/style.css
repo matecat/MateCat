@@ -1024,11 +1024,16 @@ body.cattool .searchbox .block.right
 */
 section .header .context
 {
+	display: none;
 	float: left;
 	color: #666;
 	text-decoration: none;
 	margin: 3px 0 0 10px;
 }
+	section.has-reference .header .context
+	{
+		display: block;
+	}
 	section .header .context:hover
 	{
 		color: #000;

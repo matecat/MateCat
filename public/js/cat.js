@@ -3137,7 +3137,7 @@ UI = {
 //                this.readonly = true;
 				var readonly = (this.readonly == 'true') ? true : false;
 				var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
-				newFile += '<section id="segment-' + this.sid + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + '">' +
+				newFile += '<section id="segment-' + this.sid + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
 						'	<span class="number">' + this.sid + '</span>' +
 						'	<div class="body">' +
