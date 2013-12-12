@@ -752,6 +752,10 @@ background-size: 15px!important;
 	{
 	/*float: none;*/
 	}
+.searchbox #exec-replaceall
+	{
+	visibility: hidden;
+	}
 section mark
 	{
 	background: transparent;
