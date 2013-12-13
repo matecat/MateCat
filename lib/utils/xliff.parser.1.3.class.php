@@ -107,14 +107,34 @@ class Xliff_Parser {
 				if (isset($temp[1]))
 					$xliff['files'][$i]['attr']['target-language'] = $temp[1];
 
+                /*
+                 * PHP 5.2 BUG/INCONSISTENCY vs PHP > 5.2 IN preg_match_all
+                 * This code works only in php > 5.2 when there are more than one internal-file tag
+                 *
+                 *   preg_match_all( '|<internal-file[^>]form\s?=\s?["\'](.*?)["\'][^>]*>(.*?)</internal-file>|si', $file, $temp, PREG_SET_ORDER );
+                 *   foreach( $temp as $_order => $internal ){
+                 *       $xliff['files'][$i]['reference'][$_order]['form-type'] = $internal[1];
+                 *       $xliff['files'][$i]['reference'][$_order]['base64']    = $internal[2];
+                 *   }
+                 *  unset($internal);
+                 *  unset($temp);
+                 *
+                 */
+
                 //get External reference for sub-files
-                //maybe error for potential exhausting of memory when a file base64 are very large
-                preg_match_all( '|<internal-file[^>]form\s?=\s?["\'](.*?)["\'][^>]*>(.*?)</internal-file>|si', $file, $temp, PREG_SET_ORDER );
-                foreach( $temp as $_order => $internal ){
-                    $xliff['files'][$i]['reference'][$_order]['form-type'] = $internal[1];
-                    $xliff['files'][$i]['reference'][$_order]['base64']    = $internal[2];
+                //should be an error for potential exhausting of memory when a base64 file is very large
+                $temp = explode( "<internal-file", $file );
+                $_order = 0;
+                foreach( $temp as &$internal_file ){ //pass by reference, do not make another copy of the array
+                    preg_match( '|form\s?=\s?["\'](.*?)["\'][^>]*>(.*)</internal-file>|si', $internal_file, $hash );
+                    if( isset( $hash[1] ) ){
+                        $xliff['files'][$i]['reference'][$_order]['form-type'] = $hash[1];
+                        $xliff['files'][$i]['reference'][$_order]['base64']    = $hash[2];
+                        $_order++;
+                    }
                 }
-                unset($internal);
+                unset($_order);
+                unset($hash);
                 unset($temp);
 
 				// Getting Trans-units
