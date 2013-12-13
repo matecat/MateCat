@@ -709,10 +709,10 @@ class ProjectManager {
                             $mrk_ext_succ_tags     = mysql_real_escape_string( $seg_source[ 'mrk-ext-succ-tags' ] );
 
                             if( $this->projectStructure['file_references']->offsetExists( $fid ) ){
-                                $file_reference = $this->projectStructure['file_references'][$fid];
-                            } else $file_reference = null;
+                                $file_reference = (int) $this->projectStructure['file_references'][$fid];
+                            } else $file_reference = 'NULL';
 
-                            $this->projectStructure['segments'][$fid]->append( "('$trans_unit_id',$fid,'$file_reference','$source',$num_words,'$mid','$ext_tags','$ext_succ_tags',$show_in_cattool,'$mrk_ext_prec_tags','$mrk_ext_succ_tags')" );
+                            $this->projectStructure['segments'][$fid]->append( "('$trans_unit_id',$fid,$file_reference,'$source',$num_words,'$mid','$ext_tags','$ext_succ_tags',$show_in_cattool,'$mrk_ext_prec_tags','$mrk_ext_succ_tags')" );
 
                         }
 
@@ -769,10 +769,10 @@ class ProjectManager {
                         }
 
                         if( $this->projectStructure['file_references']->offsetExists( $fid ) ){
-                            $file_reference = $this->projectStructure['file_references'][$fid];
-                        } else $file_reference = null;
+                            $file_reference = (int) $this->projectStructure['file_references'][$fid];
+                        } else $file_reference = 'NULL';
 
-                        $this->projectStructure['segments'][$fid]->append( "('$trans_unit_id',$fid,'$file_reference','$source',$num_words,NULL,'$prec_tags','$succ_tags',$show_in_cattool,NULL,NULL)" );
+                        $this->projectStructure['segments'][$fid]->append( "('$trans_unit_id',$fid, $file_reference,'$source',$num_words,NULL,'$prec_tags','$succ_tags',$show_in_cattool,NULL,NULL)" );
 
                     }
                 }
