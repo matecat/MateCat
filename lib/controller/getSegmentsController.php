@@ -192,9 +192,10 @@ class getSegmentsController extends ajaxcontroller {
             unset($seg['id_segment_start']);
             unset($seg['serialized_errors_list']);
 
-            $seg['segment'] = $this->filetype_handler->parse($seg['segment']);
+            //DOH!! this replace C2A0 with whitespaces!!!   WHY?????
+            //$seg['segment'] = $this->filetype_handler->parse($seg['segment']);
 
-            $seg['segment'] = CatUtils::rawxliff2view($seg['segment']);
+            $seg['segment'] = CatUtils::rawxliff2view( $seg['segment'] );
 
             //log::doLog( "1 - ".$seg['translation']);
             $seg['translation'] = CatUtils::rawxliff2view($seg['translation']);

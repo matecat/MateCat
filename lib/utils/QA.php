@@ -428,10 +428,10 @@ class QA {
         $source_seg = mb_convert_encoding( $source_seg, 'UTF-8', $src_enc );
         $target_seg = mb_convert_encoding( $target_seg, 'UTF-8', $trg_enc );
 
-        $source_seg = preg_replace( '#\n#u', chr( 0xc2 ) . chr( 0xa0 ), $source_seg );
+        //Why i do this?? I'm replacing line feed with nbsp....
+        //$source_seg = preg_replace( '#\n#u', chr( 0xc2 ) . chr( 0xa0 ), $source_seg );
 
-
-        //Log::doLog($_GET);
+//        Log::doLog($_POST);
 //        Log::doLog($source_seg);
 //        Log::doLog($target_seg);
 //        Log::hexDump($source_seg);

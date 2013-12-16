@@ -3079,7 +3079,8 @@ UI = {
 				}
 				// Attention Bug: We are mixing the view mode and the raw data mode.
 				// before doing a enanched view you will need to add a data-original tag
-				$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + this.segment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + this.translation + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+                escapedSegment = UI.decodePlaceholders(this.segment);
+				$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + this.translation + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
 			});
 			UI.markSuggestionTags(segment);
 			UI.setDeleteSuggestion(segment);
@@ -3137,6 +3138,12 @@ UI = {
 //                this.readonly = true;
 				var readonly = (this.readonly == 'true') ? true : false;
 				var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
+
+                /* this is to show line feed in source too, because server side we replace \n with placeholders */
+                escapedSegment = escapedSegment.replace( config.brPlaceholderRegex, "\n" );
+                /* see also replacement made in source content below */
+                /* this is to show line feed in source too, because server side we replace \n with placeholders */
+
 				newFile += '<section id="segment-' + this.sid + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
 						'	<span class="number">' + this.sid + '</span>' +
@@ -3147,8 +3154,8 @@ UI = {
 //						'			<a href="#" id="segment-' + this.sid + '-context" class="context" title="Open context" target="_blank">Context</a>' +
 						'		</div>' +
 						'		<div class="text">' +
-						'			<div class="wrap">' +
-						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + this.segment + '</div>' +
+						'			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
+						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholders(this.segment) + '</div>' +
 						'				<div class="copy" title="Copy source to target">' +
 						'                   <a href="#"></a>' +
 						'                   <p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p>' +
@@ -3728,9 +3735,17 @@ UI = {
 		var dd = new Date();
 		ts = dd.getTime();
 		var token = this.currentSegmentId + '-' + ts.toString();
-		//var src_content = $('.source', this.currentSegment).attr('data-original');  
-		var src_content = this.getSegmentSource();
-		var trg_content = this.getSegmentTarget();
+
+		//var src_content = $('.source', this.currentSegment).attr('data-original');
+
+        if( this.translationPlaceholdersEnabled ){
+            var trg_content = this.getAreaWithRawLineFeed( this.currentSegment ).text();
+            var src_content = this.getSourceWithRawLineFeed( this.currentSegment ).text();
+        } else {
+            var trg_content = $( '.editarea', this.currentSegment ).text();
+            var src_content = this.getSegmentSource();
+        }
+
 		this.checkSegmentsArray[token] = trg_content;
 		APP.doRequest({
 			data: {
@@ -3823,14 +3838,28 @@ UI = {
 	},
 	addPlaceHolders: function(segment) {
 		area = $('.editarea', segment);
-		$('div', area).each(function() {
-			$(this).prepend('<span class="placeholder">' + config.brPlaceholder + '</span>');
-		});
+//		$('div', area).each(function() {
+//			$(this).prepend('<span class="placeholder">' + config.brPlaceholder + '</span>');
+//		});
 		$('br', area).each(function() {
 			$(this).after('<span class="placeholder">' + config.brPlaceholder + '</span>');
 		});
-		//		console.log(area.html());
+				console.log(area);
 	},
+    getAreaWithRawLineFeed: function(segment) {
+        area = $('.editarea', segment ).clone();
+        $('br', area).each(function() {
+            $(this).after("\n");
+        });
+        return area;
+    },
+    getSourceWithRawLineFeed: function(segment) {
+        sourceArea = $('.source', segment ).clone();
+        $('br', sourceArea).each(function() {
+            $(this).after("\n");
+        });
+        return sourceArea;
+    },
 	removePlaceholders: function(segment) {
 		$('.editarea span.placeholder', segment).remove();
 	},

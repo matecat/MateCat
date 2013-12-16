@@ -27,9 +27,6 @@ class getWarningController extends ajaxcontroller {
 
         $this->__postInput = (object)filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->__postInput->src_content = CatUtils::view2rawxliff( $this->__postInput->src_content );
-        $this->__postInput->trg_content = CatUtils::view2rawxliff( $this->__postInput->trg_content );
-
     }
 
     /**

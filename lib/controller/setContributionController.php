@@ -115,8 +115,8 @@ class setContributionController extends ajaxcontroller {
 
         $config = TMS::getConfigStruct();
 
-        $config[ 'segment' ]       = $this->source;
-        $config[ 'translation' ]   = $this->target;
+        $config[ 'segment' ]       = CatUtils::view2rawxliff( $this->source );
+        $config[ 'translation' ]   = CatUtils::view2rawxliff( $this->target );
         $config[ 'source_lang' ]   = $this->source_lang;
         $config[ 'target_lang' ]   = $this->target_lang;
         $config[ 'email' ]         = "demo@matecat.com";

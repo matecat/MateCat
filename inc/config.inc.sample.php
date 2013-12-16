@@ -282,7 +282,7 @@ class INIT {
             E_ERROR             => 'E_ERROR',
             E_USER_ERROR        => 'E_USER_ERROR',
             E_RECOVERABLE_ERROR => 'E_RECOVERABLE_ERROR',
-            E_DEPRECATED        => 'DEPRECATION_NOTICE',
+            //E_DEPRECATED        => 'DEPRECATION_NOTICE', //From PHP 5.3
         );
 
         # Getting last error
