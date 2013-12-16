@@ -117,6 +117,20 @@ class TMS_RESULT {
         return $a;
     }
 
+    /**
+     * Transform one level list to multi level matches based on segment key
+     * @return array
+     */
+    public function get_glossary_matches_as_array(){
+        $tmp_vector = array();
+        $TMS_RESULT = $this->get_matches_as_array();
+        foreach( $TMS_RESULT as $single_match ){
+            $tmp_vector[$single_match['segment']][] = $single_match;
+        }
+        $TMS_RESULT = $tmp_vector;
+        return $TMS_RESULT;
+    }
+
     public function get_as_array() {
         return ((array) $this);
     }

@@ -78,7 +78,7 @@ class glossaryController extends ajaxcontroller {
             switch ( $this->exec ) {
 
                 case 'get':
-                    $TMS_RESULT = $_TMS->get( $config )->get_matches_as_array();
+                    $TMS_RESULT = $_TMS->get( $config )->get_glossary_matches_as_array();
                     $this->result[ 'data' ][ 'matches' ] = $TMS_RESULT;
                     break;
                 case 'set':
