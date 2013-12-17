@@ -782,7 +782,6 @@ only screen and (min-device-pixel-ratio: 2),
 only screen and (min-resolution: 192dpi),
 only screen and (in-resolution: 2dppx) { 
 .preview span {height: 30px;width: 30px;display: block;background-size: 25px;}
-
 .extdoc {background: url(../img/matecat_file_icons2x.png) 6px 0 no-repeat !important;}
 .extppt {background: url(../img/matecat_file_icons2x.png) 6px -36px no-repeat !important;}
 .extxml {background: url(../img/matecat_file_icons2x.png) 6px -446px no-repeat !important;}
@@ -806,5 +805,16 @@ body.cattool #jobMenu li a
 {
 	background-size: 25px !important;
 }
+
+.sub-editor .gl-search .set-glossary
+{
+	background: url(../img/add-black2x.png) no-repeat;
+	background-size:20px;
+}    
+.sub-editor .gl-search .set-search
+{
+	background: url(../img/searchgl-black2x.png) no-repeat;
+	background-size:20px;
+}  
 
 }
