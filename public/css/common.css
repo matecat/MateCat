@@ -782,8 +782,10 @@ only screen and (min-device-pixel-ratio: 2),
 only screen and (min-resolution: 192dpi),
 only screen and (in-resolution: 2dppx) { 
 .preview span {height: 30px;width: 30px;display: block;background-size: 25px;}
-.extdoc {background: url(../img/matecat_file_icons2x.png) 6px 0 no-repeat !important;}
-.extppt {background: url(../img/matecat_file_icons2x.png) 6px -36px no-repeat !important;}
+
+
+.extdoc {background: url(../img/matecat_file_icons2x.png) 6px 0 no-repeat !important;} /* .doc, .dot, . docx, .dotx, .docm, .dotm, .odt, .sxw*/
+.extppt {background: url(../img/matecat_file_icons2x.png) 6px -36px no-repeat !important;} /* .pot, .pps, .ppt, .potm, .potx, .ppsm, .ppsx, .pptm, .pptx, .odp, .sxi*/
 .extxml {background: url(../img/matecat_file_icons2x.png) 6px -446px no-repeat !important;}
 .extpdf {background: url(../img/matecat_file_icons2x.png) 6px -106px no-repeat !important;}
 .extxls {background: url(../img/matecat_file_icons2x.png) 6px -140px no-repeat !important;}
