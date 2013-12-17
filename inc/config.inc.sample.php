@@ -296,7 +296,7 @@ class INIT {
             case E_USER_ERROR:
             case E_RECOVERABLE_ERROR:
 
-                if( !ob_end_clean() ) ob_start();
+                if( !ob_get_clean() ) ob_start();
                 debug_print_backtrace();
                 $output = ob_get_contents();
                 ob_end_clean();
