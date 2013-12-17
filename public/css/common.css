@@ -773,6 +773,28 @@ section.currSearchSegment mark.searchMarker
 	{
 	background: #00c1e6;
 	}
+	
+	
+.extdoc {background: url(../img/matecat_file_icons.png) 6px 0 no-repeat !important;} /* .doc, .dot, . docx, .dotx, .docm, .dotm, .odt, .sxw*/
+.extppt {background: url(../img/matecat_file_icons.png) 6px -36px no-repeat !important;} /* .pot, .pps, .ppt, .potm, .potx, .ppsm, .ppsx, .pptm, .pptx, .odp, .sxi*/
+.exthtm {background: url(../img/matecat_file_icons.png) 6px -72px no-repeat !important;} /* .htm, .html */
+.extpdf {background: url(../img/matecat_file_icons.png) 6px -106px no-repeat !important;} /* .pdf */
+.extxls {background: url(../img/matecat_file_icons.png) 6px -140px no-repeat !important;} /* .xls, .xlt, .xlsm, .xlsx, .xltx, .ods, .sxc, .csv */
+.exttxt {background: url(../img/matecat_file_icons.png) 6px -172px no-repeat !important;} /* .txt */
+.extxif {background: url(../img/matecat_file_icons.png) 6px -208px no-repeat !important;} /* .xliff */
+.extttx {background: url(../img/matecat_file_icons.png) 6px -242px no-repeat !important;} /* .ttx */
+.extitd {background: url(../img/matecat_file_icons.png) 6px -276px no-repeat !important;} /* .itd */
+.extxlf {background: url(../img/matecat_file_icons.png) 6px -310px no-repeat !important;} /* .xlf */
+.extmif {background: url(../img/matecat_file_icons.png) 6px -344px no-repeat !important;} /* .mif */
+.extidd {background: url(../img/matecat_file_icons.png) 6px -380px no-repeat !important;} /* .idml */
+.extqxp {background: url(../img/matecat_file_icons.png) 6px -414px no-repeat !important;} /* .xtg */
+.extxml {background: url(../img/matecat_file_icons.png) 6px -446px no-repeat !important;} /* .xml */
+.extrcc {background: url(../img/matecat_file_icons.png) 6px -484px no-repeat !important;} /* .rc */
+.extres {background: url(../img/matecat_file_icons.png) 6px -518px no-repeat !important;} /* .resx */
+.extsgl {background: url(../img/matecat_file_icons.png) 6px -552px no-repeat !important;} /* .sgml */
+.extsgm {background: url(../img/matecat_file_icons.png) 6px -586px no-repeat !important;}  /* .sgm */
+.extpro {background: url(../img/matecat_file_icons.png) 6px -620px no-repeat !important;} /* .properties */
+	
 
 /* retina display query */
 @media only screen and (-webkit-min-device-pixel-ratio: 2),
@@ -786,23 +808,23 @@ only screen and (in-resolution: 2dppx) {
 
 .extdoc {background: url(../img/matecat_file_icons2x.png) 6px 0 no-repeat !important;} /* .doc, .dot, . docx, .dotx, .docm, .dotm, .odt, .sxw*/
 .extppt {background: url(../img/matecat_file_icons2x.png) 6px -36px no-repeat !important;} /* .pot, .pps, .ppt, .potm, .potx, .ppsm, .ppsx, .pptm, .pptx, .odp, .sxi*/
-.extxml {background: url(../img/matecat_file_icons2x.png) 6px -446px no-repeat !important;}
-.extpdf {background: url(../img/matecat_file_icons2x.png) 6px -106px no-repeat !important;}
-.extxls {background: url(../img/matecat_file_icons2x.png) 6px -140px no-repeat !important;}
-.exttxt {background: url(../img/matecat_file_icons2x.png) 6px -172px no-repeat !important;}
-.exthtm {background: url(../img/matecat_file_icons2x.png) 6px -72px no-repeat !important;}
-.extxif {background: url(../img/matecat_file_icons2x.png) 6px -208px no-repeat !important;}
-.extmif {background: url(../img/matecat_file_icons2x.png) 6px -344px no-repeat !important;}
-.extidd {background: url(../img/matecat_file_icons2x.png) 6px -380px no-repeat !important;}
-.extqxp {background: url(../img/matecat_file_icons2x.png) 6px -414px no-repeat !important;}
-.extttx {background: url(../img/matecat_file_icons2x.png) 6px -242px no-repeat !important;}
-.extitd {background: url(../img/matecat_file_icons2x.png) 6px -276px no-repeat !important;}
-.extxlf {background: url(../img/matecat_file_icons2x.png) 6px -310px no-repeat !important;}
-.extrcc {background: url(../img/matecat_file_icons2x.png) 6px -484px no-repeat !important;}
-.extres {background: url(../img/matecat_file_icons2x.png) 6px -518px no-repeat !important;}
-.extsgl {background: url(../img/matecat_file_icons2x.png) 6px -552px no-repeat !important;}
-.extsgm {background: url(../img/matecat_file_icons2x.png) 6px -586px no-repeat !important;}
-.extpro {background: url(../img/matecat_file_icons2x.png) 6px -620px no-repeat !important;}
+.exthtm {background: url(../img/matecat_file_icons2x.png) 6px -72px no-repeat !important;} /* .htm, .html */
+.extpdf {background: url(../img/matecat_file_icons2x.png) 6px -106px no-repeat !important;} /* .pdf */
+.extxls {background: url(../img/matecat_file_icons2x.png) 6px -140px no-repeat !important;} /* .xls, .xlt, .xlsm, .xlsx, .xltx, .ods, .sxc, .csv */
+.exttxt {background: url(../img/matecat_file_icons2x.png) 6px -172px no-repeat !important;} /* .txt */
+.extxif {background: url(../img/matecat_file_icons2x.png) 6px -208px no-repeat !important;} /* .xliff */
+.extttx {background: url(../img/matecat_file_icons2x.png) 6px -242px no-repeat !important;} /* .ttx */
+.extitd {background: url(../img/matecat_file_icons2x.png) 6px -276px no-repeat !important;} /* .itd */
+.extxlf {background: url(../img/matecat_file_icons2x.png) 6px -310px no-repeat !important;} /* .xlf */
+.extmif {background: url(../img/matecat_file_icons2x.png) 6px -344px no-repeat !important;} /* .mif */
+.extidd {background: url(../img/matecat_file_icons2x.png) 6px -380px no-repeat !important;} /* .idml */
+.extqxp {background: url(../img/matecat_file_icons2x.png) 6px -414px no-repeat !important;} /* .xtg */
+.extxml {background: url(../img/matecat_file_icons2x.png) 6px -446px no-repeat !important;} /* .xml */
+.extrcc {background: url(../img/matecat_file_icons2x.png) 6px -484px no-repeat !important;} /* .rc */
+.extres {background: url(../img/matecat_file_icons2x.png) 6px -518px no-repeat !important;} /* .resx */
+.extsgl {background: url(../img/matecat_file_icons2x.png) 6px -552px no-repeat !important;} /* .sgml */
+.extsgm {background: url(../img/matecat_file_icons2x.png) 6px -586px no-repeat !important;}  /* .sgm */
+.extpro {background: url(../img/matecat_file_icons2x.png) 6px -620px no-repeat !important;} /* .properties */
 body.cattool #jobMenu li a
 {
 	background-size: 25px !important;
