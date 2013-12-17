@@ -281,7 +281,7 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 
 
 
-.number
+.sid
 {
 	width: 50px !important;
 	position: absolute;	
@@ -296,12 +296,12 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 	text-decoration: none;
 	cursor: default;
 }
-section:hover .number{color:#6d6e71}		
-section.currSearchSegment .number
+section:hover .sid{color:#6d6e71}		
+section.currSearchSegment .sid
 {
 	color: #0798BC;
 }
-.editor .number{
+.editor .sid{
 	top:43px !Important;}
 
 
@@ -660,6 +660,10 @@ section.loaded .submenu {display: block;}
     background: #efefef url(../img/point.gif) 0 0 repeat-x;
     z-index: 9999999999999;
 }
+body.noGlossary .tab-switcher-gl
+{
+	display: none;
+}
 .submenu a{-webkit-transition: all  100ms ease-in;-moz-transition: all  100ms ease-in;padding:4px 20px;display:block;color:#939598;font-size:16px; float:left;font-weight:bold;text-decoration:none;border-right:1px solid #666;border-top:1px solid #666;
 		   -webkit-box-shadow: inset 0 -1px 4px #ccc;}
 .submenu .notification{margin:-1px 5px 0px 0px;background:url(../img/header-bg.jpg) 0 0 repeat-x;color:#fff !important}
@@ -735,7 +739,7 @@ section.loaded .submenu {display: block;}
 	background: url(../img/add-black.png) no-repeat;
 	background-size:20px;
 }    
-.sub-editor .gl-search .set-search
+.sub-editor .gl-search .search-glossary
 {
 	float: left;
 	margin: 20px 20px 0 0;
@@ -743,10 +747,16 @@ section.loaded .submenu {display: block;}
 	background: url(../img/searchgl-black.png) no-repeat;
 	background-size:20px;
 }  
-.sub-editor .gl-search .set-glossary:hover, .sub-editor .gl-search .set-search:hover
+.sub-editor .gl-search .set-glossary:hover, .sub-editor .gl-search .search-glossary:hover
 {
 	opacity: 0.7;
 }
+.sub-editor .gl-search .set-glossary.disabled,
+.sub-editor .gl-search .set-glossary.disabled:hover
+{
+	border: none !important;
+	opacity: 0.5 !important;
+}  
 
 .content { float: left; clear: both; border: 1px solid #ccf; border-top: none; border-left: none; background: #eef; padding: 10px 20px 20px; width: 400px; }
 

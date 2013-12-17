@@ -99,6 +99,7 @@ UI = {
 		var bb = $.cookie('noAlertConfirmTranslation');
 		this.alertConfirmTranslationEnabled = (typeof bb == 'undefined') ? true : false;
 		this.customSpellcheck = false;
+		this.noGlossary = false;
 		setTimeout(function() {
 			UI.blockGetMoreSegments = false;
 		}, 1000);
@@ -275,7 +276,7 @@ UI = {
 		$(window).on('sourceCopied', function(event) {
 		});
 
-		$("#outer").on('click', 'a.number', function(e) {
+		$("#outer").on('click', 'a.sid', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
 			return false;
@@ -844,17 +845,39 @@ UI = {
 			 //                $('.editor .sub-editor.concordances .results').empty();
 			 };
 			 */
+		}).on('click', '.sub-editor .gl-search .search-glossary', function(e) {
+			e.preventDefault();
+			var txt = $(this).parents('.gl-search').find('.search-source').text();
+			segment = $(this).parents('section').first();
+			if (txt.length > 2) {
+				UI.getGlossary(segment, false);
+			}
 		}).on('keydown', '.sub-editor .gl-search .search-source', function(e) {
 			if (e.which == 13) {
 				e.preventDefault();
 				var txt = $(this).text();
 				if (txt.length > 2) {
-					UI.getGlossary(txt);
+					segment = $(this).parents('section').first();
+					UI.getGlossary(segment, false);
 				}
+			}
+		}).on('input', '.sub-editor .gl-search .search-target', function(e) {
+			gl = $(this).parents('.gl-search').find('.set-glossary');	
+			if($(this).text() == '') {
+				gl.addClass('disabled');
+			} else {
+				gl.removeClass('disabled');
 			}
 		}).on('click', '.sub-editor .gl-search .set-glossary', function(e) {
 			e.preventDefault();
-			UI.setGlossaryItem();
+		}).on('click', '.sub-editor .gl-search .set-glossary:not(.disabled)', function(e) {
+			e.preventDefault();
+			if($(this).parents('.gl-search').find('.search-source').text() == '') {
+				APP.alert('Please insert a glossary term.');
+				return false;
+			} else {
+				UI.setGlossaryItem();
+			}
 		}).on('paste', '.editarea', function(e) {
 			UI.saveInUndoStack('paste');
 			$('#placeHolder').remove();
@@ -1431,7 +1454,7 @@ UI = {
 		if ($('.footer', segment).text() != '')
 			return false;
 
-		var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li><li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc"><a tabindex="-1" href="#">Concordance</a></li><li class="tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl"><a tabindex="-1" href="#">Glossary</a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div><div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances"><div class="overflow"><div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div><div class="results"></div></div></div><div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary"><div class="overflow"><div class="gl-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /><a class="set-search" href="#"></a><a class="set-glossary" href="#"></a></div><div class="results"></div></div></div>';
+		var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li><li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc"><a tabindex="-1" href="#">Concordance</a></li><li class="tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl"><a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div><div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances"><div class="overflow"><div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div><div class="results"></div></div></div><div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary"><div class="overflow"><div class="gl-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /><a class="search-glossary" href="#"></a><a class="set-glossary disabled" href="#"></a></div><div class="results"></div></div></div>';
 		$('.footer', segment).html(footer);
 
 
@@ -2210,30 +2233,61 @@ UI = {
 			}
 		});
 	},
-	getGlossary: function(txt, translation) {
-		$('.gl-search', UI.currentSegment).addClass('loading');
-		$('.sub-editor.glossary .overflow .results', this.currentSegment).empty();
-		$('.sub-editor.glossary .overflow .graysmall.message', this.currentSegment).empty();
-		txt = view2rawxliff(txt);
-
-		if (typeof translation != 'undefined') {
-			translation = view2rawxliff(translation);
+	getGlossary: function(segment, entireSegment, next) {
+		console.log(entireSegment);
+		if (typeof next != 'undefined') {
+			if(entireSegment) {
+				var n = (next == 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
+			} else {
+//				console.log('non entire segment');
+//				var n = $(segment);
+			}
 		} else {
-			translation = null;
+			var n = segment;
 		}
+		$('.gl-search', n).addClass('loading');
+		$('.sub-editor.glossary .overflow .results', n).empty();
+		$('.sub-editor.glossary .overflow .graysmall.message', n).empty();
+//		console.log($('.gl-search .search-source', n));
+		txt = (entireSegment)? $('.text .source', n).attr('data-original') : view2rawxliff($('.gl-search .search-source', n).val());
+		console.log(txt);
+//		txt = view2rawxliff(txt);
+
+
 
 		APP.doRequest({
 			data: {
 				action: 'glossary',
 				exec: 'get',
 				segment: txt,
-				translation: translation,
+				translation: null,
 				id_job: config.job_id,
 				password: config.password
 			},
+			context: n,
 			success: function(d) {
-//				var d = {data:{matches:{ segment: txt, translation: translation }}};
-				UI.renderGlossary(d);
+				if(typeof d.errors != 'undefined') {
+					if(d.errors[0].code == -1) {
+						UI.noGlossary = true;
+						UI.body.addClass('noGlossary');
+					};
+				};
+				numMatches = 0;
+				$(d.data.matches).each(function() {
+					numMatches++
+				})
+				if(entireSegment) {
+					if(!numMatches) {
+//						$('.tab-switcher-gl', $(this)).hide();
+					}
+				};
+				console.log(numMatches);
+				if(numMatches) {
+					UI.renderGlossary(d);
+					$('.tab-switcher-gl a .number', $(this)).text('(' + numMatches + ')');
+				} else {
+					$('.tab-switcher-gl a .number', $(this)).text('');					
+				}
 			},
 			complete: function() {
 				$('.gl-search', this.currentSegment).removeClass('loading');
@@ -2852,6 +2906,7 @@ UI = {
 		this.nextIsLoaded = false;
 		if (!this.readonly)
 			this.getContribution(segment, 0);
+			if(!this.noGlossary) this.getGlossary(segment, true, 0);
 		this.opening = true;
 		if (!(this.currentSegment.is(this.lastOpenedSegment))) {
 			var lastOpened = $(this.lastOpenedSegment).attr('id');
@@ -2871,6 +2926,8 @@ UI = {
 		if (!this.readonly) {
 			this.getContribution(segment, 1);
 			this.getContribution(segment, 2);
+			if(!this.noGlossary) this.getGlossary(segment, true, 1);
+			if(!this.noGlossary) this.getGlossary(segment, true, 2);
 		}
 		if (this.debug)
 			console.log('close/open time: ' + ((new Date()) - this.openSegmentStart));
@@ -3167,7 +3224,7 @@ UI = {
 				var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
 				newFile += '<section id="segment-' + this.sid + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true') ? ' has-reference' : '') + '">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
-						'	<span class="number">' + this.sid + '</span>' +
+						'	<span class="sid">' + this.sid + '</span>' +
 						'	<div class="body">' +
 						'		<div class="header toggle" id="segment-' + this.sid + '-header">' +
 //						'			<h2 title="" class="percentuage"><span></span></h2>' + 

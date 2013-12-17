@@ -811,12 +811,12 @@ body.cattool #jobMenu li a
 .sub-editor .gl-search .set-glossary
 {
 	background: url(../img/add-black2x.png) no-repeat;
-	background-size:20px;
+	background-size: 20px;
 }    
-.sub-editor .gl-search .set-search
+.sub-editor .gl-search .search-glossary
 {
 	background: url(../img/searchgl-black2x.png) no-repeat;
-	background-size:20px;
+	background-size: 20px;
 }  
 
 }
