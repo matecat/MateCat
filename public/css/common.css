@@ -796,6 +796,7 @@ section.currSearchSegment mark.searchMarker
 .extpro {background: url(../img/matecat_file_icons.png) 6px -620px no-repeat !important;} /* .properties */
 	
 
+
 /* retina display query */
 @media only screen and (-webkit-min-device-pixel-ratio: 2),
 only screen and (min--moz-device-pixel-ratio: 2),
