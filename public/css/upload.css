@@ -945,56 +945,9 @@ footer a:hover{text-decoration:none}
 /* file extensions */
 
 .preview span {height: 30px;width: 30px;display: block;background-size: 25px;}
-.extdoc {background: url(../img/matecat_file_icons.png) 6px 0 no-repeat;}
-.extppt {background: url(../img/matecat_file_icons.png) 6px -36px no-repeat;}
-.extxml {background: url(../img/matecat_file_icons.png) 6px -446px no-repeat;}
-.extpdf {background: url(../img/matecat_file_icons.png) 6px -106px no-repeat;}
-.extxls {background: url(../img/matecat_file_icons.png) 6px -140px no-repeat;}
-.exttxt {background: url(../img/matecat_file_icons.png) 6px -172px no-repeat;}
-.exthtm {background: url(../img/matecat_file_icons.png) 6px -72px no-repeat;}
-.extxif {background: url(../img/matecat_file_icons.png) 6px -208px no-repeat;}
-.extmif {background: url(../img/matecat_file_icons.png) 6px -344px no-repeat;}
-.extidd {background: url(../img/matecat_file_icons.png) 6px -380px no-repeat;}
-.extqxp {background: url(../img/matecat_file_icons.png) 6px -414px no-repeat;}
-.extttx {background: url(../img/matecat_file_icons.png) 6px -242px no-repeat;}
-.extitd {background: url(../img/matecat_file_icons.png) 6px -276px no-repeat;}
-.extxlf {background: url(../img/matecat_file_icons.png) 6px -310px no-repeat;}
-.extrcc {background: url(../img/matecat_file_icons.png) 6px -484px no-repeat;}
-.extres {background: url(../img/matecat_file_icons.png) 6px -518px no-repeat;}
-.extsgl {background: url(../img/matecat_file_icons.png) 6px -552px no-repeat;}
-.extsgm {background: url(../img/matecat_file_icons.png) 6px -586px no-repeat;}
-.extpro {background: url(../img/matecat_file_icons.png) 6px -620px no-repeat;}
 
 
-/* retina display query */
-@media only screen and (-webkit-min-device-pixel-ratio: 2),
-only screen and (min--moz-device-pixel-ratio: 2),
-only screen and (-o-min-device-pixel-ratio: 2/1),
-only screen and (min-device-pixel-ratio: 2),
-only screen and (min-resolution: 192dpi),
-only screen and (in-resolution: 2dppx) { 
-.preview span {height: 30px;width: 30px;display: block;background-size: 25px;}
-.extdoc {background: url(../img/matecat_file_icons2x.png) 6px 0 no-repeat;}
-.extppt {background: url(../img/matecat_file_icons2x.png) 6px -36px no-repeat;}
-.extxml {background: url(../img/matecat_file_icons2x.png) 6px -446px no-repeat;}
-.extpdf {background: url(../img/matecat_file_icons2x.png) 6px -106px no-repeat;}
-.extxls {background: url(../img/matecat_file_icons2x.png) 6px -140px no-repeat;}
-.exttxt {background: url(../img/matecat_file_icons2x.png) 6px -172px no-repeat;}
-.exthtm {background: url(../img/matecat_file_icons2x.png) 6px -72px no-repeat;}
-.extxif {background: url(../img/matecat_file_icons2x.png) 6px -208px no-repeat;}
-.extmif {background: url(../img/matecat_file_icons2x.png) 6px -344px no-repeat;}
-.extidd {background: url(../img/matecat_file_icons2x.png) 6px -380px no-repeat;}
-.extqxp {background: url(../img/matecat_file_icons2x.png) 6px -414px no-repeat;}
-.extttx {background: url(../img/matecat_file_icons2x.png) 6px -242px no-repeat;}
-.extitd {background: url(../img/matecat_file_icons2x.png) 6px -276px no-repeat;}
-.extxlf {background: url(../img/matecat_file_icons2x.png) 6px -310px no-repeat;}
-.extrcc {background: url(../img/matecat_file_icons2x.png) 6px -484px no-repeat;}
-.extres {background: url(../img/matecat_file_icons2x.png) 6px -518px no-repeat;}
-.extsgl {background: url(../img/matecat_file_icons2x.png) 6px -552px no-repeat;}
-.extsgm {background: url(../img/matecat_file_icons2x.png) 6px -586px no-repeat;}
-.extpro {background: url(../img/matecat_file_icons2x.png) 6px -620px no-repeat;}
 
 
-}
 
 

@@ -774,3 +774,37 @@ section.currSearchSegment mark.searchMarker
 	background: #00c1e6;
 	}
 
+/* retina display query */
+@media only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (min--moz-device-pixel-ratio: 2),
+only screen and (-o-min-device-pixel-ratio: 2/1),
+only screen and (min-device-pixel-ratio: 2),
+only screen and (min-resolution: 192dpi),
+only screen and (in-resolution: 2dppx) { 
+.preview span {height: 30px;width: 30px;display: block;background-size: 25px;}
+
+.extdoc {background: url(../img/matecat_file_icons2x.png) 6px 0 no-repeat !important;}
+.extppt {background: url(../img/matecat_file_icons2x.png) 6px -36px no-repeat !important;}
+.extxml {background: url(../img/matecat_file_icons2x.png) 6px -446px no-repeat !important;}
+.extpdf {background: url(../img/matecat_file_icons2x.png) 6px -106px no-repeat !important;}
+.extxls {background: url(../img/matecat_file_icons2x.png) 6px -140px no-repeat !important;}
+.exttxt {background: url(../img/matecat_file_icons2x.png) 6px -172px no-repeat !important;}
+.exthtm {background: url(../img/matecat_file_icons2x.png) 6px -72px no-repeat !important;}
+.extxif {background: url(../img/matecat_file_icons2x.png) 6px -208px no-repeat !important;}
+.extmif {background: url(../img/matecat_file_icons2x.png) 6px -344px no-repeat !important;}
+.extidd {background: url(../img/matecat_file_icons2x.png) 6px -380px no-repeat !important;}
+.extqxp {background: url(../img/matecat_file_icons2x.png) 6px -414px no-repeat !important;}
+.extttx {background: url(../img/matecat_file_icons2x.png) 6px -242px no-repeat !important;}
+.extitd {background: url(../img/matecat_file_icons2x.png) 6px -276px no-repeat !important;}
+.extxlf {background: url(../img/matecat_file_icons2x.png) 6px -310px no-repeat !important;}
+.extrcc {background: url(../img/matecat_file_icons2x.png) 6px -484px no-repeat !important;}
+.extres {background: url(../img/matecat_file_icons2x.png) 6px -518px no-repeat !important;}
+.extsgl {background: url(../img/matecat_file_icons2x.png) 6px -552px no-repeat !important;}
+.extsgm {background: url(../img/matecat_file_icons2x.png) 6px -586px no-repeat !important;}
+.extpro {background: url(../img/matecat_file_icons2x.png) 6px -620px no-repeat !important;}
+body.cattool #jobMenu li a
+{
+	background-size: 25px !important;
+}
+
+}
