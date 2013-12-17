@@ -944,7 +944,7 @@ footer a:hover{text-decoration:none}
 .name {padding: 5px!important;}
 /* file extensions */
 
-.preview span {height: 30px;width: 30px;display: block;background-size: 25px;}
+.preview span {height: 30px;width: 30px;display: block;background-size: 25px!important;}
 
 
 
