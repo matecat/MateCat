@@ -82,11 +82,10 @@ class glossaryController extends ajaxcontroller {
                     break;
                 case 'set':
                     $TMS_RESULT = $_TMS->set($config);
-                    $this->result['code'] = $TMS_RESULT;
-                    $this->result['data'] = ( $TMS_RESULT ? 'OK' : null );
-                    if ($this->result['code']) {
-                        $TMS_RESULT = $_TMS->get($config)->get_glossary_matches_as_array();
-                        $this->result['data']['matches'] = $TMS_RESULT;
+                    $set_code = $TMS_RESULT;
+                    if ($set_code) {
+                        $TMS_GET_RESULT = $_TMS->get($config)->get_glossary_matches_as_array();
+                        $this->result['data']['matches'] = $TMS_GET_RESULT;
                     }
                     break;
                 case 'delete':
