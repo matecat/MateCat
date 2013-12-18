@@ -712,7 +712,8 @@ body.noGlossary .tab-switcher-gl
 }          
 .sub-editor.glossary .gl-search.setting .set-glossary
 {
-    background: url(../img/loading.gif) 0 0 no-repeat !important;
+    background: url(../img/loading.gif);
+background-size: 20px;
 /*    float: left;
     width: 100%;
     background-size: 20px 20px;*/
