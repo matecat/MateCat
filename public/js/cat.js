@@ -574,7 +574,7 @@ UI = {
 					UI.lockTags(UI.editarea);
 				}, 10);
 			UI.registerQACheck();
-		}).on('input', '.editor .cc-search .input', function(e) {
+		}).on('input', '.editor .cc-search .input, .editor .gl-search .input', function(e) {
 			UI.markTagsInSearch($(this));
 		}).on('dblclick', '.source', function(e) {
 //            console.log(window.getSelection());
@@ -661,7 +661,7 @@ UI = {
 			setTimeout(function() {
 				UI.saveInUndoStack('drop');
 			}, 100);
-		}).on('drop paste', '.editor .cc-search .input', function(e) {
+		}).on('drop paste', '.editor .cc-search .input, .editor .gl-search .input', function(e) {
 			UI.beforeDropSearchSourceHTML = UI.editarea.html();
 			UI.currentConcordanceField = $(this);
 			setTimeout(function() {
@@ -2319,7 +2319,6 @@ UI = {
 	processLoadedGlossary: function(d, context) {
 		segment = context[0];
 		next = context[1];
-		console.log(segment);
 		if((next == 1)||(next == 2)) { // is a prefetching
 			if(!$('.footer .submenu', segment).length) { // footer has not yet been created
 				setTimeout(function() { // wait for creation
@@ -3132,8 +3131,6 @@ UI = {
 	renderGlossary: function(d, seg) {
 		segment = seg;
 		segment_id = segment.attr('id');
-		console.log(d);
-		console.log(segment);
 		$('.sub-editor.glossary .overflow .results', segment).empty();
 		$('.sub-editor.glossary .overflow .message', segment).remove();
 		numRes = 0;
