@@ -2285,7 +2285,7 @@ UI = {
 		} else {
 			var n = segment;
 		}
-		if($(n).hasClass('glossary-loaded')) return false;
+		if(($(n).hasClass('glossary-loaded'))&&(entireSegment)) return false;
 		$(n).addClass('glossary-loaded');
 		$('.gl-search', n).addClass('loading');
 		$('.sub-editor.glossary .overflow .results', n).empty();
