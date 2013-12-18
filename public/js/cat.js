@@ -2303,9 +2303,6 @@ UI = {
 			},
 			context: [n, next],
 			success: function(d) {
-				console.log(this[0]);
-				console.log(this[1]);
-				console.log(d.data.matches);
 				if(typeof d.errors != 'undefined') {
 					if(d.errors[0].code == -1) {
 						UI.noGlossary = true;
@@ -2315,13 +2312,14 @@ UI = {
 				UI.processLoadedGlossary(d, this);
 			},
 			complete: function() {
-				$('.gl-search', this.currentSegment).removeClass('loading');
+				$('.gl-search', UI.currentSegment).removeClass('loading');
 			}
 		})
 	},
 	processLoadedGlossary: function(d, context) {
 		segment = context[0];
 		next = context[1];
+		console.log(segment);
 		if((next == 1)||(next == 2)) { // is a prefetching
 			if(!$('.footer .submenu', segment).length) { // footer has not yet been created
 				setTimeout(function() { // wait for creation
@@ -2353,9 +2351,7 @@ UI = {
 		$(item).remove();
 	},
 	setGlossaryItem: function() {
-		console.log(UI.currentSegment);
-		console.log(UI.currentSegment.find('.gl-search .search-target'));
-		console.log(UI.currentSegment.find('.gl-search .search-target').text());
+		$('.gl-search', UI.currentSegment).addClass('setting');
 		APP.doRequest({
 			data: {
 				action: 'glossary',
@@ -2365,7 +2361,12 @@ UI = {
 				id_job: config.job_id,
 				password: config.password
 			},
+			context: [UI.currentSegment, next],
 			success: function(d) {
+				UI.processLoadedGlossary(d, this);
+			},
+			complete: function() {
+				$('.gl-search', UI.currentSegment).removeClass('setting');
 			}
 		})		
 	},
@@ -3131,8 +3132,10 @@ UI = {
 	renderGlossary: function(d, seg) {
 		segment = seg;
 		segment_id = segment.attr('id');
-		$('.sub-editor.concordances .overflow .results', segment).empty();
-		$('.sub-editor.concordances .overflow .message', segment).remove();
+		console.log(d);
+		console.log(segment);
+		$('.sub-editor.glossary .overflow .results', segment).empty();
+		$('.sub-editor.glossary .overflow .message', segment).remove();
 		numRes = 0;
 		$.each(d.data.matches, function(k, v) {
 			numRes++;

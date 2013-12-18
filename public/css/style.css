@@ -710,7 +710,13 @@ body.noGlossary .tab-switcher-gl
     width: 100%;
     background-size: 20px 20px;
 }          
-
+.sub-editor.glossary .gl-search.setting .set-glossary
+{
+    background: url(../img/loading.gif) 0 0 no-repeat !important;
+/*    float: left;
+    width: 100%;
+    background-size: 20px 20px;*/
+}
 .sub-editor .cc-search .search-target,
 .sub-editor .cc-search .search-source,
 .sub-editor .gl-search .search-source,
