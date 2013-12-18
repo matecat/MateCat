@@ -1491,12 +1491,57 @@ UI = {
 		 });*/
 	},
 	getIconClass: function(ext) {
-		console.log(ext);
 		c =		(
 					(ext == 'doc')||
-					(ext == 'docx')
+					(ext == 'dot')||
+					(ext == 'docx')||
+					(ext == 'dotx')||
+					(ext == 'docm')||
+					(ext == 'dotm')||
+					(ext == 'odt')||
+					(ext == 'sxw')
 				)?				'extdoc' :
-				(ext == 'ppt')?		'extppt' :
+				(
+					(ext == 'pot')||
+					(ext == 'pps')||
+					(ext == 'ppt')||
+					(ext == 'potm')||
+					(ext == 'potx')||
+					(ext == 'ppsm')||
+					(ext == 'ppsx')||
+					(ext == 'pptm')||
+					(ext == 'pptx')||
+					(ext == 'odp')||
+					(ext == 'sxi')
+				)?				'extppt' :
+				(
+					(ext == 'htm')||
+					(ext == 'html')
+				)?				'exthtm' :
+				(ext == 'pdf')?		'extpdf' :
+				(
+					(ext == 'xls')||
+					(ext == 'xlt')||
+					(ext == 'xlsm')||
+					(ext == 'xlsx')||
+					(ext == 'xltx')||
+					(ext == 'ods')||
+					(ext == 'sxc')||
+					(ext == 'csv')
+				)?				'extxls' :
+				(ext == 'txt')?		'exttxt' :
+				(ext == 'ttx')?		'extttx' :
+				(ext == 'itd')?		'extitd' :
+				(ext == 'xlf')?		'extxlf' :
+				(ext == 'mif')?		'extmif' :
+				(ext == 'idml')?	'extidd' :
+				(ext == 'xtg')?		'extqxp' :
+				(ext == 'xml')?		'extxml' :
+				(ext == 'rc')?		'extrcc' :
+				(ext == 'resx')?		'extres' :
+				(ext == 'sgml')?	'extsgl' :
+				(ext == 'sgm')?		'extsgm' :
+				(ext == 'properties')? 'extpro' :				
 								'extxif';
 		return c;		
 	},
@@ -2227,33 +2272,25 @@ UI = {
 				id_translator: config.id_translator,
 				password: config.password
 			},
-//            context: $('#' + id),
 			success: function(d) {
 				UI.renderConcordances(d, in_target);
 			}
 		});
 	},
 	getGlossary: function(segment, entireSegment, next) {
-		console.log(entireSegment);
 		if (typeof next != 'undefined') {
 			if(entireSegment) {
 				var n = (next == 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
-			} else {
-//				console.log('non entire segment');
-//				var n = $(segment);
 			}
 		} else {
 			var n = segment;
 		}
+		if($(n).hasClass('glossary-loaded')) return false;
+		$(n).addClass('glossary-loaded');
 		$('.gl-search', n).addClass('loading');
 		$('.sub-editor.glossary .overflow .results', n).empty();
 		$('.sub-editor.glossary .overflow .graysmall.message', n).empty();
-//		console.log($('.gl-search .search-source', n));
-		txt = (entireSegment)? $('.text .source', n).attr('data-original') : view2rawxliff($('.gl-search .search-source', n).val());
-		console.log(txt);
-//		txt = view2rawxliff(txt);
-
-
+		txt = (entireSegment)? $('.text .source', n).attr('data-original') : view2rawxliff($('.gl-search .search-source', n).text());
 
 		APP.doRequest({
 			data: {
@@ -2264,35 +2301,41 @@ UI = {
 				id_job: config.job_id,
 				password: config.password
 			},
-			context: n,
+			context: [n, next],
 			success: function(d) {
+				console.log(this[0]);
+				console.log(this[1]);
+				console.log(d.data.matches);
 				if(typeof d.errors != 'undefined') {
 					if(d.errors[0].code == -1) {
 						UI.noGlossary = true;
 						UI.body.addClass('noGlossary');
 					};
 				};
-				numMatches = 0;
-				$(d.data.matches).each(function() {
-					numMatches++
-				})
-				if(entireSegment) {
-					if(!numMatches) {
-//						$('.tab-switcher-gl', $(this)).hide();
-					}
-				};
-				console.log(numMatches);
-				if(numMatches) {
-					UI.renderGlossary(d);
-					$('.tab-switcher-gl a .number', $(this)).text('(' + numMatches + ')');
-				} else {
-					$('.tab-switcher-gl a .number', $(this)).text('');					
-				}
+				UI.processLoadedGlossary(d, this);
 			},
 			complete: function() {
 				$('.gl-search', this.currentSegment).removeClass('loading');
 			}
 		})
+	},
+	processLoadedGlossary: function(d, context) {
+		segment = context[0];
+		next = context[1];
+		if((next == 1)||(next == 2)) { // is a prefetching
+			if(!$('.footer .submenu', segment).length) { // footer has not yet been created
+				setTimeout(function() { // wait for creation
+					UI.processLoadedGlossary(d, context);
+				}, 200);	
+			}
+		}
+		numMatches = Object.size(d.data.matches);
+		if(numMatches) {
+			UI.renderGlossary(d, segment);
+			$('.tab-switcher-gl a .number', segment).text('(' + numMatches + ')');
+		} else {
+			$('.tab-switcher-gl a .number', segment).text('');	
+		}		
 	},
 	deleteGlossaryItem: function(item) {
 		APP.doRequest({
@@ -2310,6 +2353,9 @@ UI = {
 		$(item).remove();
 	},
 	setGlossaryItem: function() {
+		console.log(UI.currentSegment);
+		console.log(UI.currentSegment.find('.gl-search .search-target'));
+		console.log(UI.currentSegment.find('.gl-search .search-target').text());
 		APP.doRequest({
 			data: {
 				action: 'glossary',
@@ -3082,9 +3128,9 @@ UI = {
 		$('.cc-search', this.currentSegment).removeClass('loading');
 		this.setDeleteSuggestion(segment);
 	},
-	renderGlossary: function(d) {
-		segment = this.currentSegment;
-		segment_id = this.currentSegmentId;
+	renderGlossary: function(d, seg) {
+		segment = seg;
+		segment_id = segment.attr('id');
 		$('.sub-editor.concordances .overflow .results', segment).empty();
 		$('.sub-editor.concordances .overflow .message', segment).remove();
 		numRes = 0;
@@ -4540,6 +4586,13 @@ $.fn.isOnScreen = function() {
 
 };
 
+Object.size = function(obj) {
+    var size = 0, key;
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) size++;
+    }
+    return size;
+};
 
 $(document).ready(function() {
 
