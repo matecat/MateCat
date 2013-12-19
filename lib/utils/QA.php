@@ -253,6 +253,8 @@ class QA {
      */
     protected $warningList = array();
 
+    protected static $crPlaceHold = '##$_0D$##';
+
     /**
      * Add an error to error List.
      * Internal CodeMap
@@ -434,8 +436,8 @@ class QA {
         * i break CRLF and CR
          * @see getTrgNormalized
         */
-        $source_seg = str_replace( "\r", '##$0D$##', $source_seg ); //x0D character
-        $target_seg = str_replace( "\r", '##$0D$##', $target_seg ); //x0D character
+        $source_seg = str_replace( "\r", self::$crPlaceHold, $source_seg ); //x0D character
+        $target_seg = str_replace( "\r", self::$crPlaceHold, $target_seg ); //x0D character
 
 //        Log::doLog($_POST);
 //        Log::doLog($source_seg);
@@ -1250,7 +1252,7 @@ class QA {
             * this because DomDocument normalize line endings to Line Feed 0x0A
             * @see __construct
             */
-            $matches[1] = str_replace( '##$0D$##',"\r", $matches[1] );
+            $matches[1] = str_replace( self::$crPlaceHold, "\r", $matches[1] );
 
             /*
              * BUG on windows Paths: C:\\Users\\user\\Downloads\\File per field test\\1\\gui_plancompression.html

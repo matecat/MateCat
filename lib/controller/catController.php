@@ -279,6 +279,10 @@ class catController extends viewcontroller {
 
         ( INIT::$VOLUME_ANALYSIS_ENABLED        ? $this->template->analysis_enabled = true : null );
 
+        foreach( CatUtils::$placeHoldersStruct as $_className => $_placeHolder ){
+            //$this->template
+        }
+
     }
 
 }

@@ -12,6 +12,12 @@ define("NBSPPLACEHOLDER", "<x id=\"nbsp\"/>");
 
 class CatUtils {
 
+    public static $placeHoldersStruct = array(
+        '_0A'   => '##$_0A$##',
+        '_0D'   => '##$_0D$##',
+        '_0D0A' => '##$_0D0A$##',
+    );
+
     //following functions are useful for manage the consistency of non braking spaces
     // chars coming, expecially,from MS Word
     // ref nbsp code https://en.wikipedia.org/wiki/Non-breaking_space
@@ -171,9 +177,9 @@ class CatUtils {
     public static function view2rawxliff($segment) {
 
         //Replace br placeholders
-        $segment = str_replace( '##$0D0A$##',"\r\n", $segment );
-        $segment = str_replace( '##$0A$##',"\n", $segment );
-        $segment = str_replace( '##$0D$##',"\r", $segment );
+        $segment = str_replace( '##$_0D0A$##',"\r\n", $segment );
+        $segment = str_replace( '##$_0A$##',"\n", $segment );
+        $segment = str_replace( '##$_0D$##',"\r", $segment );
 
         // input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
         // output : <g> bang &amp; olufsen are > 555 </g> <x/>
@@ -201,9 +207,9 @@ class CatUtils {
 
         $segment = preg_replace('|<(.*?)>|si', "&lt;$1&gt;", $segment);
         $segment = self::restore_xliff_tags_for_wiew($segment);
-        $segment = str_replace("\r\n", '##$0D0A$##', $segment );
-        $segment = str_replace("\n", '##$0A$##', $segment );
-        $segment = str_replace("\r", '##$0D$##', $segment ); //x0D character
+        $segment = str_replace("\r\n", '##$_0D0A$##', $segment );
+        $segment = str_replace("\n", '##$_0A$##', $segment );
+        $segment = str_replace("\r", '##$_0D$##', $segment ); //x0D character
         return $segment;
     }
 
