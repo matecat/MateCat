@@ -160,6 +160,8 @@ class XliffSAXTranslationReplacer{
 	 */
 	private function tagClose($parser, $name){
 
+        $wasTarget = false;
+
 		//if it is an empty tag, do not add closing tag
 		if(!$this->isEmpty){
 			$tag='';
@@ -186,9 +188,10 @@ class XliffSAXTranslationReplacer{
 				}
 				//signal we are leaving a target
 				$this->inTarget=false;
+                $wasTarget = true;
 			}
 			//flush to pointer
-			$this->postProcAndflush($this->ofp,$tag);
+			$this->postProcAndflush($this->ofp,$tag, $wasTarget);
 
             /**
              *
@@ -274,16 +277,18 @@ class XliffSAXTranslationReplacer{
 	/*
 	   postprocess escaped data and write to disk
 	 */
-	private function postProcAndFlush($fp,$data){
-		//postprocess string
-		$data = preg_replace("/#escaped_ent#(.*?)##/", '&$1;', $data);
-		$data=str_replace('&nbsp;',' ',$data);
-		$data=str_replace("\r\n","\r",$data);
-		$data=str_replace("\n","\r",$data);
-		$data=str_replace("\r","\r\n",$data);
-		//flush to disk
-		fwrite($fp,$data);	
-	}
+    private function postProcAndFlush( $fp, $data, $wasTarget = false ) {
+        //postprocess string
+        $data = preg_replace( "/#escaped_ent#(.*?)##/", '&$1;', $data );
+        $data = str_replace( '&nbsp;', ' ', $data );
+        if ( !$wasTarget ) {
+            $data = str_replace( "\r\n", "\r", $data );
+            $data = str_replace( "\n", "\r", $data );
+            $data = str_replace( "\r", "\r\n", $data );
+        }
+        //flush to disk
+        fwrite( $fp, $data );
+    }
 
 	/*
 	   prepare segment tagging for xliff insertion

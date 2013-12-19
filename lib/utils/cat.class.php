@@ -171,7 +171,9 @@ class CatUtils {
     public static function view2rawxliff($segment) {
 
         //Replace br placeholders
-        $segment = str_replace( '##$br$##',"\n", $segment );
+        $segment = str_replace( '##$0D0A$##',"\r\n", $segment );
+        $segment = str_replace( '##$0A$##',"\n", $segment );
+        $segment = str_replace( '##$0D$##',"\r", $segment );
 
         // input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
         // output : <g> bang &amp; olufsen are > 555 </g> <x/>
@@ -199,8 +201,9 @@ class CatUtils {
 
         $segment = preg_replace('|<(.*?)>|si', "&lt;$1&gt;", $segment);
         $segment = self::restore_xliff_tags_for_wiew($segment);
-        $segment = str_replace("\r\n", '##$br$##', $segment );
-        $segment = str_replace("\n", '##$br$##', $segment ); //x0D character
+        $segment = str_replace("\r\n", '##$0D0A$##', $segment );
+        $segment = str_replace("\n", '##$0A$##', $segment );
+        $segment = str_replace("\r", '##$0D$##', $segment ); //x0D character
         return $segment;
     }
 

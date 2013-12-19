@@ -2675,9 +2675,10 @@ UI = {
 					.replace(/\&lt;\/div\>/gi, "</div>")
 					.replace(/\&lt;br\>/gi, "<br>")
 
+					.replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />')
+
 					// encapsulate tags of closing
 					.replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>");
-
 
 			if (UI.isFirefox) {
 				tx = tx.replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>");
@@ -3079,7 +3080,7 @@ UI = {
 				}
 				// Attention Bug: We are mixing the view mode and the raw data mode.
 				// before doing a enanched view you will need to add a data-original tag
-                escapedSegment = UI.decodePlaceholders(this.segment);
+                escapedSegment = UI.decodePlaceholdersToText(this.segment);
 				$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + this.translation + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
 			});
 			UI.markSuggestionTags(segment);
@@ -3140,7 +3141,9 @@ UI = {
 				var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
 
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
-                escapedSegment = escapedSegment.replace( config.brPlaceholderRegex, "\n" );
+                escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
+                escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
+                escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
                 /* see also replacement made in source content below */
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
 
@@ -3155,7 +3158,7 @@ UI = {
 						'		</div>' +
 						'		<div class="text">' +
 						'			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
-						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholders(this.segment) + '</div>' +
+						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment) + '</div>' +
 						'				<div class="copy" title="Copy source to target">' +
 						'                   <a href="#"></a>' +
 						'                   <p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p>' +
@@ -3166,7 +3169,7 @@ UI = {
 						'					</span>' +
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
-						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholders(this.translation)) + '</div>' +
+						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation)) + '</div>' +
 						'						<p class="save-warning" title="Segment modified but not saved"></p>' +
 						'					</div> <!-- .textarea-container -->' +
 						'				</div> <!-- .target -->' +
@@ -3672,7 +3675,7 @@ UI = {
 	 */
 	fillCurrentSegmentWarnings: function(warningDetails) {
 		//console.log( 'fillCurrentSegmentWarnings' );
-//        console.log('warningDetails: ',warningDetails );
+        console.log('warningDetails: ',warningDetails );
 		//scan array    
 		try {
 			$.each(warningDetails, function(key, value) {
@@ -3739,11 +3742,11 @@ UI = {
 		//var src_content = $('.source', this.currentSegment).attr('data-original');
 
         if( this.translationPlaceholdersEnabled ){
-            var trg_content = this.getAreaWithRawLineFeed( this.currentSegment ).text();
-            var src_content = this.getSourceWithRawLineFeed( this.currentSegment ).text();
+            var src_content = this.getSourceWithPlaceHoldLineFeed( this.currentSegment );
+            var trg_content = this.getTranslationWithPlaceHoldLineFeed( this.currentSegment );
         } else {
-            var trg_content = $( '.editarea', this.currentSegment ).text();
             var src_content = this.getSegmentSource();
+            var trg_content = this.getSegmentTarget();
         }
 
 		this.checkSegmentsArray[token] = trg_content;
@@ -3765,7 +3768,7 @@ UI = {
 						});
 					}
 
-					// check conditions for results discard 
+					// check conditions for results discard
 					if (!d.total) {
 						$('p.warnings', UI.currentSegment).empty();
 						return;
@@ -3790,10 +3793,13 @@ UI = {
 		var id_segment = info[1];
 		var file = $(segment).parents('article');
 		var status = status;
+
 		// Attention, to be modified when we will lock tags
-		if(this.translationPlaceholdersEnabled) this.addPlaceHolders(segment);
-		var translation = $('.editarea', segment).text();
-		if(this.translationPlaceholdersEnabled) this.removePlaceholders(segment);
+		if( this.translationPlaceholdersEnabled ) {
+            var translation = this.getTextContentWithBrPlaceHolders(segment);
+        } else {
+            var translation = $('.editarea', segment ).text();
+        }
 
 		if (translation == '')
 			return false;
@@ -3836,36 +3842,131 @@ UI = {
 			}
 		});
 	},
-	addPlaceHolders: function(segment) {
-		area = $('.editarea', segment);
-//		$('div', area).each(function() {
-//			$(this).prepend('<span class="placeholder">' + config.brPlaceholder + '</span>');
-//		});
-		$('br', area).each(function() {
-			$(this).after('<span class="placeholder">' + config.brPlaceholder + '</span>');
-		});
-				console.log(area);
-	},
-    getAreaWithRawLineFeed: function(segment) {
-        area = $('.editarea', segment ).clone();
+
+    /**
+     * Append the line delimiters to the br
+     *
+     * @param br
+     * @private
+     */
+    _addRawLineEndings: function( br ){
+
+        try{
+            var classes = $(br).attr('class').split(' ');
+            classes.each( function( index, value ){
+                switch( value ){
+                    case '0A':
+                        $(br).after("\n");
+                        break;
+                    case '0D':
+                        $(br).after("\r");
+                        break;
+                    case '0D0A':
+                        $(br).after("\r\n");
+                        break;
+                }
+            });
+        } catch ( e ){
+            //console.log( "Exception on placeholder replacement.\nAdd a default placeholder" + e );
+            //add a default placeholder
+            $(br).after("\r");
+        }
+
+    },
+    /**
+     * This function is used when a string has to be sent to the server
+     * It works over a clone of the editarea ( translation area ) and manage the text()
+     * @param segment
+     * @returns {*|text|text|XMLList|text|text}
+     */
+    getTranslationWithPlaceHoldLineFeed: function(editarea) {
+        return UI.getTextContentWithBrPlaceHolders( editarea );
+//        area = $('.editarea', segment ).clone();
+//        $('br', area).each( function( index , value ) {
+//            UI._addRawLineEndings(this);
+//        });
+//        return area.text();;
+    },
+    /**
+     * This function is used when a string has to be sent to the server
+     * It works over a clone of the editarea ( source area ) and manage the text()
+     * @param segment
+     * @returns {*|text|text|XMLList|text|text}
+     */
+    getSourceWithPlaceHoldLineFeed: function(segment) {
+        return UI.getTextContentWithBrPlaceHolders( segment, 'source' );
+//        sourceArea = $('.source', segment ).clone();
+//        $('br', sourceArea).each(function( index , value ) {
+//            value = UI._addRawLineEndings(this);
+//        });
+//        return sourceArea.text();;
+    },
+
+    /**
+     * Called when a translation is sent to the server
+     *
+     * This method get the translation edit area TEXT and place the right placeholders
+     * after the br and div
+     *
+     * @param context
+     */
+    getTextContentWithBrPlaceHolders: function( context, isSourceArea ){
+
+        if( typeof isSourceArea == 'undefined' ){
+            area = $( '.editarea', context ).clone();
+        } else {
+            area = $( '.source', context ).clone();
+        }
+
+        $( 'div', area ).each(function(){
+            $(this).prepend('<span class="placeholder">' + config.crPlaceholder + '</span>');
+        });
+
         $('br', area).each(function() {
-            $(this).after("\n");
+
+            try{
+                var br = this;
+                //split ensure array with at least 1 item or throws exception
+                var classes = $(br).attr('class').split(' ');
+                $(classes).each( function( index, value ){
+                    switch( value ){
+                        case '0A':
+                            $(br).after('<span class="placeholder">' + config.lfPlaceholder + '</span>');
+                            break;
+                        case '0D':
+                            $(br).after('<span class="placeholder">' + config.crPlaceholder + '</span>');
+                            break;
+                        case '0D0A':
+                            $(br).after('<span class="placeholder">' + config.crlfPlaceholder + '</span>');
+                            break;
+                    }
+                });
+            } catch ( e ){
+                //console.log( "Exception on placeholder replacement.\nAdd a default placeholder" + e );
+                //add a default placeholder, when a return is pressed by the user chrome add a simple <br>
+                //so
+                $(this).after('<span class="placeholder">' + config.crPlaceholder + '</span>');
+            }
+
         });
-        return area;
+
+        //trim last placeholder if present.
+        return area.text().replace( /\#\#\$(.*?)\$\#\#$/, '' );
+
     },
-    getSourceWithRawLineFeed: function(segment) {
-        sourceArea = $('.source', segment ).clone();
-        $('br', sourceArea).each(function() {
-            $(this).after("\n");
-        });
-        return sourceArea;
+
+    /**
+     * Called when a Segment string returned by server has to be visualized, it replace placeholders with br tags
+     * @param str
+     * @returns {XML|string}
+     */
+    decodePlaceholdersToText: function ( str ) {
+        var _str = str.replace( config.lfPlaceholderRegex, '<br class="0A" />' )
+                ;
+        _str = _str.replace( config.crPlaceholderRegex, '<br class="0D" />' );
+        return _str.replace( config.crlfPlaceholderRegex, '<br class="0D0A" />' );
     },
-	removePlaceholders: function(segment) {
-		$('.editarea span.placeholder', segment).remove();
-	},
-	decodePlaceholders: function(str) {
-		return str.replace(config.brPlaceholderRegex, '<br>');
-	},
+
 	processErrors: function(err, operation) {
 		$.each(err, function() {
 			if (operation == 'setTranslation') {

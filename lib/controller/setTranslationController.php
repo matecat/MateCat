@@ -40,7 +40,7 @@ class setTranslationController extends ajaxcontroller {
 //
 //        $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 //
-//        Log::doLog( $_POST );
+        Log::doLog( $_POST );
 //        Log::doLog( $this->__postInput );
 
 	}

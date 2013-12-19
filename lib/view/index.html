@@ -32,8 +32,12 @@
 					warningPollingInterval:'${warningPollingInterval}',
 					segmentQACheckInterval: '${segmentQACheckInterval}',
 					firstSegmentOfFiles: ${structure php: firstSegmentOfFiles},
-					brPlaceholder: '##$br$##',
-					brPlaceholderRegex: /\#\#\$br\$\#\#/g
+					lfPlaceholder: '##$0A$##',
+					crPlaceholder: '##$0D$##',
+					crlfPlaceholder: '##$0D0A$##',
+					lfPlaceholderRegex: /\#\#\$0A\$\#\#/g,
+					crPlaceholderRegex: /\#\#\$0D\$\#\#/g,
+					crlfPlaceholderRegex: /\#\#\$0D0A\$\#\#/g
 			};
 					var renderStart = new Date();
 					/*]]>*/
