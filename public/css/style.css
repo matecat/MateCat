@@ -710,6 +710,10 @@ body.noGlossary .tab-switcher-gl
     width: 100%;
     background-size: 20px 20px;
 }          
+.sub-editor .cc-search.loading
+{
+    background-position-x: 49.8%;
+}    
 .sub-editor.glossary .gl-search.setting .set-glossary
 {
     background: url(../img/loading.gif);
@@ -726,7 +730,7 @@ background-size: 20px;
 {
     float: left;
     width: 45.8%;
-    margin: 20px 1.5% 4px 1.5%;
+    margin: 20px 1.5% 20px 1.5%;
     border: 1px solid #aaa;
     padding: 2px 0.4%;
     border-radius: 2px;
@@ -738,6 +742,11 @@ background-size: 20px;
 .sub-editor .gl-search .search-target
 {
 	width: 43%;
+	margin-bottom: 4px;
+}
+.sub-editor .gl-search .gl-comment
+{
+	margin-bottom: 4px;
 }
 .sub-editor .gl-search .gl-comment
 {
