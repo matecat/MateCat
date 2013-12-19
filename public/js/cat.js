@@ -111,7 +111,7 @@ UI = {
 		this.savedSelActiveElement = null;
 		this.firstOpenedSegment = false;
 		this.autoscrollCorrectionEnabled = true;
-		this.translationPlaceholdersEnabled = true;
+		this.translationPlaceholdersEnabled = false;
 //		this.brPlaceholderRegex = new RegExp(config.brPlaceholder, "g");
 //		console.log(this.brPlaceholderRegex);
 		this.searchEnabled = true;
