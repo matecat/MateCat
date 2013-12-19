@@ -788,14 +788,15 @@ UI = {
 		}).on('blur', '.sub-editor.glossary .details .comment', function(e) {
 			e.preventDefault();
 			$(this).attr('contenteditable', false);
+			item = $(this).parents('.graysmall');
 			APP.doRequest({
 				data: {
 					action: 'glossary',
-					exec: 'updatecomment',
-					segment: '',
-					translation: '',
+					exec: 'update',
+					segment: item.find('.suggestion_source').text(),
+					translation: item.find('.translation').text(),
 					comment: $(this).text(),
-					id_item: $(this).parents('.graysmall').attr('data-id'),
+					id_item: item.attr('data-id'),
 					id_job: config.job_id,
 					password: config.password
 				},
@@ -905,7 +906,7 @@ UI = {
 			}
 		}).on('click', '.sub-editor .gl-search .comment a', function(e) {
 			e.preventDefault();
-			$(this).parents('.comment').find('.gl-comment').show();
+			$(this).parents('.comment').find('.gl-comment').toggle();
 		}).on('paste', '.editarea', function(e) {
 			UI.saveInUndoStack('paste');
 			$('#placeHolder').remove();
