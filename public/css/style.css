@@ -305,7 +305,7 @@ section.currSearchSegment .sid
 	top:43px !Important;}
 
 
-.comment{position:absolute;right:0;}
+/*.comment{position:absolute;right:0;}*/
 /*
 .editor .status-container{display:none;}
 */
@@ -721,11 +721,12 @@ background-size: 20px;
 .sub-editor .cc-search .search-target,
 .sub-editor .cc-search .search-source,
 .sub-editor .gl-search .search-source,
-.sub-editor .gl-search .search-target
+.sub-editor .gl-search .search-target,
+.sub-editor .gl-search .gl-comment
 {
     float: left;
     width: 45.8%;
-    margin: 20px 1.5%;
+    margin: 20px 1.5% 4px 1.5%;
     border: 1px solid #aaa;
     padding: 2px 0.4%;
     border-radius: 2px;
@@ -737,7 +738,15 @@ background-size: 20px;
 .sub-editor .gl-search .search-target
 {
 	width: 43%;
-}     
+}
+.sub-editor .gl-search .gl-comment
+{
+	display: none;
+	float: right;
+	width: 83%;
+	margin-right: 98px;
+	margin-top: 6px !important;
+}       
 .sub-editor .gl-search .set-glossary
 {
 	float: left;
@@ -764,7 +773,25 @@ background-size: 20px;
 	border: none !important;
 	opacity: 0.5 !important;
 }  
-
+.sub-editor .gl-search .comment
+{
+	float: left;
+	text-align: left;
+	width: 100%;
+	margin-bottom: 8px;
+}
+.sub-editor .gl-search .comment a
+{
+	margin-left: 19px;
+	margin-top: 4px;
+	text-decoration: none;
+	color: #666;
+	font-size: 80%;
+}
+.sub-editor .gl-search .comment a:hover
+{
+	color: #000;
+}
 .content { float: left; clear: both; border: 1px solid #ccf; border-top: none; border-left: none; background: #eef; padding: 10px 20px 20px; width: 400px; }
 
 .preview{font-family:Cambria, Arial, Helvetica, sans-serif !important; height:300px}
@@ -1374,6 +1401,29 @@ textarea, input, .editarea, .search-editarea, select  {
 /*tab rows */
 /*.overflow{overflow-y:auto;min-height:8px;margin-bottom:-1px;position:relative;z-index:9999999999999999999999999999999;}*/
 .graysmall li{width:45%;float:left;margin:2px 1px 10px 0;padding:12px 20px 12px 30px;text-align:left;color:#666;list-style:none;font-size:13px;line-height:16px;cursor:text;-webkit-transition: all  100ms ease-in;transition: all  100ms ease-in;}
+.graysmall li.details
+{
+	width: 100%;
+	padding: 0;
+	margin: 0;
+}
+.graysmall div.comment
+{
+	float: left;
+	margin-left: 30px;
+	width: 60%;
+	padding: 3px 0;
+	border-top: 1px dotted #ccc;
+	font-style: italic;
+}
+.graysmall div.comment[contenteditable=true]
+{
+	background: #fff;;
+	border: 1px solid #999;
+	padding: 3px 6px;
+	margin-left: 23px;
+	margin-bottom: 6px;
+}
 .graysmall .b{padding-left:25px!important;position:relative}
 .message li{background: url(../img/bad.png) 22px center no-repeat;padding-left:40px !Important;background-size:12px 12px}
 .graysmall:hover .trash{height:20px;}
@@ -1390,7 +1440,14 @@ textarea, input, .editarea, .search-editarea, select  {
 
 .graysmall:hover .graysmall-message{display:block;}
 .graysmall-details{display:none;position:absolute;bottom:0px;color:#666;width:100%;float:left;margin:0;padding:0;	}
-.graysmall .graysmall-details{display:block;	}
+.graysmall .graysmall-details
+{
+	display: block;
+	width: 30%;
+	position: relative;
+	float: right;
+	margin-top: -15px;
+}
 .graysmall{color:#333;background:#fbfbfb;}
 .graysmall-details li{float:right;width:auto !important;font-size:11px;margin:0 0px;padding:2px 5px 0px 5px;border-bottom:none;}
 .graysmall:hover{background:#e9e8e9;cursor:default;}
