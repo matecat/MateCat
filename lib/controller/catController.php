@@ -279,8 +279,23 @@ class catController extends viewcontroller {
 
         ( INIT::$VOLUME_ANALYSIS_ENABLED        ? $this->template->analysis_enabled = true : null );
 
-        foreach( CatUtils::$placeHoldersStruct as $_className => $_placeHolder ){
-            //$this->template
+        /*
+         * Line Feed PlaceHolding System
+         */
+        $this->template->brPlaceholdEnabled = $placeHoldingEnabled = true;
+
+        if( $placeHoldingEnabled ){
+
+            $this->template->lfPlaceholder        = CatUtils::lfPlaceholder;
+            $this->template->crPlaceholder        = CatUtils::crPlaceholder;
+            $this->template->crlfPlaceholder      = CatUtils::crlfPlaceholder;
+            $this->template->lfPlaceholderClass   = CatUtils::lfPlaceholderClass;
+            $this->template->crPlaceholderClass   = CatUtils::crPlaceholderClass;
+            $this->template->crlfPlaceholderClass = CatUtils::crlfPlaceholderClass;
+            $this->template->lfPlaceholderRegex   = CatUtils::lfPlaceholderRegex;
+            $this->template->crPlaceholderRegex   = CatUtils::crPlaceholderRegex;
+            $this->template->crlfPlaceholderRegex = CatUtils::crlfPlaceholderRegex;
+
         }
 
     }

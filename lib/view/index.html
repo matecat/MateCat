@@ -12,36 +12,44 @@
         <script type="text/javascript">
 			/*<![CDATA[*/
 			var config = {
-			basepath: '${basepath | string:/}',
-					id_translator: '${tid | nothing}',
-					private_translator: '${private_translator | string:0}',
-					id_customer: '${id_customer | string:unknown_customer}',
-					private_customer: '${private_customer | string:0}',
-					last_opened_segment: '${last_opened_segment}',
-					first_job_segment: '${first_job_segment}',
-					server_load_time: '${load_time}',
-					job_id: '${jid}',
-					password: '${password}',
-					source_rfc: '${source_code}',
-					target_rfc: '${target_code}',
-					source_lang: '${source}',
-					target_lang: '${target}',
-					time_to_edit_enabled: ${time_to_edit_enabled},
-					build_number: '${build_number}',
-					test: 'test',
-					warningPollingInterval:'${warningPollingInterval}',
-					segmentQACheckInterval: '${segmentQACheckInterval}',
-					firstSegmentOfFiles: ${structure php: firstSegmentOfFiles},
-					lfPlaceholder: '##$_0A$##',
-					crPlaceholder: '##$_0D$##',
-					crlfPlaceholder: '##$_0D0A$##',
-					lfPlaceholderRegex: /\#\#\$_0A\$\#\#/g,
-					crPlaceholderRegex: /\#\#\$_0D\$\#\#/g,
-					crlfPlaceholderRegex: /\#\#\$_0D0A\$\#\#/g
+                            basepath: '${basepath | string:/}',
+                            id_translator: '${tid | nothing}',
+                            private_translator: '${private_translator | string:0}',
+                            id_customer: '${id_customer | string:unknown_customer}',
+                            private_customer: '${private_customer | string:0}',
+                            last_opened_segment: '${last_opened_segment}',
+                            first_job_segment: '${first_job_segment}',
+                            server_load_time: '${load_time}',
+                            job_id: '${jid}',
+                            password: '${password}',
+                            source_rfc: '${source_code}',
+                            target_rfc: '${target_code}',
+                            source_lang: '${source}',
+                            target_lang: '${target}',
+                            time_to_edit_enabled: ${time_to_edit_enabled},
+                            build_number: '${build_number}',
+                            warningPollingInterval: '${warningPollingInterval}',
+                            segmentQACheckInterval: '${segmentQACheckInterval}',
+                            firstSegmentOfFiles: ${structure php: firstSegmentOfFiles},
+                            brPlaceholdEnabled: '${brPlaceholdEnabled}'
 			};
-					var renderStart = new Date();
-					/*]]>*/
+			var renderStart = new Date();
+			/*]]>*/
         </script>
+        <script tal:condition="true:brPlaceholdEnabled" type="text/javascript">
+            /*<![CDATA[*/
+            config.lfPlaceholder = '${lfPlaceholder | null}';
+            config.crPlaceholder = '${crPlaceholder | null}';
+            config.crlfPlaceholder = '${crlfPlaceholder | null}';
+            config.lfPlaceholderClass = '${lfPlaceholderClass | null}';
+            config.crPlaceholderClass = '${crPlaceholderClass | null}';
+            config.crlfPlaceholderClass = '${crlfPlaceholderClass | null}';
+            config.lfPlaceholderRegex = ${lfPlaceholderRegex | null};
+            config.crPlaceholderRegex = ${crPlaceholderRegex | null};
+            config.crlfPlaceholderRegex = ${crlfPlaceholderRegex | null};
+            /*]]>*/
+        </script>
+
         <script src="${basepath}public/js/loader.js?build=${build_number}"></script>
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
     </head>

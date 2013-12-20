@@ -111,7 +111,6 @@ UI = {
 		this.savedSelActiveElement = null;
 		this.firstOpenedSegment = false;
 		this.autoscrollCorrectionEnabled = true;
-		this.translationPlaceholdersEnabled = true;
 //		this.brPlaceholderRegex = new RegExp(config.brPlaceholder, "g");
 //		console.log(this.brPlaceholderRegex);
 		this.searchEnabled = true;
@@ -879,11 +878,15 @@ UI = {
 		}).on('keyup', '.editor .editarea', function(e) {
             if ( e.which == 13 ){
                 //replace all divs with a br and remove all br without a class
-                $( this ).find('div').each(function(){
-                    $(this).prepend( $('<br class="_0D" />') ).replaceWith( $(this).html() );
-                });
-                var cl = $(this).html().replace( /<br>/, '' );
-                $(this).html( cl );
+                var divs = $( this ).find( 'div' );
+                if( divs.length ){
+                    divs.each(function(){
+                       $(this).find( 'br:not([class])' ).remove();
+                       $(this).prepend( $('<br class="' + config.crPlaceholderClass + '" />' ) ).replaceWith( $(this).html() );
+                    });
+                } else {
+                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
+                }
             }
         });
 
@@ -2279,8 +2282,8 @@ UI = {
 		var id = n.attr('id');
 		var id_segment = id.split('-')[1];
 
-        if( UI.translationPlaceholdersEnabled ) {
-            var txt = this.getSourceWithPlaceHoldLineFeed(n);
+        if( config.brPlaceholdEnabled ) {
+            var txt = this.getSourceWithBrPlaceHolders(n);
         } else {
             var txt = $('.source', n).text();
         }
@@ -3318,9 +3321,9 @@ UI = {
 		if ((status == 'draft') || (status == 'rejected'))
 			return false;
 
-        if( UI.translationPlaceholdersEnabled ) {
-            var source = this.getSourceWithPlaceHoldLineFeed( segment );
-            var target = this.getTranslationWithPlaceHoldLineFeed( segment );
+        if( config.brPlaceholdEnabled ) {
+            var source = this.getSourceWithBrPlaceHolders( segment );
+            var target = this.getTranslationWithBrPlaceHolders( segment );
         } else {
             var source = $('.source', segment).text();
             // Attention: to be modified when we will be able to lock tags.
@@ -3765,9 +3768,9 @@ UI = {
 
 		//var src_content = $('.source', this.currentSegment).attr('data-original');
 
-        if( this.translationPlaceholdersEnabled ){
-            var src_content = this.getSourceWithPlaceHoldLineFeed( this.currentSegment );
-            var trg_content = this.getTranslationWithPlaceHoldLineFeed( this.currentSegment );
+        if( config.brPlaceholdEnabled ){
+            var src_content = this.getSourceWithBrPlaceHolders( this.currentSegment );
+            var trg_content = this.getTranslationWithBrPlaceHolders( this.currentSegment );
         } else {
             var src_content = this.getSegmentSource();
             var trg_content = this.getSegmentTarget();
@@ -3819,8 +3822,8 @@ UI = {
 		var status = status;
 
 		// Attention, to be modified when we will lock tags
-		if( this.translationPlaceholdersEnabled ) {
-            var translation = this.getTextContentWithBrPlaceHolders(segment);
+		if( config.brPlaceholdEnabled ) {
+            var translation = this.getTranslationWithBrPlaceHolders(segment);
         } else {
             var translation = $('.editarea', segment ).text();
         }
@@ -3870,18 +3873,18 @@ UI = {
      * This function is used when a string has to be sent to the server
      * It works over a clone of the editarea ( translation area ) and manage the text()
      * @param segment
-     * @returns {*|text|text|XMLList|text|text}
+     * @returns {XML|string}
      */
-    getTranslationWithPlaceHoldLineFeed: function(segment) {
+    getTranslationWithBrPlaceHolders: function(segment) {
         return UI.getTextContentWithBrPlaceHolders( segment );
     },
     /**
      * This function is used when a string has to be sent to the server
      * It works over a clone of the editarea ( source area ) and manage the text()
      * @param segment
-     * @returns {*|text|text|XMLList|text|text}
+     * @returns {XML|string}
      */
-    getSourceWithPlaceHoldLineFeed: function(segment) {
+    getSourceWithBrPlaceHolders: function(segment) {
         return UI.getTextContentWithBrPlaceHolders( segment, 'source' );
     },
 
@@ -3892,6 +3895,8 @@ UI = {
      * after br tags
      *
      * @param context
+     * @param isSourceArea
+     * @returns {XML|string}
      */
     getTextContentWithBrPlaceHolders: function( context, isSourceArea ){
 
@@ -3909,19 +3914,19 @@ UI = {
                 var classes = $(br).attr('class').split(' ');
                 $(classes).each( function( index, value ){
                     switch( value ){
-                        case '_0A':
+                        case config.lfPlaceholderClass:
                             $(br).after('<span class="placeholder">' + config.lfPlaceholder + '</span>');
                             break;
-                        case '_0D':
+                        case config.crPlaceholderClass:
                             $(br).after('<span class="placeholder">' + config.crPlaceholder + '</span>');
                             break;
-                        case '_0D0A':
+                        case config.crlfPlaceholderClass:
                             $(br).after('<span class="placeholder">' + config.crlfPlaceholder + '</span>');
                             break;
                     }
                 });
             } catch ( e ){
-                console.log( "Exception on placeholder replacement.\nAdd a default placeholder" + e.message );
+                console.log( "Exception on placeholder replacement.\nAdded a default placeholder " + e.message );
                 //add a default placeholder, when a return is pressed by the user chrome add a simple <br>
                 //so
                 $(this).after('<span class="placeholder">' + config.crPlaceholder + '</span>');
@@ -3940,9 +3945,9 @@ UI = {
      * @returns {XML|string}
      */
     decodePlaceholdersToText: function ( str ) {
-        var _str = str.replace( config.lfPlaceholderRegex, '<br class="_0A" />' )
-                      .replace( config.crPlaceholderRegex, '<br class="_0D" />' )
-                      .replace( config.crlfPlaceholderRegex, '<br class="_0D0A" />' );
+        var _str = str.replace( config.lfPlaceholderRegex, '<br class="' + config.lfPlaceholderClass +'" />' )
+                      .replace( config.crPlaceholderRegex, '<br class="' + config.crPlaceholderClass +'" />' )
+                      .replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' );
         return _str;
     },
 

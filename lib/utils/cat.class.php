@@ -12,11 +12,15 @@ define("NBSPPLACEHOLDER", "<x id=\"nbsp\"/>");
 
 class CatUtils {
 
-    public static $placeHoldersStruct = array(
-        '_0A'   => '##$_0A$##',
-        '_0D'   => '##$_0D$##',
-        '_0D0A' => '##$_0D0A$##',
-    );
+    const lfPlaceholderClass   = '_0A';
+    const crPlaceholderClass   = '_0D';
+    const crlfPlaceholderClass = '_0D0A';
+    const lfPlaceholder        = '##$_0A$##';
+    const crPlaceholder        = '##$_0D$##';
+    const crlfPlaceholder      = '##$_0D0A$##';
+    const lfPlaceholderRegex   = '/\#\#\$_0A\$\#\#/g';
+    const crPlaceholderRegex   = '/\#\#\$_0D\$\#\#/g';
+    const crlfPlaceholderRegex = '/\#\#\$_0D0A\$\#\#/g';
 
     //following functions are useful for manage the consistency of non braking spaces
     // chars coming, expecially,from MS Word
