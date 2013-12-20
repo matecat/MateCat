@@ -3496,11 +3496,17 @@ UI = {
 		$('.sub-editor .overflow a.trash', segment).click(function(e) {
 			e.preventDefault();
 			var ul = $(this).parents('.graysmall');
-//console.log('a');
-			source = $('.suggestion_source', ul).text();
-			source = view2rawxliff(source);
-			target = $('.translation', ul).text();
-			target = view2rawxliff(target);
+
+            if( config.brPlaceholdEnabled ){
+                source = UI.getTextContentWithBrPlaceHolders( ul, '.suggestion_source' );
+                target = UI.getTextContentWithBrPlaceHolders( ul, '.translation' );
+            } else {
+                source = $('.suggestion_source', ul).text();
+                target = $('.translation', ul).text();
+            }
+
+            target = view2rawxliff(target);
+            source = view2rawxliff(source);
 			ul.remove();
 
 			APP.doRequest({
@@ -3885,7 +3891,7 @@ UI = {
      * @returns {XML|string}
      */
     getSourceWithBrPlaceHolders: function(segment) {
-        return UI.getTextContentWithBrPlaceHolders( segment, 'source' );
+        return UI.getTextContentWithBrPlaceHolders( segment, '.source' );
     },
 
     /**
@@ -3895,16 +3901,14 @@ UI = {
      * after br tags
      *
      * @param context
-     * @param isSourceArea
+     * @param selector
      * @returns {XML|string}
      */
-    getTextContentWithBrPlaceHolders: function( context, isSourceArea ){
+    getTextContentWithBrPlaceHolders: function( context, selector ){
 
-        if( typeof isSourceArea == 'undefined' ){
-            area = $( '.editarea', context ).clone();
-        } else {
-            area = $( '.source', context ).clone();
-        }
+        selector = (typeof selector === "undefined") ? '.editarea' : selector;
+
+        area = $( selector, context ).clone();
 
         $('br', area).each(function() {
 

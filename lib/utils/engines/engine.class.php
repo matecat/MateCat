@@ -85,7 +85,7 @@ abstract class Engine {
 
 		$this->buildQuery($function, $parameters);
         $uniquid = uniqid('',true);
-        Log::doLog( $uniquid . " ... " . $this->url);
+//        Log::doLog( $uniquid . " ... " . $this->url);
 		$res=$this->curl($this->url);
 		$this->raw_result = json_decode($res,true);
 //        Log::doLog( $uniquid . " ... Received... " . $res );
