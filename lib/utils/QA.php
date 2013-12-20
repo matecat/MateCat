@@ -253,6 +253,8 @@ class QA {
      */
     protected $warningList = array();
 
+    protected static $crPlaceHold = '##$_0D$##';
+
     /**
      * Add an error to error List.
      * Internal CodeMap
@@ -428,10 +430,16 @@ class QA {
         $source_seg = mb_convert_encoding( $source_seg, 'UTF-8', $src_enc );
         $target_seg = mb_convert_encoding( $target_seg, 'UTF-8', $trg_enc );
 
-        $source_seg = preg_replace( '#\n#u', chr( 0xc2 ) . chr( 0xa0 ), $source_seg );
+        /**
+        * Why i do this?? I'm replacing carriage returns with a placeholder.
+        * this because DomDocument normalize line endings to Line Feed 0x0A
+        * i break CRLF and CR
+         * @see getTrgNormalized
+        */
+        $source_seg = str_replace( "\r", self::$crPlaceHold, $source_seg ); //x0D character
+        $target_seg = str_replace( "\r", self::$crPlaceHold, $target_seg ); //x0D character
 
-
-        //Log::doLog($_GET);
+//        Log::doLog($_POST);
 //        Log::doLog($source_seg);
 //        Log::doLog($target_seg);
 //        Log::hexDump($source_seg);
@@ -1238,6 +1246,13 @@ class QA {
             //IMPORTANT NOTE :
             //SEE http://www.php.net/manual/en/domdocument.savexml.php#88525
             preg_match('/<root>(.*)<\/root>/us', $this->normalizedTrgDOM->saveXML($this->normalizedTrgDOM->documentElement), $matches );
+
+            /**
+            * Why i do this?? I'm replacing Placeholders of carriage returns.
+            * this because DomDocument normalize line endings to Line Feed 0x0A
+            * @see __construct
+            */
+            $matches[1] = str_replace( self::$crPlaceHold, "\r", $matches[1] );
 
             /*
              * BUG on windows Paths: C:\\Users\\user\\Downloads\\File per field test\\1\\gui_plancompression.html

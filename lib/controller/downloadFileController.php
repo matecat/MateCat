@@ -78,7 +78,8 @@ class downloadFileController extends downloadController {
             $data = getSegmentsDownload($this->id_job, $this->password, $id_file, $nonew);
 
             //get job language and data
-            $jobData = getJobData($this->id_job);
+            //Fixed Bug: need a specific job, because we need The target Language
+            $jobData = getJobData( $this->id_job, $this->password );
 
             $debug['get_segments'][]=time();
             //create a secondary indexing mechanism on segments' array; this will be useful

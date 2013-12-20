@@ -100,7 +100,7 @@ class setContributionMTController extends ajaxcontroller {
                     )
         );
         //send stuff
-        $outcome = $this->mt->set( $this->segment, $this->translation, $this->source_lang, $this->target_lang, 'demo@matecat.com', $extra, $this->id_segment );
+        $outcome = $this->mt->set( CatUtils::view2rawxliff( $this->segment ), CatUtils::view2rawxliff( $this->translation ), $this->source_lang, $this->target_lang, 'demo@matecat.com', $extra, $this->id_segment );
 
         if ( $outcome->error->code < 0 ) {
             $this->result[ 'errors' ] = $outcome->error->get_as_array();

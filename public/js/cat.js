@@ -112,9 +112,6 @@ UI = {
 		this.savedSelActiveElement = null;
 		this.firstOpenedSegment = false;
 		this.autoscrollCorrectionEnabled = true;
-		this.translationPlaceholdersEnabled = true;
-//		this.brPlaceholderRegex = new RegExp(config.brPlaceholder, "g");
-//		console.log(this.brPlaceholderRegex);
 		this.searchEnabled = true;
 		if (this.searchEnabled)
 			$('#filterSwitch').show();
@@ -717,13 +714,15 @@ UI = {
 			UI.unlockTags();
 //			console.log('eccomi'); return false;
 			UI.setStatusButtons(this);
+
+            if (!skipChange)
+                UI.changeStatus(this, 'translated', 0);
+
 			if (w == 'translated') {
 				UI.gotoNextSegment();
 			} else {
 				$(".editarea", UI.nextUntranslatedSegment).trigger("click", "translated");
 			}
-			if (!skipChange)
-				UI.changeStatus(this, 'translated', 0);
 
 			UI.markTags();
 			UI.lockTags(UI.editarea);
@@ -931,7 +930,21 @@ UI = {
 			e.preventDefault();
 			var save = (typeof param == 'undefined') ? 'noSave' : param;
 			UI.closeSegment(UI.currentSegment, 1, save);
-		});
+		}).on('keyup', '.editor .editarea', function(e) {
+            if ( e.which == 13 ){
+                //replace all divs with a br and remove all br without a class
+                var divs = $( this ).find( 'div' );
+                if( divs.length ){
+                    divs.each(function(){
+                       $(this).find( 'br:not([class])' ).remove();
+                       $(this).prepend( $('<br class="' + config.crPlaceholderClass + '" />' ) ).replaceWith( $(this).html() );
+                    });
+                } else {
+                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
+                }
+            }
+        });
+
 		/*
 		 $('#hideAlertConfirmTranslation').bind('change', function(e) {
 		 if ($('#hideAlertConfirmTranslation').attr('checked')) {
@@ -2200,19 +2213,19 @@ UI = {
 		}
 
 
-		/*
-		 if ((typeof p['source'] == 'undefined') && (typeof p['target'] == 'undefined')) {
-		 var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
-		 if (p['status'] == 'all') {
-		 this.scrollSegment($('#' + el).next());
-		 } else {
-		 this.scrollSegment($('#' + el).nextUntil('section' + status).last().next());
-		 }
-		 } else {
-		 
-		 
-		 }
-		 */
+/*
+		if ((typeof p['source'] == 'undefined') && (typeof p['target'] == 'undefined')) {
+			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
+			if (p['status'] == 'all') {
+				this.scrollSegment($('#' + el).next());
+			} else {
+				this.scrollSegment($('#' + el).nextUntil('section' + status).last().next());
+			}
+		} else {
+
+
+		}
+*/
 	},
 	preOpenConcordance: function() {
 		var selection = window.getSelection();
@@ -2440,7 +2453,12 @@ UI = {
 		var id = n.attr('id');
 		var id_segment = id.split('-')[1];
 
-		var txt = $('.source', n).text();
+        if( config.brPlaceholdEnabled ) {
+            var txt = this.getSourceWithBrPlaceHolders(n);
+        } else {
+            var txt = $('.source', n).text();
+        }
+
 		txt = view2rawxliff(txt);
 		// Attention: As for copysource, what is the correct file format in attributes? I am assuming html encoded and "=>&quot;
 		//txt = txt.replace(/&quot;/g,'"');
@@ -2849,9 +2867,10 @@ UI = {
 					.replace(/\&lt;\/div\>/gi, "</div>")
 					.replace(/\&lt;br\>/gi, "<br>")
 
+					.replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />')
+
 					// encapsulate tags of closing
 					.replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>");
-
 
 			if (UI.isFirefox) {
 				tx = tx.replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>");
@@ -3274,7 +3293,8 @@ UI = {
 				}
 				// Attention Bug: We are mixing the view mode and the raw data mode.
 				// before doing a enanched view you will need to add a data-original tag
-				$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + this.segment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + this.translation + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+                escapedSegment = UI.decodePlaceholdersToText(this.segment);
+				$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + UI.decodePlaceholdersToText( this.translation ) + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
 			});
 			UI.markSuggestionTags(segment);
 			UI.setDeleteSuggestion(segment);
@@ -3332,7 +3352,15 @@ UI = {
 //                this.readonly = true;
 				var readonly = (this.readonly == 'true') ? true : false;
 				var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
-				newFile += '<section id="segment-' + this.sid + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true') ? ' has-reference' : '') + '">' +
+
+                /* this is to show line feed in source too, because server side we replace \n with placeholders */
+                escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
+                escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
+                escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
+                /* see also replacement made in source content below */
+                /* this is to show line feed in source too, because server side we replace \n with placeholders */
+
+				newFile += '<section id="segment-' + this.sid + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
 						'	<span class="sid">' + this.sid + '</span>' +
 						'	<div class="body">' +
@@ -3342,8 +3370,8 @@ UI = {
 //						'			<a href="#" id="segment-' + this.sid + '-context" class="context" title="Open context" target="_blank">Context</a>' +
 						'		</div>' +
 						'		<div class="text">' +
-						'			<div class="wrap">' +
-						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + this.segment + '</div>' +
+						'			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
+						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment) + '</div>' +
 						'				<div class="copy" title="Copy source to target">' +
 						'                   <a href="#"></a>' +
 						'                   <p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p>' +
@@ -3354,7 +3382,7 @@ UI = {
 						'					</span>' +
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
-						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholders(this.translation)) + '</div>' +
+						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation)) + '</div>' +
 						'						<p class="save-warning" title="Segment modified but not saved"></p>' +
 						'					</div> <!-- .textarea-container -->' +
 						'				</div> <!-- .target -->' +
@@ -3485,9 +3513,16 @@ UI = {
 	setContribution: function(segment, status, byStatus) {
 		if ((status == 'draft') || (status == 'rejected'))
 			return false;
-		var source = $('.source', segment).text();
-		// Attention: to be modified when we will be able to lock tags.
-		var target = $('.editarea', segment).text();
+
+        if( config.brPlaceholdEnabled ) {
+            var source = this.getSourceWithBrPlaceHolders( segment );
+            var target = this.getTranslationWithBrPlaceHolders( segment );
+        } else {
+            var source = $('.source', segment).text();
+            // Attention: to be modified when we will be able to lock tags.
+            var target = $('.editarea', segment).text();
+        }
+
 		if ((target == '') && (byStatus)) {
 			APP.alert('Cannot change status on an empty segment. Add a translation first!');
 		}
@@ -3653,11 +3688,17 @@ UI = {
 		$('.sub-editor .overflow a.trash', segment).click(function(e) {
 			e.preventDefault();
 			var ul = $(this).parents('.graysmall');
-//console.log('a');
-			source = $('.suggestion_source', ul).text();
-			source = view2rawxliff(source);
-			target = $('.translation', ul).text();
-			target = view2rawxliff(target);
+
+            if( config.brPlaceholdEnabled ){
+                source = UI.getTextContentWithBrPlaceHolders( ul, '.suggestion_source' );
+                target = UI.getTextContentWithBrPlaceHolders( ul, '.translation' );
+            } else {
+                source = $('.suggestion_source', ul).text();
+                target = $('.translation', ul).text();
+            }
+
+            target = view2rawxliff(target);
+            source = view2rawxliff(source);
 			ul.remove();
 
 			APP.doRequest({
@@ -3922,9 +3963,17 @@ UI = {
 		var dd = new Date();
 		ts = dd.getTime();
 		var token = this.currentSegmentId + '-' + ts.toString();
-		//var src_content = $('.source', this.currentSegment).attr('data-original');  
-		var src_content = this.getSegmentSource();
-		var trg_content = this.getSegmentTarget();
+
+		//var src_content = $('.source', this.currentSegment).attr('data-original');
+
+        if( config.brPlaceholdEnabled ){
+            var src_content = this.getSourceWithBrPlaceHolders( this.currentSegment );
+            var trg_content = this.getTranslationWithBrPlaceHolders( this.currentSegment );
+        } else {
+            var src_content = this.getSegmentSource();
+            var trg_content = this.getSegmentTarget();
+        }
+
 		this.checkSegmentsArray[token] = trg_content;
 		APP.doRequest({
 			data: {
@@ -3944,7 +3993,7 @@ UI = {
 						});
 					}
 
-					// check conditions for results discard 
+					// check conditions for results discard
 					if (!d.total) {
 						$('p.warnings', UI.currentSegment).empty();
 						return;
@@ -3969,12 +4018,13 @@ UI = {
 		var id_segment = info[1];
 		var file = $(segment).parents('article');
 		var status = status;
+
 		// Attention, to be modified when we will lock tags
-		if (this.translationPlaceholdersEnabled)
-			this.addPlaceHolders(segment);
-		var translation = $('.editarea', segment).text();
-		if (this.translationPlaceholdersEnabled)
-			this.removePlaceholders(segment);
+		if( config.brPlaceholdEnabled ) {
+            var translation = this.getTranslationWithBrPlaceHolders(segment);
+        } else {
+            var translation = $('.editarea', segment ).text();
+        }
 
 		if (translation == '')
 			return false;
@@ -4017,22 +4067,86 @@ UI = {
 			}
 		});
 	},
-	addPlaceHolders: function(segment) {
-		area = $('.editarea', segment);
-		$('div', area).each(function() {
-			$(this).prepend('<span class="placeholder">' + config.brPlaceholder + '</span>');
-		});
-		$('br', area).each(function() {
-			$(this).after('<span class="placeholder">' + config.brPlaceholder + '</span>');
-		});
-		//		console.log(area.html());
-	},
-	removePlaceholders: function(segment) {
-		$('.editarea span.placeholder', segment).remove();
-	},
-	decodePlaceholders: function(str) {
-		return str.replace(config.brPlaceholderRegex, '<br>');
-	},
+    /**
+     * This function is used when a string has to be sent to the server
+     * It works over a clone of the editarea ( translation area ) and manage the text()
+     * @param segment
+     * @returns {XML|string}
+     */
+    getTranslationWithBrPlaceHolders: function(segment) {
+        return UI.getTextContentWithBrPlaceHolders( segment );
+    },
+    /**
+     * This function is used when a string has to be sent to the server
+     * It works over a clone of the editarea ( source area ) and manage the text()
+     * @param segment
+     * @returns {XML|string}
+     */
+    getSourceWithBrPlaceHolders: function(segment) {
+        return UI.getTextContentWithBrPlaceHolders( segment, '.source' );
+    },
+
+    /**
+     * Called when a translation is sent to the server
+     *
+     * This method get the translation edit area TEXT and place the right placeholders
+     * after br tags
+     *
+     * @param context
+     * @param selector
+     * @returns {XML|string}
+     */
+    getTextContentWithBrPlaceHolders: function( context, selector ){
+
+        selector = (typeof selector === "undefined") ? '.editarea' : selector;
+
+        area = $( selector, context ).clone();
+
+        $('br', area).each(function() {
+
+            try{
+                var br = this;
+                //split ensure array with at least 1 item or throws exception
+                var classes = $(br).attr('class').split(' ');
+                $(classes).each( function( index, value ){
+                    switch( value ){
+                        case config.lfPlaceholderClass:
+                            $(br).after('<span class="placeholder">' + config.lfPlaceholder + '</span>');
+                            break;
+                        case config.crPlaceholderClass:
+                            $(br).after('<span class="placeholder">' + config.crPlaceholder + '</span>');
+                            break;
+                        case config.crlfPlaceholderClass:
+                            $(br).after('<span class="placeholder">' + config.crlfPlaceholder + '</span>');
+                            break;
+                    }
+                });
+            } catch ( e ){
+                console.log( "Exception on placeholder replacement.\nAdded a default placeholder " + e.message );
+                //add a default placeholder, when a return is pressed by the user chrome add a simple <br>
+                //so
+                $(this).after('<span class="placeholder">' + config.crPlaceholder + '</span>');
+            }
+
+        });
+
+        //trim last placeholder if present.
+        return area.text().replace( /\#\#\$(.*?)\$\#\#$/, '' );
+
+    },
+
+    /**
+     * Called when a Segment string returned by server has to be visualized, it replace placeholders with br tags
+     * @param str
+     * @returns {XML|string}
+     */
+    decodePlaceholdersToText: function ( str ) {
+        var _str = str.replace( config.lfPlaceholderRegex, '<br class="' + config.lfPlaceholderClass +'" />' )
+                      .replace( config.crPlaceholderRegex, '<br class="' + config.crPlaceholderClass +'" />' )
+                      .replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' );
+        return _str;
+    },
+
 	processErrors: function(err, operation) {
 		$.each(err, function() {
 			if (operation == 'setTranslation') {

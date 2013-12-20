@@ -12,6 +12,16 @@ define("NBSPPLACEHOLDER", "<x id=\"nbsp\"/>");
 
 class CatUtils {
 
+    const lfPlaceholderClass   = '_0A';
+    const crPlaceholderClass   = '_0D';
+    const crlfPlaceholderClass = '_0D0A';
+    const lfPlaceholder        = '##$_0A$##';
+    const crPlaceholder        = '##$_0D$##';
+    const crlfPlaceholder      = '##$_0D0A$##';
+    const lfPlaceholderRegex   = '/\#\#\$_0A\$\#\#/g';
+    const crPlaceholderRegex   = '/\#\#\$_0D\$\#\#/g';
+    const crlfPlaceholderRegex = '/\#\#\$_0D0A\$\#\#/g';
+
     //following functions are useful for manage the consistency of non braking spaces
     // chars coming, expecially,from MS Word
     // ref nbsp code https://en.wikipedia.org/wiki/Non-breaking_space
@@ -90,6 +100,7 @@ class CatUtils {
         $segment = preg_replace('|<(g\s*id=["\']+.*?["\']+\s*[^<>]*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
 
         $segment = preg_replace('|<(/g)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+
         $segment = preg_replace('|<(x.*?/?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
         $segment = preg_replace('#<(bx[ ]{0,}/?|bx .*?/?)>#si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
         $segment = preg_replace('#<(ex[ ]{0,}/?|ex .*?/?)>#si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
@@ -168,9 +179,15 @@ class CatUtils {
     }
 
     public static function view2rawxliff($segment) {
+
+        //Replace br placeholders
+        $segment = str_replace( '##$_0D0A$##',"\r\n", $segment );
+        $segment = str_replace( '##$_0A$##',"\n", $segment );
+        $segment = str_replace( '##$_0D$##',"\r", $segment );
+
         // input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
         // output : <g> bang &amp; olufsen are > 555 </g> <x/>
-        // caso controverso <g id="4" x="&lt; dfsd &gt;"> 
+        // caso controverso <g id="4" x="&lt; dfsd &gt;">
         $segment = self::placehold_xliff_tags($segment);
         $segment = htmlspecialchars(
             html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8'),
@@ -194,7 +211,9 @@ class CatUtils {
 
         $segment = preg_replace('|<(.*?)>|si', "&lt;$1&gt;", $segment);
         $segment = self::restore_xliff_tags_for_wiew($segment);
-        $segment = str_replace("&nbsp;", "++", $segment);
+        $segment = str_replace("\r\n", '##$_0D0A$##', $segment );
+        $segment = str_replace("\n", '##$_0A$##', $segment );
+        $segment = str_replace("\r", '##$_0D$##', $segment ); //x0D character
         return $segment;
     }
 
@@ -341,6 +360,11 @@ class CatUtils {
             $seg['sug_view'] = trim( CatUtils::rawxliff2view($seg['sug']) );
             $seg['source'] = trim( CatUtils::rawxliff2view( $seg['source'] ) );
             $seg['translation'] = trim( CatUtils::rawxliff2view( $seg['translation'] ) );
+
+            //TODO improvement RESET BR Placeholders
+            $seg['source'] = str_replace( '##$br$##', "<br>", $seg['source'] );
+            $seg['translation'] = str_replace( '##$br$##', "<br>", $seg['translation'] );
+            $seg['diff'] = str_replace( "\n", "<br>", $seg['diff'] );
 
             if( $seg['mt_qe'] == 0 ){
                 $seg['mt_qe'] = 'N/A';

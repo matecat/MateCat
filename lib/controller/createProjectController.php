@@ -6,6 +6,7 @@ include INIT::$UTILS_ROOT . "/ProjectManager.php";
 include INIT::$UTILS_ROOT . "/RecursiveArrayObject.php";
 
 define('DEFAULT_NUM_RESULTS', 2);
+set_time_limit(0);
 
 class createProjectController extends ajaxcontroller {
 
