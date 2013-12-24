@@ -1,3 +1,26 @@
+CREATE DATABASE IF NOT EXISTS `matecat_conversions_log` /*!40100 DEFAULT CHARACTER SET utf8 */
+
+DROP TABLE IF EXISTS `failed_conversions_log`;
+
+CREATE TABLE `failed_conversions_log` (
+  `ip_machine` varchar(15) NOT NULL,
+  `ip_client` varchar(15) NOT NULL DEFAULT 'unknown',
+  `path_backup` varchar(512) NOT NULL,
+  `direction` varchar(5) NOT NULL DEFAULT 'fw' COMMENT 'Directions: fw (forward), bw (backward)',
+  `error_message` varchar(255) DEFAULT NULL,
+  `conversion_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `src_lang` varchar(15) DEFAULT NULL,
+  `trg_lang` varchar(15) DEFAULT NULL,
+  `status` varchar(2) NOT NULL DEFAULT 'ok',
+  KEY `ip_machine_idx` (`ip_machine`),
+  KEY `direction_idx` (`direction`),
+  KEY `path_backup_idx` (`path_backup`(333)),
+  KEY `src_lang_idx` (`src_lang`),
+  KEY `trg_lang_idx` (`trg_lang`),
+  KEY `conversion_date_idx` (`conversion_date`),
+  KEY `status_idx` (`status`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Conversion Failure Log'
+
 
 DROP TABLE IF EXISTS `converters`;
 
