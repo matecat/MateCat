@@ -1,5 +1,5 @@
 <?php
-
+ini_set("memory_limit","2048M");
 set_time_limit(0);
 include_once 'main.php';
 include_once INIT::$UTILS_ROOT . "/MyMemoryAnalyzer.copyrighted.php";
@@ -20,11 +20,17 @@ while (1) {
 
 	foreach ($pid_list as $pid_res) {
 		$pid = $pid_res['id'];
+		echo "analyzing $pid, querying data...";
 
 		$segments=getSegmentsForFastVolumeAnalysys($pid);
 
+		echo "done\n";
+		$num=count($segments);
+		echo "pid $pid: $num segments\n";
+		echo "sending query to MyMemory analysis...";
 		$fastReport = $ws->fastAnalysis($segments);
-
+		echo "done\n";
+		echo "collecting stats...";
 		$data=$fastReport['data'];
 		foreach ($data as $k=>$v){
 			if (in_array($v['type'], array("75%-84%","85%-94%","95%-99%"))){
@@ -35,28 +41,31 @@ while (1) {
 				$data[$k]['type']="NO_MATCH";
 			}
 		}
+		echo "done\n";
+		$perform_Tms_Analysis = true;
+		$status = "FAST_OK";
+		if( $pid_res['id_tms'] == 0 && $pid_res['id_mt_engine'] == 0 ){
 
-        $perform_Tms_Analysis = true;
-        $status = "FAST_OK";
-        if( $pid_res['id_tms'] == 0 && $pid_res['id_mt_engine'] == 0 ){
+			/**
+			 * MyMemory disabled and MT Disabled Too
+			 * So don't perform TMS Analysis
+			 */
 
-            /**
-             * MyMemory disabled and MT Disabled Too
-             * So don't perform TMS Analysis
-             */
-
-            $perform_Tms_Analysis = false;
-            $status = "DONE";
-            Log::doLog( 'Perform Analysis ' . var_export( $perform_Tms_Analysis, true ) );
-        }
-
+			$perform_Tms_Analysis = false;
+			$status = "DONE";
+			Log::doLog( 'Perform Analysis ' . var_export( $perform_Tms_Analysis, true ) );
+		}
+		echo "inserting segments...";
 		$insertReportRes = insertFastAnalysis($pid,$data, $equivalentWordMapping, $perform_Tms_Analysis);
 		if ($insertReportRes < 0) {
 			continue;
 		}
+		echo "done\n";
+		echo "changing project status...";
 		$change_res = changeProjectStatus($pid, $status);
 		if ($change_res < 0) {
 		}
+		echo "done\n";
 	}
 }
 ?>
