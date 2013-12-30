@@ -58,6 +58,8 @@ while (1) {
 		echo "inserting segments...";
 		$insertReportRes = insertFastAnalysis($pid,$data, $equivalentWordMapping, $perform_Tms_Analysis);
 		if ($insertReportRes < 0) {
+			Log::doLog( "insertFastAnalysis failed...." );
+			echo( "insertFastAnalysis failed...." );
 			continue;
 		}
 		echo "done\n";

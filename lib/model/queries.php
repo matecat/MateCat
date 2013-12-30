@@ -405,10 +405,9 @@ function getWarning( $jid, $jpassword ) {
 
     $query = "SELECT id_segment, serialized_errors_list
                 FROM segment_translations
-                JOIN jobs ON jobs.id = id_job
+                JOIN jobs ON jobs.id = id_job AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
                 WHERE jobs.id = $jid
                 AND jobs.password = '$jpassword'
-                AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
                 AND warning != 0";
 
     $results = $db->fetch_array( $query );
