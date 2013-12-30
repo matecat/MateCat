@@ -179,7 +179,8 @@ class setTranslationController extends ajaxcontroller {
 		}
 
 		$job_stats = CatUtils::getStatsForJob($this->id_job, null, $this->password);
-		$file_stats = CatUtils::getStatsForFile($this->id_first_file);
+		//$file_stats = CatUtils::getStatsForFile($this->id_first_file);
+		$file_stats = array();
 
 		$is_completed = ($job_stats['TRANSLATED_PERC'] == '100') ? 1 : 0;
 
