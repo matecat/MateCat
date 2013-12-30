@@ -181,7 +181,7 @@ class INIT {
 		self::$BUILD_NUMBER = '0.3.3.6';
 		self::$VOLUME_ANALYSIS_ENABLED = true;
 
-		self::$WARNING_POLLING_INTERVAL = 10; //seconds
+		self::$WARNING_POLLING_INTERVAL = 20; //seconds
 		self::$SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
 
 		self::$SPELL_CHECK_TRANSPORT_TYPE = 'shell';
