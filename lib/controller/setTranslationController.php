@@ -40,7 +40,7 @@ class setTranslationController extends ajaxcontroller {
 //
 //        $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 //
-        Log::doLog( $_POST );
+//        Log::doLog( $_POST );
 //        Log::doLog( $this->__postInput );
 
 	}
@@ -179,8 +179,8 @@ class setTranslationController extends ajaxcontroller {
 		}
 
 		$job_stats = CatUtils::getStatsForJob($this->id_job, null, $this->password);
-                //$file_stats = CatUtils::getStatsForFile($this->id_first_file); //Removed .. HEAVY query, client don't need these infos at moment
-                $file_stats = array();
+		//$file_stats = CatUtils::getStatsForFile($this->id_first_file); //Removed .. HEAVY query, client don't need these infos at moment
+		$file_stats = array();
 
 		$is_completed = ($job_stats['TRANSLATED_PERC'] == '100') ? 1 : 0;
 

@@ -56,6 +56,11 @@ while (1) {
     $jid = $res['id_job'];
     echo "--- (child $my_pid) : segment $sid-$jid found \n";
     $segment = getSegmentForTMVolumeAnalysys($sid, $jid);
+    
+    echo "segment found is: ";
+    print_r($segment);
+    echo "\n";
+
     if (empty($segment)) {
         deleteLockSegment($sid, $jid,"unlock");
         echo "--- (child $my_pid) : empty segment: no segment ready for tm volume analisys: wait 3 seconds\n";
