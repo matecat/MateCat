@@ -10,6 +10,7 @@ class TMS_GET_MATCHES {
     public $raw_segment;
     public $segment;
     public $translation;
+    public $target_note;
     public $raw_translation;
     public $quality;
     public $reference;
@@ -63,6 +64,7 @@ class TMS_GET_MATCHES {
         $this->segment = array_key_exists('segment', $match) ? $match['segment'] : '';
         $this->raw_segment = array_key_exists('raw_segment', $match) ? $match['raw_segment'] : '';
         $this->translation = array_key_exists('translation', $match) ? $match['translation'] : '';
+        $this->target_note = array_key_exists('target_note', $match) ? $match['target_note'] : '';
         $this->raw_translation = array_key_exists('raw_translation', $match) ? $match['raw_translation'] : '';
         $this->quality = array_key_exists('quality', $match) ? $match['quality'] : 0;
         $this->reference = array_key_exists('reference', $match) ? $match['reference'] : '';
@@ -144,6 +146,7 @@ class TMS extends Engine {
     protected static $_config = array(
         'segment'       => null,
         'translation'   => null,
+        'tnote'         => null,
         'source_lang'   => null,
         'target_lang'   => null,
         'email'         => null,
@@ -172,6 +175,7 @@ class TMS extends Engine {
      * @param $_config = array(
      *            'segment'         => null,
      *            'translation'     => null,
+     *            'tnote'           => null,
      *            'source_lang'     => null,
      *            'target_lang'     => null,
      *            'email'           => null,
@@ -232,6 +236,7 @@ class TMS extends Engine {
         $parameters               = array();
         $parameters[ 'seg' ]      = $_config[ 'segment' ];
         $parameters[ 'tra' ]      = $_config[ 'translation' ];
+        $parameters[ 'tnote' ]    = $_config[ 'tnote' ];
         $parameters[ 'langpair' ] = $_config[ 'source_lang' ] . "|" . $_config[ 'target_lang' ];
         $parameters[ 'de' ]       = $_config[ 'email' ];
 
@@ -283,6 +288,38 @@ class TMS extends Engine {
             return false;
         }
         return true;
+    }
+
+    public function update( array $_config ){
+
+        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX : it
+        //does not handle properly iso code (en-US)-- COMMIT BUT MUST BE FIXED IN MYMEMORY
+        if ( $_config['isGlossary'] ) {
+            list( $_config['source_lang'], $trash ) = explode('-', $_config['source_lang'] );
+            list( $_config['target_lang'], $trash ) = explode('-', $_config['target_lang'] );
+        }
+        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX --
+
+        $parameters               = array();
+        $parameters[ 'seg' ]      = $_config[ 'segment' ];
+        $parameters[ 'tra' ]      = $_config[ 'translation' ];
+        $parameters[ 'langpair' ] = $_config[ 'source_lang' ] . "|" . $_config[ 'target_lang' ];
+        $parameters[ 'tnote' ]    = $_config[ 'tnote' ];
+
+        if ( !empty( $_config[ 'id_user' ] ) ) {
+            //$parameters['user'] = $id_user;
+            $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
+        }
+
+        $this->doQuery( "gloss_update" , $parameters);
+
+        $this->result = new TMS_RESULT($this->raw_result);
+
+        if ($this->result->responseStatus != "200") {
+            return false;
+        }
+        return true;
+
     }
 
     private function calculateMyMemoryKey($id_translator) {

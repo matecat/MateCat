@@ -22,7 +22,7 @@ class XliffSAXTranslationReplacer{
 
 	public function __construct( $filename,$segments, $trg_lang = null ){
 		$this->filename=$filename;
-		$this->ofp=fopen($this->filename.'.out.sdlxliff','w');
+		$this->ofp=fopen($this->filename.'.out.sdlxliff','w+');
 		$this->segments=$segments;
         $this->target_lang = $trg_lang;
 	}
@@ -208,31 +208,28 @@ class XliffSAXTranslationReplacer{
 
                 if ( is_resource( $fp_original ) ) {
 
-                    //temp close pointer to rewrite on file
-                    fclose( $this->ofp );
-
                     $idx = xml_get_current_byte_index($parser);
 
-                    $fp_this_manipulated = null; //initialize file pointer
                     $partial_orig_xliff = fread( $fp_original, $idx );
                     preg_match( '/(<cxt-defs.*<\/cxt-defs>)/si', $partial_orig_xliff, $matches );
                     fclose($fp_original);
                     if( isset( $matches[1] ) && !empty($matches[1]) ){
 
                         //open in read/write mode and place pointer at the begin of file
-                        $fp_this_manipulated = fopen( $this->filename.'.out.sdlxliff', "r+" );
+                        rewind($this->ofp);
+
                         //read needed, there should be some changes in files
                         //temporary file are ALWAYS shorter than original so $idx it's enough
-                        $partial_output_xliff = fread( $fp_this_manipulated, filesize( $this->filename.'.out.sdlxliff' )  );
+                        $partial_output_xliff = fread( $this->ofp, filesize( $this->filename.'.out.sdlxliff' )  );
 
                         //REWIND
-                        rewind( $fp_this_manipulated );
+                        rewind( $this->ofp );
 
                         //rewrite cxt-defs content
                         $output_patched = preg_replace( '/<cxt-defs.*<\/cxt-defs>/si', $matches[1], $partial_output_xliff );
 
                         //OVERWRITE with the manipulated AND patched content
-                        fwrite( $fp_this_manipulated, $output_patched );
+                        fwrite( $this->ofp, $output_patched );
                         unset($partial_output_xliff); //free mem
                         unset($output_patched); //free mem
                         unset($partial_orig_xliff); //free mem
@@ -240,9 +237,6 @@ class XliffSAXTranslationReplacer{
                     } else {
                         Log::doLog( "failed retrieve ctx-defs content ?!?" );
                     }
-
-                    //re-attach the global file-pointer
-                    $this->ofp = $fp_this_manipulated;
 
                 } else {
                     Log::doLog( "could not open some XML input" );

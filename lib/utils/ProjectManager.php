@@ -4291,6 +4291,10 @@ class ProjectManager {
 
         $serialized_reference_meta     = array();
         $serialized_reference_binaries = array();
+
+        /* Fix: PHP Warning:  Invalid argument supplied for foreach() */
+        if( !isset( $xliff_file_array['reference'] ) ) return null;
+
         foreach( $xliff_file_array['reference'] as $pos => $ref ){
 
             $found_ref = true;

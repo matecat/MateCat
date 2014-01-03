@@ -907,11 +907,7 @@ function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
         $query .= " and fj.id_file = " . intval($id_file);
     }
 
-//    $start = microtime(true);
-
     $results = $db->fetch_array( $query );
-
-//    Log::doLog(microtime(true) - $start);
 
     return $results;
 }

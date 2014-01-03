@@ -3210,8 +3210,8 @@ UI = {
 						return;
 					var disabled = (this.id == '0') ? true : false;
 					cb = this['created_by'];
-					if(typeof this.comment == 'undefined') this.comment = '';
-//					this.comment = "fake comment just for test purpose";
+					if(typeof this.target_note == 'undefined'){ this.comment = ''; }
+					else { this.comment = this.target_note; }
 					cl_suggestion = UI.getPercentuageClass(this['match']);
 					var leftTxt = this.segment;
 					leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");

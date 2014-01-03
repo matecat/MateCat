@@ -169,7 +169,9 @@ class getSegmentsController extends ajaxcontroller {
                 $this->data["$id_file"]['target'] = $lang_handler->getLocalizedName($seg['target']);
                 $this->data["$id_file"]['source_code'] = $seg['source'];
                 $this->data["$id_file"]['target_code'] = $seg['target'];
-                $this->data["$id_file"]['file_stats'] = CatUtils::getStatsForJob($seg['jid'], $id_file, $this->password);
+//                $time = microtime(true);
+                $this->data["$id_file"]['file_stats'] = CatUtils::getStatsForJob( $seg['jid'], $id_file, $this->password );
+//                Log::doLog( microtime(true) - $time );
                 $this->data["$id_file"]['segments'] = array();
             }
 

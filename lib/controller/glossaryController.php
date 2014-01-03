@@ -19,31 +19,32 @@ class glossaryController extends ajaxcontroller {
     private $password;
     private $segment;
     private $translation;
-    private $source_lang;
-    private $target_lang;
-    private $id_translator;
+    private $comment;
 
     public function __construct() {
         parent::__construct();
 
         $filterArgs = array(
-            'exec' => array('filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH),
-            'id_job' => array('filter' => FILTER_SANITIZE_NUMBER_INT),
-            'password' => array('filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH),
-            'segment' => array('filter' => FILTER_UNSAFE_RAW),
-            'translation' => array('filter' => FILTER_UNSAFE_RAW),
+            'exec'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'id_job'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'password'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'segment'     => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'translation' => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'comment'     => array( 'filter' => FILTER_UNSAFE_RAW ),
         );
 
-        //$__postInput = filter_input_array( INPUT_POST, $filterArgs );
+        $__postInput = filter_input_array( INPUT_POST, $filterArgs );
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
-        $__postInput = filter_var_array($_POST, $filterArgs);
+        //$__postInput = filter_var_array( $_POST, $filterArgs );
 
-        $this->exec = $__postInput['exec'];
-        $this->id_job = $__postInput['id_job'];
-        $this->password = $__postInput['password'];
-        $this->segment = $__postInput['segment'];
-        $this->translation = $__postInput['translation'];
+        $this->exec        = $__postInput[ 'exec' ];
+        $this->id_job      = $__postInput[ 'id_job' ];
+        $this->password    = $__postInput[ 'password' ];
+        $this->segment     = $__postInput[ 'segment' ];
+        $this->translation = $__postInput[ 'translation' ];
+        $this->comment     = $__postInput[ 'comment' ];
+
     }
 
     public function doAction() {
@@ -58,13 +59,14 @@ class glossaryController extends ajaxcontroller {
 
             $config = TMS::getConfigStruct();
 
-            $config['segment'] = $this->segment;
-            $config['translation'] = $this->translation;
-            $config['source_lang'] = $st['source'];
-            $config['target_lang'] = $st['target'];
-            $config['email'] = "demo@matecat.com";
-            $config['id_user'] = $st['id_translator'];
-            $config['isGlossary'] = true;
+            $config[ 'segment' ]     = $this->segment;
+            $config[ 'translation' ] = $this->translation;
+            $config[ 'tnote' ]       = $this->comment;
+            $config[ 'source_lang' ] = $st[ 'source' ];
+            $config[ 'target_lang' ] = $st[ 'target' ];
+            $config[ 'email' ]       = "demo@matecat.com";
+            $config[ 'id_user' ]     = $st[ 'id_translator' ];
+            $config[ 'isGlossary' ]  = true;
 
             /**
              * For future reminder
@@ -82,6 +84,14 @@ class glossaryController extends ajaxcontroller {
                     break;
                 case 'set':
                     $TMS_RESULT = $_TMS->set($config);
+                    $set_code = $TMS_RESULT;
+                    if ($set_code) {
+                        $TMS_GET_RESULT = $_TMS->get($config)->get_glossary_matches_as_array();
+                        $this->result['data']['matches'] = $TMS_GET_RESULT;
+                    }
+                    break;
+                case 'update':
+                    $TMS_RESULT = $_TMS->update($config);
                     $set_code = $TMS_RESULT;
                     if ($set_code) {
                         $TMS_GET_RESULT = $_TMS->get($config)->get_glossary_matches_as_array();

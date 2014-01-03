@@ -45,6 +45,7 @@ abstract class Engine {
 
         $this->gloss_get_url    = $data[ 'gloss_get_relative_url' ];
         $this->gloss_set_url    = $data[ 'gloss_set_relative_url' ];
+        $this->gloss_update_url = $data[ 'gloss_update_relative_url' ];
         $this->gloss_delete_url = $data[ 'gloss_delete_relative_url' ];
 
     }

@@ -46,8 +46,6 @@ class fileFormatConverter {
 		$this->opt['httpheader'] = array("Content-Type: application/x-www-form-urlencoded;charset=UTF-8");
 		$this->lang_handler=  Languages::getInstance();
 
-		$this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
-
         $this->conversionObject = new ArrayObject( array(
             'ip_machine'    => null,
             'ip_client'     => null,
@@ -68,6 +66,8 @@ class fileFormatConverter {
             self::$converters[ $converter_storage['ip_converter'] ] = 1;
             self::$Storage_Lookup_IP_Map[ $converter_storage['ip_converter'] ] = $converter_storage['ip_storage'];
         }
+
+        $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
 
 //        self::$converters = array('10.11.0.10' => 1);//for debugging purposes
 //        self::$Storage_Lookup_IP_Map = array('10.11.0.10' => '10.11.0.11');//for debugging purposes
@@ -228,7 +228,17 @@ class fileFormatConverter {
 			$res['documentContent'] = base64_decode($res['documentContent']);
 		}
 
-		unset($res['errorMessage']);
+        /**
+         * Avoid Not Recoverable Error
+         * Cannot unset string offsets
+         *
+         * If $res is not an array but boolean or string
+         *
+         */
+        if( isset($res['errorMessage']) ){
+		    unset($res['errorMessage']);
+        }
+
 		return $res;
 	}
 
