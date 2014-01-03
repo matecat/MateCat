@@ -177,7 +177,8 @@ class catController extends viewcontroller {
 
 			if (!isset($this->data["$id_file"])) {
 				$files_found[] = $seg['filename'];
-				$file_stats = CatUtils::getStatsForFile($id_file);
+				//$file_stats = CatUtils::getStatsForFile($id_file);
+				$file_stats = array();
 
 				$this->data["$id_file"]['jid'] = $seg['jid'];
 				$this->data["$id_file"]["filename"] = $seg['filename'];
