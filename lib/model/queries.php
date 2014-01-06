@@ -944,6 +944,7 @@ function getStatsForFile( $id_file ) {
 
 function getLastSegmentIDs( $id_job ) {
 
+	/*
     $query   = "
             SELECT id_segment FROM (
                 SELECT id_segment
@@ -953,6 +954,13 @@ function getLastSegmentIDs( $id_job ) {
                     ORDER BY translation_date DESC
             ) AS c LIMIT 10
     ";
+    */
+    
+    $query   = "SELECT id_segment  FROM segment_translations
+                 WHERE id_job = $id_job AND 
+                              `status` IN ( 'TRANSLATED', 'APPROVED' )
+                 ORDER BY translation_date DESC limit 10";
+   
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
