@@ -701,7 +701,8 @@ body.noGlossary .tab-switcher-gl
 
 .sub-editor .cc-search, .sub-editor .gl-search
 {
-    background: none;
+	background: none;
+	clear: both;
 }       
 .sub-editor .cc-search.loading, .sub-editor .gl-search.loading
 {
@@ -714,10 +715,29 @@ body.noGlossary .tab-switcher-gl
 {
     background-position-x: 49.8%;
 }    
+.sub-editor.glossary .private-tm-key
+{
+	float: left;
+	padding-top: 12px;
+	margin-left: 20px;
+}
+.sub-editor.glossary .gl-message
+{
+	float: right;
+	width: 50%;
+	text-align: left;
+	padding-top: 12px;
+	width: 51.6%;
+}
+.sub-editor.glossary .gl-message span
+{
+	background: #FFDE33;
+	padding: 2px 10px;
+}
 .sub-editor.glossary .gl-search.setting .set-glossary
 {
-    background: url(../img/loading.gif);
-background-size: 20px;
+	background: url(../img/loading.gif);
+	background-size: 20px;
 /*    float: left;
     width: 100%;
     background-size: 20px 20px;*/
@@ -743,6 +763,7 @@ background-size: 20px;
 {
 	width: 43%;
 	margin-bottom: 4px;
+	margin-top: 16px;
 }
 .sub-editor .gl-search .gl-comment
 {
@@ -1423,6 +1444,7 @@ textarea, input, .editarea, .search-editarea, select  {
 	padding: 3px 0;
 	border-top: 1px dotted #ccc;
 	font-style: italic;
+	background: transparent url(../img/icon_edit_left.png) right center no-repeat;
 }
 .graysmall div.comment[contenteditable=true]
 {
