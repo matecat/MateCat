@@ -772,8 +772,9 @@ body.noGlossary .tab-switcher-gl
 .sub-editor .gl-search .gl-comment
 {
 float: left;
+display: none;
 width: 80%;
-margin: 10px 1.5% 10px 1.5%;
+margin: 5px 1.5%;
 }       
 .sub-editor .gl-search .set-glossary
 {
@@ -811,7 +812,7 @@ margin: 10px 1.5% 10px 1.5%;
 .sub-editor .gl-search .comment a
 {
 	float:left;
-margin: 10px 1.5% 10px 1.5%;
+	margin: 0 1.5% 0 1.5%;
 	text-decoration: none;
 	color: #666;
 	width:7%;
