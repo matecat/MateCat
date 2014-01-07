@@ -940,15 +940,14 @@ function getStatsForFile( $id_file ) {
 
 function getLastSegmentIDs( $id_job ) {
 
+// Force Index guarantee that the optimizer will not choose translation_date and scan the full table for new jobs.
     $query   = "
-            SELECT id_segment FROM (
                 SELECT id_segment
-                    FROM segment_translations AS st
+                    FROM segment_translations FORCE INDEX (id_job) 
                     WHERE id_job = $id_job
                     AND `status` IN ( 'TRANSLATED', 'APPROVED' )
-                    ORDER BY translation_date DESC
-            ) AS c LIMIT 10
-    ";
+                    ORDER BY translation_date DESC LIMIT 10
+			   ";
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
