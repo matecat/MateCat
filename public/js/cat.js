@@ -2345,12 +2345,12 @@ UI = {
 			},
 			context: [n, next],
 			success: function(d) {
-//				if(typeof d.errors != 'undefined') {
-//					if(d.errors[0].code == -1) {
-//						UI.noGlossary = true;
+				if(typeof d.errors != 'undefined') {
+					if(d.errors[0].code == -1) {
+						UI.noGlossary = true;
 //						UI.body.addClass('noGlossary');
-//					};
-//				};
+					};
+				};
 				UI.processLoadedGlossary(d, this);
 			},
 			complete: function() {
