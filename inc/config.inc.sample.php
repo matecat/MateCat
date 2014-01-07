@@ -94,6 +94,9 @@ class INIT {
 
 	private function __construct() {
 
+		//access session data
+		@session_start();
+		register_shutdown_function( 'INIT::sessionClose' );
         register_shutdown_function( 'INIT::fatalErrorHandler' );
 
 		$root = realpath(dirname(__FILE__) . '/../');
@@ -101,16 +104,11 @@ class INIT {
 		self::$BASEURL = "/"; // Accesible by the browser
 
 		if( stripos( PHP_SAPI, 'cli' ) === false ){
-		
-			//access session data
-			@session_start();
-			register_shutdown_function( 'INIT::sessionClose' );
-
 			$protocol=stripos($_SERVER['SERVER_PROTOCOL'],"https")===FALSE?"http":"https";
 			self::$HTTPHOST="$protocol://$_SERVER[HTTP_HOST]";
 		} else {
 			echo "\nPHP Running in CLI mode.\n\n";
-			//Possible CLI configurations. No sessions for CLI!
+			//Possible CLI configurations
 		}
 
 		set_include_path(get_include_path() . PATH_SEPARATOR . $root);
