@@ -425,17 +425,20 @@ UI = {
 			success: function(d) {
 				if (d.data) {
 					var s = d.data.summary;
+					console.log(s);
 					if ((s.STATUS == 'NEW') || (s.STATUS == '') || s.IN_QUEUE_BEFORE > 0) {
 						$('.loadingbar').addClass('open');
 						if (s.IN_QUEUE_BEFORE > 0) {
 
 							//increasing number of segments ( fast analysis on another project )
 							if (UI.previousQueueSize < s.IN_QUEUE_BEFORE) {
-								$('#shortloading').children().replaceWith('<p class="label">There are other project in queue. Please wait...</p>');
+								$('#shortloading').replaceWith('<p class="label">There are other project in queue. Please wait...</p>');
+//								$('#shortloading').children().replaceWith('<p class="label">There are other project in queue. Please wait...</p>');
 							} else { //decreasing ( TM analysis on another project )
 
 								if (!$('#shortloading .queue').length) {
-									$('#shortloading').children().replaceWith('<p class="label">Fast word counting...</p><p class="queue">There are still <span class="number">' + s.IN_QUEUE_BEFORE_PRINT + '</span> segments in queue. Please wait...</p>');
+									$('#shortloading').replaceWith('<p class="label">Fast word counting...</p><p class="queue">There are still <span class="number">' + s.IN_QUEUE_BEFORE_PRINT + '</span> segments in queue. Please wait...</p>');
+//									$('#shortloading').children().replaceWith('<p class="label">Fast word counting...</p><p class="queue">There are still <span class="number">' + s.IN_QUEUE_BEFORE_PRINT + '</span> segments in queue. Please wait...</p>');
 								} else {
 									$('#shortloading .queue .number').text(s.IN_QUEUE_BEFORE_PRINT);
 								}
