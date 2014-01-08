@@ -2424,6 +2424,12 @@ UI = {
 		
 		
 	},
+	glossaryMessage: function(msg, segment) {
+		$('.sub-editor.glossary .gl-message', segment).remove();
+		$('.sub-editor.glossary .private-tm-key', segment).after('<div class="gl-message"><span>' + msg + '</span></div>');
+		$('.sub-editor.glossary .gl-message', segment).fadeOut(6000);	
+	},
+	
 	setGlossaryItem: function() {
 		$('.gl-search', UI.currentSegment).addClass('setting');
 		APP.doRequest({
@@ -2440,10 +2446,10 @@ UI = {
 			success: function(d) {
 //				d.data.created_tm_key = '76786732';
 				if(d.data.created_tm_key) {
-					$('.sub-editor.glossary .gl-message', this[0]).remove();
-					$('.sub-editor.glossary .private-tm-key', this[0]).after('<div class="gl-message"><span>A Private TM Key has been created for this job</span></div>');
-					$('.sub-editor.glossary .gl-message', this[0]).fadeOut(6000);
+					UI.glossaryMessage('A Private TM Key has been created for this job', this[0]);
 					UI.addTMKey(d.data.created_tm_key);
+				} else {
+					UI.glossaryMessage('A glossary item has been added', this[0]);					
 				}
 				UI.processLoadedGlossary(d, this);
 			},
