@@ -550,6 +550,7 @@ UI = {
 					(e.which == 190) || // mark
 					(e.which == 191) || // question mark
 					(e.which == 222)) { // apostrophe
+				console.log('ss');
 				UI.spellCheck();
 			}
 
@@ -571,7 +572,8 @@ UI = {
 					UI.lockTags(UI.editarea);
 				}, 10);
 			UI.registerQACheck();
-		}).on('input', '.editor .cc-search .input, .editor .gl-search .input', function(e) {
+		}).on('input', '.editor .cc-search .input', function(e) {
+//		}).on('input', '.editor .cc-search .input, .editor .gl-search .input', function(e) {
 			UI.markTagsInSearch($(this));
 		}).on('dblclick', '.source', function(e) {
 //            console.log(window.getSelection());
@@ -935,15 +937,33 @@ UI = {
                 //replace all divs with a br and remove all br without a class
                 var divs = $( this ).find( 'div' );
                 if( divs.length ){
-                    divs.each(function(){
-                       $(this).find( 'br:not([class])' ).remove();
-                       $(this).prepend( $('<br class="' + config.crPlaceholderClass + '" />' ) ).replaceWith( $(this).html() );
+					console.log('a');
+					divs.each(function(){
+
+//						$('#placeHolder').remove();
+//						var node = document.createElement("div");
+//						node.setAttribute('id', 'placeHolder');
+//			//            if(window.getSelection().type == 'Caret')) removeSelectedText($(this));
+//	//					removeSelectedText($(this));
+//						insertNodeAtCursor(node);
+						$(this).find( 'br:not([class])' ).remove();
+						$(this).prepend( $('<br class="' + config.crPlaceholderClass + '" />' ) ).replaceWith( $(this).html() );
+//						UI.placeCaretAtEnd(UI.editarea);
+	//					var ev = (UI.isFirefox) ? e : event;
+	//					handlepaste(this, ev);
+
+
                     });
+//				setTimeout(function() {
+//					UI.editarea.focusToEnd();
+//				}, 500);
+					
                 } else {
+					console.log('b');
                     $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
                 }
             }
-        });
+		});
 
 		/*
 		 $('#hideAlertConfirmTranslation').bind('change', function(e) {
@@ -1499,13 +1519,11 @@ UI = {
 		var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li><li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc"><a tabindex="-1" href="#">Concordance</a></li><li class="tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl"><a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div><div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances"><div class="overflow"><div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div><div class="results"></div></div></div><div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary"><div class="overflow"><div class="private-tm-key">Private TM Key: <span class="tm-key">' + (config.private_tm_key || 'not defined') + '</span></div><div class="gl-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /><a class="search-glossary" href="#"></a><a class="set-glossary disabled" href="#"></a><div class="comment"><a href="#">(+) Comment</a><div class="input gl-comment" contenteditable="true" /></div></div><div class="results"></div></div></div>';
 		$('.footer', segment).html(footer);
 
-
-		//FIXME
-		if (($(segment).hasClass('loaded')) && ($(segment).find('.matches .overflow').text() == '')) {
+		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() == '')) {
+			
 			$('.sub-editor.matches .overflow .graysmall.message', segment).remove();
 			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry, we can\'t help you this time. Check if the language pair is correct. If not, create the project again.</li></ul>');
 		}
-		;
 	},
 	createHeader: function() {
 //		console.log($('h2.percentuage', this.currentSegment));
@@ -2422,7 +2440,7 @@ UI = {
 			},
 			context: [UI.currentSegment, next],
 			success: function(d) {
-//				d.data.created_tm_key = '76786732';
+				d.data.created_tm_key = '76786732';
 				if(d.data.created_tm_key) {
 					$('.sub-editor.glossary .gl-message', this[0]).remove();
 					$('.sub-editor.glossary .private-tm-key', this[0]).after('<div class="gl-message"><span>A Private TM Key has been created for this job</span></div>');
@@ -3057,6 +3075,8 @@ UI = {
 			console.log('close/open time: ' + ((new Date()) - this.openSegmentStart));
 	},
 	placeCaretAtEnd: function(el) {
+		console.log(el);
+		console.log($(el).first().get().className);
 		var range = document.createRange();
 		var sel = window.getSelection();
 		range.setStart(el, 1);
@@ -4811,3 +4831,12 @@ $.extend($.expr[":"], {
 
 $(window).resize(function() {
 });
+
+(function($) {
+    $.fn.focusToEnd = function() {
+        return this.each(function() {
+            var v = $(this).val();
+            $(this).focus().val("").val(v);
+        });
+    };
+})(jQuery);
