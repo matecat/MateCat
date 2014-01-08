@@ -954,9 +954,7 @@ UI = {
 
 
                     });
-//				setTimeout(function() {
-//					UI.editarea.focusToEnd();
-//				}, 500);
+
 					
                 } else {
 					console.log('b');
@@ -2440,7 +2438,7 @@ UI = {
 			},
 			context: [UI.currentSegment, next],
 			success: function(d) {
-				d.data.created_tm_key = '76786732';
+//				d.data.created_tm_key = '76786732';
 				if(d.data.created_tm_key) {
 					$('.sub-editor.glossary .gl-message', this[0]).remove();
 					$('.sub-editor.glossary .private-tm-key', this[0]).after('<div class="gl-message"><span>A Private TM Key has been created for this job</span></div>');
@@ -4831,12 +4829,3 @@ $.extend($.expr[":"], {
 
 $(window).resize(function() {
 });
-
-(function($) {
-    $.fn.focusToEnd = function() {
-        return this.each(function() {
-            var v = $(this).val();
-            $(this).focus().val("").val(v);
-        });
-    };
-})(jQuery);
