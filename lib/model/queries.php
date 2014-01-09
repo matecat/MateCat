@@ -1815,7 +1815,7 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
     echo 'Queries: ' . count($chunks_st) . "\n";
     Log::doLog( 'Queries: ' . count($chunks_st) );
 
-    foreach ( $chunks_st as $chunk ) {
+    foreach ( $chunks_st as $k => $chunk ) {
 
         $query_st = $segment_translations . implode( ", ", $chunk ) .
         " ON DUPLICATE KEY UPDATE
@@ -1826,6 +1826,9 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
         $db->query( $query_st );
 
+        echo "Executed " . ( $k + 1 ) ."\n";
+        Log::doLog(  "Executed " . ( $k + 1 ) );
+
         $err   = $db->get_error();
         if ( $err[ 'error_code' ] != 0 ) {
             Log::doLog( $err );
@@ -1834,8 +1837,8 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
     }
 
-    echo "Executed.\n";
-    Log::doLog( 'Executed.' );
+    echo "Done.\n";
+    Log::doLog( 'Done.' );
 
     if( count( $st_queue_values ) ){
 
@@ -1847,11 +1850,14 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
         echo 'Queries: ' . count($chunks_st_queue) . "\n";
         Log::doLog( 'Queries: ' . count($chunks_st_queue) );
 
-        foreach( $chunks_st_queue as $queue_chunk ){
+        foreach( $chunks_st_queue as $k => $queue_chunk ){
 
             $query_st_queue = $segment_translations_queue . implode( ", ", $queue_chunk );
 
             $db->query( $query_st_queue );
+
+            echo "Executed " . ( $k + 1 ) ."\n";
+            Log::doLog(  "Executed " . ( $k + 1 ) );
 
             $err   = $db->get_error();
             if ( $err[ 'error_code' ] != 0 ) {
@@ -1861,8 +1867,8 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
         }
 
-        echo "Executed.\n";
-        Log::doLog( 'Executed.' );
+        echo "Done.\n";
+        Log::doLog( 'Done.' );
 
     }
 

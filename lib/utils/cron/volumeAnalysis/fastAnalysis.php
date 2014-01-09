@@ -6,11 +6,14 @@ include_once INIT::$UTILS_ROOT . "/MyMemoryAnalyzer.copyrighted.php";
 
 $ws = new MyMemoryAnalyzer();
 
+Log::$fileName = "fastAnalysis.log";
+
 while (1) {
 
 	$pid_list = getProjectForVolumeAnalysis('fast', 5);
 	if (empty($pid_list)) {
 		echo __FILE__ . ":" . __FUNCTION__ . " no projects ready for fast volume analisys: wait 3 seconds\n";
+		Log::doLog( __FILE__ . ":" . __FUNCTION__ . " no projects ready for fast volume analisys: wait 3 seconds" );
 		sleep(3);
 		continue;
 	}
@@ -21,17 +24,28 @@ while (1) {
 	foreach ($pid_list as $pid_res) {
 		$pid = $pid_res['id'];
 		echo "analyzing $pid, querying data...";
+        Log::doLog( "analyzing $pid, querying data..." );
 
 		$segments=getSegmentsForFastVolumeAnalysys($pid);
 
 		echo "done\n";
+        Log::doLog( "done" );
+
 		$num=count($segments);
+
 		echo "pid $pid: $num segments\n";
+        Log::doLog( "pid $pid: $num segments" );
 		echo "sending query to MyMemory analysis...";
+        Log::doLog( "sending query to MyMemory analysis..." );
+
 		$fastReport = $ws->fastAnalysis($segments);
+
 		echo "done\n";
 		echo "collecting stats...";
-		$data=$fastReport['data'];
+        Log::doLog( "done" );
+        Log::doLog( "collecting stats..." );
+
+        $data=$fastReport['data'];
 		foreach ($data as $k=>$v){
 			if (in_array($v['type'], array("75%-84%","85%-94%","95%-99%"))){
 				$data[$k]['type']="INTERNAL";
@@ -41,7 +55,10 @@ while (1) {
 				$data[$k]['type']="NO_MATCH";
 			}
 		}
+
 		echo "done\n";
+        Log::doLog( "done" );
+
 		$perform_Tms_Analysis = true;
 		$status = "FAST_OK";
 		if( $pid_res['id_tms'] == 0 && $pid_res['id_mt_engine'] == 0 ){
@@ -55,19 +72,28 @@ while (1) {
 			$status = "DONE";
 			Log::doLog( 'Perform Analysis ' . var_export( $perform_Tms_Analysis, true ) );
 		}
+
 		echo "inserting segments...\n";
-		$insertReportRes = insertFastAnalysis($pid,$data, $equivalentWordMapping, $perform_Tms_Analysis);
+        Log::doLog( "inserting segments..." );
+
+        $insertReportRes = insertFastAnalysis($pid,$data, $equivalentWordMapping, $perform_Tms_Analysis);
 		if ($insertReportRes < 0) {
 			Log::doLog( "insertFastAnalysis failed...." );
 			echo( "insertFastAnalysis failed...." );
 			continue;
 		}
+
 		echo "done\n";
+        Log::doLog( "done" );
 		echo "changing project status...";
-		$change_res = changeProjectStatus($pid, $status);
+        Log::doLog( "changing project status..." );
+
+        $change_res = changeProjectStatus($pid, $status);
 		if ($change_res < 0) {
 		}
+
 		echo "done\n";
+        Log::doLog( "done" );
 	}
 }
 ?>
