@@ -932,35 +932,20 @@ UI = {
 			e.preventDefault();
 			var save = (typeof param == 'undefined') ? 'noSave' : param;
 			UI.closeSegment(UI.currentSegment, 1, save);
-		}).on('keyup', '.editor .editarea', function(e) {
-            if ( e.which == 13 ){
-                //replace all divs with a br and remove all br without a class
-                var divs = $( this ).find( 'div' );
-                if( divs.length ){
-					console.log('a');
-					divs.each(function(){
-
-//						$('#placeHolder').remove();
-//						var node = document.createElement("div");
-//						node.setAttribute('id', 'placeHolder');
-//			//            if(window.getSelection().type == 'Caret')) removeSelectedText($(this));
-//	//					removeSelectedText($(this));
-//						insertNodeAtCursor(node);
-						$(this).find( 'br:not([class])' ).remove();
-						$(this).prepend( $('<br class="' + config.crPlaceholderClass + '" />' ) ).replaceWith( $(this).html() );
-//						UI.placeCaretAtEnd(UI.editarea);
-	//					var ev = (UI.isFirefox) ? e : event;
-	//					handlepaste(this, ev);
-
-
-                    });
-
-					
-                } else {
-					console.log('b');
-                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
-                }
-            }
+//		}).on('keyup', '.editor .editarea', function(e) {
+//            if ( e.which == 13 ){
+//                //replace all divs with a br and remove all br without a class
+//                var divs = $( this ).find( 'div' );
+//                if( divs.length ){
+//					divs.each(function(){
+//						$(this).find( 'br:not([class])' ).remove();
+//						$(this).prepend( $('<br class="' + config.crPlaceholderClass + '" />' ) ).replaceWith( $(this).html() );
+//					});
+//							
+//                } else {
+//                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
+//                }
+//            }
 		});
 
 		/*
@@ -1514,7 +1499,7 @@ UI = {
 		if ($('.footer', segment).text() != '')
 			return false;
 
-		var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li><li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc"><a tabindex="-1" href="#">Concordance</a></li><li class="tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl"><a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div><div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances"><div class="overflow"><div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div><div class="results"></div></div></div><div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary"><div class="overflow"><div class="private-tm-key">Private TM Key: <span class="tm-key">' + (config.private_tm_key || 'not defined') + '</span></div><div class="gl-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /><a class="search-glossary" href="#"></a><a class="set-glossary disabled" href="#"></a><div class="comment"><a href="#">(+) Comment</a><div class="input gl-comment" contenteditable="true" /></div></div><div class="results"></div></div></div>';
+		var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li><li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc"><a tabindex="-1" href="#">Concordance</a></li><li class="tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl"><a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div><div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances"><div class="overflow"><div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div><div class="results"></div></div></div><div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary"><div class="overflow"><div class="gl-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /><a class="search-glossary" href="#"></a><a class="set-glossary disabled" href="#"></a><div class="comment"><a href="#">(+) Comment</a><div class="input gl-comment" contenteditable="true" /></div></div><div class="results"></div></div></div>';
 		$('.footer', segment).html(footer);
 
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() == '')) {
@@ -2424,12 +2409,11 @@ UI = {
 		
 		
 	},
-	glossaryMessage: function(msg, segment) {
-		$('.sub-editor.glossary .gl-message', segment).remove();
-		$('.sub-editor.glossary .private-tm-key', segment).after('<div class="gl-message"><span>' + msg + '</span></div>');
-		$('.sub-editor.glossary .gl-message', segment).fadeOut(6000);	
+	footerMessage: function(msg, segment) {
+		$('.footer-message', segment).remove();
+		$('.submenu', segment).append('<li class="footer-message">' + msg + '</div>');
+		$('.footer-message', segment).fadeOut(6000);	
 	},
-	
 	setGlossaryItem: function() {
 		$('.gl-search', UI.currentSegment).addClass('setting');
 		APP.doRequest({
@@ -2446,10 +2430,10 @@ UI = {
 			success: function(d) {
 //				d.data.created_tm_key = '76786732';
 				if(d.data.created_tm_key) {
-					UI.glossaryMessage('A Private TM Key has been created for this job', this[0]);
-					UI.addTMKey(d.data.created_tm_key);
+					UI.footerMessage('A Private TM Key has been created for this job', this[0]);
+					UI.noGlossary = false;
 				} else {
-					UI.glossaryMessage('A glossary item has been added', this[0]);					
+					UI.footerMessage('A glossary item has been added', this[0]);					
 				}
 				UI.processLoadedGlossary(d, this);
 			},
@@ -2457,11 +2441,6 @@ UI = {
 				$('.gl-search', UI.currentSegment).removeClass('setting');
 			}
 		})		
-	},
-	addTMKey: function(k) {
-		UI.noGlossary = false;
-		config.private_tm_key = k;
-		$('.private-tm-key .tm-key').text(k);
 	},
 	getContribution: function(segment, next) {
 		var n = (next == 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);

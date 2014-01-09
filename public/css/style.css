@@ -721,26 +721,16 @@ body.noGlossary .tab-switcher-gl
 	padding-top: 12px;
 	margin-left: 20px;
 }
-.sub-editor.glossary .gl-message
+.footer-message
 {
-	float: right;
-	width: 50%;
-	text-align: left;
-	padding-top: 12px;
-	width: 51.6%;
-}
-.sub-editor.glossary .gl-message span
-{
-	background: #FFDE33;
+	margin-left: 20px;
+	background: #FFDE33 !important;
 	padding: 2px 10px;
 }
 .sub-editor.glossary .gl-search.setting .set-glossary
 {
 	background: url(../img/loading.gif);
 	background-size: 20px;
-/*    float: left;
-    width: 100%;
-    background-size: 20px 20px;*/
 }
 .sub-editor .cc-search .search-target,
 .sub-editor .cc-search .search-source,
