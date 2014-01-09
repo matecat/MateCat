@@ -63,13 +63,14 @@ while (1) {
 
     if (empty($segment)) {
         deleteLockSegment($sid, $jid,"unlock");
-        echo "--- (child $my_pid) : empty segment: no segment ready for tm volume analisys: wait 3 seconds\n";
+        echo "--- (child $my_pid) : empty segment: no segment ready for tm volume analisys: wait 5 seconds\n";
+        sleep(5);
         continue;
     }
 
     if (is_numeric($segment) and $segment < 0) {
         deleteLockSegment($sid, $jid);
-        setSegmentTranslationError($sid, $jid); // devo seetarli come done e lasciare il vecchio livello di match
+        setSegmentTranslationError($sid, $jid); // devo settarli come done e lasciare il vecchio livello di match
         echo "--- (child $my_pid) : FATAL !!  error occurred during fetching segment : exiting\n";
         continue;
     }

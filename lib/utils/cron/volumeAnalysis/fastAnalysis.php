@@ -55,7 +55,7 @@ while (1) {
 			$status = "DONE";
 			Log::doLog( 'Perform Analysis ' . var_export( $perform_Tms_Analysis, true ) );
 		}
-		echo "inserting segments...";
+		echo "inserting segments...\n";
 		$insertReportRes = insertFastAnalysis($pid,$data, $equivalentWordMapping, $perform_Tms_Analysis);
 		if ($insertReportRes < 0) {
 			Log::doLog( "insertFastAnalysis failed...." );
