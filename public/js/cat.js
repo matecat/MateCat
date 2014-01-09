@@ -550,6 +550,7 @@ UI = {
 					(e.which == 190) || // mark
 					(e.which == 191) || // question mark
 					(e.which == 222)) { // apostrophe
+				console.log('ss');
 				UI.spellCheck();
 			}
 
@@ -571,7 +572,8 @@ UI = {
 					UI.lockTags(UI.editarea);
 				}, 10);
 			UI.registerQACheck();
-		}).on('input', '.editor .cc-search .input, .editor .gl-search .input', function(e) {
+		}).on('input', '.editor .cc-search .input', function(e) {
+//		}).on('input', '.editor .cc-search .input, .editor .gl-search .input', function(e) {
 			UI.markTagsInSearch($(this));
 		}).on('dblclick', '.source', function(e) {
 //            console.log(window.getSelection());
@@ -930,20 +932,21 @@ UI = {
 			e.preventDefault();
 			var save = (typeof param == 'undefined') ? 'noSave' : param;
 			UI.closeSegment(UI.currentSegment, 1, save);
-		}).on('keyup', '.editor .editarea', function(e) {
-            if ( e.which == 13 ){
-                //replace all divs with a br and remove all br without a class
-                var divs = $( this ).find( 'div' );
-                if( divs.length ){
-                    divs.each(function(){
-                       $(this).find( 'br:not([class])' ).remove();
-                       $(this).prepend( $('<br class="' + config.crPlaceholderClass + '" />' ) ).replaceWith( $(this).html() );
-                    });
-                } else {
-                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
-                }
-            }
-        });
+//		}).on('keyup', '.editor .editarea', function(e) {
+//            if ( e.which == 13 ){
+//                //replace all divs with a br and remove all br without a class
+//                var divs = $( this ).find( 'div' );
+//                if( divs.length ){
+//					divs.each(function(){
+//						$(this).find( 'br:not([class])' ).remove();
+//						$(this).prepend( $('<br class="' + config.crPlaceholderClass + '" />' ) ).replaceWith( $(this).html() );
+//					});
+//							
+//                } else {
+//                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
+//                }
+//            }
+		});
 
 		/*
 		 $('#hideAlertConfirmTranslation').bind('change', function(e) {
@@ -1499,13 +1502,11 @@ UI = {
 		var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li><li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc"><a tabindex="-1" href="#">Concordance</a></li><li class="tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl"><a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div><div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances"><div class="overflow"><div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div><div class="results"></div></div></div><div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary"><div class="overflow"><div class="gl-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /><a class="search-glossary" href="#"></a><a class="set-glossary disabled" href="#"></a><div class="comment"><a href="#">(+) Comment</a><div class="input gl-comment" contenteditable="true" /></div></div><div class="results"></div></div></div>';
 		$('.footer', segment).html(footer);
 
-
-		//FIXME
-		if (($(segment).hasClass('loaded')) && ($(segment).find('.matches .overflow').text() == '')) {
+		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() == '')) {
+			
 			$('.sub-editor.matches .overflow .graysmall.message', segment).remove();
 			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry, we can\'t help you this time. Check if the language pair is correct. If not, create the project again.</li></ul>');
 		}
-		;
 	},
 	createHeader: function() {
 //		console.log($('h2.percentuage', this.currentSegment));
@@ -2339,6 +2340,7 @@ UI = {
 				action: 'glossary',
 				exec: 'get',
 				segment: txt,
+				automatic: entireSegment,
 				translation: null,
 				id_job: config.job_id,
 				password: config.password
@@ -2348,7 +2350,7 @@ UI = {
 				if(typeof d.errors != 'undefined') {
 					if(d.errors[0].code == -1) {
 						UI.noGlossary = true;
-						UI.body.addClass('noGlossary');
+//						UI.body.addClass('noGlossary');
 					};
 				};
 				UI.processLoadedGlossary(d, this);
@@ -2408,6 +2410,11 @@ UI = {
 		
 		
 	},
+	footerMessage: function(msg, segment) {
+		$('.footer-message', segment).remove();
+		$('.submenu', segment).append('<li class="footer-message">' + msg + '</div>');
+		$('.footer-message', segment).fadeOut(6000);	
+	},
 	setGlossaryItem: function() {
 		$('.gl-search', UI.currentSegment).addClass('setting');
 		APP.doRequest({
@@ -2422,6 +2429,13 @@ UI = {
 			},
 			context: [UI.currentSegment, next],
 			success: function(d) {
+//				d.data.created_tm_key = '76786732';
+				if(d.data.created_tm_key) {
+					UI.footerMessage('A Private TM Key has been created for this job', this[0]);
+					UI.noGlossary = false;
+				} else {
+					UI.footerMessage('A glossary item has been added', this[0]);					
+				}
 				UI.processLoadedGlossary(d, this);
 			},
 			complete: function() {
@@ -3045,6 +3059,8 @@ UI = {
 			console.log('close/open time: ' + ((new Date()) - this.openSegmentStart));
 	},
 	placeCaretAtEnd: function(el) {
+		console.log(el);
+		console.log($(el).first().get().className);
 		var range = document.createRange();
 		var sel = window.getSelection();
 		range.setStart(el, 1);
@@ -3219,7 +3235,7 @@ UI = {
 					var rightTxt = this.translation;
 					rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
 					rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
-					$('.sub-editor.glossary .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><li class="details">' + ((this.comment == '')? '' : '<div class="comment">' + this.comment + '</div>') + '<ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></li></ul>');
+					$('.sub-editor.glossary .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><li class="details">' + ((this.comment == '')? '' : '<div class="comment">' + this.comment + '</div>') + '<ul class="graysmall-details"><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></li></ul>');
 				})
 			});
 		} else {

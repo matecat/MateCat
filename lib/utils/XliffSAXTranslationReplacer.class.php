@@ -210,7 +210,7 @@ class XliffSAXTranslationReplacer{
 
                     $idx = xml_get_current_byte_index($parser);
 
-                    $partial_orig_xliff = fread( $fp_original, $idx );
+                    $partial_orig_xliff = fread( $fp_original, $idx + 1024 );
                     preg_match( '/(<cxt-defs.*<\/cxt-defs>)/si', $partial_orig_xliff, $matches );
                     fclose($fp_original);
                     if( isset( $matches[1] ) && !empty($matches[1]) ){
