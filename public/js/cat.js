@@ -2468,7 +2468,7 @@ UI = {
 		var id_segment = id.split('-')[1];
 
         if( config.brPlaceholdEnabled ) {
-            var txt = this.getSourceWithBrPlaceHolders(n);
+            var txt = this.postProcessEditarea(n, '.source');
         } else {
             var txt = $('.source', n).text();
         }
@@ -3531,8 +3531,8 @@ UI = {
 			return false;
 
         if( config.brPlaceholdEnabled ) {
-            var source = this.getSourceWithBrPlaceHolders( segment );
-            var target = this.getTranslationWithBrPlaceHolders( segment );
+            var source = this.postProcessEditarea(segment, '.source');
+            var target = this.postProcessEditarea(segment);
         } else {
             var source = $('.source', segment).text();
             // Attention: to be modified when we will be able to lock tags.
@@ -3706,8 +3706,8 @@ UI = {
 			var ul = $(this).parents('.graysmall');
 
             if( config.brPlaceholdEnabled ){
-                source = UI.getTextContentWithBrPlaceHolders( ul, '.suggestion_source' );
-                target = UI.getTextContentWithBrPlaceHolders( ul, '.translation' );
+                source = UI.postProcessEditarea( ul, '.suggestion_source' );
+                target = UI.postProcessEditarea( ul, '.translation' );
             } else {
                 source = $('.suggestion_source', ul).text();
                 target = $('.translation', ul).text();
@@ -3983,8 +3983,8 @@ UI = {
 		//var src_content = $('.source', this.currentSegment).attr('data-original');
 
         if( config.brPlaceholdEnabled ){
-            var src_content = this.getSourceWithBrPlaceHolders( this.currentSegment );
-            var trg_content = this.getTranslationWithBrPlaceHolders( this.currentSegment );
+            var src_content = this.postProcessEditarea(this.currentSegment, '.source');
+            var trg_content = this.postProcessEditarea(this.currentSegment);
         } else {
             var src_content = this.getSegmentSource();
             var trg_content = this.getSegmentTarget();
@@ -4037,7 +4037,7 @@ UI = {
 
 		// Attention, to be modified when we will lock tags
 		if( config.brPlaceholdEnabled ) {
-            var translation = this.getTranslationWithBrPlaceHolders(segment);
+            var translation = this.postProcessEditarea(segment);
         } else {
             var translation = $('.editarea', segment ).text();
         }
@@ -4089,18 +4089,18 @@ UI = {
      * @param segment
      * @returns {XML|string}
      */
-    getTranslationWithBrPlaceHolders: function(segment) {
-        return UI.getTextContentWithBrPlaceHolders( segment );
-    },
+//    getTranslationWithBrPlaceHolders: function(segment) {
+//        return UI.getTextContentWithBrPlaceHolders( segment );
+//    },
     /**
      * This function is used when a string has to be sent to the server
      * It works over a clone of the editarea ( source area ) and manage the text()
      * @param segment
      * @returns {XML|string}
      */
-    getSourceWithBrPlaceHolders: function(segment) {
-        return UI.getTextContentWithBrPlaceHolders( segment, '.source' );
-    },
+//    getSourceWithBrPlaceHolders: function(segment) {
+//        return UI.getTextContentWithBrPlaceHolders( segment, '.source' );
+//    },
 
     /**
      * Called when a translation is sent to the server
@@ -4112,8 +4112,11 @@ UI = {
      * @param selector
      * @returns {XML|string}
      */
-    getTextContentWithBrPlaceHolders: function( context, selector ){
+	fixBR: function(txt) {
+		return txt.replace(/<br>/g, '').replace(/<div>/g, '<br class="' + config.crPlaceholderClass + '">').replace(/<\/div>/g, '');
+	},
 
+	postProcessEditarea: function(context, selector){
         selector = (typeof selector === "undefined") ? '.editarea' : selector;
 
         area = $( selector, context ).clone();
@@ -4146,8 +4149,9 @@ UI = {
 
         });
 
+		txt = this.fixBR(area.text());
         //trim last placeholder if present.
-        return area.text().replace( /\#\#\$(.*?)\$\#\#$/, '' );
+		return txt.replace( /\#\#\$(.*?)\$\#\#$/, '' );
 
     },
 
