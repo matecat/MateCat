@@ -2340,6 +2340,7 @@ UI = {
 				action: 'glossary',
 				exec: 'get',
 				segment: txt,
+				automatic: entireSegment,
 				translation: null,
 				id_job: config.job_id,
 				password: config.password
