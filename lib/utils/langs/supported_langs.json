@@ -227,7 +227,7 @@
 				"en":"Chinese Simplified"
 			}],
 			"isocode":"zh",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"top":"top10 top20",
 			"rfc3066code":"zh-CN"
@@ -238,7 +238,7 @@
 				"en":"Chinese Traditional"
 			}],
 			"isocode":"zh",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"top":"top20",
 			"rfc3066code":"zh-TW"
@@ -727,7 +727,7 @@
 				"en":"Korean"
 			}],
 			"isocode":"ko",
-			"enabled":true,
+			"enabled":false,
 			"rtl":false,
 			"rfc3066code":"ko-KR"
 		}
