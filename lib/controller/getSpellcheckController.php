@@ -9,6 +9,8 @@ class getSpellcheckController extends ajaxcontroller {
     private $__postInput = null;
 
     public function __construct() {
+
+        $this->disableSessions();
         parent::__construct();
 
         $filterArgs = array(

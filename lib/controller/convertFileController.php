@@ -18,7 +18,10 @@ class convertFileController extends ajaxcontroller {
 	private $errDir;
 
 	public function __construct() {
+
+        $this->disableSessions();
 		parent::__construct();
+
 		$this->file_name = $this->get_from_get_post('file_name');
 		$this->source_lang = $this->get_from_get_post("source_lang");
 		$this->target_lang = $this->get_from_get_post("target_lang");

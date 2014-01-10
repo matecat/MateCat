@@ -17,6 +17,8 @@ class getProjectsController extends ajaxcontroller {
 	public $notAllCancelled = 0;
 
 	public function __construct() {
+
+        $this->disableSessions();
 		parent::__construct();
 
 		$this->lang_handler=Languages::getInstance();

@@ -9,6 +9,8 @@ class setCurrentSegmentController extends ajaxcontroller {
 
 
     public function __construct() {
+
+        $this->disableSessions();
         parent::__construct();
 
         $filterArgs = array(

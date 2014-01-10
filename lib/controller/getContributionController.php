@@ -24,6 +24,8 @@ class getContributionController extends ajaxcontroller {
     private $__postInput = array();
 
 	public function __construct() {
+
+        $this->disableSessions();
 		parent::__construct();
 
         $filterArgs = array(

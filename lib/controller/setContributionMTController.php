@@ -17,6 +17,8 @@ class setContributionMTController extends ajaxcontroller {
 	private $mt;
 
 	public function __construct() {
+
+        $this->disableSessions();
 		parent::__construct();
         //segment
         $this->segment = $this->get_from_get_post( 'source' );

@@ -26,6 +26,8 @@ class setContributionController extends ajaxcontroller {
     private $__postInput;
 
 	public function __construct() {
+
+        $this->disableSessions();
 		parent::__construct();
 
 
