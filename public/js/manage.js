@@ -593,13 +593,13 @@ UI = {
 	            '		<span class="value">' + this.mt_engine_name + '</span>'+
 	            '	</div>';
 
-            if (this.private_tm_key!==''){
-                    
-                     newProject += '	<div class="field">'+
-	            '		<h3>Private TM Key:</h3>'+
-	            '		<span class="value">'+this.private_tm_key+'</span>'+
-	            '	</div>';
-            }
+//            if (this.private_tm_key!==''){
+//                    
+//                     newProject += '	<div class="field">'+
+//	            '		<h3>Private TM Key:</h3>'+
+//	            '		<span class="value">'+this.private_tm_key+'</span>'+
+//	            '	</div>';
+//            }
                     
 		      newProject += '    <table class="tablestats continue tablesorter" width="100%" border="0" cellspacing="0" cellpadding="0" id="project-'+this.id+'">'+
 		        '        <thead>'+
@@ -623,7 +623,6 @@ UI = {
             var ind = 0;
             $.each(this, function() {
                 ind++;
-console.log(this);
 		        var newJob = '    <tr class="row " data-jid="'+this.id+'" data-status="'+this.status+'" data-password="'+this.password+'">'+
 		            '        <td class="create-date" data-date="'+this.create_date+'">'+this.formatted_create_date+'</td>'+
 		            '        <td class="job-detail">'+
