@@ -2096,7 +2096,7 @@ function getNextSegmentAndLock() {
     $q1 = "SET autocommit=0";
     $q2 = "START TRANSACTION";
     //lock row
-    $rnd = mt_rand(0,100); //rand num shold be ( child_num / myMemory_sec_response_time )
+    $rnd = mt_rand(0,15); //rand num shold be ( child_num / myMemory_sec_response_time )
     $q3 = "select id_segment, id_job from segment_translations_analysis_queue where locked=0 limit $rnd,1 for update";
     //end transaction
     $q4 = "ROLLBACK";
