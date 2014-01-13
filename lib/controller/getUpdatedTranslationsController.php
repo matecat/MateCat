@@ -10,6 +10,8 @@ class getUpdatedTranslationsController extends ajaxcontroller {
     private $last_segment = "";
 
     public function __construct() {
+
+        $this->disableSessions();
         parent::__construct();
 
         $filterArgs = array(

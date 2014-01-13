@@ -20,6 +20,8 @@ class getSearchController extends ajaxcontroller {
     private $queryParams = array();
 
     public function __construct() {
+
+        $this->disableSessions();
         parent::__construct();
 
         $filterArgs = array(

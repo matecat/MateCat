@@ -1462,6 +1462,11 @@ textarea, input, .editarea, .search-editarea, select  {
 
 .graysmall:hover .graysmall-message{display:block;}
 .graysmall-details{display:none;position:absolute;bottom:0px;color:#666;width:100%;float:left;margin:0;padding:0;	}
+
+.glossary .graysmall .graysmall-details {
+	margin-top: 0;
+}
+
 .graysmall .graysmall-details
 {
 	display: block;

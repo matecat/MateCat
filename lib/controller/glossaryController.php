@@ -22,6 +22,8 @@ class glossaryController extends ajaxcontroller {
     private $comment;
 
     public function __construct() {
+
+        $this->disableSessions();
         parent::__construct();
 
         $filterArgs = array(

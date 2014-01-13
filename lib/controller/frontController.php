@@ -357,6 +357,10 @@ abstract class ajaxcontroller extends controller {
 
 	protected $result;
 
+    public function disableSessions(){
+        INIT::sessionClose();
+    }
+
 	protected function __construct() {
 		parent::__construct();
 		$buffer = ob_get_contents();

@@ -24,6 +24,8 @@ class createProjectController extends ajaxcontroller {
     private $disable_tms_engine_flag;
 
     public function __construct() {
+
+        $this->disableSessions();
         parent::__construct();
 
         $filterArgs = array(

@@ -48,8 +48,8 @@ while (1) {
     $res = getNextSegmentAndLock();
     
     if (empty($res)) {
-        echo "--- (child $my_pid) : _-_getNextSegmentAndLock_-_ no segment ready for tm volume analisys: wait 3 seconds\n";
-        sleep(3);
+        echo "--- (child $my_pid) : _-_getNextSegmentAndLock_-_ no segment ready for tm volume analisys: wait 5 seconds\n";
+        sleep(5);
         continue;
     }
     $sid = $res['id_segment'];

@@ -12,6 +12,8 @@ class changeJobsStatusController extends ajaxcontroller {
     private $undo;
 
     public function __construct() {
+
+        $this->disableSessions();
         parent::__construct();
 
         $filterArgs = array(

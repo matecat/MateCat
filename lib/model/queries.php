@@ -1815,6 +1815,10 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
     echo 'Queries: ' . count($chunks_st) . "\n";
     Log::doLog( 'Queries: ' . count($chunks_st) );
 
+    //USE the MySQL InnoDB isolation Level to protect from thread high concurrency access
+    $db->query( 'SET autocommit=0' );
+    $db->query( 'START TRANSACTION' );
+
     foreach ( $chunks_st as $k => $chunk ) {
 
         $query_st = $segment_translations . implode( ", ", $chunk ) .
@@ -1861,6 +1865,8 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
             $err   = $db->get_error();
             if ( $err[ 'error_code' ] != 0 ) {
+                $db->query( 'ROLLBACK' );
+                $db->query( 'SET autocommit=1' );
                 Log::doLog( $err );
                 return $err[ 'error_code' ] * -1;
             }
@@ -1880,10 +1886,16 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
+
+        $db->query( 'ROLLBACK' );
+        $db->query( 'SET autocommit=1' );
         log::doLog( $err );
 
         return $errno * -1;
     }
+
+    $db->query( 'COMMIT' );
+    $db->query( 'SET autocommit=1' );
 
     return $db->affected_rows;
 }

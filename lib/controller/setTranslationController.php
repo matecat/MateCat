@@ -19,7 +19,9 @@ class setTranslationController extends ajaxcontroller {
 	private $chosen_suggestion_index;
 
 	public function __construct() {
+        $this->disableSessions();
 		parent::__construct();
+        
         $this->id_job        = $this->get_from_get_post( 'id_job' );
         $this->id_segment    = $this->get_from_get_post( 'id_segment' );
         $this->id_translator = $this->get_from_get_post( 'id_translator' );
