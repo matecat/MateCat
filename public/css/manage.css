@@ -287,7 +287,11 @@ body.manage th.create-date
 	
 body.manage th.job-detail
 	{
-	width: 50%;
+	width: 45%;
+	}
+body.manage th.private-tm-key
+	{
+	min-width: 120px;
 	}
 
 body.manage th.words

@@ -593,19 +593,20 @@ UI = {
 	            '		<span class="value">' + this.mt_engine_name + '</span>'+
 	            '	</div>';
 
-            if (this.private_tm_key!==''){
-                    
-                     newProject += '	<div class="field">'+
-	            '		<h3>Private TM Key:</h3>'+
-	            '		<span class="value">'+this.private_tm_key+'</span>'+
-	            '	</div>';
-            }
+//            if (this.private_tm_key!==''){
+//                    
+//                     newProject += '	<div class="field">'+
+//	            '		<h3>Private TM Key:</h3>'+
+//	            '		<span class="value">'+this.private_tm_key+'</span>'+
+//	            '	</div>';
+//            }
                     
 		      newProject += '    <table class="tablestats continue tablesorter" width="100%" border="0" cellspacing="0" cellpadding="0" id="project-'+this.id+'">'+
 		        '        <thead>'+
 			    '            <tr>'+
 			    '                <th class="create-date header">Create Date</th>'+
-			    '                <th class="job-detail">Job</th>';
+			    '                <th class="job-detail">Job</th>'+
+			    '                <th class="private-tm-key">Private TM Key</th>';
 
             if(config.v_analysis){
                 newProject += '                <th class="words header">Payable Words</th>';
@@ -622,7 +623,6 @@ UI = {
             var ind = 0;
             $.each(this, function() {
                 ind++;
-
 		        var newJob = '    <tr class="row " data-jid="'+this.id+'" data-status="'+this.status+'" data-password="'+this.password+'">'+
 		            '        <td class="create-date" data-date="'+this.create_date+'">'+this.formatted_create_date+'</td>'+
 		            '        <td class="job-detail">'+
@@ -631,8 +631,10 @@ UI = {
 		            '        		<div class="langs">'+this.sourceTxt+'&nbsp;&gt;&nbsp;'+this.targetTxt+'</div>'+
 		            '        		<a class="url" target="_blank" href="/translate/'+project.name+'/'+this.source+'-'+this.target+'/'+this.id+((prefix)? '-'+ind : '')+'-'+this.password+'">'+config.hostpath+'/translate/.../'+this.id+((prefix)? '-'+ind : '')+'-'+this.password+'</a>'+
 		            '        	</span>'+
+		            '        </td>'+
+		            '        <td class="tm-key">'+
+		            '        	<span>'+ ((typeof this.private_tm_key == 'undefined')? '': this.private_tm_key) + '</span>'+
 		            '        </td>';
-
                 if(config.v_analysis){
                     newJob += '        <td class="words">'+this.stats.TOTAL_FORMATTED+'</td>';
                 }
