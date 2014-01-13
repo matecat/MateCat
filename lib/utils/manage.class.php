@@ -107,7 +107,13 @@ class ManageUtils {
 				$job['stats'] = $statsByJobId[ $job['id'] . "-" . $job['password'] ];
 
 				$project['id_engine_mt']= $job_array[5];
-				$project['private_tm_key']= $job_array[6];
+
+                //FIXME: BUG MyMemory private key can be different for every job, must be associated to the job and not to the project
+                //FIXME: there should be more than one private TM key
+				$project['private_tm_key'] = $job_array[6];
+
+                $job['private_tm_key'] = $job_array[6];
+
 				$job['disabled']= ($job_array[7]=='cancelled')?"disabled":"";
 				$job['status']= $job_array[7];
 				if($job_array[7]!='cancelled') $project['no_active_jobs'] = false;
@@ -132,6 +138,7 @@ class ManageUtils {
 
 		}
 		return $projects;
+
 	}
 }
 

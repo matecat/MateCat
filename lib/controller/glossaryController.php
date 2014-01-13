@@ -105,47 +105,29 @@ class glossaryController extends ajaxcontroller {
 
                     break;
                 case 'set':
-
-                    if (empty($st['id_translator'])) {
-
-                        $newUser = json_decode( file_get_contents( 'http://mymemory.translated.net/api/createranduser' ) );
-
-                        /*
-                            'key' => '54tnffDgG7Vaw',
-                           'error' => '',
-                           'code' => 200,
-                           'id' => 'MyMemory_29973efb18',
-                           'pass' => '30d076c045',
-
-                         */
-
-                        Log::doLog( $newUser );
-
-                        if( $newUser->error || $newUser->code != 200 ){
-                            throw new Exception("User private key failure.", -1);
-                        }
-
-                        $data                       = array();
-                        $data[ 'username' ]         = $newUser->id;
-                        $data[ 'email' ]            = '';
-                        $data[ 'password' ]         = $newUser->pass;
-                        $data[ 'first_name' ]       = '';
-                        $data[ 'last_name' ]        = '';
-                        $data[ 'mymemory_api_key' ] = $newUser->key;
-
-                        $res = Database::obtain()->insert( 'translators', $data );
-
-                        Log::doLog( $res );
-
-                        $config[ 'id_user' ]     = $newUser->key;
-
+                    if ( empty($st['id_translator']) ) {
+                        $newUser = TMS::createMyMemoryKey( $this->id_job ); //throws exception
+                        $config[ 'id_user' ]     = $newUser->id;
                     }
-
                     $TMS_RESULT = $_TMS->set($config);
-                    $set_code = $TMS_RESULT; Log::doLog($set_code);
-                    if ($set_code) {
-                        $TMS_GET_RESULT = $_TMS->get($config)->get_glossary_matches_as_array();
-                        $this->result['data']['matches'] = $TMS_GET_RESULT;
+                    $set_code = $TMS_RESULT;
+
+                    if ( $set_code ) {
+//                       Often the get method after a set is not in real time, so return the same values ( FAKE )
+//                        $TMS_GET_RESULT = $_TMS->get($config)->get_glossary_matches_as_array();
+//                        $this->result['data']['matches'] = $TMS_GET_RESULT;
+                        $this->result['data']['matches'] = array(
+                            $config['segment'] => array(
+                                    array(
+                                        'segment'          => $config['segment'],
+                                        'translation'      => $config['segment'],
+                                        'last_update_date' => date_create()->format('Y-m-d H:i:m'),
+                                        'last_updated_by'  => $newUser->id,
+                                        'created_by'       => $newUser->id,
+                                        'target_note'      => $config['tnote'],
+                                    )
+                            )
+                        );
                     }
                     break;
                 case 'update':
