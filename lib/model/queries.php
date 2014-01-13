@@ -1100,6 +1100,23 @@ function insertProject( ArrayObject $projectStructure ) {
     return $results[ 'LAST_INSERT_ID()' ];
 }
 
+function updateTranslatorJob( $id_job, stdClass $newUser ){
+
+    $data                       = array();
+    $data[ 'username' ]         = $newUser->id;
+    $data[ 'email' ]            = '';
+    $data[ 'password' ]         = $newUser->pass;
+    $data[ 'first_name' ]       = '';
+    $data[ 'last_name' ]        = '';
+    $data[ 'mymemory_api_key' ] = $newUser->key;
+
+    $db = Database::obtain();
+
+    $res = $db->insert( 'translators', $data );
+    $res = $db->update( 'jobs', array( 'id_translator' => $newUser->id ), ' id = ' . (int)$id_job  );
+
+}
+
 //never used email , first_name and last_name
 //function insertTranslator( $user, $pass, $api_key, $email = '', $first_name = '', $last_name = '' ) {
 function insertTranslator( ArrayObject $projectStructure ) {
