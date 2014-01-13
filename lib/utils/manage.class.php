@@ -80,15 +80,16 @@ class ManageUtils {
 				$job['targetTxt'] = $lang_handler->getLocalizedName($job['target']);
 				//raw
 				$job['create_date']= $job_array[3];
+
 				//standard
-				$job['formatted_create_date']= date('Y D d, H:i',strtotime($job_array[3]));
+				$job['formatted_create_date']= date('Y M d, H:i',strtotime($job_array[3]));
 				//quest'anno
 				if(date('Y')==date('Y',strtotime($job_array[3]))){
 					$job['formatted_create_date']=date('F d, H:i',strtotime($job_array[3]));
 				}
 				//questo mese
 				if(date('Y-m')==date('Y-m',strtotime($job_array[3]))){
-					$job['formatted_create_date']=date('F d I, H:i',strtotime($job_array[3]));
+					$job['formatted_create_date']=date('F d l, H:i',strtotime($job_array[3]));
 				}
 				//ieri
 				if(date('Y-m-d',strtotime('yesterday'))==date('Y-m-d',strtotime($job_array[3]))){
