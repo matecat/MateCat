@@ -503,6 +503,10 @@ body.manage .searchbox .block.right
 	{
 	margin-top: 18px !important;
 	}
+.searchbox .block
+	{
+	margin-bottom: 8px;
+	}
 body.manage.filterOpen #contentBox
 	{
 	margin-top: 40px;
