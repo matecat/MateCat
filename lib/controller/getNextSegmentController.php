@@ -8,6 +8,8 @@ class getNextSegmentController extends ajaxcontroller {
 
 
 	public function __construct() {
+
+        $this->disableSessions();
 		parent::__construct();
 
 		$this->id_segment = $this->get_from_get_post('id_segment');

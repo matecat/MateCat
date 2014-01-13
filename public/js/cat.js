@@ -813,7 +813,7 @@ UI = {
 			if (e.which == 13) { // enter
 				e.preventDefault();
 				var txt = $(this).text();
-				if (txt.length > 2)
+				if (txt.length > 1)
 					UI.getConcordance(txt, 0);
 			} else {
 				if ($('.editor .sub-editor .cc-search .search-target').text().length > 0) {
@@ -876,9 +876,12 @@ UI = {
 			e.preventDefault();
 			var txt = $(this).parents('.gl-search').find('.search-source').text();
 			segment = $(this).parents('section').first();
-			if (txt.length > 2) {
+			if (txt.length > 1) {
 				UI.getGlossary(segment, false);
+			} else {
+				APP.alert('Please insert a string of two letters at least!');
 			}
+
 		}).on('keydown', '.sub-editor .gl-search .search-source', function(e) {
 			if (e.which == 13) {
 				e.preventDefault();
@@ -2859,36 +2862,36 @@ UI = {
 	lockTags: function(el) {
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
-//		console.log('LOCK TAGS');
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
 		if (!this.taglockEnabled)
 			return false;
 		if (this.noTagsInSegment())
 			return false;
-		$(editarea).each(function(index) {
+		
+		$(editarea).first().each(function(index) {
 			saveSelection();
 
 			var tx = $(this).html();
-
+			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
+			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
 			tx = tx.replace(/\<span/gi, "<pl")
 					.replace(/\<\/span/gi, "</pl")
 					.replace(/&lt;/gi, "<")
-					.replace(/(\<(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid[^<]*?&gt;)/gi, "<pl contenteditable=\"false\" class=\"locked\">$1</pl>")
+					.replace(/(\<(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid[^<]*?&gt;)/gi, brTx1)
 					.replace(/\</gi, "&lt;")
 					.replace(/\&lt;pl/gi, "<span")
 					.replace(/\&lt;\/pl/gi, "</span")
 					.replace(/\&lt;div\>/gi, "<div>")
 					.replace(/\&lt;\/div\>/gi, "</div>")
 					.replace(/\&lt;br\>/gi, "<br>")
-
 					.replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />')
 
 					// encapsulate tags of closing
-					.replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>");
+					.replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
 
 			if (UI.isFirefox) {
 				tx = tx.replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>");
-				tx = tx.replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>");
+				tx = tx.replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span class=\"$2\" contenteditable=\"false\">$3</span>");
 			} else {
 				// fix nested encapsulation
 				tx = tx.replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>");

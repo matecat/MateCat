@@ -24,6 +24,8 @@ class getSegmentsController extends ajaxcontroller {
     private $page = 0;
 
     public function __construct() {
+
+        $this->disableSessions();
         parent::__construct();
 
         $filterArgs = array(
