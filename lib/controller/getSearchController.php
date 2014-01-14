@@ -72,7 +72,7 @@ class getSearchController extends ajaxcontroller {
             'src'         => null,
             'trg'         => null,
             'status'      => $this->status,
-            'replacement' => null,
+            'replacement' => $this->replace,
             'matchCase'   => $this->matchCase,
             'exactMatch'  => $this->exactMatch,
         ) );
@@ -99,7 +99,8 @@ class getSearchController extends ajaxcontroller {
             case 'find':
                 $this->doSearch();
                 break;
-            case 'replace':
+            case 'replaceAll':
+                $this->doReplaceAll();
                 break;
             default :
                 $this->result['error'][] = array("code" => -11, "message" => "unknown  function. Use find or replace");
@@ -131,6 +132,10 @@ class getSearchController extends ajaxcontroller {
         }
         $this->result['total']    = $res['count'];
         $this->result['segments'] = $res['sidlist'];
+    }
+
+    private function doReplaceAll(){
+
     }
 
 }
