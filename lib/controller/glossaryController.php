@@ -120,7 +120,7 @@ class glossaryController extends ajaxcontroller {
                             $config['segment'] => array(
                                     array(
                                         'segment'          => $config['segment'],
-                                        'translation'      => $config['segment'],
+                                        'translation'      => $config['translation'],
                                         'last_update_date' => date_create()->format('Y-m-d H:i:m'),
                                         'last_updated_by'  => $newUser->id,
                                         'created_by'       => $newUser->id,
