@@ -3918,11 +3918,12 @@ UI = {
 	 * @returns {undefined}
 	 */
 	fillCurrentSegmentWarnings: function(warningDetails) {
-		//console.log( 'fillCurrentSegmentWarnings' );
+		console.log( 'fillCurrentSegmentWarnings' );
 //        console.log('warningDetails: ',warningDetails );
 		//scan array    
 		try {
 			$.each(warningDetails, function(key, value) {
+				UI.highlightTagMismatch(value);
 //                console.log('value: ',value );
 				if ('segment-' + value.id_segment === UI.currentSegment[0].id) {
 					UI.fillWarnings(UI.currentSegment, $.parseJSON(value.warnings));
@@ -3934,6 +3935,197 @@ UI = {
 		}
 	},
 	//check for segments in warning in the project
+	highlightTagMismatch: function(seg) {
+		console.log(seg);
+		segment = $('#segment-' + seg);
+		if(segment.length) {
+			sAr = [];
+			tAr = [];
+			$('.source span.locked', segment).each(function() {
+				sAr.push($(this).text());
+			});
+			$('.target span.locked', segment).each(function() {
+				tAr.push($(this).text());
+			});
+//			console.log(sAr);
+//			console.log(tAr);
+//			console.log(sAr.length);
+//			console.log(tAr.length);
+			if(sAr.length > tAr.length) {
+				console.log('source');
+				sAr = UI.compareArrays(sAr, tAr);
+				
+//				$.each(sAr, function(key,value) {
+//					s = value;
+//					$.each(tAr, function(k,v) {
+//						if(s == v) {
+//							sAr.splice(key, 1);
+//							tAr.splice(k, 1);
+//						}
+//					})									
+//				});
+				console.log(sAr);
+				if(!sAr.length) $('.source span.locked', segment).removeClass('mismatch');
+				$.each(sAr, function(kk,vv) {
+					txt = vv;
+					console.log(txt);
+					$('.source span.locked:not(.temp)', segment).filter(function() {
+						return $(this).text() === txt;
+					}).last().addClass('mismatch temp');					
+				});
+				$('.source span.locked.temp', segment).removeClass('temp');
+//				$('.source span.locked:not(.mismatch)', segment).last().addClass('mismatch');
+			} else {
+				console.log('target');
+/*
+				$.each(tAr, function(key,value) {
+					t = value;
+					$.each(sAr, function(k,v) {
+						if(t == v) {
+							console.log(tAr);
+							tAr = jQuery.grep(tAr, function(value) {
+							  return value != t;
+							});
+							console.log(tAr);
+							sAr = jQuery.grep(sAr, function(value) {
+							  return value != v;
+							});
+//							tAr.splice(key, 1);
+//							sAr.splice(k, 1);
+						}
+					})									
+				});
+*/
+				tAr = UI.compareArrays(tAr, sAr);
+//				$.each(tAr, function(key,value) {
+//					t = value;
+//					$.each(sAr, function(k,v) {
+//						if(t == v) {
+//							tAr.splice(key, 1);
+//							sAr.splice(k, 1);
+//						}
+//					})									
+//				});
+				console.log(tAr);
+				if(!tAr.length) $('.target span.locked', segment).removeClass('mismatch');
+				$.each(tAr, function(kk,vv) {
+					txt = vv;
+					console.log(txt);
+					$('.target span.locked:not(.temp)', segment).filter(function() {
+						return $(this).text() === txt;
+					}).last().addClass('mismatch temp');					
+				});
+				$('.target span.locked.temp', segment).removeClass('temp');
+
+
+//				Array1 = tAr;
+//				Array2 = sAr;
+//				where = '.editarea';
+			}
+
+//			var Array1 = sAr;
+//			var Array2 = tAr;
+//			if(!sAr.length) {
+//				Array1 = tAr;
+//				Array2 = sAr;
+//			}
+//			if(!tAr.length) {
+//				Array1 = sAr;
+//				Array2 = tAr;
+//			}	
+//Array1 = Array1.filter(function(val) {
+//  return Array2.indexOf(val) == -1;
+//});
+//console.log(Array1);
+//console.log(where);
+
+
+
+		}
+		
+/*
+		segment = $('#segment-' + seg);
+		if(segment.length) {
+			sAr = [];
+			tAr = [];
+			$('.source span.locked', segment).each(function() {
+				sAr.push($(this).text());
+			});
+			$('.target span.locked', segment).each(function() {
+				tAr.push($(this).text());
+			});
+			console.log(sAr);
+			console.log(tAr);
+			if(!s.Ar.length) {
+//				Array1 = tAr;
+//				Array2 = sAr;
+			}
+			if(!s.Ar.length) {
+//				Array1 = sAr;
+//				Array2 = tAr;
+			}			
+var Array1 = new Array("a","b","c","d","e","f");
+var Array2 = new Array("c","e");	
+
+Array1 = Array1.filter(function(val) {
+  return Array2.indexOf(val) == -1;
+});
+console.log(Array1);
+*/
+
+
+
+/*
+			console.log(seg);
+			sourceArray = $('.source span.locked', segment);
+			targetArray = $('.editarea span.locked', segment);
+			sourceArray = sourceArray.filter(function(val) {
+			  return targetArray.indexOf(val) == -1;
+			});			
+			console.log(sourceArray);
+*/
+//			console.log(targetArray);
+/*
+			if(!sourceArray.length) {
+				firstIterator = targetArray;
+				secondIterator = sourceArray;
+			}
+			if(!targetArray.length) {
+				firstIterator = sourceArray;
+				secondIterator = targetArray;
+			}
+			firstIterator.each(function() {
+				i1 = $(this);
+//				console.log(seg);
+				console.log(i1);
+				secondIterator.each(function() {
+					console.log('aa');
+					console.log(i1.html());
+					console.log($(this).html());
+				})				
+				
+			})
+*/
+//			console.log($('.source span.locked', segment));
+//			console.log($('.editarea span.locked', segment));
+//			console.log('il segmento ' + seg + ' è caricato');
+//		};
+	},
+	compareArrays: function(i1, i2) {
+		$.each(i1, function(key,value) {
+			t = value;
+			$.each(i2, function(k,v) {
+				if(t == v) {
+					i1.splice(key, 1);
+					i2.splice(k, 1);
+					UI.compareArrays(i1, i2);
+					return false;
+				}
+			})									
+		});
+		return i1;
+	},
+
 	checkWarnings: function(openingSegment) {
 		var dd = new Date();
 		ts = dd.getTime();
@@ -3954,7 +4146,7 @@ UI = {
 
 				//check for errors
 				if (UI.globalWarnings.length > 0) {
-
+					console.log(data);
 					//for now, put only last in the pointer to segment id
 					warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
 //                    console.log('warningPosition: ' + warningPosition);
@@ -3962,6 +4154,9 @@ UI = {
 					if (openingSegment)
 						UI.fillCurrentSegmentWarnings(data.details);
 
+					$.each(UI.globalWarnings, function(key, value) {
+						UI.highlightTagMismatch(value);
+					});					
 					//switch to css for warning
 					$('#notifbox').attr('class', 'warningbox').attr("title", "Some translations seems to have TAGS and/or other untraslatables that do not match the source").find('.numbererror').text(UI.globalWarnings.length);
 

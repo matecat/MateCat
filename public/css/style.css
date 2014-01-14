@@ -1824,6 +1824,11 @@ footer nav
 	padding-bottom: 3px;
 	vertical-align: middle;
 }
+.editarea .locked.mismatch,
+.source .locked.mismatch
+{
+	color: red !important;
+}
 .editor .cc-search .input .locked
 {
 	font-size: 70%;
