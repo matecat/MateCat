@@ -361,10 +361,13 @@ class CatUtils {
             $seg['source'] = trim( CatUtils::rawxliff2view( $seg['source'] ) );
             $seg['translation'] = trim( CatUtils::rawxliff2view( $seg['translation'] ) );
 
-            //TODO improvement RESET BR Placeholders
-            $seg['source'] = str_replace( '##$br$##', "<br>", $seg['source'] );
-            $seg['translation'] = str_replace( '##$br$##', "<br>", $seg['translation'] );
-            $seg['diff'] = str_replace( "\n", "<br>", $seg['diff'] );
+            $array_patterns     = array( rtrim( self::lfPlaceholderRegex, 'g' ) , rtrim( self::crPlaceholderRegex, 'g' ), rtrim( self::crlfPlaceholderRegex, 'g' ) );
+            $array_replacements = array( '<br class="_0A" />', '<br class="_0D" />', '<br class="_0D0A" />' );
+
+            $seg['source'] = preg_replace( $array_patterns, $array_replacements, $seg['source'] );
+            $seg['translation'] = preg_replace( $array_patterns, $array_replacements, $seg['translation'] );
+            $seg['diff'] = preg_replace( $array_patterns, $array_replacements, $seg['diff'] );
+
 
             if( $seg['mt_qe'] == 0 ){
                 $seg['mt_qe'] = 'N/A';
