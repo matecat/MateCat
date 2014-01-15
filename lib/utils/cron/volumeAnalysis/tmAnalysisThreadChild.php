@@ -153,9 +153,11 @@ while (1) {
      * So don't worry, perform TMS Analysis
      *
      */
-    $tms = new TMS( $_TMS );
-    $tms_match = $tms->get( $config );
-    $tms_match = $tms_match->get_matches_as_array();
+    if( $tms_enabled ){
+        $tms = new TMS( $_TMS );
+        $tms_match = $tms->get( $config );
+        $tms_match = $tms_match->get_matches_as_array();
+    }
 
     /**
      * Call External MT engine if it is a custom one ( mt not requested from MyMemory )
