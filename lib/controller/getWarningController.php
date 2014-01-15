@@ -127,14 +127,14 @@ class getWarningController extends ajaxcontroller {
         $QA->performConsistencyCheck();
         if ( $QA->thereAreWarnings() ) {
 //        if ( $QA->thereAreErrors() ) {
-            $this->result[ 'details' ]                                           = array();
-            $this->result[ 'details' ][ $this->__postInput->id ]                 = array();
-            $this->result[ 'details' ][ $this->__postInput->id ][ 'id_segment' ] = $this->__postInput->id;
-//            $this->result[ 'details' ][ $this->__postInput->id ][ 'warnings' ]   = $QA->getErrorsJSON();
+            $this->result[ 'details' ]                 = array();
+            $this->result[ 'details' ]                 = array();
+            $this->result[ 'details' ][ 'id_segment' ] = $this->__postInput->id;
+//            $this->result[ 'details' ][ 'warnings' ]   = $QA->getErrorsJSON();
 //            $this->result[ 'total' ]                                             = count( $QA->getErrors() );
-            $this->result[ 'details' ][ $this->__postInput->id ][ 'warnings' ]     = $QA->getWarningsJSON();
-            $this->result[ 'details' ][ $this->__postInput->id ][ 'tag_mismatch' ] = $QA->getMalformedXmlStructs();
-            $this->result[ 'total' ]                                               = count( $QA->getWarnings() );
+            $this->result[ 'details' ][ 'warnings' ]     = $QA->getWarningsJSON();
+            $this->result[ 'details' ][ 'tag_mismatch' ] = $QA->getMalformedXmlStructs();
+            $this->result[ 'total' ]                     = count( $QA->getWarnings() );
 
         }
 
