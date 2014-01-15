@@ -1712,8 +1712,8 @@ UI = {
 //			return false;
 		}
 		else if (this.searchMode == 'source&target') {
-			APP.alert('Combined search is temporarily disabled');
-			return false;
+//			APP.alert('Combined search is temporarily disabled');
+//			return false;
 		}
 
 		var source = (p['source']) ? p['source'] : '';
@@ -1760,7 +1760,7 @@ UI = {
 			this.render(this.pendingRender);
 			this.pendingRender = false;
 		}
-		console.log(this.editarea.html());
+//		console.log(this.editarea.html());
 	},
 	execReplaceAll: function() {
 //		console.log('replace all');
@@ -1923,8 +1923,8 @@ UI = {
 				UI.doMarkSearchResults(trgHasTags, $(q + " .editarea:" + containsFunc + "('" + txtTrg + "')"), regTarget, q, txtTrg, ignoreCase);
 //				UI.execSearchResultsMarking(UI.filterExactMatch($(q + " .source:" + containsFunc + "('" + txtSrc + "')"), txtSrc), regSource, false);
 //				UI.execSearchResultsMarking(UI.filterExactMatch($(q + " .editarea:" + containsFunc + "('" + txtTrg + "')"), txtTrg), regTarget, false);
-
-				$('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
+				$('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker').removeClass('searchPreMarker');
+//				$('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
 				$('mark.searchPreMarker:not(.searchMarker)').each(function() {
 					var a = $(this).text();
 					$(this).replaceWith(a);
@@ -2001,9 +2001,10 @@ UI = {
 		}
 	},
 	execSearchResultsMarking: function(areas, regex, testRegex) {
+		searchMarker = (UI.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
 			if (!testRegex || ($(this).text().match(testRegex) != null)) {
-				var tt = $(this).html().replace(/&lt;/g, UI.openTagPlaceholder).replace(/&gt;/g, UI.closeTagPlaceholder).replace(regex, '<mark class="searchMarker">$1</mark>').replace(openTagReg, '&lt;').replace(closeTagReg, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
+				var tt = $(this).html().replace(/&lt;/g, UI.openTagPlaceholder).replace(/&gt;/g, UI.closeTagPlaceholder).replace(regex, '<mark class="' + searchMarker + '">$1</mark>').replace(openTagReg, '&lt;').replace(closeTagReg, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
 				$(this).html(tt);
 			}
 		});
@@ -2059,6 +2060,35 @@ UI = {
 
 			}
 		} else if (this.searchMode == 'source&target') {
+
+			var m = $(".editarea mark.currSearchItem"); // ***
+//            console.log($(m).nextAll('mark.searchMarker').length);
+			if ($(m).nextAll('mark.searchMarker').length) { // there are other subsequent results in the segment
+				console.log('altri item nel segmento');
+				$(m).removeClass('currSearchItem');
+				$(m).nextAll('mark.searchMarker').first().addClass('currSearchItem');
+				if (unmark)
+					$(m).replaceWith($(m).text());
+				UI.goingToNext = false;
+			} else { // jump to results in subsequents segments
+				console.log('m.length: ' + m.length);
+				seg = (m.length) ? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
+				if (seg.length) {
+					skipCurrent = $(seg).has("mark.currSearchItem").length;
+					this.gotoSearchResultAfter({
+						el: 'segment-' + $(seg).attr('id').split('-')[1],
+						skipCurrent: skipCurrent,
+						unmark: unmark
+					});
+				} else {//console.log('b');
+					setTimeout(function() {
+						UI.gotoNextResultItem(false);
+					}, 500);
+				}
+			}
+
+
+/*
 			var seg = $("section.currSearchSegment");
 //            var m = $("section.currSearchSegment mark.searchMarker");
 //            seg = (m.length)? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
@@ -2069,6 +2099,7 @@ UI = {
 					el: 'segment-' + $(seg).attr('id').split('-')[1]
 				});
 			}
+*/			
 		} else {
 			var m = $("mark.currSearchItem");
 //            console.log($(m).nextAll('mark.searchMarker').length);
@@ -2140,7 +2171,50 @@ UI = {
 
 
 			}
-		} else if (this.searchMode == 'source&target') { // searchMode: source&target
+		} else { // searchMode: source&target or normal
+			var wh = (this.searchMode == 'source&target')? ' .editarea' : '';
+			seg = $('section' + wh).has("mark.searchMarker");
+			ss = (this.searchMode == 'source&target')? el + '-editarea' : el;
+			found = false;
+			$.each(seg, function(index) {
+				if ($(this).attr('id') >= ss) {
+					if (($(this).attr('id') == ss) && (skipCurrent)) {
+					} else {
+						found = true;
+						$("html,body").animate({
+							scrollTop: $(this).offset().top - 200
+						}, 500);
+						setTimeout(function() {
+							UI.goingToNext = false;
+						}, 500);
+						var m = $("mark.currSearchItem");
+						$(m).removeClass('currSearchItem');
+						$(this).find('mark.searchMarker').first().addClass('currSearchItem');
+						if (unmark)
+							$(m).replaceWith($(m).text());
+						return false;
+					}
+				}
+			});			
+			if (!found) {
+				// load new segments
+				if (!this.searchResultsSegments) {
+					this.pendingRender = {
+						firstLoad: false,
+						applySearch: true,
+						detectSegmentToScroll: true
+					};
+				} else {
+					seg2scroll = this.nextUnloadedResultSegment();
+					$('#outer').empty();
+					this.render({
+						firstLoad: false,
+						applySearch: true,
+						segmentToScroll: seg2scroll
+					});
+				}
+			}
+/*
 			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
 			destination = (($('#' + el + ":has(mark.searchMarker)").length) && (!$('#' + el).hasClass('currSearchSegment'))) ? $('#' + el) : $('#' + el).nextAll(status + ":has(mark.searchMarker)").first();
 //            destination = $('#'+el).nextAll(status + ":has(mark.searchMarker)").first();            
@@ -2167,68 +2241,9 @@ UI = {
 					});
 				}
 			}
-
-
-		} else { // searchMode: normal
-			seg = $('section').has("mark.searchMarker");
-			ss = el;
-			found = false;
-			$.each(seg, function(index) {
-				if ($(this).attr('id') >= ss) {
-					if (($(this).attr('id') == ss) && (skipCurrent)) {
-					} else {
-						found = true;
-						$("html,body").animate({
-							scrollTop: $(this).offset().top - 200
-						}, 500);
-						setTimeout(function() {
-							UI.goingToNext = false;
-						}, 500);
-						var m = $("mark.currSearchItem");
-						$(m).removeClass('currSearchItem');
-						$(this).find('mark.searchMarker').first().addClass('currSearchItem');
-						if (unmark)
-							$(m).replaceWith($(m).text());
-						return false;
-					}
-				}
-			});
-			if (!found) {
-				// load new segments
-				if (!this.searchResultsSegments) {
-					this.pendingRender = {
-						firstLoad: false,
-						applySearch: true,
-						detectSegmentToScroll: true
-					};
-				} else {
-					seg2scroll = this.nextUnloadedResultSegment();
-					$('#outer').empty();
-					this.render({
-						firstLoad: false,
-						applySearch: true,
-						segmentToScroll: seg2scroll
-					});
-				}
-
-			}
-			;
-		}
-
-
-/*
-		if ((typeof p['source'] == 'undefined') && (typeof p['target'] == 'undefined')) {
-			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
-			if (p['status'] == 'all') {
-				this.scrollSegment($('#' + el).next());
-			} else {
-				this.scrollSegment($('#' + el).nextUntil('section' + status).last().next());
-			}
-		} else {
-
-
-		}
 */
+
+		}
 	},
 	preOpenConcordance: function() {
 		var selection = window.getSelection();
@@ -2446,7 +2461,6 @@ UI = {
 		})		
 	},
 	getContribution: function(segment, next) {
-		console.log(segment);
 		var n = (next == 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
 		if ($(n).hasClass('loaded')) {
 			this.spellCheck();
@@ -2467,7 +2481,6 @@ UI = {
 		if ((!n.length) && (next)) {
 			return false;
 		}
-		console.log(n);
 		var id = n.attr('id');
 		var id_segment = id.split('-')[1];
 
@@ -2722,7 +2735,8 @@ UI = {
 //				} else if (this.searchMode == 'source&target') {
 //					$('#segment-' + options.segmentToScroll).addClass('currSearchSegment');
 				} else {
-					$('#segment-' + options.segmentToScroll).addClass('currSearchSegment');
+					$('#segment-' + options.segmentToScroll + ' .editarea mark.searchMarker').first().addClass('currSearchItem');
+//					$('#segment-' + options.segmentToScroll).addClass('currSearchSegment');
 				}
 			}
 		}
@@ -3000,7 +3014,7 @@ UI = {
 		this.getConcordance(this.currentSelectedText, this.currentSearchInTarget);
 	},
 	openSegment: function(editarea, operation) {
-//		segment = $('#segment-' + $(editarea).attr('data-sid'));
+		var segment = $('#segment-' + $(editarea).attr('data-sid'));
 		this.openSegmentStart = new Date();
 		if (!this.byButton) {
 			if (this.justSelecting('editarea'))
@@ -3028,7 +3042,6 @@ UI = {
 
 		this.fillCurrentSegmentWarnings(this.globalWarnings);
 		this.setNextWarnedSegment();
-		segment = $('#segment-' + $(editarea).attr('data-sid'));
 
 		this.focusEditarea = setTimeout(function() {
 			UI.editarea.focus();
@@ -3871,34 +3884,18 @@ UI = {
 	 * @param {type} warnings
 	 * @returns {undefined}
 	 */
-	setNextWarnedSegment: function(segment_id) {
-		segment_id = segment_id || UI.currentSegmentId;
-//        UI.globalWarnings = (Loader.detect('test'))? fakeArr : UI.globalWarnings;
+	setNextWarnedSegment: function(sid) {
+		sid = sid || UI.currentSegmentId;
 		idList = UI.globalWarnings;
 		$.each(idList, function(index) {
-			if (this > segment_id) {
+			if (this > sid) {
 				$('#point2seg').attr('href', '#' + this);
 				return false;
 			}
 			if (this == idList[idList.length - 1]) {
 				$('#point2seg').attr('href', '#' + idList[0]);
 			}
-			;
 		});
-		/*
-		 counter = 0;
-		 $.each(UI.globalWarnings, function(key, value) {
-		 counter++;
-		 if(counter== 1) UI.firstWarnedSegment = key;
-		 if(key > segment_id) {
-		 $('#point2seg').attr('href', '#'+key);
-		 return false;
-		 }
-		 if(counter == Object.keys(UI.globalWarnings).length) {
-		 $('#point2seg').attr('href', '#'+UI.firstWarnedSegment);                
-		 };
-		 });
-		 */
 	},
 	fillWarnings: function(segment, warnings) {
 		//console.log( 'fillWarnings' );
@@ -3921,13 +3918,12 @@ UI = {
 	 * @returns {undefined}
 	 */
 	fillCurrentSegmentWarnings: function(warningDetails) {
-		console.log( 'fillCurrentSegmentWarnings' );
+//		console.log( 'fillCurrentSegmentWarnings' );
 //        console.log('warningDetails: ',warningDetails );
 		//scan array    
 		try {
 			$.each(warningDetails, function(key, value) {
 				UI.highlightTagMismatch(value);
-//                console.log('value: ',value );
 				if ('segment-' + value.id_segment === UI.currentSegment[0].id) {
 					UI.fillWarnings(UI.currentSegment, $.parseJSON(value.warnings));
 				}
@@ -3939,8 +3935,9 @@ UI = {
 	},
 	//check for segments in warning in the project
 	highlightTagMismatch: function(seg) {
+		return false;
 		console.log(seg);
-		segment = $('#segment-' + seg);
+		var segment = $('#segment-' + seg);
 		if(segment.length) {
 			sAr = [];
 			tAr = [];
@@ -3950,23 +3947,9 @@ UI = {
 			$('.target span.locked', segment).each(function() {
 				tAr.push($(this).text());
 			});
-//			console.log(sAr);
-//			console.log(tAr);
-//			console.log(sAr.length);
-//			console.log(tAr.length);
 			if(sAr.length > tAr.length) {
 				console.log('source');
 				sAr = UI.compareArrays(sAr, tAr);
-				
-//				$.each(sAr, function(key,value) {
-//					s = value;
-//					$.each(tAr, function(k,v) {
-//						if(s == v) {
-//							sAr.splice(key, 1);
-//							tAr.splice(k, 1);
-//						}
-//					})									
-//				});
 				console.log(sAr);
 				if(!sAr.length) $('.source span.locked', segment).removeClass('mismatch');
 				$.each(sAr, function(kk,vv) {
@@ -3980,35 +3963,7 @@ UI = {
 //				$('.source span.locked:not(.mismatch)', segment).last().addClass('mismatch');
 			} else {
 				console.log('target');
-/*
-				$.each(tAr, function(key,value) {
-					t = value;
-					$.each(sAr, function(k,v) {
-						if(t == v) {
-							console.log(tAr);
-							tAr = jQuery.grep(tAr, function(value) {
-							  return value != t;
-							});
-							console.log(tAr);
-							sAr = jQuery.grep(sAr, function(value) {
-							  return value != v;
-							});
-//							tAr.splice(key, 1);
-//							sAr.splice(k, 1);
-						}
-					})									
-				});
-*/
 				tAr = UI.compareArrays(tAr, sAr);
-//				$.each(tAr, function(key,value) {
-//					t = value;
-//					$.each(sAr, function(k,v) {
-//						if(t == v) {
-//							tAr.splice(key, 1);
-//							sAr.splice(k, 1);
-//						}
-//					})									
-//				});
 				console.log(tAr);
 				if(!tAr.length) $('.target span.locked', segment).removeClass('mismatch');
 				$.each(tAr, function(kk,vv) {
@@ -4019,100 +3974,8 @@ UI = {
 					}).last().addClass('mismatch temp');					
 				});
 				$('.target span.locked.temp', segment).removeClass('temp');
-
-
-//				Array1 = tAr;
-//				Array2 = sAr;
-//				where = '.editarea';
 			}
-
-//			var Array1 = sAr;
-//			var Array2 = tAr;
-//			if(!sAr.length) {
-//				Array1 = tAr;
-//				Array2 = sAr;
-//			}
-//			if(!tAr.length) {
-//				Array1 = sAr;
-//				Array2 = tAr;
-//			}	
-//Array1 = Array1.filter(function(val) {
-//  return Array2.indexOf(val) == -1;
-//});
-//console.log(Array1);
-//console.log(where);
-
-
-
 		}
-		
-/*
-		segment = $('#segment-' + seg);
-		if(segment.length) {
-			sAr = [];
-			tAr = [];
-			$('.source span.locked', segment).each(function() {
-				sAr.push($(this).text());
-			});
-			$('.target span.locked', segment).each(function() {
-				tAr.push($(this).text());
-			});
-			console.log(sAr);
-			console.log(tAr);
-			if(!s.Ar.length) {
-//				Array1 = tAr;
-//				Array2 = sAr;
-			}
-			if(!s.Ar.length) {
-//				Array1 = sAr;
-//				Array2 = tAr;
-			}			
-var Array1 = new Array("a","b","c","d","e","f");
-var Array2 = new Array("c","e");	
-
-Array1 = Array1.filter(function(val) {
-  return Array2.indexOf(val) == -1;
-});
-console.log(Array1);
-*/
-
-
-
-/*
-			console.log(seg);
-			sourceArray = $('.source span.locked', segment);
-			targetArray = $('.editarea span.locked', segment);
-			sourceArray = sourceArray.filter(function(val) {
-			  return targetArray.indexOf(val) == -1;
-			});			
-			console.log(sourceArray);
-*/
-//			console.log(targetArray);
-/*
-			if(!sourceArray.length) {
-				firstIterator = targetArray;
-				secondIterator = sourceArray;
-			}
-			if(!targetArray.length) {
-				firstIterator = sourceArray;
-				secondIterator = targetArray;
-			}
-			firstIterator.each(function() {
-				i1 = $(this);
-//				console.log(seg);
-				console.log(i1);
-				secondIterator.each(function() {
-					console.log('aa');
-					console.log(i1.html());
-					console.log($(this).html());
-				})				
-				
-			})
-*/
-//			console.log($('.source span.locked', segment));
-//			console.log($('.editarea span.locked', segment));
-//			console.log('il segmento ' + seg + ' è caricato');
-//		};
 	},
 	compareArrays: function(i1, i2) {
 		$.each(i1, function(key,value) {
@@ -4149,7 +4012,6 @@ console.log(Array1);
 
 				//check for errors
 				if (UI.globalWarnings.length > 0) {
-					console.log(data);
 					//for now, put only last in the pointer to segment id
 					warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
 //                    console.log('warningPosition: ' + warningPosition);
