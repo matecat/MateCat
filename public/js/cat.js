@@ -2446,6 +2446,7 @@ UI = {
 		})		
 	},
 	getContribution: function(segment, next) {
+		console.log(segment);
 		var n = (next == 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
 		if ($(n).hasClass('loaded')) {
 			this.spellCheck();
@@ -2466,6 +2467,7 @@ UI = {
 		if ((!n.length) && (next)) {
 			return false;
 		}
+		console.log(n);
 		var id = n.attr('id');
 		var id_segment = id.split('-')[1];
 
@@ -2998,6 +3000,7 @@ UI = {
 		this.getConcordance(this.currentSelectedText, this.currentSearchInTarget);
 	},
 	openSegment: function(editarea, operation) {
+//		segment = $('#segment-' + $(editarea).attr('data-sid'));
 		this.openSegmentStart = new Date();
 		if (!this.byButton) {
 			if (this.justSelecting('editarea'))
@@ -3025,6 +3028,7 @@ UI = {
 
 		this.fillCurrentSegmentWarnings(this.globalWarnings);
 		this.setNextWarnedSegment();
+		segment = $('#segment-' + $(editarea).attr('data-sid'));
 
 		this.focusEditarea = setTimeout(function() {
 			UI.editarea.focus();
