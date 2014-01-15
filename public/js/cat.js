@@ -3919,11 +3919,11 @@ UI = {
 	 */
 	fillCurrentSegmentWarnings: function(warningDetails) {
 //		console.log( 'fillCurrentSegmentWarnings' );
-//        console.log('warningDetails: ',warningDetails );
+        console.log('warningDetails: ',warningDetails );
 		//scan array    
 		try {
 			$.each(warningDetails, function(key, value) {
-				UI.highlightTagMismatch(value);
+//				UI.highlightTagMismatch(value);
 				if ('segment-' + value.id_segment === UI.currentSegment[0].id) {
 					UI.fillWarnings(UI.currentSegment, $.parseJSON(value.warnings));
 				}
@@ -3934,8 +3934,13 @@ UI = {
 		}
 	},
 	//check for segments in warning in the project
+	markTagMismatch: function(d) {
+		console.log('D: ', d);
+		console.log('D: ', d[0]);
+		
+	},
+
 	highlightTagMismatch: function(seg) {
-		return false;
 		console.log(seg);
 		var segment = $('#segment-' + seg);
 		if(segment.length) {
@@ -4006,6 +4011,7 @@ UI = {
 				token: token
 			},
 			success: function(data) {
+				console.log(data);
 				var warningPosition = '';
 //                console.log('data.total: '+data.total);
 				UI.globalWarnings = data.details;
@@ -4019,9 +4025,9 @@ UI = {
 					if (openingSegment)
 						UI.fillCurrentSegmentWarnings(data.details);
 
-					$.each(UI.globalWarnings, function(key, value) {
-						UI.highlightTagMismatch(value);
-					});					
+//					$.each(UI.globalWarnings, function(key, value) {
+//						UI.highlightTagMismatch(value);
+//					});					
 					//switch to css for warning
 					$('#notifbox').attr('class', 'warningbox').attr("title", "Some translations seems to have TAGS and/or other untraslatables that do not match the source").find('.numbererror').text(UI.globalWarnings.length);
 
@@ -4084,6 +4090,7 @@ UI = {
 
 
 					UI.fillCurrentSegmentWarnings(d.details); // update warnings
+					UI.markTagMismatch(d.details);
 					delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
 					UI.currentSegment.removeClass('waiting_for_check_result');
 				}
