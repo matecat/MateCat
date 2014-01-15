@@ -155,6 +155,13 @@ class QA {
      */
     protected $trgDomMap; // = array( 'elemCount' => 0, 'x' => array(), 'g' => array(), 'refID' => array(), 'DOMElement' => array(), 'DOMText' => array() );
 
+    /**
+     * Array of Diff structure malformed xml content
+     *
+     * @var array
+     */
+    protected $malformedXmlStructDiff = array();
+
     const ERR_NONE               = 0;
     const ERR_COUNT              = 1;
     const ERR_SOURCE             = 2;
@@ -452,6 +459,11 @@ class QA {
         $this->srcDom = $this->_loadDom($source_seg, self::ERR_SOURCE);
         $this->trgDom = $this->_loadDom($target_seg, self::ERR_TARGET);
 
+
+        if( $this->thereAreErrors() ){
+            $this->_getTagDiff();
+        }
+
         $this->_resetDOMMaps();
 
     }
@@ -674,6 +686,106 @@ class QA {
             $this->_addError($targetErrorType);
         }
         return $dom;
+    }
+
+    public function getMalformedXmlStructs(){
+        return $this->malformedXmlStructDiff;
+    }
+
+    /**
+     * Get deep information about xml loading failure for tag mismatch
+     *
+     */
+    protected function _getTagDiff(){
+
+        preg_match_all( '/(<[^\/>]+>)/', $this->source_seg, $matches );
+        $malformedXmlSrcStruct = $matches[1];
+        preg_match_all( '/(<[^\/>]+>)/', $this->target_seg, $matches );
+        $malformedXmlTrgStruct = $matches[1];
+
+//        Log::doLog( $malformedXmlSrcStruct );
+//        Log::doLog( $malformedXmlTrgStruct );
+
+        /* Returns an array containing all of the values in array1 whose values exist in all of the parameters. */
+        $diffArraySrc = array_intersect( $malformedXmlSrcStruct, $malformedXmlTrgStruct );
+        $diffArrayTrg = array_intersect( $malformedXmlTrgStruct, $malformedXmlSrcStruct );
+
+//        Log::doLog( $diffArraySrc );
+//        Log::doLog( $diffArrayTrg );
+
+        //devo togliere queste chiavi dal source
+        $diffArraySrc = array_diff_key( $malformedXmlSrcStruct, $diffArraySrc );
+//        Log::doLog($diffArraySrc);
+
+        //ore devo togliere queste chiavi dal target
+        $diffArrayTrg = array_diff_key( $malformedXmlTrgStruct, $diffArrayTrg );
+//        Log::doLog($diffArrayTrg);
+
+
+        //this is for </g>
+        preg_match_all( '/(<\/[a-zA-Z]+>)/', $this->source_seg, $matches );
+        $_closingSrcTag = $matches[1];
+//        Log::doLog(  $matches );
+        preg_match_all( '/(<\/[a-zA-Z]+>)/', $this->target_seg, $matches );
+//        Log::doLog(  $matches );
+        $_closingTrgTag = $matches[1];
+
+        $differentElementsTrg = array();
+        if( array_unique( $_closingSrcTag ) != array_unique( $_closingTrgTag ) ){
+            $differentElementsTrg = array_diff( $_closingTrgTag, $_closingSrcTag );
+//            Log::doLog( 'elementi diversi illumina target' );
+//            Log::doLog( $differentElementsTrg );
+        }
+
+        $sourceHasMore = false;
+        $diffNumberOfClosing = array();
+        if( count($_closingSrcTag) != count($_closingTrgTag) ){
+
+
+            if( count($_closingSrcTag) - count($_closingTrgTag) > 0 ){
+
+                foreach( $_closingTrgTag as $k => $v ){
+                    unset( $_closingSrcTag[ array_search( $v, $_closingSrcTag ) ] );
+                }
+
+                $diffNumberOfClosing = &$_closingSrcTag;
+                $sourceHasMore = true;
+
+            } else {
+
+                foreach( $_closingSrcTag as $k => $v ){
+                    unset( $_closingTrgTag[ array_search( $v, $_closingTrgTag ) ] );
+                }
+
+                $diffNumberOfClosing = &$_closingTrgTag;
+
+            }
+
+//            Log::doLog( 'Numero elementi diversi' );
+//            Log::doLog( $diffNumberOfClosing );
+//            Log::doLog( $sourceHasMore );
+
+        }
+
+        if( $sourceHasMore ){
+            $srcTotal = array_merge( $diffArraySrc, $diffNumberOfClosing );
+            $trgTotal = array_merge( $diffArrayTrg, $differentElementsTrg );
+        } else {
+            $tmp = array_unique( array_merge( $differentElementsTrg, $diffNumberOfClosing ) );
+            $trgTotal = array_merge( $diffArrayTrg, $tmp );
+            $srcTotal = $diffArraySrc;
+        }
+
+
+        $totalResult = array(
+            'source' => $srcTotal,
+            'target' => $trgTotal,
+        );
+
+//        Log::doLog($totalResult);
+
+        $this->malformedXmlStructDiff = $totalResult;
+
     }
 
     /**
@@ -921,7 +1033,7 @@ class QA {
         $diffArray = array_diff_assoc($this->srcDomMap['refID'], $this->trgDomMap['refID']);
         if( !empty($diffArray) && !empty($this->trgDomMap['DOMElement']) ){
             $this->_addError(self::ERR_TAG_ID);
-            //Log::doLog($diffArray);
+//            Log::doLog($diffArray);
         }
 
     }
@@ -937,6 +1049,10 @@ class QA {
     protected function _checkContentConsistency( DOMNodeList $srcNodeList, DOMNodeList $trgNodeList ) {
 
         $this->_checkTagMismatch( $srcNodeList, $trgNodeList );
+
+        if( $this->thereAreErrors() ){
+            $this->_getTagDiff();
+        }
 
         //* Fix error undefined variable trgTagReference when source target contains tags and target not
         $trgTagReference = array('node_idx' => null);
