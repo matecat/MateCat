@@ -46,7 +46,7 @@ while (1) {
     }
 
     $res = getNextSegmentAndLock();
-    
+
     if (empty($res)) {
         echo "--- (child $my_pid) : _-_getNextSegmentAndLock_-_ no segment ready for tm volume analisys: wait 5 seconds\n";
         sleep(5);

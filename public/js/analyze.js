@@ -429,21 +429,17 @@ UI = {
 					if ((s.STATUS == 'NEW') || (s.STATUS == '') || s.IN_QUEUE_BEFORE > 0) {
 						$('.loadingbar').addClass('open');
 						if (s.IN_QUEUE_BEFORE > 0) {
-
 							//increasing number of segments ( fast analysis on another project )
-							if (UI.previousQueueSize < s.IN_QUEUE_BEFORE) {
-								$('#shortloading').replaceWith('<p class="label">There are other project in queue. Please wait...</p>');
-//								$('#shortloading').children().replaceWith('<p class="label">There are other project in queue. Please wait...</p>');
+							if ( UI.previousQueueSize <= s.IN_QUEUE_BEFORE ) {
+                                $('#shortloading' ).show().html('<p class="label">There are other project in queue. Please wait...</p>');
+                                $('#longloading' ).hide();
 							} else { //decreasing ( TM analysis on another project )
-
-								if (!$('#shortloading .queue').length) {
-									$('#shortloading').replaceWith('<p class="label">Fast word counting...</p><p class="queue">There are still <span class="number">' + s.IN_QUEUE_BEFORE_PRINT + '</span> segments in queue. Please wait...</p>');
-//									$('#shortloading').children().replaceWith('<p class="label">Fast word counting...</p><p class="queue">There are still <span class="number">' + s.IN_QUEUE_BEFORE_PRINT + '</span> segments in queue. Please wait...</p>');
+								if ( !$('#shortloading .queue').length ) {
+									$('#shortloading').html('<p class="label">Fast word counting...</p><p class="queue">There are still <span class="number">' + s.IN_QUEUE_BEFORE_PRINT + '</span> segments in queue. Please wait...</p>');
 								} else {
 									$('#shortloading .queue .number').text(s.IN_QUEUE_BEFORE_PRINT);
 								}
 							}
-
 						}
 						UI.previousQueueSize = s.IN_QUEUE_BEFORE;
 					}
