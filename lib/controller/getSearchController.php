@@ -135,7 +135,8 @@ class getSearchController extends ajaxcontroller {
     }
 
     private function doReplaceAll(){
-
+        $this->queryParams['trg'] =  $this->target;
+        Log::doLog( $this );
     }
 
 }

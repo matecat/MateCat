@@ -1768,14 +1768,34 @@ UI = {
 		$('.editarea mark.searchMarker').remove();
 		this.applySearch();
 //		$('.modal[data-name=confirmReplaceAll] .btn-ok').addClass('disabled').text('Replacing...').attr('disabled', 'disabled');
-		var p = this.searchParams;
+
+        if ($('#replace-target').val() != '') {
+            this.searchParams['replace'] = $('#replace-target').val();
+        } else {
+            APP.alert('You must specify the replacement value.');
+            delete this.searchParams['replace'];
+            return false;
+        }
+
+        if ($('#select-status').val() != '') {
+            this.searchParams['status'] = $('#select-status').val();
+            this.body.attr('data-filter-status', $('#select-status').val());
+        } else {
+            delete this.searchParams['status'];
+        }
+
+        this.searchParams['match-case'] = $('#match-case').is(':checked');
+        this.searchParams['exact-match'] = $('#exact-match').is(':checked');
+
+        var p = this.searchParams;
 		var source = (p['source']) ? p['source'] : '';
 		var target = (p['target']) ? p['target'] : '';
-		var replace = (p['replace']) ? p['replace'] : '';
+		var replace = (p['replace']); // ? p['replace'] : ''; //now not needed, already checked before
 		var dd = new Date();
 		APP.doRequest({
 			data: {
-				action: 'replaceAll',
+				action: 'getSearch',
+                function: 'replaceAll',
 				job: config.job_id,
 				token: dd.getTime(),
 				password: config.password,
