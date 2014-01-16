@@ -77,7 +77,7 @@ $(document).ready(function(){
         });
     });
     if ($.browser.mozilla) {
-        $('.popup-languages .popup-box').empty().append('<ul class="test"><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li></ul>');
+//        $('.popup-languages .popup-box').empty().append('<ul class="test"><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li><li>test</li></ul>');
     };
 
 });

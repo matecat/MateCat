@@ -20,8 +20,11 @@ class glossaryController extends ajaxcontroller {
     private $segment;
     private $translation;
     private $comment;
+    private $automatic;
 
     public function __construct() {
+
+        $this->disableSessions();
         parent::__construct();
 
         $filterArgs = array(
@@ -31,6 +34,7 @@ class glossaryController extends ajaxcontroller {
             'segment'     => array( 'filter' => FILTER_UNSAFE_RAW ),
             'translation' => array( 'filter' => FILTER_UNSAFE_RAW ),
             'comment'     => array( 'filter' => FILTER_UNSAFE_RAW ),
+            'automatic'   => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -44,6 +48,7 @@ class glossaryController extends ajaxcontroller {
         $this->segment     = $__postInput[ 'segment' ];
         $this->translation = $__postInput[ 'translation' ];
         $this->comment     = $__postInput[ 'comment' ];
+        $this->automatic   = $__postInput[ 'automatic' ];
 
     }
 
@@ -52,10 +57,6 @@ class glossaryController extends ajaxcontroller {
         $st = getJobData($this->id_job, $this->password);
 
         try {
-
-            if (empty($st['id_translator'])) {
-                throw new Exception("No Private Glossary Key provided for Job.", -1);
-            }
 
             $config = TMS::getConfigStruct();
 
@@ -67,6 +68,8 @@ class glossaryController extends ajaxcontroller {
             $config[ 'email' ]       = "demo@matecat.com";
             $config[ 'id_user' ]     = $st[ 'id_translator' ];
             $config[ 'isGlossary' ]  = true;
+            $config[ 'get_mt' ]      = null;
+            $config[ 'num_result' ]  = null;
 
             /**
              * For future reminder
@@ -79,15 +82,64 @@ class glossaryController extends ajaxcontroller {
             switch ($this->exec) {
 
                 case 'get':
+
                     $TMS_RESULT = $_TMS->get($config)->get_glossary_matches_as_array();
+
+                    /**
+                     * Return only exact matches in glossary when a search is executed over the entire segment
+                     * Reordered by positional status of matches in source
+                     *
+                     * Example:
+                     * Segment: On average, Members of the House of Commons have 4,2 support staff.
+                     *
+                     * Glossary terms found: House of Commons, House of Lords
+                     *
+                     * Return: House of Commons
+                     *
+                     */
+                    if( $this->automatic ){
+                        $tmp_Result = array();
+                        foreach( $TMS_RESULT as $k => $val ){
+                            if( ( $res = mb_stripos( $this->segment, $k ) ) === false ){
+                                unset( $TMS_RESULT[$k] );
+                            } else {
+                                $tmp_Result[$res] = $k;
+                            }
+                        }
+                        ksort( $tmp_Result ); //sort by position in source
+                        $ordered_Result = array();
+                        foreach( $tmp_Result as $glossary_matches ){
+                            $ordered_Result[ $glossary_matches ] = $TMS_RESULT[ $glossary_matches ];
+                        }
+                        $TMS_RESULT = $ordered_Result;
+                    }
                     $this->result['data']['matches'] = $TMS_RESULT;
+
                     break;
                 case 'set':
+                    if ( empty($st['id_translator']) ) {
+                        $newUser = TMS::createMyMemoryKey( $this->id_job ); //throws exception
+                        $config[ 'id_user' ]     = $newUser->id;
+                    }
                     $TMS_RESULT = $_TMS->set($config);
                     $set_code = $TMS_RESULT;
-                    if ($set_code) {
-                        $TMS_GET_RESULT = $_TMS->get($config)->get_glossary_matches_as_array();
-                        $this->result['data']['matches'] = $TMS_GET_RESULT;
+
+                    if ( $set_code ) {
+//                       Often the get method after a set is not in real time, so return the same values ( FAKE )
+//                        $TMS_GET_RESULT = $_TMS->get($config)->get_glossary_matches_as_array();
+//                        $this->result['data']['matches'] = $TMS_GET_RESULT;
+                        $this->result['data']['matches'] = array(
+                            $config['segment'] => array(
+                                    array(
+                                        'segment'          => $config['segment'],
+                                        'translation'      => $config['translation'],
+                                        'last_update_date' => date_create()->format('Y-m-d H:i:m'),
+                                        'last_updated_by'  => $newUser->id,
+                                        'created_by'       => $newUser->id,
+                                        'target_note'      => $config['tnote'],
+                                    )
+                            )
+                        );
                     }
                     break;
                 case 'update':

@@ -555,7 +555,6 @@ UI = {
 			}
 
 		}).on('input', '.editarea', function(e) {
-			console.log('input');
 			if (UI.body.hasClass('searchActive'))
 				UI.resetSearch();
 			UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
@@ -813,7 +812,7 @@ UI = {
 			if (e.which == 13) { // enter
 				e.preventDefault();
 				var txt = $(this).text();
-				if (txt.length > 2)
+				if (txt.length > 1)
 					UI.getConcordance(txt, 0);
 			} else {
 				if ($('.editor .sub-editor .cc-search .search-target').text().length > 0) {
@@ -876,9 +875,12 @@ UI = {
 			e.preventDefault();
 			var txt = $(this).parents('.gl-search').find('.search-source').text();
 			segment = $(this).parents('section').first();
-			if (txt.length > 2) {
+			if (txt.length > 1) {
 				UI.getGlossary(segment, false);
+			} else {
+				APP.alert('Please insert a string of two letters at least!');
 			}
+
 		}).on('keydown', '.sub-editor .gl-search .search-source', function(e) {
 			if (e.which == 13) {
 				e.preventDefault();
@@ -932,20 +934,19 @@ UI = {
 			e.preventDefault();
 			var save = (typeof param == 'undefined') ? 'noSave' : param;
 			UI.closeSegment(UI.currentSegment, 1, save);
-//		}).on('keyup', '.editor .editarea', function(e) {
-//            if ( e.which == 13 ){
-//                //replace all divs with a br and remove all br without a class
-//                var divs = $( this ).find( 'div' );
-//                if( divs.length ){
-//					divs.each(function(){
-//						$(this).find( 'br:not([class])' ).remove();
-//						$(this).prepend( $('<br class="' + config.crPlaceholderClass + '" />' ) ).replaceWith( $(this).html() );
-//					});
-//							
-//                } else {
-//                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
-//                }
-//            }
+		}).on('keyup', '.editor .editarea', function(e) {
+            if ( e.which == 13 ){
+                //replace all divs with a br and remove all br without a class
+                var divs = $( this ).find( 'div' );
+                if( divs.length ){
+					divs.each(function(){
+						$(this).find( 'br:not([class])' ).remove();
+						$(this).prepend( $('<br class="' + config.crPlaceholderClass + '" />' ) ).replaceWith( $(this).html() );
+					});
+                } else {
+                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
+                }
+            }
 		});
 
 		/*
@@ -1398,6 +1399,7 @@ UI = {
 		this.lastOpenedEditarea.attr('contenteditable', 'false');
 		this.body.removeClass('editing');
 		$(segment).removeClass("editor");
+		$('span.locked.mismatch', segment).removeClass('mismatch');
 		//		$('#downloadProject').focus();
 		if (!this.opening) {
 			this.checkIfFinished(1);
@@ -1499,7 +1501,7 @@ UI = {
 		if ($('.footer', segment).text() != '')
 			return false;
 
-		var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li><li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc"><a tabindex="-1" href="#">Concordance</a></li><li class="tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl"><a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div><div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances"><div class="overflow"><div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div><div class="results"></div></div></div><div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary"><div class="overflow"><div class="gl-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /><a class="search-glossary" href="#"></a><a class="set-glossary disabled" href="#"></a><div class="comment"><a href="#">(+) Comment</a><div class="input gl-comment" contenteditable="true" /></div></div><div class="results"></div></div></div>';
+		var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li><li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc"><a tabindex="-1" href="#">Concordance</a></li><li class="tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl"><a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div><div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances"><div class="overflow"><div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div><div class="results"></div></div></div><div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary"><div class="overflow"><div class="gl-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /><!-- a class="search-glossary" href="#"></a --><a class="set-glossary disabled" href="#"></a><div class="comment"><a href="#">(+) Comment</a><div class="input gl-comment" contenteditable="true" /></div></div><div class="results"></div></div></div>';
 		$('.footer', segment).html(footer);
 
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() == '')) {
@@ -1710,8 +1712,8 @@ UI = {
 //			return false;
 		}
 		else if (this.searchMode == 'source&target') {
-			APP.alert('Combined search is temporarily disabled');
-			return false;
+//			APP.alert('Combined search is temporarily disabled');
+//			return false;
 		}
 
 		var source = (p['source']) ? p['source'] : '';
@@ -1758,7 +1760,7 @@ UI = {
 			this.render(this.pendingRender);
 			this.pendingRender = false;
 		}
-		console.log(this.editarea.html());
+//		console.log(this.editarea.html());
 	},
 	execReplaceAll: function() {
 //		console.log('replace all');
@@ -1766,14 +1768,34 @@ UI = {
 		$('.editarea mark.searchMarker').remove();
 		this.applySearch();
 //		$('.modal[data-name=confirmReplaceAll] .btn-ok').addClass('disabled').text('Replacing...').attr('disabled', 'disabled');
-		var p = this.searchParams;
+
+        if ($('#replace-target').val() != '') {
+            this.searchParams['replace'] = $('#replace-target').val();
+        } else {
+            APP.alert('You must specify the replacement value.');
+            delete this.searchParams['replace'];
+            return false;
+        }
+
+        if ($('#select-status').val() != '') {
+            this.searchParams['status'] = $('#select-status').val();
+            this.body.attr('data-filter-status', $('#select-status').val());
+        } else {
+            delete this.searchParams['status'];
+        }
+
+        this.searchParams['match-case'] = $('#match-case').is(':checked');
+        this.searchParams['exact-match'] = $('#exact-match').is(':checked');
+
+        var p = this.searchParams;
 		var source = (p['source']) ? p['source'] : '';
 		var target = (p['target']) ? p['target'] : '';
 		var replace = (p['replace']) ? p['replace'] : '';
 		var dd = new Date();
 		APP.doRequest({
 			data: {
-				action: 'replaceAll',
+				action: 'getSearch',
+                function: 'replaceAll',
 				job: config.job_id,
 				token: dd.getTime(),
 				password: config.password,
@@ -1921,8 +1943,8 @@ UI = {
 				UI.doMarkSearchResults(trgHasTags, $(q + " .editarea:" + containsFunc + "('" + txtTrg + "')"), regTarget, q, txtTrg, ignoreCase);
 //				UI.execSearchResultsMarking(UI.filterExactMatch($(q + " .source:" + containsFunc + "('" + txtSrc + "')"), txtSrc), regSource, false);
 //				UI.execSearchResultsMarking(UI.filterExactMatch($(q + " .editarea:" + containsFunc + "('" + txtTrg + "')"), txtTrg), regTarget, false);
-
-				$('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
+				$('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker').removeClass('searchPreMarker');
+//				$('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
 				$('mark.searchPreMarker:not(.searchMarker)').each(function() {
 					var a = $(this).text();
 					$(this).replaceWith(a);
@@ -1999,9 +2021,10 @@ UI = {
 		}
 	},
 	execSearchResultsMarking: function(areas, regex, testRegex) {
+		searchMarker = (UI.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
 			if (!testRegex || ($(this).text().match(testRegex) != null)) {
-				var tt = $(this).html().replace(/&lt;/g, UI.openTagPlaceholder).replace(/&gt;/g, UI.closeTagPlaceholder).replace(regex, '<mark class="searchMarker">$1</mark>').replace(openTagReg, '&lt;').replace(closeTagReg, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
+				var tt = $(this).html().replace(/&lt;/g, UI.openTagPlaceholder).replace(/&gt;/g, UI.closeTagPlaceholder).replace(regex, '<mark class="' + searchMarker + '">$1</mark>').replace(openTagReg, '&lt;').replace(closeTagReg, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
 				$(this).html(tt);
 			}
 		});
@@ -2057,6 +2080,35 @@ UI = {
 
 			}
 		} else if (this.searchMode == 'source&target') {
+
+			var m = $(".editarea mark.currSearchItem"); // ***
+//            console.log($(m).nextAll('mark.searchMarker').length);
+			if ($(m).nextAll('mark.searchMarker').length) { // there are other subsequent results in the segment
+				console.log('altri item nel segmento');
+				$(m).removeClass('currSearchItem');
+				$(m).nextAll('mark.searchMarker').first().addClass('currSearchItem');
+				if (unmark)
+					$(m).replaceWith($(m).text());
+				UI.goingToNext = false;
+			} else { // jump to results in subsequents segments
+				console.log('m.length: ' + m.length);
+				seg = (m.length) ? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
+				if (seg.length) {
+					skipCurrent = $(seg).has("mark.currSearchItem").length;
+					this.gotoSearchResultAfter({
+						el: 'segment-' + $(seg).attr('id').split('-')[1],
+						skipCurrent: skipCurrent,
+						unmark: unmark
+					});
+				} else {//console.log('b');
+					setTimeout(function() {
+						UI.gotoNextResultItem(false);
+					}, 500);
+				}
+			}
+
+
+/*
 			var seg = $("section.currSearchSegment");
 //            var m = $("section.currSearchSegment mark.searchMarker");
 //            seg = (m.length)? $(m).parents('section') : $('mark.searchMarker').first().parents('section');
@@ -2067,6 +2119,7 @@ UI = {
 					el: 'segment-' + $(seg).attr('id').split('-')[1]
 				});
 			}
+*/			
 		} else {
 			var m = $("mark.currSearchItem");
 //            console.log($(m).nextAll('mark.searchMarker').length);
@@ -2138,7 +2191,50 @@ UI = {
 
 
 			}
-		} else if (this.searchMode == 'source&target') { // searchMode: source&target
+		} else { // searchMode: source&target or normal
+			var wh = (this.searchMode == 'source&target')? ' .editarea' : '';
+			seg = $('section' + wh).has("mark.searchMarker");
+			ss = (this.searchMode == 'source&target')? el + '-editarea' : el;
+			found = false;
+			$.each(seg, function(index) {
+				if ($(this).attr('id') >= ss) {
+					if (($(this).attr('id') == ss) && (skipCurrent)) {
+					} else {
+						found = true;
+						$("html,body").animate({
+							scrollTop: $(this).offset().top - 200
+						}, 500);
+						setTimeout(function() {
+							UI.goingToNext = false;
+						}, 500);
+						var m = $("mark.currSearchItem");
+						$(m).removeClass('currSearchItem');
+						$(this).find('mark.searchMarker').first().addClass('currSearchItem');
+						if (unmark)
+							$(m).replaceWith($(m).text());
+						return false;
+					}
+				}
+			});			
+			if (!found) {
+				// load new segments
+				if (!this.searchResultsSegments) {
+					this.pendingRender = {
+						firstLoad: false,
+						applySearch: true,
+						detectSegmentToScroll: true
+					};
+				} else {
+					seg2scroll = this.nextUnloadedResultSegment();
+					$('#outer').empty();
+					this.render({
+						firstLoad: false,
+						applySearch: true,
+						segmentToScroll: seg2scroll
+					});
+				}
+			}
+/*
 			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
 			destination = (($('#' + el + ":has(mark.searchMarker)").length) && (!$('#' + el).hasClass('currSearchSegment'))) ? $('#' + el) : $('#' + el).nextAll(status + ":has(mark.searchMarker)").first();
 //            destination = $('#'+el).nextAll(status + ":has(mark.searchMarker)").first();            
@@ -2165,68 +2261,9 @@ UI = {
 					});
 				}
 			}
-
-
-		} else { // searchMode: normal
-			seg = $('section').has("mark.searchMarker");
-			ss = el;
-			found = false;
-			$.each(seg, function(index) {
-				if ($(this).attr('id') >= ss) {
-					if (($(this).attr('id') == ss) && (skipCurrent)) {
-					} else {
-						found = true;
-						$("html,body").animate({
-							scrollTop: $(this).offset().top - 200
-						}, 500);
-						setTimeout(function() {
-							UI.goingToNext = false;
-						}, 500);
-						var m = $("mark.currSearchItem");
-						$(m).removeClass('currSearchItem');
-						$(this).find('mark.searchMarker').first().addClass('currSearchItem');
-						if (unmark)
-							$(m).replaceWith($(m).text());
-						return false;
-					}
-				}
-			});
-			if (!found) {
-				// load new segments
-				if (!this.searchResultsSegments) {
-					this.pendingRender = {
-						firstLoad: false,
-						applySearch: true,
-						detectSegmentToScroll: true
-					};
-				} else {
-					seg2scroll = this.nextUnloadedResultSegment();
-					$('#outer').empty();
-					this.render({
-						firstLoad: false,
-						applySearch: true,
-						segmentToScroll: seg2scroll
-					});
-				}
-
-			}
-			;
-		}
-
-
-/*
-		if ((typeof p['source'] == 'undefined') && (typeof p['target'] == 'undefined')) {
-			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
-			if (p['status'] == 'all') {
-				this.scrollSegment($('#' + el).next());
-			} else {
-				this.scrollSegment($('#' + el).nextUntil('section' + status).last().next());
-			}
-		} else {
-
-
-		}
 */
+
+		}
 	},
 	preOpenConcordance: function() {
 		var selection = window.getSelection();
@@ -2718,7 +2755,8 @@ UI = {
 //				} else if (this.searchMode == 'source&target') {
 //					$('#segment-' + options.segmentToScroll).addClass('currSearchSegment');
 				} else {
-					$('#segment-' + options.segmentToScroll).addClass('currSearchSegment');
+					$('#segment-' + options.segmentToScroll + ' .editarea mark.searchMarker').first().addClass('currSearchItem');
+//					$('#segment-' + options.segmentToScroll).addClass('currSearchSegment');
 				}
 			}
 		}
@@ -2859,36 +2897,36 @@ UI = {
 	lockTags: function(el) {
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
-//		console.log('LOCK TAGS');
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
 		if (!this.taglockEnabled)
 			return false;
 		if (this.noTagsInSegment())
 			return false;
-		$(editarea).each(function(index) {
+		
+		$(editarea).first().each(function(index) {
 			saveSelection();
 
 			var tx = $(this).html();
-
+			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
+			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
 			tx = tx.replace(/\<span/gi, "<pl")
 					.replace(/\<\/span/gi, "</pl")
 					.replace(/&lt;/gi, "<")
-					.replace(/(\<(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid[^<]*?&gt;)/gi, "<pl contenteditable=\"false\" class=\"locked\">$1</pl>")
+					.replace(/(\<(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid[^<]*?&gt;)/gi, brTx1)
 					.replace(/\</gi, "&lt;")
 					.replace(/\&lt;pl/gi, "<span")
 					.replace(/\&lt;\/pl/gi, "</span")
 					.replace(/\&lt;div\>/gi, "<div>")
 					.replace(/\&lt;\/div\>/gi, "</div>")
 					.replace(/\&lt;br\>/gi, "<br>")
-
 					.replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />')
 
 					// encapsulate tags of closing
-					.replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>");
+					.replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
 
 			if (UI.isFirefox) {
 				tx = tx.replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>");
-				tx = tx.replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>");
+				tx = tx.replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span class=\"$2\" contenteditable=\"false\">$3</span>");
 			} else {
 				// fix nested encapsulation
 				tx = tx.replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>");
@@ -2950,12 +2988,30 @@ UI = {
 		$(ed).focus();
 	},
 	detectTags: function(area) {
+/*
+		brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
+console.log($(area).html());
+		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, brTx2));
+console.log($(area).html());
+
+		if (!this.firstMarking) {
+			if(UI.isFirefox) {
+				$(area).html($(area).html().replace(/(\<span class=\".*?locked.*?\" contenteditable=\"false\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span class=\"locked\" contenteditable=\"false\">$2</span>"));								
+			} else {
+				$(area).html($(area).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));				
+			}
+
+		}
+*/
+		
 		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 		//$(area).html($(area).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 		//$(area).html($(area).html().replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 		if (!this.firstMarking) {
 			$(area).html($(area).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
 		}
+//		this.placeCaretAtEnd(document.getElementById(UI.editarea.attr('id')));
+//		this.placeCaretAtEnd(UI.editarea);
 
 	},
 	markTagsInSearch: function(el) {
@@ -2963,7 +3019,7 @@ UI = {
 			return false;
 		var elements = (typeof el == 'undefined') ? $('.editor .cc-search .input') : el;
 		elements.each(function() {
-			UI.detectTags(this);
+//			UI.detectTags(this);
 		});
 	},
 	millisecondsToTime: function(milli) {
@@ -2996,6 +3052,7 @@ UI = {
 		this.getConcordance(this.currentSelectedText, this.currentSearchInTarget);
 	},
 	openSegment: function(editarea, operation) {
+		var segment = $('#segment-' + $(editarea).attr('data-sid'));
 		this.openSegmentStart = new Date();
 		if (!this.byButton) {
 			if (this.justSelecting('editarea'))
@@ -3021,7 +3078,7 @@ UI = {
 
 		this.currentSegment.attr('data-searchItems', ($('mark.searchMarker', this.editarea).length));
 
-		this.fillCurrentSegmentWarnings(this.globalWarnings);
+		this.fillCurrentSegmentWarnings(this.globalWarnings, true);
 		this.setNextWarnedSegment();
 
 		this.focusEditarea = setTimeout(function() {
@@ -3059,32 +3116,32 @@ UI = {
 			console.log('close/open time: ' + ((new Date()) - this.openSegmentStart));
 	},
 	placeCaretAtEnd: function(el) {
-		console.log(el);
-		console.log($(el).first().get().className);
-		var range = document.createRange();
-		var sel = window.getSelection();
-		range.setStart(el, 1);
-		range.collapse(true);
-		sel.removeAllRanges();
-		sel.addRange(range);
-		el.focus();
-		/*
+//		console.log(el);
+//		console.log($(el).first().get().className);
+//		var range = document.createRange();
+//		var sel = window.getSelection();
+//		range.setStart(el, 1);
+//		range.collapse(true);
+//		sel.removeAllRanges();
+//		sel.addRange(range);
+//		el.focus();
+		
 		 $(el).focus();
 		 if (typeof window.getSelection != "undefined"
-		 && typeof document.createRange != "undefined") {
-		 var range = document.createRange();
-		 range.selectNodeContents($(el));
-		 range.collapse(false);
-		 var sel = window.getSelection();
-		 sel.removeAllRanges();
-		 sel.addRange(range);
+				&& typeof document.createRange != "undefined") {
+			var range = document.createRange();
+			range.selectNodeContents(el);
+			range.collapse(false);
+			var sel = window.getSelection();
+			sel.removeAllRanges();
+			sel.addRange(range);
 		 } else if (typeof document.body.createTextRange != "undefined") {
-		 var textRange = document.body.createTextRange();
-		 textRange.moveToElementText(el);
-		 textRange.collapse(false);
-		 textRange.select();
+			var textRange = document.body.createTextRange();
+			textRange.moveToElementText(el);
+			textRange.collapse(false);
+			textRange.select();
 		 }
-		 */
+		
 	},
 	registerQACheck: function() {
 		clearTimeout(UI.pendingQACheck);
@@ -3865,34 +3922,18 @@ UI = {
 	 * @param {type} warnings
 	 * @returns {undefined}
 	 */
-	setNextWarnedSegment: function(segment_id) {
-		segment_id = segment_id || UI.currentSegmentId;
-//        UI.globalWarnings = (Loader.detect('test'))? fakeArr : UI.globalWarnings;
+	setNextWarnedSegment: function(sid) {
+		sid = sid || UI.currentSegmentId;
 		idList = UI.globalWarnings;
 		$.each(idList, function(index) {
-			if (this > segment_id) {
+			if (this > sid) {
 				$('#point2seg').attr('href', '#' + this);
 				return false;
 			}
 			if (this == idList[idList.length - 1]) {
 				$('#point2seg').attr('href', '#' + idList[0]);
 			}
-			;
 		});
-		/*
-		 counter = 0;
-		 $.each(UI.globalWarnings, function(key, value) {
-		 counter++;
-		 if(counter== 1) UI.firstWarnedSegment = key;
-		 if(key > segment_id) {
-		 $('#point2seg').attr('href', '#'+key);
-		 return false;
-		 }
-		 if(counter == Object.keys(UI.globalWarnings).length) {
-		 $('#point2seg').attr('href', '#'+UI.firstWarnedSegment);                
-		 };
-		 });
-		 */
 	},
 	fillWarnings: function(segment, warnings) {
 		//console.log( 'fillWarnings' );
@@ -3914,23 +3955,56 @@ UI = {
 	 * 
 	 * @returns {undefined}
 	 */
-	fillCurrentSegmentWarnings: function(warningDetails) {
-		//console.log( 'fillCurrentSegmentWarnings' );
-//        console.log('warningDetails: ',warningDetails );
-		//scan array    
-		try {
-			$.each(warningDetails, function(key, value) {
-//                console.log('value: ',value );
-				if ('segment-' + value.id_segment === UI.currentSegment[0].id) {
-					UI.fillWarnings(UI.currentSegment, $.parseJSON(value.warnings));
-				}
-			});
-		} catch (e) {
-			//try to read index 0 of undefined currentSegment when document start
-			//console.log( e.toString() );
+	fillCurrentSegmentWarnings: function(warningDetails, global) {
+		if(global) {
+//			$.each(warningDetails, function(key, value) {
+//				console.log()
+//				if ('segment-' + value.id_segment === UI.currentSegment[0].id) {
+//					UI.fillWarnings(UI.currentSegment, $.parseJSON(value.warnings));
+//				}
+//			});			
+		} else {
+			UI.fillWarnings(UI.currentSegment, $.parseJSON(warningDetails.warnings));
 		}
+
 	},
 	//check for segments in warning in the project
+	markTagMismatch: function(d) {
+		if(typeof d.tag_mismatch.source != 'undefined') {
+			$.each(d.tag_mismatch.source, function(index) {
+				$('#segment-' + d.id_segment + ' .source span.locked:not(.temp)').filter(function() {
+					return $(this).text() === d.tag_mismatch.source[index];
+				}).last().addClass('temp');							
+			});			
+		}
+		if(typeof d.tag_mismatch.target != 'undefined') {
+			$.each(d.tag_mismatch.target, function(index) {
+				$('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').filter(function() {
+					return $(this).text() === d.tag_mismatch.target[index];
+				}).last().addClass('temp');							
+			});			
+		}
+
+		$('#segment-' + d.id_segment + ' span.locked.mismatch').addClass('mismatch-old').removeClass('mismatch');
+		$('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
+		$('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
+		
+	},
+	compareArrays: function(i1, i2) {
+		$.each(i1, function(key,value) {
+			t = value;
+			$.each(i2, function(k,v) {
+				if(t == v) {
+					i1.splice(key, 1);
+					i2.splice(k, 1);
+					UI.compareArrays(i1, i2);
+					return false;
+				}
+			})									
+		});
+		return i1;
+	},
+
 	checkWarnings: function(openingSegment) {
 		var dd = new Date();
 		ts = dd.getTime();
@@ -3951,14 +4025,13 @@ UI = {
 
 				//check for errors
 				if (UI.globalWarnings.length > 0) {
-
 					//for now, put only last in the pointer to segment id
 					warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
 //                    console.log('warningPosition: ' + warningPosition);
 
 					if (openingSegment)
-						UI.fillCurrentSegmentWarnings(data.details);
-
+						UI.fillCurrentSegmentWarnings(data.details, true);
+			
 					//switch to css for warning
 					$('#notifbox').attr('class', 'warningbox').attr("title", "Some translations seems to have TAGS and/or other untraslatables that do not match the source").find('.numbererror').text(UI.globalWarnings.length);
 
@@ -4002,25 +4075,17 @@ UI = {
 			},
 			success: function(d) {
 				if (UI.currentSegment.hasClass('waiting_for_check_result')) {
-					if (d.details) {
-						$.each(d.details, function(key, value) {
-							id_seg = key;
-							item = value;
-						});
-					}
-
 					// check conditions for results discard
 					if (!d.total) {
 						$('p.warnings', UI.currentSegment).empty();
+						$('span.locked.mismatch', UI.currentSegment).removeClass('mismatch');
 						return;
 					}
-					if (id_seg != UI.currentSegmentId)
-						return;
 					if (UI.editarea.text().trim() != UI.checkSegmentsArray[d.token].trim())
 						return;
 
-
-					UI.fillCurrentSegmentWarnings(d.details); // update warnings
+					UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
+					UI.markTagMismatch(d.details);
 					delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
 					UI.currentSegment.removeClass('waiting_for_check_result');
 				}

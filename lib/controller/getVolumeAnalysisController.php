@@ -16,7 +16,10 @@ class getVolumeAnalysisController extends ajaxcontroller {
     private $standard_price_per_word = 0.10; //(dollari) se indipendente dalla combinazione metterlo nel config
 
     public function __construct() {
+
+        $this->disableSessions();
         parent::__construct();
+
         $this->id_project = $this->get_from_get_post( 'pid' );
     }
 

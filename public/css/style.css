@@ -747,6 +747,7 @@ body.noGlossary .tab-switcher-gl
     box-shadow: inset 0 1px 2px #ddd;
     -webkit-box-shadow: inset 0 1px 2px #ddd;
     text-align: left;
+	min-height: 20px;
 }           
 .sub-editor .gl-search .search-source,
 .sub-editor .gl-search .search-target
@@ -1461,6 +1462,11 @@ textarea, input, .editarea, .search-editarea, select  {
 
 .graysmall:hover .graysmall-message{display:block;}
 .graysmall-details{display:none;position:absolute;bottom:0px;color:#666;width:100%;float:left;margin:0;padding:0;	}
+
+.glossary .graysmall .graysmall-details {
+	margin-top: 0;
+}
+
 .graysmall .graysmall-details
 {
 	display: block;
@@ -1778,7 +1784,7 @@ footer nav
 .source .locked
 {
 	color: #ddd !important;
-	font-size: 70%;
+	font-size: 13px;
 	font-style: italic;
 	/*
 		cursor: move !important;
@@ -1813,14 +1819,20 @@ footer nav
 .editor .source .locked
 {
 	color: #767676 !important;
-	font-size: 70%;
+	font-size: 13px;
 	font-style: italic;
 	padding-bottom: 3px;
 	vertical-align: middle;
 }
+.editarea .locked.mismatch,
+.source .locked.mismatch,
+.locked.mismatch-old
+{
+	color: red !important;
+}
 .editor .cc-search .input .locked
 {
-	font-size: 70%;
+	font-size: 13px;
 }
 
 

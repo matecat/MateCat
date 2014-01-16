@@ -327,5 +327,18 @@ class TMS extends Engine {
         return $key;
     }
 
+    public static function createMyMemoryKey( $id_job ){
+
+        $newUser = json_decode( file_get_contents( 'http://mymemory.translated.net/api/createranduser' ) );
+        if ( empty( $newUser ) || $newUser->error || $newUser->code != 200 ) {
+            throw new Exception( "User private key failure.", -1 );
+        }
+
+        updateTranslatorJob( $id_job, $newUser );
+
+        return $newUser;
+
+    }
+
 }
 

@@ -17,6 +17,8 @@ class getProjectsController extends ajaxcontroller {
 	public $notAllCancelled = 0;
 
 	public function __construct() {
+
+        $this->disableSessions();
 		parent::__construct();
 
 		$this->lang_handler=Languages::getInstance();
@@ -77,15 +79,11 @@ class getProjectsController extends ajaxcontroller {
 
 	public function doAction() {
 
-		$time_loop_tot=0;
-		$time_loop=0;
 		$start = (($this->page - 1) * $this->step);
 
 		$projects = ManageUtils::queryProjects($start,$this->step,$this->search_in_pname,$this->search_source,$this->search_target,$this->search_status,$this->search_onlycompleted,$this->filter_enabled,$this->project_id);
 
 		$projnum = getProjectsNumber($start,$this->step,$this->search_in_pname,$this->search_source,$this->search_target,$this->search_status,$this->search_onlycompleted,$this->filter_enabled);
-
-        	//log::doLog('PNUMBER:',$projnum);
 
 		$this->result['data'] = json_encode($projects);
 		$this->result['page'] = $this->page;

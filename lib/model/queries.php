@@ -1100,6 +1100,23 @@ function insertProject( ArrayObject $projectStructure ) {
     return $results[ 'LAST_INSERT_ID()' ];
 }
 
+function updateTranslatorJob( $id_job, stdClass $newUser ){
+
+    $data                       = array();
+    $data[ 'username' ]         = $newUser->id;
+    $data[ 'email' ]            = '';
+    $data[ 'password' ]         = $newUser->pass;
+    $data[ 'first_name' ]       = '';
+    $data[ 'last_name' ]        = '';
+    $data[ 'mymemory_api_key' ] = $newUser->key;
+
+    $db = Database::obtain();
+
+    $res = $db->insert( 'translators', $data );
+    $res = $db->update( 'jobs', array( 'id_translator' => $newUser->id ), ' id = ' . (int)$id_job  );
+
+}
+
 //never used email , first_name and last_name
 //function insertTranslator( $user, $pass, $api_key, $email = '', $first_name = '', $last_name = '' ) {
 function insertTranslator( ArrayObject $projectStructure ) {
@@ -1281,7 +1298,7 @@ function getProjectJobData( $pid ) {
  *
  * @return array
  */
-function getProjectData( $pid, $project_password = null, $jid = null ) {
+function getProjectData( $pid, $project_password = null, $jid = null, $jpassword = null ) {
 
     $query = "
               SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, f.id, f.id AS id_file,f.filename, p.status_analysis,
@@ -1304,27 +1321,33 @@ function getProjectData( $pid, $project_password = null, $jid = null ) {
                     %s
                     AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
                     %s
+                    %s
 
                     GROUP BY f.id, j.id, j.password
                     ORDER BY j.create_date, j.job_first_segment
              ";
 
-    $and_1 = $and_2 = null;
+    $and_1 = $and_2 = $and_3 = null;
+
+    $db      = Database::obtain();
 
     if( !empty( $project_password ) ){
-        $and_1 = " and p.password = '$project_password' ";
+        $and_1 = " and p.password = '" . $db->escape( $project_password ) . "' ";
     }
 
     if( !empty($jid) ){
         $and_2 = " and j.id = " . intval($jid);
     }
 
-    $query = sprintf( $query, $and_1, $and_2 );
+    if( !empty($jpassword) ){
+        $and_2 = " and j.password = '" . $db->escape( $jpassword ) . "' ";
+    }
 
-    $db      = Database::obtain();
+    $query = sprintf( $query, $and_1, $and_2, $and_3 );
+
     $results = $db->fetch_array( $query );
 
-    //echo "<pre>" .var_export( $results , true ) . "</pre>";
+//    echo "<pre>" .var_export( $results , true ) . "</pre>"; die();
 
     return $results;
 }
@@ -1607,7 +1630,7 @@ function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
 }
 
 function getSegmentsForFastVolumeAnalysys( $pid ) {
-    $query   = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment
+    $query   = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment, j.source
 		from segments as s 
 		inner join files_job as fj on fj.id_file=s.id_file
 		inner join jobs as j on fj.id_job=j.id
@@ -2079,7 +2102,7 @@ function getNextSegmentAndLock() {
     $q1 = "SET autocommit=0";
     $q2 = "START TRANSACTION";
     //lock row
-    $rnd = mt_rand(0,100); //rand num shold be ( child_num / myMemory_sec_response_time )
+    $rnd = mt_rand(0,15); //rand num shold be ( child_num / myMemory_sec_response_time )
     $q3 = "select id_segment, id_job from segment_translations_analysis_queue where locked=0 limit $rnd,1 for update";
     //end transaction
     $q4 = "ROLLBACK";

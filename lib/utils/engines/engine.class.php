@@ -16,9 +16,10 @@ abstract class Engine {
 	protected $error = array('code' => 0, 'description' => '');
 	protected $raw_result = array();
 
-    protected $gloss_get_relative_url;
-    protected $gloss_set_relative_url;
-    protected $gloss_delete_relative_url;
+    protected $gloss_get_url;
+    protected $gloss_set_url;
+    protected $gloss_delete_url;
+    protected $gloss_update_url;
 
 	protected function __construct($id) {
 		$this->id = $id;

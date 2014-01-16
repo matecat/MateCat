@@ -210,10 +210,11 @@ class downloadFileController extends downloadController {
         }
         $debug['total'][]=time();
 
-	unlink($path);
-	unlink($path.'.out.sdlxliff');
-	rmdir(INIT::$TMP_DOWNLOAD.'/'.$this->id_job.'/'.$id_file.'/');
-	rmdir(INIT::$TMP_DOWNLOAD.'/'.$this->id_job.'/');
+        unlink($path);
+        unlink($path.'.out.sdlxliff');
+        rmdir(INIT::$TMP_DOWNLOAD.'/'.$this->id_job.'/'.$id_file.'/');
+        rmdir(INIT::$TMP_DOWNLOAD.'/'.$this->id_job.'/');
+
     }
 
     private function setContent($output_content) {

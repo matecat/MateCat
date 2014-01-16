@@ -56,7 +56,7 @@ a:hover{text-decoration:none}
 .cl{clear:both}
 
 /* TABELLA */
-.tablestats{font-size:16px;/*margin-top:5px;padding-bottom: 50px;*/}
+.tablestats{font-size:16px;/*margin-top:5px;padding-bottom: 50px;*/clear: both;}
 .tablestats th, .tablestats td{ background:#fff;padding:10px;text-align:right;border-bottom:1px solid #ccc;border-right:1px solid #ccc;font-weight:normal;}
 .tablestats th{border-top:1px solid #ccc;background:#F6F6F6;text-align:center;font-size:14px;}
 .tablestats th:first-child {width: 35%; border-left:1px solid #ccc;}
