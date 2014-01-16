@@ -1825,7 +1825,8 @@ footer nav
 	vertical-align: middle;
 }
 .editarea .locked.mismatch,
-.source .locked.mismatch
+.source .locked.mismatch,
+.locked.mismatch-old
 {
 	color: red !important;
 }

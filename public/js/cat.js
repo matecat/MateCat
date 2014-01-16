@@ -555,7 +555,6 @@ UI = {
 			}
 
 		}).on('input', '.editarea', function(e) {
-			console.log('input');
 			if (UI.body.hasClass('searchActive'))
 				UI.resetSearch();
 			UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
@@ -1400,6 +1399,7 @@ UI = {
 		this.lastOpenedEditarea.attr('contenteditable', 'false');
 		this.body.removeClass('editing');
 		$(segment).removeClass("editor");
+		$('span.locked.mismatch', segment).removeClass('mismatch');
 		//		$('#downloadProject').focus();
 		if (!this.opening) {
 			this.checkIfFinished(1);
@@ -3040,7 +3040,7 @@ UI = {
 
 		this.currentSegment.attr('data-searchItems', ($('mark.searchMarker', this.editarea).length));
 
-		this.fillCurrentSegmentWarnings(this.globalWarnings);
+		this.fillCurrentSegmentWarnings(this.globalWarnings, true);
 		this.setNextWarnedSegment();
 
 		this.focusEditarea = setTimeout(function() {
@@ -3917,70 +3917,40 @@ UI = {
 	 * 
 	 * @returns {undefined}
 	 */
-	fillCurrentSegmentWarnings: function(warningDetails) {
-//		console.log( 'fillCurrentSegmentWarnings' );
-        console.log('warningDetails: ',warningDetails );
-		//scan array    
-		try {
-			$.each(warningDetails, function(key, value) {
-//				UI.highlightTagMismatch(value);
-				if ('segment-' + value.id_segment === UI.currentSegment[0].id) {
-					UI.fillWarnings(UI.currentSegment, $.parseJSON(value.warnings));
-				}
-			});
-		} catch (e) {
-			//try to read index 0 of undefined currentSegment when document start
-			//console.log( e.toString() );
+	fillCurrentSegmentWarnings: function(warningDetails, global) {
+		if(global) {
+//			$.each(warningDetails, function(key, value) {
+//				console.log()
+//				if ('segment-' + value.id_segment === UI.currentSegment[0].id) {
+//					UI.fillWarnings(UI.currentSegment, $.parseJSON(value.warnings));
+//				}
+//			});			
+		} else {
+			UI.fillWarnings(UI.currentSegment, $.parseJSON(warningDetails.warnings));
 		}
+
 	},
 	//check for segments in warning in the project
 	markTagMismatch: function(d) {
-		console.log('D: ', d);
-		console.log('D: ', d[0]);
-		
-	},
-
-	highlightTagMismatch: function(seg) {
-		console.log(seg);
-		var segment = $('#segment-' + seg);
-		if(segment.length) {
-			sAr = [];
-			tAr = [];
-			$('.source span.locked', segment).each(function() {
-				sAr.push($(this).text());
-			});
-			$('.target span.locked', segment).each(function() {
-				tAr.push($(this).text());
-			});
-			if(sAr.length > tAr.length) {
-				console.log('source');
-				sAr = UI.compareArrays(sAr, tAr);
-				console.log(sAr);
-				if(!sAr.length) $('.source span.locked', segment).removeClass('mismatch');
-				$.each(sAr, function(kk,vv) {
-					txt = vv;
-					console.log(txt);
-					$('.source span.locked:not(.temp)', segment).filter(function() {
-						return $(this).text() === txt;
-					}).last().addClass('mismatch temp');					
-				});
-				$('.source span.locked.temp', segment).removeClass('temp');
-//				$('.source span.locked:not(.mismatch)', segment).last().addClass('mismatch');
-			} else {
-				console.log('target');
-				tAr = UI.compareArrays(tAr, sAr);
-				console.log(tAr);
-				if(!tAr.length) $('.target span.locked', segment).removeClass('mismatch');
-				$.each(tAr, function(kk,vv) {
-					txt = vv;
-					console.log(txt);
-					$('.target span.locked:not(.temp)', segment).filter(function() {
-						return $(this).text() === txt;
-					}).last().addClass('mismatch temp');					
-				});
-				$('.target span.locked.temp', segment).removeClass('temp');
-			}
+		if(typeof d.tag_mismatch.source != 'undefined') {
+			$.each(d.tag_mismatch.source, function(index) {
+				$('#segment-' + d.id_segment + ' .source span.locked:not(.temp)').filter(function() {
+					return $(this).text() === d.tag_mismatch.source[index];
+				}).last().addClass('temp');							
+			});			
 		}
+		if(typeof d.tag_mismatch.target != 'undefined') {
+			$.each(d.tag_mismatch.target, function(index) {
+				$('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').filter(function() {
+					return $(this).text() === d.tag_mismatch.target[index];
+				}).last().addClass('temp');							
+			});			
+		}
+
+		$('#segment-' + d.id_segment + ' span.locked.mismatch').addClass('mismatch-old').removeClass('mismatch');
+		$('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
+		$('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
+		
 	},
 	compareArrays: function(i1, i2) {
 		$.each(i1, function(key,value) {
@@ -4011,7 +3981,6 @@ UI = {
 				token: token
 			},
 			success: function(data) {
-				console.log(data);
 				var warningPosition = '';
 //                console.log('data.total: '+data.total);
 				UI.globalWarnings = data.details;
@@ -4023,11 +3992,8 @@ UI = {
 //                    console.log('warningPosition: ' + warningPosition);
 
 					if (openingSegment)
-						UI.fillCurrentSegmentWarnings(data.details);
-
-//					$.each(UI.globalWarnings, function(key, value) {
-//						UI.highlightTagMismatch(value);
-//					});					
+						UI.fillCurrentSegmentWarnings(data.details, true);
+			
 					//switch to css for warning
 					$('#notifbox').attr('class', 'warningbox').attr("title", "Some translations seems to have TAGS and/or other untraslatables that do not match the source").find('.numbererror').text(UI.globalWarnings.length);
 
@@ -4071,25 +4037,16 @@ UI = {
 			},
 			success: function(d) {
 				if (UI.currentSegment.hasClass('waiting_for_check_result')) {
-					if (d.details) {
-						$.each(d.details, function(key, value) {
-							id_seg = key;
-							item = value;
-						});
-					}
-
 					// check conditions for results discard
 					if (!d.total) {
 						$('p.warnings', UI.currentSegment).empty();
+						$('span.locked.mismatch', UI.currentSegment).removeClass('mismatch');
 						return;
 					}
-					if (id_seg != UI.currentSegmentId)
-						return;
 					if (UI.editarea.text().trim() != UI.checkSegmentsArray[d.token].trim())
 						return;
 
-
-					UI.fillCurrentSegmentWarnings(d.details); // update warnings
+					UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
 					UI.markTagMismatch(d.details);
 					delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
 					UI.currentSegment.removeClass('waiting_for_check_result');
