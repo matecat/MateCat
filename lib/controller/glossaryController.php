@@ -83,10 +83,11 @@ class glossaryController extends ajaxcontroller {
 
                 case 'get':
 
-                    $TMS_RESULT = $_TMS->get($config)->get_glossary_matches_as_array(); Log::doLog($TMS_RESULT);
+                    $TMS_RESULT = $_TMS->get($config)->get_glossary_matches_as_array();
 
                     /**
                      * Return only exact matches in glossary when a search is executed over the entire segment
+                     * Reordered by positional status of matches in source
                      *
                      * Example:
                      * Segment: On average, Members of the House of Commons have 4,2 support staff.
@@ -106,11 +107,11 @@ class glossaryController extends ajaxcontroller {
                             }
                         }
                         ksort( $tmp_Result ); //sort by position in source
-                        $new_Result = array();
+                        $ordered_Result = array();
                         foreach( $tmp_Result as $glossary_matches ){
-                            $new_Result[ $glossary_matches ] = $TMS_RESULT[ $glossary_matches ];
+                            $ordered_Result[ $glossary_matches ] = $TMS_RESULT[ $glossary_matches ];
                         }
-                        $TMS_RESULT = $new_Result;
+                        $TMS_RESULT = $ordered_Result;
                     }
                     $this->result['data']['matches'] = $TMS_RESULT;
 
