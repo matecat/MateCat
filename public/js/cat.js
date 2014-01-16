@@ -1790,7 +1790,7 @@ UI = {
         var p = this.searchParams;
 		var source = (p['source']) ? p['source'] : '';
 		var target = (p['target']) ? p['target'] : '';
-		var replace = (p['replace']); // ? p['replace'] : ''; //now not needed, already checked before
+		var replace = (p['replace']) ? p['replace'] : '';
 		var dd = new Date();
 		APP.doRequest({
 			data: {
@@ -2988,12 +2988,30 @@ UI = {
 		$(ed).focus();
 	},
 	detectTags: function(area) {
+/*
+		brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
+console.log($(area).html());
+		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, brTx2));
+console.log($(area).html());
+
+		if (!this.firstMarking) {
+			if(UI.isFirefox) {
+				$(area).html($(area).html().replace(/(\<span class=\".*?locked.*?\" contenteditable=\"false\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span class=\"locked\" contenteditable=\"false\">$2</span>"));								
+			} else {
+				$(area).html($(area).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));				
+			}
+
+		}
+*/
+		
 		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 		//$(area).html($(area).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 		//$(area).html($(area).html().replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 		if (!this.firstMarking) {
 			$(area).html($(area).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
 		}
+//		this.placeCaretAtEnd(document.getElementById(UI.editarea.attr('id')));
+//		this.placeCaretAtEnd(UI.editarea);
 
 	},
 	markTagsInSearch: function(el) {
@@ -3001,7 +3019,7 @@ UI = {
 			return false;
 		var elements = (typeof el == 'undefined') ? $('.editor .cc-search .input') : el;
 		elements.each(function() {
-			UI.detectTags(this);
+//			UI.detectTags(this);
 		});
 	},
 	millisecondsToTime: function(milli) {
@@ -3098,32 +3116,32 @@ UI = {
 			console.log('close/open time: ' + ((new Date()) - this.openSegmentStart));
 	},
 	placeCaretAtEnd: function(el) {
-		console.log(el);
-		console.log($(el).first().get().className);
-		var range = document.createRange();
-		var sel = window.getSelection();
-		range.setStart(el, 1);
-		range.collapse(true);
-		sel.removeAllRanges();
-		sel.addRange(range);
-		el.focus();
-		/*
+//		console.log(el);
+//		console.log($(el).first().get().className);
+//		var range = document.createRange();
+//		var sel = window.getSelection();
+//		range.setStart(el, 1);
+//		range.collapse(true);
+//		sel.removeAllRanges();
+//		sel.addRange(range);
+//		el.focus();
+		
 		 $(el).focus();
 		 if (typeof window.getSelection != "undefined"
-		 && typeof document.createRange != "undefined") {
-		 var range = document.createRange();
-		 range.selectNodeContents($(el));
-		 range.collapse(false);
-		 var sel = window.getSelection();
-		 sel.removeAllRanges();
-		 sel.addRange(range);
+				&& typeof document.createRange != "undefined") {
+			var range = document.createRange();
+			range.selectNodeContents(el);
+			range.collapse(false);
+			var sel = window.getSelection();
+			sel.removeAllRanges();
+			sel.addRange(range);
 		 } else if (typeof document.body.createTextRange != "undefined") {
-		 var textRange = document.body.createTextRange();
-		 textRange.moveToElementText(el);
-		 textRange.collapse(false);
-		 textRange.select();
+			var textRange = document.body.createTextRange();
+			textRange.moveToElementText(el);
+			textRange.collapse(false);
+			textRange.select();
 		 }
-		 */
+		
 	},
 	registerQACheck: function() {
 		clearTimeout(UI.pendingQACheck);
