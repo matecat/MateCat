@@ -46,7 +46,7 @@ while (1) {
     }
 
     $res = getNextSegmentAndLock();
-    
+
     if (empty($res)) {
         echo "--- (child $my_pid) : _-_getNextSegmentAndLock_-_ no segment ready for tm volume analisys: wait 5 seconds\n";
         sleep(5);
@@ -83,10 +83,12 @@ while (1) {
     //lock segment
     echo "--- (child $my_pid) :  segment $sid-$jid locked\n";
 
+    $cjk = array( 'zh-TW' => 1.8, 'zh-CN' => 1.8, 'ja-JP' => 2.5, 'ko-KR' => 2.5 );
+
     $source          = $segment[ 'source' ];
     $target          = $segment[ 'target' ];
     $id_translator   = $segment[ 'id_translator' ];
-    $raw_wc          = $segment[ 'raw_word_count' ];
+    $raw_wc          = ( array_key_exists( $source, $cjk ) ? mb_strlen( $segment['segment'], 'UTF-8' ) / $cjk[$source] : $segment[ 'raw_word_count' ] );
     $fast_match_type = $segment[ 'match_type' ];
 
     $text            = $segment[ 'segment' ]; // CatUtils::view2rawxliff($segment['segment']); // da verificare

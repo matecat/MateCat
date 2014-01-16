@@ -918,6 +918,7 @@ UI = {
 //            if(window.getSelection().type == 'Caret')) removeSelectedText($(this));
 			removeSelectedText($(this));
 			insertNodeAtCursor(node);
+			if(UI.isFirefox) pasteHtmlAtCaret('<div id="placeHolder"></div>');
 			var ev = (UI.isFirefox) ? e : event;
 			handlepaste(this, ev);
 
@@ -3257,7 +3258,7 @@ console.log($(area).html());
 				var rightTxt = (in_target) ? this.segment : this.translation;
 				rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
 				rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
-				$('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+				$('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><!-- li class="percent ' + cl_suggestion + '">' + (this.match) + '</li --><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
 			});
 		} else {
 			console.log('no matches');
@@ -4532,7 +4533,6 @@ function handlepaste(elem, e) {
 		else {
 			elem.innerHTML = "";
 		}
-
 		waitforpastedata(elem, savedcontent);
 		if (e.preventDefault) {
 			e.stopPropagation();
@@ -4567,16 +4567,9 @@ function waitforpastedata(elem, savedcontent) {
 function processpaste(elem, savedcontent) {
 	pasteddata = elem.innerHTML;
 
-	if (UI.isFirefox) {
-		var div = document.createElement("div");
-		div.innerHTML = pasteddata;
-		savedcontent = htmlEncode($(div).text());
-	}
-
 	//^^Alternatively loop through dom (elem.childNodes or elem.getElementsByTagName) here
 	elem.innerHTML = savedcontent;
-	if (UI.isFirefox)
-		UI.lockTags();
+	
 	// Do whatever with gathered data;
 	$('#placeHolder').before(pasteddata);
 	focusOnPlaceholder();
@@ -4628,6 +4621,53 @@ function insertNodeAtCursor(node) {
 		html = (node.nodeType == 3) ? node.data : node.outerHTML;
 		range.pasteHTML(html);
 	}
+}
+
+function pasteHtmlAtCaret(html, selectPastedContent) {
+    var sel, range;
+    if (window.getSelection) {
+        // IE9 and non-IE
+        sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+            range = sel.getRangeAt(0);
+            range.deleteContents();
+
+            // Range.createContextualFragment() would be useful here but is
+            // only relatively recently standardized and is not supported in
+            // some browsers (IE9, for one)
+            var el = document.createElement("div");
+            el.innerHTML = html;
+            var frag = document.createDocumentFragment(), node, lastNode;
+            while ( (node = el.firstChild) ) {
+                lastNode = frag.appendChild(node);
+            }
+            var firstNode = frag.firstChild;
+            range.insertNode(frag);
+
+            // Preserve the selection
+            if (lastNode) {
+                range = range.cloneRange();
+                range.setStartAfter(lastNode);
+                if (selectPastedContent) {
+                    range.setStartBefore(firstNode);
+                } else {
+                    range.collapse(true);
+                }
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+        }
+    } else if ( (sel = document.selection) && sel.type != "Control") {
+        // IE < 9
+        var originalRange = sel.createRange();
+        originalRange.collapse(true);
+        sel.createRange().pasteHTML(html);
+        if (selectPastedContent) {
+            range = sel.createRange();
+            range.setEndPoint("StartToStart", originalRange);
+            range.select();
+        }
+    }
 }
 
 function removeSelectedText(editarea) {

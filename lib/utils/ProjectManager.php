@@ -703,7 +703,7 @@ class ProjectManager {
                             $ext_tags              = mysql_real_escape_string( $seg_source[ 'ext-prec-tags' ] );
                             $source                = mysql_real_escape_string( $seg_source[ 'raw-content' ] );
                             $ext_succ_tags         = mysql_real_escape_string( $seg_source[ 'ext-succ-tags' ] );
-                            $num_words             = CatUtils::segment_raw_wordcount( $seg_source[ 'raw-content' ] );
+                            $num_words             = CatUtils::segment_raw_wordcount( $seg_source[ 'raw-content' ], $xliff_file['attr']['source-language'] );
                             $trans_unit_id         = mysql_real_escape_string( $xliff_trans_unit[ 'attr' ][ 'id' ] );
                             $mrk_ext_prec_tags     = mysql_real_escape_string( $seg_source[ 'mrk-ext-prec-tags' ] );
                             $mrk_ext_succ_tags     = mysql_real_escape_string( $seg_source[ 'mrk-ext-succ-tags' ] );
@@ -754,7 +754,7 @@ class ProjectManager {
 
                         //we do the word count after the place-holding with <x id="nbsp"/>
                         //so &nbsp; are now not recognized as word and not counted as payable
-                        $num_words = CatUtils::segment_raw_wordcount($source);
+                        $num_words = CatUtils::segment_raw_wordcount($source, $xliff_file['attr']['source-language'] );
 
                         //applying escaping after raw count
                         $source = mysql_real_escape_string($source);
