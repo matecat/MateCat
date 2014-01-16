@@ -68,6 +68,8 @@ class glossaryController extends ajaxcontroller {
             $config[ 'email' ]       = "demo@matecat.com";
             $config[ 'id_user' ]     = $st[ 'id_translator' ];
             $config[ 'isGlossary' ]  = true;
+            $config[ 'get_mt' ]      = null;
+            $config[ 'num_result' ]  = null;
 
             /**
              * For future reminder
@@ -85,6 +87,7 @@ class glossaryController extends ajaxcontroller {
 
                     /**
                      * Return only exact matches in glossary when a search is executed over the entire segment
+                     * Reordered by positional status of matches in source
                      *
                      * Example:
                      * Segment: On average, Members of the House of Commons have 4,2 support staff.
@@ -95,11 +98,20 @@ class glossaryController extends ajaxcontroller {
                      *
                      */
                     if( $this->automatic ){
+                        $tmp_Result = array();
                         foreach( $TMS_RESULT as $k => $val ){
-                            if( mb_stripos( $this->segment, $k ) === false ){
+                            if( ( $res = mb_stripos( $this->segment, $k ) ) === false ){
                                 unset( $TMS_RESULT[$k] );
+                            } else {
+                                $tmp_Result[$res] = $k;
                             }
                         }
+                        ksort( $tmp_Result ); //sort by position in source
+                        $ordered_Result = array();
+                        foreach( $tmp_Result as $glossary_matches ){
+                            $ordered_Result[ $glossary_matches ] = $TMS_RESULT[ $glossary_matches ];
+                        }
+                        $TMS_RESULT = $ordered_Result;
                     }
                     $this->result['data']['matches'] = $TMS_RESULT;
 

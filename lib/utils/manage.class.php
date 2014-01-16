@@ -109,10 +109,6 @@ class ManageUtils {
 
 				$project['id_engine_mt']= $job_array[5];
 
-                //FIXME: BUG MyMemory private key can be different for every job, must be associated to the job and not to the project
-                //FIXME: there should be more than one private TM key
-				$project['private_tm_key'] = $job_array[6];
-
                 $job['private_tm_key'] = $job_array[6];
 
 				$job['disabled']= ($job_array[7]=='cancelled')?"disabled":"";

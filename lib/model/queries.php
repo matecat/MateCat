@@ -1298,7 +1298,7 @@ function getProjectJobData( $pid ) {
  *
  * @return array
  */
-function getProjectData( $pid, $project_password = null, $jid = null ) {
+function getProjectData( $pid, $project_password = null, $jid = null, $jpassword = null ) {
 
     $query = "
               SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, f.id, f.id AS id_file,f.filename, p.status_analysis,
@@ -1321,27 +1321,33 @@ function getProjectData( $pid, $project_password = null, $jid = null ) {
                     %s
                     AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
                     %s
+                    %s
 
                     GROUP BY f.id, j.id, j.password
                     ORDER BY j.create_date, j.job_first_segment
              ";
 
-    $and_1 = $and_2 = null;
+    $and_1 = $and_2 = $and_3 = null;
+
+    $db      = Database::obtain();
 
     if( !empty( $project_password ) ){
-        $and_1 = " and p.password = '$project_password' ";
+        $and_1 = " and p.password = '" . $db->escape( $project_password ) . "' ";
     }
 
     if( !empty($jid) ){
         $and_2 = " and j.id = " . intval($jid);
     }
 
-    $query = sprintf( $query, $and_1, $and_2 );
+    if( !empty($jpassword) ){
+        $and_2 = " and j.password = '" . $db->escape( $jpassword ) . "' ";
+    }
 
-    $db      = Database::obtain();
+    $query = sprintf( $query, $and_1, $and_2, $and_3 );
+
     $results = $db->fetch_array( $query );
 
-    //echo "<pre>" .var_export( $results , true ) . "</pre>";
+//    echo "<pre>" .var_export( $results , true ) . "</pre>"; die();
 
     return $results;
 }
@@ -1624,7 +1630,7 @@ function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
 }
 
 function getSegmentsForFastVolumeAnalysys( $pid ) {
-    $query   = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment
+    $query   = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment, j.source
 		from segments as s 
 		inner join files_job as fj on fj.id_file=s.id_file
 		inner join jobs as j on fj.id_job=j.id

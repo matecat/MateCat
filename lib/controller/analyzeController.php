@@ -6,7 +6,8 @@ include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 class analyzeController extends viewcontroller {
 
     private $pid;
-    private $password;
+    private $ppassword;
+    private $jpassword;
     private $pname = "";
     private $total_raw_word_count = 0;
     private $total_raw_word_count_print = "";
@@ -24,7 +25,7 @@ class analyzeController extends viewcontroller {
     private $tm_wc_unit = "";
     private $raw_wc_unit = "";
     private $standard_wc_unit = "";
-    private $jobs;
+    private $jobs = array();
     private $project_not_found = false;
     private $project_status = "";
     private $num_segments = 0;
@@ -32,16 +33,27 @@ class analyzeController extends viewcontroller {
 
     public function __construct() {
         parent::__construct( false );
-        parent::makeTemplate( "analyze.html" );
 
         $this->pid      = $this->get_from_get_post( "pid" );
-        $this->password = $this->get_from_get_post( "password" );
-        $this->jobs     = array();
+        $this->jid      = $this->get_from_get_post( "jid" );
+        $pass = $this->get_from_get_post( "password" );
+
+        if( !empty( $this->jid ) ){
+            parent::makeTemplate( "jobAnalysis.html" );
+            $this->jpassword = $pass;
+            $this->ppassword = null;
+        } else {
+            parent::makeTemplate( "analyze.html" );
+            $this->jid       = null;
+            $this->jpassword = null;
+            $this->ppassword = $pass;
+        }
+
     }
 
     public function doAction() {
 
-        $project_by_jobs_data = getProjectData( $this->pid, $this->password );
+        $project_by_jobs_data = getProjectData( $this->pid, $this->ppassword, $this->jid, $this->jpassword );
 
         $lang_handler = Languages::getInstance();
 
@@ -242,7 +254,7 @@ class analyzeController extends viewcontroller {
             $this->total_raw_word_count_print = number_format( $this->total_raw_word_count, 0, ".", "," );
         }
 
-        //echo "<pre>" . print_r ( $this->jobs, true ) . "</pre>"; exit;
+//        echo "<pre>" . print_r ( $this->jobs, true ) . "</pre>"; exit;
 
     }
 
@@ -259,7 +271,7 @@ class analyzeController extends viewcontroller {
         $this->template->total_raw_word_count_print = $this->total_raw_word_count_print;
         $this->template->pname                      = $this->pname;
         $this->template->pid                        = $this->pid;
-        $this->template->project_password           = $this->password;
+        $this->template->project_password           = $this->ppassword;
         $this->template->project_not_found          = $this->project_not_found;
         $this->template->fast_wc_time               = $this->fast_wc_time;
         $this->template->tm_wc_time                 = $this->tm_wc_time;

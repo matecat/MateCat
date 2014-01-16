@@ -227,7 +227,7 @@
 				"en":"Chinese Simplified"
 			}],
 			"isocode":"zh",
-			"enabled":false,
+			"enabled":true,
 			"rtl":false,
 			"top":"top10 top20",
 			"rfc3066code":"zh-CN"
@@ -238,7 +238,7 @@
 				"en":"Chinese Traditional"
 			}],
 			"isocode":"zh",
-			"enabled":false,
+			"enabled":true,
 			"rtl":false,
 			"top":"top20",
 			"rfc3066code":"zh-TW"
@@ -636,7 +636,7 @@
 				"en":"Japanese"
 			}],
 			"isocode":"ja",
-			"enabled":false,
+			"enabled":true,
 			"rtl":false,
 			"top":"top10 top20",
 			"rfc3066code":"ja-JP"
@@ -727,7 +727,7 @@
 				"en":"Korean"
 			}],
 			"isocode":"ko",
-			"enabled":false,
+			"enabled":true,
 			"rtl":false,
 			"rfc3066code":"ko-KR"
 		}
