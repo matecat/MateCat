@@ -68,6 +68,8 @@ class glossaryController extends ajaxcontroller {
             $config[ 'email' ]       = "demo@matecat.com";
             $config[ 'id_user' ]     = $st[ 'id_translator' ];
             $config[ 'isGlossary' ]  = true;
+            $config[ 'get_mt' ]      = null;
+            $config[ 'num_result' ]  = null;
 
             /**
              * For future reminder
@@ -81,7 +83,7 @@ class glossaryController extends ajaxcontroller {
 
                 case 'get':
 
-                    $TMS_RESULT = $_TMS->get($config)->get_glossary_matches_as_array();
+                    $TMS_RESULT = $_TMS->get($config)->get_glossary_matches_as_array(); Log::doLog($TMS_RESULT);
 
                     /**
                      * Return only exact matches in glossary when a search is executed over the entire segment
@@ -95,11 +97,20 @@ class glossaryController extends ajaxcontroller {
                      *
                      */
                     if( $this->automatic ){
+                        $tmp_Result = array();
                         foreach( $TMS_RESULT as $k => $val ){
-                            if( mb_stripos( $this->segment, $k ) === false ){
+                            if( ( $res = mb_stripos( $this->segment, $k ) ) === false ){
                                 unset( $TMS_RESULT[$k] );
+                            } else {
+                                $tmp_Result[$res] = $k;
                             }
                         }
+                        ksort( $tmp_Result ); //sort by position in source
+                        $new_Result = array();
+                        foreach( $tmp_Result as $glossary_matches ){
+                            $new_Result[ $glossary_matches ] = $TMS_RESULT[ $glossary_matches ];
+                        }
+                        $TMS_RESULT = $new_Result;
                     }
                     $this->result['data']['matches'] = $TMS_RESULT;
 
