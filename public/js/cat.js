@@ -1790,7 +1790,7 @@ UI = {
         var p = this.searchParams;
 		var source = (p['source']) ? p['source'] : '';
 		var target = (p['target']) ? p['target'] : '';
-		var replace = (p['replace']); // ? p['replace'] : ''; //now not needed, already checked before
+		var replace = (p['replace']) ? p['replace'] : '';
 		var dd = new Date();
 		APP.doRequest({
 			data: {
