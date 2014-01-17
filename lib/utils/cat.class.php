@@ -22,6 +22,8 @@ class CatUtils {
     const crPlaceholderRegex   = '/\#\#\$_0D\$\#\#/g';
     const crlfPlaceholderRegex = '/\#\#\$_0D0A\$\#\#/g';
 
+    public static $cjk = array( 'zh-TW' => 1.8, 'zh-CN' => 1.8, 'ja-JP' => 2.5, 'ko-KR' => 2.5 );
+
     //following functions are useful for manage the consistency of non braking spaces
     // chars coming, expecially,from MS Word
     // ref nbsp code https://en.wikipedia.org/wiki/Non-breaking_space
@@ -676,56 +678,75 @@ class CatUtils {
         return $file_stats;
     }
 
-    //CONTA LE PAROLE IN UNA STRINGA
-    public static function segment_raw_wordcount( $string, $source_lang = 'en-US' ) {
+    public static function clean_raw_string4fast_word_count( $string, $source_lang = 'en-US' ){
 
         $app = trim( $string );
-        $n   = strlen( $app );
         if ( $app == "" ) {
-            return 0;
+            return '';
         }
 
-        $res  = 0;
-        $temp = array();
+        $string = preg_replace( "#<.*?" . ">#si", "", $string );
+        $string = preg_replace( "#<\/.*?" . ">#si", "", $string );
+
+        $string = str_replace( ":", "", $string );
+        $string = str_replace( ";", "", $string );
+        $string = str_replace( "[", "", $string );
+        $string = str_replace( "]", "", $string );
+        $string = str_replace( "?", "", $string );
+        $string = str_replace( "!", "", $string );
+        $string = str_replace( "{", "", $string );
+        $string = str_replace( "}", "", $string );
+        $string = str_replace( "(", "", $string );
+        $string = str_replace( ")", "", $string );
+        $string = str_replace( "/", "", $string );
+        $string = str_replace( "\\", "", $string );
+        $string = str_replace( "|", "", $string );
+        $string = str_replace( "£", "", $string );
+        $string = str_replace( "$", "", $string );
+        $string = str_replace( "%", "", $string );
+        $string = str_replace( "-", "", $string );
+        $string = str_replace( "_", "", $string );
+        $string = str_replace( "#", "", $string );
+        $string = str_replace( "§", "", $string );
+        $string = str_replace( "^", "", $string );
+        $string = str_replace( "â€???", "", $string );
+        $string = str_replace( "&", "", $string );
 
 
-        $cjk = array( 'zh-TW' => 1.8, 'zh-CN' => 1.8, 'ja-JP' => 2.5, 'ko-KR' => 2.5 );
+        if ( array_key_exists( $source_lang, self::$cjk ) ) {
 
-        if ( array_key_exists( $source_lang, $cjk ) ) {
-            $res = mb_strlen( $string, 'UTF-8' ) / $cjk[ $source_lang ];
+            // 17/01/2014
+            // sostituiamo i numeri con N nel CJK in modo da non alterare i rapporti carattere/parola
+            // in modo che il conteggio
+            // parole consideri i segmenti che differiscono per soli numeri some ripetizioni (come TRADOS)
+            $string = preg_replace( "/[0-9]+([\.,][0-9]+)*/", "N", $string );
+
         } else {
-
-            $string = preg_replace( "#<.*?" . ">#si", "", $string );
-            $string = preg_replace( "#<\/.*?" . ">#si", "", $string );
-
-            $string = str_replace( ":", "", $string );
-            $string = str_replace( ";", "", $string );
-            $string = str_replace( "[", "", $string );
-            $string = str_replace( "]", "", $string );
-            $string = str_replace( "?", "", $string );
-            $string = str_replace( "!", "", $string );
-            $string = str_replace( "{", "", $string );
-            $string = str_replace( "}", "", $string );
-            $string = str_replace( "(", "", $string );
-            $string = str_replace( ")", "", $string );
-            $string = str_replace( "/", "", $string );
-            $string = str_replace( "\\", "", $string );
-            $string = str_replace( "|", "", $string );
-            $string = str_replace( "£", "", $string );
-            $string = str_replace( "$", "", $string );
-            $string = str_replace( "%", "", $string );
-            $string = str_replace( "-", "", $string );
-            $string = str_replace( "_", "", $string );
-            $string = str_replace( "#", "", $string );
-            $string = str_replace( "§", "", $string );
-            $string = str_replace( "^", "", $string );
-            $string = str_replace( "â€???", "", $string );
-            $string = str_replace( "&", "", $string );
 
             // 08/02/2011 CONCORDATO CON MARCO : sostituire tutti i numeri con un segnaposto, in modo che il conteggio
             // parole consideri i segmenti che differiscono per soli numeri some ripetizioni (come TRADOS)
             $string = preg_replace( "/[0-9]+([\.,][0-9]+)*/", "<TRANSLATED_NUMBER>", $string );
 
+        }
+
+        return $string;
+
+    }
+
+    //CONTA LE PAROLE IN UNA STRINGA
+    public static function segment_raw_wordcount( $string, $source_lang = 'en-US' ) {
+
+        $string = self::clean_raw_string4fast_word_count( $string, $source_lang );
+
+        if ( $string == "" ) {
+            return 0;
+        }
+
+        if ( array_key_exists( $source_lang, self::$cjk ) ) {
+
+            $res = mb_strlen( $string, 'UTF-8' ) / self::$cjk[ $source_lang ];
+
+        } else {
 
             $string = str_replace( " ", "<sep>", $string );
             $string = str_replace( ", ", "<sep>", $string );
@@ -734,7 +755,6 @@ class CatUtils {
             $string = str_replace( ".", "<sep>", $string );
             $string = str_replace( "\"", "<sep>", $string );
             $string = str_replace( "\'", "<sep>", $string );
-
 
             $app = explode( "<sep>", $string );
             foreach ( $app as $a ) {
@@ -751,6 +771,7 @@ class CatUtils {
         }
 
         return $res;
+
     }
 
     /**
