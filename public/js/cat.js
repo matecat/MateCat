@@ -15,6 +15,8 @@ UI = {
 		this.isMac = (navigator.platform == 'MacIntel') ? true : false;
 		this.body = $('body');
 		this.firstLoad = firstLoad;
+		this.markedAtRender = false;
+
 //        if (firstLoad)
 //            this.startRender = true;
 		this.initSegNum = 200; // number of segments initially loaded
@@ -1002,8 +1004,6 @@ UI = {
 		})
 		$("#jobMenu").on('click', 'li:not(.currSegment)', function(e) {
 			e.preventDefault();
-//            UI.scrollSegment($('#segment-' + $(this).attr('data-segment')), true);
-//            UI.scrollSegment($(this).attr('data-segment'), true);
 			UI.renderAndScrollToSegment($(this).attr('data-segment'), true);
 		})
 		$("#jobMenu").on('click', 'li.currSegment', function(e) {
@@ -2764,6 +2764,7 @@ UI = {
 		$('#outer').removeClass('loading loadingBefore');
 		this.loadingMore = false;
 		this.setWaypoints();
+		if(this.taglockEnabled) this.markTags();
 	},
 	getSegmentSource: function(seg) {
 		segment = (typeof seg == 'undefined') ? this.currentSegment : seg;
@@ -2961,9 +2962,11 @@ UI = {
 		});
 	},
 	markTags: function() {
-//		console.log('MARK TAGS');
-		if (!this.taglockEnabled)
+		console.log('MARK TAGS');
+		if (!this.taglockEnabled || this.markedAtRender)
 			return false;
+		console.log('ecco');
+		this.markedAtRender = true;
 		if (this.noTagsInSegment(1))
 			return false;
 		$('.source').each(function() {
