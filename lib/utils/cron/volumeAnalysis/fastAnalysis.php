@@ -28,6 +28,13 @@ while (1) {
 
 		$segments=getSegmentsForFastVolumeAnalysys($pid);
 
+        //remove tags before Fast Match count for CJK languages and other also
+//        if( isset($segments[0]['source']) && array_key_exists( $segments[0]['source'], CatUtils::$cjk ) ){
+            foreach( $segments as $pos => $segment ){
+                $segments[$pos]['segment'] = CatUtils::clean_raw_string4fast_word_count( $segment['segment'], $segments[0]['source'] );
+            }
+//        }
+
 		echo "done\n";
         Log::doLog( "done" );
 

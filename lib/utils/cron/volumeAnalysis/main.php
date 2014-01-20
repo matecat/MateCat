@@ -6,6 +6,7 @@ INIT::obtain();
 
 require_once INIT::$UTILS_ROOT.'/log.class.php';
 require_once INIT::$UTILS_ROOT.'/utils.class.php';
+require_once INIT::$UTILS_ROOT.'/cat.class.php';
 require_once INIT::$CONTROLLER_ROOT.'/frontController.php';
 require_once INIT::$MODEL_ROOT.'/Database.class.php';
 require_once INIT::$MODEL_ROOT.'/queries.php';
