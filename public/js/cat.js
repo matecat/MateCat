@@ -57,7 +57,7 @@ UI = {
 		this.readonly = (this.body.hasClass('archived')) ? true : false;
 		this.suggestionShortcutLabel = 'ALT+' + ((UI.isMac) ? "CMD" : "CTRL") + '+';
 
-		this.taglockEnabled = true;
+		this.taglockEnabled = config.taglockEnabled || true;
 		this.debug = Loader.detect('debug');
 		this.checkTutorialNeed();
 
