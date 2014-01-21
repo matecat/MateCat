@@ -39,7 +39,7 @@ $tms = new TMS( 1 );
 foreach( $fObject as $k => $row ){
     $config[ 'segment' ]       = $row[0];
     $config[ 'translation' ]   = $row[1];
-    $config[ 'tnote' ]         = $row[2];
+    $config[ 'tnote' ]         = ( isset($row[2]) ? $row[2] : null );
 
     $tms->set( $config );
 

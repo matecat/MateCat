@@ -150,10 +150,11 @@ function doReplaceAll( ArrayObject $queryParams ){
     }
 
     if( $queryParams['exactMatch'] ) {
-        $LIKE = "[[:space:]]";
+        $Space_Left = "[[:space:]]{0,}";
+        $Space_Right = "[[:space:]]";
         $replacement = $replacement . " "; //add spaces to replace " a " with "b "
     } else {
-        $LIKE = ""; // we also want to replace all occurrences in a string: replace "mod" with "dog" in "mod modifier" -> "dog dogifier"
+        $Space_Left = $Space_Right = ""; // we also want to replace all occurrences in a string: replace "mod" with "dog" in "mod modifier" -> "dog dogifier"
     }
 
 // this doesn't works because of REPLACE IS ALWAYS CASE SENSITIVE, moreover, we can't perform UNDO
@@ -173,22 +174,23 @@ function doReplaceAll( ArrayObject $queryParams ){
                 JOIN jobs ON st.id_job = id AND password = '{$queryParams['password']}' AND id = {$queryParams['job']}
                 WHERE id_job = {$queryParams['job']}
                 AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
-                AND segment_translations.status != 'NEW'
+                AND st.status != 'NEW'
                 AND locked != 1
-                AND translation REGEXP $SQL_CASE'{$LIKE}{0,}{$trg}{$LIKE}'
+                AND translation REGEXP $SQL_CASE'{$Space_Left}{$trg}{$Space_Right}'
                 $where_status
            ";
 
     //use this for UNDO
     $resultSet = $db->fetch_array($sql);
 
+    Log::doLog( $sql );
     Log::doLog( "Replace ALL Total ResultSet " . count($resultSet) );
 
     $sqlBatch = array();
     foreach( $resultSet as $key => $tRow ){
         //we get the spaces before needed string and re-apply before substitution because we can't know if there are
         //and how much they are
-        $trMod = preg_replace( "#({$LIKE}{0,}){$trg}{$LIKE}#$modifier", '$1'.$replacement, $tRow['translation'] );
+        $trMod = preg_replace( "#({$Space_Left}){$trg}{$Space_Right}#$modifier", '$1'.$replacement, $tRow['translation'] );
         $sqlBatch[] = "({$tRow['id_segment']},{$tRow['id_job']},'{$trMod}')";
     }
 
@@ -975,28 +977,28 @@ function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
 		select
                 j.id,
 		SUM(
-				IF( IFNULL( st.eq_word_count, 0 ) = 0, s.raw_word_count, st.eq_word_count)
+				IF( IFNULL( st.eq_word_count, -1 ) = -1, s.raw_word_count, st.eq_word_count)
 		   ) as TOTAL,
 		SUM(
 				IF(
 					st.status IS NULL OR
 					st.status='DRAFT' OR
 					st.status='NEW',
-					IF( IFNULL( st.eq_word_count, 0 ) = 0 , s.raw_word_count, st.eq_word_count),0)
+					IF( IFNULL( st.eq_word_count, -1 ) = -1 , s.raw_word_count, st.eq_word_count),0)
 		   ) as DRAFT,
 		SUM(
 				IF(st.status='REJECTED',
-					IF( IFNULL( st.eq_word_count, 0 ) = 0 , s.raw_word_count, st.eq_word_count),0
+					IF( IFNULL( st.eq_word_count, -1 ) = -1 , s.raw_word_count, st.eq_word_count),0
 				  )
 		   ) as REJECTED,
 		SUM(
 				IF(st.status='TRANSLATED',
-					IF( IFNULL( st.eq_word_count, 0 ) = 0 , s.raw_word_count, st.eq_word_count),0
+					IF( IFNULL( st.eq_word_count, -1 ) = -1 , s.raw_word_count, st.eq_word_count),0
 				  )
 		   ) as TRANSLATED,
 		SUM(
 				IF(st.status='APPROVED',
-					IF( IFNULL( st.eq_word_count, 0 ) = 0, s.raw_word_count, st.eq_word_count),0
+					IF( IFNULL( st.eq_word_count, -1 ) = -1, s.raw_word_count, st.eq_word_count),0
 				  )
 		   ) as APPROVED
 
@@ -2434,8 +2436,10 @@ function countSegments( $pid ) {
 		from segments s 
 		inner join files_job fj on fj.id_file=s.id_file
 		inner join jobs j on j.id= fj.id_job
-		where id_project=$pid and raw_word_count>0
+		where id_project=$pid
 		";
+
+    //-- and raw_word_count>0 -- removed, count ALL segments
 
     $results = $db->query_first( $query );
 
