@@ -505,6 +505,7 @@ class ProjectManager {
             $query = "INSERT INTO jobs ( " . implode( ", ", array_keys( $jobInfo ) ) . " )
                         VALUES ( '" . implode( "', '", array_values( $jobInfo ) ) . "' )
                         ON DUPLICATE KEY UPDATE
+                        last_opened_segment = {$jobInfo['last_opened_segment']},
                         job_first_segment = '{$jobInfo['job_first_segment']}',
                         job_last_segment = '{$jobInfo['job_last_segment']}'";
 

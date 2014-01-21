@@ -1877,6 +1877,14 @@ UI = {
 		this.applySearch();
 //		$('.modal[data-name=confirmReplaceAll] .btn-ok').addClass('disabled').text('Replacing...').attr('disabled', 'disabled');
 
+        if ( $('#search-target').val() != '' ) {
+            this.searchParams['target'] = $('#search-target').val();
+        } else {
+            APP.alert('You must specify the Target value to replace.');
+            delete this.searchParams['target'];
+            return false;
+        }
+
         if ($('#replace-target').val() != '') {
             this.searchParams['replace'] = $('#replace-target').val();
         } else {
@@ -1900,6 +1908,21 @@ UI = {
 		var target = (p['target']) ? p['target'] : '';
 		var replace = (p['replace']) ? p['replace'] : '';
 		var dd = new Date();
+
+        console.log( {
+            action: 'getSearch',
+                    function: 'replaceAll',
+                    job: config.job_id,
+                    token: dd.getTime(),
+                    password: config.password,
+                    source: source,
+                    target: target,
+                    status: p['status'],
+                    matchcase: p['match-case'],
+                    exactmatch: p['exact-match'],
+                    replace: replace
+        } );
+
 		APP.doRequest({
 			data: {
 				action: 'getSearch',
