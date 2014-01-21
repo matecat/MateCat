@@ -15,6 +15,7 @@ UI = {
 		this.isMac = (navigator.platform == 'MacIntel') ? true : false;
 		this.body = $('body');
 		this.firstLoad = firstLoad;
+
 //        if (firstLoad)
 //            this.startRender = true;
 		this.initSegNum = 200; // number of segments initially loaded
@@ -57,7 +58,7 @@ UI = {
 		this.readonly = (this.body.hasClass('archived')) ? true : false;
 		this.suggestionShortcutLabel = 'ALT+' + ((UI.isMac) ? "CMD" : "CTRL") + '+';
 
-		this.taglockEnabled = true;
+		this.taglockEnabled = config.taglockEnabled || true;
 		this.debug = Loader.detect('debug');
 		this.checkTutorialNeed();
 
@@ -126,7 +127,7 @@ UI = {
 		}, 2000);
 		this.checkSegmentsArray = {};
 		this.firstMarking = true;
-		this.markTags();
+//		this.markTags(true);
 		this.firstMarking = false;
 		this.setContextMenu();
 		this.createJobMenu();
@@ -1002,8 +1003,6 @@ UI = {
 		})
 		$("#jobMenu").on('click', 'li:not(.currSegment)', function(e) {
 			e.preventDefault();
-//            UI.scrollSegment($('#segment-' + $(this).attr('data-segment')), true);
-//            UI.scrollSegment($(this).attr('data-segment'), true);
 			UI.renderAndScrollToSegment($(this).attr('data-segment'), true);
 		})
 		$("#jobMenu").on('click', 'li.currSegment', function(e) {
@@ -1770,6 +1769,14 @@ UI = {
 		this.applySearch();
 //		$('.modal[data-name=confirmReplaceAll] .btn-ok').addClass('disabled').text('Replacing...').attr('disabled', 'disabled');
 
+        if ( $('#search-target').val() != '' ) {
+            this.searchParams['target'] = $('#search-target').val();
+        } else {
+            APP.alert('You must specify the Target value to replace.');
+            delete this.searchParams['target'];
+            return false;
+        }
+
         if ($('#replace-target').val() != '') {
             this.searchParams['replace'] = $('#replace-target').val();
         } else {
@@ -1793,6 +1800,21 @@ UI = {
 		var target = (p['target']) ? p['target'] : '';
 		var replace = (p['replace']) ? p['replace'] : '';
 		var dd = new Date();
+
+        console.log( {
+            action: 'getSearch',
+                    function: 'replaceAll',
+                    job: config.job_id,
+                    token: dd.getTime(),
+                    password: config.password,
+                    source: source,
+                    target: target,
+                    status: p['status'],
+                    matchcase: p['match-case'],
+                    exactmatch: p['exact-match'],
+                    replace: replace
+        } );
+
 		APP.doRequest({
 			data: {
 				action: 'getSearch',
@@ -2764,6 +2786,8 @@ UI = {
 		$('#outer').removeClass('loading loadingBefore');
 		this.loadingMore = false;
 		this.setWaypoints();
+
+		if(this.taglockEnabled) this.markTags();
 	},
 	getSegmentSource: function(seg) {
 		segment = (typeof seg == 'undefined') ? this.currentSegment : seg;
@@ -2961,9 +2985,7 @@ UI = {
 		});
 	},
 	markTags: function() {
-//		console.log('MARK TAGS');
-		if (!this.taglockEnabled)
-			return false;
+		if (!this.taglockEnabled) return false;
 		if (this.noTagsInSegment(1))
 			return false;
 		$('.source').each(function() {

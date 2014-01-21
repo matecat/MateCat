@@ -279,6 +279,10 @@ class catController extends viewcontroller {
 
         ( INIT::$VOLUME_ANALYSIS_ENABLED        ? $this->template->analysis_enabled = true : null );
 
+        if( array_key_exists( $this->source_code, CatUtils::$cjk ) ){
+            $this->template->taglockEnabled = false;
+        }
+
         /*
          * Line Feed PlaceHolding System
          */

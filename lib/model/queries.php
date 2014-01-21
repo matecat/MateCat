@@ -19,9 +19,9 @@ function doSearchQuery( ArrayObject $queryParams ) {
     }
 
     if( $queryParams['matchCase'] ) {
-        $SQL_MOD = "";
+        $SQL_CASE = "";
     } else {
-        $SQL_MOD = "LOWER ";
+        $SQL_CASE = "LOWER ";
         $src = strtolower( $src );
         $trg = strtolower( $trg );
     }
@@ -37,7 +37,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
 
         $query = "SELECT s.id, sum(
                     ROUND (
-                        ( LENGTH( s.segment ) - LENGTH( REPLACE ( $SQL_MOD( segment ), $SQL_MOD( '$src' ), '') ) ) / LENGTH('$src') )
+                        ( LENGTH( s.segment ) - LENGTH( REPLACE ( $SQL_CASE( segment ), $SQL_CASE( '$src' ), '') ) ) / LENGTH('$src') )
                     ) AS count
                     FROM segments s
                     INNER JOIN files_job fj on s.id_file=fj.id_file
@@ -51,7 +51,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
 
         $query = "SELECT  st.id_segment as id, sum(
                     ROUND (
-                      ( LENGTH( st.translation ) - LENGTH( REPLACE ( $SQL_MOD( st.translation ), $SQL_MOD( '$trg' ), '') ) ) / LENGTH('$trg') )
+                      ( LENGTH( st.translation ) - LENGTH( REPLACE ( $SQL_CASE( st.translation ), $SQL_CASE( '$trg' ), '') ) ) / LENGTH('$trg') )
                     ) AS count
                     FROM segment_translations st
                     WHERE st.id_job = {$queryParams['job']}
@@ -59,7 +59,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
                     AND st.status != 'NEW'
                     $where_status
                     AND ROUND (
-                      ( LENGTH( st.translation ) - LENGTH( REPLACE ( $SQL_MOD ( st.translation ), $SQL_MOD ( '$trg' ), '') ) ) / LENGTH('$trg') )
+                      ( LENGTH( st.translation ) - LENGTH( REPLACE ( $SQL_CASE ( st.translation ), $SQL_CASE ( '$trg' ), '') ) ) / LENGTH('$trg') )
                      > 0
                     GROUP BY st.id_segment WITH ROLLUP";
 
@@ -71,8 +71,8 @@ function doSearchQuery( ArrayObject $queryParams ) {
                     WHERE st.id_job = {$queryParams['job']}
                     AND st.translation LIKE '" . $LIKE . $trg . $LIKE . "'
                     AND s.segment LIKE '" . $LIKE . $src . $LIKE . "'
-                    AND LENGTH( REPLACE ( $SQL_MOD( segment ), $SQL_MOD( '$src' ), '') ) != LENGTH( s.segment )
-                    AND LENGTH( REPLACE ( $SQL_MOD( st.translation ), $SQL_MOD( '$trg' ), '') ) != LENGTH( st.translation )
+                    AND LENGTH( REPLACE ( $SQL_CASE( segment ), $SQL_CASE( '$src' ), '') ) != LENGTH( s.segment )
+                    AND LENGTH( REPLACE ( $SQL_CASE( st.translation ), $SQL_CASE( '$trg' ), '') ) != LENGTH( st.translation )
                     AND st.status != 'NEW'
                     $where_status ";
 
@@ -126,6 +126,117 @@ function doSearchQuery( ArrayObject $queryParams ) {
     }
 
     return $vector;
+}
+
+function doReplaceAll( ArrayObject $queryParams ){
+
+    $db = Database::obtain();
+
+    $trg         = $db->escape( $queryParams['trg'] );
+    $replacement = $db->escape( $queryParams['replacement'] );
+
+    $where_status = "";
+    if ( $queryParams[ 'status' ] != 'all' && $queryParams[ 'status' ] != 'new' ) {
+        $status       = $queryParams[ 'status' ]; //no escape: hardcoded
+        $where_status = " AND st.status = '$status'";
+    }
+
+    if( $queryParams['matchCase'] ) {
+        $SQL_CASE = "BINARY ";
+        $modifier = 'u';
+    } else {
+        $SQL_CASE = "";
+        $modifier = 'iu';
+    }
+
+    if( $queryParams['exactMatch'] ) {
+        $LIKE = "[[:space:]]";
+        $replacement = $replacement . " "; //add spaces to replace " a " with "b "
+    } else {
+        $LIKE = ""; // we also want to replace all occurrences in a string: replace "mod" with "dog" in "mod modifier" -> "dog dogifier"
+    }
+
+// this doesn't works because of REPLACE IS ALWAYS CASE SENSITIVE, moreover, we can't perform UNDO
+//    $sql = "UPDATE segment_translations, jobs
+//                SET translation = REPLACE( translation, '{$LIKE}{$trg}{$LIKE}', '{$replacement}' )
+//                WHERE id_job = jobs.id
+//                AND id_job = {$queryParams['job']}
+//                AND jobs.password = '{$queryParams['password']}'
+//                AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
+//                AND segment_translations.status != 'NEW'
+//                AND locked != 1
+//                $where_status
+//            ";
+
+    $sql = "SELECT id_segment, id_job, translation
+                FROM segment_translations st
+                JOIN jobs ON st.id_job = id AND password = '{$queryParams['password']}' AND id = {$queryParams['job']}
+                WHERE id_job = {$queryParams['job']}
+                AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
+                AND segment_translations.status != 'NEW'
+                AND locked != 1
+                AND translation REGEXP $SQL_CASE'{$LIKE}{0,}{$trg}{$LIKE}'
+                $where_status
+           ";
+
+    //use this for UNDO
+    $resultSet = $db->fetch_array($sql);
+
+    Log::doLog( "Replace ALL Total ResultSet " . count($resultSet) );
+
+    $sqlBatch = array();
+    foreach( $resultSet as $key => $tRow ){
+        //we get the spaces before needed string and re-apply before substitution because we can't know if there are
+        //and how much they are
+        $trMod = preg_replace( "#({$LIKE}{0,}){$trg}{$LIKE}#$modifier", '$1'.$replacement, $tRow['translation'] );
+        $sqlBatch[] = "({$tRow['id_segment']},{$tRow['id_job']},'{$trMod}')";
+    }
+
+    //MySQL default max_allowed_packet is 16MB, this system surely need more
+    //but we can assume that max translation length is more or less 2.5KB
+    // so, for 100 translations of that size we can have 250KB + 20% char strings for query and id.
+    // 300KB is a very low number compared to 16MB
+    $sqlBatchChunk = array_chunk( $sqlBatch, 100 );
+
+    foreach( $sqlBatchChunk as $k => $batch ){
+
+        //WE USE INSERT STATEMENT for it's convenience ( update multiple fields in multiple rows in batch )
+        //we try to insert these rows in a table wherein the primary key ( unique by definition )
+        //is a coupled key ( id_segment, id_job ), but these values are already present ( duplicates )
+        //so make an "ON DUPLICATE KEY UPDATE"
+        $sqlInsert = "INSERT INTO segment_translations ( id_segment, id_job, translation )
+                        VALUES %s
+                        ON DUPLICATE KEY UPDATE translation = VALUES( translation )";
+
+        $sqlInsert = sprintf( $sqlInsert, implode( ",", $batch ) );
+
+        $db->query( $sqlInsert );
+
+        if( !$db->affected_rows ){
+
+            $msg = "\n\n Error ReplaceAll \n\n Integrity failure: \n\n
+                        - job id            : " . $queryParams['job'] . "
+                        - original data and failed query stored in log ReplaceAll_Failures.log\n\n
+                   ";
+
+            Log::$fileName = 'ReplaceAll_Failures.log';
+            Log::doLog( $resultSet );
+            Log::doLog( $sqlInsert );
+            Log::doLog( $msg );
+
+            Utils::sendErrMailReport( $msg );
+
+            throw new Exception( 'Update translations failure.' ); //bye bye translations....
+
+        }
+
+        //we must divide by 2 because Insert count as 1 but fails and duplicate key update count as 2
+        Log::doLog( "Replace ALL Batch " . ($k +1) . " - Affected Rows " . ( $db->affected_rows / 2 ) );
+
+    }
+
+    Log::doLog( "Replace ALL Done." );
+
 }
 
 function getReferenceSegment( $jid, $jpass, $sid, $binaries = null ){
@@ -2343,12 +2454,17 @@ function countSegments( $pid ) {
 
 function countSegmentsTranslationAnalyzed( $pid ) {
     $db    = Database::obtain();
-    $query = "select sum(if(st.tm_analysis_status='DONE',1,0)) as num_analyzed,
-		sum(eq_word_count) as eq_wc ,
-		sum(standard_word_count) as st_wc
-			from segment_translations st
-			inner join jobs j on j.id=st.id_job
-			where j.id_project=$pid";
+    $query = "SELECT SUM(
+                        CASE
+                            WHEN st.standard_word_count != 0 THEN IF( st.tm_analysis_status = 'DONE', 1, 0 )
+                            WHEN st.standard_word_count = 0 THEN 1
+                        END
+                    ) AS num_analyzed,
+                SUM(eq_word_count) AS eq_wc ,
+                SUM(standard_word_count) AS st_wc
+                FROM segment_translations st
+                INNER JOIN jobs j ON j.id=st.id_job
+                WHERE j.id_project=$pid";
 
     $results = $db->query_first( $query );
     $err     = $db->get_error();
