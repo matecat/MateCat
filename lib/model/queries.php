@@ -2454,12 +2454,17 @@ function countSegments( $pid ) {
 
 function countSegmentsTranslationAnalyzed( $pid ) {
     $db    = Database::obtain();
-    $query = "select sum(if(st.tm_analysis_status='DONE',1,0)) as num_analyzed,
-		sum(eq_word_count) as eq_wc ,
-		sum(standard_word_count) as st_wc
-			from segment_translations st
-			inner join jobs j on j.id=st.id_job
-			where j.id_project=$pid";
+    $query = "SELECT SUM(
+                        CASE
+                            WHEN st.standard_word_count != 0 THEN IF( st.tm_analysis_status = 'DONE', 1, 0 )
+                            WHEN st.standard_word_count = 0 THEN 1
+                        END
+                    ) AS num_analyzed,
+                SUM(eq_word_count) AS eq_wc ,
+                SUM(standard_word_count) AS st_wc
+                FROM segment_translations st
+                INNER JOIN jobs j ON j.id=st.id_job
+                WHERE j.id_project=$pid";
 
     $results = $db->query_first( $query );
     $err     = $db->get_error();
