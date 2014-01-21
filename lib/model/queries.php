@@ -977,28 +977,28 @@ function getStatsForJob( $id_job, $id_file = null, $jPassword = null ) {
 		select
                 j.id,
 		SUM(
-				IF( IFNULL( st.eq_word_count, 0 ) = 0, s.raw_word_count, st.eq_word_count)
+				IF( IFNULL( st.eq_word_count, -1 ) = -1, s.raw_word_count, st.eq_word_count)
 		   ) as TOTAL,
 		SUM(
 				IF(
 					st.status IS NULL OR
 					st.status='DRAFT' OR
 					st.status='NEW',
-					IF( IFNULL( st.eq_word_count, 0 ) = 0 , s.raw_word_count, st.eq_word_count),0)
+					IF( IFNULL( st.eq_word_count, -1 ) = -1 , s.raw_word_count, st.eq_word_count),0)
 		   ) as DRAFT,
 		SUM(
 				IF(st.status='REJECTED',
-					IF( IFNULL( st.eq_word_count, 0 ) = 0 , s.raw_word_count, st.eq_word_count),0
+					IF( IFNULL( st.eq_word_count, -1 ) = -1 , s.raw_word_count, st.eq_word_count),0
 				  )
 		   ) as REJECTED,
 		SUM(
 				IF(st.status='TRANSLATED',
-					IF( IFNULL( st.eq_word_count, 0 ) = 0 , s.raw_word_count, st.eq_word_count),0
+					IF( IFNULL( st.eq_word_count, -1 ) = -1 , s.raw_word_count, st.eq_word_count),0
 				  )
 		   ) as TRANSLATED,
 		SUM(
 				IF(st.status='APPROVED',
-					IF( IFNULL( st.eq_word_count, 0 ) = 0, s.raw_word_count, st.eq_word_count),0
+					IF( IFNULL( st.eq_word_count, -1 ) = -1, s.raw_word_count, st.eq_word_count),0
 				  )
 		   ) as APPROVED
 
@@ -2436,8 +2436,10 @@ function countSegments( $pid ) {
 		from segments s 
 		inner join files_job fj on fj.id_file=s.id_file
 		inner join jobs j on j.id= fj.id_job
-		where id_project=$pid and raw_word_count>0
+		where id_project=$pid
 		";
+
+    //-- and raw_word_count>0 -- removed, count ALL segments
 
     $results = $db->query_first( $query );
 
