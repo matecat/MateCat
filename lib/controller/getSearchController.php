@@ -68,6 +68,7 @@ class getSearchController extends ajaxcontroller {
 
         $this->queryParams = new ArrayObject( array(
             'job'         => $this->job,
+            'password'    => $this->password,
             'key'         => null,
             'src'         => null,
             'trg'         => null,
@@ -136,7 +137,11 @@ class getSearchController extends ajaxcontroller {
 
     private function doReplaceAll(){
         $this->queryParams['trg'] =  $this->target;
-        Log::doLog( $this );
+        /**
+         * Leave the FatalErrorHandler catch the Exception, so the message with Contact Support will be sent
+         * @throws Exception
+         */
+        doReplaceAll( $this->queryParams );
     }
 
 }
