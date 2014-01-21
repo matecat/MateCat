@@ -150,10 +150,11 @@ function doReplaceAll( ArrayObject $queryParams ){
     }
 
     if( $queryParams['exactMatch'] ) {
-        $LIKE = "[[:space:]]";
+        $Space_Left = "[[:space:]]{0,}";
+        $Space_Right = "[[:space:]]";
         $replacement = $replacement . " "; //add spaces to replace " a " with "b "
     } else {
-        $LIKE = ""; // we also want to replace all occurrences in a string: replace "mod" with "dog" in "mod modifier" -> "dog dogifier"
+        $Space_Left = $Space_Right = ""; // we also want to replace all occurrences in a string: replace "mod" with "dog" in "mod modifier" -> "dog dogifier"
     }
 
 // this doesn't works because of REPLACE IS ALWAYS CASE SENSITIVE, moreover, we can't perform UNDO
@@ -173,22 +174,23 @@ function doReplaceAll( ArrayObject $queryParams ){
                 JOIN jobs ON st.id_job = id AND password = '{$queryParams['password']}' AND id = {$queryParams['job']}
                 WHERE id_job = {$queryParams['job']}
                 AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
-                AND segment_translations.status != 'NEW'
+                AND st.status != 'NEW'
                 AND locked != 1
-                AND translation REGEXP $SQL_CASE'{$LIKE}{0,}{$trg}{$LIKE}'
+                AND translation REGEXP $SQL_CASE'{$Space_Left}{$trg}{$Space_Right}'
                 $where_status
            ";
 
     //use this for UNDO
     $resultSet = $db->fetch_array($sql);
 
+    Log::doLog( $sql );
     Log::doLog( "Replace ALL Total ResultSet " . count($resultSet) );
 
     $sqlBatch = array();
     foreach( $resultSet as $key => $tRow ){
         //we get the spaces before needed string and re-apply before substitution because we can't know if there are
         //and how much they are
-        $trMod = preg_replace( "#({$LIKE}{0,}){$trg}{$LIKE}#$modifier", '$1'.$replacement, $tRow['translation'] );
+        $trMod = preg_replace( "#({$Space_Left}){$trg}{$Space_Right}#$modifier", '$1'.$replacement, $tRow['translation'] );
         $sqlBatch[] = "({$tRow['id_segment']},{$tRow['id_job']},'{$trMod}')";
     }
 
