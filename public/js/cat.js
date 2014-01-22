@@ -1149,7 +1149,7 @@ UI = {
 				cancelTxt: 'Cancel',
 				callback: 'execReplaceAll',
 				okTxt: 'Continue',
-				msg: "Do you really want to replace this text in all search results?"
+				msg: "Do you really want to replace this text in all search results? <br>(The page will be refreshed after confirm)"
 			});
 		});
 		$("#exec-replace").click(function(e) {
@@ -1905,24 +1905,10 @@ UI = {
 		var replace = (p['replace']) ? p['replace'] : '';
 		var dd = new Date();
 
-        console.log( {
-            action: 'getSearch',
-                    function: 'replaceAll',
-                    job: config.job_id,
-                    token: dd.getTime(),
-                    password: config.password,
-                    source: source,
-                    target: target,
-                    status: p['status'],
-                    matchcase: p['match-case'],
-                    exactmatch: p['exact-match'],
-                    replace: replace
-        } );
-
 		APP.doRequest({
 			data: {
 				action: 'getSearch',
-                function: 'replaceAll',
+				function: 'replaceAll',
 				job: config.job_id,
 				token: dd.getTime(),
 				password: config.password,
@@ -1935,6 +1921,10 @@ UI = {
 			},
 			success: function(d) {
 				console.log('success replace all');
+				$('#outer').empty();
+				UI.render({
+					firstLoad: false
+				})
 			}
 		});
 	},
@@ -2890,8 +2880,7 @@ UI = {
 		$('#outer').removeClass('loading loadingBefore');
 		this.loadingMore = false;
 		this.setWaypoints();
-
-		if(this.taglockEnabled) this.markTags();
+		this.markTags();
 	},
 	getSegmentSource: function(seg) {
 		segment = (typeof seg == 'undefined') ? this.currentSegment : seg;
