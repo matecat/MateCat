@@ -18,20 +18,20 @@ $db->connect ();
 $config = TMS::getConfigStruct();
 
 $config[ 'source_lang' ]   = "en-US";
-$config[ 'target_lang' ]   = "it-IT";
+$config[ 'target_lang' ]   = "de-DE";
 $config[ 'email' ]         = "demo@matecat.com";
-//$config[ 'get_mt' ]        = true;
+$config[ 'get_mt' ]        = false;
 $config[ 'id_user' ]       = "MyMemory_4b3bcd17c1";
 //$config[ 'mt_only' ]       = false;
-//$config[ 'num_result' ]    = 2;
+$config[ 'num_result' ]    = null;
 //$config[ 'isConcordance' ] = false;
 $config[ 'isGlossary' ]    = true;
 
 
 //$fObject = new SplFileObject( 'Glossary_en_it.csv' );
-$fObject = new SplFileObject( 'Fake_Glossary.csv' );
+$fObject = new SplFileObject( '11490946_German_Glossary.csv' );
 $fObject->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE | SplFileObject::READ_AHEAD );
-$fObject->setCsvControl( ";", '"' );
+$fObject->setCsvControl( ",", '"' );
 
 
 $tms = new TMS( 1 );

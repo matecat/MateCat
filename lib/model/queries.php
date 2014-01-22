@@ -944,7 +944,7 @@ function getStatsForMultipleJobs( $_jids ) {
         $jids = implode( ',', $_jids );
     }
 
-    $query = "select SUM(IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(st.status='REJECTED',IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(st.status='TRANSLATED',IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(st.status='APPROVED',IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count),0)) as APPROVED, j.id, j.password
+    $query = "select SUM(IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(st.status='REJECTED',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(st.status='TRANSLATED',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(st.status='APPROVED',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as APPROVED, j.id, j.password
 
 		from jobs j
 		INNER JOIN files_job fj on j.id=fj.id_job
