@@ -47,6 +47,7 @@ UI = {
 		this.checkUpdatesEvery = 180000;
 		this.autoUpdateEnabled = true;
 		this.goingToNext = false;
+		this.preCloseTagAutocomplete = false;
 
 		/**
 		 * Global Warnings array definition.
@@ -220,11 +221,10 @@ UI = {
 			UI.addWord(UI.selectedMisspelledElement.text());
 		}).on('click', '.tag-autocomplete li', function(e) {
 			e.preventDefault();
-			UI.editarea.html(UI.editarea.html().replace(/&lt;([\s\w]*?\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 			setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
 			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));	
 			UI.closeTagAutocompletePanel();
-//			$('.tag-autocomplete, .tag-autocomplete-endcursor').remove();
 			UI.lockTags(UI.editarea);
 		})
 		
@@ -440,24 +440,14 @@ UI = {
 			e.preventDefault();
 			UI.preOpenConcordance();
 		}).on('keypress', '.editor .editarea', function(e) {
-			console.log(e.which);
 			if(e.which == 60) { // opening tag sign
 				UI.openTagAutocompletePanel();
 			};
-/*
-		if(e.which == 47) { // slash
-				if($('.tag-autocomplete').length) {
-					UI.checkAutocompleteTags();
-				}
-			};
-*/
 			setTimeout(function() {
 				if($('.tag-autocomplete').length) {
 					UI.checkAutocompleteTags();
 				}
-			}, 10);			
-
-
+			}, 100);			
 		}).on('keydown', '.editor .editarea', function(e) {
 //			console.log(e.which);
 //			console.log(e.keyCode);
@@ -503,14 +493,10 @@ UI = {
 					UI.closeTagAutocompletePanel();
 					setTimeout(function() {
 						UI.openTagAutocompletePanel();
+						added = UI.getPartialTagAutocomplete();
+						if(added == '') UI.closeTagAutocompletePanel();
 					}, 10);		
 				}
-
-//				setTimeout(function() {
-//					if($('.tag-autocomplete').length) {
-//						UI.checkAutocompleteTags();
-//					}
-//				}, 10);		
 			}
 			if (e.which == 37) { // left arrow
 				var selection = window.getSelection();
@@ -531,11 +517,8 @@ UI = {
 
 			if (e.which == 38) { // top arrow
 				if($('.tag-autocomplete').length) {
-//					console.log($('.tag-autocomplete li.current'));
-//					console.log($('.tag-autocomplete li:first'));
-//					console.log($('.tag-autocomplete li.current').is($('.tag-autocomplete li:first')));
 					if(!$('.tag-autocomplete li.current').is($('.tag-autocomplete li:first'))) {
-						$('.tag-autocomplete li.current:not(:first-child)').removeClass('current').prev().addClass('current');
+						$('.tag-autocomplete li.current:not(:first-child)').removeClass('current').prevAll(':not(.hidden)').first().addClass('current');
 						return false;
 					}	
 				}
@@ -571,7 +554,7 @@ UI = {
 
 			if (e.which == 40) { // down arrow
 				if($('.tag-autocomplete').length) {
-					$('.tag-autocomplete li.current:not(:last-child)').removeClass('current').next().addClass('current');	
+					$('.tag-autocomplete li.current:not(:last-child)').removeClass('current').nextAll(':not(.hidden)').first().addClass('current');	
 					return false;
 				}
 				var selection = window.getSelection();
@@ -1315,7 +1298,8 @@ UI = {
 		this.currentSegment = segment = $('#segment-' + this.currentSegmentId);
 		this.currentFile = segment.parent();
 		this.currentFileId = this.currentFile.attr('id').split('-')[1];
-		this.sourceTags = $('.source', this.currentSegment).html().match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);		
+		var sourceTags = $('.source', this.currentSegment).html().match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
+		this.sourceTags = sourceTags || [];
 	},
 	applySearch: function(segment) {
 		if (this.body.hasClass('searchActive'))
@@ -1389,29 +1373,40 @@ UI = {
 
 		}
 	},
-	checkAutocompleteTags: function() {
-		console.log(UI.editarea.html());
-//		var added = UI.editarea.html().match(/&lt;([\s\w\/]*?)<span class="tag-autocomplete-endcursor">/gi);
+	getPartialTagAutocomplete: function() {
 		var added = UI.editarea.html().match(/&lt;([&;"\w\s\/=]*?)<span class="tag-autocomplete-endcursor">/gi);
-//		console.log('ADDED 1: ', added);
-		added = htmlDecode(added[0].replace(/\<span class="tag-autocomplete-endcursor"\>/gi, '')).replace(/\xA0/gi," ");
+		added = (added == null)? '' : htmlDecode(added[0].replace(/\<span class="tag-autocomplete-endcursor"\>/gi, '')).replace(/\xA0/gi," ");
+		return added;
+	},
 
-		console.log($('.tag-autocomplete').html());
+	checkAutocompleteTags: function() {
+		added = this.getPartialTagAutocomplete();
+
 		$('.tag-autocomplete li').each(function() {
 			var str = $(this).text();
-			console.log('"' + str.substring(0, added.length) + '" VS "' + added + '"');
-			console.log(str.substring(0, added.length).charCodeAt(added.length - 1));
-			console.log(added.charCodeAt(added.length - 1));
 			if( str.substring(0, added.length) === added ) {
-				console.log('SI');
 				$(this).removeClass('hidden');
 			} else {
 				$(this).addClass('hidden');								
 			};
 		})
+		if(!$('.tag-autocomplete li:not(.hidden)').length) {
+			$('.tag-autocomplete').addClass('empty');
+			if(UI.preCloseTagAutocomplete) {
+				UI.closeTagAutocompletePanel();
+				return false;				
+			}
+			UI.preCloseTagAutocomplete = true;
+		} else {
+			$('.tag-autocomplete li.current').removeClass('current');
+			$('.tag-autocomplete li:not(.hidden)').first().addClass('current');
+			$('.tag-autocomplete').removeClass('empty');			
+			UI.preCloseTagAutocomplete = false;
+		};
 	},
 
 	openTagAutocompletePanel: function() {
+		if(!UI.sourceTags.length) return false;
 		$('.tag-autocomplete-marker').remove();
 		var node = document.createElement("span");
 		node.setAttribute('class', 'tag-autocomplete-marker');
@@ -1427,7 +1422,8 @@ UI = {
 			$('.tag-autocomplete ul').append('<li' + ((index == 0)? ' class="current"' : '') + '>' + this + '</li>');
 		});
 		$('.tag-autocomplete').css('top', offset.top + 20);
-		$('.tag-autocomplete').css('left', offset.left);						
+		$('.tag-autocomplete').css('left', offset.left);
+		this.checkAutocompleteTags();
 	},
 	closeTagAutocompletePanel: function() {
 		$('.tag-autocomplete, .tag-autocomplete-endcursor').remove();

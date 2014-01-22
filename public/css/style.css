@@ -2129,12 +2129,17 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror
 }
 .tag-autocomplete
 {
+	display: b	lock;
 	position: absolute;
 	z-index: 999;
 	background: #eee;
 	border: 1px solid #999;
 	min-width: 100px;
 	padding: 1px;
+}
+.tag-autocomplete.empty
+{
+	display: none;
 }
 
 .tag-autocomplete li
