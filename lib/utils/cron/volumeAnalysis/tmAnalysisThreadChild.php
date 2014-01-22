@@ -46,7 +46,7 @@ while (1) {
     }
 
     $res = getNextSegmentAndLock();
-    
+
     if (empty($res)) {
         echo "--- (child $my_pid) : _-_getNextSegmentAndLock_-_ no segment ready for tm volume analisys: wait 5 seconds\n";
         sleep(5);
@@ -89,7 +89,7 @@ while (1) {
     $raw_wc          = $segment[ 'raw_word_count' ];
     $fast_match_type = $segment[ 'match_type' ];
 
-    $text            = $segment[ 'segment' ]; // CatUtils::view2rawxliff($segment['segment']); // da verificare
+    $text            = $segment[ 'segment' ];
 
     if ($raw_wc == 0) {
         echo "--- (child $my_pid) : empty segment. deleting lock and continue\n";

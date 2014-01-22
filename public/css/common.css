@@ -754,7 +754,7 @@ background-size: 15px!important;
 	}
 .searchbox #exec-replaceall
 	{
-	visibility: hidden;
+	/* visibility: hidden; */
 	}
 section mark
 	{

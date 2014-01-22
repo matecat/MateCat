@@ -15,6 +15,7 @@ UI = {
 		this.isMac = (navigator.platform == 'MacIntel') ? true : false;
 		this.body = $('body');
 		this.firstLoad = firstLoad;
+
 //        if (firstLoad)
 //            this.startRender = true;
 		this.initSegNum = 200; // number of segments initially loaded
@@ -57,7 +58,7 @@ UI = {
 		this.readonly = (this.body.hasClass('archived')) ? true : false;
 		this.suggestionShortcutLabel = 'ALT+' + ((UI.isMac) ? "CMD" : "CTRL") + '+';
 
-		this.taglockEnabled = true;
+		this.taglockEnabled = config.taglockEnabled || true;
 		this.debug = Loader.detect('debug');
 		this.checkTutorialNeed();
 
@@ -126,7 +127,7 @@ UI = {
 		}, 2000);
 		this.checkSegmentsArray = {};
 		this.firstMarking = true;
-		this.markTags();
+//		this.markTags(true);
 		this.firstMarking = false;
 		this.setContextMenu();
 		this.createJobMenu();
@@ -918,6 +919,7 @@ UI = {
 //            if(window.getSelection().type == 'Caret')) removeSelectedText($(this));
 			removeSelectedText($(this));
 			insertNodeAtCursor(node);
+			if(UI.isFirefox) pasteHtmlAtCaret('<div id="placeHolder"></div>');
 			var ev = (UI.isFirefox) ? e : event;
 			handlepaste(this, ev);
 
@@ -1001,8 +1003,6 @@ UI = {
 		})
 		$("#jobMenu").on('click', 'li:not(.currSegment)', function(e) {
 			e.preventDefault();
-//            UI.scrollSegment($('#segment-' + $(this).attr('data-segment')), true);
-//            UI.scrollSegment($(this).attr('data-segment'), true);
 			UI.renderAndScrollToSegment($(this).attr('data-segment'), true);
 		})
 		$("#jobMenu").on('click', 'li.currSegment', function(e) {
@@ -1769,6 +1769,14 @@ UI = {
 		this.applySearch();
 //		$('.modal[data-name=confirmReplaceAll] .btn-ok').addClass('disabled').text('Replacing...').attr('disabled', 'disabled');
 
+        if ( $('#search-target').val() != '' ) {
+            this.searchParams['target'] = $('#search-target').val();
+        } else {
+            APP.alert('You must specify the Target value to replace.');
+            delete this.searchParams['target'];
+            return false;
+        }
+
         if ($('#replace-target').val() != '') {
             this.searchParams['replace'] = $('#replace-target').val();
         } else {
@@ -1792,6 +1800,21 @@ UI = {
 		var target = (p['target']) ? p['target'] : '';
 		var replace = (p['replace']) ? p['replace'] : '';
 		var dd = new Date();
+
+        console.log( {
+            action: 'getSearch',
+                    function: 'replaceAll',
+                    job: config.job_id,
+                    token: dd.getTime(),
+                    password: config.password,
+                    source: source,
+                    target: target,
+                    status: p['status'],
+                    matchcase: p['match-case'],
+                    exactmatch: p['exact-match'],
+                    replace: replace
+        } );
+
 		APP.doRequest({
 			data: {
 				action: 'getSearch',
@@ -2763,6 +2786,8 @@ UI = {
 		$('#outer').removeClass('loading loadingBefore');
 		this.loadingMore = false;
 		this.setWaypoints();
+
+		if(this.taglockEnabled) this.markTags();
 	},
 	getSegmentSource: function(seg) {
 		segment = (typeof seg == 'undefined') ? this.currentSegment : seg;
@@ -2960,9 +2985,7 @@ UI = {
 		});
 	},
 	markTags: function() {
-//		console.log('MARK TAGS');
-		if (!this.taglockEnabled)
-			return false;
+		if (!this.taglockEnabled) return false;
 		if (this.noTagsInSegment(1))
 			return false;
 		$('.source').each(function() {
@@ -3257,7 +3280,7 @@ console.log($(area).html());
 				var rightTxt = (in_target) ? this.segment : this.translation;
 				rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
 				rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
-				$('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+				$('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><!-- li class="percent ' + cl_suggestion + '">' + (this.match) + '</li --><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
 			});
 		} else {
 			console.log('no matches');
@@ -4532,7 +4555,6 @@ function handlepaste(elem, e) {
 		else {
 			elem.innerHTML = "";
 		}
-
 		waitforpastedata(elem, savedcontent);
 		if (e.preventDefault) {
 			e.stopPropagation();
@@ -4567,16 +4589,9 @@ function waitforpastedata(elem, savedcontent) {
 function processpaste(elem, savedcontent) {
 	pasteddata = elem.innerHTML;
 
-	if (UI.isFirefox) {
-		var div = document.createElement("div");
-		div.innerHTML = pasteddata;
-		savedcontent = htmlEncode($(div).text());
-	}
-
 	//^^Alternatively loop through dom (elem.childNodes or elem.getElementsByTagName) here
 	elem.innerHTML = savedcontent;
-	if (UI.isFirefox)
-		UI.lockTags();
+	
 	// Do whatever with gathered data;
 	$('#placeHolder').before(pasteddata);
 	focusOnPlaceholder();
@@ -4628,6 +4643,53 @@ function insertNodeAtCursor(node) {
 		html = (node.nodeType == 3) ? node.data : node.outerHTML;
 		range.pasteHTML(html);
 	}
+}
+
+function pasteHtmlAtCaret(html, selectPastedContent) {
+    var sel, range;
+    if (window.getSelection) {
+        // IE9 and non-IE
+        sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+            range = sel.getRangeAt(0);
+            range.deleteContents();
+
+            // Range.createContextualFragment() would be useful here but is
+            // only relatively recently standardized and is not supported in
+            // some browsers (IE9, for one)
+            var el = document.createElement("div");
+            el.innerHTML = html;
+            var frag = document.createDocumentFragment(), node, lastNode;
+            while ( (node = el.firstChild) ) {
+                lastNode = frag.appendChild(node);
+            }
+            var firstNode = frag.firstChild;
+            range.insertNode(frag);
+
+            // Preserve the selection
+            if (lastNode) {
+                range = range.cloneRange();
+                range.setStartAfter(lastNode);
+                if (selectPastedContent) {
+                    range.setStartBefore(firstNode);
+                } else {
+                    range.collapse(true);
+                }
+                sel.removeAllRanges();
+                sel.addRange(range);
+            }
+        }
+    } else if ( (sel = document.selection) && sel.type != "Control") {
+        // IE < 9
+        var originalRange = sel.createRange();
+        originalRange.collapse(true);
+        sel.createRange().pasteHTML(html);
+        if (selectPastedContent) {
+            range = sel.createRange();
+            range.setEndPoint("StartToStart", originalRange);
+            range.select();
+        }
+    }
 }
 
 function removeSelectedText(editarea) {
