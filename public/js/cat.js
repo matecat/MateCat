@@ -1919,8 +1919,11 @@ UI = {
 				exactmatch: p['exact-match'],
 				replace: replace
 			},
-			success: function(d) {
-				console.log('success replace all');
+			success: function(d) {				
+				if(d.error.length) {
+					APP.alert(d.error[0].message);
+					return false;
+				}
 				$('#outer').empty();
 				UI.render({
 					firstLoad: false
