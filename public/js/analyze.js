@@ -416,11 +416,13 @@ UI = {
 		if (this.stopPolling)
 			return;
 		var pid = $("#pid").attr("data-pid");
+		var ppassword = $("#pid").attr("data-pwd");
 
 		APP.doRequest({
 			data: {
 				action: 'getVolumeAnalysis',
-				pid: pid
+				pid: pid,
+                ppassword: ppassword
 			},
 			success: function(d) {
 				if (d.data) {

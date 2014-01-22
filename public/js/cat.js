@@ -47,6 +47,7 @@ UI = {
 		this.checkUpdatesEvery = 180000;
 		this.autoUpdateEnabled = true;
 		this.goingToNext = false;
+		this.preCloseTagAutocomplete = false;
 
 		/**
 		 * Global Warnings array definition.
@@ -218,8 +219,15 @@ UI = {
 			e.preventDefault();
 			UI.closeContextMenu();
 			UI.addWord(UI.selectedMisspelledElement.text());
+		}).on('click', '.tag-autocomplete li', function(e) {
+			e.preventDefault();
+			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+			setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
+			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));	
+			UI.closeTagAutocompletePanel();
+			UI.lockTags(UI.editarea);
 		})
-
+		
 		$(window).on('scroll', function(e) {
 			UI.browserScrollPositionRestoreCorrection();
 //            UI.setSegmentPointer();
@@ -393,6 +401,7 @@ UI = {
 				operation = 'clicking';
 			this.onclickEditarea = new Date();
 			UI.notYetOpened = false;
+			$('.tag-autocomplete, .tag-autocomplete-endcursor').remove();
 			if ((!$(this).is(UI.editarea)) || (UI.editarea == '') || (!UI.body.hasClass('editing'))) {
 				if (operation == 'moving') {
 					if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
@@ -430,7 +439,19 @@ UI = {
 		}).on('keydown', '.editor .source, .editor .editarea', 'alt+ctrl+c', function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
+		}).on('keypress', '.editor .editarea', function(e) {
+			if(e.which == 60) { // opening tag sign
+				UI.openTagAutocompletePanel();
+			};
+			setTimeout(function() {
+				if($('.tag-autocomplete').length) {
+					UI.checkAutocompleteTags();
+				}
+			}, 100);			
 		}).on('keydown', '.editor .editarea', function(e) {
+//			console.log(e.which);
+//			console.log(e.keyCode);
+//			console.log(e.charCode);
 			var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
 			if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
 				if (event.which == 88) { // ctrl+x
@@ -467,7 +488,16 @@ UI = {
 					}
 				}
 			}
-
+			if (e.which == 8) { // backspace
+				if($('.tag-autocomplete').length) {
+					UI.closeTagAutocompletePanel();
+					setTimeout(function() {
+						UI.openTagAutocompletePanel();
+						added = UI.getPartialTagAutocomplete();
+						if(added == '') UI.closeTagAutocompletePanel();
+					}, 10);		
+				}
+			}
 			if (e.which == 37) { // left arrow
 				var selection = window.getSelection();
 				var range = selection.getRangeAt(0);
@@ -486,6 +516,12 @@ UI = {
 			}
 
 			if (e.which == 38) { // top arrow
+				if($('.tag-autocomplete').length) {
+					if(!$('.tag-autocomplete li.current').is($('.tag-autocomplete li:first'))) {
+						$('.tag-autocomplete li.current:not(:first-child)').removeClass('current').prevAll(':not(.hidden)').first().addClass('current');
+						return false;
+					}	
+				}
 				var selection = window.getSelection();
 				var range = selection.getRangeAt(0);
 				if (range.startOffset != range.endOffset) {
@@ -517,6 +553,10 @@ UI = {
 			}
 
 			if (e.which == 40) { // down arrow
+				if($('.tag-autocomplete').length) {
+					$('.tag-autocomplete li.current:not(:last-child)').removeClass('current').nextAll(':not(.hidden)').first().addClass('current');	
+					return false;
+				}
 				var selection = window.getSelection();
 				var range = selection.getRangeAt(0);
 				if (range.startOffset != range.endOffset) {
@@ -542,6 +582,13 @@ UI = {
 				}, 100);
 			}
 
+			if (e.which == 13) { // return
+				if($('.tag-autocomplete').length) {
+					$('.tag-autocomplete li.current').click();	
+					return false;
+				}
+			}
+
 			if (
 					(e.which == 13) || // return
 					(e.which == 32) || // space
@@ -551,7 +598,6 @@ UI = {
 					(e.which == 190) || // mark
 					(e.which == 191) || // question mark
 					(e.which == 222)) { // apostrophe
-				console.log('ss');
 				UI.spellCheck();
 			}
 
@@ -1252,6 +1298,8 @@ UI = {
 		this.currentSegment = segment = $('#segment-' + this.currentSegmentId);
 		this.currentFile = segment.parent();
 		this.currentFileId = this.currentFile.attr('id').split('-')[1];
+		var sourceTags = $('.source', this.currentSegment).html().match(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi);
+		this.sourceTags = sourceTags || [];
 	},
 	applySearch: function(segment) {
 		if (this.body.hasClass('searchActive'))
@@ -1325,6 +1373,62 @@ UI = {
 
 		}
 	},
+	getPartialTagAutocomplete: function() {
+		var added = UI.editarea.html().match(/&lt;([&;"\w\s\/=]*?)<span class="tag-autocomplete-endcursor">/gi);
+		added = (added == null)? '' : htmlDecode(added[0].replace(/\<span class="tag-autocomplete-endcursor"\>/gi, '')).replace(/\xA0/gi," ");
+		return added;
+	},
+
+	checkAutocompleteTags: function() {
+		added = this.getPartialTagAutocomplete();
+
+		$('.tag-autocomplete li').each(function() {
+			var str = $(this).text();
+			if( str.substring(0, added.length) === added ) {
+				$(this).removeClass('hidden');
+			} else {
+				$(this).addClass('hidden');								
+			};
+		})
+		if(!$('.tag-autocomplete li:not(.hidden)').length) {
+			$('.tag-autocomplete').addClass('empty');
+			if(UI.preCloseTagAutocomplete) {
+				UI.closeTagAutocompletePanel();
+				return false;				
+			}
+			UI.preCloseTagAutocomplete = true;
+		} else {
+			$('.tag-autocomplete li.current').removeClass('current');
+			$('.tag-autocomplete li:not(.hidden)').first().addClass('current');
+			$('.tag-autocomplete').removeClass('empty');			
+			UI.preCloseTagAutocomplete = false;
+		};
+	},
+
+	openTagAutocompletePanel: function() {
+		if(!UI.sourceTags.length) return false;
+		$('.tag-autocomplete-marker').remove();
+		var node = document.createElement("span");
+		node.setAttribute('class', 'tag-autocomplete-marker');
+		insertNodeAtCursor(node);
+		var endCursor = document.createElement("span");
+		endCursor.setAttribute('class', 'tag-autocomplete-endcursor');
+		insertNodeAtCursor(endCursor);
+
+		var offset = $('.tag-autocomplete-marker').offset();
+		$('.tag-autocomplete-marker').remove();
+		UI.body.append('<div class="tag-autocomplete"><ul></ul></div>');
+		$.each(UI.sourceTags, function(index) {
+			$('.tag-autocomplete ul').append('<li' + ((index == 0)? ' class="current"' : '') + '>' + this + '</li>');
+		});
+		$('.tag-autocomplete').css('top', offset.top + 20);
+		$('.tag-autocomplete').css('left', offset.left);
+		this.checkAutocompleteTags();
+	},
+	closeTagAutocompletePanel: function() {
+		$('.tag-autocomplete, .tag-autocomplete-endcursor').remove();
+	},
+
 	chooseSuggestion: function(w) {
 		this.copySuggestionInEditarea(this.currentSegment, $('.editor ul[data-item=' + w + '] li.b .translation').text(), $('.editor .editarea'), $('.editor ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
 		this.lockTags(this.editarea);
@@ -3011,31 +3115,10 @@ UI = {
 		$(ed).focus();
 	},
 	detectTags: function(area) {
-/*
-		brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
-console.log($(area).html());
-		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, brTx2));
-console.log($(area).html());
-
-		if (!this.firstMarking) {
-			if(UI.isFirefox) {
-				$(area).html($(area).html().replace(/(\<span class=\".*?locked.*?\" contenteditable=\"false\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span class=\"locked\" contenteditable=\"false\">$2</span>"));								
-			} else {
-				$(area).html($(area).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));				
-			}
-
-		}
-*/
-		
 		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-		//$(area).html($(area).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-		//$(area).html($(area).html().replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 		if (!this.firstMarking) {
 			$(area).html($(area).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
 		}
-//		this.placeCaretAtEnd(document.getElementById(UI.editarea.attr('id')));
-//		this.placeCaretAtEnd(UI.editarea);
-
 	},
 	markTagsInSearch: function(el) {
 		if (!this.taglockEnabled)
@@ -4690,6 +4773,17 @@ function pasteHtmlAtCaret(html, selectPastedContent) {
             range.select();
         }
     }
+}
+
+function setCursorPosition(el, pos) {
+	var pos = pos || 0;
+	var range = document.createRange();
+	var sel = window.getSelection();
+	range.setStart(el, pos);
+	range.collapse(true);
+	sel.removeAllRanges();
+	sel.addRange(range);
+	el.focus();	
 }
 
 function removeSelectedText(editarea) {

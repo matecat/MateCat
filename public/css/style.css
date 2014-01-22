@@ -2127,4 +2127,35 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror
 {
 	display: block;
 }
+.tag-autocomplete
+{
+	display: b	lock;
+	position: absolute;
+	z-index: 999;
+	background: #eee;
+	border: 1px solid #999;
+	min-width: 100px;
+	padding: 1px;
+}
+.tag-autocomplete.empty
+{
+	display: none;
+}
 
+.tag-autocomplete li
+{
+	display: block;
+	text-align: left;
+	list-style-type: none;
+	z-index: 99999999999999;
+	font-size: 80%;
+}
+.tag-autocomplete li.current
+{
+	background: #00C1E6;
+	color: #fff;
+}
+.tag-autocomplete li.hidden
+{
+	display: none;
+}
