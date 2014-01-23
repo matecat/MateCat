@@ -182,9 +182,11 @@ UI = {
 		}).bind('keydown', 'Ctrl+z', function(e) {
 			e.preventDefault();
 			UI.undoInSegment(segment);
+			UI.closeTagAutocompletePanel();
 		}).bind('keydown', 'Meta+z', function(e) {
 			e.preventDefault();
 			UI.undoInSegment(segment);
+			UI.closeTagAutocompletePanel();
 		}).bind('keydown', 'Ctrl+y', function(e) {
 			e.preventDefault();
 			UI.redoInSegment(segment);
@@ -401,7 +403,7 @@ UI = {
 				operation = 'clicking';
 			this.onclickEditarea = new Date();
 			UI.notYetOpened = false;
-			$('.tag-autocomplete, .tag-autocomplete-endcursor').remove();
+			UI.closeTagAutocompletePanel();
 			if ((!$(this).is(UI.editarea)) || (UI.editarea == '') || (!UI.body.hasClass('editing'))) {
 				if (operation == 'moving') {
 					if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
@@ -1382,6 +1384,8 @@ UI = {
 	checkAutocompleteTags: function() {
 		added = this.getPartialTagAutocomplete();
 
+		console.log('added: "', added + '"');
+		$('.tag-autocomplete li.hidden').removeClass('hidden');
 		$('.tag-autocomplete li').each(function() {
 			var str = $(this).text();
 			if( str.substring(0, added.length) === added ) {
@@ -1400,7 +1404,7 @@ UI = {
 		} else {
 			$('.tag-autocomplete li.current').removeClass('current');
 			$('.tag-autocomplete li:not(.hidden)').first().addClass('current');
-			$('.tag-autocomplete').removeClass('empty');			
+			$('.tag-autocomplete').removeClass('empty');		
 			UI.preCloseTagAutocomplete = false;
 		};
 	},
@@ -1421,12 +1425,14 @@ UI = {
 		$.each(UI.sourceTags, function(index) {
 			$('.tag-autocomplete ul').append('<li' + ((index == 0)? ' class="current"' : '') + '>' + this + '</li>');
 		});
+
 		$('.tag-autocomplete').css('top', offset.top + 20);
 		$('.tag-autocomplete').css('left', offset.left);
 		this.checkAutocompleteTags();
 	},
 	closeTagAutocompletePanel: function() {
 		$('.tag-autocomplete, .tag-autocomplete-endcursor').remove();
+		UI.preCloseTagAutocomplete = false;
 	},
 
 	chooseSuggestion: function(w) {
@@ -3055,8 +3061,10 @@ UI = {
 			}
 
 			tx = tx.replace(/(\<\/span\>)$(\s){0,}/gi, "</span> ");
+			var prevNumTags = $('span.locked', this).length;
 			$(this).html(tx);
 			restoreSelection();
+			if($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
 		})
 
 	},
