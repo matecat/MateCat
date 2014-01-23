@@ -86,7 +86,7 @@ class setTranslationController extends ajaxcontroller {
 
             $pCheck = new AjaxPasswordCheck();
             //check for Password correctness
-            if( !$pCheck->grantJobAccessByJobData( $job_data, $this->password, $this->id_segment ) ){
+            if( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password, $this->id_segment ) ){
                 $this->result['error'][] = array("code" => -10, "message" => "wrong password");
             }
 

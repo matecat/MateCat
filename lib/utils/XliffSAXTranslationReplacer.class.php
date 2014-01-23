@@ -292,9 +292,9 @@ class XliffSAXTranslationReplacer{
 
 		$seg ['segment'] = CatUtils::restorenbsp ( $seg ['segment'] );
 		$seg ['translation'] = CatUtils::restorenbsp ( $seg ['translation'] );
-                
-        $seg ['segment'] = CatUtils::restore_xml_entities ( $seg ['segment'] );
-		$seg ['translation'] = CatUtils::restore_xml_entities ( $seg ['translation'] );
+
+        $seg ['segment'] = CatUtils::view2rawxliff( $seg ['segment'] );
+        $seg ['translation'] = CatUtils::view2rawxliff ( $seg ['translation'] );
 
         //QA non sense for source/source check until source can be changed. For now SKIP
 		if (is_null ( $seg ['translation'] ) || $seg ['translation'] == '') {

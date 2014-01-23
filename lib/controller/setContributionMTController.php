@@ -72,7 +72,7 @@ class setContributionMTController extends ajaxcontroller {
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
-        if( !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ){
+        if( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ){
             $this->result['error'][] = array( "code" => -10, "message" => "wrong password" );
 
             $msg = "\n\n Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
