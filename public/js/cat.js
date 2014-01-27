@@ -58,6 +58,7 @@ UI = {
 		this.upOpts = {offset: '-40%'};
 		this.readonly = (this.body.hasClass('archived')) ? true : false;
 		this.suggestionShortcutLabel = 'ALT+' + ((UI.isMac) ? "CMD" : "CTRL") + '+';
+
 		this.taglockEnabled = config.taglockEnabled;
 		this.debug = Loader.detect('debug');
 		this.checkTutorialNeed();
