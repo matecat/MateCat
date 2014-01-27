@@ -93,7 +93,7 @@ class getContributionController extends ajaxcontroller {
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
-        if( !$pCheck->grantJobAccessByJobData( $st, $this->password ) ){
+        if( empty( $st ) || !$pCheck->grantJobAccessByJobData( $st, $this->password ) ){
             $this->result['error'][] = array( "code" => -10, "message" => "wrong password" );
             return -1;
         }
