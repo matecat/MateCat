@@ -215,7 +215,12 @@ UI = {
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
 			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 			saveSelection();
-			var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;			
+			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
+				setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
+				saveSelection();
+			}
+//			console.log($('.rangySelectionBoundary', UI.editarea)[0]);
+			var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;
 			$('.rangySelectionBoundary', UI.editarea).remove();
 			$('.tag-autocomplete-endcursor', UI.editarea).after(ph);
 //			setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
@@ -4613,8 +4618,6 @@ function setCursorPosition(el, pos) {
 	var pos = pos || 0;
 	var range = document.createRange();
 	var sel = window.getSelection();
-	console.log(range);
-	console.log(sel);
 	range.setStart(el, pos);
 //	range.setStartAfter( el );
 	range.collapse(true);
