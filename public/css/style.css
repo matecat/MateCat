@@ -2127,6 +2127,10 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror
 {
 	display: block;
 }
+body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
+{
+	display: none;
+}
 .tag-autocomplete
 {
 	display: b	lock;

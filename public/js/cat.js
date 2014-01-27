@@ -412,7 +412,7 @@ UI = {
 			e.preventDefault();
 			UI.preOpenConcordance();
 		}).on('keypress', '.editor .editarea', function(e) {
-			if(e.which == 60) { // opening tag sign
+			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
 				UI.openTagAutocompletePanel();
 			};
 			setTimeout(function() {
@@ -1077,7 +1077,6 @@ UI = {
 		});
 		$("#search-target").on('input', function(e) {
 			if ($(this).val() == '') {
-				console.log('a');
 				$('#replace-target, #exec-replace, #exec-replaceall').attr('disabled', 'disabled');
 			} else {
 				if ($('#enable-replace').is(':checked'))
@@ -1752,10 +1751,12 @@ UI = {
 			this.enableTagMark();
 		}
 	},
-	enableTagMark: function() {
+	enableTagMark: function() {console.log('enable tag mark');
 		this.taglockEnabled = true;
 		this.body.removeClass('tagmarkDisabled');
+		saveSelection();
 		this.markTags();
+		restoreSelection();
 	},
 	disableTagMark: function() {
 		this.taglockEnabled = false;
@@ -1905,7 +1906,7 @@ UI = {
 				$('section.justAdded').removeClass('justAdded');
 			}
 		} else { // search mode: normal
-			console.log('search mode: normal');
+//			console.log('search mode: normal');
 			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
 			var txt = (typeof p['source'] != 'undefined') ? p['source'] : (typeof p['target'] != 'undefined') ? p['target'] : '';
 			if (singleSegment) {
@@ -2896,6 +2897,8 @@ UI = {
 		});
 	},
 	markTags: function() {
+		console.log('mark tags');
+		console.log('taglockEnabled: ' + this.taglockEnabled);
 		if (!this.taglockEnabled) return false;
 		if (this.noTagsInSegment(1))
 			return false;
