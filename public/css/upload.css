@@ -771,13 +771,17 @@ header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margi
 	.popup-languages ul
 		{
         -webkit-column-count: 5;
-        /*-webkit-column-count: 6;*/
         column-count: 5;	
         -moz-column-count: 5;
         width:100% !important;
-        height: 476px;
         margin-top:20px;
 		}
+		
+		@-moz-document url-prefix() {
+   .popup-languages ul {
+         height: 520px;
+    }
+}
 
 .popup ul li
 	{
