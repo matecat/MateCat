@@ -211,9 +211,16 @@ UI = {
 			UI.addWord(UI.selectedMisspelledElement.text());
 		}).on('click', '.tag-autocomplete li', function(e) {
 			e.preventDefault();
-			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-			setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
-			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));	
+//			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+//			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
+			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+			saveSelection();
+			var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;			
+			$('.rangySelectionBoundary', UI.editarea).remove();
+			$('.tag-autocomplete-endcursor', UI.editarea).after(ph);
+//			setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
+			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));
+			restoreSelection();
 			UI.closeTagAutocompletePanel();
 			UI.lockTags(UI.editarea);
 		})
@@ -413,13 +420,27 @@ UI = {
 			UI.preOpenConcordance();
 		}).on('keypress', '.editor .editarea', function(e) {
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
+				if($('.tag-autocomplete').length) {
+					e.preventDefault();
+					return false;
+				};
 				UI.openTagAutocompletePanel();
+			};
+			if((e.which == 62)&&(UI.taglockEnabled)) { // closing tag sign
+				if($('.tag-autocomplete').length) {
+					e.preventDefault();
+					return false;
+				};
 			};
 			setTimeout(function() {
 				if($('.tag-autocomplete').length) {
+//					console.log(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) != null);
+					if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) != null) {
+						UI.editarea.html(UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"\><\/span>'));
+					}
 					UI.checkAutocompleteTags();
 				}
-			}, 100);			
+			}, 50);			
 		}).on('keydown', '.editor .editarea', function(e) {
 			var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
 			if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
@@ -480,6 +501,7 @@ UI = {
 						$('.rangySelectionBoundary', UI.editarea).remove();
 					}
 				}
+				UI.closeTagAutocompletePanel();
 			}
 
 			if (e.which == 38) { // top arrow
@@ -517,6 +539,7 @@ UI = {
 						$('.rangySelectionBoundary', UI.editarea).remove();
 					}
 				}
+				UI.closeTagAutocompletePanel();
 			}
 
 			if (e.which == 40) { // down arrow
@@ -1202,14 +1225,16 @@ UI = {
 		}
 	},
 	getPartialTagAutocomplete: function() {
-		var added = UI.editarea.html().match(/&lt;([&;"\w\s\/=]*?)<span class="tag-autocomplete-endcursor">/gi);
+//		var added = UI.editarea.html().match(/&lt;([&;"\w\s\/=]*?)<span class="tag-autocomplete-endcursor">/gi);
+		var added = UI.editarea.html().match(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?<span class="tag-autocomplete-endcursor">/gi);
+//		console.log(added);
 		added = (added == null)? '' : htmlDecode(added[0].replace(/\<span class="tag-autocomplete-endcursor"\>/gi, '')).replace(/\xA0/gi," ");
 		return added;
 	},
 
 	checkAutocompleteTags: function() {
 		added = this.getPartialTagAutocomplete();
-		console.log('added: "', added + '"');
+//		console.log('added: "', added + '"');
 		$('.tag-autocomplete li.hidden').removeClass('hidden');
 		$('.tag-autocomplete li').each(function() {
 			var str = $(this).text();
@@ -1237,6 +1262,7 @@ UI = {
 	openTagAutocompletePanel: function() {
 		if(!UI.sourceTags.length) return false;
 		$('.tag-autocomplete-marker').remove();
+
 		var node = document.createElement("span");
 		node.setAttribute('class', 'tag-autocomplete-marker');
 		insertNodeAtCursor(node);
@@ -1253,7 +1279,7 @@ UI = {
 
 		$('.tag-autocomplete').css('top', offset.top + 20);
 		$('.tag-autocomplete').css('left', offset.left);
-		this.checkAutocompleteTags();
+		this.checkAutocompleteTags();	
 	},
 	closeTagAutocompletePanel: function() {
 		$('.tag-autocomplete, .tag-autocomplete-endcursor').remove();
@@ -2897,8 +2923,6 @@ UI = {
 		});
 	},
 	markTags: function() {
-		console.log('mark tags');
-		console.log('taglockEnabled: ' + this.taglockEnabled);
 		if (!this.taglockEnabled) return false;
 		if (this.noTagsInSegment(1))
 			return false;
@@ -4589,7 +4613,10 @@ function setCursorPosition(el, pos) {
 	var pos = pos || 0;
 	var range = document.createRange();
 	var sel = window.getSelection();
+	console.log(range);
+	console.log(sel);
 	range.setStart(el, pos);
+//	range.setStartAfter( el );
 	range.collapse(true);
 	sel.removeAllRanges();
 	sel.addRange(range);
