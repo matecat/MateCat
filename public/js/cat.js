@@ -228,6 +228,7 @@ UI = {
 			restoreSelection();
 			UI.closeTagAutocompletePanel();
 			UI.lockTags(UI.editarea);
+			UI.currentSegmentQA();
 		})
 		
 		$(window).on('scroll', function(e) {
@@ -302,7 +303,7 @@ UI = {
 				return;
 
 			UI.selectingReadonly = setTimeout(function() {
-				APP.alert('This part has not been assigned to you.');
+				APP.alert({msg: 'This part has not been assigned to you.'});
 			}, 200);
 		}).on('mousedown', 'section.readonly, section.readonly a.status', function(e) {
 			sel = window.getSelection();
@@ -463,6 +464,7 @@ UI = {
 					e.preventDefault();
 					$('.selected', $(this)).remove();
 					UI.saveInUndoStack('cancel');
+					UI.currentSegmentQA();
 				} else {
 					try {
 						var numTagsBefore = UI.editarea.text().match(/\<.*?\>/gi).length;
@@ -663,9 +665,7 @@ UI = {
 
 						UI.showContextMenu(str, e.pageY, e.pageX);
 					}
-					;
 				}
-				;
 				return false;
 			}
 			return true;
@@ -869,7 +869,7 @@ UI = {
 			if (txt.length > 1) {
 				UI.getGlossary(segment, false);
 			} else {
-				APP.alert('Please insert a string of two letters at least!');
+				APP.alert({msg: 'Please insert a string of two letters at least!'});
 			}
 
 		}).on('keydown', '.sub-editor .gl-search .search-source', function(e) {
@@ -893,7 +893,7 @@ UI = {
 		}).on('click', '.sub-editor .gl-search .set-glossary:not(.disabled)', function(e) {
 			e.preventDefault();
 			if($(this).parents('.gl-search').find('.search-source').text() == '') {
-				APP.alert('Please insert a glossary term.');
+				APP.alert({msg: 'Please insert a glossary term.'});
 				return false;
 			} else {
 				UI.setGlossaryItem();
@@ -921,6 +921,7 @@ UI = {
 				UI.saveInUndoStack('paste');
 			}, 100);
 			UI.lockTags(UI.editarea);
+			UI.currentSegmentQA();
 		}).on('click', 'a.close', function(e, param) {
 			e.preventDefault();
 			var save = (typeof param == 'undefined') ? 'noSave' : param;
@@ -1070,7 +1071,7 @@ UI = {
 		$("#exec-replace").click(function(e) {
 			e.preventDefault();
 			if ($('#search-target').val() == $('#replace-target').val()) {
-				APP.alert('Attention: you are replacing the same text!');
+				APP.alert({msg: 'Attention: you are replacing the same text!'});
 				return false;
 			}
 
@@ -1644,7 +1645,7 @@ UI = {
 		this.searchParams['exact-match'] = $('#exact-match').is(':checked');
 		this.searchParams['search'] = 1;
 		if ((typeof this.searchParams['source'] == 'undefined') && (typeof this.searchParams['target'] == 'undefined') && (this.searchParams['status'] == 'all')) {
-			APP.alert('You must specify at least one between source and target<br>or choose a status');
+			APP.alert({msg: 'You must specify at least one between source and target<br>or choose a status'});
 			return false;
 		}
 		this.disableTagMark();
@@ -1719,7 +1720,7 @@ UI = {
         if ( $('#search-target').val() != '' ) {
             this.searchParams['target'] = $('#search-target').val();
         } else {
-            APP.alert('You must specify the Target value to replace.');
+            APP.alert({msg: 'You must specify the Target value to replace.'});
             delete this.searchParams['target'];
             return false;
         }
@@ -1727,7 +1728,7 @@ UI = {
         if ($('#replace-target').val() != '') {
             this.searchParams['replace'] = $('#replace-target').val();
         } else {
-            APP.alert('You must specify the replacement value.');
+            APP.alert({msg: 'You must specify the replacement value.'});
             delete this.searchParams['replace'];
             return false;
         }
@@ -1764,7 +1765,7 @@ UI = {
 			},
 			success: function(d) {				
 				if(d.error.length) {
-					APP.alert(d.error[0].message);
+					APP.alert({msg: d.error[0].message});
 					return false;
 				}
 				$('#outer').empty();
@@ -3542,7 +3543,7 @@ UI = {
         }
 
 		if ((target == '') && (byStatus)) {
-			APP.alert('Cannot change status on an empty segment. Add a translation first!');
+			APP.alert({msg: 'Cannot change status on an empty segment. Add a translation first!'});
 		}
 		if (target == '') {
 			return false;
@@ -3631,7 +3632,7 @@ UI = {
 		// Attention: to be modified when we will be able to lock tags.
 		var target = $('.editarea', segment).text();
 		if ((target == '') && (byStatus)) {
-			APP.alert('Cannot change status on an empty segment. Add a translation first!');
+			APP.alert({msg: 'Cannot change status on an empty segment. Add a translation first!'});
 		}
 		if (target == '') {
 			return false;
@@ -4180,25 +4181,33 @@ UI = {
 	processErrors: function(err, operation) {
 		$.each(err, function() {
 			if (operation == 'setTranslation') {
-				if (this['code'] != '-10') {
-					APP.alert("Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>");
+				if (this['code'] != '-10') { // is not a password error
+					APP.alert({msg: "Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
 				}
 			}
 
-			if (operation == 'setContribution' && this['code'] != '-10') {
-				APP.alert("Error in saving the translation memory.<br />Try the to save again the segment.<br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>");
+			if (operation == 'setContribution' && this['code'] != '-10') { // is not a password error
+				APP.alert({msg: "Error in saving the translation memory.<br />Try the to save again the segment.<br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
 			}
 
 			if (this['code'] == '-10') {
-				APP.alert("Job canceled or assigned to another translator");
+//				APP.alert("Job canceled or assigned to another translator");
+				APP.alert({
+					msg: 'Job canceled or assigned to another translator', 
+					callback: 'reloadPage' 
+				});		
 				//FIXME
 				// This Alert, will be NEVER displayed because are no-blocking
 				// Transform location.reload(); to a callable function passed as callback to alert
-				location.reload();
 			}
 
 		});
 	},
+	reloadPage: function() {
+		console.log('reloadPage');
+		location.reload();
+	},
+
 	someSegmentToSave: function() {
 		res = ($('section.modified').length) ? true : false;
 		return res;
