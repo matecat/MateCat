@@ -4,15 +4,25 @@
 */
 
 Loader = {
-	
+	concatSources: false, // set to true if you want to load all the js source components instead of the whole cat.js
 	components: new Array (
 		'common',
 		'cat'
 	),
-
+	source_components: new Array (
+		'ui.core', 
+		'ui.init',
+		'ui.render',
+		'ui.events',
+		'ui.contribution',
+		'ui.tags',
+		'ui.concordance',
+		'ui.glossary',
+		'ui.search',
+		'functions'
+	),
 	forkComponents: new Array (
 	),
-		
 	libraries: new Array (
         'jquery',
         'jquery-ui-1.8.20.custom.min',
@@ -24,15 +34,12 @@ Loader = {
         'rangy-core',
         'rangy-selectionsaverestore'
 	),
-	
 	include: function(f,p,b) {
 		document.write('<script type="text/javascript" src="' + b + p + f + '?build=' + config.build_number + '"></script>');
     },
-
 	includeStyle: function(f,p,b) {
 		document.write('<link rel="stylesheet" type="text/css" href="' + b + p + f + '?build=' + config.build_number + '" media="screen" />');
     },
-
 	detect: function(a) {
 		if (window.location.href.indexOf('?') == -1) return;
 		var vars = window.location.href.split('?')[1].split('&');
@@ -46,20 +53,27 @@ Loader = {
 		}
 		return;
 	},
-
 	start: function() {
 		var l = this.libraries;
+		var s = this.source_components;
 		var c = this.detect('fork')? this.forkComponents : this.components;
 		this.basePath = config.basepath+'public/js/';
 		for (var i = 0; i < l.length; i++) this.include(l[i] + '.js', 'lib/', this.basePath);
-		for (var i = 0; i < c.length; i++) this.include(c[i] + '.js', '', this.basePath);
+		this.include('common.js', '', this.basePath);
+		if(this.concatSources) {
+			for (var i = 0; i < s.length; i++) this.include(s[i] + '.js', 'cat_source/', this.basePath);
+		} else {
+			this.include('cat.js', '', this.basePath);
+		}
+		
+//		for (var i = 0; i < c.length; i++) this.include(c[i] + '.js', '', this.basePath);
 
-		if(this.detect('log')) {
-			this.include('log.js', 'lib/casmacat/', this.basePath);
-		}
-		if(this.detect('replay')) {
-			this.include('replay.js', 'lib/casmacat/', this.basePath);
-		}
+//		if(this.detect('log')) {
+//			this.include('log.js', 'lib/casmacat/', this.basePath);
+//		}
+//		if(this.detect('replay')) {
+//			this.include('replay.js', 'lib/casmacat/', this.basePath);
+//		}
 	}
 }
 
