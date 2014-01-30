@@ -1422,6 +1422,7 @@ UI = {
 
 		// Attention, to be modified when we will lock tags
 		if( config.brPlaceholdEnabled ) {
+			console.log('s');
             var translation = this.postProcessEditarea(segment);
         } else {
             var translation = $('.editarea', segment ).text();
@@ -1498,46 +1499,19 @@ UI = {
      * @returns {XML|string}
      */
 	fixBR: function(txt) {
-		return txt.replace(/<br>/g, '').replace(/<div>/g, '<br class="' + config.crPlaceholderClass + '">').replace(/<\/div>/g, '');
+		var ph = '<br class="' + config.crPlaceholderClass + '">';
+		var re = new RegExp(ph + '$', "gi");
+		return txt.replace(/<div><br><\/div>/g, ph).replace(/<div>/g, '<br class="' + config.crPlaceholderClass + '">').replace(/<\/div>/g, '').replace(/<br>/g, ph).replace(re, '');
+//		return txt.replace(/<br>/g, '').replace(/<div>/g, '<br class="' + config.crPlaceholderClass + '">').replace(/<\/div>/g, '').replace(re, '');
 	},
 
 	postProcessEditarea: function(context, selector){
-        selector = (typeof selector === "undefined") ? '.editarea' : selector;
-
-        area = $( selector, context ).clone();
-
-        $('br', area).each(function() {
-
-            try{
-                var br = this;
-                //split ensure array with at least 1 item or throws exception
-                var classes = $(br).attr('class').split(' ');
-                $(classes).each( function( index, value ){
-                    switch( value ){
-                        case config.lfPlaceholderClass:
-                            $(br).after('<span class="placeholder">' + config.lfPlaceholder + '</span>');
-                            break;
-                        case config.crPlaceholderClass:
-                            $(br).after('<span class="placeholder">' + config.crPlaceholder + '</span>');
-                            break;
-                        case config.crlfPlaceholderClass:
-                            $(br).after('<span class="placeholder">' + config.crlfPlaceholder + '</span>');
-                            break;
-                    }
-                });
-            } catch ( e ){
-                console.log( "Exception on placeholder replacement.\nAdded a default placeholder " + e.message );
-                //add a default placeholder, when a return is pressed by the user chrome add a simple <br>
-                //so
-                $(this).after('<span class="placeholder">' + config.crPlaceholder + '</span>');
-            }
-
-        });
-
-		txt = this.fixBR(area.text());
-        //trim last placeholder if present.
-		return txt.replace( /\#\#\$(.*?)\$\#\#$/, '' );
-
+		selector = (typeof selector === "undefined") ? '.editarea' : selector;
+		area = $( selector, context ).clone();
+		console.log($(area).html());
+		var txt = this.fixBR($(area).html());
+		console.log(txt);
+		return txt;
     }, 
 
     /**

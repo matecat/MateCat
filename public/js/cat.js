@@ -1422,6 +1422,7 @@ UI = {
 
 		// Attention, to be modified when we will lock tags
 		if( config.brPlaceholdEnabled ) {
+			console.log('s');
             var translation = this.postProcessEditarea(segment);
         } else {
             var translation = $('.editarea', segment ).text();
@@ -1498,46 +1499,19 @@ UI = {
      * @returns {XML|string}
      */
 	fixBR: function(txt) {
-		return txt.replace(/<br>/g, '').replace(/<div>/g, '<br class="' + config.crPlaceholderClass + '">').replace(/<\/div>/g, '');
+		var ph = '<br class="' + config.crPlaceholderClass + '">';
+		var re = new RegExp(ph + '$', "gi");
+		return txt.replace(/<div><br><\/div>/g, ph).replace(/<div>/g, '<br class="' + config.crPlaceholderClass + '">').replace(/<\/div>/g, '').replace(/<br>/g, ph).replace(re, '');
+//		return txt.replace(/<br>/g, '').replace(/<div>/g, '<br class="' + config.crPlaceholderClass + '">').replace(/<\/div>/g, '').replace(re, '');
 	},
 
 	postProcessEditarea: function(context, selector){
-        selector = (typeof selector === "undefined") ? '.editarea' : selector;
-
-        area = $( selector, context ).clone();
-
-        $('br', area).each(function() {
-
-            try{
-                var br = this;
-                //split ensure array with at least 1 item or throws exception
-                var classes = $(br).attr('class').split(' ');
-                $(classes).each( function( index, value ){
-                    switch( value ){
-                        case config.lfPlaceholderClass:
-                            $(br).after('<span class="placeholder">' + config.lfPlaceholder + '</span>');
-                            break;
-                        case config.crPlaceholderClass:
-                            $(br).after('<span class="placeholder">' + config.crPlaceholder + '</span>');
-                            break;
-                        case config.crlfPlaceholderClass:
-                            $(br).after('<span class="placeholder">' + config.crlfPlaceholder + '</span>');
-                            break;
-                    }
-                });
-            } catch ( e ){
-                console.log( "Exception on placeholder replacement.\nAdded a default placeholder " + e.message );
-                //add a default placeholder, when a return is pressed by the user chrome add a simple <br>
-                //so
-                $(this).after('<span class="placeholder">' + config.crPlaceholder + '</span>');
-            }
-
-        });
-
-		txt = this.fixBR(area.text());
-        //trim last placeholder if present.
-		return txt.replace( /\#\#\$(.*?)\$\#\#$/, '' );
-
+		selector = (typeof selector === "undefined") ? '.editarea' : selector;
+		area = $( selector, context ).clone();
+		console.log($(area).html());
+		var txt = this.fixBR($(area).html());
+		console.log(txt);
+		return txt;
     }, 
 
     /**
@@ -2753,11 +2727,9 @@ $.extend(UI, {
 			e.preventDefault();
 			var save = (typeof param == 'undefined') ? 'noSave' : param;
 			UI.closeSegment(UI.currentSegment, 1, save);
-		});
-
-//        .on('keyup', '.editor .editarea', function(e) {
-//            if ( e.which == 13 ){
-//                //replace all divs with a br and remove all br without a class
+		}).on('keyup', '.editor .editarea', function(e) {
+            if ( e.which == 13 ){
+                //replace all divs with a br and remove all br without a class
 //                var divs = $( this ).find( 'div' );
 //                if( divs.length ){
 //					divs.each(function(){
@@ -2767,9 +2739,8 @@ $.extend(UI, {
 //                } else {
 //                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
 //                }
-//            }
-//		});
-
+            }
+		});
 		UI.toSegment = true;
 		if (!this.segmentToScrollAtRender)
 			UI.gotoSegment(this.startSegmentId);
@@ -3030,13 +3001,14 @@ $.extend(UI, {
 		}
 		var id = n.attr('id');
 		var id_segment = id.split('-')[1];
-
+/*
         if( config.brPlaceholdEnabled ) {
             var txt = this.postProcessEditarea(n, '.source');
         } else {
             var txt = $('.source', n).text();
         }
-
+*/
+		var txt = $('.source', n).text();
 		txt = view2rawxliff(txt);
 		// Attention: As for copysource, what is the correct file format in attributes? I am assuming html encoded and "=>&quot;
 		//txt = txt.replace(/&quot;/g,'"');

@@ -807,15 +807,15 @@ $.extend(UI, {
 		}).on('keyup', '.editor .editarea', function(e) {
             if ( e.which == 13 ){
                 //replace all divs with a br and remove all br without a class
-                var divs = $( this ).find( 'div' );
-                if( divs.length ){
-					divs.each(function(){
-						$(this).find( 'br:not([class])' ).remove();
-						$(this).prepend( $('<br class="' + config.crPlaceholderClass + '" />' ) ).replaceWith( $(this).html() );
-					});
-                } else {
-                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
-                }
+//                var divs = $( this ).find( 'div' );
+//                if( divs.length ){
+//					divs.each(function(){
+//						$(this).find( 'br:not([class])' ).remove();
+//						$(this).prepend( $('<br class="' + config.crPlaceholderClass + '" />' ) ).replaceWith( $(this).html() );
+//					});
+//                } else {
+//                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
+//                }
             }
 		});
 		UI.toSegment = true;
