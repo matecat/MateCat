@@ -91,7 +91,7 @@ UI = {
 				} else {
 					$.removeCookie('noTutorial');
 				}
-			})
+			});
 		}
 	},
 	closeSegment: function(segment, byButton, operation) {
@@ -175,15 +175,15 @@ UI = {
 		$('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
 	},
 	createFooter: function(segment) {
-		if ($('.matches .overflow', segment).text() != '')
+		if ($('.matches .overflow', segment).text() !== '')
 			return false;
-		if ($('.footer', segment).text() != '')
+		if ($('.footer', segment).text() !== '')
 			return false; 
 
 		var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li><li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc"><a tabindex="-1" href="#">Concordance</a></li><li class="tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl"><a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div><div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances"><div class="overflow"><div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div><div class="results"></div></div></div><div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary"><div class="overflow"><div class="gl-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /><!-- a class="search-glossary" href="#"></a --><a class="set-glossary disabled" href="#"></a><div class="comment"><a href="#">(+) Comment</a><div class="input gl-comment" contenteditable="true" /></div></div><div class="results"></div></div></div>';
 		$('.footer', segment).html(footer);
 
-		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() == '')) {
+		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
 			
 			$('.sub-editor.matches .overflow .graysmall.message', segment).remove();
 			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry, we can\'t help you this time. Check if the language pair is correct. If not, create the project again.</li></ul>');
@@ -208,10 +208,12 @@ UI = {
 				'		<li class="currSegment" data-segment="' + UI.currentSegmentId + '"><a href="#">Go to current segment</a></li>' +
 				'    </ul>' +
 				'</nav>';
-		this.body.append(menu);
-		/*  $('#jobMenu li').each(function() {
-		 APP.fitText($(this), $('a',$(this)), 20);
-		 });*/
+		this.body.append(menu); 
+/*
+		$('#jobMenu li').each(function() {
+			APP.fitText($(this), $('a', $(this)), 20);
+		});
+*/
 	},
 	getIconClass: function(ext) {
 		c =		(
@@ -282,11 +284,11 @@ UI = {
 		if (!times)
 			times = 1;
 		if (direction == 'down') {
-			var adjacent = segment.next();
+			adjacent = segment.next();
 			if (!adjacent.is('section'))
 				adjacent = this.currentFile.next().find('section:first');
 		} else {
-			var adjacent = segment.prev();
+			adjacent = segment.prev();
 			if (!adjacent.is('section'))
 				adjacent = $('.editor').parents('article').prev().find('section:last');
 		}
@@ -316,7 +318,6 @@ UI = {
 					$('#segmentPointer').removeClass('up').addClass('down').css('margin-top', ($(window).height() - 140) + 'px').show();
 				}
 			}
-			;
 		}
 	},
 	detectRefSegId: function(where) {
@@ -355,10 +356,8 @@ UI = {
 				found = parseInt(this);
 				return false;
 			}
-			;
 		});
-		if (found == '') {
-//            console.log("bisogna ricominciare dall'inizio");
+		if (found === '') {
 			found = this.searchResultsSegments[0];
 		}
 		return found;
@@ -386,7 +385,7 @@ UI = {
 					UI.segMoving = $(this).attr('id').split('-')[1];
 					return false;
 				}
-			})
+			});
 		}
 
 		if (where == 'before') {
@@ -412,15 +411,15 @@ UI = {
 	getMoreSegments_success: function(d) {
 		if (d.error.length)
 			this.processErrors(d.error, 'getMoreSegments');
-		where = d.data['where'];
-		if (typeof d.data['files'] != 'undefined') {
+		where = d.data.where;
+		if (typeof d.data.files != 'undefined') {
 			firstSeg = $('section').first();
 			lastSeg = $('section').last();
 			var numsegToAdd = 0;
-			$.each(d.data['files'], function() {
+			$.each(d.data.files, function() {
 				numsegToAdd = numsegToAdd + this.segments.length;
 			});
-			this.renderSegments(d.data['files'], where, false);
+			this.renderSegments(d.data.files, where, false);
 
 			// if getting segments before, UI points to the segment triggering the event 
 			if ((where == 'before') && (numsegToAdd)) {
@@ -439,7 +438,7 @@ UI = {
 		}
 		if (where == 'after') {
 		}
-		if (d.data['files'].length == 0) {
+		if (d.data.files.length === 0) {
 			if (where == 'after')
 				this.noMoreSegmentsAfter = true;
 			if (where == 'before')
@@ -523,15 +522,15 @@ UI = {
 	getSegments_success: function(d, options) {
 		if (d.error.length)
 			this.processErrors(d.error, 'getSegments');
-		where = d.data['where'];
-		$.each(d.data['files'], function() {
-			startSegmentId = this['segments'][0]['sid'];
-		})
+		where = d.data.where;
+		$.each(d.data.files, function() {
+			startSegmentId = this.segments[0].sid;
+		});
 		if (typeof this.startSegmentId == 'undefined')
 			this.startSegmentId = startSegmentId;
 		this.body.addClass('loaded');
-		if (typeof d.data['files'] != 'undefined') {
-			this.renderSegments(d.data['files'], where, this.firstLoad);
+		if (typeof d.data.files != 'undefined') {
+			this.renderSegments(d.data.files, where, this.firstLoad);
 			if ((options.openCurrentSegmentAfter) && (!options.segmentToScroll) && (!options.segmentToOpen)) {
 				seg = (UI.firstLoad) ? this.currentSegmentId : UI.startSegmentId;
 				this.gotoSegment(seg);
@@ -638,7 +637,6 @@ UI = {
 				$('.editarea', next).trigger("click", "moving");
 			}
 		}
-		;
 	},
 	gotoOpenSegment: function() {
 		if ($('#segment-' + this.currentSegmentId).length) {
@@ -648,7 +646,7 @@ UI = {
 			this.render({
 				firstLoad: false,
 				segmentToOpen: this.currentSegmentId
-			})
+			});
 		}
 		$(window).trigger({
 			type: "scrolledToOpenSegment",
@@ -667,7 +665,6 @@ UI = {
 				this.topReached();
 			}
 		}
-		;
 		if (prev.length)
 			this.scrollSegment(prev);
 	},
@@ -720,7 +717,7 @@ UI = {
 			if (this.justSelecting('editarea'))
 				return;
 		}
-		this.firstOpenedSegment = (this.firstOpenedSegment == 0) ? 1 : 2;
+		this.firstOpenedSegment = (this.firstOpenedSegment === 0) ? 1 : 2;
 		this.byButton = false;
 		this.cacheObjects(editarea);
 		this.updateJobMenu();
@@ -789,8 +786,7 @@ UI = {
 //		el.focus();
 		
 		 $(el).focus();
-		 if (typeof window.getSelection != "undefined"
-				&& typeof document.createRange != "undefined") {
+		 if (typeof window.getSelection != "undefined" && typeof document.createRange != "undefined") {
 			var range = document.createRange();
 			range.selectNodeContents(el);
 			range.collapse(false);
@@ -818,7 +814,7 @@ UI = {
 		$('#outer').empty();
 		this.render({
 			firstLoad: false
-		})
+		});
 	},
 	renderUntranslatedOutOfView: function() {
 		this.infiniteScroll = false;
@@ -827,7 +823,7 @@ UI = {
 		$('#outer').empty();
 		this.render({
 			firstLoad: false
-		})
+		});
 	},
 	reloadWarning: function() {
 		this.renderUntranslatedOutOfView();
@@ -836,17 +832,17 @@ UI = {
 	pointBackToSegment: function(segmentId) {
 		if (!this.infiniteScroll)
 			return;
-		if (segmentId == '') {
+		if (segmentId === '') {
 			this.startSegmentId = config.last_opened_segment;
 			$('#outer').empty();
 			this.render({
 				firstLoad: false
-			})
+			});
 		} else {
 			$('#outer').empty();
 			this.render({
 				firstLoad: false
-			})
+			});
 		}
 	},
 	pointToOpenSegment: function() {
@@ -869,7 +865,7 @@ UI = {
 	renderSegments: function(files, where, starting) {
 		$.each(files, function(k, v) {
 			var newFile = '';
-			var fs = this['file_stats'];
+			var fs = this.file_stats;
 //            var fid = fs['ID_FILE'];
 			var fid = k;
 			var articleToAdd = ((where == 'center') || (!$('#file-' + fid).length)) ? true : false;
@@ -893,9 +889,9 @@ UI = {
 						'			<strong>' + this.source + '</strong> [<span class="source-lang">' + this.source_code + '</span>]&nbsp;>&nbsp;<strong>' + this.target + '</strong> [<span class="target-lang">' + this.target_code + '</span>]' +
 						'		</li>' +
 						'		<li class="wordcounter">' +
-						'			Payable Words: <strong>' + fs['TOTAL_FORMATTED'] + '</strong>' +
+						'			Payable Words: <strong>' + fs.TOTAL_FORMATTED + '</strong>' +
 //                '			To-do: <strong>' + fs['DRAFT_FORMATTED'] + '</strong>'+
-						'			<span id="rejected" class="hidden">Rejected: <strong>' + fs['REJECTED_FORMATTED'] + '</strong></span>' +
+						'			<span id="rejected" class="hidden">Rejected: <strong>' + fs.REJECTED_FORMATTED + '</strong></span>' +
 						'		</li>' +
 						'	</ul>';
 			}
@@ -953,7 +949,7 @@ UI = {
 						'	</div> <!-- .body -->' +
 						'	<ul class="statusmenu"></ul>' +
 						'</section> ';
-			})
+			});
 
 			if (articleToAdd) {
 				newFile += '</article>';
@@ -979,7 +975,7 @@ UI = {
 					$('#file-' + fid).append(newFile);
 				}
 			}
-		})
+		});
 		if (starting) {
 			this.init();
 		}
@@ -1000,7 +996,7 @@ UI = {
 			caller: 'link2file',
 			segmentToScroll: sid,
 			scrollToFile: true
-		})
+		});
 //        this.render(false, segment.selector.split('-')[1]);
 	},
 	scrollSegment: function(segment) {
@@ -1012,7 +1008,7 @@ UI = {
 			this.render({
 				firstLoad: false,
 				segmentToOpen: segment.selector.split('-')[1]
-			})
+			});
 		}
 		var spread = 23;
 		var current = this.currentSegment;
@@ -1079,11 +1075,11 @@ UI = {
 				$.each(data.result, function(key, value) { //key --> 0: { 'word': { 'offset':20, 'misses':['word1','word2'] } }
 
 					var word = Object.keys(value)[0];
-					replacements = value[word]['misses'].join(",");
+					replacements = value[word].misses.join(",");
 
 					var Position = [
-						parseInt(value[word]['offset']),
-						parseInt(value[word]['offset']) + parseInt(word.length)
+						parseInt(value[word].offset),
+						parseInt(value[word].offset) + parseInt(word.length)
 					];
 
 					var sentTextInPosition = ed.text().substring(Position[0], Position[1]);
@@ -1092,7 +1088,7 @@ UI = {
 					var re = new RegExp("(\\b" + word + "\\b)", "gi");
 					$(ed).html($(ed).html().replace(re, '<span class="misspelled" data-replacements="' + replacements + '">$1</span>'));
 					// fix nested encapsulation
-					$(ed).html($(ed).html().replace(/(\<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(\<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
+					$(ed).html($(ed).html().replace(/(<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(<span class=\"misspelled\" data-replacements=\"(.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 //
 //                    });
 				});
@@ -1236,7 +1232,6 @@ UI = {
 			$('.downloadtr-button').focus();
 			return false;
 		}
-		;
 		this.buttonClickStop = new Date();
 		this.copyToNextIfSame(nextUntranslatedSegment);
 		this.byButton = true;
@@ -1320,7 +1315,7 @@ UI = {
 					UI.compareArrays(i1, i2);
 					return false;
 				}
-			})									
+			});						
 		});
 		return i1;
 	},
@@ -1376,11 +1371,11 @@ UI = {
 		//var src_content = $('.source', this.currentSegment).attr('data-original');
 
         if( config.brPlaceholdEnabled ){
-            var src_content = this.postProcessEditarea(this.currentSegment, '.source');
-            var trg_content = this.postProcessEditarea(this.currentSegment);
+            src_content = this.postProcessEditarea(this.currentSegment, '.source');
+            trg_content = this.postProcessEditarea(this.currentSegment);
         } else {
-            var src_content = this.getSegmentSource();
-            var trg_content = this.getSegmentTarget();
+            src_content = this.getSegmentSource();
+            trg_content = this.getSegmentTarget();
         }
 
 		this.checkSegmentsArray[token] = trg_content;
@@ -1418,17 +1413,17 @@ UI = {
 		var info = $(segment).attr('id').split('-');
 		var id_segment = info[1];
 		var file = $(segment).parents('article');
-		var status = status;
+//		var status = status;
 
 		// Attention, to be modified when we will lock tags
 		if( config.brPlaceholdEnabled ) {
 			console.log('s');
-            var translation = this.postProcessEditarea(segment);
+            translation = this.postProcessEditarea(segment);
         } else {
-            var translation = $('.editarea', segment ).text();
+            translation = $('.editarea', segment ).text();
         }
 
-		if (translation == '')
+		if (translation === '')
 			return false;
 		var time_to_edit = UI.editTime;
 		var id_translator = config.id_translator;
@@ -1512,7 +1507,7 @@ UI = {
 		var txt = this.fixBR($(area).html());
 		console.log(txt);
 		return txt;
-    }, 
+    },
 
     /**
      * Called when a Segment string returned by server has to be visualized, it replace placeholders with br tags
@@ -1529,16 +1524,16 @@ UI = {
 	processErrors: function(err, operation) {
 		$.each(err, function() {
 			if (operation == 'setTranslation') {
-				if (this['code'] != '-10') { // is not a password error
+				if (this.code != '-10') { // is not a password error
 					APP.alert({msg: "Error in saving the translation. Try the following: <br />1) Refresh the page (Ctrl+F5 twice) <br />2) Clear the cache in the browser <br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
 				}
 			}
 
-			if (operation == 'setContribution' && this['code'] != '-10') { // is not a password error
+			if (operation == 'setContribution' && this.code != '-10') { // is not a password error
 				APP.alert({msg: "Error in saving the translation memory.<br />Try the to save again the segment.<br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
 			}
 
-			if (this['code'] == '-10') {
+			if (this.code == '-10') {
 //				APP.alert("Job canceled or assigned to another translator");
 				APP.alert({
 					msg: 'Job canceled or assigned to another translator', 
@@ -1576,7 +1571,6 @@ UI = {
 			//check status of global warnings
 			this.checkWarnings(false);
 		}
-		;
 	},
 	setWaypoints: function() {
 		this.firstSegment.waypoint('remove');
@@ -1678,7 +1672,7 @@ UI = {
 		}
 	},
 	undoInSegment: function() {
-		if (this.undoStackPosition == 0)
+		if (this.undoStackPosition === 0)
 			this.saveInUndoStack('undo');
 		var ind = 0;
 		if (this.undoStack[this.undoStack.length - 1 - this.undoStackPosition - 1])
@@ -1708,10 +1702,10 @@ UI = {
 				return;
 		}
 
-		if (this.editarea.html() == '')
+		if (this.editarea.html() === '')
 			return;
 
-		var ss = this.editarea.html().match(/\<span.*?contenteditable\="false".*?\>/gi);
+		var ss = this.editarea.html().match(/<span.*?contenteditable\="false".*?\>/gi);
 		var tt = this.editarea.html().match(/&lt;/gi);
 		if (tt) {
 			if ((tt.length) && (!ss))
@@ -1727,7 +1721,7 @@ UI = {
 			this.undoStack.splice(this.undoStack.length - pos, pos);
 			this.undoStackPosition = 0;
 		}
-		this.undoStack.push(this.editarea.html().replace(/(\<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
+		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
 	},
 	clearUndoStack: function() {
 		this.undoStack = [];
@@ -1750,7 +1744,7 @@ UI = {
 		}
 		return o;
 	}
-}
+};
 
 $(document).ready(function() {
 
@@ -1762,7 +1756,7 @@ $(document).ready(function() {
 	});
 	UI.render({
 		firstLoad: true
-	})
+	});
 	//launch segments check on opening
 	UI.checkWarnings(true);
 	//and on every polling interval

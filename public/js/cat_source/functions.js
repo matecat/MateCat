@@ -34,11 +34,11 @@ function handlepaste(elem, e) {
 
 	if (e && e.clipboardData && e.clipboardData.getData) {// Webkit - get data from clipboard, put into editdiv, cleanup, then cancel event
 		if (/text\/html/.test(e.clipboardData.types)) {
-			var txt = (UI.tagSelection) ? UI.tagSelection : htmlEncode(e.clipboardData.getData('text/plain'));
+			txt = (UI.tagSelection) ? UI.tagSelection : htmlEncode(e.clipboardData.getData('text/plain'));
 			elem.innerHTML = txt;
 		}
 		else if (/text\/plain/.test(e.clipboardData.types)) {
-			var txt = (UI.tagSelection) ? UI.tagSelection : htmlEncode(e.clipboardData.getData('text/plain'));
+			txt = (UI.tagSelection) ? UI.tagSelection : htmlEncode(e.clipboardData.getData('text/plain'));
 			elem.innerHTML = txt;
 		}
 		else {
@@ -67,10 +67,10 @@ function waitforpastedata(elem, savedcontent) {
 		that = {
 			e: elem,
 			s: savedcontent
-		}
+		};
 		that.callself = function() {
-			waitforpastedata(that.e, that.s)
-		}
+			waitforpastedata(that.e, that.s);
+		};
 		setTimeout(that.callself, 20);
 	}
 }
@@ -182,7 +182,7 @@ function pasteHtmlAtCaret(html, selectPastedContent) {
 }
 
 function setCursorPosition(el, pos) {
-	var pos = pos || 0;
+	pos = pos || 0;
 	var range = document.createRange();
 	var sel = window.getSelection();
 	range.setStart(el, pos);
@@ -207,7 +207,6 @@ function removeSelectedText(editarea) {
 				oSelection.deleteFromDocument();
 			}
 		}
-		;
 	} else {
 		document.selection.clear();
 	}
@@ -314,11 +313,8 @@ function restoreSelection() {
 	}
 }
 
-function selectText(element) {
-	var doc = document
-			, text = element
-			, range, selection
-			;
+function selectText(element) { 
+	var doc = document, text = element, range, selection;
 	if (doc.body.createTextRange) {
 		range = document.body.createTextRange();
 		range.moveToElementText(text);

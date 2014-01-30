@@ -5,10 +5,10 @@
 
 Loader = {
 	concatSources: false, // set to true if you want to load all the js source components instead of the whole cat.js
-	components: new Array (
-		'common',
-		'cat'
-	),
+//	components: new Array (
+//		'common',
+//		'cat'
+//	),
 	source_components: new Array (
 		'ui.core', 
 		'ui.init',
@@ -56,7 +56,7 @@ Loader = {
 	start: function() {
 		var l = this.libraries;
 		var s = this.source_components;
-		var c = this.detect('fork')? this.forkComponents : this.components;
+//		var c = this.detect('fork')? this.forkComponents : this.components;
 		this.basePath = config.basepath+'public/js/';
 		for (var i = 0; i < l.length; i++) this.include(l[i] + '.js', 'lib/', this.basePath);
 		this.include('common.js', '', this.basePath);

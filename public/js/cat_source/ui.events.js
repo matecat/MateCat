@@ -91,7 +91,7 @@ $.extend(UI, {
 			e.preventDefault();
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
-			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
 				setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
@@ -107,28 +107,28 @@ $.extend(UI, {
 			UI.closeTagAutocompletePanel();
 			UI.lockTags(UI.editarea);
 			UI.currentSegmentQA();
-		})
+		});
 		
 		$(window).on('scroll', function(e) {
 			UI.browserScrollPositionRestoreCorrection();
-		})
+		});
 // no more used:
 		$("header .filter").click(function(e) {
 			e.preventDefault();
 			UI.body.toggleClass('filtering');
-		})
+		});
 		$("#filterSwitch").bind('click', function(e) {
 			UI.toggleSearch(e);
-		})
+		});
 		$("#segmentPointer").click(function(e) {
 			e.preventDefault();
 			UI.pointToOpenSegment();
-		})
+		});
 
 		$(".replace").click(function(e) {
 			e.preventDefault();
 			UI.body.toggleClass('replace-box');
-		})
+		});
 
 		jQuery('.editarea').trigger('update');
 
@@ -265,7 +265,7 @@ $.extend(UI, {
 			this.onclickEditarea = new Date();
 			UI.notYetOpened = false;
 			UI.closeTagAutocompletePanel();
-			if ((!$(this).is(UI.editarea)) || (UI.editarea == '') || (!UI.body.hasClass('editing'))) {
+			if ((!$(this).is(UI.editarea)) || (UI.editarea === '') || (!UI.body.hasClass('editing'))) {
 				if (operation == 'moving') {
 					if ((UI.lastOperation == 'moving') && (UI.recentMoving)) {
 						UI.segmentToOpen = segment;
@@ -307,20 +307,20 @@ $.extend(UI, {
 				if($('.tag-autocomplete').length) {
 					e.preventDefault();
 					return false;
-				};
+				}
 				UI.openTagAutocompletePanel();
-			};
+			}
 			if((e.which == 62)&&(UI.taglockEnabled)) { // closing tag sign
 				if($('.tag-autocomplete').length) {
 					e.preventDefault();
 					return false;
-				};
-			};
+				}
+			}
 			setTimeout(function() {
 				if($('.tag-autocomplete').length) {
 //					console.log(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) != null);
-					if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) != null) {
-						UI.editarea.html(UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"\><\/span>'));
+					if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) !== null) {
+						UI.editarea.html(UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>'));
 					}
 					UI.checkAutocompleteTags();
 				}
@@ -344,22 +344,22 @@ $.extend(UI, {
 					UI.saveInUndoStack('cancel');
 					UI.currentSegmentQA();
 				} else {
-					try {
-						var numTagsBefore = UI.editarea.text().match(/\<.*?\>/gi).length;
+//					try {
+						var numTagsBefore = UI.editarea.text().match(/<.*?\>/gi).length;
 						var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
 						setTimeout(function() {
-							var numTagsAfter = UI.editarea.text().match(/\<.*?\>/gi).length;
+							var numTagsAfter = UI.editarea.text().match(/<.*?\>/gi).length;
 							var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
 							if (numTagsAfter < numTagsBefore)
 								UI.saveInUndoStack('cancel');
 							if (numSpacesAfter < numSpacesBefore)
 								UI.saveInUndoStack('cancel');
 						}, 50);
-					} catch (e) {
+//					} catch (e) {
 						//Error: Cannot read property 'length' of null 
 						//when we are on first character position in edit area and try to BACKSPACE
 						//console.log(e.message); 
-					}
+//					}
 				}
 			}
 			if (e.which == 8) { // backspace
@@ -368,19 +368,19 @@ $.extend(UI, {
 					setTimeout(function() {
 						UI.openTagAutocompletePanel();
 						added = UI.getPartialTagAutocomplete();
-						if(added == '') UI.closeTagAutocompletePanel();
+						if(added === '') UI.closeTagAutocompletePanel();
 					}, 10);		
 				}
 			}
 			if (e.which == 37) { // left arrow
-				var selection = window.getSelection();
-				var range = selection.getRangeAt(0);
+				selection = window.getSelection();
+				range = selection.getRangeAt(0);
 				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
-					var r = range.startContainer.data;
+					r = range.startContainer.data;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) { // if a tag is selected
 						saveSelection();
-						var rr = document.createRange();
-						var referenceNode = $('.rangySelectionBoundary', UI.editarea).first().get(0);
+						rr = document.createRange();
+						referenceNode = $('.rangySelectionBoundary', UI.editarea).first().get(0);
 						rr.setStartBefore(referenceNode);
 						rr.setEndBefore(referenceNode);
 						$('.rangySelectionBoundary', UI.editarea).remove();
@@ -396,14 +396,14 @@ $.extend(UI, {
 						return false;
 					}	
 				}
-				var selection = window.getSelection();
-				var range = selection.getRangeAt(0);
+				selection = window.getSelection();
+				range = selection.getRangeAt(0);
 				if (range.startOffset != range.endOffset) {
-					var r = range.startContainer.data;
+					r = range.startContainer.data;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) {
 						saveSelection();
-						var rr = document.createRange();
-						var referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
+						rr = document.createRange();
+						referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
 						rr.setStartAfter(referenceNode);
 						rr.setEndAfter(referenceNode);
 						$('.rangySelectionBoundary', UI.editarea).remove();
@@ -411,14 +411,14 @@ $.extend(UI, {
 				}
 			}
 			if (e.which == 39) { // right arrow
-				var selection = window.getSelection();
-				var range = selection.getRangeAt(0);
+				selection = window.getSelection();
+				range = selection.getRangeAt(0);
 				if (range.startOffset != range.endOffset) {
-					var r = range.startContainer.data;
+					r = range.startContainer.data;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) {
 						saveSelection();
-						var rr = document.createRange();
-						var referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
+						rr = document.createRange();
+						referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
 						rr.setStartAfter(referenceNode);
 						rr.setEndAfter(referenceNode);
 						$('.rangySelectionBoundary', UI.editarea).remove();
@@ -432,14 +432,14 @@ $.extend(UI, {
 					$('.tag-autocomplete li.current:not(:last-child)').removeClass('current').nextAll(':not(.hidden)').first().addClass('current');	
 					return false;
 				}
-				var selection = window.getSelection();
-				var range = selection.getRangeAt(0);
+				selection = window.getSelection();
+				range = selection.getRangeAt(0);
 				if (range.startOffset != range.endOffset) {
-					var r = range.startContainer.data;
+					r = range.startContainer.data;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) {
 						saveSelection();
-						var rr = document.createRange();
-						var referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
+						rr = document.createRange();
+						referenceNode = $('.rangySelectionBoundary', UI.editarea).last().get(0);
 						rr.setStartAfter(referenceNode);
 						rr.setEndAfter(referenceNode);
 						$('.rangySelectionBoundary', UI.editarea).remove();
@@ -507,6 +507,7 @@ $.extend(UI, {
 			if (e.button == 2) { // right click
 				// temporarily disabled
 				return true;
+/*
 				if ($('#contextMenu').css('display') == 'block')
 					return true;
 
@@ -545,6 +546,7 @@ $.extend(UI, {
 					}
 				}
 				return false;
+				*/
 			}
 			return true;
 		}).on('dragstart', '.editor .editarea .locked', function(e) {
@@ -610,7 +612,7 @@ $.extend(UI, {
 
 			UI.checkHeaviness();
 			if (UI.blockButtons) {
-				if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId == '') {
+				if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
 					console.log('segment is already loaded');
 				} else {
 					console.log('segment is not loaded');
@@ -715,7 +717,7 @@ $.extend(UI, {
 				},
 				complete: function() {
 				}
-			})					
+			});
 		}).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
 			if (e.which == 13) { // enter
 				e.preventDefault();
@@ -761,7 +763,7 @@ $.extend(UI, {
 			}
 		}).on('input', '.sub-editor .gl-search .search-target', function(e) {
 			gl = $(this).parents('.gl-search').find('.set-glossary');	
-			if($(this).text() == '') {
+			if($(this).text() === '') {
 				gl.addClass('disabled');
 			} else {
 				gl.removeClass('disabled');
@@ -770,7 +772,7 @@ $.extend(UI, {
 			e.preventDefault();
 		}).on('click', '.sub-editor .gl-search .set-glossary:not(.disabled)', function(e) {
 			e.preventDefault();
-			if($(this).parents('.gl-search').find('.search-source').text() == '') {
+			if($(this).parents('.gl-search').find('.search-source').text() === '') {
 				APP.alert({msg: 'Please insert a glossary term.'});
 				return false;
 			} else {
@@ -825,39 +827,39 @@ $.extend(UI, {
 		$(".end-message-box a.close").on('click', function(e) {
 			e.preventDefault();
 			UI.body.removeClass('justdone');
-		})
+		});
 
 		this.checkIfFinishedFirst();
 
 		$("section .close").bind('keydown', 'Shift+tab', function(e) {
 			e.preventDefault();
 			$(this).parents('section').find('a.translated').focus();
-		})
+		});
 
 		$("a.translated").bind('keydown', 'tab', function(e) {
 			e.preventDefault();
 			$(this).parents('section').find('.close').focus();
-		})
+		});
 
 		$("#navSwitcher").on('click', function(e) {
 			e.preventDefault();
-		})
+		});
 		$("#pname").on('click', function(e) {
 			e.preventDefault();
 			UI.toggleFileMenu();
-		})
+		});
 		$("#jobNav .jobstart").on('click', function(e) {
 			e.preventDefault();
 			UI.scrollSegment($('#segment-' + config.firstSegmentOfFiles[0].first_segment));
-		})
+		});
 		$("#jobMenu").on('click', 'li:not(.currSegment)', function(e) {
 			e.preventDefault();
 			UI.renderAndScrollToSegment($(this).attr('data-segment'), true);
-		})
+		});
 		$("#jobMenu").on('click', 'li.currSegment', function(e) {
 			e.preventDefault();
 			UI.pointToOpenSegment();
-		})
+		});
 		$("#jobNav .prevfile").on('click', function(e) {
 			e.preventDefault();
 			currArtId = $(UI.currentFile).attr('id').split('-')[1];
@@ -866,7 +868,7 @@ $.extend(UI, {
 					firstSegmentOfCurrentFile = this.first_segment;
 			});
 			UI.scrollSegment($('#segment-' + firstSegmentOfCurrentFile));
-		})
+		});
 		$("#jobNav .currseg").on('click', function(e) {
 			e.preventDefault();
 
@@ -874,16 +876,16 @@ $.extend(UI, {
 				$('#outer').empty();
 				UI.render({
 					firstLoad: false
-				})
+				});
 			} else {
 				UI.scrollSegment(UI.currentSegment);
 			}
-		})
+		});
 		$("#jobNav .nextfile").on('click', function(e) {
 			e.preventDefault();
-			if (UI.tempViewPoint == '') { // the user have not used yet the Job Nav
+			if (UI.tempViewPoint === '') { // the user have not used yet the Job Nav
 				// go to current file first segment
-				currFileFirstSegmentId = $(UI.currentFile).attr('id').split('-')[1]
+				currFileFirstSegmentId = $(UI.currentFile).attr('id').split('-')[1];
 				$.each(config.firstSegmentOfFiles, function() {
 					if (this.id_file == currFileFirstSegmentId)
 						firstSegId = this.first_segment;
@@ -894,7 +896,7 @@ $.extend(UI, {
 			$.each(config.firstSegmentOfFiles, function() {
 				console.log(this.id_file);
 			});
-		})
+		});
 
 // Search and replace
 
@@ -902,7 +904,7 @@ $.extend(UI, {
 			e.preventDefault();
 			if ($("#exec-find").attr('disabled') != 'disabled')
 				$("#exec-find").click();
-		})
+		});
 
 		$("#exec-find").click(function(e) {
 			e.preventDefault();
@@ -932,7 +934,7 @@ $.extend(UI, {
 				UI.render({
 					firstLoad: false,
 					segmentToOpen: UI.currentSegmentId
-				})
+				});
 			}
 
 		});
@@ -971,7 +973,7 @@ $.extend(UI, {
 			}
 		});
 		$("#enable-replace").on('change', function(e) {
-			if (($('#enable-replace').is(':checked')) && ($('#search-target').val() != '')) {
+			if (($('#enable-replace').is(':checked')) && ($('#search-target').val() !== '')) {
 				$('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');
 			} else {
 				$('#replace-target, #exec-replace, #exec-replaceall').attr('disabled', 'disabled');
@@ -983,7 +985,7 @@ $.extend(UI, {
 			}
 		});
 		$("#search-target").on('input', function(e) {
-			if ($(this).val() == '') {
+			if ($(this).val() === '') {
 				$('#replace-target, #exec-replace, #exec-replaceall').attr('disabled', 'disabled');
 			} else {
 				if ($('#enable-replace').is(':checked'))

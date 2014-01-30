@@ -36,7 +36,6 @@ $.extend(UI, {
 		} else {
 			mismatch = true;
 		}
-		;
 		return(mismatch);
 	},
 	
@@ -44,7 +43,7 @@ $.extend(UI, {
 	detectTags: function(area) {
 		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 		if (!this.firstMarking) {
-			$(area).html($(area).html().replace(/(\<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
+			$(area).html($(area).html().replace(/(<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
 		}
 	},
 	disableTagMark: function() {
@@ -70,17 +69,17 @@ $.extend(UI, {
 		$('.footer .suggestion_source', segment).each(function() {
 			$(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 			if (UI.isFirefox) {
-				$(this).html($(this).html().replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
+				$(this).html($(this).html().replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			} else {
-				$(this).html($(this).html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
+				$(this).html($(this).html().replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			}
 		});
 		$('.footer .translation').each(function() {
 			$(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 			if (UI.isFirefox) {
-				$(this).html($(this).html().replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
+				$(this).html($(this).html().replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			} else {
-				$(this).html($(this).html().replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>"));
+				$(this).html($(this).html().replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			}
 		});
 	},
@@ -123,11 +122,11 @@ $.extend(UI, {
 			var tx = $(this).html();
 			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
 			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
-			tx = tx.replace(/\<span/gi, "<pl")
-					.replace(/\<\/span/gi, "</pl")
+			tx = tx.replace(/<span/gi, "<pl")
+					.replace(/<\/span/gi, "</pl")
 					.replace(/&lt;/gi, "<")
-					.replace(/(\<(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid[^<]*?&gt;)/gi, brTx1)
-					.replace(/\</gi, "&lt;")
+					.replace(/(<(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid[^<]*?&gt;)/gi, brTx1)
+					.replace(/</gi, "&lt;")
 					.replace(/\&lt;pl/gi, "<span")
 					.replace(/\&lt;\/pl/gi, "</span")
 					.replace(/\&lt;div\>/gi, "<div>")
@@ -139,26 +138,26 @@ $.extend(UI, {
 					.replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
 
 			if (UI.isFirefox) {
-				tx = tx.replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>");
-				tx = tx.replace(/(\<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span class=\"$2\" contenteditable=\"false\">$3</span>");
+				tx = tx.replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>");
+				tx = tx.replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(<\/span\>){2,}/gi, "<span class=\"$2\" contenteditable=\"false\">$3</span>");
 			} else {
 				// fix nested encapsulation
-				tx = tx.replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(\<\/span\>){2,}/gi, "$1$5</span>");
-				tx = tx.replace(/(\<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(\<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>");
+				tx = tx.replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>");
+				tx = tx.replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>");
 			}
 
-			tx = tx.replace(/(\<\/span\>)$(\s){0,}/gi, "</span> ");
+			tx = tx.replace(/(<\/span\>)$(\s){0,}/gi, "</span> ");
 			var prevNumTags = $('span.locked', this).length;
 			$(this).html(tx);
 			restoreSelection();
 			if($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
-		})
+		});
 
 	},
 	unlockTags: function() {
 		if (!this.taglockEnabled)
 			return false;
-		this.editarea.html(this.editarea.html().replace(/\<span contenteditable=\"false\" class=\"locked\"\>(.*?)\<\/span\>/gi, "$1"));
+		this.editarea.html(this.editarea.html().replace(/<span contenteditable=\"false\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1"));
 	},
 	
 	// TAG CLEANING
@@ -173,7 +172,7 @@ $.extend(UI, {
 			if (this[0] == 1) {
 				draggedText += this[1];
 			}
-		})
+		});
 
 		draggedText = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2");
 		var div = document.createElement("div");
@@ -182,7 +181,7 @@ $.extend(UI, {
 		var phcode = $('.rangySelectionBoundary')[0].outerHTML;
 		$('.rangySelectionBoundary').text(this.cursorPlaceholder);
 
-		closeTag = '</' + $(div).text().trim().replace(/\<(.*?)\s.*?\>/gi, "$1") + '>';
+		closeTag = '</' + $(div).text().trim().replace(/<(.*?)\s.*?\>/gi, "$1") + '>';
 		newTag = $(div).text();
 
 		var newText = area.text().replace(draggedText, newTag);
@@ -226,8 +225,8 @@ $.extend(UI, {
 				$(this).removeClass('hidden');
 			} else {
 				$(this).addClass('hidden');	
-			};
-		})
+			}
+		});
 		if(!$('.tag-autocomplete li:not(.hidden)').length) {
 			$('.tag-autocomplete').addClass('empty');
 			if(UI.preCloseTagAutocomplete) {
@@ -240,7 +239,7 @@ $.extend(UI, {
 			$('.tag-autocomplete li:not(.hidden)').first().addClass('current');
 			$('.tag-autocomplete').removeClass('empty');		
 			UI.preCloseTagAutocomplete = false;
-		};
+		}
 	},
 	closeTagAutocompletePanel: function() {
 		$('.tag-autocomplete, .tag-autocomplete-endcursor').remove();
@@ -250,7 +249,7 @@ $.extend(UI, {
 //		var added = UI.editarea.html().match(/&lt;([&;"\w\s\/=]*?)<span class="tag-autocomplete-endcursor">/gi);
 		var added = UI.editarea.html().match(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?<span class="tag-autocomplete-endcursor">/gi);
 //		console.log(added);
-		added = (added == null)? '' : htmlDecode(added[0].replace(/\<span class="tag-autocomplete-endcursor"\>/gi, '')).replace(/\xA0/gi," ");
+		added = (added === null)? '' : htmlDecode(added[0].replace(/<span class="tag-autocomplete-endcursor"\>/gi, '')).replace(/\xA0/gi," ");
 		return added;
 	},
 	openTagAutocompletePanel: function() {
@@ -268,7 +267,7 @@ $.extend(UI, {
 		$('.tag-autocomplete-marker').remove();
 		UI.body.append('<div class="tag-autocomplete"><ul></ul></div>');
 		$.each(UI.sourceTags, function(index) {
-			$('.tag-autocomplete ul').append('<li' + ((index == 0)? ' class="current"' : '') + '>' + this + '</li>');
+			$('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + '>' + this + '</li>');
 		});
 
 		$('.tag-autocomplete').css('top', offset.top + 20);

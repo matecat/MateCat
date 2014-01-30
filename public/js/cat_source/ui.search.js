@@ -7,7 +7,7 @@ $.extend(UI, {
 			this.markSearchResults({
 				singleSegment: segment,
 				where: 'no'
-			})
+			});
 	},
 	resetSearch: function() {
 		this.body.removeClass('searchActive');
@@ -21,37 +21,37 @@ $.extend(UI, {
 		$('.search-display').removeClass('displaying');
 		$('section.currSearchSegment').removeClass('currSearchSegment');
 
-		if ($('#search-source').val() != '') {
-			this.searchParams['source'] = $('#search-source').val();
+		if ($('#search-source').val() !== '') {
+			this.searchParams.source = $('#search-source').val();
 		} else {
-			delete this.searchParams['source'];
+			delete this.searchParams.source;
 		}
 
-		if ($('#search-target').val() != '') {
-			this.searchParams['target'] = $('#search-target').val();
+		if ($('#search-target').val() !== '') {
+			this.searchParams.target = $('#search-target').val();
 			if ($('#enable-replace').is(':checked'))
 				$('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');
 		} else {
-			delete this.searchParams['target'];
+			delete this.searchParams.target;
 			$('#replace-target, #exec-replace, #exec-replaceall').attr('disabled', 'disabled');
 		}
 
-		if ($('#select-status').val() != '') {
-			this.searchParams['status'] = $('#select-status').val();
+		if ($('#select-status').val() !== '') {
+			this.searchParams.status = $('#select-status').val();
 			this.body.attr('data-filter-status', $('#select-status').val());
 		} else {
-			delete this.searchParams['status'];
+			delete this.searchParams.status;
 		}
 
-		if ($('#replace-target').val() != '') {
-			this.searchParams['replace'] = $('#replace-target').val();
+		if ($('#replace-target').val() !== '') {
+			this.searchParams.replace = $('#replace-target').val();
 		} else {
-			delete this.searchParams['replace'];
+			delete this.searchParams.replace;
 		}
 		this.searchParams['match-case'] = $('#match-case').is(':checked');
 		this.searchParams['exact-match'] = $('#exact-match').is(':checked');
-		this.searchParams['search'] = 1;
-		if ((typeof this.searchParams['source'] == 'undefined') && (typeof this.searchParams['target'] == 'undefined') && (this.searchParams['status'] == 'all')) {
+		this.searchParams.search = 1;
+		if ((typeof this.searchParams.source == 'undefined') && (typeof this.searchParams.target == 'undefined') && (this.searchParams.status == 'all')) {
 			APP.alert({msg: 'You must specify at least one between source and target<br>or choose a status'});
 			return false;
 		}
@@ -59,8 +59,8 @@ $.extend(UI, {
 
 		var p = this.searchParams;
 
-		this.searchMode = ((typeof p['source'] == 'undefined') && (typeof p['target'] == 'undefined')) ? 'onlyStatus' :
-				((typeof p['source'] != 'undefined') && (typeof p['target'] != 'undefined')) ? 'source&target' : 'normal';
+		this.searchMode = ((typeof p.source == 'undefined') && (typeof p.target == 'undefined')) ? 'onlyStatus' :
+				((typeof p.source != 'undefined') && (typeof p.target != 'undefined')) ? 'source&target' : 'normal';
 		if (this.searchMode == 'onlyStatus') {
 
 //			APP.alert('Status only search is temporarily disabled');
@@ -71,9 +71,9 @@ $.extend(UI, {
 //			return false;
 		}
 
-		var source = (p['source']) ? p['source'] : '';
-		var target = (p['target']) ? p['target'] : '';
-		var replace = (p['replace']) ? p['replace'] : '';
+		var source = (p.source) ? p.source : '';
+		var target = (p.target) ? p.target : '';
+		var replace = (p.replace) ? p.replace : '';
 		this.markSearchResults();
 		this.gotoSearchResultAfter({
 			el: 'segment-' + this.currentSegmentId
@@ -91,7 +91,7 @@ $.extend(UI, {
 				password: config.password,
 				source: source,
 				target: target,
-				status: this.searchParams['status'],
+				status: this.searchParams.status,
 				matchcase: this.searchParams['match-case'],
 				exactmatch: this.searchParams['exact-match'],
 				replace: replace
@@ -108,8 +108,8 @@ $.extend(UI, {
 		this.numSearchResultsSegments = (d.segments) ? d.segments.length : 0;
 		this.updateSearchDisplay();
 		if (this.pendingRender) {
-			if (this.pendingRender['detectSegmentToScroll'])
-				this.pendingRender['segmentToScroll'] = this.nextUnloadedResultSegment();
+			if (this.pendingRender.detectSegmentToScroll)
+				this.pendingRender.segmentToScroll = this.nextUnloadedResultSegment();
 			$('#outer').empty();
 
 			this.render(this.pendingRender);
@@ -124,36 +124,36 @@ $.extend(UI, {
 		this.applySearch();
 //		$('.modal[data-name=confirmReplaceAll] .btn-ok').addClass('disabled').text('Replacing...').attr('disabled', 'disabled');
 
-        if ( $('#search-target').val() != '' ) {
-            this.searchParams['target'] = $('#search-target').val();
+        if ( $('#search-target').val() !== '' ) {
+            this.searchParams.target = $('#search-target').val();
         } else {
             APP.alert({msg: 'You must specify the Target value to replace.'});
-            delete this.searchParams['target'];
+            delete this.searchParams.target;
             return false;
         }
 
-        if ($('#replace-target').val() != '') {
-            this.searchParams['replace'] = $('#replace-target').val();
+        if ($('#replace-target').val() !== '') {
+            this.searchParams.replace = $('#replace-target').val();
         } else {
             APP.alert({msg: 'You must specify the replacement value.'});
-            delete this.searchParams['replace'];
+            delete this.searchParams.replace;
             return false;
         }
 
-        if ($('#select-status').val() != '') {
-            this.searchParams['status'] = $('#select-status').val();
+        if ($('#select-status').val() !== '') {
+            this.searchParams.status = $('#select-status').val();
             this.body.attr('data-filter-status', $('#select-status').val());
         } else {
-            delete this.searchParams['status'];
+            delete this.searchParams.status;
         }
 
         this.searchParams['match-case'] = $('#match-case').is(':checked');
         this.searchParams['exact-match'] = $('#exact-match').is(':checked');
 
         var p = this.searchParams;
-		var source = (p['source']) ? p['source'] : '';
-		var target = (p['target']) ? p['target'] : '';
-		var replace = (p['replace']) ? p['replace'] : '';
+		var source = (p.source) ? p.source : '';
+		var target = (p.target) ? p.target : '';
+		var replace = (p.replace) ? p.replace : '';
 		var dd = new Date();
 
 		APP.doRequest({
@@ -165,7 +165,7 @@ $.extend(UI, {
 				password: config.password,
 				source: source,
 				target: target,
-				status: p['status'],
+				status: p.status,
 				matchcase: p['match-case'],
 				exactmatch: p['exact-match'],
 				replace: replace
@@ -178,13 +178,13 @@ $.extend(UI, {
 				$('#outer').empty();
 				UI.render({
 					firstLoad: false
-				})
+				});
 			}
 		});
 	},
 	checkSearchStrings: function() {
-		s = this.searchParams['source'];
-		if (s.match(/[\<\>]/gi)) { // there is a tag in source
+		s = this.searchParams.source;
+		if (s.match(/[<\>]/gi)) { // there is a tag in source
 			this.disableTagMark();
 		} else {
 			this.enableTagMark();
@@ -213,13 +213,13 @@ $.extend(UI, {
 		query = '';
 		if (this.searchParams['exact-match'])
 			query += ' exactly';
-		if (this.searchParams['source'])
-			query += ' <span class="param">' + this.searchParams['source'] + '</span> in source';
-		if (this.searchParams['target'])
-			query += ' <span class="param">' + this.searchParams['target'] + '</span> in target';
+		if (this.searchParams.source)
+			query += ' <span class="param">' + this.searchParams.source + '</span> in source';
+		if (this.searchParams.target)
+			query += ' <span class="param">' + this.searchParams.target + '</span> in target';
 
-		if (this.searchParams['status'])
-			query += (((this.searchParams['source']) || (this.searchParams['target'])) ? ' and' : '') + ' status <span class="param">' + this.searchParams['status'] + '</span>';
+		if (this.searchParams.status)
+			query += (((this.searchParams.source) || (this.searchParams.target)) ? ' and' : '') + ' status <span class="param">' + this.searchParams.status + '</span>';
 		query += ' (' + ((this.searchParams['match-case']) ? 'case sensitive' : 'case insensitive') + ')';
 		$('.search-display .query').html(query);
 		$('.search-display').addClass('displaying');
@@ -247,7 +247,7 @@ $.extend(UI, {
 	updateSearchDisplayCount: function(segment) {
 		numRes = $('.search-display .numbers .results');
 		numRes.text(parseInt(numRes.text()) - 1);
-		if (($('.editarea mark.searchMarker', segment).length - 1) == 0) {
+		if (($('.editarea mark.searchMarker', segment).length - 1) === 0) {
 			numSeg = $('.search-display .numbers .segments');
 			numSeg.text(parseInt(numSeg.text()) - 1);
 		}
@@ -274,7 +274,7 @@ $.extend(UI, {
 		}
 		var p = this.searchParams;
 //        console.log('mode: ' + mode + ' - coso: ' + coso);
-		var targetToo = typeof p['target'] != 'undefined';
+		var targetToo = typeof p.target != 'undefined';
 		var containsFunc = (p['match-case']) ? 'contains' : 'containsNC';
 		var ignoreCase = (p['match-case']) ? '' : 'i';
 
@@ -285,14 +285,14 @@ $.extend(UI, {
 
 		} else if (this.searchMode == 'source&target') { // search mode: source&target
 			console.log('source & target');
-			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
+			status = (p.status == 'all') ? '' : '.status-' + p.status;
 			q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
-			var regSource = new RegExp('(' + htmlEncode(p['source']) + ')', "g" + ignoreCase);
-			var regTarget = new RegExp('(' + htmlEncode(p['target']) + ')', "g" + ignoreCase);
-			txtSrc = p['source'];
-			txtTrg = p['target'];
-			srcHasTags = (txtSrc.match(/\<.*?\>/gi) != null) ? true : false;
-			trgHasTags = (txtTrg.match(/\<.*?\>/gi) != null) ? true : false;
+			var regSource = new RegExp('(' + htmlEncode(p.source) + ')', "g" + ignoreCase);
+			var regTarget = new RegExp('(' + htmlEncode(p.target) + ')', "g" + ignoreCase);
+			txtSrc = p.source;
+			txtTrg = p.target;
+			srcHasTags = (txtSrc.match(/<.*?\>/gi) !== null) ? true : false;
+			trgHasTags = (txtTrg.match(/<.*?\>/gi) !== null) ? true : false;
 
 			if (typeof where == 'undefined') {
 				UI.doMarkSearchResults(srcHasTags, $(q + " .source:" + containsFunc + "('" + txtSrc + "')"), regSource, q, txtSrc, ignoreCase);
@@ -312,13 +312,13 @@ $.extend(UI, {
 						if ($(this).attr('id') < sid) {
 							$(this).addClass('justAdded');
 						}
-					})
+					});
 				} else {
 					$('section').each(function(index) {
 						if ($(this).attr('id') > sid) {
 							$(this).addClass('justAdded');
 						}
-					})
+					});
 				}
 				UI.execSearchResultsMarking(UI.filterExactMatch($(q + ".justAdded:not(.status-new) .source:" + containsFunc + "('" + txtSrc + "')"), txtSrc), regSource, false);
 				UI.execSearchResultsMarking(UI.filterExactMatch($(q + ".justAdded:not(.status-new) .editarea:" + containsFunc + "('" + txtTrg + "')"), txtTrg), regTarget, false);
@@ -329,16 +329,16 @@ $.extend(UI, {
 			}
 		} else { // search mode: normal
 //			console.log('search mode: normal');
-			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
-			var txt = (typeof p['source'] != 'undefined') ? p['source'] : (typeof p['target'] != 'undefined') ? p['target'] : '';
+			status = (p.status == 'all') ? '' : '.status-' + p.status;
+			var txt = (typeof p.source != 'undefined') ? p.source : (typeof p.target != 'undefined') ? p.target : '';
 			if (singleSegment) {
-				var what = (typeof p['source'] != 'undefined') ? ' .source' : (typeof p['target'] != 'undefined') ? ' .editarea' : '';
+				what = (typeof p.source != 'undefined') ? ' .source' : (typeof p.target != 'undefined') ? ' .editarea' : '';
 				q = '#' + $(singleSegment).attr('id') + what;
 			} else {
-				var what = (typeof p['source'] != 'undefined') ? ' .source' : (typeof p['target'] != 'undefined') ? ':not(.status-new) .editarea' : '';
+				what = (typeof p.source != 'undefined') ? ' .source' : (typeof p.target != 'undefined') ? ':not(.status-new) .editarea' : '';
 				q = "section" + status + what;
 			}
-			hasTags = (txt.match(/\<.*?\>/gi) != null) ? true : false;
+			hasTags = (txt.match(/<.*?\>/gi) !== null) ? true : false;
 			var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder);
 			var reg = new RegExp('(' + htmlEncode(regTxt) + ')', "g" + ignoreCase);
 
@@ -351,13 +351,13 @@ $.extend(UI, {
 						if ($(this).attr('id') < sid) {
 							$(this).addClass('justAdded');
 						}
-					})
+					});
 				} else {
 					$('section').each(function(index) {
 						if ($(this).attr('id') > sid) {
 							$(this).addClass('justAdded');
 						}
-					})
+					});
 				}
 				UI.doMarkSearchResults(hasTags, $("section" + status + ".justAdded" + what + ":" + containsFunc + "('" + txt + "')"), reg, q, txt, ignoreCase);
 				$('section.justAdded').removeClass('justAdded');
@@ -379,7 +379,7 @@ $.extend(UI, {
 	execSearchResultsMarking: function(areas, regex, testRegex) {
 		searchMarker = (UI.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
-			if (!testRegex || ($(this).text().match(testRegex) != null)) {
+			if (!testRegex || ($(this).text().match(testRegex) !== null)) {
 				var tt = $(this).html().replace(/&lt;/g, UI.openTagPlaceholder).replace(/&gt;/g, UI.closeTagPlaceholder).replace(regex, '<mark class="' + searchMarker + '">$1</mark>').replace(openTagReg, '&lt;').replace(closeTagReg, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
 				$(this).html(tt);
 			}
@@ -412,9 +412,9 @@ $.extend(UI, {
 
 		if (this.searchMode == 'onlyStatus') {
 			console.log('only status');
-			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
+			var status = (p.status == 'all') ? '' : '.status-' + p.status;
 			el = $('section.currSearchSegment');
-			if (p['status'] == 'all') {
+			if (p.status == 'all') {
 				this.scrollSegment($(el).next());
 			} else {
 				if (el.nextAll(status).length) {
@@ -437,7 +437,7 @@ $.extend(UI, {
 			}
 		} else if (this.searchMode == 'source&target') {
 
-			var m = $(".editarea mark.currSearchItem"); // ***
+			m = $(".editarea mark.currSearchItem"); // ***
 //            console.log($(m).nextAll('mark.searchMarker').length);
 			if ($(m).nextAll('mark.searchMarker').length) { // there are other subsequent results in the segment
 				console.log('altri item nel segmento');
@@ -477,7 +477,7 @@ $.extend(UI, {
 			}
 */			
 		} else {
-			var m = $("mark.currSearchItem");
+			m = $("mark.currSearchItem");
 //            console.log($(m).nextAll('mark.searchMarker').length);
 			if ($(m).nextAll('mark.searchMarker').length) { // there are other subsequent results in the segment
 				console.log('altri item nel segmento');
@@ -515,9 +515,9 @@ $.extend(UI, {
 //        console.log($('#' + el + ":has(mark.searchMarker)").length);
 
 		if (this.searchMode == 'onlyStatus') { // searchMode: onlyStatus
-			var status = (p['status'] == 'all') ? '' : '.status-' + p['status'];
+			var status = (p.status == 'all') ? '' : '.status-' + p.status;
 
-			if (p['status'] == 'all') {
+			if (p.status == 'all') {
 				this.scrollSegment($('#' + el).next());
 			} else {
 //				console.log($('#' + el));
@@ -624,16 +624,16 @@ $.extend(UI, {
 	checkSearchChanges: function() {
 		changes = false;
 		var p = this.searchParams;
-		if (p['source'] != $('#search-source').val()) {
-			if (!((typeof p['source'] == 'undefined') && ($('#search-source').val() == '')))
+		if (p.source != $('#search-source').val()) {
+			if (!((typeof p.source == 'undefined') && ($('#search-source').val() === '')))
 				changes = true;
 		}
-		if (p['target'] != $('#search-target').val()) {
-			if (!((typeof p['target'] == 'undefined') && ($('#search-target').val() == '')))
+		if (p.target != $('#search-target').val()) {
+			if (!((typeof p.target == 'undefined') && ($('#search-target').val() === '')))
 				changes = true;
 		}
-		if (p['status'] != $('#select-status').val()) {
-			if (!(typeof p['status'] == 'undefined'))
+		if (p.status != $('#select-status').val()) {
+			if ((typeof p.status != 'undefined'))
 				changes = true;
 		}
 		if (p['match-case'] != $('#match-case').is(':checked')) {

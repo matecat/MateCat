@@ -16,9 +16,9 @@ $.extend(UI, {
 		}
 		percentageClass = this.getPercentuageClass(match);
 
-		if ($.trim(translation) != '') {
+		if ($.trim(translation) !== '') {
 
-			//ANTONIO 20121205    	editarea.text(translation).addClass('fromSuggestion');
+			//ANTONIO 20121205 editarea.text(translation).addClass('fromSuggestion');
 
 			if (decode) {
 				translation = htmlDecode(translation);
@@ -46,7 +46,7 @@ $.extend(UI, {
 		});
 	},
 	getContribution: function(segment, next) {
-		var n = (next == 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
+		var n = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
 		if ($(n).hasClass('loaded')) {
 			this.spellCheck();
 			if (next) {
@@ -66,7 +66,7 @@ $.extend(UI, {
 		if ((!n.length) && (next)) {
 			return false;
 		}
-		var id = n.attr('id');
+		var id = n.attr('id'); 
 		var id_segment = id.split('-')[1];
 /*
         if( config.brPlaceholdEnabled ) {
@@ -81,7 +81,7 @@ $.extend(UI, {
 		//txt = txt.replace(/&quot;/g,'"');
 
 		if (!next) {
-			$(".loader", n).addClass('loader_on')
+			$(".loader", n).addClass('loader_on');
 		}
 
 		APP.doRequest({
@@ -93,8 +93,7 @@ $.extend(UI, {
 				text: txt,
 				id_job: config.job_id,
 				num_results: this.numContributionMatchesResults,
-				id_translator: config.id_translator,
-				password: config.password
+				id_translator: config.id_translator
 			},
 			context: $('#' + id),
 			success: function(d) {
@@ -138,7 +137,7 @@ $.extend(UI, {
 			if (isActiveSegment) {
 				editarea.removeClass("indent");
 			} else {
-				if (editareaLength == 0)
+				if (editareaLength === 0)
 					editarea.addClass("indent");
 			}
 			var translation = d.data.matches[0].translation;
@@ -148,7 +147,7 @@ $.extend(UI, {
 			var match = d.data.matches[0].match;
 
 			var copySuggestionDone = false;
-			if (editareaLength == 0) {
+			if (editareaLength === 0) {
 				UI.copySuggestionInEditarea(segment, translation, editarea, match, true, true, 0);
 				if (UI.body.hasClass('searchActive'))
 					UI.addWarningToSearchDisplay();
@@ -161,29 +160,29 @@ $.extend(UI, {
 			$('.sub-editor.matches .overflow', segment).empty();
 
 			$.each(d.data.matches, function(index) {
-				if ((this.segment == '') || (this.translation == ''))
+				if ((this.segment === '') || (this.translation === ''))
 					return;
 				var disabled = (this.id == '0') ? true : false;
-				cb = this['created_by'];
+				cb = this.created_by;
 
 				if ("sentence_confidence" in this &&
 						(
-								this['sentence_confidence'] != "" &&
-								this['sentence_confidence'] != 0 &&
-								this['sentence_confidence'] != "0" &&
-								this['sentence_confidence'] != null &&
-								this['sentence_confidence'] != false &&
-								typeof this['sentence_confidence'] != 'undefined'
+								this.sentence_confidence !== "" &&
+								this.sentence_confidence !== 0 &&
+								this.sentence_confidence != "0" &&
+								this.sentence_confidence !== null &&
+								this.sentence_confidence !== false &&
+								typeof this.sentence_confidence != 'undefined'
 								)
 						) {
-					suggestion_info = "Quality: <b>" + this['sentence_confidence'] + "</b>";
+					suggestion_info = "Quality: <b>" + this.sentence_confidence + "</b>";
 				} else if (this.match != 'MT') {
-					suggestion_info = this['last_update_date'];
+					suggestion_info = this.last_update_date;
 				} else {
 					suggestion_info = '';
 				}
 
-				cl_suggestion = UI.getPercentuageClass(this['match']);
+				cl_suggestion = UI.getPercentuageClass(this.match);
 
 				if (!$('.sub-editor.matches', segment).length) {
 					UI.createFooter(segment);
@@ -215,18 +214,18 @@ $.extend(UI, {
 			return false;
 
         if( config.brPlaceholdEnabled ) {
-            var source = this.postProcessEditarea(segment, '.source');
-            var target = this.postProcessEditarea(segment);
+            source = this.postProcessEditarea(segment, '.source');
+            target = this.postProcessEditarea(segment);
         } else {
-            var source = $('.source', segment).text();
+            source = $('.source', segment).text();
             // Attention: to be modified when we will be able to lock tags.
-            var target = $('.editarea', segment).text();
+            target = $('.editarea', segment).text();
         }
 
-		if ((target == '') && (byStatus)) {
+		if ((target === '') && (byStatus)) {
 			APP.alert({msg: 'Cannot change status on an empty segment. Add a translation first!'});
 		}
-		if (target == '') {
+		if (target === '') {
 			return false;
 		}
 		this.updateContribution(source, target);
@@ -261,10 +260,10 @@ $.extend(UI, {
 		source = view2rawxliff(source);
 		// Attention: to be modified when we will be able to lock tags.
 		var target = $('.editarea', segment).text();
-		if ((target == '') && (byStatus)) {
+		if ((target === '') && (byStatus)) {
 			APP.alert({msg: 'Cannot change status on an empty segment. Add a translation first!'});
 		}
-		if (target == '') {
+		if (target === '') {
 			return false;
 		}
 		target = view2rawxliff(target);
@@ -344,7 +343,7 @@ $.extend(UI, {
 			$(this).find('.graysmall-message').text(UI.suggestionShortcutLabel + (index + 1));
 			$(this).attr('data-item', index + 1);
 			UI.reinitMMShortcuts();
-		})
+		});
 	},
 	reinitMMShortcuts: function(a) {
 		var keys = (this.isMac) ? 'alt+meta' : 'alt+ctrl';
@@ -379,7 +378,7 @@ $.extend(UI, {
 //            if (e.which != 101) {
 			UI.chooseSuggestion('5');
 //            }
-		})
+		}); 
 	},
 	setChosenSuggestion: function(w) {
 		this.editarea.data('lastChosenSuggestion', w);

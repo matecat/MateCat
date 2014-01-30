@@ -14,7 +14,7 @@ $.extend(UI, {
 			},
 			success: function(d) {
 			}
-		})
+		});
 		dad = $(item).prevAll('.glossary-item').first();
 		$(item).remove();
 //		console.log($(dad).next().length);
@@ -30,15 +30,15 @@ $.extend(UI, {
 //				console.log('finiti');
 				$(numLabel).text('').attr('data-num', 0);	
 			}					
-		};
+		}
 	},
 	getGlossary: function(segment, entireSegment, next) {
 		if (typeof next != 'undefined') {
 			if(entireSegment) {
-				var n = (next == 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
+				n = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
 			}
 		} else {
-			var n = segment;
+			n = segment;
 		}
 		if(($(n).hasClass('glossary-loaded'))&&(entireSegment)) return false;
 		$(n).addClass('glossary-loaded');
@@ -63,14 +63,14 @@ $.extend(UI, {
 					if(d.errors[0].code == -1) {
 						UI.noGlossary = true;
 //						UI.body.addClass('noGlossary');
-					};
-				};
+					}
+				}
 				UI.processLoadedGlossary(d, this);
 			},
 			complete: function() {
 				$('.gl-search', UI.currentSegment).removeClass('loading');
 			}
-		})
+		});
 	},
 	processLoadedGlossary: function(d, context) {
 		segment = context[0];
@@ -102,21 +102,21 @@ $.extend(UI, {
 				numRes++;
 				$('.sub-editor.glossary .overflow .results', segment).append('<div class="glossary-item"><span>' + k + '</span></div>');
 				$.each(this, function(index) {
-					if ((this.segment == '') || (this.translation == ''))
+					if ((this.segment === '') || (this.translation === ''))
 						return;
 					var disabled = (this.id == '0') ? true : false;
-					cb = this['created_by'];
+					cb = this.created_by;
 					if(typeof this.target_note == 'undefined'){ this.comment = ''; }
 					else { this.comment = this.target_note; }
-					cl_suggestion = UI.getPercentuageClass(this['match']);
+					cl_suggestion = UI.getPercentuageClass(this.match);
 					var leftTxt = this.segment;
 					leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");
 					leftTxt = leftTxt.replace(/\}\#/gi, "</mark>");
 					var rightTxt = this.translation;
 					rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
 					rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
-					$('.sub-editor.glossary .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><li class="details">' + ((this.comment == '')? '' : '<div class="comment">' + this.comment + '</div>') + '<ul class="graysmall-details"><li>' + this['last_update_date'] + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></li></ul>');
-				})
+					$('.sub-editor.glossary .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><li class="details">' + ((this.comment === '')? '' : '<div class="comment">' + this.comment + '</div>') + '<ul class="graysmall-details"><li>' + this.last_update_date + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></li></ul>');
+				});
 			});
 		} else {
 			console.log('no matches');
@@ -149,7 +149,7 @@ $.extend(UI, {
 			complete: function() {
 				$('.gl-search', UI.currentSegment).removeClass('setting');
 			}
-		})		
+		});
 	},
 });
 

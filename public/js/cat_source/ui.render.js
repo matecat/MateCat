@@ -64,8 +64,8 @@ $.extend(UI, {
 		this.debug = Loader.detect('debug');
 		this.checkTutorialNeed();
 
-		UI.detectStartSegment();
-		options['openCurrentSegmentAfter'] = ((!seg) && (!this.firstLoad)) ? true : false;
+		UI.detectStartSegment(); 
+		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
 		UI.getSegments(options);
 		if (this.firstLoad && this.autoUpdateEnabled) {
 			this.lastUpdateRequested = new Date();

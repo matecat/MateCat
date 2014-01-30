@@ -16,7 +16,7 @@ $.extend(UI, {
 		this.firstScroll = true;
 		this.blockGetMoreSegments = true;
 		this.searchParams = {};
-		this.searchParams['search'] = 0;
+		this.searchParams.search = 0;
 		var bb = $.cookie('noAlertConfirmTranslation');
 		this.alertConfirmTranslationEnabled = (typeof bb == 'undefined') ? true : false;
 		this.customSpellcheck = false;
@@ -55,6 +55,6 @@ $.extend(UI, {
 		// SET EVENTS
 		this.setEvents(); 
 	},
-});
+}); 
 
 
