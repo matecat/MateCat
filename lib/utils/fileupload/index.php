@@ -15,8 +15,8 @@ ini_set('max_input_time',3600);
 
 require $_SERVER["DOCUMENT_ROOT"] . '/inc/config.inc.php';
 @INIT::obtain();
-require INIT::$UTILS_ROOT . '/utils.class.php';
-require INIT::$UTILS_ROOT . '/log.class.php';
+require INIT::$UTILS_ROOT . '/Utils.php';
+require INIT::$UTILS_ROOT . '/Log.php';
 require('upload.class.php');
 require( INIT::$UTILS_ROOT . '/DetectProprietaryXliff.php' );
 

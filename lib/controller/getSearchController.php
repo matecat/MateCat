@@ -1,10 +1,10 @@
 <?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include_once INIT::$UTILS_ROOT . "/cat.class.php";
+include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
-class getSearchController extends ajaxcontroller {
+class getSearchController extends ajaxController {
 
     private $job;
     private $token;

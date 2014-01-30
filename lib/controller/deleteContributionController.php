@@ -9,7 +9,7 @@ include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
-class deleteContributionController extends ajaxcontroller {
+class deleteContributionController extends ajaxController {
 
     private $seg;
     private $tra;

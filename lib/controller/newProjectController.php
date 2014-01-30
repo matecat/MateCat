@@ -2,9 +2,10 @@
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
+include_once INIT::$UTILS_ROOT . "/Utils.php";
 
 
-class newProjectController extends viewcontroller {
+class newProjectController extends viewController {
 
 	private $guid = '';
 	private $mt_engines;
@@ -20,7 +21,7 @@ class newProjectController extends viewcontroller {
 		} else {
 			parent::makeTemplate("upload_cloud.html");
 		}
-		$this->guid = $this->create_guid();
+		$this->guid = Utils::create_guid();
 		$this->lang_handler=Languages::getInstance();
 	}
 
@@ -211,36 +212,6 @@ class newProjectController extends viewcontroller {
         $this->template->incomingUrl                = '/login?incomingUrl=' . $_SERVER[ 'REQUEST_URI' ];
 
 	}
-
-	public function create_guid($namespace = '') {
-		static $guid = '';
-		$uid = uniqid("", true);
-		$data = $namespace;
-		$data .= $_SERVER['REQUEST_TIME'];
-		$data .= $_SERVER['HTTP_USER_AGENT'];
-		if (isset($_SERVER['LOCAL_ADDR'])) {
-			$data .= $_SERVER['LOCAL_ADDR']; // Windows only
-		}
-		if (isset($_SERVER['LOCAL_PORT'])) {
-			$data .= $_SERVER['LOCAL_PORT']; // Windows only
-		}
-		$data .= $_SERVER['REMOTE_ADDR'];
-		$data .= $_SERVER['REMOTE_PORT'];
-		$hash = strtoupper(hash('ripemd128', $uid . $guid . md5($data)));
-		$guid = '{' .
-			substr($hash, 0, 8) .
-			'-' .
-			substr($hash, 8, 4) .
-			'-' .
-			substr($hash, 12, 4) .
-			'-' .
-			substr($hash, 16, 4) .
-			'-' .
-			substr($hash, 20, 12) .
-			'}';
-		return $guid;
-	}
-
 
 }
 

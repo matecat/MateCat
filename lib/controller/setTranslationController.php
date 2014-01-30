@@ -1,12 +1,12 @@
 <?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include INIT::$UTILS_ROOT . "/cat.class.php";
+include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 include_once INIT::$UTILS_ROOT . '/QA.php';
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
-include_once INIT::$UTILS_ROOT . '/log.class.php';
+include_once INIT::$UTILS_ROOT . '/Log.php';
 
-class setTranslationController extends ajaxcontroller {
+class setTranslationController extends ajaxController {
 
 	private $id_job;
 	private $id_segment;

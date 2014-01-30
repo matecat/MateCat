@@ -1,7 +1,7 @@
 <?
 include_once INIT::$MODEL_ROOT . "/queries.php";
 
-class formLoginController extends ajaxcontroller{	
+class formLoginController extends ajaxController{
 	private $login='';
 	private $pass='';	
 

@@ -2,7 +2,7 @@
 include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
-class setContributionMTController extends ajaxcontroller {
+class setContributionMTController extends ajaxController {
 
 	private $segment;
     private $password;

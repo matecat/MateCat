@@ -1,5 +1,5 @@
 <?
-include_once INIT::$UTILS_ROOT."/cat.class.php";
+include_once INIT::$UTILS_ROOT."/CatUtils.php";
 abstract class Engine {
 
 	protected $id = "";

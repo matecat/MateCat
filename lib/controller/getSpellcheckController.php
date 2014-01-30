@@ -4,7 +4,7 @@
 include_once INIT::$UTILS_ROOT . '/SpellChecker/SpellCheckFactory.php';
 include_once INIT::$UTILS_ROOT . '/langs/languages.class.php';
 
-class getSpellcheckController extends ajaxcontroller {
+class getSpellcheckController extends ajaxController {
 
     private $__postInput = null;
 

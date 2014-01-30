@@ -10,10 +10,10 @@
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 include_once INIT::$UTILS_ROOT . '/RecursiveArrayObject.php';
 include_once INIT::$UTILS_ROOT . '/ProjectManager.php';
-include_once INIT::$UTILS_ROOT . '/cat.class.php';
-include_once INIT::$UTILS_ROOT . '/log.class.php';
+include_once INIT::$UTILS_ROOT . '/CatUtils.php';
+include_once INIT::$UTILS_ROOT . '/Log.php';
 
-class splitJobController extends ajaxcontroller {
+class splitJobController extends ajaxController {
 
     private $exec;
     private $project_id;

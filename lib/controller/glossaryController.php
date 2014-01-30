@@ -12,7 +12,7 @@ include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
 include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include_once INIT::$MODEL_ROOT . "/queries.php";
 
-class glossaryController extends ajaxcontroller {
+class glossaryController extends ajaxController {
 
     private $exec;
     private $id_job;
@@ -118,7 +118,8 @@ class glossaryController extends ajaxcontroller {
                     break;
                 case 'set':
                     if ( empty($st['id_translator']) ) {
-                        $newUser = TMS::createMyMemoryKey( $this->id_job ); //throws exception
+                        $newUser                 = TMS::createMyMemoryKey( $this->id_job ); //throws exception
+                        updateTranslatorJob( $this->id_job, $newUser );
                         $config[ 'id_user' ]     = $newUser->id;
                     }
                     $TMS_RESULT = $_TMS->set($config);

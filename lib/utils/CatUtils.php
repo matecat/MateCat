@@ -2,7 +2,7 @@
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/MyMemory.copyrighted.php";
-include_once INIT::$UTILS_ROOT . "/utils.class.php";
+include_once INIT::$UTILS_ROOT . "/Utils.php";
 include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 define("LTPLACEHOLDER", "##LESSTHAN##");
@@ -515,25 +515,7 @@ class CatUtils {
         return $res_job_stats;
 
     }
-    
-    /**
-     * 
-     * Find significant digits from float num.
-     * 
-     * Accepted range are between 0 and 2 ( max approximation )
-     * 
-     * @param float $floatNum
-     * @return int
-     */
-    protected static function _getSignificantDigits( $floatNum ){
-        if( $floatNum == 0 ){
-            return 0;
-        }
-        $decimalNumbers = ceil( log10( $floatNum ) );
-        $decimalNumbers = ( $decimalNumbers >= 0 ? 0 : abs($decimalNumbers) +1 );
-        return ( $decimalNumbers < 2 ? $decimalNumbers : 2 ); //force max to 2 decimal number
-    }
-    
+
     /**
      * Make an estimation on performance
      * 
@@ -604,19 +586,23 @@ class CatUtils {
         $job_stats[ 'TRANSLATED_PERC' ] = ( $job_stats[ 'TRANSLATED' ] / $job_stats[ 'TOTAL' ] * 100 );
         $job_stats[ 'PROGRESS_PERC' ]   = ( $job_stats[ 'PROGRESS' ] / $job_stats[ 'TOTAL' ] ) * 100;
 
-        $significantDigits    = array();
-        $significantDigits[ ] = self::_getSignificantDigits( $job_stats[ 'TRANSLATED_PERC' ] );
-        $significantDigits[ ] = self::_getSignificantDigits( $job_stats[ 'DRAFT_PERC' ] );
-        $significantDigits[ ] = self::_getSignificantDigits( $job_stats[ 'APPROVED_PERC' ] );
-        $significantDigits[ ] = self::_getSignificantDigits( $job_stats[ 'REJECTED_PERC' ] );
-        $significantDigits    = max( $significantDigits );
+        $temp = array(
+                $job_stats[ 'TRANSLATED_PERC' ],
+                $job_stats[ 'DRAFT_PERC' ],
+                $job_stats[ 'REJECTED_PERC' ],
+                $job_stats[ 'PROGRESS_PERC' ],
+        );
+        $max = max( $temp );
+        $min = min( $temp );
+        if( $max < 99 || $min > 1 ) $significantDigits = 0;
+        else $significantDigits = 2;
 
         $job_stats[ 'TRANSLATED_PERC_FORMATTED' ] = round( $job_stats[ 'TRANSLATED_PERC' ], $significantDigits );
         $job_stats[ 'DRAFT_PERC_FORMATTED' ]      = round( $job_stats[ 'DRAFT_PERC' ], $significantDigits );
         $job_stats[ 'APPROVED_PERC_FORMATTED' ]   = round( $job_stats[ 'APPROVED_PERC' ], $significantDigits );
         $job_stats[ 'REJECTED_PERC_FORMATTED' ]   = round( $job_stats[ 'REJECTED_PERC' ], $significantDigits );
         $job_stats[ 'PROGRESS_PERC_FORMATTED' ]   = round( $job_stats[ 'PROGRESS_PERC' ], $significantDigits );
-        
+
         $t = 'approved';
         if ($job_stats['TRANSLATED_FORMATTED'] > 0)
             $t = "translated";

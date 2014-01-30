@@ -100,15 +100,20 @@ class AjaxPasswordCheck {
         return false;
     }
 
-    public function grantProjectAccess( array $projectJobData, $ppassword, $jpassword = null ){
+    public function grantProjectAccess( array $projectJobData, $ppassword = null, $jpassword = null ){
+
+        if( empty($ppassword) && empty($jpassword) ){
+            return false;
+        }
 
         $result = array();
         foreach( $projectJobData as $pJD ){
 
             //if password is null no request of job check was made
-            $_check_job = ( is_null( $jpassword ) ? true : $this->_grantAccess( $pJD['jpassword'], $jpassword ) );
+            $_check_jproject = ( is_null( $ppassword ) ? true : $this->_grantAccess( $pJD['ppassword'], $ppassword ) );
+            $_check_job      = ( is_null( $jpassword ) ? true : $this->_grantAccess( $pJD['jpassword'], $jpassword ) );
 
-            $result[] = $this->_grantAccess( $pJD['ppassword'], $ppassword ) && $_check_job ;
+            $result[] = $_check_jproject && $_check_job ;
         }
 
         if ( array_search( true, $result, true ) !== false ) return true;

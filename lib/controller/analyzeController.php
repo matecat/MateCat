@@ -3,7 +3,7 @@
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
-class analyzeController extends viewcontroller {
+class analyzeController extends viewController {
 
     private $pid;
     private $ppassword;

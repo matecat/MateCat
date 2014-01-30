@@ -3,7 +3,7 @@
 include_once INIT::$MODEL_ROOT . "/queries.php";
 //include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
-class getUpdatedTranslationsController extends ajaxcontroller {
+class getUpdatedTranslationsController extends ajaxController {
 
     private $last_timestamp = "";
     private $first_segment = "";

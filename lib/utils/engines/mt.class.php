@@ -1,9 +1,9 @@
 <?
 
 
-//include_once INIT::$UTILS_ROOT . "/cat.class.php";
+//include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 include_once INIT::$UTILS_ROOT."/engines/engine.class.php";
-include_once INIT::$UTILS_ROOT."/cat.class.php";
+include_once INIT::$UTILS_ROOT."/CatUtils.php";
 
 
 class MT_ERROR {
@@ -58,7 +58,7 @@ class MT extends Engine {
 	public function __construct($id) {
 		parent::__construct($id);
         if ($this->type != "MT") {
-            throw new Exception("not a MT engine");
+            throw new Exception("Engine $id is not a MT engine, found $this->type");
         }
 	}
 

@@ -1,5 +1,5 @@
 <?
-include_once INIT::$UTILS_ROOT."/cat.class.php";
+include_once INIT::$UTILS_ROOT."/CatUtils.php";
 include_once INIT::$UTILS_ROOT . '/QA.php';
 class XliffSAXTranslationReplacer{
 
@@ -43,9 +43,10 @@ class XliffSAXTranslationReplacer{
 		fwrite($this->ofp,'<?xml version="1.0" encoding="utf-8"?>');
 
 		//create parser
-		$xml_parser = xml_parser_create();
+		$xml_parser = xml_parser_create('UTF-8');
+
 		//configure parser
-		//pass this object to parser to make its variables and functions visible inside callbacks 
+		//pass this object to parser to make its variables and functions visible inside callbacks
 		xml_set_object($xml_parser,$this);
 		//avoid uppercasing all tags name
 		xml_parser_set_option($xml_parser, XML_OPTION_CASE_FOLDING, false);
@@ -59,21 +60,22 @@ class XliffSAXTranslationReplacer{
 			/*
 			   preprocess file
 			 */
-			$temporary_check_buffer = preg_replace("/&(.*?);/", '#escaped_ent#$1##', $this->currentBuffer);
+            // obfuscate entities because sax automatically does html_entity_decode
+			$temporary_check_buffer = preg_replace("/&(.*?);/", '##$1##', $this->currentBuffer);
 
 			//avoid cutting entities in half: 
 			//the last fread could have truncated an entity (say, '&lt;' in '&l'), thus invalidating the escaping
 			while(strpos($temporary_check_buffer,'&')!==FALSE){
 				//if an entity is still present, fetch some more and repeat the escaping
 				$this->currentBuffer.=fread($fp,64);
-				$temporary_check_buffer = preg_replace("/&(.*?);/", '#escaped_ent#$1##', $this->currentBuffer);
+				$temporary_check_buffer = preg_replace("/&(.*?);/", '##$1##', $this->currentBuffer);
 			}
 			//free stuff outside the loop
 			unset($temporary_check_buffer);
 			//get lenght of chunk
 			$this->len=strlen($this->currentBuffer);
 
-			$this->currentBuffer = preg_replace("/&(.*?);/", '#escaped_ent#$1##', $this->currentBuffer);
+			$this->currentBuffer = preg_replace("/&(.*?);/", '##$1##', $this->currentBuffer);
 
 			//parse chunk of text
 			if (!xml_parse($xml_parser, $this->currentBuffer, feof($fp))) {
@@ -273,7 +275,7 @@ class XliffSAXTranslationReplacer{
 	 */
     private function postProcAndFlush( $fp, $data, $wasTarget = false ) {
         //postprocess string
-        $data = preg_replace( "/#escaped_ent#(.*?)##/", '&$1;', $data );
+        $data = preg_replace( "/##(.*?)##/", '&$1;', $data );
         $data = str_replace( '&nbsp;', ' ', $data );
         if ( !$wasTarget ) {
             $data = str_replace( "\r\n", "\r", $data );

@@ -10,8 +10,8 @@
 if( !class_exists('INIT', false )){
     include '/var/www/cattool/inc/config.inc.php';
     @INIT::obtain();
-    include_once INIT::$UTILS_ROOT . '/utils.class.php';
-    include_once INIT::$UTILS_ROOT . '/log.class.php';
+    include_once INIT::$UTILS_ROOT . '/Utils.php';
+    include_once INIT::$UTILS_ROOT . '/Log.php';
     include_once INIT::$MODEL_ROOT . '/Database.class.php';
     require_once "PHPUnit/Autoload.php";
 }

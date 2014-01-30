@@ -2,7 +2,7 @@
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 
-class pauseResumeController extends ajaxcontroller {
+class pauseResumeController extends ajaxController {
 
 	private $id_project;
 	private $act;
