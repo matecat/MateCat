@@ -1493,20 +1493,51 @@ UI = {
      * @param selector
      * @returns {XML|string}
      */
-	fixBR: function(txt) {
-		var ph = '<br class="' + config.crPlaceholderClass + '">';
-		var re = new RegExp(ph + '$', "gi");
-		return txt.replace(/<div><br><\/div>/g, ph).replace(/<div>/g, '<br class="' + config.crPlaceholderClass + '">').replace(/<\/div>/g, '').replace(/<br>/g, ph).replace(re, '');
-//		return txt.replace(/<br>/g, '').replace(/<div>/g, '<br class="' + config.crPlaceholderClass + '">').replace(/<\/div>/g, '').replace(re, '');
-	},
-
 	postProcessEditarea: function(context, selector){
 		selector = (typeof selector === "undefined") ? '.editarea' : selector;
 		area = $( selector, context ).clone();
-		console.log($(area).html());
-		var txt = this.fixBR($(area).html());
-		console.log(txt);
-		return txt;
+
+        var divs = $( area ).find( 'div' );
+        if( divs.length ){
+            divs.each(function(){
+                $(this).find( 'br:not([class])' ).remove();
+                $(this).prepend( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
+            });
+        } else {
+            $(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>') );
+        }
+
+//        Now commented, but valid for future purposes when the user will choose what type of carriage return
+//        $('br', area).each(function() {
+//
+//            try{
+//                var br = this;
+//                //split ensure array with at least 1 item or throws exception
+//                var classes = $(br).attr('class').split(' ');
+//                $(classes).each( function( index, value ){
+//                    switch( value ){
+//                        case config.lfPlaceholderClass:
+//                            $(br).after('<span class="placeholder">' + config.lfPlaceholder + '</span>');
+//                            break;
+//                        case config.crPlaceholderClass:
+//                            $(br).after('<span class="placeholder">' + config.crPlaceholder + '</span>');
+//                            break;
+//                        case config.crlfPlaceholderClass:
+//                            $(br).after('<span class="placeholder">' + config.crlfPlaceholder + '</span>');
+//                            break;
+//                    }
+//                });
+//            } catch ( e ){
+//                console.log( "Exception on placeholder replacement.\nAdded a default placeholder " + e.message );
+//                //add a default placeholder, when a return is pressed by the user chrome add a simple <br>
+//                //so
+//                $(this).after('<span class="placeholder">' + config.crPlaceholder + '</span>');
+//            }
+//
+//        });
+
+        return area.text();
+
     },
 
     /**
