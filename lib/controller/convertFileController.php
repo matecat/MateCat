@@ -3,19 +3,19 @@
 set_time_limit(0);
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include_once INIT::$UTILS_ROOT . "/cat.class.php";
+include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 include_once INIT::$UTILS_ROOT . "/fileFormatConverter.class.php";
 
-class convertFileController extends ajaxcontroller {
+class convertFileController extends ajaxController {
 
-	private $file_name;
-	private $source_lang;
-	private $target_lang;
+	protected $file_name;
+	protected $source_lang;
+	protected $target_lang;
 
-	private $cache_days=10;
+	protected $cache_days=10;
 
-	private $intDir;
-	private $errDir;
+	protected $intDir;
+	protected $errDir;
 
 	public function __construct() {
 
@@ -26,8 +26,8 @@ class convertFileController extends ajaxcontroller {
 		$this->source_lang = $this->get_from_get_post("source_lang");
 		$this->target_lang = $this->get_from_get_post("target_lang");
 
-		$this->intDir = INIT::$UPLOAD_REPOSITORY.'/' . $_COOKIE['upload_session'];
-		$this->errDir = INIT::$STORAGE_DIR.'/conversion_errors/' . $_COOKIE['upload_session'];
+		$this->intDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $_COOKIE['upload_session'];
+		$this->errDir = INIT::$STORAGE_DIR . DIRECTORY_SEPARATOR . 'conversion_errors' . DIRECTORY_SEPARATOR . $_COOKIE['upload_session'];
 
 	}
 
@@ -38,7 +38,7 @@ class convertFileController extends ajaxcontroller {
 			return false;
 		}
 
-		$file_path = $this->intDir . '/' . $this->file_name;
+		$file_path = $this->intDir . DIRECTORY_SEPARATOR . $this->file_name;
 
 		if ( !file_exists( $file_path ) ) {
 			$this->result['errors'][] = array("code" => -6, "message" => "Error during upload. Please retry.");
@@ -176,7 +176,7 @@ class convertFileController extends ajaxcontroller {
 			mkdir($this->intDir . "_converted");
 		};
 
-		$result = file_put_contents( "$this->intDir" . "_converted/$this->file_name.sdlxliff", $xliffContent );
+		$result = file_put_contents( "$this->intDir" . "_converted" . DIRECTORY_SEPARATOR . $this->file_name . ".sdlxliff", $xliffContent );
 
         //$result = number of bytes written
         if( $result ){

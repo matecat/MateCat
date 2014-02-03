@@ -1,8 +1,8 @@
 <?php
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include_once INIT::$UTILS_ROOT . "/cat.class.php";
+include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 
-class changePasswordController extends ajaxcontroller {
+class changePasswordController extends ajaxController {
 	private $res_type;
 	private $res_id;
 	private $password;

@@ -6,7 +6,7 @@
  * @author domenico
  */
 include_once("AbstractTest.php");
-include_once INIT::$UTILS_ROOT . '/cat.class.php';
+include_once INIT::$UTILS_ROOT . '/CatUtils.php';
 include_once INIT::$UTILS_ROOT . '/QA.php';
 class Tests_QATest extends Tests_AbstractTest {
 

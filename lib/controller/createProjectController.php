@@ -1,14 +1,14 @@
 <?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include INIT::$UTILS_ROOT . "/cat.class.php";
-include INIT::$UTILS_ROOT . "/ProjectManager.php";
-include INIT::$UTILS_ROOT . "/RecursiveArrayObject.php";
+include_once INIT::$UTILS_ROOT . "/CatUtils.php";
+include_once INIT::$UTILS_ROOT . "/ProjectManager.php";
+include_once INIT::$UTILS_ROOT . "/RecursiveArrayObject.php";
 
 define('DEFAULT_NUM_RESULTS', 2);
 set_time_limit(0);
 
-class createProjectController extends ajaxcontroller {
+class createProjectController extends ajaxController {
 
     private $file_name;
     private $project_name;
@@ -40,13 +40,13 @@ class createProjectController extends ajaxcontroller {
             'private_tm_pass'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
         );
 
-        //$__postInput = filter_input_array( INPUT_POST, $filterArgs );
+        $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
-        $__postInput = filter_var_array( $_POST, $filterArgs );
+        //$__postInput = filter_var_array( $_POST, $filterArgs );
 
-        $this->file_name               = $__postInput[ 'file_name' ]; // da cambiare
+        $this->file_name               = $__postInput[ 'file_name' ]; // da cambiare, FA SCHIFO la serializzazione
         $this->project_name            = $__postInput[ 'project_name' ];
         $this->source_language         = $__postInput[ 'source_language' ];
         $this->target_language         = $__postInput[ 'target_language' ];
@@ -161,6 +161,7 @@ class createProjectController extends ajaxcontroller {
                 'private_tm_key'     => $this->private_tm_key,
                 'private_tm_user'    => $this->private_tm_user,
                 'private_tm_pass'    => $this->private_tm_pass,
+                'uploadToken'        => $_COOKIE['upload_session'],
                 'array_files'        => $arFiles, //list of file names
                 'file_id_list'       => array(),
                 'file_references'    => array(),

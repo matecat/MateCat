@@ -59,8 +59,8 @@ class ConvertersMonitor {
         require_once $this->ROOT . '/inc/config.inc.php';
         INIT::obtain();
 
-        require_once INIT::$UTILS_ROOT . "/log.class.php";
-        require_once INIT::$UTILS_ROOT . "/utils.class.php";
+        require_once INIT::$UTILS_ROOT . "/Log.php";
+        require_once INIT::$UTILS_ROOT . "/Utils.php";
         require_once INIT::$MODEL_ROOT . '/Database.class.php';
         require_once INIT::$UTILS_ROOT . "/fileFormatConverter.class.php";
 
@@ -389,7 +389,7 @@ class ConvertersMonitor {
             $lastTenLogs = array_unique( $lastTenLogs[ 'history' ] );
 
             //there are only failures
-            if ( count( $lastTenLogs ) == 1 && $lastTenLogs[ 0 ] == 0 && count( $_lastTenLogs ) == 10 ) {
+            if ( count( $lastTenLogs ) == 1 && $lastTenLogs[ 0 ] == 0 && count( $_lastTenLogs ) == 9 ) {
                 //set Reboot status and set for reboot
                 $this->resultSet[ $ip_converter ][ 'status_reboot' ] = 1;
                 $this->setForReboot[ ]                               = $ip_converter;

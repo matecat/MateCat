@@ -1,10 +1,10 @@
 <?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include_once INIT::$UTILS_ROOT . "/cat.class.php";
+include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 include_once INIT::$UTILS_ROOT . "/manage.class.php";
 
-class changeJobsStatusController extends ajaxcontroller {
+class changeJobsStatusController extends ajaxController {
 
     private $res_type;
     private $res_id;

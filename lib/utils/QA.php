@@ -1,4 +1,4 @@
-<?php include_once INIT::$UTILS_ROOT . '/log.class.php';
+<?php include_once INIT::$UTILS_ROOT . '/Log.php';
 
 /**
  * Class errObject
@@ -792,7 +792,7 @@ class QA {
 
         preg_match_all( '/(<[^\/>]+[\/]{0,1}>)/', $this->source_seg, $matches );
         $malformedXmlSrcStruct = $matches[1];
-        preg_match_all( '/(<[^\/>]+>)/', $this->target_seg, $matches );
+        preg_match_all( '/(<[^\/>]+[\/]{0,1}>)/', $this->target_seg, $matches );
         $malformedXmlTrgStruct = $matches[1];
 
 //        Log::doLog( $malformedXmlSrcStruct );

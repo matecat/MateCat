@@ -8,7 +8,7 @@ include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
 include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
-class setContributionController extends ajaxcontroller {
+class setContributionController extends ajaxController {
 
 	private $id_customer;
 	private $translator_username;
@@ -128,7 +128,7 @@ class setContributionController extends ajaxcontroller {
 
 		if ($id_tms != 0) {
 
-            //if translator_username is empty no key is added to MyMemory api SET query string, so, anonymous by default
+            //if translator_username is empty no key is added to MyMemory API SET query string, so, anonymous by default
 
             $tms = new TMS( $id_tms );
             $result = $tms->set( $config );

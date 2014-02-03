@@ -3,9 +3,8 @@ $root = realpath(dirname(__FILE__) . '/../../../');
 include_once "$root/inc/config.inc.php";
 INIT::obtain();
 
-require_once INIT::$UTILS_ROOT.'/log.class.php';
-require_once INIT::$UTILS_ROOT.'/utils.class.php';
-require_once INIT::$CONTROLLER_ROOT.'/frontController.php';
+require_once INIT::$UTILS_ROOT.'/Log.php';
+require_once INIT::$UTILS_ROOT.'/Utils.php';
 require_once INIT::$MODEL_ROOT.'/Database.class.php';
 require_once INIT::$MODEL_ROOT.'/queries.php';
 

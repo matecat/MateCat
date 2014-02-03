@@ -1,8 +1,8 @@
 <?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include INIT::$UTILS_ROOT . "/filetype.class.php";
-include INIT::$UTILS_ROOT . "/cat.class.php";
+//include_once INIT::$UTILS_ROOT . "/filetype.class.php";
+include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 include_once INIT::$UTILS_ROOT . '/QA.php';
 
@@ -11,7 +11,7 @@ include_once INIT::$UTILS_ROOT . '/QA.php';
  *
  * @author antonio
  */
-class catController extends viewcontroller {
+class catController extends viewController {
 
 	private $data = array();
 	private $cid = "";
@@ -191,7 +191,7 @@ class catController extends viewcontroller {
 //				$this->data["$id_file"]['last_opened_segment'] = $seg['last_opened_segment'];
 //				$this->data["$id_file"]['file_stats'] = $file_stats;
 			}
-			$this->filetype_handler = new filetype($seg['mime_type']);
+			//$this->filetype_handler = new filetype($seg['mime_type']);
 
 
 
