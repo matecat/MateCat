@@ -121,13 +121,13 @@ body.searchActive #filterSwitch
 
 .breadcrumbs #pname
 {
-
 	float: left;
 	padding-left: 22px;
-	background:url(../img/arrow-down.png) center left no-repeat;
-    max-width: 300px;
-    overflow: hidden;
-    margin-left:2px
+	background: url(../img/arrow-down.png) center left no-repeat;
+	max-width: 300px;
+	/*overflow: hidden;*/
+	margin-left:2px;
+	word-break: break-all;
 }
 
 .breadcrumbs #pname .details
