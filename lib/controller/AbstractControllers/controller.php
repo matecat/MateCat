@@ -40,8 +40,10 @@ abstract class controller {
             header('Content-Type: application/json; charset=utf-8');
 
         } else {
+            //load Template Engine
             require_once INIT::$ROOT . '/inc/PHPTAL/PHPTAL.php';
         }
+
 
         //Default :  cat
         $action = ( isset( $_POST[ 'action' ] ) ) ? $_POST[ 'action' ] : ( isset( $_GET[ 'action' ] ) ? $_GET[ 'action' ] : 'cat' );
