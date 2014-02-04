@@ -90,7 +90,6 @@ abstract class viewController extends controller {
 
     public function __construct( $isAuthRequired = false ) {
         parent::__construct();
-        require_once INIT::$ROOT . '/inc/PHPTAL/PHPTAL.php';
         $this->supportedBrowser = $this->isSupportedWebBrowser();
         $this->isAuthRequired   = $isAuthRequired;
 

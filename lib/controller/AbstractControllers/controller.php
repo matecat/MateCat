@@ -39,6 +39,8 @@ abstract class controller {
             @ob_get_clean();
             header('Content-Type: application/json; charset=utf-8');
 
+        } else {
+            require_once INIT::$ROOT . '/inc/PHPTAL/PHPTAL.php';
         }
 
         //Default :  cat
