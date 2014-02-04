@@ -27,7 +27,7 @@ abstract class controller {
 
             array_walk_recursive( $_REQUEST , 'controller::sanitizeString' );
 
-            if( !isset( $_REQUEST['action'] ) ){
+            if( !isset( $_REQUEST['action'] ) || empty( $_REQUEST['action'] ) ){
                 header( "HTTP/1.1 200 OK" );
                 echo "OK";
                 die();

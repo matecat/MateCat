@@ -1,0 +1,497 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+
+
+    <link href="https://dt8kf6553cww8.cloudfront.net/static/css/main-vflOiBka9.css" type="text/css" rel="stylesheet"/>
+    <link href="https://dt8kf6553cww8.cloudfront.net/static/css/web_sprites-vflRFF_Zg.css" type="text/css" rel="stylesheet"/>
+    <link href="https://dt8kf6553cww8.cloudfront.net/static/css/developers-vfl3yolJW.css" type="text/css" rel="stylesheet"/>
+    <link href="https://dt8kf6553cww8.cloudfront.net/static/css/prettify-vflwwlzmU.css" type="text/css" rel="stylesheet"/>
+    <link href="https://dt8kf6553cww8.cloudfront.net/static/css/sidebar-vflEHmVka.css" type="text/css" rel="stylesheet"/>
+
+
+    <style type="text/css">
+
+        dl dd {
+            line-height: 24px;
+        }
+
+        dd {
+
+        }
+
+        .METHOD dt {
+            float: left;
+            width: 100px;
+            font-size: 11px;
+            text-transform: uppercase;
+            color: #888;
+            text-align: right;
+            line-height: 20px;
+            padding: 2px 40px 0 0;
+            margin: 0;
+            font-weight: normal;
+            display: block;
+        }
+
+        .METHOD dl dt.url-label {
+            padding-top: 11px;
+        }
+
+        .METHOD dd ul.parameters {
+            padding: 1px 0 0 140px;
+        }
+
+        .METHOD p {
+            padding: 0 0 0 140px;
+        }
+
+        .METHOD pre.literal-block {
+            /*max-width:820px;*/
+        }
+
+        .METHOD .errors-table td {
+            padding: 0 10px 10px 0;
+        }
+
+        pre {
+            margin-left: 140px;
+            max-width: 800px;
+            font-size: 90%;
+        }
+
+        table {
+            border-collapse: collapse;
+            border-spacing: 0;
+            margin-bottom: 30px;
+            margin-left: 140px;
+        }
+        table.api-param-values {
+            border: 1px solid #ddd;
+            align: center;
+            max-width: 800px;
+        }
+        tbody {
+            display: table-row-group;
+            vertical-align: middle;
+            border-color: inherit;
+        }
+        tr {
+            display: table-row;
+            vertical-align: inherit;
+            border-color: inherit;
+        }
+        td, th {
+            display: table-cell;
+        }
+        table.api-param-values tr {
+            width: 20px;
+        }
+        table.api-param-values th {
+            background-color: #fafafa;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+            vertical-align: top;
+            padding: 6px 6px 6px 11px;
+            margin:0;
+            min-width: 100px;
+        }
+        table.api-param-values td {
+            text-align: left;
+            vertical-align: top;
+            padding: 6px 6px 6px 11px;
+            line-height: 20px;
+            margin:0;
+        }
+        td pre {
+            margin-left: 0;
+        }
+    </style>
+
+</head>
+<body id="main_body" style="padding-left: 190px;padding-top: 40px;width: 780px;">
+
+<div id="outer-frame" class="has_sidebar developers-docs-page">
+
+    <div class="METHOD" class="section toc-el"><h3 class="method-title">/new (POST)</h3>
+        <dl>
+            <dt>Description</dt>
+            <dd><p>Create a new Project.</p>
+            </dd>
+            <dt class="url-label">URL Structure</dt>
+            <dd>
+                <pre class="literal-block">https://matecatpro.translated.net/<b>api</b>/new</pre>
+            </dd>
+            <dt>Method</dt>
+            <dd>POST ( multipart/form-data )</dd>
+            <dt>Files To Upload</dt>
+            <dd><p><em>required</em> The file(s) to be uploaded.</p></dd>
+            <dt>Parameters</dt>
+            <dd>
+                <ul class="parameters">
+                    <li><span class="param">project_name</span> <code>(string)</code> The name of the project you want
+                        create.
+                    </li>
+                    <li><span class="param">source_lang</span> <code>(string)</code> RFC 3066 language Code ( en-US )
+                    </li>
+                    <li><span class="param">target_lang</span> <code>(string)</code> RFC 3066 language(s) Code(s).
+                        Multiple
+                        languages must be comma separated ( <code>it-IT,fr-FR,es-ES</code> )
+                    </li>
+                    <li><span class="param">tms_engine</span> <code>(int)</code> Identifier for Memory Server (
+                        <code>ZERO</code> means disabled, <code>ONE</code> means MyMemory )
+                    </li>
+                    <li><span class="param">disable_tms_engine</span> <code>(bool)</code> This flag needs to disable
+                        Memory
+                        Server. It should be set to <code>0</code> or <code>false</code>
+                        to enable contributions from MyMemory Engine
+                        ( N.B.: activating this flag force <code>tms_engine</code> to <code>ZERO</code> )
+                    </li>
+                    <li><span class="param">private_tm_key</span> <code>(string)</code> Private Key for MyMemory. Fill
+                        this
+                        field with your MyMemory private key if you already have one
+                    </li>
+                    <li><span class="param">create_new_tm_key</span> <code>(bool)</code> Set this flag <code>true</code>
+                        if
+                        you want to create a new MyMemory key.
+                        ( N.B. will be ignored if <code>private_tm_key</code> is not null )
+                    </li>
+                </ul>
+            </dd>
+            <dt>Returns</dt>
+            <dd>
+                <p>The metadata for the created project.</p>
+
+                <p>More information on the returned metadata fields are available
+                    <a href="#metadata-new-details">here</a>
+                </p>
+
+                <p><strong>Sample JSON response</strong></p>
+            <pre class="literal-block">
+{
+    "status": "OK",
+    "id_project": 5368,
+    "ppassword": "76ba60c027b9",
+}
+            </pre>
+                <p><strong>Return value definitions</strong></p>
+                <table id="metadata-new-details" class="api-param-values">
+                    <tbody>
+                    <tr>
+                        <th>field</th>
+                        <th>description</th>
+                    </tr>
+                    <tr>
+                        <td><code>status</code></td>
+                        <td>Return the creation status of the project. The statuses can be:
+                            <ul>
+                                <li><code>OK</code> indicating that the creation worked.</li>
+                                <li><code>FAIL</code> indicating that the creation is failed.</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>id_project</code></td>
+                        <td>Return the unique id of the project just created.
+                            If creation status is <code>FAIL</code> this key will simply be omitted from the result.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>ppassword</code></td>
+                        <td>Return the password of the project just created.
+                            If creation status is <code>FAIL</code> this key will simply be omitted from the result.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+            </dd>
+            <dt>Errors</dt>
+            <dd>
+                <table class="errors-table">
+                    <tbody>
+                    <tr>
+                        <td>FAIL</td>
+                        <td>The project creation is failed</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                        <pre class="literal-block">
+{
+    "status": "FAIL",
+}
+                        </pre>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </dd>
+            <dt>Notes</dt>
+            <dd><p><code>/new</code> has a maximum file size limit of 60 MB per file and a max number of files of 100.</p></dd>
+            <dd><p>Matecat PRO accept only 54 file formats. A list of all accepted file are available
+                <a href="#accepted-files">here</a></p>
+            </dd>
+        </dl>
+    </div>
+
+    <div class="METHOD" class="section toc-el"><h3 class="method-title">/status (POST)</h3>
+        <dl>
+            <dt>Description</dt>
+            <dd><p>Retrieve the status of a project</p>
+            </dd>
+            <dt class="url-label">URL Structure</dt>
+            <dd>
+                <pre class="literal-block">https://matecatpro.translated.net/<b>api</b>/status</pre>
+            </dd>
+            <dt>Method</dt>
+            <dd>POST ( application/x-www-form-urlencoded )</dd>
+            <dt>Parameters</dt>
+            <dd>
+                <ul class="parameters">
+                    <li><span class="param">id_project</span> <code>(int)</code> The identifier of the project, should be the
+                        value returned by the <a href="#METHOD" ><code>/new</code></a> method.
+                    </li>
+                    <li><span class="param">ppassword</span> <code>(string)</code> The password associated with the project, should be the
+                        value returned by the <a href="#METHOD" ><code>/new</code></a> method ( associated with the id_project )
+                    </li>
+                </ul>
+            </dd>
+            <dt>Returns</dt>
+            <dd>
+                <p>The metadata for the created project containing the status of the project.</p>
+
+                <p>More information on the returned metadata fields are available
+                    <a href="#metadata-status-details">here</a>
+                </p>
+
+                <p><strong>Sample JSON response</strong></p>
+            <pre class="literal-block">
+{"data": {
+    "jobs": {
+        "5615": {
+            "chunks": {
+                "e77eeea779d2": {
+                    "6291": {
+                        "TOTAL_PAYABLE":
+                                [
+                                    143.15
+                                ],
+                        "REPETITIONS":
+                                [
+                                    0,
+                                    "0"
+                                ],
+                        "MT":
+                                [
+                                    167,
+                                    "167"
+                                ],
+                        "NEW":
+                                [
+                                    0,
+                                    "0"
+                                ],
+                        "TM_100":
+                                [
+                                    2,
+                                    "2"
+                                ],
+                        "TM_75_99":
+                                [
+                                    1,
+                                    "1"
+                                ],
+                        "INTERNAL_MATCHES":
+                                [
+                                    0,
+                                    "0"
+                                ],
+                        "ICE":
+                                [
+                                    0,
+                                    "0"
+                                ],
+                        "FILENAME": "Test1.docx"
+                    }
+                }
+            },
+            "totals": {
+                "e77eeea779d2": {
+                    "TOTAL_PAYABLE":
+                            [
+                                143.15,
+                                "143"
+                            ],
+                    "REPETITIONS":
+                            [
+                                0,
+                                "0"
+                            ],
+                    "MT":
+                            [
+                                167,
+                                "167"
+                            ],
+                    "NEW":
+                            [
+                                0,
+                                "0"
+                            ],
+                    "TM_100":
+                            [
+                                2,
+                                "2"
+                            ],
+                    "TM_75_99":
+                            [
+                                1,
+                                "1"
+                            ],
+                    "INTERNAL_MATCHES":
+                            [
+                                0,
+                                "0"
+                            ],
+                    "ICE":
+                            [
+                                0,
+                                "0"
+                            ]
+                    }
+                }
+            }
+        },
+        "summary": {
+            "IN_QUEUE_BEFORE": 0,
+            "IN_QUEUE_BEFORE_PRINT": "0",
+            "STATUS": "DONE",
+            "TOTAL_SEGMENTS": 16,
+            "SEGMENTS_ANALYZED": 16,
+            "TOTAL_SEGMENTS_PRINT": "16",
+            "SEGMENTS_ANALYZED_PRINT": "16",
+            "TOTAL_FAST_WC": "169.00",
+            "TOTAL_TM_WC": 143.15,
+            "TOTAL_FAST_WC_PRINT": "169",
+            "TOTAL_STANDARD_WC": 168.2,
+            "TOTAL_STANDARD_WC_PRINT": "168",
+            "TOTAL_TM_WC_PRINT": "143",
+            "STANDARD_WC_TIME": "27",
+            "FAST_WC_TIME": "27",
+            "TM_WC_TIME": "23",
+            "STANDARD_WC_UNIT": "minutes",
+            "TM_WC_UNIT": "minutes",
+            "FAST_WC_UNIT": "minutes",
+            "USAGE_FEE": "0.78",
+            "PRICE_PER_WORD": "0.030",
+            "DISCOUNT": "2",
+            "NAME": "MyProject4",
+            "TOTAL_RAW_WC": 170,
+            "TOTAL_RAW_WC_PRINT": "170",
+            "TOTAL_PAYABLE": 143.15,
+            "TOTAL_PAYABLE_PRINT": "143",
+            "PAYABLE_WC_TIME": "23",
+            "PAYABLE_WC_UNIT": "minutes",
+            "DISCOUNT_WC": "0"
+        }
+    },
+   "status": "DONE",
+   "analyze": "http:\/\/matecat.local\/analyze\/MyProject4\/5368-76ba60c027b9",
+   "jobs": {
+       "jid-jpass": ["5615-e77eeea779d2"],
+       "job-url": {
+            "5615-e77eeea779d2": "http:\/\/matecat.local\/translate\/MyProject4\/de-DE-en-US\/5615-e77eeea779d2"
+        }
+    }
+}
+            </pre>
+            <p><strong>Return value definitions</strong></p>
+                <table id="metadata-status-details" class="api-param-values">
+                    <tbody>
+                    <tr>
+                        <th>field</th>
+                        <th>description</th>
+                    </tr>
+                    <tr>
+                        <td><code>jobs</code></td>
+                        <td>A structure containing all the info for the specified project.
+                            The numerical keys on the first level are the ID of the Jobs contained in the project.
+                            ( An ID identifies a language target, so, there are so many languages as there are IDs and vice versa  ).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>chunks</code></td>
+                        <td>A structure containing the password for the associated job ID.
+                            There may be multiple chunks ( passwords ) for the same job ID because of the split.
+                            So this key can have multiple entries.
+                            Inside every entry key ( passwords ) whe have one or more numerical key indicating the id of every file in the chunk
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>totals</code></td>
+                        <td>Returns the total for every chunk. The entries inside this key are the sums of values for all the chunks of the job.</td>
+                    </tr>
+                    <tr>
+                        <td><code>summary</code></td>
+                        <td>Returns the total for the project.</td>
+                    </tr>
+                    <tr>
+                        <td><code>status</code></td>
+                        <td>Return the analysis status of the project. The statuses can be:
+                            <ul>
+                                <li><code>ANALYZING</code> indicating that the analysis/creation still working.</li>
+                                <li><code>NO_SEGMENTS_FOUND</code> indicating that the project are no segments to analyze.</li>
+                                <li><code>ANALYSIS_NOT_ENABLED</code> indicating that no analysis will be performed because of matecat configurations.</li>
+                                <li><code>DONE</code> indicating that the analysis/creation is completed.</li>
+                                <li><code>FAIL</code> indicating that the analysis/creation is failed.</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>analyze</code></td>
+                        <td>A link to the analyze page where you can fine all these project info.</td>
+                    </tr>
+                    <tr>
+                        <td><code>jid-jpass</code></td>
+                        <td>A unique identifier for every job in the project.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>job-url</code></td>
+                        <td>An object containing all the links to the jobs of the project
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </dd>
+            <dt>Errors</dt>
+            <dd>
+                <table class="errors-table">
+                    <tbody>
+                    <tr>
+                        <td>FAIL</td>
+                        <td>Wrong Password. Access denied</td>
+                    </tr>
+                    <tr>
+                        <td>FAIL</td>
+                        <td>No id project provided</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                        <pre class="literal-block">
+{
+    "status":  "FAIL",
+    "message": "Wrong Password. Access denied"
+}
+                        </pre>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </dd>
+        </dl>
+    </div>
+
+</div>
+
+</body>
+</html>

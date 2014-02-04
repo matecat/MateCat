@@ -5,17 +5,20 @@
 //include_once INIT::$UTILS_ROOT . "/Utils.php";
 
 /**
- * Class testApiController
  *
- * Metodo New
-    V1: sincrona
-    INPUT
-    - files
-    - source lang
-    - target lang(s)
-    - project_name
-    - user
-    - flags: tm_key, no_mt,no_tm (attenzione ai valori contrastanti)
+ * Create new Project on Matecat With HTTP POST ( multipart/form-data ) protocol
+ *
+ * POST Params:
+ *
+ * 'project_name'       => (string) The name of the project you want create
+ * 'source_lang'        => (string) RFC 3066 language Code ( en-US )
+ * 'target_lang'        => (string) RFC 3066 language(s) Code. Comma separated ( it-IT,fr-FR,es-ES )
+ * 'tms_engine'         => (int)    Identifier for Memory Server ( ZERO means disabled, ONE means MyMemory )
+ * 'mt_engine'          => (int)    Identifier for TM Server ( ZERO means disabled, ONE means MyMemory )
+ * 'disable_tms_engine' => (bool)   Memory Server should be disabled or not ( Force 'tms_engine' to ZERO )
+ * 'private_tm_key'     => (string) Private Key for MyMemory
+ * 'create_new_tm_key'  => (bool)   Set true if you want to create a new MyMemory key ( used only if 'private_tm_key' is null )
+ *
  *
  */
 class NewController extends ajaxController {
@@ -83,6 +86,10 @@ class NewController extends ajaxController {
 
     public function doAction() {
 
+        if( $this->disable_tms_engine_flag ){
+            $this->tms_engine = 0;
+        }
+
         try {
             if( $this->tms_engine != 0 ){
                 include INIT::$UTILS_ROOT . "/engines/tms.class.php";
@@ -113,7 +120,6 @@ class NewController extends ajaxController {
                             array( "code" => -1, "message" => $e->getMessage() )
                     )
             );
-
         }
 
         $arFiles = array();
