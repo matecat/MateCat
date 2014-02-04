@@ -1,13 +1,20 @@
 <?php
-/**
- * Created by PhpStorm.
- * User: domenico
- * Date: 30/01/14
- * Time: 16.36
- * 
- */
 
 class StatusController extends getVolumeAnalysisController {
+
+    protected $api_output = array(
+            'status' => 'FAIL'
+    );
+
+    /**
+     * Check Status of a created Project With HTTP POST ( application/x-www-form-urlencoded ) protocol
+     *
+     * POST Params:
+     *
+     * 'id_project'         => (int)    ID of Project to check
+     * 'ppassword'          => (string) Project Password
+     *
+     */
 
     public function __construct() {
 
@@ -25,4 +32,19 @@ class StatusController extends getVolumeAnalysisController {
 
     }
 
+    public function finalize() {
+        $toJson = json_encode( $this->api_output );
+        echo $toJson;
+    }
+
+    public function doAction() {
+
+        parent::doAction();
+        if( !empty( $this->result['errors'] ) ){
+            $this->api_output['message'] = $this->result['errors'][1];
+        } else{
+            $this->api_output = $this->result;
+        }
+        
+    }
 } 

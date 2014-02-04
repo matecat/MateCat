@@ -308,6 +308,9 @@ class getVolumeAnalysisController extends ajaxController {
             case 'NOT_TO_ANALYZE':
                 $this->result['status']  = 'ANALYSIS_NOT_ENABLED';
                 break;
+            case 'DONE':
+                $this->result['status']  = 'DONE';
+                break;
             default: //this can not be
                 $this->result['status']  = 'FAIL';
                 break;

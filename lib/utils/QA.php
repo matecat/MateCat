@@ -489,24 +489,28 @@ class QA {
         preg_match_all( self::$regexpAscii, $target_seg, $matches_trg );
 
 //        Log::doLog($source_seg);
-//        Log::doLog($target_seg);
+//        Log::hexDump($target_seg);
 
         if ( !empty( $matches_src[ 1 ] ) ) {
+            $test_src = $source_seg;
             foreach ( $matches_src[ 1 ] as $v ) {
-                $test_src = preg_replace( self::$regexpAscii, self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $source_seg );
+                $test_src = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) .'}{1})/u', self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $test_src, 1 );
             }
             //Source Content wrong use placeholded one
             $source_seg = $test_src;
         }
 
         if ( !empty( $matches_trg[ 1 ] ) ) {
+            $test_trg = $target_seg;
             foreach ( $matches_trg[ 1 ] as $v ) {
-                $test_trg = preg_replace( self::$regexpAscii, self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $target_seg );
+                $test_trg = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) .'}{1})/u', self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $test_trg, 1 );
             }
             //Target Content wrong use placeholded one
             $target_seg = $test_trg;
         }
 
+//        Log::hexDump($source_seg);
+//        Log::hexDump($target_seg);
 
         /**
          * Do it again for entities because
@@ -520,16 +524,18 @@ class QA {
         preg_match_all( self::$regexpEntity, $target_seg, $matches_trg );
 
         if ( !empty( $matches_src[ 1 ] ) ) {
+            $test_src = $source_seg;
             foreach ( $matches_src[ 1 ] as $v ) {
-                $test_src = preg_replace( self::$regexpEntity, self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $source_seg );
+                $test_src = preg_replace( '/&#x(' . sprintf( "%02X", ord( $v ) ) .'{1});/u', self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $test_src );
             }
             //Source Content wrong use placeholded one
             $source_seg = $test_src;
         }
 
         if ( !empty( $matches_trg[ 1 ] ) ) {
+            $test_trg = $target_seg;
             foreach ( $matches_trg[ 1 ] as $v ) {
-                $test_trg = preg_replace( self::$regexpEntity, self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $target_seg );
+                $test_trg = preg_replace( '/&#x(' . sprintf( "%02X", ord( $v ) ) .'{1});/u', self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $test_trg );
             }
             //Target Content wrong use placeholded one
             $target_seg = $test_trg;
@@ -1430,9 +1436,9 @@ class QA {
             if( !empty( $matches_trg[1] )){
 
                 foreach( $matches_trg[1] as $v ){
-                    $matches[1] = preg_replace( self::$regexpPlaceHoldAscii, '&#x' . $v . ';' , $matches[1] );
+                    $matches[1] = preg_replace( '/##\$_(' . $v . '{1})\$##/u', '&#x' . $v . ';' , $matches[1], 1 );
                 }
-//                Log::doLog($test);
+//                Log::hexDump($matches[1]);
             }
 
             /*
