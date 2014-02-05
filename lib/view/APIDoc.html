@@ -38,7 +38,7 @@
             padding-top: 11px;
         }
 
-        .METHOD dd ul.parameters {
+        .METHOD dd ul.parameters, .parameters {
             padding: 1px 0 0 140px;
         }
 
@@ -106,6 +106,23 @@
         td pre {
             margin-left: 0;
         }
+
+        .listlang {
+            -webkit-column-count: 2;
+            column-count: 2;
+            -moz-column-count: 2;
+            margin-top: 20px;
+            margin: 0px;
+            float: left;
+            width: auto;
+            list-style: none;
+            font-size: 14px;
+        }
+
+        .api-param-values td, .api-param-values th {
+            border-right:1px solid #ddd;
+        }
+
     </style>
 
 </head>
@@ -113,7 +130,7 @@
 
 <div id="outer-frame" class="has_sidebar developers-docs-page">
 
-    <div class="METHOD" class="section toc-el"><h3 class="method-title">/new (POST)</h3>
+    <div id="NEW" class="METHOD" class="section toc-el"><h3 class="method-title">/new (POST)</h3>
         <dl>
             <dt>Description</dt>
             <dd><p>Create a new Project.</p>
@@ -249,10 +266,10 @@
             <dd>
                 <ul class="parameters">
                     <li><span class="param">id_project</span> <code>(int)</code> The identifier of the project, should be the
-                        value returned by the <a href="#METHOD" ><code>/new</code></a> method.
+                        value returned by the <a href="#NEW" ><code>/new</code></a> method.
                     </li>
                     <li><span class="param">ppassword</span> <code>(string)</code> The password associated with the project, should be the
-                        value returned by the <a href="#METHOD" ><code>/new</code></a> method ( associated with the id_project )
+                        value returned by the <a href="#NEW" ><code>/new</code></a> method ( associated with the id_project )
                     </li>
                 </ul>
             </dd>
@@ -487,6 +504,102 @@
                     </tr>
                     </tbody>
                 </table>
+            </dd>
+
+        </dl>
+    </div>
+
+    <div id="file-formats" class="METHOD" class="section toc-el">
+        <h3 class="method-title">Supported file formats</h3>
+            <dt id="accepted-files">List of supported file formats</dt>
+            <dd>
+
+                <table class="api-param-values">
+                    <thead>
+                        <th>Office</th>
+                        <th>Web</th>
+                        <th>Interchange Formats</th>
+                        <th>Desktop Publishing</th>
+                        <th>Localization</th>
+                    </thead>
+                    <tr>
+                        <td>
+                            <ul class="listlang">
+                                <li>doc</li>
+                                <li>dot</li>
+                                <li>docx</li>
+                                <li>dotx</li>
+                                <li>docm</li>
+                                <li>dotm</li>
+                                <li>pdf</li>
+                                <li>xls</li>
+                                <li>xlt</li>
+                                <li>xlsm</li>
+                                <li>xlsx</li>
+                                <li>xltx</li>
+                                <li>pot</li>
+                                <li>pps</li>
+                                <li>ppt</li>
+                                <li>potm</li>
+                                <li>potx</li>
+                                <li>ppsm</li>
+                                <li>ppsx</li>
+                                <li>pptm</li>
+                                <li>pptx</li>
+                                <li>odp</li>
+                                <li>ods</li>
+                                <li>odt</li>
+                                <li>sxw</li>
+                                <li>sxc</li>
+                                <li>sxi</li>
+                                <li>txt</li>
+                                <li>csv</li>
+                                <li>xml</li>
+                            </ul>
+                        </td>
+                        <td>
+                            <ul class="listlang">
+                                <li>htm</li>
+                                <li>html</li>
+                                <li>xhtml</li>
+                                <li>xml</li>
+                            </ul>
+                        </td>
+                        <td>
+                            <ul class=" listlang">
+                                <li>xliff</li>
+                                <li>sdlxliff</li>
+                                <li>ttx</li>
+                                <li>itd</li>
+                                <li>xlf</li>
+                            </ul>
+                        </td>
+                        <td>
+                            <ul class=" listlang">
+                                <li>mif</li>
+                                <li>inx</li>
+                                <li>idml</li>
+                                <li>icml</li>
+                                <li>xtg</li>
+                                <li>tag</li>
+                                <li>xml</li>
+                                <li>dita</li>
+                            </ul>
+                        </td>
+                        <td>
+                            <ul class=" listlang">
+                                <li>properties</li>
+                                <li>rc</li>
+                                <li>resx</li>
+                                <li>xml</li>
+                                <li>dita</li>
+                                <li>sgml</li>
+                                <li>sgm</li>
+                            </ul>
+                        </td>
+                    </tr>
+                </table>
+
             </dd>
         </dl>
     </div>

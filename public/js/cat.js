@@ -3510,7 +3510,7 @@ $.extend(UI, {
 //		console.log('a: ', $(editarea).html());
 		$(editarea).first().each(function(index) {
 			saveSelection();
-			console.log('a0: ', $(editarea).html());
+//			console.log('a0: ', $(editarea).html());
 			
 //			UI.editarea.focus();
 //			saveSelection();
@@ -3518,51 +3518,31 @@ $.extend(UI, {
 			var tx = $(this).html();
 			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"true\">$1</pl>" : "<pl contenteditable=\"true\" class=\"locked\">$1</pl>";
 			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"true\">$1</span>" : "<span contenteditable=\"true\" class=\"locked\">$1</span>";
-			tx = tx.replace(/<span/gi, "<pl");
-//			console.log('a1: ', tx);
-					tx = tx.replace(/<\/span/gi, "</pl");
-//			console.log('a2: ', tx);
-					tx = tx.replace(/&lt;/gi, "<");
-//			console.log('a3: ', tx);
-					tx = tx.replace(/(<(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid[^<]*?&gt;)/gi, brTx1);
-//			console.log('a4: ', tx);
-					tx = tx.replace(/</gi, "&lt;");
-//			console.log('a5: ', tx);
-					tx = tx.replace(/\&lt;pl/gi, "<span");
-//			console.log('a6: ', tx);
-					tx = tx.replace(/\&lt;\/pl/gi, "</span");
-//			console.log('a7: ', tx);
-					tx = tx.replace(/\&lt;div\>/gi, "<div>");
-//			console.log('a8: ', tx);
-					tx = tx.replace(/\&lt;\/div\>/gi, "</div>");
-//			console.log('a9: ',tx);
-					tx = tx.replace(/\&lt;br\>/gi, "<br>");
-//			console.log('a10: ', tx);
-					tx = tx.replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />');
 
-					// encapsulate tags of closing
-					tx = tx.replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
-		console.log('b: ', tx);
+            tx = tx.replace(/<span/gi, "<pl")
+                    .replace(/<\/span/gi, "</pl")
+                    .replace(/&lt;/gi, "<")
+					.replace(/(<(g|x|bx|ex|bpt|ept|ph[^a-z]*|it|mrk)\sid[^<]*?&gt;)/gi, brTx1)
+					.replace(/</gi, "&lt;")
+                    .replace(/\&lt;pl/gi, "<span")
+                    .replace(/\&lt;\/pl/gi, "</span")
+                    .replace(/\&lt;div\>/gi, "<div>")
+                    .replace(/\&lt;\/div\>/gi, "</div>")
+                    .replace(/\&lt;br\>/gi, "<br>")
+                    .replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />')
+                    .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
 
 			if (UI.isFirefox) {
-				tx = tx.replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>");
-				tx = tx.replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(<\/span\>){2,}/gi, "<span class=\"$2\" contenteditable=\"false\">$3</span>");
+                tx = tx.replace(/(<span class=\"[^>]*locked[^>]*\" contenteditable=\"true\"\>)(:?\1)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
 			} else {
-				// fix nested encapsulation
-				tx = tx.replace(/(<span contenteditable=\"true\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"true\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>");
-				console.log('c: ', tx);
-				
-				tx = tx.replace(/(<span contenteditable=\"true\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(<\/span\>){2,}/gi, "<span contenteditable=\"true\" class=\"$2\">$3</span>");
-			console.log('d: ', tx);
+				tx = tx.replace(/(<span contenteditable=\"true\" class=\"[^>]*locked[^>]*\"\>)(:?\1)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
 			}
 
 			tx = tx.replace(/(<\/span\>)$(\s){0,}/gi, "</span> ");
 			var prevNumTags = $('span.locked', this).length;
 			$(this).html(tx);
-//			console.log('e: ', $(editarea).html());
 			restoreSelection();
-//			console.log('f: ', $(editarea).html());
-			
+
 			if($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
 		});
 
