@@ -3406,10 +3406,16 @@ $.extend(UI, {
 	
 	// TAG MARK
 	detectTags: function(area) {
-		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-		if (!this.firstMarking) {
-			$(area).html($(area).html().replace(/(<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
-		}
+
+        //ALL in one
+        $(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
+
+//		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+//      if (!this.firstMarking) {
+//			$(area).html($(area).html().replace(/(<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
+//          console.log( $(area).html() );
+//		}
+
 	},
 	disableTagMark: function() {
 		this.taglockEnabled = false;
@@ -3456,11 +3462,11 @@ $.extend(UI, {
 			UI.detectTags(this);
 		});
 
-		$('.editarea').each(function() {
-			if ($('#segment-' + $(this).data('sid')).hasClass('mismatch'))
-				return false;
-			UI.detectTags(this);
-		});
+//		$('.editarea').each(function() {
+//			if ($('#segment-' + $(this).data('sid')).hasClass('mismatch'))
+//				return false;
+//			UI.detectTags(this);
+//		});
 	},
 	markTagsInSearch: function(el) {
 		if (!this.taglockEnabled)
