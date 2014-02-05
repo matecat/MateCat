@@ -27,7 +27,7 @@ abstract class controller {
 
             array_walk_recursive( $_REQUEST , 'controller::sanitizeString' );
 
-            if( !isset( $_REQUEST['action'] ) ){
+            if( !isset( $_REQUEST['action'] ) || empty( $_REQUEST['action'] ) ){
                 header( "HTTP/1.1 200 OK" );
                 echo "OK";
                 die();
@@ -39,7 +39,11 @@ abstract class controller {
             @ob_get_clean();
             header('Content-Type: application/json; charset=utf-8');
 
+        } else {
+            //load Template Engine
+            require_once INIT::$ROOT . '/inc/PHPTAL/PHPTAL.php';
         }
+
 
         //Default :  cat
         $action = ( isset( $_POST[ 'action' ] ) ) ? $_POST[ 'action' ] : ( isset( $_GET[ 'action' ] ) ? $_GET[ 'action' ] : 'cat' );

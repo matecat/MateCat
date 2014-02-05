@@ -98,6 +98,7 @@ class INIT {
                 self::$ROOT . "/lib/controller/AbstractControllers",
                 self::$ROOT . "/lib/controller/API",
                 self::$ROOT . "/lib/controller",
+                self::$ROOT . "/inc/PHPTAL",
                 self::$ROOT . "/lib/utils/API",
                 self::$ROOT . "/lib/utils",
                 self::$ROOT . "/lib/model" ,

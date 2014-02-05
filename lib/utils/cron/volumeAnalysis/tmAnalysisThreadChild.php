@@ -202,6 +202,7 @@ while (1) {
         echo "--- (child $my_pid) : error from mymemory : set error and continue\n"; // ERROR FROM MYMEMORY
         setSegmentTranslationError($sid, $jid); // devo settarli come done e lasciare il vecchio livello di match
         deleteLockSegment($sid, $jid);
+        tryToCloseProject($pid);
         continue;
     }
 
@@ -287,10 +288,20 @@ while (1) {
     deleteLockSegment($sid, $jid);
     echo "--- (child $my_pid) : segment $sid-$jid unlocked\n";
 
+    tryToCloseProject($pid);
+
+}
+
+//}
+
+function tryToCloseProject( $pid ){
+
+    global $my_pid;
+
     $segs_in_project = countSegments($pid);
     if ($segs_in_project < 0) {
         echo "--- (child $my_pid) : WARNING !!! error while counting segments in projects $pid skipping and continue \n";
-        continue;
+        return;
     }
     echo "--- (child $my_pid) : count segments in project $pid = $segs_in_project\n";
     $analyzed_report = countSegmentsTranslationAnalyzed($pid);
@@ -303,9 +314,8 @@ while (1) {
         $tm_wc_res = changeTmWc($pid, $pid_eq_words, $pid_standard_words);
     }
     echo "\n\n";
-}
 
-//}
+}
 
 function getNewMatchType($tm_match_type, $fast_match_type, $equivalentWordMapping) {
 
