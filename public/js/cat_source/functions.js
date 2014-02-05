@@ -186,7 +186,7 @@ function setCursorPosition(el, pos) {
 	var range = document.createRange();
 	var sel = window.getSelection();
 	range.setStart(el, pos);
-//	range.setStartAfter( el );
+	if(pos == 'end') range.setStartAfter(el);
 	range.collapse(true);
 	sel.removeAllRanges();
 	sel.addRange(range);

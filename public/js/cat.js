@@ -2354,6 +2354,15 @@ $.extend(UI, {
 					}
 				}
 				UI.closeTagAutocompletePanel();
+				setTimeout(function() {
+					saveSelection();
+					parentTag = $('span.locked', UI.editarea).has(' .rangySelectionBoundary');
+					isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
+					restoreSelection();
+					if(isInsideTag) {
+						setCursorPosition(parentTag[0]);
+					}
+				}, 50);
 			}
 
 			if (e.which == 38) { // top arrow
@@ -2392,6 +2401,16 @@ $.extend(UI, {
 					}
 				}
 				UI.closeTagAutocompletePanel();
+				setTimeout(function() {
+					saveSelection();
+					parentTag = $('span.locked', UI.editarea).has(' .rangySelectionBoundary');
+					isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
+					restoreSelection();
+					if(isInsideTag) {
+						setCursorPosition(parentTag[0], 'end');
+					}
+				}, 50);
+
 			}
 
 			if (e.which == 40) { // down arrow
@@ -4783,7 +4802,7 @@ function setCursorPosition(el, pos) {
 	var range = document.createRange();
 	var sel = window.getSelection();
 	range.setStart(el, pos);
-//	range.setStartAfter( el );
+	if(pos == 'end') range.setStartAfter(el);
 	range.collapse(true);
 	sel.removeAllRanges();
 	sel.addRange(range);
