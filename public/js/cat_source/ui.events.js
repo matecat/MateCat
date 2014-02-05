@@ -344,7 +344,7 @@ $.extend(UI, {
 					$('.selected', $(this)).remove();
 					UI.saveInUndoStack('cancel');
 					UI.currentSegmentQA();
-				} else {
+				} else {console.log('eccolo');
 //					try {
 						var numTagsBefore = UI.editarea.text().match(/<.*?\>/gi).length;
 						var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;

@@ -2309,7 +2309,7 @@ $.extend(UI, {
 					$('.selected', $(this)).remove();
 					UI.saveInUndoStack('cancel');
 					UI.currentSegmentQA();
-				} else {
+				} else {console.log('eccolo');
 //					try {
 						var numTagsBefore = UI.editarea.text().match(/<.*?\>/gi).length;
 						var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
@@ -3410,7 +3410,7 @@ $.extend(UI, {
 	// TAG MARK
 	detectTags: function(area) {
         //ALL in one
-        $(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
+        $(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"true\" class=\"locked\">$2</span>"));
 
 //		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 //      if (!this.firstMarking) {
@@ -3463,11 +3463,11 @@ $.extend(UI, {
 			UI.detectTags(this);
 		});
 
-//		$('.editarea').each(function() {
-//			if ($('#segment-' + $(this).data('sid')).hasClass('mismatch'))
-//				return false;
-//			UI.detectTags(this);
-//		});
+		$('.editarea').each(function() {
+			if ($('#segment-' + $(this).data('sid')).hasClass('mismatch'))
+				return false;
+			UI.detectTags(this);
+		});
 	},
 	markTagsInSearch: function(el) {
 		if (!this.taglockEnabled)
@@ -3488,41 +3488,62 @@ $.extend(UI, {
 		if (this.noTagsInSegment())
 			return false;
 //		console.log('b');
-//		console.log($(editarea).html());
+//		console.log('a: ', $(editarea).html());
 		$(editarea).first().each(function(index) {
 			saveSelection();
-
+			console.log('a0: ', $(editarea).html());
+			
+//			UI.editarea.focus();
+//			saveSelection();
+//			restoreSelection();
 			var tx = $(this).html();
-			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
-			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
-			tx = tx.replace(/<span/gi, "<pl")
-					.replace(/<\/span/gi, "</pl")
-					.replace(/&lt;/gi, "<")
-					.replace(/(<(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid[^<]*?&gt;)/gi, brTx1)
-					.replace(/</gi, "&lt;")
-					.replace(/\&lt;pl/gi, "<span")
-					.replace(/\&lt;\/pl/gi, "</span")
-					.replace(/\&lt;div\>/gi, "<div>")
-					.replace(/\&lt;\/div\>/gi, "</div>")
-					.replace(/\&lt;br\>/gi, "<br>")
-					.replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />')
+			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"true\">$1</pl>" : "<pl contenteditable=\"true\" class=\"locked\">$1</pl>";
+			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"true\">$1</span>" : "<span contenteditable=\"true\" class=\"locked\">$1</span>";
+			tx = tx.replace(/<span/gi, "<pl");
+//			console.log('a1: ', tx);
+					tx = tx.replace(/<\/span/gi, "</pl");
+//			console.log('a2: ', tx);
+					tx = tx.replace(/&lt;/gi, "<");
+//			console.log('a3: ', tx);
+					tx = tx.replace(/(<(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid[^<]*?&gt;)/gi, brTx1);
+//			console.log('a4: ', tx);
+					tx = tx.replace(/</gi, "&lt;");
+//			console.log('a5: ', tx);
+					tx = tx.replace(/\&lt;pl/gi, "<span");
+//			console.log('a6: ', tx);
+					tx = tx.replace(/\&lt;\/pl/gi, "</span");
+//			console.log('a7: ', tx);
+					tx = tx.replace(/\&lt;div\>/gi, "<div>");
+//			console.log('a8: ', tx);
+					tx = tx.replace(/\&lt;\/div\>/gi, "</div>");
+//			console.log('a9: ',tx);
+					tx = tx.replace(/\&lt;br\>/gi, "<br>");
+//			console.log('a10: ', tx);
+					tx = tx.replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />');
 
 					// encapsulate tags of closing
-					.replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
+					tx = tx.replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
+		console.log('b: ', tx);
 
 			if (UI.isFirefox) {
 				tx = tx.replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>");
 				tx = tx.replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(<\/span\>){2,}/gi, "<span class=\"$2\" contenteditable=\"false\">$3</span>");
 			} else {
 				// fix nested encapsulation
-				tx = tx.replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>");
-				tx = tx.replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"$2\">$3</span>");
+				tx = tx.replace(/(<span contenteditable=\"true\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"true\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>");
+				console.log('c: ', tx);
+				
+				tx = tx.replace(/(<span contenteditable=\"true\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(<\/span\>){2,}/gi, "<span contenteditable=\"true\" class=\"$2\">$3</span>");
+			console.log('d: ', tx);
 			}
 
 			tx = tx.replace(/(<\/span\>)$(\s){0,}/gi, "</span> ");
 			var prevNumTags = $('span.locked', this).length;
 			$(this).html(tx);
+//			console.log('e: ', $(editarea).html());
 			restoreSelection();
+//			console.log('f: ', $(editarea).html());
+			
 			if($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
 		});
 
@@ -3530,7 +3551,7 @@ $.extend(UI, {
 	unlockTags: function() {
 		if (!this.taglockEnabled)
 			return false;
-		this.editarea.html(this.editarea.html().replace(/<span contenteditable=\"false\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1"));
+		this.editarea.html(this.editarea.html().replace(/<span contenteditable=\"true\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1"));
 	},
 	
 	// TAG CLEANING
