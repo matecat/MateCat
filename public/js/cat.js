@@ -2291,6 +2291,7 @@ $.extend(UI, {
 				}
 			}, 50);			
 		}).on('keydown', '.editor .editarea', function(e) {
+
 			var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
 			if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
 				if (event.which == 88) { // ctrl+x
@@ -2303,7 +2304,7 @@ $.extend(UI, {
 			}
 
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
-				if ($('.selected', $(this)).length) {
+				if ($('.selected', $(this)).length) {console.log('a');
 					e.preventDefault();
 					$('.selected', $(this)).remove();
 					UI.saveInUndoStack('cancel');
@@ -2327,6 +2328,7 @@ $.extend(UI, {
 //					}
 				}
 			}
+			
 			if (e.which == 8) { // backspace
 				if($('.tag-autocomplete').length) {
 					UI.closeTagAutocompletePanel();
@@ -2463,6 +2465,7 @@ $.extend(UI, {
 		}).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
+			setCursorPosition(this);
 			selectText(this);
 			$(this).toggleClass('selected');
 //		}).on('contextmenu', '.source', function(e) {
@@ -3405,7 +3408,7 @@ $.extend(UI, {
 	},
 	
 	// TAG MARK
-	detectTags: function(area) {
+	detectTags: function(area) {console.log('detect');
 		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 		if (!this.firstMarking) {
 			$(area).html($(area).html().replace(/(<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
@@ -3456,11 +3459,11 @@ $.extend(UI, {
 			UI.detectTags(this);
 		});
 
-		$('.editarea').each(function() {
-			if ($('#segment-' + $(this).data('sid')).hasClass('mismatch'))
-				return false;
-			UI.detectTags(this);
-		});
+//		$('.editarea').each(function() {
+//			if ($('#segment-' + $(this).data('sid')).hasClass('mismatch'))
+//				return false;
+//			UI.detectTags(this);
+//		});
 	},
 	markTagsInSearch: function(el) {
 		if (!this.taglockEnabled)
@@ -3480,7 +3483,8 @@ $.extend(UI, {
 			return false;
 		if (this.noTagsInSegment())
 			return false;
-		
+//		console.log('b');
+//		console.log($(editarea).html());
 		$(editarea).first().each(function(index) {
 			saveSelection();
 

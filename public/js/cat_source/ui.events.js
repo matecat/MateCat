@@ -326,6 +326,7 @@ $.extend(UI, {
 				}
 			}, 50);			
 		}).on('keydown', '.editor .editarea', function(e) {
+
 			var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
 			if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
 				if (event.which == 88) { // ctrl+x
@@ -338,7 +339,7 @@ $.extend(UI, {
 			}
 
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
-				if ($('.selected', $(this)).length) {
+				if ($('.selected', $(this)).length) {console.log('a');
 					e.preventDefault();
 					$('.selected', $(this)).remove();
 					UI.saveInUndoStack('cancel');
@@ -362,6 +363,7 @@ $.extend(UI, {
 //					}
 				}
 			}
+			
 			if (e.which == 8) { // backspace
 				if($('.tag-autocomplete').length) {
 					UI.closeTagAutocompletePanel();
@@ -498,6 +500,7 @@ $.extend(UI, {
 		}).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
+			setCursorPosition(this);
 			selectText(this);
 			$(this).toggleClass('selected');
 //		}).on('contextmenu', '.source', function(e) {
