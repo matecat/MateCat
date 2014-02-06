@@ -371,9 +371,6 @@ $.extend(UI, {
 								UI.saveInUndoStack('cancel');
 							if (numSpacesAfter < numSpacesBefore)
 								UI.saveInUndoStack('cancel');
-							console.log('QUI: ', UI.editarea.html());
-
-
 						}, 50);
 
 				

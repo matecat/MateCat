@@ -2336,9 +2336,6 @@ $.extend(UI, {
 								UI.saveInUndoStack('cancel');
 							if (numSpacesAfter < numSpacesBefore)
 								UI.saveInUndoStack('cancel');
-							console.log('QUI: ', UI.editarea.html());
-
-
 						}, 50);
 
 				
@@ -3537,7 +3534,6 @@ $.extend(UI, {
             } else {
                 tx = tx.replace(/(<span contenteditable="true" class="[^"]*"\>)(:?<span contenteditable="true" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
             }
-
 
 //			if (UI.isFirefox) {
 //				tx = tx.replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>");
