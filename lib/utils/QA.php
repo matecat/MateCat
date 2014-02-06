@@ -313,13 +313,13 @@ class QA {
     protected function _addError($errCode) {
 
         //Real error Code log
-        try {
-            throw new Exception('');
-        } catch( Exception $e ){
-            Log::doLog( $errCode . " :: " . $this->_errorMap[$errCode]);
-            $trace = $e->getTrace();
-            Log::doLog( $trace[1] );
-        }
+//        try {
+//            throw new Exception('');
+//        } catch( Exception $e ){
+//            Log::doLog( $errCode . " :: " . $this->_errorMap[$errCode]);
+//            $trace = $e->getTrace();
+//            Log::doLog( $trace[1] );
+//        }
 
         switch( $errCode ) {
             case self::ERR_COUNT:
