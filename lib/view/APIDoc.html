@@ -123,6 +123,10 @@
             border-right:1px solid #ddd;
         }
 
+        em {
+            padding-right:15px;
+        }
+
     </style>
 
 </head>
@@ -146,29 +150,28 @@
             <dt>Parameters</dt>
             <dd>
                 <ul class="parameters">
-                    <li><span class="param">project_name</span> <code>(string)</code> The name of the project you want
+                    <li><em>required</em><span class="param">project_name</span> <code>(string)</code> The name of the project you want
                         create.
                     </li>
-                    <li><span class="param">source_lang</span> <code>(string)</code> RFC 3066 language Code ( en-US )
+                    <li><em>required</em><span class="param">source_lang</span> <code>(string)</code> <a href="http://www.rfc-editor.org/rfc/rfc5646.txt" target="blank" >RFC 5646</a> language+region Code ( en-US ) as specified in <a href="http://www.w3.org/International/articles/language-tags/" target="blank" >W3C standards</a>
                     </li>
-                    <li><span class="param">target_lang</span> <code>(string)</code> RFC 3066 language(s) Code(s).
-                        Multiple
-                        languages must be comma separated ( <code>it-IT,fr-FR,es-ES</code> )
+                    <li><em>required</em><span class="param">target_lang</span> <code>(string)</code> <a href="http://www.rfc-editor.org/rfc/rfc5646.txt" target="blank" >RFC 5646</a> language(s)+region(s) Code(s)  as specified in <a href="http://www.w3.org/International/articles/language-tags/" target="blank" >W3C standards</a>.
+                        Multiple languages must be comma separated ( <code>it-IT,fr-FR,es-ES</code> )
                     </li>
-                    <li><span class="param">tms_engine</span> <code>(int)</code> Identifier for Memory Server (
+                    <li><em>required ( default 0 )</em><span class="param">tms_engine</span> <code>(int)</code> Identifier for Memory Server (
                         <code>ZERO</code> means disabled, <code>ONE</code> means MyMemory )
                     </li>
-                    <li><span class="param">disable_tms_engine</span> <code>(bool)</code> This flag needs to disable
+                    <li><em>optional ( default 0 )</em><span class="param">disable_tms_engine</span> <code>(bool)</code> This flag needs to disable
                         Memory
                         Server. It should be set to <code>0</code> or <code>false</code>
                         to enable contributions from MyMemory Engine
                         ( N.B.: activating this flag force <code>tms_engine</code> to <code>ZERO</code> )
                     </li>
-                    <li><span class="param">private_tm_key</span> <code>(string)</code> Private Key for MyMemory. Fill
+                    <li><em>optional</em><span class="param">private_tm_key</span> <code>(string)</code> Private Key for MyMemory. Fill
                         this
                         field with your MyMemory private key if you already have one
                     </li>
-                    <li><span class="param">create_new_tm_key</span> <code>(bool)</code> Set this flag <code>true</code>
+                    <li><em>optional</em><span class="param">create_new_tm_key</span> <code>(bool)</code> Set this flag <code>true</code>
                         if
                         you want to create a new MyMemory key.
                         ( N.B. will be ignored if <code>private_tm_key</code> is not null )
@@ -265,10 +268,10 @@
             <dt>Parameters</dt>
             <dd>
                 <ul class="parameters">
-                    <li><span class="param">id_project</span> <code>(int)</code> The identifier of the project, should be the
+                    <li><em>required</em><span class="param">id_project</span> <code>(int)</code> The identifier of the project, should be the
                         value returned by the <a href="#NEW" ><code>/new</code></a> method.
                     </li>
-                    <li><span class="param">ppassword</span> <code>(string)</code> The password associated with the project, should be the
+                    <li><em>required</em><span class="param">ppassword</span> <code>(string)</code> The password associated with the project, should be the
                         value returned by the <a href="#NEW" ><code>/new</code></a> method ( associated with the id_project )
                     </li>
                 </ul>
