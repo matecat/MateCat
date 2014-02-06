@@ -344,18 +344,41 @@ $.extend(UI, {
 					$('.selected', $(this)).remove();
 					UI.saveInUndoStack('cancel');
 					UI.currentSegmentQA();
-				} else {console.log('eccolo');
+				} else {
 //					try {
 						var numTagsBefore = UI.editarea.text().match(/<.*?\>/gi).length;
 						var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
+
+						console.log(UI.editarea.html());
+						saveSelection();
+						console.log(UI.editarea.html());
+						parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
+						isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
+						restoreSelection();
+						if ((e.which == 8)&&(isInsideTag)) {
+							console.log('inside tag');
+						}
+						console.log(e.which + ' - ' + isInsideTag);
 						setTimeout(function() {
+							if ((e.which == 46)&&(isInsideTag)) {
+								console.log('inside tag');
+							}
+							console.log(e.which + ' - ' + isInsideTag);
 							var numTagsAfter = UI.editarea.text().match(/<.*?\>/gi).length;
 							var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
 							if (numTagsAfter < numTagsBefore)
 								UI.saveInUndoStack('cancel');
 							if (numSpacesAfter < numSpacesBefore)
 								UI.saveInUndoStack('cancel');
+							console.log('QUI: ', UI.editarea.html());
+
+
 						}, 50);
+
+				
+//						selectText(this);
+
+
 //					} catch (e) {
 						//Error: Cannot read property 'length' of null 
 						//when we are on first character position in edit area and try to BACKSPACE
@@ -388,16 +411,8 @@ $.extend(UI, {
 						$('.rangySelectionBoundary', UI.editarea).remove();
 					}
 				}
-				UI.closeTagAutocompletePanel();
-				setTimeout(function() {
-					saveSelection();
-					parentTag = $('span.locked', UI.editarea).has(' .rangySelectionBoundary');
-					isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
-					restoreSelection();
-					if(isInsideTag) {
-						setCursorPosition(parentTag[0]);
-					}
-				}, 50);
+				UI.closeTagAutocompletePanel(); 
+				UI.jumpTag('');
 			}
 
 			if (e.which == 38) { // top arrow
@@ -436,16 +451,7 @@ $.extend(UI, {
 					}
 				}
 				UI.closeTagAutocompletePanel();
-				setTimeout(function() {
-					saveSelection();
-					parentTag = $('span.locked', UI.editarea).has(' .rangySelectionBoundary');
-					isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
-					restoreSelection();
-					if(isInsideTag) {
-						setCursorPosition(parentTag[0], 'end');
-					}
-				}, 50);
-
+				UI.jumpTag('end');
 			}
 
 			if (e.which == 40) { // down arrow

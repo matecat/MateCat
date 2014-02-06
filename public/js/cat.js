@@ -2309,18 +2309,41 @@ $.extend(UI, {
 					$('.selected', $(this)).remove();
 					UI.saveInUndoStack('cancel');
 					UI.currentSegmentQA();
-				} else {console.log('eccolo');
+				} else {
 //					try {
 						var numTagsBefore = UI.editarea.text().match(/<.*?\>/gi).length;
 						var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
+
+						console.log(UI.editarea.html());
+						saveSelection();
+						console.log(UI.editarea.html());
+						parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
+						isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
+						restoreSelection();
+						if ((e.which == 8)&&(isInsideTag)) {
+							console.log('inside tag');
+						}
+						console.log(e.which + ' - ' + isInsideTag);
 						setTimeout(function() {
+							if ((e.which == 46)&&(isInsideTag)) {
+								console.log('inside tag');
+							}
+							console.log(e.which + ' - ' + isInsideTag);
 							var numTagsAfter = UI.editarea.text().match(/<.*?\>/gi).length;
 							var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
 							if (numTagsAfter < numTagsBefore)
 								UI.saveInUndoStack('cancel');
 							if (numSpacesAfter < numSpacesBefore)
 								UI.saveInUndoStack('cancel');
+							console.log('QUI: ', UI.editarea.html());
+
+
 						}, 50);
+
+				
+//						selectText(this);
+
+
 //					} catch (e) {
 						//Error: Cannot read property 'length' of null 
 						//when we are on first character position in edit area and try to BACKSPACE
@@ -2353,16 +2376,8 @@ $.extend(UI, {
 						$('.rangySelectionBoundary', UI.editarea).remove();
 					}
 				}
-				UI.closeTagAutocompletePanel();
-				setTimeout(function() {
-					saveSelection();
-					parentTag = $('span.locked', UI.editarea).has(' .rangySelectionBoundary');
-					isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
-					restoreSelection();
-					if(isInsideTag) {
-						setCursorPosition(parentTag[0]);
-					}
-				}, 50);
+				UI.closeTagAutocompletePanel(); 
+				UI.jumpTag('');
 			}
 
 			if (e.which == 38) { // top arrow
@@ -2401,16 +2416,7 @@ $.extend(UI, {
 					}
 				}
 				UI.closeTagAutocompletePanel();
-				setTimeout(function() {
-					saveSelection();
-					parentTag = $('span.locked', UI.editarea).has(' .rangySelectionBoundary');
-					isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
-					restoreSelection();
-					if(isInsideTag) {
-						setCursorPosition(parentTag[0], 'end');
-					}
-				}, 50);
-
+				UI.jumpTag('end');
 			}
 
 			if (e.which == 40) { // down arrow
@@ -3522,8 +3528,8 @@ $.extend(UI, {
             tx = tx.replace(/<span/gi, "<pl")
                     .replace(/<\/span/gi, "</pl")
                     .replace(/&lt;/gi, "<")
-					.replace(/(<(g|x|bx|ex|bpt|ept|ph[^a-z]*|it|mrk)\sid[^<]*?&gt;)/gi, brTx1)
-					.replace(/</gi, "&lt;")
+                    .replace(/(<(g|x|bx|ex|bpt|ept|ph[^a-z]*|it|mrk)\sid[^<]*?&gt;)/gi, brTx1)
+                    .replace(/</gi, "&lt;")
                     .replace(/\&lt;pl/gi, "<span")
                     .replace(/\&lt;\/pl/gi, "</span")
                     .replace(/\&lt;div\>/gi, "<div>")
@@ -3532,11 +3538,20 @@ $.extend(UI, {
                     .replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />')
                     .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
 
-			if (UI.isFirefox) {
+            if (UI.isFirefox) {
                 tx = tx.replace(/(<span class=\"[^>]*locked[^>]*\" contenteditable=\"true\"\>)(:?\1)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
-			} else {
-				tx = tx.replace(/(<span contenteditable=\"true\" class=\"[^>]*locked[^>]*\"\>)(:?\1)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
-			}
+            } else {
+                tx = tx.replace(/(<span contenteditable=\"true\" class=\"[^>]*locked[^>]*\"\>)(:?\1)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
+            }
+
+//			if (UI.isFirefox) {
+//				tx = tx.replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>");
+//				tx = tx.replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>){2,}(.*?)(<\/span\>){2,}/gi, "<span class=\"$2\" contenteditable=\"false\">$3</span>");
+//			} else {
+//				// fix nested encapsulation
+//				tx = tx.replace(/(<span contenteditable=\"true\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"true\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>");
+//				tx = tx.replace(/(<span contenteditable=\"true\" class=\"(.*?locked.*?)\"\>){2,}(.*?)(<\/span\>){2,}/gi, "<span contenteditable=\"true\" class=\"$2\">$3</span>");
+//			}
 
 			tx = tx.replace(/(<\/span\>)$(\s){0,}/gi, "</span> ");
 			var prevNumTags = $('span.locked', this).length;
@@ -3667,6 +3682,19 @@ $.extend(UI, {
 		$('.tag-autocomplete').css('left', offset.left);
 		this.checkAutocompleteTags();	
 	},
+	jumpTag: function(pos) {
+		pos = pos || 0;
+		setTimeout(function() {
+			saveSelection();
+			parentTag = $('span.locked', UI.editarea).has(' .rangySelectionBoundary');
+			isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
+			restoreSelection();
+			if(isInsideTag) {
+				setCursorPosition(parentTag[0], pos);
+			}
+		}, 50);		
+	},
+
 });
 
 

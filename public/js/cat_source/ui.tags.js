@@ -123,7 +123,7 @@ $.extend(UI, {
 //		console.log('a: ', $(editarea).html());
 		$(editarea).first().each(function(index) {
 			saveSelection();
-			console.log('a0: ', $(editarea).html());
+//			console.log('a0: ', $(editarea).html());
 			
 //			UI.editarea.focus();
 //			saveSelection();
@@ -289,6 +289,19 @@ $.extend(UI, {
 		$('.tag-autocomplete').css('left', offset.left);
 		this.checkAutocompleteTags();	
 	},
+	jumpTag: function(pos) {
+		pos = pos || 0;
+		setTimeout(function() {
+			saveSelection();
+			parentTag = $('span.locked', UI.editarea).has(' .rangySelectionBoundary');
+			isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
+			restoreSelection();
+			if(isInsideTag) {
+				setCursorPosition(parentTag[0], pos);
+			}
+		}, 50);		
+	},
+
 });
 
 
