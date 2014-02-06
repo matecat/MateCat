@@ -2269,6 +2269,7 @@ $.extend(UI, {
 			UI.preOpenConcordance();
 		}).on('keypress', '.editor .editarea', function(e) {
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
+				console.log('KEYPRESS SU EDITAREA: ', UI.editarea.html());
 				if($('.tag-autocomplete').length) {
 					e.preventDefault();
 					return false;
@@ -2335,9 +2336,6 @@ $.extend(UI, {
 								UI.saveInUndoStack('cancel');
 							if (numSpacesAfter < numSpacesBefore)
 								UI.saveInUndoStack('cancel');
-							console.log('QUI: ', UI.editarea.html());
-
-
 						}, 50);
 
 				
@@ -3512,15 +3510,8 @@ $.extend(UI, {
 			return false;
 		if (this.noTagsInSegment())
 			return false;
-//		console.log('b');
-//		console.log('a: ', $(editarea).html());
 		$(editarea).first().each(function(index) {
 			saveSelection();
-//			console.log('a0: ', $(editarea).html());
-			
-//			UI.editarea.focus();
-//			saveSelection();
-//			restoreSelection();
 			var tx = $(this).html();
 			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"true\">$1</pl>" : "<pl contenteditable=\"true\" class=\"locked\">$1</pl>";
 			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"true\">$1</span>" : "<span contenteditable=\"true\" class=\"locked\">$1</span>";
@@ -3543,7 +3534,6 @@ $.extend(UI, {
             } else {
                 tx = tx.replace(/(<span contenteditable="true" class="[^"]*"\>)(:?<span contenteditable="true" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
             }
-
 
 //			if (UI.isFirefox) {
 //				tx = tx.replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>");
@@ -3664,6 +3654,7 @@ $.extend(UI, {
 	openTagAutocompletePanel: function() {
 		if(!UI.sourceTags.length) return false;
 		$('.tag-autocomplete-marker').remove();
+		console.log('openTagAutocompletePanel 1: ', UI.editarea.html());
 
 		var node = document.createElement("span");
 		node.setAttribute('class', 'tag-autocomplete-marker');
@@ -3678,10 +3669,12 @@ $.extend(UI, {
 		$.each(UI.sourceTags, function(index) {
 			$('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + '>' + this + '</li>');
 		});
+		console.log('openTagAutocompletePanel 2: ', UI.editarea.html());
 
 		$('.tag-autocomplete').css('top', offset.top + 20);
 		$('.tag-autocomplete').css('left', offset.left);
 		this.checkAutocompleteTags();	
+		console.log('openTagAutocompletePanel 3: ', UI.editarea.html());
 	},
 	jumpTag: function(pos) {
 		pos = pos || 0;
@@ -3694,6 +3687,13 @@ $.extend(UI, {
 				setCursorPosition(parentTag[0], pos);
 			}
 		}, 50);		
+	},
+	movePHOutOfTags: function() {
+		if($('span.locked .rangySelectionBoundary', this.editarea).length) {
+			ph = $('span.locked .rangySelectionBoundary', this.editarea);
+			$('span.locked', this.editarea).has('.rangySelectionBoundary').before(ph[0].outerHTML);
+			ph.remove();
+		}
 	},
 
 });
@@ -4924,6 +4924,7 @@ function saveSelection(el) {
 	editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
 
 	UI.savedSelActiveElement = document.activeElement;
+	UI.movePHOutOfTags();
 }
 
 function restoreSelection() {
