@@ -1,0 +1,535 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>Untitled Document</title>
+<link href="/public/css/style.css" rel="stylesheet" type="text/css" />
+<link href="/public/css/manage.css" rel="stylesheet" type="text/css" />
+<link href="/public/css/common.css" rel="stylesheet" type="text/css" />
+<style>
+a {
+color: #39699a;
+}
+
+#contentBox pre {
+background: #fbfbfb;
+padding: 10px;
+border: 1px dashed #ccc;
+font-size:1em;
+}
+.apidesc td {
+padding: 8px;
+text-align:center;
+}
+.api dt {
+float: left;
+text-align:right;
+color:#666666;
+}
+.api dd {
+margin-left:120px;
+}
+.api dl {
+margin-left: 40px;
+line-height: 22px;
+.api {padding-top:0;}
+.api header {position:relative;}
+.api h1, .api h2 {color:#000!important; margin-top:20px;}
+.api h3 {color:#000!important;font-weight:bold!important; font-size:20px!important;margin-top:20px;}
+.gototop {text-align: right;
+margin: 10px 0;
+display: block;
+padding-bottom: 20px;
+border-bottom: 1px dashed #ccc;}
+</style>
+</head>
+<body class="api">
+<header>
+            <div class="wrapper ">   
+                <a href="/" class="logo"></a>
+            </div>
+        </header>
+<div id="contentBox" class="wrapper">
+       <a name="top"><h1>API</h1></a>
+        	<ul class="menu">
+          
+            <li><a href="#new-post">/new (POST)</a></li>
+            <li><a href="#status-post">/status (POST)</a></li>
+                        <li><a href="#file-format">Supported file format</a></li>
+
+            </ul>
+
+                     
+                    <a name="new-post"><h3 class="method-title">/new (POST)</h3></a>
+        <dl>
+            <dt>Description</dt>
+            <dd><p>Create a new Project.</p>
+            </dd>
+            <dt class="url-label">URL Structure</dt>
+            <dd>
+                <pre class="literal-block">https://matecatpro.translated.net/<b>api</b>/new</pre>
+            </dd>
+            <dt>Method</dt>
+            <dd>POST ( multipart/form-data )</dd>
+            <dt>Files To Upload</dt>
+            <dd><p><em>required</em> The file(s) to be uploaded.</p></dd>
+            <dt>Parameters</dt>
+            <dd>
+                <ul class="parameters">
+                    <li><em>required</em><span class="param">project_name</span> <code>(string)</code> The name of the project you want
+                        create.
+                    </li>
+                    <li><em>required</em><span class="param">source_lang</span> <code>(string)</code> <a href="http://www.rfc-editor.org/rfc/rfc5646.txt" target="blank">RFC 5646</a> language+region Code ( en-US ) as specified in <a href="http://www.w3.org/International/articles/language-tags/" target="blank">W3C standards</a>
+                    </li>
+                    <li><em>required</em><span class="param">target_lang</span> <code>(string)</code> <a href="http://www.rfc-editor.org/rfc/rfc5646.txt" target="blank">RFC 5646</a> language(s)+region(s) Code(s)  as specified in <a href="http://www.w3.org/International/articles/language-tags/" target="blank">W3C standards</a>.
+                        Multiple languages must be comma separated ( <code>it-IT,fr-FR,es-ES</code> )
+                    </li>
+                    <li><em>required ( default 0 )</em><span class="param">tms_engine</span> <code>(int)</code> Identifier for Memory Server (
+                        <code>ZERO</code> means disabled, <code>ONE</code> means MyMemory )
+                    </li>
+                    <li><em>optional ( default 0 )</em><span class="param">disable_tms_engine</span> <code>(bool)</code> This flag needs to disable
+                        Memory
+                        Server. It should be set to <code>0</code> or <code>false</code>
+                        to enable contributions from MyMemory Engine
+                        ( N.B.: activating this flag force <code>tms_engine</code> to <code>ZERO</code> )
+                    </li>
+                    <li><em>optional</em><span class="param">private_tm_key</span> <code>(string)</code> Private Key for MyMemory. Fill
+                        this
+                        field with your MyMemory private key if you already have one
+                    </li>
+                    <li><em>optional</em><span class="param">create_new_tm_key</span> <code>(bool)</code> Set this flag <code>true</code>
+                        if
+                        you want to create a new MyMemory key.
+                        ( N.B. will be ignored if <code>private_tm_key</code> is not null )
+                    </li>
+                </ul>
+            </dd>
+            <dt>Returns</dt>
+            <dd>
+                <p>The metadata for the created project.</p>
+
+                <p>More information on the returned metadata fields are available
+                    <a href="http://matecat.local/api/docs#metadata-new-details">here</a>
+                </p>
+
+                <p><strong>Sample JSON response</strong></p>
+            <pre class="literal-block">{
+    "status": "OK",
+    "id_project": 5368,
+    "ppassword": "76ba60c027b9",
+}
+            </pre>
+                <p><strong>Return value definitions</strong></p>
+				<table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+                    <tbody>
+                    <tr>
+                        <th>field</th>
+                        <th>description</th>
+                    </tr>
+                    <tr>
+                        <td><code>status</code></td>
+                        <td>Return the creation status of the project. The statuses can be:
+                            <ul>
+                                <li><code>OK</code> indicating that the creation worked.</li>
+                                <li><code>FAIL</code> indicating that the creation is failed.</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>id_project</code></td>
+                        <td>Return the unique id of the project just created.
+                            If creation status is <code>FAIL</code> this key will simply be omitted from the result.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>ppassword</code></td>
+                        <td>Return the password of the project just created.
+                            If creation status is <code>FAIL</code> this key will simply be omitted from the result.
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+
+            </dd>
+            <dt>Errors</dt>
+            <dd>
+                <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+
+                    <tbody>
+                    <tr>
+                        <td>FAIL</td>
+                        <td>The project creation is failed</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                        <pre class="literal-block">{
+    "status": "FAIL",
+}
+                        </pre>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </dd>
+            <dt>Notes</dt>
+            <dd><p><code>/new</code> has a maximum file size limit of 60 MB per file and a max number of files of 100.</p></dd>
+            <dd><p>Matecat PRO accept only 54 file formats. A list of all accepted file are available
+                <a href="http://matecat.local/api/docs#accepted-files">here</a></p>
+            </dd>
+        </dl>
+        <a class="gototop" href="#top">Torna sopra</a>
+         <a name="status-post"><h3 class="method-title">/status (POST)</h3></a>
+        <dl>
+            <dt>Description</dt>
+            <dd><p>Retrieve the status of a project</p>
+            </dd>
+            <dt class="url-label">URL Structure</dt>
+            <dd>
+                <pre class="literal-block">https://matecatpro.translated.net/<b>api</b>/status</pre>
+            </dd>
+            <dt>Method</dt>
+            <dd>POST ( application/x-www-form-urlencoded )</dd>
+            <dt>Parameters</dt>
+            <dd>
+                <ul class="parameters">
+                    <li><em>required</em><span class="param">id_project</span> <code>(int)</code> The identifier of the project, should be the
+                        value returned by the <a href="http://matecat.local/api/docs#NEW"><code>/new</code></a> method.
+                    </li>
+                    <li><em>required</em><span class="param">ppassword</span> <code>(string)</code> The password associated with the project, should be the
+                        value returned by the <a href="http://matecat.local/api/docs#NEW"><code>/new</code></a> method ( associated with the id_project )
+                    </li>
+                </ul>
+            </dd>
+            <dt>Returns</dt>
+            <dd>
+                <p>The metadata for the created project containing the status of the project.</p>
+
+                <p>More information on the returned metadata fields are available
+                    <a href="http://matecat.local/api/docs#metadata-status-details">here</a>
+                </p>
+
+                <p><strong>Sample JSON response</strong></p>
+            <pre class="literal-block">{"data": {
+    "jobs": {
+        "5615": {
+            "chunks": {
+                "e77eeea779d2": {
+                    "6291": {
+                        "TOTAL_PAYABLE":
+                                [
+                                    143.15
+                                ],
+                        "REPETITIONS":
+                                [
+                                    0,
+                                    "0"
+                                ],
+                        "MT":
+                                [
+                                    167,
+                                    "167"
+                                ],
+                        "NEW":
+                                [
+                                    0,
+                                    "0"
+                                ],
+                        "TM_100":
+                                [
+                                    2,
+                                    "2"
+                                ],
+                        "TM_75_99":
+                                [
+                                    1,
+                                    "1"
+                                ],
+                        "INTERNAL_MATCHES":
+                                [
+                                    0,
+                                    "0"
+                                ],
+                        "ICE":
+                                [
+                                    0,
+                                    "0"
+                                ],
+                        "FILENAME": "Test1.docx"
+                    }
+                }
+            },
+            "totals": {
+                "e77eeea779d2": {
+                    "TOTAL_PAYABLE":
+                            [
+                                143.15,
+                                "143"
+                            ],
+                    "REPETITIONS":
+                            [
+                                0,
+                                "0"
+                            ],
+                    "MT":
+                            [
+                                167,
+                                "167"
+                            ],
+                    "NEW":
+                            [
+                                0,
+                                "0"
+                            ],
+                    "TM_100":
+                            [
+                                2,
+                                "2"
+                            ],
+                    "TM_75_99":
+                            [
+                                1,
+                                "1"
+                            ],
+                    "INTERNAL_MATCHES":
+                            [
+                                0,
+                                "0"
+                            ],
+                    "ICE":
+                            [
+                                0,
+                                "0"
+                            ]
+                    }
+                }
+            }
+        },
+        "summary": {
+            "IN_QUEUE_BEFORE": 0,
+            "IN_QUEUE_BEFORE_PRINT": "0",
+            "STATUS": "DONE",
+            "TOTAL_SEGMENTS": 16,
+            "SEGMENTS_ANALYZED": 16,
+            "TOTAL_SEGMENTS_PRINT": "16",
+            "SEGMENTS_ANALYZED_PRINT": "16",
+            "TOTAL_FAST_WC": "169.00",
+            "TOTAL_TM_WC": 143.15,
+            "TOTAL_FAST_WC_PRINT": "169",
+            "TOTAL_STANDARD_WC": 168.2,
+            "TOTAL_STANDARD_WC_PRINT": "168",
+            "TOTAL_TM_WC_PRINT": "143",
+            "STANDARD_WC_TIME": "27",
+            "FAST_WC_TIME": "27",
+            "TM_WC_TIME": "23",
+            "STANDARD_WC_UNIT": "minutes",
+            "TM_WC_UNIT": "minutes",
+            "FAST_WC_UNIT": "minutes",
+            "USAGE_FEE": "0.78",
+            "PRICE_PER_WORD": "0.030",
+            "DISCOUNT": "2",
+            "NAME": "MyProject4",
+            "TOTAL_RAW_WC": 170,
+            "TOTAL_RAW_WC_PRINT": "170",
+            "TOTAL_PAYABLE": 143.15,
+            "TOTAL_PAYABLE_PRINT": "143",
+            "PAYABLE_WC_TIME": "23",
+            "PAYABLE_WC_UNIT": "minutes",
+            "DISCOUNT_WC": "0"
+        }
+    },
+   "status": "DONE",
+   "analyze": "http:\/\/matecat.local\/analyze\/MyProject4\/5368-76ba60c027b9",
+   "jobs": {
+       "jid-jpass": ["5615-e77eeea779d2"],
+       "job-url": {
+            "5615-e77eeea779d2": "http:\/\/matecat.local\/translate\/MyProject4\/de-DE-en-US\/5615-e77eeea779d2"
+        }
+    }
+}
+            </pre>
+            <p><strong>Return value definitions</strong></p>
+               <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+
+                    <tbody>
+                    <tr>
+                        <th>field</th>
+                        <th>description</th>
+                    </tr>
+                    <tr>
+                        <td><code>jobs</code></td>
+                        <td>A structure containing all the info for the specified project.
+                            The numerical keys on the first level are the ID of the Jobs contained in the project.
+                            ( An ID identifies a language target, so, there are so many languages as there are IDs and vice versa  ).
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>chunks</code></td>
+                        <td>A structure containing the password for the associated job ID.
+                            There may be multiple chunks ( passwords ) for the same job ID because of the split.
+                            So this key can have multiple entries.
+                            Inside every entry key ( passwords ) whe have one or more numerical key indicating the id of every file in the chunk
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>totals</code></td>
+                        <td>Returns the total for every chunk. The entries inside this key are the sums of values for all the chunks of the job.</td>
+                    </tr>
+                    <tr>
+                        <td><code>summary</code></td>
+                        <td>Returns the total for the project.</td>
+                    </tr>
+                    <tr>
+                        <td><code>status</code></td>
+                        <td>Return the analysis status of the project. The statuses can be:
+                            <ul>
+                                <li><code>ANALYZING</code> indicating that the analysis/creation still working.</li>
+                                <li><code>NO_SEGMENTS_FOUND</code> indicating that the project are no segments to analyze.</li>
+                                <li><code>ANALYSIS_NOT_ENABLED</code> indicating that no analysis will be performed because of matecat configurations.</li>
+                                <li><code>DONE</code> indicating that the analysis/creation is completed.</li>
+                                <li><code>FAIL</code> indicating that the analysis/creation is failed.</li>
+                            </ul>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>analyze</code></td>
+                        <td>A link to the analyze page where you can fine all these project info.</td>
+                    </tr>
+                    <tr>
+                        <td><code>jid-jpass</code></td>
+                        <td>A unique identifier for every job in the project.
+                        </td>
+                    </tr>
+                    <tr>
+                        <td><code>job-url</code></td>
+                        <td>An object containing all the links to the jobs of the project
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </dd>
+            <dt>Errors</dt>
+            <dd>
+               <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+
+                    <tbody>
+                    <tr>
+                        <td>FAIL</td>
+                        <td>Wrong Password. Access denied</td>
+                    </tr>
+                    <tr>
+                        <td>FAIL</td>
+                        <td>No id project provided</td>
+                    </tr>
+                    <tr>
+                        <td colspan="2">
+                        <pre class="literal-block">{
+    "status":  "FAIL",
+    "message": "Wrong Password. Access denied"
+}
+                        </pre>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </dd>
+
+        </dl>
+        <a class="gototop" href="#top">Torna sopra</a>
+         <a name="file-format"><h3 class="method-title">Supported file formats</h3></a>
+            <dt id="accepted-files">List of supported file formats</dt>
+            <dd>
+
+                <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+
+                    <thead>
+                        <tr><th>Office</th>
+                        <th>Web</th>
+                        <th>Interchange Formats</th>
+                        <th>Desktop Publishing</th>
+                        <th>Localization</th>
+                    </tr></thead>
+                    <tbody><tr>
+                        <td>
+                            <ul class="listlang">
+                                <li>doc</li>
+                                <li>dot</li>
+                                <li>docx</li>
+                                <li>dotx</li>
+                                <li>docm</li>
+                                <li>dotm</li>
+                                <li>pdf</li>
+                                <li>xls</li>
+                                <li>xlt</li>
+                                <li>xlsm</li>
+                                <li>xlsx</li>
+                                <li>xltx</li>
+                                <li>pot</li>
+                                <li>pps</li>
+                                <li>ppt</li>
+                                <li>potm</li>
+                                <li>potx</li>
+                                <li>ppsm</li>
+                                <li>ppsx</li>
+                                <li>pptm</li>
+                                <li>pptx</li>
+                                <li>odp</li>
+                                <li>ods</li>
+                                <li>odt</li>
+                                <li>sxw</li>
+                                <li>sxc</li>
+                                <li>sxi</li>
+                                <li>txt</li>
+                                <li>csv</li>
+                                <li>xml</li>
+                            </ul>
+                        </td>
+                        <td>
+                            <ul class="listlang">
+                                <li>htm</li>
+                                <li>html</li>
+                                <li>xhtml</li>
+                                <li>xml</li>
+                            </ul>
+                        </td>
+                        <td>
+                            <ul class=" listlang">
+                                <li>xliff</li>
+                                <li>sdlxliff</li>
+                                <li>ttx</li>
+                                <li>itd</li>
+                                <li>xlf</li>
+                            </ul>
+                        </td>
+                        <td>
+                            <ul class=" listlang">
+                                <li>mif</li>
+                                <li>inx</li>
+                                <li>idml</li>
+                                <li>icml</li>
+                                <li>xtg</li>
+                                <li>tag</li>
+                                <li>xml</li>
+                                <li>dita</li>
+                            </ul>
+                        </td>
+                        <td>
+                            <ul class=" listlang">
+                                <li>properties</li>
+                                <li>rc</li>
+                                <li>resx</li>
+                                <li>xml</li>
+                                <li>dita</li>
+                                <li>sgml</li>
+                                <li>sgm</li>
+                            </ul>
+                        </td>
+                    </tr>
+                </tbody></table>
+
+            </dd>
+                     
+                      <a class="gototop" href="#top">Torna sopra</a>
+                     
+</div>
+</body>
+</html>

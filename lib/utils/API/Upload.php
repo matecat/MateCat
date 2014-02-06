@@ -2,15 +2,12 @@
 /**
  *
  * @author Domenico Lupinetti - Ostico@gmail.com
- * @license Released Under Lesser GPL License
- *	http://www.gnu.org/licenses/lgpl-3.0-standalone.html
  *
  * @example
  * <pre>
  *   if( \Registry::getInstance ()->get ( "HttpRequest", 'requestMethod' ) == 'POST' ) {
  *       $uploadInstance = new Upload();
- *       $filesToUpload = \Registry::getInstance ()->get ( "HttpRequest", 'fileUpload' );
- *       $uploadInstance->uploadFiles($filesToUpload /* $_FILES * /);
+ *       $uploadInstance->uploadFiles( $_FILES );
  *   }
  * </pre>
  *
@@ -41,7 +38,7 @@ class Upload  {
             mkdir( $this->dirUpload, 0775 );
         }
 
-        //Mime Whit List, take it from ProjectManager.php
+        //Mime White List, take it from ProjectManager.php
         $this->acceptedMime = array();
 
         //flatten to one dimensional list of keys

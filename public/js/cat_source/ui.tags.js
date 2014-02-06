@@ -139,9 +139,9 @@ $.extend(UI, {
                     .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
 
             if (UI.isFirefox) {
-                tx = tx.replace(/(<span class=\"[^>]*locked[^>]*\" contenteditable=\"true\"\>)(:?\1)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
+                tx = tx.replace(/(<span class="[^"]*" contenteditable="true"\>)(:?<span class="[^"]*" contenteditable="true"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
             } else {
-                tx = tx.replace(/(<span contenteditable=\"true\" class=\"[^>]*locked[^>]*\"\>)(:?\1)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
+                tx = tx.replace(/(<span contenteditable="true" class="[^"]*"\>)(:?<span contenteditable="true" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
             }
 
 //			if (UI.isFirefox) {
