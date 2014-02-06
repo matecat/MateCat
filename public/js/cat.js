@@ -2275,6 +2275,7 @@ $.extend(UI, {
 					return false;
 				}
 				UI.openTagAutocompletePanel();
+				console.log('Q: ', UI.editarea.html());
 			}
 			if((e.which == 62)&&(UI.taglockEnabled)) { // closing tag sign
 				if($('.tag-autocomplete').length) {
@@ -2315,14 +2316,15 @@ $.extend(UI, {
 						var numTagsBefore = UI.editarea.text().match(/<.*?\>/gi).length;
 						var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
 
-						console.log(UI.editarea.html());
-						saveSelection();
-						console.log(UI.editarea.html());
+						saveSelection('noMove');
 						parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
 						isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
 						restoreSelection();
 						if ((e.which == 8)&&(isInsideTag)) {
-							console.log('inside tag');
+							console.log('AA: ', UI.editarea.html());
+							parentTag.remove();
+							e.preventDefault();
+							console.log('BB: ', UI.editarea.html());
 						}
 						console.log(e.which + ' - ' + isInsideTag);
 						setTimeout(function() {
@@ -2330,12 +2332,15 @@ $.extend(UI, {
 								console.log('inside tag');
 							}
 							console.log(e.which + ' - ' + isInsideTag);
+							console.log('CC: ', UI.editarea.html());
 							var numTagsAfter = UI.editarea.text().match(/<.*?\>/gi).length;
 							var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
 							if (numTagsAfter < numTagsBefore)
 								UI.saveInUndoStack('cancel');
 							if (numSpacesAfter < numSpacesBefore)
 								UI.saveInUndoStack('cancel');
+							console.log('DD: ', UI.editarea.html());
+
 						}, 50);
 
 				
@@ -2361,6 +2366,7 @@ $.extend(UI, {
 				}
 			}
 			if (e.which == 37) { // left arrow
+				console.log('a: ', UI.editarea.html());
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
 				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
@@ -2374,8 +2380,10 @@ $.extend(UI, {
 						$('.rangySelectionBoundary', UI.editarea).remove();
 					}
 				}
-				UI.closeTagAutocompletePanel(); 
-				UI.jumpTag('');
+				console.log('b: ', UI.editarea.html());
+				UI.closeTagAutocompletePanel();
+				console.log('c: ', UI.editarea.html());
+				UI.jumpTag('start');
 			}
 
 			if (e.which == 38) { // top arrow
@@ -3502,7 +3510,7 @@ $.extend(UI, {
 	},
 
 	// TAG LOCK
-	lockTags: function(el) {
+	lockTags: function(el) {console.log('lock tags');
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
@@ -3677,9 +3685,12 @@ $.extend(UI, {
 		console.log('openTagAutocompletePanel 3: ', UI.editarea.html());
 	},
 	jumpTag: function(pos) {
-		pos = pos || 0;
+		pos = pos || 'start';
 		setTimeout(function() {
-			saveSelection();
+			console.log('d: ', UI.editarea.html());
+			saveSelection(pos);
+			console.log('z: ', UI.editarea.html());
+//			console.log(pos);
 			parentTag = $('span.locked', UI.editarea).has(' .rangySelectionBoundary');
 			isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
 			restoreSelection();
@@ -3688,10 +3699,14 @@ $.extend(UI, {
 			}
 		}, 50);		
 	},
-	movePHOutOfTags: function() {
+	movePHOutOfTags: function(where) {
 		if($('span.locked .rangySelectionBoundary', this.editarea).length) {
 			ph = $('span.locked .rangySelectionBoundary', this.editarea);
-			$('span.locked', this.editarea).has('.rangySelectionBoundary').before(ph[0].outerHTML);
+			if(where == 'start') {
+				$('span.locked', this.editarea).has('.rangySelectionBoundary').before(ph[0].outerHTML);
+			} else {
+				$('span.locked', this.editarea).has('.rangySelectionBoundary').after(ph[0].outerHTML);
+			}
 			ph.remove();
 		}
 	},
@@ -4806,7 +4821,7 @@ function pasteHtmlAtCaret(html, selectPastedContent) {
     }
 }
 
-function setCursorPosition(el, pos) {
+function setCursorPosition(el, pos) {console.log(pos);
 	pos = pos || 0;
 	var range = document.createRange();
 	var sel = window.getSelection();
@@ -4914,8 +4929,9 @@ function rawxliff2rawview(segment) { // currently unused
 	return segment;
 }
 
-function saveSelection(el) {
-	var editarea = (typeof editarea == 'undefined') ? UI.editarea : el;
+function saveSelection(pos) {console.log(pos);
+//	var editarea = (typeof editarea == 'undefined') ? UI.editarea : el;
+	var editarea = UI.editarea;
 	if (UI.savedSel) {
 		rangy.removeMarkers(UI.savedSel);
 	}
@@ -4924,7 +4940,7 @@ function saveSelection(el) {
 	editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
 
 	UI.savedSelActiveElement = document.activeElement;
-	UI.movePHOutOfTags();
+	if(pos != 'noMove') UI.movePHOutOfTags(pos);
 }
 
 function restoreSelection() {

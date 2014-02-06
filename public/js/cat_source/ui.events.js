@@ -310,6 +310,7 @@ $.extend(UI, {
 					return false;
 				}
 				UI.openTagAutocompletePanel();
+				console.log('Q: ', UI.editarea.html());
 			}
 			if((e.which == 62)&&(UI.taglockEnabled)) { // closing tag sign
 				if($('.tag-autocomplete').length) {
@@ -350,14 +351,15 @@ $.extend(UI, {
 						var numTagsBefore = UI.editarea.text().match(/<.*?\>/gi).length;
 						var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
 
-						console.log(UI.editarea.html());
-						saveSelection();
-						console.log(UI.editarea.html());
+						saveSelection('noMove');
 						parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
 						isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
 						restoreSelection();
 						if ((e.which == 8)&&(isInsideTag)) {
-							console.log('inside tag');
+							console.log('AA: ', UI.editarea.html());
+							parentTag.remove();
+							e.preventDefault();
+							console.log('BB: ', UI.editarea.html());
 						}
 						console.log(e.which + ' - ' + isInsideTag);
 						setTimeout(function() {
@@ -365,12 +367,15 @@ $.extend(UI, {
 								console.log('inside tag');
 							}
 							console.log(e.which + ' - ' + isInsideTag);
+							console.log('CC: ', UI.editarea.html());
 							var numTagsAfter = UI.editarea.text().match(/<.*?\>/gi).length;
 							var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
 							if (numTagsAfter < numTagsBefore)
 								UI.saveInUndoStack('cancel');
 							if (numSpacesAfter < numSpacesBefore)
 								UI.saveInUndoStack('cancel');
+							console.log('DD: ', UI.editarea.html());
+
 						}, 50);
 
 				
@@ -396,6 +401,7 @@ $.extend(UI, {
 				}
 			}
 			if (e.which == 37) { // left arrow
+				console.log('a: ', UI.editarea.html());
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
 				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
@@ -409,8 +415,10 @@ $.extend(UI, {
 						$('.rangySelectionBoundary', UI.editarea).remove();
 					}
 				}
-				UI.closeTagAutocompletePanel(); 
-				UI.jumpTag('');
+				console.log('b: ', UI.editarea.html());
+				UI.closeTagAutocompletePanel();
+				console.log('c: ', UI.editarea.html());
+				UI.jumpTag('start');
 			}
 
 			if (e.which == 38) { // top arrow

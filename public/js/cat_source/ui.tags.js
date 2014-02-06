@@ -111,7 +111,7 @@ $.extend(UI, {
 	},
 
 	// TAG LOCK
-	lockTags: function(el) {
+	lockTags: function(el) {console.log('lock tags');
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
@@ -286,9 +286,12 @@ $.extend(UI, {
 		console.log('openTagAutocompletePanel 3: ', UI.editarea.html());
 	},
 	jumpTag: function(pos) {
-		pos = pos || 0;
+		pos = pos || 'start';
 		setTimeout(function() {
-			saveSelection();
+			console.log('d: ', UI.editarea.html());
+			saveSelection(pos);
+			console.log('z: ', UI.editarea.html());
+//			console.log(pos);
 			parentTag = $('span.locked', UI.editarea).has(' .rangySelectionBoundary');
 			isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
 			restoreSelection();
@@ -297,10 +300,14 @@ $.extend(UI, {
 			}
 		}, 50);		
 	},
-	movePHOutOfTags: function() {
+	movePHOutOfTags: function(where) {
 		if($('span.locked .rangySelectionBoundary', this.editarea).length) {
 			ph = $('span.locked .rangySelectionBoundary', this.editarea);
-			$('span.locked', this.editarea).has('.rangySelectionBoundary').before(ph[0].outerHTML);
+			if(where == 'start') {
+				$('span.locked', this.editarea).has('.rangySelectionBoundary').before(ph[0].outerHTML);
+			} else {
+				$('span.locked', this.editarea).has('.rangySelectionBoundary').after(ph[0].outerHTML);
+			}
 			ph.remove();
 		}
 	},

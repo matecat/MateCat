@@ -181,7 +181,7 @@ function pasteHtmlAtCaret(html, selectPastedContent) {
     }
 }
 
-function setCursorPosition(el, pos) {
+function setCursorPosition(el, pos) {console.log(pos);
 	pos = pos || 0;
 	var range = document.createRange();
 	var sel = window.getSelection();
@@ -289,8 +289,9 @@ function rawxliff2rawview(segment) { // currently unused
 	return segment;
 }
 
-function saveSelection(el) {
-	var editarea = (typeof editarea == 'undefined') ? UI.editarea : el;
+function saveSelection(pos) {console.log(pos);
+//	var editarea = (typeof editarea == 'undefined') ? UI.editarea : el;
+	var editarea = UI.editarea;
 	if (UI.savedSel) {
 		rangy.removeMarkers(UI.savedSel);
 	}
@@ -299,7 +300,7 @@ function saveSelection(el) {
 	editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
 
 	UI.savedSelActiveElement = document.activeElement;
-	UI.movePHOutOfTags();
+	if(pos != 'noMove') UI.movePHOutOfTags(pos);
 }
 
 function restoreSelection() {
