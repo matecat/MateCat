@@ -304,6 +304,7 @@ $.extend(UI, {
 			UI.preOpenConcordance();
 		}).on('keypress', '.editor .editarea', function(e) {
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
+				console.log('KEYPRESS SU EDITAREA: ', UI.editarea.html());
 				if($('.tag-autocomplete').length) {
 					e.preventDefault();
 					return false;

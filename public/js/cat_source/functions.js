@@ -299,6 +299,7 @@ function saveSelection(el) {
 	editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
 
 	UI.savedSelActiveElement = document.activeElement;
+	UI.movePHOutOfTags();
 }
 
 function restoreSelection() {
