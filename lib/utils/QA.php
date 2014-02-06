@@ -284,9 +284,9 @@ class QA {
 
     protected static $regexpAscii = '/([\x{00}-\x{1F}\x{7F}]{1})/u';
 
-    protected static $regexpEntity = '/&#x([0-1]{1}[0-9A-F]{1})/u'; //&#x1E;
+    protected static $regexpEntity = '/&#x([0-1]{0,1}[0-9A-F]{1})/u'; //&#x1E;  &#xE;
 
-    protected static $regexpPlaceHoldAscii = '/##\$_([0-1]{1}[0-9A-F]{1})\$##/u';
+    protected static $regexpPlaceHoldAscii = '/##\$_([0-1]{0,1}[0-9A-F]{1})\$##/u';
 
     /**
      * List of Errors from  check analysis
@@ -526,7 +526,13 @@ class QA {
         if ( !empty( $matches_src[ 1 ] ) ) {
             $test_src = $source_seg;
             foreach ( $matches_src[ 1 ] as $v ) {
-                $test_src = preg_replace( '/&#x(' . sprintf( "%02X", ord( $v ) ) .'{1});/u', self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $test_src );
+                $byte = sprintf( "%02X", hexdec( $v ) );
+                if( $byte[0] == '0' ){
+                    $regexp = '/&#x([' . $byte[0] .']{0,1}' . $byte[1] . ');/u';
+                } else {
+                    $regexp = '/&#x(' . $byte . ');/u';
+                }
+                $test_src = preg_replace( $regexp, self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $test_src );
             }
             //Source Content wrong use placeholded one
             $source_seg = $test_src;
@@ -535,7 +541,13 @@ class QA {
         if ( !empty( $matches_trg[ 1 ] ) ) {
             $test_trg = $target_seg;
             foreach ( $matches_trg[ 1 ] as $v ) {
-                $test_trg = preg_replace( '/&#x(' . sprintf( "%02X", ord( $v ) ) .'{1});/u', self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $test_trg );
+                $byte = sprintf( "%02X", hexdec( $v ) );
+                if( $byte[0] == '0' ){
+                    $regexp = '/&#x([' . $byte[0] .']{0,1}' . $byte[1] . ');/u';
+                } else {
+                    $regexp = '/&#x(' . $byte . ');/u';
+                }
+                $test_trg = preg_replace( $regexp, self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $test_trg );
             }
             //Target Content wrong use placeholded one
             $target_seg = $test_trg;
