@@ -36,13 +36,10 @@ class DetectProprietaryXliff {
             // Checking Requirements (By specs, I know that xliff version is in the first 1KB)
             $file_content = fread($file_pointer, 1024);
             fclose($file_pointer);
-            preg_match('|<xliff\s.*?version\s?=\s?["\'](.*?)["\'](.*?)>|si', $file_content, $tmp);
 
-            //idiom Check
-            if ( isset($tmp[2]) && stripos( $tmp[2], 'idiominc.com' ) !== false ) {
-                self::$fileType['proprietary'] = true;
-                self::$fileType['proprietary_name'] = 'idiom world server';
-            }
+            $tmp = self::isXliff( $file_content );
+
+            self::_checkIdiom( $tmp );
 
         }
         self::$fileType['info'] = $info;
@@ -50,17 +47,36 @@ class DetectProprietaryXliff {
 
     }
 
-    public static function getInfoByStringData( $stringData ) {
+    public static function isXliff( $stringData ){
 
         $stringData = substr( $stringData, 0, 1024 );
 
         preg_match('|<xliff\s.*?version\s?=\s?["\'](.*?)["\'](.*?)>|si', $stringData, $tmp);
+
+        if( !empty($tmp) ){
+            return $tmp;
+        }
+
+        return false;
+
+    }
+
+    protected static function _checkIdiom( $tmp ){
 
         //idiom Check
         if ( isset($tmp[2]) && stripos( $tmp[2], 'idiominc.com' ) !== false ) {
             self::$fileType['proprietary'] = true;
             self::$fileType['proprietary_name'] = 'idiom world server';
         }
+
+    }
+
+    public static function getInfoByStringData( $stringData ) {
+
+        $tmp = self::isXliff( $stringData );
+
+        //idiom Check
+        self::_checkIdiom( $tmp );
 
         return self::$fileType;
 
