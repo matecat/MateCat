@@ -49,9 +49,7 @@ class NewController extends ajaxController {
                 'target_lang'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
                 'tms_engine'         => array( 'filter' => FILTER_VALIDATE_INT ),
                 'mt_engine'          => array( 'filter' => FILTER_VALIDATE_INT ),
-                'disable_tms_engine' => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
                 'private_tm_key'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'create_new_tm_key'  => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -69,13 +67,7 @@ class NewController extends ajaxController {
         $this->target_lang             = $__postInput[ 'target_lang' ];
         $this->tms_engine              = $__postInput[ 'tms_engine' ]; // Default 1 MyMemory
         $this->mt_engine               = $__postInput[ 'mt_engine' ]; // Default 1 MyMemory
-        $this->disable_tms_engine_flag = $__postInput[ 'disable_tms_engine' ]; // se false allora MyMemory
         $this->private_tm_key          = $__postInput[ 'private_tm_key' ];
-        $this->create_new_tm_key       = $__postInput[ 'create_new_tm_key' ];
-
-        if ( $this->disable_tms_engine_flag ) {
-            $this->tms_engine = 0; //remove default MyMemory
-        }
 
     }
 
@@ -86,17 +78,13 @@ class NewController extends ajaxController {
 
     public function doAction() {
 
-        if( $this->disable_tms_engine_flag ){
-            $this->tms_engine = 0;
-        }
-
         try {
             if( $this->tms_engine != 0 ){
-                include INIT::$UTILS_ROOT . "/engines/tms.class.php";
+                include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
                 $test_valid_TMS = new TMS( $this->tms_engine );
             }
             if( $this->mt_engine != 0 && $this->mt_engine != 1 ){
-                include INIT::$UTILS_ROOT . "/engines/mt.class.php";
+                include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
                 $test_valid_MT = new MT( $this->mt_engine );
             }
         } catch ( Exception $ex ) {
@@ -171,16 +159,14 @@ class NewController extends ajaxController {
         }
         /* Do conversions here */
 
-        //the first check on empty is redundant but assume that
-        //from api a key is sent and the flag is check
-        if( empty( $this->private_tm_key ) && $this->create_new_tm_key ){
+        //from api a key is sent and the value is 'new'
+        if( $this->private_tm_key == 'new' ){
+            include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
             //crea nuova chiave
             $newUser = TMS::createMyMemoryKey(); //throws exception
-
             $this->private_tm_key  = $newUser->key;
             $this->private_tm_user = $newUser->id;
             $this->private_tm_pass = $newUser->pass;
-
         }
 
         $projectStructure = new RecursiveArrayObject(
@@ -225,7 +211,7 @@ class NewController extends ajaxController {
 
         $this->api_output[ 'status' ]       = 'OK';
         $this->api_output[ 'id_project' ]   = $projectStructure['result']['id_project'];
-        $this->api_output[ 'ppassword' ]    = $projectStructure['result']['ppassword'];
+        $this->api_output[ 'project_pass' ]    = $projectStructure['result']['ppassword'];
 
     }
 

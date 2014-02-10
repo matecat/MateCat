@@ -97,20 +97,9 @@
             <li><em>required ( default 0 )</em><span class="param">mt_engine</span> <code>(int)</code> Identifier for Machine Translation Service (
                 <code>ZERO</code> means disabled, <code>ONE</code> means get MT from MyMemory )
             </li>
-            <li><em>optional ( default 0 )</em><span class="param">disable_tms_engine</span> <code>(bool)</code> This flag needs to disable
-                Memory
-                Server. It should be set to <code>0</code> or <code>false</code>
-                to enable contributions from MyMemory Engine
-                ( N.B.: activating this flag force <code>tms_engine</code> to <code>ZERO</code> )
-            </li>
             <li><em>optional</em><span class="param">private_tm_key</span> <code>(string)</code> Private Key for MyMemory. Fill
                 this
                 field with your MyMemory private key if you already have one
-            </li>
-            <li><em>optional</em><span class="param">create_new_tm_key</span> <code>(bool)</code> Set this flag <code>true</code>
-                if
-                you want to create a new MyMemory key.
-                ( N.B. will be ignored if <code>private_tm_key</code> is not null )
             </li>
         </ul>
     </dd>
@@ -130,7 +119,7 @@
             <pre class="literal-block">{
     "status": "OK",
     "id_project": 5368,
-    "ppassword": "76ba60c027b9",
+    "project_pass": "76ba60c027b9",
 }
             </pre>
         <p><strong>Return value definitions</strong></p>
@@ -156,7 +145,7 @@
                 </td>
             </tr>
             <tr>
-                <td><code>ppassword</code></td>
+                <td><code>project_pass</code></td>
                 <td>Return the password of the project just created.
                     If creation status is <code>FAIL</code> this key will simply be omitted from the result.
                 </td>
@@ -209,7 +198,7 @@
         <li><em>required</em><span class="param">id_project</span> <code>(int)</code> The identifier of the project, should be the
             value returned by the <a href="http://matecat.local/api/docs#new-post"><code>/new</code></a> method.
         </li>
-        <li><em>required</em><span class="param">ppassword</span> <code>(string)</code> The password associated with the project, should be the
+        <li><em>required</em><span class="param">project_pass</span> <code>(string)</code> The password associated with the project, should be the
             value returned by the <a href="http://matecat.local/api/docs#new-post"><code>/new</code></a> method ( associated with the id_project )
         </li>
     </ul>
@@ -352,11 +341,11 @@
         }
     },
    "status": "DONE",
-   "analyze": "http:\/\/matecat.local\/analyze\/MyProject4\/5368-76ba60c027b9",
+   "analyze": "\/analyze\/MyProject4\/5368-76ba60c027b9",
    "jobs": {
        "jid-jpass": ["5615-e77eeea779d2"],
        "job-url": {
-            "5615-e77eeea779d2": "http:\/\/matecat.local\/translate\/MyProject4\/de-DE-en-US\/5615-e77eeea779d2"
+            "5615-e77eeea779d2": "\/translate\/MyProject4\/de-DE-en-US\/5615-e77eeea779d2"
         }
     }
 }

@@ -316,12 +316,12 @@ class getVolumeAnalysisController extends ajaxController {
                 break;
         }
 
-        $this->result['analyze'] = INIT::$HTTPHOST . "/analyze/" . $project_data[0]['pname'] . "/" . $project_data[0]['pid'] . "-" . $project_data[0]['ppassword'];
+        $this->result['analyze'] = "/analyze/" . $project_data[0]['pname'] . "/" . $project_data[0]['pid'] . "-" . $project_data[0]['ppassword'];
         $this->result['jobs']   = array();
 
         foreach( $project_data as $job ){
             $this->result['jobs']['jid-jpass'][] = $job['jid_jpassword'];
-            $this->result['jobs']['job-url'][ $job['jid_jpassword'] ] = INIT::$HTTPHOST . "/translate/" . $job['job_url'];
+            $this->result['jobs']['job-url'][ $job['jid_jpassword'] ] = "/translate/" . $job['job_url'];
         }
 
     }
