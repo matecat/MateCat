@@ -2004,10 +2004,7 @@ $.extend(UI, {
 		}).bind('keydown', 'Meta+left', function(e) {
 			e.preventDefault();
 			UI.pointToOpenSegment();
-		}).bind('keydown', 'Ctrl+right', function(e) {
-			e.preventDefault();
-			UI.copySource();
-		}).bind('keydown', 'Ctrl+shift+major', function(e) {
+		}).bind('keydown', 'Alt+ctrl+i', function(e) {
 			e.preventDefault();
 			UI.copySource();
 		}).bind('keydown', 'Ctrl+z', function(e) {
@@ -2321,7 +2318,7 @@ $.extend(UI, {
 						isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
 						restoreSelection();
 						if ((e.which == 8)&&(isInsideTag)) {
-							console.log('AA: ', UI.editarea.html());
+							console.log('AA: ', UI.editarea.html()); 
 							parentTag.remove();
 							e.preventDefault();
 							console.log('BB: ', UI.editarea.html());
