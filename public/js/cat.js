@@ -1964,7 +1964,7 @@ $.extend(UI, {
 
 
 /*
-	Component: ui.render 
+	Component: ui.events 
  */
 $.extend(UI, {
 	setEvents: function() {
@@ -2289,19 +2289,19 @@ $.extend(UI, {
 					UI.checkAutocompleteTags();
 				}
 			}, 50);			
-		}).on('keydown', '.editor .editarea', function(e) {
-
+		}).on('keydown', '.editor .editarea', function(e) {console.log(e.which);
+/*
 			var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
 			if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
 				if (event.which == 88) { // ctrl+x
-					if ($('.selected', $(this)).length) {
+					if ($('.selected', $(this)).length) {console.log('VEDIAMO');
 						event.preventDefault();
 						UI.tagSelection = getSelectionHtml();
 						$('.selected', $(this)).remove();
 					}
 				}
 			}
-
+*/
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
 				if ($('.selected', $(this)).length) {console.log('a');
 					e.preventDefault();
@@ -3437,6 +3437,7 @@ $.extend(UI, {
 	
 	// TAG MARK
 	detectTags: function(area) {
+		
         //ALL in one
         $(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"true\" class=\"locked\">$2</span>"));
 
@@ -3490,6 +3491,7 @@ $.extend(UI, {
 		$('.source').each(function() {
 			UI.detectTags(this);
 		});
+		$('.source .locked').attr('contenteditable', 'false');
 
 		$('.editarea').each(function() {
 			if ($('#segment-' + $(this).data('sid')).hasClass('mismatch'))
