@@ -2321,7 +2321,7 @@ $.extend(UI, {
 						isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
 						restoreSelection();
 						if ((e.which == 8)&&(isInsideTag)) {
-							console.log('AA: ', UI.editarea.html());
+							console.log('AA: ', UI.editarea.html()); 
 							parentTag.remove();
 							e.preventDefault();
 							console.log('BB: ', UI.editarea.html());
