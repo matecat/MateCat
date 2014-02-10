@@ -740,7 +740,7 @@ class CatUtils {
             $string = str_replace( "' ", "<sep>", $string );
             $string = str_replace( ".", "<sep>", $string );
             $string = str_replace( "\"", "<sep>", $string );
-            $string = str_replace( "\'", "<sep>", $string );
+            $string = str_replace( '\'', "<sep>", $string );
 
             $app = explode( "<sep>", $string );
             foreach ( $app as $a ) {
@@ -753,7 +753,7 @@ class CatUtils {
                 }
             }
 
-            $res = count( $temp );
+            $res = @count( $temp );
         }
 
         return $res;

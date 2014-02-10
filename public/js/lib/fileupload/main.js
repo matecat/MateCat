@@ -342,16 +342,23 @@ $(function () {
             filesize: data.result[0].size,
             filerow: data.context,
             extension: data.result[0].name.split('.')[data.result[0].name.split('.').length-1],
-            enforceConversion: ( typeof data.result[0].convert !== "undefined" ) ? true : false
+            enforceConversion: data.result[0].convert
         };
 
         //check for specific xlf file type, someone needs forced conversion /** @see upload.class.php */
-		if( ( fileSpecs.extension=='xliff' || fileSpecs.extension=='sdlxliff' || fileSpecs.extension=='xlf' ) && !fileSpecs.enforceConversion ) {
-//			console.log('checkAnalyzability(): '+checkAnalyzability());
-			if(checkAnalyzability('file upload completed')) {
-				enableAnalyze();
-			}
-		}
+//		if( ( fileSpecs.extension=='xliff' || fileSpecs.extension=='sdlxliff' || fileSpecs.extension=='xlf' ) && !fileSpecs.enforceConversion ) {
+////			console.log('checkAnalyzability(): '+checkAnalyzability());
+//			if(checkAnalyzability('file upload completed')) {
+//				enableAnalyze();
+//			}
+//		}
+
+        if( !fileSpecs.enforceConversion ){
+            if(checkAnalyzability('file upload completed')) {
+                enableAnalyze();
+            }
+        }
+
 		if($('body').hasClass('started')) {
 			setFileReadiness();
 			if(checkAnalyzability('primo caricamento')) {
@@ -541,15 +548,15 @@ progressBar = function(filerow,start,filesize) {
 convertFile = function(fname,filerow,filesize, enforceConversion) {
 
     console.log( 'Enforce conversion: ' + enforceConversion );
-    firstEnforceConversion = (typeof enforceConversion === "undefined") ? false : true;
+    firstEnforceConversion = (typeof enforceConversion === "undefined") ? false : enforceConversion;
 //    console.log(firstEnforceConversion);
     enforceConversion = (typeof enforceConversion === "undefined") ? false : enforceConversion;
 
 //	filerow = data.context;
 //	var fname = data.files[0].name;
-	var extension = fname.split('.')[fname.split('.').length-1];
+//	var extension = fname.split('.')[fname.split('.').length-1];
 
-	if( ( extension=='xliff' || extension=='sdlxliff' || extension=='xlf' ) && enforceConversion === false ) {
+	if( enforceConversion === false ) {
 		filerow.addClass('ready');
 			if(checkAnalyzability('convert file')) {
 				enableAnalyze();
@@ -798,9 +805,10 @@ checkConversions = function() {console.log('check conversions');
         
 		var name = $('.name',this).text();
 		var extension = name.split('.')[name.split('.').length-1];
-		if((extension=='xliff')||(extension=='sdlxliff')||(extension=='xlf')) {
-			return;
-		} else {
+
+//		if((extension=='xliff')||(extension=='sdlxliff')||(extension=='xlf')) {
+//			return;
+//		} else {
 			$.ajax({
 	            url: '?action=checkFileConversion',
 	            data: {
@@ -830,7 +838,7 @@ checkConversions = function() {console.log('check conversions');
 	            }
 	        });
 			
-		}
+//		}
     })
 }
 

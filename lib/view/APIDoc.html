@@ -7,10 +7,10 @@
     <link href="/public/css/manage.css" rel="stylesheet" type="text/css" />
     <link href="/public/css/common.css" rel="stylesheet" type="text/css" />
     <style>
+
         a {
             color: #39699a;
         }
-
         #contentBox pre {
             background: #fbfbfb;
             padding: 10px;
@@ -32,6 +32,7 @@
         .api dl {
             margin-left: 40px;
             line-height: 22px;
+        }
         .api {padding-top:0;}
         .api header {position:relative;}
         .api h1, .api h2 {color:#000!important; margin-top:20px;}
@@ -41,6 +42,13 @@
             display: block;
             padding-bottom: 20px;
             border-bottom: 1px dashed #ccc;}
+        .api table ul.lang-list {
+            -webkit-column-count: 5;
+            column-count: 5;
+            -moz-column-count: 5;
+            text-align: left;
+        }
+
     </style>
 </head>
 <body class="api">
@@ -58,7 +66,6 @@
     <li><a href="#file-format">Supported file format</a></li>
 
 </ul>
-
 
 <a name="new-post"><h3 class="method-title">/new (POST)</h3></a>
 <dl>
@@ -110,6 +117,10 @@
 
         <p>More information on the returned metadata fields are available
             <a href="http://matecat.local/api/docs#metadata-new-details">here</a>
+        </p>
+
+        <p>A complete list of accepted languages in the right format are available
+            <a href="http://matecat.local/api/docs#supported-langs">here</a>
         </p>
 
         <p><strong>Sample JSON response</strong></p>
@@ -457,8 +468,57 @@
     </tr>
     <tr>
         <td><code>TOTAL_FAST_WC</code></td>
-        <td>A field containing the total number of segments the project.</td>
+        <td>A field containing the total number of words calculated in fast mode for the project.</td>
     </tr>
+    <tr>
+        <td><code>TOTAL_FAST_WC_PRINT</code></td>
+        <td>A field containing the locale formatted number of the preceding field.</td>
+    </tr>
+    <tr>
+        <td><code>TOTAL_TM_WC</code></td>
+        <td>A field containing the total number of segments found in the translation memory server.</td>
+    </tr>
+    <tr>
+        <td><code>TOTAL_TM_WC_PRINT</code></td>
+        <td>A field containing the locale formatted number of the preceding field.</td>
+    </tr>
+
+    <tr>
+        <td><code>TOTAL_STANDARD_WC</code></td>
+        <td>A field containing the total number of words calculated with standard word count system.</td>
+    </tr>
+    <tr>
+        <td><code>TOTAL_STANDARD_WC_PRINT</code></td>
+        <td>A field containing the locale formatted number of the preceding field.</td>
+    </tr>
+
+    <tr>
+        <td><code>STANDARD_WC_TIME</code></td>
+        <td>A field containing the total number of words calculated with standard word count system.</td>
+    </tr>
+    <tr>
+        <td><code>TOTAL_TM_WC_PRINT</code></td>
+        <td>A field containing the locale formatted number of the preceding field.</td>
+    </tr>
+
+    <tr>
+        <td><code>TOTAL_RAW_WC</code></td>
+        <td>A field containing the total number of words calculated without any repetition check.</td>
+    </tr>
+    <tr>
+        <td><code>TOTAL_RAW_WC_PRINT</code></td>
+        <td>A field containing the locale formatted number of the preceding field.</td>
+    </tr>
+
+    <tr>
+        <td><code>TOTAL_PAYABLE</code></td>
+        <td>A field containing the final total number of words calculated by Matecat.</td>
+    </tr>
+    <tr>
+        <td><code>TOTAL_PAYABLE_PRINT</code></td>
+        <td>A field containing the locale formatted number of the preceding field.</td>
+    </tr>
+
     </tbody>
 </table>
 </dd>
@@ -505,7 +565,7 @@
         </tr></thead>
         <tbody><tr>
             <td>
-                <ul class="listlang">
+                <ul>
                     <li>doc</li>
                     <li>dot</li>
                     <li>docx</li>
@@ -581,6 +641,100 @@
         </tr>
         </tbody></table>
 
+</dd>
+
+
+<dt id="supported-langs">Supported languages</dt>
+<dd>
+    <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+        <thead>
+            <th>
+                Language ( Code )
+            </th>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                <ul class="lang-list">
+                    <li>Afrikaans (af-ZA)</li>
+                    <li>Albanian (sq-AL)</li>
+                    <li>Arabic (ar-SA)</li>
+                    <li>Armenian (hy-AM)</li>
+                    <li>Basque (eu-ES)</li>
+                    <li>Bengali (bn-IN)</li>
+                    <li>Bielarus (be-BY)</li>
+                    <li>Bosnian (bs-BA)</li>
+                    <li>Breton (br-FR)</li>
+                    <li>Bulgarian (bg-BG)</li>
+                    <li>Catalan (ca-ES)</li>
+                    <li>Chinese Simplified (zh-CN)</li>
+                    <li>Chinese Traditional (zh-TW)</li>
+                    <li>Croatian (hr-HR)</li>
+                    <li>Czech (cs-CZ)</li>
+                    <li>Danish (da-DK)</li>
+                    <li>Dutch (nl-NL)</li>
+                    <li>English (en-GB)</li>
+                    <li>English US (en-US)</li>
+                    <li>Estonian (et-EE)</li>
+                    <li>Faroese (fo-FO)</li>
+                    <li>Finnish (fi-FI)</li>
+                    <li>Flemish (nl-BE)</li>
+                    <li>French (fr-FR)</li>
+                    <li>Galician (gl-ES)</li>
+                    <li>Georgian (ka-GE)</li>
+                    <li>German (de-DE)</li>
+                    <li>Greek (el-GR)</li>
+                    <li>Gujarati (gu-IN)</li>
+                    <li>Hebrew (he-IL)</li>
+                    <li>Hindi (hi-IN)</li>
+                    <li>Hungarian (hu-HU)</li>
+                    <li>Icelandic (is-IS)</li>
+                    <li>Indonesian (id-ID)</li>
+                    <li>Irish Gaelic (ga-IE)</li>
+                    <li>Italian (it-IT)</li>
+                    <li>Japanese (ja-JP)</li>
+                    <li>Kazakh (kk-KZ)</li>
+                    <li>Korean (ko-KR)</li>
+                    <li>Latvian (lv-LV)</li>
+                    <li>Lithuanian (lt-LT)</li>
+                    <li>Macedonian (mk-MK)</li>
+                    <li>Malay (ms-MY)</li>
+                    <li>Maltese (mt-MT)</li>
+                    <li>Maori (mi-NZ)</li>
+                    <li>Mongolian (mn-MN)</li>
+                    <li>Nepali (ne-NP)</li>
+                    <li>Norwegian Bokmål (nb-NO)</li>
+                    <li>Norwegian Nynorsk (nn-NO)</li>
+                    <li>Pakistani (ur-PK)</li>
+                    <li>Pashto (ps-PK)</li>
+                    <li>Persian (fa-IR)</li>
+                    <li>Polish (pl-PL)</li>
+                    <li>Portuguese (pt-PT)</li>
+                    <li>Portuguese Brazil (pt-BR)</li>
+                    <li>Quebecois (fr-CA)</li>
+                    <li>Quechua (qu-XN)</li>
+                    <li>Romanian (ro-RO)</li>
+                    <li>Russian (ru-RU)</li>
+                    <li>Serbian Latin (sr-Latn-RS)</li>
+                    <li>Serbian Cyrillic (sr-Cyrl-RS)</li>
+                    <li>Slovak (sk-SK)</li>
+                    <li>Slovenian (sl-SI)</li>
+                    <li>Spanish (es-ES)</li>
+                    <li>Spanish Latin America (es-MX)</li>
+                    <li>Swedish (sv-SE)</li>
+                    <li>Swiss German (de-CH)</li>
+                    <li>Tamil (ta-LK)</li>
+                    <li>Telugu (te-IN)</li>
+                    <li>Thai (th-TH)</li>
+                    <li>Turkish (tr-TR)</li>
+                    <li>Ukrainian (uk-UA)</li>
+                    <li>Vietnamese (vi-VN)</li>
+                    <li>Welsh (cy-GB)</li>
+                </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
 </dd>
 
 <a class="gototop" href="#top">Torna sopra</a>

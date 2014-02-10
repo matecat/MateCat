@@ -54,29 +54,19 @@ class convertFileController extends ajaxController {
 
         try {
 
-            $fileType = DetectProprietaryXliff::getInfoByStringData($original_content);
+            $fileType = DetectProprietaryXliff::getInfo($file_path);
 
-            if ( $fileType['proprietary'] && INIT::$CONVERSION_ENABLED ) {
-
-                if ($fileType['proprietary_name'] == 'idiom world server') {
-                    $convert = true;
-                } else {
-                    unlink($file_path);
-                    $this->result['errors'][] = array("code" => -7, "message" => 'Matecat Open-Source does not support ' . ucwords($fileType['proprietary_name']) . '. Use MatecatPro.' );
-                    return -1;
-                }
-
-            } else if ( $fileType['proprietary'] && !INIT::$CONVERSION_ENABLED ) {
+            //found proprietary xliff
+            if ( $fileType['proprietary'] && !INIT::$CONVERSION_ENABLED ) {
                 unlink($file_path);
                 $this->result['errors'][] = array("code" => -7, "message" => 'Matecat Open-Source does not support ' . ucwords($fileType['proprietary_name']) . '. Use MatecatPro.' );
                 return -1;
 
-            } else {
+            }
 
-                if( DetectProprietaryXliff::isXliff( $original_content ) ){
-                    return 0; //ok don't convert a standard sdlxliff
-                }
-
+            if( !$fileType['proprietary'] && DetectProprietaryXliff::isXliffExtension() ){
+                $this->result['code'] = 1; // OK for client
+                return 0; //ok don't convert a standard sdlxliff
             }
 
         } catch (Exception $e) {

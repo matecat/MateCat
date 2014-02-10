@@ -9,13 +9,19 @@
 
 class DetectProprietaryXliff {
 
-    protected static $fileType = array(
-        'info'             => array(),
-        'proprietary'      => false,
-        'proprietary_name' => null
-    );
+    protected static $fileType = array();
+
+    protected static function _reset(){
+        self::$fileType = array(
+                'info'             => array(),
+                'proprietary'      => false,
+                'proprietary_name' => null
+        );
+    }
 
     public static function getInfo( $fullPathToFile ) {
+
+        self::_reset();
 
         /**
          * Conversion Enforce
@@ -24,36 +30,45 @@ class DetectProprietaryXliff {
          * if this is a proprietary file
          *
          */
-        $info = pathinfo( $fullPathToFile );
-        if ( ( $info[ 'extension' ] == 'xliff' ) || ( $info[ 'extension' ] == 'sdlxliff' ) || ( $info[ 'extension' ] == 'xlf' ) ) {
-
-
-            if ( !file_exists( $fullPathToFile ) ) {
-                throw new Exception( "File " . $fullPathToFile . " not found..." );
-            }
-
-            $file_pointer = fopen("$fullPathToFile", 'r');
-            // Checking Requirements (By specs, I know that xliff version is in the first 1KB)
-            $file_content = fread($file_pointer, 1024);
-            fclose($file_pointer);
-
-            $tmp = self::isXliff( $file_content );
-
-            self::_checkIdiom( $tmp );
-
-        }
-        self::$fileType['info'] = $info;
+        $tmp = self::isXliff( null, $fullPathToFile );
+        self::_checkIdiom( $tmp );
         return self::$fileType;
 
     }
 
-    public static function isXliff( $stringData ){
+    public static function isXliff( $stringData = null, $fullPathToFile = null ) {
 
-        $stringData = substr( $stringData, 0, 1024 );
+        self::_reset();
 
-        preg_match('|<xliff\s.*?version\s?=\s?["\'](.*?)["\'](.*?)>|si', $stringData, $tmp);
+        $info = array();
 
-        if( !empty($tmp) ){
+        if ( !empty ( $stringData ) && empty( $fullPathToFile ) ) {
+            $stringData = substr( $stringData, 0, 1024 );
+
+        } elseif ( empty( $stringData ) && !empty( $fullPathToFile ) ) {
+            $info         = pathinfo( $fullPathToFile );
+            $file_pointer = fopen( "$fullPathToFile", 'r' );
+            // Checking Requirements (By specs, I know that xliff version is in the first 1KB)
+            $stringData = fread( $file_pointer, 1024 );
+            fclose( $file_pointer );
+
+        } elseif ( !empty( $stringData ) && !empty( $fileName ) ) {
+            //we want to check extension and content
+            $info = pathinfo( $fullPathToFile );
+
+        }
+
+        self::$fileType['info'] = $info;
+
+        //we want to check extension also if file path is specified
+        if ( !empty( $info ) && !self::isXliffExtension() ) {
+            //THIS IS NOT an xliff
+            return false;
+        }
+
+        preg_match( '|<xliff\s.*?version\s?=\s?["\'](.*?)["\'](.*?)>|si', $stringData, $tmp );
+
+        if ( !empty( $tmp ) ) {
             return $tmp;
         }
 
@@ -64,14 +79,18 @@ class DetectProprietaryXliff {
     protected static function _checkIdiom( $tmp ){
 
         //idiom Check
-        if ( isset($tmp[2]) && stripos( $tmp[2], 'idiominc.com' ) !== false ) {
-            self::$fileType['proprietary'] = true;
-            self::$fileType['proprietary_name'] = 'idiom world server';
+        if( isset($tmp[2]) ){
+            if( stripos( $tmp[2], 'idiominc.com' ) !== false ) {
+                self::$fileType['proprietary'] = true;
+                self::$fileType['proprietary_name'] = 'idiom world server';
+            }
         }
 
     }
 
     public static function getInfoByStringData( $stringData ) {
+
+        self::_reset();
 
         $tmp = self::isXliff( $stringData );
 
@@ -79,6 +98,23 @@ class DetectProprietaryXliff {
         self::_checkIdiom( $tmp );
 
         return self::$fileType;
+
+    }
+
+    public static function isXliffExtension(){
+
+        if ( empty( self::$fileType['info'] ) ) return false;
+
+        switch( self::$fileType['info']['extension'] ){
+            case 'xliff':
+            case 'sdlxliff':
+            case 'xlf':
+                return true;
+                break;
+            default:
+                return false;
+                break;
+        }
 
     }
 
