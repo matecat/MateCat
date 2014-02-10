@@ -1,5 +1,5 @@
 /*
-	Component: ui.render 
+	Component: ui.events 
  */
 $.extend(UI, {
 	setEvents: function() {
@@ -324,19 +324,19 @@ $.extend(UI, {
 					UI.checkAutocompleteTags();
 				}
 			}, 50);			
-		}).on('keydown', '.editor .editarea', function(e) {
-
+		}).on('keydown', '.editor .editarea', function(e) {console.log(e.which);
+/*
 			var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
 			if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
 				if (event.which == 88) { // ctrl+x
-					if ($('.selected', $(this)).length) {
+					if ($('.selected', $(this)).length) {console.log('VEDIAMO');
 						event.preventDefault();
 						UI.tagSelection = getSelectionHtml();
 						$('.selected', $(this)).remove();
 					}
 				}
 			}
-
+*/
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
 				if ($('.selected', $(this)).length) {console.log('a');
 					e.preventDefault();

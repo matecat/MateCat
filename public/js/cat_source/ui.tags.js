@@ -41,6 +41,7 @@ $.extend(UI, {
 	
 	// TAG MARK
 	detectTags: function(area) {
+		
         //ALL in one
         $(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"true\" class=\"locked\">$2</span>"));
 
@@ -94,6 +95,7 @@ $.extend(UI, {
 		$('.source').each(function() {
 			UI.detectTags(this);
 		});
+		$('.source .locked').attr('contenteditable', 'false');
 
 		$('.editarea').each(function() {
 			if ($('#segment-' + $(this).data('sid')).hasClass('mismatch'))
