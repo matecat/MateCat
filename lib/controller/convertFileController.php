@@ -52,7 +52,30 @@ class convertFileController extends ajaxController {
 		    $xliffContent = getXliffBySHA1( $sha1, $this->source_lang, $this->target_lang,$this->cache_days );
 		}
 
-		if ( isset($xliffContent) && !empty($xliffContent)) {
+        try {
+
+            $fileType = DetectProprietaryXliff::getInfo($file_path);
+
+            //found proprietary xliff
+            if ( $fileType['proprietary'] && !INIT::$CONVERSION_ENABLED ) {
+                unlink($file_path);
+                $this->result['errors'][] = array("code" => -7, "message" => 'Matecat Open-Source does not support ' . ucwords($fileType['proprietary_name']) . '. Use MatecatPro.' );
+                return -1;
+
+            }
+
+            if( !$fileType['proprietary'] && DetectProprietaryXliff::isXliffExtension() ){
+                $this->result['code'] = 1; // OK for client
+                return 0; //ok don't convert a standard sdlxliff
+            }
+
+        } catch (Exception $e) {
+            $this->result['errors'][] = array("code" => -8, "message" => $e->getMessage());
+            Log::doLog( $e->getMessage() );
+            return -1;
+        }
+
+		if ( isset($xliffContent) && !empty($xliffContent) ) {
 
 			$xliffContent=  gzinflate($xliffContent);
 			$res = $this->put_xliff_on_file($xliffContent, $this->intDir);

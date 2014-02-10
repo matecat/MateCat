@@ -160,9 +160,13 @@ class NewController extends ajaxController {
         $converter->source_lang = $this->source_lang;
         $converter->target_lang = $this->target_lang;
         $converter->doAction();
+
         try {
             $converter->checkResult();
         } catch ( Exception $ex ){
+            $this->api_output[ 'message' ] = $ex->getMessage();
+            $this->result[ 'errors' ][ ] = array( "code" => $ex->getCode(), "message" => $ex->getMessage() );
+            Log::doLog( $ex->getMessage() );
             return -1;
         }
         /* Do conversions here */

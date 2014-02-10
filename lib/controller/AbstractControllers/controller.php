@@ -36,6 +36,8 @@ abstract class controller {
             $_REQUEST['action'] = ucfirst( $_REQUEST['action'] );
             $_POST['action']    = $_REQUEST['action'];
 
+            Log::$fileName = 'API.log';
+
             @ob_get_clean();
             header('Content-Type: application/json; charset=utf-8');
 
