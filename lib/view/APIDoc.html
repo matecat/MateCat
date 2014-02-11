@@ -91,15 +91,14 @@
             <li><em>required</em><span class="param">target_lang</span> <code>(string)</code> <a href="http://www.rfc-editor.org/rfc/rfc5646.txt" target="blank">RFC 5646</a> language(s)+region(s) Code(s)  as specified in <a href="http://www.w3.org/International/articles/language-tags/" target="blank">W3C standards</a>.
                 Multiple languages must be comma separated ( <code>it-IT,fr-FR,es-ES</code> )
             </li>
-            <li><em>required ( default 0 )</em><span class="param">tms_engine</span> <code>(int)</code> Identifier for Memory Server (
+            <li><em>required ( default 1 )</em><span class="param">tms_engine</span> <code>(int)</code> Identifier for Memory Server (
                 <code>ZERO</code> means disabled, <code>ONE</code> means MyMemory )
             </li>
-            <li><em>required ( default 0 )</em><span class="param">mt_engine</span> <code>(int)</code> Identifier for Machine Translation Service (
+            <li><em>required ( default 1 )</em><span class="param">mt_engine</span> <code>(int)</code> Identifier for Machine Translation Service (
                 <code>ZERO</code> means disabled, <code>ONE</code> means get MT from MyMemory )
             </li>
             <li><em>optional</em><span class="param">private_tm_key</span> <code>(string)</code> Private Key for MyMemory. Fill
-                this
-                field with your MyMemory private key if you already have one
+                this field with your MyMemory private key if you already have one or set to <code>new</code> to create a new one.
             </li>
         </ul>
     </dd>

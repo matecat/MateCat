@@ -15,10 +15,7 @@
  * 'target_lang'        => (string) RFC 3066 language(s) Code. Comma separated ( it-IT,fr-FR,es-ES )
  * 'tms_engine'         => (int)    Identifier for Memory Server ( ZERO means disabled, ONE means MyMemory )
  * 'mt_engine'          => (int)    Identifier for TM Server ( ZERO means disabled, ONE means MyMemory )
- * 'disable_tms_engine' => (bool)   Memory Server should be disabled or not ( Force 'tms_engine' to ZERO )
- * 'private_tm_key'     => (string) Private Key for MyMemory
- * 'create_new_tm_key'  => (bool)   Set true if you want to create a new MyMemory key ( used only if 'private_tm_key' is null )
- *
+ * 'private_tm_key'     => (string) Private Key for MyMemory ( set to new to create a new one )
  *
  */
 class NewController extends ajaxController {
@@ -29,7 +26,6 @@ class NewController extends ajaxController {
     private $mt_engine;  //1 default MyMemory
     private $tms_engine;  //1 default MyMemory
     private $private_tm_key;
-    private $create_new_tm_key;
 
     private $private_tm_user = null;
     private $private_tm_pass = null;
@@ -47,12 +43,15 @@ class NewController extends ajaxController {
                 'project_name'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
                 'source_lang'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
                 'target_lang'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'tms_engine'         => array( 'filter' => FILTER_VALIDATE_INT ),
-                'mt_engine'          => array( 'filter' => FILTER_VALIDATE_INT ),
+                'tms_engine'         => array( 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => array( 'default' => 1, 'min_range' => 0 ) ),
+                'mt_engine'          => array( 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => array( 'default' => 1, 'min_range' => 0 ) ),
                 'private_tm_key'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
+
+        if( is_null( $__postInput[ 'tms_engine' ] ) ) $__postInput[ 'tms_engine' ] = 1;
+        if( is_null( $__postInput[ 'mt_engine' ] ) )  $__postInput[ 'mt_engine' ]  = 1;
 
         foreach( $__postInput as $key => $val ){
             $__postInput[$key] = urldecode( $val );
