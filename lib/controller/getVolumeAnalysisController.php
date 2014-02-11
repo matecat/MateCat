@@ -320,7 +320,7 @@ class getVolumeAnalysisController extends ajaxController {
         $this->result['jobs']   = array();
 
         foreach( $project_data as $job ){
-            $this->result['jobs']['jid-jpass'][] = $job['jid_jpassword'];
+            $this->result['jobs']['job_id-job_password'][] = $job['jid_jpassword'];
             $this->result['jobs']['job-url'][ $job['jid_jpassword'] ] = "/translate/" . $job['job_url'];
         }
 
