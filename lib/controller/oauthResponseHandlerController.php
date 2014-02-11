@@ -6,7 +6,7 @@ header("Pragma: no-cache");
 require_once INIT::$UTILS_ROOT .'/openid/LightOpenId.class.php';
 include_once INIT::$MODEL_ROOT . "/queries.php";
 
-class oauthResponseHandlerController extends viewcontroller{
+class oauthResponseHandlerController extends viewController{
 
 	private $openid;
 	private $redirectUrl;

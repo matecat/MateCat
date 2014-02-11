@@ -2,7 +2,7 @@
 
 error_reporting(E_ALL);
 include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
-include_once INIT::$UTILS_ROOT . "/cat.class.php";
+include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 
 class TMS_GET_MATCHES {
 
@@ -165,7 +165,7 @@ class TMS extends Engine {
     public function __construct($id) {
         parent::__construct($id);
         if ($this->type != "TM") {
-            throw new Exception("not a TMS engine");
+            throw new Exception("Engine $id is not a TMS engine, found $this->type");
         }
     }
 
@@ -327,14 +327,12 @@ class TMS extends Engine {
         return $key;
     }
 
-    public static function createMyMemoryKey( $id_job ){
+    public static function createMyMemoryKey(){
 
         $newUser = json_decode( file_get_contents( 'http://mymemory.translated.net/api/createranduser' ) );
         if ( empty( $newUser ) || $newUser->error || $newUser->code != 200 ) {
             throw new Exception( "User private key failure.", -1 );
         }
-
-        updateTranslatorJob( $id_job, $newUser );
 
         return $newUser;
 

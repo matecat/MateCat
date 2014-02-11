@@ -3,7 +3,7 @@
 #include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 include_once INIT::$UTILS_ROOT . '/SpellChecker/SpellCheckFactory.php';
 
-class setSpellcheckController extends ajaxcontroller {
+class setSpellcheckController extends ajaxController {
 
     private $__postInput = null;
 

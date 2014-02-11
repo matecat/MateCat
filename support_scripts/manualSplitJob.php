@@ -11,9 +11,9 @@ $num_split = $argv[3];
 $apply_split=isset($argv[4]) && $argv[4]=="--apply";
 
 @INIT::obtain();
-include_once INIT::$UTILS_ROOT . '/cat.class.php';
-include_once INIT::$UTILS_ROOT . '/utils.class.php';
-include_once INIT::$UTILS_ROOT . '/log.class.php';
+include_once INIT::$UTILS_ROOT . '/CatUtils.php';
+include_once INIT::$UTILS_ROOT . '/Utils.php';
+include_once INIT::$UTILS_ROOT . '/Log.php';
 include_once INIT::$MODEL_ROOT . '/queries.php';
 ini_set('error_reporting', E_ALL );
 $db = Database::obtain ( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );

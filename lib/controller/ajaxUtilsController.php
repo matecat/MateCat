@@ -7,7 +7,7 @@
  * To change this template use File | Settings | File Templates.
  */
 
-class ajaxUtilsController extends ajaxcontroller {
+class ajaxUtilsController extends ajaxController {
 
     private $__postInput = null;
     private $__getInput = null;

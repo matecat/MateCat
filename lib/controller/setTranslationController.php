@@ -1,12 +1,12 @@
 <?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include INIT::$UTILS_ROOT . "/cat.class.php";
+include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 include_once INIT::$UTILS_ROOT . '/QA.php';
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
-include_once INIT::$UTILS_ROOT . '/log.class.php';
+include_once INIT::$UTILS_ROOT . '/Log.php';
 
-class setTranslationController extends ajaxcontroller {
+class setTranslationController extends ajaxController {
 
 	private $id_job;
 	private $id_segment;
@@ -86,7 +86,7 @@ class setTranslationController extends ajaxcontroller {
 
             $pCheck = new AjaxPasswordCheck();
             //check for Password correctness
-            if( !$pCheck->grantJobAccessByJobData( $job_data, $this->password, $this->id_segment ) ){
+            if( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password, $this->id_segment ) ){
                 $this->result['error'][] = array("code" => -10, "message" => "wrong password");
             }
 

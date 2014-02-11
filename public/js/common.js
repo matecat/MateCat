@@ -10,7 +10,13 @@ APP = {
         }).on('click', '.modal[data-type=alert] .btn-ok', function(e) {
             e.preventDefault();
             APP.closePopup();
-        }).on('click', '.modal[data-type=confirm] .btn-ok', function(e) {
+            if($(this).attr('data-callback')) {
+                if( typeof UI[$(this).attr('data-callback')] === 'function' ){
+                    UI[$(this).attr('data-callback')]();
+                    APP.confirmValue = true;
+                }
+            }
+	  }).on('click', '.modal[data-type=confirm] .btn-ok', function(e) {
             e.preventDefault();
             APP.closePopup();
             if($(this).attr('data-callback')) {
@@ -42,16 +48,18 @@ APP = {
             APP.closePopup();
         })
     },
-    alert: function(msg) {
+    alert: function(options) {
         //FIXME
         // Alert message, NEVER displayed if there are a redirect after it because html div popups are no-blocking
         // Transform alert to a function like confirm with a callable function passed as callback
-        this.popup({
-            type: 'alert',
-            closeClickingOutside: true,
-            title: 'Warning',
-            content: msg
-        });
+		
+		this.popup({
+			type: 'alert',
+			onConfirm: options.callback,
+			closeClickingOutside: true,
+			title: 'Warning',
+			content: options.msg
+		});
     },
     confirm: function(options) {
         this.waitingConfirm = true;
@@ -147,7 +155,7 @@ APP = {
                     '       <h1>' + conf.title + '</h1>' +
                     '       <p>' + conf.content + '</p>';
         if(conf.type == 'alert') {
-            newPopup += '<a href="#" class="btn-ok">Ok<\a>';
+            newPopup += '<a href="#" class="btn-ok"' + ((conf.onConfirm)? ' data-callback="' + conf.onConfirm + '"' : '') + '>Ok<\a>';
         } else if(conf.type == 'confirm') {
             newPopup +=     '<a href="#" class="btn-cancel"' + ((conf.onCancel)? ' data-callback="' + conf.onCancel + '"' : '') + '>' + ((conf.cancelTxt)? conf.cancelTxt : 'Cancel') + '<\a>' +          
                              '<a href="#" class="btn-ok"' + ((conf.onConfirm)? ' data-callback="' + conf.onConfirm + '"' : '') + '>' + ((conf.okTxt)? conf.okTxt : 'Ok') + '<\a>';    
@@ -173,21 +181,23 @@ APP = {
 //            $('.popup:not(.hide), .popup-outer:not(.hide)').remove();
     },
     fitText: function(container,child,limitHeight) {
-        if(container.height() < (limitHeight+1)) return;
-        txt = child.text();
-        var name = txt;
-        var ext = '';
-        if(txt.split('.').length > 1) {
-            var extension = txt.split('.')[txt.split('.').length-1];
-            name = txt.replace('.'+extension,'');
-            ext = '.' + extension;
-        }
-        firstHalf = name.substr(0 , Math.ceil(name.length/2));
-        secondHalf = name.replace(firstHalf,'');
-        child.text(firstHalf.substr(0,firstHalf.length-1)+'[...]'+secondHalf.substr(1)+ext);
-        while (container.height() > limitHeight) {
-            child.text(child.text().replace(/(.)\[\.\.\.\](.)/,'[...]'));
-        }
+		if(container.height() < (limitHeight+1)) return;
+		txt = child.text();
+		var name = txt;
+		var ext = '';
+		if(txt.split('.').length > 1) {
+			var extension = txt.split('.')[txt.split('.').length-1];
+			name = txt.replace('.'+extension,'');
+			ext = '.' + extension;
+		}
+		firstHalf = name.substr(0 , Math.ceil(name.length/2));
+		secondHalf = name.replace(firstHalf,'');
+		child.text(firstHalf.substr(0,firstHalf.length-1)+'[...]'+secondHalf.substr(1)+ext);
+		while (container.height() > limitHeight) {
+			num = child.text().length;
+			child.text(child.text().replace(/(.)\[\.\.\.\](.)/,'[...]'));
+			if(num == child.text().length) break;
+		}
     },
     objectSize: function(obj) {
         var size = 0, key;

@@ -15,7 +15,7 @@ include_once INIT::$UTILS_ROOT . '/engines/mt.class.php';
 //Mock Objects for Mute the curl
 class MUTE_TMS extends TMS {
 
-    public $fakeUrl = 'http://api.mymemory.translated.net/get?q=The+law+specifically+exempts+small+firms+that+have+fewer+than+50+full-time+employees.&langpair=en-US%7Cit-IT&de=demo%40matecat.com&mt=1&numres=3';
+    public $fakeUrl = 'http://API.mymemory.translated.net/get?q=The+law+specifically+exempts+small+firms+that+have+fewer+than+50+full-time+employees.&langpair=en-US%7Cit-IT&de=demo%40matecat.com&mt=1&numres=3';
     public $fakeRes = '{"responseData":{"translatedText":"La legge esenta espressamente le piccole imprese con meno di 50 dipendenti a tempo pieno."},"responseDetails":"","responseStatus":200,"matches":[{"id":"0","segment":"The law specifically exempts small firms that have fewer than 50 full-time employees.","translation":"La legge esenta espressamente le piccole imprese con meno di 50 dipendenti a tempo pieno.","quality":"70","reference":"Machine Translation provided by Google, Microsoft, Worldlingo or MyMemory customized engine.","usage-count":1,"subject":"All","created-by":"MT!","last-updated-by":"MT!","create-date":"2013-10-14","last-update-date":"2013-10-14","match":0.85},{"id":"440094133","segment":"full-time employee","translation":"dipendente a tempo pieno","quality":"74","reference":"","usage-count":1,"subject":"General","created-by":"","last-updated-by":"","create-date":"2013-10-10 18:59:39","last-update-date":"2013-10-10 18:59:39","match":0.15},{"id":"440008758","segment":"5 full-time fundraisers.","translation":"5 dialogatori dedicati.","quality":"74","reference":"","usage-count":2,"subject":"All","created-by":"anonymous","last-updated-by":"anonymous","create-date":"2013-09-12 22:12:55","last-update-date":"2013-09-12 22:12:55","match":0.15}]}';
 
     protected function curl($url) {
@@ -105,8 +105,8 @@ class Tests_EnginesTest extends Tests_AbstractTest {
     public function testRightUrlForTMS(){
 
         //PATCHED FIXME
-        $expected_String = "http://api.mymemory.translated.net/get?q=This+provision+takes+effect+in+2014.&langpair=en-US%7Cit-IT&de=demo%40matecat.com&mt=1&numres=3&conc=true&mtonly=1";
-        $expected_String = "http://api.mymemory.translated.net/get?q=This+provision+takes+effect+in+2014.&langpair=en%7Cit&de=demo%40matecat.com&mt=1&numres=3&conc=true&mtonly=1";
+        $expected_String = "http://API.mymemory.translated.net/get?q=This+provision+takes+effect+in+2014.&langpair=en-US%7Cit-IT&de=demo%40matecat.com&mt=1&numres=3&conc=true&mtonly=1";
+        $expected_String = "http://API.mymemory.translated.net/get?q=This+provision+takes+effect+in+2014.&langpair=en%7Cit&de=demo%40matecat.com&mt=1&numres=3&conc=true&mtonly=1";
 
         $text = "This provision takes effect in 2014.";
         $source = "en-US";

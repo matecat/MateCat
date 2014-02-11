@@ -2,19 +2,20 @@
 
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include_once INIT::$UTILS_ROOT . "/cat.class.php";
+include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 
-class getVolumeAnalysisController extends ajaxcontroller {
+class getVolumeAnalysisController extends ajaxController {
     protected $id_project;
-    private $status_project = "";
-    private $total_wc_fast_analysis = 0;
-    private $total_wc_tm_analysis = 0;
-    private $total_wc_standard_analysis = 0;
-    private $total_wc_standard_fast_analysis = 0;
-    private $total_segments = 0;
-    private $segments_analyzed = 0;
-    private $matecat_price_per_word = 0.03; //(dollari) se indipendente dalla combinazione metterlo nel config
-    private $standard_price_per_word = 0.10; //(dollari) se indipendente dalla combinazione metterlo nel config
+    protected $status_project = "";
+    protected $total_raw_wc = 0;
+    protected $total_wc_fast_analysis = 0;
+    protected $total_wc_tm_analysis = 0;
+    protected $total_wc_standard_analysis = 0;
+    protected $total_wc_standard_fast_analysis = 0;
+    protected $total_segments = 0;
+    protected $segments_analyzed = 0;
+    protected $matecat_price_per_word = 0.03; //(dollari) se indipendente dalla combinazione metterlo nel config
+    protected $standard_price_per_word = 0.10; //(dollari) se indipendente dalla combinazione metterlo nel config
 
     public function __construct() {
 
@@ -24,12 +25,14 @@ class getVolumeAnalysisController extends ajaxcontroller {
         $filterArgs = array(
             'pid'                 => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'ppassword'           => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'jpassword'           => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         $this->id_project = $__postInput[ 'pid' ];
         $this->ppassword  = $__postInput[ 'ppassword' ];
+        $this->jpassword  = $__postInput[ 'jpassword' ];
 
     }
 
@@ -42,7 +45,7 @@ class getVolumeAnalysisController extends ajaxcontroller {
 
         $project_data = getProjectJobData( $this->id_project );
         $passCheck = new AjaxPasswordCheck();
-        $access = $passCheck->grantProjectAccess( $project_data, $this->ppassword );
+        $access = $passCheck->grantProjectAccess( $project_data, $this->ppassword ) || $passCheck->grantProjectJobAccessOnJobPass( $project_data, null, $this->jpassword );
 
         if( !$access ){
             $this->result[ 'errors' ] = array( -10, "Wrong Password. Access denied" );
@@ -61,16 +64,16 @@ class getVolumeAnalysisController extends ajaxcontroller {
 
         $this->total_segments = count( $res );
 
+        //get status of project
+        $this->status_project = $project_data[0][ 'status_analysis' ];
+
         //array of totals per job-file
         $total_payable = array();
 
+        //VERY Expensive cycle ± 0.7 s for 27650 segments ( 150k words )
         foreach ( $res as $r ) {
             if ( $r[ 'st_status_analysis' ] == 'DONE' ) {
                 $this->segments_analyzed += 1;
-            }
-
-            if ( empty( $this->status_project ) ) {
-                $this->status_project = $r[ 'status_analysis' ];
             }
 
             if ( $this->total_wc_fast_analysis == 0 and $r[ 'fast_analysis_wc' ] > 0 ) {
@@ -88,7 +91,7 @@ class getVolumeAnalysisController extends ajaxcontroller {
             $eq_words      = $r[ 'eq_word_count' ];
             $st_word_count = $r[ 'standard_word_count' ];
 
-
+            $this->total_raw_wc += $r['raw_word_count'];
             $this->total_wc_tm_analysis += $eq_words;
             $this->total_wc_standard_analysis += $st_word_count;
 
@@ -134,10 +137,6 @@ class getVolumeAnalysisController extends ajaxcontroller {
 
             $return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ $keyValue ] = array( $w, $words_print );
 
-            $w           = $return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ $keyValue ][ 0 ] + $words;
-            $words_print = number_format( $w, 0, ".", "," );
-
-
             $tmp_tot = $return_data[ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ][0];
             $tmp_tot += $words;
             $words_print = number_format( $tmp_tot, 0, ".", "," );
@@ -151,9 +150,12 @@ class getVolumeAnalysisController extends ajaxcontroller {
             //take note of payable words for job/file combination
             $total_payable[ $jid ][ $jpassword ][ $r[ 'id_file' ] ] = $return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ "TOTAL_PAYABLE" ][ 0 ];
 
+            $return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ 'FILENAME' ] = $r[ 'filename' ];
+
         }
 
         //sum all totals for each job
+        //N^3 but there are a little number of rows max 30
         foreach ( $total_payable as $jid => $chunks ) {
 
             foreach ( $chunks as $_jpassword => $files ) {
@@ -237,9 +239,13 @@ class getVolumeAnalysisController extends ajaxcontroller {
         $discount     = round( $standard_fee - $matecat_fee );
 
         // THIS IS A PATCH (WORKAROUND): not a good pratice. Try solution. the tm analysis fail in set the status to done
+        //TODO: ADDENDUM, the previous described bug should already be solved, try to remove workaround
         if ( $this->segments_analyzed > 0 and $this->total_segments == $this->segments_analyzed ) {
             $this->status_project = "DONE";
         }
+
+        $return_data[ 'summary' ][ 'NAME' ]       = $project_data[0]['pname'];
+
         $return_data[ 'summary' ][ 'IN_QUEUE_BEFORE' ]       = $numSegmentsInQueue;
         $return_data[ 'summary' ][ 'IN_QUEUE_BEFORE_PRINT' ] = number_format( $numSegmentsInQueue, 0, ".", "," );
 
@@ -253,10 +259,12 @@ class getVolumeAnalysisController extends ajaxcontroller {
         $return_data[ 'summary' ][ 'TOTAL_STANDARD_WC' ] = $this->total_wc_standard_analysis;
         $return_data[ 'summary' ][ 'TOTAL_FAST_WC' ]     = $this->total_wc_fast_analysis;
         $return_data[ 'summary' ][ 'TOTAL_TM_WC' ]       = $this->total_wc_tm_analysis;
+        $return_data[ 'summary' ][ 'TOTAL_RAW_WC' ]      = $this->total_raw_wc;
 
         $return_data[ 'summary' ][ 'TOTAL_STANDARD_WC_PRINT' ] = number_format( $this->total_wc_standard_analysis, 0, ".", "," );
         $return_data[ 'summary' ][ 'TOTAL_FAST_WC_PRINT' ]     = number_format( $this->total_wc_fast_analysis, 0, ".", "," );
         $return_data[ 'summary' ][ 'TOTAL_TM_WC_PRINT' ]       = number_format( $this->total_wc_tm_analysis, 0, ".", "," );
+        $return_data[ 'summary' ][ 'TOTAL_RAW_WC_PRINT' ]      = number_format( $this->total_raw_wc, 0, ".", "," );
 
 
         $return_data[ 'summary' ][ 'TOTAL_PAYABLE' ]       = $this->total_wc_tm_analysis;
@@ -286,6 +294,35 @@ class getVolumeAnalysisController extends ajaxcontroller {
         $return_data[ 'summary' ][ 'DISCOUNT_WC' ]    = number_format( $discount_wc, 0, ".", "," );
 
         $this->result[ 'data' ] = $return_data;
+
+        //aggregate Extra Infos
+        switch ( $this->status_project ) {
+            case 'NEW':
+            case 'FAST_OK':
+            case 'NOT_READY_FOR_ANALYSIS':
+                $this->result['status']  = 'ANALYZING';
+                break;
+            case 'EMPTY':
+                $this->result['status']  = 'NO_SEGMENTS_FOUND';
+                break;
+            case 'NOT_TO_ANALYZE':
+                $this->result['status']  = 'ANALYSIS_NOT_ENABLED';
+                break;
+            case 'DONE':
+                $this->result['status']  = 'DONE';
+                break;
+            default: //this can not be
+                $this->result['status']  = 'FAIL';
+                break;
+        }
+
+        $this->result['analyze'] = "/analyze/" . $project_data[0]['pname'] . "/" . $project_data[0]['pid'] . "-" . $project_data[0]['ppassword'];
+        $this->result['jobs']   = array();
+
+        foreach( $project_data as $job ){
+            $this->result['jobs']['job_id-job_password'][] = $job['jid_jpassword'];
+            $this->result['jobs']['job-url'][ $job['jid_jpassword'] ] = "/translate/" . $job['job_url'];
+        }
 
     }
 

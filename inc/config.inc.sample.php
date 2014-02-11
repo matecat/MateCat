@@ -92,33 +92,63 @@ class INIT {
 		@session_write_close();
 	}
 
-	private function __construct() {
+    protected static function _setIncludePath( $custom_paths = null ) {
+        $def_path = array(
+                self::$ROOT,
+                self::$ROOT . "/lib/controller/AbstractControllers",
+                self::$ROOT . "/lib/controller/API",
+                self::$ROOT . "/lib/controller",
+                self::$ROOT . "/inc/PHPTAL",
+                self::$ROOT . "/lib/utils/API",
+                self::$ROOT . "/lib/utils",
+                self::$ROOT . "/lib/model" ,
+        );
+        if( !empty($custom_paths) ){
+            $def_path = array_merge( $def_path, $custom_paths );
+        }
+        set_include_path ( implode( PATH_SEPARATOR, $def_path ) );
+    }
+
+    public static function loadClass( $className ) {
+
+        $className = ltrim( $className, '\\' );
+        $fileName  = '';
+        $namespace = '';
+        if ( $lastNsPos = strrpos( $className, '\\' ) ) {
+            $namespace = substr( $className, 0, $lastNsPos );
+            $className = substr( $className, $lastNsPos + 1 );
+            $fileName  = str_replace( '\\', DIRECTORY_SEPARATOR, $namespace ) . DIRECTORY_SEPARATOR;
+        }
+        $fileName .= str_replace( '_', DIRECTORY_SEPARATOR, $className ) . '.php';
+        //@include $fileName;
+
+        @require $fileName;
+
+    }
+
+    private function __construct() {
+
+        $root = realpath(dirname(__FILE__) . '/../');
 
         register_shutdown_function( 'INIT::fatalErrorHandler' );
 
-		$root = realpath(dirname(__FILE__) . '/../');
-		self::$ROOT = $root;  // Accesible by Apache/PHP
-		self::$BASEURL = "/"; // Accesible by the browser
+        if( stripos( PHP_SAPI, 'cli' ) === false ){
+            //access session data
+            @session_start();
+            register_shutdown_function( 'INIT::sessionClose' );
 
-		if( stripos( PHP_SAPI, 'cli' ) === false ){
-			//access session data
-			@session_start();
-			register_shutdown_function( 'INIT::sessionClose' );
-			
-			$protocol=stripos($_SERVER['SERVER_PROTOCOL'],"https")===FALSE?"http":"https";
-			self::$HTTPHOST="$protocol://$_SERVER[HTTP_HOST]";
-		} else {
-			echo "\nPHP Running in CLI mode.\n\n";
-			//Possible CLI configurations. We definitly don't want sessions in our cron scripts
-		}
+            $protocol=stripos($_SERVER['SERVER_PROTOCOL'],"https")===FALSE?"http":"https";
+            self::$HTTPHOST="$protocol://$_SERVER[HTTP_HOST]";
+        } else {
+            echo "\nPHP Running in CLI mode.\n\n";
+            //Possible CLI configurations. We definitly don't want sessions in our cron scripts
+        }
 
-		set_include_path(get_include_path() . PATH_SEPARATOR . $root);
-
-		self::$TIME_TO_EDIT_ENABLED = false;
-
-
-		self::$DEFAULT_NUM_RESULTS_FROM_TM = 3;
-		self::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
+        self::$ROOT                           = $root; // Accesible by Apache/PHP
+        self::$BASEURL                        = "/"; // Accesible by the browser
+        self::$TIME_TO_EDIT_ENABLED           = false;
+        self::$DEFAULT_NUM_RESULTS_FROM_TM    = 3;
+        self::$THRESHOLD_MATCH_TM_NOT_TO_SHOW = 50;
 
 		self::$DB_SERVER   = "localhost"; //database server
 		self::$DB_DATABASE = "matecat"; //database name
@@ -138,6 +168,8 @@ class INIT {
 		self::$CONTROLLER_ROOT                 = self::$ROOT . '/lib/controller';
 		self::$UTILS_ROOT                      = self::$ROOT . '/lib/utils';
 
+        $this->_setIncludePath();
+        spl_autoload_register('INIT::loadClass');
 
 		if (!is_dir(self::$STORAGE_DIR)){
 			mkdir (self::$STORAGE_DIR,0755,true);
@@ -192,81 +224,82 @@ class INIT {
         self::$MAX_UPLOAD_FILE_SIZE = 60 * 1024 * 1024; // bytes
         self::$MAX_NUM_FILES = 100;
 
-		self::$SUPPORTED_FILE_TYPES = array(
-				'Office' => array(
-					'doc' => array(''),
-					'dot' => array(''),
-					'docx' => array(''),
-					'dotx' => array(''),
-					'docm' => array(''),
-					'dotm' => array(''),
-					'pdf' => array(''),
-					'xls' => array(''),
-					'xlt' => array(''),
-					'xlsm' => array(''),
-					'xlsx' => array(''),
-					'xltx' => array(''),
-					'pot' => array(''),
-					'pps' => array(''),
-					'ppt' => array(''),
-					'potm' => array(''),
-					'potx' => array(''),
-					'ppsm' => array(''),
-					'ppsx' => array(''),
-					'pptm' => array(''),
-					'pptx' => array(''),
-					'odp' => array(''),
-					'ods' => array(''),
-					'odt' => array(''),
-					'sxw' => array(''),
-					'sxc' => array(''),
-					'sxi' => array(''),
-					'txt' => array(''),
-					'csv' => array(''),
-					'xml' => array('')
-						//                'vxd' => array("Try converting to XML")
-						),
-					'Web' => array(
-							'htm' => array(''),
-							'html' => array(''),
-							'xhtml' => array(''),
-							'xml' => array('')
-						      ),
-					"Interchange Formats" => array(
-							'xliff' => array('default'),
-							'sdlxliff' => array('default'),
-							'ttx' => array(''),
-							'itd' => array(''),
-							'xlf' => array('default')
-							),
-					"Desktop Publishing" => array(
-							//                'fm' => array('', "Try converting to MIF"),
-							'mif' => array(''),
-							'inx' => array(''),
-							'idml' => array(''),
-							'icml' => array(''),
-							//                'indd' => array('', "Try converting to INX"),
-							'xtg' => array(''),
-							'tag' => array(''),
-							'xml' => array(''),
-							'dita' => array('')
-							),
-					"Localization" => array(
-							'properties' => array(''),
-							'rc' => array(''),
-							'resx' => array(''),
-							'xml' => array(''),
-							'dita' => array(''),
-							'sgml' => array(''),
-							'sgm' => array('')
-							)
-						);
-		self::$UNSUPPORTED_FILE_TYPES = array(
-				'fm' => array('', "Try converting to MIF"),
-				'indd' => array('', "Try converting to INX")
-				);
+        self::$SUPPORTED_FILE_TYPES = array(
+            'Office'              => array(
+                'doc'  => array( '' ),
+                'dot'  => array( '' ),
+                'docx' => array( '' ),
+                'dotx' => array( '' ),
+                'docm' => array( '' ),
+                'dotm' => array( '' ),
+                'pdf'  => array( '' ),
+                'xls'  => array( '' ),
+                'xlt'  => array( '' ),
+                'xlsm' => array( '' ),
+                'xlsx' => array( '' ),
+                'xltx' => array( '' ),
+                'pot'  => array( '' ),
+                'pps'  => array( '' ),
+                'ppt'  => array( '' ),
+                'potm' => array( '' ),
+                'potx' => array( '' ),
+                'ppsm' => array( '' ),
+                'ppsx' => array( '' ),
+                'pptm' => array( '' ),
+                'pptx' => array( '' ),
+                'odp'  => array( '' ),
+                'ods'  => array( '' ),
+                'odt'  => array( '' ),
+                'sxw'  => array( '' ),
+                'sxc'  => array( '' ),
+                'sxi'  => array( '' ),
+                'txt'  => array( '' ),
+                'csv'  => array( '' ),
+                'xml'  => array( '' )
+                //                'vxd' => array("Try converting to XML")
+            ),
+            'Web'                 => array(
+                'htm'   => array( '' ),
+                'html'  => array( '' ),
+                'xhtml' => array( '' ),
+                'xml'   => array( '' )
+            ),
+            "Interchange Formats" => array(
+                'xliff'    => array( 'default' ),
+                'sdlxliff' => array( 'default' ),
+                'ttx'      => array( '' ),
+                'itd'      => array( '' ),
+                'xlf'      => array( 'default' )
+            ),
+            "Desktop Publishing"  => array(
+                //                'fm' => array('', "Try converting to MIF"),
+                'mif'  => array( '' ),
+                'inx'  => array( '' ),
+                'idml' => array( '' ),
+                'icml' => array( '' ),
+                //                'indd' => array('', "Try converting to INX"),
+                'xtg'  => array( '' ),
+                'tag'  => array( '' ),
+                'xml'  => array( '' ),
+                'dita' => array( '' )
+            ),
+            "Localization"        => array(
+                'properties' => array( '' ),
+                'rc'         => array( '' ),
+                'resx'       => array( '' ),
+                'xml'        => array( '' ),
+                'dita'       => array( '' ),
+                'sgml'       => array( '' ),
+                'sgm'        => array( '' )
+            )
+        );
 
-		//self::$DEFAULT_FILE_TYPES = 'xliff|sdlxliff|xlf';
+        self::$UNSUPPORTED_FILE_TYPES = array(
+            'fm'   => array( '', "Try converting to MIF" ),
+            'indd' => array( '', "Try converting to INX" )
+        );
+
+        //self::$DEFAULT_FILE_TYPES = 'xliff|sdlxliff|xlf';
 		//self::$CONVERSION_FILE_TYPES = 'doc|dot|docx|dotx|docm|dotm|rtf|pdf|xls|xlsx|xlt|xltx|pot|pps|ppt|potm|potx|ppsm|ppsx|pptm|pptx|mif|inx|idml|icml|txt|csv|htm|html|xhtml|properties|odp|ods|odt|sxw|sxc|sxi|xtg|tag|itd|sgml|sgm|dll|exe|rc|ttx|resx|dita|fm|vxd|indd';
 		//self::$CONVERSION_FILE_TYPES_PARTIALLY_SUPPORTED = '[{"format": "fm", "message": "Try converting to MIF"},{"format": "indd", "message": "Try converting to INX"},{"format": "vxd", "message": "Try converting to XML"}]';
 
@@ -297,7 +330,7 @@ class INIT {
             case E_USER_ERROR:
             case E_RECOVERABLE_ERROR:
 
-                if( !ob_get_clean() ) ob_start();
+                if( !ob_end_clean() ) ob_start();
                 debug_print_backtrace();
                 $output = ob_get_contents();
                 ob_end_clean();
@@ -308,6 +341,8 @@ class INIT {
                 $output .= "{$error['message']}\n\t";
                 $output .=  "Not Recoverable Error on line {$error['line']} in file " . $error['file'];
                 $output .=  " - PHP " . PHP_VERSION . " (" . PHP_OS . ")\n";
+                $output .=  " - REQUEST URI: " . print_r( $_SERVER['REQUEST_URI'], true ) . "\n";
+                $output .=  " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
                 $output .=  "\n\t";
                 $output .=  "Aborting...\n";
                 $output .= "</pre>";

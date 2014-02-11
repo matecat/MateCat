@@ -416,13 +416,19 @@ UI = {
 		if (this.stopPolling)
 			return;
 		var pid = $("#pid").attr("data-pid");
+
+        if( typeof $("#pid").attr("data-pwd") === 'undefined' ){
+            var jpassword =  $('tbody.tablestats' ).attr('data-pwd');
+        }
+
 		var ppassword = $("#pid").attr("data-pwd");
 
 		APP.doRequest({
 			data: {
 				action: 'getVolumeAnalysis',
 				pid: pid,
-                ppassword: ppassword
+                ppassword: ppassword,
+                jpassword: jpassword
 			},
 			success: function(d) {
 				if (d.data) {

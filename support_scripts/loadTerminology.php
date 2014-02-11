@@ -1,10 +1,11 @@
 <?php
-
+$test = false;
+$skip = true;
 
 include '/var/www/cattool/inc/config.inc.php';
 @INIT::obtain();
-include_once INIT::$UTILS_ROOT . '/utils.class.php';
-include_once INIT::$UTILS_ROOT . '/log.class.php';
+include_once INIT::$UTILS_ROOT . '/Utils.php';
+include_once INIT::$UTILS_ROOT . '/Log.php';
 include_once INIT::$MODEL_ROOT . '/Database.class.php';
 include_once INIT::$MODEL_ROOT . '/queries.php';
 include_once INIT::$UTILS_ROOT . '/engines/engine.class.php';
@@ -18,10 +19,10 @@ $db->connect ();
 $config = TMS::getConfigStruct();
 
 $config[ 'source_lang' ]   = "en-US";
-$config[ 'target_lang' ]   = "de-DE";
+$config[ 'target_lang' ]   = "fr-FR";
 $config[ 'email' ]         = "demo@matecat.com";
 $config[ 'get_mt' ]        = false;
-$config[ 'id_user' ]       = "MyMemory_4b3bcd17c1";
+$config[ 'id_user' ]       = "MyMemory_aa2c9e1eb8";
 //$config[ 'mt_only' ]       = false;
 $config[ 'num_result' ]    = null;
 //$config[ 'isConcordance' ] = false;
@@ -29,19 +30,32 @@ $config[ 'isGlossary' ]    = true;
 
 
 //$fObject = new SplFileObject( 'Glossary_en_it.csv' );
-$fObject = new SplFileObject( '11490946_German_Glossary.csv' );
-$fObject->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE | SplFileObject::READ_AHEAD );
-$fObject->setCsvControl( ",", '"' );
+$fObject = new SplFileObject( 'GlossaryEN2FR.csv' );
+$fObject->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE );
+$fObject->setCsvControl( "\t", '"' );
 
 
 $tms = new TMS( 1 );
 
 foreach( $fObject as $k => $row ){
+
+    if ( $test || $skip ){
+        if( !isset($row[1]) || empty($row[1]) ){
+            echo "\nFailed at Row: ";
+            print_r( ( $fObject->key() + 1 ). "\n" );
+            echo $row[0] . "\n\n";
+            //sleep(1);
+            continue;
+        }
+    }
+
     $config[ 'segment' ]       = $row[0];
     $config[ 'translation' ]   = $row[1];
     $config[ 'tnote' ]         = ( isset($row[2]) ? $row[2] : null );
 
-    $tms->set( $config );
+    if( !$test ){
+        $tms->set( $config );
+    }
 
     echo print_r($config,true) . "\n";
 }

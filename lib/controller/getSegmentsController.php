@@ -1,14 +1,14 @@
 <?php
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include INIT::$UTILS_ROOT . "/filetype.class.php";
-include INIT::$UTILS_ROOT . "/cat.class.php";
+//include_once INIT::$UTILS_ROOT . "/filetype.class.php";
+include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 /*
  * To change this template, choose Tools | Templates
  * and open the template in the editor.
  */
-class getSegmentsController extends ajaxcontroller {
+class getSegmentsController extends ajaxController {
 
     private $data = array();
     private $cid = "";
@@ -177,7 +177,7 @@ class getSegmentsController extends ajaxcontroller {
                 $this->data["$id_file"]['segments'] = array();
             }
 
-            $this->filetype_handler = new filetype($seg['mime_type']);
+//            $this->filetype_handler = new filetype($seg['mime_type']);
 
             unset($seg['id_file']);
             unset($seg['source']);

@@ -9,7 +9,7 @@ include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
-class deleteContributionController extends ajaxcontroller {
+class deleteContributionController extends ajaxController {
 
     private $seg;
     private $tra;
@@ -57,7 +57,7 @@ class deleteContributionController extends ajaxcontroller {
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
-        if( !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ){
+        if( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ){
             $this->result[ 'error' ][ ] = array( "code" => -10, "message" => "wrong password" );
             return;
         }

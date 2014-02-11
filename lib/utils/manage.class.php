@@ -1,7 +1,7 @@
 <?
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include_once INIT::$UTILS_ROOT . "/cat.class.php";
+include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 class ManageUtils {

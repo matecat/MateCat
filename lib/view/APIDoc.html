@@ -1,0 +1,735 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Untitled Document</title>
+    <link href="/public/css/style.css" rel="stylesheet" type="text/css" />
+    <link href="/public/css/manage.css" rel="stylesheet" type="text/css" />
+    <link href="/public/css/common.css" rel="stylesheet" type="text/css" />
+    <style>
+
+        a {
+            color: #39699a;
+        }
+        #contentBox pre {
+            background: #fbfbfb;
+            padding: 10px;
+            border: 1px dashed #ccc;
+            font-size:1em;
+        }
+        .apidesc td {
+            padding: 8px;
+            text-align:center;
+        }
+        .api dt {
+            float: left;
+            text-align:right;
+            color:#666666;
+        }
+        .api dd {
+            margin-left:120px;
+        }
+        .api dl {
+            margin-left: 40px;
+            line-height: 22px;
+        }
+        .api {padding-top:0;}
+        .api header {position:relative;}
+        .api h1, .api h2 {color:#000!important; margin-top:20px;}
+        .api h3 {color:#000!important;font-weight:bold!important; font-size:20px!important;margin-top:20px;}
+        .gototop {text-align: right;
+            margin: 10px 0;
+            display: block;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #ccc;}
+        .api table ul.lang-list {
+            -webkit-column-count: 5;
+            column-count: 5;
+            -moz-column-count: 5;
+            text-align: left;
+        }
+
+    </style>
+</head>
+<body class="api">
+<header>
+    <div class="wrapper ">
+        <a href="/" class="logo"></a>
+    </div>
+</header>
+<div id="contentBox" class="wrapper">
+<a name="top"><h1>API</h1></a>
+<ul class="menu">
+
+    <li><a href="#new-post">/new (POST)</a></li>
+    <li><a href="#status-post">/status (POST)</a></li>
+    <li><a href="#file-format">Supported file format</a></li>
+
+</ul>
+
+<a name="new-post"><h3 class="method-title">/new (POST)</h3></a>
+<dl>
+    <dt>Description</dt>
+    <dd><p>Create a new Project.</p>
+    </dd>
+    <dt class="url-label">URL Structure</dt>
+    <dd>
+        <pre class="literal-block">https://matecatpro.translated.net/<b>api</b>/new</pre>
+    </dd>
+    <dt>Method</dt>
+    <dd>POST ( multipart/form-data )</dd>
+    <dt>Files To Upload</dt>
+    <dd><p><em>required</em> The file(s) to be uploaded.</p></dd>
+    <dt>Parameters</dt>
+    <dd>
+        <ul class="parameters">
+            <li><em>required</em><span class="param">project_name</span> <code>(string)</code> The name of the project you want
+                create.
+            </li>
+            <li><em>required</em><span class="param">source_lang</span> <code>(string)</code> <a href="http://www.rfc-editor.org/rfc/rfc5646.txt" target="blank">RFC 5646</a> language+region Code ( en-US <b>case sensitive</b> ) as specified in <a href="http://www.w3.org/International/articles/language-tags/" target="blank">W3C standards</a>
+            </li>
+            <li><em>required</em><span class="param">target_lang</span> <code>(string)</code> <a href="http://www.rfc-editor.org/rfc/rfc5646.txt" target="blank">RFC 5646</a> language(s)+region(s) Code(s)  as specified in <a href="http://www.w3.org/International/articles/language-tags/" target="blank">W3C standards</a>.
+                Multiple languages must be comma separated ( <code>it-IT,fr-FR,es-ES</code> <b>case sensitive</b> )
+            </li>
+            <li><em>optional ( default 1 )</em><span class="param">tms_engine</span> <code>(int)</code> Identifier for Memory Server (
+                <code>0 ( ZERO )</code> means disabled, <code>1 ( ONE )</code> means MyMemory )
+            </li>
+            <li><em>optional ( default 1 )</em><span class="param">mt_engine</span> <code>(int)</code> Identifier for Machine Translation Service (
+                <code>0 ( ZERO )</code> means disabled, <code>1 ( ONE )</code> means get MT from MyMemory )
+            </li>
+            <li><em>optional</em><span class="param">private_tm_key</span> <code>(string)</code> Private Key for MyMemory. Fill
+                this field with your MyMemory private key if you already have one or set to <code>new</code> to create a new one.
+            </li>
+        </ul>
+    </dd>
+    <dt>Returns</dt>
+    <dd>
+        <p>The metadata for the created project.</p>
+
+        <p>More information on the returned metadata fields are available
+            <a href="http://matecat.local/api/docs#metadata-new-details">here</a>
+        </p>
+
+        <p>A complete list of accepted languages in the right format are available
+            <a href="http://matecat.local/api/docs#supported-langs">here</a>
+        </p>
+
+        <p><strong>Sample JSON response</strong></p>
+            <pre class="literal-block">{
+    "status": "OK",
+    "id_project": 5368,
+    "project_pass": "76ba60c027b9",
+}
+            </pre>
+        <p><strong>Return value definitions</strong></p>
+        <table id="metadata-new-details" class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+            <tbody>
+            <tr>
+                <th>field</th>
+                <th>description</th>
+            </tr>
+            <tr>
+                <td><code>status</code></td>
+                <td>Return the creation status of the project. The statuses can be:
+                    <ul>
+                        <li><code>OK</code> indicating that the creation worked.</li>
+                        <li><code>FAIL</code> indicating that the creation is failed.</li>
+                    </ul>
+                </td>
+            </tr>
+            <tr>
+                <td><code>id_project</code></td>
+                <td>Return the unique id of the project just created.
+                    If creation status is <code>FAIL</code> this key will simply be omitted from the result.
+                </td>
+            </tr>
+            <tr>
+                <td><code>project_pass</code></td>
+                <td>Return the password of the project just created.
+                    If creation status is <code>FAIL</code> this key will simply be omitted from the result.
+                </td>
+            </tr>
+            </tbody>
+        </table>
+
+    </dd>
+    <dt>Errors</dt>
+    <dd>
+        <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+
+            <tbody>
+            <tr>
+                <td>FAIL</td>
+                <td>The project creation is failed</td>
+            </tr>
+            <tr>
+                <td colspan="2">
+                        <pre class="literal-block">{
+    "status": "FAIL",
+}
+                        </pre>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+    </dd>
+    <dt>Notes</dt>
+    <dd><p><code>/new</code> has a maximum file size limit of 60 MB per file and a max number of files of 100.</p></dd>
+    <dd><p>Matecat PRO accept only 54 file formats. A list of all accepted file are available
+        <a href="http://matecat.local/api/docs#accepted-files">here</a></p>
+    </dd>
+</dl>
+<a class="gototop" href="#top">Torna sopra</a>
+<a name="status-post"><h3 class="method-title">/status (GET)</h3></a>
+<dl>
+<dt>Description</dt>
+<dd><p>Retrieve the status of a project</p>
+</dd>
+<dt class="url-label">URL Structure</dt>
+<dd>
+    <pre class="literal-block">https://matecatpro.translated.net/<b>api</b>/status/?<code>id_project=<12345></code>&<code>project_pass=<1abcde123></abcde123></code></pre>
+</dd>
+<dt>Method</dt>
+<dd>GET</dd>
+<dt>Parameters</dt>
+<dd>
+    <ul class="parameters">
+        <li><em>required</em><span class="param">id_project</span> <code>(int)</code> The identifier of the project, should be the
+            value returned by the <a href="http://matecat.local/api/docs#new-post"><code>/new</code></a> method.
+        </li>
+        <li><em>required</em><span class="param">project_pass</span> <code>(string)</code> The password associated with the project, should be the
+            value returned by the <a href="http://matecat.local/api/docs#new-post"><code>/new</code></a> method ( associated with the id_project )
+        </li>
+    </ul>
+</dd>
+<dt>Returns</dt>
+<dd>
+<p>The metadata for the created project containing the status of the project.</p>
+
+<p>More information on the returned metadata fields are available
+    <a href="http://matecat.local/api/docs#metadata-status-details">here</a>
+</p>
+
+<p><strong>Sample JSON response</strong></p>
+            <pre class="literal-block">{"data": {
+    "jobs": {
+        "5615": {
+            "chunks": {
+                "e77eeea779d2": {
+                    "6291": {
+                        "TOTAL_PAYABLE":
+                                [
+                                    143.15
+                                ],
+                        "REPETITIONS":
+                                [
+                                    0,
+                                    "0"
+                                ],
+                        "MT":
+                                [
+                                    167,
+                                    "167"
+                                ],
+                        "NEW":
+                                [
+                                    0,
+                                    "0"
+                                ],
+                        "TM_100":
+                                [
+                                    2,
+                                    "2"
+                                ],
+                        "TM_75_99":
+                                [
+                                    1,
+                                    "1"
+                                ],
+                        "INTERNAL_MATCHES":
+                                [
+                                    0,
+                                    "0"
+                                ],
+                        "ICE":
+                                [
+                                    0,
+                                    "0"
+                                ],
+                        "FILENAME": "Test1.docx"
+                    }
+                }
+            },
+            "totals": {
+                "e77eeea779d2": {
+                    "TOTAL_PAYABLE":
+                            [
+                                143.15,
+                                "143"
+                            ],
+                    "REPETITIONS":
+                            [
+                                0,
+                                "0"
+                            ],
+                    "MT":
+                            [
+                                167,
+                                "167"
+                            ],
+                    "NEW":
+                            [
+                                0,
+                                "0"
+                            ],
+                    "TM_100":
+                            [
+                                2,
+                                "2"
+                            ],
+                    "TM_75_99":
+                            [
+                                1,
+                                "1"
+                            ],
+                    "INTERNAL_MATCHES":
+                            [
+                                0,
+                                "0"
+                            ],
+                    "ICE":
+                            [
+                                0,
+                                "0"
+                            ]
+                    }
+                }
+            }
+        },
+        "summary": {
+            "IN_QUEUE_BEFORE": 0,
+            "IN_QUEUE_BEFORE_PRINT": "0",
+            "STATUS": "DONE",
+            "TOTAL_SEGMENTS": 16,
+            "SEGMENTS_ANALYZED": 16,
+            "TOTAL_SEGMENTS_PRINT": "16",
+            "SEGMENTS_ANALYZED_PRINT": "16",
+            "TOTAL_FAST_WC": "169.00",
+            "TOTAL_TM_WC": 143.15,
+            "TOTAL_FAST_WC_PRINT": "169",
+            "TOTAL_STANDARD_WC": 168.2,
+            "TOTAL_STANDARD_WC_PRINT": "168",
+            "TOTAL_TM_WC_PRINT": "143",
+            "STANDARD_WC_TIME": "27",
+            "FAST_WC_TIME": "27",
+            "TM_WC_TIME": "23",
+            "STANDARD_WC_UNIT": "minutes",
+            "TM_WC_UNIT": "minutes",
+            "FAST_WC_UNIT": "minutes",
+            "USAGE_FEE": "0.78",
+            "PRICE_PER_WORD": "0.030",
+            "DISCOUNT": "2",
+            "NAME": "MyProject4",
+            "TOTAL_RAW_WC": 170,
+            "TOTAL_RAW_WC_PRINT": "170",
+            "TOTAL_PAYABLE": 143.15,
+            "TOTAL_PAYABLE_PRINT": "143",
+            "PAYABLE_WC_TIME": "23",
+            "PAYABLE_WC_UNIT": "minutes",
+            "DISCOUNT_WC": "0"
+        }
+    },
+   "status": "DONE",
+   "analyze": "\/analyze\/MyProject4\/5368-76ba60c027b9",
+   "jobs": {
+       "job_id-job_password": ["5615-e77eeea779d2"],
+       "job-url": {
+            "5615-e77eeea779d2": "\/translate\/MyProject4\/de-DE-en-US\/5615-e77eeea779d2"
+        }
+    }
+}
+            </pre>
+<p><strong>Return value definitions</strong></p>
+<table id="metadata-status-details" class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+
+    <tbody>
+    <tr>
+        <th>field</th>
+        <th>description</th>
+    </tr>
+    <tr>
+        <td><code>jobs</code></td>
+        <td>A structure containing all the info for the specified project.
+            The numerical keys on the first level are the ID of the Jobs contained in the project.
+            ( An ID identifies a language target, so, there are so many languages as there are IDs and vice versa  ).
+        </td>
+    </tr>
+    <tr>
+        <td><code>chunks</code></td>
+        <td>A structure containing the password for the associated job ID.
+            There may be multiple chunks ( passwords ) for the same job ID because of the split.
+            So this key can have multiple entries.
+            Inside every entry key ( passwords ) whe have one or more numerical key indicating the id of every file in the chunk
+        </td>
+    </tr>
+    <tr>
+        <td><code>totals</code></td>
+        <td>Returns the total for every chunk. The entries inside this key are the sums of values for all the chunks of the job.</td>
+    </tr>
+    <tr>
+        <td><code>summary</code></td>
+        <td>Returns the total for the project.</td>
+    </tr>
+    <tr id="project-status">
+        <td><code>status</code></td>
+        <td>Return the analysis status of the project. The statuses can be:
+            <ul>
+                <li><code>ANALYZING</code> indicating that the analysis/creation still working.</li>
+                <li><code>NO_SEGMENTS_FOUND</code> indicating that the project are no segments to analyze.</li>
+                <li><code>ANALYSIS_NOT_ENABLED</code> indicating that no analysis will be performed because of matecat configurations.</li>
+                <li><code>DONE</code> indicating that the analysis/creation is completed.</li>
+                <li><code>FAIL</code> indicating that the analysis/creation is failed.</li>
+            </ul>
+        </td>
+    </tr>
+    <tr>
+        <td><code>analyze</code></td>
+        <td>A link to the analyze page where you can fine all these project info.</td>
+    </tr>
+    <tr>
+        <td><code>job_id-job_password</code></td>
+        <td>A unique identifier for every job in the project.
+        </td>
+    </tr>
+    <tr>
+        <td><code>job-url</code></td>
+        <td>An object containing all the links to the jobs of the project</td>
+    </tr>
+    <tr>
+        <td><code>TOTAL_PAYABLE</code></td>
+        <td>A field containing the number of matecat payable words count in the project/chunk/file</td>
+    </tr>
+    <tr>
+        <td><code>REPETITIONS</code></td>
+        <td>A field containing the number of words repetition in the project/chunk/file</td>
+    </tr>
+    <tr>
+        <td><code>INTERNAL_MATCHES</code></td>
+        <td>A field containing the number of partial matches found in the project/chunk/file</td>
+    </tr>
+    <tr>
+        <td><code>MT</code></td>
+        <td>A field containing the number of matches by Machine Translation in the project/chunk/file</td>
+    </tr>
+    <tr>
+        <td><code>NEW</code></td>
+        <td>A field containing the number of words not found in Machine Translations nor in Memory Server in the project/chunk/file</td>
+    </tr>
+    <tr>
+        <td><code>TM_100</code></td>
+        <td>A field containing the number of exact matches found in Memory Server in the project/chunk/file</td>
+    </tr>
+    <tr>
+        <td><code>TM_75_99</code></td>
+        <td>A field containing the number of matches found in the Memory Server scored between 75% and 99% in the project/chunk/file</td>
+    </tr>
+    <tr>
+        <td><code>ICE</code></td>
+        <td>A field containing the number of exact matches in context found in the project/chunk/file</td>
+    </tr>
+    <tr>
+        <td><code>IN_QUEUE_BEFORE</code></td>
+        <td>A field containing the number of segments in the analysis queue before the project and not relative to the project.</td>
+    </tr>
+    <tr>
+        <td><code>IN_QUEUE_BEFORE_PRINT</code></td>
+        <td>A field containing the locale formatted number of the preceding field.</td>
+    </tr>
+    <tr>
+        <td><code>STATUS</code></td>
+        <td>A field containing the analysis status of the project. See <a href="#project-status" >status</a></td>
+    </tr>
+    <tr>
+        <td><code>TOTAL_SEGMENTS</code></td>
+        <td>A field containing the total number of segments the project.</td>
+    </tr>
+    <tr>
+        <td><code>SEGMENTS_ANALYZED_PRINT</code></td>
+        <td>A field containing the locale formatted number of the preceding field.</td>
+    </tr>
+    <tr>
+        <td><code>TOTAL_FAST_WC</code></td>
+        <td>A field containing the total number of words calculated in fast mode for the project.</td>
+    </tr>
+    <tr>
+        <td><code>TOTAL_FAST_WC_PRINT</code></td>
+        <td>A field containing the locale formatted number of the preceding field.</td>
+    </tr>
+    <tr>
+        <td><code>TOTAL_TM_WC</code></td>
+        <td>A field containing the total number of segments found in the translation memory server.</td>
+    </tr>
+    <tr>
+        <td><code>TOTAL_TM_WC_PRINT</code></td>
+        <td>A field containing the locale formatted number of the preceding field.</td>
+    </tr>
+
+    <tr>
+        <td><code>TOTAL_STANDARD_WC</code></td>
+        <td>A field containing the total number of words calculated with standard word count system.</td>
+    </tr>
+    <tr>
+        <td><code>TOTAL_STANDARD_WC_PRINT</code></td>
+        <td>A field containing the locale formatted number of the preceding field.</td>
+    </tr>
+
+    <tr>
+        <td><code>STANDARD_WC_TIME</code></td>
+        <td>A field containing the total number of words calculated with standard word count system.</td>
+    </tr>
+    <tr>
+        <td><code>TOTAL_TM_WC_PRINT</code></td>
+        <td>A field containing the locale formatted number of the preceding field.</td>
+    </tr>
+
+    <tr>
+        <td><code>TOTAL_RAW_WC</code></td>
+        <td>A field containing the total number of words calculated without any repetition check.</td>
+    </tr>
+    <tr>
+        <td><code>TOTAL_RAW_WC_PRINT</code></td>
+        <td>A field containing the locale formatted number of the preceding field.</td>
+    </tr>
+
+    <tr>
+        <td><code>TOTAL_PAYABLE</code></td>
+        <td>A field containing the final total number of words calculated by Matecat.</td>
+    </tr>
+    <tr>
+        <td><code>TOTAL_PAYABLE_PRINT</code></td>
+        <td>A field containing the locale formatted number of the preceding field.</td>
+    </tr>
+
+    </tbody>
+</table>
+</dd>
+<dt>Errors</dt>
+<dd>
+    <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+
+        <tbody>
+        <tr>
+            <td>FAIL</td>
+            <td>Wrong Password. Access denied</td>
+        </tr>
+        <tr>
+            <td>FAIL</td>
+            <td>No id project provided</td>
+        </tr>
+        <tr>
+            <td colspan="2">
+                        <pre class="literal-block">{
+    "status":  "FAIL",
+    "message": "Wrong Password. Access denied"
+}
+                        </pre>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</dd>
+
+</dl>
+<a class="gototop" href="#top">Torna sopra</a>
+<a name="file-format"><h3 class="method-title">Supported file formats</h3></a>
+<dt id="accepted-files">List of supported file formats</dt>
+<dd>
+
+    <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+
+        <thead>
+        <tr><th>Office</th>
+            <th>Web</th>
+            <th>Interchange Formats</th>
+            <th>Desktop Publishing</th>
+            <th>Localization</th>
+        </tr></thead>
+        <tbody><tr>
+            <td>
+                <ul>
+                    <li>doc</li>
+                    <li>dot</li>
+                    <li>docx</li>
+                    <li>dotx</li>
+                    <li>docm</li>
+                    <li>dotm</li>
+                    <li>pdf</li>
+                    <li>xls</li>
+                    <li>xlt</li>
+                    <li>xlsm</li>
+                    <li>xlsx</li>
+                    <li>xltx</li>
+                    <li>pot</li>
+                    <li>pps</li>
+                    <li>ppt</li>
+                    <li>potm</li>
+                    <li>potx</li>
+                    <li>ppsm</li>
+                    <li>ppsx</li>
+                    <li>pptm</li>
+                    <li>pptx</li>
+                    <li>odp</li>
+                    <li>ods</li>
+                    <li>odt</li>
+                    <li>sxw</li>
+                    <li>sxc</li>
+                    <li>sxi</li>
+                    <li>txt</li>
+                    <li>csv</li>
+                    <li>xml</li>
+                </ul>
+            </td>
+            <td>
+                <ul class="listlang">
+                    <li>htm</li>
+                    <li>html</li>
+                    <li>xhtml</li>
+                    <li>xml</li>
+                </ul>
+            </td>
+            <td>
+                <ul class=" listlang">
+                    <li>xliff</li>
+                    <li>sdlxliff</li>
+                    <li>ttx</li>
+                    <li>itd</li>
+                    <li>xlf</li>
+                </ul>
+            </td>
+            <td>
+                <ul class=" listlang">
+                    <li>mif</li>
+                    <li>inx</li>
+                    <li>idml</li>
+                    <li>icml</li>
+                    <li>xtg</li>
+                    <li>tag</li>
+                    <li>xml</li>
+                    <li>dita</li>
+                </ul>
+            </td>
+            <td>
+                <ul class=" listlang">
+                    <li>properties</li>
+                    <li>rc</li>
+                    <li>resx</li>
+                    <li>xml</li>
+                    <li>dita</li>
+                    <li>sgml</li>
+                    <li>sgm</li>
+                </ul>
+            </td>
+        </tr>
+        </tbody></table>
+
+</dd>
+
+
+<dt id="supported-langs">Supported languages</dt>
+<dd>
+    <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+        <thead>
+            <th>
+                Language ( Code )
+            </th>
+        </thead>
+        <tbody>
+            <tr>
+                <td>
+                <ul class="lang-list">
+                    <li>Afrikaans (af-ZA)</li>
+                    <li>Albanian (sq-AL)</li>
+                    <li>Arabic (ar-SA)</li>
+                    <li>Armenian (hy-AM)</li>
+                    <li>Basque (eu-ES)</li>
+                    <li>Bengali (bn-IN)</li>
+                    <li>Bielarus (be-BY)</li>
+                    <li>Bosnian (bs-BA)</li>
+                    <li>Breton (br-FR)</li>
+                    <li>Bulgarian (bg-BG)</li>
+                    <li>Catalan (ca-ES)</li>
+                    <li>Chinese Simplified (zh-CN)</li>
+                    <li>Chinese Traditional (zh-TW)</li>
+                    <li>Croatian (hr-HR)</li>
+                    <li>Czech (cs-CZ)</li>
+                    <li>Danish (da-DK)</li>
+                    <li>Dutch (nl-NL)</li>
+                    <li>English (en-GB)</li>
+                    <li>English US (en-US)</li>
+                    <li>Estonian (et-EE)</li>
+                    <li>Faroese (fo-FO)</li>
+                    <li>Finnish (fi-FI)</li>
+                    <li>Flemish (nl-BE)</li>
+                    <li>French (fr-FR)</li>
+                    <li>Galician (gl-ES)</li>
+                    <li>Georgian (ka-GE)</li>
+                    <li>German (de-DE)</li>
+                    <li>Greek (el-GR)</li>
+                    <li>Gujarati (gu-IN)</li>
+                    <li>Hebrew (he-IL)</li>
+                    <li>Hindi (hi-IN)</li>
+                    <li>Hungarian (hu-HU)</li>
+                    <li>Icelandic (is-IS)</li>
+                    <li>Indonesian (id-ID)</li>
+                    <li>Irish Gaelic (ga-IE)</li>
+                    <li>Italian (it-IT)</li>
+                    <li>Japanese (ja-JP)</li>
+                    <li>Kazakh (kk-KZ)</li>
+                    <li>Korean (ko-KR)</li>
+                    <li>Latvian (lv-LV)</li>
+                    <li>Lithuanian (lt-LT)</li>
+                    <li>Macedonian (mk-MK)</li>
+                    <li>Malay (ms-MY)</li>
+                    <li>Maltese (mt-MT)</li>
+                    <li>Maori (mi-NZ)</li>
+                    <li>Mongolian (mn-MN)</li>
+                    <li>Nepali (ne-NP)</li>
+                    <li>Norwegian Bokmål (nb-NO)</li>
+                    <li>Norwegian Nynorsk (nn-NO)</li>
+                    <li>Pakistani (ur-PK)</li>
+                    <li>Pashto (ps-PK)</li>
+                    <li>Persian (fa-IR)</li>
+                    <li>Polish (pl-PL)</li>
+                    <li>Portuguese (pt-PT)</li>
+                    <li>Portuguese Brazil (pt-BR)</li>
+                    <li>Quebecois (fr-CA)</li>
+                    <li>Quechua (qu-XN)</li>
+                    <li>Romanian (ro-RO)</li>
+                    <li>Russian (ru-RU)</li>
+                    <li>Serbian Latin (sr-Latn-RS)</li>
+                    <li>Serbian Cyrillic (sr-Cyrl-RS)</li>
+                    <li>Slovak (sk-SK)</li>
+                    <li>Slovenian (sl-SI)</li>
+                    <li>Spanish (es-ES)</li>
+                    <li>Spanish Latin America (es-MX)</li>
+                    <li>Swedish (sv-SE)</li>
+                    <li>Swiss German (de-CH)</li>
+                    <li>Tamil (ta-LK)</li>
+                    <li>Telugu (te-IN)</li>
+                    <li>Thai (th-TH)</li>
+                    <li>Turkish (tr-TR)</li>
+                    <li>Ukrainian (uk-UA)</li>
+                    <li>Vietnamese (vi-VN)</li>
+                    <li>Welsh (cy-GB)</li>
+                </ul>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</dd>
+
+<a class="gototop" href="#top">Torna sopra</a>
+
+</div>
+</body>
+</html>
