@@ -329,7 +329,7 @@ class TMS extends Engine {
 
     public static function createMyMemoryKey(){
 
-        $newUser = json_decode( file_get_contents( 'http://mymemory.translated.net/API/createranduser' ) );
+        $newUser = json_decode( file_get_contents( 'http://mymemory.translated.net/api/createranduser' ) );
         if ( empty( $newUser ) || $newUser->error || $newUser->code != 200 ) {
             throw new Exception( "User private key failure.", -1 );
         }
