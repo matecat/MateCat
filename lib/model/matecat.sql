@@ -1,4 +1,6 @@
--- MySQL dump 10.13  Distrib 5.5.32, for debian-linux-gnu (x86_64)
+CREATE DATABASE  IF NOT EXISTS `matecat` /*!40100 DEFAULT CHARACTER SET utf8 */;
+USE `matecat`;
+-- MySQL dump 10.13  Distrib 5.5.35, for debian-linux-gnu (x86_64)
 --
 -- Host: 10.30.1.241    Database: matecat
 -- ------------------------------------------------------
@@ -16,12 +18,52 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Current Database: `matecat`
+-- Table structure for table `converters`
 --
 
-CREATE DATABASE /*!32312 IF NOT EXISTS*/ `matecat` /*!40100 DEFAULT CHARACTER SET utf8 */;
+DROP TABLE IF EXISTS `converters`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `converters` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip_converter` varchar(45) NOT NULL,
+  `ip_storage` varchar(45) NOT NULL,
+  `ip_machine_host` varchar(45) NOT NULL,
+  `machine_host_user` varchar(45) NOT NULL,
+  `machine_host_pass` varchar(45) NOT NULL,
+  `instance_name` varchar(45) NOT NULL,
+  `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `status_active` tinyint(4) NOT NULL DEFAULT '1',
+  `status_offline` tinyint(4) NOT NULL DEFAULT '0',
+  `status_reboot` tinyint(4) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  UNIQUE KEY `ip_converter_UNIQUE` (`ip_converter`),
+  UNIQUE KEY `ip_storage_UNIQUE` (`ip_storage`),
+  KEY `status_active` (`status_active`),
+  KEY `status_offline` (`status_offline`),
+  KEY `status_reboot` (`status_reboot`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
-USE `matecat`;
+--
+-- Table structure for table `converters_log`
+--
+
+DROP TABLE IF EXISTS `converters_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `converters_log` (
+  `id_log` int(11) NOT NULL AUTO_INCREMENT,
+  `id_converter` int(11) NOT NULL,
+  `check_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `test_passed` tinyint(4) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id_log`),
+  KEY `timestamp_idx` (`check_time`),
+  KEY `outcome_idx` (`test_passed`),
+  KEY `id_converter_idx` (`id_converter`)
+) ENGINE=MyISAM AUTO_INCREMENT=242981 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `engines`
@@ -39,15 +81,47 @@ CREATE TABLE `engines` (
   `translate_relative_url` varchar(100) DEFAULT 'get',
   `contribute_relative_url` varchar(100) DEFAULT NULL,
   `delete_relative_url` varchar(100) DEFAULT NULL,
+  `gloss_get_relative_url` varchar(100) DEFAULT NULL,
+  `gloss_set_relative_url` varchar(100) DEFAULT NULL,
+  `gloss_update_relative_url` varchar(100) DEFAULT NULL,
+  `gloss_delete_relative_url` varchar(100) DEFAULT NULL,
   `extra_parameters` text,
   `google_api_compliant_version` varchar(45) DEFAULT NULL COMMENT 'credo sia superfluo',
   `penalty` int(11) DEFAULT '0',
+  `active` tinyint(4) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `type` (`type`),
+  KEY `active_idx` (`active`) USING BTREE,
   FULLTEXT KEY `name` (`name`),
   FULLTEXT KEY `description` (`description`),
   FULLTEXT KEY `base_url` (`base_url`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=30 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+LOCK TABLES `engines` WRITE;
+/*!40000 ALTER TABLE `engines` DISABLE KEYS */;
+INSERT INTO `engines` VALUES (0,'NONE - PLACEHOLDER','NONE','No MT','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,100,1),(1,'MyMemory (All Pairs)','TM','MyMemory: next generation Translation Memory technology','http://api-proxied.mymemory.translated.net','get','set','delete','glossary/get','glossary/set','glossary/update','glossary/delete',NULL,'1',0,1),(2,'FBK Legal (EN->IT) - Ad.','MT','FBK (EN->IT) Moses Legal engine','http://hlt-services2.fbk.eu:8888','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(3,'LIUM-IT (EN->DE)','MT','Lium (EN->FR) Moses Information Technology engine','http://193.52.29.52:8001','translate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(4,'FBK Legal (EN>FR) - Ad.','MT','FBK (EN->FR) Moses Legal engine','http://hlt-services2.fbk.eu:8988','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(5,'LIUM-LEGAL (EN->DE)','MT','Lium (EN->FR) Moses Legal engine','http://193.52.29.52:8002','translate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,14,1),(6,'FBK TED (IT>EN)','MT','FBK (IT->EN) Moses Information Technology engine','http://hlt-services2.fbk.eu:8788','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1);
+/*!40000 ALTER TABLE `engines` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+--
+-- Table structure for table `file_references`
+--
+
+DROP TABLE IF EXISTS `file_references`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `file_references` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id_project` bigint(20) NOT NULL,
+  `id_file` bigint(20) NOT NULL,
+  `part_filename` varchar(1024) NOT NULL,
+  `serialized_reference_meta` varchar(1024) DEFAULT NULL,
+  `serialized_reference_binaries` longblob,
+  PRIMARY KEY (`id`),
+  KEY `id_file` (`id_file`)
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -58,7 +132,7 @@ DROP TABLE IF EXISTS `files`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `files` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_project` int(11) NOT NULL,
   `filename` varchar(255) DEFAULT NULL,
   `source_language` varchar(45) NOT NULL,
@@ -68,8 +142,9 @@ CREATE TABLE `files` (
   `original_file` longblob,
   PRIMARY KEY (`id`),
   KEY `id_project` (`id_project`),
-  KEY `sha1` (`sha1_original_file`) USING HASH
-) ENGINE=MyISAM AUTO_INCREMENT=5300 DEFAULT CHARSET=utf8;
+  KEY `sha1` (`sha1_original_file`) USING HASH,
+  KEY `filename` (`filename`)
+) ENGINE=MyISAM AUTO_INCREMENT=16403 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -101,9 +176,11 @@ DROP TABLE IF EXISTS `jobs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `jobs` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `password` varchar(45) DEFAULT NULL,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `password` varchar(45) NOT NULL,
   `id_project` int(11) NOT NULL,
+  `job_first_segment` bigint(20) unsigned NOT NULL,
+  `job_last_segment` bigint(20) unsigned NOT NULL,
   `id_translator` varchar(100) NOT NULL DEFAULT 'generic_translator',
   `job_type` varchar(45) DEFAULT NULL,
   `source` varchar(45) DEFAULT NULL,
@@ -121,12 +198,15 @@ CREATE TABLE `jobs` (
   `status_translator` varchar(100) DEFAULT NULL,
   `status` varchar(15) NOT NULL DEFAULT 'active',
   `completed` bit(1) NOT NULL DEFAULT b'0',
-  PRIMARY KEY (`id`),
+  UNIQUE KEY `primary_id_pass` (`id`,`password`),
   KEY `id_job_to_revise` (`id_job_to_revise`),
   KEY `id_project` (`id_project`) USING BTREE,
   KEY `owner` (`owner`),
-  KEY `id_translator` (`id_translator`)
-) ENGINE=MyISAM AUTO_INCREMENT=4992 DEFAULT CHARSET=utf8;
+  KEY `id_translator` (`id_translator`),
+  KEY `first_last_segment_idx` (`job_first_segment`,`job_last_segment`),
+  KEY `id` (`id`) USING BTREE,
+  KEY `password` (`password`)
+) ENGINE=MyISAM AUTO_INCREMENT=13702 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -189,7 +269,7 @@ CREATE TABLE `projects` (
   KEY `id_customer` (`id_customer`),
   KEY `status_analysis` (`status_analysis`),
   KEY `for_debug` (`for_debug`)
-) ENGINE=MyISAM AUTO_INCREMENT=4719 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=11675 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -200,8 +280,8 @@ DROP TABLE IF EXISTS `segment_translations`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `segment_translations` (
-  `id_segment` int(11) NOT NULL,
-  `id_job` int(11) NOT NULL,
+  `id_segment` bigint(20) NOT NULL,
+  `id_job` bigint(20) NOT NULL,
   `status` varchar(45) DEFAULT 'NEW',
   `translation` text,
   `translation_date` datetime DEFAULT NULL,
@@ -215,6 +295,7 @@ CREATE TABLE `segment_translations` (
   `suggestion_match` int(11) DEFAULT NULL,
   `suggestion_source` varchar(45) DEFAULT NULL,
   `suggestion_position` int(11) DEFAULT NULL,
+  `mt_qe` float(19,14) NOT NULL DEFAULT '0.00000000000000',
   `tm_analysis_status` varchar(50) DEFAULT 'UNDONE',
   `locked` tinyint(4) DEFAULT '0',
   `warning` tinyint(4) NOT NULL DEFAULT '0',
@@ -257,7 +338,8 @@ DROP TABLE IF EXISTS `segments`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `segments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `id_file` int(11) NOT NULL,
+  `id_file` bigint(20) NOT NULL,
+  `id_file_part` bigint(20) DEFAULT NULL,
   `internal_id` varchar(100) DEFAULT NULL,
   `xliff_mrk_id` varchar(70) DEFAULT NULL,
   `xliff_ext_prec_tags` text,
@@ -273,8 +355,9 @@ CREATE TABLE `segments` (
   KEY `mrk_id` (`xliff_mrk_id`) USING BTREE,
   KEY `show_in_cat` (`show_in_cattool`) USING BTREE,
   KEY `raw_word_count` (`raw_word_count`) USING BTREE,
+  KEY `id_file_part_idx` (`id_file_part`),
   FULLTEXT KEY `segment` (`segment`)
-) ENGINE=MyISAM AUTO_INCREMENT=2356805 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=8778242 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -343,71 +426,4 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2013-08-01 18:20:10
--- MySQL dump 10.13  Distrib 5.5.32, for debian-linux-gnu (x86_64)
---
--- Host: 10.30.1.241    Database: matecat
--- ------------------------------------------------------
--- Server version	5.5.31-0+wheezy1-log
-
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
-
---
--- Table structure for table `engines`
---
-
-DROP TABLE IF EXISTS `engines`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `engines` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` varchar(200) DEFAULT 'no_name_engine',
-  `type` varchar(45) NOT NULL DEFAULT 'MT',
-  `description` text,
-  `base_url` varchar(200) NOT NULL,
-  `translate_relative_url` varchar(100) DEFAULT 'get',
-  `contribute_relative_url` varchar(100) DEFAULT NULL,
-  `delete_relative_url` varchar(100) DEFAULT NULL,
-  `extra_parameters` text,
-  `google_api_compliant_version` varchar(45) DEFAULT NULL COMMENT 'credo sia superfluo',
-  `penalty` int(11) DEFAULT '0',
-  PRIMARY KEY (`id`),
-  KEY `type` (`type`),
-  FULLTEXT KEY `name` (`name`),
-  FULLTEXT KEY `description` (`description`),
-  FULLTEXT KEY `base_url` (`base_url`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `engines`
---
-
-LOCK TABLES `engines` WRITE;
-/*!40000 ALTER TABLE `engines` DISABLE KEYS */;
-INSERT INTO `engines` VALUES (1,'MyMemory (All Pairs)','TM','MyMemory: next generation Translation Memory technology','http://api.mymemory.translated.net','get','set','delete',NULL,'1',0),(2,'FBK-IT (EN->IT)','MT','FBK (EN->IT) Moses Information Technology engine','http://hlt-services2.fbk.eu:8480','translate','update',NULL,NULL,'2',14),(3,'LIUM-IT (EN->DE)','MT','Lium (EN->FR) Moses Information Technology engine','http://193.52.29.52:8001','translate',NULL,NULL,NULL,'2',14),(4,'FBK-LEGAL (EN>IT)','MT','FBK (EN->IT) Moses Legal engine','http://hlt-services2.fbk.eu:8490','translate',NULL,NULL,NULL,'2',14),(5,'LIUM-LEGAL (EN->DE)','MT','Lium (EN->FR) Moses Legal engine','http://193.52.29.52:8002','translate',NULL,NULL,NULL,NULL,14),(6,'TEST PURPOSE FBK (EN->IT)','MT','TEST PURPOSE ONLY  - FBK (EN->IT)','http://hlt-services2.fbk.eu:8482','translate','update',NULL,NULL,'2',14);
-/*!40000 ALTER TABLE `engines` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
-
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2013-08-01 18:20:10
-CREATE USER 'matecat'@'localhost' IDENTIFIED BY 'matecat01';
-GRANT ALL ON matecat.* TO 'matecat'@'localhost' IDENTIFIED BY 'matecat01';
-FLUSH PRIVILEGES;
+-- Dump completed on 2014-02-11 12:06:16
