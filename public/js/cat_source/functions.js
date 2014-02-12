@@ -181,7 +181,7 @@ function pasteHtmlAtCaret(html, selectPastedContent) {
     }
 }
 
-function setCursorPosition(el, pos) {console.log(pos);
+function setCursorPosition(el, pos) {
 	pos = pos || 0;
 	var range = document.createRange();
 	var sel = window.getSelection();
@@ -289,7 +289,7 @@ function rawxliff2rawview(segment) { // currently unused
 	return segment;
 }
 
-function saveSelection(pos) {console.log(pos);
+function saveSelection(pos) {//console.log(pos);
 //	var editarea = (typeof editarea == 'undefined') ? UI.editarea : el;
 	var editarea = UI.editarea;
 	if (UI.savedSel) {
@@ -300,7 +300,7 @@ function saveSelection(pos) {console.log(pos);
 	editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
 
 	UI.savedSelActiveElement = document.activeElement;
-	if(pos != 'noMove') UI.movePHOutOfTags(pos);
+//	if(pos != 'noMove') UI.movePHOutOfTags(pos);
 }
 
 function restoreSelection() {

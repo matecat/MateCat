@@ -300,14 +300,16 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.preOpenConcordance();
 		}).on('keypress', '.editor .editarea', function(e) {
+//			console.log('keypress: ', UI.editarea.html());
+
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
-				console.log('KEYPRESS SU EDITAREA: ', UI.editarea.html());
+//				console.log('KEYPRESS SU EDITAREA: ', UI.editarea.html());
 				if($('.tag-autocomplete').length) {
 					e.preventDefault();
 					return false;
 				}
 				UI.openTagAutocompletePanel();
-				console.log('Q: ', UI.editarea.html());
+//				console.log('Q: ', UI.editarea.html());
 			}
 			if((e.which == 62)&&(UI.taglockEnabled)) { // closing tag sign
 				if($('.tag-autocomplete').length) {
@@ -324,7 +326,8 @@ $.extend(UI, {
 					UI.checkAutocompleteTags();
 				}
 			}, 50);			
-		}).on('keydown', '.editor .editarea', function(e) {console.log(e.which);
+		}).on('keydown', '.editor .editarea', function(e) {
+//			console.log('keydown: ', UI.editarea.html());
 /*
 			var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
 			if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
@@ -358,20 +361,20 @@ $.extend(UI, {
 							e.preventDefault();
 							console.log('BB: ', UI.editarea.html());
 						}
-						console.log(e.which + ' - ' + isInsideTag);
+//						console.log(e.which + ' - ' + isInsideTag);
 						setTimeout(function() {
 							if ((e.which == 46)&&(isInsideTag)) {
 								console.log('inside tag');
 							}
-							console.log(e.which + ' - ' + isInsideTag);
-							console.log('CC: ', UI.editarea.html());
+//							console.log(e.which + ' - ' + isInsideTag);
+//							console.log('CC: ', UI.editarea.html());
 							var numTagsAfter = UI.editarea.text().match(/<.*?\>/gi).length;
 							var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
 							if (numTagsAfter < numTagsBefore)
 								UI.saveInUndoStack('cancel');
 							if (numSpacesAfter < numSpacesBefore)
 								UI.saveInUndoStack('cancel');
-							console.log('DD: ', UI.editarea.html());
+//							console.log('DD: ', UI.editarea.html());
 
 						}, 50);
 
@@ -398,7 +401,6 @@ $.extend(UI, {
 				}
 			}
 			if (e.which == 37) { // left arrow
-				console.log('a: ', UI.editarea.html());
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
 				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
@@ -412,10 +414,8 @@ $.extend(UI, {
 						$('.rangySelectionBoundary', UI.editarea).remove();
 					}
 				}
-				console.log('b: ', UI.editarea.html());
 				UI.closeTagAutocompletePanel();
-				console.log('c: ', UI.editarea.html());
-				UI.jumpTag('start');
+//				UI.jumpTag('start');
 			}
 
 			if (e.which == 38) { // top arrow
@@ -454,7 +454,7 @@ $.extend(UI, {
 					}
 				}
 				UI.closeTagAutocompletePanel();
-				UI.jumpTag('end');
+//				UI.jumpTag('end');
 			}
 
 			if (e.which == 40) { // down arrow
@@ -520,7 +520,9 @@ $.extend(UI, {
 			}
 			if (!UI.body.hasClass('searchActive'))
 				setTimeout(function() {
+//					console.log('before tag lock: ', UI.editarea.html());
 					UI.lockTags(UI.editarea);
+//					console.log('after tag lock: ', UI.editarea.html());
 				}, 10);
 			UI.registerQACheck();
 		}).on('input', '.editor .cc-search .input', function(e) {
@@ -838,7 +840,9 @@ $.extend(UI, {
 			var save = (typeof param == 'undefined') ? 'noSave' : param;
 			UI.closeSegment(UI.currentSegment, 1, save);
 		}).on('keyup', '.editor .editarea', function(e) {
-            if ( e.which == 13 ){
+			if ( e.which == 13 ){
+//				$(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
+
                 //replace all divs with a br and remove all br without a class
 //                var divs = $( this ).find( 'div' );
 //                if( divs.length ){
@@ -849,7 +853,7 @@ $.extend(UI, {
 //                } else {
 //                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
 //                }
-            }
+			}
 		});
 		UI.toSegment = true;
 		if (!this.segmentToScrollAtRender)
