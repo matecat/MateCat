@@ -79,6 +79,7 @@ UI = {
 			this.body.addClass('justdone');
 		}
 	},
+/*
 	checkTutorialNeed: function() {
 		if (!Loader.detect('tutorial'))
 			return false;
@@ -94,6 +95,7 @@ UI = {
 			});
 		}
 	},
+*/
 	closeSegment: function(segment, byButton, operation) {
 		if ((typeof segment == 'undefined') || (typeof UI.toSegment != 'undefined')) {
 			this.toSegment = undefined;

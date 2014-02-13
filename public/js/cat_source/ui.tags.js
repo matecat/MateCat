@@ -115,7 +115,7 @@ $.extend(UI, {
 	},
 
 	// TAG LOCK
-	lockTags: function(el) {//console.log('lock tags');
+	lockTags: function(el) {console.log('lock tags');
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
@@ -179,35 +179,64 @@ $.extend(UI, {
 	},
 	
 	// TAG CLEANING
-	cleanDroppedTag: function(area, beforeDropHTML) {
+	cleanDroppedTag: function(area, beforeDropHTML) {console.log('clean');
 
-		if (area == this.editarea)
+		if (area == this.editarea) {
 			this.droppingInEditarea = false;
+	//		console.log(area.html());
 
-		var diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
-		var draggedText = '';
-		$(diff).each(function() {
-			if (this[0] == 1) {
-				draggedText += this[1];
+			var diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
+	//		console.log('diff: ', diff);
+			var draggedText = '';
+			$(diff).each(function() {
+				if (this[0] == 1) {
+					draggedText += this[1];
+				}
+			});
+	//		console.log(diff);
+			draggedText = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2");
+			dr2 = draggedText.replace(/(<br>)$/, '').replace(/(<span.*?>)\&nbsp;/,'$1');
+	//		console.log(draggedText);
+	//		console.log(dr2);
+	//		console.log('1: ', area.html());
+			area.html(area.html().replace(draggedText, dr2));
+	//		console.log('2: ', area.html());			
+		} else {
+	// old cleaning code to be evaluated
+			var diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
+			console.log('diff: ', diff);
+			var draggedText = '';
+			$(diff).each(function() {
+				if (this[0] == 1) {
+					draggedText += this[1];
+				}
+			});
+			draggedText = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2").replace(/(<br>)$/gi, '');
+			var div = document.createElement("div");
+			div.innerHTML = draggedText;
+			saveSelection();
+			$('.rangySelectionBoundary', area)[1].remove();
+			if($('span .rangySelectionBoundary', area).length) {
+				var spel = $('span', area).has('.rangySelectionBoundary');
+				var rsb = $('span .rangySelectionBoundary', area).detach();
+				spel.after(rsb);
 			}
-		});
+			var phcode = $('.rangySelectionBoundary')[0].outerHTML;
+			$('.rangySelectionBoundary').text(this.cursorPlaceholder);
+			console.log('x: ', UI.editarea.html());
 
-		draggedText = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2");
-		var div = document.createElement("div");
-		div.innerHTML = draggedText;
-		saveSelection();
-		var phcode = $('.rangySelectionBoundary')[0].outerHTML;
-		$('.rangySelectionBoundary').text(this.cursorPlaceholder);
+	//		closeTag = '</' + $(div).text().trim().replace(/<(.*?)\s.*?\>/gi, "$1") + '>';
+			newTag = $(div).text();
+			console.log('newTag: ', newTag);
 
-		closeTag = '</' + $(div).text().trim().replace(/<(.*?)\s.*?\>/gi, "$1") + '>';
-		newTag = $(div).text();
-
-		var newText = area.text().replace(draggedText, newTag);
-		area.text(newText);
-		area.html(area.html().replace(this.cursorPlaceholder, phcode));
-		restoreSelection();
-		area.html(area.html().replace(this.cursorPlaceholder, ''));
-
+			var newText = area.text().replace(draggedText, newTag);
+			console.log('area.text(): ', area.text());
+			console.log('newText: ', newText);
+			area.text(newText);
+			area.html(area.html().replace(this.cursorPlaceholder, phcode));
+			restoreSelection();
+			area.html(area.html().replace(this.cursorPlaceholder, ''));			
+		}
 	},
 	
 	// TAG MISMATCH
