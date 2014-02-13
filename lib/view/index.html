@@ -5,10 +5,11 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
+<!--
         <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/jquery-ui.css?build=${build_number}" rel="stylesheet" type="text/css" />
-
+-->
         <script type="text/javascript">
 			/*<![CDATA[*/
 			var config = {
@@ -32,7 +33,8 @@
 				segmentQACheckInterval: '${segmentQACheckInterval}',
 				firstSegmentOfFiles: ${structure php: firstSegmentOfFiles},
 				taglockEnabled: ${taglockEnabled | string:1},
-				brPlaceholdEnabled: '${brPlaceholdEnabled}'
+				brPlaceholdEnabled: '${brPlaceholdEnabled}',
+				optimized: false
 			};
 			var renderStart = new Date();
 			/*]]>*/
@@ -50,9 +52,23 @@
             config.crlfPlaceholderRegex = ${crlfPlaceholderRegex | null};
             /*]]>*/
         </script>
-
-        <script src="${basepath}public/js/loader.js?build=${build_number}"></script>
-        <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
+		<script>
+            /*<![CDATA[*/
+			if(config.optimized) {
+				document.write("<link href=\"${basepath}public/css/app.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
+				document.write("<script src=\"${basepath}public/js/app.js?build=${build_number}\"><\/script>");
+			} else {
+				document.write("<link href=\"${basepath}public/css/common.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
+				document.write("<link href=\"${basepath}public/css/style.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
+				document.write("<link href=\"${basepath}public/css/jquery-ui.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
+				document.write("<script src=\"${basepath}public/js/loader.js?build=${build_number}\"><\/script>");
+				document.write("<script src=\"${basepath}public/js/logout.js?build=${build_number}\"><\/script>");				
+			}
+            /*]]>*/
+		</script>	
+		
+<!--        <script src="${basepath}public/js/loader.js?build=${build_number}"></script> 
+        <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>-->
     </head>
     <body tal:condition="not:supportedBrowser">
         <div  metal:use-macro="unsupported_browser.html/unsupported"/>

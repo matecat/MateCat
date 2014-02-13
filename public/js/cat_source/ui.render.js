@@ -61,8 +61,9 @@ $.extend(UI, {
 		this.suggestionShortcutLabel = 'ALT+' + ((UI.isMac) ? "CMD" : "CTRL") + '+';
 
 		this.taglockEnabled = config.taglockEnabled;
-		this.debug = Loader.detect('debug');
-		this.checkTutorialNeed();
+		this.debug = false;
+//		this.debug = Loader.detect('debug');
+//		this.checkTutorialNeed();
 
 		UI.detectStartSegment(); 
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;

@@ -79,6 +79,7 @@ UI = {
 			this.body.addClass('justdone');
 		}
 	},
+/*
 	checkTutorialNeed: function() {
 		if (!Loader.detect('tutorial'))
 			return false;
@@ -94,6 +95,7 @@ UI = {
 			});
 		}
 	},
+*/
 	closeSegment: function(segment, byButton, operation) {
 		if ((typeof segment == 'undefined') || (typeof UI.toSegment != 'undefined')) {
 			this.toSegment = undefined;
@@ -1519,7 +1521,12 @@ UI = {
 				$(this).prepend( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
 			});
 		} else {
-			$(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>') );
+//			console.log('post process 1: ', $(area).html());
+//			console.log($(area).find( 'br:not([class])' ).length);
+//			$(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>') );
+			$(area).find('br:not([class]), br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
+//			$(area).find( 'br:not([class])' ).replaceWith( $('[BR]') );
+//			console.log('post process 2: ', $(area).html());
 		}
 
 //        Now commented, but valid for future purposes when the user will choose what type of carriage return
