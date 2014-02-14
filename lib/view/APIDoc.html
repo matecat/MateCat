@@ -228,8 +228,8 @@
                                 ],
                         "MT":
                                 [
-                                    167,
-                                    "167"
+                                    166,
+                                    "166"
                                 ],
                         "NEW":
                                 [
@@ -256,6 +256,11 @@
                                     0,
                                     "0"
                                 ],
+                        "NUMBERS_ONLY":
+                                [
+                                    1,
+                                    "1"
+                                ],
                         "FILENAME": "Test1.docx"
                     }
                 }
@@ -274,8 +279,8 @@
                             ],
                     "MT":
                             [
-                                167,
-                                "167"
+                                166,
+                                "166"
                             ],
                     "NEW":
                             [
@@ -301,25 +306,24 @@
                             [
                                 0,
                                 "0"
-                            ]
+                            ],
+                    "NUMBERS_ONLY":
+                            [
+                                1,
+                                "1"
+                            ],
                     }
                 }
             }
         },
         "summary": {
             "IN_QUEUE_BEFORE": 0,
-            "IN_QUEUE_BEFORE_PRINT": "0",
             "STATUS": "DONE",
             "TOTAL_SEGMENTS": 16,
             "SEGMENTS_ANALYZED": 16,
-            "TOTAL_SEGMENTS_PRINT": "16",
-            "SEGMENTS_ANALYZED_PRINT": "16",
             "TOTAL_FAST_WC": "169.00",
             "TOTAL_TM_WC": 143.15,
-            "TOTAL_FAST_WC_PRINT": "169",
             "TOTAL_STANDARD_WC": 168.2,
-            "TOTAL_STANDARD_WC_PRINT": "168",
-            "TOTAL_TM_WC_PRINT": "143",
             "STANDARD_WC_TIME": "27",
             "FAST_WC_TIME": "27",
             "TM_WC_TIME": "23",
@@ -331,9 +335,7 @@
             "DISCOUNT": "2",
             "NAME": "MyProject4",
             "TOTAL_RAW_WC": 170,
-            "TOTAL_RAW_WC_PRINT": "170",
             "TOTAL_PAYABLE": 143.15,
-            "TOTAL_PAYABLE_PRINT": "143",
             "PAYABLE_WC_TIME": "23",
             "PAYABLE_WC_UNIT": "minutes",
             "DISCOUNT_WC": "0"
@@ -438,12 +440,12 @@
         <td>A field containing the number of exact matches in context found in the project/chunk/file</td>
     </tr>
     <tr>
-        <td><code>IN_QUEUE_BEFORE</code></td>
-        <td>A field containing the number of segments in the analysis queue before the project and not relative to the project.</td>
+        <td><code>NUMBERS_ONLY</code></td>
+        <td>A field containing only number, dates and similar not translatable data ( Ex: 93/127 ) found in the project/chunk/file</td>
     </tr>
     <tr>
-        <td><code>IN_QUEUE_BEFORE_PRINT</code></td>
-        <td>A field containing the locale formatted number of the preceding field.</td>
+        <td><code>IN_QUEUE_BEFORE</code></td>
+        <td>A field containing the number of segments in the analysis queue before the project and not relative to the project.</td>
     </tr>
     <tr>
         <td><code>STATUS</code></td>
@@ -454,62 +456,29 @@
         <td>A field containing the total number of segments the project.</td>
     </tr>
     <tr>
-        <td><code>SEGMENTS_ANALYZED_PRINT</code></td>
-        <td>A field containing the locale formatted number of the preceding field.</td>
-    </tr>
-    <tr>
         <td><code>TOTAL_FAST_WC</code></td>
         <td>A field containing the total number of words calculated in fast mode for the project.</td>
-    </tr>
-    <tr>
-        <td><code>TOTAL_FAST_WC_PRINT</code></td>
-        <td>A field containing the locale formatted number of the preceding field.</td>
     </tr>
     <tr>
         <td><code>TOTAL_TM_WC</code></td>
         <td>A field containing the total number of segments found in the translation memory server.</td>
     </tr>
     <tr>
-        <td><code>TOTAL_TM_WC_PRINT</code></td>
-        <td>A field containing the locale formatted number of the preceding field.</td>
-    </tr>
-
-    <tr>
         <td><code>TOTAL_STANDARD_WC</code></td>
         <td>A field containing the total number of words calculated with standard word count system.</td>
     </tr>
-    <tr>
-        <td><code>TOTAL_STANDARD_WC_PRINT</code></td>
-        <td>A field containing the locale formatted number of the preceding field.</td>
-    </tr>
-
     <tr>
         <td><code>STANDARD_WC_TIME</code></td>
         <td>A field containing the total number of words calculated with standard word count system.</td>
     </tr>
     <tr>
-        <td><code>TOTAL_TM_WC_PRINT</code></td>
-        <td>A field containing the locale formatted number of the preceding field.</td>
-    </tr>
-
-    <tr>
         <td><code>TOTAL_RAW_WC</code></td>
         <td>A field containing the total number of words calculated without any repetition check.</td>
     </tr>
     <tr>
-        <td><code>TOTAL_RAW_WC_PRINT</code></td>
-        <td>A field containing the locale formatted number of the preceding field.</td>
-    </tr>
-
-    <tr>
         <td><code>TOTAL_PAYABLE</code></td>
         <td>A field containing the final total number of words calculated by Matecat.</td>
     </tr>
-    <tr>
-        <td><code>TOTAL_PAYABLE_PRINT</code></td>
-        <td>A field containing the locale formatted number of the preceding field.</td>
-    </tr>
-
     </tbody>
 </table>
 </dd>
