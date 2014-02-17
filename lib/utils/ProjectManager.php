@@ -889,6 +889,15 @@ class ProjectManager {
         $a               = str_replace( "\n", " NL ", $a );
         $pattern_x_start = '/^(\s*<x .*?\/>)(.*)/mis';
         $pattern_x_end   = '/(.*)(<x .*?\/>\s*)$/mis';
+
+        //TODO:
+        //What happens here? this regexp fails for
+        //<g id="pt1497"><g id="pt1498"><x id="nbsp"/></g></g>
+        //And this
+        /* $pattern_g       = '/^(\s*<g [^>]*?>)(.*?)(<\/g>\s*)$/mis'; */
+        //break document consistency in project Manager
+        //where is the bug? there or in extract segments?
+
         $pattern_g       = '/^(\s*<g [^>]*?>)([^<]*?)(<\/g>\s*)$/mis';
         $found           = false;
         $prec            = "";

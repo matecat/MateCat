@@ -39,7 +39,8 @@ class StatusController extends getVolumeAnalysisController {
 
     public function doAction() {
 
-        parent::doAction();
+        $this->formatApiData();
+
         if( !empty( $this->result['errors'] ) ){
             $this->api_output['message'] = $this->result['errors'][1];
         } else{

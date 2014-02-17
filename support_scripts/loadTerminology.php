@@ -18,11 +18,11 @@ $db->connect ();
 
 $config = TMS::getConfigStruct();
 
-$config[ 'source_lang' ]   = "en-US";
-$config[ 'target_lang' ]   = "fr-FR";
+$config[ 'source_lang' ]   = "es-ES";
+$config[ 'target_lang' ]   = "it-IT";
 $config[ 'email' ]         = "demo@matecat.com";
 $config[ 'get_mt' ]        = false;
-$config[ 'id_user' ]       = "MyMemory_aa2c9e1eb8";
+$config[ 'id_user' ]       = "MyMemory_157f083a38";
 //$config[ 'mt_only' ]       = false;
 $config[ 'num_result' ]    = null;
 //$config[ 'isConcordance' ] = false;
@@ -30,9 +30,9 @@ $config[ 'isGlossary' ]    = true;
 
 
 //$fObject = new SplFileObject( 'Glossary_en_it.csv' );
-$fObject = new SplFileObject( 'GlossaryEN2FR.csv' );
+$fObject = new SplFileObject( '10932411 - Glossary - Glossary.csv' );
 $fObject->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE );
-$fObject->setCsvControl( "\t", '"' );
+$fObject->setCsvControl( ",", '"' );
 
 
 $tms = new TMS( 1 );
@@ -55,6 +55,7 @@ foreach( $fObject as $k => $row ){
 
     if( !$test ){
         $tms->set( $config );
+        echo "SET\n";
     }
 
     echo print_r($config,true) . "\n";

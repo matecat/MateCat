@@ -3,7 +3,7 @@
 set_time_limit(180);
 include_once INIT::$MODEL_ROOT."/queries.php";
 include_once INIT::$UTILS_ROOT."/CatUtils.php";
-include_once INIT::$UTILS_ROOT."/fileFormatConverter.class.php";
+include_once INIT::$UTILS_ROOT."/FileFormatConverter.php";
 include_once(INIT::$UTILS_ROOT.'/XliffSAXTranslationReplacer.class.php');
 include_once(INIT::$UTILS_ROOT.'/DetectProprietaryXliff.php');
 
@@ -183,7 +183,7 @@ class downloadFileController extends downloadController {
                 $output_content[$id_file]['target'] = $jobData['target'];
 
                 // specs for filename at the task https://app.asana.com/0/1096066951381/2263196383117
-                $converter = new fileFormatConverter();
+                $converter = new FileFormatConverter();
                 $debug[ 'do_conversion' ][ ] = time();
                 $convertResult = $converter->convertToOriginal( $output_content[ $id_file ], $chosen_machine );
                 $output_content[ $id_file ][ 'content' ] = $convertResult[ 'documentContent' ];

@@ -1695,7 +1695,7 @@ function getProjectStatsVolumeAnalysis( $pid ) {
                 p.fast_analysis_wc,
                 p.tm_analysis_wc,
                 p.standard_analysis_wc,
-                st.tm_analysis_status AS st_status_analysis
+                st.tm_analysis_status AS st_status_analysis     , s.segment, s.xliff_mrk_ext_prec_tags, s.xliff_mrk_ext_succ_tags, s.show_in_cattool
             FROM
                 segment_translations AS st
                     JOIN
@@ -1708,8 +1708,8 @@ function getProjectStatsVolumeAnalysis( $pid ) {
                 files f ON s.id_file = f.id
             WHERE
                 p.id = $pid
-                    AND p.status_analysis IN ('NEW' , 'FAST_OK', 'DONE')
-                    AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
+                AND p.status_analysis IN ('NEW' , 'FAST_OK', 'DONE')
+                AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
             ";
 
     $db      = Database::obtain();
