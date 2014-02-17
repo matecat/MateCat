@@ -21,6 +21,12 @@ $.extend(UI, {
 //            this.startRender = true;
 		this.initSegNum = 200; // number of segments initially loaded
 		this.moreSegNum = 50;
+		this.numOpenedSegments = 0;
+		this.hasToBeRerendered = false;
+		this.maxMinutesBeforeRerendering = 30;
+		setTimeout(function() {
+			UI.hasToBeRerendered = true;
+		}, this.maxMinutesBeforeRerendering*60000);	
 		this.loadingMore = false;
 		this.infiniteScroll = true;
 		this.noMoreSegmentsAfter = false;

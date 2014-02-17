@@ -115,7 +115,8 @@ $.extend(UI, {
 	},
 
 	// TAG LOCK
-	lockTags: function(el) {console.log('lock tags');
+	lockTags: function(el) {
+//		console.log('lock tags');
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
