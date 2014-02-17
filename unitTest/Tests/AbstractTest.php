@@ -13,7 +13,6 @@ if( !class_exists('INIT', false )){
     include_once INIT::$UTILS_ROOT . '/Utils.php';
     include_once INIT::$UTILS_ROOT . '/Log.php';
     include_once INIT::$MODEL_ROOT . '/Database.class.php';
-    require_once "PHPUnit/Autoload.php";
 }
 
 abstract class Tests_AbstractTest extends PHPUnit_Framework_TestCase {

@@ -344,11 +344,13 @@
    "status": "DONE",
    "analyze": "\/analyze\/MyProject4\/5368-76ba60c027b9",
    "jobs": {
-       "job_id-job_password": ["5615-e77eeea779d2"],
+        "langpairs": {
+                "5615-e77eeea779d2": "de-DE-en-US"
+        },
        "job-url": {
             "5615-e77eeea779d2": "\/translate\/MyProject4\/de-DE-en-US\/5615-e77eeea779d2"
         }
-    }
+   }
 }
             </pre>
 <p><strong>Return value definitions</strong></p>
@@ -399,8 +401,8 @@
         <td>A link to the analyze page where you can fine all these project info.</td>
     </tr>
     <tr>
-        <td><code>job_id-job_password</code></td>
-        <td>A unique identifier for every job in the project.
+        <td><code>langpairs</code></td>
+        <td>The language pairs for every job/chunk in the project.
         </td>
     </tr>
     <tr>
