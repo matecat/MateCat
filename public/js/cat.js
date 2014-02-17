@@ -63,8 +63,11 @@ UI = {
 		});
 	},
 	checkHeaviness: function() {
-		if ($('section').length > 500) {
-			UI.reloadToSegment(UI.nextUntranslatedSegmentId);
+//		console.log('UI.hasToBeRerendered: ', this.hasToBeRerendered);
+//		console.log(this.initSegNum + ' - ' + this.numOpenedSegments + ' - ' + (this.initSegNum/this.numOpenedSegments));
+//		if (($('section').length > 500)||(this.numOpenedSegments > 2)) {
+		if (($('section').length > 500)||((this.initSegNum/this.numOpenedSegments) < 2)||(this.hasToBeRerendered)) {
+			UI.reloadToSegment(UI.currentSegmentId);
 		}
 	},
 	checkIfFinished: function(closing) {
@@ -719,6 +722,7 @@ UI = {
 			if (this.justSelecting('editarea'))
 				return;
 		}
+		this.numOpenedSegments++;
 		this.firstOpenedSegment = (this.firstOpenedSegment === 0) ? 1 : 2;
 		this.byButton = false;
 		this.cacheObjects(editarea);
@@ -1419,7 +1423,6 @@ UI = {
 
 		// Attention, to be modified when we will lock tags
 		if( config.brPlaceholdEnabled ) {
-			console.log('s');
             translation = this.postProcessEditarea(segment);
         } else {
             translation = $('.editarea', segment ).text();
@@ -1914,6 +1917,12 @@ $.extend(UI, {
 //            this.startRender = true;
 		this.initSegNum = 200; // number of segments initially loaded
 		this.moreSegNum = 50;
+		this.numOpenedSegments = 0;
+		this.hasToBeRerendered = false;
+		this.maxMinutesBeforeRerendering = 30;
+		setTimeout(function() {
+			UI.hasToBeRerendered = true;
+		}, this.maxMinutesBeforeRerendering*60000);	
 		this.loadingMore = false;
 		this.infiniteScroll = true;
 		this.noMoreSegmentsAfter = false;
@@ -3523,7 +3532,8 @@ $.extend(UI, {
 	},
 
 	// TAG LOCK
-	lockTags: function(el) {console.log('lock tags');
+	lockTags: function(el) {
+//		console.log('lock tags');
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
