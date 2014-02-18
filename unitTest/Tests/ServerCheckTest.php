@@ -10,15 +10,21 @@ include_once("AbstractTest.php");
 
 class Tests_ServerCheckTest extends Tests_AbstractTest {
 
+    public function testSingleInstance(){
+        $servCheck = ServerCheck::getInstance();
+        $servCheck2 = ServerCheck::getInstance();
+        $this->assertEquals( spl_object_hash($servCheck), spl_object_hash( $servCheck2 ) );
+    }
+
     public function testServerParams(){
         $servCheck = ServerCheck::getInstance();
         $this->assertInstanceOf( 'ServerCheck', $servCheck );
-        $params = $servCheck->getServerParams() ;
+        $params = $servCheck->getAllServerParams() ;
 
         $this->assertNotEmpty( $params );
-        $this->assertNotEmpty( $params['upload'] );
+        $this->assertNotEmpty( $params->getUpload() );
 
-        $this->assertArrayHasKey( 'upload', $params );
+        $this->assertAttributeNotEmpty( 'upload', $params );
 
     }
 
@@ -31,15 +37,44 @@ class Tests_ServerCheckTest extends Tests_AbstractTest {
 
         $this->assertNotEmpty( $params );
 
-        $this->assertArrayHasKey( 'post_max_size', $params );
-        $this->assertArrayHasKey( 'upload_max_filesize', $params );
+        $this->assertAttributeNotEmpty( 'post_max_size', $params );
+        $this->assertAttributeNotEmpty( 'upload_max_filesize', $params );
 
-        $this->assertNotEquals( $params['post_max_size'], -1 );
-        $this->assertNotEquals( $params['upload_max_filesize'], -1 );
+        $this->assertNotEquals( $params->getPostMaxSize(), -1 );
+        $this->assertNotEquals( $params->getUploadMaxFilesize(), -1 );
 
     }
 
+    public function testReadOnly(){
+        $servCheck = ServerCheck::getInstance();
 
+        $allServerParams = $servCheck->getAllServerParams() ;
+        $upload = $servCheck->getUploadParams() ;
+
+        $this->assertEquals( $servCheck->getUploadParams(), $allServerParams->getUpload() );
+        $this->assertEquals( $upload, $allServerParams->getUpload() );
+
+        $this->assertNotEquals( spl_object_hash( $upload ), $allServerParams->getUpload() );
+        $this->assertNotEquals( spl_object_hash( $upload ), $servCheck->getUploadParams() );
+
+        $this->setExpectedException('DomainException');
+        $allServerParams->field_test_not_existent = "kkk";
+
+        $this->setExpectedException('Exception');
+        echo $allServerParams->field_test_not_existent;
+
+    }
+
+    public function testMysql(){
+
+        DBLoader4Test::getUp();
+
+        $servCheck = ServerCheck::getInstance();
+        $mysql_params = $servCheck->getMysqlConfParams();
+
+        $this->assertInstanceOf( 'ServerCheck_params', $mysql_params );
+
+    }
 
 }
 

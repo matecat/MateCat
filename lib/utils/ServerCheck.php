@@ -11,17 +11,22 @@ class ServerCheck {
 
     protected static $_INSTANCE;
 
-    protected static $serverParams = array();
-    protected static $uploadParams = array(
-            'post_max_size'       => -1,
-            'upload_max_filesize' => -1
-    );
+    protected static $serverParams;
+
+    /**
+     * @var ServerCheck_params
+     */
+    protected static $uploadParams;
+
+    /**
+     * @var ServerCheck_params
+     */
+    protected static $MysqlParams;
 
     protected function __construct(){
 
-        self::$serverParams = array(
-                'upload' => self::$uploadParams
-        );
+        self::$uploadParams = new ServerCheck_params();
+        self::$serverParams = new ServerCheck_params();
 
         //init class loading server params
         $this->checkUploadParams();
@@ -50,8 +55,7 @@ class ServerCheck {
             }
         } else { $allowed_post = (int)$matches[1]; }
 
-        self::$serverParams['upload']['post_max_size'] = $allowed_post;
-        self::$uploadParams['post_max_size'] = $allowed_post;
+        self::$uploadParams->post_max_size = $allowed_post;
 
         preg_match( $regexp, ini_get('upload_max_filesize'), $matches );
         if( isset( $matches[2] ) ){
@@ -65,19 +69,48 @@ class ServerCheck {
             }
         } else { $allowed_upload = (int)$matches[1]; }
 
-        self::$serverParams['upload']['upload_max_filesize'] = $allowed_upload;
-        self::$uploadParams['upload_max_filesize'] = $allowed_upload;
+        self::$uploadParams->upload_max_filesize = $allowed_upload;
+
+        self::$serverParams->upload = new ServerCheck_uploadParams( self::$uploadParams );
 
         return $this;
 
     }
 
+    /**
+     * @return ServerCheck_uploadParams
+     */
     public function getUploadParams(){
-        return self::$uploadParams;
+        return new ServerCheck_uploadParams( self::$uploadParams );
     }
 
-    public function getServerParams(){
-        return self::$serverParams;
+    /**
+     * @return ServerCheck_serverParams
+     */
+    public function getAllServerParams(){
+        return new ServerCheck_serverParams( self::$serverParams );
+    }
+
+    public function getMysqlConfParams(){
+
+        if( self::$MysqlParams === null ){
+
+            self::$MysqlParams  = new ServerCheck_params();
+
+            $db = Database::obtain();
+            $queryMaxBuffSize = "show variables";
+            $variables = $db->fetch_array($queryMaxBuffSize);
+            foreach ( $variables as $key => $value ){
+                $_VAR_NAME = $value['Variable_name'];
+                self::$MysqlParams->$_VAR_NAME = $value['Value'];
+            }
+
+            self::$serverParams->mysql_params = self::$MysqlParams;
+
+        }
+
+        return self::$MysqlParams;
+
     }
 
 } 
