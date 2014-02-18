@@ -17,8 +17,8 @@ $.extend(UI, {
 		this.blockGetMoreSegments = true;
 		this.searchParams = {};
 		this.searchParams.search = 0;
-		var bb = $.cookie('noAlertConfirmTranslation');
-		this.alertConfirmTranslationEnabled = (typeof bb == 'undefined') ? true : false;
+//		var bb = $.cookie('noAlertConfirmTranslation');
+//		this.alertConfirmTranslationEnabled = (typeof bb == 'undefined') ? true : false;
 		this.customSpellcheck = false;
 		this.noGlossary = false;
 		setTimeout(function() {

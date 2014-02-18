@@ -65,17 +65,17 @@ $.extend(UI, {
 			UI.toggleSearch(e);
 		}).bind('keydown', 'Ctrl+f', function(e) {
 			UI.toggleSearch(e);
-		}).on('change', '#hideAlertConfirmTranslation', function(e) {
-			console.log($(this).prop('checked'));
-			if ($(this).prop('checked')) {
-				console.log('checked');
-				UI.alertConfirmTranslationEnabled = false;
-				$.cookie('noAlertConfirmTranslation', true, {expires: 1000});
-			} else {
-				console.log('unchecked');
-				UI.alertConfirmTranslationEnabled = true;
-				$.removeCookie('noAlertConfirmTranslation');
-			}
+//		}).on('change', '#hideAlertConfirmTranslation', function(e) {
+//			console.log($(this).prop('checked'));
+//			if ($(this).prop('checked')) {
+//				console.log('checked');
+//				UI.alertConfirmTranslationEnabled = false;
+//				$.cookie('noAlertConfirmTranslation', true, {expires: 1000});
+//			} else {
+//				console.log('unchecked');
+//				UI.alertConfirmTranslationEnabled = true;
+//				$.removeCookie('noAlertConfirmTranslation');
+//			}
 		}).on('click', '#spellCheck .words', function(e) {
 			e.preventDefault();
 			UI.selectedMisspelledElement.replaceWith($(this).text());
@@ -255,7 +255,7 @@ $.extend(UI, {
 
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();
-			e.stopPropagation();
+			e.stopPropagation();			
 		}).on('click', '.editarea', function(e, operation, action) {
 			if (typeof operation == 'undefined')
 				operation = 'clicking';
