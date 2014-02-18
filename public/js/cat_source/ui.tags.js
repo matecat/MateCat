@@ -91,7 +91,7 @@ $.extend(UI, {
 	},
 	markTags: function() {
 		if (!this.taglockEnabled) return false;
-		UI.checkHeaviness(); 
+//		UI.checkHeaviness(); 
 		
 		if (this.noTagsInSegment(1))
 			return false;

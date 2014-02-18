@@ -60,7 +60,7 @@
 			} else {
 				document.write("<link href=\"${basepath}public/css/common.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
 				document.write("<link href=\"${basepath}public/css/style.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
-				document.write("<link href=\"${basepath}public/css/jquery-ui.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
+//				document.write("<link href=\"${basepath}public/css/jquery-ui.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
 				document.write("<script src=\"${basepath}public/js/loader.js?build=${build_number}\"><\/script>");
 				document.write("<script src=\"${basepath}public/js/logout.js?build=${build_number}\"><\/script>");				
 			}
@@ -600,10 +600,13 @@
             <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>
             <form action=""><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>
         </div>
+<!-- Actually unused -->
+<!--
         <div id="alertConfirmTranslation" class="dialog" title="Attention">
             <p>To confirm your translation, please press on Translated or use the shortcut CTRL+Enter.</p>
             <form action=""><input id="hideAlertConfirmTranslation" type="checkbox" value="" /><label for="hideAlertConfirmTranslation">Do not display again</label></form>
         </div>
+-->
         <!--
                         <div class="end-message-box">
                         <div class="end-message-col1">

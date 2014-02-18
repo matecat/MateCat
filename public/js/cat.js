@@ -1852,8 +1852,8 @@ $.extend(UI, {
 		this.blockGetMoreSegments = true;
 		this.searchParams = {};
 		this.searchParams.search = 0;
-		var bb = $.cookie('noAlertConfirmTranslation');
-		this.alertConfirmTranslationEnabled = (typeof bb == 'undefined') ? true : false;
+//		var bb = $.cookie('noAlertConfirmTranslation');
+//		this.alertConfirmTranslationEnabled = (typeof bb == 'undefined') ? true : false;
 		this.customSpellcheck = false;
 		this.noGlossary = false;
 		setTimeout(function() {
@@ -1915,8 +1915,8 @@ $.extend(UI, {
 
 //        if (firstLoad)
 //            this.startRender = true;
-		this.initSegNum = 200; // number of segments initially loaded
-		this.moreSegNum = 50;
+		this.initSegNum = 100; // number of segments initially loaded
+		this.moreSegNum = 25;
 		this.numOpenedSegments = 0;
 		this.hasToBeRerendered = false;
 		this.maxMinutesBeforeRerendering = 30;
@@ -2047,17 +2047,17 @@ $.extend(UI, {
 			UI.toggleSearch(e);
 		}).bind('keydown', 'Ctrl+f', function(e) {
 			UI.toggleSearch(e);
-		}).on('change', '#hideAlertConfirmTranslation', function(e) {
-			console.log($(this).prop('checked'));
-			if ($(this).prop('checked')) {
-				console.log('checked');
-				UI.alertConfirmTranslationEnabled = false;
-				$.cookie('noAlertConfirmTranslation', true, {expires: 1000});
-			} else {
-				console.log('unchecked');
-				UI.alertConfirmTranslationEnabled = true;
-				$.removeCookie('noAlertConfirmTranslation');
-			}
+//		}).on('change', '#hideAlertConfirmTranslation', function(e) {
+//			console.log($(this).prop('checked'));
+//			if ($(this).prop('checked')) {
+//				console.log('checked');
+//				UI.alertConfirmTranslationEnabled = false;
+//				$.cookie('noAlertConfirmTranslation', true, {expires: 1000});
+//			} else {
+//				console.log('unchecked');
+//				UI.alertConfirmTranslationEnabled = true;
+//				$.removeCookie('noAlertConfirmTranslation');
+//			}
 		}).on('click', '#spellCheck .words', function(e) {
 			e.preventDefault();
 			UI.selectedMisspelledElement.replaceWith($(this).text());
@@ -2237,7 +2237,7 @@ $.extend(UI, {
 
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();
-			e.stopPropagation();
+			e.stopPropagation();			
 		}).on('click', '.editarea', function(e, operation, action) {
 			if (typeof operation == 'undefined')
 				operation = 'clicking';
@@ -3508,7 +3508,7 @@ $.extend(UI, {
 	},
 	markTags: function() {
 		if (!this.taglockEnabled) return false;
-		UI.checkHeaviness(); 
+//		UI.checkHeaviness(); 
 		
 		if (this.noTagsInSegment(1))
 			return false;

@@ -19,8 +19,8 @@ $.extend(UI, {
 
 //        if (firstLoad)
 //            this.startRender = true;
-		this.initSegNum = 200; // number of segments initially loaded
-		this.moreSegNum = 50;
+		this.initSegNum = 100; // number of segments initially loaded
+		this.moreSegNum = 25;
 		this.numOpenedSegments = 0;
 		this.hasToBeRerendered = false;
 		this.maxMinutesBeforeRerendering = 30;
