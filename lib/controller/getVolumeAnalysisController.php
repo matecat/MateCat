@@ -349,6 +349,8 @@ class getVolumeAnalysisController extends ajaxController {
 
         } else {
 
+            Log::doLog( $this->_project_data );
+
             switch ( $this->status_project ) {
                 case 'NEW':
                 case 'FAST_OK':
@@ -373,8 +375,8 @@ class getVolumeAnalysisController extends ajaxController {
             $this->result['jobs']   = array();
 
             foreach( $this->_project_data as $job ){
-                $this->result[ 'jobs' ][ 'job_id-job_password' ][ ]             = $job[ 'jid_jpassword' ];
-                $this->result[ 'jobs' ][ 'job-url' ][ $job[ 'jid_jpassword' ] ] = "/translate/" . $job[ 'job_url' ];
+                $this->result[ 'jobs' ][ 'langpairs' ][ $job[ 'jid_jpassword' ] ] = $job[ 'lang_pair' ];
+                $this->result[ 'jobs' ][ 'job-url' ][ $job[ 'jid_jpassword' ] ]   = "/translate/" . $job[ 'job_url' ];
             }
 
         }

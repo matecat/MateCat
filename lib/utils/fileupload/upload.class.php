@@ -426,9 +426,19 @@ class UploadHandler {
     }
 
     public function post() {
+
+        $uploadParams = ServerCheck::getInstance()->getUploadParams();
+
+
+        Log::doLog( $uploadParams );
+
+
         if (isset($_REQUEST['_method']) && $_REQUEST['_method'] === 'DELETE') {
             return $this->delete();
         }
+
+
+
         $upload = isset($_FILES[$this->options['param_name']]) ?
                 $_FILES[$this->options['param_name']] : null;
         $info = array();

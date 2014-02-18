@@ -1402,6 +1402,7 @@ function getProjectJobData( $pid ) {
                        job_first_segment,
                        job_last_segment,
                        CONCAT( jobs.id , '-', jobs.password ) as jid_jpassword,
+                       CONCAT( jobs.source, '-', jobs.target ) as lang_pair,
                        CONCAT( projects.name, '/', jobs.source, '-', jobs.target, '/', jobs.id , '-', jobs.password ) as job_url,
                        status_owner
                 FROM jobs
@@ -1695,7 +1696,7 @@ function getProjectStatsVolumeAnalysis( $pid ) {
                 p.fast_analysis_wc,
                 p.tm_analysis_wc,
                 p.standard_analysis_wc,
-                st.tm_analysis_status AS st_status_analysis     , s.segment, s.xliff_mrk_ext_prec_tags, s.xliff_mrk_ext_succ_tags, s.show_in_cattool
+                st.tm_analysis_status AS st_status_analysis
             FROM
                 segment_translations AS st
                     JOIN
