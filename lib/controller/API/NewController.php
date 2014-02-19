@@ -39,6 +39,9 @@ class NewController extends ajaxController {
         $this->disableSessions();
         parent::__construct();
 
+        //force client to close connection, avoid UPLOAD_ERR_PARTIAL for keep-alive connections
+        header("Connection: close");
+
         $filterArgs = array(
                 'project_name'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
                 'source_lang'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
@@ -116,7 +119,8 @@ class NewController extends ajaxController {
             $arFiles[] = $input_value->name;
         }
 
-        $default_project_name = $arFiles[0];
+        //if fileupload was failed this index ( 0 = does not exists )
+        $default_project_name = @$arFiles[0];
         if (count($arFiles) > 1) {
             $default_project_name = "MATECAT_PROJ-" . date("Ymdhi");
         }

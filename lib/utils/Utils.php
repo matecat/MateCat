@@ -234,7 +234,7 @@ Importance: High
         $uid  = uniqid( "", true );
         $data = $namespace;
         $data .= $_SERVER[ 'REQUEST_TIME' ];
-        $data .= $_SERVER[ 'HTTP_USER_AGENT' ];
+        $data .= @$_SERVER[ 'HTTP_USER_AGENT' ];
 
         if ( isset( $_SERVER[ 'LOCAL_ADDR' ] ) ) {
             $data .= $_SERVER[ 'LOCAL_ADDR' ]; // Windows only

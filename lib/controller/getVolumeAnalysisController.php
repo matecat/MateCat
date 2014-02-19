@@ -54,7 +54,7 @@ class getVolumeAnalysisController extends ajaxController {
     protected $total_init = array(
             "TOTAL_PAYABLE"    => array( 0, "0" ), "REPETITIONS" => array( 0, "0" ), "MT" => array( 0, "0" ),
             "NEW"              => array( 0, "0" ), "TM_100" => array( 0, "0" ), "TM_75_99" => array( 0, "0" ),
-            "INTERNAL_MATCHES" => array( 0, "0" ), "ICE" => array( 0, "0" ), "EMPTY" => array( 0, "0" )
+            "INTERNAL_MATCHES" => array( 0, "0" ), "ICE" => array( 0, "0" ), "NUMBERS_ONLY" => array( 0, "0" )
     );
 
     protected $_resultSet = array();

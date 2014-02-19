@@ -27,7 +27,7 @@ Loader = {
         'jquery',
 //        'jquery-ui-1.8.20.custom.min',
         'jquery.hotkeys.min',
-//        'jquery.cookie',
+        'jquery.cookie',
         'diff_match_patch',
         'waypoints',
         'rangy-core',

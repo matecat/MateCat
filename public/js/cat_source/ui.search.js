@@ -9,7 +9,7 @@ $.extend(UI, {
 				where: 'no'
 			});
 	},
-	resetSearch: function() {
+	resetSearch: function() {console.log('reset search');
 		this.body.removeClass('searchActive');
 		this.clearSearchMarkers();
 		this.setFindFunction('find');

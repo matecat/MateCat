@@ -56,6 +56,11 @@ UI = {
 		this.setContribution(segment, status, byStatus);
 		this.setContributionMT(segment, status, byStatus);
 		this.getNextSegment(this.currentSegment, 'untranslated');
+		if(!this.nextUntranslatedSegmentId) {
+			$(window).trigger({
+				type: "allTranslated"
+			});
+		};
 		$(window).trigger({
 			type: "statusChanged",
 			segment: segment,
@@ -219,6 +224,39 @@ UI = {
 			APP.fitText($(this), $('a', $(this)), 20);
 		});
 */
+	},
+	displaySurvey: function(s) {
+		if(this.surveyDisplayed) return;
+		survey = '<div class="modal survey" data-type="view">' +
+				'	<div class="popup-outer"></div>' +
+				'	<div class="popup">' +
+				'		<a href="#" class="x-popup"></a>' +
+				'		<h1>Survey</h1>' +
+				'		<div class="popup-box">' +
+				'			<iframe src="' + s + '" width="100%" height="400" frameborder="0" marginheight="0" marginwidth="0">Loading ...</iframe>' +
+				'		</div>' +
+				'	</div>' +
+				'</div>';	
+		this.body.append(survey);
+		$('.modal.survey').show();
+	},
+	surveyAlreadyDisplayed: function() {
+		if(typeof $.cookie('surveyedJobs') != 'undefined') {
+			var c = $.cookie('surveyedJobs');
+			surv = c.split('||')[0];
+			if(config.survey === surv) {
+				jobs = $.cookie('surveyedJobs').split('||')[1].split(',');
+				var found = false;
+				$.each(jobs, function(index) {
+					if(this == config.job_id) {
+						found = true;
+					}
+				});
+				return found;
+			}
+		} else {
+			return false;
+		}
 	},
 	getIconClass: function(ext) {
 		c =		(
@@ -736,7 +774,6 @@ UI = {
 		this.saveInUndoStack('open');
 		this.autoSave = true;
 		this.activateSegment();
-
 		this.getNextSegment(this.currentSegment, 'untranslated');
 		this.setCurrentSegment(segment);
 		this.currentSegment.addClass('opened');

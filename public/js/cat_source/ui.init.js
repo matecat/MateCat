@@ -48,12 +48,16 @@ $.extend(UI, {
 		this.firstMarking = true;
 //		this.markTags(true);
 		this.firstMarking = false;
+		this.surveyDisplayed = false;
 		this.setContextMenu();
 		this.createJobMenu();
 		$('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');
 
 		// SET EVENTS
-		this.setEvents(); 
+		this.setEvents();
+		if(this.surveyAlreadyDisplayed()) {
+			this.surveyDisplayed = true;
+		}
 	},
 }); 
 
