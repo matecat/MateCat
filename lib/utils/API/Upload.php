@@ -38,7 +38,7 @@ class Upload  {
             mkdir( $this->dirUpload, 0775 );
         }
 
-        //Mime White List, take it from ProjectManager.php
+        //Mime White List, take them from ProjectManager.php
         $this->acceptedMime = array();
 
         //flatten to one dimensional list of keys
