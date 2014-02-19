@@ -48,17 +48,17 @@
                             </li>
                             <li><span class="req">required</span> <code class="param">source_lang</code> <code>(string)</code> <a href="http://www.rfc-editor.org/rfc/rfc5646.txt" target="blank">RFC 5646</a> language+region Code ( en-US <b>case sensitive</b> ) as specified in <a href="http://www.w3.org/International/articles/language-tags/" target="blank">W3C standards</a>
                             </li>
-                            <li><span class="req">required</span><code class="param"> target_lang</code> <code>(string)</code> <a href="http://www.rfc-editor.org/rfc/rfc5646.txt" target="blank">RFC 5646</a> language(s)+region(s) Code(s)  as specified in <a href="http://www.w3.org/International/articles/language-tags/" target="blank">W3C standards</a>.
-                                Multiple languages must be comma separated ( <code>it-IT,fr-FR,es-ES</code> <b>case sensitive</b>)
+                            <li><span class="req">required</span> <code class="param">target_lang</code> <code>(string)</code> <a href="http://www.rfc-editor.org/rfc/rfc5646.txt" target="blank">RFC 5646</a> language(s)+region(s) Code(s)  as specified in <a href="http://www.w3.org/International/articles/language-tags/" target="blank">W3C standards</a>.
+                                <br />Multiple languages must be comma separated ( <code>it-IT,fr-FR,es-ES</code> <b>case sensitive</b>)
                             </li>
-                            <li><span class="opt">optional (default 1) </span><code class="param">tms_engine</code> <code>(int)</code> Identifier for Memory Server
-                                <code>(0 ( ZERO )</code> means disabled, <code>1 ( ONE )</code> means MyMemory)
+                            <li><span class="opt">optional (default 1)</span> <code class="param">tms_engine</code> <code>(int)</code> Identifier for Memory Server
+                                <code>0</code> means disabled, <code>1</code> means MyMemory)
                             </li>
                             <li><span class="opt">optional (default 1)</span> <code class="param"> mt_engine</code> <code>(int)</code> Identifier for Machine Translation Service
-                                <code>(0 ( ZERO )</code> means disabled, <code>1 ( ONE )</code> means get MT from MyMemory)
+                                <code>0</code> means disabled, <code>1</code> means get MT from MyMemory)
                             </li>
-                            <li><span class="opt">optional</span> <code class="param"> private_tm_key</code> <code>(string)</code> Private Key for MyMemory. Fill
-                                this field with your MyMemory private key if you already have one or set to <code>new</code> to create a new one.
+                            <li><span class="opt">optional</span> <code class="param"> private_tm_key</code> <code>(string)</code> Private Key for MyMemory.
+                                <br />Fill this field with your MyMemory private key if you already have one or set to <code>new</code> to create a new one.
                             </li>
                         </ul>
                     </dd>
