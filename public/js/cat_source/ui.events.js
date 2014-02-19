@@ -104,10 +104,25 @@ $.extend(UI, {
 			UI.closeTagAutocompletePanel();
 			UI.lockTags(UI.editarea);
 			UI.currentSegmentQA();
+		}).on('click', '.modal.survey .x-popup', function(e) {
+			UI.surveyDisplayed = true;
+			if(typeof $.cookie('surveyedJobs') != 'undefined') {
+				var c = $.cookie('surveyedJobs');
+				surv = c.split('||')[0];
+				if(config.survey === surv) {
+					$.cookie('surveyedJobs', c + config.job_id + ',');
+				}
+			} else {
+				$.cookie('surveyedJobs', config.survey + '||' + config.job_id + ',', { path: '/' });
+			}
+		}).on('click', '.modal.survey .popup-outer', function(e) {
+			$('.modal.survey').hide();
 		});
 		
 		$(window).on('scroll', function(e) {
 			UI.browserScrollPositionRestoreCorrection();
+		}).on('allTranslated', function(e) {
+			if(config.survey) UI.displaySurvey(config.survey);
 		});
 // no more used:
 		$("header .filter").click(function(e) {

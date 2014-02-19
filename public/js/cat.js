@@ -56,6 +56,11 @@ UI = {
 		this.setContribution(segment, status, byStatus);
 		this.setContributionMT(segment, status, byStatus);
 		this.getNextSegment(this.currentSegment, 'untranslated');
+		if(!this.nextUntranslatedSegmentId) {
+			$(window).trigger({
+				type: "allTranslated"
+			});
+		};
 		$(window).trigger({
 			type: "statusChanged",
 			segment: segment,
@@ -219,6 +224,39 @@ UI = {
 			APP.fitText($(this), $('a', $(this)), 20);
 		});
 */
+	},
+	displaySurvey: function(s) {
+		if(this.surveyDisplayed) return;
+		survey = '<div class="modal survey" data-type="view">' +
+				'	<div class="popup-outer"></div>' +
+				'	<div class="popup">' +
+				'		<a href="#" class="x-popup"></a>' +
+				'		<h1>Survey</h1>' +
+				'		<div class="popup-box">' +
+				'			<iframe src="' + s + '" width="100%" height="400" frameborder="0" marginheight="0" marginwidth="0">Loading ...</iframe>' +
+				'		</div>' +
+				'	</div>' +
+				'</div>';	
+		this.body.append(survey);
+		$('.modal.survey').show();
+	},
+	surveyAlreadyDisplayed: function() {
+		if(typeof $.cookie('surveyedJobs') != 'undefined') {
+			var c = $.cookie('surveyedJobs');
+			surv = c.split('||')[0];
+			if(config.survey === surv) {
+				jobs = $.cookie('surveyedJobs').split('||')[1].split(',');
+				var found = false;
+				$.each(jobs, function(index) {
+					if(this == config.job_id) {
+						found = true;
+					}
+				});
+				return found;
+			}
+		} else {
+			return false;
+		}
 	},
 	getIconClass: function(ext) {
 		c =		(
@@ -736,7 +774,6 @@ UI = {
 		this.saveInUndoStack('open');
 		this.autoSave = true;
 		this.activateSegment();
-
 		this.getNextSegment(this.currentSegment, 'untranslated');
 		this.setCurrentSegment(segment);
 		this.currentSegment.addClass('opened');
@@ -1884,12 +1921,16 @@ $.extend(UI, {
 		this.firstMarking = true;
 //		this.markTags(true);
 		this.firstMarking = false;
+		this.surveyDisplayed = false;
 		this.setContextMenu();
 		this.createJobMenu();
 		$('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');
 
 		// SET EVENTS
-		this.setEvents(); 
+		this.setEvents();
+		if(this.surveyAlreadyDisplayed()) {
+			this.surveyDisplayed = true;
+		}
 	},
 }); 
 
@@ -2087,10 +2128,25 @@ $.extend(UI, {
 			UI.closeTagAutocompletePanel();
 			UI.lockTags(UI.editarea);
 			UI.currentSegmentQA();
+		}).on('click', '.modal.survey .x-popup', function(e) {
+			UI.surveyDisplayed = true;
+			if(typeof $.cookie('surveyedJobs') != 'undefined') {
+				var c = $.cookie('surveyedJobs');
+				surv = c.split('||')[0];
+				if(config.survey === surv) {
+					$.cookie('surveyedJobs', c + config.job_id + ',');
+				}
+			} else {
+				$.cookie('surveyedJobs', config.survey + '||' + config.job_id + ',', { path: '/' });
+			}
+		}).on('click', '.modal.survey .popup-outer', function(e) {
+			$('.modal.survey').hide();
 		});
 		
 		$(window).on('scroll', function(e) {
 			UI.browserScrollPositionRestoreCorrection();
+		}).on('allTranslated', function(e) {
+			if(config.survey) UI.displaySurvey(config.survey);
 		});
 // no more used:
 		$("header .filter").click(function(e) {
