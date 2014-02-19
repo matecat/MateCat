@@ -484,7 +484,7 @@
                         <dt id="accepted-files">List of supported file formats</dt>
                         <dd>
                         
-                            <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+                            <table class="tablestats fileformat" width="100%" border="0" cellspacing="0" cellpadding="0">
                         
                                 <thead>
                                 <tr><th>Office</th>
@@ -495,7 +495,7 @@
                                 </tr></thead>
                                 <tbody><tr>
                                     <td>
-                                        <ul>
+                                        <ul class="office">
                                             <li>doc</li>
                                             <li>dot</li>
                                             <li>docx</li>
@@ -710,6 +710,20 @@ console.log(position)
     });
 jQuery( ".menu a " ).click(function() {
   jQuery(this).addClass('selected');
+});
+jQuery(function() {
+  jQuery('a[href*=#]:not([href=#])').click(function() {
+    if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+      var target = jQuery(this.hash);
+      target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
+      if (target.length) {
+        jQuery('html,body').animate({
+          scrollTop: target.offset().top
+        }, 1000);
+        return false;
+      }
+    }
+  });
 });
 </script>
 </body>
