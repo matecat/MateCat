@@ -1396,13 +1396,14 @@ UI = {
 			},
 			success: function(d) {
 				if (UI.currentSegment.hasClass('waiting_for_check_result')) {
+
 					// check conditions for results discard
 					if (!d.total) {
 						$('p.warnings', UI.currentSegment).empty();
 						$('span.locked.mismatch', UI.currentSegment).removeClass('mismatch');
 						return;
 					}
-					if (UI.editarea.text().trim() != UI.checkSegmentsArray[d.token].trim())
+					if (UI.editarea.text().trim() != UI.checkSegmentsArray[d.token].trim().replace(config.crlfPlaceholderRegex, ''))
 						return;
 
 					UI.fillCurrentSegmentWarnings(d.details, false); // update warnings

@@ -1396,13 +1396,14 @@ UI = {
 			},
 			success: function(d) {
 				if (UI.currentSegment.hasClass('waiting_for_check_result')) {
+
 					// check conditions for results discard
 					if (!d.total) {
 						$('p.warnings', UI.currentSegment).empty();
 						$('span.locked.mismatch', UI.currentSegment).removeClass('mismatch');
 						return;
 					}
-					if (UI.editarea.text().trim() != UI.checkSegmentsArray[d.token].trim())
+					if (UI.editarea.text().trim() != UI.checkSegmentsArray[d.token].trim().replace(config.crlfPlaceholderRegex, ''))
 						return;
 
 					UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
@@ -2498,6 +2499,9 @@ $.extend(UI, {
 				UI.tagToDelete = null;
 			}
 			if (UI.droppingInEditarea) {
+				console.log('prima del clean 1: ', UI.editarea.html());
+//				$('.editor .editarea span[style*="color"]+br').remove();
+//				console.log('prima del clean 2: ', UI.editarea.html());
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
 			}
 			if (!UI.body.hasClass('searchActive'))
@@ -2584,7 +2588,11 @@ $.extend(UI, {
 				segment: UI.currentSegment
 			});
 			UI.saveInUndoStack('drop');
+			console.log('bbb: ', UI.editarea.html());
+			$(this).css('float', 'left');
 			setTimeout(function() {
+				UI.editarea.removeAttr('style');
+				console.log('ccc: ', UI.editarea.html());
 				UI.saveInUndoStack('drop');
 			}, 100);
 		}).on('drop paste', '.editor .cc-search .input, .editor .gl-search .input', function(e) {
@@ -3137,6 +3145,12 @@ $.extend(UI, {
 		$(".loader", n).removeClass('loader_on');
 	},
 	getContribution_success: function(d, segment) {
+//		console.log(d.data.matches);
+//		localStorage.setItem($(segment).attr('id').split('-')[1], JSON.stringify(d.data.matches));
+//		console.log(localStorage.getItem($(segment).attr('id').split('-')[1]));
+//		console.log(localStorage.getItem('4679214'));
+//		console.log(!localStorage.getItem('4679214'));
+//		console.log(localStorage.getItem('4679215'));
 		this.renderContributions(d, segment);
 		if ($(segment).attr('id').split('-')[1] == UI.currentSegmentId)
 			this.currentSegmentQA();
@@ -3601,28 +3615,59 @@ $.extend(UI, {
 
 		if (area == this.editarea) {
 			this.droppingInEditarea = false;
-	//		console.log(area.html());
 
 			var diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
-	//		console.log('diff: ', diff);
 			var draggedText = '';
 			$(diff).each(function() {
 				if (this[0] == 1) {
 					draggedText += this[1];
 				}
 			});
-	//		console.log(diff);
 			draggedText = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2");
 			dr2 = draggedText.replace(/(<br>)$/, '').replace(/(<span.*?>)\&nbsp;/,'$1');
-	//		console.log(draggedText);
-	//		console.log(dr2);
-	//		console.log('1: ', area.html());
+//			dr2 = draggedText.replace(/(<span.*?>)\&nbsp;/,'$1');
 			area.html(area.html().replace(draggedText, dr2));
-	//		console.log('2: ', area.html());			
+			console.log('111: ', UI.editarea.html());
+
+			var div = document.createElement("div");
+			div.innerHTML = draggedText;
+			console.log('div html: ', $(div).html());
+			console.log('dragged text: ', draggedText);
+			var isMarkup = draggedText.match(/^<span style=\"font\-size\: 13px/gi);
+			saveSelection();
+
+			$('.rangySelectionBoundary', area).last().remove();
+			if($('span .rangySelectionBoundary', area).length) {
+				var spel = $('span', area).has('.rangySelectionBoundary');
+				var rsb = $('span .rangySelectionBoundary', area).detach();
+				spel.after(rsb);
+			}
+			var phcode = $('.rangySelectionBoundary').last().outerHTML;
+			console.log('phcode: ', phcode);
+			$('.rangySelectionBoundary').text(this.cursorPlaceholder);
+
+	//		closeTag = '</' + $(div).text().trim().replace(/<(.*?)\s.*?\>/gi, "$1") + '>';
+			newTag = $(div).text();
+
+			var newText = area.text().replace(draggedText, newTag);
+			console.log('222: ', UI.editarea.html());
+			console.log(newText);
+			if(isMarkup) {
+				console.log('IS MARKUP!!!');
+				area.text(newText);
+			}
+			console.log('333: ', UI.editarea.html());
+			if(typeof phcode == 'undefined') phcode = '';
+			console.log('phcode 1: ', phcode);
+			if(isMarkup) area.html(area.html().replace(this.cursorPlaceholder, phcode));
+			console.log('444: ', UI.editarea.html());
+			restoreSelection();
+			if(isMarkup) area.html(area.html().replace(this.cursorPlaceholder, ''));			
+
+			
 		} else {
 	// old cleaning code to be evaluated
 			var diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
-			console.log('diff: ', diff);
 			var draggedText = '';
 			$(diff).each(function() {
 				if (this[0] == 1) {
@@ -3633,7 +3678,7 @@ $.extend(UI, {
 			var div = document.createElement("div");
 			div.innerHTML = draggedText;
 			saveSelection();
-			$('.rangySelectionBoundary', area)[1].remove();
+			$('.rangySelectionBoundary', area).last().remove();
 			if($('span .rangySelectionBoundary', area).length) {
 				var spel = $('span', area).has('.rangySelectionBoundary');
 				var rsb = $('span .rangySelectionBoundary', area).detach();
@@ -3641,15 +3686,11 @@ $.extend(UI, {
 			}
 			var phcode = $('.rangySelectionBoundary')[0].outerHTML;
 			$('.rangySelectionBoundary').text(this.cursorPlaceholder);
-			console.log('x: ', UI.editarea.html());
 
 	//		closeTag = '</' + $(div).text().trim().replace(/<(.*?)\s.*?\>/gi, "$1") + '>';
 			newTag = $(div).text();
-			console.log('newTag: ', newTag);
 
 			var newText = area.text().replace(draggedText, newTag);
-			console.log('area.text(): ', area.text());
-			console.log('newText: ', newText);
 			area.text(newText);
 			area.html(area.html().replace(this.cursorPlaceholder, phcode));
 			restoreSelection();

@@ -108,6 +108,12 @@ $.extend(UI, {
 		$(".loader", n).removeClass('loader_on');
 	},
 	getContribution_success: function(d, segment) {
+//		console.log(d.data.matches);
+//		localStorage.setItem($(segment).attr('id').split('-')[1], JSON.stringify(d.data.matches));
+//		console.log(localStorage.getItem($(segment).attr('id').split('-')[1]));
+//		console.log(localStorage.getItem('4679214'));
+//		console.log(!localStorage.getItem('4679214'));
+//		console.log(localStorage.getItem('4679215'));
 		this.renderContributions(d, segment);
 		if ($(segment).attr('id').split('-')[1] == UI.currentSegmentId)
 			this.currentSegmentQA();
