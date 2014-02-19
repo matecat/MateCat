@@ -115,8 +115,9 @@ $.extend(UI, {
 			} else {
 				$.cookie('surveyedJobs', config.survey + '||' + config.job_id + ',', { path: '/' });
 			}
+			$('.modal.survey').remove();
 		}).on('click', '.modal.survey .popup-outer', function(e) {
-			$('.modal.survey').hide();
+			$('.modal.survey').hide().remove();
 		});
 		
 		$(window).on('scroll', function(e) {
