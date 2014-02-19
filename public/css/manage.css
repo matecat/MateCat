@@ -670,7 +670,7 @@ padding-right: 20px;
         }
         .api dl {
             margin-left: 40px;
-            line-height: 22px;
+            line-height: 30px;
         }
         .api {padding-top:0;}
         .api header {position:relative;}
@@ -681,14 +681,29 @@ padding-right: 20px;
             display: block;
             padding-bottom: 20px;
             border-bottom: 1px dashed #ccc;}
+			
+			.api .fileformat { -webkit-column-count: 2;
+            column-count: 2;
+            -moz-column-count: 2;}
+			
+			.api .fileformat li {
+margin: 8px 0px 3px 2px;
+padding: 1px 5px;
+}
+.api .fileformat li:nth-child(2n+1) {
+background: #efefef;
+}
+			
+			
         .api table ul.lang-list {
             -webkit-column-count: 5;
             column-count: 5;
             -moz-column-count: 5;
             text-align: left;
+			line-height:30px;
         }
 		
-			.api .tablestats th,.api .tablestats td {text-align:left;width:20%;}
+			.api .tablestats th,.api .tablestats td {text-align:left;width:20%;vertical-align: top;}
 table {table-layout: fixed; width:100%;}
 .api .colsx {float: left;
 position: fixed;}
@@ -730,10 +745,13 @@ background-color: #f4f4f4;
 white-space: nowrap;
 border-radius: 4px;}
 
-.req {
+.req, .opt {
 font-family:inherit;
 color: #c7254e;
 background-color: #f9f2f4;
 white-space: nowrap;padding: 2px 4px;
 border-left: 2px solid #c7254e;
 border-radius: 4px;}
+.opt {background-color: #dff0d8; border-left: 2px solid #3c763d; color: #3c763d;}
+
+.api p {margin:0;}
