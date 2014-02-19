@@ -3,12 +3,12 @@
 include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
 include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
 include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
-include_once INIT::$UTILS_ROOT . "/cat.class.php";
+include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 include_once INIT::$UTILS_ROOT . "/QA.php";
 
-class getContributionController extends ajaxcontroller {
+class getContributionController extends ajaxController {
 
 	private $id_segment;
 	private $id_job;
@@ -93,7 +93,7 @@ class getContributionController extends ajaxcontroller {
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
-        if( !$pCheck->grantJobAccessByJobData( $st, $this->password ) ){
+        if( empty( $st ) || !$pCheck->grantJobAccessByJobData( $st, $this->password ) ){
             $this->result['error'][] = array( "code" => -10, "message" => "wrong password" );
             return -1;
         }

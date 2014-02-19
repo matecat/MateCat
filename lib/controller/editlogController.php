@@ -1,14 +1,14 @@
 <?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include_once INIT::$UTILS_ROOT . "/cat.class.php";
+include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 
 /**
  * Description of catController
  *
  * @author antonio
  */
-class editlogController extends viewcontroller {
+class editlogController extends viewController {
 
 	private $jid = "";
 	private $pid = "";

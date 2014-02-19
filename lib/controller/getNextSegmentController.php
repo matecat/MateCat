@@ -1,7 +1,7 @@
 <?php
 include_once INIT::$MODEL_ROOT . "/queries.php";
 
-class getNextSegmentController extends ajaxcontroller {
+class getNextSegmentController extends ajaxController {
 
 	private $id_segment;
 	private $id_job;

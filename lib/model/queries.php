@@ -944,7 +944,7 @@ function getStatsForMultipleJobs( $_jids ) {
         $jids = implode( ',', $_jids );
     }
 
-    $query = "select SUM(IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(st.status='REJECTED',IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(st.status='TRANSLATED',IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(st.status='APPROVED',IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count),0)) as APPROVED, j.id, j.password
+    $query = "select SUM(IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(st.status='REJECTED',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(st.status='TRANSLATED',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(st.status='APPROVED',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as APPROVED, j.id, j.password
 
 		from jobs j
 		INNER JOIN files_job fj on j.id=fj.id_job
@@ -1225,7 +1225,8 @@ function updateTranslatorJob( $id_job, stdClass $newUser ){
 
     $db = Database::obtain();
 
-    $res = $db->insert( 'translators', $data );
+    $res = $db->insert( 'translators', $data ); //ignore errors on duplicate key
+
     $res = $db->update( 'jobs', array( 'id_translator' => $newUser->id ), ' id = ' . (int)$id_job  );
 
 }
@@ -1392,10 +1393,22 @@ function getProjectJobData( $pid ) {
 
     $db    = Database::obtain();
 
-    $query   = "SELECT projects.id AS pid, projects.password AS ppassword, jobs.id as jid, jobs.password as jpassword, job_first_segment, job_last_segment, status_owner
+    $query   = "SELECT projects.id AS pid,
+                       projects.name as pname,
+                       projects.password AS ppassword,
+                       projects.status_analysis,
+                       jobs.id as jid,
+                       jobs.password as jpassword,
+                       job_first_segment,
+                       job_last_segment,
+                       CONCAT( jobs.id , '-', jobs.password ) as jid_jpassword,
+                       CONCAT( jobs.source, '-', jobs.target ) as lang_pair,
+                       CONCAT( projects.name, '/', jobs.source, '-', jobs.target, '/', jobs.id , '-', jobs.password ) as job_url,
+                       status_owner
                 FROM jobs
                 JOIN projects ON jobs.id_project = projects.id
                 WHERE projects.id = %u
+                ORDER BY jid, job_last_segment
     ";
 
     $query = sprintf( $query, $pid );
@@ -1408,6 +1421,7 @@ function getProjectJobData( $pid ) {
  * @param      $pid
  * @param null $project_password
  * @param null $jid
+ * @param null $jpassword
  *
  * @return array
  */
@@ -1671,6 +1685,7 @@ function getProjectStatsVolumeAnalysis( $pid ) {
                 j.password as jpassword,
                 st.id_segment AS sid,
                 s.id_file,
+                f.filename,
                 s.raw_word_count,
                 st.suggestion_source,
                 st.suggestion_match,
@@ -1690,11 +1705,13 @@ function getProjectStatsVolumeAnalysis( $pid ) {
                 jobs AS j ON j.id = st.id_job
                     JOIN
                 projects AS p ON p.id = j.id_project
+                    JOIN
+                files f ON s.id_file = f.id
             WHERE
                 p.id = $pid
-                    AND p.status_analysis IN ('NEW' , 'FAST_OK', 'DONE')
-                    AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
-                    AND st.match_type <> ''";
+                AND p.status_analysis IN ('NEW' , 'FAST_OK', 'DONE')
+                AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
+            ";
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );

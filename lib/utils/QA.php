@@ -1,4 +1,4 @@
-<?php include_once INIT::$UTILS_ROOT . '/log.class.php';
+<?php include_once INIT::$UTILS_ROOT . '/Log.php';
 
 /**
  * Class errObject
@@ -245,7 +245,49 @@ class QA {
          */
         1100 => 'More/fewer whitespaces found next to the tags.',
     );
-    
+
+    protected static $asciiPlaceHoldMap = array(
+        '00' => array( 'symbol' => 'NULL', 'placeHold' => '##$_00$##', 'numeral' => 0x00 ),
+        '01' => array( 'symbol' => 'SOH',  'placeHold' => '##$_01$##', 'numeral' => 0x01 ),
+        '02' => array( 'symbol' => 'STX',  'placeHold' => '##$_02$##', 'numeral' => 0x02 ),
+        '03' => array( 'symbol' => 'ETX',  'placeHold' => '##$_03$##', 'numeral' => 0x03 ),
+        '04' => array( 'symbol' => 'EOT',  'placeHold' => '##$_04$##', 'numeral' => 0x04 ),
+        '05' => array( 'symbol' => 'ENQ',  'placeHold' => '##$_05$##', 'numeral' => 0x05 ),
+        '06' => array( 'symbol' => 'ACK',  'placeHold' => '##$_06$##', 'numeral' => 0x06 ),
+        '07' => array( 'symbol' => 'BEL',  'placeHold' => '##$_07$##', 'numeral' => 0x07 ),
+        '08' => array( 'symbol' => 'BS',   'placeHold' => '##$_08$##', 'numeral' => 0x08 ),
+        '09' => array( 'symbol' => 'HT',   'placeHold' => '##$_09$##', 'numeral' => 0x09 ),
+        '0A' => array( 'symbol' => 'LF',   'placeHold' => '##$_0A$##', 'numeral' => 0x0A ),
+        '0B' => array( 'symbol' => 'VT',   'placeHold' => '##$_0B$##', 'numeral' => 0x0B ),
+        '0C' => array( 'symbol' => 'FF',   'placeHold' => '##$_0C$##', 'numeral' => 0x0C ),
+        '0D' => array( 'symbol' => 'CR',   'placeHold' => '##$_0D$##', 'numeral' => 0x0D ),
+        '0E' => array( 'symbol' => 'SO',   'placeHold' => '##$_0E$##', 'numeral' => 0x0E ),
+        '0F' => array( 'symbol' => 'SI',   'placeHold' => '##$_0F$##', 'numeral' => 0x0F ),
+        '10' => array( 'symbol' => 'DLE',  'placeHold' => '##$_10$##', 'numeral' => 0x10 ),
+        '11' => array( 'symbol' => 'DC',   'placeHold' => '##$_11$##', 'numeral' => 0x11 ),
+        '12' => array( 'symbol' => 'DC',   'placeHold' => '##$_12$##', 'numeral' => 0x12 ),
+        '13' => array( 'symbol' => 'DC',   'placeHold' => '##$_13$##', 'numeral' => 0x13 ),
+        '14' => array( 'symbol' => 'DC',   'placeHold' => '##$_14$##', 'numeral' => 0x14 ),
+        '15' => array( 'symbol' => 'NAK',  'placeHold' => '##$_15$##', 'numeral' => 0x15 ),
+        '16' => array( 'symbol' => 'SYN',  'placeHold' => '##$_16$##', 'numeral' => 0x16 ),
+        '17' => array( 'symbol' => 'ETB',  'placeHold' => '##$_17$##', 'numeral' => 0x17 ),
+        '18' => array( 'symbol' => 'CAN',  'placeHold' => '##$_18$##', 'numeral' => 0x18 ),
+        '19' => array( 'symbol' => 'EM',   'placeHold' => '##$_19$##', 'numeral' => 0x19 ),
+        '1A' => array( 'symbol' => 'SUB',  'placeHold' => '##$_1A$##', 'numeral' => 0x1A ),
+        '1B' => array( 'symbol' => 'ESC',  'placeHold' => '##$_1B$##', 'numeral' => 0x1B ),
+        '1C' => array( 'symbol' => 'FS',   'placeHold' => '##$_1C$##', 'numeral' => 0x1C ),
+        '1D' => array( 'symbol' => 'GS',   'placeHold' => '##$_1D$##', 'numeral' => 0x1D ),
+        '1E' => array( 'symbol' => 'RS',   'placeHold' => '##$_1E$##', 'numeral' => 0x1E ),
+        '1F' => array( 'symbol' => 'US',   'placeHold' => '##$_1F$##', 'numeral' => 0x1F ),
+        '7F' => array( 'symbol' => 'DEL',  'placeHold' => '##$_7F$##', 'numeral' => 0x7F ),
+    );
+
+    protected static $regexpAscii = '/([\x{00}-\x{1F}\x{7F}]{1})/u';
+
+    protected static $regexpEntity = '/&#x([0-1]{0,1}[0-9A-F]{1})/u'; //&#x1E;  &#xE;
+
+    protected static $regexpPlaceHoldAscii = '/##\$_([0-1]{0,1}[0-9A-F]{1})\$##/u';
+
     /**
      * List of Errors from  check analysis
      * 
@@ -271,13 +313,13 @@ class QA {
     protected function _addError($errCode) {
 
         //Real error Code log
-        try {
-            throw new Exception('');
-        } catch( Exception $e ){
-            Log::doLog( $errCode . " :: " . $this->_errorMap[$errCode]);
-            $trace = $e->getTrace();
-            Log::doLog( $trace[1] );
-        }
+//        try {
+//            throw new Exception('');
+//        } catch( Exception $e ){
+//            Log::doLog( $errCode . " :: " . $this->_errorMap[$errCode]);
+//            $trace = $e->getTrace();
+//            Log::doLog( $trace[1] );
+//        }
 
         switch( $errCode ) {
             case self::ERR_COUNT:
@@ -438,20 +480,84 @@ class QA {
         $target_seg = mb_convert_encoding( $target_seg, 'UTF-8', $trg_enc );
 
         /**
-        * Why i do this?? I'm replacing carriage returns with a placeholder.
-        * this because DomDocument normalize line endings to Line Feed 0x0A
-        * i break CRLF and CR
-         * @see getTrgNormalized
+        * Why i do this?? I'm replacing non printable chars with a placeholder.
+        * this because DomDocument can not handle not printable chars
+        *
+        * @see getTrgNormalized
         */
-        $source_seg = str_replace( "\r", self::$crPlaceHold, $source_seg ); //x0D character
-        $target_seg = str_replace( "\r", self::$crPlaceHold, $target_seg ); //x0D character
+        preg_match_all( self::$regexpAscii, $source_seg, $matches_src );
+        preg_match_all( self::$regexpAscii, $target_seg, $matches_trg );
+
+//        Log::doLog($source_seg);
+//        Log::hexDump($target_seg);
+
+        if ( !empty( $matches_src[ 1 ] ) ) {
+            $test_src = $source_seg;
+            foreach ( $matches_src[ 1 ] as $v ) {
+                $test_src = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) .'}{1})/u', self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $test_src, 1 );
+            }
+            //Source Content wrong use placeholded one
+            $source_seg = $test_src;
+        }
+
+        if ( !empty( $matches_trg[ 1 ] ) ) {
+            $test_trg = $target_seg;
+            foreach ( $matches_trg[ 1 ] as $v ) {
+                $test_trg = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) .'}{1})/u', self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $test_trg, 1 );
+            }
+            //Target Content wrong use placeholded one
+            $target_seg = $test_trg;
+        }
+
+//        Log::hexDump($source_seg);
+//        Log::hexDump($target_seg);
+
+        /**
+         * Do it again for entities because
+         *
+         * $segment = html_entity_decode($segment, ENT_NOQUOTES | ENT_XML1, 'UTF-8');
+         *
+         * does not works for not printable chars
+         *
+         */
+        preg_match_all( self::$regexpEntity, $source_seg, $matches_src );
+        preg_match_all( self::$regexpEntity, $target_seg, $matches_trg );
+
+        if ( !empty( $matches_src[ 1 ] ) ) {
+            $test_src = $source_seg;
+            foreach ( $matches_src[ 1 ] as $v ) {
+                $byte = sprintf( "%02X", hexdec( $v ) );
+                if( $byte[0] == '0' ){
+                    $regexp = '/&#x([' . $byte[0] .']{0,1}' . $byte[1] . ');/u';
+                } else {
+                    $regexp = '/&#x(' . $byte . ');/u';
+                }
+                $test_src = preg_replace( $regexp, self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $test_src );
+            }
+            //Source Content wrong use placeholded one
+            $source_seg = $test_src;
+        }
+
+        if ( !empty( $matches_trg[ 1 ] ) ) {
+            $test_trg = $target_seg;
+            foreach ( $matches_trg[ 1 ] as $v ) {
+                $byte = sprintf( "%02X", hexdec( $v ) );
+                if( $byte[0] == '0' ){
+                    $regexp = '/&#x([' . $byte[0] .']{0,1}' . $byte[1] . ');/u';
+                } else {
+                    $regexp = '/&#x(' . $byte . ');/u';
+                }
+                $test_trg = preg_replace( $regexp, self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $test_trg );
+            }
+            //Target Content wrong use placeholded one
+            $target_seg = $test_trg;
+        }
 
 //        Log::doLog($_POST);
 //        Log::doLog($source_seg);
 //        Log::doLog($target_seg);
 //        Log::hexDump($source_seg);
 //        Log::hexDump($target_seg);
-
 
         $this->source_seg = $source_seg;
         $this->target_seg = $target_seg;
@@ -681,7 +787,8 @@ class QA {
                     }
                 }
             }
-            //Log::doLog($rrorList);
+//            Log::doLog($xmlString);
+//            Log::doLog($rrorList);
 
             $this->_addError($targetErrorType);
         }
@@ -698,29 +805,16 @@ class QA {
      */
     protected function _getTagDiff(){
 
-        preg_match_all( '/(<[^\/>]+>)/', $this->source_seg, $matches );
+//        Log::doLog( $this->source_seg );
+//        Log::doLog( $this->target_seg );
+
+        preg_match_all( '/(<[^\/>]+[\/]{0,1}>)/', $this->source_seg, $matches );
         $malformedXmlSrcStruct = $matches[1];
-        preg_match_all( '/(<[^\/>]+>)/', $this->target_seg, $matches );
+        preg_match_all( '/(<[^\/>]+[\/]{0,1}>)/', $this->target_seg, $matches );
         $malformedXmlTrgStruct = $matches[1];
 
 //        Log::doLog( $malformedXmlSrcStruct );
 //        Log::doLog( $malformedXmlTrgStruct );
-
-        /* Returns an array containing all of the values in array1 whose values exist in all of the parameters. */
-        $diffArraySrc = array_intersect( $malformedXmlSrcStruct, $malformedXmlTrgStruct );
-        $diffArrayTrg = array_intersect( $malformedXmlTrgStruct, $malformedXmlSrcStruct );
-
-//        Log::doLog( $diffArraySrc );
-//        Log::doLog( $diffArrayTrg );
-
-        //devo togliere queste chiavi dal source
-        $diffArraySrc = array_diff_key( $malformedXmlSrcStruct, $diffArraySrc );
-//        Log::doLog($diffArraySrc);
-
-        //ore devo togliere queste chiavi dal target
-        $diffArrayTrg = array_diff_key( $malformedXmlTrgStruct, $diffArrayTrg );
-//        Log::doLog($diffArrayTrg);
-
 
         //this is for </g>
         preg_match_all( '/(<\/[a-zA-Z]+>)/', $this->source_seg, $matches );
@@ -730,56 +824,38 @@ class QA {
 //        Log::doLog(  $matches );
         $_closingTrgTag = $matches[1];
 
-        $differentElementsTrg = array();
-        if( array_unique( $_closingSrcTag ) != array_unique( $_closingTrgTag ) ){
-            $differentElementsTrg = array_diff( $_closingTrgTag, $_closingSrcTag );
-//            Log::doLog( 'elementi diversi illumina target' );
-//            Log::doLog( $differentElementsTrg );
-        }
+        $clonedSrc = $malformedXmlSrcStruct;
+        $clonedTrg = $malformedXmlTrgStruct;
 
-        $sourceHasMore = false;
-        $diffNumberOfClosing = array();
-        if( count($_closingSrcTag) != count($_closingTrgTag) ){
-
-
-            if( count($_closingSrcTag) - count($_closingTrgTag) > 0 ){
-
-                foreach( $_closingTrgTag as $k => $v ){
-                    unset( $_closingSrcTag[ array_search( $v, $_closingSrcTag ) ] );
-                }
-
-                $diffNumberOfClosing = &$_closingSrcTag;
-                $sourceHasMore = true;
-
-            } else {
-
-                foreach( $_closingSrcTag as $k => $v ){
-                    unset( $_closingTrgTag[ array_search( $v, $_closingTrgTag ) ] );
-                }
-
-                $diffNumberOfClosing = &$_closingTrgTag;
-
+        foreach( $malformedXmlTrgStruct as $tag ){
+            if( ( $pos = array_search( $tag, $clonedSrc ) ) !== false ){
+                unset( $clonedSrc[$pos] );
             }
-
-//            Log::doLog( 'Numero elementi diversi' );
-//            Log::doLog( $diffNumberOfClosing );
-//            Log::doLog( $sourceHasMore );
-
         }
 
-        if( $sourceHasMore ){
-            $srcTotal = array_merge( $diffArraySrc, $diffNumberOfClosing );
-            $trgTotal = array_merge( $diffArrayTrg, $differentElementsTrg );
-        } else {
-            $tmp = array_unique( array_merge( $differentElementsTrg, $diffNumberOfClosing ) );
-            $trgTotal = array_merge( $diffArrayTrg, $tmp );
-            $srcTotal = $diffArraySrc;
+        foreach( $malformedXmlSrcStruct as $tag ){
+            if( ( $pos = array_search( $tag, $clonedTrg ) ) !== false ){
+                unset( $clonedTrg[$pos] );
+            }
         }
 
+        $clonedClosingSrc = $_closingSrcTag;
+        $clonedClosingTrg = $_closingTrgTag;
+        foreach( $_closingTrgTag as $tag ){
+            if( ( $pos = array_search( $tag, $clonedClosingSrc ) ) !== false ){
+                unset( $clonedClosingSrc[$pos] );
+            }
+        }
+
+        foreach( $_closingSrcTag as $tag ){
+            if( ( $pos = array_search( $tag, $clonedClosingTrg ) ) !== false ){
+                unset( $clonedClosingTrg[$pos] );
+            }
+        }
 
         $totalResult = array(
-            'source' => $srcTotal,
-            'target' => $trgTotal,
+            'source' => array_merge( $clonedSrc, $clonedClosingSrc ),
+            'target' => array_merge( $clonedTrg, $clonedClosingTrg ),
         );
 
 //        Log::doLog($totalResult);
@@ -1364,11 +1440,18 @@ class QA {
             preg_match('/<root>(.*)<\/root>/us', $this->normalizedTrgDOM->saveXML($this->normalizedTrgDOM->documentElement), $matches );
 
             /**
-            * Why i do this?? I'm replacing Placeholders of carriage returns.
-            * this because DomDocument normalize line endings to Line Feed 0x0A
+            * Why i do this?? I'm replacing Placeholders of non printable chars
+            * this because DomDocument can't handle non printable chars
             * @see __construct
             */
-            $matches[1] = str_replace( self::$crPlaceHold, "\r", $matches[1] );
+            preg_match_all( self::$regexpPlaceHoldAscii, $matches[1], $matches_trg );
+            if( !empty( $matches_trg[1] )){
+
+                foreach( $matches_trg[1] as $v ){
+                    $matches[1] = preg_replace( '/##\$_(' . $v . '{1})\$##/u', '&#x' . $v . ';' , $matches[1], 1 );
+                }
+//                Log::hexDump($matches[1]);
+            }
 
             /*
              * BUG on windows Paths: C:\\Users\\user\\Downloads\\File per field test\\1\\gui_plancompression.html

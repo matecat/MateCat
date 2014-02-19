@@ -5,34 +5,37 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
+<!--
         <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/jquery-ui.css?build=${build_number}" rel="stylesheet" type="text/css" />
-
+-->
         <script type="text/javascript">
 			/*<![CDATA[*/
 			var config = {
-                            basepath: '${basepath | string:/}',
-                            id_translator: '${tid | nothing}',
-                            private_translator: '${private_translator | string:0}',
-                            id_customer: '${id_customer | string:unknown_customer}',
-                            private_customer: '${private_customer | string:0}',
-                            last_opened_segment: '${last_opened_segment}',
-                            first_job_segment: '${first_job_segment}',
-                            server_load_time: '${load_time}',
-                            job_id: '${jid}',
-                            password: '${password}',
-                            source_rfc: '${source_code}',
-                            target_rfc: '${target_code}',
-                            source_lang: '${source}',
-                            target_lang: '${target}',
-                            time_to_edit_enabled: ${time_to_edit_enabled},
-                            build_number: '${build_number}',
-                            warningPollingInterval: '${warningPollingInterval}',
-                            segmentQACheckInterval: '${segmentQACheckInterval}',
-                            firstSegmentOfFiles: ${structure php: firstSegmentOfFiles},
-                            taglockEnabled: ${taglockEnabled | string:1},
-                            brPlaceholdEnabled: '${brPlaceholdEnabled}'
+				basepath: '${basepath | string:/}',
+				id_translator: '${tid | nothing}',
+				private_translator: '${private_translator | string:0}',
+				id_customer: '${id_customer | string:unknown_customer}',
+				private_customer: '${private_customer | string:0}',
+				last_opened_segment: '${last_opened_segment}',
+				first_job_segment: '${first_job_segment}',
+				server_load_time: '${load_time}',
+				job_id: '${jid}',
+				password: '${password}',
+				source_rfc: '${source_code}',
+				target_rfc: '${target_code}',
+				source_lang: '${source}',
+				target_lang: '${target}',
+				time_to_edit_enabled: ${time_to_edit_enabled},
+				build_number: '${build_number}',
+				warningPollingInterval: '${warningPollingInterval}',
+				segmentQACheckInterval: '${segmentQACheckInterval}',
+				firstSegmentOfFiles: ${structure php: firstSegmentOfFiles},
+				taglockEnabled: ${taglockEnabled | string:1},
+				brPlaceholdEnabled: '${brPlaceholdEnabled}',
+				survey: 'https://docs.google.com/a/translated.net/forms/d/1wlYhTHra-5B-gplv9rNyi3THDy9ZBrDnECASWZPh6WM/viewform?embedded=true"',
+				optimized: false
 			};
 			var renderStart = new Date();
 			/*]]>*/
@@ -50,9 +53,23 @@
             config.crlfPlaceholderRegex = ${crlfPlaceholderRegex | null};
             /*]]>*/
         </script>
-
-        <script src="${basepath}public/js/loader.js?build=${build_number}"></script>
-        <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
+		<script>
+            /*<![CDATA[*/
+			if(config.optimized) {
+				document.write("<link href=\"${basepath}public/css/app.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
+				document.write("<script src=\"${basepath}public/js/app.js?build=${build_number}\"><\/script>");
+			} else {
+				document.write("<link href=\"${basepath}public/css/common.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
+				document.write("<link href=\"${basepath}public/css/style.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
+//				document.write("<link href=\"${basepath}public/css/jquery-ui.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
+				document.write("<script src=\"${basepath}public/js/loader.js?build=${build_number}\"><\/script>");
+				document.write("<script src=\"${basepath}public/js/logout.js?build=${build_number}\"><\/script>");				
+			}
+            /*]]>*/
+		</script>	
+		
+<!--        <script src="${basepath}public/js/loader.js?build=${build_number}"></script> 
+        <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>-->
     </head>
     <body tal:condition="not:supportedBrowser">
         <div  metal:use-macro="unsupported_browser.html/unsupported"/>
@@ -584,10 +601,13 @@
             <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>
             <form action=""><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>
         </div>
+<!-- Actually unused -->
+<!--
         <div id="alertConfirmTranslation" class="dialog" title="Attention">
             <p>To confirm your translation, please press on Translated or use the shortcut CTRL+Enter.</p>
             <form action=""><input id="hideAlertConfirmTranslation" type="checkbox" value="" /><label for="hideAlertConfirmTranslation">Do not display again</label></form>
         </div>
+-->
         <!--
                         <div class="end-message-box">
                         <div class="end-message-col1">

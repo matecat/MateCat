@@ -3,7 +3,7 @@ include_once INIT::$MODEL_ROOT . "/queries.php";
 
 define('DEFAULT_NUM_RESULTS', 2);
 
-class changeInternalLanguageController extends ajaxcontroller {
+class changeInternalLanguageController extends ajaxController {
 
 	private $source_language;
 	private $target_language;

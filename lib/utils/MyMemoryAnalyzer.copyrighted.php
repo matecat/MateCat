@@ -1,7 +1,7 @@
 <?php
 $root = realpath(dirname(__FILE__) . '/../../');
 include_once ($root."/inc/config.inc.php"); // only fortesting purpose
-include_once (INIT::$UTILS_ROOT."/utils.class.php"); //only for testing purpose
+include_once (INIT::$UTILS_ROOT."/Utils.php"); //only for testing purpose
 /*
    This code is copyrighted and property of Translated s.r.l.
    Should not be distrubuted.

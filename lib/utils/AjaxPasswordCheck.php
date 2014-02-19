@@ -100,15 +100,20 @@ class AjaxPasswordCheck {
         return false;
     }
 
-    protected function _grantProjectJobAccess( array $projectJobData, $ppassword, $jpassword = null ){
+    public function grantProjectAccess( array $projectJobData, $ppassword = null, $jpassword = null ){
+
+        if( empty($ppassword) && empty($jpassword) ){
+            return false;
+        }
 
         $result = array();
         foreach( $projectJobData as $pJD ){
 
             //if password is null no request of job check was made
-            $_check_job = ( is_null( $jpassword ) ? true : $this->_grantAccess( $pJD['jpassword'], $jpassword ) );
+            $_check_jproject = ( is_null( $ppassword ) ? true : $this->_grantAccess( $pJD['ppassword'], $ppassword ) );
+            $_check_job      = ( is_null( $jpassword ) ? true : $this->_grantAccess( $pJD['jpassword'], $jpassword ) );
 
-            $result[] = $this->_grantAccess( $pJD['ppassword'], $ppassword ) && $_check_job ;
+            $result[] = $_check_jproject && $_check_job ;
         }
 
         if ( array_search( true, $result, true ) !== false ) return true;
@@ -116,12 +121,12 @@ class AjaxPasswordCheck {
 
     }
 
-    public function grantProjectJobAccess( array $projectJobData, $ppassword, $jpassword ){
-        return $this->_grantProjectJobAccess( $projectJobData, $ppassword, $jpassword );
+    public function grantProjectJobAccessOnJobPass( array $projectJobData, $ppassword, $jpassword ){
+        return $this->grantProjectAccess( $projectJobData, $ppassword, $jpassword );
     }
 
 
-    public function grantProjectAccess( array $projectJobData, $ppassword, $jobID ){
+    public function grantProjectAccessOnJobID( array $projectJobData, $ppassword, $jobID ){
 
         $job_list = array();
         foreach( $projectJobData as $pJD ){
@@ -131,7 +136,7 @@ class AjaxPasswordCheck {
         //no job id provided, deny access
         if( array_search( $jobID, $job_list, true ) === false ) return false;
 
-        return $this->_grantProjectJobAccess( $projectJobData, $ppassword );
+        return $this->grantProjectAccess( $projectJobData, $ppassword );
 
     }
 

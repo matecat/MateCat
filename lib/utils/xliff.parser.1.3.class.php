@@ -170,7 +170,7 @@ class Xliff_Parser {
 
 
 						unset($temp);
-						preg_match('|<target.*?>(.*?)</target>|si', $trans_unit, $temp);
+						preg_match('|<target.*?>(.+?)</target>|si', $trans_unit, $temp);
 						if (isset($temp[1])) {
 							$temp[1] = self::fix_non_well_formed_xml($temp[1]);
 							$xliff['files'][$i]['trans-units'][$j]['target']['raw-content'] = $temp[1];

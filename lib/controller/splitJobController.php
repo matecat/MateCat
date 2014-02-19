@@ -10,10 +10,10 @@
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 include_once INIT::$UTILS_ROOT . '/RecursiveArrayObject.php';
 include_once INIT::$UTILS_ROOT . '/ProjectManager.php';
-include_once INIT::$UTILS_ROOT . '/cat.class.php';
-include_once INIT::$UTILS_ROOT . '/log.class.php';
+include_once INIT::$UTILS_ROOT . '/CatUtils.php';
+include_once INIT::$UTILS_ROOT . '/Log.php';
 
-class splitJobController extends ajaxcontroller {
+class splitJobController extends ajaxController {
 
     private $exec;
     private $project_id;
@@ -109,7 +109,7 @@ class splitJobController extends ajaxcontroller {
     protected function checkMergeAccess(){
 
         $passCheck = new AjaxPasswordCheck();
-        $access = $passCheck->grantProjectAccess( $this->project_data, $this->project_pass, $this->job_id );
+        $access = $passCheck->grantProjectAccessOnJobID( $this->project_data, $this->project_pass, $this->job_id );
 
         if( !$access ){
             throw new Exception( "Access denied", -10 );
@@ -120,7 +120,7 @@ class splitJobController extends ajaxcontroller {
     protected function checkSplitAccess(){
 
         $passCheck = new AjaxPasswordCheck();
-        $access = $passCheck->grantProjectJobAccess( $this->project_data, $this->project_pass, $this->job_pass );
+        $access = $passCheck->grantProjectJobAccessOnJobPass( $this->project_data, $this->project_pass, $this->job_pass );
 
         if( !$access ){
             throw new Exception( "Wrong Password. Access denied", -10 );

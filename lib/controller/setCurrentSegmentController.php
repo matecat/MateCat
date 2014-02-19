@@ -2,7 +2,7 @@
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
-class setCurrentSegmentController extends ajaxcontroller {
+class setCurrentSegmentController extends ajaxController {
 
 	private $id_segment;
 	private $id_job;

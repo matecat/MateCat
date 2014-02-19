@@ -386,16 +386,26 @@ class UploadHandler {
          * if this is an idiom.inc xlf file type, enforce conversion
          * $file->convert = true;
          */
+        $file->convert = true;
         try {
-            $fileType = DetectProprietaryXliff::getInfo($file_path);
-            if ($fileType['proprietary'] && INIT::$CONVERSION_ENABLED) {
-                if ($fileType['proprietary_name'] == 'idiom world server') {
-                    $file->convert = true;
+
+            $fileType = DetectProprietaryXliff::getInfo( $file_path );
+            if( DetectProprietaryXliff::isXliffExtension() ){
+
+                if ( $fileType['proprietary'] ){
+
+                    if ( !INIT::$CONVERSION_ENABLED ) {
+                        $file->convert = false;
+                        unlink($file_path);
+                        $file->error = 'Matecat Open-Source does not support ' . ucwords($fileType['proprietary_name']) . '. Use MatecatPro.';
+                    }
+
+                } else {
+                    $file->convert = false;
                 }
-            } else if ($fileType['proprietary'] && !INIT::$CONVERSION_ENABLED) {
-                unlink($file_path);
-                $file->error = 'Matecat Open-Source does not support ' . ucwords($fileType['proprietary_name']) . '. Use MatecatPro.';
+
             }
+
         } catch (Exception $e) {
             Log::doLog($e->getMessage());
         }
@@ -419,6 +429,7 @@ class UploadHandler {
         if (isset($_REQUEST['_method']) && $_REQUEST['_method'] === 'DELETE') {
             return $this->delete();
         }
+
         $upload = isset($_FILES[$this->options['param_name']]) ?
                 $_FILES[$this->options['param_name']] : null;
         $info = array();
@@ -446,6 +457,36 @@ class UploadHandler {
                                     $upload['type'] : null), isset($upload['error']) ? $upload['error'] : null
             );
         }
+
+        //check for server misconfiguration
+        $uploadParams = ServerCheck::getInstance()->getUploadParams();
+        if( $_SERVER['CONTENT_LENGTH'] >= $uploadParams->getPostMaxSize()  ){
+
+            $fp = fopen ( "php://input", "r" );
+
+            list( $trash, $boundary ) = explode( 'boundary=', $_SERVER['CONTENT_TYPE'] );
+
+            $regexp = '/' . $boundary . '.*?filename="(.*)".*?Content-Type:(.*)\x{0D}\x{0A}\x{0D}\x{0A}/sm';
+
+            $readBuff = fread( $fp, 1024 );
+            while ( !preg_match( $regexp , $readBuff, $matches ) ){
+                $readBuff .= fread( $fp, 1024 );
+            }
+            fclose($fp);
+
+            $file = new stdClass();
+            $file->name = $this->trim_file_name( $matches[1], trim( $matches[2] ), null );
+            $file->size = null;
+            $file->type = trim( $matches[2] );
+            $file->error = "The file is too large.  Please Contact support@matecat.com and report these details: \"The server configuration does not conform with Matecat configuration. Check for max header post size value.\"";
+
+            $info = array( $file );
+
+        } elseif( $_SERVER['CONTENT_LENGTH'] >= $uploadParams->getUploadMaxFilesize() ){
+            $info[0]->error = "The file is too large.  Please Contact support@matecat.com and report these details: \"The server configuration does not conform with Matecat configuration. Check for max file upload value.\"";
+        }
+        //check for server misconfiguration
+
         header('Vary: Accept');
         $json = json_encode($info);
         $redirect = isset($_REQUEST['redirect']) ?

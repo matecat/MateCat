@@ -30,7 +30,7 @@ $(document).ready(function(){
         var src = $('#source-lang').val();
         var trg = $('#target-lang').val();
         if($('#target-lang').val().split(',').length > 1) {
-            APP.alert('Cannot swap languages when <br>multiple target languages are selected!');
+            APP.alert({msg: 'Cannot swap languages when <br>multiple target languages are selected!'});
             return false;
         }
         $('#source-lang').val(trg);

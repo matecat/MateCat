@@ -1,8 +1,9 @@
 <?php
+include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
 include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 
-class setContributionMTController extends ajaxcontroller {
+class setContributionMTController extends ajaxController {
 
 	private $segment;
     private $password;
@@ -72,7 +73,7 @@ class setContributionMTController extends ajaxcontroller {
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
-        if( !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ){
+        if( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ){
             $this->result['error'][] = array( "code" => -10, "message" => "wrong password" );
 
             $msg = "\n\n Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );

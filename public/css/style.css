@@ -121,13 +121,13 @@ body.searchActive #filterSwitch
 
 .breadcrumbs #pname
 {
-
 	float: left;
 	padding-left: 22px;
-	background:url(../img/arrow-down.png) center left no-repeat;
-    max-width: 300px;
-    overflow: hidden;
-    margin-left:2px
+	background: url(../img/arrow-down.png) center left no-repeat;
+	max-width: 300px;
+	/*overflow: hidden;*/
+	margin-left:2px;
+	word-break: break-all;
 }
 
 .breadcrumbs #pname .details
@@ -1193,15 +1193,15 @@ section.status-new.opened .editarea
 
 .editarea, .search-editarea, .textarea-container .area
 {
-	display: block; 
-	float:right;
-	width: 99%;
+	display: inline-block; 
+	/*float:right;*/
+	width: 100%;
 	height:96%;
 	line-height:30px;
 	min-height: 70px;
 	resize: none;
 	overflow:hidden;
-	margin:2px 0 0px 10px;
+	margin:2px 0 0px -11px;
 	padding:5px;
 	color:#4d4d4f;
 	border:1px solid transparent;
@@ -1258,7 +1258,7 @@ section.readonly .status-container
 	height: 96% !important;
 	font-size:18px;
 	color:#000;
-	margin:-2px 0 5px 10px;
+	margin:-2px 0 5px -11px;
 	border:1px solid #727272;
 	box-shadow: inset 0 1px 2px #ccc;
 	-webkit-box-shadow: inset 0 1px 2px #ccc;
@@ -1272,9 +1272,9 @@ section.readonly .status-container
 .editarea:hover 
 {
 	border:1px solid #666;
-
 	cursor:text;
 	color:#000;
+
 }
 
 body.rtl-target .editor .editarea span
@@ -2127,4 +2127,39 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror
 {
 	display: block;
 }
+body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
+{
+	display: none;
+}
+.tag-autocomplete
+{
+	display: b	lock;
+	position: absolute;
+	z-index: 999;
+	background: #eee;
+	border: 1px solid #999;
+	min-width: 100px;
+	padding: 1px;
+}
+.tag-autocomplete.empty
+{
+	display: none;
+}
 
+.tag-autocomplete li
+{
+	display: block;
+	text-align: left;
+	list-style-type: none;
+	z-index: 99999999999999;
+	font-size: 80%;
+}
+.tag-autocomplete li.current
+{
+	background: #00C1E6;
+	color: #fff;
+}
+.tag-autocomplete li.hidden
+{
+	display: none;
+}

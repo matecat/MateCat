@@ -28,6 +28,7 @@ class ProjectManager {
                     'private_tm_key'     => 0,
                     'private_tm_user'    => null,
                     'private_tm_pass'    => null,
+                    'uploadToken'        => null,
                     'array_files'        => array(), //list of file names
                     'file_id_list'       => array(),
                     'file_references'    => array(),
@@ -87,7 +88,7 @@ class ProjectManager {
         if ( !empty( $this->projectStructure['private_tm_key'] ) ) {
             //the base case is when the user clicks on "generate private TM" button:
             //a (user, pass, key) tuple is generated and can be inserted
-            //if it comes with it's own key without querying the creation api, create a (key,key,key) user
+            //if it comes with it's own key without querying the creation API, create a (key,key,key) user
             if ( empty( $this->projectStructure['private_tm_user'] ) ) {
                 $this->projectStructure['private_tm_user'] = $this->projectStructure['private_tm_key'];
                 $this->projectStructure['private_tm_pass'] = $this->projectStructure['private_tm_key'];
@@ -98,7 +99,7 @@ class ProjectManager {
         }
 
 
-        $uploadDir = INIT::$UPLOAD_REPOSITORY . "/" . $_COOKIE['upload_session'];
+        $uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure['uploadToken'];
         foreach ( $this->projectStructure['array_files'] as $fileName ) {
 
             /**
@@ -111,7 +112,7 @@ class ProjectManager {
             $enforcedConversion = false;
             try {
 
-                $fileType = DetectProprietaryXliff::getInfo( INIT::$UPLOAD_REPOSITORY. '/' .$_COOKIE['upload_session'].'/' . $fileName );
+                $fileType = DetectProprietaryXliff::getInfo( INIT::$UPLOAD_REPOSITORY. DIRECTORY_SEPARATOR .$this->projectStructure['uploadToken'].DIRECTORY_SEPARATOR . $fileName );
                 //Log::doLog( 'Proprietary detection: ' . var_export( $fileType, true ) );
 
                 if( $fileType['proprietary'] == true  ){
@@ -157,7 +158,7 @@ class ProjectManager {
                 $real_fileName = $fileName;
             }
 
-            $filePathName = $fileDir . '/' . $real_fileName;
+            $filePathName = $fileDir . DIRECTORY_SEPARATOR . $real_fileName;
 
             if ( !file_exists( $filePathName ) ) {
                 $this->projectStructure[ 'result' ][ 'errors' ][ ] = array( "code" => -6, "message" => "File not found on server after upload." );
@@ -725,7 +726,7 @@ class ProjectManager {
                         $tempSeg = CatUtils::placeholdnbsp( $tempSeg );
                         $prec_tags = NULL;
                         $succ_tags = NULL;
-                        if ( empty( $tempSeg ) || $tempSeg == NBSPPLACEHOLDER ) { //@see cat.class.php, ( DEFINE NBSPPLACEHOLDER ) don't show <x id=\"nbsp\"/>
+                        if ( empty( $tempSeg ) || $tempSeg == NBSPPLACEHOLDER ) { //@see CatUtils.php, ( DEFINE NBSPPLACEHOLDER ) don't show <x id=\"nbsp\"/>
                             $show_in_cattool = 0;
                         } else {
                             $extract_external                              = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
@@ -888,6 +889,15 @@ class ProjectManager {
         $a               = str_replace( "\n", " NL ", $a );
         $pattern_x_start = '/^(\s*<x .*?\/>)(.*)/mis';
         $pattern_x_end   = '/(.*)(<x .*?\/>\s*)$/mis';
+
+        //TODO:
+        //What happens here? this regexp fails for
+        //<g id="pt1497"><g id="pt1498"><x id="nbsp"/></g></g>
+        //And this
+        /* $pattern_g       = '/^(\s*<g [^>]*?>)(.*?)(<\/g>\s*)$/mis'; */
+        //break document consistency in project Manager
+        //where is the bug? there or in extract segments?
+
         $pattern_g       = '/^(\s*<g [^>]*?>)([^<]*?)(<\/g>\s*)$/mis';
         $found           = false;
         $prec            = "";
@@ -952,7 +962,7 @@ class ProjectManager {
 
     }
 
-    protected function _getExtensionFromMimeType( $mime_type ){
+    public static function getExtensionFromMimeType( $mime_type ){
 
         $reference = array(
             'application/andrew-inset'         =>
@@ -4246,7 +4256,7 @@ class ProjectManager {
 
         if( array_key_exists( $mime_type, $reference ) ){
             if ( array_key_exists( 'default', $reference[$mime_type] ) ) return $reference[$mime_type]['default'];
-            return $reference[$mime_type][ array_rand( $reference[$mime_type] ) ];
+            return $reference[$mime_type][ array_rand( $reference[$mime_type] ) ]; // rand :D
         }
         return null;
 
@@ -4300,7 +4310,7 @@ class ProjectManager {
 
             $found_ref = true;
 
-            $_ext = $this->_getExtensionFromMimeType( $ref['form-type'] );
+            $_ext = self::getExtensionFromMimeType( $ref['form-type'] );
             if( $_ext !== null ){
 
                 //insert in database if exists extension

@@ -11,8 +11,8 @@ set_time_limit( 0 );
 
 include '/var/www/cattool/inc/config.inc.php';
 @INIT::obtain();
-include '/var/www/cattool/lib/utils/utils.class.php';
-include '/var/www/cattool/lib/utils/log.class.php';
+include '/var/www/cattool/lib/utils/Utils.php';
+include '/var/www/cattool/lib/utils/Log.php';
 
 SpellCheckerServer::getInstance()->main();
 

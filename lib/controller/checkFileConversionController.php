@@ -1,9 +1,9 @@
 <?php
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include_once INIT::$UTILS_ROOT . "/cat.class.php";
+include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 
-class checkFileConversionController extends ajaxcontroller {
+class checkFileConversionController extends ajaxController {
 
       private $file_name;
 

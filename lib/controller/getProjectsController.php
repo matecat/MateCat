@@ -1,6 +1,6 @@
 <?php
 include_once INIT::$MODEL_ROOT . "/queries.php";
-include_once INIT::$UTILS_ROOT . "/cat.class.php";
+include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 include_once INIT::$UTILS_ROOT . "/manage.class.php";
 include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
@@ -10,7 +10,7 @@ include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
  * @author andrea
  */
 
-class getProjectsController extends ajaxcontroller {
+class getProjectsController extends ajaxController {
 
 	private $jid = "";
 	private $pid = "";
