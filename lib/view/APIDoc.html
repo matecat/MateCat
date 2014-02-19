@@ -306,13 +306,13 @@
         }
     },
    "status": "DONE",
-   "analyze": "\/analyze\/MyProject4\/5368-76ba60c027b9",
+   "analyze": "/analyze/MyProject4/5368-76ba60c027b9",
    "jobs": {
         "langpairs": {
                 "5615-e77eeea779d2": "de-DE-en-US"
         },
        "job-url": {
-            "5615-e77eeea779d2": "\/translate\/MyProject4\/de-DE-en-US\/5615-e77eeea779d2"
+            "5615-e77eeea779d2": "/translate/MyProject4/de-DE-en-US/5615-e77eeea779d2"
         }
    }
 }                                   </pre>
@@ -713,7 +713,7 @@ jQuery( ".menu a " ).click(function() {
 });
 jQuery(function() {
   jQuery('a[href*=#]:not([href=#])').click(function() {
-    if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+    if (location.pathname.replace(/^//,'') == this.pathname.replace(/^//,'') && location.hostname == this.hostname) {
       var target = jQuery(this.hash);
       target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
       if (target.length) {
