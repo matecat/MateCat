@@ -84,5 +84,5 @@ Instructions (based on a Debian distro)
 9) restart apache
     apache2ctl restart
 10) enable pcntl in php5 CLI php.ini by removing pcntl functions from
-    disable_functions in /etc/php5/apache2/php.ini
+    disable_functions in /etc/php5/cli/php.ini
 

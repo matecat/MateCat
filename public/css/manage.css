@@ -745,12 +745,13 @@ background-color: #f4f4f4;
 white-space: nowrap;
 border-radius: 4px;}
 
-.req {
+.req, .opt {
 font-family:inherit;
 color: #c7254e;
 background-color: #f9f2f4;
 white-space: nowrap;padding: 2px 4px;
 border-left: 2px solid #c7254e;
 border-radius: 4px;}
+.opt {background-color: #dff0d8; border-left: 2px solid #3c763d; color: #3c763d;}
 
 .api p {margin:0;}
