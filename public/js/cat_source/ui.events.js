@@ -113,7 +113,7 @@ $.extend(UI, {
 					$.cookie('surveyedJobs', c + config.job_id + ',');
 				}
 			} else {
-				$.cookie('surveyedJobs', config.survey + '||' + config.job_id + ',', { path: '/' });
+				$.cookie('surveyedJobs', config.survey + '||' + config.job_id + ',', { expires: 20, path: '/' });
 			}
 			$('.modal.survey').remove();
 		}).on('click', '.modal.survey .popup-outer', function(e) {
@@ -316,7 +316,7 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.preOpenConcordance();
 		}).on('keypress', '.editor .editarea', function(e) {
-//			console.log('keypress: ', UI.editarea.html());
+			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
 //				console.log('KEYPRESS SU EDITAREA: ', UI.editarea.html());
@@ -357,25 +357,30 @@ $.extend(UI, {
 			}
 */
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
-				if ($('.selected', $(this)).length) {console.log('a');
+				if ($('.selected', $(this)).length) {
 					e.preventDefault();
 					$('.selected', $(this)).remove();
 					UI.saveInUndoStack('cancel');
 					UI.currentSegmentQA();
 				} else {
 //					try {
-						var numTagsBefore = UI.editarea.text().match(/<.*?\>/gi).length;
+//						console.log(UI.editarea.text().match(/<.*?\>/gi) == null);
+						var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) != null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
 						var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
 
 						saveSelection('noMove');
 						parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
 						isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
+						parentMark = $('.searchMarker', UI.editarea).has('.rangySelectionBoundary');
+						isInsideMark = $('.searchMarker .rangySelectionBoundary', UI.editarea).length;
 						restoreSelection();
+						
+						// insideTag management
 						if ((e.which == 8)&&(isInsideTag)) {
-							console.log('AA: ', UI.editarea.html()); 
+//							console.log('AA: ', UI.editarea.html()); 
 							parentTag.remove();
 							e.preventDefault();
-							console.log('BB: ', UI.editarea.html());
+//							console.log('BB: ', UI.editarea.html());
 						}
 //						console.log(e.which + ' - ' + isInsideTag);
 						setTimeout(function() {
@@ -384,7 +389,7 @@ $.extend(UI, {
 							}
 //							console.log(e.which + ' - ' + isInsideTag);
 //							console.log('CC: ', UI.editarea.html());
-							var numTagsAfter = UI.editarea.text().match(/<.*?\>/gi).length;
+							var numTagsAfter = (UI.editarea.text().match(/<.*?\>/gi) != null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
 							var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
 							if (numTagsAfter < numTagsBefore)
 								UI.saveInUndoStack('cancel');
@@ -393,7 +398,11 @@ $.extend(UI, {
 //							console.log('DD: ', UI.editarea.html());
 
 						}, 50);
-
+						
+						// insideMark management
+						if ((e.which == 8)&&(isInsideMark)) {
+							console.log('inside mark'); 
+						}
 				
 //						selectText(this);
 
@@ -493,9 +502,10 @@ $.extend(UI, {
 				}
 			}
 
-			if (!((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40))) { // arrow
-				if (UI.body.hasClass('searchActive'))
+			if (!((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40))) { // not arrows
+				if (UI.body.hasClass('searchActive')) {
 					UI.resetSearch();
+				}
 			}
 			if (e.which == 32) { // space
 				setTimeout(function() {
@@ -522,9 +532,11 @@ $.extend(UI, {
 				UI.spellCheck();
 			}
 
-		}).on('input', '.editarea', function(e) {
-			if (UI.body.hasClass('searchActive'))
+		}).on('input', '.editarea', function(e) {console.log('input in editarea');
+			if (UI.body.hasClass('searchActive')) {
+				console.log('on input');
 				UI.resetSearch();
+			}
 			UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
 			if (UI.draggingInsideEditarea) {
 				$(UI.tagToDelete).remove();
