@@ -22,6 +22,7 @@
                     <li><a href="#new-post">/new (POST)</a></li>
                     <li><a href="#status-post">/status (POST)</a></li>
                     <li><a href="#file-format">Supported file format</a></li>
+                     <li><a href="#languages">Supported languages</a></li>
                 </ul>
         </div>
     <div class="coldx">
@@ -112,12 +113,14 @@
                             </tbody>
                         </table>
                 
-                    </dd>
-                    <dt>Errors</dt>
-                    <dd>
+                   <p><strong>Errors</strong></p>
                         <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
                 
                             <tbody>
+                             <tr>
+                                <th>status</th>
+                                <th>message</th>
+                            </tr>
                             <tr>
                                 <td>FAIL</td>
                                 <td>The project creation is failed</td>
@@ -481,8 +484,7 @@
            
             <div class="block">
                     <a name="file-format"><h3 class="method-title">Supported file formats</h3></a>
-                        <dt id="accepted-files">List of supported file formats</dt>
-                        <dd>
+                        
                         
                             <table class="tablestats fileformat" width="100%" border="0" cellspacing="0" cellpadding="0">
                         
@@ -571,11 +573,14 @@
                                 </tr>
                                 </tbody></table>
                         
-                        </dd>
+                      
+                          <a class="gototop" href="#top">Go to top</a>        
+			</div>
+           
+            <div class="block">
+                    <a name="languages"><h3 class="method-title">Supported languages</h3></a>
+                      
                         
-                        
-                        <dt id="supported-langs">Supported languages</dt>
-                        <dd>
                             <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
                                 <thead>
                                     <th>
@@ -665,11 +670,11 @@
                                     </tr>
                                 </tbody>
                             </table>
-                        </dd>
                         
                         
                         
-                        <a class="gototop" href="#top">Go to top</a>
+                        
+                        <a class="last gototop" href="#top">Go to top</a>
              </div>
               <div class="block">
             </div>
@@ -713,8 +718,8 @@ jQuery( ".menu a " ).click(function() {
 });
 jQuery(function() {
   jQuery('a[href*=#]:not([href=#])').click(function() {
-    if (location.pathname.replace(/^//,'') == this.pathname.replace(/^//,'') && location.hostname == this.hostname) {
-      var target = jQuery(this.hash);
+if (location.pathname.replace(/^\//,'') == this.pathname.replace(/^\//,'') && location.hostname == this.hostname) {
+	      var target = jQuery(this.hash);
       target = target.length ? target : $('[name=' + this.hash.slice(1) +']');
       if (target.length) {
         jQuery('html,body').animate({

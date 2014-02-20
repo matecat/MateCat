@@ -231,9 +231,9 @@ UI = {
 				'	<div class="popup-outer"></div>' +
 				'	<div class="popup">' +
 				'		<a href="#" class="x-popup"></a>' +
-				'		<h1>Survey</h1>' +
+				'		<h1>Translation Completed - Take a Survey</h1>' +
 				'		<div class="popup-box">' +
-				'			<iframe src="' + s + '" width="100%" height="400" frameborder="0" marginheight="0" marginwidth="0">Loading ...</iframe>' +
+				'			<iframe src="' + s + '" width="100%" height="670" frameborder="0" marginheight="0" marginwidth="0">Loading ...</iframe>' +
 				'		</div>' +
 				'	</div>' +
 				'</div>';	
