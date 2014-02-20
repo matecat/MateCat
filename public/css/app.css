@@ -3015,3 +3015,8 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 {
 	display: none;
 }
+
+.modal.survey .popup
+{
+	margin-top: -350px;
+}
