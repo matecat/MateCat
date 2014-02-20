@@ -646,11 +646,12 @@ body.manage #search-projectname
         }
 		.api .menu {line-height:26px;}
         #contentBox pre {
-            background: #fbfbfb;
-            padding: 10px;
-            border: 1px dashed #ccc;
-            font-size:1em;
-			color: #666;
+           background: #fbfbfb;
+padding: 0 10px;
+border: 1px dashed #ccc;
+font-size: 1em;
+margin: 15px 0;
+color: #666;
         }
         .apidesc td {
             padding: 8px;
@@ -682,6 +683,8 @@ padding-right: 20px;
             padding-bottom: 20px;
             border-bottom: 1px dashed #ccc;}
 			
+			.api .gototop.last {border-bottom:none;}
+			
 			.api .fileformat { -webkit-column-count: 2;
             column-count: 2;
             -moz-column-count: 2;}
@@ -702,6 +705,11 @@ background: #efefef;
             text-align: left;
 			line-height:30px;
         }
+		
+		.api .block:last-child {height: 20px;
+min-height: 20px;}
+
+
 		
 			.api .tablestats th,.api .tablestats td {text-align:left;width:20%;vertical-align: top;}
 table {table-layout: fixed; width:100%;}
@@ -732,6 +740,7 @@ background-size: 43px;padding-top: 30px;}
 
 .api dd {
 margin-left: 120px;
+margin-bottom:10px;
 }
 
 .api .top {display:block;}
