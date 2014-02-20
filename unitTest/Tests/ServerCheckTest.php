@@ -46,10 +46,14 @@ class Tests_ServerCheckTest extends Tests_AbstractTest {
     }
 
     public function testReadOnly(){
+
+        DBLoader4Test::getUp();
+
         $servCheck = ServerCheck::getInstance();
 
         $allServerParams = $servCheck->getAllServerParams() ;
         $upload = $servCheck->getUploadParams() ;
+        $mysql_params = $servCheck->getMysqlParams();
 
         $this->assertEquals( $servCheck->getUploadParams(), $allServerParams->getUpload() );
         $this->assertEquals( $upload, $allServerParams->getUpload() );
@@ -59,9 +63,20 @@ class Tests_ServerCheckTest extends Tests_AbstractTest {
 
         $this->setExpectedException('DomainException');
         $allServerParams->field_test_not_existent = "kkk";
-
         $this->setExpectedException('Exception');
         echo $allServerParams->field_test_not_existent;
+
+
+        $this->setExpectedException('DomainException');
+        $upload->field_test_not_existent = "kkk";
+        $this->setExpectedException('Exception');
+        echo $upload->field_test_not_existent;
+
+
+        $this->setExpectedException('DomainException');
+        $mysql_params->field_test_not_existent = "kkk";
+        $this->setExpectedException('Exception');
+        echo $mysql_params->field_test_not_existent;
 
     }
 
@@ -70,9 +85,9 @@ class Tests_ServerCheckTest extends Tests_AbstractTest {
         DBLoader4Test::getUp();
 
         $servCheck = ServerCheck::getInstance();
-        $mysql_params = $servCheck->getMysqlConfParams();
+        $mysql_params = $servCheck->getMysqlParams();
 
-        $this->assertInstanceOf( 'ServerCheck_params', $mysql_params );
+        $this->assertInstanceOf( 'ServerCheck_mysqlParams', $mysql_params );
 
     }
 

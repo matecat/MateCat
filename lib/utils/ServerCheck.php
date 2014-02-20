@@ -91,21 +91,28 @@ class ServerCheck {
         return new ServerCheck_serverParams( self::$serverParams );
     }
 
-    public function getMysqlConfParams(){
+    /**
+     * @return ServerCheck_mysqlParams
+     */
+    public function getMysqlParams(){
+        return new ServerCheck_mysqlParams( $this->_getLazyCachedMysqlConfParams() );
+    }
+
+    protected function _getLazyCachedMysqlConfParams(){
 
         if( self::$MysqlParams === null ){
 
             self::$MysqlParams  = new ServerCheck_params();
 
             $db = Database::obtain();
-            $queryMaxBuffSize = "show variables";
-            $variables = $db->fetch_array($queryMaxBuffSize);
+            $queryMysqlVariables = "show variables";
+            $variables = $db->fetch_array($queryMysqlVariables);
             foreach ( $variables as $key => $value ){
                 $_VAR_NAME = $value['Variable_name'];
                 self::$MysqlParams->$_VAR_NAME = $value['Value'];
             }
 
-            self::$serverParams->mysql_params = self::$MysqlParams;
+            self::$serverParams->mysql_params = new ServerCheck_mysqlParams( self::$MysqlParams );
 
         }
 
