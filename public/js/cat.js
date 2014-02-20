@@ -150,12 +150,18 @@ UI = {
 		this.saveInUndoStack('copysource');
 		$(".editarea", this.currentSegment).text(source_val).keyup().focus();
 		this.saveInUndoStack('copysource');
-		$(".editarea", this.currentSegment).effect("highlight", {}, 1000);
+//		$(".editarea", this.currentSegment).effect("highlight", {}, 1000);
 		$(window).trigger({
 			type: "sourceCopied",
 			segment: segment
 		});
-		this.currentSegment.addClass('modified');
+		this.currentSegment.addClass('highlighted1');
+		setTimeout(function() {
+			UI.currentSegment.addClass('modified highlighted2');
+		}, 100);
+		setTimeout(function() {
+			UI.currentSegment.removeClass('highlighted1 highlighted2');
+		}, 2000);
 		this.currentSegmentQA();
 		this.setChosenSuggestion(0);
 		this.lockTags(this.editarea);
