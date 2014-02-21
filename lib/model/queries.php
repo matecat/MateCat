@@ -394,8 +394,12 @@ function insertUser( $data ) {
 
 function tryInsertUserFromOAuth( $data ) {
     //check if user exists
-    $query   = "select email from users where email='" . $data[ 'email' ] . "'";
     $db      = Database::obtain();
+
+    //avoid injection
+    $data[ 'email' ] = $db->escape( $data[ 'email' ] );
+
+    $query   = "select email from users where email='" . $data[ 'email' ] . "'";
     $results = $db->query_first( $query );
 
     if ( 0 == count( $results ) or false == $results ) {
@@ -414,6 +418,8 @@ function tryInsertUserFromOAuth( $data ) {
     return $cid;
 }
 
+
+
 function getArrayOfSuggestionsJSON( $id_segment ) {
     $query   = "select suggestions_array from segment_translations where id_segment=$id_segment";
     $db      = Database::obtain();
@@ -429,13 +435,15 @@ function getArrayOfSuggestionsJSON( $id_segment ) {
  *
  * <pre>
  * $jobData = array(
- *      'source'        => 'it-IT',
- *      'target'        => 'en-US',
- *      'id_mt_engine'  => 1,
- *      'id_tms'        => 1,
- *      'id_translator' => '',
- *      'status'        => 'active',
- *      'password'      => 'UnDvBUXMiSBGNjSV'
+ *      'source'            => 'it-IT',
+ *      'target'            => 'en-US',
+ *      'id_mt_engine'      => 1,
+ *      'id_tms'            => 1,
+ *      'id_translator'     => '',
+ *      'status'            => 'active',
+ *      'password'          => 'UnDvBUXMiSBGNjSV',
+ *      'job_first_segment' => '1234',
+ *      'job_last_segment'  => '1456',
  * );
  * </pre>
  *
@@ -1382,11 +1390,22 @@ function insertFile( ArrayObject $projectStructure, $file_name, $mime_type, $con
 
 function insertFilesJob( $id_job, $id_file ) {
     $data              = array();
-    $data[ 'id_job' ]  = $id_job;
-    $data[ 'id_file' ] = $id_file;
+    $data[ 'id_job' ]  = (int)$id_job;
+    $data[ 'id_file' ] = (int)$id_file;
 
     $db = Database::obtain();
     $db->insert( 'files_job', $data );
+}
+
+function updateJobOwner( $jid, $new_owner ){
+
+    $db = Database::obtain();
+
+    $new_owner = $db->escape( $new_owner );
+    $res = $db->update( 'jobs', array( 'owner' => $new_owner ), ' id = ' . (int)$jid  );
+
+    return $res;
+
 }
 
 function getProjectJobData( $pid ) {
@@ -2055,18 +2074,17 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
 function changeProjectStatus( $pid, $status, $if_status_not = array() ) {
 
+    $db = Database::obtain();
 
-    $data[ 'status_analysis' ] = $status;
-    $where                     = "id=$pid ";
+    $data[ 'status_analysis' ] = $db->escape( $status );
+    $where                     = "id = " . (int)$pid;
 
     if ( !empty( $if_status_not ) ) {
         foreach ( $if_status_not as $v ) {
-            $where .= " and status_analysis<>'$v' ";
+            $where .= " and status_analysis <> '" . $db->escape( $v ) . "' ";
         }
     }
 
-
-    $db = Database::obtain();
     $db->update( 'projects', $data, $where );
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
@@ -2080,28 +2098,49 @@ function changeProjectStatus( $pid, $status, $if_status_not = array() ) {
 }
 
 function changePassword( $res, $id, $password, $new_password ) {
-    //    $new_password = 'changedpassword';
-    //$new_password = $password;
-
-    if ( $res == "prj" ) {
-        $query = "update projects set password=\"$new_password\" where id=$id";
-    } else {
-        $query = "update jobs set password=\"$new_password\" where id=$id and password = \"$password\" ";
-    }
 
     $db = Database::obtain();
-    $db->query( $query );
 
-    return $new_password;
+    $query      = "UPDATE %s SET password = '%s' WHERE id = %u AND password = '%s' ";
+    $sel_query  = "SELECT 1 FROM %s WHERE id = %u AND password = '%s'";
+    $row_exists = false;
+
+    if ( $res == "prj" ) {
+
+        $sel_query = sprintf( $sel_query, 'projects', $id, $db->escape( $password ) );
+        $res = $db->fetch_array($sel_query);
+        $row_exists = @(bool)array_pop( $res[0] );
+
+        $query = sprintf( $query, 'projects', $db->escape( $new_password ), $id, $db->escape( $password ) );
+
+    } else {
+
+        $sel_query = sprintf( $sel_query, 'jobs', $id, $db->escape( $password ) );
+        $res = $db->fetch_array($sel_query);
+        $row_exists = @(bool)array_pop( $res[0] );
+
+        $query = sprintf( $query, 'jobs', $db->escape( $new_password ), $id, $db->escape( $password ) );
+
+    }
+
+    $res   = $db->query( $query );
+    $err   = $db->get_error();
+    $errno = $err[ 'error_code' ];
+    if ( $errno != 0 ) {
+        Log::doLog( $err );
+        return $errno * -1;
+    }
+
+    return ( $db->affected_rows | $row_exists );
 
 }
 
 function cancelJob( $res, $id ) {
 
     if ( $res == "prj" ) {
-        $query = "update jobs set status_owner='cancelled' where id_project=$id";
+        $query = "update jobs set status_owner='cancelled' where id_project=" . (int)$id;
     } else {
-        $query = "update jobs set status_owner='cancelled' where id=$id";
+        $query = "update jobs set status_owner='cancelled' where id=" . (int)$id;
     }
     /*
        if ($res == "prj") {
@@ -2120,9 +2159,9 @@ function cancelJob( $res, $id ) {
 function archiveJob( $res, $id ) {
 
     if ( $res == "prj" ) {
-        $query = "update jobs set status='archived' where id_project=$id";
+        $query = "update jobs set status='archived' where id_project=" . (int)$id;
     } else {
-        $query = "update jobs set status='archived' where id=$id";
+        $query = "update jobs set status='archived' where id=" . (int)$id;
     }
     /*
        if ($res == "prj") {
@@ -2141,7 +2180,7 @@ function archiveJob( $res, $id ) {
 function updateProjectOwner( $ownerEmail, $project_id ) {
     $db              = Database::obtain();
     $data            = array();
-    $data[ 'owner' ] = $ownerEmail;
+    $data[ 'owner' ] = $db->escape( $ownerEmail );
     $where           = sprintf( " id_project = %u ", $project_id );
     $result          = $db->update( 'jobs', $data, $where );
 
@@ -2150,8 +2189,10 @@ function updateProjectOwner( $ownerEmail, $project_id ) {
 
 function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = null ) {
 
+    $db = Database::obtain();
+
     if ( $res == "prj" ) {
-        $status_filter_query = ( $only_if ) ? " and status_owner='$only_if'" : "";
+        $status_filter_query = ( $only_if ) ? " and status_owner='" . $db->escape( $only_if ) . "'" : "";
         $arStatus            = explode( ',', $status );
 
         $test = count( explode( ':', $arStatus[ 0 ] ) );
@@ -2183,7 +2224,7 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
      */
     //    $query = "update jobs set disabled=1 where id=$id";
 
-    $db = Database::obtain();
+    //$db = Database::obtain();
     $db->query( $query );
 
 }

@@ -316,7 +316,7 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.preOpenConcordance();
 		}).on('keypress', '.editor .editarea', function(e) {
-			console.log('keypress: ', UI.editarea.html());
+//			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
 //				console.log('KEYPRESS SU EDITAREA: ', UI.editarea.html());
@@ -532,7 +532,8 @@ $.extend(UI, {
 				UI.spellCheck();
 			}
 
-		}).on('input', '.editarea', function(e) {console.log('input in editarea');
+		}).on('input', '.editarea', function(e) {
+//			console.log('input in editarea');
 			if (UI.body.hasClass('searchActive')) {
 				console.log('on input');
 				UI.resetSearch();
