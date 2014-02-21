@@ -341,6 +341,13 @@ $.extend(UI, {
 		var addition = ($(':first-child', UI.editarea).hasClass('tag-autocomplete-endcursor'))? 30 : 20;
 		$('.tag-autocomplete-marker').remove();
 		UI.body.append('<div class="tag-autocomplete"><ul></ul></div>');
+		var arrayUnique = function(a) {
+			return a.reduce(function(p, c) {
+				if (p.indexOf(c) < 0) p.push(c);
+				return p;
+			}, []);
+		};
+		UI.sourceTags = arrayUnique(UI.sourceTags);
 		$.each(UI.sourceTags, function(index) {
 			$('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + '>' + this + '</li>');
 		});

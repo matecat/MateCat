@@ -2340,7 +2340,7 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.preOpenConcordance();
 		}).on('keypress', '.editor .editarea', function(e) {
-			console.log('keypress: ', UI.editarea.html());
+//			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
 //				console.log('KEYPRESS SU EDITAREA: ', UI.editarea.html());
@@ -2556,7 +2556,8 @@ $.extend(UI, {
 				UI.spellCheck();
 			}
 
-		}).on('input', '.editarea', function(e) {console.log('input in editarea');
+		}).on('input', '.editarea', function(e) {
+//			console.log('input in editarea');
 			if (UI.body.hasClass('searchActive')) {
 				console.log('on input');
 				UI.resetSearch();
@@ -3841,6 +3842,13 @@ $.extend(UI, {
 		var addition = ($(':first-child', UI.editarea).hasClass('tag-autocomplete-endcursor'))? 30 : 20;
 		$('.tag-autocomplete-marker').remove();
 		UI.body.append('<div class="tag-autocomplete"><ul></ul></div>');
+		var arrayUnique = function(a) {
+			return a.reduce(function(p, c) {
+				if (p.indexOf(c) < 0) p.push(c);
+				return p;
+			}, []);
+		};
+		UI.sourceTags = arrayUnique(UI.sourceTags);
 		$.each(UI.sourceTags, function(index) {
 			$('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + '>' + this + '</li>');
 		});
