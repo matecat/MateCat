@@ -1291,28 +1291,61 @@ UI = {
 	},
 	continueDownload: function() {
 
-        if (!$('#downloadProject').hasClass('disabled')) {
+        //check if we are in download status
+        if ( !$('#downloadProject').hasClass('disabled') ) {
 
+            //disable download button
             $('#downloadProject').addClass('disabled');
 
-            $("body").append("<iframe id='iframeDownload' src='' style='display: none;'></iframe>");
-            var downloadToken = new Date().getTime();
-            $('#iframeDownload').attr({'src': $("form#fileDownload").attr('action') + "?" + $("form#fileDownload").serialize() + "&downloadToken=" + downloadToken });
-            $('#iframeDownload').ready(function () {
+            //create an iFrame element
+            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
+                id:'iframeDownload',
+                src: ''
+            });
 
+            //append iFrame to the DOM
+            $("body").append( iFrameDownload );
+
+            //generate a token download
+            var downloadToken = new Date().getTime();
+
+            //set event listner, on ready, attach an interval that check for finished download
+            iFrameDownload.ready(function () {
+
+                //create a GLOBAL setInterval so in anonymous function it can be disabled
                 downloadTimer = window.setInterval(function () {
 
+                    //check for cookie
                     var token = $.cookie('downloadToken');
-                    if (token == downloadToken) {
+
+                    //if the cookie is found, download is completed
+                    //remove iframe an re-enable download button
+                    if ( token == downloadToken ) {
                         $('#downloadProject').removeClass('disabled');
-                        window.clearInterval(downloadTimer);
+                        window.clearInterval( downloadTimer );
                         $.cookie('downloadToken', null, { path: '/', expires: -1 });
-                        $('#iframeDownload').remove();
+                        iFrameDownload.remove();
                     }
 
                 }, 2000);
 
             });
+
+            //clone the html form and append a token for download
+            var iFrameForm = $("form#fileDownload").clone().append(
+                $( document.createElement( 'input' ) ).prop({
+                    type:'hidden',
+                    name:'downloadToken',
+                    value: downloadToken
+                })
+            );
+
+            //append from to newly created iFrame and submit form post
+            iFrameDownload.contents().find('body').append( iFrameForm );
+            iFrameDownload.contents().find("form#fileDownload").submit();
+
+        } else {
+            //we are in download status
         }
 
 	},

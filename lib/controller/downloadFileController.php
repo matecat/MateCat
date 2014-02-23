@@ -18,6 +18,8 @@ class downloadFileController extends downloadController {
     protected $downloadToken;
 
     public function __construct() {
+
+        INIT::sessionClose();
         parent::__construct();
 
         $filterArgs = array(
@@ -29,7 +31,7 @@ class downloadFileController extends downloadController {
             'downloadToken' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
 
-        $__postInput = filter_input_array( INPUT_GET, $filterArgs );
+        $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI Test scripts
