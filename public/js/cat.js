@@ -1289,11 +1289,33 @@ UI = {
 	goToFirstError: function() {
 		location.href = $('#point2seg').attr('href');
 	},
-	continueDownload: function() {
-		$("form#fileDownload").unbind().submit().bind('submit', function(e) {
-			e.preventDefault();
-		});
-	},
+    continueDownload: function () {
+
+        if (!$('#downloadProject').hasClass('disabled')) {
+
+            $('#downloadProject').addClass('disabled');
+
+            $("body").append("<iframe id='iframeDownload' src='' style='display: none;'></iframe>");
+            var downloadToken = new Date().getTime();
+            $('#iframeDownload').attr({'src': $("form#fileDownload").attr('action') + "?" + $("form#fileDownload").serialize() + "&downloadToken=" + downloadToken });
+            $('#iframeDownload').ready(function () {
+
+                downloadTimer = window.setInterval(function () {
+
+                    var token = $.cookie('downloadToken');
+                    if (token == downloadToken) {
+                        $('#downloadProject').removeClass('disabled');
+                        window.clearInterval(downloadTimer);
+                        $.cookie('downloadToken', null, { path: '/', expires: -1 });
+                        $('#iframeDownload').remove();
+                    }
+
+                }, 2000);
+
+            });
+        }
+
+    },
 	/**
 	 * fill segments with relative errors from polling
 	 * 

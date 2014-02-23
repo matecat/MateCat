@@ -15,17 +15,34 @@ class downloadFileController extends downloadController {
     private $fname;
     private $download_type;
 
+    protected $downloadToken;
+
     public function __construct() {
         parent::__construct();
 
-        $this->fname = $this->get_from_get_post('filename');
-        $this->id_file = $this->get_from_get_post('id_file');
-        $this->id_job = $this->get_from_get_post('id_job');
-        $this->download_type = $this->get_from_get_post('download_type');
-        $this->filename = $this->fname;
-        $this->password = $this->get_from_get_post("password");
+        $filterArgs = array(
+            'filename'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'id_file'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'id_job'        => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'download_type' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'password'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'downloadToken' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+        );
 
-        $this->download_type = $this->get_from_get_post("download_type");
+        $__postInput = filter_input_array( INPUT_GET, $filterArgs );
+
+        //NOTE: This is for debug purpose only,
+        //NOTE: Global $_POST Overriding from CLI Test scripts
+        //$__postInput = filter_var_array( $_POST, $filterArgs );
+
+        $this->fname         = $__postInput[ 'filename' ];
+        $this->id_file       = $__postInput[ 'id_file' ];
+        $this->id_job        = $__postInput[ 'id_job' ];
+        $this->download_type = $__postInput[ 'download_type' ];
+        $this->password      = $__postInput[ 'password' ];
+        $this->downloadToken = $__postInput[ 'downloadToken' ];
+
+        $this->filename      = $this->fname;
 
         if (empty($this->id_job)) {
             $this->id_job = "Unknown";
