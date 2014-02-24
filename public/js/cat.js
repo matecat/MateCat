@@ -356,19 +356,6 @@ UI = {
 		this.firstSegment = s.first();
 		this.lastSegment = s.last();
 	},
-	setSegmentPointer: function() {
-		if ($('.editor').length) {
-			if ($('.editor').isOnScreen()) {
-				$('#segmentPointer').hide();
-			} else {
-				if ($(window).scrollTop() > $('.editor').offset().top) {
-					$('#segmentPointer').removeClass('down').css('margin-top', '-10px').addClass('up').show();
-				} else {
-					$('#segmentPointer').removeClass('up').addClass('down').css('margin-top', ($(window).height() - 140) + 'px').show();
-				}
-			}
-		}
-	},
 	detectRefSegId: function(where) {
 		var step = this.moreSegNum;
 		var seg = (where == 'after') ? $('section').last() : (where == 'before') ? $('section').first() : '';
@@ -431,6 +418,7 @@ UI = {
 		if (where == 'before') {
 			$("section").each(function() {
 				if ($(this).offset().top > $(window).scrollTop()) {
+//				if ($(this).offset().top > $(window).scrollTop()) {
 					UI.segMoving = $(this).attr('id').split('-')[1];
 					return false;
 				}
@@ -448,7 +436,7 @@ UI = {
 				action: 'getSegments',
 				jid: config.job_id,
 				password: config.password,
-				step: 50,
+				step: UI.moreSegNum,
 				segment: segId,
 				where: where
 			},
@@ -1092,7 +1080,7 @@ UI = {
 
 		$("html,body").stop();
 		$("html,body").animate({
-			scrollTop: destinationTop - 20
+			documentElement: destinationTop - 20
 		}, 500);
 		setTimeout(function() {
 			UI.goingToNext = false;
@@ -1273,7 +1261,6 @@ UI = {
 		var statusSwitcher = $(".status", segment);
 		statusSwitcher.removeClass("col-approved col-rejected col-done col-draft");
 
-		var statusToGo = (isTranslatedButton) ? 'untranslated' : '';
 		var nextUntranslatedSegment = $('#segment-' + this.nextUntranslatedSegmentId);
 		this.nextUntranslatedSegment = nextUntranslatedSegment;
 		if ((!isTranslatedButton) && (!nextUntranslatedSegment.length)) {
@@ -1365,7 +1352,7 @@ UI = {
 	setNextWarnedSegment: function(sid) {
 		sid = sid || UI.currentSegmentId;
 		idList = UI.globalWarnings;
-		$.each(idList, function(index) {
+		$.each(idList, function() {
 			if (this > sid) {
 				$('#point2seg').attr('href', '#' + this);
 				return false;
@@ -1851,7 +1838,7 @@ UI = {
 		this.currentSegment.removeClass('waiting_for_check_result');
 		this.registerQACheck();
 	},
-	saveInUndoStack: function(action) {
+	saveInUndoStack: function() {
 		currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
 		if (typeof currentItem != 'undefined') {
@@ -2028,10 +2015,14 @@ $.extend(UI, {
 		scrollToFile = (options.scrollToFile || false);
 		seg = (segmentToOpen || false);
 		this.segmentToScrollAtRender = (seg) ? seg : false;
-		this.isWebkit = $.browser.webkit;
-		this.isChrome = $.browser.webkit && !!window.chrome;
-		this.isFirefox = $.browser.mozilla;
-		this.isSafari = $.browser.webkit && !window.chrome;
+//		this.isWebkit = $.browser.webkit;
+//		this.isChrome = $.browser.webkit && !!window.chrome;
+//		this.isFirefox = $.browser.mozilla;
+//		this.isSafari = $.browser.webkit && !window.chrome;
+		this.isChrome = (typeof window.chrome != 'undefined');
+		this.isFirefox = (typeof navigator.mozApps != 'undefined');
+//		console.log('body.scrollTop: ', $('body').scrollTop());
+//		console.log('window.scrollTop: ', $(window).scrollTop());
 		this.isMac = (navigator.platform == 'MacIntel') ? true : false;
 		this.body = $('body');
 		this.firstLoad = firstLoad;
@@ -2230,31 +2221,10 @@ $.extend(UI, {
 		}).on('allTranslated', function(e) {
 			if(config.survey) UI.displaySurvey(config.survey);
 		})
-//window.onbeforeunload = UI.beforeExit();
-window.onbeforeunload = goodbye;
+		window.onbeforeunload = goodbye;
 
 
-function goodbye(e) {
-	if ($('#downloadProject').hasClass('disabled')) {
-		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
-		var leave_message = 'You have a pending download. Are you sure you want to quit?'
-		if(dont_confirm_leave!==1) {
-			if(!e) e = window.event;
-			//e.cancelBubble is supported by IE - this will kill the bubbling process.
-			e.cancelBubble = true;
-			e.returnValue = leave_message;
-			//e.stopPropagation works in Firefox.
-			if (e.stopPropagation) 
-			{
-				e.stopPropagation();
-				e.preventDefault();
-			}
 
-			//return works for Chrome and Safari
-			return leave_message;
-		}
-	}
-}   
 	
 // no more used:
 		$("header .filter").click(function(e) {
@@ -2500,7 +2470,7 @@ function goodbye(e) {
 						var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) != null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
 						var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
 
-						saveSelection('noMove');
+						saveSelection();
 						parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
 						isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
 						parentMark = $('.searchMarker', UI.editarea).has('.rangySelectionBoundary');
@@ -2987,7 +2957,7 @@ function goodbye(e) {
 			$('#placeHolder').remove();
 			var node = document.createElement("div");
 			node.setAttribute('id', 'placeHolder');
-			removeSelectedText($(this));
+			removeSelectedText();
 			insertNodeAtCursor(node);
 			if(UI.isFirefox) pasteHtmlAtCaret('<div id="placeHolder"></div>');
 			var ev = (UI.isFirefox) ? e : event;
@@ -3489,12 +3459,12 @@ $.extend(UI, {
 		}
 		target = view2rawxliff(target);
 		var languages = $(segment).parents('article').find('.languages');
-		var source_lang = $('.source-lang', languages).text();
-		var target_lang = $('.target-lang', languages).text();
-		var id_translator = config.id_translator;
-		var private_translator = config.private_translator;
-		var id_customer = config.id_customer;
-		var private_customer = config.private_customer;
+//		var source_lang = $('.source-lang', languages).text();
+//		var target_lang = $('.target-lang', languages).text();
+//		var id_translator = config.id_translator;
+//		var private_translator = config.private_translator;
+//		var id_customer = config.id_customer;
+//		var private_customer = config.private_customer;
 
 		var info = $(segment).attr('id').split('-');
 		var id_segment = info[1];
@@ -3965,33 +3935,6 @@ $.extend(UI, {
 		$('.tag-autocomplete').css('left', offset.left);
 		this.checkAutocompleteTags();	
 	},
-/*
-// functions to handle the chrome bug on contenteditable false elements
-	jumpTag: function(pos) {
-		pos = pos || 'start';
-		setTimeout(function() {
-			saveSelection(pos);
-			parentTag = $('span.locked', UI.editarea).has(' .rangySelectionBoundary');
-			isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
-			restoreSelection();
-			if(isInsideTag) {
-				setCursorPosition(parentTag[0], pos);
-			}
-		}, 50);		
-	},
-
-	movePHOutOfTags: function(where) {
-		if($('span.locked .rangySelectionBoundary', this.editarea).length) {
-			ph = $('span.locked .rangySelectionBoundary', this.editarea);
-			if(where == 'start') {
-				$('span.locked', this.editarea).has('.rangySelectionBoundary').before(ph[0].outerHTML);
-			} else {
-				$('span.locked', this.editarea).has('.rangySelectionBoundary').after(ph[0].outerHTML);
-			}
-			ph.remove();
-		}
-	},
-*/
 });
 
 
@@ -4518,7 +4461,7 @@ $.extend(UI, {
 		}
 		var p = this.searchParams;
 //        console.log('mode: ' + mode + ' - coso: ' + coso);
-		var targetToo = typeof p.target != 'undefined';
+//		var targetToo = typeof p.target != 'undefined';
 		var containsFunc = (p['match-case']) ? 'contains' : 'containsNC';
 		var ignoreCase = (p['match-case']) ? '' : 'i';
 
@@ -4911,10 +4854,8 @@ $.extend(UI, {
 		e.preventDefault();
 		if ($('body').hasClass('filterOpen')) {
 			$('body').removeClass('filterOpen');
-//            $("body").scrollTop($("body").scrollTop()+$('.searchbox').height());
 		} else {
 			$('body').addClass('filterOpen');
-//            $("body").scrollTop($("body").scrollTop()-$('.searchbox').height());
 			$('#search-source').focus();
 		}
 	},
@@ -5114,7 +5055,7 @@ function setCursorPosition(el, pos) {
 	el.focus();	
 }
 
-function removeSelectedText(editarea) {
+function removeSelectedText() {
 	if (window.getSelection || document.getSelection) {
 		var oSelection = (window.getSelection ? window : document).getSelection();
 		if (oSelection.type == 'Caret') {
@@ -5210,7 +5151,7 @@ function rawxliff2rawview(segment) { // currently unused
 	return segment;
 }
 
-function saveSelection(pos) {//console.log(pos);
+function saveSelection() {
 //	var editarea = (typeof editarea == 'undefined') ? UI.editarea : el;
 	var editarea = UI.editarea;
 	if (UI.savedSel) {
@@ -5221,7 +5162,6 @@ function saveSelection(pos) {//console.log(pos);
 	editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
 
 	UI.savedSelActiveElement = document.activeElement;
-//	if(pos != 'noMove') UI.movePHOutOfTags(pos);
 }
 
 function restoreSelection() {
@@ -5284,6 +5224,28 @@ function setBrowserHistoryBehavior() {
 
 }
 
+function goodbye(e) {
+	if ($('#downloadProject').hasClass('disabled')) {
+		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
+		var leave_message = 'You have a pending download. Are you sure you want to quit?'
+		if(dont_confirm_leave!==1) {
+			if(!e) e = window.event;
+			//e.cancelBubble is supported by IE - this will kill the bubbling process.
+			e.cancelBubble = true;
+			e.returnValue = leave_message;
+			//e.stopPropagation works in Firefox.
+			if (e.stopPropagation) 
+			{
+				e.stopPropagation();
+				e.preventDefault();
+			}
+
+			//return works for Chrome and Safari
+			return leave_message;
+		}
+	}
+}   
+
 $.fn.isOnScreen = function() {
 
 	var win = $(window);
@@ -5292,6 +5254,8 @@ $.fn.isOnScreen = function() {
 		top: win.scrollTop(),
 		left: win.scrollLeft()
 	};
+	console.log('viewport: ', viewport);
+
 	viewport.right = viewport.left + win.width();
 	viewport.bottom = viewport.top + win.height();
 

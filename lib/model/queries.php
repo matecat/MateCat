@@ -670,7 +670,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
             $ref_point = $ref_segment - ( $step + 1 );
             break;
         case 'center':
-            $ref_point = ( (float)$ref_segment ) - 100;
+            $ref_point = ( (float)$ref_segment ) - (int)( $step / 2 );
             break;
     }
 

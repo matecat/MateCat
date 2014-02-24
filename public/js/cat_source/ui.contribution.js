@@ -274,12 +274,12 @@ $.extend(UI, {
 		}
 		target = view2rawxliff(target);
 		var languages = $(segment).parents('article').find('.languages');
-		var source_lang = $('.source-lang', languages).text();
-		var target_lang = $('.target-lang', languages).text();
-		var id_translator = config.id_translator;
-		var private_translator = config.private_translator;
-		var id_customer = config.id_customer;
-		var private_customer = config.private_customer;
+//		var source_lang = $('.source-lang', languages).text();
+//		var target_lang = $('.target-lang', languages).text();
+//		var id_translator = config.id_translator;
+//		var private_translator = config.private_translator;
+//		var id_customer = config.id_customer;
+//		var private_customer = config.private_customer;
 
 		var info = $(segment).attr('id').split('-');
 		var id_segment = info[1];

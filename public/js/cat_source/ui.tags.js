@@ -356,33 +356,6 @@ $.extend(UI, {
 		$('.tag-autocomplete').css('left', offset.left);
 		this.checkAutocompleteTags();	
 	},
-/*
-// functions to handle the chrome bug on contenteditable false elements
-	jumpTag: function(pos) {
-		pos = pos || 'start';
-		setTimeout(function() {
-			saveSelection(pos);
-			parentTag = $('span.locked', UI.editarea).has(' .rangySelectionBoundary');
-			isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
-			restoreSelection();
-			if(isInsideTag) {
-				setCursorPosition(parentTag[0], pos);
-			}
-		}, 50);		
-	},
-
-	movePHOutOfTags: function(where) {
-		if($('span.locked .rangySelectionBoundary', this.editarea).length) {
-			ph = $('span.locked .rangySelectionBoundary', this.editarea);
-			if(where == 'start') {
-				$('span.locked', this.editarea).has('.rangySelectionBoundary').before(ph[0].outerHTML);
-			} else {
-				$('span.locked', this.editarea).has('.rangySelectionBoundary').after(ph[0].outerHTML);
-			}
-			ph.remove();
-		}
-	},
-*/
 });
 
 

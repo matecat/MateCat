@@ -9,10 +9,14 @@ $.extend(UI, {
 		scrollToFile = (options.scrollToFile || false);
 		seg = (segmentToOpen || false);
 		this.segmentToScrollAtRender = (seg) ? seg : false;
-		this.isWebkit = $.browser.webkit;
-		this.isChrome = $.browser.webkit && !!window.chrome;
-		this.isFirefox = $.browser.mozilla;
-		this.isSafari = $.browser.webkit && !window.chrome;
+//		this.isWebkit = $.browser.webkit;
+//		this.isChrome = $.browser.webkit && !!window.chrome;
+//		this.isFirefox = $.browser.mozilla;
+//		this.isSafari = $.browser.webkit && !window.chrome;
+		this.isChrome = (typeof window.chrome != 'undefined');
+		this.isFirefox = (typeof navigator.mozApps != 'undefined');
+//		console.log('body.scrollTop: ', $('body').scrollTop());
+//		console.log('window.scrollTop: ', $(window).scrollTop());
 		this.isMac = (navigator.platform == 'MacIntel') ? true : false;
 		this.body = $('body');
 		this.firstLoad = firstLoad;

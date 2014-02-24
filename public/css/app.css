@@ -2127,14 +2127,14 @@ section.readonly .status-container
 }
 .editor.highlighted1 .editarea
 {
-	background-color: yellow;
+	background-color: #ffff94;
 }
 .editor.highlighted2 .editarea
 {
-	-moz-transition:background-color 2s;
-	-webkit-transition:background-color 2s !important;
-	-o-transition:background-color 2s;
-	transition:background-color 2s !important;
+	-moz-transition:background-color 1.5s;
+	-webkit-transition:background-color 1.5s !important;
+	-o-transition:background-color 1.5s;
+	transition:background-color 1.5s !important;
 	background-color: transparent;
 }
 /*.editor.modified .editarea

@@ -125,31 +125,10 @@ $.extend(UI, {
 		}).on('allTranslated', function(e) {
 			if(config.survey) UI.displaySurvey(config.survey);
 		})
-//window.onbeforeunload = UI.beforeExit();
-window.onbeforeunload = goodbye;
+		window.onbeforeunload = goodbye;
 
 
-function goodbye(e) {
-	if ($('#downloadProject').hasClass('disabled')) {
-		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
-		var leave_message = 'You have a pending download. Are you sure you want to quit?'
-		if(dont_confirm_leave!==1) {
-			if(!e) e = window.event;
-			//e.cancelBubble is supported by IE - this will kill the bubbling process.
-			e.cancelBubble = true;
-			e.returnValue = leave_message;
-			//e.stopPropagation works in Firefox.
-			if (e.stopPropagation) 
-			{
-				e.stopPropagation();
-				e.preventDefault();
-			}
 
-			//return works for Chrome and Safari
-			return leave_message;
-		}
-	}
-}   
 	
 // no more used:
 		$("header .filter").click(function(e) {
@@ -395,7 +374,7 @@ function goodbye(e) {
 						var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) != null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
 						var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
 
-						saveSelection('noMove');
+						saveSelection();
 						parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
 						isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
 						parentMark = $('.searchMarker', UI.editarea).has('.rangySelectionBoundary');
@@ -882,7 +861,7 @@ function goodbye(e) {
 			$('#placeHolder').remove();
 			var node = document.createElement("div");
 			node.setAttribute('id', 'placeHolder');
-			removeSelectedText($(this));
+			removeSelectedText();
 			insertNodeAtCursor(node);
 			if(UI.isFirefox) pasteHtmlAtCaret('<div id="placeHolder"></div>');
 			var ev = (UI.isFirefox) ? e : event;

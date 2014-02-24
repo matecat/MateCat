@@ -274,7 +274,7 @@ $.extend(UI, {
 		}
 		var p = this.searchParams;
 //        console.log('mode: ' + mode + ' - coso: ' + coso);
-		var targetToo = typeof p.target != 'undefined';
+//		var targetToo = typeof p.target != 'undefined';
 		var containsFunc = (p['match-case']) ? 'contains' : 'containsNC';
 		var ignoreCase = (p['match-case']) ? '' : 'i';
 
@@ -667,10 +667,8 @@ $.extend(UI, {
 		e.preventDefault();
 		if ($('body').hasClass('filterOpen')) {
 			$('body').removeClass('filterOpen');
-//            $("body").scrollTop($("body").scrollTop()+$('.searchbox').height());
 		} else {
 			$('body').addClass('filterOpen');
-//            $("body").scrollTop($("body").scrollTop()-$('.searchbox').height());
 			$('#search-source').focus();
 		}
 	},

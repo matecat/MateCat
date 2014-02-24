@@ -356,19 +356,6 @@ UI = {
 		this.firstSegment = s.first();
 		this.lastSegment = s.last();
 	},
-	setSegmentPointer: function() {
-		if ($('.editor').length) {
-			if ($('.editor').isOnScreen()) {
-				$('#segmentPointer').hide();
-			} else {
-				if ($(window).scrollTop() > $('.editor').offset().top) {
-					$('#segmentPointer').removeClass('down').css('margin-top', '-10px').addClass('up').show();
-				} else {
-					$('#segmentPointer').removeClass('up').addClass('down').css('margin-top', ($(window).height() - 140) + 'px').show();
-				}
-			}
-		}
-	},
 	detectRefSegId: function(where) {
 		var step = this.moreSegNum;
 		var seg = (where == 'after') ? $('section').last() : (where == 'before') ? $('section').first() : '';
@@ -431,6 +418,7 @@ UI = {
 		if (where == 'before') {
 			$("section").each(function() {
 				if ($(this).offset().top > $(window).scrollTop()) {
+//				if ($(this).offset().top > $(window).scrollTop()) {
 					UI.segMoving = $(this).attr('id').split('-')[1];
 					return false;
 				}
@@ -448,7 +436,7 @@ UI = {
 				action: 'getSegments',
 				jid: config.job_id,
 				password: config.password,
-				step: 50,
+				step: UI.moreSegNum,
 				segment: segId,
 				where: where
 			},
@@ -1092,7 +1080,7 @@ UI = {
 
 		$("html,body").stop();
 		$("html,body").animate({
-			scrollTop: destinationTop - 20
+			documentElement: destinationTop - 20
 		}, 500);
 		setTimeout(function() {
 			UI.goingToNext = false;
@@ -1273,7 +1261,6 @@ UI = {
 		var statusSwitcher = $(".status", segment);
 		statusSwitcher.removeClass("col-approved col-rejected col-done col-draft");
 
-		var statusToGo = (isTranslatedButton) ? 'untranslated' : '';
 		var nextUntranslatedSegment = $('#segment-' + this.nextUntranslatedSegmentId);
 		this.nextUntranslatedSegment = nextUntranslatedSegment;
 		if ((!isTranslatedButton) && (!nextUntranslatedSegment.length)) {
@@ -1365,7 +1352,7 @@ UI = {
 	setNextWarnedSegment: function(sid) {
 		sid = sid || UI.currentSegmentId;
 		idList = UI.globalWarnings;
-		$.each(idList, function(index) {
+		$.each(idList, function() {
 			if (this > sid) {
 				$('#point2seg').attr('href', '#' + this);
 				return false;
@@ -1851,7 +1838,7 @@ UI = {
 		this.currentSegment.removeClass('waiting_for_check_result');
 		this.registerQACheck();
 	},
-	saveInUndoStack: function(action) {
+	saveInUndoStack: function() {
 		currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
 		if (typeof currentItem != 'undefined') {
