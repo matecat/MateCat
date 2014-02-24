@@ -124,7 +124,33 @@ $.extend(UI, {
 			UI.browserScrollPositionRestoreCorrection();
 		}).on('allTranslated', function(e) {
 			if(config.survey) UI.displaySurvey(config.survey);
-		});
+		})
+//window.onbeforeunload = UI.beforeExit();
+window.onbeforeunload = goodbye;
+
+
+function goodbye(e) {
+	if ($('#downloadProject').hasClass('disabled')) {
+		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
+		var leave_message = 'You have a pending download. Are you sure you want to quit?'
+		if(dont_confirm_leave!==1) {
+			if(!e) e = window.event;
+			//e.cancelBubble is supported by IE - this will kill the bubbling process.
+			e.cancelBubble = true;
+			e.returnValue = leave_message;
+			//e.stopPropagation works in Firefox.
+			if (e.stopPropagation) 
+			{
+				e.stopPropagation();
+				e.preventDefault();
+			}
+
+			//return works for Chrome and Safari
+			return leave_message;
+		}
+	}
+}   
+	
 // no more used:
 		$("header .filter").click(function(e) {
 			e.preventDefault();
@@ -239,6 +265,7 @@ $.extend(UI, {
 			$(".menucolor").hide();
 		}).on('click', '#downloadProject', function(e) {
 			e.preventDefault();
+			if($('#downloadProject').hasClass('disabled')) return false;
 			if ($("#notifbox").hasClass("warningbox")) {
 				APP.confirm({
 					name: 'confirmDownload',
