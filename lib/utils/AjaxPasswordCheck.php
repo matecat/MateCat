@@ -17,13 +17,15 @@ class AjaxPasswordCheck {
      * @var array
      */
     protected $jobData = array(
-            'source'        => null,
-            'target'        => null,
-            'id_mt_engine'  => null,
-            'id_tms'        => null,
-            'id_translator' => null,
-            'status'        => null,
-            'password'      => null
+            'source'            => null,
+            'target'            => null,
+            'id_mt_engine'      => null,
+            'id_tms'            => null,
+            'id_translator'     => null,
+            'status'            => null,
+            'password'          => null,
+            'job_first_segment' => null,
+            'job_last_segment'  => null
     );
 
     public function getData(){

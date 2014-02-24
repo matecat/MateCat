@@ -22,7 +22,7 @@ class CatUtils {
     const crPlaceholderRegex   = '/\#\#\$_0D\$\#\#/g';
     const crlfPlaceholderRegex = '/\#\#\$_0D0A\$\#\#/g';
 
-    public static $cjk = array( 'zh-TW' => 1.8, 'zh-CN' => 1.8, 'ja-JP' => 2.5, 'ko-KR' => 2.5, 'km-KH' => 2.5 );
+    public static $cjk = array( 'zh-TW' => 1.8, 'zh-CN' => 1.8, 'ja-JP' => 2.5, 'ko-KR' => 2.5, 'km-KH' => 5 );
 
     //following functions are useful for manage the consistency of non braking spaces
     // chars coming, expecially,from MS Word
