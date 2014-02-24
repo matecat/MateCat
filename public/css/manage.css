@@ -647,10 +647,10 @@ body.manage #search-projectname
 		.api .menu {line-height:26px;}
         #contentBox pre {
            background: #fbfbfb;
-padding: 0 10px;
+padding: 5px 10px;
 border: 1px dashed #ccc;
 font-size: 1em;
-margin: 15px 0;
+margin: 20px 0;
 color: #666;
         }
         .apidesc td {
