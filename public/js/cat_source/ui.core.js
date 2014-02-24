@@ -1080,7 +1080,7 @@ UI = {
 
 		$("html,body").stop();
 		$("html,body").animate({
-			documentElement: destinationTop - 20
+			scrollTop: destinationTop - 20
 		}, 500);
 		setTimeout(function() {
 			UI.goingToNext = false;

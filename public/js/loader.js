@@ -28,7 +28,7 @@ Loader = {
 //		'jquery',
 //        'jquery-ui-1.8.20.custom.min',
 		'jquery.hotkeys.min',
-//		'jquery-migrate-1.2.1',
+		'jquery-migrate-1.2.1',
 		'jquery.cookie',
 		'diff_match_patch',
 		'waypoints',
