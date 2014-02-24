@@ -647,10 +647,10 @@ body.manage #search-projectname
 		.api .menu {line-height:26px;}
         #contentBox pre {
            background: #fbfbfb;
-padding: 0 10px;
+padding: 5px 10px;
 border: 1px dashed #ccc;
 font-size: 1em;
-margin: 15px 0;
+margin: 20px 0;
 color: #666;
         }
         .apidesc td {
@@ -714,7 +714,9 @@ min-height: 20px;}
 			.api .tablestats th,.api .tablestats td {text-align:left;width:20%;vertical-align: top;}
 table {table-layout: fixed; width:100%;}
 .api .colsx {float: left;
-position: fixed;}
+position: fixed;
+padding-right: 1%;
+width: 13%;}
 .api .coldx {float: right;
 width: 85%;
 margin-top: 10px;}

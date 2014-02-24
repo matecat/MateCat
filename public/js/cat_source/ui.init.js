@@ -23,7 +23,7 @@ $.extend(UI, {
 		this.noGlossary = false;
 		setTimeout(function() {
 			UI.blockGetMoreSegments = false;
-		}, 1000);
+		}, 200);
 		this.detectFirstLast();
 		this.reinitMMShortcuts();
 		this.initSegmentNavBar();

@@ -21,7 +21,6 @@ class downloadFileController extends downloadController {
 
         INIT::sessionClose();
         parent::__construct();
-
         $filterArgs = array(
             'filename'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'id_file'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
