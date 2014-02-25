@@ -15,14 +15,14 @@ UI = {
 			$('#jobMenu .currSegment').hide();
 		}
 		var menuHeight = $('#jobMenu').height();
-		var startTop = 47 - menuHeight;
+//		var startTop = 47 - menuHeight;
 		$('#jobMenu').css('top', (47 - menuHeight) + "px");
 
 		if ($('#jobMenu').hasClass('open')) {
 			$('#jobMenu').animate({top: "-=" + menuHeight + "px"}, 500).removeClass('open');
 		} else {
 			$('#jobMenu').animate({top: "+=" + menuHeight + "px"}, 300, function() {
-				$('body').on('click', function(e) {
+				$('body').on('click', function() {
 					if ($('#jobMenu').hasClass('open')) {
 						UI.toggleFileMenu();
 					}
@@ -60,7 +60,7 @@ UI = {
 			$(window).trigger({
 				type: "allTranslated"
 			});
-		};
+		}
 		$(window).trigger({
 			type: "statusChanged",
 			segment: segment,
@@ -110,7 +110,7 @@ UI = {
 			return true;
 		}
 
-		var closeStart = new Date();
+//		var closeStart = new Date();
 		this.autoSave = false;
 
 		$(window).trigger({
@@ -215,7 +215,7 @@ UI = {
 	createJobMenu: function() {
 		var menu = '<nav id="jobMenu" class="topMenu">' +
 				'    <ul>';
-		$.each(config.firstSegmentOfFiles, function(index) {
+		$.each(config.firstSegmentOfFiles, function() {
 			menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><span class="' + UI.getIconClass(this.file_name.split('.')[this.file_name.split('.').length -1]) + '"></span><a href="#" title="' + this.file_name + '" >' + this.file_name + '</a></li>';
 		});
 
@@ -253,7 +253,7 @@ UI = {
 			if(config.survey === surv) {
 				jobs = $.cookie('surveyedJobs').split('||')[1].split(',');
 				var found = false;
-				$.each(jobs, function(index) {
+				$.each(jobs, function() {
 					if(this == config.job_id) {
 						found = true;
 					}
@@ -327,7 +327,7 @@ UI = {
 	deActivateSegment: function(byButton) {
 		this.removeButtons(byButton);
 		this.removeHeader(byButton);
-		this.removeFooter(byButton);
+//		this.removeFooter(byButton);
 	},
 	detectAdjacentSegment: function(segment, direction, times) { // currently unused
 		if (!times)
@@ -357,7 +357,7 @@ UI = {
 		this.lastSegment = s.last();
 	},
 	detectRefSegId: function(where) {
-		var step = this.moreSegNum;
+//		var step = this.moreSegNum;
 		var seg = (where == 'after') ? $('section').last() : (where == 'before') ? $('section').first() : '';
 		var segId = (seg.length) ? seg.attr('id').split('-')[1] : 0;
 		return segId;
@@ -473,8 +473,8 @@ UI = {
 			}
 
 		}
-		if (where == 'after') {
-		}
+//		if (where == 'after') {
+//		}
 		if (d.data.files.length === 0) {
 			if (where == 'after')
 				this.noMoreSegmentsAfter = true;
@@ -675,6 +675,18 @@ UI = {
 			}
 		}
 	},
+	gotoNextUntranslatedSegment: function() {
+		if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
+			if (!UI.nextUntranslatedSegmentId) {
+				UI.closeSegment(UI.currentSegment);
+			} else {
+				UI.reloadWarning();
+			}
+		} else {
+			$("#segment-" + UI.nextUntranslatedSegmentId + " .editarea").trigger("click");
+		}
+	},
+	
 	gotoOpenSegment: function() {
 		if ($('#segment-' + this.currentSegmentId).length) {
 			this.scrollSegment(this.currentSegment);
@@ -738,7 +750,7 @@ UI = {
 		$(ed).focus();
 	},
 	millisecondsToTime: function(milli) {
-		var milliseconds = milli % 1000;
+//		var milliseconds = milli % 1000;
 		var seconds = Math.round((milli / 1000) % 60);
 		var minutes = Math.floor((milli / (60 * 1000)) % 60);
 		return [minutes, seconds];
@@ -890,8 +902,8 @@ UI = {
 		$('#' + segment.attr('id') + '-buttons').empty();
 		$('p.warnings', segment).remove();
 	},
-	removeFooter: function(byButton) {
-	},
+//	removeFooter: function(byButton) {
+//	},
 	removeHeader: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
 		$('#' + segment.attr('id') + '-header').empty();
@@ -900,7 +912,7 @@ UI = {
 		statusMenu.empty().hide();
 	},
 	renderSegments: function(files, where, starting) {
-		$.each(files, function(k, v) {
+		$.each(files, function(k) {
 			var newFile = '';
 			var fs = this.file_stats;
 //            var fid = fs['ID_FILE'];
@@ -934,7 +946,7 @@ UI = {
 			}
 
 			var t = config.time_to_edit_enabled;
-			$.each(this.segments, function(index) {
+			$.each(this.segments, function() {
 //                this.readonly = true;
 				var readonly = (this.readonly == 'true') ? true : false;
 				var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
@@ -1026,7 +1038,7 @@ UI = {
 		this.setTranslation(segment, status, 'autosave');
 		segment.addClass('saved');
 	},
-	renderAndScrollToSegment: function(sid, file) {
+	renderAndScrollToSegment: function(sid) {
 		$('#outer').empty();
 		this.render({
 			firstLoad: false,
@@ -1114,12 +1126,12 @@ UI = {
 					var word = Object.keys(value)[0];
 					replacements = value[word].misses.join(",");
 
-					var Position = [
-						parseInt(value[word].offset),
-						parseInt(value[word].offset) + parseInt(word.length)
-					];
+//					var Position = [
+//						parseInt(value[word].offset),
+//						parseInt(value[word].offset) + parseInt(word.length)
+//					];
 
-					var sentTextInPosition = ed.text().substring(Position[0], Position[1]);
+//					var sentTextInPosition = ed.text().substring(Position[0], Position[1]);
 					//console.log(sentTextInPosition);
 
 					var re = new RegExp("(\\b" + word + "\\b)", "gi");
@@ -1138,9 +1150,6 @@ UI = {
 				action: 'setSpellcheck',
 				slang: config.target_rfc,
 				word: word
-			},
-			success: function(data) {
-
 			}
 		});
 	},
@@ -1151,11 +1160,11 @@ UI = {
 			UI.currentSegment = undefined;
 		} else {
 			setTimeout(function() {
-				var hash_value = window.location.hash;
+//				var hash_value = window.location.hash;
 				window.location.hash = UI.currentSegmentId;
 			}, 300);
 		}
-		var file = this.currentFile;
+//		var file = this.currentFile;
 		if (this.readonly)
 			return;
 		APP.doRequest({
@@ -1192,8 +1201,8 @@ UI = {
 	setProgress: function(stats) {
 		var s = stats;
 		m = $('footer .meter');
-		var status = 'approved';
-		var total = s.TOTAL;
+//		var status = 'approved';
+//		var total = s.TOTAL;
 		var t_perc = s.TRANSLATED_PERC;
 		var a_perc = s.APPROVED_PERC;
 		var d_perc = s.DRAFT_PERC;
@@ -1204,8 +1213,8 @@ UI = {
 		var d_perc_formatted = s.DRAFT_PERC_FORMATTED;
 		var r_perc_formatted = s.REJECTED_PERC_FORMATTED;
 
-		var d_formatted = s.DRAFT_FORMATTED;
-		var r_formatted = s.REJECTED_FORMATTED;
+//		var d_formatted = s.DRAFT_FORMATTED;
+//		var r_formatted = s.REJECTED_FORMATTED;
 		var t_formatted = s.TODO_FORMATTED;
 
 		var wph = s.WORDS_PER_HOUR;
@@ -1872,7 +1881,7 @@ UI = {
 	},
 	updateJobMenu: function() {
 		$('#jobMenu li.current').removeClass('current');
-		$('#jobMenu li:not(.currSegment)').each(function(index) {
+		$('#jobMenu li:not(.currSegment)').each(function() {
 			if ($(this).attr('data-file') == UI.currentFileId)
 				$(this).addClass('current');
 		});
@@ -1930,7 +1939,7 @@ $(document).ready(function() {
 });
 
 $.extend($.expr[":"], {
-	"containsNC": function(elem, i, match, array) {
+	"containsNC": function(elem, i, match) {
 		return (elem.textContent || elem.innerText || "").toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
 	}
 });

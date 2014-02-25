@@ -55,10 +55,10 @@ $.extend(UI, {
 	disableTagMark: function() {
 		this.taglockEnabled = false;
 		this.body.addClass('tagmarkDisabled');
-		$('.source span.locked').each(function(index) {
+		$('.source span.locked').each(function() {
 			$(this).replaceWith($(this).html());
 		});
-		$('.editarea span.locked').each(function(index) {
+		$('.editarea span.locked').each(function() {
 			$(this).replaceWith($(this).html());
 		});
 	},
@@ -124,7 +124,7 @@ $.extend(UI, {
 			return false;
 		if (this.noTagsInSegment())
 			return false;
-		$(editarea).first().each(function(index) {
+		$(editarea).first().each(function() {
 			saveSelection();
 			var tx = $(this).html();
 			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
@@ -185,8 +185,8 @@ $.extend(UI, {
 		if (area == this.editarea) {
 			this.droppingInEditarea = false;
 
-			var diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
-			var draggedText = '';
+			diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
+			draggedText = '';
 			$(diff).each(function() {
 				if (this[0] == 1) {
 					draggedText += this[1];
@@ -198,27 +198,27 @@ $.extend(UI, {
 			area.html(area.html().replace(draggedText, dr2));
 			console.log('111: ', UI.editarea.html());
 
-			var div = document.createElement("div");
+			div = document.createElement("div");
 			div.innerHTML = draggedText;
 			console.log('div html: ', $(div).html());
 			console.log('dragged text: ', draggedText);
-			var isMarkup = draggedText.match(/^<span style=\"font\-size\: 13px/gi);
+			isMarkup = draggedText.match(/^<span style=\"font\-size\: 13px/gi);
 			saveSelection();
 
 			$('.rangySelectionBoundary', area).last().remove();
 			if($('span .rangySelectionBoundary', area).length) {
-				var spel = $('span', area).has('.rangySelectionBoundary');
-				var rsb = $('span .rangySelectionBoundary', area).detach();
+				spel = $('span', area).has('.rangySelectionBoundary');
+				rsb = $('span .rangySelectionBoundary', area).detach();
 				spel.after(rsb);
 			}
-			var phcode = $('.rangySelectionBoundary').last().outerHTML;
+			phcode = $('.rangySelectionBoundary').last().outerHTML;
 			console.log('phcode: ', phcode);
 			$('.rangySelectionBoundary').text(this.cursorPlaceholder);
 
 	//		closeTag = '</' + $(div).text().trim().replace(/<(.*?)\s.*?\>/gi, "$1") + '>';
 			newTag = $(div).text();
 
-			var newText = area.text().replace(draggedText, newTag);
+			newText = area.text().replace(draggedText, newTag);
 			console.log('222: ', UI.editarea.html());
 			console.log(newText);
 			if(isMarkup) {
@@ -236,30 +236,30 @@ $.extend(UI, {
 			
 		} else {
 	// old cleaning code to be evaluated
-			var diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
-			var draggedText = '';
+			diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
+			draggedText = '';
 			$(diff).each(function() {
 				if (this[0] == 1) {
 					draggedText += this[1];
 				}
 			});
 			draggedText = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2").replace(/(<br>)$/gi, '');
-			var div = document.createElement("div");
+			div = document.createElement("div");
 			div.innerHTML = draggedText;
 			saveSelection();
 			$('.rangySelectionBoundary', area).last().remove();
 			if($('span .rangySelectionBoundary', area).length) {
-				var spel = $('span', area).has('.rangySelectionBoundary');
-				var rsb = $('span .rangySelectionBoundary', area).detach();
+				spel = $('span', area).has('.rangySelectionBoundary');
+				rsb = $('span .rangySelectionBoundary', area).detach();
 				spel.after(rsb);
 			}
-			var phcode = $('.rangySelectionBoundary')[0].outerHTML;
+			phcode = $('.rangySelectionBoundary')[0].outerHTML;
 			$('.rangySelectionBoundary').text(this.cursorPlaceholder);
 
 	//		closeTag = '</' + $(div).text().trim().replace(/<(.*?)\s.*?\>/gi, "$1") + '>';
 			newTag = $(div).text();
 
-			var newText = area.text().replace(draggedText, newTag);
+			newText = area.text().replace(draggedText, newTag);
 			area.text(newText);
 			area.html(area.html().replace(this.cursorPlaceholder, phcode));
 			restoreSelection();

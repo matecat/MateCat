@@ -606,9 +606,29 @@ article
 
 .editor .footer{height:100%;}
 
-.text{width:100%;margin:1px 0 0 0;padding:0px 0 0px 0;position:relative;-webkit-transition: all  50ms ease-in;background:#f1f2f2 url(../img/freccia-light.png) 49% 10px  no-repeat;overflow:hidden;float:left;transition: all  50ms ease-in;-webkit-box-shadow: inset 0 1px 1px 1px #f7f8f9;box-shadow: inset 0 1px 1px 1px #f7f8f9;color:#4d4d4f}
+.text
+{
+	width:100%;
+	margin:1px 0 0 0;
+	padding:0px 0 0px 0;
+	position:relative;
+	-webkit-transition: all  50ms ease-in;
+	background: #f1f2f2;
+	/*background: #f1f2f2 url(../img/freccia-light.png) 49% 10px no-repeat;*/
+	overflow:hidden;
+	float:left;
+	transition: all 50ms ease-in;
+	-webkit-box-shadow: inset 0 1px 1px 1px #f7f8f9;
+	box-shadow: inset 0 1px 1px 1px #f7f8f9;
+	color:#4d4d4f;
+}
 
-.text:hover{background:#ecedeb url(../img/freccia-light.png) 49% 10px  no-repeat;color:#000}
+.text:hover
+{
+	background: #ecedeb;
+//	background:#ecedeb url(../img/freccia-light.png) 49% 10px  no-repeat;
+	color:#000;
+}
 
 /*
 .text:hover .editarea{color:#000}
@@ -1445,7 +1465,21 @@ textarea, input, .editarea, .search-editarea, select  {
 
 /*tab rows */
 /*.overflow{overflow-y:auto;min-height:8px;margin-bottom:-1px;position:relative;z-index:9999999999999999999999999999999;}*/
-.graysmall li{width:45%;float:left;margin:2px 1px 10px 0;padding:12px 20px 12px 30px;text-align:left;color:#666;list-style:none;font-size:13px;line-height:16px;cursor:text;-webkit-transition: all  100ms ease-in;transition: all  100ms ease-in;}
+.graysmall li
+{
+	width:45%;
+	float:left;
+	margin:2px 1px 10px 0;
+	padding:12px 20px 12px 30px;
+	text-align:left;
+	color:#666;
+	list-style:none;
+	font-size: 14px;
+	line-height:16px;
+	cursor:text;
+	-webkit-transition: all 100ms ease-in;
+	transition: all 100ms ease-in;
+}
 .graysmall li.details
 {
 	width: 100%;

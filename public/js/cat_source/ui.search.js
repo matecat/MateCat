@@ -308,13 +308,13 @@ $.extend(UI, {
 			} else {
 				sid = $(seg).attr('id');
 				if (where == 'before') {
-					$('section').each(function(index) {
+					$('section').each(function() {
 						if ($(this).attr('id') < sid) {
 							$(this).addClass('justAdded');
 						}
 					});
 				} else {
-					$('section').each(function(index) {
+					$('section').each(function() {
 						if ($(this).attr('id') > sid) {
 							$(this).addClass('justAdded');
 						}
@@ -347,13 +347,13 @@ $.extend(UI, {
 			} else {
 				sid = $(seg).attr('id');
 				if (where == 'before') {
-					$('section').each(function(index) {
+					$('section').each(function() {
 						if ($(this).attr('id') < sid) {
 							$(this).addClass('justAdded');
 						}
 					});
 				} else {
-					$('section').each(function(index) {
+					$('section').each(function() {
 						if ($(this).attr('id') > sid) {
 							$(this).addClass('justAdded');
 						}
@@ -552,7 +552,7 @@ $.extend(UI, {
 			seg = $('section' + wh).has("mark.searchMarker");
 			ss = (this.searchMode == 'source&target')? el + '-editarea' : el;
 			found = false;
-			$.each(seg, function(index) {
+			$.each(seg, function() {
 				if ($(this).attr('id') >= ss) {
 					if (($(this).attr('id') == ss) && (skipCurrent)) {
 					} else {

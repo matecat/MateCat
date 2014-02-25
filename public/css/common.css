@@ -683,6 +683,7 @@ background-size: 15px!important;
 	float: left;
 	width: 100%;
 	min-height: 20px;
+	height: 48px;
 	font-size:12px;
 	border-bottom: 1px solid #666;
 	background:#efefef url(../img/point.gif) 0 0 repeat-x;

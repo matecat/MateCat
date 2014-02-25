@@ -99,7 +99,7 @@ $.extend(UI, {
 			success: function(d) {
 				UI.getContribution_success(d, this);
 			},
-			complete: function(d) {
+			complete: function() {
 				UI.getContribution_complete(n);
 			}
 		});
@@ -201,10 +201,10 @@ $.extend(UI, {
 			UI.markSuggestionTags(segment);
 			UI.setDeleteSuggestion(segment);
 			UI.lockTags();
-			if (copySuggestionDone) {
-				if (isActiveSegment) {
-				}
-			}
+//			if (copySuggestionDone) {
+//				if (isActiveSegment) {
+//				}
+//			}
 
 			$('.translated', segment).removeAttr('disabled');
 			$('.draft', segment).removeAttr('disabled');
@@ -273,7 +273,7 @@ $.extend(UI, {
 			return false;
 		}
 		target = view2rawxliff(target);
-		var languages = $(segment).parents('article').find('.languages');
+//		var languages = $(segment).parents('article').find('.languages');
 //		var source_lang = $('.source-lang', languages).text();
 //		var target_lang = $('.target-lang', languages).text();
 //		var id_translator = config.id_translator;
@@ -351,7 +351,7 @@ $.extend(UI, {
 			UI.reinitMMShortcuts();
 		});
 	},
-	reinitMMShortcuts: function(a) {
+	reinitMMShortcuts: function() {
 		var keys = (this.isMac) ? 'alt+meta' : 'alt+ctrl';
 		$('body').unbind('keydown.alt1').unbind('keydown.alt2').unbind('keydown.alt3').unbind('keydown.alt4').unbind('keydown.alt5');
 		$("body, .editarea").bind('keydown.alt1', keys + '+1', function(e) {

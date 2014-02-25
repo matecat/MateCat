@@ -2,7 +2,7 @@
 	Component: ui.init
  */
 $.extend(UI, {
-	init: function(options) {
+	init: function() {
 		this.initStart = new Date();
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
