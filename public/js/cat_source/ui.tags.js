@@ -181,7 +181,7 @@ $.extend(UI, {
 	
 	// TAG CLEANING
 	cleanDroppedTag: function(area, beforeDropHTML) {console.log('clean');
-
+		console.log(area);
 		if (area == this.editarea) {
 			this.droppingInEditarea = false;
 

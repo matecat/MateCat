@@ -206,6 +206,8 @@ $.extend(UI, {
 			UI.someUserSelection = (sel.type == 'Range') ? true : false;
 		}).on('dblclick', 'section.readonly', function() {
 			clearTimeout(UI.selectingReadonly);
+		}).on('dblclick', '.matches .graysmall', function() {
+			UI.chooseSuggestion($(this).attr('data-item'));
 		}).on('blur', '.graysmall .translation', function(e) {
 			e.preventDefault();
 			UI.closeInplaceEditor($(this));

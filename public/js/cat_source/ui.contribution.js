@@ -7,7 +7,8 @@ $.extend(UI, {
 		this.lockTags(this.editarea);
 		this.setChosenSuggestion(w);
 
-		this.editarea.focus().effect("highlight", {}, 1000);
+		this.editarea.focus();
+		this.highlightEditarea();
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
 

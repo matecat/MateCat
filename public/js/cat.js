@@ -155,17 +155,22 @@ UI = {
 			type: "sourceCopied",
 			segment: segment
 		});
+		this.highlightEditarea();
+
+		this.currentSegmentQA();
+		this.setChosenSuggestion(0);
+		this.lockTags(this.editarea);
+	},
+	highlightEditarea: function() {
 		this.currentSegment.addClass('highlighted1');
 		setTimeout(function() {
 			UI.currentSegment.addClass('modified highlighted2');
 		}, 100);
 		setTimeout(function() {
 			UI.currentSegment.removeClass('highlighted1 highlighted2');
-		}, 2000);
-		this.currentSegmentQA();
-		this.setChosenSuggestion(0);
-		this.lockTags(this.editarea);
+		}, 2000);		
 	},
+
 	confirmDownload: function(res) {
 		if (res) {
 			if (UI.isChrome) {
@@ -2311,6 +2316,8 @@ $.extend(UI, {
 			UI.someUserSelection = (sel.type == 'Range') ? true : false;
 		}).on('dblclick', 'section.readonly', function() {
 			clearTimeout(UI.selectingReadonly);
+		}).on('dblclick', '.matches .graysmall', function() {
+			UI.chooseSuggestion($(this).attr('data-item'));
 		}).on('blur', '.graysmall .translation', function(e) {
 			e.preventDefault();
 			UI.closeInplaceEditor($(this));
@@ -3199,7 +3206,8 @@ $.extend(UI, {
 		this.lockTags(this.editarea);
 		this.setChosenSuggestion(w);
 
-		this.editarea.focus().effect("highlight", {}, 1000);
+		this.editarea.focus();
+		this.highlightEditarea();
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
 
@@ -3767,7 +3775,7 @@ $.extend(UI, {
 	
 	// TAG CLEANING
 	cleanDroppedTag: function(area, beforeDropHTML) {console.log('clean');
-
+		console.log(area);
 		if (area == this.editarea) {
 			this.droppingInEditarea = false;
 

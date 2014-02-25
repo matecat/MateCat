@@ -155,17 +155,22 @@ UI = {
 			type: "sourceCopied",
 			segment: segment
 		});
+		this.highlightEditarea();
+
+		this.currentSegmentQA();
+		this.setChosenSuggestion(0);
+		this.lockTags(this.editarea);
+	},
+	highlightEditarea: function() {
 		this.currentSegment.addClass('highlighted1');
 		setTimeout(function() {
 			UI.currentSegment.addClass('modified highlighted2');
 		}, 100);
 		setTimeout(function() {
 			UI.currentSegment.removeClass('highlighted1 highlighted2');
-		}, 2000);
-		this.currentSegmentQA();
-		this.setChosenSuggestion(0);
-		this.lockTags(this.editarea);
+		}, 2000);		
 	},
+
 	confirmDownload: function(res) {
 		if (res) {
 			if (UI.isChrome) {
