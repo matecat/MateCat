@@ -767,6 +767,10 @@ UI = {
 	openSegment: function(editarea, operation) {
 		var segment = $('#segment-' + $(editarea).attr('data-sid'));
 		this.openSegmentStart = new Date();
+		if(UI.warningStopped) {
+			UI.warningStopped = false;
+			UI.checkWarnings(false);
+		}
 		if (!this.byButton) {
 			if (this.justSelecting('editarea'))
 				return;
@@ -1424,6 +1428,11 @@ UI = {
 		});
 		return i1;
 	},
+	startWarning: function() {
+		setTimeout(function() {
+			UI.checkWarnings(false);
+		}, config.warningPollingInterval);		
+	},
 
 	checkWarnings: function(openingSegment) {
 		var dd = new Date();
@@ -1438,7 +1447,13 @@ UI = {
 				password: config.password,
 				token: token
 			},
+			error: function(error) {
+//				console.log('getWarning error: ', error);
+				UI.warningStopped = true;
+			},
 			success: function(data) {
+//				console.log('getWarning success');
+				UI.startWarning();
 				var warningPosition = '';
 //                console.log('data.total: '+data.total);
 				UI.globalWarnings = data.details;
@@ -1463,7 +1478,8 @@ UI = {
 				}
 
 				UI.setNextWarnedSegment();
-//                $('#point2seg').attr('href', warningPosition);
+
+				//                $('#point2seg').attr('href', warningPosition);
 			}
 		});
 	},
@@ -1938,9 +1954,9 @@ $(document).ready(function() {
 	//launch segments check on opening
 	UI.checkWarnings(true);
 	//and on every polling interval
-	setInterval(function() {
-		UI.checkWarnings(false);
-	}, config.warningPollingInterval);
+//	setInterval(function() {
+//		UI.checkWarnings(false);
+//	}, config.warningPollingInterval);
 });
 
 $.extend($.expr[":"], {
