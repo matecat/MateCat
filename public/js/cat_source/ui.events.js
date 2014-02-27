@@ -125,9 +125,12 @@ $.extend(UI, {
 		}).on('allTranslated', function() {
 			if(config.survey) UI.displaySurvey(config.survey);
 		});
-		window.onbeforeunload = goodbye;
+//		window.onbeforeunload = goodbye;
 
-
+		window.onbeforeunload = function(e) {
+			goodbye(e);
+			localStorage.clear();
+		};
 
 	
 // no more used:

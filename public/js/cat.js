@@ -205,9 +205,12 @@ UI = {
 		$('.footer', segment).html(footer);
 
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
-			
-			$('.sub-editor.matches .overflow .graysmall.message', segment).remove();
-			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry, we can\'t help you this time. Check if the language pair is correct. If not, create the project again.</li></ul>');
+			var d = JSON.parse(localStorage.getItem(config.job_id + '-' + $(segment).attr('id').split('-')[1]));
+			console.log('li prendo dal local storage');
+			UI.processContributions(d, segment);
+
+//			$('.sub-editor.matches .overflow .graysmall.message', segment).remove();
+//			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry, we can\'t help you this time. Check if the language pair is correct. If not, create the project again.</li></ul>');
 		}
 	},
 	createHeader: function() {
@@ -332,7 +335,7 @@ UI = {
 	deActivateSegment: function(byButton) {
 		this.removeButtons(byButton);
 		this.removeHeader(byButton);
-//		this.removeFooter(byButton);
+		this.removeFooter(byButton);
 	},
 	detectAdjacentSegment: function(segment, direction, times) { // currently unused
 		if (!times)
@@ -911,8 +914,10 @@ UI = {
 		$('#' + segment.attr('id') + '-buttons').empty();
 		$('p.warnings', segment).remove();
 	},
-//	removeFooter: function(byButton) {
-//	},
+	removeFooter: function(byButton) {
+		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;		
+		$('#' + segment.attr('id') + ' .footer').empty();
+	},
 	removeHeader: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
 		$('#' + segment.attr('id') + '-header').empty();
@@ -1447,22 +1452,18 @@ UI = {
 				password: config.password,
 				token: token
 			},
-			error: function(error) {
-//				console.log('getWarning error: ', error);
+			error: function() {
 				UI.warningStopped = true;
 			},
 			success: function(data) {
-//				console.log('getWarning success');
 				UI.startWarning();
 				var warningPosition = '';
-//                console.log('data.total: '+data.total);
 				UI.globalWarnings = data.details;
 
 				//check for errors
 				if (UI.globalWarnings.length > 0) {
 					//for now, put only last in the pointer to segment id
 					warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
-//                    console.log('warningPosition: ' + warningPosition);
 
 					if (openingSegment)
 						UI.fillCurrentSegmentWarnings(data.details, true);
@@ -2064,7 +2065,7 @@ $.extend(UI, {
 		this.moreSegNum = 25;
 		this.numOpenedSegments = 0;
 		this.hasToBeRerendered = false;
-		this.maxMinutesBeforeRerendering = 30;
+		this.maxMinutesBeforeRerendering = 60;
 		setTimeout(function() {
 			UI.hasToBeRerendered = true;
 		}, this.maxMinutesBeforeRerendering*60000);	
@@ -2252,9 +2253,12 @@ $.extend(UI, {
 		}).on('allTranslated', function() {
 			if(config.survey) UI.displaySurvey(config.survey);
 		});
-		window.onbeforeunload = goodbye;
+//		window.onbeforeunload = goodbye;
 
-
+		window.onbeforeunload = function(e) {
+			goodbye(e);
+			localStorage.clear();
+		};
 
 	
 // no more used:
@@ -3326,11 +3330,14 @@ $.extend(UI, {
 	},
 	getContribution_success: function(d, segment) {
 //		console.log(d.data.matches);
-//		localStorage.setItem($(segment).attr('id').split('-')[1], JSON.stringify(d.data.matches));
+		localStorage.setItem(config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
 //		console.log(localStorage.getItem($(segment).attr('id').split('-')[1]));
 //		console.log(localStorage.getItem('4679214'));
 //		console.log(!localStorage.getItem('4679214'));
 //		console.log(localStorage.getItem('4679215'));
+		this.processContributions(d, segment);
+	},
+	processContributions: function(d, segment) {
 		this.renderContributions(d, segment);
 		if ($(segment).attr('id').split('-')[1] == UI.currentSegmentId)
 			this.currentSegmentQA();
@@ -3344,7 +3351,7 @@ $.extend(UI, {
 			$('.submenu li.matches a span', segment).text('(' + d.data.matches.length + ')');
 		} else {
 			$(".sbm > .matches", segment).hide();
-		}
+		}		
 	},
 	renderContributions: function(d, segment) {
 		var isActiveSegment = $(segment).hasClass('editor');

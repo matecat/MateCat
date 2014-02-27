@@ -27,7 +27,7 @@ $.extend(UI, {
 		this.moreSegNum = 25;
 		this.numOpenedSegments = 0;
 		this.hasToBeRerendered = false;
-		this.maxMinutesBeforeRerendering = 30;
+		this.maxMinutesBeforeRerendering = 60;
 		setTimeout(function() {
 			UI.hasToBeRerendered = true;
 		}, this.maxMinutesBeforeRerendering*60000);	
