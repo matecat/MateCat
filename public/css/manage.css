@@ -132,18 +132,18 @@ body.manage .actions a
 	body.manage .actions a.change
 		{
 		margin-left: 5px !important;
-		background: url(../img/change_password.png) 0 0 no-repeat;
+		background: url(../img/sprite.png) -13px -136px no-repeat;
 		}
 		
 	body.manage .actions a.cancel
 		{
 		margin-left: 33px !important;
-		background: url(../img/cancel-job.png) 0 0 no-repeat;
+		background: url(../img/sprite.png) -13px -78px no-repeat;
 		}
 	body.manage .actions a.archive
 		{
 		margin-left: 61px !important;
-		background: url(../img/archive-job.png) 0 1px no-repeat;
+		background: url(../img/sprite.png) -13px -59px no-repeat;
 		}
 	body.manage .actions a.resume
 		{
@@ -180,9 +180,9 @@ body.manage a.unarchive-project
 	text-indent: -10000px;
 	margin-left: 10px;
 	top: 5px;
-	background: url(../img/cancel-job.png) 0 0 no-repeat;
-	
-/*
+	background: url(../img/sprite.png) -13px -78px no-repeat;
+/*	background: url(../img/cancel-job.png) 0 0 no-repeat;
+
 	width: 18px;
 	height: 18px;
 	margin-left: 40px;
@@ -199,7 +199,7 @@ body.manage a.unarchive-project
 
 body.manage a.archive-project
 	{
-	background: url(../img/archive-job.png) 0 1px no-repeat;
+	background: url(../img/sprite.png) -13px -59px no-repeat;
 	}
 	body.manage .article.allArchived a.archive-project,
 	body.manage[data-filter-status=archived] a.archive-project,
@@ -209,7 +209,7 @@ body.manage a.archive-project
 		}
 body.manage a.resume-project
 	{
-	background: url(../img/resume-job.png) 0 0 no-repeat;
+	background: url(../img/sprite.png) -13px -98px no-repeat;
 	}
 	body.manage[data-filter-status=archived] a.resume-project
 		{
@@ -218,7 +218,7 @@ body.manage a.resume-project
 
 body.manage a.unarchive-project
 	{
-	background: url(../img/unarchive-job.png) 0 1px no-repeat;
+	background: url(../img/sprite.png) -13px -37px no-repeat;
 	}
 	body.manage[data-filter-status=cancelled] a.unarchive-project
 		{

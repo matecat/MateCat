@@ -408,8 +408,8 @@ border-left: 3px solid #ffcc00;
 .currSegment a
 
  {
-background: #efefef url(../img/backto.png) 20px 12px no-repeat !important;
-background-size: 15px!important;  
+background: #efefef url(../img/sprite.png) 15px -160px no-repeat !important;
+background-size: 25px!important;  
 border-top: 1px solid #ccc;
 box-shadow: inset 0px 1px #fff;
 -moz-box-shadow: inset 0px 1px #fff;
@@ -421,11 +421,7 @@ box-shadow: inset 0px 1px #fff;
 
 
 
-.currSegment a:hover
- {
-background: #e4e4e4 url(../img/backto.png) 20px 12px no-repeat !important;
-background-size: 15px!important;
-    }
+
 
 
     .topMenu ul li a:hover
@@ -675,6 +671,11 @@ background-size: 15px!important;
     {
     float: right;
     }    
+	
+.manage .searchbox {	
+	min-height: 20px;
+	height: 48px;
+}
     
 .searchbox
 	{
@@ -682,8 +683,6 @@ background-size: 15px!important;
 	position: fixed;
 	float: left;
 	width: 100%;
-	min-height: 20px;
-	height: 48px;
 	font-size:12px;
 	border-bottom: 1px solid #666;
 	background:#efefef url(../img/point.gif) 0 0 repeat-x;
