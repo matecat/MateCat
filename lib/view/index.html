@@ -436,7 +436,7 @@
                 </nav>
 
 
-                <div id="statistics">
+                <div id="statistics" style="${php: job_stats['ANALYSIS_COMPLETE'] ? '' : job_stats['STATUS_BAR_NO_DISPLAY'] }">
                     <p class="progress">Progress:</p>
                     <div class="meter">
 
@@ -453,7 +453,7 @@
                             <tal:block tal:condition="php: empty(analysis_enabled)">
                                 Payable Words
                             </tal:block>
-                            : <strong tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
+                            : <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
                         </li>
 
                         <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
@@ -513,6 +513,10 @@
 
                     </div>
 
+                </div>
+
+                <div tal:condition="php: !job_stats['ANALYSIS_COMPLETE']" id="analyzing">
+                    <p class="progress">Calculating word count...</p>
                 </div>
 
             </div> <!-- .wrapper -->

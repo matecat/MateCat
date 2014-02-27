@@ -1185,12 +1185,19 @@ UI = {
 	},
 	setDownloadStatus: function(stats) {
 		var t = 'approved';
-		if (parseFloat(stats.TRANSLATED))
+        var app = parseFloat(stats.APPROVED);
+        var tra = parseFloat(stats.TRANSLATED);
+        var dra = parseFloat(stats.DRAFT);
+        var rej = parseFloat(stats.REJECTED);
+		if (tra)
 			t = 'translated';
-		if (parseFloat(stats.DRAFT))
+		if (dra)
 			t = 'draft';
-		if (parseFloat(stats.REJECTED))
+		if (rej)
 			t = 'draft';
+        if( !tra && !dra && !rej && !app ){
+            t = 'draft';
+        }
 		$('.downloadtr-button').removeClass("draft translated approved").addClass(t);
 		var label = (t == 'translated') ? 'DOWNLOAD TRANSLATION' : 'PREVIEW';
 		$('#downloadProject').attr('value', label);
@@ -1198,6 +1205,13 @@ UI = {
 	setProgress: function(stats) {
 		var s = stats;
 		m = $('footer .meter');
+        if( !s.ANALYSIS_COMPLETE ){
+            $('#statistics' ).hide();
+            $('#analyzing' ).show();
+        } else {
+            $('#statistics' ).show();
+            $('#analyzing' ).hide();
+        }
 		var status = 'approved';
 		var total = s.TOTAL;
 		var t_perc = s.TRANSLATED_PERC;
@@ -1242,6 +1256,8 @@ UI = {
 		$('#stat-todo strong').html(t_formatted);
 		$('#stat-wph strong').html(wph);
 		$('#stat-completion strong').html(completion);
+		$('#total-payable').html(s.TOTAL_FORMATTED);
+
 	},
 	chunkedSegmentsLoaded: function() {
 		return $('section.readonly').length;

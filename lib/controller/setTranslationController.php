@@ -168,6 +168,34 @@ class setTranslationController extends ajaxController {
         Log::doLog( $msg . "\n" );
 
 
+        /*
+         * begin stats counter
+         */
+        $old_wStruct = new WordCount_Struct();
+        $old_wStruct->setIdJob( $this->id_job );
+        $old_wStruct->setJobPassword( $this->password );
+        $old_wStruct->setNewWords( $job_data['new_words'] );
+        $old_wStruct->setDraftWords( $job_data['draft_words'] );
+        $old_wStruct->setTranslatedWords( $job_data['translated_words'] );
+        $old_wStruct->setApprovedWords( $job_data['approved_words'] );
+        $old_wStruct->setRejectedWords( $job_data['rejected_words'] );
+
+        $old_translation = getCurrentTranslation( $this->id_job, $this->id_segment );
+        if( $this->status != $old_translation['status'] ){
+
+            //cambiato status, sposta i conteggi
+            $old_count = ( !empty( $old_translation['eq_word_count'] ) ? $old_translation['eq_word_count'] : $segment['raw_word_count'] );
+
+            $counter = new WordCount_Counter( $old_wStruct );
+            $counter->setOldStatus( $old_translation['status'] );
+            $counter->setNewStatus( $this->status );
+            $newValues = $counter->getUpdatedValues( $old_count );
+            $newTotals = $counter->updateDB( $newValues );
+
+        } else {
+            $newTotals = $old_wStruct;
+        }
+
         $res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreErrors() );
 
         if (!empty($res['error'])) {
@@ -180,9 +208,15 @@ class setTranslationController extends ajaxController {
 			return -1;
 		}
 
-		$job_stats = CatUtils::getStatsForJob($this->id_job, null, $this->password);
+//		$job_stats = CatUtils::getStatsForJob($this->id_job, null, $this->password);
+		$job_stats = CatUtils::getFastStatsForJob( $newTotals );
+        $project = getProject( $job_data['id_project'] );
+        $project = array_pop( $project );
+        $job_stats['ANALYSIS_COMPLETE'] = ( $project['status_analysis'] == 'DONE' ? true : false );
+
 		//$file_stats = CatUtils::getStatsForFile($this->id_first_file); //Removed .. HEAVY query, client don't need these infos at moment
-		$file_stats = array();
+
+        $file_stats = array();
 
 		$is_completed = ($job_stats['TRANSLATED_PERC'] == '100') ? 1 : 0;
 

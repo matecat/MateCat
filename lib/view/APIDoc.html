@@ -21,7 +21,6 @@
                 <ul class="menu">
                     <li><a href="#new-post">/new (POST)</a></li>
                     <li><a href="#status-post">/status (GET)</a></li>
-                    <li><a href="#takeProject-post">/take_project (POST)</a></li>
                     <li><a href="#change_project_password-post">/change_project_password (POST)</a></li>
                     <li><a href="#file-format">Supported file format</a></li>
                      <li><a href="#languages">Supported languages</a></li>
@@ -357,7 +356,7 @@
                                 <td>Return the analysis status of the project. The statuses can be:
                                     <ul>
                                         <li><code>ANALYZING</code> indicating that the analysis/creation still working.</li>
-                                        <li><code>NO_SEGMENTS_FOUND</code> indicating that the project are no segments to analyze.</li>
+                                        <li><code>NO_SEGMENTS_FOUND</code> indicating that the project has no segments to analyze.</li>
                                         <li><code>ANALYSIS_NOT_ENABLED</code> indicating that no analysis will be performed because of matecat configurations.</li>
                                         <li><code>DONE</code> indicating that the analysis/creation is completed.</li>
                                         <li><code>FAIL</code> indicating that the analysis/creation is failed.</li>
@@ -480,101 +479,6 @@
                         </dl>
                         <a class="gototop" href="#top">Go to top</a>
 			</div>
-
-            <div class="block">
-                <a name="takeProject-post"><h3 class="method-title">/take_project (POST)</h3></a>
-                <dl>
-                    <dt>Description</dt>
-                    <dd><p>Take ownership of a project.</p>
-                    </dd>
-                    <dt class="url-label">URL Structure</dt>
-                    <dd>
-                        <pre class="literal-block">https://matecatpro.translated.net/<b>api</b>/take_project</pre>
-                    </dd>
-                    <dt>Method</dt>
-                    <dd>POST ( application/x-www-form-urlencoded )</dd>
-                    <dt>Parameters</dt>
-                    <dd>
-                        <ul class="parameters">
-                            <li><span class="req">required</span> <code class="param">id_project</code> <code>(int)</code>
-                                The id of the project you want to take the ownership.
-                            </li>
-                            <li><span class="req">required</span> <code class="param">project_pass</code>
-                                <code>(string)</code> The password of the project you want to take the ownership.</a></li>
-                            <li><span class="req">required</span> <code class="param">owner_email</code>
-                                <code>(string)</code> The email of the new owner of the project.
-                                <br/>N.B.: The email MUST exists into Matecat. No debug will be provided for wrong ( not
-                                existent ) email.
-                                <br/><b>In this case the response will be always OK</b>
-                            </li>
-                        </ul>
-                    </dd>
-                    <dt>Returns</dt>
-                    <dd>
-                        <p>The result status for the request.</p>
-
-                        <p><strong>Sample JSON response</strong></p>
-                                <pre class="literal-block">
-{
-    "status":  "OK"
-}                               </pre>
-                        <p><strong>Return value definitions</strong></p>
-                        <table id="metadata-take-ownership" class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
-                            <tbody>
-                            <tr>
-                                <th>field</th>
-                                <th>description</th>
-                            </tr>
-                            <tr>
-                                <td><code>status</code></td>
-                                <td>Return the exit status of the action. The statuses can be:
-                                    <ul>
-                                        <li>
-                                            <code>OK</code> indicating that the action worked.
-                                            <br/>N.B.: No debug will be provided for wrong ( not existent ) email.
-                                            <br/><b>In this case the response will be every time OK</b>
-                                        </li>
-                                        <li><code>FAIL</code> indicating that the action failed because of the job was
-                                            not found.
-                                        </li>
-                                    </ul>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td><code>message</code></td>
-                                <td>Return the error message for the action if the status is <code>FAIL</code></td>
-                            </tr>
-                            </tbody>
-                        </table>
-
-                        <p><strong>Errors</strong></p>
-                        <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
-
-                            <tbody>
-                            <tr>
-                                <th>status</th>
-                                <th>message</th>
-                            </tr>
-                            <tr>
-                                <td>FAIL</td>
-                                <td>The project creation is failed</td>
-                            </tr>
-                            <tr>
-                                <td colspan="2">
-                                            <pre class="literal-block">
-{
-    "status": "FAIL",
-    "message": "Project not found"
-}                                           </pre>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                    </dd>
-                </dl>
-
-                <a class="gototop" href="#top">Go to top</a>
-            </div>
 
         <!-- change Password Block -->
         <div class="block">

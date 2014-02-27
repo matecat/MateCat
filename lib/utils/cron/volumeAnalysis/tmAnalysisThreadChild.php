@@ -298,20 +298,32 @@ function tryToCloseProject( $pid ){
 
     global $my_pid;
 
-    $segs_in_project = countSegments($pid);
-    if ($segs_in_project < 0) {
+    $_analyzed_report = getProjectSegmentsTranslationSummary($pid);
+
+    $project_totals = array_pop($_analyzed_report); //remove rollup
+
+    echo "--- (child $my_pid) : count segments in project $pid = " . $project_totals['project_segments'] . "\n";
+
+    if ( is_numeric( $_analyzed_report ) && $_analyzed_report < 0) {
         echo "--- (child $my_pid) : WARNING !!! error while counting segments in projects $pid skipping and continue \n";
         return;
     }
-    echo "--- (child $my_pid) : count segments in project $pid = $segs_in_project\n";
-    $analyzed_report = countSegmentsTranslationAnalyzed($pid);
-    $segs_analyzed = $analyzed_report['num_analyzed'];
-    $pid_eq_words = $analyzed_report['eq_wc'];
-    $pid_standard_words = $analyzed_report['st_wc'];
-    if ($segs_in_project - $segs_analyzed == 0) {
+
+    if ( $project_totals['project_segments'] - $project_totals['num_analyzed'] == 0 ) {
+
+        $pid_eq_words = $project_totals['eq_wc'];
+        $pid_standard_words = $project_totals['st_wc'];
+
         echo "--- (child $my_pid) : analysis project $pid finished : change status to DONE\n";
         $change_res = changeProjectStatus($pid, "DONE");
         $tm_wc_res = changeTmWc($pid, $pid_eq_words, $pid_standard_words);
+
+        echo "--- (child $my_pid) : trying to initialize job total word count.\n";
+        foreach( $_analyzed_report as $job_info ){
+            $counter = new WordCount_Counter();
+            $counter->initializeJobWordCount( $job_info['id_job'], $job_info['password'] );
+        }
+
     }
     echo "\n\n";
 

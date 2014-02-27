@@ -36,6 +36,9 @@ class NewController extends ajaxController {
 
     public function __construct() {
 
+        //limit execution time to 300 seconds
+        set_time_limit( 300 );
+
         $this->disableSessions();
         parent::__construct();
 

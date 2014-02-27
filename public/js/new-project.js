@@ -10,7 +10,7 @@ $(document).ready(function() {
         $(this).addClass('disabled');
         $(this).attr('disabled','');
         //call API
-        $.get("http://mymemory.translated.net/API/createranduser",function(data){
+        $.get("http://mymemory.translated.net/api/createranduser",function(data){
             //parse to appropriate type
             //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
             if(typeof data == 'string'){

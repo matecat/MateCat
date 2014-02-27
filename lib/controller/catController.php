@@ -21,7 +21,7 @@ class catController extends viewController {
 	private $source = "";
 	private $pname = "";
 	private $create_date = "";
-	private $filetype_handler = null;
+	private $project_status = 'NEW';
 	private $start_from = 0;
 	private $page = 0;
 	private $start_time = 0.00;
@@ -113,15 +113,17 @@ class catController extends viewController {
             return;
         }
 
-		foreach ($data as $i => $seg) {
+		foreach ($data as $i => $prj) {
+
+            $this->project_status = $prj;
 
 			if (empty($this->pname)) {
-				$this->pname = $seg['pname'];
-				$this->downloadFileName = $seg['pname'] . ".zip"; // will be overwritten below in case of one file job
+				$this->pname = $prj['pname'];
+				$this->downloadFileName = $prj['pname'] . ".zip"; // will be overwritten below in case of one file job
 			}
 
 			if (empty($this->last_opened_segment)) {
-				$this->last_opened_segment = $seg['last_opened_segment'];
+				$this->last_opened_segment = $prj['last_opened_segment'];
 			}
 
 			if (empty($this->first_job_segment)) {
@@ -129,38 +131,38 @@ class catController extends viewController {
 			}
             
 			if (empty($this->cid)) {
-				$this->cid = $seg['cid'];
+				$this->cid = $prj['cid'];
 			}
 
 			if (empty($this->pid)) {
-				$this->pid = $seg['pid'];
+				$this->pid = $prj['pid'];
 			}
 
 			if (empty($this->tid)) {
-				$this->tid = $seg['tid'];
+				$this->tid = $prj['tid'];
 			}
 
 			if (empty($this->create_date)) {
-				$this->create_date = $seg['create_date'];
+				$this->create_date = $prj['create_date'];
 			}
 
 			if (empty($this->source_code)) {
-				$this->source_code = $seg['source'];
+				$this->source_code = $prj['source'];
 			}
 
 			if (empty($this->target_code)) {
-				$this->target_code = $seg['target'];
+				$this->target_code = $prj['target'];
 			}
 
 			if (empty($this->source)) {
-				$s = explode("-", $seg['source']);
+				$s = explode("-", $prj['source']);
 				$source = strtoupper($s[0]);
 				$this->source = $source;
 				$this->source_rtl= ($lang_handler->isRTL(strtolower($this->source)))? ' rtl-source' : '';
 			}
 
 			if (empty($this->target)) {
-				$t = explode("-", $seg['target']);
+				$t = explode("-", $prj['target']);
 				$target = strtoupper($t[0]);
 				$this->target = $target;
 				$this->target_rtl= ($lang_handler->isRTL(strtolower($this->target)))? ' rtl-target' : '';
@@ -168,15 +170,15 @@ class catController extends viewController {
 			//check if language belongs to supported right-to-left languages
 
 
-			if ($seg['status'] == 'archived') {
+			if ($prj['status'] == 'archived') {
 				$this->job_archived = true;
 			}
 
-			$id_file = $seg['id_file'];
+			$id_file = $prj['id_file'];
 
 
 			if (!isset($this->data["$id_file"])) {
-				$files_found[] = $seg['filename'];
+				$files_found[] = $prj['filename'];
 //				$file_stats = CatUtils::getStatsForFile($id_file);
 //
 //				$this->data["$id_file"]['jid'] = $seg['jid'];
@@ -193,31 +195,51 @@ class catController extends viewController {
 			}
 			//$this->filetype_handler = new filetype($seg['mime_type']);
 
+            $wStruct = new WordCount_Struct();
 
+            $wStruct->setIdJob( $this->jid );
+            $wStruct->setJobPassword( $this->password );
+            $wStruct->setNewWords( $prj['new_words'] );
+            $wStruct->setDraftWords( $prj['draft_words'] );
+            $wStruct->setTranslatedWords( $prj['translated_words'] );
+            $wStruct->setApprovedWords( $prj['approved_words'] );
+            $wStruct->setRejectedWords( $prj['rejected_words'] );
 
-			unset($seg['id_file']);
-			unset($seg['source']);
-			unset($seg['target']);
-			unset($seg['source_code']);
-			unset($seg['target_code']);
-			unset($seg['mime_type']);
-			unset($seg['filename']);
-			unset($seg['jid']);
-			unset($seg['pid']);
-			unset($seg['cid']);
-			unset($seg['tid']);
-			unset($seg['pname']);
-			unset($seg['create_date']);
+			unset($prj['id_file']);
+			unset($prj['source']);
+			unset($prj['target']);
+			unset($prj['source_code']);
+			unset($prj['target_code']);
+			unset($prj['mime_type']);
+			unset($prj['filename']);
+			unset($prj['jid']);
+			unset($prj['pid']);
+			unset($prj['cid']);
+			unset($prj['tid']);
+			unset($prj['pname']);
+			unset($prj['create_date']);
 //			unset($seg['id_segment_end']);
 //			unset($seg['id_segment_start']);
-			unset($seg['last_opened_segment']);
-		}
+			unset($prj['last_opened_segment']);
+
+            unset( $prj[ 'new_words' ] );
+            unset( $prj[ 'draft_words' ] );
+            unset( $prj[ 'translated_words' ] );
+            unset( $prj[ 'approved_words' ] );
+            unset( $prj[ 'rejected_words' ] );
+
+            $this->job_stats = CatUtils::getFastStatsForJob( $wStruct );
+
+            Log::doLog( $this->job_stats );
+
+            //$this->job_stats = CatUtils::getStatsForJob( $this->jid, null, $this->password );
+
+        }
 
 		if (empty($this->last_opened_segment)) {
 			$this->last_opened_segment = getFirstSegmentId($this->jid, $this->password);
 		}
 
-		$this->job_stats = CatUtils::getStatsForJob( $this->jid, null, $this->password );
 		if (count($files_found) == 1) {
 			$this->downloadFileName = $files_found[0];
 		}
@@ -258,6 +280,11 @@ class catController extends viewController {
         $this->template->first_job_segment   = $this->first_job_segment;
         $this->template->last_opened_segment = $this->last_opened_segment;
         //$this->template->data                = $this->data;
+
+        $this->job_stats['STATUS_BAR_NO_DISPLAY'] = ( $this->project_status['status_analysis'] == 'DONE' ? '' : 'display:none;' );
+        $this->job_stats['ANALYSIS_COMPLETE']   = ( $this->project_status['status_analysis'] == 'DONE' ? true : false );
+
+        Log::doLog( $this->job_stats );
 
         $this->template->job_stats = $this->job_stats;
 
