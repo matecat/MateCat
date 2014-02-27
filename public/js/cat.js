@@ -150,12 +150,18 @@ UI = {
 		this.saveInUndoStack('copysource');
 		$(".editarea", this.currentSegment).text(source_val).keyup().focus();
 		this.saveInUndoStack('copysource');
-		$(".editarea", this.currentSegment).effect("highlight", {}, 1000);
+//		$(".editarea", this.currentSegment).effect("highlight", {}, 1000);
 		$(window).trigger({
 			type: "sourceCopied",
 			segment: segment
 		});
-		this.currentSegment.addClass('modified');
+		this.currentSegment.addClass('highlighted1');
+		setTimeout(function() {
+			UI.currentSegment.addClass('modified highlighted2');
+		}, 100);
+		setTimeout(function() {
+			UI.currentSegment.removeClass('highlighted1 highlighted2');
+		}, 2000);
 		this.currentSegmentQA();
 		this.setChosenSuggestion(0);
 		this.lockTags(this.editarea);
@@ -1305,13 +1311,13 @@ UI = {
 	goToFirstError: function() {
 		location.href = $('#point2seg').attr('href');
 	},
-    continueDownload: function () {
+	continueDownload: function() {
 
         //check if we are in download status
         if ( !$('#downloadProject').hasClass('disabled') ) {
 
             //disable download button
-            $('#downloadProject').addClass('disabled');
+            $('#downloadProject').addClass('disabled').val('DOWNLOADING...');
 
             //create an iFrame element
             var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
@@ -1337,7 +1343,7 @@ UI = {
                     //if the cookie is found, download is completed
                     //remove iframe an re-enable download button
                     if ( token == downloadToken ) {
-                        $('#downloadProject').removeClass('disabled');
+                        $('#downloadProject').removeClass('disabled').val('PREVIEW');
                         window.clearInterval( downloadTimer );
                         $.cookie('downloadToken', null, { path: '/', expires: -1 });
                         iFrameDownload.remove();
@@ -1348,7 +1354,7 @@ UI = {
             });
 
             //clone the html form and append a token for download
-            var iFrameForm = $("form#fileDownload").clone().append(
+            var iFrameForm = $("#fileDownload").clone().append(
                 $( document.createElement( 'input' ) ).prop({
                     type:'hidden',
                     name:'downloadToken',
@@ -1358,13 +1364,13 @@ UI = {
 
             //append from to newly created iFrame and submit form post
             iFrameDownload.contents().find('body').append( iFrameForm );
-            iFrameDownload.contents().find("form#fileDownload").submit();
+            iFrameDownload.contents().find("#fileDownload").submit();
 
         } else {
             //we are in download status
         }
 
-    },
+	},
 	/**
 	 * fill segments with relative errors from polling
 	 * 
@@ -1901,6 +1907,26 @@ UI = {
 		});
 		$('#jobMenu li.currSegment').attr('data-segment', UI.currentSegmentId);
 	},
+//	beforeExit: function() {
+//		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
+//		var leave_message = 'You are sure that you want to leave?'
+//		if(dont_confirm_leave!==1) {
+//			if(!e) e = window.event;
+//			//e.cancelBubble is supported by IE - this will kill the bubbling process.
+//			e.cancelBubble = true;
+//			e.returnValue = leave_message;
+//			//e.stopPropagation works in Firefox.
+//			if (e.stopPropagation) 
+//			{
+//				e.stopPropagation();
+//				e.preventDefault();
+//			}
+//
+//			//return works for Chrome and Safari
+//			return leave_message;
+//		}		
+//	},
+
 	zerofill: function(i, l, s) {
 		var o = i.toString();
 		if (!s) {
@@ -1967,7 +1993,7 @@ $.extend(UI, {
 		this.noGlossary = false;
 		setTimeout(function() {
 			UI.blockGetMoreSegments = false;
-		}, 1000);
+		}, 200);
 		this.detectFirstLast();
 		this.reinitMMShortcuts();
 		this.initSegmentNavBar();
@@ -2219,7 +2245,33 @@ $.extend(UI, {
 			UI.browserScrollPositionRestoreCorrection();
 		}).on('allTranslated', function(e) {
 			if(config.survey) UI.displaySurvey(config.survey);
-		});
+		})
+//window.onbeforeunload = UI.beforeExit();
+window.onbeforeunload = goodbye;
+
+
+function goodbye(e) {
+	if ($('#downloadProject').hasClass('disabled')) {
+		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
+		var leave_message = 'You have a pending download. Are you sure you want to quit?'
+		if(dont_confirm_leave!==1) {
+			if(!e) e = window.event;
+			//e.cancelBubble is supported by IE - this will kill the bubbling process.
+			e.cancelBubble = true;
+			e.returnValue = leave_message;
+			//e.stopPropagation works in Firefox.
+			if (e.stopPropagation) 
+			{
+				e.stopPropagation();
+				e.preventDefault();
+			}
+
+			//return works for Chrome and Safari
+			return leave_message;
+		}
+	}
+}   
+	
 // no more used:
 		$("header .filter").click(function(e) {
 			e.preventDefault();
@@ -2334,6 +2386,7 @@ $.extend(UI, {
 			$(".menucolor").hide();
 		}).on('click', '#downloadProject', function(e) {
 			e.preventDefault();
+			if($('#downloadProject').hasClass('disabled')) return false;
 			if ($("#notifbox").hasClass("warningbox")) {
 				APP.confirm({
 					name: 'confirmDownload',

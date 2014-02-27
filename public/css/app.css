@@ -2114,13 +2114,37 @@ section.readonly .status-container
 	border:1px solid #727272;
 	box-shadow: inset 0 1px 2px #ccc;
 	-webkit-box-shadow: inset 0 1px 2px #ccc;
-	transition:none;
-	-webkit-transition: none;
+/*	-moz-transition:background-color 2s;
+	-webkit-transition:background-color 2s !important;
+	-o-transition:background-color 2s;
+	transition:background-color 2s !important;
+	background-color: #fff !important;*/
+/*	transition:none;
+	-webkit-transition: none;*/
 
     /*word-break: normal;*/
-
+	/*background-color: transparent;*/
 }
-
+.editor.highlighted1 .editarea
+{
+	background-color: yellow;
+}
+.editor.highlighted2 .editarea
+{
+	-moz-transition:background-color 2s;
+	-webkit-transition:background-color 2s !important;
+	-o-transition:background-color 2s;
+	transition:background-color 2s !important;
+	background-color: transparent;
+}
+/*.editor.modified .editarea
+{
+	-moz-transition:background-color 2s;
+	-webkit-transition:background-color 2s !important;
+	-o-transition:background-color 2s;
+	transition:background-color 2s !important;
+	background-color: #fff !important;
+}*/
 .editarea:hover 
 {
 	border:1px solid #666;
