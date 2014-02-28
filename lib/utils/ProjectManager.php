@@ -489,8 +489,11 @@ class ProjectManager {
         $jobInfo = mysql_fetch_assoc( $jobInfo );
 
         $data = array();
+        $jobs = array();
 
         foreach( $projectStructure['split_result']['chunks'] as $chunk => $contents ){
+
+            Log::doLog( $projectStructure['split_result']['chunks'] );
 
             //IF THIS IS NOT the original job, DELETE relevant fields
             if( $contents['segment_start'] != $projectStructure['split_result']['job_first_segment'] ){
@@ -519,10 +522,15 @@ class ProjectManager {
             $projectStructure['array_jobs']['job_segments']->offsetSet( $projectStructure[ 'job_to_split' ] . "-" . $jobInfo['password'], new ArrayObject( array( $contents['segment_start'], $contents['segment_end'] ) ) );
 
             $data[] = $query;
+            $jobs[] = $jobInfo;
         }
 
-        foreach( $data as $query ){
+        foreach( $data as $position => $query ){
             $res = mysql_query( $query, $this->mysql_link );
+
+            $wCountManager = new WordCount_Counter();
+            $wCountManager->initializeJobWordCount( $jobs[$position]['id'], $jobs[$position]['password'] );
+
             if( $res !== true ){
                 $msg = "Failed to split job into " . count( $projectStructure['split_result']['chunks'] ) . " chunks\n";
                 $msg .= "Tried to perform SQL: \n" . print_r(  $data ,true ) . " \n\n";
@@ -603,6 +611,9 @@ class ProjectManager {
                 throw new Exception( 'Failed to merge jobs, project damaged. Contact Matecat Support to rebuild project.', -8 );
             }
         }
+
+        $wCountManager = new WordCount_Counter();
+        $wCountManager->initializeJobWordCount( $first_job['id'], $first_job['password'] );
 
     }
 
