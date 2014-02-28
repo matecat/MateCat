@@ -233,7 +233,7 @@ class catController extends viewController {
             //BackWard Compatibility, for projects created with old versions
             if( $wStruct->getTotal() == 0 ){
                 $wCounter = new WordCount_Counter();
-                $wCounter->initializeJobWordCount( $this->jid, $this->password );
+                $wStruct = $wCounter->initializeJobWordCount( $this->jid, $this->password );
             }
 
 //            Log::doLog( $this->job_stats );
