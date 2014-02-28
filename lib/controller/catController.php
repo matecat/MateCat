@@ -228,13 +228,13 @@ class catController extends viewController {
             unset( $prj[ 'approved_words' ] );
             unset( $prj[ 'rejected_words' ] );
 
-            $this->job_stats = CatUtils::getFastStatsForJob( $wStruct );
-
             //BackWard Compatibility, for projects created with old versions
             if( $wStruct->getTotal() == 0 ){
                 $wCounter = new WordCount_Counter();
                 $wStruct = $wCounter->initializeJobWordCount( $this->jid, $this->password );
             }
+
+            $this->job_stats = CatUtils::getFastStatsForJob( $wStruct );
 
 //            Log::doLog( $this->job_stats );
 
