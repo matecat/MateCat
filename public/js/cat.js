@@ -1301,7 +1301,7 @@ UI = {
         if ( !$('#downloadProject').hasClass('disabled') ) {
 
             //disable download button
-            $('#downloadProject').addClass('disabled').val('DOWNLOADING...');
+            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING...');
 
             //create an iFrame element
             var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
@@ -1319,7 +1319,7 @@ UI = {
             iFrameDownload.ready(function () {
 
                 //create a GLOBAL setInterval so in anonymous function it can be disabled
-                downloadTimer = window.setInterval(function () {
+                var downloadTimer = window.setInterval(function () {
 
                     //check for cookie
                     var token = $.cookie('downloadToken');
@@ -1327,7 +1327,7 @@ UI = {
                     //if the cookie is found, download is completed
                     //remove iframe an re-enable download button
                     if ( token == downloadToken ) {
-                        $('#downloadProject').removeClass('disabled').val('PREVIEW');
+                        $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
                         window.clearInterval( downloadTimer );
                         $.cookie('downloadToken', null, { path: '/', expires: -1 });
                         iFrameDownload.remove();
