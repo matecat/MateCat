@@ -230,7 +230,13 @@ class catController extends viewController {
 
             $this->job_stats = CatUtils::getFastStatsForJob( $wStruct );
 
-            Log::doLog( $this->job_stats );
+            //BackWard Compatibility, for projects created with old versions
+            if( $wStruct->getTotal() == 0 ){
+                $wCounter = new WordCount_Counter();
+                $wCounter->initializeJobWordCount( $this->jid, $this->password );
+            }
+
+//            Log::doLog( $this->job_stats );
 
             //$this->job_stats = CatUtils::getStatsForJob( $this->jid, null, $this->password );
 
@@ -284,7 +290,7 @@ class catController extends viewController {
         $this->job_stats['STATUS_BAR_NO_DISPLAY'] = ( $this->project_status['status_analysis'] == 'DONE' ? '' : 'display:none;' );
         $this->job_stats['ANALYSIS_COMPLETE']   = ( $this->project_status['status_analysis'] == 'DONE' ? true : false );
 
-        Log::doLog( $this->job_stats );
+//        Log::doLog( $this->job_stats );
 
         $this->template->job_stats = $this->job_stats;
 
