@@ -193,7 +193,7 @@ function setCursorPosition(el, pos) {
 	el.focus();	
 }
 
-function removeSelectedText(editarea) {
+function removeSelectedText() {
 	if (window.getSelection || document.getSelection) {
 		var oSelection = (window.getSelection ? window : document).getSelection();
 		if (oSelection.type == 'Caret') {
@@ -289,7 +289,7 @@ function rawxliff2rawview(segment) { // currently unused
 	return segment;
 }
 
-function saveSelection(pos) {//console.log(pos);
+function saveSelection() {
 //	var editarea = (typeof editarea == 'undefined') ? UI.editarea : el;
 	var editarea = UI.editarea;
 	if (UI.savedSel) {
@@ -300,7 +300,6 @@ function saveSelection(pos) {//console.log(pos);
 	editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
 
 	UI.savedSelActiveElement = document.activeElement;
-//	if(pos != 'noMove') UI.movePHOutOfTags(pos);
 }
 
 function restoreSelection() {
@@ -351,7 +350,7 @@ function getSelectionHtml() {
 
 function setBrowserHistoryBehavior() {
 
-	window.onpopstate = function(event) {
+	window.onpopstate = function() {
 		segmentId = location.hash.substr(1);
 		if (UI.segmentIsLoaded(segmentId)) {
 			$(".editarea", $('#segment-' + segmentId)).click();
@@ -363,6 +362,28 @@ function setBrowserHistoryBehavior() {
 
 }
 
+function goodbye(e) {
+	if ($('#downloadProject').hasClass('disabled')) {
+		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
+		var leave_message = 'You have a pending download. Are you sure you want to quit?';
+		if(dont_confirm_leave!==1) {
+			if(!e) e = window.event;
+			//e.cancelBubble is supported by IE - this will kill the bubbling process.
+			e.cancelBubble = true;
+			e.returnValue = leave_message;
+			//e.stopPropagation works in Firefox.
+			if (e.stopPropagation) 
+			{
+				e.stopPropagation();
+				e.preventDefault();
+			}
+
+			//return works for Chrome and Safari
+			return leave_message;
+		}
+	}
+}   
+
 $.fn.isOnScreen = function() {
 
 	var win = $(window);
@@ -371,6 +392,8 @@ $.fn.isOnScreen = function() {
 		top: win.scrollTop(),
 		left: win.scrollLeft()
 	};
+	console.log('viewport: ', viewport);
+
 	viewport.right = viewport.left + win.width();
 	viewport.bottom = viewport.top + win.height();
 

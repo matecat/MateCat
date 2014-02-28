@@ -2,7 +2,7 @@
 	Component: ui.init
  */
 $.extend(UI, {
-	init: function(options) {
+	init: function() {
 		this.initStart = new Date();
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
@@ -49,6 +49,7 @@ $.extend(UI, {
 //		this.markTags(true);
 		this.firstMarking = false;
 		this.surveyDisplayed = false;
+		this.warningStopped = false;
 		this.setContextMenu();
 		this.createJobMenu();
 		$('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');

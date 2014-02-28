@@ -15,14 +15,14 @@ UI = {
 			$('#jobMenu .currSegment').hide();
 		}
 		var menuHeight = $('#jobMenu').height();
-		var startTop = 47 - menuHeight;
+//		var startTop = 47 - menuHeight;
 		$('#jobMenu').css('top', (47 - menuHeight) + "px");
 
 		if ($('#jobMenu').hasClass('open')) {
 			$('#jobMenu').animate({top: "-=" + menuHeight + "px"}, 500).removeClass('open');
 		} else {
 			$('#jobMenu').animate({top: "+=" + menuHeight + "px"}, 300, function() {
-				$('body').on('click', function(e) {
+				$('body').on('click', function() {
 					if ($('#jobMenu').hasClass('open')) {
 						UI.toggleFileMenu();
 					}
@@ -60,7 +60,7 @@ UI = {
 			$(window).trigger({
 				type: "allTranslated"
 			});
-		};
+		}
 		$(window).trigger({
 			type: "statusChanged",
 			segment: segment,
@@ -110,7 +110,7 @@ UI = {
 			return true;
 		}
 
-		var closeStart = new Date();
+//		var closeStart = new Date();
 		this.autoSave = false;
 
 		$(window).trigger({
@@ -155,17 +155,22 @@ UI = {
 			type: "sourceCopied",
 			segment: segment
 		});
+		this.highlightEditarea();
+
+		this.currentSegmentQA();
+		this.setChosenSuggestion(0);
+		this.lockTags(this.editarea);
+	},
+	highlightEditarea: function() {
 		this.currentSegment.addClass('highlighted1');
 		setTimeout(function() {
 			UI.currentSegment.addClass('modified highlighted2');
 		}, 100);
 		setTimeout(function() {
 			UI.currentSegment.removeClass('highlighted1 highlighted2');
-		}, 2000);
-		this.currentSegmentQA();
-		this.setChosenSuggestion(0);
-		this.lockTags(this.editarea);
+		}, 2000);		
 	},
+
 	confirmDownload: function(res) {
 		if (res) {
 			if (UI.isChrome) {
@@ -200,9 +205,12 @@ UI = {
 		$('.footer', segment).html(footer);
 
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
-			
-			$('.sub-editor.matches .overflow .graysmall.message', segment).remove();
-			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry, we can\'t help you this time. Check if the language pair is correct. If not, create the project again.</li></ul>');
+			var d = JSON.parse(localStorage.getItem(config.job_id + '-' + $(segment).attr('id').split('-')[1]));
+			console.log('li prendo dal local storage');
+			UI.processContributions(d, segment);
+
+//			$('.sub-editor.matches .overflow .graysmall.message', segment).remove();
+//			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry, we can\'t help you this time. Check if the language pair is correct. If not, create the project again.</li></ul>');
 		}
 	},
 	createHeader: function() {
@@ -215,7 +223,7 @@ UI = {
 	createJobMenu: function() {
 		var menu = '<nav id="jobMenu" class="topMenu">' +
 				'    <ul>';
-		$.each(config.firstSegmentOfFiles, function(index) {
+		$.each(config.firstSegmentOfFiles, function() {
 			menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><span class="' + UI.getIconClass(this.file_name.split('.')[this.file_name.split('.').length -1]) + '"></span><a href="#" title="' + this.file_name + '" >' + this.file_name + '</a></li>';
 		});
 
@@ -253,7 +261,7 @@ UI = {
 			if(config.survey === surv) {
 				jobs = $.cookie('surveyedJobs').split('||')[1].split(',');
 				var found = false;
-				$.each(jobs, function(index) {
+				$.each(jobs, function() {
 					if(this == config.job_id) {
 						found = true;
 					}
@@ -356,21 +364,8 @@ UI = {
 		this.firstSegment = s.first();
 		this.lastSegment = s.last();
 	},
-	setSegmentPointer: function() {
-		if ($('.editor').length) {
-			if ($('.editor').isOnScreen()) {
-				$('#segmentPointer').hide();
-			} else {
-				if ($(window).scrollTop() > $('.editor').offset().top) {
-					$('#segmentPointer').removeClass('down').css('margin-top', '-10px').addClass('up').show();
-				} else {
-					$('#segmentPointer').removeClass('up').addClass('down').css('margin-top', ($(window).height() - 140) + 'px').show();
-				}
-			}
-		}
-	},
 	detectRefSegId: function(where) {
-		var step = this.moreSegNum;
+//		var step = this.moreSegNum;
 		var seg = (where == 'after') ? $('section').last() : (where == 'before') ? $('section').first() : '';
 		var segId = (seg.length) ? seg.attr('id').split('-')[1] : 0;
 		return segId;
@@ -431,6 +426,7 @@ UI = {
 		if (where == 'before') {
 			$("section").each(function() {
 				if ($(this).offset().top > $(window).scrollTop()) {
+//				if ($(this).offset().top > $(window).scrollTop()) {
 					UI.segMoving = $(this).attr('id').split('-')[1];
 					return false;
 				}
@@ -448,7 +444,7 @@ UI = {
 				action: 'getSegments',
 				jid: config.job_id,
 				password: config.password,
-				step: 50,
+				step: UI.moreSegNum,
 				segment: segId,
 				where: where
 			},
@@ -485,8 +481,8 @@ UI = {
 			}
 
 		}
-		if (where == 'after') {
-		}
+//		if (where == 'after') {
+//		}
 		if (d.data.files.length === 0) {
 			if (where == 'after')
 				this.noMoreSegmentsAfter = true;
@@ -687,6 +683,18 @@ UI = {
 			}
 		}
 	},
+	gotoNextUntranslatedSegment: function() {
+		if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
+			if (!UI.nextUntranslatedSegmentId) {
+				UI.closeSegment(UI.currentSegment);
+			} else {
+				UI.reloadWarning();
+			}
+		} else {
+			$("#segment-" + UI.nextUntranslatedSegmentId + " .editarea").trigger("click");
+		}
+	},
+	
 	gotoOpenSegment: function() {
 		if ($('#segment-' + this.currentSegmentId).length) {
 			this.scrollSegment(this.currentSegment);
@@ -750,7 +758,7 @@ UI = {
 		$(ed).focus();
 	},
 	millisecondsToTime: function(milli) {
-		var milliseconds = milli % 1000;
+//		var milliseconds = milli % 1000;
 		var seconds = Math.round((milli / 1000) % 60);
 		var minutes = Math.floor((milli / (60 * 1000)) % 60);
 		return [minutes, seconds];
@@ -762,6 +770,10 @@ UI = {
 	openSegment: function(editarea, operation) {
 		var segment = $('#segment-' + $(editarea).attr('data-sid'));
 		this.openSegmentStart = new Date();
+		if(UI.warningStopped) {
+			UI.warningStopped = false;
+			UI.checkWarnings(false);
+		}
 		if (!this.byButton) {
 			if (this.justSelecting('editarea'))
 				return;
@@ -903,6 +915,8 @@ UI = {
 		$('p.warnings', segment).remove();
 	},
 	removeFooter: function(byButton) {
+		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;		
+		$('#' + segment.attr('id') + ' .footer').empty();
 	},
 	removeHeader: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
@@ -912,7 +926,7 @@ UI = {
 		statusMenu.empty().hide();
 	},
 	renderSegments: function(files, where, starting) {
-		$.each(files, function(k, v) {
+		$.each(files, function(k) {
 			var newFile = '';
 			var fs = this.file_stats;
 //            var fid = fs['ID_FILE'];
@@ -946,7 +960,7 @@ UI = {
 			}
 
 			var t = config.time_to_edit_enabled;
-			$.each(this.segments, function(index) {
+			$.each(this.segments, function() {
 //                this.readonly = true;
 				var readonly = (this.readonly == 'true') ? true : false;
 				var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
@@ -1038,7 +1052,7 @@ UI = {
 		this.setTranslation(segment, status, 'autosave');
 		segment.addClass('saved');
 	},
-	renderAndScrollToSegment: function(sid, file) {
+	renderAndScrollToSegment: function(sid) {
 		$('#outer').empty();
 		this.render({
 			firstLoad: false,
@@ -1126,12 +1140,12 @@ UI = {
 					var word = Object.keys(value)[0];
 					replacements = value[word].misses.join(",");
 
-					var Position = [
-						parseInt(value[word].offset),
-						parseInt(value[word].offset) + parseInt(word.length)
-					];
+//					var Position = [
+//						parseInt(value[word].offset),
+//						parseInt(value[word].offset) + parseInt(word.length)
+//					];
 
-					var sentTextInPosition = ed.text().substring(Position[0], Position[1]);
+//					var sentTextInPosition = ed.text().substring(Position[0], Position[1]);
 					//console.log(sentTextInPosition);
 
 					var re = new RegExp("(\\b" + word + "\\b)", "gi");
@@ -1150,9 +1164,6 @@ UI = {
 				action: 'setSpellcheck',
 				slang: config.target_rfc,
 				word: word
-			},
-			success: function(data) {
-
 			}
 		});
 	},
@@ -1163,11 +1174,11 @@ UI = {
 			UI.currentSegment = undefined;
 		} else {
 			setTimeout(function() {
-				var hash_value = window.location.hash;
+//				var hash_value = window.location.hash;
 				window.location.hash = UI.currentSegmentId;
 			}, 300);
 		}
-		var file = this.currentFile;
+//		var file = this.currentFile;
 		if (this.readonly)
 			return;
 		APP.doRequest({
@@ -1218,8 +1229,8 @@ UI = {
             $('#statistics' ).show();
             $('#analyzing' ).hide();
         }
-		var status = 'approved';
-		var total = s.TOTAL;
+//		var status = 'approved';
+//		var total = s.TOTAL;
 		var t_perc = s.TRANSLATED_PERC;
 		var a_perc = s.APPROVED_PERC;
 		var d_perc = s.DRAFT_PERC;
@@ -1230,8 +1241,8 @@ UI = {
 		var d_perc_formatted = s.DRAFT_PERC_FORMATTED;
 		var r_perc_formatted = s.REJECTED_PERC_FORMATTED;
 
-		var d_formatted = s.DRAFT_FORMATTED;
-		var r_formatted = s.REJECTED_FORMATTED;
+//		var d_formatted = s.DRAFT_FORMATTED;
+//		var r_formatted = s.REJECTED_FORMATTED;
 		var t_formatted = s.TODO_FORMATTED;
 
 		var wph = s.WORDS_PER_HOUR;
@@ -1289,7 +1300,6 @@ UI = {
 		var statusSwitcher = $(".status", segment);
 		statusSwitcher.removeClass("col-approved col-rejected col-done col-draft");
 
-		var statusToGo = (isTranslatedButton) ? 'untranslated' : '';
 		var nextUntranslatedSegment = $('#segment-' + this.nextUntranslatedSegmentId);
 		this.nextUntranslatedSegment = nextUntranslatedSegment;
 		if ((!isTranslatedButton) && (!nextUntranslatedSegment.length)) {
@@ -1381,7 +1391,7 @@ UI = {
 	setNextWarnedSegment: function(sid) {
 		sid = sid || UI.currentSegmentId;
 		idList = UI.globalWarnings;
-		$.each(idList, function(index) {
+		$.each(idList, function() {
 			if (this > sid) {
 				$('#point2seg').attr('href', '#' + this);
 				return false;
@@ -1439,6 +1449,11 @@ UI = {
 		});
 		return i1;
 	},
+	startWarning: function() {
+		setTimeout(function() {
+			UI.checkWarnings(false);
+		}, config.warningPollingInterval);		
+	},
 
 	checkWarnings: function(openingSegment) {
 		var dd = new Date();
@@ -1453,16 +1468,18 @@ UI = {
 				password: config.password,
 				token: token
 			},
+			error: function() {
+				UI.warningStopped = true;
+			},
 			success: function(data) {
+				UI.startWarning();
 				var warningPosition = '';
-//                console.log('data.total: '+data.total);
 				UI.globalWarnings = data.details;
 
 				//check for errors
 				if (UI.globalWarnings.length > 0) {
 					//for now, put only last in the pointer to segment id
 					warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
-//                    console.log('warningPosition: ' + warningPosition);
 
 					if (openingSegment)
 						UI.fillCurrentSegmentWarnings(data.details, true);
@@ -1478,7 +1495,8 @@ UI = {
 				}
 
 				UI.setNextWarnedSegment();
-//                $('#point2seg').attr('href', warningPosition);
+
+				//                $('#point2seg').attr('href', warningPosition);
 			}
 		});
 	},
@@ -1867,7 +1885,7 @@ UI = {
 		this.currentSegment.removeClass('waiting_for_check_result');
 		this.registerQACheck();
 	},
-	saveInUndoStack: function(action) {
+	saveInUndoStack: function() {
 		currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
 		if (typeof currentItem != 'undefined') {
@@ -1901,7 +1919,7 @@ UI = {
 	},
 	updateJobMenu: function() {
 		$('#jobMenu li.current').removeClass('current');
-		$('#jobMenu li:not(.currSegment)').each(function(index) {
+		$('#jobMenu li:not(.currSegment)').each(function() {
 			if ($(this).attr('data-file') == UI.currentFileId)
 				$(this).addClass('current');
 		});
@@ -1953,13 +1971,13 @@ $(document).ready(function() {
 	//launch segments check on opening
 	UI.checkWarnings(true);
 	//and on every polling interval
-	setInterval(function() {
-		UI.checkWarnings(false);
-	}, config.warningPollingInterval);
+//	setInterval(function() {
+//		UI.checkWarnings(false);
+//	}, config.warningPollingInterval);
 });
 
 $.extend($.expr[":"], {
-	"containsNC": function(elem, i, match, array) {
+	"containsNC": function(elem, i, match) {
 		return (elem.textContent || elem.innerText || "").toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
 	}
 });

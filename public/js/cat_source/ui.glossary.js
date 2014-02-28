@@ -11,8 +11,6 @@ $.extend(UI, {
 				translation: item.find('.translation').text(),
 				id_job: config.job_id,
 				password: config.password
-			},
-			success: function(d) {
 			}
 		});
 		dad = $(item).prevAll('.glossary-item').first();
@@ -98,7 +96,7 @@ $.extend(UI, {
 		numRes = 0;
 
 		if (Object.size(d.data.matches)) {console.log('ci sono match');
-			$.each(d.data.matches, function(k, v) {
+			$.each(d.data.matches, function(k) {
 				numRes++;
 				$('.sub-editor.glossary .overflow .results', segment).append('<div class="glossary-item"><span>' + k + '</span></div>');
 				$.each(this, function(index) {

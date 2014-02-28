@@ -9,10 +9,14 @@ $.extend(UI, {
 		scrollToFile = (options.scrollToFile || false);
 		seg = (segmentToOpen || false);
 		this.segmentToScrollAtRender = (seg) ? seg : false;
-		this.isWebkit = $.browser.webkit;
-		this.isChrome = $.browser.webkit && !!window.chrome;
-		this.isFirefox = $.browser.mozilla;
-		this.isSafari = $.browser.webkit && !window.chrome;
+//		this.isWebkit = $.browser.webkit;
+//		this.isChrome = $.browser.webkit && !!window.chrome;
+//		this.isFirefox = $.browser.mozilla;
+//		this.isSafari = $.browser.webkit && !window.chrome;
+		this.isChrome = (typeof window.chrome != 'undefined');
+		this.isFirefox = (typeof navigator.mozApps != 'undefined');
+//		console.log('body.scrollTop: ', $('body').scrollTop());
+//		console.log('window.scrollTop: ', $(window).scrollTop());
 		this.isMac = (navigator.platform == 'MacIntel') ? true : false;
 		this.body = $('body');
 		this.firstLoad = firstLoad;
@@ -23,7 +27,7 @@ $.extend(UI, {
 		this.moreSegNum = 25;
 		this.numOpenedSegments = 0;
 		this.hasToBeRerendered = false;
-		this.maxMinutesBeforeRerendering = 30;
+		this.maxMinutesBeforeRerendering = 60;
 		setTimeout(function() {
 			UI.hasToBeRerendered = true;
 		}, this.maxMinutesBeforeRerendering*60000);	

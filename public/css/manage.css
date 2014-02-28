@@ -27,7 +27,7 @@ h3{margin:0px 0 0 0;padding:0;font-size:18px;color:#999999 !important;font-weigh
 .tablestats  tr:hover{background:#f7f8f9}
 .tablestats{border-top:1px solid #ccc;margin-bottom:40px;-moz-box-shadow: 0 1px 2px #ccc;background:#fff}
 .tablestats.continue{margin-bottom:4px !important;}
-.logo{float:left;border:0;background:url(../img/logo.png) 0px 0px no-repeat;width:145px;height:31px; background-size: 130px 26px;}
+.logo{margin-top:6px!important;}
 
 .error-symbol{background:url(../img/red-error-symbol.png) 0 0 no-repeat; position:absolute;margin:42px 0 0 -30px;display:block;width:23px;height:23px;background-size:21px 19px}
 
@@ -132,18 +132,18 @@ body.manage .actions a
 	body.manage .actions a.change
 		{
 		margin-left: 5px !important;
-		background: url(../img/change_password.png) 0 0 no-repeat;
+		background: url(../img/sprite.png) -13px -136px no-repeat;
 		}
 		
 	body.manage .actions a.cancel
 		{
 		margin-left: 33px !important;
-		background: url(../img/cancel-job.png) 0 0 no-repeat;
+		background: url(../img/sprite.png) -13px -78px no-repeat;
 		}
 	body.manage .actions a.archive
 		{
 		margin-left: 61px !important;
-		background: url(../img/archive-job.png) 0 1px no-repeat;
+		background: url(../img/sprite.png) -13px -59px no-repeat;
 		}
 	body.manage .actions a.resume
 		{
@@ -180,9 +180,9 @@ body.manage a.unarchive-project
 	text-indent: -10000px;
 	margin-left: 10px;
 	top: 5px;
-	background: url(../img/cancel-job.png) 0 0 no-repeat;
-	
-/*
+	background: url(../img/sprite.png) -13px -78px no-repeat;
+/*	background: url(../img/cancel-job.png) 0 0 no-repeat;
+
 	width: 18px;
 	height: 18px;
 	margin-left: 40px;
@@ -199,7 +199,7 @@ body.manage a.unarchive-project
 
 body.manage a.archive-project
 	{
-	background: url(../img/archive-job.png) 0 1px no-repeat;
+	background: url(../img/sprite.png) -13px -59px no-repeat;
 	}
 	body.manage .article.allArchived a.archive-project,
 	body.manage[data-filter-status=archived] a.archive-project,
@@ -209,7 +209,7 @@ body.manage a.archive-project
 		}
 body.manage a.resume-project
 	{
-	background: url(../img/resume-job.png) 0 0 no-repeat;
+	background: url(../img/sprite.png) -13px -98px no-repeat;
 	}
 	body.manage[data-filter-status=archived] a.resume-project
 		{
@@ -218,7 +218,7 @@ body.manage a.resume-project
 
 body.manage a.unarchive-project
 	{
-	background: url(../img/unarchive-job.png) 0 1px no-repeat;
+	background: url(../img/sprite.png) -13px -37px no-repeat;
 	}
 	body.manage[data-filter-status=cancelled] a.unarchive-project
 		{
@@ -650,6 +650,7 @@ body.manage #search-projectname
 padding: 5px 10px;
 border: 1px dashed #ccc;
 font-size: 1em;
+line-height:20px;
 margin: 20px 0;
 color: #666;
         }
@@ -689,14 +690,26 @@ padding-right: 20px;
             column-count: 2;
             -moz-column-count: 2;}
 			
-			.api .fileformat li {
-margin: 8px 0px 3px 2px;
-padding: 1px 5px;
+
+.fileformat span {
+padding: 10px 15px 10px 40px;
+margin: 5px 0 0 0;
+width: 30px;
+height:15px;
+float: left;
+background-size: 25px!important;
 }
-.api .fileformat li:nth-child(2n+1) {
+
+.api .tablestats tr:hover {background:none;}
+
+/*.api .fileformat li:nth-child(2n+1) {
 background: #efefef;
-}
-			
+}*/
+ ul.office {
+            -webkit-column-count: 3;
+            column-count: 3;
+            -moz-column-count: 3;
+        }			
 			
         .api table ul.lang-list {
             -webkit-column-count: 5;
@@ -709,9 +722,11 @@ background: #efefef;
 		.api .block:last-child {height: 20px;
 min-height: 20px;}
 
-
+.fileformat th {
+padding-left:15px;
+}
 		
-			.api .tablestats th,.api .tablestats td {text-align:left;width:20%;vertical-align: top;}
+			.api .tablestats th,.api .tablestats td {text-align:left;vertical-align: top;}
 table {table-layout: fixed; width:100%;}
 .api .colsx {float: left;
 position: fixed;

@@ -274,7 +274,7 @@ $.extend(UI, {
 		}
 		var p = this.searchParams;
 //        console.log('mode: ' + mode + ' - coso: ' + coso);
-		var targetToo = typeof p.target != 'undefined';
+//		var targetToo = typeof p.target != 'undefined';
 		var containsFunc = (p['match-case']) ? 'contains' : 'containsNC';
 		var ignoreCase = (p['match-case']) ? '' : 'i';
 
@@ -308,13 +308,13 @@ $.extend(UI, {
 			} else {
 				sid = $(seg).attr('id');
 				if (where == 'before') {
-					$('section').each(function(index) {
+					$('section').each(function() {
 						if ($(this).attr('id') < sid) {
 							$(this).addClass('justAdded');
 						}
 					});
 				} else {
-					$('section').each(function(index) {
+					$('section').each(function() {
 						if ($(this).attr('id') > sid) {
 							$(this).addClass('justAdded');
 						}
@@ -347,13 +347,13 @@ $.extend(UI, {
 			} else {
 				sid = $(seg).attr('id');
 				if (where == 'before') {
-					$('section').each(function(index) {
+					$('section').each(function() {
 						if ($(this).attr('id') < sid) {
 							$(this).addClass('justAdded');
 						}
 					});
 				} else {
-					$('section').each(function(index) {
+					$('section').each(function() {
 						if ($(this).attr('id') > sid) {
 							$(this).addClass('justAdded');
 						}
@@ -552,7 +552,7 @@ $.extend(UI, {
 			seg = $('section' + wh).has("mark.searchMarker");
 			ss = (this.searchMode == 'source&target')? el + '-editarea' : el;
 			found = false;
-			$.each(seg, function(index) {
+			$.each(seg, function() {
 				if ($(this).attr('id') >= ss) {
 					if (($(this).attr('id') == ss) && (skipCurrent)) {
 					} else {
@@ -667,10 +667,8 @@ $.extend(UI, {
 		e.preventDefault();
 		if ($('body').hasClass('filterOpen')) {
 			$('body').removeClass('filterOpen');
-//            $("body").scrollTop($("body").scrollTop()+$('.searchbox').height());
 		} else {
 			$('body').addClass('filterOpen');
-//            $("body").scrollTop($("body").scrollTop()-$('.searchbox').height());
 			$('#search-source').focus();
 		}
 	},

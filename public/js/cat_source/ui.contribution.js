@@ -7,7 +7,8 @@ $.extend(UI, {
 		this.lockTags(this.editarea);
 		this.setChosenSuggestion(w);
 
-		this.editarea.focus().effect("highlight", {}, 1000);
+		this.editarea.focus();
+		this.highlightEditarea();
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
 
@@ -99,7 +100,7 @@ $.extend(UI, {
 			success: function(d) {
 				UI.getContribution_success(d, this);
 			},
-			complete: function(d) {
+			complete: function() {
 				UI.getContribution_complete(n);
 			}
 		});
@@ -109,11 +110,14 @@ $.extend(UI, {
 	},
 	getContribution_success: function(d, segment) {
 //		console.log(d.data.matches);
-//		localStorage.setItem($(segment).attr('id').split('-')[1], JSON.stringify(d.data.matches));
+		localStorage.setItem(config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
 //		console.log(localStorage.getItem($(segment).attr('id').split('-')[1]));
 //		console.log(localStorage.getItem('4679214'));
 //		console.log(!localStorage.getItem('4679214'));
 //		console.log(localStorage.getItem('4679215'));
+		this.processContributions(d, segment);
+	},
+	processContributions: function(d, segment) {
 		this.renderContributions(d, segment);
 		if ($(segment).attr('id').split('-')[1] == UI.currentSegmentId)
 			this.currentSegmentQA();
@@ -127,7 +131,7 @@ $.extend(UI, {
 			$('.submenu li.matches a span', segment).text('(' + d.data.matches.length + ')');
 		} else {
 			$(".sbm > .matches", segment).hide();
-		}
+		}		
 	},
 	renderContributions: function(d, segment) {
 		var isActiveSegment = $(segment).hasClass('editor');
@@ -201,10 +205,10 @@ $.extend(UI, {
 			UI.markSuggestionTags(segment);
 			UI.setDeleteSuggestion(segment);
 			UI.lockTags();
-			if (copySuggestionDone) {
-				if (isActiveSegment) {
-				}
-			}
+//			if (copySuggestionDone) {
+//				if (isActiveSegment) {
+//				}
+//			}
 
 			$('.translated', segment).removeAttr('disabled');
 			$('.draft', segment).removeAttr('disabled');
@@ -273,13 +277,13 @@ $.extend(UI, {
 			return false;
 		}
 		target = view2rawxliff(target);
-		var languages = $(segment).parents('article').find('.languages');
-		var source_lang = $('.source-lang', languages).text();
-		var target_lang = $('.target-lang', languages).text();
-		var id_translator = config.id_translator;
-		var private_translator = config.private_translator;
-		var id_customer = config.id_customer;
-		var private_customer = config.private_customer;
+//		var languages = $(segment).parents('article').find('.languages');
+//		var source_lang = $('.source-lang', languages).text();
+//		var target_lang = $('.target-lang', languages).text();
+//		var id_translator = config.id_translator;
+//		var private_translator = config.private_translator;
+//		var id_customer = config.id_customer;
+//		var private_customer = config.private_customer;
 
 		var info = $(segment).attr('id').split('-');
 		var id_segment = info[1];
@@ -351,7 +355,7 @@ $.extend(UI, {
 			UI.reinitMMShortcuts();
 		});
 	},
-	reinitMMShortcuts: function(a) {
+	reinitMMShortcuts: function() {
 		var keys = (this.isMac) ? 'alt+meta' : 'alt+ctrl';
 		$('body').unbind('keydown.alt1').unbind('keydown.alt2').unbind('keydown.alt3').unbind('keydown.alt4').unbind('keydown.alt5');
 		$("body, .editarea").bind('keydown.alt1', keys + '+1', function(e) {
