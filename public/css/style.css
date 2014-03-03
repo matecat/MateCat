@@ -1236,13 +1236,15 @@ section.status-new.opened .editarea
 	-webkit-transition: all  50ms ease-in;
 }
 
-section.readonly
+section.readonly,
+body.archived section
 {
     z-index: 9998;
     background: transparent;
 }
 
-section.readonly .text
+section.readonly .text,
+body.archived section .text
 {
 	background: rgba(250,250,250,0.1);
 	text-shadow: 0 1px 0 #ccc;
@@ -1256,6 +1258,7 @@ section.readonly .text
 
 
 section.readonly .status-container
+body.archived section .status-container
 {
     /*display: none;*/
 }
@@ -1579,7 +1582,8 @@ textarea, input, .editarea, .search-editarea, select  {
 
 /*status*/
 .status-container .status{width:11px;display:block;position:absolute;height:100%;padding:0;background:#dddedf;right:0;border-left:1px solid #ccc;	margin:0px 0px 0px 0 !Important;z-index:99;border-bottom:1px solid #ccc	}
-section.readonly .status-container a.status:hover
+section.readonly .status-container a.status:hover,
+body.archived section .status-container a.status:hover
 {
     cursor: default !important;
 }

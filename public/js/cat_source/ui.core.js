@@ -30,7 +30,7 @@ UI = {
 			}).addClass('open');
 		}
 	},
-	activateSegment: function() {
+	activateSegment: function() {console.log('activate');
 		this.createFooter(this.currentSegment);
 		this.createButtons();
 		this.createHeader();
@@ -768,6 +768,7 @@ UI = {
 		$('#spellCheck .words').remove();
 	},
 	openSegment: function(editarea, operation) {
+//		if(UI.body.hasClass('archived')) return;
 		var segment = $('#segment-' + $(editarea).attr('data-sid'));
 		this.openSegmentStart = new Date();
 		if(UI.warningStopped) {
@@ -962,7 +963,7 @@ UI = {
 			var t = config.time_to_edit_enabled;
 			$.each(this.segments, function() {
 //                this.readonly = true;
-				var readonly = (this.readonly == 'true') ? true : false;
+				var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
 				var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
 
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
@@ -986,7 +987,8 @@ UI = {
 						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment) + '</div>' +
 						'				<div class="copy" title="Copy source to target">' +
 						'                   <a href="#"></a>' +
-						'                   <p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p>' +
+						'                   <p>ALT+CTRL+I</p>' +
+//						'                   <p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p>' +
 						'				</div>' +
 						'				<div class="target item" id="segment-' + this.sid + '-target">' +
 						'					<span class="hide toggle"> ' +

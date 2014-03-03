@@ -200,10 +200,11 @@ $.extend(UI, {
 				return;
 			if (UI.someUserSelection)
 				return;
-
+			var msg = (UI.body.hasClass('archived'))? 'Job has been archived and cannot be edited.' : 'This part has not been assigned to you.';
 			UI.selectingReadonly = setTimeout(function() {
-				APP.alert({msg: 'This part has not been assigned to you.'});
+				APP.alert({msg: msg});
 			}, 200);
+
 		}).on('mousedown', 'section.readonly, section.readonly a.status', function() {
 			sel = window.getSelection();
 			UI.someUserSelection = (sel.type == 'Range') ? true : false;
