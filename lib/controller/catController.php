@@ -37,6 +37,7 @@ class catController extends viewController {
     private $firstSegmentOfFiles = '[]';
 
     private $first_job_segment;
+    private $last_job_segment;
     private $last_opened_segment;
 
 	private $thisUrl;
@@ -126,10 +127,6 @@ class catController extends viewController {
 				$this->last_opened_segment = $prj['last_opened_segment'];
 			}
 
-			if (empty($this->first_job_segment)) {
-//				$this->first_job_segment = @$seg['id_segment_start'];
-			}
-            
 			if (empty($this->cid)) {
 				$this->cid = $prj['cid'];
 			}
@@ -243,9 +240,13 @@ class catController extends viewController {
 
         }
 
+        //TODO check and improve, this is not needed
 		if (empty($this->last_opened_segment)) {
 			$this->last_opened_segment = getFirstSegmentId($this->jid, $this->password);
 		}
+
+        $this->first_job_segment =$this->project_status['job_first_segment'];
+        $this->last_job_segment =$this->project_status['job_last_segment'];
 
 		if (count($files_found) == 1) {
 			$this->downloadFileName = $files_found[0];
@@ -285,6 +286,7 @@ class catController extends viewController {
         $this->template->target_rtl  = $this->target_rtl;
 
         $this->template->first_job_segment   = $this->first_job_segment;
+        $this->template->last_job_segment    = $this->last_job_segment;
         $this->template->last_opened_segment = $this->last_opened_segment;
         //$this->template->data                = $this->data;
 
