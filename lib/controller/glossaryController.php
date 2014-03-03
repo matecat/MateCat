@@ -119,7 +119,7 @@ class glossaryController extends ajaxController {
                 case 'set':
 
                     if ( $st['id_tms'] == 0 ) {
-                        throw new Exception( "Sorry no glossary associated to the project ", -11 );
+                        throw new Exception( "Glossary is not available when the TM feature is disabled", -11 );
                     }
 
                     $TMS_RESULT = $_TMS->set($config);
