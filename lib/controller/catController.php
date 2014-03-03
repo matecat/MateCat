@@ -115,7 +115,7 @@ class catController extends viewController {
 
 		foreach ($data as $i => $prj) {
 
-            $this->project_status = $prj;
+            $this->project_status = $prj; // get one row values for the project are the same for every row
 
 			if (empty($this->pname)) {
 				$this->pname = $prj['pname'];
@@ -229,9 +229,10 @@ class catController extends viewController {
             unset( $prj[ 'rejected_words' ] );
 
             //BackWard Compatibility, for projects created with old versions
-            if( $wStruct->getTotal() == 0 ){
+            if( $wStruct->getTotal() == 0 && $prj['status_analysis'] == 'DONE' ){
                 $wCounter = new WordCount_Counter();
                 $wStruct = $wCounter->initializeJobWordCount( $this->jid, $this->password );
+                Log::doLog( "BackWard compatibility set Counter." );
             }
 
             $this->job_stats = CatUtils::getFastStatsForJob( $wStruct );
@@ -297,6 +298,7 @@ class catController extends viewController {
         $end_time                               = microtime( true ) * 1000;
         $load_time                              = $end_time - $this->start_time;
         $this->template->load_time              = $load_time;
+        $this->template->tms_enabled            = var_export( (bool)$this->project_status['id_tms'], true );
         $this->template->time_to_edit_enabled   = INIT::$TIME_TO_EDIT_ENABLED;
         $this->template->build_number           = INIT::$BUILD_NUMBER;
         $this->template->downloadFileName       = $this->downloadFileName;
