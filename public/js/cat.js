@@ -1206,12 +1206,12 @@ UI = {
         var tra = parseFloat(stats.TRANSLATED);
         var dra = parseFloat(stats.DRAFT);
         var rej = parseFloat(stats.REJECTED);
-		if (tra)
-			t = 'translated';
-		if (dra)
-			t = 'draft';
-		if (rej)
-			t = 'draft';
+        if (tra)
+            t = 'translated';
+        if (dra)
+            t = 'draft';
+        if (rej)
+            t = 'draft';
         if( !tra && !dra && !rej && !app ){
             t = 'draft';
         }
@@ -1273,9 +1273,9 @@ UI = {
 		$('#stat-todo strong').html(t_formatted);
 		$('#stat-wph strong').html(wph);
 		$('#stat-completion strong').html(completion);
-		$('#total-payable').html(s.TOTAL_FORMATTED);
+        $('#total-payable').html(s.TOTAL_FORMATTED);
 
-	},
+    },
 	chunkedSegmentsLoaded: function() {
 		return $('section.readonly').length;
 	},
@@ -1345,7 +1345,7 @@ UI = {
             iFrameDownload.ready(function () {
 
                 //create a GLOBAL setInterval so in anonymous function it can be disabled
-                var downloadTimer = window.setInterval(function () {
+                downloadTimer = window.setInterval(function () {
 
                     //check for cookie
                     var token = $.cookie('downloadToken');
@@ -1721,7 +1721,7 @@ UI = {
 			}
 
 			if (operation == 'setContribution' && this.code != '-10') { // is not a password error
-				APP.alert({msg: "Error in saving the translation memory.<br />Try the to save again the segment.<br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
+				APP.alert({msg: "Error in saving the translation memory.<br />Try to save again the segment.<br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
 			}
 
 			if (this.code == '-10') {

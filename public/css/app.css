@@ -408,8 +408,8 @@ border-left: 3px solid #ffcc00;
 .currSegment a
 
  {
-background: #efefef url(../img/backto.png) 20px 12px no-repeat !important;
-background-size: 15px!important;  
+background: #efefef url(../img/sprite.png) 15px -160px no-repeat !important;
+background-size: 25px!important;  
 border-top: 1px solid #ccc;
 box-shadow: inset 0px 1px #fff;
 -moz-box-shadow: inset 0px 1px #fff;
@@ -421,11 +421,7 @@ box-shadow: inset 0px 1px #fff;
 
 
 
-.currSegment a:hover
- {
-background: #e4e4e4 url(../img/backto.png) 20px 12px no-repeat !important;
-background-size: 15px!important;
-    }
+
 
 
     .topMenu ul li a:hover
@@ -675,6 +671,11 @@ background-size: 15px!important;
     {
     float: right;
     }    
+	
+.manage .searchbox {	
+	min-height: 20px;
+	height: 48px;
+}
     
 .searchbox
 	{
@@ -682,8 +683,6 @@ background-size: 15px!important;
 	position: fixed;
 	float: left;
 	width: 100%;
-	min-height: 20px;
-	height: 48px;
 	font-size:12px;
 	border-bottom: 1px solid #666;
 	background:#efefef url(../img/point.gif) 0 0 repeat-x;
@@ -881,8 +880,8 @@ header .wrapper{padding:0px 0 0 0;}
 }
 .notific
 {
-	background:url(../img/ok-symbol.png) center 15px no-repeat;
-	background-size:24px 20px;
+background: url(../img/sprite.png) 15px -182px no-repeat;
+background-size: 24px;
 }
 .warningbox
 {
@@ -909,14 +908,15 @@ header .wrapper{padding:0px 0 0 0;}
     display: none;
     text-align: center;
     width: 60px;
-    background: url(../img/search.png) center 14px no-repeat !important;
-    background-size: 20px 20px !important;
+	background: url(../img/sprite.png) 19px -364px no-repeat;
+	background-size: 22px;
     cursor: pointer;
 	/*    text-indent: -9999px;*/
 }
 body.searchActive #filterSwitch
 {
-    background-image: url(../img/search-active.png) !important;
+    background: url(../img/sprite.png) 19px -400px no-repeat;
+	background-size: 22px;
 }
 
 #filterSwitch:hover
@@ -981,7 +981,7 @@ body.searchActive #filterSwitch
 {
 	float: left;
 	padding-left: 22px;
-	background: url(../img/arrow-down.png) center left no-repeat;
+	background: url(../img/sprite.png) -15px -434px no-repeat;
 	max-width: 300px;
 	/*overflow: hidden;*/
 	margin-left:2px;
@@ -1340,8 +1340,8 @@ article .translated:active, article .draft:active, article .btn:active, article 
     margin-left: 47%;
     margin-top: 5px;
     width: 50px !important;
-    background: transparent url(../img/freccia.png) center top no-repeat;
-    opacity: 0.2;
+	background: url(../img/sprite.png) 5px -853px no-repeat;    
+	opacity: 0.2;
 }
 .editor .outersource .copy
 {
@@ -1650,16 +1650,15 @@ margin: 5px 1.5%;
 	float: left;
 	height:20px; width:20px;
 	margin: 20px 0 0 0;
-	background: url(../img/add-black.png) no-repeat;
-	background-size:20px;
+	background: url(../img/sprite.png) -11px -407px no-repeat;
+background-size: 42px;
 }    
 .sub-editor .gl-search .search-glossary
 {
 	float: left;
 	margin: 20px 1% 0 0;
 	height:20px; width:20px;
-	background: url(../img/searchgl-black.png) no-repeat;
-	background-size:20px;
+	/*background: url(../img/searchgl-black.png) no-repeat;*/
 }  
 .sub-editor .gl-search .set-glossary:hover, .sub-editor .gl-search .search-glossary:hover
 {
@@ -1694,7 +1693,7 @@ margin: 5px 1.5%;
 .content { float: left; clear: both; border: 1px solid #ccf; border-top: none; border-left: none; background: #eef; padding: 10px 20px 20px; width: 400px; }
 
 .preview{font-family:Cambria, Arial, Helvetica, sans-serif !important; height:300px}
-.filter{background: url(../img/filter.png) center center no-repeat;width:45px;height:44px;display:block;float:right;background-size:13px 14px;margin:-5px 10px -2px 0;border-left:1px solid #333;border-right:1px solid #333;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;position:relative;display:none !important;}
+.filter{	background: url(../img/sprite.png) 2px -218px no-repeat;width:45px;height:44px;display:block;float:right;margin:-5px 10px -2px 0;border-left:1px solid #333;border-right:1px solid #333;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;position:relative;display:none !important;}
 .arrow-top{display:block;position:absolute;bottom:-12px;right:10px;height:20px;width:20px;background:url(../img/search-arrow.png) 0 0 no-repeat;display:none;background-size:16px 8px}
 
 /*search*/
@@ -1981,8 +1980,8 @@ body.cattool .searchbox .block.right
 
 
 
-.close{background:url(../img/x.png) center 1px no-repeat;width:22px;height:20px;display:block;position:absolute;right:0;top:0;}
-.close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover{background:url(../img/x.png) center -30px no-repeat;width:22px;height:20px;display:block;position:absolute;right:0;}
+.close{background: url(../img/sprite.png) -11px -156px no-repeat;width:22px;height:20px;display:block;position:absolute;right:0;top:0;}
+.close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover{background: url(../img/sprite.png) -11px -187px no-repeat;width:22px;height:20px;display:block;position:absolute;right:0;}
 
 
 .h-text{width:auto;height:20px;display:block;position:absolute;left:10px;top:2px;color:#fff;font-size:12px;text-decoration:none;text-transform:none;}
