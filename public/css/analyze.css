@@ -173,11 +173,10 @@ background: #ccc url(/public/img/split.png) 10px no-repeat;
 	padding:10px 0 20px 0;
 	overflow: hidden;
 }
-
 .none {display:none;}
-.splitbtn.done {background:#09beec url(../img/split.png) 12px center no-repeat!important;float: right;
+.splitbtn.done {background:#09beec url(../img/sprite.png)  -2px -453px no-repeat!important;float: right;
 				padding: 2px 15px 2px 35px!important; margin-bottom:0;}
-.splitbtn.done:hover {background:#12b4df url(../img/split.png) 12px center no-repeat!important;}
+.splitbtn.done:hover {background:#12b4df url(../img/sprite.png)  -2px -453px no-repeat!important;}
 .popup-split input[type="text"][disabled] {background:#f0f0f0;}
 .stopsplitbtn{
 	display: block;
@@ -227,17 +226,17 @@ background: #ccc url(/public/img/split.png) 10px no-repeat;
 	opacity: 1!important;
 }
 
-.splitbtn {background: #09beec url(/public/img/split.png) 10px no-repeat;}
+.splitbtn {background: #09beec url(../img/sprite.png) -2px -453px no-repeat;}
 
 div.popup-split .uploadbtn {padding:2px 15px!important;}
 
-.splitbtn:hover {background: #12b4df url(/public/img/split.png) 10px no-repeat; -moz-box-shadow: 0 1px 2px #666;
+.splitbtn:hover {background: #09beec url(../img/sprite.png) -2px -453px no-repeat; -moz-box-shadow: 0 1px 2px #666;
 				 -webkit-box-shadow: 0 1px 2px #666;
 				 box-shadow: 0 1px 2px #666;}
 
-.mergebtn {background: #09beec url(/public/img/merge.png) 10px no-repeat;}
+.mergebtn {background: #09beec url(../img/sprite.png) -2px -1192px no-repeat;}
 
-.mergebtn:hover {background: #12b4df url(/public/img/merge.png) 10px no-repeat; -moz-box-shadow: 0 1px 2px #666;
+.mergebtn:hover {background: #12b4df url(../img/sprite.png) -2px -1192px no-repeat; -moz-box-shadow: 0 1px 2px #666;
 				 -webkit-box-shadow: 0 1px 2px #666;
 				 box-shadow: 0 1px 2px #666;}
 
@@ -293,7 +292,7 @@ div.disabled .label, div.disabled .splitselect, div.disabled .splitbtn {display:
 
 
 .subfile p{margin:0 -35px 0 0px;	word-break: break-word;
-		   padding:0 30px;background: url(../img/subfile.png) 10px 1px no-repeat;background-size:13px 13px;}
+		   padding:0 30px;background: url(../img/sprite.png) 3px -304px no-repeat;background-size:26px;}
 .totaltable td{font-size:18px;}
 .totaltable td.languages{border-left:1px solid #ccc;}
 table tr.totaltable td.stat-payable {

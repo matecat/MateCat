@@ -148,12 +148,12 @@ body.manage .actions a
 	body.manage .actions a.resume
 		{
 		margin-left: 33px !important;
-		background: url(../img/resume-job.png) 0 0px no-repeat;
+		background: url(../img/sprite.png) -13px -98px no-repeat;
 		}
 	body.manage .actions a.unarchive
 		{
 		margin-left: 61px !important;
-		background: url(../img/unarchive-job.png) 0 1px no-repeat;
+		background: url(../img/sprite.png) -13px -37px no-repeat;
 		}
 
 	body.manage tr[data-status=active] .actions a.resume,
@@ -218,7 +218,7 @@ body.manage a.resume-project
 
 body.manage a.unarchive-project
 	{
-	background: url(../img/sprite.png) -13px -37px no-repeat;
+	background: url(../img/sprite.png) -13px -39px no-repeat;
 	}
 	body.manage[data-filter-status=cancelled] a.unarchive-project
 		{

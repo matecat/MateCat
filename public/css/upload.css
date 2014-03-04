@@ -404,8 +404,8 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
     width: 50% !Important;
   }
   
-  .cancel-btn{background:#f26522 url(../img/xbtn.gif) 13px 14px no-repeat !Important}
-  .cancel-btn:hover{background:#d1581c url(../img/xbtn.gif) 13px 14px no-repeat !Important}
+  .cancel-btn{background:#f26522 url(../img/sprite.png) -4px -1157px no-repeat !Important}
+  .cancel-btn:hover{background:#d1581c url(../img/sprite.png)  -4px -1157px no-repeat !Important}
 /* Fix for IE 6: */
 *html .fileinput-button {
   margin-right: -2px;
@@ -509,7 +509,7 @@ h2.payoff
 
 
 /*UI buttons*/
-.fileinput-button {  font-size: 1.1em;overflow: hidden;  margin: 0 auto;  width:200px;  cursor:pointer;padding:8px 0 6px 0;background:#09beec url(../img/plus.png) 12px center no-repeat;color:#fff;font-weight:bold;margin-bottom:30px !important}
+.fileinput-button {  font-size: 1.1em;overflow: hidden;  margin: 0 auto;  width:200px;  cursor:pointer;padding:8px 0 6px 0;background: #09beec url(../img/sprite.png) -4px -517px no-repeat;color:#fff;font-weight:bold;margin-bottom:30px !important}
 .upload-footer .fileinput-button 
 	{
 	position: relative;
@@ -522,8 +522,8 @@ h2.payoff
 .delete .btn, .cancel .btn {height:35px !important;font-size: 1.1em;}
 .cancel button{background: url(../img/delete.png) center center no-repeat !important;border:0 !important;text-indent:-999999px}
 
-.delete button{background: url(../img/delete-retina.png) center center no-repeat !important;background-size:12px 13px !important;padding:0 0 20px 0 !important;border:0 !important;text-indent:-999999px}
-.delete button:hover, .cancel button:hover{background:#ca2a2e url(../img/delete-white-retina.png) center center no-repeat !important;background-size:12px 13px !important;}
+.delete button{background: url(../img/sprite.png) 12px -1074px no-repeat !important;padding:0 0 20px 0 !important;border:0 !important;text-indent:-999999px;}
+.delete button:hover, .cancel button:hover{background:#ca2a2e url(../img/sprite.png) 12px -1115px  no-repeat !important;}
 .cancel .ui-button-text span, .delete .ui-button-text span{margin:-3px 0 0 15px !Important;display:block;float:left;}
 
 
@@ -696,8 +696,8 @@ tr.ready .size span{visibility: visible;}
 
 .advanced-box{display:none;margin:0px 0 10px 0;float:left;width:auto;}
 .advanced-box h2{margin-top:-20px !important; padding-top:0 !important}
-.more{background: url(../img/+.gif) 0 5px no-repeat;background-size:12px 12px;padding:0 0 10px 18px;float:left}
-.minus{background: url(../img/-.gif) 0 5px no-repeat;background-size:12px 12px;}
+.more{background: url(../img/sprite.png) 0 -259px no-repeat;background-size:12px;padding:0 0 10px 18px;float:left}
+.minus{background: url(../img/sprite.png) 0 -285px no-repeat;background-size:12px;}
 .translate-box .fileinput-button{margin-top:8px;text-align:center;padding:4px 0px}
 
 
@@ -919,6 +919,7 @@ footer a:hover{text-decoration:none}
 #create_private_tm_btn
 	{
 	width: 250px;
+	background-position: -3px -519px;
 	}    
 
 #swaplang
@@ -929,8 +930,8 @@ footer a:hover{text-decoration:none}
     width: 15px;
     height: 18px;
     margin: 56px 10px 0 10px;
-    background: url(../img/swap.png) 0 0px no-repeat;
-    opacity: 0.5;
+	background: url(../img/sprite.png) -13px -561px no-repeat;    
+	opacity: 0.5;
     }
     #swaplang:hover {
         opacity: 1;
