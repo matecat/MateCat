@@ -41,8 +41,10 @@ $.extend(UI, {
 		if(($(n).hasClass('glossary-loaded'))&&(entireSegment)) return false;
 		$(n).addClass('glossary-loaded');
 		$('.gl-search', n).addClass('loading');
-		$('.sub-editor.glossary .overflow .results', n).empty();
-		$('.sub-editor.glossary .overflow .graysmall.message', n).empty();
+		if(config.tms_enabled) {
+			$('.sub-editor.glossary .overflow .results', n).empty();
+			$('.sub-editor.glossary .overflow .graysmall.message', n).empty();			
+		}
 		txt = (entireSegment)? $('.text .source', n).attr('data-original') : view2rawxliff($('.gl-search .search-source', n).text());
 
 		APP.doRequest({

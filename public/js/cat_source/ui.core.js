@@ -30,7 +30,7 @@ UI = {
 			}).addClass('open');
 		}
 	},
-	activateSegment: function() {console.log('activate');
+	activateSegment: function() {
 		this.createFooter(this.currentSegment);
 		this.createButtons();
 		this.createHeader();
@@ -201,8 +201,53 @@ UI = {
 		if ($('.footer', segment).text() !== '')
 			return false; 
 
-		var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li><li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc"><a tabindex="-1" href="#">Concordance</a></li><li class="tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl"><a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div><div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances"><div class="overflow"><div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div><div class="results"></div></div></div><div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary"><div class="overflow"><div class="gl-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /><!-- a class="search-glossary" href="#"></a --><a class="set-glossary disabled" href="#"></a><div class="comment"><a href="#">(+) Comment</a><div class="input gl-comment" contenteditable="true" /></div></div><div class="results"></div></div></div>';
+		var footer =	'<ul class="submenu">' +
+					'	<li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
+					'		<a tabindex="-1" href="#">Translation matches</a>' +
+					'	</li>' +
+					'	<li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc">' +
+					'		<a tabindex="-1" href="#">Concordance</a>' +
+					'	</li>' +
+					'	<li class="tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl">' +
+					'		<a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a>' +
+					'	</li>' +
+					'</ul>' +
+					'<div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches">' +
+					'	<div class="overflow"></div>' +
+					'</div>' +
+					'<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
+					'	<div class="overflow">' + 
+						((config.tms_enabled)? '<div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div>' : '<ul class="graysmall message"><li>Concordance is not available when the TM feature is disabled</li></ul>') + 
+					'		<div class="results"></div>' +
+					'	</div>' +
+					'</div>' +
+					'<div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary">' +
+					'	<div class="overflow">' + 
+					'		<ul class="graysmall message"><li>Glossary is not available when the TM feature is disabled</li></ul>' + 
+					'	</div>' +
+					'</div>';
+				
+//					'<div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary">' +
+//					'	<div class="overflow"><ul class="graysmall message"><li>Glossary is not available when the TM feature is disabled</li></ul></div></div>';
+//					((config.tms_enabled)? '<div class="gl-search">aaaa</div>' : '<ul class="graysmall message"><li>Glossary is not available when the TM feature is disabled</li></ul>') +
+					
+//					((config.tms_enabled)?
+//					'		<div class="gl-search">' +
+//					'			<div class="input search-source" contenteditable="true" />' +
+//					'				<div class="input search-target" contenteditable="true" />' +
+//					'					<!-- a class="search-glossary" href="#"></a --><a class="set-glossary disabled" href="#"></a>' +
+//					'					<div class="comment">' +
+//					'						<a href="#">(+) Comment</a>' +
+//					'						<div class="input gl-comment" contenteditable="true" /></div>'
+//					'					</div>' +
+//					'					<div class="results"></div>' +
+//					'				</div>' +
+//					'			</div>' +
+//					'		</div>' : '<ul class="graysmall message"><li>Glossary is not available when the TM feature is disabled</li></ul>') +
+//					'	</div>' +
+//					'</div>';
 		$('.footer', segment).html(footer);
+		console.log('aa:', $('.footer', segment).html());
 
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
 			var d = JSON.parse(localStorage.getItem(config.job_id + '-' + $(segment).attr('id').split('-')[1]));
@@ -212,6 +257,8 @@ UI = {
 //			$('.sub-editor.matches .overflow .graysmall.message', segment).remove();
 //			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry, we can\'t help you this time. Check if the language pair is correct. If not, create the project again.</li></ul>');
 		}
+		console.log('bb:', $('.footer', segment).html());
+
 	},
 	createHeader: function() {
 		if ($('h2.percentuage', this.currentSegment).length) {
@@ -493,30 +540,33 @@ UI = {
 		this.loadingMore = false;
 		this.setWaypoints();
 	},
-	getNextSegment: function(segment, status) {console.log('getNextSegment: ', segment);
+	getNextSegment: function(segment, status) {//console.log('getNextSegment: ', segment);
 		var seg = this.currentSegment;
 
 		var rules = (status == 'untranslated') ? 'section.status-draft:not(.readonly), section.status-rejected:not(.readonly), section.status-new:not(.readonly)' : 'section.status-' + status + ':not(.readonly)';
 		var n = $(seg).nextAll(rules).first();
-		console.log('$(seg).nextAll().length: ', $(seg).nextAll().length);
-		console.log('n.length 1: ', n.length);
+//		console.log('$(seg).nextAll().length: ', $(seg).nextAll().length);
+//		console.log('n.length 1: ', n.length);
 		if (!n.length) {
 			n = $(seg).parents('article').next().find(rules).first();
 		}
-		console.log('n.length 2: ', n.length);
-		console.log('UI.nextUntranslatedSegmentIdByServer: ', UI.nextUntranslatedSegmentIdByServer);
-		console.log('UI.noMoreSegmentsAfter: ', UI.noMoreSegmentsAfter);
+//		console.log('n.length 2: ', n.length);
+//		console.log('UI.nextUntranslatedSegmentIdByServer: ', UI.nextUntranslatedSegmentIdByServer);
+//		console.log('UI.noMoreSegmentsAfter: ', UI.noMoreSegmentsAfter);
 		if (n.length) { // se ci sono sotto segmenti caricati con lo status indicato
-			console.log('1');
+//			console.log('1');
 			this.nextUntranslatedSegmentId = $(n).attr('id').split('-')[1];
-		} else if ((UI.nextUntranslatedSegmentIdByServer) && (!UI.noMoreSegmentsAfter)) {
-			console.log('2');
-			this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
 		} else {
-			console.log('3');
-			this.nextUntranslatedSegmentId = 0;
+			this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;			
 		}
-		console.log('UI.nextUntranslatedSegmentId: ', UI.nextUntranslatedSegmentId);
+//		} else if ((UI.nextUntranslatedSegmentIdByServer) && (!UI.noMoreSegmentsAfter)) {
+//			console.log('2');
+//			this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
+//		} else {
+//			console.log('3');
+//			this.nextUntranslatedSegmentId = 0;
+//		}
+//		console.log('UI.nextUntranslatedSegmentId: ', UI.nextUntranslatedSegmentId);
 
 		var i = $(seg).next();
 		if (!i.length) {
