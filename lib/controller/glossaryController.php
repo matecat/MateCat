@@ -117,11 +117,11 @@ class glossaryController extends ajaxController {
 
                     break;
                 case 'set':
-                    if ( empty($st['id_translator']) ) {
-                        $newUser                 = TMS::createMyMemoryKey( $this->id_job ); //throws exception
-                        updateTranslatorJob( $this->id_job, $newUser );
-                        $config[ 'id_user' ]     = $newUser->id;
+
+                    if ( $st['id_tms'] == 0 ) {
+                        throw new Exception( "Glossary is not available when the TM feature is disabled", -11 );
                     }
+
                     $TMS_RESULT = $_TMS->set($config);
                     $set_code = $TMS_RESULT;
 
@@ -135,8 +135,8 @@ class glossaryController extends ajaxController {
                                         'segment'          => $config['segment'],
                                         'translation'      => $config['translation'],
                                         'last_update_date' => date_create()->format('Y-m-d H:i:m'),
-                                        'last_updated_by'  => $newUser->id,
-                                        'created_by'       => $newUser->id,
+                                        'last_updated_by'  => $st['id_translator'],
+                                        'created_by'       => $st['id_translator'],
                                         'target_note'      => $config['tnote'],
                                     )
                             )

@@ -37,6 +37,7 @@ class catController extends viewController {
     private $firstSegmentOfFiles = '[]';
 
     private $first_job_segment;
+    private $last_job_segment;
     private $last_opened_segment;
 
 	private $thisUrl;
@@ -115,7 +116,7 @@ class catController extends viewController {
 
 		foreach ($data as $i => $prj) {
 
-            $this->project_status = $prj;
+            $this->project_status = $prj; // get one row values for the project are the same for every row
 
 			if (empty($this->pname)) {
 				$this->pname = $prj['pname'];
@@ -126,10 +127,6 @@ class catController extends viewController {
 				$this->last_opened_segment = $prj['last_opened_segment'];
 			}
 
-			if (empty($this->first_job_segment)) {
-//				$this->first_job_segment = @$seg['id_segment_start'];
-			}
-            
 			if (empty($this->cid)) {
 				$this->cid = $prj['cid'];
 			}
@@ -229,9 +226,10 @@ class catController extends viewController {
             unset( $prj[ 'rejected_words' ] );
 
             //BackWard Compatibility, for projects created with old versions
-            if( $wStruct->getTotal() == 0 ){
+            if( $wStruct->getTotal() == 0 && $prj['status_analysis'] == 'DONE' ){
                 $wCounter = new WordCount_Counter();
                 $wStruct = $wCounter->initializeJobWordCount( $this->jid, $this->password );
+                Log::doLog( "BackWard compatibility set Counter." );
             }
 
             $this->job_stats = CatUtils::getFastStatsForJob( $wStruct );
@@ -242,9 +240,13 @@ class catController extends viewController {
 
         }
 
+        //TODO check and improve, this is not needed
 		if (empty($this->last_opened_segment)) {
 			$this->last_opened_segment = getFirstSegmentId($this->jid, $this->password);
 		}
+
+        $this->first_job_segment =$this->project_status['job_first_segment'];
+        $this->last_job_segment =$this->project_status['job_last_segment'];
 
 		if (count($files_found) == 1) {
 			$this->downloadFileName = $files_found[0];
@@ -284,6 +286,7 @@ class catController extends viewController {
         $this->template->target_rtl  = $this->target_rtl;
 
         $this->template->first_job_segment   = $this->first_job_segment;
+        $this->template->last_job_segment    = $this->last_job_segment;
         $this->template->last_opened_segment = $this->last_opened_segment;
         //$this->template->data                = $this->data;
 
@@ -297,6 +300,7 @@ class catController extends viewController {
         $end_time                               = microtime( true ) * 1000;
         $load_time                              = $end_time - $this->start_time;
         $this->template->load_time              = $load_time;
+        $this->template->tms_enabled            = var_export( (bool)$this->project_status['id_tms'], true );
         $this->template->time_to_edit_enabled   = INIT::$TIME_TO_EDIT_ENABLED;
         $this->template->build_number           = INIT::$BUILD_NUMBER;
         $this->template->downloadFileName       = $this->downloadFileName;

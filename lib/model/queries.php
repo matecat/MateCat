@@ -619,13 +619,15 @@ function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
 
 function getSegmentsInfo( $jid, $password ) {
 
-    $query = "select j.id as jid, j.id_project as pid,j.source,j.target, j.last_opened_segment, j.id_translator as tid,
-		p.id_customer as cid, j.id_translator as tid, j.status_owner as status,
+    $query = "select j.id as jid, j.id_project as pid,j.source,j.target,
+                j.last_opened_segment, j.id_translator as tid, j.id_tms,
+		        p.id_customer as cid, j.id_translator as tid, j.status_owner as status,
 
-		j.new_words, j.draft_words, j.translated_words, j.approved_words, j.rejected_words,
+                j.job_first_segment, j.job_last_segment,
+		        j.new_words, j.draft_words, j.translated_words, j.approved_words, j.rejected_words,
 
-		p.name as pname, p.create_date , fj.id_file, p.status_analysis,
-		f.filename, f.mime_type
+                p.name as pname, p.create_date , fj.id_file, p.status_analysis,
+                f.filename, f.mime_type
 
 			from jobs j 
 			inner join projects p on p.id=j.id_project
