@@ -509,7 +509,7 @@ h2.payoff
 
 
 /*UI buttons*/
-.fileinput-button {  font-size: 1.1em;overflow: hidden;  margin: 0 auto;  width:200px;  cursor:pointer;padding:8px 0 6px 0;background: #09beec url(../img/sprite.png) -4px -517px no-repeat;color:#fff;font-weight:bold;margin-bottom:30px !important}
+.fileinput-button {  font-size: 1.1em;overflow: hidden;  margin: 0 auto;  width:200px;  cursor:pointer;padding:8px 0 6px 0;background: #09beec url(../img/sprite.png) -4px -516px no-repeat;color:#fff;font-weight:bold;margin-bottom:30px !important}
 .upload-footer .fileinput-button 
 	{
 	position: relative;
@@ -696,7 +696,7 @@ tr.ready .size span{visibility: visible;}
 
 .advanced-box{display:none;margin:0px 0 10px 0;float:left;width:auto;}
 .advanced-box h2{margin-top:-20px !important; padding-top:0 !important}
-.more{background: url(../img/sprite.png) 0 -259px no-repeat;background-size:12px;padding:0 0 10px 18px;float:left}
+.more{background: url(../img/sprite.png) 0 -259px no-repeat;background-size:12px;padding:0 0 5px 18px;margin-bottom:5px;float:left}
 .minus{background: url(../img/sprite.png) 0 -285px no-repeat;background-size:12px;}
 .translate-box .fileinput-button{margin-top:8px;text-align:center;padding:4px 0px}
 

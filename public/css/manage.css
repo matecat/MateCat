@@ -739,8 +739,7 @@ margin-top: 10px;}
 }
 .logosmall {display:none;}
 .menuscroll .logosmall {display:block}
-.logosmall {background: url(../img/logo-ico.png) no-repeat;
-background-size: 43px;padding-top: 30px;}
+.logosmall {background: url(../img/sprite.png) 1px -1403px no-repeat;padding-top: 30px;}
 
 
 .block { min-height:600px;height: auto;
