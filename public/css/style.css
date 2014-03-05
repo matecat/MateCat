@@ -2233,11 +2233,11 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 
 .noConnection
 {
-	-webkit-animation: fadein 2s; /* Safari and Chrome */
-       -moz-animation: fadein 2s; /* Firefox */
-        -ms-animation: fadein 2s; /* Internet Explorer */
-         -o-animation: fadein 2s; /* Opera */
-            animation: fadein 2s;
+	-webkit-animation: fadein 0.5s; /* Safari and Chrome */
+       -moz-animation: fadein 0.5s; /* Firefox */
+        -ms-animation: fadein 0.5s; /* Internet Explorer */
+         -o-animation: fadein 0.5s; /* Opera */
+            animation: fadein 0.5s;
 			background: #333;
 	position: fixed;
 	top: 0;
@@ -2275,6 +2275,52 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 @-o-keyframes fadein {
     from { opacity: 0; }
     to   { opacity: 0.6; }
+}
+
+.ReConnection
+{
+	-webkit-animation: fadeout 0.5s; /* Safari and Chrome */
+       -moz-animation: fadeout 0.5s; /* Firefox */
+        -ms-animation: fadeout 0.5s; /* Internet Explorer */
+         -o-animation: fadeout 0.5s; /* Opera */
+            animation: fadeout 0.5s;
+			background: #333;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 99999999999999;
+	opacity: 0.6;
+}
+
+@keyframes fadeout {
+    from { opacity: 0.6 }
+    to   { opacity: 0 }
+}
+
+/* Firefox */
+@-moz-keyframes fadeout {
+    from { opacity: 0.6 }
+    to   { opacity: 0 }
+}
+
+/* Safari and Chrome */
+@-webkit-keyframes fadeout{
+    from { opacity: 0.6 }
+    to   { opacity: 0 }
+}
+
+/* Internet Explorer */
+@-ms-keyframes fadeout {
+    from { opacity: 0.6 }
+    to   { opacity: 0 }
+}​
+
+/* Opera */
+@-o-keyframes fadeout {
+    from { opacity: 0.6 }
+    to   { opacity: 0 }
 }
 	
 
