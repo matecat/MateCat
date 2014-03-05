@@ -812,8 +812,6 @@ only screen and (min-device-pixel-ratio: 2),
 only screen and (min-resolution: 192dpi),
 only screen and (in-resolution: 2dppx) { 
 .preview span {height: 30px;width: 30px;display: block;background-size: 25px;}
-
-
 .extdoc {background: url(../img/matecat_file_icons2x.png) 6px 0 no-repeat !important;} /* .doc, .dot, . docx, .dotx, .docm, .dotm, .odt, .sxw*/
 .extppt {background: url(../img/matecat_file_icons2x.png) 6px -34px no-repeat !important;} /* .pot, .pps, .ppt, .potm, .potx, .ppsm, .ppsx, .pptm, .pptx, .odp, .sxi*/
 .exthtm {background: url(../img/matecat_file_icons2x.png) 6px -70px no-repeat !important;} /* .htm, .html */
@@ -851,6 +849,12 @@ body.cattool #jobMenu li a
 	background: url(../img/searchgl-black2x.png) no-repeat;
 	background-size: 20px;
 }  
+
+.popup h1 {
+	background: #6d6e71 url(../img/sprite2x.png) 10px 10px no-repeat;	
+		background-size: 42px;
+
+}
 
 }
 
@@ -2113,7 +2117,7 @@ body.archived section .text
 
 
 
-section.readonly .status-container
+section.readonly .status-container,
 body.archived section .status-container
 {
     /*display: none;*/
@@ -3196,4 +3200,34 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 	border-radius: 0px 3px 0px 0px;
 	-webkit-border-radius: 0px 3px 0px 0px;
 	z-index: 999999999999999;
+}
+/* retina display query */
+@media only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (min--moz-device-pixel-ratio: 2),
+only screen and (-o-min-device-pixel-ratio: 2/1),
+only screen and (min-device-pixel-ratio: 2),
+only screen and (min-resolution: 192dpi),
+only screen and (in-resolution: 2dppx) { 
+
+.breadcrumbs #pname {
+	background: url(../img/sprite2x.png) -15px -434px no-repeat;
+}
+.outersource .copy {
+	background: url(../img/sprite2x.png) 5px -853px no-repeat;
+}
+.sub-editor .gl-search .set-glossary {
+	background: url(../img/sprite2x.png) -11px -407px no-repeat;
+}
+.warnings {
+	background: url(../img/sprite2x.png) -13px -1360px no-repeat;	
+}
+.close {
+	background: url(../img/sprite2x.png) -11px -156px no-repeat;
+}
+.close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover {
+	background: url(../img/sprite2x.png) -11px -187px no-repeat;
+}
+.breadcrumbs #pname, .outersource .copy, .sub-editor .gl-search .set-glossary, .warnings, .close, .close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover {
+	background-size: 42px;
+}
 }

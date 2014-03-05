@@ -1890,6 +1890,8 @@ UI = {
 		$('#contextMenu .shortcut .cmd').html(cmd);
 	},
 	setTranslation_success: function(d, segment, status) {
+		console.log('d: ', d);
+		console.log('segment: ', segment);
 		if (d.error.length)
 			this.processErrors(d.error, 'setTranslation');
 		if (d.data == 'OK') {
