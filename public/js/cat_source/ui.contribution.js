@@ -97,6 +97,9 @@ $.extend(UI, {
 				id_translator: config.id_translator
 			},
 			context: $('#' + id),
+			error: function(d) {
+				UI.failedConnection(id_segment, 'getContribution');
+			},
 			success: function(d) {
 				UI.getContribution_success(d, this);
 			},

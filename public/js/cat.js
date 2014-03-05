@@ -51,7 +51,7 @@ UI = {
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
 		$('.percentuage', segment).removeClass('visible');
 		if (!segment.hasClass('saved'))
-			this.setTranslation(segment, status);
+			this.setTranslation($(segment).attr('id').split('-')[1], status);
 		segment.removeClass('saved');
 		this.setContribution(segment, status, byStatus);
 		this.setContributionMT(segment, status, byStatus);
@@ -236,11 +236,9 @@ UI = {
 					'					<div class="results"></div>' +
 					'				</div>' +
 					'			</div>' +
-					'		</div>' : 
-					'<ul class="graysmall message"><li>Glossary is not available when the TM feature is disabled</li></ul>') +
+					'		</div>' : '<ul class="graysmall message"><li>Glossary is not available when the TM feature is disabled</li></ul>') +
 					'	</div>' +
 					'</div>';
-				
 		$('.footer', segment).html(footer);
 
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
@@ -251,6 +249,7 @@ UI = {
 //			$('.sub-editor.matches .overflow .graysmall.message', segment).remove();
 //			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry, we can\'t help you this time. Check if the language pair is correct. If not, create the project again.</li></ul>');
 		}
+
 	},
 	createHeader: function() {
 		if ($('h2.percentuage', this.currentSegment).length) {
@@ -1102,7 +1101,7 @@ UI = {
 			status = 'draft';
 		}
 		console.log('SAVE SEGMENT');
-		this.setTranslation(segment, status, 'autosave');
+		this.setTranslation($(segment).attr('id').split('-')[1], status, 'autosave');
 		segment.addClass('saved');
 	},
 	renderAndScrollToSegment: function(sid) {
@@ -1599,11 +1598,19 @@ UI = {
 			}
 		}, 'local');
 	},
-	setTranslation: function(segment, status, caller) {
+	setTranslation: function(id_segment, status, caller) {
+		reqArguments = arguments;
+		segment = $('#segment-' + id_segment);
+		console.log('arguments: ', arguments);
+		console.log('id_segment: ', id_segment);
+		console.log('status: ', status);
+		console.log('caller: ', caller);
+  
+		
 		caller = (typeof caller == 'undefined') ? false : caller;
 //		console.log('SET TRANSLATION');
-		var info = $(segment).attr('id').split('-');
-		var id_segment = info[1];
+//		var info = $(segment).attr('id').split('-');
+//		var id_segment = info[1];
 		var file = $(segment).parents('article');
 //		var status = status;
 
@@ -1634,7 +1641,6 @@ UI = {
 //		}
 		autosave = (caller == 'autosave') ? true : false;
 
-
 		APP.doRequest({
 			data: {
 				action: 'setTranslation',
@@ -1650,11 +1656,62 @@ UI = {
 				chosen_suggestion_index: chosen_suggestion,
 				autosave: autosave
 			},
+			error: function() {
+//				UI.failedConnection(reqArguments, 'setTranslation');
+			},
 			success: function(d) {
 				UI.setTranslation_success(d, segment, status);
 			}
 		});
 	},
+	failedConnection: function(reqArguments, operation) {
+//		$('.noConnection, .noConnectionMsg').remove();
+		if(operation != 'getWarning') {
+			pendingConnection = {
+				operation: operation,
+				args: reqArguments
+			}
+			UI.abortedOperations.push(pendingConnection);
+		}
+//		UI.abortedReqArguments = reqArguments;
+//		UI.abortedOperation = operation;
+		if(!$('.noConnection').length) UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available<br /><input type="button" id="checkConnection" value="Try to reconnect" /></div>');
+	},
+	checkConnection: function() {
+		APP.doRequest({
+			data: {
+				action: 'ajaxUtils',
+				exec: 'ping'
+			},
+			error: function(d) {
+				console.log('error on checking connection');
+			},
+			success: function(d) {
+				console.log('connection is back');
+				UI.connectionIsBack();
+			}
+		});
+	},
+	
+	connectionIsBack: function() {
+		var arg = UI.abortedReqArguments;
+		if(UI.abortedOperation == 'setTranslation') {
+			UI[UI.abortedOperation](arg[0], arg[1], arg [2]);
+			restoredOperationMsg = 'The translation you were saving before interruction is now been saved';
+		} else if(UI.abortedOperation == 'setContribution') {
+			
+		} else {
+			restoredOperationMsg = '';
+		}
+
+		$('.noConnectionMsg').text('The connection is back. Your last, interrupted operation has now been done.');
+
+
+		$('.noConnection, .noConnectionMsg').remove();
+
+	},
+
+	
     /**
      * This function is used when a string has to be sent to the server
      * It works over a clone of the editarea ( translation area ) and manage the text()
@@ -2091,6 +2148,7 @@ $.extend(UI, {
 		this.firstMarking = false;
 		this.surveyDisplayed = false;
 		this.warningStopped = false;
+		this.abortedOperations = [];
 		this.setContextMenu();
 		this.createJobMenu();
 		$('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');
@@ -2476,6 +2534,9 @@ $.extend(UI, {
 			} else {
 				$('#segment-' + $('#contextMenu').attr('data-sid') + ' .editarea').trigger('click', ['clicking', 'openConcordance']);
 			}
+		}).on('click', '#checkConnection', function(e) {console.log('eccolo');
+			e.preventDefault();
+			UI.checkConnection();
 		}).on('click', '#statistics .meter a', function(e) {
 			e.preventDefault();
 			UI.gotoNextUntranslatedSegment();
@@ -3248,7 +3309,7 @@ $.extend(UI, {
 
 				$("mark.currSearchItem").text(txt);
 				segment = $("mark.currSearchItem").parents('section');
-				UI.setTranslation(segment, UI.getStatus(segment), 'replace');
+				UI.setTranslation($(segment).attr('id').split('-')[1], UI.getStatus(segment), 'replace');
 				UI.updateSearchDisplayCount(segment);
 				$(segment).attr('data-searchItems', $('mark.searchMarker', segment).length);
 
@@ -3392,6 +3453,9 @@ $.extend(UI, {
 				id_translator: config.id_translator
 			},
 			context: $('#' + id),
+			error: function(d) {
+				UI.failedConnection(id_segment, 'getContribution');
+			},
 			success: function(d) {
 				UI.getContribution_success(d, this);
 			},
