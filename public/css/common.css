@@ -812,8 +812,6 @@ only screen and (min-device-pixel-ratio: 2),
 only screen and (min-resolution: 192dpi),
 only screen and (in-resolution: 2dppx) { 
 .preview span {height: 30px;width: 30px;display: block;background-size: 25px;}
-
-
 .extdoc {background: url(../img/matecat_file_icons2x.png) 6px 0 no-repeat !important;} /* .doc, .dot, . docx, .dotx, .docm, .dotm, .odt, .sxw*/
 .extppt {background: url(../img/matecat_file_icons2x.png) 6px -34px no-repeat !important;} /* .pot, .pps, .ppt, .potm, .potx, .ppsm, .ppsx, .pptm, .pptx, .odp, .sxi*/
 .exthtm {background: url(../img/matecat_file_icons2x.png) 6px -70px no-repeat !important;} /* .htm, .html */
@@ -851,5 +849,11 @@ body.cattool #jobMenu li a
 	background: url(../img/searchgl-black2x.png) no-repeat;
 	background-size: 20px;
 }  
+
+.popup h1 {
+	background: #6d6e71 url(../img/sprite2x.png) 10px 10px no-repeat;	
+		background-size: 42px;
+
+}
 
 }

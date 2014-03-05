@@ -2341,3 +2341,33 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 	-webkit-border-radius: 0px 3px 0px 0px;
 	z-index: 999999999999999;
 }
+/* retina display query */
+@media only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (min--moz-device-pixel-ratio: 2),
+only screen and (-o-min-device-pixel-ratio: 2/1),
+only screen and (min-device-pixel-ratio: 2),
+only screen and (min-resolution: 192dpi),
+only screen and (in-resolution: 2dppx) { 
+
+.breadcrumbs #pname {
+	background: url(../img/sprite2x.png) -15px -434px no-repeat;
+}
+.outersource .copy {
+	background: url(../img/sprite2x.png) 5px -853px no-repeat;
+}
+.sub-editor .gl-search .set-glossary {
+	background: url(../img/sprite2x.png) -11px -407px no-repeat;
+}
+.warnings {
+	background: url(../img/sprite2x.png) -13px -1360px no-repeat;	
+}
+.close {
+	background: url(../img/sprite2x.png) -11px -156px no-repeat;
+}
+.close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover {
+	background: url(../img/sprite2x.png) -11px -187px no-repeat;
+}
+.breadcrumbs #pname, .outersource .copy, .sub-editor .gl-search .set-glossary, .warnings, .close, .close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover {
+	background-size: 42px;
+}
+}
