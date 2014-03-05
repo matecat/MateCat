@@ -956,7 +956,7 @@ body.searchActive #filterSwitch
 
 .tag-mismatch{float:left !important}
 
-.warnings{clear:left;color:#D65959;background: url(../img/sprite.png) -11px -1360px no-repeat;float:left;position:relative;left:52%;top:-12px;margin-top:-12px;padding:2px  0 2px 18px;font-size:14px;background-size:15px;max-width:200px;text-align: left}
+.warnings{clear:left;color:#D65959;background: url(../img/sprite.png) -13px -1360px no-repeat;float:left;position:relative;left:52%;top:-12px;margin-top:-12px;padding:2px  0 2px 18px;font-size:14px;max-width:200px;text-align: left}
 .warnings:empty{ display:none; }
 .mismatch .warnings{display:block}
 
@@ -3089,7 +3089,12 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 
 .noConnection
 {
-	background: #79BEE4;
+	-webkit-animation: fadein 0.5s; /* Safari and Chrome */
+       -moz-animation: fadein 0.5s; /* Firefox */
+        -ms-animation: fadein 0.5s; /* Internet Explorer */
+         -o-animation: fadein 0.5s; /* Opera */
+            animation: fadein 0.5s;
+			background: #333;
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -3098,6 +3103,83 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 	z-index: 99999999999999;
 	opacity: 0.6;
 }
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 0.6 }
+}
+
+/* Firefox */
+@-moz-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 0.6; }
+}
+
+/* Safari and Chrome */
+@-webkit-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 0.6; }
+}
+
+/* Internet Explorer */
+@-ms-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 0.6; }
+}​
+
+/* Opera */
+@-o-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 0.6; }
+}
+
+.reConnection
+{
+	-webkit-animation: fadeout 0.5s; /* Safari and Chrome */
+       -moz-animation: fadeout 0.5s; /* Firefox */
+        -ms-animation: fadeout 0.5s; /* Internet Explorer */
+         -o-animation: fadeout 0.5s; /* Opera */
+            animation: fadeout 0.5s;
+			background: #333;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 99999999999999;
+	opacity: 0.6;
+}
+
+@keyframes fadeout {
+    from { opacity: 0.6 }
+    to   { opacity: 0 }
+}
+
+/* Firefox */
+@-moz-keyframes fadeout {
+    from { opacity: 0.6 }
+    to   { opacity: 0 }
+}
+
+/* Safari and Chrome */
+@-webkit-keyframes fadeout{
+    from { opacity: 0.6 }
+    to   { opacity: 0 }
+}
+
+/* Internet Explorer */
+@-ms-keyframes fadeout {
+    from { opacity: 0.6 }
+    to   { opacity: 0 }
+}​
+
+/* Opera */
+@-o-keyframes fadeout {
+    from { opacity: 0.6 }
+    to   { opacity: 0 }
+}
+	
+
 .noConnectionMsg
 {
 	position: fixed;

@@ -98,7 +98,7 @@ $.extend(UI, {
 			},
 			context: $('#' + id),
 			error: function(d) {
-				UI.failedConnection(id_segment, 'getContribution');
+				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
 				UI.getContribution_success(d, this);
@@ -350,6 +350,9 @@ $.extend(UI, {
 					seg: source,
 					tra: target,
 					id_translator: config.id_translator
+				},
+				error: function() {
+					UI.failedConnection(0, 'deleteContribution');
 				},
 				success: function(d) {
 					UI.setDeleteSuggestion_success(d);
