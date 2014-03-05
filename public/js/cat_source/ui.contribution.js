@@ -222,7 +222,8 @@ $.extend(UI, {
 			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');
 		}
 	},
-	setContribution: function(segment, status, byStatus) {
+	setContribution: function(id_segment, status, byStatus) {
+		segment = $('#segment-' + id_segment);
 		if ((status == 'draft') || (status == 'rejected'))
 			return false;
 
@@ -244,6 +245,7 @@ $.extend(UI, {
 		this.updateContribution(source, target);
 	},
 	updateContribution: function(source, target) {
+		reqArguments = arguments;
 		source = view2rawxliff(source);
 		target = view2rawxliff(target);
 		APP.doRequest({
@@ -260,6 +262,10 @@ $.extend(UI, {
 				id_customer: config.id_customer,
 				private_customer: config.private_customer
 			},
+			context: reqArguments,
+			error: function() {
+				UI.failedConnection(this, 'updateContribution');
+			},
 			success: function(d) {
 				if (d.error.length)
 					UI.processErrors(d.error, 'setContribution');
@@ -267,6 +273,7 @@ $.extend(UI, {
 		});
 	},
 	setContributionMT: function(segment, status, byStatus) {
+		reqArguments = arguments;
 		if ((status == 'draft') || (status == 'rejected'))
 			return false;
 		var source = $('.source', segment).text();
@@ -305,6 +312,10 @@ $.extend(UI, {
 				time_to_edit: time_to_edit,
 				id_job: config.job_id,
 				chosen_suggestion_index: chosen_suggestion
+			},
+			context: reqArguments,
+			error: function() {
+				UI.failedConnection(this, 'setContributionMT');
 			},
 			success: function(d) {
 				if (d.error.length)
