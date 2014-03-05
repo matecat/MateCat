@@ -373,10 +373,10 @@ body.manage td.words
 th.header {
 	background: #efefef url(../img/bg.gif) right center no-repeat !important;
 }
-th.headerSortUp {
+th.headerSortUp, th.tablesorter-headerAsc {
 	background: #efefef url(../img/asc.gif) right center no-repeat !important;
 }
-th.headerSortDown {
+th.headerSortDown, th.tablesorter-headerDesc {
 	background: #efefef url(../img/desc.gif) right center no-repeat !important;
 }
 
@@ -808,8 +808,10 @@ body.manage .actions a.archive {
 body.manage .actions a.unarchive {
 	background: url(../img/sprite2x.png) -13px -39px no-repeat;
 }
-
-.filter, body.manage a.cancel-project, body.manage a.archive-project, body.manage a.resume-project, body.manage a.unarchive-project, body.manage .actions a.change, body.manage .actions a.cancel, body.manage .actions a.archive, body.manage .actions a.unarchive, .breadcrumbs #pname  {
+.logosmall {
+	background: url(../img/sprite2x.png) 1px -1403px no-repeat;
+}
+.filter, body.manage a.cancel-project, body.manage a.archive-project, body.manage a.resume-project, body.manage a.unarchive-project, body.manage .actions a.change, body.manage .actions a.cancel, body.manage .actions a.archive, body.manage .actions a.unarchive, .breadcrumbs #pname, .logosmall  {
 	background-size:42px;	
 }
 }
