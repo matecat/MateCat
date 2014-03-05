@@ -497,7 +497,7 @@ h2.payoff
 .uploaded .btncontinue{display:block;}
 .btncontinue p{float:left !important;font-size:14px !important;margin:0px 0 0 0 !important;padding:0;}
 .btncontinue .fileinput-button{float:left ;margin:7px 0 0 10px !important;width:auto;padding:8px 10px 0px 30px}
-
+#add-files {background-position: -4px -518px;}
 
 
 
@@ -689,7 +689,10 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 .dragging .file-drag, .uploaded .file-drop, .uploaded .fileupload-buttonbar{height:0;}
 
 .name{width:230px;}
-.size {width:200px;}
+.size {
+width: 100px;
+text-align: right!important; padding-right:20px;
+}
 .size span{visibility: hidden;}
 
 tr.ready .size span{visibility: visible;}
