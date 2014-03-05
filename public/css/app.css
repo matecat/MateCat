@@ -3087,3 +3087,32 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 {
 	margin-top: -370px;
 }
+
+.noConnection
+{
+	background: #79BEE4;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 99999999999999;
+	opacity: 0.6;
+}
+.noConnectionMsg
+{
+	position: fixed;
+	left: 0px;
+	bottom: 0px;
+	z-index: 10001;
+	background: #434C56;
+	border: 1px solid #1A232E;
+	color: #DDE4EA;
+	border-left: 0px;
+	border-bottom: 0px;
+	padding: 14px;
+	padding-bottom: 30px;
+	border-radius: 0px 3px 0px 0px;
+	-webkit-border-radius: 0px 3px 0px 0px;
+	z-index: 999999999999999;
+}
