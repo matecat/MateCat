@@ -1257,7 +1257,7 @@ body.archived section .text
 
 
 
-section.readonly .status-container
+section.readonly .status-container,
 body.archived section .status-container
 {
     /*display: none;*/
@@ -2277,7 +2277,7 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
     to   { opacity: 0.6; }
 }
 
-.ReConnection
+.reConnection
 {
 	-webkit-animation: fadeout 0.5s; /* Safari and Chrome */
        -moz-animation: fadeout 0.5s; /* Firefox */

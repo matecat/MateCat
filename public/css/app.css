@@ -542,10 +542,9 @@ box-shadow: inset 0px 1px #fff;
     {
     overflow: visible;
     max-height: inherit;
-    background-size: 35px 25px !important;
     font-size: 24px;
-    background: #6d6e71 url(../img/matecat-logosmall.png) 12px center no-repeat;
-    padding: 7px 10px 7px 58px;
+    background: #6d6e71 url(../img/sprite.png) 10px 10px no-repeat;
+    padding: 10px 10px 7px 58px;
     border-bottom: 1px solid #000;
     color: #fff;
     margin: 0 !important;
@@ -606,18 +605,18 @@ box-shadow: inset 0px 1px #fff;
 
 .popup .x-popup
     {
-    background: url(../img/x-popup.png) center center no-repeat;
-    display: block;
-    height: 40px;
-    width: 40px;
-    float: right;
-    margin: 1px 0px 0 0;
-    background-size: 19px 19px;
+ background: url(../img/sprite.png) 10px -303px no-repeat;
+display: block;
+height: 40px;
+width: 40px;
+float: right;
+margin: 1px 0px 0 0;
+background-size: 22px;
     }
 .popup .x-popup:hover
     {
-    background: url(../img/x-popup-hover.png) center center no-repeat;
-    background-size: 19px 19px;
+ background: url(../img/sprite.png) 10px -334px no-repeat;
+background-size: 22px;
     }  
 
 .popup .btn-ok,
@@ -859,7 +858,7 @@ body.cattool #jobMenu li a
 /*
 body.cattool{background: url(../img/loading.gif) 47.5% 241px no-repeat;background-size: 20px 20px;}
 */
-body.cattool.editing{background: url(../img/loading.gif) 47.5% 241px no-repeat;background-size: 20px 20px;}
+body.cattool.editing{/*background: url(../img/loading.gif) 47.5% 241px no-repeat;background-size: 20px 20px;*/}
 
 
 input, textarea{font-family:calibri, Arial, Helvetica, sans-serif;font-size:16px;}
@@ -885,8 +884,8 @@ background-size: 24px;
 }
 .warningbox
 {
-	background: url(../img/warning.png) center 10px no-repeat !important;
-	background-size:28px 24px !important;
+background: url(../img/sprite.png) 16px -848px no-repeat!important;
+background-size: 28px!important;
 }
 
 #notifbox a
@@ -957,7 +956,7 @@ body.searchActive #filterSwitch
 
 .tag-mismatch{float:left !important}
 
-.warnings{clear:left;color:#D65959;background:url(../img/red-error-symbol.png) 0px 4px no-repeat;float:left;position:relative;left:52%;top:-12px;margin-top:-12px;padding:2px  0 2px 18px;font-size:14px;background-size:15px;max-width:200px;text-align: left}
+.warnings{clear:left;color:#D65959;background: url(../img/sprite.png) -13px -1360px no-repeat;float:left;position:relative;left:52%;top:-12px;margin-top:-12px;padding:2px  0 2px 18px;font-size:14px;max-width:200px;text-align: left}
 .warnings:empty{ display:none; }
 .mismatch .warnings{display:block}
 
@@ -2367,13 +2366,13 @@ textarea, input, .editarea, .search-editarea, select  {
 .graysmall .b{padding-left:25px!important;position:relative}
 .message li{background: url(../img/bad.png) 22px center no-repeat;padding-left:40px !Important;background-size:12px 12px}
 .graysmall:hover .trash{height:20px;}
-.trash:hover{background:url(../img/delete-black.gif) center 0px no-repeat}
+.trash:hover{background: url(../img/sprite.png) -10px -1245px no-repeat;opacity:1;}
 
 
 .trash{transition: width 2s; transition: width 2s; /* Firefox 4 */ -webkit-transition: width 2s; /* Safari and Chrome */ -o-transition: width 2s; /* Opera */ -webkit-transition: all 0.1s linear;
 	   transition: all 0.1s linear;
 	   -o-transition: all 0.1s linear;
-	   -ms-transition: all 0.1s linear;display:block;height:0;width:20px;background:url(../img/delete.png) center 2px no-repeat;position:absolute;right:5px;top:14px}
+	   -ms-transition: all 0.1s linear;display:block;height:0;width:20px;background: url(../img/sprite.png) -10px -1243px no-repeat; opacity:0.5;position:absolute;right:5px;top:14px}
 .graysmall-message{bottom:-10px;left:25px;position:absolute;font-size:10px;display:none;color:#999999}
 
 
@@ -3090,7 +3089,12 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 
 .noConnection
 {
-	background: #79BEE4;
+	-webkit-animation: fadein 0.5s; /* Safari and Chrome */
+       -moz-animation: fadein 0.5s; /* Firefox */
+        -ms-animation: fadein 0.5s; /* Internet Explorer */
+         -o-animation: fadein 0.5s; /* Opera */
+            animation: fadein 0.5s;
+			background: #333;
 	position: fixed;
 	top: 0;
 	left: 0;
@@ -3099,6 +3103,83 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 	z-index: 99999999999999;
 	opacity: 0.6;
 }
+
+@keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 0.6 }
+}
+
+/* Firefox */
+@-moz-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 0.6; }
+}
+
+/* Safari and Chrome */
+@-webkit-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 0.6; }
+}
+
+/* Internet Explorer */
+@-ms-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 0.6; }
+}​
+
+/* Opera */
+@-o-keyframes fadein {
+    from { opacity: 0; }
+    to   { opacity: 0.6; }
+}
+
+.reConnection
+{
+	-webkit-animation: fadeout 0.5s; /* Safari and Chrome */
+       -moz-animation: fadeout 0.5s; /* Firefox */
+        -ms-animation: fadeout 0.5s; /* Internet Explorer */
+         -o-animation: fadeout 0.5s; /* Opera */
+            animation: fadeout 0.5s;
+			background: #333;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	z-index: 99999999999999;
+	opacity: 0.6;
+}
+
+@keyframes fadeout {
+    from { opacity: 0.6 }
+    to   { opacity: 0 }
+}
+
+/* Firefox */
+@-moz-keyframes fadeout {
+    from { opacity: 0.6 }
+    to   { opacity: 0 }
+}
+
+/* Safari and Chrome */
+@-webkit-keyframes fadeout{
+    from { opacity: 0.6 }
+    to   { opacity: 0 }
+}
+
+/* Internet Explorer */
+@-ms-keyframes fadeout {
+    from { opacity: 0.6 }
+    to   { opacity: 0 }
+}​
+
+/* Opera */
+@-o-keyframes fadeout {
+    from { opacity: 0.6 }
+    to   { opacity: 0 }
+}
+	
+
 .noConnectionMsg
 {
 	position: fixed;

@@ -279,7 +279,7 @@ $.extend(UI, {
 			} else {
 				$('#segment-' + $('#contextMenu').attr('data-sid') + ' .editarea').trigger('click', ['clicking', 'openConcordance']);
 			}
-		}).on('click', '#checkConnection', function(e) {console.log('eccolo');
+		}).on('click', '#checkConnection', function(e) {
 			e.preventDefault();
 			UI.checkConnection();
 		}).on('click', '#statistics .meter a', function(e) {
@@ -802,6 +802,9 @@ $.extend(UI, {
 					id_item: item.attr('data-id'),
 					id_job: config.job_id,
 					password: config.password
+				},
+				error: function() {
+					UI.failedConnection(0, 'glossary');
 				},
 				context: [UI.currentSegment, next]
 			});

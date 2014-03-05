@@ -53,7 +53,7 @@ UI = {
 		if (!segment.hasClass('saved'))
 			this.setTranslation($(segment).attr('id').split('-')[1], status);
 		segment.removeClass('saved');
-		this.setContribution(segment, status, byStatus);
+		this.setContribution($(segment).attr('id').split('-')[1], status, byStatus);
 		this.setContributionMT(segment, status, byStatus);
 		this.getNextSegment(this.currentSegment, 'untranslated');
 		if(!this.nextUntranslatedSegmentId) {
@@ -71,9 +71,11 @@ UI = {
 //		console.log('UI.hasToBeRerendered: ', this.hasToBeRerendered);
 //		console.log(this.initSegNum + ' - ' + this.numOpenedSegments + ' - ' + (this.initSegNum/this.numOpenedSegments));
 //		if (($('section').length > 500)||(this.numOpenedSegments > 2)) {
+/*
 		if (($('section').length > 500)||((this.initSegNum/this.numOpenedSegments) < 2)||(this.hasToBeRerendered)) {
 			UI.reloadToSegment(UI.currentSegmentId);
 		}
+*/		
 	},
 	checkIfFinished: function(closing) {
 		if (((this.progress_perc != this.done_percentage) && (this.progress_perc == '100')) || ((closing) && (this.progress_perc == '100'))) {
@@ -486,6 +488,9 @@ UI = {
 				segment: segId,
 				where: where
 			},
+			error: function() {
+				UI.failedConnection(0, 'getMoreSegments');
+			},
 			success: function(d) {
 				UI.getMoreSegments_success(d);
 			}
@@ -609,6 +614,9 @@ UI = {
 				segment: seg,
 				where: where
 			},
+			error: function() {
+				UI.failedConnection(0, 'getSegments');
+			},
 			success: function(d) {
 				UI.getSegments_success(d, options);
 			}
@@ -691,6 +699,9 @@ UI = {
 					last_timestamp: lastUpdateRequested.getTime(),
 					first_segment: $('section').first().attr('id').split('-')[1],
 					last_segment: $('section').last().attr('id').split('-')[1]
+				},
+				error: function() {
+					UI.failedConnection(0, 'getUpdatedTranslations');
 				},
 				success: function(d) {
 					UI.lastUpdateRequested = new Date();
@@ -1185,6 +1196,9 @@ UI = {
 				sentence: UI.editarea.text()
 			},
 			context: editarea,
+			error: function() {
+				UI.failedConnection(0, 'getSpellcheck');
+			},
 			success: function(data) {
 				ed = this;
 				$.each(data.result, function(key, value) { //key --> 0: { 'word': { 'offset':20, 'misses':['word1','word2'] } }
@@ -1220,6 +1234,7 @@ UI = {
 		});
 	},
 	setCurrentSegment: function(segment, closed) {
+		reqArguments = arguments;
 		var id_segment = this.currentSegmentId;
 		if (closed) {
 			id_segment = 0;
@@ -1239,6 +1254,10 @@ UI = {
 				password: config.password,
 				id_segment: id_segment,
 				id_job: config.job_id
+			},
+			context: reqArguments,
+			error: function() {
+				UI.failedConnection(this, 'setCurrentSegment');
 			},
 			success: function(d) {
 				UI.setCurrentSegment_success(d);
@@ -1522,6 +1541,7 @@ UI = {
 			},
 			error: function() {
 				UI.warningStopped = true;
+				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(data) {
 				UI.startWarning();
@@ -1560,13 +1580,13 @@ UI = {
 
 		//var src_content = $('.source', this.currentSegment).attr('data-original');
 
-        if( config.brPlaceholdEnabled ){
-            src_content = this.postProcessEditarea(this.currentSegment, '.source');
-            trg_content = this.postProcessEditarea(this.currentSegment);
-        } else {
-            src_content = this.getSegmentSource();
-            trg_content = this.getSegmentTarget();
-        }
+		if( config.brPlaceholdEnabled ){
+			src_content = this.postProcessEditarea(this.currentSegment, '.source');
+			trg_content = this.postProcessEditarea(this.currentSegment);
+		} else {
+			src_content = this.getSegmentSource();
+			trg_content = this.getSegmentTarget();
+		}
 
 		this.checkSegmentsArray[token] = trg_content;
 		APP.doRequest({
@@ -1577,6 +1597,9 @@ UI = {
 				password: config.password,
 				src_content: src_content,
 				trg_content: trg_content
+			},
+			error: function() {
+				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
 				if (UI.currentSegment.hasClass('waiting_for_check_result')) {
@@ -1600,26 +1623,16 @@ UI = {
 	},
 	setTranslation: function(id_segment, status, caller) {
 		reqArguments = arguments;
-		segment = $('#segment-' + id_segment);
-		console.log('arguments: ', arguments);
-		console.log('id_segment: ', id_segment);
-		console.log('status: ', status);
-		console.log('caller: ', caller);
-  
-		
+		segment = $('#segment-' + id_segment); 
 		caller = (typeof caller == 'undefined') ? false : caller;
-//		console.log('SET TRANSLATION');
-//		var info = $(segment).attr('id').split('-');
-//		var id_segment = info[1];
 		var file = $(segment).parents('article');
-//		var status = status;
 
 		// Attention, to be modified when we will lock tags
 		if( config.brPlaceholdEnabled ) {
-            translation = this.postProcessEditarea(segment);
-        } else {
-            translation = $('.editarea', segment ).text();
-        }
+			translation = this.postProcessEditarea(segment);
+		} else {
+			translation = $('.editarea', segment ).text();
+		}
 
 		if (translation === '')
 			return false;
@@ -1656,8 +1669,9 @@ UI = {
 				chosen_suggestion_index: chosen_suggestion,
 				autosave: autosave
 			},
+			context: reqArguments,
 			error: function() {
-//				UI.failedConnection(reqArguments, 'setTranslation');
+				UI.failedConnection(this, 'setTranslation');
 			},
 			success: function(d) {
 				UI.setTranslation_success(d, segment, status);
@@ -1665,17 +1679,17 @@ UI = {
 		});
 	},
 	failedConnection: function(reqArguments, operation) {
-//		$('.noConnection, .noConnectionMsg').remove();
 		if(operation != 'getWarning') {
-			pendingConnection = {
+			var pendingConnection = {
 				operation: operation,
 				args: reqArguments
 			}
 			UI.abortedOperations.push(pendingConnection);
 		}
-//		UI.abortedReqArguments = reqArguments;
-//		UI.abortedOperation = operation;
-		if(!$('.noConnection').length) UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available<br /><input type="button" id="checkConnection" value="Try to reconnect" /></div>');
+		if(!$('.noConnection').length) {
+			UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available.<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>');
+			$(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
+		}
 	},
 	checkConnection: function() {
 		APP.doRequest({
@@ -1685,6 +1699,8 @@ UI = {
 			},
 			error: function(d) {
 				console.log('error on checking connection');
+				$(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">30 seconds</span>.');
+				$(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
 			},
 			success: function(d) {
 				console.log('connection is back');
@@ -1692,23 +1708,34 @@ UI = {
 			}
 		});
 	},
-	
 	connectionIsBack: function() {
-		var arg = UI.abortedReqArguments;
-		if(UI.abortedOperation == 'setTranslation') {
-			UI[UI.abortedOperation](arg[0], arg[1], arg [2]);
-			restoredOperationMsg = 'The translation you were saving before interruction is now been saved';
-		} else if(UI.abortedOperation == 'setContribution') {
-			
-		} else {
-			restoredOperationMsg = '';
-		}
-
+		this.execAbortedOperations();
 		$('.noConnectionMsg').text('The connection is back. Your last, interrupted operation has now been done.');
+		setTimeout(function() {
+			$('.noConnection').addClass('reConnection');
+			setTimeout(function() {
+				$('.noConnection, .noConnectionMsg').remove();
+			}, 500);		
+		}, 3000);	
 
-
-		$('.noConnection, .noConnectionMsg').remove();
-
+	},
+	execAbortedOperations: function() {
+		$.each(UI.abortedOperations, function() {
+			args = this.args;
+			operation = this.operation;
+			if(operation == 'setTranslation') {
+				UI[operation](args[0], args[1], args[2]);
+			} else if(operation == 'updateContribution') {
+				UI[operation](args[0], args[1]);
+			} else if(operation == 'setContributionMT') {
+				UI[operation](args[0], args[1], args[2]);
+			} else if(operation == 'setCurrentSegment') {
+				UI[operation](args[0], args[1], args[2]);
+			} else if(operation == 'getSegments') {
+				UI.reloadWarning();
+			}
+		});
+		UI.abortedOperations = [];
 	},
 
 	
