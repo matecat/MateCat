@@ -542,10 +542,9 @@ box-shadow: inset 0px 1px #fff;
     {
     overflow: visible;
     max-height: inherit;
-    background-size: 35px 25px !important;
     font-size: 24px;
-    background: #6d6e71 url(../img/matecat-logosmall.png) 12px center no-repeat;
-    padding: 7px 10px 7px 58px;
+    background: #6d6e71 url(../img/sprite.png) 10px 10px no-repeat;
+    padding: 10px 10px 7px 58px;
     border-bottom: 1px solid #000;
     color: #fff;
     margin: 0 !important;
@@ -606,18 +605,18 @@ box-shadow: inset 0px 1px #fff;
 
 .popup .x-popup
     {
-    background: url(../img/x-popup.png) center center no-repeat;
-    display: block;
-    height: 40px;
-    width: 40px;
-    float: right;
-    margin: 1px 0px 0 0;
-    background-size: 19px 19px;
+ background: url(../img/sprite.png) 10px -303px no-repeat;
+display: block;
+height: 40px;
+width: 40px;
+float: right;
+margin: 1px 0px 0 0;
+background-size: 22px;
     }
 .popup .x-popup:hover
     {
-    background: url(../img/x-popup-hover.png) center center no-repeat;
-    background-size: 19px 19px;
+ background: url(../img/sprite.png) 10px -334px no-repeat;
+background-size: 22px;
     }  
 
 .popup .btn-ok,
