@@ -227,6 +227,8 @@ class getContributionController extends ajaxController {
 
 		$matches = array_slice( $matches, 0, $this->num_results );
 
+
+        /* New Feature only if this is not a MT and if it is a ( 90 =< MATCH < 100 ) */
         ( isset($matches[0]['match']) ? $firstMatchVal = floatval( $matches[0]['match'] ) : null );
         if( isset( $firstMatchVal ) && $firstMatchVal >= 90 && $firstMatchVal < 100 ){
 
@@ -265,6 +267,8 @@ class getContributionController extends ajaxController {
             }
 
         }
+        /* New Feature only if this is not a MT and if it is a ( 90 =< MATCH < 100 ) */
+
 
         if( !$this->concordance_search ){
             //execute these lines only in segment contribution search,
@@ -277,8 +281,21 @@ class getContributionController extends ajaxController {
         }
 
 		foreach ($matches as &$match) {
+
 			if (strpos($match['created_by'], 'MT') !== false) {
 				$match['match'] = 'MT';
+
+                $QA = new PostProcess( $match['raw_segment'], $match['raw_translation'] );
+                $QA->realignMTSpaces();
+
+                //this should every time be ok because MT preserve tags, but we use the check on the errors
+                //for logic correctness
+                if( !$QA->thereAreErrors() ){
+                    $match['raw_translation'] = $QA->getTrgNormalized();
+                    $match['translation'] = CatUtils::rawxliff2view( $match['raw_translation'] );
+                } else {
+                    Log::doLog( $QA->getErrors() );
+                }
 			}
 			if ($match['created_by'] == 'MT!') {
 				$match['created_by'] = 'MT'; //MyMemory returns MT!
