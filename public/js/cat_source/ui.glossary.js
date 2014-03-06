@@ -11,6 +11,9 @@ $.extend(UI, {
 				translation: item.find('.translation').text(),
 				id_job: config.job_id,
 				password: config.password
+			},
+			error: function() {
+				UI.failedConnection(0, 'deleteGlossaryItem');
 			}
 		});
 		dad = $(item).prevAll('.glossary-item').first();
@@ -41,8 +44,10 @@ $.extend(UI, {
 		if(($(n).hasClass('glossary-loaded'))&&(entireSegment)) return false;
 		$(n).addClass('glossary-loaded');
 		$('.gl-search', n).addClass('loading');
-		$('.sub-editor.glossary .overflow .results', n).empty();
-		$('.sub-editor.glossary .overflow .graysmall.message', n).empty();
+		if(config.tms_enabled) {
+			$('.sub-editor.glossary .overflow .results', n).empty();
+			$('.sub-editor.glossary .overflow .graysmall.message', n).empty();			
+		}
 		txt = (entireSegment)? $('.text .source', n).attr('data-original') : view2rawxliff($('.gl-search .search-source', n).text());
 
 		APP.doRequest({
@@ -56,6 +61,9 @@ $.extend(UI, {
 				password: config.password
 			},
 			context: [n, next],
+			error: function() {
+				UI.failedConnection(0, 'glossary');
+			},
 			success: function(d) {
 				if(typeof d.errors != 'undefined') {
 					if(d.errors[0].code == -1) {
@@ -134,6 +142,9 @@ $.extend(UI, {
 				password: config.password
 			},
 			context: [UI.currentSegment, next],
+			error: function() {
+				UI.failedConnection(0, 'glossary');
+			},
 			success: function(d) {
 //				d.data.created_tm_key = '76786732';
 				if(d.data.created_tm_key) {

@@ -38,7 +38,9 @@ class ajaxUtilsController extends ajaxController {
                 unset( $_SESSION[ 'incomingUrl' ] );
                 unset( $_SESSION[ '_newProject' ] );
                 break;
-
+			case 'ping':
+				$this->result['data'] = array( "OK", time() ); 
+				break;
         }
 
     }

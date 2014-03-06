@@ -50,6 +50,7 @@ $.extend(UI, {
 		this.firstMarking = false;
 		this.surveyDisplayed = false;
 		this.warningStopped = false;
+		this.abortedOperations = [];
 		this.setContextMenu();
 		this.createJobMenu();
 		$('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');

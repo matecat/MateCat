@@ -279,6 +279,9 @@ $.extend(UI, {
 			} else {
 				$('#segment-' + $('#contextMenu').attr('data-sid') + ' .editarea').trigger('click', ['clicking', 'openConcordance']);
 			}
+		}).on('click', '#checkConnection', function(e) {
+			e.preventDefault();
+			UI.checkConnection();
 		}).on('click', '#statistics .meter a', function(e) {
 			e.preventDefault();
 			UI.gotoNextUntranslatedSegment();
@@ -418,7 +421,12 @@ $.extend(UI, {
 						if ((e.which == 8)&&(isInsideMark)) {
 							console.log('inside mark'); 
 						}
-				
+//						console.log('a: ', UI.editarea.html());
+//						saveSelection();
+//						console.log('b: ', UI.editarea.html());
+//						setTimeout(function() {
+//							console.log('c: ', UI.editarea.html());
+//						}, 100);				
 //						selectText(this);
 
 
@@ -517,7 +525,7 @@ $.extend(UI, {
 				}
 			}
 
-			if (!((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40))) { // not arrows
+			if (!((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8) || (e.which == 46) || (e.which == 91))) { // not arrows, backspace, canc or cmd
 				if (UI.body.hasClass('searchActive')) {
 					UI.resetSearch();
 				}
@@ -549,10 +557,11 @@ $.extend(UI, {
 
 		}).on('input', '.editarea', function() {
 //			console.log('input in editarea');
-			if (UI.body.hasClass('searchActive')) {
-				console.log('on input');
-				UI.resetSearch();
-			}
+//			DA SPOSTARE IN DROP E PASTE
+//			if (UI.body.hasClass('searchActive')) {
+//				console.log('on input');
+//				UI.resetSearch();
+//			}
 			UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
 			if (UI.draggingInsideEditarea) {
 				$(UI.tagToDelete).remove();
@@ -675,16 +684,21 @@ $.extend(UI, {
 
 			var skipChange = false;
 			if (w == 'next-untranslated') {
-//				console.log('entra');
+				console.log('next-untranslated');
 				if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
+					console.log('il nextuntranslated non è caricato: ', UI.nextUntranslatedSegmentId);
 					UI.changeStatus(this, 'translated', 0);
 					skipChange = true;
 					if (!UI.nextUntranslatedSegmentId) {
+						console.log('a');
 						$('#' + $(this).attr('data-segmentid') + '-close').click();
 					} else {
+						console.log('b');
 						UI.reloadWarning();
 					}
 
+				} else {
+					console.log('il nextuntranslated è già caricato: ', UI.nextUntranslatedSegmentId);
 				}
 			} else {
 				if (!$(UI.currentSegment).nextAll('section').length) {
@@ -794,6 +808,9 @@ $.extend(UI, {
 					id_item: item.attr('data-id'),
 					id_job: config.job_id,
 					password: config.password
+				},
+				error: function() {
+					UI.failedConnection(0, 'glossary');
 				},
 				context: [UI.currentSegment, next]
 			});
@@ -1046,7 +1063,7 @@ $.extend(UI, {
 
 				$("mark.currSearchItem").text(txt);
 				segment = $("mark.currSearchItem").parents('section');
-				UI.setTranslation(segment, UI.getStatus(segment), 'replace');
+				UI.setTranslation($(segment).attr('id').split('-')[1], UI.getStatus(segment), 'replace');
 				UI.updateSearchDisplayCount(segment);
 				$(segment).attr('data-searchItems', $('mark.searchMarker', segment).length);
 

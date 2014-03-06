@@ -96,15 +96,7 @@ body.manage .buttons
 	width: 10%;
 */
 	}
-body.manage a.change
-	{
-	width: 16px;
-	height: 16px;
-	margin-top: 24px;
-	text-indent: -10000px;
-	position: absolute;
-	background: url(../img/change_password.png) 0 0 no-repeat;
-	}
+
 	body.manage tr.disabled a.change
 		{
 		display: none;
@@ -148,12 +140,12 @@ body.manage .actions a
 	body.manage .actions a.resume
 		{
 		margin-left: 33px !important;
-		background: url(../img/resume-job.png) 0 0px no-repeat;
+		background: url(../img/sprite.png) -13px -98px no-repeat;
 		}
 	body.manage .actions a.unarchive
 		{
 		margin-left: 61px !important;
-		background: url(../img/unarchive-job.png) 0 1px no-repeat;
+		background: url(../img/sprite.png) -13px -39px no-repeat;
 		}
 
 	body.manage tr[data-status=active] .actions a.resume,
@@ -218,7 +210,7 @@ body.manage a.resume-project
 
 body.manage a.unarchive-project
 	{
-	background: url(../img/sprite.png) -13px -37px no-repeat;
+	background: url(../img/sprite.png) -13px -39px no-repeat;
 	}
 	body.manage[data-filter-status=cancelled] a.unarchive-project
 		{
@@ -381,10 +373,10 @@ body.manage td.words
 th.header {
 	background: #efefef url(../img/bg.gif) right center no-repeat !important;
 }
-th.headerSortUp {
+th.headerSortUp, th.tablesorter-headerAsc {
 	background: #efefef url(../img/asc.gif) right center no-repeat !important;
 }
-th.headerSortDown {
+th.headerSortDown, th.tablesorter-headerDesc {
 	background: #efefef url(../img/desc.gif) right center no-repeat !important;
 }
 
@@ -739,8 +731,7 @@ margin-top: 10px;}
 }
 .logosmall {display:none;}
 .menuscroll .logosmall {display:block}
-.logosmall {background: url(../img/logo-ico.png) no-repeat;
-background-size: 43px;padding-top: 30px;}
+.logosmall {background: url(../img/sprite.png) 1px -1403px no-repeat;padding-top: 30px;}
 
 
 .block { min-height:600px;height: auto;
@@ -781,3 +772,46 @@ border-radius: 4px;}
 .opt {background-color: #dff0d8; border-left: 2px solid #3c763d; color: #3c763d;}
 
 .api p {margin:0;}
+
+/* retina display query */
+@media only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (min--moz-device-pixel-ratio: 2),
+only screen and (-o-min-device-pixel-ratio: 2/1),
+only screen and (min-device-pixel-ratio: 2),
+only screen and (min-resolution: 192dpi),
+only screen and (in-resolution: 2dppx) { 
+
+.filter {
+	background: url(../img/sprite2x.png) 2px -218px no-repeat;
+}
+body.manage a.cancel-project, body.manage a.archive-project, body.manage a.resume-project, body.manage a.unarchive-project {
+	background: url(../img/sprite2x.png) -13px -78px no-repeat;
+}
+body.manage a.archive-project {
+	background: url(../img/sprite2x.png) -13px -59px no-repeat;
+}
+body.manage a.resume-project {
+	background: url(../img/sprite2x.png) -13px -98px no-repeat;
+}
+body.manage a.unarchive-project {
+	background: url(../img/sprite2x.png) -13px -39px no-repeat;
+}
+body.manage .actions a.change {
+	background: url(../img/sprite2x.png) -13px -136px no-repeat;
+}
+body.manage .actions a.cancel {
+	background: url(../img/sprite2x.png) -13px -78px no-repeat;
+}
+body.manage .actions a.archive {
+	background: url(../img/sprite2x.png) -13px -59px no-repeat;
+}
+body.manage .actions a.unarchive {
+	background: url(../img/sprite2x.png) -13px -39px no-repeat;
+}
+.logosmall {
+	background: url(../img/sprite2x.png) 1px -1403px no-repeat;
+}
+.filter, body.manage a.cancel-project, body.manage a.archive-project, body.manage a.resume-project, body.manage a.unarchive-project, body.manage .actions a.change, body.manage .actions a.cancel, body.manage .actions a.archive, body.manage .actions a.unarchive, .breadcrumbs #pname, .logosmall  {
+	background-size:42px;	
+}
+}
