@@ -338,7 +338,7 @@ class getContributionController extends ajaxController {
                 /* $translation = */
                 "",
                 /* $tm_status_analysis = */
-                "UNDONE",
+                "DONE",
                 /* $warning = */
                 0,
                 /* $err_json = */
