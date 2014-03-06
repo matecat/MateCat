@@ -331,7 +331,7 @@ class getContributionController extends ajaxController {
             $data[ 'suggestion_source' ]   = $match[ 'created_by' ];
             $data[ 'mt_qe' ]               = $mt_qe;
 
-            $where = " id_segment= " . (int)$this->id_segment . " and id_job = " . (int)$this->id_job . " and status != 'TRANSLATED' ";
+            $where = " id_segment= " . (int)$this->id_segment . " and id_job = " . (int)$this->id_job . " and status = 'NEW' ";
 
             $db = Database::obtain();
             $db->update( 'segment_translations', $data, $where );
@@ -347,7 +347,10 @@ class getContributionController extends ajaxController {
                 return $errno * -1;
             }
 
-            return $db->affected_rows;
+            $rows = $db->affected_rows;
+            Log::doLog("Affected: " . $rows );
+
+            return $rows;
 
         }
 
