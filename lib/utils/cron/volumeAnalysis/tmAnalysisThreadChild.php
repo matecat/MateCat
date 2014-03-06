@@ -270,13 +270,13 @@ while (1) {
 
         $standard_words = $equivalentWordMapping["NO_MATCH"] * $raw_wc / 100;
 
-        $QA = new PostProcess( $matches[0]['raw_segment'], $suggestion );
-        $QA->realignMTSpaces();
+        $check = new PostProcess( $matches[0]['raw_segment'], $suggestion );
+        $check->realignMTSpaces();
 
         //this should every time be ok because MT preserve tags, but we use the check on the errors
         //for logic correctness
-        if( !$QA->thereAreErrors() ){
-            $suggestion = CatUtils::view2rawxliff( $QA->getTrgNormalized() );
+        if( !$check->thereAreErrors() ){
+            $suggestion = CatUtils::view2rawxliff( $check->getTrgNormalized() );
         }
 
     }
