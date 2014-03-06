@@ -4,6 +4,7 @@ include "main.php";
 include INIT::$UTILS_ROOT . "/engines/mt.class.php";
 include INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include INIT::$UTILS_ROOT . "/QA.php";
+include INIT::$UTILS_ROOT . "/PostProcess.php";
 
 define("PID_FOLDER", ".pidlist");
 define("NUM_PROCESSES", 1);
@@ -211,7 +212,7 @@ while (1) {
         $tm_match_type = "MT";
     }
 
-    /* New Feature */
+    /* New Feature only if this is not a MT and if it is a ( 90 =< MATCH < 100 ) try to realign tag ID*/
     ( isset($matches[ 0 ]['match']) ? $firstMatchVal = floatval( $matches[ 0 ]['match'] ) : null );
     if( isset( $firstMatchVal ) && $firstMatchVal >= 90 && $firstMatchVal < 100 ){
 
@@ -248,6 +249,7 @@ while (1) {
         }
 
     }
+    /* New Feature only if this is not a MT and if it is a ( 90 =< MATCH < 100 ) try to realign tag ID*/
 
     $suggestion = CatUtils::view2rawxliff($matches[0]['raw_translation']);
 
@@ -263,24 +265,42 @@ while (1) {
     $eq_words = $equivalentWordMapping[$new_match_type] * $raw_wc / 100;
     $standard_words = $eq_words;
 
+    //if the first match is MT perform QA realignment
     if ($new_match_type == 'MT') {
+
         $standard_words = $equivalentWordMapping["NO_MATCH"] * $raw_wc / 100;
+
+        $check = new PostProcess( $matches[0]['raw_segment'], $suggestion );
+        $check->realignMTSpaces();
+
+        //this should every time be ok because MT preserve tags, but we use the check on the errors
+        //for logic correctness
+        if( !$check->thereAreErrors() ){
+            $suggestion = CatUtils::view2rawxliff( $check->getTrgNormalized() );
+            $err_json = '';
+        } else {
+            $err_json = $check->getErrorsJSON();
+        }
+
+    } else {
+
+        //try to perform only the tagCheck
+        $check = new PostProcess( $text, $suggestion );
+        $check->performTagCheckOnly();
+
+        log::doLog( $check->getErrors() );
+
+        if( $check->thereAreErrors() ){
+            $err_json = $check->getErrorsJSON();
+        } else {
+            $err_json = '';
+        }
+
     }
 
     ( !empty( $matches[0]['sentence_confidence'] ) ? $mt_qe = floatval( $matches[0]['sentence_confidence'] ) : $mt_qe = null );
 
-    $check = new QA( $text, $suggestion );
-    $check->performTagCheckOnly();
-
-    //log::doLog($check->getErrors(true));
-
     echo "--- (child $my_pid) : sid=$sid --- \$tm_match_type=$tm_match_type, \$fast_match_type=$fast_match_type, \$new_match_type=$new_match_type, \$equivalentWordMapping[\$new_match_type]=" . $equivalentWordMapping[$new_match_type] . ", \$raw_wc=$raw_wc,\$standard_words=$standard_words,\$eq_words=$eq_words\n";
-
-    if( $check->thereAreErrors() ){
-        $err_json = $check->getErrorsJSON();
-    } else {
-        $err_json = '';
-    }
 
     $ret = CatUtils::addTranslationSuggestion($sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json, $mt_qe );
     //unlock segment

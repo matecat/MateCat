@@ -227,6 +227,8 @@ class getContributionController extends ajaxController {
 
 		$matches = array_slice( $matches, 0, $this->num_results );
 
+
+        /* New Feature only if this is not a MT and if it is a ( 90 =< MATCH < 100 ) */
         ( isset($matches[0]['match']) ? $firstMatchVal = floatval( $matches[0]['match'] ) : null );
         if( isset( $firstMatchVal ) && $firstMatchVal >= 90 && $firstMatchVal < 100 ){
 
@@ -265,6 +267,8 @@ class getContributionController extends ajaxController {
             }
 
         }
+        /* New Feature only if this is not a MT and if it is a ( 90 =< MATCH < 100 ) */
+
 
         if( !$this->concordance_search ){
             //execute these lines only in segment contribution search,
@@ -277,8 +281,21 @@ class getContributionController extends ajaxController {
         }
 
 		foreach ($matches as &$match) {
+
 			if (strpos($match['created_by'], 'MT') !== false) {
 				$match['match'] = 'MT';
+
+                $QA = new PostProcess( $match['raw_segment'], $match['raw_translation'] );
+                $QA->realignMTSpaces();
+
+                //this should every time be ok because MT preserve tags, but we use the check on the errors
+                //for logic correctness
+                if( !$QA->thereAreErrors() ){
+                    $match['raw_translation'] = $QA->getTrgNormalized();
+                    $match['translation'] = CatUtils::rawxliff2view( $match['raw_translation'] );
+                } else {
+                    Log::doLog( $QA->getErrors() );
+                }
 			}
 			if ($match['created_by'] == 'MT!') {
 				$match['created_by'] = 'MT'; //MyMemory returns MT!
@@ -305,8 +322,8 @@ class getContributionController extends ajaxController {
 
 	}
 
-	private function setSuggestionReport($matches) {
-		if (count($matches) > 0) {
+    private function setSuggestionReport($matches) {
+        if (count($matches) > 0) {
 
             foreach ( $matches as $k => $m ) {
                 $matches[ $k ][ 'raw_translation' ] = CatUtils::view2rawxliff( $matches[ $k ][ 'raw_translation' ] );
@@ -317,40 +334,45 @@ class getContributionController extends ajaxController {
 
             ( !empty( $match['sentence_confidence'] ) ? $mt_qe = floatval( $match['sentence_confidence'] ) : $mt_qe = null );
 
-            $suggestion        = $match[ 'raw_translation' ];
-            $suggestion_match  = $match[ 'match' ];
-            $suggestion_source = $match[ 'created_by' ];
-            $ret               = CatUtils::addTranslationSuggestion(
+            if (strpos($match['created_by'], 'MT') !== false) {
+                $match['match'] = 'MT';
+            }
+            if ($match['created_by'] == 'MT!') {
+                $match['created_by'] = 'MT'; //MyMemory returns MT!
+            }
 
-                $this->id_segment,
-                $this->id_job,
-                $suggestions_json_array,
-                $suggestion,
-                $suggestion_match,
-                $suggestion_source,
+            $data                          = array();
+            $data[ 'suggestions_array' ]   = $suggestions_json_array;
+            $data[ 'suggestion' ]          = $match[ 'raw_translation' ];
+            $data[ 'suggestion_match' ]    = $match[ 'match' ];
+            $data[ 'suggestion_source' ]   = $match[ 'created_by' ];
+            $data[ 'mt_qe' ]               = $mt_qe;
 
-                /* $match_type = */
-                "",
-                /* $eq_words = */
-                0,
-                /* $standard_words = */
-                0,
-                /* $translation = */
-                "",
-                /* $tm_status_analysis = */
-                "UNDONE",
-                /* $warning = */
-                0,
-                /* $err_json = */
-                '',
-                $mt_qe
+            $where = " id_segment= " . (int)$this->id_segment . " and id_job = " . (int)$this->id_job . " and status = 'NEW' ";
 
-            );
-            return $ret;
-		}
+            $db = Database::obtain();
+            $db->update( 'segment_translations', $data, $where );
 
-		return 0;
-	}
+            Log::doLog($data);
+            Log::doLog($where);
+
+            $err   = $db->get_error();
+            $errno = $err[ 'error_code' ];
+            if ( $errno != 0 ) {
+                log::doLog( $err );
+
+                return $errno * -1;
+            }
+
+            $rows = $db->affected_rows;
+            Log::doLog("Affected: " . $rows );
+
+            return $rows;
+
+        }
+
+        return 0;
+    }
 
     private static function __compareScore($a, $b) {
         if( floatval($a['match']) == floatval($b['match']) ){ return 0; }

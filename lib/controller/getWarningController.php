@@ -136,6 +136,9 @@ class getWarningController extends ajaxController {
             $this->result[ 'details' ][ 'tag_mismatch' ] = $QA->getMalformedXmlStructs();
             $this->result[ 'total' ]                     = count( $QA->getWarnings() );
 
+//            Log::doLog($this->__postInput->trg_content);
+//            Log::doLog($QA->getTrgNormalized());
+
         }
 
     }

@@ -664,6 +664,7 @@ class CatUtils {
     public static function getFastStatsForJob( WordCount_Struct $wCount ){
 
         $job_stats = array();
+        $job_stats[ 'id' ]         = $wCount->getIdJob();
 //        $job_stats[ 'NEW' ]        = $wCount->getNewWords();
         $job_stats[ 'DRAFT' ]      = $wCount->getNewWords() + $wCount->getDraftWords();
         $job_stats[ 'TRANSLATED' ] = $wCount->getTranslatedWords();
