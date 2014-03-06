@@ -1669,12 +1669,12 @@ UI = {
 				chosen_suggestion_index: chosen_suggestion,
 				autosave: autosave
 			},
-			context: reqArguments,
+			context: [reqArguments, segment, status],
 			error: function() {
-				UI.failedConnection(this, 'setTranslation');
+				UI.failedConnection(this[0], 'setTranslation');
 			},
 			success: function(d) {
-				UI.setTranslation_success(d, segment, status);
+				UI.setTranslation_success(d, this[1], this[2]);
 			}
 		});
 	},
@@ -1890,8 +1890,6 @@ UI = {
 		$('#contextMenu .shortcut .cmd').html(cmd);
 	},
 	setTranslation_success: function(d, segment, status) {
-		console.log('d: ', d);
-		console.log('segment: ', segment);
 		if (d.error.length)
 			this.processErrors(d.error, 'setTranslation');
 		if (d.data == 'OK') {
