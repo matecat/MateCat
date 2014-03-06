@@ -2703,7 +2703,12 @@ $.extend(UI, {
 						if ((e.which == 8)&&(isInsideMark)) {
 							console.log('inside mark'); 
 						}
-				
+//						console.log('a: ', UI.editarea.html());
+//						saveSelection();
+//						console.log('b: ', UI.editarea.html());
+//						setTimeout(function() {
+//							console.log('c: ', UI.editarea.html());
+//						}, 100);				
 //						selectText(this);
 
 
@@ -2802,7 +2807,7 @@ $.extend(UI, {
 				}
 			}
 
-			if (!((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40))) { // not arrows
+			if (!((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8) || (e.which == 46) || (e.which == 91))) { // not arrows, backspace, canc or cmd
 				if (UI.body.hasClass('searchActive')) {
 					UI.resetSearch();
 				}
@@ -2834,10 +2839,11 @@ $.extend(UI, {
 
 		}).on('input', '.editarea', function() {
 //			console.log('input in editarea');
-			if (UI.body.hasClass('searchActive')) {
-				console.log('on input');
-				UI.resetSearch();
-			}
+//			DA SPOSTARE IN DROP E PASTE
+//			if (UI.body.hasClass('searchActive')) {
+//				console.log('on input');
+//				UI.resetSearch();
+//			}
 			UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
 			if (UI.draggingInsideEditarea) {
 				$(UI.tagToDelete).remove();

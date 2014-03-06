@@ -2899,7 +2899,6 @@ body.rtl-target .footer .sugg-target
 
 body.archived ul.buttons,
 body.archived ul.header-menu,
-body.archived .status-container,
 body.archived .footer
 {
 	display: none !important;
