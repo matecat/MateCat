@@ -277,16 +277,18 @@ while (1) {
         //for logic correctness
         if( !$check->thereAreErrors() ){
             $suggestion = CatUtils::view2rawxliff( $check->getTrgNormalized() );
+            $err_json = '';
+        } else {
+            $err_json = $check->getErrorsJSON();
         }
 
-    }
-    else {
+    } else {
 
         //try to perform only the tagCheck
         $check = new PostProcess( $text, $suggestion );
         $check->performTagCheckOnly();
 
-        log::doLog($check->getErrors(true));
+        log::doLog( $check->getErrors() );
 
         if( $check->thereAreErrors() ){
             $err_json = $check->getErrorsJSON();
