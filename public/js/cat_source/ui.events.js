@@ -569,16 +569,11 @@ $.extend(UI, {
 				UI.tagToDelete = null;
 			}
 			if (UI.droppingInEditarea) {
-				console.log('prima del clean 1: ', UI.editarea.html());
-//				$('.editor .editarea span[style*="color"]+br').remove();
-//				console.log('prima del clean 2: ', UI.editarea.html());
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
 			}
 			if (!UI.body.hasClass('searchActive'))
 				setTimeout(function() {
-//					console.log('before tag lock: ', UI.editarea.html());
 					UI.lockTags(UI.editarea);
-//					console.log('after tag lock: ', UI.editarea.html());
 				}, 10);
 			UI.registerQACheck();
 		}).on('input', '.editor .cc-search .input', function() {
@@ -658,11 +653,9 @@ $.extend(UI, {
 				segment: UI.currentSegment
 			});
 			UI.saveInUndoStack('drop');
-			console.log('bbb: ', UI.editarea.html());
 			$(this).css('float', 'left');
 			setTimeout(function() {
 				UI.editarea.removeAttr('style');
-				console.log('ccc: ', UI.editarea.html());
 				UI.saveInUndoStack('drop');
 			}, 100);
 		}).on('drop paste', '.editor .cc-search .input, .editor .gl-search .input', function() {

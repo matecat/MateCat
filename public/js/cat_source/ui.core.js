@@ -1683,7 +1683,7 @@ UI = {
 			var pendingConnection = {
 				operation: operation,
 				args: reqArguments
-			}
+			};
 			UI.abortedOperations.push(pendingConnection);
 		}
 		if(!$('.noConnection').length) {

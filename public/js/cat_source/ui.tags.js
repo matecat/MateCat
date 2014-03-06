@@ -180,8 +180,7 @@ $.extend(UI, {
 	},
 	
 	// TAG CLEANING
-	cleanDroppedTag: function(area, beforeDropHTML) {console.log('clean');
-		console.log(area);
+	cleanDroppedTag: function(area, beforeDropHTML) {
 		if (area == this.editarea) {
 			this.droppingInEditarea = false;
 
@@ -194,46 +193,38 @@ $.extend(UI, {
 			});
 			draggedText = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2");
 			dr2 = draggedText.replace(/(<br>)$/, '').replace(/(<span.*?>)\&nbsp;/,'$1');
-//			dr2 = draggedText.replace(/(<span.*?>)\&nbsp;/,'$1');
+
 			area.html(area.html().replace(draggedText, dr2));
-			console.log('111: ', UI.editarea.html());
 
 			div = document.createElement("div");
 			div.innerHTML = draggedText;
-			console.log('div html: ', $(div).html());
-			console.log('dragged text: ', draggedText);
 			isMarkup = draggedText.match(/^<span style=\"font\-size\: 13px/gi);
 			saveSelection();
 
-			$('.rangySelectionBoundary', area).last().remove();
+			if($('span .rangySelectionBoundary', area).length > 1) $('.rangySelectionBoundary', area).last().remove();
 			if($('span .rangySelectionBoundary', area).length) {
 				spel = $('span', area).has('.rangySelectionBoundary');
 				rsb = $('span .rangySelectionBoundary', area).detach();
 				spel.after(rsb);
 			}
-			phcode = $('.rangySelectionBoundary').last().outerHTML;
-			console.log('phcode: ', phcode);
+			phcode = $('.rangySelectionBoundary')[0].outerHTML;
 			$('.rangySelectionBoundary').text(this.cursorPlaceholder);
 
-	//		closeTag = '</' + $(div).text().trim().replace(/<(.*?)\s.*?\>/gi, "$1") + '>';
 			newTag = $(div).text();
-
-			newText = area.text().replace(draggedText, newTag);
-			console.log('222: ', UI.editarea.html());
-			console.log(newText);
-			if(isMarkup) {
-				console.log('IS MARKUP!!!');
-				area.text(newText);
-			}
-			console.log('333: ', UI.editarea.html());
+			var cloneEl = area;
+			// encode br before textification
+			$('br', cloneEl).each(function() {
+				$(this).replaceWith('[**[br class="' + this.className + '"]**]');				
+			});
+			newText = cloneEl.text().replace(draggedText, newTag);
+			cloneEl = null;
 			if(typeof phcode == 'undefined') phcode = '';
-			console.log('phcode 1: ', phcode);
-			if(isMarkup) area.html(area.html().replace(this.cursorPlaceholder, phcode));
-			console.log('444: ', UI.editarea.html());
-			restoreSelection();
-			if(isMarkup) area.html(area.html().replace(this.cursorPlaceholder, ''));			
 
-			
+			area.text(newText);
+			area.html(area.html().replace(this.cursorPlaceholder, phcode));
+			restoreSelection();
+			area.html(area.html().replace(this.cursorPlaceholder, '').replace(/\[\*\*\[(.*?)\]\*\*\]/gi, "<$1>"));
+
 		} else {
 	// old cleaning code to be evaluated
 			diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
@@ -247,8 +238,8 @@ $.extend(UI, {
 			div = document.createElement("div");
 			div.innerHTML = draggedText;
 			saveSelection();
-			$('.rangySelectionBoundary', area).last().remove();
-			if($('span .rangySelectionBoundary', area).length) {
+			$('.rangySelectionBoundary', area).last().remove(); // eventually removes a duplicated selectionBoundary
+			if($('span .rangySelectionBoundary', area).length) { // if there's a selectionBoundary inside a span, move the first after the latter
 				spel = $('span', area).has('.rangySelectionBoundary');
 				rsb = $('span .rangySelectionBoundary', area).detach();
 				spel.after(rsb);
@@ -256,9 +247,7 @@ $.extend(UI, {
 			phcode = $('.rangySelectionBoundary')[0].outerHTML;
 			$('.rangySelectionBoundary').text(this.cursorPlaceholder);
 
-	//		closeTag = '</' + $(div).text().trim().replace(/<(.*?)\s.*?\>/gi, "$1") + '>';
 			newTag = $(div).text();
-
 			newText = area.text().replace(draggedText, newTag);
 			area.text(newText);
 			area.html(area.html().replace(this.cursorPlaceholder, phcode));
