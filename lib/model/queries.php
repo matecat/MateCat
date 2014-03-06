@@ -824,8 +824,6 @@ function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $su
     $and_sugg = "";
     if ( $tm_status_analysis != 'DONE' ) {
         $and_sugg = "and suggestions_array is NULL";
-    } else {
-        $and_sugg = "and status != 'TRANSLATED' ";
     }
 
     $where = " id_segment=$id_segment and id_job=$id_job $and_sugg";

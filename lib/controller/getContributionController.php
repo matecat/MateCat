@@ -305,8 +305,8 @@ class getContributionController extends ajaxController {
 
 	}
 
-	private function setSuggestionReport($matches) {
-		if (count($matches) > 0) {
+    private function setSuggestionReport($matches) {
+        if (count($matches) > 0) {
 
             foreach ( $matches as $k => $m ) {
                 $matches[ $k ][ 'raw_translation' ] = CatUtils::view2rawxliff( $matches[ $k ][ 'raw_translation' ] );
@@ -317,40 +317,35 @@ class getContributionController extends ajaxController {
 
             ( !empty( $match['sentence_confidence'] ) ? $mt_qe = floatval( $match['sentence_confidence'] ) : $mt_qe = null );
 
-            $suggestion        = $match[ 'raw_translation' ];
-            $suggestion_match  = $match[ 'match' ];
-            $suggestion_source = $match[ 'created_by' ];
-            $ret               = CatUtils::addTranslationSuggestion(
+            $data                          = array();
+            $data[ 'suggestions_array' ]   = $suggestions_json_array;
+            $data[ 'suggestion' ]          = $match[ 'raw_translation' ];
+            $data[ 'suggestion_match' ]    = $match[ 'match' ];
+            $data[ 'suggestion_source' ]   = $match[ 'created_by' ];
+            $data[ 'mt_qe' ]               = $mt_qe;
 
-                $this->id_segment,
-                $this->id_job,
-                $suggestions_json_array,
-                $suggestion,
-                $suggestion_match,
-                $suggestion_source,
+            $where = " id_segment= " . (int)$this->id_segment . " and id_job = " . (int)$this->id_job . " and status != 'TRANSLATED' ";
 
-                /* $match_type = */
-                "",
-                /* $eq_words = */
-                0,
-                /* $standard_words = */
-                0,
-                /* $translation = */
-                "",
-                /* $tm_status_analysis = */
-                "DONE",
-                /* $warning = */
-                0,
-                /* $err_json = */
-                '',
-                $mt_qe
+            $db = Database::obtain();
+            $db->update( 'segment_translations', $data, $where );
 
-            );
-            return $ret;
-		}
+            Log::doLog($data);
+            Log::doLog($where);
 
-		return 0;
-	}
+            $err   = $db->get_error();
+            $errno = $err[ 'error_code' ];
+            if ( $errno != 0 ) {
+                log::doLog( $err );
+
+                return $errno * -1;
+            }
+
+            return $db->affected_rows;
+
+        }
+
+        return 0;
+    }
 
     private static function __compareScore($a, $b) {
         if( floatval($a['match']) == floatval($b['match']) ){ return 0; }
