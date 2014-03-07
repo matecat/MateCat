@@ -984,18 +984,6 @@ function getStatsForMultipleJobs( $_jids ) {
     return $jobs_stats;
 }
 
-function getGlobalStatsForJob( $id_job, $jPassword = null ){
-    $query = "SELECT
-                id_job, password
-                new_words,
-                draft_words,
-                translated_words,
-                approved_words,
-                rejected_words
-
-             ";
-}
-
 /**
  * Inefficient function for high traffic requests like setTranslation
  *

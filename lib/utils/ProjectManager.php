@@ -493,7 +493,7 @@ class ProjectManager {
 
         foreach( $projectStructure['split_result']['chunks'] as $chunk => $contents ){
 
-            Log::doLog( $projectStructure['split_result']['chunks'] );
+//            Log::doLog( $projectStructure['split_result']['chunks'] );
 
             //IF THIS IS NOT the original job, DELETE relevant fields
             if( $contents['segment_start'] != $projectStructure['split_result']['job_first_segment'] ){

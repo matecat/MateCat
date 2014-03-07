@@ -15,7 +15,7 @@ include_once INIT::$UTILS_ROOT . '/engines/mt.class.php';
 //Mock Objects for Mute the curl
 class MUTE_TMS extends TMS {
 
-    public $fakeUrl = 'http://API.mymemory.translated.net/get?q=The+law+specifically+exempts+small+firms+that+have+fewer+than+50+full-time+employees.&langpair=en-US%7Cit-IT&de=demo%40matecat.com&mt=1&numres=3';
+    public $fakeUrl = 'http://api.mymemory.translated.net/get?q=The+law+specifically+exempts+small+firms+that+have+fewer+than+50+full-time+employees.&langpair=en-US%7Cit-IT&de=demo%40matecat.com&mt=1&numres=3';
     public $fakeRes = '{"responseData":{"translatedText":"La legge esenta espressamente le piccole imprese con meno di 50 dipendenti a tempo pieno."},"responseDetails":"","responseStatus":200,"matches":[{"id":"0","segment":"The law specifically exempts small firms that have fewer than 50 full-time employees.","translation":"La legge esenta espressamente le piccole imprese con meno di 50 dipendenti a tempo pieno.","quality":"70","reference":"Machine Translation provided by Google, Microsoft, Worldlingo or MyMemory customized engine.","usage-count":1,"subject":"All","created-by":"MT!","last-updated-by":"MT!","create-date":"2013-10-14","last-update-date":"2013-10-14","match":0.85},{"id":"440094133","segment":"full-time employee","translation":"dipendente a tempo pieno","quality":"74","reference":"","usage-count":1,"subject":"General","created-by":"","last-updated-by":"","create-date":"2013-10-10 18:59:39","last-update-date":"2013-10-10 18:59:39","match":0.15},{"id":"440008758","segment":"5 full-time fundraisers.","translation":"5 dialogatori dedicati.","quality":"74","reference":"","usage-count":2,"subject":"All","created-by":"anonymous","last-updated-by":"anonymous","create-date":"2013-09-12 22:12:55","last-update-date":"2013-09-12 22:12:55","match":0.15}]}';
 
     protected function curl($url) {
@@ -105,20 +105,22 @@ class Tests_EnginesTest extends Tests_AbstractTest {
     public function testRightUrlForTMS(){
 
         //PATCHED FIXME
-        $expected_String = "http://API.mymemory.translated.net/get?q=This+provision+takes+effect+in+2014.&langpair=en-US%7Cit-IT&de=demo%40matecat.com&mt=1&numres=3&conc=true&mtonly=1";
-        $expected_String = "http://API.mymemory.translated.net/get?q=This+provision+takes+effect+in+2014.&langpair=en%7Cit&de=demo%40matecat.com&mt=1&numres=3&conc=true&mtonly=1";
+        $expected_String = "http://api.mymemory.translated.net/get?q=This+provision+takes+effect+in+2014.&langpair=en-US%7Cit-IT&de=demo%40matecat.com&mt=1&numres=3&conc=true&mtonly=1";
+        $expected_String = "http://api.mymemory.translated.net/get?q=This+provision+takes+effect+in+2014.&langpair=en%7Cit&de=demo%40matecat.com&mt=1&numres=3&conc=true&mtonly=1";
 
-        $text = "This provision takes effect in 2014.";
-        $source = "en-US";
-        $target = "it-IT";
-        $user  = "demo@matecat.com";
-        $mt_from_tms = 1;
-        $mt_only = true;
-        $id_translator = null;
-        $is_concordance = true;
+        $config = TMS::getConfigStruct();
+        $config[ 'get_mt' ]  = true;
+        $config[ 'mt_only' ] = true;
+        $config[ 'segment' ]       = "This provision takes effect in 2014.";
+        $config[ 'source_lang' ]   = "en-US";
+        $config[ 'target_lang' ]   = "it-IT";
+        $config[ 'email' ]         = "demo@matecat.com";
+        $config[ 'id_user' ]       = null;
+        $config[ 'num_result' ]    = 3;
+        $config[ 'isConcordance' ] = true;
 
         $tms = new MUTE_TMS( 1 ); //MyMemory
-        $tms->get( $text, $source, $target, $user, $mt_from_tms, $id_translator, 3, $mt_only, $is_concordance );
+        $tms->get( $config );
 
         $class = new \ReflectionObject($tms);
         $prop = $class->getProperty('url');
@@ -232,7 +234,7 @@ class Tests_EnginesTest extends Tests_AbstractTest {
         $this->assertArrayHasKey( 'match', $mt_res );
         $this->assertArrayHasKey( 'sentence_confidence', $mt_res );
         $this->assertEquals( '50.35047642150528',  $mt_res['sentence_confidence'] );
-        $this->assertEquals( 'MT-FBK-IT (EN->IT)', $mt_res['created_by'] );
+        $this->assertEquals( 'MT-FBK Legal (EN->IT) - Ad.', $mt_res['created_by'] );
         $this->assertEquals(
             "congruente con l'approccio coordinato il distretti di Tesoreria, Labor, e Health e Human Services sta svolgendo in sviluppo delle normative e altre istruzioni sotto il economiche Care Act, la notifica anche sollecita l'immissione su come le tre Reparti deve interpretare ed applicare i privilegi Agisci' s disposizioni limitando la possibilità di piani ed emittenti di imporre un periodo di attesa dello stato di copertura per più di 90 giorni a partire dalla 2014.",
             $mt_res['raw_translation']

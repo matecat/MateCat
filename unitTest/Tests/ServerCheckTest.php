@@ -47,7 +47,7 @@ class Tests_ServerCheckTest extends Tests_AbstractTest {
 
     public function testReadOnly(){
 
-        DBLoader4Test::getUp();
+        Tests_DBLoader4Test::getUp();
 
         $servCheck = ServerCheck::getInstance();
 
@@ -82,7 +82,7 @@ class Tests_ServerCheckTest extends Tests_AbstractTest {
 
     public function testMysql(){
 
-        DBLoader4Test::getUp();
+        Tests_DBLoader4Test::getUp();
 
         $servCheck = ServerCheck::getInstance();
         $mysql_params = $servCheck->getMysqlParams();

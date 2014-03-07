@@ -9,7 +9,7 @@
 
 include_once("AbstractTest.php");
 
-class DBLoader4Test {
+class Tests_DBLoader4Test {
 
     public static $DB_SERVER   = "localhost"; //database server
     public static $DB_DATABASE = "unittest_matecat_local"; //database name

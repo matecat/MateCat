@@ -32,6 +32,7 @@ class Framework_AllTests {
         $suite->addTestSuite('Tests_QATest');
         $suite->addTestSuite('Tests_EnginesTest');
         $suite->addTestSuite('Tests_ServerCheckTest');
+        $suite->addTestSuite('Tests_PostProcessTest');
         // ...
 
         return $suite;

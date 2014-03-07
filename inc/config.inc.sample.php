@@ -106,7 +106,7 @@ class INIT {
         if( !empty($custom_paths) ){
             $def_path = array_merge( $def_path, $custom_paths );
         }
-        set_include_path ( implode( PATH_SEPARATOR, $def_path ) );
+        set_include_path ( get_include_path() . PATH_SEPARATOR . implode( PATH_SEPARATOR, $def_path ) );
     }
 
     public static function loadClass( $className ) {
