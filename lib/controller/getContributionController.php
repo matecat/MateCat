@@ -334,9 +334,6 @@ class getContributionController extends ajaxController {
 
             ( !empty( $match['sentence_confidence'] ) ? $mt_qe = floatval( $match['sentence_confidence'] ) : $mt_qe = null );
 
-            if (strpos($match['created_by'], 'MT') !== false) {
-                $match['match'] = 'MT';
-            }
             if ($match['created_by'] == 'MT!') {
                 $match['created_by'] = 'MT'; //MyMemory returns MT!
             }
@@ -344,7 +341,6 @@ class getContributionController extends ajaxController {
             $data                          = array();
             $data[ 'suggestions_array' ]   = $suggestions_json_array;
             $data[ 'suggestion' ]          = $match[ 'raw_translation' ];
-            $data[ 'suggestion_match' ]    = $match[ 'match' ];
             $data[ 'suggestion_source' ]   = $match[ 'created_by' ];
             $data[ 'mt_qe' ]               = $mt_qe;
 
