@@ -286,7 +286,7 @@ UI = {
 				'	<div class="popup survey">' +
 				'		<a href="#" class="x-popup"></a>' +
 				'		<h1>Translation Completed - Take a Survey</h1>' +
-				'		<p class="surveynotice">To stop displaying the survey, click on the <b>X</b> icon on the top right corner ot this popup.</p>' +
+				'		<p class="surveynotice">To stop displaying the survey, click on the <b>X</b> icon on the top right corner of this popup.</p>' +
 				'		<div class="popup-box">' +
 				'			<iframe src="' + s + '" width="100%" height="670" frameborder="0" marginheight="0" marginwidth="0">Loading ...</iframe>' +
 				'		</div>' +
