@@ -211,7 +211,7 @@ class INIT {
 		self::$ENABLED_BROWSERS = array('chrome', 'safari', 'firefox');
 		self::$CONVERSION_ENABLED = true;
 		self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-		self::$BUILD_NUMBER = '0.3.3.8';
+		self::$BUILD_NUMBER = '0.3.3.8.2';
 		self::$VOLUME_ANALYSIS_ENABLED = true;
 
 		self::$WARNING_POLLING_INTERVAL = 20; //seconds
