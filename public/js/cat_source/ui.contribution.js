@@ -2,7 +2,7 @@
 	Component: ui.contribution
  */
 $.extend(UI, {
-	chooseSuggestion: function(w) {
+	chooseSuggestion: function(w) {console.log('chooseSuggestion');
 		this.copySuggestionInEditarea(this.currentSegment, $('.editor ul[data-item=' + w + '] li.b .translation').text(), $('.editor .editarea'), $('.editor ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
 		this.lockTags(this.editarea);
 		this.setChosenSuggestion(w);
@@ -372,39 +372,33 @@ $.extend(UI, {
 			UI.reinitMMShortcuts();
 		});
 	},
-	reinitMMShortcuts: function() {
+	reinitMMShortcuts: function() {console.log('reinitMMShortcuts');
 		var keys = (this.isMac) ? 'alt+meta' : 'alt+ctrl';
 		$('body').unbind('keydown.alt1').unbind('keydown.alt2').unbind('keydown.alt3').unbind('keydown.alt4').unbind('keydown.alt5');
 		$("body, .editarea").bind('keydown.alt1', keys + '+1', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-//            if (e.which != 97) {
 			UI.chooseSuggestion('1');
-//            }
 		}).bind('keydown.alt2', keys + '+2', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-//            if (e.which != 98) {
 			UI.chooseSuggestion('2');
-//            }
 		}).bind('keydown.alt3', keys + '+3', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-//            if (e.which != 99) {
 			UI.chooseSuggestion('3');
-//            }
 		}).bind('keydown.alt4', keys + '+4', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-//            if (e.which != 100) {
 			UI.chooseSuggestion('4');
-//            }
 		}).bind('keydown.alt5', keys + '+5', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-//            if (e.which != 101) {
 			UI.chooseSuggestion('5');
-//            }
+		}).bind('keydown.alt6', keys + '+6', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			UI.chooseSuggestion('6');
 		}); 
 	},
 	setChosenSuggestion: function(w) {

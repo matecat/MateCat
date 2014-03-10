@@ -6,7 +6,8 @@ $.extend(UI, {
 		this.initStart = new Date();
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
-		this.numContributionMatchesResults = 3;
+		this.numContributionMatchesResults = 6;
+		this.numDisplayContributionMatches = 3;
 		this.numMatchesResults = 10;
 		this.numSegments = $('section').length;
 		this.editarea = '';

@@ -280,20 +280,20 @@ UI = {
 */
 	},
 	displaySurvey: function(s) {
-		if(this.surveyDisplayed) return;
-		survey = '<div class="modal survey" data-type="view">' +
-				'	<div class="popup-outer"></div>' +
-				'	<div class="popup survey">' +
-				'		<a href="#" class="x-popup"></a>' +
-				'		<h1>Translation Completed - Take a Survey</h1>' +
-				'		<p class="surveynotice">To stop displaying the survey, click on the <b>X</b> icon on the top right corner of this popup.</p>' +
-				'		<div class="popup-box">' +
-				'			<iframe src="' + s + '" width="100%" height="670" frameborder="0" marginheight="0" marginwidth="0">Loading ...</iframe>' +
-				'		</div>' +
-				'	</div>' +
-				'</div>';	
-		this.body.append(survey);
-		$('.modal.survey').show();
+        if(this.surveyDisplayed) return;
+        survey = '<div class="modal survey" data-type="view">' +
+                '	<div class="popup-outer"></div>' +
+                '	<div class="popup survey">' +
+                '		<a href="#" class="x-popup"></a>' +
+                '		<h1>Translation Completed - Take a Survey</h1>' +
+                '		<p class="surveynotice">To stop displaying the survey, click on the <b>X</b> icon on the top right corner of this popup.</p>' +
+                '		<div class="popup-box">' +
+                '			<iframe src="' + s + '" width="100%" height="670" frameborder="0" marginheight="0" marginwidth="0">Loading ...</iframe>' +
+                '		</div>' +
+                '	</div>' +
+                '</div>';
+        this.body.append(survey);
+        $('.modal.survey').show();
 	},
 	surveyAlreadyDisplayed: function() {
 		if(typeof $.cookie('surveyedJobs') != 'undefined') {
@@ -1417,7 +1417,7 @@ UI = {
             iFrameDownload.ready(function () {
 
                 //create a GLOBAL setInterval so in anonymous function it can be disabled
-                var downloadTimer = window.setInterval(function () {
+                downloadTimer = window.setInterval(function () {
 
                     //check for cookie
                     var token = $.cookie('downloadToken');
@@ -2132,7 +2132,8 @@ $.extend(UI, {
 		this.initStart = new Date();
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
-		this.numContributionMatchesResults = 3;
+		this.numContributionMatchesResults = 6;
+		this.numDisplayContributionMatches = 3;
 		this.numMatchesResults = 10;
 		this.numSegments = $('section').length;
 		this.editarea = '';
@@ -3388,7 +3389,7 @@ $.extend(UI, {
 	Component: ui.contribution
  */
 $.extend(UI, {
-	chooseSuggestion: function(w) {
+	chooseSuggestion: function(w) {console.log('chooseSuggestion');
 		this.copySuggestionInEditarea(this.currentSegment, $('.editor ul[data-item=' + w + '] li.b .translation').text(), $('.editor .editarea'), $('.editor ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
 		this.lockTags(this.editarea);
 		this.setChosenSuggestion(w);
@@ -3758,39 +3759,33 @@ $.extend(UI, {
 			UI.reinitMMShortcuts();
 		});
 	},
-	reinitMMShortcuts: function() {
+	reinitMMShortcuts: function() {console.log('reinitMMShortcuts');
 		var keys = (this.isMac) ? 'alt+meta' : 'alt+ctrl';
 		$('body').unbind('keydown.alt1').unbind('keydown.alt2').unbind('keydown.alt3').unbind('keydown.alt4').unbind('keydown.alt5');
 		$("body, .editarea").bind('keydown.alt1', keys + '+1', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-//            if (e.which != 97) {
 			UI.chooseSuggestion('1');
-//            }
 		}).bind('keydown.alt2', keys + '+2', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-//            if (e.which != 98) {
 			UI.chooseSuggestion('2');
-//            }
 		}).bind('keydown.alt3', keys + '+3', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-//            if (e.which != 99) {
 			UI.chooseSuggestion('3');
-//            }
 		}).bind('keydown.alt4', keys + '+4', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-//            if (e.which != 100) {
 			UI.chooseSuggestion('4');
-//            }
 		}).bind('keydown.alt5', keys + '+5', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-//            if (e.which != 101) {
 			UI.chooseSuggestion('5');
-//            }
+		}).bind('keydown.alt6', keys + '+6', function(e) {
+			e.preventDefault();
+			e.stopPropagation();
+			UI.chooseSuggestion('6');
 		}); 
 	},
 	setChosenSuggestion: function(w) {

@@ -1349,8 +1349,9 @@ textarea, input, .editarea, .search-editarea, select  {
 .graysmall .translation
 {
     display: block;
-    padding: 4px;
-    margin-left: -4px;
+	padding-bottom: 4px;
+    /*padding: 4px;
+    margin-left: -4px;*/
 }
 .graysmall .translation.editing
 {
