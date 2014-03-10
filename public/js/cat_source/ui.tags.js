@@ -43,7 +43,8 @@ $.extend(UI, {
 	detectTags: function(area) {
 		
         //ALL in one
-        $(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"true\" class=\"locked\">$2</span>"));
+        $(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
+//        $(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"true\" class=\"locked\">$2</span>"));
 
 //		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 //      if (!this.firstMarking) {
@@ -54,14 +55,14 @@ $.extend(UI, {
 	disableTagMark: function() {
 		this.taglockEnabled = false;
 		this.body.addClass('tagmarkDisabled');
-		$('.source span.locked').each(function(index) {
+		$('.source span.locked').each(function() {
 			$(this).replaceWith($(this).html());
 		});
-		$('.editarea span.locked').each(function(index) {
+		$('.editarea span.locked').each(function() {
 			$(this).replaceWith($(this).html());
 		});
 	},
-	enableTagMark: function() {console.log('enable tag mark');
+	enableTagMark: function() {//console.log('enable tag mark');
 		this.taglockEnabled = true;
 		this.body.removeClass('tagmarkDisabled');
 		saveSelection();
@@ -90,12 +91,13 @@ $.extend(UI, {
 	},
 	markTags: function() {
 		if (!this.taglockEnabled) return false;
+//		UI.checkHeaviness(); 
+		
 		if (this.noTagsInSegment(1))
 			return false;
 		$('.source').each(function() {
 			UI.detectTags(this);
 		});
-		$('.source .locked').attr('contenteditable', 'false');
 
 		$('.editarea').each(function() {
 			if ($('#segment-' + $(this).data('sid')).hasClass('mismatch'))
@@ -113,7 +115,8 @@ $.extend(UI, {
 	},
 
 	// TAG LOCK
-	lockTags: function(el) {console.log('lock tags');
+	lockTags: function(el) {
+//		console.log('lock tags');
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
@@ -121,11 +124,13 @@ $.extend(UI, {
 			return false;
 		if (this.noTagsInSegment())
 			return false;
-		$(editarea).first().each(function(index) {
+		$(editarea).first().each(function() {
 			saveSelection();
 			var tx = $(this).html();
-			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"true\">$1</pl>" : "<pl contenteditable=\"true\" class=\"locked\">$1</pl>";
-			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"true\">$1</span>" : "<span contenteditable=\"true\" class=\"locked\">$1</span>";
+			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
+			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";			
+//			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"true\">$1</pl>" : "<pl contenteditable=\"true\" class=\"locked\">$1</pl>";
+//			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"true\">$1</span>" : "<span contenteditable=\"true\" class=\"locked\">$1</span>";
 
             tx = tx.replace(/<span/gi, "<pl")
                     .replace(/<\/span/gi, "</pl")
@@ -141,9 +146,11 @@ $.extend(UI, {
                     .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
 
             if (UI.isFirefox) {
-                tx = tx.replace(/(<span class="[^"]*" contenteditable="true"\>)(:?<span class="[^"]*" contenteditable="true"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
+                tx = tx.replace(/(<span class="[^"]*" contenteditable="false"\>)(:?<span class="[^"]*" contenteditable="false"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
+//                tx = tx.replace(/(<span class="[^"]*" contenteditable="true"\>)(:?<span class="[^"]*" contenteditable="true"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
             } else {
-                tx = tx.replace(/(<span contenteditable="true" class="[^"]*"\>)(:?<span contenteditable="true" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
+                tx = tx.replace(/(<span contenteditable="false" class="[^"]*"\>)(:?<span contenteditable="false" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
+//                tx = tx.replace(/(<span contenteditable="true" class="[^"]*"\>)(:?<span contenteditable="true" class="[^"]*"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
             }
 
 //			if (UI.isFirefox) {
@@ -156,6 +163,7 @@ $.extend(UI, {
 //			}
 
 			tx = tx.replace(/(<\/span\>)$(\s){0,}/gi, "</span> ");
+			tx = tx.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
 			var prevNumTags = $('span.locked', this).length;
 			$(this).html(tx);
 			restoreSelection();
@@ -167,39 +175,85 @@ $.extend(UI, {
 	unlockTags: function() {
 		if (!this.taglockEnabled)
 			return false;
-		this.editarea.html(this.editarea.html().replace(/<span contenteditable=\"true\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1"));
+		this.editarea.html(this.editarea.html().replace(/<span contenteditable=\"false\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1"));
+//		this.editarea.html(this.editarea.html().replace(/<span contenteditable=\"true\" class=\"locked\"\>(.*?)<\/span\>/gi, "$1"));
 	},
 	
 	// TAG CLEANING
 	cleanDroppedTag: function(area, beforeDropHTML) {
-
-		if (area == this.editarea)
+		if (area == this.editarea) {
 			this.droppingInEditarea = false;
 
-		var diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
-		var draggedText = '';
-		$(diff).each(function() {
-			if (this[0] == 1) {
-				draggedText += this[1];
+			diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
+			draggedText = '';
+			$(diff).each(function() {
+				if (this[0] == 1) {
+					draggedText += this[1];
+				}
+			});
+			draggedText = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2");
+			dr2 = draggedText.replace(/(<br>)$/, '').replace(/(<span.*?>)\&nbsp;/,'$1');
+
+			area.html(area.html().replace(draggedText, dr2));
+
+			div = document.createElement("div");
+			div.innerHTML = draggedText;
+			isMarkup = draggedText.match(/^<span style=\"font\-size\: 13px/gi);
+			saveSelection();
+
+			if($('span .rangySelectionBoundary', area).length > 1) $('.rangySelectionBoundary', area).last().remove();
+			if($('span .rangySelectionBoundary', area).length) {
+				spel = $('span', area).has('.rangySelectionBoundary');
+				rsb = $('span .rangySelectionBoundary', area).detach();
+				spel.after(rsb);
 			}
-		});
+			phcode = $('.rangySelectionBoundary')[0].outerHTML;
+			$('.rangySelectionBoundary').text(this.cursorPlaceholder);
 
-		draggedText = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2");
-		var div = document.createElement("div");
-		div.innerHTML = draggedText;
-		saveSelection();
-		var phcode = $('.rangySelectionBoundary')[0].outerHTML;
-		$('.rangySelectionBoundary').text(this.cursorPlaceholder);
+			newTag = $(div).text();
+			var cloneEl = area;
+			// encode br before textification
+			$('br', cloneEl).each(function() {
+				$(this).replaceWith('[**[br class="' + this.className + '"]**]');				
+			});
+			newText = cloneEl.text().replace(draggedText, newTag);
+			cloneEl = null;
+			if(typeof phcode == 'undefined') phcode = '';
 
-		closeTag = '</' + $(div).text().trim().replace(/<(.*?)\s.*?\>/gi, "$1") + '>';
-		newTag = $(div).text();
+			area.text(newText);
+			area.html(area.html().replace(this.cursorPlaceholder, phcode));
+			restoreSelection();
+			area.html(area.html().replace(this.cursorPlaceholder, '').replace(/\[\*\*\[(.*?)\]\*\*\]/gi, "<$1>"));
 
-		var newText = area.text().replace(draggedText, newTag);
-		area.text(newText);
-		area.html(area.html().replace(this.cursorPlaceholder, phcode));
-		restoreSelection();
-		area.html(area.html().replace(this.cursorPlaceholder, ''));
+		} else {
+	// old cleaning code to be evaluated
+			diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
+			draggedText = '';
+			$(diff).each(function() {
+				if (this[0] == 1) {
+					draggedText += this[1];
+				}
+			});
+			draggedText = draggedText.replace(/^(\&nbsp;)(.*?)(\&nbsp;)$/gi, "$2").replace(/(<br>)$/gi, '');
+			div = document.createElement("div");
+			div.innerHTML = draggedText;
+			saveSelection();
+			$('.rangySelectionBoundary', area).last().remove(); // eventually removes a duplicated selectionBoundary
+			if($('span .rangySelectionBoundary', area).length) { // if there's a selectionBoundary inside a span, move the first after the latter
+				spel = $('span', area).has('.rangySelectionBoundary');
+				rsb = $('span .rangySelectionBoundary', area).detach();
+				spel.after(rsb);
+			}
+			phcode = $('.rangySelectionBoundary')[0].outerHTML;
+			$('.rangySelectionBoundary').text(this.cursorPlaceholder);
 
+			newTag = $(div).text();
+			newText = area.text().replace(draggedText, newTag);
+			area.text(newText);
+			area.html(area.html().replace(this.cursorPlaceholder, phcode));
+			restoreSelection();
+			area.html(area.html().replace(this.cursorPlaceholder, ''));			
+		}
 	},
 	
 	// TAG MISMATCH
@@ -265,7 +319,6 @@ $.extend(UI, {
 	openTagAutocompletePanel: function() {
 		if(!UI.sourceTags.length) return false;
 		$('.tag-autocomplete-marker').remove();
-		console.log('openTagAutocompletePanel 1: ', UI.editarea.html());
 
 		var node = document.createElement("span");
 		node.setAttribute('class', 'tag-autocomplete-marker');
@@ -273,47 +326,25 @@ $.extend(UI, {
 		var endCursor = document.createElement("span");
 		endCursor.setAttribute('class', 'tag-autocomplete-endcursor');
 		insertNodeAtCursor(endCursor);
-
 		var offset = $('.tag-autocomplete-marker').offset();
+		var addition = ($(':first-child', UI.editarea).hasClass('tag-autocomplete-endcursor'))? 30 : 20;
 		$('.tag-autocomplete-marker').remove();
 		UI.body.append('<div class="tag-autocomplete"><ul></ul></div>');
+		var arrayUnique = function(a) {
+			return a.reduce(function(p, c) {
+				if (p.indexOf(c) < 0) p.push(c);
+				return p;
+			}, []);
+		};
+		UI.sourceTags = arrayUnique(UI.sourceTags);
 		$.each(UI.sourceTags, function(index) {
 			$('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + '>' + this + '</li>');
 		});
-		console.log('openTagAutocompletePanel 2: ', UI.editarea.html());
 
-		$('.tag-autocomplete').css('top', offset.top + 20);
+		$('.tag-autocomplete').css('top', offset.top + addition);
 		$('.tag-autocomplete').css('left', offset.left);
 		this.checkAutocompleteTags();	
-		console.log('openTagAutocompletePanel 3: ', UI.editarea.html());
 	},
-	jumpTag: function(pos) {
-		pos = pos || 'start';
-		setTimeout(function() {
-			console.log('d: ', UI.editarea.html());
-			saveSelection(pos);
-			console.log('z: ', UI.editarea.html());
-//			console.log(pos);
-			parentTag = $('span.locked', UI.editarea).has(' .rangySelectionBoundary');
-			isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
-			restoreSelection();
-			if(isInsideTag) {
-				setCursorPosition(parentTag[0], pos);
-			}
-		}, 50);		
-	},
-	movePHOutOfTags: function(where) {
-		if($('span.locked .rangySelectionBoundary', this.editarea).length) {
-			ph = $('span.locked .rangySelectionBoundary', this.editarea);
-			if(where == 'start') {
-				$('span.locked', this.editarea).has('.rangySelectionBoundary').before(ph[0].outerHTML);
-			} else {
-				$('span.locked', this.editarea).has('.rangySelectionBoundary').after(ph[0].outerHTML);
-			}
-			ph.remove();
-		}
-	},
-
 });
 
 

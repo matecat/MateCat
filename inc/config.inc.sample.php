@@ -106,7 +106,7 @@ class INIT {
         if( !empty($custom_paths) ){
             $def_path = array_merge( $def_path, $custom_paths );
         }
-        set_include_path ( implode( PATH_SEPARATOR, $def_path ) );
+        set_include_path ( get_include_path() . PATH_SEPARATOR . implode( PATH_SEPARATOR, $def_path ) );
     }
 
     public static function loadClass( $className ) {
@@ -211,7 +211,7 @@ class INIT {
 		self::$ENABLED_BROWSERS = array('chrome', 'safari', 'firefox');
 		self::$CONVERSION_ENABLED = true;
 		self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-		self::$BUILD_NUMBER = '0.3.3.7.1';
+		self::$BUILD_NUMBER = '0.3.3.8.2';
 		self::$VOLUME_ANALYSIS_ENABLED = true;
 
 		self::$WARNING_POLLING_INTERVAL = 20; //seconds

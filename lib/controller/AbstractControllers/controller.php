@@ -13,9 +13,10 @@ require_once INIT::$UTILS_ROOT .'/AuthCookie.php';
 
 abstract class controller {
 
-    public static function sanitizeString( &$value, $item ){
-        $value = filter_var( $value, FILTER_SANITIZE_STRING, array( 'flags' => /* FILTER_FLAG_STRIP_HIGH | */ FILTER_FLAG_STRIP_LOW ) );
-    }
+//    public static function sanitizeString( &$value, $item ){
+//        $value = urldecode( $value );
+//        $value = filter_var( $value, FILTER_SANITIZE_STRING, array( 'flags' => /* FILTER_FLAG_STRIP_HIGH | */ FILTER_FLAG_STRIP_LOW ) );
+//    }
 
     /**
      * TODO refactoring
@@ -25,7 +26,7 @@ abstract class controller {
 
         if( isset( $_REQUEST['api'] ) && filter_input( INPUT_GET, 'api', FILTER_VALIDATE_BOOLEAN ) ){
 
-            array_walk_recursive( $_REQUEST , 'controller::sanitizeString' );
+//            array_walk_recursive( $_REQUEST , 'controller::sanitizeString' );
 
             if( !isset( $_REQUEST['action'] ) || empty( $_REQUEST['action'] ) ){
                 header( "HTTP/1.1 200 OK" );
@@ -33,8 +34,10 @@ abstract class controller {
                 die();
             }
 
-            $_REQUEST['action'] = ucfirst( $_REQUEST['action'] );
-            $_POST['action']    = $_REQUEST['action'];
+            $_REQUEST[ 'action' ][0] = strtoupper( $_REQUEST[ 'action' ][ 0 ] );
+            $func                 = create_function( '$c', 'return strtoupper($c[1]);' ); //PHP 5.2 compatibility, don't use a lambda function
+            $_REQUEST[ 'action' ] = preg_replace_callback( '/_([a-z])/', $func, $_REQUEST[ 'action' ] );
+            $_POST[ 'action' ]    = $_REQUEST[ 'action' ];
 
             Log::$fileName = 'API.log';
 

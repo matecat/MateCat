@@ -4,6 +4,8 @@
 //include_once INIT::$UTILS_ROOT . "/API/Upload.php";
 //include_once INIT::$UTILS_ROOT . "/Utils.php";
 
+include_once INIT::$UTILS_ROOT."/engines/engine.class.php";
+
 /**
  *
  * Create new Project on Matecat With HTTP POST ( multipart/form-data ) protocol
@@ -36,22 +38,28 @@ class NewController extends ajaxController {
 
     public function __construct() {
 
+        //limit execution time to 300 seconds
+        set_time_limit( 300 );
+
         $this->disableSessions();
         parent::__construct();
+
+        //force client to close connection, avoid UPLOAD_ERR_PARTIAL for keep-alive connections
+        header("Connection: close");
 
         $filterArgs = array(
                 'project_name'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
                 'source_lang'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
                 'target_lang'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'tms_engine'         => array( 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => array( 'default' => 1, 'min_range' => 0 ) ),
-                'mt_engine'          => array( 'filter' => FILTER_VALIDATE_INT, 'flags' => FILTER_REQUIRE_SCALAR, 'options' => array( 'default' => 1, 'min_range' => 0 ) ),
+                'tms_engine'         => array( 'filter' => FILTER_VALIDATE_INT,    'flags' => FILTER_REQUIRE_SCALAR, 'options' => array( 'default' => 1, 'min_range' => 0 ) ),
+                'mt_engine'          => array( 'filter' => FILTER_VALIDATE_INT,    'flags' => FILTER_REQUIRE_SCALAR, 'options' => array( 'default' => 1, 'min_range' => 0 ) ),
                 'private_tm_key'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        if( is_null( $__postInput[ 'tms_engine' ] ) ) $__postInput[ 'tms_engine' ] = 1;
-        if( is_null( $__postInput[ 'mt_engine' ] ) )  $__postInput[ 'mt_engine' ]  = 1;
+        if( !isset($__postInput[ 'tms_engine' ]) || is_null( $__postInput[ 'tms_engine' ] ) ) $__postInput[ 'tms_engine' ] = 1;
+        if( !isset($__postInput[ 'mt_engine' ]) || is_null( $__postInput[ 'mt_engine' ] ) )  $__postInput[ 'mt_engine' ]  = 1;
 
         foreach( $__postInput as $key => $val ){
             $__postInput[$key] = urldecode( $val );
@@ -87,12 +95,13 @@ class NewController extends ajaxController {
                 $test_valid_MT = new MT( $this->mt_engine );
             }
         } catch ( Exception $ex ) {
+            $this->api_output[ 'message' ] = $ex->getMessage();
             Log::doLog( $ex->getMessage() );
             return -1;
         }
 
         if (empty($_FILES)) {
-            $this->result['errors'][] = array("code" => -1, "message" => "Missing file name.");
+            $this->result['errors'][] = array("code" => -1, "message" => "Missing file. Not Sent.");
             return -1;
         }
 
@@ -107,6 +116,7 @@ class NewController extends ajaxController {
                             array( "code" => -1, "message" => $e->getMessage() )
                     )
             );
+            $this->api_output[ 'message' ] = $e->getMessage();
         }
 
         $arFiles = array();
@@ -114,7 +124,8 @@ class NewController extends ajaxController {
             $arFiles[] = $input_value->name;
         }
 
-        $default_project_name = $arFiles[0];
+        //if fileupload was failed this index ( 0 = does not exists )
+        $default_project_name = @$arFiles[0];
         if (count($arFiles) > 1) {
             $default_project_name = "MATECAT_PROJ-" . date("Ymdhi");
         }
@@ -124,19 +135,21 @@ class NewController extends ajaxController {
         }
 
         if ( empty( $this->source_lang ) ) {
+            $this->api_output[ 'message' ] = "Missing source language." ;
             $this->result[ 'errors' ][ ] = array( "code" => -3, "message" => "Missing source language." );
         }
 
         if ( empty( $this->target_lang ) ) {
+            $this->api_output[ 'message' ] = "Missing target language.";
             $this->result[ 'errors' ][ ] = array( "code" => -4, "message" => "Missing target language." );
         }
 
         //ONE OR MORE ERRORS OCCURRED : EXITING
+        //for now we sent to api output only the LAST error message, but we log all
         if ( !empty( $this->result[ 'errors' ] ) ) {
             $msg = "Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
             Log::doLog( $msg );
             Utils::sendErrMailReport( $msg );
-
             return -1; //exit code
         }
 

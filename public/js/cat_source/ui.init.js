@@ -2,11 +2,12 @@
 	Component: ui.init
  */
 $.extend(UI, {
-	init: function(options) {
+	init: function() {
 		this.initStart = new Date();
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
-		this.numContributionMatchesResults = 3;
+		this.numContributionMatchesResults = 6;
+		this.numDisplayContributionMatches = 3;
 		this.numMatchesResults = 10;
 		this.numSegments = $('section').length;
 		this.editarea = '';
@@ -17,13 +18,13 @@ $.extend(UI, {
 		this.blockGetMoreSegments = true;
 		this.searchParams = {};
 		this.searchParams.search = 0;
-		var bb = $.cookie('noAlertConfirmTranslation');
-		this.alertConfirmTranslationEnabled = (typeof bb == 'undefined') ? true : false;
+//		var bb = $.cookie('noAlertConfirmTranslation');
+//		this.alertConfirmTranslationEnabled = (typeof bb == 'undefined') ? true : false;
 		this.customSpellcheck = false;
 		this.noGlossary = false;
 		setTimeout(function() {
 			UI.blockGetMoreSegments = false;
-		}, 1000);
+		}, 200);
 		this.detectFirstLast();
 		this.reinitMMShortcuts();
 		this.initSegmentNavBar();
@@ -48,12 +49,18 @@ $.extend(UI, {
 		this.firstMarking = true;
 //		this.markTags(true);
 		this.firstMarking = false;
+		this.surveyDisplayed = false;
+		this.warningStopped = false;
+		this.abortedOperations = [];
 		this.setContextMenu();
 		this.createJobMenu();
 		$('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');
 
 		// SET EVENTS
-		this.setEvents(); 
+		this.setEvents();
+		if(this.surveyAlreadyDisplayed()) {
+			this.surveyDisplayed = true;
+		}
 	},
 }); 
 

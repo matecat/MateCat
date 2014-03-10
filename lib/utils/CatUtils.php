@@ -22,7 +22,7 @@ class CatUtils {
     const crPlaceholderRegex   = '/\#\#\$_0D\$\#\#/g';
     const crlfPlaceholderRegex = '/\#\#\$_0D0A\$\#\#/g';
 
-    public static $cjk = array( 'zh-TW' => 1.8, 'zh-CN' => 1.8, 'ja-JP' => 2.5, 'ko-KR' => 2.5 );
+    public static $cjk = array( 'zh-TW' => 1.8, 'zh-CN' => 1.8, 'ja-JP' => 2.5, 'ko-KR' => 2.5, 'km-KH' => 5 );
 
     //following functions are useful for manage the consistency of non braking spaces
     // chars coming, expecially,from MS Word
@@ -103,14 +103,14 @@ class CatUtils {
 
         $segment = preg_replace('|<(/g)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
 
-        $segment = preg_replace('|<(x.*?/?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(x .*?/?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
         $segment = preg_replace('#<(bx[ ]{0,}/?|bx .*?/?)>#si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
         $segment = preg_replace('#<(ex[ ]{0,}/?|ex .*?/?)>#si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
         $segment = preg_replace('|<(bpt\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
         $segment = preg_replace('|<(/bpt)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
         $segment = preg_replace('|<(ept\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
         $segment = preg_replace('|<(/ept)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
-        $segment = preg_replace('|<(ph\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
+        $segment = preg_replace('|<(ph .*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
         $segment = preg_replace('|<(/ph)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
         $segment = preg_replace('|<(it\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
         $segment = preg_replace('|<(/ph)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
@@ -576,7 +576,6 @@ class CatUtils {
         $job_stats[ 'PROGRESS_FORMATTED' ]   = number_format( $job_stats[ 'TRANSLATED' ] + $job_stats[ 'APPROVED' ], 0, ".", "," );
         $job_stats[ 'APPROVED_FORMATTED' ]   = number_format( $job_stats[ 'APPROVED' ], 0, ".", "," );
         $job_stats[ 'REJECTED_FORMATTED' ]   = number_format( $job_stats[ 'REJECTED' ], 0, ".", "," );
-        $job_stats[ 'TODO_FORMATTED' ]       = number_format( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ], 0, ".", "," );
         $job_stats[ 'DRAFT_FORMATTED' ]      = number_format( $job_stats[ 'DRAFT' ], 0, ".", "," );
         $job_stats[ 'TRANSLATED_FORMATTED' ] = number_format( $job_stats[ 'TRANSLATED' ], 0, ".", "," );
 
@@ -603,6 +602,13 @@ class CatUtils {
         $job_stats[ 'REJECTED_PERC_FORMATTED' ]   = round( $job_stats[ 'REJECTED_PERC' ], $significantDigits );
         $job_stats[ 'PROGRESS_PERC_FORMATTED' ]   = round( $job_stats[ 'PROGRESS_PERC' ], $significantDigits );
 
+        $todo = $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ];
+        if( $todo < 1 && $todo > 0 ){
+            $job_stats[ 'TODO_FORMATTED' ] = 1;
+        } else {
+            $job_stats[ 'TODO_FORMATTED' ] = number_format( $job_stats[ 'DRAFT' ] + $job_stats[ 'REJECTED' ], 0, ".", "," );
+        }
+
         $t = 'approved';
         if ($job_stats['TRANSLATED_FORMATTED'] > 0)
             $t = "translated";
@@ -610,6 +616,12 @@ class CatUtils {
             $t = "draft";
         if ($job_stats['REJECTED_FORMATTED'] > 0)
             $t = "draft";
+        if( $job_stats['TRANSLATED_FORMATTED'] == 0 &&
+                $job_stats['DRAFT_FORMATTED'] == 0 &&
+                $job_stats['REJECTED_FORMATTED'] == 0 &&
+                $job_stats['APPROVED_FORMATTED'] == 0 ){
+            $t = 'draft';
+        }
         $job_stats['DOWNLOAD_STATUS'] = $t;
 
         return $job_stats;
@@ -647,6 +659,22 @@ class CatUtils {
         $job_stats = self::_getStatsForJob($job_stats, true); //true set estimation check if present
         return self::_performanceEstimationTime($job_stats);
         
+    }
+
+    public static function getFastStatsForJob( WordCount_Struct $wCount ){
+
+        $job_stats = array();
+        $job_stats[ 'id' ]         = $wCount->getIdJob();
+//        $job_stats[ 'NEW' ]        = $wCount->getNewWords();
+        $job_stats[ 'DRAFT' ]      = $wCount->getNewWords() + $wCount->getDraftWords();
+        $job_stats[ 'TRANSLATED' ] = $wCount->getTranslatedWords();
+        $job_stats[ 'APPROVED' ]   = $wCount->getApprovedWords();
+        $job_stats[ 'REJECTED' ]   = $wCount->getRejectedWords();
+
+        $job_stats[ 'TOTAL' ]   = $wCount->getTotal();
+        $job_stats = self::_getStatsForJob($job_stats, true); //true set estimation check if present
+        return self::_performanceEstimationTime($job_stats);
+
     }
 
     public static function getStatsForFile($fid) {

@@ -1,4 +1,5 @@
 <?php
+include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
 include_once INIT::$UTILS_ROOT . "/engines/mt.class.php";
 include_once INIT::$UTILS_ROOT . '/AjaxPasswordCheck.php';
 

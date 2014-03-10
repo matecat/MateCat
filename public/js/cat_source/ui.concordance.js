@@ -18,6 +18,9 @@ $.extend(UI, {
 				id_translator: config.id_translator,
 				password: config.password
 			},
+			error: function() {
+				UI.failedConnection(this, 'getConcordance');
+			},
 			success: function(d) {
 				UI.renderConcordances(d, in_target);
 			}

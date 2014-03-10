@@ -24,15 +24,16 @@ Loader = {
 	forkComponents: new Array (
 	),
 	libraries: new Array (
-        'jquery',
-        'jquery-ui-1.8.20.custom.min',
-        'jquery.hotkeys',
-        'jquery.cookie',
-        'jquery-fieldselection.min',
-        'diff_match_patch',
-        'waypoints',
-        'rangy-core',
-        'rangy-selectionsaverestore'
+		'jquery-1.11.0.min',
+//		'jquery',
+//        'jquery-ui-1.8.20.custom.min',
+		'jquery.hotkeys.min',
+//		'jquery-migrate-1.2.1',
+		'jquery.cookie',
+		'diff_match_patch',
+		'waypoints',
+		'rangy-core',
+		'rangy-selectionsaverestore'
 	),
 	include: function(f,p,b) {
 		document.write('<script type="text/javascript" src="' + b + p + f + '?build=' + config.build_number + '"></script>');

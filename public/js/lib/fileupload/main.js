@@ -16,7 +16,7 @@ UI = null;
 
 var base = Math.log( config.maxFileSize ) / Math.log( 1024 );
 delete window.base;
-config.maxFileSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) ) + ' MB';
+config.maxFileSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
 
 UI = {
     init: function() {
@@ -342,6 +342,7 @@ $(function () {
             filesize: data.result[0].size,
             filerow: data.context,
             extension: data.result[0].name.split('.')[data.result[0].name.split('.').length-1],
+            error: ( typeof data.result[0].error !== 'undefined' ? data.result[0].error : false ),
             enforceConversion: data.result[0].convert
         };
 
@@ -369,34 +370,39 @@ $(function () {
 
         //console.log(data.data);
 
-        if(typeof data.data != 'undefined') {
+        $('.name',fileSpecs.filerow).text(fileSpecs.fname);
 
-			if(fileSpecs.filesize == 0) {
-				$('.name',fileSpecs.filerow).text(fileSpecs.fname);
-			}
+        if ( typeof data.data != 'undefined' && !fileSpecs.error ) {
 
-			if(config.conversionEnabled) {
+            if ( config.conversionEnabled ) {
 
 //				console.log('fileuploadcompleted');
 //				console.log('hasclass converting?: ' + fileSpecs.filerow.hasClass('converting'));
 
-				if(!fileSpecs.filerow.hasClass('converting')) {
+                if ( !fileSpecs.filerow.hasClass( 'converting' ) ) {
                     //console.log( filerow );
-				  console.log('ACTION: bind fileuploadcompleted');
-                    convertFile( fileSpecs.fname,fileSpecs.filerow,fileSpecs.filesize, fileSpecs.enforceConversion );
-				}
-			} else {
+                    console.log( 'ACTION: bind fileuploadcompleted' );
+                    convertFile( fileSpecs.fname, fileSpecs.filerow, fileSpecs.filesize, fileSpecs.enforceConversion );
+                }
+
+            } else {
                 enableAnalyze();
             }
 
+        } else if ( fileSpecs.error ) {
+            disableAnalyze();
+            $( '.error-message' ).addClass( 'no-more' ).text( 'An error occurred during upload.' ).show();
+            $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
+            $( '#add-files' ).addClass( 'disabled' );
+            $( '#add-files input' ).attr( 'disabled', 'disabled' );
         }
 	
-
 		if($('.upload-table tr').length) {
 			$('.upload-files').addClass('uploaded');
 		} else {
 			$('.upload-files').removeClass('uploaded');
 		}
+
 	});
 
 	$('.upload-files').bind('dragleave', function (e) {
@@ -606,7 +612,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 //              console.log(this.context);
 //			falsePositive = ((typeof this.context == 'undefined')||(!this.context))? false : true; // suggested solution
 			falsePositive = (typeof this.context == 'undefined')? false : true; // old solution
-              filerow.removeClass('converting');
+            filerow.removeClass('converting');
 			filerow.addClass('ready');
            	if( d.code == 1 ) {
 				$('.ui-progressbar-value', filerow).addClass('completed').css('width', '100%');

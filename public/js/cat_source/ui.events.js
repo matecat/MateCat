@@ -56,26 +56,26 @@ $.extend(UI, {
 		}).bind('keydown', 'Meta+Shift+z', function(e) {
 			e.preventDefault();
 			UI.redoInSegment(segment);
-		}).bind('keydown', 'Ctrl+c', function(e) {
+		}).bind('keydown', 'Ctrl+c', function() {
 			UI.tagSelection = false;
-		}).bind('keydown', 'Meta+c', function(e) {
+		}).bind('keydown', 'Meta+c', function() {
 			UI.tagSelection = false;
 //		}).bind('keydown', 'Backspace', function(e) {
 		}).bind('keydown', 'Meta+f', function(e) {
 			UI.toggleSearch(e);
 		}).bind('keydown', 'Ctrl+f', function(e) {
 			UI.toggleSearch(e);
-		}).on('change', '#hideAlertConfirmTranslation', function(e) {
-			console.log($(this).prop('checked'));
-			if ($(this).prop('checked')) {
-				console.log('checked');
-				UI.alertConfirmTranslationEnabled = false;
-				$.cookie('noAlertConfirmTranslation', true, {expires: 1000});
-			} else {
-				console.log('unchecked');
-				UI.alertConfirmTranslationEnabled = true;
-				$.removeCookie('noAlertConfirmTranslation');
-			}
+//		}).on('change', '#hideAlertConfirmTranslation', function(e) {
+//			console.log($(this).prop('checked'));
+//			if ($(this).prop('checked')) {
+//				console.log('checked');
+//				UI.alertConfirmTranslationEnabled = false;
+//				$.cookie('noAlertConfirmTranslation', true, {expires: 1000});
+//			} else {
+//				console.log('unchecked');
+//				UI.alertConfirmTranslationEnabled = true;
+//				$.removeCookie('noAlertConfirmTranslation');
+//			}
 		}).on('click', '#spellCheck .words', function(e) {
 			e.preventDefault();
 			UI.selectedMisspelledElement.replaceWith($(this).text());
@@ -104,11 +104,35 @@ $.extend(UI, {
 			UI.closeTagAutocompletePanel();
 			UI.lockTags(UI.editarea);
 			UI.currentSegmentQA();
+		}).on('click', '.modal.survey .x-popup', function() {
+			UI.surveyDisplayed = true;
+			if(typeof $.cookie('surveyedJobs') != 'undefined') {
+				var c = $.cookie('surveyedJobs');
+				surv = c.split('||')[0];
+				if(config.survey === surv) {
+					$.cookie('surveyedJobs', c + config.job_id + ',');
+				}
+			} else {
+				$.cookie('surveyedJobs', config.survey + '||' + config.job_id + ',', { expires: 20, path: '/' });
+			}
+			$('.modal.survey').remove();
+		}).on('click', '.modal.survey .popup-outer', function() {
+			$('.modal.survey').hide().remove();
 		});
 		
-		$(window).on('scroll', function(e) {
+		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
+		}).on('allTranslated', function() {
+			if(config.survey) UI.displaySurvey(config.survey);
 		});
+//		window.onbeforeunload = goodbye;
+
+		window.onbeforeunload = function(e) {
+			goodbye(e);
+			localStorage.clear();
+		};
+
+	
 // no more used:
 		$("header .filter").click(function(e) {
 			e.preventDefault();
@@ -144,12 +168,12 @@ $.extend(UI, {
 
 		//overlay
 
-		$(".x-stats").click(function(e) {
+		$(".x-stats").click(function() {
 			$(".stats").toggle();
 		});
 
-		$(window).on('sourceCopied', function(event) {
-		});
+//		$(window).on('sourceCopied', function(event) {
+//		});
 
 		$("#outer").on('click', 'a.sid', function(e) {
 			e.preventDefault();
@@ -158,16 +182,16 @@ $.extend(UI, {
 		}).on('click', 'a.status', function(e) {
 			e.preventDefault();
 			e.stopPropagation();
-		}).on('click', 'section:not(.readonly) a.status', function(e) {
-			console.log('status');
+		}).on('click', 'section:not(.readonly) a.status', function() {
+//			console.log('status');
 			var segment = $(this).parents("section");
 			var statusMenu = $("ul.statusmenu", segment);
 
 			UI.createStatusMenu(statusMenu);
 			statusMenu.show();
-			var autoCloseStatusMenu = $('html').bind("click.vediamo", function(event) {
+			$('html').bind("click.outOfStatusMenu", function() {
 				$("ul.statusmenu").hide();
-				$('html').unbind('click.vediamo');
+				$('html').unbind('click.outOfStatusMenu');
 				UI.removeStatusMenu(statusMenu);
 			});
 		}).on('click', 'section.readonly, section.readonly a.status', function(e) {
@@ -176,15 +200,18 @@ $.extend(UI, {
 				return;
 			if (UI.someUserSelection)
 				return;
-
+			var msg = (UI.body.hasClass('archived'))? 'Job has been archived and cannot be edited.' : 'This part has not been assigned to you.';
 			UI.selectingReadonly = setTimeout(function() {
-				APP.alert({msg: 'This part has not been assigned to you.'});
+				APP.alert({msg: msg});
 			}, 200);
-		}).on('mousedown', 'section.readonly, section.readonly a.status', function(e) {
+
+		}).on('mousedown', 'section.readonly, section.readonly a.status', function() {
 			sel = window.getSelection();
 			UI.someUserSelection = (sel.type == 'Range') ? true : false;
-		}).on('dblclick', 'section.readonly', function(e) {
+		}).on('dblclick', 'section.readonly', function() {
 			clearTimeout(UI.selectingReadonly);
+		}).on('dblclick', '.matches .graysmall', function() {
+			UI.chooseSuggestion($(this).attr('data-item'));
 		}).on('blur', '.graysmall .translation', function(e) {
 			e.preventDefault();
 			UI.closeInplaceEditor($(this));
@@ -223,6 +250,7 @@ $.extend(UI, {
 			$(".menucolor").hide();
 		}).on('click', '#downloadProject', function(e) {
 			e.preventDefault();
+			if($('#downloadProject').hasClass('disabled')) return false;
 			if ($("#notifbox").hasClass("warningbox")) {
 				APP.confirm({
 					name: 'confirmDownload',
@@ -238,24 +266,30 @@ $.extend(UI, {
 		}).on('click', '.alert .close', function(e) {
 			e.preventDefault();
 			$('.alert').remove();
-		}).on('click', '.downloadtr-button .draft', function(e) {
+		}).on('click', '.downloadtr-button .draft', function() {
 			if (UI.isChrome) {
 				$('.download-chrome').addClass('d-open');
 				setTimeout(function() {
 					$('.download-chrome').removeClass('d-open');
 				}, 7000);
 			}
-		}).on('click', '#contextMenu #searchConcordance', function(e) {
+		}).on('click', '#contextMenu #searchConcordance', function() {
 			if ($('#contextMenu').attr('data-sid') == UI.currentSegmentId) {
 				UI.openConcordance();
 			} else {
 				$('#segment-' + $('#contextMenu').attr('data-sid') + ' .editarea').trigger('click', ['clicking', 'openConcordance']);
 			}
+		}).on('click', '#checkConnection', function(e) {
+			e.preventDefault();
+			UI.checkConnection();
+		}).on('click', '#statistics .meter a', function(e) {
+			e.preventDefault();
+			UI.gotoNextUntranslatedSegment();
 		});
 
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();
-			e.stopPropagation();
+			e.stopPropagation();			
 		}).on('click', '.editarea', function(e, operation, action) {
 			if (typeof operation == 'undefined')
 				operation = 'clicking';
@@ -300,14 +334,16 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.preOpenConcordance();
 		}).on('keypress', '.editor .editarea', function(e) {
+//			console.log('keypress: ', UI.editarea.html());
+
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
-				console.log('KEYPRESS SU EDITAREA: ', UI.editarea.html());
+//				console.log('KEYPRESS SU EDITAREA: ', UI.editarea.html());
 				if($('.tag-autocomplete').length) {
 					e.preventDefault();
 					return false;
 				}
 				UI.openTagAutocompletePanel();
-				console.log('Q: ', UI.editarea.html());
+//				console.log('Q: ', UI.editarea.html());
 			}
 			if((e.which == 62)&&(UI.taglockEnabled)) { // closing tag sign
 				if($('.tag-autocomplete').length) {
@@ -324,7 +360,8 @@ $.extend(UI, {
 					UI.checkAutocompleteTags();
 				}
 			}, 50);			
-		}).on('keydown', '.editor .editarea', function(e) {console.log(e.which);
+		}).on('keydown', '.editor .editarea', function(e) {
+//			console.log('keydown: ', UI.editarea.html());
 /*
 			var special = event.type !== "keypress" && jQuery.hotkeys.specialKeys[ event.which ];
 			if ((event.metaKey && !event.ctrlKey && special !== "meta") || (event.ctrlKey)) {
@@ -338,44 +375,58 @@ $.extend(UI, {
 			}
 */
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
-				if ($('.selected', $(this)).length) {console.log('a');
+				if ($('.selected', $(this)).length) {
 					e.preventDefault();
 					$('.selected', $(this)).remove();
 					UI.saveInUndoStack('cancel');
 					UI.currentSegmentQA();
 				} else {
 //					try {
-						var numTagsBefore = UI.editarea.text().match(/<.*?\>/gi).length;
+//						console.log(UI.editarea.text().match(/<.*?\>/gi) == null);
+						var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
 						var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
 
-						saveSelection('noMove');
+						saveSelection();
 						parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
 						isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
+						parentMark = $('.searchMarker', UI.editarea).has('.rangySelectionBoundary');
+						isInsideMark = $('.searchMarker .rangySelectionBoundary', UI.editarea).length;
 						restoreSelection();
+						
+						// insideTag management
 						if ((e.which == 8)&&(isInsideTag)) {
-							console.log('AA: ', UI.editarea.html()); 
+//							console.log('AA: ', UI.editarea.html()); 
 							parentTag.remove();
 							e.preventDefault();
-							console.log('BB: ', UI.editarea.html());
+//							console.log('BB: ', UI.editarea.html());
 						}
-						console.log(e.which + ' - ' + isInsideTag);
+//						console.log(e.which + ' - ' + isInsideTag);
 						setTimeout(function() {
 							if ((e.which == 46)&&(isInsideTag)) {
 								console.log('inside tag');
 							}
-							console.log(e.which + ' - ' + isInsideTag);
-							console.log('CC: ', UI.editarea.html());
-							var numTagsAfter = UI.editarea.text().match(/<.*?\>/gi).length;
+//							console.log(e.which + ' - ' + isInsideTag);
+//							console.log('CC: ', UI.editarea.html());
+							var numTagsAfter = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
 							var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
 							if (numTagsAfter < numTagsBefore)
 								UI.saveInUndoStack('cancel');
 							if (numSpacesAfter < numSpacesBefore)
 								UI.saveInUndoStack('cancel');
-							console.log('DD: ', UI.editarea.html());
+//							console.log('DD: ', UI.editarea.html());
 
 						}, 50);
-
-				
+						
+						// insideMark management
+						if ((e.which == 8)&&(isInsideMark)) {
+							console.log('inside mark'); 
+						}
+//						console.log('a: ', UI.editarea.html());
+//						saveSelection();
+//						console.log('b: ', UI.editarea.html());
+//						setTimeout(function() {
+//							console.log('c: ', UI.editarea.html());
+//						}, 100);				
 //						selectText(this);
 
 
@@ -398,7 +449,6 @@ $.extend(UI, {
 				}
 			}
 			if (e.which == 37) { // left arrow
-				console.log('a: ', UI.editarea.html());
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
 				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
@@ -412,10 +462,8 @@ $.extend(UI, {
 						$('.rangySelectionBoundary', UI.editarea).remove();
 					}
 				}
-				console.log('b: ', UI.editarea.html());
 				UI.closeTagAutocompletePanel();
-				console.log('c: ', UI.editarea.html());
-				UI.jumpTag('start');
+//				UI.jumpTag('start');
 			}
 
 			if (e.which == 38) { // top arrow
@@ -454,7 +502,7 @@ $.extend(UI, {
 					}
 				}
 				UI.closeTagAutocompletePanel();
-				UI.jumpTag('end');
+//				UI.jumpTag('end');
 			}
 
 			if (e.which == 40) { // down arrow
@@ -477,9 +525,10 @@ $.extend(UI, {
 				}
 			}
 
-			if (!((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40))) { // arrow
-				if (UI.body.hasClass('searchActive'))
+			if (!((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8) || (e.which == 46) || (e.which == 91))) { // not arrows, backspace, canc or cmd
+				if (UI.body.hasClass('searchActive')) {
 					UI.resetSearch();
+				}
 			}
 			if (e.which == 32) { // space
 				setTimeout(function() {
@@ -506,9 +555,13 @@ $.extend(UI, {
 				UI.spellCheck();
 			}
 
-		}).on('input', '.editarea', function(e) {
-			if (UI.body.hasClass('searchActive'))
-				UI.resetSearch();
+		}).on('input', '.editarea', function() {
+//			console.log('input in editarea');
+//			DA SPOSTARE IN DROP E PASTE
+//			if (UI.body.hasClass('searchActive')) {
+//				console.log('on input');
+//				UI.resetSearch();
+//			}
 			UI.currentSegment.addClass('modified').removeClass('waiting_for_check_result');
 			if (UI.draggingInsideEditarea) {
 				$(UI.tagToDelete).remove();
@@ -523,7 +576,7 @@ $.extend(UI, {
 					UI.lockTags(UI.editarea);
 				}, 10);
 			UI.registerQACheck();
-		}).on('input', '.editor .cc-search .input', function(e) {
+		}).on('input', '.editor .cc-search .input', function() {
 			UI.markTagsInSearch($(this));
 		}).on('click', '.editor .source .locked,.editor .editarea .locked', function(e) {
 			e.preventDefault();
@@ -580,7 +633,7 @@ $.extend(UI, {
 				*/
 			}
 			return true;
-		}).on('dragstart', '.editor .editarea .locked', function(e) {
+		}).on('dragstart', '.editor .editarea .locked', function() {
 			var selection = window.getSelection();
 			var range = selection.getRangeAt(0);
 			if (range.startContainer.data != range.endContainer.data)
@@ -600,17 +653,19 @@ $.extend(UI, {
 				segment: UI.currentSegment
 			});
 			UI.saveInUndoStack('drop');
+			$(this).css('float', 'left');
 			setTimeout(function() {
+				UI.editarea.removeAttr('style');
 				UI.saveInUndoStack('drop');
 			}, 100);
-		}).on('drop paste', '.editor .cc-search .input, .editor .gl-search .input', function(e) {
+		}).on('drop paste', '.editor .cc-search .input, .editor .gl-search .input', function() {
 			UI.beforeDropSearchSourceHTML = UI.editarea.html();
 			UI.currentConcordanceField = $(this);
 			setTimeout(function() {
 				UI.cleanDroppedTag(UI.currentConcordanceField, UI.beforeDropSearchSourceHTML);
 			}, 100);
-		}).on('click', '.editor .editarea .locked.selected', function(e) {
-		}).on('click', '.editor .editarea, .editor .source', function(e) {
+//		}).on('click', '.editor .editarea .locked.selected', function(e) {
+		}).on('click', '.editor .editarea, .editor .source', function() {
 			$('.selected', $(this)).removeClass('selected');
 			UI.currentSelectedText = false;
 			UI.currentSearchInTarget = false;
@@ -622,16 +677,21 @@ $.extend(UI, {
 
 			var skipChange = false;
 			if (w == 'next-untranslated') {
-				console.log('entra');
+				console.log('next-untranslated');
 				if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
+					console.log('il nextuntranslated non è caricato: ', UI.nextUntranslatedSegmentId);
 					UI.changeStatus(this, 'translated', 0);
 					skipChange = true;
 					if (!UI.nextUntranslatedSegmentId) {
+						console.log('a');
 						$('#' + $(this).attr('data-segmentid') + '-close').click();
 					} else {
+						console.log('b');
 						UI.reloadWarning();
 					}
 
+				} else {
+					console.log('il nextuntranslated è già caricato: ', UI.nextUntranslatedSegmentId);
 				}
 			} else {
 				if (!$(UI.currentSegment).nextAll('section').length) {
@@ -672,32 +732,31 @@ $.extend(UI, {
 			UI.lockTags(UI.editarea);
 			UI.changeStatusStop = new Date();
 			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-		}).on('click', 'a.approved', function(e) {
+		}).on('click', 'a.approved', function() {
 			UI.setStatusButtons(this);
 			$(".editarea", UI.nextUntranslatedSegment).click();
 
 			UI.changeStatus(this, 'approved', 0);
 			UI.changeStatusStop = new Date();
 			UI.changeStatusOperations = UI.changeStatusStop - UI.buttonClickStop;
-
-		}).on('click', 'a.d, a.a, a.r, a.f', function(e) {
+		}).on('click', 'a.d, a.a, a.r, a.f', function() {
 			var segment = $(this).parents("section");
 			$("a.status", segment).removeClass("col-approved col-rejected col-done col-draft");
 			$("ul.statusmenu", segment).toggle();
 			return false;
-		}).on('click', 'a.d', function(e) {
+		}).on('click', 'a.d', function() {
 			UI.changeStatus(this, 'translated', 1);
-		}).on('click', 'a.a', function(e) {
+		}).on('click', 'a.a', function() {
 			UI.changeStatus(this, 'approved', 1);
-		}).on('click', 'a.r', function(e) {
+		}).on('click', 'a.r', function() {
 			UI.changeStatus(this, 'rejected', 1);
-		}).on('click', 'a.f', function(e) {
+		}).on('click', 'a.f', function() {
 			UI.changeStatus(this, 'draft', 1);
 		}).on('click', '.editor .outersource .copy', function(e) {
 //        }).on('click', 'a.copysource', function(e) {
 			e.preventDefault();
 			UI.copySource();
-		}).on('click', '.tagmenu, .warning, .viewer, .notification-box li a', function(e) {
+		}).on('click', '.tagmenu, .warning, .viewer, .notification-box li a', function() {
 			return false;
 		}).on('click', '.tab-switcher-tm', function(e) {
 			e.preventDefault();
@@ -743,11 +802,10 @@ $.extend(UI, {
 					id_job: config.job_id,
 					password: config.password
 				},
-				context: [UI.currentSegment, next],
-				success: function(d) {
+				error: function() {
+					UI.failedConnection(0, 'glossary');
 				},
-				complete: function() {
-				}
+				context: [UI.currentSegment, next]
 			});
 		}).on('keydown', '.sub-editor .cc-search .search-source', function(e) {
 			if (e.which == 13) { // enter
@@ -792,7 +850,7 @@ $.extend(UI, {
 					UI.getGlossary(segment, false);
 				}
 			}
-		}).on('input', '.sub-editor .gl-search .search-target', function(e) {
+		}).on('input', '.sub-editor .gl-search .search-target', function() {
 			gl = $(this).parents('.gl-search').find('.set-glossary');	
 			if($(this).text() === '') {
 				gl.addClass('disabled');
@@ -817,7 +875,7 @@ $.extend(UI, {
 			$('#placeHolder').remove();
 			var node = document.createElement("div");
 			node.setAttribute('id', 'placeHolder');
-			removeSelectedText($(this));
+			removeSelectedText();
 			insertNodeAtCursor(node);
 			if(UI.isFirefox) pasteHtmlAtCaret('<div id="placeHolder"></div>');
 			var ev = (UI.isFirefox) ? e : event;
@@ -838,7 +896,9 @@ $.extend(UI, {
 			var save = (typeof param == 'undefined') ? 'noSave' : param;
 			UI.closeSegment(UI.currentSegment, 1, save);
 		}).on('keyup', '.editor .editarea', function(e) {
-            if ( e.which == 13 ){
+			if ( e.which == 13 ){
+//				$(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
+
                 //replace all divs with a br and remove all br without a class
 //                var divs = $( this ).find( 'div' );
 //                if( divs.length ){
@@ -849,7 +909,7 @@ $.extend(UI, {
 //                } else {
 //                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
 //                }
-            }
+			}
 		});
 		UI.toSegment = true;
 		if (!this.segmentToScrollAtRender)
@@ -885,7 +945,7 @@ $.extend(UI, {
 		});
 		$("#jobMenu").on('click', 'li:not(.currSegment)', function(e) {
 			e.preventDefault();
-			UI.renderAndScrollToSegment($(this).attr('data-segment'), true);
+			UI.renderAndScrollToSegment($(this).attr('data-segment'));
 		});
 		$("#jobMenu").on('click', 'li.currSegment', function(e) {
 			e.preventDefault();
@@ -996,26 +1056,26 @@ $.extend(UI, {
 
 				$("mark.currSearchItem").text(txt);
 				segment = $("mark.currSearchItem").parents('section');
-				UI.setTranslation(segment, UI.getStatus(segment), 'replace');
+				UI.setTranslation($(segment).attr('id').split('-')[1], UI.getStatus(segment), 'replace');
 				UI.updateSearchDisplayCount(segment);
 				$(segment).attr('data-searchItems', $('mark.searchMarker', segment).length);
 
 				UI.gotoNextResultItem(true);
 			}
 		});
-		$("#enable-replace").on('change', function(e) {
+		$("#enable-replace").on('change', function() {
 			if (($('#enable-replace').is(':checked')) && ($('#search-target').val() !== '')) {
 				$('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');
 			} else {
 				$('#replace-target, #exec-replace, #exec-replaceall').attr('disabled', 'disabled');
 			}
 		});
-		$("#search-source, #search-target").on('input', function(e) {
+		$("#search-source, #search-target").on('input', function() {
 			if (UI.checkSearchChanges()) {
 				UI.setFindFunction('find');
 			}
 		});
-		$("#search-target").on('input', function(e) {
+		$("#search-target").on('input', function() {
 			if ($(this).val() === '') {
 				$('#replace-target, #exec-replace, #exec-replaceall').attr('disabled', 'disabled');
 			} else {
@@ -1023,12 +1083,12 @@ $.extend(UI, {
 					$('#replace-target, #exec-replace, #exec-replaceall').removeAttr('disabled');
 			}
 		});
-		$("#select-status").on('change', function(e) {
+		$("#select-status").on('change', function() {
 			if (UI.checkSearchChanges()) {
 				UI.setFindFunction('find');
 			}
 		});
-		$("#match-case, #exact-match").on('change', function(e) {
+		$("#match-case, #exact-match").on('change', function() {
 			UI.setFindFunction('find');
 		});
 		this.initEnd = new Date();

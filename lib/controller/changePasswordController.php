@@ -3,10 +3,10 @@ include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 
 class changePasswordController extends ajaxController {
-	private $res_type;
-	private $res_id;
-	private $password;
-	private $undo;
+	protected $res_type;
+	protected $res_id;
+	protected $password;
+	protected $undo;
 
 	public function __construct() {
 
@@ -22,9 +22,6 @@ class changePasswordController extends ajaxController {
         );
 
         $__postInput        = filter_input_array( INPUT_POST, $filterArgs );
-
-
-        Log::doLog( $__postInput );
 
         $this->res_type     = $__postInput[ 'res' ];
         $this->res_id       = $__postInput[ 'id' ];
@@ -44,7 +41,7 @@ class changePasswordController extends ajaxController {
             $actual_pwd = $this->password;
         }
 
-        $changePass                 = changePassword( $this->res_type, $this->res_id, $actual_pwd, $new_pwd );
+        changePassword( $this->res_type, $this->res_id, $actual_pwd, $new_pwd );
         $this->result[ 'password' ] = $new_pwd;
         $this->result[ 'undo' ]     = $this->password;
 

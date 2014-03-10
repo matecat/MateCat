@@ -9,18 +9,28 @@ $.extend(UI, {
 		scrollToFile = (options.scrollToFile || false);
 		seg = (segmentToOpen || false);
 		this.segmentToScrollAtRender = (seg) ? seg : false;
-		this.isWebkit = $.browser.webkit;
-		this.isChrome = $.browser.webkit && !!window.chrome;
-		this.isFirefox = $.browser.mozilla;
-		this.isSafari = $.browser.webkit && !window.chrome;
+//		this.isWebkit = $.browser.webkit;
+//		this.isChrome = $.browser.webkit && !!window.chrome;
+//		this.isFirefox = $.browser.mozilla;
+//		this.isSafari = $.browser.webkit && !window.chrome;
+		this.isChrome = (typeof window.chrome != 'undefined');
+		this.isFirefox = (typeof navigator.mozApps != 'undefined');
+//		console.log('body.scrollTop: ', $('body').scrollTop());
+//		console.log('window.scrollTop: ', $(window).scrollTop());
 		this.isMac = (navigator.platform == 'MacIntel') ? true : false;
 		this.body = $('body');
 		this.firstLoad = firstLoad;
 
 //        if (firstLoad)
 //            this.startRender = true;
-		this.initSegNum = 200; // number of segments initially loaded
-		this.moreSegNum = 50;
+		this.initSegNum = 100; // number of segments initially loaded
+		this.moreSegNum = 25;
+		this.numOpenedSegments = 0;
+		this.hasToBeRerendered = false;
+		this.maxMinutesBeforeRerendering = 60;
+		setTimeout(function() {
+			UI.hasToBeRerendered = true;
+		}, this.maxMinutesBeforeRerendering*60000);	
 		this.loadingMore = false;
 		this.infiniteScroll = true;
 		this.noMoreSegmentsAfter = false;
@@ -61,8 +71,9 @@ $.extend(UI, {
 		this.suggestionShortcutLabel = 'ALT+' + ((UI.isMac) ? "CMD" : "CTRL") + '+';
 
 		this.taglockEnabled = config.taglockEnabled;
-		this.debug = Loader.detect('debug');
-		this.checkTutorialNeed();
+		this.debug = false;
+//		this.debug = Loader.detect('debug');
+//		this.checkTutorialNeed();
 
 		UI.detectStartSegment(); 
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;

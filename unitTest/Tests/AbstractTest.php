@@ -6,14 +6,13 @@
  * 
  */
 
-
-if( !class_exists('INIT', false )){
-    include '/var/www/cattool/inc/config.inc.php';
-    @INIT::obtain();
+if( !class_exists('INIT', false ) ){
+    $root = realpath( dirname(__FILE__) . '/../../inc/' );
+    include $root . '/config.inc.php';
+    INIT::obtain();
     include_once INIT::$UTILS_ROOT . '/Utils.php';
     include_once INIT::$UTILS_ROOT . '/Log.php';
     include_once INIT::$MODEL_ROOT . '/Database.class.php';
-    require_once "PHPUnit/Autoload.php";
 }
 
 abstract class Tests_AbstractTest extends PHPUnit_Framework_TestCase {

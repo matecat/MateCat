@@ -3,7 +3,7 @@
 set_time_limit(180);
 include_once INIT::$MODEL_ROOT."/queries.php";
 include_once INIT::$UTILS_ROOT."/CatUtils.php";
-include_once INIT::$UTILS_ROOT."/fileFormatConverter.class.php";
+include_once INIT::$UTILS_ROOT."/FileFormatConverter.php";
 include_once(INIT::$UTILS_ROOT.'/XliffSAXTranslationReplacer.class.php');
 include_once(INIT::$UTILS_ROOT.'/DetectProprietaryXliff.php');
 
@@ -15,17 +15,35 @@ class downloadFileController extends downloadController {
     private $fname;
     private $download_type;
 
+    protected $downloadToken;
+
     public function __construct() {
+
+        INIT::sessionClose();
         parent::__construct();
+        $filterArgs = array(
+            'filename'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'id_file'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'id_job'        => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'download_type' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'password'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'downloadToken' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+        );
 
-        $this->fname = $this->get_from_get_post('filename');
-        $this->id_file = $this->get_from_get_post('id_file');
-        $this->id_job = $this->get_from_get_post('id_job');
-        $this->download_type = $this->get_from_get_post('download_type');
-        $this->filename = $this->fname;
-        $this->password = $this->get_from_get_post("password");
+        $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->download_type = $this->get_from_get_post("download_type");
+        //NOTE: This is for debug purpose only,
+        //NOTE: Global $_POST Overriding from CLI Test scripts
+        //$__postInput = filter_var_array( $_POST, $filterArgs );
+
+        $this->fname         = $__postInput[ 'filename' ];
+        $this->id_file       = $__postInput[ 'id_file' ];
+        $this->id_job        = $__postInput[ 'id_job' ];
+        $this->download_type = $__postInput[ 'download_type' ];
+        $this->password      = $__postInput[ 'password' ];
+        $this->downloadToken = $__postInput[ 'downloadToken' ];
+
+        $this->filename      = $this->fname;
 
         if (empty($this->id_job)) {
             $this->id_job = "Unknown";
@@ -64,6 +82,7 @@ class downloadFileController extends downloadController {
             $path=INIT::$TMP_DOWNLOAD.'/'.$this->id_job.'/'.$id_file.'/'.$current_filename.'.sdlxliff';
             //make dir if doesn't exist
             if(!file_exists(dirname($path))){
+                Log::doLog('exec ("chmod 666 ' . $path . '");');
                 mkdir(dirname($path), 0777, true);
                 exec ("chmod 666 $path");
             }
@@ -183,7 +202,7 @@ class downloadFileController extends downloadController {
                 $output_content[$id_file]['target'] = $jobData['target'];
 
                 // specs for filename at the task https://app.asana.com/0/1096066951381/2263196383117
-                $converter = new fileFormatConverter();
+                $converter = new FileFormatConverter();
                 $debug[ 'do_conversion' ][ ] = time();
                 $convertResult = $converter->convertToOriginal( $output_content[ $id_file ], $chosen_machine );
                 $output_content[ $id_file ][ 'content' ] = $convertResult[ 'documentContent' ];

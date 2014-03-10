@@ -27,7 +27,7 @@ h3{margin:0px 0 0 0;padding:0;font-size:18px;color:#999999 !important;font-weigh
 .tablestats  tr:hover{background:#f7f8f9}
 .tablestats{border-top:1px solid #ccc;margin-bottom:40px;-moz-box-shadow: 0 1px 2px #ccc;background:#fff}
 .tablestats.continue{margin-bottom:4px !important;}
-.logo{float:left;border:0;background:url(../img/logo.png) 0px 0px no-repeat;width:145px;height:31px; background-size: 130px 26px;}
+.logo{margin-top:6px!important;}
 
 .error-symbol{background:url(../img/red-error-symbol.png) 0 0 no-repeat; position:absolute;margin:42px 0 0 -30px;display:block;width:23px;height:23px;background-size:21px 19px}
 
@@ -96,15 +96,7 @@ body.manage .buttons
 	width: 10%;
 */
 	}
-body.manage a.change
-	{
-	width: 16px;
-	height: 16px;
-	margin-top: 24px;
-	text-indent: -10000px;
-	position: absolute;
-	background: url(../img/change_password.png) 0 0 no-repeat;
-	}
+
 	body.manage tr.disabled a.change
 		{
 		display: none;
@@ -132,28 +124,28 @@ body.manage .actions a
 	body.manage .actions a.change
 		{
 		margin-left: 5px !important;
-		background: url(../img/change_password.png) 0 0 no-repeat;
+		background: url(../img/sprite.png) -13px -136px no-repeat;
 		}
 		
 	body.manage .actions a.cancel
 		{
 		margin-left: 33px !important;
-		background: url(../img/cancel-job.png) 0 0 no-repeat;
+		background: url(../img/sprite.png) -13px -78px no-repeat;
 		}
 	body.manage .actions a.archive
 		{
 		margin-left: 61px !important;
-		background: url(../img/archive-job.png) 0 1px no-repeat;
+		background: url(../img/sprite.png) -13px -59px no-repeat;
 		}
 	body.manage .actions a.resume
 		{
 		margin-left: 33px !important;
-		background: url(../img/resume-job.png) 0 0px no-repeat;
+		background: url(../img/sprite.png) -13px -98px no-repeat;
 		}
 	body.manage .actions a.unarchive
 		{
 		margin-left: 61px !important;
-		background: url(../img/unarchive-job.png) 0 1px no-repeat;
+		background: url(../img/sprite.png) -13px -39px no-repeat;
 		}
 
 	body.manage tr[data-status=active] .actions a.resume,
@@ -180,9 +172,9 @@ body.manage a.unarchive-project
 	text-indent: -10000px;
 	margin-left: 10px;
 	top: 5px;
-	background: url(../img/cancel-job.png) 0 0 no-repeat;
-	
-/*
+	background: url(../img/sprite.png) -13px -78px no-repeat;
+/*	background: url(../img/cancel-job.png) 0 0 no-repeat;
+
 	width: 18px;
 	height: 18px;
 	margin-left: 40px;
@@ -199,7 +191,7 @@ body.manage a.unarchive-project
 
 body.manage a.archive-project
 	{
-	background: url(../img/archive-job.png) 0 1px no-repeat;
+	background: url(../img/sprite.png) -13px -59px no-repeat;
 	}
 	body.manage .article.allArchived a.archive-project,
 	body.manage[data-filter-status=archived] a.archive-project,
@@ -209,7 +201,7 @@ body.manage a.archive-project
 		}
 body.manage a.resume-project
 	{
-	background: url(../img/resume-job.png) 0 0 no-repeat;
+	background: url(../img/sprite.png) -13px -98px no-repeat;
 	}
 	body.manage[data-filter-status=archived] a.resume-project
 		{
@@ -218,7 +210,7 @@ body.manage a.resume-project
 
 body.manage a.unarchive-project
 	{
-	background: url(../img/unarchive-job.png) 0 1px no-repeat;
+	background: url(../img/sprite.png) -13px -39px no-repeat;
 	}
 	body.manage[data-filter-status=cancelled] a.unarchive-project
 		{
@@ -381,10 +373,10 @@ body.manage td.words
 th.header {
 	background: #efefef url(../img/bg.gif) right center no-repeat !important;
 }
-th.headerSortUp {
+th.headerSortUp, th.tablesorter-headerAsc {
 	background: #efefef url(../img/asc.gif) right center no-repeat !important;
 }
-th.headerSortDown {
+th.headerSortDown, th.tablesorter-headerDesc {
 	background: #efefef url(../img/desc.gif) right center no-repeat !important;
 }
 
@@ -638,3 +630,188 @@ body.manage #search-projectname
 	{
 	width: 170px !important;
 	}
+	
+
+
+ .api a {
+            color: #39699a;
+        }
+		.api .menu {line-height:26px;}
+        #contentBox pre {
+           background: #fbfbfb;
+padding: 5px 10px;
+border: 1px dashed #ccc;
+font-size: 1em;
+line-height:20px;
+margin: 20px 0;
+color: #666;
+        }
+        .apidesc td {
+            padding: 8px;
+            text-align:center;
+        }
+        .api dt {
+            float: left;
+            text-align:left;
+            color:#666666;
+			width: 100px;
+padding-right: 20px;
+        }
+		.
+		
+        .api dd {
+            margin-left:120px;
+        }
+        .api dl {
+            margin-left: 40px;
+            line-height: 30px;
+        }
+        .api {padding-top:0;}
+        .api header {position:relative;}
+        .api h1, .api h2 {color:#000!important; margin-top:20px;}
+        .api h3 {color:#000!important;font-weight:bold!important; font-size:20px!important;margin-bottom:20px;padding-top:20px;}
+        .gototop {text-align: right;
+            margin: 10px 0;
+            display: block;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #ccc;}
+			
+			.api .gototop.last {border-bottom:none;}
+			
+			.api .fileformat { -webkit-column-count: 2;
+            column-count: 2;
+            -moz-column-count: 2;}
+			
+
+.fileformat span {
+padding: 10px 15px 10px 40px;
+margin: 5px 0 0 0;
+width: 30px;
+height:15px;
+float: left;
+background-size: 25px!important;
+}
+
+.api .tablestats tr:hover {background:none;}
+
+/*.api .fileformat li:nth-child(2n+1) {
+background: #efefef;
+}*/
+ ul.office {
+            -webkit-column-count: 3;
+            column-count: 3;
+            -moz-column-count: 3;
+        }			
+			
+        .api table ul.lang-list {
+            -webkit-column-count: 5;
+            column-count: 5;
+            -moz-column-count: 5;
+            text-align: left;
+			line-height:30px;
+        }
+		
+		.api .block:last-child {height: 20px;
+min-height: 20px;}
+
+.fileformat th {
+padding-left:15px;
+}
+		
+			.api .tablestats th,.api .tablestats td {text-align:left;vertical-align: top;}
+table {table-layout: fixed; width:100%;}
+.api .colsx {float: left;
+position: fixed;
+padding-right: 1%;
+width: 13%;}
+.api .coldx {float: right;
+width: 85%;
+margin-top: 10px;}
+.menuscroll {margin-top: -30px;
+}
+.logosmall {display:none;}
+.menuscroll .logosmall {display:block}
+.logosmall {background: url(../img/sprite.png) 1px -1403px no-repeat;padding-top: 30px;}
+
+
+.block { min-height:600px;height: auto;
+}
+
+
+.menu a.active {
+    color: #ccc;
+}
+
+.menu .selected a{
+   font-weight:bold;
+}
+
+.api dd {
+margin-left: 120px;
+margin-bottom:10px;
+}
+
+.api .top {display:block;}
+.param {
+font-weight: 600;
+}
+code {padding: 2px 4px;
+font-size: 90%;
+color: #39699a;
+background-color: #f4f4f4;
+white-space: nowrap;
+border-radius: 4px;}
+
+.req, .opt {
+font-family:inherit;
+color: #c7254e;
+background-color: #f9f2f4;
+white-space: nowrap;padding: 2px 4px;
+border-left: 2px solid #c7254e;
+border-radius: 4px;}
+.opt {background-color: #dff0d8; border-left: 2px solid #3c763d; color: #3c763d;}
+
+.api p {margin:0;}
+
+/* retina display query */
+@media only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (min--moz-device-pixel-ratio: 2),
+only screen and (-o-min-device-pixel-ratio: 2/1),
+only screen and (min-device-pixel-ratio: 2),
+only screen and (min-resolution: 192dpi),
+only screen and (in-resolution: 2dppx) { 
+
+.filter {
+	background: url(../img/sprite2x.png) 2px -218px no-repeat;
+}
+body.manage a.cancel-project, body.manage a.archive-project, body.manage a.resume-project, body.manage a.unarchive-project {
+	background: url(../img/sprite2x.png) -13px -78px no-repeat;
+}
+body.manage a.archive-project {
+	background: url(../img/sprite2x.png) -13px -59px no-repeat;
+}
+body.manage a.resume-project {
+	background: url(../img/sprite2x.png) -13px -98px no-repeat;
+}
+body.manage a.unarchive-project {
+	background: url(../img/sprite2x.png) -13px -39px no-repeat;
+}
+body.manage .actions a.change {
+	background: url(../img/sprite2x.png) -13px -136px no-repeat;
+}
+body.manage .actions a.cancel {
+	background: url(../img/sprite2x.png) -13px -78px no-repeat;
+}
+body.manage .actions a.archive {
+	background: url(../img/sprite2x.png) -13px -59px no-repeat;
+}
+body.manage .actions a.unarchive {
+	background: url(../img/sprite2x.png) -13px -39px no-repeat;
+}
+.logosmall {
+	background: url(../img/sprite2x.png) 1px -1403px no-repeat;
+}
+.filter, body.manage a.cancel-project, body.manage a.archive-project, body.manage a.resume-project, body.manage a.unarchive-project, body.manage .actions a.change, body.manage .actions a.cancel, body.manage .actions a.archive, body.manage .actions a.unarchive, .breadcrumbs #pname, .logosmall  {
+	background-size:42px;	
+}
+}

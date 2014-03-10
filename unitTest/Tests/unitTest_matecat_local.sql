@@ -19,10 +19,52 @@
 -- Current Database: `unittest_matecat_local`
 --
 DROP SCHEMA IF EXISTS `unittest_matecat_local`;
-
 CREATE SCHEMA `unittest_matecat_local` /*!40100 DEFAULT CHARACTER SET utf8 */;
-
 USE `unittest_matecat_local`;
+
+DROP TABLE IF EXISTS `converters`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `converters` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `ip_converter` varchar(45) NOT NULL,
+  `ip_storage` varchar(45) NOT NULL,
+  `ip_machine_host` varchar(45) NOT NULL,
+  `machine_host_user` varchar(45) NOT NULL,
+  `machine_host_pass` varchar(45) NOT NULL,
+  `instance_name` varchar(45) NOT NULL,
+  `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `status_active` tinyint(4) NOT NULL DEFAULT '1',
+  `status_offline` tinyint(4) NOT NULL DEFAULT '0',
+  `status_reboot` tinyint(4) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id_UNIQUE` (`id`),
+  UNIQUE KEY `ip_converter_UNIQUE` (`ip_converter`),
+  UNIQUE KEY `ip_storage_UNIQUE` (`ip_storage`),
+  KEY `status_active` (`status_active`),
+  KEY `status_offline` (`status_offline`),
+  KEY `status_reboot` (`status_reboot`)
+) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Table structure for table `converters_log`
+--
+
+DROP TABLE IF EXISTS `converters_log`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `converters_log` (
+  `id_log` int(11) NOT NULL AUTO_INCREMENT,
+  `id_converter` int(11) NOT NULL,
+  `check_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `test_passed` tinyint(4) NOT NULL DEFAULT '1',
+  PRIMARY KEY (`id_log`),
+  KEY `timestamp_idx` (`check_time`),
+  KEY `outcome_idx` (`test_passed`),
+  KEY `id_converter_idx` (`id_converter`)
+) ENGINE=MyISAM AUTO_INCREMENT=242981 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `engines`
@@ -40,15 +82,21 @@ CREATE TABLE `engines` (
   `translate_relative_url` varchar(100) DEFAULT 'get',
   `contribute_relative_url` varchar(100) DEFAULT NULL,
   `delete_relative_url` varchar(100) DEFAULT NULL,
+  `gloss_get_relative_url` varchar(100) DEFAULT NULL,
+  `gloss_set_relative_url` varchar(100) DEFAULT NULL,
+  `gloss_update_relative_url` varchar(100) DEFAULT NULL,
+  `gloss_delete_relative_url` varchar(100) DEFAULT NULL,
   `extra_parameters` text,
   `google_api_compliant_version` varchar(45) DEFAULT NULL COMMENT 'credo sia superfluo',
   `penalty` int(11) DEFAULT '0',
+  `active` tinyint(4) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `type` (`type`),
+  KEY `active_idx` (`active`) USING BTREE,
   FULLTEXT KEY `name` (`name`),
   FULLTEXT KEY `description` (`description`),
   FULLTEXT KEY `base_url` (`base_url`)
-) ENGINE=MyISAM AUTO_INCREMENT=9 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=30 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -57,18 +105,29 @@ CREATE TABLE `engines` (
 
 LOCK TABLES `engines` WRITE;
 /*!40000 ALTER TABLE `engines` DISABLE KEYS */;
-INSERT INTO `engines` VALUES
-('0', 'NONE - PLACEHOLDER', 'NONE', 'No MT', '', '', NULL, NULL, NULL, NULL, 100),
-(1, 'MyMemory (All Pairs)', 'TM', 'MyMemory: next generation Translation Memory technology', 'http://api.mymemory.translated.net', 'get', 'set', 'delete', NULL, '1', 0),
-(2, 'FBK-IT (EN->IT)', 'MT', 'FBK (EN->IT) Moses Information Technology engine', 'http://hlt-services2.fbk.eu:8601', 'translate', 'update', NULL, NULL, '2', 14),
-(3, 'LIUM-IT (EN->DE)', 'MT', 'Lium (EN->FR) Moses Information Technology engine', 'http://193.52.29.52:8001', 'translate', NULL, NULL, NULL, '2', 14),
-(4, 'FBK-LEGAL (EN>IT)', 'MT', 'FBK (EN->IT) Moses Legal engine', 'http://hlt-services2.fbk.eu:8701', 'translate', NULL, NULL, NULL, '2', 14),
-(5, 'LIUM-LEGAL (EN->DE)', 'MT', 'Lium (EN->FR) Moses Legal engine', 'http://193.52.29.52:8002', 'translate', NULL, NULL, NULL, NULL, 14),
-(6, 'TEST PURPOSE FBK (EN->IT)', 'MT', 'TEST PURPOSE ONLY  - FBK (EN->IT)', 'http://hlt-services2.fbk.eu:8482', 'translate', 'update', NULL, NULL, '2', 14),
-(7, 'FBK-LEGAL Online (EN->IT)', 'MT', 'FBK (EN->IT) Online learning. Moses Legal engine.', 'http://hlt-services2.fbk.eu:8702', 'translate', 'update', NULL, NULL, '2', 14),
-(8, 'FBK-IT (EN>FR)','MT','FBK (EN->FR) Moses Information Technology engine','http://hlt-services2.fbk.eu:8401','translate',NULL,NULL,NULL,'2',14);
+INSERT INTO `engines` VALUES (0,'NONE - PLACEHOLDER','NONE','No MT','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,100,1),(1,'MyMemory (All Pairs)','TM','MyMemory: next generation Translation Memory technology','http://api-proxied.mymemory.translated.net','get','set','delete','glossary/get','glossary/set','glossary/update','glossary/delete',NULL,'1',0,1),(2,'FBK Legal (EN->IT) - Ad.','MT','FBK (EN->IT) Moses Legal engine','http://hlt-services2.fbk.eu:8888','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(3,'LIUM-IT (EN->DE)','MT','Lium (EN->FR) Moses Information Technology engine','http://193.52.29.52:8001','translate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(4,'FBK Legal (EN>FR) - Ad.','MT','FBK (EN->FR) Moses Legal engine','http://hlt-services2.fbk.eu:8988','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(5,'LIUM-LEGAL (EN->DE)','MT','Lium (EN->FR) Moses Legal engine','http://193.52.29.52:8002','translate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,14,1),(6,'FBK TED (IT>EN)','MT','FBK (IT->EN) Moses Information Technology engine','http://hlt-services2.fbk.eu:8788','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1);
 /*!40000 ALTER TABLE `engines` ENABLE KEYS */;
 UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+--
+-- Table structure for table `file_references`
+--
+
+DROP TABLE IF EXISTS `file_references`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `file_references` (
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `id_project` bigint(20) NOT NULL,
+  `id_file` bigint(20) NOT NULL,
+  `part_filename` varchar(1024) NOT NULL,
+  `serialized_reference_meta` varchar(1024) DEFAULT NULL,
+  `serialized_reference_binaries` longblob,
+  PRIMARY KEY (`id`),
+  KEY `id_file` (`id_file`)
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8;
+/*!40101 SET character_set_client = @saved_cs_client */;
 
 --
 -- Table structure for table `files`
@@ -78,7 +137,7 @@ DROP TABLE IF EXISTS `files`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `files` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_project` int(11) NOT NULL,
   `filename` varchar(255) DEFAULT NULL,
   `source_language` varchar(45) NOT NULL,
@@ -88,7 +147,8 @@ CREATE TABLE `files` (
   `original_file` longblob,
   PRIMARY KEY (`id`),
   KEY `id_project` (`id_project`),
-  KEY `sha1` (`sha1_original_file`) USING HASH
+  KEY `sha1` (`sha1_original_file`) USING HASH,
+  KEY `filename` (`filename`)
 ) ENGINE=MyISAM AUTO_INCREMENT=5301 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -141,9 +201,11 @@ DROP TABLE IF EXISTS `jobs`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `jobs` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `password` varchar(45) DEFAULT NULL,
+  `id` bigint(20) NOT NULL AUTO_INCREMENT,
+  `password` varchar(45) NOT NULL,
   `id_project` int(11) NOT NULL,
+  `job_first_segment` bigint(20) unsigned NOT NULL,
+  `job_last_segment` bigint(20) unsigned NOT NULL,
   `id_translator` varchar(100) NOT NULL DEFAULT 'generic_translator',
   `job_type` varchar(45) DEFAULT NULL,
   `source` varchar(45) DEFAULT NULL,
@@ -161,11 +223,14 @@ CREATE TABLE `jobs` (
   `status_translator` varchar(100) DEFAULT NULL,
   `status` varchar(15) NOT NULL DEFAULT 'active',
   `completed` bit(1) NOT NULL DEFAULT b'0',
-  PRIMARY KEY (`id`),
+  UNIQUE KEY `primary_id_pass` (`id`,`password`),
   KEY `id_job_to_revise` (`id_job_to_revise`),
   KEY `id_project` (`id_project`) USING BTREE,
   KEY `owner` (`owner`),
-  KEY `id_translator` (`id_translator`)
+  KEY `id_translator` (`id_translator`),
+  KEY `first_last_segment_idx` (`job_first_segment`,`job_last_segment`),
+  KEY `id` (`id`) USING BTREE,
+  KEY `password` (`password`)
 ) ENGINE=MyISAM AUTO_INCREMENT=4993 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
@@ -175,7 +240,7 @@ CREATE TABLE `jobs` (
 
 LOCK TABLES `jobs` WRITE;
 /*!40000 ALTER TABLE `jobs` DISABLE KEYS */;
-INSERT INTO `jobs` VALUES (4992,'ch29w8de',4719,'',NULL,'en-US','it-IT',NULL,NULL,NULL,NULL,1,1,'2013-10-09 16:03:29',0,'','active',NULL,'active','\0');
+INSERT INTO `jobs` VALUES (4992,'ch29w8de',4719,2356805,2356815,'',NULL,'en-US','it-IT',NULL,NULL,NULL,NULL,1,1,'2013-10-09 16:03:29',0,'','active',NULL,'active','\0');
 /*!40000 ALTER TABLE `jobs` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -279,8 +344,8 @@ DROP TABLE IF EXISTS `segment_translations`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `segment_translations` (
-  `id_segment` int(11) NOT NULL,
-  `id_job` int(11) NOT NULL,
+  `id_segment` bigint(20) NOT NULL,
+  `id_job` bigint(20) NOT NULL,
   `status` varchar(45) DEFAULT 'NEW',
   `translation` text,
   `translation_date` datetime DEFAULT NULL,
@@ -357,7 +422,8 @@ DROP TABLE IF EXISTS `segments`;
 /*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `segments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `id_file` int(11) NOT NULL,
+  `id_file` bigint(20) NOT NULL,
+  `id_file_part` bigint(20) DEFAULT NULL,
   `internal_id` varchar(100) DEFAULT NULL,
   `xliff_mrk_id` varchar(70) DEFAULT NULL,
   `xliff_ext_prec_tags` text,
@@ -373,6 +439,7 @@ CREATE TABLE `segments` (
   KEY `mrk_id` (`xliff_mrk_id`) USING BTREE,
   KEY `show_in_cat` (`show_in_cattool`) USING BTREE,
   KEY `raw_word_count` (`raw_word_count`) USING BTREE,
+  KEY `id_file_part_idx` (`id_file_part`),
   FULLTEXT KEY `segment` (`segment`)
 ) ENGINE=MyISAM AUTO_INCREMENT=2356816 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -383,7 +450,8 @@ CREATE TABLE `segments` (
 
 LOCK TABLES `segments` WRITE;
 /*!40000 ALTER TABLE `segments` DISABLE KEYS */;
-INSERT INTO `segments` VALUES (2356805,5300,'4df8461a-b0bc-4003-b411-ab5c0cc7ff0e','1','<g id=\"pt1\">','','<g id=\"pt2\">WASHINGTON </g><g id=\"pt3\">â€” The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.</g>','','</g>',36.00,1),(2356806,5300,'3127871f-936d-4c20-ae94-de295a60e7f2','2','<g id=\"pt4\"><g id=\"pt5\">','','Under the Affordable Care Act, employers with 50 or more full-time employees that do not offer affordable health coverage to their full-time employees may be required to make a shared responsibility payment.','','',32.00,1),(2356807,5300,'3127871f-936d-4c20-ae94-de295a60e7f2','3','Â  ','','The law specifically exempts small firms that have fewer than 50 full-time employees.','','',13.00,1),(2356808,5300,'3127871f-936d-4c20-ae94-de295a60e7f2','4',' ','','This provision takes effect in 2014.','','</g></g>',6.00,1),(2356809,5300,'58da8345-6ad8-4681-9819-573eb9bf5c01','5','<g id=\"pt6\"><g id=\"pt7\">','','Notice 2011-36, posted today on IRS.gov, solicits public input and comment on several issues that will be the subject of future proposed guidance as Treasury and the IRS work to provide information to employers on how to comply with the shared responsibility provisions.','','',44.00,1),(2356810,5300,'58da8345-6ad8-4681-9819-573eb9bf5c01','6','Â  ','','In particular, the notice requests comment on possible approaches employers could use to determine who is a full-time employee.','','Â </g></g>',19.00,1),(2356811,5300,'92d05960-0900-430c-8b4f-b75f9637a053','7','<g id=\"pt8\"><g id=\"pt9\">','','Todayâ€™s request for comment is designed to ensure that Treasury and IRS continue to receive broad input from stakeholders on how best to implement the shared responsibility provisions in a way that is workable and administrable for employers, allowing them flexibility and minimizing<x id=\"nbsp\"/> burdens.','','',44.00,1),(2356812,5300,'92d05960-0900-430c-8b4f-b75f9637a053','8','Â  ','','Employers have asked for guidance on this provision, and a number of stakeholder groups have approached Treasury and IRS with information and initial suggestions, which have been taken into account in developing todayâ€™s notice.','','',34.00,1),(2356813,5300,'92d05960-0900-430c-8b4f-b75f9637a053','9','Â  ','','By soliciting comments and feedback now, Treasury and IRS are giving all interested parties the opportunity for input before proposed regulations are issued at a later date.','','</g></g>',27.00,1),(2356814,5300,'f478631d-d40a-4649-9874-63364681a6d2','10','<g id=\"pt10\"><g id=\"pt11\">','','Consistent with the coordinated approach the Departments of Treasury, Labor, and Health and Human Services are taking in developing the regulations and other guidance under the Affordable Care Act, the notice also solicits input on how the three Departments should interpret and apply the Actâ€™s provisions limiting the ability of plans and issuers to impose a waiting period for health coverage of longer than 90 days starting in 2014.','','',69.00,1),(2356815,5300,'f478631d-d40a-4649-9874-63364681a6d2','11','Â  ','','In addition, the notice invites comment on how guidance under the 90-day provisions should be coordinated with the rules Treasury and IRS will propose regarding the shared responsibility provisions.','','</g></g>',29.00,1);
+INSERT INTO `segments` VALUES
+(2356805,5300,NULL,'4df8461a-b0bc-4003-b411-ab5c0cc7ff0e','1','<g id=\"pt1\">','','<g id=\"pt2\">WASHINGTON </g><g id=\"pt3\">â€” The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.</g>','','</g>',36.00,1),(2356806,5300,NULL,'3127871f-936d-4c20-ae94-de295a60e7f2','2','<g id=\"pt4\"><g id=\"pt5\">','','Under the Affordable Care Act, employers with 50 or more full-time employees that do not offer affordable health coverage to their full-time employees may be required to make a shared responsibility payment.','','',32.00,1),(2356807,5300,NULL,'3127871f-936d-4c20-ae94-de295a60e7f2','3','Â  ','','The law specifically exempts small firms that have fewer than 50 full-time employees.','','',13.00,1),(2356808,5300,NULL,'3127871f-936d-4c20-ae94-de295a60e7f2','4',' ','','This provision takes effect in 2014.','','</g></g>',6.00,1),(2356809,5300,NULL,'58da8345-6ad8-4681-9819-573eb9bf5c01','5','<g id=\"pt6\"><g id=\"pt7\">','','Notice 2011-36, posted today on IRS.gov, solicits public input and comment on several issues that will be the subject of future proposed guidance as Treasury and the IRS work to provide information to employers on how to comply with the shared responsibility provisions.','','',44.00,1),(2356810,5300,NULL,'58da8345-6ad8-4681-9819-573eb9bf5c01','6','Â  ','','In particular, the notice requests comment on possible approaches employers could use to determine who is a full-time employee.','','Â </g></g>',19.00,1),(2356811,5300,NULL,'92d05960-0900-430c-8b4f-b75f9637a053','7','<g id=\"pt8\"><g id=\"pt9\">','','Todayâ€™s request for comment is designed to ensure that Treasury and IRS continue to receive broad input from stakeholders on how best to implement the shared responsibility provisions in a way that is workable and administrable for employers, allowing them flexibility and minimizing<x id=\"nbsp\"/> burdens.','','',44.00,1),(2356812,5300,NULL,'92d05960-0900-430c-8b4f-b75f9637a053','8','Â  ','','Employers have asked for guidance on this provision, and a number of stakeholder groups have approached Treasury and IRS with information and initial suggestions, which have been taken into account in developing todayâ€™s notice.','','',34.00,1),(2356813,5300,NULL,'92d05960-0900-430c-8b4f-b75f9637a053','9','Â  ','','By soliciting comments and feedback now, Treasury and IRS are giving all interested parties the opportunity for input before proposed regulations are issued at a later date.','','</g></g>',27.00,1),(2356814,5300,NULL,'f478631d-d40a-4649-9874-63364681a6d2','10','<g id=\"pt10\"><g id=\"pt11\">','','Consistent with the coordinated approach the Departments of Treasury, Labor, and Health and Human Services are taking in developing the regulations and other guidance under the Affordable Care Act, the notice also solicits input on how the three Departments should interpret and apply the Actâ€™s provisions limiting the ability of plans and issuers to impose a waiting period for health coverage of longer than 90 days starting in 2014.','','',69.00,1),(2356815,5300,NULL,'f478631d-d40a-4649-9874-63364681a6d2','11','Â  ','','In addition, the notice invites comment on how guidance under the 90-day provisions should be coordinated with the rules Treasury and IRS will propose regarding the shared responsibility provisions.','','</g></g>',29.00,1);
 /*!40000 ALTER TABLE `segments` ENABLE KEYS */;
 UNLOCK TABLES;
 

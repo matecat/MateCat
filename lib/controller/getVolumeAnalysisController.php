@@ -17,6 +17,50 @@ class getVolumeAnalysisController extends ajaxController {
     protected $matecat_price_per_word = 0.03; //(dollari) se indipendente dalla combinazione metterlo nel config
     protected $standard_price_per_word = 0.10; //(dollari) se indipendente dalla combinazione metterlo nel config
 
+    protected $return_data = array();
+
+    protected $_data_struct = array(
+            'jobs'    => array(),
+            'summary' =>
+                    array(
+                            "IN_QUEUE_BEFORE"         => 0, "IN_QUEUE_BEFORE_PRINT" => "0", "STATUS" => "",
+                            "TOTAL_SEGMENTS"          => 0, "SEGMENTS_ANALYZED" => 0, "TOTAL_SEGMENTS_PRINT" => 0,
+                            "SEGMENTS_ANALYZED_PRINT" => 0,
+                            "TOTAL_FAST_WC"           => 0, "TOTAL_TM_WC" => 0, "TOTAL_FAST_WC_PRINT" => "0",
+                            "TOTAL_STANDARD_WC"       => 0, "TOTAL_STANDARD_WC_PRINT" => "0",
+                            "TOTAL_TM_WC_PRINT"       => "0",
+                            "STANDARD_WC_TIME"        => 0, "FAST_WC_TIME" => 0, "TM_WC_TIME" => 0,
+                            "STANDARD_WC_UNIT"        => "", "TM_WC_UNIT" => "", "FAST_WC_UNIT" => "",
+                            "USAGE_FEE"               => 0.00,
+                            "PRICE_PER_WORD"          => 0.00, "DISCOUNT" => 0.00
+                    )
+    );
+
+    protected $_api_data_struct = array(
+            'jobs'    => array(),
+            'summary' =>
+                    array(
+                            "IN_QUEUE_BEFORE"         => 0, "STATUS" => "",
+                            "TOTAL_SEGMENTS"          => 0, "SEGMENTS_ANALYZED" => 0,
+                            "TOTAL_FAST_WC"           => 0, "TOTAL_TM_WC" => 0,
+                            "TOTAL_STANDARD_WC"       => 0,
+                            "STANDARD_WC_TIME"        => 0, "FAST_WC_TIME" => 0, "TM_WC_TIME" => 0,
+                            "STANDARD_WC_UNIT"        => "", "TM_WC_UNIT" => "", "FAST_WC_UNIT" => "",
+                            "USAGE_FEE"               => 0.00,
+                            "PRICE_PER_WORD"          => 0.00, "DISCOUNT" => 0.00
+                    )
+    );
+
+    protected $total_init = array(
+            "TOTAL_PAYABLE"    => array( 0, "0" ), "REPETITIONS" => array( 0, "0" ), "MT" => array( 0, "0" ),
+            "NEW"              => array( 0, "0" ), "TM_100" => array( 0, "0" ), "TM_75_99" => array( 0, "0" ),
+            "INTERNAL_MATCHES" => array( 0, "0" ), "ICE" => array( 0, "0" ), "NUMBERS_ONLY" => array( 0, "0" )
+    );
+
+    protected $_resultSet = array();
+    protected $_others_in_queue = 0;
+    protected $_project_data = array();
+
     public function __construct() {
 
         $this->disableSessions();
@@ -37,41 +81,56 @@ class getVolumeAnalysisController extends ajaxController {
     }
 
     public function doAction() {
+        $this->formatWebData();
+    }
+
+    public function formatApiData(){
+        $this->_fetchProjectData( $this->_api_data_struct );
+        $this->_formatData( false );
+    }
+
+    public function formatWebData(){
+        $this->_fetchProjectData( $this->_data_struct );
+        $this->_formatData( true );
+    }
+
+    protected function _fetchProjectData( array $return_data ) {
 
         if ( empty( $this->id_project ) ) {
             $this->result[ 'errors' ] = array( -1, "No id project provided" );
             return -1;
         }
 
-        $project_data = getProjectJobData( $this->id_project );
+        $this->_project_data = getProjectJobData( $this->id_project );
+
         $passCheck = new AjaxPasswordCheck();
-        $access = $passCheck->grantProjectAccess( $project_data, $this->ppassword ) || $passCheck->grantProjectJobAccessOnJobPass( $project_data, null, $this->jpassword );
+        $access = $passCheck->grantProjectAccess( $this->_project_data, $this->ppassword ) || $passCheck->grantProjectJobAccessOnJobPass( $this->_project_data, null, $this->jpassword );
 
         if( !$access ){
             $this->result[ 'errors' ] = array( -10, "Wrong Password. Access denied" );
             return -1;
         }
 
+        $this->_resultSet       = getProjectStatsVolumeAnalysis( $this->id_project );
+        $this->_others_in_queue = getNumSegmentsInQueue( $this->id_project );
 
-        $res                = getProjectStatsVolumeAnalysis( $this->id_project );
-        $numSegmentsInQueue = getNumSegmentsInQueue( $this->id_project );
-
-        $return_data = array( 'jobs' => array(), 'summary' =>
-                array( "IN_QUEUE_BEFORE"  => 0, "IN_QUEUE_BEFORE_PRINT" => "0", "STATUS" => "", "TOTAL_SEGMENTS" => 0, "SEGMENTS_ANALYZED" => 0, "TOTAL_SEGMENTS_PRINT" => 0, "SEGMENTS_ANALYZED_PRINT" => 0,
-                       "TOTAL_FAST_WC"    => 0, "TOTAL_TM_WC" => 0, "TOTAL_FAST_WC_PRINT" => "0", "TOTAL_STANDARD_WC" => 0, "TOTAL_STANDARD_WC_PRINT" => "0", "TOTAL_TM_WC_PRINT" => "0", "STANDARD_WC_TIME" => 0, "FAST_WC_TIME" => 0, "TM_WC_TIME" => 0,
-                       "STANDARD_WC_UNIT" => "", "TM_WC_UNIT" => "", "FAST_WC_UNIT" => "", "USAGE_FEE" => 0.00, "PRICE_PER_WORD" => 0.00, "DISCOUNT" => 0.00 ) );
-        $total_init  = array( "TOTAL_PAYABLE" => array( 0, "0" ), "REPETITIONS" => array( 0, "0" ), "MT" => array( 0, "0" ), "NEW" => array( 0, "0" ), "TM_100" => array( 0, "0" ), "TM_75_99" => array( 0, "0" ), "INTERNAL_MATCHES" => array( 0, "0" ), "ICE" => array( 0, "0" ) );
-
-        $this->total_segments = count( $res );
+        $this->total_segments = count( $this->_resultSet );
 
         //get status of project
-        $this->status_project = $project_data[0][ 'status_analysis' ];
+        $this->status_project = $this->_project_data[ 0 ][ 'status_analysis' ];
+
+        $this->return_data    = $return_data;
+
+    }
+
+    protected function _formatData( $_forWEB = true ){
 
         //array of totals per job-file
         $total_payable = array();
 
         //VERY Expensive cycle ± 0.7 s for 27650 segments ( 150k words )
-        foreach ( $res as $r ) {
+        foreach ( $this->_resultSet as $r ) {
+
             if ( $r[ 'st_status_analysis' ] == 'DONE' ) {
                 $this->segments_analyzed += 1;
             }
@@ -96,24 +155,24 @@ class getVolumeAnalysisController extends ajaxController {
             $this->total_wc_standard_analysis += $st_word_count;
 
             //init indexes to avoid notices
-            if ( !array_key_exists( $jid, $return_data[ 'jobs' ] ) ) {
-                $return_data[ 'jobs' ][ $jid ]             = array();
-                $return_data[ 'jobs' ][ $jid ][ 'chunks' ] = array();
-                $return_data[ 'jobs' ][ $jid ][ 'totals' ] = array();
+            if ( !array_key_exists( $jid, $this->return_data[ 'jobs' ] ) ) {
+                $this->return_data[ 'jobs' ][ $jid ]             = array();
+                $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ] = array();
+                $this->return_data[ 'jobs' ][ $jid ][ 'totals' ] = array();
                 $total_payable[ $jid ]                     = array();
             }
 
-            if ( !array_key_exists( $jpassword, $return_data[ 'jobs' ][$jid]['chunks'] ) ) {
-                $return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ] = array();
+            if ( !array_key_exists( $jpassword, $this->return_data[ 'jobs' ][$jid]['chunks'] ) ) {
+                $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ] = array();
                 $total_payable[ $jid ][ $jpassword ] = array();
             }
 
-            if( !array_key_exists( $jpassword, $return_data[ 'jobs' ][ $jid ][ 'totals' ] ) ){
-                $return_data[ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ] = $total_init;
+            if( !array_key_exists( $jpassword, $this->return_data[ 'jobs' ][ $jid ][ 'totals' ] ) ){
+                $this->return_data[ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ] = $this->total_init;
             }
 
-            if ( !isset( $return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ] ) ) {
-                $return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ] = $total_init;
+            if ( !isset( $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ] ) ) {
+                $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ] = $this->total_init;
             }
             //END init indexes
 
@@ -130,27 +189,29 @@ class getVolumeAnalysisController extends ajaxController {
                 $keyValue = 'NEW';
             } elseif ( $r[ 'match_type' ] == "REPETITIONS" ) {
                 $keyValue = 'REPETITIONS';
+            } else {
+                $keyValue = 'NUMBERS_ONLY';
             }
 
-            $w           = $return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ $keyValue ][ 0 ] + $words;
+            $w           = $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ $keyValue ][ 0 ] + $words;
             $words_print = number_format( $w, 0, ".", "," );
 
-            $return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ $keyValue ] = array( $w, $words_print );
+            $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ $keyValue ] = array( $w, $words_print );
 
-            $tmp_tot = $return_data[ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ][0];
+            $tmp_tot = $this->return_data[ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ][0];
             $tmp_tot += $words;
             $words_print = number_format( $tmp_tot, 0, ".", "," );
-            $return_data[ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ] = array( $tmp_tot, $words_print );
+            $this->return_data[ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ] = array( $tmp_tot, $words_print );
 
 
             //SUM WITH PREVIOUS ( Accumulator )
-            $eq_words    = $return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ "TOTAL_PAYABLE" ][ 0 ] + $eq_words;
-            $return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ "TOTAL_PAYABLE" ] = array( $eq_words );
+            $eq_words    = $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ "TOTAL_PAYABLE" ][ 0 ] + $eq_words;
+            $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ "TOTAL_PAYABLE" ] = array( $eq_words );
 
             //take note of payable words for job/file combination
-            $total_payable[ $jid ][ $jpassword ][ $r[ 'id_file' ] ] = $return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ "TOTAL_PAYABLE" ][ 0 ];
+            $total_payable[ $jid ][ $jpassword ][ $r[ 'id_file' ] ] = $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ "TOTAL_PAYABLE" ][ 0 ];
 
-            $return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ 'FILENAME' ] = $r[ 'filename' ];
+            $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ 'FILENAME' ] = $r[ 'filename' ];
 
         }
 
@@ -160,10 +221,10 @@ class getVolumeAnalysisController extends ajaxController {
 
             foreach ( $chunks as $_jpassword => $files ) {
                 foreach( $files as $fid => $v ){
-                    $return_data[ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 0 ] += $v;
+                    $this->return_data[ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 0 ] += $v;
 
                     //format numbers after sum
-                    $return_data[ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 1 ] = number_format( $return_data[ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 0 ], 0, ".", "," );
+                    $this->return_data[ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 1 ] = number_format( $this->return_data[ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 0 ], 0, ".", "," );
                 }
             }
         }
@@ -244,88 +305,85 @@ class getVolumeAnalysisController extends ajaxController {
             $this->status_project = "DONE";
         }
 
-        $return_data[ 'summary' ][ 'NAME' ]       = $project_data[0]['pname'];
-
-        $return_data[ 'summary' ][ 'IN_QUEUE_BEFORE' ]       = $numSegmentsInQueue;
-        $return_data[ 'summary' ][ 'IN_QUEUE_BEFORE_PRINT' ] = number_format( $numSegmentsInQueue, 0, ".", "," );
-
-        $return_data[ 'summary' ][ 'STATUS' ]               = $this->status_project;
-        $return_data[ 'summary' ][ 'TOTAL_SEGMENTS' ]       = $this->total_segments;
-        $return_data[ 'summary' ][ 'TOTAL_SEGMENTS_PRINT' ] = number_format( $this->total_segments, 0, ".", "," );
-
-        $return_data[ 'summary' ][ 'SEGMENTS_ANALYZED_PRINT' ] = number_format( $this->segments_analyzed, 0, ".", "," );
-        $return_data[ 'summary' ][ 'SEGMENTS_ANALYZED' ]       = $this->segments_analyzed;
-
-        $return_data[ 'summary' ][ 'TOTAL_STANDARD_WC' ] = $this->total_wc_standard_analysis;
-        $return_data[ 'summary' ][ 'TOTAL_FAST_WC' ]     = $this->total_wc_fast_analysis;
-        $return_data[ 'summary' ][ 'TOTAL_TM_WC' ]       = $this->total_wc_tm_analysis;
-        $return_data[ 'summary' ][ 'TOTAL_RAW_WC' ]      = $this->total_raw_wc;
-
-        $return_data[ 'summary' ][ 'TOTAL_STANDARD_WC_PRINT' ] = number_format( $this->total_wc_standard_analysis, 0, ".", "," );
-        $return_data[ 'summary' ][ 'TOTAL_FAST_WC_PRINT' ]     = number_format( $this->total_wc_fast_analysis, 0, ".", "," );
-        $return_data[ 'summary' ][ 'TOTAL_TM_WC_PRINT' ]       = number_format( $this->total_wc_tm_analysis, 0, ".", "," );
-        $return_data[ 'summary' ][ 'TOTAL_RAW_WC_PRINT' ]      = number_format( $this->total_raw_wc, 0, ".", "," );
-
-
-        $return_data[ 'summary' ][ 'TOTAL_PAYABLE' ]       = $this->total_wc_tm_analysis;
-        $return_data[ 'summary' ][ 'TOTAL_PAYABLE_PRINT' ] = number_format( $this->total_wc_tm_analysis, 0, ".", "," );
+        $this->return_data[ 'summary' ][ 'NAME' ]              = $this->_project_data[ 0 ][ 'pname' ];
+        $this->return_data[ 'summary' ][ 'IN_QUEUE_BEFORE' ]   = $this->_others_in_queue;
+        $this->return_data[ 'summary' ][ 'STATUS' ]            = $this->status_project;
+        $this->return_data[ 'summary' ][ 'TOTAL_SEGMENTS' ]    = $this->total_segments;
+        $this->return_data[ 'summary' ][ 'SEGMENTS_ANALYZED' ] = $this->segments_analyzed;
+        $this->return_data[ 'summary' ][ 'TOTAL_STANDARD_WC' ] = $this->total_wc_standard_analysis;
+        $this->return_data[ 'summary' ][ 'TOTAL_FAST_WC' ]     = $this->total_wc_fast_analysis;
+        $this->return_data[ 'summary' ][ 'TOTAL_TM_WC' ]       = $this->total_wc_tm_analysis;
+        $this->return_data[ 'summary' ][ 'TOTAL_RAW_WC' ]      = $this->total_raw_wc;
+        $this->return_data[ 'summary' ][ 'TOTAL_PAYABLE' ]     = $this->total_wc_tm_analysis;
 
         if ( $this->status_project == 'FAST_OK' or $this->status_project == "DONE" ) {
-            $return_data[ 'summary' ][ 'PAYABLE_WC_TIME' ] = number_format( $tm_wc_time, 0, ".", "," );
-            $return_data[ 'summary' ][ 'PAYABLE_WC_UNIT' ] = $tm_wc_unit;
+            $this->return_data[ 'summary' ][ 'PAYABLE_WC_TIME' ] = number_format( $tm_wc_time, 0, ".", "," );
+            $this->return_data[ 'summary' ][ 'PAYABLE_WC_UNIT' ] = $tm_wc_unit;
         } else {
-            $return_data[ 'summary' ][ 'PAYABLE_WC_TIME' ] = number_format( $fast_wc_time, 0, ".", "," );
-            $return_data[ 'summary' ][ 'PAYABLE_WC_UNIT' ] = $fast_wc_unit;
+            $this->return_data[ 'summary' ][ 'PAYABLE_WC_TIME' ] = number_format( $fast_wc_time, 0, ".", "," );
+            $this->return_data[ 'summary' ][ 'PAYABLE_WC_UNIT' ] = $fast_wc_unit;
         }
 
-        $return_data[ 'summary' ][ 'FAST_WC_TIME' ] = number_format( $fast_wc_time, 0, ".", "," );
-        $return_data[ 'summary' ][ 'FAST_WC_UNIT' ] = $fast_wc_unit;
-
-        $return_data[ 'summary' ][ 'TM_WC_TIME' ] = number_format( $tm_wc_time, 0, ".", "," );
-        $return_data[ 'summary' ][ 'TM_WC_UNIT' ] = $tm_wc_unit;
-
-        $return_data[ 'summary' ][ 'STANDARD_WC_TIME' ] = number_format( $standard_wc_time, 0, ".", "," );
-        $return_data[ 'summary' ][ 'STANDARD_WC_UNIT' ] = $standard_wc_unit;
-
-
-        $return_data[ 'summary' ][ 'USAGE_FEE' ]      = number_format( $matecat_fee, 2, ".", "," );
-        $return_data[ 'summary' ][ 'PRICE_PER_WORD' ] = number_format( $this->matecat_price_per_word, 3, ".", "," );
-        $return_data[ 'summary' ][ 'DISCOUNT' ]       = number_format( $discount, 0, ".", "," );
-        $return_data[ 'summary' ][ 'DISCOUNT_WC' ]    = number_format( $discount_wc, 0, ".", "," );
-
-        $this->result[ 'data' ] = $return_data;
+        $this->return_data[ 'summary' ][ 'FAST_WC_TIME' ]     = number_format( $fast_wc_time, 0, ".", "," );
+        $this->return_data[ 'summary' ][ 'FAST_WC_UNIT' ]     = $fast_wc_unit;
+        $this->return_data[ 'summary' ][ 'TM_WC_TIME' ]       = number_format( $tm_wc_time, 0, ".", "," );
+        $this->return_data[ 'summary' ][ 'TM_WC_UNIT' ]       = $tm_wc_unit;
+        $this->return_data[ 'summary' ][ 'STANDARD_WC_TIME' ] = number_format( $standard_wc_time, 0, ".", "," );
+        $this->return_data[ 'summary' ][ 'STANDARD_WC_UNIT' ] = $standard_wc_unit;
+        $this->return_data[ 'summary' ][ 'USAGE_FEE' ]        = number_format( $matecat_fee, 2, ".", "," );
+        $this->return_data[ 'summary' ][ 'PRICE_PER_WORD' ]   = number_format( $this->matecat_price_per_word, 3, ".", "," );
+        $this->return_data[ 'summary' ][ 'DISCOUNT' ]         = number_format( $discount, 0, ".", "," );
+        $this->return_data[ 'summary' ][ 'DISCOUNT_WC' ]      = number_format( $discount_wc, 0, ".", "," );
 
         //aggregate Extra Infos
-        switch ( $this->status_project ) {
-            case 'NEW':
-            case 'FAST_OK':
-            case 'NOT_READY_FOR_ANALYSIS':
-                $this->result['status']  = 'ANALYZING';
-                break;
-            case 'EMPTY':
-                $this->result['status']  = 'NO_SEGMENTS_FOUND';
-                break;
-            case 'NOT_TO_ANALYZE':
-                $this->result['status']  = 'ANALYSIS_NOT_ENABLED';
-                break;
-            case 'DONE':
-                $this->result['status']  = 'DONE';
-                break;
-            default: //this can not be
-                $this->result['status']  = 'FAIL';
-                break;
+        if ( $_forWEB ){
+
+            $this->return_data[ 'summary' ][ 'IN_QUEUE_BEFORE_PRINT' ]   = number_format( $this->_others_in_queue, 0, ".", "," );
+            $this->return_data[ 'summary' ][ 'TOTAL_SEGMENTS_PRINT' ]    = number_format( $this->total_segments, 0, ".", "," );
+            $this->return_data[ 'summary' ][ 'SEGMENTS_ANALYZED_PRINT' ] = number_format( $this->segments_analyzed, 0, ".", "," );
+            $this->return_data[ 'summary' ][ 'TOTAL_STANDARD_WC_PRINT' ] = number_format( $this->total_wc_standard_analysis, 0, ".", "," );
+            $this->return_data[ 'summary' ][ 'TOTAL_FAST_WC_PRINT' ]     = number_format( $this->total_wc_fast_analysis, 0, ".", "," );
+            $this->return_data[ 'summary' ][ 'TOTAL_TM_WC_PRINT' ]       = number_format( $this->total_wc_tm_analysis, 0, ".", "," );
+            $this->return_data[ 'summary' ][ 'TOTAL_RAW_WC_PRINT' ]      = number_format( $this->total_raw_wc, 0, ".", "," );
+            $this->return_data[ 'summary' ][ 'TOTAL_PAYABLE_PRINT' ]     = number_format( $this->total_wc_tm_analysis, 0, ".", "," );
+
+        } else {
+
+            Log::doLog( $this->_project_data );
+
+            switch ( $this->status_project ) {
+                case 'NEW':
+                case 'FAST_OK':
+                case 'NOT_READY_FOR_ANALYSIS':
+                    $this->result['status']  = 'ANALYZING';
+                    break;
+                case 'EMPTY':
+                    $this->result['status']  = 'NO_SEGMENTS_FOUND';
+                    break;
+                case 'NOT_TO_ANALYZE':
+                    $this->result['status']  = 'ANALYSIS_NOT_ENABLED';
+                    break;
+                case 'DONE':
+                    $this->result['status']  = 'DONE';
+                    break;
+                default: //this can not be
+                    $this->result['status']  = 'FAIL';
+                    break;
+            }
+
+            $this->result['analyze'] = "/analyze/" . $this->_project_data[0]['pname'] . "/" . $this->_project_data[0]['pid'] . "-" . $this->_project_data[0]['ppassword'];
+            $this->result['jobs']   = array();
+
+            foreach( $this->_project_data as $job ){
+                $this->result[ 'jobs' ][ 'langpairs' ][ $job[ 'jid_jpassword' ] ] = $job[ 'lang_pair' ];
+                $this->result[ 'jobs' ][ 'job-url' ][ $job[ 'jid_jpassword' ] ]   = "/translate/" . $job[ 'job_url' ];
+            }
+
         }
 
-        $this->result['analyze'] = "/analyze/" . $project_data[0]['pname'] . "/" . $project_data[0]['pid'] . "-" . $project_data[0]['ppassword'];
-        $this->result['jobs']   = array();
-
-        foreach( $project_data as $job ){
-            $this->result['jobs']['job_id-job_password'][] = $job['jid_jpassword'];
-            $this->result['jobs']['job-url'][ $job['jid_jpassword'] ] = "/translate/" . $job['job_url'];
-        }
+        $this->result[ 'data' ] = $this->return_data;
 
     }
 
 }
 
-?>

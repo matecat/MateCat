@@ -52,7 +52,7 @@ class DetectProprietaryXliff {
             $stringData = fread( $file_pointer, 1024 );
             fclose( $file_pointer );
 
-        } elseif ( !empty( $stringData ) && !empty( $fileName ) ) {
+        } elseif ( !empty( $stringData ) && !empty( $fullPathToFile ) ) {
             //we want to check extension and content
             $info = pathinfo( $fullPathToFile );
 

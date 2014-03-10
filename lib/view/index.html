@@ -5,10 +5,11 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
+<!--
         <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/jquery-ui.css?build=${build_number}" rel="stylesheet" type="text/css" />
-
+-->
         <script type="text/javascript">
 			/*<![CDATA[*/
 			var config = {
@@ -19,7 +20,9 @@
 				private_customer: '${private_customer | string:0}',
 				last_opened_segment: '${last_opened_segment}',
 				first_job_segment: '${first_job_segment}',
+				last_job_segment: '${last_job_segment}',
 				server_load_time: '${load_time}',
+				tms_enabled: ${tms_enabled | string:true},
 				job_id: '${jid}',
 				password: '${password}',
 				source_rfc: '${source_code}',
@@ -32,7 +35,10 @@
 				segmentQACheckInterval: '${segmentQACheckInterval}',
 				firstSegmentOfFiles: ${structure php: firstSegmentOfFiles},
 				taglockEnabled: ${taglockEnabled | string:1},
-				brPlaceholdEnabled: '${brPlaceholdEnabled}'
+				brPlaceholdEnabled: '${brPlaceholdEnabled}',
+				survey: 'https://docs.google.com/a/translated.net/forms/d/1BDOlu7KQ0FU6EpVnf8PTucV4aHf90mZpf2kNM5MD_qg/viewform?embedded=true',
+				//survey: false,
+				optimized: false
 			};
 			var renderStart = new Date();
 			/*]]>*/
@@ -50,9 +56,23 @@
             config.crlfPlaceholderRegex = ${crlfPlaceholderRegex | null};
             /*]]>*/
         </script>
-
-        <script src="${basepath}public/js/loader.js?build=${build_number}"></script>
-        <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
+		<script>
+            /*<![CDATA[*/
+			if(config.optimized) {
+				document.write("<link href=\"${basepath}public/css/app.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
+				document.write("<script src=\"${basepath}public/js/app.js?build=${build_number}\"><\/script>");
+			} else {
+				document.write("<link href=\"${basepath}public/css/common.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
+				document.write("<link href=\"${basepath}public/css/style.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
+//				document.write("<link href=\"${basepath}public/css/jquery-ui.css?build=${build_number}\" rel=\"stylesheet\" type=\"text/css\" />");
+				document.write("<script src=\"${basepath}public/js/loader.js?build=${build_number}\"><\/script>");
+				document.write("<script src=\"${basepath}public/js/logout.js?build=${build_number}\"><\/script>");				
+			}
+            /*]]>*/
+		</script>	
+		
+<!--        <script src="${basepath}public/js/loader.js?build=${build_number}"></script> 
+        <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>-->
     </head>
     <body tal:condition="not:supportedBrowser">
         <div  metal:use-macro="unsupported_browser.html/unsupported"/>
@@ -419,7 +439,7 @@
                 </nav>
 
 
-                <div id="statistics">
+                <div id="statistics" style="${php: job_stats['ANALYSIS_COMPLETE'] ? '' : job_stats['STATUS_BAR_NO_DISPLAY'] }">
                     <p class="progress">Progress:</p>
                     <div class="meter">
 
@@ -436,7 +456,7 @@
                             <tal:block tal:condition="php: empty(analysis_enabled)">
                                 Payable Words
                             </tal:block>
-                            : <strong tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
+                            : <strong id="total-payable" tal:content="job_stats/TOTAL_FORMATTED|default"> - -.- - -</strong>
                         </li>
 
                         <li id="stat-todo">To-do: <strong tal:content="job_stats/TODO_FORMATTED|default">--</strong></li>
@@ -496,6 +516,10 @@
 
                     </div>
 
+                </div>
+
+                <div tal:condition="php: !job_stats['ANALYSIS_COMPLETE']" id="analyzing">
+                    <p class="progress">Calculating word count...</p>
                 </div>
 
             </div> <!-- .wrapper -->
@@ -584,10 +608,13 @@
             <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>
             <form action=""><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>
         </div>
+<!-- Actually unused -->
+<!--
         <div id="alertConfirmTranslation" class="dialog" title="Attention">
             <p>To confirm your translation, please press on Translated or use the shortcut CTRL+Enter.</p>
             <form action=""><input id="hideAlertConfirmTranslation" type="checkbox" value="" /><label for="hideAlertConfirmTranslation">Do not display again</label></form>
         </div>
+-->
         <!--
                         <div class="end-message-box">
                         <div class="end-message-col1">

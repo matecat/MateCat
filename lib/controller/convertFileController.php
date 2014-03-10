@@ -4,7 +4,7 @@ set_time_limit(0);
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 include_once INIT::$UTILS_ROOT . "/CatUtils.php";
-include_once INIT::$UTILS_ROOT . "/fileFormatConverter.class.php";
+include_once INIT::$UTILS_ROOT . "/FileFormatConverter.php";
 
 class convertFileController extends ajaxController {
 
@@ -94,7 +94,7 @@ class convertFileController extends ajaxController {
 			$original_content_zipped = gzdeflate($original_content, 5);
 			unset($original_content);
 
-			$converter = new fileFormatConverter();
+			$converter = new FileFormatConverter();
 			if(strpos($this->target_lang,',')!==FALSE){
 				$single_language=explode(',',$this->target_lang);
 				$single_language=$single_language[0];

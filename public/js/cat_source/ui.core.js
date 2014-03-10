@@ -15,14 +15,14 @@ UI = {
 			$('#jobMenu .currSegment').hide();
 		}
 		var menuHeight = $('#jobMenu').height();
-		var startTop = 47 - menuHeight;
+//		var startTop = 47 - menuHeight;
 		$('#jobMenu').css('top', (47 - menuHeight) + "px");
 
 		if ($('#jobMenu').hasClass('open')) {
 			$('#jobMenu').animate({top: "-=" + menuHeight + "px"}, 500).removeClass('open');
 		} else {
 			$('#jobMenu').animate({top: "+=" + menuHeight + "px"}, 300, function() {
-				$('body').on('click', function(e) {
+				$('body').on('click', function() {
 					if ($('#jobMenu').hasClass('open')) {
 						UI.toggleFileMenu();
 					}
@@ -51,11 +51,16 @@ UI = {
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
 		$('.percentuage', segment).removeClass('visible');
 		if (!segment.hasClass('saved'))
-			this.setTranslation(segment, status);
+			this.setTranslation($(segment).attr('id').split('-')[1], status);
 		segment.removeClass('saved');
-		this.setContribution(segment, status, byStatus);
+		this.setContribution($(segment).attr('id').split('-')[1], status, byStatus);
 		this.setContributionMT(segment, status, byStatus);
 		this.getNextSegment(this.currentSegment, 'untranslated');
+		if(!this.nextUntranslatedSegmentId) {
+			$(window).trigger({
+				type: "allTranslated"
+			});
+		}
 		$(window).trigger({
 			type: "statusChanged",
 			segment: segment,
@@ -63,9 +68,14 @@ UI = {
 		});
 	},
 	checkHeaviness: function() {
-		if ($('section').length > 500) {
-			UI.reloadToSegment(UI.nextUntranslatedSegmentId);
+//		console.log('UI.hasToBeRerendered: ', this.hasToBeRerendered);
+//		console.log(this.initSegNum + ' - ' + this.numOpenedSegments + ' - ' + (this.initSegNum/this.numOpenedSegments));
+//		if (($('section').length > 500)||(this.numOpenedSegments > 2)) {
+/*
+		if (($('section').length > 500)||((this.initSegNum/this.numOpenedSegments) < 2)||(this.hasToBeRerendered)) {
+			UI.reloadToSegment(UI.currentSegmentId);
 		}
+*/		
 	},
 	checkIfFinished: function(closing) {
 		if (((this.progress_perc != this.done_percentage) && (this.progress_perc == '100')) || ((closing) && (this.progress_perc == '100'))) {
@@ -79,6 +89,7 @@ UI = {
 			this.body.addClass('justdone');
 		}
 	},
+/*
 	checkTutorialNeed: function() {
 		if (!Loader.detect('tutorial'))
 			return false;
@@ -94,13 +105,14 @@ UI = {
 			});
 		}
 	},
+*/
 	closeSegment: function(segment, byButton, operation) {
 		if ((typeof segment == 'undefined') || (typeof UI.toSegment != 'undefined')) {
 			this.toSegment = undefined;
 			return true;
 		}
 
-		var closeStart = new Date();
+//		var closeStart = new Date();
 		this.autoSave = false;
 
 		$(window).trigger({
@@ -140,16 +152,27 @@ UI = {
 		this.saveInUndoStack('copysource');
 		$(".editarea", this.currentSegment).text(source_val).keyup().focus();
 		this.saveInUndoStack('copysource');
-		$(".editarea", this.currentSegment).effect("highlight", {}, 1000);
+//		$(".editarea", this.currentSegment).effect("highlight", {}, 1000);
 		$(window).trigger({
 			type: "sourceCopied",
 			segment: segment
 		});
-		this.currentSegment.addClass('modified');
+		this.highlightEditarea();
+
 		this.currentSegmentQA();
 		this.setChosenSuggestion(0);
 		this.lockTags(this.editarea);
 	},
+	highlightEditarea: function() {
+		this.currentSegment.addClass('highlighted1');
+		setTimeout(function() {
+			UI.currentSegment.addClass('modified highlighted2');
+		}, 100);
+		setTimeout(function() {
+			UI.currentSegment.removeClass('highlighted1 highlighted2');
+		}, 2000);		
+	},
+
 	confirmDownload: function(res) {
 		if (res) {
 			if (UI.isChrome) {
@@ -180,14 +203,55 @@ UI = {
 		if ($('.footer', segment).text() !== '')
 			return false; 
 
-		var footer = '<ul class="submenu"><li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm"><a tabindex="-1" href="#">Translation matches</a></li><li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc"><a tabindex="-1" href="#">Concordance</a></li><li class="tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl"><a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a></li></ul><div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches"><div class="overflow"></div></div><div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances"><div class="overflow"><div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div><div class="results"></div></div></div><div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary"><div class="overflow"><div class="gl-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /><!-- a class="search-glossary" href="#"></a --><a class="set-glossary disabled" href="#"></a><div class="comment"><a href="#">(+) Comment</a><div class="input gl-comment" contenteditable="true" /></div></div><div class="results"></div></div></div>';
+		var footer =	'<ul class="submenu">' +
+					'	<li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
+					'		<a tabindex="-1" href="#">Translation matches</a>' +
+					'	</li>' +
+					'	<li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc">' +
+					'		<a tabindex="-1" href="#">Concordance</a>' +
+					'	</li>' +
+					'	<li class="tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl">' +
+					'		<a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a>' +
+					'	</li>' +
+					'</ul>' +
+					'<div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches">' +
+					'	<div class="overflow"></div>' +
+					'</div>' +
+					'<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
+					'	<div class="overflow">' + 
+						((config.tms_enabled)? '<div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div>' : '<ul class="graysmall message"><li>Concordance is not available when the TM feature is disabled</li></ul>') + 
+					'		<div class="results"></div>' +
+					'	</div>' +
+					'</div>' +
+					'<div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary">' +
+					'	<div class="overflow">' + 
+
+					((config.tms_enabled)?
+					'		<div class="gl-search">' +
+					'			<div class="input search-source" contenteditable="true" />' +
+					'				<div class="input search-target" contenteditable="true" />' +
+					'					<!-- a class="search-glossary" href="#"></a --><a class="set-glossary disabled" href="#"></a>' +
+					'					<div class="comment">' +
+					'						<a href="#">(+) Comment</a>' +
+					'						<div class="input gl-comment" contenteditable="true" /></div>' +
+					'					</div>' +
+					'					<div class="results"></div>' +
+					'				</div>' +
+					'			</div>' +
+					'		</div>' : '<ul class="graysmall message"><li>Glossary is not available when the TM feature is disabled</li></ul>') +
+					'	</div>' +
+					'</div>';
 		$('.footer', segment).html(footer);
 
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
-			
-			$('.sub-editor.matches .overflow .graysmall.message', segment).remove();
-			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry, we can\'t help you this time. Check if the language pair is correct. If not, create the project again.</li></ul>');
+			var d = JSON.parse(localStorage.getItem(config.job_id + '-' + $(segment).attr('id').split('-')[1]));
+//			console.log('li prendo dal local storage');
+			UI.processContributions(d, segment);
+
+//			$('.sub-editor.matches .overflow .graysmall.message', segment).remove();
+//			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry, we can\'t help you this time. Check if the language pair is correct. If not, create the project again.</li></ul>');
 		}
+
 	},
 	createHeader: function() {
 		if ($('h2.percentuage', this.currentSegment).length) {
@@ -199,7 +263,7 @@ UI = {
 	createJobMenu: function() {
 		var menu = '<nav id="jobMenu" class="topMenu">' +
 				'    <ul>';
-		$.each(config.firstSegmentOfFiles, function(index) {
+		$.each(config.firstSegmentOfFiles, function() {
 			menu += '<li data-file="' + this.id_file + '" data-segment="' + this.first_segment + '"><span class="' + UI.getIconClass(this.file_name.split('.')[this.file_name.split('.').length -1]) + '"></span><a href="#" title="' + this.file_name + '" >' + this.file_name + '</a></li>';
 		});
 
@@ -214,6 +278,40 @@ UI = {
 			APP.fitText($(this), $('a', $(this)), 20);
 		});
 */
+	},
+	displaySurvey: function(s) {
+        if(this.surveyDisplayed) return;
+        survey = '<div class="modal survey" data-type="view">' +
+                '	<div class="popup-outer"></div>' +
+                '	<div class="popup survey">' +
+                '		<a href="#" class="x-popup"></a>' +
+                '		<h1>Translation Completed - Take a Survey</h1>' +
+                '		<p class="surveynotice">To stop displaying the survey, click on the <b>X</b> icon on the top right corner of this popup.</p>' +
+                '		<div class="popup-box">' +
+                '			<iframe src="' + s + '" width="100%" height="670" frameborder="0" marginheight="0" marginwidth="0">Loading ...</iframe>' +
+                '		</div>' +
+                '	</div>' +
+                '</div>';
+        this.body.append(survey);
+        $('.modal.survey').show();
+	},
+	surveyAlreadyDisplayed: function() {
+		if(typeof $.cookie('surveyedJobs') != 'undefined') {
+			var c = $.cookie('surveyedJobs');
+			surv = c.split('||')[0];
+			if(config.survey === surv) {
+				jobs = $.cookie('surveyedJobs').split('||')[1].split(',');
+				var found = false;
+				$.each(jobs, function() {
+					if(this == config.job_id) {
+						found = true;
+					}
+				});
+				return found;
+			}
+		} else {
+			return false;
+		}
 	},
 	getIconClass: function(ext) {
 		c =		(
@@ -307,21 +405,8 @@ UI = {
 		this.firstSegment = s.first();
 		this.lastSegment = s.last();
 	},
-	setSegmentPointer: function() {
-		if ($('.editor').length) {
-			if ($('.editor').isOnScreen()) {
-				$('#segmentPointer').hide();
-			} else {
-				if ($(window).scrollTop() > $('.editor').offset().top) {
-					$('#segmentPointer').removeClass('down').css('margin-top', '-10px').addClass('up').show();
-				} else {
-					$('#segmentPointer').removeClass('up').addClass('down').css('margin-top', ($(window).height() - 140) + 'px').show();
-				}
-			}
-		}
-	},
 	detectRefSegId: function(where) {
-		var step = this.moreSegNum;
+//		var step = this.moreSegNum;
 		var seg = (where == 'after') ? $('section').last() : (where == 'before') ? $('section').first() : '';
 		var segId = (seg.length) ? seg.attr('id').split('-')[1] : 0;
 		return segId;
@@ -382,6 +467,7 @@ UI = {
 		if (where == 'before') {
 			$("section").each(function() {
 				if ($(this).offset().top > $(window).scrollTop()) {
+//				if ($(this).offset().top > $(window).scrollTop()) {
 					UI.segMoving = $(this).attr('id').split('-')[1];
 					return false;
 				}
@@ -399,9 +485,12 @@ UI = {
 				action: 'getSegments',
 				jid: config.job_id,
 				password: config.password,
-				step: 50,
+				step: UI.moreSegNum,
 				segment: segId,
 				where: where
+			},
+			error: function() {
+				UI.failedConnection(0, 'getMoreSegments');
 			},
 			success: function(d) {
 				UI.getMoreSegments_success(d);
@@ -436,8 +525,8 @@ UI = {
 			}
 
 		}
-		if (where == 'after') {
-		}
+//		if (where == 'after') {
+//		}
 		if (d.data.files.length === 0) {
 			if (where == 'after')
 				this.noMoreSegmentsAfter = true;
@@ -448,21 +537,33 @@ UI = {
 		this.loadingMore = false;
 		this.setWaypoints();
 	},
-	getNextSegment: function(segment, status) {
+	getNextSegment: function(segment, status) {//console.log('getNextSegment: ', segment);
 		var seg = this.currentSegment;
 
 		var rules = (status == 'untranslated') ? 'section.status-draft:not(.readonly), section.status-rejected:not(.readonly), section.status-new:not(.readonly)' : 'section.status-' + status + ':not(.readonly)';
 		var n = $(seg).nextAll(rules).first();
+//		console.log('$(seg).nextAll().length: ', $(seg).nextAll().length);
+//		console.log('n.length 1: ', n.length);
 		if (!n.length) {
 			n = $(seg).parents('article').next().find(rules).first();
 		}
-		if (n.length) {
+//		console.log('n.length 2: ', n.length);
+//		console.log('UI.nextUntranslatedSegmentIdByServer: ', UI.nextUntranslatedSegmentIdByServer);
+//		console.log('UI.noMoreSegmentsAfter: ', UI.noMoreSegmentsAfter);
+		if (n.length) { // se ci sono sotto segmenti caricati con lo status indicato
+//			console.log('1');
 			this.nextUntranslatedSegmentId = $(n).attr('id').split('-')[1];
-		} else if ((UI.nextUntranslatedSegmentIdByServer) && (!UI.noMoreSegmentsAfter)) {
-			this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
 		} else {
-			this.nextUntranslatedSegmentId = 0;
+			this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;			
 		}
+//		} else if ((UI.nextUntranslatedSegmentIdByServer) && (!UI.noMoreSegmentsAfter)) {
+//			console.log('2');
+//			this.nextUntranslatedSegmentId = UI.nextUntranslatedSegmentIdByServer;
+//		} else {
+//			console.log('3');
+//			this.nextUntranslatedSegmentId = 0;
+//		}
+//		console.log('UI.nextUntranslatedSegmentId: ', UI.nextUntranslatedSegmentId);
 
 		var i = $(seg).next();
 		if (!i.length) {
@@ -513,6 +614,9 @@ UI = {
 				step: step,
 				segment: seg,
 				where: where
+			},
+			error: function() {
+				UI.failedConnection(0, 'getSegments');
 			},
 			success: function(d) {
 				UI.getSegments_success(d, options);
@@ -597,6 +701,9 @@ UI = {
 					first_segment: $('section').first().attr('id').split('-')[1],
 					last_segment: $('section').last().attr('id').split('-')[1]
 				},
+				error: function() {
+					UI.failedConnection(0, 'getUpdatedTranslations');
+				},
 				success: function(d) {
 					UI.lastUpdateRequested = new Date();
 					UI.updateSegments(d.data);
@@ -638,6 +745,18 @@ UI = {
 			}
 		}
 	},
+	gotoNextUntranslatedSegment: function() {console.log('gotoNextUntranslatedSegment');
+		if (!UI.segmentIsLoaded(UI.nextUntranslatedSegmentId)) {
+			if (!UI.nextUntranslatedSegmentId) {
+				UI.closeSegment(UI.currentSegment);
+			} else {
+				UI.reloadWarning();
+			}
+		} else {
+			$("#segment-" + UI.nextUntranslatedSegmentId + " .editarea").trigger("click");
+		}
+	},
+	
 	gotoOpenSegment: function() {
 		if ($('#segment-' + this.currentSegmentId).length) {
 			this.scrollSegment(this.currentSegment);
@@ -701,7 +820,7 @@ UI = {
 		$(ed).focus();
 	},
 	millisecondsToTime: function(milli) {
-		var milliseconds = milli % 1000;
+//		var milliseconds = milli % 1000;
 		var seconds = Math.round((milli / 1000) % 60);
 		var minutes = Math.floor((milli / (60 * 1000)) % 60);
 		return [minutes, seconds];
@@ -711,12 +830,18 @@ UI = {
 		$('#spellCheck .words').remove();
 	},
 	openSegment: function(editarea, operation) {
+//		if(UI.body.hasClass('archived')) return;
 		var segment = $('#segment-' + $(editarea).attr('data-sid'));
 		this.openSegmentStart = new Date();
+		if(UI.warningStopped) {
+			UI.warningStopped = false;
+			UI.checkWarnings(false);
+		}
 		if (!this.byButton) {
 			if (this.justSelecting('editarea'))
 				return;
 		}
+		this.numOpenedSegments++;
 		this.firstOpenedSegment = (this.firstOpenedSegment === 0) ? 1 : 2;
 		this.byButton = false;
 		this.cacheObjects(editarea);
@@ -730,7 +855,6 @@ UI = {
 		this.saveInUndoStack('open');
 		this.autoSave = true;
 		this.activateSegment();
-
 		this.getNextSegment(this.currentSegment, 'untranslated');
 		this.setCurrentSegment(segment);
 		this.currentSegment.addClass('opened');
@@ -854,6 +978,8 @@ UI = {
 		$('p.warnings', segment).remove();
 	},
 	removeFooter: function(byButton) {
+		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;		
+		$('#' + segment.attr('id') + ' .footer').empty();
 	},
 	removeHeader: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
@@ -863,7 +989,7 @@ UI = {
 		statusMenu.empty().hide();
 	},
 	renderSegments: function(files, where, starting) {
-		$.each(files, function(k, v) {
+		$.each(files, function(k) {
 			var newFile = '';
 			var fs = this.file_stats;
 //            var fid = fs['ID_FILE'];
@@ -897,9 +1023,9 @@ UI = {
 			}
 
 			var t = config.time_to_edit_enabled;
-			$.each(this.segments, function(index) {
+			$.each(this.segments, function() {
 //                this.readonly = true;
-				var readonly = (this.readonly == 'true') ? true : false;
+				var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
 				var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
 
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
@@ -923,7 +1049,8 @@ UI = {
 						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment) + '</div>' +
 						'				<div class="copy" title="Copy source to target">' +
 						'                   <a href="#"></a>' +
-						'                   <p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p>' +
+						'                   <p>ALT+CTRL+I</p>' +
+//						'                   <p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+RIGHT</p>' +
 						'				</div>' +
 						'				<div class="target item" id="segment-' + this.sid + '-target">' +
 						'					<span class="hide toggle"> ' +
@@ -986,10 +1113,10 @@ UI = {
 			status = 'draft';
 		}
 		console.log('SAVE SEGMENT');
-		this.setTranslation(segment, status, 'autosave');
+		this.setTranslation($(segment).attr('id').split('-')[1], status, 'autosave');
 		segment.addClass('saved');
 	},
-	renderAndScrollToSegment: function(sid, file) {
+	renderAndScrollToSegment: function(sid) {
 		$('#outer').empty();
 		this.render({
 			firstLoad: false,
@@ -1070,6 +1197,9 @@ UI = {
 				sentence: UI.editarea.text()
 			},
 			context: editarea,
+			error: function() {
+				UI.failedConnection(0, 'getSpellcheck');
+			},
 			success: function(data) {
 				ed = this;
 				$.each(data.result, function(key, value) { //key --> 0: { 'word': { 'offset':20, 'misses':['word1','word2'] } }
@@ -1077,12 +1207,12 @@ UI = {
 					var word = Object.keys(value)[0];
 					replacements = value[word].misses.join(",");
 
-					var Position = [
-						parseInt(value[word].offset),
-						parseInt(value[word].offset) + parseInt(word.length)
-					];
+//					var Position = [
+//						parseInt(value[word].offset),
+//						parseInt(value[word].offset) + parseInt(word.length)
+//					];
 
-					var sentTextInPosition = ed.text().substring(Position[0], Position[1]);
+//					var sentTextInPosition = ed.text().substring(Position[0], Position[1]);
 					//console.log(sentTextInPosition);
 
 					var re = new RegExp("(\\b" + word + "\\b)", "gi");
@@ -1101,24 +1231,22 @@ UI = {
 				action: 'setSpellcheck',
 				slang: config.target_rfc,
 				word: word
-			},
-			success: function(data) {
-
 			}
 		});
 	},
 	setCurrentSegment: function(segment, closed) {
+		reqArguments = arguments;
 		var id_segment = this.currentSegmentId;
 		if (closed) {
 			id_segment = 0;
 			UI.currentSegment = undefined;
 		} else {
 			setTimeout(function() {
-				var hash_value = window.location.hash;
+//				var hash_value = window.location.hash;
 				window.location.hash = UI.currentSegmentId;
 			}, 300);
 		}
-		var file = this.currentFile;
+//		var file = this.currentFile;
 		if (this.readonly)
 			return;
 		APP.doRequest({
@@ -1127,6 +1255,10 @@ UI = {
 				password: config.password,
 				id_segment: id_segment,
 				id_job: config.job_id
+			},
+			context: reqArguments,
+			error: function() {
+				UI.failedConnection(this, 'setCurrentSegment');
 			},
 			success: function(d) {
 				UI.setCurrentSegment_success(d);
@@ -1142,12 +1274,19 @@ UI = {
 	},
 	setDownloadStatus: function(stats) {
 		var t = 'approved';
-		if (parseFloat(stats.TRANSLATED))
-			t = 'translated';
-		if (parseFloat(stats.DRAFT))
-			t = 'draft';
-		if (parseFloat(stats.REJECTED))
-			t = 'draft';
+        var app = parseFloat(stats.APPROVED);
+        var tra = parseFloat(stats.TRANSLATED);
+        var dra = parseFloat(stats.DRAFT);
+        var rej = parseFloat(stats.REJECTED);
+        if (tra)
+            t = 'translated';
+        if (dra)
+            t = 'draft';
+        if (rej)
+            t = 'draft';
+        if( !tra && !dra && !rej && !app ){
+            t = 'draft';
+        }
 		$('.downloadtr-button').removeClass("draft translated approved").addClass(t);
 		var label = (t == 'translated') ? 'DOWNLOAD TRANSLATION' : 'PREVIEW';
 		$('#downloadProject').attr('value', label);
@@ -1155,8 +1294,15 @@ UI = {
 	setProgress: function(stats) {
 		var s = stats;
 		m = $('footer .meter');
-		var status = 'approved';
-		var total = s.TOTAL;
+        if( !s.ANALYSIS_COMPLETE ){
+            $('#statistics' ).hide();
+            $('#analyzing' ).show();
+        } else {
+            $('#statistics' ).show();
+            $('#analyzing' ).hide();
+        }
+//		var status = 'approved';
+//		var total = s.TOTAL;
 		var t_perc = s.TRANSLATED_PERC;
 		var a_perc = s.APPROVED_PERC;
 		var d_perc = s.DRAFT_PERC;
@@ -1167,8 +1313,8 @@ UI = {
 		var d_perc_formatted = s.DRAFT_PERC_FORMATTED;
 		var r_perc_formatted = s.REJECTED_PERC_FORMATTED;
 
-		var d_formatted = s.DRAFT_FORMATTED;
-		var r_formatted = s.REJECTED_FORMATTED;
+//		var d_formatted = s.DRAFT_FORMATTED;
+//		var r_formatted = s.REJECTED_FORMATTED;
 		var t_formatted = s.TODO_FORMATTED;
 
 		var wph = s.WORDS_PER_HOUR;
@@ -1199,7 +1345,9 @@ UI = {
 		$('#stat-todo strong').html(t_formatted);
 		$('#stat-wph strong').html(wph);
 		$('#stat-completion strong').html(completion);
-	},
+        $('#total-payable').html(s.TOTAL_FORMATTED);
+
+    },
 	chunkedSegmentsLoaded: function() {
 		return $('section.readonly').length;
 	},
@@ -1224,7 +1372,6 @@ UI = {
 		var statusSwitcher = $(".status", segment);
 		statusSwitcher.removeClass("col-approved col-rejected col-done col-draft");
 
-		var statusToGo = (isTranslatedButton) ? 'untranslated' : '';
 		var nextUntranslatedSegment = $('#segment-' + this.nextUntranslatedSegmentId);
 		this.nextUntranslatedSegment = nextUntranslatedSegment;
 		if ((!isTranslatedButton) && (!nextUntranslatedSegment.length)) {
@@ -1247,9 +1394,64 @@ UI = {
 		location.href = $('#point2seg').attr('href');
 	},
 	continueDownload: function() {
-		$("form#fileDownload").unbind().submit().bind('submit', function(e) {
-			e.preventDefault();
-		});
+
+        //check if we are in download status
+        if ( !$('#downloadProject').hasClass('disabled') ) {
+
+            //disable download button
+            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING...');
+
+            //create an iFrame element
+            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
+                id:'iframeDownload',
+                src: ''
+            });
+
+            //append iFrame to the DOM
+            $("body").append( iFrameDownload );
+
+            //generate a token download
+            var downloadToken = new Date().getTime();
+
+            //set event listner, on ready, attach an interval that check for finished download
+            iFrameDownload.ready(function () {
+
+                //create a GLOBAL setInterval so in anonymous function it can be disabled
+                downloadTimer = window.setInterval(function () {
+
+                    //check for cookie
+                    var token = $.cookie('downloadToken');
+
+                    //if the cookie is found, download is completed
+                    //remove iframe an re-enable download button
+                    if ( token == downloadToken ) {
+                        $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
+                        window.clearInterval( downloadTimer );
+                        $.cookie('downloadToken', null, { path: '/', expires: -1 });
+                        iFrameDownload.remove();
+                    }
+
+                }, 2000);
+
+            });
+
+            //clone the html form and append a token for download
+            var iFrameForm = $("#fileDownload").clone().append(
+                $( document.createElement( 'input' ) ).prop({
+                    type:'hidden',
+                    name:'downloadToken',
+                    value: downloadToken
+                })
+            );
+
+            //append from to newly created iFrame and submit form post
+            iFrameDownload.contents().find('body').append( iFrameForm );
+            iFrameDownload.contents().find("#fileDownload").submit();
+
+        } else {
+            //we are in download status
+        }
+
 	},
 	/**
 	 * fill segments with relative errors from polling
@@ -1261,7 +1463,7 @@ UI = {
 	setNextWarnedSegment: function(sid) {
 		sid = sid || UI.currentSegmentId;
 		idList = UI.globalWarnings;
-		$.each(idList, function(index) {
+		$.each(idList, function() {
 			if (this > sid) {
 				$('#point2seg').attr('href', '#' + this);
 				return false;
@@ -1319,6 +1521,11 @@ UI = {
 		});
 		return i1;
 	},
+	startWarning: function() {
+		setTimeout(function() {
+			UI.checkWarnings(false);
+		}, config.warningPollingInterval);		
+	},
 
 	checkWarnings: function(openingSegment) {
 		var dd = new Date();
@@ -1333,16 +1540,19 @@ UI = {
 				password: config.password,
 				token: token
 			},
+			error: function() {
+				UI.warningStopped = true;
+				UI.failedConnection(0, 'getWarning');
+			},
 			success: function(data) {
+				UI.startWarning();
 				var warningPosition = '';
-//                console.log('data.total: '+data.total);
 				UI.globalWarnings = data.details;
 
 				//check for errors
 				if (UI.globalWarnings.length > 0) {
 					//for now, put only last in the pointer to segment id
 					warningPosition = '#' + data.details[ Object.keys(data.details).sort().shift() ].id_segment;
-//                    console.log('warningPosition: ' + warningPosition);
 
 					if (openingSegment)
 						UI.fillCurrentSegmentWarnings(data.details, true);
@@ -1358,7 +1568,8 @@ UI = {
 				}
 
 				UI.setNextWarnedSegment();
-//                $('#point2seg').attr('href', warningPosition);
+
+				//                $('#point2seg').attr('href', warningPosition);
 			}
 		});
 	},
@@ -1370,13 +1581,13 @@ UI = {
 
 		//var src_content = $('.source', this.currentSegment).attr('data-original');
 
-        if( config.brPlaceholdEnabled ){
-            src_content = this.postProcessEditarea(this.currentSegment, '.source');
-            trg_content = this.postProcessEditarea(this.currentSegment);
-        } else {
-            src_content = this.getSegmentSource();
-            trg_content = this.getSegmentTarget();
-        }
+		if( config.brPlaceholdEnabled ){
+			src_content = this.postProcessEditarea(this.currentSegment, '.source');
+			trg_content = this.postProcessEditarea(this.currentSegment);
+		} else {
+			src_content = this.getSegmentSource();
+			trg_content = this.getSegmentTarget();
+		}
 
 		this.checkSegmentsArray[token] = trg_content;
 		APP.doRequest({
@@ -1388,15 +1599,19 @@ UI = {
 				src_content: src_content,
 				trg_content: trg_content
 			},
+			error: function() {
+				UI.failedConnection(0, 'getWarning');
+			},
 			success: function(d) {
 				if (UI.currentSegment.hasClass('waiting_for_check_result')) {
+
 					// check conditions for results discard
 					if (!d.total) {
 						$('p.warnings', UI.currentSegment).empty();
 						$('span.locked.mismatch', UI.currentSegment).removeClass('mismatch');
 						return;
 					}
-					if (UI.editarea.text().trim() != UI.checkSegmentsArray[d.token].trim())
+					if (UI.editarea.text().trim() != UI.checkSegmentsArray[d.token].trim().replace(config.crlfPlaceholderRegex, ''))
 						return;
 
 					UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
@@ -1407,21 +1622,18 @@ UI = {
 			}
 		}, 'local');
 	},
-	setTranslation: function(segment, status, caller) {
+	setTranslation: function(id_segment, status, caller) {
+		reqArguments = arguments;
+		segment = $('#segment-' + id_segment); 
 		caller = (typeof caller == 'undefined') ? false : caller;
-//		console.log('SET TRANSLATION');
-		var info = $(segment).attr('id').split('-');
-		var id_segment = info[1];
 		var file = $(segment).parents('article');
-//		var status = status;
 
 		// Attention, to be modified when we will lock tags
 		if( config.brPlaceholdEnabled ) {
-			console.log('s');
-            translation = this.postProcessEditarea(segment);
-        } else {
-            translation = $('.editarea', segment ).text();
-        }
+			translation = this.postProcessEditarea(segment);
+		} else {
+			translation = $('.editarea', segment ).text();
+		}
 
 		if (translation === '')
 			return false;
@@ -1443,7 +1655,6 @@ UI = {
 //		}
 		autosave = (caller == 'autosave') ? true : false;
 
-
 		APP.doRequest({
 			data: {
 				action: 'setTranslation',
@@ -1459,11 +1670,76 @@ UI = {
 				chosen_suggestion_index: chosen_suggestion,
 				autosave: autosave
 			},
+			context: [reqArguments, segment, status],
+			error: function() {
+				UI.failedConnection(this[0], 'setTranslation');
+			},
 			success: function(d) {
-				UI.setTranslation_success(d, segment, status);
+				UI.setTranslation_success(d, this[1], this[2]);
 			}
 		});
 	},
+	failedConnection: function(reqArguments, operation) {
+		if(operation != 'getWarning') {
+			var pendingConnection = {
+				operation: operation,
+				args: reqArguments
+			};
+			UI.abortedOperations.push(pendingConnection);
+		}
+		if(!$('.noConnection').length) {
+			UI.body.append('<div class="noConnection"></div><div class="noConnectionMsg">No connection available.<br /><span class="reconnect">Trying to reconnect in <span class="countdown">30 seconds</span>.</span><br /><br /><input type="button" id="checkConnection" value="Try to reconnect now" /></div>');
+			$(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
+		}
+	},
+	checkConnection: function() {
+		APP.doRequest({
+			data: {
+				action: 'ajaxUtils',
+				exec: 'ping'
+			},
+			error: function(d) {
+				console.log('error on checking connection');
+				$(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">30 seconds</span>.');
+				$(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
+			},
+			success: function(d) {
+				console.log('connection is back');
+				UI.connectionIsBack();
+			}
+		});
+	},
+	connectionIsBack: function() {
+		this.execAbortedOperations();
+		$('.noConnectionMsg').text('The connection is back. Your last, interrupted operation has now been done.');
+		setTimeout(function() {
+			$('.noConnection').addClass('reConnection');
+			setTimeout(function() {
+				$('.noConnection, .noConnectionMsg').remove();
+			}, 500);		
+		}, 3000);	
+
+	},
+	execAbortedOperations: function() {
+		$.each(UI.abortedOperations, function() {
+			args = this.args;
+			operation = this.operation;
+			if(operation == 'setTranslation') {
+				UI[operation](args[0], args[1], args[2]);
+			} else if(operation == 'updateContribution') {
+				UI[operation](args[0], args[1]);
+			} else if(operation == 'setContributionMT') {
+				UI[operation](args[0], args[1], args[2]);
+			} else if(operation == 'setCurrentSegment') {
+				UI[operation](args[0], args[1], args[2]);
+			} else if(operation == 'getSegments') {
+				UI.reloadWarning();
+			}
+		});
+		UI.abortedOperations = [];
+	},
+
+	
     /**
      * This function is used when a string has to be sent to the server
      * It works over a clone of the editarea ( translation area ) and manage the text()
@@ -1519,7 +1795,12 @@ UI = {
 				$(this).prepend( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
 			});
 		} else {
-			$(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>') );
+//			console.log('post process 1: ', $(area).html());
+//			console.log($(area).find( 'br:not([class])' ).length);
+//			$(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>') );
+			$(area).find('br:not([class]), br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
+//			$(area).find( 'br:not([class])' ).replaceWith( $('[BR]') );
+//			console.log('post process 2: ', $(area).html());
 		}
 
 //        Now commented, but valid for future purposes when the user will choose what type of carriage return
@@ -1578,7 +1859,7 @@ UI = {
 			}
 
 			if (operation == 'setContribution' && this.code != '-10') { // is not a password error
-				APP.alert({msg: "Error in saving the translation memory.<br />Try the to save again the segment.<br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
+				APP.alert({msg: "Error in saving the translation memory.<br />Try to save again the segment.<br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
 			}
 
 			if (this.code == '-10') {
@@ -1742,7 +2023,7 @@ UI = {
 		this.currentSegment.removeClass('waiting_for_check_result');
 		this.registerQACheck();
 	},
-	saveInUndoStack: function(action) {
+	saveInUndoStack: function() {
 		currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
 		if (typeof currentItem != 'undefined') {
@@ -1776,12 +2057,32 @@ UI = {
 	},
 	updateJobMenu: function() {
 		$('#jobMenu li.current').removeClass('current');
-		$('#jobMenu li:not(.currSegment)').each(function(index) {
+		$('#jobMenu li:not(.currSegment)').each(function() {
 			if ($(this).attr('data-file') == UI.currentFileId)
 				$(this).addClass('current');
 		});
 		$('#jobMenu li.currSegment').attr('data-segment', UI.currentSegmentId);
 	},
+//	beforeExit: function() {
+//		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
+//		var leave_message = 'You are sure that you want to leave?'
+//		if(dont_confirm_leave!==1) {
+//			if(!e) e = window.event;
+//			//e.cancelBubble is supported by IE - this will kill the bubbling process.
+//			e.cancelBubble = true;
+//			e.returnValue = leave_message;
+//			//e.stopPropagation works in Firefox.
+//			if (e.stopPropagation) 
+//			{
+//				e.stopPropagation();
+//				e.preventDefault();
+//			}
+//
+//			//return works for Chrome and Safari
+//			return leave_message;
+//		}		
+//	},
+
 	zerofill: function(i, l, s) {
 		var o = i.toString();
 		if (!s) {
@@ -1808,13 +2109,13 @@ $(document).ready(function() {
 	//launch segments check on opening
 	UI.checkWarnings(true);
 	//and on every polling interval
-	setInterval(function() {
-		UI.checkWarnings(false);
-	}, config.warningPollingInterval);
+//	setInterval(function() {
+//		UI.checkWarnings(false);
+//	}, config.warningPollingInterval);
 });
 
 $.extend($.expr[":"], {
-	"containsNC": function(elem, i, match, array) {
+	"containsNC": function(elem, i, match) {
 		return (elem.textContent || elem.innerText || "").toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
 	}
 });

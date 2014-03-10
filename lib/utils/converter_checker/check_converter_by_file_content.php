@@ -62,7 +62,7 @@ class ConvertersMonitor {
         require_once INIT::$UTILS_ROOT . "/Log.php";
         require_once INIT::$UTILS_ROOT . "/Utils.php";
         require_once INIT::$MODEL_ROOT . '/Database.class.php';
-        require_once INIT::$UTILS_ROOT . "/fileFormatConverter.class.php";
+        require_once INIT::$UTILS_ROOT . "/FileFormatConverter.php";
 
         $this->db = Database::obtain( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
         $this->db->connect();
@@ -101,7 +101,7 @@ class ConvertersMonitor {
 
         }
 
-        $this->converterFactory = new fileFormatConverter();
+        $this->converterFactory = new FileFormatConverter();
 
     }
 

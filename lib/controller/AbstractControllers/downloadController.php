@@ -14,6 +14,15 @@ abstract class downloadController extends controller {
 
     public function finalize() {
         try {
+
+            if( isset( $this->downloadToken ) && !empty( $this->downloadToken )){
+                setcookie(
+                    'downloadToken',
+                    $this->downloadToken,
+                    2147483647            // expires January 1, 2038
+                );
+            }
+
             $buffer = ob_get_contents();
             ob_get_clean();
             ob_start("ob_gzhandler");  // compress page before sending
@@ -23,6 +32,7 @@ abstract class downloadController extends controller {
             header("Content-Type: application/download");
             header("Content-Disposition: attachment; filename=\"$this->filename\""); // enclose file name in double quotes in order to avoid duplicate header error. Reference https://github.com/prior/prawnto/pull/16
             header("Expires: 0");
+            header("Connection: close");
             echo $this->content;
             exit;
         } catch (Exception $e) {

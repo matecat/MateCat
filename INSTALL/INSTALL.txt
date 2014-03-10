@@ -2,7 +2,7 @@ INSTALL.TXT
 ===========
 
 Server side requirements
-- Apache 2 + MySql (version >= 5.1) + PHP 5 (version >= 5.2)
+- Apache 2 + MySql (version >= 5.1) + PHP 5 (version >= 5.2) + PHP 5 CLI (version >= 5.2)
 - Apache htaccess enabled
 - Apache rewrite module installed
 - Apache filter  module installed
@@ -45,7 +45,7 @@ Instructions (based on a Debian distro)
     a2enmod filter
     a2enmod deflate
     a2enmod headers
-6) create a virtualost in /etc/apache2/sites-available
+6) create a virtualost in /etc/apache2/sites-available named matecat.conf
     <VirtualHost @your_ip_address@:@port@>
         ServerName matecat.@your domain@
         ServerAdmin webmaster@translated.net
@@ -77,8 +77,12 @@ Instructions (based on a Debian distro)
         ServerSignature Off
     </VirtualHost>
 
-7) set php magic quotes off
-	edit /etc/php5/apache2/php.ini --- >magic_quotes_runtime = Off
-8) restart apache
+7) enable the new virtualhost
+    a2enmod matecat.conf
+8) set php magic quotes off
+	edit /etc/php5/apache2/php.ini ---> magic_quotes_runtime = Off
+9) restart apache
     apache2ctl restart
+10) enable pcntl in php5 CLI php.ini by removing pcntl functions from
+    disable_functions in /etc/php5/cli/php.ini
 

@@ -4,6 +4,7 @@ include "main.php";
 include INIT::$UTILS_ROOT . "/engines/mt.class.php";
 include INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include INIT::$UTILS_ROOT . "/QA.php";
+include INIT::$UTILS_ROOT . "/PostProcess.php";
 
 define("PID_FOLDER", ".pidlist");
 define("NUM_PROCESSES", 1);
@@ -211,7 +212,7 @@ while (1) {
         $tm_match_type = "MT";
     }
 
-    /* New Feature */
+    /* New Feature only if this is not a MT and if it is a ( 90 =< MATCH < 100 ) try to realign tag ID*/
     ( isset($matches[ 0 ]['match']) ? $firstMatchVal = floatval( $matches[ 0 ]['match'] ) : null );
     if( isset( $firstMatchVal ) && $firstMatchVal >= 90 && $firstMatchVal < 100 ){
 
@@ -248,6 +249,7 @@ while (1) {
         }
 
     }
+    /* New Feature only if this is not a MT and if it is a ( 90 =< MATCH < 100 ) try to realign tag ID*/
 
     $suggestion = CatUtils::view2rawxliff($matches[0]['raw_translation']);
 
@@ -263,24 +265,42 @@ while (1) {
     $eq_words = $equivalentWordMapping[$new_match_type] * $raw_wc / 100;
     $standard_words = $eq_words;
 
+    //if the first match is MT perform QA realignment
     if ($new_match_type == 'MT') {
+
         $standard_words = $equivalentWordMapping["NO_MATCH"] * $raw_wc / 100;
+
+        $check = new PostProcess( $matches[0]['raw_segment'], $suggestion );
+        $check->realignMTSpaces();
+
+        //this should every time be ok because MT preserve tags, but we use the check on the errors
+        //for logic correctness
+        if( !$check->thereAreErrors() ){
+            $suggestion = CatUtils::view2rawxliff( $check->getTrgNormalized() );
+            $err_json = '';
+        } else {
+            $err_json = $check->getErrorsJSON();
+        }
+
+    } else {
+
+        //try to perform only the tagCheck
+        $check = new PostProcess( $text, $suggestion );
+        $check->performTagCheckOnly();
+
+        log::doLog( $check->getErrors() );
+
+        if( $check->thereAreErrors() ){
+            $err_json = $check->getErrorsJSON();
+        } else {
+            $err_json = '';
+        }
+
     }
 
     ( !empty( $matches[0]['sentence_confidence'] ) ? $mt_qe = floatval( $matches[0]['sentence_confidence'] ) : $mt_qe = null );
 
-    $check = new QA( $text, $suggestion );
-    $check->performTagCheckOnly();
-
-    //log::doLog($check->getErrors(true));
-
     echo "--- (child $my_pid) : sid=$sid --- \$tm_match_type=$tm_match_type, \$fast_match_type=$fast_match_type, \$new_match_type=$new_match_type, \$equivalentWordMapping[\$new_match_type]=" . $equivalentWordMapping[$new_match_type] . ", \$raw_wc=$raw_wc,\$standard_words=$standard_words,\$eq_words=$eq_words\n";
-
-    if( $check->thereAreErrors() ){
-        $err_json = $check->getErrorsJSON();
-    } else {
-        $err_json = '';
-    }
 
     $ret = CatUtils::addTranslationSuggestion($sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json, $mt_qe );
     //unlock segment
@@ -298,20 +318,32 @@ function tryToCloseProject( $pid ){
 
     global $my_pid;
 
-    $segs_in_project = countSegments($pid);
-    if ($segs_in_project < 0) {
+    $_analyzed_report = getProjectSegmentsTranslationSummary($pid);
+
+    $project_totals = array_pop($_analyzed_report); //remove rollup
+
+    echo "--- (child $my_pid) : count segments in project $pid = " . $project_totals['project_segments'] . "\n";
+
+    if ( is_numeric( $_analyzed_report ) && $_analyzed_report < 0) {
         echo "--- (child $my_pid) : WARNING !!! error while counting segments in projects $pid skipping and continue \n";
         return;
     }
-    echo "--- (child $my_pid) : count segments in project $pid = $segs_in_project\n";
-    $analyzed_report = countSegmentsTranslationAnalyzed($pid);
-    $segs_analyzed = $analyzed_report['num_analyzed'];
-    $pid_eq_words = $analyzed_report['eq_wc'];
-    $pid_standard_words = $analyzed_report['st_wc'];
-    if ($segs_in_project - $segs_analyzed == 0) {
+
+    if ( $project_totals['project_segments'] - $project_totals['num_analyzed'] == 0 ) {
+
+        $pid_eq_words = $project_totals['eq_wc'];
+        $pid_standard_words = $project_totals['st_wc'];
+
         echo "--- (child $my_pid) : analysis project $pid finished : change status to DONE\n";
         $change_res = changeProjectStatus($pid, "DONE");
         $tm_wc_res = changeTmWc($pid, $pid_eq_words, $pid_standard_words);
+
+        echo "--- (child $my_pid) : trying to initialize job total word count.\n";
+        foreach( $_analyzed_report as $job_info ){
+            $counter = new WordCount_Counter();
+            $counter->initializeJobWordCount( $job_info['id_job'], $job_info['password'] );
+        }
+
     }
     echo "\n\n";
 

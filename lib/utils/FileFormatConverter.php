@@ -6,7 +6,7 @@ define ("BOM","\xEF\xBB\xBF");
 include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 
-class fileFormatConverter {
+class FileFormatConverter {
 
 	private $ip; //current converter chosen for this job
 	private $port = "8732"; //port the convertrs listen to

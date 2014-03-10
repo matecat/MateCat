@@ -35,7 +35,7 @@ class PHPTAL_Dom_PHPTALDocumentBuilder extends PHPTAL_Dom_DocumentBuilder
         return $this->documentElement;
     }
 
-    protected function getXmlnsState()
+    public function getXmlnsState()
     {
         return $this->_xmlns;
     }

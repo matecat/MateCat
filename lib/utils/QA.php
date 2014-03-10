@@ -13,7 +13,7 @@ class errObject {
     public $outcome;
     public $debug;
 
-    private $orig_debug;
+    protected $orig_debug;
 
     /**
      * Output externally the original debug string, needed for occurrence count
@@ -392,7 +392,7 @@ class QA {
      * )
      * </pre>
      *
-     * @param errObject[] $list
+     * @param $list errObject[]
      * @param bool $count
      * @return errObject[]
      */
@@ -718,6 +718,7 @@ class QA {
                     'id'        => $elementID,
                     'parent_id' => $parentID,
                     'node_idx'  => $i,
+                    'innerHTML' => $element->ownerDocument->saveXML( $element )
                 );
 
                 //set depth and increment for next occurrence
@@ -776,7 +777,7 @@ class QA {
     protected function _loadDom( $xmlString, $targetErrorType ){
         libxml_use_internal_errors(true);
         $dom = new DOMDocument('1.0', 'utf-8');
-        $trg_xml_valid = @$dom->loadXML("<root>$xmlString</root>", LIBXML_NOBLANKS | LIBXML_NOENT );
+        $trg_xml_valid = @$dom->loadXML("<root>$xmlString</root>", LIBXML_NOENT );
         if ($trg_xml_valid === FALSE) {
 
             $rrorList = libxml_get_errors();
@@ -1007,7 +1008,7 @@ class QA {
             //$this->_addError(self::ERR_BOUNDARY_TAIL);
 
         } else {
-            $this->target_seg = preg_replace( '#[\s\t\r\n]+$#u', "", $this->target_seg );
+            $this->target_seg = rtrim( $this->target_seg );
         }
 
         $this->trgDom = $this->_loadDom( $this->target_seg, self::ERR_TARGET );
@@ -1438,6 +1439,13 @@ class QA {
             //IMPORTANT NOTE :
             //SEE http://www.php.net/manual/en/domdocument.savexml.php#88525
             preg_match('/<root>(.*)<\/root>/us', $this->normalizedTrgDOM->saveXML($this->normalizedTrgDOM->documentElement), $matches );
+
+//            try {
+//                throw new Exception();
+//            } catch ( Exception $e ){
+//                Log::doLog( "\n" . $this->trgDom->saveXML() );
+//                Log::doLog( $e->getTraceAsString() . "\n\n");
+//            }
 
             /**
             * Why i do this?? I'm replacing Placeholders of non printable chars
