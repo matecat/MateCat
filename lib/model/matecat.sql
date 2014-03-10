@@ -1,30 +1,20 @@
-CREATE DATABASE  IF NOT EXISTS `matecat` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `matecat`;
--- MySQL dump 10.13  Distrib 5.5.35, for debian-linux-gnu (x86_64)
---
--- Host: 10.30.1.241    Database: matecat
--- ------------------------------------------------------
--- Server version	5.5.31-0+wheezy1-log
+-- Database: `matecat`
+-- 
 
-/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
-/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
-/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
-/*!40101 SET NAMES utf8 */;
-/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
-/*!40103 SET TIME_ZONE='+00:00' */;
-/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
-/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
-/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
-/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+SET SESSION sql_mode='NO_AUTO_VALUE_ON_ZERO';
 
---
+DROP DATABASE `matecat`;
+CREATE DATABASE `matecat` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
+USE matecat;
+
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `converters`
---
+-- 
 
 DROP TABLE IF EXISTS `converters`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `converters` (
+CREATE TABLE IF NOT EXISTS `converters` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ip_converter` varchar(45) NOT NULL,
   `ip_storage` varchar(45) NOT NULL,
@@ -43,17 +33,16 @@ CREATE TABLE `converters` (
   KEY `status_active` (`status_active`),
   KEY `status_offline` (`status_offline`),
   KEY `status_reboot` (`status_reboot`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
 
---
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `converters_log`
---
+-- 
 
 DROP TABLE IF EXISTS `converters_log`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `converters_log` (
+CREATE TABLE IF NOT EXISTS `converters_log` (
   `id_log` int(11) NOT NULL AUTO_INCREMENT,
   `id_converter` int(11) NOT NULL,
   `check_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -62,17 +51,16 @@ CREATE TABLE `converters_log` (
   KEY `timestamp_idx` (`check_time`),
   KEY `outcome_idx` (`test_passed`),
   KEY `id_converter_idx` (`id_converter`)
-) ENGINE=MyISAM AUTO_INCREMENT=242981 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=MyISAM AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
 
---
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `engines`
---
+-- 
 
 DROP TABLE IF EXISTS `engines`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `engines` (
+CREATE TABLE IF NOT EXISTS `engines` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(200) DEFAULT 'no_name_engine',
   `type` varchar(45) NOT NULL DEFAULT 'MT',
@@ -95,24 +83,22 @@ CREATE TABLE `engines` (
   FULLTEXT KEY `name` (`name`),
   FULLTEXT KEY `description` (`description`),
   FULLTEXT KEY `base_url` (`base_url`)
-) ENGINE=MyISAM AUTO_INCREMENT=30 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 AUTO_INCREMENT=7 ;
 
 LOCK TABLES `engines` WRITE;
 /*!40000 ALTER TABLE `engines` DISABLE KEYS */;
 INSERT INTO `engines` VALUES (0,'NONE - PLACEHOLDER','NONE','No MT','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,100,1),(1,'MyMemory (All Pairs)','TM','MyMemory: next generation Translation Memory technology','http://api-proxied.mymemory.translated.net','get','set','delete','glossary/get','glossary/set','glossary/update','glossary/delete',NULL,'1',0,1),(2,'FBK Legal (EN->IT) - Ad.','MT','FBK (EN->IT) Moses Legal engine','http://hlt-services2.fbk.eu:8888','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(3,'LIUM-IT (EN->DE)','MT','Lium (EN->FR) Moses Information Technology engine','http://193.52.29.52:8001','translate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(4,'FBK Legal (EN>FR) - Ad.','MT','FBK (EN->FR) Moses Legal engine','http://hlt-services2.fbk.eu:8988','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(5,'LIUM-LEGAL (EN->DE)','MT','Lium (EN->FR) Moses Legal engine','http://193.52.29.52:8002','translate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,14,1),(6,'FBK TED (IT>EN)','MT','FBK (IT->EN) Moses Information Technology engine','http://hlt-services2.fbk.eu:8788','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1);
 /*!40000 ALTER TABLE `engines` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
---
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `file_references`
---
+-- 
 
 DROP TABLE IF EXISTS `file_references`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `file_references` (
+CREATE TABLE IF NOT EXISTS `file_references` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_project` bigint(20) NOT NULL,
   `id_file` bigint(20) NOT NULL,
@@ -121,17 +107,16 @@ CREATE TABLE `file_references` (
   `serialized_reference_binaries` longblob,
   PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
 
---
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `files`
---
+-- 
 
 DROP TABLE IF EXISTS `files`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `files` (
+CREATE TABLE IF NOT EXISTS `files` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_project` int(11) NOT NULL,
   `filename` varchar(255) DEFAULT NULL,
@@ -144,17 +129,16 @@ CREATE TABLE `files` (
   KEY `id_project` (`id_project`),
   KEY `sha1` (`sha1_original_file`) USING HASH,
   KEY `filename` (`filename`)
-) ENGINE=MyISAM AUTO_INCREMENT=16403 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=MyISAM AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
 
---
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `files_job`
---
+-- 
 
 DROP TABLE IF EXISTS `files_job`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `files_job` (
+CREATE TABLE IF NOT EXISTS `files_job` (
   `id_job` int(11) NOT NULL,
   `id_file` int(11) NOT NULL,
   `assign_date` datetime DEFAULT NULL,
@@ -166,16 +150,15 @@ CREATE TABLE `files_job` (
   PRIMARY KEY (`id_job`,`id_file`),
   KEY `id_file` (`id_file`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `jobs`
---
+-- 
 
 DROP TABLE IF EXISTS `jobs`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `jobs` (
+CREATE TABLE IF NOT EXISTS `jobs` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `password` varchar(45) NOT NULL,
   `id_project` int(11) NOT NULL,
@@ -198,6 +181,11 @@ CREATE TABLE `jobs` (
   `status_translator` varchar(100) DEFAULT NULL,
   `status` varchar(15) NOT NULL DEFAULT 'active',
   `completed` bit(1) NOT NULL DEFAULT b'0',
+  `new_words` float(10,2) NOT NULL DEFAULT '0.00',
+  `draft_words` float(10,2) NOT NULL DEFAULT '0.00',
+  `translated_words` float(10,2) NOT NULL DEFAULT '0.00',
+  `approved_words` float(10,2) NOT NULL DEFAULT '0.00',
+  `rejected_words` float(10,2) NOT NULL DEFAULT '0.00',
   UNIQUE KEY `primary_id_pass` (`id`,`password`),
   KEY `id_job_to_revise` (`id_job_to_revise`),
   KEY `id_project` (`id_project`) USING BTREE,
@@ -206,17 +194,16 @@ CREATE TABLE `jobs` (
   KEY `first_last_segment_idx` (`job_first_segment`,`job_last_segment`),
   KEY `id` (`id`) USING BTREE,
   KEY `password` (`password`)
-) ENGINE=MyISAM AUTO_INCREMENT=13702 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=MyISAM AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
 
---
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `notifications`
---
+-- 
 
 DROP TABLE IF EXISTS `notifications`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `notifications` (
+CREATE TABLE IF NOT EXISTS `notifications` (
   `id` int(11) NOT NULL,
   `id_comment` int(11) NOT NULL,
   `id_translator` varchar(100) CHARACTER SET latin1 NOT NULL,
@@ -224,16 +211,15 @@ CREATE TABLE `notifications` (
   PRIMARY KEY (`id`),
   KEY `id_comment` (`id_comment`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `original_files_map`
---
+-- 
 
 DROP TABLE IF EXISTS `original_files_map`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `original_files_map` (
+CREATE TABLE IF NOT EXISTS `original_files_map` (
   `sha1` varchar(100) NOT NULL,
   `source` varchar(50) NOT NULL,
   `target` varchar(50) NOT NULL,
@@ -242,16 +228,15 @@ CREATE TABLE `original_files_map` (
   `creation_date` date DEFAULT NULL,
   PRIMARY KEY (`sha1`,`source`,`target`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `projects`
---
+-- 
 
 DROP TABLE IF EXISTS `projects`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `projects` (
+CREATE TABLE IF NOT EXISTS `projects` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `password` varchar(45) DEFAULT NULL,
   `id_customer` varchar(45) NOT NULL,
@@ -269,17 +254,16 @@ CREATE TABLE `projects` (
   KEY `id_customer` (`id_customer`),
   KEY `status_analysis` (`status_analysis`),
   KEY `for_debug` (`for_debug`)
-) ENGINE=MyISAM AUTO_INCREMENT=11675 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=MyISAM AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
 
---
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `segment_translations`
---
+-- 
 
 DROP TABLE IF EXISTS `segment_translations`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `segment_translations` (
+CREATE TABLE IF NOT EXISTS `segment_translations` (
   `id_segment` bigint(20) NOT NULL,
   `id_job` bigint(20) NOT NULL,
   `status` varchar(45) DEFAULT 'NEW',
@@ -309,16 +293,15 @@ CREATE TABLE `segment_translations` (
   KEY `id_segment` (`id_segment`) USING BTREE,
   KEY `warning` (`warning`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `segment_translations_analysis_queue`
---
+-- 
 
 DROP TABLE IF EXISTS `segment_translations_analysis_queue`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `segment_translations_analysis_queue` (
+CREATE TABLE IF NOT EXISTS `segment_translations_analysis_queue` (
   `id_segment` int(11) NOT NULL,
   `id_job` int(11) NOT NULL,
   `locked` int(11) DEFAULT '0',
@@ -327,16 +310,15 @@ CREATE TABLE `segment_translations_analysis_queue` (
   PRIMARY KEY (`id_segment`,`id_job`),
   KEY `locked` (`locked`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `segments`
---
+-- 
 
 DROP TABLE IF EXISTS `segments`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `segments` (
+CREATE TABLE IF NOT EXISTS `segments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_file` bigint(20) NOT NULL,
   `id_file_part` bigint(20) DEFAULT NULL,
@@ -357,17 +339,16 @@ CREATE TABLE `segments` (
   KEY `raw_word_count` (`raw_word_count`) USING BTREE,
   KEY `id_file_part_idx` (`id_file_part`),
   FULLTEXT KEY `segment` (`segment`)
-) ENGINE=MyISAM AUTO_INCREMENT=8778242 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=MyISAM AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
 
---
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `segments_comments`
---
+-- 
 
 DROP TABLE IF EXISTS `segments_comments`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `segments_comments` (
+CREATE TABLE IF NOT EXISTS `segments_comments` (
   `id` int(11) NOT NULL,
   `id_segment` int(11) NOT NULL,
   `comment` text,
@@ -376,16 +357,15 @@ CREATE TABLE `segments_comments` (
   PRIMARY KEY (`id`),
   KEY `id_segment` (`id_segment`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `translators`
---
+-- 
 
 DROP TABLE IF EXISTS `translators`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `translators` (
+CREATE TABLE IF NOT EXISTS `translators` (
   `username` varchar(100) NOT NULL,
   `email` varchar(45) DEFAULT NULL,
   `password` varchar(45) DEFAULT NULL,
@@ -395,16 +375,15 @@ CREATE TABLE `translators` (
   PRIMARY KEY (`username`),
   KEY `email` (`email`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
+-- --------------------------------------------------------
+
+-- 
 -- Table structure for table `users`
---
+-- 
 
 DROP TABLE IF EXISTS `users`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `users` (
+CREATE TABLE IF NOT EXISTS `users` (
   `email` varchar(50) NOT NULL,
   `salt` varchar(50) NOT NULL,
   `pass` varchar(50) NOT NULL,
@@ -415,15 +394,4 @@ CREATE TABLE `users` (
   PRIMARY KEY (`email`),
   KEY `api_key` (`api_key`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
-/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
-/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
-/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
-/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
-/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
-/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
-/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
-
--- Dump completed on 2014-02-11 12:06:16
