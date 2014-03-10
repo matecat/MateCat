@@ -10,7 +10,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
     $src = $db->escape( $queryParams['src'] );
     $trg = $db->escape( $queryParams['trg'] );
 
-//    Log::doLog( $queryParams );
+    Log::doLog( $queryParams );
 
     $where_status = "";
     if ( $queryParams[ 'status' ] != 'all' ) {
@@ -81,12 +81,11 @@ function doSearchQuery( ArrayObject $queryParams ) {
         $query = "SELECT st.id_segment as id
                     FROM segment_translations as st
                     WHERE st.id_job = {$queryParams['job']}
-                    AND st.status != 'NEW'
                     $where_status ";
 
     }
 
-//    Log::doLog($query);
+    Log::doLog($query);
 
     $results = $db->fetch_array( $query );
     $err     = $db->get_error();
