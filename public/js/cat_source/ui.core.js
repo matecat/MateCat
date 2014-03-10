@@ -2008,6 +2008,9 @@ UI = {
 			ind = this.undoStack.length - 1 - this.undoStackPosition - 1;
 
 		this.editarea.html(this.undoStack[ind]);
+		setCursorPosition(document.getElementsByClassName("undoCursorPlaceholder")[0]);
+		$('.undoCursorPlaceholder').remove();
+
 		if (!ind)
 			this.lockTags();
 
@@ -2024,6 +2027,7 @@ UI = {
 		this.registerQACheck();
 	},
 	saveInUndoStack: function() {
+//		noRestore = (typeof noRestore == 'undefined')? 0 : 1;
 		currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
 		if (typeof currentItem != 'undefined') {
@@ -2050,6 +2054,9 @@ UI = {
 			this.undoStack.splice(this.undoStack.length - pos, pos);
 			this.undoStackPosition = 0;
 		}
+		saveSelection();
+		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder"></span>')
+		restoreSelection();
 		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
 	},
 	clearUndoStack: function() {

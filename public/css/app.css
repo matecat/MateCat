@@ -1174,7 +1174,10 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 section:hover .sid{color:#6d6e71}		
 section.currSearchSegment .sid
 {
-	color: #0798BC;
+	background: #00c1e6;
+	color: #000;
+	padding-bottom: 5px;
+	/*color: #0798BC;*/
 }
 .editor .sid{
 	top:43px !Important;}
@@ -2223,8 +2226,9 @@ textarea, input, .editarea, .search-editarea, select  {
 .graysmall .translation
 {
     display: block;
-    padding: 4px;
-    margin-left: -4px;
+	padding-bottom: 4px;
+    /*padding: 4px;
+    margin-left: -4px;*/
 }
 .graysmall .translation.editing
 {

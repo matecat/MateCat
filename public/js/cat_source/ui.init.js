@@ -4,6 +4,7 @@
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
+		this.version = "";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 6;
@@ -62,6 +63,6 @@ $.extend(UI, {
 			this.surveyDisplayed = true;
 		}
 	},
-}); 
+});
 
 
