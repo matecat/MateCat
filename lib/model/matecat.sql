@@ -1,5 +1,8 @@
 -- Database: `matecat`
 -- 
+
+SET SESSION sql_mode='NO_AUTO_VALUE_ON_ZERO';
+
 DROP DATABASE `matecat`;
 CREATE DATABASE `matecat` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 USE matecat;
@@ -80,7 +83,7 @@ CREATE TABLE IF NOT EXISTS `engines` (
   FULLTEXT KEY `name` (`name`),
   FULLTEXT KEY `description` (`description`),
   FULLTEXT KEY `base_url` (`base_url`)
-) ENGINE=MyISAM AUTO_INCREMENT=0 DEFAULT CHARSET=utf8 AUTO_INCREMENT=0 ;
+) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 AUTO_INCREMENT=7 ;
 
 LOCK TABLES `engines` WRITE;
 /*!40000 ALTER TABLE `engines` DISABLE KEYS */;
