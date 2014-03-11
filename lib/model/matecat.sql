@@ -3,7 +3,6 @@
 
 SET SESSION sql_mode='NO_AUTO_VALUE_ON_ZERO';
 
-DROP DATABASE `matecat`;
 CREATE DATABASE `matecat` DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;
 USE matecat;
 
@@ -13,7 +12,6 @@ USE matecat;
 -- Table structure for table `converters`
 -- 
 
-DROP TABLE IF EXISTS `converters`;
 CREATE TABLE IF NOT EXISTS `converters` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ip_converter` varchar(45) NOT NULL,
@@ -41,7 +39,6 @@ CREATE TABLE IF NOT EXISTS `converters` (
 -- Table structure for table `converters_log`
 -- 
 
-DROP TABLE IF EXISTS `converters_log`;
 CREATE TABLE IF NOT EXISTS `converters_log` (
   `id_log` int(11) NOT NULL AUTO_INCREMENT,
   `id_converter` int(11) NOT NULL,
@@ -59,7 +56,6 @@ CREATE TABLE IF NOT EXISTS `converters_log` (
 -- Table structure for table `engines`
 -- 
 
-DROP TABLE IF EXISTS `engines`;
 CREATE TABLE IF NOT EXISTS `engines` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(200) DEFAULT 'no_name_engine',
@@ -73,6 +69,8 @@ CREATE TABLE IF NOT EXISTS `engines` (
   `gloss_set_relative_url` varchar(100) DEFAULT NULL,
   `gloss_update_relative_url` varchar(100) DEFAULT NULL,
   `gloss_delete_relative_url` varchar(100) DEFAULT NULL,
+  `tmx_import_relative_url` varchar(100) DEFAULT NULL,
+  `tmx_status_relative_url` varchar(100) DEFAULT NULL,
   `extra_parameters` text,
   `google_api_compliant_version` varchar(45) DEFAULT NULL COMMENT 'credo sia superfluo',
   `penalty` int(11) DEFAULT '0',
@@ -83,11 +81,18 @@ CREATE TABLE IF NOT EXISTS `engines` (
   FULLTEXT KEY `name` (`name`),
   FULLTEXT KEY `description` (`description`),
   FULLTEXT KEY `base_url` (`base_url`)
-) ENGINE=MyISAM AUTO_INCREMENT=7 DEFAULT CHARSET=utf8 AUTO_INCREMENT=7 ;
+) ENGINE=MyISAM  DEFAULT CHARSET=utf8 AUTO_INCREMENT=7 ;
 
 LOCK TABLES `engines` WRITE;
 /*!40000 ALTER TABLE `engines` DISABLE KEYS */;
-INSERT INTO `engines` VALUES (0,'NONE - PLACEHOLDER','NONE','No MT','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,100,1),(1,'MyMemory (All Pairs)','TM','MyMemory: next generation Translation Memory technology','http://api-proxied.mymemory.translated.net','get','set','delete','glossary/get','glossary/set','glossary/update','glossary/delete',NULL,'1',0,1),(2,'FBK Legal (EN->IT) - Ad.','MT','FBK (EN->IT) Moses Legal engine','http://hlt-services2.fbk.eu:8888','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(3,'LIUM-IT (EN->DE)','MT','Lium (EN->FR) Moses Information Technology engine','http://193.52.29.52:8001','translate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(4,'FBK Legal (EN>FR) - Ad.','MT','FBK (EN->FR) Moses Legal engine','http://hlt-services2.fbk.eu:8988','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(5,'LIUM-LEGAL (EN->DE)','MT','Lium (EN->FR) Moses Legal engine','http://193.52.29.52:8002','translate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,14,1),(6,'FBK TED (IT>EN)','MT','FBK (IT->EN) Moses Information Technology engine','http://hlt-services2.fbk.eu:8788','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1);
+INSERT INTO `engines` (`id`, `name`, `type`, `description`, `base_url`, `translate_relative_url`, `contribute_relative_url`, `delete_relative_url`, `gloss_get_relative_url`, `gloss_set_relative_url`, `gloss_update_relative_url`, `gloss_delete_relative_url`, `tmx_import_relative_url`, `tmx_status_relative_url`, `extra_parameters`, `google_api_compliant_version`, `penalty`, `active`) VALUES
+(0, 'NONE - PLACEHOLDER', 'NONE', 'No MT', '', '', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 100, 1),
+(1, 'MyMemory (All Pairs)', 'TM', 'MyMemory: next generation Translation Memory technology', 'http://api-proxied.mymemory.translated.net', 'get', 'set', 'delete', 'glossary/get', 'glossary/set', 'glossary/update', 'glossary/delete', 'tmx/import', 'tmx/status', NULL, '1', 0, 1),
+(2, 'FBK Legal (EN->IT) - Ad.', 'MT', 'FBK (EN->IT) Moses Legal engine', 'http://hlt-services2.fbk.eu:8888', 'translate', 'update', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2', 14, 1),
+(3, 'LIUM-IT (EN->DE)', 'MT', 'Lium (EN->FR) Moses Information Technology engine', 'http://193.52.29.52:8001', 'translate', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2', 14, 1),
+(4, 'FBK Legal (EN>FR) - Ad.', 'MT', 'FBK (EN->FR) Moses Legal engine', 'http://hlt-services2.fbk.eu:8988', 'translate', 'update', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2', 14, 1),
+(5, 'LIUM-LEGAL (EN->DE)', 'MT', 'Lium (EN->FR) Moses Legal engine', 'http://193.52.29.52:8002', 'translate', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 14, 1),
+(6, 'FBK TED (IT>EN)', 'MT', 'FBK (IT->EN) Moses Information Technology engine', 'http://hlt-services2.fbk.eu:8788', 'translate', 'update', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, '2', 14, 1);
 /*!40000 ALTER TABLE `engines` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -97,7 +102,6 @@ UNLOCK TABLES;
 -- Table structure for table `file_references`
 -- 
 
-DROP TABLE IF EXISTS `file_references`;
 CREATE TABLE IF NOT EXISTS `file_references` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_project` bigint(20) NOT NULL,
@@ -115,7 +119,6 @@ CREATE TABLE IF NOT EXISTS `file_references` (
 -- Table structure for table `files`
 -- 
 
-DROP TABLE IF EXISTS `files`;
 CREATE TABLE IF NOT EXISTS `files` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_project` int(11) NOT NULL,
@@ -137,7 +140,6 @@ CREATE TABLE IF NOT EXISTS `files` (
 -- Table structure for table `files_job`
 -- 
 
-DROP TABLE IF EXISTS `files_job`;
 CREATE TABLE IF NOT EXISTS `files_job` (
   `id_job` int(11) NOT NULL,
   `id_file` int(11) NOT NULL,
@@ -157,7 +159,6 @@ CREATE TABLE IF NOT EXISTS `files_job` (
 -- Table structure for table `jobs`
 -- 
 
-DROP TABLE IF EXISTS `jobs`;
 CREATE TABLE IF NOT EXISTS `jobs` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `password` varchar(45) NOT NULL,
@@ -202,7 +203,6 @@ CREATE TABLE IF NOT EXISTS `jobs` (
 -- Table structure for table `notifications`
 -- 
 
-DROP TABLE IF EXISTS `notifications`;
 CREATE TABLE IF NOT EXISTS `notifications` (
   `id` int(11) NOT NULL,
   `id_comment` int(11) NOT NULL,
@@ -218,7 +218,6 @@ CREATE TABLE IF NOT EXISTS `notifications` (
 -- Table structure for table `original_files_map`
 -- 
 
-DROP TABLE IF EXISTS `original_files_map`;
 CREATE TABLE IF NOT EXISTS `original_files_map` (
   `sha1` varchar(100) NOT NULL,
   `source` varchar(50) NOT NULL,
@@ -235,7 +234,6 @@ CREATE TABLE IF NOT EXISTS `original_files_map` (
 -- Table structure for table `projects`
 -- 
 
-DROP TABLE IF EXISTS `projects`;
 CREATE TABLE IF NOT EXISTS `projects` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `password` varchar(45) DEFAULT NULL,
@@ -262,7 +260,6 @@ CREATE TABLE IF NOT EXISTS `projects` (
 -- Table structure for table `segment_translations`
 -- 
 
-DROP TABLE IF EXISTS `segment_translations`;
 CREATE TABLE IF NOT EXISTS `segment_translations` (
   `id_segment` bigint(20) NOT NULL,
   `id_job` bigint(20) NOT NULL,
@@ -300,7 +297,6 @@ CREATE TABLE IF NOT EXISTS `segment_translations` (
 -- Table structure for table `segment_translations_analysis_queue`
 -- 
 
-DROP TABLE IF EXISTS `segment_translations_analysis_queue`;
 CREATE TABLE IF NOT EXISTS `segment_translations_analysis_queue` (
   `id_segment` int(11) NOT NULL,
   `id_job` int(11) NOT NULL,
@@ -317,7 +313,6 @@ CREATE TABLE IF NOT EXISTS `segment_translations_analysis_queue` (
 -- Table structure for table `segments`
 -- 
 
-DROP TABLE IF EXISTS `segments`;
 CREATE TABLE IF NOT EXISTS `segments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_file` bigint(20) NOT NULL,
@@ -347,7 +342,6 @@ CREATE TABLE IF NOT EXISTS `segments` (
 -- Table structure for table `segments_comments`
 -- 
 
-DROP TABLE IF EXISTS `segments_comments`;
 CREATE TABLE IF NOT EXISTS `segments_comments` (
   `id` int(11) NOT NULL,
   `id_segment` int(11) NOT NULL,
@@ -364,7 +358,6 @@ CREATE TABLE IF NOT EXISTS `segments_comments` (
 -- Table structure for table `translators`
 -- 
 
-DROP TABLE IF EXISTS `translators`;
 CREATE TABLE IF NOT EXISTS `translators` (
   `username` varchar(100) NOT NULL,
   `email` varchar(45) DEFAULT NULL,
@@ -382,7 +375,6 @@ CREATE TABLE IF NOT EXISTS `translators` (
 -- Table structure for table `users`
 -- 
 
-DROP TABLE IF EXISTS `users`;
 CREATE TABLE IF NOT EXISTS `users` (
   `email` varchar(50) NOT NULL,
   `salt` varchar(50) NOT NULL,

@@ -21,6 +21,9 @@ abstract class Engine {
     protected $gloss_delete_url;
     protected $gloss_update_url;
 
+    protected $tmx_import_url;
+    protected $tmx_status_url;
+
 	protected function __construct($id) {
 		$this->id = $id;
 		if ( is_null($this->id) || $this->id == '' ) {
@@ -49,26 +52,34 @@ abstract class Engine {
         $this->gloss_update_url = $data[ 'gloss_update_relative_url' ];
         $this->gloss_delete_url = $data[ 'gloss_delete_relative_url' ];
 
+        $this->tmx_import_url = $data[ 'tmx_import_relative_url' ];
+        $this->tmx_status_url = $data[ 'tmx_status_relative_url' ];
+
     }
 
-	protected function curl($url) {
+	protected function curl($url,$postfields=false) {
 		$ch = curl_init();
 
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         curl_setopt($ch, CURLOPT_USERAGENT, "user agent");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        //        curl_setopt($ch, CURLOPT_VERBOSE, true);
-        curl_setopt($ch, CURLOPT_HTTPGET, true);
 
-        curl_setopt($ch,CURLOPT_TIMEOUT,10); //we can wait max 10 seconds
+		//if some postfields are passed, switch to post mode, set parameters and prolong timeout
+		if($postfields){
+			curl_setopt($ch, CURLOPT_POST,true);
+		    curl_setopt($ch, CURLOPT_POSTFIELDS, $postfields);
+        	curl_setopt($ch,CURLOPT_TIMEOUT,120); //wait max 2 mins 
+		}else{
+	        curl_setopt($ch, CURLOPT_HTTPGET, true);
+        	curl_setopt($ch,CURLOPT_TIMEOUT,10); //we can wait max 10 seconds
+		}
+
 
         $output = curl_exec($ch);
         $curl_errno = curl_errno($ch);
         $curl_error = curl_error($ch);
-//		$info = curl_getinfo($ch);
 
-        //$curl_errno == 28 /* CURLE_OPERATION_TIMEDOUT */
         if( $curl_errno > 0 ){
             Log::doLog('Curl Error: ' . $curl_errno . " - " . $curl_error . " " . var_export( parse_url( $url ) ,true) );
             $output = json_encode( array( 'error' => array( 'code' => - $curl_errno , 'message' => " Server Not Available" ) ) ); //return negative number
@@ -76,24 +87,38 @@ abstract class Engine {
 
         // Chiude la risorsa curl
         curl_close($ch);
-        return $output;
+		return $output;
 	}
 
-	protected function doQuery($function, $parameters = array()) {
+	protected function doQuery($function, $parameters = array(),$isPost=false) {
 		$this->error = array(); // reset last error
 		if (!$this->existsFunction($function)) {
 			return false;
 		}
 
-		$this->buildQuery($function, $parameters);
-        $uniquid = uniqid('',true);
-        Log::doLog( $uniquid . " ... " . $this->url);
-		$res=$this->curl($this->url);
+		$uniquid = uniqid('',true);
+		Log::doLog( $uniquid . " ... " . $this->url);
+
+		if($isPost){
+			//compose the POST
+			$this->buildPostQuery($function);
+			$res=$this->curl($this->url, $parameters);
+		}else{
+			//compose the GET string
+			$this->buildGetQuery($function, $parameters);
+			$res=$this->curl($this->url);
+		}
+
 		$this->raw_result = json_decode($res,true);
-        Log::doLog( $uniquid . " ... Received... " . $res );
+		Log::doLog( $uniquid . " ... Received... " . $res );
 	}
 
-	private function buildQuery($function, $parameters) {
+	private function buildPostQuery($function){
+		$function = strtolower(trim($function));
+		$this->url = "$this->base_url/" . $this->{$function . "_url"};
+	}	
+
+	private function buildGetQuery($function, $parameters) {
 		$function = strtolower(trim($function));
 		$this->url = "$this->base_url/" . $this->{$function . "_url"} . "?";
 		if (is_array($this->extra_parameters) and !empty($this->extra_parameters)) {
@@ -111,7 +136,7 @@ abstract class Engine {
 			return false;
 		}
 
-        $ret = ( isset( $this->{$type . "_url"} ) and !empty( $this->{$type . "_url"} ) );
+		$ret = ( isset( $this->{$type . "_url"} ) and !empty( $this->{$type . "_url"} ) );
 		if (!$ret) {
 			$this->error['code'] = -2;
 			$this->error['description'] = "operation $type not defined for this engine";
