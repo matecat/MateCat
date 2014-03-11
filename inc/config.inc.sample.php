@@ -267,6 +267,7 @@ class INIT {
             "Interchange Formats" => array(
                 'xliff'    => array( 'default' ),
                 'sdlxliff' => array( 'default' ),
+                'tmx'    => array( '' ),
                 'ttx'      => array( '' ),
                 'itd'      => array( '' ),
                 'xlf'      => array( 'default' )

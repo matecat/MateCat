@@ -49,6 +49,9 @@ abstract class Engine {
         $this->gloss_update_url = $data[ 'gloss_update_relative_url' ];
         $this->gloss_delete_url = $data[ 'gloss_delete_relative_url' ];
 
+        $this->tmx_import_url = $data[ 'tmx_import_relative_url' ];
+        $this->tmx_status_url = $data[ 'tmx_status_relative_url' ];
+
     }
 
 	protected function curl($url) {
