@@ -428,6 +428,14 @@
             $.each(files, function (index, file) {
                 console.log('FILE: ', file);
                 file.error = that._hasError(file);
+// START Customization by Andrea Martines (Translated) 11/03/2014
+//				if(file.name.split('.')[file.name.split('.').length - 1] == 'tmx') {
+//					file.error = null;
+//					return false;
+//				}
+// END Customization by Andrea Martines (Translated) 11/03/2014
+
+                console.log('file.error: ', file.error);
                 if (file.error) {
                     valid = false;
 // START Customization by Andrea Martines (Translated) 25/03/2013

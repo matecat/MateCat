@@ -36,7 +36,7 @@ UI = {
     confirmRestartConversions: function() {
         UI.restartConversions();
     },
-    errorsBeforeUpload: function(file) {
+    errorsBeforeUpload: function(file) {console.log('errorsBeforeUpload');
 //        console.log(file);
         ext = file.name.split('.')[file.name.split('.').length - 1];
 //        console.log(ext);
@@ -60,7 +60,7 @@ UI = {
             msg = 'Error during upload. The uploaded file exceed the file size limit of ' + config.maxFileSizePrint;
         }
 		UI.checkFailedConversionsNumber();
-		
+		console.log('msg: ', msg);
         return msg;
     },
     restartConversions: function() {
@@ -150,7 +150,13 @@ $(function () {
         console.log(data.files[0].size);
         console.log(config.maxFileSize);
         console.log(data.files[0].type);
-        
+         console.log(data.files[0].name.split('.')[data.files[0].name.split('.').length - 1]);
+		 var extension = data.files[0].name.split('.')[data.files[0].name.split('.').length - 1];
+		 if(extension == 'tmx') {
+			 console.log('tmx');
+			 return false;
+		 }
+       
 //        if(!isValidFileExtension(data.files[0].name)) {
 //            alert($('.upload-table tr').length);
 //			jqXHR = data.submit();
