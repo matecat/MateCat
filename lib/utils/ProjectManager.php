@@ -8,6 +8,7 @@
  */
 include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 include_once INIT::$UTILS_ROOT . "/DetectProprietaryXliff.php";
+include_once INIT::$UTILS_ROOT . "/engines/TMSServiceFactory.class.php";
 
 class ProjectManager {
 
@@ -102,9 +103,10 @@ class ProjectManager {
 		$uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure['uploadToken'];
 		foreach ( $this->projectStructure['array_files'] as $fileName ) {
 
-			if('tmx'== pathinfo($fileName, PATHINFO_EXTENSION)){
+			if('tmx'== pathinfo($fileName, PATHINFO_EXTENSION) and !empty($this->projectStructure['private_tm_key'])){
 				//if TMX, load into provided MyMmemory key 
-				
+				$tmx_service=TMSServiceFactory::getTMXService($this->projectStructure['tms_engine']);
+				$tmx_res=$tmx_service->import("$uploadDir/$fileName",$this->projectStructure['private_tm_key']);
 				//and skip the rest of the loop
 				continue;
 			}
