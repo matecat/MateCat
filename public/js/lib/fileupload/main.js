@@ -768,6 +768,10 @@ checkAnalyzability = function(who) {
 			if(!$(this).hasClass('ready')) {
 				res = false;
 			}
+			var filename = $(this).find('.name').text();
+			if((filename.split('.')[filename.split('.').length -1].toLowerCase() == 'tmx')&&($('.upload-table tr:not(.failed)').length == 1)) {
+				res = false;				
+			};
 		})
 		if($('.upload-table tr.failed').length) res = false;
 		return res;
