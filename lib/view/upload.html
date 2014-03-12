@@ -4,7 +4,7 @@
  * jQuery File Upload Plugin Demo 6.9.1
  * https://github.com/blueimp/jQuery-File-Upload
  *
- * Copyright 2010, Sebastian Tschan
+ * Copyright 2010, Sebastian Tschant
  * https://blueimp.net
  *
  * Licensed under the MIT license:
@@ -506,10 +506,6 @@
             <span class="extxml"></span>
             {% mimeok=1} %}
 			
-			{% if (o.files[i].type == "text/tmx" || o.files[i].type == "application/tmx" || o.files[i].type == "application/x-tmx" ) { %}
-					
-            <span class="exttmx"></span>
-            {% mimeok=1} %}
 			
 			{% if (o.files[i].type == "text/html" || o.files[i].type == "application/xhtml+xml"  ) { %}
 					
@@ -564,6 +560,9 @@
             <span class="extpro"></span>
             {% mimeok=1} %}
 			
+			 {% if (/tmx/.test( o.files[i].name.split('.').pop() ) ) { %}
+            <span class="exttmx"></span>
+            {% mimeok=1} %}
 			
 				
 			

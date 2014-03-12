@@ -793,9 +793,9 @@ section.currSearchSegment mark.searchMarker
 .extsgl {background: url(../img/matecat_file_icons.png) 6px -552px no-repeat !important;} /* .sgml */
 .extsgm {background: url(../img/matecat_file_icons.png) 6px -584px no-repeat !important;}  /* .sgm */
 .extpro {background: url(../img/matecat_file_icons.png) 6px -618px no-repeat !important;} /* .properties */
-.extdit {background: url(../img/matecat_file_icons.png) 6px -652px no-repeat !important;} /* .dit */
+.extdit {background: url(../img/matecat_file_icons.png) 6px -652px no-repeat !important;} /* .dita */
 .exttag {background: url(../img/matecat_file_icons.png) 6px -686px no-repeat !important;} /* .tag */
-.exttmx {background: url(../img/matecat_file_icons.png) 6px -720px no-repeat !important;} /* .tmx */
+.exttmx {background: url(../img/matecat_file_icons.png) 6px -722px no-repeat !important;} /* .tmx */
 
 #jobMenu span {height: 25px;
 	padding: 5px;
@@ -832,9 +832,9 @@ only screen and (in-resolution: 2dppx) {
 	.extsgl {background: url(../img/matecat_file_icons2x.png) 6px -550px no-repeat !important;} /* .sgml */
 	.extsgm {background: url(../img/matecat_file_icons2x.png) 6px -584px no-repeat !important;}  /* .sgm */
 	.extpro {background: url(../img/matecat_file_icons2x.png) 6px -618px no-repeat !important;} /* .properties */
-	.extdit {background: url(../img/matecat_file_icons2x.png) 6px -652px no-repeat !important;} /* .dit */
+	.extdit {background: url(../img/matecat_file_icons2x.png) 6px -652px no-repeat !important;} /* .dita */
 	.exttag {background: url(../img/matecat_file_icons2x.png) 6px -686px no-repeat !important;} /* .tag */
-	.exttmx {background: url(../img/matecat_file_icons2x.png) 6px -720px no-repeat !important;} /* .tmx */
+	.exttmx {background: url(../img/matecat_file_icons2x.png) 6px -722px no-repeat !important;} /* .tmx */
 
 
 	body.cattool #jobMenu li a
