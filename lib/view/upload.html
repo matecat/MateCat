@@ -183,6 +183,7 @@
 
 
 <div class="cl"></div>
+<p class="warning-message"> Error: the errmsg will appear here... </p>
 <p class="error-message"> Error: the errmsg will appear here... </p>
 
 <div class="cl"></div>
@@ -195,6 +196,7 @@
 
             <p tal:condition="true:conversion_enabled" class="file-drag">
                 <strong>Drag and drop</strong> your file here<br/>
+				<span class="min">(Upload your TMX files as well)</span><br />
                 or</p>
 
             <p tal:condition="not:conversion_enabled" class="file-drag">
@@ -670,7 +672,7 @@
 
 
 <div class="modal supported-formats" data-type="view">
-    <div class="popup-outer"></div>
+    <div class="popup-outer closeClickingOutside"></div>
     <div class="popup">
         <a href="#" class="x-popup"></a>
 

@@ -172,7 +172,7 @@ APP = {
         $('body').append(newPopup);
 //        $('.modal:not([data-type=view])').show();
 //        $('.popup').fadeIn('fast');
-        if(conf.closeClickingOutside) $('.popup-outer').addClass('closeClickingOutside');
+		if(conf.closeClickingOutside) $('.popup-outer').addClass('closeClickingOutside');
     },
     closePopup: function() {
         $('.modal[data-type=view]').hide();

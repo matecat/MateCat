@@ -537,6 +537,10 @@ body{font-family:Calibri, Arial, Helvetica, sans-serif}
 	}
 .translate-box select{width:257px;height:37px;padding:5px;font-size:18px;border:1px solid #ccc;margin:1px 0 5px 0}
 .upload-input{width:100%;padding:4px 5px 3px 5px;font-size:22px !important; -moz-border-radius: 2px;border-radius: 2px;border:1px solid #ccc}
+#private-tm-key
+{
+	border: 3px solid #12B4DF;
+}
 
 
 /* upload footer */
@@ -625,7 +629,10 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 
 .drag{text-align:center;padding-bottom:0px;overflow:hidden;}
 .drag p{ text-align:center;margin:30px 0 10px 0;font-size:36px;line-height:50px;}
-
+.drag p span.min
+{
+	font-size:24px;
+}
 #overlay
 	{
     display: none;
@@ -659,15 +666,36 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 
 
 
-.error-message{background:#d65757 url(../img/error-symbol.png) 10px center no-repeat;color:#fff;padding:10px 0;margin:10px 0 0 0;float:left;font-weight:bold;width:100%;-moz-border-radius: 2px;border-radius: 2px;border:1px solid #c45f5f;text-indent:40px;display:none}
-
+.error-message,
+.warning-message
+{
+	background:#d65757 url(../img/error-symbol.png) 10px center no-repeat;
+	color:#fff;
+	padding:10px 0;
+	margin:10px 0 0 0;
+	float:left;
+	font-weight:bold;
+	width:100%;
+	-moz-border-radius: 2px;
+	border-radius: 2px;
+	border:1px solid #c45f5f;
+	text-indent:40px;
+	display:none;
+}
+.warning-message
+{
+	background: #12B4DF !important;
+	border-color: #008AAF;
+	padding: 10px;
+	text-indent: 0;
+}
 
 
 
 .file-drag{ transition: width 2s; -moz-transition: width 2s; /* Firefox 4 */ -webkit-transition: width 2s; /* Safari and Chrome */ -o-transition: width 2s; /* Opera */ } 
 .file-drag {
 	overflow:hidden;
-	height:100px;
+	/*height:100px;*/
 	margin:10px auto;
 	cursor:pointer;
 	position:relative;

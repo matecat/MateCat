@@ -184,7 +184,14 @@ $(document).ready(function() {
             $("#create_private_tm_btn").removeClass("disabled");
         }
     });
-
+ 
+	$("#private-tm-key").on('keyup', function(e) {
+		if($(this).val() == '') {
+			$('#create_private_tm_btn').removeClass('disabled');
+			$('#create_private_tm_btn').removeAttr('disabled','');			
+		};
+    });
+	
     $("input, select").change(function(e) {          
         $('.error-message').hide();
     //		        if($('.upload-table tr').length) $('.uploadbtn').removeAttr('disabled').removeClass('disabled');
