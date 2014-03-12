@@ -103,11 +103,57 @@ class ProjectManager {
 		$uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure['uploadToken'];
 		foreach ( $this->projectStructure['array_files'] as $fileName ) {
 
-			if('tmx'== pathinfo($fileName, PATHINFO_EXTENSION) and !empty($this->projectStructure['private_tm_key'])){
-				//if TMX, load into provided MyMmemory key 
-				$tmx_service=TMSServiceFactory::getTMXService($this->projectStructure['tms_engine']);
-				$tmx_res=$tmx_service->import("$uploadDir/$fileName",$this->projectStructure['private_tm_key']);
-				//and skip the rest of the loop
+			//if TMX, 
+			if('tmx'== pathinfo($fileName, PATHINFO_EXTENSION)){
+				//and have a TM key
+				if(!empty($this->projectStructure['private_tm_key'])){
+					//is the TM loaded?
+					$loaded=false;
+
+					//get the TMX management component from the factory
+					$tmxServiceWrapper=TMSServiceFactory::getTMXService($this->projectStructure['tms_engine']);
+
+					//import the TMX
+					$import_outcome=$tmxServiceWrapper->import("$uploadDir/$fileName",$this->projectStructure['private_tm_key']);
+
+					//wait until current TMX is loaded
+					while(!$loaded){
+						//now we repeatedly scan the list of loaded TMs
+						//this counter is used to get the latest TM in case of duplicates 
+						$tmx_max_id=0;
+
+						//check if TM has been loaded
+						$allMemories=$tmxServiceWrapper->getStatus($this->projectStructure['private_tm_key'],$fileName);
+
+						//scan through memories 
+						foreach($allMemories as $memory){
+							//obtain max id
+							$tmx_max_id=max($tmx_max_id,$memory['id']);
+
+							//if maximum is current, pick it (it means that, among duplicates, it's the latest)
+							if($tmx_max_id==$memory['id']){
+								$current_tm=$memory;
+							}
+						}
+
+						switch($current_tm['status']){
+							case "0":
+								//wait for the daemon to process it 
+								//THIS IS WRONG BY DESIGN, WE SHOULD NOT ACT AS AN ASYNCH DAEMON WHILE WE ARE IN A SYNCH APACHE PROCESS
+								log::doLog("waiting for \"$fileName\" to be loaded into MyMemory");
+								sleep(5);
+								break;
+							default:
+								//loaded (or error, in any case go ahead)
+								log::doLog("\"$fileName\" has been loaded into MyMemory");
+								$loaded=true;
+								break;
+						}
+					}
+
+				}
+
+				//in any case, skip the rest of the loop, go to the next file
 				continue;
 			}
 

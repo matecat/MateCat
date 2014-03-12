@@ -1034,7 +1034,7 @@ class QA {
         try {
             $this->_prepareDOMStructures();
         } catch ( DOMException $ex ) {
-            Log::doLog( $ex->getMessage() );
+            Log::doLog("tryRealignTagID: ".$ex->getMessage() );
             return $this->getErrors();
         }
 
