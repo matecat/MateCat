@@ -1536,9 +1536,10 @@ textarea, input, .editarea, .search-editarea, select  {
 {
 	display: block;
 	width: 30%;
-	position: relative;
-	float: right;
-	margin-top: -15px;
+	position: absolute;
+	bottom:0;
+	right:0;
+	margin-top:10px;
 }
 .graysmall{color:#333;background:#fbfbfb;}
 .graysmall-details li{float:right;width:auto !important;font-size:11px;margin:0 0px;padding:2px 5px 0px 5px;border-bottom:none;}
