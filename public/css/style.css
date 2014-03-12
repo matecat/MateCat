@@ -1603,13 +1603,32 @@ body.archived section .status-container a.status:hover
 
 
 section.status-translated .status{background-color:#0798bc !important}
+
 section.status-approved .status{background-color:#639d5e !important;}
 /* section.status-draft .status{background-color:#dddedf !important;} */
 section.status-rejected .status{background-color:#b02429 !important;}
 
+/*.status-translated .text {
+-webkit-animation:myfirst 0.7s; /* Chrome, Safari, Opera 
+animation:myfirst 0.7s;
+}
+
+ Chrome, Safari, Opera 
+@-webkit-keyframes myfirst
+{
+from {background:#09beec;}
+to {background:#f1f2f2;}
+}
+
+ Standard syntax 
+@keyframes myfirst
+{
+from {background:#09beec;}
+to {background:#f1f2f2;}
+}
 
 section.editor.status-translated .status{background-color:#09beec !important}
-section.editor.status-approved .status{background-color:#7cc576 !important;}
+section.editor.status-approved .status{background-color:#7cc576 !important;} */
 /*section.editor.status-draft .status{background-color:#dddedf !important;}*/
 section.editor.status-rejected .status{background-color:#dc2e34 !important;}
 

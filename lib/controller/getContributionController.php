@@ -246,7 +246,7 @@ class getContributionController extends ajaxController {
 
                 $log_prepend = "CLIENT REALIGN IDS PROCEDURE | ";
                 if( !$qaRealign->thereAreErrors() ){
-
+					/*
                     Log::doLog( $log_prepend . " - Requested Segment: " . var_export( $this->__postInput, true) );
                     Log::doLog( $log_prepend . "Fuzzy: " . $fuzzy .  " - Try to Execute Tag ID Realignment." );
                     Log::doLog( $log_prepend . "TMS RAW RESULT:" );
@@ -258,7 +258,7 @@ class getContributionController extends ajaxController {
                     $matches[0]['match'] = ( $fuzzy == 0 ? '100%' : '99%' );
                     Log::doLog( $log_prepend . "View Segment:     " . var_export($matches[0]['segment'], true) );
                     Log::doLog( $log_prepend . "View Translation: " . var_export($matches[0]['translation'], true) );
-
+					*/
                 } else {
                     Log::doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $this->__postInput['id_segment'] );
                 }
@@ -348,8 +348,8 @@ class getContributionController extends ajaxController {
             $db = Database::obtain();
             $db->update( 'segment_translations', $data, $where );
 
-            Log::doLog($data);
-            Log::doLog($where);
+            //Log::doLog($data);
+            //Log::doLog($where);
 
             $err   = $db->get_error();
             $errno = $err[ 'error_code' ];
@@ -360,7 +360,7 @@ class getContributionController extends ajaxController {
             }
 
             $rows = $db->affected_rows;
-            Log::doLog("Affected: " . $rows );
+            //Log::doLog("Affected: " . $rows );
 
             return $rows;
 

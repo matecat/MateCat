@@ -232,15 +232,17 @@ while (1) {
             $log_prepend = $UNIQUID . " - SERVER REALIGN IDS PROCEDURE | ";
             if ( !$qaRealign->thereAreErrors() ) {
 
+				/*
                 Log::doLog( $log_prepend . " - Requested Segment: " . var_export( $segment, true ) );
                 Log::doLog( $log_prepend . "Fuzzy: " . $fuzzy . " - Try to Execute Tag ID Realignment." );
                 Log::doLog( $log_prepend . "TMS RAW RESULT:" );
                 Log::doLog( $log_prepend . var_export( $matches[ 0 ], true ) );
 
                 Log::doLog( $log_prepend . "Realignment Success:" );
+				*/
                 $matches[0]['raw_translation'] = $qaRealign->getTrgNormalized();
                 $matches[0]['match'] = ( $fuzzy == 0 ? '100%' : '99%' );
-                Log::doLog( $log_prepend . "Raw Translation: " . var_export( $matches[ 0 ]['raw_translation'], true ) );
+                //Log::doLog( $log_prepend . "Raw Translation: " . var_export( $matches[ 0 ]['raw_translation'], true ) );
 
             } else {
                 Log::doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $segment['sid'] );
@@ -288,7 +290,7 @@ while (1) {
         $check = new PostProcess( $text, $suggestion );
         $check->performTagCheckOnly();
 
-        log::doLog( $check->getErrors() );
+        //log::doLog( $check->getErrors() );
 
         if( $check->thereAreErrors() ){
             $err_json = $check->getErrorsJSON();
