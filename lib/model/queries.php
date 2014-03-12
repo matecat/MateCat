@@ -10,7 +10,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
     $src = $db->escape( $queryParams['src'] );
     $trg = $db->escape( $queryParams['trg'] );
 
-    Log::doLog( $queryParams );
+    //Log::doLog( $queryParams );
 
     $where_status = "";
     if ( $queryParams[ 'status' ] != 'all' ) {
@@ -85,7 +85,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
 
     }
 
-    Log::doLog($query);
+    //Log::doLog($query);
 
     $results = $db->fetch_array( $query );
     $err     = $db->get_error();
@@ -182,8 +182,8 @@ function doReplaceAll( ArrayObject $queryParams ){
     //use this for UNDO
     $resultSet = $db->fetch_array($sql);
 
-    Log::doLog( $sql );
-    Log::doLog( "Replace ALL Total ResultSet " . count($resultSet) );
+    //Log::doLog( $sql );
+    //Log::doLog( "Replace ALL Total ResultSet " . count($resultSet) );
 
     $sqlBatch = array();
     foreach( $resultSet as $key => $tRow ){
@@ -232,11 +232,11 @@ function doReplaceAll( ArrayObject $queryParams ){
         }
 
         //we must divide by 2 because Insert count as 1 but fails and duplicate key update count as 2
-        Log::doLog( "Replace ALL Batch " . ($k +1) . " - Affected Rows " . ( $db->affected_rows / 2 ) );
+        //Log::doLog( "Replace ALL Batch " . ($k +1) . " - Affected Rows " . ( $db->affected_rows / 2 ) );
 
     }
 
-    Log::doLog( "Replace ALL Done." );
+    //Log::doLog( "Replace ALL Done." );
 
 }
 
@@ -1574,31 +1574,7 @@ function getProjects( $start, $step, $search_in_pname, $search_source, $search_t
     $single_query = ( $project_id ) ? " j.id_project=$project_id and" : "";
     $owner        = $_SESSION[ 'cid' ];
     $owner_query  = " j.owner='$owner' and";
-//	$owner_query = "";
 
-    /*
-log::doLog('PN QUERY:',$pn_query);
-log::doLog('SEARCH TARGET:',$search_target);
-
-log::doLog('FILTERING:',$filtering);
-log::doLog('SHOWARCHIVED:',$search_showarchived);
-log::doLog('SHOWCANCELLED:',$search_showcancelled);
-
-$status_query = " (j.status_owner='ongoing'";
-//	if(!$search_showarchived && !$search_showcancelled) {
-if($filtering) {
-if($search_showarchived) $status_query .= " or j.status_owner='archived'";
-if($search_showcancelled) $status_query .= " or j.status_owner='cancelled'";
-$status_query .= ") and";
-} else {
-$status_query = " (j.status_owner='ongoing' or j.status_owner='cancelled' or j.status_owner='archived') and";
-}
-//	$status_query = (!$search_showarchived && !$search_showcancelled)? "j.status='ongoing' or j.status='cancelled' and" : "";
-log::doLog('STATUS QUERY:',$status_query);
-
-//	$sa_query = ($search_showarchived)? " j.status='archived' and" : "";
-//	$sc_query = ($search_showcancelled)? " j.status='cancelled' and" : "";
-*/
     $query_tail = $pn_query . $ss_query . $st_query . $sst_query . $oc_query . $single_query . $owner_query;
 
     $filter_query = ( $query_tail == '' ) ? '' : 'where ' . $query_tail;
@@ -2020,11 +1996,11 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
     $chunks_st = array_chunk( $st_values, 500 );
 
-    echo 'Insert Segment Translations: ' . count($st_values) . "\n";
-    Log::doLog( 'Insert Segment Translations: ' . count($st_values) );
+    //echo 'Insert Segment Translations: ' . count($st_values) . "\n";
+    //Log::doLog( 'Insert Segment Translations: ' . count($st_values) );
 
-    echo 'Queries: ' . count($chunks_st) . "\n";
-    Log::doLog( 'Queries: ' . count($chunks_st) );
+    //echo 'Queries: ' . count($chunks_st) . "\n";
+    //Log::doLog( 'Queries: ' . count($chunks_st) );
 
     //USE the MySQL InnoDB isolation Level to protect from thread high concurrency access
     $db->query( 'SET autocommit=0' );
@@ -2041,8 +2017,8 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
         $db->query( $query_st );
 
-        echo "Executed " . ( $k + 1 ) ."\n";
-        Log::doLog(  "Executed " . ( $k + 1 ) );
+        //echo "Executed " . ( $k + 1 ) ."\n";
+        //Log::doLog(  "Executed " . ( $k + 1 ) );
 
         $err   = $db->get_error();
         if ( $err[ 'error_code' ] != 0 ) {
@@ -2057,8 +2033,8 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
      */
     if( !$perform_Tms_Analysis ){
         $_details = getProjectSegmentsTranslationSummary( $pid );
-        echo "--- trying to initialize job total word count.\n";
-        Log::doLog(  "--- trying to initialize job total word count." );
+        //echo "--- trying to initialize job total word count.\n";
+        //Log::doLog(  "--- trying to initialize job total word count." );
 
         $project_details = array_pop($_details); //remove rollup
 
@@ -2071,18 +2047,18 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
     /* IF NO TM ANALYSIS, upload the jobs global word count */
 
 
-    echo "Done.\n";
-    Log::doLog( 'Done.' );
+    //echo "Done.\n";
+    //Log::doLog( 'Done.' );
 
     if( count( $st_queue_values ) ){
 
         $chunks_st_queue = array_chunk( $st_queue_values, 500 );
 
-        echo 'Insert Segment Translations Queue: ' . count($st_queue_values) . "\n";
-        Log::doLog( 'Insert Segment Translations Queue: ' . count($st_queue_values) );
+        //echo 'Insert Segment Translations Queue: ' . count($st_queue_values) . "\n";
+        //Log::doLog( 'Insert Segment Translations Queue: ' . count($st_queue_values) );
 
-        echo 'Queries: ' . count($chunks_st_queue) . "\n";
-        Log::doLog( 'Queries: ' . count($chunks_st_queue) );
+        //echo 'Queries: ' . count($chunks_st_queue) . "\n";
+        //Log::doLog( 'Queries: ' . count($chunks_st_queue) );
 
         foreach( $chunks_st_queue as $k => $queue_chunk ){
 
@@ -2090,8 +2066,8 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
             $db->query( $query_st_queue );
 
-            echo "Executed " . ( $k + 1 ) ."\n";
-            Log::doLog(  "Executed " . ( $k + 1 ) );
+            //echo "Executed " . ( $k + 1 ) ."\n";
+            //Log::doLog(  "Executed " . ( $k + 1 ) );
 
             $err   = $db->get_error();
             if ( $err[ 'error_code' ] != 0 ) {
@@ -2103,8 +2079,8 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
         }
 
-        echo "Done.\n";
-        Log::doLog( 'Done.' );
+        //echo "Done.\n";
+        //Log::doLog( 'Done.' );
 
     }
 

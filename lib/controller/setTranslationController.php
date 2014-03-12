@@ -165,7 +165,7 @@ class setTranslationController extends ajaxController {
 - firstCheckErrors  : " . var_export( $check->getErrors(), true ) . "
 - postCheckErrors   : " . ( isset($postCheck) ? var_export( $postCheck->getErrors(), true ) : 'null' );
 
-        Log::doLog( $msg . "\n" );
+        //Log::doLog( $msg . "\n" );
 
 
         /*

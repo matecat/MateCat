@@ -97,7 +97,7 @@ abstract class Engine {
 		}
 
 		$uniquid = uniqid('',true);
-		Log::doLog( $uniquid . " ... " . $this->url);
+		//Log::doLog( $uniquid . " ... " . $this->url);
 
 		if($isPost){
 			//compose the POST
@@ -110,7 +110,7 @@ abstract class Engine {
 		}
 
 		$this->raw_result = json_decode($res,true);
-		Log::doLog( $uniquid . " ... Received... " . $res );
+		//Log::doLog( $uniquid . " ... Received... " . $res );
 	}
 
 	private function buildPostQuery($function){

@@ -18,13 +18,16 @@ class SimpleTMX extends Engine{
 				);
 		//query db
 		$this->doQuery('tmx_import', $postfields,true);
-
-
+		return $this->raw_result;
 	}
 
-	public function getStatus($key){
+	public function getStatus($key,$name=false){
 
 		$parameters=array('key'=>$key);
+
+		//if provided, add name parameter
+		if($name) $parameters['name']=$name;
+
 		$this->doQuery('tmx_status', $parameters,false);
 		return $this->raw_result;
 	}

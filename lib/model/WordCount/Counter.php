@@ -89,7 +89,7 @@ class WordCount_Counter {
         $newWCount->setIdJob( $this->oldWCount->getIdJob() );
         $newWCount->setJobPassword( $this->oldWCount->getJobPassword() );
 
-        Log::doLog( $newWCount );
+        //Log::doLog( $newWCount );
 
         $callSetNew = 'set' . $this->newStatusCall;
         $callSetOld = 'set' . $this->oldStatusCall;
@@ -97,7 +97,7 @@ class WordCount_Counter {
         $newWCount->$callSetOld( - $words_amount );
         $newWCount->$callSetNew( + $words_amount );
 
-        Log::doLog( $newWCount );
+        //Log::doLog( $newWCount );
 
         return $newWCount;
 
@@ -119,7 +119,7 @@ class WordCount_Counter {
     public function initializeJobWordCount( $id_job, $jPassword ) {
 
         $_details = getStatsForJob( $id_job, null, $jPassword );
-        Log::doLog( "--- trying to Iitialize/reset job total word count." );
+        //Log::doLog( "--- trying to Iitialize/reset job total word count." );
 
         $job_details = array_pop( $_details ); //get the row
 
@@ -133,7 +133,7 @@ class WordCount_Counter {
         $wStruct->setRejectedWords( $job_details[ 'REJECTED' ] );
         initializeWordCount( $wStruct );
 
-        Log::doLog( $wStruct );
+        //Log::doLog( $wStruct );
 
         return $wStruct;
 
