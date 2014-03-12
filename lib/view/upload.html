@@ -506,6 +506,11 @@
             <span class="extxml"></span>
             {% mimeok=1} %}
 			
+			{% if (o.files[i].type == "text/tmx" || o.files[i].type == "application/tmx" || o.files[i].type == "application/x-tmx" ) { %}
+					
+            <span class="exttmx"></span>
+            {% mimeok=1} %}
+			
 			{% if (o.files[i].type == "text/html" || o.files[i].type == "application/xhtml+xml"  ) { %}
 					
             <span class="exthtm"></span>
