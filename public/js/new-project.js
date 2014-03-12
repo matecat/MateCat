@@ -185,8 +185,8 @@ $(document).ready(function() {
         }
     });
  
-	$("#private-tm-key").change(function(e) {
-        if($(this).val() == '') {
+	$("#private-tm-key").on('keyup', function(e) {
+		if($(this).val() == '') {
 			$('#create_private_tm_btn').removeClass('disabled');
 			$('#create_private_tm_btn').removeAttr('disabled','');			
 		};
