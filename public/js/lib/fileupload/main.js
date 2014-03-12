@@ -263,6 +263,8 @@ $(function () {
 		if($('.upload-table tr:not(.failed)').length) {
 			if(checkAnalyzability('fileuploaddestroyed')) {
 				enableAnalyze();
+			} else {
+				disableAnalyze();
 			}
 //			if(typeof err == 'undefined') enableAnalyze();
 		} else {
@@ -769,10 +771,16 @@ checkAnalyzability = function(who) {
 				res = false;
 			}
 			var filename = $(this).find('.name').text();
-			if((filename.split('.')[filename.split('.').length -1].toLowerCase() == 'tmx')&&($('.upload-table tr:not(.failed)').length == 1)) {
-				res = false;				
-			};
-		})
+			if(filename.split('.')[filename.split('.').length -1].toLowerCase() == 'tmx') {
+				$(this).addClass('tmx');
+			}
+//			if((filename.split('.')[filename.split('.').length -1].toLowerCase() == 'tmx')&&($('.upload-table tr:not(.failed)').length == 1)) {
+//				res = false;				
+//			};
+		});
+		if(!$('.upload-table tr:not(.failed, .tmx)').length) {
+			res = false;
+		}
 		if($('.upload-table tr.failed').length) res = false;
 		return res;
 	} else {
