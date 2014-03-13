@@ -105,6 +105,20 @@ class ProjectManager {
 		}
 
 
+		//sort files in order to process TMX first
+		$sortedFiles=array();
+		foreach ( $this->projectStructure['array_files'] as $fileName ) {
+			if('tmx'== pathinfo($fileName, PATHINFO_EXTENSION)){
+					array_unshift($sortedFiles,$fileName);
+			}else{
+					array_push($sortedFiles,$fileName);
+			}
+			
+		}
+		$this->projectStructure['array_files']=$sortedFiles;
+		unset($sortedFiles);
+
+
 		$uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure['uploadToken'];
 		foreach ( $this->projectStructure['array_files'] as $fileName ) {
 
@@ -117,6 +131,11 @@ class ProjectManager {
 					//import the TMX, the check is deferred after this loop
 					log::doLog("loading \"$fileName\"");
 					$import_outcome=$this->tmxServiceWrapper->import("$uploadDir/$fileName",$this->projectStructure['private_tm_key']);
+					if('KO'==$import_outcome['status']){
+								$this->projectStructure['result']['errors'][] = array( "code" => -15, "message" => "Cant't load TMX files right now, try later" );
+								return false;
+
+					}
 				}
 
 				//in any case, skip the rest of the loop, go to the next file
@@ -246,6 +265,13 @@ class ProjectManager {
 						//check if TM has been loaded
 						$allMemories=$this->tmxServiceWrapper->getStatus($this->projectStructure['private_tm_key'],$fileName);
 
+						if(0==count($allMemories)){
+							//what the hell? No memories although I've just loaded some? Eject!
+							$this->projectStructure['result']['errors'][] = array( "code" => -15, "message" => "Cant't load TMX files right now, try later" );
+							return false;
+
+						}
+
 						//scan through memories 
 						foreach($allMemories as $memory){
 							//obtain max id
@@ -264,10 +290,14 @@ class ProjectManager {
 								log::doLog("waiting for \"$fileName\" to be loaded into MyMemory");
 								sleep(5);
 								break;
-							default:
+							case "1":
 								//loaded (or error, in any case go ahead)
 								log::doLog("\"$fileName\" has been loaded into MyMemory");
 								$loaded=true;
+								break;
+							default:
+								$this->projectStructure['result']['errors'][] = array( "code" => -14, "message" => "Invalid TMX ($fileName)" );
+								return false;
 								break;
 						}
 					}
