@@ -118,12 +118,22 @@ function truncate_filename(n, len) {
 	return filename + '.' + ext;
 }
 
-function insertNodeAtCursor(node) {
+function insertNodeAtCursor(node) {console.log('insertNodeAtCursor');
 	var range, html;
 	if (window.getSelection && window.getSelection().getRangeAt) {
-		if (window.getSelection().type == 'Caret') {
+
+		console.log('window.getSelection().isCollapsed: ', window.getSelection().isCollapsed);
+		console.log('window.getSelection().rangeCount: ', window.getSelection().rangeCount);
+		console.log('window.getSelection(): ', window.getSelection());
+
+//		if ((window.getSelection().isCollapsed)||(UI.isFirefox)) {
+//		if (window.getSelection().type == 'Caret') { console.log('a');
+		if ((window.getSelection().type == 'Caret')||(UI.isFirefox)) {
 			range = window.getSelection().getRangeAt(0);
+			console.log('range: ', range);
+			console.log('1: ', UI.editarea.html());
 			range.insertNode(node);
+			console.log('2: ', UI.editarea.html());
 		} else {
 		}
 
