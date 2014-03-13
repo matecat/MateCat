@@ -13,16 +13,17 @@ $(document).ready(function() {
         $.get("http://mymemory.translated.net/api/createranduser",function(data){
             //parse to appropriate type
             //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
-            if(typeof data == 'string'){
-                data=jQuery.parseJSON(data);
-            }
-            //put value into input field
-            $('#private-tm-key').val(data.key);
-            $('#private-tm-user').val(data.id);
-            $('#private-tm-pass').val(data.pass);
-            //hide spinner
-            $('#get-new-tm-spinner').hide();
-            return false;	
+			if(typeof data == 'string'){
+				data=jQuery.parseJSON(data);
+			}
+			//put value into input field
+			$('#private-tm-key').val(data.key);
+			$('#private-tm-user').val(data.id);
+			$('#private-tm-pass').val(data.pass);
+			$('#create_private_tm_btn').attr('data-key', data.key);
+			//hide spinner
+			$('#get-new-tm-spinner').hide();
+			return false;	
         })
     })
 
@@ -175,21 +176,26 @@ $(document).ready(function() {
 		$('.translate-box.target h2 .extra').remove();
     });
 
-    $("#disable_tms_engine").change(function(e){
-        if(this.checked){
-            $("input[id^='private-tm-']").prop("disabled", true);
-            $("#create_private_tm_btn").addClass("disabled", true);
-        } else {
-            $("input[id^='private-tm-']").prop("disabled", false);
-            $("#create_private_tm_btn").removeClass("disabled");
-        }
-    });
+	$("#disable_tms_engine").change(function(e){
+		if(this.checked){
+			$("input[id^='private-tm-']").prop("disabled", true);
+			$("#create_private_tm_btn").addClass("disabled", true);
+		} else {
+			if(!$('#create_private_tm_btn[data-key]').length) {
+				$("input[id^='private-tm-']").prop("disabled", false);
+				$("#create_private_tm_btn").removeClass("disabled");
+			}
+		}
+	});
  
 	$("#private-tm-key").on('keyup', function(e) {
-		if($(this).val() == '') {
-			$('#create_private_tm_btn').removeClass('disabled');
-			$('#create_private_tm_btn').removeAttr('disabled','');			
-		};
+//		if($(this).val() == '') {
+//			$('#create_private_tm_btn').removeClass('disabled');
+//			$('#create_private_tm_btn').removeAttr('disabled');
+//		} else {
+//			$('#create_private_tm_btn').addClass('disabled');
+//			$('#create_private_tm_btn').attr('disabled','disabled');			
+//		};
     });
 	
     $("input, select").change(function(e) {          
