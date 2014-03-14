@@ -165,12 +165,14 @@ class setTranslationController extends ajaxController {
 - firstCheckErrors  : " . var_export( $check->getErrors(), true ) . "
 - postCheckErrors   : " . ( isset($postCheck) ? var_export( $postCheck->getErrors(), true ) : 'null' );
 
-        Log::doLog( $msg . "\n" );
+        //Log::doLog( $msg . "\n" );
 
 
         /*
          * begin stats counter
          */
+        $old_translation = getCurrentTranslation( $this->id_job, $this->id_segment );
+
         $old_wStruct = new WordCount_Struct();
         $old_wStruct->setIdJob( $this->id_job );
         $old_wStruct->setJobPassword( $this->password );
@@ -180,7 +182,13 @@ class setTranslationController extends ajaxController {
         $old_wStruct->setApprovedWords( $job_data['approved_words'] );
         $old_wStruct->setRejectedWords( $job_data['rejected_words'] );
 
-        $old_translation = getCurrentTranslation( $this->id_job, $this->id_segment );
+        $old_wStruct->setIdSegment( $this->id_segment );
+
+        //redundant, this is made into WordCount_Counter::updateDB
+        $old_wStruct->setOldStatus( $old_translation['status'] );
+        $old_wStruct->setNewStatus( $this->status );
+
+        //redundant because the update is made only where status = old status
         if( $this->status != $old_translation['status'] ){
 
             //cambiato status, sposta i conteggi
@@ -196,7 +204,7 @@ class setTranslationController extends ajaxController {
             $newTotals = $old_wStruct;
         }
 
-        $res = CatUtils::addSegmentTranslation($this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreErrors() );
+        $res = CatUtils::addSegmentTranslation( $this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreErrors() );
 
         if (!empty($res['error'])) {
 			$this->result['error'] = $res['error'];
