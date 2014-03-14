@@ -302,7 +302,7 @@ class ProjectManager {
 								//wait for the daemon to process it 
 								//THIS IS WRONG BY DESIGN, WE SHOULD NOT ACT AS AN ASYNCH DAEMON WHILE WE ARE IN A SYNCH APACHE PROCESS
 								log::doLog("waiting for \"$fileName\" to be loaded into MyMemory");
-								sleep(5);
+								sleep(3);
 								break;
 							case "1":
 								//loaded (or error, in any case go ahead)
