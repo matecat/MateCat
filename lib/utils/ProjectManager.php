@@ -18,6 +18,15 @@ class ProjectManager {
 
 	protected $tmxServiceWrapper;
 
+	protected $checkTMX; 
+	/*
+	   flag used to indicate TMX check status: 
+	   0-not to check, or check passed
+	   1-still checking, but no useful TM for this project have been found, so far (no one matches this project langpair)
+	 */
+
+	protected $langService;
+
 	public function __construct( ArrayObject $projectStructure = null ){
 
 		if ( $projectStructure == null ) {
@@ -57,6 +66,10 @@ class ProjectManager {
 
 		//get the TMX management component from the factory
 		$this->tmxServiceWrapper=TMSServiceFactory::getTMXService($this->projectStructure['tms_engine']);
+
+		$this->langService=Languages::getInstance();
+
+		$this->checkTMX=0;
 
 		$mysql_hostname = INIT::$DB_SERVER;   // Database Server machine
 		$mysql_database = INIT::$DB_DATABASE;     // Database Name
@@ -109,11 +122,13 @@ class ProjectManager {
 		$sortedFiles=array();
 		foreach ( $this->projectStructure['array_files'] as $fileName ) {
 			if('tmx'== pathinfo($fileName, PATHINFO_EXTENSION)){
-					array_unshift($sortedFiles,$fileName);
+				//found TMX, enable language checking routines
+				$this->checkTMX=1;
+				array_unshift($sortedFiles,$fileName);
 			}else{
-					array_push($sortedFiles,$fileName);
+				array_push($sortedFiles,$fileName);
 			}
-			
+
 		}
 		$this->projectStructure['array_files']=$sortedFiles;
 		unset($sortedFiles);
@@ -132,9 +147,8 @@ class ProjectManager {
 					log::doLog("loading \"$fileName\"");
 					$import_outcome=$this->tmxServiceWrapper->import("$uploadDir/$fileName",$this->projectStructure['private_tm_key']);
 					if('KO'==$import_outcome['status']){
-								$this->projectStructure['result']['errors'][] = array( "code" => -15, "message" => "Cant't load TMX files right now, try later" );
-								return false;
-
+						$this->projectStructure['result']['errors'][] = array( "code" => -15, "message" => "Cant't load TMX files right now, try later" );
+						return false;
 					}
 				}
 
@@ -288,7 +302,7 @@ class ProjectManager {
 								//wait for the daemon to process it 
 								//THIS IS WRONG BY DESIGN, WE SHOULD NOT ACT AS AN ASYNCH DAEMON WHILE WE ARE IN A SYNCH APACHE PROCESS
 								log::doLog("waiting for \"$fileName\" to be loaded into MyMemory");
-								sleep(5);
+								sleep(3);
 								break;
 							case "1":
 								//loaded (or error, in any case go ahead)
@@ -300,13 +314,40 @@ class ProjectManager {
 								return false;
 								break;
 						}
+
 					}
 
-				}
+					//once the language is loaded, check if language is compliant (unless something useful has already been found)
+					if(1==$this->checkTMX){
+						//get localized target languages of TM (in case it's a multilingual TM)
+						$tmTargets=explode(';',$current_tm['target_lang']);
 
-				//in any case, skip the rest of the loop, go to the next file
-				continue;
+						//indicates if something has been found for current memory
+						$found=false;
+
+						//compare localized target languages array (in case it's a multilingual project) to the TM supplied
+						//if nothing matches, then the TM supplied can't have matches for this project
+						foreach($this->projectStructure['target_language'] as $projectTarget){
+							if(in_array($this->langService->getLocalizedName($projectTarget),$tmTargets)){
+								$found=true;
+								break;
+							}
+						}
+
+						//if this TM matches the project lagpair and something has been found
+						if($found and $current_tm['source_lang']==$this->langService->getLocalizedName($this->projectStructure['source_language'])){
+							//the TMX is good to go
+							$this->checkTMX=0;
+						}
+					}
+				}
 			}
+		}
+
+		if(1==$this->checkTMX){
+			//this means that noone of uploaded TMX were usable for this project. Warn the user.
+			$this->projectStructure['result']['errors'][] = array( "code" => -16, "message" => "No usable segment found in TMXs for the language pairs of this project" );
+			return false;
 		}
 
 
