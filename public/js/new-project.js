@@ -176,15 +176,17 @@ $(document).ready(function() {
 		$('.translate-box.target h2 .extra').remove();
     });
 
-    $("#disable_tms_engine").change(function(e){
-        if(this.checked){
-            $("input[id^='private-tm-']").prop("disabled", true);
-            $("#create_private_tm_btn").addClass("disabled", true);
-        } else {
-            $("input[id^='private-tm-']").prop("disabled", false);
-            $("#create_private_tm_btn").removeClass("disabled");
-        }
-    });
+	$("#disable_tms_engine").change(function(e){
+		if(this.checked){
+			$("input[id^='private-tm-']").prop("disabled", true);
+			$("#create_private_tm_btn").addClass("disabled", true);
+		} else {
+			if(!$('#create_private_tm_btn[data-key]').length) {
+				$("input[id^='private-tm-']").prop("disabled", false);
+				$("#create_private_tm_btn").removeClass("disabled");
+			}
+		}
+	});
  
 	$("#private-tm-key").on('keyup', function(e) {
 //		if($(this).val() == '') {
