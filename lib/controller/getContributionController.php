@@ -251,11 +251,12 @@ class getContributionController extends ajaxController {
                     Log::doLog( $log_prepend . "Fuzzy: " . $fuzzy .  " - Try to Execute Tag ID Realignment." );
                     Log::doLog( $log_prepend . "TMS RAW RESULT:" );
                     Log::doLog( $log_prepend . var_export($matches[0], true) );
-
                     Log::doLog( $log_prepend . "Realignment Success:");
+                    */
                     $matches[0]['segment'] = CatUtils::rawxliff2view( $this->text );
                     $matches[0]['translation'] = CatUtils::rawxliff2view( $qaRealign->getTrgNormalized() );
                     $matches[0]['match'] = ( $fuzzy == 0 ? '100%' : '99%' );
+                    /*
                     Log::doLog( $log_prepend . "View Segment:     " . var_export($matches[0]['segment'], true) );
                     Log::doLog( $log_prepend . "View Translation: " . var_export($matches[0]['translation'], true) );
 					*/

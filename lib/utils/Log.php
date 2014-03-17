@@ -17,6 +17,8 @@ class Log {
 
     public static $fileName;
 
+    public static $uniqID;
+
     protected static function _writeTo( $stringData ) {
         if ( !file_exists( LOG_REPOSITORY ) || !is_dir( LOG_REPOSITORY ) ) {
             mkdir( LOG_REPOSITORY );
@@ -40,7 +42,7 @@ class Log {
 
         $ip = Utils::getRealIpAddr();
 
-        $stringDataInfo = "[$now ($ip)]";
+        $stringDataInfo = "[$now ($ip)] " . self::$uniqID . " ";
 
         if ( isset( $trace[ 2 ][ 'class' ] ) ) {
             $stringDataInfo .= " " . $trace[ 2 ][ 'class' ] . "-> ";
@@ -56,18 +58,29 @@ class Log {
 
     public static function doLog() {
 
+        $head = self::_getHeader();
+
         $string = "";
         $ct     = func_num_args(); // number of argument passed
         for ( $i = 0; $i < $ct; $i++ ) {
             $curr_arg = func_get_arg( $i ); // get each argument passed
-            if ( is_string( $curr_arg ) ) {
-                $string .= $curr_arg;
-            } else {
-                $string .= var_export( $curr_arg, true );
+
+            $tmp = explode( "\n", var_export( $curr_arg, true ) );
+            foreach( $tmp as $row ){
+                $string .= $head . $row . "\n";
             }
+
+//            if ( is_string( $curr_arg ) ) {
+//                $string .= $head . $curr_arg . "\n";
+//            } else {
+//                $tmp = explode( "\n", var_export( $curr_arg, true ) );
+//                foreach( $tmp as $row ){
+//                    $string .= $head . $row . "\n";
+//                }
+//            }
         }
 
-        self::_writeTo( self::_getHeader() . $string . "\n" );
+        self::_writeTo( $string );
     }
 
     /**

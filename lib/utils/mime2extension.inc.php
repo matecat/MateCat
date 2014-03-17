@@ -3290,4 +3290,5 @@
                     ),
         );
 
-?>
+    return $reference;
+

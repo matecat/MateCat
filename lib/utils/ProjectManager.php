@@ -1054,7 +1054,7 @@ class ProjectManager {
 
 	public static function getExtensionFromMimeType( $mime_type ){
 
-		include('mime2extension.inc.php');
+        $reference = include('mime2extension.inc.php');
 		if( array_key_exists( $mime_type, $reference ) ){
 			if ( array_key_exists( 'default', $reference[$mime_type] ) ) return $reference[$mime_type]['default'];
 			return $reference[$mime_type][ array_rand( $reference[$mime_type] ) ]; // rand :D
