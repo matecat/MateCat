@@ -88,18 +88,27 @@ $.extend(UI, {
 			e.preventDefault();
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
+			console.log('a: ', UI.editarea.html());
 			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+			console.log('b: ', UI.editarea.html());
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
+				console.log('qui: ', document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
 				setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
 				saveSelection();
 			}
 //			console.log($('.rangySelectionBoundary', UI.editarea)[0]);
+			console.log('c: ', UI.editarea.html());
 			var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;
+			console.log('ph: ', ph);
 			$('.rangySelectionBoundary', UI.editarea).remove();
+			console.log('d: ', UI.editarea.html());
+			console.log($('.tag-autocomplete-endcursor', UI.editarea));
 			$('.tag-autocomplete-endcursor', UI.editarea).after(ph);
 //			setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
+			console.log('e: ', UI.editarea.html());
 			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));
+			console.log('f: ', UI.editarea.html());
 			restoreSelection();
 			UI.closeTagAutocompletePanel();
 			UI.lockTags(UI.editarea);
@@ -353,9 +362,12 @@ $.extend(UI, {
 			}
 			setTimeout(function() {
 				if($('.tag-autocomplete').length) {
+					console.log('ecco');
+					console.log('prima del replace: ', UI.editarea.html());
 //					console.log(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) != null);
 					if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) !== null) {
 						UI.editarea.html(UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>'));
+//						console.log('dopo del replace: ', UI.editarea.html());
 					}
 					UI.checkAutocompleteTags();
 				}
@@ -381,60 +393,51 @@ $.extend(UI, {
 					UI.saveInUndoStack('cancel');
 					UI.currentSegmentQA();
 				} else {
-//					try {
-//						console.log(UI.editarea.text().match(/<.*?\>/gi) == null);
-						var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
-						var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
 
-						saveSelection();
-						parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
-						isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
-						parentMark = $('.searchMarker', UI.editarea).has('.rangySelectionBoundary');
-						isInsideMark = $('.searchMarker .rangySelectionBoundary', UI.editarea).length;
-						restoreSelection();
-						
-						// insideTag management
-						if ((e.which == 8)&&(isInsideTag)) {
+					var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
+					var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
+					console.log('a: ', UI.editarea.html());
+					saveSelection();
+					console.log('b: ', UI.editarea.html());
+					parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
+					isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
+					parentMark = $('.searchMarker', UI.editarea).has('.rangySelectionBoundary');
+					isInsideMark = $('.searchMarker .rangySelectionBoundary', UI.editarea).length;
+					restoreSelection();
+					console.log('c: ', UI.editarea.html());
+					console.log('isInsideTag: ', isInsideTag);
+
+					// insideTag management
+					if ((e.which == 8)&&(isInsideTag)) {
 //							console.log('AA: ', UI.editarea.html()); 
-							parentTag.remove();
-							e.preventDefault();
+						parentTag.remove();
+						e.preventDefault();
 //							console.log('BB: ', UI.editarea.html());
-						}
+					}
 //						console.log(e.which + ' - ' + isInsideTag);
-						setTimeout(function() {
-							if ((e.which == 46)&&(isInsideTag)) {
-								console.log('inside tag');
-							}
+					setTimeout(function() {
+						if ((e.which == 46)&&(isInsideTag)) {
+							console.log('inside tag');
+						}
 //							console.log(e.which + ' - ' + isInsideTag);
 //							console.log('CC: ', UI.editarea.html());
-							var numTagsAfter = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
-							var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
-							if (numTagsAfter < numTagsBefore)
-								UI.saveInUndoStack('cancel');
-							if (numSpacesAfter < numSpacesBefore)
-								UI.saveInUndoStack('cancel');
+						var numTagsAfter = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
+						var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
+						if (numTagsAfter < numTagsBefore)
+							UI.saveInUndoStack('cancel');
+						if (numSpacesAfter < numSpacesBefore)
+							UI.saveInUndoStack('cancel');
 //							console.log('DD: ', UI.editarea.html());
 
-						}, 50);
-						
-						// insideMark management
-						if ((e.which == 8)&&(isInsideMark)) {
-							console.log('inside mark'); 
-						}
-//						console.log('a: ', UI.editarea.html());
-//						saveSelection();
-//						console.log('b: ', UI.editarea.html());
-//						setTimeout(function() {
-//							console.log('c: ', UI.editarea.html());
-//						}, 100);				
-//						selectText(this);
+					}, 50);
+
+					// insideMark management
+					if ((e.which == 8)&&(isInsideMark)) {
+						console.log('inside mark'); 
+					}
 
 
-//					} catch (e) {
-						//Error: Cannot read property 'length' of null 
-						//when we are on first character position in edit area and try to BACKSPACE
-						//console.log(e.message); 
-//					}
+
 				}
 			}
 			

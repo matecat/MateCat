@@ -279,9 +279,10 @@ $.extend(UI, {
 	},	
 
 	// TAG AUTOCOMPLETE
-	checkAutocompleteTags: function() {
+	checkAutocompleteTags: function() {console.log('checkAutocompleteTags');
 		added = this.getPartialTagAutocomplete();
 //		console.log('added: "', added + '"');
+		console.log('aa: ', UI.editarea.html());
 		$('.tag-autocomplete li.hidden').removeClass('hidden');
 		$('.tag-autocomplete li').each(function() {
 			var str = $(this).text();
@@ -291,7 +292,9 @@ $.extend(UI, {
 				$(this).addClass('hidden');	
 			}
 		});
+		console.log('bb: ', UI.editarea.html());
 		if(!$('.tag-autocomplete li:not(.hidden)').length) {
+
 			$('.tag-autocomplete').addClass('empty');
 			if(UI.preCloseTagAutocomplete) {
 				UI.closeTagAutocompletePanel();
@@ -299,9 +302,12 @@ $.extend(UI, {
 			}
 			UI.preCloseTagAutocomplete = true;
 		} else {
+			console.log('dd: ', UI.editarea.html());
+
 			$('.tag-autocomplete li.current').removeClass('current');
 			$('.tag-autocomplete li:not(.hidden)').first().addClass('current');
 			$('.tag-autocomplete').removeClass('empty');		
+			console.log('ee: ', UI.editarea.html());
 			UI.preCloseTagAutocomplete = false;
 		}
 	},
@@ -310,13 +316,15 @@ $.extend(UI, {
 		UI.preCloseTagAutocomplete = false;
 	},
 	getPartialTagAutocomplete: function() {
+		console.log('inizio di getPartialTagAutocomplete: ', UI.editarea.html());
 //		var added = UI.editarea.html().match(/&lt;([&;"\w\s\/=]*?)<span class="tag-autocomplete-endcursor">/gi);
 		var added = UI.editarea.html().match(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?<span class="tag-autocomplete-endcursor">/gi);
 //		console.log(added);
 		added = (added === null)? '' : htmlDecode(added[0].replace(/<span class="tag-autocomplete-endcursor"\>/gi, '')).replace(/\xA0/gi," ");
+		console.log('added: ', added);
 		return added;
 	},
-	openTagAutocompletePanel: function() {
+	openTagAutocompletePanel: function() {console.log('openTagAutocompletePanel');
 		if(!UI.sourceTags.length) return false;
 		$('.tag-autocomplete-marker').remove();
 
@@ -326,6 +334,7 @@ $.extend(UI, {
 		var endCursor = document.createElement("span");
 		endCursor.setAttribute('class', 'tag-autocomplete-endcursor');
 		insertNodeAtCursor(endCursor);
+		console.log('inserito endcursor: ', UI.editarea.html());
 		var offset = $('.tag-autocomplete-marker').offset();
 		var addition = ($(':first-child', UI.editarea).hasClass('tag-autocomplete-endcursor'))? 30 : 20;
 		$('.tag-autocomplete-marker').remove();
@@ -340,7 +349,7 @@ $.extend(UI, {
 		$.each(UI.sourceTags, function(index) {
 			$('.tag-autocomplete ul').append('<li' + ((index === 0)? ' class="current"' : '') + '>' + this + '</li>');
 		});
-
+		
 		$('.tag-autocomplete').css('top', offset.top + addition);
 		$('.tag-autocomplete').css('left', offset.left);
 		this.checkAutocompleteTags();	

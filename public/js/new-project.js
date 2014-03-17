@@ -71,6 +71,7 @@ $(document).ready(function() {
                     $.each(d.errors, function() {
                         $('.error-message').append( '<div>' + this.message + '<br /></div>' ).show();
                     });
+					$('.uploadbtn').attr('value', 'Analyze');
                     $('body').removeClass('creating');
 //                    var btnTxt = (config.analysisEnabled)? 'Analyze' : 'Translate';
 //                    $('.uploadbtn').attr('value',btnTxt).removeClass('disabled').removeAttr('disabled');
