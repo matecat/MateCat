@@ -1875,14 +1875,18 @@ function updateWordCount( WordCount_Struct $wStruct ){
 
     $db = Database::obtain();
 
-    $query = "UPDATE jobs SET
-                new_words = new_words + " . $wStruct->getNewWords() . ",
-                draft_words = draft_words + " . $wStruct->getDraftWords() . ",
-                translated_words = translated_words + " . $wStruct->getTranslatedWords() . ",
-                approved_words = approved_words + " . $wStruct->getApprovedWords() . ",
-                rejected_words = rejected_words + " . $wStruct->getRejectedWords() . "
-              WHERE id = " . (int)$wStruct->getIdJob() . "
-              AND password = '" . $db->escape( $wStruct->getJobPassword() ) . "'";
+    $query = "UPDATE jobs as j, segment_translations AS st SET
+                    new_words = new_words + " . $wStruct->getNewWords() . ",
+                    draft_words = draft_words + " . $wStruct->getDraftWords() . ",
+                    translated_words = translated_words + " . $wStruct->getTranslatedWords() . ",
+                    approved_words = approved_words + " . $wStruct->getApprovedWords() . ",
+                    rejected_words = rejected_words + " . $wStruct->getRejectedWords() . ",
+                    st.status = '" . $db->escape( $wStruct->getNewStatus() ) . "'
+                WHERE j.id = " . (int)$wStruct->getIdJob() . "
+                AND st.id_job = j.id
+                AND j.password = '" . $db->escape( $wStruct->getJobPassword() ) . "'
+                AND st.status = '" . $db->escape( $wStruct->getOldStatus() ) . "'
+                AND st.id_segment = " . (int)$wStruct->getIdSegment();
 
     $db->query( $query );
 

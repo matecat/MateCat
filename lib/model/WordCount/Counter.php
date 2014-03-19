@@ -89,6 +89,10 @@ class WordCount_Counter {
         $newWCount->setIdJob( $this->oldWCount->getIdJob() );
         $newWCount->setJobPassword( $this->oldWCount->getJobPassword() );
 
+        $newWCount->setIdSegment( $this->oldWCount->getIdSegment() );
+        $newWCount->setOldStatus( $this->oldStatus );
+        $newWCount->setNewStatus( $this->newStatus );
+
         //Log::doLog( $newWCount );
 
         $callSetNew = 'set' . $this->newStatusCall;
@@ -112,6 +116,9 @@ class WordCount_Counter {
         $newWCount->setApprovedWords( $this->oldWCount->getApprovedWords() + $wordCount_Struct->getApprovedWords() );
         $newWCount->setRejectedWords( $this->oldWCount->getRejectedWords() + $wordCount_Struct->getRejectedWords() );
         $newWCount->setDraftWords( $this->oldWCount->getDraftWords() + $wordCount_Struct->getDraftWords() );
+        $newWCount->setIdSegment( $this->oldWCount->getIdSegment() );
+        $newWCount->setOldStatus( $this->oldStatus );
+        $newWCount->setNewStatus( $this->newStatus );
         return $newWCount;
 
     }

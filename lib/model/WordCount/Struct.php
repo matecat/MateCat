@@ -17,13 +17,76 @@ class WordCount_Struct {
     protected $approved_words = 0;
     protected $rejected_words = 0;
 
+    protected $id_segment = null;
+    protected $old_status = null;
+    protected $new_status = null;
+
     protected $total = 0;
 
     /**
-     * @param int $approved_words
+     * @param null $id_segment
+     *
+     * @return $this
+     */
+    public function setIdSegment( $id_segment ) {
+        $this->id_segment = $id_segment;
+
+        return $this;
+    }
+
+    /**
+     * @return int
+     */
+    public function getIdSegment() {
+        return $this->id_segment;
+    }
+
+    /**
+     * @param null $status
+     *
+     * @return $this
+     */
+    public function setOldStatus( $status ) {
+        $this->old_status = $status;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOldStatus() {
+        return $this->old_status;
+    }
+
+    /**
+     * @param null $new_status
+     *
+     * @return $this
+     */
+    public function setNewStatus( $new_status ) {
+        $this->new_status = $new_status;
+
+        return $this;
+    }
+
+    /**
+     * @return null
+     */
+    public function getNewStatus() {
+        return $this->new_status;
+    }
+
+
+
+    /**
+     * @param $approved_words
+     *
+     * @return $this
      */
     public function setApprovedWords( $approved_words ) {
         $this->approved_words = (float)$approved_words;
+        return $this;
     }
 
     /**
@@ -34,10 +97,13 @@ class WordCount_Struct {
     }
 
     /**
-     * @param int $draft_words
+     * @param $draft_words
+     *
+     * @return $this
      */
     public function setDraftWords( $draft_words ) {
         $this->draft_words = (float)$draft_words;
+        return $this;
     }
 
     /**
@@ -48,10 +114,13 @@ class WordCount_Struct {
     }
 
     /**
-     * @param mixed $id_job
+     * @param $id_job
+     *
+     * @return $this
      */
     public function setIdJob( $id_job ) {
         $this->id_job = (int)$id_job;
+        return $this;
     }
 
     /**
@@ -62,10 +131,13 @@ class WordCount_Struct {
     }
 
     /**
-     * @param mixed $job_password
+     * @param $job_password
+     *
+     * @return $this
      */
     public function setJobPassword( $job_password ) {
         $this->job_password = $job_password;
+        return $this;
     }
 
     /**
@@ -76,10 +148,13 @@ class WordCount_Struct {
     }
 
     /**
-     * @param int $new_words
+     * @param $new_words
+     *
+     * @return $this
      */
     public function setNewWords( $new_words ) {
         $this->new_words = (float)$new_words;
+        return $this;
     }
 
     /**
@@ -90,10 +165,13 @@ class WordCount_Struct {
     }
 
     /**
-     * @param int $rejected_words
+     * @param $rejected_words
+     *
+     * @return $this
      */
     public function setRejectedWords( $rejected_words ) {
         $this->rejected_words = (float)$rejected_words;
+        return $this;
     }
 
     /**
@@ -104,10 +182,13 @@ class WordCount_Struct {
     }
 
     /**
-     * @param int $translated_words
+     * @param $translated_words
+     *
+     * @return $this
      */
     public function setTranslatedWords( $translated_words ) {
         $this->translated_words = (float)$translated_words;
+        return $this;
     }
 
     /**

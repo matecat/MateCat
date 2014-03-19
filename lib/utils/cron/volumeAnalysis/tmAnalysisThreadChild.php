@@ -95,6 +95,7 @@ while (1) {
     if ($raw_wc == 0) {
         echo "--- (child $my_pid) : empty segment. deleting lock and continue\n";
         deleteLockSegment($sid, $jid);
+        setSegmentTranslationError($sid, $jid); // SET as DONE
         continue;
     }
 

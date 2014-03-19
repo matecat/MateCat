@@ -65,15 +65,15 @@ abstract class Engine {
         curl_setopt($ch, CURLOPT_USERAGENT, "user agent");
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-		//if some postfields are passed, switch to post mode, set parameters and prolong timeout
-		if($postfields){
-			curl_setopt($ch, CURLOPT_POST,true);
-		    curl_setopt($ch, CURLOPT_POSTFIELDS, $postfields);
-        	curl_setopt($ch,CURLOPT_TIMEOUT,120); //wait max 2 mins 
-		}else{
-	        curl_setopt($ch, CURLOPT_HTTPGET, true);
-        	curl_setopt($ch,CURLOPT_TIMEOUT,10); //we can wait max 10 seconds
-		}
+        //if some postfields are passed, switch to post mode, set parameters and prolong timeout
+        if ( $postfields ) {
+            curl_setopt( $ch, CURLOPT_POST, true );
+            curl_setopt( $ch, CURLOPT_POSTFIELDS, $postfields );
+            curl_setopt( $ch, CURLOPT_TIMEOUT, 120 ); //wait max 2 mins
+        } else {
+            curl_setopt( $ch, CURLOPT_HTTPGET, true );
+            curl_setopt( $ch, CURLOPT_TIMEOUT, 10 ); //we can wait max 10 seconds
+        }
 
 
         $output = curl_exec($ch);
@@ -91,26 +91,29 @@ abstract class Engine {
 	}
 
 	protected function doQuery($function, $parameters = array(),$isPost=false) {
-		$this->error = array(); // reset last error
-		if (!$this->existsFunction($function)) {
-			return false;
-		}
 
-		$uniquid = uniqid('',true);
-		//Log::doLog( $uniquid . " ... " . $this->url);
+        $this->error = array(); // reset last error
+        if ( !$this->existsFunction( $function ) ) {
+            return false;
+        }
 
-		if($isPost){
-			//compose the POST
-			$this->buildPostQuery($function);
-			$res=$this->curl($this->url, $parameters);
-		}else{
-			//compose the GET string
-			$this->buildGetQuery($function, $parameters);
-			$res=$this->curl($this->url);
-		}
+        $uniquid = uniqid();
 
-		$this->raw_result = json_decode($res,true);
-		//Log::doLog( $uniquid . " ... Received... " . $res );
+        if ( $isPost ) {
+            //compose the POST
+            $this->buildPostQuery( $function );
+            Log::doLog( $uniquid . " ... " . $this->url );
+            $res = $this->curl( $this->url, $parameters );
+        } else {
+            //compose the GET string
+            $this->buildGetQuery( $function, $parameters );
+            Log::doLog( $uniquid . " ... " . $this->url );
+            $res = $this->curl( $this->url );
+        }
+
+        $this->raw_result = json_decode( $res, true );
+        Log::doLog( $uniquid . " ... Received... " . $res );
+
 	}
 
 	private function buildPostQuery($function){

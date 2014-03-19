@@ -284,9 +284,9 @@ class QA {
 
     protected static $regexpAscii = '/([\x{00}-\x{1F}\x{7F}]{1})/u';
 
-    protected static $regexpEntity = '/&#x([0-1]{0,1}[0-9A-F]{1})/u'; //&#x1E;  &#xE;
+    protected static $regexpEntity = '/&#x([0-1]{0,1}[0-9A-F]{1,2})/u'; //&#x1E;  &#xE;
 
-    protected static $regexpPlaceHoldAscii = '/##\$_([0-1]{0,1}[0-9A-F]{1})\$##/u';
+    protected static $regexpPlaceHoldAscii = '/##\$_([0-1]{0,1}[0-9A-F]{1,2})\$##/u';
 
     /**
      * List of Errors from  check analysis
