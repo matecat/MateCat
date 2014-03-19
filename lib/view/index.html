@@ -89,6 +89,7 @@
     <body class="cattool${job_archived}${source_rtl}${target_rtl}" tal:condition="php: supportedBrowser && !job_not_found && !job_cancelled" define="catpage string:true">
 
         <header metal:use-macro="header.html/main_header">
+
             <div class="wrapper">   
                 <form id="fileDownload" action="${basepath}" method="post">
                     <input type="hidden" name="action" value="downloadFile" />
@@ -266,135 +267,6 @@
                 <p class="found"><span class="numbers">Found <span class="results">...</span> results in <span class="segments">...</span> segments</span> having<span class="query">...</span></p>
             </div>
         </div>
-
-        <!--
-                <div class="search">    
-               <div class="col1-search">
-               <ul>
-               <li style="float:right">
-                 <input name="" type="button" class="btn" value="FILTER" />
-               </li>
-               <li>
-               <input type="text" style="width:40px !important" value="SEG" onFocus="if (this.value == 'SEG') {this.value = '';}" onBlur="if (this.value == '') {this.value = 'SEG';}" class="search-input"/>  			   
-               </li>
-               <li>
-                        <select class="search-select" >
-                 <option value="prova">FILENAME</option>
-               </select>  	
-                </li>
-              <li>
-        <div class="search-editarea " contenteditable="true" onClick="if ($(this).text()=='SOURCE') $(this).text('')" onBlur="if ($(this).text()=='') $(this).text('SOURCE')">SOURCE</div>
-                  </li>      
-						
-						
-                        <li>
-                                                         <div class="search-editarea" contenteditable="true" onClick="if ($(this).text()=='TRANSLATION') $(this).text('')" onBlur="if ($(this).text()=='') $(this).text('TRANSLATION')">TRANSLATION</div>
-										 
-										 
-                                         </li>
-		
-        <li>
-		
-		
-                  <span class="custom-checkbox replace">
-          <input type="checkbox" />
-          <span class="box normal-check" title="show/hide draft segments"><span class="tick "></span></span>
-        </span> 
-		
-        <p> REPLACE </p>
-		
-        </li>
-		
-         </ul>
-			
-			
-		
-				 
-              <ul class="r-replace-box">
-          <li style="float:right">
-             <input name="" type="button" class="btn" value="REPLACE" />
-		  
-          </li>
-          <li style="margin-left:202px">
-              <div class="search-editarea" contenteditable="true" onClick="if ($(this).text()=='REPLACE SOURCE WITH') $(this).text('')" onBlur="if ($(this).text()=='') $(this).text('REPLACE SOURCE WITH')">REPLACE SOURCE WITH</div>
-            </li>
-            <li>     
-        <div class="search-editarea" contenteditable="true" onClick="if ($(this).text()=='REPLACE TRANSLATION WITH') $(this).text('')" onBlur="if ($(this).text()=='') $(this).text('REPLACE TRANSLATION WITH')">REPLACE TRANSLATION WITH</div>
-        </li>
-        </ul>
-		  
-             </div>
-			 
-		  
-		  
-		  
-		  
-          <div class="checkbox-box">
-		  
-          <ul>
-		  
-          <li>
-		  
-		  
-		  
-		
-		
-		  
-		  
-		  
-         <span class="custom-checkbox" style="margin-left:8px">
-          <input type="checkbox" />
-          <span class="box normal-check" title="show/hide draft segments"><span class="tick"></span></span>       </span>     
-               <p > MATCH WHOLE WORDS</p>
-               <span class="custom-checkbox">
-          <input type="checkbox"/>
-          <span class="box normal-check" title="show/hide draft segments"><span class="tick"></span></span>       </span> 
-               <p> CASE SENSITIVE</p>
-               </li>
-		 
-        <li>
-		
-        <span class="custom-checkbox" style="margin-left:10px;">
-          <input type="checkbox" checked="checked"/>
-          <span class="box tr-check" title="show/hide translated segments"><span class="tick"></span></span>
-        </span>
-		 
-        <p style="margin-right:5px;">Translated</p>
-        </li>
-		
-        <li>
-        <span class="custom-checkbox">
-          <input type="checkbox" checked="checked"/>
-          <span class="box dr-check" title="show/hide draft segments"><span class="tick"></span></span>
-        </span>
-        <p style="margin-right:5px;">Draft</p>
-        </li>
-        <li>
-        <span class="custom-checkbox">
-          <input type="checkbox" checked="checked"/>
-          <span class="box rj-check" title="show/hide rejected segments"><span class="tick"></span></span>
-        </span>
-        <p style="margin-right:5px;">Rejected</p>
-        </li>
-        <li><span class="custom-checkbox">
-          <input type="checkbox" checked="checked"/>
-          <span class="box ap-check" title="show/hide approved segments"><span class="tick"></span></span>
-        </span>
-        <p style="margin-right:10px;">Approved</p>
-        </li>
-		
-		  
-		  
-          </ul>
-		  
-          </div>
-		  
-			   
-			  
-            </div>   
-        -->
-        <!--  END header serach  div (hidden by default) -->    
-
 
         <div id="outer">
 
@@ -603,7 +475,6 @@
         </ul>
 
         <a id="segmentPointer" href="#" title="Go to the active segment"></a>
-
         <div id="dialog" class="dialog" title="Basic dialog">
             <p>Howto layer to show a basic tutorial of the cattool when the first-time user open it.</p>
             <form action=""><input id="hideTutorial" type="checkbox" value="" />Do not display again </form>

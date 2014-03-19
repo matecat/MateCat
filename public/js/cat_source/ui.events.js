@@ -65,6 +65,11 @@ $.extend(UI, {
 			UI.toggleSearch(e);
 		}).bind('keydown', 'Ctrl+f', function(e) {
 			UI.toggleSearch(e);
+		}).on('click', '#messageDisplay .close', function(e) {
+			e.preventDefault();
+			$('body').removeClass('incomingMsg');
+			var expireDate = new Date($('#messageDisplay').attr('data-expire'));
+			$.cookie($('#messageDisplay').attr('data-token'), '', { expires: expireDate });		
 //		}).on('change', '#hideAlertConfirmTranslation', function(e) {
 //			console.log($(this).prop('checked'));
 //			if ($(this).prop('checked')) {

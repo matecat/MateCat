@@ -111,7 +111,9 @@ class getWarningController extends ajaxController {
 
         $this->result[ 'details' ] = array_values($result);
         $this->result[ 'token' ]   = $this->__postInput->token;
-    }
+//        $this->result['messages']  = '[{"msg":"Test message 1","token":"token1","expire":"2014-04-03 00:00"},{"msg":"Test message 2","token":"token2","expire":"2014-04-04 12:00"}]';
+
+	}
 
     /**
      * Performs a check on single segment
@@ -135,7 +137,8 @@ class getWarningController extends ajaxController {
             $this->result[ 'details' ][ 'warnings' ]     = $QA->getWarningsJSON();
             $this->result[ 'details' ][ 'tag_mismatch' ] = $QA->getMalformedXmlStructs();
             $this->result[ 'total' ]                     = count( $QA->getWarnings() );
-
+//temp
+			
 //            Log::doLog($this->__postInput->trg_content);
 //            Log::doLog($QA->getTrgNormalized());
 

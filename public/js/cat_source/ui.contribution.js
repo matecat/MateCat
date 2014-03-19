@@ -97,7 +97,7 @@ $.extend(UI, {
 				id_translator: config.id_translator
 			},
 			context: $('#' + id),
-			error: function(d) {
+			error: function() {
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
@@ -372,7 +372,7 @@ $.extend(UI, {
 			UI.reinitMMShortcuts();
 		});
 	},
-	reinitMMShortcuts: function() {console.log('reinitMMShortcuts');
+	reinitMMShortcuts: function() {//console.log('reinitMMShortcuts');
 		var keys = (this.isMac) ? 'alt+meta' : 'alt+ctrl';
 		$('body').unbind('keydown.alt1').unbind('keydown.alt2').unbind('keydown.alt3').unbind('keydown.alt4').unbind('keydown.alt5');
 		$("body, .editarea").bind('keydown.alt1', keys + '+1', function(e) {

@@ -1544,10 +1544,17 @@ UI = {
 				UI.warningStopped = true;
 				UI.failedConnection(0, 'getWarning');
 			},
-			success: function(data) {
+			success: function(data) {//console.log('check warnings success');
 				UI.startWarning();
 				var warningPosition = '';
 				UI.globalWarnings = data.details;
+//				console.log(data.messages);
+//				console.log($.parseJSON(data.messages));
+//				data.messages = {
+//						msg: "messaggio di prova"
+//					};
+//		
+//				messages = ["Something happened! This is simply a fake message to inform you."];
 
 				//check for errors
 				if (UI.globalWarnings.length > 0) {
@@ -1566,10 +1573,32 @@ UI = {
 					//reset the pointer to offending segment
 					$('#point2seg').attr('href', '#');
 				}
+				
+				// check for messages
+				if(typeof data.messages != 'undefined') {
+					var msgArray = $.parseJSON(data.messages);
+					if (msgArray.length > 0) {
+						UI.displayMessage(msgArray);
+					}
+				}
+
 
 				UI.setNextWarnedSegment();
 
 				//                $('#point2seg').attr('href', warningPosition);
+			}
+		});
+	},
+	displayMessage: function(messages) {
+		if($('body').hasClass('incomingMsg')) return false;
+		$.each(messages, function(index) {
+			if(typeof $.cookie('msg-' + this.token) == 'undefined') {
+//				$.cookie('msg-' + this.token, '', { expires: 7 });
+				msg = this.msg;
+				$('#messageDisplay .msg').html(msg);
+				$('#messageDisplay').attr('data-token', 'msg-' + this.token).attr('data-expire', this.expire);
+				$('body').addClass('incomingMsg');
+				return false;
 			}
 		});
 	},
@@ -1698,12 +1727,12 @@ UI = {
 				action: 'ajaxUtils',
 				exec: 'ping'
 			},
-			error: function(d) {
+			error: function() {
 				console.log('error on checking connection');
 				$(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">30 seconds</span>.');
 				$(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
 			},
-			success: function(d) {
+			success: function() {
 				console.log('connection is back');
 				UI.connectionIsBack();
 			}
@@ -2055,7 +2084,7 @@ UI = {
 			this.undoStackPosition = 0;
 		}
 		saveSelection();
-		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder"></span>')
+		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder"></span>');
 		restoreSelection();
 		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
 	},
@@ -2357,6 +2386,11 @@ $.extend(UI, {
 			UI.toggleSearch(e);
 		}).bind('keydown', 'Ctrl+f', function(e) {
 			UI.toggleSearch(e);
+		}).on('click', '#messageDisplay .close', function(e) {
+			e.preventDefault();
+			$('body').removeClass('incomingMsg');
+			var expireDate = new Date($('#messageDisplay').attr('data-expire'));
+			$.cookie($('#messageDisplay').attr('data-token'), '', { expires: expireDate });		
 //		}).on('change', '#hideAlertConfirmTranslation', function(e) {
 //			console.log($(this).prop('checked'));
 //			if ($(this).prop('checked')) {
@@ -3495,7 +3529,7 @@ $.extend(UI, {
 				id_translator: config.id_translator
 			},
 			context: $('#' + id),
-			error: function(d) {
+			error: function() {
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
@@ -3770,7 +3804,7 @@ $.extend(UI, {
 			UI.reinitMMShortcuts();
 		});
 	},
-	reinitMMShortcuts: function() {console.log('reinitMMShortcuts');
+	reinitMMShortcuts: function() {//console.log('reinitMMShortcuts');
 		var keys = (this.isMac) ? 'alt+meta' : 'alt+ctrl';
 		$('body').unbind('keydown.alt1').unbind('keydown.alt2').unbind('keydown.alt3').unbind('keydown.alt4').unbind('keydown.alt5');
 		$("body, .editarea").bind('keydown.alt1', keys + '+1', function(e) {
