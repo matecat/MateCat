@@ -2377,6 +2377,8 @@ function resetLockSegment() {
 }
 
 function deleteLockSegment( $id_segment, $id_job, $mode = "delete" ) {
+    //set memcache
+
     $db = Database::obtain();
     if ( $mode == "delete" ) {
         $q = "delete from segment_translations_analysis_queue where id_segment=$id_segment and id_job=$id_job";
