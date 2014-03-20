@@ -1,7 +1,7 @@
  
 $(document).ready(function() {
 
-    $('#create_private_tm_btn').click(function (){
+    $('#create_private_tm_btn').click(function() {
         //prevent double click
         if($(this).hasClass('disabled')) return false;
         //show spinner
@@ -9,22 +9,26 @@ $(document).ready(function() {
         //disable button
         $(this).addClass('disabled');
         $(this).attr('disabled','');
-        //call API
-        $.get("http://mymemory.translated.net/api/createranduser",function(data){
-            //parse to appropriate type
-            //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
-			if(typeof data == 'string'){
-				data=jQuery.parseJSON(data);
-			}
-			//put value into input field
-			$('#private-tm-key').val(data.key);
-			$('#private-tm-user').val(data.id);
-			$('#private-tm-pass').val(data.pass);
-			$('#create_private_tm_btn').attr('data-key', data.key);
-			//hide spinner
-			$('#get-new-tm-spinner').hide();
-			return false;	
-        })
+		if(typeof $(this).attr('data-key') == 'undefined') {
+			//call API
+			$.get("http://mymemory.translated.net/api/createranduser",function(data){
+				//parse to appropriate type
+				//this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
+				if(typeof data == 'string'){
+					data=jQuery.parseJSON(data);
+				}
+				//put value into input field
+				$('#private-tm-key').val(data.key);
+				$('#private-tm-user').val(data.id);
+				$('#private-tm-pass').val(data.pass);
+				$('#create_private_tm_btn').attr('data-key', data.key);
+				//hide spinner
+				$('#get-new-tm-spinner').hide();
+				return false;	
+			})			
+		} else {
+			$('#private-tm-key').val($(this).attr('data-key'));
+		}
     })
 
     $(".more").click(function(e){
@@ -190,13 +194,13 @@ $(document).ready(function() {
 	});
  
 	$("#private-tm-key").on('keyup', function(e) {
-//		if($(this).val() == '') {
-//			$('#create_private_tm_btn').removeClass('disabled');
-//			$('#create_private_tm_btn').removeAttr('disabled');
-//		} else {
-//			$('#create_private_tm_btn').addClass('disabled');
-//			$('#create_private_tm_btn').attr('disabled','disabled');			
-//		};
+		if($(this).val() == '') {
+			$('#create_private_tm_btn').removeClass('disabled');
+			$('#create_private_tm_btn').removeAttr('disabled');
+		} else {
+			$('#create_private_tm_btn').addClass('disabled');
+			$('#create_private_tm_btn').attr('disabled','disabled');			
+		};
     });
 	
     $("input, select").change(function(e) {          
