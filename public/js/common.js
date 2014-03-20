@@ -130,29 +130,30 @@ APP = {
 //            }
 //        }
     },
-    doRequest: function(req,log) {
-        logTxt = (typeof log == 'undefined')? '' : '&type=' + log;
-        var setup = {
-            url: config.basepath + '?action=' + req.data.action + logTxt + this.appendTime(),
-            data: req.data,
-            type: 'POST',
-            dataType: 'json'
-            //TODO set timeout longer than server curl for TM/MT
-        };
+	doRequest: function(req,log) {
+		logTxt = (typeof log == 'undefined')? '' : '&type=' + log;
+		version = (typeof config.build_number == 'undefined')? '' : '-v' + config.build_number;
+		var setup = {
+			url: config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version,
+			data: req.data,
+			type: 'POST',
+			dataType: 'json'
+			//TODO set timeout longer than server curl for TM/MT
+		};
 
-        // Callbacks
-        if (typeof req.success === 'function')
-            setup.success = req.success;
-        if (typeof req.complete === 'function')
-            setup.complete = req.complete;
-        if (typeof req.context != 'undefined')
-            setup.context = req.context;
-        if (typeof req.error === 'function')
-            setup.error = req.error;
-        if (typeof req.beforeSend === 'function')
-            setup.beforeSend = req.beforeSend;
-        $.ajax(setup);        
-    }, 
+		// Callbacks
+		if (typeof req.success === 'function')
+			setup.success = req.success;
+		if (typeof req.complete === 'function')
+			setup.complete = req.complete;
+		if (typeof req.context != 'undefined')
+			setup.context = req.context;
+		if (typeof req.error === 'function')
+			setup.error = req.error;
+		if (typeof req.beforeSend === 'function')
+			setup.beforeSend = req.beforeSend;
+		$.ajax(setup);        
+	}, 
     appendTime: function() {
         var t = new Date();
         return '&time=' + t.getTime();
