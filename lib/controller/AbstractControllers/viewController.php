@@ -50,6 +50,9 @@ abstract class viewController extends controller {
         } elseif ( preg_match( '/Netscape/i', $u_agent ) ) {
             $bname = 'Netscape';
             $ub    = "Netscape";
+        } else {
+            $bname = 'Unknown';
+            $ub    = "Unknown";
         }
 
         // finally get the correct version number

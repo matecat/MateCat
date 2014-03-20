@@ -7,16 +7,16 @@ class XliffSAXTranslationReplacer{
 	private $inTU=false;//flag to check wether we are in a <trans-unit>
 	private $inTarget=false;//flag to check wether we are in a <target>, to ignore everything
 	private $isEmpty=false; //flag to check wether we are in an empty tag (<tag/>)
+
+//	private $innerBuffer; //buffer for special tag
+//	private $bufferIsActive = false; //buffer for special tag
+
 	private $offset=0;//offset for SAX pointer
 	private $ofp;//output stream pointer
 	private $currentBuffer;//the current piece of text it's been parsed
 	private $len;//length of the currentBuffer
 	private $segments; //array of translations
 	private $currentId;//id of current <trans-unit>
-	private $empty_tags=array('detected-encoding','detected-source-lang','detected-target-lang','fmt','sdl:cxt','cxt','sdl:node','sdl:ref-file','ref-file','sdl:seg','seg','x');
-	private $regular_tags=array('body','bpt','bpt-props','node-def','cxt-defs','ept','sdl:filetype-id','filetype-id','file','file-info','fmt-def','fmt-defs','g','group','header','internal-file','mrk','ph','props','reference','sdl:cxts','cxts','sdl:filetype','filetype','sdl:filetype-info','filetype-info','sdl:ref-files','ref-files','sdl:seg-defs','seg-defs','seg-source','sniff-info','source','st','tag','tag-defs','target','trans-unit','value','xliff');
-
-    //'cxt-def',
 
     private $target_lang;
 
@@ -63,21 +63,24 @@ class XliffSAXTranslationReplacer{
             // obfuscate entities because sax automatically does html_entity_decode
 			$temporary_check_buffer = preg_replace("/&(.*?);/", '##$1##', $this->currentBuffer);
 
+            $lastByte = $temporary_check_buffer[strlen($temporary_check_buffer) -1];
+
 			//avoid cutting entities in half: 
 			//the last fread could have truncated an entity (say, '&lt;' in '&l'), thus invalidating the escaping
-			while(strpos($temporary_check_buffer,'&')!==FALSE){
+			while( strpos( $temporary_check_buffer, '&' ) !== FALSE ) {
 				//if an entity is still present, fetch some more and repeat the escaping
 				$this->currentBuffer.=fread($fp,64);
 				$temporary_check_buffer = preg_replace("/&(.*?);/", '##$1##', $this->currentBuffer);
 			}
 			//free stuff outside the loop
 			unset($temporary_check_buffer);
-			//get lenght of chunk
-			$this->len=strlen($this->currentBuffer);
 
-			$this->currentBuffer = preg_replace("/&(.*?);/", '##$1##', $this->currentBuffer);
+            $this->currentBuffer = preg_replace("/&(.*?);/", '##$1##', $this->currentBuffer);
 
-			//parse chunk of text
+            //get lenght of chunk
+            $this->len = strlen( $this->currentBuffer );
+
+            //parse chunk of text
 			if (!xml_parse($xml_parser, $this->currentBuffer, feof($fp))) {
 				//if unable, die
 				die(sprintf("XML error: %s at line %d",
@@ -85,7 +88,7 @@ class XliffSAXTranslationReplacer{
 							xml_get_current_line_number($xml_parser)));
 			}
 			//get accumulated this->offset in document: as long as SAX pointer advances, we keep track of total bytes it has seen so far; this way, we can translate its global pointer in an address local to the current buffer of text to retrieve last char of tag
-			$this->offset+=$this->len;
+            $this->offset += $this->len;
 		}
 		//close parser
 		xml_parser_free($xml_parser);
@@ -105,56 +108,63 @@ class XliffSAXTranslationReplacer{
 			//get id
 			$this->currentId=$attr['id'];
 		}
-		//check if we are entering into a <target>
-		if('target'==$name){
-			$this->inTarget=true;
-		}
+
+        //check if we are entering into a <target>
+        if('target'==$name){
+            $this->inTarget = true;
+        }
+
+        //check if we are inside a <target>
 		//<target> must be stripped to be replaced, so this check avoids <target> reconstruction
-		if(!$this->inTarget){
+        if ( !$this->inTarget ) {
 
 			//costruct tag
-			$tag="<$name ";
-			foreach($attr as $k=>$v){
+            $tag = "<$name ";
+
+			foreach( $attr as $k => $v ){
 
                 //if tag name is file, we must replace the target-language attribute
                 if( $name == 'file' && $k == 'target-language' && !empty($this->target_lang) ){
                     //replace Target language with job language provided from constructor
-				    $tag.="$k=\"$this->target_lang\" ";
+				    $tag .= "$k=\"$this->target_lang\" ";
                     //Log::doLog($k . " => " . $this->target_lang);
                 } else {
                     //put attributes in it
-                    $tag.="$k=\"$v\" ";
+                    $tag .= "$k=\"$v\" ";
                 }
 
 			}
 
 			//this logic helps detecting empty tags
 			//get current position of SAX pointer in all the stream of data is has read so far: it points at the end of current tag
-			$idx = xml_get_current_byte_index($parser);
-			//check wether the bounds of current tag are entirely in current buffer or the end of the current tag is outside current buffer (in the latter case, it's in next buffer to be read by the while loop); this check is necessary because we may have truncated a tag in half with current read, and the other half may be encountered in the next buffer it will be passed
-			if (isset($this->currentBuffer[$idx-$this->offset])) {
-				//if this tag entire lenght fitted in the buffer, the last char must be the last symbol before the '>'; if it's an empty tag, it is assumed that it's a '/'
-				$tmp_offset=$idx-$this->offset;
-			} else {
-				//if it's out, simple use the last character of the chunk
-				$tmp_offset=$this->len-1;
-			}
+            $idx = xml_get_current_byte_index( $parser );
+            //check wether the bounds of current tag are entirely in current buffer or the end of the current tag is outside current buffer (in the latter case, it's in next buffer to be read by the while loop); this check is necessary because we may have truncated a tag in half with current read, and the other half may be encountered in the next buffer it will be passed
+            if ( isset( $this->currentBuffer[ $idx - $this->offset ] ) ) {
+                //if this tag entire lenght fitted in the buffer, the last char must be the last symbol before the '>'; if it's an empty tag, it is assumed that it's a '/'
+                $tmp_offset = $idx - $this->offset;
+                $lastChar = $this->currentBuffer[ $idx - $this->offset ];
+            } else {
+                //if it's out, simple use the last character of the chunk
+                $tmp_offset = $this->len - 1;
+                $lastChar = $this->currentBuffer[ $this->len - 1 ];
+            }
 
-			//detect empty tag
-			//if last char of tag is a backslash (or it's a well known empty tag), it's an empty tag
-			if(in_array($name,$this->empty_tags) and !in_array($name,$this->regular_tags)){
-				$this->isEmpty=true;
-				//add the slash to the tag
-				$tag.='/';
-			}
+            //trim last space
+            $tag = rtrim( $tag );
 
-			//trim last space
-			$tag=rtrim($tag);
+            //detect empty tag
+            $this->isEmpty = ( $lastChar == '/' || $name == 'x' );
+            if( $this->isEmpty ){
+                $tag .= '/';
+            }
+
 			//add tag ending
-			$tag.=">";
-			//flush to pointer
-			$this->postProcAndflush($this->ofp,$tag);
+            $tag .= ">";
+
+            $this->postProcAndflush( $this->ofp, $tag );
+
 		}
+
 	}
 
 	/*
@@ -163,17 +173,19 @@ class XliffSAXTranslationReplacer{
 	private function tagClose($parser, $name){
 
         $wasTarget = false;
+        $tag = '';
 
 		//if it is an empty tag, do not add closing tag
-		if(!$this->isEmpty){
-			$tag='';
-			if(!$this->inTarget){
-				//add ending tag
-				$tag="</$name>";
-			}
+		if( !$this->isEmpty ){
+
+            if( !$this->inTarget ){
+                $tag = "</$name>";
+            }
+
 			//if it's a source and there is a translation available, append the target to it
-			if('target'==$name){
-				if(isset($this->segments[ 'matecat|' . $this->currentId ] )){
+            if ( 'target' == $name ) {
+
+				if( isset($this->segments[ 'matecat|' . $this->currentId ] ) ){
 					//get translation of current segment, by indirect indexing: id -> positional index -> segment
 					//actually there may be more that one segment to that ID if there are two mrk of the same source segment
 					$id_list=$this->segments[ 'matecat|' . $this->currentId ];
@@ -188,74 +200,26 @@ class XliffSAXTranslationReplacer{
 					//append translation
 					$tag="<target>$translation</target>";
 				}
+
 				//signal we are leaving a target
-				$this->inTarget=false;
-                $wasTarget = true;
+                $this->inTarget = false;
+                $wasTarget      = true;
+
 			}
-			//flush to pointer
-			$this->postProcAndflush($this->ofp,$tag, $wasTarget);
 
-            /**
-             *
-             * ctx-def tags can be either empty and not empty,
-             * we can't determine which type it is a runtime,
-             *
-             * Because they can be only at beginning of trados file ( after the base64 encoded original file )
-             * we patch the content with the original one
-             *
-             */
-            if( $name == "cxt-defs" ){
-
-                $fp_original = fopen( $this->filename, "r" );
-
-                if ( is_resource( $fp_original ) ) {
-
-                    $idx = xml_get_current_byte_index($parser);
-
-                    $partial_orig_xliff = fread( $fp_original, $idx + 1024 );
-                    preg_match( '/(<cxt-defs.*<\/cxt-defs>)/si', $partial_orig_xliff, $matches );
-                    fclose($fp_original);
-                    if( isset( $matches[1] ) && !empty($matches[1]) ){
-
-                        //open in read/write mode and place pointer at the begin of file
-                        rewind($this->ofp);
-
-                        //read needed, there should be some changes in files
-                        //temporary file are ALWAYS shorter than original so $idx it's enough
-                        $partial_output_xliff = fread( $this->ofp, filesize( $this->filename.'.out.sdlxliff' )  );
-
-                        //REWIND
-                        rewind( $this->ofp );
-
-                        //rewrite cxt-defs content
-                        $output_patched = preg_replace( '/<cxt-defs.*<\/cxt-defs>/si', $matches[1], $partial_output_xliff );
-
-                        //OVERWRITE with the manipulated AND patched content
-                        fwrite( $this->ofp, $output_patched );
-                        unset($partial_output_xliff); //free mem
-                        unset($output_patched); //free mem
-                        unset($partial_orig_xliff); //free mem
-
-                    } else {
-                        Log::doLog( "failed retrieve ctx-defs content ?!?" );
-                    }
-
-                } else {
-                    Log::doLog( "could not open some XML input" );
-                }
-
-            }
-
-		}
-		else{
+		} else{
 			//ok, nothing to be done; reset flag for next coming tag
-			$this->isEmpty=false;
+            $this->isEmpty = false;
 		}
 
-		//check if we are leaving a <trans-unit>
+        //flush to pointer
+        $this->postProcAndflush( $this->ofp, $tag, $wasTarget );
+
+        //check if we are leaving a <trans-unit>
 		if('trans-unit'==$name){
 			$this->inTU=false;
 		}
+
 	}
 
 	/*
@@ -315,15 +279,6 @@ class XliffSAXTranslationReplacer{
             }
 
 		}
-
-		//fix to escape non-html entities
-//		$translation = str_replace("&lt;", '#LT#', $translation);
-//		$translation = str_replace("&gt;", '#GT#', $translation);
-//		$translation = str_replace("&amp;", '#AMP#', $translation);
-//		$translation = html_entity_decode($translation,ENT_NOQUOTES,"utf-8");
-//		$translation = str_replace('#AMP#','&amp;', $translation);
-//		$translation = str_replace('#LT#','&lt;', $translation);
-//		$translation = str_replace('#GT#','&gt;', $translation);
 
 		@$xml_valid = simplexml_load_string("<placeholder>$translation</placeholder>");
 		if (!$xml_valid) {

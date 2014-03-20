@@ -231,9 +231,9 @@ class getContributionController extends ajaxController {
         ( isset($matches[0]['match']) ? $firstMatchVal = floatval( $matches[0]['match'] ) : null );
         if( isset( $firstMatchVal ) && $firstMatchVal >= 90 && $firstMatchVal < 100 ){
 
-            $srcSearch = strip_tags($this->text);
-            $segmentFound = strip_tags($matches[0]['raw_segment']);
-            $srcSearch = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $srcSearch ) );
+            $srcSearch    = strip_tags( $this->text );
+            $segmentFound = strip_tags( $matches[ 0 ][ 'raw_segment' ] );
+            $srcSearch    = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $srcSearch ) );
             $segmentFound = mb_strtolower( preg_replace( '#[\x{20}]{2,}#u', chr( 0x20 ), $segmentFound ) );
 
             $fuzzy = levenshtein($srcSearch, $segmentFound) / log10( mb_strlen( $srcSearch . $segmentFound ) +1 );
