@@ -3167,7 +3167,7 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 	opacity: 0.6;
 }
 
-#messageDisplay
+#messageBar
 {
 	display: block;
 	height: 26px;
@@ -3176,15 +3176,19 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 /*	-webkit-transition: all 200ms ease-in; 
 	transition: all 200ms ease-in;*/
 }
-#messageDisplay .msg
+#messageBar .msg
 {
 	display: block;
 	margin-top: 2px;
 }
-#messageDisplay .close
+#messageBar .close
 {
 	float: right;
 	margin: 6px 6px 0 0;
+}
+#messageBar.fixed .close
+{
+	display: none;
 }
 @keyframes fadein {
     from { opacity: 0; }
