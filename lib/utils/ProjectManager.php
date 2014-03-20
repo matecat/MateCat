@@ -139,17 +139,16 @@ class ProjectManager {
 
 			//if TMX, 
 			if('tmx'== pathinfo($fileName, PATHINFO_EXTENSION)){
-				//and have a TM key
-				if(!empty($this->projectStructure['private_tm_key'])){
-
-
-					//import the TMX, the check is deferred after this loop
-					log::doLog("loading \"$fileName\"");
-					$import_outcome=$this->tmxServiceWrapper->import("$uploadDir/$fileName",$this->projectStructure['private_tm_key']);
-					if('KO'==$import_outcome['status']){
-						$this->projectStructure['result']['errors'][] = array( "code" => -15, "message" => "Cant't load TMX files right now, try later" );
-						return false;
-					}
+				//import the TMX, the check is deferred after this loop
+				log::doLog("loading \"$fileName\"");
+				$import_outcome=$this->tmxServiceWrapper->import("$uploadDir/$fileName",$this->projectStructure['private_tm_key']);
+				if('400'==$import_outcome['responseStatus']){
+					$this->projectStructure['result']['errors'][] = array( "code" => -15, "message" => "Cant't load TMX files right now, try later" );
+					return false;
+				}
+				if('403'==$import_outcome["responseStatus"]){
+					$this->projectStructure['result']['errors'][] = array( "code" => -15, "message" => "Invalid key provided (".$this->projectStructure['private_tm_key'].")");
+					return false;
 				}
 
 				//in any case, skip the rest of the loop, go to the next file
@@ -265,80 +264,77 @@ class ProjectManager {
 
 			//if TMX, 
 			if('tmx'== pathinfo($fileName, PATHINFO_EXTENSION)){
-				//and have a TM key
-				if(!empty($this->projectStructure['private_tm_key'])){
-					//is the TM loaded?
-					$loaded=false;
+				//is the TM loaded?
+				$loaded=false;
 
-					//wait until current TMX is loaded
-					while(!$loaded){
-						//now we repeatedly scan the list of loaded TMs
-						//this counter is used to get the latest TM in case of duplicates 
-						$tmx_max_id=0;
+				//wait until current TMX is loaded
+				while(!$loaded){
+					//now we repeatedly scan the list of loaded TMs
+					//this counter is used to get the latest TM in case of duplicates 
+					$tmx_max_id=0;
 
-						//check if TM has been loaded
-						$allMemories=$this->tmxServiceWrapper->getStatus($this->projectStructure['private_tm_key'],$fileName);
+					//check if TM has been loaded
+					$allMemories=$this->tmxServiceWrapper->getStatus($this->projectStructure['private_tm_key'],$fileName);
 
-						if(0==count($allMemories)){
-							//what the hell? No memories although I've just loaded some? Eject!
-							$this->projectStructure['result']['errors'][] = array( "code" => -15, "message" => "Cant't load TMX files right now, try later" );
-							return false;
-
-						}
-
-						//scan through memories 
-						foreach($allMemories as $memory){
-							//obtain max id
-							$tmx_max_id=max($tmx_max_id,$memory['id']);
-
-							//if maximum is current, pick it (it means that, among duplicates, it's the latest)
-							if($tmx_max_id==$memory['id']){
-								$current_tm=$memory;
-							}
-						}
-
-						switch($current_tm['status']){
-							case "0":
-								//wait for the daemon to process it 
-								//THIS IS WRONG BY DESIGN, WE SHOULD NOT ACT AS AN ASYNCH DAEMON WHILE WE ARE IN A SYNCH APACHE PROCESS
-								log::doLog("waiting for \"$fileName\" to be loaded into MyMemory");
-								sleep(3);
-								break;
-							case "1":
-								//loaded (or error, in any case go ahead)
-								log::doLog("\"$fileName\" has been loaded into MyMemory");
-								$loaded=true;
-								break;
-							default:
-								$this->projectStructure['result']['errors'][] = array( "code" => -14, "message" => "Invalid TMX ($fileName)" );
-								return false;
-								break;
-						}
+					if("200"!=$allMemories['responseStatus'] or 0==count($allMemories['responseData']['tm'])){
+						//what the hell? No memories although I've just loaded some? Eject!
+						$this->projectStructure['result']['errors'][] = array( "code" => -15, "message" => "Cant't load TMX files right now, try later" );
+						return false;
 
 					}
 
-					//once the language is loaded, check if language is compliant (unless something useful has already been found)
-					if(1==$this->checkTMX){
-						//get localized target languages of TM (in case it's a multilingual TM)
-						$tmTargets=explode(';',$current_tm['target_lang']);
+					//scan through memories 
+					foreach($allMemories['responseData']['tm'] as $memory){
+						//obtain max id
+						$tmx_max_id=max($tmx_max_id,$memory['id']);
 
-						//indicates if something has been found for current memory
-						$found=false;
-
-						//compare localized target languages array (in case it's a multilingual project) to the TM supplied
-						//if nothing matches, then the TM supplied can't have matches for this project
-						foreach($this->projectStructure['target_language'] as $projectTarget){
-							if(in_array($this->langService->getLocalizedName($projectTarget),$tmTargets)){
-								$found=true;
-								break;
-							}
+						//if maximum is current, pick it (it means that, among duplicates, it's the latest)
+						if($tmx_max_id==$memory['id']){
+							$current_tm=$memory;
 						}
+					}
 
-						//if this TM matches the project lagpair and something has been found
-						if($found and $current_tm['source_lang']==$this->langService->getLocalizedName($this->projectStructure['source_language'])){
-							//the TMX is good to go
-							$this->checkTMX=0;
+					switch($current_tm['status']){
+						case "0":
+							//wait for the daemon to process it 
+							//THIS IS WRONG BY DESIGN, WE SHOULD NOT ACT AS AN ASYNCH DAEMON WHILE WE ARE IN A SYNCH APACHE PROCESS
+							log::doLog("waiting for \"$fileName\" to be loaded into MyMemory");
+							sleep(3);
+							break;
+						case "1":
+							//loaded (or error, in any case go ahead)
+							log::doLog("\"$fileName\" has been loaded into MyMemory");
+							$loaded=true;
+							break;
+						default:
+							$this->projectStructure['result']['errors'][] = array( "code" => -14, "message" => "Invalid TMX ($fileName)" );
+							return false;
+							break;
+					}
+
+				}
+
+				//once the language is loaded, check if language is compliant (unless something useful has already been found)
+				if(1==$this->checkTMX){
+					//get localized target languages of TM (in case it's a multilingual TM)
+					$tmTargets=explode(';',$current_tm['target_lang']);
+
+					//indicates if something has been found for current memory
+					$found=false;
+
+					//compare localized target languages array (in case it's a multilingual project) to the TM supplied
+					//if nothing matches, then the TM supplied can't have matches for this project
+					foreach($this->projectStructure['target_language'] as $projectTarget){
+						if(in_array($this->langService->getLocalizedName($projectTarget),$tmTargets)){
+							$found=true;
+							break;
 						}
+					}
+
+					//if this TM matches the project lagpair and something has been found
+					if($found and $current_tm['source_lang']==$this->langService->getLocalizedName($this->projectStructure['source_language'])){
+						//the TMX is good to go
+						$this->checkTMX=0;
 					}
 				}
 			}
@@ -1125,7 +1121,7 @@ class ProjectManager {
 
 	public static function getExtensionFromMimeType( $mime_type ){
 
-        $reference = include('mime2extension.inc.php');
+		$reference = include('mime2extension.inc.php');
 		if( array_key_exists( $mime_type, $reference ) ){
 			if ( array_key_exists( 'default', $reference[$mime_type] ) ) return $reference[$mime_type]['default'];
 			return $reference[$mime_type][ array_rand( $reference[$mime_type] ) ]; // rand :D
