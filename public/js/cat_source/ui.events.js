@@ -65,11 +65,12 @@ $.extend(UI, {
 			UI.toggleSearch(e);
 		}).bind('keydown', 'Ctrl+f', function(e) {
 			UI.toggleSearch(e);
-		}).on('click', '#messageDisplay .close', function(e) {
-			e.preventDefault();
-			$('body').removeClass('incomingMsg');
-			var expireDate = new Date($('#messageDisplay').attr('data-expire'));
-			$.cookie($('#messageDisplay').attr('data-token'), '', { expires: expireDate });		
+//		}).on('click', '#messageBar .close', function(e) {
+//			e.preventDefault();
+//			$('body').removeClass('incomingMsg');
+//			var expireDate = new Date($('#messageBar').attr('data-expire'));
+//			$.cookie($('#messageBar').attr('data-token'), '', { expires: expireDate });		
+					
 //		}).on('change', '#hideAlertConfirmTranslation', function(e) {
 //			console.log($(this).prop('checked'));
 //			if ($(this).prop('checked')) {
@@ -89,6 +90,8 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.closeContextMenu();
 			UI.addWord(UI.selectedMisspelledElement.text());
+		}).on('click', '.reloadPage', function(e) {
+			location.reload(true);
 		}).on('click', '.tag-autocomplete li', function(e) {
 			e.preventDefault();
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));

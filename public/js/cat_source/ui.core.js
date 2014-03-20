@@ -1593,14 +1593,27 @@ UI = {
 		if($('body').hasClass('incomingMsg')) return false;
 		$.each(messages, function(index) {
 			if(typeof $.cookie('msg-' + this.token) == 'undefined') {
-//				$.cookie('msg-' + this.token, '', { expires: 7 });
-				msg = this.msg;
-				$('#messageDisplay .msg').html(msg);
-				$('#messageDisplay').attr('data-token', 'msg-' + this.token).attr('data-expire', this.expire);
-				$('body').addClass('incomingMsg');
+				UI.showMessage({
+					msg: this.msg,
+					token: this.token,
+					showOnce: true,
+					cookieExpire: this.expire
+				});
 				return false;
 			}
 		});
+	},
+	showMessage: function(options) {
+		APP.showMessage(options);
+	},
+	checkVersion: function() {
+		if(this.version != config.build_number) {
+			UI.showMessage({
+				msg: 'A new version of MateCat has been released. Please <a href="#" class="reloadPage">click here</a> or clic CTRL+F5 (or CMD+R on Mac) to update.',
+				token: false,
+				fixed: true
+			});
+		}
 	},
 	currentSegmentQA: function() {
 		this.currentSegment.addClass('waiting_for_check_result');
@@ -2144,10 +2157,6 @@ $(document).ready(function() {
 	});
 	//launch segments check on opening
 	UI.checkWarnings(true);
-	//and on every polling interval
-//	setInterval(function() {
-//		UI.checkWarnings(false);
-//	}, config.warningPollingInterval);
 });
 
 $.extend($.expr[":"], {

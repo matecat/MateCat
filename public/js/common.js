@@ -83,6 +83,33 @@ APP = {
         this.checkConfirmation();
         return APP.confirmValue;
     },
+	initMessageBar: function() {
+		if(!$('header #messageBar').length) {
+			console.log('no messageBar found');
+			$('header').prepend('<div id="messageBar"><span class="msg"></span><a href="#" class="close"></a></div>');
+		}
+		$("body").on('click', '#messageBar .close', function(e) {
+			e.preventDefault();
+			$('body').removeClass('incomingMsg');
+			if(typeof $('#messageBar').attr('data-token') != 'undefined') {
+				var expireDate = new Date($('#messageBar').attr('data-expire'));
+				$.cookie($('#messageBar').attr('data-token'), '', { expires: expireDate });				
+			}
+		});
+	},
+	showMessage: function(options) {
+		$('#messageBar .msg').html(options.msg);
+		if(options.showOnce) {
+			$('#messageBar').attr('data-token', 'msg-' + options.token).attr('data-expire', options.expire);
+		}
+		if(typeof options.fixed != 'undefined') {
+			$('#messageBar').addClass('fixed');
+		} else {
+			$('#messageBar').removeClass('fixed');			
+		}
+		$('body').addClass('incomingMsg');
+	},
+
     checkConfirmation: function() {
 //        if(this.waitingConfirm) {
 //            setTimeout(function() {
