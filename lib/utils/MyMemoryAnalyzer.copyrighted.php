@@ -11,7 +11,7 @@ include_once (INIT::$UTILS_ROOT."/Utils.php"); //only for testing purpose
 
 class MyMemoryAnalyzer {
 
-	private $url = "http://api-proxied.mymemory.translated.net";
+	private $url = "http://api.mymemory.translated.net";
 
 	public function __construct() {
 

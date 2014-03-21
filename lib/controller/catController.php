@@ -314,31 +314,43 @@ class catController extends viewController {
 		$this->template->filtered = $this->filter_enabled;
 		$this->template->filtered_class = ($this->filter_enabled) ? ' open' : '';
 
-        ( INIT::$VOLUME_ANALYSIS_ENABLED        ? $this->template->analysis_enabled = true : null );
+		( INIT::$VOLUME_ANALYSIS_ENABLED        ? $this->template->analysis_enabled = true : null );
 
-        if( array_key_exists( $this->target_code, CatUtils::$cjk ) ){
-            $this->template->taglockEnabled = 0;
-        }
+		//check if it is a composite language, for cjk check that accepts only ISO 639 code
+		if(strpos($this->target_code,'-')!==FALSE){
+			//pick only first part
+			$tmp_lang=explode('-',$this->target_code);
+			$target_code_no_country=$tmp_lang[0];
+			unset($tmp_lang);
+		}else{
+			//not a RFC code, it's fine
+			$target_code_no_country=$this->target_code;
+		}
 
-        /*
-         * Line Feed PlaceHolding System
-         */
-        $this->template->brPlaceholdEnabled = $placeHoldingEnabled = true;
+		//check if cjk
+		if( array_key_exists( $target_code_no_country, CatUtils::$cjk ) ){
+			$this->template->taglockEnabled = 0;
+		}
 
-        if( $placeHoldingEnabled ){
+		/*
+		 * Line Feed PlaceHolding System
+		 */
+		$this->template->brPlaceholdEnabled = $placeHoldingEnabled = true;
 
-            $this->template->lfPlaceholder        = CatUtils::lfPlaceholder;
-            $this->template->crPlaceholder        = CatUtils::crPlaceholder;
-            $this->template->crlfPlaceholder      = CatUtils::crlfPlaceholder;
-            $this->template->lfPlaceholderClass   = CatUtils::lfPlaceholderClass;
-            $this->template->crPlaceholderClass   = CatUtils::crPlaceholderClass;
-            $this->template->crlfPlaceholderClass = CatUtils::crlfPlaceholderClass;
-            $this->template->lfPlaceholderRegex   = CatUtils::lfPlaceholderRegex;
-            $this->template->crPlaceholderRegex   = CatUtils::crPlaceholderRegex;
-            $this->template->crlfPlaceholderRegex = CatUtils::crlfPlaceholderRegex;
+		if( $placeHoldingEnabled ){
 
-        }
+			$this->template->lfPlaceholder        = CatUtils::lfPlaceholder;
+			$this->template->crPlaceholder        = CatUtils::crPlaceholder;
+			$this->template->crlfPlaceholder      = CatUtils::crlfPlaceholder;
+			$this->template->lfPlaceholderClass   = CatUtils::lfPlaceholderClass;
+			$this->template->crPlaceholderClass   = CatUtils::crPlaceholderClass;
+			$this->template->crlfPlaceholderClass = CatUtils::crlfPlaceholderClass;
+			$this->template->lfPlaceholderRegex   = CatUtils::lfPlaceholderRegex;
+			$this->template->crPlaceholderRegex   = CatUtils::crPlaceholderRegex;
+			$this->template->crlfPlaceholderRegex = CatUtils::crlfPlaceholderRegex;
 
-    }
+		}
+
+	}
 
 }
