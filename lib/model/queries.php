@@ -564,11 +564,12 @@ function getTranslatorKey( $id_translator ) {
     $db->query_first( $query );
     $results = $db->query_first( $query );
 
+    $res = null;
     if ( ( is_array( $results ) ) AND ( array_key_exists( "mymemory_api_key", $results ) ) ) {
-        return $results[ 'mymemory_api_key' ];
+        $res = $results[ 'mymemory_api_key' ];
     }
 
-    return null;
+    return $res;
 }
 
 function getEngines( $type = "MT" ) {

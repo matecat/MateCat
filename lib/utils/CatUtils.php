@@ -195,6 +195,9 @@ class CatUtils {
             html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8'),
             ENT_NOQUOTES, 'UTF-8', false
         );
+
+        $segment = preg_replace('/&(?!lt|gt|amp|quot|apos)/', '&amp;' , $segment );
+
         $segment = self::restore_xliff_tags($segment);
         return $segment;
     }

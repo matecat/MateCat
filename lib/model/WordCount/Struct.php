@@ -21,7 +21,7 @@ class WordCount_Struct {
     protected $old_status = null;
     protected $new_status = null;
 
-    protected $total = 0;
+    protected $total;
 
     /**
      * @param null $id_segment
@@ -202,13 +202,16 @@ class WordCount_Struct {
      * @return int
      */
     public function getTotal(){
-        return $this->total = (
+
+        $this->total = (
                 $this->new_words +
                 $this->draft_words +
                 $this->translated_words +
                 $this->rejected_words +
                 $this->approved_words
         );
+
+        return ( $this->total == 0 ) ? 1 : $this->total;
     }
 
 } 
