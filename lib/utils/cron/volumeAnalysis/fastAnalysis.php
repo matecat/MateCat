@@ -24,35 +24,32 @@ while (1) {
 	foreach ($pid_list as $pid_res) {
 		$pid = $pid_res['id'];
 		echo "analyzing $pid, querying data...";
-        Log::doLog( "analyzing $pid, querying data..." );
+		Log::doLog( "analyzing $pid, querying data..." );
 
 		$segments=getSegmentsForFastVolumeAnalysys($pid);
 
-        //remove tags before Fast Match count for CJK languages and other also
-//        if( isset($segments[0]['source']) && array_key_exists( $segments[0]['source'], CatUtils::$cjk ) ){
-            foreach( $segments as $pos => $segment ){
-                $segments[$pos]['segment'] = CatUtils::clean_raw_string4fast_word_count( $segment['segment'], $segments[0]['source'] );
-            }
-//        }
+		foreach( $segments as $pos => $segment ){
+			$segments[$pos]['segment'] = CatUtils::clean_raw_string4fast_word_count( $segment['segment'], $segments[0]['source'] );
+		}
 
 		echo "done\n";
-        Log::doLog( "done" );
+		Log::doLog( "done" );
 
 		$num=count($segments);
 
 		echo "pid $pid: $num segments\n";
-        Log::doLog( "pid $pid: $num segments" );
+		Log::doLog( "pid $pid: $num segments" );
 		echo "sending query to MyMemory analysis...";
-        Log::doLog( "sending query to MyMemory analysis..." );
+		Log::doLog( "sending query to MyMemory analysis..." );
 
 		$fastReport = $ws->fastAnalysis($segments);
 
 		echo "done\n";
 		echo "collecting stats...";
-        Log::doLog( "done" );
-        Log::doLog( "collecting stats..." );
+		Log::doLog( "done" );
+		Log::doLog( "collecting stats..." );
 
-        $data=$fastReport['data'];
+		$data=$fastReport['data'];
 		foreach ($data as $k=>$v){
 			if (in_array($v['type'], array("75%-84%","85%-94%","95%-99%"))){
 				$data[$k]['type']="INTERNAL";
@@ -64,7 +61,7 @@ while (1) {
 		}
 
 		echo "done\n";
-        Log::doLog( "done" );
+		Log::doLog( "done" );
 
 		$perform_Tms_Analysis = true;
 		$status = "FAST_OK";
@@ -81,9 +78,9 @@ while (1) {
 		}
 
 		echo "inserting segments...\n";
-        Log::doLog( "inserting segments..." );
+		Log::doLog( "inserting segments..." );
 
-        $insertReportRes = insertFastAnalysis($pid,$data, $equivalentWordMapping, $perform_Tms_Analysis);
+		$insertReportRes = insertFastAnalysis($pid,$data, $equivalentWordMapping, $perform_Tms_Analysis);
 		if ($insertReportRes < 0) {
 			Log::doLog( "insertFastAnalysis failed...." );
 			echo( "insertFastAnalysis failed...." );
@@ -91,16 +88,16 @@ while (1) {
 		}
 
 		echo "done\n";
-        Log::doLog( "done" );
+		Log::doLog( "done" );
 		echo "changing project status...";
-        Log::doLog( "changing project status..." );
+		Log::doLog( "changing project status..." );
 
-        $change_res = changeProjectStatus($pid, $status);
+		$change_res = changeProjectStatus($pid, $status);
 		if ($change_res < 0) {
 		}
 
 		echo "done\n";
-        Log::doLog( "done" );
+		Log::doLog( "done" );
 	}
 }
 ?>

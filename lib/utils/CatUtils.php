@@ -22,7 +22,7 @@ class CatUtils {
     const crPlaceholderRegex   = '/\#\#\$_0D\$\#\#/g';
     const crlfPlaceholderRegex = '/\#\#\$_0D0A\$\#\#/g';
 
-    public static $cjk = array( 'zh-TW' => 1.8, 'zh-CN' => 1.8, 'ja-JP' => 2.5, 'ko-KR' => 2.5, 'km-KH' => 5 );
+    public static $cjk = array( 'zh' => 1.8, 'ja' => 2.5, 'ko' => 2.5, 'km' => 5 );
 
     //following functions are useful for manage the consistency of non braking spaces
     // chars coming, expecially,from MS Word
@@ -701,6 +701,12 @@ class CatUtils {
         if ( $app == "" ) {
             return '';
         }
+		
+		if(strpos($source_lang,'-')!==FALSE){
+			$tmp_lang=explode('-',$source_lang);
+			$source_lang=$tmp_lang[0];
+			unset($tmp_lang);
+		}
 
         $string = preg_replace( "#<.*?" . ">#si", "", $string );
         $string = preg_replace( "#<\/.*?" . ">#si", "", $string );
@@ -752,6 +758,13 @@ class CatUtils {
 
     //CONTA LE PAROLE IN UNA STRINGA
     public static function segment_raw_wordcount( $string, $source_lang = 'en-US' ) {
+
+		if(strpos($source_lang,'-')!==FALSE){
+			$tmp_lang=explode('-',$source_lang);
+			$source_lang=$tmp_lang[0];
+			unset($tmp_lang);
+		}
+
 
         $string = self::clean_raw_string4fast_word_count( $string, $source_lang );
 
