@@ -196,7 +196,8 @@ class CatUtils {
             ENT_NOQUOTES, 'UTF-8', false
         );
 
-        $segment = preg_replace('/&(?!lt|gt|amp|quot|apos)/', '&amp;' , $segment );
+        //encode all not valid XML entities
+        $segment = preg_replace('/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,4};)/', '&amp;' , $segment );
 
         $segment = self::restore_xliff_tags($segment);
         return $segment;

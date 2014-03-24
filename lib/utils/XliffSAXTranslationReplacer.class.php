@@ -8,8 +8,8 @@ class XliffSAXTranslationReplacer{
 	private $inTarget=false;//flag to check wether we are in a <target>, to ignore everything
 	private $isEmpty=false; //flag to check wether we are in an empty tag (<tag/>)
 
-//	private $innerBuffer; //buffer for special tag
-//	private $bufferIsActive = false; //buffer for special tag
+	private $CDATABuffer = ""; //buffer for special tag
+	private $bufferIsActive = false; //buffer for special tag
 
 	private $offset=0;//offset for SAX pointer
 	private $ofp;//output stream pointer
@@ -102,19 +102,19 @@ class XliffSAXTranslationReplacer{
 	 */
 	private function tagOpen($parser, $name, $attr){
 
-		//check if we are entering into a <trans-unit>
-		if('trans-unit'==$name){
-			$this->inTU=true;
-			//get id
-			$this->currentId=$attr['id'];
-		}
+//		//check if we are entering into a <trans-unit>
+//		if('trans-unit'==$name){
+//			$this->inTU=true;
+//			//get id
+//			$this->currentId=$attr['id'];
+//		}
 
         //check if we are entering into a <target>
         if('target'==$name){
             $this->inTarget = true;
         }
 
-        //check if we are inside a <target>
+        //check if we are inside a <target>, obviously this happen only if there are targets inside the trans-unit
 		//<target> must be stripped to be replaced, so this check avoids <target> reconstruction
         if ( !$this->inTarget ) {
 
@@ -161,7 +161,13 @@ class XliffSAXTranslationReplacer{
 			//add tag ending
             $tag .= ">";
 
-            $this->postProcAndflush( $this->ofp, $tag );
+            //seta a Buffer for the segSource Source tag
+            if( 'source' == $name || 'seg-source' == $name || $this->bufferIsActive ){
+                $this->bufferIsActive = true;
+                $this->CDATABuffer .= $tag;
+            } else {
+                $this->postProcAndflush( $this->ofp, $tag );
+            }
 
 		}
 
@@ -172,53 +178,70 @@ class XliffSAXTranslationReplacer{
 	 */
 	private function tagClose($parser, $name){
 
-        $wasTarget = false;
         $tag = '';
 
-		//if it is an empty tag, do not add closing tag
+        /**
+         * if it is an empty tag, do not add closing tag because we have already closed it in
+         *
+         * self::tagOpen method
+         *
+         */
 		if( !$this->isEmpty ){
 
             if( !$this->inTarget ){
                 $tag = "</$name>";
             }
 
-			//if it's a source and there is a translation available, append the target to it
+            //if it's a source and there is a translation available, append the target to it
             if ( 'target' == $name ) {
 
-				if( isset($this->segments[ 'matecat|' . $this->currentId ] ) ){
-					//get translation of current segment, by indirect indexing: id -> positional index -> segment
-					//actually there may be more that one segment to that ID if there are two mrk of the same source segment
-					$id_list=$this->segments[ 'matecat|' . $this->currentId ];
+                if ( isset( $this->segments[ 'matecat|' . $this->currentId ] ) ) {
+                    //get translation of current segment, by indirect indexing: id -> positional index -> segment
+                    //actually there may be more that one segment to that ID if there are two mrk of the same source segment
+                    $id_list = $this->segments[ 'matecat|' . $this->currentId ];
 
-					//init translation
-					$translation='';
-					foreach($id_list as $id){
-						$seg=$this->segments[$id];
-						//add xliff markup, appending multiple MRKs
-						$translation=$this->prepareSegment($seg,$translation);
-					}
-					//append translation
-					$tag="<target>$translation</target>";
-				}
+                    //init translation
+                    $translation = '';
+                    foreach ( $id_list as $id ) {
+                        $seg = $this->segments[ $id ];
+                        //add xliff markup, appending multiple MRKs
+                        $translation = $this->prepareSegment( $seg, $translation );
+                    }
+                    //append translation
+                    $tag = "<target>$translation</target>";
+                }
 
-				//signal we are leaving a target
+                //signal we are leaving a target
                 $this->inTarget = false;
-                $wasTarget      = true;
+                $this->postProcAndflush( $this->ofp, $tag, $treatAsCDATA = true );
 
-			}
+            } elseif ( 'source' == $name || 'seg-source' == $name ) { // we are closing a critical CDATA section
 
-		} else{
+                $this->bufferIsActive = false;
+                $tag                  = $this->CDATABuffer . "</$name>";
+                $this->CDATABuffer    = "";
+                //flush to pointer
+                $this->postProcAndflush( $this->ofp, $tag );
+
+            } elseif ( $this->bufferIsActive ) { // this is a tag ( <g | <mrk ) inside a seg or seg-source tag
+                $this->CDATABuffer .= "</$name>";
+                //Do NOT Flush
+
+            } else { //generic tag closure do Nothing
+                //flush to pointer
+                $this->postProcAndflush( $this->ofp, $tag );
+            }
+
+
+        } else{
 			//ok, nothing to be done; reset flag for next coming tag
             $this->isEmpty = false;
 		}
 
-        //flush to pointer
-        $this->postProcAndflush( $this->ofp, $tag, $wasTarget );
-
-        //check if we are leaving a <trans-unit>
-		if('trans-unit'==$name){
-			$this->inTU=false;
-		}
+//        //check if we are leaving a <trans-unit>
+//		if('trans-unit'==$name){
+//			$this->inTU=false;
+//		}
 
 	}
 
@@ -227,21 +250,25 @@ class XliffSAXTranslationReplacer{
 	 */
 	private function characterData($parser,$data){
 		//don't write <target> data
-		if(!$this->inTarget){
+		if(!$this->inTarget && !$this->bufferIsActive ){
 
 			//flush to pointer
 			$this->postProcAndflush($this->ofp,$data);
-		}
+
+		} elseif( $this->bufferIsActive ) {
+            $this->CDATABuffer .= $data;
+        }
+
 	}
 
 	/*
 	   postprocess escaped data and write to disk
 	 */
-    private function postProcAndFlush( $fp, $data, $wasTarget = false ) {
+    private function postProcAndFlush( $fp, $data, $treatAsCDATA = false ) {
         //postprocess string
         $data = preg_replace( "/##(.*?)##/", '&$1;', $data );
         $data = str_replace( '&nbsp;', ' ', $data );
-        if ( !$wasTarget ) {
+        if ( !$treatAsCDATA ) {
             $data = str_replace( "\r\n", "\r", $data );
             $data = str_replace( "\n", "\r", $data );
             $data = str_replace( "\r", "\r\n", $data );
@@ -280,6 +307,7 @@ class XliffSAXTranslationReplacer{
 
 		}
 
+        //already useful after QA implementation?? Log to see if they executed some times
 		@$xml_valid = simplexml_load_string("<placeholder>$translation</placeholder>");
 		if (!$xml_valid) {
 			$temp = preg_split("|\<|si", $translation);
@@ -292,8 +320,11 @@ class XliffSAXTranslationReplacer{
 					$end_tags = "<$item$end_tags"; //insert at the top of the string
 				}
 			}
+            Log::doLog( "simplexml_load_string validation of $translation" );
 			$translation = str_replace($end_tags, "", $translation);
 		}
+        //already useful after QA implementation??
+
 
 		if (!empty($seg['mrk_id'])) {
 			$translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">".$seg['mrk_prev_tags'].$translation.$seg['mrk_succ_tags']."</mrk>";
