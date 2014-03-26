@@ -12,6 +12,7 @@ class INIT {
 	public static $DB_DATABASE;
 	public static $DB_USER;
 	public static $DB_PASS;
+    public static $MEMCACHE_SERVERS = array();
 	public static $LOG_REPOSITORY;
 	public static $STORAGE_DIR;
 	public static $UPLOAD_REPOSITORY;
@@ -155,6 +156,7 @@ class INIT {
 		self::$DB_USER     = "matecat"; //database login
 		self::$DB_PASS     = "matecat01"; //databasepassword
 
+        self::$MEMCACHE_SERVERS = array( 'localhost:11211' => 1 );
 
 		self::$STORAGE_DIR                     = self::$ROOT . "/storage";
 		self::$LOG_REPOSITORY                  = self::$STORAGE_DIR . "/log_archive";

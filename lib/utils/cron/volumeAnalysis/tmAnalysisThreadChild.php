@@ -5,6 +5,7 @@ include INIT::$UTILS_ROOT . "/engines/mt.class.php";
 include INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include INIT::$UTILS_ROOT . "/QA.php";
 include INIT::$UTILS_ROOT . "/PostProcess.php";
+include INIT::$UTILS_ROOT . "/MemcacheHandler.php";
 
 define("PID_FOLDER", ".pidlist");
 define("NUM_PROCESSES", 1);
@@ -35,6 +36,8 @@ $my_pid = getmypid();
 $parent_pid = posix_getppid();
 echo "--- (child $my_pid) : parent pid is $parent_pid\n";
 
+$memcacheHandler = MemcacheHandler::getInstance();
+
 while (1) {
     if (!processFileExists($my_pid)) {
         die("(child $my_pid) :  EXITING!  my file does not exists anymore\n");
@@ -63,21 +66,36 @@ while (1) {
     echo "\n";
 
     if (empty($segment)) {
-        deleteLockSegment($sid, $jid,"unlock");
         echo "--- (child $my_pid) : empty segment: no segment ready for tm volume analisys: wait 5 seconds\n";
         sleep(5);
         continue;
     }
 
     if (is_numeric($segment) and $segment < 0) {
-        deleteLockSegment($sid, $jid);
         setSegmentTranslationError($sid, $jid); // devo settarli come done e lasciare il vecchio livello di match
         echo "--- (child $my_pid) : FATAL !!  error occurred during fetching segment : exiting\n";
         continue;
     }
 
-
     $pid = $segment['pid'];
+
+    //get the number of segments in job
+    $_existingLock = $memcacheHandler->add( 'project_lock:' . $pid, true ); // lock for 1 month
+    if ( $_existingLock !== false ) {
+
+        $total_segs = getProjectSegmentsTranslationSummary( $pid );
+
+        $total_segs = array_pop( $total_segs ); // get the Rollup Value
+        var_export( $total_segs );
+
+        $memcacheHandler->add( 'project:' . $pid, $total_segs[ 'project_segments' ] );
+        $memcacheHandler->increment( 'num_analyzed:' . $pid, $total_segs[ 'num_analyzed' ] );
+        echo "--- (child $my_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID\n";
+    } else {
+        $_existingPid = $memcacheHandler->get( 'project:' . $pid );
+        echo "--- (child $my_pid) : found $_existingPid segments for PID in Memcache\n";
+    }
+
 
     echo "--- (child $my_pid) : fetched data for segment $sid-$jid. PID is $pid\n";
 
@@ -94,8 +112,9 @@ while (1) {
 
     if ($raw_wc == 0) {
         echo "--- (child $my_pid) : empty segment. deleting lock and continue\n";
-        deleteLockSegment($sid, $jid);
+        incrementCount( $pid, 0, 0 );
         setSegmentTranslationError($sid, $jid); // SET as DONE
+        tryToCloseProject( $pid, $my_pid );
         continue;
     }
 
@@ -203,8 +222,8 @@ while (1) {
     if ( !$matches || !is_array($matches) ) {
         echo "--- (child $my_pid) : error from mymemory : set error and continue\n"; // ERROR FROM MYMEMORY
         setSegmentTranslationError($sid, $jid); // devo settarli come done e lasciare il vecchio livello di match
-        deleteLockSegment($sid, $jid);
-        tryToCloseProject($pid);
+        incrementCount( $pid, 0, 0 );
+        tryToCloseProject( $pid, $my_pid );
         continue;
     }
 
@@ -308,42 +327,56 @@ while (1) {
     $ret = CatUtils::addTranslationSuggestion($sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json, $mt_qe );
     //set memcache
 
+    incrementCount( $pid, $eq_words, $standard_words );
+
     //unlock segment
 
-    deleteLockSegment($sid, $jid);
     echo "--- (child $my_pid) : segment $sid-$jid unlocked\n";
 
-    tryToCloseProject($pid);
+    tryToCloseProject( $pid, $my_pid );
 
 }
 
 //}
 
-function tryToCloseProject( $pid ){
+function incrementCount( $pid, $eq_words, $standard_words ){
+    $memcacheHandler = MemcacheHandler::getInstance();
+    $memcacheHandler->increment( 'eq_wc:' . $pid, $eq_words * 100 );
+    $memcacheHandler->increment( 'st_wc:' . $pid, $standard_words * 100 );
+    $memcacheHandler->increment( 'num_analyzed:' . $pid, 1 );
+}
 
-    global $my_pid;
 
-    $_analyzed_report = getProjectSegmentsTranslationSummary($pid);
+function tryToCloseProject( $pid, $child_process_id ){
 
-    $project_totals = array_pop($_analyzed_report); //remove rollup
 
-    echo "--- (child $my_pid) : count segments in project $pid = " . $project_totals['project_segments'] . "\n";
+    $project_totals                       = array();
+    $memcacheHandler                      = MemcacheHandler::getInstance();
+    $project_totals[ 'project_segments' ] = $memcacheHandler->get( 'project:' . $pid );
+    $project_totals[ 'num_analyzed' ]     = $memcacheHandler->get( 'num_analyzed:' . $pid );
+    $project_totals[ 'eq_wc' ]            = $memcacheHandler->get( 'eq_wc:' . $pid ) / 100;
+    $project_totals[ 'st_wc' ]            = $memcacheHandler->get( 'st_wc:' . $pid ) / 100;
 
-    if ( is_numeric( $_analyzed_report ) && $_analyzed_report < 0) {
-        echo "--- (child $my_pid) : WARNING !!! error while counting segments in projects $pid skipping and continue \n";
+    echo "--- (child $child_process_id) : count segments in project $pid = " . $project_totals['project_segments'] . "\n";
+    echo "--- (child $child_process_id) : Analyzed segments in project $pid = " . $project_totals['num_analyzed'] . "\n";
+
+    if ( empty( $project_totals[ 'project_segments' ] )) {
+        echo "--- (child $child_process_id) : WARNING !!! error while counting segments in projects $pid skipping and continue \n";
         return;
     }
 
     if ( $project_totals['project_segments'] - $project_totals['num_analyzed'] == 0 ) {
 
-        $pid_eq_words = $project_totals['eq_wc'];
-        $pid_standard_words = $project_totals['st_wc'];
+        $_analyzed_report = getProjectSegmentsTranslationSummary($pid);
 
-        echo "--- (child $my_pid) : analysis project $pid finished : change status to DONE\n";
-        $change_res = changeProjectStatus($pid, "DONE");
-        $tm_wc_res = changeTmWc($pid, $pid_eq_words, $pid_standard_words);
+        $total_segs = array_pop( $_analyzed_report ); //remove Rollup
 
-        echo "--- (child $my_pid) : trying to initialize job total word count.\n";
+        echo "--- (child $child_process_id) : analysis project $pid finished : change status to DONE\n";
+
+        changeProjectStatus($pid, "DONE");
+        changeTmWc( $pid, $project_totals['eq_wc'], $project_totals['st_wc'] );
+
+        echo "--- (child $child_process_id) : trying to initialize job total word count.\n";
         foreach( $_analyzed_report as $job_info ){
             $counter = new WordCount_Counter();
             $counter->initializeJobWordCount( $job_info['id_job'], $job_info['password'] );
