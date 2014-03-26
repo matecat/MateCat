@@ -136,7 +136,15 @@ function launchProcesses($numProcesses = 1, $equivalentWordMapping = array()) {
             } else {
                 echo "(child $pid) : file " . PID_FOLDER . "/$pid created !!!\n";
             }
-            pcntl_exec("/usr/bin/php",array("tmAnalysisThreadChild.php"));
+
+            try{
+                MemcacheHandler::getInstance();
+                pcntl_exec("/usr/bin/php",array("tmAnalysisThreadChild.php"));
+            } catch( LogicException $e ){
+                echo "(child $pid) : Memcache Server not configured. Fallback to Mysql Version\n";
+                pcntl_exec("/usr/bin/php",array("tmAnalysisThreadChildMySQL.php"));
+            }
+
             exit;
         }
         usleep(200000); // this sleep is for tempt to avoid two fork select the same segment: it will be better found something different. Problem table is MyISAM

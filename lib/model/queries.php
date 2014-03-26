@@ -2524,7 +2524,6 @@ function lockUnlockSegment( $sid, $jid, $value ) {
  *
  * @return mixed
  *
- * @deprecated No more used
  */
 function countSegments( $pid ) {
     $db = Database::obtain();
@@ -2622,7 +2621,9 @@ function countSegmentsTranslationAnalyzed( $pid ) {
                         WHEN st.standard_word_count != 0 THEN IF( st.tm_analysis_status = 'DONE', 1, 0 )
                         WHEN st.standard_word_count = 0 THEN 1
                     END
-                ) AS num_analyzed
+                ) AS num_analyzed,
+                SUM(eq_word_count) AS eq_wc ,
+                SUM(standard_word_count) AS st_wc
                 FROM segments s
                 JOIN segment_translations st ON s.id = st.id_segment
                 INNER JOIN jobs j ON j.id = st.id_job
