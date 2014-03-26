@@ -800,6 +800,8 @@ font-weight: normal !important;
 }
 
 
+.claim span {font-weight:bold; color:#39699a;}
+
 .extdoc {background: url(../img/matecat_file_icons.png) 6px 0 no-repeat !important;} /* .doc, .dot, . docx, .dotx, .docm, .dotm, .odt, .sxw*/
 .extppt {background: url(../img/matecat_file_icons.png) 6px -34px no-repeat !important;} /* .pot, .pps, .ppt, .potm, .potx, .ppsm, .ppsx, .pptm, .pptx, .odp, .sxi*/
 .exthtm {background: url(../img/matecat_file_icons.png) 6px -70px no-repeat !important;} /* .htm, .html, .xhtml */
