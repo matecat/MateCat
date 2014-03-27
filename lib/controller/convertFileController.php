@@ -59,7 +59,7 @@ class convertFileController extends ajaxController {
             //found proprietary xliff
             if ( $fileType['proprietary'] && !INIT::$CONVERSION_ENABLED ) {
                 unlink($file_path);
-                $this->result['errors'][] = array("code" => -7, "message" => 'Matecat Open-Source does not support ' . ucwords($fileType['proprietary_name']) . '. Use MatecatPro.' );
+                $this->result['errors'][] = array("code" => -7, "message" => 'Matecat Open-Source does not support ' . ucwords($fileType['proprietary_name']) . '. Use MatecatPro.', 'debug' => basename( $this->file_name ) );
                 return -1;
 
             }
@@ -85,7 +85,7 @@ class convertFileController extends ajaxController {
                 //custom error message passed directly to javascript client and displayed as is
                 $convertResult['errorMessage'] = "Error: failed to save converted file from cache to disk";
                 $this->result['code'] = -100;
-                $this->result['errors'][] = array( "code" => -100, "message" => $convertResult['errorMessage'] );
+                $this->result['errors'][] = array( "code" => -100, "message" => $convertResult['errorMessage'], 'debug' => basename( $this->file_name ) );
 
 			}
 
@@ -104,7 +104,25 @@ class convertFileController extends ajaxController {
 
 			$convertResult = $converter->convertToSdlxliff( $file_path, $this->source_lang, $single_language );
 
-			if ( $convertResult['isSuccess'] == 1 ) {
+            if ( $convertResult['isSuccess'] == 1 ) {
+
+                /* try to back convert the file */
+                $output_content                     = array();
+                $output_content[ 'out_xliff_name' ] = $file_path . '.out.sdlxliff';
+                $output_content[ 'source' ]         = $this->source_lang;
+                $output_content[ 'target' ]         = $single_language;
+                $output_content[ 'content' ]        = $convertResult['xliffContent'];
+                $output_content[ 'filename' ]       = $this->file_name;
+                $back_convertResult                 = $converter->convertToOriginal( $output_content );
+                /* try to back convert the file */
+
+                if( $back_convertResult['isSuccess'] == false ){
+                    //custom error message passed directly to javascript client and displayed as is
+                    $convertResult['errorMessage'] = "Error: there is a problem with this file, it cannot be reconverted to the original.";
+                    $this->result['code'] = -100;
+                    $this->result['errors'][] = array( "code" => -100, "message" => $convertResult['errorMessage'], 'debug' => basename( $this->file_name ) );
+                    return false;
+                }
 
 				//$uid = $convertResult['uid']; // va inserito nel database
 				$xliffContent = $convertResult['xliffContent'];
@@ -116,7 +134,7 @@ class convertFileController extends ajaxController {
                         //custom error message passed directly to javascript client and displayed as is
                         $convertResult['errorMessage'] = "Error: File too large";
                         $this->result['code'] = -100;
-                        $this->result['errors'][] = array( "code" => -100, "message" => $convertResult['errorMessage'] );
+                        $this->result['errors'][] = array( "code" => -100, "message" => $convertResult['errorMessage'], 'debug' => basename( $this->file_name ) );
                         return;
                     }
                 }
@@ -129,12 +147,12 @@ class convertFileController extends ajaxController {
                     //custom error message passed directly to javascript client and displayed as is
                     $convertResult['errorMessage'] = "Error: failed to save file on disk";
                     $this->result['code'] = -100;
-                    $this->result['errors'][] = array( "code" => -100, "message" => $convertResult['errorMessage'] );
-                    //return false
+                    $this->result['errors'][] = array( "code" => -100, "message" => $convertResult['errorMessage'], 'debug' => basename( $this->file_name ) );
+                    return false;
 
 				}
 
-			} else {
+            } else {
 
                 $file = pathinfo( $this->file_name );
 
@@ -186,7 +204,7 @@ class convertFileController extends ajaxController {
 
                 //custom error message passed directly to javascript client and displayed as is
 				$this->result['code'] = -100;
-				$this->result['errors'][] = array("code" => -100, "message" => $convertResult['errorMessage']);
+				$this->result['errors'][] = array("code" => -100, "message" => $convertResult['errorMessage'], "debug" => $file['basename'] );
 
 			}
 

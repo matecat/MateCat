@@ -162,12 +162,12 @@ class NewController extends ajaxController {
 		$converter->target_lang = $this->target_lang;
 		$converter->doAction();
 
-		try {
-			$converter->checkResult();
-		} catch ( Exception $ex ){
-			$this->api_output[ 'message' ] = $ex->getMessage();
-			$this->result[ 'errors' ][ ] = array( "code" => $ex->getCode(), "message" => $ex->getMessage() );
-			Log::doLog( $ex->getMessage() );
+	    $status = $converter->checkResult();
+		if( !empty( $status ) ){
+			$this->api_output[ 'message' ] = 'Project Conversion Failure';
+			$this->api_output[ 'debug' ]   = $status;
+			$this->result[ 'errors' ]      = $status;
+			Log::doLog( $status );
 			return -1;
 		}
 		/* Do conversions here */
@@ -219,10 +219,14 @@ class NewController extends ajaxController {
 
 		if( !empty( $projectStructure['result']['errors'] ) ){
 			//errors already logged
-			$this->api_output['message']=$projectStructure['result']['errors'][0]['message'];
-		}else{
+			$this->api_output['message'] = 'Project Creation Failure';
+            $this->api_output[ 'debug' ] = $projectStructure['result']['errors'];
+
+		} else {
+
 			//everything ok
 			$this->api_output[ 'status' ]       = 'OK';
+			$this->api_output[ 'message' ]      = 'Success';
 			$this->api_output[ 'id_project' ]   = $projectStructure['result']['id_project'];
 			$this->api_output[ 'project_pass' ]    = $projectStructure['result']['ppassword'];
 		}
