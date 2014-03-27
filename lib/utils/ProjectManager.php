@@ -137,7 +137,7 @@ class ProjectManager {
 		$uploadDir = INIT::$UPLOAD_REPOSITORY . DIRECTORY_SEPARATOR . $this->projectStructure['uploadToken'];
 		foreach ( $this->projectStructure['array_files'] as $fileName ) {
 
-			//if TMX, 
+			//if TMX,
 			if('tmx'== pathinfo($fileName, PATHINFO_EXTENSION)){
 				//import the TMX, the check is deferred after this loop
 				log::doLog("loading \"$fileName\"");

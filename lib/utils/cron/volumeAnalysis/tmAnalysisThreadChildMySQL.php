@@ -62,14 +62,12 @@ while (1) {
     echo "\n";
 
     if (empty($segment)) {
-        deleteLockSegment($sid, $jid,"unlock");
         echo "--- (child $my_pid) : empty segment: no segment ready for tm volume analisys: wait 5 seconds\n";
         sleep(5);
         continue;
     }
 
     if (is_numeric($segment) and $segment < 0) {
-        deleteLockSegment($sid, $jid);
         setSegmentTranslationError($sid, $jid); // devo settarli come done e lasciare il vecchio livello di match
         echo "--- (child $my_pid) : FATAL !!  error occurred during fetching segment : exiting\n";
         continue;
@@ -93,7 +91,6 @@ while (1) {
 
     if ($raw_wc == 0) {
         echo "--- (child $my_pid) : empty segment. deleting lock and continue\n";
-        deleteLockSegment($sid, $jid);
         continue;
     }
 
@@ -201,7 +198,6 @@ while (1) {
     if ( !$matches || !is_array($matches) ) {
         echo "--- (child $my_pid) : error from mymemory : set error and continue\n"; // ERROR FROM MYMEMORY
         setSegmentTranslationError($sid, $jid); // devo settarli come done e lasciare il vecchio livello di match
-        deleteLockSegment($sid, $jid);
         tryToCloseProject($pid);
         continue;
     }
@@ -285,8 +281,7 @@ while (1) {
     $ret = CatUtils::addTranslationSuggestion($sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json, $mt_qe );
     //unlock segment
 
-    deleteLockSegment($sid, $jid);
-    echo "--- (child $my_pid) : segment $sid-$jid unlocked\n";
+    echo "--- (child $my_pid) : segment $sid-$jid finished\n";
 
     tryToCloseProject($pid);
 

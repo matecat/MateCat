@@ -205,8 +205,9 @@ class getVolumeAnalysisController extends ajaxController {
 
 
             //SUM WITH PREVIOUS ( Accumulator )
-            $eq_words    = $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ "TOTAL_PAYABLE" ][ 0 ] + $eq_words;
-            $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ "TOTAL_PAYABLE" ] = array( $eq_words );
+            $eq_words       = $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ "TOTAL_PAYABLE" ][ 0 ] + $eq_words;
+            $eq_words_print = number_format( $eq_words, 0, ".", "," );
+            $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ "TOTAL_PAYABLE" ] = array( $eq_words, $eq_words_print );
 
             //take note of payable words for job/file combination
             $total_payable[ $jid ][ $jpassword ][ $r[ 'id_file' ] ] = $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ "TOTAL_PAYABLE" ][ 0 ];

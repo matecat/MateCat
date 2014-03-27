@@ -186,7 +186,9 @@ class createProjectController extends ajaxController {
 
         $this->result = $projectStructure['result'];
 
-        setcookie( "upload_session", "", time() - 10000 );
+        if( !empty( $this->projectStructure['result']['errors'] ) ){
+            setcookie( "upload_session", "", time() - 10000 );
+        }
 
     }
 
