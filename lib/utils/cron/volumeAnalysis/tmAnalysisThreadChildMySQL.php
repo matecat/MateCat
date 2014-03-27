@@ -4,8 +4,6 @@ include "main.php";
 include INIT::$UTILS_ROOT . "/engines/mt.class.php";
 include INIT::$UTILS_ROOT . "/engines/tms.class.php";
 include INIT::$UTILS_ROOT . "/QA.php";
-include INIT::$UTILS_ROOT . "/PostProcess.php";
-include INIT::$UTILS_ROOT . "/MemcacheHandler.php";
 
 define("PID_FOLDER", ".pidlist");
 define("NUM_PROCESSES", 1);
@@ -36,8 +34,6 @@ $my_pid = getmypid();
 $parent_pid = posix_getppid();
 echo "--- (child $my_pid) : parent pid is $parent_pid\n";
 
-$memcacheHandler = MemcacheHandler::getInstance();
-
 while (1) {
     if (!processFileExists($my_pid)) {
         die("(child $my_pid) :  EXITING!  my file does not exists anymore\n");
@@ -66,36 +62,21 @@ while (1) {
     echo "\n";
 
     if (empty($segment)) {
+        deleteLockSegment($sid, $jid,"unlock");
         echo "--- (child $my_pid) : empty segment: no segment ready for tm volume analisys: wait 5 seconds\n";
         sleep(5);
         continue;
     }
 
     if (is_numeric($segment) and $segment < 0) {
+        deleteLockSegment($sid, $jid);
         setSegmentTranslationError($sid, $jid); // devo settarli come done e lasciare il vecchio livello di match
         echo "--- (child $my_pid) : FATAL !!  error occurred during fetching segment : exiting\n";
         continue;
     }
 
+
     $pid = $segment['pid'];
-
-    //get the number of segments in job
-    $_existingLock = $memcacheHandler->add( 'project_lock:' . $pid, true ); // lock for 1 month
-    if ( $_existingLock !== false ) {
-
-        $total_segs = getProjectSegmentsTranslationSummary( $pid );
-
-        $total_segs = array_pop( $total_segs ); // get the Rollup Value
-        var_export( $total_segs );
-
-        $memcacheHandler->add( 'project:' . $pid, $total_segs[ 'project_segments' ] );
-        $memcacheHandler->increment( 'num_analyzed:' . $pid, $total_segs[ 'num_analyzed' ] );
-        echo "--- (child $my_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID\n";
-    } else {
-        $_existingPid = $memcacheHandler->get( 'project:' . $pid );
-        echo "--- (child $my_pid) : found $_existingPid segments for PID in Memcache\n";
-    }
-
 
     echo "--- (child $my_pid) : fetched data for segment $sid-$jid. PID is $pid\n";
 
@@ -112,9 +93,7 @@ while (1) {
 
     if ($raw_wc == 0) {
         echo "--- (child $my_pid) : empty segment. deleting lock and continue\n";
-        incrementCount( $pid, 0, 0 );
-        setSegmentTranslationError($sid, $jid); // SET as DONE
-        tryToCloseProject( $pid, $my_pid );
+        deleteLockSegment($sid, $jid);
         continue;
     }
 
@@ -222,8 +201,8 @@ while (1) {
     if ( !$matches || !is_array($matches) ) {
         echo "--- (child $my_pid) : error from mymemory : set error and continue\n"; // ERROR FROM MYMEMORY
         setSegmentTranslationError($sid, $jid); // devo settarli come done e lasciare il vecchio livello di match
-        incrementCount( $pid, 0, 0 );
-        tryToCloseProject( $pid, $my_pid );
+        deleteLockSegment($sid, $jid);
+        tryToCloseProject($pid);
         continue;
     }
 
@@ -232,7 +211,7 @@ while (1) {
         $tm_match_type = "MT";
     }
 
-    /* New Feature only if this is not a MT and if it is a ( 90 =< MATCH < 100 ) try to realign tag ID*/
+    /* New Feature */
     ( isset($matches[ 0 ]['match']) ? $firstMatchVal = floatval( $matches[ 0 ]['match'] ) : null );
     if( isset( $firstMatchVal ) && $firstMatchVal >= 90 && $firstMatchVal < 100 ){
 
@@ -252,17 +231,15 @@ while (1) {
             $log_prepend = $UNIQUID . " - SERVER REALIGN IDS PROCEDURE | ";
             if ( !$qaRealign->thereAreErrors() ) {
 
-				/*
                 Log::doLog( $log_prepend . " - Requested Segment: " . var_export( $segment, true ) );
                 Log::doLog( $log_prepend . "Fuzzy: " . $fuzzy . " - Try to Execute Tag ID Realignment." );
                 Log::doLog( $log_prepend . "TMS RAW RESULT:" );
                 Log::doLog( $log_prepend . var_export( $matches[ 0 ], true ) );
 
                 Log::doLog( $log_prepend . "Realignment Success:" );
-				*/
                 $matches[0]['raw_translation'] = $qaRealign->getTrgNormalized();
                 $matches[0]['match'] = ( $fuzzy == 0 ? '100%' : '99%' );
-                //Log::doLog( $log_prepend . "Raw Translation: " . var_export( $matches[ 0 ]['raw_translation'], true ) );
+                Log::doLog( $log_prepend . "Raw Translation: " . var_export( $matches[ 0 ]['raw_translation'], true ) );
 
             } else {
                 Log::doLog( $log_prepend . 'Realignment Failed. Skip. Segment: ' . $segment['sid'] );
@@ -271,7 +248,6 @@ while (1) {
         }
 
     }
-    /* New Feature only if this is not a MT and if it is a ( 90 =< MATCH < 100 ) try to realign tag ID*/
 
     $suggestion = CatUtils::view2rawxliff($matches[0]['raw_translation']);
 
@@ -287,101 +263,55 @@ while (1) {
     $eq_words = $equivalentWordMapping[$new_match_type] * $raw_wc / 100;
     $standard_words = $eq_words;
 
-    //if the first match is MT perform QA realignment
     if ($new_match_type == 'MT') {
-
         $standard_words = $equivalentWordMapping["NO_MATCH"] * $raw_wc / 100;
-
-        $check = new PostProcess( $matches[0]['raw_segment'], $suggestion );
-        $check->realignMTSpaces();
-
-        //this should every time be ok because MT preserve tags, but we use the check on the errors
-        //for logic correctness
-        if( !$check->thereAreErrors() ){
-            $suggestion = CatUtils::view2rawxliff( $check->getTrgNormalized() );
-            $err_json = '';
-        } else {
-            $err_json = $check->getErrorsJSON();
-        }
-
-    } else {
-
-        //try to perform only the tagCheck
-        $check = new PostProcess( $text, $suggestion );
-        $check->performTagCheckOnly();
-
-        //log::doLog( $check->getErrors() );
-
-        if( $check->thereAreErrors() ){
-            $err_json = $check->getErrorsJSON();
-        } else {
-            $err_json = '';
-        }
-
     }
 
     ( !empty( $matches[0]['sentence_confidence'] ) ? $mt_qe = floatval( $matches[0]['sentence_confidence'] ) : $mt_qe = null );
 
+    $check = new QA( $text, $suggestion );
+    $check->performTagCheckOnly();
+
+    //log::doLog($check->getErrors(true));
+
     echo "--- (child $my_pid) : sid=$sid --- \$tm_match_type=$tm_match_type, \$fast_match_type=$fast_match_type, \$new_match_type=$new_match_type, \$equivalentWordMapping[\$new_match_type]=" . $equivalentWordMapping[$new_match_type] . ", \$raw_wc=$raw_wc,\$standard_words=$standard_words,\$eq_words=$eq_words\n";
 
+    if( $check->thereAreErrors() ){
+        $err_json = $check->getErrorsJSON();
+    } else {
+        $err_json = '';
+    }
+
     $ret = CatUtils::addTranslationSuggestion($sid, $jid, $suggestion_json, $suggestion, $suggestion_match, $suggestion_source, $new_match_type, $eq_words, $standard_words, $suggestion, "DONE", (int)$check->thereAreErrors(), $err_json, $mt_qe );
-    //set memcache
-
-    incrementCount( $pid, $eq_words, $standard_words );
-
     //unlock segment
 
+    deleteLockSegment($sid, $jid);
     echo "--- (child $my_pid) : segment $sid-$jid unlocked\n";
 
-    tryToCloseProject( $pid, $my_pid );
+    tryToCloseProject($pid);
 
 }
 
 //}
 
-function incrementCount( $pid, $eq_words, $standard_words ){
-    $memcacheHandler = MemcacheHandler::getInstance();
-    $memcacheHandler->increment( 'eq_wc:' . $pid, $eq_words * 100 );
-    $memcacheHandler->increment( 'st_wc:' . $pid, $standard_words * 100 );
-    $memcacheHandler->increment( 'num_analyzed:' . $pid, 1 );
-}
+function tryToCloseProject( $pid ){
 
+    global $my_pid;
 
-function tryToCloseProject( $pid, $child_process_id ){
-
-
-    $project_totals                       = array();
-    $memcacheHandler                      = MemcacheHandler::getInstance();
-    $project_totals[ 'project_segments' ] = $memcacheHandler->get( 'project:' . $pid );
-    $project_totals[ 'num_analyzed' ]     = $memcacheHandler->get( 'num_analyzed:' . $pid );
-    $project_totals[ 'eq_wc' ]            = $memcacheHandler->get( 'eq_wc:' . $pid ) / 100;
-    $project_totals[ 'st_wc' ]            = $memcacheHandler->get( 'st_wc:' . $pid ) / 100;
-
-    echo "--- (child $child_process_id) : count segments in project $pid = " . $project_totals['project_segments'] . "\n";
-    echo "--- (child $child_process_id) : Analyzed segments in project $pid = " . $project_totals['num_analyzed'] . "\n";
-
-    if ( empty( $project_totals[ 'project_segments' ] )) {
-        echo "--- (child $child_process_id) : WARNING !!! error while counting segments in projects $pid skipping and continue \n";
+    $segs_in_project = countSegments($pid);
+    if ($segs_in_project < 0) {
+        echo "--- (child $my_pid) : WARNING !!! error while counting segments in projects $pid skipping and continue \n";
         return;
     }
-
-    if ( $project_totals['project_segments'] - $project_totals['num_analyzed'] == 0 ) {
-
-        $_analyzed_report = getProjectSegmentsTranslationSummary($pid);
-
-        $total_segs = array_pop( $_analyzed_report ); //remove Rollup
-
-        echo "--- (child $child_process_id) : analysis project $pid finished : change status to DONE\n";
-
-        changeProjectStatus($pid, "DONE");
-        changeTmWc( $pid, $project_totals['eq_wc'], $project_totals['st_wc'] );
-
-        echo "--- (child $child_process_id) : trying to initialize job total word count.\n";
-        foreach( $_analyzed_report as $job_info ){
-            $counter = new WordCount_Counter();
-            $counter->initializeJobWordCount( $job_info['id_job'], $job_info['password'] );
-        }
-
+    echo "--- (child $my_pid) : count segments in project $pid = $segs_in_project\n";
+    $analyzed_report = countSegmentsTranslationAnalyzed($pid);
+    $segs_analyzed = $analyzed_report['num_analyzed'];
+    $pid_eq_words = $analyzed_report['eq_wc'];
+    $pid_standard_words = $analyzed_report['st_wc'];
+    if ($segs_in_project - $segs_analyzed == 0) {
+        echo "--- (child $my_pid) : analysis project $pid finished : change status to DONE\n";
+        $change_res = changeProjectStatus($pid, "DONE");
+        $tm_wc_res = changeTmWc($pid, $pid_eq_words, $pid_standard_words);
     }
     echo "\n\n";
 

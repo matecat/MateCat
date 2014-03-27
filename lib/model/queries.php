@@ -2307,55 +2307,46 @@ function getNextSegmentAndLock() {
     //get link
     $db = Database::obtain();
 
-    //declare statements
-    //begin transaction
-    $q1 = "SET autocommit=0";
-    $q2 = "START TRANSACTION";
+    //start locking
+    $db->query( "SET autocommit=0" );
+    $db->query( "START TRANSACTION" );
+    //query
+
     //lock row
-    $rnd = mt_rand(0,15); //rand num shold be ( child_num / myMemory_sec_response_time )
+    $rnd = mt_rand(0,15); //rand num should be ( child_num / myMemory_sec_response_time )
     $q3 = "select id_segment, id_job from segment_translations_analysis_queue where locked=0 limit $rnd,1 for update";
     //end transaction
-    $q4 = "ROLLBACK";
-    $q5 = "COMMIT";
-    $q6 = "SET autocommit=1";
 
-    //execute statements
-    //start locking
-    $db->query( $q1 );
-    $db->query( $q2 );
-    //query
     $res = $db->query_first( $q3 );
+
     //if nothing useful
     if ( empty( $res ) ) {
         //empty result
-        $res = "";
-        $db->query( $q4 );
+        $db->query( "ROLLBACK" );
+        $res = null;
     } else {
-        //else
-        //take note of IDs
-        $id_job     = $res[ 'id_job' ];
-        $id_segment = $res[ 'id_segment' ];
 
-        //set lock flag on row
-        $data[ 'locked' ] = 1;
-        $where            = " id_job=$id_job and id_segment=$id_segment ";
-        //update segment
-        $db->update( "segment_translations_analysis_queue", $data, $where );
+        //DELETE
+        $query = "DELETE FROM segment_translations_analysis_queue WHERE id_segment = %u AND id_job = %u";
+        $query = sprintf( $query, $res['id_segment'], $res['id_job'] );
+        $db->query( $query );
         $err   = $db->get_error();
+
         $errno = $err[ 'error_code' ];
-        //if something went wrong
-        if ( $errno != 0 ) {
-            log::doLog( $err );
-            $db->query( $q4 );
+
+        if ( $errno != 0 || $db->affected_rows == 0 ) {
+            Log::doLog( $err );
+            $db->query( "ROLLBACK" );
             //return error code
-            $res = -1;
+            $res = null;
         } else {
             //if everything went well, commit
-            $db->query( $q5 );
+            $db->query( "COMMIT" );
         }
+
     }
     //release locks and end transaction
-    $db->query( $q6 );
+    $db->query( "SET autocommit=1" );
 
     //return stuff
     return $res;
@@ -2533,7 +2524,6 @@ function lockUnlockSegment( $sid, $jid, $value ) {
  *
  * @return mixed
  *
- * @deprecated No more used
  */
 function countSegments( $pid ) {
     $db = Database::obtain();
@@ -2631,7 +2621,9 @@ function countSegmentsTranslationAnalyzed( $pid ) {
                         WHEN st.standard_word_count != 0 THEN IF( st.tm_analysis_status = 'DONE', 1, 0 )
                         WHEN st.standard_word_count = 0 THEN 1
                     END
-                ) AS num_analyzed
+                ) AS num_analyzed,
+                SUM(eq_word_count) AS eq_wc ,
+                SUM(standard_word_count) AS st_wc
                 FROM segments s
                 JOIN segment_translations st ON s.id = st.id_segment
                 INNER JOIN jobs j ON j.id = st.id_job

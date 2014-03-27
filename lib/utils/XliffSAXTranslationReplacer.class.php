@@ -102,12 +102,12 @@ class XliffSAXTranslationReplacer{
 	 */
 	private function tagOpen($parser, $name, $attr){
 
-//		//check if we are entering into a <trans-unit>
-//		if('trans-unit'==$name){
-//			$this->inTU=true;
-//			//get id
-//			$this->currentId=$attr['id'];
-//		}
+		//check if we are entering into a <trans-unit>
+		if('trans-unit'==$name){
+			$this->inTU=true;
+			//get id
+			$this->currentId=$attr['id'];
+		}
 
         //check if we are entering into a <target>
         if('target'==$name){
@@ -238,10 +238,10 @@ class XliffSAXTranslationReplacer{
             $this->isEmpty = false;
 		}
 
-//        //check if we are leaving a <trans-unit>
-//		if('trans-unit'==$name){
-//			$this->inTU=false;
-//		}
+        //check if we are leaving a <trans-unit>
+		if('trans-unit'==$name){
+			$this->inTU=false;
+		}
 
 	}
 
@@ -307,7 +307,7 @@ class XliffSAXTranslationReplacer{
 
 		}
 
-        //already useful after QA implementation?? Log to see if they executed some times
+        //already useful after QA implementation?? Log to see if it is executed some times
 		@$xml_valid = simplexml_load_string("<placeholder>$translation</placeholder>");
 		if (!$xml_valid) {
 			$temp = preg_split("|\<|si", $translation);
