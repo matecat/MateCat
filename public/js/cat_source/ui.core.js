@@ -49,12 +49,13 @@ UI = {
 	},
 	changeStatus: function(ob, status, byStatus) {
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
+		segment_id = $(segment).attr('id').split('-')[1];
 		$('.percentuage', segment).removeClass('visible');
 		if (!segment.hasClass('saved'))
 			this.setTranslation($(segment).attr('id').split('-')[1], status);
 		segment.removeClass('saved');
-		this.setContribution($(segment).attr('id').split('-')[1], status, byStatus);
-		this.setContributionMT(segment, status, byStatus);
+		this.setContribution(segment_id, status, byStatus);
+		this.setContributionMT(segment_id, status, byStatus);
 		this.getNextSegment(this.currentSegment, 'untranslated');
 		if(!this.nextUntranslatedSegmentId) {
 			$(window).trigger({
@@ -244,7 +245,7 @@ UI = {
 		$('.footer', segment).html(footer);
 
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
-			var d = JSON.parse(localStorage.getItem(config.job_id + '-' + $(segment).attr('id').split('-')[1]));
+			var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1]));
 //			console.log('li prendo dal local storage');
 			UI.processContributions(d, segment);
 
@@ -677,6 +678,7 @@ UI = {
 		this.loadingMore = false;
 		this.setWaypoints();
 		this.markTags();
+		this.checkPendingOperations();
 	},
 	getSegmentSource: function(seg) {
 		segment = (typeof seg == 'undefined') ? this.currentSegment : seg;
@@ -831,7 +833,8 @@ UI = {
 	},
 	openSegment: function(editarea, operation) {
 //		if(UI.body.hasClass('archived')) return;
-		var segment = $('#segment-' + $(editarea).attr('data-sid'));
+		segment_id = $(editarea).attr('data-sid');
+		var segment = $('#segment-' + segment_id);
 		this.openSegmentStart = new Date();
 		if(UI.warningStopped) {
 			UI.warningStopped = false;
@@ -856,7 +859,7 @@ UI = {
 		this.autoSave = true;
 		this.activateSegment();
 		this.getNextSegment(this.currentSegment, 'untranslated');
-		this.setCurrentSegment(segment);
+		this.setCurrentSegment();
 		this.currentSegment.addClass('opened');
 
 		this.currentSegment.attr('data-searchItems', ($('mark.searchMarker', this.editarea).length));
@@ -1234,7 +1237,7 @@ UI = {
 			}
 		});
 	},
-	setCurrentSegment: function(segment, closed) {
+	setCurrentSegment: function(closed) {
 		reqArguments = arguments;
 		var id_segment = this.currentSegmentId;
 		if (closed) {
@@ -1721,7 +1724,32 @@ UI = {
 			}
 		});
 	},
+	failover: function(reqArguments, operation) {
+		console.log('failover on ' + operation);
+		if(operation != 'getWarning') {
+			var pendingConnection = {
+				operation: operation,
+				args: reqArguments
+			};
+			console.log('pendingConnection: ', pendingConnection);
+			var dd = new Date();
+			if(pendingConnection.args) {
+				localStorage.setItem('pending-' + dd.getTime(), JSON.stringify(pendingConnection));
+			}
+			if(!UI.checkConnectionTimeout) {
+				UI.checkConnectionTimeout = setTimeout(function() {
+					UI.checkConnection();
+					UI.checkConnectionTimeout = false;
+				}, 5000);	
+			}
+		}
+	},
+
 	failedConnection: function(reqArguments, operation) {
+		if(this.autoFailoverEnabled) {
+			this.failover(reqArguments, operation);
+			return false;
+		}
 		if(operation != 'getWarning') {
 			var pendingConnection = {
 				operation: operation,
@@ -1742,27 +1770,51 @@ UI = {
 			},
 			error: function() {
 				console.log('error on checking connection');
-				$(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">30 seconds</span>.');
-				$(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");
+				if(UI.autoFailoverEnabled) {
+					setTimeout(function() {
+						UI.checkConnection();
+					}, 5000);	
+				} else {
+					$(".noConnectionMsg .reconnect").html('Still no connection. Trying to reconnect in <span class="countdown">30 seconds</span>.');
+					$(".noConnectionMsg .countdown").countdown(UI.checkConnection, 30, " seconds");					
+				}
+
 			},
 			success: function() {
 				console.log('connection is back');
-				UI.connectionIsBack();
+				if(!UI.restoringAbortedOperations) UI.connectionIsBack();
 			}
 		});
 	},
 	connectionIsBack: function() {
+		UI.restoringAbortedOperations = true;
 		this.execAbortedOperations();
-		$('.noConnectionMsg').text('The connection is back. Your last, interrupted operation has now been done.');
-		setTimeout(function() {
-			$('.noConnection').addClass('reConnection');
+		if(!UI.autoFailoverEnabled) {
+			$('.noConnectionMsg').text('The connection is back. Your last, interrupted operation has now been done.');
 			setTimeout(function() {
-				$('.noConnection, .noConnectionMsg').remove();
-			}, 500);		
-		}, 3000);	
+				$('.noConnection').addClass('reConnection');
+				setTimeout(function() {
+					$('.noConnection, .noConnectionMsg').remove();
+				}, 500);		
+			}, 3000);	
+		}
+		UI.restoringAbortedOperations = false;
 
 	},
 	execAbortedOperations: function() {
+		if(UI.autoFailoverEnabled) {
+//			console.log(localStorage);
+			var pendingArray = [];
+			inp = 'pending';
+			$.each(localStorage, function(k,v) {
+				if(k.substring(0, inp.length) === inp) {
+					pendingArray.push(JSON.parse(v));
+				}
+			});
+//			console.log(pendingArray);
+			UI.abortedOperations = pendingArray;
+		}
+//		console.log(UI.abortedOperations);
 		$.each(UI.abortedOperations, function() {
 			args = this.args;
 			operation = this.operation;
@@ -1773,12 +1825,35 @@ UI = {
 			} else if(operation == 'setContributionMT') {
 				UI[operation](args[0], args[1], args[2]);
 			} else if(operation == 'setCurrentSegment') {
-				UI[operation](args[0], args[1], args[2]);
+				UI[operation](args[0]);
 			} else if(operation == 'getSegments') {
 				UI.reloadWarning();
 			}
 		});
 		UI.abortedOperations = [];
+		UI.clearStorage('pending');
+	},
+	checkPendingOperations: function() {
+		if(this.checkInStorage('pending')) {
+			UI.execAbortedOperations();
+		};
+	},
+	checkInStorage: function(what) {
+		var found = false;
+		$.each(localStorage, function(k,v) {
+			if(k.substring(0, what.length) === what) {
+				found = true;
+			}
+		});
+		return found;
+	},
+
+	clearStorage: function(what) {
+		$.each(localStorage, function(k,v) {
+			if(k.substring(0, what.length) === what) {
+				localStorage.removeItem(k);
+			}
+		});
 	},
 
 	

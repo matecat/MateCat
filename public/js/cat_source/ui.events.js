@@ -146,7 +146,9 @@ $.extend(UI, {
 
 		window.onbeforeunload = function(e) {
 			goodbye(e);
-			localStorage.clear();
+			UI.clearStorage('contribution');
+			
+//			localStorage.clear();
 		};
 
 	
@@ -748,7 +750,7 @@ $.extend(UI, {
 			}
 
 			UI.checkHeaviness();
-			if (UI.blockButtons) {
+			if ((UI.blockButtons)&&(!UI.autoFailoverEnabled)) {
 				if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
 					console.log('segment is already loaded');
 				} else {

@@ -34,6 +34,7 @@ $.extend(UI, {
 		this.savedSelActiveElement = null;
 		this.firstOpenedSegment = false;
 		this.autoscrollCorrectionEnabled = true;
+		this.autoFailoverEnabled = false;
 		this.searchEnabled = true;
 		if (this.searchEnabled)
 			$('#filterSwitch').show();

@@ -113,7 +113,7 @@ $.extend(UI, {
 	},
 	getContribution_success: function(d, segment) {
 //		console.log(d.data.matches);
-		localStorage.setItem(config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
+		localStorage.setItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1], JSON.stringify(d));
 //		console.log(localStorage.getItem($(segment).attr('id').split('-')[1]));
 //		console.log(localStorage.getItem('4679214'));
 //		console.log(!localStorage.getItem('4679214'));
@@ -222,8 +222,8 @@ $.extend(UI, {
 			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');
 		}
 	},
-	setContribution: function(id_segment, status, byStatus) {
-		segment = $('#segment-' + id_segment);
+	setContribution: function(segment_id, status, byStatus) {
+		segment = $('#segment-' + segment_id);
 		if ((status == 'draft') || (status == 'rejected'))
 			return false;
 
@@ -272,7 +272,8 @@ $.extend(UI, {
 			}
 		});
 	},
-	setContributionMT: function(segment, status, byStatus) {
+	setContributionMT: function(segment_id, status, byStatus) {
+		segment = $('#segment-' + segment_id);
 		reqArguments = arguments;
 		if ((status == 'draft') || (status == 'rejected'))
 			return false;
