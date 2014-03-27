@@ -773,6 +773,34 @@ section.currSearchSegment mark.searchMarker
 	background: #00c1e6;
 }
 
+.offline {padding:0;}
+
+.offline .claim {
+	text-align:center;
+	margin: 0 auto;
+	padding-top:70px;
+}
+.offline .cat {
+	height:300px;
+	background:url(../img/offline.jpg) no-repeat center center;
+}
+
+.offline header {
+background: #6d6e71;
+border-bottom: 1px solid #333;
+padding: 0px 0 2px 0;
+margin-bottom: 20px;
+height: 45px;
+}
+
+.offline h1 {font-size:40px;}
+.offline h2 {
+color: #999999 !important;
+font-weight: normal !important;
+}
+
+
+.claim span {font-weight:bold; color:#39699a;}
 
 .extdoc {background: url(../img/matecat_file_icons.png) 6px 0 no-repeat !important;} /* .doc, .dot, . docx, .dotx, .docm, .dotm, .odt, .sxw*/
 .extppt {background: url(../img/matecat_file_icons.png) 6px -34px no-repeat !important;} /* .pot, .pps, .ppt, .potm, .potx, .ppsm, .ppsx, .pptm, .pptx, .odp, .sxi*/
