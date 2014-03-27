@@ -140,8 +140,10 @@ function launchProcesses($numProcesses = 1, $equivalentWordMapping = array()) {
             try{
                 MemcacheHandler::getInstance();
                 pcntl_exec("/usr/bin/php",array("tmAnalysisThreadChild.php"));
-            } catch( LogicException $e ){
-                echo "(child $pid) : Memcache Server not configured. Fallback to Mysql Version\n";
+            } catch( Exception $e ){
+                echo $e->getMessage() . "\n";
+                echo $e->getTraceAsString() . "\n";
+                echo "(child $pid) : Fallback to Mysql Version\n";
                 pcntl_exec("/usr/bin/php",array("tmAnalysisThreadChildMySQL.php"));
             }
 

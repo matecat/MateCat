@@ -218,7 +218,7 @@ class ConvertersMonitor {
         $ret = array();
         switch ( $command ) {
             case 'start':
-                $cmd[ ] = "screen -d -m VBoxHeadless --startvm '" . $this->host_machine_map[ $ip_converter ][ 'instance_name' ] . "'";
+                $cmd[ ] = "screen -d -m -S " . $this->host_machine_map[ $ip_converter ][ 'instance_name' ] . " VBoxHeadless --startvm '" . $this->host_machine_map[ $ip_converter ][ 'instance_name' ] . "'";
                 break;
             case 'stop':
                 $cmd[ ] = " VBoxManage controlvm '" . $this->host_machine_map[ $ip_converter ][ 'instance_name' ] . "' poweroff";
@@ -226,7 +226,7 @@ class ConvertersMonitor {
             case 'restart':
             default:
                 $cmd[ ] = " VBoxManage controlvm '" . $this->host_machine_map[ $ip_converter ][ 'instance_name' ] . "' poweroff";
-                $cmd[ ] = "screen -d -m VBoxHeadless --startvm '" . $this->host_machine_map[ $ip_converter ][ 'instance_name' ] . "'";
+                $cmd[ ] = "screen -d -m -S " . $this->host_machine_map[ $ip_converter ][ 'instance_name' ] . " VBoxHeadless --startvm '" . $this->host_machine_map[ $ip_converter ][ 'instance_name' ] . "'";
         }
 
         self::_prettyEcho( "Connecting to " . $this->host_machine_map[ $ip_converter ][ 'ip_machine_host' ] );
@@ -246,6 +246,7 @@ class ConvertersMonitor {
             foreach ( $cmd as $c ) {
                 $stream = ssh2_exec( $conn, $c );
                 stream_set_blocking( $stream, true );
+                sleep(1);
                 $stream_out  = ssh2_fetch_stream( $stream, SSH2_STREAM_STDIO );
                 $ret_content = stream_get_contents( $stream_out );
 

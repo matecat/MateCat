@@ -94,6 +94,7 @@ abstract class Engine {
 
         $this->error = array(); // reset last error
         if ( !$this->existsFunction( $function ) ) {
+            Log::doLog( 'Requested method ' . $function . ' not Found.' );
             return false;
         }
 

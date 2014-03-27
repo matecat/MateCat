@@ -595,6 +595,12 @@ UI = {
 
 								context = $(global_context).find('#file_' + job_id + '_' + jobpassword + '_' + id_file);
 
+                                var s_payable = $('.stat_payable strong', context );
+                                var s_payable_txt = s_payable.text();
+                                s_payable.text( file_details.TOTAL_PAYABLE[1] );
+                                if ( s_payable_txt != file_details.TOTAL_PAYABLE[1] )
+                                    s_payable.effect( "highlight", {}, 1000 );
+
 								var s_new = $('.stat_new', context);
 								var s_new_txt = s_new.text();
 								s_new.text(file_details.NEW[1]);

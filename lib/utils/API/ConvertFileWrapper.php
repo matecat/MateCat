@@ -39,9 +39,17 @@ class ConvertFileWrapper extends convertFileController {
      */
     public function checkResult() {
 
-        foreach( $this->resultStack as $status ){
-            if( $status['code'] < 0 ) throw new Exception( $status['errors'][0]['message'], $status['errors'][0]['code'] );
+//        Log::doLog( $this->resultStack );
+
+        $failure = false;
+        foreach( $this->resultStack as $res ){
+            if( $res['code'] < 0 ) { $failure = true; }
         }
+
+        $result = array();
+        if( $failure ) $result = end( $this->resultStack );
+        $this->resultStack = $result['errors'];
+        return $this->resultStack;
 
     }
 

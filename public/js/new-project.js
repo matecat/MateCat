@@ -43,8 +43,21 @@ $(document).ready(function() {
         if (UI.conversionsAreToRestart()) {
             APP.confirm({msg: 'Source language changed. The files must be reimported.', callback: 'confirmRestartConversions'});
         }
+        if( UI.checkTMXLangFailure() ){
+            UI.delTMXLangFailure();
+        }
     });
-         
+
+    $("#target-lang").change(function(e) {
+        $('.popup-languages li.on').each(function(){
+            $(this).removeClass('on').find('input').removeAttr('checked');
+        });
+        $('.translate-box.target h2 .extra').remove();
+        if( UI.checkTMXLangFailure() ){
+            UI.delTMXLangFailure();
+        }
+    });
+
     $("input.uploadbtn").click(function(e) {
         $('body').addClass('creating');
         var files = '';
@@ -71,14 +84,24 @@ $(document).ready(function() {
             },
             success: function(d){
                 if( typeof d.errors != 'undefined' ) {
+
                     $('.error-message').text('');
+
                     $.each(d.errors, function() {
+
+                        if( this.code == -16 ){
+                            UI.addTMXLangFailure();
+                        }
+
                         $('.error-message').append( '<div>' + this.message + '<br /></div>' ).show();
                     });
+
 					$('.uploadbtn').attr('value', 'Analyze');
                     $('body').removeClass('creating');
+
 //                    var btnTxt = (config.analysisEnabled)? 'Analyze' : 'Translate';
 //                    $('.uploadbtn').attr('value',btnTxt).removeClass('disabled').removeAttr('disabled');
+
                 } else {
                     //							$.cookie('upload_session', null);
                     if(config.analysisEnabled) {
@@ -172,13 +195,6 @@ $(document).ready(function() {
     $(".close").click(function(e) {          
         $("div.popup-languages").hide();
         $("div.grayed").hide();
-    });
-
-    $("#target-lang").change(function(e) {          
-        $('.popup-languages li.on').each(function(){
-			$(this).removeClass('on').find('input').removeAttr('checked');
-		});
-		$('.translate-box.target h2 .extra').remove();
     });
 
 	$("#disable_tms_engine").change(function(e){
