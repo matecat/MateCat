@@ -2097,6 +2097,7 @@ UI = {
 			this.undoStackPosition = 0;
 		}
 		saveSelection();
+		$('.undoCursorPlaceholder').remove();
 		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder"></span>');
 		restoreSelection();
 		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
@@ -2977,6 +2978,8 @@ $.extend(UI, {
 			}
 			return true;
 		}).on('dragstart', '.editor .editarea .locked', function() {
+//			console.log('dragstart tag: ', $(this));
+//			$(this).addClass('dragged');
 			var selection = window.getSelection();
 			var range = selection.getRangeAt(0);
 			if (range.startContainer.data != range.endContainer.data)
@@ -2984,6 +2987,13 @@ $.extend(UI, {
 
 			UI.draggingInsideEditarea = true;
 			UI.tagToDelete = $(this);
+//		}).on('drop', '.editor .editarea .locked', function() {
+//			console.log('dropped tag: ', $(this));
+		}).on('drag', '.editarea .locked, .source .locked', function(e) {
+//			console.log('a tag is dragged');
+//			console.log('e: ', $(this).text());
+			UI.draggingTagIsOpening = ($(this).text().match(/^<\//gi))? false : true;
+			UI.draggingTagText = $(this).text();
 		}).on('drop', '.editor .editarea', function(e) {
 			if (e.stopPropagation) {
 				e.stopPropagation(); // stops the browser from redirecting.
@@ -2996,8 +3006,35 @@ $.extend(UI, {
 				segment: UI.currentSegment
 			});
 			UI.saveInUndoStack('drop');
+//			UI.beforeDropEditareaHTMLtreated = UI.editarea.html();
 			$(this).css('float', 'left');
 			setTimeout(function() {
+				var strChunk = UI.editarea.html().replace(/(^.*?)&nbsp;(<span contenteditable\="false" class\="locked).*?$/gi, '$1');
+
+				// Check if the browser has cancelled a space when dropping the tag (this happen when dropping near a space). 
+				// In this case, we have to add it again because we are also deleting the &nbsp; added by the browser.
+				// We cannot detect if the user has dropped immediately before or after the space, so we decide where to put it according if it is an opening tag or a closing tag,
+				if(UI.beforeDropEditareaHTML.indexOf(strChunk + ' ') >= 0) {  
+					toAddBefore = (UI.draggingTagIsOpening)? ' ' : ''; 
+					toAddAfter = (UI.draggingTagIsOpening)? '' : ' ';
+				} else {
+					toAddBefore = toAddAfter = '';
+				}
+				UI.draggingTagIsOpening = null;
+				UI.editarea.html(UI.editarea.html().replace(/&nbsp;(<span contenteditable\="false" class\="locked)/gi, toAddBefore + '$1').replace(/(&gt;<\/span>)&nbsp;/gi, '$1' + toAddAfter));
+				var nn = 0;
+				$('.locked', UI.editarea).each(function(index) {
+					if($(this).text() == UI.draggingTagText) {
+						uniqueEl = $(this);
+						nn++;
+						return false;
+					}
+				})
+				if(nn > 0) {
+					setCursorPosition(uniqueEl[0].nextSibling, 0);
+				}
+				
+				UI.draggingTagText = null;
 				UI.editarea.removeAttr('style');
 				UI.saveInUndoStack('drop');
 			}, 100);
@@ -3007,7 +3044,6 @@ $.extend(UI, {
 			setTimeout(function() {
 				UI.cleanDroppedTag(UI.currentConcordanceField, UI.beforeDropSearchSourceHTML);
 			}, 100);
-//		}).on('click', '.editor .editarea .locked.selected', function(e) {
 		}).on('click', '.editor .editarea, .editor .source', function() {
 			$('.selected', $(this)).removeClass('selected');
 			UI.currentSelectedText = false;
@@ -5348,7 +5384,7 @@ function setCursorPosition(el, pos) {
 	range.collapse(true);
 	sel.removeAllRanges();
 	sel.addRange(range);
-	el.focus();	
+	if(typeof el[0] != 'undefined') el.focus();	
 }
 
 function removeSelectedText() {

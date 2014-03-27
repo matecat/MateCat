@@ -2097,6 +2097,7 @@ UI = {
 			this.undoStackPosition = 0;
 		}
 		saveSelection();
+		$('.undoCursorPlaceholder').remove();
 		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder"></span>');
 		restoreSelection();
 		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));

@@ -200,7 +200,7 @@ function setCursorPosition(el, pos) {
 	range.collapse(true);
 	sel.removeAllRanges();
 	sel.addRange(range);
-	el.focus();	
+	if(typeof el[0] != 'undefined') el.focus();	
 }
 
 function removeSelectedText() {
