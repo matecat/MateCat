@@ -220,7 +220,7 @@ class downloadFileController extends downloadController {
                 if ($pathinfo['extension'] != 'zip') {
                     $this->filename = $pathinfo['basename'] . ".zip";
                 }
-                $this->content = $this->composeZip($output_content); //add zip archive content here;
+                $this->content = $this->composeZip( $output_content, $jobData['source'] ); //add zip archive content here;
             } elseif (count($output_content) == 1) {
                 $this->setContent($output_content);
             }
@@ -249,7 +249,7 @@ class downloadFileController extends downloadController {
         }
     }
 
-    private function composeZip($output_content) {
+    private function composeZip( $output_content, $sourceLang ) {
         $file = tempnam("/tmp", "zipmatecat");
         $zip = new ZipArchive();
         $zip->open($file, ZipArchive::OVERWRITE);
@@ -263,7 +263,22 @@ class downloadFileController extends downloadController {
             }
 
             //Php Zip bug, utf-8 not supported
-            $zip->addFromString( iconv( "UTF-8", 'ASCII//TRANSLIT//IGNORE', $f['filename'] ), $f['content']);
+            $sourceLang = str_replace( "-", "_", $sourceLang );
+            setlocale( LC_CTYPE, $sourceLang );
+            $fName = iconv( "UTF-8", 'ASCII//TRANSLIT', $f['filename'] );
+
+            $fName = preg_replace( '/[^\p{L}0-9a-zA-Z_\.\-]/u', "_", $fName );
+            $fName = preg_replace( '/[_]{2,}/', "_", $fName );
+            $fName = str_replace( '_.', ".", $fName );
+
+            $nFinfo = pathinfo($fName);
+            $ext    = $nFinfo['filename'];
+            if( strlen( $ext ) < 3 ){
+                $fName = substr( uniqid(), -5 ) . "_" . $fName;
+            }
+
+            $zip->addFromString( $fName, $f['content'] );
+
         }
 
         // Close and send to users
