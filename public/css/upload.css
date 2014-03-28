@@ -583,7 +583,7 @@ color:#000; background:#efefef url(../img/point.gif) 0 0 repeat-x;border-bottom:
 
 a{color:#39699a}
 
-.cl{ clear:both;}
+.cl{ clear:both; visibility:hidden;}
 
 .uploadtext{float:left;width:55%;}
 .uploadtext h2{margin:15px 0 0 0;}
@@ -686,10 +686,12 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 {
 	background: #12B4DF !important;
 	border-color: #008AAF;
-	padding: 10px;
+	padding: 10px 0 10px 0;
 	text-indent: 0;
 }
-
+.warning-message span {
+    margin-left: 15px;
+}
 
 
 .file-drag{ transition: width 2s; -moz-transition: width 2s; /* Firefox 4 */ -webkit-transition: width 2s; /* Safari and Chrome */ -o-transition: width 2s; /* Opera */ } 

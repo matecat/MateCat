@@ -127,7 +127,7 @@ UI = {
 //		   $('#private-tm-key').addClass('selected').effect( "pulsate", "slow" );			 
 		}
 
-		$('.warning-message').html('You are uploading a translation memory. By default, it will be loaded into the public archive, to the benefit of the community.<br/>You can keep this translation memory private either by providing an existing private key or by generating a new one.').show();
+		$('.warning-message').html('<span>You are uploading a translation memory. By default, it will be loaded into the public archive, to the benefit of the community.</span><br/><span>You can keep this translation memory private either by providing an existing private key or by generating a new one.</span>').show();
 		
 	},
 

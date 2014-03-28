@@ -84,8 +84,8 @@ class convertFileController extends ajaxController {
 
                 //custom error message passed directly to javascript client and displayed as is
                 $convertResult['errorMessage'] = "Error: failed to save converted file from cache to disk";
-                $this->result['code'] = -100;
-                $this->result['errors'][] = array( "code" => -100, "message" => $convertResult['errorMessage'], 'debug' => basename( $this->file_name ) );
+                $this->result['code'] = -101;
+                $this->result['errors'][] = array( "code" => -101, "message" => $convertResult['errorMessage'], 'debug' => basename( $this->file_name ) );
 
 			}
 
@@ -118,9 +118,9 @@ class convertFileController extends ajaxController {
 
                 if( $back_convertResult['isSuccess'] == false ){
                     //custom error message passed directly to javascript client and displayed as is
-                    $convertResult['errorMessage'] = "Error: there is a problem with this file, it cannot be reconverted to the original.";
-                    $this->result['code'] = -100;
-                    $this->result['errors'][] = array( "code" => -100, "message" => $convertResult['errorMessage'], 'debug' => basename( $this->file_name ) );
+                    $convertResult['errorMessage'] = "Error: there is a problem with this file, it cannot be converted back to the original one.";
+                    $this->result['code'] = -110;
+                    $this->result['errors'][] = array( "code" => -110, "message" => $convertResult['errorMessage'], 'debug' => basename( $this->file_name ) );
                     return false;
                 }
 
@@ -133,8 +133,8 @@ class convertFileController extends ajaxController {
                     if ( $res_insert < 0 ) {
                         //custom error message passed directly to javascript client and displayed as is
                         $convertResult['errorMessage'] = "Error: File too large";
-                        $this->result['code'] = -100;
-                        $this->result['errors'][] = array( "code" => -100, "message" => $convertResult['errorMessage'], 'debug' => basename( $this->file_name ) );
+                        $this->result['code'] = -102;
+                        $this->result['errors'][] = array( "code" => -102, "message" => $convertResult['errorMessage'], 'debug' => basename( $this->file_name ) );
                         return;
                     }
                 }
@@ -146,8 +146,8 @@ class convertFileController extends ajaxController {
 
                     //custom error message passed directly to javascript client and displayed as is
                     $convertResult['errorMessage'] = "Error: failed to save file on disk";
-                    $this->result['code'] = -100;
-                    $this->result['errors'][] = array( "code" => -100, "message" => $convertResult['errorMessage'], 'debug' => basename( $this->file_name ) );
+                    $this->result['code'] = -103;
+                    $this->result['errors'][] = array( "code" => -103, "message" => $convertResult['errorMessage'], 'debug' => basename( $this->file_name ) );
                     return false;
 
 				}

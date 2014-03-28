@@ -284,15 +284,15 @@ class ProjectManager {
 					}
 
 					//scan through memories 
-					foreach($allMemories['responseData']['tm'] as $memory){
-						//obtain max id
-						$tmx_max_id=max($tmx_max_id,$memory['id']);
+                    foreach ( $allMemories[ 'responseData' ][ 'tm' ] as $memory ) {
+                        //obtain max id
+                        $tmx_max_id = max( $tmx_max_id, $memory[ 'id' ] );
 
-						//if maximum is current, pick it (it means that, among duplicates, it's the latest)
-						if($tmx_max_id==$memory['id']){
-							$current_tm=$memory;
-						}
-					}
+                        //if maximum is current, pick it (it means that, among duplicates, it's the latest)
+                        if ( $tmx_max_id == $memory[ 'id' ] ) {
+                            $current_tm = $memory;
+                        }
+                    }
 
 					switch($current_tm['status']){
 						case "0":
