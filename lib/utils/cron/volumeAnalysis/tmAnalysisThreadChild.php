@@ -67,12 +67,14 @@ while (1) {
 
     if (empty($segment)) {
         echo "--- (child $my_pid) : empty segment: no segment ready for tm volume analisys: wait 5 seconds\n";
+        incrementCount( $pid, 0, 0 );
         sleep(5);
         continue;
     }
 
     if (is_numeric($segment) and $segment < 0) {
         setSegmentTranslationError($sid, $jid); // devo settarli come done e lasciare il vecchio livello di match
+        incrementCount( $pid, 0, 0 );
         echo "--- (child $my_pid) : FATAL !!  error occurred during fetching segment : exiting\n";
         continue;
     }
