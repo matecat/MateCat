@@ -15,6 +15,9 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
+CREATE SCHEMA IF NOT EXISTS `matecat` /*!40100 DEFAULT CHARACTER SET utf8 */;
+USE `matecat`;
+
 --
 -- Table structure for table `converters`
 --
@@ -41,7 +44,7 @@ CREATE TABLE `converters` (
   KEY `status_active` (`status_active`),
   KEY `status_offline` (`status_offline`),
   KEY `status_reboot` (`status_reboot`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -60,7 +63,7 @@ CREATE TABLE `converters_log` (
   KEY `timestamp_idx` (`check_time`),
   KEY `outcome_idx` (`test_passed`),
   KEY `id_converter_idx` (`id_converter`)
-) ENGINE=MyISAM AUTO_INCREMENT=338723 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -92,11 +95,19 @@ CREATE TABLE `engines` (
   PRIMARY KEY (`id`),
   KEY `type` (`type`),
   KEY `active_idx` (`active`) USING BTREE,
-  FULLTEXT KEY `name` (`name`),
-  FULLTEXT KEY `description` (`description`),
-  FULLTEXT KEY `base_url` (`base_url`)
-) ENGINE=MyISAM AUTO_INCREMENT=35 DEFAULT CHARSET=utf8;
+  KEY `name` (`name`),
+  KEY `description` (`description`),
+  KEY `base_url` (`base_url`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+INSERT INTO `engines` (`id`,`name`,`type`,`description`,`base_url`,`translate_relative_url`,`contribute_relative_url`,`delete_relative_url`,`gloss_get_relative_url`,`gloss_set_relative_url`,`gloss_update_relative_url`,`gloss_delete_relative_url`,`tmx_import_relative_url`,`tmx_status_relative_url`,`extra_parameters`,`google_api_compliant_version`,`penalty`,`active`) VALUES (0,'NONE - PLACEHOLDER','NONE','No MT','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,100,1);
+INSERT INTO `engines` (`id`,`name`,`type`,`description`,`base_url`,`translate_relative_url`,`contribute_relative_url`,`delete_relative_url`,`gloss_get_relative_url`,`gloss_set_relative_url`,`gloss_update_relative_url`,`gloss_delete_relative_url`,`tmx_import_relative_url`,`tmx_status_relative_url`,`extra_parameters`,`google_api_compliant_version`,`penalty`,`active`) VALUES (1,'MyMemory (All Pairs)','TM','MyMemory: next generation Translation Memory technology','http://api-proxied.mymemory.translated.net','get','set','delete','glossary/get','glossary/set','glossary/update','glossary/delete','tmx/import','tmx/status',NULL,'1',0,1);
+INSERT INTO `engines` (`id`,`name`,`type`,`description`,`base_url`,`translate_relative_url`,`contribute_relative_url`,`delete_relative_url`,`gloss_get_relative_url`,`gloss_set_relative_url`,`gloss_update_relative_url`,`gloss_delete_relative_url`,`tmx_import_relative_url`,`tmx_status_relative_url`,`extra_parameters`,`google_api_compliant_version`,`penalty`,`active`) VALUES (2,'FBK Legal (EN->IT) - Ad.','MT','FBK (EN->IT) Moses Legal engine','http://hlt-services2.fbk.eu:8888','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1);
+INSERT INTO `engines` (`id`,`name`,`type`,`description`,`base_url`,`translate_relative_url`,`contribute_relative_url`,`delete_relative_url`,`gloss_get_relative_url`,`gloss_set_relative_url`,`gloss_update_relative_url`,`gloss_delete_relative_url`,`tmx_import_relative_url`,`tmx_status_relative_url`,`extra_parameters`,`google_api_compliant_version`,`penalty`,`active`) VALUES (3,'LIUM-IT (EN->DE)','MT','Lium (EN->FR) Moses Information Technology engine','http://193.52.29.52:8001','translate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1);
+INSERT INTO `engines` (`id`,`name`,`type`,`description`,`base_url`,`translate_relative_url`,`contribute_relative_url`,`delete_relative_url`,`gloss_get_relative_url`,`gloss_set_relative_url`,`gloss_update_relative_url`,`gloss_delete_relative_url`,`tmx_import_relative_url`,`tmx_status_relative_url`,`extra_parameters`,`google_api_compliant_version`,`penalty`,`active`) VALUES (4,'FBK Legal (EN>FR) - Ad.','MT','FBK (EN->FR) Moses Legal engine','http://hlt-services2.fbk.eu:8988','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1);
+INSERT INTO `engines` (`id`,`name`,`type`,`description`,`base_url`,`translate_relative_url`,`contribute_relative_url`,`delete_relative_url`,`gloss_get_relative_url`,`gloss_set_relative_url`,`gloss_update_relative_url`,`gloss_delete_relative_url`,`tmx_import_relative_url`,`tmx_status_relative_url`,`extra_parameters`,`google_api_compliant_version`,`penalty`,`active`) VALUES (5,'LIUM-LEGAL (EN->DE)','MT','Lium (EN->FR) Moses Legal engine','http://193.52.29.52:8002','translate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,14,1);
+INSERT INTO `engines` (`id`,`name`,`type`,`description`,`base_url`,`translate_relative_url`,`contribute_relative_url`,`delete_relative_url`,`gloss_get_relative_url`,`gloss_set_relative_url`,`gloss_update_relative_url`,`gloss_delete_relative_url`,`tmx_import_relative_url`,`tmx_status_relative_url`,`extra_parameters`,`google_api_compliant_version`,`penalty`,`active`) VALUES (6,'FBK TED (IT>EN)','MT','FBK (IT->EN) Moses Information Technology engine','http://hlt-services2.fbk.eu:8788','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1);
 
 --
 -- Table structure for table `file_references`
@@ -114,7 +125,7 @@ CREATE TABLE `file_references` (
   `serialized_reference_binaries` longblob,
   PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -137,7 +148,7 @@ CREATE TABLE `files` (
   KEY `id_project` (`id_project`),
   KEY `sha1` (`sha1_original_file`) USING HASH,
   KEY `filename` (`filename`)
-) ENGINE=MyISAM AUTO_INCREMENT=23228 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -158,7 +169,7 @@ CREATE TABLE `files_job` (
   `status_analisys` varchar(50) DEFAULT 'NEW' COMMENT 'NEW\nIN PROGRESS\nDONE',
   PRIMARY KEY (`id_job`,`id_file`),
   KEY `id_file` (`id_file`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -204,7 +215,7 @@ CREATE TABLE `jobs` (
   KEY `first_last_segment_idx` (`job_first_segment`,`job_last_segment`),
   KEY `id` (`id`) USING BTREE,
   KEY `password` (`password`)
-) ENGINE=MyISAM AUTO_INCREMENT=18059 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -239,7 +250,7 @@ CREATE TABLE `original_files_map` (
   `deflated_xliff` longblob,
   `creation_date` date DEFAULT NULL,
   PRIMARY KEY (`sha1`,`source`,`target`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -267,7 +278,7 @@ CREATE TABLE `projects` (
   KEY `id_customer` (`id_customer`),
   KEY `status_analysis` (`status_analysis`),
   KEY `for_debug` (`for_debug`)
-) ENGINE=MyISAM AUTO_INCREMENT=14952 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -306,7 +317,7 @@ CREATE TABLE `segment_translations` (
   KEY `locked` (`locked`) USING BTREE,
   KEY `id_segment` (`id_segment`) USING BTREE,
   KEY `warning` (`warning`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -354,8 +365,8 @@ CREATE TABLE `segments` (
   KEY `show_in_cat` (`show_in_cattool`) USING BTREE,
   KEY `raw_word_count` (`raw_word_count`) USING BTREE,
   KEY `id_file_part_idx` (`id_file_part`),
-  FULLTEXT KEY `segment` (`segment`)
-) ENGINE=MyISAM AUTO_INCREMENT=10705616 DEFAULT CHARSET=utf8;
+  KEY `segment` (`segment`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -392,7 +403,7 @@ CREATE TABLE `translators` (
   `mymemory_api_key` varchar(50) NOT NULL,
   PRIMARY KEY (`username`),
   KEY `email` (`email`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -412,7 +423,7 @@ CREATE TABLE `users` (
   `api_key` varchar(100) NOT NULL,
   PRIMARY KEY (`email`),
   KEY `api_key` (`api_key`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
