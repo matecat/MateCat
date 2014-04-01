@@ -96,7 +96,6 @@ CREATE TABLE `engines` (
   KEY `type` (`type`),
   KEY `active_idx` (`active`) USING BTREE,
   KEY `name` (`name`),
-  KEY `description` (`description`),
   KEY `base_url` (`base_url`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -364,8 +363,7 @@ CREATE TABLE `segments` (
   KEY `mrk_id` (`xliff_mrk_id`) USING BTREE,
   KEY `show_in_cat` (`show_in_cattool`) USING BTREE,
   KEY `raw_word_count` (`raw_word_count`) USING BTREE,
-  KEY `id_file_part_idx` (`id_file_part`),
-  KEY `segment` (`segment`)
+  KEY `id_file_part_idx` (`id_file_part`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
