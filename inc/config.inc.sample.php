@@ -156,7 +156,7 @@ class INIT {
 		self::$DB_USER     = "matecat"; //database login
 		self::$DB_PASS     = "matecat01"; //database password
 
-        self::$MEMCACHE_SERVERS = array( "localhost:11211" => 1 );
+        self::$MEMCACHE_SERVERS = array( /* "localhost:11211" => 1 */ );
 
 		self::$STORAGE_DIR                     = self::$ROOT . "/storage";
 		self::$LOG_REPOSITORY                  = self::$STORAGE_DIR . "/log_archive";

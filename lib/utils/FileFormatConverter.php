@@ -67,10 +67,10 @@ class FileFormatConverter {
             self::$Storage_Lookup_IP_Map[ $converter_storage['ip_converter'] ] = $converter_storage['ip_storage'];
         }
 
-        $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
-
 //        self::$converters = array('10.11.0.10' => 1);//for debugging purposes
 //        self::$Storage_Lookup_IP_Map = array('10.11.0.10' => '10.11.0.11');//for debugging purposes
+
+        $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
 
 	}
 
@@ -323,8 +323,8 @@ class FileFormatConverter {
 
 		$data['fileExtension'] = $extension;
 		$data['fileName'] = "$filename.$extension";
-		$data['sourceLocale'] = $this->lang_handler->getSDLStudioCode($source_lang);
-		$data['targetLocale'] = $this->lang_handler->getSDLStudioCode($target_lang);
+        $data['sourceLocale'] = $this->lang_handler->getLangRegionCode($source_lang);
+        $data['targetLocale'] = $this->lang_handler->getLangRegionCode($target_lang);
 
 		log::doLog($this->ip." start conversion to xliff of $file_path");
 		$start_time=time();
