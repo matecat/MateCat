@@ -2188,6 +2188,21 @@ UI = {
 		});
 		$('#jobMenu li.currSegment').attr('data-segment', UI.currentSegmentId);
 	},
+	loadCustomization: function() {
+		if ($.cookie('user_customization')) {
+			this.custom = $.parseJSON($.cookie('user_customization'));
+		} else {
+			this.custom = {
+				"extended_concordance": false
+			}
+			this.saveCustomization();
+		}
+	},
+	saveCustomization: function() {
+		$.cookie('user_customization', JSON.stringify(this.custom), { expires: 3650 });
+	},
+
+	
 //	beforeExit: function() {
 //		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
 //		var leave_message = 'You are sure that you want to leave?'
@@ -2254,7 +2269,7 @@ $.extend(UI, {
 		this.version = "0.3.3.8.3";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
-		this.numContributionMatchesResults = 6;
+		this.numContributionMatchesResults = 3;
 		this.numDisplayContributionMatches = 3;
 		this.numMatchesResults = 10;
 		this.numSegments = $('section').length;
@@ -2273,6 +2288,7 @@ $.extend(UI, {
 		setTimeout(function() {
 			UI.blockGetMoreSegments = false;
 		}, 200);
+		this.loadCustomization();
 		this.detectFirstLast();
 		this.reinitMMShortcuts();
 		this.initSegmentNavBar();
@@ -3352,6 +3368,31 @@ $.extend(UI, {
 			e.preventDefault();
 			var save = (typeof param == 'undefined') ? 'noSave' : param;
 			UI.closeSegment(UI.currentSegment, 1, save);
+		}).on('click', '.concordances .more', function(e) {
+			e.preventDefault();
+			tab = $(this).parents('.concordances');
+			container = $('.overflow', $(tab));
+//			console.log($(container).height());
+			if($(tab).hasClass('extended')) {
+				UI.setExtendedConcordances(false);
+
+/*				
+				$(tab).removeClass('extended')
+//				console.log(container.height());
+				$(container).removeAttr('style');
+//				console.log($(container).height());
+				$(this).text('More');
+*/
+			} else {
+				UI.setExtendedConcordances(true);
+				
+//				$(container).css('height', $(tab).height() + 'px');
+//				$(tab).addClass('extended');
+//				$(this).text('Less');
+//				UI.custom.extended_concordance = true;
+//				UI.saveCustomization();
+			}
+			$(this).parents('.matches').toggleClass('extended');
 		}).on('keyup', '.editor .editarea', function(e) {
 			if ( e.which == 13 ){
 //				$(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
@@ -4379,16 +4420,42 @@ $.extend(UI, {
 				this.openConcordance();
 			}
 		}
-	},	
+	},
+	setExtendedConcordances: function(extended) {
+		if(!extended) {
+			$('.sub-editor.concordances').removeClass('extended');
+			$('.sub-editor.concordances .overflow').removeAttr('style');	
+			if($('.sub-editor.concordances .more').length) {
+				$('.sub-editor.concordances .more').text('More');
+			} else {
+				$('.sub-editor.concordances', segment).append('<a href="#" class="more">More</a>');				
+			}
+			this.custom.extended_concordance = false;
+			this.saveCustomization();
+		} else {
+			$('.sub-editor.concordances .overflow').css('height', $('.sub-editor.concordances').height() + 'px');
+			$('.sub-editor.concordances').addClass('extended');
+			if($('.sub-editor.concordances .more').length) {
+				$('.sub-editor.concordances .more').text('Less');
+			} else {
+				$('.sub-editor.concordances', segment).append('<a href="#" class="more">Less</a>');				
+			}
+			this.custom.extended_concordance = true;
+			this.saveCustomization();
+		}
+	},
 	renderConcordances: function(d, in_target) {
 		segment = this.currentSegment;
 		segment_id = this.currentSegmentId;
+
 		$('.sub-editor.concordances .overflow .results', segment).empty();
 		$('.sub-editor.concordances .overflow .message', segment).remove();
 		if (d.data.matches.length) {
 			$.each(d.data.matches, function(index) {
 				if ((this.segment === '') || (this.translation === ''))
 					return;
+				prime = (index < UI.numDisplayContributionMatches)? ' prime' : '';
+
 				var disabled = (this.id == '0') ? true : false;
 				cb = this.created_by;
 				cl_suggestion = UI.getPercentuageClass(this.match);
@@ -4398,8 +4465,13 @@ $.extend(UI, {
 				var rightTxt = (in_target) ? this.segment : this.translation;
 				rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
 				rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
-				$('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><!-- li class="percent ' + cl_suggestion + '">' + (this.match) + '</li --><li>' + this.last_update_date + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+				$('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall' + prime + '" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><!-- li class="percent ' + cl_suggestion + '">' + (this.match) + '</li --><li>' + this.last_update_date + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
 			});
+			if(UI.custom.extended_concordance) {
+				UI.setExtendedConcordances(true);			
+			} else {
+				UI.setExtendedConcordances(false);
+			};
 		} else {
 			console.log('no matches');
 			$('.sub-editor.concordances .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');
@@ -4415,7 +4487,7 @@ $.extend(UI, {
 		elements.each(function() {
 //			UI.detectTags(this);
 		});
-	},
+	}
 });
 
 

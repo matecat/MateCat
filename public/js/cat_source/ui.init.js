@@ -7,7 +7,7 @@ $.extend(UI, {
 		this.version = "";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
-		this.numContributionMatchesResults = 6;
+		this.numContributionMatchesResults = 3;
 		this.numDisplayContributionMatches = 3;
 		this.numMatchesResults = 10;
 		this.numSegments = $('section').length;
@@ -26,6 +26,7 @@ $.extend(UI, {
 		setTimeout(function() {
 			UI.blockGetMoreSegments = false;
 		}, 200);
+		this.loadCustomization();
 		this.detectFirstLast();
 		this.reinitMMShortcuts();
 		this.initSegmentNavBar();

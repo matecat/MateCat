@@ -943,6 +943,31 @@ $.extend(UI, {
 			e.preventDefault();
 			var save = (typeof param == 'undefined') ? 'noSave' : param;
 			UI.closeSegment(UI.currentSegment, 1, save);
+		}).on('click', '.concordances .more', function(e) {
+			e.preventDefault();
+			tab = $(this).parents('.concordances');
+			container = $('.overflow', $(tab));
+//			console.log($(container).height());
+			if($(tab).hasClass('extended')) {
+				UI.setExtendedConcordances(false);
+
+/*				
+				$(tab).removeClass('extended')
+//				console.log(container.height());
+				$(container).removeAttr('style');
+//				console.log($(container).height());
+				$(this).text('More');
+*/
+			} else {
+				UI.setExtendedConcordances(true);
+				
+//				$(container).css('height', $(tab).height() + 'px');
+//				$(tab).addClass('extended');
+//				$(this).text('Less');
+//				UI.custom.extended_concordance = true;
+//				UI.saveCustomization();
+			}
+			$(this).parents('.matches').toggleClass('extended');
 		}).on('keyup', '.editor .editarea', function(e) {
 			if ( e.which == 13 ){
 //				$(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );

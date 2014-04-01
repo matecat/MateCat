@@ -2188,6 +2188,21 @@ UI = {
 		});
 		$('#jobMenu li.currSegment').attr('data-segment', UI.currentSegmentId);
 	},
+	loadCustomization: function() {
+		if ($.cookie('user_customization')) {
+			this.custom = $.parseJSON($.cookie('user_customization'));
+		} else {
+			this.custom = {
+				"extended_concordance": false
+			}
+			this.saveCustomization();
+		}
+	},
+	saveCustomization: function() {
+		$.cookie('user_customization', JSON.stringify(this.custom), { expires: 3650 });
+	},
+
+	
 //	beforeExit: function() {
 //		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
 //		var leave_message = 'You are sure that you want to leave?'
