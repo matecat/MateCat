@@ -684,10 +684,11 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 }
 .warning-message
 {
-	background: #12B4DF !important;
-	border-color: #008AAF;
+	background: #FFFA8B !important;
+	border-color: #000;
 	padding: 10px 0 10px 0;
 	text-indent: 0;
+	color: #000;
 }
 .warning-message span {
     margin-left: 15px;
