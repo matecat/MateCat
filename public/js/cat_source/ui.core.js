@@ -2201,6 +2201,15 @@ UI = {
 	saveCustomization: function() {
 		$.cookie('user_customization', JSON.stringify(this.custom), { expires: 3650 });
 	},
+	setShortcuts: function() {
+		if($('#settings-shortcuts .list').length) return;
+		$('#settings-shortcuts .overflow').append('<table class="list"></table>');
+		$.each(this.shortcuts, function() {
+			$('#settings-shortcuts .list').append('<tr><td class="label">' + this.label + '</td><td class="combination"><span contenteditable="true">' + this.combinations[0] + '</span></td></tr>');
+		});
+
+
+	},
 
 	
 //	beforeExit: function() {

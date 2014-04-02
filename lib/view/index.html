@@ -282,9 +282,40 @@
             </ul>
         </nav>
 
+<div class="modal popup-settings" data-type="view">
+    <div class="popup-outer"></div>
+    <div class="popup">
+        <a href="#" class="x-popup"></a>
 
+        <h1>
+            <a href="#" id="settings-save" class="btn-ok right">Save</a>
+            <a href="#" id="settings-restore" class="btn-cancel right">Restore</a>
+            Settings
+        </h1>
+
+        <div class="popup-box">
+			<ul class="submenu">
+				<li class="active" data-tab="settings-shortcuts">
+					<a tabindex="-1" href="#">Keyboard Shortcuts</a>
+				</li>
+				<li data-tab="settings-other">
+					<a tabindex="-1" href="#">(Other)</a>
+				</li>
+			</ul>
+
+			<div class="tab sub-editor" id="settings-shortcuts">	
+				<div class="overflow"><p>Click on a shortcut to change it.</p></div>
+			</div>
+ 			<div class="tab sub-editor" id="settings-other">	
+				<div class="overflow">Other</div>
+			</div>
+		</div>
+    </div>
+</div>
 
         <footer>
+			<a href="#" id="settingsSwitcher" title="Settings"></a>
+
 			<!--
 						<a href="#" id="navSwitcher" title="Open Navigation Bar">Open Navigation Bar</a>
 			-->

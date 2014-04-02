@@ -1602,8 +1602,15 @@ article
 
 /*submenu*/
 .submenu {background:#fff;text-align:left;width:100%;border-bottom:1px solid #666;margin-top: 1px;}
-.submenu {display: none;}
-
+.submenu
+{
+	display: none;
+}
+.popup .submenu
+{
+	display: block;
+	padding-top: 20px;
+}
 
 .submenu:after{ content: ".";
 				display: block;
@@ -3254,6 +3261,70 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 {
 	display: none;
 }
+
+#settingsSwitcher
+{
+	position: relative;
+	float: right;
+	width: 16px;
+	height: 16px;
+	margin: 6px 8px 0 0;
+	background: url(../img/settings.png) 0 0 no-repeat;
+	background-size: 16px 16px;
+	text-indent: -9999px;
+	opacity: 0.5;
+}
+#settingsSwitcher:hover
+{
+	opacity: 1;
+}
+
+.popup-settings .popup {
+	width: 60% !important;
+	margin: 0 !important;
+	left: 20% !important;
+	top: 5%;
+}
+.popup-settings .tab:first-of-type
+{
+	display: block;
+}
+.popup-settings #settings-shortcuts .list
+{
+	margin: 10px;
+	text-align: left;
+}
+.popup-settings #settings-shortcuts .list tr
+{
+	vertical-align: top;
+}
+.popup-settings #settings-shortcuts .list .label
+{
+	width: 48%;
+	text-align: right;
+}
+.popup-settings #settings-shortcuts .list .combination
+{
+	padding-left: 20px;
+}
+.popup-settings #settings-shortcuts .list .combination span
+{
+	border: 1px solid #aaa;
+	padding: 1px 5px;
+}
+/*.popup-settings #settings-shortcuts .list dt
+{
+	float: left;
+	width: 49%;
+	background: yellow;
+}
+.popup-settings #settings-shortcuts .list dd
+{
+	float: left;
+	width: 49%;
+	margin: 0;
+	background: orange;
+}*/
 @keyframes fadein {
     from { opacity: 0; }
     to   { opacity: 0.6 }

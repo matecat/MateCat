@@ -2201,6 +2201,15 @@ UI = {
 	saveCustomization: function() {
 		$.cookie('user_customization', JSON.stringify(this.custom), { expires: 3650 });
 	},
+	setShortcuts: function() {
+		if($('#settings-shortcuts .list').length) return;
+		$('#settings-shortcuts .overflow').append('<table class="list"></table>');
+		$.each(this.shortcuts, function() {
+			$('#settings-shortcuts .list').append('<tr><td class="label">' + this.label + '</td><td class="combination"><span contenteditable="true">' + this.combinations[0] + '</span></td></tr>');
+		});
+
+
+	},
 
 	
 //	beforeExit: function() {
@@ -2317,6 +2326,87 @@ $.extend(UI, {
 		this.surveyDisplayed = false;
 		this.warningStopped = false;
 		this.abortedOperations = [];
+		this.shortcuts = {
+			"translate": {
+				"label" : "Confirm translation",
+				"equivalent": "click on Translated",
+				"combinations" : {
+					"standard": "ctrl+return",
+					"mac": "meta+return",
+				}
+			},
+			"translate-nextUntranslated": {
+				"label" : "Confirm translation and go to Next untranslated segment",
+				"equivalent": "click on [T+>>]",
+				"combinations" : [
+					"ctrl+shift+return",
+					"meta+shift+return"
+				]
+			},
+			"openNext": {
+				"label" : "Go to next segment",
+				"equivalent": "",
+				"combinations" : [
+					"ctrl+down",
+					"meta+down"
+				]
+			},
+			"openPrevious": {
+				"label" : "Go to previous segment",
+				"equivalent": "",
+				"combinations" : [
+					"ctrl+up",
+					"meta+up"
+				]
+			},
+			"gotoCurrent": {
+				"label" : "Go to current segment",
+				"equivalent": "",
+				"combinations" : [
+					"ctrl+left",
+					"meta+left"
+				]
+			},
+			"copySource": {
+				"label" : "Copy source to target",
+				"equivalent": "click on > between source and target",
+				"combinations" : [
+					"alt+ctrl+i"
+				]
+			},
+			"undoInSegment": {
+				"label" : "Undo in segment",
+				"equivalent": "",
+				"combinations" : [
+					"ctrl+z"
+				]
+			},
+			"redoInSegment": {
+				"label" : "Undo in segment",
+				"equivalent": "",
+				"combinations" : [
+					"ctrl+y",
+					"meta+shift+z"
+				]
+			},
+			"openSearch": {
+				"label" : "Open search (if not yet opened)",
+				"equivalent": "",
+				"combinations" : [
+					"ctrl+f",
+					"meta+f"
+				]
+			},
+			"searchInConcordance": {
+				"label" : "Perform Concordance search on word(s) selected in the source or target segment",
+				"equivalent": "",
+				"combinations" : [
+					"alt+ctrl+c",
+					"alt+meta+c"
+				]
+			},
+		}
+		this.setShortcuts();
 		this.setContextMenu();
 		this.createJobMenu();
 		$('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');
@@ -2507,6 +2597,26 @@ $.extend(UI, {
 //				UI.alertConfirmTranslationEnabled = true;
 //				$.removeCookie('noAlertConfirmTranslation');
 //			}
+		}).on('click', '#settingsSwitcher', function(e) {
+			e.preventDefault();
+			$('.popup-settings').show();
+		}).on('click', '.popup-settings #settings-restore', function(e) {
+			e.preventDefault();
+			APP.closePopup();
+		}).on('click', '.popup-settings #settings-save', function(e) {
+			e.preventDefault();
+			APP.closePopup();
+		}).on('click', '.popup-settings .x-popup', function(e) {
+			console.log('close');
+		}).on('click', '.popup-settings .submenu li', function(e) {
+			e.preventDefault();
+			$('.popup-settings .submenu li.active').removeClass('active');
+			$(this).addClass('active');
+			$('.popup-settings .tab').hide();
+			$('#' + $(this).attr('data-tab')).show();
+//			console.log($(this).attr('data-tab'));
+		}).on('click', '.popup-settings .submenu li a', function(e) {
+			e.preventDefault();
 		}).on('click', '#spellCheck .words', function(e) {
 			e.preventDefault();
 			UI.selectedMisspelledElement.replaceWith($(this).text());

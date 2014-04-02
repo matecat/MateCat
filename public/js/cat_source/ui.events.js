@@ -82,6 +82,26 @@ $.extend(UI, {
 //				UI.alertConfirmTranslationEnabled = true;
 //				$.removeCookie('noAlertConfirmTranslation');
 //			}
+		}).on('click', '#settingsSwitcher', function(e) {
+			e.preventDefault();
+			$('.popup-settings').show();
+		}).on('click', '.popup-settings #settings-restore', function(e) {
+			e.preventDefault();
+			APP.closePopup();
+		}).on('click', '.popup-settings #settings-save', function(e) {
+			e.preventDefault();
+			APP.closePopup();
+		}).on('click', '.popup-settings .x-popup', function(e) {
+			console.log('close');
+		}).on('click', '.popup-settings .submenu li', function(e) {
+			e.preventDefault();
+			$('.popup-settings .submenu li.active').removeClass('active');
+			$(this).addClass('active');
+			$('.popup-settings .tab').hide();
+			$('#' + $(this).attr('data-tab')).show();
+//			console.log($(this).attr('data-tab'));
+		}).on('click', '.popup-settings .submenu li a', function(e) {
+			e.preventDefault();
 		}).on('click', '#spellCheck .words', function(e) {
 			e.preventDefault();
 			UI.selectedMisspelledElement.replaceWith($(this).text());
