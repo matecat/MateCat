@@ -195,7 +195,7 @@ class downloadFileController extends downloadController {
             } catch ( Exception $e ) { Log::doLog( $e->getMessage() ); }
 
 
-            if (!in_array($mime_type, array("xliff", "sdlxliff", "xlf")) || $enforcedConversion ) {
+            if ( !in_array($mime_type, array("xliff", "sdlxliff", "xlf")) || $enforcedConversion ) {
 
                 $output_content[$id_file]['out_xliff_name'] = $path.'.out.sdlxliff';
                 $output_content[$id_file]['source'] = $jobData['source'];

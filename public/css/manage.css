@@ -659,7 +659,11 @@ line-height:20px;
 margin: 20px 0;
 color: #666;
         }
-        .apidesc td {
+
+#contentBox pre.literal-block {word-wrap: break-word;}
+
+
+.apidesc td {
             padding: 8px;
             text-align:center;
         }

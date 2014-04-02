@@ -51,8 +51,8 @@ class Languages{
 		//create internal support objects representation
 		foreach($langs as $lang){
 			//add tradoscode -> rfc mapping
-			if(isset($lang['tradossupportedcode'])){
-				self::$map_string2rfc[$lang['tradossupportedcode']]=$lang['rfc3066code'];
+			if(isset($lang['languageRegionCode'])){
+				self::$map_string2rfc[$lang['languageRegionCode']]=$lang['rfc3066code'];
 			}
 			//add rfc fallback
 			self::$map_string2rfc[$lang['rfc3066code']]=$lang['rfc3066code'];
@@ -90,9 +90,13 @@ class Languages{
 		return self::$map_rfc2obj[$code]['enabled'];
 	}
 
-	//get corresponding SDL Studio 2011 code given a localized name
-	public static function getSDLStudioCode($localizedName){
-		@$value=self::$map_rfc2obj[self::$map_string2rfc[$localizedName]]['tradossupportedcode'];
+	/**
+     * get corresponding Language-Region code given a localized name
+     * http://www.rfc-editor.org/rfc/rfc5646.txt
+     * http://www.w3.org/International/articles/language-tags/
+     */
+	public static function getLangRegionCode($localizedName){
+		@$value=self::$map_rfc2obj[self::$map_string2rfc[$localizedName]]['languageRegionCode'];
 		if(empty($value)){
 			$value=self::get3066Code($localizedName);
 		}

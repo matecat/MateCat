@@ -130,12 +130,73 @@
                                 <td colspan="2">
                                         <pre class="literal-block">
 {
-    "status": "FAIL",
-}                                       </pre>
+	status: "FAIL"
+	message: "Project Conversion Failure"
+	debug: [2]
+	0:  {
+		code: -110
+		message: "Error: there is a problem with this file, it cannot be converted back to the original one."
+		debug: "TEST_FAILURE_DOC1.docx"
+	}
+	1:  {
+		code: -100
+		message: "Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOC."
+		debug: "TEST_FAILURE_DOC2.docx"
+	}
+
+}                                      </pre>
                                 </td>
                             </tr>
                             </tbody>
                         </table>
+
+                        <p><strong>Debug Codes</strong></p>
+                        <table class="tablestats" width="100%" border="0" cellspacing="0" cellpadding="0">
+
+                            <tbody>
+                            <tr>
+                                <th>code</th>
+                                <th>message</th>
+                                <th>debug</th>
+                            </tr>
+                            <tr>
+                                <td>-1</td>
+                                <td>"Error: missing file name."</td>
+                                <td>NULL</td>
+                            </tr>
+                            <tr>
+                                <td>-6</td>
+                                <td>"Error during upload. Please retry."</td>
+                                <td>NULL</td>
+                            </tr>
+                            <tr>
+                                <td>-100</td>
+                                <td>"Conversion error. Try opening and saving the document with a new name. If this does not work, try converting to DOC."</td>
+                                <td>The failed file name. </td>
+                            </tr>
+                            <tr>
+                                <td>-101</td>
+                                <td>"Error: failed to save converted file from cache to disk"</td>
+                                <td>The failed file name. </td>
+                            </tr>
+                            <tr>
+                                <td>-102</td>
+                                <td>"Error: File too large"</td>
+                                <td>The failed file name. </td>
+                            </tr>
+                            <tr>
+                                <td>-103</td>
+                                <td>"Error: failed to save file on disk"</td>
+                                <td>The failed file name. </td>
+                            </tr>
+                            <tr>
+                                <td>-110</td>
+                                <td>"Error: there is a problem with this file, it cannot be converted back to the original one."</td>
+                                <td>The failed file name. </td>
+                            </tr>
+                            </tbody>
+                        </table>
+
                     </dd>
                     <dt>Notes</dt>
                     <dd><p><code>/new</code> has a maximum file size limit of 60 MB per file and a max number of files of 100.</p></dd>
@@ -410,7 +471,7 @@
                             </tr>
                             <tr>
                                 <td><code>NUMBERS_ONLY</code></td>
-                                <td>A field containing only number, dates and similar not translatable data ( Ex: 93/127 ) found in the project/chunk/file</td>
+                                <td>A field containing only number, dates and similar not translatable data ( <br />Ex: 93/127 ) found in the project/chunk/file</td>
                             </tr>
                             <tr>
                                 <td><code>IN_QUEUE_BEFORE</code></td>

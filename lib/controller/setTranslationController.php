@@ -77,17 +77,22 @@ class setTranslationController extends ajaxController {
 		} else {
 
             //get Job Infos, we need only a row of jobs ( split )
-            $job_data = getJobData( (int) $this->id_job, $this->password );
+            $job_data = getJobData( (int)$this->id_job, $this->password );
+            if ( empty( $job_data ) ) {
+                $msg = "Error : empty job data \n\n " . var_export( $_POST, true ) . "\n";
+                Log::doLog( $msg );
+                Utils::sendErrMailReport( $msg );
+            }
 
             //add check for job status archived.
-            if( strtolower( $job_data['status'] ) == 'archived' ){
-                $this->result['error'][] = array("code" => -3, "message" => "job archived");
+            if ( strtolower( $job_data[ 'status' ] ) == 'archived' ) {
+                $this->result[ 'error' ][ ] = array( "code" => -3, "message" => "job archived" );
             }
 
             $pCheck = new AjaxPasswordCheck();
             //check for Password correctness
-            if( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password, $this->id_segment ) ){
-                $this->result['error'][] = array("code" => -10, "message" => "wrong password");
+            if ( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password, $this->id_segment ) ) {
+                $this->result[ 'error' ][ ] = array( "code" => -10, "message" => "wrong password" );
             }
 
         }
@@ -98,10 +103,6 @@ class setTranslationController extends ajaxController {
 
 		if (empty($this->time_to_edit)) {
 			$this->time_to_edit = 0;
-		}
-
-		if (empty($this->status)) {
-			$this->status = 'DRAFT';
 		}
 
 		if ( is_null($this->translation) || $this->translation === '' ) {
