@@ -310,6 +310,9 @@ class Database {
 			$this->error = mysql_error();
 			$this->errno = mysql_errno();
 			$msg = "<b>WARNING:</b> No link_id found. Likely not be connected to database.<br />$msg";
+            if( $this->errno == 1040 || $this->errno == 2003 ){
+                throw new RuntimeException( "( $this->errno ): " . $this->error, $this->errno );
+            }
 		}
 		// if no debug, done here
 		if (!$this->debug) {
