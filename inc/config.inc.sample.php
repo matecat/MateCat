@@ -333,18 +333,22 @@ class INIT {
             case E_USER_ERROR:
             case E_RECOVERABLE_ERROR:
 
-                if( !ob_end_clean() ) ob_start();
+                ini_set( 'display_errors', 'Off' );
+
+                if( !ob_get_level() ){ ob_start(); }
+                else { ob_end_clean(); ob_start(); }
+
                 debug_print_backtrace();
                 $output = ob_get_contents();
                 ob_end_clean();
 
                 # Here we handle the error, displaying HTML, logging, ...
-                $output .= "<pre>";
+                $output .= "<pre>\n";
                 $output .= "[ {$errorType[$error['type']]} ]\n\t";
                 $output .= "{$error['message']}\n\t";
                 $output .=  "Not Recoverable Error on line {$error['line']} in file " . $error['file'];
                 $output .=  " - PHP " . PHP_VERSION . " (" . PHP_OS . ")\n";
-                $output .=  " - REQUEST URI: " . print_r( $_SERVER['REQUEST_URI'], true ) . "\n";
+                $output .=  " - REQUEST URI: " . print_r( @$_SERVER['REQUEST_URI'], true ) . "\n";
                 $output .=  " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
                 $output .=  "\n\t";
                 $output .=  "Aborting...\n";
