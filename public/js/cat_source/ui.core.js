@@ -1989,7 +1989,9 @@ UI = {
 				// This Alert, will be NEVER displayed because are no-blocking
 				// Transform location.reload(); to a callable function passed as callback to alert
 			}
-
+//			if (this.code == '-1000') {
+//				UI.failedConnection(0, 'getContribution');
+//			}
 		});
 	},
 	reloadPage: function() {
@@ -2118,6 +2120,7 @@ UI = {
 		}
 	},
 	undoInSegment: function() {
+		console.log('undoInSegment');
 		if (this.undoStackPosition === 0)
 			this.saveInUndoStack('undo');
 		var ind = 0;
@@ -2203,12 +2206,22 @@ UI = {
 	},
 	setShortcuts: function() {
 		if($('#settings-shortcuts .list').length) return;
-		$('#settings-shortcuts .overflow').append('<table class="list"></table>');
+		$('#settings-shortcuts #default-shortcuts').before('<table class="list"></table>');
 		$.each(this.shortcuts, function() {
-			$('#settings-shortcuts .list').append('<tr><td class="label">' + this.label + '</td><td class="combination"><span contenteditable="true">' + this.combinations[0] + '</span></td></tr>');
+			$('#settings-shortcuts .list').append('<tr><td class="label">' + this.label + '</td><td class="combination"><span contenteditable="true" class="keystroke">' + ((UI.isMac) ? ((typeof this.keystrokes.mac == 'undefined')? UI.viewShortcutSymbols(this.keystrokes.standard) : UI.viewShortcutSymbols(this.keystrokes.mac)) : UI.viewShortcutSymbols(this.keystrokes.standard)) + '</span></td></tr>');
 		});
-
-
+	},
+	viewShortcutSymbols: function(txt) {
+		txt = txt.replace(/meta/gi, '&#8984').replace(/return/gi, '&#9166').replace(/alt/gi, '&#8997').replace(/shift/gi, '&#8679').replace(/up/gi, '&#8593').replace(/down/gi, '&#8595').replace(/left/gi, '&#8592').replace(/right/gi, '&#8594');
+		return txt;
+	},
+	writeNewShortcut: function(c, s, k) {
+		$(k).html(s.html().substring(0, s.html().length - 1)).removeClass('changing').addClass('modified').blur();
+		$(s).remove();
+		$('.msg', c).remove();
+		$('#settings-shortcuts.modifying').removeClass('modifying');
+		$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').addClass('modified');
+		$('.popup-settings').addClass('modified');
 	},
 
 	

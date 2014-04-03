@@ -2,69 +2,81 @@
 	Component: ui.events 
  */
 $.extend(UI, {
-	setEvents: function() {
-		$("body").bind('keydown', 'Ctrl+return', function(e) {
+	bindShortcuts: function() {
+		$("body").removeClass('shortcutsDisabled');
+		$("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.standard, function(e) {
 			e.preventDefault();
 			$('.editor .translated').click();
-		}).bind('keydown', 'Meta+return', function(e) {
+//		}).bind('keydown', 'Meta+return', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.mac, function(e) {
 			e.preventDefault();
+			console.log('funziona');
 			$('.editor .translated').click();
-		}).bind('keydown', 'Ctrl+shift+return', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.translate_nextUntranslated.keystrokes.standard, function(e) {
 			e.preventDefault();
 			$('.editor .next-untranslated').click();
-		}).bind('keydown', 'Meta+shift+return', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.translate_nextUntranslated.keystrokes.mac, function(e) {
 			e.preventDefault();
 			$('.editor .next-untranslated').click();
-		}).bind('keydown', 'Ctrl+pageup', function(e) {
+		}).on('keydown.shortcuts', null, 'Ctrl+pageup', function(e) {
 			e.preventDefault();
-		}).bind('keydown', 'Ctrl+down', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.openNext.keystrokes.standard, function(e) {
 			e.preventDefault();
 			e.stopPropagation();
 			UI.gotoNextSegment();
-		}).bind('keydown', 'Meta+down', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.openNext.keystrokes.mac, function(e) {
 			e.preventDefault();
 			e.stopPropagation();
 			UI.gotoNextSegment();
-		}).bind('keydown', 'Ctrl+up', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.openPrevious.keystrokes.standard, function(e) {
 			e.preventDefault();
 			e.stopPropagation();
 			UI.gotoPreviousSegment();
-		}).bind('keydown', 'Meta+up', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.openPrevious.keystrokes.mac, function(e) {
 			e.preventDefault();
 			e.stopPropagation();
 			UI.gotoPreviousSegment();
-		}).bind('keydown', 'Ctrl+left', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.gotoCurrent.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.pointToOpenSegment();
-		}).bind('keydown', 'Meta+left', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.gotoCurrent.keystrokes.mac, function(e) {
 			e.preventDefault();
 			UI.pointToOpenSegment();
-		}).bind('keydown', 'Alt+ctrl+i', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.copySource.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.copySource();
-		}).bind('keydown', 'Ctrl+z', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.undoInSegment.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.undoInSegment(segment);
 			UI.closeTagAutocompletePanel();
-		}).bind('keydown', 'Meta+z', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.undoInSegment.keystrokes.mac, function(e) {
 			e.preventDefault();
 			UI.undoInSegment(segment);
 			UI.closeTagAutocompletePanel();
-		}).bind('keydown', 'Ctrl+y', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.redoInSegment.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.redoInSegment(segment);
-		}).bind('keydown', 'Meta+Shift+z', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.redoInSegment.keystrokes.mac, function(e) {
 			e.preventDefault();
 			UI.redoInSegment(segment);
-		}).bind('keydown', 'Ctrl+c', function() {
+		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.standard, function(e) {
+			UI.toggleSearch(e);
+		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.mac, function(e) {
+			UI.toggleSearch(e);
+		});		
+	},
+	unbindShortcuts: function() {
+		$("body").off(".shortcuts").addClass('shortcutsDisabled');
+	},
+	setEvents: function() {
+		this.bindShortcuts();
+		
+		$("body").bind('keydown', 'Ctrl+c', function() {
 			UI.tagSelection = false;
 		}).bind('keydown', 'Meta+c', function() {
 			UI.tagSelection = false;
 //		}).bind('keydown', 'Backspace', function(e) {
-		}).bind('keydown', 'Meta+f', function(e) {
-			UI.toggleSearch(e);
-		}).bind('keydown', 'Ctrl+f', function(e) {
-			UI.toggleSearch(e);
+
 //		}).on('click', '#messageBar .close', function(e) {
 //			e.preventDefault();
 //			$('body').removeClass('incomingMsg');
@@ -84,6 +96,7 @@ $.extend(UI, {
 //			}
 		}).on('click', '#settingsSwitcher', function(e) {
 			e.preventDefault();
+			UI.unbindShortcuts();
 			$('.popup-settings').show();
 		}).on('click', '.popup-settings #settings-restore', function(e) {
 			e.preventDefault();
@@ -91,6 +104,10 @@ $.extend(UI, {
 		}).on('click', '.popup-settings #settings-save', function(e) {
 			e.preventDefault();
 			APP.closePopup();
+		}).on('click', '.modal .x-popup', function(e) {
+			if($('body').hasClass('shortcutsDisabled')) {
+				UI.bindShortcuts();
+			}
 		}).on('click', '.popup-settings .x-popup', function(e) {
 			console.log('close');
 		}).on('click', '.popup-settings .submenu li', function(e) {
@@ -102,6 +119,16 @@ $.extend(UI, {
 //			console.log($(this).attr('data-tab'));
 		}).on('click', '.popup-settings .submenu li a', function(e) {
 			e.preventDefault();
+		}).on('click', '#settings-shortcuts .list .combination .keystroke', function(e) {
+			$('#settings-shortcuts .list .combination .msg').remove();
+			$('#settings-shortcuts .list .combination .keystroke.changing').removeClass('changing');
+			$(this).toggleClass('changing').after('<span class="msg">New: </span>');
+			$('#settings-shortcuts').addClass('modifying');
+		}).on('click', '#settings-shortcuts #default-shortcuts', function(e) {
+			e.preventDefault();
+			$('#settings-shortcuts .list').remove();
+			UI.setShortcuts();
+			$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').removeClass('modified');	
 		}).on('click', '#spellCheck .words', function(e) {
 			e.preventDefault();
 			UI.selectedMisspelledElement.replaceWith($(this).text());
@@ -155,6 +182,46 @@ $.extend(UI, {
 			$('.modal.survey').remove();
 		}).on('click', '.modal.survey .popup-outer', function() {
 			$('.modal.survey').hide().remove();
+		}).on('keydown', '#settings-shortcuts.modifying .keystroke', function(e) {
+			e.preventDefault();
+			var n = e.which;
+			var c = $(this).parents('.combination');
+			if(!(c.find('.new').length)) {
+				$(c).append('<span class="new"></span>')
+			}
+			var s = $('.new', c);
+			console.log(n);
+			if((n == '16')||(n == '17')||(n == '18')||(n == '91')) { // is a control key
+
+				if($('.control', s).length > 1) {
+					console.log('troppi tasti control: ', $('span', s).length);
+					return false;
+				}
+			
+				k = (n == '16')? 'shift' : (n == '17')? 'ctrl' : (n == '18')? 'alt' : (n == '91')? 'meta' : '';
+				s.html(s.html() + '<span class="control">' + UI.viewShortcutSymbols(k) + '</span>' + '+');
+			} else {
+				console.log('b');
+				s.html(s.html() + '<span class="char">' + UI.viewShortcutSymbols('&#' + e.which) + '</span>' + '+');				
+			}
+			if($('span', s).length > 2) {
+//				console.log('numero span: ', $('span', s).length);
+				UI.writeNewShortcut(c, s, this);
+
+//				$(this).html(s.html().substring(0, s.html().length - 1)).removeClass('changing').addClass('modified').blur();
+//				$(s).remove();
+//				$('.msg', c).remove();
+//				$('#settings-shortcuts.modifying').removeClass('modifying');
+//				$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').addClass('modified');
+			}				
+		}).on('keyup', '#settings-shortcuts.modifying .keystroke', function(e) {
+			console.log('keyup');
+			var c = $(this).parents('.combination');
+			var s = $('.new', c);
+			if(($('.control', s).length)&&($('.char', s).length)) {
+				UI.writeNewShortcut(c, s, this);
+			}
+			$(s).remove();
 		});
 		
 		$(window).on('scroll', function() {
@@ -366,10 +433,10 @@ $.extend(UI, {
 			}
 			if (UI.debug)
 				console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea));
-		}).on('keydown', '.editor .source, .editor .editarea', 'alt+meta+c', function(e) {
+		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
-		}).on('keydown', '.editor .source, .editor .editarea', 'alt+ctrl+c', function(e) {
+		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
 		}).on('keypress', '.editor .editarea', function(e) {

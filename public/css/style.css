@@ -755,6 +755,10 @@ body.noGlossary .tab-switcher-gl
     outline: none;
 	padding-top:5px !important;
 }
+.submenu li.modified a
+{
+    color: red;
+}
 
 .sub-editor
 {
@@ -2397,15 +2401,39 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 {
 	width: 48%;
 	text-align: right;
+	line-height: 130%;
+	padding-top: 6px;
 }
 .popup-settings #settings-shortcuts .list .combination
 {
 	padding-left: 20px;
 }
-.popup-settings #settings-shortcuts .list .combination span
+.popup-settings #settings-shortcuts .list .combination .keystroke
 {
 	border: 1px solid #aaa;
 	padding: 1px 5px;
+}
+.popup-settings #settings-shortcuts .list .combination .keystroke.modified
+{
+	border-color: red;
+}
+.popup-settings #settings-shortcuts .list .combination .keystroke.changing
+{
+	background: #0798BC;
+	color: #fff;
+}
+.popup-settings #settings-shortcuts .list .combination .msg
+{
+	margin-left: 20px;
+	color: #999;
+}
+.popup-settings #settings-restore
+{
+	display: none;
+}
+.popup-settings.modified #settings-restore
+{
+	display: block;
 }
 /*.popup-settings #settings-shortcuts .list dt
 {

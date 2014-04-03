@@ -59,80 +59,81 @@ $.extend(UI, {
 			"translate": {
 				"label" : "Confirm translation",
 				"equivalent": "click on Translated",
-				"combinations" : {
+				"keystrokes" : {
 					"standard": "ctrl+return",
 					"mac": "meta+return",
 				}
 			},
-			"translate-nextUntranslated": {
+			"translate_nextUntranslated": {
 				"label" : "Confirm translation and go to Next untranslated segment",
 				"equivalent": "click on [T+>>]",
-				"combinations" : [
-					"ctrl+shift+return",
-					"meta+shift+return"
-				]
+				"keystrokes" : {
+					"standard": "ctrl+shift+return",
+					"mac": "meta+shift+return",
+				}
 			},
 			"openNext": {
 				"label" : "Go to next segment",
 				"equivalent": "",
-				"combinations" : [
-					"ctrl+down",
-					"meta+down"
-				]
+				"keystrokes" : {
+					"standard": "ctrl+down",
+					"mac": "meta+down",
+				}
 			},
 			"openPrevious": {
 				"label" : "Go to previous segment",
 				"equivalent": "",
-				"combinations" : [
-					"ctrl+up",
-					"meta+up"
-				]
+				"keystrokes" : {
+					"standard": "ctrl+up",
+					"mac": "meta+up",
+				}
 			},
 			"gotoCurrent": {
 				"label" : "Go to current segment",
 				"equivalent": "",
-				"combinations" : [
-					"ctrl+left",
-					"meta+left"
-				]
+				"keystrokes" : {
+					"standard": "ctrl+left",
+					"mac": "meta+left",
+				}
 			},
 			"copySource": {
 				"label" : "Copy source to target",
 				"equivalent": "click on > between source and target",
-				"combinations" : [
-					"alt+ctrl+i"
-				]
+				"keystrokes" : {
+					"standard": "alt+ctrl+i",
+				}
 			},
 			"undoInSegment": {
 				"label" : "Undo in segment",
 				"equivalent": "",
-				"combinations" : [
-					"ctrl+z"
-				]
+				"keystrokes" : {
+					"standard": "ctrl+z",
+					"mac": "meta+z",
+				}
 			},
 			"redoInSegment": {
 				"label" : "Undo in segment",
 				"equivalent": "",
-				"combinations" : [
-					"ctrl+y",
-					"meta+shift+z"
-				]
+				"keystrokes" : {
+					"standard": "ctrl+y",
+					"mac": "meta+shift+z",
+				}
 			},
 			"openSearch": {
-				"label" : "Open search (if not yet opened)",
+				"label" : "Open/Close search panel",
 				"equivalent": "",
-				"combinations" : [
-					"ctrl+f",
-					"meta+f"
-				]
+				"keystrokes" : {
+					"standard": "ctrl+f",
+					"mac": "meta+f",
+				}
 			},
 			"searchInConcordance": {
 				"label" : "Perform Concordance search on word(s) selected in the source or target segment",
 				"equivalent": "",
-				"combinations" : [
-					"alt+ctrl+c",
-					"alt+meta+c"
-				]
+				"keystrokes" : {
+					"standard": "alt+ctrl+c",
+					"mac": "alt+meta+c",
+				}
 			},
 		}
 		this.setShortcuts();
