@@ -881,6 +881,10 @@ only screen and (in-resolution: 2dppx) {
 	background-size: 20px;
 }  
 
+.fileinput-button {
+	background: #09beec url(../img/sprite2x.png) -4px -516px no-repeat;
+}
+
 .popup h1 {
 	background: #6d6e71 url(../img/sprite2x.png) 10px 10px no-repeat;	
 	background-size: 42px;
