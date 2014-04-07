@@ -201,8 +201,18 @@ $.extend(UI, {
 				k = (n == '16')? 'shift' : (n == '17')? 'ctrl' : (n == '18')? 'alt' : (n == '91')? 'meta' : '';
 				s.html(s.html() + '<span class="control">' + UI.viewShortcutSymbols(k) + '</span>' + '+');
 			} else {
-				console.log('b');
-				s.html(s.html() + '<span class="char">' + UI.viewShortcutSymbols('&#' + e.which) + '</span>' + '+');				
+				console.log(n);
+				symbol = (n == '8')? '9003' :
+						(n == '9')? '8682' :
+						(n == '13')? '8629' :
+						(n == '37')? '8592' :
+						(n == '38')? '8593' :
+						(n == '39')? '8594' :
+						(n == '40')? '8595' : n;
+				console.log('symbol: ', symbol);
+//				pref = ($.inArray(n, [37, 38, 39, 40]))? '#' : '';
+				s.html(s.html() + '<span class="char">' + UI.viewShortcutSymbols('&#' + symbol) + '</span>' + '+');
+				console.log(s.html());
 			}
 			if($('span', s).length > 2) {
 //				console.log('numero span: ', $('span', s).length);

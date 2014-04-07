@@ -2364,6 +2364,7 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 
 #settingsSwitcher
 {
+	display: none;
 	position: relative;
 	float: right;
 	width: 16px;

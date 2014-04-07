@@ -101,6 +101,9 @@ $.extend(UI, {
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
+				console.log(d);
+				if (d.error.length)
+					UI.processErrors(d.error, 'getContribution');
 				UI.getContribution_success(d, this);
 			},
 			complete: function() {

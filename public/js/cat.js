@@ -1968,6 +1968,7 @@ UI = {
     },
 
 	processErrors: function(err, operation) {
+		console.log('processErrors: ', err);
 		$.each(err, function() {
 			if (operation == 'setTranslation') {
 				if (this.code != '-10') { // is not a password error
@@ -1989,9 +1990,10 @@ UI = {
 				// This Alert, will be NEVER displayed because are no-blocking
 				// Transform location.reload(); to a callable function passed as callback to alert
 			}
-//			if (this.code == '-1000') {
-//				UI.failedConnection(0, 'getContribution');
-//			}
+			if (this.code == '-1000') {
+				console.log('ERROR -1000');
+				UI.failedConnection(0, 'no');
+			}
 		});
 	},
 	reloadPage: function() {
@@ -2212,7 +2214,7 @@ UI = {
 		});
 	},
 	viewShortcutSymbols: function(txt) {
-		txt = txt.replace(/meta/gi, '&#8984').replace(/return/gi, '&#9166').replace(/alt/gi, '&#8997').replace(/shift/gi, '&#8679').replace(/up/gi, '&#8593').replace(/down/gi, '&#8595').replace(/left/gi, '&#8592').replace(/right/gi, '&#8594');
+		txt = txt.replace(/meta/gi, '&#8984').replace(/return/gi, '&#8629').replace(/alt/gi, '&#8997').replace(/shift/gi, '&#8679').replace(/up/gi, '&#8593').replace(/down/gi, '&#8595').replace(/left/gi, '&#8592').replace(/right/gi, '&#8594');
 		return txt;
 	},
 	writeNewShortcut: function(c, s, k) {
@@ -2730,8 +2732,18 @@ $.extend(UI, {
 				k = (n == '16')? 'shift' : (n == '17')? 'ctrl' : (n == '18')? 'alt' : (n == '91')? 'meta' : '';
 				s.html(s.html() + '<span class="control">' + UI.viewShortcutSymbols(k) + '</span>' + '+');
 			} else {
-				console.log('b');
-				s.html(s.html() + '<span class="char">' + UI.viewShortcutSymbols('&#' + e.which) + '</span>' + '+');				
+				console.log(n);
+				symbol = (n == '8')? '9003' :
+						(n == '9')? '8682' :
+						(n == '13')? '8629' :
+						(n == '37')? '8592' :
+						(n == '38')? '8593' :
+						(n == '39')? '8594' :
+						(n == '40')? '8595' : n;
+				console.log('symbol: ', symbol);
+//				pref = ($.inArray(n, [37, 38, 39, 40]))? '#' : '';
+				s.html(s.html() + '<span class="char">' + UI.viewShortcutSymbols('&#' + symbol) + '</span>' + '+');
+				console.log(s.html());
 			}
 			if($('span', s).length > 2) {
 //				console.log('numero span: ', $('span', s).length);
@@ -3893,6 +3905,9 @@ $.extend(UI, {
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
+				console.log(d);
+				if (d.error.length)
+					UI.processErrors(d.error, 'getContribution');
 				UI.getContribution_success(d, this);
 			},
 			complete: function() {
