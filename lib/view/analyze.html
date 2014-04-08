@@ -17,8 +17,7 @@
 			totalAnalyzed: '${num_segments_analyzed}',
 			isLoggedIn: '${isLoggedIn}',
 			showModalBoxLogin: '${showModalBoxLogin}',
-			enable_outsource: true
-//			enable_outsource: ${enable_outsource}
+			enable_outsource: ${enable_outsource}
         };
     </script>
 
@@ -335,7 +334,6 @@
                                 <td class="stat_mt">0</td>
                                 <td class="empty">
                                     <a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${job/jid}-${job/jpassword}" href="#" target="_blank" class="uploadbtn">Translate</a>
-                                    <a class="outsource" href="#">outsource</a>
                                 </td>
                             </tr>
                             <tal:block tal:define="files job/files; f php:array()" tal:repeat="f files">
@@ -396,7 +394,7 @@
         <div class="popup-box">
            <p>Select the link below and share it with your translators or with your client</p>
            <div class="out-link"><code>http://matecat.local/translate/prova/en-US-fr-FR/19153-bd17c71da22f#11143640</code></div>
-               <a class="uploadbtn">Translate</a>
+               <a class="uploadbtn in-popup" target="_blank">Translate</a>
         </div>
         <div class="outsourceto">
         <h2>Outsource to Translated.net</h2>
