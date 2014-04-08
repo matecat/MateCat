@@ -333,6 +333,7 @@
                                 <td class="stat_mt">0</td>
                                 <td class="empty">
                                     <a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${job/jid}-${job/jpassword}" href="#" target="_blank" class="uploadbtn">Translate</a>
+                                    <a class="outsource" href="#">outsource</a>
                                 </td>
                             </tr>
                             <tal:block tal:define="files job/files; f php:array()" tal:repeat="f files">
@@ -381,6 +382,31 @@
     </div>
     <div class="cl"></div>
 </div>
+
+<!-- modale outsource -->
+<div class="modal outsourcemodal" data-type="view" style="display:none;">
+    <div class="popup-outer"></div>
+    <div class="popup">
+        <a href="#" class="x-popup"></a>
+
+        <h1>Here is the link to your new translation job</h1>
+
+        <div class="popup-box">
+           <p>Select the link below and share it with your translators or with your client</p>
+           <div class="out-link"><code>http://matecat.local/translate/prova/en-US-fr-FR/19153-bd17c71da22f#11143640</code></div>
+               <a class="uploadbtn">Translate</a>
+        </div>
+        <div class="outsourceto">
+        <h2>Outsource to Translated.net</h2>
+        	<div class="copytext"><p>Commit your project to a network of more than 98128 translators trusted by 19021 clients.<br />
+            Payment within 5 days of translation delivery, by credit card, bank transfer or PayPal.</p></div>
+              <a class="uploadbtn">Show prices</a>
+        </div>
+        <!-- END DIV SPLIT BOX -->
+    </div>
+    <!-- END DIV POPUP-SPLIT INTERNO -->
+</div>
+<!-- fine modale outsource -->
 
 <div class="modal popup-split" data-type="view">
     <div class="popup-outer"></div>
@@ -503,7 +529,9 @@
 <!-- FINE POPUP LOGIN -->
 <!-- JS SPLIT JOB  -->
 <script type="text/javascript">
-
+$( ".outsource" ).click(function() {
+  $( ".outsourcemodal" ).show();
+});
 </script>
 
 <!-- FINE JS SPLIT JOB -->
