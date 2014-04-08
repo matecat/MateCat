@@ -983,9 +983,42 @@ footer a:hover{text-decoration:none}
 /* file extensions */
 
 .preview span {height: 30px;width: 30px;display: block;background-size: 25px!important;}
+/* retina display query */
+@media only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (min--moz-device-pixel-ratio: 2),
+only screen and (-o-min-device-pixel-ratio: 2/1),
+only screen and (min-device-pixel-ratio: 2),
+only screen and (min-resolution: 192dpi),
+only screen and (in-resolution: 2dppx) { 
+ #swaplang {
+background: url(../img/sprite2x.png) -13px -561px no-repeat;
+}
+.fileinput-button {
+	background: #09beec url(../img/sprite2x.png) -4px -515px no-repeat;
+}
 
 
 
+.cancel-btn {
+background: #f26522 url(../img/sprite2x.png) -4px -1157px no-repeat !Important;
+}
 
+.cancel-btn:hover {
+background: #d1581c url(../img/sprite2x.png) -4px -1157px no-repeat !Important;
+}
+
+.delete button {
+background: url(../img/sprite2x.png) 12px -1074px no-repeat !important;
+}
+
+.delete button:hover, .cancel button:hover {
+background: #ca2a2e url(../img/sprite2x.png) 12px -1115px no-repeat !important;
+}
+
+#swaplang, .fileinput-button, .cancel-btn, .cancel-btn:hover, .delete button, .delete button:hover, .cancel button:hover  {
+	background-size: 42px!important;
+}
+
+}
 
 

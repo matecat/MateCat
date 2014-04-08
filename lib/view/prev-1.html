@@ -1,0 +1,229 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Outsource - Matecat</title>
+    <link href="/public/css/prev.css" rel="stylesheet" type="text/css" />
+</head>
+<body class="prev">
+<header>
+    <div class="wrapper ">
+        <a href="/" class="logo"></a>
+    </div>
+</header>
+<div class="payment-top">
+		<div class="intro">
+        		<h1>Outsource to Translated.net</h1>
+                <img src="http://www.translated.net/en/pub/images/translated-logo_2x.png" />
+        </div>
+        </div>
+        <div class="payment-cont">
+        <div class="step left">
+        		<ul>
+                	<li class="active">1. Registration</li>
+                    <li>2. Order</li>
+                    <li>3. Confirm</li>
+                  </ul>
+        </div>
+        <div class="pad step1 left">
+        <div> 
+        <p>Create an account on Translated.net or sign in</p>
+                    <input type="hidden" id="newCustomerValidationOk" value="1"/>
+
+
+                    <div id="usertypecontainer" style="font-size:130%">
+                        <p>                                                      
+                            <input  name="userType" type="radio" value="old" id="usertype_old" checked="checked" tal:attributes="checked php:!isset(user_type) OR (isset(user_type) AND user_type NE 'new')?'checked' : ''" />
+                            <label class="preventivo" for="usertype_old"  style="margin-right:15px;cursor:pointer">Registered user</label>
+                            <input name="userType" type="radio" id="usertype_new" value="new" tal:attributes="checked php:(isset(user_type) AND user_type EQ 'new')?'checked' : ''" />
+                            <label class="preventivo" for="usertype_new" style="margin-right:15px;cursor:pointer">New user</label>	
+                        </p>
+                    </div>
+
+
+
+                    <div id="returninguser">
+                        <h2 >Registered user</h2>
+                        <form id="returningCustomerForm" method="post" action="online-quote-3">
+                            <input type="hidden" value="" name="pid" tal:attributes="value pid|null"/>
+
+
+                            <input type="hidden" name="productSource"  tal:attributes="value productSource|null" value=""/>
+                            <input type="hidden" name="productTargets"  tal:attributes="value productTargets | null"  value=""/>
+                            <input type="hidden" name="productDelivery"  tal:attributes="value productDelivery | null"  value=""/>
+                            <input type="hidden" name="productTotalEuro"  tal:attributes="value productTotalEuro | null" value=""/>
+                            <input type="hidden" name="productGMT" tal:attributes="value productGMT | null"  value=""/>
+
+                            <input type="hidden" value="old" name="user_type" />	
+                            <input type="hidden" value="" id="returningCid" name="cid" tal:attributes="value cid|null"/>					
+                            <input type="hidden" value="" id="returningEmail" name="returning_email" tal:attributes="value cid|null"/>					
+                            <p>								
+                                <label class="preventivo" for="user">Username: <br/>
+                                    <input value="" tal:attributes="value returning_user_id|nothing" class="textbox validate[required]" type="text" name="returning_user_id" id="returning_user_id" />
+                                </label>
+                                <br/>						
+
+                                <label class="preventivo" for="password">Password:<br />
+                                    <input value=""  class="textbox validate[required]" type="password" name="returning_user_password"  id="returning_user_password" />
+                                </label>
+                                <br />			        
+                                <input  id="returningCustomerButton" type="submit" class="orderbtn floatdx button"  value="Continue"  />  
+                                <span id="loadingsml-w" ></span>
+
+                                <span class="psw"><a  class="forgotPassword">Forgot your password?</a></span>	
+                                <p style="border:0; width:10px;height:10px" id="returningCustomerPrompt"></p>
+                                <div id="returningCustomerAuthError" tal:attributes="class php:isset(postback_error) and postback_error=='loginError' ?'errortext':'errortext hide'" class="errortext hide">
+                                    Incorrect username or password <br/> Forgot your password? <br/> Don't remember which e-mail address you used to register?<br/> Contact us at <a href="mailto:info@translated.net?Subject=Customer Lost Access Data">info@translated.net</a>
+                                </div>						
+                            </p>
+                        </form>							
+                    </div>		
+
+                    <div class="cl"></div>	
+
+                    <div id="registeruser" class="alpha hide">
+                        <h2>New user</h2>
+                        <h3>
+                            Provide the contact details for the person receiving the jobs
+                        </h3> 
+                        <form  id="newCustomerForm" class="formID" method="post" action="online-quote-3">
+                            <input type="hidden" value="" name="pid" tal:attributes="value pid|null"/>
+                            <input type="hidden" value="" id="newCid" name="cid" tal:attributes="value cid|null"/>
+
+                            <input type="hidden" name="productSource"  tal:attributes="value productSource| nothing" value=""/>
+                            <input type="hidden" name="productTargets"  tal:attributes="value productTargets| nothing" value=""/>
+                            <input type="hidden" name="productDelivery"  tal:attributes="value productDelivery| nothing"  value=""/>
+                            <input type="hidden" name="productTotalEuro"  tal:attributes="value productTotalEuro| nothing" value=""/>
+                            <input type="hidden" name="productGMT" tal:attributes="value productGMT| nothing"  value=""/>
+                            <input type="hidden" value="new" name="user_type" />
+                            <input type="hidden" value="0" id="is_ue_country" name="is_ue_country"  tal:attributes="value is_ue_country| isEuDefaultCountry | nothing"/>
+
+                            <p>  					
+                                <label class="preventivo" style="float:left;margin-right:15px;cursor:pointer;width:auto;">
+                                    <input checked="checked" name="is_business_user" type="radio" value="1" />Company:
+                                </label>					
+                                <label style="float:left">
+                                    <input name="is_business_user" type="radio" value="0" /> Private individual 
+                                </label>
+                            </p><br /><br /><br />
+                            <p>
+                                <label class="preventivo" for="new_user_id">Username* : (e.g. hotelroma22)</label>
+                                <input value="" class="textbox  validate[required,custom[noWhitespace],custom[noSpecialCaracters],length[0,20],ajax[checkExisitingIdCustomer]]" type="text" name="new_user_id" id="new_user_id" tal:attributes="value new_user_id| nothing" />
+
+                                <br />
+
+                                <label class="preventivo" for="new_password">Password*:</label>
+                                <input value="" class="textbox  validate[required,custom[noSpecialCaracters],custom[noWhitespace],length[0,20]]" type="password" name="new_password"  id="new_password" />
+
+                                <br />
+
+                                <label class="preventivo" for="new_password_confirm">Re-type password*:</label>
+                                <input class="textbox validate[required,custom[noSpecialCaracters],confirm[new_password],custom[noWhitespace],length[0,20]] text-input" type="password" name="new_password_confirm"  id="new_password_confirm" />									
+                                <br />	
+
+                                <label class="preventivo" for="new_email">E-mail*: </label>
+                                <input name="new_email" id="new_email" type="text"  class="textbox validate[required,custom[email]]" tal:attributes="value new_email| nothing" />									
+                                <br/>				
+
+                                <label class="preventivo" for="new_user_name">First and last name*:	</label>
+                                <input name="new_user_name" id="new_user_name" value="" type="text" class="textbox validate[required,length[0,80]]" tal:attributes="value new_user_name| nothing" />									
+                                <br />												
+
+                                <label class="preventivo" for="new_telephone" >Telephone: </label>
+                                <input  name="new_telephone" id="new_telephone"  type="text"  class="textbox validate[length[0,20]]" tal:attributes="value new_telephone| nothing" />									
+                                <br/>	
+
+                                <!--label class="preventivo" for="new_fax" >Fax： </label-->
+                                <input  style="display:none" name="new_fax" id="new_fax"  type="text"  class="textbox validate[length[0,20]]" tal:attributes="value new_fax| nothing" />									
+                                <!--br/-->						
+
+                                <label class="preventivo" for="new_timezone">Time zone:</label>		
+                                <select id="new_timezone" name="new_timezone"  class="textbox" tal:define="timezone php:array()">
+                                    <tal:block tal:repeat="timezone timezones">
+                                        <option tal:define="key repeat/timezone/key"  tal:attributes="selected php:key EQ GMTOffset; value key" tal:content="timezone/long"></option>					
+                                    </tal:block>
+                                </select>				
+                                <br/>		
+                            </p>
+                            <h3>Billing information</h3>							
+                            <p>     				
+                                <label class="preventivo" for="new_ragsoc">Company name: </label>
+                                <input name="new_ragsoc" id="new_ragsoc" type="text"  class="textbox validate[funcCall[requiredOnlyifBusinessUser],length[0,80]]" tal:attributes="value new_ragsoc| nothing" />								
+                                <br/>
+
+                                <label class="preventivo" for="new_address_1">Address (line 1)*: </label>
+                                <input name="new_address_1" id="new_address_1" type="text"  class="textbox validate[required,length[0,80]]" tal:attributes="value new_address_1| nothing"/>
+
+                                <br/>
+
+                                <label class="preventivo" for="new_address_2">Address (line 2): </label>
+                                <input name="new_address_2" id="new_address_2" type="text"  class="textbox validate[length[0,80]]" tal:attributes="value new_address_2| nothing" />
+
+                                <br/>
+
+                                <label class="preventivo" for="new_city">City: </label>
+                                <input name="new_city" id="new_city" type="text"  class="textbox validate[length[0,40]]" tal:attributes="value new_city| nothing"/>
+
+                                <br/>
+
+                                <label class="preventivo" for="new_zipcode">ZIP code: </label>
+                                <input name="new_zipcode" id="new_zipcode" type="text"  class="textbox validate[length[0,10]]" tal:attributes="value new_zipcode| nothing"/>
+
+                                <br/>
+
+                                <label class="preventivo" for="new_country">Country: </label>
+                                <select class="textbox" gtbfieldid="26" name="new_country" id="new_country" >
+                                    <tal:block   tal:repeat="country countries" tal:define="defCountry new_country | defaultCountry | nothing; country php:array()">											
+                                        <option  tal:condition="php:defCountry EQ key" tal:define="key repeat/country/key" tal:attributes="selected string:yes ; value key"   tal:content="country"></option>										
+                                        <option tal:condition="php:defCountry NE key" tal:define="key repeat/country/key" tal:attributes="value key"   tal:content="country"></option>										
+                                    </tal:block>
+                                </select>									
+                                <br/>		
+                                <label class="preventivo" for="new_fiscal_code">Tax ID (Codice Fiscale): </label>
+                                <input name="new_fiscal_code" id="new_fiscal_code" type="text"  class="textbox " tal:attributes="value new_fiscal_code| nothing"/>
+                                <br/>
+                                <label class="preventivo" for="new_vat_code">VAT Number (EU only):</label>
+                                <input name="new_vat_code" id="new_vat_code" type="text"  class="textbox " tal:attributes="value new_vat_code| nothing"/>
+                            </p>																												
+                            <div id="admin_contact_container">
+                                <h4>Administrative contact (Same person: <input name="new_admin_ref_equal" id="new_admin_ref_equal" type="checkbox"  class="checkbox" checked="checked"/>)
+                                </h4>	
+                                <div class="cl"></div>					
+                                <p id="new_admin_ref_data" class="hide">	
+                                    <span>The person responsible for payment, to whom the invoice is to be sent</span>						
+                                    <label class="preventivo" for="new_admin_ref_name">First and Last Name*:</label>
+                                    <input name="new_admin_ref_name" id="new_admin_ref_name" type="text"  class="textbox validate[length[0,60]]" tal:attributes="value new_admin_ref_name| nothing"/>
+                                    <br/>
+
+                                    <label class="preventivo" for="new_admin_ref_email">E-mail: </label>
+                                    <input name="new_admin_ref_email" id="new_admin_ref_email" type="text"  class="textbox validate[optional,custom[email]]" tal:attributes="value new_admin_ref_email| nothing"/>
+                                    <br/>
+
+                                    <label class="preventivo" for="new_admin_ref_tel">Telephone: </label>
+                                    <input name="new_admin_ref_tel" id="new_admin_ref_tel" type="text"  class="textbox validate[length[0,20]]" tal:attributes="value new_ref_tel| nothing"/>
+                                    <br/>
+
+                                    <!--label class="preventivo" for="new_admin_ref_fax">Fax: </label -->
+                                    <input style="display:none" name="new_admin_ref_fax" id="new_admin_ref_fax" type="text"  class="textbox validate[length[0,20]]" tal:attributes="value new_admin_ref_fax| nothing"/>
+                                    <!--br/-->												
+                                </p>
+
+                            </div>
+                            <p style="border:0; width:10px;height:10px" id="newCustomerPrompt"></p>
+                            <div id="newCustomerAuthError" tal:attributes="class php:isset(postback_error) ?'errortext':'errortext hide'" class="errortext hide">
+                                Error creating new profile.<br/> A message has been sent to technical support. <br/> Please contact the administration department at <a href="mailto:info@translated.net?subject=order error occurred">info@translated.net</a> <br/>and include your name and a telephone number where you can be contacted in the next few minutes. <br/> We apologize for the inconvenience										
+                            </div>			
+                            <span id="loadingsml-w2"></span>
+                            <input  type="submit" class="orderbtn floatdx" style="margin:0 10px 0px 0;" value="Continue"  /> 						
+
+
+                        </form>
+                    </div>				
+                </div>
+        </div>
+</div>
+<footer>
+</footer>
+
+</body>
+</html>

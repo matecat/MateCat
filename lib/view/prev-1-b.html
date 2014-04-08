@@ -1,0 +1,44 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Outsource - Matecat</title>
+    <link href="/public/css/prev.css" rel="stylesheet" type="text/css" />
+        <script type="text/javascript" src="/public/js/lib/jquery.js"></script>
+</head>
+<body class="prev">
+<header>
+    <div class="wrapper ">
+        <a href="/" class="logo"></a>
+    </div>
+</header>
+<div class="payment-top">
+		<div class="intro">
+        		<h1>Outsource to Translated.net</h1>
+                <img src="http://www.translated.net/en/pub/images/translated-logo_2x.png" />
+        </div>
+        </div>
+        <div class="payment-cont">
+        <div class="step left">
+        		<ul>
+                	<li class="active">1. Registration</li>
+                    <li>2. Order</li>
+                    <li>3. Confirm</li>
+                  </ul>
+        </div>
+       <iframe id="foo" src="http://www.translated.net/en/online-quote-2" />
+      <script type="text/javascript">
+		$(function(){
+			var f=$('#foo')
+			f.load(function(){ 
+				f.contents().find('div').hide(); 
+			})
+		})
+	</script>
+       </iframe>
+</div>
+<footer>
+</footer>
+
+</body>
+</html>

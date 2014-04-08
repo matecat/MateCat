@@ -813,3 +813,26 @@ footer a:hover{text-decoration:none}
 {
     margin-left: 10px;
 }         
+
+/* retina display query */
+@media only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (min--moz-device-pixel-ratio: 2),
+only screen and (-o-min-device-pixel-ratio: 2/1),
+only screen and (min-device-pixel-ratio: 2),
+only screen and (min-resolution: 192dpi),
+only screen and (in-resolution: 2dppx) { 
+
+.splitbtn, .splitbtn:hover, .splitbtn.done, .splitbtn.done:hover {
+background: #09beec url(../img/sprite2x.png) -2px -453px no-repeat!important;
+}
+
+.mergebtn, .mergebtn:hover {
+background: #09beec url(../img/sprite2x.png) -2px -1192px no-repeat;
+}
+
+.subfile p {background: url(../img/sprite2x.png) 3px -304px no-repeat;
+background-size: 26px;
+}
+
+.splitbtn, .splitbtn:hover ,  .splitbtn.done, .splitbtn.done:hover, .mergebtn, .mergebtn:hover {background-size:42px!important;}
+}
