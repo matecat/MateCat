@@ -32,6 +32,79 @@ UI = {
 			e.preventDefault();
 			$(".content-table").toggle();
 		});
+		$(".uploadbtn").click(function(e) {
+			if(config.enable_outsource) {
+				e.preventDefault();
+				console.log($('.modal.outsource .popup-box .chunks tr').length);
+//				if(!$('.modal.outsource .popup-box .chunks tr').length) console.log('questo');
+				if(!$('.modal.outsource .popup-box .chunks tr').length) {
+					$('.modal.outsource .popup-box .chunks').empty();
+					rows = '<tr class="thead"><th>Source</th><th>Target</th><th>ID</th><th># words</th><th>Outsource</th></tr>';
+					$('.jobcontainer').each(function() {
+						source_lang = $(this).find('h3 .source_lang').text();
+						target_lang = $(this).find('h3 .target_lang').text();
+						$(this).find('.totaltable').each(function() {
+							rows += '<tr data-cid="' + $(this).find('.splitnum').text() + '" data-price=""><td class="source">' + source_lang + '</td><td class="target">' + target_lang + '</td><td class="cid">' + $(this).find('.splitnum').text() + '</td><td class="words">' + $(this).find('.stat-payable').text() + '</td><td class="outs"><input type="checkbox" checked="checked" /></td></tr>';
+						})					
+					})
+					$('.modal.outsource .chunks').append(rows);
+				}
+
+				// temp, outsourceToTranslated response simulation
+				var d = {
+					chunks: [],
+					delivery_date: "2014-04-01 11:30"
+				};
+				$('.modal.outsource .chunks tr:not(.thead)').each(function() {
+					chunk_id = $(this).find('.cid').text();
+					chunk = {
+						"id" : chunk_id,
+						"price" : 20.12
+					}
+					d.chunks.push(chunk);
+				})
+				// end temp
+				
+				$.each(d.chunks, function(index) {
+					$('.modal.outsource .chunks tr[data-cid=' + this.id + ']').attr('data-price', this.price);
+				});
+				total = 0;
+				$('.modal.outsource .chunks tr:not(.thead):has(input[checked=checked])').each(function() {
+					total += parseFloat($(this).attr('data-price'));
+				})
+
+				$('.modal.outsource .chunks').after('<p>Delivery at: <span class="delivery">' + d.delivery_date + '</span></p><p>€ <span class="total">' + total + '</span></p>');
+
+
+				UI.showOutsourceData(d);
+/*
+				APP.doRequest({
+					data: {
+						action: 'outsourceToTranslated',
+						pid: $('#pid').attr('data-pid')
+					},
+					error: function() {
+//						UI.failedConnection(0, 'outsourceToTranslated');
+					},
+					success: function(d) {
+						UI.showOutsourceData(d);
+					}
+				});
+*/
+				$('.modal.outsource').show();
+			}
+		});
+		$(".modal.outsource").on('click', '.chunks input', function(e) {
+//			e.preventDefault();
+			console.log('cliccato');
+			total = 0;
+			console.log($('.modal.outsource .chunks tr:not(.thead) input:checked').length)
+			$('.modal.outsource .chunks tr:not(.thead):has(input:checked)').each(function() {
+				console.log($(this).attr('data-price'));
+				total += parseFloat($(this).attr('data-price'));
+			})
+			$('.modal.outsource .total').text(total);
+		});
 		/*        
 		 $(".part1").click(function(e){
 		 e.preventDefault();
@@ -411,6 +484,9 @@ UI = {
 				}
 			});
 		}
+	},
+	showOutsourceData: function(d) {
+		console.log(d);
 	},
 	pollData: function() {
 		if (this.stopPolling)

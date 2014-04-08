@@ -10,13 +10,15 @@
     <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
 
     <script type="text/javascript">
-        var config = {
-            basepath: '${basepath | string:/}',
-            status: '${project_status}',
-            totalSegments: '${num_segments}',
-            totalAnalyzed: '${num_segments_analyzed}',
-            isLoggedIn: '${isLoggedIn}',
-            showModalBoxLogin: '${showModalBoxLogin}'
+		var config = {
+			basepath: '${basepath | string:/}',
+			status: '${project_status}',
+			totalSegments: '${num_segments}',
+			totalAnalyzed: '${num_segments_analyzed}',
+			isLoggedIn: '${isLoggedIn}',
+			showModalBoxLogin: '${showModalBoxLogin}',
+			enable_outsource: true
+//			enable_outsource: ${enable_outsource}
         };
     </script>
 
@@ -230,7 +232,7 @@
                 <div tal:define="splitted id_for_job/splitted">
 
                     <h3>
-                        <span tal:replace="id_for_job/source">English</span> &gt; <span tal:replace="id_for_job/target">Italian</span>
+                        <span class="source_lang" tal:content="id_for_job/source">English</span> &gt; <span class="target_lang" tal:content="id_for_job/target">Italian</span>
                     </h3>
 
                     <div class="splitbtn-cont">
@@ -447,6 +449,23 @@
 
 
 </content>
+
+<div class="modal outsource" data-type="view">
+    <div class="popup-outer"></div>
+    <div class="popup">
+        <a href="#" class="x-popup"></a>
+
+        <h1>
+            Outsource to Translated
+        </h1>
+
+        <div class="popup-box">
+			<p>Logo + intro Translated</p>
+			<table class="chunks">
+			</table>
+		</div>
+    </div>
+</div>
 
 <footer>
     <div class="wrapper">
