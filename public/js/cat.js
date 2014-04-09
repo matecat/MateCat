@@ -4973,7 +4973,7 @@ $.extend(UI, {
 		this.searchResultsSegments = d.segments;
 		this.numSearchResultsSegments = (d.segments) ? d.segments.length : 0;
 		this.updateSearchDisplay();
-		if (this.pendingRender) {
+		if (this.pendingRender) {console.log('pending render: ', this.pendingRender);
 			if (this.pendingRender.detectSegmentToScroll)
 				this.pendingRender.segmentToScroll = this.nextUnloadedResultSegment();
 			$('#outer').empty();
@@ -5146,6 +5146,8 @@ $.extend(UI, {
 
 		openTagReg = new RegExp(UI.openTagPlaceholder, "g");
 		closeTagReg = new RegExp(UI.closeTagPlaceholder, "g");
+		console.log('openTagReg: ', openTagReg);
+		console.log('closeTagReg: ', closeTagReg);
 
 		if (this.searchMode == 'onlyStatus') { // search mode: onlyStatus
 
@@ -5206,7 +5208,8 @@ $.extend(UI, {
 			}
 			hasTags = (txt.match(/<.*?\>/gi) !== null) ? true : false;
 			var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder);
-			var reg = new RegExp('(' + htmlEncode(regTxt) + ')', "g" + ignoreCase);
+			var reg = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
+//			var reg = new RegExp('(' + htmlEncode(regTxt) + ')', "g" + ignoreCase);
 
 			if ((typeof where == 'undefined') || (where == 'no')) {
 				UI.doMarkSearchResults(hasTags, $(q + ":" + containsFunc + "('" + txt + "')"), reg, q, txt, ignoreCase);
@@ -5235,6 +5238,7 @@ $.extend(UI, {
 		}
 	},
 	doMarkSearchResults: function(hasTags, items, regex, q, txt, ignoreCase) {
+		console.log('doMarkSearchResults');
 		if (!hasTags) {
 			this.execSearchResultsMarking(UI.filterExactMatch(items, txt), regex, false);
 		} else {
@@ -5243,11 +5247,16 @@ $.extend(UI, {
 		}
 	},
 	execSearchResultsMarking: function(areas, regex, testRegex) {
+		console.log('execSearchResultsMarking');
+		console.log('regex: ', regex);
+		console.log('testRegex: ', testRegex);
 		searchMarker = (UI.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
 			if (!testRegex || ($(this).text().match(testRegex) !== null)) {
 				var tt = $(this).html().replace(/&lt;/g, UI.openTagPlaceholder).replace(/&gt;/g, UI.closeTagPlaceholder).replace(regex, '<mark class="' + searchMarker + '">$1</mark>').replace(openTagReg, '&lt;').replace(closeTagReg, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
+				console.log('1: ', $(this).html());
 				$(this).html(tt);
+				console.log('2: ', $(this).html());
 			}
 		});
 	},
@@ -5372,6 +5381,7 @@ $.extend(UI, {
 //		UI.goingToNext = false;
 	},
 	gotoSearchResultAfter: function(options) {
+		console.log('options: ', options);
 		el = options.el;
 		skipCurrent = (options.skipCurrent || false);
 		unmark = (options.unmark || false);
