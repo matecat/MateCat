@@ -207,6 +207,22 @@ margin-right: 10px;
 line-height: 10px;
 }
 
+.footer-popup ul li {
+display: inline;
+}
+
+.footer-popup a {
+font-size: 13px;
+padding-right: 20px;
+}
+
+.footer-popup {
+border-top: 1px solid #ccc;
+clear: both;
+margin-top: 30px;
+padding: 4px 0px 0px;
+}
+
 /* scroll pop-up
 .outsourcemodal .popup-box {
 	overflow-y: auto;
