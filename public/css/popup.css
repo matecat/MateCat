@@ -100,7 +100,11 @@ border-radius: 4px;
 -webkit-box-sizing: border-box;
 -moz-box-sizing: border-box;
 box-sizing: border-box;
-margin-bottom:20px;
+margin-bottom: 20px;
+font-size: 15px;
+color: #333;
+height: 43px;
+width: 82%;
 }
 .outsourcemodal h2 {
 font-size: 20px;
@@ -123,7 +127,7 @@ border: 1px solid #ccc;
 border-radius: 4px;
 text-align: left;
 background: #f3f3f3;
-margin: 20px 20px 20px;
+margin-top: 20px;
 padding: 10px 20px;
 }
 
