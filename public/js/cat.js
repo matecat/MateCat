@@ -5153,8 +5153,8 @@ $.extend(UI, {
 			console.log('source & target');
 			status = (p.status == 'all') ? '' : '.status-' + p.status;
 			q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
-			var regSource = new RegExp('(' + htmlEncode(p.source) + ')', "g" + ignoreCase);
-			var regTarget = new RegExp('(' + htmlEncode(p.target) + ')', "g" + ignoreCase);
+			var regSource = new RegExp('(' + htmlEncode(p.source).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
+			var regTarget = new RegExp('(' + htmlEncode(p.target).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
 			txtSrc = p.source;
 			txtTrg = p.target;
 			srcHasTags = (txtSrc.match(/<.*?\>/gi) !== null) ? true : false;
@@ -5206,7 +5206,8 @@ $.extend(UI, {
 			}
 			hasTags = (txt.match(/<.*?\>/gi) !== null) ? true : false;
 			var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder);
-			var reg = new RegExp('(' + htmlEncode(regTxt) + ')', "g" + ignoreCase);
+			var reg = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
+//			var reg = new RegExp('(' + htmlEncode(regTxt) + ')', "g" + ignoreCase);
 
 			if ((typeof where == 'undefined') || (where == 'no')) {
 				UI.doMarkSearchResults(hasTags, $(q + ":" + containsFunc + "('" + txt + "')"), reg, q, txt, ignoreCase);
@@ -5372,6 +5373,7 @@ $.extend(UI, {
 //		UI.goingToNext = false;
 	},
 	gotoSearchResultAfter: function(options) {
+		console.log('options: ', options);
 		el = options.el;
 		skipCurrent = (options.skipCurrent || false);
 		unmark = (options.unmark || false);

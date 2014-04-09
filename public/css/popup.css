@@ -119,7 +119,7 @@ background: url(../img/logo_translated.png) no-repeat 590px 0px;
 background: #7eaf3e;
 width: auto;
 float: left;
-margin-left: 40%!important;
+margin: -10px 0 5px 40% !important;
 }
 
 .outsourceto {
