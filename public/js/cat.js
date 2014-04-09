@@ -4973,7 +4973,7 @@ $.extend(UI, {
 		this.searchResultsSegments = d.segments;
 		this.numSearchResultsSegments = (d.segments) ? d.segments.length : 0;
 		this.updateSearchDisplay();
-		if (this.pendingRender) {console.log('pending render: ', this.pendingRender);
+		if (this.pendingRender) {
 			if (this.pendingRender.detectSegmentToScroll)
 				this.pendingRender.segmentToScroll = this.nextUnloadedResultSegment();
 			$('#outer').empty();
@@ -5146,8 +5146,6 @@ $.extend(UI, {
 
 		openTagReg = new RegExp(UI.openTagPlaceholder, "g");
 		closeTagReg = new RegExp(UI.closeTagPlaceholder, "g");
-		console.log('openTagReg: ', openTagReg);
-		console.log('closeTagReg: ', closeTagReg);
 
 		if (this.searchMode == 'onlyStatus') { // search mode: onlyStatus
 
@@ -5155,8 +5153,8 @@ $.extend(UI, {
 			console.log('source & target');
 			status = (p.status == 'all') ? '' : '.status-' + p.status;
 			q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
-			var regSource = new RegExp('(' + htmlEncode(p.source) + ')', "g" + ignoreCase);
-			var regTarget = new RegExp('(' + htmlEncode(p.target) + ')', "g" + ignoreCase);
+			var regSource = new RegExp('(' + htmlEncode(p.source).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
+			var regTarget = new RegExp('(' + htmlEncode(p.target).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
 			txtSrc = p.source;
 			txtTrg = p.target;
 			srcHasTags = (txtSrc.match(/<.*?\>/gi) !== null) ? true : false;
@@ -5238,7 +5236,6 @@ $.extend(UI, {
 		}
 	},
 	doMarkSearchResults: function(hasTags, items, regex, q, txt, ignoreCase) {
-		console.log('doMarkSearchResults');
 		if (!hasTags) {
 			this.execSearchResultsMarking(UI.filterExactMatch(items, txt), regex, false);
 		} else {
@@ -5247,16 +5244,11 @@ $.extend(UI, {
 		}
 	},
 	execSearchResultsMarking: function(areas, regex, testRegex) {
-		console.log('execSearchResultsMarking');
-		console.log('regex: ', regex);
-		console.log('testRegex: ', testRegex);
 		searchMarker = (UI.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
 			if (!testRegex || ($(this).text().match(testRegex) !== null)) {
 				var tt = $(this).html().replace(/&lt;/g, UI.openTagPlaceholder).replace(/&gt;/g, UI.closeTagPlaceholder).replace(regex, '<mark class="' + searchMarker + '">$1</mark>').replace(openTagReg, '&lt;').replace(closeTagReg, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
-				console.log('1: ', $(this).html());
 				$(this).html(tt);
-				console.log('2: ', $(this).html());
 			}
 		});
 	},

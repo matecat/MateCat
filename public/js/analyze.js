@@ -41,7 +41,8 @@ UI = {
 		$(".uploadbtn:not(.in-popup)").click(function(e) {
 			if(config.enable_outsource) {
 				e.preventDefault();
-				$('.outsourcemodal code').text(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
+//				$('.outsourcemodal code').text(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
+				$('.outsourcemodal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
 				$('.outsourcemodal .uploadbtn').attr('href', $(this).attr('href'));
 				$('.outsourcemodal').show();
 				
