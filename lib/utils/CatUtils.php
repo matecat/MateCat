@@ -675,7 +675,9 @@ class CatUtils {
         $job_stats[ 'APPROVED' ]   = $wCount->getApprovedWords();
         $job_stats[ 'REJECTED' ]   = $wCount->getRejectedWords();
 
-        $job_stats[ 'TOTAL' ]   = $wCount->getTotal();
+        //avoid division by zero warning
+        $total = $wCount->getTotal();
+        $job_stats[ 'TOTAL' ]      = ( $total == 0 ? 1 : $total );
         $job_stats = self::_getStatsForJob($job_stats, true); //true set estimation check if present
         return self::_performanceEstimationTime($job_stats);
 

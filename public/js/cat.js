@@ -1975,7 +1975,7 @@ UI = {
 				}
 			}
 
-			if (operation == 'setContribution' && this.code != '-10') { // is not a password error
+			if (operation == 'setContribution' && this.code != '-10' ) { // is not a password error
 				APP.alert({msg: "Error in saving the translation memory.<br />Try to save again the segment.<br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
 			}
 
@@ -4928,7 +4928,7 @@ $.extend(UI, {
 			}
 			hasTags = (txt.match(/<.*?\>/gi) !== null) ? true : false;
 			var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder);
-			var reg = new RegExp('(' + htmlEncode(regTxt) + ')', "g" + ignoreCase);
+                        var reg = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
 
 			if ((typeof where == 'undefined') || (where == 'no')) {
 				UI.doMarkSearchResults(hasTags, $(q + ":" + containsFunc + "('" + txt + "')"), reg, q, txt, ignoreCase);
