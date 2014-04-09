@@ -34,7 +34,7 @@ UI = {
 		});
 		$(".outsourceto .uploadbtn").click(function(e) {
 			e.preventDefault();
-			$('.outsourcemodal .x-popup').trigger('click');
+//			$('.outsourcemodal .x-popup').trigger('click');
 			UI.showPrices();
 		});
 
@@ -48,16 +48,16 @@ UI = {
 				return false;
 			}
 		});
-		$(".modal.outsource").on('click', '.chunks input', function(e) {
+		$(".outsourcemodal").on('click', '.chunks input', function(e) {
 //			e.preventDefault();
 			console.log('cliccato');
 			total = 0;
-			console.log($('.modal.outsource .chunks tr:not(.thead) input:checked').length)
-			$('.modal.outsource .chunks tr:not(.thead):has(input:checked)').each(function() {
+			console.log($('.outsourcemodal .chunks tr:not(.thead) input:checked').length)
+			$('.outsourcemodal .chunks tr:not(.thead):has(input:checked)').each(function() {
 				console.log($(this).attr('data-price'));
 				total += parseFloat($(this).attr('data-price'));
 			})
-			$('.modal.outsource .total').text(total);
+			$('.outsourcemodal .total').text(total);
 		});
 		/*        
 		 $(".part1").click(function(e){
@@ -270,10 +270,13 @@ UI = {
 		}
 	},
 	showPrices: function() {
-		console.log($('.modal.outsource .popup-box .chunks tr').length);
-//				if(!$('.modal.outsource .popup-box .chunks tr').length) console.log('questo');
-		if(!$('.modal.outsource .popup-box .chunks tr').length) {
-			$('.modal.outsource .popup-box .chunks').empty();
+		$('.outsourcemodal h1').text('Outsource to Translated');
+		$('.outsourcemodal section.choose').hide();
+		$('.outsourcemodal section.outs').show();
+		console.log($('.outsourcemodal .popup-box .chunks tr').length);
+//				if(!$('.outsourcemodal .popup-box .chunks tr').length) console.log('questo');
+		if(!$('.outsourcemodal .popup-box .chunks tr').length) {
+			$('.outsourcemodal .popup-box .chunks').empty();
 			rows = '<tr class="thead"><th>Source</th><th>Target</th><th>ID</th><th># words</th><th>Outsource</th></tr>';
 			$('.jobcontainer').each(function() {
 				source_lang = $(this).find('h3 .source_lang').text();
@@ -282,7 +285,7 @@ UI = {
 					rows += '<tr data-cid="' + $(this).find('.splitnum').text() + '" data-price=""><td class="source">' + source_lang + '</td><td class="target">' + target_lang + '</td><td class="cid">' + $(this).find('.splitnum').text() + '</td><td class="words">' + $(this).find('.stat-payable').text() + '</td><td class="outs"><input type="checkbox" checked="checked" /></td></tr>';
 				})					
 			})
-			$('.modal.outsource .chunks').append(rows);
+			$('.outsourcemodal .chunks').append(rows);
 		}
 
 		// temp, outsourceToTranslated response simulation
@@ -290,7 +293,7 @@ UI = {
 			chunks: [],
 			delivery_date: "2014-04-01 11:30"
 		};
-		$('.modal.outsource .chunks tr:not(.thead)').each(function() {
+		$('.outsourcemodal .chunks tr:not(.thead)').each(function() {
 			chunk_id = $(this).find('.cid').text();
 			chunk = {
 				"id" : chunk_id,
@@ -301,14 +304,14 @@ UI = {
 		// end temp
 
 		$.each(d.chunks, function(index) {
-			$('.modal.outsource .chunks tr[data-cid=' + this.id + ']').attr('data-price', this.price);
+			$('.outsourcemodal .chunks tr[data-cid=' + this.id + ']').attr('data-price', this.price);
 		});
 		total = 0;
-		$('.modal.outsource .chunks tr:not(.thead):has(input[checked=checked])').each(function() {
+		$('.outsourcemodal .chunks tr:not(.thead):has(input[checked=checked])').each(function() {
 			total += parseFloat($(this).attr('data-price'));
 		})
 
-		$('.modal.outsource .chunks').after('<p>Delivery at: <span class="delivery">' + d.delivery_date + '</span></p><p>€ <span class="total">' + total + '</span></p>');
+		$('.outsourcemodal .chunks').after('<p>Delivery at: <span class="delivery">' + d.delivery_date + '</span></p><p>€ <span class="total">' + total + '</span></p>');
 
 
 		UI.showOutsourceData(d);
@@ -326,7 +329,7 @@ UI = {
 			}
 		});
 */
-		$('.modal.outsource').show();
+//		$('.outsourcemodal').show();
 
 		
 	},

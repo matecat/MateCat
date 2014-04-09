@@ -813,7 +813,10 @@ footer a:hover{text-decoration:none}
 {
     margin-left: 10px;
 }         
-
+.outsourcemodal section.outs
+{
+	display: none;
+}
 /* retina display query */
 @media only screen and (-webkit-min-device-pixel-ratio: 2),
 only screen and (min--moz-device-pixel-ratio: 2),
