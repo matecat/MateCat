@@ -84,6 +84,18 @@ class setTranslationController extends ajaxController {
                 Utils::sendErrMailReport( $msg );
             }
 
+            $db = Database::obtain();
+            $err   = $db->get_error();
+            $errno = $err[ 'error_code' ];
+
+            if ( $errno != 0 ) {
+                $msg = "Error : empty job data \n\n " .  var_export($_POST ,true )."\n";
+                Log::doLog( $msg );
+                Utils::sendErrMailReport( $msg );
+                $this->result['error'][] = array("code" => -101, "message" => "database error");
+		return -1;
+            }
+
             //add check for job status archived.
             if ( strtolower( $job_data[ 'status' ] ) == 'archived' ) {
                 $this->result[ 'error' ][ ] = array( "code" => -3, "message" => "job archived" );
