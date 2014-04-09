@@ -111,8 +111,16 @@ font-size: 20px;
 font-weight: bold;
 margin:10px 0;
 background: url(../img/logo_translated.png) no-repeat 590px 0px;
+background-size: 120px;
 }
 
+.outs h2 {
+background: url(../img/logo_translated.png) no-repeat;
+background-size: 180px;
+height: 41px;
+margin-top: 20px;
+width: 180px;
+}
 
 
 .outsourceto .uploadbtn {
@@ -156,7 +164,7 @@ background: #F6F6F6;
 
 
 table.chunks  th:last-child {
-width: 20%;	
+width: 15%;	
 }
 
 table.chunks  tr:last-child {
@@ -178,5 +186,19 @@ background: #E7E7E7;
 }
 
 
+.delivery span {
+color: #5E5E5E;
+}
 
+.total  span {
+font-weight: bold;
+font-size: 30px!important;
+}
+
+.total {margin-bottom:30px;}
+.delivery, .total {
+text-align: right;
+margin-right: 10px;
+line-height: 10px;
+}
 

@@ -551,17 +551,17 @@ a:hover{text-decoration:none}
 
 /*scrollbar*/
 
-.split-box3 ::-webkit-scrollbar {
+.split-box3 ::-webkit-scrollbar, .outsourcemodal .popup-box ::-webkit-scrollbar  {
     width: 16px;
 }
 
-.split-box3 ::-webkit-scrollbar-track {
+.split-box3 ::-webkit-scrollbar-track, .outsourcemodal .popup-box ::-webkit-scrollbar-track {
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
 
 
 }
 
-.split-box3 ::-webkit-scrollbar-thumb {
+.split-box3 ::-webkit-scrollbar-thumb, .outsourcemodal .popup-box ::-webkit-scrollbar-thumb {
 
 	background:#ccc url(../img/bgscrollbar.png) center center no-repeat;
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
@@ -820,6 +820,12 @@ footer a:hover{text-decoration:none}
 {
 	display: none;
 }
+.outsourcemodal .popup-box {
+	overflow-y: auto;
+max-height: 525px;
+}
+
+
 /* retina display query */
 @media only screen and (-webkit-min-device-pixel-ratio: 2),
 only screen and (min--moz-device-pixel-ratio: 2),
