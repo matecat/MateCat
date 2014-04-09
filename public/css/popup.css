@@ -119,6 +119,7 @@ background: url(../img/logo_translated.png) no-repeat;
 background-size: 180px;
 height: 41px;
 margin-top: 20px;
+margin-bottom:-10px;
 width: 180px;
 }
 
@@ -190,15 +191,25 @@ background: #E7E7E7;
 color: #5E5E5E;
 }
 
-.total  span {
-font-weight: bold;
-font-size: 30px!important;
+.delivery {
+font-size: 22px!important;
 }
 
-.total {margin-bottom:30px;}
+.total  {
+font-weight: bold;
+font-size: 40px!important;
+}
+
+.total {margin:30px 0;}
 .delivery, .total {
 text-align: right;
 margin-right: 10px;
 line-height: 10px;
 }
 
+/* scroll pop-up
+.outsourcemodal .popup-box {
+	overflow-y: auto;
+max-height: 525px;
+}
+*/

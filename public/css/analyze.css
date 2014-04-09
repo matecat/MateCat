@@ -820,10 +820,7 @@ footer a:hover{text-decoration:none}
 {
 	display: none;
 }
-.outsourcemodal .popup-box {
-	overflow-y: auto;
-max-height: 525px;
-}
+
 
 
 /* retina display query */
