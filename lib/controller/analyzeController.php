@@ -286,7 +286,7 @@ class analyzeController extends viewController {
         $this->template->num_segments_analyzed      = $this->num_segments_analyzed;
         $this->template->logged_user                = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
         $this->template->build_number               = INIT::$BUILD_NUMBER;
-		$this->template->enable_outsource           = INIT::$ENABLE_OUTSOU;
+	$this->template->enable_outsource           = INIT::$ENABLE_OUTSOURCE;
 
         $this->template->isLoggedIn = $this->isLoggedIn();
 
