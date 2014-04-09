@@ -116,8 +116,10 @@ background: url(../img/logo_translated.png) no-repeat 590px 0px;
 
 
 .outsourceto .uploadbtn {
-background:#7eaf3e;	
-width:auto;
+background: #7eaf3e;
+width: auto;
+float: left;
+margin-left: 40%!important;
 }
 
 .outsourceto {
@@ -129,6 +131,50 @@ text-align: left;
 background: #f3f3f3;
 margin-top: 20px;
 padding: 10px 20px;
+}
+
+
+table.chunks {
+overflow: hidden;
+border: 2px solid #ccc;
+background: #fefefe;
+width: 100%;
+border-collapse: collapse;
+}
+
+table.chunks  th, table.chunks  td {
+padding: 0.5em 1em;
+border: 1px solid #ccc;
+}
+
+.thead {
+background: #F6F6F6;
+}
+
+
+
+
+
+table.chunks  th:last-child {
+width: 20%;	
+}
+
+table.chunks  tr:last-child {
+	background:#fff;
+}
+
+
+table.chunks td.last {
+border-right: none;
+}
+
+table.chunks td {
+border-top: 1px solid #e0e0e0;
+border-right: 1px solid #e0e0e0;
+}
+
+table .chunks tr:first-child {
+background: #E7E7E7;
 }
 
 
