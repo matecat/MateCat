@@ -895,6 +895,7 @@ UI = {
 		if (!this.readonly) {
 			this.getContribution(segment, 1);
 			this.getContribution(segment, 2);
+//			if(this.nextSegmentId != this.nextUntranslatedSegmentId) this.getContribution(segment, 2);
 			if(!this.noGlossary) this.getGlossary(segment, true, 1);
 			if(!this.noGlossary) this.getGlossary(segment, true, 2);
 		}

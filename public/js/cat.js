@@ -895,6 +895,7 @@ UI = {
 		if (!this.readonly) {
 			this.getContribution(segment, 1);
 			this.getContribution(segment, 2);
+//			if(this.nextSegmentId != this.nextUntranslatedSegmentId) this.getContribution(segment, 2);
 			if(!this.noGlossary) this.getGlossary(segment, true, 1);
 			if(!this.noGlossary) this.getGlossary(segment, true, 2);
 		}
@@ -3820,6 +3821,8 @@ $.extend(UI, {
 		});
 	},
 	getContribution: function(segment, next) {
+//		console.log('next: ', next);
+//		console.log('getContribution di ', segment);
 		var n = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
 		if ($(n).hasClass('loaded')) {
 			this.spellCheck();
@@ -3857,7 +3860,12 @@ $.extend(UI, {
 		if (!next) {
 			$(".loader", n).addClass('loader_on');
 		}
-
+		if((next == 2)&&(this.nextSegmentId == this.nextUntranslatedSegmentId)) {
+//			console.log('il successivo e il successivo non tradotto sono lo stesso');
+			return false;
+		}
+//		console.log('this.nextSegmentId: ', this.nextSegmentId);
+//		console.log('this.nextUntranslatedSegmentId: ', this.nextUntranslatedSegmentId);
 		APP.doRequest({
 			data: {
 				action: 'getContribution',
@@ -3874,7 +3882,7 @@ $.extend(UI, {
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
-				console.log(d);
+//				console.log(d);
 				if (d.error.length)
 					UI.processErrors(d.error, 'getContribution');
 				UI.getContribution_success(d, this);
