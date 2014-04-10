@@ -44,8 +44,8 @@ APP = {
             APP.waitingConfirm = false;
             APP.cancelValue = true;
         }).on('click', '.popup-outer.closeClickingOutside', function(e) {
-            e.preventDefault();
-            APP.closePopup();
+			e.preventDefault();
+			$(this).parents('.modal').find('.x-popup').click();
         })
     },
     alert: function(options) {
@@ -250,5 +250,15 @@ APP = {
             x1 = x1.replace(rgx, '$1' + ',' + '$2');
         }
         return x1 + x2;
-    }            
+    },
+	zerofill: function(i, l, s) {
+		var o = i.toString();
+		if (!s) {
+			s = '0';
+		}
+		while (o.length < l) {
+			o = s + o;
+		}
+		return o;
+	}
 };

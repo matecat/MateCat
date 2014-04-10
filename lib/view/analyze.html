@@ -23,6 +23,7 @@
 
     <script type="text/javascript" src="${basepath}public/js/lib/jquery.js"></script>
     <script type="text/javascript" src="${basepath}public/js/lib/jquery-ui.js"></script>
+    <script type="text/javascript" src="${basepath}public/js/lib/jquery-dateFormat.min.js"></script>
     <script type="text/javascript" src="${basepath}public/js/common.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/analyze.js?build=${build_number}"></script>
     <script type='text/javascript' src="${basepath}public/js/login.js?build=${build_number}"></script>
@@ -384,7 +385,7 @@
 </div>
 
 <div class="modal outsourcemodal" data-type="view">
-	<div class="popup-outer"></div>
+	<div class="popup-outer closeClickingOutside"></div>
 	<div class="popup">
 		<a href="#" class="x-popup"></a>
 
@@ -411,12 +412,14 @@
 			<section class="outs">
             <h2></h2>
 			 <p>Translated.net is a fast and easy professional translation services, trusted by more than 43,000 clients worldwide. You can pay within 5 days of translation delivery, by credit card, bank transfer or PayPal.</p>
-			<table class="chunks">
+			<div class="chunks-container">
+			 <table class="chunks">
 			</table>
-            <p  class="total">€ <span>40.24</span></p>
-            <p  class="delivery">Delivery at: <span>2014-04-01 11:30</span></p>
-                <a href="">back</a>
-                                  <a href="https://www.translated.home/mcl/login.html" target="_blank" class="continuebtn">Continue</a>
+			</div>
+		<p class="total">€ <span></span></p>
+		<p class="delivery">Delivery at: <span></span></p>
+			<a class="back" href="#">back</a>
+			<a href="https://www.translated.home/mcl/login.html" target="_blank" class="continuebtn">Continue</a>
           <div class="footer-popup">
           	<ul>
             	<li><a href="#" target="_blank">Why is convenient to Matecat</a></li>

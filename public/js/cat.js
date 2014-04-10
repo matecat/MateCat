@@ -1368,8 +1368,8 @@ UI = {
 		if (config.time_to_edit_enabled) {
 			var editSec = $('.timetoedit .edit-sec', segment);
 			var editMin = $('.timetoedit .edit-min', segment);
-			editMin.text(this.zerofill(editedTime[0], 2));
-			editSec.text(this.zerofill(editedTime[1], 2));
+			editMin.text(APP.zerofill(editedTime[0], 2));
+			editSec.text(APP.zerofill(editedTime[1], 2));
 		}
 		tte.data('raw_time_to_edit', this.totalTime);
 		var statusSwitcher = $(".status", segment);
@@ -2224,39 +2224,8 @@ UI = {
 		$('#settings-shortcuts.modifying').removeClass('modifying');
 		$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').addClass('modified');
 		$('.popup-settings').addClass('modified');
-	},
-
-	
-//	beforeExit: function() {
-//		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
-//		var leave_message = 'You are sure that you want to leave?'
-//		if(dont_confirm_leave!==1) {
-//			if(!e) e = window.event;
-//			//e.cancelBubble is supported by IE - this will kill the bubbling process.
-//			e.cancelBubble = true;
-//			e.returnValue = leave_message;
-//			//e.stopPropagation works in Firefox.
-//			if (e.stopPropagation) 
-//			{
-//				e.stopPropagation();
-//				e.preventDefault();
-//			}
-//
-//			//return works for Chrome and Safari
-//			return leave_message;
-//		}		
-//	},
-
-	zerofill: function(i, l, s) {
-		var o = i.toString();
-		if (!s) {
-			s = '0';
-		}
-		while (o.length < l) {
-			o = s + o;
-		}
-		return o;
 	}
+
 };
 
 $(document).ready(function() {

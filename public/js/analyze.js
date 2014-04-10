@@ -50,16 +50,24 @@ UI = {
 			}
 		});
 		$(".outsourcemodal").on('click', '.chunks input', function(e) {
-//			e.preventDefault();
-			console.log('cliccato');
-			total = 0;
-			console.log($('.outsourcemodal .chunks tr:not(.thead) input:checked').length)
-			$('.outsourcemodal .chunks tr:not(.thead):has(input:checked)').each(function() {
-				console.log($(this).attr('data-price'));
-				total += parseFloat($(this).attr('data-price'));
-			})
-			$('.outsourcemodal .total').text(total);
+			e.stopPropagation();
+			UI.setPrices();
+		}).on('click', '.outsourcemodal .x-popup', function(e) {
+			UI.showOutsourceChoice();
+		}).on('click', '.chunks td.outs', function(e) {
+			e.stopPropagation();
+			ch = $(this).find('input');
+			if($(ch).attr('checked')) {
+				$(ch).removeAttr('checked');
+			} else {
+				$(ch).attr('checked', 'checked');
+			}
+			UI.setPrices();
+		}).on('click', '.back', function(e) {
+			e.preventDefault();
+			UI.showOutsourceChoice();
 		});
+
 		/*        
 		 $(".part1").click(function(e){
 		 e.preventDefault();
@@ -270,12 +278,25 @@ UI = {
 			$('.popup-split').removeClass('error-number');
 		}
 	},
+	showOutsourceChoice: function() {
+		$('.outsourcemodal h1').text('Here is the link to your new translation job');
+		$('.outsourcemodal section.outs').hide();
+		$('.outsourcemodal section.choose').show();
+	},
+	setPrices: function() {
+		total = 0;
+		$('.outsourcemodal .chunks tr:not(.thead):has(input:checked)').each(function() {
+			total += parseFloat($(this).attr('data-price'));
+		})
+		$('.outsourcemodal .total span').text(total.toFixed(2));
+		$('.outsourcemodal .delivery span').text(UI.getFarthestDate());
+	},
+
 	showPrices: function() {
 		$('.outsourcemodal h1').text('Outsource to Translated');
 		$('.outsourcemodal section.choose').hide();
 		$('.outsourcemodal section.outs').show();
-		console.log($('.outsourcemodal .popup-box .chunks tr').length);
-//				if(!$('.outsourcemodal .popup-box .chunks tr').length) console.log('questo');
+
 		if(!$('.outsourcemodal .popup-box .chunks tr').length) {
 			$('.outsourcemodal .popup-box .chunks').empty();
 			rows = '<tr class="thead"><th>Source</th><th>Target</th><th>ID</th><th># words</th><th>Outsource</th></tr>';
@@ -288,35 +309,6 @@ UI = {
 			})
 			$('.outsourcemodal .chunks').append(rows);
 		}
-
-		// temp, outsourceToTranslated response simulation
-		var d = {
-			chunks: [],
-			delivery_date: "2014-04-01 11:30"
-		};
-		$('.outsourcemodal .chunks tr:not(.thead)').each(function() {
-			chunk_id = $(this).find('.cid').text();
-			chunk = {
-				"id" : chunk_id,
-				"price" : 20.12
-			}
-			d.chunks.push(chunk);
-		})
-		// end temp
-
-		$.each(d.chunks, function(index) {
-			$('.outsourcemodal .chunks tr[data-cid=' + this.id + ']').attr('data-price', this.price);
-		});
-		total = 0;
-		$('.outsourcemodal .chunks tr:not(.thead):has(input[checked=checked])').each(function() {
-			total += parseFloat($(this).attr('data-price'));
-		})
-
-		$('.outsourcemodal .chunks').after('<p>Delivery at: <span class="delivery">' + d.delivery_date + '</span></p><p>€ <span class="total">' + total + '</span></p>');
-
-
-		UI.showOutsourceData(d);
-/*
 		APP.doRequest({
 			data: {
 				action: 'outsourceToTranslated',
@@ -326,13 +318,17 @@ UI = {
 //						UI.failedConnection(0, 'outsourceToTranslated');
 			},
 			success: function(d) {
-				UI.showOutsourceData(d);
+				UI.showOutsourceData($.parseJSON(d.data));
 			}
 		});
-*/
-//		$('.outsourcemodal').show();
-
-		
+	},
+	getFarthestDate: function() {
+		farthest = new Date(0);
+		$('.outsourcemodal .chunks tr:not(.thead):has(input[checked=checked])').each(function() {
+			dd = new Date($(this).attr('data-delivery'));
+			if(dd.getTime() > farthest.getTime()) farthest = dd;
+		})
+		return $.format.date(farthest, "D MMMM") + ' at ' + $.format.date(farthest, "hh:mm a") + ' (GMT+1)';
 	},
 
 	checkStatus: function(status) {
@@ -506,7 +502,18 @@ UI = {
 		}
 	},
 	showOutsourceData: function(d) {
-		console.log(d);
+		var chunks = d;
+//		var chunks = d.chunks;
+		$.each(chunks, function(index) {
+			$('.outsourcemodal .chunks tr[data-cid=' + this.id + ']').attr('data-price', this.price).attr('data-delivery', this.delivery_date);
+		});
+		total = 0;
+		$('.outsourcemodal .chunks tr:not(.thead):has(input[checked=checked])').each(function() {
+			total += parseFloat($(this).attr('data-price'));
+		})
+		
+		$('.outsourcemodal .delivery span').text(UI.getFarthestDate());
+		$('.outsourcemodal .total span').text(total.toFixed(2));
 	},
 	pollData: function() {
 		if (this.stopPolling)
@@ -529,7 +536,6 @@ UI = {
 			success: function(d) {
 				if (d.data) {
 					var s = d.data.summary;
-					console.log(s);
 					if ((s.STATUS == 'NEW') || (s.STATUS == '') || s.IN_QUEUE_BEFORE > 0) {
 						$('.loadingbar').addClass('open');
 						if (s.IN_QUEUE_BEFORE > 0) {
