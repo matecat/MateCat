@@ -211,7 +211,7 @@ class WordCount_Struct {
                 $this->approved_words
         );
 
-        return ( $this->total == 0 ) ? 1 : $this->total;
+        return $this->total;
     }
 
 } 

@@ -207,6 +207,20 @@ class setTranslationController extends ajaxController {
 
         $res = CatUtils::addSegmentTranslation( $this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreErrors() );
 
+        //propagate translations
+        $TPropagation                             = array();
+        $TPropagation[ 'id_job' ]                 = $this->id_job;
+        $TPropagation[ 'status' ]                 = 'DRAFT';
+        $TPropagation[ 'translation' ]            = $translation;
+        $TPropagation[ 'serialized_errors_list' ] = $err_json;
+        $TPropagation[ 'warning' ]                = $check->thereAreErrors();
+        $TPropagation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
+        $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
+
+        if( $this->status == 'TRANSLATED' ){
+            propagateTranslation( $TPropagation, $job_data );
+        }
+
         if (!empty($res['error'])) {
 			$this->result['error'] = $res['error'];
 

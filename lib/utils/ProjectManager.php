@@ -197,7 +197,7 @@ class ProjectManager {
 			   if it's not one of the listed formats (or it is, but you had to convert it anyway), 
 			   and conversion in enabled in first place
 			 */
-			if ( ( ( !in_array($mimeType,array('sdlxliff','xliff','xlf','tmx'))) || $enforcedConversion ) && INIT::$CONVERSION_ENABLED ) {
+			if ( ( !in_array( $mimeType, array( 'sdlxliff', 'xliff', 'xlf', 'tmx' ) ) || $enforcedConversion ) && INIT::$CONVERSION_ENABLED ) {
 
 				//converted file is inside "_converted" directory
 				$fileDir          = $uploadDir . '_converted';
@@ -656,8 +656,8 @@ class ProjectManager {
 				VALUES ( '" . implode( "', '", array_values( $jobInfo ) ) . "' )
 				ON DUPLICATE KEY UPDATE
 				last_opened_segment = {$jobInfo['last_opened_segment']},
-									job_first_segment = '{$jobInfo['job_first_segment']}',
-									job_last_segment = '{$jobInfo['job_last_segment']}'";
+                job_first_segment = '{$jobInfo['job_first_segment']}',
+                job_last_segment = '{$jobInfo['job_last_segment']}'";
 
 
 			//add here job id to list
@@ -861,6 +861,7 @@ class ProjectManager {
 							$mid                   = mysql_real_escape_string( $seg_source[ 'mid' ] );
 							$ext_tags              = mysql_real_escape_string( $seg_source[ 'ext-prec-tags' ] );
 							$source                = mysql_real_escape_string( $seg_source[ 'raw-content' ] );
+							$source_hash           = mysql_real_escape_string( md5( $seg_source[ 'raw-content' ] ) );
 							$ext_succ_tags         = mysql_real_escape_string( $seg_source[ 'ext-succ-tags' ] );
 							$num_words             = CatUtils::segment_raw_wordcount( $seg_source[ 'raw-content' ], $xliff_file['attr']['source-language'] );
 							$trans_unit_id         = mysql_real_escape_string( $xliff_trans_unit[ 'attr' ][ 'id' ] );
@@ -871,7 +872,7 @@ class ProjectManager {
 								$file_reference = (int) $this->projectStructure['file_references'][$fid];
 							} else $file_reference = 'NULL';
 
-							$this->projectStructure['segments'][$fid]->append( "('$trans_unit_id',$fid,$file_reference,'$source',$num_words,'$mid','$ext_tags','$ext_succ_tags',$show_in_cattool,'$mrk_ext_prec_tags','$mrk_ext_succ_tags')" );
+							$this->projectStructure['segments'][$fid]->append( "('$trans_unit_id',$fid,$file_reference,'$source','$source_hash',$num_words,'$mid','$ext_tags','$ext_succ_tags',$show_in_cattool,'$mrk_ext_prec_tags','$mrk_ext_succ_tags')" );
 
 						}
 
@@ -916,7 +917,8 @@ class ProjectManager {
 						$num_words = CatUtils::segment_raw_wordcount($source, $xliff_file['attr']['source-language'] );
 
 						//applying escaping after raw count
-						$source = mysql_real_escape_string($source);
+                        $source      = mysql_real_escape_string( $source );
+                        $source_hash = mysql_real_escape_string( md5( $source ) );
 
 						$trans_unit_id = mysql_real_escape_string($xliff_trans_unit['attr']['id']);
 
@@ -931,7 +933,7 @@ class ProjectManager {
 							$file_reference = (int) $this->projectStructure['file_references'][$fid];
 						} else $file_reference = 'NULL';
 
-						$this->projectStructure['segments'][$fid]->append( "('$trans_unit_id',$fid, $file_reference,'$source',$num_words,NULL,'$prec_tags','$succ_tags',$show_in_cattool,NULL,NULL)" );
+						$this->projectStructure['segments'][$fid]->append( "('$trans_unit_id',$fid, $file_reference,'$source','$source_hash',$num_words,NULL,'$prec_tags','$succ_tags',$show_in_cattool,NULL,NULL)" );
 
 					}
 				}
@@ -946,7 +948,7 @@ class ProjectManager {
 			throw new Exception( "Segment import - no segments found", -1 );
 		}
 
-		$baseQuery = "INSERT INTO segments ( internal_id, id_file, id_file_part, segment, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values ";
+		$baseQuery = "INSERT INTO segments ( internal_id, id_file, id_file_part, segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values ";
 
 		Log::doLog( "Segments: Total Rows to insert: " . count( $this->projectStructure['segments'][$fid] ) );
 		//split the query in to chunks if there are too much segments
@@ -970,7 +972,7 @@ class ProjectManager {
 
 		if( !empty( $this->projectStructure['translations'] ) ){
 
-			$last_segments_query = "SELECT id, internal_id from segments WHERE id_file = %u";
+			$last_segments_query = "SELECT id, internal_id, segment_hash from segments WHERE id_file = %u";
 			$last_segments_query = sprintf( $last_segments_query, $fid );
 
 			$last_segments = mysql_query( $last_segments_query, $this->mysql_link );
@@ -981,6 +983,8 @@ class ProjectManager {
 				if( $this->projectStructure['translations']->offsetExists( "" . $row['internal_id'] ) ) {
 					$this->projectStructure['translations'][ "" . $row['internal_id'] ]->offsetSet( 0, $row['id'] );
 					$this->projectStructure['translations'][ "" . $row['internal_id'] ]->offsetSet( 1, $row['internal_id'] );
+                    //WARNING offset 2 are the target translations
+					$this->projectStructure['translations'][ "" . $row['internal_id'] ]->offsetSet( 3, $row['segment_hash'] );
 				}
 
 			}
@@ -1001,14 +1005,14 @@ class ProjectManager {
 			}
 
 			//id_segment, id_job, status, translation, translation_date, tm_analysis_status, locked
-			$this->projectStructure['query_translations']->append( "( '{$struct[0]}', $jid, 'TRANSLATED', '{$struct[2]}', NOW(), 'DONE', 1 )" );
+			$this->projectStructure['query_translations']->append( "( '{$struct[0]}', $jid, '{$struct[2]}', 'TRANSLATED', '{$struct[1]}', NOW(), 'DONE', 1 )" );
 
 		}
 
 		// Executing the Query
 		if( !empty( $this->projectStructure['query_translations'] ) ){
 
-			$baseQuery = "INSERT INTO segment_translations (id_segment, id_job, status, translation, translation_date, tm_analysis_status, locked)
+			$baseQuery = "INSERT INTO segment_translations (id_segment, id_job, segment_hash, status, translation, translation_date, tm_analysis_status, locked)
 				values ";
 
 			Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $this->projectStructure['query_translations'] ) );
@@ -1017,7 +1021,7 @@ class ProjectManager {
 
 			Log::doLog( "Pre-Translations: Total Queries to execute: " . count( $this->projectStructure['query_translations'] ) );
 
-			//        Log::doLog( print_r( $query_translations,true ) );
+//			Log::doLog( print_r( $this->projectStructure['translations'],true ) );
 
 			foreach( $this->projectStructure['query_translations'] as $i => $chunk ){
 

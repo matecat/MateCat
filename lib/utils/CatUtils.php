@@ -328,11 +328,14 @@ class CatUtils {
 //            $tra_for_diff = html_entity_decode($tra_for_diff, ENT_NOQUOTES, 'UTF-8');
 
             //$ter          = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
-		$ter=array();
-            $seg[ 'ter' ] = $ter[ 1 ] * 100;
+
+            //with this patch we have warnings when accessing indexes
+            $ter=array();
+
+            $seg[ 'ter' ] = @$ter[ 1 ] * 100;
             $stat_ter[ ]  = $seg[ 'ter' ] * $seg[ 'rwc' ];
-            $seg[ 'ter' ] = round( $ter[ 1 ] * 100 ) . "%";
-            $diff_ter     = $ter[ 0 ];
+            $seg[ 'ter' ] = round( @$ter[ 1 ] * 100 ) . "%";
+            $diff_ter     = @$ter[ 0 ];
 
             if ( $seg[ 'sug' ] <> $seg[ 'translation' ] ) {
 
@@ -675,7 +678,9 @@ class CatUtils {
         $job_stats[ 'APPROVED' ]   = $wCount->getApprovedWords();
         $job_stats[ 'REJECTED' ]   = $wCount->getRejectedWords();
 
-        $job_stats[ 'TOTAL' ]   = $wCount->getTotal();
+        //avoid division by zero warning
+        $total = $wCount->getTotal();
+        $job_stats[ 'TOTAL' ]      = ( $total == 0 ? 1 : $total );
         $job_stats = self::_getStatsForJob($job_stats, true); //true set estimation check if present
         return self::_performanceEstimationTime($job_stats);
 

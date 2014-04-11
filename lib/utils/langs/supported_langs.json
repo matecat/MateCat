@@ -1207,7 +1207,7 @@
 			"enabled":true,
 			"rtl":false,
 			"rfc3066code":"sr-Latn-RS",
-                        "languageRegionCode":"sr-Latn-RS"
+            "languageRegionCode":"sr-Latn-RS"
 		}
 	,
         {
@@ -1218,7 +1218,7 @@
 			"enabled":true,
 			"rtl":false,
 			"rfc3066code":"sr-Cyrl-RS",
-                        "languageRegionCode":"sr-Cyrl-RS"
+            "languageRegionCode":"sr-Cyrl-RS"
 		}
 	,
         

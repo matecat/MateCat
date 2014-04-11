@@ -3,6 +3,8 @@ UI = null;
 UI = {
 	init: function() {
 		this.stopPolling = false;
+        this.pollingTime = 1000;
+        this.segmentsThreshold = 50000;
 		this.noProgressTail = 0;
 		this.lastProgressSegments = 0;
 
@@ -754,9 +756,13 @@ UI = {
 
 					if (d.data.summary.STATUS != 'DONE') {
 						$('.dosplit').addClass('disabled');
+                        if( d.data.summary.TOTAL_SEGMENTS > UI.segmentsThreshold  ){
+                            UI.pollingTime = parseInt( d.data.summary.TOTAL_SEGMENTS / 20 ) ;
+                            console.log( 'Polling time: ' + UI.pollingTime );
+                        }
 						setTimeout(function() {
 							UI.pollData();
-						}, 1000);
+						}, UI.pollingTime );
 					} else {
 						$('.dosplit').removeClass('disabled');
 						$('#longloading .approved-bar').css('width', '100%');

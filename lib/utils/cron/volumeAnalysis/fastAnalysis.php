@@ -28,9 +28,16 @@ while (1) {
 
 		$segments=getSegmentsForFastVolumeAnalysys($pid);
 
+        //compose a lookup array
+        $segment_hashes = array();
+
 		foreach( $segments as $pos => $segment ){
 			$segments[$pos]['segment'] = CatUtils::clean_raw_string4fast_word_count( $segment['segment'], $segments[0]['source'] );
+            $segment_hashes[ $segment['id'] ] = $segment['segment_hash'];
+            unset( $segments[$pos]['id'] );
+            unset( $segments[$pos]['segment_hash'] );
 		}
+
 
 		echo "done\n";
 		Log::doLog( "done" );
@@ -49,16 +56,22 @@ while (1) {
 		Log::doLog( "done" );
 		Log::doLog( "collecting stats..." );
 
-		$data=$fastReport['data'];
-		foreach ($data as $k=>$v){
-			if (in_array($v['type'], array("75%-84%","85%-94%","95%-99%"))){
-				$data[$k]['type']="INTERNAL";
-			}
+        $data = $fastReport[ 'data' ];
+        foreach ( $data as $k => $v ) {
 
-			if (in_array($v['type'], array("50%-74%"))){
-				$data[$k]['type']="NO_MATCH";
-			}
-		}
+            if ( in_array( $v[ 'type' ], array( "75%-84%", "85%-94%", "95%-99%" ) ) ) {
+                $data[ $k ][ 'type' ] = "INTERNAL";
+            }
+
+            if ( in_array( $v[ 'type' ], array( "50%-74%" ) ) ) {
+                $data[ $k ][ 'type' ] = "NO_MATCH";
+            }
+
+            list( $sid, $not_needed )     = explode( "-", $k );
+            $data[ $k ][ 'sid' ]          = $sid;
+            $data[ $k ][ 'segment_hash' ] = $segment_hashes[ $sid ];
+
+        }
 
 		echo "done\n";
 		Log::doLog( "done" );

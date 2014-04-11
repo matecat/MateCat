@@ -120,6 +120,11 @@ while (1) {
         continue;
     }
 
+    //reset vectors
+    $matches   = array();
+    $tms_match = array();
+    $mt_res    = array();
+
     $config = TMS::getConfigStruct();
     $config[ 'segment' ]       = $text;
     $config[ 'source_lang' ]   = $source;
@@ -185,7 +190,6 @@ while (1) {
     /**
      * Call External MT engine if it is a custom one ( mt not requested from MyMemory )
      */
-    $mt_res = array();
     $mt_match = "";
     if ( $id_mt_engine > 1 /* Request MT Directly */ ) {
         $mt = new MT($id_mt_engine);
@@ -206,8 +210,6 @@ while (1) {
 
         }
     }
-
-    $matches = array();
 
     if (!empty($tms_match)) {
         $matches = $tms_match;
