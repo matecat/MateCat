@@ -43,12 +43,13 @@ UI = {
 		$(".uploadbtn:not(.in-popup)").click(function(e) {
 			if(config.enable_outsource) {
 				e.preventDefault();
-				jobData = $('.outsource.modal .uploadbtn').attr('href').split('-');
+				chunkId = $(this).parents('.totaltable').find('.languages .splitnum').text();
+				jobData = $(this).attr('href').split('/')[$(this).attr('href').split('/').length - 1].split('-');
 				APP.doRequest({
 					data: {
 						action: 'outsourceToTranslated',
 						pid: $('#pid').attr('data-pid'),
-						ppassword: $("#pid").attr("data-pwd")
+						ppassword: $("#pid").attr("data-pwd"),
 						jobs: [
 							{
 								jid: jobData[0],
@@ -56,13 +57,24 @@ UI = {
 							}
 						]
 					},
+					context: chunkId,
 					error: function() {
 		//						UI.failedConnection(0, 'outsourceToTranslated');
 					},
 					success: function(d) {
-						chunk = $.parseJSON(d.data).chunks[0];
-//						dd = new Date($(this).attr('data-delivery'));
-						$('.outsource.modal .delivery span').text($.format.date(chunk.delivery_date, "D MMMM") + ' at ' + $.format.date(chunk.delivery_date, "hh:mm a") + ' (GMT+1)');
+						
+						chunks = d.data;
+						chunkId = this;
+						ind = 0;
+						$.each(chunks, function(index) {
+							if(this.id == chunkId) ind = index;
+						});
+						chunk = d.data[ind];
+						
+//						chunk = $.parseJSON(d.data[0]);
+//						console.log(d.data[0]);
+						dd = new Date(chunk.delivery_date);
+						$('.outsource.modal .delivery span').text($.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh:mm a") + ' (GMT+1)');
 						$('.outsource.modal .total span').text(chunk.price);
 //						UI.translated_pid = $.parseJSON(d.data).translated_pid;
 //						UI.showOutsourceData($.parseJSON(d.data).chunks);

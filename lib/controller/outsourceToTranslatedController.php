@@ -49,49 +49,43 @@ class outsourceToTranslatedController extends ajaxController {
     public function doAction() {
 
         $this->result[ 'code' ] = 1;
-//		simulation valid for this analysis file: http://matecat.local/analyze/009-INDESIGN-Welcome_to_GDRIVE_mini.inx_en-US_de-DE.sdlxliff/15758-8ba30e8d72c9
+//		simulation valid for this analysis file: http://matecat.local/analyze/prova_2/5609-44f946e3a0b0
         $this->result[ 'data' ] = array (
                                         0 =>
                                                 array (
-                                                        'id' => '19060-1',
+                                                        'id' => '5887-1',
                                                         'price' => 20.12,
                                                         'delivery_date' => '2014-04-01 11:00',
                                                 ),
                                         1 =>
                                                 array (
-                                                        'id' => '19060-2',
+                                                        'id' => '5887-2',
                                                         'price' => 30.12,
                                                         'delivery_date' => '2014-04-01 11:05',
                                                 ),
                                         2 =>
                                                 array (
-                                                        'id' => '19059-1',
+                                                        'id' => '5887-3',
                                                         'price' => 10.54,
                                                         'delivery_date' => '2014-04-01 11:10',
                                                 ),
                                         3 =>
                                                 array (
-                                                        'id' => '19059-2',
+                                                        'id' => '5886',
                                                         'price' => 38.15,
                                                         'delivery_date' => '2014-04-01 11:15',
                                                 ),
                                         4 =>
                                                 array (
-                                                        'id' => '19061-1',
+                                                        'id' => '5885-1',
                                                         'price' => 50.72,
                                                         'delivery_date' => '2014-04-01 11:20',
                                                 ),
                                         5 =>
                                                 array (
-                                                        'id' => '19061-2',
+                                                        'id' => '5885-2',
                                                         'price' => 8.4,
                                                         'delivery_date' => '2014-04-01 11:25',
-                                                ),
-                                        6 =>
-                                                array (
-                                                        'id' => '19061-3',
-                                                        'price' => 3.42,
-                                                        'delivery_date' => '2014-04-01 11:30',
                                                 ),
                                 );
 
