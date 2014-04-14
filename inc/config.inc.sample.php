@@ -47,8 +47,8 @@ class INIT {
 	public static $SPELL_CHECK_ENABLED;
 	public static $MAX_UPLOAD_FILE_SIZE;
 	public static $MAX_NUM_FILES;
-        public static $REFERENCE_REPOSITORY;
-        public static $ENABLE_OUTSOURCE = false;
+    public static $REFERENCE_REPOSITORY;
+    public static $ENABLE_OUTSOURCE = false;
 
 	private function initOK() {
 
@@ -154,8 +154,8 @@ class INIT {
 
 		self::$DB_SERVER   = "localhost"; //database server
 		self::$DB_DATABASE = "matecat"; //database name
-		self::$DB_USER     = "matecat"; //database login
-		self::$DB_PASS     = "matecat01"; //database password
+		self::$DB_USER     = "matecat_user"; //database login
+		self::$DB_PASS     = "matecat_user"; //database password
 
         self::$MEMCACHE_SERVERS = array( /* "localhost:11211" => 1 */ );
 

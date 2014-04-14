@@ -43,10 +43,50 @@ UI = {
 		$(".uploadbtn:not(.in-popup)").click(function(e) {
 			if(config.enable_outsource) {
 				e.preventDefault();
-//				$('.outsourcemodal code').text(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
-				$('.outsourcemodal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
-				$('.outsourcemodal .uploadbtn').attr('href', $(this).attr('href'));
-				$('.outsourcemodal').show();
+				chunkId = $(this).parents('.totaltable').find('.languages .splitnum').text();
+				jobData = $(this).attr('href').split('/')[$(this).attr('href').split('/').length - 1].split('-');
+				APP.doRequest({
+					data: {
+						action: 'outsourceToTranslated',
+						pid: $('#pid').attr('data-pid'),
+						ppassword: $("#pid").attr("data-pwd"),
+						jobs: [
+							{
+								jid: jobData[0],
+								jpassword: jobData[1]
+							}
+						]
+					},
+					context: chunkId,
+					error: function() {
+		//						UI.failedConnection(0, 'outsourceToTranslated');
+					},
+					success: function(d) {
+						
+						chunks = d.data;
+						chunkId = this;
+						ind = 0;
+						$.each(chunks, function(index) {
+							if(this.id == chunkId) ind = index;
+						});
+						chunk = d.data[ind];
+						
+//						chunk = $.parseJSON(d.data[0]);
+//						console.log(d.data[0]);
+						dd = new Date(chunk.delivery_date);
+						$('.outsource.modal .delivery span').text($.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh:mm a") + ' (GMT+1)');
+						$('.outsource.modal .total span').text(chunk.price);
+//						UI.translated_pid = $.parseJSON(d.data).translated_pid;
+//						UI.showOutsourceData($.parseJSON(d.data).chunks);
+					}
+				});
+				$('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
+				$('.outsource.modal .uploadbtn').attr('href', $(this).attr('href'));
+
+				$('.outsource.modal').show();
+//				$('.outsourcemodal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
+//				$('.outsourcemodal .uploadbtn').attr('href', $(this).attr('href'));
+//				$('.outsourcemodal').show();
 				
 				return false;
 			}
@@ -314,13 +354,15 @@ UI = {
 		APP.doRequest({
 			data: {
 				action: 'outsourceToTranslated',
-				pid: $('#pid').attr('data-pid')
+				pid: $('#pid').attr('data-pid'),
+				password: $("#pid").attr("data-pwd")
 			},
 			error: function() {
 //						UI.failedConnection(0, 'outsourceToTranslated');
 			},
 			success: function(d) {
-				UI.showOutsourceData($.parseJSON(d.data));
+				UI.translated_pid = $.parseJSON(d.data).translated_pid;
+				UI.showOutsourceData($.parseJSON(d.data).chunks);
 			}
 		});
 	},
@@ -505,7 +547,6 @@ UI = {
 	},
 	showOutsourceData: function(d) {
 		var chunks = d;
-//		var chunks = d.chunks;
 		$.each(chunks, function(index) {
 			$('.outsourcemodal .chunks tr[data-cid=' + this.id + ']').attr('data-price', this.price).attr('data-delivery', this.delivery_date);
 		});
@@ -516,6 +557,7 @@ UI = {
 		
 		$('.outsourcemodal .delivery span').text(UI.getFarthestDate());
 		$('.outsourcemodal .total span').text(total.toFixed(2));
+		$('.outsourcemodal .outs .continuebtn').attr('href', $('.outsourcemodal .outs .continuebtn').attr('href') + '?pid=' + UI.translated_pid);
 	},
 	pollData: function() {
 		if (this.stopPolling)
