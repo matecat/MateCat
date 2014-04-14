@@ -312,13 +312,15 @@ UI = {
 		APP.doRequest({
 			data: {
 				action: 'outsourceToTranslated',
-				pid: $('#pid').attr('data-pid')
+				pid: $('#pid').attr('data-pid'),
+				password: $("#pid").attr("data-pwd")
 			},
 			error: function() {
 //						UI.failedConnection(0, 'outsourceToTranslated');
 			},
 			success: function(d) {
-				UI.showOutsourceData($.parseJSON(d.data));
+				UI.translated_pid = $.parseJSON(d.data).translated_pid;
+				UI.showOutsourceData($.parseJSON(d.data).chunks);
 			}
 		});
 	},
@@ -503,7 +505,6 @@ UI = {
 	},
 	showOutsourceData: function(d) {
 		var chunks = d;
-//		var chunks = d.chunks;
 		$.each(chunks, function(index) {
 			$('.outsourcemodal .chunks tr[data-cid=' + this.id + ']').attr('data-price', this.price).attr('data-delivery', this.delivery_date);
 		});
@@ -514,6 +515,7 @@ UI = {
 		
 		$('.outsourcemodal .delivery span').text(UI.getFarthestDate());
 		$('.outsourcemodal .total span').text(total.toFixed(2));
+		$('.outsourcemodal .outs .continuebtn').attr('href', $('.outsourcemodal .outs .continuebtn').attr('href') + '?pid=' + UI.translated_pid);
 	},
 	pollData: function() {
 		if (this.stopPolling)
