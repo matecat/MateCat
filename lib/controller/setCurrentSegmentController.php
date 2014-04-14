@@ -58,8 +58,30 @@ class setCurrentSegmentController extends ajaxController {
         $insertRes     = setCurrentSegmentInsert( $this->id_segment, $this->id_job, $this->password );
         $nextSegmentId = getNextUntranslatedSegment( $this->id_segment, $this->id_job, $this->password );
 
+        $Translation_mismatches = getTranslationsMismatches( $this->id_job, $this->password, $this->id_segment );
+
+        $result = array( 'editable' => array(), 'not_editable' => array() );
+
+        foreach( $Translation_mismatches as $position => $row ){
+
+            if( $row['editable'] ){
+                $result['editable'][] = array(
+                        'translation' => $row['translation'],
+                        'TOT' => $row['TOT'],
+                        'involved_id' => explode( ",", $row['involved_id'] )
+                );
+            } else {
+                $result['not_editable'][] = array(
+                        'translation' => $row['translation'],
+                        'TOT' => $row['TOT'],
+                        'involved_id' => explode( ",", $row['involved_id'] )
+                );
+            }
+
+        }
+
         $this->result[ 'code' ] = 1;
-        $this->result[ 'data' ] = "OK";
+        $this->result[ 'data' ] = $result;
 
         $nSegment = array( 'id' => null );
         if( isset( $nextSegmentId[ 0 ][ 'id' ] ) ){

@@ -35,6 +35,7 @@ class catController extends viewController {
 	private $job_cancelled = false;
 
     private $firstSegmentOfFiles = '[]';
+    private $fileCounter = '[]';
 
     private $first_job_segment;
     private $last_job_segment;
@@ -255,9 +256,15 @@ class catController extends viewController {
         /**
          * get first segment of every file
          */
-         $this->firstSegmentOfFiles = json_encode( getFirstSegmentOfFilesInJob( $this->jid ) );
+        $fileInfo = getFirstSegmentOfFilesInJob( $this->jid );
+        $TotalPayable = array();
+        foreach( $fileInfo as $file ){
+            $TotalPayable[ $file['id_file'] ]['TOTAL_FORMATTED'] = $file['TOTAL_FORMATTED'];
+        }
+        $this->firstSegmentOfFiles = json_encode( $fileInfo );
+        $this->fileCounter         = json_encode( $TotalPayable );
 
-	}
+    }
 
 	public function setTemplateVars() {
 
@@ -267,12 +274,14 @@ class catController extends viewController {
             $this->template->source_code         = null;
             $this->template->target_code         = null;
             $this->template->firstSegmentOfFiles = null;
+            $this->template->fileCounter         = null;
         } else {
             $this->template->pid                 = $this->pid;
             $this->template->target              = $this->target;
             $this->template->source_code         = $this->source_code;
             $this->template->target_code         = $this->target_code;
             $this->template->firstSegmentOfFiles = $this->firstSegmentOfFiles;
+            $this->template->fileCounter         = $this->fileCounter;
         }
 
         $this->template->jid         = $this->jid;
@@ -311,30 +320,30 @@ class catController extends viewController {
         $this->template->incomingUrl            = '/login?incomingUrl=' . $this->thisUrl;
         $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
         $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
-		$this->template->filtered = $this->filter_enabled;
-		$this->template->filtered_class = ($this->filter_enabled) ? ' open' : '';
+        $this->template->filtered = $this->filter_enabled;
+        $this->template->filtered_class = ( $this->filter_enabled ) ? ' open' : '';
 
 		( INIT::$VOLUME_ANALYSIS_ENABLED        ? $this->template->analysis_enabled = true : null );
 
 		//check if it is a composite language, for cjk check that accepts only ISO 639 code
-		if(strpos($this->target_code,'-')!==FALSE){
-			//pick only first part
-			$tmp_lang=explode('-',$this->target_code);
-			$target_code_no_country=$tmp_lang[0];
-			unset($tmp_lang);
-		}else{
-			//not a RFC code, it's fine
-			$target_code_no_country=$this->target_code;
-		}
+        if ( strpos( $this->target_code, '-' ) !== false ) {
+            //pick only first part
+            $tmp_lang               = explode( '-', $this->target_code );
+            $target_code_no_country = $tmp_lang[ 0 ];
+            unset( $tmp_lang );
+        } else {
+            //not a RFC code, it's fine
+            $target_code_no_country = $this->target_code;
+        }
 
-		//check if cjk
-		if( array_key_exists( $target_code_no_country, CatUtils::$cjk ) ){
-			$this->template->taglockEnabled = 0;
-		}
+        //check if cjk
+        if ( array_key_exists( $target_code_no_country, CatUtils::$cjk ) ) {
+            $this->template->taglockEnabled = 0;
+        }
 
-		/*
-		 * Line Feed PlaceHolding System
-		 */
+        /*
+         * Line Feed PlaceHolding System
+         */
 		$this->template->brPlaceholdEnabled = $placeHoldingEnabled = true;
 
 		if( $placeHoldingEnabled ){

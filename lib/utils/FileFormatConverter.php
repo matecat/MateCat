@@ -67,8 +67,8 @@ class FileFormatConverter {
             self::$Storage_Lookup_IP_Map[ $converter_storage['ip_converter'] ] = $converter_storage['ip_storage'];
         }
 
-//        self::$converters = array('10.11.0.10' => 1);//for debugging purposes
-//        self::$Storage_Lookup_IP_Map = array('10.11.0.10' => '10.11.0.11');//for debugging purposes
+//        self::$converters = array('10.11.0.18' => 1);//for debugging purposes
+//        self::$Storage_Lookup_IP_Map = array('10.11.0.18' => '10.11.0.19');//for debugging purposes
 
         $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
 
@@ -175,11 +175,11 @@ class FileFormatConverter {
 	}
 
 	private function extractUidandExt(&$content) {
-		$pattern = '|<file original="\w:\\\\.*?\\\\.*?\\\\(.*?)\\\\(.*?)\.(.*?)".*?>|';
+		$pattern = '|<file original=".+?([a-f\-0-9]{36}).+?\.(.*)".*?>|';
 		$matches = array();
 		preg_match($pattern, $content, $matches);
 
-		return array($matches[1], $matches[3]);
+		return array($matches[1], $matches[2]);
 	}
 
 	private function is_assoc($array) {
@@ -207,7 +207,7 @@ class FileFormatConverter {
 
             //when Launched by CRON Script send Error Report is disabled
             if( $this->sendErrorReport ) {
-                rename( $this->conversionObject->path_name , $this->conversionObject->path_backup );
+                @rename( $this->conversionObject->path_name , $this->conversionObject->path_backup );
                 $this->__saveConversionErrorLog();
                 $this->__notifyError();
             }

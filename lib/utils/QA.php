@@ -494,7 +494,8 @@ class QA {
         if ( !empty( $matches_src[ 1 ] ) ) {
             $test_src = $source_seg;
             foreach ( $matches_src[ 1 ] as $v ) {
-                $test_src = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) .'}{1})/u', self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $test_src, 1 );
+                $key = "" . sprintf( "%02X", ord( $v ) ) . "";
+                $test_src = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) .'}{1})/u', self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_src, 1 );
             }
             //Source Content wrong use placeholded one
             $source_seg = $test_src;
@@ -503,7 +504,8 @@ class QA {
         if ( !empty( $matches_trg[ 1 ] ) ) {
             $test_trg = $target_seg;
             foreach ( $matches_trg[ 1 ] as $v ) {
-                $test_trg = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) .'}{1})/u', self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $test_trg, 1 );
+                $key = "" . sprintf( "%02X", ord( $v ) ) . "";
+                $test_trg = preg_replace( '/(\x{' . sprintf( "%02X", ord( $v ) ) .'}{1})/u', self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_trg, 1 );
             }
             //Target Content wrong use placeholded one
             $target_seg = $test_trg;
@@ -532,7 +534,12 @@ class QA {
                 } else {
                     $regexp = '/&#x(' . $byte . ');/u';
                 }
-                $test_src = preg_replace( $regexp, self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $test_src );
+
+                $key = "" . sprintf( "%02X", hexdec( $v ) ) . "";
+                if( array_key_exists( $key, self::$asciiPlaceHoldMap ) ){
+                    $test_src = preg_replace( $regexp, self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_src );
+                }
+
             }
             //Source Content wrong use placeholded one
             $source_seg = $test_src;
@@ -547,7 +554,12 @@ class QA {
                 } else {
                     $regexp = '/&#x(' . $byte . ');/u';
                 }
-                $test_trg = preg_replace( $regexp, self::$asciiPlaceHoldMap[ sprintf( "%02X", ord( $v ) ) ][ 'placeHold' ], $test_trg );
+
+                $key = "" . sprintf( "%02X", hexdec( $v ) ) . "";
+                if( array_key_exists( $key, self::$asciiPlaceHoldMap ) ){
+                    $test_trg = preg_replace( $regexp, self::$asciiPlaceHoldMap[ $key ][ 'placeHold' ], $test_trg );
+                }
+
             }
             //Target Content wrong use placeholded one
             $target_seg = $test_trg;

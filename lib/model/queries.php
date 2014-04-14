@@ -508,13 +508,15 @@ function getSegment( $id_segment ) {
 function getFirstSegmentOfFilesInJob( $jid ) {
     $db      = Database::obtain();
     $jid     = intval( $jid );
-    $query   = "select id_file, min( segments.id ) as first_segment, filename as file_name
-                from files_job
-                join segments using( id_file )
-                join files on files.id = id_file
-                where files_job.id_job = $jid
-                and segments.show_in_cattool = 1
-                group by id_file";
+    $query   = "SELECT id_file, MIN( segments.id ) AS first_segment, filename AS file_name,
+                    FORMAT( SUM( IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count) ) , 0 ) AS TOTAL_FORMATTED
+                FROM files_job
+                JOIN segments USING( id_file )
+                JOIN files ON files.id = id_file
+                LEFT JOIN segment_translations AS st ON segments.id = st.id_segment
+                WHERE files_job.id_job = $jid
+                AND segments.show_in_cattool = 1
+                GROUP BY id_file";
     $results = $db->fetch_array( $query );
 
     return $results;
@@ -710,6 +712,121 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
     $results = $db->fetch_array( $query );
 
     return $results;
+}
+
+function getTranslationsMismatches( $jid, $jpassword, $sid = null ){
+
+    $db = Database::obtain();
+
+    if( $sid != null ){
+
+        /**
+         * Get all the available translations for this segment id,
+         * the amount of equal translations,
+         * a list of id,
+         * and an editable boolean field identifying if jobs is mine or not
+         *
+         */
+        $queryForTranslationMismatch = "
+                SELECT
+                    translation,
+                    COUNT(1) as TOT,
+                    GROUP_CONCAT( id_segment ) AS involved_id,
+                    IF( password = '%s', 1, 0 ) AS editable
+                FROM segment_translations
+                JOIN jobs ON id_job = id AND id_segment between jobs.job_first_segment AND jobs.job_last_segment
+                WHERE segment_hash = (
+                    SELECT segment_hash FROM segments WHERE id = %u
+                )
+                AND segment_translations.status IN( 'TRANSLATED' ) -- , 'APPROVED' )
+                AND id_job = %u
+                AND id_segment != %u
+                GROUP BY translation, CONCAT( id_job, '-', password )
+        ";
+
+        $query = sprintf( $queryForTranslationMismatch, $db->escape( $jpassword ), $sid, $jid, $sid );
+
+    } else {
+
+        /**
+         * This query gets, for each hash with more than one translations available, the min id of the segments
+         *
+         * If we want also to check for mismatches against approved translations also,
+         * we have to add the APPROVED status condition.
+         *
+         * But be careful, queries are much more heaviest.
+         * ( Ca. 4X -> 0.01/0.02s for a job with 55k segments on a dev environment )
+         *
+         */
+        $queryForMismatchesInJob = "
+                SELECT
+                    COUNT( segment_hash ) AS total_sources,
+                    COUNT( DISTINCT translation ) AS translations_available,
+                    IF( password = '%s', MIN( id_segment ), NULL ) AS first_of_my_job
+                FROM segment_translations
+                JOIN jobs ON id_job = id AND id_segment between jobs.job_first_segment AND jobs.job_last_segment
+                WHERE id_job = %u
+                AND segment_translations.status IN( 'TRANSLATED' ) -- , 'APPROVED' )
+                GROUP BY segment_hash, CONCAT( id_job, '-', password )
+                HAVING translations_available != total_sources
+                AND translations_available > 1
+        ";
+
+        $query = sprintf( $queryForMismatchesInJob, $db->escape( $jpassword ), $jid );
+
+    }
+
+    $results = $db->fetch_array( $query );
+
+    return $results;
+
+}
+
+/**
+ * This function propagates the translation to every identical sources in the chunk/job
+ *
+ * @param $params
+ * @param $job_data
+ *
+ * @return int
+ */
+function propagateTranslation( $params, $job_data ){
+
+    $db = Database::obtain();
+
+    $q = array();
+    foreach ( $params as $key => $value ) {
+        if ( is_bool( $value ) ) {
+            $q[ ] = $key . " = " . var_export( (bool)$value , true );
+        } elseif ( !is_numeric( $value ) ) {
+            $q[ ] = $key . " = '" . $db->escape( $value ) . "'";
+        } else {
+            $q[ ] = $key . " = " . (float)$value;
+        }
+    }
+
+    $TranslationPropagate = "
+        UPDATE segment_translations
+            SET " . implode( ", ", $q ) . ", time_to_edit = time_to_edit + 0
+            WHERE id_job = {$params[ 'id_job' ]}
+            AND segment_hash = '" . $params[ 'segment_hash' ] . "'
+            AND status IN ( 'DRAFT', 'NEW', 'REJECTED' )
+            AND id_segment BETWEEN {$job_data[ 'job_first_segment' ]} AND {$job_data[ 'job_last_segment' ]}
+    ";
+
+    $db->query( $TranslationPropagate );
+
+    $err = $db->get_error();
+
+    if( $err['error_code'] != 0 ){
+        Log::doLog( "Error in propagating Translation: " . $err['error_code'] . ": " . $err['error_description'] );
+        Log::doLog( $TranslationPropagate );
+        Log::doLog( $params );
+        return -$err['error_code'];
+    }
+
+    return $db->affected_rows;
+
 }
 
 function getLastSegmentInNextFetchWindow( $jid, $password, $step = 50, $ref_segment, $where = 'after' ) {
@@ -1787,7 +1904,7 @@ function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
 }
 
 function getSegmentsForFastVolumeAnalysys( $pid ) {
-    $query   = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment, j.source
+    $query   = "select concat( s.id, '-', group_concat( distinct concat( j.id, ':' , j.password ) ) ) as jsid, s.segment, j.source, s.segment_hash, s.id as id
 		from segments as s 
 		inner join files_job as fj on fj.id_file=s.id_file
 		inner join jobs as j on fj.id_job=j.id
@@ -1933,6 +2050,7 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
     $data[ 'id_segment' ]          = null;
     $data[ 'id_job' ]              = null;
+    $data[ 'segment_hash' ]        = null;
     $data[ 'match_type' ]          = null;
     $data[ 'eq_word_count' ]       = null;
     $data[ 'standard_word_count' ] = null;
@@ -1978,6 +2096,7 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
             $data[ 'id_segment' ]          = (int)$id_segment;
             $data[ 'id_job' ]              = (int)$id_job;
+            $data[ 'segment_hash' ]        = $db->escape( $v['segment_hash'] );
             $data[ 'match_type' ]          = $db->escape( $type );
             $data[ 'eq_word_count' ]       = (float)$eq_word;
             $data[ 'standard_word_count' ] = (float)$standard_words;
@@ -2404,6 +2523,7 @@ function getSegmentForTMVolumeAnalysys( $id_segment, $id_job ) {
 			where
 			p.status_analysis='FAST_OK' and
 			st.id_segment=$id_segment and st.id_job=$id_job
+			and st.locked = 0
 			limit 1";
 
     $db      = Database::obtain();
@@ -2589,6 +2709,7 @@ function getProjectSegmentsTranslationSummary( $pid ){
                 JOIN segments s ON s.id = id_segment
                 INNER JOIN jobs j ON j.id=st.id_job
                 WHERE j.id_project = $pid
+                AND st.locked = 0
                 GROUP BY id_job WITH ROLLUP";
 
     $results = $db->fetch_array( $query );
@@ -2618,10 +2739,10 @@ function countSegmentsTranslationAnalyzed( $pid ) {
                 COUNT( s.id ) AS project_segments,
                 SUM(
                     CASE
-                        WHEN st.standard_word_count != 0 THEN IF( st.tm_analysis_status = 'DONE', 1, 0 )
+                        WHEN ( st.standard_word_count != 0 OR st.standard_word_count IS NULL ) THEN IF( st.tm_analysis_status = 'DONE', 1, 0 )
                         WHEN st.standard_word_count = 0 THEN 1
                     END
-                ) AS num_analyzed,
+                ) AS num_analyzed
                 SUM(eq_word_count) AS eq_wc ,
                 SUM(standard_word_count) AS st_wc
                 FROM segments s
