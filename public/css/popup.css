@@ -229,10 +229,10 @@ clear:both;
 
 /* versione 3: box */
 
-.pricebox .outsourceto, .pricebox .onyourown {padding:0; border:none; border-radius:0;}
+.pricebox .outsourceto, .pricebox .onyourown {padding:0; border:none; border-radius:0; margin-bottom:5px;}
 .pricebox .outsourceto {border-top:1px solid #ccc;}
 .pricebox .outsourceto h2 {
-margin-top: 20px;
+margin-top: 15px;
 }
 .pricebox .copytext {float:left;width:59%;padding-right:1%;}
 .pricebox .total {float: left;
@@ -247,11 +247,17 @@ background: #FAFAFA;}
 float: left;
 margin:10px 0 10px 30%!important;
 }
-.pricebox .tprice, .pricebox .tprice span, .pricebox .delivery, .pricebox .delivery span, .pricebox .gmt {display:block; float:none;}
-.pricebox .tprice span {
-border-top: 1px solid #ccc;
+.pricebox .tprice, .pricebox .tprice span, .pricebox .delivery, .pricebox .delivery span, .pricebox .zone, .pricebox .tprice span {display:block; float:none;}
+.pricebox .tprice .tpricetitle {
+border-bottom: 1px solid #ccc;
+font-size:24px!important;
+padding-bottom: 5px;
+margin-bottom: 10px;
 }
-
+span.zone {
+font-size: 14px;
+}
+.pricebox .tprice .euro, .pricebox .tprice .displayprice {display:inline;}
 .pricebox .tprice {line-height:30px; margin-bottom:10px;}
 .pricebox delivery {line-height:30px;}
 
