@@ -121,8 +121,9 @@ width: 180px;
 }
 
 .outsourceto h2 {
-background: url(../img/logo_translated.png) no-repeat 580px 0px;
-background-size: 137px;
+background: url(../img/logo_translated.png) no-repeat 610px 0px;
+background-size: 140px;
+height: 32px;
 	
 }
 
@@ -139,15 +140,19 @@ overflow: hidden;
 border: 1px solid #ccc;
 border-radius: 4px;
 text-align: left;
-margin-top: 20px;
+/*margin-top: 20px;*/
 padding: 10px 20px;
 }
 
-.outsourceto:hover, .onyourown:hover {
+/*.outsourceto:hover, .onyourown:hover {
 	border: 1px solid #000;
 	-moz-box-shadow: 0 0px 6px #888;
 -webkit-box-shadow: 0 0px 6px #888;
-}
+}*/
+
+.total:hover {border: 1px solid #000;
+	-moz-box-shadow: 0 0px 6px #888;
+-webkit-box-shadow: 0 0px 6px #888;}
 
 .paylater, .gmt {
 font-size: 14px;
@@ -157,16 +162,99 @@ clear: both;
 margin-top:-10px;
 }
 
-.outsourceto .continuebtn {
+/*.outsourceto .continuebtn {
 float: right;
-margin-top:60px!important;
+margin:90px 0 0 0!important;
 }
 
-.copytext p {
+.outsourceto .right .continuebtn {
+float: right;
+margin:10px 0 10px 0!important;
+}*/
+
+/*.copytext p {
 border-bottom: 1px solid #ccc;
 box-shadow: 0px 2px 1px -2px #E2E2E2;
 padding-bottom: 10px;
+}*/
+
+.delivery span {
+color: #5E5E5E;
+font-weight:normal;
 }
+
+.delivery {
+font-size: 22px!important;
+font-weight:bold;
+}
+
+/*.offer {
+float:left;
+	width:80%;
+}*/
+
+.tprice span  {
+font-weight: bold;
+font-size: 40px!important;
+padding-top:10px;
+}
+
+
+.tprice {
+/*margin:20px 0;*/
+font-size: 22px!important;
+font-weight: bold;
+}
+/*.delivery, .tprice {
+line-height: 0px;
+clear: both;
+float:left;
+}*/
+
+/* versione 2: right */
+.vright .offer {
+width:100%;
+}
+
+
+
+.vright .delivery, .vright .tprice, .vright .paylater, .vright .gmt{
+float:right;
+}
+
+.vright .continuebtn {
+margin: 10px 0!important;	
+clear:both;
+}
+
+/* versione 3: box */
+
+.pricebox .outsourceto, .pricebox .onyourown {padding:0; border:none; border-radius:0;}
+.pricebox .outsourceto {border-top:1px solid #ccc;}
+.pricebox .outsourceto h2 {
+margin-top: 20px;
+}
+.pricebox .copytext {float:left;width:59%;padding-right:1%;}
+.pricebox .total {float: left;
+width: 35%;
+padding: 1% 2%;
+border: 1px solid #ccc;
+border-radius: 4px;
+margin: 10px 0;
+text-align: center;
+background: #FAFAFA;}
+.pricebox .continuebtn {clear: both;
+float: left;
+margin:10px 0 10px 30%!important;
+}
+.pricebox .tprice, .pricebox .tprice span, .pricebox .delivery, .pricebox .delivery span, .pricebox .gmt {display:block; float:none;}
+.pricebox .tprice span {
+border-top: 1px solid #ccc;
+}
+
+.pricebox .tprice {line-height:30px; margin-bottom:10px;}
+.pricebox delivery {line-height:30px;}
+
 
 table.chunks {
 overflow: hidden;
@@ -208,38 +296,6 @@ table .chunks tr:first-child {
 background: #E7E7E7;
 }
 
-
-.delivery span {
-color: #5E5E5E;
-font-weight:normal;
-}
-
-.delivery {
-font-size: 22px!important;
-font-weight:bold;
-}
-
-.total {
-float:left;
-	width:80%;
-}
-
-.tprice span  {
-font-weight: bold;
-font-size: 40px!important;
-}
-
-
-.tprice {
-margin:20px 0;
-font-size: 22px!important;
-font-weight: bold;
-}
-.delivery, .tprice {
-line-height: 0px;
-clear: both;
-float:left;
-}
 
 .footer-popup ul li {
 display: inline;
