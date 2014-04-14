@@ -43,10 +43,38 @@ UI = {
 		$(".uploadbtn:not(.in-popup)").click(function(e) {
 			if(config.enable_outsource) {
 				e.preventDefault();
-//				$('.outsourcemodal code').text(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
-				$('.outsourcemodal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
-				$('.outsourcemodal .uploadbtn').attr('href', $(this).attr('href'));
-				$('.outsourcemodal').show();
+				jobData = $('.outsource.modal .uploadbtn').attr('href').split('-');
+				APP.doRequest({
+					data: {
+						action: 'outsourceToTranslated',
+						pid: $('#pid').attr('data-pid'),
+						ppassword: $("#pid").attr("data-pwd")
+						jobs: [
+							{
+								jid: jobData[0],
+								jpassword: jobData[1]
+							}
+						]
+					},
+					error: function() {
+		//						UI.failedConnection(0, 'outsourceToTranslated');
+					},
+					success: function(d) {
+						chunk = $.parseJSON(d.data).chunks[0];
+//						dd = new Date($(this).attr('data-delivery'));
+						$('.outsource.modal .delivery span').text($.format.date(chunk.delivery_date, "D MMMM") + ' at ' + $.format.date(chunk.delivery_date, "hh:mm a") + ' (GMT+1)');
+						$('.outsource.modal .total span').text(chunk.price);
+//						UI.translated_pid = $.parseJSON(d.data).translated_pid;
+//						UI.showOutsourceData($.parseJSON(d.data).chunks);
+					}
+				});
+				$('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
+				$('.outsource.modal .uploadbtn').attr('href', $(this).attr('href'));
+
+				$('.outsource.modal').show();
+//				$('.outsourcemodal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
+//				$('.outsourcemodal .uploadbtn').attr('href', $(this).attr('href'));
+//				$('.outsourcemodal').show();
 				
 				return false;
 			}

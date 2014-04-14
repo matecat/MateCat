@@ -85,13 +85,13 @@ box-shadow: inset 0 0 1px 1px #888;
 }
 
 
-.outsourcemodal .popup {
+.outsource.modal .popup {
 width:800px;margin: -200px 0 0 -400px;
 }
-.outsourcemodal .popup-box {
+.outsource.modal .popup-box {
 text-align:left; padding:0 20px;
 }
-.outsourcemodal .out-link {
+.outsource.modal .out-link {
 padding: .3em .6em;
 display: inline-block;
 border: 1px solid #ccc;
@@ -106,7 +106,7 @@ color: #333;
 height: 43px;
 width: 82%;
 }
-.outsourcemodal h2 {
+.outsource.modal h2 {
 font-size: 20px;
 font-weight: bold;
 margin:10px 0;
