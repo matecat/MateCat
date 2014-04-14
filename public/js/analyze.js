@@ -74,8 +74,9 @@ UI = {
 //						chunk = $.parseJSON(d.data[0]);
 //						console.log(d.data[0]);
 						dd = new Date(chunk.delivery_date);
-						$('.outsource.modal .delivery span').text($.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh:mm a") + ' (GMT+1)');
-						$('.outsource.modal .total span').text(chunk.price);
+						$('.outsource.modal .delivery span.time').text($.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh:mm a"));
+						$('.outsource.modal .delivery span.zone').text('(GMT+1)');
+						$('.outsource.modal .total span.displayprice').text(chunk.price);
 //						UI.translated_pid = $.parseJSON(d.data).translated_pid;
 //						UI.showOutsourceData($.parseJSON(d.data).chunks);
 					}
@@ -556,7 +557,7 @@ UI = {
 		})
 		
 		$('.outsourcemodal .delivery span').text(UI.getFarthestDate());
-		$('.outsourcemodal .total span').text(total.toFixed(2));
+		$('.outsourcemodal .total span.displayprice').text(total.toFixed(2));
 		$('.outsourcemodal .outs .continuebtn').attr('href', $('.outsourcemodal .outs .continuebtn').attr('href') + '?pid=' + UI.translated_pid);
 	},
 	pollData: function() {
