@@ -110,12 +110,9 @@ width: 82%;
 font-size: 20px;
 font-weight: bold;
 margin:10px 0;
-background: url(../img/logo_translated.png) no-repeat 590px 0px;
-background-size: 120px;
 }
 
 .outs h2 {
-background: url(../img/logo_translated.png) no-repeat;
 background-size: 180px;
 height: 41px;
 margin-top: 20px;
@@ -123,6 +120,11 @@ margin-bottom:-10px;
 width: 180px;
 }
 
+.outsourceto h2 {
+background: url(../img/logo_translated.png) no-repeat 580px 0px;
+background-size: 137px;
+	
+}
 
 .outsourceto .uploadbtn {
 background: #7eaf3e;
@@ -131,17 +133,40 @@ float: left;
 margin: -10px 0 5px 40% !important;
 }
 
-.outsourceto {
+.outsourceto, .onyourown {
 margin: 0 auto;
 overflow: hidden;
 border: 1px solid #ccc;
 border-radius: 4px;
 text-align: left;
-background: #f3f3f3;
 margin-top: 20px;
 padding: 10px 20px;
 }
 
+.outsourceto:hover, .onyourown:hover {
+	border: 1px solid #000;
+	-moz-box-shadow: 0 0px 6px #888;
+-webkit-box-shadow: 0 0px 6px #888;
+}
+
+.paylater, .gmt {
+font-size: 14px;
+font-weight: normal;
+float:left;
+clear: both;
+margin-top:-10px;
+}
+
+.outsourceto .continuebtn {
+float: right;
+margin-top:60px!important;
+}
+
+.copytext p {
+border-bottom: 1px solid #ccc;
+box-shadow: 0px 2px 1px -2px #E2E2E2;
+padding-bottom: 10px;
+}
 
 table.chunks {
 overflow: hidden;
@@ -159,9 +184,6 @@ border: 1px solid #ccc;
 .thead {
 background: #F6F6F6;
 }
-
-
-
 
 
 table.chunks  th:last-child {
@@ -189,22 +211,34 @@ background: #E7E7E7;
 
 .delivery span {
 color: #5E5E5E;
+font-weight:normal;
 }
 
 .delivery {
 font-size: 22px!important;
+font-weight:bold;
 }
 
-.total  {
+.total {
+float:left;
+	width:80%;
+}
+
+.tprice span  {
 font-weight: bold;
 font-size: 40px!important;
 }
 
-.total {margin:30px 0;}
-.delivery, .total {
-text-align: right;
-margin-right: 10px;
-line-height: 10px;
+
+.tprice {
+margin:20px 0;
+font-size: 22px!important;
+font-weight: bold;
+}
+.delivery, .tprice {
+line-height: 0px;
+clear: both;
+float:left;
 }
 
 .footer-popup ul li {
