@@ -156,8 +156,8 @@ class outsourceToTranslatedController extends ajaxController {
         $this->result[ 'code' ] = 1;
         $this->result[ 'data' ] = array_values( $client_output );
         $this->result[ 'return_url' ] = array(
-            'url_ok' => INIT::$HTTPHOST . INIT::$BASEURL,
-            'url_ko' => INIT::$HTTPHOST . INIT::$BASEURL,
+            'url_ok' => INIT::$HTTPHOST . INIT::$BASEURL . "/redirectSuccessPage/",
+            'url_ko' => INIT::$HTTPHOST . INIT::$BASEURL . "/redirectErrorPage/",
         );
 
     }
