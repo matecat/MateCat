@@ -67,6 +67,7 @@ while (1) {
 
     if (empty($segment)) {
         echo "--- (child $my_pid) : empty segment: no segment ready for tm volume analisys: wait 5 seconds\n";
+        setSegmentTranslationError($sid, $jid); // devo settarli come done e lasciare il vecchio livello di match
         incrementCount( $pid, 0, 0 );
         sleep(5);
         continue;
