@@ -127,6 +127,7 @@ class outsourceToTranslatedController extends ajaxController {
 
         $this->result[ 'code' ] = 1;
         $this->result[ 'data' ] = $client_output;
+        $this->result[ 'return_url' ] = array("url_ok" => 'http://matecat.local/redirectSuccessPage', "url_ko" => 'http://matecat.local/redirectErrorPage');
 
 
     }

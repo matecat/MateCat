@@ -413,7 +413,11 @@
                                                 <div class="delivery">Delivery guaranteed by: <span class="time"></span><span class="zone"></span>
                                                    
                                         		</div>
-                                        		<a href="https://www.translated.home/mcl/login.html" target="_blank" class="continuebtn">Continue</a>
+											<form id="continueForm" action="https://www.translated.home/mcl/login.php" method="POST" target="_blank">
+												<input type="hidden" name="url-ok" value="" />
+												<input type="hidden" name="url-ko" value="" />
+												<a href="#" class="continuebtn disabled">Continue</a>
+											</form>
                                  			</div>
                     				</div>
 						</div>

@@ -44,7 +44,7 @@ UI = {
 			if(config.enable_outsource) {
 				e.preventDefault();
 				chunkId = $(this).parents('.totaltable').find('.languages .splitnum').text();
-				jobData = $(this).attr('href').split('/')[$(this).attr('href').split('/').length - 1].split('-');
+				row = $(this).parents('.tablestats');
 				APP.doRequest({
 					data: {
 						action: 'outsourceToTranslated',
@@ -52,8 +52,8 @@ UI = {
 						ppassword: $("#pid").attr("data-pwd"),
 						jobs: [
 							{
-								jid: jobData[0],
-								jpassword: jobData[1]
+								jid: row.attr('data-jid'),
+								jpassword: row.attr('data-pwd')
 							}
 						]
 					},
@@ -73,10 +73,13 @@ UI = {
 						
 //						chunk = $.parseJSON(d.data[0]);
 //						console.log(d.data[0]);
+						UI.url_ok = d.return_url.url_ok;
+						UI.url_ko = d.return_url.url_ko;
 						dd = new Date(chunk.delivery_date);
 						$('.outsource.modal .delivery span.time').text($.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh:mm a"));
 						$('.outsource.modal .delivery span.zone').text('(GMT+1)');
 						$('.outsource.modal .total span.displayprice').text(chunk.price);
+						$('.outsource.modal .continuebtn').removeClass('disabled');
 //						UI.translated_pid = $.parseJSON(d.data).translated_pid;
 //						UI.showOutsourceData($.parseJSON(d.data).chunks);
 					}
@@ -109,8 +112,17 @@ UI = {
 		}).on('click', '.back', function(e) {
 			e.preventDefault();
 			UI.showOutsourceChoice();
-		});
+		})
 
+		$(".outsource.modal").on('click', '.continuebtn:not(.disabled)', function(e) {
+			e.preventDefault();
+			
+			$('#continueForm input[name=url-ok]').attr('value', UI.url_ok);
+			$('#continueForm input[name=url-ko]').attr('value', UI.url_ko);
+			$('#continueForm').submit();
+		}).on('click', '.continuebtn.disabled', function(e) {
+			e.preventDefault();
+		});
 		/*        
 		 $(".part1").click(function(e){
 		 e.preventDefault();
@@ -191,6 +203,9 @@ UI = {
 		}).on('click', '.modal .x-popup', function(e) {
 			e.preventDefault();
 			APP.closePopup();
+		}).on('click', '.modal.outsource .x-popup', function(e) {
+			$('.modal.outsource .displayprice').empty();
+			$('.modal.outsource .delivery .time').empty();
 		}).on('click', '.popup-split .x-popup', function(e) {
 			UI.resetSplitPopup();
 		}).on('blur', '.popup-split .jobs .input-small', function(e) {

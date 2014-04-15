@@ -1114,8 +1114,10 @@ APP = {
 	doRequest: function(req,log) {
 		logTxt = (typeof log == 'undefined')? '' : '&type=' + log;
 		version = (typeof config.build_number == 'undefined')? '' : '-v' + config.build_number;
+		builtURL = (req.url)? req.url : config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version;
 		var setup = {
-			url: config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version,
+			url: builtURL,
+//			url: config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version,
 			data: req.data,
 			type: 'POST',
 			dataType: 'json'
