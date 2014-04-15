@@ -9,7 +9,7 @@ class outsourceToTranslatedController extends ajaxController {
 
     public function __construct() {
 
-        $this->disableSessions();
+        //SESSION ENABLED
         parent::__construct();
 
         $filterArgs = array(
@@ -52,6 +52,7 @@ class outsourceToTranslatedController extends ajaxController {
         $raw_volAnalysis = file_get_contents( INIT::$HTTPHOST . INIT::$BASEURL . "api/status?id_project=" . $this->pid . "&project_pass=" . $this->ppassword );
 
         $volAnalysis = json_decode( $raw_volAnalysis, true );
+        $_jobLangs  = array();
 
 //        Log::doLog( $volAnalysis );
 
@@ -63,8 +64,13 @@ class outsourceToTranslatedController extends ajaxController {
                 CURLOPT_CONNECTTIMEOUT => 2
         );
 
-        $mh = new MultiCurlHandler();
+//        unset($_SESSION['outsource_to_translated_cache']);
+//        Log::doLog( $_SESSION );
 
+        $cache_cart = Shop_Cart::getInstance( 'outsource_to_translated_cache' );
+
+        //prepare handlers for curl to quote service
+        $mh = new MultiCurlHandler();
         foreach( $this->jobList as $job ){
 
 //            Log::doLog( $job );
@@ -86,18 +92,21 @@ class outsourceToTranslatedController extends ajaxController {
              */
             $langPairs = $volAnalysis[ 'jobs' ][ 'langpairs' ][ $job[ 'jid' ] . "-" .$job['jpassword'] ];
 
-            Log::doLog( $langPairs );
 
             $_langPairs_array = explode( "-", $langPairs );
             $source = $_langPairs_array[0] . "-" . $_langPairs_array[1];
             $target = $_langPairs_array[2] . "-" . $_langPairs_array[3];
 
+            //save langpairs of the jobs
+            $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'source' ] = $source;
+            $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'target' ] = $target;
 
             $url = "http://www.translated.net/hts/?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target&pn=MATECAT_{$job[ 'jid' ]}-{$job['jpassword']}&w=$job_payableWords";
 
-            Log::doLog($url);
-
-            $tokenHash = $mh->createResource( $url, $options, $job[ 'jid' ] . "-" .$job['jpassword'] );
+            if( !$cache_cart->itemExists( $job[ 'jid' ] . "-" . $job['jpassword'] ) ){
+                Log::doLog( "Not Found in Cache. Call url for Quote:" . $url );
+                $tokenHash = $mh->createResource( $url, $options, $job[ 'jid' ] . "-" .$job['jpassword'] );
+            }
 
         }
 
@@ -105,7 +114,7 @@ class outsourceToTranslatedController extends ajaxController {
 
         $res = $mh->getAllContents();
 
-        $client_output = array();
+        //fetch contents and store in cache if there are
         foreach( $res as $jpid => $quote ){
 
             /*
@@ -119,16 +128,37 @@ class outsourceToTranslatedController extends ajaxController {
              */
 
             $result_quote = explode( "\n", $quote );
-            $client_output[] = array( 'id' => $jpid, 'price' => $result_quote[4], 'delivery_date' => $result_quote[2] );
+
+            $itemCart                     = new Shop_Item();
+            $itemCart[ 'id' ]            = $jpid;
+            $itemCart[ 'name' ]          = "MATECAT_$jpid";
+            $itemCart[ 'price' ]         = $result_quote[ 4 ];
+            $itemCart[ 'delivery_date' ] = $result_quote[ 2 ];
+            $itemCart[ 'source' ]        = $_jobLangs[ $jpid ]['source'];
+            $itemCart[ 'target' ]        = $_jobLangs[ $jpid ]['target'];
+            $cache_cart->addItem( $itemCart );
 
         }
 
-        Log::doLog($res);
+        $shopping_cart = Shop_Cart::getInstance( 'outsource_to_translated' );
+        $shopping_cart->emptyCart();
+
+        //now get the right contents
+        foreach ( $this->jobList as $job ){
+            $shopping_cart->addItem( $cache_cart->getItem( $job[ 'jid' ] . "-" .$job['jpassword'] ) );
+        }
+
+        $client_output = $shopping_cart->getCart();
+
+//        Log::doLog( $client_output );
+//        $client_output[] = array( 'id' => $jpid, 'price' => $result_quote[4], 'delivery_date' => $result_quote[2] );
 
         $this->result[ 'code' ] = 1;
-        $this->result[ 'data' ] = $client_output;
-        $this->result[ 'return_url' ] = array("url_ok" => 'http://matecat.local/redirectSuccessPage', "url_ko" => 'http://matecat.local/redirectErrorPage');
-
+        $this->result[ 'data' ] = array_values( $client_output );
+        $this->result[ 'return_url' ] = array(
+            'url_ok' => INIT::$HTTPHOST . INIT::$BASEURL,
+            'url_ko' => INIT::$HTTPHOST . INIT::$BASEURL,
+        );
 
     }
 

@@ -18,7 +18,13 @@ class MultiCurlHandler {
     public function __construct(){
 
         $this->multi_handler = curl_multi_init();
-//        curl_multi_setopt( $this->multi_handler, CURLMOPT_MAXCONNECTS, 50 );
+
+        Utils::getPHPVersion();
+        if( PHP_MINOR_VERSION >= 5 ){
+//          curl_multi_setopt only for (PHP 5 >= 5.5.0) Default 10
+
+            curl_multi_setopt( $this->multi_handler, CURLMOPT_MAXCONNECTS, 50 );
+        }
 
     }
 
