@@ -695,6 +695,7 @@ class ProjectManager {
 	 */
 	public function applySplit( ArrayObject $projectStructure ){
 		$this->_splitJob( $projectStructure );
+        Shop_Cart::getInstance( 'outsource_to_translated_cache' )->emptyCart();
 	}
 
 	public function mergeALL( ArrayObject $projectStructure, $renewPassword = false ){
@@ -760,6 +761,8 @@ class ProjectManager {
 
 		$wCountManager = new WordCount_Counter();
 		$wCountManager->initializeJobWordCount( $first_job['id'], $first_job['password'] );
+
+        Shop_Cart::getInstance( 'outsource_to_translated_cache' )->emptyCart();
 
 	}
 

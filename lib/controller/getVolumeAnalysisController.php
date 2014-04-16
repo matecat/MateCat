@@ -350,7 +350,7 @@ class getVolumeAnalysisController extends ajaxController {
 
         } else {
 
-            Log::doLog( $this->_project_data );
+//            Log::doLog( $this->_project_data );
 
             switch ( $this->status_project ) {
                 case 'NEW':

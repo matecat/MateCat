@@ -48,8 +48,32 @@ class outsourceToTranslatedController extends ajaxController {
 
     public function doAction() {
 
+        $cache_cart = Shop_Cart::getInstance( 'outsource_to_translated_cache' );
 
-        $raw_volAnalysis = file_get_contents( INIT::$HTTPHOST . INIT::$BASEURL . "api/status?id_project=" . $this->pid . "&project_pass=" . $this->ppassword );
+        $project_url_api = INIT::$HTTPHOST . INIT::$BASEURL . "api/status?id_project=" . $this->pid . "&project_pass=" . $this->ppassword;
+
+        if( !$cache_cart->itemExists( $project_url_api ) ){
+
+            //trick/hack for shop cart
+            //Use the shop cart to add Projects info
+            //to the cache cart because of taking advantage of the cart cache invalidation on project split/merge
+            Log::doLog( "Project Not Found in Cache. Call API url for STATUS: " . $project_url_api );
+            $raw_volAnalysis = file_get_contents( $project_url_api );
+
+            $itemCart                     = new Shop_Item();
+            $itemCart[ 'id' ]             = $project_url_api;
+            $itemCart[ 'info' ]           = $raw_volAnalysis;
+
+            $cache_cart->addItem( $itemCart );
+
+        } else{
+
+            $tmp_project_cache = $cache_cart->getItem( $project_url_api );
+            $raw_volAnalysis = $tmp_project_cache[ 'info' ];
+
+        }
+
+//        Log::doLog( $raw_volAnalysis );
 
         $volAnalysis = json_decode( $raw_volAnalysis, true );
         $_jobLangs  = array();
@@ -64,17 +88,9 @@ class outsourceToTranslatedController extends ajaxController {
                 CURLOPT_CONNECTTIMEOUT => 2
         );
 
-//        unset($_SESSION['outsource_to_translated_cache']);
-//        Log::doLog( $_SESSION );
-
-        $cache_cart = Shop_Cart::getInstance( 'outsource_to_translated_cache' );
-
         //prepare handlers for curl to quote service
         $mh = new MultiCurlHandler();
         foreach( $this->jobList as $job ){
-
-//            Log::doLog( $job );
-//            Log::doLog( $volAnalysis[ 'data' ] );
 
             //trim decimals to int
             $job_payableWords =  (int)$volAnalysis[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ][ $job['jpassword'] ]['TOTAL_PAYABLE'][0];

@@ -63,6 +63,9 @@ class MultiCurlHandler {
      */
     public function multiExec() {
 
+//        Log::doLog( "Executing: " );
+//        Log::doLog( $this->curl_handlers );
+
         $still_running = null;
 
         do {
