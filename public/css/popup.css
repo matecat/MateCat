@@ -121,9 +121,9 @@ width: 180px;
 }
 
 .outsourceto h2 {
-background: url(../img/logo_translated.png) no-repeat 610px 0px;
+background: url(../img/logo_translated.png) no-repeat 0px 45px;
 background-size: 140px;
-height: 32px;
+height: 78px;
 	
 }
 
@@ -179,13 +179,13 @@ padding-bottom: 10px;
 }*/
 
 .delivery span {
-color: #5E5E5E;
-font-weight:normal;
+font-size: 24px;
+font-weight: bold;
 }
 
 .delivery {
-font-size: 22px!important;
-font-weight:bold;
+font-size: 16px!important;
+font-weight:normal;
 }
 
 /*.offer {
@@ -234,6 +234,9 @@ clear:both;
 .pricebox .outsourceto h2 {
 margin-top: 15px;
 }
+.pricebox .copytext p:first-child {
+margin-top: 0!important;
+}
 .pricebox .copytext {float:left;width:59%;padding-right:1%;}
 .pricebox .total {float: left;
 width: 35%;
@@ -241,21 +244,23 @@ padding: 1% 2%;
 border: 1px solid #ccc;
 border-radius: 4px;
 margin: 10px 0;
+margin-top:-45px;
 text-align: center;
 background: #FAFAFA;}
 .pricebox .continuebtn {clear: both;
 float: left;
 margin:10px 0 10px 30%!important;
 }
-.pricebox .tprice, .pricebox .tprice span, .pricebox .delivery, .pricebox .delivery span, .pricebox .zone, .pricebox .tprice span {display:block; float:none;}
+.pricebox .tprice, .pricebox .tprice span, .pricebox .delivery, .pricebox .delivery span, .pricebox .zone, .pricebox .zone2, .pricebox .tprice span {display:block; float:none;}
 .pricebox .tprice .tpricetitle {
 border-bottom: 1px solid #ccc;
 font-size:24px!important;
 padding-bottom: 5px;
 margin-bottom: 10px;
 }
-span.zone {
+span.zone, span.zone2 {
 font-size: 14px;
+font-weight:normal;
 }
 .pricebox .tprice .euro, .pricebox .tprice .displayprice {display:inline;}
 .pricebox .tprice {line-height:30px; margin-bottom:10px;}
