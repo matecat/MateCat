@@ -120,21 +120,18 @@ margin-bottom:-10px;
 width: 180px;
 }
 
-.outsourceto h2 {
-background: url(../img/logo_translated.png) no-repeat 0px 45px;
-background-size: 140px;
-height: 78px;
-	
-}
 
-.outsourceto .uploadbtn {
+
+.revealprices .uploadbtn {
 background: #7eaf3e;
 width: auto;
 float: left;
 margin: -10px 0 5px 40% !important;
 }
 
-.outsourceto, .onyourown {
+.revealprices img {width:140px;}
+
+ .onyourown {
 margin: 0 auto;
 overflow: hidden;
 border: 1px solid #ccc;
@@ -228,11 +225,12 @@ clear:both;
 }
 
 /* versione 3: box */
-
+.revealprices {display:none;}
 .pricebox .outsourceto, .pricebox .onyourown {padding:0; border:none; border-radius:0; margin-bottom:5px;}
 .pricebox .outsourceto {border-top:1px solid #ccc;}
 .pricebox .outsourceto h2 {
 margin-top: 15px;
+float:left;
 }
 .pricebox .copytext p:first-child {
 margin-top: 0!important;
@@ -244,7 +242,6 @@ padding: 1% 2%;
 border: 1px solid #ccc;
 border-radius: 4px;
 margin: 10px 0;
-margin-top:-45px;
 text-align: center;
 background: #FAFAFA;}
 .pricebox .continuebtn {clear: both;
@@ -266,7 +263,7 @@ font-weight:normal;
 .pricebox .tprice {line-height:30px; margin-bottom:10px;}
 .pricebox delivery {line-height:30px;}
 
-
+.uploadbtn.showprices  {width:auto; margin-top:15px!important;}
 table.chunks {
 overflow: hidden;
 border: 2px solid #ccc;

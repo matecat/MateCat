@@ -400,8 +400,10 @@
                                 <a class="uploadbtn in-popup" target="_blank">Open</a>
                         </div>
                        <div class="outsourceto">
-                                    <h2>Option #2 - Outsource to a translation company</h2>
+                                    <h2>Option #2 - Outsource to a translation company</h2>  <a class="uploadbtn showprices">Show prices</a>
+                           <div class="revealprices">
                                     <div class="copytext">
+                                    <img src="/public/img/logo_translated.png" />
                                         <p>Translated, since 1999, provides professional translation services with a team of more than 80,000 translators and is trusted by more than 40,000 customers. </p>
                                         <p>You can pay within 5 days of translation delivery, by credit card, bank transfer or PayPal.</p>
                                         <p><a href="#" target="_blank"><small>Why outsourcing is good for you and Matecat.</small></a></p>
@@ -419,8 +421,9 @@
 												<a href="#" class="continuebtn disabled">Order</a>
 											</form>
                                  			</div>
-                    				</div>
-						</div>
+                    				</div><!-- end total-->
+                               </div><!-- end reveal prices-->
+						</div><!--end outsourceto-->
 	</div>
 	</div>
  </div>
@@ -552,6 +555,12 @@
 <script type="text/javascript">
 $( ".outsource" ).click(function() {
   $( ".outsourcemodal" ).show();
+});
+
+$( ".showprices" ).click(function() {
+	  $( this ).hide();
+
+  $( ".revealprices" ).show();
 });
 </script>
 
