@@ -7,7 +7,7 @@
  * Time: 15.17
  *
  */
-class Shop_ItemJob extends Shop_AbstractItem  {
+class Shop_ItemHTSQuoteJob extends Shop_AbstractItem {
 
     protected $__storage = array(
             'id'            => null,
@@ -18,7 +18,7 @@ class Shop_ItemJob extends Shop_AbstractItem  {
             'target'        => null,
             'price'         => 0,
             'words'         => 0,
-            'info'          => null,
+            'show_info'     => null,
             'delivery_date' => null
     );
 

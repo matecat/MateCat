@@ -37,14 +37,28 @@ UI = {
 		$(".outsourceto .uploadbtn").click(function(e) {
 			e.preventDefault();
 //			$('.outsourcemodal .x-popup').trigger('click');
-			UI.showPrices();
+//			UI.showPrices();
 		});
 
-		$(".uploadbtn:not(.in-popup)").click(function(e) {
+        $( ".outsource" ).click(function() {
+            $( ".outsourcemodal" ).show();
+        });
+
+        $( ".showprices" ).click(function() {
+            $( this ).hide();
+            $( ".revealprices" ).show();
+        });
+
+        //Added .translate class in html button because of double call to
+        //API when displaying prices on showprices button ( class .in-popup was removed and .uploadbtn was too much widely used... )
+		$(".translate").click(function(e) {
 			if(config.enable_outsource) {
 				e.preventDefault();
 				chunkId = $(this).parents('.totaltable').find('.languages .splitnum').text();
 				row = $(this).parents('.tablestats');
+
+                var display_boxPrice = false;
+
 				APP.doRequest({
 					data: {
 						action: 'outsourceToTranslated',
@@ -76,12 +90,20 @@ UI = {
 						UI.url_ok = d.return_url.url_ok;
 						UI.url_ko = d.return_url.url_ko;
 						dd = new Date(chunk.delivery_date);
-						$('.outsource.modal .delivery span.time').text($.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh:mm a"));
-						$('.outsource.modal .delivery span.zone').text('(GMT+1)');
+						$('.outsource.modal .delivery span.time').text( $.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh:mm a") );
+						$('.outsource.modal .delivery span.zone').text( dd.getTimezoneOffset() );
 						$('.outsource.modal .total span.displayprice').text(chunk.price);
 						$('.outsource.modal .continuebtn').removeClass('disabled');
 //						UI.translated_pid = $.parseJSON(d.data).translated_pid;
 //						UI.showOutsourceData($.parseJSON(d.data).chunks);
+
+                        console.log( chunk );
+
+                        //this tell to the ui if price box sould be displayed immediately
+                        if( chunk.show_info == '1' ){
+                            $( ".showprices" ).click();
+                        }
+
 					}
 				});
 				$('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
@@ -117,8 +139,8 @@ UI = {
 		$(".outsource.modal").on('click', '.continuebtn:not(.disabled)', function(e) {
 			e.preventDefault();
 			
-			$('#continueForm input[name=url-ok]').attr('value', UI.url_ok);
-			$('#continueForm input[name=url-ko]').attr('value', UI.url_ko);
+			$('#continueForm input[name=url_ok]').attr('value', UI.url_ok);
+			$('#continueForm input[name=url_ko]').attr('value', UI.url_ko);
 			$('#continueForm').submit();
 		}).on('click', '.continuebtn.disabled', function(e) {
 			e.preventDefault();
@@ -367,20 +389,29 @@ UI = {
 			})
 			$('.outsourcemodal .chunks').append(rows);
 		}
-		APP.doRequest({
-			data: {
-				action: 'outsourceToTranslated',
-				pid: $('#pid').attr('data-pid'),
-				password: $("#pid").attr("data-pwd")
-			},
-			error: function() {
-//						UI.failedConnection(0, 'outsourceToTranslated');
-			},
-			success: function(d) {
-				UI.translated_pid = $.parseJSON(d.data).translated_pid;
-				UI.showOutsourceData($.parseJSON(d.data).chunks);
-			}
-		});
+
+
+        //Commented because no job list provided, not valid call to API, moreover success response now is not used!!!
+        // @see ' $(".translate").click( ' in line 43 for the right use,
+        //this should do the same things.
+        //Usable for future purpose on "select all jobs 4 quote"
+
+//		APP.doRequest({
+//			data: {
+//				action: 'outsourceToTranslated',
+//				pid: $('#pid').attr('data-pid'),
+//				ppassword: $("#pid").attr("data-pwd")
+//			},
+//			error: function() {
+////						UI.failedConnection(0, 'outsourceToTranslated');
+//			},
+//			success: function(d) {
+//				UI.translated_pid = $.parseJSON(d.data).translated_pid;
+//				UI.showOutsourceData($.parseJSON(d.data).chunks);
+//			}
+//		});
+
+
 	},
 	getFarthestDate: function() {
 		farthest = new Date(0);

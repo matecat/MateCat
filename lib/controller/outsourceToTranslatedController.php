@@ -40,13 +40,13 @@ class outsourceToTranslatedController extends ajaxController {
             $this->result[ 'errors' ][] = array( "code" => -3, "message" => "No job list Provided" );
         }
 
-        if( !empty( $this->result[ 'errors' ] ) ){
-            return -1; // ERROR
-        }
-
     }
 
     public function doAction() {
+
+        if( !empty( $this->result[ 'errors' ] ) ){
+            return -1; // ERROR
+        }
 
         $cache_cart = Shop_Cart::getInstance( 'outsource_to_translated_cache' );
 
@@ -60,9 +60,9 @@ class outsourceToTranslatedController extends ajaxController {
             Log::doLog( "Project Not Found in Cache. Call API url for STATUS: " . $project_url_api );
             $raw_volAnalysis = file_get_contents( $project_url_api );
 
-            $itemCart                     = new Shop_ItemJob();
+            $itemCart                     = new Shop_ItemHTSQuoteJob();
             $itemCart[ 'id' ]             = $project_url_api;
-            $itemCart[ 'info' ]           = $raw_volAnalysis;
+            $itemCart[ 'show_info' ]      = $raw_volAnalysis;
 
             $cache_cart->addItem( $itemCart );
 
@@ -117,7 +117,7 @@ class outsourceToTranslatedController extends ajaxController {
             $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'source' ] = $source;
             $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'target' ] = $target;
 
-            $url = "http://www.translated.net/hts/?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target&pn=MATECAT_{$job[ 'jid' ]}-{$job['jpassword']}&w=$job_payableWords";
+            $url = "http://www.translated.net/hts/?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target&pn=MATECAT_{$job[ 'jid' ]}-{$job['jpassword']}&w=$job_payableWords&df=matecat";
 
             if( !$cache_cart->itemExists( $job[ 'jid' ] . "-" . $job['jpassword'] ) ){
                 Log::doLog( "Not Found in Cache. Call url for Quote:" . $url );
@@ -141,11 +141,12 @@ class outsourceToTranslatedController extends ajaxController {
              *   488
              *   46.36
              *   11140320
+             *   1
              */
 
-            $result_quote = explode( "\n", $quote );
 
-            $itemCart                     = new Shop_ItemJob();
+            $result_quote = explode( "\n", $quote );
+            $itemCart                     = new Shop_ItemHTSQuoteJob();
             $itemCart[ 'id' ]            = $jpid;
             $itemCart[ 'name' ]          = "MATECAT_$jpid";
             $itemCart[ 'delivery_date' ] = $result_quote[ 2 ];
@@ -154,6 +155,7 @@ class outsourceToTranslatedController extends ajaxController {
             $itemCart[ 'hts_pid' ]       = $result_quote[ 5 ];
             $itemCart[ 'source' ]        = $_jobLangs[ $jpid ]['source'];
             $itemCart[ 'target' ]        = $_jobLangs[ $jpid ]['target'];
+            $itemCart[ 'show_info' ]     = $result_quote[ 6 ];
             $cache_cart->addItem( $itemCart );
 
         }
@@ -163,7 +165,7 @@ class outsourceToTranslatedController extends ajaxController {
 
         //now get the right contents
         foreach ( $this->jobList as $job ){
-            $shopping_cart->addItem( $cache_cart->getItem( $job[ 'jid' ] . "-" .$job['jpassword'] ) );
+            $shopping_cart->addItem( $cache_cart->getItem( $job[ 'jid' ] . "-" . $job['jpassword'] ) );
         }
 
         $client_output = $shopping_cart->getCart();
@@ -181,5 +183,3 @@ class outsourceToTranslatedController extends ajaxController {
     }
 
 }
-
-?>

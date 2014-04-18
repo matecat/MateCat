@@ -9,14 +9,14 @@
  */
 
 
-require 'ItemJob.php';
+require 'ItemHTSQuoteJob.php';
 
 class Shop_Cart {
 
     protected static $_instance = array();
 
     /**
-     * @var Shop_ItemJob[]
+     * @var Shop_ItemHTSQuoteJob[]
      */
     protected $cart;
 
@@ -87,7 +87,7 @@ class Shop_Cart {
 
     public function getItem( $item_id ){
         if( array_key_exists( $item_id, $this->cart ) ){
-            return Shop_ItemJob::getInflate( $this->cart[ $item_id ] );
+            return Shop_ItemHTSQuoteJob::getInflate( $this->cart[ $item_id ] );
         }
     }
 
