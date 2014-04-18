@@ -9,14 +9,14 @@
  */
 
 
-require 'Item.php';
+require 'ItemJob.php';
 
 class Shop_Cart {
 
     protected static $_instance = array();
 
     /**
-     * @var Shop_Item[]
+     * @var Shop_ItemJob[]
      */
     protected $cart;
 
@@ -46,7 +46,19 @@ class Shop_Cart {
         $this->cart = & $_SESSION[ $this->cartName ];
     }
 
-    public function addItem( Shop_Item $item ) {
+    public function addItem( Shop_AbstractItem $item ) {
+
+        if( !isset( $item['id'] ) || $item['id'] == null ){
+            throw new LogicException( "Field 'id' in object " . get_class( $item ) . " is mandatory." );
+        }
+
+        if( !isset( $item['quantity'] ) || $item['quantity'] == null ){
+            throw new LogicException( "Field 'quantity' in object " . get_class( $item ) . " is mandatory." );
+        }
+
+        if( !isset( $item['price'] ) || $item['price'] == null ){
+            throw new LogicException( "Field 'price' in object " . get_class( $item ) . " is mandatory." );
+        }
 
         $item_id   = $item['id'];
 
@@ -75,7 +87,7 @@ class Shop_Cart {
 
     public function getItem( $item_id ){
         if( array_key_exists( $item_id, $this->cart ) ){
-            return Shop_Item::getInflate( $this->cart[ $item_id ] );
+            return Shop_ItemJob::getInflate( $this->cart[ $item_id ] );
         }
     }
 

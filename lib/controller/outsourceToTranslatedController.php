@@ -60,7 +60,7 @@ class outsourceToTranslatedController extends ajaxController {
             Log::doLog( "Project Not Found in Cache. Call API url for STATUS: " . $project_url_api );
             $raw_volAnalysis = file_get_contents( $project_url_api );
 
-            $itemCart                     = new Shop_Item();
+            $itemCart                     = new Shop_ItemJob();
             $itemCart[ 'id' ]             = $project_url_api;
             $itemCart[ 'info' ]           = $raw_volAnalysis;
 
@@ -145,11 +145,13 @@ class outsourceToTranslatedController extends ajaxController {
 
             $result_quote = explode( "\n", $quote );
 
-            $itemCart                     = new Shop_Item();
+            $itemCart                     = new Shop_ItemJob();
             $itemCart[ 'id' ]            = $jpid;
             $itemCart[ 'name' ]          = "MATECAT_$jpid";
-            $itemCart[ 'price' ]         = $result_quote[ 4 ];
             $itemCart[ 'delivery_date' ] = $result_quote[ 2 ];
+            $itemCart[ 'words' ]         = $result_quote[ 3 ];
+            $itemCart[ 'price' ]         = $result_quote[ 4 ];
+            $itemCart[ 'hts_pid' ]       = $result_quote[ 5 ];
             $itemCart[ 'source' ]        = $_jobLangs[ $jpid ]['source'];
             $itemCart[ 'target' ]        = $_jobLangs[ $jpid ]['target'];
             $cache_cart->addItem( $itemCart );
@@ -172,8 +174,8 @@ class outsourceToTranslatedController extends ajaxController {
         $this->result[ 'code' ] = 1;
         $this->result[ 'data' ] = array_values( $client_output );
         $this->result[ 'return_url' ] = array(
-            'url_ok' => INIT::$HTTPHOST . INIT::$BASEURL . "/redirectSuccessPage/",
-            'url_ko' => INIT::$HTTPHOST . INIT::$BASEURL . "/redirectErrorPage/",
+            'url_ok' => INIT::$HTTPHOST . INIT::$BASEURL . "redirectSuccessPage/", // see .htaccess
+            'url_ko' => INIT::$HTTPHOST . INIT::$BASEURL . "redirectErrorPage/",
         );
 
     }

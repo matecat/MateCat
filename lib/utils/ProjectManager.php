@@ -1007,8 +1007,8 @@ class ProjectManager {
 				continue;
 			}
 
-			//id_segment, id_job, status, translation, translation_date, tm_analysis_status, locked
-			$this->projectStructure['query_translations']->append( "( '{$struct[0]}', $jid, '{$struct[2]}', 'TRANSLATED', '{$struct[1]}', NOW(), 'DONE', 1 )" );
+			//id_segment, id_job, segment_hash, status, translation, translation_date, tm_analysis_status, locked
+			$this->projectStructure['query_translations']->append( "( '{$struct[0]}', $jid, '{$struct[3]}', 'TRANSLATED', '{$struct[2]}', NOW(), 'DONE', 1 )" );
 
 		}
 

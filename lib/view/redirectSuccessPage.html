@@ -5,21 +5,7 @@
 		<script src="${basepath}public/js/lib/jquery.js"></script>
 		<script>
 			var config = {
-				prova: '${prova}',
-				data: [
-					{
-						id: "12345",
-						source: "IT",
-						target: "EN",
-						words: 145
-					},
-					{
-						id: "12346",
-						source: "IT",
-						target: "FR",
-						words: 38
-					},
-				]
+				data: ${structure php: data}
 			}
 			$(document).ready(function() {
 				var data = JSON.stringify(config.data);
@@ -30,7 +16,8 @@
 		</script>
 	</head>
 	<body>
-		<form style="visibility: hidden" id="redirectForm" action="https://www.translated.home/mcl/review.php" method="POST">
+		 <form style="visibility: hidden" id="redirectForm" action="https://www.translated.home/mcl/review.php" method="POST">
+        <!--<form style="visibility: hidden" id="redirectForm" action="http://matecat.local/phpinfo.php" method="POST">-->
 			<input type="hidden" id="sessionData" name="data" value="" />
 		</form>
 	</body>
