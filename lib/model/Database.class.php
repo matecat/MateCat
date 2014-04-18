@@ -84,6 +84,18 @@ class Database {
 	public function get_error_number() {
 		return $this->errno;
 	}
+#-############################################
+# desc: switches db
+# Param: $name of the db to connect to
+
+	public function useDb($name){
+
+		if(@mysql_select_db($name, $this->link_id)) {//no database
+			$this->database=$name;
+		}
+
+
+	}
 
 #-#############################################
 # desc: connect and select database using vars above
