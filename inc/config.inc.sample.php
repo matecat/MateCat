@@ -48,7 +48,7 @@ class INIT {
 	public static $MAX_UPLOAD_FILE_SIZE;
 	public static $MAX_NUM_FILES;
     public static $REFERENCE_REPOSITORY;
-    public static $ENABLE_OUTSOURCE = false;
+    public static $ENABLE_OUTSOURCE = true;
 
 	private function initOK() {
 
