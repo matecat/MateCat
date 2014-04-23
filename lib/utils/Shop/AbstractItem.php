@@ -7,40 +7,43 @@
  * 
  */
 
-abstract class Shop_AbstractItem extends ArrayObject {
+abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterface {
 
     /**
-     * These fields are mandatory for Class Shop_Cart
+     * These fields are mandatory to use with Class Shop_Cart
+     *
+     * $__storage = array(
+     *      '_id_type_class' => null,
+     *      'id'             => null,
+     *      'quantity'       => null,
+     *      'price'          => null,
+     * );
      *
      * @var array
      */
     protected $__storage = array(
-        'id'       => null,
-        'quantity' => null,
-        'price'    => null,
+            '_id_type_class' => null,
+            'id'             => null,
+            'quantity'       => null,
+            'price'          => null,
     );
-
-    /**
-     *
-     * Because of compatibility with php 5.2 we can't use late static bindings ( introduced in php 5.3 )
-     *
-     * So we can't use 'static' reserved word, we have to use 'self'
-     *
-     * Workaround: declare this method as abstract and implement every time equals in the children
-     *
-     * @see Shop_ItemJob::getInflate
-     *
-     * @param $storage
-     *
-     * @return mixed
-     */
-    abstract public static function getInflate( $storage );
 
     public function __construct(){
         parent::__construct();
+
+        $value = get_class( $this );
+
+        //prepare the structure to accept  the value
+        //this key is mandatory for Cart Class because of $calledClass::getInflate( $storage );
+        $this->__storage[ '_id_type_class' ] = $value;
+
+        //set the value
+        $this->offsetSet( '_id_type_class', $value );
+
         foreach( $this->__storage as $key => $value ){
             $this->offsetSet( $key, $value );
         }
+
     }
 
     public function getStorage(){

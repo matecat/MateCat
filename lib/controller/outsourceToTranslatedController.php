@@ -40,6 +40,8 @@ class outsourceToTranslatedController extends ajaxController {
             $this->result[ 'errors' ][] = array( "code" => -3, "message" => "No job list Provided" );
         }
 
+//        Log::doLog(  $this->jobList  );
+
     }
 
     public function doAction() {
@@ -69,7 +71,7 @@ class outsourceToTranslatedController extends ajaxController {
         } else{
 
             $tmp_project_cache = $cache_cart->getItem( $project_url_api );
-            $raw_volAnalysis = $tmp_project_cache[ 'info' ];
+            $raw_volAnalysis = $tmp_project_cache[ 'show_info' ];
 
         }
 
@@ -120,7 +122,7 @@ class outsourceToTranslatedController extends ajaxController {
             $url = "http://www.translated.net/hts/?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target&pn=MATECAT_{$job[ 'jid' ]}-{$job['jpassword']}&w=$job_payableWords&df=matecat";
 
             if( !$cache_cart->itemExists( $job[ 'jid' ] . "-" . $job['jpassword'] ) ){
-                Log::doLog( "Not Found in Cache. Call url for Quote:" . $url );
+                Log::doLog( "Not Found in Cache. Call url for Quote:  " . $url );
                 $tokenHash = $mh->createResource( $url, $options, $job[ 'jid' ] . "-" .$job['jpassword'] );
             }
 
@@ -144,6 +146,7 @@ class outsourceToTranslatedController extends ajaxController {
              *   1
              */
 
+//            Log::doLog($quote);
 
             $result_quote = explode( "\n", $quote );
             $itemCart                     = new Shop_ItemHTSQuoteJob();
