@@ -92,7 +92,8 @@ class Shop_Cart {
 
             //for compatibility with php 5.2 ( lacks of late static bindings -> new static() in the abstract class )
             //we can't use Shop_AbstractItem::getInflate to get the right child object
-            return $classType::getInflate( $this->cart[ $item_id ] );
+            //return $classType::getInflate( $this->cart[ $item_id ] ); //not valid in php 5.2.x
+            return call_user_func_array( $classType . '::getInflate', array( $this->cart[ $item_id ] ) );
 
         }
     }
