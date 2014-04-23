@@ -15,30 +15,20 @@ abstract class Shop_AbstractItem extends ArrayObject {
      * @var array
      */
     protected $__storage = array(
-        'id'       => null,
-        'quantity' => null,
-        'price'    => null,
+            '_id_type_class' => null,
+            'id'             => null,
+            'quantity'       => null,
+            'price'          => null,
     );
-
-    /**
-     *
-     * Because of compatibility with php 5.2 we can't use late static bindings ( introduced in php 5.3 )
-     *
-     * So we can't use 'static' reserved word, we have to use 'self'
-     *
-     * Workaround: declare this method as abstract and implement every time equals in the children
-     *
-     * @see Shop_ItemJob::getInflate
-     *
-     * @param $storage
-     *
-     * @return mixed
-     */
-    abstract public static function getInflate( $storage );
 
     public function __construct(){
         parent::__construct();
         foreach( $this->__storage as $key => $value ){
+
+            if( $key == '_id_type_class' ) {
+                $value = get_class( $this );
+            }
+
             $this->offsetSet( $key, $value );
         }
     }

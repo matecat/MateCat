@@ -10,16 +10,17 @@
 class Shop_ItemHTSQuoteJob extends Shop_AbstractItem {
 
     protected $__storage = array(
-            'id'            => null,
-            'quantity'      => 1,
-            'name'          => null,
-            'hts_pid'       => null,
-            'source'        => null,
-            'target'        => null,
-            'price'         => 0,
-            'words'         => 0,
-            'show_info'     => null,
-            'delivery_date' => null
+            '_id_type_class' => null,
+            'id'             => null,
+            'quantity'       => 1,
+            'name'           => null,
+            'hts_pid'        => null,
+            'source'         => null,
+            'target'         => null,
+            'price'          => 0,
+            'words'          => 0,
+            'show_info'      => null,
+            'delivery_date'  => null
     );
 
     /**
@@ -44,4 +45,4 @@ class Shop_ItemHTSQuoteJob extends Shop_AbstractItem {
         return $obj;
     }
 
-} 
+}

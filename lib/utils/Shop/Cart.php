@@ -16,7 +16,7 @@ class Shop_Cart {
     protected static $_instance = array();
 
     /**
-     * @var Shop_ItemHTSQuoteJob[]
+     * @var Shop_AbstractItem[]
      */
     protected $cart;
 
@@ -87,7 +87,13 @@ class Shop_Cart {
 
     public function getItem( $item_id ){
         if( array_key_exists( $item_id, $this->cart ) ){
-            return Shop_ItemHTSQuoteJob::getInflate( $this->cart[ $item_id ] );
+
+            $classType = $this->cart[ $item_id ][ '_id_type_class' ];
+
+            //for compatibility with php 5.2 ( lacks of late static bindings -> new static() in the abstract class )
+            //we can't use Shop_AbstractItem::getInflate to get the right child object
+            return $classType::getInflate( $this->cart[ $item_id ] );
+
         }
     }
 

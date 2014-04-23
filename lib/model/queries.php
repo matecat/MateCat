@@ -687,7 +687,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 	$query = "SELECT j.id AS jid, j.id_project AS pid,j.source,j.target, j.last_opened_segment, j.id_translator AS tid,
 		p.id_customer AS cid, j.id_translator AS tid,
 		p.name AS pname, p.create_date , fj.id_file,
-		f.filename, f.mime_type, s.id AS sid, s.segment, s.raw_word_count, s.internal_id,
+		f.filename, f.mime_type, s.id AS sid, s.segment, s.segment_hash, s.raw_word_count, s.internal_id,
 		IF (st.status='NEW',NULL,st.translation) AS translation,
 		st.status, IF(st.time_to_edit IS NULL,0,st.time_to_edit) AS time_to_edit,
 		s.xliff_ext_prec_tags, s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
