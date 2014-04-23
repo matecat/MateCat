@@ -235,7 +235,7 @@ float:left;
 .pricebox .copytext p:first-child {
 margin-top: 0!important;
 }
-.pricebox .copytext {float:left;width:59%;padding-right:1%;}
+.pricebox .copytext {float:left;width:58%;padding-right:2%;}
 .pricebox .total {float: left;
 width: 35%;
 padding: 1% 2%;
@@ -262,7 +262,11 @@ font-weight:normal;
 .pricebox .tprice .euro, .pricebox .tprice .displayprice {display:inline;}
 .pricebox .tprice {line-height:30px; margin-bottom:10px;}
 .pricebox delivery {line-height:30px;}
-
+.pricebox .paybox {
+border-radius: 4px;
+background: url(../img/card.png) no-repeat 250px 37px;
+background-size: 170px;
+}
 .uploadbtn.showprices  {width:auto; margin-top:15px!important;}
 table.chunks {
 overflow: hidden;
