@@ -10,7 +10,6 @@
 class Shop_ItemHTSQuoteJob extends Shop_AbstractItem {
 
     protected $__storage = array(
-            '_id_type_class' => null,
             'id'             => null,
             'quantity'       => 1,
             'name'           => null,

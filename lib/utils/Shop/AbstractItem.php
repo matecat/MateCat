@@ -7,10 +7,17 @@
  * 
  */
 
-abstract class Shop_AbstractItem extends ArrayObject {
+abstract class Shop_AbstractItem extends ArrayObject implements Shop_ItemInterface {
 
     /**
-     * These fields are mandatory for Class Shop_Cart
+     * These fields are mandatory to use with Class Shop_Cart
+     *
+     * $__storage = array(
+     *      '_id_type_class' => null,
+     *      'id'             => null,
+     *      'quantity'       => null,
+     *      'price'          => null,
+     * );
      *
      * @var array
      */
@@ -23,14 +30,20 @@ abstract class Shop_AbstractItem extends ArrayObject {
 
     public function __construct(){
         parent::__construct();
+
+        $value = get_class( $this );
+
+        //prepare the structure to accept  the value
+        //this key is mandatory for Cart Class because of $calledClass::getInflate( $storage );
+        $this->__storage[ '_id_type_class' ] = $value;
+
+        //set the value
+        $this->offsetSet( '_id_type_class', $value );
+
         foreach( $this->__storage as $key => $value ){
-
-            if( $key == '_id_type_class' ) {
-                $value = get_class( $this );
-            }
-
             $this->offsetSet( $key, $value );
         }
+
     }
 
     public function getStorage(){
