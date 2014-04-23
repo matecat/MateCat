@@ -3346,6 +3346,12 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 {
 	display: block;
 }
+
+.source .glossary-item
+{
+	border-bottom: 1px dotted #c0c;
+}
+
 /*.popup-settings #settings-shortcuts .list dt
 {
 	float: left;
