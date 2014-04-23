@@ -91,8 +91,13 @@ UI = {
 						UI.url_ko = d.return_url.url_ko;
 						dd = new Date(chunk.delivery_date);
 						$('.outsource.modal .delivery span.time').text( $.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh:mm a") );
-						$('.outsource.modal .delivery span.zone').text( dd.getTimezoneOffset() );
-						$('.outsource.modal .total span.displayprice').text(chunk.price);
+
+                        var timeOffset = ( -dd.getTimezoneOffset() / 60 );
+                        var timeZone   = Intl.DateTimeFormat().resolved.timeZone.replace('San_Marino', 'Rome');
+                        var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' ' + timeZone + ' )';
+
+                        $('.outsource.modal .delivery span.zone2').text( extendedTimeZone );
+						$('.outsource.modal .total span.displayprice').text( new Intl.NumberFormat('en').format( chunk.price ) );
 						$('.outsource.modal .continuebtn').removeClass('disabled');
 //						UI.translated_pid = $.parseJSON(d.data).translated_pid;
 //						UI.showOutsourceData($.parseJSON(d.data).chunks);
@@ -419,7 +424,12 @@ UI = {
 			dd = new Date($(this).attr('data-delivery'));
 			if(dd.getTime() > farthest.getTime()) farthest = dd;
 		})
-		return $.format.date(farthest, "D MMMM") + ' at ' + $.format.date(farthest, "hh:mm a") + ' (GMT+1)';
+
+        var timeOffset = ( -dd.getTimezoneOffset() / 60 );
+        var timeZone   = Intl.DateTimeFormat().resolved.timeZone.replace('San_Marino', 'Rome');
+        var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' ' + timeZone + ' )';
+
+		return $.format.date(farthest, "D MMMM") + ' at ' + $.format.date(farthest, "hh:mm a") + ' ' + extendedTimeZone;
 	},
 
 	checkStatus: function(status) {

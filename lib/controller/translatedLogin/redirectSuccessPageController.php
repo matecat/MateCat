@@ -24,7 +24,7 @@ class translatedLogin_redirectSuccessPageController extends viewController {
         }
 
         $this->template->data = json_encode( $item_list );
-        $this->template->redirect_url = 'https://www.translated.home/mcl/review.php';
+        $this->template->redirect_url = 'http://openid.translated.home/review.php';
 
     }
 
