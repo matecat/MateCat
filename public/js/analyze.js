@@ -8,6 +8,8 @@ UI = {
 		this.noProgressTail = 0;
 		this.lastProgressSegments = 0;
 
+        this.quoteResponse = [];
+
 		this.previousQueueSize = 0;
 
 		APP.fitText($('#pid'), $('#pname'), 50);
@@ -62,7 +64,7 @@ UI = {
 
 				APP.doRequest({
 					data: {
-						action: 'outsourceToTranslated',
+						action: 'outsourceTo',
 						pid: $('#pid').attr('data-pid'),
 						ppassword: $("#pid").attr("data-pwd"),
 						jobs: [
@@ -77,7 +79,11 @@ UI = {
 		//						UI.failedConnection(0, 'outsourceToTranslated');
 					},
 					success: function(d) {
-						
+
+                        //this === UI
+                        UI.quoteResponse = d.data;
+//                        console.log( d.data);
+
 						chunks = d.data;
 						chunkId = this;
 						ind = 0;
@@ -130,7 +136,7 @@ UI = {
 //				$('.outsourcemodal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
 //				$('.outsourcemodal .uploadbtn').attr('href', $(this).attr('href'));
 //				$('.outsourcemodal').show();
-				
+
 				return false;
 			}
 		});
@@ -158,6 +164,7 @@ UI = {
 			
 			$('#continueForm input[name=url_ok]').attr('value', UI.url_ok);
 			$('#continueForm input[name=url_ko]').attr('value', UI.url_ko);
+			$('#continueForm input[name=quoteData]').attr('value', JSON.stringify( UI.quoteResponse ) );
 			$('#continueForm').submit();
 		}).on('click', '.continuebtn.disabled', function(e) {
 			e.preventDefault();

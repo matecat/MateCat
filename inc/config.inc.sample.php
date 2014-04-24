@@ -48,7 +48,24 @@ class INIT {
 	public static $MAX_UPLOAD_FILE_SIZE;
 	public static $MAX_NUM_FILES;
     public static $REFERENCE_REPOSITORY;
+
+
+
+
+
+    /**
+     * ENABLE_OUTSOURCE set as true will show the option to outsource to an external translation provider (translated.net by default)
+     * You can set it to false, but We are happy if you keep this on.
+     * For each translation outsourced to Translated.net (the main Matecat developer),
+     * Matecat gets more development budget and bugs fixes and new features get implemented faster.
+     * In short: please turn it off only if strictly necessary :)
+     * @var bool
+     */
     public static $ENABLE_OUTSOURCE = true;
+
+
+
+
 
 	private function initOK() {
 

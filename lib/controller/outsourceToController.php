@@ -1,7 +1,7 @@
 <?php
 include_once INIT::$MODEL_ROOT . "/queries.php";
 
-class outsourceToTranslatedController extends ajaxController {
+class outsourceToController extends ajaxController {
 	
 	private $pid;
 	private $ppassword;
@@ -49,9 +49,10 @@ class outsourceToTranslatedController extends ajaxController {
         if( !empty( $this->result[ 'errors' ] ) ){
             return -1; // ERROR
         }
-//unset( $_SESSION['outsource_to_translated_cache']);
+
         $cache_cart = Shop_Cart::getInstance( 'outsource_to_translated_cache' );
 
+        //call matecat API for Project status and information
         $project_url_api = INIT::$HTTPHOST . INIT::$BASEURL . "api/status?id_project=" . $this->pid . "&project_pass=" . $this->ppassword;
 
         if( !$cache_cart->itemExists( $project_url_api ) ){
@@ -155,11 +156,10 @@ class outsourceToTranslatedController extends ajaxController {
             $itemCart[ 'delivery_date' ] = $result_quote[ 2 ];
             $itemCart[ 'words' ]         = $result_quote[ 3 ];
             $itemCart[ 'price' ]         = $result_quote[ 4 ];
-            $itemCart[ 'hts_pid' ]       = $result_quote[ 5 ];
+            $itemCart[ 'quote_pid' ]     = $result_quote[ 5 ];
             $itemCart[ 'source' ]        = $_jobLangs[ $jpid ]['source'];
             $itemCart[ 'target' ]        = $_jobLangs[ $jpid ]['target'];
-            $itemCart[ 'show_info' ]     = "1";
-//            $itemCart[ 'show_info' ]     = $result_quote[ 6 ];
+            $itemCart[ 'show_info' ]     = $result_quote[ 6 ];
             $cache_cart->addItem( $itemCart );
 
         }

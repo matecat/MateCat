@@ -13,7 +13,7 @@ class Shop_ItemHTSQuoteJob extends Shop_AbstractItem {
             'id'             => null,
             'quantity'       => 1,
             'name'           => null,
-            'hts_pid'        => null,
+            'quote_pid'      => null,
             'source'         => null,
             'target'         => null,
             'price'          => 0,
