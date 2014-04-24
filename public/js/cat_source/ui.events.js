@@ -925,6 +925,15 @@ $.extend(UI, {
 			$('.editor .sub-editor').hide();
 			$('.editor .sub-editor.glossary').show();
 			$('.gl-search .search-source').focus();
+		}).on('click', '.tab-switcher-al', function(e) {
+			e.preventDefault();
+			$('.editor .submenu .active').removeClass('active');
+			$(this).addClass('active');
+			$('.editor .sub-editor').hide();
+			$('.editor .sub-editor.alternatives').show();
+		}).on('click', '.alternatives a', function(e) {
+			e.preventDefault();
+			$('.editor .tab-switcher-al').click();
 		}).on('click', '.sub-editor.glossary .overflow a.trash', function(e) {
 			e.preventDefault();
 			ul = $(this).parents('ul.graysmall').first();
