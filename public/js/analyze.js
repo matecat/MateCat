@@ -97,7 +97,7 @@ UI = {
                         var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' ' + timeZone + ' )';
 
                         $('.outsource.modal .delivery span.zone2').text( extendedTimeZone );
-						$('.outsource.modal .total span.displayprice').text( new Intl.NumberFormat('en').format( chunk.price ) );
+						$('.outsource.modal .total span.displayprice').text( Intl.NumberFormat('en').format( chunk.price ) );
 						$('.outsource.modal .continuebtn').removeClass('disabled');
 //						UI.translated_pid = $.parseJSON(d.data).translated_pid;
 //						UI.showOutsourceData($.parseJSON(d.data).chunks);
