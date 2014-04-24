@@ -10,6 +10,8 @@ UI = {
 
 		this.previousQueueSize = 0;
 
+        this.isFirefox = (typeof navigator.mozApps != 'undefined');
+
 		APP.fitText($('#pid'), $('#pname'), 50);
 		$(".subfile .filename").each(function() {
 			APP.fitText($(this), $(this), 50);
@@ -93,11 +95,19 @@ UI = {
 						$('.outsource.modal .delivery span.time').text( $.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh:mm a") );
 
                         var timeOffset = ( -dd.getTimezoneOffset() / 60 );
-                        var timeZone   = Intl.DateTimeFormat().resolved.timeZone.replace('San_Marino', 'Rome');
-                        var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' ' + timeZone + ' )';
+
+                        //check for international API support on ECMAScript
+                        if ( window.Intl && typeof window.Intl === "object" ){
+                            //Assume it's supported, lets localize
+                            var timeZone   = Intl.DateTimeFormat().resolved.timeZone.replace('San_Marino', 'Rome');
+                            var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' ' + timeZone + ' )';
+                            $('.outsource.modal .total span.displayprice').text( Intl.NumberFormat('en').format( chunk.price ) );
+                        } else {
+                            var extendedTimeZone = '( ' + dd.toString().replace(/^.*GMT.*\(/, "").replace(/\)$/, "") + ' - GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';
+                            $('.outsource.modal .total span.displayprice').text( parseFloat( chunk.price ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
+                        }
 
                         $('.outsource.modal .delivery span.zone2').text( extendedTimeZone );
-						$('.outsource.modal .total span.displayprice').text( Intl.NumberFormat('en').format( chunk.price ) );
 						$('.outsource.modal .continuebtn').removeClass('disabled');
 //						UI.translated_pid = $.parseJSON(d.data).translated_pid;
 //						UI.showOutsourceData($.parseJSON(d.data).chunks);
