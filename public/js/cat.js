@@ -214,6 +214,9 @@ UI = {
 					'	<li class="tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl">' +
 					'		<a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a>' +
 					'	</li>' +
+					'	<li class="tab-switcher-al" id="segment-' + this.currentSegmentId + '-al">' +
+					'		<a tabindex="-1" href="#">Alternatives&nbsp;<span class="number"></span></a>' +
+					'	</li>' +
 					'</ul>' +
 					'<div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches">' +
 					'	<div class="overflow"></div>' +
@@ -241,6 +244,9 @@ UI = {
 					'			</div>' +
 					'		</div>' : '<ul class="graysmall message"><li>Glossary is not available when the TM feature is disabled</li></ul>') +
 					'	</div>' +
+					'</div>'+
+					'<div class="tab sub-editor alternatives" id="segment-' + this.currentSegmentId + '-alternatives">' +
+					'	<div class="overflow"></div>' +
 					'</div>';
 		$('.footer', segment).html(footer);
 
@@ -980,6 +986,7 @@ UI = {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
 		$('#' + segment.attr('id') + '-buttons').empty();
 		$('p.warnings', segment).remove();
+		$('p.alternatives', segment).remove();
 	},
 	removeFooter: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;		
@@ -1039,7 +1046,7 @@ UI = {
                 /* see also replacement made in source content below */
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
 
-				newFile += '<section id="segment-' + this.sid + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '">' +
+				newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
 						'	<span class="sid">' + this.sid + '</span>' +
 						'	<div class="body">' +
@@ -1265,6 +1272,7 @@ UI = {
 				UI.failedConnection(this, 'setCurrentSegment');
 			},
 			success: function(d) {
+				console.log('d1: ', d);
 				UI.setCurrentSegment_success(d);
 			}
 		});
@@ -1275,6 +1283,37 @@ UI = {
 		this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
 //		this.nextUntranslatedSegmentIdByServer = d.nextUntranslatedSegmentId;
 		this.getNextSegment(this.currentSegment, 'untranslated');
+		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
+	},
+	detectTranslationAlternatives: function(d) {
+//		console.log('d2: ', d.data.editable.length + d.data.not_editable.length);
+		numAlt = d.data.editable.length + d.data.not_editable.length;
+		numSeg = 0;
+		$.each(d.data.editable, function() {
+			numSeg += this.involved_id.length;
+		});
+		console.log('numAlt: ', numAlt);
+		console.log('numSeg: ', numSeg);
+		if(numAlt) {
+			UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">This segment has ' + numAlt + ' alternative translation' + ((numAlt > 1)? 's' : '') + '</a></p>');
+			tab = UI.currentSegment.find('.tab-switcher-al');
+			tab.find('.number').text('(' + numAlt + ')');
+			UI.renderAlternatives(d);
+			tab.show();
+		}
+	},
+	renderAlternatives: function(d) {
+		console.log('aa: ', d);
+		segment = UI.currentSegment;
+		segment_id = UI.currentSegmentId;
+		escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
+
+		$.each(d.data.editable, function(index) {
+
+			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span class="translation">' + UI.decodePlaceholdersToText( this.translation ) + '</span></li></ul>');
+
+		});
+
 	},
 	setDownloadStatus: function(stats) {
 		var t = 'approved';
@@ -2021,8 +2060,18 @@ UI = {
 			this.setProgress(d.stats);
 			//check status of global warnings
 			this.checkWarnings(false);
+			this.propagateTranslation(segment);
 		}
 	},
+	propagateTranslation: function(segment) {
+		console.log($(segment).attr('data-hash'));
+		$.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected'), function(index) {
+			$('.editarea', this).html($('.editarea', segment).html());
+			UI.setStatus($(this), 'draft');
+		});
+		$('section[data-hash=' + $(segment).attr('data-hash') + ']');
+	},
+
 	setWaypoints: function() {
 		this.firstSegment.waypoint('remove');
 		this.lastSegment.waypoint('remove');
@@ -3393,6 +3442,15 @@ $.extend(UI, {
 			$('.editor .sub-editor').hide();
 			$('.editor .sub-editor.glossary').show();
 			$('.gl-search .search-source').focus();
+		}).on('click', '.tab-switcher-al', function(e) {
+			e.preventDefault();
+			$('.editor .submenu .active').removeClass('active');
+			$(this).addClass('active');
+			$('.editor .sub-editor').hide();
+			$('.editor .sub-editor.alternatives').show();
+		}).on('click', '.alternatives a', function(e) {
+			e.preventDefault();
+			$('.editor .tab-switcher-al').click();
 		}).on('click', '.sub-editor.glossary .overflow a.trash', function(e) {
 			e.preventDefault();
 			ul = $(this).parents('ul.graysmall').first();
