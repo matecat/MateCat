@@ -56,8 +56,9 @@ UI = {
 				e.preventDefault();
 				chunkId = $(this).parents('.totaltable').find('.languages .splitnum').text();
 				row = $(this).parents('.tablestats');
+				$('.modal.outsource .outsourceto h2').addClass('loading');
 
-                var display_boxPrice = false;
+				var display_boxPrice = false;
 
 				APP.doRequest({
 					data: {
@@ -97,12 +98,15 @@ UI = {
 //						UI.translated_pid = $.parseJSON(d.data).translated_pid;
 //						UI.showOutsourceData($.parseJSON(d.data).chunks);
 
-                        console.log( chunk );
-
-                        //this tell to the ui if price box sould be displayed immediately
-                        if( chunk.show_info == '1' ){
-                            $( ".showprices" ).click();
-                        }
+						console.log( chunk );
+						$('.modal.outsource .outsourceto h2').removeClass('loading');
+						
+						//this tell to the ui if price box sould be displayed immediately
+						if( chunk.show_info == '1' ){
+							$(".showprices" ).click();
+						} else {
+							$(".showprices" ).show();
+						}
 
 					}
 				});
@@ -228,6 +232,7 @@ UI = {
 		}).on('click', '.modal.outsource .x-popup', function(e) {
 			$('.modal.outsource .displayprice').empty();
 			$('.modal.outsource .delivery .time').empty();
+			$('.modal.outsource .revealprices, .modal.outsource .showprices').hide();
 		}).on('click', '.popup-split .x-popup', function(e) {
 			UI.resetSplitPopup();
 		}).on('blur', '.popup-split .jobs .input-small', function(e) {
@@ -419,7 +424,8 @@ UI = {
 			dd = new Date($(this).attr('data-delivery'));
 			if(dd.getTime() > farthest.getTime()) farthest = dd;
 		})
-		return $.format.date(farthest, "D MMMM") + ' at ' + $.format.date(farthest, "hh:mm a") + ' (GMT+1)';
+		return $.format.date(farthest, "D MMMM") + ' at ' + $.format.date(farthest, "hh:mm a") + ' ' + farthest.getTimezoneOffset();
+//		return $.format.date(farthest, "D MMMM") + ' at ' + $.format.date(farthest, "hh:mm a") + ' (GMT+1)';
 	},
 
 	checkStatus: function(status) {
