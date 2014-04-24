@@ -92,8 +92,21 @@ UI = {
 						UI.url_ko = d.return_url.url_ko;
 						dd = new Date(chunk.delivery_date);
 						$('.outsource.modal .delivery span.time').text( $.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh:mm a") );
-						$('.outsource.modal .delivery span.zone').text( dd.getTimezoneOffset() );
-						$('.outsource.modal .total span.displayprice').text(chunk.price);
+
+                        var timeOffset = ( -dd.getTimezoneOffset() / 60 );
+
+                        //check for international API support on ECMAScript
+                        if ( window.Intl && typeof window.Intl === "object" ){
+                            //Assume it's supported, lets localize
+                            var timeZone   = Intl.DateTimeFormat().resolved.timeZone.replace('San_Marino', 'Rome');
+                            var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' ' + timeZone + ' )';
+                            $('.outsource.modal .total span.displayprice').text( Intl.NumberFormat('en').format( chunk.price ) );
+                        } else {
+                            var extendedTimeZone = '( ' + dd.toString().replace(/^.*GMT.*\(/, "").replace(/\)$/, "") + ' - GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';
+                            $('.outsource.modal .total span.displayprice').text( parseFloat( chunk.price ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
+                        }
+
+                        $('.outsource.modal .delivery span.zone2').text( extendedTimeZone );
 						$('.outsource.modal .continuebtn').removeClass('disabled');
 //						UI.translated_pid = $.parseJSON(d.data).translated_pid;
 //						UI.showOutsourceData($.parseJSON(d.data).chunks);
@@ -424,8 +437,21 @@ UI = {
 			dd = new Date($(this).attr('data-delivery'));
 			if(dd.getTime() > farthest.getTime()) farthest = dd;
 		})
-		return $.format.date(farthest, "D MMMM") + ' at ' + $.format.date(farthest, "hh:mm a") + ' ' + farthest.getTimezoneOffset();
-//		return $.format.date(farthest, "D MMMM") + ' at ' + $.format.date(farthest, "hh:mm a") + ' (GMT+1)';
+
+        var timeOffset = ( -dd.getTimezoneOffset() / 60 );
+
+        //check for international API support on ECMAScript
+        if ( window.Intl && typeof window.Intl === "object" ){
+            //Assume it's supported, lets localize
+            var timeZone   = Intl.DateTimeFormat().resolved.timeZone.replace('San_Marino', 'Rome');
+            var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' ' + timeZone + ' )';
+            $('.outsource.modal .total span.displayprice').text( Intl.NumberFormat('en').format( chunk.price ) );
+        } else {
+            var extendedTimeZone = '( ' + dd.toString().replace(/^.*GMT.*\(/, "").replace(/\)$/, "") + ' - GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';
+            $('.outsource.modal .total span.displayprice').text( parseFloat( chunk.price ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
+        }
+
+		return $.format.date(farthest, "D MMMM") + ' at ' + $.format.date(farthest, "hh:mm a") + ' ' + extendedTimeZone;
 	},
 
 	checkStatus: function(status) {

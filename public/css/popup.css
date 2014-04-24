@@ -236,6 +236,9 @@ clear:both;
 margin-top: 15px;
 float:left;
 }
+.pricebox .copytext p {
+    font-size:16px;
+}
 .pricebox .copytext p:first-child {
 margin-top: 0!important;
 }
@@ -266,7 +269,11 @@ font-weight:normal;
 .pricebox .tprice .euro, .pricebox .tprice .displayprice {display:inline;}
 .pricebox .tprice {line-height:30px; margin-bottom:10px;}
 .pricebox delivery {line-height:30px;}
-
+.pricebox .paybox {
+    border-radius: 4px;
+    background: url(../img/card.png) no-repeat 250px 37px;
+    background-size: 170px;
+}
 .uploadbtn.showprices  
 {
 	display: none;
