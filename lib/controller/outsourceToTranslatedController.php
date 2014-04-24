@@ -49,7 +49,7 @@ class outsourceToTranslatedController extends ajaxController {
         if( !empty( $this->result[ 'errors' ] ) ){
             return -1; // ERROR
         }
-
+//unset( $_SESSION['outsource_to_translated_cache']);
         $cache_cart = Shop_Cart::getInstance( 'outsource_to_translated_cache' );
 
         $project_url_api = INIT::$HTTPHOST . INIT::$BASEURL . "api/status?id_project=" . $this->pid . "&project_pass=" . $this->ppassword;
@@ -158,7 +158,8 @@ class outsourceToTranslatedController extends ajaxController {
             $itemCart[ 'hts_pid' ]       = $result_quote[ 5 ];
             $itemCart[ 'source' ]        = $_jobLangs[ $jpid ]['source'];
             $itemCart[ 'target' ]        = $_jobLangs[ $jpid ]['target'];
-            $itemCart[ 'show_info' ]     = $result_quote[ 6 ];
+            $itemCart[ 'show_info' ]     = "1";
+//            $itemCart[ 'show_info' ]     = $result_quote[ 6 ];
             $cache_cart->addItem( $itemCart );
 
         }

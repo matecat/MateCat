@@ -10,8 +10,6 @@ UI = {
 
 		this.previousQueueSize = 0;
 
-        this.isFirefox = (typeof navigator.mozApps != 'undefined');
-
 		APP.fitText($('#pid'), $('#pname'), 50);
 		$(".subfile .filename").each(function() {
 			APP.fitText($(this), $(this), 50);
@@ -58,8 +56,9 @@ UI = {
 				e.preventDefault();
 				chunkId = $(this).parents('.totaltable').find('.languages .splitnum').text();
 				row = $(this).parents('.tablestats');
+				$('.modal.outsource .outsourceto h2').addClass('loading');
 
-                var display_boxPrice = false;
+				var display_boxPrice = false;
 
 				APP.doRequest({
 					data: {
@@ -112,12 +111,15 @@ UI = {
 //						UI.translated_pid = $.parseJSON(d.data).translated_pid;
 //						UI.showOutsourceData($.parseJSON(d.data).chunks);
 
-                        console.log( chunk );
-
-                        //this tell to the ui if price box sould be displayed immediately
-                        if( chunk.show_info == '1' ){
-                            $( ".showprices" ).click();
-                        }
+						console.log( chunk );
+						$('.modal.outsource .outsourceto h2').removeClass('loading');
+						
+						//this tell to the ui if price box sould be displayed immediately
+						if( chunk.show_info == '1' ){
+							$(".showprices" ).click();
+						} else {
+							$(".showprices" ).show();
+						}
 
 					}
 				});
@@ -243,6 +245,7 @@ UI = {
 		}).on('click', '.modal.outsource .x-popup', function(e) {
 			$('.modal.outsource .displayprice').empty();
 			$('.modal.outsource .delivery .time').empty();
+			$('.modal.outsource .revealprices, .modal.outsource .showprices').hide();
 		}).on('click', '.popup-split .x-popup', function(e) {
 			UI.resetSplitPopup();
 		}).on('blur', '.popup-split .jobs .input-small', function(e) {
@@ -436,8 +439,17 @@ UI = {
 		})
 
         var timeOffset = ( -dd.getTimezoneOffset() / 60 );
-        var timeZone   = Intl.DateTimeFormat().resolved.timeZone.replace('San_Marino', 'Rome');
-        var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' ' + timeZone + ' )';
+
+        //check for international API support on ECMAScript
+        if ( window.Intl && typeof window.Intl === "object" ){
+            //Assume it's supported, lets localize
+            var timeZone   = Intl.DateTimeFormat().resolved.timeZone.replace('San_Marino', 'Rome');
+            var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' ' + timeZone + ' )';
+            $('.outsource.modal .total span.displayprice').text( Intl.NumberFormat('en').format( chunk.price ) );
+        } else {
+            var extendedTimeZone = '( ' + dd.toString().replace(/^.*GMT.*\(/, "").replace(/\)$/, "") + ' - GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';
+            $('.outsource.modal .total span.displayprice').text( parseFloat( chunk.price ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
+        }
 
 		return $.format.date(farthest, "D MMMM") + ' at ' + $.format.date(farthest, "hh:mm a") + ' ' + extendedTimeZone;
 	},

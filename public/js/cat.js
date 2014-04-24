@@ -4716,6 +4716,7 @@ $.extend(UI, {
 					}
 				}
 				UI.processLoadedGlossary(d, this);
+				UI.markGlossaryItemsInSource(d, this);
 			},
 			complete: function() {
 				$('.gl-search', UI.currentSegment).removeClass('loading');
@@ -4740,6 +4741,70 @@ $.extend(UI, {
 			$('.tab-switcher-gl a .number', segment).text('').attr('data-num', 0);	
 		}		
 	},
+	markGlossaryItemsInSource: function(d, context) {
+		console.log('d: ', d);
+		console.log('context: ', context);
+		if (Object.size(d.data.matches)) {
+			i = 0;
+			cleanString = $('.source', UI.currentSegment).html();
+			console.log('cleanString: ', cleanString);
+			var intervals = [];
+			$.each(d.data.matches, function(k) {
+				i++;
+				console.log(k);
+//				console.log(i);
+				var re = new RegExp("(" + k + ")", "gi");
+				coso = cleanString.replace(re, '<mark>' + k + '</mark>');
+				console.log('position 1: ', coso.indexOf('<mark>'));
+				console.log('position 2: ', coso.indexOf('</mark>') - 6);
+				int = {
+					x: coso.indexOf('<mark>'), 
+					y: coso.indexOf('</mark>') - 6
+				} 
+				intervals.push(int);
+				
+				
+//				$('.source', UI.currentSegment).html($('.source', UI.currentSegment).html().replace(re, '<mark class="glossary-' + i + '">' + k + '</mark>'));
+
+//				numRes++;
+//				$('.sub-editor.glossary .overflow .results', segment).append('<div class="glossary-item"><span>' + k + '</span></div>');
+//				$.each(this, function(index) {
+//					if ((this.segment === '') || (this.translation === ''))
+//						return;
+//					var disabled = (this.id == '0') ? true : false;
+//					cb = this.created_by;
+//					if(typeof this.target_note == 'undefined'){ this.comment = ''; }
+//					else { this.comment = this.target_note; }
+//					cl_suggestion = UI.getPercentuageClass(this.match);
+//					var leftTxt = this.segment;
+//					leftTxt = leftTxt.replace(/\#\{/gi, "<mark>");
+//					leftTxt = leftTxt.replace(/\}\#/gi, "</mark>");
+//					var rightTxt = this.translation;
+//					rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
+//					rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
+//					$('.sub-editor.glossary .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><li class="details">' + ((this.comment === '')? '' : '<div class="comment">' + this.comment + '</div>') + '<ul class="graysmall-details"><li>' + this.last_update_date + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></li></ul>');
+//				});
+			});
+			console.log('intervals: ', intervals);
+			console.log(UI.smallestInterval(intervals));
+			intervalsUnion = [];
+			intervalsUnion.push(UI.smallestInterval(intervals));
+			$.each(intervals, function(index) {
+			});
+			console.log('intervalsUnion: ', intervalsUnion);
+		}		
+	},
+	smallestInterval: function(ar) {
+		smallest = {
+					x: 1000000, 
+					y: 2000000
+				} 
+		$.each(ar, function(index) {
+			if(this.x < smallest.x) smallest = this;
+		});
+		return smallest;
+	},
+
 	renderGlossary: function(d, seg) {
 		segment = seg;
 		segment_id = segment.attr('id');

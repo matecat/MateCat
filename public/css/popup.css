@@ -107,11 +107,15 @@ height: 43px;
 width: 82%;
 }
 .outsource.modal h2 {
-font-size: 20px;
-font-weight: bold;
-margin:10px 0;
+	font-size: 20px;
+	font-weight: bold;
+	margin: 10px 0;
 }
-
+.outsource.modal h2.loading {
+	background: url(../img/loader.gif) right 6px no-repeat;
+	background-size: 20px;
+	padding-right: 40px;
+}
 .outs h2 {
 background-size: 180px;
 height: 41px;
@@ -266,11 +270,16 @@ font-weight:normal;
 .pricebox .tprice {line-height:30px; margin-bottom:10px;}
 .pricebox delivery {line-height:30px;}
 .pricebox .paybox {
-border-radius: 4px;
-background: url(../img/card.png) no-repeat 250px 37px;
-background-size: 170px;
+    border-radius: 4px;
+    background: url(../img/card.png) no-repeat 250px 37px;
+    background-size: 170px;
 }
-.uploadbtn.showprices  {width:auto; margin-top:15px!important;}
+.uploadbtn.showprices  
+{
+	display: none;
+	width: auto; 
+	margin-top: 15px! important;
+}
 table.chunks {
 overflow: hidden;
 border: 2px solid #ccc;
