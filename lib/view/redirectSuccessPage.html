@@ -5,11 +5,13 @@
 		<script src="${basepath}public/js/lib/jquery.js"></script>
 		<script>
 			var config = {
-				data: ${structure php: data}
+				data: ${structure php: data},
+                tokenAuth: '${structure php: tokenAuth}'
 			}
 			$(document).ready(function() {
 				var data = JSON.stringify(config.data);
 				$('#sessionData').val(data);
+				$('#tokenAuth').val(config.tokenAuth);
 				$('#redirectForm').submit();
 			});
 	
@@ -17,6 +19,7 @@
 	</head>
 	<body>
 		 <form style="visibility: hidden" id="redirectForm" action="${redirect_url}" method="POST">
+			<input type="hidden" id="tokenAuth" name="tokenAuth" value="" />
 			<input type="hidden" id="sessionData" name="data" value="" />
 		</form>
 	</body>

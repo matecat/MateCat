@@ -3,11 +3,30 @@
 
 class translatedLogin_redirectSuccessPageController extends viewController {
 
-
+    protected $tokenAuth;
 
 	public function __construct() {
+
+        //SESSION ENABLED
+
 		parent::__construct(false);
 		parent::makeTemplate("redirectSuccessPage.html");
+
+        $filterArgs = array(
+                'tk' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+        );
+
+        $__getInput = filter_input_array( INPUT_GET, $filterArgs );
+
+        /*
+         *
+         * Do something with Token ( send it for authentication on confirm ?! )
+         *
+         *  $__getInput['tk']
+         *
+         */
+        $this->tokenAuth = $__getInput['tk'];
+
 	}
 
 	public function doAction() {}
@@ -23,9 +42,10 @@ class translatedLogin_redirectSuccessPageController extends viewController {
             $item_list[ ] = $item;
         }
 
+        $this->template->tokenAuth = $this->tokenAuth;
         $this->template->data = json_encode( $item_list );
-//        $this->template->redirect_url = 'http://openid.translated.home/review.php';
-        $this->template->redirect_url = 'http://openid.loc/review.php';
+        $this->template->redirect_url = 'http://signin.translated.net/review.php';
+//        $this->template->redirect_url = 'http://openid.loc/review.php';
 
     }
 
