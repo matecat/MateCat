@@ -3,6 +3,7 @@
  */
 $.extend(UI, {
 	chooseSuggestion: function(w) {console.log('chooseSuggestion');
+//		console.log($('.editor ul[data-item=' + w + '] li.b .translation'));
 		this.copySuggestionInEditarea(this.currentSegment, $('.editor ul[data-item=' + w + '] li.b .translation').text(), $('.editor .editarea'), $('.editor ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
 		this.lockTags(this.editarea);
 		this.setChosenSuggestion(w);
