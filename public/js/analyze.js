@@ -8,6 +8,8 @@ UI = {
 		this.noProgressTail = 0;
 		this.lastProgressSegments = 0;
 
+        this.quoteResponse = [];
+
 		this.previousQueueSize = 0;
 
 		APP.fitText($('#pid'), $('#pname'), 50);
@@ -62,7 +64,7 @@ UI = {
 
 				APP.doRequest({
 					data: {
-						action: 'outsourceToTranslated',
+						action: 'outsourceTo',
 						pid: $('#pid').attr('data-pid'),
 						ppassword: $("#pid").attr("data-pwd"),
 						jobs: [
@@ -77,7 +79,12 @@ UI = {
 		//						UI.failedConnection(0, 'outsourceToTranslated');
 					},
 					success: function(d) {
-						
+
+                        //IMPORTANT this store the quote response to a class variable
+                        //to be posted out when Order Button is pressed
+                        UI.quoteResponse = d.data;
+//                        console.log( d.data);
+
 						chunks = d.data;
 						chunkId = this;
 						ind = 0;
@@ -130,7 +137,7 @@ UI = {
 //				$('.outsourcemodal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
 //				$('.outsourcemodal .uploadbtn').attr('href', $(this).attr('href'));
 //				$('.outsourcemodal').show();
-				
+
 				return false;
 			}
 		});
@@ -158,6 +165,9 @@ UI = {
 			
 			$('#continueForm input[name=url_ok]').attr('value', UI.url_ok);
 			$('#continueForm input[name=url_ko]').attr('value', UI.url_ko);
+
+            //IMPORTANT post out the quotes
+			$('#continueForm input[name=quoteData]').attr('value', JSON.stringify( UI.quoteResponse ) );
 			$('#continueForm').submit();
 		}).on('click', '.continuebtn.disabled', function(e) {
 			e.preventDefault();

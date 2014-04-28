@@ -119,7 +119,11 @@ class Shop_Cart {
     }
 
     public function getCart() {
-        return $this->cart;
+        $_cart = $this->cart;
+        foreach( $_cart as $k => $v ){
+            unset( $_cart[$k]['_id_type_class'] );
+        }
+        return $_cart;
     }
 
     public static function issetCart( $cart_name ) {
