@@ -1213,7 +1213,21 @@ body.cattool .searchbox .block.right
 .header{height: 20px; width:100%; color:#a7a9ac; font-size:12px; float:left;text-align:left;background:#efefef;border-bottom:1px solid #ccc;margin-bottom:5px;-webkit-box-shadow: inset 0 1px 1px 1px #f4f7f9;box-shadow: inset 0 1px 1px 1px #f4f7f9;}
 
 
-
+.header .repetition
+{
+/*	float: left;
+	margin: 4px 0 0 6px;
+	text-transform: uppercase;
+	color: #888;
+	font-size: 11px;*/
+	float: left;
+	margin: 0px 0 0 0px;
+	text-transform: uppercase;
+	color: #FFF;
+	font-size: 11px;
+	background: #999;
+	padding: 4px 8px;
+}
 
 
 

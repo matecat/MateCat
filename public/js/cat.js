@@ -1292,10 +1292,11 @@ UI = {
 		$.each(d.data.editable, function() {
 			numSeg += this.involved_id.length;
 		});
-		console.log('numAlt: ', numAlt);
-		console.log('numSeg: ', numSeg);
+//		console.log('numAlt: ', numAlt);
+//		console.log('numSeg: ', numSeg);
 		if(numAlt) {
-			UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">This segment has ' + numAlt + ' alternative translation' + ((numAlt > 1)? 's' : '') + '</a></p>');
+			if(!$('.header .repetition', UI.currentSegment).length) $('.header', UI.currentSegment).prepend('<span class="repetition">Repetition</span>');
+			UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + numAlt + ' different way' + ((numAlt > 1)? 's' : '') + '</a></p>');
 			tab = UI.currentSegment.find('.tab-switcher-al');
 			tab.find('.number').text('(' + numAlt + ')');
 			UI.renderAlternatives(d);
@@ -1303,17 +1304,28 @@ UI = {
 		}
 	},
 	renderAlternatives: function(d) {
-		console.log('aa: ', d);
 		segment = UI.currentSegment;
 		segment_id = UI.currentSegmentId;
 		escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
-
 		$.each(d.data.editable, function(index) {
-
-			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span class="translation">' + UI.decodePlaceholdersToText( this.translation ) + '</span></li></ul>');
-
+			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.decodePlaceholdersToText(this.translation) + '</span></li></ul>');
 		});
 
+	},
+	chooseAlternative: function(w) {console.log('chooseAlternative');
+		this.copyAlternativeInEditarea($('.sugg-target .translation', w).text());
+		this.lockTags(this.editarea);
+		this.editarea.focus();
+		this.highlightEditarea();
+	},
+	copyAlternativeInEditarea: function(translation) {
+		if ($.trim(translation) !== '') {
+			if (this.body.hasClass('searchActive'))
+				this.addWarningToSearchDisplay();
+			this.saveInUndoStack('copyalternative');
+			$(UI.editarea).text(translation).addClass('fromAlternative');
+			this.saveInUndoStack('copyalternative');
+		}
 	},
 	setDownloadStatus: function(stats) {
 		var t = 'approved';
@@ -2587,7 +2599,16 @@ $.extend(UI, {
 	},
 	setEvents: function() {
 		this.bindShortcuts();
-		
+		$("body").on('keydown', null, 'ctrl+1', function(e) {
+			e.preventDefault();
+			$('.editor .tab.alternatives .graysmall[data-item=1]').trigger('dblclick');
+		}).on('keydown', null, 'ctrl+2', function(e) {
+			e.preventDefault();
+			$('.editor .tab.alternatives .graysmall[data-item=2]').trigger('dblclick');
+		}).on('keydown', null, 'ctrl+3', function(e) {
+			e.preventDefault();
+			$('.editor .tab.alternatives .graysmall[data-item=3]').trigger('dblclick');
+		});		
 		$("body").bind('keydown', 'Ctrl+c', function() {
 			UI.tagSelection = false;
 		}).bind('keydown', 'Meta+c', function() {
@@ -2845,6 +2866,9 @@ $.extend(UI, {
 			clearTimeout(UI.selectingReadonly);
 		}).on('dblclick', '.matches .graysmall', function() {
 			UI.chooseSuggestion($(this).attr('data-item'));
+		}).on('dblclick', '.alternatives .graysmall', function() {
+			UI.chooseAlternative($(this));
+		}).on('dblclick', '.alternatives .graysmall', function() {
 		}).on('blur', '.graysmall .translation', function(e) {
 			e.preventDefault();
 			UI.closeInplaceEditor($(this));
@@ -3802,6 +3826,7 @@ $.extend(UI, {
  */
 $.extend(UI, {
 	chooseSuggestion: function(w) {console.log('chooseSuggestion');
+//		console.log($('.editor ul[data-item=' + w + '] li.b .translation'));
 		this.copySuggestionInEditarea(this.currentSegment, $('.editor ul[data-item=' + w + '] li.b .translation').text(), $('.editor .editarea'), $('.editor ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
 		this.lockTags(this.editarea);
 		this.setChosenSuggestion(w);

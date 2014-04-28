@@ -70,7 +70,16 @@ $.extend(UI, {
 	},
 	setEvents: function() {
 		this.bindShortcuts();
-		
+		$("body").on('keydown', null, 'ctrl+1', function(e) {
+			e.preventDefault();
+			$('.editor .tab.alternatives .graysmall[data-item=1]').trigger('dblclick');
+		}).on('keydown', null, 'ctrl+2', function(e) {
+			e.preventDefault();
+			$('.editor .tab.alternatives .graysmall[data-item=2]').trigger('dblclick');
+		}).on('keydown', null, 'ctrl+3', function(e) {
+			e.preventDefault();
+			$('.editor .tab.alternatives .graysmall[data-item=3]').trigger('dblclick');
+		});		
 		$("body").bind('keydown', 'Ctrl+c', function() {
 			UI.tagSelection = false;
 		}).bind('keydown', 'Meta+c', function() {
@@ -328,6 +337,9 @@ $.extend(UI, {
 			clearTimeout(UI.selectingReadonly);
 		}).on('dblclick', '.matches .graysmall', function() {
 			UI.chooseSuggestion($(this).attr('data-item'));
+		}).on('dblclick', '.alternatives .graysmall', function() {
+			UI.chooseAlternative($(this));
+		}).on('dblclick', '.alternatives .graysmall', function() {
 		}).on('blur', '.graysmall .translation', function(e) {
 			e.preventDefault();
 			UI.closeInplaceEditor($(this));
