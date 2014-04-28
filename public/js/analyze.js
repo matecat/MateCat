@@ -80,7 +80,8 @@ UI = {
 					},
 					success: function(d) {
 
-                        //this === UI
+                        //IMPORTANT this store the quote response to a class variable
+                        //to be posted out when Order Button is pressed
                         UI.quoteResponse = d.data;
 //                        console.log( d.data);
 
@@ -164,6 +165,8 @@ UI = {
 			
 			$('#continueForm input[name=url_ok]').attr('value', UI.url_ok);
 			$('#continueForm input[name=url_ko]').attr('value', UI.url_ko);
+
+            //IMPORTANT post out the quotes
 			$('#continueForm input[name=quoteData]').attr('value', JSON.stringify( UI.quoteResponse ) );
 			$('#continueForm').submit();
 		}).on('click', '.continuebtn.disabled', function(e) {
