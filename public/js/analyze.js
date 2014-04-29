@@ -12,6 +12,9 @@ UI = {
 
 		this.previousQueueSize = 0;
 
+        UI.url_ok = config.url_ok;
+        UI.url_ko = config.url_ko;
+
 		APP.fitText($('#pid'), $('#pname'), 50);
 		$(".subfile .filename").each(function() {
 			APP.fitText($(this), $(this), 50);
@@ -95,8 +98,7 @@ UI = {
 						
 //						chunk = $.parseJSON(d.data[0]);
 //						console.log(d.data[0]);
-						UI.url_ok = d.return_url.url_ok;
-						UI.url_ko = d.return_url.url_ko;
+
 						dd = new Date(chunk.delivery_date);
 						$('.outsource.modal .delivery span.time').text( $.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh:mm a") );
 

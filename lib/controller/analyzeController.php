@@ -5,6 +5,36 @@ include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 class analyzeController extends viewController {
 
+    /**
+     * External EndPoint for outsource Login Service or for all in one login and Confirm Order
+     *
+     * If a login service exists, it can return a token authentication on the Success page,
+     *
+     * That token will be sent back to the review/confirm page on the provider website to grant it logged
+     *
+     * The success Page must to be set in '$this->_outsource_login_url_ok'
+     *
+     *
+     * Values from quote result will be posted there anyway.
+     *
+     * @var string
+     */
+    protected $_outsource_login_API =  'http://openid.translated.home/';
+//    protected $_outsource_login_API =  'http://signin.translated.net/';
+
+    /**
+     * These are the urls where the user will be redirected after
+     * he performed the login on the external service
+     *
+     * Set them appropriately in the constructor.
+     *
+     * They can be null if an all in one login/review/confirm is implemented on the external provider system
+     *
+     * @var string
+     */
+    protected $_outsource_login_url_ok = "";
+    protected $_outsource_login_url_ko = "";
+
     private $pid;
     private $ppassword;
     private $jpassword;
@@ -33,6 +63,9 @@ class analyzeController extends viewController {
 
     public function __construct() {
         parent::__construct( false );
+
+        $this->_outsource_login_url_ok = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedSuccess";
+        $this->_outsource_login_url_ko = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedError";
 
         $this->pid      = $this->get_from_get_post( "pid" );
         $this->jid      = $this->get_from_get_post( "jid" );
@@ -287,8 +320,7 @@ class analyzeController extends viewController {
         $this->template->logged_user                = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
         $this->template->build_number               = INIT::$BUILD_NUMBER;
 	    $this->template->enable_outsource           = INIT::$ENABLE_OUTSOURCE;
-	    $this->template->translated_openid          = 'http://signin.translated.net/';
-//	    $this->template->translated_openid          = 'http://openid.loc/';
+	    $this->template->translated_openid          = $this->_outsource_login_API;
 
         $this->template->isLoggedIn = $this->isLoggedIn();
 
@@ -301,6 +333,9 @@ class analyzeController extends viewController {
         }
 
         $this->template->incomingUrl = '/login?incomingUrl=' . $_SERVER[ 'REQUEST_URI' ];
+
+        $this->template->url_ok = $this->_outsource_login_url_ok;
+        $this->template->url_ko = $this->_outsource_login_url_ko;
 
     }
 
