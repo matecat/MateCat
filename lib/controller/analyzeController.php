@@ -22,19 +22,6 @@ class analyzeController extends viewController {
     protected $_outsource_login_API =  'http://openid.translated.home/';
 //    protected $_outsource_login_API =  'http://signin.translated.net/';
 
-    /**
-     * These are the urls where the user will be redirected after
-     * he performed the login on the external service
-     *
-     * Set them appropriately in the constructor.
-     *
-     * They can be null if an all in one login/review/confirm is implemented on the external provider system
-     *
-     * @var string
-     */
-    protected $_outsource_login_url_ok = "";
-    protected $_outsource_login_url_ko = "";
-
     private $pid;
     private $ppassword;
     private $jpassword;
@@ -63,9 +50,6 @@ class analyzeController extends viewController {
 
     public function __construct() {
         parent::__construct( false );
-
-        $this->_outsource_login_url_ok = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedSuccess";
-        $this->_outsource_login_url_ko = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedError";
 
         $this->pid      = $this->get_from_get_post( "pid" );
         $this->jid      = $this->get_from_get_post( "jid" );
@@ -333,9 +317,6 @@ class analyzeController extends viewController {
         }
 
         $this->template->incomingUrl = '/login?incomingUrl=' . $_SERVER[ 'REQUEST_URI' ];
-
-        $this->template->url_ok = $this->_outsource_login_url_ok;
-        $this->template->url_ko = $this->_outsource_login_url_ko;
 
     }
 

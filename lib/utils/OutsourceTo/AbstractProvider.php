@@ -10,6 +10,20 @@
 abstract class OutsourceTo_AbstractProvider {
 
     /**
+     * These are the urls where the user will be redirected after
+     * he performed the login on the external service
+     *
+     * Set them appropriately in the constructor.
+     *
+     * They can be null if an all in one login/review/confirm is implemented on the external provider system
+     *
+     * @var string
+     */
+    protected $_outsource_login_url_ok = "";
+    protected $_outsource_login_url_ko = "";
+
+
+    /**
      *
      * @var Shop_AbstractItem[]
      */
@@ -89,4 +103,18 @@ abstract class OutsourceTo_AbstractProvider {
         return $this;
     }
 
-} 
+    /**
+     * @return string
+     */
+    public function getOutsourceLoginUrlKo() {
+        return $this->_outsource_login_url_ko;
+    }
+
+    /**
+     * @return string
+     */
+    public function getOutsourceLoginUrlOk() {
+        return $this->_outsource_login_url_ok;
+    }
+
+}

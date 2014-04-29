@@ -9,6 +9,16 @@
 
 class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
+    public function __construct(){
+
+        /**
+         * @see OutsourceTo_AbstractProvider
+         */
+        $this->_outsource_login_url_ok = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedSuccess";
+        $this->_outsource_login_url_ko = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedError";
+
+    }
+
     public function performQuote( $volAnalysis = null ){
 
         $cache_cart = Shop_Cart::getInstance( 'outsource_to_external_cache' );
