@@ -4828,7 +4828,7 @@ $.extend(UI, {
 		console.log('d: ', d);
 		console.log('context: ', context);
 		if (Object.size(d.data.matches)) {
-			i = 0;
+			i = 0;	
 			cleanString = $('.source', UI.currentSegment).html();
 			console.log('cleanString: ', cleanString);
 			var intervals = [];
@@ -4845,6 +4845,7 @@ $.extend(UI, {
 					y: coso.indexOf('</mark>') - 6
 				} 
 				intervals.push(int);
+//				console.log(UI.checkIntervalsUnions(intervals, i));
 				
 				
 //				$('.source', UI.currentSegment).html($('.source', UI.currentSegment).html().replace(re, '<mark class="glossary-' + i + '">' + k + '</mark>'));
@@ -4868,15 +4869,57 @@ $.extend(UI, {
 //					$('.sub-editor.glossary .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><li class="details">' + ((this.comment === '')? '' : '<div class="comment">' + this.comment + '</div>') + '<ul class="graysmall-details"><li>' + this.last_update_date + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></li></ul>');
 //				});
 			});
-			console.log('intervals: ', intervals);
-			console.log(UI.smallestInterval(intervals));
+
+//			console.log('intervals: ', intervals);
+//			console.log(UI.smallestInterval(intervals));
+			UI.intervalsUnion = [];
+			
+			UI.checkIntervalsUnions(intervals);
+//			console.log(UI.checkIntervalsUnions(intervals));
+
+/*
 			intervalsUnion = [];
 			intervalsUnion.push(UI.smallestInterval(intervals));
 			$.each(intervals, function(index) {
 			});
 			console.log('intervalsUnion: ', intervalsUnion);
+*/
 		}		
 	},
+	checkIntervalsUnions: function(intervals) { 
+		// ricordati di togliere la chiamata dal console.log e di eliminare il return sotto
+		// se intervals è vuoto uscire dalla funzione e vai ad una funzione che applica la formattazione al source basandosi su UI.intervalsUnion
+		smallest = UI.smallestInterval(intervals);
+		$.each(intervals, function(indice) {
+			if(this === smallest) smallestIndex = indice;
+		});
+		mod = 0;
+		$.each(intervals, function(i) {
+//			console.log('i: ' + i + ', index: ' + smallestIndex);
+			if(i != smallestIndex )  {
+				console.log(this.x + ' è tra ' + smallest.x + ' e ' + smallest.y + '?');
+				if((smallest.x <= this.x)&&(smallest.y >= this.x)) { // this item is to be merged to the smallest
+					console.log(this.x + ' è da unire');
+					smallest.y = this.y;
+					mod++;
+				}
+			}
+		});
+		if(mod) {
+			// aggiorna lo smallest.y e riesegui la funzione
+			intervals[smallestIndex].y = smallest.y;
+//			this.checkIntervalsUnions(intervals);
+		} else {
+			console.log('non modificato: ', intervals);
+			// copia lo smallest in UI.intervalsUnion, eliminalo da intervals e riesegui la funzione.
+		}
+
+
+//		intervals.splice(smallestIndex, 1);
+//		console.log('intervals meno lo smallest', intervals);
+//		return intervals;
+	},
+
 	smallestInterval: function(ar) {
 		smallest = {
 					x: 1000000, 
