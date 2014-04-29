@@ -2479,7 +2479,7 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 	display: block;
 }
 
-.source .glossary-item
+.source mark.inGlossary
 {
 	border-bottom: 1px dotted #c0c;
 }
