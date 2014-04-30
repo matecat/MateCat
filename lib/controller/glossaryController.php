@@ -69,7 +69,7 @@ class glossaryController extends ajaxController {
             $config[ 'id_user' ]     = $st[ 'id_translator' ];
             $config[ 'isGlossary' ]  = true;
             $config[ 'get_mt' ]      = null;
-            $config[ 'num_result' ]  = null;
+            $config[ 'num_result' ]  = 100; //do not want limit the results from glossary: set as a big number
 
             /**
              * For future reminder

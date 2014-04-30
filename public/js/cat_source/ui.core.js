@@ -215,7 +215,7 @@ UI = {
 					'		<a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a>' +
 					'	</li>' +
 					'	<li class="tab-switcher-al" id="segment-' + this.currentSegmentId + '-al">' +
-					'		<a tabindex="-1" href="#">Alternatives&nbsp;<span class="number"></span></a>' +
+					'		<a tabindex="-1" href="#">Already translated as&nbsp;<span class="number"></span></a>' +
 					'	</li>' +
 					'</ul>' +
 					'<div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches">' +
@@ -1272,7 +1272,6 @@ UI = {
 				UI.failedConnection(this, 'setCurrentSegment');
 			},
 			success: function(d) {
-				console.log('d1: ', d);
 				UI.setCurrentSegment_success(d);
 			}
 		});
@@ -1286,7 +1285,24 @@ UI = {
 		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
 	},
 	detectTranslationAlternatives: function(d) {
-//		console.log('d2: ', d.data.editable.length + d.data.not_editable.length);
+		if(d.data.editable.length + d.data.not_editable.length) {
+			if(!$('.header .repetition', UI.currentSegment).length) $('.header', UI.currentSegment).prepend('<span class="repetition">Autopropagated</span>');
+		}
+
+		sameContentIndex = -1;
+		$.each(d.data.editable, function(ind) {
+			if(this.translation == UI.editarea.text()) {
+				sameContentIndex = ind;
+			}
+		});
+		if(sameContentIndex != -1) d.data.editable.splice(sameContentIndex, 1);
+
+		sameContentIndex1 = -1;
+		$.each(d.data.not_editable, function(ind) {
+			if(this.translation == UI.editarea.text()) sameContentIndex1 = ind;
+		});
+		if(sameContentIndex1 != -1) d.data.not_editable.splice(sameContentIndex1, 1);
+		
 		numAlt = d.data.editable.length + d.data.not_editable.length;
 		numSeg = 0;
 		$.each(d.data.editable, function() {
@@ -1295,22 +1311,25 @@ UI = {
 //		console.log('numAlt: ', numAlt);
 //		console.log('numSeg: ', numSeg);
 		if(numAlt) {
-			if(!$('.header .repetition', UI.currentSegment).length) $('.header', UI.currentSegment).prepend('<span class="repetition">Repetition</span>');
 			UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + numAlt + ' different way' + ((numAlt > 1)? 's' : '') + '</a></p>');
 			tab = UI.currentSegment.find('.tab-switcher-al');
 			tab.find('.number').text('(' + numAlt + ')');
 			UI.renderAlternatives(d);
 			tab.show();
+			tab.trigger('click');
 		}
 	},
 	renderAlternatives: function(d) {
+		console.log(d);
 		segment = UI.currentSegment;
 		segment_id = UI.currentSegmentId;
 		escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
 		$.each(d.data.editable, function(index) {
-			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.decodePlaceholdersToText(this.translation) + '</span></li></ul>');
+			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.decodePlaceholdersToText(this.translation) + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">Go</a></li></ul>');
 		});
-
+		$.each(d.data.not_editable, function(index1) {
+			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.decodePlaceholdersToText(this.translation) + '</span></li></ul>');
+		});
 	},
 	chooseAlternative: function(w) {console.log('chooseAlternative');
 		this.copyAlternativeInEditarea($('.sugg-target .translation', w).text());
