@@ -1,12 +1,46 @@
 <?php
-include_once INIT::$MODEL_ROOT . "/queries.php";
+/**
+ * Controller to receive ajax request to make an External provider Quote
+ */
 
+/**
+ * Class outsourceToController
+ */
 class outsourceToController extends ajaxController {
-	
-	private $pid;
-	private $ppassword;
-	private $jobList;
 
+    /**
+     * The project ID
+     * @var int
+     */
+    private $pid;
+
+    /**
+     * The project Password
+     * @var string
+     */
+    private $ppassword;
+
+    /**
+     * A list of job_id/job_password for quote request
+     *
+     * <pre>
+     * Ex:
+     *   array(
+     *      0 => array(
+     *          'id' => 5901,
+     *          'jpassword' => '6decb661a182',
+     *      ),
+     *   );
+     * </pre>
+     *
+     * @var array
+     */
+    private $jobList;
+
+    /**
+     * Class constructor, validate/sanitize incoming params
+     *
+     */
     public function __construct() {
 
         //SESSION ENABLED
@@ -44,6 +78,11 @@ class outsourceToController extends ajaxController {
 
     }
 
+    /**
+     * Perform Controller Action
+     *
+     * @return int|null
+     */
     public function doAction() {
 
         if( !empty( $this->result[ 'errors' ] ) ){
@@ -51,10 +90,10 @@ class outsourceToController extends ajaxController {
         }
 
         $outsourceTo = new OutsourceTo_Translated();
-        $outsourceTo->setPid( $this->pid );
-        $outsourceTo->setPpassword( $this->ppassword );
-        $outsourceTo->setJobList( $this->jobList );
-        $outsourceTo->performQuote();
+        $outsourceTo->setPid( $this->pid )
+                    ->setPpassword( $this->ppassword )
+                    ->setJobList( $this->jobList )
+                    ->performQuote();
 
         /*
          * Example:

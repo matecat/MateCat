@@ -118,15 +118,21 @@ class glossaryController extends ajaxController {
                     break;
                 case 'set':
 
-                    if ( $st['id_tms'] == 0 ) {
+                    if ( $st[ 'id_tms' ] == 0 ) {
                         throw new Exception( "Glossary is not available when the TM feature is disabled", -11 );
+                    }
+
+                    if ( empty( $st[ 'id_translator' ] ) ) {
+                        $newUser                 = TMS::createMyMemoryKey( $this->id_job ); //throws exception
+                        updateTranslatorJob( $this->id_job, $newUser );
+                        $config[ 'id_user' ]     = $newUser->id;
                     }
 
                     $TMS_RESULT = $_TMS->set($config);
                     $set_code = $TMS_RESULT;
 
                     if ( $set_code ) {
-//                       Often the get method after a set is not in real time, so return the same values ( FAKE )
+//                        Often the get method after a set is not in real time, so return the same values ( FAKE )
 //                        $TMS_GET_RESULT = $_TMS->get($config)->get_glossary_matches_as_array();
 //                        $this->result['data']['matches'] = $TMS_GET_RESULT;
                         $this->result['data']['matches'] = array(

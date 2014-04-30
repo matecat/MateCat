@@ -1,20 +1,43 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: domenico domenico@translated.net / ostico@gmail.com
+ */
+
+/**
+ * Manager for a Multi Curl connection
+ *
+ * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 14/04/14
  * Time: 18.35
  * 
  */
-
 class MultiCurlHandler {
 
+    /**
+     * The multi curl resource
+     *
+     * @var resource
+     */
     protected $multi_handler;
 
+    /**
+     * Pool to manage the curl instances and retrieve them by unique hash identifier
+     *
+     * @var array
+     */
     protected $curl_handlers = array();
 
+    /**
+     * Container for the curl results
+     *
+     * @var array
+     */
     protected $multi_curl_results = array();
 
+    /**
+     * Class Constructor, init the multi curl handler
+     *
+     */
     public function __construct(){
 
         $this->multi_handler = curl_multi_init();
@@ -58,7 +81,9 @@ class MultiCurlHandler {
     }
 
     /**
-     * Execute all curl in multiple parallel calls reading from stream select
+     * Execute all curl in multiple parallel calls
+     * Run the sub-connections of the current cURL handle and store the results
+     * to a container
      *
      */
     public function multiExec() {
@@ -80,13 +105,14 @@ class MultiCurlHandler {
     }
 
     /**
+     * Create a curl resource and add it to the pool indexing it with an unique identifier
+     *
      * @param $url string
      * @param $options array
      * @param $tokenHash string
      *
      * @return string Curl identifier
      *
-     * @throws LogicException
      */
     public function createResource( $url, $options, $tokenHash = null ){
 
@@ -104,6 +130,8 @@ class MultiCurlHandler {
     }
 
     /**
+     * Add an already existent curl resource to the pool indexing it with an unique identifier
+     *
      * @param resource     $curl_resource
      * @param null|string  $tokenHash
      *
@@ -141,7 +169,7 @@ class MultiCurlHandler {
     }
 
     /**
-     * Get single result content from responses array
+     * Get single result content from responses array by it's unique Index
      *
      * @param $tokenHash
      *

@@ -1,24 +1,41 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: domenico domenico@translated.net / ostico@gmail.com
+ */
+
+/**
+ * Concrete Class to negotiate a Quote/Login/Review/Confirm communication
+ *
+ * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 29/04/14
  * Time: 10.48
  * 
  */
-
 class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
+    /**
+     * Class constructor
+     *
+     * There will be defined the callback urls for success or failure on login system
+     *
+     */
     public function __construct(){
 
         /**
-         * @see OutsourceTo_AbstractProvider
+         * @see OutsourceTo_AbstractProvider::$_outsource_login_url_ok
          */
         $this->_outsource_login_url_ok = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedSuccess";
         $this->_outsource_login_url_ko = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedError";
 
     }
 
+    /**
+     * Perform a quote on the remote Provider server
+     *
+     * @see OutsourceTo_AbstractProvider::performQuote
+     *
+     * @param array|null $volAnalysis
+     */
     public function performQuote( $volAnalysis = null ){
 
         $cache_cart = Shop_Cart::getInstance( 'outsource_to_external_cache' );

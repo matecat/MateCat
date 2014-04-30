@@ -736,13 +736,13 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ){
 				FROM segment_translations
 				JOIN jobs ON id_job = id AND id_segment between jobs.job_first_segment AND jobs.job_last_segment
 				WHERE segment_hash = (
-						SELECT segment_hash FROM segments WHERE id = %u
-						)
+					SELECT segment_hash FROM segments WHERE id = %u
+				)
 				AND segment_translations.status IN( 'TRANSLATED' ) -- , 'APPROVED' )
 				AND id_job = %u
 				AND id_segment != %u
 				GROUP BY translation, CONCAT( id_job, '-', password )
-				";
+		";
 
 		$query = sprintf( $queryForTranslationMismatch, $db->escape( $jpassword ), $sid, $jid, $sid );
 
@@ -770,7 +770,7 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ){
 				GROUP BY segment_hash, CONCAT( id_job, '-', password )
 				HAVING translations_available != total_sources
 				AND translations_available > 1
-				";
+		";
 
 		$query = sprintf( $queryForMismatchesInJob, $db->escape( $jpassword ), $jid );
 

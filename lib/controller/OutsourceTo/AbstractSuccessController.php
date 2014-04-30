@@ -1,6 +1,14 @@
 <?php
+/**
+ * Created by PhpStorm.
+ */
 
-
+/**
+ * Class OutsourceTo_AbstractSuccessController
+ *
+ * Manage the generic return controller for a remote Login auth
+ *
+ */
 abstract class OutsourceTo_AbstractSuccessController extends viewController {
 
     /**
@@ -17,21 +25,50 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
      */
     protected $review_order_page = '';
 
+    /**
+     * The name of the key that transport the authentication token.
+     *
+     * MUST BE SET IN Concrete Class
+     *
+     * @var string
+     */
+    protected $tokenName;
+
+    /**
+     * The token authentication from remote service Login
+     *
+     * @var string
+     */
     protected $tokenAuth;
 
-	public function __construct() {
+    /**
+     * Class Constructor
+     *
+     * @throws LogicException
+     *
+     */
+    public function __construct() {
 
         if( empty( $this->review_order_page ) ){
             throw new LogicException( "Property 'review_order_page' can not be EMPTY" );
         }
 
+        if( empty( $this->tokenName ) ){
+            throw new LogicException( "Property 'tokenName' can not be EMPTY" );
+        }
+
         //SESSION ENABLED
 
 		parent::__construct(false);
-		parent::makeTemplate("redirectSuccessPage.html");
+
+        /**
+         * redirectSuccessPage is a white page with a form submitted by javascript
+         *
+         */
+        parent::makeTemplate("redirectSuccessPage.html");
 
         $filterArgs = array(
-                'tk' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+                $this->tokenName => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
 
         $__getInput = filter_input_array( INPUT_GET, $filterArgs );
@@ -47,10 +84,19 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
 
 	}
 
-	public function doAction() {}
+    /**
+     * Empty at moment
+     *
+     * @return mixed|void
+     */
+    public function doAction() {}
 
-
-	public function setTemplateVars() {
+    /**
+     * Set the template vars to the redirect Page
+     *
+     * @return mixed|void
+     */
+    public function setTemplateVars() {
 
         $shop_cart = Shop_Cart::getInstance('outsource_to_external');
 
