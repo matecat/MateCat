@@ -132,6 +132,7 @@ UI = {
 			this.saveSegment(segment);
 		}
 		this.deActivateSegment(byButton);
+		this.removeGlossaryMarksFormSource();
 
 		this.lastOpenedEditarea.attr('contenteditable', 'false');
 		this.body.removeClass('editing');
@@ -1311,7 +1312,7 @@ UI = {
 //		console.log('numAlt: ', numAlt);
 //		console.log('numSeg: ', numSeg);
 		if(numAlt) {
-			UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + numAlt + ' different way' + ((numAlt > 1)? 's' : '') + '</a></p>');
+			UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + ((numAlt > 1)? 'other ' + numAlt + ' different' : 'another') + ' way' + ((numAlt > 1)? 's' : '') + '</a></p>');
 			tab = UI.currentSegment.find('.tab-switcher-al');
 			tab.find('.number').text('(' + numAlt + ')');
 			UI.renderAlternatives(d);
@@ -1325,10 +1326,10 @@ UI = {
 		segment_id = UI.currentSegmentId;
 		escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
 		$.each(d.data.editable, function(index) {
-			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.decodePlaceholdersToText(this.translation) + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">Go</a></li></ul>');
+			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.decodePlaceholdersToText(this.translation) + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
 		});
 		$.each(d.data.not_editable, function(index1) {
-			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.decodePlaceholdersToText(this.translation) + '</span></li></ul>');
+			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.decodePlaceholdersToText(this.translation) + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
 		});
 	},
 	chooseAlternative: function(w) {console.log('chooseAlternative');
@@ -4900,9 +4901,9 @@ $.extend(UI, {
 				},
 			]
 */
-			console.log('intervals: ', JSON.stringify(intervals));
+//			console.log('intervals: ', JSON.stringify(intervals));
 			UI.checkIntervalsUnions(intervals);
-			console.log('array unione: ', JSON.stringify(UI.intervalsUnion));
+//			console.log('array unione: ', JSON.stringify(UI.intervalsUnion));
 			UI.startGlossaryMark = '<mark class="inGlossary">';
 			UI.endGlossaryMark = '</mark>';
 			markLength = UI.startGlossaryMark.length + UI.endGlossaryMark.length;
@@ -4911,27 +4912,41 @@ $.extend(UI, {
 				added = markLength * index;
 				sourceString = sourceString.splice(this.x + added, 0, UI.startGlossaryMark);				
 				sourceString = sourceString.splice(this.y + added + UI.startGlossaryMark.length, 0, UI.endGlossaryMark);
-				console.log(sourceString);
+//				console.log(sourceString);
 				$('.editor .source').html(sourceString);
-				console.log($('.editor .source').html());
+//				console.log($('.editor .source').html());
 			});
 
 			
 		}		
 	},
+	removeGlossaryMarksFormSource: function() {
+		$('.editor mark.inGlossary').each(function() {
+			$(this).replaceWith($(this).html());
+		})
+	},
+
 	checkIntervalsUnions: function(intervals) {
 		UI.endedIntervalAnalysis = false;
 		smallest = UI.smallestInterval(intervals);
+//		console.log('smallest: ', smallest);
 		$.each(intervals, function(indice) {
 			if(this === smallest) smallestIndex = indice;
 		});
+		mod = 0;
 		$.each(intervals, function(i) {
 			if(i != smallestIndex )  {
 				if((smallest.x <= this.x)&&(smallest.y >= this.x)) { // this item is to be merged to the smallest
+					mod++;
 					smallest.y = this.y;
 					intervals.splice(i, 1);
 					UI.checkIntervalsUnions(intervals);
 				}
+//				if((i == (intervals.length -1))&&(!mod)) {
+//					console.log('il primo non ha trovato unioni');
+////					UI.checkIntervalsUnions(intervals);
+//					return false;
+//				}
 			}
 		});
 		if(UI.endedIntervalAnalysis) {
@@ -4940,7 +4955,11 @@ $.extend(UI, {
 			return false;
 		}
 		if(smallest.x < 1000000) UI.intervalsUnion.push(smallest);
+//			console.log('intervals 1: ', JSON.stringify(intervals));
 		intervals.splice(smallestIndex, 1);
+//			console.log('intervals 2: ', JSON.stringify(intervals));
+			if(!intervals.length) return false;
+			if(!mod) UI.checkIntervalsUnions(intervals);
 		UI.endedIntervalAnalysis = true;
 		return false;
 	},
