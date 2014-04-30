@@ -28,153 +28,8 @@ UI = {
 
 		//        fit_text_to_container($("#pname"));
 
-		$(".more").click(function(e) {
-			e.preventDefault();
-			$(".content").toggle();
-		});
-		$(".more-table").click(function(e) {
-			e.preventDefault();
-			$(".content-table").toggle();
-		});
-		$(".outsourceto .uploadbtn").click(function(e) {
-			e.preventDefault();
-//			$('.outsourcemodal .x-popup').trigger('click');
-//			UI.showPrices();
-		});
 
-        $( ".outsource" ).click(function() {
-            $( ".outsourcemodal" ).show();
-        });
 
-        $( ".showprices" ).click(function() {
-            $( this ).hide();
-            $( ".revealprices" ).show();
-        });
-
-        //Added .translate class in html button because of double call to
-        //API when displaying prices on showprices button ( class .in-popup was removed and .uploadbtn was too much widely used... )
-		$(".translate").click(function(e) {
-			if(config.enable_outsource) {
-				e.preventDefault();
-				chunkId = $(this).parents('.totaltable').find('.languages .splitnum').text();
-				row = $(this).parents('.tablestats');
-				$('.modal.outsource .outsourceto h2').addClass('loading');
-
-				var display_boxPrice = false;
-
-				APP.doRequest({
-					data: {
-						action: 'outsourceTo',
-						pid: $('#pid').attr('data-pid'),
-						ppassword: $("#pid").attr("data-pwd"),
-						jobs: [
-							{
-								jid: row.attr('data-jid'),
-								jpassword: row.attr('data-pwd')
-							}
-						]
-					},
-					context: chunkId,
-					error: function() {
-		//						UI.failedConnection(0, 'outsourceToTranslated');
-					},
-					success: function(d) {
-
-                        //IMPORTANT this store the quote response to a class variable
-                        //to be posted out when Order Button is pressed
-                        UI.quoteResponse = d.data;
-//                        console.log( d.data);
-
-						chunks = d.data;
-						chunkId = this;
-						ind = 0;
-						$.each(chunks, function(index) {
-							if(this.id == chunkId) ind = index;
-						});
-						chunk = d.data[ind];
-						
-//						chunk = $.parseJSON(d.data[0]);
-//						console.log(d.data[0]);
-
-                        //now taked from config and not from ajax response
-                        UI.url_ok = d.return_url.url_ok;
-                        UI.url_ko = d.return_url.url_ko;
-
-						dd = new Date(chunk.delivery_date);
-						$('.outsource.modal .delivery span.time').text( $.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh:mm a") );
-
-                        var timeOffset = ( -dd.getTimezoneOffset() / 60 );
-
-                        //check for international API support on ECMAScript
-                        if ( window.Intl && typeof window.Intl === "object" ){
-                            //Assume it's supported, lets localize
-                            var timeZone   = Intl.DateTimeFormat().resolved.timeZone.replace('San_Marino', 'Rome');
-                            var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' ' + timeZone + ' )';
-                            $('.outsource.modal .total span.displayprice').text( Intl.NumberFormat('en').format( chunk.price ) );
-                        } else {
-                            var extendedTimeZone = '( ' + dd.toString().replace(/^.*GMT.*\(/, "").replace(/\)$/, "") + ' - GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';
-                            $('.outsource.modal .total span.displayprice').text( parseFloat( chunk.price ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
-                        }
-
-                        $('.outsource.modal .delivery span.zone2').text( extendedTimeZone );
-						$('.outsource.modal .continuebtn').removeClass('disabled');
-//						UI.translated_pid = $.parseJSON(d.data).translated_pid;
-//						UI.showOutsourceData($.parseJSON(d.data).chunks);
-
-						console.log( chunk );
-						$('.modal.outsource .outsourceto h2').removeClass('loading');
-						
-						//this tell to the ui if price box sould be displayed immediately
-						if( chunk.show_info == '1' ){
-							$(".showprices" ).click();
-						} else {
-							$(".showprices" ).show();
-						}
-
-					}
-				});
-				$('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
-				$('.outsource.modal .uploadbtn').attr('href', $(this).attr('href'));
-
-				$('.outsource.modal').show();
-//				$('.outsourcemodal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
-//				$('.outsourcemodal .uploadbtn').attr('href', $(this).attr('href'));
-//				$('.outsourcemodal').show();
-
-				return false;
-			}
-		});
-		$(".outsourcemodal").on('click', '.chunks input', function(e) {
-			e.stopPropagation();
-			UI.setPrices();
-		}).on('click', '.outsourcemodal .x-popup', function(e) {
-			UI.showOutsourceChoice();
-		}).on('click', '.chunks td.outs', function(e) {
-			e.stopPropagation();
-			ch = $(this).find('input');
-			if($(ch).attr('checked')) {
-				$(ch).removeAttr('checked');
-			} else {
-				$(ch).attr('checked', 'checked');
-			}
-			UI.setPrices();
-		}).on('click', '.back', function(e) {
-			e.preventDefault();
-			UI.showOutsourceChoice();
-		})
-
-		$(".outsource.modal").on('click', '.continuebtn:not(.disabled)', function(e) {
-			e.preventDefault();
-			
-			$('#continueForm input[name=url_ok]').attr('value', UI.url_ok);
-			$('#continueForm input[name=url_ko]').attr('value', UI.url_ko);
-
-            //IMPORTANT post out the quotes
-			$('#continueForm input[name=quoteData]').attr('value', JSON.stringify( UI.quoteResponse ) );
-			$('#continueForm').submit();
-		}).on('click', '.continuebtn.disabled', function(e) {
-			e.preventDefault();
-		});
 		/*        
 		 $(".part1").click(function(e){
 		 e.preventDefault();
@@ -255,10 +110,6 @@ UI = {
 		}).on('click', '.modal .x-popup', function(e) {
 			e.preventDefault();
 			APP.closePopup();
-		}).on('click', '.modal.outsource .x-popup', function(e) {
-			$('.modal.outsource .displayprice').empty();
-			$('.modal.outsource .delivery .time').empty();
-			$('.modal.outsource .revealprices, .modal.outsource .showprices').hide();
 		}).on('click', '.popup-split .x-popup', function(e) {
 			UI.resetSplitPopup();
 		}).on('blur', '.popup-split .jobs .input-small', function(e) {
@@ -388,83 +239,6 @@ UI = {
 			$('.popup-split #exec-split').removeClass('disabled');
 			$('.popup-split').removeClass('error-number');
 		}
-	},
-	showOutsourceChoice: function() {
-		$('.outsourcemodal h1').text('Here is the link to your new translation job');
-		$('.outsourcemodal section.outs').hide();
-		$('.outsourcemodal section.choose').show();
-	},
-	setPrices: function() {
-		total = 0;
-		$('.outsourcemodal .chunks tr:not(.thead):has(input:checked)').each(function() {
-			total += parseFloat($(this).attr('data-price'));
-		})
-		$('.outsourcemodal .total span').text(total.toFixed(2));
-		$('.outsourcemodal .delivery span').text(UI.getFarthestDate());
-	},
-
-	showPrices: function() {
-		$('.outsourcemodal h1').text('Outsource to Translated');
-		$('.outsourcemodal section.choose').hide();
-		$('.outsourcemodal section.outs').show();
-
-		if(!$('.outsourcemodal .popup-box .chunks tr').length) {
-			$('.outsourcemodal .popup-box .chunks').empty();
-			rows = '<tr class="thead"><th>Source</th><th>Target</th><th>ID</th><th># words</th><th>Outsource</th></tr>';
-			$('.jobcontainer').each(function() {
-				source_lang = $(this).find('h3 .source_lang').text();
-				target_lang = $(this).find('h3 .target_lang').text();
-				$(this).find('.totaltable').each(function() {
-					rows += '<tr data-cid="' + $(this).find('.splitnum').text() + '" data-price=""><td class="source">' + source_lang + '</td><td class="target">' + target_lang + '</td><td class="cid">' + $(this).find('.splitnum').text() + '</td><td class="words">' + $(this).find('.stat-payable').text() + '</td><td class="outs"><input type="checkbox" checked="checked" /></td></tr>';
-				})					
-			})
-			$('.outsourcemodal .chunks').append(rows);
-		}
-
-
-        //Commented because no job list provided, not valid call to API, moreover success response now is not used!!!
-        // @see ' $(".translate").click( ' in line 43 for the right use,
-        //this should do the same things.
-        //Usable for future purpose on "select all jobs 4 quote"
-
-//		APP.doRequest({
-//			data: {
-//				action: 'outsourceToTranslated',
-//				pid: $('#pid').attr('data-pid'),
-//				ppassword: $("#pid").attr("data-pwd")
-//			},
-//			error: function() {
-////						UI.failedConnection(0, 'outsourceToTranslated');
-//			},
-//			success: function(d) {
-//				UI.translated_pid = $.parseJSON(d.data).translated_pid;
-//				UI.showOutsourceData($.parseJSON(d.data).chunks);
-//			}
-//		});
-
-
-	},
-	getFarthestDate: function() {
-		farthest = new Date(0);
-		$('.outsourcemodal .chunks tr:not(.thead):has(input[checked=checked])').each(function() {
-			dd = new Date($(this).attr('data-delivery'));
-			if(dd.getTime() > farthest.getTime()) farthest = dd;
-		})
-
-        var timeOffset = ( -dd.getTimezoneOffset() / 60 );
-
-        //check for international API support on ECMAScript
-        if ( window.Intl && typeof window.Intl === "object" ){
-            //Assume it's supported, lets localize
-            var timeZone   = Intl.DateTimeFormat().resolved.timeZone.replace('San_Marino', 'Rome');
-            var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' ' + timeZone + ' )';
-            $('.outsource.modal .total span.displayprice').text( Intl.NumberFormat('en').format( chunk.price ) );
-        } else {
-            var extendedTimeZone = '( ' + dd.toString().replace(/^.*GMT.*\(/, "").replace(/\)$/, "") + ' - GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';
-            $('.outsource.modal .total span.displayprice').text( parseFloat( chunk.price ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
-        }
-
-		return $.format.date(farthest, "D MMMM") + ' at ' + $.format.date(farthest, "hh:mm a") + ' ' + extendedTimeZone;
 	},
 
 	checkStatus: function(status) {
@@ -636,20 +410,6 @@ UI = {
 				}
 			});
 		}
-	},
-	showOutsourceData: function(d) {
-		var chunks = d;
-		$.each(chunks, function(index) {
-			$('.outsourcemodal .chunks tr[data-cid=' + this.id + ']').attr('data-price', this.price).attr('data-delivery', this.delivery_date);
-		});
-		total = 0;
-		$('.outsourcemodal .chunks tr:not(.thead):has(input[checked=checked])').each(function() {
-			total += parseFloat($(this).attr('data-price'));
-		})
-		
-		$('.outsourcemodal .delivery span').text(UI.getFarthestDate());
-		$('.outsourcemodal .total span.displayprice').text(total.toFixed(2));
-		$('.outsourcemodal .outs .continuebtn').attr('href', $('.outsourcemodal .outs .continuebtn').attr('href') + '?pid=' + UI.translated_pid);
 	},
 	pollData: function() {
 		if (this.stopPolling)
@@ -991,4 +751,5 @@ $(document).ready(function() {
 		gopopup($(e.target).data('oauth'));
 	});
 	UI.init();
+	UI.outsourceInit();
 });

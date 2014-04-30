@@ -1650,8 +1650,17 @@ textarea, input, .editarea, .search-editarea, select  {
 	margin-top:10px;
 }
 .graysmall{color:#333;background:#fbfbfb;}
+.graysmall.notEditable
+{
+	background: #ccc;
+}
+
 .graysmall-details li{float:right;width:auto !important;font-size:11px;margin:0 0px;padding:2px 5px 0px 5px;border-bottom:none;}
 .graysmall:hover{background:#e9e8e9;cursor:default;}
+.graysmall.notEditable:hover
+{
+	background: #999;
+}
 
 .graysmall:hover li span{color:#000 !important}
 
