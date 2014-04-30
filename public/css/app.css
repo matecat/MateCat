@@ -2504,6 +2504,10 @@ textarea, input, .editarea, .search-editarea, select  {
 	-webkit-transition: all 100ms ease-in;
 	transition: all 100ms ease-in;
 }
+.graysmall li.goto
+{
+	width: 10px;
+}
 .graysmall li.details
 {
 	width: 100%;
