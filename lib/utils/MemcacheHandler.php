@@ -2,7 +2,7 @@
 
 /**
  * Created by PhpStorm.
- * User: domenico domenico@translated.net / ostico@gmail.com
+  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 24/03/14
  * Time: 19.36
  *
@@ -21,13 +21,25 @@ class MemcacheHandler {
      * @var array
      */
     protected static $_MemCachePool;
+
+    /**
+     * This is the weight
+     *
+     * @var int
+     */
     protected static $_MemCachePoolWeights;
 
     /**
+     * Store the connection resource/pool
+     *
      * @var Memcache
      */
     protected static $_Connection = null;
 
+    /**
+     *
+     * @throws Exception
+     */
     protected function __construct() {
 
         if( !class_exists( 'Memcache', false ) ){
@@ -49,7 +61,7 @@ class MemcacheHandler {
                 list( $host, $port ) = explode( ":", $__host );
                 self::$_Connection->setServerParams( $host, $port, 1, -1, false );
                 Log::doLog( "Server $host:$port down, not available." );
-                unset( self::$_MemCachePool[ $_host ] );
+                unset( self::$_MemCachePool[ $__host ] );
             }
 
         }

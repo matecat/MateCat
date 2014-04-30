@@ -16,6 +16,7 @@ class ChangeProjectPasswordController  extends ajaxController {
     public function __construct() {
 
         $this->disableSessions();
+        parent::__construct();
 
         $filterArgs = array(
                 'id_project'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),

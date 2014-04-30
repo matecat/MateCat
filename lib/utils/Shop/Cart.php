@@ -2,30 +2,42 @@
 
 /**
  * Created by PhpStorm.
- * User: domenico domenico@translated.net / ostico@gmail.com
+ */
+
+/**
+ * Generic Cart Container / Manager attached to the session
+ *
+ * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 15/04/14
  * Time: 15.01
  *
  */
-
-
-require 'ItemHTSQuoteJob.php';
-
 class Shop_Cart {
 
+    /**
+     * Singleton Pool container
+     *
+     * @var Shop_Cart[]
+     */
     protected static $_instance = array();
 
     /**
+     * The cart content storage
+     *
      * @var Shop_AbstractItem[]
      */
     protected $cart;
 
     /**
+     * Unique identifier for the cart
+     *
      * @var string
      */
     protected $cartName;
 
     /**
+     * Retrieve an instance of Cart identified by $cartName in a pool with singleton pattern
+     *
      * @param String $cartName
      *
      * @return Shop_Cart
@@ -38,6 +50,12 @@ class Shop_Cart {
         return self::$_instance[ $cartName ];
     }
 
+    /**
+     * Create a new instance of cart identified by $cartName
+     * That instance is automatically attached to session vars
+     *
+     * @param $cartName
+     */
     protected function __construct( $cartName ) {
         $this->cartName = $cartName;
         if ( !isset ( $_SESSION[ $this->cartName ] ) ) {
@@ -46,6 +64,13 @@ class Shop_Cart {
         $this->cart = & $_SESSION[ $this->cartName ];
     }
 
+    /**
+     * Add an item to the cart
+     *
+     * @param Shop_AbstractItem $item
+     *
+     * @throws LogicException
+     */
     public function addItem( Shop_AbstractItem $item ) {
 
         if( !isset( $item['id'] ) || $item['id'] == null ){
@@ -77,14 +102,33 @@ class Shop_Cart {
 
     }
 
+    /**
+     * Check if an item exists in cart by check it's unique id
+     *
+     * @param $item_id
+     *
+     * @return bool
+     */
     public function itemExists( $item_id ){
         return array_key_exists( $item_id, $this->cart );
     }
 
+    /**
+     * Count items in cart
+     *
+     * @return int
+     */
     public function countItems() {
         return count( $this->cart );
     }
 
+    /**
+     * Gat an item from cart bay it's unique id
+     *
+     * @param $item_id
+     *
+     * @return mixed
+     */
     public function getItem( $item_id ){
         if( array_key_exists( $item_id, $this->cart ) ){
 
@@ -98,6 +142,11 @@ class Shop_Cart {
         }
     }
 
+    /**
+     * Remove an item from the cart
+     *
+     * @param $item_id
+     */
     public function delItem( $item_id ) {
         $item_id = intval( $item_id );
 
@@ -109,15 +158,29 @@ class Shop_Cart {
 
     }
 
+    /**
+     * Clean cart content by removing all items
+     *
+     */
     public function emptyCart() {
         array_splice( $this->cart, 0 );
     }
 
+    /**
+     * Destroy the cart resource
+     *
+     */
     public function deleteCart() {
         unset ( $this->cart );
         unset ( $_SESSION[ $this->cartName ] );
+        unset( self::$_instance[ $this->cartName ]);
     }
 
+    /**
+     * Return the cart content
+     *
+     * @return Shop_AbstractItem[]
+     */
     public function getCart() {
         $_cart = $this->cart;
         foreach( $_cart as $k => $v ){
@@ -126,6 +189,13 @@ class Shop_Cart {
         return $_cart;
     }
 
+    /**
+     * Check if cart exists by it's name
+     *
+     * @param $cart_name
+     *
+     * @return bool
+     */
     public static function issetCart( $cart_name ) {
         if ( empty( $_SESSION[ $cart_name ] ) ) {
             false;
