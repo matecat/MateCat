@@ -1285,22 +1285,23 @@ UI = {
 		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
 	},
 	detectTranslationAlternatives: function(d) {
-//		console.log('d2: ', d.data.editable.length + d.data.not_editable.length);
 		if(d.data.editable.length + d.data.not_editable.length) {
 			if(!$('.header .repetition', UI.currentSegment).length) $('.header', UI.currentSegment).prepend('<span class="repetition">Autopropagated</span>');
 		}
 
 		sameContentIndex = -1;
 		$.each(d.data.editable, function(ind) {
-			if(this.translation == UI.editarea.text()) sameContentIndex = ind;
+			if(this.translation == UI.editarea.text()) {
+				sameContentIndex = ind;
+			}
 		});
-		d.data.editable.splice(sameContentIndex, 1);
+		if(sameContentIndex != -1) d.data.editable.splice(sameContentIndex, 1);
 
 		sameContentIndex1 = -1;
 		$.each(d.data.not_editable, function(ind) {
 			if(this.translation == UI.editarea.text()) sameContentIndex1 = ind;
 		});
-		d.data.not_editable.splice(sameContentIndex1, 1);
+		if(sameContentIndex1 != -1) d.data.not_editable.splice(sameContentIndex1, 1);
 		
 		numAlt = d.data.editable.length + d.data.not_editable.length;
 		numSeg = 0;
