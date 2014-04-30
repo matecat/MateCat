@@ -151,9 +151,9 @@ $.extend(UI, {
 				},
 			]
 */
-			console.log('intervals: ', JSON.stringify(intervals));
+//			console.log('intervals: ', JSON.stringify(intervals));
 			UI.checkIntervalsUnions(intervals);
-			console.log('array unione: ', JSON.stringify(UI.intervalsUnion));
+//			console.log('array unione: ', JSON.stringify(UI.intervalsUnion));
 			UI.startGlossaryMark = '<mark class="inGlossary">';
 			UI.endGlossaryMark = '</mark>';
 			markLength = UI.startGlossaryMark.length + UI.endGlossaryMark.length;
@@ -162,27 +162,41 @@ $.extend(UI, {
 				added = markLength * index;
 				sourceString = sourceString.splice(this.x + added, 0, UI.startGlossaryMark);				
 				sourceString = sourceString.splice(this.y + added + UI.startGlossaryMark.length, 0, UI.endGlossaryMark);
-				console.log(sourceString);
+//				console.log(sourceString);
 				$('.editor .source').html(sourceString);
-				console.log($('.editor .source').html());
+//				console.log($('.editor .source').html());
 			});
 
 			
 		}		
 	},
+	removeGlossaryMarksFormSource: function() {
+		$('.editor mark.inGlossary').each(function() {
+			$(this).replaceWith($(this).html());
+		})
+	},
+
 	checkIntervalsUnions: function(intervals) {
 		UI.endedIntervalAnalysis = false;
 		smallest = UI.smallestInterval(intervals);
+//		console.log('smallest: ', smallest);
 		$.each(intervals, function(indice) {
 			if(this === smallest) smallestIndex = indice;
 		});
+		mod = 0;
 		$.each(intervals, function(i) {
 			if(i != smallestIndex )  {
 				if((smallest.x <= this.x)&&(smallest.y >= this.x)) { // this item is to be merged to the smallest
+					mod++;
 					smallest.y = this.y;
 					intervals.splice(i, 1);
 					UI.checkIntervalsUnions(intervals);
 				}
+//				if((i == (intervals.length -1))&&(!mod)) {
+//					console.log('il primo non ha trovato unioni');
+////					UI.checkIntervalsUnions(intervals);
+//					return false;
+//				}
 			}
 		});
 		if(UI.endedIntervalAnalysis) {
@@ -191,7 +205,11 @@ $.extend(UI, {
 			return false;
 		}
 		if(smallest.x < 1000000) UI.intervalsUnion.push(smallest);
+//			console.log('intervals 1: ', JSON.stringify(intervals));
 		intervals.splice(smallestIndex, 1);
+//			console.log('intervals 2: ', JSON.stringify(intervals));
+			if(!intervals.length) return false;
+			if(!mod) UI.checkIntervalsUnions(intervals);
 		UI.endedIntervalAnalysis = true;
 		return false;
 	},

@@ -132,6 +132,7 @@ UI = {
 			this.saveSegment(segment);
 		}
 		this.deActivateSegment(byButton);
+		this.removeGlossaryMarksFormSource();
 
 		this.lastOpenedEditarea.attr('contenteditable', 'false');
 		this.body.removeClass('editing');
@@ -1311,7 +1312,7 @@ UI = {
 //		console.log('numAlt: ', numAlt);
 //		console.log('numSeg: ', numSeg);
 		if(numAlt) {
-			UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + numAlt + ' different way' + ((numAlt > 1)? 's' : '') + '</a></p>');
+			UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + ((numAlt > 1)? 'other ' + numAlt + ' different' : 'another') + ' way' + ((numAlt > 1)? 's' : '') + '</a></p>');
 			tab = UI.currentSegment.find('.tab-switcher-al');
 			tab.find('.number').text('(' + numAlt + ')');
 			UI.renderAlternatives(d);
@@ -1325,10 +1326,10 @@ UI = {
 		segment_id = UI.currentSegmentId;
 		escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
 		$.each(d.data.editable, function(index) {
-			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.decodePlaceholdersToText(this.translation) + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">Go</a></li></ul>');
+			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.decodePlaceholdersToText(this.translation) + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
 		});
 		$.each(d.data.not_editable, function(index1) {
-			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.decodePlaceholdersToText(this.translation) + '</span></li></ul>');
+			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.decodePlaceholdersToText(this.translation) + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
 		});
 	},
 	chooseAlternative: function(w) {console.log('chooseAlternative');
