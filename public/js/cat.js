@@ -1286,6 +1286,9 @@ UI = {
 	},
 	detectTranslationAlternatives: function(d) {
 //		console.log('d2: ', d.data.editable.length + d.data.not_editable.length);
+		if(d.data.editable.length + d.data.not_editable.length) {
+			if(!$('.header .repetition', UI.currentSegment).length) $('.header', UI.currentSegment).prepend('<span class="repetition">Autopropagated</span>');
+		}
 
 		sameContentIndex = -1;
 		$.each(d.data.editable, function(ind) {
@@ -1307,7 +1310,6 @@ UI = {
 //		console.log('numAlt: ', numAlt);
 //		console.log('numSeg: ', numSeg);
 		if(numAlt) {
-			if(!$('.header .repetition', UI.currentSegment).length) $('.header', UI.currentSegment).prepend('<span class="repetition">Repetition</span>');
 			UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + numAlt + ' different way' + ((numAlt > 1)? 's' : '') + '</a></p>');
 			tab = UI.currentSegment.find('.tab-switcher-al');
 			tab.find('.number').text('(' + numAlt + ')');
@@ -6183,7 +6185,6 @@ $.extend(UI, {
 		$('.popup-settings').addClass('modified');
 	}
 });
-
 
 
 
