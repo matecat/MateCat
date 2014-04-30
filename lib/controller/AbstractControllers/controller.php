@@ -24,8 +24,7 @@ abstract class controller {
         if( isset( $_REQUEST['api'] ) && filter_input( INPUT_GET, 'api', FILTER_VALIDATE_BOOLEAN ) ){
 
             if( !isset( $_REQUEST['action'] ) || empty( $_REQUEST['action'] ) ){
-                header( "HTTP/1.1 200 OK" );
-                echo "OK";
+                header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "api/docs", true, 303 ); //Redirect 303 See Other
                 die();
             }
 

@@ -85,7 +85,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
 
 	}
 
-	//Log::doLog($query);
+//	Log::doLog($query);
 
 	$results = $db->fetch_array( $query );
 	$err     = $db->get_error();
