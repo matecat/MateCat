@@ -229,8 +229,22 @@ class INIT {
 		self::$AUTHCOOKIENAME='matecat_login';
 		self::$AUTHCOOKIEDURATION=86400*60;
 		self::$ENABLED_BROWSERS = array('chrome', 'safari', 'firefox');
-		self::$CONVERSION_ENABLED = false;
-		self::$ANALYSIS_WORDS_PER_DAYS = 3000;
+
+        /**
+         * Matecat opens ource by default only handles xliff files with a strong focus on sdlxliff
+         * ( xliff produced by SDL Trados )
+         *
+         * We are not including the file converters into the Matecat code because we haven't find any open source
+         * library that satisfy the required quality and licensing.
+         *
+         * Here you have two options
+         *  a) Keep $CONVERSION_ENABLED to false, manually convert your files into xliff using SDL Trados, Okapi or similar
+         *  b) Set $CONVERSION_ENABLED to true and implement your own converter
+         *
+         */
+        self::$CONVERSION_ENABLED = false;
+
+        self::$ANALYSIS_WORDS_PER_DAYS = 3000;
 		self::$BUILD_NUMBER = '0.3.3.8.3';
 		self::$VOLUME_ANALYSIS_ENABLED = true;
 

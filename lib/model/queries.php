@@ -168,6 +168,14 @@ function doReplaceAll( ArrayObject $queryParams ){
 	//                $where_status
 	//            ";
 
+    /**
+     * Escape Meta-characters to use in regular expression
+     *
+     */
+    $regexpEscapedTrg = preg_replace( '#([\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1',$trg );
+
+//    Log::doLog( $regexpTrg );
+
 	$sql = "SELECT id_segment, id_job, translation
                 FROM segment_translations st
                 JOIN jobs ON st.id_job = id AND password = '{$queryParams['password']}' AND id = {$queryParams['job']}
@@ -175,7 +183,7 @@ function doReplaceAll( ArrayObject $queryParams ){
             AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
                 AND st.status != 'NEW'
                 AND locked != 1
-                AND translation REGEXP $SQL_CASE'{$Space_Left}{$trg}{$Space_Right}'
+                AND translation REGEXP $SQL_CASE'{$Space_Left}{$regexpEscapedTrg}{$Space_Right}'
                 $where_status
                 ";
 
@@ -183,14 +191,15 @@ function doReplaceAll( ArrayObject $queryParams ){
 	$resultSet = $db->fetch_array($sql);
 
 //	Log::doLog( $sql );
-//	Log::doLog( "Replace ALL Total ResultSet " . count($resultSet) );
+	Log::doLog( "Replace ALL Total ResultSet " . count($resultSet) );
 
 	$sqlBatch = array();
 	foreach( $resultSet as $key => $tRow ){
 		//we get the spaces before needed string and re-apply before substitution because we can't know if there are
 		//and how much they are
-		$trMod = preg_replace( "#({$Space_Left}){$trg}{$Space_Right}#$modifier", '$1'.$replacement, $tRow['translation'] );
-		$sqlBatch[] = "({$tRow['id_segment']},{$tRow['id_job']},'{$trMod}')";
+		$trMod = preg_replace( "#({$Space_Left}){$regexpEscapedTrg}{$Space_Right}#$modifier", '$1'.$replacement, $tRow['translation'] );
+		$trMod = $db->escape( $trMod );
+        $sqlBatch[] = "({$tRow['id_segment']},{$tRow['id_job']},'{$trMod}')";
 	}
 
 	//MySQL default max_allowed_packet is 16MB, this system surely need more
@@ -221,6 +230,7 @@ function doReplaceAll( ArrayObject $queryParams ){
 				";
 
 			Log::$fileName = 'ReplaceAll_Failures.log';
+			Log::doLog( $sql );
 			Log::doLog( $resultSet );
 			Log::doLog( $sqlInsert );
 			Log::doLog( $msg );
@@ -692,8 +702,8 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 		st.status, COALESCE( time_to_edit, 0 ),
 		s.xliff_ext_prec_tags, s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
 
-		IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly,
-		COALESCE( autopropagated_from, 0 ) as autopropagated_from
+		IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
+		-- , COALESCE( autopropagated_from, 0 ) as autopropagated_from
 
 			,IF( fr.id IS NULL, 'false', 'true' ) as has_reference
 
