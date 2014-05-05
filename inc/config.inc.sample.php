@@ -12,7 +12,7 @@ class INIT {
 	public static $DB_DATABASE;
 	public static $DB_USER;
 	public static $DB_PASS;
-        public static $MEMCACHE_SERVERS = array();
+    public static $MEMCACHE_SERVERS = array();
 	public static $LOG_REPOSITORY;
 	public static $STORAGE_DIR;
 	public static $UPLOAD_REPOSITORY;
@@ -229,7 +229,7 @@ class INIT {
 		self::$AUTHCOOKIENAME='matecat_login';
 		self::$AUTHCOOKIEDURATION=86400*60;
 		self::$ENABLED_BROWSERS = array('chrome', 'safari', 'firefox');
-		self::$CONVERSION_ENABLED = true;
+		self::$CONVERSION_ENABLED = false;
 		self::$ANALYSIS_WORDS_PER_DAYS = 3000;
 		self::$BUILD_NUMBER = '0.3.3.8.3';
 		self::$VOLUME_ANALYSIS_ENABLED = true;

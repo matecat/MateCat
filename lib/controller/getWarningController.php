@@ -124,6 +124,12 @@ class getWarningController extends ajaxController {
             if( !empty( $row['first_of_my_job'] ) ){
                 $result['mine']++;
                 $result['list_in_my_job'][] = $row['first_of_my_job'];
+//                $result['list_in_my_job'][] = array_shift( explode( "," , $row['first_of_my_job'] ) );
+
+                //append to global list
+                $this->result[ 'details' ][] = $row['first_of_my_job'];
+//                $this->result[ 'details' ] = array_merge( $this->result[ 'details' ], explode( "," , $row['first_of_my_job'] )  )
+
             }
         }
 

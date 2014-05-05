@@ -169,21 +169,21 @@ function doReplaceAll( ArrayObject $queryParams ){
 	//            ";
 
 	$sql = "SELECT id_segment, id_job, translation
-		FROM segment_translations st
-		JOIN jobs ON st.id_job = id AND password = '{$queryParams['password']}' AND id = {$queryParams['job']}
-	WHERE id_job = {$queryParams['job']}
-	AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
-		AND st.status != 'NEW'
-		AND locked != 1
-		AND translation REGEXP $SQL_CASE'{$Space_Left}{$trg}{$Space_Right}'
-		$where_status
-		";
+                FROM segment_translations st
+                JOIN jobs ON st.id_job = id AND password = '{$queryParams['password']}' AND id = {$queryParams['job']}
+            WHERE id_job = {$queryParams['job']}
+            AND id_segment BETWEEN jobs.job_first_segment AND jobs.job_last_segment
+                AND st.status != 'NEW'
+                AND locked != 1
+                AND translation REGEXP $SQL_CASE'{$Space_Left}{$trg}{$Space_Right}'
+                $where_status
+                ";
 
 	//use this for UNDO
 	$resultSet = $db->fetch_array($sql);
 
-	//Log::doLog( $sql );
-	//Log::doLog( "Replace ALL Total ResultSet " . count($resultSet) );
+//	Log::doLog( $sql );
+//	Log::doLog( "Replace ALL Total ResultSet " . count($resultSet) );
 
 	$sqlBatch = array();
 	foreach( $resultSet as $key => $tRow ){
@@ -232,11 +232,11 @@ function doReplaceAll( ArrayObject $queryParams ){
 		}
 
 		//we must divide by 2 because Insert count as 1 but fails and duplicate key update count as 2
-		//Log::doLog( "Replace ALL Batch " . ($k +1) . " - Affected Rows " . ( $db->affected_rows / 2 ) );
+		Log::doLog( "Replace ALL Batch " . ($k +1) . " - Affected Rows " . ( $db->affected_rows / 2 ) );
 
 	}
 
-	//Log::doLog( "Replace ALL Done." );
+	Log::doLog( "Replace ALL Done." );
 
 }
 
@@ -689,10 +689,11 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 		p.name AS pname, p.create_date , fj.id_file,
 		f.filename, f.mime_type, s.id AS sid, s.segment, s.segment_hash, s.raw_word_count, s.internal_id,
 		IF (st.status='NEW',NULL,st.translation) AS translation,
-		st.status, IF(st.time_to_edit IS NULL,0,st.time_to_edit) AS time_to_edit,
+		st.status, COALESCE( time_to_edit, 0 ),
 		s.xliff_ext_prec_tags, s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
 
-		IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
+		IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly,
+		COALESCE( autopropagated_from, 0 ) as autopropagated_from
 
 			,IF( fr.id IS NULL, 'false', 'true' ) as has_reference
 
@@ -768,8 +769,7 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ){
 				WHERE id_job = %u
 				AND segment_translations.status IN( 'TRANSLATED' ) -- , 'APPROVED' )
 				GROUP BY segment_hash, CONCAT( id_job, '-', password )
-				HAVING translations_available != total_sources
-				AND translations_available > 1
+				HAVING translations_available > 1
 		";
 
 		$query = sprintf( $queryForMismatchesInJob, $db->escape( $jpassword ), $jid );
@@ -805,11 +805,14 @@ function propagateTranslation( $params, $job_data ){
 		}
 	}
 
+    //the job password seems a better idea to search only the segments in the actual chunk,
+    //but it needs an update in join on 2 tables.
+    //job_first_segment and job_last_segment should do the same thing
 	$TranslationPropagate = "
 		UPDATE segment_translations
-		SET " . implode( ", ", $q ) . ", time_to_edit = time_to_edit + 0
+		SET " . implode( ", ", $q ) . "
 		WHERE id_job = {$params[ 'id_job' ]}
-	AND segment_hash = '" . $params[ 'segment_hash' ] . "'
+	    AND segment_hash = '" . $params[ 'segment_hash' ] . "'
 		AND status IN ( 'DRAFT', 'NEW', 'REJECTED' )
 		AND id_segment BETWEEN {$job_data[ 'job_first_segment' ]} AND {$job_data[ 'job_last_segment' ]}
 	";
@@ -871,7 +874,21 @@ function setTranslationUpdate( $id_segment, $id_job, $status, $time_to_edit, $tr
 	$translation = $db->escape( $translation );
 	$status      = $db->escape( $status );
 
-	$q = "UPDATE segment_translations SET status='$status', suggestion_position='$chosen_suggestion_index', serialized_errors_list='$errors', time_to_edit=IF(time_to_edit is null,0,time_to_edit) + $time_to_edit, translation='$translation', translation_date='$now', warning=" . (int)$warning . " WHERE id_segment=$id_segment and id_job=$id_job";
+	$q = "UPDATE segment_translations
+	            SET status='$status',
+	            suggestion_position='$chosen_suggestion_index',
+	            serialized_errors_list='$errors',
+	            time_to_edit = time_to_edit + $time_to_edit,
+	            translation='$translation',
+	            translation_date='$now',
+	            warning=" . (int)$warning;
+
+    //we put the patch here for convenience
+    if( $status == 'TRANSLATED' ){
+        $q .= ", autopropagated_from = NULL";
+    }
+
+	$q .= " WHERE id_segment=$id_segment and id_job=$id_job";
 
 	if( empty( $translation ) && !is_numeric( $translation ) ){
 		$msg = "\n\n Error setTranslationUpdate \n\n Empty translation found: \n\n " . var_export( array_merge( array( 'db_query' => $q ), $_POST ), true );
@@ -1985,6 +2002,9 @@ function initializeWordCount( WordCount_Struct $wStruct ){
 /**
  * Update the word count for the job
  *
+ * We perform an update in join with jobs table
+ * because we want to update the word count only for the current chunk
+ *
  * @param WordCount_Struct $wStruct
  *
  * @return int
@@ -1993,18 +2013,19 @@ function updateWordCount( WordCount_Struct $wStruct ){
 
 	$db = Database::obtain();
 
+    //Update in JOIN
 	$query = "UPDATE jobs as j, segment_translations AS st SET
-		new_words = new_words + " . $wStruct->getNewWords() . ",
-				  draft_words = draft_words + " . $wStruct->getDraftWords() . ",
-				  translated_words = translated_words + " . $wStruct->getTranslatedWords() . ",
-				  approved_words = approved_words + " . $wStruct->getApprovedWords() . ",
-				  rejected_words = rejected_words + " . $wStruct->getRejectedWords() . ",
-				  st.status = '" . $db->escape( $wStruct->getNewStatus() ) . "'
-					  WHERE j.id = " . (int)$wStruct->getIdJob() . "
-					  AND st.id_job = j.id
-					  AND j.password = '" . $db->escape( $wStruct->getJobPassword() ) . "'
-					  AND st.status = '" . $db->escape( $wStruct->getOldStatus() ) . "'
-					  AND st.id_segment = " . (int)$wStruct->getIdSegment();
+                new_words = new_words + " . $wStruct->getNewWords() . ",
+                draft_words = draft_words + " . $wStruct->getDraftWords() . ",
+                translated_words = translated_words + " . $wStruct->getTranslatedWords() . ",
+                approved_words = approved_words + " . $wStruct->getApprovedWords() . ",
+                rejected_words = rejected_words + " . $wStruct->getRejectedWords() . ",
+                st.status = '" . $db->escape( $wStruct->getNewStatus() ) . "'
+                  WHERE j.id = " . (int)$wStruct->getIdJob() . "
+                  AND st.id_job = j.id
+                  AND j.password = '" . $db->escape( $wStruct->getJobPassword() ) . "'
+                  AND st.status = '" . $db->escape( $wStruct->getOldStatus() ) . "'
+                  AND st.id_segment = " . (int)$wStruct->getIdSegment();
 
 	$db->query( $query );
 

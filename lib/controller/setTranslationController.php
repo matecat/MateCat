@@ -212,6 +212,7 @@ class setTranslationController extends ajaxController {
         $TPropagation[ 'id_job' ]                 = $this->id_job;
         $TPropagation[ 'status' ]                 = 'DRAFT';
         $TPropagation[ 'translation' ]            = $translation;
+        $TPropagation[ 'autopropagated_from' ]    = $this->id_segment;
         $TPropagation[ 'serialized_errors_list' ] = $err_json;
         $TPropagation[ 'warning' ]                = $check->thereAreErrors();
         $TPropagation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
@@ -237,7 +238,7 @@ class setTranslationController extends ajaxController {
         $project = array_pop( $project );
         $job_stats['ANALYSIS_COMPLETE'] = ( $project['status_analysis'] == 'DONE' ? true : false );
 
-		//$file_stats = CatUtils::getStatsForFile($this->id_first_file); //Removed .. HEAVY query, client don't need these infos at moment
+		//$file_stats = CatUtils::getStatsForFile($this->id_first_file); //Removed .. HEAVY query, client don't need these info at moment
 
         $file_stats = array();
 
