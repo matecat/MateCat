@@ -30,8 +30,8 @@ UI = {
 			}).addClass('open');
 		}
 	},
-	activateSegment: function() {
-		this.createFooter(this.currentSegment);
+	activateSegment: function(isDifferent) {
+		this.createFooter(this.currentSegment, isDifferent);
 		this.createButtons();
 		this.createHeader();
 	},
@@ -199,7 +199,7 @@ UI = {
 		$('#segment-' + this.currentSegmentId + '-buttons').empty().append(buttons);
 		$('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
 	},
-	createFooter: function(segment) {
+	createFooter: function(segment, isDifferent) {
 		if ($('.matches .overflow', segment).text() !== '')
 			return false;
 		if ($('.footer', segment).text() !== '')
@@ -252,6 +252,7 @@ UI = {
 		$('.footer', segment).html(footer);
 
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
+			if(!isDifferent) return false;
 			var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1]));
 //			console.log('li prendo dal local storage');
 			UI.processContributions(d, segment);
@@ -869,7 +870,13 @@ UI = {
 		this.clearUndoStack();
 		this.saveInUndoStack('open');
 		this.autoSave = true;
-		this.activateSegment();
+
+		var s1 = $('#segment-' + this.lastTranslatedSegmentId + ' .source').text();
+		var s2 = $('.source', segment).text();
+		var isDifferent = lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50;
+		
+		
+		this.activateSegment(isDifferent);
 		this.getNextSegment(this.currentSegment, 'untranslated');
 		this.setCurrentSegment();
 		this.currentSegment.addClass('opened');
@@ -885,22 +892,25 @@ UI = {
 		}, 100);
 		this.currentIsLoaded = false;
 		this.nextIsLoaded = false;
+
+
 		if (!this.readonly) {
 			console.log('ultimo segmento tradotto :', this.lastTranslatedSegmentId);
 			console.log('source last translated segment: ', $('#segment-' + this.lastTranslatedSegmentId + ' .source').text());
 			console.log('source this segment: ', $('.source', segment).text());
-			var s1 = $('#segment-' + this.lastTranslatedSegmentId + ' .source').text();
-			var s2 = $('.source', segment).text();
+//			var s1 = $('#segment-' + this.lastTranslatedSegmentId + ' .source').text();
+//			var s2 = $('.source', segment).text();
 			console.log(lev(s1, s2));
 			console.log(lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50);
 
-			if(lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50) {
+			if(isDifferent) {
+//			if(lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50) {
 				this.getContribution(segment, 0);
 			} else {
+				$(segment).removeClass('loaded');
+				$(".loader", n).addClass('loader_on');
 				setTimeout(function() {
 					console.log(segment);
-					$(segment).removeClass('loaded');
-					$(".loader", n).addClass('loader_on');
 					$('.editor .matches .graysmall').remove();
 					UI.getContribution(segment, 0);
 				}, 3000);				
