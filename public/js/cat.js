@@ -900,6 +900,8 @@ UI = {
 				setTimeout(function() {
 					console.log(segment);
 					$(segment).removeClass('loaded');
+					$(".loader", n).addClass('loader_on');
+					$('.editor .matches .graysmall').remove();
 					UI.getContribution(segment, 0);
 				}, 3000);				
 			};
@@ -3942,7 +3944,7 @@ $.extend(UI, {
 		});
 	},
 	getContribution: function(segment, next) {
-		console.log('next: ', next);
+//		console.log('next: ', next);
 //		console.log('next: ', next);
 //		console.log('getContribution di ', segment);
 		var n = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);

@@ -900,6 +900,8 @@ UI = {
 				setTimeout(function() {
 					console.log(segment);
 					$(segment).removeClass('loaded');
+					$(".loader", n).addClass('loader_on');
+					$('.editor .matches .graysmall').remove();
 					UI.getContribution(segment, 0);
 				}, 3000);				
 			};

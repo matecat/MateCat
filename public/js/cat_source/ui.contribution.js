@@ -48,7 +48,7 @@ $.extend(UI, {
 		});
 	},
 	getContribution: function(segment, next) {
-		console.log('next: ', next);
+//		console.log('next: ', next);
 //		console.log('next: ', next);
 //		console.log('getContribution di ', segment);
 		var n = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
