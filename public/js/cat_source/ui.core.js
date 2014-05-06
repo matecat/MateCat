@@ -885,9 +885,28 @@ UI = {
 		}, 100);
 		this.currentIsLoaded = false;
 		this.nextIsLoaded = false;
-		if (!this.readonly)
-			this.getContribution(segment, 0);
-			if(!this.noGlossary) this.getGlossary(segment, true, 0);
+		if (!this.readonly) {
+			console.log('ultimo segmento tradotto :', this.lastTranslatedSegmentId);
+			console.log('source last translated segment: ', $('#segment-' + this.lastTranslatedSegmentId + ' .source').text());
+			console.log('source this segment: ', $('.source', segment).text());
+			var s1 = $('#segment-' + this.lastTranslatedSegmentId + ' .source').text();
+			var s2 = $('.source', segment).text();
+			console.log(lev(s1, s2));
+			console.log(lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50);
+
+			if(lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50) {
+				this.getContribution(segment, 0);
+			} else {
+				setTimeout(function() {
+					console.log(segment);
+					$(segment).removeClass('loaded');
+					UI.getContribution(segment, 0);
+				}, 3000);				
+			};
+//			console.log(1- (lev(s1,s2)/max(lenght(s1),lenght(s2))*100 >50);
+//			this.getContribution(segment, 0);			
+		}
+		if(!this.noGlossary) this.getGlossary(segment, true, 0);
 		this.opening = true;
 		if (!(this.currentSegment.is(this.lastOpenedSegment))) {
 			var lastOpened = $(this.lastOpenedSegment).attr('id');
@@ -1762,6 +1781,7 @@ UI = {
 	setTranslation: function(id_segment, status, caller) {
 		reqArguments = arguments;
 		segment = $('#segment-' + id_segment); 
+		this.lastTranslatedSegmentId = id_segment;
 		caller = (typeof caller == 'undefined') ? false : caller;
 		var file = $(segment).parents('article');
 

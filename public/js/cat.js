@@ -885,9 +885,28 @@ UI = {
 		}, 100);
 		this.currentIsLoaded = false;
 		this.nextIsLoaded = false;
-		if (!this.readonly)
-			this.getContribution(segment, 0);
-			if(!this.noGlossary) this.getGlossary(segment, true, 0);
+		if (!this.readonly) {
+			console.log('ultimo segmento tradotto :', this.lastTranslatedSegmentId);
+			console.log('source last translated segment: ', $('#segment-' + this.lastTranslatedSegmentId + ' .source').text());
+			console.log('source this segment: ', $('.source', segment).text());
+			var s1 = $('#segment-' + this.lastTranslatedSegmentId + ' .source').text();
+			var s2 = $('.source', segment).text();
+			console.log(lev(s1, s2));
+			console.log(lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50);
+
+			if(lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50) {
+				this.getContribution(segment, 0);
+			} else {
+				setTimeout(function() {
+					console.log(segment);
+					$(segment).removeClass('loaded');
+					UI.getContribution(segment, 0);
+				}, 3000);				
+			};
+//			console.log(1- (lev(s1,s2)/max(lenght(s1),lenght(s2))*100 >50);
+//			this.getContribution(segment, 0);			
+		}
+		if(!this.noGlossary) this.getGlossary(segment, true, 0);
 		this.opening = true;
 		if (!(this.currentSegment.is(this.lastOpenedSegment))) {
 			var lastOpened = $(this.lastOpenedSegment).attr('id');
@@ -1053,7 +1072,7 @@ UI = {
                 /* see also replacement made in source content below */
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
 
-				newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '">' +
+                newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
 						'	<span class="sid">' + this.sid + '</span>' +
 						'	<div class="body">' +
@@ -1292,6 +1311,20 @@ UI = {
 		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
 	},
 	detectTranslationAlternatives: function(d) {
+
+        /**
+         * To Andrea:
+         *
+         * removed because business logic has changed, now auto-propagation info
+         * is sent as response in getMoreSegments and added as data in the "section" Tag and
+         * rendered/prepared in renderSegments/createHeader
+         * and managed in propagateTranslation
+         *
+         * @see renderSegments
+         * @see createHeader
+         * @see propagateTranslation
+         *
+         */
 //		if(d.data.editable.length + d.data.not_editable.length) {
 //			if(!$('.header .repetition', UI.currentSegment).length) $('.header', UI.currentSegment).prepend('<span class="repetition">Autopropagated</span>');
 //		}
@@ -1748,6 +1781,7 @@ UI = {
 	setTranslation: function(id_segment, status, caller) {
 		reqArguments = arguments;
 		segment = $('#segment-' + id_segment); 
+		this.lastTranslatedSegmentId = id_segment;
 		caller = (typeof caller == 'undefined') ? false : caller;
 		var file = $(segment).parents('article');
 
@@ -2098,25 +2132,25 @@ UI = {
 			this.setProgress(d.stats);
 			//check status of global warnings
 			this.checkWarnings(false);
-			this.propagateTranslation(segment, status);
-		}
-	},
-	propagateTranslation: function(segment, status) {
-		console.log($(segment).attr('data-hash'));
+            this.propagateTranslation(segment, status);
+        }
+    },
+    propagateTranslation: function(segment, status) {
+        console.log($(segment).attr('data-hash'));
 
         if( status == 'translated' ){
             //unset actual segment as autoPropagated because now it is translated
             $( segment ).data( 'autopropagated', false );
         }
 
-		$.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected'), function(index) {
-			$('.editarea', this).html( $('.editarea', segment).html() );
-			UI.setStatus($(this), 'draft');
-            //unset actual segment as autoPropagated
+        $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected'), function(index) {
+            $('.editarea', this).html( $('.editarea', segment).html() );
+            UI.setStatus($(this), 'draft');
+            //set segment as autoPropagated
             $( this ).data( 'autopropagated', true );
-		});
-		$('section[data-hash=' + $(segment).attr('data-hash') + ']');
-	},
+        });
+        $('section[data-hash=' + $(segment).attr('data-hash') + ']');
+    },
 
 	setWaypoints: function() {
 		this.firstSegment.waypoint('remove');
@@ -2915,7 +2949,7 @@ $.extend(UI, {
 			ed = $(this).parents('.graysmall').find('.translation');
 			UI.editContribution(UI.currentSegment, $(this).parents('.graysmall'));
 			UI.closeInplaceEditor(ed);
-		}).on('click', '.tab.alternatives .graysmall .goto a', function(e) {
+		}).on('click', '.tab.alternatives .graysmall .goto a', function(e) {console.log('eccolo');
 			e.preventDefault();
 			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')));
 		});
@@ -3908,6 +3942,7 @@ $.extend(UI, {
 		});
 	},
 	getContribution: function(segment, next) {
+		console.log('next: ', next);
 //		console.log('next: ', next);
 //		console.log('getContribution di ', segment);
 		var n = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
@@ -6186,6 +6221,78 @@ Object.size = function(obj) {
 String.prototype.splice = function( idx, rem, s ) {
     return (this.slice(0,idx) + s + this.slice(idx + Math.abs(rem)));
 };
+
+function lev(s1, s2) {
+  //       discuss at: http://phpjs.org/functions/levenshtein/
+  //      original by: Carlos R. L. Rodrigues (http://www.jsfromhell.com)
+  //      bugfixed by: Onno Marsman
+  //       revised by: Andrea Giammarchi (http://webreflection.blogspot.com)
+  // reimplemented by: Brett Zamir (http://brett-zamir.me)
+  // reimplemented by: Alexander M Beedie
+  //        example 1: levenshtein('Kevin van Zonneveld', 'Kevin van Sommeveld');
+  //        returns 1: 3
+
+  if (s1 == s2) {
+    return 0;
+  }
+
+  var s1_len = s1.length;
+  var s2_len = s2.length;
+  if (s1_len === 0) {
+    return s2_len;
+  }
+  if (s2_len === 0) {
+    return s1_len;
+  }
+
+  // BEGIN STATIC
+  var split = false;
+  try {
+    split = !('0')[0];
+  } catch (e) {
+    split = true; // Earlier IE may not support access by string index
+  }
+  // END STATIC
+  if (split) {
+    s1 = s1.split('');
+    s2 = s2.split('');
+  }
+
+  var v0 = new Array(s1_len + 1);
+  var v1 = new Array(s1_len + 1);
+
+  var s1_idx = 0,
+    s2_idx = 0,
+    cost = 0;
+  for (s1_idx = 0; s1_idx < s1_len + 1; s1_idx++) {
+    v0[s1_idx] = s1_idx;
+  }
+  var char_s1 = '',
+    char_s2 = '';
+  for (s2_idx = 1; s2_idx <= s2_len; s2_idx++) {
+    v1[0] = s2_idx;
+    char_s2 = s2[s2_idx - 1];
+
+    for (s1_idx = 0; s1_idx < s1_len; s1_idx++) {
+      char_s1 = s1[s1_idx];
+      cost = (char_s1 == char_s2) ? 0 : 1;
+      var m_min = v0[s1_idx + 1] + 1;
+      var b = v1[s1_idx] + 1;
+      var c = v0[s1_idx] + cost;
+      if (b < m_min) {
+        m_min = b;
+      }
+      if (c < m_min) {
+        m_min = c;
+      }
+      v1[s1_idx + 1] = m_min;
+    }
+    var v_tmp = v0;
+    v0 = v1;
+    v1 = v_tmp;
+  }
+  return v0[s1_len];
+}
 /*
 	Component: ui.customization
  */
