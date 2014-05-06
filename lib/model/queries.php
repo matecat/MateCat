@@ -10,7 +10,8 @@ function doSearchQuery( ArrayObject $queryParams ) {
 	$src = $db->escape( $queryParams['src'] );
 	$trg = $db->escape( $queryParams['trg'] );
 
-	//Log::doLog( $queryParams );
+//	Log::doLog( $queryParams );
+//	Log::doLog( $trg );
 
 	$where_status = "";
 	if ( $queryParams[ 'status' ] != 'all' ) {
@@ -32,6 +33,16 @@ function doSearchQuery( ArrayObject $queryParams ) {
 		$LIKE = "%";
 	}
 
+    /**
+     * Escape Meta-characters to use in regular expression ( LIKE is treated inside MySQL as a Regexp pattern )
+     *
+     */
+    $_regexpEscapedSrc = preg_replace( '#([\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1',$queryParams['src'] );
+    $_regexpEscapedSrc = $db->escape( $_regexpEscapedSrc );
+
+    $_regexpEscapedTrg = preg_replace( '#([\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1',$queryParams['trg'] );
+    $_regexpEscapedTrg = $db->escape( $_regexpEscapedTrg );
+
 	$query = "";
 	if ( $key == "source" ) {
 
@@ -43,7 +54,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
 			INNER JOIN files_job fj on s.id_file=fj.id_file
 			LEFT JOIN segment_translations st on st.id_segment = s.id AND st.id_job = fj.id_job
 			WHERE fj.id_job = {$queryParams['job']}
-		AND s.segment LIKE '" . $LIKE . $src . $LIKE . "'
+		AND s.segment LIKE '" . $LIKE . $_regexpEscapedSrc . $LIKE . "'
 			$where_status
 			GROUP BY s.id WITH ROLLUP";
 
@@ -55,7 +66,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
 			) AS count
 			FROM segment_translations st
 			WHERE st.id_job = {$queryParams['job']}
-		AND st.translation LIKE '" . $LIKE . $trg . $LIKE . "'
+		AND st.translation LIKE '" . $LIKE . $_regexpEscapedTrg . $LIKE . "'
 			AND st.status != 'NEW'
 			$where_status
 			AND ROUND (
@@ -69,8 +80,8 @@ function doSearchQuery( ArrayObject $queryParams ) {
 			FROM segment_translations as st
 			JOIN segments as s on id = id_segment
 			WHERE st.id_job = {$queryParams['job']}
-		AND st.translation LIKE '" . $LIKE . $trg . $LIKE . "'
-			AND s.segment LIKE '" . $LIKE . $src . $LIKE . "'
+		AND st.translation LIKE '" . $LIKE . $_regexpEscapedTrg . $LIKE . "'
+			AND s.segment LIKE '" . $LIKE . $_regexpEscapedSrc . $LIKE . "'
 			AND LENGTH( REPLACE ( $SQL_CASE( segment ), $SQL_CASE( '$src' ), '') ) != LENGTH( s.segment )
 			AND LENGTH( REPLACE ( $SQL_CASE( st.translation ), $SQL_CASE( '$trg' ), '') ) != LENGTH( st.translation )
 			AND st.status != 'NEW'
@@ -89,6 +100,8 @@ function doSearchQuery( ArrayObject $queryParams ) {
 
 	$results = $db->fetch_array( $query );
 	$err     = $db->get_error();
+
+//    Log::doLog($results);
 
 	$errno   = $err[ 'error_code' ];
 
@@ -129,10 +142,9 @@ function doSearchQuery( ArrayObject $queryParams ) {
 
 function doReplaceAll( ArrayObject $queryParams ){
 
-	$db = Database::obtain();
-
-	$trg         = $db->escape( $queryParams['trg'] );
-	$replacement = $db->escape( $queryParams['replacement'] );
+	$db          = Database::obtain();
+	$trg         = $queryParams['trg'];
+	$replacement = $queryParams['replacement'];
 
 	$where_status = "";
 	if ( $queryParams[ 'status' ] != 'all' && $queryParams[ 'status' ] != 'new' ) {
@@ -172,7 +184,12 @@ function doReplaceAll( ArrayObject $queryParams ){
      * Escape Meta-characters to use in regular expression
      *
      */
-    $regexpEscapedTrg = preg_replace( '#([\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1',$trg );
+    $_regexpEscapedTrg = preg_replace( '#([\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1',$trg );
+
+    /**
+     * Escape for database
+     */
+    $regexpEscapedTrg = $db->escape( $_regexpEscapedTrg );
 
 //    Log::doLog( $regexpTrg );
 
@@ -191,14 +208,23 @@ function doReplaceAll( ArrayObject $queryParams ){
 	$resultSet = $db->fetch_array($sql);
 
 //	Log::doLog( $sql );
-	Log::doLog( "Replace ALL Total ResultSet " . count($resultSet) );
+//	Log::doLog( $resultSet );
+//	Log::doLog( "Replace ALL Total ResultSet " . count($resultSet) );
 
 	$sqlBatch = array();
 	foreach( $resultSet as $key => $tRow ){
+
+//        Log::doLog( "#({$Space_Left}){$_regexpEscapedTrg}{$Space_Right}#$modifier" );
+//        Log::doLog( '$1'.$replacement );
+
 		//we get the spaces before needed string and re-apply before substitution because we can't know if there are
 		//and how much they are
-		$trMod = preg_replace( "#({$Space_Left}){$regexpEscapedTrg}{$Space_Right}#$modifier", '$1'.$replacement, $tRow['translation'] );
-		$trMod = $db->escape( $trMod );
+		$trMod = preg_replace( "#({$Space_Left}){$_regexpEscapedTrg}{$Space_Right}#$modifier", '$1'.$replacement, $tRow['translation'] );
+
+        /**
+         * Escape for database
+         */
+        $trMod = $db->escape( $trMod );
         $sqlBatch[] = "({$tRow['id_segment']},{$tRow['id_job']},'{$trMod}')";
 	}
 
@@ -219,6 +245,8 @@ function doReplaceAll( ArrayObject $queryParams ){
 			ON DUPLICATE KEY UPDATE translation = VALUES( translation )";
 
 		$sqlInsert = sprintf( $sqlInsert, implode( ",", $batch ) );
+
+//        Log::doLog( $sqlInsert );
 
 		$db->query( $sqlInsert );
 
@@ -242,11 +270,11 @@ function doReplaceAll( ArrayObject $queryParams ){
 		}
 
 		//we must divide by 2 because Insert count as 1 but fails and duplicate key update count as 2
-		Log::doLog( "Replace ALL Batch " . ($k +1) . " - Affected Rows " . ( $db->affected_rows / 2 ) );
+//		Log::doLog( "Replace ALL Batch " . ($k +1) . " - Affected Rows " . ( $db->affected_rows / 2 ) );
 
 	}
 
-	Log::doLog( "Replace ALL Done." );
+//	Log::doLog( "Replace ALL Done." );
 
 }
 
@@ -703,7 +731,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 		s.xliff_ext_prec_tags, s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
 
 		IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
-		-- , COALESCE( autopropagated_from, 0 ) as autopropagated_from
+		, COALESCE( autopropagated_from, 0 ) as autopropagated_from
 
 			,IF( fr.id IS NULL, 'false', 'true' ) as has_reference
 
