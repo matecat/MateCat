@@ -919,6 +919,7 @@ Log::doLog( $query );
  * @param $params
  * @param $job_data
  *
+ * @throws Exception
  * @return int
  */
 function propagateTranslation( $params, $job_data ){
@@ -953,10 +954,9 @@ function propagateTranslation( $params, $job_data ){
     $err = $db->get_error();
 
     if( $err['error_code'] != 0 ){
-        Log::doLog( "Error in propagating Translation: " . $err['error_code'] . ": " . $err['error_description'] );
-        Log::doLog( $TranslationPropagate );
-        Log::doLog( $params );
-        return -$err['error_code'];
+        throw new Exception( "Error in propagating Translation: " . $err['error_code'] . ": " . $err['error_description']
+                . "\n" . $TranslationPropagate . "\n" . var_export( $params, true ) ,
+                -$err['error_code'] );
     }
 
     return $db->affected_rows;

@@ -245,7 +245,15 @@ class setTranslationController extends ajaxController {
         $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
 
         if( $this->status == 'TRANSLATED' ){
-            propagateTranslation( $TPropagation, $job_data );
+
+            try {
+                propagateTranslation( $TPropagation, $job_data );
+            } catch ( Exception $e ){
+                $msg = $e->getMessage() . "\n\n" . $e->getTraceAsString();
+                Log::doLog( $msg );
+                Utils::sendErrMailReport( $msg );
+            }
+
         }
 
         if (!empty($res['error'])) {
