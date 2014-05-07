@@ -204,7 +204,10 @@ UI = {
 		isDifferent = (typeof isDifferent == 'undefined')? true : isDifferent;
 		console.log('isDifferent 2: ', isDifferent);
 		if ($('.matches .overflow', segment).text() !== '') {
-			if(!isDifferent) return false;		
+			if(!isDifferent) {
+				$('.matches .overflow', segment).empty();
+				return false;
+			}		
 		}
 		if ($('.footer', segment).text() !== '')
 			return false; 
