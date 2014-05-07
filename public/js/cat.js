@@ -205,6 +205,7 @@ UI = {
 		console.log('isDifferent 2: ', isDifferent);
 		if ($('.matches .overflow', segment).text() !== '') {
 			if(!isDifferent) {
+				console.log ("in isDiffetent");
 				$('.matches .overflow', segment).empty();
 				return false;
 			}		
@@ -903,25 +904,28 @@ UI = {
 
 
 		if (!this.readonly) {
-			console.log('ultimo segmento tradotto :', this.lastTranslatedSegmentId);
-			console.log('source last translated segment: ', $('#segment-' + this.lastTranslatedSegmentId + ' .source').text());
-			console.log('source this segment: ', $('.source', segment).text());
+//			console.log('ultimo segmento tradotto :', this.lastTranslatedSegmentId);
+//			console.log('source last translated segment: ', $('#segment-' + this.lastTranslatedSegmentId + ' .source').text());
+//			console.log('source this segment: ', $('.source', segment).text());
 //			var s1 = $('#segment-' + this.lastTranslatedSegmentId + ' .source').text();
 //			var s2 = $('.source', segment).text();
-			console.log(lev(s1, s2));
-			console.log(lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50);
-
+//			console.log(lev(s1, s2));
+//			console.log(lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50);
+			console.log('isd: ', isDifferent);
 			if(isDifferent) {
 //			if(lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50) {
 				this.getContribution(segment, 0);
 			} else {
 				$(segment).removeClass('loaded');
+				console.log($(segment).hasClass('loaded'));
 				console.log('spinner by opensegment');
 				$(".loader", segment).addClass('loader_on');
 				setTimeout(function() {
 					console.log(segment);
-					$('.editor .matches .graysmall').remove();
+//					$('.editor .matches .graysmall').remove();
+					console.log('1');
 					UI.getContribution(segment, 0);
+					console.log('2');
 				}, 3000);				
 			};
 //			console.log(1- (lev(s1,s2)/max(lenght(s1),lenght(s2))*100 >50);
@@ -2375,6 +2379,7 @@ $.extend($.expr[":"], {
 
 $(window).resize(function() {
 });
+
 
 
 /*
@@ -3968,12 +3973,15 @@ $.extend(UI, {
 			translation: translation
 		});
 	},
-	getContribution: function(segment, next) {
+	getContribution: function(segment, next) {console.log('getContribution');
 //		console.log('next: ', next);
 //		console.log('next: ', next);
 //		console.log('getContribution di ', segment);
 		var n = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
+		console.log('n: ', n);
+		console.log('and this is where class loaded is evaluated');
 		if ($(n).hasClass('loaded')) {
+			console.log('hasclass loaded');
 			this.spellCheck();
 			if (next) {
 				this.nextIsLoaded = true;
@@ -4005,7 +4013,7 @@ $.extend(UI, {
 		txt = view2rawxliff(txt);
 		// Attention: As for copysource, what is the correct file format in attributes? I am assuming html encoded and "=>&quot;
 		//txt = txt.replace(/&quot;/g,'"');
-
+console.log('vediamo next: ', next);
 		if (!next) {
 				console.log('spinner by getcontribution');
 			$(".loader", n).addClass('loader_on');
@@ -4103,6 +4111,7 @@ $.extend(UI, {
 			} else {
 			}
 			var segment_id = segment.attr('id');
+console.log('add class loaded for segment ' + segment_id+ ' in renderContribution 1');
 			$(segment).addClass('loaded');
 			$('.sub-editor.matches .overflow', segment).empty();
 
@@ -4152,6 +4161,7 @@ $.extend(UI, {
 		} else {
 			if (UI.debug)
 				console.log('no matches');
+console.log('add class loaded for segment ' + segment_id+ ' in renderContribution 2')
 			$(segment).addClass('loaded');
 			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');
 		}
@@ -4340,7 +4350,6 @@ $.extend(UI, {
 		this.editarea.data('lastChosenSuggestion', w);
 	},
 });
-
 
 /*
 	Component: ui.tags
