@@ -34,7 +34,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
 	}
 
     /**
-     * Escape Meta-characters to use in regular expression ( LIKE is treated inside MySQL as a Regexp pattern )
+     * Escape Meta-characters to use in regular expression ( LIKE STATEMENT is treated inside MySQL as a Regexp pattern )
      *
      */
     $_regexpEscapedSrc = preg_replace( '#([\[\]\(\)\*\.\?\^\$\{\}\+\-\|\\\\])#', '\\\\$1',$queryParams['src'] );
@@ -820,56 +820,6 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ){
 
 }
 
-/**
- * This function propagates the translation to every identical sources in the chunk/job
- *
- * @param $params
- * @param $job_data
- *
- * @return int
- */
-function propagateTranslation( $params, $job_data ){
-
-	$db = Database::obtain();
-
-	$q = array();
-	foreach ( $params as $key => $value ) {
-		if ( is_bool( $value ) ) {
-			$q[ ] = $key . " = " . var_export( (bool)$value , true );
-		} elseif ( !is_numeric( $value ) ) {
-			$q[ ] = $key . " = '" . $db->escape( $value ) . "'";
-		} else {
-			$q[ ] = $key . " = " . (float)$value;
-		}
-	}
-
-    //the job password seems a better idea to search only the segments in the actual chunk,
-    //but it needs an update in join on 2 tables.
-    //job_first_segment and job_last_segment should do the same thing
-	$TranslationPropagate = "
-		UPDATE segment_translations
-		SET " . implode( ", ", $q ) . "
-		WHERE id_job = {$params[ 'id_job' ]}
-	    AND segment_hash = '" . $params[ 'segment_hash' ] . "'
-		AND status IN ( 'DRAFT', 'NEW', 'REJECTED' )
-		AND id_segment BETWEEN {$job_data[ 'job_first_segment' ]} AND {$job_data[ 'job_last_segment' ]}
-	";
-
-	$db->query( $TranslationPropagate );
-
-	$err = $db->get_error();
-
-	if( $err['error_code'] != 0 ){
-		Log::doLog( "Error in propagating Translation: " . $err['error_code'] . ": " . $err['error_description'] );
-		Log::doLog( $TranslationPropagate );
-		Log::doLog( $params );
-		return -$err['error_code'];
-	}
-
-	return $db->affected_rows;
-
-}
-
 function getLastSegmentInNextFetchWindow( $jid, $password, $step = 50, $ref_segment, $where = 'after' ) {
 	switch ( $where ) {
 		case 'after':
@@ -904,7 +854,118 @@ function getLastSegmentInNextFetchWindow( $jid, $password, $step = 50, $ref_segm
 	return $results[ 'max_id' ];
 }
 
+function addTranslation( array $_Translation ){
+
+    $db  = Database::obtain();
+
+    if( empty( $_Translation['translation'] ) && !is_numeric( $_Translation['translation'] ) ){
+        $msg = "\n\n Error setTranslationUpdate \n\n Empty translation found: \n\n " . var_export( array_merge( array( 'db_query' => $q ), $_POST ), true );
+        Log::doLog( $msg );
+        Utils::sendErrMailReport( $msg );
+        return -1;
+    }
+
+    $query = "INSERT INTO `segment_translations` ";
+
+    foreach ( $_Translation as $key => $val ) {
+
+        if ( strtolower( $val ) == 'now()' || strtolower( $val ) == 'current_timestamp()' || strtolower( $val ) == 'sysdate()' ) {
+            $_Translation[$key] =  "NOW()";
+        } elseif( is_numeric( $val ) ) {
+            $_Translation[$key] = (float)$val;
+        } elseif( is_bool( $val ) ){
+            $_Translation[$key] =  var_export( $val, true );
+        } elseif ( strtolower( $val ) == 'null' || empty( $val ) ) {
+            $_Translation[$key] =  "NULL";
+        } else {
+            $_Translation[$key] = "'" . $db->escape( $val ) . "'";
+        }
+
+    }
+
+    $query .= "(" . implode(", ", array_keys( $_Translation ) ) . ") VALUES (" . implode( ", ", array_values( $_Translation ) ) . ")";
+
+    $query .= "
+				ON DUPLICATE KEY UPDATE
+				status = {$_Translation['status']},
+                suggestion_position = {$_Translation['suggestion_position']},
+                serialized_errors_list = {$_Translation['serialized_errors_list']},
+                time_to_edit = time_to_edit + VALUES( time_to_edit ),
+                translation = {$_Translation['translation']},
+                translation_date = {$_Translation['translation_date']},
+                warning = " . $_Translation['warning'];
+
+    if( isset( $_Translation['autopropagated_from'] ) ){
+        $query .= " , autopropagated_from = NULL";
+    }
+Log::doLog( $query );
+    $db->query( $query );
+
+    $err   = $db->get_error();
+    $errno = $err[ 'error_code' ];
+
+    if ( $errno != 0 ) {
+        log::doLog( "$errno: " . var_export( $err, true ) );
+        return $errno * -1;
+    }
+
+    return $db->affected_rows;
+
+}
+
+/**
+ * This function propagates the translation to every identical sources in the chunk/job
+ *
+ * @param $params
+ * @param $job_data
+ *
+ * @return int
+ */
+function propagateTranslation( $params, $job_data ){
+
+    $db = Database::obtain();
+
+    $q = array();
+    foreach ( $params as $key => $value ) {
+        if ( is_bool( $value ) ) {
+            $q[ ] = $key . " = " . var_export( (bool)$value , true );
+        } elseif ( !is_numeric( $value ) ) {
+            $q[ ] = $key . " = '" . $db->escape( $value ) . "'";
+        } else {
+            $q[ ] = $key . " = " . (float)$value;
+        }
+    }
+
+    //the job password seems a better idea to search only the segments in the actual chunk,
+    //but it needs an update in join on 2 tables.
+    //job_first_segment and job_last_segment should do the same thing
+    $TranslationPropagate = "
+		UPDATE segment_translations
+		SET " . implode( ", ", $q ) . "
+		WHERE id_job = {$params[ 'id_job' ]}
+	    AND segment_hash = '" . $params[ 'segment_hash' ] . "'
+		AND status IN ( 'DRAFT', 'NEW', 'REJECTED' )
+		AND id_segment BETWEEN {$job_data[ 'job_first_segment' ]} AND {$job_data[ 'job_last_segment' ]}
+	";
+
+    $db->query( $TranslationPropagate );
+
+    $err = $db->get_error();
+
+    if( $err['error_code'] != 0 ){
+        Log::doLog( "Error in propagating Translation: " . $err['error_code'] . ": " . $err['error_description'] );
+        Log::doLog( $TranslationPropagate );
+        Log::doLog( $params );
+        return -$err['error_code'];
+    }
+
+    return $db->affected_rows;
+
+}
+
+/*
 function setTranslationUpdate( $id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index, $warning = 0 ) {
+
 	// need to use the plain update instead of library function because of the need to update an existent value in db (time_to_edit)
 	$now = date( "Y-m-d H:i:s" );
 	$db  = Database::obtain();
@@ -939,7 +1000,7 @@ function setTranslationUpdate( $id_segment, $id_job, $status, $time_to_edit, $tr
 	$errno = $err[ 'error_code' ];
 
 	if ( $errno != 0 ) {
-		log::doLog( "$errno: $err" );
+		log::doLog( "$errno: " . var_export( $err, true ) );
 		return $errno * -1;
 	}
 
@@ -973,13 +1034,14 @@ function setTranslationInsert( $id_segment, $id_job, $status, $time_to_edit, $tr
 
 	if ( $errno != 0 ) {
 		if ( $errno != 1062 ) {
-			log::doLog( "$errno: $err" );
+			log::doLog( "$errno: " . var_export( $err, true ) );
 		}
 		return $errno * -1;
 	}
 
 	return $db->affected_rows;
 }
+*/
 
 function setSuggestionUpdate( $id_segment, $id_job, $suggestions_json_array, $suggestion, $suggestion_match, $suggestion_source, $match_type, $eq_words, $standard_words, $translation, $tm_status_analysis, $warning, $err_json_list, $mt_qe ) {
 	$data                          = array();
@@ -2043,6 +2105,9 @@ function initializeWordCount( WordCount_Struct $wStruct ){
  * We perform an update in join with jobs table
  * because we want to update the word count only for the current chunk
  *
+ * Update the status of segment_translation is needed to avoid duplicated calls
+ * ( The second call fails for status condition )
+ *
  * @param WordCount_Struct $wStruct
  *
  * @return int
@@ -2844,7 +2909,7 @@ function setJobCompleteness( $jid, $is_completed ) {
 	$errno   = $err[ 'error_code' ];
 
 	if ( $errno != 0 ) {
-		log::doLog( "$errno: $err" );
+		log::doLog( "$errno: " . var_export( $err, true ) );
 
 		return $errno * -1;
 	}
