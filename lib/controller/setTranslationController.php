@@ -199,13 +199,39 @@ class setTranslationController extends ajaxController {
             $counter->setOldStatus( $old_translation['status'] );
             $counter->setNewStatus( $this->status );
             $newValues = $counter->getUpdatedValues( $old_count );
+
+            /**
+             * WARNING: THIS CHANGE THE STATUS OF SEGMENT_TRANSLATIONS ALSO
+             *
+             * Needed because of duplicated setTranslationsController calls for the same segment
+             *   ( The second call fails for status in where condition )
+             *
+             */
             $newTotals = $counter->updateDB( $newValues );
 
         } else {
             $newTotals = $old_wStruct;
         }
+        $_Translation                            = array();
+        $_Translation[ 'id_segment' ]            = $this->id_segment;
+        $_Translation[ 'id_job' ]                = $this->id_job;
+        $_Translation[ 'status' ]                = $this->status;
+        $_Translation[ 'time_to_edit' ]          = $this->time_to_edit;
+        $_Translation[ 'translation' ]           = $translation;
+        $_Translation[ 'serialized_errors_list' ] = $err_json;
+        $_Translation[ 'suggestion_position' ]   = $this->chosen_suggestion_index;
+        $_Translation[ 'warning' ]               = $check->thereAreErrors();
+        $_Translation[ 'translation_date' ]      = date( "Y-m-d H:i:s" );
 
-        $res = CatUtils::addSegmentTranslation( $this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreErrors() );
+        /**
+         * when the status of the translation changes, the auto propagation flag
+         * must be removed
+         */
+        if( rtrim($translation) != $old_translation['translation'] || $this->status == 'TRANSLATED' || $this->status == 'APPROVED' ){
+            $_Translation[ 'autopropagated_from' ] = 'NULL';
+        }
+
+        $res = CatUtils::addSegmentTranslation( $_Translation );
 
         //propagate translations
         $TPropagation                             = array();

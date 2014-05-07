@@ -61,14 +61,6 @@ class TMS extends Engine {
         $parameters = array();
         $parameters['q'] =  $_config['segment'] ;
 
-        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX : it
-        //does not handle properly iso code (en-US)-- COMMIT BUT MUST BE FIXED IN MYMEMORY
-        if ( $_config['isConcordance'] || $_config['isGlossary'] ) {
-            list( $_config['source_lang'], $trash ) = explode('-', $_config['source_lang'] );
-            list( $_config['target_lang'], $trash ) = explode('-', $_config['target_lang'] );
-        }
-        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX --
-
         $parameters[ 'langpair' ] = $_config['source_lang'] . "|" . $_config['target_lang'];
         $parameters[ 'de' ]       = $_config[ 'email' ];
         $parameters[ 'mt' ]       = $_config[ 'get_mt' ];
@@ -91,14 +83,6 @@ class TMS extends Engine {
     }
 
     public function set( array $_config ) {
-
-        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX : it
-        //does not handle properly iso code (en-US)-- COMMIT BUT MUST BE FIXED IN MYMEMORY
-        if ( $_config['isGlossary'] ) {
-            list( $_config['source_lang'], $trash ) = explode('-', $_config['source_lang'] );
-            list( $_config['target_lang'], $trash ) = explode('-', $_config['target_lang'] );
-        }
-        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX --
 
         $parameters               = array();
         $parameters[ 'seg' ]      = $_config[ 'segment' ];
@@ -126,14 +110,6 @@ class TMS extends Engine {
 
     public function delete( array $_config ) {
 
-        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX : it
-        //does not handle properly iso code (en-US)-- COMMIT BUT MUST BE FIXED IN MYMEMORY
-        if ( $_config['isGlossary'] ) {
-            list( $_config['source_lang'], $trash ) = explode('-', $_config['source_lang'] );
-            list( $_config['target_lang'], $trash ) = explode('-', $_config['target_lang'] );
-        }
-        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX --
-
         $parameters               = array();
         $parameters[ 'seg' ]      = $_config[ 'segment' ];
         $parameters[ 'tra' ]      = $_config[ 'translation' ];
@@ -158,14 +134,6 @@ class TMS extends Engine {
     }
 
     public function update( array $_config ){
-
-        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX : it
-        //does not handle properly iso code (en-US)-- COMMIT BUT MUST BE FIXED IN MYMEMORY
-        if ( $_config['isGlossary'] ) {
-            list( $_config['source_lang'], $trash ) = explode('-', $_config['source_lang'] );
-            list( $_config['target_lang'], $trash ) = explode('-', $_config['target_lang'] );
-        }
-        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX --
 
         $parameters               = array();
         $parameters[ 'seg' ]      = $_config[ 'segment' ];

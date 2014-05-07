@@ -2012,6 +2012,12 @@ UI = {
 //			console.log('post process 2: ', $(area).html());
 		}
 
+        //remove last br if it is present and if after that element there's nothing
+        if( !$( 'span.placeholder:last', area ).next().length ){
+//            console.log( $( 'span.placeholder:last', area ).html() );
+            $( 'span.placeholder:last', area ).remove();
+        }
+
 //        Now commented, but valid for future purposes when the user will choose what type of carriage return
 //        $('br', area).each(function() {
 //
