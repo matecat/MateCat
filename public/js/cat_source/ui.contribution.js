@@ -86,6 +86,7 @@ $.extend(UI, {
 		//txt = txt.replace(/&quot;/g,'"');
 
 		if (!next) {
+				console.log('spinner by getcontribution');
 			$(".loader", n).addClass('loader_on');
 		}
 		if((next == 2)&&(this.nextSegmentId == this.nextUntranslatedSegmentId)) {
