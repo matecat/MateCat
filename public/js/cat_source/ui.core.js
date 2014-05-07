@@ -200,8 +200,12 @@ UI = {
 		$('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
 	},
 	createFooter: function(segment, isDifferent) {
-		if ($('.matches .overflow', segment).text() !== '')
-			return false;
+		console.log('isDifferent 1: ', isDifferent);
+		isDifferent = (typeof isDifferent == 'undefined')? true : isDifferent;
+		console.log('isDifferent 2: ', isDifferent);
+		if ($('.matches .overflow', segment).text() !== '') {
+			if(!isDifferent) return false;		
+		}
 		if ($('.footer', segment).text() !== '')
 			return false; 
 
@@ -250,8 +254,9 @@ UI = {
 					'	<div class="overflow"></div>' +
 					'</div>';
 		$('.footer', segment).html(footer);
-
+		console.log('isDifferent 3: ', isDifferent);
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
+			console.log('isDifferent 4: ', isDifferent);
 			if(!isDifferent) return false;
 			var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1]));
 //			console.log('li prendo dal local storage');
@@ -908,7 +913,8 @@ UI = {
 				this.getContribution(segment, 0);
 			} else {
 				$(segment).removeClass('loaded');
-				$(".loader", n).addClass('loader_on');
+				console.log('spinner by opensegment');
+				$(".loader", segment).addClass('loader_on');
 				setTimeout(function() {
 					console.log(segment);
 					$('.editor .matches .graysmall').remove();
