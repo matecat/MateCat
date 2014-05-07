@@ -2533,6 +2533,7 @@ textarea, input, .editarea, .search-editarea, select  {
 	margin-bottom: 6px;
 }
 .graysmall .b{padding-left:25px!important;position:relative}
+
 .message li{background: url(../img/bad.png) 22px center no-repeat;padding-left:40px !Important;background-size:12px 12px}
 .graysmall:hover .trash{height:20px;}
 .trash:hover{background: url(../img/sprite.png) -10px -1245px no-repeat;opacity:1;}
@@ -3026,7 +3027,6 @@ footer nav
 	.graysmall-message{left:55px !important}
 
 
-
 }
 
 @media screen and (max-width: 1180px){
@@ -3049,7 +3049,18 @@ footer nav
 
 	.search-editarea {width:200px !Important}
 	.text .item,.white li{width: 44% !important}
-
+}
+@media screen and (min-width: 1280px){
+	.alternatives .graysmall .sugg-target
+	{
+		width: 40% !important;
+	}
+}
+@media screen and (max-width: 1280px){
+	.alternatives .graysmall .sugg-target
+	{
+		width: 37% !important;
+	}
 }
 
 li.tag-mismatch
