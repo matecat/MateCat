@@ -233,6 +233,16 @@ class setTranslationController extends ajaxController {
 
         $res = CatUtils::addSegmentTranslation( $_Translation );
 
+        if (!empty($res['error'])) {
+            $this->result['error'] = $res['error'];
+
+            $msg = "\n\n Error addSegmentTranslation \n\n Database Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
+            Log::doLog( $msg );
+            Utils::sendErrMailReport( $msg );
+
+            return -1;
+        }
+
         //propagate translations
         $TPropagation                             = array();
         $TPropagation[ 'id_job' ]                 = $this->id_job;
@@ -255,16 +265,6 @@ class setTranslationController extends ajaxController {
             }
 
         }
-
-        if (!empty($res['error'])) {
-			$this->result['error'] = $res['error'];
-
-            $msg = "\n\n Error addSegmentTranslation \n\n Database Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
-            Log::doLog( $msg );
-            Utils::sendErrMailReport( $msg );
-
-			return -1;
-		}
 
 //		$job_stats = CatUtils::getStatsForJob($this->id_job, null, $this->password);
 		$job_stats = CatUtils::getFastStatsForJob( $newTotals );
