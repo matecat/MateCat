@@ -132,6 +132,7 @@ $.extend(UI, {
             //IMPORTANT post out the quotes
 			$('#continueForm input[name=quoteData]').attr('value', JSON.stringify( UI.quoteResponse ) );
 			$('#continueForm').submit();
+            $('#continueForm input[name=quoteData]').attr('value', '' );
 		}).on('click', '.continuebtn.disabled', function(e) {
 			e.preventDefault();
 		});

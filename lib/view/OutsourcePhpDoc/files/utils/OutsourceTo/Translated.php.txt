@@ -38,6 +38,9 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
      */
     public function performQuote( $volAnalysis = null ){
 
+        /**
+         * cache this job info for 20 minutes ( session duration )
+         */
         $cache_cart = Shop_Cart::getInstance( 'outsource_to_external_cache' );
 
         if ( $volAnalysis == null ) {
@@ -94,19 +97,18 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
              * //languages are in the form:
              *
              *     "langpairs":{
-             *          "5888-e94bd2f79afd":"en-GB-fr-FR",
-             *          "5889-c853a841dafd":"en-GB-de-DE",
-             *          "5890-e852ca45c66e":"en-GB-it-IT",
-             *          "5891-b43f2f067319":"en-GB-es-ES"
+             *          "5888-e94bd2f79afd":"en-GB|fr-FR",
+             *          "5889-c853a841dafd":"en-GB|de-DE",
+             *          "5890-e852ca45c66e":"en-GB|it-IT",
+             *          "5891-b43f2f067319":"en-GB|es-ES"
              *   },
              *
              */
             $langPairs = $volAnalysis[ 'jobs' ][ 'langpairs' ][ $job[ 'jid' ] . "-" .$job['jpassword'] ];
 
-
-            $_langPairs_array = explode( "-", $langPairs );
-            $source = $_langPairs_array[0] . "-" . $_langPairs_array[1];
-            $target = $_langPairs_array[2] . "-" . $_langPairs_array[3];
+            $_langPairs_array = explode( "|", $langPairs );
+            $source = $_langPairs_array[0];
+            $target = $_langPairs_array[1];
 
             //save langpairs of the jobs
             $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'source' ] = $source;
@@ -149,8 +151,8 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $itemCart[ 'words' ]         = $result_quote[ 3 ];
             $itemCart[ 'price' ]         = $result_quote[ 4 ];
             $itemCart[ 'quote_pid' ]     = $result_quote[ 5 ];
-            $itemCart[ 'source' ]        = $_jobLangs[ $jpid ]['source'];
-            $itemCart[ 'target' ]        = $_jobLangs[ $jpid ]['target'];
+            $itemCart[ 'source' ]        = $_jobLangs[ $jpid ]['source']; //get the right language
+            $itemCart[ 'target' ]        = $_jobLangs[ $jpid ]['target']; //get the right language
             $itemCart[ 'show_info' ]     = $result_quote[ 6 ];
             $cache_cart->addItem( $itemCart );
 

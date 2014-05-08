@@ -5,6 +5,7 @@
 
 /**
  * Controller that handle the success return from login page
+ * The user will be redirected on this class to get the session quote data.
  *
  * Used to set the next redirect page on remote provider system
  *

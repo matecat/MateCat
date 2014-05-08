@@ -70,11 +70,24 @@ class outsourceToController extends ajaxController {
             $this->result[ 'errors' ][] = array( "code" => -2, "message" => "No project Password Provided" );
         }
 
+
+        //        Log::doLog(  $this->jobList  );
+        /**
+         * The Job List form
+         *
+         * <pre>
+         * Ex:
+         *   array(
+         *      0 => array(
+         *          'id' => 5901,
+         *          'jpassword' => '6decb661a182',
+         *      ),
+         *   );
+         * </pre>
+         */
         if( empty( $this->jobList ) ){
             $this->result[ 'errors' ][] = array( "code" => -3, "message" => "No job list Provided" );
         }
-
-//        Log::doLog(  $this->jobList  );
 
     }
 

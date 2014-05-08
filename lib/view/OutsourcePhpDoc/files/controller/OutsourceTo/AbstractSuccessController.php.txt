@@ -7,15 +7,15 @@
  * Class OutsourceTo_AbstractSuccessController
  *
  * Manage the generic return controller for a remote Login auth
+ * The user will be redirected on this class to get the session quote data.
  *
  */
 abstract class OutsourceTo_AbstractSuccessController extends viewController {
 
     /**
+     *
      * This url is the page where the user will be redirected after he performed the login on the Provider
      * website
-     *
-     * The user will be redirected there to get the session quote data.
      *
      * It can be NULL if the review/confirm procedure already occurred on the external Service website
      *
@@ -81,6 +81,9 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
          *
          */
         $this->tokenAuth = $__getInput['tk'];
+
+        Log::doLog( $_GET );
+        Log::doLog( $_SERVER['QUERY_STRING'] );
 
 	}
 
