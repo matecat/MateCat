@@ -1817,7 +1817,7 @@ UI = {
 			translation = $('.editarea', segment ).text();
 		}
 
-		if (translation === '')
+		if (translation === '') 
 			return false;
 		var time_to_edit = UI.editTime;
 		var id_translator = config.id_translator;
@@ -2053,20 +2053,20 @@ UI = {
 //			console.log($(area).find( 'br:not([class])' ).length);
 //			$(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>') );
 
-			$(area).find('br:not([class]), br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
+            $(area).find('br:not([class]), br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
             $(area).find('br.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
             $(area).find('br.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
 
 //			$(area).find( 'br:not([class])' ).replaceWith( $('[BR]') );
 //			console.log('post process 2: ', $(area).html());
-		}
+        }
 
         //remove last br if it is present and if after that element there's nothing
         //try because span should not be present
         try {
             if( !$( 'span.placeholder:last', area ).get(0).nextSibling.nodeValue.length ){
-    //            console.log( $( 'span.placeholder:last', area ).get(0).nextSibling );
-    //            console.log( $( 'span.placeholder:last', area ).get(0).nextSibling.nodeValue.length );
+                //            console.log( $( 'span.placeholder:last', area ).get(0).nextSibling );
+                //            console.log( $( 'span.placeholder:last', area ).get(0).nextSibling.nodeValue.length );
                 $( 'span.placeholder:last', area ).remove();
             }
         } catch ( e ){}
@@ -4017,9 +4017,8 @@ $.extend(UI, {
             var txt = $('.source', n).text();
         }
 
-//      var txt = $('.source', n).text();
+//		var txt = $('.source', n).text();
 		txt = view2rawxliff(txt);
-
 		// Attention: As for copysource, what is the correct file format in attributes? I am assuming html encoded and "=>&quot;
 		//txt = txt.replace(/&quot;/g,'"');
 console.log('vediamo next: ', next);
