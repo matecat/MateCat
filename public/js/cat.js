@@ -3173,7 +3173,7 @@ $.extend(UI, {
 //							console.log(e.which + ' - ' + isInsideTag);
 //							console.log('CC: ', UI.editarea.html());
 						var numTagsAfter = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
-						var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
+						var numSpacesAfter = (UI.editarea.text())? UI.editarea.text().match(/\s/gi).length : 0;
 						if (numTagsAfter < numTagsBefore)
 							UI.saveInUndoStack('cancel');
 						if (numSpacesAfter < numSpacesBefore)
