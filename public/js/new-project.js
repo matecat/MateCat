@@ -108,7 +108,7 @@ $(document).ready(function() {
 
                         if( d.status == 'EMPTY' ){
                             $('body').removeClass('creating');
-                            APP.alert({msg: 'No text to translate in the file(s). Perhaps it is a scanned file or an image?'});
+                            APP.alert({msg: 'No text to translate in the file(s).<br />Perhaps it is a scanned file or an image?'});
                             $('.uploadbtn').attr('value','Analyze').removeAttr('disabled').removeClass('disabled');
                         } else {
                             location.href = config.hostpath + config.basepath + 'analyze/' + d.project_name + '/' + d.id_project + '-' + d.ppassword;
