@@ -1817,8 +1817,8 @@ UI = {
 			translation = $('.editarea', segment ).text();
 		}
 
-		if (translation === '')
-			return false;
+//		if (translation === '') 
+//			return false;
 		var time_to_edit = UI.editTime;
 		var id_translator = config.id_translator;
 		var errors = '';

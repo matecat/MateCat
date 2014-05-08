@@ -76,14 +76,14 @@ $.extend(UI, {
 		}
 		var id = n.attr('id'); 
 		var id_segment = id.split('-')[1];
-/*
+
         if( config.brPlaceholdEnabled ) {
             var txt = this.postProcessEditarea(n, '.source');
         } else {
             var txt = $('.source', n).text();
         }
-*/
-		var txt = $('.source', n).text();
+
+//		var txt = $('.source', n).text();
 		txt = view2rawxliff(txt);
 		// Attention: As for copysource, what is the correct file format in attributes? I am assuming html encoded and "=>&quot;
 		//txt = txt.replace(/&quot;/g,'"');
