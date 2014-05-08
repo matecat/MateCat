@@ -1,0 +1,882 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0"/>
+    <meta charset="utf-8"/>
+    <title>API Documentation</title>
+    <meta name="author" content=""/>
+    <meta name="description" content=""/>
+
+    <link href="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/css/bootstrap-combined.no-icons.min.css" rel="stylesheet">
+    <link href="https://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.min.css" rel="stylesheet">
+    <link href="../css/prism.css" rel="stylesheet" media="all"/>
+    <link href="../css/template.css" rel="stylesheet" media="all"/>
+    
+    <!--[if lt IE 9]>
+    <script src="https://html5shim.googlecode.com/svn/trunk/html5.js" type="text/javascript"></script>
+    <![endif]-->
+    <script src="https://code.jquery.com/jquery-1.11.0.min.js" type="text/javascript"></script>
+    <script src="https://code.jquery.com/ui/1.10.4/jquery-ui.min.js" type="text/javascript"></script>
+    <script src="https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.2/js/bootstrap.min.js"></script>
+    <script src="../js/jquery.smooth-scroll.js"></script>
+    <script src="../js/prism.min.js"></script>
+    <!-- TODO: Add http://jscrollpane.kelvinluck.com/ to style the scrollbars for browsers not using webkit-->
+    <script type="text/javascript">
+    function loadExternalCodeSnippets() {
+        Array.prototype.slice.call(document.querySelectorAll('pre[data-src]')).forEach(function (pre) {
+            var src = pre.getAttribute('data-src');
+            var extension = (src.match(/\.(\w+)$/) || [, ''])[1];
+            var language = 'php';
+
+            var code = document.createElement('code');
+            code.className = 'language-' + language;
+
+            pre.textContent = '';
+
+            code.textContent = 'Loading…';
+
+            pre.appendChild(code);
+
+            var xhr = new XMLHttpRequest();
+
+            xhr.open('GET', src, true);
+
+            xhr.onreadystatechange = function () {
+                if (xhr.readyState == 4) {
+
+                    if (xhr.status < 400 && xhr.responseText) {
+                        code.textContent = xhr.responseText;
+
+                        Prism.highlightElement(code);
+                    }
+                    else if (xhr.status >= 400) {
+                        code.textContent = '✖ Error ' + xhr.status + ' while fetching file: ' + xhr.statusText;
+                    }
+                    else {
+                        code.textContent = '✖ Error: File does not exist or is empty';
+                    }
+                }
+            };
+
+            xhr.send(null);
+        });
+    }
+
+    $(document).ready(function(){
+        loadExternalCodeSnippets();
+    });
+    $('#source-view').on('shown', function () {
+        loadExternalCodeSnippets();
+    })
+</script>
+
+    <link rel="shortcut icon" href="../images/favicon.ico"/>
+    <link rel="apple-touch-icon" href="../images/apple-touch-icon.png"/>
+    <link rel="apple-touch-icon" sizes="72x72" href="../images/apple-touch-icon-72x72.png"/>
+    <link rel="apple-touch-icon" sizes="114x114" href="../images/apple-touch-icon-114x114.png"/>
+</head>
+<body>
+
+<div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+        <div class="container">
+            <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+                <i class="icon-ellipsis-vertical"></i>
+            </a>
+            <a class="brand" href="../index.html">API Documentation</a>
+
+            <div class="nav-collapse">
+                <ul class="nav pull-right">
+                                        <li class="dropdown" id="charts-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Charts <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="../graphs/class.html">
+                                    <i class="icon-list-alt"></i>&#160;Class hierarchy diagram
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="dropdown" id="reports-menu">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                            Reports <b class="caret"></b>
+                        </a>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <a href="../reports/errors.html">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <i class="icon-list-alt"></i>&#160;Errors <span class="label label-info pull-right">0</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="../reports/markers.html">
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        <i class="icon-list-alt"></i>&#160;Markers <span class="label label-info pull-right">0</span>
+                                </a>
+                            </li>
+                            <li>
+                                <a href="../reports/deprecated.html">
+                                                                                                                                                                                        <i class="icon-list-alt"></i>&#160;Deprecated <span class="label label-info pull-right">1</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!--<div class="go_to_top">-->
+    <!--<a href="#___" style="color: inherit">Back to top&#160;&#160;<i class="icon-upload icon-white"></i></a>-->
+    <!--</div>-->
+</div>
+
+<div id="___" class="container-fluid">
+        <section class="row-fluid">
+        <div class="span2 sidebar">
+                                <div class="accordion" style="margin-bottom: 0">
+        <div class="accordion-group">
+            <div class="accordion-heading">
+                                    <a class="accordion-toggle " data-toggle="collapse" data-target="#namespace-1353641288"></a>
+                                <a href="../namespaces/default.html" style="margin-left: 30px; padding-left: 0">\</a>
+            </div>
+            <div id="namespace-1353641288" class="accordion-body collapse in">
+                <div class="accordion-inner">
+
+                    
+                    <ul>
+                                                    <li class="interface"><a href="../classes/Shop_ItemInterface.html">Shop_ItemInterface</a></li>
+                                                                                                    <li class="class"><a href="../classes/ajaxController.html">ajaxController</a></li>
+                                                    <li class="class"><a href="../classes/controller.html">controller</a></li>
+                                                    <li class="class"><a href="../classes/MultiCurlHandler.html">MultiCurlHandler</a></li>
+                                                    <li class="class"><a href="../classes/OutsourceTo_AbstractProvider.html">OutsourceTo_AbstractProvider</a></li>
+                                                    <li class="class"><a href="../classes/OutsourceTo_AbstractSuccessController.html">OutsourceTo_AbstractSuccessController</a></li>
+                                                    <li class="class"><a href="../classes/OutsourceTo_MyCustomProvider1.html">OutsourceTo_MyCustomProvider1</a></li>
+                                                    <li class="class"><a href="../classes/OutsourceTo_MyCustomProvider2.html">OutsourceTo_MyCustomProvider2</a></li>
+                                                    <li class="class"><a href="../classes/OutsourceTo_MyCustomProvider3.html">OutsourceTo_MyCustomProvider3</a></li>
+                                                    <li class="class"><a href="../classes/OutsourceTo_MyCustomProvider3SuccessController.html">OutsourceTo_MyCustomProvider3SuccessController</a></li>
+                                                    <li class="class"><a href="../classes/OutsourceTo_Translated.html">OutsourceTo_Translated</a></li>
+                                                    <li class="class"><a href="../classes/OutsourceTo_TranslatedSuccessController.html">OutsourceTo_TranslatedSuccessController</a></li>
+                                                    <li class="class"><a href="../classes/outsourceToController.html">outsourceToController</a></li>
+                                                    <li class="class"><a href="../classes/Shop_AbstractItem.html">Shop_AbstractItem</a></li>
+                                                    <li class="class"><a href="../classes/Shop_Cart.html">Shop_Cart</a></li>
+                                                    <li class="class"><a href="../classes/Shop_ItemHTSQuoteJob.html">Shop_ItemHTSQuoteJob</a></li>
+                                                    <li class="class"><a href="../classes/viewController.html">viewController</a></li>
+                                            </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+
+        </div>
+    </section>
+    <section class="row-fluid">
+        <div class="span10 offset2">
+            <div class="row-fluid">
+                <div class="span8 content class">
+                    <nav>
+                                                <a href="../namespaces/default.html">\</a> <i class="icon-level-up"></i>
+                                            </nav>
+                    <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal"><i class="icon-code"></i></a>
+
+                    <h1><small>\</small>OutsourceTo_MyCustomProvider1</h1>
+                    <p><em>Concrete Class to negotiate a Quote/Login/Review/Confirm communication</em></p>
+                    
+
+                    <section id="summary">
+                        <h2>Summary</h2>
+                        <section class="row-fluid heading">
+                            <section class="span4">
+                                <a href="#methods">Methods</a>
+                            </section>
+                            <section class="span4">
+                                <a href="#properties">Properties</a>
+                            </section>
+                            <section class="span4">
+                                <a href="#constants">Constants</a>
+                            </section>
+                        </section>
+                        <section class="row-fluid public">
+                            <section class="span4">
+                                                                    <a href="../classes/OutsourceTo_AbstractProvider.html#method___construct" class="">__construct()</a><br />
+                                                                    <a href="../classes/OutsourceTo_MyCustomProvider1.html#method_performQuote" class="">performQuote()</a><br />
+                                                                    <a href="../classes/OutsourceTo_AbstractProvider.html#method_getQuotesResult" class="">getQuotesResult()</a><br />
+                                                                    <a href="../classes/OutsourceTo_AbstractProvider.html#method_setJobList" class="">setJobList()</a><br />
+                                                                    <a href="../classes/OutsourceTo_AbstractProvider.html#method_setPid" class="">setPid()</a><br />
+                                                                    <a href="../classes/OutsourceTo_AbstractProvider.html#method_setPpassword" class="">setPpassword()</a><br />
+                                                                    <a href="../classes/OutsourceTo_AbstractProvider.html#method_getOutsourceLoginUrlKo" class="">getOutsourceLoginUrlKo()</a><br />
+                                                                    <a href="../classes/OutsourceTo_AbstractProvider.html#method_getOutsourceLoginUrlOk" class="">getOutsourceLoginUrlOk()</a><br />
+                                                            </section>
+                            <section class="span4">
+                                                                    <em>No public properties found</em>
+                                                            </section>
+                            <section class="span4">
+                                                                    <em>No constants found</em>
+                                                            </section>
+                        </section>
+                        <section class="row-fluid protected">
+                            <section class="span4">
+                                                                    <em>No protected methods found</em>
+                                                            </section>
+                            <section class="span4">
+                                                                    <a href="../classes/OutsourceTo_AbstractProvider.html#property__outsource_login_url_ok" class="">$_outsource_login_url_ok</a><br />
+                                                                    <a href="../classes/OutsourceTo_AbstractProvider.html#property__outsource_login_url_ko" class="">$_outsource_login_url_ko</a><br />
+                                                                    <a href="../classes/OutsourceTo_AbstractProvider.html#property__quote_result" class="">$_quote_result</a><br />
+                                                                    <a href="../classes/OutsourceTo_AbstractProvider.html#property_pid" class="">$pid</a><br />
+                                                                    <a href="../classes/OutsourceTo_AbstractProvider.html#property_ppassword" class="">$ppassword</a><br />
+                                                                    <a href="../classes/OutsourceTo_AbstractProvider.html#property_jobList" class="">$jobList</a><br />
+                                                            </section>
+                            <section class="span4">
+                                <em>N/A</em>
+                            </section>
+                        </section>
+                        <section class="row-fluid private">
+                            <section class="span4">
+                                                                    <em>No private methods found</em>
+                                                            </section>
+                            <section class="span4">
+                                                                    <em>No private properties found</em>
+                                                            </section>
+                            <section class="span4">
+                                <em>N/A</em>
+                            </section>
+                        </section>
+                    </section>
+                </div>
+                <aside class="span4 detailsbar">
+                                        
+                    
+                    <dl>
+                        <dt>File</dt>
+                            <dd><a href="../files/utils.OutsourceTo.MyCustomProvider1.php.html"><div class="path-wrapper">utils/OutsourceTo/MyCustomProvider1.php</div></a></dd>
+                                                <dt>Package</dt>
+                            <dd><div class="namespace-wrapper"></div></dd>
+                                                <dt>Class hierarchy</dt>
+                            <dd class="hierarchy">
+                                                                                                                                                                                                                                                                                                
+                                        <div class="namespace-wrapper"><a href="../classes/OutsourceTo_AbstractProvider.html">\OutsourceTo_AbstractProvider</a></div>
+                                                                                                    <div class="namespace-wrapper">\OutsourceTo_MyCustomProvider1</div>
+                            </dd>
+
+                        
+                        
+                        
+                        
+                                                                        </dl>
+                    <h2>Tags</h2>
+                    <table class="table table-condensed">
+                                            <tr>
+                            <th>
+                                author
+                            </th>
+                            <td>
+                                                                    <p>domenico domenico@translated.net / ostico@gmail.com
+Date: 29/04/14
+Time: 10.48</p>
+                                                            </td>
+                        </tr>
+                                            <tr>
+                            <th>
+                                todo
+                            </th>
+                            <td>
+                                                            </td>
+                        </tr>
+                                        </table>
+                </aside>
+            </div>
+
+                        
+                                    <a id="properties" name="properties"></a>
+            <div class="row-fluid">
+                <div class="span8 content class">
+                    <h2>Properties</h2>
+                </div>
+                <aside class="span4 detailsbar"></aside>
+            </div>
+
+                                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property__outsource_login_url_ok" name="property__outsource_login_url_ok" class="anchor"></a>
+            <article class="property">
+                <h3 class="protected ">$_outsource_login_url_ok</h3>
+                <pre class="signature">$_outsource_login_url_ok : string</pre>
+                <p><em>These are the url where the user will be redirected after
+he performed the login on the external service</em></p>
+                <p>Set them appropriately in the constructor.</p>
+<p>They can be null if an all in one login/review/confirm is implemented on the external provider system</p>
+
+                                <h4>Type</h4>
+                string
+                                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                        <dl>
+                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/OutsourceTo_AbstractProvider.html"><div class="path-wrapper">\OutsourceTo_AbstractProvider</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            todo
+                        </th>
+                        <td>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property__outsource_login_url_ko" name="property__outsource_login_url_ko" class="anchor"></a>
+            <article class="property">
+                <h3 class="protected ">$_outsource_login_url_ko</h3>
+                <pre class="signature">$_outsource_login_url_ko : string</pre>
+                <p><em>These are the url where the user will be redirected after
+has failed the login on the external service</em></p>
+                <p>Set them appropriately in the constructor.</p>
+<p>They can be null if an all in one login/review/confirm is implemented on the external provider system</p>
+
+                                <h4>Type</h4>
+                string
+                                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                        <dl>
+                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/OutsourceTo_AbstractProvider.html"><div class="path-wrapper">\OutsourceTo_AbstractProvider</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            todo
+                        </th>
+                        <td>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property__quote_result" name="property__quote_result" class="anchor"></a>
+            <article class="property">
+                <h3 class="protected ">$_quote_result</h3>
+                <pre class="signature">$_quote_result : \Shop_AbstractItem[]</pre>
+                <p><em>Object containing the quote result</em></p>
+                
+
+                                <h4>Type</h4>
+                \Shop_AbstractItem[]
+                                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                        <dl>
+                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/OutsourceTo_AbstractProvider.html"><div class="path-wrapper">\OutsourceTo_AbstractProvider</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            todo
+                        </th>
+                        <td>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property_pid" name="property_pid" class="anchor"></a>
+            <article class="property">
+                <h3 class="protected ">$pid</h3>
+                <pre class="signature">$pid : int</pre>
+                <p><em></em></p>
+                
+
+                                <h4>Type</h4>
+                int
+                &mdash; Project ID                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                        <dl>
+                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/OutsourceTo_AbstractProvider.html"><div class="path-wrapper">\OutsourceTo_AbstractProvider</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            todo
+                        </th>
+                        <td>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property_ppassword" name="property_ppassword" class="anchor"></a>
+            <article class="property">
+                <h3 class="protected ">$ppassword</h3>
+                <pre class="signature">$ppassword : string</pre>
+                <p><em></em></p>
+                
+
+                                <h4>Type</h4>
+                string
+                &mdash; Project Password                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                        <dl>
+                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/OutsourceTo_AbstractProvider.html"><div class="path-wrapper">\OutsourceTo_AbstractProvider</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            todo
+                        </th>
+                        <td>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="property_jobList" name="property_jobList" class="anchor"></a>
+            <article class="property">
+                <h3 class="protected ">$jobList</h3>
+                <pre class="signature">$jobList : array</pre>
+                <p><em>List of job Ids and relative passwords that will be sent to the provider for quoting</em></p>
+                <pre>
+Ex:
+  array(
+     0 => array(
+         'id' => 5901,
+         'jpassword' => '6decb661a182',
+     ),
+  );
+</pre>
+
+                                <h4>Type</h4>
+                array
+                &mdash; List of job ids and relative passwords                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                        <dl>
+                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/OutsourceTo_AbstractProvider.html"><div class="path-wrapper">\OutsourceTo_AbstractProvider</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            todo
+                        </th>
+                        <td>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                            
+                                    <a id="methods" name="methods"></a>
+            <div class="row-fluid">
+                <div class="span8 content class"><h2>Methods</h2></div>
+                <aside class="span4 detailsbar"></aside>
+            </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method___construct" name="method___construct" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">__construct()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">__construct()</pre>
+                <p><em>Class constructor</em></p>
+                <p>Here will be defined the callback urls for success or failure on login system</p>
+
+                
+                
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/OutsourceTo_AbstractProvider.html"><div class="path-wrapper">\OutsourceTo_AbstractProvider</div></a></dd>
+                                                                            <dt>See also</dt>
+                                                                <dd><a href="../classes/OutsourceTo_AbstractProvider.html#property__outsource_login_url_ok"><span class="namespace-wrapper"></span></a></dd>
+                                            <dd><a href="../classes/OutsourceTo_AbstractProvider.html#property__outsource_login_url_ko"><span class="namespace-wrapper"></span></a></dd>
+                                                                </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            todo
+                        </th>
+                        <td>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_performQuote" name="method_performQuote" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">performQuote()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">performQuote(array|null <span class="argument">$volAnalysis</span>) : void</pre>
+                <p><em>Perform Quotes to the selected Provider</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>array|null</td>
+                                <td>$volAnalysis </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                            </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            todo
+                        </th>
+                        <td>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getQuotesResult" name="method_getQuotesResult" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getQuotesResult()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getQuotesResult() : \Shop_AbstractItem[]</pre>
+                <p><em>Get quotes Result after Provider Interrogation</em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    \Shop_AbstractItem[]
+                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/OutsourceTo_AbstractProvider.html"><div class="path-wrapper">\OutsourceTo_AbstractProvider</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            todo
+                        </th>
+                        <td>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_setJobList" name="method_setJobList" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">setJobList()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">setJobList(array <span class="argument">$jobList</span>) : $this</pre>
+                <p><em>Set The Job List</em></p>
+                <pre>
+Ex:
+  array(
+     0 => array(
+         'id' => 5901,
+         'jpassword' => '6decb661a182',
+     ),
+  );
+</pre>
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>array</td>
+                                <td>$jobList </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    $this
+                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/OutsourceTo_AbstractProvider.html"><div class="path-wrapper">\OutsourceTo_AbstractProvider</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            todo
+                        </th>
+                        <td>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_setPid" name="method_setPid" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">setPid()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">setPid(int <span class="argument">$pid</span>) : $this</pre>
+                <p><em>Set the right project ID for the outsource request</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>int</td>
+                                <td>$pid </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    $this
+                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/OutsourceTo_AbstractProvider.html"><div class="path-wrapper">\OutsourceTo_AbstractProvider</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            todo
+                        </th>
+                        <td>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_setPpassword" name="method_setPpassword" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">setPpassword()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">setPpassword(string <span class="argument">$ppassword</span>) : $this</pre>
+                <p><em>Set the Password for the project</em></p>
+                
+
+                                    <h4>Parameters</h4>
+                    <table class="table table-condensed table-hover">
+                                                    <tr>
+                                <td>string</td>
+                                <td>$ppassword </td>
+                                <td></td>
+                            </tr>
+                                            </table>
+                
+                
+                                    <h4>Returns</h4>
+                    $this
+                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/OutsourceTo_AbstractProvider.html"><div class="path-wrapper">\OutsourceTo_AbstractProvider</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            todo
+                        </th>
+                        <td>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getOutsourceLoginUrlKo" name="method_getOutsourceLoginUrlKo" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getOutsourceLoginUrlKo()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getOutsourceLoginUrlKo() : string</pre>
+                <p><em>Get the url for return callback on failed login</em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    string
+                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/OutsourceTo_AbstractProvider.html"><div class="path-wrapper">\OutsourceTo_AbstractProvider</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            todo
+                        </th>
+                        <td>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                    <div class="row-fluid">
+        <div class="span8 content class">
+            <a id="method_getOutsourceLoginUrlOk" name="method_getOutsourceLoginUrlOk" class="anchor"></a>
+            <article class="method">
+                <h3 class="public ">getOutsourceLoginUrlOk()</h3>
+                <a href="#source-view" role="button" class="pull-right btn" data-toggle="modal" style="font-size: 1.1em; padding: 9px 14px"><i class="icon-code"></i></a>
+                <pre class="signature" style="margin-right: 54px;">getOutsourceLoginUrlOk() : string</pre>
+                <p><em>Get the url for return callback on success login</em></p>
+                
+
+                
+                
+                                    <h4>Returns</h4>
+                    string
+                                                </article>
+        </div>
+        <aside class="span4 detailsbar">
+            <h1><i class="icon-arrow-down"></i></h1>
+                                                            <dl>
+                                                    <dt>Inherited from</dt>
+                    <dd><a href="../classes/OutsourceTo_AbstractProvider.html"><div class="path-wrapper">\OutsourceTo_AbstractProvider</div></a></dd>
+                                                            </dl>
+            <h2>Tags</h2>
+            <table class="table table-condensed">
+                                    <tr>
+                        <th>
+                            todo
+                        </th>
+                        <td>
+                                                    </td>
+                    </tr>
+                            </table>
+        </aside>
+    </div>
+
+                                                                    </div>
+    </section>
+
+    <div id="source-view" class="modal hide fade" tabindex="-1" role="dialog" aria-labelledby="source-view-label" aria-hidden="true">
+        <div class="modal-header">
+            <button type="button" class="close" data-dismiss="modal" aria-hidden="true">×</button>
+            <h3 id="source-view-label">MyCustomProvider1.php</h3>
+        </div>
+        <div class="modal-body">
+            <pre data-src="../files/utils/OutsourceTo/MyCustomProvider1.php.txt" class="language-php line-numbers"></pre>
+        </div>
+    </div>
+
+    <footer class="row-fluid">
+        <section class="span10 offset2">
+            <section class="row-fluid">
+                <section class="span10 offset1">
+                    <section class="row-fluid footer-sections">
+                        <section class="span4">
+                                                        <h1><i class="icon-code"></i></h1>
+                            <div>
+                                <ul>
+                                                                    </ul>
+                            </div>
+                        </section>
+                        <section class="span4">
+                                                        <h1><i class="icon-bar-chart"></i></h1>
+                            <div>
+                                <ul>
+                                    <li><a href="../graphs/class.html">Class Hierarchy Diagram</a></li>
+                                </ul>
+                            </div>
+                        </section>
+                        <section class="span4">
+                                                        <h1><i class="icon-pushpin"></i></h1>
+                            <div>
+                                <ul>
+                                    <li><a href="../reports/errors.html">Errors</a></li>
+                                    <li><a href="../reports/markers.html">Markers</a></li>
+                                </ul>
+                            </div>
+                        </section>
+                    </section>
+                </section>
+            </section>
+            <section class="row-fluid">
+                <section class="span10 offset1">
+                    <hr />
+                    Documentation is powered by <a href="http://www.phpdoc.org/">phpDocumentor </a> and authored
+                    on May 8th, 2014 at 17:57.
+                </section>
+            </section>
+        </section>
+    </footer>
+</div>
+
+</body>
+</html>

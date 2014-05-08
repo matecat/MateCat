@@ -2052,16 +2052,24 @@ UI = {
 //			console.log('post process 1: ', $(area).html());
 //			console.log($(area).find( 'br:not([class])' ).length);
 //			$(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>') );
-			$(area).find('br:not([class]), br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
+
+            $(area).find('br:not([class]), br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
+            $(area).find('br.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
+            $(area).find('br.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
+
 //			$(area).find( 'br:not([class])' ).replaceWith( $('[BR]') );
 //			console.log('post process 2: ', $(area).html());
-		}
+        }
 
         //remove last br if it is present and if after that element there's nothing
-        if( !$( 'span.placeholder:last', area ).next().length ){
-//            console.log( $( 'span.placeholder:last', area ).html() );
-            $( 'span.placeholder:last', area ).remove();
-        }
+        //try because span should not be present
+        try {
+            if( !$( 'span.placeholder:last', area ).get(0).nextSibling.nodeValue.length ){
+                //            console.log( $( 'span.placeholder:last', area ).get(0).nextSibling );
+                //            console.log( $( 'span.placeholder:last', area ).get(0).nextSibling.nodeValue.length );
+                $( 'span.placeholder:last', area ).remove();
+            }
+        } catch ( e ){}
 
 //        Now commented, but valid for future purposes when the user will choose what type of carriage return
 //        $('br', area).each(function() {

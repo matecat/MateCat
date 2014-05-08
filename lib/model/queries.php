@@ -1687,7 +1687,7 @@ function getProjectJobData( $pid ) {
 		job_first_segment,
 		job_last_segment,
 		CONCAT( jobs.id , '-', jobs.password ) as jid_jpassword,
-		CONCAT( jobs.source, '-', jobs.target ) as lang_pair,
+		CONCAT( jobs.source, '|', jobs.target ) as lang_pair,
 		CONCAT( projects.name, '/', jobs.source, '-', jobs.target, '/', jobs.id , '-', jobs.password ) as job_url,
 		status_owner
 			FROM jobs
