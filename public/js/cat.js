@@ -2061,16 +2061,6 @@ UI = {
 //			console.log('post process 2: ', $(area).html());
         }
 
-        //remove last br if it is present and if after that element there's nothing
-        //try because span should not be present
-        try {
-            if( !$( 'span.placeholder:last', area ).get(0).nextSibling.nodeValue.length ){
-                //            console.log( $( 'span.placeholder:last', area ).get(0).nextSibling );
-                //            console.log( $( 'span.placeholder:last', area ).get(0).nextSibling.nodeValue.length );
-                $( 'span.placeholder:last', area ).remove();
-            }
-        } catch ( e ){}
-
 //        Now commented, but valid for future purposes when the user will choose what type of carriage return
 //        $('br', area).each(function() {
 //
@@ -2099,9 +2089,23 @@ UI = {
 //            }
 //
 //        });
+//		return area.text();
 
-		return area.text();
 
+/*      //trim last br if it is present and if after that element there's nothing
+        //check if a node with placeholdr class exists and take the last one
+        var lastPlacehold = $( 'span.placeholder:last', area ).get(0);
+        if( typeof lastPlacehold != 'undefined' ){
+            //if there are NOT something after
+            if( lastPlacehold.nextSibling == null ) {
+                $( 'span.placeholder:last', area ).remove();
+            }
+        }
+*/
+        //same as preeceding commented but with regular expression, better because remove ALL trailing BR not only one
+        /* trim all last br if it is present and if after that element there's nothing */
+//        console.log( $( area ).text() );
+        return $( area ).text().replace( /(:?[ \xA0]*##\$_[0-9A-F]{2,4}\$##[ \xA0]*)+$/, "" );
 
 
     },
