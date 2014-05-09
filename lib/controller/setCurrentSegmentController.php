@@ -66,13 +66,13 @@ class setCurrentSegmentController extends ajaxController {
 
             if( $row['editable'] ){
                 $result['editable'][] = array(
-                        'translation' => $row['translation'],
+                        'translation' => CatUtils::rawxliff2view( $row['translation'] ),
                         'TOT' => $row['TOT'],
                         'involved_id' => explode( ",", $row['involved_id'] )
                 );
             } else {
                 $result['not_editable'][] = array(
-                        'translation' => $row['translation'],
+                        'translation' => CatUtils::rawxliff2view( $row['translation'] ),
                         'TOT' => $row['TOT'],
                         'involved_id' => explode( ",", $row['involved_id'] )
                 );

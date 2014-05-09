@@ -1359,7 +1359,7 @@ UI = {
 		sameContentIndex = -1;
 		$.each(d.data.editable, function(ind) {
             //Remove trailing spaces for string comparison
-			if( this.translation == UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) {
+			if( this.translation == rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) ) {
 				sameContentIndex = ind;
 			}
 		});
@@ -1368,7 +1368,7 @@ UI = {
 		sameContentIndex1 = -1;
 		$.each(d.data.not_editable, function(ind) {
             //Remove trailing spaces for string comparison
-			if(this.translation == UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) sameContentIndex1 = ind;
+			if(this.translation == rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) ) sameContentIndex1 = ind;
 		});
 		if(sameContentIndex1 != -1) d.data.not_editable.splice(sameContentIndex1, 1);
 		
@@ -1394,14 +1394,17 @@ UI = {
 		segment_id = UI.currentSegmentId;
 		escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
 		$.each(d.data.editable, function(index) {
-			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.decodePlaceholdersToText(this.translation) + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation) ) );            UI.dmp.diff_cleanupEfficiency( diff_view );
+			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
 		});
 		$.each(d.data.not_editable, function(index1) {
-			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.decodePlaceholdersToText(this.translation) + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation) ) );            UI.dmp.diff_cleanupEfficiency( diff_view );
+			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
 		});
 	},
 	chooseAlternative: function(w) {console.log('chooseAlternative');
-		this.copyAlternativeInEditarea($('.sugg-target .translation', w).text());
+        console.log( $('.sugg-target .realData', w ) );
+		this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text() ) );
 		this.lockTags(this.editarea);
 		this.editarea.focus();
 		this.highlightEditarea();
@@ -1691,6 +1694,7 @@ UI = {
 				UI.startWarning();
 				var warningPosition = '';
 				UI.globalWarnings = data.details;
+                UI.translationMismatches = data.translation_mismatches;
 //				console.log(data.messages);
 //				console.log($.parseJSON(data.messages));
 //				data.messages = {
@@ -1708,7 +1712,7 @@ UI = {
 						UI.fillCurrentSegmentWarnings(data.details, true);
 			
 					//switch to css for warning
-					$('#notifbox').attr('class', 'warningbox').attr("title", "Some translations seems to have TAGS and/or other untraslatables that do not match the source").find('.numbererror').text(UI.globalWarnings.length);
+					$('#notifbox').attr('class', 'warningbox').attr("title", "Click to see the segments with potential issues").find('.numbererror').text(UI.globalWarnings.length);
 
 				} else {
 					//if everything is ok, switch css to ok
@@ -2620,6 +2624,11 @@ $.extend(UI, {
 		 */
 		this.globalWarnings = [];
 
+        /**
+         * Global Translation mismatches array definition.
+         */
+        this.translationMismatches = [];
+
 		this.downOpts = {offset: '130%'};
 		this.upOpts = {offset: '-40%'};
 		this.readonly = (this.body.hasClass('archived')) ? true : false;
@@ -3026,8 +3035,9 @@ $.extend(UI, {
 			$(".menucolor").hide();
 		}).on('click', '#downloadProject', function(e) {
 			e.preventDefault();
-			if($('#downloadProject').hasClass('disabled')) return false;
-			if ($("#notifbox").hasClass("warningbox")) {
+			if( $('#downloadProject').hasClass('disabled') ) return false;
+            //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
+			if ( $("#notifbox").hasClass("warningbox") && UI.translationMismatches.total != UI.globalWarnings.length ) {
 				APP.confirm({
 					name: 'confirmDownload',
 					cancelTxt: 'Fix errors',

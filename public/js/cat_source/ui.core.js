@@ -1335,7 +1335,7 @@ UI = {
 		this.getNextSegment(this.currentSegment, 'untranslated');
 		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
 	},
-	detectTranslationAlternatives: function(d) {
+    detectTranslationAlternatives: function(d) {
 
         /**
          *
@@ -1356,56 +1356,59 @@ UI = {
 //			if(!$('.header .repetition', UI.currentSegment).length) $('.header', UI.currentSegment).prepend('<span class="repetition">Autopropagated</span>');
 //		}
 
-		sameContentIndex = -1;
-		$.each(d.data.editable, function(ind) {
+        sameContentIndex = -1;
+        $.each(d.data.editable, function(ind) {
             //Remove trailing spaces for string comparison
-            if( this.translation == UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) {
-				sameContentIndex = ind;
-			}
-		});
-		if(sameContentIndex != -1) d.data.editable.splice(sameContentIndex, 1);
+            if( this.translation == rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) ) {
+                sameContentIndex = ind;
+            }
+        });
+        if(sameContentIndex != -1) d.data.editable.splice(sameContentIndex, 1);
 
-		sameContentIndex1 = -1;
-		$.each(d.data.not_editable, function(ind) {
+        sameContentIndex1 = -1;
+        $.each(d.data.not_editable, function(ind) {
             //Remove trailing spaces for string comparison
-			if(this.translation == UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) sameContentIndex1 = ind;
-		});
-		if(sameContentIndex1 != -1) d.data.not_editable.splice(sameContentIndex1, 1);
-		
-		numAlt = d.data.editable.length + d.data.not_editable.length;
-		numSeg = 0;
-		$.each(d.data.editable, function() {
-			numSeg += this.involved_id.length;
-		});
+            if(this.translation == rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) ) sameContentIndex1 = ind;
+        });
+        if(sameContentIndex1 != -1) d.data.not_editable.splice(sameContentIndex1, 1);
+
+        numAlt = d.data.editable.length + d.data.not_editable.length;
+        numSeg = 0;
+        $.each(d.data.editable, function() {
+            numSeg += this.involved_id.length;
+        });
 //		console.log('numAlt: ', numAlt);
 //		console.log('numSeg: ', numSeg);
-		if(numAlt) {
-			UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + ((numAlt > 1)? 'other ' + numAlt + ' different' : 'another') + ' way' + ((numAlt > 1)? 's' : '') + '</a></p>');
-			tab = UI.currentSegment.find('.tab-switcher-al');
-			tab.find('.number').text('(' + numAlt + ')');
-			UI.renderAlternatives(d);
-			tab.show();
-			tab.trigger('click');
-		}
-	},
-	renderAlternatives: function(d) {
-		console.log(d);
-		segment = UI.currentSegment;
-		segment_id = UI.currentSegmentId;
-		escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
-		$.each(d.data.editable, function(index) {
-			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.decodePlaceholdersToText(this.translation) + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
-		});
-		$.each(d.data.not_editable, function(index1) {
-			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.decodePlaceholdersToText(this.translation) + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
-		});
-	},
-	chooseAlternative: function(w) {console.log('chooseAlternative');
-		this.copyAlternativeInEditarea($('.sugg-target .translation', w).text());
-		this.lockTags(this.editarea);
-		this.editarea.focus();
-		this.highlightEditarea();
-	},
+        if(numAlt) {
+            UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + ((numAlt > 1)? 'other ' + numAlt + ' different' : 'another') + ' way' + ((numAlt > 1)? 's' : '') + '</a></p>');
+            tab = UI.currentSegment.find('.tab-switcher-al');
+            tab.find('.number').text('(' + numAlt + ')');
+            UI.renderAlternatives(d);
+            tab.show();
+            tab.trigger('click');
+        }
+    },
+    renderAlternatives: function(d) {
+        console.log(d);
+        segment = UI.currentSegment;
+        segment_id = UI.currentSegmentId;
+        escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
+        $.each(d.data.editable, function(index) {
+            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation) ) );            UI.dmp.diff_cleanupEfficiency( diff_view );
+            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+        });
+        $.each(d.data.not_editable, function(index1) {
+            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation) ) );            UI.dmp.diff_cleanupEfficiency( diff_view );
+            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+        });
+    },
+    chooseAlternative: function(w) {console.log('chooseAlternative');
+        console.log( $('.sugg-target .realData', w ) );
+        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text() ) );
+        this.lockTags(this.editarea);
+        this.editarea.focus();
+        this.highlightEditarea();
+    },
 	copyAlternativeInEditarea: function(translation) {
 		if ($.trim(translation) !== '') {
 			if (this.body.hasClass('searchActive'))
@@ -1691,6 +1694,7 @@ UI = {
 				UI.startWarning();
 				var warningPosition = '';
 				UI.globalWarnings = data.details;
+				UI.translationMismatches = data.translation_mismatches;
 //				console.log(data.messages);
 //				console.log($.parseJSON(data.messages));
 //				data.messages = {
@@ -1708,7 +1712,7 @@ UI = {
 						UI.fillCurrentSegmentWarnings(data.details, true);
 			
 					//switch to css for warning
-					$('#notifbox').attr('class', 'warningbox').attr("title", "Some translations seems to have TAGS and/or other untraslatables that do not match the source").find('.numbererror').text(UI.globalWarnings.length);
+					$('#notifbox').attr('class', 'warningbox').attr("title", "Click to see the segments with potential issues").find('.numbererror').text(UI.globalWarnings.length);
 
 				} else {
 					//if everything is ok, switch css to ok
