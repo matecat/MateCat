@@ -1338,12 +1338,14 @@ UI = {
 	detectTranslationAlternatives: function(d) {
 
         /**
-         * To Andrea:
          *
-         * removed because business logic has changed, now auto-propagation info
+         * the three rows below are commented because business logic has changed, now auto-propagation info
          * is sent as response in getMoreSegments and added as data in the "section" Tag and
          * rendered/prepared in renderSegments/createHeader
          * and managed in propagateTranslation
+         *
+         * TODO
+         * I leave them here but they should be removed
          *
          * @see renderSegments
          * @see createHeader
@@ -1356,7 +1358,8 @@ UI = {
 
 		sameContentIndex = -1;
 		$.each(d.data.editable, function(ind) {
-			if(this.translation == UI.editarea.text()) {
+            //Remove trailing spaces for string comparison
+			if( this.translation == UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) {
 				sameContentIndex = ind;
 			}
 		});
@@ -1364,7 +1367,8 @@ UI = {
 
 		sameContentIndex1 = -1;
 		$.each(d.data.not_editable, function(ind) {
-			if(this.translation == UI.editarea.text()) sameContentIndex1 = ind;
+            //Remove trailing spaces for string comparison
+			if(this.translation == UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) sameContentIndex1 = ind;
 		});
 		if(sameContentIndex1 != -1) d.data.not_editable.splice(sameContentIndex1, 1);
 		
