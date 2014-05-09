@@ -82,9 +82,9 @@ class downloadFileController extends downloadController {
             $path=INIT::$TMP_DOWNLOAD.'/'.$this->id_job.'/'.$id_file.'/'.$current_filename.'.sdlxliff';
             //make dir if doesn't exist
             if(!file_exists(dirname($path))){
-                Log::doLog('exec ("chmod 666 ' . $path . '");');
+                Log::doLog('exec ("chmod 666 ' . escapeshellarg( $path ) . '");');
                 mkdir(dirname($path), 0777, true);
-                exec ("chmod 666 $path");
+                exec ( "chmod 666 " . escapeshellarg( $path ) );
             }
             //create file
             $fp=fopen($path,'w+');
