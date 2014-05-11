@@ -858,13 +858,6 @@ function addTranslation( array $_Translation ){
 
     $db  = Database::obtain();
 
-    if( empty( $_Translation['translation'] ) && !is_numeric( $_Translation['translation'] ) ){
-        $msg = "\n\n Error setTranslationUpdate \n\n Empty translation found: \n\n " . var_export( array_merge( array( 'db_query' => $q ), $_POST ), true );
-        Log::doLog( $msg );
-        Utils::sendErrMailReport( $msg );
-        return -1;
-    }
-
     $query = "INSERT INTO `segment_translations` ";
 
     foreach ( $_Translation as $key => $val ) {
@@ -898,7 +891,14 @@ function addTranslation( array $_Translation ){
     if( isset( $_Translation['autopropagated_from'] ) ){
         $query .= " , autopropagated_from = NULL";
     }
-Log::doLog( $query );
+
+    if( empty( $_Translation['translation'] ) && !is_numeric( $_Translation['translation'] ) ){
+        $msg = "\n\n Error setTranslationUpdate \n\n Empty translation found after DB Escape: \n\n " . var_export( array_merge( array( 'db_query' => $query ), $_POST ), true );
+        Log::doLog( $msg );
+        Utils::sendErrMailReport( $msg );
+        return -1;
+    }
+
     $db->query( $query );
 
     $err   = $db->get_error();
