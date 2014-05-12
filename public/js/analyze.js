@@ -145,6 +145,8 @@ UI = {
 		}).on('click', '.popup-split #exec-split-confirm', function(e) {
 			e.preventDefault();
 			UI.confirmSplit();
+		}).on('click', '.out-link', function(e) {
+			this.select();
 		}).on('click', '.mergebtn:not(.disabled)', function(e) {
 			e.preventDefault();
 			APP.confirm({

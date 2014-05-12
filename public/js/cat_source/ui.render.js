@@ -7,6 +7,7 @@ $.extend(UI, {
 		segmentToOpen = (options.segmentToOpen || false);
 		segmentToScroll = (options.segmentToScroll || false);
 		scrollToFile = (options.scrollToFile || false);
+		highlight = (options.highlight || false);
 		seg = (segmentToOpen || false);
 		this.segmentToScrollAtRender = (seg) ? seg : false;
 //		this.isWebkit = $.browser.webkit;
@@ -83,6 +84,11 @@ $.extend(UI, {
 		UI.detectStartSegment(); 
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
 		UI.getSegments(options);
+//		if(highlight) {
+//			console.log('HIGHLIGHT');
+//			UI.highlightEditarea();
+//		}
+
 		if (this.firstLoad && this.autoUpdateEnabled) {
 			this.lastUpdateRequested = new Date();
 			setTimeout(function() {

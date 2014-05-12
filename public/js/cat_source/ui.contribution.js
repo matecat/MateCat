@@ -47,15 +47,15 @@ $.extend(UI, {
 			translation: translation
 		});
 	},
-	getContribution: function(segment, next) {console.log('getContribution');
+	getContribution: function(segment, next) {//console.log('getContribution');
 //		console.log('next: ', next);
 //		console.log('next: ', next);
 //		console.log('getContribution di ', segment);
 		var n = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
-		console.log('n: ', n);
-		console.log('and this is where class loaded is evaluated');
+//		console.log('n: ', n);
+//		console.log('and this is where class loaded is evaluated');
 		if ($(n).hasClass('loaded')) {
-			console.log('hasclass loaded');
+//			console.log('hasclass loaded');
 			this.spellCheck();
 			if (next) {
 				this.nextIsLoaded = true;
@@ -87,9 +87,8 @@ $.extend(UI, {
 		txt = view2rawxliff(txt);
 		// Attention: As for copysource, what is the correct file format in attributes? I am assuming html encoded and "=>&quot;
 		//txt = txt.replace(/&quot;/g,'"');
-console.log('vediamo next: ', next);
 		if (!next) {
-				console.log('spinner by getcontribution');
+//				console.log('spinner by getcontribution');
 			$(".loader", n).addClass('loader_on');
 		}
 		if((next == 2)&&(this.nextSegmentId == this.nextUntranslatedSegmentId)) {
@@ -185,7 +184,6 @@ console.log('vediamo next: ', next);
 			} else {
 			}
 			var segment_id = segment.attr('id');
-console.log('add class loaded for segment ' + segment_id+ ' in renderContribution 1');
 			$(segment).addClass('loaded');
 			$('.sub-editor.matches .overflow', segment).empty();
 

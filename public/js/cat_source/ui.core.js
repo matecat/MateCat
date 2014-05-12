@@ -165,13 +165,14 @@ UI = {
 		this.setChosenSuggestion(0);
 		this.lockTags(this.editarea);
 	},
-	highlightEditarea: function() {
-		this.currentSegment.addClass('highlighted1');
+	highlightEditarea: function(seg) {
+		segment = seg || this.currentSegment;
+		segment.addClass('highlighted1');
 		setTimeout(function() {
-			UI.currentSegment.addClass('modified highlighted2');
-		}, 100);
+			$(segment).addClass('modified highlighted2');
+		}, 300);
 		setTimeout(function() {
-			UI.currentSegment.removeClass('highlighted1 highlighted2');
+			$(segment).removeClass('highlighted1 highlighted2');
 		}, 2000);		
 	},
 
@@ -200,12 +201,9 @@ UI = {
 		$('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
 	},
 	createFooter: function(segment, isDifferent) {
-		console.log('isDifferent 1: ', isDifferent);
 		isDifferent = (typeof isDifferent == 'undefined')? true : isDifferent;
-		console.log('isDifferent 2: ', isDifferent);
 		if ($('.matches .overflow', segment).text() !== '') {
 			if(!isDifferent) {
-				console.log ("in isDiffetent");
 				$('.matches .overflow', segment).empty();
 				return false;
 			}		
@@ -224,7 +222,7 @@ UI = {
 					'		<a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a>' +
 					'	</li>' +
 					'	<li class="tab-switcher-al" id="segment-' + this.currentSegmentId + '-al">' +
-					'		<a tabindex="-1" href="#">Already translated as&nbsp;<span class="number"></span></a>' +
+					'		<a tabindex="-1" href="#">Translation conflicts&nbsp;<span class="number"></span></a>' +
 					'	</li>' +
 					'</ul>' +
 					'<div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches">' +
@@ -258,9 +256,7 @@ UI = {
 					'	<div class="overflow"></div>' +
 					'</div>';
 		$('.footer', segment).html(footer);
-		console.log('isDifferent 3: ', isDifferent);
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
-			console.log('isDifferent 4: ', isDifferent);
 			if(!isDifferent) return false;
 			var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1]));
 //			console.log('li prendo dal local storage');
@@ -697,6 +693,9 @@ UI = {
 			}
 		}
 		$('#outer').removeClass('loading loadingBefore');
+		if(options.highlight) {
+			UI.highlightEditarea($('#segment-' + options.segmentToScroll));
+		}
 		this.loadingMore = false;
 		this.setWaypoints();
 		this.markTags();
@@ -911,21 +910,21 @@ UI = {
 //			var s2 = $('.source', segment).text();
 //			console.log(lev(s1, s2));
 //			console.log(lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50);
-			console.log('isd: ', isDifferent);
+//			console.log('isd: ', isDifferent);
 			if(isDifferent) {
 //			if(lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50) {
 				this.getContribution(segment, 0);
 			} else {
 				$(segment).removeClass('loaded');
-				console.log($(segment).hasClass('loaded'));
-				console.log('spinner by opensegment');
+//				console.log($(segment).hasClass('loaded'));
+//				console.log('spinner by opensegment');
 				$(".loader", segment).addClass('loader_on');
 				setTimeout(function() {
-					console.log(segment);
+//					console.log(segment);
 //					$('.editor .matches .graysmall').remove();
-					console.log('1');
+//					console.log('1');
 					UI.getContribution(segment, 0);
-					console.log('2');
+//					console.log('2');
 				}, 3000);				
 			};
 //			console.log(1- (lev(s1,s2)/max(lenght(s1),lenght(s2))*100 >50);
@@ -1036,7 +1035,7 @@ UI = {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
 		$('#' + segment.attr('id') + '-buttons').empty();
 		$('p.warnings', segment).remove();
-		$('p.alternatives', segment).remove();
+//		$('p.alternatives', segment).remove();
 	},
 	removeFooter: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;		
@@ -1188,7 +1187,8 @@ UI = {
 		});
 //        this.render(false, segment.selector.split('-')[1]);
 	},
-	scrollSegment: function(segment) {
+	scrollSegment: function(segment, highlight) {
+		highlight = highlight || false;
 //		console.log(segment);
 //        segment = (noOpen)? $('#segment-'+segment) : segment;
 //        noOpen = (typeof noOpen == 'undefined')? false : noOpen;
@@ -1196,7 +1196,8 @@ UI = {
 			$('#outer').empty();
 			this.render({
 				firstLoad: false,
-				segmentToOpen: segment.selector.split('-')[1]
+				segmentToScroll: segment.selector.split('-')[1],
+				highlight: highlight
 			});
 		}
 		var spread = 23;
@@ -1380,7 +1381,7 @@ UI = {
 //		console.log('numAlt: ', numAlt);
 //		console.log('numSeg: ', numSeg);
         if(numAlt) {
-            UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + ((numAlt > 1)? 'other ' + numAlt + ' different' : 'another') + ' way' + ((numAlt > 1)? 's' : '') + '</a></p>');
+//            UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + ((numAlt > 1)? 'other ' + numAlt + ' different' : 'another') + ' way' + ((numAlt > 1)? 's' : '') + '</a></p>');
             tab = UI.currentSegment.find('.tab-switcher-al');
             tab.find('.number').text('(' + numAlt + ')');
             UI.renderAlternatives(d);
@@ -1389,7 +1390,7 @@ UI = {
         }
     },
     renderAlternatives: function(d) {
-        console.log(d);
+//        console.log(d);
         segment = UI.currentSegment;
         segment_id = UI.currentSegmentId;
         escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
@@ -2041,7 +2042,7 @@ UI = {
 	},
 */
 
-    postProcessEditarea: function(context, selector){ 
+    postProcessEditarea: function(context, selector){
         selector = (typeof selector === "undefined") ? '.editarea' : selector;
         area = $( selector, context ).clone();
         /*
