@@ -245,7 +245,7 @@ class INIT {
         self::$CONVERSION_ENABLED = false;
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-		self::$BUILD_NUMBER = '0.3.3.9';
+		self::$BUILD_NUMBER = '0.3.4';
 		self::$VOLUME_ANALYSIS_ENABLED = true;
 
 		self::$WARNING_POLLING_INTERVAL = 20; //seconds

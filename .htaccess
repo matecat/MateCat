@@ -2,11 +2,11 @@ php_value magic_quotes_gpc off
 <IfModule mod_rewrite.c>
 RewriteEngine On
 
-#RewriteCond %{REQUEST_URI} !/offline.html$
-#RewriteCond %{REQUEST_URI} !/public/css/common.css$
-#RewriteCond %{REQUEST_URI} !/public/img/logo.png$
-#RewriteCond %{REQUEST_URI} !/public/img/offline.jpg$
-#RewriteRule $ /offline.html [R=307,L]
+RewriteCond %{REQUEST_URI} !/offline.html$
+RewriteCond %{REQUEST_URI} !/public/css/common.css$
+RewriteCond %{REQUEST_URI} !/public/img/logo.png$
+RewriteCond %{REQUEST_URI} !/public/img/offline.jpg$
+RewriteRule $ /offline.html [R=307,L]
 
 
 RewriteRule ^$ index.php?action=newProject [QSA,L]
