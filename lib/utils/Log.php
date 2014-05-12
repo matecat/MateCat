@@ -65,8 +65,8 @@ class Log {
         for ( $i = 0; $i < $ct; $i++ ) {
             $curr_arg = func_get_arg( $i ); // get each argument passed
 
-            $tmp = explode( "\n", var_export( $curr_arg, true ) );
-//            $tmp = explode( "\n", print_r( $curr_arg, true ) );
+//            $tmp = explode( "\n", var_export( $curr_arg, true ) );
+            $tmp = explode( "\n", print_r( $curr_arg, true ) );
             foreach( $tmp as $row ){
                 $string .= $head . $row . "\n";
             }

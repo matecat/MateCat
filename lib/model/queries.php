@@ -899,10 +899,15 @@ function addTranslation( array $_Translation ){
         return -1;
     }
 
+    Log::doLog( $query );
+
     $db->query( $query );
 
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
+
+    Log::doLog( $err );
+    Log::doLog( $db->affected_rows );
 
     if ( $errno != 0 ) {
         log::doLog( "$errno: " . var_export( $err, true ) );
@@ -1994,9 +1999,9 @@ function getProjectForVolumeAnalysis( $type, $limit = 1 ) {
 	$type = strtoupper( $type );
 
 	if ( $type == 'FAST' ) {
-		$status_search = "NEW";
+		$status_search = Constants_ProjectStatus::STATUS_NEW;
 	} else {
-		$status_search = "FAST_OK";
+		$status_search = Constants_ProjectStatus::STATUS_FAST_OK;
 	}
 	$query = "select p.id, id_tms, id_mt_engine, group_concat( distinct j.id ) as jid_list
 		from projects p

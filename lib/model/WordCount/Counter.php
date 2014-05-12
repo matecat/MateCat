@@ -24,12 +24,6 @@ class WordCount_Counter {
     protected $newStatus;
     protected $oldStatus;
 
-    const STATUS_NEW        = 'NEW';
-    const STATUS_DRAFT      = 'DRAFT';
-    const STATUS_TRANSLATED = 'TRANSLATED';
-    const STATUS_APPROVED   = 'APPROVED';
-    const STATUS_REJECTED   = 'REJECTED';
-
     protected static $constCache = array();
 
     /**
@@ -37,7 +31,7 @@ class WordCount_Counter {
      */
     public function __construct( WordCount_Struct $oldWCount = null ){
 
-        $reflect = new ReflectionClass( $this );
+        $reflect = new ReflectionClass( 'Constants_TranslationStatus' );
         self::$constCache = array_flip( $reflect->getConstants() );
 
         if( $oldWCount !== null ){
@@ -133,11 +127,11 @@ class WordCount_Counter {
         $wStruct = new WordCount_Struct();
         $wStruct->setIdJob( $job_details[ 'id' ] );
         $wStruct->setJobPassword( $jPassword );
-        $wStruct->setNewWords( $job_details[ 'NEW' ] );
-        $wStruct->setDraftWords( $job_details[ 'DRAFT' ] - $job_details[ 'NEW' ] );
-        $wStruct->setTranslatedWords( $job_details[ 'TRANSLATED' ] );
-        $wStruct->setApprovedWords( $job_details[ 'APPROVED' ] );
-        $wStruct->setRejectedWords( $job_details[ 'REJECTED' ] );
+        $wStruct->setNewWords( $job_details[ Constants_TranslationStatus::STATUS_NEW ] );
+        $wStruct->setDraftWords( $job_details[  Constants_TranslationStatus::STATUS_DRAFT  ] - $job_details[  Constants_TranslationStatus::STATUS_NEW  ] );
+        $wStruct->setTranslatedWords( $job_details[  Constants_TranslationStatus::STATUS_TRANSLATED  ] );
+        $wStruct->setApprovedWords( $job_details[  Constants_TranslationStatus::STATUS_APPROVED  ] );
+        $wStruct->setRejectedWords( $job_details[  Constants_TranslationStatus::STATUS_REJECTED ] );
         initializeWordCount( $wStruct );
 
         //Log::doLog( $wStruct );

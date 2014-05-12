@@ -231,7 +231,7 @@ class INIT {
 		self::$ENABLED_BROWSERS = array('chrome', 'safari', 'firefox');
 
         /**
-         * Matecat opens ource by default only handles xliff files with a strong focus on sdlxliff
+         * Matecat open source by default only handles xliff files with a strong focus on sdlxliff
          * ( xliff produced by SDL Trados )
          *
          * We are not including the file converters into the Matecat code because we haven't find any open source

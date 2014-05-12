@@ -226,8 +226,8 @@ class catController extends viewController {
             unset( $prj[ 'approved_words' ] );
             unset( $prj[ 'rejected_words' ] );
 
-            //BackWard Compatibility, for projects created with old versions
-            if( $wStruct->getTotal() == 0 && $prj['status_analysis'] == 'DONE' ){
+            //For projects created with No tm analysis enabled
+            if( $wStruct->getTotal() == 0 && ( $prj['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ||  $prj['status_analysis'] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ){
                 $wCounter = new WordCount_Counter();
                 $wStruct = $wCounter->initializeJobWordCount( $this->jid, $this->password );
                 Log::doLog( "BackWard compatibility set Counter." );
@@ -299,8 +299,8 @@ class catController extends viewController {
         $this->template->last_opened_segment = $this->last_opened_segment;
         //$this->template->data                = $this->data;
 
-        $this->job_stats['STATUS_BAR_NO_DISPLAY'] = ( $this->project_status['status_analysis'] == 'DONE' ? '' : 'display:none;' );
-        $this->job_stats['ANALYSIS_COMPLETE']   = ( $this->project_status['status_analysis'] == 'DONE' ? true : false );
+        $this->job_stats['STATUS_BAR_NO_DISPLAY'] = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
+        $this->job_stats['ANALYSIS_COMPLETE']   = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? true : false );
 
 //        Log::doLog( $this->job_stats );
 

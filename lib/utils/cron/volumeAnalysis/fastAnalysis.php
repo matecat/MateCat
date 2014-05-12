@@ -77,7 +77,7 @@ while (1) {
 		Log::doLog( "done" );
 
 		$perform_Tms_Analysis = true;
-		$status = "FAST_OK";
+		$status = Constants_ProjectStatus::STATUS_FAST_OK;
 		if( $pid_res['id_tms'] == 0 && $pid_res['id_mt_engine'] == 0 ){
 
 			/**
@@ -86,7 +86,7 @@ while (1) {
 			 */
 
 			$perform_Tms_Analysis = false;
-			$status = "DONE";
+			$status = Constants_ProjectStatus::STATUS_DONE;
 			Log::doLog( 'Perform Analysis ' . var_export( $perform_Tms_Analysis, true ) );
 		}
 
