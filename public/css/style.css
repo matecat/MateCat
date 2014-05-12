@@ -1443,11 +1443,11 @@ section.highlighted2 .editarea
 }
 */
 
-section.highlighted1 .editarea
+section:not(.editor).highlighted1 .editarea
 {
 	background-color: #00C1E6;
 }
-section.highlighted2 .editarea
+section:not(.editor).highlighted2 .editarea
 {
 	-moz-transition:background-color 1.5s;
 	-webkit-transition:background-color 1.5s !important;

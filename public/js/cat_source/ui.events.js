@@ -354,11 +354,8 @@ $.extend(UI, {
 			UI.closeInplaceEditor(ed);
 		}).on('click', '.tab.alternatives .graysmall .goto a', function(e) {console.log('eccolo');
 			e.preventDefault();
-			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')));
+			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), true);
 			UI.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
-
-//			$('#segment-' + $(this).attr('data-goto')).addClass('pulsate');
-			console.log('mah');
 		});
 
 		$(".joblink").click(function(e) {

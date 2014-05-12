@@ -2328,6 +2328,7 @@ body.archived section .status-container
 {
 	background-color: #ffff94;
 }
+
 .editor.highlighted2 .editarea
 {
 	-moz-transition:background-color 1.5s;
@@ -2336,6 +2337,34 @@ body.archived section .status-container
 	transition:background-color 1.5s !important;
 	background-color: transparent;
 }
+/*
+section.highlighted1 .editarea
+{
+	border: 4px solid #0798BC;
+}
+section.highlighted2 .editarea
+{
+	-moz-transition: border 1.5s;
+	-webkit-transition: border 1.5s !important;
+	-o-transition: border 1.5s;
+	transition: border 1.5s !important;
+	border: 4px solid transparent;
+}
+*/
+
+section:not(.editor).highlighted1 .editarea
+{
+	background-color: #00C1E6;
+}
+section:not(.editor).highlighted2 .editarea
+{
+	-moz-transition:background-color 1.5s;
+	-webkit-transition:background-color 1.5s !important;
+	-o-transition:background-color 1.5s;
+	transition:background-color 1.5s !important;
+	background-color: transparent;
+}
+
 /*.editor.modified .editarea
 {
 	-moz-transition:background-color 2s;
