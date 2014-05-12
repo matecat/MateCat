@@ -1681,6 +1681,7 @@ body.noGlossary .tab-switcher-gl
     outline: none;
 }
 
+
 .submenu li.active a
 {
     background: #fff;
@@ -1695,6 +1696,13 @@ body.noGlossary .tab-switcher-gl
 .submenu li.modified a
 {
     color: red;
+}
+
+.tab-switcher-al a
+{
+	color: #D65959 !important;
+	background: #fff url(../img/sprite.png) -8px -1357px no-repeat !important;
+	padding-left: 24px;
 }
 
 .sub-editor

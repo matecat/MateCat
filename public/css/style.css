@@ -772,6 +772,7 @@ body.noGlossary .tab-switcher-gl
     outline: none;
 }
 
+
 .submenu li.active a
 {
     background: #fff;
@@ -786,6 +787,13 @@ body.noGlossary .tab-switcher-gl
 .submenu li.modified a
 {
     color: red;
+}
+
+.tab-switcher-al a
+{
+	color: #D65959 !important;
+	background: #fff url(../img/sprite.png) -8px -1357px no-repeat !important;
+	padding-left: 24px;
 }
 
 .sub-editor
@@ -1411,6 +1419,7 @@ body.archived section .status-container
 {
 	background-color: #ffff94;
 }
+
 .editor.highlighted2 .editarea
 {
 	-moz-transition:background-color 1.5s;
@@ -1419,6 +1428,34 @@ body.archived section .status-container
 	transition:background-color 1.5s !important;
 	background-color: transparent;
 }
+/*
+section.highlighted1 .editarea
+{
+	border: 4px solid #0798BC;
+}
+section.highlighted2 .editarea
+{
+	-moz-transition: border 1.5s;
+	-webkit-transition: border 1.5s !important;
+	-o-transition: border 1.5s;
+	transition: border 1.5s !important;
+	border: 4px solid transparent;
+}
+*/
+
+section.highlighted1 .editarea
+{
+	background-color: #00C1E6;
+}
+section.highlighted2 .editarea
+{
+	-moz-transition:background-color 1.5s;
+	-webkit-transition:background-color 1.5s !important;
+	-o-transition:background-color 1.5s;
+	transition:background-color 1.5s !important;
+	background-color: transparent;
+}
+
 /*.editor.modified .editarea
 {
 	-moz-transition:background-color 2s;

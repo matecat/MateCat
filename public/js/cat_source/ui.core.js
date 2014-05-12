@@ -165,13 +165,15 @@ UI = {
 		this.setChosenSuggestion(0);
 		this.lockTags(this.editarea);
 	},
-	highlightEditarea: function() {
-		this.currentSegment.addClass('highlighted1');
+	highlightEditarea: function(seg) {
+		segment = seg || this.currentSegment;
+		console.log('segment: ', segment);
+		segment.addClass('highlighted1');
 		setTimeout(function() {
-			UI.currentSegment.addClass('modified highlighted2');
+			segment.addClass('modified highlighted2');
 		}, 100);
 		setTimeout(function() {
-			UI.currentSegment.removeClass('highlighted1 highlighted2');
+			segment.removeClass('highlighted1 highlighted2');
 		}, 2000);		
 	},
 
@@ -224,7 +226,7 @@ UI = {
 					'		<a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a>' +
 					'	</li>' +
 					'	<li class="tab-switcher-al" id="segment-' + this.currentSegmentId + '-al">' +
-					'		<a tabindex="-1" href="#">Already translated as&nbsp;<span class="number"></span></a>' +
+					'		<a tabindex="-1" href="#">Translation conflicts&nbsp;<span class="number"></span></a>' +
 					'	</li>' +
 					'</ul>' +
 					'<div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches">' +
@@ -1036,7 +1038,7 @@ UI = {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
 		$('#' + segment.attr('id') + '-buttons').empty();
 		$('p.warnings', segment).remove();
-		$('p.alternatives', segment).remove();
+//		$('p.alternatives', segment).remove();
 	},
 	removeFooter: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;		
@@ -1380,7 +1382,7 @@ UI = {
 //		console.log('numAlt: ', numAlt);
 //		console.log('numSeg: ', numSeg);
         if(numAlt) {
-            UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + ((numAlt > 1)? 'other ' + numAlt + ' different' : 'another') + ' way' + ((numAlt > 1)? 's' : '') + '</a></p>');
+//            UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + ((numAlt > 1)? 'other ' + numAlt + ' different' : 'another') + ' way' + ((numAlt > 1)? 's' : '') + '</a></p>');
             tab = UI.currentSegment.find('.tab-switcher-al');
             tab.find('.number').text('(' + numAlt + ')');
             UI.renderAlternatives(d);
@@ -2041,7 +2043,7 @@ UI = {
 	},
 */
 
-    postProcessEditarea: function(context, selector){ 
+    postProcessEditarea: function(context, selector){
         selector = (typeof selector === "undefined") ? '.editarea' : selector;
         area = $( selector, context ).clone();
         /*
