@@ -196,7 +196,7 @@
 
             <p tal:condition="true:conversion_enabled" class="file-drag">
                 <strong>Drag and drop</strong> your file here<br/>
-				<span class="min">(Upload your TMX files as well)</span><br />
+				<span class="min">You may also import your own translation memories (TMX)</span><br />
                 or</p>
 
             <p tal:condition="not:conversion_enabled" class="file-drag">
@@ -730,6 +730,7 @@
         <nav>
             <ul>
                 <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
+                <li><a tal:attributes="href string:${basepath}api/docs">API</a></li>
             </ul>
 
             <tal:block tal:condition="php: empty(logged_user)">

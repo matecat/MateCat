@@ -80,38 +80,63 @@ class getWarningController extends ajaxController {
      * </pre>
      */
     private function __globalWarningsCall() {
-        $result                  = getWarning( $this->__postInput->id_job, $this->__postInput->password );
+
+        $result = getWarning( $this->__postInput->id_job, $this->__postInput->password );
 
         foreach ( $result as $position => &$item ) {
 
             //PATCH - REMOVE WHITESPACES FROM GLOBAL WARNING ( Backward compatibility )
-            $serialized_err = json_decode( $item['serialized_errors_list'] );
-
-            $foundTagMismatch = false;
-            foreach( $serialized_err as $k => $error ){
-
-                switch ( $error->outcome ) {
-                    case QA::ERR_TAG_MISMATCH:
-                    case QA::ERR_TAG_ID:
-                    case QA::ERR_UNCLOSED_X_TAG:
-                        $foundTagMismatch = true;
-                        break;
-                }
-
-            }
-
-            if( !$foundTagMismatch ){
-                unset( $result[$position] );
-            } else {
-                $item = $item[ 'id_segment' ];
-            }
+//            $serialized_err = json_decode( $item['serialized_errors_list'] );
+//
+//            $foundTagMismatch = false;
+//            foreach( $serialized_err as $k => $error ){
+//
+//                switch ( $error->outcome ) {
+//                    case QA::ERR_TAG_MISMATCH:
+//                    case QA::ERR_TAG_ID:
+//                    case QA::ERR_UNCLOSED_X_TAG:
+//                        $foundTagMismatch = true;
+//                        break;
+//                }
+//
+//            }
+//
+//            if( !$foundTagMismatch ){
+//                unset( $result[$position] );
+//            } else {
+//                $item = $item[ 'id_segment' ];
+//            }
             //PATCH - REMOVE WHITESPACES FROM GLOBAL WARNING ( Backward compatibility )
+
+            $item = $item[ 'id_segment' ];
 
         }
 
         $this->result[ 'details' ] = array_values($result);
         $this->result[ 'token' ]   = $this->__postInput->token;
 //        $this->result['messages']  = '[{"msg":"Test message 1","token":"token1","expire":"2014-04-03 00:00"},{"msg":"Test message 2","token":"token2","expire":"2014-04-04 12:00"}]';
+
+        $tMismatch = getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
+
+        $result = array( 'total' => count( $tMismatch ), 'mine' => 0, 'list_in_my_job' => array() );
+
+        foreach ( $tMismatch as $row ){
+            if( !empty( $row['first_of_my_job'] ) ){
+                $result['mine']++;
+                $result['list_in_my_job'][] = $row['first_of_my_job'];
+//                $result['list_in_my_job'][] = array_shift( explode( "," , $row['first_of_my_job'] ) );
+
+                //append to global list
+                $this->result[ 'details' ][] = $row['first_of_my_job'];
+//                $this->result[ 'details' ] = array_merge( $this->result[ 'details' ], explode( "," , $row['first_of_my_job'] )  )
+
+            }
+        }
+
+        //???? php maps internally numerical keys of array_unique as string so with json_encode
+        //it become an object and not an array!!
+        $this->result[ 'details' ] = array_values( array_unique( $this->result[ 'details' ] ) );
+        $this->result[ 'translation_mismatches' ] = $result;
 
 	}
 

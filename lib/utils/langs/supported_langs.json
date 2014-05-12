@@ -159,7 +159,7 @@
 			"enabled":true,
 			"rtl":false,
 			"rfc3066code":"bs-BA",
-			"tradossupportedcode":"bs-Latn-BA"
+			"languageRegionCode":"bs-Latn-BA"
 		}
 	,
 		{
@@ -1051,7 +1051,7 @@
 			"isocode":"ps",
 			"enabled":true,
 			"rtl":true,
-			"tradossupportedcode":"ps-AF",
+			"languageRegionCode":"ps-AF",
 			"rfc3066code":"ps-PK"
 		}
 	,
@@ -1207,7 +1207,7 @@
 			"enabled":true,
 			"rtl":false,
 			"rfc3066code":"sr-Latn-RS",
-                        "tradossupportedcode":"sr-Latn-RS"
+            "languageRegionCode":"sr-Latn-RS"
 		}
 	,
         {
@@ -1218,7 +1218,7 @@
 			"enabled":true,
 			"rtl":false,
 			"rfc3066code":"sr-Cyrl-RS",
-                        "tradossupportedcode":"sr-Cyrl-RS"
+            "languageRegionCode":"sr-Cyrl-RS"
 		}
 	,
         
@@ -1402,7 +1402,7 @@
 			"isocode":"ta",
 			"enabled":true,
 			"rtl":false,
-			"tradossupportedcode":"ta-IN",
+			"languageRegionCode":"ta-IN",
 			"rfc3066code":"ta-LK"
 		}
 	,

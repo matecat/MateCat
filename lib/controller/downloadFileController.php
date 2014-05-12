@@ -82,9 +82,9 @@ class downloadFileController extends downloadController {
             $path=INIT::$TMP_DOWNLOAD.'/'.$this->id_job.'/'.$id_file.'/'.$current_filename.'.sdlxliff';
             //make dir if doesn't exist
             if(!file_exists(dirname($path))){
-                Log::doLog('exec ("chmod 666 ' . $path . '");');
+                Log::doLog('exec ("chmod 666 ' . escapeshellarg( $path ) . '");');
                 mkdir(dirname($path), 0777, true);
-                exec ("chmod 666 $path");
+                exec ( "chmod 666 " . escapeshellarg( $path ) );
             }
             //create file
             $fp=fopen($path,'w+');
@@ -195,7 +195,7 @@ class downloadFileController extends downloadController {
             } catch ( Exception $e ) { Log::doLog( $e->getMessage() ); }
 
 
-            if (!in_array($mime_type, array("xliff", "sdlxliff", "xlf")) || $enforcedConversion ) {
+            if ( !in_array($mime_type, array("xliff", "sdlxliff", "xlf")) || $enforcedConversion ) {
 
                 $output_content[$id_file]['out_xliff_name'] = $path.'.out.sdlxliff';
                 $output_content[$id_file]['source'] = $jobData['source'];
@@ -212,68 +212,73 @@ class downloadFileController extends downloadController {
 
         }
 
-        $ext = "";
-        if ($this->download_type == 'all') {
-            if (count($output_content) > 1) {
-                $this->filename = $this->fname;
-                $pathinfo = pathinfo($this->fname);
-                if ($pathinfo['extension'] != 'zip') {
-                    $this->filename = $pathinfo['basename'] . ".zip";
-                }
-                $this->content = $this->composeZip( $output_content, $jobData['source'] ); //add zip archive content here;
-            } elseif (count($output_content) == 1) {
-                $this->setContent($output_content);
-            }
-        } else {
-            $this->setContent($output_content);
-        }
-        $debug['total'][]=time();
+        //set the file Name
+        $pathinfo       = pathinfo( $this->fname );
+        $this->filename = $pathinfo['filename']  . "_" . $jobData[ 'target' ] . "." . $pathinfo['extension'];
 
-        unlink($path);
-        unlink($path.'.out.sdlxliff');
-        rmdir(INIT::$TMP_DOWNLOAD.'/'.$this->id_job.'/'.$id_file.'/');
-        rmdir(INIT::$TMP_DOWNLOAD.'/'.$this->id_job.'/');
+        //qui prodest to check download type?
+//        if ( $this->download_type == 'all' && count( $output_content ) > 1 ) {
+        if ( count( $output_content ) > 1 ) {
+
+            if ( $pathinfo[ 'extension' ] != 'zip' ) {
+                $this->filename = $pathinfo[ 'basename' ] . ".zip";
+            }
+
+            $this->composeZip( $output_content, $jobData[ 'source' ] ); //add zip archive content here;
+
+        } else {
+            //always an array with 1 element, pop it, Ex: array( array() )
+            $output_content = array_pop( $output_content );
+            $this->setContent( $output_content );
+        }
+
+        $debug[ 'total' ][ ] = time();
+
+        unlink( $path );
+        unlink( $path . '.out.sdlxliff' );
+        rmdir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $id_file . '/' );
+        rmdir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
 
     }
 
-    private function setContent($output_content) {
-        foreach ($output_content as $oc) {
-            $pathinfo = pathinfo($oc['filename']);
-            $ext = $pathinfo['extension'];
-            $this->filename = $oc['filename'];
+    private function setContent( $output_content ) {
 
-            if ($ext == 'pdf' or $ext == "PDF") {
-                $this->filename = $pathinfo['basename'] . ".docx";
-            }
-            $this->content = $oc['content'];
+        $this->filename = $this->sanitizeFileExtension( $output_content['filename'] );
+        $this->content = $output_content['content'];
+
+    }
+
+    private function sanitizeFileExtension( $filename ){
+
+        $pathinfo = pathinfo( $filename );
+
+        if ( strtolower( $pathinfo[ 'extension' ] ) == 'pdf' ) {
+            $filename = $pathinfo[ 'basename' ] . ".docx";
         }
+
+        return $filename;
+
     }
 
     private function composeZip( $output_content, $sourceLang ) {
+
         $file = tempnam("/tmp", "zipmatecat");
         $zip = new ZipArchive();
         $zip->open($file, ZipArchive::OVERWRITE);
 
         // Staff with content
         foreach ($output_content as $f) {
-            $pathinfo = pathinfo($f['filename']);
-            $ext = $pathinfo['extension'];
-            if ($ext == 'pdf' or $ext == "PDF") {
-                $f['filename'] = $pathinfo['basename'] . ".docx";
-            }
+
+            $f[ 'filename' ] = $this->sanitizeFileExtension( $f[ 'filename' ] );
 
             //Php Zip bug, utf-8 not supported
-            $sourceLang = str_replace( "-", "_", $sourceLang );
-            setlocale( LC_CTYPE, $sourceLang );
-            $fName = iconv( "UTF-8", 'ASCII//TRANSLIT', $f['filename'] );
-
-            $fName = preg_replace( '/[^\p{L}0-9a-zA-Z_\.\-]/u', "_", $fName );
+            $fName = preg_replace( '/[^0-9a-zA-Z_\.\-]/u', "_", $f['filename'] );
             $fName = preg_replace( '/[_]{2,}/', "_", $fName );
             $fName = str_replace( '_.', ".", $fName );
 
             $nFinfo = pathinfo($fName);
-            $ext    = $nFinfo['filename'];
-            if( strlen( $ext ) < 3 ){
+            $_name    = $nFinfo['filename'];
+            if( strlen( $_name ) < 3 ){
                 $fName = substr( uniqid(), -5 ) . "_" . $fName;
             }
 
@@ -285,10 +290,8 @@ class downloadFileController extends downloadController {
         $zip->close();
         $zip_content = file_get_contents("$file");
         unlink($file);
-        return $zip_content;
-    }
 
-    private function convertToOriginalFormat() {
+        $this->content =  $zip_content;
 
     }
 

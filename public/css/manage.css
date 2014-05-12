@@ -659,7 +659,11 @@ line-height:20px;
 margin: 20px 0;
 color: #666;
         }
-        .apidesc td {
+
+#contentBox pre.literal-block {word-wrap: break-word;}
+
+
+.apidesc td {
             padding: 8px;
             text-align:center;
         }
@@ -747,7 +751,9 @@ margin-top: 10px;}
 .logosmall {background: url(../img/sprite.png) 1px -1403px no-repeat;padding-top: 30px;}
 
 
-.block { min-height:600px;height: auto;
+.block
+{
+	height: auto;
 }
 
 

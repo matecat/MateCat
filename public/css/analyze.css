@@ -71,7 +71,7 @@ a:hover{text-decoration:none}
 .languages{font-weight:bold;font-size:18px;text-align:left !important; width:35%;}
 
 /* SPLIT JOB */
-.uploadbtn {
+.uploadbtn, .continuebtn {
 	background: #09beec; font-weight: bold;
 	/*   background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
 	   background: -moz-linear-gradient(top,  #09beec,  #119ec4);
@@ -100,12 +100,15 @@ a:hover{text-decoration:none}
 	margin: 0 0 -3px 10px !important;
 	float: right;
 }
-.uploadbtn:hover {-moz-box-shadow: 0 1px 2px #666;
+
+
+.uploadbtn:hover, .continuebtn:hover {-moz-box-shadow: 0 1px 2px #666;
 				  -webkit-box-shadow: 0 1px 2px #666;
 				  box-shadow: 0 1px 2px #666;
 				  background: #12b4df;}
+.continuebtn,  .continuebtn:hover {background:#7eaf3e;}
 
-.uploadbtn:active {-moz-box-shadow: inset 0 0 1px 1px #888;
+.uploadbtn:active, .continuebtn:hover {-moz-box-shadow: inset 0 0 1px 1px #888;
 				   -webkit-box-shadow: inset 0 0 1px 1px #888;
 				   box-shadow: inset 0 0 1px 1px #888;}
 
@@ -548,17 +551,17 @@ a:hover{text-decoration:none}
 
 /*scrollbar*/
 
-.split-box3 ::-webkit-scrollbar {
+.split-box3 ::-webkit-scrollbar, .outsource.modal .popup-box ::-webkit-scrollbar  {
     width: 16px;
 }
 
-.split-box3 ::-webkit-scrollbar-track {
+.split-box3 ::-webkit-scrollbar-track, .outsource.modal .popup-box ::-webkit-scrollbar-track {
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
 
 
 }
 
-.split-box3 ::-webkit-scrollbar-thumb {
+.split-box3 ::-webkit-scrollbar-thumb, .outsource.modal .popup-box ::-webkit-scrollbar-thumb {
 
 	background:#ccc url(../img/bgscrollbar.png) center center no-repeat;
     -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5); 
@@ -813,3 +816,38 @@ footer a:hover{text-decoration:none}
 {
     margin-left: 10px;
 }         
+.outsource.modal section.outs
+{
+	display: none;
+}
+
+.outsource.modal .popup {
+	top: 30%;
+}
+.chunks-container
+{
+	max-height: 250px;
+	overflow: auto;
+}
+/* retina display query */
+@media only screen and (-webkit-min-device-pixel-ratio: 2),
+only screen and (min--moz-device-pixel-ratio: 2),
+only screen and (-o-min-device-pixel-ratio: 2/1),
+only screen and (min-device-pixel-ratio: 2),
+only screen and (min-resolution: 192dpi),
+only screen and (in-resolution: 2dppx) { 
+
+.splitbtn, .splitbtn:hover, .splitbtn.done, .splitbtn.done:hover {
+background: #09beec url(../img/sprite2x.png) -2px -453px no-repeat!important;
+}
+
+.mergebtn, .mergebtn:hover {
+background: #09beec url(../img/sprite2x.png) -2px -1192px no-repeat;
+}
+
+.subfile p {background: url(../img/sprite2x.png) 3px -304px no-repeat;
+background-size: 26px;
+}
+
+.splitbtn, .splitbtn:hover ,  .splitbtn.done, .splitbtn.done:hover, .mergebtn, .mergebtn:hover {background-size:42px!important;}
+}

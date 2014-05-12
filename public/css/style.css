@@ -119,7 +119,30 @@ body.searchActive #filterSwitch
 
 .tag-mismatch{float:left !important}
 
-.warnings{clear:left;color:#D65959;background: url(../img/sprite.png) -13px -1360px no-repeat;float:left;position:relative;left:52%;top:-12px;margin-top:-12px;padding:2px  0 2px 18px;font-size:14px;max-width:200px;text-align: left}
+.warnings, 
+.text .alternatives 
+{
+	clear:left;
+	color:#D65959;
+	background: url(../img/sprite.png) -13px -1360px no-repeat;
+	float:left;
+	position:relative;
+	left:52%;
+	top:-12px;
+	margin-top:-12px;
+	padding:2px  0 2px 18px;
+	font-size:14px;
+	max-width:200px;
+	text-align: left;
+}
+.text .alternatives 
+{
+	max-width: 300px;
+}
+.alternatives a
+{
+	color: #D65959 !important;
+}
 .warnings:empty{ display:none; }
 .mismatch .warnings{display:block}
 
@@ -506,15 +529,16 @@ article .translated:active, article .draft:active, article .btn:active, article 
     margin-top: 5px;
     width: 50px !important;
 	background: url(../img/sprite.png) 5px -853px no-repeat;    
-	opacity: 0.2;
+/*	opacity: 0.4;*/
 }
+
 .editor .outersource .copy
 {
 	display: block;
 }
 .outersource .copy:hover
 {
-	opacity: 1;
+	background: url(../img/sprite.png) 5px -1461px no-repeat;    
 	cursor: pointer;
 }
 
@@ -674,6 +698,22 @@ article
 
 .graysmall{width:100%;background:#fbfbfb;float:left;position:relative;border-bottom:1px solid #ccc;color:#666;-webkit-transition: all  100ms ease-in;transition: all  100ms ease-in;}
 .graysmall:last-child{border-bottom:none !Important}
+.tab.concordances .graysmall
+{
+	display: none;
+}
+.tab.concordances .graysmall.prime
+{
+	display: block;
+}
+.tab.concordances.extended .graysmall
+{
+	display: block;
+}
+.tab.concordances.extended .overflow
+{
+	overflow: auto;
+}
 .graygreen{color:#fff !important;border-top:1px solid #ccc;border-left:1px solid #ccc;width:25px !important;text-align:center !important}
 
 
@@ -681,8 +721,15 @@ article
 
 /*submenu*/
 .submenu {background:#fff;text-align:left;width:100%;border-bottom:1px solid #666;margin-top: 1px;}
-.submenu {display: none;}
-
+.submenu
+{
+	display: none;
+}
+.popup .submenu
+{
+	display: block;
+	padding-top: 20px;
+}
 
 .submenu:after{ content: ".";
 				display: block;
@@ -703,6 +750,10 @@ section.loaded .submenu {display: block;}
     background: #efefef url(../img/point.gif) 0 0 repeat-x;
     z-index: 9999999999999;
 }
+.tab-switcher-al
+{
+	display: none;
+}
 body.noGlossary .tab-switcher-gl
 {
 	display: none;
@@ -721,6 +772,7 @@ body.noGlossary .tab-switcher-gl
     outline: none;
 }
 
+
 .submenu li.active a
 {
     background: #fff;
@@ -732,14 +784,45 @@ body.noGlossary .tab-switcher-gl
     outline: none;
 	padding-top:5px !important;
 }
+.submenu li.modified a
+{
+    color: red;
+}
+
+.tab-switcher-al a
+{
+	color: #D65959 !important;
+	background: #fff url(../img/sprite.png) -8px -1357px no-repeat !important;
+	padding-left: 24px;
+}
 
 .sub-editor
 {
     display: none;
+	float: left;
+	width: 100%;
 }   
 .sub-editor.matches
 {
 	display: block;
+}
+
+.sub-editor.concordances .results
+{
+	float: left;
+	width: 100%;
+}
+.sub-editor.concordances .more
+{
+	display: inline-block;
+	text-decoration: none;
+	color: #FFF;
+	padding: 0 10px;
+	background: #999;
+	font-size: 14px;
+	border-top-left-radius: 6px;
+	border-top-right-radius: 6px;
+	min-width: 40px;
 }
 
 .sub-editor .cc-search, .sub-editor .gl-search
@@ -1138,7 +1221,21 @@ body.cattool .searchbox .block.right
 .header{height: 20px; width:100%; color:#a7a9ac; font-size:12px; float:left;text-align:left;background:#efefef;border-bottom:1px solid #ccc;margin-bottom:5px;-webkit-box-shadow: inset 0 1px 1px 1px #f4f7f9;box-shadow: inset 0 1px 1px 1px #f4f7f9;}
 
 
-
+.header .repetition
+{
+/*	float: left;
+	margin: 4px 0 0 6px;
+	text-transform: uppercase;
+	color: #888;
+	font-size: 11px;*/
+	float: left;
+	margin: 0px 0 0 0px;
+	text-transform: uppercase;
+	color: #FFF;
+	font-size: 11px;
+	background: #999;
+	padding: 4px 8px;
+}
 
 
 
@@ -1322,6 +1419,7 @@ body.archived section .status-container
 {
 	background-color: #ffff94;
 }
+
 .editor.highlighted2 .editarea
 {
 	-moz-transition:background-color 1.5s;
@@ -1330,6 +1428,34 @@ body.archived section .status-container
 	transition:background-color 1.5s !important;
 	background-color: transparent;
 }
+/*
+section.highlighted1 .editarea
+{
+	border: 4px solid #0798BC;
+}
+section.highlighted2 .editarea
+{
+	-moz-transition: border 1.5s;
+	-webkit-transition: border 1.5s !important;
+	-o-transition: border 1.5s;
+	transition: border 1.5s !important;
+	border: 4px solid transparent;
+}
+*/
+
+section:not(.editor).highlighted1 .editarea
+{
+	background-color: #00C1E6;
+}
+section:not(.editor).highlighted2 .editarea
+{
+	-moz-transition:background-color 1.5s;
+	-webkit-transition:background-color 1.5s !important;
+	-o-transition:background-color 1.5s;
+	transition:background-color 1.5s !important;
+	background-color: transparent;
+}
+
 /*.editor.modified .editarea
 {
 	-moz-transition:background-color 2s;
@@ -1506,6 +1632,10 @@ textarea, input, .editarea, .search-editarea, select  {
 	-webkit-transition: all 100ms ease-in;
 	transition: all 100ms ease-in;
 }
+.graysmall li.goto
+{
+	width: 10px;
+}
 .graysmall li.details
 {
 	width: 100%;
@@ -1531,6 +1661,7 @@ textarea, input, .editarea, .search-editarea, select  {
 	margin-bottom: 6px;
 }
 .graysmall .b{padding-left:25px!important;position:relative}
+
 .message li{background: url(../img/bad.png) 22px center no-repeat;padding-left:40px !Important;background-size:12px 12px}
 .graysmall:hover .trash{height:20px;}
 .trash:hover{background: url(../img/sprite.png) -10px -1245px no-repeat;opacity:1;}
@@ -1561,8 +1692,17 @@ textarea, input, .editarea, .search-editarea, select  {
 	margin-top:10px;
 }
 .graysmall{color:#333;background:#fbfbfb;}
+.graysmall.notEditable
+{
+	background: #ccc;
+}
+
 .graysmall-details li{float:right;width:auto !important;font-size:11px;margin:0 0px;padding:2px 5px 0px 5px;border-bottom:none;}
 .graysmall:hover{background:#e9e8e9;cursor:default;}
+.graysmall.notEditable:hover
+{
+	background: #999;
+}
 
 .graysmall:hover li span{color:#000 !important}
 
@@ -2015,7 +2155,6 @@ footer nav
 	.graysmall-message{left:55px !important}
 
 
-
 }
 
 @media screen and (max-width: 1180px){
@@ -2038,7 +2177,18 @@ footer nav
 
 	.search-editarea {width:200px !Important}
 	.text .item,.white li{width: 44% !important}
-
+}
+@media screen and (min-width: 1280px){
+	.alternatives .graysmall .sugg-target
+	{
+		width: 40% !important;
+	}
+}
+@media screen and (max-width: 1280px){
+	.alternatives .graysmall .sugg-target
+	{
+		width: 37% !important;
+	}
 }
 
 li.tag-mismatch
@@ -2313,6 +2463,115 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 {
 	display: none;
 }
+
+#settingsSwitcher
+{
+	display: none;
+	position: relative;
+	float: right;
+	width: 16px;
+	height: 16px;
+	margin: 6px 8px 0 0;
+	background: url(../img/settings.png) 0 0 no-repeat;
+	background-size: 16px 16px;
+	text-indent: -9999px;
+	opacity: 0.5;
+}
+#settingsSwitcher:hover
+{
+	opacity: 1;
+}
+
+.popup-settings .popup {
+	width: 60% !important;
+	margin: 0 !important;
+	left: 20% !important;
+	top: 5%;
+}
+.popup-settings .tab:first-of-type
+{
+	display: block;
+}
+.popup-settings #settings-shortcuts .list
+{
+	margin: 10px;
+	text-align: left;
+}
+.popup-settings #settings-shortcuts .list tr
+{
+	vertical-align: top;
+}
+.popup-settings #settings-shortcuts .list .label
+{
+	width: 48%;
+	text-align: right;
+	line-height: 130%;
+	padding-top: 6px;
+}
+.popup-settings #settings-shortcuts .list .combination
+{
+	padding-left: 20px;
+}
+.popup-settings #settings-shortcuts .list .combination .keystroke
+{
+	border: 1px solid #aaa;
+	padding: 1px 5px;
+}
+.popup-settings #settings-shortcuts .list .combination .keystroke.modified
+{
+	border-color: red;
+}
+.popup-settings #settings-shortcuts .list .combination .keystroke.changing
+{
+	background: #0798BC;
+	color: #fff;
+}
+.popup-settings #settings-shortcuts .list .combination .msg
+{
+	margin-left: 20px;
+	color: #999;
+}
+.popup-settings #settings-restore
+{
+	display: none;
+}
+.popup-settings.modified #settings-restore
+{
+	display: block;
+}
+
+.editor .source mark.inGlossary
+{
+	border-bottom: 1px dotted #c0c;
+}
+
+/*.popup-settings #settings-shortcuts .list dt
+{
+	float: left;
+	width: 49%;
+	background: yellow;
+}
+.popup-settings #settings-shortcuts .list dd
+{
+	float: left;
+	width: 49%;
+	margin: 0;
+	background: orange;
+}*/
+
+ins.diff
+{
+	background: #C3FFC3;
+}
+
+del.diff
+{
+	background: #FFCFCF;
+}
+
+
+
+
 @keyframes fadein {
     from { opacity: 0; }
     to   { opacity: 0.6 }
@@ -2420,6 +2679,11 @@ only screen and (in-resolution: 2dppx) {
 .outersource .copy {
 	background: url(../img/sprite2x.png) 5px -853px no-repeat;
 }
+.outersource .copy:hover
+{
+	background: url(../img/sprite2x.png) 5px -1461px no-repeat;    
+	cursor: pointer;
+}
 .sub-editor .gl-search .set-glossary {
 	background: url(../img/sprite2x.png) -11px -407px no-repeat;
 }
@@ -2432,7 +2696,10 @@ only screen and (in-resolution: 2dppx) {
 .close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover {
 	background: url(../img/sprite2x.png) -11px -187px no-repeat;
 }
-.breadcrumbs #pname, .outersource .copy, .sub-editor .gl-search .set-glossary, .warnings, .close, .close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover {
+.breadcrumbs #pname, .outersource .copy, .sub-editor .gl-search .set-glossary, .warnings, .close, .close:hover, .close:focus, .x-stats:hover, .x-com:hover, .x-addcom:hover, .outersource .copy:hover {
 	background-size: 42px;
 }
+
+
+
 }

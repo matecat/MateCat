@@ -100,20 +100,21 @@ abstract class Engine {
 
         $uniquid = uniqid();
 
+        //DO NOT REMOVE LOGS
         if ( $isPost ) {
             //compose the POST
             $this->buildPostQuery( $function );
-            //Log::doLog( $uniquid . " ... " . $this->url );
+            Log::doLog( $uniquid . " ... " . $this->url );
             $res = $this->curl( $this->url, $parameters );
         } else {
             //compose the GET string
             $this->buildGetQuery( $function, $parameters );
-            //Log::doLog( $uniquid . " ... " . $this->url );
+            Log::doLog( $uniquid . " ... " . $this->url );
             $res = $this->curl( $this->url );
         }
 
         $this->raw_result = json_decode( $res, true );
-        //Log::doLog( $uniquid . " ... Received... " . $res );
+        Log::doLog( $uniquid . " ... Received... " . $res );
 
 	}
 

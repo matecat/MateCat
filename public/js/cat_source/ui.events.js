@@ -2,69 +2,90 @@
 	Component: ui.events 
  */
 $.extend(UI, {
-	setEvents: function() {
-		$("body").bind('keydown', 'Ctrl+return', function(e) {
+	bindShortcuts: function() {
+		$("body").removeClass('shortcutsDisabled');
+		$("body").on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.standard, function(e) {
 			e.preventDefault();
 			$('.editor .translated').click();
-		}).bind('keydown', 'Meta+return', function(e) {
+//		}).bind('keydown', 'Meta+return', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.translate.keystrokes.mac, function(e) {
 			e.preventDefault();
+			console.log('funziona');
 			$('.editor .translated').click();
-		}).bind('keydown', 'Ctrl+shift+return', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.translate_nextUntranslated.keystrokes.standard, function(e) {
 			e.preventDefault();
 			$('.editor .next-untranslated').click();
-		}).bind('keydown', 'Meta+shift+return', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.translate_nextUntranslated.keystrokes.mac, function(e) {
 			e.preventDefault();
 			$('.editor .next-untranslated').click();
-		}).bind('keydown', 'Ctrl+pageup', function(e) {
+		}).on('keydown.shortcuts', null, 'Ctrl+pageup', function(e) {
 			e.preventDefault();
-		}).bind('keydown', 'Ctrl+down', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.openNext.keystrokes.standard, function(e) {
 			e.preventDefault();
 			e.stopPropagation();
 			UI.gotoNextSegment();
-		}).bind('keydown', 'Meta+down', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.openNext.keystrokes.mac, function(e) {
 			e.preventDefault();
 			e.stopPropagation();
 			UI.gotoNextSegment();
-		}).bind('keydown', 'Ctrl+up', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.openPrevious.keystrokes.standard, function(e) {
 			e.preventDefault();
 			e.stopPropagation();
 			UI.gotoPreviousSegment();
-		}).bind('keydown', 'Meta+up', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.openPrevious.keystrokes.mac, function(e) {
 			e.preventDefault();
 			e.stopPropagation();
 			UI.gotoPreviousSegment();
-		}).bind('keydown', 'Ctrl+left', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.gotoCurrent.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.pointToOpenSegment();
-		}).bind('keydown', 'Meta+left', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.gotoCurrent.keystrokes.mac, function(e) {
 			e.preventDefault();
 			UI.pointToOpenSegment();
-		}).bind('keydown', 'Alt+ctrl+i', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.copySource.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.copySource();
-		}).bind('keydown', 'Ctrl+z', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.undoInSegment.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.undoInSegment(segment);
 			UI.closeTagAutocompletePanel();
-		}).bind('keydown', 'Meta+z', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.undoInSegment.keystrokes.mac, function(e) {
 			e.preventDefault();
 			UI.undoInSegment(segment);
 			UI.closeTagAutocompletePanel();
-		}).bind('keydown', 'Ctrl+y', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.redoInSegment.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.redoInSegment(segment);
-		}).bind('keydown', 'Meta+Shift+z', function(e) {
+		}).on('keydown.shortcuts', null, UI.shortcuts.redoInSegment.keystrokes.mac, function(e) {
 			e.preventDefault();
 			UI.redoInSegment(segment);
-		}).bind('keydown', 'Ctrl+c', function() {
+		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.standard, function(e) {
+			UI.toggleSearch(e);
+		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.mac, function(e) {
+			UI.toggleSearch(e);
+		});		
+	},
+	unbindShortcuts: function() {
+		$("body").off(".shortcuts").addClass('shortcutsDisabled');
+	},
+	setEvents: function() {
+		this.bindShortcuts();
+		$("body").on('keydown', null, 'ctrl+1', function(e) {
+			e.preventDefault();
+			$('.editor .tab.alternatives .graysmall[data-item=1]').trigger('dblclick');
+		}).on('keydown', null, 'ctrl+2', function(e) {
+			e.preventDefault();
+			$('.editor .tab.alternatives .graysmall[data-item=2]').trigger('dblclick');
+		}).on('keydown', null, 'ctrl+3', function(e) {
+			e.preventDefault();
+			$('.editor .tab.alternatives .graysmall[data-item=3]').trigger('dblclick');
+		});		
+		$("body").bind('keydown', 'Ctrl+c', function() {
 			UI.tagSelection = false;
 		}).bind('keydown', 'Meta+c', function() {
 			UI.tagSelection = false;
 //		}).bind('keydown', 'Backspace', function(e) {
-		}).bind('keydown', 'Meta+f', function(e) {
-			UI.toggleSearch(e);
-		}).bind('keydown', 'Ctrl+f', function(e) {
-			UI.toggleSearch(e);
+
 //		}).on('click', '#messageBar .close', function(e) {
 //			e.preventDefault();
 //			$('body').removeClass('incomingMsg');
@@ -82,6 +103,41 @@ $.extend(UI, {
 //				UI.alertConfirmTranslationEnabled = true;
 //				$.removeCookie('noAlertConfirmTranslation');
 //			}
+		}).on('click', '#settingsSwitcher', function(e) {
+			e.preventDefault();
+			UI.unbindShortcuts();
+			$('.popup-settings').show();
+		}).on('click', '.popup-settings #settings-restore', function(e) {
+			e.preventDefault();
+			APP.closePopup();
+		}).on('click', '.popup-settings #settings-save', function(e) {
+			e.preventDefault();
+			APP.closePopup();
+		}).on('click', '.modal .x-popup', function(e) {
+			if($('body').hasClass('shortcutsDisabled')) {
+				UI.bindShortcuts();
+			}
+		}).on('click', '.popup-settings .x-popup', function(e) {
+			console.log('close');
+		}).on('click', '.popup-settings .submenu li', function(e) {
+			e.preventDefault();
+			$('.popup-settings .submenu li.active').removeClass('active');
+			$(this).addClass('active');
+			$('.popup-settings .tab').hide();
+			$('#' + $(this).attr('data-tab')).show();
+//			console.log($(this).attr('data-tab'));
+		}).on('click', '.popup-settings .submenu li a', function(e) {
+			e.preventDefault();
+		}).on('click', '#settings-shortcuts .list .combination .keystroke', function(e) {
+			$('#settings-shortcuts .list .combination .msg').remove();
+			$('#settings-shortcuts .list .combination .keystroke.changing').removeClass('changing');
+			$(this).toggleClass('changing').after('<span class="msg">New: </span>');
+			$('#settings-shortcuts').addClass('modifying');
+		}).on('click', '#settings-shortcuts #default-shortcuts', function(e) {
+			e.preventDefault();
+			$('#settings-shortcuts .list').remove();
+			UI.setShortcuts();
+			$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').removeClass('modified');	
 		}).on('click', '#spellCheck .words', function(e) {
 			e.preventDefault();
 			UI.selectedMisspelledElement.replaceWith($(this).text());
@@ -135,6 +191,56 @@ $.extend(UI, {
 			$('.modal.survey').remove();
 		}).on('click', '.modal.survey .popup-outer', function() {
 			$('.modal.survey').hide().remove();
+		}).on('keydown', '#settings-shortcuts.modifying .keystroke', function(e) {
+			e.preventDefault();
+			var n = e.which;
+			var c = $(this).parents('.combination');
+			if(!(c.find('.new').length)) {
+				$(c).append('<span class="new"></span>')
+			}
+			var s = $('.new', c);
+			console.log(n);
+			if((n == '16')||(n == '17')||(n == '18')||(n == '91')) { // is a control key
+
+				if($('.control', s).length > 1) {
+					console.log('troppi tasti control: ', $('span', s).length);
+					return false;
+				}
+			
+				k = (n == '16')? 'shift' : (n == '17')? 'ctrl' : (n == '18')? 'alt' : (n == '91')? 'meta' : '';
+				s.html(s.html() + '<span class="control">' + UI.viewShortcutSymbols(k) + '</span>' + '+');
+			} else {
+				console.log(n);
+				symbol = (n == '8')? '9003' :
+						(n == '9')? '8682' :
+						(n == '13')? '8629' :
+						(n == '37')? '8592' :
+						(n == '38')? '8593' :
+						(n == '39')? '8594' :
+						(n == '40')? '8595' : n;
+				console.log('symbol: ', symbol);
+//				pref = ($.inArray(n, [37, 38, 39, 40]))? '#' : '';
+				s.html(s.html() + '<span class="char">' + UI.viewShortcutSymbols('&#' + symbol) + '</span>' + '+');
+				console.log(s.html());
+			}
+			if($('span', s).length > 2) {
+//				console.log('numero span: ', $('span', s).length);
+				UI.writeNewShortcut(c, s, this);
+
+//				$(this).html(s.html().substring(0, s.html().length - 1)).removeClass('changing').addClass('modified').blur();
+//				$(s).remove();
+//				$('.msg', c).remove();
+//				$('#settings-shortcuts.modifying').removeClass('modifying');
+//				$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').addClass('modified');
+			}				
+		}).on('keyup', '#settings-shortcuts.modifying .keystroke', function(e) {
+			console.log('keyup');
+			var c = $(this).parents('.combination');
+			var s = $('.new', c);
+			if(($('.control', s).length)&&($('.char', s).length)) {
+				UI.writeNewShortcut(c, s, this);
+			}
+			$(s).remove();
 		});
 		
 		$(window).on('scroll', function() {
@@ -231,6 +337,9 @@ $.extend(UI, {
 			clearTimeout(UI.selectingReadonly);
 		}).on('dblclick', '.matches .graysmall', function() {
 			UI.chooseSuggestion($(this).attr('data-item'));
+		}).on('dblclick', '.alternatives .graysmall', function() {
+			UI.chooseAlternative($(this));
+		}).on('dblclick', '.alternatives .graysmall', function() {
 		}).on('blur', '.graysmall .translation', function(e) {
 			e.preventDefault();
 			UI.closeInplaceEditor($(this));
@@ -243,6 +352,10 @@ $.extend(UI, {
 			ed = $(this).parents('.graysmall').find('.translation');
 			UI.editContribution(UI.currentSegment, $(this).parents('.graysmall'));
 			UI.closeInplaceEditor(ed);
+		}).on('click', '.tab.alternatives .graysmall .goto a', function(e) {console.log('eccolo');
+			e.preventDefault();
+			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), true);
+			UI.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
 		});
 
 		$(".joblink").click(function(e) {
@@ -268,20 +381,21 @@ $.extend(UI, {
 		$('html').click(function() {
 			$(".menucolor").hide();
 		}).on('click', '#downloadProject', function(e) {
-			e.preventDefault();
-			if($('#downloadProject').hasClass('disabled')) return false;
-			if ($("#notifbox").hasClass("warningbox")) {
-				APP.confirm({
-					name: 'confirmDownload',
-					cancelTxt: 'Fix errors',
-					onCancel: 'goToFirstError',
-					callback: 'continueDownload',
-					okTxt: 'Continue',
-					msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"
-				});
-			} else {
-				UI.continueDownload();
-			}
+            e.preventDefault();
+            if( $('#downloadProject').hasClass('disabled') ) return false;
+            //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
+            if ( $("#notifbox").hasClass("warningbox") && UI.translationMismatches.total != UI.globalWarnings.length ) {
+                APP.confirm({
+                    name: 'confirmDownload',
+                    cancelTxt: 'Fix errors',
+                    onCancel: 'goToFirstError',
+                    callback: 'continueDownload',
+                    okTxt: 'Continue',
+                    msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"
+                });
+            } else {
+                UI.continueDownload();
+            }
 		}).on('click', '.alert .close', function(e) {
 			e.preventDefault();
 			$('.alert').remove();
@@ -346,10 +460,10 @@ $.extend(UI, {
 			}
 			if (UI.debug)
 				console.log('Total onclick Editarea: ' + ((new Date()) - this.onclickEditarea));
-		}).on('keydown', '.editor .source, .editor .editarea', 'alt+meta+c', function(e) {
+		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.mac, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
-		}).on('keydown', '.editor .source, .editor .editarea', 'alt+ctrl+c', function(e) {
+		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
 		}).on('keypress', '.editor .editarea', function(e) {
@@ -432,7 +546,7 @@ $.extend(UI, {
 //							console.log(e.which + ' - ' + isInsideTag);
 //							console.log('CC: ', UI.editarea.html());
 						var numTagsAfter = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
-						var numSpacesAfter = UI.editarea.text().match(/\s/gi).length;
+						var numSpacesAfter = (UI.editarea.text())? UI.editarea.text().match(/\s/gi).length : 0;
 						if (numTagsAfter < numTagsBefore)
 							UI.saveInUndoStack('cancel');
 						if (numSpacesAfter < numSpacesBefore)
@@ -828,6 +942,15 @@ $.extend(UI, {
 			$('.editor .sub-editor').hide();
 			$('.editor .sub-editor.glossary').show();
 			$('.gl-search .search-source').focus();
+		}).on('click', '.tab-switcher-al', function(e) {
+			e.preventDefault();
+			$('.editor .submenu .active').removeClass('active');
+			$(this).addClass('active');
+			$('.editor .sub-editor').hide();
+			$('.editor .sub-editor.alternatives').show();
+		}).on('click', '.alternatives a', function(e) {
+			e.preventDefault();
+			$('.editor .tab-switcher-al').click();
 		}).on('click', '.sub-editor.glossary .overflow a.trash', function(e) {
 			e.preventDefault();
 			ul = $(this).parents('ul.graysmall').first();
@@ -943,6 +1066,31 @@ $.extend(UI, {
 			e.preventDefault();
 			var save = (typeof param == 'undefined') ? 'noSave' : param;
 			UI.closeSegment(UI.currentSegment, 1, save);
+		}).on('click', '.concordances .more', function(e) {
+			e.preventDefault();
+			tab = $(this).parents('.concordances');
+			container = $('.overflow', $(tab));
+//			console.log($(container).height());
+			if($(tab).hasClass('extended')) {
+				UI.setExtendedConcordances(false);
+
+/*				
+				$(tab).removeClass('extended')
+//				console.log(container.height());
+				$(container).removeAttr('style');
+//				console.log($(container).height());
+				$(this).text('More');
+*/
+			} else {
+				UI.setExtendedConcordances(true);
+				
+//				$(container).css('height', $(tab).height() + 'px');
+//				$(tab).addClass('extended');
+//				$(this).text('Less');
+//				UI.custom.extended_concordance = true;
+//				UI.saveCustomization();
+			}
+			$(this).parents('.matches').toggleClass('extended');
 		}).on('keyup', '.editor .editarea', function(e) {
 			if ( e.which == 13 ){
 //				$(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );

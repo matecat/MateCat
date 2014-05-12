@@ -1,29 +1,53 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: domenico
  * Date: 27/01/14
  * Time: 18.57
  * 
  */
 
+/**
+ * Class ajaxController
+ * Abstract class to manage the Ajax requests
+ *
+ */
 abstract class ajaxController extends controller {
 
-    protected $result;
+    /**
+     * Carry the result from Executed Controller Action and returned in json format to the Client
+     *
+     * @var array
+     */
+    protected $result = array("error" => array(), "data" => array());
 
+    /**
+     * Explicitly disable sessions for ajax call
+     *
+     * Sessions enabled on INIT Class
+     *
+     */
     public function disableSessions(){
         INIT::sessionClose();
     }
 
+    /**
+     * Class constructor, initialize the header content type.
+     */
     protected function __construct() {
+
         parent::__construct();
+
         $buffer = ob_get_contents();
         ob_get_clean();
-        // ob_start("ob_gzhandler");        // compress page before sending
+        // ob_start("ob_gzhandler");        // compress page before sending //Not supported for json response on ajax calls
         header('Content-Type: application/json; charset=utf-8');
-        $this->result = array("error" => array(), "data" => array());
+
     }
 
+    /**
+     * Call the output in JSON format
+     *
+     */
     public function finalize() {
         $toJson = json_encode($this->result);
         echo $toJson;

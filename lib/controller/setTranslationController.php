@@ -77,7 +77,24 @@ class setTranslationController extends ajaxController {
 		} else {
 
             //get Job Infos, we need only a row of jobs ( split )
-            $job_data = getJobData( (int) $this->id_job, $this->password );
+            $job_data = getJobData( (int)$this->id_job, $this->password );
+            if ( empty( $job_data ) ) {
+                $msg = "Error : empty job data \n\n " . var_export( $_POST, true ) . "\n";
+                Log::doLog( $msg );
+                Utils::sendErrMailReport( $msg );
+            }
+
+            $db = Database::obtain();
+            $err   = $db->get_error();
+            $errno = $err[ 'error_code' ];
+
+            if ( $errno != 0 ) {
+                $msg = "Error : empty job data \n\n " .  var_export($_POST ,true )."\n";
+                Log::doLog( $msg );
+                Utils::sendErrMailReport( $msg );
+                $this->result['error'][] = array("code" => -101, "message" => "database error");
+		return -1;
+            }
 
             $db = Database::obtain();
             $err   = $db->get_error();
@@ -92,14 +109,14 @@ class setTranslationController extends ajaxController {
             }
 
             //add check for job status archived.
-            if( strtolower( $job_data['status'] ) == 'archived' ){
-                $this->result['error'][] = array("code" => -3, "message" => "job archived");
+            if ( strtolower( $job_data[ 'status' ] ) == 'archived' ) {
+                $this->result[ 'error' ][ ] = array( "code" => -3, "message" => "job archived" );
             }
 
             $pCheck = new AjaxPasswordCheck();
             //check for Password correctness
-            if( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password, $this->id_segment ) ){
-                $this->result['error'][] = array("code" => -10, "message" => "wrong password");
+            if ( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password, $this->id_segment ) ) {
+                $this->result[ 'error' ][ ] = array( "code" => -10, "message" => "wrong password" );
             }
 
         }
@@ -110,10 +127,6 @@ class setTranslationController extends ajaxController {
 
 		if (empty($this->time_to_edit)) {
 			$this->time_to_edit = 0;
-		}
-
-		if (empty($this->status)) {
-			$this->status = 'DRAFT';
 		}
 
 		if ( is_null($this->translation) || $this->translation === '' ) {
@@ -210,23 +223,72 @@ class setTranslationController extends ajaxController {
             $counter->setOldStatus( $old_translation['status'] );
             $counter->setNewStatus( $this->status );
             $newValues = $counter->getUpdatedValues( $old_count );
+
+            /**
+             * WARNING: THIS CHANGE THE STATUS OF SEGMENT_TRANSLATIONS ALSO
+             *
+             * Needed because of duplicated setTranslationsController calls for the same segment
+             *   ( The second call fails for status in where condition )
+             *
+             */
             $newTotals = $counter->updateDB( $newValues );
 
         } else {
             $newTotals = $old_wStruct;
         }
+        $_Translation                            = array();
+        $_Translation[ 'id_segment' ]            = $this->id_segment;
+        $_Translation[ 'id_job' ]                = $this->id_job;
+        $_Translation[ 'status' ]                = $this->status;
+        $_Translation[ 'time_to_edit' ]          = $this->time_to_edit;
+        $_Translation[ 'translation' ]           = preg_replace( '/[ \t\n\r\0\x0A\xA0]+$/u', '', $translation );
+        $_Translation[ 'serialized_errors_list' ] = $err_json;
+        $_Translation[ 'suggestion_position' ]   = $this->chosen_suggestion_index;
+        $_Translation[ 'warning' ]               = $check->thereAreErrors();
+        $_Translation[ 'translation_date' ]      = date( "Y-m-d H:i:s" );
 
-        $res = CatUtils::addSegmentTranslation( $this->id_segment, $this->id_job, $this->status, $this->time_to_edit, $translation, $err_json,$this->chosen_suggestion_index, $check->thereAreErrors() );
+        /**
+         * when the status of the translation changes, the auto propagation flag
+         * must be removed
+         */
+        if( $_Translation[ 'translation' ] != $old_translation['translation'] || $this->status == 'TRANSLATED' || $this->status == 'APPROVED' ){
+            $_Translation[ 'autopropagated_from' ] = 'NULL';
+        }
+
+        $res = CatUtils::addSegmentTranslation( $_Translation );
 
         if (!empty($res['error'])) {
-			$this->result['error'] = $res['error'];
+            $this->result['error'] = $res['error'];
 
             $msg = "\n\n Error addSegmentTranslation \n\n Database Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
             Log::doLog( $msg );
             Utils::sendErrMailReport( $msg );
 
-			return -1;
-		}
+            return -1;
+        }
+
+        //propagate translations
+        $TPropagation                             = array();
+        $TPropagation[ 'id_job' ]                 = $this->id_job;
+        $TPropagation[ 'status' ]                 = 'DRAFT';
+        $TPropagation[ 'translation' ]            = $translation;
+        $TPropagation[ 'autopropagated_from' ]    = $this->id_segment;
+        $TPropagation[ 'serialized_errors_list' ] = $err_json;
+        $TPropagation[ 'warning' ]                = $check->thereAreErrors();
+        $TPropagation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
+        $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
+
+        if( $this->status == 'TRANSLATED' ){
+
+            try {
+                propagateTranslation( $TPropagation, $job_data );
+            } catch ( Exception $e ){
+                $msg = $e->getMessage() . "\n\n" . $e->getTraceAsString();
+                Log::doLog( $msg );
+                Utils::sendErrMailReport( $msg );
+            }
+
+        }
 
 //		$job_stats = CatUtils::getStatsForJob($this->id_job, null, $this->password);
 		$job_stats = CatUtils::getFastStatsForJob( $newTotals );
@@ -234,7 +296,7 @@ class setTranslationController extends ajaxController {
         $project = array_pop( $project );
         $job_stats['ANALYSIS_COMPLETE'] = ( $project['status_analysis'] == 'DONE' ? true : false );
 
-		//$file_stats = CatUtils::getStatsForFile($this->id_first_file); //Removed .. HEAVY query, client don't need these infos at moment
+		//$file_stats = CatUtils::getStatsForFile($this->id_first_file); //Removed .. HEAVY query, client don't need these info at moment
 
         $file_stats = array();
 

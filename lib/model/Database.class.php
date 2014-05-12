@@ -84,6 +84,18 @@ class Database {
 	public function get_error_number() {
 		return $this->errno;
 	}
+#-############################################
+# desc: switches db
+# Param: $name of the db to connect to
+
+	public function useDb($name){
+
+		if(@mysql_select_db($name, $this->link_id)) {//no database
+			$this->database=$name;
+		}
+
+
+	}
 
 #-#############################################
 # desc: connect and select database using vars above
@@ -310,6 +322,9 @@ class Database {
 			$this->error = mysql_error();
 			$this->errno = mysql_errno();
 			$msg = "<b>WARNING:</b> No link_id found. Likely not be connected to database.<br />$msg";
+            if( $this->errno == 1040 || $this->errno == 2003 ){
+                throw new RuntimeException( "( $this->errno ): " . $this->error, $this->errno );
+            }
 		}
 		// if no debug, done here
 		if (!$this->debug) {

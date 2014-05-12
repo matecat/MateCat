@@ -39,6 +39,8 @@ class ajaxUtilsController extends ajaxController {
                 unset( $_SESSION[ '_newProject' ] );
                 break;
 			case 'ping':
+                $db = Database::obtain();
+                $db->query("SELECT 1");
 				$this->result['data'] = array( "OK", time() ); 
 				break;
         }

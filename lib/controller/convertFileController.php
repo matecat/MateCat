@@ -66,10 +66,11 @@ class convertFileController extends ajaxController {
 
             if( !$fileType['proprietary'] && DetectProprietaryXliff::isXliffExtension() ){
                 $this->result['code'] = 1; // OK for client
+                $this->result['errors'][] = array( "code" => 0, "message" => "OK" );
                 return 0; //ok don't convert a standard sdlxliff
             }
 
-        } catch (Exception $e) {
+        } catch (Exception $e) { //try catch not used because of exception no more raised
             $this->result['errors'][] = array("code" => -8, "message" => $e->getMessage());
             Log::doLog( $e->getMessage() );
             return -1;

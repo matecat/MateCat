@@ -34,6 +34,10 @@ $.extend(UI, {
 		}
 	},
 	getGlossary: function(segment, entireSegment, next) {
+//		console.log('get glossary');
+//		console.log('segment: ', segment);
+//		console.log('entireSegment: ', entireSegment);
+//		console.log('next: ', next);
 		if (typeof next != 'undefined') {
 			if(entireSegment) {
 				n = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
@@ -41,7 +45,7 @@ $.extend(UI, {
 		} else {
 			n = segment;
 		}
-		if(($(n).hasClass('glossary-loaded'))&&(entireSegment)) return false;
+//		if(($(n).hasClass('glossary-loaded'))&&(entireSegment)) return false;
 		$(n).addClass('glossary-loaded');
 		$('.gl-search', n).addClass('loading');
 		if(config.tms_enabled) {
@@ -72,6 +76,8 @@ $.extend(UI, {
 					}
 				}
 				UI.processLoadedGlossary(d, this);
+//				console.log('next?: ', this[1]);
+				if(!this[1]) UI.markGlossaryItemsInSource(d, this);
 			},
 			complete: function() {
 				$('.gl-search', UI.currentSegment).removeClass('loading');
@@ -96,6 +102,129 @@ $.extend(UI, {
 			$('.tab-switcher-gl a .number', segment).text('').attr('data-num', 0);	
 		}		
 	},
+	markGlossaryItemsInSource: function(d, context) {
+		if (Object.size(d.data.matches)) {
+			i = 0;	
+			cleanString = $('.source', UI.currentSegment).html();
+			var intervals = [];
+			$.each(d.data.matches, function(k) {
+				i++;
+				var re = new RegExp("(" + k + ")", "gi");
+				coso = cleanString.replace(re, '<mark>' + k + '</mark>');
+				int = {
+					x: coso.indexOf('<mark>'), 
+					y: coso.indexOf('</mark>') - 6
+				} 
+				intervals.push(int);
+			});
+			console.log('intervals: ', intervals);
+			UI.intervalsUnion = [];
+/*
+			intervals = [
+				{
+					x: 27,
+					y: 29
+				},
+				{
+					x: 8,
+					y: 10
+				},
+				{
+					x: 4,
+					y: 6
+				},
+				{
+					x: 3,
+					y: 5
+				},
+				{
+					x: 9,
+					y: 18
+				},
+				{
+					x: 16,
+					y: 20
+				},
+				{
+					x: 25,
+					y: 28
+				},
+			]
+*/
+//			console.log('intervals: ', JSON.stringify(intervals));
+			UI.checkIntervalsUnions(intervals);
+//			console.log('array unione: ', JSON.stringify(UI.intervalsUnion));
+			UI.startGlossaryMark = '<mark class="inGlossary">';
+			UI.endGlossaryMark = '</mark>';
+			markLength = UI.startGlossaryMark.length + UI.endGlossaryMark.length;
+			sourceString = $('.editor .source').html();
+			$.each(UI.intervalsUnion, function(index) {
+				added = markLength * index;
+				sourceString = sourceString.splice(this.x + added, 0, UI.startGlossaryMark);				
+				sourceString = sourceString.splice(this.y + added + UI.startGlossaryMark.length, 0, UI.endGlossaryMark);
+//				console.log(sourceString);
+				$('.editor .source').html(sourceString);
+//				console.log($('.editor .source').html());
+			});
+
+			
+		}		
+	},
+	removeGlossaryMarksFormSource: function() {
+		$('.editor mark.inGlossary').each(function() {
+			$(this).replaceWith($(this).html());
+		})
+	},
+
+	checkIntervalsUnions: function(intervals) {
+		UI.endedIntervalAnalysis = false;
+		smallest = UI.smallestInterval(intervals);
+//		console.log('smallest: ', smallest);
+		$.each(intervals, function(indice) {
+			if(this === smallest) smallestIndex = indice;
+		});
+		mod = 0;
+		$.each(intervals, function(i) {
+			if(i != smallestIndex )  {
+				if((smallest.x <= this.x)&&(smallest.y >= this.x)) { // this item is to be merged to the smallest
+					mod++;
+					smallest.y = this.y;
+					intervals.splice(i, 1);
+					UI.checkIntervalsUnions(intervals);
+				}
+//				if((i == (intervals.length -1))&&(!mod)) {
+//					console.log('il primo non ha trovato unioni');
+////					UI.checkIntervalsUnions(intervals);
+//					return false;
+//				}
+			}
+		});
+		if(UI.endedIntervalAnalysis) {
+			if(!intervals.length) return false;
+			UI.checkIntervalsUnions(intervals);
+			return false;
+		}
+		if(smallest.x < 1000000) UI.intervalsUnion.push(smallest);
+//			console.log('intervals 1: ', JSON.stringify(intervals));
+		intervals.splice(smallestIndex, 1);
+//			console.log('intervals 2: ', JSON.stringify(intervals));
+			if(!intervals.length) return false;
+			if(!mod) UI.checkIntervalsUnions(intervals);
+		UI.endedIntervalAnalysis = true;
+		return false;
+	},
+
+	smallestInterval: function(ar) {
+		smallest = {
+					x: 1000000, 
+					y: 2000000
+				} 
+		$.each(ar, function(index) {
+			if(this.x < smallest.x) smallest = this;
+		});
+		return smallest;
+	},
+
 	renderGlossary: function(d, seg) {
 		segment = seg;
 		segment_id = segment.attr('id');
@@ -103,7 +232,7 @@ $.extend(UI, {
 		$('.sub-editor.glossary .overflow .message', segment).remove();
 		numRes = 0;
 
-		if (Object.size(d.data.matches)) {console.log('ci sono match');
+		if (Object.size(d.data.matches)) {//console.log('ci sono match');
 			$.each(d.data.matches, function(k) {
 				numRes++;
 				$('.sub-editor.glossary .overflow .results', segment).append('<div class="glossary-item"><span>' + k + '</span></div>');

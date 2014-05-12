@@ -97,7 +97,7 @@ class Utils {
 		return 0;
 	}
 
-	public static function sendErrMailReport( $htmlContent ){
+	public static function sendErrMailReport( $htmlContent, $subject = null ){
 
 		include_once @INIT::$UTILS_ROOT . '/phpmailer/class.phpmailer.php';
 		if( !class_exists( 'PHPMailer', false ) ){
@@ -150,14 +150,19 @@ class Utils {
 		 *
 		 * Microsoft Outlook adds these header fields when setting a message to High priority:
 		 *
-		 X-Priority: 1 (Highest)
-		 X-MSMail-Priority: High
-Importance: High
-
+		 * X-Priority: 1 (Highest)
+		 * X-MSMail-Priority: High
+		 * Importance: High
+         *
 		 */
 		$mail->Priority = 1;
 
-		$mail->Subject = 'Alert from Matecat: ' . php_uname('n');
+        if( empty( $subject ) ){
+		    $mail->Subject = 'Alert from Matecat: ' . php_uname('n');
+        } else {
+            $mail->Subject = $subject;
+        }
+
 		$mail->Body    = '<pre>' . self::_getBackTrace() . "<br />" . $htmlContent . '</pre>';
 
 		$txtContent = preg_replace(  '|<br[\x{20}/]*>|ui', "\n\n", $htmlContent );

@@ -49,16 +49,42 @@ $.extend(UI, {
 				this.openConcordance();
 			}
 		}
-	},	
+	},
+	setExtendedConcordances: function(extended) {
+		if(!extended) {
+			$('.sub-editor.concordances').removeClass('extended');
+			$('.sub-editor.concordances .overflow').removeAttr('style');	
+			if($('.sub-editor.concordances .more').length) {
+				$('.sub-editor.concordances .more').text('More');
+			} else {
+				$('.sub-editor.concordances', segment).append('<a href="#" class="more">More</a>');				
+			}
+			this.custom.extended_concordance = false;
+			this.saveCustomization();
+		} else {
+			$('.sub-editor.concordances .overflow').css('height', $('.sub-editor.concordances').height() + 'px');
+			$('.sub-editor.concordances').addClass('extended');
+			if($('.sub-editor.concordances .more').length) {
+				$('.sub-editor.concordances .more').text('Less');
+			} else {
+				$('.sub-editor.concordances', segment).append('<a href="#" class="more">Less</a>');				
+			}
+			this.custom.extended_concordance = true;
+			this.saveCustomization();
+		}
+	},
 	renderConcordances: function(d, in_target) {
 		segment = this.currentSegment;
 		segment_id = this.currentSegmentId;
+
 		$('.sub-editor.concordances .overflow .results', segment).empty();
 		$('.sub-editor.concordances .overflow .message', segment).remove();
 		if (d.data.matches.length) {
 			$.each(d.data.matches, function(index) {
 				if ((this.segment === '') || (this.translation === ''))
 					return;
+				prime = (index < UI.numDisplayContributionMatches)? ' prime' : '';
+
 				var disabled = (this.id == '0') ? true : false;
 				cb = this.created_by;
 				cl_suggestion = UI.getPercentuageClass(this.match);
@@ -68,8 +94,13 @@ $.extend(UI, {
 				var rightTxt = (in_target) ? this.segment : this.translation;
 				rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
 				rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
-				$('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><!-- li class="percent ' + cl_suggestion + '">' + (this.match) + '</li --><li>' + this.last_update_date + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+				$('.sub-editor.concordances .overflow .results', segment).append('<ul class="graysmall' + prime + '" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><ul class="graysmall-details"><!-- li class="percent ' + cl_suggestion + '">' + (this.match) + '</li --><li>' + this.last_update_date + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
 			});
+			if(UI.custom.extended_concordance) {
+				UI.setExtendedConcordances(true);			
+			} else {
+				UI.setExtendedConcordances(false);
+			};
 		} else {
 			console.log('no matches');
 			$('.sub-editor.concordances .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');
@@ -85,7 +116,7 @@ $.extend(UI, {
 		elements.each(function() {
 //			UI.detectTags(this);
 		});
-	},
+	}
 });
 
 

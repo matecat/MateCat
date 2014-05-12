@@ -44,8 +44,8 @@ APP = {
             APP.waitingConfirm = false;
             APP.cancelValue = true;
         }).on('click', '.popup-outer.closeClickingOutside', function(e) {
-            e.preventDefault();
-            APP.closePopup();
+			e.preventDefault();
+			$(this).parents('.modal').find('.x-popup').click();
         })
     },
     alert: function(options) {
@@ -133,8 +133,10 @@ APP = {
 	doRequest: function(req,log) {
 		logTxt = (typeof log == 'undefined')? '' : '&type=' + log;
 		version = (typeof config.build_number == 'undefined')? '' : '-v' + config.build_number;
+		builtURL = (req.url)? req.url : config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version;
 		var setup = {
-			url: config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version,
+			url: builtURL,
+//			url: config.basepath + '?action=' + req.data.action + logTxt + this.appendTime() + version,
 			data: req.data,
 			type: 'POST',
 			dataType: 'json'
@@ -250,5 +252,15 @@ APP = {
             x1 = x1.replace(rgx, '$1' + ',' + '$2');
         }
         return x1 + x2;
-    }            
+    },
+	zerofill: function(i, l, s) {
+		var o = i.toString();
+		if (!s) {
+			s = '0';
+		}
+		while (o.length < l) {
+			o = s + o;
+		}
+		return o;
+	}
 };

@@ -328,11 +328,14 @@ class CatUtils {
 //            $tra_for_diff = html_entity_decode($tra_for_diff, ENT_NOQUOTES, 'UTF-8');
 
             //$ter          = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
-		$ter=array();
-            $seg[ 'ter' ] = $ter[ 1 ] * 100;
+
+            //with this patch we have warnings when accessing indexes
+            $ter=array();
+
+            $seg[ 'ter' ] = @$ter[ 1 ] * 100;
             $stat_ter[ ]  = $seg[ 'ter' ] * $seg[ 'rwc' ];
-            $seg[ 'ter' ] = round( $ter[ 1 ] * 100 ) . "%";
-            $diff_ter     = $ter[ 0 ];
+            $seg[ 'ter' ] = round( @$ter[ 1 ] * 100 ) . "%";
+            $diff_ter     = @$ter[ 0 ];
 
             if ( $seg[ 'sug' ] <> $seg[ 'translation' ] ) {
 
@@ -412,24 +415,17 @@ class CatUtils {
         return array($data, $stats);
     }
 
-    public static function addSegmentTranslation($id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index, $warning = 0) {
+    public static function addSegmentTranslation( array $_Translation ) {
 
+        $updateRes = addTranslation( $_Translation );
 
-        $insertRes = setTranslationInsert($id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index, $warning);
-        if ($insertRes < 0 and $insertRes != -1062) {
-            $result['error'][] = array("code" => -4, "message" => "error occurred during the storing (INSERT) of the translation for the segment $id_segment - Error: $insertRes");
+        if ($updateRes < 0) {
+            $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment $id_segment - Error: $updateRes");
             return $result;
         }
-        if ($insertRes == -1062) {
 
-            $updateRes = setTranslationUpdate($id_segment, $id_job, $status, $time_to_edit, $translation, $errors, $chosen_suggestion_index, $warning);
-
-            if ($updateRes < 0) {
-                $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment $id_segment - Error: $updateRes");
-                return $result;
-            }
-        }
         return 0;
+
     }
 
     public static function addTranslationSuggestion($id_segment, $id_job, $suggestions_json_array = "", $suggestion = "", $suggestion_match = "", $suggestion_source = "", $match_type = "", $eq_words = 0, $standard_words = 0, $translation = "", $tm_status_analysis = "UNDONE", $warning = 0, $err_json = '', $mt_qe = 0 ) {

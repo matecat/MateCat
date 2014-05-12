@@ -61,7 +61,7 @@ class XliffSAXTranslationReplacer{
 			   preprocess file
 			 */
             // obfuscate entities because sax automatically does html_entity_decode
-			$temporary_check_buffer = preg_replace("/&(.*?);/", '##$1##', $this->currentBuffer);
+			$temporary_check_buffer = preg_replace("/&(.*?);/", '#%$1#%', $this->currentBuffer);
 
             $lastByte = $temporary_check_buffer[strlen($temporary_check_buffer) -1];
 
@@ -70,12 +70,12 @@ class XliffSAXTranslationReplacer{
 			while( strpos( $temporary_check_buffer, '&' ) !== FALSE ) {
 				//if an entity is still present, fetch some more and repeat the escaping
 				$this->currentBuffer.=fread($fp,64);
-				$temporary_check_buffer = preg_replace("/&(.*?);/", '##$1##', $this->currentBuffer);
+				$temporary_check_buffer = preg_replace("/&(.*?);/", '#%$1#%', $this->currentBuffer);
 			}
 			//free stuff outside the loop
 			unset($temporary_check_buffer);
 
-            $this->currentBuffer = preg_replace("/&(.*?);/", '##$1##', $this->currentBuffer);
+            $this->currentBuffer = preg_replace("/&(.*?);/", '#%$1#%', $this->currentBuffer);
 
             //get lenght of chunk
             $this->len = strlen( $this->currentBuffer );
@@ -266,7 +266,7 @@ class XliffSAXTranslationReplacer{
 	 */
     private function postProcAndFlush( $fp, $data, $treatAsCDATA = false ) {
         //postprocess string
-        $data = preg_replace( "/##(.*?)##/", '&$1;', $data );
+        $data = preg_replace( "/#%(.*?)#%/", '&$1;', $data );
         $data = str_replace( '&nbsp;', ' ', $data );
         if ( !$treatAsCDATA ) {
             $data = str_replace( "\r\n", "\r", $data );

@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title></title>
+</head>
+<body>
+
+<div metal:define-macro="outsource_modal">
+
+    <div class="modal outsource" data-type="view">
+        <div class="popup-outer closeClickingOutside"></div>
+        <div class="popup">
+            <a href="#" class="x-popup"></a>
+
+            <h1>Choose the best way to translate</h1>
+
+            <div class="popup-box pricebox">
+                <div class="choose">
+                    <div class="onyourown">
+                        <h2>Option #1 - Translate with your team</h2>
+                        <p>Share the following link with your translator.</p>
+                        <input class="out-link" type="text" value="http://matecat.local/translate/prova/en-US-fr-FR/19153-bd17c71da22f#11143640" readonly="readonly"/>
+                        <a class="uploadbtn in-popup" target="_blank">Open</a>
+                    </div>
+                    <div class="outsourceto">
+                        <h2>Option #2 - Outsource to a translation company</h2>  <a class="uploadbtn showprices">Show
+                        prices</a>
+
+                        <div class="revealprices">
+                            <div class="copytext">
+                                <img src="/public/img/logo_translated.png"/>
+
+                                <p>Translated, since 1999, provides professional translation services with a team of more
+                                    than 80,000 translators and is trusted by more than 40,000 customers. </p>
+
+                                <p class="paybox">You can pay within 5 days of translation delivery, by <strong>credit
+                                    card</strong>, <strong>bank transfer</strong> or <strong>PayPal</strong>.</p>
+
+                                <p><a href="#" target="_blank">
+                                    <small>Why outsourcing is good for you and Matecat.</small>
+                                </a></p>
+                            </div>
+                            <div class="total">
+                                <div class="offer">
+                                    <div class="tprice">
+                                        <span class="tpricetitle">Professional Translation</span><span class="euro">€</span>
+                                        <span class="displayprice"></span>
+                                    </div>
+                                    <div class="delivery">Delivery guaranteed by:
+                                        <span class="time"></span><span class="zone2">(GMT +1 Paris, Rome)</span>
+                                    </div>
+                                    <form id="continueForm" action="${outsource_service_login}" method="POST" target="_blank">
+                                        <input type="hidden" name="url_ok" value=""/>
+                                        <input type="hidden" name="url_ko" value=""/>
+                                        <input type="hidden" name="quoteData" value=""/>
+                                        <a href="#" class="continuebtn disabled">Order</a>
+                                    </form>
+                                </div>
+                            </div>
+                            <!-- end total-->
+                        </div>
+                        <!-- end reveal prices-->
+                    </div>
+                    <!--end outsourceto-->
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+</body>
+</html>

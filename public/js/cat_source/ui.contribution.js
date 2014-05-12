@@ -3,6 +3,7 @@
  */
 $.extend(UI, {
 	chooseSuggestion: function(w) {console.log('chooseSuggestion');
+//		console.log($('.editor ul[data-item=' + w + '] li.b .translation'));
 		this.copySuggestionInEditarea(this.currentSegment, $('.editor ul[data-item=' + w + '] li.b .translation').text(), $('.editor .editarea'), $('.editor ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
 		this.lockTags(this.editarea);
 		this.setChosenSuggestion(w);
@@ -46,9 +47,15 @@ $.extend(UI, {
 			translation: translation
 		});
 	},
-	getContribution: function(segment, next) {
+	getContribution: function(segment, next) {//console.log('getContribution');
+//		console.log('next: ', next);
+//		console.log('next: ', next);
+//		console.log('getContribution di ', segment);
 		var n = (next === 0) ? $(segment) : (next == 1) ? $('#segment-' + this.nextSegmentId) : $('#segment-' + this.nextUntranslatedSegmentId);
+//		console.log('n: ', n);
+//		console.log('and this is where class loaded is evaluated');
 		if ($(n).hasClass('loaded')) {
+//			console.log('hasclass loaded');
 			this.spellCheck();
 			if (next) {
 				this.nextIsLoaded = true;
@@ -69,22 +76,27 @@ $.extend(UI, {
 		}
 		var id = n.attr('id'); 
 		var id_segment = id.split('-')[1];
-/*
+
         if( config.brPlaceholdEnabled ) {
             var txt = this.postProcessEditarea(n, '.source');
         } else {
             var txt = $('.source', n).text();
         }
-*/
-		var txt = $('.source', n).text();
+
+//		var txt = $('.source', n).text();
 		txt = view2rawxliff(txt);
 		// Attention: As for copysource, what is the correct file format in attributes? I am assuming html encoded and "=>&quot;
 		//txt = txt.replace(/&quot;/g,'"');
-
 		if (!next) {
+//				console.log('spinner by getcontribution');
 			$(".loader", n).addClass('loader_on');
 		}
-
+		if((next == 2)&&(this.nextSegmentId == this.nextUntranslatedSegmentId)) {
+//			console.log('il successivo e il successivo non tradotto sono lo stesso');
+			return false;
+		}
+//		console.log('this.nextSegmentId: ', this.nextSegmentId);
+//		console.log('this.nextUntranslatedSegmentId: ', this.nextUntranslatedSegmentId);
 		APP.doRequest({
 			data: {
 				action: 'getContribution',
@@ -101,6 +113,9 @@ $.extend(UI, {
 				UI.failedConnection(0, 'getContribution');
 			},
 			success: function(d) {
+//				console.log(d);
+				if (d.error.length)
+					UI.processErrors(d.error, 'getContribution');
 				UI.getContribution_success(d, this);
 			},
 			complete: function() {
@@ -218,6 +233,7 @@ $.extend(UI, {
 		} else {
 			if (UI.debug)
 				console.log('no matches');
+console.log('add class loaded for segment ' + segment_id+ ' in renderContribution 2')
 			$(segment).addClass('loaded');
 			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');
 		}
@@ -254,8 +270,8 @@ $.extend(UI, {
 				id_job: config.job_id,
 				source: source,
 				target: target,
-				source_lang: config.source_lang,
-				target_lang: config.target_lang,
+				source_lang: config.source_rfc,
+				target_lang: config.target_rfc,
 				password: config.password,
 				id_translator: config.id_translator,
 				private_translator: config.private_translator,
@@ -406,4 +422,3 @@ $.extend(UI, {
 		this.editarea.data('lastChosenSuggestion', w);
 	},
 });
-

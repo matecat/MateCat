@@ -5,6 +5,24 @@ include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 class analyzeController extends viewController {
 
+    /**
+     * External EndPoint for outsource Login Service or for all in one login and Confirm Order
+     *
+     * If a login service exists, it can return a token authentication on the Success page,
+     *
+     * That token will be sent back to the review/confirm page on the provider website to grant it logged
+     *
+     * The success Page must be set in concrete subclass of "OutsourceTo_AbstractProvider"
+     *  Ex: "OutsourceTo_Translated"
+     *
+     *
+     * Values from quote result will be posted there anyway.
+     *
+     * @var string
+     */
+    protected $_outsource_login_API =  'http://openid.translated.home/';
+//    protected $_outsource_login_API =  'http://signin.translated.net/';
+
     private $pid;
     private $ppassword;
     private $jpassword;
@@ -286,6 +304,8 @@ class analyzeController extends viewController {
         $this->template->num_segments_analyzed      = $this->num_segments_analyzed;
         $this->template->logged_user                = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
         $this->template->build_number               = INIT::$BUILD_NUMBER;
+	    $this->template->enable_outsource           = INIT::$ENABLE_OUTSOURCE;
+	    $this->template->outsource_service_login    = $this->_outsource_login_API;
 
         $this->template->isLoggedIn = $this->isLoggedIn();
 

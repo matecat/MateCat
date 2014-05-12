@@ -317,7 +317,7 @@ class getContributionController extends ajaxController {
             }
 
 		}
-
+//throw new Exception( '' );
         $this->result['data']['matches'] = $matches;
 
 	}

@@ -30,6 +30,8 @@ class ConvertersMonitor {
 
     public $converterFactory;
 
+    const selectAllLikeMatecat               = "SELECT SUM( status_active ) as in_pool FROM converters WHERE status_offline = 0";
+    const selectAllNotOffline                = "SELECT * FROM converters WHERE status_offline = 0";
     const hideRow                            = "UPDATE converters SET status_active = 0 WHERE ip_converter = '%s' ";
     const insertLogRow                       = "INSERT INTO converters_log VALUES ( NULL , %u, CURRENT_TIMESTAMP, %u )";
     const selectLastTwoLogs_beforeUpdate     = "SELECT test_passed FROM converters_log
@@ -69,11 +71,13 @@ class ConvertersMonitor {
 
         //init params
         $this->path      = $this->ROOT . '/lib/utils/converter_checker';
-        $queryServerList = "SELECT * FROM converters WHERE status_offline = 0";
-        $resultSet       = $this->db->fetch_array( $queryServerList );
+        $resultSet       = $this->db->fetch_array( self::selectAllNotOffline );
 
         if( empty($resultSet) ){
-            self::_prettyEcho( "**** WARNING ... No converter Online Found. ****" );
+            self::_prettyEcho( "------------------------------------" );
+            self::_prettyEcho( "************* WARNING **************" );
+            self::_prettyEcho( "------------------------------------" );
+            $this->alertForEmptyPool();
             die(1);
         }
 
@@ -158,13 +162,50 @@ class ConvertersMonitor {
                 self::_prettyEcho( "OK" );
             }
 
-            self::_prettyEcho( "---------------------------------" );
+            self::_prettyEcho( "------------------------------------" );
 
         }
 
+        $this->alertForEmptyPool();
+
         $this->performRebooting();
 
-        self::_prettyEcho( "---------------------------------" );
+        self::_prettyEcho( "------------------------------------" );
+
+    }
+
+    /**
+     * Check for an Empty pool and send Alert Notification
+     *
+     */
+    public function alertForEmptyPool(){
+
+        $result = $this->db->query_first( self::selectAllLikeMatecat );
+        $count = array_pop( $result );
+
+        if( $count == 0 ){
+
+            self::_prettyEcho( "************************************" );
+            self::_prettyEcho( "********* CRITICAL STATUS **********" );
+            self::_prettyEcho( "************************************" );
+            self::_prettyEcho( "**** NO ACTIVE CONVERTERS FOUND ****" );
+            self::_prettyEcho( "************************************" );
+            self::_prettyEcho( "------------------------------------" );
+
+            $msg = "<pre>\n\n ************************************"
+                 . "\n ********* CRITICAL STATUS **********"
+                 . "\n ************************************"
+                  . "\n **** NO ACTIVE CONVERTERS FOUND ****"
+                 . "\n ************************************"
+                 . "\n</pre>";
+
+            Utils::sendErrMailReport( $msg );
+
+        } else {
+            self::_prettyEcho( "ACTIVES: " . $count );
+            self::_prettyEcho( "------------------------------------" );
+        }
+
 
     }
 
@@ -177,7 +218,7 @@ class ConvertersMonitor {
         //to be safe, we could send reboot command twice
         $this->setForReboot = array_unique( $this->setForReboot );
 
-        self::_prettyEcho( "**** Found " . count( $this->setForReboot ) . " to be rebooted. ****" );
+        self::_prettyEcho( "****** Found " . count( $this->setForReboot ) . " to be rebooted ******" );
 
         foreach ( $this->setForReboot as $ip_to_reboot ) {
 

@@ -49,6 +49,24 @@ class INIT {
 	public static $MAX_NUM_FILES;
     public static $REFERENCE_REPOSITORY;
 
+
+
+
+
+    /**
+     * ENABLE_OUTSOURCE set as true will show the option to outsource to an external translation provider (translated.net by default)
+     * You can set it to false, but We are happy if you keep this on.
+     * For each translation outsourced to Translated.net (the main Matecat developer),
+     * Matecat gets more development budget and bugs fixes and new features get implemented faster.
+     * In short: please turn it off only if strictly necessary :)
+     * @var bool
+     */
+    public static $ENABLE_OUTSOURCE = true;
+
+
+
+
+
 	private function initOK() {
 
 		$flagfile = ".initok.lock";
@@ -211,9 +229,23 @@ class INIT {
 		self::$AUTHCOOKIENAME='matecat_login';
 		self::$AUTHCOOKIEDURATION=86400*60;
 		self::$ENABLED_BROWSERS = array('chrome', 'safari', 'firefox');
-		self::$CONVERSION_ENABLED = true;
-		self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-		self::$BUILD_NUMBER = '0.3.3.8.3';
+
+        /**
+         * Matecat opens ource by default only handles xliff files with a strong focus on sdlxliff
+         * ( xliff produced by SDL Trados )
+         *
+         * We are not including the file converters into the Matecat code because we haven't find any open source
+         * library that satisfy the required quality and licensing.
+         *
+         * Here you have two options
+         *  a) Keep $CONVERSION_ENABLED to false, manually convert your files into xliff using SDL Trados, Okapi or similar
+         *  b) Set $CONVERSION_ENABLED to true and implement your own converter
+         *
+         */
+        self::$CONVERSION_ENABLED = false;
+
+        self::$ANALYSIS_WORDS_PER_DAYS = 3000;
+		self::$BUILD_NUMBER = '0.3.4';
 		self::$VOLUME_ANALYSIS_ENABLED = true;
 
 		self::$WARNING_POLLING_INTERVAL = 20; //seconds
@@ -333,18 +365,22 @@ class INIT {
             case E_USER_ERROR:
             case E_RECOVERABLE_ERROR:
 
-                if( !ob_end_clean() ) ob_start();
+                ini_set( 'display_errors', 'Off' );
+
+                if( !ob_get_level() ){ ob_start(); }
+                else { ob_end_clean(); ob_start(); }
+
                 debug_print_backtrace();
                 $output = ob_get_contents();
                 ob_end_clean();
 
                 # Here we handle the error, displaying HTML, logging, ...
-                $output .= "<pre>";
+                $output .= "<pre>\n";
                 $output .= "[ {$errorType[$error['type']]} ]\n\t";
                 $output .= "{$error['message']}\n\t";
                 $output .=  "Not Recoverable Error on line {$error['line']} in file " . $error['file'];
                 $output .=  " - PHP " . PHP_VERSION . " (" . PHP_OS . ")\n";
-                $output .=  " - REQUEST URI: " . print_r( $_SERVER['REQUEST_URI'], true ) . "\n";
+                $output .=  " - REQUEST URI: " . print_r( @$_SERVER['REQUEST_URI'], true ) . "\n";
                 $output .=  " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
                 $output .=  "\n\t";
                 $output .=  "Aborting...\n";

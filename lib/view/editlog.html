@@ -153,7 +153,8 @@
                 <nav>
                     <ul>
                         <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
-                    </ul>
+                        <li><a tal:attributes="href string:${basepath}api/docs">API</a></li>
+                   </ul>
 
                     <tal:block tal:condition="php: empty(logged_user)">
                         <div id='welcomebox'>
