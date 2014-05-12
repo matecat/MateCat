@@ -2558,6 +2558,20 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 	margin: 0;
 	background: orange;
 }*/
+
+ins.diff
+{
+	background: #C3FFC3;
+}
+
+del.diff
+{
+	background: #FFCFCF;
+}
+
+
+
+
 @keyframes fadein {
     from { opacity: 0; }
     to   { opacity: 0.6 }

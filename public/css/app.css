@@ -3467,6 +3467,20 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 	margin: 0;
 	background: orange;
 }*/
+
+ins.diff
+{
+	background: #e6ffe6;
+}
+
+del.diff
+{
+	background: #ffe6e6;
+}
+
+
+
+
 @keyframes fadein {
     from { opacity: 0; }
     to   { opacity: 0.6 }
