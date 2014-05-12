@@ -1335,7 +1335,7 @@ UI = {
 		this.getNextSegment(this.currentSegment, 'untranslated');
 		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
 	},
-	detectTranslationAlternatives: function(d) {
+    detectTranslationAlternatives: function(d) {
 
         /**
          *
@@ -1356,59 +1356,60 @@ UI = {
 //			if(!$('.header .repetition', UI.currentSegment).length) $('.header', UI.currentSegment).prepend('<span class="repetition">Autopropagated</span>');
 //		}
 
-		sameContentIndex = -1;
-		$.each(d.data.editable, function(ind) {
+        sameContentIndex = -1;
+        $.each(d.data.editable, function(ind) {
             //Remove trailing spaces for string comparison
-			if( this.translation == rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) ) {
-				sameContentIndex = ind;
-			}
-		});
-		if(sameContentIndex != -1) d.data.editable.splice(sameContentIndex, 1);
+            if( this.translation == rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) ) {
+                sameContentIndex = ind;
+            }
+        });
+        if(sameContentIndex != -1) d.data.editable.splice(sameContentIndex, 1);
 
-		sameContentIndex1 = -1;
-		$.each(d.data.not_editable, function(ind) {
+        sameContentIndex1 = -1;
+        $.each(d.data.not_editable, function(ind) {
             //Remove trailing spaces for string comparison
-			if(this.translation == rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) ) sameContentIndex1 = ind;
-		});
-		if(sameContentIndex1 != -1) d.data.not_editable.splice(sameContentIndex1, 1);
-		
-		numAlt = d.data.editable.length + d.data.not_editable.length;
-		numSeg = 0;
-		$.each(d.data.editable, function() {
-			numSeg += this.involved_id.length;
-		});
+            if(this.translation == rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) ) sameContentIndex1 = ind;
+        });
+        if(sameContentIndex1 != -1) d.data.not_editable.splice(sameContentIndex1, 1);
+
+        numAlt = d.data.editable.length + d.data.not_editable.length;
+        numSeg = 0;
+        $.each(d.data.editable, function() {
+            numSeg += this.involved_id.length;
+        });
 //		console.log('numAlt: ', numAlt);
 //		console.log('numSeg: ', numSeg);
-		if(numAlt) {
-			UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + ((numAlt > 1)? 'other ' + numAlt + ' different' : 'another') + ' way' + ((numAlt > 1)? 's' : '') + '</a></p>');
-			tab = UI.currentSegment.find('.tab-switcher-al');
-			tab.find('.number').text('(' + numAlt + ')');
-			UI.renderAlternatives(d);
-			tab.show();
-			tab.trigger('click');
-		}
-	},
-	renderAlternatives: function(d) {
-		console.log(d);
-		segment = UI.currentSegment;
-		segment_id = UI.currentSegmentId;
-		escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
-		$.each(d.data.editable, function(index) {
+        if(numAlt) {
+            UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + ((numAlt > 1)? 'other ' + numAlt + ' different' : 'another') + ' way' + ((numAlt > 1)? 's' : '') + '</a></p>');
+            tab = UI.currentSegment.find('.tab-switcher-al');
+            tab.find('.number').text('(' + numAlt + ')');
+            UI.renderAlternatives(d);
+            tab.show();
+            tab.trigger('click');
+        }
+    },
+    renderAlternatives: function(d) {
+        console.log(d);
+        segment = UI.currentSegment;
+        segment_id = UI.currentSegmentId;
+        escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
+        $.each(d.data.editable, function(index) {
+			var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation) ) );
+			UI.dmp.diff_cleanupEfficiency( diff_view );
+            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+        });
+        $.each(d.data.not_editable, function(index1) {
             var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation) ) );            UI.dmp.diff_cleanupEfficiency( diff_view );
-			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
-		});
-		$.each(d.data.not_editable, function(index1) {
-            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation) ) );            UI.dmp.diff_cleanupEfficiency( diff_view );
-			$('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
-		});
-	},
-	chooseAlternative: function(w) {console.log('chooseAlternative');
+            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+        });
+    },
+    chooseAlternative: function(w) {console.log('chooseAlternative');
         console.log( $('.sugg-target .realData', w ) );
-		this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text() ) );
-		this.lockTags(this.editarea);
-		this.editarea.focus();
-		this.highlightEditarea();
-	},
+        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text() ) );
+        this.lockTags(this.editarea);
+        this.editarea.focus();
+        this.highlightEditarea();
+    },
 	copyAlternativeInEditarea: function(translation) {
 		if ($.trim(translation) !== '') {
 			if (this.body.hasClass('searchActive'))
@@ -1694,7 +1695,7 @@ UI = {
 				UI.startWarning();
 				var warningPosition = '';
 				UI.globalWarnings = data.details;
-                UI.translationMismatches = data.translation_mismatches;
+				UI.translationMismatches = data.translation_mismatches;
 //				console.log(data.messages);
 //				console.log($.parseJSON(data.messages));
 //				data.messages = {
@@ -2040,23 +2041,23 @@ UI = {
 	},
 */
 
-	postProcessEditarea: function(context, selector){
-		selector = (typeof selector === "undefined") ? '.editarea' : selector;
-		area = $( selector, context ).clone();
-/*
-		console.log($(area).html());
-		var txt = this.fixBR($(area).html());
-		console.log(txt);
-		return txt;
-*/
+    postProcessEditarea: function(context, selector){ 
+        selector = (typeof selector === "undefined") ? '.editarea' : selector;
+        area = $( selector, context ).clone();
+        /*
+         console.log($(area).html());
+         var txt = this.fixBR($(area).html());
+         console.log(txt);
+         return txt;
+         */
 
-		var divs = $( area ).find( 'div' );
-		if( divs.length ){
-			divs.each(function(){
-				$(this).find( 'br:not([class])' ).remove();
-				$(this).prepend( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
-			});
-		} else {
+        var divs = $( area ).find( 'div' );
+        if( divs.length ){
+            divs.each(function(){
+                $(this).find( 'br:not([class])' ).remove();
+                $(this).prepend( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
+            });
+        } else {
 //			console.log('post process 1: ', $(area).html());
 //			console.log($(area).find( 'br:not([class])' ).length);
 //			$(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>') );
@@ -2408,7 +2409,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.3.3.8.3";
+		this.version = "0.3.3.9";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -2629,7 +2630,7 @@ $.extend(UI, {
          */
         this.translationMismatches = [];
 
-		this.downOpts = {offset: '130%'};
+        this.downOpts = {offset: '130%'};
 		this.upOpts = {offset: '-40%'};
 		this.readonly = (this.body.hasClass('archived')) ? true : false;
 		this.suggestionShortcutLabel = 'ALT+' + ((UI.isMac) ? "CMD" : "CTRL") + '+';
@@ -3034,21 +3035,21 @@ $.extend(UI, {
 		$('html').click(function() {
 			$(".menucolor").hide();
 		}).on('click', '#downloadProject', function(e) {
-			e.preventDefault();
-			if( $('#downloadProject').hasClass('disabled') ) return false;
+            e.preventDefault();
+            if( $('#downloadProject').hasClass('disabled') ) return false;
             //the translation mismatches are not a severe Error, but only a warn, so don't display Error Popup
-			if ( $("#notifbox").hasClass("warningbox") && UI.translationMismatches.total != UI.globalWarnings.length ) {
-				APP.confirm({
-					name: 'confirmDownload',
-					cancelTxt: 'Fix errors',
-					onCancel: 'goToFirstError',
-					callback: 'continueDownload',
-					okTxt: 'Continue',
-					msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"
-				});
-			} else {
-				UI.continueDownload();
-			}
+            if ( $("#notifbox").hasClass("warningbox") && UI.translationMismatches.total != UI.globalWarnings.length ) {
+                APP.confirm({
+                    name: 'confirmDownload',
+                    cancelTxt: 'Fix errors',
+                    onCancel: 'goToFirstError',
+                    callback: 'continueDownload',
+                    okTxt: 'Continue',
+                    msg: "Potential errors (missing tags, numbers etc.) found in the text. <br>If you continue, part of the content could be untranslated - look for the string \"UNTRANSLATED_CONTENT\" in the downloaded file(s).<br><br>Continue downloading or fix the error in MateCat:"
+                });
+            } else {
+                UI.continueDownload();
+            }
 		}).on('click', '.alert .close', function(e) {
 			e.preventDefault();
 			$('.alert').remove();
