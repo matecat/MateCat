@@ -103,16 +103,20 @@ class setContributionController extends ajaxController {
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
-        if( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ){
+        if( empty( $job_data ) ){
+            $this->result['error'][] = array("code" => -101, "message" => "error fetching job data");
+        }
+
+        if(empty($this->result['error']) && !$pCheck->grantJobAccessByJobData( $job_data, $this->password ) ){
             $this->result['error'][] = array("code" => -10, "message" => "wrong password");
         }
 
-		if (!empty($this->result['error'])) {
+        if (!empty($this->result['error'])) {
             $msg = "\n\n Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
             Log::doLog( $msg );
             Utils::sendErrMailReport( $msg );
-			return -1;
-		}
+	        return -1;
+	    }
 
 
         $config = TMS::getConfigStruct();

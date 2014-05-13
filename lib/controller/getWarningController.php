@@ -118,6 +118,8 @@ class getWarningController extends ajaxController {
 
         $tMismatch = getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
 
+        Log::doLog( $tMismatch );
+
         $result = array( 'total' => count( $tMismatch ), 'mine' => 0, 'list_in_my_job' => array() );
 
         foreach ( $tMismatch as $row ){

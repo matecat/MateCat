@@ -2142,7 +2142,7 @@ UI = {
 				}
 			}
 
-			if (operation == 'setContribution' && this.code != '-10') { // is not a password error
+			if (operation == 'setContribution' && this.code != '-10' ) { // is not a password error
 				APP.alert({msg: "Error in saving the translation memory.<br />Try to save again the segment.<br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
 			}
 
@@ -2411,7 +2411,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.3.3.9";
+		this.version = "0.3.4.1";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
