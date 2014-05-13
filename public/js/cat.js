@@ -166,6 +166,7 @@ UI = {
 		this.lockTags(this.editarea);
 	},
 	highlightEditarea: function(seg) {
+		$('.highlighted1, .highlighted2').removeClass('highlighted1 highlighted2');
 		segment = seg || this.currentSegment;
 		segment.addClass('highlighted1');
 		setTimeout(function() {
@@ -1670,7 +1671,8 @@ UI = {
 		return i1;
 	},
 	startWarning: function() {
-		setTimeout(function() {
+		clearTimeout(UI.startWarningTimeout);
+		UI.startWarningTimeout = setTimeout(function() {
 			UI.checkWarnings(false);
 		}, config.warningPollingInterval);		
 	},
