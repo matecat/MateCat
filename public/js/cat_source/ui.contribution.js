@@ -386,7 +386,7 @@ console.log('add class loaded for segment ' + segment_id+ ' in renderContributio
 		$(".editor .matches .graysmall").each(function(index) {
 			$(this).find('.graysmall-message').text(UI.suggestionShortcutLabel + (index + 1));
 			$(this).attr('data-item', index + 1);
-			UI.reinitMMShortcuts();
+//			UI.reinitMMShortcuts();
 		});
 	},
 	reinitMMShortcuts: function() {//console.log('reinitMMShortcuts');

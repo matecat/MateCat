@@ -2435,7 +2435,7 @@ $.extend(UI, {
 		}, 200);
 		this.loadCustomization();
 		this.detectFirstLast();
-		this.reinitMMShortcuts();
+//		this.reinitMMShortcuts();
 		this.initSegmentNavBar();
 		rangy.init();
 		this.savedSel = null;
@@ -2735,13 +2735,34 @@ $.extend(UI, {
 		this.bindShortcuts();
 		$("body").on('keydown', null, 'ctrl+1', function(e) {
 			e.preventDefault();
-			$('.editor .tab.alternatives .graysmall[data-item=1]').trigger('dblclick');
+			active = $('.editor .submenu li.active');
+			if(active.hasClass('tab-switcher-tm')) {
+				tab = 'matches';
+				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
+			} else if(active.hasClass('tab-switcher-al')) {
+				tab = 'alternatives';								
+				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
+			}
 		}).on('keydown', null, 'ctrl+2', function(e) {
 			e.preventDefault();
-			$('.editor .tab.alternatives .graysmall[data-item=2]').trigger('dblclick');
+			active = $('.editor .submenu li.active');
+			if(active.hasClass('tab-switcher-tm')) {
+				tab = 'matches';
+				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');		
+			} else if(active.hasClass('tab-switcher-al')) {
+				tab = 'alternatives';								
+				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');
+			}
 		}).on('keydown', null, 'ctrl+3', function(e) {
 			e.preventDefault();
-			$('.editor .tab.alternatives .graysmall[data-item=3]').trigger('dblclick');
+			active = $('.editor .submenu li.active');
+			if(active.hasClass('tab-switcher-tm')) {
+				tab = 'matches';
+				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');		
+			} else if(active.hasClass('.tab-switcher-al')) {
+				tab = 'alternatives';								
+				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
+			}
 		});		
 		$("body").bind('keydown', 'Ctrl+c', function() {
 			UI.tagSelection = false;
@@ -4348,7 +4369,7 @@ console.log('add class loaded for segment ' + segment_id+ ' in renderContributio
 		$(".editor .matches .graysmall").each(function(index) {
 			$(this).find('.graysmall-message').text(UI.suggestionShortcutLabel + (index + 1));
 			$(this).attr('data-item', index + 1);
-			UI.reinitMMShortcuts();
+//			UI.reinitMMShortcuts();
 		});
 	},
 	reinitMMShortcuts: function() {//console.log('reinitMMShortcuts');
