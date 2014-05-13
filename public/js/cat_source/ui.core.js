@@ -166,14 +166,13 @@ UI = {
 		this.lockTags(this.editarea);
 	},
 	highlightEditarea: function(seg) {
-		$('.highlighted1, .highlighted2').removeClass('highlighted1 highlighted2');
 		segment = seg || this.currentSegment;
 		segment.addClass('highlighted1');
 		setTimeout(function() {
-			$(segment).addClass('modified highlighted2');
+			$('.highlighted1').addClass('modified highlighted2');
 		}, 300);
 		setTimeout(function() {
-			$(segment).removeClass('highlighted1 highlighted2');
+			$('.highlighted1, .highlighted2').removeClass('highlighted1 highlighted2');
 		}, 2000);		
 	},
 

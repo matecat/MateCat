@@ -166,14 +166,13 @@ UI = {
 		this.lockTags(this.editarea);
 	},
 	highlightEditarea: function(seg) {
-		$('.highlighted1, .highlighted2').removeClass('highlighted1 highlighted2');
 		segment = seg || this.currentSegment;
 		segment.addClass('highlighted1');
 		setTimeout(function() {
-			$(segment).addClass('modified highlighted2');
+			$('.highlighted1').addClass('modified highlighted2');
 		}, 300);
 		setTimeout(function() {
-			$(segment).removeClass('highlighted1 highlighted2');
+			$('.highlighted1, .highlighted2').removeClass('highlighted1 highlighted2');
 		}, 2000);		
 	},
 
@@ -3016,7 +3015,7 @@ $.extend(UI, {
 			ed = $(this).parents('.graysmall').find('.translation');
 			UI.editContribution(UI.currentSegment, $(this).parents('.graysmall'));
 			UI.closeInplaceEditor(ed);
-		}).on('click', '.tab.alternatives .graysmall .goto a', function(e) {console.log('eccolo');
+		}).on('click', '.tab.alternatives .graysmall .goto a', function(e) {
 			e.preventDefault();
 			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), true);
 			UI.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
