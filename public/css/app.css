@@ -3470,12 +3470,12 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 
 ins.diff
 {
-	background: #e6ffe6;
+	background: #C3FFC3;
 }
 
 del.diff
 {
-	background: #ffe6e6;
+	background: #FFCFCF;
 }
 
 

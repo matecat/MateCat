@@ -886,7 +886,32 @@ UI = {
 		
 		this.activateSegment(isDifferent);
 		this.getNextSegment(this.currentSegment, 'untranslated');
+
+
+
+//		console.log('segment: ', segment_id);
+//		console.log('this.readonly: ', this.readonly);
+//		console.log('isDifferent: ', isDifferent);
+		if ((!this.readonly)&&(!isDifferent)) {
+			$('#segment-' + segment_id + ' .alternatives .overflow').hide();
+		}
 		this.setCurrentSegment();
+		
+		if (!this.readonly) {
+			if(isDifferent) {
+				this.getContribution(segment, 0);
+			} else {
+				$(segment).removeClass('loaded');
+				$(".loader", segment).addClass('loader_on');
+				setTimeout(function() {
+					$('.alternatives .overflow', segment).show();
+					UI.getContribution(segment, 0);
+				}, 3000);				
+			};	
+		}		
+		
+		
+//		if(!isDifferent) $('.editor .alternatives .overflow').hide();
 		this.currentSegment.addClass('opened');
 
 		this.currentSegment.attr('data-searchItems', ($('mark.searchMarker', this.editarea).length));
@@ -902,34 +927,7 @@ UI = {
 		this.nextIsLoaded = false;
 
 
-		if (!this.readonly) {
-//			console.log('ultimo segmento tradotto :', this.lastTranslatedSegmentId);
-//			console.log('source last translated segment: ', $('#segment-' + this.lastTranslatedSegmentId + ' .source').text());
-//			console.log('source this segment: ', $('.source', segment).text());
-//			var s1 = $('#segment-' + this.lastTranslatedSegmentId + ' .source').text();
-//			var s2 = $('.source', segment).text();
-//			console.log(lev(s1, s2));
-//			console.log(lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50);
-//			console.log('isd: ', isDifferent);
-			if(isDifferent) {
-//			if(lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50) {
-				this.getContribution(segment, 0);
-			} else {
-				$(segment).removeClass('loaded');
-//				console.log($(segment).hasClass('loaded'));
-//				console.log('spinner by opensegment');
-				$(".loader", segment).addClass('loader_on');
-				setTimeout(function() {
-//					console.log(segment);
-//					$('.editor .matches .graysmall').remove();
-//					console.log('1');
-					UI.getContribution(segment, 0);
-//					console.log('2');
-				}, 3000);				
-			};
-//			console.log(1- (lev(s1,s2)/max(lenght(s1),lenght(s2))*100 >50);
-//			this.getContribution(segment, 0);			
-		}
+
 		if(!this.noGlossary) this.getGlossary(segment, true, 0);
 		this.opening = true;
 		if (!(this.currentSegment.is(this.lastOpenedSegment))) {
@@ -1390,7 +1388,9 @@ UI = {
         }
     },
     renderAlternatives: function(d) {
-//        console.log(d);
+//		console.log('renderAlternatives');
+//		console.log($('.editor .submenu').length);
+//		console.log(UI.currentSegmentId);
         segment = UI.currentSegment;
         segment_id = UI.currentSegmentId;
         escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
@@ -1405,7 +1405,7 @@ UI = {
         });
     },
     chooseAlternative: function(w) {console.log('chooseAlternative');
-        console.log( $('.sugg-target .realData', w ) );
+//        console.log( $('.sugg-target .realData', w ) );
         this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text() ) );
         this.lockTags(this.editarea);
         this.editarea.focus();
@@ -2189,7 +2189,7 @@ UI = {
         }
     },
     propagateTranslation: function(segment, status) {
-        console.log($(segment).attr('data-hash'));
+//        console.log($(segment).attr('data-hash'));
 
         if( status == 'translated' ){
             //unset actual segment as autoPropagated because now it is translated
