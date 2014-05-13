@@ -115,8 +115,8 @@ class setContributionController extends ajaxController {
             $msg = "\n\n Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
             Log::doLog( $msg );
             Utils::sendErrMailReport( $msg );
-	    return -1;
-	}
+	        return -1;
+	    }
 
 
         $config = TMS::getConfigStruct();
