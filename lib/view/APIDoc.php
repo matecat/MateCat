@@ -1,3 +1,7 @@
+<?
+require_once '../../inc/config.inc.php';
+INIT::obtain();
+?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
@@ -36,7 +40,7 @@
                     </dd>
                     <dt class="url-label">URL Structure</dt>
                     <dd>
-                        <pre class="literal-block">https://matecatpro.translated.net/<b>api</b>/new</pre>
+                        <pre class="literal-block"><?=INIT::$HTTPHOST . INIT::$BASEURL?><b>api</b>/new</pre>
                     </dd>
                     <dt>Method</dt>
                     <dd>POST ( multipart/form-data )</dd>
@@ -69,11 +73,11 @@
                         <p>The metadata for the created project.</p>
                 
                         <p>More information on the returned metadata fields are available
-                            <a href="http://matecat.local/api/docs#metadata-new-details">here</a>
+                            <a href="<?=INIT::$HTTPHOST . INIT::$BASEURL?>api/docs#metadata-new-details">here</a>
                         </p>
                 
                         <p>A complete list of accepted languages in the right format are available
-                            <a href="http://matecat.local/api/docs#supported-langs">here</a>
+                            <a href="<?=INIT::$HTTPHOST . INIT::$BASEURL?>api/docs#supported-langs">here</a>
                         </p>
                 
                         <p><strong>Sample JSON response</strong></p>
@@ -201,7 +205,7 @@
                     <dt>Notes</dt>
                     <dd><p><code>/new</code> has a maximum file size limit of 60 MB per file and a max number of files of 100.</p></dd>
                     <dd><p>Matecat PRO accept only 54 file formats. A list of all accepted file are available
-                        <a href="http://matecat.local/api/docs#accepted-files">here</a></p>
+                        <a href="<?=INIT::$HTTPHOST . INIT::$BASEURL?>api/docs#accepted-files">here</a></p>
                     </dd>
                 </dl>
                 
@@ -215,7 +219,7 @@
                         </dd>
                         <dt class="url-label">URL Structure</dt>
                         <dd>
-                            <pre class="literal-block">https://matecatpro.translated.net/<b>api</b>/status/?<code>id_project=<12345></code>&<code>project_pass=<1abcde123></abcde123></code></pre>
+                            <pre class="literal-block"><?=INIT::$HTTPHOST . INIT::$BASEURL?><b>api</b>/status/?<code>id_project=<12345></code>&<code>project_pass=<1abcde123></abcde123></code></pre>
                         </dd>
                         <dt>Method</dt>
                         <dd>GET</dd>
@@ -223,10 +227,10 @@
                         <dd>
                             <ul class="parameters">
                                 <li><span class="req">required</span> <code class="param"> id_project</code> <code>(int)</code> The identifier of the project, should be the
-                                    value returned by the <a href="http://matecat.local/api/docs#new-post"><code>/new</code></a> method.
+                                    value returned by the <a href="<?=INIT::$HTTPHOST . INIT::$BASEURL?>api/docs#new-post"><code>/new</code></a> method.
                                 </li>
                                 <li><span class="req">required</span> <code class="param"> project_pass</code> <code>(string)</code> The password associated with the project, should be the
-                                    value returned by the <a href="http://matecat.local/api/docs#new-post"><code>/new</code></a> method ( associated with the id_project )
+                                    value returned by the <a href="<?=INIT::$HTTPHOST . INIT::$BASEURL?>api/docs#new-post"><code>/new</code></a> method ( associated with the id_project )
                                 </li>
                             </ul>
                         </dd>
@@ -235,7 +239,7 @@
                         <p>The metadata for the created project containing the status of the project.</p>
                         
                         <p>More information on the returned metadata fields are available
-                            <a href="http://matecat.local/api/docs#metadata-status-details">here</a>
+                            <a href="<?=INIT::$HTTPHOST . INIT::$BASEURL?>api/docs#metadata-status-details">here</a>
                         </p>
                         
                         <p><strong>Sample JSON response</strong></p>
@@ -554,7 +558,7 @@
                 </dd>
                 <dt class="url-label">URL Structure</dt>
                 <dd>
-                    <pre class="literal-block">https://matecatpro.translated.net/<b>api</b>/change_project_password</pre>
+                    <pre class="literal-block"><?=INIT::$HTTPHOST . INIT::$BASEURL?><b>api</b>/change_project_password</pre>
                 </dd>
                 <dt>Method</dt>
                 <dd>POST ( application/x-www-form-urlencoded )</dd>
