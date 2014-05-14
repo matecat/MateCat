@@ -3023,7 +3023,6 @@ $.extend(UI, {
 			UI.chooseSuggestion($(this).attr('data-item'));
 		}).on('dblclick', '.alternatives .graysmall', function() {
 			UI.chooseAlternative($(this));
-		}).on('dblclick', '.alternatives .graysmall', function() {
 		}).on('blur', '.graysmall .translation', function(e) {
 			e.preventDefault();
 			UI.closeInplaceEditor($(this));
@@ -3985,9 +3984,9 @@ $.extend(UI, {
 	Component: ui.contribution
  */
 $.extend(UI, {
-	chooseSuggestion: function(w) {console.log('chooseSuggestion');
+	chooseSuggestion: function(w) {
 //		console.log($('.editor ul[data-item=' + w + '] li.b .translation'));
-		this.copySuggestionInEditarea(this.currentSegment, $('.editor ul[data-item=' + w + '] li.b .translation').text(), $('.editor .editarea'), $('.editor ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
+		this.copySuggestionInEditarea(this.currentSegment, $('.editor .tab.matches ul[data-item=' + w + '] li.b .translation').text(), $('.editor .editarea'), $('.editor .tab.matches ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
 		this.lockTags(this.editarea);
 		this.setChosenSuggestion(w);
 
@@ -3995,7 +3994,6 @@ $.extend(UI, {
 		this.highlightEditarea();
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
-
 		if (typeof (decode) == "undefined") {
 			decode = false;
 		}
