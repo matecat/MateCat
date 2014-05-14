@@ -1445,14 +1445,14 @@ section.highlighted2 .editarea
 
 section:not(.editor).highlighted1 .editarea
 {
-	background-color: #00C1E6;
+	border: 1px solid #00C1E6;
 }
 section:not(.editor).highlighted2 .editarea
 {
-	-moz-transition:background-color 1.5s;
-	-webkit-transition:background-color 1.5s !important;
-	-o-transition:background-color 1.5s;
-	transition:background-color 1.5s !important;
+	-moz-transition:border 500ms ease-out;
+	-webkit-transition:border 500ms ease-out  !important;
+	-o-transition:border 500ms ease-out; 
+	transition:border 500ms ease-out !important;
 	background-color: transparent;
 }
 
