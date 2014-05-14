@@ -5000,7 +5000,7 @@ $.extend(UI, {
 			var intervals = [];
 			$.each(d.data.matches, function(k) {
 				i++;
-				var re = new RegExp("(" + k + ")", "gi");
+				var re = new RegExp("(" + k.trim() + ")", "gi");
 				coso = cleanString.replace(re, '<mark>' + k + '</mark>');
 				int = {
 					x: coso.indexOf('<mark>'), 
