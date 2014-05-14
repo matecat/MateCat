@@ -109,7 +109,7 @@ $.extend(UI, {
 			var intervals = [];
 			$.each(d.data.matches, function(k) {
 				i++;
-				var re = new RegExp("(" + k + ")", "gi");
+				var re = new RegExp("(" + k.trim() + ")", "gi");
 				coso = cleanString.replace(re, '<mark>' + k + '</mark>');
 				int = {
 					x: coso.indexOf('<mark>'), 
@@ -117,7 +117,6 @@ $.extend(UI, {
 				} 
 				intervals.push(int);
 			});
-			console.log('intervals: ', intervals);
 			UI.intervalsUnion = [];
 /*
 			intervals = [
@@ -165,9 +164,7 @@ $.extend(UI, {
 //				console.log(sourceString);
 				$('.editor .source').html(sourceString);
 //				console.log($('.editor .source').html());
-			});
-
-			
+			});		
 		}		
 	},
 	removeGlossaryMarksFormSource: function() {
@@ -177,6 +174,7 @@ $.extend(UI, {
 	},
 
 	checkIntervalsUnions: function(intervals) {
+		console.log('intervals: ', intervals);
 		UI.endedIntervalAnalysis = false;
 		smallest = UI.smallestInterval(intervals);
 //		console.log('smallest: ', smallest);
