@@ -360,7 +360,6 @@ $.extend(UI, {
 			UI.chooseSuggestion($(this).attr('data-item'));
 		}).on('dblclick', '.alternatives .graysmall', function() {
 			UI.chooseAlternative($(this));
-		}).on('dblclick', '.alternatives .graysmall', function() {
 		}).on('blur', '.graysmall .translation', function(e) {
 			e.preventDefault();
 			UI.closeInplaceEditor($(this));
