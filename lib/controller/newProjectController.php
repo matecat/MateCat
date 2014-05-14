@@ -12,9 +12,11 @@ class newProjectController extends viewController {
 	private $tms_engines;
 	private $lang_handler;
 
-        private $sourceLangArray=array();
-        private $targetLangArray=array();
+    private $sourceLangArray=array();
+    private $targetLangArray=array();
+
 	public function __construct() {
+
 		parent::__construct(false);
 		if (!isset($_REQUEST['fork'])) {
 			parent::makeTemplate("upload.html");

@@ -100,7 +100,7 @@ class glossaryController extends ajaxController {
                     if( $this->automatic ){
                         $tmp_Result = array();
                         foreach( $TMS_RESULT as $k => $val ){
-                            if( ( $res = mb_stripos( $this->segment, $k ) ) === false ){
+                            if( ( $res = mb_stripos( $this->segment, preg_replace( '/[ \t\n\r\0\x0A\xA0]+$/u', '', $k ) ) ) === false ){
                                 unset( $TMS_RESULT[$k] );
                             } else {
                                 $tmp_Result[$res] = $k;
