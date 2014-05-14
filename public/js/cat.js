@@ -2142,7 +2142,7 @@ UI = {
 				}
 			}
 
-			if (operation == 'setContribution' && this.code != '-10' ) { // is not a password error
+			if (operation == 'setContribution' && this.code != '-10') { // is not a password error
 				APP.alert({msg: "Error in saving the translation memory.<br />Try to save again the segment.<br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
 			}
 
@@ -4979,7 +4979,7 @@ $.extend(UI, {
 			var intervals = [];
 			$.each(d.data.matches, function(k) {
 				i++;
-				var re = new RegExp("(" + k + ")", "gi");
+				var re = new RegExp("(" + k.trim() + ")", "gi");
 				coso = cleanString.replace(re, '<mark>' + k + '</mark>');
 				int = {
 					x: coso.indexOf('<mark>'), 
@@ -4987,7 +4987,6 @@ $.extend(UI, {
 				} 
 				intervals.push(int);
 			});
-			console.log('intervals: ', intervals);
 			UI.intervalsUnion = [];
 /*
 			intervals = [
@@ -5035,9 +5034,7 @@ $.extend(UI, {
 //				console.log(sourceString);
 				$('.editor .source').html(sourceString);
 //				console.log($('.editor .source').html());
-			});
-
-			
+			});		
 		}		
 	},
 	removeGlossaryMarksFormSource: function() {
@@ -5047,6 +5044,7 @@ $.extend(UI, {
 	},
 
 	checkIntervalsUnions: function(intervals) {
+		console.log('intervals: ', intervals);
 		UI.endedIntervalAnalysis = false;
 		smallest = UI.smallestInterval(intervals);
 //		console.log('smallest: ', smallest);
