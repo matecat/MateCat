@@ -1443,18 +1443,18 @@ section.highlighted2 .editarea
 }
 */
 
-section:not(.editor).highlighted1 .editarea
-{
-	background-color: #00C1E6;
+section:not(.editor).highlighted1 .editarea {
+border-color: #00C1E6;
 }
 section:not(.editor).highlighted2 .editarea
 {
-	-moz-transition:background-color 1.5s;
-	-webkit-transition:background-color 1.5s !important;
-	-o-transition:background-color 1.5s;
-	transition:background-color 1.5s !important;
-	background-color: transparent;
+-moz-transition: border-color 3s;
+-webkit-transition: border-color 3s !important;
+-o-transition: border-color 3s;
+transition: border-color 3s !important;
+border-color: transparent;
 }
+
 
 /*.editor.modified .editarea
 {
@@ -1752,7 +1752,7 @@ body.archived section .status-container a.status:hover
     cursor: default !important;
 }
 
-.editor .status{width:8px;display:block;position:absolute;right:0;height:100%;padding-bottom:5px;background:#f5f5f5; top:0;margin:-6px 0 0 0 !important; border-bottom:0}
+.editor .status{width:8px;display:block;position:absolute;right:0;height:100%;padding-bottom:6px;background:#f5f5f5; top:0;margin:-6px 0 0 0 !important; border-bottom:0}
 
 
 
@@ -2672,6 +2672,7 @@ only screen and (-o-min-device-pixel-ratio: 2/1),
 only screen and (min-device-pixel-ratio: 2),
 only screen and (min-resolution: 192dpi),
 only screen and (in-resolution: 2dppx) { 
+
 
 .breadcrumbs #pname {
 	background: url(../img/sprite2x.png) -15px -434px no-repeat;
