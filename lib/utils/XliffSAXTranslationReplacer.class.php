@@ -69,22 +69,20 @@ class XliffSAXTranslationReplacer{
             //the last fread could have truncated an entity (say, '&lt;' in '&l'), thus invalidating the escaping
             //***** and if there is an & that it is not an entity, this is an infinite loop !!!!!
 
-            $running    = true;
             $escape_AMP = false;
 
-            // 9 is the max len of an entity. So, suppose that the & is at the end of buffer,
+            // 9 is the max length of an entity. So, suppose that the & is at the end of buffer,
             // add 9 Bytes and substitute the entities, if the & is present and it is not at the end
             //it can't be a entity, exit the loop
 
-            while ( $running ) {
+            while ( true ) {
 
                 $_ampPos = strpos( $temporary_check_buffer, '&' );
 
                 //check for real entity or escape it to safely exit from the loop!!!
                 if ( $_ampPos === false || strlen( substr( $temporary_check_buffer, $_ampPos ) ) > 9 ) {
                     $escape_AMP = true;
-                    $running    = false;
-                    continue;
+                    break;
                 }
 
                 //if an entity is still present, fetch some more and repeat the escaping
