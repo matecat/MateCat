@@ -322,25 +322,6 @@ CREATE TABLE `segment_translations` (
 SET character_set_client = @saved_cs_client;
 
 --
--- Table structure for table `segment_translations_analysis_queue2`
---
-
-DROP TABLE IF EXISTS `segment_translations_analysis_queue2`;
-SET @saved_cs_client     = @@character_set_client;
-SET character_set_client = utf8;
-CREATE TABLE `segment_translations_analysis_queue2` (
-  `id_segment` int(11) NOT NULL,
-  `id_job` int(11) NOT NULL,
-  `locked` int(11) DEFAULT '0',
-  `pid` int(11) DEFAULT NULL,
-  `date_insert` datetime DEFAULT NULL,
-  PRIMARY KEY (`id_segment`,`id_job`),
-  KEY `locked` (`locked`) USING BTREE,
-  KEY `pid` (`pid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-SET character_set_client = @saved_cs_client;
-
---
 -- Table structure for table `segments`
 --
 
