@@ -2,9 +2,9 @@
 	Component: ui.contribution
  */
 $.extend(UI, {
-	chooseSuggestion: function(w) {console.log('chooseSuggestion');
+	chooseSuggestion: function(w) {
 //		console.log($('.editor ul[data-item=' + w + '] li.b .translation'));
-		this.copySuggestionInEditarea(this.currentSegment, $('.editor ul[data-item=' + w + '] li.b .translation').text(), $('.editor .editarea'), $('.editor ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
+		this.copySuggestionInEditarea(this.currentSegment, $('.editor .tab.matches ul[data-item=' + w + '] li.b .translation').text(), $('.editor .editarea'), $('.editor .tab.matches ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
 		this.lockTags(this.editarea);
 		this.setChosenSuggestion(w);
 
@@ -12,7 +12,6 @@ $.extend(UI, {
 		this.highlightEditarea();
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
-
 		if (typeof (decode) == "undefined") {
 			decode = false;
 		}
@@ -386,7 +385,7 @@ console.log('add class loaded for segment ' + segment_id+ ' in renderContributio
 		$(".editor .matches .graysmall").each(function(index) {
 			$(this).find('.graysmall-message').text(UI.suggestionShortcutLabel + (index + 1));
 			$(this).attr('data-item', index + 1);
-			UI.reinitMMShortcuts();
+//			UI.reinitMMShortcuts();
 		});
 	},
 	reinitMMShortcuts: function() {//console.log('reinitMMShortcuts');

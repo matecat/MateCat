@@ -34,67 +34,89 @@ class XliffSAXTranslationReplacer{
 	 */
 
 
-	public function replaceTranslation(){
-		//open file
-		if (!($fp = fopen($this->filename, "r"))) {
-			die("could not open XML input");
-		}
-		//write xml header
-		fwrite($this->ofp,'<?xml version="1.0" encoding="utf-8"?>');
+    public function replaceTranslation() {
+        //open file
+        if ( !( $fp = fopen( $this->filename, "r" ) ) ) {
+            die( "could not open XML input" );
+        }
+        //write xml header
+        fwrite( $this->ofp, '<?xml version="1.0" encoding="utf-8"?>' );
 
-		//create parser
-		$xml_parser = xml_parser_create('UTF-8');
+        //create parser
+        $xml_parser = xml_parser_create( 'UTF-8' );
 
-		//configure parser
-		//pass this object to parser to make its variables and functions visible inside callbacks
-		xml_set_object($xml_parser,$this);
-		//avoid uppercasing all tags name
-		xml_parser_set_option($xml_parser, XML_OPTION_CASE_FOLDING, false);
-		//define callbacks for tags
-		xml_set_element_handler($xml_parser, "tagOpen", "tagClose");
-		//define callback for data
-		xml_set_character_data_handler($xml_parser, "characterData");
+        //configure parser
+        //pass this object to parser to make its variables and functions visible inside callbacks
+        xml_set_object( $xml_parser, $this );
+        //avoid uppercasing all tags name
+        xml_parser_set_option( $xml_parser, XML_OPTION_CASE_FOLDING, false );
+        //define callbacks for tags
+        xml_set_element_handler( $xml_parser, "tagOpen", "tagClose" );
+        //define callback for data
+        xml_set_character_data_handler( $xml_parser, "characterData" );
 
-		//read a chunk of text
-		while ($this->currentBuffer = fread($fp, 4096)) {
-			/*
-			   preprocess file
-			 */
+        //read a chunk of text
+        while ( $this->currentBuffer = fread( $fp, 4096 ) ) {
+            /*
+               preprocess file
+             */
             // obfuscate entities because sax automatically does html_entity_decode
-			$temporary_check_buffer = preg_replace("/&(.*?);/", '#%$1#%', $this->currentBuffer);
+            $temporary_check_buffer = preg_replace( "/&(.*?);/", '#%$1#%', $this->currentBuffer );
 
-            $lastByte = $temporary_check_buffer[strlen($temporary_check_buffer) -1];
+            $lastByte = $temporary_check_buffer[ strlen( $temporary_check_buffer ) - 1 ];
 
-			//avoid cutting entities in half: 
-			//the last fread could have truncated an entity (say, '&lt;' in '&l'), thus invalidating the escaping
-			while( strpos( $temporary_check_buffer, '&' ) !== FALSE ) {
-				//if an entity is still present, fetch some more and repeat the escaping
-				$this->currentBuffer.=fread($fp,64);
-				$temporary_check_buffer = preg_replace("/&(.*?);/", '#%$1#%', $this->currentBuffer);
-			}
-			//free stuff outside the loop
-			unset($temporary_check_buffer);
+            //avoid cutting entities in half:
+            //the last fread could have truncated an entity (say, '&lt;' in '&l'), thus invalidating the escaping
+            //***** and if there is an & that it is not an entity, this is an infinite loop !!!!!
 
-            $this->currentBuffer = preg_replace("/&(.*?);/", '#%$1#%', $this->currentBuffer);
+            $escape_AMP = false;
+
+            // 9 is the max length of an entity. So, suppose that the & is at the end of buffer,
+            // add 9 Bytes and substitute the entities, if the & is present and it is not at the end
+            //it can't be a entity, exit the loop
+
+            while ( true ) {
+
+                $_ampPos = strpos( $temporary_check_buffer, '&' );
+
+                //check for real entity or escape it to safely exit from the loop!!!
+                if ( $_ampPos === false || strlen( substr( $temporary_check_buffer, $_ampPos ) ) > 9 ) {
+                    $escape_AMP = true;
+                    break;
+                }
+
+                //if an entity is still present, fetch some more and repeat the escaping
+                $this->currentBuffer .= fread( $fp, 9 );
+                $temporary_check_buffer = preg_replace( "/&(.*?);/", '#%$1#%', $this->currentBuffer );
+
+            }
+
+            //free stuff outside the loop
+            unset( $temporary_check_buffer );
+
+            $this->currentBuffer = preg_replace( "/&(.*?);/", '#%$1#%', $this->currentBuffer );
+            if ( $escape_AMP ) {
+                $this->currentBuffer = str_replace( "&", '#%amp#%', $this->currentBuffer );
+            }
 
             //get lenght of chunk
             $this->len = strlen( $this->currentBuffer );
 
             //parse chunk of text
-			if (!xml_parse($xml_parser, $this->currentBuffer, feof($fp))) {
-				//if unable, die
-				die(sprintf("XML error: %s at line %d",
-							xml_error_string(xml_get_error_code($xml_parser)),
-							xml_get_current_line_number($xml_parser)));
-			}
-			//get accumulated this->offset in document: as long as SAX pointer advances, we keep track of total bytes it has seen so far; this way, we can translate its global pointer in an address local to the current buffer of text to retrieve last char of tag
+            if ( !xml_parse( $xml_parser, $this->currentBuffer, feof( $fp ) ) ) {
+                //if unable, die
+                die( sprintf( "XML error: %s at line %d",
+                        xml_error_string( xml_get_error_code( $xml_parser ) ),
+                        xml_get_current_line_number( $xml_parser ) ) );
+            }
+            //get accumulated this->offset in document: as long as SAX pointer advances, we keep track of total bytes it has seen so far; this way, we can translate its global pointer in an address local to the current buffer of text to retrieve last char of tag
             $this->offset += $this->len;
-		}
-		//close parser
-		xml_parser_free($xml_parser);
-		//close file pointer
-		fclose($fp);
-	}
+        }
+        //close parser
+        xml_parser_free( $xml_parser );
+        //close file pointer
+        fclose( $fp );
+    }
 
 
 	/*

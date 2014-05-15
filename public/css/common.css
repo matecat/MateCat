@@ -864,6 +864,7 @@ only screen and (in-resolution: 2dppx) {
 	.exttag {background: url(../img/matecat_file_icons2x.png) 6px -686px no-repeat !important;} /* .tag */
 	.exttmx {background: url(../img/matecat_file_icons2x.png) 6px -722px no-repeat !important;} /* .tmx */
 
+.popup {background: #fff url(../img/borderfix.png) repeat-x!important;}
 
 	body.cattool #jobMenu li a
 	{

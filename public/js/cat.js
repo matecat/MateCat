@@ -169,10 +169,10 @@ UI = {
 		segment = seg || this.currentSegment;
 		segment.addClass('highlighted1');
 		setTimeout(function() {
-			$(segment).addClass('modified highlighted2');
+			$('.highlighted1').addClass('modified highlighted2');
 		}, 300);
 		setTimeout(function() {
-			$(segment).removeClass('highlighted1 highlighted2');
+			$('.highlighted1, .highlighted2').removeClass('highlighted1 highlighted2');
 		}, 2000);		
 	},
 
@@ -886,7 +886,32 @@ UI = {
 		
 		this.activateSegment(isDifferent);
 		this.getNextSegment(this.currentSegment, 'untranslated');
+
+
+
+//		console.log('segment: ', segment_id);
+//		console.log('this.readonly: ', this.readonly);
+//		console.log('isDifferent: ', isDifferent);
+		if ((!this.readonly)&&(!isDifferent)) {
+			$('#segment-' + segment_id + ' .alternatives .overflow').hide();
+		}
 		this.setCurrentSegment();
+		
+		if (!this.readonly) {
+			if(isDifferent) {
+				this.getContribution(segment, 0);
+			} else {
+				$(segment).removeClass('loaded');
+				$(".loader", segment).addClass('loader_on');
+				setTimeout(function() {
+					$('.alternatives .overflow', segment).show();
+					UI.getContribution(segment, 0);
+				}, 3000);				
+			};	
+		}		
+		
+		
+//		if(!isDifferent) $('.editor .alternatives .overflow').hide();
 		this.currentSegment.addClass('opened');
 
 		this.currentSegment.attr('data-searchItems', ($('mark.searchMarker', this.editarea).length));
@@ -902,34 +927,7 @@ UI = {
 		this.nextIsLoaded = false;
 
 
-		if (!this.readonly) {
-//			console.log('ultimo segmento tradotto :', this.lastTranslatedSegmentId);
-//			console.log('source last translated segment: ', $('#segment-' + this.lastTranslatedSegmentId + ' .source').text());
-//			console.log('source this segment: ', $('.source', segment).text());
-//			var s1 = $('#segment-' + this.lastTranslatedSegmentId + ' .source').text();
-//			var s2 = $('.source', segment).text();
-//			console.log(lev(s1, s2));
-//			console.log(lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50);
-//			console.log('isd: ', isDifferent);
-			if(isDifferent) {
-//			if(lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50) {
-				this.getContribution(segment, 0);
-			} else {
-				$(segment).removeClass('loaded');
-//				console.log($(segment).hasClass('loaded'));
-//				console.log('spinner by opensegment');
-				$(".loader", segment).addClass('loader_on');
-				setTimeout(function() {
-//					console.log(segment);
-//					$('.editor .matches .graysmall').remove();
-//					console.log('1');
-					UI.getContribution(segment, 0);
-//					console.log('2');
-				}, 3000);				
-			};
-//			console.log(1- (lev(s1,s2)/max(lenght(s1),lenght(s2))*100 >50);
-//			this.getContribution(segment, 0);			
-		}
+
 		if(!this.noGlossary) this.getGlossary(segment, true, 0);
 		this.opening = true;
 		if (!(this.currentSegment.is(this.lastOpenedSegment))) {
@@ -1390,7 +1388,9 @@ UI = {
         }
     },
     renderAlternatives: function(d) {
-//        console.log(d);
+//		console.log('renderAlternatives');
+//		console.log($('.editor .submenu').length);
+//		console.log(UI.currentSegmentId);
         segment = UI.currentSegment;
         segment_id = UI.currentSegmentId;
         escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
@@ -1405,7 +1405,7 @@ UI = {
         });
     },
     chooseAlternative: function(w) {console.log('chooseAlternative');
-        console.log( $('.sugg-target .realData', w ) );
+//        console.log( $('.sugg-target .realData', w ) );
         this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text() ) );
         this.lockTags(this.editarea);
         this.editarea.focus();
@@ -1670,7 +1670,8 @@ UI = {
 		return i1;
 	},
 	startWarning: function() {
-		setTimeout(function() {
+		clearTimeout(UI.startWarningTimeout);
+		UI.startWarningTimeout = setTimeout(function() {
 			UI.checkWarnings(false);
 		}, config.warningPollingInterval);		
 	},
@@ -2189,7 +2190,7 @@ UI = {
         }
     },
     propagateTranslation: function(segment, status) {
-        console.log($(segment).attr('data-hash'));
+//        console.log($(segment).attr('data-hash'));
 
         if( status == 'translated' ){
             //unset actual segment as autoPropagated because now it is translated
@@ -2410,7 +2411,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.3.3.9";
+		this.version = "0.3.4.2";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -2434,7 +2435,7 @@ $.extend(UI, {
 		}, 200);
 		this.loadCustomization();
 		this.detectFirstLast();
-		this.reinitMMShortcuts();
+//		this.reinitMMShortcuts();
 		this.initSegmentNavBar();
 		rangy.init();
 		this.savedSel = null;
@@ -2635,7 +2636,8 @@ $.extend(UI, {
         this.downOpts = {offset: '130%'};
 		this.upOpts = {offset: '-40%'};
 		this.readonly = (this.body.hasClass('archived')) ? true : false;
-		this.suggestionShortcutLabel = 'ALT+' + ((UI.isMac) ? "CMD" : "CTRL") + '+';
+//		this.suggestionShortcutLabel = 'ALT+' + ((UI.isMac) ? "CMD" : "CTRL") + '+';
+		this.suggestionShortcutLabel = 'CTRL+';
 
 		this.taglockEnabled = config.taglockEnabled;
 		this.debug = false;
@@ -2734,13 +2736,34 @@ $.extend(UI, {
 		this.bindShortcuts();
 		$("body").on('keydown', null, 'ctrl+1', function(e) {
 			e.preventDefault();
-			$('.editor .tab.alternatives .graysmall[data-item=1]').trigger('dblclick');
+			active = $('.editor .submenu li.active');
+			if(active.hasClass('tab-switcher-tm')) {
+				tab = 'matches';
+				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
+			} else if(active.hasClass('tab-switcher-al')) {
+				tab = 'alternatives';								
+				$('.editor .tab.' + tab + ' .graysmall[data-item=1]').trigger('dblclick');
+			}
 		}).on('keydown', null, 'ctrl+2', function(e) {
 			e.preventDefault();
-			$('.editor .tab.alternatives .graysmall[data-item=2]').trigger('dblclick');
+			active = $('.editor .submenu li.active');
+			if(active.hasClass('tab-switcher-tm')) {
+				tab = 'matches';
+				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');		
+			} else if(active.hasClass('tab-switcher-al')) {
+				tab = 'alternatives';								
+				$('.editor .tab.' + tab + ' .graysmall[data-item=2]').trigger('dblclick');
+			}
 		}).on('keydown', null, 'ctrl+3', function(e) {
 			e.preventDefault();
-			$('.editor .tab.alternatives .graysmall[data-item=3]').trigger('dblclick');
+			active = $('.editor .submenu li.active');
+			if(active.hasClass('tab-switcher-tm')) {
+				tab = 'matches';
+				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');		
+			} else if(active.hasClass('.tab-switcher-al')) {
+				tab = 'alternatives';								
+				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
+			}
 		});		
 		$("body").bind('keydown', 'Ctrl+c', function() {
 			UI.tagSelection = false;
@@ -3001,7 +3024,6 @@ $.extend(UI, {
 			UI.chooseSuggestion($(this).attr('data-item'));
 		}).on('dblclick', '.alternatives .graysmall', function() {
 			UI.chooseAlternative($(this));
-		}).on('dblclick', '.alternatives .graysmall', function() {
 		}).on('blur', '.graysmall .translation', function(e) {
 			e.preventDefault();
 			UI.closeInplaceEditor($(this));
@@ -3014,7 +3036,7 @@ $.extend(UI, {
 			ed = $(this).parents('.graysmall').find('.translation');
 			UI.editContribution(UI.currentSegment, $(this).parents('.graysmall'));
 			UI.closeInplaceEditor(ed);
-		}).on('click', '.tab.alternatives .graysmall .goto a', function(e) {console.log('eccolo');
+		}).on('click', '.tab.alternatives .graysmall .goto a', function(e) {
 			e.preventDefault();
 			UI.scrollSegment($('#segment-' + $(this).attr('data-goto')), true);
 			UI.highlightEditarea($('#segment-' + $(this).attr('data-goto')));
@@ -3963,9 +3985,9 @@ $.extend(UI, {
 	Component: ui.contribution
  */
 $.extend(UI, {
-	chooseSuggestion: function(w) {console.log('chooseSuggestion');
+	chooseSuggestion: function(w) {
 //		console.log($('.editor ul[data-item=' + w + '] li.b .translation'));
-		this.copySuggestionInEditarea(this.currentSegment, $('.editor ul[data-item=' + w + '] li.b .translation').text(), $('.editor .editarea'), $('.editor ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
+		this.copySuggestionInEditarea(this.currentSegment, $('.editor .tab.matches ul[data-item=' + w + '] li.b .translation').text(), $('.editor .editarea'), $('.editor .tab.matches ul[data-item=' + w + '] ul.graysmall-details .percent').text(), false, false, w);
 		this.lockTags(this.editarea);
 		this.setChosenSuggestion(w);
 
@@ -3973,7 +3995,6 @@ $.extend(UI, {
 		this.highlightEditarea();
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
-
 		if (typeof (decode) == "undefined") {
 			decode = false;
 		}
@@ -4347,7 +4368,7 @@ console.log('add class loaded for segment ' + segment_id+ ' in renderContributio
 		$(".editor .matches .graysmall").each(function(index) {
 			$(this).find('.graysmall-message').text(UI.suggestionShortcutLabel + (index + 1));
 			$(this).attr('data-item', index + 1);
-			UI.reinitMMShortcuts();
+//			UI.reinitMMShortcuts();
 		});
 	},
 	reinitMMShortcuts: function() {//console.log('reinitMMShortcuts');
@@ -4978,7 +4999,7 @@ $.extend(UI, {
 			var intervals = [];
 			$.each(d.data.matches, function(k) {
 				i++;
-				var re = new RegExp("(" + k + ")", "gi");
+				var re = new RegExp("(" + k.trim() + ")", "gi");
 				coso = cleanString.replace(re, '<mark>' + k + '</mark>');
 				int = {
 					x: coso.indexOf('<mark>'), 
@@ -4986,7 +5007,6 @@ $.extend(UI, {
 				} 
 				intervals.push(int);
 			});
-			console.log('intervals: ', intervals);
 			UI.intervalsUnion = [];
 /*
 			intervals = [
@@ -5034,9 +5054,7 @@ $.extend(UI, {
 //				console.log(sourceString);
 				$('.editor .source').html(sourceString);
 //				console.log($('.editor .source').html());
-			});
-
-			
+			});		
 		}		
 	},
 	removeGlossaryMarksFormSource: function() {
@@ -5046,6 +5064,7 @@ $.extend(UI, {
 	},
 
 	checkIntervalsUnions: function(intervals) {
+		console.log('intervals: ', intervals);
 		UI.endedIntervalAnalysis = false;
 		smallest = UI.smallestInterval(intervals);
 //		console.log('smallest: ', smallest);

@@ -1,6 +1,14 @@
 php_value magic_quotes_gpc off
 <IfModule mod_rewrite.c>
 RewriteEngine On
+
+#RewriteCond %{REQUEST_URI} !/offline.html$
+#RewriteCond %{REQUEST_URI} !/public/css/common.css$
+#RewriteCond %{REQUEST_URI} !/public/img/logo.png$
+#RewriteCond %{REQUEST_URI} !/public/img/offline.jpg$
+#RewriteRule $ /offline.html [R=307,L]
+
+
 RewriteRule ^$ index.php?action=newProject [QSA,L]
 
 RewriteRule ^(translate)[/]?$ index.php?action=cat [L]
@@ -25,7 +33,7 @@ RewriteRule ^(manage)/([^/]*)/?$ index.php?action=manage&page=$2 [QSA,L]
 RewriteRule ^(editlog)/([^/]*)-([^/]*)/?$ index.php?action=editlog&jid=$2&password=$3 [L]
 RewriteRule ^(referenceFile)/([^/]*)/([^/]*)/([^/]*)?$ index.php?action=referenceFile&job_id=$2&job_password=$3&segment_id=$4 [L]
 
-RewriteRule ^api/docs$ lib/view/APIDoc.html [L]
+RewriteRule ^api/docs$ lib/view/APIDoc.php [L]
 RewriteRule ^(api)[/]?([^/]*)?$ index.php?api=true&action=$2 [QSA,L]
 
 </IfModule>

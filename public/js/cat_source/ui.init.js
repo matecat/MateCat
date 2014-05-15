@@ -28,7 +28,7 @@ $.extend(UI, {
 		}, 200);
 		this.loadCustomization();
 		this.detectFirstLast();
-		this.reinitMMShortcuts();
+//		this.reinitMMShortcuts();
 		this.initSegmentNavBar();
 		rangy.init();
 		this.savedSel = null;

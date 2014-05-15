@@ -135,6 +135,22 @@ abstract class viewController extends controller {
 
         $this->supportedBrowser = $this->isSupportedWebBrowser();
 
+        //try to get user name from cookie if it is not present and put it in session
+        if ( empty( $_SESSION[ 'cid' ] ) ) {
+
+            //log::doLog(get_class($this)." requires check for login");
+            $username_from_cookie = AuthCookie::getCredentials();
+            if ( $username_from_cookie ) {
+                $_SESSION[ 'cid' ] = $username_from_cookie;
+            }
+
+        }
+
+        //even if no login in required, if user data is present, pull it out
+        if ( !empty( $_SESSION[ 'cid' ] ) ){
+            $this->logged_user = getUserData( $_SESSION[ 'cid' ] );
+        }
+
         if( $isAuthRequired  ) {
             //if auth is required, stat procedure
             $this->doAuth();
@@ -165,11 +181,6 @@ abstract class viewController extends controller {
             $mustRedirectToLogin = true;
         }
 
-        //even if no login in required, if user data is present, pull it out
-        if ( !empty( $_SESSION[ 'cid' ] ) ) {
-            $this->logged_user = getUserData( $_SESSION[ 'cid' ] );
-        }
-
         if ( $mustRedirectToLogin ) {
             //redirect to login page
             header( 'Location: /login' );
@@ -185,12 +196,6 @@ abstract class viewController extends controller {
      * @return bool
      */
     public function isLoggedIn() {
-        //log::doLog(get_class($this)." requires check for login");
-        $username_from_cookie = AuthCookie::getCredentials();
-        if ( $username_from_cookie ) {
-            $_SESSION[ 'cid' ] = $username_from_cookie;
-        }
-
         return ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
     }
 
