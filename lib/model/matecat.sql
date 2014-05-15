@@ -438,7 +438,7 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-05-15 17:23:40
+-- Dump completed on 2014-05-15 17:25:55
 -- MySQL dump 10.11
 --
 -- Host: 10.30.1.250    Database: matecat_sandbox
@@ -510,7 +510,7 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-05-15 17:23:40
+-- Dump completed on 2014-05-15 17:25:55
 
 
 
@@ -567,7 +567,8 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-05-15 17:23:40
+-- Dump completed on 2014-05-15 17:25:55
 CREATE USER 'matecat'@'localhost' IDENTIFIED BY 'matecat01';
+GRANT ALL ON matecat_sandbox.* TO 'matecat'@'localhost';
 GRANT ALL ON matecat_analysis.* TO 'matecat'@'localhost';
 FLUSH PRIVILEGES;
