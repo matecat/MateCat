@@ -1443,18 +1443,21 @@ section.highlighted2 .editarea
 }
 */
 
-section:not(.editor).highlighted1 .editarea
-{
-	border: 1px solid #00C1E6;
+section:not(.editor).highlighted1 .editarea {
+border-color: #00C1E6;
+border-width:2px;
 }
 section:not(.editor).highlighted2 .editarea
 {
-	-moz-transition:border 500ms ease-out;
-	-webkit-transition:border 500ms ease-out  !important;
-	-o-transition:border 500ms ease-out; 
-	transition:border 500ms ease-out !important;
-	background-color: transparent;
+-moz-transition: border-color 2s;
+-webkit-transition: border-color 2s !important;
+-o-transition: border-color 2s;
+transition: border-color 2s !important;
+border-color: transparent;
+border-width:2px;
+
 }
+
 
 /*.editor.modified .editarea
 {
