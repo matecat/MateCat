@@ -436,7 +436,13 @@ UI = {
 					var s = d.data.summary;
 					if ((s.STATUS == 'NEW') || (s.STATUS == '') || s.IN_QUEUE_BEFORE > 0) {
 						$('.loadingbar').addClass('open');
-						if (s.IN_QUEUE_BEFORE > 0) {
+
+                        if( config.daemon_warning ){
+                            UI.displayError('The analysis seems not to be running. Contact <a href="mailto:antonio@translated.net">support@matecat.com</a>');
+                            $('#standard-equivalent-words .word-number' ).removeClass('loading').text( $('#raw-words .word-number' ).text() );
+                            $('#matecat-equivalent-words .word-number' ).removeClass('loading').text( $('#raw-words .word-number' ).text() );
+                            return false;
+                        } else if (s.IN_QUEUE_BEFORE > 0) {
 							//increasing number of segments ( fast analysis on another project )
 							if ( UI.previousQueueSize <= s.IN_QUEUE_BEFORE ) {
                                 $('#shortloading' ).show().html('<p class="label">There are other project in queue. Please wait...</p>');
@@ -465,7 +471,7 @@ UI = {
 							UI.noProgressTail = 0;
 						} else {
 							UI.noProgressTail++;
-							if (UI.noProgressTail > 9) {
+                            if (UI.noProgressTail > 9) {
 								//$('#longloading .meter').hide();
 								//$('#longloading p').html('The analyzer seems to have a problem. Contact <a href="mailto:antonio@translated.net">antonio@translated.net</a> or try refreshing the page.');
 								UI.displayError('The analyzer seems to have a problem. Contact <a href="mailto:antonio@translated.net">antonio@translated.net</a> or try refreshing the page.');

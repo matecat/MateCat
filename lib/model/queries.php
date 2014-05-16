@@ -899,15 +899,15 @@ function addTranslation( array $_Translation ){
         return -1;
     }
 
-    Log::doLog( $query );
+//    Log::doLog( $query );
 
     $db->query( $query );
 
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
 
-    Log::doLog( $err );
-    Log::doLog( $db->affected_rows );
+//    Log::doLog( $err );
+//    Log::doLog( $db->affected_rows );
 
     if ( $errno != 0 ) {
         log::doLog( "$errno: " . var_export( $err, true ) );
@@ -2609,10 +2609,8 @@ function getNextSegmentAndLock() {
 function resetLockSegment() {
 	$db               = Database::obtain();
 	$db->useDb('matecat_analysis');
-	$data[ 'locked' ] = 0;
-	$where            = " locked=1 ";
-	$db->update( "matecat_analysis.segment_translations_analysis_queue", $data, $where );
-	$err   = $db->get_error();
+    $db->query( "UPDATE matecat_analysis.segment_translations_analysis_queue SET locked = 0 where locked = 1" );
+	$err = $db->get_error();
 	$db->useDb(INIT::$DB_DATABASE);
 	$errno = $err[ 'error_code' ];
 	if ( $errno != 0 ) {
@@ -2838,20 +2836,20 @@ function getProjectSegmentsTranslationSummary( $pid ){
 		password,
 		SUM(eq_word_count) AS eq_wc,
 		SUM(standard_word_count) AS st_wc
-			, SUM( IF( IFNULL( eq_word_count, -1 ) = -1, raw_word_count, eq_word_count) ) as TOTAL
-			,COUNT( s.id ) AS project_segments,
-		SUM(
-				CASE
-				WHEN st.standard_word_count != 0 THEN IF( st.tm_analysis_status = 'DONE', 1, 0 )
-				WHEN st.standard_word_count = 0 THEN 1
-				END
-		   ) AS num_analyzed
-			FROM segment_translations st
-			JOIN segments s ON s.id = id_segment
-			INNER JOIN jobs j ON j.id=st.id_job
-			WHERE j.id_project = $pid
-			AND st.locked = 0
-			GROUP BY id_job WITH ROLLUP";
+        , SUM( IF( IFNULL( eq_word_count, -1 ) = -1, raw_word_count, eq_word_count) ) as TOTAL
+        , COUNT( s.id ) AS project_segments,
+        SUM(
+            CASE
+                WHEN st.standard_word_count != 0 THEN IF( st.tm_analysis_status = 'DONE', 1, 0 )
+                WHEN st.standard_word_count = 0 THEN 1
+            END
+        ) AS num_analyzed
+        FROM segment_translations st
+        JOIN segments s ON s.id = id_segment
+        INNER JOIN jobs j ON j.id=st.id_job
+        WHERE j.id_project = $pid
+        AND st.locked = 0
+        GROUP BY id_job WITH ROLLUP";
 
 	$results = $db->fetch_array( $query );
 
@@ -2877,19 +2875,19 @@ function countSegmentsTranslationAnalyzed( $pid ) {
 	$db    = Database::obtain();
 
 	$query = "SELECT
-		COUNT( s.id ) AS project_segments,
-		SUM(
-				CASE
-				WHEN ( st.standard_word_count != 0 OR st.standard_word_count IS NULL ) THEN IF( st.tm_analysis_status = 'DONE', 1, 0 )
-				WHEN st.standard_word_count = 0 THEN 1
-				END
-		   ) AS num_analyzed
-			SUM(eq_word_count) AS eq_wc ,
-		SUM(standard_word_count) AS st_wc
-			FROM segments s
-			JOIN segment_translations st ON s.id = st.id_segment
-			INNER JOIN jobs j ON j.id = st.id_job
-			WHERE j.id_project = $pid";
+            COUNT( s.id ) AS project_segments,
+            SUM(
+                CASE
+                    WHEN ( st.standard_word_count != 0 OR st.standard_word_count IS NULL ) THEN IF( st.tm_analysis_status = 'DONE', 1, 0 )
+                    WHEN st.standard_word_count = 0 THEN 1
+                END
+            ) AS num_analyzed,
+            SUM(eq_word_count) AS eq_wc ,
+            SUM(standard_word_count) AS st_wc
+            FROM segments s
+            JOIN segment_translations st ON s.id = st.id_segment
+            INNER JOIN jobs j ON j.id = st.id_job
+            WHERE j.id_project = $pid";
 
 	$results = $db->query_first( $query );
 

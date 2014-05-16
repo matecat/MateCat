@@ -4,6 +4,16 @@ set_time_limit(0);
 include_once 'main.php';
 include_once INIT::$UTILS_ROOT . "/MyMemoryAnalyzer.copyrighted.php";
 
+/* Write my pid to a file */
+$my_pid = getmypid();
+
+if ( !file_exists( Constants_Daemons::PID_FOLDER ) ) {
+    mkdir( Constants_Daemons::PID_FOLDER );
+}
+
+file_put_contents( Constants_Daemons::PID_FOLDER . "/" . Constants_Daemons::FAST_PID_FILE, $my_pid );
+/**/
+
 $ws = new MyMemoryAnalyzer();
 
 Log::$fileName = "fastAnalysis.log";

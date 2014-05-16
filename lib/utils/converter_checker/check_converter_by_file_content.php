@@ -542,7 +542,7 @@ class ConvertersMonitor {
 //            }
 //
 //            if( $winword_total_load > 60 ){
-//                self::_prettyEcho( "> *** Found harmful instance of WINWORD, SET FOR REBOOT....", 4 );
+//                self::_prettyEcho( "> *** Found harmful instance, SET FOR REBOOT....", 4 );
 //                $this->setForReboot[ ] = $ip_converter;
 //            }
 //
