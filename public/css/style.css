@@ -2569,7 +2569,12 @@ del.diff
 	background: #FFCFCF;
 }
 
-
+.tab-marker
+{
+	color: #999;
+	margin-left: 4px;
+	margin-right: 4px;
+}
 
 
 @keyframes fadein {

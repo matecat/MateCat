@@ -3194,6 +3194,9 @@ $.extend(UI, {
 				}
 			}
 */
+
+			console.log(e.which); 
+
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
 				if ($('.selected', $(this)).length) {
 					e.preventDefault();
@@ -3258,6 +3261,13 @@ $.extend(UI, {
 						if(added === '') UI.closeTagAutocompletePanel();
 					}, 10);		
 				}
+			}
+			if (e.which == 9) { // tab
+				e.preventDefault();
+				var node = document.createElement("span");
+				node.setAttribute('class', 'tab-marker');
+				node.textContent = htmlDecode("&#8677;");
+				insertNodeAtCursor(node);				
 			}
 			if (e.which == 37) { // left arrow
 				selection = window.getSelection();
