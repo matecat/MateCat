@@ -100,6 +100,14 @@ $.extend(UI, {
 				tab = 'alternatives';								
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			}
+		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
+			e.preventDefault();
+//			console.log('nbsp');
+			config.nbspPlaceholderClass = '_NBSP';
+			var node = document.createElement("span");
+			node.setAttribute('class', 'nbsp-marker ' + config.nbspPlaceholderClass);
+			node.textContent = htmlDecode(".");
+			insertNodeAtCursor(node);
 		});		
 		$("body").bind('keydown', 'Ctrl+c', function() {
 			UI.tagSelection = false;
@@ -531,7 +539,7 @@ $.extend(UI, {
 			}
 */
 
-			console.log(e.which); 
+//			console.log(e.which); 
 
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
 				if ($('.selected', $(this)).length) {
@@ -601,9 +609,9 @@ $.extend(UI, {
 			if (e.which == 9) { // tab
 				e.preventDefault();
 				var node = document.createElement("span");
-				node.setAttribute('class', 'tab-marker');
+				node.setAttribute('class', 'tab-marker ' + config.tabPlaceholderClass);
 				node.textContent = htmlDecode("&#8677;");
-				insertNodeAtCursor(node);				
+				insertNodeAtCursor(node);
 			}
 			if (e.which == 37) { // left arrow
 				selection = window.getSelection();
