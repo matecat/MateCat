@@ -103,7 +103,7 @@ $.extend(UI, {
 		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
 			e.preventDefault();
 //			console.log('nbsp');
-			config.nbspPlaceholderClass = '_NBSP';
+//			config.nbspPlaceholderClass = '_NBSP';
 			var node = document.createElement("span");
 			node.setAttribute('class', 'nbsp-marker ' + config.nbspPlaceholderClass);
 			node.textContent = htmlDecode(".");

@@ -2077,6 +2077,7 @@ UI = {
         }
 
         $(area).find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
+        $(area).find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
 
 
 //        Now commented, but valid for future purposes when the user will choose what type of carriage return
@@ -2137,7 +2138,8 @@ UI = {
         var _str = str.replace( config.lfPlaceholderRegex, '<br class="' + config.lfPlaceholderClass +'" />' )
                       .replace( config.crPlaceholderRegex, '<br class="' + config.crPlaceholderClass +'" />' )
                       .replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
-                      .replace( config.tabPlaceholderRegex, '<span class="tab-marker ' + config.tabPlaceholderClass +'">&#8677;</span>' );
+                      .replace( config.tabPlaceholderRegex, '<span class="tab-marker ' + config.tabPlaceholderClass +'">&#8677;</span>' )
+                      .replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker ' + config.nbspPlaceholderClass +'">.</span>' );
         return _str;
     },
 
@@ -2775,7 +2777,7 @@ $.extend(UI, {
 		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
 			e.preventDefault();
 //			console.log('nbsp');
-			config.nbspPlaceholderClass = '_NBSP';
+//			config.nbspPlaceholderClass = '_NBSP';
 			var node = document.createElement("span");
 			node.setAttribute('class', 'nbsp-marker ' + config.nbspPlaceholderClass);
 			node.textContent = htmlDecode(".");
