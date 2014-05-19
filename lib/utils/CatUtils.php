@@ -22,6 +22,10 @@ class CatUtils {
     const crPlaceholderRegex   = '/\#\#\$_0D\$\#\#/g';
     const crlfPlaceholderRegex = '/\#\#\$_0D0A\$\#\#/g';
 
+    const tabPlaceholder       = '##$_09$##';
+    const tabPlaceholderClass  = '_09';
+    const tabPlaceholderRegex  = '/\#\#\$_09\$\#\#/g';
+
     public static $cjk = array( 'zh' => 1.8, 'ja' => 2.5, 'ko' => 2.5, 'km' => 5 );
 
     //following functions are useful for manage the consistency of non braking spaces
@@ -186,6 +190,7 @@ class CatUtils {
         $segment = str_replace( '##$_0D0A$##',"\r\n", $segment );
         $segment = str_replace( '##$_0A$##',"\n", $segment );
         $segment = str_replace( '##$_0D$##',"\r", $segment );
+        $segment = str_replace( '##$_09$##',"\t", $segment );
 
         // input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
         // output : <g> bang &amp; olufsen are > 555 </g> <x/>
@@ -220,6 +225,7 @@ class CatUtils {
         $segment = str_replace("\r\n", '##$_0D0A$##', $segment );
         $segment = str_replace("\n", '##$_0A$##', $segment );
         $segment = str_replace("\r", '##$_0D$##', $segment ); //x0D character
+        $segment = str_replace("\t", '##$_09$##', $segment ); //x0D character
         return $segment;
     }
 
