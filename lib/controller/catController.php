@@ -358,6 +358,10 @@ class catController extends viewController {
 			$this->template->crPlaceholderRegex   = CatUtils::crPlaceholderRegex;
 			$this->template->crlfPlaceholderRegex = CatUtils::crlfPlaceholderRegex;
 
+            $this->template->tabPlaceholder       = CatUtils::tabPlaceholder;
+            $this->template->tabPlaceholderClass  = CatUtils::tabPlaceholderClass;
+            $this->template->tabPlaceholderRegex  = CatUtils::tabPlaceholderRegex;
+
 		}
 
 	}
