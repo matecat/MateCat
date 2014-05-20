@@ -1091,6 +1091,10 @@ UI = {
                 escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
                 escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
                 escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
+				
+				/* tab placeholders replacement */
+ //               escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "<span class=" );
+				
                 /* see also replacement made in source content below */
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
 
@@ -1741,17 +1745,17 @@ UI = {
 	},
 	displayMessage: function(messages) {
 		if($('body').hasClass('incomingMsg')) return false;
-		$.each(messages, function(index) {
-			if(typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date( this.expire ) > ( new Date ) )  ) {
-				UI.showMessage({
-					msg: this.msg,
-					token: this.token,
-					showOnce: true,
-					expire: this.expire
-				});
-				return false;
-			}
-		});
+        $.each(messages, function(index) {
+            if(typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date( this.expire ) > ( new Date ) )  ) {
+                UI.showMessage({
+                    msg: this.msg,
+                    token: this.token,
+                    showOnce: true,
+                    expire: this.expire
+                });
+                return false;
+            }
+        });
 	},
 	showMessage: function(options) {
 		APP.showMessage(options);
@@ -2072,6 +2076,10 @@ UI = {
 //			console.log('post process 2: ', $(area).html());
         }
 
+        $(area).find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
+        $(area).find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
+
+
 //        Now commented, but valid for future purposes when the user will choose what type of carriage return
 //        $('br', area).each(function() {
 //
@@ -2129,7 +2137,9 @@ UI = {
     decodePlaceholdersToText: function ( str ) {
         var _str = str.replace( config.lfPlaceholderRegex, '<br class="' + config.lfPlaceholderClass +'" />' )
                       .replace( config.crPlaceholderRegex, '<br class="' + config.crPlaceholderClass +'" />' )
-                      .replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' );
+                      .replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
+                      .replace( config.tabPlaceholderRegex, '<span class="tab-marker ' + config.tabPlaceholderClass +'">&#8677;</span>' )
+                      .replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker ' + config.nbspPlaceholderClass +'">.</span>' );
         return _str;
     },
 
@@ -2764,6 +2774,14 @@ $.extend(UI, {
 				tab = 'alternatives';								
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			}
+		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
+			e.preventDefault();
+//			console.log('nbsp');
+//			config.nbspPlaceholderClass = '_NBSP';
+			var node = document.createElement("span");
+			node.setAttribute('class', 'nbsp-marker ' + config.nbspPlaceholderClass);
+			node.textContent = htmlDecode(".");
+			insertNodeAtCursor(node);
 		});		
 		$("body").bind('keydown', 'Ctrl+c', function() {
 			UI.tagSelection = false;
@@ -3194,6 +3212,9 @@ $.extend(UI, {
 				}
 			}
 */
+
+//			console.log(e.which); 
+
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
 				if ($('.selected', $(this)).length) {
 					e.preventDefault();
@@ -3258,6 +3279,13 @@ $.extend(UI, {
 						if(added === '') UI.closeTagAutocompletePanel();
 					}, 10);		
 				}
+			}
+			if (e.which == 9) { // tab
+				e.preventDefault();
+				var node = document.createElement("span");
+				node.setAttribute('class', 'tab-marker ' + config.tabPlaceholderClass);
+				node.textContent = htmlDecode("&#8677;");
+				insertNodeAtCursor(node);
 			}
 			if (e.which == 37) { // left arrow
 				selection = window.getSelection();

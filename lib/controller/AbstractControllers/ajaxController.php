@@ -53,7 +53,7 @@ abstract class ajaxController extends controller {
 
         switch (json_last_error()) {
             case JSON_ERROR_NONE:
-                Log::doLog(' - No errors');
+//                Log::doLog(' - No errors');
                 break;
             case JSON_ERROR_DEPTH:
                 Log::doLog(' - Maximum stack depth exceeded');
