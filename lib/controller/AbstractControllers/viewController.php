@@ -73,7 +73,10 @@ abstract class viewController extends controller {
             $ub    = "Chrome";
         } elseif ( preg_match( '/Safari/i', $u_agent ) ) {
             $bname = 'Apple Safari';
-            $ub    = "Safari";
+	    $ub    = "Safari";
+	} elseif ( preg_match( '/AppleWebKit/i', $u_agent ) ) {
+	    $bname = 'Apple Safari';
+	    $ub    = "Safari";
         } elseif ( preg_match( '/Opera/i', $u_agent ) ) {
             $bname = 'Opera';
             $ub    = "Opera";
