@@ -100,6 +100,7 @@ class MultiCurlHandler {
         foreach( $this->curl_handlers as $tokenHash => $curl_resource ){
             $temp = curl_multi_getcontent ( $curl_resource );
             $this->multi_curl_results[ $tokenHash ] = $temp;
+//            Log::doLog($temp);
         }
 
     }

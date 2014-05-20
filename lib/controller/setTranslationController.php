@@ -50,10 +50,10 @@ class setTranslationController extends ajaxController {
 	public function doAction() {
 
         switch( $this->status ) {
-            case 'TRANSLATED':
-            case 'APPROVED':
-            case 'REJECTED':
-            case 'DRAFT':
+            case Constants_TranslationStatus::STATUS_TRANSLATED:
+            case Constants_TranslationStatus::STATUS_APPROVED:
+            case Constants_TranslationStatus::STATUS_REJECTED:
+            case Constants_TranslationStatus::STATUS_DRAFT:
                 break;
             default:
                 //NO debug and NO-actions for un-mapped status
@@ -186,6 +186,30 @@ class setTranslationController extends ajaxController {
          */
         $old_translation = getCurrentTranslation( $this->id_job, $this->id_segment );
 
+        //if volume analysis is not enables and no translation rows exists
+        //create the row
+        if( !INIT::$VOLUME_ANALYSIS_ENABLED && empty( $old_translation['status'] ) ){
+
+            $_Translation                            = array();
+            $_Translation[ 'id_segment' ]            = (int)$this->id_segment;
+            $_Translation[ 'id_job' ]                = (int)$this->id_job;
+            $_Translation[ 'status' ]                = Constants_TranslationStatus::STATUS_NEW;
+            $_Translation[ 'segment_hash' ]          = $segment['segment_hash'];
+            $_Translation[ 'translation' ]           = $segment['segment'];
+            $_Translation[ 'standard_word_count' ]   = $segment['raw_word_count'];
+            $_Translation[ 'serialized_errors_list' ] = '';
+            $_Translation[ 'suggestion_position' ]   = 0;
+            $_Translation[ 'warning' ]               = false;
+            $_Translation[ 'translation_date' ]      = date( "Y-m-d H:i:s" );
+            addTranslation( $_Translation );
+
+            /*
+             * begin stats counter
+             */
+            $old_translation = getCurrentTranslation( $this->id_job, $this->id_segment );
+
+        }
+
         $old_wStruct = new WordCount_Struct();
         $old_wStruct->setIdJob( $this->id_job );
         $old_wStruct->setJobPassword( $this->password );
@@ -205,10 +229,14 @@ class setTranslationController extends ajaxController {
         if( $this->status != $old_translation['status'] ){
 
             //cambiato status, sposta i conteggi
-            $old_count = ( !empty( $old_translation['eq_word_count'] ) ? $old_translation['eq_word_count'] : $segment['raw_word_count'] );
+            $old_count  = ( !empty( $old_translation['eq_word_count'] ) ? $old_translation['eq_word_count'] : $segment['raw_word_count'] );
+
+            //if there is not a row in segment_translations because volume analysis is disabled
+            //search for a just created row
+            $old_status = ( !empty( $old_translation['status'] ) ? $old_translation['status'] : Constants_TranslationStatus::STATUS_NEW );
 
             $counter = new WordCount_Counter( $old_wStruct );
-            $counter->setOldStatus( $old_translation['status'] );
+            $counter->setOldStatus( $old_status );
             $counter->setNewStatus( $this->status );
             $newValues = $counter->getUpdatedValues( $old_count );
 
@@ -224,6 +252,7 @@ class setTranslationController extends ajaxController {
         } else {
             $newTotals = $old_wStruct;
         }
+
         $_Translation                            = array();
         $_Translation[ 'id_segment' ]            = $this->id_segment;
         $_Translation[ 'id_job' ]                = $this->id_job;
@@ -239,7 +268,7 @@ class setTranslationController extends ajaxController {
          * when the status of the translation changes, the auto propagation flag
          * must be removed
          */
-        if( $_Translation[ 'translation' ] != $old_translation['translation'] || $this->status == 'TRANSLATED' || $this->status == 'APPROVED' ){
+        if( $_Translation[ 'translation' ] != $old_translation['translation'] || $this->status == Constants_TranslationStatus::STATUS_TRANSLATED || $this->status == Constants_TranslationStatus::STATUS_APPROVED ){
             $_Translation[ 'autopropagated_from' ] = 'NULL';
         }
 
@@ -258,7 +287,7 @@ class setTranslationController extends ajaxController {
         //propagate translations
         $TPropagation                             = array();
         $TPropagation[ 'id_job' ]                 = $this->id_job;
-        $TPropagation[ 'status' ]                 = 'DRAFT';
+        $TPropagation[ 'status' ]                 = Constants_TranslationStatus::STATUS_DRAFT;
         $TPropagation[ 'translation' ]            = $translation;
         $TPropagation[ 'autopropagated_from' ]    = $this->id_segment;
         $TPropagation[ 'serialized_errors_list' ] = $err_json;
@@ -266,7 +295,7 @@ class setTranslationController extends ajaxController {
         $TPropagation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
         $TPropagation[ 'segment_hash' ]           = $old_translation[ 'segment_hash' ];
 
-        if( $this->status == 'TRANSLATED' ){
+        if( $this->status == Constants_TranslationStatus::STATUS_TRANSLATED ){
 
             try {
                 propagateTranslation( $TPropagation, $job_data );
@@ -282,7 +311,12 @@ class setTranslationController extends ajaxController {
 		$job_stats = CatUtils::getFastStatsForJob( $newTotals );
         $project = getProject( $job_data['id_project'] );
         $project = array_pop( $project );
-        $job_stats['ANALYSIS_COMPLETE'] = ( $project['status_analysis'] == 'DONE' ? true : false );
+
+        $job_stats['ANALYSIS_COMPLETE'] = (
+
+                $project['status_analysis'] == Constants_ProjectStatus::STATUS_DONE || $project['status_analysis'] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE
+
+                ? true : false );
 
 		//$file_stats = CatUtils::getStatsForFile($this->id_first_file); //Removed .. HEAVY query, client don't need these info at moment
 

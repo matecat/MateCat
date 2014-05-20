@@ -100,7 +100,7 @@ APP = {
 	showMessage: function(options) {
 		$('#messageBar .msg').html(options.msg);
 		if(options.showOnce) {
-			$('#messageBar').attr('data-token', 'msg-' + options.token).attr('data-expire', options.expire);
+			$('#messageBar').attr({'data-token': 'msg-' + options.token, 'data-expire': options.expire});
 		}
 		if(typeof options.fixed != 'undefined') {
 			$('#messageBar').addClass('fixed');

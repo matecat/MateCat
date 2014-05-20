@@ -307,7 +307,7 @@ function tryToCloseProject( $pid ){
     $pid_standard_words = $analyzed_report['st_wc'];
     if ($segs_in_project - $segs_analyzed == 0) {
         echo "--- (child $my_pid) : analysis project $pid finished : change status to DONE\n";
-        $change_res = changeProjectStatus($pid, "DONE");
+        $change_res = changeProjectStatus($pid, Constants_ProjectStatus::STATUS_DONE );
         $tm_wc_res = changeTmWc($pid, $pid_eq_words, $pid_standard_words);
     }
     echo "\n\n";

@@ -1742,12 +1742,12 @@ UI = {
 	displayMessage: function(messages) {
 		if($('body').hasClass('incomingMsg')) return false;
 		$.each(messages, function(index) {
-			if(typeof $.cookie('msg-' + this.token) == 'undefined') {
+			if(typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date( this.expire ) > ( new Date ) )  ) {
 				UI.showMessage({
 					msg: this.msg,
 					token: this.token,
 					showOnce: true,
-					cookieExpire: this.expire
+					expire: this.expire
 				});
 				return false;
 			}

@@ -4,6 +4,16 @@ set_time_limit(0);
 include_once 'main.php';
 include_once INIT::$UTILS_ROOT . "/MyMemoryAnalyzer.copyrighted.php";
 
+/* Write my pid to a file */
+$my_pid = getmypid();
+
+if ( !file_exists( Constants_Daemons::PID_FOLDER ) ) {
+    mkdir( Constants_Daemons::PID_FOLDER );
+}
+
+file_put_contents( Constants_Daemons::PID_FOLDER . "/" . Constants_Daemons::FAST_PID_FILE, $my_pid );
+/**/
+
 $ws = new MyMemoryAnalyzer();
 
 Log::$fileName = "fastAnalysis.log";
@@ -77,7 +87,7 @@ while (1) {
 		Log::doLog( "done" );
 
 		$perform_Tms_Analysis = true;
-		$status = "FAST_OK";
+		$status = Constants_ProjectStatus::STATUS_FAST_OK;
 		if( $pid_res['id_tms'] == 0 && $pid_res['id_mt_engine'] == 0 ){
 
 			/**
@@ -86,7 +96,7 @@ while (1) {
 			 */
 
 			$perform_Tms_Analysis = false;
-			$status = "DONE";
+			$status = Constants_ProjectStatus::STATUS_DONE;
 			Log::doLog( 'Perform Analysis ' . var_export( $perform_Tms_Analysis, true ) );
 		}
 

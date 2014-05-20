@@ -127,6 +127,8 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
         $res = $mh->getAllContents();
 
+        $failures = array();
+
         //fetch contents and store in cache if there are
         foreach( $res as $jpid => $quote ){
 
@@ -149,12 +151,15 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $itemCart[ 'name' ]          = "MATECAT_$jpid";
             $itemCart[ 'delivery_date' ] = $result_quote[ 2 ];
             $itemCart[ 'words' ]         = $result_quote[ 3 ];
-            $itemCart[ 'price' ]         = $result_quote[ 4 ];
+            $itemCart[ 'price' ]         = ( $result_quote[ 4 ] ? $result_quote[ 4 ] : 0 );
             $itemCart[ 'quote_pid' ]     = $result_quote[ 5 ];
             $itemCart[ 'source' ]        = $_jobLangs[ $jpid ]['source']; //get the right language
             $itemCart[ 'target' ]        = $_jobLangs[ $jpid ]['target']; //get the right language
             $itemCart[ 'show_info' ]     = $result_quote[ 6 ];
             $cache_cart->addItem( $itemCart );
+
+            //Oops we got an error
+            if( $itemCart[ 'price' ] == 0 && empty( $itemCart[ 'words' ] ) ) $failures[$jpid] = $jpid;
 
         }
 
@@ -167,6 +172,11 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         }
 
         $this->_quote_result = $shopping_cart->getCart();
+
+        //check for failures.. destroy the cache
+        if( !empty( $failures ) ){
+            $cache_cart->emptyCart();
+        }
 
     }
 

@@ -160,7 +160,7 @@ class Utils {
         if( empty( $subject ) ){
 		    $mail->Subject = 'Alert from Matecat: ' . php_uname('n');
         } else {
-            $mail->Subject = $subject;
+            $mail->Subject = $subject . ' ' . php_uname('n');
         }
 
 		$mail->Body    = '<pre>' . self::_getBackTrace() . "<br />" . $htmlContent . '</pre>';

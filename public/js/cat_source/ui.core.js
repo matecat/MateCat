@@ -1741,17 +1741,17 @@ UI = {
 	},
 	displayMessage: function(messages) {
 		if($('body').hasClass('incomingMsg')) return false;
-		$.each(messages, function(index) {
-			if(typeof $.cookie('msg-' + this.token) == 'undefined') {
-				UI.showMessage({
-					msg: this.msg,
-					token: this.token,
-					showOnce: true,
-					cookieExpire: this.expire
-				});
-				return false;
-			}
-		});
+        $.each(messages, function(index) {
+            if(typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date( this.expire ) > ( new Date ) )  ) {
+                UI.showMessage({
+                    msg: this.msg,
+                    token: this.token,
+                    showOnce: true,
+                    expire: this.expire
+                });
+                return false;
+            }
+        });
 	},
 	showMessage: function(options) {
 		APP.showMessage(options);

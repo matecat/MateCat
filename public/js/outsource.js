@@ -62,9 +62,21 @@ $.extend(UI, {
 						});
 						chunk = d.data[ind];
 
-                        //now taked from config and not from ajax response
                         UI.url_ok = d.return_url.url_ok;
                         UI.url_ko = d.return_url.url_ko;
+
+                        if( chunk.price == 0 && chunk.words == '' ){
+                            console.log('Oops we got an error...');
+                            $('.tpricetitle' ).text('' ).css({'border-bottom':'none'});
+                            $('.outsource.modal .total span.euro' ).text( '' );
+                            $('.outsource.modal .total span.displayprice' ).text( '' );
+                            $('.outsource.modal .delivery span.zone2').text( '' );
+                            $('.outsource.modal .delivery').text( 'Ops we got an error, try again.' );
+                            $('.modal.outsource .outsourceto h2').removeClass('loading');
+                            $('.outsource.modal').show();
+                            $(".showprices" ).show();
+                            return false;
+                        }
 
 						dd = new Date(chunk.delivery_date);
 						$('.outsource.modal .delivery span.time').text( $.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh:mm a") );

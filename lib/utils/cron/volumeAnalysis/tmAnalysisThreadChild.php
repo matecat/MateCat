@@ -378,7 +378,7 @@ function tryToCloseProject( $pid, $child_process_id ){
 
         echo "--- (child $child_process_id) : analysis project $pid finished : change status to DONE\n";
 
-        changeProjectStatus($pid, "DONE");
+        changeProjectStatus( $pid, Constants_ProjectStatus::STATUS_DONE );
         changeTmWc( $pid, $project_totals['eq_wc'], $project_totals['st_wc'] );
 
         echo "--- (child $child_process_id) : trying to initialize job total word count.\n";

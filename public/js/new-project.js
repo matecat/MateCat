@@ -116,7 +116,7 @@ $(document).ready(function() {
 
                     } else {
 
-                        if( d.target_language.length > 1 ){ //if multiple language selected show a job list
+                        if( Object.keys( d.target_language ).length > 1 ){ //if multiple language selected show a job list
                             d.files = [];
                             d.trgLangHumanReadable = $('#target-lang option:selected').text().split(',');
                             d.srcLangHumanReadable = $('#source-lang option:selected').text();

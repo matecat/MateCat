@@ -114,8 +114,8 @@ class getWarningController extends ajaxController {
 
         $this->result[ 'details' ] = array_values($result);
         $this->result[ 'token' ]   = $this->__postInput->token;
-	
-	//$this->result['messages']  = '[{"msg":"<strong>Notice</strong>: Friday 16th, from 23:00 to 4:00 (GMT +2), you may experience slow responses or a brief disconnection. In the latter case, try again in 15 minutes.","token":"token-down-20140516","expire":"2014-05-17 08:00"}]';
+	//        $this->result['messages']  = '[{"msg":"Test message 1","token":"token1","expire":"2014-04-03 00:00"},{"msg":"Test message 2","token":"token2","expire":"2014-04-04 12:00"}]';
+        $this->result['messages']  = '[{"msg":"<strong>Notice</strong>: Friday 23th, from 23:00 to 4:00 (GMT +2), you may experience slow responses or a brief disconnection. In the latter case, try again in 15 minutes.","token":"token-down-20140516","expire":"2014-05-24 08:00"}]';
 
         $tMismatch = getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
 

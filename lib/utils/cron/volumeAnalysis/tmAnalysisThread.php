@@ -2,16 +2,13 @@
 set_time_limit(0);
 require "main.php";
 
-define("PID_FOLDER", ".pidlist");
-define("NUM_PROCESSES", 1);
-define("NUM_PROCESSES_FILE", ".num_processes");
-
 $my_pid = getmypid();
 
-if (!file_exists(PID_FOLDER)) {
-    mkdir(PID_FOLDER);
+if ( !file_exists( Constants_Daemons::PID_FOLDER ) ) {
+    mkdir( Constants_Daemons::PID_FOLDER );
 }
 
+file_put_contents( Constants_Daemons::PID_FOLDER . "/" . Constants_Daemons::TM_MASTER_PID_FILE, $my_pid );
 
 // PROCESS CONTROL FUNCTIONS
 function isRunningProcess($pid) {
@@ -22,7 +19,7 @@ function isRunningProcess($pid) {
 }
 
 function processFileExists($pid) {
-    $folder = PID_FOLDER;
+    $folder = Constants_Daemons::PID_FOLDER;
     echo __FUNCTION__ . " : $folder/$pid ....";
     if (file_exists("$folder/$pid")) {
         echo "true\n\n";
@@ -40,7 +37,7 @@ $deletedPidList = deletePidFile();
 do {
     foreach ($deletedPidList as $k => $pid) {
         // check il process pid ended
-        if (!isRunningProcess($pid)) {
+        if ( !isRunningProcess($pid) ) {
             unset($deletedPidList[$k]);
             echo "(parent $my_pid) : pid $pid unset\n";
         }
@@ -105,7 +102,7 @@ while (1) {
 
 function getPidFromFiles() {
     $cwd = getcwd();
-    chdir(PID_FOLDER);
+    chdir( Constants_Daemons::PID_FOLDER );
     $files = glob('*'); // get all file names
     chdir($cwd);
     return $files;
@@ -130,11 +127,11 @@ function launchProcesses($numProcesses = 1, $equivalentWordMapping = array()) {
         } else {
             // child process runs what is here
             $pid = getmypid();
-            if (!touch(PID_FOLDER . "/$pid")) {
+            if (!touch( Constants_Daemons::PID_FOLDER . "/$pid")) {
                 echo "(child $pid) : FATAL !! cannot create child file. Exiting!\n";
                 return -2;
             } else {
-                echo "(child $pid) : file " . PID_FOLDER . "/$pid created !!!\n";
+                echo "(child $pid) : file " . Constants_Daemons::PID_FOLDER . "/$pid created !!!\n";
             }
 
             try{
@@ -166,16 +163,19 @@ function deletePidFile($pid = "", $num = -1) {
     }
 
     echo "no pid indicated --> deleting all (or num if \$num > 0) pid files\n";
-    
-    foreach ($files as $file) { // iterate files
-        if (is_file(PID_FOLDER . "/$file")) {
+
+    foreach ( $files as $file ) { // iterate files
+
+        if( in_array( $file, array( Constants_Daemons::FAST_PID_FILE, Constants_Daemons::TM_MASTER_PID_FILE ) ) ) continue;
+
+        if ( is_file( Constants_Daemons::PID_FOLDER . "/$file" ) ) {
             echo "deleting pid $file ....";
-            unlink(PID_FOLDER . "/$file"); // delete 
+            unlink( Constants_Daemons::PID_FOLDER . "/$file" ); // delete
             echo "done\n";
-            $pidDeleted[] = $file;
-            if ($num > 0) {
-                $numDeleted+=1;
-                if ($numDeleted == $num) {
+            $pidDeleted[ ] = $file;
+            if ( $num > 0 ) {
+                $numDeleted += 1;
+                if ( $numDeleted == $num ) {
                     break;
                 }
             }
@@ -190,13 +190,13 @@ function deletePidFile($pid = "", $num = -1) {
 
 function setNumProcesses() {
     // legge quanti processi lanciare
-    $num_processes = NUM_PROCESSES;
-    if (file_exists(NUM_PROCESSES_FILE)) {
-        $num_processes = intval(file_get_contents(NUM_PROCESSES_FILE));
+    $num_processes = Constants_Daemons::NUM_PROCESSES;
+    if ( file_exists( Constants_Daemons::NUM_PROCESSES_FILE ) ) {
+        $num_processes = intval( file_get_contents( Constants_Daemons::NUM_PROCESSES_FILE ) );
     }
     if (!is_int($num_processes)) {
-        echo "WARNING : num processes from file is not numeric. Back to default value NUM_PROCESSES = " . NUM_PROCESSES . "\n";
-        $num_processes = NUM_PROCESSES;
+        echo "WARNING : num processes from file is not numeric. Back to default value NUM_PROCESSES = " . Constants_Daemons::NUM_PROCESSES . "\n";
+        $num_processes = Constants_Daemons::NUM_PROCESSES;
     }
     return $num_processes;
 }

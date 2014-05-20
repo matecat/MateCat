@@ -54,7 +54,7 @@ class ProjectManager {
 						'segments'           => array(), //array of files_id => segmentsArray()
 						'translations'       => array(), //one translation for every file because translations are files related
 						'query_translations' => array(),
-						'status'             => 'NOT_READY_FOR_ANALYSIS',
+						'status'             => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
 						'job_to_split'       => null,
 						'job_to_split_pass'  => null,
 						'split_result'       => null,
@@ -403,9 +403,9 @@ class ProjectManager {
 			self::_deleteDir( $uploadDir . '_converted' );
 		}
 
-		$this->projectStructure['status'] = ( INIT::$VOLUME_ANALYSIS_ENABLED ) ? 'NEW' : 'NOT_TO_ANALYZE';
+		$this->projectStructure['status'] = ( INIT::$VOLUME_ANALYSIS_ENABLED ) ? Constants_ProjectStatus::STATUS_NEW : Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;
 		if( $isEmptyProject ){
-			$this->projectStructure['status'] = 'EMPTY';
+			$this->projectStructure['status'] = Constants_ProjectStatus::STATUS_EMPTY;
 		}
 
 		changeProjectStatus( $this->projectStructure['id_project'], $this->projectStructure['status'] );
