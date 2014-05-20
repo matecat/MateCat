@@ -3487,9 +3487,25 @@ del.diff
 }
 .nbsp-marker
 {
-	color: #aaa;
-	margin-left: 6px;
-	margin-right: 6px;
+	color: #AAA;
+	position: relative;
+	padding-left: 4px;
+	margin-right: 4px;
+	top: -4px;
+
+/*	background: url(../img/bg-nbsp.png) center center no-repeat; 
+	width: 20px;
+	margin-right: 1px;
+	display: inline-block;
+	text-indent: -9999px;*/
+/*
+	color: #AAA;
+	display: inline-block;
+	margin-left: 5px;
+	width: 15px;
+	background: url(../img/bg-nbsp.png) 6px 13px no-repeat;
+	background-size: 3px 4px;
+*/
 }
 
 @keyframes fadein {
