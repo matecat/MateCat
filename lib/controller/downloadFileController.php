@@ -115,37 +115,6 @@ class downloadFileController extends downloadController {
             unset($xsp);
             $debug['replace'][] = time();
 
-            /*
-               TEMPORARY HACK
-               read header of file (guess first 500B) and detect if it was an old file created on VM TradosAPI (10.30.1.247)
-               if so, point the conversion explicitly to this VM and not to the cloud, otherwise conversion will fail
-             */
-            //get first 500B
-            $header_of_file_for_hack=file_get_contents($path.'.out.sdlxliff',false,NULL,-1,500);
-
-            //extract file tag
-            preg_match('/<file .*?>/s',$header_of_file_for_hack,$res_header_of_file_for_hack);
-
-            //make it a regular tag
-            $file_tag=$res_header_of_file_for_hack[0].'</file>';
-
-            //objectify
-            $tag=simplexml_load_string($file_tag);
-
-            //get "original" attribute
-            $original_uri=trim($tag['original']);
-
-            $chosen_machine=false;
-            if(strpos($original_uri,'C:\automation')!==FALSE){
-                $chosen_machine='10.30.1.247';
-                log::doLog('Old project detected, falling back to old VM');
-            }
-
-            unset($header_of_file_for_hack,$file_tag,$tag,$original_uri);
-            /*
-               END OF HACK
-             */
-
             $original=file_get_contents($path.'.out.sdlxliff');
 
             $output_content[$id_file]['content'] = $original;

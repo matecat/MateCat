@@ -379,7 +379,7 @@ class FileFormatConverter {
 			$this->ip=$this->pickRandConverter();
 			$storage      = $this->getValidStorage();
 
-			//add trados to replace/regexp pattern because whe have more than 1 replacement
+			//add replace/regexp pattern because whe have more than 1 replacement
 			//http://stackoverflow.com/questions/2222643/php-preg-replace
 			$xliffContent = self::replacedAddress( $storage, $xliffContent );
 		}else{
