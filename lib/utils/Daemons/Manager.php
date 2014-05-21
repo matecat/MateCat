@@ -32,6 +32,13 @@ class Daemons_Manager {
         return false;
     }
 
+    /**
+     * WARNING on 2 frontend web server or in an architecture where the daemons runs in a place different from the web server
+     * this should be put in a shared location ( memcache/redis/ntfs/mysql ) and a service should be
+     * queried for know that number
+     *
+     * @return bool
+     */
     public static function thereIsAMisconfiguration(){
         return ( INIT::$VOLUME_ANALYSIS_ENABLED && !Daemons_Manager::fastAnalysisIsRunning() && !Daemons_Manager::tmAnalysisIsRunning() );
     }
