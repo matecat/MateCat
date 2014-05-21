@@ -8,6 +8,11 @@ if ( !file_exists( Constants_Daemons::PID_FOLDER ) ) {
     mkdir( Constants_Daemons::PID_FOLDER );
 }
 
+/**
+ * WARNING on 2 frontend web server or in an architecture where the daemons runs in a place different from the web server
+ * this should be put in a shared location ( memcache/redis/ntfs/mysql ) and a service should be
+ * queried for know that number
+ */
 file_put_contents( Constants_Daemons::PID_FOLDER . "/" . Constants_Daemons::TM_MASTER_PID_FILE, $my_pid );
 
 // PROCESS CONTROL FUNCTIONS
