@@ -95,7 +95,7 @@
 
         <option class="separator" disabled="disabled">---</option>
 
-        <tal:block tal:repeat="language languages">
+        <tal:block tal:repeat="language source_languages">
             <option tal:condition="php: (noSourceLangHistory EQ 'false')&&(language['code'] EQ 'en-US')" selected="selected" tal:attributes="value language/code" tal:content="language/name">
                 ---
             </option>
@@ -121,7 +121,7 @@
 
         <option class="separator" disabled="disabled">---</option>
 
-        <tal:block tal:repeat="language languages">
+        <tal:block tal:repeat="language target_languages">
             <option tal:condition="php: (noTargetLangHistory EQ 'false')&&(language['code'] EQ 'fr-FR')" selected="selected" tal:attributes="value language/code" tal:content="language/name">
                 ---
             </option>
@@ -711,7 +711,7 @@
         <div class="popup-box">
             <ul class="listlang">
 
-                <tal:block tal:repeat="language languages">
+                <tal:block tal:repeat="language target_languages">
                     <li tal:attributes="class language/top">
                         <input type="checkbox" tal:attributes="value language/code; id language/code"/>
                         <label tal:attributes="for language/name" tal:content="language/name" onClick="return false">---</label>

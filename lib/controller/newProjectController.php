@@ -12,8 +12,8 @@ class newProjectController extends viewController {
 	private $tms_engines;
 	private $lang_handler;
 
-    private $sourceLangArray=array();
-    private $targetLangArray=array();
+	private $sourceLangArray=array();
+	private $targetLangArray=array();
 
 	public function __construct() {
 
@@ -187,31 +187,40 @@ class newProjectController extends viewController {
 	}
 
 	public function setTemplateVars() {
+		$source_languages=$this->lang_handler->getEnabledLanguages( 'en' );
 
-        $this->template->languages          = $this->lang_handler->getEnabledLanguages( 'en' );
-        $this->template->upload_session_id  = $this->guid;
-        $this->template->mt_engines         = $this->mt_engines;
-        $this->template->tms_engines        = $this->tms_engines;
-        $this->template->conversion_enabled = INIT::$CONVERSION_ENABLED;
-        if ( INIT::$CONVERSION_ENABLED ) {
-            $this->template->allowed_file_types = $this->getExtensions( "" );
-        } else {
-            $this->template->allowed_file_types = $this->getExtensions( "default" );
-        }
+		$target_languages=$this->lang_handler->getEnabledLanguages( 'en' );
+		foreach ($target_languages as $k => $v){
+			if (in_array($v['code'],array('ko-KR', 'zh-CN','zh-TW','ja-JP'))){
+				unset ($target_languages[$k]);
+			}
+		}
+		$this->template->source_languages          = $source_languages;
+		$this->template->target_languages          = $target_languages;
 
-        $this->template->supported_file_types_array = $this->getCategories();
-        $this->template->unsupported_file_types     = $this->getExtensionsUnsupported();
-        $this->template->formats_number             = $this->countExtensions();
-        $this->template->volume_analysis_enabled    = INIT::$VOLUME_ANALYSIS_ENABLED;
-        $this->template->sourceLangHistory          = $this->sourceLangArray;
-        $this->template->targetLangHistory          = $this->targetLangArray;
-        $this->template->noSourceLangHistory        = $this->noSourceLangHistory;
-        $this->template->noTargetLangHistory        = $this->noTargetLangHistory;
-        $this->template->logged_user                = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
-        $this->template->build_number               = INIT::$BUILD_NUMBER;
-        $this->template->maxFileSize                = INIT::$MAX_UPLOAD_FILE_SIZE;
-        $this->template->maxNumberFiles             = INIT::$MAX_NUM_FILES;
-        $this->template->incomingUrl                = '/login?incomingUrl=' . $_SERVER[ 'REQUEST_URI' ];
+		$this->template->upload_session_id  = $this->guid;
+		$this->template->mt_engines         = $this->mt_engines;
+		$this->template->tms_engines        = $this->tms_engines;
+		$this->template->conversion_enabled = INIT::$CONVERSION_ENABLED;
+		if ( INIT::$CONVERSION_ENABLED ) {
+			$this->template->allowed_file_types = $this->getExtensions( "" );
+		} else {
+			$this->template->allowed_file_types = $this->getExtensions( "default" );
+		}
+
+		$this->template->supported_file_types_array = $this->getCategories();
+		$this->template->unsupported_file_types     = $this->getExtensionsUnsupported();
+		$this->template->formats_number             = $this->countExtensions();
+		$this->template->volume_analysis_enabled    = INIT::$VOLUME_ANALYSIS_ENABLED;
+		$this->template->sourceLangHistory          = $this->sourceLangArray;
+		$this->template->targetLangHistory          = $this->targetLangArray;
+		$this->template->noSourceLangHistory        = $this->noSourceLangHistory;
+		$this->template->noTargetLangHistory        = $this->noTargetLangHistory;
+		$this->template->logged_user                = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
+		$this->template->build_number               = INIT::$BUILD_NUMBER;
+		$this->template->maxFileSize                = INIT::$MAX_UPLOAD_FILE_SIZE;
+		$this->template->maxNumberFiles             = INIT::$MAX_NUM_FILES;
+		$this->template->incomingUrl                = '/login?incomingUrl=' . $_SERVER[ 'REQUEST_URI' ];
 
 	}
 
