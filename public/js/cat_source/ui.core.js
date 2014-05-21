@@ -2142,6 +2142,11 @@ UI = {
                       .replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker ' + config.nbspPlaceholderClass +'">.</span>' );
         return _str;
     },
+	unnestMarkers: function() {
+		$('.editor .editarea .marker .marker').each(function() {
+			$(this).parents('.marker').after($(this));
+		})
+	},
 
 	processErrors: function(err, operation) {
 		console.log('processErrors: ', err);

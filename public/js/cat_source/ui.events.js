@@ -105,9 +105,18 @@ $.extend(UI, {
 //			console.log('nbsp');
 //			config.nbspPlaceholderClass = '_NBSP';
 			var node = document.createElement("span");
-			node.setAttribute('class', 'nbsp-marker ' + config.nbspPlaceholderClass);
+			node.setAttribute('class', 'marker nbsp-marker lastInserted ' + config.nbspPlaceholderClass);
 			node.textContent = htmlDecode(".");
 			insertNodeAtCursor(node);
+			UI.unnestMarkers();
+/*
+			setCursorPosition($('.editor .editarea .lastInserted')[0]);
+			console.log('a: ', UI.editarea.html());
+			$('.editor .editarea .lastInserted').after($('.editor .editarea .undoCursorPlaceholder'));
+			console.log('b: ', UI.editarea.html());
+			$('.editor .editarea .lastInserted').removeClass('lastInserted');
+			console.log('c: ', UI.editarea.html());
+*/
 		});		
 		$("body").bind('keydown', 'Ctrl+c', function() {
 			UI.tagSelection = false;
@@ -609,9 +618,10 @@ $.extend(UI, {
 			if (e.which == 9) { // tab
 				e.preventDefault();
 				var node = document.createElement("span");
-				node.setAttribute('class', 'tab-marker ' + config.tabPlaceholderClass);
+				node.setAttribute('class', 'marker tab-marker ' + config.tabPlaceholderClass);
 				node.textContent = htmlDecode("&#8677;");
 				insertNodeAtCursor(node);
+				UI.unnestMarkers();		
 			}
 			if (e.which == 37) { // left arrow
 				selection = window.getSelection();
