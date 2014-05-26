@@ -207,7 +207,7 @@
 				"en":"Cebuano" 
 			}],
 			"isocode":"cb",
-			"enabled":false,
+			"enabled":true,
 			"rtl":false,
 			"rfc3066code":"cb-PH"
 		}
@@ -1370,7 +1370,7 @@
 				"en":"Tagalog"
 			}],
 			"isocode":"tl",
-			"enabled":false,
+			"enabled":true,
 			"rtl":false,
 			"rfc3066code":"tl-PH"
 		}
@@ -1403,7 +1403,7 @@
 			"enabled":true,
 			"rtl":false,
 			"languageRegionCode":"ta-IN",
-			"rfc3066code":"ta-LK"
+			"rfc3066code":"ta-IN"
 		}
 	,
 		{

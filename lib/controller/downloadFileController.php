@@ -15,6 +15,8 @@ class downloadFileController extends downloadController {
     private $fname;
     private $download_type;
 
+    protected $JobInfo;
+
     protected $downloadToken;
 
     public function __construct() {
@@ -60,6 +62,11 @@ class downloadFileController extends downloadController {
         $nonew = 0;
         $output_content = array();
 
+        //get job language and data
+        //Fixed Bug: need a specific job, because we need The target Language
+        //Removed from within the foreach cycle, the job is always the same....
+        $jobData = $this->JobInfo = getJobData( $this->id_job, $this->password );
+
         /*
         the procedure is now as follows:
         1)original file is loaded from DB into RAM and the flushed in a temp file on disk; a file handler is obtained
@@ -95,10 +102,6 @@ class downloadFileController extends downloadController {
 
             $debug['get_segments'][]=time();
             $data = getSegmentsDownload($this->id_job, $this->password, $id_file, $nonew);
-
-            //get job language and data
-            //Fixed Bug: need a specific job, because we need The target Language
-            $jobData = getJobData( $this->id_job, $this->password );
 
             $debug['get_segments'][]=time();
             //create a secondary indexing mechanism on segments' array; this will be useful
