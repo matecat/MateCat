@@ -1365,15 +1365,16 @@
 			"rfc3066code":"syc-TR"
 		}
 	,
-		{
-			"localized":[{
-				"en":"Tagalog"
-			}],
-			"isocode":"tl",
-			"enabled":true,
-			"rtl":false,
-			"rfc3066code":"fil-PH"
-		}
+        {
+            "localized":[{
+                "en":"Tagalog"
+            }],
+            "isocode":"tl",
+            "enabled":true,
+            "rtl":false,
+            "languageRegionCode":"fil-PH",
+            "rfc3066code":"tl-PH"
+        }
 	,
 		{
 			"localized":[{

@@ -126,7 +126,7 @@ class downloadFileController extends downloadController {
             $transunit_translation = "";
             $debug['replace'][] = time();
             //instatiate parser
-            $xsp = new XliffSAXTranslationReplacer( $path, $data, $jobData['target'] );
+            $xsp = new XliffSAXTranslationReplacer( $path, $data, Languages::getInstance()->getLangRegionCode($jobData['target']) );
             //run parsing
             $xsp->replaceTranslation();
             unset($xsp);
