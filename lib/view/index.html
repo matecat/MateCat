@@ -339,6 +339,7 @@
                     <ul>
                         <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
                         <li><a tal:attributes="href string:${basepath}editlog/${jid}-${password}">Editing Log</a></li>
+                        <li><a href="http://docs.matecat.com" target="_blank">Docs</a></li>
                     </ul>
 
                     <tal:block tal:condition="php: empty(logged_user)">
@@ -352,7 +353,7 @@
                             <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
                         </div>
                     </tal:block>
-
+					
                 </nav>
 
 

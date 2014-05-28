@@ -127,7 +127,7 @@ UI = {
 //		   $('#private-tm-key').addClass('selected').effect( "pulsate", "slow" );			 
 		}
 
-		$('.warning-message').html('<span>You are uploading a translation memory. To keep it private, generate a private TM key or enter an existing key. If you do not provide a private TM key, the content of your TMX file and project will be available to all MateCat users.</span>').show();
+		$('.warning-message').html('<span>You are uploading a translation memory. To keep it private, generate a private TM key or enter an existing key. <br />If you do not provide a private TM key, the content of your TMX file and project will be available to all MateCat users.</span>').show();
 		
 	},
 
