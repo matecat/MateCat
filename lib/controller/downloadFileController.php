@@ -6,7 +6,7 @@ include_once INIT::$UTILS_ROOT."/CatUtils.php";
 include_once INIT::$UTILS_ROOT."/FileFormatConverter.php";
 include_once(INIT::$UTILS_ROOT.'/XliffSAXTranslationReplacer.class.php');
 include_once(INIT::$UTILS_ROOT.'/DetectProprietaryXliff.php');
-
+//include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 
 class downloadFileController extends downloadController {
 
@@ -125,8 +125,9 @@ class downloadFileController extends downloadController {
             }
             $transunit_translation = "";
             $debug['replace'][] = time();
+
             //instatiate parser
-            $xsp = new XliffSAXTranslationReplacer( $path, $data, $jobData['target'] );
+            $xsp = new XliffSAXTranslationReplacer( $path, $data, Languages::getInstance()->getLangRegionCode($jobData['target']) );
             //run parsing
             $xsp->replaceTranslation();
             unset($xsp);

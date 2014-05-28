@@ -48,9 +48,8 @@ abstract class viewController extends controller {
      */
     private function getBrowser() {
         $u_agent  = $_SERVER[ 'HTTP_USER_AGENT' ];
-        log::doLog ($_SERVER);
-	
-	$bname    = 'Unknown';
+
+	    $bname    = 'Unknown';
         $platform = 'Unknown';
         $version  = "";
 
@@ -212,7 +211,6 @@ abstract class viewController extends controller {
     private function isSupportedWebBrowser() {
         $browser_info = $this->getBrowser();
         $browser_name = strtolower( $browser_info[ 'name' ] );
-	log::doLog ($browser_info);
 
         foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
             if ( stripos( $browser_name, $enabled_browser ) !== false ) {
