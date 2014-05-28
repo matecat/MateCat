@@ -28,7 +28,8 @@ $.extend(UI, {
 				this.addWarningToSearchDisplay();
 
 			this.saveInUndoStack('copysuggestion');
-			$(editarea).text(translation).addClass('fromSuggestion');
+			translation = UI.decodePlaceholdersToText(htmlEncode(translation));
+			$(editarea).html(translation).addClass('fromSuggestion');
 			this.saveInUndoStack('copysuggestion');
 			$('.percentuage', segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
 			if (which)
