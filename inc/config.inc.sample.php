@@ -54,6 +54,8 @@ class INIT {
 	public static $OAUTH_SCOPES;
 	public static $OAUTH_CLIENT_APP_NAME;
 
+    public static $OAUTH_CONFIG;
+
     /**
      * ENABLE_OUTSOURCE set as true will show the option to outsource to an external translation provider (translated.net by default)
      * You can set it to false, but We are happy if you keep this on.
@@ -149,6 +151,8 @@ class INIT {
     private function __construct() {
 
         $root = realpath(dirname(__FILE__) . '/../');
+        $OAUTH_CONFIG = parse_ini_file( realpath( dirname( __FILE__ ) . '/../oauth_config.ini' ), true );
+        self::$OAUTH_CONFIG = $OAUTH_CONFIG['OAUTH_CONFIG'];
 
         register_shutdown_function( 'INIT::fatalErrorHandler' );
 
@@ -349,16 +353,18 @@ class INIT {
 	     * - under REDIRECT URIs, insert "http://<domain>/oauth/response" , where <domain> is the same that you specified in the previous step
 	     * - click "Create client ID"
 	     * Your client ID and client secret are now available.
+         * You can add these information into the inc/oauth_config.ini file.
 	     * Done!
 	     */
-	    self::$OAUTH_CLIENT_ID      = "<YOUR_CLIENT_ID>";
-	    self::$OAUTH_CLIENT_SECRET  = "<YOUR_CLIENT_SECRET>";
-	    self::$OAUTH_REDIRECT_URL   = self::$HTTPHOST . "/oauth/response";
-		self::$OAUTH_SCOPES = array(
-			'https://www.googleapis.com/auth/userinfo.email',
-			'https://www.googleapis.com/auth/userinfo.profile'
-		);
-	    self::$OAUTH_CLIENT_APP_NAME = "Matecat";
+        self::$OAUTH_CLIENT_ID       = self::$OAUTH_CONFIG['OAUTH_CLIENT_ID'];
+        self::$OAUTH_CLIENT_SECRET   = self::$OAUTH_CONFIG['OAUTH_CLIENT_SECRET'];
+        self::$OAUTH_CLIENT_APP_NAME = self::$OAUTH_CONFIG['OAUTH_CLIENT_APP_NAME'];
+
+        self::$OAUTH_REDIRECT_URL    = self::$HTTPHOST . "/oauth/response";
+        self::$OAUTH_SCOPES = array(
+                'https://www.googleapis.com/auth/userinfo.email',
+                'https://www.googleapis.com/auth/userinfo.profile'
+        );
 
         //self::$DEFAULT_FILE_TYPES = 'xliff|sdlxliff|xlf';
 		//self::$CONVERSION_FILE_TYPES = 'doc|dot|docx|dotx|docm|dotm|rtf|pdf|xls|xlsx|xlt|xltx|pot|pps|ppt|potm|potx|ppsm|ppsx|pptm|pptx|mif|inx|idml|icml|txt|csv|htm|html|xhtml|properties|odp|ods|odt|sxw|sxc|sxi|xtg|tag|itd|sgml|sgm|dll|exe|rc|ttx|resx|dita|fm|vxd|indd';
