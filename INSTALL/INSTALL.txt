@@ -99,4 +99,5 @@ Instructions (based on a Debian distro)
    - under REDIRECT URIs, insert "http://<domain>/oauth/response" , where <domain> is the same that you specified in the previous step
    - click "Create client ID"
    Your client ID and client secret are now available.
+   You can add these information into the inc/oauth_config.ini file.
    Done!
