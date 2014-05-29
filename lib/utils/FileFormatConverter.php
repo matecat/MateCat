@@ -397,8 +397,8 @@ class FileFormatConverter {
         $this->conversionObject->path_name  = $xliffVector['out_xliff_name'];
         $this->conversionObject->file_name  = pathinfo( $xliffVector['out_xliff_name'], PATHINFO_BASENAME );
         $this->conversionObject->direction  = 'bw';
-        $this->conversionObject->src_lang   = $xliffVector['source'];
-        $this->conversionObject->trg_lang   = $xliffVector['target'];
+        $this->conversionObject->src_lang   = $this->lang_handler->getLangRegionCode($xliffVector['source']);
+        $this->conversionObject->trg_lang   = $this->lang_handler->getLangRegionCode($xliffVector['target']);
 
 		log::doLog($this->ip." start conversion back to original");
 		$start_time=time();

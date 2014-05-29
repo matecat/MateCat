@@ -1,78 +1,115 @@
 <!doctype html>
 <html dir="ltr" lang="en-US">
 
-    <head>
-        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
-        <title>Matecat Login</title>
-        <link rel="icon" href="${basepath}public/img/favicon.ico" />
-        <script src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
-        <script src="${basepath}public/js/common.js?build=${build_number}"></script>
-        <script src="${basepath}public/js/login.js?build=${build_number}"></script>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <title>Matecat Login</title>
+    <link rel="icon" href="${basepath}public/img/favicon.ico" />
+    <script src="${basepath}public/js/lib/jquery.js?build=${build_number}"></script>
+    <script src="${basepath}public/js/common.js?build=${build_number}"></script>
+    <script src="${basepath}public/js/login.js?build=${build_number}"></script>
 
-        <script type="text/javascript">
-            var config = {
-                basepath: '${basepath | string:/}'
-            };
-        </script>
-        <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
-        <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
-        <link href="${basepath}public/css/login.css?build=${build_number}" rel="stylesheet" type="text/css" />
-    </head>
+    <script type="text/javascript">
+        var config = {
+            basepath: '${basepath | string:/}'
+        };
+    </script>
 
-
-<body class="login">
-    <header>
-        <div class="wrapper">   
-            <a href="${basepath}" class="logo"></a>
-        </div>
-        <div class="cl"></div>
-
-    </header>
-	<div class="container"></div>
-	<span id="incomingurl" tal:content='incomingUrl'></span>
-	<div class="wrap" >
-		<h1>Translated</h1>
-		<h2>Translate your files</h2>
-		<h3>Matecat gives you more matches<br />than any other translation tool.</h3>
-    
-        <div class="outer">
-            <div class="inner">
-                <button id="sign-in" tal:attributes='data-oauth oauthFormUrl' name="" type="button" class="login-button">Sign in using Google</button>
-            </div>
-        </div>
-<!--
-        <span class=""></span>
-        <p class="">or</p>
-		
-	<form class=""  id='logintranslated' action="formLogin" method='POST'>
-	  <h5>Already a customer?</h5>
-	  <ul class="">
-		<li>
-		<label for="clientiUserid">User </label><br/>
-
-		<input name="login" id="clientiUserid" type="text" class=""/>
-		</li>					  		
-		<li>
-		<label for="clientiPassword">Password</label><br/>
-
-		<input name="pass" id="clientiPassword" type="password" class=""/>
-		<br />
-		</li>
-		<input id="clientiSubmit" name="clienti.submit" type="submit" class="" value="Sign in" />
-         <div id='loadingspinner' class='loadingspinner'><img src='public/img/loader.gif' alt='Loading...'/></div>
-        <div class=""></div>
-<div id='msg' ></div>
-	  </ul>
-	</form>
-
-<div id='forgotpass'>
-<h5>Forgot Password</h5>
-<form id="formReset">
-<input name="passreset" id="emailToReset" type="text" class=""/>
-<input id="passSubmit" name="pass.submit" type="submit" class="" value="Send pass" />
-</form>
-</div>
+    <!--
+    <script type="text/javascript">
+        (function () {
+            var po = document.createElement('script');
+            po.type = 'text/javascript';
+            po.async = true;
+            po.src = 'https://plus.google.com/js/client:plusone.js';
+            var s = document.getElementsByTagName('script')[0];
+            s.parentNode.insertBefore(po, s);
+        })();
+    </script>
 -->
-	</div>
+    <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
+    <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
+    <link href="${basepath}public/css/login.css?build=${build_number}" rel="stylesheet" type="text/css" />
+</head>
+
+
+<body>
+<header>
+    <div class="wrapper">
+        <a href="${basepath}" class="logo"></a>
+    </div>
+    <div class="cl"></div>
+
+</header>
+<div class="container"></div>
+<span id="incomingurl" tal:content='incomingUrl'></span>
+<div class="wrap" >
+    <h1>Translated</h1>
+    <h2>Translate your files</h2>
+    <h3>Matecat gives you more matches<br />than any other translation tool.</h3>
+
+    <div class="outer">
+        <div class="inner">
+            <!--id="sign-in"-->
+            <button id = "sign-in"
+                    tal:attributes='data-oauth oauthFormUrl'
+                    name=""
+                    type="button"
+                    class="login-button"
+                    >Sign in using Google</button>
+        </div>
+    </div>
+
+
+    <!--<div class="outer">
+        <div class="inner">
+        <span id="signinButton">
+            <button tal:attributes='data-oauth oauthFormUrl' name="" type="button"
+                    class="g-signin login-button"
+                    data-callback="bobCallback"
+                    data-clientid="828918069802-dpdv0b7jeptbvr5lm0gsgmg3056up974.apps.googleusercontent.com"
+                    data-cookiepolicy="single_host_origin"
+                    data-requestvisibleactions="http://schemas.google.com/AddActivity"
+                    data-scope="https://www.googleapis.com/auth/plus.login https://www.googleapis.com/auth/userinfo.email">
+              Sign in using Google
+          </button>
+        </span>
+        </div>
+    </div>-->
+
+    <!--
+            <span class=""></span>
+            <p class="">or</p>
+
+        <form class=""  id='logintranslated' action="formLogin" method='POST'>
+          <h5>Already a customer?</h5>
+          <ul class="">
+            <li>
+            <label for="clientiUserid">User </label><br/>
+
+            <input name="login" id="clientiUserid" type="text" class=""/>
+            </li>
+            <li>
+            <label for="clientiPassword">Password</label><br/>
+
+            <input name="pass" id="clientiPassword" type="password" class=""/>
+            <br />
+            </li>
+            <input id="clientiSubmit" name="clienti.submit" type="submit" class="" value="Sign in" />
+             <div id='loadingspinner' class='loadingspinner'><img src='public/img/loader.gif' alt='Loading...'/></div>
+            <div class=""></div>
+    <div id='msg' ></div>
+          </ul>
+        </form>
+
+    <div id='forgotpass'>
+    <h5>Forgot Password</h5>
+    <form id="formReset">
+    <input name="passreset" id="emailToReset" type="text" class=""/>
+    <input id="passSubmit" name="pass.submit" type="submit" class="" value="Send pass" />
+    </form>
+    </div>
+    -->
+</div>
 </body>
 </html>

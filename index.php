@@ -2,7 +2,8 @@
 require_once 'inc/config.inc.php';
 
 INIT::obtain();
-
+ini_set('display_errors', 'on');
+ini_set("error_reporting", E_ALL);
 require_once INIT::$UTILS_ROOT . '/Log.php';
 require_once INIT::$UTILS_ROOT . '/Utils.php';
 require_once INIT::$MODEL_ROOT . '/Database.class.php';

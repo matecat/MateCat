@@ -84,7 +84,7 @@ $(document).ready(function() {
             },
             success: function(d){
 				console.log('d: ', d);
-				return false;
+
                 if( typeof d.errors != 'undefined' ) {
 
                     $('.error-message').text('');
