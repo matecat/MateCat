@@ -67,7 +67,7 @@
 			}],
 			"isocode":"az",
 			"enabled":false,
-			"rtl":true,
+			"rtl":false,
 			"rfc3066code":"az-AZ",
             "languageRegionCode":"az-Latn-AZ"
 		}
