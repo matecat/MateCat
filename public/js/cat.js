@@ -2135,11 +2135,20 @@ UI = {
      * @returns {XML|string}
      */
     decodePlaceholdersToText: function ( str ) {
-        var _str = str.replace( config.lfPlaceholderRegex, '<br class="' + config.lfPlaceholderClass +'" />' )
-                      .replace( config.crPlaceholderRegex, '<br class="' + config.crPlaceholderClass +'" />' )
-                      .replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
-                      .replace( config.tabPlaceholderRegex, '<span class="tab-marker ' + config.tabPlaceholderClass +'">&#8677;</span>' )
-                      .replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker ' + config.nbspPlaceholderClass +'">.</span>' );
+//		if(typeof encode == 'undefined') { console.log('non encodare');
+			var _str = str.replace( config.lfPlaceholderRegex, '<br class="' + config.lfPlaceholderClass +'" />' )
+						  .replace( config.crPlaceholderRegex, '<br class="' + config.crPlaceholderClass +'" />' )
+						  .replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
+						  .replace( config.tabPlaceholderRegex, '<span class="tab-marker ' + config.tabPlaceholderClass +'">&#8677;</span>' )
+						  .replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker ' + config.nbspPlaceholderClass +'">.</span>' );			
+//		} else { console.log('encoda');
+//			_str = str.replace( config.lfPlaceholderRegex, htmlEncode('<br class="' + config.lfPlaceholderClass +'" />') )
+//						  .replace( config.crPlaceholderRegex, htmlEncode('<br class="' + config.crPlaceholderClass +'" />') )
+//						  .replace( config.crlfPlaceholderRegex, htmlEncode('<br class="' + config.crlfPlaceholderClass +'" />') )
+//						  .replace( config.tabPlaceholderRegex, htmlEncode('<span class="tab-marker ' + config.tabPlaceholderClass +'">&#8677;</span>') )
+//						  .replace( config.nbspPlaceholderRegex, htmlEncode('<span class="nbsp-marker ' + config.nbspPlaceholderClass +'">.</span>') );
+//			console.log('_str: ', _str);
+//		}
         return _str;
     },
 	unnestMarkers: function() {
@@ -4054,7 +4063,8 @@ $.extend(UI, {
 				this.addWarningToSearchDisplay();
 
 			this.saveInUndoStack('copysuggestion');
-			$(editarea).text(translation).addClass('fromSuggestion');
+			translation = UI.decodePlaceholdersToText(htmlEncode(translation));
+			$(editarea).html(translation).addClass('fromSuggestion');
 			this.saveInUndoStack('copysuggestion');
 			$('.percentuage', segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
 			if (which)

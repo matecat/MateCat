@@ -83,6 +83,8 @@ $(document).ready(function() {
                 $('.uploadbtn').attr('value','Analyzing...').attr('disabled','disabled').addClass('disabled');
             },
             success: function(d){
+				console.log('d: ', d);
+
                 if( typeof d.errors != 'undefined' ) {
 
                     $('.error-message').text('');
@@ -107,6 +109,7 @@ $(document).ready(function() {
                     if(config.analysisEnabled) {
 
                         if( d.status == 'EMPTY' ){
+							console.log('EMPTY');
                             $('body').removeClass('creating');
                             APP.alert({msg: 'No text to translate in the file(s).<br />Perhaps it is a scanned file or an image?'});
                             $('.uploadbtn').attr('value','Analyze').removeAttr('disabled').removeClass('disabled');

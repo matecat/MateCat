@@ -56,8 +56,22 @@ class downloadFileController extends downloadController {
         $debug=array();
         $debug['total'][]=time();
 
+        //get job language and data
+        //Fixed Bug: need a specific job, because we need The target Language
+        //Removed from within the foreach cycle, the job is always the same....
+        $jobData = $this->JobInfo = getJobData( $this->id_job, $this->password );
+
+        $pCheck = new AjaxPasswordCheck();
+        //check for Password correctness
+        if ( empty( $jobData ) || !$pCheck->grantJobAccessByJobData( $jobData, $this->password ) ) {
+            $msg = "Error : wrong password provided for download \n\n " .  var_export( $_POST ,true )."\n";
+            Log::doLog( $msg );
+            Utils::sendErrMailReport( $msg );
+            return null;
+        }
+
         $debug['get_file'][]=time();
-        $files_job = getFilesForJob($this->id_job, $this->id_file);
+        $files_job = getFilesForJob( $this->id_job, $this->id_file );
         $debug['get_file'][]=time();
         $nonew = 0;
         $output_content = array();
@@ -112,7 +126,7 @@ class downloadFileController extends downloadController {
             $transunit_translation = "";
             $debug['replace'][] = time();
             //instatiate parser
-            $xsp = new XliffSAXTranslationReplacer( $path, $data, $jobData['target'] );
+            $xsp = new XliffSAXTranslationReplacer( $path, $data, Languages::getInstance()->getLangRegionCode($jobData['target']) );
             //run parsing
             $xsp->replaceTranslation();
             unset($xsp);

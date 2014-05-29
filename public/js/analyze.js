@@ -423,7 +423,6 @@ UI = {
         }
 
 		var ppassword = $("#pid").attr("data-pwd");
-
 		APP.doRequest({
 			data: {
 				action: 'getVolumeAnalysis',
@@ -434,6 +433,10 @@ UI = {
 			success: function(d) {
 				if (d.data) {
 					var s = d.data.summary;
+					//temp 
+//					config.daemon_warning = false;
+//					s.IN_QUEUE_BEFORE = 10;
+					//end temp					
 					if ((s.STATUS == 'NEW') || (s.STATUS == '') || s.IN_QUEUE_BEFORE > 0) {
 						$('.loadingbar').addClass('open');
 
