@@ -48,10 +48,11 @@ class INIT {
 	public static $MAX_UPLOAD_FILE_SIZE;
 	public static $MAX_NUM_FILES;
     public static $REFERENCE_REPOSITORY;
-
-
-
-
+	public static $OAUTH_CLIENT_ID;
+	public static $OAUTH_CLIENT_SECRET;
+	public static $OAUTH_REDIRECT_URL;
+	public static $OAUTH_SCOPES;
+	public static $OAUTH_CLIENT_APP_NAME;
 
     /**
      * ENABLE_OUTSOURCE set as true will show the option to outsource to an external translation provider (translated.net by default)
@@ -228,7 +229,7 @@ class INIT {
 
 		self::$AUTHCOOKIENAME='matecat_login';
 		self::$AUTHCOOKIEDURATION=86400*60;
-		self::$ENABLED_BROWSERS = array('chrome', 'safari', 'firefox');
+		self::$ENABLED_BROWSERS = array('applewebkit','chrome', 'safari', 'firefox');
 
         /**
          * Matecat open source by default only handles xliff files with a strong focus on sdlxliff
@@ -333,6 +334,31 @@ class INIT {
             'fm'   => array( '', "Try converting to MIF" ),
             'indd' => array( '', "Try converting to INX" )
         );
+
+	    /**
+	     * If you don't have a client id and client secret, please visit
+	     * Google Developers Console (https://console.developers.google.com/)
+	     * and follow these instructions:
+	     * - click "Create Project" button and specify project name
+	     * - In the sidebar on the left, select APIs & auth.
+	     * - In the displayed list of APIs, make sure "Google+ API" show a status of ON. If it doesn't, enable it.
+	     * - In the sidebar on the left, select "Credentials" under "APIs & auth" menu.
+	     * - Click "Create new client ID" button
+	     * - under APPLICATION TYPE, select "web application" option
+	     * - under AUTHORIZED JAVASCRIPT ORIGINS, insert the domain on which you installed MateCat
+	     * - under REDIRECT URIs, insert "http://<domain>/oauth/response" , where <domain> is the same that you specified in the previous step
+	     * - click "Create client ID"
+	     * Your client ID and client secret are now available.
+	     * Done!
+	     */
+	    self::$OAUTH_CLIENT_ID      = "<YOUR_CLIENT_ID>";
+	    self::$OAUTH_CLIENT_SECRET  = "<YOUR_CLIENT_SECRET>";
+	    self::$OAUTH_REDIRECT_URL   = self::$HTTPHOST . "/oauth/response";
+		self::$OAUTH_SCOPES = array(
+			'https://www.googleapis.com/auth/userinfo.email',
+			'https://www.googleapis.com/auth/userinfo.profile'
+		);
+	    self::$OAUTH_CLIENT_APP_NAME = "Matecat";
 
         //self::$DEFAULT_FILE_TYPES = 'xliff|sdlxliff|xlf';
 		//self::$CONVERSION_FILE_TYPES = 'doc|dot|docx|dotx|docm|dotm|rtf|pdf|xls|xlsx|xlt|xltx|pot|pps|ppt|potm|potx|ppsm|ppsx|pptm|pptx|mif|inx|idml|icml|txt|csv|htm|html|xhtml|properties|odp|ods|odt|sxw|sxc|sxi|xtg|tag|itd|sgml|sgm|dll|exe|rc|ttx|resx|dita|fm|vxd|indd';
