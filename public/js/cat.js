@@ -1513,6 +1513,68 @@ UI = {
 	hideEditToolbar: function() {
 		$('.editor .editToolbar').hide();
 	},
+
+	formatSelection: function(op) {
+		selection = window.getSelection();
+		range = selection.getRangeAt(0);
+/*
+		console.log('range: ', (range));
+		console.log('prova: ', (range.startOffset));
+		console.log('prova 1: ', $(range.commonAncestorContainer).text().charAt(range.startOffset - 1));
+		console.log('range.commonAncestorContainer: ', (range.commonAncestorContainer.nodeValue));
+		console.log('range.commonAncestorContainer.text(): ', ($(range.commonAncestorContainer).text()));
+		aa = $(range.commonAncestorContainer).text();
+		bb = aa.match(/[t]*?$/gi);
+		cc = aa.slice(-1);
+		console.log(aa);
+		console.log(bb);
+		console.log(cc);
+*/
+		prova = $(range.commonAncestorContainer).text().charAt(range.startOffset - 1);
+//		console.log('carattere prima della selezione: ', prova);
+		aa = prova.match(/\W$/gi);
+//		console.log(aa);
+//		console.log(!aa);
+//		if(aa) {
+//			ss = 'bisogna capitalizzare anche la prima'
+//		} else {
+//			ss = 'non capitalizzare la prima'			
+//		}
+//		console.log(ss);
+		str = getSelectionHtml();
+		newStr = '';
+//		console.log($.parseHTML(str));
+		$.each($.parseHTML(str), function(index) {
+			if(this.nodeName == '#text') {
+				d = this.data;
+/*
+				if(op == 'uppercase') {
+					toAdd = d.toUpperCase();
+				} else if(op == 'lowercase') {
+					toAdd = d.toLowerCase();
+				} else if(op == 'capitalize') {
+					console.log(index + ' - ' + d);
+					if(index == 0) {
+						if(!aa) {
+							toAdd = d;
+						} else {
+							toAdd = toTitleCase(d);
+						}
+					} else {
+						toAdd = toTitleCase(d);
+					}
+				}
+*/
+				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? toTitleCase(d) : d;
+				newStr += toAdd;
+			} else {
+				newStr += this.innerText;					
+			}
+		});
+		replaceSelectedText(newStr);
+		UI.lockTags();
+	},
+
 	setStatus: function(segment, status) {
 		segment.removeClass("status-draft status-translated status-approved status-rejected status-new").addClass("status-" + status);
 	},
@@ -3159,17 +3221,17 @@ $.extend(UI, {
 			e.preventDefault();
 			e.stopPropagation();			
 		}).on('mouseup', '.editarea', function(e) {
-			console.log('mouseup');
-			console.log($(window.getSelection().getRangeAt(0))[0].collapsed);
 			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
 				UI.showEditToolbar();
 			};
 		}).on('mousedown', '.editarea', function(e) {
-			console.log('mousedown');
-
-//			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-				UI.hideEditToolbar();
-//			};			
+			UI.hideEditToolbar();
+		}).on('mousedown', '.editToolbar .uppercase', function(e) {
+			UI.formatSelection('uppercase');
+		}).on('mousedown', '.editToolbar .lowercase', function(e) {
+			UI.formatSelection('lowercase');
+		}).on('mousedown', '.editToolbar .capitalize', function(e) {
+			UI.formatSelection('capitalize');
 		}).on('click', '.editarea', function(e, operation, action) {
 			if (typeof operation == 'undefined')
 				operation = 'clicking';
@@ -6459,17 +6521,26 @@ function lev(s1, s2) {
 }
 function replaceSelectedText(replacementText) {
     var sel, range;
-    if (window.getSelection) {
+    if (window.getSelection) {console.log('a');
         sel = window.getSelection();
-        if (sel.rangeCount) {
+        if (sel.rangeCount) {console.log('b');
             range = sel.getRangeAt(0);
             range.deleteContents();
             range.insertNode(document.createTextNode(replacementText));
         }
-    } else if (document.selection && document.selection.createRange) {
+    } else if (document.selection && document.selection.createRange) {console.log('c');
         range = document.selection.createRange();
         range.text = replacementText;
     }
+}
+
+function capitaliseFirstLetter(string)
+{
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+function toTitleCase(str)
+{
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }
 /*
 	Component: ui.customization

@@ -461,17 +461,17 @@ $.extend(UI, {
 			e.preventDefault();
 			e.stopPropagation();			
 		}).on('mouseup', '.editarea', function(e) {
-			console.log('mouseup');
-			console.log($(window.getSelection().getRangeAt(0))[0].collapsed);
 			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
 				UI.showEditToolbar();
 			};
 		}).on('mousedown', '.editarea', function(e) {
-			console.log('mousedown');
-
-//			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-				UI.hideEditToolbar();
-//			};			
+			UI.hideEditToolbar();
+		}).on('mousedown', '.editToolbar .uppercase', function(e) {
+			UI.formatSelection('uppercase');
+		}).on('mousedown', '.editToolbar .lowercase', function(e) {
+			UI.formatSelection('lowercase');
+		}).on('mousedown', '.editToolbar .capitalize', function(e) {
+			UI.formatSelection('capitalize');
 		}).on('click', '.editarea', function(e, operation, action) {
 			if (typeof operation == 'undefined')
 				operation = 'clicking';

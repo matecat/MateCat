@@ -3527,11 +3527,11 @@ del.diff
 	height: 16px;
 	margin-right: 10px;
 	cursor: pointer;
-	opacity: 0.6;
+	opacity: 0.8;
 }
 .editToolbar li:hover
 {
-	opacity: 0.4;
+	opacity: 0.5;
 }
 .editToolbar li.uppercase
 {
