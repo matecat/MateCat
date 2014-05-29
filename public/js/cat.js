@@ -30,8 +30,8 @@ UI = {
 			}).addClass('open');
 		}
 	},
-	activateSegment: function(isDifferent) {
-		this.createFooter(this.currentSegment, isDifferent);
+	activateSegment: function(isNotSimilar) {
+		this.createFooter(this.currentSegment, isNotSimilar);
 		this.createButtons();
 		this.createHeader();
 	},
@@ -200,10 +200,10 @@ UI = {
 		$('#segment-' + this.currentSegmentId + '-buttons').empty().append(buttons);
 		$('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
 	},
-	createFooter: function(segment, isDifferent) {
-		isDifferent = (typeof isDifferent == 'undefined')? true : isDifferent;
+	createFooter: function(segment, emptyContributions) {
+		emptyContributions = (typeof emptyContributions == 'undefined')? true : emptyContributions;
 		if ($('.matches .overflow', segment).text() !== '') {
-			if(!isDifferent) {
+			if(!emptyContributions) {
 				$('.matches .overflow', segment).empty();
 				return false;
 			}		
@@ -257,7 +257,7 @@ UI = {
 					'</div>';
 		$('.footer', segment).html(footer);
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
-			if(!isDifferent) return false;
+			if(!isNotSimilar) return false;
 			var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1]));
 //			console.log('li prendo dal local storage');
 			UI.processContributions(d, segment);
@@ -881,26 +881,25 @@ UI = {
 
 		var s1 = $('#segment-' + this.lastTranslatedSegmentId + ' .source').text();
 		var s2 = $('.source', segment).text();
-		var isDifferent = lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50;
+		var isNotSimilar = lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50;
+		var isEqual = (s1 == s2);
 		
-		
-		this.activateSegment(isDifferent);
+		getNormally = isNotSimilar || isEqual;
+//		console.log('getNormally: ', getNormally);
+		this.activateSegment(getNormally);
 		this.getNextSegment(this.currentSegment, 'untranslated');
 
-
-
-//		console.log('segment: ', segment_id);
-//		console.log('this.readonly: ', this.readonly);
-//		console.log('isDifferent: ', isDifferent);
-		if ((!this.readonly)&&(!isDifferent)) {
+		if ((!this.readonly)&&(!getNormally)) {
 			$('#segment-' + segment_id + ' .alternatives .overflow').hide();
 		}
 		this.setCurrentSegment();
 		
 		if (!this.readonly) {
-			if(isDifferent) {
+			if(getNormally) {
+				console.log('fa il getContribution normale');
 				this.getContribution(segment, 0);
 			} else {
+				console.log('riprova dopo 3 secondi');
 				$(segment).removeClass('loaded');
 				$(".loader", segment).addClass('loader_on');
 				setTimeout(function() {
@@ -911,7 +910,7 @@ UI = {
 		}		
 		
 		
-//		if(!isDifferent) $('.editor .alternatives .overflow').hide();
+//		if(!isNotSimilar) $('.editor .alternatives .overflow').hide();
 		this.currentSegment.addClass('opened');
 
 		this.currentSegment.attr('data-searchItems', ($('mark.searchMarker', this.editarea).length));
@@ -1122,6 +1121,11 @@ UI = {
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
 						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation)) + '</div>' +
+						'						<ul class="editToolbar">' +
+						'							<li class="uppercase" title="Uppercase"></li>' +
+						'							<li class="lowercase" title="Lowercase"></li>' +
+						'							<li class="capitalize" title="Capitalized"></li>' +
+						'						</ul>' +
 						'						<p class="save-warning" title="Segment modified but not saved"></p>' +
 						'					</div> <!-- .textarea-container -->' +
 						'				</div> <!-- .target -->' +
@@ -1502,6 +1506,12 @@ UI = {
     },
 	chunkedSegmentsLoaded: function() {
 		return $('section.readonly').length;
+	},
+	showEditToolbar: function() {
+		$('.editor .editToolbar').show();
+	},
+	hideEditToolbar: function() {
+		$('.editor .editToolbar').hide();
 	},
 	setStatus: function(segment, status) {
 		segment.removeClass("status-draft status-translated status-approved status-rejected status-new").addClass("status-" + status);
@@ -3148,6 +3158,18 @@ $.extend(UI, {
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();
 			e.stopPropagation();			
+		}).on('mouseup', '.editarea', function(e) {
+			console.log('mouseup');
+			console.log($(window.getSelection().getRangeAt(0))[0].collapsed);
+			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
+				UI.showEditToolbar();
+			};
+		}).on('mousedown', '.editarea', function(e) {
+			console.log('mousedown');
+
+//			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
+				UI.hideEditToolbar();
+//			};			
 		}).on('click', '.editarea', function(e, operation, action) {
 			if (typeof operation == 'undefined')
 				operation = 'clicking';
@@ -6435,7 +6457,20 @@ function lev(s1, s2) {
   }
   return v0[s1_len];
 }
-
+function replaceSelectedText(replacementText) {
+    var sel, range;
+    if (window.getSelection) {
+        sel = window.getSelection();
+        if (sel.rangeCount) {
+            range = sel.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(document.createTextNode(replacementText));
+        }
+    } else if (document.selection && document.selection.createRange) {
+        range = document.selection.createRange();
+        range.text = replacementText;
+    }
+}
 /*
 	Component: ui.customization
  */

@@ -460,6 +460,18 @@ $.extend(UI, {
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();
 			e.stopPropagation();			
+		}).on('mouseup', '.editarea', function(e) {
+			console.log('mouseup');
+			console.log($(window.getSelection().getRangeAt(0))[0].collapsed);
+			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
+				UI.showEditToolbar();
+			};
+		}).on('mousedown', '.editarea', function(e) {
+			console.log('mousedown');
+
+//			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
+				UI.hideEditToolbar();
+//			};			
 		}).on('click', '.editarea', function(e, operation, action) {
 			if (typeof operation == 'undefined')
 				operation = 'clicking';
