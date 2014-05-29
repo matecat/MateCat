@@ -151,7 +151,7 @@ class INIT {
     private function __construct() {
 
         $root = realpath(dirname(__FILE__) . '/../');
-        $OAUTH_CONFIG = parse_ini_file( realpath( dirname( __FILE__ ) . '/../oauth_config.ini' ), true );
+        $OAUTH_CONFIG = parse_ini_file( realpath( dirname( __FILE__ ) . '/oauth_config.ini' ), true );
         self::$OAUTH_CONFIG = $OAUTH_CONFIG['OAUTH_CONFIG'];
 
         register_shutdown_function( 'INIT::fatalErrorHandler' );
@@ -353,7 +353,15 @@ class INIT {
 	     * - under REDIRECT URIs, insert "http://<domain>/oauth/response" , where <domain> is the same that you specified in the previous step
 	     * - click "Create client ID"
 	     * Your client ID and client secret are now available.
-         * You can add these information into the inc/oauth_config.ini file.
+         *
+         * Edit the file inc/oauth_config.ini.sample with the right parameters obtained in the previous step of this guide.
+         * set:
+         * OAUTH_CLIENT_ID with your client ID
+         * OAUTH_CLIENT_SECRET with your client secret
+         * OAUTH_CLIENT_APP_NAME with your custom app name, if you want, or leave Matecat
+         *
+         * save and rename to oauth_config.ini file.
+         *
 	     * Done!
 	     */
         self::$OAUTH_CLIENT_ID       = self::$OAUTH_CONFIG['OAUTH_CLIENT_ID'];
