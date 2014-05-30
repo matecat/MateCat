@@ -522,3 +522,26 @@ function lev(s1, s2) {
   }
   return v0[s1_len];
 }
+function replaceSelectedText(replacementText) {
+    var sel, range;
+    if (window.getSelection) {console.log('a');
+        sel = window.getSelection();
+        if (sel.rangeCount) {console.log('b');
+            range = sel.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(document.createTextNode(replacementText));
+        }
+    } else if (document.selection && document.selection.createRange) {console.log('c');
+        range = document.selection.createRange();
+        range.text = replacementText;
+    }
+}
+
+function capitaliseFirstLetter(string)
+{
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+function toTitleCase(str)
+{
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}

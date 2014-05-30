@@ -932,6 +932,11 @@ header
 	transition: margin-top 200ms ease-out;
 	-webkit-transition: margin-top 200ms ease-out;
 }
+body.login header
+{
+	margin-top: 0 !important;
+	height: 47px;
+}
 body.incomingMsg header
 {
 	margin-top: 0px;
@@ -3507,7 +3512,42 @@ del.diff
 	background-size: 3px 4px;
 */
 }
+.editToolbar
+{
+	/*float: left;*/	
+	position: relative;
+	display: none;
+	margin-top: -6px;
+}
 
+.editToolbar li
+{
+	float: left;
+	width: 16px;
+	height: 16px;
+	margin-right: 10px;
+	cursor: pointer;
+	opacity: 0.8;
+}
+.editToolbar li:hover
+{
+	opacity: 0.5;
+}
+.editToolbar li.uppercase
+{
+	background: url(../img/edit-uppercase1.png) center center no-repeat;
+	background-size: 28px;
+}
+.editToolbar li.lowercase
+{
+	background: url(../img/edit-lowercase1.png) center center no-repeat;
+	background-size: 28px;
+}
+.editToolbar li.capitalize
+{
+	background: url(../img/edit-capitalize.png) center 1px no-repeat;
+	background-size: 12px 12px;
+}
 @keyframes fadein {
     from { opacity: 0; }
     to   { opacity: 0.6 }
