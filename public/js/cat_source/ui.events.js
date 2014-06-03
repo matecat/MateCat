@@ -472,6 +472,8 @@ $.extend(UI, {
 			UI.formatSelection('lowercase');
 		}).on('mousedown', '.editToolbar .capitalize', function(e) {
 			UI.formatSelection('capitalize');
+		}).on('mouseup', '.editToolbar li', function(e) {
+			restoreSelection();
 		}).on('click', '.editarea', function(e, operation, action) {
 			if (typeof operation == 'undefined')
 				operation = 'clicking';
@@ -633,7 +635,7 @@ $.extend(UI, {
 				node.setAttribute('class', 'marker tab-marker ' + config.tabPlaceholderClass);
 				node.textContent = htmlDecode("&#8677;");
 				insertNodeAtCursor(node);
-				UI.unnestMarkers();		
+				UI.unnestMarkers();
 			}
 			if (e.which == 37) { // left arrow
 				selection = window.getSelection();

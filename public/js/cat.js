@@ -896,7 +896,6 @@ UI = {
 		
 		if (!this.readonly) {
 			if(getNormally) {
-				console.log('fa il getContribution normale');
 				this.getContribution(segment, 0);
 			} else {
 				console.log('riprova dopo 3 secondi');
@@ -1517,33 +1516,13 @@ UI = {
 	formatSelection: function(op) {
 		selection = window.getSelection();
 		range = selection.getRangeAt(0);
-/*
-		console.log('range: ', (range));
-		console.log('prova: ', (range.startOffset));
-		console.log('prova 1: ', $(range.commonAncestorContainer).text().charAt(range.startOffset - 1));
-		console.log('range.commonAncestorContainer: ', (range.commonAncestorContainer.nodeValue));
-		console.log('range.commonAncestorContainer.text(): ', ($(range.commonAncestorContainer).text()));
-		aa = $(range.commonAncestorContainer).text();
-		bb = aa.match(/[t]*?$/gi);
-		cc = aa.slice(-1);
-		console.log(aa);
-		console.log(bb);
-		console.log(cc);
-*/
+
 		prova = $(range.commonAncestorContainer).text().charAt(range.startOffset - 1);
-//		console.log('carattere prima della selezione: ', prova);
+		insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
 		aa = prova.match(/\W$/gi);
-//		console.log(aa);
-//		console.log(!aa);
-//		if(aa) {
-//			ss = 'bisogna capitalizzare anche la prima'
-//		} else {
-//			ss = 'non capitalizzare la prima'			
-//		}
-//		console.log(ss);
 		str = getSelectionHtml();
+
 		newStr = '';
-//		console.log($.parseHTML(str));
 		$.each($.parseHTML(str), function(index) {
 			if(this.nodeName == '#text') {
 				d = this.data;
@@ -1572,7 +1551,12 @@ UI = {
 			}
 		});
 		replaceSelectedText(newStr);
+
 		UI.lockTags();
+		this.saveInUndoStack('formatSelection');
+		saveSelection();
+		$('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
+		$('.editor .editarea .formatSelection-placeholder').remove();
 	},
 
 	setStatus: function(segment, status) {
@@ -3232,6 +3216,8 @@ $.extend(UI, {
 			UI.formatSelection('lowercase');
 		}).on('mousedown', '.editToolbar .capitalize', function(e) {
 			UI.formatSelection('capitalize');
+		}).on('mouseup', '.editToolbar li', function(e) {
+			restoreSelection();
 		}).on('click', '.editarea', function(e, operation, action) {
 			if (typeof operation == 'undefined')
 				operation = 'clicking';
@@ -3393,7 +3379,7 @@ $.extend(UI, {
 				node.setAttribute('class', 'marker tab-marker ' + config.tabPlaceholderClass);
 				node.textContent = htmlDecode("&#8677;");
 				insertNodeAtCursor(node);
-				UI.unnestMarkers();		
+				UI.unnestMarkers();
 			}
 			if (e.which == 37) { // left arrow
 				selection = window.getSelection();
@@ -6115,30 +6101,27 @@ function truncate_filename(n, len) {
 	return filename + '.' + ext;
 }
 
-function insertNodeAtCursor(node) {console.log('insertNodeAtCursor');
+function insertNodeAtCursor(node) {
 	var range, html;
 	if (window.getSelection && window.getSelection().getRangeAt) {
-
-		console.log('window.getSelection().isCollapsed: ', window.getSelection().isCollapsed);
-		console.log('window.getSelection().rangeCount: ', window.getSelection().rangeCount);
-		console.log('window.getSelection(): ', window.getSelection());
-
-//		if ((window.getSelection().isCollapsed)||(UI.isFirefox)) {
-//		if (window.getSelection().type == 'Caret') { console.log('a');
 		if ((window.getSelection().type == 'Caret')||(UI.isFirefox)) {
 			range = window.getSelection().getRangeAt(0);
-			console.log('range: ', range);
-			console.log('1: ', UI.editarea.html());
 			range.insertNode(node);
-			console.log('2: ', UI.editarea.html());
+			setCursorAfterNode(range, node);
 		} else {
 		}
-
 	} else if (document.selection && document.selection.createRange) {
 		range = document.selection.createRange();
 		html = (node.nodeType == 3) ? node.data : node.outerHTML;
 		range.pasteHTML(html);
 	}
+}
+
+function setCursorAfterNode(range, node) {
+	range.setStartAfter(node);
+	range.setEndAfter(node); 
+	window.getSelection().removeAllRanges();
+	window.getSelection().addRange(range);
 }
 
 function pasteHtmlAtCaret(html, selectPastedContent) {
@@ -6305,7 +6288,6 @@ function saveSelection() {
 	UI.savedSel = rangy.saveSelection();
 	// this is just to prevent the addiction of a couple of placeholders who may sometimes occur for a Rangy bug
 	editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
-
 	UI.savedSelActiveElement = document.activeElement;
 }
 
@@ -6353,6 +6335,31 @@ function getSelectionHtml() {
 		}
 	}
 	return html;
+}
+
+function insertHtmlAfterSelection(html) {
+    var sel, range, node;
+    if (window.getSelection) {
+        sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+            range = window.getSelection().getRangeAt(0);
+            range.collapse(false);
+
+            // Range.createContextualFragment() would be useful here but is
+            // non-standard and not supported in all browsers (IE9, for one)
+            var el = document.createElement("div");
+            el.innerHTML = html;
+            var frag = document.createDocumentFragment(), node, lastNode;
+            while ( (node = el.firstChild) ) {
+                lastNode = frag.appendChild(node);
+            }
+            range.insertNode(frag);
+        }
+    } else if (document.selection && document.selection.createRange) {
+        range = document.selection.createRange();
+        range.collapse(false);
+        range.pasteHTML(html);
+    }
 }
 
 function setBrowserHistoryBehavior() {
@@ -6521,9 +6528,9 @@ function lev(s1, s2) {
 }
 function replaceSelectedText(replacementText) {
     var sel, range;
-    if (window.getSelection) {console.log('a');
+    if (window.getSelection) {
         sel = window.getSelection();
-        if (sel.rangeCount) {console.log('b');
+        if (sel.rangeCount) {
             range = sel.getRangeAt(0);
             range.deleteContents();
             range.insertNode(document.createTextNode(replacementText));

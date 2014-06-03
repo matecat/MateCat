@@ -896,7 +896,6 @@ UI = {
 		
 		if (!this.readonly) {
 			if(getNormally) {
-				console.log('fa il getContribution normale');
 				this.getContribution(segment, 0);
 			} else {
 				console.log('riprova dopo 3 secondi');
@@ -1517,33 +1516,13 @@ UI = {
 	formatSelection: function(op) {
 		selection = window.getSelection();
 		range = selection.getRangeAt(0);
-/*
-		console.log('range: ', (range));
-		console.log('prova: ', (range.startOffset));
-		console.log('prova 1: ', $(range.commonAncestorContainer).text().charAt(range.startOffset - 1));
-		console.log('range.commonAncestorContainer: ', (range.commonAncestorContainer.nodeValue));
-		console.log('range.commonAncestorContainer.text(): ', ($(range.commonAncestorContainer).text()));
-		aa = $(range.commonAncestorContainer).text();
-		bb = aa.match(/[t]*?$/gi);
-		cc = aa.slice(-1);
-		console.log(aa);
-		console.log(bb);
-		console.log(cc);
-*/
+
 		prova = $(range.commonAncestorContainer).text().charAt(range.startOffset - 1);
-//		console.log('carattere prima della selezione: ', prova);
+		insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
 		aa = prova.match(/\W$/gi);
-//		console.log(aa);
-//		console.log(!aa);
-//		if(aa) {
-//			ss = 'bisogna capitalizzare anche la prima'
-//		} else {
-//			ss = 'non capitalizzare la prima'			
-//		}
-//		console.log(ss);
 		str = getSelectionHtml();
+
 		newStr = '';
-//		console.log($.parseHTML(str));
 		$.each($.parseHTML(str), function(index) {
 			if(this.nodeName == '#text') {
 				d = this.data;
@@ -1572,7 +1551,12 @@ UI = {
 			}
 		});
 		replaceSelectedText(newStr);
+
 		UI.lockTags();
+		this.saveInUndoStack('formatSelection');
+		saveSelection();
+		$('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
+		$('.editor .editarea .formatSelection-placeholder').remove();
 	},
 
 	setStatus: function(segment, status) {
