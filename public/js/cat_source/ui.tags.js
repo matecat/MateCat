@@ -41,9 +41,11 @@ $.extend(UI, {
 	
 	// TAG MARK
 	detectTags: function(area) {
+		//ALL in one
+//		$(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
+		$(area).html($(area).html().replace(/(:?<span[^>]*locked[^>]*>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
 		
-        //ALL in one
-        $(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
+
 //        $(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"true\" class=\"locked\">$2</span>"));
 
 //		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
@@ -100,9 +102,12 @@ $.extend(UI, {
 		});
 
 		$('.editarea').each(function() {
+//			if($(this).attr('data-sid') == 13655401) console.log('AAAAAAAAAAA: ', $(this).attr('data-sid'));
 			if ($('#segment-' + $(this).data('sid')).hasClass('mismatch'))
 				return false;
+//			if($(this).attr('data-sid') == 13655401) console.log('prova 1: ', $('#segment-13655401 .editarea').html());
 			UI.detectTags(this);
+//			if($(this).attr('data-sid') == 13655401) console.log('prova 2: ', $('#segment-13655401 .editarea').html());
 		});
 	},
 	markTagsInSearch: function(el) {
@@ -354,6 +359,16 @@ $.extend(UI, {
 		$('.tag-autocomplete').css('left', offset.left);
 		this.checkAutocompleteTags();	
 	},
+	jumpTag: function(range, where) {
+//		console.log('range: ', range);
+//		console.log(range.endContainer.data.length);
+//		console.log(range.endOffset);
+		if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) { 
+//			console.log('da saltare');
+			setCursorAfterNode(range, range.endContainer.nextElementSibling);
+		}
+	},
+
 });
 
 

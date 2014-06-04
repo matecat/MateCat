@@ -3548,6 +3548,41 @@ del.diff
 	background: url(../img/edit-capitalize.png) center 1px no-repeat;
 	background-size: 12px 12px;
 }
+
+.editarea span.monad
+{
+	display: inline;
+	margin-left: 6px;
+	padding: 1px 2px 3px 40px;
+	background-image: url(../img/soft-return1.png);
+	background-size: 16px;
+	background-repeat: no-repeat;
+	background-position: center left;
+	width: 20px;
+	position: relative;
+}
+.editarea br.soft
+{
+    display: block;
+    margin: -10px 0px 3px 40px;
+    padding: 1px 2px 3px 40px;
+    border: 1px dotted green;
+    font-size: 8px;
+    line-height: 8px;
+    height: 8px;
+    background: yellow;  
+    background-image: url("https://sites.google.com/a/fundoogeek.com/home/images/WhiteStarinRedCircle.gif");
+    background-repeat: no-repeat;
+    background-position: top left;
+    background-origin: content-box;
+    color: blue;
+    content: "A";
+    width: 20px;
+    position: relative;
+     top: -7px;
+}
+
+
 @keyframes fadein {
     from { opacity: 0; }
     to   { opacity: 0.6 }

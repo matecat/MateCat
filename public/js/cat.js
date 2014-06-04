@@ -201,6 +201,8 @@ UI = {
 		$('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
 	},
 	createFooter: function(segment, emptyContributions) {
+//		isNotSimilar = emptyContributions;
+//		console.log('emptyContributions: ', emptyContributions);
 		emptyContributions = (typeof emptyContributions == 'undefined')? true : emptyContributions;
 		if ($('.matches .overflow', segment).text() !== '') {
 			if(!emptyContributions) {
@@ -257,7 +259,7 @@ UI = {
 					'</div>';
 		$('.footer', segment).html(footer);
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
-			if(!isNotSimilar) return false;
+//			if(isNotSimilar) return false;
 			var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1]));
 //			console.log('li prendo dal local storage');
 			UI.processContributions(d, segment);
@@ -698,8 +700,11 @@ UI = {
 		}
 		this.loadingMore = false;
 		this.setWaypoints();
+//		console.log('prova a: ', $('#segment-13655401 .editarea').html());
 		this.markTags();
+//		console.log('prova b: ', $('#segment-13655401 .editarea').html());
 		this.checkPendingOperations();
+
 	},
 	getSegmentSource: function(seg) {
 		segment = (typeof seg == 'undefined') ? this.currentSegment : seg;
@@ -1095,7 +1100,6 @@ UI = {
 				
                 /* see also replacement made in source content below */
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
-
                 newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
 						'	<span class="sid">' + this.sid + '</span>' +
@@ -2125,8 +2129,8 @@ UI = {
 //			$(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>') );
 
             $(area).find('br:not([class]), br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
-            $(area).find('br.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
-            $(area).find('br.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
+            $(area).find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
+            $(area).find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
 
 //			$(area).find( 'br:not([class])' ).replaceWith( $('[BR]') );
 //			console.log('post process 2: ', $(area).html());
@@ -2190,22 +2194,15 @@ UI = {
      * @param str
      * @returns {XML|string}
      */
-    decodePlaceholdersToText: function ( str ) {
-//		if(typeof encode == 'undefined') { console.log('non encodare');
-			var _str = str.replace( config.lfPlaceholderRegex, '<br class="' + config.lfPlaceholderClass +'" />' )
-						  .replace( config.crPlaceholderRegex, '<br class="' + config.crPlaceholderClass +'" />' )
-						  .replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
-						  .replace( config.tabPlaceholderRegex, '<span class="tab-marker ' + config.tabPlaceholderClass +'">&#8677;</span>' )
-						  .replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker ' + config.nbspPlaceholderClass +'">.</span>' );			
-//		} else { console.log('encoda');
-//			_str = str.replace( config.lfPlaceholderRegex, htmlEncode('<br class="' + config.lfPlaceholderClass +'" />') )
-//						  .replace( config.crPlaceholderRegex, htmlEncode('<br class="' + config.crPlaceholderClass +'" />') )
-//						  .replace( config.crlfPlaceholderRegex, htmlEncode('<br class="' + config.crlfPlaceholderClass +'" />') )
-//						  .replace( config.tabPlaceholderRegex, htmlEncode('<span class="tab-marker ' + config.tabPlaceholderClass +'">&#8677;</span>') )
-//						  .replace( config.nbspPlaceholderRegex, htmlEncode('<span class="nbsp-marker ' + config.nbspPlaceholderClass +'">.</span>') );
-//			console.log('_str: ', _str);
-//		}
-        return _str;
+    decodePlaceholdersToText: function (str) {
+//		console.log('str 1: ', str);
+		var _str = str.replace( config.lfPlaceholderRegex, '<span class="monad ' + config.lfPlaceholderClass +'"><br /></span>' )
+					.replace( config.crPlaceholderRegex, '<span class="monad  ' + config.crPlaceholderClass +'"><br /></span>' )
+					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
+					.replace( config.tabPlaceholderRegex, '<span class="tab-marker ' + config.tabPlaceholderClass +'">&#8677;</span>' )
+					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker ' + config.nbspPlaceholderClass +'">.</span>' );			
+//		console.log('str 2: ', _str);
+		return _str;
     },
 	unnestMarkers: function() {
 		$('.editor .editarea .marker .marker').each(function() {
@@ -2844,6 +2841,15 @@ $.extend(UI, {
 				tab = 'alternatives';								
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			}
+		}).on('keydown', '.editor .editarea', 'shift+return', function(e) {
+			e.preventDefault();
+			var node = document.createElement("span");
+			var br = document.createElement("br");
+			node.setAttribute('class', 'monad ' + config.lfPlaceholderClass);
+			node.setAttribute('contenteditable', 'false');
+			node.appendChild(br);
+			insertNodeAtCursor(node);
+			UI.unnestMarkers();
 		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
 			e.preventDefault();
 //			console.log('nbsp');
@@ -3435,7 +3441,7 @@ $.extend(UI, {
 					}
 				}
 				UI.closeTagAutocompletePanel();
-//				UI.jumpTag('end');
+				UI.jumpTag(range, 'end');
 			}
 
 			if (e.which == 40) { // down arrow
@@ -4571,9 +4577,11 @@ $.extend(UI, {
 	
 	// TAG MARK
 	detectTags: function(area) {
+		//ALL in one
+//		$(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
+		$(area).html($(area).html().replace(/(:?<span[^>]*locked[^>]*>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
 		
-        //ALL in one
-        $(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
+
 //        $(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"true\" class=\"locked\">$2</span>"));
 
 //		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
@@ -4630,9 +4638,12 @@ $.extend(UI, {
 		});
 
 		$('.editarea').each(function() {
+//			if($(this).attr('data-sid') == 13655401) console.log('AAAAAAAAAAA: ', $(this).attr('data-sid'));
 			if ($('#segment-' + $(this).data('sid')).hasClass('mismatch'))
 				return false;
+//			if($(this).attr('data-sid') == 13655401) console.log('prova 1: ', $('#segment-13655401 .editarea').html());
 			UI.detectTags(this);
+//			if($(this).attr('data-sid') == 13655401) console.log('prova 2: ', $('#segment-13655401 .editarea').html());
 		});
 	},
 	markTagsInSearch: function(el) {
@@ -4884,6 +4895,16 @@ $.extend(UI, {
 		$('.tag-autocomplete').css('left', offset.left);
 		this.checkAutocompleteTags();	
 	},
+	jumpTag: function(range, where) {
+//		console.log('range: ', range);
+//		console.log(range.endContainer.data.length);
+//		console.log(range.endOffset);
+		if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) { 
+//			console.log('da saltare');
+			setCursorAfterNode(range, range.endContainer.nextElementSibling);
+		}
+	},
+
 });
 
 

@@ -100,6 +100,15 @@ $.extend(UI, {
 				tab = 'alternatives';								
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			}
+		}).on('keydown', '.editor .editarea', 'shift+return', function(e) {
+			e.preventDefault();
+			var node = document.createElement("span");
+			var br = document.createElement("br");
+			node.setAttribute('class', 'monad ' + config.lfPlaceholderClass);
+			node.setAttribute('contenteditable', 'false');
+			node.appendChild(br);
+			insertNodeAtCursor(node);
+			UI.unnestMarkers();
 		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
 			e.preventDefault();
 //			console.log('nbsp');
@@ -691,7 +700,7 @@ $.extend(UI, {
 					}
 				}
 				UI.closeTagAutocompletePanel();
-//				UI.jumpTag('end');
+				UI.jumpTag(range, 'end');
 			}
 
 			if (e.which == 40) { // down arrow
