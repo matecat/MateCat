@@ -1962,7 +1962,8 @@ function getProjectStatsVolumeAnalysis( $pid ) {
 		p.fast_analysis_wc,
 		p.tm_analysis_wc,
 		p.standard_analysis_wc,
-		st.tm_analysis_status AS st_status_analysis
+		st.tm_analysis_status AS st_status_analysis,
+		st.locked as translated
 			FROM
 			segment_translations AS st
 			JOIN
@@ -2565,7 +2566,7 @@ function getNextSegmentAndLock() {
 
 	//lock row
 	$rnd = mt_rand(0,15); //rand num should be ( child_num / myMemory_sec_response_time )
-	$q3 = "select id_segment, id_job from matecat_analysis.segment_translations_analysis_queue where locked=0 limit $rnd,1 for update";
+	$q3 = "select id_segment, id_job, pid from matecat_analysis.segment_translations_analysis_queue where locked=0 limit $rnd,1 for update";
 	//end transaction
 
 	$res = $db->query_first( $q3 );

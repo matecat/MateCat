@@ -1008,14 +1008,14 @@ class ProjectManager {
 			}
 
 			//id_segment, id_job, segment_hash, status, translation, translation_date, tm_analysis_status, locked
-			$this->projectStructure['query_translations']->append( "( '{$struct[0]}', $jid, '{$struct[3]}', 'TRANSLATED', '{$struct[2]}', NOW(), 'DONE', 1 )" );
+			$this->projectStructure['query_translations']->append( "( '{$struct[0]}', $jid, '{$struct[3]}', 'TRANSLATED', '{$struct[2]}', NOW(), 'DONE', 1, 'ICE' )" );
 
 		}
 
 		// Executing the Query
 		if( !empty( $this->projectStructure['query_translations'] ) ){
 
-			$baseQuery = "INSERT INTO segment_translations (id_segment, id_job, segment_hash, status, translation, translation_date, tm_analysis_status, locked)
+			$baseQuery = "INSERT INTO segment_translations (id_segment, id_job, segment_hash, status, translation, translation_date, tm_analysis_status, locked, match_type )
 				values ";
 
 			Log::doLog( "Pre-Translations: Total Rows to insert: " . count( $this->projectStructure['query_translations'] ) );
