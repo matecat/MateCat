@@ -1511,10 +1511,10 @@ UI = {
 		return $('section.readonly').length;
 	},
 	showEditToolbar: function() {
-		$('.editor .editToolbar').show();
+		$('.editor .editToolbar').addClass('visible');
 	},
 	hideEditToolbar: function() {
-		$('.editor .editToolbar').hide();
+		$('.editor .editToolbar').removeClass('visible');
 	},
 
 	formatSelection: function(op) {
