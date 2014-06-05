@@ -3516,8 +3516,13 @@ del.diff
 {
 	/*float: left;*/	
 	position: relative;
-	display: none;
+	display: block;
+	visibility: hidden;
 	margin-top: -6px;
+}
+.editToolbar.visible
+{
+	visibility: visible;
 }
 
 .editToolbar li
