@@ -1525,11 +1525,20 @@ UI = {
 		insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
 		aa = prova.match(/\W$/gi);
 		str = getSelectionHtml();
-
+console.log('aa: ', aa);
 		newStr = '';
 		$.each($.parseHTML(str), function(index) {
 			if(this.nodeName == '#text') {
 				d = this.data;
+//				console.log(index + ' - ' + d);
+//				console.log(!index);
+//				console.log(!aa);
+				jump = ((!index)&&(!aa));
+//				console.log(d.charAt(0));
+				capStr = toTitleCase(d);
+				if(jump) {
+					capStr = d.charAt(0) + toTitleCase(d).slice(1);
+				}
 /*
 				if(op == 'uppercase') {
 					toAdd = d.toUpperCase();
@@ -1548,7 +1557,7 @@ UI = {
 					}
 				}
 */
-				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? toTitleCase(d) : d;
+				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
 				newStr += toAdd;
 			} else {
 				newStr += this.innerText;					
