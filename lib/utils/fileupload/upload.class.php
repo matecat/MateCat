@@ -380,35 +380,11 @@ class UploadHandler {
         }
 
         /**
-         * Conversion Enforce
          *
-         * Check on extensions no more sufficient, we want check content
-         * if this is an idiom.inc xlf file type, enforce conversion
-         * $file->convert = true;
+         * OLD
+         * Conversion check are now made server side
          */
         $file->convert = true;
-        try {
-
-            $fileType = DetectProprietaryXliff::getInfo( $file_path );
-            if( DetectProprietaryXliff::isXliffExtension() ){
-
-                if ( $fileType['proprietary'] ){
-
-                    if ( !INIT::$CONVERSION_ENABLED ) {
-                        $file->convert = false;
-                        unlink($file_path);
-                        $file->error = 'Matecat Open-Source does not support ' . ucwords($fileType['proprietary_name']) . '. Use MatecatPro.';
-                    }
-
-                } else {
-                    $file->convert = false;
-                }
-
-            }
-
-        } catch (Exception $e) {
-            Log::doLog($e->getMessage());
-        }
 
         return $file;
     }

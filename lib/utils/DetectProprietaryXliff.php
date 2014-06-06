@@ -13,10 +13,11 @@ class DetectProprietaryXliff {
 
 	protected static function _reset(){
 		self::$fileType = array(
-				'info'             => array(),
-				'proprietary'      => false,
-				'proprietary_name' => null
-				);
+				'info'                      => array(),
+				'proprietary'               => false,
+				'proprietary_name'          => null,
+                'proprietary_short_name'    => null
+			);
 	}
 
 	public static function getInfo( $fullPathToFile ) {
@@ -32,6 +33,7 @@ class DetectProprietaryXliff {
 		 */
 		$tmp = self::isXliff( null, $fullPathToFile );
 		self::_checkIdiom( $tmp );
+		self::_checkSDL( $tmp );
 		return self::$fileType;
 
 	}
@@ -81,14 +83,29 @@ class DetectProprietaryXliff {
 		//idiom Check
 		if( isset($tmp[2]) ){
 			if( stripos( $tmp[2], 'idiominc.com' ) !== false ) {
-				self::$fileType['proprietary'] = true;
-				self::$fileType['proprietary_name'] = 'idiom world server';
+                self::$fileType[ 'proprietary' ]            = true;
+                self::$fileType[ 'proprietary_name' ]       = 'idiom world server';
+                self::$fileType[ 'proprietary_short_name' ] = 'idiom';
 			}
 		}
 
 	}
 
-	public static function getInfoByStringData( $stringData ) {
+    protected static function _checkSDL( $tmp ){
+
+        //idiom Check
+        if( isset($tmp[0]) ){
+            if( stripos( $tmp[0], 'sdl:version' ) !== false ) {
+                //little trick, we consider not proprietary Sdlxliff files because we can handle them
+                self::$fileType[ 'proprietary' ]            = false;
+                self::$fileType[ 'proprietary_name' ]       = 'SDL Studio ';
+                self::$fileType[ 'proprietary_short_name' ] = 'trados';
+            }
+        }
+
+    }
+
+    public static function getInfoByStringData( $stringData ) {
 
 		self::_reset();
 
@@ -96,7 +113,7 @@ class DetectProprietaryXliff {
 
 		//idiom Check
 		self::_checkIdiom( $tmp );
-
+        self::_checkSDL( $tmp );
 		return self::$fileType;
 
 	}

@@ -158,34 +158,63 @@ class ProjectManager {
 			/**
 			 * Conversion Enforce
 			 *
+             * we have to know if a file can be found in _converted directory
+             *
 			 * Check Extension no more sufficient, we want check content
 			 * if this is an idiom xlf file type, conversion are enforced
 			 * $enforcedConversion = true; //( if conversion is enabled )
 			 */
-			$enforcedConversion = false;
+            $isAConvertedFile = true;
 			try {
 
-				$fileType = DetectProprietaryXliff::getInfo( INIT::$UPLOAD_REPOSITORY. DIRECTORY_SEPARATOR .$this->projectStructure['uploadToken'].DIRECTORY_SEPARATOR . $fileName );
-				//Log::doLog( 'Proprietary detection: ' . var_export( $fileType, true ) );
+                $fileType = DetectProprietaryXliff::getInfo( INIT::$UPLOAD_REPOSITORY. DIRECTORY_SEPARATOR . $this->projectStructure['uploadToken'].DIRECTORY_SEPARATOR . $fileName );
 
-				if( $fileType['proprietary'] == true  ){
+                if ( DetectProprietaryXliff::isXliffExtension() ) {
 
-					if( INIT::$CONVERSION_ENABLED && $fileType['proprietary_name'] == 'idiom world server' ){
-						$enforcedConversion = true;
-						Log::doLog( 'Idiom found, conversion Enforced: ' . var_export( $enforcedConversion, true ) );
+                    if ( INIT::$CONVERSION_ENABLED ) {
 
-					} else {
-						/**
-						 * Application misconfiguration.
-						 * upload should not be happened, but if we are here, raise an error.
-						 * @see upload.class.php
-						 * */
-						$this->projectStructure['result']['errors'][] = array("code" => -8, "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)");
-						setcookie("upload_session", "", time() - 10000);
-						return;
-						//stop execution
-					}
-				}
+                        //conversion enforce
+                        if ( !INIT::$FORCE_XLIFF_CONVERSION ) {
+
+                            //ONLY IDIOM is forced to be converted
+                            //if file is not proprietary like idiom AND Enforce is disabled
+                            //we take it as is
+                            if( !$fileType[ 'proprietary' ] ) {
+                                $isAConvertedFile = false;
+                                //ok don't convert a standard sdlxliff
+                            }
+
+                        } else {
+
+                            //if conversion enforce is active
+                            //we force all xliff files but not files produced by SDL Studio because we can handle them
+                            if( $fileType['proprietary_short_name'] == 'trados' ) {
+                                $isAConvertedFile = false;
+                                //ok don't convert a standard sdlxliff
+
+                            }
+
+                        }
+
+                    } elseif ( $fileType[ 'proprietary' ] ) {
+
+                        /**
+                         * Application misconfiguration.
+                         * upload should not be happened, but if we are here, raise an error.
+                         * @see upload.class.php
+                         * */
+                        $this->projectStructure['result']['errors'][] = array("code" => -8, "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)");
+                        setcookie("upload_session", "", time() - 10000);
+                        return -1;
+                        //stop execution
+
+                    } elseif ( !$fileType[ 'proprietary' ] ) {
+                        $isAConvertedFile = false;
+                        //ok don't convert a standard sdlxliff
+                    }
+
+                }
+
 			} catch ( Exception $e ) { Log::doLog( $e->getMessage() ); }
 
 
@@ -195,9 +224,9 @@ class ProjectManager {
 
 			/*
 			   if it's not one of the listed formats (or it is, but you had to convert it anyway), 
-			   and conversion in enabled in first place
+			   and conversion is enabled in first place
 			 */
-			if ( ( !in_array( $mimeType, array( 'sdlxliff', 'xliff', 'xlf', 'tmx' ) ) || $enforcedConversion ) && INIT::$CONVERSION_ENABLED ) {
+			if ( $isAConvertedFile ) {
 
 				//converted file is inside "_converted" directory
 				$fileDir          = $uploadDir . '_converted';

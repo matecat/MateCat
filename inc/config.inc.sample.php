@@ -34,6 +34,7 @@ class INIT {
 	public static $CONVERSION_FILE_TYPES;
 	public static $CONVERSION_FILE_TYPES_PARTIALLY_SUPPORTED;
 	public static $CONVERSION_ENABLED;
+	public static $FORCE_XLIFF_CONVERSION;
 	public static $ANALYSIS_WORDS_PER_DAYS;
 	public static $VOLUME_ANALYSIS_ENABLED;
 	public static $WARNING_POLLING_INTERVAL;
@@ -253,6 +254,7 @@ class INIT {
 		self::$BUILD_NUMBER = '0.3.4.3';
 		self::$VOLUME_ANALYSIS_ENABLED = true;
 
+        self::$FORCE_XLIFF_CONVERSION = false;
 		self::$WARNING_POLLING_INTERVAL = 20; //seconds
 		self::$SEGMENT_QA_CHECK_INTERVAL = 1; //seconds
 
@@ -306,7 +308,7 @@ class INIT {
             "Interchange Formats" => array(
                 'xliff'    => array( 'default','','extxif' ),
                 'sdlxliff' => array( 'default','','extixif' ),
-                'tmx'    => array( '','','exttmx'),
+                'tmx'      => array( '','','exttmx'),
                 'ttx'      => array( '','','extttx'),
                 'itd'      => array( '','','extitd'),
                 'xlf'      => array( 'default', '', 'extxlf' )
@@ -323,7 +325,7 @@ class INIT {
                 'xml'  => array( '','','extxml'),
                 'dita' => array( '','','extdit')
             ),
-            "Localization"        => array(
+            "Localization"   => array(
                 'properties' => array( '','','extpro'),
                 'rc'         => array( '','','extrcc'),
                 'resx'       => array( '','','extres'),
