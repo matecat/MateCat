@@ -287,10 +287,11 @@ class ConvertersMonitor {
             foreach ( $cmd as $c ) {
                 $stream = ssh2_exec( $conn, $c );
                 stream_set_blocking( $stream, true );
-                sleep(1);
+                sleep(5);
                 $stream_out  = ssh2_fetch_stream( $stream, SSH2_STREAM_STDIO );
                 $ret_content = stream_get_contents( $stream_out );
-
+                fclose( $stream );
+                sleep(2);
                 $ret[ ] = "command is $c";
                 $ret[ ] = $ret_content;
 
@@ -491,7 +492,7 @@ class ConvertersMonitor {
             $thisTimeFailure = new DateTime();
 
             //if this failure happened 5 minutes after reboot time
-            if( $thisTimeFailure->modify('-5 minutes') >= $rebootTime ){
+            if( $thisTimeFailure->modify('-6 minutes') >= $rebootTime ){
 
                 self::_prettyEcho( "> *** FAILED REBOOT FOUND....", 4 );
 
