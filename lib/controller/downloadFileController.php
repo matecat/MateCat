@@ -6,7 +6,7 @@ include_once INIT::$UTILS_ROOT."/CatUtils.php";
 include_once INIT::$UTILS_ROOT."/FileFormatConverter.php";
 include_once(INIT::$UTILS_ROOT.'/XliffSAXTranslationReplacer.class.php');
 include_once(INIT::$UTILS_ROOT.'/DetectProprietaryXliff.php');
-//include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
+
 
 class downloadFileController extends downloadController {
 
@@ -92,97 +92,93 @@ class downloadFileController extends downloadController {
         */
 
         foreach ($files_job as $file) {
-            $mime_type = $file['mime_type'];
-            $id_file = $file['id_file'];
-            $current_filename = $file['filename'];
-            $original = $file['xliff_file'];
+
+            $mime_type        = $file[ 'mime_type' ];
+            $id_file          = $file[ 'id_file' ];
+            $current_filename = $file[ 'filename' ];
+            $original_xliff   = $file[ 'xliff_file' ];
 
             //flush file on disk
-            $original=str_replace("\r\n","\n",$original);
+//            $original_xliff = str_replace( "\r\n", "\n", $original_xliff ); //dos2unix ??? why??
+
             //get path
-            $path=INIT::$TMP_DOWNLOAD.'/'.$this->id_job.'/'.$id_file.'/'.$current_filename.'.sdlxliff';
+            $path = INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $id_file . '/' . $current_filename . '.sdlxliff';
+
             //make dir if doesn't exist
-            if(!file_exists(dirname($path))){
-                Log::doLog('exec ("chmod 666 ' . escapeshellarg( $path ) . '");');
-                mkdir(dirname($path), 0777, true);
-                exec ( "chmod 666 " . escapeshellarg( $path ) );
+            if ( !file_exists( dirname( $path ) ) ) {
+
+                Log::doLog( 'exec ("chmod 666 ' . escapeshellarg( $path ) . '");' );
+                mkdir( dirname( $path ), 0777, true );
+                exec( "chmod 666 " . escapeshellarg( $path ) );
+
             }
+
             //create file
-            $fp=fopen($path,'w+');
+            $fp = fopen( $path, 'w+' );
+
             //flush file to disk
-            fwrite($fp,$original);
+            fwrite( $fp, $original_xliff );
+
             //free memory, as we can work with file on disk now
-            unset($original);
+            unset( $original_xliff );
 
-            $debug['get_segments'][]=time();
-            $data = getSegmentsDownload($this->id_job, $this->password, $id_file, $nonew);
 
-            $debug['get_segments'][]=time();
+            $debug[ 'get_segments' ][ ] = time();
+            $data                       = getSegmentsDownload( $this->id_job, $this->password, $id_file, $nonew );
+            $debug[ 'get_segments' ][ ] = time();
+
             //create a secondary indexing mechanism on segments' array; this will be useful
             //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
-            foreach($data as $i=>$k){
-                $data[ 'matecat|' . $k['internal_id'] ][]=$i;
+            foreach ( $data as $i => $k ) {
+                $data[ 'matecat|' . $k[ 'internal_id' ] ][ ] = $i;
             }
-            $transunit_translation = "";
+
             $debug['replace'][] = time();
 
             //instatiate parser
-            $xsp = new XliffSAXTranslationReplacer( $path, $data, Languages::getInstance()->getLangRegionCode($jobData['target']) );
+            $xsp = new XliffSAXTranslationReplacer( $path, $data, Languages::getInstance()->getLangRegionCode($jobData['target']), $fp );
+
             //run parsing
             $xsp->replaceTranslation();
-            unset($xsp);
-            $debug['replace'][] = time();
+            unset( $xsp );
 
-            $original=file_get_contents($path.'.out.sdlxliff');
+            $debug[ 'replace' ][ ] = time();
 
-            $output_content[$id_file]['content'] = $original;
-            $output_content[$id_file]['filename'] = $current_filename;
+            $output_xliff = file_get_contents( $path . '.out.sdlxliff' );
+
+            $output_content[ $id_file ][ 'content' ]  = $output_xliff;
+            $output_content[ $id_file ][ 'filename' ] = $current_filename;
 
             //TODO set a flag in database when file uploaded to know if this file is a proprietary xlf converted
             //TODO so we can load from database the original file blob ONLY when needed
             /**
              * Conversion Enforce
              *
-             * Check Extentions no more sufficient, we want check content
-             * if this is an idiom xlf file type, conversion are enforced
-             * $enforcedConversion = true; //( if conversion is enabled )
-             *
-             * dos2unix must be enabled for xliff forced conversions
-             *
              */
-            $enforcedConversion = false;
+            $convertBackToOriginal = true;
             try {
 
-                $file['original_file'] = @gzinflate($file['original_file']);
+                //if it is a not converted file ( sdlxliff ) we have an empty field original_file
+                //so we can simplify all the logic with:
+                // is empty original_file? if it is, we don't need conversion back because
+                // we already have an sdlxliff or an accepted file
+                $file['original_file'] = @gzinflate( $file['original_file'] );
 
-                $fileType = DetectProprietaryXliff::getInfoByStringData( $file['original_file'] );
-                //Log::doLog( 'Proprietary detection: ' . var_export( $fileType, true ) );
-
-                if( $fileType['proprietary'] == true  ){
-
-                    if( INIT::$CONVERSION_ENABLED && $fileType['proprietary_name'] == 'idiom world server' ){
-                        $enforcedConversion = true;
-
-                        //force unix type files
-                        $output_content[$id_file]['content'] = CatUtils::dos2unix( $output_content[$id_file]['content'] );
-
-                        Log::doLog( 'Idiom found, conversion Enforced: ' . var_export( $enforcedConversion, true ) );
-
-                    } else {
-                        /**
-                         * Application misconfiguration.
-                         * upload should not be happened, but if we are here, raise an error.
-                         * @see upload.class.php
-                         * */
-                        Log::doLog( "Application misconfiguration. Upload should not be happened, but if we are here, raise an error." );
-                        return;
-                        //stop execution
-                    }
+                if( !INIT::$CONVERSION_ENABLED || empty( $file['original_file'] ) ){
+                    $convertBackToOriginal = false;
+                    Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal , true ) );
                 }
+                else {
+                    //dos2unix ??? why??
+                    //force unix type files
+//                    $output_content[$id_file]['content'] = CatUtils::dos2unix( $output_content[$id_file]['content'] );
+                    Log::doLog( "NO SDLXLIFF, Conversion enforced: {$file['filename']} --- " . var_export( $convertBackToOriginal , true ) );
+                }
+
+
             } catch ( Exception $e ) { Log::doLog( $e->getMessage() ); }
 
-
-            if ( !in_array($mime_type, array("xliff", "sdlxliff", "xlf")) || $enforcedConversion ) {
+            if ( $convertBackToOriginal ) {
 
                 $output_content[$id_file]['out_xliff_name'] = $path.'.out.sdlxliff';
                 $output_content[$id_file]['source'] = $jobData['source'];
@@ -191,7 +187,7 @@ class downloadFileController extends downloadController {
                 // specs for filename at the task https://app.asana.com/0/1096066951381/2263196383117
                 $converter = new FileFormatConverter();
                 $debug[ 'do_conversion' ][ ] = time();
-                $convertResult = $converter->convertToOriginal( $output_content[ $id_file ], $chosen_machine );
+                $convertResult = $converter->convertToOriginal( $output_content[ $id_file ], $chosen_machine = false );
                 $output_content[ $id_file ][ 'content' ] = $convertResult[ 'documentContent' ];
                 $debug[ 'do_conversion' ][ ] = time();
 

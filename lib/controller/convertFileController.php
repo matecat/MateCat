@@ -52,22 +52,60 @@ class convertFileController extends ajaxController {
 		    $xliffContent = getXliffBySHA1( $sha1, $this->source_lang, $this->target_lang,$this->cache_days );
 		}
 
+        //XLIFF Conversion management
+        //cyclomatic complexity 9999999 ..... but it works, for now.
         try {
 
             $fileType = DetectProprietaryXliff::getInfo($file_path);
 
-            //found proprietary xliff
-            if ( $fileType['proprietary'] && !INIT::$CONVERSION_ENABLED ) {
-                unlink($file_path);
-                $this->result['errors'][] = array("code" => -7, "message" => 'Matecat Open-Source does not support ' . ucwords($fileType['proprietary_name']) . '. Use MatecatPro.', 'debug' => basename( $this->file_name ) );
-                return -1;
+            if ( DetectProprietaryXliff::isXliffExtension() ) {
 
-            }
+                if ( INIT::$CONVERSION_ENABLED ) {
 
-            if( !$fileType['proprietary'] && DetectProprietaryXliff::isXliffExtension() ){
-                $this->result['code'] = 1; // OK for client
-                $this->result['errors'][] = array( "code" => 0, "message" => "OK" );
-                return 0; //ok don't convert a standard sdlxliff
+                    //conversion enforce
+                    if ( !INIT::$FORCE_XLIFF_CONVERSION ) {
+
+                        //ONLY IDIOM is forced to be converted
+                        //if file is not proprietary like idiom AND Enforce is disabled
+                        //we take it as is
+                        if( !$fileType[ 'proprietary' ] ) {
+                            $this->result[ 'code' ]      = 1; // OK for client
+                            $this->result[ 'errors' ][ ] = array( "code" => 0, "message" => "OK" );
+                            return 0; //ok don't convert a standard sdlxliff
+                        }
+
+                    } else {
+
+                        //if conversion enforce is active
+                        //we force all xliff files but not files produced by SDL Studio because we can handle them
+                        if( $fileType['proprietary_short_name'] == 'trados' ) {
+                            $this->result[ 'code' ]      = 1; // OK for client
+                            $this->result[ 'errors' ][ ] = array( "code" => 0, "message" => "OK" );
+                            return 0; //ok don't convert a standard sdlxliff
+                        }
+
+                    }
+
+                } elseif ( $fileType[ 'proprietary' ] ) {
+
+                    unlink( $file_path );
+                    $this->result[ 'errors' ][ ] = array(
+                            "code"    => -7,
+                            "message" => 'Matecat Open-Source does not support ' . ucwords( $fileType[ 'proprietary_name' ] ) . '. Use MatecatPro.',
+                            'debug'   => basename( $this->file_name )
+                    );
+
+                    return -1;
+
+                } elseif ( !$fileType[ 'proprietary' ] ) {
+
+                    $this->result[ 'code' ]      = 1; // OK for client
+                    $this->result[ 'errors' ][ ] = array( "code" => 0, "message" => "OK" );
+
+                    return 0; //ok don't convert a standard sdlxliff
+
+                }
+
             }
 
         } catch (Exception $e) { //try catch not used because of exception no more raised
