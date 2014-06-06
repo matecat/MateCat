@@ -862,6 +862,11 @@ function addTranslation( array $_Translation ){
 
     foreach ( $_Translation as $key => $val ) {
 
+        if( $key == 'translation' ){
+            $_Translation[$key] = "'" . $db->escape( $val ) . "'";
+            continue;
+        }
+
         if ( strtolower( $val ) == 'now()' || strtolower( $val ) == 'current_timestamp()' || strtolower( $val ) == 'sysdate()' ) {
             $_Translation[$key] =  "NOW()";
         } elseif( is_numeric( $val ) ) {
