@@ -2582,11 +2582,11 @@ del.diff
 }
 .nbsp-marker
 {
-	color: #AAA;
+	color: #aaa;
 	position: relative;
 	padding-left: 4px;
 	margin-right: 4px;
-	top: -4px;
+	top: 5px;
 
 /*	background: url(../img/bg-nbsp.png) center center no-repeat; 
 	width: 20px;
@@ -2601,6 +2601,14 @@ del.diff
 	background: url(../img/bg-nbsp.png) 6px 13px no-repeat;
 	background-size: 3px 4px;
 */
+}
+.space-marker
+{
+	color: #ccc;
+	position: relative;
+	padding-left: 4px;
+	margin-right: 4px;
+	top: -4px;
 }
 .editToolbar
 {
@@ -2644,7 +2652,7 @@ del.diff
 	background-size: 12px 12px;
 }
 
-.editarea span.monad
+.editarea span.softReturn
 {
 	display: inline;
 	margin-left: 6px;

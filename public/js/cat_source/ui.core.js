@@ -1525,11 +1525,20 @@ UI = {
 		insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
 		aa = prova.match(/\W$/gi);
 		str = getSelectionHtml();
-
+console.log('aa: ', aa);
 		newStr = '';
 		$.each($.parseHTML(str), function(index) {
 			if(this.nodeName == '#text') {
 				d = this.data;
+//				console.log(index + ' - ' + d);
+//				console.log(!index);
+//				console.log(!aa);
+				jump = ((!index)&&(!aa));
+//				console.log(d.charAt(0));
+				capStr = toTitleCase(d);
+				if(jump) {
+					capStr = d.charAt(0) + toTitleCase(d).slice(1);
+				}
 /*
 				if(op == 'uppercase') {
 					toAdd = d.toUpperCase();
@@ -1548,7 +1557,7 @@ UI = {
 					}
 				}
 */
-				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? toTitleCase(d) : d;
+				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
 				newStr += toAdd;
 			} else {
 				newStr += this.innerText;					
@@ -2138,6 +2147,7 @@ UI = {
 
         $(area).find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
         $(area).find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
+        $(area).find('span.space-marker').replaceWith(' ');
 
 
 //        Now commented, but valid for future purposes when the user will choose what type of carriage return
@@ -2196,14 +2206,30 @@ UI = {
      */
     decodePlaceholdersToText: function (str) {
 //		console.log('str 1: ', str);
-		var _str = str.replace( config.lfPlaceholderRegex, '<span class="monad ' + config.lfPlaceholderClass +'"><br /></span>' )
+		var _str = this.encodeSpacesAsPlaceholders(str);
+//		var _str = str;
+		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad ' + config.lfPlaceholderClass +'"><br /></span>' )
+//		str = str.replace( config.lfPlaceholderRegex, '<span class="monad ' + config.lfPlaceholderClass +'"><br /></span>' )
 					.replace( config.crPlaceholderRegex, '<span class="monad  ' + config.crPlaceholderClass +'"><br /></span>' )
 					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
 					.replace( config.tabPlaceholderRegex, '<span class="tab-marker ' + config.tabPlaceholderClass +'">&#8677;</span>' )
-					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker ' + config.nbspPlaceholderClass +'">.</span>' );			
+					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker ' + config.nbspPlaceholderClass +'" contenteditable="false">°</span>' );
+//					.replace(/\s/gi, '<span class="space-marker">.</span>' );
 //		console.log('str 2: ', _str);
 		return _str;
     },
+	encodeSpacesAsPlaceholders: function(str) {
+		newStr = '';
+		$.each($.parseHTML(str), function(index) {
+			if(this.nodeName == '#text') {
+				newStr += this.data.replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
+			} else {
+				newStr += this.data;
+			}
+		});
+		return newStr;
+	},
+
 	unnestMarkers: function() {
 		$('.editor .editarea .marker .marker').each(function() {
 			$(this).parents('.marker').after($(this));
