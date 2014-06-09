@@ -2147,6 +2147,7 @@ console.log('aa: ', aa);
 
         $(area).find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
         $(area).find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
+        $(area).find('span.space-marker').replaceWith(' ');
 
 
 //        Now commented, but valid for future purposes when the user will choose what type of carriage return
@@ -2205,14 +2206,30 @@ console.log('aa: ', aa);
      */
     decodePlaceholdersToText: function (str) {
 //		console.log('str 1: ', str);
-		var _str = str.replace( config.lfPlaceholderRegex, '<span class="monad ' + config.lfPlaceholderClass +'"><br /></span>' )
+		var _str = this.encodeSpacesAsPlaceholders(str);
+//		var _str = str;
+		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad ' + config.lfPlaceholderClass +'"><br /></span>' )
+//		str = str.replace( config.lfPlaceholderRegex, '<span class="monad ' + config.lfPlaceholderClass +'"><br /></span>' )
 					.replace( config.crPlaceholderRegex, '<span class="monad  ' + config.crPlaceholderClass +'"><br /></span>' )
 					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
 					.replace( config.tabPlaceholderRegex, '<span class="tab-marker ' + config.tabPlaceholderClass +'">&#8677;</span>' )
-					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker ' + config.nbspPlaceholderClass +'">.</span>' );			
+					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker ' + config.nbspPlaceholderClass +'" contenteditable="false">°</span>' );
+//					.replace(/\s/gi, '<span class="space-marker">.</span>' );
 //		console.log('str 2: ', _str);
 		return _str;
     },
+	encodeSpacesAsPlaceholders: function(str) {
+		newStr = '';
+		$.each($.parseHTML(str), function(index) {
+			if(this.nodeName == '#text') {
+				newStr += this.data.replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
+			} else {
+				newStr += this.data;
+			}
+		});
+		return newStr;
+	},
+
 	unnestMarkers: function() {
 		$('.editor .editarea .marker .marker').each(function() {
 			$(this).parents('.marker').after($(this));
@@ -2854,18 +2871,28 @@ $.extend(UI, {
 			e.preventDefault();
 			var node = document.createElement("span");
 			var br = document.createElement("br");
-			node.setAttribute('class', 'monad ' + config.lfPlaceholderClass);
+			node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
 			node.setAttribute('contenteditable', 'false');
 			node.appendChild(br);
 			insertNodeAtCursor(node);
 			UI.unnestMarkers();
+		}).on('keydown', '.editor .editarea', 'space', function(e) {
+			e.preventDefault();
+			console.log('space');
+			var node = document.createElement("span");
+			node.setAttribute('class', 'marker monad space-marker lastInserted');
+			node.setAttribute('contenteditable', 'false');
+			node.textContent = htmlDecode(".");
+			insertNodeAtCursor(node);
+			UI.unnestMarkers();
 		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
 			e.preventDefault();
-//			console.log('nbsp');
+			console.log('nbsp');
 //			config.nbspPlaceholderClass = '_NBSP';
 			var node = document.createElement("span");
-			node.setAttribute('class', 'marker nbsp-marker lastInserted ' + config.nbspPlaceholderClass);
-			node.textContent = htmlDecode(".");
+			node.setAttribute('class', 'marker monad nbsp-marker lastInserted ' + config.nbspPlaceholderClass);
+			node.setAttribute('contenteditable', 'false');
+			node.textContent = htmlDecode("°");
 			insertNodeAtCursor(node);
 			UI.unnestMarkers();
 /*
