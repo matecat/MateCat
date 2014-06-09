@@ -1111,7 +1111,7 @@ UI = {
 						'		</div>' +
 						'		<div class="text">' +
 						'			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
-						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment) + '</div>' +
+						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment, true) + '</div>' +
 						'				<div class="copy" title="Copy source to target">' +
 						'                   <a href="#"></a>' +
 						'                   <p>ALT+CTRL+I</p>' +
@@ -1123,7 +1123,7 @@ UI = {
 						'					</span>' +
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
-						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation)) + '</div>' +
+						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true)) + '</div>' +
 						'						<ul class="editToolbar">' +
 						'							<li class="uppercase" title="Uppercase"></li>' +
 						'							<li class="lowercase" title="Lowercase"></li>' +
@@ -1525,7 +1525,6 @@ UI = {
 		insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
 		aa = prova.match(/\W$/gi);
 		str = getSelectionHtml();
-console.log('aa: ', aa);
 		newStr = '';
 		$.each($.parseHTML(str), function(index) {
 			if(this.nodeName == '#text') {
@@ -1560,10 +1559,12 @@ console.log('aa: ', aa);
 				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
 				newStr += toAdd;
 			} else {
-				newStr += this.innerText;					
+				newStr += this.outerHTML;					
+//				newStr += this.innerText;					
 			}
 		});
-		replaceSelectedText(newStr);
+//		replaceSelectedText(newStr);
+		replaceSelectedHtml(newStr);
 
 		UI.lockTags();
 		this.saveInUndoStack('formatSelection');
@@ -2204,27 +2205,28 @@ console.log('aa: ', aa);
      * @param str
      * @returns {XML|string}
      */
-    decodePlaceholdersToText: function (str) {
-//		console.log('str 1: ', str);
-		var _str = this.encodeSpacesAsPlaceholders(str);
-//		var _str = str;
+    decodePlaceholdersToText: function (str, jumpSpacesEncode) {
+		jumpSpacesEncode = jumpSpacesEncode || false;
+		var _str = str;
+		if(jumpSpacesEncode) {
+			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str));
+//			_str = this.encodeSpacesAsPlaceholders(_str);
+		}
+		
 		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad ' + config.lfPlaceholderClass +'"><br /></span>' )
-//		str = str.replace( config.lfPlaceholderRegex, '<span class="monad ' + config.lfPlaceholderClass +'"><br /></span>' )
 					.replace( config.crPlaceholderRegex, '<span class="monad  ' + config.crPlaceholderClass +'"><br /></span>' )
 					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
 					.replace( config.tabPlaceholderRegex, '<span class="tab-marker ' + config.tabPlaceholderClass +'">&#8677;</span>' )
 					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker ' + config.nbspPlaceholderClass +'" contenteditable="false">°</span>' );
-//					.replace(/\s/gi, '<span class="space-marker">.</span>' );
-//		console.log('str 2: ', _str);
 		return _str;
     },
 	encodeSpacesAsPlaceholders: function(str) {
 		newStr = '';
 		$.each($.parseHTML(str), function(index) {
 			if(this.nodeName == '#text') {
-				newStr += this.data.replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
+				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
 			} else {
-				newStr += this.data;
+				newStr += $(this).text();
 			}
 		});
 		return newStr;
@@ -2237,7 +2239,6 @@ console.log('aa: ', aa);
 	},
 
 	processErrors: function(err, operation) {
-		console.log('processErrors: ', err);
 		$.each(err, function() {
 			if (operation == 'setTranslation') {
 				if (this.code != '-10') { // is not a password error
