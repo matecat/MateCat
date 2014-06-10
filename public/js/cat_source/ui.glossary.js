@@ -174,7 +174,7 @@ $.extend(UI, {
 	},
 
 	checkIntervalsUnions: function(intervals) {
-		console.log('intervals: ', intervals);
+//		console.log('intervals: ', intervals);
 		UI.endedIntervalAnalysis = false;
 		smallest = UI.smallestInterval(intervals);
 //		console.log('smallest: ', smallest);

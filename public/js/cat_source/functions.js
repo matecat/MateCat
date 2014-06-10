@@ -557,7 +557,20 @@ function replaceSelectedText(replacementText) {
         range.text = replacementText;
     }
 }
-
+function replaceSelectedHtml(replacementHtml) {
+    var sel, range;
+    if (window.getSelection) {
+        sel = window.getSelection();
+        if (sel.rangeCount) {
+            range = sel.getRangeAt(0);
+            range.deleteContents();
+			pasteHtmlAtCaret(replacementHtml);
+        }
+    } else if (document.selection && document.selection.createRange) {console.log('c');
+        range = document.selection.createRange();
+        range.text = replacementText;
+    }
+}
 function capitaliseFirstLetter(string)
 {
     return string.charAt(0).toUpperCase() + string.slice(1);
