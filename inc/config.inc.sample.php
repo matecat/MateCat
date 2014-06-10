@@ -56,6 +56,7 @@ class INIT {
 	public static $OAUTH_CLIENT_APP_NAME;
 
     public static $OAUTH_CONFIG;
+	public static $CONFIG_VERSION_ERR_MESSAGE;
 
     /**
      * ENABLE_OUTSOURCE set as true will show the option to outsource to an external translation provider (translated.net by default)
@@ -376,6 +377,8 @@ class INIT {
                 'https://www.googleapis.com/auth/userinfo.profile'
         );
 
+	    self::$CONFIG_VERSION_ERR_MESSAGE = "Your config.ini.php file is not up-to-date.";
+
         //self::$DEFAULT_FILE_TYPES = 'xliff|sdlxliff|xlf';
 		//self::$CONVERSION_FILE_TYPES = 'doc|dot|docx|dotx|docm|dotm|rtf|pdf|xls|xlsx|xlt|xltx|pot|pps|ppt|potm|potx|ppsm|ppsx|pptm|pptx|mif|inx|idml|icml|txt|csv|htm|html|xhtml|properties|odp|ods|odt|sxw|sxc|sxi|xtg|tag|itd|sgml|sgm|dll|exe|rc|ttx|resx|dita|fm|vxd|indd';
 		//self::$CONVERSION_FILE_TYPES_PARTIALLY_SUPPORTED = '[{"format": "fm", "message": "Try converting to MIF"},{"format": "indd", "message": "Try converting to INX"},{"format": "vxd", "message": "Try converting to XML"}]';
@@ -469,5 +472,5 @@ class INIT {
 	}
 
 }
-
+return true;
 ?>
