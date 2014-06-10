@@ -67,8 +67,9 @@
 			}],
 			"isocode":"az",
 			"enabled":false,
-			"rtl":true,
-			"rfc3066code":"az-AZ"
+			"rtl":false,
+			"rfc3066code":"az-AZ",
+            "languageRegionCode":"az-Latn-AZ"
 		}
 	,
 		{
@@ -1365,15 +1366,16 @@
 			"rfc3066code":"syc-TR"
 		}
 	,
-		{
-			"localized":[{
-				"en":"Tagalog"
-			}],
-			"isocode":"tl",
-			"enabled":true,
-			"rtl":false,
-			"rfc3066code":"tl-PH"
-		}
+        {
+            "localized":[{
+                "en":"Tagalog"
+            }],
+            "isocode":"tl",
+            "enabled":true,
+            "rtl":false,
+            "languageRegionCode":"fil-PH",
+            "rfc3066code":"tl-PH"
+        }
 	,
 		{
 			"localized":[{
@@ -1403,7 +1405,7 @@
 			"enabled":true,
 			"rtl":false,
 			"languageRegionCode":"ta-IN",
-			"rfc3066code":"ta-IN"
+			"rfc3066code":"ta-LK"
 		}
 	,
 		{

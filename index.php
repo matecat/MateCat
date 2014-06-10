@@ -2,7 +2,6 @@
 require_once 'inc/config.inc.php';
 
 INIT::obtain();
-
 require_once INIT::$UTILS_ROOT . '/Log.php';
 require_once INIT::$UTILS_ROOT . '/Utils.php';
 require_once INIT::$MODEL_ROOT . '/Database.class.php';

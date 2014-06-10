@@ -4,6 +4,8 @@ include_once INIT::$UTILS_ROOT . '/QA.php';
 class XliffSAXTranslationReplacer{
 
 	private $filename; //source filename
+    private $originalFP;
+
 	private $inTU=false;//flag to check wether we are in a <trans-unit>
 	private $inTarget=false;//flag to check wether we are in a <target>, to ignore everything
 	private $isEmpty=false; //flag to check wether we are in an empty tag (<tag/>)
@@ -12,7 +14,7 @@ class XliffSAXTranslationReplacer{
 	private $bufferIsActive = false; //buffer for special tag
 
 	private $offset=0;//offset for SAX pointer
-	private $ofp;//output stream pointer
+	private $outputFP;//output stream pointer
 	private $currentBuffer;//the current piece of text it's been parsed
 	private $len;//length of the currentBuffer
 	private $segments; //array of translations
@@ -20,27 +22,34 @@ class XliffSAXTranslationReplacer{
 
     private $target_lang;
 
-	public function __construct( $filename,$segments, $trg_lang = null ){
-		$this->filename=$filename;
-		$this->ofp=fopen($this->filename.'.out.sdlxliff','w+');
-		$this->segments=$segments;
+    public function __construct( $filename, $segments, $trg_lang = null, $filePointer = null ) {
+
+        $this->filename    = $filename;
+
+        if ( is_resource( $filePointer ) ) {
+            $this->originalFP = $filePointer;
+            rewind( $this->originalFP );
+        } else {
+            if ( !( $this->originalFP = fopen( $this->filename, "r" ) ) ) {
+                die( "could not open XML input" );
+            }
+        }
+
+        $this->outputFP    = fopen( $this->filename . '.out.sdlxliff', 'w+' );
+        $this->segments    = $segments;
         $this->target_lang = $trg_lang;
-	}
 
-	/*
-	   public function __destruct(){
-	   fclose($this->ofp);
-	   }
-	 */
+    }
 
+    public function __destruct() {
+        fclose( $this->originalFP );
+        fclose( $this->outputFP );
+    }
 
     public function replaceTranslation() {
-        //open file
-        if ( !( $fp = fopen( $this->filename, "r" ) ) ) {
-            die( "could not open XML input" );
-        }
+
         //write xml header
-        fwrite( $this->ofp, '<?xml version="1.0" encoding="utf-8"?>' );
+        fwrite( $this->outputFP, '<?xml version="1.0" encoding="utf-8"?>' );
 
         //create parser
         $xml_parser = xml_parser_create( 'UTF-8' );
@@ -56,7 +65,7 @@ class XliffSAXTranslationReplacer{
         xml_set_character_data_handler( $xml_parser, "characterData" );
 
         //read a chunk of text
-        while ( $this->currentBuffer = fread( $fp, 4096 ) ) {
+        while ( $this->currentBuffer = fread( $this->originalFP, 4096 ) ) {
             /*
                preprocess file
              */
@@ -86,7 +95,7 @@ class XliffSAXTranslationReplacer{
                 }
 
                 //if an entity is still present, fetch some more and repeat the escaping
-                $this->currentBuffer .= fread( $fp, 9 );
+                $this->currentBuffer .= fread( $this->originalFP, 9 );
                 $temporary_check_buffer = preg_replace( "/&(.*?);/", '#%$1#%', $this->currentBuffer );
 
             }
@@ -103,7 +112,7 @@ class XliffSAXTranslationReplacer{
             $this->len = strlen( $this->currentBuffer );
 
             //parse chunk of text
-            if ( !xml_parse( $xml_parser, $this->currentBuffer, feof( $fp ) ) ) {
+            if ( !xml_parse( $xml_parser, $this->currentBuffer, feof( $this->originalFP ) ) ) {
                 //if unable, die
                 die( sprintf( "XML error: %s at line %d",
                         xml_error_string( xml_get_error_code( $xml_parser ) ),
@@ -114,8 +123,7 @@ class XliffSAXTranslationReplacer{
         }
         //close parser
         xml_parser_free( $xml_parser );
-        //close file pointer
-        fclose( $fp );
+
     }
 
 
@@ -188,7 +196,7 @@ class XliffSAXTranslationReplacer{
                 $this->bufferIsActive = true;
                 $this->CDATABuffer .= $tag;
             } else {
-                $this->postProcAndflush( $this->ofp, $tag );
+                $this->postProcAndflush( $this->outputFP, $tag );
             }
 
 		}
@@ -235,7 +243,7 @@ class XliffSAXTranslationReplacer{
 
                 //signal we are leaving a target
                 $this->inTarget = false;
-                $this->postProcAndflush( $this->ofp, $tag, $treatAsCDATA = true );
+                $this->postProcAndflush( $this->outputFP, $tag, $treatAsCDATA = true );
 
             } elseif ( 'source' == $name || 'seg-source' == $name ) { // we are closing a critical CDATA section
 
@@ -243,7 +251,7 @@ class XliffSAXTranslationReplacer{
                 $tag                  = $this->CDATABuffer . "</$name>";
                 $this->CDATABuffer    = "";
                 //flush to pointer
-                $this->postProcAndflush( $this->ofp, $tag );
+                $this->postProcAndflush( $this->outputFP, $tag );
 
             } elseif ( $this->bufferIsActive ) { // this is a tag ( <g | <mrk ) inside a seg or seg-source tag
                 $this->CDATABuffer .= "</$name>";
@@ -251,7 +259,7 @@ class XliffSAXTranslationReplacer{
 
             } else { //generic tag closure do Nothing
                 //flush to pointer
-                $this->postProcAndflush( $this->ofp, $tag );
+                $this->postProcAndflush( $this->outputFP, $tag );
             }
 
 
@@ -275,7 +283,7 @@ class XliffSAXTranslationReplacer{
 		if(!$this->inTarget && !$this->bufferIsActive ){
 
 			//flush to pointer
-			$this->postProcAndflush($this->ofp,$data);
+			$this->postProcAndflush($this->outputFP,$data);
 
 		} elseif( $this->bufferIsActive ) {
             $this->CDATABuffer .= $data;
@@ -291,6 +299,7 @@ class XliffSAXTranslationReplacer{
         $data = preg_replace( "/#%(.*?)#%/", '&$1;', $data );
         $data = str_replace( '&nbsp;', ' ', $data );
         if ( !$treatAsCDATA ) {
+            //unix2dos
             $data = str_replace( "\r\n", "\r", $data );
             $data = str_replace( "\n", "\r", $data );
             $data = str_replace( "\r", "\r\n", $data );

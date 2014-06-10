@@ -6,39 +6,43 @@ header("Pragma: no-cache");
 
 class loginPageController extends viewController {
 
-	private $oauthFormUrl;
 	private $incomingUrl;
+	private $authURL;
 
-    public function __construct() {
-        parent::__construct();
-        parent::makeTemplate("login.html");
+	public function __construct() {
+		parent::__construct();
+		parent::makeTemplate("login.html");
 
-        //set url forpopup to oauth
-        $this->oauthFormUrl=INIT::$HTTPHOST.'/oauth/request';
+		$filterArgs = array(
+			'incomingUrl'  => array( 'filter' => FILTER_SANITIZE_URL )
+		);
 
-        //try to see if user specified some url
-        $this->incomingUrl =$this->get_from_get_post("incomingUrl");
-        //if nothing is specified by user
-        if(empty($this->incomingUrl)){
-            //open session to pull put information about incoming url
-            $this->incomingUrl=$_SESSION['incomingUrl'];
-        }else{
-            //else, update session
-            $_SESSION['incomingUrl']=$this->incomingUrl;
-        }
+		$__postInput = filter_input_array( INPUT_GET, $filterArgs );
 
-    }
+		$this->incomingUrl = $__postInput[ 'incomingUrl' ];
 
-    public function doAction() {
+		//if nothing is specified by user
+		if(empty($this->incomingUrl)){
+			//open session to pull put information about incoming url
+			$this->incomingUrl=$_SESSION['incomingUrl'];
+		}else{
+			//else, update session
+			$_SESSION['incomingUrl']=$this->incomingUrl;
+		}
+	}
 
-    }
+	public function doAction() {
+		$this->client = OauthClient::getInstance()->getClient();
 
-    public function setTemplateVars() {
-	$this->template->oauthFormUrl=$this->oauthFormUrl;
-	$this->template->incomingUrl=$this->incomingUrl;
-	$this->template->build_number = INIT::$BUILD_NUMBER;
-	
-	    }
+		$this->authURL = $this->client->createAuthUrl();
+
+	}
+
+	public function setTemplateVars() {
+		$this->template->oauthFormUrl   = $this->authURL;
+		$this->template->incomingUrl    = $this->incomingUrl;
+		$this->template->build_number   = INIT::$BUILD_NUMBER;
+	}
 
 }
 

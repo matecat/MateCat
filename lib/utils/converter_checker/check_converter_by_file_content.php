@@ -287,10 +287,10 @@ class ConvertersMonitor {
             foreach ( $cmd as $c ) {
                 $stream = ssh2_exec( $conn, $c );
                 stream_set_blocking( $stream, true );
-                sleep(1);
                 $stream_out  = ssh2_fetch_stream( $stream, SSH2_STREAM_STDIO );
                 $ret_content = stream_get_contents( $stream_out );
-
+                sleep(15);
+                fclose( $stream );
                 $ret[ ] = "command is $c";
                 $ret[ ] = $ret_content;
 
