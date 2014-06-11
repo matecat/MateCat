@@ -1611,16 +1611,20 @@ UI = {
 	setNextWarnedSegment: function(sid) {
 		sid = sid || UI.currentSegmentId;
 		idList = UI.globalWarnings;
+		idList.sort();
+		found = false;
 		$.each(idList, function() {
 			if (this > sid) {
 				$('#point2seg').attr('href', '#' + this);
+				found = true;
 				return false;
 			}
-			if (this == idList[idList.length - 1]) {
-				$('#point2seg').attr('href', '#' + idList[0]);
-			}
 		});
+		if(!found) {
+			$('#point2seg').attr('href', '#' + UI.firstWarnedSegment);
+		}
 	},
+
 	fillWarnings: function(segment, warnings) {
 		//console.log( 'fillWarnings' );
 		//console.log( warnings);
@@ -1696,7 +1700,8 @@ UI = {
 			success: function(data) {//console.log('check warnings success');
 				UI.startWarning();
 				var warningPosition = '';
-				UI.globalWarnings = data.details;
+				UI.globalWarnings = data.details.sort();
+				UI.firstWarnedSegment = UI.globalWarnings[0];
 				UI.translationMismatches = data.translation_mismatches;
 //				console.log(data.messages);
 //				console.log($.parseJSON(data.messages));
@@ -1741,17 +1746,17 @@ UI = {
 	},
 	displayMessage: function(messages) {
 		if($('body').hasClass('incomingMsg')) return false;
-		$.each(messages, function(index) {
-			if(typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date( this.expire ) > ( new Date ) )  ) {
-				UI.showMessage({
-					msg: this.msg,
-					token: this.token,
-					showOnce: true,
-					expire: this.expire
-				});
-				return false;
-			}
-		});
+        $.each(messages, function(index) {
+            if(typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date( this.expire ) > ( new Date ) )  ) {
+                UI.showMessage({
+                    msg: this.msg,
+                    token: this.token,
+                    showOnce: true,
+                    expire: this.expire
+                });
+                return false;
+            }
+        });
 	},
 	showMessage: function(options) {
 		APP.showMessage(options);
@@ -2462,6 +2467,12 @@ $.extend(UI, {
 		this.surveyDisplayed = false;
 		this.warningStopped = false;
 		this.abortedOperations = [];
+		
+		/**
+		 * Global Warnings array definition.
+		 */
+		this.globalWarnings = [];
+
 		this.shortcuts = {
 			"translate": {
 				"label" : "Confirm translation",
@@ -2622,11 +2633,6 @@ $.extend(UI, {
 		this.autoUpdateEnabled = true;
 		this.goingToNext = false;
 		this.preCloseTagAutocomplete = false;
-
-		/**
-		 * Global Warnings array definition.
-		 */
-		this.globalWarnings = [];
 
         /**
          * Global Translation mismatches array definition.
@@ -3810,6 +3816,10 @@ $.extend(UI, {
 		$("a.translated").bind('keydown', 'tab', function(e) {
 			e.preventDefault();
 			$(this).parents('section').find('.close').focus();
+		});
+
+		$("#point2seg").bind('mousedown', function(e) {
+			UI.setNextWarnedSegment();
 		});
 
 		$("#navSwitcher").on('click', function(e) {

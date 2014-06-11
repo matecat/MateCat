@@ -1611,16 +1611,20 @@ UI = {
 	setNextWarnedSegment: function(sid) {
 		sid = sid || UI.currentSegmentId;
 		idList = UI.globalWarnings;
+		idList.sort();
+		found = false;
 		$.each(idList, function() {
 			if (this > sid) {
 				$('#point2seg').attr('href', '#' + this);
+				found = true;
 				return false;
 			}
-			if (this == idList[idList.length - 1]) {
-				$('#point2seg').attr('href', '#' + idList[0]);
-			}
 		});
+		if(!found) {
+			$('#point2seg').attr('href', '#' + UI.firstWarnedSegment);
+		}
 	},
+
 	fillWarnings: function(segment, warnings) {
 		//console.log( 'fillWarnings' );
 		//console.log( warnings);
@@ -1696,7 +1700,8 @@ UI = {
 			success: function(data) {//console.log('check warnings success');
 				UI.startWarning();
 				var warningPosition = '';
-				UI.globalWarnings = data.details;
+				UI.globalWarnings = data.details.sort();
+				UI.firstWarnedSegment = UI.globalWarnings[0];
 				UI.translationMismatches = data.translation_mismatches;
 //				console.log(data.messages);
 //				console.log($.parseJSON(data.messages));

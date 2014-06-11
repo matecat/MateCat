@@ -1148,6 +1148,10 @@ $.extend(UI, {
 			$(this).parents('section').find('.close').focus();
 		});
 
+		$("#point2seg").bind('mousedown', function(e) {
+			UI.setNextWarnedSegment();
+		});
+
 		$("#navSwitcher").on('click', function(e) {
 			e.preventDefault();
 		});
