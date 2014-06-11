@@ -765,7 +765,7 @@ $.extend(UI, {
 			}
 
 		}).on('input', '.editarea', function() {
-//			console.log('input in editarea');
+			console.log('input in editarea');
 //			DA SPOSTARE IN DROP E PASTE
 //			if (UI.body.hasClass('searchActive')) {
 //				console.log('on input');
@@ -1124,6 +1124,7 @@ $.extend(UI, {
 			e.preventDefault();
 			$(this).parents('.comment').find('.gl-comment').toggle();
 		}).on('paste', '.editarea', function(e) {
+			console.log('paste in editarea');
 			UI.saveInUndoStack('paste');
 			$('#placeHolder').remove();
 			var node = document.createElement("div");
@@ -1210,6 +1211,10 @@ $.extend(UI, {
 			$(this).parents('section').find('.close').focus();
 		});
 
+		$("#point2seg").bind('mousedown', function(e) {
+			UI.setNextWarnedSegment();
+		});
+		
 		$("#navSwitcher").on('click', function(e) {
 			e.preventDefault();
 		});

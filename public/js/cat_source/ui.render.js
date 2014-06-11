@@ -61,10 +61,7 @@ $.extend(UI, {
 		this.goingToNext = false;
 		this.preCloseTagAutocomplete = false;
 
-		/**
-		 * Global Warnings array definition.
-		 */
-		this.globalWarnings = [];
+
 
         /**
          * Global Translation mismatches array definition.

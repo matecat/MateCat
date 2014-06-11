@@ -121,15 +121,19 @@ $.extend(UI, {
 
 	// TAG LOCK
 	lockTags: function(el) {
-//		console.log('lock tags');
+		console.log('lock tags');
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
+			console.log('editarea: ', this);
 		if (!this.taglockEnabled)
 			return false;
+			console.log('a');
 		if (this.noTagsInSegment())
 			return false;
+			console.log('b');
 		$(editarea).first().each(function() {
+			console.log('editarea: ', this);
 			saveSelection();
 			var tx = $(this).html();
 			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";

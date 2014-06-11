@@ -144,7 +144,8 @@ UI = {
 	},
 	copySource: function() {
 
-		var source_val = $.trim($(".source", this.currentSegment).text());
+		var source_val = $.trim($(".source", this.currentSegment).html());
+//		var source_val = $.trim($(".source", this.currentSegment).text());
 		// Test
 		//source_val = source_val.replace(/&quot;/g,'"');
 
@@ -152,7 +153,8 @@ UI = {
 		// I hope it still works.
 
 		this.saveInUndoStack('copysource');
-		$(".editarea", this.currentSegment).text(source_val).keyup().focus();
+		$(".editarea", this.currentSegment).html(source_val).keyup().focus();
+//		$(".editarea", this.currentSegment).text(source_val).keyup().focus();
 		this.saveInUndoStack('copysource');
 //		$(".editarea", this.currentSegment).effect("highlight", {}, 1000);
 		$(window).trigger({
@@ -1094,6 +1096,7 @@ UI = {
                 escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
                 escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
                 escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
+				console.log('vediamo perché: ', UI.decodePlaceholdersToText(this.segment, true, 'prova'));
 				
 				/* tab placeholders replacement */
  //               escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "<span class=" );
@@ -1111,7 +1114,7 @@ UI = {
 						'		</div>' +
 						'		<div class="text">' +
 						'			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
-						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment, true) + '</div>' +
+						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment, true, 'source') + '</div>' +
 						'				<div class="copy" title="Copy source to target">' +
 						'                   <a href="#"></a>' +
 						'                   <p>ALT+CTRL+I</p>' +
@@ -1123,7 +1126,7 @@ UI = {
 						'					</span>' +
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
-						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true)) + '</div>' +
+						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, 'translation')) + '</div>' +
 						'						<ul class="editToolbar">' +
 						'							<li class="uppercase" title="Uppercase"></li>' +
 						'							<li class="lowercase" title="Lowercase"></li>' +
@@ -1404,30 +1407,31 @@ UI = {
 //		console.log(UI.currentSegmentId);
         segment = UI.currentSegment;
         segment_id = UI.currentSegmentId;
-        escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
+        escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, 'render alternatives');
         $.each(d.data.editable, function(index) {
-			var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation) ) );
+			var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, 'editable alternatives') ) );
 			UI.dmp.diff_cleanupEfficiency( diff_view );
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
         $.each(d.data.not_editable, function(index1) {
-            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation) ) );            UI.dmp.diff_cleanupEfficiency( diff_view );
+            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, 'not editable alternatives') ) );            UI.dmp.diff_cleanupEfficiency( diff_view );
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
     },
     chooseAlternative: function(w) {console.log('chooseAlternative');
 //        console.log( $('.sugg-target .realData', w ) );
-        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text() ) );
+        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text(), true, 'choose alternative' ) );
         this.lockTags(this.editarea);
         this.editarea.focus();
         this.highlightEditarea();
     },
 	copyAlternativeInEditarea: function(translation) {
+		console.log('translation: ', translation);
 		if ($.trim(translation) !== '') {
 			if (this.body.hasClass('searchActive'))
 				this.addWarningToSearchDisplay();
 			this.saveInUndoStack('copyalternative');
-			$(UI.editarea).text(translation).addClass('fromAlternative');
+			$(UI.editarea).html(translation).addClass('fromAlternative');
 			this.saveInUndoStack('copyalternative');
 		}
 	},
@@ -1685,15 +1689,18 @@ UI = {
 	setNextWarnedSegment: function(sid) {
 		sid = sid || UI.currentSegmentId;
 		idList = UI.globalWarnings;
+		idList.sort();
+		found = false;
 		$.each(idList, function() {
 			if (this > sid) {
 				$('#point2seg').attr('href', '#' + this);
+				found = true;
 				return false;
 			}
-			if (this == idList[idList.length - 1]) {
-				$('#point2seg').attr('href', '#' + idList[0]);
-			}
 		});
+		if(!found) {
+			$('#point2seg').attr('href', '#' + UI.firstWarnedSegment);
+		}
 	},
 	fillWarnings: function(segment, warnings) {
 		//console.log( 'fillWarnings' );
@@ -1770,15 +1777,9 @@ UI = {
 			success: function(data) {//console.log('check warnings success');
 				UI.startWarning();
 				var warningPosition = '';
-				UI.globalWarnings = data.details;
+				UI.globalWarnings = data.details.sort();
+				UI.firstWarnedSegment = UI.globalWarnings[0];
 				UI.translationMismatches = data.translation_mismatches;
-//				console.log(data.messages);
-//				console.log($.parseJSON(data.messages));
-//				data.messages = {
-//						msg: "messaggio di prova"
-//					};
-//		
-//				messages = ["Something happened! This is simply a fake message to inform you."];
 
 				//check for errors
 				if (UI.globalWarnings.length > 0) {
@@ -2205,14 +2206,36 @@ UI = {
      * @param str
      * @returns {XML|string}
      */
-    decodePlaceholdersToText: function (str, jumpSpacesEncode) {
+    decodePlaceholdersToText: function (str, jumpSpacesEncode, operation) {return false;
+		console.log('decodePH operation: ', operation);
+//		if(operation == 'source') {
+			console.log('SOURCE STR: ', str);
+//		}
+
+		jumpSpacesEncode = jumpSpacesEncode || false;
+		console.log('jumpSpacesEncode: ', jumpSpacesEncode);
+		var _str = str;
+		console.log('_str 1: ', _str);
+
+		if(jumpSpacesEncode) {
+			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str));
+//			_str = this.encodeSpacesAsPlaceholders(_str);
+		}
+		console.log('_str 2: ', _str);
+		return _str;
+//		console.log('str: ', str);
+//		var _str = str;
+//
+////		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' );
+//		return _str;
+		
 		jumpSpacesEncode = jumpSpacesEncode || false;
 		var _str = str;
 		if(jumpSpacesEncode) {
 			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str));
 //			_str = this.encodeSpacesAsPlaceholders(_str);
 		}
-		
+		console.log('Q _str: ', _str);
 		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
@@ -2220,15 +2243,36 @@ UI = {
 					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">°</span>' );
 		return _str;
     },
-	encodeSpacesAsPlaceholders: function(str) {
+	encodeSpacesAsPlaceholders: function(str) {return false;
+		console.log('STR: ', str);
+		console.log('$.parseHTML(str): ', $.parseHTML(str));
 		newStr = '';
 		$.each($.parseHTML(str), function(index) {
+			console.log('THIS: ', this);
 			if(this.nodeName == '#text') {
+				console.log('this1: ', this);
+				console.log('typeof this: ', typeof this);
+				console.log('$(this).text(): ', $(this).text());
+				console.log('$(this).html(): ', $(this).html());
+				console.log('this.data: ', this.data);
+				console.log('this.outerHTML: ', this.outerHTML);
 				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
+//				newStr += this.outerHTML.replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
+				console.log('n1: ', newStr);
 			} else {
-				newStr += $(this).text();
+				console.log('this2: ', this);
+				console.log('this.outerHTML: ', this.outerHTML);
+				console.log('this.innerHTML: ', this.innerHTML);
+				console.log($.parseHTML(this.outerHTML));
+				console.log('match: ', this.outerHTML.match(/<.*?>/gi));
+				match = this.outerHTML.match(/<.*?>/gi);
+//				if(match)
+//				newStr += this.outerHTML;
+				newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>') + htmlEncode(match[1]);
+				console.log('n2: ', newStr);
 			}
 		});
+		console.log('NEW STR: ', newStr);
 		return newStr;
 	},
 
@@ -2566,6 +2610,12 @@ $.extend(UI, {
 		this.surveyDisplayed = false;
 		this.warningStopped = false;
 		this.abortedOperations = [];
+
+		/**
+		 * Global Warnings array definition.
+		 */
+		this.globalWarnings = [];		
+		
 		this.shortcuts = {
 			"translate": {
 				"label" : "Confirm translation",
@@ -2727,10 +2777,7 @@ $.extend(UI, {
 		this.goingToNext = false;
 		this.preCloseTagAutocomplete = false;
 
-		/**
-		 * Global Warnings array definition.
-		 */
-		this.globalWarnings = [];
+
 
         /**
          * Global Translation mismatches array definition.
@@ -3533,7 +3580,7 @@ $.extend(UI, {
 			}
 
 		}).on('input', '.editarea', function() {
-//			console.log('input in editarea');
+			console.log('input in editarea');
 //			DA SPOSTARE IN DROP E PASTE
 //			if (UI.body.hasClass('searchActive')) {
 //				console.log('on input');
@@ -3892,6 +3939,7 @@ $.extend(UI, {
 			e.preventDefault();
 			$(this).parents('.comment').find('.gl-comment').toggle();
 		}).on('paste', '.editarea', function(e) {
+			console.log('paste in editarea');
 			UI.saveInUndoStack('paste');
 			$('#placeHolder').remove();
 			var node = document.createElement("div");
@@ -3978,6 +4026,10 @@ $.extend(UI, {
 			$(this).parents('section').find('.close').focus();
 		});
 
+		$("#point2seg").bind('mousedown', function(e) {
+			UI.setNextWarnedSegment();
+		});
+		
 		$("#navSwitcher").on('click', function(e) {
 			e.preventDefault();
 		});
@@ -4160,6 +4212,7 @@ $.extend(UI, {
 		this.highlightEditarea();
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
+console.log('translation 1: ', translation);
 		if (typeof (decode) == "undefined") {
 			decode = false;
 		}
@@ -4169,6 +4222,7 @@ $.extend(UI, {
 			//ANTONIO 20121205 editarea.text(translation).addClass('fromSuggestion');
 
 			if (decode) {
+console.log('translation 2: ', translation);
 				translation = htmlDecode(translation);
 			}
 			if (this.body.hasClass('searchActive'))
@@ -4177,8 +4231,10 @@ $.extend(UI, {
 			this.saveInUndoStack('copysuggestion');
 //			translation = UI.decodePlaceholdersToText(translation, true);
 //			translation = UI.decodePlaceholdersToText(htmlEncode(translation), true);
-console.log('translation: ', translation);
-			translation = UI.encodeSpacesAsPlaceholders(translation);
+console.log('translation 3: ', translation);
+			if(!which) translation = UI.encodeSpacesAsPlaceholders(translation);
+//			translation = UI.encodeSpacesAsPlaceholders(translation);
+console.log('translation 4: ', translation);
 			$(editarea).html(translation).addClass('fromSuggestion');
 			this.saveInUndoStack('copysuggestion');
 			$('.percentuage', segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
@@ -4318,7 +4374,7 @@ console.log('translation: ', translation);
 
 			var copySuggestionDone = false;
 			if (editareaLength === 0) {
-				console.log('translation 1: ', translation);
+				console.log('translation AA: ', translation);
 				UI.copySuggestionInEditarea(segment, translation, editarea, match, true, true, 0);
 				if (UI.body.hasClass('searchActive'))
 					UI.addWarningToSearchDisplay();
@@ -4360,8 +4416,8 @@ console.log('translation: ', translation);
 				}
 				// Attention Bug: We are mixing the view mode and the raw data mode.
 				// before doing a enanched view you will need to add a data-original tag
-                escapedSegment = UI.decodePlaceholdersToText(this.segment, true);
-				$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + UI.decodePlaceholdersToText( this.translation, true ) + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+                escapedSegment = UI.decodePlaceholdersToText(this.segment, true, 'contribution source');
+				$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + UI.decodePlaceholdersToText( this.translation, true, 'contribution translation' ) + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
 			});
 			UI.markSuggestionTags(segment);
 			UI.setDeleteSuggestion(segment);
@@ -4689,15 +4745,19 @@ $.extend(UI, {
 
 	// TAG LOCK
 	lockTags: function(el) {
-//		console.log('lock tags');
+		console.log('lock tags');
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
+			console.log('editarea: ', this);
 		if (!this.taglockEnabled)
 			return false;
+			console.log('a');
 		if (this.noTagsInSegment())
 			return false;
+			console.log('b');
 		$(editarea).first().each(function() {
+			console.log('editarea: ', this);
 			saveSelection();
 			var tx = $(this).html();
 			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
