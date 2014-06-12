@@ -1096,7 +1096,7 @@ UI = {
                 escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
                 escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
                 escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
-				console.log('vediamo perché: ', UI.decodePlaceholdersToText(this.segment, true, 'prova'));
+//				console.log('vediamo perché: ', UI.decodePlaceholdersToText(this.segment, true, 'prova'));
 				
 				/* tab placeholders replacement */
  //               escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "<span class=" );
@@ -2206,22 +2206,23 @@ UI = {
      * @param str
      * @returns {XML|string}
      */
-    decodePlaceholdersToText: function (str, jumpSpacesEncode, operation) {return false;
-		console.log('decodePH operation: ', operation);
+    decodePlaceholdersToText: function (str, jumpSpacesEncode, operation) {
+		toLog = ((operation == 'contribution source'));
+		if(toLog) console.log('decodePH operation: ', operation);
 //		if(operation == 'source') {
-			console.log('SOURCE STR: ', str);
+			if(toLog) console.log('SOURCE STR: ', str);
 //		}
 
 		jumpSpacesEncode = jumpSpacesEncode || false;
-		console.log('jumpSpacesEncode: ', jumpSpacesEncode);
+		if(toLog) console.log('jumpSpacesEncode: ', jumpSpacesEncode);
 		var _str = str;
-		console.log('_str 1: ', _str);
+		if(toLog) console.log('_str 1: ', _str);
 
 		if(jumpSpacesEncode) {
-			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str));
+			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), toLog);
 //			_str = this.encodeSpacesAsPlaceholders(_str);
 		}
-		console.log('_str 2: ', _str);
+		if(toLog) console.log('_str 2: ', _str);
 		return _str;
 //		console.log('str: ', str);
 //		var _str = str;
@@ -2243,36 +2244,36 @@ UI = {
 					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">°</span>' );
 		return _str;
     },
-	encodeSpacesAsPlaceholders: function(str) {return false;
-		console.log('STR: ', str);
-		console.log('$.parseHTML(str): ', $.parseHTML(str));
+	encodeSpacesAsPlaceholders: function(str, toLog) {
+		if(toLog) console.log('STR: ', str);
+		if(toLog) console.log('$.parseHTML(str): ', $.parseHTML(str));
 		newStr = '';
 		$.each($.parseHTML(str), function(index) {
-			console.log('THIS: ', this);
+			if(toLog) console.log('THIS: ', this);
 			if(this.nodeName == '#text') {
-				console.log('this1: ', this);
-				console.log('typeof this: ', typeof this);
-				console.log('$(this).text(): ', $(this).text());
-				console.log('$(this).html(): ', $(this).html());
-				console.log('this.data: ', this.data);
-				console.log('this.outerHTML: ', this.outerHTML);
+				if(toLog) console.log('this1: ', this);
+				if(toLog) console.log('typeof this: ', typeof this);
+				if(toLog) console.log('$(this).text(): ', $(this).text());
+				if(toLog) console.log('$(this).html(): ', $(this).html());
+				if(toLog) console.log('this.data: ', this.data);
+				if(toLog) console.log('this.outerHTML: ', this.outerHTML);
 				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
 //				newStr += this.outerHTML.replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
-				console.log('n1: ', newStr);
+				if(toLog) console.log('n1: ', newStr);
 			} else {
-				console.log('this2: ', this);
-				console.log('this.outerHTML: ', this.outerHTML);
-				console.log('this.innerHTML: ', this.innerHTML);
-				console.log($.parseHTML(this.outerHTML));
-				console.log('match: ', this.outerHTML.match(/<.*?>/gi));
+				if(toLog) console.log('this2: ', this);
+				if(toLog) console.log('this.outerHTML: ', this.outerHTML);
+				if(toLog) console.log('this.innerHTML: ', this.innerHTML);
+				if(toLog) console.log($.parseHTML(this.outerHTML));
+				if(toLog) console.log('match: ', this.outerHTML.match(/<.*?>/gi));
 				match = this.outerHTML.match(/<.*?>/gi);
 //				if(match)
 //				newStr += this.outerHTML;
 				newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>') + htmlEncode(match[1]);
-				console.log('n2: ', newStr);
+				if(toLog) console.log('n2: ', newStr);
 			}
 		});
-		console.log('NEW STR: ', newStr);
+		if(toLog) console.log('NEW STR: ', newStr);
 		return newStr;
 	},
 
@@ -4418,6 +4419,7 @@ console.log('translation 4: ', translation);
 				// before doing a enanched view you will need to add a data-original tag
                 escapedSegment = UI.decodePlaceholdersToText(this.segment, true, 'contribution source');
 				$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + UI.decodePlaceholdersToText( this.translation, true, 'contribution translation' ) + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
+//				console.log('dopo: ', $('.sub-editor.matches .overflow .suggestion_source', segment).html());
 			});
 			UI.markSuggestionTags(segment);
 			UI.setDeleteSuggestion(segment);
