@@ -2213,11 +2213,11 @@ UI = {
 //			_str = this.encodeSpacesAsPlaceholders(_str);
 		}
 		
-		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad ' + config.lfPlaceholderClass +'"><br /></span>' )
-					.replace( config.crPlaceholderRegex, '<span class="monad  ' + config.crPlaceholderClass +'"><br /></span>' )
+		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
+					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
-					.replace( config.tabPlaceholderRegex, '<span class="tab-marker ' + config.tabPlaceholderClass +'">&#8677;</span>' )
-					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker ' + config.nbspPlaceholderClass +'" contenteditable="false">°</span>' );
+					.replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
+					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">°</span>' );
 		return _str;
     },
 	encodeSpacesAsPlaceholders: function(str) {
@@ -3419,7 +3419,8 @@ $.extend(UI, {
 			if (e.which == 9) { // tab
 				e.preventDefault();
 				var node = document.createElement("span");
-				node.setAttribute('class', 'marker tab-marker ' + config.tabPlaceholderClass);
+				node.setAttribute('class', 'marker monad tab-marker ' + config.tabPlaceholderClass);
+				node.setAttribute('contenteditable', 'false');
 				node.textContent = htmlDecode("&#8677;");
 				insertNodeAtCursor(node);
 				UI.unnestMarkers();

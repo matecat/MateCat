@@ -651,7 +651,8 @@ $.extend(UI, {
 			if (e.which == 9) { // tab
 				e.preventDefault();
 				var node = document.createElement("span");
-				node.setAttribute('class', 'marker tab-marker ' + config.tabPlaceholderClass);
+				node.setAttribute('class', 'marker monad tab-marker ' + config.tabPlaceholderClass);
+				node.setAttribute('contenteditable', 'false');
 				node.textContent = htmlDecode("&#8677;");
 				insertNodeAtCursor(node);
 				UI.unnestMarkers();
