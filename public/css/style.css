@@ -371,7 +371,7 @@ section{position:relative;float:left;width:100%;-webkit-transition: all  100ms e
 /*projectbar*/
 .languages{text-align:center !important;padding:15px 0 0 50px; }
 .wordscounter{float:right;text-align:right}
-.wordcounter{text-align:right;margin-right:-70px !important}
+.wordcounter{display: none !important; text-align:right;margin-right:-70px !important}
 .wordcounter strong{margin-right:0px}
 strong:first-child{margin-right:0px !important}
 

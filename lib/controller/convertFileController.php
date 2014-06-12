@@ -68,7 +68,7 @@ class convertFileController extends ajaxController {
                         //ONLY IDIOM is forced to be converted
                         //if file is not proprietary like idiom AND Enforce is disabled
                         //we take it as is
-                        if( !$fileType[ 'proprietary' ] ) {
+                        if( !$fileType[ 'proprietary' ] || $fileType['info']['extension'] == 'tmx' ) {
                             $this->result[ 'code' ]      = 1; // OK for client
                             $this->result[ 'errors' ][ ] = array( "code" => 0, "message" => "OK" );
                             return 0; //ok don't convert a standard sdlxliff
@@ -78,7 +78,7 @@ class convertFileController extends ajaxController {
 
                         //if conversion enforce is active
                         //we force all xliff files but not files produced by SDL Studio because we can handle them
-                        if( $fileType['proprietary_short_name'] == 'trados' ) {
+                        if( $fileType['proprietary_short_name'] == 'trados' || $fileType['info']['extension'] == 'tmx' ) {
                             $this->result[ 'code' ]      = 1; // OK for client
                             $this->result[ 'errors' ][ ] = array( "code" => 0, "message" => "OK" );
                             return 0; //ok don't convert a standard sdlxliff
