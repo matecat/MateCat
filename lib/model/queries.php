@@ -727,7 +727,7 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 		p.name AS pname, p.create_date , fj.id_file,
 		f.filename, f.mime_type, s.id AS sid, s.segment, s.segment_hash, s.raw_word_count, s.internal_id,
 		IF (st.status='NEW',NULL,st.translation) AS translation,
-		st.status, COALESCE( time_to_edit, 0 ),
+		st.status, COALESCE( time_to_edit, 0 ) as time_to_edit,
 		s.xliff_ext_prec_tags, s.xliff_ext_succ_tags, st.serialized_errors_list, st.warning,
 
 		IF( ( s.id BETWEEN j.job_first_segment AND j.job_last_segment ) , 'false', 'true' ) AS readonly
