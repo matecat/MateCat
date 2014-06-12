@@ -1096,7 +1096,7 @@ UI = {
                 escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
                 escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
                 escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
-//				console.log('vediamo perché: ', UI.decodePlaceholdersToText(this.segment, true, 'prova'));
+//				console.log('vediamo perché: ', UI.decodePlaceholdersToText(this.segment, true, this.sid, 'prova'));
 				
 				/* tab placeholders replacement */
  //               escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "<span class=" );
@@ -1114,7 +1114,7 @@ UI = {
 						'		</div>' +
 						'		<div class="text">' +
 						'			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
-						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment, true, 'source') + '</div>' +
+						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment, true, this.sid, 'source') + '</div>' +
 						'				<div class="copy" title="Copy source to target">' +
 						'                   <a href="#"></a>' +
 						'                   <p>ALT+CTRL+I</p>' +
@@ -1126,7 +1126,7 @@ UI = {
 						'					</span>' +
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
-						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, 'translation')) + '</div>' +
+						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
 						'						<ul class="editToolbar">' +
 						'							<li class="uppercase" title="Uppercase"></li>' +
 						'							<li class="lowercase" title="Lowercase"></li>' +
@@ -1407,20 +1407,20 @@ UI = {
 //		console.log(UI.currentSegmentId);
         segment = UI.currentSegment;
         segment_id = UI.currentSegmentId;
-        escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, 'render alternatives');
+        escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
         $.each(d.data.editable, function(index) {
-			var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, 'editable alternatives') ) );
+			var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives') ) );
 			UI.dmp.diff_cleanupEfficiency( diff_view );
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
         $.each(d.data.not_editable, function(index1) {
-            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, 'not editable alternatives') ) );            UI.dmp.diff_cleanupEfficiency( diff_view );
+            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'not editable alternatives') ) );            UI.dmp.diff_cleanupEfficiency( diff_view );
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
     },
     chooseAlternative: function(w) {console.log('chooseAlternative');
 //        console.log( $('.sugg-target .realData', w ) );
-        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text(), true, 'choose alternative' ) );
+        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text(), true, UI.currentSegmentId, 'choose alternative' ) );
         this.lockTags(this.editarea);
         this.editarea.focus();
         this.highlightEditarea();
@@ -2206,8 +2206,9 @@ UI = {
      * @param str
      * @returns {XML|string}
      */
-    decodePlaceholdersToText: function (str, jumpSpacesEncode, operation) {
-		toLog = ((operation == 'contribution source'));
+    decodePlaceholdersToText: function (str, jumpSpacesEncode, sid, operation) {
+		toLog = (sid == '13735228');
+//		toLog = ((operation == 'contribution source'));
 		if(toLog) console.log('decodePH operation: ', operation);
 //		if(operation == 'source') {
 			if(toLog) console.log('SOURCE STR: ', str);
@@ -2219,7 +2220,7 @@ UI = {
 		if(toLog) console.log('_str 1: ', _str);
 
 		if(jumpSpacesEncode) {
-			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), toLog);
+			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true, toLog);
 //			_str = this.encodeSpacesAsPlaceholders(_str);
 		}
 		if(toLog) console.log('_str 2: ', _str);
@@ -2233,7 +2234,7 @@ UI = {
 		jumpSpacesEncode = jumpSpacesEncode || false;
 		var _str = str;
 		if(jumpSpacesEncode) {
-			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str));
+			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true);
 //			_str = this.encodeSpacesAsPlaceholders(_str);
 		}
 		console.log('Q _str: ', _str);
@@ -2244,7 +2245,40 @@ UI = {
 					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">°</span>' );
 		return _str;
     },
-	encodeSpacesAsPlaceholders: function(str, toLog) {
+	encodeSpacesAsPlaceholders: function(str, root, toLog) {
+
+		var newStr = '';
+		$.each($.parseHTML(str), function(index) {
+			if(this.nodeName == '#text') {
+				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
+			} else {
+				match = this.outerHTML.match(/<.*?>/gi);
+				console.log('match: ', match);
+				if(match.length == 1) { // se è 1 solo, è un tag inline
+					
+				} else if(match.length == 2) { // se sono due, non ci sono tag innestati
+					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+//					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+				} else {
+					console.log('vediamo: ', $.parseHTML(this.outerHTML));
+
+					newStr += htmlEncode(match[0]) + UI.encodeSpacesAsPlaceholders(this.innerHTML) + htmlEncode(match[1], false);
+					
+//					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);
+					
+//					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);					
+				}
+				
+				
+				// se sono più di due, ci sono tag innestati
+			}
+		});
+		if(root) {
+			newStr = newStr.replace(/#@-lt-@#/gi, '<').replace(/#@-gt-@#/gi, '>').replace(/#@-space-@#/gi, ' ');
+		}
+		return newStr;
+		
+/*
 		if(toLog) console.log('STR: ', str);
 		if(toLog) console.log('$.parseHTML(str): ', $.parseHTML(str));
 		newStr = '';
@@ -2275,7 +2309,41 @@ UI = {
 		});
 		if(toLog) console.log('NEW STR: ', newStr);
 		return newStr;
+*/
 	},
+	prova: function(str, root) {
+		var newStr = '';
+		$.each($.parseHTML(str), function(index) {
+			if(this.nodeName == '#text') {
+				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
+			} else {
+				match = this.outerHTML.match(/<.*?>/gi);
+				console.log('match: ', match);
+				if(match.length == 1) { // se è 1 solo, è un tag inline
+					
+				} else if(match.length == 2) { // se sono due, non ci sono tag innestati
+					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+//					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+				} else {
+					console.log('vediamo: ', $.parseHTML(this.outerHTML));
+
+					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML) + htmlEncode(match[1], false);
+					
+//					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);
+					
+//					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);					
+				}
+				
+				
+				// se sono più di due, ci sono tag innestati
+			}
+		});
+		if(root) {
+			newStr = newStr.replace(/#@-lt-@#/gi, '<').replace(/#@-gt-@#/gi, '>').replace(/#@-space-@#/gi, ' ');
+		}
+		return newStr;
+	},
+
 
 	unnestMarkers: function() {
 		$('.editor .editarea .marker .marker').each(function() {
