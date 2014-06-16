@@ -546,15 +546,20 @@ function getSegment( $id_segment ) {
 function getFirstSegmentOfFilesInJob( $jid ) {
 	$db      = Database::obtain();
 	$jid     = intval( $jid );
-	$query   = "SELECT id_file, MIN( segments.id ) AS first_segment, filename AS file_name,
-		FORMAT( SUM( IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count) ) , 0 ) AS TOTAL_FORMATTED
-			FROM files_job
-			JOIN segments USING( id_file )
-			JOIN files ON files.id = id_file
-			LEFT JOIN segment_translations AS st ON segments.id = st.id_segment
-			WHERE files_job.id_job = $jid
-			AND segments.show_in_cattool = 1
-			GROUP BY id_file";
+	$query   = "SELECT DISTINCT id_file, MIN( segments.id ) AS first_segment, filename AS file_name,
+                    FORMAT(
+                        SUM( IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count) )
+                        , 0
+                    ) AS TOTAL_FORMATTED
+                FROM files_job
+                JOIN segments USING( id_file )
+                JOIN files ON files.id = id_file
+                JOIN jobs ON jobs.id = files_job.id_job
+                LEFT JOIN segment_translations AS st ON segments.id = st.id_segment AND st.id_job = jobs.id
+                WHERE files_job.id_job = $jid
+                AND segments.show_in_cattool = 1
+                GROUP BY id_file, jobs.id, jobs.password";
+
 	$results = $db->fetch_array( $query );
 
 	return $results;
