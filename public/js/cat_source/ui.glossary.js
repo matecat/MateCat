@@ -34,7 +34,6 @@ $.extend(UI, {
 		}
 	},
 	getGlossary: function(segment, entireSegment, next) {
-//		console.log('get glossary');
 //		console.log('segment: ', segment);
 //		console.log('entireSegment: ', entireSegment);
 //		console.log('next: ', next);
@@ -53,6 +52,12 @@ $.extend(UI, {
 			$('.sub-editor.glossary .overflow .graysmall.message', n).empty();			
 		}
 		txt = (entireSegment)? $('.text .source', n).attr('data-original') : view2rawxliff($('.gl-search .search-source', n).text());
+//		console.log('typeof n: ', typeof $(n).attr('id'));
+//		console.log('n: ', $(n).attr('id').split('-')[1]);
+//		if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 1: ', $('.source', n).html()); 
+//		if($(n).attr('id').split('-')[1] == '13735228') {
+//			console.log('QUI 1: ', $('.source', n).html()); 
+//		}
 
 		APP.doRequest({
 			data: {
@@ -75,9 +80,16 @@ $.extend(UI, {
 //						UI.body.addClass('noGlossary');
 					}
 				}
+				n = this[0];
+//				if($(n).attr('id').split('-')[1] == '13735228') console.log('QUI 2: ', $('.source', n).html()); 
+//				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 2: ', $('.source', n).html()); 
+
 				UI.processLoadedGlossary(d, this);
+//				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 3: ', $('.source', n).html()); 
+//				if($(n).attr('id').split('-')[1] == '13735228') console.log('QUI 3: ', $('.source', n).html()); 
 //				console.log('next?: ', this[1]);
 				if(!this[1]) UI.markGlossaryItemsInSource(d, this);
+//				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 4: ', $('.source', n).html()); 
 			},
 			complete: function() {
 				$('.gl-search', UI.currentSegment).removeClass('loading');
@@ -111,6 +123,7 @@ $.extend(UI, {
 				i++;
 				var re = new RegExp("(" + k.trim() + ")", "gi");
 				coso = cleanString.replace(re, '<mark>' + k + '</mark>');
+				if(coso.indexOf('<mark>') == -1) return;
 				int = {
 					x: coso.indexOf('<mark>'), 
 					y: coso.indexOf('</mark>') - 6
@@ -118,41 +131,7 @@ $.extend(UI, {
 				intervals.push(int);
 			});
 			UI.intervalsUnion = [];
-/*
-			intervals = [
-				{
-					x: 27,
-					y: 29
-				},
-				{
-					x: 8,
-					y: 10
-				},
-				{
-					x: 4,
-					y: 6
-				},
-				{
-					x: 3,
-					y: 5
-				},
-				{
-					x: 9,
-					y: 18
-				},
-				{
-					x: 16,
-					y: 20
-				},
-				{
-					x: 25,
-					y: 28
-				},
-			]
-*/
-//			console.log('intervals: ', JSON.stringify(intervals));
 			UI.checkIntervalsUnions(intervals);
-//			console.log('array unione: ', JSON.stringify(UI.intervalsUnion));
 			UI.startGlossaryMark = '<mark class="inGlossary">';
 			UI.endGlossaryMark = '</mark>';
 			markLength = UI.startGlossaryMark.length + UI.endGlossaryMark.length;
@@ -161,9 +140,7 @@ $.extend(UI, {
 				added = markLength * index;
 				sourceString = sourceString.splice(this.x + added, 0, UI.startGlossaryMark);				
 				sourceString = sourceString.splice(this.y + added + UI.startGlossaryMark.length, 0, UI.endGlossaryMark);
-//				console.log(sourceString);
 				$('.editor .source').html(sourceString);
-//				console.log($('.editor .source').html());
 			});		
 		}		
 	},

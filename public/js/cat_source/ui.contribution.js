@@ -21,7 +21,7 @@ console.log('translation 1: ', translation);
 			//ANTONIO 20121205 editarea.text(translation).addClass('fromSuggestion');
 
 			if (decode) {
-console.log('translation 2: ', translation);
+				console.log('translation 2: ', translation);
 				translation = htmlDecode(translation);
 			}
 			if (this.body.hasClass('searchActive'))
@@ -172,8 +172,14 @@ console.log('translation 4: ', translation);
 			var match = d.data.matches[0].match;
 
 			var copySuggestionDone = false;
+			var segment_id = segment.attr('id');
+/*
 			if (editareaLength === 0) {
 				console.log('translation AA: ', translation);
+//				translation = UI.decodePlaceholdersToText(translation, true, segment_id, 'translation');
+				translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
+				console.log($('#' + segment_id + ' .matches .graysmall'));
+				console.log('translation BB: ', translation);
 				UI.copySuggestionInEditarea(segment, translation, editarea, match, true, true, 0);
 				if (UI.body.hasClass('searchActive'))
 					UI.addWarningToSearchDisplay();
@@ -181,7 +187,7 @@ console.log('translation 4: ', translation);
 				copySuggestionDone = true;
 			} else {
 			}
-			var segment_id = segment.attr('id');
+*/
 			$(segment).addClass('loaded');
 			$('.sub-editor.matches .overflow', segment).empty();
 
@@ -220,8 +226,21 @@ console.log('translation 4: ', translation);
 //				console.log('dopo: ', $('.sub-editor.matches .overflow .suggestion_source', segment).html());
 			});
 			UI.markSuggestionTags(segment);
+
 			UI.setDeleteSuggestion(segment);
 			UI.lockTags();
+			if (editareaLength === 0) {
+				console.log('translation AA: ', translation);
+//				translation = UI.decodePlaceholdersToText(translation, true, segment_id, 'translation');
+				translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
+				console.log($('#' + segment_id + ' .matches .graysmall'));
+				console.log('translation BB: ', translation);
+				UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
+				if (UI.body.hasClass('searchActive'))
+					UI.addWarningToSearchDisplay();
+				UI.setChosenSuggestion(1);
+				copySuggestionDone = true;
+			}						
 //			if (copySuggestionDone) {
 //				if (isActiveSegment) {
 //				}

@@ -1091,6 +1091,7 @@ UI = {
 				var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
                 var autoPropagated = this.autopropagated_from != 0;
 				var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
+//				if(this.sid == '13735228') console.log('escapedsegment: ', escapedSegment);
 
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
                 escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
@@ -1150,7 +1151,6 @@ UI = {
 						'	<ul class="statusmenu"></ul>' +
 						'</section> ';
 			});
-
 			if (articleToAdd) {
 				newFile += '</article>';
 			}
@@ -2207,23 +2207,26 @@ UI = {
      * @returns {XML|string}
      */
     decodePlaceholdersToText: function (str, jumpSpacesEncode, sid, operation) {
-		toLog = (sid == '13735228');
+		toLog = (sid == '12912488');
 //		toLog = ((operation == 'contribution source'));
-		if(toLog) console.log('decodePH operation: ', operation);
+//		if(toLog) console.log('decodePH operation: ', operation);
 //		if(operation == 'source') {
-			if(toLog) console.log('SOURCE STR: ', str);
+//			if(toLog) console.log('SOURCE STR: ', str);
 //		}
 
 		jumpSpacesEncode = jumpSpacesEncode || false;
-		if(toLog) console.log('jumpSpacesEncode: ', jumpSpacesEncode);
 		var _str = str;
-		if(toLog) console.log('_str 1: ', _str);
 
 		if(jumpSpacesEncode) {
 			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true, toLog);
 //			_str = this.encodeSpacesAsPlaceholders(_str);
 		}
-		if(toLog) console.log('_str 2: ', _str);
+		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
+					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
+					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
+					.replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
+					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">°</span>' );
+
 		return _str;
 //		console.log('str: ', str);
 //		var _str = str;
@@ -2237,7 +2240,6 @@ UI = {
 			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true);
 //			_str = this.encodeSpacesAsPlaceholders(_str);
 		}
-		console.log('Q _str: ', _str);
 		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
@@ -2249,18 +2251,17 @@ UI = {
 
 		var newStr = '';
 		$.each($.parseHTML(str), function(index) {
+
 			if(this.nodeName == '#text') {
 				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
 			} else {
 				match = this.outerHTML.match(/<.*?>/gi);
-				console.log('match: ', match);
 				if(match.length == 1) { // se è 1 solo, è un tag inline
 					
 				} else if(match.length == 2) { // se sono due, non ci sono tag innestati
 					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
 //					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
 				} else {
-					console.log('vediamo: ', $.parseHTML(this.outerHTML));
 
 					newStr += htmlEncode(match[0]) + UI.encodeSpacesAsPlaceholders(this.innerHTML) + htmlEncode(match[1], false);
 					
@@ -2277,40 +2278,8 @@ UI = {
 			newStr = newStr.replace(/#@-lt-@#/gi, '<').replace(/#@-gt-@#/gi, '>').replace(/#@-space-@#/gi, ' ');
 		}
 		return newStr;
-		
-/*
-		if(toLog) console.log('STR: ', str);
-		if(toLog) console.log('$.parseHTML(str): ', $.parseHTML(str));
-		newStr = '';
-		$.each($.parseHTML(str), function(index) {
-			if(toLog) console.log('THIS: ', this);
-			if(this.nodeName == '#text') {
-				if(toLog) console.log('this1: ', this);
-				if(toLog) console.log('typeof this: ', typeof this);
-				if(toLog) console.log('$(this).text(): ', $(this).text());
-				if(toLog) console.log('$(this).html(): ', $(this).html());
-				if(toLog) console.log('this.data: ', this.data);
-				if(toLog) console.log('this.outerHTML: ', this.outerHTML);
-				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
-//				newStr += this.outerHTML.replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
-				if(toLog) console.log('n1: ', newStr);
-			} else {
-				if(toLog) console.log('this2: ', this);
-				if(toLog) console.log('this.outerHTML: ', this.outerHTML);
-				if(toLog) console.log('this.innerHTML: ', this.innerHTML);
-				if(toLog) console.log($.parseHTML(this.outerHTML));
-				if(toLog) console.log('match: ', this.outerHTML.match(/<.*?>/gi));
-				match = this.outerHTML.match(/<.*?>/gi);
-//				if(match)
-//				newStr += this.outerHTML;
-				newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>') + htmlEncode(match[1]);
-				if(toLog) console.log('n2: ', newStr);
-			}
-		});
-		if(toLog) console.log('NEW STR: ', newStr);
-		return newStr;
-*/
 	},
+/*
 	prova: function(str, root) {
 		var newStr = '';
 		$.each($.parseHTML(str), function(index) {
@@ -2343,7 +2312,7 @@ UI = {
 		}
 		return newStr;
 	},
-
+*/
 
 	unnestMarkers: function() {
 		$('.editor .editarea .marker .marker').each(function() {

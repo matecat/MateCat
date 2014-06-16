@@ -1091,6 +1091,7 @@ UI = {
 				var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
                 var autoPropagated = this.autopropagated_from != 0;
 				var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
+//				if(this.sid == '13735228') console.log('escapedsegment: ', escapedSegment);
 
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
                 escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
@@ -1150,7 +1151,6 @@ UI = {
 						'	<ul class="statusmenu"></ul>' +
 						'</section> ';
 			});
-
 			if (articleToAdd) {
 				newFile += '</article>';
 			}
@@ -2207,23 +2207,26 @@ UI = {
      * @returns {XML|string}
      */
     decodePlaceholdersToText: function (str, jumpSpacesEncode, sid, operation) {
-		toLog = (sid == '13735228');
+		toLog = (sid == '12912488');
 //		toLog = ((operation == 'contribution source'));
-		if(toLog) console.log('decodePH operation: ', operation);
+//		if(toLog) console.log('decodePH operation: ', operation);
 //		if(operation == 'source') {
-			if(toLog) console.log('SOURCE STR: ', str);
+//			if(toLog) console.log('SOURCE STR: ', str);
 //		}
 
 		jumpSpacesEncode = jumpSpacesEncode || false;
-		if(toLog) console.log('jumpSpacesEncode: ', jumpSpacesEncode);
 		var _str = str;
-		if(toLog) console.log('_str 1: ', _str);
 
 		if(jumpSpacesEncode) {
 			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true, toLog);
 //			_str = this.encodeSpacesAsPlaceholders(_str);
 		}
-		if(toLog) console.log('_str 2: ', _str);
+		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
+					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
+					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
+					.replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
+					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">°</span>' );
+
 		return _str;
 //		console.log('str: ', str);
 //		var _str = str;
@@ -2237,7 +2240,6 @@ UI = {
 			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true);
 //			_str = this.encodeSpacesAsPlaceholders(_str);
 		}
-		console.log('Q _str: ', _str);
 		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
@@ -2249,18 +2251,17 @@ UI = {
 
 		var newStr = '';
 		$.each($.parseHTML(str), function(index) {
+
 			if(this.nodeName == '#text') {
 				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
 			} else {
 				match = this.outerHTML.match(/<.*?>/gi);
-				console.log('match: ', match);
 				if(match.length == 1) { // se è 1 solo, è un tag inline
 					
 				} else if(match.length == 2) { // se sono due, non ci sono tag innestati
 					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
 //					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
 				} else {
-					console.log('vediamo: ', $.parseHTML(this.outerHTML));
 
 					newStr += htmlEncode(match[0]) + UI.encodeSpacesAsPlaceholders(this.innerHTML) + htmlEncode(match[1], false);
 					
@@ -2277,40 +2278,8 @@ UI = {
 			newStr = newStr.replace(/#@-lt-@#/gi, '<').replace(/#@-gt-@#/gi, '>').replace(/#@-space-@#/gi, ' ');
 		}
 		return newStr;
-		
-/*
-		if(toLog) console.log('STR: ', str);
-		if(toLog) console.log('$.parseHTML(str): ', $.parseHTML(str));
-		newStr = '';
-		$.each($.parseHTML(str), function(index) {
-			if(toLog) console.log('THIS: ', this);
-			if(this.nodeName == '#text') {
-				if(toLog) console.log('this1: ', this);
-				if(toLog) console.log('typeof this: ', typeof this);
-				if(toLog) console.log('$(this).text(): ', $(this).text());
-				if(toLog) console.log('$(this).html(): ', $(this).html());
-				if(toLog) console.log('this.data: ', this.data);
-				if(toLog) console.log('this.outerHTML: ', this.outerHTML);
-				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
-//				newStr += this.outerHTML.replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
-				if(toLog) console.log('n1: ', newStr);
-			} else {
-				if(toLog) console.log('this2: ', this);
-				if(toLog) console.log('this.outerHTML: ', this.outerHTML);
-				if(toLog) console.log('this.innerHTML: ', this.innerHTML);
-				if(toLog) console.log($.parseHTML(this.outerHTML));
-				if(toLog) console.log('match: ', this.outerHTML.match(/<.*?>/gi));
-				match = this.outerHTML.match(/<.*?>/gi);
-//				if(match)
-//				newStr += this.outerHTML;
-				newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>') + htmlEncode(match[1]);
-				if(toLog) console.log('n2: ', newStr);
-			}
-		});
-		if(toLog) console.log('NEW STR: ', newStr);
-		return newStr;
-*/
 	},
+/*
 	prova: function(str, root) {
 		var newStr = '';
 		$.each($.parseHTML(str), function(index) {
@@ -2343,7 +2312,7 @@ UI = {
 		}
 		return newStr;
 	},
-
+*/
 
 	unnestMarkers: function() {
 		$('.editor .editarea .marker .marker').each(function() {
@@ -4291,7 +4260,7 @@ console.log('translation 1: ', translation);
 			//ANTONIO 20121205 editarea.text(translation).addClass('fromSuggestion');
 
 			if (decode) {
-console.log('translation 2: ', translation);
+				console.log('translation 2: ', translation);
 				translation = htmlDecode(translation);
 			}
 			if (this.body.hasClass('searchActive'))
@@ -4442,8 +4411,14 @@ console.log('translation 4: ', translation);
 			var match = d.data.matches[0].match;
 
 			var copySuggestionDone = false;
+			var segment_id = segment.attr('id');
+/*
 			if (editareaLength === 0) {
 				console.log('translation AA: ', translation);
+//				translation = UI.decodePlaceholdersToText(translation, true, segment_id, 'translation');
+				translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
+				console.log($('#' + segment_id + ' .matches .graysmall'));
+				console.log('translation BB: ', translation);
 				UI.copySuggestionInEditarea(segment, translation, editarea, match, true, true, 0);
 				if (UI.body.hasClass('searchActive'))
 					UI.addWarningToSearchDisplay();
@@ -4451,7 +4426,7 @@ console.log('translation 4: ', translation);
 				copySuggestionDone = true;
 			} else {
 			}
-			var segment_id = segment.attr('id');
+*/
 			$(segment).addClass('loaded');
 			$('.sub-editor.matches .overflow', segment).empty();
 
@@ -4490,8 +4465,21 @@ console.log('translation 4: ', translation);
 //				console.log('dopo: ', $('.sub-editor.matches .overflow .suggestion_source', segment).html());
 			});
 			UI.markSuggestionTags(segment);
+
 			UI.setDeleteSuggestion(segment);
 			UI.lockTags();
+			if (editareaLength === 0) {
+				console.log('translation AA: ', translation);
+//				translation = UI.decodePlaceholdersToText(translation, true, segment_id, 'translation');
+				translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
+				console.log($('#' + segment_id + ' .matches .graysmall'));
+				console.log('translation BB: ', translation);
+				UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
+				if (UI.body.hasClass('searchActive'))
+					UI.addWarningToSearchDisplay();
+				UI.setChosenSuggestion(1);
+				copySuggestionDone = true;
+			}						
 //			if (copySuggestionDone) {
 //				if (isActiveSegment) {
 //				}
@@ -4818,19 +4806,15 @@ $.extend(UI, {
 
 	// TAG LOCK
 	lockTags: function(el) {
-		console.log('lock tags');
+//		console.log('lock tags');
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
-			console.log('editarea: ', this);
 		if (!this.taglockEnabled)
 			return false;
-			console.log('a');
 		if (this.noTagsInSegment())
 			return false;
-			console.log('b');
 		$(editarea).first().each(function() {
-			console.log('editarea: ', this);
 			saveSelection();
 			var tx = $(this).html();
 			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
@@ -5233,7 +5217,6 @@ $.extend(UI, {
 		}
 	},
 	getGlossary: function(segment, entireSegment, next) {
-//		console.log('get glossary');
 //		console.log('segment: ', segment);
 //		console.log('entireSegment: ', entireSegment);
 //		console.log('next: ', next);
@@ -5252,6 +5235,12 @@ $.extend(UI, {
 			$('.sub-editor.glossary .overflow .graysmall.message', n).empty();			
 		}
 		txt = (entireSegment)? $('.text .source', n).attr('data-original') : view2rawxliff($('.gl-search .search-source', n).text());
+//		console.log('typeof n: ', typeof $(n).attr('id'));
+//		console.log('n: ', $(n).attr('id').split('-')[1]);
+//		if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 1: ', $('.source', n).html()); 
+//		if($(n).attr('id').split('-')[1] == '13735228') {
+//			console.log('QUI 1: ', $('.source', n).html()); 
+//		}
 
 		APP.doRequest({
 			data: {
@@ -5274,9 +5263,16 @@ $.extend(UI, {
 //						UI.body.addClass('noGlossary');
 					}
 				}
+				n = this[0];
+//				if($(n).attr('id').split('-')[1] == '13735228') console.log('QUI 2: ', $('.source', n).html()); 
+//				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 2: ', $('.source', n).html()); 
+
 				UI.processLoadedGlossary(d, this);
+//				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 3: ', $('.source', n).html()); 
+//				if($(n).attr('id').split('-')[1] == '13735228') console.log('QUI 3: ', $('.source', n).html()); 
 //				console.log('next?: ', this[1]);
 				if(!this[1]) UI.markGlossaryItemsInSource(d, this);
+//				if((typeof $(n).attr('id') != 'undefined')&&($(n).attr('id').split('-')[1] == '13735228')) console.log('QUI 4: ', $('.source', n).html()); 
 			},
 			complete: function() {
 				$('.gl-search', UI.currentSegment).removeClass('loading');
@@ -5310,6 +5306,7 @@ $.extend(UI, {
 				i++;
 				var re = new RegExp("(" + k.trim() + ")", "gi");
 				coso = cleanString.replace(re, '<mark>' + k + '</mark>');
+				if(coso.indexOf('<mark>') == -1) return;
 				int = {
 					x: coso.indexOf('<mark>'), 
 					y: coso.indexOf('</mark>') - 6
@@ -5317,41 +5314,7 @@ $.extend(UI, {
 				intervals.push(int);
 			});
 			UI.intervalsUnion = [];
-/*
-			intervals = [
-				{
-					x: 27,
-					y: 29
-				},
-				{
-					x: 8,
-					y: 10
-				},
-				{
-					x: 4,
-					y: 6
-				},
-				{
-					x: 3,
-					y: 5
-				},
-				{
-					x: 9,
-					y: 18
-				},
-				{
-					x: 16,
-					y: 20
-				},
-				{
-					x: 25,
-					y: 28
-				},
-			]
-*/
-//			console.log('intervals: ', JSON.stringify(intervals));
 			UI.checkIntervalsUnions(intervals);
-//			console.log('array unione: ', JSON.stringify(UI.intervalsUnion));
 			UI.startGlossaryMark = '<mark class="inGlossary">';
 			UI.endGlossaryMark = '</mark>';
 			markLength = UI.startGlossaryMark.length + UI.endGlossaryMark.length;
@@ -5360,9 +5323,7 @@ $.extend(UI, {
 				added = markLength * index;
 				sourceString = sourceString.splice(this.x + added, 0, UI.startGlossaryMark);				
 				sourceString = sourceString.splice(this.y + added + UI.startGlossaryMark.length, 0, UI.endGlossaryMark);
-//				console.log(sourceString);
 				$('.editor .source').html(sourceString);
-//				console.log($('.editor .source').html());
 			});		
 		}		
 	},
