@@ -23,6 +23,7 @@
         </Directory>
         php_flag register_globals off
         php_flag magic_quotes_gpc off
+        php_admin_flag short_open_tag on
         LogLevel error
         ErrorLog /var/log/apache2/matecat.error.log
         CustomLog /var/log/apache2/matecat.log combined
