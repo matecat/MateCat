@@ -2207,11 +2207,11 @@ UI = {
      * @returns {XML|string}
      */
     decodePlaceholdersToText: function (str, jumpSpacesEncode, sid, operation) {
-		toLog = (sid == '12912488');
+		toLog = (sid == '13735228');
 //		toLog = ((operation == 'contribution source'));
 //		if(toLog) console.log('decodePH operation: ', operation);
 //		if(operation == 'source') {
-//			if(toLog) console.log('SOURCE STR: ', str);
+			if(toLog) console.log('SOURCE STR: ', str);
 //		}
 
 		jumpSpacesEncode = jumpSpacesEncode || false;
@@ -2225,15 +2225,15 @@ UI = {
 					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
 					.replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
-					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">°</span>' );
+					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false"> </span>' );
 
+		if(toLog) console.log('_str: ', _str);
 		return _str;
-//		console.log('str: ', str);
 //		var _str = str;
 //
 ////		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' );
 //		return _str;
-		
+/*		
 		jumpSpacesEncode = jumpSpacesEncode || false;
 		var _str = str;
 		if(jumpSpacesEncode) {
@@ -2246,6 +2246,7 @@ UI = {
 					.replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
 					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">°</span>' );
 		return _str;
+		*/
     },
 	encodeSpacesAsPlaceholders: function(str, root, toLog) {
 
@@ -2253,13 +2254,13 @@ UI = {
 		$.each($.parseHTML(str), function(index) {
 
 			if(this.nodeName == '#text') {
-				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
+				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker" contenteditable="false"> </span>');
 			} else {
 				match = this.outerHTML.match(/<.*?>/gi);
 				if(match.length == 1) { // se è 1 solo, è un tag inline
 					
 				} else if(match.length == 2) { // se sono due, non ci sono tag innestati
-					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@# #@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
 //					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
 				} else {
 

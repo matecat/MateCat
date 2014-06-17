@@ -1283,7 +1283,7 @@ section{position:relative;float:left;width:100%;-webkit-transition: all  100ms e
 .wordscounter{float:right;text-align:right}
 .wordcounter
 {
-	display: none !important;
+	display: block !important;
 	text-align: right;
 	margin-right: -70px !important;
 }
@@ -2266,9 +2266,9 @@ section.status-new.opened .editarea
 	border:1px solid transparent;
 	-moz-border-radius: 2px;
 	border-radius: 2px;
-	/*
-		word-break: break-all;
-	*/
+	
+		word-break: break-word;
+	
     hyphens: auto;
 	-moz-hyphens: auto;
 	transition: all  50ms ease-in;
@@ -3499,9 +3499,13 @@ del.diff
 {
 	color: #aaa;
 	position: relative;
-	padding-left: 4px;
-	margin-right: 4px;
-	top: 5px;
+	padding-right: 12px;
+	opacity: 0.2;
+	/*width: 20px !important;*/
+	top: 3px;
+	font-size: 10px;
+	background: url(../img/circle.png) 0px 0px no-repeat;
+	background-size: 8px;
 
 /*	background: url(../img/bg-nbsp.png) center center no-repeat; 
 	width: 20px;
@@ -3519,12 +3523,28 @@ del.diff
 }
 .space-marker
 {
+	color: #CCC;
+	position: relative;
+	left: 4px;
+	padding-right: 12px;
+/*	padding-left: 6px;
+	margin-right: 4px;
+	margin-left: 4px;*/
+	opacity: 0.2;
+	/*width: 20px !important;*/
+	top: 3px;
+	font-size: 10px;
+	background: url(../img/dot.png) 0px 0px no-repeat;
+	background-size: 6px;
+/*
 	color: #ccc;
 	position: relative;
 	padding-left: 4px;
 	margin-right: 4px;
 	top: -4px;
+*/
 }
+
 .editToolbar
 {
 	/*float: left;*/	
