@@ -456,6 +456,6 @@ SET character_set_client = @saved_cs_client;
 
 -- Dump completed on 2014-06-16 19:19:31
 CREATE USER 'matecat'@'localhost' IDENTIFIED BY 'matecat01';
-GRANT ALL ON matecat_sandbox.* TO 'matecat'@'localhost';
+GRANT ALL ON matecat.* TO 'matecat'@'localhost';
 GRANT ALL ON matecat_analysis.* TO 'matecat'@'localhost';
 FLUSH PRIVILEGES;

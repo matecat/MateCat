@@ -1,0 +1,7 @@
+﻿MateCat Install Tutorial
+
+
+See the complete installation guide here:
+
+http://docs.matecat.com/general-information/installation-guide
+
