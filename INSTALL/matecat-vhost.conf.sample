@@ -1,6 +1,7 @@
  <VirtualHost *:80>
-        ServerName matecat.local
+        ServerName localhost
         ServerAdmin root@localhost
+
         DocumentRoot @@@path@@@
         DirectoryIndex index.php index.php3 index.html index.htm index.shtml
         <Directory @@@path@@@/>
