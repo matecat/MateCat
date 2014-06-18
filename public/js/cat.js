@@ -4,31 +4,35 @@
 UI = null;
 
 UI = {
-	toggleFileMenu: function() {
-
-		if ($('#jobMenu').is(':animated')) {
+	toggleFileMenu: function() {console.log('ddd');
+        jobMenu = $('#jobMenu');
+		if (jobMenu.is(':animated')) {
 			return false;
-		}
-		if (this.body.hasClass('editing')) {
-			$('#jobMenu .currSegment').show();
 		} else {
-			$('#jobMenu .currSegment').hide();
-		}
-		var menuHeight = $('#jobMenu').height();
+            currSegment = jobMenu.find('.currSegment');
+            if (this.body.hasClass('editing')) {
+                currSegment.show();
+            } else {
+                currSegment.hide();
+            }
+            var menuHeight = jobMenu.height();
 //		var startTop = 47 - menuHeight;
-		$('#jobMenu').css('top', (47 - menuHeight) + "px");
+            jobMenu.css('top', (47 - menuHeight) + "px");
 
-		if ($('#jobMenu').hasClass('open')) {
-			$('#jobMenu').animate({top: "-=" + menuHeight + "px"}, 500).removeClass('open');
-		} else {
-			$('#jobMenu').animate({top: "+=" + menuHeight + "px"}, 300, function() {
-				$('body').on('click', function() {
-					if ($('#jobMenu').hasClass('open')) {
-						UI.toggleFileMenu();
-					}
-				});
-			}).addClass('open');
-		}
+            if (jobMenu.hasClass('open')) {
+                jobMenu.animate({top: "-=" + menuHeight + "px"}, 500).removeClass('open');
+            } else {
+                jobMenu.animate({top: "+=" + menuHeight + "px"}, 300, function() {
+                    $('body').on('click', function() {
+                        if (jobMenu.hasClass('open')) {
+                            UI.toggleFileMenu();
+                        }
+                    });
+                }).addClass('open');
+            }
+            return true;
+        }
+
 	},
 	activateSegment: function(isNotSimilar) {
 		this.createFooter(this.currentSegment, isNotSimilar);
@@ -111,36 +115,37 @@ UI = {
 		if ((typeof segment == 'undefined') || (typeof UI.toSegment != 'undefined')) {
 			this.toSegment = undefined;
 			return true;
-		}
+		} else {
+//		    var closeStart = new Date();
+            this.autoSave = false;
 
-//		var closeStart = new Date();
-		this.autoSave = false;
+            $(window).trigger({
+                type: "segmentClosed",
+                segment: segment
+            });
 
-		$(window).trigger({
-			type: "segmentClosed",
-			segment: segment
-		});
+            clearTimeout(this.liveConcordanceSearchReq);
 
-		clearTimeout(this.liveConcordanceSearchReq); 
+            var saveBrevior = true;
+            if (operation != 'noSave') {
+                if ((operation == 'translated') || (operation == 'Save'))
+                    saveBrevior = false;
+            }
+            if ((segment.hasClass('modified')) && (saveBrevior)) {
+                this.saveSegment(segment);
+            }
+            this.deActivateSegment(byButton);
+            this.removeGlossaryMarksFormSource();
 
-		var saveBrevior = true;
-		if (operation != 'noSave') {
-			if ((operation == 'translated') || (operation == 'Save'))
-				saveBrevior = false;
-		}
-		if ((segment.hasClass('modified')) && (saveBrevior)) {
-			this.saveSegment(segment);
-		}
-		this.deActivateSegment(byButton);
-		this.removeGlossaryMarksFormSource();
-
-		this.lastOpenedEditarea.attr('contenteditable', 'false');
-		this.body.removeClass('editing');
-		$(segment).removeClass("editor");
-		$('span.locked.mismatch', segment).removeClass('mismatch');
-		if (!this.opening) {
-			this.checkIfFinished(1);
-		}
+            this.lastOpenedEditarea.attr('contenteditable', 'false');
+            this.body.removeClass('editing');
+            $(segment).removeClass("editor");
+            $('span.locked.mismatch', segment).removeClass('mismatch');
+            if (!this.opening) {
+                this.checkIfFinished(1);
+            }
+            return true;
+        }
 	},
 	copySource: function() {
 
@@ -199,8 +204,9 @@ UI = {
 	createButtons: function() {
 		var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
 		var buttons = '<li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+&gt;&gt;</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li><li><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
-		$('#segment-' + this.currentSegmentId + '-buttons').empty().append(buttons);
-		$('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
+		var buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
+        buttonsOb.empty().append(buttons);
+        buttonsOb.before('<p class="warnings"></p>');
 	},
 	createFooter: function(segment, emptyContributions) {
 //		isNotSimilar = emptyContributions;
@@ -210,7 +216,7 @@ UI = {
 			if(!emptyContributions) {
 				$('.matches .overflow', segment).empty();
 				return false;
-			}		
+			}
 		}
 		if ($('.footer', segment).text() !== '')
 			return false; 
@@ -331,7 +337,9 @@ UI = {
 					}
 				});
 				return found;
-			}
+			} else {
+                return true;
+            }
 		} else {
 			return false;
 		}
@@ -419,8 +427,10 @@ UI = {
 				return adjacent;
 			} else {
 				this.detectAdjacentSegment(adjacent, direction, times - 1);
+                return true;
 			}
 		} else {
+            return true;
 		}
 	},
 	detectFirstLast: function() {
@@ -430,7 +440,8 @@ UI = {
 	},
 	detectRefSegId: function(where) {
 //		var step = this.moreSegNum;
-		var seg = (where == 'after') ? $('section').last() : (where == 'before') ? $('section').first() : '';
+		var section = $('section');
+        var seg = (where == 'after') ? section.last() : (where == 'before') ? section.first() : '';
 		var segId = (seg.length) ? seg.attr('id').split('-')[1] : 0;
 		return segId;
 	},
@@ -524,9 +535,10 @@ UI = {
 		if (d.error.length)
 			this.processErrors(d.error, 'getMoreSegments');
 		where = d.data.where;
+        section = $('section');
 		if (typeof d.data.files != 'undefined') {
-			firstSeg = $('section').first();
-			lastSeg = $('section').last();
+			firstSeg = section.first();
+			lastSeg = section.last();
 			var numsegToAdd = 0;
 			$.each(d.data.files, function() {
 				numsegToAdd = numsegToAdd + this.segments.length;
@@ -902,6 +914,7 @@ UI = {
 		this.setCurrentSegment();
 		
 		if (!this.readonly) {
+            console.log('getNormally: ', getNormally);
 			if(getNormally) {
 				this.getContribution(segment, 0);
 			} else {
@@ -1390,7 +1403,7 @@ UI = {
         $.each(d.data.editable, function() {
             numSeg += this.involved_id.length;
         });
-//		console.log('numAlt: ', numAlt);
+		console.log('numAlt: ', numAlt);
 //		console.log('numSeg: ', numSeg);
         if(numAlt) {
 //            UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + ((numAlt > 1)? 'other ' + numAlt + ' different' : 'another') + ' way' + ((numAlt > 1)? 's' : '') + '</a></p>');

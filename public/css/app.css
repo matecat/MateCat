@@ -2989,6 +2989,10 @@ footer nav
 	padding-bottom: 3px;
 	vertical-align: middle;
 }
+.editor .footer .locked
+{
+	color: #a8a8a8 !important;
+}
 .editarea .locked.mismatch,
 .source .locked.mismatch,
 .locked.mismatch-old
@@ -3504,8 +3508,8 @@ del.diff
 	/*width: 20px !important;*/
 	top: 3px;
 	font-size: 10px;
-	background: url(../img/circle.png) 0px 0px no-repeat;
-	background-size: 8px;
+	background: url(../img/circle.png) 3px 0px no-repeat;
+	background-size: 6px;
 
 /*	background: url(../img/bg-nbsp.png) center center no-repeat; 
 	width: 20px;

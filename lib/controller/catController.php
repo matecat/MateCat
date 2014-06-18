@@ -310,6 +310,7 @@ class catController extends viewController {
         $load_time                              = $end_time - $this->start_time;
         $this->template->load_time              = $load_time;
         $this->template->tms_enabled            = var_export( (bool)$this->project_status['id_tms'], true );
+        $this->template->mt_enabled            = var_export( (bool)$this->project_status['id_mt_engine'], true );
         $this->template->time_to_edit_enabled   = INIT::$TIME_TO_EDIT_ENABLED;
         $this->template->build_number           = INIT::$BUILD_NUMBER;
         $this->template->downloadFileName       = $this->downloadFileName;
