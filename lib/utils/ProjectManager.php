@@ -8,7 +8,6 @@
  */
 include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 include_once INIT::$UTILS_ROOT . "/DetectProprietaryXliff.php";
-include_once INIT::$UTILS_ROOT . "/engines/TMSServiceFactory.class.php";
 
 class ProjectManager {
 
@@ -105,6 +104,20 @@ class ProjectManager {
 		//create user (Massidda 2013-01-24)
 		//this is done only if an API key is provided
 		if ( !empty( $this->projectStructure['private_tm_key'] ) ) {
+
+            $APIKeySrv = TMSServiceFactory::getAPIKeyService();
+
+            try {
+
+                if( !$APIKeySrv->checkCorrectKey( $this->projectStructure['private_tm_key'] ) ){
+                    throw new Exception( "Error: The TM private key provided is not valid.", -3 );
+                }
+
+            } catch ( Exception $e ){
+                $this->projectStructure['result']['errors'][] = array( "code" => $e->getCode(), "message" => $e->getMessage() );
+                return false;
+            }
+
 			//the base case is when the user clicks on "generate private TM" button:
 			//a (user, pass, key) tuple is generated and can be inserted
 			//if it comes with it's own key without querying the creation API, create a (key,key,key) user
