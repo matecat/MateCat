@@ -1329,9 +1329,10 @@
 				"en":"Swahili"
 			}],
 			"isocode":"sw",
-			"enabled":false,
+			"enabled":true,
 			"rtl":false,
-			"rfc3066code":"sw-SZ"
+			"rfc3066code":"sw-SZ",
+			"languageRegionCode":"sw-KE"
 		}
 	,
 		{
