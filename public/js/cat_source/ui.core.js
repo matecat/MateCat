@@ -1385,6 +1385,11 @@ UI = {
         sameContentIndex = -1;
         $.each(d.data.editable, function(ind) {
             //Remove trailing spaces for string comparison
+            console.log('this.translation: ' + this.translation);
+            console.log('UI.decodePlaceholdersToText(this.translation): ' + UI.decodePlaceholdersToText(this.translation));
+            console.log('UI.editarea.text(): ' + UI.editarea.text());
+            console.log("UI.editarea.text().replace( /[ \xA0]+$/ , '' ): " + UI.editarea.text().replace( /[ \xA0]+$/ , '' ));
+            console.log("rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) )" + rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ));
             if( this.translation == rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) ) {
                 sameContentIndex = ind;
             }
@@ -2131,7 +2136,7 @@ UI = {
 	},
 */
 
-    postProcessEditarea: function(context, selector){
+    postProcessEditarea: function(context, selector){console.log('postprocesseditarea');
         selector = (typeof selector === "undefined") ? '.editarea' : selector;
         area = $( selector, context ).clone();
         /*
@@ -2273,7 +2278,7 @@ UI = {
 				if(match.length == 1) { // se è 1 solo, è un tag inline
 					
 				} else if(match.length == 2) { // se sono due, non ci sono tag innestati
-					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@# #@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker#@-space-@#marker#@-space-@#monad"#@-space-@#contenteditable="false"#@-gt-@# #@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
 //					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
 				} else {
 
@@ -2562,7 +2567,7 @@ UI = {
 		}
 		saveSelection();
 		$('.undoCursorPlaceholder').remove();
-		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder"></span>');
+		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad"></span>');
 		restoreSelection();
 		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
 	},
