@@ -115,7 +115,7 @@ $.extend(UI, {
 			var node = document.createElement("span");
 			node.setAttribute('class', 'marker monad space-marker lastInserted');
 			node.setAttribute('contenteditable', 'false');
-			node.textContent = htmlDecode(".");
+//			node.textContent = htmlDecode(" ");
 			insertNodeAtCursor(node);
 			UI.unnestMarkers();
 		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
@@ -125,7 +125,7 @@ $.extend(UI, {
 			var node = document.createElement("span");
 			node.setAttribute('class', 'marker monad nbsp-marker lastInserted ' + config.nbspPlaceholderClass);
 			node.setAttribute('contenteditable', 'false');
-			node.textContent = htmlDecode("°");
+//			node.textContent = htmlDecode(" ");
 			insertNodeAtCursor(node);
 			UI.unnestMarkers();
 /*

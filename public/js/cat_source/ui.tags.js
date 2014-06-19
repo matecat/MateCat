@@ -266,24 +266,31 @@ $.extend(UI, {
 	
 	// TAG MISMATCH
 	markTagMismatch: function(d) {
-		if(typeof d.tag_mismatch.source != 'undefined') {
-			$.each(d.tag_mismatch.source, function(index) {
-				$('#segment-' + d.id_segment + ' .source span.locked:not(.temp)').filter(function() {
-					return $(this).text() === d.tag_mismatch.source[index];
-				}).last().addClass('temp');							
-			});			
-		}
-		if(typeof d.tag_mismatch.target != 'undefined') {
-			$.each(d.tag_mismatch.target, function(index) {
-				$('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').filter(function() {
-					return $(this).text() === d.tag_mismatch.target[index];
-				}).last().addClass('temp');							
-			});			
-		}
+        // temp
+//        d.tag_mismatch.order = 2;
+        if((typeof d.tag_mismatch.order == 'undefined')||(d.tag_mismatch.order == '')) {
+            if(typeof d.tag_mismatch.source != 'undefined') {
+                $.each(d.tag_mismatch.source, function(index) {
+                    $('#segment-' + d.id_segment + ' .source span.locked:not(.temp)').filter(function() {
+                        return $(this).text() === d.tag_mismatch.source[index];
+                    }).last().addClass('temp');
+                });
+            }
+            if(typeof d.tag_mismatch.target != 'undefined') {
+                $.each(d.tag_mismatch.target, function(index) {
+                    $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').filter(function() {
+                        return $(this).text() === d.tag_mismatch.target[index];
+                    }).last().addClass('temp');
+                });
+            }
 
-		$('#segment-' + d.id_segment + ' span.locked.mismatch').addClass('mismatch-old').removeClass('mismatch');
-		$('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
-		$('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
+            $('#segment-' + d.id_segment + ' span.locked.mismatch').addClass('mismatch-old').removeClass('mismatch');
+            $('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
+            $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
+        } else {
+            $($('#segment-' + d.id_segment + ' .editarea .locked')[d.tag_mismatch.order - 1]).addClass('order-error');
+        }
+
 	},	
 
 	// TAG AUTOCOMPLETE
