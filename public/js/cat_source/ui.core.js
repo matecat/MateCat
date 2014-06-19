@@ -223,7 +223,7 @@ UI = {
 
 		var footer =	'<ul class="submenu">' +
 					'	<li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
-					'		<a tabindex="-1" href="#">Translation matches</a>' +
+					'		<a tabindex="-1" href="#">Translation matches' + ((config.mt_enabled)? '' : ' (No MT)') + '</a>' +
 					'	</li>' +
 					'	<li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc">' +
 					'		<a tabindex="-1" href="#">Concordance</a>' +
