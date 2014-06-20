@@ -27,6 +27,7 @@ class INIT {
 	public static $THRESHOLD_MATCH_TM_NOT_TO_SHOW;
 	public static $TIME_TO_EDIT_ENABLED;
 	public static $ENABLED_BROWSERS;
+    public static $UNTESTED_BROWSERS;
 	public static $BUILD_NUMBER;
 	public static $DEFAULT_FILE_TYPES;
 	public static $SUPPORTED_FILE_TYPES;
@@ -235,6 +236,12 @@ class INIT {
 		self::$AUTHCOOKIENAME='matecat_login';
 		self::$AUTHCOOKIEDURATION=86400*60;
 		self::$ENABLED_BROWSERS = array('applewebkit','chrome', 'safari', 'firefox');
+
+        // sometimes the browser declare to be Mozilla but does not provide a valid Name (e.g. Safari).
+        // This occurs expecially in mobile environment. As an example, when try to open a link from within
+        // of GMail app, it redirect to an internal browser that does not declare a valid name
+        // In this case we will show a notice on the top of the page instead of stop the access
+        self::$UNTESTED_BROWSERS = array('mozillageneric');
 
         /**
          * Matecat open source by default only handles xliff files with a strong focus on sdlxliff
