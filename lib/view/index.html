@@ -85,7 +85,7 @@
 <!--        <script src="${basepath}public/js/loader.js?build=${build_number}"></script> 
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>-->
     </head>
-    <body tal:condition="not:supportedBrowser">
+    <body tal:condition="php:supportedBrowser EQ 0">
         <div  metal:use-macro="unsupported_browser.html/unsupported"/>
     </body>
     <body tal:condition="true:job_not_found">
@@ -97,10 +97,9 @@
     </body>
 
 
-    <body class="cattool${job_archived}${source_rtl}${target_rtl}" tal:condition="php: supportedBrowser && !job_not_found && !job_cancelled" define="catpage string:true">
+    <body class="cattool${job_archived}${source_rtl}${target_rtl}" tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled" define="catpage string:true">
 
         <header metal:use-macro="header.html/main_header">
-
             <div class="wrapper">   
                 <form id="fileDownload" action="${basepath}" method="post">
                     <input type="hidden" name="action" value="downloadFile" />
