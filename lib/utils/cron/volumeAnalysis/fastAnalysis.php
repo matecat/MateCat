@@ -103,7 +103,11 @@ while (1) {
 			$perform_Tms_Analysis = false;
 			$status = Constants_ProjectStatus::STATUS_DONE;
 			Log::doLog( 'Perform Analysis ' . var_export( $perform_Tms_Analysis, true ) );
-		}
+		} elseif( count( $segments ) == 0 ){
+            //there is no analysis on that file, it is ALL Pre-Translated
+            Log::doLog('There is no analysis on that file, it is ALL Pre-Translated');
+            $status = Constants_ProjectStatus::STATUS_DONE;
+        }
 
 		echo "inserting segments...\n";
 		Log::doLog( "inserting segments..." );

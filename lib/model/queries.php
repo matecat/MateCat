@@ -2297,8 +2297,9 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 	 */
 	if( !$perform_Tms_Analysis ){
 		$_details = getProjectSegmentsTranslationSummary( $pid );
-		//echo "--- trying to initialize job total word count.\n";
-		//Log::doLog(  "--- trying to initialize job total word count." );
+
+        echo "--- trying to initialize job total word count.\n";
+		Log::doLog(  "--- trying to initialize job total word count." );
 
 		$project_details = array_pop($_details); //remove rollup
 
