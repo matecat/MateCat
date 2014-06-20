@@ -665,7 +665,7 @@ function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
 function getSegmentsInfo( $jid, $password ) {
 
 	$query = "select j.id as jid, j.id_project as pid,j.source,j.target,
-		j.last_opened_segment, j.id_translator as tid, j.id_tms,
+		j.last_opened_segment, j.id_translator as tid, j.id_tms, j.id_mt_engine,
 		p.id_customer as cid, j.id_translator as tid, j.status_owner as status,
 
 		j.job_first_segment, j.job_last_segment,

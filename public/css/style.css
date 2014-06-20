@@ -2089,6 +2089,11 @@ footer nav
 {
 	color: red !important;
 }
+.editarea .locked.order-error,
+.source .locked.order-error
+{
+    color: #e000ff !important;
+}
 .editor .cc-search .input .locked
 {
 	font-size: 13px;
