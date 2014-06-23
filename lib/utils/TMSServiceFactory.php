@@ -7,9 +7,9 @@ include_once INIT::$UTILS_ROOT . "/CatUtils.php";
 include_once INIT::$UTILS_ROOT . "/engines/LocalAPIKeyService.class.php";
 include_once INIT::$UTILS_ROOT . "/engines/SimpleTMX.class.php";
 
-class TMSServiceFactory{
-	public static function getAPIKeyService(){
+class TMSServiceFactory {
 
+	public static function getAPIKeyService(){
 		return new LocalAPIKeyService();
 	}
 

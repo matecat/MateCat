@@ -491,7 +491,7 @@ UI = {
 					old_standard_words = standard_words.text();
 
 					newSText = '';
-					if (s.TOTAL_STANDARD_WC > 0) {
+					if ( s.STATUS == 'DONE' || s.TOTAL_STANDARD_WC > 0 ) {
 						standard_words.removeClass('loading');
 						$('#standard-equivalent-words .days').show();
 						newSText = s.TOTAL_STANDARD_WC_PRINT;
@@ -508,7 +508,7 @@ UI = {
 					var matecat_words = $('#matecat-equivalent-words .word-number');
 					old_matecat_words = matecat_words.text();
 					newMText = '';
-					if (s.TOTAL_PAYABLE > 0) {
+					if ( s.STATUS == 'DONE' || s.TOTAL_PAYABLE > 0) {
 						matecat_words.removeClass('loading');
 						$('#matecat-equivalent-words .days').show();
 						newMText = s.TOTAL_PAYABLE_PRINT;
@@ -522,13 +522,14 @@ UI = {
 					$('#matecat-equivalent-words .workDays').text(s.PAYABLE_WC_TIME);
 					$('#matecat-equivalent-words .unit').text(s.PAYABLE_WC_UNIT);
 
-					if (s.DISCOUNT_WC > 0) {
-						$('.promo-text span').text(s.DISCOUNT_WC);
-						$('.promo-text').show();
-					} else {
-						$('.promo-text').hide();
-						$('.promo-text span').text(s.DISCOUNT_WC);
-					}
+//					if ( s.DISCOUNT_WC > 0) {
+//						$('.promo-text span').text(s.DISCOUNT_WC);
+//						$('.promo-text').show();
+//					} else {
+//						$('.promo-text').hide();
+//						$('.promo-text span').text(s.DISCOUNT_WC);s
+//					}
+
 					$('#usageFee').text(s.USAGE_FEE);
 					$('#pricePerWord').text(s.PRICE_PER_WORD);
 					$('#discount').text(s.DISCOUNT);

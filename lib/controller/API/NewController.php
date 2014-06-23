@@ -172,17 +172,32 @@ class NewController extends ajaxController {
 		}
 		/* Do conversions here */
 
-		//from api a key is sent and the value is 'new'
-		if( $this->private_tm_key == 'new' ){
-			include_once INIT::$UTILS_ROOT . "/engines/tms.class.php";
-			//crea nuova chiave
-			$newUser = TMS::createMyMemoryKey(); //throws exception
-			$this->private_tm_key  = $newUser->key;
-			$this->private_tm_user = $newUser->id;
-			$this->private_tm_pass = $newUser->pass;
-		}
 
-		$projectStructure = new RecursiveArrayObject(
+        //from api a key is sent and the value is 'new'
+        if ( $this->private_tm_key == 'new' ) {
+
+            try {
+
+                $APIKeySrv = TMSServiceFactory::getAPIKeyService();
+
+                $newUser = $APIKeySrv->createMyMemoryKey();
+
+                $this->private_tm_key  = $newUser->key;
+                $this->private_tm_user = $newUser->id;
+                $this->private_tm_pass = $newUser->pass;
+
+            } catch ( Exception $e ) {
+
+                $this->api_output[ 'message' ] = 'Project Creation Failure';
+                $this->api_output[ 'debug' ]   = array( "code" => $e->getCode(), "message" => $e->getMessage() );
+
+                return -1;
+            }
+
+        }
+
+
+        $projectStructure = new RecursiveArrayObject(
 				array(
 					'id_project'         => null,
 					'id_customer'        => null,
