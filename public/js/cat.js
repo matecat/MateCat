@@ -2225,35 +2225,16 @@ UI = {
      * @returns {XML|string}
      */
     decodePlaceholdersToText: function (str, jumpSpacesEncode, sid, operation) {
-		toLog = (sid == '13735228');
+//		toLog = (sid == '13735228');
 //		toLog = ((operation == 'contribution source'));
 //		if(toLog) console.log('decodePH operation: ', operation);
 //		if(operation == 'source') {
-			if(toLog) console.log('SOURCE STR: ', str);
+//			if(toLog) console.log('SOURCE STR: ', str);
 //		}
 
 		jumpSpacesEncode = jumpSpacesEncode || false;
 		var _str = str;
 
-		if(jumpSpacesEncode) {
-			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true, toLog);
-//			_str = this.encodeSpacesAsPlaceholders(_str);
-		}
-		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
-					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
-					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
-					.replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
-					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false"> </span>' );
-
-		if(toLog) console.log('_str: ', _str);
-		return _str;
-//		var _str = str;
-//
-////		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' );
-//		return _str;
-/*		
-		jumpSpacesEncode = jumpSpacesEncode || false;
-		var _str = str;
 		if(jumpSpacesEncode) {
 			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true);
 //			_str = this.encodeSpacesAsPlaceholders(_str);
@@ -2262,23 +2243,24 @@ UI = {
 					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
 					.replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
-					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">°</span>' );
+					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">&nbsp;</span>' );
+
+//		if(toLog) console.log('_str: ', _str);
 		return _str;
-		*/
     },
-	encodeSpacesAsPlaceholders: function(str, root, toLog) {
+	encodeSpacesAsPlaceholders: function(str, root) {
 
 		var newStr = '';
 		$.each($.parseHTML(str), function(index) {
 
 			if(this.nodeName == '#text') {
-				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker" contenteditable="false"> </span>');
+				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker marker monad" contenteditable="false">&nbsp;</span>');
 			} else {
 				match = this.outerHTML.match(/<.*?>/gi);
 				if(match.length == 1) { // se è 1 solo, è un tag inline
 					
 				} else if(match.length == 2) { // se sono due, non ci sono tag innestati
-					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker#@-space-@#marker#@-space-@#monad"#@-space-@#contenteditable="false"#@-gt-@# #@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker#@-space-@#marker#@-space-@#monad"#@-space-@#contenteditable="false"#@-gt-@#&nbsp;#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
 //					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
 				} else {
 
@@ -2567,7 +2549,7 @@ UI = {
 		}
 		saveSelection();
 		$('.undoCursorPlaceholder').remove();
-		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad"></span>');
+		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
 		restoreSelection();
 		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
 	},
@@ -2635,6 +2617,7 @@ $.extend(UI, {
 //		this.alertConfirmTranslationEnabled = (typeof bb == 'undefined') ? true : false;
 		this.customSpellcheck = false;
 		this.noGlossary = false;
+        this.hiddenTextEnabled = false;
 		setTimeout(function() {
 			UI.blockGetMoreSegments = false;
 		}, 200);
@@ -2987,7 +2970,8 @@ $.extend(UI, {
 			var node = document.createElement("span");
 			node.setAttribute('class', 'marker monad space-marker lastInserted');
 			node.setAttribute('contenteditable', 'false');
-//			node.textContent = htmlDecode(" ");
+			node.textContent = htmlDecode("&nbsp;");
+//			node.textContent = "&nbsp;";
 			insertNodeAtCursor(node);
 			UI.unnestMarkers();
 		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
@@ -5330,9 +5314,13 @@ $.extend(UI, {
 			var intervals = [];
 			$.each(d.data.matches, function(k) {
 				i++;
-				var re = new RegExp("(" + k.trim() + ")", "gi");
-				coso = cleanString.replace(re, '<mark>' + k + '</mark>');
-				if(coso.indexOf('<mark>') == -1) return;
+				k1 = UI.decodePlaceholdersToText(k, true);
+                k2 = k1.replace(/<\//gi, '<\\/').replace(/\(/gi, '\\(').replace(/\)/gi, '\\)');
+                var re = new RegExp(k2.trim(), "gi");
+                var cs = cleanString;
+                coso = cs.replace(re, '<mark>' + k1 + '</mark>');
+
+                if(coso.indexOf('<mark>') == -1) return;
 				int = {
 					x: coso.indexOf('<mark>'), 
 					y: coso.indexOf('</mark>') - 6
@@ -5434,7 +5422,7 @@ $.extend(UI, {
 					var rightTxt = this.translation;
 					rightTxt = rightTxt.replace(/\#\{/gi, "<mark>");
 					rightTxt = rightTxt.replace(/\}\#/gi, "</mark>");
-					$('.sub-editor.glossary .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + leftTxt + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + rightTxt + '</span></li><li class="details">' + ((this.comment === '')? '' : '<div class="comment">' + this.comment + '</div>') + '<ul class="graysmall-details"><li>' + this.last_update_date + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></li></ul>');
+					$('.sub-editor.glossary .overflow .results', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + UI.decodePlaceholdersToText(leftTxt, true) + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + UI.decodePlaceholdersToText(rightTxt, true) + '</span></li><li class="details">' + ((this.comment === '')? '' : '<div class="comment">' + this.comment + '</div>') + '<ul class="graysmall-details"><li>' + this.last_update_date + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></li></ul>');
 				});
 			});
 		} else {

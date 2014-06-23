@@ -2225,35 +2225,16 @@ UI = {
      * @returns {XML|string}
      */
     decodePlaceholdersToText: function (str, jumpSpacesEncode, sid, operation) {
-		toLog = (sid == '13735228');
+//		toLog = (sid == '13735228');
 //		toLog = ((operation == 'contribution source'));
 //		if(toLog) console.log('decodePH operation: ', operation);
 //		if(operation == 'source') {
-			if(toLog) console.log('SOURCE STR: ', str);
+//			if(toLog) console.log('SOURCE STR: ', str);
 //		}
 
 		jumpSpacesEncode = jumpSpacesEncode || false;
 		var _str = str;
 
-		if(jumpSpacesEncode) {
-			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true, toLog);
-//			_str = this.encodeSpacesAsPlaceholders(_str);
-		}
-		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
-					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
-					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
-					.replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
-					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false"> </span>' );
-
-		if(toLog) console.log('_str: ', _str);
-		return _str;
-//		var _str = str;
-//
-////		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' );
-//		return _str;
-/*		
-		jumpSpacesEncode = jumpSpacesEncode || false;
-		var _str = str;
 		if(jumpSpacesEncode) {
 			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true);
 //			_str = this.encodeSpacesAsPlaceholders(_str);
@@ -2262,23 +2243,24 @@ UI = {
 					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
 					.replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
-					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">°</span>' );
+					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">&nbsp;</span>' );
+
+//		if(toLog) console.log('_str: ', _str);
 		return _str;
-		*/
     },
-	encodeSpacesAsPlaceholders: function(str, root, toLog) {
+	encodeSpacesAsPlaceholders: function(str, root) {
 
 		var newStr = '';
 		$.each($.parseHTML(str), function(index) {
 
 			if(this.nodeName == '#text') {
-				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker" contenteditable="false"> </span>');
+				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker marker monad" contenteditable="false">&nbsp;</span>');
 			} else {
 				match = this.outerHTML.match(/<.*?>/gi);
 				if(match.length == 1) { // se è 1 solo, è un tag inline
 					
 				} else if(match.length == 2) { // se sono due, non ci sono tag innestati
-					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker#@-space-@#marker#@-space-@#monad"#@-space-@#contenteditable="false"#@-gt-@# #@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker#@-space-@#marker#@-space-@#monad"#@-space-@#contenteditable="false"#@-gt-@#&nbsp;#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
 //					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
 				} else {
 
@@ -2567,7 +2549,7 @@ UI = {
 		}
 		saveSelection();
 		$('.undoCursorPlaceholder').remove();
-		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad"></span>');
+		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
 		restoreSelection();
 		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
 	},

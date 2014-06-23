@@ -115,7 +115,8 @@ $.extend(UI, {
 			var node = document.createElement("span");
 			node.setAttribute('class', 'marker monad space-marker lastInserted');
 			node.setAttribute('contenteditable', 'false');
-//			node.textContent = htmlDecode(" ");
+			node.textContent = htmlDecode("&nbsp;");
+//			node.textContent = "&nbsp;";
 			insertNodeAtCursor(node);
 			UI.unnestMarkers();
 		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
