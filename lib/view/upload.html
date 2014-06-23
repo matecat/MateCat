@@ -68,10 +68,88 @@
 <header>
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
+        
+        <div id="dd" class="wrapper-dropdown-5 pull-right" tabindex="1">                    
+           <tal:block tal:condition="php: empty(logged_user)">
+                        <span>Anonymous</span> (<a id='loginlink' tal:attributes="href incomingUrl">login</a>)
+            </tal:block>
+            <tal:block tal:condition="php: !empty(logged_user)">
+                    <span tal:content='logged_user'></span>
+            </tal:block>
+
+    <ul class="dropdown">
+        <li><a class="memory-mgmt" href="#"><i class="icon-user"></i>TM Management</a></li>
+        <li><a href="#"><i class="icon-user"></i>Glossary Management</a></li>
+        <li><a href="#"><i class="icon-cog"></i>Projects</a></li>
+        <li><a href="#"><i class="icon-cog"></i>Help</a></li>
+        <li><a id='logoutlink' href='#'><i class="icon-remove"></i>Logout</a></li>
+    </ul>
+</div>
     </div>
     <div class="cl"></div>
 
 </header>
+<div class="mgmt-panel">
+<a href="#" class="x-popup"></a>
+	<div class="mgmt-container">
+    	<div class="mgmt-table">
+            <h1 class="pull-left">TM Management</h1>
+            <a class="pull-right add-tm" href="#"><span>Import TM</span></a>
+            <table class="mgmt-tm">
+                <thead>
+                    <th>Glossary Name</th>
+                    <th>Private Key</th>
+                    <th>Description</th>
+                    <th>Lang Pair</th>
+                    <th>Lookup</th>
+                    <th>Update</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Google Drive</td>
+                        <td>90231291i201i</td>
+                        <td>Inf tech</td>
+                        <td>en-US - es-ES</td>
+                        <td><input type="checkbox" /></td>
+                        <td><input type="checkbox" /></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    		<div class="mgmt-container">
+                <div class="mgmt-add-tm">
+
+    	            <h1 class="pull-left">Import Translation Memory</h1>
+            <a class="pull-right back-mgmt" href="#"><span>Back to TM management</span></a>
+            	<div class="translate-box source">
+                   <h2>Source Language</h2>
+                    <select name="source-lang" id="source-lang">
+                        <tal:block tal:define="language php:array()" tal:repeat="language sourceLangHistory">
+                            <option class="custom" tal:condition="language/selected" selected="selected" tal:attributes="value language/code" tal:content="language/name"></option>
+                            <option class="custom" tal:condition="not:language/selected" tal:attributes="value language/code" tal:content="language/name"></option>
+                        </tal:block>
+                
+                        <option class="separator" disabled="disabled">---</option>
+                
+                        <tal:block tal:repeat="language source_languages">
+                            <option tal:condition="php: (noSourceLangHistory EQ 'false')&&(language['code'] EQ 'en-US')" selected="selected" tal:attributes="value language/code" tal:content="language/name">
+                                ---
+                            </option>
+                            <option tal:condition="php: (noSourceLangHistory NE 'false')&&(language['code'] EQ 'en-US')" tal:attributes="value language/code" tal:content="language/name">
+                                ---
+                            </option>
+                            <option tal:condition="php: language['code'] NE 'en-US'" tal:attributes="value language/code" tal:content="language/name">
+                                ---
+                            </option>
+                        </tal:block>
+                    </select>
+            </div>
+            
+            
+            </div>
+    </div>
+</div>
 <div class="wrapper-upload">
 <h1 tal:condition="true:conversion_enabled">Translate your files</h1>
 
@@ -728,20 +806,25 @@
     <div class="wrapper">
 
         <nav>
-            <ul>
-                <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
+            <ul class="pull-left">
                 <li><a tal:attributes="href string:${basepath}api/docs">API</a></li>
+				<li><a href="http://docs.matecat.com" target="_blank">How Matecat counts words</a></li>
 				<li><a href="http://docs.matecat.com" target="_blank">Docs</a></li>
             </ul>
+            <ul class="pull-right">
+                <li><a tal:attributes="href string:${basepath}manage/?new=1" style="display:none">>Manage</a></li>
+            </ul>
+            
+          
 
             <tal:block tal:condition="php: empty(logged_user)">
-                <div id='welcomebox'>
+                <div id='welcomebox' style="display:none">
                     <span>Anonymous</span> (<a id='loginlink' tal:attributes="href incomingUrl">login</a>)
                 </div>
             </tal:block>
 
             <tal:block tal:condition="php: !empty(logged_user)">
-                <div id='welcomebox'>
+                <div id='welcomebox' style="display:none">>
                     <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
                 </div>
             </tal:block>
@@ -751,7 +834,63 @@
     </div>
 </footer>
 
+
+
 <script src="${basepath}public/js/lib/snapengage.js"></script>
+
+<script type="text/javascript">
+
+			function DropDown(el) {
+				this.dd = el;
+				this.initEvents();
+			}
+			DropDown.prototype = {
+				initEvents : function() {
+					var obj = this;
+
+					obj.dd.on('click', function(event){
+						$(this).toggleClass('active');
+						event.stopPropagation();
+					});	
+				}
+			}
+
+			$(function() {
+
+				var dd = new DropDown( $('#dd') );
+
+				$(document).click(function() {
+					// all dropdowns
+					$('.wrapper-dropdown-5').removeClass('active');
+				});
+
+			});
+			
+			$( ".memory-mgmt" ).click(function() {
+  $( ".mgmt-panel" ).show();
+});
+
+$( ".x-popup" ).click(function() {
+  $( ".mgmt-panel" ).hide();
+});
+
+$( ".add-tm" ).click(function() {
+  $( ".mgmt-table" ).hide();
+  $( ".mgmt-add-tm" ).show();
+  });
+
+$( ".back-mgmt" ).click(function() {
+  $( ".mgmt-add-tm" ).hide();
+  $( ".mgmt-table" ).show();
+});
+
+
+
+
+			
+			
+
+		</script>
 
 </body>
 
