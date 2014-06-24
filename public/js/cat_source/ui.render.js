@@ -60,7 +60,7 @@ $.extend(UI, {
 		this.autoUpdateEnabled = true;
 		this.goingToNext = false;
 		this.preCloseTagAutocomplete = false;
-        this.hiddenTextEnabled = true;
+        this.hiddenTextEnabled = false;
 
 
 
