@@ -447,7 +447,6 @@ body.manage .pagination a:hover
 body.manage header .filter
 	{
 	display: block !important;
-	margin-top: -2px !important;
 	}
 
 body.manage .search
@@ -801,7 +800,7 @@ only screen and (min-resolution: 192dpi),
 only screen and (in-resolution: 2dppx) { 
 
 .filter {
-	background: url(../img/sprite2x.png) 2px -218px no-repeat;
+	background: url(../img/sprite2x.png) 2px -214px no-repeat;
 }
 body.manage a.cancel-project, body.manage a.archive-project, body.manage a.resume-project, body.manage a.unarchive-project {
 	background: url(../img/sprite2x.png) -13px -78px no-repeat;

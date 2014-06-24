@@ -380,12 +380,11 @@ footer nav li:first-child
 /*end-scrollbar*/
 /* mgmt panel  */
 
-.mgmt-panel {display:none; 
-margin:0 auto; overflow:hidden; width:100%;}
+
 
 .mgmt-panel .tablestats {display:block;}
 
-.mgmt-container {width:90%; text-align:left;}
+.mgmt-wrapper {width:92%; text-align:left;}
 
 /*end mgmt panel */
 
@@ -393,17 +392,23 @@ margin:0 auto; overflow:hidden; width:100%;}
 
 	
 .wrapper-dropdown-5 {
-    /* Size & position */
-    position: relative;
-    width: 135px;
-    margin: 0 auto;
-    padding: 13px 15px;
- 
-    /* Styles */
-    color: #fff;
-    cursor: pointer;
-    outline: none;
-    transition: all 0.3s ease-out;
+   position: relative;
+margin: 0 auto;
+padding: 14px 10px;
+border-right: 1px solid #333;
+	border-left: 1px solid #333;
+
+margin-left: 10px;
+margin-top: -10px;
+color: #fff;
+box-shadow: 0px 0px 1px #AEAEAE;
+cursor: pointer;
+outline: none;
+transition: all 0.3s ease-out;
+}
+
+.wrapper-dropdown-5:hover {
+background-color: #636567;
 }
 
 
@@ -411,27 +416,29 @@ margin:0 auto; overflow:hidden; width:100%;}
 		color:#fff;
 }
 
- 
-.wrapper-dropdown-5:after { /* Little arrow */
-    content: "";
-    width: 0;
-    height: 0;
-    position: absolute;
-    top: 50%;
-    right: 15px;
-    margin-top: -3px;
-    border-width: 6px 6px 0 6px;
-    border-style: solid;
-    border-color: #fff transparent;
+.login-info {
+
+padding: 6px 0;
+color: #fff;
 }
+
+ 
+.dropdown-icon { /* Little arrow */
+    background:url(../img/avatar.png) center right no-repeat;
+	width: 22px;
+height: 20px;
+}
+
 
 .wrapper-dropdown-5 .dropdown {
     /* Size & position */
     position: absolute;
     top: 100%;
-    left: 0;
+	border-radius: 0 0 5px 5px;
     right: 0;
- 
+	margin-top: 1px;
+margin-right: -1px;
+ 	width:210px;
     /* Styles */
     background: #fff;
     border: 1px solid rgba(0,0,0,0.2);
@@ -444,6 +451,8 @@ margin:0 auto; overflow:hidden; width:100%;}
     max-height: 0;
     overflow: hidden;
 }
+
+
 
 .wrapper-dropdown-5 .dropdown li {
     padding: 0 10px ;
@@ -477,7 +486,6 @@ margin:0 auto; overflow:hidden; width:100%;}
 /* Active state */
  
 .wrapper-dropdown-5.active {
-    background: #4cbeff;
     box-shadow: none;
     border-bottom: none;
     color: white;
@@ -505,6 +513,10 @@ margin:0 auto; overflow:hidden; width:100%;}
 .no-pointerevents .wrapper-dropdown-1.active .dropdown {
     display: block;
 }
+
+.needtobelogged {display:none; height:150px; text-align:center; padding:15px 5px; 
+color:#333;}
+
 
 /*end dropdown menu profile */
 
@@ -643,11 +655,11 @@ margin:0 auto; overflow:hidden; width:100%;}
 	    display: none;
     }
 
-    #popupWrapper
+    #popupWrapper, .mgmt-popup-outer
     {
 	    display: none;
     }
-    .popup-outer
+    .popup-outer, .mgmt-popup-outer
     {
 	    background: #000;
 	    position: fixed;
@@ -658,6 +670,10 @@ margin:0 auto; overflow:hidden; width:100%;}
 	    z-index: 99999999999999;
 	    opacity: 0.6;
     }
+	
+	.mgmt-popup-outer {
+		z-index: 10;
+	}
 
     .popup
     {
@@ -763,16 +779,17 @@ margin:0 auto; overflow:hidden; width:100%;}
 	 .mgmt-panel .x-popup {
 		position:absolute;
 		right:160px; 
-		
+		margin-top: 10px;
 	 }
 	
 	
-    .popup .x-popup:hover
+    .popup .x-popup:hover, .mgmt-panel .x-popup:hover
     {
 	    background: url(../img/sprite.png) 10px -334px no-repeat;
 	    background-size: 22px;
     }  
-
+	
+	.mgmt-panel .btn-ok,
     .popup .btn-ok,
     .popup .btn-cancel 
     {
@@ -789,6 +806,10 @@ margin:0 auto; overflow:hidden; width:100%;}
 	    background: -moz-linear-gradient(top,  #09beec,  #119ec4);
 	    background: linear-gradient(top,  #09beec,  #119ec4);
 }
+
+.mgmt-panel .btn-ok {
+		    padding: 5px 18px;
+}
 .popup h1 .btn-ok,
 .popup h1 .btn-cancel 
 {
@@ -802,6 +823,7 @@ margin:0 auto; overflow:hidden; width:100%;}
 	    background: -moz-linear-gradient(top,  #f6f6f6,  #e2e3e5);
 	    background: linear-gradient(top,  #f6f6f6,  #e2e3e5);
 }
+.mgmt-panel .btn-ok:hover,
 .popup .btn-ok:hover, 
 .popup .btn-cancel:hover
 {
@@ -810,8 +832,9 @@ margin:0 auto; overflow:hidden; width:100%;}
 	box-shadow: 0 1px 2px #ccc;
 	border:1px solid #000;
     }
-
-    .popup .btn-ok::active,
+	
+	.mgmt-panel .btn-ok:active,
+    .popup .btn-ok:active,
     .popup .btn-cancel:active
     {
 	    -moz-box-shadow: inset 0 0 1px 1px #888;
@@ -851,22 +874,40 @@ margin:0 auto; overflow:hidden; width:100%;}
 	z-index: 9999;
 }
 
-.mgmt-add-tm {display:none;
-
+.mgmt-add-tm, .needtobelogged {display:none;
 }
 
 .mgmt-add-tm .source {clear:both;}
 
 
+div.mgmt-container {
+margin: 0 auto;
+overflow: hidden;
+width: 100%;
+}
+
+.mgmt-add-tm .btn-ok {
+margin-top: 20px;
+}
+
 .mgmt-panel {
+	display:none; 
+margin:0 auto; overflow:hidden; width:100%; -webkit-box-shadow: 0 1px 10px #000;
 		margin-top: -20px;
 		background: #fff;
 		padding-bottom:30px;
 			font-size:16px;
+		
 
 }
 
-.mgmt-panel .add-tm, .back-mgmt {padding:10px;}
+.mgmt-panel .add-tm {
+	margin-top: 20px;
+margin-right: 40px;
+display: block;
+}
+
+ .back-mgmt {padding:20px; margin-right:20px;}
 
 .mgmt-tm {
 	border-top: 1px solid #ccc;	
@@ -875,11 +916,26 @@ margin:0 auto; overflow:hidden; width:100%;}
 	border-collapse:collapse;
 }
 
+#sort {cursor: move;}
 .mgmt-tm td, .mgmt-tm th {
 border: 1px solid #ccc;
 padding: 8px;
+background: #fff;
 margin: 1px 0;
 }
+
+.mgmt-add-tm input {
+	width: 200px;
+font-size: 12px !important;
+height: 30px;
+padding: 0 10px;
+border: 1px solid #abadb3;
+-webkit-transition: all 100ms ease-in;
+-moz-transition: all 100ms ease-in;
+}
+
+
+.clear {clear:both;}
 
 .mgmt-tm th {background:#f4f4f4;}
 body.filterOpen .searchbox
@@ -887,12 +943,19 @@ body.filterOpen .searchbox
 	display: block;
 	}
 
-	.searchbox label
+	.searchbox label, .mgmt-panel label
 	{
 		display: inline;
 		width: auto !important;
 		margin-right: 5px;
 		text-transform: uppercase;
+}
+
+.mgmt-panel label {
+display: block;
+text-transform: none;
+padding-bottom: 5px;
+font-weight: bold;
 }
 
 
@@ -901,7 +964,7 @@ body.filterOpen .searchbox
 {
 	text-transform: uppercase;
 }
-.searchbox .block
+.searchbox .block, .mgmt-panel .block
 {
 	float: left;
 	margin-right: 20px;
