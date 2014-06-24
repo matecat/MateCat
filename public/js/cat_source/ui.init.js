@@ -23,7 +23,6 @@ $.extend(UI, {
 //		this.alertConfirmTranslationEnabled = (typeof bb == 'undefined') ? true : false;
 		this.customSpellcheck = false;
 		this.noGlossary = false;
-        this.hiddenTextEnabled = false;
 		setTimeout(function() {
 			UI.blockGetMoreSegments = false;
 		}, 200);
