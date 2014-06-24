@@ -111,7 +111,7 @@ UI = {
 		}
 	},
 */
-	closeSegment: function(segment, byButton, operation) {
+	closeSegment: function(segment, byButton, operation) {console.log('CLOSE SEGMENT');
 		if ((typeof segment == 'undefined') || (typeof UI.toSegment != 'undefined')) {
 			this.toSegment = undefined;
 			return true;
@@ -872,6 +872,8 @@ UI = {
 		$('#spellCheck .words').remove();
 	},
 	openSegment: function(editarea, operation) {
+        console.log('open segment - editarea: ', UI.currentSegmentId);
+        console.log('operation: ', operation);
 //		if(UI.body.hasClass('archived')) return;
 		segment_id = $(editarea).attr('data-sid');
 		var segment = $('#segment-' + segment_id);
@@ -2231,7 +2233,7 @@ UI = {
 //		if(operation == 'source') {
 //			if(toLog) console.log('SOURCE STR: ', str);
 //		}
-
+        if(!UI.hiddenTextEnabled) return str;
 		jumpSpacesEncode = jumpSpacesEncode || false;
 		var _str = str;
 
@@ -2249,18 +2251,19 @@ UI = {
 		return _str;
     },
 	encodeSpacesAsPlaceholders: function(str, root) {
+        if(!UI.hiddenTextEnabled) return str;
 
 		var newStr = '';
 		$.each($.parseHTML(str), function(index) {
 
 			if(this.nodeName == '#text') {
-				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker marker monad" contenteditable="false">&nbsp;</span>');
+				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker marker monad" contenteditable="false"> </span>');
 			} else {
 				match = this.outerHTML.match(/<.*?>/gi);
 				if(match.length == 1) { // se è 1 solo, è un tag inline
 					
 				} else if(match.length == 2) { // se sono due, non ci sono tag innestati
-					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker#@-space-@#marker#@-space-@#monad"#@-space-@#contenteditable="false"#@-gt-@#&nbsp;#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker#@-space-@#marker#@-space-@#monad"#@-space-@#contenteditable="false"#@-gt-@# #@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
 //					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
 				} else {
 
