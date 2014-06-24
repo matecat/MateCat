@@ -99,7 +99,7 @@ TRG;
         $normalized = $check->getTrgNormalized();
 
         //" 1 " -> 20 31 20
-        $this->assertEquals( '<g id="6"> 1 </g><g id="7">st  </g><g id="8"> Section of Tokyo, Osaka</g>', $normalized );
+        $this->assertEquals( '<g id="6"> 1 </g><g id="7">st  </g><g id="8"> Section of Tokyo, Osaka</g>', $normalized );
 
     }
 
@@ -207,7 +207,7 @@ SRC;
         $normalized = $check->getTrgNormalized();
 
         //" 1 " -> 20 31 20
-        $this->assertEquals( '<g id="6"> 1 </g><g id="7">st  </g><g id="8"> Section of Tokyo, Osaka</g>', $normalized );
+        $this->assertEquals( '<g id="6"> 1 </g><g id="7">st  </g><g id="8"> Section of Tokyo, Osaka</g>', $normalized );
 
     }
 
@@ -299,8 +299,7 @@ TRG;
         $warnings = $check->getWarnings();
 
         $this->assertCount( 1, $errors );
-        $this->assertCount( 2, $warnings );
-
+        $this->assertCount( 3, $warnings );
         $this->assertAttributeEquals( 1000, 'outcome', $errors[0] );
         $this->assertAttributeEquals( 1100, 'outcome', $warnings[0] );
 
@@ -338,7 +337,7 @@ TRG;
         $warnings = $check->getWarnings();
 
         $this->assertCount( 1, $errors );
-        $this->assertCount( 1, $warnings ); // warnings are not checked because of tag mismatch,
+        $this->assertCount( 2, $warnings ); // warnings are not checked because of tag mismatch,
                                             // analysis on space warnings skipped de facto
         $this->assertAttributeEquals( 4, 'outcome', $errors[0] );
 

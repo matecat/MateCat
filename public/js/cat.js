@@ -5007,7 +5007,9 @@ $.extend(UI, {
             $('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
             $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
         } else {
-            $($('#segment-' + d.id_segment + ' .editarea .locked')[d.tag_mismatch.order - 1]).addClass('order-error');
+            $('#segment-' + d.id_segment + ' .editarea .locked' ).filter(function() {
+                return $(this).text() === d.tag_mismatch.order[0];
+            }).addClass('order-error');
         }
 
 	},	

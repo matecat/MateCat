@@ -162,13 +162,14 @@ class getWarningController extends ajaxController {
             $this->result[ 'details' ][ 'id_segment' ] = $this->__postInput->id;
 //            $this->result[ 'details' ][ 'warnings' ]   = $QA->getErrorsJSON();
 //            $this->result[ 'total' ]                                             = count( $QA->getErrors() );
-            $this->result[ 'details' ][ 'warnings' ]     = $QA->getWarningsJSON();
-            $this->result[ 'details' ][ 'tag_mismatch' ] = $QA->getMalformedXmlStructs();
-            $this->result[ 'total' ]                     = count( $QA->getWarnings() );
+            $this->result[ 'details' ][ 'warnings' ]                = $QA->getWarningsJSON();
+            $this->result[ 'details' ][ 'tag_mismatch' ]            = $QA->getMalformedXmlStructs();
+            $this->result[ 'details' ][ 'tag_mismatch' ][ 'order' ] = $QA->getTargetTagPositionError();
+            $this->result[ 'total' ]                                = count( $QA->getWarnings() );
 //temp
 			
 //            Log::doLog($this->__postInput->trg_content);
-//            Log::doLog($QA->getTrgNormalized());
+//            Log::doLog($this->result);
 
         }
 

@@ -160,7 +160,14 @@ class QA {
      *
      * @var array
      */
-    protected $malformedXmlStructDiff = array();
+    protected $malformedXmlStructDiff = array( 'source' => array(), 'target' => array() );
+
+    /**
+     * Array of Tag position errors
+     *
+     * @var array
+     */
+    protected $tagPositionError = array();
 
     const ERR_NONE               = 0;
     const ERR_COUNT              = 1;
@@ -177,6 +184,7 @@ class QA {
     const ERR_BOUNDARY_TAIL      = 12;
     const ERR_UNCLOSED_X_TAG     = 13;
     const ERR_BOUNDARY_HEAD_TEXT = 14;
+    const ERR_TAG_ORDER          = 15;
 
     const ERR_TAG_MISMATCH       = 1000;
 
@@ -203,6 +211,7 @@ class QA {
      *     ERR_BOUNDARY_TAIL       =>  'End line char mismatch',
      *     ERR_UNCLOSED_X_TAG      =>  'Wrong format for x tag.Should be <x .... />'
      *     ERR_BOUNDARY_HEAD_TEXT  =>  'Mismatch of Special chars ( and spaces ) before a tag or after a closing G tag'
+     *     ERR_TAG_ORDER           =>  'Mismatch of position between source and target tag'
      * );
      * </pre>
      * @var array(string) 
@@ -223,6 +232,7 @@ class QA {
         12 => 'End line char mismatch',
         13 => 'Wrong format for x tag. Should be < x .... />',
         14 => 'Char mismatch before a tag',
+        15 => 'Tags position mismatch',
 
         /*
          * grouping
@@ -302,8 +312,6 @@ class QA {
      */
     protected $warningList = array();
 
-    protected static $crPlaceHold = '##$_0D$##';
-
     /**
      * Add an error to error List.
      * Internal CodeMap
@@ -341,6 +349,7 @@ class QA {
             case self::ERR_BOUNDARY_HEAD:
             case self::ERR_BOUNDARY_TAIL:
             case self::ERR_BOUNDARY_HEAD_TEXT:
+            case self::ERR_TAG_ORDER:
                 $this->warningList[] = errObject::get( array( 'outcome' => self::ERR_SPACE_MISMATCH, 'debug' => $this->_errorMap[self::ERR_SPACE_MISMATCH] ) );
             break;
             default:
@@ -917,6 +926,7 @@ class QA {
 
         $this->_checkTagsBoundary();
         $this->_checkContentConsistency( $srcNodeList, $trgNodeList );
+        $this->_checkTagPositions();
 
         // all checks completed
         return $this->getErrors();
@@ -940,6 +950,34 @@ class QA {
 
         // all checks completed
         return $this->getErrors();
+
+    }
+
+    public function getTargetTagPositionError(){
+        return $this->tagPositionError;
+    }
+
+    /**
+     * Check for errors in tag position
+     *
+     */
+    protected function _checkTagPositions(){
+
+//        Log::doLog( $this->source_seg );
+//        Log::doLog( $this->target_seg );
+
+        preg_match_all( '/(<[^\/>]+[\/]{0,1}>|<\/[a-zA-Z]+>)/', $this->source_seg, $matches );
+        $malformedXmlSrcStruct = $matches[ 1 ];
+        preg_match_all( '/(<[^\/>]+[\/]{0,1}>|<\/[a-zA-Z]+>)/', $this->target_seg, $matches );
+        $malformedXmlTrgStruct = $matches[ 1 ];
+
+        foreach( $malformedXmlTrgStruct as $pos => $tag ){
+            if( $malformedXmlSrcStruct[ $pos ] != $tag ){
+                $this->_addError( self::ERR_TAG_ORDER );
+                $this->tagPositionError[] = $tag;
+                break;
+            }
+        }
 
     }
 
@@ -1304,40 +1342,40 @@ class QA {
             $this->_addError(self::ERR_WS_HEAD);
         }
 
-        //normalize the target first space according to the source type
-        if( $srcHasHeadNBSP != $trgHasHeadNBSP && !$this->thereAreErrors() ){
-
-            //get the string from normalized string
-            if( is_null($trgTagReference['parent_id']) ){
-                //get the string from normalized string
-                $_nodeNormalized = $this->normalizedTrgDOMNodeList->item( $trgTagReference['node_idx'] );
-                $_trgNodeContent = $_nodeNormalized->nodeValue;
-
-            } else {
-
-                $_nodeNormalized = $this->_queryDOMElement( $this->normalizedTrgDOM, $trgTagReference );
-                $_trgNodeContent = $_nodeNormalized->nodeValue;
-
-            }
-
-            if( $srcHasHeadNBSP ) {
-                $_trgNodeContent = preg_replace( "/^\x{20}{1}/u", Utils::unicode2chr(0Xa0), $_trgNodeContent );
-            } else {
-                $_trgNodeContent = preg_replace( "/^\x{a0}{1}/u", Utils::unicode2chr(0X20), $_trgNodeContent );
-            }
-            $_nodeNormalized->nodeValue = $_trgNodeContent;
-
-            $xpath = new DOMXPath( $this->normalizedTrgDOM );
-            $query = '//*[@id="' . $trgTagReference['id'] . '"]';
-
-            $node = $xpath->query($query);
-
-            foreach( $node as $n ){
-                //only a parent node can replace it's child
-                $n->parentNode->replaceChild( $this->normalizedTrgDOM->importNode( $_nodeNormalized, true ), $n );
-            }
-
-        }
+//        //normalize the target first space according to the source type
+//        if( $srcHasHeadNBSP != $trgHasHeadNBSP && !$this->thereAreErrors() ){
+//
+//            //get the string from normalized string
+//            if( is_null($trgTagReference['parent_id']) ){
+//                //get the string from normalized string
+//                $_nodeNormalized = $this->normalizedTrgDOMNodeList->item( $trgTagReference['node_idx'] );
+//                $_trgNodeContent = $_nodeNormalized->nodeValue;
+//
+//            } else {
+//
+//                $_nodeNormalized = $this->_queryDOMElement( $this->normalizedTrgDOM, $trgTagReference );
+//                $_trgNodeContent = $_nodeNormalized->nodeValue;
+//
+//            }
+//
+//            if( $srcHasHeadNBSP ) {
+//                $_trgNodeContent = preg_replace( "/^\x{20}{1}/u", Utils::unicode2chr(0Xa0), $_trgNodeContent );
+//            } else {
+//                $_trgNodeContent = preg_replace( "/^\x{a0}{1}/u", Utils::unicode2chr(0X20), $_trgNodeContent );
+//            }
+//            $_nodeNormalized->nodeValue = $_trgNodeContent;
+//
+//            $xpath = new DOMXPath( $this->normalizedTrgDOM );
+//            $query = '//*[@id="' . $trgTagReference['id'] . '"]';
+//
+//            $node = $xpath->query($query);
+//
+//            foreach( $node as $n ){
+//                //only a parent node can replace it's child
+//                $n->parentNode->replaceChild( $this->normalizedTrgDOM->importNode( $_nodeNormalized, true ), $n );
+//            }
+//
+//        }
 
     }
 
@@ -1382,40 +1420,40 @@ class QA {
 //        }
 
     	//normalize the target first space according to the source type
-    	if( $srcHasTailNBSP != $trgHasTailNBSP && !$this->thereAreErrors() ){
-
-            //get the string from normalized string
-            if( is_null($trgTagReference['parent_id']) ){
-                //get the string from normalized string
-                $_nodeNormalized = $this->normalizedTrgDOMNodeList->item( $trgTagReference['node_idx'] );
-                $_trgNodeContent = $_nodeNormalized->nodeValue;
-
-            } else {
-
-                $_nodeNormalized = $this->_queryDOMElement( $this->normalizedTrgDOM, $trgTagReference );
-                $_trgNodeContent = $_nodeNormalized->nodeValue;
-
-            }
-
-    		if( $srcHasTailNBSP ) {
-    			$_trgNodeContent = preg_replace( "/\x{20}{1}$/u", Utils::unicode2chr(0Xa0), $_trgNodeContent );
-    		} else {
-    			$_trgNodeContent = preg_replace( "/\x{a0}{1}$/u", Utils::unicode2chr(0X20), $_trgNodeContent );
-    		}
-
-            $_nodeNormalized->nodeValue = $_trgNodeContent;
-
-            $xpath = new DOMXPath( $this->normalizedTrgDOM );
-            $query = '//*[@id="' . $trgTagReference['id'] . '"]';
-
-            $node = $xpath->query($query);
-
-            foreach( $node as $n ){
-                //only a parent node can replace it's child
-                $n->parentNode->replaceChild( $this->normalizedTrgDOM->importNode( $_nodeNormalized, true ), $n );
-            }
-
-        }
+//    	if( $srcHasTailNBSP != $trgHasTailNBSP && !$this->thereAreErrors() ){
+//
+//            //get the string from normalized string
+//            if( is_null($trgTagReference['parent_id']) ){
+//                //get the string from normalized string
+//                $_nodeNormalized = $this->normalizedTrgDOMNodeList->item( $trgTagReference['node_idx'] );
+//                $_trgNodeContent = $_nodeNormalized->nodeValue;
+//
+//            } else {
+//
+//                $_nodeNormalized = $this->_queryDOMElement( $this->normalizedTrgDOM, $trgTagReference );
+//                $_trgNodeContent = $_nodeNormalized->nodeValue;
+//
+//            }
+//
+//    		if( $srcHasTailNBSP ) {
+//    			$_trgNodeContent = preg_replace( "/\x{20}{1}$/u", Utils::unicode2chr(0Xa0), $_trgNodeContent );
+//    		} else {
+//    			$_trgNodeContent = preg_replace( "/\x{a0}{1}$/u", Utils::unicode2chr(0X20), $_trgNodeContent );
+//    		}
+//
+//            $_nodeNormalized->nodeValue = $_trgNodeContent;
+//
+//            $xpath = new DOMXPath( $this->normalizedTrgDOM );
+//            $query = '//*[@id="' . $trgTagReference['id'] . '"]';
+//
+//            $node = $xpath->query($query);
+//
+//            foreach( $node as $n ){
+//                //only a parent node can replace it's child
+//                $n->parentNode->replaceChild( $this->normalizedTrgDOM->importNode( $_nodeNormalized, true ), $n );
+//            }
+//
+//        }
 
     }
 
