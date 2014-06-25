@@ -209,7 +209,8 @@
 			"isocode":"cb",
 			"enabled":true,
 			"rtl":false,
-			"rfc3066code":"cb-PH"
+			"rfc3066code":"cb-PH",
+            "languageRegionCode":"fil-PH"
 		}
 	,
 		{
