@@ -101,7 +101,9 @@ $.extend(UI, {
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			}
 		}).on('keydown', '.editor .editarea', 'shift+return', function(e) {
-			e.preventDefault();
+            if(!UI.hiddenTextEnabled) return;
+
+            e.preventDefault();
 			var node = document.createElement("span");
 			var br = document.createElement("br");
 			node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
@@ -110,16 +112,21 @@ $.extend(UI, {
 			insertNodeAtCursor(node);
 			UI.unnestMarkers();
 		}).on('keydown', '.editor .editarea', 'space', function(e) {
+            if(!UI.hiddenTextEnabled) return;
 			e.preventDefault();
+            UI.editarea.find('.lastInserted').removeClass('lastInserted');
 //			console.log('space');
 			var node = document.createElement("span");
 			node.setAttribute('class', 'marker monad space-marker lastInserted');
 			node.setAttribute('contenteditable', 'false');
-//			node.textContent = htmlDecode(" ");
+			node.textContent = htmlDecode(" ");
+//			node.textContent = "&nbsp;";
 			insertNodeAtCursor(node);
 			UI.unnestMarkers();
 		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
+            if(!UI.hiddenTextEnabled) return;
 			e.preventDefault();
+            UI.editarea.find('.lastInserted').removeClass('lastInserted');
 //			console.log('nbsp');
 //			config.nbspPlaceholderClass = '_NBSP';
 			var node = document.createElement("span");
@@ -590,41 +597,56 @@ $.extend(UI, {
 					UI.saveInUndoStack('cancel');
 					UI.currentSegmentQA();
 				} else {
-
+console.log('QUI');
 					var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
-					var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
-//					console.log('a: ', UI.editarea.html());
+					var numSpacesBefore = $('.space-marker', UI.editarea).length;
+//                    var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
+					console.log('a: ', UI.editarea.html());
 					saveSelection();
-//					console.log('b: ', UI.editarea.html());
+					console.log('b: ', UI.editarea.html());
 					parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
 					isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
 					parentMark = $('.searchMarker', UI.editarea).has('.rangySelectionBoundary');
 					isInsideMark = $('.searchMarker .rangySelectionBoundary', UI.editarea).length;
-					restoreSelection();
-//					console.log('c: ', UI.editarea.html());
+					console.log('c: ', UI.editarea.html());
+
+
 //					console.log('isInsideTag: ', isInsideTag);
+                    restoreSelection();
 
 					// insideTag management
 					if ((e.which == 8)&&(isInsideTag)) {
-//							console.log('AA: ', UI.editarea.html()); 
+							console.log('AA: ', UI.editarea.html());
 						parentTag.remove();
 						e.preventDefault();
 //							console.log('BB: ', UI.editarea.html());
 					}
+
 //						console.log(e.which + ' - ' + isInsideTag);
 					setTimeout(function() {
 						if ((e.which == 46)&&(isInsideTag)) {
 							console.log('inside tag');
 						}
 //							console.log(e.which + ' - ' + isInsideTag);
-//							console.log('CC: ', UI.editarea.html());
+                        saveSelection();
+                        // detect if selection ph is inside a monad tag
+                        console.log('sel placeholders inside a monad', $('.monad .rangySelectionBoundary', UI.editarea).length);
+                        if($('.monad .rangySelectionBoundary', UI.editarea).length) {
+                            console.log($('.monad:has(.rangySelectionBoundary)', UI.editarea));
+                            $('.monad:has(.rangySelectionBoundary)', UI.editarea).after($('.monad .rangySelectionBoundary', UI.editarea));
+                            // move selboundary after the
+                        }
+                        console.log('CC: ', UI.editarea.html());
+                        restoreSelection();
+							console.log('DD: ', UI.editarea.html());
 						var numTagsAfter = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
-						var numSpacesAfter = (UI.editarea.text())? UI.editarea.text().match(/\s/gi).length : 0;
-						if (numTagsAfter < numTagsBefore)
-							UI.saveInUndoStack('cancel');
-						if (numSpacesAfter < numSpacesBefore)
-							UI.saveInUndoStack('cancel');
-//							console.log('DD: ', UI.editarea.html());
+						var numSpacesAfter = $('.space-marker', UI.editarea).length;
+//                        var numSpacesAfter = (UI.editarea.text())? UI.editarea.text().match(/\s/gi).length : 0;
+						if (numTagsAfter < numTagsBefore) UI.saveInUndoStack('cancel');
+						if (numSpacesAfter < numSpacesBefore) UI.saveInUndoStack('cancel');
+                        console.log('EE: ', UI.editarea.html());
+                        console.log($(':focus'));
+
 
 					}, 50);
 
@@ -649,6 +671,8 @@ $.extend(UI, {
 				}
 			}
 			if (e.which == 9) { // tab
+                if(!UI.hiddenTextEnabled) return;
+
 				e.preventDefault();
 				var node = document.createElement("span");
 				node.setAttribute('class', 'marker monad tab-marker ' + config.tabPlaceholderClass);
@@ -732,6 +756,8 @@ $.extend(UI, {
 						$('.rangySelectionBoundary', UI.editarea).remove();
 					}
 				}
+                console.log($(':focus'));
+                //              return false;
 			}
 
 			if (!((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8) || (e.which == 46) || (e.which == 91))) { // not arrows, backspace, canc or cmd
