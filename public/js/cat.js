@@ -1898,8 +1898,19 @@ UI = {
 						$('span.locked.mismatch', UI.currentSegment).removeClass('mismatch');
 						return;
 					}
-					if (UI.editarea.text().trim() != UI.checkSegmentsArray[d.token].trim().replace(config.crlfPlaceholderRegex, ''))
-						return;
+
+                    escapedSegment = UI.checkSegmentsArray[d.token].trim().replace( config.lfPlaceholderRegex, "\n" );
+                    escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
+                    escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
+                    escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "\t" );
+                    escapedSegment = escapedSegment.replace( config.nbspPlaceholderRegex, $( document.createElement('span') ).html('&nbsp;').text() );
+
+                    if (UI.editarea.text().trim() != escapedSegment ){
+                        console.log( UI.editarea.text().trim() );
+                        console.log( UI.checkSegmentsArray[d.token].trim() );
+                        console.log( escapedSegment  );
+                        return;
+                    }
 
 					UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
 					UI.markTagMismatch(d.details);
