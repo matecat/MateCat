@@ -139,8 +139,8 @@ class setTranslationController extends ajaxController {
         $check = new QA($segment['segment'], $this->translation);
         $check->performConsistencyCheck();
 
-        if( $check->thereAreErrors() ){
-            $err_json = $check->getErrorsJSON();
+        if( $check->thereAreWarnings() ){
+            $err_json = $check->getWarningsJSON();
             $translation = $this->translation;
         } else {
             $err_json = '';
@@ -152,31 +152,31 @@ class setTranslationController extends ajaxController {
              * Some strange behaviours occurred about getTrgNormalized method
              * TODO remove after it has collected data??
              */
-            $postCheck = new QA( $segment['segment'], $translation );
-            $postCheck->performConsistencyCheck();
-            if( $postCheck->thereAreErrors() ){
-
-                $msg = "\n\n Error setTranslationController \n\n Consistency failure: \n\n Used original Translation. \n\n
-                        - job id            : " . $this->id_job . "
-                        - segment id        : " . $this->id_segment . "
-                        - original source   : " . $segment['segment'] . "
-                        - original target   : " . $this->translation . "
-                        - normalized target : " . $translation;
-
-                Log::doLog( $msg );
-                Utils::sendErrMailReport( $msg );
-
-                $translation = $this->translation;
-
-            }
+//            $postCheck = new QA( $segment['segment'], $translation );
+//            $postCheck->performConsistencyCheck();
+//            if( $postCheck->thereAreErrors() ){
+//
+//                $msg = "\n\n Error setTranslationController \n\n Consistency failure: \n\n Used original Translation. \n\n
+//                        - job id            : " . $this->id_job . "
+//                        - segment id        : " . $this->id_segment . "
+//                        - original source   : " . $segment['segment'] . "
+//                        - original target   : " . $this->translation . "
+//                        - normalized target : " . $translation;
+//
+//                Log::doLog( $msg );
+//                Utils::sendErrMailReport( $msg );
+//
+//                $translation = $this->translation;
+//
+//            }
 
         }
 
-        $msg = "\n\n setTranslationController \n Consistency Log:
-- job id            : " . $this->id_job . "
-- segment id        : " . $this->id_segment . "
-- firstCheckErrors  : " . var_export( $check->getErrors(), true ) . "
-- postCheckErrors   : " . ( isset($postCheck) ? var_export( $postCheck->getErrors(), true ) : 'null' );
+//        $msg = "\n\n setTranslationController \n Consistency Log:
+//- job id            : " . $this->id_job . "
+//- segment id        : " . $this->id_segment . "
+//- firstCheckErrors  : " . var_export( $check->getErrors(), true ) . "
+//- postCheckErrors   : " . ( isset($postCheck) ? var_export( $postCheck->getErrors(), true ) : 'null' );
 
         //Log::doLog( $msg . "\n" );
 
@@ -261,7 +261,7 @@ class setTranslationController extends ajaxController {
         $_Translation[ 'translation' ]           = preg_replace( '/[ \t\n\r\0\x0A\xA0]+$/u', '', $translation );
         $_Translation[ 'serialized_errors_list' ] = $err_json;
         $_Translation[ 'suggestion_position' ]   = $this->chosen_suggestion_index;
-        $_Translation[ 'warning' ]               = $check->thereAreErrors();
+        $_Translation[ 'warning' ]               = $check->thereAreWarnings();
         $_Translation[ 'translation_date' ]      = date( "Y-m-d H:i:s" );
 
         /**

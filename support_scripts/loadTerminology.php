@@ -18,29 +18,32 @@ $db->connect ();
 
 $glossaries = array(
 
-        array( 'file' => 'GLOSSARIO_EN_ARA.csv', 'source' => 'en-GB', 'target' => 'ar-SA' ),
-        array( 'file' => 'GLOSSARIO_EN_BUL.csv', 'source' => 'en-GB', 'target' => 'bg-BG' ),
-        array( 'file' => 'GLOSSARIO_EN_CHI_SIMPL.csv', 'source' => 'en-GB', 'target' => 'zh-CN' ),
-        array( 'file' => 'GLOSSARIO_EN_CHI_TRAD.csv', 'source' => 'en-GB', 'target' => 'zh-TW' ),
-        array( 'file' => 'GLOSSARIO_EN_CZE.csv', 'source' => 'en-GB', 'target' => 'cs-CZ' ),
-        array( 'file' => 'GLOSSARIO_EN_DUT.csv', 'source' => 'en-GB', 'target' => 'nl-NL' ),
-        array( 'file' => 'GLOSSARIO_EN_FRE.csv', 'source' => 'en-GB', 'target' => 'fr-FR' ),
-        array( 'file' => 'GLOSSARIO_EN_GER.csv', 'source' => 'en-GB', 'target' => 'de-DE' ),
-        array( 'file' => 'GLOSSARIO_EN_HIN.csv', 'source' => 'en-GB', 'target' => 'hi-IN' ),
-        array( 'file' => 'GLOSSARIO_EN_HUN.csv', 'source' => 'en-GB', 'target' => 'hu-HU' ),
-        array( 'file' => 'GLOSSARIO_EN_IT.csv', 'source' => 'en-GB', 'target' => 'it-IT' ),
-        array( 'file' => 'GLOSSARIO_EN_KOR.csv', 'source' => 'en-GB', 'target' => 'ko-KR' ),
-        array( 'file' => 'GLOSSARIO_EN_MAY.csv', 'source' => 'en-GB', 'target' => 'ms-MY' ),
-        array( 'file' => 'GLOSSARIO_EN_POL.csv', 'source' => 'en-GB', 'target' => 'pl-PL' ),
-        array( 'file' => 'GLOSSARIO_EN_RUM.csv', 'source' => 'en-GB', 'target' => 'ro-RO' ),
-        array( 'file' => 'GLOSSARIO_EN_SLO.csv', 'source' => 'en-GB', 'target' => 'sk-SK' ),
-        array( 'file' => 'GLOSSARIO_EN_SPA.csv', 'source' => 'en-GB', 'target' => 'es-ES' ),
-        array( 'file' => 'GLOSSARIO_EN_SPA_LATAM.csv', 'source' => 'en-GB', 'target' => 'es-MX' ),
-        array( 'file' => 'GLOSSARIO_EN_SRP.csv', 'source' => 'en-GB', 'target' => 'sr-Latn-RS' ),
-        array( 'file' => 'GLOSSARIO_EN_TAM.csv', 'source' => 'en-GB', 'target' => 'ta-IN' ),
-        array( 'file' => 'GLOSSARIO_EN_TGL.csv', 'source' => 'en-GB', 'target' => 'tl-PH' ),
-        array( 'file' => 'GLOSSARIO_EN_TUR.csv', 'source' => 'en-GB', 'target' => 'tr-TR' ),
-        array( 'file' => 'GLOSSARIO_EN_UKR.csv', 'source' => 'en-GB', 'target' => 'uk-UA' ),
+        array( 'file' => 'GlossaryNL2EN.csv', 'source' => 'nl-NL', 'target' => 'en-US' ),
+        array( 'file' => 'GlossaryNL2FR.csv', 'source' => 'nl-NL', 'target' => 'fr-FR' ),
+
+
+//        array( 'file' => 'GLOSSARIO_EN_BUL.csv', 'source' => 'en-GB', 'target' => 'bg-BG' ),
+//        array( 'file' => 'GLOSSARIO_EN_CHI_SIMPL.csv', 'source' => 'en-GB', 'target' => 'zh-CN' ),
+//        array( 'file' => 'GLOSSARIO_EN_CHI_TRAD.csv', 'source' => 'en-GB', 'target' => 'zh-TW' ),
+//        array( 'file' => 'GLOSSARIO_EN_CZE.csv', 'source' => 'en-GB', 'target' => 'cs-CZ' ),
+//        array( 'file' => 'GLOSSARIO_EN_DUT.csv', 'source' => 'en-GB', 'target' => 'nl-NL' ),
+//        array( 'file' => 'GLOSSARIO_EN_FRE.csv', 'source' => 'en-GB', 'target' => 'fr-FR' ),
+//        array( 'file' => 'GLOSSARIO_EN_GER.csv', 'source' => 'en-GB', 'target' => 'de-DE' ),
+//        array( 'file' => 'GLOSSARIO_EN_HIN.csv', 'source' => 'en-GB', 'target' => 'hi-IN' ),
+//        array( 'file' => 'GLOSSARIO_EN_HUN.csv', 'source' => 'en-GB', 'target' => 'hu-HU' ),
+//        array( 'file' => 'GLOSSARIO_EN_IT.csv', 'source' => 'en-GB', 'target' => 'it-IT' ),
+//        array( 'file' => 'GLOSSARIO_EN_KOR.csv', 'source' => 'en-GB', 'target' => 'ko-KR' ),
+//        array( 'file' => 'GLOSSARIO_EN_MAY.csv', 'source' => 'en-GB', 'target' => 'ms-MY' ),
+//        array( 'file' => 'GLOSSARIO_EN_POL.csv', 'source' => 'en-GB', 'target' => 'pl-PL' ),
+//        array( 'file' => 'GLOSSARIO_EN_RUM.csv', 'source' => 'en-GB', 'target' => 'ro-RO' ),
+//        array( 'file' => 'GLOSSARIO_EN_SLO.csv', 'source' => 'en-GB', 'target' => 'sk-SK' ),
+//        array( 'file' => 'GLOSSARIO_EN_SPA.csv', 'source' => 'en-GB', 'target' => 'es-ES' ),
+//        array( 'file' => 'GLOSSARIO_EN_SPA_LATAM.csv', 'source' => 'en-GB', 'target' => 'es-MX' ),
+//        array( 'file' => 'GLOSSARIO_EN_SRP.csv', 'source' => 'en-GB', 'target' => 'sr-Latn-RS' ),
+//        array( 'file' => 'GLOSSARIO_EN_TAM.csv', 'source' => 'en-GB', 'target' => 'ta-IN' ),
+//        array( 'file' => 'GLOSSARIO_EN_TGL.csv', 'source' => 'en-GB', 'target' => 'tl-PH' ),
+//        array( 'file' => 'GLOSSARIO_EN_TUR.csv', 'source' => 'en-GB', 'target' => 'tr-TR' ),
+//        array( 'file' => 'GLOSSARIO_EN_UKR.csv', 'source' => 'en-GB', 'target' => 'uk-UA' ),
 
 );
 
@@ -54,7 +57,7 @@ foreach ( $glossaries as $gloss ) {
     $config[ 'target_lang' ] = $gloss['target'];
     $config[ 'email' ]       = "demo@matecat.com";
     $config[ 'get_mt' ]      = false;
-    $config[ 'id_user' ]     = "3d995a93a1a7dbf987e9";
+    $config[ 'id_user' ]     = "06d8b80bb2fc5136e8a3";
     $config[ 'num_result' ]  = null;
     $config[ 'isGlossary' ]  = true;
 
@@ -73,7 +76,7 @@ foreach ( $glossaries as $gloss ) {
                 echo "\nFailed at Row: ";
                 print_r( ( $fObject->key() + 1 ) . "\n" );
                 echo $row[ 0 ] . "\n";
-                echo $row[ 1 ] . "\n\n";
+//                echo $row[ 1 ] . "\n\n";
 //                sleep(1);
                 continue;
             }
