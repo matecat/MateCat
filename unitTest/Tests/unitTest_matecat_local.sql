@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.5.32, for debian-linux-gnu (x86_64)
+-- MySQL dump 10.13  Distrib 5.5.37, for debian-linux-gnu (x86_64)
 --
 -- Host: localhost    Database: unittest_matecat_local
 -- ------------------------------------------------------
--- Server version	5.5.32-0ubuntu0.13.04.1
+-- Server version	5.5.37-0ubuntu0.14.04.1-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -18,9 +18,14 @@
 --
 -- Current Database: `unittest_matecat_local`
 --
+
 DROP SCHEMA IF EXISTS `unittest_matecat_local`;
 CREATE SCHEMA `unittest_matecat_local` /*!40100 DEFAULT CHARACTER SET utf8 */;
 USE `unittest_matecat_local`;
+
+--
+-- Table structure for table `converters`
+--
 
 DROP TABLE IF EXISTS `converters`;
 /*!40101 SET @saved_cs_client     = @@character_set_client */;
@@ -44,8 +49,17 @@ CREATE TABLE `converters` (
   KEY `status_active` (`status_active`),
   KEY `status_offline` (`status_offline`),
   KEY `status_reboot` (`status_reboot`)
-) ENGINE=InnoDB AUTO_INCREMENT=6 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `converters`
+--
+
+LOCK TABLES `converters` WRITE;
+/*!40000 ALTER TABLE `converters` DISABLE KEYS */;
+/*!40000 ALTER TABLE `converters` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `converters_log`
@@ -63,8 +77,17 @@ CREATE TABLE `converters_log` (
   KEY `timestamp_idx` (`check_time`),
   KEY `outcome_idx` (`test_passed`),
   KEY `id_converter_idx` (`id_converter`)
-) ENGINE=MyISAM AUTO_INCREMENT=242981 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=604885 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `converters_log`
+--
+
+LOCK TABLES `converters_log` WRITE;
+/*!40000 ALTER TABLE `converters_log` DISABLE KEYS */;
+/*!40000 ALTER TABLE `converters_log` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
 -- Table structure for table `engines`
@@ -86,17 +109,16 @@ CREATE TABLE `engines` (
   `gloss_set_relative_url` varchar(100) DEFAULT NULL,
   `gloss_update_relative_url` varchar(100) DEFAULT NULL,
   `gloss_delete_relative_url` varchar(100) DEFAULT NULL,
+  `tmx_import_relative_url` varchar(100) DEFAULT NULL,
+  `tmx_status_relative_url` varchar(100) DEFAULT NULL,
   `extra_parameters` text,
   `google_api_compliant_version` varchar(45) DEFAULT NULL COMMENT 'credo sia superfluo',
   `penalty` int(11) DEFAULT '0',
   `active` tinyint(4) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `type` (`type`),
-  KEY `active_idx` (`active`) USING BTREE,
-  FULLTEXT KEY `name` (`name`),
-  FULLTEXT KEY `description` (`description`),
-  FULLTEXT KEY `base_url` (`base_url`)
-) ENGINE=MyISAM AUTO_INCREMENT=30 DEFAULT CHARSET=utf8;
+  KEY `active_idx` (`active`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -105,10 +127,9 @@ CREATE TABLE `engines` (
 
 LOCK TABLES `engines` WRITE;
 /*!40000 ALTER TABLE `engines` DISABLE KEYS */;
-INSERT INTO `engines` VALUES (0,'NONE - PLACEHOLDER','NONE','No MT','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,100,1),(1,'MyMemory (All Pairs)','TM','MyMemory: next generation Translation Memory technology','http://api-proxied.mymemory.translated.net','get','set','delete','glossary/get','glossary/set','glossary/update','glossary/delete',NULL,'1',0,1),(2,'FBK Legal (EN->IT) - Ad.','MT','FBK (EN->IT) Moses Legal engine','http://hlt-services2.fbk.eu:8888','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(3,'LIUM-IT (EN->DE)','MT','Lium (EN->FR) Moses Information Technology engine','http://193.52.29.52:8001','translate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(4,'FBK Legal (EN>FR) - Ad.','MT','FBK (EN->FR) Moses Legal engine','http://hlt-services2.fbk.eu:8988','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(5,'LIUM-LEGAL (EN->DE)','MT','Lium (EN->FR) Moses Legal engine','http://193.52.29.52:8002','translate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,14,1),(6,'FBK TED (IT>EN)','MT','FBK (IT->EN) Moses Information Technology engine','http://hlt-services2.fbk.eu:8788','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1);
+INSERT INTO `engines` VALUES (0,'NONE - PLACEHOLDER','NONE','No MT','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,100,1),(1,'MyMemory (All Pairs)','TM','MyMemory: next generation Translation Memory technology','http://api.mymemory.translated.net','get','set','delete','glossary/get','glossary/set','glossary/update','glossary/delete','tmx/import','tmx/status',NULL,'1',0,1),(2,'FBK Legal (EN->IT) - Ad.','MT','FBK (EN->IT) Moses Legal engine','http://hlt-services2.fbk.eu:8888','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(3,'LIUM-IT (EN->DE)','MT','Lium (EN->FR) Moses Information Technology engine','http://193.52.29.52:8001','translate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(4,'FBK Legal (EN>FR) - Ad.','MT','FBK (EN->FR) Moses Legal engine','http://hlt-services2.fbk.eu:8988','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(5,'LIUM-LEGAL (EN->DE)','MT','Lium (EN->FR) Moses Legal engine','http://193.52.29.52:8002','translate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,14,1),(6,'FBK TED (IT>EN)','MT','FBK (IT->EN) Moses Information Technology engine','http://hlt-services2.fbk.eu:8788','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(29,'MyMemory (All Pairs) - proxy','TM','MyMemory: next generation Translation Memory technology','http://api.mymemory.translated.net','get','set','delete','glossary/get','glossary/set','glossary/update','glossary/delete',NULL,NULL,NULL,'1',0,1),(30,'FBK Legal (EN->IT) AdaTest01','MT','FBK Legal (EN->IT) AdaTest01 - Used for field test for online learning - March 2014','http://hlt-services2.fbk.eu:8721','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(31,'FBK Legal (EN->IT) AdaTest02','MT','FBK Legal (EN->IT) AdaTest02 - Used for field test for online learning - March 2014','http://hlt-services2.fbk.eu:8722','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(32,'FBK Legal (EN->IT) AdaTest03','MT','FBK Legal (EN->IT) AdaTest03 - Used for field test for online learning - March 2014','http://hlt-services2.fbk.eu:8723','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(33,'FBK Legal (EN->IT) AdaTest04','MT','FBK Legal (EN->IT) AdaTest04 - Used for field test for online learning - March 2014','http://hlt-services2.fbk.eu:8724','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(34,'FBK Legal (EN>IT) StatTest','MT',NULL,'http://hlt-services2.fbk.eu:8720','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(35,'FBK Legal (EN>FR) AdaTest01','MT','FBK Legal (EN>FR) AdaTest01 - Used for field test for online learning - April 2014','http://hlt-services2.fbk.eu:8521','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(36,'FBK Legal (EN>FR) AdaTest02','MT','FBK Legal (EN>FR) AdaTest02 - Used for field test for online learning - April 2014','http://hlt-services2.fbk.eu:8522','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(37,'FBK Legal (EN>FR) AdaTest03','MT','FBK Legal (EN>FR) AdaTest03 - Used for field test for online learning - April 2014','http://hlt-services2.fbk.eu:8523','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(38,'FBK Legal (EN>FR) AdaTest04','MT','FBK Legal (EN>FR) AdaTest01 - Used for field test for online learning - April 2014','http://hlt-services2.fbk.eu:8524','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1);
 /*!40000 ALTER TABLE `engines` ENABLE KEYS */;
 UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 --
 -- Table structure for table `file_references`
@@ -130,6 +151,15 @@ CREATE TABLE `file_references` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
+-- Dumping data for table `file_references`
+--
+
+LOCK TABLES `file_references` WRITE;
+/*!40000 ALTER TABLE `file_references` DISABLE KEYS */;
+/*!40000 ALTER TABLE `file_references` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `files`
 --
 
@@ -149,7 +179,7 @@ CREATE TABLE `files` (
   KEY `id_project` (`id_project`),
   KEY `sha1` (`sha1_original_file`) USING HASH,
   KEY `filename` (`filename`)
-) ENGINE=MyISAM AUTO_INCREMENT=5301 DEFAULT CHARSET=utf8;
+) ENGINE=MyISAM AUTO_INCREMENT=28740 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -180,7 +210,7 @@ CREATE TABLE `files_job` (
   `status_analisys` varchar(50) DEFAULT 'NEW' COMMENT 'NEW\nIN PROGRESS\nDONE',
   PRIMARY KEY (`id_job`,`id_file`),
   KEY `id_file` (`id_file`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -223,6 +253,11 @@ CREATE TABLE `jobs` (
   `status_translator` varchar(100) DEFAULT NULL,
   `status` varchar(15) NOT NULL DEFAULT 'active',
   `completed` bit(1) NOT NULL DEFAULT b'0',
+  `new_words` float(10,2) NOT NULL DEFAULT '0.00',
+  `draft_words` float(10,2) NOT NULL DEFAULT '0.00',
+  `translated_words` float(10,2) NOT NULL DEFAULT '0.00',
+  `approved_words` float(10,2) NOT NULL DEFAULT '0.00',
+  `rejected_words` float(10,2) NOT NULL DEFAULT '0.00',
   UNIQUE KEY `primary_id_pass` (`id`,`password`),
   KEY `id_job_to_revise` (`id_job_to_revise`),
   KEY `id_project` (`id_project`) USING BTREE,
@@ -231,7 +266,7 @@ CREATE TABLE `jobs` (
   KEY `first_last_segment_idx` (`job_first_segment`,`job_last_segment`),
   KEY `id` (`id`) USING BTREE,
   KEY `password` (`password`)
-) ENGINE=MyISAM AUTO_INCREMENT=4993 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=4993 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -240,7 +275,7 @@ CREATE TABLE `jobs` (
 
 LOCK TABLES `jobs` WRITE;
 /*!40000 ALTER TABLE `jobs` DISABLE KEYS */;
-INSERT INTO `jobs` VALUES (4992,'ch29w8de',4719,2356805,2356815,'',NULL,'en-US','it-IT',NULL,NULL,NULL,NULL,1,1,'2013-10-09 16:03:29',0,'','active',NULL,'active','\0');
+INSERT INTO `jobs` VALUES (4992,'ch29w8de',4719,2356805,2356815,'',NULL,'en-US','it-IT',NULL,NULL,NULL,NULL,1,1,'2013-10-09 16:03:29',0,'','active',NULL,'active','\0',0.00,0.00,0.00,0.00,0.00);
 /*!40000 ALTER TABLE `jobs` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -285,7 +320,7 @@ CREATE TABLE `original_files_map` (
   `deflated_xliff` longblob,
   `creation_date` date DEFAULT NULL,
   PRIMARY KEY (`sha1`,`source`,`target`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -323,7 +358,7 @@ CREATE TABLE `projects` (
   KEY `id_customer` (`id_customer`),
   KEY `status_analysis` (`status_analysis`),
   KEY `for_debug` (`for_debug`)
-) ENGINE=MyISAM AUTO_INCREMENT=4720 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=18453 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -346,10 +381,12 @@ DROP TABLE IF EXISTS `segment_translations`;
 CREATE TABLE `segment_translations` (
   `id_segment` bigint(20) NOT NULL,
   `id_job` bigint(20) NOT NULL,
+  `segment_hash` varchar(45) NOT NULL,
+  `autopropagated_from` bigint(20) DEFAULT NULL,
   `status` varchar(45) DEFAULT 'NEW',
   `translation` text,
   `translation_date` datetime DEFAULT NULL,
-  `time_to_edit` int(11) DEFAULT '0',
+  `time_to_edit` int(11) NOT NULL DEFAULT '0',
   `match_type` varchar(45) DEFAULT 'NEW',
   `context_hash` blob,
   `eq_word_count` double(20,2) DEFAULT NULL,
@@ -371,8 +408,10 @@ CREATE TABLE `segment_translations` (
   KEY `tm_analysis_status` (`tm_analysis_status`) USING BTREE,
   KEY `locked` (`locked`) USING BTREE,
   KEY `id_segment` (`id_segment`) USING BTREE,
-  KEY `warning` (`warning`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+  KEY `warning` (`warning`),
+  KEY `segment_hash` (`segment_hash`) USING HASH,
+  KEY `auto_idx` (`autopropagated_from`) USING BTREE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -381,36 +420,8 @@ CREATE TABLE `segment_translations` (
 
 LOCK TABLES `segment_translations` WRITE;
 /*!40000 ALTER TABLE `segment_translations` DISABLE KEYS */;
-INSERT INTO `segment_translations` VALUES (1,1,'TRANSLATED','C:\\Users\\user\\Downloads\\File per campo test\\1\\gui_email.html \\\' \' \\\\\' \\\\\\','2013-10-15 12:14:33',37564,'',NULL,0.00,0.00,'[{\"id\":\"0\",\"raw_segment\":\"\",\"segment\":\"C:\\\\Users\\\\user\\\\Downloads\\\\File per field test\\\\1\\\\gui_email.html\",\"translation\":\"C:\\\\ Users\\\\ user\\\\ Downloads\\\\ File per campo test\\\\ 1\\\\ gui_email.html\",\"raw_translation\":\"C:\\\\ Users\\\\ user\\\\ Downloads\\\\ File per campo test\\\\ 1\\\\ gui_email.html\",\"quality\":0,\"reference\":\"\",\"usage_count\":0,\"subject\":\"\",\"created_by\":\"MT-FBK-IT (EN->IT)\",\"last_updated_by\":\"\",\"create_date\":\"0000-00-00\",\"last_update_date\":\"2013-10-15\",\"match\":\"86%\",\"sentence_confidence\":\"71.49164987426263\"}]','C:\\ Users\\ user\\ Downloads\\ File per campo test\\ 1\\ gui_email.html',86,'MT',1,71.49165344238281,'UNDONE',0,0,'');
+INSERT INTO `segment_translations` VALUES (1,1,'xxx',0,'TRANSLATED','C:\\Users\\user\\Downloads\\File per campo test\\1\\gui_email.html \\\' \' \\\\\' \\\\\\','2013-10-15 12:14:33',37564,'',NULL,0.00,0.00,'[{\"id\":\"0\",\"raw_segment\":\"\",\"segment\":\"C:\\\\Users\\\\user\\\\Downloads\\\\File per field test\\\\1\\\\gui_email.html\",\"translation\":\"C:\\\\ Users\\\\ user\\\\ Downloads\\\\ File per campo test\\\\ 1\\\\ gui_email.html\",\"raw_translation\":\"C:\\\\ Users\\\\ user\\\\ Downloads\\\\ File per campo test\\\\ 1\\\\ gui_email.html\",\"quality\":0,\"reference\":\"\",\"usage_count\":0,\"subject\":\"\",\"created_by\":\"MT-FBK-IT (EN->IT)\",\"last_updated_by\":\"\",\"create_date\":\"0000-00-00\",\"last_update_date\":\"2013-10-15\",\"match\":\"86%\",\"sentence_confidence\":\"71.49164987426263\"}]','C:\\ Users\\ user\\ Downloads\\ File per campo test\\ 1\\ gui_email.html',86,'MT',1,71.49165344238281,'UNDONE',0,0,'');
 /*!40000 ALTER TABLE `segment_translations` ENABLE KEYS */;
-UNLOCK TABLES;
-/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
-
---
--- Table structure for table `segment_translations_analysis_queue`
---
-
-DROP TABLE IF EXISTS `segment_translations_analysis_queue`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `segment_translations_analysis_queue` (
-  `id_segment` int(11) NOT NULL,
-  `id_job` int(11) NOT NULL,
-  `locked` int(11) DEFAULT '0',
-  `pid` int(11) DEFAULT NULL,
-  `date_insert` datetime DEFAULT NULL,
-  PRIMARY KEY (`id_segment`,`id_job`),
-  KEY `locked` (`locked`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Dumping data for table `segment_translations_analysis_queue`
---
-
-LOCK TABLES `segment_translations_analysis_queue` WRITE;
-/*!40000 ALTER TABLE `segment_translations_analysis_queue` DISABLE KEYS */;
-/*!40000 ALTER TABLE `segment_translations_analysis_queue` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -429,6 +440,7 @@ CREATE TABLE `segments` (
   `xliff_ext_prec_tags` text,
   `xliff_mrk_ext_prec_tags` text,
   `segment` text,
+  `segment_hash` varchar(45) NOT NULL,
   `xliff_mrk_ext_succ_tags` text,
   `xliff_ext_succ_tags` text,
   `raw_word_count` double(20,2) DEFAULT NULL,
@@ -440,8 +452,8 @@ CREATE TABLE `segments` (
   KEY `show_in_cat` (`show_in_cattool`) USING BTREE,
   KEY `raw_word_count` (`raw_word_count`) USING BTREE,
   KEY `id_file_part_idx` (`id_file_part`),
-  FULLTEXT KEY `segment` (`segment`)
-) ENGINE=MyISAM AUTO_INCREMENT=2356816 DEFAULT CHARSET=utf8;
+  KEY `segment_hash` (`segment_hash`) USING HASH COMMENT 'MD5 hash of segment content'
+) ENGINE=InnoDB AUTO_INCREMENT=2356816 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -450,8 +462,7 @@ CREATE TABLE `segments` (
 
 LOCK TABLES `segments` WRITE;
 /*!40000 ALTER TABLE `segments` DISABLE KEYS */;
-INSERT INTO `segments` VALUES
-(2356805,5300,NULL,'4df8461a-b0bc-4003-b411-ab5c0cc7ff0e','1','<g id=\"pt1\">','','<g id=\"pt2\">WASHINGTON </g><g id=\"pt3\">â€” The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.</g>','','</g>',36.00,1),(2356806,5300,NULL,'3127871f-936d-4c20-ae94-de295a60e7f2','2','<g id=\"pt4\"><g id=\"pt5\">','','Under the Affordable Care Act, employers with 50 or more full-time employees that do not offer affordable health coverage to their full-time employees may be required to make a shared responsibility payment.','','',32.00,1),(2356807,5300,NULL,'3127871f-936d-4c20-ae94-de295a60e7f2','3','Â  ','','The law specifically exempts small firms that have fewer than 50 full-time employees.','','',13.00,1),(2356808,5300,NULL,'3127871f-936d-4c20-ae94-de295a60e7f2','4',' ','','This provision takes effect in 2014.','','</g></g>',6.00,1),(2356809,5300,NULL,'58da8345-6ad8-4681-9819-573eb9bf5c01','5','<g id=\"pt6\"><g id=\"pt7\">','','Notice 2011-36, posted today on IRS.gov, solicits public input and comment on several issues that will be the subject of future proposed guidance as Treasury and the IRS work to provide information to employers on how to comply with the shared responsibility provisions.','','',44.00,1),(2356810,5300,NULL,'58da8345-6ad8-4681-9819-573eb9bf5c01','6','Â  ','','In particular, the notice requests comment on possible approaches employers could use to determine who is a full-time employee.','','Â </g></g>',19.00,1),(2356811,5300,NULL,'92d05960-0900-430c-8b4f-b75f9637a053','7','<g id=\"pt8\"><g id=\"pt9\">','','Todayâ€™s request for comment is designed to ensure that Treasury and IRS continue to receive broad input from stakeholders on how best to implement the shared responsibility provisions in a way that is workable and administrable for employers, allowing them flexibility and minimizing<x id=\"nbsp\"/> burdens.','','',44.00,1),(2356812,5300,NULL,'92d05960-0900-430c-8b4f-b75f9637a053','8','Â  ','','Employers have asked for guidance on this provision, and a number of stakeholder groups have approached Treasury and IRS with information and initial suggestions, which have been taken into account in developing todayâ€™s notice.','','',34.00,1),(2356813,5300,NULL,'92d05960-0900-430c-8b4f-b75f9637a053','9','Â  ','','By soliciting comments and feedback now, Treasury and IRS are giving all interested parties the opportunity for input before proposed regulations are issued at a later date.','','</g></g>',27.00,1),(2356814,5300,NULL,'f478631d-d40a-4649-9874-63364681a6d2','10','<g id=\"pt10\"><g id=\"pt11\">','','Consistent with the coordinated approach the Departments of Treasury, Labor, and Health and Human Services are taking in developing the regulations and other guidance under the Affordable Care Act, the notice also solicits input on how the three Departments should interpret and apply the Actâ€™s provisions limiting the ability of plans and issuers to impose a waiting period for health coverage of longer than 90 days starting in 2014.','','',69.00,1),(2356815,5300,NULL,'f478631d-d40a-4649-9874-63364681a6d2','11','Â  ','','In addition, the notice invites comment on how guidance under the 90-day provisions should be coordinated with the rules Treasury and IRS will propose regarding the shared responsibility provisions.','','</g></g>',29.00,1);
+INSERT INTO `segments` VALUES (2356805,5300,NULL,'4df8461a-b0bc-4003-b411-ab5c0cc7ff0e','1','<g id=\"pt1\">','','<g id=\"pt2\">WASHINGTON </g><g id=\"pt3\">â€” The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.</g>','23477888ef3973218445b1466e823dde','','</g>',36.00,1),(2356806,5300,NULL,'3127871f-936d-4c20-ae94-de295a60e7f2','2','<g id=\"pt4\"><g id=\"pt5\">','','Under the Affordable Care Act, employers with 50 or more full-time employees that do not offer affordable health coverage to their full-time employees may be required to make a shared responsibility payment.','689c9e816ee6a66cdcc453f7375d5abe','','',32.00,1),(2356807,5300,NULL,'3127871f-936d-4c20-ae94-de295a60e7f2','3','Â  ','','The law specifically exempts small firms that have fewer than 50 full-time employees.','13559a5ceb53eb9b98ccdf1d12421665','','',13.00,1),(2356808,5300,NULL,'3127871f-936d-4c20-ae94-de295a60e7f2','4',' ','','This provision takes effect in 2014.','3345f6c45bea8e88b887c1b28ebe32ba','','</g></g>',6.00,1),(2356809,5300,NULL,'58da8345-6ad8-4681-9819-573eb9bf5c01','5','<g id=\"pt6\"><g id=\"pt7\">','','Notice 2011-36, posted today on IRS.gov, solicits public input and comment on several issues that will be the subject of future proposed guidance as Treasury and the IRS work to provide information to employers on how to comply with the shared responsibility provisions.','972bc7c4f1b7afedf94b8f8f99d853d9','','',44.00,1),(2356810,5300,NULL,'58da8345-6ad8-4681-9819-573eb9bf5c01','6','Â  ','','In particular, the notice requests comment on possible approaches employers could use to determine who is a full-time employee.','d6a8c01a8c07472bb21f782b860b7980','','Â </g></g>',19.00,1),(2356811,5300,NULL,'92d05960-0900-430c-8b4f-b75f9637a053','7','<g id=\"pt8\"><g id=\"pt9\">','','Todayâ€™s request for comment is designed to ensure that Treasury and IRS continue to receive broad input from stakeholders on how best to implement the shared responsibility provisions in a way that is workable and administrable for employers, allowing them flexibility and minimizing<x id=\"nbsp\"/> burdens.','d12ceca8bf74dd8dcc655088cee8eed4','','',44.00,1),(2356812,5300,NULL,'92d05960-0900-430c-8b4f-b75f9637a053','8','Â  ','','Employers have asked for guidance on this provision, and a number of stakeholder groups have approached Treasury and IRS with information and initial suggestions, which have been taken into account in developing todayâ€™s notice.','59f45e0b3f73b7a36d314da7b404ab76','','',34.00,1),(2356813,5300,NULL,'92d05960-0900-430c-8b4f-b75f9637a053','9','Â  ','','By soliciting comments and feedback now, Treasury and IRS are giving all interested parties the opportunity for input before proposed regulations are issued at a later date.','e2533b722f7497598b8d54824b71d05e','','</g></g>',27.00,1),(2356814,5300,NULL,'f478631d-d40a-4649-9874-63364681a6d2','10','<g id=\"pt10\"><g id=\"pt11\">','','Consistent with the coordinated approach the Departments of Treasury, Labor, and Health and Human Services are taking in developing the regulations and other guidance under the Affordable Care Act, the notice also solicits input on how the three Departments should interpret and apply the Actâ€™s provisions limiting the ability of plans and issuers to impose a waiting period for health coverage of longer than 90 days starting in 2014.','9f7228238096ceca429bb54bf5b65945','','',69.00,1),(2356815,5300,NULL,'f478631d-d40a-4649-9874-63364681a6d2','11','Â  ','','In addition, the notice invites comment on how guidance under the 90-day provisions should be coordinated with the rules Treasury and IRS will propose regarding the shared responsibility provisions.','918d34a7f0761b6101ee0d2d75428053','','</g></g>',29.00,1);
 /*!40000 ALTER TABLE `segments` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -498,7 +509,7 @@ CREATE TABLE `translators` (
   `mymemory_api_key` varchar(50) NOT NULL,
   PRIMARY KEY (`username`),
   KEY `email` (`email`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -527,7 +538,7 @@ CREATE TABLE `users` (
   `api_key` varchar(100) NOT NULL,
   PRIMARY KEY (`email`),
   KEY `api_key` (`api_key`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -548,10 +559,50 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+-- Dump completed on 2014-06-23 13:46:26
+
+--
+-- Current Database: `matecat_analysis`
+--
+DROP SCHEMA IF EXISTS `unittest_matecat_analysis_local`;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `unittest_matecat_analysis_local` /*!40100 DEFAULT CHARACTER SET latin1 */;
+
+USE `unittest_matecat_analysis_local`;
+
+--
+-- Table structure for table `segment_translations_analysis_queue`
+--
+
+DROP TABLE IF EXISTS `segment_translations_analysis_queue`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `segment_translations_analysis_queue` (
+  `id_segment` int(11) NOT NULL,
+  `id_job` int(11) NOT NULL,
+  `locked` int(11) DEFAULT '0',
+  `pid` int(11) DEFAULT NULL,
+  `date_insert` datetime DEFAULT NULL,
+  PRIMARY KEY (`id_segment`,`id_job`),
+  KEY `locked` (`locked`) USING BTREE,
+  KEY `pid` (`pid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+
 -- Dump completed on 2013-10-09 16:04:19
 -- Drop user if already Exista
 GRANT USAGE ON *.* TO 'unt_matecat_user'@'localhost';
 DROP USER 'unt_matecat_user'@'localhost';
 CREATE USER 'unt_matecat_user'@'localhost' IDENTIFIED BY 'unt_matecat_user';
 GRANT ALL ON unittest_matecat_local.* TO 'unt_matecat_user'@'localhost' IDENTIFIED BY 'unt_matecat_user';
+GRANT ALL ON unittest_matecat_analysis_local.* TO 'matecat'@'localhost';
 FLUSH PRIVILEGES;

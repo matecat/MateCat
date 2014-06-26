@@ -160,7 +160,14 @@ class QA {
      *
      * @var array
      */
-    protected $malformedXmlStructDiff = array();
+    protected $malformedXmlStructDiff = array( 'source' => array(), 'target' => array() );
+
+    /**
+     * Array of Tag position errors
+     *
+     * @var array
+     */
+    protected $tagPositionError = array();
 
     const ERR_NONE               = 0;
     const ERR_COUNT              = 1;
@@ -177,6 +184,7 @@ class QA {
     const ERR_BOUNDARY_TAIL      = 12;
     const ERR_UNCLOSED_X_TAG     = 13;
     const ERR_BOUNDARY_HEAD_TEXT = 14;
+    const ERR_TAG_ORDER          = 15;
 
     const ERR_TAG_MISMATCH       = 1000;
 
@@ -203,6 +211,7 @@ class QA {
      *     ERR_BOUNDARY_TAIL       =>  'End line char mismatch',
      *     ERR_UNCLOSED_X_TAG      =>  'Wrong format for x tag.Should be <x .... />'
      *     ERR_BOUNDARY_HEAD_TEXT  =>  'Mismatch of Special chars ( and spaces ) before a tag or after a closing G tag'
+     *     ERR_TAG_ORDER           =>  'Mismatch of position between source and target tag'
      * );
      * </pre>
      * @var array(string) 
@@ -223,6 +232,7 @@ class QA {
         12 => 'End line char mismatch',
         13 => 'Wrong format for x tag. Should be < x .... />',
         14 => 'Char mismatch before a tag',
+        15 => 'Tag order mismatch',
 
         /*
          * grouping
@@ -288,12 +298,17 @@ class QA {
 
     protected static $regexpPlaceHoldAscii = '/##\$_([0-1]{0,1}[0-9A-F]{1,2})\$##/u';
 
+
+    const ERROR   = 'ERROR';
+    const WARNING = 'WARNING';
+    const INFO    = 'INFO';
+
     /**
      * List of Errors from  check analysis
      * 
      * @var array(errObject(number:string))
      */
-    protected $exceptionList = array();
+    protected $exceptionList = array( self::ERROR => array(), self::WARNING => array(), self::INFO => array() );
 
     /**
      * List of warnings from check analysis
@@ -301,8 +316,6 @@ class QA {
      * @var array(errObject(number,string))
      */
     protected $warningList = array();
-
-    protected static $crPlaceHold = '##$_0D$##';
 
     /**
      * Add an error to error List.
@@ -325,13 +338,13 @@ class QA {
             case self::ERR_COUNT:
             case self::ERR_SOURCE:
             case self::ERR_TARGET:
-                $this->exceptionList[] = errObject::get( array( 'outcome' => self::ERR_TAG_MISMATCH, 'debug' => $this->_errorMap[self::ERR_TAG_MISMATCH] ) );
+                $this->exceptionList[ self::ERROR ][] = errObject::get( array( 'outcome' => self::ERR_TAG_MISMATCH, 'debug' => $this->_errorMap[self::ERR_TAG_MISMATCH] ) );
             break;
             case self::ERR_TAG_ID:
-            	$this->exceptionList[] = errObject::get( array( 'outcome' => self::ERR_TAG_ID, 'debug' => $this->_errorMap[self::ERR_TAG_ID] ) );
+            	$this->exceptionList[ self::ERROR ][] = errObject::get( array( 'outcome' => self::ERR_TAG_ID, 'debug' => $this->_errorMap[self::ERR_TAG_ID] ) );
             break;
             case self::ERR_UNCLOSED_X_TAG:
-                $this->exceptionList[] = errObject::get( array( 'outcome' => $errCode, 'debug' => $this->_errorMap[$errCode] ) );
+                $this->exceptionList[ self::ERROR ][] = errObject::get( array( 'outcome' => $errCode, 'debug' => $this->_errorMap[$errCode] ) );
             break;
 
             case self::ERR_WS_HEAD:
@@ -341,10 +354,36 @@ class QA {
             case self::ERR_BOUNDARY_HEAD:
             case self::ERR_BOUNDARY_TAIL:
             case self::ERR_BOUNDARY_HEAD_TEXT:
-                $this->warningList[] = errObject::get( array( 'outcome' => self::ERR_SPACE_MISMATCH, 'debug' => $this->_errorMap[self::ERR_SPACE_MISMATCH] ) );
+                $this->exceptionList[ self::INFO ][] = errObject::get( array( 'outcome' => self::ERR_SPACE_MISMATCH, 'debug' => $this->_errorMap[self::ERR_SPACE_MISMATCH] ) );
             break;
+            case self::ERR_TAG_ORDER:
             default:
-                $this->warningList[] = errObject::get( array( 'outcome' => $errCode, 'debug' => $this->_errorMap[$errCode] ) );
+                $this->exceptionList[ self::WARNING ][] = errObject::get( array( 'outcome' => $errCode, 'debug' => $this->_errorMap[$errCode] ) );
+            break;
+        }
+
+    }
+
+    /**
+     * Get Information about Error on the basis of the required level
+     *
+     * @param $level
+     *
+     * @return bool
+     */
+    protected function _thereAreErrorLevel( $level ){
+
+        switch ( $level ){
+            case self::ERROR:
+                return !empty($this->exceptionList[ self::ERROR ]);
+            break;
+            case self::WARNING:
+                $warnings = array_merge( $this->exceptionList[ self::ERROR ], $this->exceptionList[ self::WARNING ] );
+                return !empty( $warnings );
+            break;
+            case self::INFO:
+                $warnings = array_merge( $this->exceptionList[ self::INFO ], $this->exceptionList[ self::ERROR ], $this->exceptionList[ self::WARNING ] );
+                return !empty( $warnings );
             break;
         }
 
@@ -352,21 +391,37 @@ class QA {
 
     /**
      * Check for found Errors
-     * 
+     *
      * @return bool
      */
     public function thereAreErrors(){
-        return !empty($this->exceptionList);
+        return $this->_thereAreErrorLevel( self::ERROR );
     }
-    
+
+    /**
+     * Export Error List
+     *
+     */
+    public function getErrors() {
+        return $this->checkErrorNone( self::ERROR );
+    }
+
+    /**
+     * Get error list in json format
+     *
+     * @return string Json
+     */
+    public function getErrorsJSON() {
+        return json_encode( $this->checkErrorNone(  self::ERROR, true ) );
+    }
+
     /**
      * Check For Warnings
      *
      * return bool
      */
     public function thereAreWarnings(){
-    	$warnings = array_merge( $this->exceptionList, $this->warningList );
-    	return !empty($warnings);
+    	return $this->_thereAreErrorLevel( self::WARNING );
     }
 
 	/**
@@ -375,7 +430,43 @@ class QA {
 	 * @return errObject[]
 	 */
     public function getWarnings(){
-    	return $this->checkErrorNone( array_merge( $this->warningList, $this->exceptionList ) );
+    	return $this->checkErrorNone( self::WARNING );
+    }
+
+    /**
+     * Get warning list in json format
+     *
+     * @return string Json
+     */
+    public function getWarningsJSON() {
+        return json_encode( $this->checkErrorNone( self::WARNING, true ) );
+    }
+
+    /**
+     * Check For Notices
+     *
+     * return bool
+     */
+    public function thereAreNotices(){
+        return $this->_thereAreErrorLevel( self::INFO );
+    }
+
+    /**
+     * Get Notice level errors
+     *
+     * @return errObject[]
+     */
+    public function getNotices(){
+        return $this->checkErrorNone( self::INFO );
+    }
+
+    /**
+     * Get Notices list in json format
+     *
+     * @return string Json
+     */
+    public function getNoticesJSON() {
+        return json_encode( $this->checkErrorNone( self::INFO, true ) );
     }
 
     /**
@@ -392,16 +483,31 @@ class QA {
      * )
      * </pre>
      *
-     * @param $list errObject[]
+     * @param string $level
      * @param bool $count
+     *
      * @return errObject[]
      */
-    protected function checkErrorNone( array $list, $count = false ){
-    	if( empty( $list ) ){
-    		return array( errObject::get( array( 'outcome' => self::ERR_NONE, 'debug' => $this->_errorMap[self::ERR_NONE] . " [ 0 ]" ) ) );
+    protected function checkErrorNone( $level =  self::ERROR , $count = false ){
+
+        if( !$this->_thereAreErrorLevel( $level ) ){
+    		return array( errObject::get( array( 'outcome' => self::ERR_NONE, 'debug' => $this->_errorMap[ self::ERR_NONE ] . " [ 0 ]" ) ) );
     	}
 
-        if ($count) {
+        switch( $level ){
+            case self::INFO:
+                $list = array_merge( $this->exceptionList[ self::INFO ], $this->exceptionList[ self::WARNING ], $this->exceptionList[ self::ERROR ] );
+                break;
+            case self::WARNING:
+                $list = array_merge( $this->exceptionList[ self::WARNING ], $this->exceptionList[ self::ERROR ] );
+                break;
+            case self::ERROR:
+            default:
+                $list = $this->exceptionList[ self::ERROR ];
+                break;
+        }
+
+        if ( $count ) {
             /**
              * count same values in array of errors.
              * we use array_map with strval callback function because array_count_values can count only strings or int
@@ -410,8 +516,7 @@ class QA {
              *
              * @see http://www.php.net/manual/en/function.array-count-values.php
              **/
-            $errorCount = array_count_values(array_map('strval', $list));
-
+            $errorCount = array_count_values( array_map( 'strval', $list ) );
             /**
              * array_unique remove duplicated values in array,
              * Two elements are considered equal if and only if (string) $elem1 === (string) $elem2
@@ -420,45 +525,21 @@ class QA {
              *
              * @see http://www.php.net/manual/en/function.array-unique.php
              */
-            $list = array_unique($list);
+            $list = array_values( array_unique( $list ) );
 
             /**
              * @param $errObj errObject
              */
-            foreach ($list as $errObj) {
-                $errObj->debug = $errObj->getOrigDebug() . " ( " . $errorCount[$errObj->outcome] . " )";
+            foreach ( $list as $errObj ) {
+                $errObj->debug = $errObj->getOrigDebug() . " ( " . $errorCount[ $errObj->outcome ] . " )";
             }
+
         }
+
         return $list;
 
     }
     
-    /**
-     * Export Error List
-     *
-     */
-    public function getErrors() {
-        return $this->checkErrorNone($this->exceptionList);
-    }
-
-    /**
-     * Get error list in json format
-     * 
-     * @return string Json
-     */
-    public function getErrorsJSON() {
-        return json_encode( $this->checkErrorNone($this->exceptionList, true) );
-    }
-    
-    /**
-     * Get warning list in json format
-     *
-     * @return string Json
-     */
-    public function getWarningsJSON() {
-    	return json_encode( $this->checkErrorNone( array_merge( $this->warningList, $this->exceptionList ), true ) );
-    }
-
     /**
      * Class constructor
      * 
@@ -917,6 +998,7 @@ class QA {
 
         $this->_checkTagsBoundary();
         $this->_checkContentConsistency( $srcNodeList, $trgNodeList );
+        $this->_checkTagPositions();
 
         // all checks completed
         return $this->getErrors();
@@ -940,6 +1022,34 @@ class QA {
 
         // all checks completed
         return $this->getErrors();
+
+    }
+
+    public function getTargetTagPositionError(){
+        return $this->tagPositionError;
+    }
+
+    /**
+     * Check for errors in tag position
+     *
+     */
+    protected function _checkTagPositions(){
+
+//        Log::doLog( $this->source_seg );
+//        Log::doLog( $this->target_seg );
+
+        preg_match_all( '/(<[^\/>]+[\/]{0,1}>|<\/[a-zA-Z]+>)/', $this->source_seg, $matches );
+        $malformedXmlSrcStruct = $matches[ 1 ];
+        preg_match_all( '/(<[^\/>]+[\/]{0,1}>|<\/[a-zA-Z]+>)/', $this->target_seg, $matches );
+        $malformedXmlTrgStruct = $matches[ 1 ];
+
+        foreach( $malformedXmlTrgStruct as $pos => $tag ){
+            if( $malformedXmlSrcStruct[ $pos ] != $tag ){
+                $this->_addError( self::ERR_TAG_ORDER );
+                $this->tagPositionError[] = $tag;
+                break;
+            }
+        }
 
     }
 
@@ -1304,40 +1414,40 @@ class QA {
             $this->_addError(self::ERR_WS_HEAD);
         }
 
-        //normalize the target first space according to the source type
-        if( $srcHasHeadNBSP != $trgHasHeadNBSP && !$this->thereAreErrors() ){
-
-            //get the string from normalized string
-            if( is_null($trgTagReference['parent_id']) ){
-                //get the string from normalized string
-                $_nodeNormalized = $this->normalizedTrgDOMNodeList->item( $trgTagReference['node_idx'] );
-                $_trgNodeContent = $_nodeNormalized->nodeValue;
-
-            } else {
-
-                $_nodeNormalized = $this->_queryDOMElement( $this->normalizedTrgDOM, $trgTagReference );
-                $_trgNodeContent = $_nodeNormalized->nodeValue;
-
-            }
-
-            if( $srcHasHeadNBSP ) {
-                $_trgNodeContent = preg_replace( "/^\x{20}{1}/u", Utils::unicode2chr(0Xa0), $_trgNodeContent );
-            } else {
-                $_trgNodeContent = preg_replace( "/^\x{a0}{1}/u", Utils::unicode2chr(0X20), $_trgNodeContent );
-            }
-            $_nodeNormalized->nodeValue = $_trgNodeContent;
-
-            $xpath = new DOMXPath( $this->normalizedTrgDOM );
-            $query = '//*[@id="' . $trgTagReference['id'] . '"]';
-
-            $node = $xpath->query($query);
-
-            foreach( $node as $n ){
-                //only a parent node can replace it's child
-                $n->parentNode->replaceChild( $this->normalizedTrgDOM->importNode( $_nodeNormalized, true ), $n );
-            }
-
-        }
+//        //normalize the target first space according to the source type
+//        if( $srcHasHeadNBSP != $trgHasHeadNBSP && !$this->thereAreErrors() ){
+//
+//            //get the string from normalized string
+//            if( is_null($trgTagReference['parent_id']) ){
+//                //get the string from normalized string
+//                $_nodeNormalized = $this->normalizedTrgDOMNodeList->item( $trgTagReference['node_idx'] );
+//                $_trgNodeContent = $_nodeNormalized->nodeValue;
+//
+//            } else {
+//
+//                $_nodeNormalized = $this->_queryDOMElement( $this->normalizedTrgDOM, $trgTagReference );
+//                $_trgNodeContent = $_nodeNormalized->nodeValue;
+//
+//            }
+//
+//            if( $srcHasHeadNBSP ) {
+//                $_trgNodeContent = preg_replace( "/^\x{20}{1}/u", Utils::unicode2chr(0Xa0), $_trgNodeContent );
+//            } else {
+//                $_trgNodeContent = preg_replace( "/^\x{a0}{1}/u", Utils::unicode2chr(0X20), $_trgNodeContent );
+//            }
+//            $_nodeNormalized->nodeValue = $_trgNodeContent;
+//
+//            $xpath = new DOMXPath( $this->normalizedTrgDOM );
+//            $query = '//*[@id="' . $trgTagReference['id'] . '"]';
+//
+//            $node = $xpath->query($query);
+//
+//            foreach( $node as $n ){
+//                //only a parent node can replace it's child
+//                $n->parentNode->replaceChild( $this->normalizedTrgDOM->importNode( $_nodeNormalized, true ), $n );
+//            }
+//
+//        }
 
     }
 
@@ -1382,40 +1492,40 @@ class QA {
 //        }
 
     	//normalize the target first space according to the source type
-    	if( $srcHasTailNBSP != $trgHasTailNBSP && !$this->thereAreErrors() ){
-
-            //get the string from normalized string
-            if( is_null($trgTagReference['parent_id']) ){
-                //get the string from normalized string
-                $_nodeNormalized = $this->normalizedTrgDOMNodeList->item( $trgTagReference['node_idx'] );
-                $_trgNodeContent = $_nodeNormalized->nodeValue;
-
-            } else {
-
-                $_nodeNormalized = $this->_queryDOMElement( $this->normalizedTrgDOM, $trgTagReference );
-                $_trgNodeContent = $_nodeNormalized->nodeValue;
-
-            }
-
-    		if( $srcHasTailNBSP ) {
-    			$_trgNodeContent = preg_replace( "/\x{20}{1}$/u", Utils::unicode2chr(0Xa0), $_trgNodeContent );
-    		} else {
-    			$_trgNodeContent = preg_replace( "/\x{a0}{1}$/u", Utils::unicode2chr(0X20), $_trgNodeContent );
-    		}
-
-            $_nodeNormalized->nodeValue = $_trgNodeContent;
-
-            $xpath = new DOMXPath( $this->normalizedTrgDOM );
-            $query = '//*[@id="' . $trgTagReference['id'] . '"]';
-
-            $node = $xpath->query($query);
-
-            foreach( $node as $n ){
-                //only a parent node can replace it's child
-                $n->parentNode->replaceChild( $this->normalizedTrgDOM->importNode( $_nodeNormalized, true ), $n );
-            }
-
-        }
+//    	if( $srcHasTailNBSP != $trgHasTailNBSP && !$this->thereAreErrors() ){
+//
+//            //get the string from normalized string
+//            if( is_null($trgTagReference['parent_id']) ){
+//                //get the string from normalized string
+//                $_nodeNormalized = $this->normalizedTrgDOMNodeList->item( $trgTagReference['node_idx'] );
+//                $_trgNodeContent = $_nodeNormalized->nodeValue;
+//
+//            } else {
+//
+//                $_nodeNormalized = $this->_queryDOMElement( $this->normalizedTrgDOM, $trgTagReference );
+//                $_trgNodeContent = $_nodeNormalized->nodeValue;
+//
+//            }
+//
+//    		if( $srcHasTailNBSP ) {
+//    			$_trgNodeContent = preg_replace( "/\x{20}{1}$/u", Utils::unicode2chr(0Xa0), $_trgNodeContent );
+//    		} else {
+//    			$_trgNodeContent = preg_replace( "/\x{a0}{1}$/u", Utils::unicode2chr(0X20), $_trgNodeContent );
+//    		}
+//
+//            $_nodeNormalized->nodeValue = $_trgNodeContent;
+//
+//            $xpath = new DOMXPath( $this->normalizedTrgDOM );
+//            $query = '//*[@id="' . $trgTagReference['id'] . '"]';
+//
+//            $node = $xpath->query($query);
+//
+//            foreach( $node as $n ){
+//                //only a parent node can replace it's child
+//                $n->parentNode->replaceChild( $this->normalizedTrgDOM->importNode( $_nodeNormalized, true ), $n );
+//            }
+//
+//        }
 
     }
 

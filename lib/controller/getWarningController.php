@@ -83,30 +83,9 @@ class getWarningController extends ajaxController {
 
         $result = getWarning( $this->__postInput->id_job, $this->__postInput->password );
 
+        Log::$fileName = "temp.log";
+        Log::doLog( $result );
         foreach ( $result as $position => &$item ) {
-
-            //PATCH - REMOVE WHITESPACES FROM GLOBAL WARNING ( Backward compatibility )
-//            $serialized_err = json_decode( $item['serialized_errors_list'] );
-//
-//            $foundTagMismatch = false;
-//            foreach( $serialized_err as $k => $error ){
-//
-//                switch ( $error->outcome ) {
-//                    case QA::ERR_TAG_MISMATCH:
-//                    case QA::ERR_TAG_ID:
-//                    case QA::ERR_UNCLOSED_X_TAG:
-//                        $foundTagMismatch = true;
-//                        break;
-//                }
-//
-//            }
-//
-//            if( !$foundTagMismatch ){
-//                unset( $result[$position] );
-//            } else {
-//                $item = $item[ 'id_segment' ];
-//            }
-            //PATCH - REMOVE WHITESPACES FROM GLOBAL WARNING ( Backward compatibility )
 
             $item = $item[ 'id_segment' ];
 
@@ -155,20 +134,21 @@ class getWarningController extends ajaxController {
 
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
         $QA->performConsistencyCheck();
-        if ( $QA->thereAreWarnings() ) {
+        if ( $QA->thereAreNotices() ) {
 //        if ( $QA->thereAreErrors() ) {
             $this->result[ 'details' ]                 = array();
             $this->result[ 'details' ]                 = array();
             $this->result[ 'details' ][ 'id_segment' ] = $this->__postInput->id;
 //            $this->result[ 'details' ][ 'warnings' ]   = $QA->getErrorsJSON();
 //            $this->result[ 'total' ]                                             = count( $QA->getErrors() );
-            $this->result[ 'details' ][ 'warnings' ]     = $QA->getWarningsJSON();
-            $this->result[ 'details' ][ 'tag_mismatch' ] = $QA->getMalformedXmlStructs();
-            $this->result[ 'total' ]                     = count( $QA->getWarnings() );
+            $this->result[ 'details' ][ 'warnings' ]                = $QA->getNoticesJSON();
+            $this->result[ 'details' ][ 'tag_mismatch' ]            = $QA->getMalformedXmlStructs();
+            $this->result[ 'details' ][ 'tag_mismatch' ][ 'order' ] = $QA->getTargetTagPositionError();
+            $this->result[ 'total' ]                                = count( $QA->getNotices() );
 //temp
 			
 //            Log::doLog($this->__postInput->trg_content);
-//            Log::doLog($QA->getTrgNormalized());
+//            Log::doLog($this->result);
 
         }
 
