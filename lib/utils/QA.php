@@ -550,7 +550,6 @@ class QA {
      * 
      */
     public function __construct($source_seg, $target_seg) {
-
         mb_regex_encoding('UTF-8');
         mb_internal_encoding("UTF-8");
 
