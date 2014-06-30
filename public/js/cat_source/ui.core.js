@@ -111,7 +111,7 @@ UI = {
 		}
 	},
 */
-	closeSegment: function(segment, byButton, operation) {console.log('CLOSE SEGMENT');
+	closeSegment: function(segment, byButton, operation) {//console.log('CLOSE SEGMENT');
 		if ((typeof segment == 'undefined') || (typeof UI.toSegment != 'undefined')) {
 			this.toSegment = undefined;
 			return true;
@@ -872,8 +872,8 @@ UI = {
 		$('#spellCheck .words').remove();
 	},
 	openSegment: function(editarea, operation) {
-        console.log('open segment - editarea: ', UI.currentSegmentId);
-        console.log('operation: ', operation);
+//        console.log('open segment - editarea: ', UI.currentSegmentId);
+//        console.log('operation: ', operation);
 //		if(UI.body.hasClass('archived')) return;
 		segment_id = $(editarea).attr('data-sid');
 		var segment = $('#segment-' + segment_id);
@@ -916,7 +916,7 @@ UI = {
 		this.setCurrentSegment();
 		
 		if (!this.readonly) {
-            console.log('getNormally: ', getNormally);
+ //           console.log('getNormally: ', getNormally);
 			if(getNormally) {
 				this.getContribution(segment, 0);
 			} else {
@@ -1410,7 +1410,7 @@ UI = {
         $.each(d.data.editable, function() {
             numSeg += this.involved_id.length;
         });
-		console.log('numAlt: ', numAlt);
+//		console.log('numAlt: ', numAlt);
 //		console.log('numSeg: ', numSeg);
         if(numAlt) {
 //            UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + ((numAlt > 1)? 'other ' + numAlt + ' different' : 'another') + ' way' + ((numAlt > 1)? 's' : '') + '</a></p>');
@@ -2138,7 +2138,7 @@ UI = {
 	},
 */
 
-    postProcessEditarea: function(context, selector){console.log('postprocesseditarea');
+    postProcessEditarea: function(context, selector){//console.log('postprocesseditarea');
         selector = (typeof selector === "undefined") ? '.editarea' : selector;
         area = $( selector, context ).clone();
         /*
@@ -2236,11 +2236,13 @@ UI = {
         if(!UI.hiddenTextEnabled) return str;
 		jumpSpacesEncode = jumpSpacesEncode || false;
 		var _str = str;
-
-		if(jumpSpacesEncode) {
-			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true);
+        if(UI.markSpacesEnabled) {
+            if(jumpSpacesEncode) {
+                _str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true);
 //			_str = this.encodeSpacesAsPlaceholders(_str);
-		}
+            }
+        }
+
 		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
