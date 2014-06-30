@@ -600,19 +600,24 @@ $.extend(UI, {
 					UI.saveInUndoStack('cancel');
 					UI.currentSegmentQA();
 				} else {
-console.log('QUI');
+//console.log('QUI');
 					var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
 					var numSpacesBefore = $('.space-marker', UI.editarea).length;
 //                    var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
 //					console.log('a: ', UI.editarea.html());
 					saveSelection();
-//					console.log('b: ', UI.editarea.html());
+
 					parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
 					isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
 					parentMark = $('.searchMarker', UI.editarea).has('.rangySelectionBoundary');
 					isInsideMark = $('.searchMarker .rangySelectionBoundary', UI.editarea).length;
 //					console.log('c: ', UI.editarea.html());
 
+
+                    var selBound = $('.rangySelectionBoundary', UI.editarea);
+                    var undeletableMonad = ((selBound.prev().hasClass('monad'))&&(selBound.prev().prev().prop("tagName") == 'BR'))? true : false;
+                    if(undeletableMonad) selBound.prev().remove();
+//                    if(undeletableMonad) selBound.prev().before(selBound);
 
 //					console.log('isInsideTag: ', isInsideTag);
                     restoreSelection();
@@ -759,7 +764,7 @@ console.log('QUI');
 						$('.rangySelectionBoundary', UI.editarea).remove();
 					}
 				}
-                console.log($(':focus'));
+//                console.log($(':focus'));
                 //              return false;
 			}
 
