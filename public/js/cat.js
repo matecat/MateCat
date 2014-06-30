@@ -1906,9 +1906,9 @@ UI = {
                     escapedSegment = escapedSegment.replace( config.nbspPlaceholderRegex, $( document.createElement('span') ).html('&nbsp;').text() );
 
                     if (UI.editarea.text().trim() != escapedSegment ){
-                        console.log( UI.editarea.text().trim() );
-                        console.log( UI.checkSegmentsArray[d.token].trim() );
-                        console.log( escapedSegment  );
+//                        console.log( UI.editarea.text().trim() );
+//                        console.log( UI.checkSegmentsArray[d.token].trim() );
+//                        console.log( escapedSegment  );
                         return;
                     }
 
@@ -2227,7 +2227,10 @@ UI = {
         //same as preeceding commented but with regular expression, better because remove ALL trailing BR not only one
         /* trim all last br if it is present and if after that element there's nothing */
 //        console.log( $( area ).text() );
-        return $( area ).text().replace( /(:?[ \xA0]*##\$_[0-9A-F]{2,4}\$##[ \xA0]*)+$/, "" );
+//        console.log( $( area ).text().replace( /(:?[ \xA0]*##\$_[0-9A-F]{2,4}\$##[ \xA0]*)+$/, "" ) );
+        return $(area).text();
+
+//        return $( area ).text().replace( /(:?[ \xA0]*##\$_[0-9A-F]{2,4}\$##[ \xA0]*)+$/, "" );
 
 
     },
