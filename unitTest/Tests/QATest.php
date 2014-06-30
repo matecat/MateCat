@@ -52,14 +52,19 @@ TRG;
         $check = new QA($source_seg, $target_seg);
         $check->performConsistencyCheck();
 
+        $notices  = $check->getNotices();
         $warnings = $check->getWarnings();
         $errors   = $check->getErrors();
 
         $this->assertFalse( $check->thereAreErrors() );
-        $this->assertTrue( $check->thereAreWarnings() );
+        $this->assertFalse( $check->thereAreWarnings() );
+        $this->assertTrue( $check->thereAreNotices() );
+
+        $this->assertEquals( count( $notices ), 1 );
+        $this->assertEquals( 1100, $notices[0]->outcome );
 
         $this->assertEquals( count( $warnings ), 1 );
-        $this->assertEquals( 1100, $warnings[0]->outcome );
+        $this->assertEquals( 0, $warnings[0]->outcome );
 
         $this->assertEquals( count( $errors ), 1 );
         $this->assertEquals( 0, $errors[0]->outcome );
@@ -84,22 +89,31 @@ TRG;
         $check = new QA($source_seg, $target_seg);
         $check->performConsistencyCheck();
 
+        $notices  = $check->getNotices();
         $warnings = $check->getWarnings();
         $errors   = $check->getErrors();
 
         $this->assertFalse( $check->thereAreErrors() );
         $this->assertFalse( $check->thereAreWarnings() );
+        $this->assertFalse( $check->thereAreNotices() );
 
-        $this->assertEquals( count( $warnings ), 1 );
+        $this->assertEquals( 1, count( $notices ) );
+        $this->assertEquals( 0, $notices[0]->outcome );
+
+        $this->assertEquals( 1, count( $warnings ) );
         $this->assertEquals( 0, $warnings[0]->outcome );
 
-        $this->assertEquals( count( $errors ), 1 );
+        $this->assertEquals( 1, count( $errors ) );
         $this->assertEquals( 0, $errors[0]->outcome );
+
+        $this->assertRegExp( '/\[ 0 \]/', $check->getErrorsJSON() );
+        $this->assertRegExp( '/\[ 0 \]/', $check->getWarningsJSON() );
+        $this->assertRegExp( '/\[ 0 \]/', $check->getNoticesJSON() );
 
         $normalized = $check->getTrgNormalized();
 
         //" 1 " -> 20 31 20
-        $this->assertEquals( '<g id="6"> 1 </g><g id="7">st  </g><g id="8"> Section of Tokyo, Osaka</g>', $normalized );
+        $this->assertEquals( '<g id="6"> 1 </g><g id="7">st  </g><g id="8"> Section of Tokyo, Osaka</g>', $normalized );
 
     }
 
@@ -120,20 +134,28 @@ TRG;
         $check->performConsistencyCheck();
 
         $warnings = $check->getWarnings();
+
+        $notices  = $check->getNotices();
+        $warnings = $check->getWarnings();
         $errors   = $check->getErrors();
 
         $this->assertFalse( $check->thereAreErrors() );
-        $this->assertTrue( $check->thereAreWarnings() );
+        $this->assertFalse( $check->thereAreWarnings() );
+        $this->assertTrue( $check->thereAreNotices() );
 
-        $this->assertEquals( count( $warnings ), 2 );
-        $this->assertEquals( 1100, $warnings[0]->outcome );
-        $this->assertEquals( 1100, $warnings[1]->outcome );
+        $this->assertEquals( count( $notices ), 2 );
+        $this->assertEquals( 1100, $notices[0]->outcome );
+        $this->assertEquals( 1100, $notices[1]->outcome );
+
+        $this->assertEquals( count( $warnings ), 1 );
+        $this->assertEquals( 0, $warnings[0]->outcome );
 
         $this->assertEquals( count( $errors ), 1 );
         $this->assertEquals( 0, $errors[0]->outcome );
 
         $this->assertRegExp( '/\[ 0 \]/', $check->getErrorsJSON() );
-        $this->assertRegExp( '/ 2 /', $check->getWarningsJSON() );
+        $this->assertRegExp( '/\[ 0 \]/', $check->getWarningsJSON() );
+        $this->assertRegExp( '/ 2 /', $check->getNoticesJSON() );
 
     }
 
@@ -155,22 +177,29 @@ TRG;
         $check = new QA($source_seg, $target_seg);
         $check->performConsistencyCheck();
 //die();
+
+        $notices  = $check->getNotices();
         $warnings = $check->getWarnings();
         $errors   = $check->getErrors();
 
         $this->assertFalse( $check->thereAreErrors() );
-        $this->assertTrue( $check->thereAreWarnings() );
+        $this->assertFalse( $check->thereAreWarnings() );
+        $this->assertTrue( $check->thereAreNotices() );
 
-        $this->assertEquals( 3, count( $warnings ) );
-        $this->assertEquals( 1100, $warnings[0]->outcome );
-        $this->assertEquals( 1100, $warnings[1]->outcome );
-        $this->assertEquals( 1100, $warnings[2]->outcome );
+        $this->assertEquals( 3, count( $notices ) );
+        $this->assertEquals( 1100, $notices[0]->outcome );
+        $this->assertEquals( 1100, $notices[1]->outcome );
+        $this->assertEquals( 1100, $notices[2]->outcome );
+
+        $this->assertEquals( 1, count( $warnings ) );
+        $this->assertEquals( 0, $warnings[0]->outcome );
 
         $this->assertEquals( 1, count( $errors ) );
         $this->assertEquals( 0, $errors[0]->outcome );
 
         $this->assertRegExp( '/\[ 0 \]/', $check->getErrorsJSON() );
-        $this->assertRegExp( '/ 3 /', $check->getWarningsJSON() );
+        $this->assertRegExp( '/\[ 0 \]/', $check->getWarningsJSON() );
+        $this->assertRegExp( '/ 3 /', $check->getNoticesJSON() );
 
     }
 
@@ -192,22 +221,31 @@ SRC;
         $check = new QA($source_seg, $target_seg);
         $check->performConsistencyCheck();
 
+        $notices  = $check->getNotices();
         $warnings = $check->getWarnings();
         $errors   = $check->getErrors();
 
         $this->assertFalse( $check->thereAreErrors() );
         $this->assertFalse( $check->thereAreWarnings() );
+        $this->assertFalse( $check->thereAreNotices() );
 
-        $this->assertEquals( count( $warnings ), 1 );
+        $this->assertEquals( 1, count( $notices ) );
+        $this->assertEquals( 0, $notices[0]->outcome );
+
+        $this->assertEquals( 1, count( $warnings ) );
         $this->assertEquals( 0, $warnings[0]->outcome );
 
-        $this->assertEquals( count( $errors ), 1 );
+        $this->assertEquals( 1, count( $errors ) );
         $this->assertEquals( 0, $errors[0]->outcome );
+
+        $this->assertRegExp( '/\[ 0 \]/', $check->getErrorsJSON() );
+        $this->assertRegExp( '/\[ 0 \]/', $check->getWarningsJSON() );
+        $this->assertRegExp( '/\[ 0 \]/', $check->getNoticesJSON() );
 
         $normalized = $check->getTrgNormalized();
 
         //" 1 " -> 20 31 20
-        $this->assertEquals( '<g id="6"> 1 </g><g id="7">st  </g><g id="8"> Section of Tokyo, Osaka</g>', $normalized );
+        $this->assertEquals( '<g id="6"> 1 </g><g id="7">st  </g><g id="8"> Section of Tokyo, Osaka</g>', $normalized );
 
     }
 
@@ -227,27 +265,32 @@ TRG;
         $check = new QA($source_seg, $target_seg);
         $check->performConsistencyCheck();
 
+        $notices  = $check->getNotices();
         $warnings = $check->getWarnings();
-
         $errors   = $check->getErrors();
 
         $this->assertFalse( $check->thereAreErrors() );
-        $this->assertTrue( $check->thereAreWarnings() );
+        $this->assertFalse( $check->thereAreWarnings() );
+        $this->assertTrue( $check->thereAreNotices() );
 
-        $this->assertEquals( 3, count( $warnings ) );
-        $this->assertEquals( 1100, $warnings[0]->outcome );
-        $this->assertEquals( 1100, $warnings[1]->outcome );
-        $this->assertEquals( 1100, $warnings[2]->outcome );
+        $this->assertEquals( 3, count( $notices ) );
+        $this->assertEquals( 1100, $notices[0]->outcome );
+        $this->assertEquals( 1100, $notices[1]->outcome );
+        $this->assertEquals( 1100, $notices[2]->outcome );
+
+        $this->assertEquals( 1, count( $warnings ) );
+        $this->assertEquals( 0, $warnings[0]->outcome );
 
         $this->assertEquals( 1, count( $errors ) );
         $this->assertEquals( 0, $errors[0]->outcome );
 
         $this->assertRegExp( '/\[ 0 \]/', $check->getErrorsJSON() );
-        $this->assertRegExp( '/ 3 /', $check->getWarningsJSON() );
+        $this->assertRegExp( '/\[ 0 \]/', $check->getWarningsJSON() );
+        $this->assertRegExp( '/ 3 /', $check->getNoticesJSON() );
 
     }
 
-    public function testAnalysisRecursive(){
+    public function testAnalysisRecursive1(){
 
         //Strings already converted to raw xliff
 
@@ -262,23 +305,26 @@ TRG;
         $check = new QA($source_seg, $target_seg);
         $check->performConsistencyCheck();
 
-        $this->assertTrue( $check->thereAreWarnings() ); //a space after tag: <g id="pt233">
+        $this->assertTrue( $check->thereAreNotices() ); //a space after tag: <g id="pt233">
 
-        $warnings = $check->getWarnings();
+        $notices = $check->getNotices();
 
-        $this->assertCount( 2, $warnings );
-        $this->assertAttributeEquals( 1100, 'outcome', $warnings[0] );
-        $this->assertAttributeEquals( 1100, 'outcome', $warnings[1] );
+        $this->assertCount( 2, $notices );
+        $this->assertAttributeEquals( 1100, 'outcome', $notices[0] );
+        $this->assertAttributeEquals( 1100, 'outcome', $notices[1] );
 
-        $this->assertRegExp( '/ 2 /', $check->getWarningsJSON() );
+        $this->assertRegExp( '/ 2 /', $check->getNoticesJSON() );
 
-        $this->assertEquals('[{"outcome":1100,"debug":"More\/fewer whitespaces found next to the tags. ( 2 )"}]', $check->getWarningsJSON() );
+        $this->assertEquals('[{"outcome":1100,"debug":"More\/fewer whitespaces found next to the tags. ( 2 )"}]', $check->getNoticesJSON() );
 
 
         $check = new QA($source_seg, $target_seg);
         $check->performTagCheckOnly();
         $this->assertFalse( $check->thereAreErrors() );
 
+    }
+
+    public function testAnalysisRecursive2(){
 
         //PHASE 2 check for errors
         $source_seg = <<<SRC
@@ -292,31 +338,82 @@ TRG;
         $check = new QA($source_seg, $target_seg);
         $check->performConsistencyCheck();
 
-        $this->assertTrue( $check->thereAreWarnings() ); //a space after tag: <g id="pt233"> and a mismatch <x id="231"/>
+        $this->assertTrue( $check->thereAreNotices() ); //a space after tag: <g id="pt233"> and a mismatch <x id="231"/>
+        $this->assertTrue( $check->thereAreWarnings() ); //order changed in the tags
         $this->assertTrue( $check->thereAreErrors() );   //mismatch <x id="231"/>
 
         $errors = $check->getErrors();
         $warnings = $check->getWarnings();
+        $notices = $check->getNotices();
 
         $this->assertCount( 1, $errors );
         $this->assertCount( 2, $warnings );
+        $this->assertCount( 3, $notices );
 
         $this->assertAttributeEquals( 1000, 'outcome', $errors[0] );
-        $this->assertAttributeEquals( 1100, 'outcome', $warnings[0] );
 
-        $this->assertRegExp( '/ 1 /', $check->getWarningsJSON() );
-        $this->assertRegExp( '/ 1 /', $check->getErrorsJSON() );
+        $this->assertAttributeEquals( 15, 'outcome', $warnings[0] );
+        $this->assertAttributeEquals( 1000, 'outcome', $warnings[1] );
 
+        $this->assertAttributeEquals( 1100, 'outcome', $notices[0] );
+        $this->assertAttributeEquals( 15, 'outcome', $notices[1] );
+        $this->assertAttributeEquals( 1000, 'outcome', $notices[2] );
+
+        $this->assertEquals( '[{"outcome":15,"debug":"Tag order mismatch ( 1 )"},{"outcome":1000,"debug":"Tag mismatch ( 1 )"}]', $check->getWarningsJSON() );
+        $this->assertEquals( '[{"outcome":1000,"debug":"Tag mismatch ( 1 )"}]', $check->getErrorsJSON() );
+        $this->assertEquals( '[{"outcome":1100,"debug":"More\\/fewer whitespaces found next to the tags. ( 1 )"},{"outcome":15,"debug":"Tag order mismatch ( 1 )"},{"outcome":1000,"debug":"Tag mismatch ( 1 )"}]', $check->getNoticesJSON() );
 
 
         $check = new QA($source_seg, $target_seg);
         $check->performTagCheckOnly();
         $this->assertTrue( $check->thereAreErrors() );
         $errors = $check->getErrors();
+
         $this->assertCount( 1, $errors );
         $this->assertAttributeEquals( 1000, 'outcome', $errors[0] );
         $this->assertRegExp( '/ 1 /', $check->getErrorsJSON() );
 
+        $this->assertTrue( $check->thereAreNotices() );
+        $this->assertTrue( $check->thereAreWarnings() );
+        $this->assertTrue( $check->thereAreErrors() );
+
+        $this->assertEquals( $check->getNotices(), $check->getWarnings() );
+        $this->assertEquals( $check->getNotices(), $check->getErrors() );
+        $this->assertEquals( $check->getWarnings(), $check->getErrors() );
+
+    }
+
+    public function testTagOnlyAnalysisRecursive3(){
+
+        $source_seg = <<<SRC
+<g id="pt231"><g id="pt232">APPARTEMENT ELSA ET JOY </g><g id="pt233">&lt;&lt;1.0&gt;&gt;</g></g> <g id="pt235"><g id="pt236"> </g></g> <g id="pt238"><g id="pt239">Elsa sur son ordinateur tape des lignes de code quand sa colocataire, Joy, entre dans sa chambre.</g></g>
+SRC;
+
+        $target_seg = <<<TRG
+<g id="pt231"><g id="pt232">ELSA AND JOY'S<x id="231"/> APARTMENT </g><g id="pt233"> &lt;&lt;1.0&gt;&gt;</g></g> <g id="pt235"><g id="pt236"> </g></g> <g id="pt238"><g id="pt239">Elsa's on her computer typing lines of code when her roommate, Joy, enters the room.</g></g>
+TRG;
+
+        $check = new QA($source_seg, $target_seg);
+        $check->performTagCheckOnly();
+        $this->assertTrue( $check->thereAreErrors() );
+        $errors = $check->getErrors();
+
+        $this->assertCount( 1, $errors );
+        $this->assertAttributeEquals( 1000, 'outcome', $errors[0] );
+        $this->assertRegExp( '/ 1 /', $check->getErrorsJSON() );
+
+        $this->assertTrue( $check->thereAreNotices() );
+        $this->assertTrue( $check->thereAreWarnings() );
+        $this->assertTrue( $check->thereAreErrors() );
+
+        $this->assertEquals( $check->getNotices(), $check->getWarnings() );
+        $this->assertEquals( $check->getNotices(), $check->getErrors() );
+        $this->assertEquals( $check->getWarnings(), $check->getErrors() );
+
+
+    }
+
+    public function testAnalysisRecursive4(){
 
         //CHECK TAG ID MISMATCH
         $source_seg = <<<SRC
@@ -338,9 +435,12 @@ TRG;
         $warnings = $check->getWarnings();
 
         $this->assertCount( 1, $errors );
-        $this->assertCount( 1, $warnings ); // warnings are not checked because of tag mismatch,
+        $this->assertCount( 2, $warnings ); // warnings are not checked because of tag mismatch,
                                             // analysis on space warnings skipped de facto
         $this->assertAttributeEquals( 4, 'outcome', $errors[0] );
+    }
+
+    public function testAnalysisRecursive5(){
 
         //PHASE 3 check for particular tag mismatch: unclosed x tag <x id="231">
         $source_seg = <<<SRC
@@ -555,6 +655,46 @@ SRC;
         $this->assertFalse( $check->thereAreWarnings() );
 
         $this->assertNotEmpty( $check->getTrgNormalized() );
+
+    }
+
+    public function testSpaces_Notices(){
+
+        $source_seg = <<<SRC
+<g id="pt2">WASHINGTON </g><g id="pt3">— The Treasury Department and Internal Revenue Service today requested public comment on issues relating to the shared responsibility provisions included in the Affordable Care Act that will apply to certain employers starting in 2014.</g>
+SRC;
+
+        $target_seg = <<<TRG
+<g id="pt2"> WASHINGTON </g><g id="pt3">- Il Dipartimento del Tesoro e Internal Revenue Service di oggi hanno chiesto un commento pubblico sulle questioni relative alle disposizioni di responsabilità condivise incluse nel Affordable Care Act che verranno applicate a certi datori di lavoro a partire dal 2014. </g>
+TRG;
+
+        $source_seg = CatUtils::view2rawxliff( $source_seg );
+        $target_seg = CatUtils::view2rawxliff( $target_seg );
+
+        $check = new QA($source_seg, $target_seg);
+        $check->performConsistencyCheck();
+
+        $notices = $check->getNotices();
+        $warnings = $check->getWarnings();
+        $errors   = $check->getErrors();
+
+        $this->assertFalse( $check->thereAreErrors() );
+        $this->assertFalse( $check->thereAreWarnings() );
+        $this->assertTrue( $check->thereAreNotices() );
+
+        $this->assertEquals( count( $notices ), 2 );
+        $this->assertEquals( 1100, $notices[0]->outcome );
+
+        $this->assertEquals( count( $warnings ), 1 );
+        $this->assertEquals( 0, $warnings[0]->outcome );
+
+        $this->assertEquals( count( $errors ), 1 );
+        $this->assertEquals( 0, $errors[0]->outcome );
+
+        $normalized = $check->getTrgNormalized();
+
+        //" 1 " -> 20 31 20
+        $this->assertEquals( '<g id="pt2"> WASHINGTON </g><g id="pt3">- Il Dipartimento del Tesoro e Internal Revenue Service di oggi hanno chiesto un commento pubblico sulle questioni relative alle disposizioni di responsabilità condivise incluse nel Affordable Care Act che verranno applicate a certi datori di lavoro a partire dal 2014. </g>', $normalized );
 
     }
 
