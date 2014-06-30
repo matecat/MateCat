@@ -2593,34 +2593,24 @@ del.diff
 	color: #999;
 	margin-left: 4px;
 	margin-right: 4px;
+    position: relative;
+    top: 2px;
 }
 .nbsp-marker
 {
+/*
 	color: #aaa;
 	position: relative;
 	padding-right: 12px;
 	opacity: 0.2;
-	/*width: 20px !important;*/
 	top: 3px;
 	font-size: 10px;
 	background: url(../img/circle.png) 3px 0px no-repeat;
 	background-size: 6px;
-
-/*	background: url(../img/bg-nbsp.png) center center no-repeat; 
-	width: 20px;
-	margin-right: 1px;
-	display: inline-block;
-	text-indent: -9999px;*/
-/*
-	color: #AAA;
-	display: inline-block;
-	margin-left: 5px;
-	width: 15px;
-	background: url(../img/bg-nbsp.png) 6px 13px no-repeat;
-	background-size: 3px 4px;
-*/
+	*/
 }
-.space-marker
+.space-marker,
+.nbsp-marker
 {
 	color: #CCC;
 	position: relative;
