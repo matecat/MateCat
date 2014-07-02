@@ -50,7 +50,7 @@ class Languages{
 		}
 		//create internal support objects representation
 		foreach($langs as $lang){
-			//add tradoscode -> rfc mapping
+			//add code -> rfc mapping
 			if(isset($lang['languageRegionCode'])){
 				self::$map_string2rfc[$lang['languageRegionCode']]=$lang['rfc3066code'];
 			}
