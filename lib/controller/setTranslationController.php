@@ -34,7 +34,7 @@ class setTranslationController extends ajaxController {
                 'id_segment'              => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'time_to_edit'            => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'id_translator'           => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-                'translation'             => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_UNSAFE_RAW ),
+                'translation'             => array( 'filter' => FILTER_UNSAFE_RAW ),
                 'chosen_suggestion_index' => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'status'                  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
