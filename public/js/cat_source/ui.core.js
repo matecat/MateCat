@@ -17,7 +17,11 @@ UI = {
             }
             var menuHeight = jobMenu.height();
 //		var startTop = 47 - menuHeight;
-            jobMenu.css('top', (47 - menuHeight) + "px");
+            var messageBarIsOpen = UI.body.hasClass('incomingMsg');
+            messageBarHeight = (messageBarIsOpen)? $('#messageBar').height() + 5 : 0;
+            console.log('messageBarHeight: ', messageBarHeight);
+            jobMenu.css('top', (messageBarHeight + 47 - menuHeight) + "px");
+//            jobMenu.css('top', (47 - menuHeight) + "px");
 
             if (jobMenu.hasClass('open')) {
                 jobMenu.animate({top: "-=" + menuHeight + "px"}, 500).removeClass('open');
@@ -2399,11 +2403,42 @@ UI = {
 			this.setProgress(d.stats);
 			//check status of global warnings
 			this.checkWarnings(false);
+            this.beforePropagateTranslation(segment, status);
+        }
+    },
+    beforePropagateTranslation: function(segment, status) {
+        console.log('before propagate');
+        checkBefore = false;
+        if(checkBefore) {
+            APP.popup({
+                name: 'confirmPropagation',
+                title: 'Warning',
+                buttons: [
+                    {
+                        type: 'ok',
+                        text: 'Yes',
+                        callback: 'doPropagate',
+                        params: 'true',
+                        closeOnClick: 'true'
+                    },
+                    {
+                        type: 'cancel',
+                        text: 'No, thanks',
+                        callback: 'doPropagate',
+                        params: 'false',
+                        closeOnClick: 'true'
+                    }
+                ],
+                content: "Dou you want to extend the autopropagation of this translation even to already translated segments?"
+            });
+        } else {
             this.propagateTranslation(segment, status);
         }
     },
+
     propagateTranslation: function(segment, status) {
 //        console.log($(segment).attr('data-hash'));
+
 
         if( status == 'translated' ){
             //unset actual segment as autoPropagated because now it is translated
@@ -2418,8 +2453,11 @@ UI = {
         });
         $('section[data-hash=' + $(segment).attr('data-hash') + ']');
     },
+    doPropagate: function (trans) {
+        console.log('trans: ', trans);
+    },
 
-	setWaypoints: function() {
+    setWaypoints: function() {
 		this.firstSegment.waypoint('remove');
 		this.lastSegment.waypoint('remove');
 		this.detectFirstLast();
