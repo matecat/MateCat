@@ -2156,7 +2156,7 @@ UI = {
 	},
 */
 
-    postProcessEditarea: function(context, selector){//console.log('postprocesseditarea');
+    postProcessEditarea: function(context, selector){console.log('postprocesseditarea');
         selector = (typeof selector === "undefined") ? '.editarea' : selector;
         area = $( selector, context ).clone();
         /*

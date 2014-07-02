@@ -546,7 +546,27 @@ $.extend(UI, {
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
-		}).on('keypress', '.editor .editarea', function(e) {
+        }).on('keyup', '.editor .editarea', 'return', function(e) {
+            if(!UI.defaultBRmanagement) {
+                range = window.getSelection().getRangeAt(0);
+                $('.returnTempPlaceholder', UI.editarea).after('<br />');
+                node = $('.returnTempPlaceholder + br', UI.editarea)[0];
+                setCursorAfterNode(range, node);
+                saveSelection();
+                $('.returnTempPlaceholder', UI.editarea).remove();
+                restoreSelection();
+            }
+        }).on('keydown', '.editor .editarea', 'return', function(e) {
+            UI.defaultBRmanagement = false;
+            if(!$('br', UI.editarea).length) {
+                UI.defaultBRmanagement = true;
+            } else {
+                saveSelection();
+                $('.rangySelectionBoundary', UI.editarea).after('<span class="returnTempPlaceholder" contenteditable="false"></span>');
+                restoreSelection();
+                e.preventDefault();
+            }
+        }).on('keypress', '.editor .editarea', function(e) {
 //			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
@@ -613,13 +633,15 @@ $.extend(UI, {
 					isInsideMark = $('.searchMarker .rangySelectionBoundary', UI.editarea).length;
 //					console.log('c: ', UI.editarea.html());
 
-
+                    sbIndex = 0;
+                    var translation = $.parseHTML(UI.editarea.html());
+                    $.each(translation, function(index) {
+                        if($(this).hasClass('rangySelectionBoundary')) sbIndex = index;
+                    });
+                    var undeletableMonad = (($(translation[sbIndex-1]).hasClass('monad'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
                     var selBound = $('.rangySelectionBoundary', UI.editarea);
-                    var undeletableMonad = ((selBound.prev().hasClass('monad'))&&(selBound.prev().prev().prop("tagName") == 'BR'))? true : false;
                     if(undeletableMonad) selBound.prev().remove();
-//                    if(undeletableMonad) selBound.prev().before(selBound);
 
-//					console.log('isInsideTag: ', isInsideTag);
                     restoreSelection();
 
 					// insideTag management
