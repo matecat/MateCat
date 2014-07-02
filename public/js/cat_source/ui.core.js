@@ -17,7 +17,11 @@ UI = {
             }
             var menuHeight = jobMenu.height();
 //		var startTop = 47 - menuHeight;
-            jobMenu.css('top', (47 - menuHeight) + "px");
+            var messageBarIsOpen = UI.body.hasClass('incomingMsg');
+            messageBarHeight = (messageBarIsOpen)? $('#messageBar').height() + 5 : 0;
+            console.log('messageBarHeight: ', messageBarHeight);
+            jobMenu.css('top', (messageBarHeight + 47 - menuHeight) + "px");
+//            jobMenu.css('top', (47 - menuHeight) + "px");
 
             if (jobMenu.hasClass('open')) {
                 jobMenu.animate({top: "-=" + menuHeight + "px"}, 500).removeClass('open');
