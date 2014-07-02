@@ -94,7 +94,9 @@ class getWarningController extends ajaxController {
         $this->result[ 'details' ] = array_values($result);
         $this->result[ 'token' ]   = $this->__postInput->token;
 	//        $this->result['messages']  = '[{"msg":"Test message 1","token":"token1","expire":"2014-04-03 00:00"},{"msg":"Test message 2","token":"token2","expire":"2014-04-04 12:00"}]';
-//	    $this->result['messages']  = '[{"msg":"Test message 1","token":"token1","expire":"2014-05-19 11:28"},{"msg":"Test message 2","token":"token2","expire":"2014-04-04 12:00"}]';
+//
+//        $msg = 'MateCat will be undergoing scheduled maintenance starting on Wednesday, July 2 at 08:00 PM CEST. MateCat will be unavailable for approximately 3 hours.<br /> We apologize for any inconvenience. For any questions, contact us support@matecat.com.';
+//        $this->result['messages']  = '[{"msg":"' . $msg . '", "token":"' . md5($msg) . '", "expire":"2014-07-02 23:30:00"}]';
 
         $tMismatch = getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
 

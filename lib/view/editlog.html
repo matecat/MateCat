@@ -20,14 +20,14 @@
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
     </head>
 
-    <body tal:condition="php:supportedBrowser EQ 0">
+    <body tal:condition="not:supportedBrowser">
         <div  metal:use-macro="unsupported_browser.html/unsupported"/>
     </body>
 
-    <body tal:condition="php:supportedBrowser NE 0">
+    <body tal:condition="supportedBrowser">
         <!--metal:use-macro="header.html/main_header"-->
         <header style="padding-bottom:5px" >
-            <div class="wrapper">
+            <div class="wrapper">       
                 <a href="${basepath}" class="logo"></a>
 
                 <div class="breadcrumbs">    
