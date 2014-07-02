@@ -458,6 +458,7 @@ height: 21px;
 
 .dropdown-icon .icon-paw {
 font-size: 1.5em;
+margin-right: 10px;
 }
 
 .dropdown .icon-stack-exchange {
@@ -848,7 +849,7 @@ color:#333;}
 }
 
 .mgmt-panel-tm .btn-ok, .mgmt-panel-gl .btn-ok {
-		    padding: 5px 18px;
+		    padding: 4px 18px;
 }
 .popup h1 .btn-ok,
 .popup h1 .btn-cancel 
@@ -897,7 +898,6 @@ color:#333;}
 
 .searchbox, .mgmt-panel-tm, .mgmt-panel-gl
 {
-	display: none;
 	position: fixed;
 	float: left;
 	width: 100%;
@@ -915,7 +915,8 @@ color:#333;}
 	z-index: 9999;
 }
 
-.mgmt-add-tm, .mgmt-add-gl
+
+.mgmt-add-tm, .mgmt-add-gl, .searchbox, .mgmt-panel-gl, .addrow-tm, .addrow-gl
  {display:none;
 }
 
@@ -943,15 +944,11 @@ margin:0 auto; overflow:hidden; width:100%; -webkit-box-shadow: 0 1px 10px #000;
 
 }
 
-.mgmt-panel-tm .add-tm, .mgmt-panel-gl .add-gl{
-	margin-top: 20px;
-margin-right: 40px;
-display: block;
-}
+
 
  .back-mgmt {padding:20px; margin-right:20px;}
 
-.mgmt-tm {
+.mgmt-tm, .mgmt-gl {
 	border-top: 1px solid #ccc;	
 	width:100%;
 	border-bottom:40px;
@@ -959,7 +956,7 @@ display: block;
 }
 
 #sort {cursor: move;}
-.mgmt-tm td, .mgmt-tm th {
+.mgmt-tm td, .mgmt-tm th, .mgmt-gl td, .mgmt-gl th {
 border: 1px solid #ccc;
 padding: 8px;
 background: #fff;
@@ -968,27 +965,32 @@ margin: 1px 0;
 
 
 .mgmt-panel select {width: 230px;
-height: 32px;
+height: 20px;
 padding: 5px;
 font-size: 13px;
 border: 1px solid #ccc;
 margin: 1px 0 5px 0;}
 
 .btn-confirm {margin-top:25px!important;}
-
-.mgmt-panel input[type="file"] {
-width: 225px;
-margin-right:123px;
+span.newrow.text-center {
+width: 100%;
+display: block;
 }
 
+.mgmt-panel h3 {
+margin: 10px 0;
+}
+
+.addrow {width:100%;}
+.addrow label {float:left;}
+
 .mgmt-panel p {
-margin-top: 0;
-margin-bottom: 25px;
+margin-top: 10px;
+margin-bottom: 10px;
 }
 
 .mgmt-add-tm input, .mgmt-add-gl input {
-	width: 200px;
-font-size: 12px !important;
+ font-size: 12px !important;
 height: 22px;
 color: #999999;
 float:left;
@@ -1006,7 +1008,7 @@ border: 1px solid #abadb3;
 
 .clear {clear:both;}
 
-.mgmt-tm th {background:#f4f4f4;}
+.mgmt-tm th, .mgmt-gl th {background:#f4f4f4;}
 body.filterOpen .searchbox
 {
 	display: block;
@@ -1021,10 +1023,81 @@ body.filterOpen .searchbox
 }
 
 .mgmt-panel label {
-display: block;
 text-transform: none;
 padding-bottom: 5px;
 font-weight: bold;
+}
+
+a.memory-mgmt.pull-right {
+margin-top: 35px;
+background: url(../img/sprite.png) 0 -259px no-repeat;
+background-size: 12px;
+padding: 0 0 5px 18px;
+margin-bottom: 5px;
+}
+
+@media screen and ( max-height: 600px ){
+		
+.mgmt-container {
+overflow-y: scroll!important;
+width: 100%!important;
+overflow-x: hidden!important;
+height: 200px;
+}
+}
+/* Tabs */
+
+.nav-tabs {
+border-bottom: 1px solid #ddd;
+float: left;
+clear: both;
+width:100%;
+}
+
+.nav-tabs>li {
+float: left;
+margin-bottom: -1px;
+}
+.nav>li {
+position: relative;
+display: block;
+}
+
+.nav>li>a {
+position: relative;
+text-decoration:none;
+display: block;
+padding: 10px 15px;
+}
+
+.nav-tabs>li.active>a, .nav-tabs>li.active>a:hover, .nav-tabs>li.active>a:focus {
+color: #555;
+cursor: default;
+background-color: #fff;
+font-size:120%;
+font-weight:bold;
+margin-top: -5px;
+border: 1px solid #ddd;
+border-bottom-color: transparent;
+}
+.nav-tabs>li>a {
+margin-right: 2px;
+line-height: 1.42857143;
+border: 1px solid transparent;
+border-radius: 4px 4px 0 0;
+}
+
+.text-center {
+	text-align:center!important;}
+
+.mgmt-input {
+width: 90%;
+padding: 5px;
+margin-bottom:20px;
+font-size: 16px !important;
+-moz-border-radius: 2px;
+border-radius: 2px;
+border: 1px solid #ccc;
 }
 
 
@@ -1039,8 +1112,12 @@ font-weight: bold;
 	margin-right: 20px;
 	text-align: left;
 	margin-top: 2px;
-	margin-bottom: 25px;
 }
+
+input#key {width:75%;}
+
+.addrow-tm .block, .addrow-gl .block {width: 40%;}
+.addrow-gl select {height: 32px; margin-bottom:20px;}
 .searchbox .block .field
 {
 	width: 100%;
@@ -1253,6 +1330,9 @@ p.surveynotice{
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.icon-glass:before {
+	content: "\f000";
+}
 .icon-search:before {
 	content: "\f002";
 }
@@ -3825,7 +3905,7 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 #messageBar
 {
 	display: block;
-    height: auto;
+	height: auto;
     min-height: 26px;
 	background: #FFFA8B;
 	padding: 4px 10px;

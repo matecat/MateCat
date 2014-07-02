@@ -1964,8 +1964,25 @@ UI = {
 //			}
 //		}
 		autosave = (caller == 'autosave') ? true : false;
+        this.tempReqArguments = {
+            id_segment: id_segment,
+            id_job: config.job_id,
+            id_first_file: file.attr('id').split('-')[1],
+            password: config.password,
+            status: status,
+            translation: translation,
+            time_to_edit: time_to_edit,
+            id_translator: id_translator,
+            errors: errors,
+            chosen_suggestion_index: chosen_suggestion,
+            autosave: autosave
+        };
+        reqData = this.tempReqArguments;
+        reqData.action = 'setTranslation';
 
 		APP.doRequest({
+            data: reqData,
+/*
 			data: {
 				action: 'setTranslation',
 				id_segment: id_segment,
@@ -1980,6 +1997,7 @@ UI = {
 				chosen_suggestion_index: chosen_suggestion,
 				autosave: autosave
 			},
+*/
 			context: [reqArguments, segment, status],
 			error: function() {
 				UI.failedConnection(this[0], 'setTranslation');
@@ -2408,8 +2426,14 @@ UI = {
     },
     beforePropagateTranslation: function(segment, status) {
         console.log('before propagate');
-        checkBefore = false;
-        if(checkBefore) {
+        if (typeof $.cookie('_auto-propagation-' + config.job_id + '-' + config.password) != 'undefined') { // cookie already set
+            if($.cookie('_auto-propagation-' + config.job_id + '-' + config.password) == '1') {
+                UI.propagateTranslation(segment, status, true);
+            } else {
+                UI.propagateTranslation(segment, status, false);
+            }
+        } else {
+//            var sid = segment.attr('id').split('-')[1];
             APP.popup({
                 name: 'confirmPropagation',
                 title: 'Warning',
@@ -2431,30 +2455,80 @@ UI = {
                 ],
                 content: "Dou you want to extend the autopropagation of this translation even to already translated segments?"
             });
+        }
+  /*
+        if ($.cookie('_auto-propagation-' + config.job_id + '-' + config.password)) {
+            console.log('cookie already set');
+
+        } else {
+            console.log('cookie not yet set');
+            APP.popup({
+                name: 'confirmPropagation',
+                title: 'Warning',
+                buttons: [
+                    {
+                        type: 'ok',
+                        text: 'Yes',
+                        callback: 'doPropagate',
+                        params: 'true',
+                        closeOnClick: 'true'
+                    },
+                    {
+                        type: 'cancel',
+                        text: 'No, thanks',
+                        callback: 'doPropagate',
+                        params: 'false',
+                        closeOnClick: 'true'
+                    }
+                ],
+                content: "Dou you want to extend the autopropagation of this translation even to already translated segments?"
+            });
+        }
+        checkBefore = false;
+        if(checkBefore) {
+
         } else {
             this.propagateTranslation(segment, status);
         }
+        */
     },
 
-    propagateTranslation: function(segment, status) {
+    propagateTranslation: function(segment, status, evenTranslated) {
 //        console.log($(segment).attr('data-hash'));
+        this.tempReqArguments = null;
 
 
         if( status == 'translated' ){
             //unset actual segment as autoPropagated because now it is translated
             $( segment ).data( 'autopropagated', false );
         }
-
-        $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected'), function(index) {
+        plusTranslated = (evenTranslated)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated': '';
+        $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + plusTranslated), function(index) {
             $('.editarea', this).html( $('.editarea', segment).html() );
-            UI.setStatus($(this), 'draft');
+//            UI.setStatus($(this), 'draft');
             //set segment as autoPropagated
             $( this ).data( 'autopropagated', true );
         });
-        $('section[data-hash=' + $(segment).attr('data-hash') + ']');
+//        $('section[data-hash=' + $(segment).attr('data-hash') + ']');
     },
     doPropagate: function (trans) {
-        console.log('trans: ', trans);
+        reqData = this.tempReqArguments;
+        reqData.action = 'setAutoPropagation';
+        reqData.propagateAll = trans;
+
+        this.tempReqArguments = null;
+
+        APP.doRequest({
+            data: reqData,
+            context: [reqData, trans],
+            error: function() {
+            },
+            success: function() {
+                console.log('success setAutoPropagation');
+                UI.propagateTranslation($('#segment-' + this[0].id_segment), this[0].status, this[1]);
+            }
+        });
+
     },
 
     setWaypoints: function() {
@@ -2662,7 +2736,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.3.4.3";
+		this.version = "0.3.4.5";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
