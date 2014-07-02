@@ -43,7 +43,7 @@ class setTranslationController extends ajaxController {
 
         $this->id_job                  = $__postInput[ 'id_job' ];
         $this->password                = $__postInput[ 'password' ];
-        $this->propagateAll            = $__postInput[ 'propagateAll' ];
+        $this->propagateAll            = $__postInput[ 'propagateAll' ]; //not used here but used in child class setAutoPropagationController
         $this->id_segment              = $__postInput[ 'id_segment' ];
         $this->time_to_edit            = (int)$__postInput[ 'time_to_edit' ]; //cast to int, so the default is 0
         $this->id_translator           = $__postInput[ 'id_translator' ];
