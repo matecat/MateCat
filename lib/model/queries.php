@@ -933,36 +933,51 @@ function addTranslation( array $_Translation ){
  *
  * @param $params
  * @param $job_data
- *
+ * @param $propagateToTranslated
+ * @param $_idSegment
  * @throws Exception
  * @return int
  */
-function propagateTranslation( $params, $job_data ){
+function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTranslated = false ){
 
     $db = Database::obtain();
 
     $q = array();
     foreach ( $params as $key => $value ) {
-        if ( is_bool( $value ) ) {
+        if( $key == 'status' ){
+
+            if( $propagateToTranslated ){
+                $q[ ]      = $key . " = IF( status = 'TRANSLATED' , 'TRANSLATED', '" . $db->escape( $value ) . "' )";
+                $andStatus = "AND status IN ( 'DRAFT', 'NEW', 'REJECTED', 'TRANSLATED' )";
+            } else {
+                $q[ ]      = $key . " = '" . $db->escape( $value ) . "'";
+                $andStatus = "AND status IN ( 'DRAFT', 'NEW', 'REJECTED' )";
+            }
+
+        } elseif ( is_bool( $value ) ) {
             $q[ ] = $key . " = " . var_export( (bool)$value , true );
         } elseif ( !is_numeric( $value ) ) {
             $q[ ] = $key . " = '" . $db->escape( $value ) . "'";
         } else {
             $q[ ] = $key . " = " . (float)$value;
         }
+
     }
 
     //the job password seems a better idea to search only the segments in the actual chunk,
     //but it needs an update in join on 2 tables.
     //job_first_segment and job_last_segment should do the same thing
     $TranslationPropagate = "
-		UPDATE segment_translations
-		SET " . implode( ", ", $q ) . "
-		WHERE id_job = {$params[ 'id_job' ]}
-	    AND segment_hash = '" . $params[ 'segment_hash' ] . "'
-		AND status IN ( 'DRAFT', 'NEW', 'REJECTED' )
-		AND id_segment BETWEEN {$job_data[ 'job_first_segment' ]} AND {$job_data[ 'job_last_segment' ]}
-	";
+        UPDATE segment_translations
+        SET " . implode( ", ", $q ) . "
+        WHERE id_job = {$params[ 'id_job' ]}
+        AND segment_hash = '" . $params[ 'segment_hash' ] . "'
+        $andStatus
+        AND id_segment BETWEEN {$job_data[ 'job_first_segment' ]} AND {$job_data[ 'job_last_segment' ]}
+        AND id_segment != $_idSegment
+    ";
+
+//    Log::doLog( $TranslationPropagate );
 
     $db->query( $TranslationPropagate );
 
