@@ -458,6 +458,7 @@ height: 21px;
 
 .dropdown-icon .icon-paw {
 font-size: 1.5em;
+margin-right: 10px;
 }
 
 .dropdown .icon-stack-exchange {
@@ -947,7 +948,7 @@ margin:0 auto; overflow:hidden; width:100%; -webkit-box-shadow: 0 1px 10px #000;
 
  .back-mgmt {padding:20px; margin-right:20px;}
 
-.mgmt-tm {
+.mgmt-tm, .mgmt-gl {
 	border-top: 1px solid #ccc;	
 	width:100%;
 	border-bottom:40px;
@@ -955,7 +956,7 @@ margin:0 auto; overflow:hidden; width:100%; -webkit-box-shadow: 0 1px 10px #000;
 }
 
 #sort {cursor: move;}
-.mgmt-tm td, .mgmt-tm th {
+.mgmt-tm td, .mgmt-tm th, .mgmt-gl td, .mgmt-gl th {
 border: 1px solid #ccc;
 padding: 8px;
 background: #fff;
@@ -1007,7 +1008,7 @@ border: 1px solid #abadb3;
 
 .clear {clear:both;}
 
-.mgmt-tm th {background:#f4f4f4;}
+.mgmt-tm th, .mgmt-gl th {background:#f4f4f4;}
 body.filterOpen .searchbox
 {
 	display: block;
@@ -1115,8 +1116,8 @@ border: 1px solid #ccc;
 
 input#key {width:75%;}
 
-.addrow-tm .block {width: 40%;}
-
+.addrow-tm .block, .addrow-gl .block {width: 40%;}
+.addrow-gl select {height: 32px; margin-bottom:20px;}
 .searchbox .block .field
 {
 	width: 100%;
@@ -1329,6 +1330,9 @@ p.surveynotice{
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.icon-glass:before {
+	content: "\f000";
+}
 .icon-search:before {
 	content: "\f002";
 }

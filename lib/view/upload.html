@@ -71,13 +71,12 @@
         <a href="${basepath}" class="logo"></a>
         <tal:block tal:condition="php: empty(logged_user)">
         	<div id="dd" class="wrapper-dropdown-5 pull-right" tabindex="1">                    
-                <span class="dropdown-icon pull-right"><span class="icon-paw"></span></span>
+                <span class="dropdown-icon pull-right"><span class="icon-paw"></span><span class="icon-sort-down"></span></span>
                 <ul class="dropdown">
                        <li><div class="needtobelogged" href="#"><h2>Advanced Features</h2>
                        <br />Advanced features are only available to logged in users
                        <br /><br /><a id="sign-in"><img src="/public/img/signin-blu.png" /></a>
                        </div></li>
-                        <li><a class="memory-mgmt">Language Resources</a></li>
                 </ul>
         </div>
         </tal:block>
@@ -176,7 +175,7 @@
                        
                             <div class="addrow-tm">
               <h3>Add a TM</h3>
-                 <p>Upload a CSV file with source and target terms and comments separated by a semicolon. Example: source term; target term; comment.</p>
+                 <p>Short description here.</p>
               <div class="block">
               <input class="mgmt-input" type="text" width="20" id="name" onfocus="this.value='';"  value="Enter a name" />
               </div>
@@ -191,15 +190,7 @@
 <label class="fileupload">Select a TMX </label><input type="file" />
 </div>
 				<input type="button" value="Add a TM" id="add" class="pull-right add-tm-ok btn-ok" onclick="Javascript:addRow()" />
-                 
-                      
                        </div>
-              
-              
-
-                
-  
-  
             </div>
 		</div>
     </div>
@@ -215,91 +206,96 @@
       <li ><a href="#tm"  class="mgmt-tm">TM Management</a></li>
       <li class="active"><a href="#glossaries">Glossaries</a></li>
      
-    </ul>             <div class="mgmt-container">
-     <p>Upload a CSV file with source and target terms and comments separated by a semicolon. Example: source term; target term; comment.</p>
-                <table class="mgmt-tm" id="sort">
+    </ul>             
+    
+    <div class="mgmt-container">
+   <h3>Manage Glossaries</h3>
+                <table class="mgmt-gl" id="sort">
                     <thead>
-                        <th>Priority</th>
-                        <th>Glossary name</th>
-                        <th>Private Key</th>
-                        <th>Description</th>
-                        <th>Lang Pair</th>
-                        <th>Lookup</th>
-                        <th>Update</th>
+                      <tr>
+                      	<th class="text-center"  width="7%">Priority</th>
+                        <th width="23%">Glossary name</th>
+                        <th width="20%">Private Key</th>
+                        <th width="30%">Description</th>
+                        <th width="10%">Lang Pair</th>
+                        <th class="text-center"  width="5%">Lookup</th>
+                        <th class="text-center" width="5%">Update</th>
+                    </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td class="index">1</td>
+                            <td class="index text-center">1</td>
                             <td><a href="#">Google Drive</a></td>
                             <td>90231291i201i</td>
                             <td>Inf tech</td>
                             <td><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
-                            <td><input type="checkbox" /></td>
-                            <td><input type="checkbox" /></td>
+                            <td  class="text-center" ><input type="checkbox" /></td>
+                            <td  class="text-center" ><input type="checkbox" /></td>
                         </tr>
                         <tr>
-                            <td class="index">2</td>
+                            <td class="text-center index">2</td>
                             <td><a href="#">Google Gmail</a></td>
                             <td>2932938238</td>
                             <td>Inf tech</td>
                             <td><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">es-ES</span></td>
-                            <td><input type="checkbox" /></td>
-                            <td><input type="checkbox" /></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
                         </tr>
                         <tr>
-                            <td class="index">3</td>
+                            <td class="text-center index">3</td>
                             <td><a href="#">Europarl</a></td>
                             <td>192819819281981</td>
                             <td>Legal (amendments)</td>
                             <td><span class="mgmt-source">es-ES</span> - <span class="mgmt-target">fr-FR</span></td>
-                            <td><input type="checkbox" /></td>
-                            <td><input type="checkbox" /></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
                         </tr>
                         <tr>
-                            <td class="index">4</td>
+                            <td class="text-center index">4</td>
                             <td>Google Drive 21</td>
                             <td>xxxxxxxxxxx</td>
                             <td>Inf tech</td>
                             <td><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
-                            <td><input type="checkbox" /></td>
-                            <td><input type="checkbox" /></td>
+                            <td  class="text-center" ><input type="checkbox" /></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
                         </tr>
-                    </tbody>
-                </table>
-                             <a class="pull-right btn-ok" href="#"><span>Import glossary</span></a>
+                          </tbody>
+                       </table>
+                       <br />
+                             <a class="pull-right add-gl btn-ok" href="#"><span>Import glossary</span></a>
 
         </div>
     
-        <h1 class="pull-left">Import glossary</h1>
+    
+    	<div class="addrow-gl">
+        <h3>Import glossary</h3>
+          <p>Upload a CSV file with source and target terms and comments separated by a semicolon. Example: source term; target term; comment.</p>
             <div class="mgmt-container">
            
             <div class="block">
-                            <label>Source</label>
                              <select>
                              	<option>Source language</option>
                              </select>
                     </div>
                     <div class="block">
-                            <label>Target</label>
                               <select>
-                             	<option>Source language</option>
+                             	<option>Target language</option>
                              </select>
                     </div>
                <div class="block">
-                            <label>Enter a description for your TM</label>
-                             <input type="textarea" value="" />
+                             <input type="textarea" class="mgmt-input" value="Enter a short description" />
                     </div>
-                <div class="block clear">
-                    <label>Enter your private key</label>
-                    <input class="search-input" type="text" value="" />
-                     <a class="btn-ok pull-right">Create new private key</a>
+                <div class="block ">
+                    <input class="mgmt-input" id="key" type="text" value="Enter your private key" />
+                     <a class="btn-ok pull-right">Create</a>
                   </div>
                
-                    <div class="block">
+                    <div class="block clear">
                                 <label>Select a file to upload (.csv)</label>
                             <input type="file"  />
                      </div>
                      <a class="btn-ok pull-right btn-confirm">Upload</a>
+            </div>
             </div>
 		</div>
     </div>
@@ -1080,16 +1076,25 @@ $( ".popup-outer" ).click(function() {
 $( ".mgmt-tm" ).click(function() {
   $( ".mgmt-panel-gl" ).hide();
   $( ".mgmt-panel-tm" ).show();
+      $( "table.mgmt-tm" ).show();
   });
   
   $( ".mgmt-gl" ).click(function() {
-  $( ".mgmt-panel-gl" ).hide();
+  $( ".mgmt-panel-tm" ).hide();
+    $( "table.mgmt-tm" ).hide();
   $( ".mgmt-panel-gl" ).show();
+
   });
   
   $( ".add-tm" ).click(function() {
   $(this).hide();
   $( ".addrow-tm" ).show();
+  });
+  
+  
+    $( ".add-gl" ).click(function() {
+  $(this).hide();
+  $( ".addrow-gl" ).show();
   });
   
 
