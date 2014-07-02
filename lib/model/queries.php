@@ -2163,7 +2163,7 @@ function updateWordCount( WordCount_Struct $wStruct ){
 
 	$db->query( $query );
 
-	Log::doLog( $query . "\n" );
+//	Log::doLog( $query . "\n" );
 
 	$err   = $db->get_error();
 	$errno = $err[ 'error_code' ];
@@ -2171,6 +2171,8 @@ function updateWordCount( WordCount_Struct $wStruct ){
 		Log::doLog( $err );
 		return $errno * -1;
 	}
+
+    Log::doLog( "Affected: " . $db->affected_rows . "\n" );
 
 	return $db->affected_rows;
 
