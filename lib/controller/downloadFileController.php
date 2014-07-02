@@ -10,10 +10,10 @@ include_once(INIT::$UTILS_ROOT.'/DetectProprietaryXliff.php');
 
 class downloadFileController extends downloadController {
 
-    private $id_job;
-    private $password;
-    private $fname;
-    private $download_type;
+    protected $id_job;
+    protected $password;
+    protected $fname;
+    protected $download_type;
 
     protected $JobInfo;
 
@@ -71,15 +71,10 @@ class downloadFileController extends downloadController {
         }
 
         $debug['get_file'][]=time();
-        $files_job = getFilesForJob( $this->id_job, $this->id_file );
+        $files_job = getFilesForJob($this->id_job, $this->id_file);
         $debug['get_file'][]=time();
         $nonew = 0;
         $output_content = array();
-
-        //get job language and data
-        //Fixed Bug: need a specific job, because we need The target Language
-        //Removed from within the foreach cycle, the job is always the same....
-        $jobData = $this->JobInfo = getJobData( $this->id_job, $this->password );
 
         /*
         the procedure is now as follows:
@@ -217,21 +212,21 @@ class downloadFileController extends downloadController {
 
         $debug[ 'total' ][ ] = time();
 
-//        unlink( $path );
-//        unlink( $path . '.out.sdlxliff' );
-//        rmdir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $id_file . '/' );
-//        rmdir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
+        unlink( $path );
+        unlink( $path . '.out.sdlxliff' );
+        rmdir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $id_file . '/' );
+        rmdir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
 
     }
 
-    private function setContent( $output_content ) {
+    protected function setContent( $output_content ) {
 
         $this->filename = $this->sanitizeFileExtension( $output_content['filename'] );
         $this->content = $output_content['content'];
 
     }
 
-    private function sanitizeFileExtension( $filename ){
+    protected function sanitizeFileExtension( $filename ){
 
         $pathinfo = pathinfo( $filename );
 
@@ -243,7 +238,7 @@ class downloadFileController extends downloadController {
 
     }
 
-    private function composeZip( $output_content, $sourceLang ) {
+    protected function composeZip( $output_content, $sourceLang ) {
 
         $file = tempnam("/tmp", "zipmatecat");
         $zip = new ZipArchive();

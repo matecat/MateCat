@@ -258,7 +258,7 @@ class INIT {
         self::$CONVERSION_ENABLED = false;
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-		self::$BUILD_NUMBER = '0.3.4.3';
+		self::$BUILD_NUMBER = '0.3.4.5';
 		self::$VOLUME_ANALYSIS_ENABLED = true;
 
         self::$FORCE_XLIFF_CONVERSION = false;
@@ -383,13 +383,6 @@ class INIT {
                 'https://www.googleapis.com/auth/userinfo.profile'
         );
 
-        //self::$DEFAULT_FILE_TYPES = 'xliff|sdlxliff|xlf';
-		//self::$CONVERSION_FILE_TYPES = 'doc|dot|docx|dotx|docm|dotm|rtf|pdf|xls|xlsx|xlt|xltx|pot|pps|ppt|potm|potx|ppsm|ppsx|pptm|pptx|mif|inx|idml|icml|txt|csv|htm|html|xhtml|properties|odp|ods|odt|sxw|sxc|sxi|xtg|tag|itd|sgml|sgm|dll|exe|rc|ttx|resx|dita|fm|vxd|indd';
-		//self::$CONVERSION_FILE_TYPES_PARTIALLY_SUPPORTED = '[{"format": "fm", "message": "Try converting to MIF"},{"format": "indd", "message": "Try converting to INX"},{"format": "vxd", "message": "Try converting to XML"}]';
-
-		//if (!$this->initOK()) {
-		//    throw new Exception("ERROR");
-		//}
 	}
 
     public static function fatalErrorHandler() {
@@ -476,5 +469,3 @@ class INIT {
 	}
 
 }
-
-?>

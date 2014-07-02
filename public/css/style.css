@@ -2462,7 +2462,7 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 #messageBar
 {
 	display: block;
-    height: auto;
+	height: auto;
     min-height: 26px;
 	background: #FFFA8B;
 	padding: 4px 10px;
