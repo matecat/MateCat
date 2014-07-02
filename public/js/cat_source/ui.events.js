@@ -60,9 +60,9 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.redoInSegment(segment);
 		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.standard, function(e) {
-			UI.toggleSearch(e);
+            if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
 		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.mac, function(e) {
-			UI.toggleSearch(e);
+            if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
 		});		
 	},
 	unbindShortcuts: function() {
@@ -546,7 +546,27 @@ $.extend(UI, {
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
-		}).on('keypress', '.editor .editarea', function(e) {
+        }).on('keyup', '.editor .editarea', 'return', function(e) {
+            if(!UI.defaultBRmanagement) {
+                range = window.getSelection().getRangeAt(0);
+                $('.returnTempPlaceholder', UI.editarea).after('<br />');
+                node = $('.returnTempPlaceholder + br', UI.editarea)[0];
+                setCursorAfterNode(range, node);
+                saveSelection();
+                $('.returnTempPlaceholder', UI.editarea).remove();
+                restoreSelection();
+            }
+        }).on('keydown', '.editor .editarea', 'return', function(e) {
+            UI.defaultBRmanagement = false;
+            if(!$('br', UI.editarea).length) {
+                UI.defaultBRmanagement = true;
+            } else {
+                saveSelection();
+                $('.rangySelectionBoundary', UI.editarea).after('<span class="returnTempPlaceholder" contenteditable="false"></span>');
+                restoreSelection();
+                e.preventDefault();
+            }
+        }).on('keypress', '.editor .editarea', function(e) {
 //			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
@@ -600,21 +620,28 @@ $.extend(UI, {
 					UI.saveInUndoStack('cancel');
 					UI.currentSegmentQA();
 				} else {
-console.log('QUI');
+//console.log('QUI');
 					var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
 					var numSpacesBefore = $('.space-marker', UI.editarea).length;
 //                    var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
 //					console.log('a: ', UI.editarea.html());
 					saveSelection();
-//					console.log('b: ', UI.editarea.html());
+
 					parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
 					isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
 					parentMark = $('.searchMarker', UI.editarea).has('.rangySelectionBoundary');
 					isInsideMark = $('.searchMarker .rangySelectionBoundary', UI.editarea).length;
 //					console.log('c: ', UI.editarea.html());
 
+                    sbIndex = 0;
+                    var translation = $.parseHTML(UI.editarea.html());
+                    $.each(translation, function(index) {
+                        if($(this).hasClass('rangySelectionBoundary')) sbIndex = index;
+                    });
+                    var undeletableMonad = (($(translation[sbIndex-1]).hasClass('monad'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
+                    var selBound = $('.rangySelectionBoundary', UI.editarea);
+                    if(undeletableMonad) selBound.prev().remove();
 
-//					console.log('isInsideTag: ', isInsideTag);
                     restoreSelection();
 
 					// insideTag management
@@ -759,7 +786,7 @@ console.log('QUI');
 						$('.rangySelectionBoundary', UI.editarea).remove();
 					}
 				}
-                console.log($(':focus'));
+//                console.log($(':focus'));
                 //              return false;
 			}
 

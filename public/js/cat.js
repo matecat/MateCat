@@ -17,7 +17,11 @@ UI = {
             }
             var menuHeight = jobMenu.height();
 //		var startTop = 47 - menuHeight;
-            jobMenu.css('top', (47 - menuHeight) + "px");
+            var messageBarIsOpen = UI.body.hasClass('incomingMsg');
+            messageBarHeight = (messageBarIsOpen)? $('#messageBar').height() + 5 : 0;
+            console.log('messageBarHeight: ', messageBarHeight);
+            jobMenu.css('top', (messageBarHeight + 47 - menuHeight) + "px");
+//            jobMenu.css('top', (47 - menuHeight) + "px");
 
             if (jobMenu.hasClass('open')) {
                 jobMenu.animate({top: "-=" + menuHeight + "px"}, 500).removeClass('open');
@@ -1383,7 +1387,6 @@ UI = {
 //		if(d.data.editable.length + d.data.not_editable.length) {
 //			if(!$('.header .repetition', UI.currentSegment).length) $('.header', UI.currentSegment).prepend('<span class="repetition">Autopropagated</span>');
 //		}
-
         sameContentIndex = -1;
         $.each(d.data.editable, function(ind) {
             //Remove trailing spaces for string comparison
@@ -1422,19 +1425,27 @@ UI = {
         }
     },
     renderAlternatives: function(d) {
-//		console.log('renderAlternatives');
+		console.log('renderAlternatives d: ', d);
 //		console.log($('.editor .submenu').length);
 //		console.log(UI.currentSegmentId);
         segment = UI.currentSegment;
         segment_id = UI.currentSegmentId;
         escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
+        console.log('escapedSegment: ', escapedSegment);
         $.each(d.data.editable, function(index) {
-			var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives') ) );
+//            console.log('this.translation: ', this.translation);
+//            console.log('aa: ', UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives'));
+//			console.log('coso: ', htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives') ));
+ //           var aa = UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives');
+ //           bb = aa.replace()
+            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives') ) );
+            console.log('diff_view: ', diff_view);
 			UI.dmp.diff_cleanupEfficiency( diff_view );
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
         $.each(d.data.not_editable, function(index1) {
-            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'not editable alternatives') ) );            UI.dmp.diff_cleanupEfficiency( diff_view );
+            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'not editable alternatives') ) );
+            UI.dmp.diff_cleanupEfficiency( diff_view );
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
     },
@@ -2149,7 +2160,7 @@ UI = {
 	},
 */
 
-    postProcessEditarea: function(context, selector){//console.log('postprocesseditarea');
+    postProcessEditarea: function(context, selector){console.log('postprocesseditarea');
         selector = (typeof selector === "undefined") ? '.editarea' : selector;
         area = $( selector, context ).clone();
         /*
@@ -2257,7 +2268,7 @@ UI = {
             }
         }
 
-		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
+		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
 					.replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
@@ -2935,9 +2946,9 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.redoInSegment(segment);
 		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.standard, function(e) {
-			UI.toggleSearch(e);
+            if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
 		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.mac, function(e) {
-			UI.toggleSearch(e);
+            if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
 		});		
 	},
 	unbindShortcuts: function() {
@@ -3421,7 +3432,27 @@ $.extend(UI, {
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
-		}).on('keypress', '.editor .editarea', function(e) {
+        }).on('keyup', '.editor .editarea', 'return', function(e) {
+            if(!UI.defaultBRmanagement) {
+                range = window.getSelection().getRangeAt(0);
+                $('.returnTempPlaceholder', UI.editarea).after('<br />');
+                node = $('.returnTempPlaceholder + br', UI.editarea)[0];
+                setCursorAfterNode(range, node);
+                saveSelection();
+                $('.returnTempPlaceholder', UI.editarea).remove();
+                restoreSelection();
+            }
+        }).on('keydown', '.editor .editarea', 'return', function(e) {
+            UI.defaultBRmanagement = false;
+            if(!$('br', UI.editarea).length) {
+                UI.defaultBRmanagement = true;
+            } else {
+                saveSelection();
+                $('.rangySelectionBoundary', UI.editarea).after('<span class="returnTempPlaceholder" contenteditable="false"></span>');
+                restoreSelection();
+                e.preventDefault();
+            }
+        }).on('keypress', '.editor .editarea', function(e) {
 //			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
@@ -3475,21 +3506,28 @@ $.extend(UI, {
 					UI.saveInUndoStack('cancel');
 					UI.currentSegmentQA();
 				} else {
-console.log('QUI');
+//console.log('QUI');
 					var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
 					var numSpacesBefore = $('.space-marker', UI.editarea).length;
 //                    var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
 //					console.log('a: ', UI.editarea.html());
 					saveSelection();
-//					console.log('b: ', UI.editarea.html());
+
 					parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
 					isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
 					parentMark = $('.searchMarker', UI.editarea).has('.rangySelectionBoundary');
 					isInsideMark = $('.searchMarker .rangySelectionBoundary', UI.editarea).length;
 //					console.log('c: ', UI.editarea.html());
 
+                    sbIndex = 0;
+                    var translation = $.parseHTML(UI.editarea.html());
+                    $.each(translation, function(index) {
+                        if($(this).hasClass('rangySelectionBoundary')) sbIndex = index;
+                    });
+                    var undeletableMonad = (($(translation[sbIndex-1]).hasClass('monad'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
+                    var selBound = $('.rangySelectionBoundary', UI.editarea);
+                    if(undeletableMonad) selBound.prev().remove();
 
-//					console.log('isInsideTag: ', isInsideTag);
                     restoreSelection();
 
 					// insideTag management
@@ -3634,7 +3672,7 @@ console.log('QUI');
 						$('.rangySelectionBoundary', UI.editarea).remove();
 					}
 				}
-                console.log($(':focus'));
+//                console.log($(':focus'));
                 //              return false;
 			}
 
