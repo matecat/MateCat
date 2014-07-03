@@ -371,7 +371,12 @@ section{position:relative;float:left;width:100%;-webkit-transition: all  100ms e
 /*projectbar*/
 .languages{text-align:center !important;padding:15px 0 0 50px; }
 .wordscounter{float:right;text-align:right}
-.wordcounter{display: none !important; text-align:right;margin-right:-70px !important}
+.wordcounter
+{
+	display: block !important;
+	text-align: right;
+	margin-right: -70px !important;
+}
 .wordcounter strong{margin-right:0px}
 strong:first-child{margin-right:0px !important}
 
@@ -946,7 +951,7 @@ background-size: 42px;
 .content { float: left; clear: both; border: 1px solid #ccf; border-top: none; border-left: none; background: #eef; padding: 10px 20px 20px; width: 400px; }
 
 .preview{font-family:Cambria, Arial, Helvetica, sans-serif !important; height:300px}
-.filter{	background: url(../img/sprite.png) 2px -218px no-repeat;width:45px;height:44px;display:block;float:right;margin:-5px 10px -2px 0;border-left:1px solid #333;border-right:1px solid #333;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;position:relative;display:none !important;}
+.filter{	background: url(../img/sprite.png) 2px -214px no-repeat;width:45px;height:49px;box-shadow: 0px 0px 1px #AEAEAE;display:block;float:right;margin:-5px 10px -2px 0;border-left:1px solid #333;border-right:1px solid #333;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;position:relative;display:none !important;}
 .arrow-top{display:block;position:absolute;bottom:-12px;right:10px;height:20px;width:20px;background:url(../img/search-arrow.png) 0 0 no-repeat;display:none;background-size:16px 8px}
 
 /*search*/
@@ -1351,9 +1356,9 @@ section.status-new.opened .editarea
 	border:1px solid transparent;
 	-moz-border-radius: 2px;
 	border-radius: 2px;
-	/*
-		word-break: break-all;
-	*/
+	
+		word-break: break-word;
+	
     hyphens: auto;
 	-moz-hyphens: auto;
 	transition: all  50ms ease-in;
@@ -2074,11 +2079,20 @@ footer nav
 	padding-bottom: 3px;
 	vertical-align: middle;
 }
+.editor .footer .locked
+{
+	color: #a8a8a8 !important;
+}
 .editarea .locked.mismatch,
 .source .locked.mismatch,
 .locked.mismatch-old
 {
 	color: red !important;
+}
+.editarea .locked.order-error,
+.source .locked.order-error
+{
+    color: #e000ff !important;
 }
 .editor .cc-search .input .locked
 {
@@ -2448,7 +2462,8 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 #messageBar
 {
 	display: block;
-	height: 26px;
+	height: auto;
+    min-height: 26px;
 	background: #FFFA8B;
 	padding: 4px 10px;
 /*	-webkit-transition: all 200ms ease-in; 
@@ -2579,37 +2594,47 @@ del.diff
 	color: #999;
 	margin-left: 4px;
 	margin-right: 4px;
+    position: relative;
+    top: 2px;
 }
 .nbsp-marker
 {
+/*
 	color: #aaa;
 	position: relative;
-	padding-left: 4px;
-	margin-right: 4px;
-	top: 5px;
-
-/*	background: url(../img/bg-nbsp.png) center center no-repeat; 
-	width: 20px;
-	margin-right: 1px;
-	display: inline-block;
-	text-indent: -9999px;*/
-/*
-	color: #AAA;
-	display: inline-block;
-	margin-left: 5px;
-	width: 15px;
-	background: url(../img/bg-nbsp.png) 6px 13px no-repeat;
-	background-size: 3px 4px;
-*/
+	padding-right: 12px;
+	opacity: 0.2;
+	top: 3px;
+	font-size: 10px;
+	background: url(../img/circle.png) 3px 0px no-repeat;
+	background-size: 6px;
+	*/
 }
-.space-marker
+.space-marker,
+.nbsp-marker
 {
+	color: #CCC;
+	position: relative;
+	left: 4px;
+	padding-right: 12px;
+/*	padding-left: 6px;
+	margin-right: 4px;
+	margin-left: 4px;*/
+	opacity: 0.2;
+	/*width: 20px !important;*/
+	top: 3px;
+	font-size: 10px;
+	background: url(../img/dot.png) 0px 0px no-repeat;
+	background-size: 6px;
+/*
 	color: #ccc;
 	position: relative;
 	padding-left: 4px;
 	margin-right: 4px;
 	top: -4px;
+*/
 }
+
 .editToolbar
 {
 	/*float: left;*/	

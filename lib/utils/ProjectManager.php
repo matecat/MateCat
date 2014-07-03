@@ -8,7 +8,6 @@
  */
 include_once INIT::$UTILS_ROOT . "/xliff.parser.1.3.class.php";
 include_once INIT::$UTILS_ROOT . "/DetectProprietaryXliff.php";
-include_once INIT::$UTILS_ROOT . "/engines/TMSServiceFactory.class.php";
 
 class ProjectManager {
 
@@ -105,6 +104,20 @@ class ProjectManager {
 		//create user (Massidda 2013-01-24)
 		//this is done only if an API key is provided
 		if ( !empty( $this->projectStructure['private_tm_key'] ) ) {
+
+            $APIKeySrv = TMSServiceFactory::getAPIKeyService();
+
+            try {
+
+                if( !$APIKeySrv->checkCorrectKey( $this->projectStructure['private_tm_key'] ) ){
+                    throw new Exception( "Error: The TM private key provided is not valid.", -3 );
+                }
+
+            } catch ( Exception $e ){
+                $this->projectStructure['result']['errors'][] = array( "code" => $e->getCode(), "message" => $e->getMessage() );
+                return false;
+            }
+
 			//the base case is when the user clicks on "generate private TM" button:
 			//a (user, pass, key) tuple is generated and can be inserted
 			//if it comes with it's own key without querying the creation API, create a (key,key,key) user
@@ -265,7 +278,7 @@ class ProjectManager {
 			} catch ( Exception $e ){
 
 				if ( $e->getCode() == -1 ) {
-					$this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "No segments found in $fileName");
+					$this->projectStructure['result']['errors'][] = array("code" => -1, "message" => "No text to translate in the file $fileName.");
 				} elseif( $e->getCode() == -2 ) {
 					$this->projectStructure['result']['errors'][] = array("code" => -7, "message" => "Failed to store segments in database for $fileName");
 				} elseif( $e->getCode() == -3 ) {
@@ -818,6 +831,10 @@ class ProjectManager {
 			throw new Exception( "Xliff Import: Error parsing. Check Log file.", -4 );
 		}
 
+        //needed to check if a file has only one segment
+        //for correctness: we could have more tag files in the xliff
+        $fileCounter_Show_In_Cattool = 0;
+
 		// Creating the Query
 		foreach ($xliff['files'] as $xliff_file) {
 
@@ -829,18 +846,25 @@ class ProjectManager {
 			$this->_extractFileReferences( $fid, $xliff_file );
 
 			foreach ($xliff_file['trans-units'] as $xliff_trans_unit) {
-				if (!isset($xliff_trans_unit['attr']['translate'])) {
-					$xliff_trans_unit['attr']['translate'] = 'yes';
-				}
-				if ($xliff_trans_unit['attr']['translate'] == "no") {
 
-				} else {
+                //initialize flag
+                $show_in_cattool = 1;
+
+                if ( !isset( $xliff_trans_unit[ 'attr' ][ 'translate' ] ) ) {
+                    $xliff_trans_unit[ 'attr' ][ 'translate' ] = 'yes';
+                }
+
+                if ( $xliff_trans_unit[ 'attr' ][ 'translate' ] == "no" ) {
+                    //No segments to translate
+                    //don't increment global counter '$fileCounter_Show_In_Cattool'
+                    $show_in_cattool = 0;
+                } else {
+
 					// If the XLIFF is already segmented (has <seg-source>)
 					if (isset($xliff_trans_unit['seg-source'])) {
 
 						foreach ($xliff_trans_unit['seg-source'] as $position => $seg_source) {
 
-							$show_in_cattool = 1;
 							$tempSeg = strip_tags($seg_source['raw-content']);
 							$tempSeg = trim($tempSeg);
 
@@ -909,7 +933,6 @@ class ProjectManager {
 						}
 
 					} else {
-						$show_in_cattool = 1;
 
 						$tempSeg = strip_tags( $xliff_trans_unit['source']['raw-content'] );
 						$tempSeg = trim($tempSeg);
@@ -969,16 +992,19 @@ class ProjectManager {
 
 					}
 				}
-			}
+
+                //increment the counter for not empty segments
+                $fileCounter_Show_In_Cattool += $show_in_cattool;
+
+            }
 		}
 
 		// *NOTE*: PHP>=5.3 throws UnexpectedValueException, but PHP 5.2 throws ErrorException
 		//use generic
-
-		if (empty($this->projectStructure['segments'][$fid])) {
-			Log::doLog("Segment import - no segments found\n");
-			throw new Exception( "Segment import - no segments found", -1 );
-		}
+        if ( empty( $this->projectStructure[ 'segments' ][ $fid ] ) || $fileCounter_Show_In_Cattool == 0 ) {
+            Log::doLog( "Segment import - no segments found\n" );
+            throw new Exception( "Segment import - no segments found", -1 );
+        }
 
 		$baseQuery = "INSERT INTO segments ( internal_id, id_file, id_file_part, segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values ";
 

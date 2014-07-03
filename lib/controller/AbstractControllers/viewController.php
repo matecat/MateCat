@@ -48,7 +48,8 @@ abstract class viewController extends controller {
      */
     private function getBrowser() {
         $u_agent  = $_SERVER[ 'HTTP_USER_AGENT' ];
-        $bname    = 'Unknown';
+
+	    $bname    = 'Unknown';
         $platform = 'Unknown';
         $version  = "";
 
@@ -73,16 +74,19 @@ abstract class viewController extends controller {
             $ub    = "Chrome";
         } elseif ( preg_match( '/Safari/i', $u_agent ) ) {
             $bname = 'Apple Safari';
-	    $ub    = "Safari";
-	} elseif ( preg_match( '/AppleWebKit/i', $u_agent ) ) {
-	    $bname = 'Apple Safari';
-	    $ub    = "Safari";
+	        $ub    = "Safari";
+	    } elseif ( preg_match( '/AppleWebKit/i', $u_agent ) ) {
+	        $bname = 'Apple Safari';
+	        $ub    = "Safari";
         } elseif ( preg_match( '/Opera/i', $u_agent ) ) {
             $bname = 'Opera';
             $ub    = "Opera";
         } elseif ( preg_match( '/Netscape/i', $u_agent ) ) {
             $bname = 'Netscape';
             $ub    = "Netscape";
+        } elseif ( preg_match( '/Mozilla/i', $u_agent ) ) {
+            $bname = 'Mozilla Generic';
+            $ub    = "Mozillageneric";
         } else {
             $bname = 'Unknown';
             $ub    = "Unknown";
@@ -219,11 +223,18 @@ abstract class viewController extends controller {
 
         foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
             if ( stripos( $browser_name, $enabled_browser ) !== false ) {
-                return true;
+                return 1;
             }
         }
 
-        return false;
+        foreach ( INIT::$UNTESTED_BROWSERS as $untested_browser ) {
+            if ( stripos( $browser_name, $untested_browser ) !== false ) {
+                return -1;
+            }
+        }
+
+
+        return 0;
     }
 
     /**

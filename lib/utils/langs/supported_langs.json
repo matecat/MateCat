@@ -67,8 +67,9 @@
 			}],
 			"isocode":"az",
 			"enabled":false,
-			"rtl":true,
-			"rfc3066code":"az-AZ"
+			"rtl":false,
+			"rfc3066code":"az-AZ",
+            "languageRegionCode":"az-Latn-AZ"
 		}
 	,
 		{
@@ -209,7 +210,8 @@
 			"isocode":"cb",
 			"enabled":true,
 			"rtl":false,
-			"rfc3066code":"cb-PH"
+			"rfc3066code":"cb-PH",
+            "languageRegionCode":"fil-PH"
 		}
 	,
 		{
@@ -1329,9 +1331,10 @@
 				"en":"Swahili"
 			}],
 			"isocode":"sw",
-			"enabled":false,
+			"enabled":true,
 			"rtl":false,
-			"rfc3066code":"sw-SZ"
+			"rfc3066code":"sw-SZ",
+			"languageRegionCode":"sw-KE"
 		}
 	,
 		{

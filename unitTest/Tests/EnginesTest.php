@@ -25,7 +25,7 @@ class MUTE_TMS extends TMS {
 //Mock Objects for Mute the curl
 class MUTE_MT extends MT {
 
-    public $fakeUrl = 'http://hlt-services2.fbk.eu:8601/translate?q=Consistent+with+the+coordinated+approach+the+Departments+of+Treasury%2C+Labor%2C+and+Health+and+Human+Services+are+taking+in+developing+the+regulations+and+other+guidance+under+the+Affordable+Care+Act%2C+the+notice+also+solicits+input+on+how+the+three+Departments+should+interpret+and+apply+the+Act%E2%80%99s+provisions+limiting+the+ability+of+plans+and+issuers+to+impose+a+waiting+period+for+health+coverage+of+longer+than+90+days+starting+in+2014.&source=en&target=it&key=';
+    public $fakeUrl = 'http://hlt-services2.fbk.eu:8888/translate?q=Consistent+with+the+coordinated+approach+the+Departments+of+Treasury%2C+Labor%2C+and+Health+and+Human+Services+are+taking+in+developing+the+regulations+and+other+guidance+under+the+Affordable+Care+Act%2C+the+notice+also+solicits+input+on+how+the+three+Departments+should+interpret+and+apply+the+Act%E2%80%99s+provisions+limiting+the+ability+of+plans+and+issuers+to+impose+a+waiting+period+for+health+coverage+of+longer+than+90+days+starting+in+2014.&source=en&target=it&key=';
     public $fakeRes = '{"data": {"translations": [{"segmentID": "0000", "translatedText": "congruente con l\'approccio coordinato il distretti di Tesoreria, Labor, e Health e Human Services sta svolgendo in sviluppo delle normative e altre istruzioni sotto il economiche Care Act, la notifica anche sollecita l\'immissione su come le tre Reparti deve interpretare ed applicare i privilegi Agisci\' s disposizioni limitando la possibilit\u00e0 di piani ed emittenti di imporre un periodo di attesa dello stato di copertura per pi\u00f9 di 90 giorni a partire dalla 2014.", "sentence_confidence": "50.35047642150528", "systemName": "SYSTEM_baseline", "wordAlignment": [[[0], [0]], [[1], [1]], [[2], [2]], [[4], [3]], [[3], [4]], [[5], [5]], [[6], [6]], [[7], [7]], [[8], [8]], [[9], [9]], [[10], [10]], [[11], [11]], [[12], [12]], [[13], [13]], [[14], [14]], [[15], [15]], [[16], [16]], [[17], [17]], [[18], [18]], [[19], [19]], [[20], [20]], [[21], [21]], [[22], [22]], [[23], [23]], [[24], [24]], [[25], [25]], [[26], [26]], [[27], [27]], [[28], [28]], [[29], [29]], [[30], [30]], [[31], [31]], [[32], [32]], [[33], [33]], [[34], [34]], [[35], [35]], [[35], [36]], [[36], [37]], [[37], [38]], [[38], [39]], [[39], [40]], [[40], [41]], [[41], [42]], [[42], [43]], [[43], [44]], [[44], [45]], [[45], [46]], [[46], [47]], [[47], [48]], [[47], [49]], [[48], [50]], [[49], [51]], [[50], [52]], [[51], [53]], [[52], [54]], [[53], [55]], [[54], [56]], [[55], [57]], [[56], [58]], [[57], [59]], [[58], [60]], [[59], [61]], [[60], [62]], [[62], [63]], [[61], [64]], [[61], [65]], [[64], [66]], [[64], [67]], [[66], [68]], [[65], [69]], [[63], [70]], [[67], [71]], [[68], [72]], [[69], [73]], [[70], [74]], [[71], [75]], [[71], [76]], [[72], [77]], [[73], [78]], [[74], [79]]], "phraseAlignment": [[[0], [0]], [[1], [1]], [[2], [2]], [[4], [3]], [[3], [4]], [[5], [5]], [[6], [6]], [[7], [7]], [[8], [8]], [[9], [9]], [[10], [10]], [[11], [11]], [[12], [12]], [[13], [13]], [[14], [14]], [[15], [15]], [[16], [16]], [[17], [17]], [[18], [18]], [[19], [19]], [[20, 21], [20, 21]], [[22], [22]], [[23], [23]], [[24], [24]], [[25], [25]], [[26], [26]], [[27], [27]], [[28], [28]], [[29], [29]], [[30], [30]], [[31], [31]], [[32], [32]], [[33], [33]], [[34], [34]], [[35, 36], [35, 36, 37]], [[37, 38, 39], [38, 39, 40]], [[40], [41]], [[41], [42]], [[42], [43]], [[43], [44]], [[44, 45], [45, 46]], [[46, 47], [47, 48, 49]], [[48], [50]], [[49], [51]], [[50], [52]], [[51], [53]], [[52, 53], [54, 55]], [[54], [56]], [[55], [57]], [[56], [58]], [[57], [59]], [[58, 59], [60, 61]], [[60], [62]], [[61, 62], [63, 64, 65]], [[64], [66, 67]], [[66], [68]], [[65], [69]], [[63], [70]], [[67, 68], [71, 72]], [[69], [73]], [[70], [74]], [[71, 72], [75, 76, 77]], [[73], [78]], [[74], [79]]]}]}}';
 
     protected function curl($url,$postfields=false) {
@@ -53,7 +53,7 @@ class Tests_EnginesTest extends Tests_AbstractTest {
     }
 
     protected static function _resetDB(){
-        $cmd = "mysql -u root -padmin < " . dirname( __FILE__ ) . "/unitTest_matecat_local.sql 2>&1";
+        $cmd = "mysql -u root < " . dirname( __FILE__ ) . "/unitTest_matecat_local.sql 2>&1";
         $res = shell_exec( $cmd );
         if( !is_null($res) ){
             $msg = 'Shell Exec Command Failed: ' . $cmd;
@@ -104,9 +104,7 @@ class Tests_EnginesTest extends Tests_AbstractTest {
 
     public function testRightUrlForTMS(){
 
-        //PATCHED FIXME
         $expected_String = "http://api.mymemory.translated.net/get?q=This+provision+takes+effect+in+2014.&langpair=en-US%7Cit-IT&de=demo%40matecat.com&mt=1&numres=3&conc=true&mtonly=1";
-        $expected_String = "http://api.mymemory.translated.net/get?q=This+provision+takes+effect+in+2014.&langpair=en%7Cit&de=demo%40matecat.com&mt=1&numres=3&conc=true&mtonly=1";
 
         $config = TMS::getConfigStruct();
         $config[ 'get_mt' ]  = true;
@@ -135,12 +133,11 @@ class Tests_EnginesTest extends Tests_AbstractTest {
         $expected_url = "/translate?q=This+provision+takes+effect+in+2014.&source=en&target=it&key=demo%40matecat.com";
 
         $domains = array(
-            2 => 'http://hlt-services2.fbk.eu:8601',
+            2 => 'http://hlt-services2.fbk.eu:8888',
             3 => 'http://193.52.29.52:8001',
-            4 => 'http://hlt-services2.fbk.eu:8701',
+            4 => 'http://hlt-services2.fbk.eu:8988',
             5 => 'http://193.52.29.52:8002',
-            6 => 'http://hlt-services2.fbk.eu:8482',
-            7 => 'http://hlt-services2.fbk.eu:8702',
+            6 => 'http://hlt-services2.fbk.eu:8788',
         );
 
         $text = "This provision takes effect in 2014.";
@@ -182,13 +179,6 @@ class Tests_EnginesTest extends Tests_AbstractTest {
         $prop = $class->getProperty('url');
         $prop->setAccessible(true);
         $this->assertEquals( $domains[6] . $expected_url, $prop->getValue($mt) );
-
-        $mt = new MUTE_MT( 7 );
-        $mt->get( $text, $source, $target, $key );
-        $class = new \ReflectionObject($mt);
-        $prop = $class->getProperty('url');
-        $prop->setAccessible(true);
-        $this->assertEquals( $domains[7] . $expected_url, $prop->getValue($mt) );
 
     }
 

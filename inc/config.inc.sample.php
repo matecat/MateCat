@@ -27,6 +27,7 @@ class INIT {
 	public static $THRESHOLD_MATCH_TM_NOT_TO_SHOW;
 	public static $TIME_TO_EDIT_ENABLED;
 	public static $ENABLED_BROWSERS;
+    public static $UNTESTED_BROWSERS;
 	public static $BUILD_NUMBER;
 	public static $DEFAULT_FILE_TYPES;
 	public static $SUPPORTED_FILE_TYPES;
@@ -237,6 +238,12 @@ class INIT {
 		self::$AUTHCOOKIEDURATION=86400*60;
 		self::$ENABLED_BROWSERS = array('applewebkit','chrome', 'safari', 'firefox');
 
+        // sometimes the browser declare to be Mozilla but does not provide a valid Name (e.g. Safari).
+        // This occurs expecially in mobile environment. As an example, when try to open a link from within
+        // of GMail app, it redirect to an internal browser that does not declare a valid name
+        // In this case we will show a notice on the top of the page instead of stop the access
+        self::$UNTESTED_BROWSERS = array('mozillageneric');
+
         /**
          * Matecat open source by default only handles xliff files with a strong focus on sdlxliff
          * ( xliff produced by SDL Trados )
@@ -252,7 +259,7 @@ class INIT {
         self::$CONVERSION_ENABLED = false;
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-		self::$BUILD_NUMBER = '0.3.4.3';
+		self::$BUILD_NUMBER = '0.3.4.5';
 		self::$VOLUME_ANALYSIS_ENABLED = true;
 
         self::$FORCE_XLIFF_CONVERSION = false;
@@ -379,13 +386,6 @@ class INIT {
 
 	    self::$CONFIG_VERSION_ERR_MESSAGE = "Your config.ini.php file is not up-to-date.";
 
-        //self::$DEFAULT_FILE_TYPES = 'xliff|sdlxliff|xlf';
-		//self::$CONVERSION_FILE_TYPES = 'doc|dot|docx|dotx|docm|dotm|rtf|pdf|xls|xlsx|xlt|xltx|pot|pps|ppt|potm|potx|ppsm|ppsx|pptm|pptx|mif|inx|idml|icml|txt|csv|htm|html|xhtml|properties|odp|ods|odt|sxw|sxc|sxi|xtg|tag|itd|sgml|sgm|dll|exe|rc|ttx|resx|dita|fm|vxd|indd';
-		//self::$CONVERSION_FILE_TYPES_PARTIALLY_SUPPORTED = '[{"format": "fm", "message": "Try converting to MIF"},{"format": "indd", "message": "Try converting to INX"},{"format": "vxd", "message": "Try converting to XML"}]';
-
-		//if (!$this->initOK()) {
-		//    throw new Exception("ERROR");
-		//}
 	}
 
     public static function fatalErrorHandler() {
@@ -473,4 +473,4 @@ class INIT {
 
 }
 return true;
-?>
+

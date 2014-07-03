@@ -91,6 +91,7 @@ APP = {
 		$("body").on('click', '#messageBar .close', function(e) {
 			e.preventDefault();
 			$('body').removeClass('incomingMsg');
+            $('#messageBar').html('<span class="msg"></span><a href="#" class="close"></a>');
 			if(typeof $('#messageBar').attr('data-token') != 'undefined') {
 				var expireDate = new Date($('#messageBar').attr('data-expire'));
 				$.cookie($('#messageBar').attr('data-token'), '', { expires: expireDate });				

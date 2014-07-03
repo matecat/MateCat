@@ -4,31 +4,39 @@
 UI = null;
 
 UI = {
-	toggleFileMenu: function() {
-
-		if ($('#jobMenu').is(':animated')) {
+	toggleFileMenu: function() {console.log('ddd');
+        jobMenu = $('#jobMenu');
+		if (jobMenu.is(':animated')) {
 			return false;
-		}
-		if (this.body.hasClass('editing')) {
-			$('#jobMenu .currSegment').show();
 		} else {
-			$('#jobMenu .currSegment').hide();
-		}
-		var menuHeight = $('#jobMenu').height();
+            currSegment = jobMenu.find('.currSegment');
+            if (this.body.hasClass('editing')) {
+                currSegment.show();
+            } else {
+                currSegment.hide();
+            }
+            var menuHeight = jobMenu.height();
 //		var startTop = 47 - menuHeight;
-		$('#jobMenu').css('top', (47 - menuHeight) + "px");
+            var messageBarIsOpen = UI.body.hasClass('incomingMsg');
+            messageBarHeight = (messageBarIsOpen)? $('#messageBar').height() + 5 : 0;
+            console.log('messageBarHeight: ', messageBarHeight);
+            jobMenu.css('top', (messageBarHeight + 47 - menuHeight) + "px");
+//            jobMenu.css('top', (47 - menuHeight) + "px");
 
-		if ($('#jobMenu').hasClass('open')) {
-			$('#jobMenu').animate({top: "-=" + menuHeight + "px"}, 500).removeClass('open');
-		} else {
-			$('#jobMenu').animate({top: "+=" + menuHeight + "px"}, 300, function() {
-				$('body').on('click', function() {
-					if ($('#jobMenu').hasClass('open')) {
-						UI.toggleFileMenu();
-					}
-				});
-			}).addClass('open');
-		}
+            if (jobMenu.hasClass('open')) {
+                jobMenu.animate({top: "-=" + menuHeight + "px"}, 500).removeClass('open');
+            } else {
+                jobMenu.animate({top: "+=" + menuHeight + "px"}, 300, function() {
+                    $('body').on('click', function() {
+                        if (jobMenu.hasClass('open')) {
+                            UI.toggleFileMenu();
+                        }
+                    });
+                }).addClass('open');
+            }
+            return true;
+        }
+
 	},
 	activateSegment: function(isNotSimilar) {
 		this.createFooter(this.currentSegment, isNotSimilar);
@@ -107,44 +115,46 @@ UI = {
 		}
 	},
 */
-	closeSegment: function(segment, byButton, operation) {
+	closeSegment: function(segment, byButton, operation) {//console.log('CLOSE SEGMENT');
 		if ((typeof segment == 'undefined') || (typeof UI.toSegment != 'undefined')) {
 			this.toSegment = undefined;
 			return true;
-		}
+		} else {
+//		    var closeStart = new Date();
+            this.autoSave = false;
 
-//		var closeStart = new Date();
-		this.autoSave = false;
+            $(window).trigger({
+                type: "segmentClosed",
+                segment: segment
+            });
 
-		$(window).trigger({
-			type: "segmentClosed",
-			segment: segment
-		});
+            clearTimeout(this.liveConcordanceSearchReq);
 
-		clearTimeout(this.liveConcordanceSearchReq); 
+            var saveBrevior = true;
+            if (operation != 'noSave') {
+                if ((operation == 'translated') || (operation == 'Save'))
+                    saveBrevior = false;
+            }
+            if ((segment.hasClass('modified')) && (saveBrevior)) {
+                this.saveSegment(segment);
+            }
+            this.deActivateSegment(byButton);
+            this.removeGlossaryMarksFormSource();
 
-		var saveBrevior = true;
-		if (operation != 'noSave') {
-			if ((operation == 'translated') || (operation == 'Save'))
-				saveBrevior = false;
-		}
-		if ((segment.hasClass('modified')) && (saveBrevior)) {
-			this.saveSegment(segment);
-		}
-		this.deActivateSegment(byButton);
-		this.removeGlossaryMarksFormSource();
-
-		this.lastOpenedEditarea.attr('contenteditable', 'false');
-		this.body.removeClass('editing');
-		$(segment).removeClass("editor");
-		$('span.locked.mismatch', segment).removeClass('mismatch');
-		if (!this.opening) {
-			this.checkIfFinished(1);
-		}
+            this.lastOpenedEditarea.attr('contenteditable', 'false');
+            this.body.removeClass('editing');
+            $(segment).removeClass("editor");
+            $('span.locked.mismatch', segment).removeClass('mismatch');
+            if (!this.opening) {
+                this.checkIfFinished(1);
+            }
+            return true;
+        }
 	},
 	copySource: function() {
 
-		var source_val = $.trim($(".source", this.currentSegment).text());
+		var source_val = $.trim($(".source", this.currentSegment).html());
+//		var source_val = $.trim($(".source", this.currentSegment).text());
 		// Test
 		//source_val = source_val.replace(/&quot;/g,'"');
 
@@ -152,7 +162,8 @@ UI = {
 		// I hope it still works.
 
 		this.saveInUndoStack('copysource');
-		$(".editarea", this.currentSegment).text(source_val).keyup().focus();
+		$(".editarea", this.currentSegment).html(source_val).keyup().focus();
+//		$(".editarea", this.currentSegment).text(source_val).keyup().focus();
 		this.saveInUndoStack('copysource');
 //		$(".editarea", this.currentSegment).effect("highlight", {}, 1000);
 		$(window).trigger({
@@ -197,8 +208,9 @@ UI = {
 	createButtons: function() {
 		var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
 		var buttons = '<li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+&gt;&gt;</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li><li><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
-		$('#segment-' + this.currentSegmentId + '-buttons').empty().append(buttons);
-		$('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
+		var buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
+        buttonsOb.empty().append(buttons);
+        buttonsOb.before('<p class="warnings"></p>');
 	},
 	createFooter: function(segment, emptyContributions) {
 //		isNotSimilar = emptyContributions;
@@ -208,14 +220,14 @@ UI = {
 			if(!emptyContributions) {
 				$('.matches .overflow', segment).empty();
 				return false;
-			}		
+			}
 		}
 		if ($('.footer', segment).text() !== '')
 			return false; 
 
 		var footer =	'<ul class="submenu">' +
 					'	<li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
-					'		<a tabindex="-1" href="#">Translation matches</a>' +
+					'		<a tabindex="-1" href="#">Translation matches' + ((config.mt_enabled)? '' : ' (No MT)') + '</a>' +
 					'	</li>' +
 					'	<li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc">' +
 					'		<a tabindex="-1" href="#">Concordance</a>' +
@@ -329,7 +341,9 @@ UI = {
 					}
 				});
 				return found;
-			}
+			} else {
+                return true;
+            }
 		} else {
 			return false;
 		}
@@ -417,8 +431,10 @@ UI = {
 				return adjacent;
 			} else {
 				this.detectAdjacentSegment(adjacent, direction, times - 1);
+                return true;
 			}
 		} else {
+            return true;
 		}
 	},
 	detectFirstLast: function() {
@@ -428,7 +444,8 @@ UI = {
 	},
 	detectRefSegId: function(where) {
 //		var step = this.moreSegNum;
-		var seg = (where == 'after') ? $('section').last() : (where == 'before') ? $('section').first() : '';
+		var section = $('section');
+        var seg = (where == 'after') ? section.last() : (where == 'before') ? section.first() : '';
 		var segId = (seg.length) ? seg.attr('id').split('-')[1] : 0;
 		return segId;
 	},
@@ -522,9 +539,10 @@ UI = {
 		if (d.error.length)
 			this.processErrors(d.error, 'getMoreSegments');
 		where = d.data.where;
+        section = $('section');
 		if (typeof d.data.files != 'undefined') {
-			firstSeg = $('section').first();
-			lastSeg = $('section').last();
+			firstSeg = section.first();
+			lastSeg = section.last();
 			var numsegToAdd = 0;
 			$.each(d.data.files, function() {
 				numsegToAdd = numsegToAdd + this.segments.length;
@@ -858,6 +876,8 @@ UI = {
 		$('#spellCheck .words').remove();
 	},
 	openSegment: function(editarea, operation) {
+//        console.log('open segment - editarea: ', UI.currentSegmentId);
+//        console.log('operation: ', operation);
 //		if(UI.body.hasClass('archived')) return;
 		segment_id = $(editarea).attr('data-sid');
 		var segment = $('#segment-' + segment_id);
@@ -900,6 +920,7 @@ UI = {
 		this.setCurrentSegment();
 		
 		if (!this.readonly) {
+ //           console.log('getNormally: ', getNormally);
 			if(getNormally) {
 				this.getContribution(segment, 0);
 			} else {
@@ -1089,11 +1110,13 @@ UI = {
 				var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
                 var autoPropagated = this.autopropagated_from != 0;
 				var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
+//				if(this.sid == '13735228') console.log('escapedsegment: ', escapedSegment);
 
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
                 escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
                 escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
                 escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
+//				console.log('vediamo perché: ', UI.decodePlaceholdersToText(this.segment, true, this.sid, 'prova'));
 				
 				/* tab placeholders replacement */
  //               escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "<span class=" );
@@ -1111,7 +1134,7 @@ UI = {
 						'		</div>' +
 						'		<div class="text">' +
 						'			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
-						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment, true) + '</div>' +
+						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment, true, this.sid, 'source') + '</div>' +
 						'				<div class="copy" title="Copy source to target">' +
 						'                   <a href="#"></a>' +
 						'                   <p>ALT+CTRL+I</p>' +
@@ -1123,7 +1146,7 @@ UI = {
 						'					</span>' +
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
-						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true)) + '</div>' +
+						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
 						'						<ul class="editToolbar">' +
 						'							<li class="uppercase" title="Uppercase"></li>' +
 						'							<li class="lowercase" title="Lowercase"></li>' +
@@ -1147,7 +1170,6 @@ UI = {
 						'	<ul class="statusmenu"></ul>' +
 						'</section> ';
 			});
-
 			if (articleToAdd) {
 				newFile += '</article>';
 			}
@@ -1365,10 +1387,14 @@ UI = {
 //		if(d.data.editable.length + d.data.not_editable.length) {
 //			if(!$('.header .repetition', UI.currentSegment).length) $('.header', UI.currentSegment).prepend('<span class="repetition">Autopropagated</span>');
 //		}
-
         sameContentIndex = -1;
         $.each(d.data.editable, function(ind) {
             //Remove trailing spaces for string comparison
+            console.log('this.translation: ' + this.translation);
+            console.log('UI.decodePlaceholdersToText(this.translation): ' + UI.decodePlaceholdersToText(this.translation));
+            console.log('UI.editarea.text(): ' + UI.editarea.text());
+            console.log("UI.editarea.text().replace( /[ \xA0]+$/ , '' ): " + UI.editarea.text().replace( /[ \xA0]+$/ , '' ));
+            console.log("rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) )" + rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ));
             if( this.translation == rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) ) {
                 sameContentIndex = ind;
             }
@@ -1399,35 +1425,44 @@ UI = {
         }
     },
     renderAlternatives: function(d) {
-//		console.log('renderAlternatives');
+		console.log('renderAlternatives d: ', d);
 //		console.log($('.editor .submenu').length);
 //		console.log(UI.currentSegmentId);
         segment = UI.currentSegment;
         segment_id = UI.currentSegmentId;
-        escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html());
+        escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
+        console.log('escapedSegment: ', escapedSegment);
         $.each(d.data.editable, function(index) {
-			var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation) ) );
+//            console.log('this.translation: ', this.translation);
+//            console.log('aa: ', UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives'));
+//			console.log('coso: ', htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives') ));
+ //           var aa = UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives');
+ //           bb = aa.replace()
+            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives') ) );
+            console.log('diff_view: ', diff_view);
 			UI.dmp.diff_cleanupEfficiency( diff_view );
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
         $.each(d.data.not_editable, function(index1) {
-            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation) ) );            UI.dmp.diff_cleanupEfficiency( diff_view );
+            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'not editable alternatives') ) );
+            UI.dmp.diff_cleanupEfficiency( diff_view );
             $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
     },
     chooseAlternative: function(w) {console.log('chooseAlternative');
 //        console.log( $('.sugg-target .realData', w ) );
-        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text() ) );
+        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text(), true, UI.currentSegmentId, 'choose alternative' ) );
         this.lockTags(this.editarea);
         this.editarea.focus();
         this.highlightEditarea();
     },
 	copyAlternativeInEditarea: function(translation) {
+		console.log('translation: ', translation);
 		if ($.trim(translation) !== '') {
 			if (this.body.hasClass('searchActive'))
 				this.addWarningToSearchDisplay();
 			this.saveInUndoStack('copyalternative');
-			$(UI.editarea).text(translation).addClass('fromAlternative');
+			$(UI.editarea).html(translation).addClass('fromAlternative');
 			this.saveInUndoStack('copyalternative');
 		}
 	},
@@ -1685,15 +1720,18 @@ UI = {
 	setNextWarnedSegment: function(sid) {
 		sid = sid || UI.currentSegmentId;
 		idList = UI.globalWarnings;
+		idList.sort();
+		found = false;
 		$.each(idList, function() {
 			if (this > sid) {
 				$('#point2seg').attr('href', '#' + this);
+				found = true;
 				return false;
 			}
-			if (this == idList[idList.length - 1]) {
-				$('#point2seg').attr('href', '#' + idList[0]);
-			}
 		});
+		if(!found) {
+			$('#point2seg').attr('href', '#' + UI.firstWarnedSegment);
+		}
 	},
 	fillWarnings: function(segment, warnings) {
 		//console.log( 'fillWarnings' );
@@ -1770,15 +1808,9 @@ UI = {
 			success: function(data) {//console.log('check warnings success');
 				UI.startWarning();
 				var warningPosition = '';
-				UI.globalWarnings = data.details;
+				UI.globalWarnings = data.details.sort();
+				UI.firstWarnedSegment = UI.globalWarnings[0];
 				UI.translationMismatches = data.translation_mismatches;
-//				console.log(data.messages);
-//				console.log($.parseJSON(data.messages));
-//				data.messages = {
-//						msg: "messaggio di prova"
-//					};
-//		
-//				messages = ["Something happened! This is simply a fake message to inform you."];
 
 				//check for errors
 				if (UI.globalWarnings.length > 0) {
@@ -1877,8 +1909,19 @@ UI = {
 						$('span.locked.mismatch', UI.currentSegment).removeClass('mismatch');
 						return;
 					}
-					if (UI.editarea.text().trim() != UI.checkSegmentsArray[d.token].trim().replace(config.crlfPlaceholderRegex, ''))
-						return;
+
+                    escapedSegment = UI.checkSegmentsArray[d.token].trim().replace( config.lfPlaceholderRegex, "\n" );
+                    escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
+                    escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
+                    escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "\t" );
+                    escapedSegment = escapedSegment.replace( config.nbspPlaceholderRegex, $( document.createElement('span') ).html('&nbsp;').text() );
+
+                    if (UI.editarea.text().trim() != escapedSegment ){
+//                        console.log( UI.editarea.text().trim() );
+//                        console.log( UI.checkSegmentsArray[d.token].trim() );
+//                        console.log( escapedSegment  );
+                        return;
+                    }
 
 					UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
 					UI.markTagMismatch(d.details);
@@ -2117,7 +2160,7 @@ UI = {
 	},
 */
 
-    postProcessEditarea: function(context, selector){
+    postProcessEditarea: function(context, selector){console.log('postprocesseditarea');
         selector = (typeof selector === "undefined") ? '.editarea' : selector;
         area = $( selector, context ).clone();
         /*
@@ -2195,7 +2238,10 @@ UI = {
         //same as preeceding commented but with regular expression, better because remove ALL trailing BR not only one
         /* trim all last br if it is present and if after that element there's nothing */
 //        console.log( $( area ).text() );
-        return $( area ).text().replace( /(:?[ \xA0]*##\$_[0-9A-F]{2,4}\$##[ \xA0]*)+$/, "" );
+//        console.log( $( area ).text().replace( /(:?[ \xA0]*##\$_[0-9A-F]{2,4}\$##[ \xA0]*)+$/, "" ) );
+        return $(area).text();
+
+//        return $( area ).text().replace( /(:?[ \xA0]*##\$_[0-9A-F]{2,4}\$##[ \xA0]*)+$/, "" );
 
 
     },
@@ -2205,32 +2251,99 @@ UI = {
      * @param str
      * @returns {XML|string}
      */
-    decodePlaceholdersToText: function (str, jumpSpacesEncode) {
+    decodePlaceholdersToText: function (str, jumpSpacesEncode, sid, operation) {
+//		toLog = (sid == '13735228');
+//		toLog = ((operation == 'contribution source'));
+//		if(toLog) console.log('decodePH operation: ', operation);
+//		if(operation == 'source') {
+//			if(toLog) console.log('SOURCE STR: ', str);
+//		}
+        if(!UI.hiddenTextEnabled) return str;
 		jumpSpacesEncode = jumpSpacesEncode || false;
 		var _str = str;
-		if(jumpSpacesEncode) {
-			_str = this.encodeSpacesAsPlaceholders(htmlDecode(_str));
+        if(UI.markSpacesEnabled) {
+            if(jumpSpacesEncode) {
+                _str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true);
 //			_str = this.encodeSpacesAsPlaceholders(_str);
-		}
-		
-		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
+            }
+        }
+
+		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
 					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
 					.replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
-					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">°</span>' );
+					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">&nbsp;</span>' );
+
+//		if(toLog) console.log('_str: ', _str);
 		return _str;
     },
-	encodeSpacesAsPlaceholders: function(str) {
-		newStr = '';
+	encodeSpacesAsPlaceholders: function(str, root) {
+        if(!UI.hiddenTextEnabled) return str;
+
+		var newStr = '';
+		$.each($.parseHTML(str), function(index) {
+
+			if(this.nodeName == '#text') {
+				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker marker monad" contenteditable="false"> </span>');
+			} else {
+				match = this.outerHTML.match(/<.*?>/gi);
+				if(match.length == 1) { // se è 1 solo, è un tag inline
+					
+				} else if(match.length == 2) { // se sono due, non ci sono tag innestati
+					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker#@-space-@#marker#@-space-@#monad"#@-space-@#contenteditable="false"#@-gt-@# #@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+//					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+				} else {
+
+					newStr += htmlEncode(match[0]) + UI.encodeSpacesAsPlaceholders(this.innerHTML) + htmlEncode(match[1], false);
+					
+//					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);
+					
+//					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);					
+				}
+				
+				
+				// se sono più di due, ci sono tag innestati
+			}
+		});
+		if(root) {
+			newStr = newStr.replace(/#@-lt-@#/gi, '<').replace(/#@-gt-@#/gi, '>').replace(/#@-space-@#/gi, ' ');
+		}
+		return newStr;
+	},
+/*
+	prova: function(str, root) {
+		var newStr = '';
 		$.each($.parseHTML(str), function(index) {
 			if(this.nodeName == '#text') {
 				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
 			} else {
-				newStr += $(this).text();
+				match = this.outerHTML.match(/<.*?>/gi);
+				console.log('match: ', match);
+				if(match.length == 1) { // se è 1 solo, è un tag inline
+					
+				} else if(match.length == 2) { // se sono due, non ci sono tag innestati
+					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+//					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+				} else {
+					console.log('vediamo: ', $.parseHTML(this.outerHTML));
+
+					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML) + htmlEncode(match[1], false);
+					
+//					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);
+					
+//					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);					
+				}
+				
+				
+				// se sono più di due, ci sono tag innestati
 			}
 		});
+		if(root) {
+			newStr = newStr.replace(/#@-lt-@#/gi, '<').replace(/#@-gt-@#/gi, '>').replace(/#@-space-@#/gi, ' ');
+		}
 		return newStr;
 	},
+*/
 
 	unnestMarkers: function() {
 		$('.editor .editarea .marker .marker').each(function() {
@@ -2466,7 +2579,7 @@ UI = {
 		}
 		saveSelection();
 		$('.undoCursorPlaceholder').remove();
-		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder"></span>');
+		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
 		restoreSelection();
 		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
 	},

@@ -43,6 +43,7 @@
 	<script src="${basepath}public/js/lib/jquery.js"></script>
 	<script src="${basepath}public/js/common.js"></script>
 	<script src="${basepath}public/js/upload.js"></script>
+	<script src="${basepath}public/js/addtablerow.js"></script>
 	<script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
     <script type="text/javascript">
@@ -68,13 +69,243 @@
 <header>
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
+        <tal:block tal:condition="php: empty(logged_user)">
+        	<div id="dd" class="wrapper-dropdown-5 pull-right" tabindex="1">                    
+                <span class="dropdown-icon pull-right"><span class="icon-paw"></span><span class="icon-sort-down"></span></span>
+                <ul class="dropdown">
+                       <li><div class="needtobelogged" href="#"><h2>Advanced Features</h2>
+                       <br />Advanced features are only available to logged in users
+                       <br /><br /><a id="sign-in"><img src="/public/img/signin-blu.png" /></a>
+                       </div></li>
+                </ul>
+        </div>
+        </tal:block>
+        <tal:block tal:condition="php: !empty(logged_user)">
+        <div id="dd" class="wrapper-dropdown-5 pull-right logged" tabindex="1">                    
+                    <span class="dropdown-icon pull-right "><img src="/public/img/logged.png" /></span>
+                    <ul class="dropdown">
+                        <li  class="userinfo"><a>Welcome <a tal:content='logged_user'></a></a></li>
+                        <li><a class="memory-mgmt" href="#"><span class="icon-language"></span> Language Resources</a></li>
+                        <li><a tal:attributes="href string:${basepath}manage/?new=1"><span class="icon-tasks"></span> Manage Projects</a></li>
+                        <li><a class="memory-mgmt"  id='logoutlink' href="#"><span class="icon-power-off"></span> Logout</a></li>
+                    </ul>
+        </div>
+        </tal:block>
     </div>
-    <div class="cl"></div>
-
+<div class="cl"></div>
 </header>
+<!-- inizio tm mgmt -->
+<div class="mgmt-panel mgmt-panel-tm">
+	<div class="mgmt-wrapper">
+    	<div class="mgmt-table-tm">
+            <h1 class="pull-left"  id="draggable">Language Resources</h1>
+             <a href="#" class="x-popup pull-right"></a>
+             <ul id="myTab" class="nav nav-tabs" role="tablist">
+      <li class="active"><a href="#tm">TM Management</a></li>
+      <li class=""><a href="#glossaries" class="mgmt-gl">Glossaries</a></li>
+     
+    </ul>
+             <div class="mgmt-container">
+          		<h3>Match source</h3>
+                <div class="block">
+                <label>MT</label>
+                <select>
+                <option>select</option>
+                </select>
+                </div>
+                <div class="block">
+                <label>Lookup</label>
+                <input type="checkbox" />
+                </div>
+                <div class="clear"></div>
+                <h3>Manage TM</h3>
+                <table class="mgmt-tm" id="sort">
+                    <thead>
+                      <tr>
+                      	<th class="text-center"  width="7%">Priority</th>
+                        <th width="23%">Translation Memory</th>
+                        <th width="20%">Private Key</th>
+                        <th width="30%">Description</th>
+                        <th width="10%">Lang Pair</th>
+                        <th class="text-center"  width="5%">Lookup</th>
+                        <th class="text-center" width="5%">Update</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="index text-center">1</td>
+                            <td><a href="#">Google Drive</a></td>
+                            <td>90231291i201i</td>
+                            <td>Inf tech</td>
+                            <td><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
+                            <td  class="text-center" ><input type="checkbox" /></td>
+                            <td  class="text-center" ><input type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center index">2</td>
+                            <td><a href="#">Google Gmail</a></td>
+                            <td>2932938238</td>
+                            <td>Inf tech</td>
+                            <td><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">es-ES</span></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center index">3</td>
+                            <td><a href="#">Europarl</a></td>
+                            <td>192819819281981</td>
+                            <td>Legal (amendments)</td>
+                            <td><span class="mgmt-source">es-ES</span> - <span class="mgmt-target">fr-FR</span></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center index">4</td>
+                            <td>Google Drive 21</td>
+                            <td>xxxxxxxxxxx</td>
+                            <td>Inf tech</td>
+                            <td><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
+                            <td  class="text-center" ><input type="checkbox" /></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
+                        </tr>
+                          </tbody>
+                       </table>
+                       <br />
+                            <a href="#" class="btn-ok clear pull-right add-tm">Add a TM</a>
+                       
+                            <div class="addrow-tm">
+              <h3>Add a TM</h3>
+                 <p>Short description here.</p>
+              <div class="block">
+              <input class="mgmt-input" type="text" width="20" id="name" onfocus="this.value='';"  value="Enter a name" />
+              </div>
+              <div class="block">
+                  <input class="mgmt-input" type="text" id="key" onfocus="this.value='';"  value="Create new private key" />
+                  <a class="btn-ok pull-right">Create</a>
+               </div>
+               <div class="block clear">
+               <input class="mgmt-input" type="text" id="description" onfocus="this.value='';"  value="Enter a short description" />
+               </div>
+                <div class="block">
+<label class="fileupload">Select a TMX </label><input type="file" />
+</div>
+				<input type="button" value="Add a TM" id="add" class="pull-right add-tm-ok btn-ok" onclick="Javascript:addRow()" />
+                       </div>
+            </div>
+		</div>
+    </div>
+</div>
+<!-- fine tm mgmt -->
+<!-- inizio glossary mgmt -->
+<div class="mgmt-panel mgmt-panel-gl">
+	<div class="mgmt-wrapper">
+    	<div class="mgmt-table-gl">
+            <h1 class="pull-left"  id="draggable">Language Resources</h1>
+             <a href="#" class="x-popup pull-right"></a>
+  <ul id="myTab" class="nav nav-tabs" role="tablist">
+      <li ><a href="#tm"  class="mgmt-tm">TM Management</a></li>
+      <li class="active"><a href="#glossaries">Glossaries</a></li>
+     
+    </ul>             
+    
+    <div class="mgmt-container">
+   <h3>Manage Glossaries</h3>
+                <table class="mgmt-gl" id="sort">
+                    <thead>
+                      <tr>
+                      	<th class="text-center"  width="7%">Priority</th>
+                        <th width="23%">Glossary name</th>
+                        <th width="20%">Private Key</th>
+                        <th width="30%">Description</th>
+                        <th width="10%">Lang Pair</th>
+                        <th class="text-center"  width="5%">Lookup</th>
+                        <th class="text-center" width="5%">Update</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="index text-center">1</td>
+                            <td><a href="#">Google Drive</a></td>
+                            <td>90231291i201i</td>
+                            <td>Inf tech</td>
+                            <td><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
+                            <td  class="text-center" ><input type="checkbox" /></td>
+                            <td  class="text-center" ><input type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center index">2</td>
+                            <td><a href="#">Google Gmail</a></td>
+                            <td>2932938238</td>
+                            <td>Inf tech</td>
+                            <td><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">es-ES</span></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center index">3</td>
+                            <td><a href="#">Europarl</a></td>
+                            <td>192819819281981</td>
+                            <td>Legal (amendments)</td>
+                            <td><span class="mgmt-source">es-ES</span> - <span class="mgmt-target">fr-FR</span></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center index">4</td>
+                            <td>Google Drive 21</td>
+                            <td>xxxxxxxxxxx</td>
+                            <td>Inf tech</td>
+                            <td><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
+                            <td  class="text-center" ><input type="checkbox" /></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
+                        </tr>
+                          </tbody>
+                       </table>
+                       <br />
+                             <a class="pull-right add-gl btn-ok" href="#"><span>Import glossary</span></a>
+
+        </div>
+    
+    
+    	<div class="addrow-gl">
+        <h3>Import glossary</h3>
+          <p>Upload a CSV file with source and target terms and comments separated by a semicolon. Example: source term; target term; comment.</p>
+            <div class="mgmt-container">
+           
+            <div class="block">
+                             <select>
+                             	<option>Source language</option>
+                             </select>
+                    </div>
+                    <div class="block">
+                              <select>
+                             	<option>Target language</option>
+                             </select>
+                    </div>
+               <div class="block">
+                             <input type="textarea" class="mgmt-input" value="Enter a short description" />
+                    </div>
+                <div class="block ">
+                    <input class="mgmt-input" id="key" type="text" value="Enter your private key" />
+                     <a class="btn-ok pull-right">Create</a>
+                  </div>
+               
+                    <div class="block clear">
+                                <label>Select a file to upload (.csv)</label>
+                            <input type="file"  />
+                     </div>
+                     <a class="btn-ok pull-right btn-confirm">Upload</a>
+            </div>
+            </div>
+		</div>
+    </div>
+</div>
+<!-- fine glossary mgmt -->
+
+<div class="mgmt-popup-outer closeClickingOutside popup-outer"></div>
+
 <div class="wrapper-upload">
 <h1 tal:condition="true:conversion_enabled">Translate your files</h1>
-
 <h1 tal:condition="not:conversion_enabled">Translate an XLIFF file</h1>
 
 <h2 class="payoff">Matecat gives you more matches than any other translation tool.</h2>
@@ -137,8 +368,10 @@
     <br/>
     <a href="#" id="multiple-link">Multiple languages?</a>
 </div>
+<div class="translate-box">
+        <a href="#" class="memory-mgmt pull-right">Add language resource</a>
+</div>
 <div class="cl"></div>
-<a href="#" class="more">Options</a>
 
 
 <div class="cl"></div>
@@ -164,7 +397,6 @@
 
     <div class="translate-box">
         <span class="btn btn-success fileinput-button" id="create_private_tm_btn">
-            <i class="icon-plus icon-white"></i>
             <span>Create a new private TM</span>
             <input id="private-tm-new" type="file" name="files[]" multiple="multiple" class="multiple-button"/>
         </span>
@@ -215,7 +447,7 @@
                     <div class="span7">
                         <!-- The fileinput-button span is used to style the file input field as button -->
                                     <span class="btn btn-success fileinput-button">
-                                        <i class="icon-plus icon-white"></i>
+                                       
                                         <span>Add files...</span>
                                         <input type="file" name="files[]" multiple="multiple" class="multiple-button"/>
                                     </span>
@@ -284,7 +516,6 @@
 
             <p tal:condition="not:conversion_enabled"><strong>Drag and drop</strong> your XLIFF here or </p>
                         <span id="add-files" class="btn fileinput-button">
-                            <i class="icon-plus icon-white"></i>
                             <span>Add files...</span>
                             <input type="file" name="files[]" multiple="multiple" class="multiple-button"/>
                         </span> 
@@ -728,20 +959,25 @@
     <div class="wrapper">
 
         <nav>
-            <ul>
-                <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
+            <ul class="pull-left">
                 <li><a tal:attributes="href string:${basepath}api/docs">API</a></li>
-				<li><a href="http://docs.matecat.com" target="_blank">Docs</a></li>
+				<li><a href="http://docs.matecat.com" target="_blank">How Matecat counts words</a></li>
+				<li><a href="http://docs.matecat.com" target="_blank">Help</a></li>
             </ul>
+            <ul class="pull-right">
+                <li style="display:none"><a tal:attributes="href string:${basepath}manage/?new=1" >>Manage</a></li>
+            </ul>
+            
+          
 
             <tal:block tal:condition="php: empty(logged_user)">
-                <div id='welcomebox'>
+                <div id='welcomebox' style="display:none">
                     <span>Anonymous</span> (<a id='loginlink' tal:attributes="href incomingUrl">login</a>)
                 </div>
             </tal:block>
 
             <tal:block tal:condition="php: !empty(logged_user)">
-                <div id='welcomebox'>
+                <div id='welcomebox' style="display:none">>
                     <span tal:content='logged_user'></span> (<a id='logoutlink' href='#'>logout</a>)
                 </div>
             </tal:block>
@@ -751,7 +987,148 @@
     </div>
 </footer>
 
+<!-- POPUP LOGIN -->
+<div id='popupWrapper' class="loginpopup">
+    <div class="popup-outer"></div>
+    <div class="popup">
+
+        <a href="#" class="x-popup"></a>
+
+        <h1>Login</h1>
+
+        <h2>
+            Log in to add the project to your management panel.<br/>If the project is not added, you will not be able to
+            retrieve the URL.
+        </h2>
+
+        <div class="outer">
+            <div class="inner">
+                <button id="sign-in" name="" type="button" class="login-button"
+                 >Sign in using Google
+                </button>
+            </div>
+        </div>
+        <br/> Or <br/>
+        <a href="#" class="anonymous"> Stay anonymous</a>
+
+    </div>
+</div>
+<!-- FINE POPUP LOGIN -->
+
+
 <script src="${basepath}public/js/lib/snapengage.js"></script>
+
+<script type="text/javascript">
+
+// script per il funzionamento del dropdown menu del profilo utente 
+
+
+			function DropDown(el) {
+				this.dd = el;
+				this.initEvents();
+			}
+			DropDown.prototype = {
+				initEvents : function() {
+					var obj = this;
+
+					obj.dd.on('click', function(event){
+						$(this).toggleClass('active');
+						event.stopPropagation();
+					});	
+				}
+			}
+
+			$(function() {
+
+				var dd = new DropDown( $('#dd') );
+
+				$(document).click(function() {
+					// all dropdowns
+					$('.wrapper-dropdown-5').removeClass('active');
+				});
+
+			});
+			
+
+$( ".memory-mgmt" ).click(function() {
+  $( ".mgmt-panel-tm" ).show();
+  $( ".mgmt-popup-outer" ).show();
+    $("#dd").addClass('open');
+});
+
+$( ".open" ).click(function() {
+  $( ".mgmt-panel-tm" ).hide();
+  $( ".mgmt-popup-outer" ).hide();
+});
+
+$( ".x-popup" ).click(function() {
+  $( ".mgmt-panel" ).hide();
+  $( ".mgmt-popup-outer" ).hide();
+    $( ".loginpopup" ).hide();
+});
+
+$( ".popup-outer" ).click(function() {
+  $( ".mgmt-panel" ).hide();
+  $( ".mgmt-popup-outer" ).hide();
+    $( ".loginpopup" ).hide();
+});
+
+$( ".mgmt-tm" ).click(function() {
+  $( ".mgmt-panel-gl" ).hide();
+  $( ".mgmt-panel-tm" ).show();
+      $( "table.mgmt-tm" ).show();
+  });
+  
+  $( ".mgmt-gl" ).click(function() {
+  $( ".mgmt-panel-tm" ).hide();
+    $( "table.mgmt-tm" ).hide();
+  $( ".mgmt-panel-gl" ).show();
+
+  });
+  
+  $( ".add-tm" ).click(function() {
+  $(this).hide();
+  $( ".addrow-tm" ).show();
+  });
+  
+  
+    $( ".add-gl" ).click(function() {
+  $(this).hide();
+  $( ".addrow-gl" ).show();
+  });
+  
+
+$( "#sign-in" ).click(function() {
+  $( ".loginpopup" ).show();
+});
+
+    	$('#sort td:first').addClass('index');
+
+
+
+// plugin per rendere sortable le tabelle 
+// sorgente: http://www.foliotek.com/devblog/make-table-rows-sortable-using-jquery-ui-sortable/
+
+var fixHelperModified = function(e, tr) {
+    var $originals = tr.children();
+    var $helper = tr.clone();
+    $helper.children().each(function(index) {
+        $(this).width($originals.eq(index).width())
+    });
+    return $helper;
+},
+    updateIndex = function(e, ui) {
+        $('.index', ui.item.parent()).each(function (i) {
+            $(this).html(i + 1);
+        });
+    };
+
+$("#sort tbody").sortable({
+    helper: fixHelperModified,
+    stop: updateIndex
+}).disableSelection();
+
+		</script>
 
 </body>
 

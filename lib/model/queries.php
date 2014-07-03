@@ -546,15 +546,20 @@ function getSegment( $id_segment ) {
 function getFirstSegmentOfFilesInJob( $jid ) {
 	$db      = Database::obtain();
 	$jid     = intval( $jid );
-	$query   = "SELECT id_file, MIN( segments.id ) AS first_segment, filename AS file_name,
-		FORMAT( SUM( IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count) ) , 0 ) AS TOTAL_FORMATTED
-			FROM files_job
-			JOIN segments USING( id_file )
-			JOIN files ON files.id = id_file
-			LEFT JOIN segment_translations AS st ON segments.id = st.id_segment
-			WHERE files_job.id_job = $jid
-			AND segments.show_in_cattool = 1
-			GROUP BY id_file";
+	$query   = "SELECT DISTINCT id_file, MIN( segments.id ) AS first_segment, filename AS file_name,
+                    FORMAT(
+                        SUM( IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count) )
+                        , 0
+                    ) AS TOTAL_FORMATTED
+                FROM files_job
+                JOIN segments USING( id_file )
+                JOIN files ON files.id = id_file
+                JOIN jobs ON jobs.id = files_job.id_job
+                LEFT JOIN segment_translations AS st ON segments.id = st.id_segment AND st.id_job = jobs.id
+                WHERE files_job.id_job = $jid
+                AND segments.show_in_cattool = 1
+                GROUP BY id_file, jobs.id, jobs.password";
+
 	$results = $db->fetch_array( $query );
 
 	return $results;
@@ -660,7 +665,7 @@ function getSegmentsDownload( $jid, $password, $id_file, $no_status_new = 1 ) {
 function getSegmentsInfo( $jid, $password ) {
 
 	$query = "select j.id as jid, j.id_project as pid,j.source,j.target,
-		j.last_opened_segment, j.id_translator as tid, j.id_tms,
+		j.last_opened_segment, j.id_translator as tid, j.id_tms, j.id_mt_engine,
 		p.id_customer as cid, j.id_translator as tid, j.status_owner as status,
 
 		j.job_first_segment, j.job_last_segment,
@@ -928,36 +933,51 @@ function addTranslation( array $_Translation ){
  *
  * @param $params
  * @param $job_data
- *
+ * @param $propagateToTranslated
+ * @param $_idSegment
  * @throws Exception
  * @return int
  */
-function propagateTranslation( $params, $job_data ){
+function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTranslated = false ){
 
     $db = Database::obtain();
 
     $q = array();
     foreach ( $params as $key => $value ) {
-        if ( is_bool( $value ) ) {
+        if( $key == 'status' ){
+
+            if( $propagateToTranslated ){
+                $q[ ]      = $key . " = IF( status = 'TRANSLATED' , 'TRANSLATED', '" . $db->escape( $value ) . "' )";
+                $andStatus = "AND status IN ( 'DRAFT', 'NEW', 'REJECTED', 'TRANSLATED' )";
+            } else {
+                $q[ ]      = $key . " = '" . $db->escape( $value ) . "'";
+                $andStatus = "AND status IN ( 'DRAFT', 'NEW', 'REJECTED' )";
+            }
+
+        } elseif ( is_bool( $value ) ) {
             $q[ ] = $key . " = " . var_export( (bool)$value , true );
         } elseif ( !is_numeric( $value ) ) {
             $q[ ] = $key . " = '" . $db->escape( $value ) . "'";
         } else {
             $q[ ] = $key . " = " . (float)$value;
         }
+
     }
 
     //the job password seems a better idea to search only the segments in the actual chunk,
     //but it needs an update in join on 2 tables.
     //job_first_segment and job_last_segment should do the same thing
     $TranslationPropagate = "
-		UPDATE segment_translations
-		SET " . implode( ", ", $q ) . "
-		WHERE id_job = {$params[ 'id_job' ]}
-	    AND segment_hash = '" . $params[ 'segment_hash' ] . "'
-		AND status IN ( 'DRAFT', 'NEW', 'REJECTED' )
-		AND id_segment BETWEEN {$job_data[ 'job_first_segment' ]} AND {$job_data[ 'job_last_segment' ]}
-	";
+        UPDATE segment_translations
+        SET " . implode( ", ", $q ) . "
+        WHERE id_job = {$params[ 'id_job' ]}
+        AND segment_hash = '" . $params[ 'segment_hash' ] . "'
+        $andStatus
+        AND id_segment BETWEEN {$job_data[ 'job_first_segment' ]} AND {$job_data[ 'job_last_segment' ]}
+        AND id_segment != $_idSegment
+    ";
+
+//    Log::doLog( $TranslationPropagate );
 
     $db->query( $TranslationPropagate );
 
@@ -2143,7 +2163,7 @@ function updateWordCount( WordCount_Struct $wStruct ){
 
 	$db->query( $query );
 
-	Log::doLog( $query . "\n" );
+//	Log::doLog( $query . "\n" );
 
 	$err   = $db->get_error();
 	$errno = $err[ 'error_code' ];
@@ -2151,6 +2171,8 @@ function updateWordCount( WordCount_Struct $wStruct ){
 		Log::doLog( $err );
 		return $errno * -1;
 	}
+
+    Log::doLog( "Affected: " . $db->affected_rows . "\n" );
 
 	return $db->affected_rows;
 
@@ -2292,8 +2314,9 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 	 */
 	if( !$perform_Tms_Analysis ){
 		$_details = getProjectSegmentsTranslationSummary( $pid );
-		//echo "--- trying to initialize job total word count.\n";
-		//Log::doLog(  "--- trying to initialize job total word count." );
+
+        echo "--- trying to initialize job total word count.\n";
+		Log::doLog(  "--- trying to initialize job total word count." );
 
 		$project_details = array_pop($_details); //remove rollup
 

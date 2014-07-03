@@ -48,3 +48,4 @@ sed -i 's/self::\$DB_SERVER   = "localhost";/self::$DB_SERVER   = "10.30.1.250";
 sed -i 's/self::\$DB_DATABASE = "matecat";/self::$DB_DATABASE = "matecat_sandbox";/g' inc/config.inc.php;
 sed -i 's/self::\$MEMCACHE_SERVERS = array( \/\* "localhost:11211" => 1 \*\/ );/self::$MEMCACHE_SERVERS = array( "localhost:11211" => 1 );/g' inc/config.inc.php;
 sed -i 's/self::\$CONVERSION_ENABLED = false;/self::$CONVERSION_ENABLED = true;/g' inc/config.inc.php;
+sed -i 's/self::\$FORCE_XLIFF_CONVERSION = false;/self::$FORCE_XLIFF_CONVERSION = true;/g' inc/config.inc.php;

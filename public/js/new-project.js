@@ -87,6 +87,7 @@ $(document).ready(function() {
 
                 if( typeof d.errors != 'undefined' ) {
 
+                    var alertComposedMessage = [];
                     $('.error-message').text('');
 
                     $.each(d.errors, function() {
@@ -95,24 +96,38 @@ $(document).ready(function() {
                             UI.addTMXLangFailure();
                         }
 
+                        if( this.code == -1 ){
+
+                            console.log('Found one or more EMPTY Files in the project');
+                            alertComposedMessage.push( this.message );
+
+                        }
+
+                        //normal error management
                         $('.error-message').append( '<div>' + this.message + '<br /></div>' ).show();
+
                     });
+
+                    if( alertComposedMessage.length > 0 ){
+                        APP.alert({msg: alertComposedMessage.join('<br />') + "<br />Perhaps scanned file(s) or image(s)?" });
+                    }
 
 					$('.uploadbtn').attr('value', 'Analyze');
                     $('body').removeClass('creating');
 
-//                    var btnTxt = (config.analysisEnabled)? 'Analyze' : 'Translate';
-//                    $('.uploadbtn').attr('value',btnTxt).removeClass('disabled').removeAttr('disabled');
-
                 } else {
                     //							$.cookie('upload_session', null);
-                    if(config.analysisEnabled) {
+                    if( config.analysisEnabled ) {
 
+                        //this should not be.
+                        //A project now are never EMPTY, it is not created anymore
                         if( d.status == 'EMPTY' ){
-							console.log('EMPTY');
+
+                            console.log('EMPTY');
                             $('body').removeClass('creating');
                             APP.alert({msg: 'No text to translate in the file(s).<br />Perhaps it is a scanned file or an image?'});
                             $('.uploadbtn').attr('value','Analyze').removeAttr('disabled').removeClass('disabled');
+
                         } else {
                             location.href = config.hostpath + config.basepath + 'analyze/' + d.project_name + '/' + d.id_project + '-' + d.ppassword;
                         }

@@ -23,6 +23,7 @@
 				last_job_segment: '${last_job_segment}',
 				server_load_time: '${load_time}',
 				tms_enabled: ${tms_enabled | string:true},
+				mt_enabled: ${mt_enabled | string:true},
 				job_id: '${jid}',
 				password: '${password}',
 				source_rfc: '${source_code}',
@@ -38,8 +39,8 @@
 				taglockEnabled: ${taglockEnabled | string:1},
 				alternativesEnabled: true,
 				brPlaceholdEnabled: '${brPlaceholdEnabled}',
-				survey: 'https://docs.google.com/a/translated.net/forms/d/1BDOlu7KQ0FU6EpVnf8PTucV4aHf90mZpf2kNM5MD_qg/viewform?embedded=true',
-				//survey: false,
+				//survey: 'https://docs.google.com/a/translated.net/forms/d/1BDOlu7KQ0FU6EpVnf8PTucV4aHf90mZpf2kNM5MD_qg/viewform?embedded=true',
+				survey: false,
 				optimized: false
 			};
 			var renderStart = new Date();
@@ -85,7 +86,7 @@
 <!--        <script src="${basepath}public/js/loader.js?build=${build_number}"></script> 
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>-->
     </head>
-    <body tal:condition="not:supportedBrowser">
+    <body tal:condition="php:supportedBrowser EQ 0">
         <div  metal:use-macro="unsupported_browser.html/unsupported"/>
     </body>
     <body tal:condition="true:job_not_found">
@@ -97,10 +98,9 @@
     </body>
 
 
-    <body class="cattool${job_archived}${source_rtl}${target_rtl}" tal:condition="php: supportedBrowser && !job_not_found && !job_cancelled" define="catpage string:true">
+    <body class="cattool${job_archived}${source_rtl}${target_rtl}" tal:condition="php: supportedBrowser NE 0 && !job_not_found && !job_cancelled" define="catpage string:true">
 
         <header metal:use-macro="header.html/main_header">
-
             <div class="wrapper">   
                 <form id="fileDownload" action="${basepath}" method="post">
                     <input type="hidden" name="action" value="downloadFile" />
