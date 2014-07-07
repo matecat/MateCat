@@ -67,7 +67,7 @@ class setAutoPropagationController extends setTranslationController {
             $TPropagation                             = array();
             $TPropagation[ 'id_job' ]                 = $this->id_job;
             $TPropagation[ 'translation' ]            = $translation;
-            $TPropagation[ 'status' ]                 = Constants_TranslationStatus::STATUS_TRANSLATED;
+            $TPropagation[ 'status' ]                 = Constants_TranslationStatus::STATUS_DRAFT;
             $TPropagation[ 'autopropagated_from' ]    = $this->id_segment;
             $_Translation[ 'serialized_errors_list' ] = $err_json;
             $TPropagation[ 'warning' ]                = $check->thereAreWarnings();
