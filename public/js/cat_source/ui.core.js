@@ -56,11 +56,12 @@ UI = {
 		this.sourceTags = sourceTags || [];
 	},
 	changeStatus: function(ob, status, byStatus) {
+        console.log('byStatus: ', byStatus);
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
 		segment_id = $(segment).attr('id').split('-')[1];
 		$('.percentuage', segment).removeClass('visible');
 		if (!segment.hasClass('saved'))
-			this.setTranslation($(segment).attr('id').split('-')[1], status);
+			this.setTranslation($(segment).attr('id').split('-')[1], status, false, byStatus);
 		segment.removeClass('saved');
 		this.setContribution(segment_id, status, byStatus);
 		this.setContributionMT(segment_id, status, byStatus);
@@ -1931,7 +1932,7 @@ UI = {
 			}
 		}, 'local');
 	},
-	setTranslation: function(id_segment, status, caller) {
+	setTranslation: function(id_segment, status, caller, byStatus) {
 		reqArguments = arguments;
 		segment = $('#segment-' + id_segment); 
 		this.lastTranslatedSegmentId = id_segment;
@@ -2003,7 +2004,7 @@ UI = {
 				UI.failedConnection(this[0], 'setTranslation');
 			},
 			success: function(d) {
-				UI.setTranslation_success(d, this[1], this[2]);
+				UI.setTranslation_success(d, this[1], this[2], this[0][3]);
 			}
 		});
 	},
@@ -2178,7 +2179,7 @@ UI = {
 	},
 */
 
-    postProcessEditarea: function(context, selector){console.log('postprocesseditarea');
+    postProcessEditarea: function(context, selector){//console.log('postprocesseditarea');
         selector = (typeof selector === "undefined") ? '.editarea' : selector;
         area = $( selector, context ).clone();
         /*
@@ -2412,7 +2413,7 @@ UI = {
 		$('#contextMenu .shortcut .alt').html(alt);
 		$('#contextMenu .shortcut .cmd').html(cmd);
 	},
-	setTranslation_success: function(d, segment, status) {
+	setTranslation_success: function(d, segment, status, byStatus) {
 		if (d.error.length)
 			this.processErrors(d.error, 'setTranslation');
 		if (d.data == 'OK') {
@@ -2421,11 +2422,13 @@ UI = {
 			this.setProgress(d.stats);
 			//check status of global warnings
 			this.checkWarnings(false);
-            this.beforePropagateTranslation(segment, status);
+            if(!byStatus) {
+                this.beforePropagateTranslation(segment, status);
+            }
         }
     },
     beforePropagateTranslation: function(segment, status) {
-        console.log('before propagate');
+//        console.log('before propagate');
         if (typeof $.cookie('_auto-propagation-' + config.job_id + '-' + config.password) != 'undefined') { // cookie already set
             if($.cookie('_auto-propagation-' + config.job_id + '-' + config.password) == '1') {
                 UI.propagateTranslation(segment, status, true);
@@ -2453,7 +2456,7 @@ UI = {
                         closeOnClick: 'true'
                     }
                 ],
-                content: "Dou you want to extend the autopropagation of this translation even to already translated segments?"
+                content: "Do you want to extend the autopropagation of this translation even to already translated segments?"
             });
         }
   /*
