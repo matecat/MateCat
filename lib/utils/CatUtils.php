@@ -432,7 +432,7 @@ class CatUtils {
         $updateRes = addTranslation( $_Translation );
 
         if ($updateRes < 0) {
-            $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment $id_segment - Error: $updateRes");
+            $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment {$_Translation['id_segment']} - Error: $updateRes");
             return $result;
         }
 

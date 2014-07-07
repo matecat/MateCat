@@ -7,6 +7,7 @@ class INIT {
 	public static $ROOT;
 	public static $BASEURL;
 	public static $HTTPHOST;
+	public static $PROTOCOL;
 	public static $DEBUG;
 	public static $DB_SERVER;
 	public static $DB_DATABASE;
@@ -164,8 +165,9 @@ class INIT {
             @session_start();
             register_shutdown_function( 'INIT::sessionClose' );
 
-            $protocol=stripos($_SERVER['SERVER_PROTOCOL'],"https")===FALSE?"http":"https";
-            self::$HTTPHOST="$protocol://$_SERVER[HTTP_HOST]";
+            self::$PROTOCOL = stripos( $_SERVER[ 'SERVER_PROTOCOL' ], "https" ) === false ? "http" : "https";
+            self::$HTTPHOST = self::$PROTOCOL . "://" . $_SERVER['HTTP_HOST'];
+
         } else {
             echo "\nPHP Running in CLI mode.\n\n";
             //Possible CLI configurations. We definitly don't want sessions in our cron scripts
@@ -239,9 +241,9 @@ class INIT {
 		self::$ENABLED_BROWSERS = array('applewebkit','chrome', 'safari', 'firefox');
 
         // sometimes the browser declare to be Mozilla but does not provide a valid Name (e.g. Safari).
-        // This occurs expecially in mobile environment. As an example, when try to open a link from within
-        // of GMail app, it redirect to an internal browser that does not declare a valid name
-        // In this case we will show a notice on the top of the page instead of stop the access
+        // This occurs especially in mobile environment. As an example, when you try to open a link from within
+        // the GMail app, it redirect to an internal browser that does not declare a valid user agent
+        // In this case we will show a notice on the top of the page instead of deny the access
         self::$UNTESTED_BROWSERS = array('mozillageneric');
 
         /**
@@ -304,7 +306,7 @@ class INIT {
                 'sxi'  => array( '','','extppt'),
                 'txt'  => array( '','','exttxt'),
                 'csv'  => array( '','','extxls'),
-                'xml'  => array( '','','extxml')
+                'xml'  => array( '','','extxml'),
                 //                'vxd' => array("Try converting to XML")
             ),
             'Web'                 => array(
@@ -472,5 +474,5 @@ class INIT {
 	}
 
 }
-return true;
 
+return true;
