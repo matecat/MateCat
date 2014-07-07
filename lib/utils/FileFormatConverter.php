@@ -67,8 +67,8 @@ class FileFormatConverter {
             self::$Storage_Lookup_IP_Map[ $converter_storage['ip_converter'] ] = $converter_storage['ip_storage'];
         }
 
-//        self::$converters = array('10.11.0.18' => 1);//for debugging purposes
-//        self::$Storage_Lookup_IP_Map = array('10.11.0.18' => '10.11.0.19');//for debugging purposes
+//        self::$converters = array('10.11.0.90' => 1);//for debugging purposes
+//        self::$Storage_Lookup_IP_Map = array('10.11.0.90' => '10.11.0.91');//for debugging purposes
 
         $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
 
@@ -379,7 +379,7 @@ class FileFormatConverter {
 			$this->ip=$this->pickRandConverter();
 			$storage      = $this->getValidStorage();
 
-			//add trados to replace/regexp pattern because whe have more than 1 replacement
+			//add replace/regexp pattern because we have more than 1 replacement
 			//http://stackoverflow.com/questions/2222643/php-preg-replace
 			$xliffContent = self::replacedAddress( $storage, $xliffContent );
 		}else{

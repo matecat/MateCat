@@ -48,7 +48,8 @@ abstract class viewController extends controller {
      */
     private function getBrowser() {
         $u_agent  = $_SERVER[ 'HTTP_USER_AGENT' ];
-        $bname    = 'Unknown';
+
+	    $bname    = 'Unknown';
         $platform = 'Unknown';
         $version  = "";
 
