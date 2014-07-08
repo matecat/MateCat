@@ -135,6 +135,12 @@ abstract class viewController extends controller {
      * @param bool $isAuthRequired
      */
     public function __construct( $isAuthRequired = false ) {
+
+	    if( !parent::isRightVersion() ) {
+		    header("Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "badConfiguration" , true, 303);
+		    exit;
+	    }
+
         parent::__construct();
 
         //load Template Engine
