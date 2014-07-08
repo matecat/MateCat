@@ -1903,28 +1903,31 @@ UI = {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
+                console.log('getwarning local success');
 				if (UI.currentSegment.hasClass('waiting_for_check_result')) {
-
 					// check conditions for results discard
 					if (!d.total) {
 						$('p.warnings', UI.currentSegment).empty();
 						$('span.locked.mismatch', UI.currentSegment).removeClass('mismatch');
 						return;
 					}
-
+/*
                     escapedSegment = UI.checkSegmentsArray[d.token].trim().replace( config.lfPlaceholderRegex, "\n" );
                     escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
                     escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
                     escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "\t" );
                     escapedSegment = escapedSegment.replace( config.nbspPlaceholderRegex, $( document.createElement('span') ).html('&nbsp;').text() );
 
+
                     if (UI.editarea.text().trim() != escapedSegment ){
+                        console.log('ecco qua');
+
 //                        console.log( UI.editarea.text().trim() );
 //                        console.log( UI.checkSegmentsArray[d.token].trim() );
 //                        console.log( escapedSegment  );
                         return;
                     }
-
+*/
 					UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
 					UI.markTagMismatch(d.details);
 					delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
@@ -3618,7 +3621,6 @@ $.extend(UI, {
 					UI.saveInUndoStack('cancel');
 					UI.currentSegmentQA();
 				} else {
-//console.log('QUI');
 					var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
 					var numSpacesBefore = $('.space-marker', UI.editarea).length;
 //                    var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
@@ -3639,6 +3641,10 @@ $.extend(UI, {
                     var undeletableMonad = (($(translation[sbIndex-1]).hasClass('monad'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
                     var selBound = $('.rangySelectionBoundary', UI.editarea);
                     if(undeletableMonad) selBound.prev().remove();
+                    if(e.which == 8) { // backspace
+                        var undeletableTag = (($(translation[sbIndex-1]).hasClass('locked'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
+                        if(undeletableTag) selBound.prev().remove();
+                    }
 
                     restoreSelection();
 
@@ -3650,12 +3656,12 @@ $.extend(UI, {
 //							console.log('BB: ', UI.editarea.html());
 					}
 
-//						console.log(e.which + ' - ' + isInsideTag);
+//					console.log(e.which + ' - ' + isInsideTag);
 					setTimeout(function() {
-						if ((e.which == 46)&&(isInsideTag)) {
+//						if ((e.which == 46)&&(isInsideTag)) {
 //							console.log('inside tag');
-						}
-//							console.log(e.which + ' - ' + isInsideTag);
+//						}
+//						console.log(e.which + ' - ' + isInsideTag);
                         saveSelection();
                         // detect if selection ph is inside a monad tag
   //                      console.log('sel placeholders inside a monad', $('.monad .rangySelectionBoundary', UI.editarea).length);
