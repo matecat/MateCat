@@ -22,6 +22,11 @@ header
 	transition: margin-top 200ms ease-out;
 	-webkit-transition: margin-top 200ms ease-out;
 }
+body.login header
+{
+	margin-top: 0 !important;
+	height: 47px;
+}
 body.incomingMsg header
 {
 	margin-top: 0px;
@@ -366,7 +371,12 @@ section{position:relative;float:left;width:100%;-webkit-transition: all  100ms e
 /*projectbar*/
 .languages{text-align:center !important;padding:15px 0 0 50px; }
 .wordscounter{float:right;text-align:right}
-.wordcounter{display: none !important; text-align:right;margin-right:-70px !important}
+.wordcounter
+{
+	display: block !important;
+	text-align: right;
+	margin-right: -70px !important;
+}
 .wordcounter strong{margin-right:0px}
 strong:first-child{margin-right:0px !important}
 
@@ -1346,9 +1356,9 @@ section.status-new.opened .editarea
 	border:1px solid transparent;
 	-moz-border-radius: 2px;
 	border-radius: 2px;
-	/*
-		word-break: break-all;
-	*/
+	
+		word-break: break-word;
+	
     hyphens: auto;
 	-moz-hyphens: auto;
 	transition: all  50ms ease-in;
@@ -2069,11 +2079,20 @@ footer nav
 	padding-bottom: 3px;
 	vertical-align: middle;
 }
+.editor .footer .locked
+{
+	color: #a8a8a8 !important;
+}
 .editarea .locked.mismatch,
 .source .locked.mismatch,
 .locked.mismatch-old
 {
 	color: red !important;
+}
+.editarea .locked.order-error,
+.source .locked.order-error
+{
+    color: #e000ff !important;
 }
 .editor .cc-search .input .locked
 {
@@ -2443,7 +2462,8 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 #messageBar
 {
 	display: block;
-	height: 26px;
+    height: auto;
+    min-height: 26px;
 	background: #FFFA8B;
 	padding: 4px 10px;
 /*	-webkit-transition: all 200ms ease-in; 
@@ -2569,7 +2589,126 @@ del.diff
 	background: #FFCFCF;
 }
 
+.tab-marker
+{
+	color: #999;
+	margin-left: 4px;
+	margin-right: 4px;
+    position: relative;
+    top: 2px;
+}
+.nbsp-marker
+{
+/*
+	color: #aaa;
+	position: relative;
+	padding-right: 12px;
+	opacity: 0.2;
+	top: 3px;
+	font-size: 10px;
+	background: url(../img/circle.png) 3px 0px no-repeat;
+	background-size: 6px;
+	*/
+}
+.space-marker,
+.nbsp-marker
+{
+	color: #CCC;
+	position: relative;
+	left: 4px;
+	padding-right: 12px;
+/*	padding-left: 6px;
+	margin-right: 4px;
+	margin-left: 4px;*/
+	opacity: 0.2;
+	/*width: 20px !important;*/
+	top: 3px;
+	font-size: 10px;
+	background: url(../img/dot.png) 0px 0px no-repeat;
+	background-size: 6px;
+/*
+	color: #ccc;
+	position: relative;
+	padding-left: 4px;
+	margin-right: 4px;
+	top: -4px;
+*/
+}
 
+.editToolbar
+{
+	/*float: left;*/	
+	position: relative;
+	display: block;
+	visibility: hidden;
+	margin-top: -6px;
+}
+.editToolbar.visible
+{
+	visibility: visible;
+}
+
+.editToolbar li
+{
+	float: left;
+	width: 16px;
+	height: 16px;
+	margin-right: 10px;
+	cursor: pointer;
+	opacity: 0.8;
+}
+.editToolbar li:hover
+{
+	opacity: 0.5;
+}
+.editToolbar li.uppercase
+{
+	background: url(../img/edit-uppercase1.png) center center no-repeat;
+	background-size: 28px;
+}
+.editToolbar li.lowercase
+{
+	background: url(../img/edit-lowercase1.png) center center no-repeat;
+	background-size: 28px;
+}
+.editToolbar li.capitalize
+{
+	background: url(../img/edit-capitalize.png) center 1px no-repeat;
+	background-size: 12px 12px;
+}
+
+.editarea span.softReturn
+{
+	display: inline;
+	margin-left: 6px;
+	padding: 1px 2px 3px 40px;
+	background-image: url(../img/soft-return1.png);
+	background-size: 16px;
+	background-repeat: no-repeat;
+	background-position: center left;
+	width: 20px;
+	position: relative;
+}
+.editarea br.soft
+{
+    display: block;
+    margin: -10px 0px 3px 40px;
+    padding: 1px 2px 3px 40px;
+    border: 1px dotted green;
+    font-size: 8px;
+    line-height: 8px;
+    height: 8px;
+    background: yellow;  
+    background-image: url("https://sites.google.com/a/fundoogeek.com/home/images/WhiteStarinRedCircle.gif");
+    background-repeat: no-repeat;
+    background-position: top left;
+    background-origin: content-box;
+    color: blue;
+    content: "A";
+    width: 20px;
+    position: relative;
+     top: -7px;
+}
 
 
 @keyframes fadein {

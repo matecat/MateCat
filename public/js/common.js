@@ -91,6 +91,7 @@ APP = {
 		$("body").on('click', '#messageBar .close', function(e) {
 			e.preventDefault();
 			$('body').removeClass('incomingMsg');
+            $('#messageBar').html('<span class="msg"></span><a href="#" class="close"></a>');
 			if(typeof $('#messageBar').attr('data-token') != 'undefined') {
 				var expireDate = new Date($('#messageBar').attr('data-expire'));
 				$.cookie($('#messageBar').attr('data-token'), '', { expires: expireDate });				
@@ -176,7 +177,8 @@ APP = {
                                     type: '', // "ok" (default) or "cancel"
                                     text: '', 
                                     callback: '', // name of a UI function to execute
-                                    params: '' // (optional) parameters to pass at the callback function
+                                    params: '', // (optional) parameters to pass at the callback function
+                                    closeOnClick: '' // (optional) true||false
                                 },
                                 ...                        
                         ]
@@ -198,11 +200,14 @@ APP = {
             APP.confirmCallbackFunction = (conf.onConfirm)? conf.onConfirm : null;
             APP.cancelCallbackFunction = (conf.onCancel)? conf.onCancel : null;
             APP.callerObject = (conf.caller)? conf.caller : null;
+        } else if(conf.type == 'free') {
+            var cl = (this.type == 'ok')? 'btn-ok' : (this.type == 'cancel')? 'btn-cancel' : '';
+            newPopup += '<a href="#"' + ((this.callback)? ' onclick="UI.' + this.callback + '(\'' + ((this.params)? this.params : '') + '\'); return false;"' : '') + ' id="popup-button-' + index + '" class="' + cl + '">' + (this.text || 'ok') + '<\a>';
         } else {
             $.each(conf.buttons, function(index) {
                 var cl = (this.type == 'ok')? 'btn-ok' : (this.type == 'cancel')? 'btn-cancel' : '';
-                newPopup += '<a href="#"' + ((this.callback)? ' onclick="UI.' + this.callback + '(\'' + ((this.params)? this.params : '') + '\'); return false;"' : '') + ' id="popup-button-' + index + '" class="' + cl + '">' + (this.text || 'ok') + '<\a>';
-            });            
+                newPopup += '<a href="#"' + ((this.callback)? ' onclick="UI.' + this.callback + '(\'' + ((this.params)? this.params : '') + '\'); ' + ((this.closeOnClick)? "$('.x-popup').click(); " : '') + 'return false;"' : '') + ' id="popup-button-' + index + '" class="' + cl + '">' + (this.text || 'ok') + '<\a>';
+            });
         }
         newPopup += '</div>';
         $('body').append(newPopup);

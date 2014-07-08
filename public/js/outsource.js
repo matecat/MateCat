@@ -92,7 +92,7 @@ $.extend(UI, {
                             //Assume it's supported, lets localize
 //                            var timeZone   = Intl.DateTimeFormat().resolved.timeZone.replace('San_Marino', 'Rome');
 //                            var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' ' + timeZone + ' )';
-                            $('.outsource.modal .total span.displayprice').text( Intl.NumberFormat('en').format( parseFloat( chunk.price ).toFixed(2) ) );
+							$('.outsource.modal .total span.displayprice').text( Intl.NumberFormat('en').format( parseFloat( chunk.price ).toFixed(2) ) );
                         } else {
                             $('.outsource.modal .total span.displayprice').text( parseFloat( chunk.price ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
 //                            var extendedTimeZone = '( ' + dd.toString().replace(/^.*GMT.*\(/, "").replace(/\)$/, "") + ' / GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';

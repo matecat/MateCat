@@ -60,9 +60,9 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.redoInSegment(segment);
 		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.standard, function(e) {
-			UI.toggleSearch(e);
+            if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
 		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.mac, function(e) {
-			UI.toggleSearch(e);
+            if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
 		});		
 	},
 	unbindShortcuts: function() {
@@ -100,6 +100,52 @@ $.extend(UI, {
 				tab = 'alternatives';								
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			}
+		}).on('keydown', '.editor .editarea', 'shift+return', function(e) {
+            if(!UI.hiddenTextEnabled) return;
+
+            e.preventDefault();
+			var node = document.createElement("span");
+			var br = document.createElement("br");
+			node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
+			node.setAttribute('contenteditable', 'false');
+			node.appendChild(br);
+			insertNodeAtCursor(node);
+			UI.unnestMarkers();
+		}).on('keydown', '.editor .editarea', 'space', function(e) {
+            if(UI.markSpacesEnabled) {
+                if(!UI.hiddenTextEnabled) return;
+                e.preventDefault();
+                UI.editarea.find('.lastInserted').removeClass('lastInserted');
+//			console.log('space');
+                var node = document.createElement("span");
+                node.setAttribute('class', 'marker monad space-marker lastInserted');
+                node.setAttribute('contenteditable', 'false');
+                node.textContent = htmlDecode(" ");
+//			node.textContent = "&nbsp;";
+                insertNodeAtCursor(node);
+                UI.unnestMarkers();
+            }
+
+		}).on('keydown', '.editor .editarea', 'ctrl+shift+space', function(e) {
+            if(!UI.hiddenTextEnabled) return;
+			e.preventDefault();
+            UI.editarea.find('.lastInserted').removeClass('lastInserted');
+//			console.log('nbsp');
+//			config.nbspPlaceholderClass = '_NBSP';
+			var node = document.createElement("span");
+			node.setAttribute('class', 'marker monad nbsp-marker lastInserted ' + config.nbspPlaceholderClass);
+			node.setAttribute('contenteditable', 'false');
+			node.textContent = htmlDecode("&nbsp;");
+			insertNodeAtCursor(node);
+			UI.unnestMarkers();
+/*
+			setCursorPosition($('.editor .editarea .lastInserted')[0]);
+			console.log('a: ', UI.editarea.html());
+			$('.editor .editarea .lastInserted').after($('.editor .editarea .undoCursorPlaceholder'));
+			console.log('b: ', UI.editarea.html());
+			$('.editor .editarea .lastInserted').removeClass('lastInserted');
+			console.log('c: ', UI.editarea.html());
+*/
 		});		
 		$("body").bind('keydown', 'Ctrl+c', function() {
 			UI.tagSelection = false;
@@ -173,9 +219,9 @@ $.extend(UI, {
 			e.preventDefault();
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
-			console.log('a: ', UI.editarea.html());
+//			console.log('a: ', UI.editarea.html());
 			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-			console.log('b: ', UI.editarea.html());
+//			console.log('b: ', UI.editarea.html());
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
 				console.log('qui: ', document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
@@ -443,6 +489,20 @@ $.extend(UI, {
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();
 			e.stopPropagation();			
+		}).on('mouseup', '.editarea', function(e) {
+			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
+				UI.showEditToolbar();
+			};
+		}).on('mousedown', '.editarea', function(e) {
+			UI.hideEditToolbar();
+		}).on('mousedown', '.editToolbar .uppercase', function(e) {
+			UI.formatSelection('uppercase');
+		}).on('mousedown', '.editToolbar .lowercase', function(e) {
+			UI.formatSelection('lowercase');
+		}).on('mousedown', '.editToolbar .capitalize', function(e) {
+			UI.formatSelection('capitalize');
+		}).on('mouseup', '.editToolbar li', function(e) {
+			restoreSelection();
 		}).on('click', '.editarea', function(e, operation, action) {
 			if (typeof operation == 'undefined')
 				operation = 'clicking';
@@ -486,7 +546,27 @@ $.extend(UI, {
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
-		}).on('keypress', '.editor .editarea', function(e) {
+        }).on('keyup', '.editor .editarea', 'return', function(e) {
+            if(!UI.defaultBRmanagement) {
+                range = window.getSelection().getRangeAt(0);
+                $('.returnTempPlaceholder', UI.editarea).after('<br />');
+                node = $('.returnTempPlaceholder + br', UI.editarea)[0];
+                setCursorAfterNode(range, node);
+                saveSelection();
+                $('.returnTempPlaceholder', UI.editarea).remove();
+                restoreSelection();
+            }
+        }).on('keydown', '.editor .editarea', 'return', function(e) {
+            UI.defaultBRmanagement = false;
+            if(!$('br', UI.editarea).length) {
+                UI.defaultBRmanagement = true;
+            } else {
+                saveSelection();
+                $('.rangySelectionBoundary', UI.editarea).after('<span class="returnTempPlaceholder" contenteditable="false"></span>');
+                restoreSelection();
+                e.preventDefault();
+            }
+        }).on('keypress', '.editor .editarea', function(e) {
 //			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
@@ -506,8 +586,8 @@ $.extend(UI, {
 			}
 			setTimeout(function() {
 				if($('.tag-autocomplete').length) {
-					console.log('ecco');
-					console.log('prima del replace: ', UI.editarea.html());
+//					console.log('ecco');
+//					console.log('prima del replace: ', UI.editarea.html());
 //					console.log(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) != null);
 					if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) !== null) {
 						UI.editarea.html(UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>'));
@@ -530,6 +610,9 @@ $.extend(UI, {
 				}
 			}
 */
+
+//			console.log(e.which); 
+
 			if ((e.which == 8) || (e.which == 46)) { // backspace e canc(mac)
 				if ($('.selected', $(this)).length) {
 					e.preventDefault();
@@ -537,41 +620,63 @@ $.extend(UI, {
 					UI.saveInUndoStack('cancel');
 					UI.currentSegmentQA();
 				} else {
-
+//console.log('QUI');
 					var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
-					var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
-					console.log('a: ', UI.editarea.html());
+					var numSpacesBefore = $('.space-marker', UI.editarea).length;
+//                    var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
+//					console.log('a: ', UI.editarea.html());
 					saveSelection();
-					console.log('b: ', UI.editarea.html());
+
 					parentTag = $('span.locked', UI.editarea).has('.rangySelectionBoundary');
 					isInsideTag = $('span.locked .rangySelectionBoundary', UI.editarea).length;
 					parentMark = $('.searchMarker', UI.editarea).has('.rangySelectionBoundary');
 					isInsideMark = $('.searchMarker .rangySelectionBoundary', UI.editarea).length;
-					restoreSelection();
-					console.log('c: ', UI.editarea.html());
-					console.log('isInsideTag: ', isInsideTag);
+//					console.log('c: ', UI.editarea.html());
+
+                    sbIndex = 0;
+                    var translation = $.parseHTML(UI.editarea.html());
+                    $.each(translation, function(index) {
+                        if($(this).hasClass('rangySelectionBoundary')) sbIndex = index;
+                    });
+                    var undeletableMonad = (($(translation[sbIndex-1]).hasClass('monad'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
+                    var selBound = $('.rangySelectionBoundary', UI.editarea);
+                    if(undeletableMonad) selBound.prev().remove();
+
+                    restoreSelection();
 
 					// insideTag management
 					if ((e.which == 8)&&(isInsideTag)) {
-//							console.log('AA: ', UI.editarea.html()); 
+//							console.log('AA: ', UI.editarea.html());
 						parentTag.remove();
 						e.preventDefault();
 //							console.log('BB: ', UI.editarea.html());
 					}
+
 //						console.log(e.which + ' - ' + isInsideTag);
 					setTimeout(function() {
 						if ((e.which == 46)&&(isInsideTag)) {
-							console.log('inside tag');
+//							console.log('inside tag');
 						}
 //							console.log(e.which + ' - ' + isInsideTag);
-//							console.log('CC: ', UI.editarea.html());
-						var numTagsAfter = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
-						var numSpacesAfter = (UI.editarea.text())? UI.editarea.text().match(/\s/gi).length : 0;
-						if (numTagsAfter < numTagsBefore)
-							UI.saveInUndoStack('cancel');
-						if (numSpacesAfter < numSpacesBefore)
-							UI.saveInUndoStack('cancel');
+                        saveSelection();
+                        // detect if selection ph is inside a monad tag
+  //                      console.log('sel placeholders inside a monad', $('.monad .rangySelectionBoundary', UI.editarea).length);
+                        if($('.monad .rangySelectionBoundary', UI.editarea).length) {
+    //                        console.log($('.monad:has(.rangySelectionBoundary)', UI.editarea));
+                            $('.monad:has(.rangySelectionBoundary)', UI.editarea).after($('.monad .rangySelectionBoundary', UI.editarea));
+                            // move selboundary after the
+                        }
+  //                      console.log('CC: ', UI.editarea.html());
+                        restoreSelection();
 //							console.log('DD: ', UI.editarea.html());
+						var numTagsAfter = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
+						var numSpacesAfter = $('.space-marker', UI.editarea).length;
+//                        var numSpacesAfter = (UI.editarea.text())? UI.editarea.text().match(/\s/gi).length : 0;
+						if (numTagsAfter < numTagsBefore) UI.saveInUndoStack('cancel');
+						if (numSpacesAfter < numSpacesBefore) UI.saveInUndoStack('cancel');
+//                        console.log('EE: ', UI.editarea.html());
+//                        console.log($(':focus'));
+
 
 					}, 50);
 
@@ -594,6 +699,17 @@ $.extend(UI, {
 						if(added === '') UI.closeTagAutocompletePanel();
 					}, 10);		
 				}
+			}
+			if (e.which == 9) { // tab
+                if(!UI.hiddenTextEnabled) return;
+
+				e.preventDefault();
+				var node = document.createElement("span");
+				node.setAttribute('class', 'marker monad tab-marker ' + config.tabPlaceholderClass);
+				node.setAttribute('contenteditable', 'false');
+				node.textContent = htmlDecode("&#8677;");
+				insertNodeAtCursor(node);
+				UI.unnestMarkers();
 			}
 			if (e.which == 37) { // left arrow
 				selection = window.getSelection();
@@ -649,7 +765,7 @@ $.extend(UI, {
 					}
 				}
 				UI.closeTagAutocompletePanel();
-//				UI.jumpTag('end');
+				UI.jumpTag(range, 'end');
 			}
 
 			if (e.which == 40) { // down arrow
@@ -670,6 +786,8 @@ $.extend(UI, {
 						$('.rangySelectionBoundary', UI.editarea).remove();
 					}
 				}
+//                console.log($(':focus'));
+                //              return false;
 			}
 
 			if (!((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8) || (e.which == 46) || (e.which == 91))) { // not arrows, backspace, canc or cmd
@@ -703,7 +821,7 @@ $.extend(UI, {
 			}
 
 		}).on('input', '.editarea', function() {
-//			console.log('input in editarea');
+			console.log('input in editarea');
 //			DA SPOSTARE IN DROP E PASTE
 //			if (UI.body.hasClass('searchActive')) {
 //				console.log('on input');
@@ -1062,6 +1180,7 @@ $.extend(UI, {
 			e.preventDefault();
 			$(this).parents('.comment').find('.gl-comment').toggle();
 		}).on('paste', '.editarea', function(e) {
+			console.log('paste in editarea');
 			UI.saveInUndoStack('paste');
 			$('#placeHolder').remove();
 			var node = document.createElement("div");
@@ -1151,7 +1270,7 @@ $.extend(UI, {
 		$("#point2seg").bind('mousedown', function(e) {
 			UI.setNextWarnedSegment();
 		});
-
+		
 		$("#navSwitcher").on('click', function(e) {
 			e.preventDefault();
 		});

@@ -187,6 +187,8 @@ class getVolumeAnalysisController extends ajaxController {
                 $keyValue = 'TM_75_99';
             } elseif ( $r[ 'match_type' ] == "50%-74%" or $r[ 'match_type' ] == "NO_MATCH" or $r[ 'match_type' ] == "NEW" ) {
                 $keyValue = 'NEW';
+            } elseif( $r[ 'match_type' ] == "ICE" ){
+                $keyValue = "ICE";
             } elseif ( $r[ 'match_type' ] == "REPETITIONS" ) {
                 $keyValue = 'REPETITIONS';
             } else {

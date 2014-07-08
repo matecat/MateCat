@@ -112,6 +112,10 @@ class Database {
 			return $this->oops("Could not open database: <b>$this->database</b>.");
 		}
 
+//TODO Negotiate collation in UTF8 when database data are migrated!!!!!
+//        mysql_query( "SET NAMES 'utf8'" );
+        mysql_set_charset( 'utf8', $this->link_id );
+
 		// unset the data so it can't be dumped
 //		$this->server = '';
 //		$this->user = '';

@@ -118,30 +118,27 @@ function truncate_filename(n, len) {
 	return filename + '.' + ext;
 }
 
-function insertNodeAtCursor(node) {console.log('insertNodeAtCursor');
+function insertNodeAtCursor(node) {
 	var range, html;
 	if (window.getSelection && window.getSelection().getRangeAt) {
-
-		console.log('window.getSelection().isCollapsed: ', window.getSelection().isCollapsed);
-		console.log('window.getSelection().rangeCount: ', window.getSelection().rangeCount);
-		console.log('window.getSelection(): ', window.getSelection());
-
-//		if ((window.getSelection().isCollapsed)||(UI.isFirefox)) {
-//		if (window.getSelection().type == 'Caret') { console.log('a');
 		if ((window.getSelection().type == 'Caret')||(UI.isFirefox)) {
 			range = window.getSelection().getRangeAt(0);
-			console.log('range: ', range);
-			console.log('1: ', UI.editarea.html());
 			range.insertNode(node);
-			console.log('2: ', UI.editarea.html());
+			setCursorAfterNode(range, node);
 		} else {
 		}
-
 	} else if (document.selection && document.selection.createRange) {
 		range = document.selection.createRange();
 		html = (node.nodeType == 3) ? node.data : node.outerHTML;
 		range.pasteHTML(html);
 	}
+}
+
+function setCursorAfterNode(range, node) {
+	range.setStartAfter(node);
+	range.setEndAfter(node); 
+	window.getSelection().removeAllRanges();
+	window.getSelection().addRange(range);
 }
 
 function pasteHtmlAtCaret(html, selectPastedContent) {
@@ -308,7 +305,6 @@ function saveSelection() {
 	UI.savedSel = rangy.saveSelection();
 	// this is just to prevent the addiction of a couple of placeholders who may sometimes occur for a Rangy bug
 	editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
-
 	UI.savedSelActiveElement = document.activeElement;
 }
 
@@ -356,6 +352,31 @@ function getSelectionHtml() {
 		}
 	}
 	return html;
+}
+
+function insertHtmlAfterSelection(html) {
+    var sel, range, node;
+    if (window.getSelection) {
+        sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+            range = window.getSelection().getRangeAt(0);
+            range.collapse(false);
+
+            // Range.createContextualFragment() would be useful here but is
+            // non-standard and not supported in all browsers (IE9, for one)
+            var el = document.createElement("div");
+            el.innerHTML = html;
+            var frag = document.createDocumentFragment(), node, lastNode;
+            while ( (node = el.firstChild) ) {
+                lastNode = frag.appendChild(node);
+            }
+            range.insertNode(frag);
+        }
+    } else if (document.selection && document.selection.createRange) {
+        range = document.selection.createRange();
+        range.collapse(false);
+        range.pasteHTML(html);
+    }
 }
 
 function setBrowserHistoryBehavior() {
@@ -521,4 +542,40 @@ function lev(s1, s2) {
     v1 = v_tmp;
   }
   return v0[s1_len];
+}
+function replaceSelectedText(replacementText) {
+    var sel, range;
+    if (window.getSelection) {
+        sel = window.getSelection();
+        if (sel.rangeCount) {
+            range = sel.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(document.createTextNode(replacementText));
+        }
+    } else if (document.selection && document.selection.createRange) {console.log('c');
+        range = document.selection.createRange();
+        range.text = replacementText;
+    }
+}
+function replaceSelectedHtml(replacementHtml) {
+    var sel, range;
+    if (window.getSelection) {
+        sel = window.getSelection();
+        if (sel.rangeCount) {
+            range = sel.getRangeAt(0);
+            range.deleteContents();
+			pasteHtmlAtCaret(replacementHtml);
+        }
+    } else if (document.selection && document.selection.createRange) {console.log('c');
+        range = document.selection.createRange();
+        range.text = replacementText;
+    }
+}
+function capitaliseFirstLetter(string)
+{
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+function toTitleCase(str)
+{
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
 }

@@ -110,6 +110,7 @@ UI = {
 	},
 
 	TMXloaded: function() {
+        console.log('ecco: ', $('#private-tm-key').val());
 		$('#disable_tms_engine').trigger('click');
 		this.createKeyByTMX();
 	},
@@ -121,13 +122,15 @@ UI = {
 				$('#private-tm-key').val($('#create_private_tm_btn').attr('data-key'));
 			}
 		} else {
+            console.log('questo');
 		   if(!$(".more").hasClass('minus')) $(".more").trigger('click');
-//		   $('#create_private_tm_btn').trigger('click');
+		   $('#create_private_tm_btn').trigger('click');
 //		   $('#private-tm-key').addClass('selected');			 
 //		   $('#private-tm-key').addClass('selected').effect( "pulsate", "slow" );			 
 		}
 
-		$('.warning-message').html('<span>You are uploading a translation memory. To keep it private, generate a private TM key or enter an existing key. If you do not provide a private TM key, the content of your TMX file and project will be available to all MateCat users.</span>').show();
+		$('.warning-message').html('<span>You are uploading a translation memory. A private TM key has been automatically generated. <br /> If you already own a private TM key you can override it.' +
+            '<br />If you empty the Private TM key field and not provide a valid TM key, the content of your TMX file and project will be available to all MateCat users.</span>').show();
 		
 	},
 
@@ -186,7 +189,7 @@ $(function () {
         console.log(data.files[0].type);
          console.log(data.files[0].name.split('.')[data.files[0].name.split('.').length - 1]);
 		 var extension = data.files[0].name.split('.')[data.files[0].name.split('.').length - 1];
-		 if(extension == 'tmx') {
+		 if( extension == 'tmx' && config.conversionEnabled ) {
 			 var tmDisabled = (typeof $('#disable_tms_engine').attr("checked") == 'undefined')? false : true;
 			 if(tmDisabled)  {
 				APP.alert({
@@ -194,7 +197,7 @@ $(function () {
 					callback: 'TMXloaded'
 				});						 
 			 } else {
-				 UI.createKeyByTMX();			
+				 UI.createKeyByTMX();
 			 };
 
 //			 return false;

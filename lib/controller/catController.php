@@ -304,12 +304,13 @@ class catController extends viewController {
 
 //        Log::doLog( $this->job_stats );
 
-        $this->template->job_stats = $this->job_stats;
+        $this->template->job_stats              = $this->job_stats;
 
         $end_time                               = microtime( true ) * 1000;
         $load_time                              = $end_time - $this->start_time;
         $this->template->load_time              = $load_time;
-        $this->template->tms_enabled            = var_export( (bool)$this->project_status['id_tms'], true );
+        $this->template->tms_enabled            = var_export( (bool)$this->project_status[ 'id_tms' ], true );
+        $this->template->mt_enabled             = var_export( (bool)$this->project_status[ 'id_mt_engine' ], true );
         $this->template->time_to_edit_enabled   = INIT::$TIME_TO_EDIT_ENABLED;
         $this->template->build_number           = INIT::$BUILD_NUMBER;
         $this->template->downloadFileName       = $this->downloadFileName;
@@ -320,8 +321,8 @@ class catController extends viewController {
         $this->template->incomingUrl            = '/login?incomingUrl=' . $this->thisUrl;
         $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
         $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
-        $this->template->filtered = $this->filter_enabled;
-        $this->template->filtered_class = ( $this->filter_enabled ) ? ' open' : '';
+        $this->template->filtered               = $this->filter_enabled;
+        $this->template->filtered_class         = ( $this->filter_enabled ) ? ' open' : '';
 
 		( INIT::$VOLUME_ANALYSIS_ENABLED        ? $this->template->analysis_enabled = true : null );
 
@@ -357,6 +358,14 @@ class catController extends viewController {
 			$this->template->lfPlaceholderRegex   = CatUtils::lfPlaceholderRegex;
 			$this->template->crPlaceholderRegex   = CatUtils::crPlaceholderRegex;
 			$this->template->crlfPlaceholderRegex = CatUtils::crlfPlaceholderRegex;
+
+            $this->template->tabPlaceholder       = CatUtils::tabPlaceholder;
+            $this->template->tabPlaceholderClass  = CatUtils::tabPlaceholderClass;
+            $this->template->tabPlaceholderRegex  = CatUtils::tabPlaceholderRegex;
+
+            $this->template->nbspPlaceholder       = CatUtils::nbspPlaceholder;
+            $this->template->nbspPlaceholderClass  = CatUtils::nbspPlaceholderClass;
+            $this->template->nbspPlaceholderRegex  = CatUtils::nbspPlaceholderRegex;
 
 		}
 

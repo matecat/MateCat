@@ -55,12 +55,12 @@ $.extend(UI, {
 		this.surveyDisplayed = false;
 		this.warningStopped = false;
 		this.abortedOperations = [];
-		
+
 		/**
 		 * Global Warnings array definition.
 		 */
-		this.globalWarnings = [];
-
+		this.globalWarnings = [];		
+		
 		this.shortcuts = {
 			"translate": {
 				"label" : "Confirm translation",
