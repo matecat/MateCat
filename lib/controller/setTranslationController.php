@@ -8,6 +8,8 @@ include_once INIT::$UTILS_ROOT . '/Log.php';
 
 class setTranslationController extends ajaxController {
 
+    protected $__postInput = array();
+
     protected $propagateAll = false;
     protected $id_job = false;
     protected $password = false;
@@ -39,17 +41,17 @@ class setTranslationController extends ajaxController {
                 'status'                  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
 
-        $__postInput = filter_input_array( INPUT_POST, $filterArgs );
+        $this->__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->id_job                  = $__postInput[ 'id_job' ];
-        $this->password                = $__postInput[ 'password' ];
-        $this->propagateAll            = $__postInput[ 'propagateAll' ]; //not used here but used in child class setAutoPropagationController
-        $this->id_segment              = $__postInput[ 'id_segment' ];
-        $this->time_to_edit            = (int)$__postInput[ 'time_to_edit' ]; //cast to int, so the default is 0
-        $this->id_translator           = $__postInput[ 'id_translator' ];
-        $this->translation             = CatUtils::view2rawxliff( $__postInput[ 'translation' ] );
-        $this->chosen_suggestion_index = $__postInput[ 'chosen_suggestion_index' ];
-        $this->status                  = strtoupper( $__postInput[ 'status' ] );
+        $this->id_job                  = $this->__postInput[ 'id_job' ];
+        $this->password                = $this->__postInput[ 'password' ];
+        $this->propagateAll            = $this->__postInput[ 'propagateAll' ]; //not used here but used in child class setAutoPropagationController
+        $this->id_segment              = $this->__postInput[ 'id_segment' ];
+        $this->time_to_edit            = (int)$this->__postInput[ 'time_to_edit' ]; //cast to int, so the default is 0
+        $this->id_translator           = $this->__postInput[ 'id_translator' ];
+        $this->translation             = CatUtils::view2rawxliff( $this->__postInput[ 'translation' ] );
+        $this->chosen_suggestion_index = $this->__postInput[ 'chosen_suggestion_index' ];
+        $this->status                  = strtoupper( $this->__postInput[ 'status' ] );
 
     }
 
@@ -167,8 +169,21 @@ class setTranslationController extends ajaxController {
 
         /*
          * begin stats counter
+         *
+         * It works good with default InnoDB Isolation level
+         *
+         * REPEATABLE-READ offering a row level lock for this id_segment
+         *
          */
-        $old_translation = getCurrentTranslation( $this->id_job, $this->id_segment );
+        $db = Database::obtain();
+        $db->begin();
+
+//        $x = uniqid('',true);
+//        Log::doLog("$x Acquiring Lock");
+//        $x2 = explode( "\n" , var_export( $this->__postInput, true) );
+//        Log::doLog("$x Lock: Trying to set " . implode( " ", $x2 ) );
+        $old_translation = getCurrentTranslationAndLock( $this->id_job, $this->id_segment );
+//        Log::doLog("$x Lock Acquired");
 
         //if volume analysis is not enabled and no translation rows exists
         //create the row
@@ -185,7 +200,13 @@ class setTranslationController extends ajaxController {
             $_Translation[ 'suggestion_position' ]    = 0;
             $_Translation[ 'warning' ]                = false;
             $_Translation[ 'translation_date' ]       = date( "Y-m-d H:i:s" );
-            addTranslation( $_Translation );
+            $res = addTranslation( $_Translation );
+
+            if( $res < 0 ){
+                $this->result[ 'error' ][ ] = array( "code" => -101, "message" => "database error" );
+                $db->rollback();
+                return $res;
+            }
 
             /*
              * begin stats counter
@@ -193,49 +214,6 @@ class setTranslationController extends ajaxController {
              */
             $old_translation = $_Translation;
 
-        }
-
-        $old_wStruct = new WordCount_Struct();
-        $old_wStruct->setIdJob( $this->id_job );
-        $old_wStruct->setJobPassword( $this->password );
-        $old_wStruct->setNewWords( $this->jobData[ 'new_words' ] );
-        $old_wStruct->setDraftWords( $this->jobData[ 'draft_words' ] );
-        $old_wStruct->setTranslatedWords( $this->jobData[ 'translated_words' ] );
-        $old_wStruct->setApprovedWords( $this->jobData[ 'approved_words' ] );
-        $old_wStruct->setRejectedWords( $this->jobData[ 'rejected_words' ] );
-
-        $old_wStruct->setIdSegment( $this->id_segment );
-
-        //redundant, this is made into WordCount_Counter::updateDB
-        $old_wStruct->setOldStatus( $old_translation[ 'status' ] );
-        $old_wStruct->setNewStatus( $this->status );
-
-        //redundant because the update is made only where status = old status
-        if ( $this->status != $old_translation[ 'status' ] ) {
-
-            //cambiato status, sposta i conteggi
-            $old_count = ( !is_null( $old_translation[ 'eq_word_count' ] ) ? $old_translation[ 'eq_word_count' ] : $segment[ 'raw_word_count' ] );
-
-            //if there is not a row in segment_translations because volume analysis is disabled
-            //search for a just created row
-            $old_status = ( !empty( $old_translation[ 'status' ] ) ? $old_translation[ 'status' ] : Constants_TranslationStatus::STATUS_NEW );
-
-            $counter = new WordCount_Counter( $old_wStruct );
-            $counter->setOldStatus( $old_status );
-            $counter->setNewStatus( $this->status );
-            $newValues = $counter->getUpdatedValues( $old_count );
-
-            /**
-             * WARNING: THIS CHANGE THE STATUS OF SEGMENT_TRANSLATIONS ALSO
-             *
-             * Needed because of duplicated setTranslationsController calls for the same segment
-             *   ( The second call fails for status in where condition )
-             *
-             */
-            $newTotals = $counter->updateDB( $newValues );
-
-        } else {
-            $newTotals = $old_wStruct;
         }
 
         $_Translation                             = array();
@@ -265,7 +243,7 @@ class setTranslationController extends ajaxController {
             $msg = "\n\n Error addSegmentTranslation \n\n Database Error \n\n " . var_export( array_merge( $this->result, $_POST ), true );
             Log::doLog( $msg );
             Utils::sendErrMailReport( $msg );
-
+            $db->rollback();
             return -1;
         }
 
@@ -312,6 +290,52 @@ class setTranslationController extends ajaxController {
 
         }
 
+        //Recount Job Totals
+        $old_wStruct = new WordCount_Struct();
+        $old_wStruct->setIdJob( $this->id_job );
+        $old_wStruct->setJobPassword( $this->password );
+        $old_wStruct->setNewWords( $this->jobData[ 'new_words' ] );
+        $old_wStruct->setDraftWords( $this->jobData[ 'draft_words' ] );
+        $old_wStruct->setTranslatedWords( $this->jobData[ 'translated_words' ] );
+        $old_wStruct->setApprovedWords( $this->jobData[ 'approved_words' ] );
+        $old_wStruct->setRejectedWords( $this->jobData[ 'rejected_words' ] );
+
+        $old_wStruct->setIdSegment( $this->id_segment );
+
+        //redundant, this is made into WordCount_Counter::updateDB
+        $old_wStruct->setOldStatus( $old_translation[ 'status' ] );
+        $old_wStruct->setNewStatus( $this->status );
+
+        //redundant because the update is made only where status = old status
+        if ( $this->status != $old_translation[ 'status' ] ) {
+
+            //cambiato status, sposta i conteggi
+            $old_count = ( !is_null( $old_translation[ 'eq_word_count' ] ) ? $old_translation[ 'eq_word_count' ] : $segment[ 'raw_word_count' ] );
+
+            //if there is not a row in segment_translations because volume analysis is disabled
+            //search for a just created row
+            $old_status = ( !empty( $old_translation[ 'status' ] ) ? $old_translation[ 'status' ] : Constants_TranslationStatus::STATUS_NEW );
+
+            $counter = new WordCount_Counter( $old_wStruct );
+            $counter->setOldStatus( $old_status );
+            $counter->setNewStatus( $this->status );
+            $newValues = $counter->getUpdatedValues( $old_count );
+
+            try{
+                $newTotals = $counter->updateDB( $newValues );
+            } catch ( Exception $e ){
+                $this->result[ 'error' ][ ] = array( "code" => -101, "message" => "database error" );
+//                Log::doLog("Lock: Transaction Aborted. " . $e->getMessage() );
+//                $x1 = explode( "\n" , var_export( $old_translation, true) );
+//                Log::doLog("Lock: Translation status was " . implode( " ", $x1 ) );
+                $db->rollback();
+                return $e->getCode();
+            }
+
+        } else {
+            $newTotals = $old_wStruct;
+        }
+
         $job_stats = CatUtils::getFastStatsForJob( $newTotals );
         $project   = getProject( $this->jobData[ 'id_project' ] );
         $project   = array_pop( $project );
@@ -350,6 +374,8 @@ class setTranslationController extends ajaxController {
         } else {
             $this->result[ 'warning' ][ 'id' ] = 0;
         }
+
+        $db->commit();
 
     }
 
