@@ -16,26 +16,26 @@ class FileFormatConverter {
 	private $lang_handler; //object that exposes language utilities
 	private $storage_lookup_map;
 
-    private $conversionObject;
+	private $conversionObject;
 
-    /**
-     * Set to true to send conversion failures report
-     *
-     * @var bool
-     */
-    public $sendErrorReport = true;
+	/**
+	 * Set to true to send conversion failures report
+	 *
+	 * @var bool
+	 */
+	public $sendErrorReport = true;
 
 	public static $Storage_Lookup_IP_Map = array();
 	public static $converters = array();
 
-    /**
-     * Set more curl option for conversion call ( fw/bw )
-     *
-     * @param array $options
-     */
-    public function setCurlOpt( $options = array() ){
-        $this->opt = array_merge( $this->opt, $options );
-    }
+	/**
+	 * Set more curl option for conversion call ( fw/bw )
+	 *
+	 * @param array $options
+	 */
+	public function setCurlOpt( $options = array() ){
+		$this->opt = array_merge( $this->opt, $options );
+	}
 
 	public function __construct() {
 
@@ -43,34 +43,34 @@ class FileFormatConverter {
 			include_once ("../../inc/config.inc.php");
 			INIT::obtain();
 		}
-		$this->opt['httpheader'] = array("Content-Type: application/x-www-form-urlencoded;charset=UTF-8");
+		$this->opt['httpheader'] = array("Content-Type:multipart/form-data;charset=UTF-8");
 		$this->lang_handler=  Languages::getInstance();
 
-        $this->conversionObject = new ArrayObject( array(
-            'ip_machine'    => null,
-            'ip_client'     => null,
-            'path_name'     => null,
-            'file_name'     => null,
-            'path_backup'   => null,
-            'direction'     => null,
-            'error_message' => null,
-            'src_lang'      => null,
-            'trg_lang'      => null,
-            'status'        => 'ok',
-        ), ArrayObject::ARRAY_AS_PROPS );
+		$this->conversionObject = new ArrayObject( array(
+					'ip_machine'    => null,
+					'ip_client'     => null,
+					'path_name'     => null,
+					'file_name'     => null,
+					'path_backup'   => null,
+					'direction'     => null,
+					'error_message' => null,
+					'src_lang'      => null,
+					'trg_lang'      => null,
+					'status'        => 'ok',
+					), ArrayObject::ARRAY_AS_PROPS );
 
-        $db = Database::obtain();
-        $converters = $db->fetch_array( "SELECT ip_converter, ip_storage FROM converters WHERE status_active = 1 AND status_offline = 0" );
+		$db = Database::obtain();
+		$converters = $db->fetch_array( "SELECT ip_converter, ip_storage FROM converters WHERE status_active = 1 AND status_offline = 0" );
 
-        foreach( $converters as $converter_storage ){
-            self::$converters[ $converter_storage['ip_converter'] ] = 1;
-            self::$Storage_Lookup_IP_Map[ $converter_storage['ip_converter'] ] = $converter_storage['ip_storage'];
-        }
+		foreach( $converters as $converter_storage ){
+			self::$converters[ $converter_storage['ip_converter'] ] = 1;
+			self::$Storage_Lookup_IP_Map[ $converter_storage['ip_converter'] ] = $converter_storage['ip_storage'];
+		}
 
-//        self::$converters = array('10.11.0.18' => 1);//for debugging purposes
-//        self::$Storage_Lookup_IP_Map = array('10.11.0.18' => '10.11.0.19');//for debugging purposes
+		self::$converters = array('10.11.0.90' => 1);//for debugging purposes
+		self::$Storage_Lookup_IP_Map = array('10.11.0.90' => '10.11.0.91');//for debugging purposes
 
-        $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
+		$this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
 
 	}
 
@@ -87,18 +87,18 @@ class FileFormatConverter {
 	//get a converter at random, weighted on number of CPUs per node
 	private function pickRandConverter() {
 
-        $converters_map = array();
+		$converters_map = array();
 
 		$tot_cpu = 0;
 		foreach ( self::$converters as $ip => $cpu ) {
 			$tot_cpu += $cpu;
-            $converters_map = array_merge( $converters_map, array_fill( 0, $cpu, $ip ) );
+			$converters_map = array_merge( $converters_map, array_fill( 0, $cpu, $ip ) );
 		}
 
 		//pick random
 		$num = rand( 0, $tot_cpu - 1 );
 
-        return $converters_map[ $num ];
+		return $converters_map[ $num ];
 
 	}
 
@@ -194,65 +194,62 @@ class FileFormatConverter {
 		if (!$is_success) {
 
 			$ret['errorMessage'] = $res['errorMessage'];
-            $this->conversionObject->error_message = $res['errorMessage'];
+			$this->conversionObject->error_message = $res['errorMessage'];
 
-            $backUp_dir = INIT::$STORAGE_DIR.'/conversion_errors/' . @$_COOKIE['upload_session'];
-            $this->conversionObject->path_backup = $backUp_dir . "/" . $this->conversionObject->file_name;
+			$backUp_dir = INIT::$STORAGE_DIR.'/conversion_errors/' . @$_COOKIE['upload_session'];
+			$this->conversionObject->path_backup = $backUp_dir . "/" . $this->conversionObject->file_name;
 
-            if ( !is_dir( $backUp_dir ) ) {
-                mkdir( $backUp_dir, 0755, true );
-            }
+			if ( !is_dir( $backUp_dir ) ) {
+				mkdir( $backUp_dir, 0755, true );
+			}
 
-            $this->conversionObject->status = 'ko';
+			$this->conversionObject->status = 'ko';
 
-            //when Launched by CRON Script send Error Report is disabled
-            if( $this->sendErrorReport ) {
-                @rename( $this->conversionObject->path_name , $this->conversionObject->path_backup );
-                $this->__saveConversionErrorLog();
-                $this->__notifyError();
-            }
+			//when Launched by CRON Script send Error Report is disabled
+			if( $this->sendErrorReport ) {
+				@rename( $this->conversionObject->path_name , $this->conversionObject->path_backup );
+				$this->__saveConversionErrorLog();
+				$this->__notifyError();
+			}
 
 			return $ret;
 
 		} else {
-            $this->conversionObject->path_backup = $this->conversionObject->path_name;
+			$this->conversionObject->path_backup = $this->conversionObject->path_name;
 
-            //when Launched by CRON Script send Error Report is disabled
-            if( $this->sendErrorReport ) {
-                $this->__saveConversionErrorLog();
-            }
+			//when Launched by CRON Script send Error Report is disabled
+			if( $this->sendErrorReport ) {
+				$this->__saveConversionErrorLog();
+			}
 
-        }
+		}
 
 		if (array_key_exists("documentContent", $res)) {
 			$res['documentContent'] = base64_decode($res['documentContent']);
 		}
 
-        /**
-         * Avoid Not Recoverable Error
-         * Cannot unset string offsets
-         *
-         * If $res is not an array but boolean or string
-         *
-         */
-        if( isset($res['errorMessage']) ){
-		    unset($res['errorMessage']);
-        }
+		/**
+		 * Avoid Not Recoverable Error
+		 * Cannot unset string offsets
+		 *
+		 * If $res is not an array but boolean or string
+		 *
+		 */
+		if( isset($res['errorMessage']) ){
+			unset($res['errorMessage']);
+		}
 
 		return $res;
 	}
 
-	private function curl_post($url, $d, $opt = array()) {
-		if (!$this->is_assoc($d)) {
+	private function curl_post($url, $data, $opt = array()) {
+		if (!$this->is_assoc($data)) {
 			throw new Exception("The input data to " . __FUNCTION__ . "must be an associative array", -1);
 		}
 
-        if ( $this->checkOpenService( $url ) ) {
+		if ( $this->checkOpenService( $url ) ) {
 
 			$ch = curl_init();
-
-			$data = http_build_query($d);
-			$d = null;
 
 			curl_setopt($ch, CURLOPT_URL, $url);
 			curl_setopt($ch, CURLOPT_HEADER, 0);
@@ -261,6 +258,7 @@ class FileFormatConverter {
 			//curl_setopt($ch, CURLOPT_VERBOSE, true);
 			curl_setopt($ch, CURLOPT_POST, true);
 			curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+
 			if ($this->is_assoc($opt) and !empty($opt)) {
 				foreach ($opt as $k => $v) {
 
@@ -275,19 +273,19 @@ class FileFormatConverter {
 			}
 
 			$output = curl_exec($ch);
-            $curl_errno = curl_errno($ch);
-            $curl_error = curl_error($ch);
+			$curl_errno = curl_errno($ch);
+			$curl_error = curl_error($ch);
 			$info = curl_getinfo($ch);
 
 			// Chiude la risorsa curl
 			curl_close($ch);
 
-            if( $curl_errno > 0 ){
-                $output = json_encode( array( "isSuccess" => false, "errorMessage" => $curl_error ) );
-            }
+			if( $curl_errno > 0 ){
+				$output = json_encode( array( "isSuccess" => false, "errorMessage" => $curl_error ) );
+			}
 
 		} else {
-            $output = json_encode( array( "isSuccess" => false, "errorMessage" => "port closed" ) );
+			$output = json_encode( array( "isSuccess" => false, "errorMessage" => "port closed" ) );
 		}
 		return $output;
 	}
@@ -310,8 +308,19 @@ class FileFormatConverter {
 			}
 		}
 
-		$data['documentContent'] = base64_encode($fileContent);
-		$fileContent = null;
+		//get random name for temporary location
+		$tmp_name='/tmp/'.sha1($filename).time();
+
+		//write encoded file to temporary location
+		file_put_contents($tmp_name, base64_encode($fileContent));
+
+
+		//assign file pointer for POST
+		$data['documentContent'] = "@$tmp_name";
+
+		//flush memory
+		unset($fileContent);
+
 		//assign converter
 		if(!$chosen_by_user_machine){
 			$this->ip=$this->pickRandConverter();
@@ -323,19 +332,19 @@ class FileFormatConverter {
 
 		$data['fileExtension'] = $extension;
 		$data['fileName'] = "$filename.$extension";
-        $data['sourceLocale'] = $this->lang_handler->getLangRegionCode($source_lang);
-        $data['targetLocale'] = $this->lang_handler->getLangRegionCode($target_lang);
+		$data['sourceLocale'] = $this->lang_handler->getLangRegionCode($source_lang);
+		$data['targetLocale'] = $this->lang_handler->getLangRegionCode($target_lang);
 
 		log::doLog($this->ip." start conversion to xliff of $file_path");
 		$start_time=time();
 
-        $this->conversionObject->ip_machine = $this->ip;
-        $this->conversionObject->ip_client  = Utils::getRealIpAddr();
-        $this->conversionObject->path_name  = $file_path;
-        $this->conversionObject->file_name  = $data['fileName'];
-        $this->conversionObject->direction  = 'fw';
-        $this->conversionObject->src_lang   = $data['sourceLocale'];
-        $this->conversionObject->trg_lang   = $data['targetLocale'];
+		$this->conversionObject->ip_machine = $this->ip;
+		$this->conversionObject->ip_client  = Utils::getRealIpAddr();
+		$this->conversionObject->path_name  = $file_path;
+		$this->conversionObject->file_name  = $data['fileName'];
+		$this->conversionObject->direction  = 'fw';
+		$this->conversionObject->src_lang   = $data['sourceLocale'];
+		$this->conversionObject->trg_lang   = $data['targetLocale'];
 
 		$curl_result = $this->curl_post($url, $data, $this->opt);
 		$end_time=time();
@@ -345,6 +354,10 @@ class FileFormatConverter {
 		$decode = json_decode($curl_result, true);
 		$curl_result = null;
 		$res = $this->__parseOutput($decode);
+
+		//remove temporary file
+		unlink($tmp_name);
+
 
 		return $res;
 	}
@@ -369,10 +382,10 @@ class FileFormatConverter {
 
 	public function convertToOriginal($xliffVector, $chosen_by_user_machine=false) {
 
-        $xliffContent = $xliffVector['content'];
-        $xliffName    = $xliffVector['out_xliff_name'];
+		$xliffContent = $xliffVector['content'];
+		$xliffName    = $xliffVector['out_xliff_name'];
 
-//        Log::dolog( $xliffName );
+		//        Log::dolog( $xliffName );
 
 		//assign converter
 		if(!$chosen_by_user_machine){
@@ -392,13 +405,13 @@ class FileFormatConverter {
 		$data['uid'] = $uid_ext[0];
 		$data['xliffContent'] = $xliffContent;
 
-        $this->conversionObject->ip_machine = $this->ip;
-        $this->conversionObject->ip_client  = Utils::getRealIpAddr();
-        $this->conversionObject->path_name  = $xliffVector['out_xliff_name'];
-        $this->conversionObject->file_name  = pathinfo( $xliffVector['out_xliff_name'], PATHINFO_BASENAME );
-        $this->conversionObject->direction  = 'bw';
-        $this->conversionObject->src_lang   = $this->lang_handler->getLangRegionCode($xliffVector['source']);
-        $this->conversionObject->trg_lang   = $this->lang_handler->getLangRegionCode($xliffVector['target']);
+		$this->conversionObject->ip_machine = $this->ip;
+		$this->conversionObject->ip_client  = Utils::getRealIpAddr();
+		$this->conversionObject->path_name  = $xliffVector['out_xliff_name'];
+		$this->conversionObject->file_name  = pathinfo( $xliffVector['out_xliff_name'], PATHINFO_BASENAME );
+		$this->conversionObject->direction  = 'bw';
+		$this->conversionObject->src_lang   = $this->lang_handler->getLangRegionCode($xliffVector['source']);
+		$this->conversionObject->trg_lang   = $this->lang_handler->getLangRegionCode($xliffVector['target']);
 
 		log::doLog($this->ip." start conversion back to original");
 		$start_time=time();
@@ -432,61 +445,61 @@ class FileFormatConverter {
 		return preg_replace( self::$Converter_Regexp, '="\\\\\\\\' . $storageIP . '\\\\tr', $xliffContent );
 	}
 
-    private function __notifyError(){
+	private function __notifyError(){
 
-        $remote_user = ( isset( $_SERVER[ 'REMOTE_USER' ] ) ) ? $_SERVER[ 'REMOTE_USER' ] : "N/A";
-        $link_file   = "http://" . $_SERVER[ 'SERVER_NAME' ] . "/" . INIT::$CONVERSIONERRORS_REPOSITORY_WEB . "/" . $_COOKIE[ 'upload_session' ] . "/" . rawurlencode( $this->conversionObject->file_name );
-        $message     = "MATECAT : conversion error notifier\n\nDetails:
-    - machine_ip : " . $this->conversionObject->ip_machine . "
-    - client ip :  " . $this->conversionObject->ip_client . "
-    - source :     " . $this->conversionObject->src_lang . "
-    - target :     " . $this->conversionObject->trg_lang . "
-    - client user (if any used) : $remote_user
-    - direction : " . $this->conversionObject->direction . "
-    - error : " . $this->conversionObject->error_message . "
-    Download file clicking to $link_file
-	";
+		$remote_user = ( isset( $_SERVER[ 'REMOTE_USER' ] ) ) ? $_SERVER[ 'REMOTE_USER' ] : "N/A";
+		$link_file   = "http://" . $_SERVER[ 'SERVER_NAME' ] . "/" . INIT::$CONVERSIONERRORS_REPOSITORY_WEB . "/" . $_COOKIE[ 'upload_session' ] . "/" . rawurlencode( $this->conversionObject->file_name );
+		$message     = "MATECAT : conversion error notifier\n\nDetails:
+			- machine_ip : " . $this->conversionObject->ip_machine . "
+			- client ip :  " . $this->conversionObject->ip_client . "
+			- source :     " . $this->conversionObject->src_lang . "
+			- target :     " . $this->conversionObject->trg_lang . "
+			- client user (if any used) : $remote_user
+						       - direction : " . $this->conversionObject->direction . "
+									    - error : " . $this->conversionObject->error_message . "
+												 Download file clicking to $link_file
+														      ";
 
-        Utils::sendErrMailReport( $message );
+															Utils::sendErrMailReport( $message );
 
-    }
+	}
 
-    private function __saveConversionErrorLog(){
+	private function __saveConversionErrorLog(){
 
-        try {
-            $_connection = new PDO('mysql:dbname=matecat_conversions_log;host=' . INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS,
-                array(
-                    PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\'',
-                    PDO::ATTR_EMULATE_PREPARES   => false,
-                    PDO::ATTR_ORACLE_NULLS => true,
-                    PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
-                ) );
-        } catch ( Exception $ex ){
-            Log::doLog('Unable to open database connection');
-            Log::doLog($ex->getMessage());
-            return;
-        }
+		try {
+			$_connection = new PDO('mysql:dbname=matecat_conversions_log;host=' . INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS,
+					array(
+						PDO::MYSQL_ATTR_INIT_COMMAND => 'SET NAMES \'UTF8\'',
+						PDO::ATTR_EMULATE_PREPARES   => false,
+						PDO::ATTR_ORACLE_NULLS => true,
+						PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+					     ) );
+		} catch ( Exception $ex ){
+			Log::doLog('Unable to open database connection');
+			Log::doLog($ex->getMessage());
+			return;
+		}
 
-        $data = $this->conversionObject->getArrayCopy();
-        Log::doLog( $this->conversionObject );
+		$data = $this->conversionObject->getArrayCopy();
+		Log::doLog( $this->conversionObject );
 
-        unset ( $data['path_name'] );
-        unset ( $data['file_name'] );
+		unset ( $data['path_name'] );
+		unset ( $data['file_name'] );
 
-        $data_keys = implode( ", ", array_keys( $data ) );
-        $data_values = array_values( $data );
-        $data_placeholders = implode( ", ", array_fill( 0, count($data), "?" ) );
-        $query = "INSERT INTO failed_conversions_log ($data_keys) VALUES ( $data_placeholders );";
+		$data_keys = implode( ", ", array_keys( $data ) );
+		$data_values = array_values( $data );
+		$data_placeholders = implode( ", ", array_fill( 0, count($data), "?" ) );
+		$query = "INSERT INTO failed_conversions_log ($data_keys) VALUES ( $data_placeholders );";
 
-        try {
-            $sttmnt = $_connection->prepare( $query );
-            $sttmnt->execute($data_values);
-        } catch ( PDOException $ex ) {
-            Log::doLog( $ex->getMessage() );
-        }
+		try {
+			$sttmnt = $_connection->prepare( $query );
+			$sttmnt->execute($data_values);
+		} catch ( PDOException $ex ) {
+			Log::doLog( $ex->getMessage() );
+		}
 
 
-    }
+	}
 
 }
 
