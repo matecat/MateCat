@@ -1558,11 +1558,11 @@ UI = {
 		range = selection.getRangeAt(0);
 
 		prova = $(range.commonAncestorContainer).text().charAt(range.startOffset - 1);
-		insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
+        str = getSelectionHtml();
+        insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
 		aa = prova.match(/\W$/gi);
-		str = getSelectionHtml();
-		newStr = '';
-		$.each($.parseHTML(str), function(index) {
+        newStr = '';
+        $.each($.parseHTML(str), function(index) {
 			if(this.nodeName == '#text') {
 				d = this.data;
 //				console.log(index + ' - ' + d);
@@ -1599,6 +1599,7 @@ UI = {
 //				newStr += this.innerText;					
 			}
 		});
+//        console.log('newStr: ', newStr);
 //		replaceSelectedText(newStr);
 		replaceSelectedHtml(newStr);
 
@@ -6685,7 +6686,7 @@ function getSelectionHtml() {
 		if (sel.rangeCount) {
 			var container = document.createElement("div");
 			for (var i = 0, len = sel.rangeCount; i < len; ++i) {
-				container.appendChild(sel.getRangeAt(i).cloneContents());
+                container.appendChild(sel.getRangeAt(i).cloneContents());
 			}
 			html = container.innerHTML;
 		}
