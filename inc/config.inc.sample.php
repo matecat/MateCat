@@ -57,6 +57,7 @@ class INIT {
 	public static $OAUTH_CLIENT_APP_NAME;
 
     public static $OAUTH_CONFIG;
+	public static $CONFIG_VERSION_ERR_MESSAGE;
 
     /**
      * ENABLE_OUTSOURCE set as true will show the option to outsource to an external translation provider (translated.net by default)
@@ -383,6 +384,8 @@ class INIT {
                 'https://www.googleapis.com/auth/userinfo.profile'
         );
 
+	    self::$CONFIG_VERSION_ERR_MESSAGE = "Your config.ini.php file is not up-to-date.";
+
 	}
 
     public static function fatalErrorHandler() {
@@ -469,3 +472,5 @@ class INIT {
 	}
 
 }
+return true;
+
