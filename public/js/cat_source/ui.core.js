@@ -1903,28 +1903,31 @@ UI = {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
+                console.log('getwarning local success');
 				if (UI.currentSegment.hasClass('waiting_for_check_result')) {
-
 					// check conditions for results discard
 					if (!d.total) {
 						$('p.warnings', UI.currentSegment).empty();
 						$('span.locked.mismatch', UI.currentSegment).removeClass('mismatch');
 						return;
 					}
-
+/*
                     escapedSegment = UI.checkSegmentsArray[d.token].trim().replace( config.lfPlaceholderRegex, "\n" );
                     escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
                     escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
                     escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "\t" );
                     escapedSegment = escapedSegment.replace( config.nbspPlaceholderRegex, $( document.createElement('span') ).html('&nbsp;').text() );
 
+
                     if (UI.editarea.text().trim() != escapedSegment ){
+                        console.log('ecco qua');
+
 //                        console.log( UI.editarea.text().trim() );
 //                        console.log( UI.checkSegmentsArray[d.token].trim() );
 //                        console.log( escapedSegment  );
                         return;
                     }
-
+*/
 					UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
 					UI.markTagMismatch(d.details);
 					delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
