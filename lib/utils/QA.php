@@ -1037,16 +1037,37 @@ class QA {
 //        Log::doLog( $this->source_seg );
 //        Log::doLog( $this->target_seg );
 
-        preg_match_all( '/(<[^\/>]+[\/]{0,1}>|<\/[a-zA-Z]+>)/', $this->source_seg, $matches );
-        $malformedXmlSrcStruct = $matches[ 1 ];
-        preg_match_all( '/(<[^\/>]+[\/]{0,1}>|<\/[a-zA-Z]+>)/', $this->target_seg, $matches );
-        $malformedXmlTrgStruct = $matches[ 1 ];
+        preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $this->source_seg, $matches );
+        $complete_malformedSrcStruct = $matches[ 1 ];
+        $open_malformedXmlSrcStruct = $matches[ 2 ];
+        $closing_malformedXmlSrcStruct = $matches[ 3 ];
 
-        foreach( $malformedXmlTrgStruct as $pos => $tag ){
-            if( $malformedXmlSrcStruct[ $pos ] != $tag ){
+        preg_match_all( '/(<([^\/>]+)[\/]{0,1}>|<\/([a-zA-Z]+)>)/', $this->target_seg, $matches );
+        $complete_malformedTrgStruct = $matches[ 1 ];
+        $open_malformedXmlTrgStruct = $matches[ 2 ];
+        $closing_malformedXmlTrgStruct = $matches[ 3 ];
+
+//        Log::doLog($complete_malformedSrcStruct);
+//        Log::doLog($open_malformedXmlSrcStruct);
+//        Log::doLog($closing_malformedXmlSrcStruct);
+//
+//        Log::doLog($complete_malformedTrgStruct);
+//        Log::doLog($open_malformedXmlTrgStruct);
+//        Log::doLog($closing_malformedXmlTrgStruct);
+
+        foreach( $open_malformedXmlTrgStruct as $pos => $tag ){
+            if( trim( $open_malformedXmlSrcStruct[ $pos ] ) != trim( $tag ) ){
                 $this->_addError( self::ERR_TAG_ORDER );
-                $this->tagPositionError[] = $tag;
-                break;
+                $this->tagPositionError[] = $complete_malformedTrgStruct[ $pos ];
+                return;
+            }
+        }
+
+        foreach( $closing_malformedXmlTrgStruct as $pos => $tag ){
+            if( trim( $closing_malformedXmlSrcStruct[ $pos ] ) != trim( $tag ) ){
+                $this->_addError( self::ERR_TAG_ORDER );
+                $this->tagPositionError[] = $complete_malformedTrgStruct[ $pos ];
+                return;
             }
         }
 
