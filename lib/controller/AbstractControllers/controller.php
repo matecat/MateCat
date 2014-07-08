@@ -57,7 +57,7 @@ abstract class controller {
 		$version_config = parse_ini_file(INIT::$ROOT."/inc/version.ini");
 		$version = $version_config['version'];
 
-		Log::doLog("Same version number? ".($version == INIT::$BUILD_NUMBER));
+//		Log::doLog("Same version number? ".($version == INIT::$BUILD_NUMBER));
 
 		return $version == INIT::$BUILD_NUMBER;
 

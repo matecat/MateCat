@@ -469,3 +469,5 @@ class INIT {
 	}
 
 }
+
+return true;
