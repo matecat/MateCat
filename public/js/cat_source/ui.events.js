@@ -491,7 +491,7 @@ $.extend(UI, {
 			e.stopPropagation();			
 		}).on('mouseup', '.editarea', function(e) {
 			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-				UI.showEditToolbar();
+				if(!UI.isFirefox) UI.showEditToolbar();
 			};
 		}).on('mousedown', '.editarea', function(e) {
 			UI.hideEditToolbar();
