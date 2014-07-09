@@ -1199,9 +1199,9 @@ function getOriginalFilesForJob( $id_job, $id_file, $password ) {
 }
 
 
-function getCurrentTranslation( $id_job, $id_segment ) {
+function getCurrentTranslationAndLock( $id_job, $id_segment ) {
 
-	$query = "SELECT * FROM segment_translations WHERE id_segment = %u AND id_job = %u";
+	$query = "SELECT * FROM segment_translations WHERE id_segment = %u AND id_job = %u FOR UPDATE";
 	$query = sprintf( $query, $id_segment, $id_job );
 
 	$db      = Database::obtain();
@@ -2147,19 +2147,15 @@ function updateWordCount( WordCount_Struct $wStruct ){
 
 	$db = Database::obtain();
 
-    //Update in JOIN
-	$query = "UPDATE jobs as j, segment_translations AS st SET
+    //Update in Transaction
+	$query = "UPDATE jobs as j SET
                 new_words = new_words + " . $wStruct->getNewWords() . ",
                 draft_words = draft_words + " . $wStruct->getDraftWords() . ",
                 translated_words = translated_words + " . $wStruct->getTranslatedWords() . ",
                 approved_words = approved_words + " . $wStruct->getApprovedWords() . ",
-                rejected_words = rejected_words + " . $wStruct->getRejectedWords() . ",
-                st.status = '" . $db->escape( $wStruct->getNewStatus() ) . "'
+                rejected_words = rejected_words + " . $wStruct->getRejectedWords() . "
                   WHERE j.id = " . (int)$wStruct->getIdJob() . "
-                  AND st.id_job = j.id
-                  AND j.password = '" . $db->escape( $wStruct->getJobPassword() ) . "'
-                  AND st.status = '" . $db->escape( $wStruct->getOldStatus() ) . "'
-                  AND st.id_segment = " . (int)$wStruct->getIdSegment();
+                  AND j.password = '" . $db->escape( $wStruct->getJobPassword() ) ."'";
 
 	$db->query( $query );
 

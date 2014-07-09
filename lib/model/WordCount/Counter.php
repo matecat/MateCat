@@ -101,9 +101,20 @@ class WordCount_Counter {
 
     }
 
+    /**
+     * @param WordCount_Struct $wordCount_Struct
+     *
+     * @return WordCount_Struct
+     * @throws Exception
+     */
     public function updateDB( WordCount_Struct $wordCount_Struct ){
 
-        updateWordCount( $wordCount_Struct );
+        $res = updateWordCount( $wordCount_Struct );
+
+        if( $res < 0 ){
+            throw new Exception( "Failed to update counter", $res );
+        }
+
         $newWCount = new WordCount_Struct();
         $newWCount->setNewWords( $this->oldWCount->getNewWords() + $wordCount_Struct->getNewWords() );
         $newWCount->setTranslatedWords( $this->oldWCount->getTranslatedWords() + $wordCount_Struct->getTranslatedWords() );

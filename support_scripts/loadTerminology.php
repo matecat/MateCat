@@ -18,12 +18,11 @@ $db->connect ();
 
 $glossaries = array(
 
-        array( 'file' => 'GLOSSARIO_EN_TUR.csv', 'source' => 'en-GB', 'target' => 'tr-TR' ),
-        array( 'file' => 'GLOSSARIO_EN_AFR.csv', 'source' => 'en-GB', 'target' => 'af-ZA' ),
-        array( 'file' => 'GLOSSARIO_EN_POR.csv', 'source' => 'en-GB', 'target' => 'pt-PT' ),
-        array( 'file' => 'GLOSSARIO_EN_THA.csv', 'source' => 'en-GB', 'target' => 'th-TH' ),
-        array( 'file' => 'GLOSSARIO_EN_GRE.csv', 'source' => 'en-GB', 'target' => 'el-GR' ),
-        array( 'file' => 'GLOSSARIO_EN_RUS.csv', 'source' => 'en-GB', 'target' => 'ru-RU' ),
+        array( 'file' => 'GLOSSARIO_EN_GRE.csv', 'source' => 'en-GB', 'target' => "el-GR" ),
+        array( 'file' => 'GLOSSARIO_EN_CHI_TRAD.csv', 'source' => 'en-GB', 'target' => "zh-TW" ),
+        array( 'file' => 'GLOSSARIO_EN_CHI.csv', 'source' => 'en-GB', 'target' => "zh-CN" ),
+        array( 'file' => 'GLOSSARIO_EN_SPA.csv', 'source' => 'en-GB', 'target' => "es-ES" ),
+        array( 'file' => 'GLOSSARIO_EN_RUS.csv', 'source' => 'en-GB', 'target' => "ru-RU" ),
 
 );
 

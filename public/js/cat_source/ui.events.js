@@ -491,7 +491,7 @@ $.extend(UI, {
 			e.stopPropagation();			
 		}).on('mouseup', '.editarea', function(e) {
 			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-				UI.showEditToolbar();
+				if(!UI.isFirefox) UI.showEditToolbar();
 			};
 		}).on('mousedown', '.editarea', function(e) {
 			UI.hideEditToolbar();
@@ -620,7 +620,6 @@ $.extend(UI, {
 					UI.saveInUndoStack('cancel');
 					UI.currentSegmentQA();
 				} else {
-//console.log('QUI');
 					var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
 					var numSpacesBefore = $('.space-marker', UI.editarea).length;
 //                    var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
@@ -641,6 +640,10 @@ $.extend(UI, {
                     var undeletableMonad = (($(translation[sbIndex-1]).hasClass('monad'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
                     var selBound = $('.rangySelectionBoundary', UI.editarea);
                     if(undeletableMonad) selBound.prev().remove();
+                    if(e.which == 8) { // backspace
+                        var undeletableTag = (($(translation[sbIndex-1]).hasClass('locked'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
+                        if(undeletableTag) selBound.prev().remove();
+                    }
 
                     restoreSelection();
 
@@ -652,12 +655,12 @@ $.extend(UI, {
 //							console.log('BB: ', UI.editarea.html());
 					}
 
-//						console.log(e.which + ' - ' + isInsideTag);
+//					console.log(e.which + ' - ' + isInsideTag);
 					setTimeout(function() {
-						if ((e.which == 46)&&(isInsideTag)) {
+//						if ((e.which == 46)&&(isInsideTag)) {
 //							console.log('inside tag');
-						}
-//							console.log(e.which + ' - ' + isInsideTag);
+//						}
+//						console.log(e.which + ' - ' + isInsideTag);
                         saveSelection();
                         // detect if selection ph is inside a monad tag
   //                      console.log('sel placeholders inside a monad', $('.monad .rangySelectionBoundary', UI.editarea).length);

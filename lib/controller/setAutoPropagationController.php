@@ -44,9 +44,13 @@ class setAutoPropagationController extends setTranslationController {
         $cookieLife = new DateTime();
         $cookieLife->modify( '+15 days' );
 
+        $db = Database::obtain();
+
         if( $this->propagateAll ){
 
-            $old_translation = getCurrentTranslation( $this->id_job, $this->id_segment );
+            $db->begin();
+
+            $old_translation = getCurrentTranslationAndLock( $this->id_job, $this->id_segment );
 
             //check tag mismatch
             //get original source segment, first
@@ -76,7 +80,9 @@ class setAutoPropagationController extends setTranslationController {
 
             try {
                 propagateTranslation( $TPropagation, $this->jobData, $this->id_segment, true );
+                $db->commit();
             } catch ( Exception $e ){
+                $db->rollback();
                 $msg = $e->getMessage() . "\n\n" . $e->getTraceAsString();
                 Log::doLog( $msg );
                 Utils::sendErrMailReport( $msg );

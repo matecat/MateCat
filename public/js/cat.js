@@ -1558,11 +1558,11 @@ UI = {
 		range = selection.getRangeAt(0);
 
 		prova = $(range.commonAncestorContainer).text().charAt(range.startOffset - 1);
-		insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
+        str = getSelectionHtml();
+        insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
 		aa = prova.match(/\W$/gi);
-		str = getSelectionHtml();
-		newStr = '';
-		$.each($.parseHTML(str), function(index) {
+        newStr = '';
+        $.each($.parseHTML(str), function(index) {
 			if(this.nodeName == '#text') {
 				d = this.data;
 //				console.log(index + ' - ' + d);
@@ -1599,6 +1599,7 @@ UI = {
 //				newStr += this.innerText;					
 			}
 		});
+//        console.log('newStr: ', newStr);
 //		replaceSelectedText(newStr);
 		replaceSelectedHtml(newStr);
 
@@ -1903,28 +1904,31 @@ UI = {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
+                console.log('getwarning local success');
 				if (UI.currentSegment.hasClass('waiting_for_check_result')) {
-
 					// check conditions for results discard
 					if (!d.total) {
 						$('p.warnings', UI.currentSegment).empty();
 						$('span.locked.mismatch', UI.currentSegment).removeClass('mismatch');
 						return;
 					}
-
+/*
                     escapedSegment = UI.checkSegmentsArray[d.token].trim().replace( config.lfPlaceholderRegex, "\n" );
                     escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
                     escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
                     escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "\t" );
                     escapedSegment = escapedSegment.replace( config.nbspPlaceholderRegex, $( document.createElement('span') ).html('&nbsp;').text() );
 
+
                     if (UI.editarea.text().trim() != escapedSegment ){
+                        console.log('ecco qua');
+
 //                        console.log( UI.editarea.text().trim() );
 //                        console.log( UI.checkSegmentsArray[d.token].trim() );
 //                        console.log( escapedSegment  );
                         return;
                     }
-
+*/
 					UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
 					UI.markTagMismatch(d.details);
 					delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
@@ -3489,7 +3493,7 @@ $.extend(UI, {
 			e.stopPropagation();			
 		}).on('mouseup', '.editarea', function(e) {
 			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-				UI.showEditToolbar();
+				if(!UI.isFirefox) UI.showEditToolbar();
 			};
 		}).on('mousedown', '.editarea', function(e) {
 			UI.hideEditToolbar();
@@ -3618,7 +3622,6 @@ $.extend(UI, {
 					UI.saveInUndoStack('cancel');
 					UI.currentSegmentQA();
 				} else {
-//console.log('QUI');
 					var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
 					var numSpacesBefore = $('.space-marker', UI.editarea).length;
 //                    var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
@@ -3639,6 +3642,10 @@ $.extend(UI, {
                     var undeletableMonad = (($(translation[sbIndex-1]).hasClass('monad'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
                     var selBound = $('.rangySelectionBoundary', UI.editarea);
                     if(undeletableMonad) selBound.prev().remove();
+                    if(e.which == 8) { // backspace
+                        var undeletableTag = (($(translation[sbIndex-1]).hasClass('locked'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
+                        if(undeletableTag) selBound.prev().remove();
+                    }
 
                     restoreSelection();
 
@@ -3650,12 +3657,12 @@ $.extend(UI, {
 //							console.log('BB: ', UI.editarea.html());
 					}
 
-//						console.log(e.which + ' - ' + isInsideTag);
+//					console.log(e.which + ' - ' + isInsideTag);
 					setTimeout(function() {
-						if ((e.which == 46)&&(isInsideTag)) {
+//						if ((e.which == 46)&&(isInsideTag)) {
 //							console.log('inside tag');
-						}
-//							console.log(e.which + ' - ' + isInsideTag);
+//						}
+//						console.log(e.which + ' - ' + isInsideTag);
                         saveSelection();
                         // detect if selection ph is inside a monad tag
   //                      console.log('sel placeholders inside a monad', $('.monad .rangySelectionBoundary', UI.editarea).length);
@@ -4961,15 +4968,17 @@ $.extend(UI, {
 		if (!this.taglockEnabled)
 			return false;
 		$('.footer .suggestion_source', segment).each(function() {
-			$(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+            $(this).html($(this).html().replace(/(&lt;[\/]*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+           // $(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 			if (UI.isFirefox) {
 				$(this).html($(this).html().replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			} else {
 				$(this).html($(this).html().replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			}
-		});
+        });
 		$('.footer .translation').each(function() {
-			$(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+            $(this).html($(this).html().replace(/(&lt;[\/]*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+//			$(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 			if (UI.isFirefox) {
 				$(this).html($(this).html().replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			} else {
@@ -5007,7 +5016,7 @@ $.extend(UI, {
 
 	// TAG LOCK
 	lockTags: function(el) {
-//		console.log('lock tags');
+//		console.log('lock tags: ', el);
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
@@ -6686,7 +6695,7 @@ function getSelectionHtml() {
 		if (sel.rangeCount) {
 			var container = document.createElement("div");
 			for (var i = 0, len = sel.rangeCount; i < len; ++i) {
-				container.appendChild(sel.getRangeAt(i).cloneContents());
+                container.appendChild(sel.getRangeAt(i).cloneContents());
 			}
 			html = container.innerHTML;
 		}

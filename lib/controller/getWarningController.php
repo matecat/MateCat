@@ -83,8 +83,6 @@ class getWarningController extends ajaxController {
 
         $result = getWarning( $this->__postInput->id_job, $this->__postInput->password );
 
-        Log::$fileName = "temp.log";
-        Log::doLog( $result );
         foreach ( $result as $position => &$item ) {
 
             $item = $item[ 'id_segment' ];

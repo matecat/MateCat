@@ -115,6 +115,14 @@ class ConvertersMonitor {
 
     public function performCheck() {
 
+        $lockHandler = fopen( "$this->path/_flock.lock", 'w+' );
+        if( !flock( $lockHandler, LOCK_EX | LOCK_NB ) ){
+            self::_prettyEcho( "*************************************************************" );
+            self::_prettyEcho( "*********** Another Instance Running. SKIP CHECK. ***********" );
+            self::_prettyEcho( "*************************************************************" );
+            return;
+        }
+
         //clean
         #self::_prettyEcho( "Removing tmp files" );
         $this->_deleteDir( "$this->path/$this->converted_dir/" );
@@ -170,6 +178,10 @@ class ConvertersMonitor {
 
         $this->performRebooting();
 
+        fclose( $lockHandler );
+        unlink( "$this->path/_flock.lock" );
+
+        self::_prettyEcho( "----------- Released Lock ----------" );
         self::_prettyEcho( "------------------------------------" );
 
     }
