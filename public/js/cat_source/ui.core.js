@@ -1936,7 +1936,8 @@ UI = {
 			}
 		}, 'local');
 	},
-	setTranslation: function(id_segment, status, caller, byStatus) {
+
+    setTranslation: function(id_segment, status, caller, byStatus) {
 		reqArguments = arguments;
 		segment = $('#segment-' + id_segment); 
 		this.lastTranslatedSegmentId = id_segment;
