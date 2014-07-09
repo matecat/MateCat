@@ -298,13 +298,14 @@ $.extend(UI, {
 	},	
 
 	// TAG AUTOCOMPLETE
-	checkAutocompleteTags: function() {//console.log('checkAutocompleteTags');
+	checkAutocompleteTags: function() {console.log('checkAutocompleteTags');
 		added = this.getPartialTagAutocomplete();
-//		console.log('added: "', added + '"');
+		console.log('added: "', added + '"');
 //		console.log('aa: ', UI.editarea.html());
 		$('.tag-autocomplete li.hidden').removeClass('hidden');
 		$('.tag-autocomplete li').each(function() {
 			var str = $(this).text();
+            console.log('"' + str.substring(0, added.length) + '" == "' + added + '"');
 			if( str.substring(0, added.length) === added ) {
 				$(this).removeClass('hidden');
 			} else {
@@ -312,7 +313,7 @@ $.extend(UI, {
 			}
 		});
 //		console.log('bb: ', UI.editarea.html());
-		if(!$('.tag-autocomplete li:not(.hidden)').length) {
+		if(!$('.tag-autocomplete li:not(.hidden)').length) { // no tags matching what the user is writing
 
 			$('.tag-autocomplete').addClass('empty');
 			if(UI.preCloseTagAutocomplete) {
