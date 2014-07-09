@@ -2710,6 +2710,12 @@ del.diff
      top: -7px;
 }
 
+.editarea span.startRow
+{
+	width: 0px;
+    float: left;
+}
+
 
 @keyframes fadein {
     from { opacity: 0; }

@@ -547,9 +547,12 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.preOpenConcordance();
         }).on('keyup', '.editor .editarea', 'return', function(e) {
+            console.log('UI.defaultBRmanagement: ', UI.defaultBRmanagement);
             if(!UI.defaultBRmanagement) {
                 range = window.getSelection().getRangeAt(0);
-                $('.returnTempPlaceholder', UI.editarea).after('<br />');
+                $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
+                console.log('qua');
+//                $('.returnTempPlaceholder', UI.editarea).after('<br />');
                 node = $('.returnTempPlaceholder + br', UI.editarea)[0];
                 setCursorAfterNode(range, node);
                 saveSelection();
@@ -637,6 +640,7 @@ $.extend(UI, {
                     $.each(translation, function(index) {
                         if($(this).hasClass('rangySelectionBoundary')) sbIndex = index;
                     });
+
                     var undeletableMonad = (($(translation[sbIndex-1]).hasClass('monad'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
                     var selBound = $('.rangySelectionBoundary', UI.editarea);
                     if(undeletableMonad) selBound.prev().remove();
@@ -717,17 +721,59 @@ $.extend(UI, {
 			if (e.which == 37) { // left arrow
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
+//                console.log('range: ', range);
 				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
-					r = range.startContainer.data;
+					r = range.startContainer.innerText;
+//                    r = range.startContainer.data;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) { // if a tag is selected
-						saveSelection();
-						rr = document.createRange();
-						referenceNode = $('.rangySelectionBoundary', UI.editarea).first().get(0);
-						rr.setStartBefore(referenceNode);
-						rr.setEndBefore(referenceNode);
-						$('.rangySelectionBoundary', UI.editarea).remove();
+/*
+                        console.log('1: ', UI.editarea.html());
+                        $('.rangySelectionBoundary', UI.editarea).remove();
+                        saveSelection();
+                        if($('span .rangySelectionBoundary', UI.editarea).length) {
+                            $('span:has(.rangySelectionBoundary)', UI.editarea).before($('.rangySelectionBoundary', UI.editarea));
+                        }
+                        console.log('2: ', UI.editarea.html());
+                        restoreSelection();
+*/
+
+                        saveSelection();
+//                        console.log(UI.editarea.html());
+                        rr = document.createRange();
+                        referenceNode = $('.rangySelectionBoundary', UI.editarea).first().get(0);
+                        rr.setStartBefore(referenceNode);
+                        rr.setEndBefore(referenceNode);
+                        $('.rangySelectionBoundary', UI.editarea).remove();
+
 					}
-				}
+				} else { // there's nothing selected
+                    console.log('nothing selected when left is pressed');
+/*
+                    saveSelection();
+                    sbIndex = 0;
+                    translation = $.parseHTML(UI.editarea.html());
+                    $.each(translation, function(index) {
+                        if($(this).hasClass('rangySelectionBoundary')) sbIndex = index;
+                    });
+//                    console.log('$(translation[sbIndex-1]).prop("tagName"): ', $(translation[sbIndex-1]).prop("tagName"));
+//                    console.log('$(translation[sbIndex-2]).prop("tagName"): ', $(translation[sbIndex-2]).prop("tagName"));
+                    if(($(translation[sbIndex-1]).prop("tagName") == 'SPAN')&&($(translation[sbIndex-2]).prop("tagName") == 'BR')) {
+                        console.log('agire');
+                        console.log(UI.editarea.html());
+                        ph = $('.rangySelectionBoundary', UI.editarea);
+                        console.log(ph);
+                        console.log(ph.prev());
+                        prev = ph.prev();
+                        prev.before('<span class="toDestroy" style="width: 0px; float: left;">&nbsp;</span>');
+//                        prev.before(ph);
+                        console.log(UI.editarea.html());
+                        restoreSelection();
+
+//                        $('.toDestroy', UI.editarea).remove();
+
+                    }
+*/
+                }
 				UI.closeTagAutocompletePanel();
 //				UI.jumpTag('start');
 			}
