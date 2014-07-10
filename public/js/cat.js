@@ -3223,6 +3223,7 @@ $.extend(UI, {
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
 //			console.log('a: ', UI.editarea.html());
 			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 //			console.log('b: ', UI.editarea.html());
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
@@ -3231,17 +3232,17 @@ $.extend(UI, {
 				saveSelection();
 			}
 //			console.log($('.rangySelectionBoundary', UI.editarea)[0]);
-			console.log('c: ', UI.editarea.html());
+//			console.log('c: ', UI.editarea.html());
 			var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;
-			console.log('ph: ', ph);
+//			console.log('ph: ', ph);
 			$('.rangySelectionBoundary', UI.editarea).remove();
-			console.log('d: ', UI.editarea.html());
-			console.log($('.tag-autocomplete-endcursor', UI.editarea));
+//			console.log('d: ', UI.editarea.html());
+//			console.log($('.tag-autocomplete-endcursor', UI.editarea));
 			$('.tag-autocomplete-endcursor', UI.editarea).after(ph);
 //			setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
-			console.log('e: ', UI.editarea.html());
+//			console.log('e: ', UI.editarea.html());
 			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));
-			console.log('f: ', UI.editarea.html());
+//			console.log('f: ', UI.editarea.html());
 			restoreSelection();
 			UI.closeTagAutocompletePanel();
 			UI.lockTags(UI.editarea);
@@ -3593,6 +3594,12 @@ $.extend(UI, {
 				if($('.tag-autocomplete').length) {
 //					console.log('ecco');
 //					console.log('prima del replace: ', UI.editarea.html());
+                    // if tag-autocomplete-endcursor is inserted before the &lt; then it is moved after it
+                    UI.stripAngular = (UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi).length)? true : false;
+                    UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"\></span>'));
+//                    console.log(UI.editarea.html().replace(/&lt;<span class="tag-autocomplete-endcursor"\><\/span>/gi, '<span class="tag-autocomplete-endcursor"\>XXX/span>&lt;'));
+//                    console.log(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"\>XXX/span>'));
+
 //					console.log(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) != null);
 					if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) !== null) {
 						UI.editarea.html(UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>'));
@@ -3854,7 +3861,8 @@ $.extend(UI, {
 
 			if (e.which == 13) { // return
 				if($('.tag-autocomplete').length) {
-					$('.tag-autocomplete li.current').click();	
+                    e.preventDefault();
+                    $('.tag-autocomplete li.current').click();
 					return false;
 				}
 			}
@@ -5234,14 +5242,15 @@ $.extend(UI, {
 	},	
 
 	// TAG AUTOCOMPLETE
-	checkAutocompleteTags: function() {console.log('checkAutocompleteTags');
+	checkAutocompleteTags: function() {//console.log('checkAutocompleteTags');
+//        console.log('checkAutocompleteTags: ', UI.editarea.html() );
 		added = this.getPartialTagAutocomplete();
-		console.log('added: "', added + '"');
+//		console.log('added: "', added + '"');
 //		console.log('aa: ', UI.editarea.html());
 		$('.tag-autocomplete li.hidden').removeClass('hidden');
 		$('.tag-autocomplete li').each(function() {
 			var str = $(this).text();
-            console.log('"' + str.substring(0, added.length) + '" == "' + added + '"');
+//            console.log('"' + str.substring(0, added.length) + '" == "' + added + '"');
 			if( str.substring(0, added.length) === added ) {
 				$(this).removeClass('hidden');
 			} else {
@@ -5275,12 +5284,13 @@ $.extend(UI, {
 //		console.log('inizio di getPartialTagAutocomplete: ', UI.editarea.html());
 //		var added = UI.editarea.html().match(/&lt;([&;"\w\s\/=]*?)<span class="tag-autocomplete-endcursor">/gi);
 		var added = UI.editarea.html().match(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?<span class="tag-autocomplete-endcursor">/gi);
-//		console.log(added);
+//        console.log('prova: ', UI.editarea.html().match(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?<span class="tag-autocomplete-endcursor">\&/gi));
+//		console.log('added 1: ', added);
 		added = (added === null)? '' : htmlDecode(added[0].replace(/<span class="tag-autocomplete-endcursor"\>/gi, '')).replace(/\xA0/gi," ");
-//		console.log('added: ', added);
+//        console.log('added 2: ', added);
 		return added;
 	},
-	openTagAutocompletePanel: function() {console.log('openTagAutocompletePanel');
+	openTagAutocompletePanel: function() {//console.log('openTagAutocompletePanel');
 		if(!UI.sourceTags.length) return false;
 		$('.tag-autocomplete-marker').remove();
 
@@ -5289,6 +5299,7 @@ $.extend(UI, {
 		insertNodeAtCursor(node);
 		var endCursor = document.createElement("span");
 		endCursor.setAttribute('class', 'tag-autocomplete-endcursor');
+//        console.log('prima di inserire endcursor: ', UI.editarea.html());
 		insertNodeAtCursor(endCursor);
 //		console.log('inserito endcursor: ', UI.editarea.html());
 		var offset = $('.tag-autocomplete-marker').offset();
@@ -5308,7 +5319,7 @@ $.extend(UI, {
 		
 		$('.tag-autocomplete').css('top', offset.top + addition);
 		$('.tag-autocomplete').css('left', offset.left);
-		this.checkAutocompleteTags();	
+		this.checkAutocompleteTags();
 	},
 	jumpTag: function(range, where) {
 //		console.log('range: ', range);
