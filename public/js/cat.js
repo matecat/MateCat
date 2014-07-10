@@ -1735,6 +1735,7 @@ UI = {
 			$('#point2seg').attr('href', '#' + UI.firstWarnedSegment);
 		}
 	},
+
 	fillWarnings: function(segment, warnings) {
 		//console.log( 'fillWarnings' );
 		//console.log( warnings);
