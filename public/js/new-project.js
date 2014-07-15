@@ -28,6 +28,7 @@ $(document).ready(function() {
 			})			
 		} else {
 			$('#private-tm-key').val($(this).attr('data-key'));
+			$('#get-new-tm-spinner').hide();
 		}
     })
 
@@ -109,7 +110,7 @@ $(document).ready(function() {
                     });
 
                     if( alertComposedMessage.length > 0 ){
-                        APP.alert({msg: alertComposedMessage.join('<br />') + "<br />Perhaps scanned file(s) or image(s)?" });
+			 APP.alert({msg: 'No text to translate in the file(s).<br />Perhaps it is a scanned file or an image? <br /> We recommend converting the file to DOCX using an OCR software (ABBYY FineReader or Nuance PDF Converter) '});
                     }
 
 					$('.uploadbtn').attr('value', 'Analyze');
