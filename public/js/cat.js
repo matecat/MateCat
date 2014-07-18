@@ -3456,7 +3456,7 @@ $.extend(UI, {
             if ( $("#notifbox").hasClass("warningbox") && UI.translationMismatches.total != UI.globalWarnings.length ) {
                 APP.confirm({
                     name: 'confirmDownload',
-                    cancelTxt: 'Fix errors',
+                    cancelTxt: 'Show issues',
                     onCancel: 'goToFirstError',
                     callback: 'continueDownload',
                     okTxt: 'Continue',
