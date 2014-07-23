@@ -743,6 +743,7 @@ $.extend(UI, {
                         console.log('2: ', UI.editarea.html());
                         restoreSelection();
 */
+                        e.preventDefault();
 
                         saveSelection();
 //                        console.log(UI.editarea.html());
@@ -810,7 +811,7 @@ $.extend(UI, {
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
 				if (range.startOffset != range.endOffset) {
-					r = range.startContainer.data;
+					r = range.startContainer.innerText;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) {
 						saveSelection();
 						rr = document.createRange();
