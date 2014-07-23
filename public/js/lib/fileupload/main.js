@@ -582,7 +582,7 @@ userLangName = function(t, userLangCode) {
 progressBar = function(filerow,start,filesize) {
 	var ob = $('.ui-progressbar-value', filerow);
 	if(ob.hasClass('completed')) return;
-	
+
 //	console.log('file size: ' + filesize);
 //	var step = filesize/100000;
 //	console.log('step: ' + step);
@@ -751,7 +751,9 @@ testProgress = function(filerow,filesize,session,progress) {
 //	var step = 50000/filesize;
 	var step = 1;
 	var stepWait = Math.pow(1.2,Math.log(filesize/1000)/Math.LN10 - 1)/10;
-	
+
+	stepWait *= 2;
+
 	progress = progress+step;
 //	console.log(progress);
 
