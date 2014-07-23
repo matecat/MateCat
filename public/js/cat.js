@@ -3753,7 +3753,6 @@ $.extend(UI, {
                         console.log('2: ', UI.editarea.html());
                         restoreSelection();
 */
-                        e.preventDefault();
 
                         saveSelection();
 //                        console.log(UI.editarea.html());
