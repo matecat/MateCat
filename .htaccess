@@ -9,6 +9,9 @@ RewriteEngine On
 #RewriteRule $ /offline.html [R=307,L]
 
 
+RewriteCond %{HTTP_HOST} privateoauth.translated.net$ [NC]
+RewriteRule ^(.*)$ http://matecat.translated.home/$1 [L,R=301] 
+
 RewriteRule ^$ index.php?action=newProject [QSA,L]
 
 RewriteRule ^(translate)[/]?$ index.php?action=cat [L]
