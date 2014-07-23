@@ -30,7 +30,7 @@ class downloadFileController extends downloadController {
             'download_type' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'password'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'downloadToken' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-	    	'force_xliff'	=> array()
+	    	'forceXliff'	=> array()
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -47,7 +47,7 @@ class downloadFileController extends downloadController {
         $this->downloadToken = $__postInput[ 'downloadToken' ];
 
         $this->filename      = $this->fname;
-		$this->force_xliff = ( isset( $__postInput[ 'force_xliff' ] ) && !empty( $__postInput[ 'force_xliff' ] ) && $__postInput[ 'force_xliff' ] == 1 );
+		$this->forceXliff = ( isset( $__postInput[ 'forceXliff' ] ) && !empty( $__postInput[ 'forceXliff' ] ) && $__postInput[ 'forceXliff' ] == 1 );
 
         if (empty($this->id_job)) {
             $this->id_job = "Unknown";
@@ -146,7 +146,7 @@ class downloadFileController extends downloadController {
             $output_content[ $id_file ][ 'content' ]  = $output_xliff;
             $output_content[ $id_file ][ 'filename' ] = $current_filename;
 
-			if ( $this->force_xliff )
+			if ( $this->forceXliff )
 			{
 				$file_info_details = pathinfo( $output_content[ $id_file ][ 'filename' ] );
 				$output_content[ $id_file ][ 'filename' ] = $file_info_details[ 'filename' ] . ".out.sdlxliff";
@@ -167,7 +167,7 @@ class downloadFileController extends downloadController {
                 // we already have an sdlxliff or an accepted file
                 $file['original_file'] = @gzinflate( $file['original_file'] );
 
-                if( !INIT::$CONVERSION_ENABLED || ( empty( $file['original_file'] ) && $mime_type == 'sdlxliff' ) || $this->force_xliff ){
+                if( !INIT::$CONVERSION_ENABLED || ( empty( $file['original_file'] ) && $mime_type == 'sdlxliff' ) || $this->forceXliff ){
                     $convertBackToOriginal = false;
                     Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal , true ) );
                 }
