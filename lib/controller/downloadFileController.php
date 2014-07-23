@@ -16,7 +16,7 @@ class downloadFileController extends downloadController {
     protected $download_type;
 
     protected $JobInfo;
-
+    protected $forceXliff;
     protected $downloadToken;
 
     public function __construct() {
@@ -30,6 +30,7 @@ class downloadFileController extends downloadController {
             'download_type' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'password'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'downloadToken' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+	    	'force_xliff'	=> array()
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -46,6 +47,7 @@ class downloadFileController extends downloadController {
         $this->downloadToken = $__postInput[ 'downloadToken' ];
 
         $this->filename      = $this->fname;
+		$this->force_xliff = ( isset( $__postInput[ 'force_xliff' ] ) && !empty( $__postInput[ 'force_xliff' ] ) && $__postInput[ 'force_xliff' ] == 1 );
 
         if (empty($this->id_job)) {
             $this->id_job = "Unknown";
@@ -144,6 +146,12 @@ class downloadFileController extends downloadController {
             $output_content[ $id_file ][ 'content' ]  = $output_xliff;
             $output_content[ $id_file ][ 'filename' ] = $current_filename;
 
+			if ( $this->force_xliff )
+			{
+				$file_info_details = pathinfo( $output_content[ $id_file ][ 'filename' ] );
+				$output_content[ $id_file ][ 'filename' ] = $file_info_details[ 'filename' ] . ".out.sdlxliff";
+			}
+			
             //TODO set a flag in database when file uploaded to know if this file is a proprietary xlf converted
             //TODO so we can load from database the original file blob ONLY when needed
             /**
@@ -159,7 +167,7 @@ class downloadFileController extends downloadController {
                 // we already have an sdlxliff or an accepted file
                 $file['original_file'] = @gzinflate( $file['original_file'] );
 
-                if( !INIT::$CONVERSION_ENABLED || ( empty( $file['original_file'] ) && $mime_type == 'sdlxliff' ) ){
+                if( !INIT::$CONVERSION_ENABLED || ( empty( $file['original_file'] ) && $mime_type == 'sdlxliff' ) || $this->force_xliff ){
                     $convertBackToOriginal = false;
                     Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal , true ) );
                 }
