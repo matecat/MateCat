@@ -1147,7 +1147,7 @@ UI = {
 						'					</span>' +
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
-						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
+						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
 						'						<ul class="editToolbar">' +
 						'							<li class="uppercase" title="Uppercase"></li>' +
 						'							<li class="lowercase" title="Lowercase"></li>' +
@@ -1434,15 +1434,23 @@ UI = {
         escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
         console.log('escapedSegment: ', escapedSegment);
         $.each(d.data.editable, function(index) {
+//            escapedTranslation = UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives');
 //            console.log('this.translation: ', this.translation);
-//            console.log('aa: ', UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives'));
+//            console.log('escapedTranslation: ', escapedTranslation);
 //			console.log('coso: ', htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives') ));
  //           var aa = UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives');
  //           bb = aa.replace()
-            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives') ) );
-            console.log('diff_view: ', diff_view);
-			UI.dmp.diff_cleanupEfficiency( diff_view );
-            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+//            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), escapedTranslation );
+            var aaa = htmlDecode(this.translation);
+            var bbb = UI.decodePlaceholdersToText(aaa, false, segment_id, 'editable alternatives');
+//            console.log('bbb: ', bbb);
+            var ccc = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), bbb );
+//            console.log('ccc: ', ccc);
+//            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode(escapedTranslation) );
+//            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives') ) );
+//            console.log('diff_view: ', diff_view);
+			UI.dmp.diff_cleanupEfficiency( ccc );
+            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(ccc) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
         $.each(d.data.not_editable, function(index1) {
             var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'not editable alternatives') ) );
@@ -3456,7 +3464,7 @@ $.extend(UI, {
             if ( $("#notifbox").hasClass("warningbox") && UI.translationMismatches.total != UI.globalWarnings.length ) {
                 APP.confirm({
                     name: 'confirmDownload',
-                    cancelTxt: 'Show issues',
+                    cancelTxt: 'Fix errors',
                     onCancel: 'goToFirstError',
                     callback: 'continueDownload',
                     okTxt: 'Continue',
@@ -3745,6 +3753,7 @@ $.extend(UI, {
                         console.log('2: ', UI.editarea.html());
                         restoreSelection();
 */
+                        e.preventDefault();
 
                         saveSelection();
 //                        console.log(UI.editarea.html());
@@ -3812,7 +3821,7 @@ $.extend(UI, {
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
 				if (range.startOffset != range.endOffset) {
-					r = range.startContainer.data;
+					r = range.startContainer.innerText;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) {
 						saveSelection();
 						rr = document.createRange();
@@ -5981,7 +5990,7 @@ $.extend(UI, {
 	updateSearchDisplayCount: function(segment) {
 		numRes = $('.search-display .numbers .results');
 		numRes.text(parseInt(numRes.text()) - 1);
-		if (($('.editarea mark.searchMarker', segment).length - 1) === 0) {
+		if (($('.targetarea mark.searchMarker', segment).length - 1) === 0) {
 			numSeg = $('.search-display .numbers .segments');
 			numSeg.text(parseInt(numSeg.text()) - 1);
 		}
@@ -5997,8 +6006,8 @@ $.extend(UI, {
 	execNext: function() {
 		this.gotoNextResultItem(false);
 	},
-	markSearchResults: function(options) { // if where is specified mark only the range of segment before or after seg (no previous clear)		
-		options = options || {};
+	markSearchResults: function(options) { // if where is specified mark only the range of segment before or after seg (no previous clear)
+        options = options || {};
 		where = options.where;
 		seg = options.seg;
 		singleSegment = options.singleSegment || false;
@@ -6030,10 +6039,10 @@ $.extend(UI, {
 
 			if (typeof where == 'undefined') {
 				UI.doMarkSearchResults(srcHasTags, $(q + " .source:" + containsFunc + "('" + txtSrc + "')"), regSource, q, txtSrc, ignoreCase);
-				UI.doMarkSearchResults(trgHasTags, $(q + " .editarea:" + containsFunc + "('" + txtTrg + "')"), regTarget, q, txtTrg, ignoreCase);
+				UI.doMarkSearchResults(trgHasTags, $(q + " .targetarea:" + containsFunc + "('" + txtTrg + "')"), regTarget, q, txtTrg, ignoreCase);
 //				UI.execSearchResultsMarking(UI.filterExactMatch($(q + " .source:" + containsFunc + "('" + txtSrc + "')"), txtSrc), regSource, false);
 //				UI.execSearchResultsMarking(UI.filterExactMatch($(q + " .editarea:" + containsFunc + "('" + txtTrg + "')"), txtTrg), regTarget, false);
-				$('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker').removeClass('searchPreMarker');
+				$('section').has('.source mark.searchPreMarker').has('.targetarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker').removeClass('searchPreMarker');
 //				$('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
 				$('mark.searchPreMarker:not(.searchMarker)').each(function() {
 					var a = $(this).text();
@@ -6055,21 +6064,20 @@ $.extend(UI, {
 					});
 				}
 				UI.execSearchResultsMarking(UI.filterExactMatch($(q + ".justAdded:not(.status-new) .source:" + containsFunc + "('" + txtSrc + "')"), txtSrc), regSource, false);
-				UI.execSearchResultsMarking(UI.filterExactMatch($(q + ".justAdded:not(.status-new) .editarea:" + containsFunc + "('" + txtTrg + "')"), txtTrg), regTarget, false);
+				UI.execSearchResultsMarking(UI.filterExactMatch($(q + ".justAdded:not(.status-new) .targetarea:" + containsFunc + "('" + txtTrg + "')"), txtTrg), regTarget, false);
 
-				$('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
+				$('section').has('.source mark.searchPreMarker').has('.targetarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
 				$('mark.searchPreMarker').removeClass('searchPreMarker');
 				$('section.justAdded').removeClass('justAdded');
 			}
 		} else { // search mode: normal
-//			console.log('search mode: normal');
 			status = (p.status == 'all') ? '' : '.status-' + p.status;
 			var txt = (typeof p.source != 'undefined') ? p.source : (typeof p.target != 'undefined') ? p.target : '';
 			if (singleSegment) {
-				what = (typeof p.source != 'undefined') ? ' .source' : (typeof p.target != 'undefined') ? ' .editarea' : '';
+				what = (typeof p.source != 'undefined') ? ' .source' : (typeof p.target != 'undefined') ? ' .targetarea' : '';
 				q = '#' + $(singleSegment).attr('id') + what;
 			} else {
-				what = (typeof p.source != 'undefined') ? ' .source' : (typeof p.target != 'undefined') ? ':not(.status-new) .editarea' : '';
+				what = (typeof p.source != 'undefined') ? ' .source' : (typeof p.target != 'undefined') ? ':not(.status-new) .targetarea' : '';
 				q = "section" + status + what;
 			}
 			hasTags = (txt.match(/<.*?\>/gi) !== null) ? true : false;
@@ -6112,7 +6120,7 @@ $.extend(UI, {
 		}
 	},
 	execSearchResultsMarking: function(areas, regex, testRegex) {
-		searchMarker = (UI.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
+        searchMarker = (UI.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
 			if (!testRegex || ($(this).text().match(testRegex) !== null)) {
 				var tt = $(this).html().replace(/&lt;/g, UI.openTagPlaceholder).replace(/&gt;/g, UI.closeTagPlaceholder).replace(regex, '<mark class="' + searchMarker + '">$1</mark>').replace(openTagReg, '&lt;').replace(closeTagReg, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
@@ -6172,7 +6180,7 @@ $.extend(UI, {
 			}
 		} else if (this.searchMode == 'source&target') {
 
-			m = $(".editarea mark.currSearchItem"); // ***
+			m = $(".targetarea mark.currSearchItem"); // ***
 //            console.log($(m).nextAll('mark.searchMarker').length);
 			if ($(m).nextAll('mark.searchMarker').length) { // there are other subsequent results in the segment
 				console.log('altri item nel segmento');
@@ -6284,7 +6292,7 @@ $.extend(UI, {
 
 			}
 		} else { // searchMode: source&target or normal
-			var wh = (this.searchMode == 'source&target')? ' .editarea' : '';
+			var wh = (this.searchMode == 'source&target')? ' .targetarea' : '';
 			seg = $('section' + wh).has("mark.searchMarker");
 			ss = (this.searchMode == 'source&target')? el + '-editarea' : el;
 			found = false;
