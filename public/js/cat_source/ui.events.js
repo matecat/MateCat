@@ -221,6 +221,7 @@ $.extend(UI, {
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
 //			console.log('a: ', UI.editarea.html());
 			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 //			console.log('b: ', UI.editarea.html());
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
@@ -229,17 +230,17 @@ $.extend(UI, {
 				saveSelection();
 			}
 //			console.log($('.rangySelectionBoundary', UI.editarea)[0]);
-			console.log('c: ', UI.editarea.html());
+//			console.log('c: ', UI.editarea.html());
 			var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;
-			console.log('ph: ', ph);
+//			console.log('ph: ', ph);
 			$('.rangySelectionBoundary', UI.editarea).remove();
-			console.log('d: ', UI.editarea.html());
-			console.log($('.tag-autocomplete-endcursor', UI.editarea));
+//			console.log('d: ', UI.editarea.html());
+//			console.log($('.tag-autocomplete-endcursor', UI.editarea));
 			$('.tag-autocomplete-endcursor', UI.editarea).after(ph);
 //			setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
-			console.log('e: ', UI.editarea.html());
+//			console.log('e: ', UI.editarea.html());
 			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));
-			console.log('f: ', UI.editarea.html());
+//			console.log('f: ', UI.editarea.html());
 			restoreSelection();
 			UI.closeTagAutocompletePanel();
 			UI.lockTags(UI.editarea);
@@ -547,9 +548,12 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.preOpenConcordance();
         }).on('keyup', '.editor .editarea', 'return', function(e) {
+            console.log('UI.defaultBRmanagement: ', UI.defaultBRmanagement);
             if(!UI.defaultBRmanagement) {
                 range = window.getSelection().getRangeAt(0);
-                $('.returnTempPlaceholder', UI.editarea).after('<br />');
+                $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
+                console.log('qua');
+//                $('.returnTempPlaceholder', UI.editarea).after('<br />');
                 node = $('.returnTempPlaceholder + br', UI.editarea)[0];
                 setCursorAfterNode(range, node);
                 saveSelection();
@@ -588,6 +592,12 @@ $.extend(UI, {
 				if($('.tag-autocomplete').length) {
 //					console.log('ecco');
 //					console.log('prima del replace: ', UI.editarea.html());
+                    // if tag-autocomplete-endcursor is inserted before the &lt; then it is moved after it
+                    UI.stripAngular = (UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi).length)? true : false;
+                    UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"\></span>'));
+//                    console.log(UI.editarea.html().replace(/&lt;<span class="tag-autocomplete-endcursor"\><\/span>/gi, '<span class="tag-autocomplete-endcursor"\>XXX/span>&lt;'));
+//                    console.log(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"\>XXX/span>'));
+
 //					console.log(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) != null);
 					if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) !== null) {
 						UI.editarea.html(UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>'));
@@ -637,6 +647,7 @@ $.extend(UI, {
                     $.each(translation, function(index) {
                         if($(this).hasClass('rangySelectionBoundary')) sbIndex = index;
                     });
+
                     var undeletableMonad = (($(translation[sbIndex-1]).hasClass('monad'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
                     var selBound = $('.rangySelectionBoundary', UI.editarea);
                     if(undeletableMonad) selBound.prev().remove();
@@ -717,17 +728,59 @@ $.extend(UI, {
 			if (e.which == 37) { // left arrow
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
+//                console.log('range: ', range);
 				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
-					r = range.startContainer.data;
+					r = range.startContainer.innerText;
+//                    r = range.startContainer.data;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) { // if a tag is selected
-						saveSelection();
-						rr = document.createRange();
-						referenceNode = $('.rangySelectionBoundary', UI.editarea).first().get(0);
-						rr.setStartBefore(referenceNode);
-						rr.setEndBefore(referenceNode);
-						$('.rangySelectionBoundary', UI.editarea).remove();
+/*
+                        console.log('1: ', UI.editarea.html());
+                        $('.rangySelectionBoundary', UI.editarea).remove();
+                        saveSelection();
+                        if($('span .rangySelectionBoundary', UI.editarea).length) {
+                            $('span:has(.rangySelectionBoundary)', UI.editarea).before($('.rangySelectionBoundary', UI.editarea));
+                        }
+                        console.log('2: ', UI.editarea.html());
+                        restoreSelection();
+*/
+
+                        saveSelection();
+//                        console.log(UI.editarea.html());
+                        rr = document.createRange();
+                        referenceNode = $('.rangySelectionBoundary', UI.editarea).first().get(0);
+                        rr.setStartBefore(referenceNode);
+                        rr.setEndBefore(referenceNode);
+                        $('.rangySelectionBoundary', UI.editarea).remove();
+
 					}
-				}
+				} else { // there's nothing selected
+                    console.log('nothing selected when left is pressed');
+/*
+                    saveSelection();
+                    sbIndex = 0;
+                    translation = $.parseHTML(UI.editarea.html());
+                    $.each(translation, function(index) {
+                        if($(this).hasClass('rangySelectionBoundary')) sbIndex = index;
+                    });
+//                    console.log('$(translation[sbIndex-1]).prop("tagName"): ', $(translation[sbIndex-1]).prop("tagName"));
+//                    console.log('$(translation[sbIndex-2]).prop("tagName"): ', $(translation[sbIndex-2]).prop("tagName"));
+                    if(($(translation[sbIndex-1]).prop("tagName") == 'SPAN')&&($(translation[sbIndex-2]).prop("tagName") == 'BR')) {
+                        console.log('agire');
+                        console.log(UI.editarea.html());
+                        ph = $('.rangySelectionBoundary', UI.editarea);
+                        console.log(ph);
+                        console.log(ph.prev());
+                        prev = ph.prev();
+                        prev.before('<span class="toDestroy" style="width: 0px; float: left;">&nbsp;</span>');
+//                        prev.before(ph);
+                        console.log(UI.editarea.html());
+                        restoreSelection();
+
+//                        $('.toDestroy', UI.editarea).remove();
+
+                    }
+*/
+                }
 				UI.closeTagAutocompletePanel();
 //				UI.jumpTag('start');
 			}
@@ -806,7 +859,8 @@ $.extend(UI, {
 
 			if (e.which == 13) { // return
 				if($('.tag-autocomplete').length) {
-					$('.tag-autocomplete li.current').click();	
+                    e.preventDefault();
+                    $('.tag-autocomplete li.current').click();
 					return false;
 				}
 			}

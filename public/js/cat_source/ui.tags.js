@@ -299,12 +299,14 @@ $.extend(UI, {
 
 	// TAG AUTOCOMPLETE
 	checkAutocompleteTags: function() {//console.log('checkAutocompleteTags');
+//        console.log('checkAutocompleteTags: ', UI.editarea.html() );
 		added = this.getPartialTagAutocomplete();
 //		console.log('added: "', added + '"');
 //		console.log('aa: ', UI.editarea.html());
 		$('.tag-autocomplete li.hidden').removeClass('hidden');
 		$('.tag-autocomplete li').each(function() {
 			var str = $(this).text();
+//            console.log('"' + str.substring(0, added.length) + '" == "' + added + '"');
 			if( str.substring(0, added.length) === added ) {
 				$(this).removeClass('hidden');
 			} else {
@@ -312,7 +314,7 @@ $.extend(UI, {
 			}
 		});
 //		console.log('bb: ', UI.editarea.html());
-		if(!$('.tag-autocomplete li:not(.hidden)').length) {
+		if(!$('.tag-autocomplete li:not(.hidden)').length) { // no tags matching what the user is writing
 
 			$('.tag-autocomplete').addClass('empty');
 			if(UI.preCloseTagAutocomplete) {
@@ -338,12 +340,13 @@ $.extend(UI, {
 //		console.log('inizio di getPartialTagAutocomplete: ', UI.editarea.html());
 //		var added = UI.editarea.html().match(/&lt;([&;"\w\s\/=]*?)<span class="tag-autocomplete-endcursor">/gi);
 		var added = UI.editarea.html().match(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?<span class="tag-autocomplete-endcursor">/gi);
-//		console.log(added);
+//        console.log('prova: ', UI.editarea.html().match(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?<span class="tag-autocomplete-endcursor">\&/gi));
+//		console.log('added 1: ', added);
 		added = (added === null)? '' : htmlDecode(added[0].replace(/<span class="tag-autocomplete-endcursor"\>/gi, '')).replace(/\xA0/gi," ");
-//		console.log('added: ', added);
+//        console.log('added 2: ', added);
 		return added;
 	},
-	openTagAutocompletePanel: function() {console.log('openTagAutocompletePanel');
+	openTagAutocompletePanel: function() {//console.log('openTagAutocompletePanel');
 		if(!UI.sourceTags.length) return false;
 		$('.tag-autocomplete-marker').remove();
 
@@ -352,6 +355,7 @@ $.extend(UI, {
 		insertNodeAtCursor(node);
 		var endCursor = document.createElement("span");
 		endCursor.setAttribute('class', 'tag-autocomplete-endcursor');
+//        console.log('prima di inserire endcursor: ', UI.editarea.html());
 		insertNodeAtCursor(endCursor);
 //		console.log('inserito endcursor: ', UI.editarea.html());
 		var offset = $('.tag-autocomplete-marker').offset();
@@ -371,7 +375,7 @@ $.extend(UI, {
 		
 		$('.tag-autocomplete').css('top', offset.top + addition);
 		$('.tag-autocomplete').css('left', offset.left);
-		this.checkAutocompleteTags();	
+		this.checkAutocompleteTags();
 	},
 	jumpTag: function(range, where) {
 //		console.log('range: ', range);
