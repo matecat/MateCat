@@ -82,6 +82,7 @@ for($i = 1; $i <= $last_id; $i += $row_interval){
 			implode(", ", $jobs),
 			INIT::$JOB_ARCHIVABILITY_THRESHOLD
 		);
+
 		//file_put_contents(INIT::$LOG_REPOSITORY."/archive_queries.txt", $q_archive."\n", FILE_APPEND);
 		//file_put_contents(INIT::$LOG_REPOSITORY."/archive_queries.txt", "=============\n", FILE_APPEND);
 
