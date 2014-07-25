@@ -2946,4 +2946,43 @@ function setJobCompleteness( $jid, $is_completed ) {
 	return $db->affected_rows;
 }
 
+/**
+ * Given an array of job IDs, this function returns the IDs of archivable jobs
+ * @param array $jobs
+ * @return array
+ */
+function getArchivableJobs($jobs = array()){
+	$db    = Database::obtain();
+	$query =
+		"select
+			distinct j.id
+		from
+			jobs j join
+			segment_translations st on j.id = st.id_job
+			and j.create_date < (curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD." day)
+		where
+			translation_date < (curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD."  day)
+			and j.status_owner = 'active'
+			and j.status = 'active'
+			and j.id in (%s)";
+
+	$results = $db->fetch_array(
+	              sprintf(
+		              $query,
+	                  implode(", ", $jobs)
+	              )
+				);
+
+	$err     = $db->get_error();
+	$errno   = $err[ 'error_code' ];
+
+	if ( $errno != 0 ) {
+		log::doLog( "$errno: " . var_export( $err, true ) );
+
+		return $errno * -1;
+	}
+
+	return $results;
+}
+
 ?>

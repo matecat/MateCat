@@ -269,5 +269,25 @@ class Utils {
 
     }
 
+	/**
+	 * @author Roberto
+	 * @param array $jobs an array of job IDs (integers)
+	 * @return array|bool An array of archivable job IDs or false in case of error
+	 */
+	public static function getArchivableJobs($jobs = array()){
+		if(!is_array($jobs) && !is_numeric($jobs)) return false;
+
+		if(is_numeric($jobs)) $jobs = array($jobs);
+
+		$jobs = getArchivableJobs($jobs);
+
+		if($jobs !== false){
+			foreach($jobs as $i=>$job){
+				$jobs[$i] = (int)$job['id'];
+			}
+		}
+		return $jobs;
+	}
+
 }
 
