@@ -49,10 +49,19 @@ class catController extends viewController {
 
 		parent::__construct(false);
 		parent::makeTemplate("index.html");
-		$this->jid = $this->get_from_get_post("jid");
-		$this->password = $this->get_from_get_post("password");
-		$this->start_from = $this->get_from_get_post("start");
-		$this->page = $this->get_from_get_post("page");
+		
+		$filterArgs = array(
+			'jid'           => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+			'password'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+			'start'         => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+			'page'          => array( 'filter' => FILTER_SANITIZE_NUMBER_INT )
+		);
+		$getInput = (object)filter_input_array( INPUT_GET, $filterArgs );
+
+		$this->jid = $getInput->jid;
+		$this->password = $getInput->password;
+		$this->start_from = $getInput->start;
+		$this->page = $getInput->page;
 
 		if (isset($_GET['step'])) {
 			$this->step = $_GET['step'];
@@ -124,6 +133,18 @@ class catController extends viewController {
 //			$this->setTemplateVars();
 			//stop execution
 			return;
+		}
+
+		$jobIsArchivable = count( Utils::getArchivableJobs($this->jid) ) > 0;
+
+		if( $jobIsArchivable && !$this->job_cancelled) {
+			//TODO: change this workaround
+
+			$res = "job";
+			$new_status = 'archived';
+
+			updateJobsStatus( $res, $this->jid, $new_status, null, null, $this->password );
+			$this->job_archived = true;
 		}
 
 		foreach ($data as $i => $job) {
@@ -286,8 +307,8 @@ class catController extends viewController {
             $this->template->target              = null;
             $this->template->source_code         = null;
             $this->template->target_code         = null;
-            $this->template->firstSegmentOfFiles = null;
-            $this->template->fileCounter         = null;
+            $this->template->firstSegmentOfFiles = 0;
+            $this->template->fileCounter         = 0;
 	        $this->template->owner_email         = $this->job_owner;
         } else {
             $this->template->pid                 = $this->pid;
