@@ -10,7 +10,7 @@ RewriteEngine On
 
 
 RewriteCond %{HTTP_HOST} privateoauth.translated.net$ [NC]
-RewriteRule ^(.*)$ http://matecat.translated.home/$1 [L,R=301] 
+RewriteRule ^(.*)$ http://matecat.local/$1 [L,R=301]
 
 RewriteRule ^$ index.php?action=newProject [QSA,L]
 

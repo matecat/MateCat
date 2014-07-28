@@ -3229,10 +3229,12 @@ $.extend(UI, {
 			e.preventDefault();
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
-//			console.log('a: ', UI.editarea.html());
+			console.log('a: ', UI.editarea.html());
+            console.log('prova: ', UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, 'COSO'))
 			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+            console.log('a1: ', UI.editarea.html());
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
-//			console.log('b: ', UI.editarea.html());
+			console.log('b: ', UI.editarea.html());
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
 				console.log('qui: ', document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
@@ -3240,17 +3242,17 @@ $.extend(UI, {
 				saveSelection();
 			}
 //			console.log($('.rangySelectionBoundary', UI.editarea)[0]);
-//			console.log('c: ', UI.editarea.html());
+			console.log('c: ', UI.editarea.html());
 			var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;
 //			console.log('ph: ', ph);
 			$('.rangySelectionBoundary', UI.editarea).remove();
-//			console.log('d: ', UI.editarea.html());
+			console.log('d: ', UI.editarea.html());
 //			console.log($('.tag-autocomplete-endcursor', UI.editarea));
 			$('.tag-autocomplete-endcursor', UI.editarea).after(ph);
 //			setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
-//			console.log('e: ', UI.editarea.html());
+			console.log('e: ', UI.editarea.html());
 			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));
-//			console.log('f: ', UI.editarea.html());
+			console.log('f: ', UI.editarea.html());
 			restoreSelection();
 			UI.closeTagAutocompletePanel();
 			UI.lockTags(UI.editarea);
@@ -3743,16 +3745,18 @@ $.extend(UI, {
 					r = range.startContainer.innerText;
 //                    r = range.startContainer.data;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) { // if a tag is selected
-/*
-                        console.log('1: ', UI.editarea.html());
-                        $('.rangySelectionBoundary', UI.editarea).remove();
-                        saveSelection();
-                        if($('span .rangySelectionBoundary', UI.editarea).length) {
-                            $('span:has(.rangySelectionBoundary)', UI.editarea).before($('.rangySelectionBoundary', UI.editarea));
-                        }
-                        console.log('2: ', UI.editarea.html());
-                        restoreSelection();
-*/
+                        e.preventDefault();
+
+                        /*
+                                                console.log('1: ', UI.editarea.html());
+                                                $('.rangySelectionBoundary', UI.editarea).remove();
+                                                saveSelection();
+                                                if($('span .rangySelectionBoundary', UI.editarea).length) {
+                                                    $('span:has(.rangySelectionBoundary)', UI.editarea).before($('.rangySelectionBoundary', UI.editarea));
+                                                }
+                                                console.log('2: ', UI.editarea.html());
+                                                restoreSelection();
+                        */
 
                         saveSelection();
 //                        console.log(UI.editarea.html());
@@ -3869,6 +3873,7 @@ $.extend(UI, {
 
 			if (e.which == 13) { // return
 				if($('.tag-autocomplete').length) {
+                    console.log('QQQQQQ: ', UI.editarea.html());
                     e.preventDefault();
                     $('.tag-autocomplete li.current').click();
 					return false;
