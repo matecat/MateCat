@@ -61,6 +61,11 @@ class INIT {
 	public static $CONFIG_VERSION_ERR_MESSAGE;
 
     /**
+	 * @var $JOB_ARCHIVABILITY_THRESHOLD int number of days of inactivity for a job before it's automatically archived
+	 */
+	public static $JOB_ARCHIVABILITY_THRESHOLD;
+
+    /**
      * ENABLE_OUTSOURCE set as true will show the option to outsource to an external translation provider (translated.net by default)
      * You can set it to false, but We are happy if you keep this on.
      * For each translation outsourced to Translated.net (the main Matecat developer),
