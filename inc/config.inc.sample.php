@@ -388,6 +388,7 @@ class INIT {
 
 	    self::$CONFIG_VERSION_ERR_MESSAGE = "Your config.ini.php file is not up-to-date.";
 
+	    self::$JOB_ARCHIVABILITY_THRESHOLD = 15;
 	}
 
     public static function fatalErrorHandler() {
