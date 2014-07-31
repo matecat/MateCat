@@ -207,7 +207,11 @@ class downloadFileController extends downloadController {
         if ( count( $output_content ) > 1 ) {
 
             if ( $pathinfo[ 'extension' ] != 'zip' ) {
-                $this->filename = $pathinfo[ 'basename' ] . ".zip";
+		    if ($this->forceXliff){
+			    $this->filename = $this->id_job . ".zip";
+		    }else{
+			    $this->filename = $pathinfo[ 'basename' ] . ".zip";
+		    }
             }
 
             $this->composeZip( $output_content, $jobData[ 'source' ] ); //add zip archive content here;

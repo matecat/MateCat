@@ -18,11 +18,8 @@ class newProjectController extends viewController {
 	public function __construct() {
 
 		parent::__construct(false);
-		if (!isset($_REQUEST['fork'])) {
-			parent::makeTemplate("upload.html");
-		} else {
-			parent::makeTemplate("upload_cloud.html");
-		}
+		parent::makeTemplate("upload.html");
+
 		$this->guid = Utils::create_guid();
 		$this->lang_handler=Languages::getInstance();
 	}
