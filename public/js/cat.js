@@ -2846,8 +2846,8 @@ $.extend(UI, {
 				"label" : "Go to current segment",
 				"equivalent": "",
 				"keystrokes" : {
-					"standard": "ctrl+left",
-					"mac": "meta+left",
+					"standard": "ctrl+home",
+					"mac": "meta+shift+up",
 				}
 			},
 			"copySource": {
@@ -3230,7 +3230,7 @@ $.extend(UI, {
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
 			console.log('a: ', UI.editarea.html());
-            console.log('prova: ', UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, 'COSO'))
+            console.log('prova: ', UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, 'COSO'));
 			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
             console.log('a1: ', UI.editarea.html());
             UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
@@ -3559,18 +3559,108 @@ $.extend(UI, {
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
+        }).on('keydown', '.editor .editarea', function(e) {
+//            saveSelection();
+//            console.log('KEYDOWN: ', UI.editarea.html());
+//            restoreSelection();
+        }).on('keypress', '.editor .editarea', function(e) {
+//            saveSelection();
+//            console.log('KEYPRESS: ', UI.editarea.html());
+//            restoreSelection();
+        }).on('keyup', '.editor .editarea', function(e) {
+/*
+            saveSelection();
+            insideBr = $('.editor .editarea .br .rangySelectionBoundary').length;
+//            if(insideBr) console.log('is inside BR');
+
+            currentBr = $('.br:has(.rangySelectionBoundary)', UI.editarea);
+//            startRow = $('.br:has(.rangySelectionBoundary) .startRow', UI.editarea);
+            pastedContent = currentBr.text().trim();
+
+//            pastedContent = startRow.text().trim();
+            restoreSelection();
+//            console.log('startRow: ', startRow);
+//            console.log('startRow text: ', startRow.text().trim());
+            currentBr.html('<br /><span class="startRow">&nbsp;</span>');
+//            console.log('currentBr: ', currentBr);
+//            console.log('pastedContent: ', pastedContent);
+            $(currentBr).after(pastedContent + '<span class="pointCursorHere"></span>');
+//            setCursorPosition($('.pointCursorHere', UI.editarea)[0]);
+            $('.pointCursorHere', UI.editarea).remove();
+*/
+//            setCursorAfterNode(window.getSelection().getRangeAt(0), $('.pointCursorHere', UI.editarea)[0]);
+
+//            console.log('ecco: ', UI.editarea.html());
+//      $('.editor .editarea .startRow').replaceWith('<span class="startRow">&nbsp;</span>' + pastedContent);
+
+            /*
+                        saveSelection();
+                        insideStartRow = $('.editor .editarea .startRow .rangySelectionBoundary').length;
+                        startRow = $('.startRow:has(.rangySelectionBoundary)', UI.editarea);
+                        pastedContent = startRow.text().trim();
+
+            //            console.log('cursore dentro a uno span? ', insideStartRow);
+                        restoreSelection();
+            //            console.log('insideStartRow: ', insideStartRow);
+            //            console.log('startRow: ', '"' + startRow.text() + '"');
+            //            console.log('startRow: ', '"' + startRow.text().trim() + '"');
+            //            $(startRow).html()
+            //            $('.editor .editarea .startRow')[0].innerHTML = '&nbsp;';
+            //            console.log('pastedContent: ', pastedContent);
+                        $('.editor .editarea .startRow').replaceWith(pastedContent);
+
+            //            $('.editor .editarea .startRow').html('&nbsp;').after(startRow.text().trim());
+            //            $('.editor .editarea .startRow').text('COSO').after(startRow.text().trim());
+            */
+
+//            saveSelection();
+//            console.log('KEYUP: ', UI.editarea.html());
+//            restoreSelection();
+/*
+            // are the cursor inside of a span tag?
+            saveSelection();
+            insideSpan = $('.editor .editarea span .rangySelectionBoundary').length;
+            console.log('cursore dentro a uno span? ', insideSpan);
+            restoreSelection();
+            console.log('insideSpan: ', insideSpan);
+            if(insideSpan) {
+                console.log('vediamo insideSpan');
+                e.preventDefault();
+            }
+*/
+            /*
+                        console.log('KEYDOWN ON EDITAREA');
+                        saveSelection();
+                        console.log('html: ', UI.editarea.html());
+                        insideSpan = $('.editor .editarea span .rangySelectionBoundary').length;
+                        console.log('cursore dentro a uno span? ', insideSpan);
+                        range = window.getSelection().getRangeAt(0);
+                        node = $('.editor .editarea span:has(.rangySelectionBoundary)')[0];
+                        if(insideSpan) {
+                            console.log(node);
+                            setCursorPosition(node, 'end');
+            //                setCursorAfterNode(range, node);
+                        }
+                        restoreSelection();
+             */
         }).on('keyup', '.editor .editarea', 'return', function(e) {
             console.log('UI.defaultBRmanagement: ', UI.defaultBRmanagement);
+
             if(!UI.defaultBRmanagement) {
                 range = window.getSelection().getRangeAt(0);
-                $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
-                console.log('qua');
-//                $('.returnTempPlaceholder', UI.editarea).after('<br />');
-                node = $('.returnTempPlaceholder + br', UI.editarea)[0];
-                setCursorAfterNode(range, node);
+//                $('.returnTempPlaceholder', UI.editarea).after('<span class="br"><br /><span class="startRow">&nbsp;</span></span>');
+                $('.returnTempPlaceholder', UI.editarea).after('<br />');
+//                $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
+//                console.log('qua');
+//                $('.returnTempPlaceholder', UI.editarea).after('<br /><img>');
+
+//                node = $('.returnTempPlaceholder + br', UI.editarea)[0];
+//                setCursorAfterNode(range, node);
                 saveSelection();
                 $('.returnTempPlaceholder', UI.editarea).remove();
                 restoreSelection();
+            } else {
+//                 $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
             }
         }).on('keydown', '.editor .editarea', 'return', function(e) {
             UI.defaultBRmanagement = false;
@@ -3583,6 +3673,7 @@ $.extend(UI, {
                 e.preventDefault();
             }
         }).on('keypress', '.editor .editarea', function(e) {
+            console.log('which: ', e.which);
 //			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
@@ -5415,9 +5506,9 @@ $.extend(UI, {
 			$('.sub-editor.concordances .overflow').css('height', $('.sub-editor.concordances').height() + 'px');
 			$('.sub-editor.concordances').addClass('extended');
 			if($('.sub-editor.concordances .more').length) {
-				$('.sub-editor.concordances .more').text('Less');
+				$('.sub-editor.concordances .more').text('Fewer');
 			} else {
-				$('.sub-editor.concordances', segment).append('<a href="#" class="more">Less</a>');				
+				$('.sub-editor.concordances', segment).append('<a href="#" class="more">Fewer</a>');
 			}
 			this.custom.extended_concordance = true;
 			this.saveCustomization();
@@ -6611,7 +6702,7 @@ function pasteHtmlAtCaret(html, selectPastedContent) {
     }
 }
 
-function setCursorPosition(el, pos) {
+function setCursorPosition(el, pos) {console.log('el: ', el);
 	pos = pos || 0;
 	var range = document.createRange();
 	var sel = window.getSelection();

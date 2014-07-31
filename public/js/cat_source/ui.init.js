@@ -98,8 +98,8 @@ $.extend(UI, {
 				"label" : "Go to current segment",
 				"equivalent": "",
 				"keystrokes" : {
-					"standard": "ctrl+left",
-					"mac": "meta+left",
+					"standard": "ctrl+home",
+					"mac": "meta+shift+up",
 				}
 			},
 			"copySource": {
