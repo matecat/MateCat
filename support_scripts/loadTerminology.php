@@ -18,11 +18,7 @@ $db->connect ();
 
 $glossaries = array(
 
-        array( 'file' => 'GLOSSARIO_EN_GRE.csv', 'source' => 'en-GB', 'target' => "el-GR" ),
-        array( 'file' => 'GLOSSARIO_EN_CHI_TRAD.csv', 'source' => 'en-GB', 'target' => "zh-TW" ),
-        array( 'file' => 'GLOSSARIO_EN_CHI.csv', 'source' => 'en-GB', 'target' => "zh-CN" ),
-        array( 'file' => 'GLOSSARIO_EN_SPA.csv', 'source' => 'en-GB', 'target' => "es-ES" ),
-        array( 'file' => 'GLOSSARIO_EN_RUS.csv', 'source' => 'en-GB', 'target' => "ru-RU" ),
+        array( 'file' => 'glossary.csv', 'source' => 'it-IT', 'target' => "en-GB" ),
 
 );
 
@@ -36,7 +32,7 @@ foreach ( $glossaries as $gloss ) {
     $config[ 'target_lang' ] = $gloss['target'];
     $config[ 'email' ]       = "demo@matecat.com";
     $config[ 'get_mt' ]      = false;
-    $config[ 'id_user' ]     = "3d995a93a1a7dbf987e9";
+    $config[ 'id_user' ]     = "5c94c21ae1f3c907b3b8";
     $config[ 'num_result' ]  = null;
     $config[ 'isGlossary' ]  = true;
 

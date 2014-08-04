@@ -338,30 +338,13 @@ class XliffSAXTranslationReplacer{
 
 		}
 
-        //already useful after QA implementation?? Log to see if it is executed some times
-		@$xml_valid = simplexml_load_string("<placeholder>$translation</placeholder>");
-		if (!$xml_valid) {
-			$temp = preg_split("|\<|si", $translation);
-			$item = end($temp);
-			if (preg_match('|/.*?>\W*$|si', $item)) {
-				$end_tags.="<$item";
-			}
-			while ($item = prev($temp)) {
-				if (preg_match('|/.*?>\W*$|si', $item)) {
-					$end_tags = "<$item$end_tags"; //insert at the top of the string
-				}
-			}
-            Log::doLog( "simplexml_load_string validation of $translation" );
-			$translation = str_replace($end_tags, "", $translation);
-		}
-        //already useful after QA implementation??
-
-
 		if (!empty($seg['mrk_id'])) {
 			$translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">".$seg['mrk_prev_tags'].$translation.$seg['mrk_succ_tags']."</mrk>";
 		}
+
 		$transunit_translation.=$seg['prev_tags'] . $translation . $end_tags . $seg['succ_tags'];
 		return $transunit_translation;
+
 	}
 
 }
