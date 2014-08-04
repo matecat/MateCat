@@ -23,7 +23,8 @@ RewriteRule ^(statistics)[/]?$ index.php?action=projectStatistics [L]
 RewriteRule ^(login)[/]?$ index.php?action=loginPage [L,QSA]
 RewriteRule ^(ajaxLogin)[/]?$ index.php?action=formLogin [L,QSA]
 
-RewriteRule ^(badConfiguration)[/]?$ lib/view/badConfiguration.html [L]
+RewriteRule ^(badConfiguration)[/]?$ index.php?action=badConfiguration [L]
+#RewriteRule ^(badConfiguration)[/]?$ lib/view/badConfiguration.html [L]
 RewriteRule ^(configMissing)[/]?$ lib/view/configMissing.html [L]
 
 #RewriteRule ^(oauth)/(request)[/]?$ index.php?action=oauthRequestInitializer [L,QSA]
