@@ -786,6 +786,7 @@ UI = {
 			$('.editarea', next).trigger("click", "moving");
 		} else {
 			next = this.currentFile.next().find('section:first');
+            console.log('next: ', next);
 			if (next.length) {
 				this.scrollSegment(next);
 				$('.editarea', next).trigger("click", "moving");

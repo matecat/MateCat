@@ -786,6 +786,7 @@ UI = {
 			$('.editarea', next).trigger("click", "moving");
 		} else {
 			next = this.currentFile.next().find('section:first');
+            console.log('next: ', next);
 			if (next.length) {
 				this.scrollSegment(next);
 				$('.editarea', next).trigger("click", "moving");
@@ -4142,7 +4143,6 @@ $.extend(UI, {
             UI.hideEditToolbar();
 
             UI.currentSegment.removeClass('modified');
-
 			var skipChange = false;
 			if (w == 'next-untranslated') {
 				console.log('next-untranslated');
@@ -4162,7 +4162,7 @@ $.extend(UI, {
 					console.log('il nextuntranslated è già caricato: ', UI.nextUntranslatedSegmentId);
 				}
 			} else {
-				if (!$(UI.currentSegment).nextAll('section').length) {
+				if (!$(UI.currentSegment).nextAll('section:not(.readonly)').length) {
 					UI.changeStatus(this, 'translated', 0);
 					skipChange = true;
 					$('#' + $(this).attr('data-segmentid') + '-close').click();
