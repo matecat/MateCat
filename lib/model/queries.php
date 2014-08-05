@@ -1422,6 +1422,7 @@ function getEditLog($jid, $pass) {
 		st.suggestions_array AS sar,
 		st.suggestion_source AS ss,
 		st.suggestion_match AS sm,
+		st.suggestion_position AS sp,
 		st.mt_qe,
 		j.id_translator AS tid,
 		j.source AS source_lang,
