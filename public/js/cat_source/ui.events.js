@@ -1116,6 +1116,7 @@ $.extend(UI, {
 			UI.beforeDropSearchSourceHTML = UI.editarea.html();
 			UI.currentConcordanceField = $(this);
 			setTimeout(function() {
+                console.log('sto per pulire');
 				UI.cleanDroppedTag(UI.currentConcordanceField, UI.beforeDropSearchSourceHTML);
 			}, 100);
 		}).on('click', '.editor .editarea, .editor .source', function() {
@@ -1338,6 +1339,7 @@ $.extend(UI, {
 			$(this).parents('.comment').find('.gl-comment').toggle();
 		}).on('paste', '.editarea', function(e) {
 			console.log('paste in editarea');
+
 			UI.saveInUndoStack('paste');
 			$('#placeHolder').remove();
 			var node = document.createElement("div");
@@ -1347,7 +1349,7 @@ $.extend(UI, {
 			if(UI.isFirefox) pasteHtmlAtCaret('<div id="placeHolder"></div>');
 			var ev = (UI.isFirefox) ? e : event;
 			handlepaste(this, ev);
-
+            /*
 			$(window).trigger({
 				type: "pastedInEditarea",
 				segment: segment
@@ -1356,8 +1358,9 @@ $.extend(UI, {
 			setTimeout(function() {
 				UI.saveInUndoStack('paste');
 			}, 100);
-			UI.lockTags(UI.editarea);
+ 			UI.lockTags(UI.editarea);
 			UI.currentSegmentQA();
+ */
 		}).on('click', 'a.close', function(e, param) {
 			e.preventDefault();
 			var save = (typeof param == 'undefined') ? 'noSave' : param;

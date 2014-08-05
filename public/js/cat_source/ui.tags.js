@@ -191,7 +191,7 @@ $.extend(UI, {
 	
 	// TAG CLEANING
 	cleanDroppedTag: function(area, beforeDropHTML) {
-		if (area == this.editarea) {
+ //       if (area == this.editarea) {
 			this.droppingInEditarea = false;
 
 			diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
@@ -234,7 +234,7 @@ $.extend(UI, {
 			area.html(area.html().replace(this.cursorPlaceholder, phcode));
 			restoreSelection();
 			area.html(area.html().replace(this.cursorPlaceholder, '').replace(/\[\*\*\[(.*?)\]\*\*\]/gi, "<$1>"));
-
+/*
 		} else {
 	// old cleaning code to be evaluated
 			diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
@@ -264,6 +264,7 @@ $.extend(UI, {
 			restoreSelection();
 			area.html(area.html().replace(this.cursorPlaceholder, ''));			
 		}
+*/
 	},
 	
 	// TAG MISMATCH
