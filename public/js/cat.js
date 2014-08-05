@@ -4133,10 +4133,14 @@ $.extend(UI, {
 			UI.currentSelectedText = false;
 			UI.currentSearchInTarget = false;
 			$('#contextMenu').hide();
+        }).on('blur', '.editor .editarea', function() {
+            UI.hideEditToolbar();
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
 			var w = ($(this).hasClass('translated')) ? 'translated' : 'next-untranslated';
 			e.preventDefault();
-			UI.currentSegment.removeClass('modified');
+            UI.hideEditToolbar();
+
+            UI.currentSegment.removeClass('modified');
 
 			var skipChange = false;
 			if (w == 'next-untranslated') {
