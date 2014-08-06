@@ -70,6 +70,8 @@ while (1) {
 		echo "collecting stats...";
 		Log::doLog( "done" );
 		Log::doLog( "collecting stats..." );
+        echo "fast $pid result: " . count($fastReport['data'])  . " segments\n";
+        Log::doLog( "fast $pid result: " . count($fastReport['data'])  . " segments" );
 
         $data = $fastReport[ 'data' ];
         foreach ( $data as $k => $v ) {

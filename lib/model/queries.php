@@ -2266,7 +2266,9 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
 				$st_queue_values[ ] = " ( '" . implode( "', '", array_values( $data_innodb ) ) . "' )";
 
-			}
+			} else {
+                Log::doLog( 'Skipped Fast Segment: ' . var_export( $data, true ) );
+            }
 
 		}
 
@@ -2274,11 +2276,11 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
 	$chunks_st = array_chunk( $st_values, 500 );
 
-	//echo 'Insert Segment Translations: ' . count($st_values) . "\n";
-	//Log::doLog( 'Insert Segment Translations: ' . count($st_values) );
+//	echo 'Insert Segment Translations: ' . count($st_values) . "\n";
+	Log::doLog( 'Insert Segment Translations: ' . count($st_values) );
 
-	//echo 'Queries: ' . count($chunks_st) . "\n";
-	//Log::doLog( 'Queries: ' . count($chunks_st) );
+//	echo 'Queries: ' . count($chunks_st) . "\n";
+	Log::doLog( 'Queries: ' . count($chunks_st) );
 
 	//USE the MySQL InnoDB isolation Level to protect from thread high concurrency access
 	$db->query( 'SET autocommit=0' );
@@ -2333,11 +2335,11 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
 		$chunks_st_queue = array_chunk( $st_queue_values, 500 );
 
-		//echo 'Insert Segment Translations Queue: ' . count($st_queue_values) . "\n";
-		//Log::doLog( 'Insert Segment Translations Queue: ' . count($st_queue_values) );
+//		echo 'Insert Segment Translations Queue: ' . count($st_queue_values) . "\n";
+		Log::doLog( 'Insert Segment Translations Queue: ' . count($st_queue_values) );
 
-		//echo 'Queries: ' . count($chunks_st_queue) . "\n";
-		//Log::doLog( 'Queries: ' . count($chunks_st_queue) );
+//		echo 'Queries: ' . count($chunks_st_queue) . "\n";
+		Log::doLog( 'Queries: ' . count($chunks_st_queue) );
 
 		foreach( $chunks_st_queue as $k => $queue_chunk ){
 
