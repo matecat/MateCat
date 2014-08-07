@@ -339,10 +339,9 @@ class CatUtils {
 //            $sug_for_diff = html_entity_decode($sug_for_diff, ENT_NOQUOTES, 'UTF-8');
 //            $tra_for_diff = html_entity_decode($tra_for_diff, ENT_NOQUOTES, 'UTF-8');
 
-            //$ter          = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
-
             //with this patch we have warnings when accessing indexes
-            $ter=array();
+//          $ter = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
+            $ter = array();
 
             $seg[ 'ter' ] = @$ter[ 1 ] * 100;
             $stat_ter[ ]  = $seg[ 'ter' ] * $seg[ 'rwc' ];
@@ -382,13 +381,37 @@ class CatUtils {
             $seg['source'] = trim( CatUtils::rawxliff2view( $seg['source'] ) );
             $seg['translation'] = trim( CatUtils::rawxliff2view( $seg['translation'] ) );
 
-            $array_patterns     = array( rtrim( self::lfPlaceholderRegex, 'g' ) , rtrim( self::crPlaceholderRegex, 'g' ), rtrim( self::crlfPlaceholderRegex, 'g' ) );
-            $array_replacements = array( '<br class="_0A" />', '<br class="_0D" />', '<br class="_0D0A" />' );
+            $array_patterns     = array(
+                    rtrim( self::lfPlaceholderRegex, 'g' ) ,
+                    rtrim( self::crPlaceholderRegex, 'g' ),
+                    rtrim( self::crlfPlaceholderRegex, 'g' ),
+                    rtrim( self::tabPlaceholderRegex, 'g' ),
+                    rtrim( self::nbspPlaceholderRegex, 'g' ),
+            );
 
+
+            $array_replacements_csv = array(
+                    '\n',
+                    '\r',
+                    '\r\n',
+                    '\t',
+                    Utils::unicode2chr(0Xa0),
+            );
+            $seg['source_csv'] = preg_replace( $array_patterns, $array_replacements_csv, $seg['source'] );
+            $seg['translation_csv'] = preg_replace( $array_patterns, $array_replacements_csv, $seg['translation'] );
+            $seg['diff_csv'] = preg_replace( $array_patterns, $array_replacements_csv, $seg['diff'] );
+
+
+            $array_replacements = array(
+                    '<br class="_0A" />',
+                    '<br class="_0D" />',
+                    '<br class="_0D0A" />',
+                    '<span class="_tab">&#9;</span>',
+                    '<span class="_nbsp">&nbsp;</span>',
+            );
             $seg['source'] = preg_replace( $array_patterns, $array_replacements, $seg['source'] );
             $seg['translation'] = preg_replace( $array_patterns, $array_replacements, $seg['translation'] );
             $seg['diff'] = preg_replace( $array_patterns, $array_replacements, $seg['diff'] );
-
 
             if( $seg['mt_qe'] == 0 ){
                 $seg['mt_qe'] = 'N/A';
