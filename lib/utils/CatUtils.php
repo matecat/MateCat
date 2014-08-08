@@ -340,7 +340,7 @@ class CatUtils {
 //            $tra_for_diff = html_entity_decode($tra_for_diff, ENT_NOQUOTES, 'UTF-8');
 
             //with this patch we have warnings when accessing indexes
-//          $ter = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
+//            $ter = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
             $ter = array();
 
             $seg[ 'ter' ] = @$ter[ 1 ] * 100;

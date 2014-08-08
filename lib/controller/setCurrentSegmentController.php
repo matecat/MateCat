@@ -59,8 +59,17 @@ class setCurrentSegmentController extends ajaxController {
         $nextSegmentId = getNextUntranslatedSegment( $this->id_segment, $this->id_job, $this->password );
 
         $Translation_mismatches = getTranslationsMismatches( $this->id_job, $this->password, $this->id_segment );
+        $thereArePossiblePropagations = false;
+        if( count( $Translation_mismatches ) == 0 ){
+            $thereArePossiblePropagations = countSegmentHashesInJob( $this->id_job, $this->password, $this->id_segment );
+            $thereArePossiblePropagations = (bool)$thereArePossiblePropagations[0];
+        }
 
-        $result = array( 'editable' => array(), 'not_editable' => array() );
+        $result = array(
+                'editable' => array(),
+                'not_editable' => array(),
+                'prop_available' => $thereArePossiblePropagations
+        );
 
         foreach( $Translation_mismatches as $position => $row ){
 

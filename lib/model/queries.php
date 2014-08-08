@@ -758,6 +758,30 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 	return $results;
 }
 
+function countSegmentHashesInJob( $jid, $jpassword, $sid ){
+
+    $db = Database::obtain();
+
+    $queryIsPropagationAvailable = "
+        SELECT COUNT(segment_hash) as available
+        FROM segment_translations
+        JOIN jobs ON id_job = id AND id_segment between jobs.job_first_segment AND jobs.job_last_segment
+        WHERE segment_hash = (
+            SELECT segment_hash FROM segments WHERE id = %u
+        )
+        AND id_job = %u
+        AND id_segment != %u
+        AND password = '%s'
+    ";
+
+    $query = sprintf( $queryIsPropagationAvailable, $sid, $jid, $sid, $db->escape( $jpassword ) );
+
+    $results = $db->query_first( $query );
+
+    return $results;
+
+}
+
 function getTranslationsMismatches( $jid, $jpassword, $sid = null ){
 
 	$db = Database::obtain();
@@ -1427,7 +1451,7 @@ function getEditLog($jid, $pass) {
 		j.id_translator AS tid,
 		j.source AS source_lang,
 		j.target AS target_lang,
-		s.raw_word_count rwc, 
+		s.raw_word_count rwc,
 		p.name as pname
 			FROM
 			jobs j 

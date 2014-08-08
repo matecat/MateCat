@@ -102,9 +102,7 @@ class editlogDownloadController extends downloadController {
             );
 
             $csvHandler->fputcsv( $row_array );
-            $position = $csvHandler->ftell();
-
-            Log::doLog( $csvHandler->__toString() );
+//            $position = $csvHandler->ftell();
 
         }
 
