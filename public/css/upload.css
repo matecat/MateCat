@@ -716,7 +716,7 @@ margin-top: 20px;
 
 .progress-extended{display:none}
 
-.error{color:#FF3300;text-align:left !Important}
+.error{color:#FF3300;text-align:left !Important;font-size:14px;}
 
 .dragging .file-drag, .uploaded .file-drop, .uploaded .fileupload-buttonbar{height:0;}
 
@@ -1028,3 +1028,6 @@ background: #ca2a2e url(../img/sprite2x.png) 12px -1115px no-repeat !important;
 }
 
 
+.error .label.label-important a{
+    cursor: pointer;
+}
