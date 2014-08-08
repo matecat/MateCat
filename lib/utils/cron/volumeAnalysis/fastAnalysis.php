@@ -2,7 +2,6 @@
 ini_set("memory_limit","2048M");
 set_time_limit(0);
 include_once 'main.php';
-include_once INIT::$UTILS_ROOT . "/MyMemoryAnalyzer.copyrighted.php";
 
 /* Write my pid to a file */
 $my_pid = getmypid();

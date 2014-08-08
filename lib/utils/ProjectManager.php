@@ -11,13 +11,16 @@ include_once INIT::$UTILS_ROOT . "/DetectProprietaryXliff.php";
 
 class ProjectManager {
 
+	/**
+	 * @var ArrayObject|RecursiveArrayObject
+	 */
 	protected $projectStructure;
 
 	protected $mysql_link;
 
 	protected $tmxServiceWrapper;
 
-	protected $checkTMX; 
+	protected $checkTMX;
 	/*
 	   flag used to indicate TMX check status: 
 	   0-not to check, or check passed
@@ -30,35 +33,36 @@ class ProjectManager {
 
 		if ( $projectStructure == null ) {
 			$projectStructure = new RecursiveArrayObject(
-					array(
-						'id_project'         => null,
-						'id_customer'        => null,
-						'user_ip'            => null,
-						'project_name'       => null,
-						'result'             => null,
-						'private_tm_key'     => 0,
-						'private_tm_user'    => null,
-						'private_tm_pass'    => null,
-						'uploadToken'        => null,
-						'array_files'        => array(), //list of file names
-						'file_id_list'       => array(),
-						'file_references'    => array(),
-						'source_language'    => null,
-						'target_language'    => null,
-						'mt_engine'          => null,
-						'tms_engine'         => null,
-						'ppassword'          => null,
-						'array_jobs'         => array( 'job_list' => array(), 'job_pass' => array(),'job_segments' => array() ),
-						'job_segments'       => array(), //array of job_id => array( min_seg, max_seg )
-						'segments'           => array(), //array of files_id => segmentsArray()
-						'translations'       => array(), //one translation for every file because translations are files related
-						'query_translations' => array(),
-						'status'             => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
-						'job_to_split'       => null,
-						'job_to_split_pass'  => null,
-						'split_result'       => null,
-						'job_to_merge'       => null,
-						) );
+				array(
+					'id_project'         => null,
+					'id_customer'        => null,
+					'user_ip'            => null,
+					'project_name'       => null,
+					'result'             => null,
+					'private_tm_key'     => 0,
+					'private_tm_user'    => null,
+					'private_tm_pass'    => null,
+					'uploadToken'        => null,
+					'array_files'        => array(), //list of file names
+					'file_id_list'       => array(),
+					'file_references'    => array(),
+					'source_language'    => null,
+					'target_language'    => null,
+					'mt_engine'          => null,
+					'tms_engine'         => null,
+					'ppassword'          => null,
+					'array_jobs'         => array( 'job_list' => array(), 'job_pass' => array(),'job_segments' => array() ),
+					'job_segments'       => array(), //array of job_id => array( min_seg, max_seg )
+					'segments'           => array(), //array of files_id => segmentsArray()
+					'translations'       => array(), //one translation for every file because translations are files related
+					'query_translations' => array(),
+					'status'             => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
+					'job_to_split'       => null,
+					'job_to_split_pass'  => null,
+					'split_result'       => null,
+					'job_to_merge'       => null,
+					'lang_detect_files'  => array()
+				) );
 		}
 
 		$this->projectStructure = $projectStructure;
@@ -84,6 +88,10 @@ class ProjectManager {
 		return $this->projectStructure;
 	}
 
+	private function sortByStrLenAsc($a, $b){
+		return strlen($a) >= strlen($b);
+	}
+
 	public function createProject() {
 
 		// project name sanitize
@@ -105,18 +113,18 @@ class ProjectManager {
 		//this is done only if an API key is provided
 		if ( !empty( $this->projectStructure['private_tm_key'] ) ) {
 
-            $APIKeySrv = TMSServiceFactory::getAPIKeyService();
+			$APIKeySrv = TMSServiceFactory::getAPIKeyService();
 
-            try {
+			try {
 
-                if( !$APIKeySrv->checkCorrectKey( $this->projectStructure['private_tm_key'] ) ){
-                    throw new Exception( "Error: The TM private key provided is not valid.", -3 );
-                }
+				if( !$APIKeySrv->checkCorrectKey( $this->projectStructure['private_tm_key'] ) ){
+					throw new Exception( "Error: The TM private key provided is not valid.", -3 );
+				}
 
-            } catch ( Exception $e ){
-                $this->projectStructure['result']['errors'][] = array( "code" => $e->getCode(), "message" => $e->getMessage() );
-                return false;
-            }
+			} catch ( Exception $e ){
+				$this->projectStructure['result']['errors'][] = array( "code" => $e->getCode(), "message" => $e->getMessage() );
+				return false;
+			}
 
 			//the base case is when the user clicks on "generate private TM" button:
 			//a (user, pass, key) tuple is generated and can be inserted
@@ -171,62 +179,62 @@ class ProjectManager {
 			/**
 			 * Conversion Enforce
 			 *
-             * we have to know if a file can be found in _converted directory
-             *
+			 * we have to know if a file can be found in _converted directory
+			 *
 			 * Check Extension no more sufficient, we want check content
 			 * if this is an idiom xlf file type, conversion are enforced
 			 * $enforcedConversion = true; //( if conversion is enabled )
 			 */
-            $isAConvertedFile = true;
+			$isAConvertedFile = true;
 			try {
 
-                $fileType = DetectProprietaryXliff::getInfo( INIT::$UPLOAD_REPOSITORY. DIRECTORY_SEPARATOR . $this->projectStructure['uploadToken'].DIRECTORY_SEPARATOR . $fileName );
+				$fileType = DetectProprietaryXliff::getInfo( INIT::$UPLOAD_REPOSITORY. DIRECTORY_SEPARATOR . $this->projectStructure['uploadToken'].DIRECTORY_SEPARATOR . $fileName );
 
-                if ( DetectProprietaryXliff::isXliffExtension() ) {
+				if ( DetectProprietaryXliff::isXliffExtension() ) {
 
-                    if ( INIT::$CONVERSION_ENABLED ) {
+					if ( INIT::$CONVERSION_ENABLED ) {
 
-                        //conversion enforce
-                        if ( !INIT::$FORCE_XLIFF_CONVERSION ) {
+						//conversion enforce
+						if ( !INIT::$FORCE_XLIFF_CONVERSION ) {
 
-                            //ONLY IDIOM is forced to be converted
-                            //if file is not proprietary like idiom AND Enforce is disabled
-                            //we take it as is
-                            if( !$fileType[ 'proprietary' ] ) {
-                                $isAConvertedFile = false;
-                                //ok don't convert a standard sdlxliff
-                            }
+							//ONLY IDIOM is forced to be converted
+							//if file is not proprietary like idiom AND Enforce is disabled
+							//we take it as is
+							if( !$fileType[ 'proprietary' ] ) {
+								$isAConvertedFile = false;
+								//ok don't convert a standard sdlxliff
+							}
 
-                        } else {
+						} else {
 
-                            //if conversion enforce is active
-                            //we force all xliff files but not files produced by SDL Studio because we can handle them
-                            if( $fileType['proprietary_short_name'] == 'trados' ) {
-                                $isAConvertedFile = false;
-                                //ok don't convert a standard sdlxliff
+							//if conversion enforce is active
+							//we force all xliff files but not files produced by SDL Studio because we can handle them
+							if( $fileType['proprietary_short_name'] == 'trados' ) {
+								$isAConvertedFile = false;
+								//ok don't convert a standard sdlxliff
 
-                            }
+							}
 
-                        }
+						}
 
-                    } elseif ( $fileType[ 'proprietary' ] ) {
+					} elseif ( $fileType[ 'proprietary' ] ) {
 
-                        /**
-                         * Application misconfiguration.
-                         * upload should not be happened, but if we are here, raise an error.
-                         * @see upload.class.php
-                         * */
-                        $this->projectStructure['result']['errors'][] = array("code" => -8, "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)");
-                        setcookie("upload_session", "", time() - 10000);
-                        return -1;
-                        //stop execution
+						/**
+						 * Application misconfiguration.
+						 * upload should not be happened, but if we are here, raise an error.
+						 * @see upload.class.php
+						 * */
+						$this->projectStructure['result']['errors'][] = array("code" => -8, "message" => "Proprietary xlf format detected. Not able to import this XLIFF file. ($fileName)");
+						setcookie("upload_session", "", time() - 10000);
+						return -1;
+						//stop execution
 
-                    } elseif ( !$fileType[ 'proprietary' ] ) {
-                        $isAConvertedFile = false;
-                        //ok don't convert a standard sdlxliff
-                    }
+					} elseif ( !$fileType[ 'proprietary' ] ) {
+						$isAConvertedFile = false;
+						//ok don't convert a standard sdlxliff
+					}
 
-                }
+				}
 
 			} catch ( Exception $e ) { Log::doLog( $e->getMessage() ); }
 
@@ -297,11 +305,14 @@ class ProjectManager {
 				Log::doLog( $e->getMessage() );
 
 			}
-
 			//exit;
 		}
 
-		//loop again through files to check to check for TMX loading 
+		//check if the files language equals the source language. If not, set an error message.
+		$this->validateFilesLanguages();
+
+		/****************/
+		//loop again through files to check to check for TMX loading
 		foreach ( $this->projectStructure['array_files'] as $fileName ) {
 
 			//if TMX, 
@@ -326,15 +337,15 @@ class ProjectManager {
 					}
 
 					//scan through memories 
-                    foreach ( $allMemories[ 'responseData' ][ 'tm' ] as $memory ) {
-                        //obtain max id
-                        $tmx_max_id = max( $tmx_max_id, $memory[ 'id' ] );
+					foreach ( $allMemories[ 'responseData' ][ 'tm' ] as $memory ) {
+						//obtain max id
+						$tmx_max_id = max( $tmx_max_id, $memory[ 'id' ] );
 
-                        //if maximum is current, pick it (it means that, among duplicates, it's the latest)
-                        if ( $tmx_max_id == $memory[ 'id' ] ) {
-                            $current_tm = $memory;
-                        }
-                    }
+						//if maximum is current, pick it (it means that, among duplicates, it's the latest)
+						if ( $tmx_max_id == $memory[ 'id' ] ) {
+							$current_tm = $memory;
+						}
+					}
 
 					switch($current_tm['status']){
 						case "0":
@@ -388,10 +399,10 @@ class ProjectManager {
 			return false;
 		}
 
-
 		if( !empty( $this->projectStructure['result']['errors'] ) ){
 			Log::doLog( "Project Creation Failed. Sent to Output all errors." );
 			Log::doLog( $this->projectStructure['result']['errors'] );
+
 			return false;
 		}
 
@@ -462,7 +473,9 @@ class ProjectManager {
 		$this->projectStructure['result'][ 'source_language' ] = $this->projectStructure['source_language'];
 		$this->projectStructure['result'][ 'target_language' ] = $this->projectStructure['target_language'];
 		$this->projectStructure['result'][ 'status' ]          = $this->projectStructure['status'];
-
+		$this->projectStructure['result'][ 'lang_detect']       = $this->projectStructure['lang_detect_files'];
+//	var_dump($this->projectStructure);
+//		exit;
 	}
 
 	protected function _createJobs( ArrayObject $projectStructure, $owner ) {
@@ -508,6 +521,78 @@ class ProjectManager {
 
 		}
 
+	}
+
+	private function validateFilesLanguages(){
+		/**
+		 * @var $filesSegments RecursiveArrayObject
+		 */
+		$filesSegments = $this->projectStructure['segments'];
+
+		/**
+		 * This is a map <file_name, check_result>, where check_result is one
+		 * of these status strings:<br/>
+		 * - ok         --> the language detected for this file is the same of source language<br/>
+		 * - warning    --> the language detected for this file is different from the source language
+		 *
+		 * @var $filename2SourceLangCheck array
+		 */
+		$filename2SourceLangCheck = array();
+
+		//istantiate MyMemory analyzer and detect languages for each file uploaded
+		$mma = new MyMemoryAnalyzer();
+		$res = $mma->detectLanguage($filesSegments, $this->projectStructure['lang_detect_files']);
+
+		//for each language detected, check if it's not equal to the source language
+		$langsDetected = $res['responseData']['translatedText'];
+		if($res !== null &&
+			is_array($langsDetected) &&
+			count($langsDetected) == count($this->projectStructure['array_files'])) {
+
+			$counter = 0;
+			foreach($langsDetected as $fileLang){
+				$currFileName = $this->projectStructure['array_files'][$counter];
+
+				//get language code
+				$sourceLang = array_shift( explode ( "-", $this->projectStructure['source_language']) );
+
+				//get extended language name using google language code
+				$languageExtendedName = langs_GoogleLanguageMapper::getLanguageCode( $fileLang );
+
+				//get extended language name using standard language code
+				$langClass = Languages::getInstance();
+				$sourceLanguageExtendedName = strtolower( $langClass->getLocalizedName($sourceLang) );
+
+				//Check job's detected language. In case of undefined language, mark it as valid
+				if($fileLang !== 'und' &&
+					$fileLang != $sourceLang &&
+					$sourceLanguageExtendedName != $languageExtendedName){
+
+					$filename2SourceLangCheck[$currFileName] = 'warning';
+
+					$languageExtendedName= ucfirst($languageExtendedName);
+
+					$this->projectStructure['result']['errors'][] = array(
+						"code"      => -17,
+						"message"   => "The source language you selected seems ".
+                                        "to be different from the source language in \"$currFileName\". Please check."
+					);
+				}
+				else{
+					$filename2SourceLangCheck[$currFileName] = 'ok';
+				}
+
+				$counter++;
+			}
+
+			if(in_array("warning", array_values( $filename2SourceLangCheck ) ) ){
+				$this->projectStructure['result'][ 'lang_detect' ] = $filename2SourceLangCheck;
+			}
+		}
+		else{
+			//There are errors while parsing JSON.
+			//Noop
+		}
 	}
 
 	/**
@@ -567,9 +652,9 @@ class ProjectManager {
 				GROUP BY s.id WITH ROLLUP";
 
 		$query = sprintf( $query,
-				$projectStructure[ 'job_to_split' ],
-				$projectStructure[ 'job_to_split_pass' ]
-				);
+			$projectStructure[ 'job_to_split' ],
+			$projectStructure[ 'job_to_split_pass' ]
+		);
 
 		$res   = mysql_query( $query, $this->mysql_link );
 
@@ -613,11 +698,11 @@ class ProjectManager {
 
 			if( !array_key_exists( $chunk, $counter ) ){
 				$counter[$chunk] = array(
-						'eq_word_count'  => 0,
-						'raw_word_count' => 0,
-						'segment_start'  => $row['id'],
-						'segment_end'    => 0,
-						);
+					'eq_word_count'  => 0,
+					'raw_word_count' => 0,
+					'segment_start'  => $row['id'],
+					'segment_end'    => 0,
+				);
 			}
 
 			$counter[$chunk][ 'eq_word_count' ]  += $row[ 'eq_word_count' ];
@@ -737,7 +822,7 @@ class ProjectManager {
 	 */
 	public function applySplit( ArrayObject $projectStructure ){
 		$this->_splitJob( $projectStructure );
-        Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
+		Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
 	}
 
 	public function mergeALL( ArrayObject $projectStructure, $renewPassword = false ){
@@ -804,7 +889,7 @@ class ProjectManager {
 		$wCountManager = new WordCount_Counter();
 		$wCountManager->initializeJobWordCount( $first_job['id'], $first_job['password'] );
 
-        Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
+		Shop_Cart::getInstance( 'outsource_to_external_cache' )->emptyCart();
 
 	}
 
@@ -831,9 +916,9 @@ class ProjectManager {
 			throw new Exception( "Xliff Import: Error parsing. Check Log file.", -4 );
 		}
 
-        //needed to check if a file has only one segment
-        //for correctness: we could have more tag files in the xliff
-        $fileCounter_Show_In_Cattool = 0;
+		//needed to check if a file has only one segment
+		//for correctness: we could have more tag files in the xliff
+		$fileCounter_Show_In_Cattool = 0;
 
 		// Creating the Query
 		foreach ($xliff['files'] as $xliff_file) {
@@ -847,18 +932,18 @@ class ProjectManager {
 
 			foreach ($xliff_file['trans-units'] as $xliff_trans_unit) {
 
-                //initialize flag
-                $show_in_cattool = 1;
+				//initialize flag
+				$show_in_cattool = 1;
 
-                if ( !isset( $xliff_trans_unit[ 'attr' ][ 'translate' ] ) ) {
-                    $xliff_trans_unit[ 'attr' ][ 'translate' ] = 'yes';
-                }
+				if ( !isset( $xliff_trans_unit[ 'attr' ][ 'translate' ] ) ) {
+					$xliff_trans_unit[ 'attr' ][ 'translate' ] = 'yes';
+				}
 
-                if ( $xliff_trans_unit[ 'attr' ][ 'translate' ] == "no" ) {
-                    //No segments to translate
-                    //don't increment global counter '$fileCounter_Show_In_Cattool'
-                    $show_in_cattool = 0;
-                } else {
+				if ( $xliff_trans_unit[ 'attr' ][ 'translate' ] == "no" ) {
+					//No segments to translate
+					//don't increment global counter '$fileCounter_Show_In_Cattool'
+					$show_in_cattool = 0;
+				} else {
 
 					// If the XLIFF is already segmented (has <seg-source>)
 					if (isset($xliff_trans_unit['seg-source'])) {
@@ -972,8 +1057,8 @@ class ProjectManager {
 						$num_words = CatUtils::segment_raw_wordcount($source, $xliff_file['attr']['source-language'] );
 
 						//applying escaping after raw count
-                        $source      = mysql_real_escape_string( $source );
-                        $source_hash = mysql_real_escape_string( md5( $source ) );
+						$source      = mysql_real_escape_string( $source );
+						$source_hash = mysql_real_escape_string( md5( $source ) );
 
 						$trans_unit_id = mysql_real_escape_string($xliff_trans_unit['attr']['id']);
 
@@ -993,18 +1078,18 @@ class ProjectManager {
 					}
 				}
 
-                //increment the counter for not empty segments
-                $fileCounter_Show_In_Cattool += $show_in_cattool;
+				//increment the counter for not empty segments
+				$fileCounter_Show_In_Cattool += $show_in_cattool;
 
-            }
+			}
 		}
 
 		// *NOTE*: PHP>=5.3 throws UnexpectedValueException, but PHP 5.2 throws ErrorException
 		//use generic
-        if ( empty( $this->projectStructure[ 'segments' ][ $fid ] ) || $fileCounter_Show_In_Cattool == 0 ) {
-            Log::doLog( "Segment import - no segments found\n" );
-            throw new Exception( "Segment import - no segments found", -1 );
-        }
+		if ( empty( $this->projectStructure[ 'segments' ][ $fid ] ) || $fileCounter_Show_In_Cattool == 0 ) {
+			Log::doLog( "Segment import - no segments found\n" );
+			throw new Exception( "Segment import - no segments found", -1 );
+		}
 
 		$baseQuery = "INSERT INTO segments ( internal_id, id_file, id_file_part, segment, segment_hash, raw_word_count, xliff_mrk_id, xliff_ext_prec_tags, xliff_ext_succ_tags, show_in_cattool,xliff_mrk_ext_prec_tags,xliff_mrk_ext_succ_tags) values ";
 
@@ -1041,7 +1126,7 @@ class ProjectManager {
 				if( $this->projectStructure['translations']->offsetExists( "" . $row['internal_id'] ) ) {
 					$this->projectStructure['translations'][ "" . $row['internal_id'] ]->offsetSet( 0, $row['id'] );
 					$this->projectStructure['translations'][ "" . $row['internal_id'] ]->offsetSet( 1, $row['internal_id'] );
-                    //WARNING offset 2 are the target translations
+					//WARNING offset 2 are the target translations
 					$this->projectStructure['translations'][ "" . $row['internal_id'] ]->offsetSet( 3, $row['segment_hash'] );
 				}
 
