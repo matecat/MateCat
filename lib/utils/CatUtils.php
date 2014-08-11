@@ -8,7 +8,7 @@ include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 define("LTPLACEHOLDER", "##LESSTHAN##");
 define("GTPLACEHOLDER", "##GREATERTHAN##");
 define("AMPPLACEHOLDER", "##AMPPLACEHOLDER##");
-define("NBSPPLACEHOLDER", "<x id=\"nbsp\"/>");
+//define("NBSPPLACEHOLDER", "<x id=\"nbsp\"/>");
 
 class CatUtils {
 
@@ -35,16 +35,16 @@ class CatUtils {
     //following functions are useful for manage the consistency of non braking spaces
     // chars coming, expecially,from MS Word
     // ref nbsp code https://en.wikipedia.org/wiki/Non-breaking_space
-    public static function placeholdnbsp($s) {
-        $s = preg_replace("/\x{a0}/u", NBSPPLACEHOLDER, $s);
-        return $s;
-    }
-
-    public static function restorenbsp($s) {
-        $pattern = "#" . NBSPPLACEHOLDER . "#";
-        $s = preg_replace($pattern, Utils::unicode2chr(0Xa0), $s);
-        return $s;
-    }
+//    public static function placeholdnbsp($s) {
+//        $s = preg_replace("/\x{a0}/u", NBSPPLACEHOLDER, $s);
+//        return $s;
+//    }
+//
+//    public static function restorenbsp($s) {
+//        $pattern = "#" . NBSPPLACEHOLDER . "#";
+//        $s = preg_replace($pattern, Utils::unicode2chr(0Xa0), $s);
+//        return $s;
+//    }
 
     // ----------------------------------------------------------------
 

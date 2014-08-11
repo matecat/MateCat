@@ -134,4 +134,3 @@ while (1) {
 		Log::doLog( "done" );
 	}
 }
-?>

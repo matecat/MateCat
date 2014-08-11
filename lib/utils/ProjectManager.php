@@ -892,8 +892,8 @@ class ProjectManager {
 
 									if( $src != $trg && !is_numeric($src) ){ //treat 0,1,2.. as translated content!
 
-										$target = CatUtils::placeholdnbsp($target_extract_external['seg']);
-										$target = mysql_real_escape_string($target);
+//										$target = CatUtils::placeholdnbsp($target_extract_external['seg']);
+										$target = mysql_real_escape_string($target_extract_external['seg']);
 
 										//add an empty string to avoid casting to int: 0001 -> 1
 										//useful for idiom internal xliff id
@@ -912,7 +912,7 @@ class ProjectManager {
 
 							//Log::doLog( $xliff_trans_unit ); die();
 
-							$seg_source[ 'raw-content' ] = CatUtils::placeholdnbsp( $seg_source[ 'raw-content' ] );
+//							$seg_source[ 'raw-content' ] = CatUtils::placeholdnbsp( $seg_source[ 'raw-content' ] );
 
 							$mid                   = mysql_real_escape_string( $seg_source[ 'mid' ] );
 							$ext_tags              = mysql_real_escape_string( $seg_source[ 'ext-prec-tags' ] );
@@ -936,10 +936,10 @@ class ProjectManager {
 
 						$tempSeg = strip_tags( $xliff_trans_unit['source']['raw-content'] );
 						$tempSeg = trim($tempSeg);
-						$tempSeg = CatUtils::placeholdnbsp( $tempSeg );
+//						$tempSeg = CatUtils::placeholdnbsp( $tempSeg );
 						$prec_tags = NULL;
 						$succ_tags = NULL;
-						if ( empty( $tempSeg ) || $tempSeg == NBSPPLACEHOLDER ) { //@see CatUtils.php, ( DEFINE NBSPPLACEHOLDER ) don't show <x id=\"nbsp\"/>
+						if ( empty( $tempSeg ) ) { //|| $tempSeg == NBSPPLACEHOLDER ) { //@see CatUtils.php, ( DEFINE NBSPPLACEHOLDER ) don't show <x id=\"nbsp\"/>
 							$show_in_cattool = 0;
 						} else {
 							$extract_external                              = $this->_strip_external( $xliff_trans_unit[ 'source' ][ 'raw-content' ] );
@@ -953,8 +953,8 @@ class ProjectManager {
 
 								if ( $xliff_trans_unit[ 'source' ][ 'raw-content' ] != $target_extract_external[ 'seg' ] ) {
 
-									$target = CatUtils::placeholdnbsp( $target_extract_external[ 'seg' ] );
-									$target = mysql_real_escape_string( $target );
+//									$target = CatUtils::placeholdnbsp( $target_extract_external[ 'seg' ] );
+									$target = mysql_real_escape_string( $target_extract_external[ 'seg' ] );
 
 									//add an empty string to avoid casting to int: 0001 -> 1
 									//useful for idiom internal xliff id
@@ -965,7 +965,8 @@ class ProjectManager {
 							}
 						}
 
-						$source = CatUtils::placeholdnbsp( $xliff_trans_unit['source']['raw-content'] );
+//						$source = CatUtils::placeholdnbsp( $xliff_trans_unit['source']['raw-content'] );
+						$source =  $xliff_trans_unit['source']['raw-content'];
 
 						//we do the word count after the place-holding with <x id="nbsp"/>
 						//so &nbsp; are now not recognized as word and not counted as payable

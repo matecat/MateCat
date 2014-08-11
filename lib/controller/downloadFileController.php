@@ -145,9 +145,9 @@ class downloadFileController extends downloadController {
 
             $output_content[ $id_file ][ 'content' ]  = $output_xliff;
             $output_content[ $id_file ][ 'filename' ] = $current_filename;
+            unset( $output_xliff );
 
-			if ( $this->forceXliff )
-			{
+			if ( $this->forceXliff ) {
 				$file_info_details = pathinfo( $output_content[ $id_file ][ 'filename' ] );
 				$output_content[ $id_file ][ 'filename' ] = $file_info_details[ 'filename' ] . ".out.sdlxliff";
 			}
@@ -170,8 +170,7 @@ class downloadFileController extends downloadController {
                 if( !INIT::$CONVERSION_ENABLED && $mime_type == 'sdlxliff' || ( empty( $file['original_file'] ) ) || $this->forceXliff ){
                     $convertBackToOriginal = false;
                     Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal , true ) );
-                }
-                else {
+                } else {
                     //dos2unix ??? why??
                     //force unix type files
 //                    $output_content[$id_file]['content'] = CatUtils::dos2unix( $output_content[$id_file]['content'] );
@@ -192,6 +191,7 @@ class downloadFileController extends downloadController {
                 $debug[ 'do_conversion' ][ ] = time();
                 $convertResult = $converter->convertToOriginal( $output_content[ $id_file ], $chosen_machine = false );
                 $output_content[ $id_file ][ 'content' ] = $convertResult[ 'documentContent' ];
+                unset( $convertResult );
                 $debug[ 'do_conversion' ][ ] = time();
 
             }
@@ -209,7 +209,7 @@ class downloadFileController extends downloadController {
             if ( $pathinfo[ 'extension' ] != 'zip' ) {
                 if ($this->forceXliff){
                     $this->filename = $this->id_job . ".zip";
-                }else{
+                } else {
                     $this->filename = $pathinfo[ 'basename' ] . ".zip";
                 }
             }
