@@ -667,6 +667,7 @@ function getSegmentsInfo( $jid, $password ) {
 	$query = "select j.id as jid, j.id_project as pid,j.source,j.target,
 		j.last_opened_segment, j.id_translator as tid, j.id_tms, j.id_mt_engine,
 		p.id_customer as cid, j.id_translator as tid, j.status_owner as status,
+		j.owner as job_owner,
 
 		j.job_first_segment, j.job_last_segment,
 		j.new_words, j.draft_words, j.translated_words, j.approved_words, j.rejected_words,
@@ -2970,6 +2971,45 @@ function setJobCompleteness( $jid, $is_completed ) {
 	}
 
 	return $db->affected_rows;
+}
+
+/**
+ * Given an array of job IDs, this function returns the IDs of archivable jobs
+ * @param array $jobs
+ * @return array
+ */
+function getArchivableJobs($jobs = array()){
+	$db    = Database::obtain();
+	$query =
+		"select
+			distinct j.id
+		from
+			jobs j join
+			segment_translations st on j.id = st.id_job
+			and j.create_date < (curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD." day)
+		where
+			translation_date < (curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD."  day)
+			and j.status_owner = 'active'
+			and j.status = 'active'
+			and j.id in (%s)";
+
+	$results = $db->fetch_array(
+	              sprintf(
+		              $query,
+	                  implode(", ", $jobs)
+	              )
+				);
+
+	$err     = $db->get_error();
+	$errno   = $err[ 'error_code' ];
+
+	if ( $errno != 0 ) {
+		log::doLog( "$errno: " . var_export( $err, true ) );
+
+		return $errno * -1;
+	}
+
+	return $results;
 }
 
 ?>

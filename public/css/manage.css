@@ -93,7 +93,7 @@ body.manage .field .value
 body.manage .urls
 	{
 	float: left;
-	width: 80%;
+	width: 100%;
 	text-align: left;
 	}
 
@@ -292,11 +292,11 @@ body.manage th.create-date
 	
 body.manage th.job-detail
 	{
-	width: 45%;
+	width: 37%;
 	}
 body.manage th.private-tm-key
 	{
-	min-width: 120px;
+	min-width: 140px;
 	}
 
 body.manage th.words
@@ -306,7 +306,7 @@ body.manage th.words
 	
 body.manage th.progress
 	{
-	width: 15%;
+	width: 12%;
 	}
 
 body.manage th.actions

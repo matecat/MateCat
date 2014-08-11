@@ -38,9 +38,6 @@ class editlogDownloadController extends downloadController {
 
         $csvHandler->fputcsv( $csv_fields );
 
-        //optimization from 2N to N
-        $position = 0;
-
         foreach ( $data as $d ){
             $sid            = $d[ 'sid' ];
             $sugg_source    = $d[ 'ss' ];
@@ -102,7 +99,6 @@ class editlogDownloadController extends downloadController {
             );
 
             $csvHandler->fputcsv( $row_array );
-//            $position = $csvHandler->ftell();
 
         }
 

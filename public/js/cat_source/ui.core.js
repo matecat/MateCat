@@ -282,10 +282,13 @@ UI = {
 		}
 
 	},
-	createHeader: function() {
-		if ($('h2.percentuage', this.currentSegment).length) {
-			return;
-		}
+    createHeader: function(forceCreation) {
+
+        forceCreation = forceCreation || false;
+
+        if ( $('h2.percentuage', this.currentSegment).length && !forceCreation ) {
+            return;
+        }
 		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="#" id="segment-' + this.currentSegmentId + '-close" class="close" title="Close this segment"></a><a href="/referenceFile/' + config.job_id + '/' + config.password + '/' + this.currentSegmentId + '" id="segment-' + this.currentSegmentId + '-context" class="context" title="Open context" target="_blank">Context</a>';
 		$('#' + this.currentSegment.attr('id') + '-header').html(header);
 
@@ -786,6 +789,7 @@ UI = {
 			$('.editarea', next).trigger("click", "moving");
 		} else {
 			next = this.currentFile.next().find('section:first');
+            console.log('next: ', next);
 			if (next.length) {
 				this.scrollSegment(next);
 				$('.editarea', next).trigger("click", "moving");
@@ -1147,7 +1151,7 @@ UI = {
 						'					</span>' +
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
-						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
+						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
 						'						<ul class="editToolbar">' +
 						'							<li class="uppercase" title="Uppercase"></li>' +
 						'							<li class="lowercase" title="Lowercase"></li>' +
@@ -1391,12 +1395,9 @@ UI = {
         sameContentIndex = -1;
         $.each(d.data.editable, function(ind) {
             //Remove trailing spaces for string comparison
-            console.log('this.translation: ' + this.translation);
-            console.log('UI.decodePlaceholdersToText(this.translation): ' + UI.decodePlaceholdersToText(this.translation));
-            console.log('UI.editarea.text(): ' + UI.editarea.text());
-            console.log("UI.editarea.text().replace( /[ \xA0]+$/ , '' ): " + UI.editarea.text().replace( /[ \xA0]+$/ , '' ));
-            console.log("rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) )" + rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ));
-            if( this.translation == rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) ) {
+//            console.log( "PostProcessEditArea: " + UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' ) );
+//            console.log( "SetCurrSegmentValue: " + this.translation );
+            if( this.translation == UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' ) ) {
                 sameContentIndex = ind;
             }
         });
@@ -1405,7 +1406,7 @@ UI = {
         sameContentIndex1 = -1;
         $.each(d.data.not_editable, function(ind) {
             //Remove trailing spaces for string comparison
-            if(this.translation == rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) ) sameContentIndex1 = ind;
+            if( this.translation == UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' ) ) sameContentIndex1 = ind;
         });
         if(sameContentIndex1 != -1) d.data.not_editable.splice(sameContentIndex1, 1);
 
@@ -1426,7 +1427,7 @@ UI = {
         }
     },
     renderAlternatives: function(d) {
-		console.log('renderAlternatives d: ', d);
+        console.log('renderAlternatives d: ', d);
 //		console.log($('.editor .submenu').length);
 //		console.log(UI.currentSegmentId);
         segment = UI.currentSegment;
@@ -1434,15 +1435,26 @@ UI = {
         escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
         console.log('escapedSegment: ', escapedSegment);
         $.each(d.data.editable, function(index) {
+//            escapedTranslation = UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives');
 //            console.log('this.translation: ', this.translation);
-//            console.log('aa: ', UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives'));
+//            console.log('escapedTranslation: ', escapedTranslation);
 //			console.log('coso: ', htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives') ));
- //           var aa = UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives');
- //           bb = aa.replace()
-            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives') ) );
-            console.log('diff_view: ', diff_view);
-			UI.dmp.diff_cleanupEfficiency( diff_view );
-            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+            //           var aa = UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives');
+            //           bb = aa.replace()
+//            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), escapedTranslation );
+
+            _str = this.translation.replace( config.lfPlaceholderRegex, "\n" )
+                    .replace( config.crPlaceholderRegex, "\r" )
+                    .replace( config.crlfPlaceholderRegex, "\r\n" )
+                    .replace( config.tabPlaceholderRegex, "\t" )
+                    .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 16 ) ) );
+            var _str = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), _str );
+
+//            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode(escapedTranslation) );
+//            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives') ) );
+//            console.log('diff_view: ', diff_view);
+            UI.dmp.diff_cleanupEfficiency( _str );
+            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(ccc) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
         $.each(d.data.not_editable, function(index1) {
             var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'not editable alternatives') ) );
@@ -2505,11 +2517,6 @@ UI = {
 //        console.log($(segment).attr('data-hash'));
         this.tempReqArguments = null;
 
-
-        if( status == 'translated' ){
-            //unset actual segment as autoPropagated because now it is translated
-            $( segment ).data( 'autopropagated', false );
-        }
         plusTranslated = (evenTranslated)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated': '';
         $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + plusTranslated), function(index) {
             $('.editarea', this).html( $('.editarea', segment).html() );
@@ -2517,6 +2524,19 @@ UI = {
             //set segment as autoPropagated
             $( this ).data( 'autopropagated', true );
         });
+
+        //this has to be called AFTER the each cycle
+        if( status == 'translated' ){
+            //unset actual segment as autoPropagated because now it is translated
+            $( segment ).data( 'autopropagated', false );
+        }
+
+        //update current Header of Just Opened Segment, because this method is called after OpenSegment
+        //but before the callback return for setTranslation ( this ).
+        //So, currentSegment pointer was just updated
+        //Needed because two consecutives segments can have the same hash
+        this.createHeader(true);
+
 //        $('section[data-hash=' + $(segment).attr('data-hash') + ']');
     },
     doPropagate: function (trans) {

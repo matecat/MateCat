@@ -109,7 +109,11 @@ $(document).ready(function() {
                     });
 
                     if( alertComposedMessage.length > 0 ){
-			 APP.alert({msg: 'No text to translate in the file(s).<br />Perhaps it is a scanned file or an image? <br /> We recommend converting the file to DOCX using an OCR software (ABBYY FineReader or Nuance PDF Converter) '});
+                         APP.alert({msg: 'No text to translate in the file(s).<br />' +
+                                        'Perhaps it is a scanned file or an image? <br /> ' +
+                                        'We recommend converting the file to DOCX using an OCR software ' +
+                                        '(<a href="http://finereader.abbyy.com/">ABBYY FineReader</a> or <a href="http://shop.nuance.com/store/nuanceus/en_US/DisplayProductDetailsPage/ThemeID.20545600/productID.298882100">Nuance PDF Converter</a>) '
+                             });
                     }
 
 					$('.uploadbtn').attr('value', 'Analyze');
