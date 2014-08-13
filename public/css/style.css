@@ -124,6 +124,13 @@ body.searchActive #filterSwitch
 
 .tag-mismatch{float:left !important}
 
+.auto-propagation-review {
+    cursor:pointer;
+    text-decoration:underline;
+    color: blue;
+    color: -webkit-link;
+}
+
 .warnings, 
 .text .alternatives 
 {

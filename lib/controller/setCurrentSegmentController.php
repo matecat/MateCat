@@ -58,11 +58,12 @@ class setCurrentSegmentController extends ajaxController {
         $insertRes     = setCurrentSegmentInsert( $this->id_segment, $this->id_job, $this->password );
         $nextSegmentId = getNextUntranslatedSegment( $this->id_segment, $this->id_job, $this->password );
 
-        $Translation_mismatches = getTranslationsMismatches( $this->id_job, $this->password, $this->id_segment );
-        $thereArePossiblePropagations = false;
-        if( count( $Translation_mismatches ) == 0 ){
-            $thereArePossiblePropagations = countSegmentHashesInJob( $this->id_job, $this->password, $this->id_segment );
-            $thereArePossiblePropagations = (bool)$thereArePossiblePropagations[0];
+        $_thereArePossiblePropagations = countThisTranslatedHashInJob( $this->id_job, $this->password, $this->id_segment );
+        $thereArePossiblePropagations = intval( $_thereArePossiblePropagations['available'] );
+
+        $Translation_mismatches = array();
+        if( $thereArePossiblePropagations ){
+            $Translation_mismatches = getTranslationsMismatches( $this->id_job, $this->password, $this->id_segment );
         }
 
         $result = array(

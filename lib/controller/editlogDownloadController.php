@@ -21,7 +21,7 @@ class editlogDownloadController extends downloadController {
 
     public function doAction() {
 
-        $data = CatUtils::getEditingLogData($this->jid, $this->password);
+        $data = CatUtils::getEditingLogData($this->jid, $this->password, true);
         $data = $data[0];
 
         $csvHandler = new SplTempFileObject( -1 );
