@@ -31,7 +31,7 @@ class getProjectsController extends ajaxController {
 		if (isset($_POST['step'])) {
 			$this->step = $_POST['step'];
 		} else {
-			$this->step = 100;
+			$this->step = 25;
 		};
 
 		if (isset($_POST['project'])) {

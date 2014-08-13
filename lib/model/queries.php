@@ -759,11 +759,11 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 	return $results;
 }
 
-function countSegmentHashesInJob( $jid, $jpassword, $sid ){
+function countThisTranslatedHashInJob( $jid, $jpassword, $sid ){
 
     $db = Database::obtain();
 
-    $queryIsPropagationAvailable = "
+    $isPropagationToAlreadyTranslatedAvailable = "
         SELECT COUNT(segment_hash) as available
         FROM segment_translations
         JOIN jobs ON id_job = id AND id_segment between jobs.job_first_segment AND jobs.job_last_segment
@@ -773,11 +773,14 @@ function countSegmentHashesInJob( $jid, $jpassword, $sid ){
         AND id_job = %u
         AND id_segment != %u
         AND password = '%s'
+        AND segment_translations.status = '" . Constants_TranslationStatus::STATUS_TRANSLATED . "'
     ";
 
-    $query = sprintf( $queryIsPropagationAvailable, $sid, $jid, $sid, $db->escape( $jpassword ) );
+    $query = sprintf( $isPropagationToAlreadyTranslatedAvailable, $sid, $jid, $sid, $db->escape( $jpassword ) );
 
     $results = $db->query_first( $query );
+
+    Log::doLog($query);
 
     return $results;
 
@@ -1246,18 +1249,32 @@ function getStatsForMultipleJobs( $_jids ) {
 		$jids = implode( ',', $_jids );
 	}
 
-	$query = "select SUM(IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(st.status='REJECTED',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(st.status='TRANSLATED',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(st.status='APPROVED',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as APPROVED, j.id, j.password
+    // OLD QUERY
+//	$query = "select SUM(IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(st.status='REJECTED',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(st.status='TRANSLATED',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(st.status='APPROVED',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as APPROVED, j.id, j.password
+//
+//		from jobs j
+//		INNER JOIN files_job fj on j.id=fj.id_job
+//		INNER join segments s on fj.id_file=s.id_file
+//		LEFT join segment_translations st on s.id=st.id_segment and st.id_job=j.id
+//
+//		WHERE j.id in ($jids)
+//
+//		AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
+//		group by j.id, j.password
+//		";
 
-		from jobs j
-		INNER JOIN files_job fj on j.id=fj.id_job
-		INNER join segments s on fj.id_file=s.id_file
-		LEFT join segment_translations st on s.id=st.id_segment and st.id_job=j.id
-
-		WHERE j.id in ($jids)
-
-		AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
-		group by j.id, j.password
-		";
+    $query = "
+            SELECT
+                (new_words + draft_words + translated_words + approved_words + rejected_words) as TOTAL ,
+                (draft_words + new_words) as DRAFT,
+                -- (new_words) as NEW,
+                rejected_words as REJECT,
+                translated_words as TRANSLATED,
+                approved_words as APPROVED,
+                id, password
+                from jobs
+            WHERE id IN ( $jids )
+    ";
 
 	$db         = Database::obtain();
 	$jobs_stats = $db->fetch_array( $query );
@@ -1886,7 +1903,7 @@ function getProjects( $start, $step, $search_in_pname, $search_source, $search_t
 			limit $start,$step";
 
 
-	//Log::doLog( $query );
+	Log::doLog( $query );
 
 	$db      = Database::obtain();
 	$results = $db->query( "SET SESSION group_concat_max_len = 10000000;" );
