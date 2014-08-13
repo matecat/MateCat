@@ -290,6 +290,17 @@ $(function () {
 	}).bind('fileuploaddestroyed', function (e,data) {
 //		var err = $.parseJSON(data.jqXHR.responseText)[0].error;
         console.log('file deleted');
+
+		var deletedFileName = data.url.match(/file=[^&]*/g);
+		deletedFileName = decodeURIComponent(deletedFileName[0].replace("file=",""));
+
+		console.log(skipLangDetectArr, deletedFileName, typeof( skipLangDetectArr[deletedFileName] ));
+
+		if(typeof( skipLangDetectArr[deletedFileName] ) !== 'undefined' ){
+			console.log(skipLangDetectArr);
+			delete skipLangDetectArr[deletedFileName];
+		}
+
         if($('.error-message.no-more').length) {
 
 			if($('.upload-table tr').length < (config.maxNumberFiles)) {
@@ -661,7 +672,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
        		return false;
         },
         success: function(d){
-//              console.log(this.context);
+
 //			falsePositive = ((typeof this.context == 'undefined')||(!this.context))? false : true; // suggested solution
 			falsePositive = (typeof this.context == 'undefined')? false : true; // old solution
             filerow.removeClass('converting');
@@ -678,6 +689,8 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 				$('.progress',filerow).fadeOut('slow', function() {
 					// Animation complete.
 				});
+
+				skipLangDetectArr[fname] = 'detect';
            	} else if( d.code < 0 ){
                 console.log(d.errors[0].message);
                 $('td.size',filerow).next().addClass('error').empty().attr('colspan','2').css({'font-size':'14px'}).append('<span class="label label-important">'+d.errors[0].message+'</span>');

@@ -289,5 +289,10 @@ class Utils {
 		return $jobs;
 	}
 
+	public static function filterLangDetectArray($arr){
+		usleep(1);
+		return filter_var( $arr, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW ) );
+	}
+
 }
 

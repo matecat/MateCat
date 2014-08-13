@@ -19,7 +19,7 @@ class createProjectController extends ajaxController {
     private $private_tm_key;
     private $private_tm_user;
     private $private_tm_pass;
-    private $analysis_status;
+	private $lang_detect_files;
 
     private $disable_tms_engine_flag;
 
@@ -37,6 +37,7 @@ class createProjectController extends ajaxController {
             'private_tm_key'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
             'private_tm_user'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
             'private_tm_pass'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+	        'lang_detect_files'  => array( 'filter' => FILTER_CALLBACK, 'options' => "Utils::filterLangDetectArray" ),
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -54,6 +55,7 @@ class createProjectController extends ajaxController {
         $this->private_tm_key          = $__postInput[ 'private_tm_key' ];
         $this->private_tm_user         = $__postInput[ 'private_tm_user' ];
         $this->private_tm_pass         = $__postInput[ 'private_tm_pass' ];
+        $this->lang_detect_files       = $__postInput[ 'lang_detect_files' ];
 
         if ( $this->disable_tms_engine_flag ) {
             $this->tms_engine = 0; //remove default MyMemory
@@ -75,7 +77,7 @@ class createProjectController extends ajaxController {
 
 
         if (empty($this->project_name)) {
-            $this->project_name = $default_project_name; //'NO_NAME'.$this->create_project_name();
+            $this->project_name = $default_project_name;
         }
 
         if (empty($this->source_language)) {
@@ -178,6 +180,7 @@ class createProjectController extends ajaxController {
                 'job_to_split'       => null,
                 'job_to_split_pass'  => null,
                 'split_result'       => null,
+	            'lang_detect_files'  => $this->lang_detect_files
             ) );
 
         $projectManager = new ProjectManager( $projectStructure );
