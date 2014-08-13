@@ -128,10 +128,7 @@ UI = {
 //		   $('#private-tm-key').addClass('selected');			 
 //		   $('#private-tm-key').addClass('selected').effect( "pulsate", "slow" );			 
 		}
-
-		$('.warning-message').html('<span>You are uploading a translation memory. A private TM key has been automatically generated. <br /> If you already own a private TM key you can override it.' +
-            '<br />If you empty the Private TM key field and not provide a valid TM key, the content of your TMX file and project will be available to all MateCat users.</span>').show();
-		
+         $('.warning-message').html('<span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.<br/>If you do not use a Private TM Key, the content of your TMX will be saved in a public TM</span>').show();
 	},
 
     checkFailedConversionsNumber: function() {
