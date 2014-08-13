@@ -9,9 +9,6 @@ RewriteEngine On
 #RewriteRule $ /offline.html [R=307,L]
 
 
-RewriteCond %{HTTP_HOST} privateoauth.translated.net$ [NC]
-RewriteRule ^(.*)$ http://matecat.local/$1 [L,R=301]
-
 RewriteRule ^$ index.php?action=newProject [QSA,L]
 
 RewriteRule ^(translate)[/]?$ index.php?action=cat [L]
@@ -27,7 +24,6 @@ RewriteRule ^(login)[/]?$ index.php?action=loginPage [L,QSA]
 RewriteRule ^(ajaxLogin)[/]?$ index.php?action=formLogin [L,QSA]
 
 RewriteRule ^(badConfiguration)[/]?$ index.php?action=badConfiguration [L]
-#RewriteRule ^(badConfiguration)[/]?$ lib/view/badConfiguration.html [L]
 RewriteRule ^(configMissing)[/]?$ lib/view/configMissing.html [L]
 
 #RewriteRule ^(oauth)/(request)[/]?$ index.php?action=oauthRequestInitializer [L,QSA]
