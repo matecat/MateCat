@@ -137,7 +137,7 @@ class catController extends viewController {
 
 		$jobIsArchivable = count( Utils::getArchivableJobs($this->jid) ) > 0;
 
-		if( $jobIsArchivable && !$this->job_cancelled && 0 ) {
+		if( $jobIsArchivable && !$this->job_cancelled ) {
 			//TODO: change this workaround
 
 			$res = "job";
