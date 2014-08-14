@@ -243,12 +243,17 @@ UI = {
 					'<div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches">' +
 					'	<div class="overflow"></div>' +
 					'</div>' +
-					'<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
-					'	<div class="overflow">' + 
-						((config.tms_enabled)? '<div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div>' : '<ul class="graysmall message"><li>Concordance is not available when the TM feature is disabled</li></ul>') + 
-					'		<div class="results"></div>' +
-					'	</div>' +
-					'</div>' +
+                    '<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
+                    '   <div class="overflow">' +
+                    ((config.tms_enabled)?
+                            '<div class="cc-search">' +
+                                    '    <div class="input search-source" contenteditable="true" />' +
+                                    '    <div class="input search-target" contenteditable="true" />' +
+                                    '    <div class="results"></div>' +
+                                    '</div>' : '<ul class="graysmall message"><li>Concordance is not available when the TM feature is disabled</li></ul>') +
+
+                    '   </div>' +
+                    '</div>' +
 					'<div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary">' +
 					'	<div class="overflow">' + 
 

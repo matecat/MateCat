@@ -717,7 +717,7 @@ article
 .graysmall:last-child{border-bottom:none !Important}
 .tab.concordances .graysmall
 {
-	display: none;
+	display: block;
 }
 .tab.concordances .graysmall.prime
 {
