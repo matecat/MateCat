@@ -3005,7 +3005,10 @@ function getArchivableJobs($jobs = array()){
 			segment_translations st on j.id = st.id_job
 			and j.create_date < (curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD." day)
 		where
-			translation_date < (curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD."  day)
+			(
+			    translation_date < (curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD."  day)
+			    OR translation_date is NULL
+			)
 			and j.status_owner = 'active'
 			and j.status = 'active'
 			and j.id in (%s)";
