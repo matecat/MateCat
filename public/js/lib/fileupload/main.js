@@ -116,19 +116,19 @@ UI = {
 	},
 
 	createKeyByTMX: function() {
-		if($('#create_private_tm_btn[data-key]').length) { // a key has already been created
+		if($('#create_private_tm_btn[data-key]').length || $('#private-tm-key').val().length ) { // a key has already been created
 			console.log('già cliccato');
-			if($('#private-tm-key').text() == '') {
+			if($('#private-tm-key').val() == '') {
 				$('#private-tm-key').val($('#create_private_tm_btn').attr('data-key'));
 			}
 		} else {
             console.log('questo');
 		   if(!$(".more").hasClass('minus')) $(".more").trigger('click');
 		   $('#create_private_tm_btn').trigger('click');
+           $('.warning-message').html('<span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.<br/>If you do not use a Private TM Key, the content of your TMX will be saved in a public TM</span>').show();
 //		   $('#private-tm-key').addClass('selected');			 
 //		   $('#private-tm-key').addClass('selected').effect( "pulsate", "slow" );			 
 		}
-         $('.warning-message').html('<span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.<br/>If you do not use a Private TM Key, the content of your TMX will be saved in a public TM</span>').show();
 	},
 
     checkFailedConversionsNumber: function() {
