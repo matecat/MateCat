@@ -665,7 +665,7 @@ margin-top: 20px;
 
 
 
-
+.error-content {padding-left: 45px; padding-right: 10px;}
 .error-message,
 .warning-message
 {
@@ -679,7 +679,6 @@ margin-top: 20px;
 	-moz-border-radius: 2px;
 	border-radius: 2px;
 	border:1px solid #c45f5f;
-	text-indent:40px;
 	display:none;
 }
 .warning-message

@@ -152,7 +152,7 @@ $(document).ready(function() {
 						}
 
 						//normal error management
-						$('.error-message').append( '<div>' + this.message + '<br /></div>' ).show();
+						$('.error-message').append( '<div class="error-content">' + this.message + '<br /></div>' ).show();
 
 					});
 
