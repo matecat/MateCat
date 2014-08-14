@@ -2523,28 +2523,31 @@ UI = {
 //        console.log($(segment).attr('data-hash'));
         this.tempReqArguments = null;
 
-        plusTranslated = (evenTranslated)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated': '';
-        $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + plusTranslated), function(index) {
-            $('.editarea', this).html( $('.editarea', segment).html() );
-
-            // if status is not set to draft, the segment content is not displayed
-            UI.setStatus($(this), 'draft');
-            //set segment as autoPropagated
-            $( this ).data( 'autopropagated', true );
-        });
-
-        //this has to be called AFTER the each cycle
         if( status == 'translated' ){
+
+            plusTranslated = (evenTranslated)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated': '';
+
+            //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
+            $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + plusTranslated ).not( segment ), function(index) {
+                $('.editarea', this).html( $('.editarea', segment).html() );
+
+                // if status is not set to draft, the segment content is not displayed
+                UI.setStatus($(this), 'draft');
+                //set segment as autoPropagated
+                $( this ).data( 'autopropagated', true );
+            });
+
             //unset actual segment as autoPropagated because now it is translated
             $( segment ).data( 'autopropagated', false );
+
+            //update current Header of Just Opened Segment
+            //NOTE: because this method is called after OpenSegment
+            // AS callback return for setTranslation ( whe are here now ),
+            // currentSegment pointer was already advanced by openSegment and header already created
+            //Needed because two consecutives segments can have the same hash
+            this.createHeader(true);
+
         }
-
-        //update current Header of Just Opened Segment, because this method is called after OpenSegment
-        //but before the callback return for setTranslation ( this ).
-        //So, currentSegment pointer was just updated
-        //Needed because two consecutives segments can have the same hash
-        this.createHeader(true);
-
 //        $('section[data-hash=' + $(segment).attr('data-hash') + ']');
     },
     doPropagate: function (trans) {
