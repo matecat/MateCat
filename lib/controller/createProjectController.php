@@ -42,8 +42,6 @@ class createProjectController extends ajaxController {
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        var_export( $__postInput );
-        exit();
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
         //$__postInput = filter_var_array( $_POST, $filterArgs );
