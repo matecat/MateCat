@@ -735,7 +735,6 @@ color:#333;}
 .popup p
 {
 	font-size: 18px;
-    padding: 5px;
     }
     .popup h1
     {
@@ -1008,11 +1007,30 @@ background: #F3F3F3!important;
 		width: 225px;
 		margin-right:12px;
 }
-
+.searchbox
+{
+	display: none;
+	position: fixed;
+	float: left;
+	width: 100%;
+	font-size:12px;
+	border-bottom: 1px solid #666;
+	background:#efefef url(../img/point.gif) 0 0 repeat-x;
+	margin-top: -27px;
+	padding:5px 4% 0px 4%;
+	-moz-box-shadow: 0 1px 3px #666;
+	-webkit-box-shadow: 0 1px 10px #666;
+	-moz-border-radius-bottom-right:2px;
+	-webkit-border-bottom-right-radius:2px;
+	-moz-border-radius-bottomleft:2px;
+	-webkit-border-bottom-left-radius:2px;
+	z-index: 9999;
+}
 
 .clear {clear:both;}
 
 .mgmt-tm th, .mgmt-gl th {background:#f4f4f4;}
+
 body.filterOpen .searchbox
 {
 	display: block;
@@ -1301,6 +1319,32 @@ p.surveynotice{
 .survey .popup-box{
 	height:inherit;	max-height:inherit;min-height:inherit;overflow-y:auto;
 }
+
+.error-message, .warning-message {
+background: #d65757 url(../img/error-symbol.png) 10px center no-repeat;
+color: #fff;
+padding: 10px 0;
+margin: 10px 0;
+float: left;
+font-weight: bold;
+width: 100%;
+-moz-border-radius: 2px;
+border-radius: 2px;
+border: 1px solid #c45f5f;
+text-indent: 40px;
+display: none;
+}
+
+.warning-message {
+background: #FFFA8B !important;
+border-color: #6D6E71;
+padding: 10px 0 10px 1%;
+text-indent: 0;
+width: 98.8%;
+color: #000;
+}
+
+
 
 @font-face {
 	font-family: 'icomoon';
