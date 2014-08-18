@@ -123,10 +123,6 @@ footer nav li:first-child
 	border-left: none;
     }
 	
-	footer nav li:last-child
-{
-	border-right: none;
-    }
 	
 	 footer nav
     {
@@ -384,7 +380,6 @@ footer nav li:first-child
 
 .mgmt-panel-tm .tablestats, .mgmt-panel.gl {display:block;}
 
-.mgmt-wrapper {width:92%; text-align:left;}
 
 /*end mgmt panel */
 
@@ -890,6 +885,13 @@ color:#333;}
     {
 	    float: right;
     }    
+	
+	
+	
+	#myTab  {
+margin-top: 20px;
+padding-left: 10px;
+}
 
     .manage .searchbox {	
 	    min-height: 20px;
@@ -898,21 +900,10 @@ color:#333;}
 
 .searchbox, .mgmt-panel-tm, .mgmt-panel-gl
 {
-	position: fixed;
 	float: left;
 	width: 100%;
 	font-size:12px;
-	border-bottom: 1px solid #666;
 	background:#efefef url(../img/point.gif) 0 0 repeat-x;
-	margin-top: -27px;
-	padding:5px 4% 0px 4%;
-	-moz-box-shadow: 0 1px 3px #666;
-	-webkit-box-shadow: 0 1px 10px #666;
-	-moz-border-radius-bottom-right:2px;
-	-webkit-border-bottom-right-radius:2px;
-	-moz-border-radius-bottomleft:2px;
-	-webkit-border-bottom-left-radius:2px;
-	z-index: 9999;
 }
 
 
@@ -928,15 +919,15 @@ color:#333;}
 div.mgmt-container {
 margin: 0 auto;
 overflow: hidden;
-width: 100%;
+width: 96%;
+text-align: left;
 }
 
 
 
 .mgmt-panel-tm, .mgmt-panel-gl {
-	display:none; 
-margin:0 auto; overflow:hidden; width:100%; -webkit-box-shadow: 0 1px 10px #000;
-		margin-top: -20px;
+
+margin:0 auto; overflow:hidden; width:100%;
 		background: #fff;
 		padding-bottom:30px;
 			font-size:16px;
@@ -987,6 +978,8 @@ margin: 10px 0;
 .mgmt-panel p {
 margin-top: 10px;
 margin-bottom: 10px;
+clear: both;
+text-align: left;
 }
 
 .mgmt-add-tm input, .mgmt-add-gl input {
@@ -998,6 +991,16 @@ padding: 5px 10px;
 border: 1px solid #abadb3;
 -webkit-transition: all 100ms ease-in;
 -moz-transition: all 100ms ease-in;
+}
+
+.nonumber {display:none;}
+.disabled .nonumber {display:block!important;}
+.disabled .number {display:none;}
+.resource {
+margin-bottom: -7px;
+}
+tr.disabled td {
+background: #F3F3F3!important;
 }
 
 .mgmt-add-gl input {
@@ -1036,15 +1039,7 @@ padding: 0 0 5px 18px;
 margin-bottom: 5px;
 }
 
-@media screen and ( max-height: 600px ){
-		
-.mgmt-container {
-overflow-y: scroll!important;
-width: 100%!important;
-overflow-x: hidden!important;
-height: 200px;
-}
-}
+
 /* Tabs */
 
 .nav-tabs {
@@ -1066,7 +1061,6 @@ display: block;
 .nav>li>a {
 position: relative;
 text-decoration:none;
-display: block;
 padding: 10px 15px;
 }
 
@@ -1092,7 +1086,7 @@ border-radius: 4px 4px 0 0;
 
 .mgmt-input {
 width: 90%;
-padding: 5px;
+padding: 10px;
 margin-bottom:20px;
 font-size: 16px !important;
 -moz-border-radius: 2px;
@@ -1113,10 +1107,12 @@ border: 1px solid #ccc;
 	text-align: left;
 	margin-top: 2px;
 }
+.addrow-gl {
+padding: 0 25px;
+}
+input#key {width:70%;}
 
-input#key {width:75%;}
-
-.addrow-tm .block, .addrow-gl .block {width: 40%;}
+.addrow-tm .block, .addrow-gl .block {width: 46%;}
 .addrow-gl select {height: 32px; margin-bottom:20px;}
 .searchbox .block .field
 {

@@ -352,7 +352,22 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
 
 
 
+.memory-mgmt {
+padding: 8px 10px 2px 10px;
+margin-top: 8px;
+color: #333;
+font-weight: bold;
+width: 240px;
+}
 
+.memory-mgmt:hover {
+background:#F7F7F7;
+}
+.memory-mgmt i {
+margin-right: 10px;
+margin-top: 2px;
+float: left;
+}
 
 .fileinput-button input {
   position: absolute;
@@ -458,7 +473,7 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
 .translate-box{float:left;margin:20px 30px 0px 0px}
 .translate-box.source{margin-right:0px}
 
-.translate-checkbox{margin-top:45px;}
+.translate-checkbox{float:left;}
 .tms-checkbox{width: 150px;height: 26px;}
 .tms-label{float:right;margin-left:4px; margin-top: 2px;}
 
@@ -539,7 +554,7 @@ body{font-family:Calibri, Arial, Helvetica, sans-serif}
 .upload-input{width:100%;padding:4px 5px 3px 5px;font-size:22px !important; -moz-border-radius: 2px;border-radius: 2px;border:1px solid #ccc}
 #private-tm-key
 {
-	/*border: 3px solid #12B4DF;*/
+	width:180px;
 }
 
 
@@ -747,15 +762,17 @@ tr.ready .size span{visibility: visible;}
 .tm-button{width: 20px; display:none; float: left; margin-left: -10px; margin-top: 35px;}
 
 .disabled, .disabled:hover, .disabled:active{opacity:0.5 !important;cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;border:1px solid #666}
-/* non fixed 
-header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margin-bottom:20px;height:45px;} */
-/*  fixed */
-header{background: #6d6e71;top: 0;left: 0;text-align: left;width: 100%;position: fixed;z-index: 999999999;border-bottom: 1px solid #333;padding: 4px 0 5px 0;height: 38px;margin-top: 0;} 
-.wrapper-upload {margin-top:60px;}
+header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margin-bottom:20px;height:45px;}
 
 .wrapper{width:98%;min-width:960px;margin:0px auto 0 auto;padding:5px 0 0 0;width:92%;font-size:14px;position:relative;text-align:left;}
-.logo{float:left;margin-top:1px;border:0;background:url(../img/logo.png) 0px 2px no-repeat;width:145px;height:31px; background-size: 130px 26px;}
-
+.logo{float:left;margin-top:5px;border:0;background:url(../img/logo.png) 0px 2px no-repeat;width:145px;height:31px; background-size: 130px 26px;}
+.popup-tm .popup-box {
+height: 500px;
+width: 100%;
+overflow-y: auto;
+margin: 0;
+/* padding-left: 10px; */
+}
 /*supported formats*/
 .supported-formats .popup
     {
@@ -770,12 +787,21 @@ header{background: #6d6e71;top: 0;left: 0;text-align: left;width: 100%;position:
     left: 5% !important;
     top: 5%;
     }
-
+	.popup-tm .popup {
+width: 94% !important;
+margin: 0 !important;
+left: 3% !important;
+top: 5%;
+}
 .popup h3
 	{
 	font-size:16px;
 	margin:10px 0 5px 0;
 	color:#333;
+	}
+	
+	.popup-tm h3 {	text-align: left;
+	font-size:20px;
 	}
 
 .popup .header
@@ -804,7 +830,6 @@ header{background: #6d6e71;top: 0;left: 0;text-align: left;width: 100%;position:
 	margin:0px;
 	padding:0;
 	float:left;
-	width:80px;
 	list-style:none;
 	font-size:14px;
 	}
@@ -958,8 +983,11 @@ footer a:hover{text-decoration:none}
 
 #create_private_tm_btn
 	{
-	width: 250px;
-	background-position: -3px -519px;
+		background-image: none;
+width: 70px;
+margin-left: -30px;
+padding: 4px 0 3px 0;
+margin-top: 9px;
 	}    
 
 #swaplang
