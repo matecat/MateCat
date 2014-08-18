@@ -55,6 +55,7 @@ $.extend(UI, {
 		this.surveyDisplayed = false;
 		this.warningStopped = false;
 		this.abortedOperations = [];
+        this.propagationsAvailable = false;
 
 		/**
 		 * Global Warnings array definition.
@@ -98,8 +99,8 @@ $.extend(UI, {
 				"label" : "Go to current segment",
 				"equivalent": "",
 				"keystrokes" : {
-					"standard": "ctrl+left",
-					"mac": "meta+left",
+					"standard": "ctrl+home",
+					"mac": "meta+shift+up",
 				}
 			},
 			"copySource": {

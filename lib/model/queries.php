@@ -667,6 +667,7 @@ function getSegmentsInfo( $jid, $password ) {
 	$query = "select j.id as jid, j.id_project as pid,j.source,j.target,
 		j.last_opened_segment, j.id_translator as tid, j.id_tms, j.id_mt_engine,
 		p.id_customer as cid, j.id_translator as tid, j.status_owner as status,
+		j.owner as job_owner,
 
 		j.job_first_segment, j.job_last_segment,
 		j.new_words, j.draft_words, j.translated_words, j.approved_words, j.rejected_words,
@@ -756,6 +757,33 @@ function getMoreSegments( $jid, $password, $step = 50, $ref_segment, $where = 'a
 	$results = $db->fetch_array( $query );
 
 	return $results;
+}
+
+function countThisTranslatedHashInJob( $jid, $jpassword, $sid ){
+
+    $db = Database::obtain();
+
+    $isPropagationToAlreadyTranslatedAvailable = "
+        SELECT COUNT(segment_hash) as available
+        FROM segment_translations
+        JOIN jobs ON id_job = id AND id_segment between jobs.job_first_segment AND jobs.job_last_segment
+        WHERE segment_hash = (
+            SELECT segment_hash FROM segments WHERE id = %u
+        )
+        AND id_job = %u
+        AND id_segment != %u
+        AND password = '%s'
+        AND segment_translations.status = '" . Constants_TranslationStatus::STATUS_TRANSLATED . "'
+    ";
+
+    $query = sprintf( $isPropagationToAlreadyTranslatedAvailable, $sid, $jid, $sid, $db->escape( $jpassword ) );
+
+    $results = $db->query_first( $query );
+
+    Log::doLog($query);
+
+    return $results;
+
 }
 
 function getTranslationsMismatches( $jid, $jpassword, $sid = null ){
@@ -933,36 +961,51 @@ function addTranslation( array $_Translation ){
  *
  * @param $params
  * @param $job_data
- *
+ * @param $propagateToTranslated
+ * @param $_idSegment
  * @throws Exception
  * @return int
  */
-function propagateTranslation( $params, $job_data ){
+function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTranslated = false ){
 
     $db = Database::obtain();
 
     $q = array();
     foreach ( $params as $key => $value ) {
-        if ( is_bool( $value ) ) {
+        if( $key == 'status' ){
+
+            if( $propagateToTranslated ){
+                $q[ ]      = $key . " = IF( status = 'TRANSLATED' , 'TRANSLATED', '" . $db->escape( $value ) . "' )";
+                $andStatus = "AND status IN ( 'DRAFT', 'NEW', 'REJECTED', 'TRANSLATED' )";
+            } else {
+                $q[ ]      = $key . " = '" . $db->escape( $value ) . "'";
+                $andStatus = "AND status IN ( 'DRAFT', 'NEW', 'REJECTED' )";
+            }
+
+        } elseif ( is_bool( $value ) ) {
             $q[ ] = $key . " = " . var_export( (bool)$value , true );
         } elseif ( !is_numeric( $value ) ) {
             $q[ ] = $key . " = '" . $db->escape( $value ) . "'";
         } else {
             $q[ ] = $key . " = " . (float)$value;
         }
+
     }
 
     //the job password seems a better idea to search only the segments in the actual chunk,
     //but it needs an update in join on 2 tables.
     //job_first_segment and job_last_segment should do the same thing
     $TranslationPropagate = "
-		UPDATE segment_translations
-		SET " . implode( ", ", $q ) . "
-		WHERE id_job = {$params[ 'id_job' ]}
-	    AND segment_hash = '" . $params[ 'segment_hash' ] . "'
-		AND status IN ( 'DRAFT', 'NEW', 'REJECTED' )
-		AND id_segment BETWEEN {$job_data[ 'job_first_segment' ]} AND {$job_data[ 'job_last_segment' ]}
-	";
+        UPDATE segment_translations
+        SET " . implode( ", ", $q ) . "
+        WHERE id_job = {$params[ 'id_job' ]}
+        AND segment_hash = '" . $params[ 'segment_hash' ] . "'
+        $andStatus
+        AND id_segment BETWEEN {$job_data[ 'job_first_segment' ]} AND {$job_data[ 'job_last_segment' ]}
+        AND id_segment != $_idSegment
+    ";
+
+//    Log::doLog( $TranslationPropagate );
 
     $db->query( $TranslationPropagate );
 
@@ -1184,9 +1227,9 @@ function getOriginalFilesForJob( $id_job, $id_file, $password ) {
 }
 
 
-function getCurrentTranslation( $id_job, $id_segment ) {
+function getCurrentTranslationAndLock( $id_job, $id_segment ) {
 
-	$query = "SELECT * FROM segment_translations WHERE id_segment = %u AND id_job = %u";
+	$query = "SELECT * FROM segment_translations WHERE id_segment = %u AND id_job = %u FOR UPDATE";
 	$query = sprintf( $query, $id_segment, $id_job );
 
 	$db      = Database::obtain();
@@ -1206,18 +1249,32 @@ function getStatsForMultipleJobs( $_jids ) {
 		$jids = implode( ',', $_jids );
 	}
 
-	$query = "select SUM(IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(st.status='REJECTED',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(st.status='TRANSLATED',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(st.status='APPROVED',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as APPROVED, j.id, j.password
+    // OLD QUERY
+//	$query = "select SUM(IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count)) as TOTAL, SUM(IF(st.status IS NULL OR st.status='DRAFT' OR st.status='NEW',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as DRAFT, SUM(IF(st.status='REJECTED',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as REJECTED, SUM(IF(st.status='TRANSLATED',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as TRANSLATED, SUM(IF(st.status='APPROVED',IF( IFNULL( st.eq_word_count, -1 ) = -1, raw_word_count, st.eq_word_count),0)) as APPROVED, j.id, j.password
+//
+//		from jobs j
+//		INNER JOIN files_job fj on j.id=fj.id_job
+//		INNER join segments s on fj.id_file=s.id_file
+//		LEFT join segment_translations st on s.id=st.id_segment and st.id_job=j.id
+//
+//		WHERE j.id in ($jids)
+//
+//		AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
+//		group by j.id, j.password
+//		";
 
-		from jobs j
-		INNER JOIN files_job fj on j.id=fj.id_job
-		INNER join segments s on fj.id_file=s.id_file
-		LEFT join segment_translations st on s.id=st.id_segment and st.id_job=j.id
-
-		WHERE j.id in ($jids)
-
-		AND s.id BETWEEN j.job_first_segment AND j.job_last_segment
-		group by j.id, j.password
-		";
+    $query = "
+            SELECT
+                (new_words + draft_words + translated_words + approved_words + rejected_words) as TOTAL ,
+                (draft_words + new_words) as DRAFT,
+                -- (new_words) as NEW,
+                rejected_words as REJECT,
+                translated_words as TRANSLATED,
+                approved_words as APPROVED,
+                id, password
+                from jobs
+            WHERE id IN ( $jids )
+    ";
 
 	$db         = Database::obtain();
 	$jobs_stats = $db->fetch_array( $query );
@@ -1407,11 +1464,12 @@ function getEditLog($jid, $pass) {
 		st.suggestions_array AS sar,
 		st.suggestion_source AS ss,
 		st.suggestion_match AS sm,
+		st.suggestion_position AS sp,
 		st.mt_qe,
 		j.id_translator AS tid,
 		j.source AS source_lang,
 		j.target AS target_lang,
-		s.raw_word_count rwc, 
+		s.raw_word_count rwc,
 		p.name as pname
 			FROM
 			jobs j 
@@ -1845,7 +1903,7 @@ function getProjects( $start, $step, $search_in_pname, $search_source, $search_t
 			limit $start,$step";
 
 
-	//Log::doLog( $query );
+	Log::doLog( $query );
 
 	$db      = Database::obtain();
 	$results = $db->query( "SET SESSION group_concat_max_len = 10000000;" );
@@ -2132,23 +2190,19 @@ function updateWordCount( WordCount_Struct $wStruct ){
 
 	$db = Database::obtain();
 
-    //Update in JOIN
-	$query = "UPDATE jobs as j, segment_translations AS st SET
+    //Update in Transaction
+	$query = "UPDATE jobs as j SET
                 new_words = new_words + " . $wStruct->getNewWords() . ",
                 draft_words = draft_words + " . $wStruct->getDraftWords() . ",
                 translated_words = translated_words + " . $wStruct->getTranslatedWords() . ",
                 approved_words = approved_words + " . $wStruct->getApprovedWords() . ",
-                rejected_words = rejected_words + " . $wStruct->getRejectedWords() . ",
-                st.status = '" . $db->escape( $wStruct->getNewStatus() ) . "'
+                rejected_words = rejected_words + " . $wStruct->getRejectedWords() . "
                   WHERE j.id = " . (int)$wStruct->getIdJob() . "
-                  AND st.id_job = j.id
-                  AND j.password = '" . $db->escape( $wStruct->getJobPassword() ) . "'
-                  AND st.status = '" . $db->escape( $wStruct->getOldStatus() ) . "'
-                  AND st.id_segment = " . (int)$wStruct->getIdSegment();
+                  AND j.password = '" . $db->escape( $wStruct->getJobPassword() ) ."'";
 
 	$db->query( $query );
 
-	Log::doLog( $query . "\n" );
+//	Log::doLog( $query . "\n" );
 
 	$err   = $db->get_error();
 	$errno = $err[ 'error_code' ];
@@ -2156,6 +2210,8 @@ function updateWordCount( WordCount_Struct $wStruct ){
 		Log::doLog( $err );
 		return $errno * -1;
 	}
+
+    Log::doLog( "Affected: " . $db->affected_rows . "\n" );
 
 	return $db->affected_rows;
 
@@ -2252,7 +2308,9 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
 				$st_queue_values[ ] = " ( '" . implode( "', '", array_values( $data_innodb ) ) . "' )";
 
-			}
+			} else {
+                Log::doLog( 'Skipped Fast Segment: ' . var_export( $data, true ) );
+            }
 
 		}
 
@@ -2260,11 +2318,11 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
 	$chunks_st = array_chunk( $st_values, 500 );
 
-	//echo 'Insert Segment Translations: ' . count($st_values) . "\n";
-	//Log::doLog( 'Insert Segment Translations: ' . count($st_values) );
+//	echo 'Insert Segment Translations: ' . count($st_values) . "\n";
+	Log::doLog( 'Insert Segment Translations: ' . count($st_values) );
 
-	//echo 'Queries: ' . count($chunks_st) . "\n";
-	//Log::doLog( 'Queries: ' . count($chunks_st) );
+//	echo 'Queries: ' . count($chunks_st) . "\n";
+	Log::doLog( 'Queries: ' . count($chunks_st) );
 
 	//USE the MySQL InnoDB isolation Level to protect from thread high concurrency access
 	$db->query( 'SET autocommit=0' );
@@ -2319,11 +2377,11 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
 		$chunks_st_queue = array_chunk( $st_queue_values, 500 );
 
-		//echo 'Insert Segment Translations Queue: ' . count($st_queue_values) . "\n";
-		//Log::doLog( 'Insert Segment Translations Queue: ' . count($st_queue_values) );
+//		echo 'Insert Segment Translations Queue: ' . count($st_queue_values) . "\n";
+		Log::doLog( 'Insert Segment Translations Queue: ' . count($st_queue_values) );
 
-		//echo 'Queries: ' . count($chunks_st_queue) . "\n";
-		//Log::doLog( 'Queries: ' . count($chunks_st_queue) );
+//		echo 'Queries: ' . count($chunks_st_queue) . "\n";
+		Log::doLog( 'Queries: ' . count($chunks_st_queue) );
 
 		foreach( $chunks_st_queue as $k => $queue_chunk ){
 
@@ -2930,6 +2988,48 @@ function setJobCompleteness( $jid, $is_completed ) {
 	}
 
 	return $db->affected_rows;
+}
+
+/**
+ * Given an array of job IDs, this function returns the IDs of archivable jobs
+ * @param array $jobs
+ * @return array
+ */
+function getArchivableJobs($jobs = array()){
+	$db    = Database::obtain();
+	$query =
+		"select
+			distinct j.id
+		from
+			jobs j join
+			segment_translations st on j.id = st.id_job
+			and j.create_date < (curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD." day)
+		where
+			(
+			    translation_date < (curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD."  day)
+			    OR translation_date is NULL
+			)
+			and j.status_owner = 'active'
+			and j.status = 'active'
+			and j.id in (%s)";
+
+	$results = $db->fetch_array(
+	              sprintf(
+		              $query,
+	                  implode(", ", $jobs)
+	              )
+				);
+
+	$err     = $db->get_error();
+	$errno   = $err[ 'error_code' ];
+
+	if ( $errno != 0 ) {
+		log::doLog( "$errno: " . var_export( $err, true ) );
+
+		return $errno * -1;
+	}
+
+	return $results;
 }
 
 ?>

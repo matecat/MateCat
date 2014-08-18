@@ -56,11 +56,12 @@ UI = {
 		this.sourceTags = sourceTags || [];
 	},
 	changeStatus: function(ob, status, byStatus) {
+        console.log('byStatus: ', byStatus);
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
 		segment_id = $(segment).attr('id').split('-')[1];
 		$('.percentuage', segment).removeClass('visible');
 		if (!segment.hasClass('saved'))
-			this.setTranslation($(segment).attr('id').split('-')[1], status);
+			this.setTranslation($(segment).attr('id').split('-')[1], status, false, byStatus);
 		segment.removeClass('saved');
 		this.setContribution(segment_id, status, byStatus);
 		this.setContributionMT(segment_id, status, byStatus);
@@ -242,12 +243,17 @@ UI = {
 					'<div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches">' +
 					'	<div class="overflow"></div>' +
 					'</div>' +
-					'<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
-					'	<div class="overflow">' + 
-						((config.tms_enabled)? '<div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div>' : '<ul class="graysmall message"><li>Concordance is not available when the TM feature is disabled</li></ul>') + 
-					'		<div class="results"></div>' +
-					'	</div>' +
-					'</div>' +
+                    '<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
+                    '   <div class="overflow">' +
+                    ((config.tms_enabled)?
+                            '<div class="cc-search">' +
+                                    '    <div class="input search-source" contenteditable="true" />' +
+                                    '    <div class="input search-target" contenteditable="true" />' +
+                                    '    <div class="results"></div>' +
+                                    '</div>' : '<ul class="graysmall message"><li>Concordance is not available when the TM feature is disabled</li></ul>') +
+
+                    '   </div>' +
+                    '</div>' +
 					'<div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary">' +
 					'	<div class="overflow">' + 
 
@@ -281,8 +287,11 @@ UI = {
 		}
 
 	},
-	createHeader: function() {
-		if ($('h2.percentuage', this.currentSegment).length) {
+	createHeader: function(forceCreation) {
+
+        forceCreation = forceCreation || false;
+
+		if ( $('h2.percentuage', this.currentSegment).length && !forceCreation ) {
 			return;
 		}
 		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="#" id="segment-' + this.currentSegmentId + '-close" class="close" title="Close this segment"></a><a href="/referenceFile/' + config.job_id + '/' + config.password + '/' + this.currentSegmentId + '" id="segment-' + this.currentSegmentId + '-context" class="context" title="Open context" target="_blank">Context</a>';
@@ -785,6 +794,7 @@ UI = {
 			$('.editarea', next).trigger("click", "moving");
 		} else {
 			next = this.currentFile.next().find('section:first');
+            console.log('next: ', next);
 			if (next.length) {
 				this.scrollSegment(next);
 				$('.editarea', next).trigger("click", "moving");
@@ -1146,7 +1156,7 @@ UI = {
 						'					</span>' +
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
-						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
+						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
 						'						<ul class="editToolbar">' +
 						'							<li class="uppercase" title="Uppercase"></li>' +
 						'							<li class="lowercase" title="Lowercase"></li>' +
@@ -1365,6 +1375,7 @@ UI = {
 		this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
 //		this.nextUntranslatedSegmentIdByServer = d.nextUntranslatedSegmentId;
 		this.getNextSegment(this.currentSegment, 'untranslated');
+        this.propagationsAvailable = d.data.prop_available;
 		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
 	},
     detectTranslationAlternatives: function(d) {
@@ -1390,12 +1401,9 @@ UI = {
         sameContentIndex = -1;
         $.each(d.data.editable, function(ind) {
             //Remove trailing spaces for string comparison
-            console.log('this.translation: ' + this.translation);
-            console.log('UI.decodePlaceholdersToText(this.translation): ' + UI.decodePlaceholdersToText(this.translation));
-            console.log('UI.editarea.text(): ' + UI.editarea.text());
-            console.log("UI.editarea.text().replace( /[ \xA0]+$/ , '' ): " + UI.editarea.text().replace( /[ \xA0]+$/ , '' ));
-            console.log("rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) )" + rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ));
-            if( this.translation == rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) ) {
+//            console.log( "PostProcessEditArea: " + UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' ) );
+//            console.log( "SetCurrSegmentValue: " + this.translation );
+            if( this.translation == UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' ) ) {
                 sameContentIndex = ind;
             }
         });
@@ -1404,7 +1412,7 @@ UI = {
         sameContentIndex1 = -1;
         $.each(d.data.not_editable, function(ind) {
             //Remove trailing spaces for string comparison
-            if(this.translation == rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) ) sameContentIndex1 = ind;
+            if( this.translation == UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' ) ) sameContentIndex1 = ind;
         });
         if(sameContentIndex1 != -1) d.data.not_editable.splice(sameContentIndex1, 1);
 
@@ -1424,6 +1432,35 @@ UI = {
             tab.trigger('click');
         }
     },
+
+    hexDump: function(data) {
+        var outputString = new String();
+        var addressPadding = "0000000";
+        var line = 0;
+        var countForCurrentLine = 0;
+
+        outputString +=
+                "Address   0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f \n" +
+                        "---------------------------------------------------------\n" +
+                        "00000000  ";
+
+        for (var i=0; i < data.length; i++) {
+            countForCurrentLine++
+            var byteData = data.substr(i, 1);
+
+            var number = data.charCodeAt(i) & 0xff;
+            var byteHex = (number < 16) ? "0" + number.toString(16) : number.toString(16);;
+
+            outputString += byteHex + " ";
+            if (countForCurrentLine == 16) {
+                countForCurrentLine = 0;
+                line++;
+                outputString += "\n" + addressPadding.substr(0, 7 - line.toString(16).length) + line.toString(16) + "0  ";
+            }
+        }
+        return outputString;
+    },
+
     renderAlternatives: function(d) {
 		console.log('renderAlternatives d: ', d);
 //		console.log($('.editor .submenu').length);
@@ -1432,22 +1469,28 @@ UI = {
         segment_id = UI.currentSegmentId;
         escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
         console.log('escapedSegment: ', escapedSegment);
+
+        function prepareTranslationDiff( translation ){
+            _str = translation.replace( config.lfPlaceholderRegex, "\n" )
+                    .replace( config.crPlaceholderRegex, "\r" )
+                    .replace( config.crlfPlaceholderRegex, "\r\n" )
+                    .replace( config.tabPlaceholderRegex, "\t" )
+                    .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 16 ) ) );
+            diff_obj = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), _str );
+            UI.dmp.diff_cleanupEfficiency( diff_obj );
+            return diff_obj;
+        }
+
         $.each(d.data.editable, function(index) {
-//            console.log('this.translation: ', this.translation);
-//            console.log('aa: ', UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives'));
-//			console.log('coso: ', htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives') ));
- //           var aa = UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives');
- //           bb = aa.replace()
-            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives') ) );
-            console.log('diff_view: ', diff_view);
-			UI.dmp.diff_cleanupEfficiency( diff_view );
-            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+            diff_obj = prepareTranslationDiff( this.translation );
+            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
+
         $.each(d.data.not_editable, function(index1) {
-            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'not editable alternatives') ) );
-            UI.dmp.diff_cleanupEfficiency( diff_view );
-            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+            diff_obj = prepareTranslationDiff( this.translation );
+            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
+
     },
     chooseAlternative: function(w) {console.log('chooseAlternative');
 //        console.log( $('.sugg-target .realData', w ) );
@@ -1557,11 +1600,11 @@ UI = {
 		range = selection.getRangeAt(0);
 
 		prova = $(range.commonAncestorContainer).text().charAt(range.startOffset - 1);
-		insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
+        str = getSelectionHtml();
+        insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
 		aa = prova.match(/\W$/gi);
-		str = getSelectionHtml();
-		newStr = '';
-		$.each($.parseHTML(str), function(index) {
+        newStr = '';
+        $.each($.parseHTML(str), function(index) {
 			if(this.nodeName == '#text') {
 				d = this.data;
 //				console.log(index + ' - ' + d);
@@ -1598,6 +1641,7 @@ UI = {
 //				newStr += this.innerText;					
 			}
 		});
+//        console.log('newStr: ', newStr);
 //		replaceSelectedText(newStr);
 		replaceSelectedHtml(newStr);
 
@@ -1901,28 +1945,31 @@ UI = {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
+                console.log('getwarning local success');
 				if (UI.currentSegment.hasClass('waiting_for_check_result')) {
-
 					// check conditions for results discard
 					if (!d.total) {
 						$('p.warnings', UI.currentSegment).empty();
 						$('span.locked.mismatch', UI.currentSegment).removeClass('mismatch');
 						return;
 					}
-
+/*
                     escapedSegment = UI.checkSegmentsArray[d.token].trim().replace( config.lfPlaceholderRegex, "\n" );
                     escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
                     escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
                     escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "\t" );
                     escapedSegment = escapedSegment.replace( config.nbspPlaceholderRegex, $( document.createElement('span') ).html('&nbsp;').text() );
 
+
                     if (UI.editarea.text().trim() != escapedSegment ){
+                        console.log('ecco qua');
+
 //                        console.log( UI.editarea.text().trim() );
 //                        console.log( UI.checkSegmentsArray[d.token].trim() );
 //                        console.log( escapedSegment  );
                         return;
                     }
-
+*/
 					UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
 					UI.markTagMismatch(d.details);
 					delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
@@ -1931,7 +1978,8 @@ UI = {
 			}
 		}, 'local');
 	},
-	setTranslation: function(id_segment, status, caller) {
+
+    setTranslation: function(id_segment, status, caller, byStatus) {
 		reqArguments = arguments;
 		segment = $('#segment-' + id_segment); 
 		this.lastTranslatedSegmentId = id_segment;
@@ -1964,8 +2012,25 @@ UI = {
 //			}
 //		}
 		autosave = (caller == 'autosave') ? true : false;
+        this.tempReqArguments = {
+            id_segment: id_segment,
+            id_job: config.job_id,
+            id_first_file: file.attr('id').split('-')[1],
+            password: config.password,
+            status: status,
+            translation: translation,
+            time_to_edit: time_to_edit,
+            id_translator: id_translator,
+            errors: errors,
+            chosen_suggestion_index: chosen_suggestion,
+            autosave: autosave
+        };
+        reqData = this.tempReqArguments;
+        reqData.action = 'setTranslation';
 
 		APP.doRequest({
+            data: reqData,
+/*
 			data: {
 				action: 'setTranslation',
 				id_segment: id_segment,
@@ -1980,12 +2045,13 @@ UI = {
 				chosen_suggestion_index: chosen_suggestion,
 				autosave: autosave
 			},
+*/
 			context: [reqArguments, segment, status],
 			error: function() {
 				UI.failedConnection(this[0], 'setTranslation');
 			},
 			success: function(d) {
-				UI.setTranslation_success(d, this[1], this[2]);
+				UI.setTranslation_success(d, this[1], this[2], this[0][3]);
 			}
 		});
 	},
@@ -2160,7 +2226,7 @@ UI = {
 	},
 */
 
-    postProcessEditarea: function(context, selector){console.log('postprocesseditarea');
+    postProcessEditarea: function(context, selector){//console.log('postprocesseditarea');
         selector = (typeof selector === "undefined") ? '.editarea' : selector;
         area = $( selector, context ).clone();
         /*
@@ -2174,14 +2240,14 @@ UI = {
         if( divs.length ){
             divs.each(function(){
                 $(this).find( 'br:not([class])' ).remove();
-                $(this).prepend( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
+                $(this).prepend( $('<span class="placeholder">' + config.crPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
             });
         } else {
 //			console.log('post process 1: ', $(area).html());
 //			console.log($(area).find( 'br:not([class])' ).length);
-//			$(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>') );
 
-            $(area).find('br:not([class]), br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
+			$(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
+            $(area).find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
             $(area).find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
             $(area).find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
 
@@ -2394,7 +2460,7 @@ UI = {
 		$('#contextMenu .shortcut .alt').html(alt);
 		$('#contextMenu .shortcut .cmd').html(cmd);
 	},
-	setTranslation_success: function(d, segment, status) {
+	setTranslation_success: function(d, segment, status, byStatus) {
 		if (d.error.length)
 			this.processErrors(d.error, 'setTranslation');
 		if (d.data == 'OK') {
@@ -2403,27 +2469,155 @@ UI = {
 			this.setProgress(d.stats);
 			//check status of global warnings
 			this.checkWarnings(false);
+            if(!byStatus) {
+                this.beforePropagateTranslation(segment, status);
+            }
+        }
+    },
+    beforePropagateTranslation: function(segment, status) {
+//        console.log('before propagate');
+
+        //disabled popup and cookie for now
+        UI.propagateTranslation(segment, status, false);
+        return false;
+
+        if ( UI.propagationsAvailable ){
+
+            if ( typeof $.cookie('_auto-propagation-' + config.job_id + '-' + config.password) != 'undefined' ) { // cookie already set
+                if($.cookie('_auto-propagation-' + config.job_id + '-' + config.password) == '1') {
+                    UI.propagateTranslation(segment, status, true);
+                } else {
+                    UI.propagateTranslation(segment, status, false);
+                }
+
+            } else {
+
+//            var sid = segment.attr('id').split('-')[1];
+                APP.popup({
+                    name: 'confirmPropagation',
+                    title: 'Warning',
+                    buttons: [
+                        {
+                            type: 'ok',
+                            text: 'Yes',
+                            callback: 'doPropagate',
+                            params: 'true',
+                            closeOnClick: 'true'
+                        },
+                        {
+                            type: 'cancel',
+                            text: 'No, thanks',
+                            callback: 'doPropagate',
+                            params: 'false',
+                            closeOnClick: 'true'
+                        }
+                    ],
+                    content: "Do you want to extend the autopropagation of this translation even to <span class='auto-propagation-review'>" + UI.propagationsAvailable + " already translated segments?</span>"
+                });
+
+                //set the parameters for search and perform it
+                $('.auto-propagation-review' ).on('click', function(){
+                    APP.closePopup();
+                    $("#filterSwitch").trigger('click');
+                    $("#search-source").val( $( '#' + $( segment ).attr('id') + '-source', segment ).text() );
+                    $('#select-status.search-select').val('translated' ).prop('selected', 'selected');
+                    $('#exact-match').prop('checked', 'checked');
+                    $("#exec-find" ).trigger('click');
+                });
+
+            }
+
+        }
+
+  /*
+        if ($.cookie('_auto-propagation-' + config.job_id + '-' + config.password)) {
+            console.log('cookie already set');
+
+        } else {
+            console.log('cookie not yet set');
+            APP.popup({
+                name: 'confirmPropagation',
+                title: 'Warning',
+                buttons: [
+                    {
+                        type: 'ok',
+                        text: 'Yes',
+                        callback: 'doPropagate',
+                        params: 'true',
+                        closeOnClick: 'true'
+                    },
+                    {
+                        type: 'cancel',
+                        text: 'No, thanks',
+                        callback: 'doPropagate',
+                        params: 'false',
+                        closeOnClick: 'true'
+                    }
+                ],
+                content: "Dou you want to extend the autopropagation of this translation even to already translated segments?"
+            });
+        }
+        checkBefore = false;
+        if(checkBefore) {
+
+        } else {
             this.propagateTranslation(segment, status);
         }
+        */
     },
-    propagateTranslation: function(segment, status) {
+
+    propagateTranslation: function(segment, status, evenTranslated) {
 //        console.log($(segment).attr('data-hash'));
+        this.tempReqArguments = null;
 
         if( status == 'translated' ){
+
+            plusTranslated = (evenTranslated)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated': '';
+
+            //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
+            $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + plusTranslated ).not( segment ), function(index) {
+                $('.editarea', this).html( $('.editarea', segment).html() );
+
+                // if status is not set to draft, the segment content is not displayed
+                UI.setStatus($(this), 'draft');
+                //set segment as autoPropagated
+                $( this ).data( 'autopropagated', true );
+            });
+
             //unset actual segment as autoPropagated because now it is translated
             $( segment ).data( 'autopropagated', false );
-        }
 
-        $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected'), function(index) {
-            $('.editarea', this).html( $('.editarea', segment).html() );
-            UI.setStatus($(this), 'draft');
-            //set segment as autoPropagated
-            $( this ).data( 'autopropagated', true );
+            //update current Header of Just Opened Segment
+            //NOTE: because this method is called after OpenSegment
+            // AS callback return for setTranslation ( whe are here now ),
+            // currentSegment pointer was already advanced by openSegment and header already created
+            //Needed because two consecutives segments can have the same hash
+            this.createHeader(true);
+
+        }
+//        $('section[data-hash=' + $(segment).attr('data-hash') + ']');
+    },
+    doPropagate: function (trans) {
+        reqData = this.tempReqArguments;
+        reqData.action = 'setAutoPropagation';
+        reqData.propagateAll = trans;
+
+        this.tempReqArguments = null;
+
+        APP.doRequest({
+            data: reqData,
+            context: [reqData, trans],
+            error: function() {
+            },
+            success: function() {
+                console.log('success setAutoPropagation');
+                UI.propagateTranslation($('#segment-' + this[0].id_segment), this[0].status, this[1]);
+            }
         });
-        $('section[data-hash=' + $(segment).attr('data-hash') + ']');
+
     },
 
-	setWaypoints: function() {
+    setWaypoints: function() {
 		this.firstSegment.waypoint('remove');
 		this.lastSegment.waypoint('remove');
 		this.detectFirstLast();
@@ -2628,7 +2822,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.3.4.3";
+		this.version = "0.3.4.6";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -2679,6 +2873,7 @@ $.extend(UI, {
 		this.surveyDisplayed = false;
 		this.warningStopped = false;
 		this.abortedOperations = [];
+        this.propagationsAvailable = false;
 
 		/**
 		 * Global Warnings array definition.
@@ -2722,8 +2917,8 @@ $.extend(UI, {
 				"label" : "Go to current segment",
 				"equivalent": "",
 				"keystrokes" : {
-					"standard": "ctrl+left",
-					"mac": "meta+left",
+					"standard": "ctrl+home",
+					"mac": "meta+shift+up",
 				}
 			},
 			"copySource": {
@@ -3106,26 +3301,29 @@ $.extend(UI, {
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
 //			console.log('a: ', UI.editarea.html());
-			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
+//            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+//            console.log('a1: ', UI.editarea.html());
+            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 //			console.log('b: ', UI.editarea.html());
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
-				console.log('qui: ', document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
+//				console.log('qui: ', document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
 				setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
 				saveSelection();
 			}
 //			console.log($('.rangySelectionBoundary', UI.editarea)[0]);
-			console.log('c: ', UI.editarea.html());
+//			console.log('c: ', UI.editarea.html());
 			var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;
-			console.log('ph: ', ph);
+//			console.log('ph: ', ph);
 			$('.rangySelectionBoundary', UI.editarea).remove();
-			console.log('d: ', UI.editarea.html());
-			console.log($('.tag-autocomplete-endcursor', UI.editarea));
+//			console.log('d: ', UI.editarea.html());
+//			console.log($('.tag-autocomplete-endcursor', UI.editarea));
 			$('.tag-autocomplete-endcursor', UI.editarea).after(ph);
 //			setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
-			console.log('e: ', UI.editarea.html());
+//			console.log('e: ', UI.editarea.html());
 			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));
-			console.log('f: ', UI.editarea.html());
+//			console.log('f: ', UI.editarea.html());
 			restoreSelection();
 			UI.closeTagAutocompletePanel();
 			UI.lockTags(UI.editarea);
@@ -3377,7 +3575,7 @@ $.extend(UI, {
 			e.stopPropagation();			
 		}).on('mouseup', '.editarea', function(e) {
 			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-				UI.showEditToolbar();
+				if(!UI.isFirefox) UI.showEditToolbar();
 			};
 		}).on('mousedown', '.editarea', function(e) {
 			UI.hideEditToolbar();
@@ -3432,15 +3630,108 @@ $.extend(UI, {
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
+        }).on('keydown', '.editor .editarea', function(e) {
+//            saveSelection();
+//            console.log('KEYDOWN: ', UI.editarea.html());
+//            restoreSelection();
+        }).on('keypress', '.editor .editarea', function(e) {
+//            saveSelection();
+//            console.log('KEYPRESS: ', UI.editarea.html());
+//            restoreSelection();
+        }).on('keyup', '.editor .editarea', function(e) {
+/*
+            saveSelection();
+            insideBr = $('.editor .editarea .br .rangySelectionBoundary').length;
+//            if(insideBr) console.log('is inside BR');
+
+            currentBr = $('.br:has(.rangySelectionBoundary)', UI.editarea);
+//            startRow = $('.br:has(.rangySelectionBoundary) .startRow', UI.editarea);
+            pastedContent = currentBr.text().trim();
+
+//            pastedContent = startRow.text().trim();
+            restoreSelection();
+//            console.log('startRow: ', startRow);
+//            console.log('startRow text: ', startRow.text().trim());
+            currentBr.html('<br /><span class="startRow">&nbsp;</span>');
+//            console.log('currentBr: ', currentBr);
+//            console.log('pastedContent: ', pastedContent);
+            $(currentBr).after(pastedContent + '<span class="pointCursorHere"></span>');
+//            setCursorPosition($('.pointCursorHere', UI.editarea)[0]);
+            $('.pointCursorHere', UI.editarea).remove();
+*/
+//            setCursorAfterNode(window.getSelection().getRangeAt(0), $('.pointCursorHere', UI.editarea)[0]);
+
+//            console.log('ecco: ', UI.editarea.html());
+//      $('.editor .editarea .startRow').replaceWith('<span class="startRow">&nbsp;</span>' + pastedContent);
+
+            /*
+                        saveSelection();
+                        insideStartRow = $('.editor .editarea .startRow .rangySelectionBoundary').length;
+                        startRow = $('.startRow:has(.rangySelectionBoundary)', UI.editarea);
+                        pastedContent = startRow.text().trim();
+
+            //            console.log('cursore dentro a uno span? ', insideStartRow);
+                        restoreSelection();
+            //            console.log('insideStartRow: ', insideStartRow);
+            //            console.log('startRow: ', '"' + startRow.text() + '"');
+            //            console.log('startRow: ', '"' + startRow.text().trim() + '"');
+            //            $(startRow).html()
+            //            $('.editor .editarea .startRow')[0].innerHTML = '&nbsp;';
+            //            console.log('pastedContent: ', pastedContent);
+                        $('.editor .editarea .startRow').replaceWith(pastedContent);
+
+            //            $('.editor .editarea .startRow').html('&nbsp;').after(startRow.text().trim());
+            //            $('.editor .editarea .startRow').text('COSO').after(startRow.text().trim());
+            */
+
+//            saveSelection();
+//            console.log('KEYUP: ', UI.editarea.html());
+//            restoreSelection();
+/*
+            // are the cursor inside of a span tag?
+            saveSelection();
+            insideSpan = $('.editor .editarea span .rangySelectionBoundary').length;
+            console.log('cursore dentro a uno span? ', insideSpan);
+            restoreSelection();
+            console.log('insideSpan: ', insideSpan);
+            if(insideSpan) {
+                console.log('vediamo insideSpan');
+                e.preventDefault();
+            }
+*/
+            /*
+                        console.log('KEYDOWN ON EDITAREA');
+                        saveSelection();
+                        console.log('html: ', UI.editarea.html());
+                        insideSpan = $('.editor .editarea span .rangySelectionBoundary').length;
+                        console.log('cursore dentro a uno span? ', insideSpan);
+                        range = window.getSelection().getRangeAt(0);
+                        node = $('.editor .editarea span:has(.rangySelectionBoundary)')[0];
+                        if(insideSpan) {
+                            console.log(node);
+                            setCursorPosition(node, 'end');
+            //                setCursorAfterNode(range, node);
+                        }
+                        restoreSelection();
+             */
         }).on('keyup', '.editor .editarea', 'return', function(e) {
+            console.log('UI.defaultBRmanagement: ', UI.defaultBRmanagement);
+
             if(!UI.defaultBRmanagement) {
                 range = window.getSelection().getRangeAt(0);
+//                $('.returnTempPlaceholder', UI.editarea).after('<span class="br"><br /><span class="startRow">&nbsp;</span></span>');
                 $('.returnTempPlaceholder', UI.editarea).after('<br />');
-                node = $('.returnTempPlaceholder + br', UI.editarea)[0];
-                setCursorAfterNode(range, node);
+//                $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
+//                console.log('qua');
+//                $('.returnTempPlaceholder', UI.editarea).after('<br /><img>');
+
+//                node = $('.returnTempPlaceholder + br', UI.editarea)[0];
+//                setCursorAfterNode(range, node);
                 saveSelection();
                 $('.returnTempPlaceholder', UI.editarea).remove();
                 restoreSelection();
+            } else {
+//                 $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
             }
         }).on('keydown', '.editor .editarea', 'return', function(e) {
             UI.defaultBRmanagement = false;
@@ -3453,6 +3744,7 @@ $.extend(UI, {
                 e.preventDefault();
             }
         }).on('keypress', '.editor .editarea', function(e) {
+            console.log('which: ', e.which);
 //			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
@@ -3474,6 +3766,12 @@ $.extend(UI, {
 				if($('.tag-autocomplete').length) {
 //					console.log('ecco');
 //					console.log('prima del replace: ', UI.editarea.html());
+                    // if tag-autocomplete-endcursor is inserted before the &lt; then it is moved after it
+                    UI.stripAngular = (UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi).length)? true : false;
+                    UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"\></span>'));
+//                    console.log(UI.editarea.html().replace(/&lt;<span class="tag-autocomplete-endcursor"\><\/span>/gi, '<span class="tag-autocomplete-endcursor"\>XXX/span>&lt;'));
+//                    console.log(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"\>XXX/span>'));
+
 //					console.log(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) != null);
 					if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) !== null) {
 						UI.editarea.html(UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>'));
@@ -3506,7 +3804,6 @@ $.extend(UI, {
 					UI.saveInUndoStack('cancel');
 					UI.currentSegmentQA();
 				} else {
-//console.log('QUI');
 					var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
 					var numSpacesBefore = $('.space-marker', UI.editarea).length;
 //                    var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
@@ -3524,9 +3821,14 @@ $.extend(UI, {
                     $.each(translation, function(index) {
                         if($(this).hasClass('rangySelectionBoundary')) sbIndex = index;
                     });
+
                     var undeletableMonad = (($(translation[sbIndex-1]).hasClass('monad'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
                     var selBound = $('.rangySelectionBoundary', UI.editarea);
                     if(undeletableMonad) selBound.prev().remove();
+                    if(e.which == 8) { // backspace
+                        var undeletableTag = (($(translation[sbIndex-1]).hasClass('locked'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
+                        if(undeletableTag) selBound.prev().remove();
+                    }
 
                     restoreSelection();
 
@@ -3538,12 +3840,12 @@ $.extend(UI, {
 //							console.log('BB: ', UI.editarea.html());
 					}
 
-//						console.log(e.which + ' - ' + isInsideTag);
+//					console.log(e.which + ' - ' + isInsideTag);
 					setTimeout(function() {
-						if ((e.which == 46)&&(isInsideTag)) {
+//						if ((e.which == 46)&&(isInsideTag)) {
 //							console.log('inside tag');
-						}
-//							console.log(e.which + ' - ' + isInsideTag);
+//						}
+//						console.log(e.which + ' - ' + isInsideTag);
                         saveSelection();
                         // detect if selection ph is inside a monad tag
   //                      console.log('sel placeholders inside a monad', $('.monad .rangySelectionBoundary', UI.editarea).length);
@@ -3600,17 +3902,61 @@ $.extend(UI, {
 			if (e.which == 37) { // left arrow
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
+//                console.log('range: ', range);
 				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
-					r = range.startContainer.data;
+					r = range.startContainer.innerText;
+//                    r = range.startContainer.data;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) { // if a tag is selected
-						saveSelection();
-						rr = document.createRange();
-						referenceNode = $('.rangySelectionBoundary', UI.editarea).first().get(0);
-						rr.setStartBefore(referenceNode);
-						rr.setEndBefore(referenceNode);
-						$('.rangySelectionBoundary', UI.editarea).remove();
+                        e.preventDefault();
+
+                        /*
+                                                console.log('1: ', UI.editarea.html());
+                                                $('.rangySelectionBoundary', UI.editarea).remove();
+                                                saveSelection();
+                                                if($('span .rangySelectionBoundary', UI.editarea).length) {
+                                                    $('span:has(.rangySelectionBoundary)', UI.editarea).before($('.rangySelectionBoundary', UI.editarea));
+                                                }
+                                                console.log('2: ', UI.editarea.html());
+                                                restoreSelection();
+                        */
+
+                        saveSelection();
+//                        console.log(UI.editarea.html());
+                        rr = document.createRange();
+                        referenceNode = $('.rangySelectionBoundary', UI.editarea).first().get(0);
+                        rr.setStartBefore(referenceNode);
+                        rr.setEndBefore(referenceNode);
+                        $('.rangySelectionBoundary', UI.editarea).remove();
+
 					}
-				}
+				} else { // there's nothing selected
+                    console.log('nothing selected when left is pressed');
+/*
+                    saveSelection();
+                    sbIndex = 0;
+                    translation = $.parseHTML(UI.editarea.html());
+                    $.each(translation, function(index) {
+                        if($(this).hasClass('rangySelectionBoundary')) sbIndex = index;
+                    });
+//                    console.log('$(translation[sbIndex-1]).prop("tagName"): ', $(translation[sbIndex-1]).prop("tagName"));
+//                    console.log('$(translation[sbIndex-2]).prop("tagName"): ', $(translation[sbIndex-2]).prop("tagName"));
+                    if(($(translation[sbIndex-1]).prop("tagName") == 'SPAN')&&($(translation[sbIndex-2]).prop("tagName") == 'BR')) {
+                        console.log('agire');
+                        console.log(UI.editarea.html());
+                        ph = $('.rangySelectionBoundary', UI.editarea);
+                        console.log(ph);
+                        console.log(ph.prev());
+                        prev = ph.prev();
+                        prev.before('<span class="toDestroy" style="width: 0px; float: left;">&nbsp;</span>');
+//                        prev.before(ph);
+                        console.log(UI.editarea.html());
+                        restoreSelection();
+
+//                        $('.toDestroy', UI.editarea).remove();
+
+                    }
+*/
+                }
 				UI.closeTagAutocompletePanel();
 //				UI.jumpTag('start');
 			}
@@ -3640,7 +3986,7 @@ $.extend(UI, {
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
 				if (range.startOffset != range.endOffset) {
-					r = range.startContainer.data;
+					r = range.startContainer.innerText;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) {
 						saveSelection();
 						rr = document.createRange();
@@ -3689,7 +4035,9 @@ $.extend(UI, {
 
 			if (e.which == 13) { // return
 				if($('.tag-autocomplete').length) {
-					$('.tag-autocomplete li.current').click();	
+                    console.log('QQQQQQ: ', UI.editarea.html());
+                    e.preventDefault();
+                    $('.tag-autocomplete li.current').click();
 					return false;
 				}
 			}
@@ -3849,6 +4197,7 @@ $.extend(UI, {
 			UI.beforeDropSearchSourceHTML = UI.editarea.html();
 			UI.currentConcordanceField = $(this);
 			setTimeout(function() {
+                console.log('sto per pulire');
 				UI.cleanDroppedTag(UI.currentConcordanceField, UI.beforeDropSearchSourceHTML);
 			}, 100);
 		}).on('click', '.editor .editarea, .editor .source', function() {
@@ -3856,11 +4205,14 @@ $.extend(UI, {
 			UI.currentSelectedText = false;
 			UI.currentSearchInTarget = false;
 			$('#contextMenu').hide();
+        }).on('blur', '.editor .editarea', function() {
+            UI.hideEditToolbar();
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
 			var w = ($(this).hasClass('translated')) ? 'translated' : 'next-untranslated';
 			e.preventDefault();
-			UI.currentSegment.removeClass('modified');
+            UI.hideEditToolbar();
 
+            UI.currentSegment.removeClass('modified');
 			var skipChange = false;
 			if (w == 'next-untranslated') {
 				console.log('next-untranslated');
@@ -3880,7 +4232,7 @@ $.extend(UI, {
 					console.log('il nextuntranslated è già caricato: ', UI.nextUntranslatedSegmentId);
 				}
 			} else {
-				if (!$(UI.currentSegment).nextAll('section').length) {
+				if (!$(UI.currentSegment).nextAll('section:not(.readonly)').length) {
 					UI.changeStatus(this, 'translated', 0);
 					skipChange = true;
 					$('#' + $(this).attr('data-segmentid') + '-close').click();
@@ -4067,6 +4419,7 @@ $.extend(UI, {
 			$(this).parents('.comment').find('.gl-comment').toggle();
 		}).on('paste', '.editarea', function(e) {
 			console.log('paste in editarea');
+
 			UI.saveInUndoStack('paste');
 			$('#placeHolder').remove();
 			var node = document.createElement("div");
@@ -4076,7 +4429,7 @@ $.extend(UI, {
 			if(UI.isFirefox) pasteHtmlAtCaret('<div id="placeHolder"></div>');
 			var ev = (UI.isFirefox) ? e : event;
 			handlepaste(this, ev);
-
+            /*
 			$(window).trigger({
 				type: "pastedInEditarea",
 				segment: segment
@@ -4085,8 +4438,9 @@ $.extend(UI, {
 			setTimeout(function() {
 				UI.saveInUndoStack('paste');
 			}, 100);
-			UI.lockTags(UI.editarea);
+ 			UI.lockTags(UI.editarea);
 			UI.currentSegmentQA();
+ */
 		}).on('click', 'a.close', function(e, param) {
 			e.preventDefault();
 			var save = (typeof param == 'undefined') ? 'noSave' : param;
@@ -4849,15 +5203,17 @@ $.extend(UI, {
 		if (!this.taglockEnabled)
 			return false;
 		$('.footer .suggestion_source', segment).each(function() {
-			$(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+            $(this).html($(this).html().replace(/(&lt;[\/]*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+           // $(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 			if (UI.isFirefox) {
 				$(this).html($(this).html().replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			} else {
 				$(this).html($(this).html().replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			}
-		});
+        });
 		$('.footer .translation').each(function() {
-			$(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+            $(this).html($(this).html().replace(/(&lt;[\/]*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+//			$(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 			if (UI.isFirefox) {
 				$(this).html($(this).html().replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			} else {
@@ -4895,7 +5251,7 @@ $.extend(UI, {
 
 	// TAG LOCK
 	lockTags: function(el) {
-//		console.log('lock tags');
+//		console.log('lock tags: ', el);
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
@@ -4960,7 +5316,7 @@ $.extend(UI, {
 	
 	// TAG CLEANING
 	cleanDroppedTag: function(area, beforeDropHTML) {
-		if (area == this.editarea) {
+ //       if (area == this.editarea) {
 			this.droppingInEditarea = false;
 
 			diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
@@ -5003,7 +5359,7 @@ $.extend(UI, {
 			area.html(area.html().replace(this.cursorPlaceholder, phcode));
 			restoreSelection();
 			area.html(area.html().replace(this.cursorPlaceholder, '').replace(/\[\*\*\[(.*?)\]\*\*\]/gi, "<$1>"));
-
+/*
 		} else {
 	// old cleaning code to be evaluated
 			diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
@@ -5033,6 +5389,7 @@ $.extend(UI, {
 			restoreSelection();
 			area.html(area.html().replace(this.cursorPlaceholder, ''));			
 		}
+*/
 	},
 	
 	// TAG MISMATCH
@@ -5068,12 +5425,14 @@ $.extend(UI, {
 
 	// TAG AUTOCOMPLETE
 	checkAutocompleteTags: function() {//console.log('checkAutocompleteTags');
+//        console.log('checkAutocompleteTags: ', UI.editarea.html() );
 		added = this.getPartialTagAutocomplete();
 //		console.log('added: "', added + '"');
 //		console.log('aa: ', UI.editarea.html());
 		$('.tag-autocomplete li.hidden').removeClass('hidden');
 		$('.tag-autocomplete li').each(function() {
 			var str = $(this).text();
+//            console.log('"' + str.substring(0, added.length) + '" == "' + added + '"');
 			if( str.substring(0, added.length) === added ) {
 				$(this).removeClass('hidden');
 			} else {
@@ -5081,7 +5440,7 @@ $.extend(UI, {
 			}
 		});
 //		console.log('bb: ', UI.editarea.html());
-		if(!$('.tag-autocomplete li:not(.hidden)').length) {
+		if(!$('.tag-autocomplete li:not(.hidden)').length) { // no tags matching what the user is writing
 
 			$('.tag-autocomplete').addClass('empty');
 			if(UI.preCloseTagAutocomplete) {
@@ -5107,12 +5466,13 @@ $.extend(UI, {
 //		console.log('inizio di getPartialTagAutocomplete: ', UI.editarea.html());
 //		var added = UI.editarea.html().match(/&lt;([&;"\w\s\/=]*?)<span class="tag-autocomplete-endcursor">/gi);
 		var added = UI.editarea.html().match(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?<span class="tag-autocomplete-endcursor">/gi);
-//		console.log(added);
+//        console.log('prova: ', UI.editarea.html().match(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?<span class="tag-autocomplete-endcursor">\&/gi));
+//		console.log('added 1: ', added);
 		added = (added === null)? '' : htmlDecode(added[0].replace(/<span class="tag-autocomplete-endcursor"\>/gi, '')).replace(/\xA0/gi," ");
-//		console.log('added: ', added);
+//        console.log('added 2: ', added);
 		return added;
 	},
-	openTagAutocompletePanel: function() {console.log('openTagAutocompletePanel');
+	openTagAutocompletePanel: function() {//console.log('openTagAutocompletePanel');
 		if(!UI.sourceTags.length) return false;
 		$('.tag-autocomplete-marker').remove();
 
@@ -5121,6 +5481,7 @@ $.extend(UI, {
 		insertNodeAtCursor(node);
 		var endCursor = document.createElement("span");
 		endCursor.setAttribute('class', 'tag-autocomplete-endcursor');
+//        console.log('prima di inserire endcursor: ', UI.editarea.html());
 		insertNodeAtCursor(endCursor);
 //		console.log('inserito endcursor: ', UI.editarea.html());
 		var offset = $('.tag-autocomplete-marker').offset();
@@ -5140,7 +5501,7 @@ $.extend(UI, {
 		
 		$('.tag-autocomplete').css('top', offset.top + addition);
 		$('.tag-autocomplete').css('left', offset.left);
-		this.checkAutocompleteTags();	
+		this.checkAutocompleteTags();
 	},
 	jumpTag: function(range, where) {
 //		console.log('range: ', range);
@@ -5223,9 +5584,9 @@ $.extend(UI, {
 			$('.sub-editor.concordances .overflow').css('height', $('.sub-editor.concordances').height() + 'px');
 			$('.sub-editor.concordances').addClass('extended');
 			if($('.sub-editor.concordances .more').length) {
-				$('.sub-editor.concordances .more').text('Less');
+				$('.sub-editor.concordances .more').text('Fewer');
 			} else {
-				$('.sub-editor.concordances', segment).append('<a href="#" class="more">Less</a>');				
+				$('.sub-editor.concordances', segment).append('<a href="#" class="more">Fewer</a>');
 			}
 			this.custom.extended_concordance = true;
 			this.saveCustomization();
@@ -5802,7 +6163,7 @@ $.extend(UI, {
 	updateSearchDisplayCount: function(segment) {
 		numRes = $('.search-display .numbers .results');
 		numRes.text(parseInt(numRes.text()) - 1);
-		if (($('.editarea mark.searchMarker', segment).length - 1) === 0) {
+		if (($('.targetarea mark.searchMarker', segment).length - 1) === 0) {
 			numSeg = $('.search-display .numbers .segments');
 			numSeg.text(parseInt(numSeg.text()) - 1);
 		}
@@ -5818,8 +6179,8 @@ $.extend(UI, {
 	execNext: function() {
 		this.gotoNextResultItem(false);
 	},
-	markSearchResults: function(options) { // if where is specified mark only the range of segment before or after seg (no previous clear)		
-		options = options || {};
+	markSearchResults: function(options) { // if where is specified mark only the range of segment before or after seg (no previous clear)
+        options = options || {};
 		where = options.where;
 		seg = options.seg;
 		singleSegment = options.singleSegment || false;
@@ -5851,10 +6212,10 @@ $.extend(UI, {
 
 			if (typeof where == 'undefined') {
 				UI.doMarkSearchResults(srcHasTags, $(q + " .source:" + containsFunc + "('" + txtSrc + "')"), regSource, q, txtSrc, ignoreCase);
-				UI.doMarkSearchResults(trgHasTags, $(q + " .editarea:" + containsFunc + "('" + txtTrg + "')"), regTarget, q, txtTrg, ignoreCase);
+				UI.doMarkSearchResults(trgHasTags, $(q + " .targetarea:" + containsFunc + "('" + txtTrg + "')"), regTarget, q, txtTrg, ignoreCase);
 //				UI.execSearchResultsMarking(UI.filterExactMatch($(q + " .source:" + containsFunc + "('" + txtSrc + "')"), txtSrc), regSource, false);
 //				UI.execSearchResultsMarking(UI.filterExactMatch($(q + " .editarea:" + containsFunc + "('" + txtTrg + "')"), txtTrg), regTarget, false);
-				$('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker').removeClass('searchPreMarker');
+				$('section').has('.source mark.searchPreMarker').has('.targetarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker').removeClass('searchPreMarker');
 //				$('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
 				$('mark.searchPreMarker:not(.searchMarker)').each(function() {
 					var a = $(this).text();
@@ -5876,21 +6237,20 @@ $.extend(UI, {
 					});
 				}
 				UI.execSearchResultsMarking(UI.filterExactMatch($(q + ".justAdded:not(.status-new) .source:" + containsFunc + "('" + txtSrc + "')"), txtSrc), regSource, false);
-				UI.execSearchResultsMarking(UI.filterExactMatch($(q + ".justAdded:not(.status-new) .editarea:" + containsFunc + "('" + txtTrg + "')"), txtTrg), regTarget, false);
+				UI.execSearchResultsMarking(UI.filterExactMatch($(q + ".justAdded:not(.status-new) .targetarea:" + containsFunc + "('" + txtTrg + "')"), txtTrg), regTarget, false);
 
-				$('section').has('.source mark.searchPreMarker').has('.editarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
+				$('section').has('.source mark.searchPreMarker').has('.targetarea mark.searchPreMarker').find('mark.searchPreMarker').addClass('searchMarker');
 				$('mark.searchPreMarker').removeClass('searchPreMarker');
 				$('section.justAdded').removeClass('justAdded');
 			}
 		} else { // search mode: normal
-//			console.log('search mode: normal');
 			status = (p.status == 'all') ? '' : '.status-' + p.status;
 			var txt = (typeof p.source != 'undefined') ? p.source : (typeof p.target != 'undefined') ? p.target : '';
 			if (singleSegment) {
-				what = (typeof p.source != 'undefined') ? ' .source' : (typeof p.target != 'undefined') ? ' .editarea' : '';
+				what = (typeof p.source != 'undefined') ? ' .source' : (typeof p.target != 'undefined') ? ' .targetarea' : '';
 				q = '#' + $(singleSegment).attr('id') + what;
 			} else {
-				what = (typeof p.source != 'undefined') ? ' .source' : (typeof p.target != 'undefined') ? ':not(.status-new) .editarea' : '';
+				what = (typeof p.source != 'undefined') ? ' .source' : (typeof p.target != 'undefined') ? ':not(.status-new) .targetarea' : '';
 				q = "section" + status + what;
 			}
 			hasTags = (txt.match(/<.*?\>/gi) !== null) ? true : false;
@@ -5933,7 +6293,7 @@ $.extend(UI, {
 		}
 	},
 	execSearchResultsMarking: function(areas, regex, testRegex) {
-		searchMarker = (UI.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
+        searchMarker = (UI.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
 			if (!testRegex || ($(this).text().match(testRegex) !== null)) {
 				var tt = $(this).html().replace(/&lt;/g, UI.openTagPlaceholder).replace(/&gt;/g, UI.closeTagPlaceholder).replace(regex, '<mark class="' + searchMarker + '">$1</mark>').replace(openTagReg, '&lt;').replace(closeTagReg, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
@@ -5993,7 +6353,7 @@ $.extend(UI, {
 			}
 		} else if (this.searchMode == 'source&target') {
 
-			m = $(".editarea mark.currSearchItem"); // ***
+			m = $(".targetarea mark.currSearchItem"); // ***
 //            console.log($(m).nextAll('mark.searchMarker').length);
 			if ($(m).nextAll('mark.searchMarker').length) { // there are other subsequent results in the segment
 				console.log('altri item nel segmento');
@@ -6105,7 +6465,7 @@ $.extend(UI, {
 
 			}
 		} else { // searchMode: source&target or normal
-			var wh = (this.searchMode == 'source&target')? ' .editarea' : '';
+			var wh = (this.searchMode == 'source&target')? ' .targetarea' : '';
 			seg = $('section' + wh).has("mark.searchMarker");
 			ss = (this.searchMode == 'source&target')? el + '-editarea' : el;
 			found = false;
@@ -6420,7 +6780,7 @@ function pasteHtmlAtCaret(html, selectPastedContent) {
     }
 }
 
-function setCursorPosition(el, pos) {
+function setCursorPosition(el, pos) {console.log('el: ', el);
 	pos = pos || 0;
 	var range = document.createRange();
 	var sel = window.getSelection();
@@ -6574,7 +6934,7 @@ function getSelectionHtml() {
 		if (sel.rangeCount) {
 			var container = document.createElement("div");
 			for (var i = 0, len = sel.rangeCount; i < len; ++i) {
-				container.appendChild(sel.getRangeAt(i).cloneContents());
+                container.appendChild(sel.getRangeAt(i).cloneContents());
 			}
 			html = container.innerHTML;
 		}

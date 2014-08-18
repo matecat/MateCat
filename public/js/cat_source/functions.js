@@ -188,7 +188,7 @@ function pasteHtmlAtCaret(html, selectPastedContent) {
     }
 }
 
-function setCursorPosition(el, pos) {
+function setCursorPosition(el, pos) {console.log('el: ', el);
 	pos = pos || 0;
 	var range = document.createRange();
 	var sel = window.getSelection();
@@ -342,7 +342,7 @@ function getSelectionHtml() {
 		if (sel.rangeCount) {
 			var container = document.createElement("div");
 			for (var i = 0, len = sel.rangeCount; i < len; ++i) {
-				container.appendChild(sel.getRangeAt(i).cloneContents());
+                container.appendChild(sel.getRangeAt(i).cloneContents());
 			}
 			html = container.innerHTML;
 		}

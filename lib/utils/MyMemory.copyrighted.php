@@ -219,11 +219,12 @@ class MyMemory {
 
                 $new_escape=escapeshellarg($new);
                 $old_escape=escapeshellarg($old);
-                $res=shell_exec(INIT::$ROOT."/third_party/TER/ComputeDiffView $lang \"$new_escape\" \"$old_escape\" 2>&1");
+                $res=shell_exec(INIT::$ROOT."/third_party/TER/ComputeDiffView $lang $new_escape $old_escape 2>&1");
 
 //                Log::doLog( $old );
 //                Log::doLog( $new );
-//                Log::doLog($res);
+                Log::doLog($res);
+//                Log::doLog( INIT::$ROOT."/third_party/TER/ComputeDiffView $lang $new_escape $old_escape 2>&1" );
 
                 // typical result
 //                DiffView:  ##LESSTHAN##g id=2##GREATERTHAN## Cette mÃ©moire de traduction dÃ©finition coÃ¯ncide littÃ©ralement avec <strike><span style="color:red;">l&#39</span></strike> <strike><span style="color:red;">;</span></strike> <strike><span style="color:red;">une</span></strike> <span style="color:blue">l'une</span> des dÃ©finitions les plus acceptÃ©es ##LESSTHAN##/g##GREATERTHAN####LESSTHAN##g id=4 xid=0b5ae0d9-a917-4f7c-9cba-ac7788d73fab

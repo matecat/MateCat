@@ -34,7 +34,6 @@ abstract class ajaxController extends controller {
      * Class constructor, initialize the header content type.
      */
     protected function __construct() {
-
         parent::__construct();
 
         $buffer = ob_get_contents();
@@ -42,6 +41,14 @@ abstract class ajaxController extends controller {
         // ob_start("ob_gzhandler");        // compress page before sending //Not supported for json response on ajax calls
         header('Content-Type: application/json; charset=utf-8');
 
+
+	    if( !parent::isRightVersion() ) {
+			$output = INIT::$CONFIG_VERSION_ERR_MESSAGE;
+			$this->result     = array("errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array() );
+			$this->api_output = array("errors" => array( array( "code" => -1000, "message" => $output ) ), "data" => array() );
+			$this->finalize();
+			exit;
+		}
     }
 
     /**

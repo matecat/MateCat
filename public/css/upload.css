@@ -505,7 +505,7 @@ h2.payoff
 .upload-table tr{background:#fff;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;border-bottom:1px dashed #ccc}
 .upload-table tr:hover{}
 
-.btncontinue{position:absolute;bottom:0;display:none;float:left;padding:0px 0 0 0 !Important;font-size:14px !Important;margin:0px 0 0 10px !important;}
+.btncontinue{position:relative;bottom:0;display:none;float:left;padding:0px 0 0 0 !Important;font-size:14px !Important;margin:0px 0 0 10px !important;}
 
 
 
@@ -626,7 +626,7 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 	border:1px dashed #ccc;
 margin-top: 20px;
 	min-height:200px;
-	padding-bottom:50px !important;
+	padding-bottom: 0px !important;
 	-moz-border-radius: 4px;
 	border-radius: 4px;
 	background:#fbfbfb;
@@ -680,7 +680,7 @@ margin-top: 20px;
 
 
 
-
+.error-content {padding-left: 45px; padding-right: 10px;}
 .error-message,
 .warning-message
 {
@@ -694,17 +694,16 @@ margin-top: 20px;
 	-moz-border-radius: 2px;
 	border-radius: 2px;
 	border:1px solid #c45f5f;
-	text-indent:40px;
 	display:none;
 }
 .warning-message
 {
-	background: #12B4DF !important;
-	border-color: #008AAF;
-	padding: 10px 0 10px 1%;
-	text-indent: 0;
-	width: 98.8%;
-	/*color: #000;*/
+    background: #FFFA8B !important;
+    border-color: #6D6E71;
+    padding: 10px 0 10px 1%;
+    text-indent: 0;
+    width: 98.8%;
+    color: #000;
 }
 .warning-message span {
     /*margin-left: 15px;*/
@@ -731,7 +730,7 @@ margin-top: 20px;
 
 .progress-extended{display:none}
 
-.error{color:#FF3300;text-align:left !Important}
+.error{color:#FF3300;text-align:left !Important;font-size:14px;}
 
 .dragging .file-drag, .uploaded .file-drop, .uploaded .fileupload-buttonbar{height:0;}
 
@@ -1056,3 +1055,6 @@ background: #ca2a2e url(../img/sprite2x.png) 12px -1115px no-repeat !important;
 }
 
 
+.error .label.label-important a{
+    cursor: pointer;
+}

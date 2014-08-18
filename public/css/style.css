@@ -124,6 +124,13 @@ body.searchActive #filterSwitch
 
 .tag-mismatch{float:left !important}
 
+.auto-propagation-review {
+    cursor:pointer;
+    text-decoration:underline;
+    color: blue;
+    color: -webkit-link;
+}
+
 .warnings, 
 .text .alternatives 
 {
@@ -538,7 +545,8 @@ article .translated:active, article .draft:active, article .btn:active, article 
     margin-left: 47%;
     margin-top: 5px;
     width: 50px !important;
-	background: url(../img/sprite.png) 5px -853px no-repeat;    
+	background: url(../img/sprite.png) 5px -853px no-repeat;
+    z-index: 1000;
 /*	opacity: 0.4;*/
 }
 
@@ -710,7 +718,7 @@ article
 .graysmall:last-child{border-bottom:none !Important}
 .tab.concordances .graysmall
 {
-	display: none;
+	display: block;
 }
 .tab.concordances .graysmall.prime
 {
@@ -2462,7 +2470,7 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 #messageBar
 {
 	display: block;
-    height: auto;
+	height: auto;
     min-height: 26px;
 	background: #FFFA8B;
 	padding: 4px 10px;
@@ -2710,6 +2718,12 @@ del.diff
      top: -7px;
 }
 
+.editarea span.startRow
+{
+	width: 0px;
+    float: left;
+}
+
 
 @keyframes fadein {
     from { opacity: 0; }
@@ -2815,6 +2829,9 @@ only screen and (in-resolution: 2dppx) {
 
 .breadcrumbs #pname {
 	background: url(../img/sprite2x.png) -15px -434px no-repeat;
+}
+body.editlog .breadcrumbs #pname {
+    background: none;
 }
 .outersource .copy {
 	background: url(../img/sprite2x.png) 5px -853px no-repeat;

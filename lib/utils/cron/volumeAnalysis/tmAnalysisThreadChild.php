@@ -94,10 +94,12 @@ while (1) {
 
         $memcacheHandler->add( 'project:' . $pid, $total_segs[ 'project_segments' ] );
         $memcacheHandler->increment( 'num_analyzed:' . $pid, $total_segs[ 'num_analyzed' ] );
-        echo "--- (child $my_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID\n";
+        echo "--- (child $my_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID $pid\n";
     } else {
         $_existingPid = $memcacheHandler->get( 'project:' . $pid );
-        echo "--- (child $my_pid) : found $_existingPid segments for PID in Memcache\n";
+        $_analyzed = $memcacheHandler->get( 'num_analyzed:' . $pid );
+        echo "--- (child $my_pid) : found $_existingPid segments for PID $pid in Memcache\n";
+        echo "--- (child $my_pid) : analyzed $_analyzed segments for PID $pid in Memcache\n";
     }
 
 
@@ -444,4 +446,3 @@ function compareScore($a, $b) {
     return ( floatval($a['match']) < floatval($b['match']) ? 1 : -1); //SORT DESC !!!!!!! INVERT MINUS SIGN
     //this is necessary since usort sorts is ascending order, thus inverting the ranking
 }
-?>

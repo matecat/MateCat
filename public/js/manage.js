@@ -265,7 +265,7 @@ UI = {
     },
     
     balanceAction: function(res,ob,d,undo,project) {
-
+        console.log('d prima: ', d);
 		// check if the project have to be hidden
 		filterStatus = this.body.attr('data-filter-status');
 		rowsInFilter = $('.article[data-pid='+project.attr('data-pid')+'] tr.row[data-status='+filterStatus+']').length;
@@ -276,7 +276,9 @@ UI = {
 		}
 		// check if there is need to append or delete items
 		numItem = $('.article:not(.invisible)').length;
+        console.log('numItem: ', numItem);
 		if(numItem < this.pageStep) {
+//            d.newItem = d.newItem || [];
 			if(typeof d != 'undefined') this.renderProjects(d.newItem,'append');
 		} else if(numItem > this.pageStep) {
 			$('.article:not(.invisible)').last().remove();
@@ -322,7 +324,7 @@ UI = {
 			data: ar,
 			context: ob,
 			success: function(d){
-				if(d.data == 'OK') {
+				if(d.data == 'OK') {console.log('dd: ', d);
 					res = ($(this).hasClass('row'))? 'job':'prj';
 					if(res=='prj') {
 						UI.getProject(this.data('pid'));
@@ -377,7 +379,7 @@ UI = {
 			var resData = (res == 'prj')? 'pid':'jid';
 			$('.message').attr('data-token',token.getTime()).html(msg + ' <a href="#" class="undo" data-res="' + res + '" data-id="' + ob.data(resData)+ '" data-password="' + ob.data('password') + '" data-operation="changeStatus" data-status="' + ((res == 'prj')? d.old_status : this.lastJobStatus) + '">Undo</a>').show();
 			setTimeout(function(){
-//				$('.message[data-token='+token.getTime()+']').hide();
+				$('.message[data-token='+token.getTime()+']').hide();
 			},5000);
 		}
 		this.balanceAction(res,ob,d,undo,project);
@@ -573,7 +575,6 @@ UI = {
 	},
 
     renderProjects: function(d,action) {
-
         this.retrieveTime = new Date();
         var projects = '';
         $.each(d, function() {

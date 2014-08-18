@@ -29,6 +29,7 @@ class catController extends viewController {
 	private $job_stats = array();
 	private $source_rtl = false;
 	private $target_rtl = false;
+	private $job_owner = "";
 
 	private $job_not_found = false;
 	private $job_archived = false;
@@ -48,10 +49,19 @@ class catController extends viewController {
 
 		parent::__construct(false);
 		parent::makeTemplate("index.html");
-		$this->jid = $this->get_from_get_post("jid");
-		$this->password = $this->get_from_get_post("password");
-		$this->start_from = $this->get_from_get_post("start");
-		$this->page = $this->get_from_get_post("page");
+		
+		$filterArgs = array(
+			'jid'           => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+			'password'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+			'start'         => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+			'page'          => array( 'filter' => FILTER_SANITIZE_NUMBER_INT )
+		);
+		$getInput = (object)filter_input_array( INPUT_GET, $filterArgs );
+
+		$this->jid = $getInput->jid;
+		$this->password = $getInput->password;
+		$this->start_from = $getInput->start;
+		$this->page = $getInput->page;
 
 		if (isset($_GET['step'])) {
 			$this->step = $_GET['step'];
@@ -109,58 +119,80 @@ class catController extends viewController {
             return;
 		}
 
-        if ($data[0]['status'] == 'cancelled') {
+		//retrieve job owner. It will be useful also if the job is archived or cancelled
+		$this->job_owner = ($data[0]['job_owner'] != "") ? $data[0]['job_owner'] : "support@matecat.com" ;
+
+		if ($data[0]['status'] == 'cancelled') {
             $this->job_cancelled = true;
             //stop execution
             return;
         }
 
-		foreach ($data as $i => $prj) {
+		if ($data[0]['status'] == 'archived') {
+			$this->job_archived = true;
+//			$this->setTemplateVars();
+			//stop execution
+			return;
+		}
 
-            $this->project_status = $prj; // get one row values for the project are the same for every row
+		$jobIsArchivable = count( Utils::getArchivableJobs($this->jid) ) > 0;
+
+		if( $jobIsArchivable && !$this->job_cancelled ) {
+			//TODO: change this workaround
+
+			$res = "job";
+			$new_status = 'archived';
+
+			updateJobsStatus( $res, $this->jid, $new_status, null, null, $this->password );
+			$this->job_archived = true;
+		}
+
+		foreach ($data as $i => $job) {
+
+            $this->project_status = $job; // get one row values for the project are the same for every row
 
 			if (empty($this->pname)) {
-				$this->pname = $prj['pname'];
-				$this->downloadFileName = $prj['pname'] . ".zip"; // will be overwritten below in case of one file job
+				$this->pname = $job['pname'];
+				$this->downloadFileName = $job['pname'] . ".zip"; // will be overwritten below in case of one file job
 			}
 
 			if (empty($this->last_opened_segment)) {
-				$this->last_opened_segment = $prj['last_opened_segment'];
+				$this->last_opened_segment = $job['last_opened_segment'];
 			}
 
 			if (empty($this->cid)) {
-				$this->cid = $prj['cid'];
+				$this->cid = $job['cid'];
 			}
 
 			if (empty($this->pid)) {
-				$this->pid = $prj['pid'];
+				$this->pid = $job['pid'];
 			}
 
 			if (empty($this->tid)) {
-				$this->tid = $prj['tid'];
+				$this->tid = $job['tid'];
 			}
 
 			if (empty($this->create_date)) {
-				$this->create_date = $prj['create_date'];
+				$this->create_date = $job['create_date'];
 			}
 
 			if (empty($this->source_code)) {
-				$this->source_code = $prj['source'];
+				$this->source_code = $job['source'];
 			}
 
 			if (empty($this->target_code)) {
-				$this->target_code = $prj['target'];
+				$this->target_code = $job['target'];
 			}
 
 			if (empty($this->source)) {
-				$s = explode("-", $prj['source']);
+				$s = explode("-", $job['source']);
 				$source = strtoupper($s[0]);
 				$this->source = $source;
 				$this->source_rtl= ($lang_handler->isRTL(strtolower($this->source)))? ' rtl-source' : '';
 			}
 
 			if (empty($this->target)) {
-				$t = explode("-", $prj['target']);
+				$t = explode("-", $job['target']);
 				$target = strtoupper($t[0]);
 				$this->target = $target;
 				$this->target_rtl= ($lang_handler->isRTL(strtolower($this->target)))? ' rtl-target' : '';
@@ -168,15 +200,16 @@ class catController extends viewController {
 			//check if language belongs to supported right-to-left languages
 
 
-			if ($prj['status'] == 'archived') {
+			if ($job['status'] == 'archived') {
 				$this->job_archived = true;
+				$this->job_owner = $data[0]['job_owner'];
 			}
 
-			$id_file = $prj['id_file'];
+			$id_file = $job['id_file'];
 
 
 			if (!isset($this->data["$id_file"])) {
-				$files_found[] = $prj['filename'];
+				$files_found[] = $job['filename'];
 //				$file_stats = CatUtils::getStatsForFile($id_file);
 //
 //				$this->data["$id_file"]['jid'] = $seg['jid'];
@@ -197,37 +230,38 @@ class catController extends viewController {
 
             $wStruct->setIdJob( $this->jid );
             $wStruct->setJobPassword( $this->password );
-            $wStruct->setNewWords( $prj['new_words'] );
-            $wStruct->setDraftWords( $prj['draft_words'] );
-            $wStruct->setTranslatedWords( $prj['translated_words'] );
-            $wStruct->setApprovedWords( $prj['approved_words'] );
-            $wStruct->setRejectedWords( $prj['rejected_words'] );
+            $wStruct->setNewWords( $job['new_words'] );
+            $wStruct->setDraftWords( $job['draft_words'] );
+            $wStruct->setTranslatedWords( $job['translated_words'] );
+            $wStruct->setApprovedWords( $job['approved_words'] );
+            $wStruct->setRejectedWords( $job['rejected_words'] );
 
-			unset($prj['id_file']);
-			unset($prj['source']);
-			unset($prj['target']);
-			unset($prj['source_code']);
-			unset($prj['target_code']);
-			unset($prj['mime_type']);
-			unset($prj['filename']);
-			unset($prj['jid']);
-			unset($prj['pid']);
-			unset($prj['cid']);
-			unset($prj['tid']);
-			unset($prj['pname']);
-			unset($prj['create_date']);
+			unset($job['id_file']);
+			unset($job['source']);
+			unset($job['target']);
+			unset($job['source_code']);
+			unset($job['target_code']);
+			unset($job['mime_type']);
+			unset($job['filename']);
+			unset($job['jid']);
+			unset($job['pid']);
+			unset($job['cid']);
+			unset($job['tid']);
+			unset($job['pname']);
+			unset($job['create_date']);
+			unset($job['owner']);
 //			unset($seg['id_segment_end']);
 //			unset($seg['id_segment_start']);
-			unset($prj['last_opened_segment']);
+			unset($job['last_opened_segment']);
 
-            unset( $prj[ 'new_words' ] );
-            unset( $prj[ 'draft_words' ] );
-            unset( $prj[ 'translated_words' ] );
-            unset( $prj[ 'approved_words' ] );
-            unset( $prj[ 'rejected_words' ] );
+            unset( $job[ 'new_words' ] );
+            unset( $job[ 'draft_words' ] );
+            unset( $job[ 'translated_words' ] );
+            unset( $job[ 'approved_words' ] );
+            unset( $job[ 'rejected_words' ] );
 
             //For projects created with No tm analysis enabled
-            if( $wStruct->getTotal() == 0 && ( $prj['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ||  $prj['status_analysis'] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ){
+            if( $wStruct->getTotal() == 0 && ( $job['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ||  $job['status_analysis'] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ){
                 $wCounter = new WordCount_Counter();
                 $wStruct = $wCounter->initializeJobWordCount( $this->jid, $this->password );
                 Log::doLog( "BackWard compatibility set Counter." );
@@ -273,8 +307,9 @@ class catController extends viewController {
             $this->template->target              = null;
             $this->template->source_code         = null;
             $this->template->target_code         = null;
-            $this->template->firstSegmentOfFiles = null;
-            $this->template->fileCounter         = null;
+            $this->template->firstSegmentOfFiles = 0;
+            $this->template->fileCounter         = 0;
+	        $this->template->owner_email         = $this->job_owner;
         } else {
             $this->template->pid                 = $this->pid;
             $this->template->target              = $this->target;
@@ -297,6 +332,7 @@ class catController extends viewController {
         $this->template->first_job_segment   = $this->first_job_segment;
         $this->template->last_job_segment    = $this->last_job_segment;
         $this->template->last_opened_segment = $this->last_opened_segment;
+		$this->template->owner_email         = $this->job_owner;
         //$this->template->data                = $this->data;
 
         $this->job_stats['STATUS_BAR_NO_DISPLAY'] = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );

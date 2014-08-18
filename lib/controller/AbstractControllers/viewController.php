@@ -48,7 +48,8 @@ abstract class viewController extends controller {
      */
     private function getBrowser() {
         $u_agent  = $_SERVER[ 'HTTP_USER_AGENT' ];
-        $bname    = 'Unknown';
+
+	    $bname    = 'Unknown';
         $platform = 'Unknown';
         $version  = "";
 
@@ -134,6 +135,12 @@ abstract class viewController extends controller {
      * @param bool $isAuthRequired
      */
     public function __construct( $isAuthRequired = false ) {
+
+	    if( !parent::isRightVersion() ) {
+		    header("Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "badConfiguration" , true, 303);
+		    exit;
+	    }
+
         parent::__construct();
 
         //load Template Engine
@@ -215,7 +222,7 @@ abstract class viewController extends controller {
         $browser_name = strtolower( $browser_info[ 'name' ] );
 
         foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
-            if ( stripos( $browser_name, $enabled_browser ) !== false ) {
+            if ( stripos( $browser_name, $enabled_browser ) !== false || 1) {
                 return 1;
             }
         }

@@ -220,26 +220,29 @@ $.extend(UI, {
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;[&;"\w\s\/=]*?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 //			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*&nbsp;*(["\w\s\/=]*?))?(\<span class="tag-autocomplete-endcursor"\>)/gi, '$2'));
 //			console.log('a: ', UI.editarea.html());
-			UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["<\->\w\s\/=]*)?(<span class="tag-autocomplete-endcursor">)/gi, '$1'));
+//            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
+//            console.log('a1: ', UI.editarea.html());
+            UI.editarea.html(UI.editarea.html().replace(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?(<span class="undoCursorPlaceholder monad" contenteditable="false"><\/span><span class="tag-autocomplete-endcursor"\>)/gi, '$1'));
 //			console.log('b: ', UI.editarea.html());
 			saveSelection();
 			if(!$('.rangySelectionBoundary', UI.editarea).length) { // click, not keypress
-				console.log('qui: ', document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
+//				console.log('qui: ', document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
 				setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
 				saveSelection();
 			}
 //			console.log($('.rangySelectionBoundary', UI.editarea)[0]);
-			console.log('c: ', UI.editarea.html());
+//			console.log('c: ', UI.editarea.html());
 			var ph = $('.rangySelectionBoundary', UI.editarea)[0].outerHTML;
-			console.log('ph: ', ph);
+//			console.log('ph: ', ph);
 			$('.rangySelectionBoundary', UI.editarea).remove();
-			console.log('d: ', UI.editarea.html());
-			console.log($('.tag-autocomplete-endcursor', UI.editarea));
+//			console.log('d: ', UI.editarea.html());
+//			console.log($('.tag-autocomplete-endcursor', UI.editarea));
 			$('.tag-autocomplete-endcursor', UI.editarea).after(ph);
 //			setCursorPosition(document.getElementsByClassName("tag-autocomplete-endcursor")[0]);
-			console.log('e: ', UI.editarea.html());
+//			console.log('e: ', UI.editarea.html());
 			$('.tag-autocomplete-endcursor').before(htmlEncode($(this).text()));
-			console.log('f: ', UI.editarea.html());
+//			console.log('f: ', UI.editarea.html());
 			restoreSelection();
 			UI.closeTagAutocompletePanel();
 			UI.lockTags(UI.editarea);
@@ -491,7 +494,7 @@ $.extend(UI, {
 			e.stopPropagation();			
 		}).on('mouseup', '.editarea', function(e) {
 			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
-				UI.showEditToolbar();
+				if(!UI.isFirefox) UI.showEditToolbar();
 			};
 		}).on('mousedown', '.editarea', function(e) {
 			UI.hideEditToolbar();
@@ -546,15 +549,108 @@ $.extend(UI, {
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
+        }).on('keydown', '.editor .editarea', function(e) {
+//            saveSelection();
+//            console.log('KEYDOWN: ', UI.editarea.html());
+//            restoreSelection();
+        }).on('keypress', '.editor .editarea', function(e) {
+//            saveSelection();
+//            console.log('KEYPRESS: ', UI.editarea.html());
+//            restoreSelection();
+        }).on('keyup', '.editor .editarea', function(e) {
+/*
+            saveSelection();
+            insideBr = $('.editor .editarea .br .rangySelectionBoundary').length;
+//            if(insideBr) console.log('is inside BR');
+
+            currentBr = $('.br:has(.rangySelectionBoundary)', UI.editarea);
+//            startRow = $('.br:has(.rangySelectionBoundary) .startRow', UI.editarea);
+            pastedContent = currentBr.text().trim();
+
+//            pastedContent = startRow.text().trim();
+            restoreSelection();
+//            console.log('startRow: ', startRow);
+//            console.log('startRow text: ', startRow.text().trim());
+            currentBr.html('<br /><span class="startRow">&nbsp;</span>');
+//            console.log('currentBr: ', currentBr);
+//            console.log('pastedContent: ', pastedContent);
+            $(currentBr).after(pastedContent + '<span class="pointCursorHere"></span>');
+//            setCursorPosition($('.pointCursorHere', UI.editarea)[0]);
+            $('.pointCursorHere', UI.editarea).remove();
+*/
+//            setCursorAfterNode(window.getSelection().getRangeAt(0), $('.pointCursorHere', UI.editarea)[0]);
+
+//            console.log('ecco: ', UI.editarea.html());
+//      $('.editor .editarea .startRow').replaceWith('<span class="startRow">&nbsp;</span>' + pastedContent);
+
+            /*
+                        saveSelection();
+                        insideStartRow = $('.editor .editarea .startRow .rangySelectionBoundary').length;
+                        startRow = $('.startRow:has(.rangySelectionBoundary)', UI.editarea);
+                        pastedContent = startRow.text().trim();
+
+            //            console.log('cursore dentro a uno span? ', insideStartRow);
+                        restoreSelection();
+            //            console.log('insideStartRow: ', insideStartRow);
+            //            console.log('startRow: ', '"' + startRow.text() + '"');
+            //            console.log('startRow: ', '"' + startRow.text().trim() + '"');
+            //            $(startRow).html()
+            //            $('.editor .editarea .startRow')[0].innerHTML = '&nbsp;';
+            //            console.log('pastedContent: ', pastedContent);
+                        $('.editor .editarea .startRow').replaceWith(pastedContent);
+
+            //            $('.editor .editarea .startRow').html('&nbsp;').after(startRow.text().trim());
+            //            $('.editor .editarea .startRow').text('COSO').after(startRow.text().trim());
+            */
+
+//            saveSelection();
+//            console.log('KEYUP: ', UI.editarea.html());
+//            restoreSelection();
+/*
+            // are the cursor inside of a span tag?
+            saveSelection();
+            insideSpan = $('.editor .editarea span .rangySelectionBoundary').length;
+            console.log('cursore dentro a uno span? ', insideSpan);
+            restoreSelection();
+            console.log('insideSpan: ', insideSpan);
+            if(insideSpan) {
+                console.log('vediamo insideSpan');
+                e.preventDefault();
+            }
+*/
+            /*
+                        console.log('KEYDOWN ON EDITAREA');
+                        saveSelection();
+                        console.log('html: ', UI.editarea.html());
+                        insideSpan = $('.editor .editarea span .rangySelectionBoundary').length;
+                        console.log('cursore dentro a uno span? ', insideSpan);
+                        range = window.getSelection().getRangeAt(0);
+                        node = $('.editor .editarea span:has(.rangySelectionBoundary)')[0];
+                        if(insideSpan) {
+                            console.log(node);
+                            setCursorPosition(node, 'end');
+            //                setCursorAfterNode(range, node);
+                        }
+                        restoreSelection();
+             */
         }).on('keyup', '.editor .editarea', 'return', function(e) {
+            console.log('UI.defaultBRmanagement: ', UI.defaultBRmanagement);
+
             if(!UI.defaultBRmanagement) {
                 range = window.getSelection().getRangeAt(0);
+//                $('.returnTempPlaceholder', UI.editarea).after('<span class="br"><br /><span class="startRow">&nbsp;</span></span>');
                 $('.returnTempPlaceholder', UI.editarea).after('<br />');
-                node = $('.returnTempPlaceholder + br', UI.editarea)[0];
-                setCursorAfterNode(range, node);
+//                $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
+//                console.log('qua');
+//                $('.returnTempPlaceholder', UI.editarea).after('<br /><img>');
+
+//                node = $('.returnTempPlaceholder + br', UI.editarea)[0];
+//                setCursorAfterNode(range, node);
                 saveSelection();
                 $('.returnTempPlaceholder', UI.editarea).remove();
                 restoreSelection();
+            } else {
+//                 $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
             }
         }).on('keydown', '.editor .editarea', 'return', function(e) {
             UI.defaultBRmanagement = false;
@@ -567,6 +663,7 @@ $.extend(UI, {
                 e.preventDefault();
             }
         }).on('keypress', '.editor .editarea', function(e) {
+            console.log('which: ', e.which);
 //			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
@@ -588,6 +685,12 @@ $.extend(UI, {
 				if($('.tag-autocomplete').length) {
 //					console.log('ecco');
 //					console.log('prima del replace: ', UI.editarea.html());
+                    // if tag-autocomplete-endcursor is inserted before the &lt; then it is moved after it
+                    UI.stripAngular = (UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi).length)? true : false;
+                    UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"\></span>'));
+//                    console.log(UI.editarea.html().replace(/&lt;<span class="tag-autocomplete-endcursor"\><\/span>/gi, '<span class="tag-autocomplete-endcursor"\>XXX/span>&lt;'));
+//                    console.log(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"\>XXX/span>'));
+
 //					console.log(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) != null);
 					if(UI.editarea.html().match(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi) !== null) {
 						UI.editarea.html(UI.editarea.html().replace(/^(<span class="tag-autocomplete-endcursor"\><\/span>&lt;)/gi, '&lt;<span class="tag-autocomplete-endcursor"><\/span>'));
@@ -620,7 +723,6 @@ $.extend(UI, {
 					UI.saveInUndoStack('cancel');
 					UI.currentSegmentQA();
 				} else {
-//console.log('QUI');
 					var numTagsBefore = (UI.editarea.text().match(/<.*?\>/gi) !== null)? UI.editarea.text().match(/<.*?\>/gi).length : 0;
 					var numSpacesBefore = $('.space-marker', UI.editarea).length;
 //                    var numSpacesBefore = UI.editarea.text().match(/\s/gi).length;
@@ -638,9 +740,14 @@ $.extend(UI, {
                     $.each(translation, function(index) {
                         if($(this).hasClass('rangySelectionBoundary')) sbIndex = index;
                     });
+
                     var undeletableMonad = (($(translation[sbIndex-1]).hasClass('monad'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
                     var selBound = $('.rangySelectionBoundary', UI.editarea);
                     if(undeletableMonad) selBound.prev().remove();
+                    if(e.which == 8) { // backspace
+                        var undeletableTag = (($(translation[sbIndex-1]).hasClass('locked'))&&($(translation[sbIndex-2]).prop("tagName") == 'BR'))? true : false;
+                        if(undeletableTag) selBound.prev().remove();
+                    }
 
                     restoreSelection();
 
@@ -652,12 +759,12 @@ $.extend(UI, {
 //							console.log('BB: ', UI.editarea.html());
 					}
 
-//						console.log(e.which + ' - ' + isInsideTag);
+//					console.log(e.which + ' - ' + isInsideTag);
 					setTimeout(function() {
-						if ((e.which == 46)&&(isInsideTag)) {
+//						if ((e.which == 46)&&(isInsideTag)) {
 //							console.log('inside tag');
-						}
-//							console.log(e.which + ' - ' + isInsideTag);
+//						}
+//						console.log(e.which + ' - ' + isInsideTag);
                         saveSelection();
                         // detect if selection ph is inside a monad tag
   //                      console.log('sel placeholders inside a monad', $('.monad .rangySelectionBoundary', UI.editarea).length);
@@ -714,17 +821,61 @@ $.extend(UI, {
 			if (e.which == 37) { // left arrow
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
+//                console.log('range: ', range);
 				if (range.startOffset != range.endOffset) { // if something is selected when the left button is pressed...
-					r = range.startContainer.data;
+					r = range.startContainer.innerText;
+//                    r = range.startContainer.data;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) { // if a tag is selected
-						saveSelection();
-						rr = document.createRange();
-						referenceNode = $('.rangySelectionBoundary', UI.editarea).first().get(0);
-						rr.setStartBefore(referenceNode);
-						rr.setEndBefore(referenceNode);
-						$('.rangySelectionBoundary', UI.editarea).remove();
+                        e.preventDefault();
+
+                        /*
+                                                console.log('1: ', UI.editarea.html());
+                                                $('.rangySelectionBoundary', UI.editarea).remove();
+                                                saveSelection();
+                                                if($('span .rangySelectionBoundary', UI.editarea).length) {
+                                                    $('span:has(.rangySelectionBoundary)', UI.editarea).before($('.rangySelectionBoundary', UI.editarea));
+                                                }
+                                                console.log('2: ', UI.editarea.html());
+                                                restoreSelection();
+                        */
+
+                        saveSelection();
+//                        console.log(UI.editarea.html());
+                        rr = document.createRange();
+                        referenceNode = $('.rangySelectionBoundary', UI.editarea).first().get(0);
+                        rr.setStartBefore(referenceNode);
+                        rr.setEndBefore(referenceNode);
+                        $('.rangySelectionBoundary', UI.editarea).remove();
+
 					}
-				}
+				} else { // there's nothing selected
+                    console.log('nothing selected when left is pressed');
+/*
+                    saveSelection();
+                    sbIndex = 0;
+                    translation = $.parseHTML(UI.editarea.html());
+                    $.each(translation, function(index) {
+                        if($(this).hasClass('rangySelectionBoundary')) sbIndex = index;
+                    });
+//                    console.log('$(translation[sbIndex-1]).prop("tagName"): ', $(translation[sbIndex-1]).prop("tagName"));
+//                    console.log('$(translation[sbIndex-2]).prop("tagName"): ', $(translation[sbIndex-2]).prop("tagName"));
+                    if(($(translation[sbIndex-1]).prop("tagName") == 'SPAN')&&($(translation[sbIndex-2]).prop("tagName") == 'BR')) {
+                        console.log('agire');
+                        console.log(UI.editarea.html());
+                        ph = $('.rangySelectionBoundary', UI.editarea);
+                        console.log(ph);
+                        console.log(ph.prev());
+                        prev = ph.prev();
+                        prev.before('<span class="toDestroy" style="width: 0px; float: left;">&nbsp;</span>');
+//                        prev.before(ph);
+                        console.log(UI.editarea.html());
+                        restoreSelection();
+
+//                        $('.toDestroy', UI.editarea).remove();
+
+                    }
+*/
+                }
 				UI.closeTagAutocompletePanel();
 //				UI.jumpTag('start');
 			}
@@ -754,7 +905,7 @@ $.extend(UI, {
 				selection = window.getSelection();
 				range = selection.getRangeAt(0);
 				if (range.startOffset != range.endOffset) {
-					r = range.startContainer.data;
+					r = range.startContainer.innerText;
 					if ((r[0] == '<') && (r[r.length - 1] == '>')) {
 						saveSelection();
 						rr = document.createRange();
@@ -803,7 +954,9 @@ $.extend(UI, {
 
 			if (e.which == 13) { // return
 				if($('.tag-autocomplete').length) {
-					$('.tag-autocomplete li.current').click();	
+                    console.log('QQQQQQ: ', UI.editarea.html());
+                    e.preventDefault();
+                    $('.tag-autocomplete li.current').click();
 					return false;
 				}
 			}
@@ -963,6 +1116,7 @@ $.extend(UI, {
 			UI.beforeDropSearchSourceHTML = UI.editarea.html();
 			UI.currentConcordanceField = $(this);
 			setTimeout(function() {
+                console.log('sto per pulire');
 				UI.cleanDroppedTag(UI.currentConcordanceField, UI.beforeDropSearchSourceHTML);
 			}, 100);
 		}).on('click', '.editor .editarea, .editor .source', function() {
@@ -970,11 +1124,14 @@ $.extend(UI, {
 			UI.currentSelectedText = false;
 			UI.currentSearchInTarget = false;
 			$('#contextMenu').hide();
+        }).on('blur', '.editor .editarea', function() {
+            UI.hideEditToolbar();
 		}).on('click', 'a.translated, a.next-untranslated', function(e) {
 			var w = ($(this).hasClass('translated')) ? 'translated' : 'next-untranslated';
 			e.preventDefault();
-			UI.currentSegment.removeClass('modified');
+            UI.hideEditToolbar();
 
+            UI.currentSegment.removeClass('modified');
 			var skipChange = false;
 			if (w == 'next-untranslated') {
 				console.log('next-untranslated');
@@ -994,7 +1151,7 @@ $.extend(UI, {
 					console.log('il nextuntranslated è già caricato: ', UI.nextUntranslatedSegmentId);
 				}
 			} else {
-				if (!$(UI.currentSegment).nextAll('section').length) {
+				if (!$(UI.currentSegment).nextAll('section:not(.readonly)').length) {
 					UI.changeStatus(this, 'translated', 0);
 					skipChange = true;
 					$('#' + $(this).attr('data-segmentid') + '-close').click();
@@ -1181,6 +1338,7 @@ $.extend(UI, {
 			$(this).parents('.comment').find('.gl-comment').toggle();
 		}).on('paste', '.editarea', function(e) {
 			console.log('paste in editarea');
+
 			UI.saveInUndoStack('paste');
 			$('#placeHolder').remove();
 			var node = document.createElement("div");
@@ -1190,7 +1348,7 @@ $.extend(UI, {
 			if(UI.isFirefox) pasteHtmlAtCaret('<div id="placeHolder"></div>');
 			var ev = (UI.isFirefox) ? e : event;
 			handlepaste(this, ev);
-
+            /*
 			$(window).trigger({
 				type: "pastedInEditarea",
 				segment: segment
@@ -1199,8 +1357,9 @@ $.extend(UI, {
 			setTimeout(function() {
 				UI.saveInUndoStack('paste');
 			}, 100);
-			UI.lockTags(UI.editarea);
+ 			UI.lockTags(UI.editarea);
 			UI.currentSegmentQA();
+ */
 		}).on('click', 'a.close', function(e, param) {
 			e.preventDefault();
 			var save = (typeof param == 'undefined') ? 'noSave' : param;
