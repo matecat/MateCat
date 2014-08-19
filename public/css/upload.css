@@ -610,7 +610,7 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
     position: relative;
 	border:1px dashed #ccc;
 margin-top: 20px;
-	min-height: 150px;
+	min-height: 200px;
 padding-bottom: 50px !important;
 	-moz-border-radius: 4px;
 	border-radius: 4px;
@@ -749,11 +749,14 @@ tr.ready .size span{visibility: visible;}
 /* non fixed 
 header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margin-bottom:20px;height:45px;} */
 /*  fixed */
-header{background: #6d6e71;top: 0;left: 0;text-align: left;width: 100%;position: fixed;z-index: 999999999;border-bottom: 1px solid #333;padding: 4px 0 5px 0;height: 38px;margin-top: 0;} 
-.wrapper-upload {margin-top:60px;}
+header{background: #6d6e71;
+border-bottom: 1px solid #333;
+padding: 0px 0 2px 0;
+margin-bottom: 20px;
+height: 45px;} 
 
 .wrapper{width:98%;min-width:960px;margin:0px auto 0 auto;padding:5px 0 0 0;width:92%;font-size:14px;position:relative;text-align:left;}
-.logo{float:left;margin-top:1px;border:0;background:url(../img/logo.png) 0px 2px no-repeat;width:145px;height:31px; background-size: 130px 26px;}
+.logo{float:left;margin-top:5px;border:0;background:url(../img/logo.png) 0px 2px no-repeat;width:145px;height:31px; background-size: 130px 26px;}
 
 /*supported formats*/
 .supported-formats .popup
