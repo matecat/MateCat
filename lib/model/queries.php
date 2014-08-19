@@ -3000,9 +3000,7 @@ function getArchivableJobs($jobs = array()){
 	$query =
 		"select
 			j.id
---			, max(translation_date) as max_date,
---			count(1) as total_rows,
---			sum( IF( translation_date IS NULL, 1, 0 ) ) as partially_translated
+--			, IFNULL( translation_date, '1970-01-01 00:00:00' )
 		from
 			jobs j join
 			segment_translations st on j.id = st.id_job

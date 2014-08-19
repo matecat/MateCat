@@ -406,9 +406,9 @@ class CatUtils {
 
 
             $array_replacements = array(
-                    '<br class="_0A" />',
-                    '<br class="_0D" />',
-                    '<br class="_0D0A" />',
+                    '<span class="_0A"></span><br />',
+                    '<span class="_0D"></span><br />',
+                    '<span class="_0D0A"></span><br />',
                     '<span class="_tab">&#9;</span>',
                     '<span class="_nbsp">&nbsp;</span>',
             );
