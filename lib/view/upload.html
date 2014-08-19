@@ -64,22 +64,44 @@
 <div metal:use-macro="unsupported_browser.html/unsupported"/>
 </body>
 <body tal:condition="supportedBrowser" class="started">
+<div class="hide learnmore">
+    <span class="open-more pull-right">✕</span>
+    <h1>More matches for your translations</h1>
+    <h2>Use MateCat and get 10% more guaranteed more margin in your translation projects</h2>
+    <div class="col-3">
+        <img src="../public/img/punto1.png" />
+        <p>Collect data to set a fair rate for post-editor and improve MT quality</p>
+    </div>
+    <div class="col-3">
+        <img src="../public/img/punto2.png" />
+        <p>Real-time progress report and quality control for your translations</p>
+    </div>
+    <div class="col-3">
+        <img src="../public/img/punto3.png" />
+        <p>Online adaptation and quality estimation for MT systems based on Moses
+</p>
+    </div>
+    <div class="bottom-lm">
+        <p><a href="http://docs.matecat.com/how-matecat-counts-words" target="_blank">Learn more about the project</a> and lorem ipsum dolor sit amet</p>
+    </div>
 
+</div>
 <header>
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
-
-
+        <a class="pull-right open-more cat-appear">About Matecat</a>
     </div>
 <div class="cl"></div>
-
 </header>
+<div class="cat-appear-div hide">
+    <img src="../public/img/about.png" />
+</div>
 <div class="wrapper-upload">
 <h1 tal:condition="true:conversion_enabled">Translate your files</h1>
 
 <h1 tal:condition="not:conversion_enabled">Translate an XLIFF file</h1>
 
-<h2 class="payoff">Matecat gives you more matches than any other translation tool.</h2>
+<h2 class="payoff">Matecat gives you more matches than any other translation tool. <a class="open-more">Learn more</a>.</h2>
 
 
 <div class="translate-box">
@@ -1106,7 +1128,27 @@ $('.savebtn').click(function() {
          	$(this).parent('tr').addClass('disabled');
         }
     });
+})
+;$( ".open-more" ).click(function() {
+    $( ".cat-appear-div" ).hide();
+  $( ".learnmore" ).slideToggle( "400", function() {
+
+    // Animation complete.
+  });
 });
+
+
+$( ".cat-appear" ).mouseenter(function() {
+    $('.cat-appear-div').show();
+    $('.cat-appear-div').animate({
+      top: '+48'
+    }, 350);
+  });
+$( ".cat-appear" ).mouseleave(function() {
+    $('.cat-appear-div').animate({
+      top: '-48'
+    }, 200);
+  });
 </script>
 
 
