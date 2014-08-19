@@ -167,7 +167,7 @@ class downloadFileController extends downloadController {
                 // we already have an sdlxliff or an accepted file
                 $file['original_file'] = @gzinflate( $file['original_file'] );
 
-                if( !INIT::$CONVERSION_ENABLED && $mime_type == 'sdlxliff' || ( empty( $file['original_file'] ) ) || $this->forceXliff ){
+                if( !INIT::$CONVERSION_ENABLED || ( empty( $file['original_file'] ) && $mime_type == 'sdlxliff' ) || $this->force_xliff ){
                     $convertBackToOriginal = false;
                     Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal , true ) );
                 } else {
