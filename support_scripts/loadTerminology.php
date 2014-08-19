@@ -18,7 +18,16 @@ $db->connect ();
 
 $glossaries = array(
 
-        array( 'file' => 'glossary.csv', 'source' => 'it-IT', 'target' => "en-GB" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "it-IT" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "da-DK" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "nl-NL" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "fr-FR" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "de-DE" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "pl-PL" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "pt-PT" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "ru-RU" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "es-ES" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "sv-SE" ),
 
 );
 
@@ -32,14 +41,14 @@ foreach ( $glossaries as $gloss ) {
     $config[ 'target_lang' ] = $gloss['target'];
     $config[ 'email' ]       = "demo@matecat.com";
     $config[ 'get_mt' ]      = false;
-    $config[ 'id_user' ]     = "5c94c21ae1f3c907b3b8";
+    $config[ 'id_user' ]     = "MyMemory_9e21425446e03d9e8952";
     $config[ 'num_result' ]  = null;
     $config[ 'isGlossary' ]  = true;
 
 
     $fObject = new SplFileObject( $gloss['file'] );
     $fObject->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE );
-    $fObject->setCsvControl( "\t", '\'' );
+    $fObject->setCsvControl( ",", '\'' );
 
 
     $tms = new TMS( 1 );

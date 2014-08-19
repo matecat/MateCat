@@ -780,7 +780,7 @@ function countThisTranslatedHashInJob( $jid, $jpassword, $sid ){
 
     $results = $db->query_first( $query );
 
-    Log::doLog($query);
+//    Log::doLog($query);
 
     return $results;
 
@@ -937,7 +937,7 @@ function addTranslation( array $_Translation ){
         return -1;
     }
 
-//    Log::doLog( $query );
+    Log::doLog( $query );
 
     $db->query( $query );
 
@@ -2999,19 +2999,20 @@ function getArchivableJobs($jobs = array()){
 	$db    = Database::obtain();
 	$query =
 		"select
-			distinct j.id
+			j.id
+--			, max(translation_date) as max_date,
+--			count(1) as total_rows,
+--			sum( IF( translation_date IS NULL, 1, 0 ) ) as partially_translated
 		from
 			jobs j join
 			segment_translations st on j.id = st.id_job
-			and j.create_date < (curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD." day)
+			and j.create_date < ( curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD." day )
 		where
-			(
-			    translation_date < (curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD."  day)
-			    OR translation_date is NULL
-			)
+		    IFNULL( translation_date, '1970-01-01 00:00:00' ) < (curdate() - interval " . INIT::$JOB_ARCHIVABILITY_THRESHOLD . " day)
 			and j.status_owner = 'active'
 			and j.status = 'active'
-			and j.id in (%s)";
+			and j.id in (%s)
+			group by j.id";
 
 	$results = $db->fetch_array(
 	              sprintf(
@@ -3031,5 +3032,3 @@ function getArchivableJobs($jobs = array()){
 
 	return $results;
 }
-
-?>
