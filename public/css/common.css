@@ -1306,6 +1306,30 @@ p.surveynotice{
 	height:inherit;	max-height:inherit;min-height:inherit;overflow-y:auto;
 }
 
+span._0A {
+display: inline;
+margin-left: 6px;
+padding: 1px 2px 3px 40px;
+background-image: url(../img/soft-return1.png);
+background-size: 16px;
+background-repeat: no-repeat;
+background-position: center left;
+width: 20px;
+position: relative;
+}
+
+span._nbsp {
+color: #CCC;
+position: relative;
+left: 4px;
+padding-right: 12px;
+opacity: 0.2;
+top: 3px;
+font-size: 10px;
+background: url(../img/dot.png) 0px 0px no-repeat;
+background-size: 6px;
+}
+
 @font-face {
 	font-family: 'icomoon';
 	src:url('fonts/icomoon.eot?-gf7xre');
