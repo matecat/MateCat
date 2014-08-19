@@ -98,6 +98,20 @@ class Database {
 	}
 
 #-#############################################
+# manage transactions for InnoDB tables
+    public function begin(){
+        mysql_query( "BEGIN;", $this->link_id );
+    }
+
+    public function commit(){
+        mysql_query( "COMMIT;", $this->link_id );
+    }
+
+    public function rollback(){
+        mysql_query( "ROLLBACK;", $this->link_id );
+    }
+
+#-#############################################
 # desc: connect and select database using vars above
 # Param: $new_link can force connect() to open a new link, even if mysql_connect() was called before with the same parameters
 
@@ -111,6 +125,10 @@ class Database {
 		if (!@mysql_select_db($this->database, $this->link_id)) {//no database
 			return $this->oops("Could not open database: <b>$this->database</b>.");
 		}
+
+//TODO Negotiate collation in UTF8 when database data are migrated!!!!!
+//        mysql_query( "SET NAMES 'utf8'" );
+        mysql_set_charset( 'utf8', $this->link_id );
 
 		// unset the data so it can't be dumped
 //		$this->server = '';

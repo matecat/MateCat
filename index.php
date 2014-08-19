@@ -1,5 +1,6 @@
 <?php
-require_once 'inc/config.inc.php';
+if( !@include_once 'inc/config.inc.php')
+	header("Location: configMissing");
 
 INIT::obtain();
 require_once INIT::$UTILS_ROOT . '/Log.php';

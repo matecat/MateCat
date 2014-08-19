@@ -103,7 +103,7 @@ while (1) {
     $config[ 'segment' ]       = $text;
     $config[ 'source_lang' ]   = $source;
     $config[ 'target_lang' ]   = $target;
-    $config[ 'email' ]         = "demo@matecat.com";
+    $config[ 'email' ]         = "tmanalysis@matecat.com";
     $config[ 'id_user' ]       = $id_translator;
     $config[ 'num_result' ]    = 3;
 
@@ -365,4 +365,3 @@ function compareScore($a, $b) {
     return ( floatval($a['match']) < floatval($b['match']) ? 1 : -1); //SORT DESC !!!!!!! INVERT MINUS SIGN
     //this is necessary since usort sorts is ascending order, thus inverting the ranking
 }
-?>

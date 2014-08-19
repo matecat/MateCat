@@ -38,5 +38,3 @@ class SimpleTMX extends Engine{
 	}
 
 }
-
-?>

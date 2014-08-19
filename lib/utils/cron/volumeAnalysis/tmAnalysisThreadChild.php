@@ -50,6 +50,7 @@ while (1) {
     }
 
     $res = getNextSegmentAndLock();
+    $pid = $res['pid'];
 
     if (empty($res)) {
         echo "--- (child $my_pid) : _-_getNextSegmentAndLock_-_ no segment ready for tm volume analisys: wait 5 seconds\n";
@@ -60,7 +61,7 @@ while (1) {
     $jid = $res['id_job'];
     echo "--- (child $my_pid) : segment $sid-$jid found \n";
     $segment = getSegmentForTMVolumeAnalysys($sid, $jid);
-    
+
     echo "segment found is: ";
     print_r($segment);
     echo "\n";
@@ -68,19 +69,19 @@ while (1) {
     if (empty($segment)) {
         echo "--- (child $my_pid) : empty segment: no segment ready for tm volume analisys: wait 5 seconds\n";
         setSegmentTranslationError($sid, $jid); // devo settarli come done e lasciare il vecchio livello di match
-        incrementCount( $pid, 0, 0 );
+        incrementCount( $res['pid'], 0, 0 );
         sleep(5);
         continue;
     }
 
     if (is_numeric($segment) and $segment < 0) {
         setSegmentTranslationError($sid, $jid); // devo settarli come done e lasciare il vecchio livello di match
-        incrementCount( $pid, 0, 0 );
+        incrementCount( $res['pid'], 0, 0 );
         echo "--- (child $my_pid) : FATAL !!  error occurred during fetching segment : exiting\n";
         continue;
     }
 
-    $pid = $segment['pid'];
+//    $pid = $segment['pid'];
 
     //get the number of segments in job
     $_existingLock = $memcacheHandler->add( 'project_lock:' . $pid, true ); // lock for 1 month
@@ -93,10 +94,12 @@ while (1) {
 
         $memcacheHandler->add( 'project:' . $pid, $total_segs[ 'project_segments' ] );
         $memcacheHandler->increment( 'num_analyzed:' . $pid, $total_segs[ 'num_analyzed' ] );
-        echo "--- (child $my_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID\n";
+        echo "--- (child $my_pid) : found " . $total_segs[ 'project_segments' ] . " segments for PID $pid\n";
     } else {
         $_existingPid = $memcacheHandler->get( 'project:' . $pid );
-        echo "--- (child $my_pid) : found $_existingPid segments for PID in Memcache\n";
+        $_analyzed = $memcacheHandler->get( 'num_analyzed:' . $pid );
+        echo "--- (child $my_pid) : found $_existingPid segments for PID $pid in Memcache\n";
+        echo "--- (child $my_pid) : analyzed $_analyzed segments for PID $pid in Memcache\n";
     }
 
 
@@ -130,7 +133,7 @@ while (1) {
     $config[ 'segment' ]       = $text;
     $config[ 'source_lang' ]   = $source;
     $config[ 'target_lang' ]   = $target;
-    $config[ 'email' ]         = "demo@matecat.com";
+    $config[ 'email' ]         = "tmanalysis@matecat.com";
     $config[ 'id_user' ]       = $id_translator;
     $config[ 'num_result' ]    = 3;
 
@@ -443,4 +446,3 @@ function compareScore($a, $b) {
     return ( floatval($a['match']) < floatval($b['match']) ? 1 : -1); //SORT DESC !!!!!!! INVERT MINUS SIGN
     //this is necessary since usort sorts is ascending order, thus inverting the ranking
 }
-?>

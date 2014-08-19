@@ -65,9 +65,9 @@ $.extend(UI, {
 			$('.sub-editor.concordances .overflow').css('height', $('.sub-editor.concordances').height() + 'px');
 			$('.sub-editor.concordances').addClass('extended');
 			if($('.sub-editor.concordances .more').length) {
-				$('.sub-editor.concordances .more').text('Less');
+				$('.sub-editor.concordances .more').text('Fewer');
 			} else {
-				$('.sub-editor.concordances', segment).append('<a href="#" class="more">Less</a>');				
+				$('.sub-editor.concordances', segment).append('<a href="#" class="more">Fewer</a>');
 			}
 			this.custom.extended_concordance = true;
 			this.saveCustomization();

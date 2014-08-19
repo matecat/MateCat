@@ -93,7 +93,7 @@ body.manage .field .value
 body.manage .urls
 	{
 	float: left;
-	width: 80%;
+	width: 100%;
 	text-align: left;
 	}
 
@@ -292,11 +292,11 @@ body.manage th.create-date
 	
 body.manage th.job-detail
 	{
-	width: 45%;
+	width: 37%;
 	}
 body.manage th.private-tm-key
 	{
-	min-width: 120px;
+	min-width: 140px;
 	}
 
 body.manage th.words
@@ -306,7 +306,7 @@ body.manage th.words
 	
 body.manage th.progress
 	{
-	width: 15%;
+	width: 12%;
 	}
 
 body.manage th.actions
@@ -447,7 +447,6 @@ body.manage .pagination a:hover
 body.manage header .filter
 	{
 	display: block !important;
-	margin-top: -2px !important;
 	}
 
 body.manage .search
@@ -801,7 +800,7 @@ only screen and (min-resolution: 192dpi),
 only screen and (in-resolution: 2dppx) { 
 
 .filter {
-	background: url(../img/sprite2x.png) 2px -218px no-repeat;
+	background: url(../img/sprite2x.png) 2px -214px no-repeat;
 }
 body.manage a.cancel-project, body.manage a.archive-project, body.manage a.resume-project, body.manage a.unarchive-project {
 	background: url(../img/sprite2x.png) -13px -78px no-repeat;

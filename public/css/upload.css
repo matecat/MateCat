@@ -609,9 +609,9 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 	
     position: relative;
 	border:1px dashed #ccc;
-
-	min-height:200px;
-	padding-bottom:50px !important;
+margin-top: 20px;
+	min-height: 200px;
+padding-bottom: 50px !important;
 	-moz-border-radius: 4px;
 	border-radius: 4px;
 	background:#fbfbfb;
@@ -665,7 +665,7 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 
 
 
-
+.error-content {padding-left: 45px; padding-right: 10px;}
 .error-message,
 .warning-message
 {
@@ -679,19 +679,19 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 	-moz-border-radius: 2px;
 	border-radius: 2px;
 	border:1px solid #c45f5f;
-	text-indent:40px;
 	display:none;
 }
 .warning-message
 {
-	background: #FFFA8B !important;
-	border-color: #000;
-	padding: 10px 0 10px 0;
-	text-indent: 0;
-	color: #000;
+    background: #FFFA8B !important;
+    border-color: #6D6E71;
+    padding: 10px 0 10px 1%;
+    text-indent: 0;
+    width: 98.8%;
+    color: #000;
 }
 .warning-message span {
-    margin-left: 15px;
+    /*margin-left: 15px;*/
 }
 
 
@@ -715,7 +715,7 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 
 .progress-extended{display:none}
 
-.error{color:#FF3300;text-align:left !Important}
+.error{color:#FF3300;text-align:left !Important;font-size:14px;}
 
 .dragging .file-drag, .uploaded .file-drop, .uploaded .fileupload-buttonbar{height:0;}
 
@@ -746,7 +746,15 @@ tr.ready .size span{visibility: visible;}
 .tm-button{width: 20px; display:none; float: left; margin-left: -10px; margin-top: 35px;}
 
 .disabled, .disabled:hover, .disabled:active{opacity:0.5 !important;cursor:default;-moz-box-shadow: none;-webkit-box-shadow: none;border:1px solid #666}
-header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margin-bottom:20px;height:45px;}
+/* non fixed 
+header{background:#6d6e71;border-bottom:1px solid #333;padding:0px 0 2px 0;margin-bottom:20px;height:45px;} */
+/*  fixed */
+header{background: #6d6e71;
+border-bottom: 1px solid #333;
+padding: 0px 0 2px 0;
+margin-bottom: 20px;
+height: 45px;} 
+
 .wrapper{width:98%;min-width:960px;margin:0px auto 0 auto;padding:5px 0 0 0;width:92%;font-size:14px;position:relative;text-align:left;}
 .logo{float:left;margin-top:5px;border:0;background:url(../img/logo.png) 0px 2px no-repeat;width:145px;height:31px; background-size: 130px 26px;}
 
@@ -1022,3 +1030,6 @@ background: #ca2a2e url(../img/sprite2x.png) 12px -1115px no-repeat !important;
 }
 
 
+.error .label.label-important a{
+    cursor: pointer;
+}

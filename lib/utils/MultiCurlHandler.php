@@ -100,7 +100,7 @@ class MultiCurlHandler {
         foreach( $this->curl_handlers as $tokenHash => $curl_resource ){
             $temp = curl_multi_getcontent ( $curl_resource );
             $this->multi_curl_results[ $tokenHash ] = $temp;
-//            Log::doLog($temp);
+//            Log::doLog( "... $tokenHash " . curl_getinfo( $curl_resource, CURLINFO_EFFECTIVE_URL ) . " : ... " . var_export( $temp, true ) );
         }
 
     }
@@ -181,6 +181,13 @@ class MultiCurlHandler {
             return $this->multi_curl_results[ $tokenHash ];
         }
         return null;
+    }
+
+    public function getError( $tokenHash ){
+        $res = array();
+        $res['httpcode'] = curl_getinfo( $this->curl_handlers[ $tokenHash ], CURLINFO_HTTP_CODE );
+        $res['error']    =  curl_error( $this->curl_handlers[ $tokenHash ] );
+        return $res;
     }
 
 } 

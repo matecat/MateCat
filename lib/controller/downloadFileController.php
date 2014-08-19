@@ -10,13 +10,13 @@ include_once(INIT::$UTILS_ROOT.'/DetectProprietaryXliff.php');
 
 class downloadFileController extends downloadController {
 
-    private $id_job;
-    private $password;
-    private $fname;
-    private $download_type;
+    protected $id_job;
+    protected $password;
+    protected $fname;
+    protected $download_type;
 
     protected $JobInfo;
-
+    protected $forceXliff;
     protected $downloadToken;
 
     public function __construct() {
@@ -30,6 +30,7 @@ class downloadFileController extends downloadController {
             'download_type' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'password'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'downloadToken' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+	    	'forceXliff'	=> array()
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -46,6 +47,7 @@ class downloadFileController extends downloadController {
         $this->downloadToken = $__postInput[ 'downloadToken' ];
 
         $this->filename      = $this->fname;
+		$this->forceXliff = ( isset( $__postInput[ 'forceXliff' ] ) && !empty( $__postInput[ 'forceXliff' ] ) && $__postInput[ 'forceXliff' ] == 1 );
 
         if (empty($this->id_job)) {
             $this->id_job = "Unknown";
@@ -71,15 +73,10 @@ class downloadFileController extends downloadController {
         }
 
         $debug['get_file'][]=time();
-        $files_job = getFilesForJob( $this->id_job, $this->id_file );
+        $files_job = getFilesForJob($this->id_job, $this->id_file);
         $debug['get_file'][]=time();
         $nonew = 0;
         $output_content = array();
-
-        //get job language and data
-        //Fixed Bug: need a specific job, because we need The target Language
-        //Removed from within the foreach cycle, the job is always the same....
-        $jobData = $this->JobInfo = getJobData( $this->id_job, $this->password );
 
         /*
         the procedure is now as follows:
@@ -148,7 +145,13 @@ class downloadFileController extends downloadController {
 
             $output_content[ $id_file ][ 'content' ]  = $output_xliff;
             $output_content[ $id_file ][ 'filename' ] = $current_filename;
+            unset( $output_xliff );
 
+			if ( $this->forceXliff ) {
+				$file_info_details = pathinfo( $output_content[ $id_file ][ 'filename' ] );
+				$output_content[ $id_file ][ 'filename' ] = $file_info_details[ 'filename' ] . ".out.sdlxliff";
+			}
+			
             //TODO set a flag in database when file uploaded to know if this file is a proprietary xlf converted
             //TODO so we can load from database the original file blob ONLY when needed
             /**
@@ -164,11 +167,10 @@ class downloadFileController extends downloadController {
                 // we already have an sdlxliff or an accepted file
                 $file['original_file'] = @gzinflate( $file['original_file'] );
 
-                if( !INIT::$CONVERSION_ENABLED || empty( $file['original_file'] ) ){
+                if( !INIT::$CONVERSION_ENABLED || ( empty( $file['original_file'] ) && $mime_type == 'sdlxliff' ) || $this->force_xliff ){
                     $convertBackToOriginal = false;
                     Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal , true ) );
-                }
-                else {
+                } else {
                     //dos2unix ??? why??
                     //force unix type files
 //                    $output_content[$id_file]['content'] = CatUtils::dos2unix( $output_content[$id_file]['content'] );
@@ -189,6 +191,7 @@ class downloadFileController extends downloadController {
                 $debug[ 'do_conversion' ][ ] = time();
                 $convertResult = $converter->convertToOriginal( $output_content[ $id_file ], $chosen_machine = false );
                 $output_content[ $id_file ][ 'content' ] = $convertResult[ 'documentContent' ];
+                unset( $convertResult );
                 $debug[ 'do_conversion' ][ ] = time();
 
             }
@@ -204,7 +207,11 @@ class downloadFileController extends downloadController {
         if ( count( $output_content ) > 1 ) {
 
             if ( $pathinfo[ 'extension' ] != 'zip' ) {
-                $this->filename = $pathinfo[ 'basename' ] . ".zip";
+                if ($this->forceXliff){
+                    $this->filename = $this->id_job . ".zip";
+                } else {
+                    $this->filename = $pathinfo[ 'basename' ] . ".zip";
+                }
             }
 
             $this->composeZip( $output_content, $jobData[ 'source' ] ); //add zip archive content here;
@@ -224,14 +231,14 @@ class downloadFileController extends downloadController {
 
     }
 
-    private function setContent( $output_content ) {
+    protected function setContent( $output_content ) {
 
         $this->filename = $this->sanitizeFileExtension( $output_content['filename'] );
         $this->content = $output_content['content'];
 
     }
 
-    private function sanitizeFileExtension( $filename ){
+    protected function sanitizeFileExtension( $filename ){
 
         $pathinfo = pathinfo( $filename );
 
@@ -243,7 +250,7 @@ class downloadFileController extends downloadController {
 
     }
 
-    private function composeZip( $output_content, $sourceLang ) {
+    protected function composeZip( $output_content, $sourceLang ) {
 
         $file = tempnam("/tmp", "zipmatecat");
         $zip = new ZipArchive();

@@ -123,7 +123,10 @@ class glossaryController extends ajaxController {
                     }
 
                     if ( empty( $st[ 'id_translator' ] ) ) {
-                        $newUser                 = TMS::createMyMemoryKey( $this->id_job ); //throws exception
+
+                        $APIKeySrv = TMSServiceFactory::getAPIKeyService();
+                        $newUser = $APIKeySrv->createMyMemoryKey(); //throws exception
+
                         updateTranslatorJob( $this->id_job, $newUser );
                         $config[ 'id_user' ]     = $newUser->id;
                     }

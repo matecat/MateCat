@@ -7,6 +7,7 @@ class INIT {
 	public static $ROOT;
 	public static $BASEURL;
 	public static $HTTPHOST;
+	public static $PROTOCOL;
 	public static $DEBUG;
 	public static $DB_SERVER;
 	public static $DB_DATABASE;
@@ -27,6 +28,7 @@ class INIT {
 	public static $THRESHOLD_MATCH_TM_NOT_TO_SHOW;
 	public static $TIME_TO_EDIT_ENABLED;
 	public static $ENABLED_BROWSERS;
+    public static $UNTESTED_BROWSERS;
 	public static $BUILD_NUMBER;
 	public static $DEFAULT_FILE_TYPES;
 	public static $SUPPORTED_FILE_TYPES;
@@ -56,6 +58,12 @@ class INIT {
 	public static $OAUTH_CLIENT_APP_NAME;
 
     public static $OAUTH_CONFIG;
+	public static $CONFIG_VERSION_ERR_MESSAGE;
+
+    /**
+	 * @var $JOB_ARCHIVABILITY_THRESHOLD int number of days of inactivity for a job before it's automatically archived
+	 */
+	public static $JOB_ARCHIVABILITY_THRESHOLD;
 
     /**
      * ENABLE_OUTSOURCE set as true will show the option to outsource to an external translation provider (translated.net by default)
@@ -162,8 +170,9 @@ class INIT {
             @session_start();
             register_shutdown_function( 'INIT::sessionClose' );
 
-            $protocol=stripos($_SERVER['SERVER_PROTOCOL'],"https")===FALSE?"http":"https";
-            self::$HTTPHOST="$protocol://$_SERVER[HTTP_HOST]";
+            self::$PROTOCOL = stripos( $_SERVER[ 'SERVER_PROTOCOL' ], "https" ) === false ? "http" : "https";
+            self::$HTTPHOST = self::$PROTOCOL . "://" . $_SERVER['HTTP_HOST'];
+
         } else {
             echo "\nPHP Running in CLI mode.\n\n";
             //Possible CLI configurations. We definitly don't want sessions in our cron scripts
@@ -236,6 +245,12 @@ class INIT {
 		self::$AUTHCOOKIEDURATION=86400*60;
 		self::$ENABLED_BROWSERS = array('applewebkit','chrome', 'safari', 'firefox');
 
+        // sometimes the browser declare to be Mozilla but does not provide a valid Name (e.g. Safari).
+        // This occurs especially in mobile environment. As an example, when you try to open a link from within
+        // the GMail app, it redirect to an internal browser that does not declare a valid user agent
+        // In this case we will show a notice on the top of the page instead of deny the access
+        self::$UNTESTED_BROWSERS = array('mozillageneric');
+
         /**
          * Matecat open source by default only handles xliff files with a strong focus on sdlxliff
          * ( xliff produced by SDL Trados )
@@ -251,7 +266,7 @@ class INIT {
         self::$CONVERSION_ENABLED = false;
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-		self::$BUILD_NUMBER = '0.3.4.3';
+		self::$BUILD_NUMBER = '0.4.0';
 		self::$VOLUME_ANALYSIS_ENABLED = true;
 
         self::$FORCE_XLIFF_CONVERSION = false;
@@ -296,7 +311,7 @@ class INIT {
                 'sxi'  => array( '','','extppt'),
                 'txt'  => array( '','','exttxt'),
                 'csv'  => array( '','','extxls'),
-                'xml'  => array( '','','extxml')
+                'xml'  => array( '','','extxml'),
                 //                'vxd' => array("Try converting to XML")
             ),
             'Web'                 => array(
@@ -376,13 +391,9 @@ class INIT {
                 'https://www.googleapis.com/auth/userinfo.profile'
         );
 
-        //self::$DEFAULT_FILE_TYPES = 'xliff|sdlxliff|xlf';
-		//self::$CONVERSION_FILE_TYPES = 'doc|dot|docx|dotx|docm|dotm|rtf|pdf|xls|xlsx|xlt|xltx|pot|pps|ppt|potm|potx|ppsm|ppsx|pptm|pptx|mif|inx|idml|icml|txt|csv|htm|html|xhtml|properties|odp|ods|odt|sxw|sxc|sxi|xtg|tag|itd|sgml|sgm|dll|exe|rc|ttx|resx|dita|fm|vxd|indd';
-		//self::$CONVERSION_FILE_TYPES_PARTIALLY_SUPPORTED = '[{"format": "fm", "message": "Try converting to MIF"},{"format": "indd", "message": "Try converting to INX"},{"format": "vxd", "message": "Try converting to XML"}]';
+	    self::$CONFIG_VERSION_ERR_MESSAGE = "Your config.ini.php file is not up-to-date.";
 
-		//if (!$this->initOK()) {
-		//    throw new Exception("ERROR");
-		//}
+	    self::$JOB_ARCHIVABILITY_THRESHOLD = 30;
 	}
 
     public static function fatalErrorHandler() {
@@ -470,4 +481,4 @@ class INIT {
 
 }
 
-?>
+return true;

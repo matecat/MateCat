@@ -8,7 +8,7 @@ include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 define("LTPLACEHOLDER", "##LESSTHAN##");
 define("GTPLACEHOLDER", "##GREATERTHAN##");
 define("AMPPLACEHOLDER", "##AMPPLACEHOLDER##");
-define("NBSPPLACEHOLDER", "<x id=\"nbsp\"/>");
+//define("NBSPPLACEHOLDER", "<x id=\"nbsp\"/>");
 
 class CatUtils {
 
@@ -22,21 +22,29 @@ class CatUtils {
     const crPlaceholderRegex   = '/\#\#\$_0D\$\#\#/g';
     const crlfPlaceholderRegex = '/\#\#\$_0D0A\$\#\#/g';
 
+    const tabPlaceholder       = '##$_09$##';
+    const tabPlaceholderClass  = '_09';
+    const tabPlaceholderRegex  = '/\#\#\$_09\$\#\#/g';
+
+    const nbspPlaceholder       = '##$_A0$##';
+    const nbspPlaceholderClass  = '_A0';
+    const nbspPlaceholderRegex  = '/\#\#\$_A0\$\#\#/g';
+
     public static $cjk = array( 'zh' => 1.8, 'ja' => 2.5, 'ko' => 2.5, 'km' => 5 );
 
     //following functions are useful for manage the consistency of non braking spaces
     // chars coming, expecially,from MS Word
     // ref nbsp code https://en.wikipedia.org/wiki/Non-breaking_space
-    public static function placeholdnbsp($s) {
-        $s = preg_replace("/\x{a0}/u", NBSPPLACEHOLDER, $s);
-        return $s;
-    }
-
-    public static function restorenbsp($s) {
-        $pattern = "#" . NBSPPLACEHOLDER . "#";
-        $s = preg_replace($pattern, Utils::unicode2chr(0Xa0), $s);
-        return $s;
-    }
+//    public static function placeholdnbsp($s) {
+//        $s = preg_replace("/\x{a0}/u", NBSPPLACEHOLDER, $s);
+//        return $s;
+//    }
+//
+//    public static function restorenbsp($s) {
+//        $pattern = "#" . NBSPPLACEHOLDER . "#";
+//        $s = preg_replace($pattern, Utils::unicode2chr(0Xa0), $s);
+//        return $s;
+//    }
 
     // ----------------------------------------------------------------
 
@@ -186,6 +194,8 @@ class CatUtils {
         $segment = str_replace( '##$_0D0A$##',"\r\n", $segment );
         $segment = str_replace( '##$_0A$##',"\n", $segment );
         $segment = str_replace( '##$_0D$##',"\r", $segment );
+        $segment = str_replace( '##$_09$##',"\t", $segment );
+        $segment = str_replace( '##$_A0$##', Utils::unicode2chr(0Xa0) , $segment );
 
         // input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
         // output : <g> bang &amp; olufsen are > 555 </g> <x/>
@@ -220,6 +230,8 @@ class CatUtils {
         $segment = str_replace("\r\n", '##$_0D0A$##', $segment );
         $segment = str_replace("\n", '##$_0A$##', $segment );
         $segment = str_replace("\r", '##$_0D$##', $segment ); //x0D character
+        $segment = str_replace("\t", '##$_09$##', $segment ); //x09 character
+        $segment = preg_replace( "/\x{a0}/u", '##$_A0$##', $segment ); //xA0 character ( NBSP )
         return $segment;
     }
 
@@ -327,10 +339,12 @@ class CatUtils {
 //            $sug_for_diff = html_entity_decode($sug_for_diff, ENT_NOQUOTES, 'UTF-8');
 //            $tra_for_diff = html_entity_decode($tra_for_diff, ENT_NOQUOTES, 'UTF-8');
 
-            //$ter          = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
-
             //with this patch we have warnings when accessing indexes
-            $ter=array();
+            if( $use_ter_diff  ){
+                $ter = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
+            } else {
+                $ter = array();
+            }
 
             $seg[ 'ter' ] = @$ter[ 1 ] * 100;
             $stat_ter[ ]  = $seg[ 'ter' ] * $seg[ 'rwc' ];
@@ -370,13 +384,37 @@ class CatUtils {
             $seg['source'] = trim( CatUtils::rawxliff2view( $seg['source'] ) );
             $seg['translation'] = trim( CatUtils::rawxliff2view( $seg['translation'] ) );
 
-            $array_patterns     = array( rtrim( self::lfPlaceholderRegex, 'g' ) , rtrim( self::crPlaceholderRegex, 'g' ), rtrim( self::crlfPlaceholderRegex, 'g' ) );
-            $array_replacements = array( '<br class="_0A" />', '<br class="_0D" />', '<br class="_0D0A" />' );
+            $array_patterns     = array(
+                    rtrim( self::lfPlaceholderRegex, 'g' ) ,
+                    rtrim( self::crPlaceholderRegex, 'g' ),
+                    rtrim( self::crlfPlaceholderRegex, 'g' ),
+                    rtrim( self::tabPlaceholderRegex, 'g' ),
+                    rtrim( self::nbspPlaceholderRegex, 'g' ),
+            );
 
+
+            $array_replacements_csv = array(
+                    '\n',
+                    '\r',
+                    '\r\n',
+                    '\t',
+                    Utils::unicode2chr(0Xa0),
+            );
+            $seg['source_csv'] = preg_replace( $array_patterns, $array_replacements_csv, $seg['source'] );
+            $seg['translation_csv'] = preg_replace( $array_patterns, $array_replacements_csv, $seg['translation'] );
+            $seg['diff_csv'] = preg_replace( $array_patterns, $array_replacements_csv, $seg['diff'] );
+
+
+            $array_replacements = array(
+                    '<span class="_0A"></span><br />',
+                    '<span class="_0D"></span><br />',
+                    '<span class="_0D0A"></span><br />',
+                    '<span class="_tab">&#9;</span>',
+                    '<span class="_nbsp">&nbsp;</span>',
+            );
             $seg['source'] = preg_replace( $array_patterns, $array_replacements, $seg['source'] );
             $seg['translation'] = preg_replace( $array_patterns, $array_replacements, $seg['translation'] );
             $seg['diff'] = preg_replace( $array_patterns, $array_replacements, $seg['diff'] );
-
 
             if( $seg['mt_qe'] == 0 ){
                 $seg['mt_qe'] = 'N/A';
@@ -420,7 +458,7 @@ class CatUtils {
         $updateRes = addTranslation( $_Translation );
 
         if ($updateRes < 0) {
-            $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment $id_segment - Error: $updateRes");
+            $result['error'][] = array("code" => -5, "message" => "error occurred during the storing (UPDATE) of the translation for the segment {$_Translation['id_segment']} - Error: $updateRes");
             return $result;
         }
 

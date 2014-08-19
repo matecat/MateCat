@@ -85,29 +85,6 @@ class getWarningController extends ajaxController {
 
         foreach ( $result as $position => &$item ) {
 
-            //PATCH - REMOVE WHITESPACES FROM GLOBAL WARNING ( Backward compatibility )
-//            $serialized_err = json_decode( $item['serialized_errors_list'] );
-//
-//            $foundTagMismatch = false;
-//            foreach( $serialized_err as $k => $error ){
-//
-//                switch ( $error->outcome ) {
-//                    case QA::ERR_TAG_MISMATCH:
-//                    case QA::ERR_TAG_ID:
-//                    case QA::ERR_UNCLOSED_X_TAG:
-//                        $foundTagMismatch = true;
-//                        break;
-//                }
-//
-//            }
-//
-//            if( !$foundTagMismatch ){
-//                unset( $result[$position] );
-//            } else {
-//                $item = $item[ 'id_segment' ];
-//            }
-            //PATCH - REMOVE WHITESPACES FROM GLOBAL WARNING ( Backward compatibility )
-
             $item = $item[ 'id_segment' ];
 
         }
@@ -115,7 +92,9 @@ class getWarningController extends ajaxController {
         $this->result[ 'details' ] = array_values($result);
         $this->result[ 'token' ]   = $this->__postInput->token;
 	//        $this->result['messages']  = '[{"msg":"Test message 1","token":"token1","expire":"2014-04-03 00:00"},{"msg":"Test message 2","token":"token2","expire":"2014-04-04 12:00"}]';
-        $this->result['messages']  = '[{"msg":"<strong>Notice</strong>: Friday 23th, from 23:00 to 4:00 (GMT +2), you may experience slow responses or a brief disconnection. In the latter case, try again in 15 minutes.","token":"token-down-20140516","expire":"2014-05-24 08:00"}]';
+//
+//        $msg = 'MateCat will be undergoing scheduled maintenance starting on Wednesday, July 2 at 08:00 PM CEST. MateCat will be unavailable for approximately 3 hours.<br /> We apologize for any inconvenience. For any questions, contact us support@matecat.com.';
+//        $this->result['messages']  = '[{"msg":"' . $msg . '", "token":"' . md5($msg) . '", "expire":"2014-07-02 23:30:00"}]';
 
         $tMismatch = getTranslationsMismatches( $this->__postInput->id_job, $this->__postInput->password );
 
@@ -155,20 +134,21 @@ class getWarningController extends ajaxController {
 
         $QA = new QA( $this->__postInput->src_content, $this->__postInput->trg_content );
         $QA->performConsistencyCheck();
-        if ( $QA->thereAreWarnings() ) {
+        if ( $QA->thereAreNotices() ) {
 //        if ( $QA->thereAreErrors() ) {
             $this->result[ 'details' ]                 = array();
             $this->result[ 'details' ]                 = array();
             $this->result[ 'details' ][ 'id_segment' ] = $this->__postInput->id;
 //            $this->result[ 'details' ][ 'warnings' ]   = $QA->getErrorsJSON();
 //            $this->result[ 'total' ]                                             = count( $QA->getErrors() );
-            $this->result[ 'details' ][ 'warnings' ]     = $QA->getWarningsJSON();
-            $this->result[ 'details' ][ 'tag_mismatch' ] = $QA->getMalformedXmlStructs();
-            $this->result[ 'total' ]                     = count( $QA->getWarnings() );
+            $this->result[ 'details' ][ 'warnings' ]                = $QA->getNoticesJSON();
+            $this->result[ 'details' ][ 'tag_mismatch' ]            = $QA->getMalformedXmlStructs();
+            $this->result[ 'details' ][ 'tag_mismatch' ][ 'order' ] = $QA->getTargetTagPositionError();
+            $this->result[ 'total' ]                                = count( $QA->getNotices() );
 //temp
 			
 //            Log::doLog($this->__postInput->trg_content);
-//            Log::doLog($QA->getTrgNormalized());
+//            Log::doLog($this->result);
 
         }
 
