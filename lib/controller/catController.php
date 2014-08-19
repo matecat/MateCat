@@ -351,7 +351,7 @@ class catController extends viewController {
         $this->template->build_number           = INIT::$BUILD_NUMBER;
         $this->template->downloadFileName       = $this->downloadFileName;
         $this->template->job_not_found          = $this->job_not_found;
-        $this->template->job_archived           = ( $this->job_archived ) ? ' archived' : '';
+        $this->template->job_archived           = ( $this->job_archived ) ? INIT::$JOB_ARCHIVABILITY_THRESHOLD : '';
         $this->template->job_cancelled          = $this->job_cancelled;
         $this->template->logged_user            = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
         $this->template->incomingUrl            = '/login?incomingUrl=' . $this->thisUrl;
