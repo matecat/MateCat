@@ -490,7 +490,7 @@ h2.payoff
 .upload-table tr{background:#fff;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in;border-bottom:1px dashed #ccc}
 .upload-table tr:hover{}
 
-.btncontinue{position:relative;bottom:0;display:none;float:left;padding:0px 0 0 0 !Important;font-size:14px !Important;margin:0px 0 0 10px !important;}
+.btncontinue{position:absolute;bottom:0;display:none;float:left;padding:0px 0 0 0 !Important;font-size:14px !Important;margin:0px 0 0 10px !important;}
 
 
 
@@ -610,8 +610,8 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
     position: relative;
 	border:1px dashed #ccc;
 margin-top: 20px;
-	min-height:200px;
-	padding-bottom: 0px !important;
+	min-height: 150px;
+padding-bottom: 50px !important;
 	-moz-border-radius: 4px;
 	border-radius: 4px;
 	background:#fbfbfb;
