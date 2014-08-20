@@ -128,6 +128,9 @@ class downloadFileController extends downloadController {
             //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
             foreach ( $data as $i => $k ) {
                 $data[ 'matecat|' . $k[ 'internal_id' ] ][ ] = $i;
+                //FIXME: temporary patch
+                $data[$i]['translation'] = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[$i]['translation'] );
+                $data[$i]['segment'] = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[$i]['segment'] );
             }
 
             $debug['replace'][] = time();
