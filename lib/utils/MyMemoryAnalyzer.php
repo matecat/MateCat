@@ -78,12 +78,16 @@ class MyMemoryAnalyzer {
 			//take first 50 segments
 			$segmentArray = array_slice($segmentArray, 0, 50);
 
-			//remove tags
-			$segmentArray = preg_replace(array("#<[^<>]*>#", "#  *#"), array("", " "), $segmentArray);
+            foreach ($segmentArray as $i => $singleSegment){
+                $singleSegment = explode(",", $singleSegment);
+                $singleSegment = array_slice( $singleSegment, 3, 1 );
 
-			foreach ($segmentArray as $i => $singleSegment){
-				$singleSegment = explode(",", $singleSegment);
-				$singleSegment = array_slice( $singleSegment, 3, 1 );
+                //remove tags, duplicated spaces and all not Unicode Letter
+                $singleSegment[0] = preg_replace(array("#<[^<>]*>#", "#\x20{2,}#", '#\PL+#u'), array("", " ", " "), $singleSegment[0]);
+
+                //remove not useful spaces
+                $singleSegment[0] = preg_replace( "#\x20{2,}#", " ", $singleSegment[0]);
+
 				$segmentArray[$i] = $singleSegment[0];
 			}
 
@@ -125,5 +129,10 @@ class MyMemoryAnalyzer {
 
 		return json_decode( $res[ $tokenHash ], true );
 	}
+
+    private function sortByStrLenAsc($a, $b){
+        return strlen($a) >= strlen($b);
+    }
+
 }
-?>
+
