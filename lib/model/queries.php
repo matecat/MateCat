@@ -2565,14 +2565,60 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
 			}
 			$ids   = trim( $ids, ',' );
 			$query = "update jobs set status_owner= case $cases end where id in ($ids)" . $status_filter_query;
+            $db->query( $query );
 
 		} else {
+
 			$query = "update jobs set status_owner='$status' where id_project=$id" . $status_filter_query;
-		}
+
+            $db->query( $query );
+
+            //Works on the basis that MAX( id_segment ) is the same for ALL Jobs in the same Project
+            // furthermore, we need a random ID so, don't worry about MySQL stupidity on random MAX
+            //example: http://dev.mysql.com/doc/refman/5.0/en/example-maximum-column-group-row.html
+            $select_max_id = "
+                    SELECT max(id_segment) as id_segment
+					    FROM segment_translations
+						JOIN jobs ON id_job = id
+						WHERE id_project = $id";
+
+            $_id_segment = $db->fetch_array( $select_max_id );
+            $_id_segment = array_pop( $_id_segment );
+            $id_segment = $_id_segment['id_segment'];
+
+            $query_for_translations = "
+                UPDATE segment_translations
+                    SET translation_date = NOW()
+                WHERE id_segment = $id_segment";
+
+            $db->query( $query_for_translations );
+
+        }
 
 
 	} else {
+
 		$query = "update jobs set status_owner='$status' where id=$id and password = '$jPassword' ";
+        $db->query( $query );
+
+        $select_max_id = "
+                    SELECT max(id_segment) as id_segment
+					    FROM segment_translations
+						JOIN jobs ON id_job = id
+						WHERE id = $id
+						 AND password = '$jPassword'";
+
+        $_id_segment = $db->fetch_array( $select_max_id );
+        $_id_segment = array_pop( $_id_segment );
+        $id_segment = $_id_segment['id_segment'];
+
+        $query_for_translations = "
+                UPDATE segment_translations
+                    SET translation_date = NOW()
+                WHERE id_segment = $id_segment";
+
+        $db->query( $query_for_translations );
+
 	}
 	/*
 	   if ($res == "prj") {
@@ -2584,7 +2630,8 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
 	//    $query = "update jobs set disabled=1 where id=$id";
 
 	//$db = Database::obtain();
-	$db->query( $query );
+
+//	$db->query( $query );
 
 }
 
@@ -2998,19 +3045,22 @@ function setJobCompleteness( $jid, $is_completed ) {
 function getArchivableJobs($jobs = array()){
 	$db    = Database::obtain();
 	$query =
-		"select
-			j.id
---			, IFNULL( translation_date, '1970-01-01 00:00:00' )
-		from
-			jobs j join
-			segment_translations st on j.id = st.id_job
-			and j.create_date < ( curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD." day )
-		where
-		    IFNULL( translation_date, '1970-01-01 00:00:00' ) < (curdate() - interval " . INIT::$JOB_ARCHIVABILITY_THRESHOLD . " day)
-			and j.status_owner = 'active'
-			and j.status = 'active'
-			and j.id in (%s)
-			group by j.id";
+		"
+        SELECT j.id, j.password , SBS.translation_date
+            FROM jobs j
+            JOIN (
+                SELECT MAX( translation_date ) AS translation_date, id_job
+                FROM segment_translations
+                    WHERE id_job IN( %s )
+                    GROUP BY id_job
+                ) AS SBS
+                ON SBS.id_job = j.id
+                AND IFNULL( SBS.translation_date, date( '1970-01-01' ) ) < ( curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD." day  )
+           WHERE
+                j.status_owner = 'active'
+                AND j.create_date < ( curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD." day )
+                AND j.status = 'active'
+                GROUP BY j.id";
 
 	$results = $db->fetch_array(
 	              sprintf(
