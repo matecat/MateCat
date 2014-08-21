@@ -47,7 +47,7 @@ class editlogDownloadController extends downloadController {
             $pe_effort_perc = $d[ 'pe_effort_perc' ];
             $hter           = $d[ 'ter' ];
             $segment        = $d[ 'source_csv' ];
-            $suggestion     = $d[ 'sug' ];
+            $suggestion     = $d[ 'sug_csv' ];
             $translation    = $d[ 'translation_csv' ];
             $id_translator  = $d[ 'tid' ];
 

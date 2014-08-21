@@ -56,5 +56,3 @@ class editlogController extends viewController {
 	}
 
 }
-
-?>

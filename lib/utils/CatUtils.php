@@ -346,6 +346,10 @@ class CatUtils {
                 $ter = array();
             }
 
+//            Log::doLog( $sug_for_diff );
+//            Log::doLog( $tra_for_diff );
+//            Log::doLog( $ter );
+
             $seg[ 'ter' ] = @$ter[ 1 ] * 100;
             $stat_ter[ ]  = $seg[ 'ter' ] * $seg[ 'rwc' ];
             $seg[ 'ter' ] = round( @$ter[ 1 ] * 100 ) . "%";
@@ -402,6 +406,7 @@ class CatUtils {
             );
             $seg['source_csv'] = preg_replace( $array_patterns, $array_replacements_csv, $seg['source'] );
             $seg['translation_csv'] = preg_replace( $array_patterns, $array_replacements_csv, $seg['translation'] );
+            $seg['sug_csv'] =  preg_replace( $array_patterns, $array_replacements_csv, $seg['sug_view'] );
             $seg['diff_csv'] = preg_replace( $array_patterns, $array_replacements_csv, $seg['diff'] );
 
 
@@ -414,6 +419,7 @@ class CatUtils {
             );
             $seg['source'] = preg_replace( $array_patterns, $array_replacements, $seg['source'] );
             $seg['translation'] = preg_replace( $array_patterns, $array_replacements, $seg['translation'] );
+            $seg['sug_view'] =  preg_replace( $array_patterns, $array_replacements, $seg['sug_view'] );
             $seg['diff'] = preg_replace( $array_patterns, $array_replacements, $seg['diff'] );
 
             if( $seg['mt_qe'] == 0 ){
