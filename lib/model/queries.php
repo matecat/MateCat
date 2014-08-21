@@ -492,7 +492,7 @@ function getArrayOfSuggestionsJSON( $id_segment ) {
 function getJobData( $id_job, $password = null ) {
 
 	$query   = "select source, target, id_mt_engine, id_tms, id_translator, status_owner as status, password,
-		job_first_segment, job_last_segment, 
+		job_first_segment, job_last_segment, create_date, owner,
 		new_words, draft_words, translated_words, approved_words, rejected_words, id_project
 			from jobs
 			where id = %u";
@@ -2497,18 +2497,10 @@ function changePassword( $res, $id, $password, $new_password ) {
 function cancelJob( $res, $id ) {
 
 	if ( $res == "prj" ) {
-		$query = "update jobs set status_owner='cancelled' where id_project=" . (int)$id;
+		$query = "update jobs set status_owner = '" . Constants_JobStatus::STATUS_CANCELLED . "' where id_project=" . (int)$id;
 	} else {
-		$query = "update jobs set status_owner='cancelled' where id=" . (int)$id;
+		$query = "update jobs set status_owner = '" . Constants_JobStatus::STATUS_CANCELLED . "' where id=" . (int)$id;
 	}
-	/*
-	   if ($res == "prj") {
-	   $query = "update jobs set status='cancelled' where id_project=$id";
-	   } else {
-	   $query = "update jobs set status='cancelled' where id=$id";
-	   }
-	 */
-	//    $query = "update jobs set disabled=1 where id=$id";
 
 	$db = Database::obtain();
 	$db->query( $query );
@@ -2518,9 +2510,9 @@ function cancelJob( $res, $id ) {
 function archiveJob( $res, $id ) {
 
 	if ( $res == "prj" ) {
-		$query = "update jobs set status='archived' where id_project=" . (int)$id;
+		$query = "update jobs set status='" . Constants_JobStatus::STATUS_ARCHIVED . "' where id_project=" . (int)$id;
 	} else {
-		$query = "update jobs set status='archived' where id=" . (int)$id;
+		$query = "update jobs set status='" . Constants_JobStatus::STATUS_ARCHIVED . "' where id=" . (int)$id;
 	}
 	/*
 	   if ($res == "prj") {

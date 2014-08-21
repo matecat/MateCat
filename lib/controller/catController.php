@@ -122,13 +122,13 @@ class catController extends viewController {
 		//retrieve job owner. It will be useful also if the job is archived or cancelled
 		$this->job_owner = ($data[0]['job_owner'] != "") ? $data[0]['job_owner'] : "support@matecat.com" ;
 
-		if ($data[0]['status'] == 'cancelled') {
+		if ( $data[0]['status'] == Constants_JobStatus::STATUS_CANCELLED ) {
             $this->job_cancelled = true;
             //stop execution
             return;
         }
 
-		if ($data[0]['status'] == 'archived') {
+		if ( $data[0]['status'] == Constants_JobStatus::STATUS_ARCHIVED ) {
 			$this->job_archived = true;
 //			$this->setTemplateVars();
 			//stop execution
@@ -154,7 +154,7 @@ class catController extends viewController {
 
             if( $lastTranslationInJob < $oneMonthAgo ){
                 $res = "job";
-                $new_status = 'archived';
+                $new_status = Constants_JobStatus::STATUS_ARCHIVED;
                 updateJobsStatus( $res, $this->jid, $new_status, null, null, $this->password );
                 $this->job_archived = true;
             }
@@ -214,7 +214,7 @@ class catController extends viewController {
 			//check if language belongs to supported right-to-left languages
 
 
-			if ($job['status'] == 'archived') {
+			if ( $job['status'] == Constants_JobStatus::STATUS_ARCHIVED ) {
 				$this->job_archived = true;
 				$this->job_owner = $data[0]['job_owner'];
 			}
@@ -303,7 +303,6 @@ class catController extends viewController {
             $this->template->target_code         = null;
             $this->template->firstSegmentOfFiles = 0;
             $this->template->fileCounter         = 0;
-	        $this->template->owner_email         = $this->job_owner;
         } else {
             $this->template->pid                 = $this->pid;
             $this->template->target              = $this->target;
@@ -327,7 +326,6 @@ class catController extends viewController {
         $this->template->last_job_segment    = $this->last_job_segment;
         $this->template->last_opened_segment = $this->last_opened_segment;
 		$this->template->owner_email         = $this->job_owner;
-        //$this->template->data                = $this->data;
 
         $this->job_stats['STATUS_BAR_NO_DISPLAY'] = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
         $this->job_stats['ANALYSIS_COMPLETE']     = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? true : false );

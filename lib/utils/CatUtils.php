@@ -232,11 +232,6 @@ class CatUtils {
         return $segment;
     }
 
-    // transform any segment format in raw xliff format: raw xliff will be used as starting format for any manipulation
-    public static function toRawXliffNormalizer($segment) {
-        ;
-    }
-
     public static function getEditingLogData($jid, $password, $use_ter_diff = false ) {
 
         $data = getEditLog($jid, $password);

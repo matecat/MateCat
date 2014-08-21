@@ -14,6 +14,8 @@ $last_id = (int)$last_id['max'];
 
 Log::doLog("[ARCHIVEJOBS] last job id is: ".$last_id);
 
+
+//WRONG!!!!!
 $query_select_jobs =
 	"select
 		j.id as jid
@@ -22,17 +24,18 @@ $query_select_jobs =
 		segment_translations st on j.id = st.id_job
 		and j.create_date < (curdate() - interval %d day)
 	where
-		j.status_owner = 'active'
+		j.status_owner = '" . Constants_JobStatus::STATUS_ACTIVE . "'
 		and j.id between %d and %d
 	group by j.id
 	having max(coalesce(translation_date, '1999-01-01 00:00:00' )) < (curdate() - interval %d  day)";
 
+//WRONG: USE queries.php
 $query_archive_jobs =
 	"update jobs
-	set status_owner = 'archived'
+	set status_owner = '" . Constants_JobStatus::STATUS_ARCHIVED . "'
 	where id in (%s)
 	and create_date < (curdate() - interval %d day)
-	and status_owner = 'active'";
+	and status_owner = '" . Constants_JobStatus::STATUS_ACTIVE . "'";
 
 //number of rows to be selected for each query
 $row_interval = 5000;
