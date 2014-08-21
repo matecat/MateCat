@@ -135,16 +135,30 @@ class catController extends viewController {
 			return;
 		}
 
-		$jobIsArchivable = count( Utils::getArchivableJobs($this->jid) ) > 0;
+        /*
+         * I prefer to use a programmatic approach to the check for the archive date because
+         * the query to check "Utils::getArchivableJobs($this->jid)" should be
+         * executed every time a job is loaded ( F5 or CTRL+R on browser ) and it cost some milliseconds ( ~0.1s )
+         * and it is little heavy for the database.
+         * We use the data we already have from last query and perform
+         * the check on the last translation only if the job is older than 30 days
+         *
+         */
+        $createDate = new DateTime( $data[0]['create_date'] );
+        $oneMonthAgo = new DateTime();
+        $oneMonthAgo->modify( '-' . INIT::$JOB_ARCHIVABILITY_THRESHOLD . ' days' );
 
-		if( $jobIsArchivable && !$this->job_cancelled ) {
-			//TODO: change this workaround
+        if( $createDate < $oneMonthAgo  && !$this->job_cancelled ) {
 
-			$res = "job";
-			$new_status = 'archived';
+            $lastTranslationInJob = new Datetime( getLastTranslationDate( $this->jid ) );
 
-			updateJobsStatus( $res, $this->jid, $new_status, null, null, $this->password );
-			$this->job_archived = true;
+            if( $lastTranslationInJob < $oneMonthAgo ){
+                $res = "job";
+                $new_status = 'archived';
+                updateJobsStatus( $res, $this->jid, $new_status, null, null, $this->password );
+                $this->job_archived = true;
+            }
+
 		}
 
 		foreach ($data as $i => $job) {
@@ -156,9 +170,9 @@ class catController extends viewController {
 				$this->downloadFileName = $job['pname'] . ".zip"; // will be overwritten below in case of one file job
 			}
 
-			if (empty($this->last_opened_segment)) {
-				$this->last_opened_segment = $job['last_opened_segment'];
-			}
+            if ( empty( $this->last_opened_segment ) ) {
+                $this->last_opened_segment = $job[ 'last_opened_segment' ];
+            }
 
 			if (empty($this->cid)) {
 				$this->cid = $job['cid'];
@@ -207,52 +221,36 @@ class catController extends viewController {
 
 			$id_file = $job['id_file'];
 
-
-			if (!isset($this->data["$id_file"])) {
-				$files_found[] = $job['filename'];
-//				$file_stats = CatUtils::getStatsForFile($id_file);
-//
-//				$this->data["$id_file"]['jid'] = $seg['jid'];
-//				$this->data["$id_file"]["filename"] = $seg['filename'];
-//				$this->data["$id_file"]["mime_type"] = $seg['mime_type'];
-////				$this->data["$id_file"]['id_segment_start'] = @$seg['id_segment_start'];
-////				$this->data["$id_file"]['id_segment_end'] = @$seg['id_segment_end'];
-//				$this->data["$id_file"]['source'] = $lang_handler->getLocalizedName($seg['source'],'en');
-//				$this->data["$id_file"]['target'] = $lang_handler->getLocalizedName($seg['target'],'en');
-//				$this->data["$id_file"]['source_code'] = $seg['source'];
-//				$this->data["$id_file"]['target_code'] = $seg['target'];
-//				$this->data["$id_file"]['last_opened_segment'] = $seg['last_opened_segment'];
-//				$this->data["$id_file"]['file_stats'] = $file_stats;
-			}
-			//$this->filetype_handler = new filetype($seg['mime_type']);
+            if ( !isset( $this->data[ "$id_file" ] ) ) {
+                $files_found[ ] = $job[ 'filename' ];
+            }
 
             $wStruct = new WordCount_Struct();
 
             $wStruct->setIdJob( $this->jid );
             $wStruct->setJobPassword( $this->password );
-            $wStruct->setNewWords( $job['new_words'] );
-            $wStruct->setDraftWords( $job['draft_words'] );
-            $wStruct->setTranslatedWords( $job['translated_words'] );
-            $wStruct->setApprovedWords( $job['approved_words'] );
-            $wStruct->setRejectedWords( $job['rejected_words'] );
+            $wStruct->setNewWords( $job[ 'new_words' ] );
+            $wStruct->setDraftWords( $job[ 'draft_words' ] );
+            $wStruct->setTranslatedWords( $job[ 'translated_words' ] );
+            $wStruct->setApprovedWords( $job[ 'approved_words' ] );
+            $wStruct->setRejectedWords( $job[ 'rejected_words' ] );
 
-			unset($job['id_file']);
-			unset($job['source']);
-			unset($job['target']);
-			unset($job['source_code']);
-			unset($job['target_code']);
-			unset($job['mime_type']);
-			unset($job['filename']);
-			unset($job['jid']);
-			unset($job['pid']);
-			unset($job['cid']);
-			unset($job['tid']);
-			unset($job['pname']);
-			unset($job['create_date']);
-			unset($job['owner']);
-//			unset($seg['id_segment_end']);
-//			unset($seg['id_segment_start']);
-			unset($job['last_opened_segment']);
+            unset( $job[ 'id_file' ] );
+            unset( $job[ 'source' ] );
+            unset( $job[ 'target' ] );
+            unset( $job[ 'source_code' ] );
+            unset( $job[ 'target_code' ] );
+            unset( $job[ 'mime_type' ] );
+            unset( $job[ 'filename' ] );
+            unset( $job[ 'jid' ] );
+            unset( $job[ 'pid' ] );
+            unset( $job[ 'cid' ] );
+            unset( $job[ 'tid' ] );
+            unset( $job[ 'pname' ] );
+            unset( $job[ 'create_date' ] );
+            unset( $job[ 'owner' ] );
+
+            unset( $job[ 'last_opened_segment' ] );
 
             unset( $job[ 'new_words' ] );
             unset( $job[ 'draft_words' ] );
@@ -261,21 +259,17 @@ class catController extends viewController {
             unset( $job[ 'rejected_words' ] );
 
             //For projects created with No tm analysis enabled
-            if( $wStruct->getTotal() == 0 && ( $job['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ||  $job['status_analysis'] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ){
+            if ( $wStruct->getTotal() == 0 && ( $job[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE || $job[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
                 $wCounter = new WordCount_Counter();
-                $wStruct = $wCounter->initializeJobWordCount( $this->jid, $this->password );
+                $wStruct  = $wCounter->initializeJobWordCount( $this->jid, $this->password );
                 Log::doLog( "BackWard compatibility set Counter." );
             }
 
             $this->job_stats = CatUtils::getFastStatsForJob( $wStruct );
 
-//            Log::doLog( $this->job_stats );
-
-            //$this->job_stats = CatUtils::getStatsForJob( $this->jid, null, $this->password );
-
         }
 
-        //TODO check and improve, this is not needed
+        //Needed because a just created job has last_opened segment NULL
 		if (empty($this->last_opened_segment)) {
 			$this->last_opened_segment = getFirstSegmentId($this->jid, $this->password);
 		}
@@ -336,7 +330,7 @@ class catController extends viewController {
         //$this->template->data                = $this->data;
 
         $this->job_stats['STATUS_BAR_NO_DISPLAY'] = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
-        $this->job_stats['ANALYSIS_COMPLETE']   = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? true : false );
+        $this->job_stats['ANALYSIS_COMPLETE']     = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? true : false );
 
 //        Log::doLog( $this->job_stats );
 

@@ -32,20 +32,6 @@ class CatUtils {
 
     public static $cjk = array( 'zh' => 1.8, 'ja' => 2.5, 'ko' => 2.5, 'km' => 5 );
 
-    //following functions are useful for manage the consistency of non braking spaces
-    // chars coming, expecially,from MS Word
-    // ref nbsp code https://en.wikipedia.org/wiki/Non-breaking_space
-//    public static function placeholdnbsp($s) {
-//        $s = preg_replace("/\x{a0}/u", NBSPPLACEHOLDER, $s);
-//        return $s;
-//    }
-//
-//    public static function restorenbsp($s) {
-//        $pattern = "#" . NBSPPLACEHOLDER . "#";
-//        $s = preg_replace($pattern, Utils::unicode2chr(0Xa0), $s);
-//        return $s;
-//    }
-
     // ----------------------------------------------------------------
 
     public static function placeholdamp($s) {
@@ -57,11 +43,6 @@ class CatUtils {
         $pattern = "#" . AMPPLACEHOLDER . "#";
         $s = preg_replace($pattern, Utils::unicode2chr("&"), $s);
         return $s;
-    }
-
-    //reconcile tag ids
-    public static function ensureTagConsistency( $q, $source_seg, $target_seg ) {
-        //TODO
     }
 
     private static function parse_time_to_edit($ms) {

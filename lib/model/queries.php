@@ -667,7 +667,7 @@ function getSegmentsInfo( $jid, $password ) {
 	$query = "select j.id as jid, j.id_project as pid,j.source,j.target,
 		j.last_opened_segment, j.id_translator as tid, j.id_tms, j.id_mt_engine,
 		p.id_customer as cid, j.id_translator as tid, j.status_owner as status,
-		j.owner as job_owner,
+		j.owner as job_owner, j.create_date,
 
 		j.job_first_segment, j.job_last_segment,
 		j.new_words, j.draft_words, j.translated_words, j.approved_words, j.rejected_words,
@@ -697,14 +697,14 @@ function getSegmentsInfo( $jid, $password ) {
 
 function getFirstSegmentId( $jid, $password ) {
 
-	$query   = "select s.id as sid
-		from segments s
-		inner join files_job fj on s.id_file = fj.id_file
-		inner join jobs j on j.id=fj.id_job
-		where fj.id_job=$jid and j.password='$password'
-		and s.show_in_cattool=1
-		order by s.id
-		limit 1
+	$query   = "SELECT s.id as sid
+                FROM segments s
+                INNER JOIN files_job fj ON s.id_file = fj.id_file
+                INNER JOIN jobs j ON j.id = fj.id_job
+                WHERE fj.id_job = $jid AND j.password = '$password'
+                AND s.show_in_cattool=1
+                ORDER BY s.id
+                LIMIT 1
 		";
 	$db      = Database::obtain();
 	$results = $db->fetch_array( $query );
@@ -2558,6 +2558,8 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
 		if ( ( $test > 1 ) && ( $undo == 1 ) ) {
 			$cases = '';
 			$ids   = '';
+
+            //help!!!
 			foreach ( $arStatus as $item ) {
 				$ss = explode( ':', $item );
 				$cases .= " when id=$ss[0] then '$ss[1]'";
@@ -2620,18 +2622,6 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
         $db->query( $query_for_translations );
 
 	}
-	/*
-	   if ($res == "prj") {
-	   $query = "update jobs set status='cancelled' where id_project=$id";
-	   } else {
-	   $query = "update jobs set status='cancelled' where id=$id";
-	   }
-	 */
-	//    $query = "update jobs set disabled=1 where id=$id";
-
-	//$db = Database::obtain();
-
-//	$db->query( $query );
 
 }
 
@@ -3039,6 +3029,9 @@ function setJobCompleteness( $jid, $is_completed ) {
 
 /**
  * Given an array of job IDs, this function returns the IDs of archivable jobs
+ *
+ * USE IN CRON
+ *
  * @param array $jobs
  * @return array
  */
@@ -3079,4 +3072,14 @@ function getArchivableJobs($jobs = array()){
 	}
 
 	return $results;
+}
+
+function getLastTranslationDate( $jid ){
+    $query = "SELECT
+                IFNULL( MAX(translation_date), DATE('1970-01-01') ) AS last_translation_date
+                FROM segment_translations
+                WHERE id_job = %u";
+    $db    = Database::obtain();
+    $res = $db->query_first( sprintf( $query, $jid ) );
+    return $res['last_translation_date'];
 }
