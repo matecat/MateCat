@@ -136,8 +136,8 @@ class catController extends viewController {
 		}
 
         /*
-         * I prefer to use a programmatic approach to the check for the archive date because
-         * the query to check "Utils::getArchivableJobs($this->jid)" should be
+         * I prefer to use a programmatic approach to the check for the archive date instead of a pure query
+         * because the query to check "Utils::getArchivableJobs($this->jid)" should be
          * executed every time a job is loaded ( F5 or CTRL+R on browser ) and it cost some milliseconds ( ~0.1s )
          * and it is little heavy for the database.
          * We use the data we already have from last query and perform
@@ -146,7 +146,7 @@ class catController extends viewController {
          */
         $createDate = new DateTime( $data[0]['create_date'] );
         $oneMonthAgo = new DateTime();
-        $oneMonthAgo->modify( '-' . INIT::$JOB_ARCHIVABILITY_THRESHOLD . ' days' );
+        $oneMonthAgo->modify( '-' . INIT::JOB_ARCHIVABILITY_THRESHOLD . ' days' );
 
         if( $createDate < $oneMonthAgo  && !$this->job_cancelled ) {
 
@@ -343,7 +343,7 @@ class catController extends viewController {
         $this->template->build_number           = INIT::$BUILD_NUMBER;
         $this->template->downloadFileName       = $this->downloadFileName;
         $this->template->job_not_found          = $this->job_not_found;
-        $this->template->job_archived           = ( $this->job_archived ) ? INIT::$JOB_ARCHIVABILITY_THRESHOLD : '';
+        $this->template->job_archived           = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
         $this->template->job_cancelled          = $this->job_cancelled;
         $this->template->logged_user            = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
         $this->template->incomingUrl            = '/login?incomingUrl=' . $this->thisUrl;

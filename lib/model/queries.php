@@ -790,7 +790,10 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ){
 
 	$db = Database::obtain();
 
-	if( $sid != null ){
+    $st_translated = Constants_TranslationStatus::STATUS_TRANSLATED;
+    $st_approved      = Constants_TranslationStatus::STATUS_APPROVED;
+
+    if( $sid != null ){
 
 		/**
 		 * Get all the available translations for this segment id,
@@ -810,7 +813,7 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ){
 				WHERE segment_hash = (
 					SELECT segment_hash FROM segments WHERE id = %u
 				)
-				AND segment_translations.status IN( 'TRANSLATED' ) -- , 'APPROVED' )
+				AND segment_translations.status IN( '$st_translated' ) -- , '$st_approved' )
 				AND id_job = %u
 				AND id_segment != %u
 				GROUP BY translation, CONCAT( id_job, '-', password )
@@ -838,7 +841,7 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ){
 				FROM segment_translations
 				JOIN jobs ON id_job = id AND id_segment between jobs.job_first_segment AND jobs.job_last_segment
 				WHERE id_job = %u
-				AND segment_translations.status IN( 'TRANSLATED' ) -- , 'APPROVED' )
+				AND segment_translations.status IN( '$st_translated' ) -- , '$st_approved' )
 				GROUP BY segment_hash, CONCAT( id_job, '-', password )
 				HAVING translations_available > 1
 		";
@@ -970,16 +973,20 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
 
     $db = Database::obtain();
 
+    $st_translated = Constants_TranslationStatus::STATUS_TRANSLATED;
+    $st_new        = Constants_TranslationStatus::STATUS_NEW;
+    $st_draft      = Constants_TranslationStatus::STATUS_DRAFT;
+
     $q = array();
     foreach ( $params as $key => $value ) {
         if( $key == 'status' ){
 
             if( $propagateToTranslated ){
-                $q[ ]      = $key . " = IF( status = 'TRANSLATED' , 'TRANSLATED', '" . $db->escape( $value ) . "' )";
-                $andStatus = "AND status IN ( 'DRAFT', 'NEW', 'REJECTED', 'TRANSLATED' )";
+                $q[ ]      = $key . " = IF( status = '$st_translated' , '$st_translated', '" . $db->escape( $value ) . "' )";
+                $andStatus = "AND status IN ( '$st_draft', '$st_new', '$st_translated' )";
             } else {
                 $q[ ]      = $key . " = '" . $db->escape( $value ) . "'";
-                $andStatus = "AND status IN ( 'DRAFT', 'NEW', 'REJECTED' )";
+                $andStatus = "AND status IN ( '$st_draft', '$st_new' )";
             }
 
         } elseif ( is_bool( $value ) ) {
@@ -3040,12 +3047,12 @@ function getArchivableJobs($jobs = array()){
                     GROUP BY id_job
                 ) AS SBS
                 ON SBS.id_job = j.id
-                AND IFNULL( SBS.translation_date, date( '1970-01-01' ) ) < ( curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD." day  )
+                AND IFNULL( SBS.translation_date, DATE( '1970-01-01' ) ) < ( curdate() - INTERVAL " . INIT::JOB_ARCHIVABILITY_THRESHOLD . " DAY  )
            WHERE
-                j.status_owner = 'active'
-                AND j.create_date < ( curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD." day )
-                AND j.status = 'active'
-                GROUP BY j.id";
+                j.status_owner = '" . Constants_JobStatus::STATUS_ACTIVE . "'
+                AND j.create_date < ( curdate() - INTERVAL " . INIT::JOB_ARCHIVABILITY_THRESHOLD . " DAY )
+                AND j.status = '" . Constants_JobStatus::STATUS_ACTIVE . "'
+           GROUP BY j.id, j.password";
 
 	$results = $db->fetch_array(
 	              sprintf(
@@ -3058,7 +3065,7 @@ function getArchivableJobs($jobs = array()){
 	$errno   = $err[ 'error_code' ];
 
 	if ( $errno != 0 ) {
-		log::doLog( "$errno: " . var_export( $err, true ) );
+		Log::doLog( "$errno: " . var_export( $err, true ) );
 
 		return $errno * -1;
 	}
@@ -3074,4 +3081,56 @@ function getLastTranslationDate( $jid ){
     $db    = Database::obtain();
     $res = $db->query_first( sprintf( $query, $jid ) );
     return $res['last_translation_date'];
+}
+
+function getMaxJobUntilDaysAgo( $days = INIT::JOB_ARCHIVABILITY_THRESHOLD ){
+
+    $last_id_query = "
+            SELECT
+                MAX(id) AS max
+            FROM jobs
+            WHERE create_date < ( curdate() - interval " . INIT::JOB_ARCHIVABILITY_THRESHOLD . " DAY )
+            AND status_owner = '" . Constants_JobStatus::STATUS_ACTIVE . "'";
+
+    $db = Database::obtain();
+    $last_id = $db->query_first($last_id_query);
+    $last_id = (int)$last_id['max'];
+    return $last_id;
+
+}
+
+function batchArchiveJobs( $jobs = array(), $days = INIT::JOB_ARCHIVABILITY_THRESHOLD ){
+
+    $query_archive_jobs = "
+        UPDATE jobs
+            SET status_owner = '" . Constants_JobStatus::STATUS_ARCHIVED . "'
+            WHERE %s
+            AND create_date < ( curdate() - INTERVAL %u DAY )";
+
+    $tuple_of_double_indexes = array();
+    foreach ( $jobs as $job ){
+        $tuple_of_double_indexes[] = sprintf( "( id = %u AND password = '%s' )", $job['id'], $job['password'] );
+    }
+
+    $q_archive = sprintf(
+            $query_archive_jobs,
+            implode( " OR ", $tuple_of_double_indexes ),
+            $days
+    );
+
+    $db = Database::obtain();
+    $db->query($q_archive);
+
+//    Log::doLog( $q_archive );
+
+    $err     = $db->get_error();
+    $errno   = $err[ 'error_code' ];
+
+    if ( $errno != 0 ) {
+        Log::doLog( "$errno: " . var_export( $err, true ) );
+        return $errno * -1;
+    }
+
+    return $db->affected_rows;
+
 }

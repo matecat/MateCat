@@ -3,99 +3,50 @@ ini_set("memory_limit","2048M");
 set_time_limit(0);
 include_once 'main.php';
 
+Log::$fileName = "archive_jobs.log";
 Log::doLog("[ARCHIVEJOBS] started");
-Log::doLog("[ARCHIVEJOBS] inactivity days threshold: ". INIT::$JOB_ARCHIVABILITY_THRESHOLD);
-$db = Database::obtain();
+Log::doLog("[ARCHIVEJOBS] inactivity days threshold: ". INIT::JOB_ARCHIVABILITY_THRESHOLD );
 
-$last_id_query = "select max(id) as max from jobs";
+//select last max before INIT::JOB_ARCHIVABILITY_THRESHOLD days ago
+//with status not archived so we skip them in the next cycle
+$last_id = getMaxJobUntilDaysAgo( INIT::JOB_ARCHIVABILITY_THRESHOLD );
 
-$last_id = $db->query_first($last_id_query);
-$last_id = (int)$last_id['max'];
+Log::doLog("[ARCHIVEJOBS] last job id is: " . $last_id );
 
-Log::doLog("[ARCHIVEJOBS] last job id is: ".$last_id);
-
-
-//WRONG!!!!!
-$query_select_jobs =
-	"select
-		j.id as jid
-	from
-		jobs j join
-		segment_translations st on j.id = st.id_job
-		and j.create_date < (curdate() - interval %d day)
-	where
-		j.status_owner = '" . Constants_JobStatus::STATUS_ACTIVE . "'
-		and j.id between %d and %d
-	group by j.id
-	having max(coalesce(translation_date, '1999-01-01 00:00:00' )) < (curdate() - interval %d  day)";
-
-//WRONG: USE queries.php
-$query_archive_jobs =
-	"update jobs
-	set status_owner = '" . Constants_JobStatus::STATUS_ARCHIVED . "'
-	where id in (%s)
-	and create_date < (curdate() - interval %d day)
-	and status_owner = '" . Constants_JobStatus::STATUS_ACTIVE . "'";
-
-//number of rows to be selected for each query
-$row_interval = 5000;
+//number of rows to be selected for each query,
+//after some tests,decide to set the upper bound to 100
+$row_interval = 100;
 
 for($i = 1; $i <= $last_id; $i += $row_interval){
 
 	Log::doLog("[ARCHIVEJOBS] searching jobs between $i and ".($i + $row_interval));
 
-	//compose select query
-	$q = sprintf(
-		$query_select_jobs,
-		INIT::$JOB_ARCHIVABILITY_THRESHOLD,
-		$i,
-		$i + $row_interval,
-		INIT::$JOB_ARCHIVABILITY_THRESHOLD
-	);
-	echo $q."\n";
-	//select archivable jobs
-	$jobs = $db->fetch_array($q);
+    //check for jobs with no new segment translations and take them
+    $jobs = getArchivableJobs( range( $i, $i + $row_interval ) );
 
-	$err     = $db->get_error();
-	$errno   = $err[ 'error_code' ];
-
-	if ( $errno != 0 ) {
-		Log::doLog( "[ARCHIVEJOBS] $errno: " . var_export( $err, true ) );
+	if ( $jobs < 0 ) {
 		Log::doLog( "[ARCHIVEJOBS] skipping batch.." );
 		continue;
 	}
 
-	//get job IDs
-	if($jobs !== false){
-		foreach($jobs as $k=>$job){
-			$jobs[$k] = (int)$job['jid'];
-		}
-	}
+    $jobsToBeArchived = count($jobs);
 
-	$jobsToBeArchived = count($jobs);
+    if( $jobsToBeArchived == 0){
+		Log::doLog("[ARCHIVEJOBS] " . $jobsToBeArchived . " found. Skipping batch.");
+	} else {
 
+        Log::doLog( "[ARCHIVEJOBS] " . $jobsToBeArchived . " found." );
 
-	if( $jobsToBeArchived == 0){
-		Log::doLog("[ARCHIVEJOBS] ".count($jobs)." found. Skipping batch.");
-	}
-	else{
-		Log::doLog("[ARCHIVEJOBS] ".count($jobs)." found.");
-		$q_archive = sprintf(
-			$query_archive_jobs,
-			implode(", ", $jobs),
-			INIT::$JOB_ARCHIVABILITY_THRESHOLD
-		);
+        $ret = batchArchiveJobs( $jobs, INIT::JOB_ARCHIVABILITY_THRESHOLD );
 
-		//file_put_contents(INIT::$LOG_REPOSITORY."/archive_queries.txt", $q_archive."\n", FILE_APPEND);
-		//file_put_contents(INIT::$LOG_REPOSITORY."/archive_queries.txt", "=============\n", FILE_APPEND);
-
-		$db->query($q_archive);
-
-		Log::doLog("[ARCHIVEJOBS] ".$db->affected_rows." jobs successfully archived");
+        if( $ret >= 0 ){
+            Log::doLog("[ARCHIVEJOBS] " . $ret . " jobs successfully archived");
+        } else {
+            Log::doLog("[ARCHIVEJOBS] FAILED !!!");
+        }
 
 	}
 
-	sleep(2);
 }
 
 Log::doLog("[ARCHIVEJOBS] Goodbye");
