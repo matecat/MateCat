@@ -33,7 +33,7 @@ class RecursiveArrayObject extends ArrayObject {
      *
      * @return string
      */
-    public function __ToString() {
+    public function __toString() {
         return 'Array';
     }
 

@@ -193,25 +193,27 @@ class MyMemory {
 		return mb_convert_encoding('&#' . intval($u) . ';', 'UTF-8', 'HTML-ENTITIES');
 	}
 
-	public static function diff($old, $new) {
-		$maxlen = 0;
-		foreach ($old as $oindex => $ovalue) {
-			$nkeys = array_keys($new, $ovalue);
-			foreach ($nkeys as $nindex) {
-				$matrix[$oindex][$nindex] = isset($matrix[$oindex - 1][$nindex - 1]) ?
-					$matrix[$oindex - 1][$nindex - 1] + 1 : 1;
-				if ($matrix[$oindex][$nindex] > $maxlen) {
-					$maxlen = $matrix[$oindex][$nindex];
-					$omax = $oindex + 1 - $maxlen;
-					$nmax = $nindex + 1 - $maxlen;
-				}
-			}
-		}
-		if ($maxlen == 0)
-			return array(array('d' => $old, 'i' => $new));
-		return array_merge(
-				self::diff(array_slice($old, 0, $omax), array_slice($new, 0, $nmax)), array_slice($new, $nmax, $maxlen), self::diff(array_slice($old, $omax + $maxlen), array_slice($new, $nmax + $maxlen)));
-	}
+    public static function diff( $old, $new ) {
+        $maxlen = 0;
+        foreach ( $old as $oindex => $ovalue ) {
+            $nkeys = array_keys( $new, $ovalue );
+            foreach ( $nkeys as $nindex ) {
+                $matrix[ $oindex ][ $nindex ] = isset( $matrix[ $oindex - 1 ][ $nindex - 1 ] ) ?
+                        $matrix[ $oindex - 1 ][ $nindex - 1 ] + 1 : 1;
+                if ( $matrix[ $oindex ][ $nindex ] > $maxlen ) {
+                    $maxlen = $matrix[ $oindex ][ $nindex ];
+                    $omax   = $oindex + 1 - $maxlen;
+                    $nmax   = $nindex + 1 - $maxlen;
+                }
+            }
+        }
+        if ( $maxlen == 0 ) {
+            return array( array( 'd' => $old, 'i' => $new ) );
+        }
+
+        return array_merge(
+                self::diff( array_slice( $old, 0, $omax ), array_slice( $new, 0, $nmax ) ), array_slice( $new, $nmax, $maxlen ), self::diff( array_slice( $old, $omax + $maxlen ), array_slice( $new, $nmax + $maxlen ) ) );
+    }
 
 	public static function diff_tercpp($old,$new,$lang = 'en' ){
 		//$res=shell_exec("/bin/tercpp.0.6.2 --noTxtIds --printDifferenceToHtmlToSTDO  -s  -rSent \"$old\" -hSent \"$new\" 2>&1");
@@ -281,17 +283,51 @@ class MyMemory {
 			}
 		}
 
-		$diff = self::diff($old_array, $new_array);
+        $diff = self::diff( $old_array, $new_array );
 
-		$ret = '';
-		foreach ($diff as $k) {
-			if (is_array($k))
-				$ret .= (!empty($k['d']) ? "<strike><span style=\"color:red;\">" . implode($sep, $k['d']) . "</span></strike>$sep" : $sep) .
-					(!empty($k['i']) ? "<span style=\"color:blue\">" . implode($sep, $k['i']) . "</span>$sep" : $sep);
-			else
-				$ret .= $k . $sep;
-		}
+        $array_patterns     = array(
+                "/&#x0A;/",
+                "/&#x0D;/",
+                "/&#x0D;&#x0A;/",
+                "/&#x09;/",
+                "/&#xA0;|&#nbsp;/",
+        );
+
+        $array_replacements = array(
+                '<span class="_0A"></span><br />',
+                '<span class="_0D"></span><br />',
+                '<span class="_0D0A"></span><br />',
+                '<span class="_tab">&#9;</span>',
+                '<span class="_nbsp">&nbsp;</span>',
+        );
+
+        $ret = '';
+        foreach ( $diff as $k ) {
+
+            if ( is_array( $k ) ) {
+
+                $k['d'] = preg_replace( $array_patterns, $array_replacements, $k['d'] );
+                $k['i'] = preg_replace( $array_patterns, $array_replacements, $k['i'] );
+
+                $ret .= ( !empty( $k[ 'd' ] ) ? "<strike><span style=\"color:red;\">" . implode( $sep, $k[ 'd' ] ) . "</span></strike>$sep" : $sep ) .
+                        ( !empty( $k[ 'i' ] ) ? "<span style=\"color:blue\">" . implode( $sep, $k[ 'i' ] ) . "</span>$sep" : $sep );
+            } else {
+
+                $k = preg_replace( $array_patterns, $array_replacements, $k );
+                $ret .= $k . $sep;
+            }
+        }
 		return $ret;
 	}
+
+    private static function placehold_xml_entities($segment) {
+        $pattern ="|&#(.*?);|";
+        $res=preg_replace($pattern,"<x id=\"XMLENT$1\"/>",$segment);
+        return $res;
+    }
+
+    public static function restore_xml_entities($segment) {
+        return preg_replace ("|<x id=\"XMLENT(.*?)\"/>|","&#$1",$segment);
+    }
 
 }

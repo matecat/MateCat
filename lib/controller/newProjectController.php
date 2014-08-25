@@ -187,12 +187,12 @@ class newProjectController extends viewController {
 		$source_languages=$this->lang_handler->getEnabledLanguages( 'en' );
 
         $target_languages = $this->lang_handler->getEnabledLanguages( 'en' );
-        foreach ( $target_languages as $k => $v ) {
-            //if (in_array($v['code'],array('ko-KR', 'zh-CN','zh-TW','ja-JP'))){
-            if ( in_array( $v[ 'code' ], array( 'ja-JP' ) ) ) {
-                unset ( $target_languages[ $k ] );
-            }
-        }
+//        foreach ( $target_languages as $k => $v ) {
+//            //if (in_array($v['code'],array('ko-KR', 'zh-CN','zh-TW','ja-JP'))){
+//            if ( in_array( $v[ 'code' ], array( 'ja-JP' ) ) ) {
+//                unset ( $target_languages[ $k ] );
+//            }
+//        }
 
 		$this->template->source_languages          = $source_languages;
 		$this->template->target_languages          = $target_languages;

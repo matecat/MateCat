@@ -61,9 +61,9 @@ class INIT {
 	public static $CONFIG_VERSION_ERR_MESSAGE;
 
     /**
-	 * @var $JOB_ARCHIVABILITY_THRESHOLD int number of days of inactivity for a job before it's automatically archived
+	 * @const JOB_ARCHIVABILITY_THRESHOLD int number of days of inactivity for a job before it's automatically archived
 	 */
-	public static $JOB_ARCHIVABILITY_THRESHOLD;
+	const JOB_ARCHIVABILITY_THRESHOLD = 30;
 
     /**
      * ENABLE_OUTSOURCE set as true will show the option to outsource to an external translation provider (translated.net by default)
@@ -75,41 +75,6 @@ class INIT {
      */
     public static $ENABLE_OUTSOURCE = true;
 
-
-
-
-
-	private function initOK() {
-
-		$flagfile = ".initok.lock";
-		if (file_exists($flagfile)) {
-			return true;
-		}
-		$errors = "";
-		if (self::$DB_SERVER == "@ip address@") {
-			$errors.="\$DB_SERVER not initialized\n";
-		}
-
-		if (self::$DB_USER == "@username@") {
-			$errors.="\$DB_USER not initialized\n";
-		}
-
-		if (self::$DB_PASS == "@password@") {
-			$errors.="\$DB_PASS not initialized\n";
-		}
-
-
-		if (empty($errors)) {
-			touch($flagfile);
-			return true;
-		} else {
-
-			echo "<pre>
-				APPLICATION INIT ERROR : \n
-				$errors\n";
-			return false;
-		}
-	}
 
 	public static function obtain() {
 		if (!self::$instance) {
@@ -266,7 +231,7 @@ class INIT {
         self::$CONVERSION_ENABLED = false;
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-		self::$BUILD_NUMBER = '0.3.4.6';
+		self::$BUILD_NUMBER = '0.4.0';
 		self::$VOLUME_ANALYSIS_ENABLED = true;
 
         self::$FORCE_XLIFF_CONVERSION = false;
@@ -393,7 +358,6 @@ class INIT {
 
 	    self::$CONFIG_VERSION_ERR_MESSAGE = "Your config.ini.php file is not up-to-date.";
 
-	    self::$JOB_ARCHIVABILITY_THRESHOLD = 30;
 	}
 
     public static function fatalErrorHandler() {
