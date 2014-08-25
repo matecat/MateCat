@@ -128,6 +128,9 @@ class downloadFileController extends downloadController {
             //prepend a string so non-trans unit id ( ex: numerical ) are not overwritten
             foreach ( $data as $i => $k ) {
                 $data[ 'matecat|' . $k[ 'internal_id' ] ][ ] = $i;
+                //FIXME: temporary patch
+                $data[$i]['translation'] = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[$i]['translation'] );
+                $data[$i]['segment'] = str_replace( '<x id="nbsp"/>', '&#xA0;', $data[$i]['segment'] );
             }
 
             $debug['replace'][] = time();
@@ -145,9 +148,9 @@ class downloadFileController extends downloadController {
 
             $output_content[ $id_file ][ 'content' ]  = $output_xliff;
             $output_content[ $id_file ][ 'filename' ] = $current_filename;
+            unset( $output_xliff );
 
-			if ( $this->forceXliff )
-			{
+			if ( $this->forceXliff ) {
 				$file_info_details = pathinfo( $output_content[ $id_file ][ 'filename' ] );
 				$output_content[ $id_file ][ 'filename' ] = $file_info_details[ 'filename' ] . ".out.sdlxliff";
 			}
@@ -167,11 +170,10 @@ class downloadFileController extends downloadController {
                 // we already have an sdlxliff or an accepted file
                 $file['original_file'] = @gzinflate( $file['original_file'] );
 
-                if( !INIT::$CONVERSION_ENABLED || ( empty( $file['original_file'] ) && $mime_type == 'sdlxliff' ) || $this->forceXliff ){
+                if( !INIT::$CONVERSION_ENABLED || ( empty( $file['original_file'] ) && $mime_type == 'sdlxliff' ) || $this->force_xliff ){
                     $convertBackToOriginal = false;
                     Log::doLog( "SDLXLIFF: {$file['filename']} --- " . var_export( $convertBackToOriginal , true ) );
-                }
-                else {
+                } else {
                     //dos2unix ??? why??
                     //force unix type files
 //                    $output_content[$id_file]['content'] = CatUtils::dos2unix( $output_content[$id_file]['content'] );
@@ -192,6 +194,7 @@ class downloadFileController extends downloadController {
                 $debug[ 'do_conversion' ][ ] = time();
                 $convertResult = $converter->convertToOriginal( $output_content[ $id_file ], $chosen_machine = false );
                 $output_content[ $id_file ][ 'content' ] = $convertResult[ 'documentContent' ];
+                unset( $convertResult );
                 $debug[ 'do_conversion' ][ ] = time();
 
             }
@@ -207,11 +210,11 @@ class downloadFileController extends downloadController {
         if ( count( $output_content ) > 1 ) {
 
             if ( $pathinfo[ 'extension' ] != 'zip' ) {
-		    if ($this->forceXliff){
-			    $this->filename = $this->id_job . ".zip";
-		    }else{
-			    $this->filename = $pathinfo[ 'basename' ] . ".zip";
-		    }
+                if ($this->forceXliff){
+                    $this->filename = $this->id_job . ".zip";
+                } else {
+                    $this->filename = $pathinfo[ 'basename' ] . ".zip";
+                }
             }
 
             $this->composeZip( $output_content, $jobData[ 'source' ] ); //add zip archive content here;

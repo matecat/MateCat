@@ -351,14 +351,15 @@ class getContributionController extends ajaxController {
             $data[ 'suggestion' ]          = $match[ 'raw_translation' ];
             $data[ 'suggestion_source' ]   = $match[ 'created_by' ];
             $data[ 'mt_qe' ]               = $mt_qe;
+            $data[ 'suggestion_match' ]    = str_replace( '%', '', $match['match'] );
 
             $where = " id_segment= " . (int)$this->id_segment . " and id_job = " . (int)$this->id_job . " and status = 'NEW' ";
 
             $db = Database::obtain();
             $db->update( 'segment_translations', $data, $where );
 
-            //Log::doLog($data);
-            //Log::doLog($where);
+//            Log::doLog($data);
+//            Log::doLog($where);
 
             $err   = $db->get_error();
             $errno = $err[ 'error_code' ];

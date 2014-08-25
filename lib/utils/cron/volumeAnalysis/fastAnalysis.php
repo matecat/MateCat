@@ -2,7 +2,6 @@
 ini_set("memory_limit","2048M");
 set_time_limit(0);
 include_once 'main.php';
-include_once INIT::$UTILS_ROOT . "/MyMemoryAnalyzer.copyrighted.php";
 
 /* Write my pid to a file */
 $my_pid = getmypid();
@@ -70,6 +69,8 @@ while (1) {
 		echo "collecting stats...";
 		Log::doLog( "done" );
 		Log::doLog( "collecting stats..." );
+        echo "fast $pid result: " . count($fastReport['data'])  . " segments\n";
+        Log::doLog( "fast $pid result: " . count($fastReport['data'])  . " segments" );
 
         $data = $fastReport[ 'data' ];
         foreach ( $data as $k => $v ) {
@@ -132,4 +133,3 @@ while (1) {
 		Log::doLog( "done" );
 	}
 }
-?>

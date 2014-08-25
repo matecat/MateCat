@@ -365,4 +365,3 @@ function compareScore($a, $b) {
     return ( floatval($a['match']) < floatval($b['match']) ? 1 : -1); //SORT DESC !!!!!!! INVERT MINUS SIGN
     //this is necessary since usort sorts is ascending order, thus inverting the ranking
 }
-?>

@@ -9,9 +9,6 @@ RewriteEngine On
 #RewriteRule $ /offline.html [R=307,L]
 
 
-RewriteCond %{HTTP_HOST} privateoauth.translated.net$ [NC]
-RewriteRule ^(.*)$ http://matecat.local/$1 [L,R=301]
-
 RewriteRule ^$ index.php?action=newProject [QSA,L]
 
 RewriteRule ^(translate)[/]?$ index.php?action=cat [L]
@@ -26,7 +23,7 @@ RewriteRule ^(statistics)[/]?$ index.php?action=projectStatistics [L]
 RewriteRule ^(login)[/]?$ index.php?action=loginPage [L,QSA]
 RewriteRule ^(ajaxLogin)[/]?$ index.php?action=formLogin [L,QSA]
 
-RewriteRule ^(badConfiguration)[/]?$ lib/view/badConfiguration.html [L]
+RewriteRule ^(badConfiguration)[/]?$ index.php?action=badConfiguration [L]
 RewriteRule ^(configMissing)[/]?$ lib/view/configMissing.html [L]
 
 #RewriteRule ^(oauth)/(request)[/]?$ index.php?action=oauthRequestInitializer [L,QSA]
@@ -39,7 +36,7 @@ RewriteRule ^(editlog)/([^/]*)-([^/]*)/?$ index.php?action=editlog&jid=$2&passwo
 RewriteRule ^(referenceFile)/([^/]*)/([^/]*)/([^/]*)?$ index.php?action=referenceFile&job_id=$2&job_password=$3&segment_id=$4 [L]
 
 RewriteRule ^api/docs$ lib/view/APIDoc.php [L]
-RewriteRule ^(api)[/]?([^/]*)?$ index.php?api=true&action=$2 [QSA,L]
+RewriteRule ^(api)[/]?([^/]*)?[/]?$ index.php?api=true&action=$2 [QSA,L]
 
 </IfModule>
 

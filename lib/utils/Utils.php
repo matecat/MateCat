@@ -269,24 +269,9 @@ class Utils {
 
     }
 
-	/**
-	 * @author Roberto
-	 * @param array $jobs an array of job IDs (integers)
-	 * @return array|bool An array of archivable job IDs or false in case of error
-	 */
-	public static function getArchivableJobs($jobs = array()){
-		if(!is_array($jobs) && !is_numeric($jobs)) return false;
-
-		if(is_numeric($jobs)) $jobs = array($jobs);
-
-		$jobs = getArchivableJobs($jobs);
-
-		if($jobs !== false){
-			foreach($jobs as $i=>$job){
-				$jobs[$i] = (int)$job['id'];
-			}
-		}
-		return $jobs;
+	public static function filterLangDetectArray($arr){
+		usleep(1);
+		return filter_var( $arr, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW ) );
 	}
 
 }

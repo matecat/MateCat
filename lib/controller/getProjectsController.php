@@ -31,7 +31,7 @@ class getProjectsController extends ajaxController {
 		if (isset($_POST['step'])) {
 			$this->step = $_POST['step'];
 		} else {
-			$this->step = 100;
+			$this->step = 25;
 		};
 
 		if (isset($_POST['project'])) {
@@ -67,7 +67,7 @@ class getProjectsController extends ajaxController {
 		if (isset($_POST['status'])) {
 			$this->search_status = $_POST['status'];
 		} else {
-			$this->search_status = 'active';
+			$this->search_status = Constants_JobStatus::STATUS_ACTIVE;
 		};
 
 		if (isset($_POST['onlycompleted'])) {

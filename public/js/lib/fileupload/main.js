@@ -116,22 +116,19 @@ UI = {
 	},
 
 	createKeyByTMX: function() {
-		if($('#create_private_tm_btn[data-key]').length) { // a key has already been created
+		if($('#create_private_tm_btn[data-key]').length || $('#private-tm-key').val().length ) { // a key has already been created
 			console.log('già cliccato');
-			if($('#private-tm-key').text() == '') {
+			if($('#private-tm-key').val() == '') {
 				$('#private-tm-key').val($('#create_private_tm_btn').attr('data-key'));
 			}
 		} else {
             console.log('questo');
 		   if(!$(".more").hasClass('minus')) $(".more").trigger('click');
 		   $('#create_private_tm_btn').trigger('click');
+           $('.warning-message').html('<span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.<br/>If you do not use a Private TM Key, the content of your TMX will be saved in a public TM</span>').show();
 //		   $('#private-tm-key').addClass('selected');			 
 //		   $('#private-tm-key').addClass('selected').effect( "pulsate", "slow" );			 
 		}
-
-		$('.warning-message').html('<span>You are uploading a translation memory. A private TM key has been automatically generated. <br /> If you already own a private TM key you can override it.' +
-            '<br />If you empty the Private TM key field and not provide a valid TM key, the content of your TMX file and project will be available to all MateCat users.</span>').show();
-		
 	},
 
     checkFailedConversionsNumber: function() {
@@ -290,6 +287,17 @@ $(function () {
 	}).bind('fileuploaddestroyed', function (e,data) {
 //		var err = $.parseJSON(data.jqXHR.responseText)[0].error;
         console.log('file deleted');
+
+		var deletedFileName = data.url.match(/file=[^&]*/g);
+		deletedFileName = decodeURIComponent(deletedFileName[0].replace("file=",""));
+
+		console.log(skipLangDetectArr, deletedFileName, typeof( skipLangDetectArr[deletedFileName] ));
+
+		if(typeof( skipLangDetectArr[deletedFileName] ) !== 'undefined' ){
+			console.log(skipLangDetectArr);
+			delete skipLangDetectArr[deletedFileName];
+		}
+
         if($('.error-message.no-more').length) {
 
 			if($('.upload-table tr').length < (config.maxNumberFiles)) {
@@ -661,7 +669,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
        		return false;
         },
         success: function(d){
-//              console.log(this.context);
+
 //			falsePositive = ((typeof this.context == 'undefined')||(!this.context))? false : true; // suggested solution
 			falsePositive = (typeof this.context == 'undefined')? false : true; // old solution
             filerow.removeClass('converting');
@@ -678,6 +686,8 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 				$('.progress',filerow).fadeOut('slow', function() {
 					// Animation complete.
 				});
+
+				skipLangDetectArr[fname] = 'detect';
            	} else if( d.code < 0 ){
                 console.log(d.errors[0].message);
                 $('td.size',filerow).next().addClass('error').empty().attr('colspan','2').css({'font-size':'14px'}).append('<span class="label label-important">'+d.errors[0].message+'</span>');

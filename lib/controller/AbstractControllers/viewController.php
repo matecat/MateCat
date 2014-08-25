@@ -222,7 +222,7 @@ abstract class viewController extends controller {
         $browser_name = strtolower( $browser_info[ 'name' ] );
 
         foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
-            if ( stripos( $browser_name, $enabled_browser ) !== false ) {
+            if ( stripos( $browser_name, $enabled_browser ) !== false || 1) {
                 return 1;
             }
         }

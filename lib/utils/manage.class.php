@@ -111,11 +111,15 @@ class ManageUtils {
 
                 $job['private_tm_key'] = $job_array[6];
 
-				$job['disabled']= ($job_array[7]=='cancelled')?"disabled":"";
+				$job['disabled']= ( $job_array[7] == Constants_JobStatus::STATUS_CANCELLED )?"disabled":"";
 				$job['status']= $job_array[7];
-				if($job_array[7]!='cancelled') $project['no_active_jobs'] = false;
-				$project['has_cancelled']=($job['status'] == 'cancelled')? 1 : $project['has_cancelled'];
-				$project['has_archived']=($job['status'] == 'archived')? 1 : $project['has_archived'];
+
+                if ( $job_array[ 7 ] != Constants_JobStatus::STATUS_CANCELLED ) {
+                    $project[ 'no_active_jobs' ] = false;
+                }
+
+                $project[ 'has_cancelled' ] = ( $job[ 'status' ] == Constants_JobStatus::STATUS_CANCELLED ) ? 1 : $project[ 'has_cancelled' ];
+                $project[ 'has_archived' ]  = ( $job[ 'status' ] == Constants_JobStatus::STATUS_ARCHIVED ) ? 1 : $project[ 'has_archived' ];
 
                 $tmp_job_4_ordering[ $job['id'] ][ $job['job_first_segment'] ] = $job;
 

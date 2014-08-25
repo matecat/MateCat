@@ -205,5 +205,3 @@ function setNumProcesses() {
     }
     return $num_processes;
 }
-
-?>

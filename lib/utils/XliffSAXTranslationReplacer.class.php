@@ -166,11 +166,17 @@ class XliffSAXTranslationReplacer{
 			}
 
 			//this logic helps detecting empty tags
-			//get current position of SAX pointer in all the stream of data is has read so far: it points at the end of current tag
+			//get current position of SAX pointer in all the stream of data is has read so far:
+            //it points at the end of current tag
             $idx = xml_get_current_byte_index( $parser );
-            //check wether the bounds of current tag are entirely in current buffer or the end of the current tag is outside current buffer (in the latter case, it's in next buffer to be read by the while loop); this check is necessary because we may have truncated a tag in half with current read, and the other half may be encountered in the next buffer it will be passed
+
+            //check wether the bounds of current tag are entirely in current buffer or the end of the current tag
+            //is outside current buffer (in the latter case, it's in next buffer to be read by the while loop);
+            //this check is necessary because we may have truncated a tag in half with current read,
+            //and the other half may be encountered in the next buffer it will be passed
             if ( isset( $this->currentBuffer[ $idx - $this->offset ] ) ) {
-                //if this tag entire lenght fitted in the buffer, the last char must be the last symbol before the '>'; if it's an empty tag, it is assumed that it's a '/'
+                //if this tag entire lenght fitted in the buffer, the last char must be the last
+                //symbol before the '>'; if it's an empty tag, it is assumed that it's a '/'
                 $tmp_offset = $idx - $this->offset;
                 $lastChar = $this->currentBuffer[ $idx - $this->offset ];
             } else {
@@ -314,8 +320,8 @@ class XliffSAXTranslationReplacer{
 	private function prepareSegment($seg,$transunit_translation = ""){
 		$end_tags = "";
 
-		$seg ['segment'] = CatUtils::restorenbsp ( $seg ['segment'] );
-		$seg ['translation'] = CatUtils::restorenbsp ( $seg ['translation'] );
+//		$seg ['segment'] = CatUtils::restorenbsp ( $seg ['segment'] );
+//		$seg ['translation'] = CatUtils::restorenbsp ( $seg ['translation'] );
 
         $seg ['segment'] = CatUtils::view2rawxliff( $seg ['segment'] );
         $seg ['translation'] = CatUtils::view2rawxliff ( $seg ['translation'] );
@@ -338,30 +344,13 @@ class XliffSAXTranslationReplacer{
 
 		}
 
-        //already useful after QA implementation?? Log to see if it is executed some times
-		@$xml_valid = simplexml_load_string("<placeholder>$translation</placeholder>");
-		if (!$xml_valid) {
-			$temp = preg_split("|\<|si", $translation);
-			$item = end($temp);
-			if (preg_match('|/.*?>\W*$|si', $item)) {
-				$end_tags.="<$item";
-			}
-			while ($item = prev($temp)) {
-				if (preg_match('|/.*?>\W*$|si', $item)) {
-					$end_tags = "<$item$end_tags"; //insert at the top of the string
-				}
-			}
-            Log::doLog( "simplexml_load_string validation of $translation" );
-			$translation = str_replace($end_tags, "", $translation);
-		}
-        //already useful after QA implementation??
-
-
 		if (!empty($seg['mrk_id'])) {
 			$translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">".$seg['mrk_prev_tags'].$translation.$seg['mrk_succ_tags']."</mrk>";
 		}
+
 		$transunit_translation.=$seg['prev_tags'] . $translation . $end_tags . $seg['succ_tags'];
 		return $transunit_translation;
+
 	}
 
 }

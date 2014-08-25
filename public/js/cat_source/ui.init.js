@@ -55,6 +55,7 @@ $.extend(UI, {
 		this.surveyDisplayed = false;
 		this.warningStopped = false;
 		this.abortedOperations = [];
+        this.propagationsAvailable = false;
 
 		/**
 		 * Global Warnings array definition.

@@ -282,10 +282,13 @@ UI = {
 		}
 
 	},
-	createHeader: function() {
-		if ($('h2.percentuage', this.currentSegment).length) {
-			return;
-		}
+    createHeader: function(forceCreation) {
+
+        forceCreation = forceCreation || false;
+
+        if ( $('h2.percentuage', this.currentSegment).length && !forceCreation ) {
+            return;
+        }
 		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="#" id="segment-' + this.currentSegmentId + '-close" class="close" title="Close this segment"></a><a href="/referenceFile/' + config.job_id + '/' + config.password + '/' + this.currentSegmentId + '" id="segment-' + this.currentSegmentId + '-context" class="context" title="Open context" target="_blank">Context</a>';
 		$('#' + this.currentSegment.attr('id') + '-header').html(header);
 
@@ -1366,6 +1369,7 @@ UI = {
 			this.processErrors(d.error, 'setCurrentSegment');
 		this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
 //		this.nextUntranslatedSegmentIdByServer = d.nextUntranslatedSegmentId;
+        this.propagationsAvailable = d.data.prop_available;
 		this.getNextSegment(this.currentSegment, 'untranslated');
 		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
 	},
@@ -1392,12 +1396,9 @@ UI = {
         sameContentIndex = -1;
         $.each(d.data.editable, function(ind) {
             //Remove trailing spaces for string comparison
-            console.log('this.translation: ' + this.translation);
-            console.log('UI.decodePlaceholdersToText(this.translation): ' + UI.decodePlaceholdersToText(this.translation));
-            console.log('UI.editarea.text(): ' + UI.editarea.text());
-            console.log("UI.editarea.text().replace( /[ \xA0]+$/ , '' ): " + UI.editarea.text().replace( /[ \xA0]+$/ , '' ));
-            console.log("rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) )" + rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ));
-            if( this.translation == rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) ) {
+//            console.log( "PostProcessEditArea: " + UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' ) );
+//            console.log( "SetCurrSegmentValue: " + this.translation );
+            if( this.translation == UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' ) ) {
                 sameContentIndex = ind;
             }
         });
@@ -1406,7 +1407,7 @@ UI = {
         sameContentIndex1 = -1;
         $.each(d.data.not_editable, function(ind) {
             //Remove trailing spaces for string comparison
-            if(this.translation == rawxliff2view( UI.editarea.text().replace( /[ \xA0]+$/ , '' ) ) ) sameContentIndex1 = ind;
+            if( this.translation == UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' ) ) sameContentIndex1 = ind;
         });
         if(sameContentIndex1 != -1) d.data.not_editable.splice(sameContentIndex1, 1);
 
@@ -1427,37 +1428,35 @@ UI = {
         }
     },
     renderAlternatives: function(d) {
-		console.log('renderAlternatives d: ', d);
+        console.log('renderAlternatives d: ', d);
 //		console.log($('.editor .submenu').length);
 //		console.log(UI.currentSegmentId);
         segment = UI.currentSegment;
         segment_id = UI.currentSegmentId;
         escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
         console.log('escapedSegment: ', escapedSegment);
+
+        function prepareTranslationDiff( translation ){
+            _str = translation.replace( config.lfPlaceholderRegex, "\n" )
+                    .replace( config.crPlaceholderRegex, "\r" )
+                    .replace( config.crlfPlaceholderRegex, "\r\n" )
+                    .replace( config.tabPlaceholderRegex, "\t" )
+                    .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 16 ) ) );
+            diff_obj = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), _str );
+            UI.dmp.diff_cleanupEfficiency( diff_obj );
+            return diff_obj;
+        }
+
         $.each(d.data.editable, function(index) {
-//            escapedTranslation = UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives');
-//            console.log('this.translation: ', this.translation);
-//            console.log('escapedTranslation: ', escapedTranslation);
-//			console.log('coso: ', htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives') ));
- //           var aa = UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives');
- //           bb = aa.replace()
-//            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), escapedTranslation );
-            var aaa = htmlDecode(this.translation);
-            var bbb = UI.decodePlaceholdersToText(aaa, false, segment_id, 'editable alternatives');
-//            console.log('bbb: ', bbb);
-            var ccc = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), bbb );
-//            console.log('ccc: ', ccc);
-//            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode(escapedTranslation) );
-//            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'editable alternatives') ) );
-//            console.log('diff_view: ', diff_view);
-			UI.dmp.diff_cleanupEfficiency( ccc );
-            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(ccc) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+            diff_obj = prepareTranslationDiff( this.translation );
+            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
+
         $.each(d.data.not_editable, function(index1) {
-            var diff_view = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( UI.decodePlaceholdersToText(this.translation, false, segment_id, 'not editable alternatives') ) );
-            UI.dmp.diff_cleanupEfficiency( diff_view );
-            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_view) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+            diff_obj = prepareTranslationDiff( this.translation );
+            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
         });
+
     },
     chooseAlternative: function(w) {console.log('chooseAlternative');
 //        console.log( $('.sugg-target .realData', w ) );
@@ -2207,14 +2206,14 @@ UI = {
         if( divs.length ){
             divs.each(function(){
                 $(this).find( 'br:not([class])' ).remove();
-                $(this).prepend( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
+                $(this).prepend( $('<span class="placeholder">' + config.crPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
             });
         } else {
 //			console.log('post process 1: ', $(area).html());
 //			console.log($(area).find( 'br:not([class])' ).length);
-//			$(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>') );
 
-            $(area).find('br:not([class]), br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
+            $(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
+            $(area).find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
             $(area).find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
             $(area).find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
 
@@ -2443,36 +2442,46 @@ UI = {
     },
     beforePropagateTranslation: function(segment, status) {
 //        console.log('before propagate');
-        if (typeof $.cookie('_auto-propagation-' + config.job_id + '-' + config.password) != 'undefined') { // cookie already set
-            if($.cookie('_auto-propagation-' + config.job_id + '-' + config.password) == '1') {
-                UI.propagateTranslation(segment, status, true);
+
+        UI.propagateTranslation(segment, status, false);
+        return false;
+
+        if ( UI.propagationsAvailable ){
+
+            if ( typeof $.cookie('_auto-propagation-' + config.job_id + '-' + config.password) != 'undefined' ) { // cookie already set
+                if($.cookie('_auto-propagation-' + config.job_id + '-' + config.password) == '1') {
+                    UI.propagateTranslation(segment, status, true);
+                } else {
+                    UI.propagateTranslation(segment, status, false);
+                }
+
             } else {
-                UI.propagateTranslation(segment, status, false);
-            }
-        } else {
 //            var sid = segment.attr('id').split('-')[1];
-            APP.popup({
-                name: 'confirmPropagation',
-                title: 'Warning',
-                buttons: [
-                    {
-                        type: 'ok',
-                        text: 'Yes',
-                        callback: 'doPropagate',
-                        params: 'true',
-                        closeOnClick: 'true'
-                    },
-                    {
-                        type: 'cancel',
-                        text: 'No, thanks',
-                        callback: 'doPropagate',
-                        params: 'false',
-                        closeOnClick: 'true'
-                    }
-                ],
-                content: "Do you want to extend the autopropagation of this translation even to already translated segments?"
-            });
+                APP.popup({
+                    name: 'confirmPropagation',
+                    title: 'Warning',
+                    buttons: [
+                        {
+                            type: 'ok',
+                            text: 'Yes',
+                            callback: 'doPropagate',
+                            params: 'true',
+                            closeOnClick: 'true'
+                        },
+                        {
+                            type: 'cancel',
+                            text: 'No, thanks',
+                            callback: 'doPropagate',
+                            params: 'false',
+                            closeOnClick: 'true'
+                        }
+                    ],
+                    content: "Do you want to extend the autopropagation of this translation even to " + UI.propagationsAvailable + " already translated segments?"
+                });
+            }
+
         }
+
   /*
         if ($.cookie('_auto-propagation-' + config.job_id + '-' + config.password)) {
             console.log('cookie already set');
@@ -2514,18 +2523,31 @@ UI = {
 //        console.log($(segment).attr('data-hash'));
         this.tempReqArguments = null;
 
-
         if( status == 'translated' ){
+
+            plusTranslated = (evenTranslated)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated': '';
+
+            //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
+            $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + plusTranslated ).not( segment ), function(index) {
+                $('.editarea', this).html( $('.editarea', segment).html() );
+
+                // if status is not set to draft, the segment content is not displayed
+                UI.setStatus($(this), 'draft');
+                //set segment as autoPropagated
+                $( this ).data( 'autopropagated', true );
+            });
+
             //unset actual segment as autoPropagated because now it is translated
             $( segment ).data( 'autopropagated', false );
+
+            //update current Header of Just Opened Segment
+            //NOTE: because this method is called after OpenSegment
+            // AS callback return for setTranslation ( whe are here now ),
+            // currentSegment pointer was already advanced by openSegment and header already created
+            //Needed because two consecutives segments can have the same hash
+            this.createHeader(true);
+
         }
-        plusTranslated = (evenTranslated)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated': '';
-        $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + plusTranslated), function(index) {
-            $('.editarea', this).html( $('.editarea', segment).html() );
-//            UI.setStatus($(this), 'draft');
-            //set segment as autoPropagated
-            $( this ).data( 'autopropagated', true );
-        });
 //        $('section[data-hash=' + $(segment).attr('data-hash') + ']');
     },
     doPropagate: function (trans) {

@@ -8,7 +8,7 @@ include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
 define("LTPLACEHOLDER", "##LESSTHAN##");
 define("GTPLACEHOLDER", "##GREATERTHAN##");
 define("AMPPLACEHOLDER", "##AMPPLACEHOLDER##");
-define("NBSPPLACEHOLDER", "<x id=\"nbsp\"/>");
+//define("NBSPPLACEHOLDER", "<x id=\"nbsp\"/>");
 
 class CatUtils {
 
@@ -32,20 +32,6 @@ class CatUtils {
 
     public static $cjk = array( 'zh' => 1.8, 'ja' => 2.5, 'ko' => 2.5, 'km' => 5 );
 
-    //following functions are useful for manage the consistency of non braking spaces
-    // chars coming, expecially,from MS Word
-    // ref nbsp code https://en.wikipedia.org/wiki/Non-breaking_space
-    public static function placeholdnbsp($s) {
-        $s = preg_replace("/\x{a0}/u", NBSPPLACEHOLDER, $s);
-        return $s;
-    }
-
-    public static function restorenbsp($s) {
-        $pattern = "#" . NBSPPLACEHOLDER . "#";
-        $s = preg_replace($pattern, Utils::unicode2chr(0Xa0), $s);
-        return $s;
-    }
-
     // ----------------------------------------------------------------
 
     public static function placeholdamp($s) {
@@ -57,11 +43,6 @@ class CatUtils {
         $pattern = "#" . AMPPLACEHOLDER . "#";
         $s = preg_replace($pattern, Utils::unicode2chr("&"), $s);
         return $s;
-    }
-
-    //reconcile tag ids
-    public static function ensureTagConsistency( $q, $source_seg, $target_seg ) {
-        //TODO
     }
 
     private static function parse_time_to_edit($ms) {
@@ -251,11 +232,6 @@ class CatUtils {
         return $segment;
     }
 
-    // transform any segment format in raw xliff format: raw xliff will be used as starting format for any manipulation
-    public static function toRawXliffNormalizer($segment) {
-        ;
-    }
-
     public static function getEditingLogData($jid, $password, $use_ter_diff = false ) {
 
         $data = getEditLog($jid, $password);
@@ -339,10 +315,16 @@ class CatUtils {
 //            $sug_for_diff = html_entity_decode($sug_for_diff, ENT_NOQUOTES, 'UTF-8');
 //            $tra_for_diff = html_entity_decode($tra_for_diff, ENT_NOQUOTES, 'UTF-8');
 
-            //$ter          = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
-
             //with this patch we have warnings when accessing indexes
-            $ter=array();
+            if( $use_ter_diff  ){
+                $ter = MyMemory::diff_tercpp( $sug_for_diff, $tra_for_diff, $lang );
+            } else {
+                $ter = array();
+            }
+
+//            Log::doLog( $sug_for_diff );
+//            Log::doLog( $tra_for_diff );
+//            Log::doLog( $ter );
 
             $seg[ 'ter' ] = @$ter[ 1 ] * 100;
             $stat_ter[ ]  = $seg[ 'ter' ] * $seg[ 'rwc' ];
@@ -382,13 +364,39 @@ class CatUtils {
             $seg['source'] = trim( CatUtils::rawxliff2view( $seg['source'] ) );
             $seg['translation'] = trim( CatUtils::rawxliff2view( $seg['translation'] ) );
 
-            $array_patterns     = array( rtrim( self::lfPlaceholderRegex, 'g' ) , rtrim( self::crPlaceholderRegex, 'g' ), rtrim( self::crlfPlaceholderRegex, 'g' ) );
-            $array_replacements = array( '<br class="_0A" />', '<br class="_0D" />', '<br class="_0D0A" />' );
+            $array_patterns     = array(
+                    rtrim( self::lfPlaceholderRegex, 'g' ) ,
+                    rtrim( self::crPlaceholderRegex, 'g' ),
+                    rtrim( self::crlfPlaceholderRegex, 'g' ),
+                    rtrim( self::tabPlaceholderRegex, 'g' ),
+                    rtrim( self::nbspPlaceholderRegex, 'g' ),
+            );
 
+
+            $array_replacements_csv = array(
+                    '\n',
+                    '\r',
+                    '\r\n',
+                    '\t',
+                    Utils::unicode2chr(0Xa0),
+            );
+            $seg['source_csv'] = preg_replace( $array_patterns, $array_replacements_csv, $seg['source'] );
+            $seg['translation_csv'] = preg_replace( $array_patterns, $array_replacements_csv, $seg['translation'] );
+            $seg['sug_csv'] =  preg_replace( $array_patterns, $array_replacements_csv, $seg['sug_view'] );
+            $seg['diff_csv'] = preg_replace( $array_patterns, $array_replacements_csv, $seg['diff'] );
+
+
+            $array_replacements = array(
+                    '<span class="_0A"></span><br />',
+                    '<span class="_0D"></span><br />',
+                    '<span class="_0D0A"></span><br />',
+                    '<span class="_tab">&#9;</span>',
+                    '<span class="_nbsp">&nbsp;</span>',
+            );
             $seg['source'] = preg_replace( $array_patterns, $array_replacements, $seg['source'] );
             $seg['translation'] = preg_replace( $array_patterns, $array_replacements, $seg['translation'] );
+            $seg['sug_view'] =  preg_replace( $array_patterns, $array_replacements, $seg['sug_view'] );
             $seg['diff'] = preg_replace( $array_patterns, $array_replacements, $seg['diff'] );
-
 
             if( $seg['mt_qe'] == 0 ){
                 $seg['mt_qe'] = 'N/A';

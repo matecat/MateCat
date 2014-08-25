@@ -18,11 +18,16 @@ $db->connect ();
 
 $glossaries = array(
 
-        array( 'file' => 'GLOSSARIO_EN_GRE.csv', 'source' => 'en-GB', 'target' => "el-GR" ),
-        array( 'file' => 'GLOSSARIO_EN_CHI_TRAD.csv', 'source' => 'en-GB', 'target' => "zh-TW" ),
-        array( 'file' => 'GLOSSARIO_EN_CHI.csv', 'source' => 'en-GB', 'target' => "zh-CN" ),
-        array( 'file' => 'GLOSSARIO_EN_SPA.csv', 'source' => 'en-GB', 'target' => "es-ES" ),
-        array( 'file' => 'GLOSSARIO_EN_RUS.csv', 'source' => 'en-GB', 'target' => "ru-RU" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "it-IT" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "da-DK" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "nl-NL" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "fr-FR" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "de-DE" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "pl-PL" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "pt-PT" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "ru-RU" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "es-ES" ),
+        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "sv-SE" ),
 
 );
 
@@ -36,14 +41,14 @@ foreach ( $glossaries as $gloss ) {
     $config[ 'target_lang' ] = $gloss['target'];
     $config[ 'email' ]       = "demo@matecat.com";
     $config[ 'get_mt' ]      = false;
-    $config[ 'id_user' ]     = "3d995a93a1a7dbf987e9";
+    $config[ 'id_user' ]     = "MyMemory_9e21425446e03d9e8952";
     $config[ 'num_result' ]  = null;
     $config[ 'isGlossary' ]  = true;
 
 
     $fObject = new SplFileObject( $gloss['file'] );
     $fObject->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE );
-    $fObject->setCsvControl( "\t", '\'' );
+    $fObject->setCsvControl( ",", '\'' );
 
 
     $tms = new TMS( 1 );
