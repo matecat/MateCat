@@ -70,6 +70,7 @@ $.extend(UI, {
 	},
 	setEvents: function() {
 		this.bindShortcuts();
+        console.log('SET EVENTS');
 		$("body").on('keydown', null, 'ctrl+1', function(e) {
 			e.preventDefault();
 			active = $('.editor .submenu li.active');
@@ -146,7 +147,7 @@ $.extend(UI, {
 			$('.editor .editarea .lastInserted').removeClass('lastInserted');
 			console.log('c: ', UI.editarea.html());
 */
-		});		
+        });
 		$("body").bind('keydown', 'Ctrl+c', function() {
 			UI.tagSelection = false;
 		}).bind('keydown', 'Meta+c', function() {
@@ -180,7 +181,7 @@ $.extend(UI, {
 		}).on('click', '.popup-settings #settings-save', function(e) {
 			e.preventDefault();
 			APP.closePopup();
-		}).on('click', '.modal .x-popup', function(e) {
+        }).on('click', '.modal .x-popup', function(e) {
 			if($('body').hasClass('shortcutsDisabled')) {
 				UI.bindShortcuts();
 			}

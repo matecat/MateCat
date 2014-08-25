@@ -123,10 +123,7 @@ footer nav li:first-child
 	border-left: none;
     }
 	
-	footer nav li:last-child
-{
-	border-right: none;
-    }
+	
 	
 	 footer nav
     {
@@ -740,6 +737,7 @@ color:#333;}
 .popup p
 {
 	font-size: 18px;
+    padding: 5px;
     }
     .popup h1
     {
@@ -1305,6 +1303,30 @@ p.surveynotice{
 	height:inherit;	max-height:inherit;min-height:inherit;overflow-y:auto;
 }
 
+span._0A {
+display: inline;
+margin-left: 6px;
+padding: 1px 2px 3px 40px;
+background-image: url(../img/soft-return1.png);
+background-size: 16px;
+background-repeat: no-repeat;
+background-position: center left;
+width: 20px;
+position: relative;
+}
+
+span._nbsp {
+color: #CCC;
+position: relative;
+left: 4px;
+padding-right: 12px;
+opacity: 0.2;
+top: 3px;
+font-size: 10px;
+background: url(../img/dot.png) 0px 0px no-repeat;
+background-size: 6px;
+}
+
 @font-face {
 	font-family: 'icomoon';
 	src:url('fonts/icomoon.eot?-gf7xre');
@@ -1566,6 +1588,13 @@ body.searchActive #filterSwitch
 .downloadtr-button:hover{-webkit-box-shadow: 0 1px 2px #666;box-shadow: 0 1px 2px #666;}
 
 .tag-mismatch{float:left !important}
+
+.auto-propagation-review {
+    cursor:pointer;
+    text-decoration:underline;
+    color: blue;
+    color: -webkit-link;
+}
 
 .warnings, 
 .text .alternatives 
@@ -1981,7 +2010,8 @@ article .translated:active, article .draft:active, article .btn:active, article 
     margin-left: 47%;
     margin-top: 5px;
     width: 50px !important;
-	background: url(../img/sprite.png) 5px -853px no-repeat;    
+	background: url(../img/sprite.png) 5px -853px no-repeat;
+    z-index: 1000;
 /*	opacity: 0.4;*/
 }
 
@@ -2153,7 +2183,7 @@ article
 .graysmall:last-child{border-bottom:none !Important}
 .tab.concordances .graysmall
 {
-	display: none;
+	display: block;
 }
 .tab.concordances .graysmall.prime
 {

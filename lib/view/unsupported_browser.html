@@ -60,13 +60,22 @@ Safari</a></li>
 </div>
 
 <div class="iepopup" metal:define-macro="job_archived">
+    <script>
+        $("body").on('click', '#reactivate-job', function(e) {
+            e.preventDefault();
+            UI.reactivateJob();
+        });
+    </script>
     <a href="${basepath}" class="logoblack"></a><br />
 
 
     <strong style="font-size:160%">This job has been archived.</strong><br />
     <small>MateCAT archives automatically jobs after ${job_archived} days of inactivity.</small><br />
+    <p tal:condition="true:ownerIsMe">
+        <a id="reactivate-job" href="#" class="translated">Reactivate it</a>
 
-    <p>If you need to access it, please ask <a href="mailto:${owner_email}">${owner_email}</a> to reactivate it<br />
+    </p>
+    <p tal:condition="not:ownerIsMe">If you need to access it, please ask <a href="mailto:${owner_email}">${owner_email}</a> to reactivate it<br />
         If you continue to get this page, email us at <a href="mailto:support@matecat.com">support@matecat.com</a>.</p>
 </div>
 
