@@ -3687,14 +3687,15 @@ $.extend(UI, {
                         restoreSelection();
              */
         }).on('keyup', '.editor .editarea', 'return', function(e) {
+/*
             console.log('UI.defaultBRmanagement: ', UI.defaultBRmanagement);
 
-            if(!UI.defaultBRmanagement) {
+ //           if(!UI.defaultBRmanagement) {
                 console.log( 'Enter key is disabled!' );
                 e.preventDefault();
                 return false;
-            };
-
+ //           };
+*/
 //            if(!UI.defaultBRmanagement) {
 //                range = window.getSelection().getRangeAt(0);
 ////                $('.returnTempPlaceholder', UI.editarea).after('<span class="br"><br /><span class="startRow">&nbsp;</span></span>');
@@ -3713,6 +3714,9 @@ $.extend(UI, {
 //            }
 
         }).on('keydown', '.editor .editarea', 'return', function(e) {
+            e.preventDefault();
+            return false;
+/*
             UI.defaultBRmanagement = false;
             if(!$('br', UI.editarea).length) {
                 UI.defaultBRmanagement = true;
@@ -3722,6 +3726,7 @@ $.extend(UI, {
                 restoreSelection();
                 e.preventDefault();
             }
+ */
         }).on('keypress', '.editor .editarea', function(e) {
             console.log('which: ', e.which);
 //			console.log('keypress: ', UI.editarea.html());
@@ -4229,6 +4234,7 @@ $.extend(UI, {
 						UI.reloadWarning();
 					}
 				}
+//                console.log('saltato ', UI.currentSegmentId);
 				return;
 			}
 			UI.blockButtons = true;

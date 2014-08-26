@@ -637,11 +637,11 @@ $.extend(UI, {
         }).on('keyup', '.editor .editarea', 'return', function(e) {
             console.log('UI.defaultBRmanagement: ', UI.defaultBRmanagement);
 
-            if(!UI.defaultBRmanagement) {
+ //           if(!UI.defaultBRmanagement) {
                 console.log( 'Enter key is disabled!' );
                 e.preventDefault();
                 return false;
-            };
+ //           };
 
 //            if(!UI.defaultBRmanagement) {
 //                range = window.getSelection().getRangeAt(0);
@@ -1177,6 +1177,7 @@ $.extend(UI, {
 						UI.reloadWarning();
 					}
 				}
+//                console.log('saltato ', UI.currentSegmentId);
 				return;
 			}
 			UI.blockButtons = true;
