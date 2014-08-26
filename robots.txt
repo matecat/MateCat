@@ -1,2 +1,4 @@
 User-agent: * 
-Disallow: / 
+Disallow: /manage/ 
+Disallow: /translate/ 
+Disallow: /editlog/ 
