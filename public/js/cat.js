@@ -1964,6 +1964,7 @@ UI = {
 	},
 
     setTranslation: function(id_segment, status, caller, byStatus) {
+        console.log('setTranslation sul segmento ', UI.currentSegmentId);
 		reqArguments = arguments;
 		segment = $('#segment-' + id_segment); 
 		this.lastTranslatedSegmentId = id_segment;
@@ -1976,9 +1977,12 @@ UI = {
 		} else {
 			translation = $('.editarea', segment ).text();
 		}
+        console.log('translation: ', translation);
 
-		if (translation === '') 
-			return false;
+		if (translation === '') {
+            this.unsavedSegmentsToRecover.push(this.currentSegmentId);
+            return false;
+        }
 		var time_to_edit = UI.editTime;
 		var id_translator = config.id_translator;
 		var errors = '';
@@ -2219,7 +2223,6 @@ UI = {
          console.log(txt);
          return txt;
          */
-
         var divs = $( area ).find( 'div' );
         if( divs.length ){
             divs.each(function(){
@@ -2457,6 +2460,13 @@ UI = {
                 this.beforePropagateTranslation(segment, status);
             }
         }
+    /*
+        console.log('setTranslation_success');
+        clearTimeout(this.recoverUnsavedSegmentsTimer);
+        this.recoverUnsavedSegmentsTimer = setTimeout(function() {
+            console.log('segments to recover: ', UI.unsavedSegmentsToRecover);
+        }, 1000);
+     */
     },
     beforePropagateTranslation: function(segment, status) {
 //        console.log('before propagate');
@@ -2845,6 +2855,8 @@ $.extend(UI, {
 		this.warningStopped = false;
 		this.abortedOperations = [];
         this.propagationsAvailable = false;
+//        this.unsavedSegmentsToRecover = [];
+//        this.recoverUnsavedSegmentsTimer = false;
 
 		/**
 		 * Global Warnings array definition.
@@ -3687,7 +3699,6 @@ $.extend(UI, {
                         restoreSelection();
              */
         }).on('keyup', '.editor .editarea', 'return', function(e) {
-/*
             console.log('UI.defaultBRmanagement: ', UI.defaultBRmanagement);
 
  //           if(!UI.defaultBRmanagement) {
@@ -3695,7 +3706,7 @@ $.extend(UI, {
                 e.preventDefault();
                 return false;
  //           };
-*/
+
 //            if(!UI.defaultBRmanagement) {
 //                range = window.getSelection().getRangeAt(0);
 ////                $('.returnTempPlaceholder', UI.editarea).after('<span class="br"><br /><span class="startRow">&nbsp;</span></span>');
@@ -3714,9 +3725,6 @@ $.extend(UI, {
 //            }
 
         }).on('keydown', '.editor .editarea', 'return', function(e) {
-            e.preventDefault();
-            return false;
-/*
             UI.defaultBRmanagement = false;
             if(!$('br', UI.editarea).length) {
                 UI.defaultBRmanagement = true;
@@ -3726,7 +3734,6 @@ $.extend(UI, {
                 restoreSelection();
                 e.preventDefault();
             }
- */
         }).on('keypress', '.editor .editarea', function(e) {
             console.log('which: ', e.which);
 //			console.log('keypress: ', UI.editarea.html());
@@ -4205,10 +4212,10 @@ $.extend(UI, {
 					UI.changeStatus(this, 'translated', 0);
 					skipChange = true;
 					if (!UI.nextUntranslatedSegmentId) {
-						console.log('a');
+//						console.log('a');
 						$('#' + $(this).attr('data-segmentid') + '-close').click();
 					} else {
-						console.log('b');
+//						console.log('b');
 						UI.reloadWarning();
 					}
 
@@ -4222,19 +4229,19 @@ $.extend(UI, {
 					$('#' + $(this).attr('data-segmentid') + '-close').click();
 				}
 			}
-
 			UI.checkHeaviness();
 			if ((UI.blockButtons)&&(!UI.autoFailoverEnabled)) {
+ //               console.log('Il segmento ' + UI.currentSegmentId + ' non è stato salvato, deve essere caricato in una coda');
 				if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
-					console.log('segment is already loaded');
+//					console.log('segment is already loaded');
 				} else {
-					console.log('segment is not loaded');
+//					console.log('segment is not loaded');
 
 					if (!UI.noMoreSegmentsAfter) {
 						UI.reloadWarning();
 					}
 				}
-//                console.log('saltato ', UI.currentSegmentId);
+ //               console.log('saltato ', UI.currentSegmentId);
 				return;
 			}
 			UI.blockButtons = true;

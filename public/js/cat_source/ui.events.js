@@ -1148,10 +1148,10 @@ $.extend(UI, {
 					UI.changeStatus(this, 'translated', 0);
 					skipChange = true;
 					if (!UI.nextUntranslatedSegmentId) {
-						console.log('a');
+//						console.log('a');
 						$('#' + $(this).attr('data-segmentid') + '-close').click();
 					} else {
-						console.log('b');
+//						console.log('b');
 						UI.reloadWarning();
 					}
 
@@ -1165,19 +1165,19 @@ $.extend(UI, {
 					$('#' + $(this).attr('data-segmentid') + '-close').click();
 				}
 			}
-
 			UI.checkHeaviness();
 			if ((UI.blockButtons)&&(!UI.autoFailoverEnabled)) {
+ //               console.log('Il segmento ' + UI.currentSegmentId + ' non è stato salvato, deve essere caricato in una coda');
 				if (UI.segmentIsLoaded(UI.nextUntranslatedSegmentId) || UI.nextUntranslatedSegmentId === '') {
-					console.log('segment is already loaded');
+//					console.log('segment is already loaded');
 				} else {
-					console.log('segment is not loaded');
+//					console.log('segment is not loaded');
 
 					if (!UI.noMoreSegmentsAfter) {
 						UI.reloadWarning();
 					}
 				}
-//                console.log('saltato ', UI.currentSegmentId);
+ //               console.log('saltato ', UI.currentSegmentId);
 				return;
 			}
 			UI.blockButtons = true;
