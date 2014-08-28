@@ -1442,7 +1442,7 @@ UI = {
                     .replace( config.crlfPlaceholderRegex, "\r\n" )
                     .replace( config.tabPlaceholderRegex, "\t" )
                     .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 16 ) ) );
-            diff_obj = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), _str );
+            diff_obj = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( _str ) );
             UI.dmp.diff_cleanupEfficiency( diff_obj );
             return diff_obj;
         }
@@ -2775,7 +2775,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.3.4.6";
+		this.version = "0.4.0";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -3670,22 +3670,30 @@ $.extend(UI, {
         }).on('keyup', '.editor .editarea', 'return', function(e) {
             console.log('UI.defaultBRmanagement: ', UI.defaultBRmanagement);
 
-            if(!UI.defaultBRmanagement) {
-                range = window.getSelection().getRangeAt(0);
-//                $('.returnTempPlaceholder', UI.editarea).after('<span class="br"><br /><span class="startRow">&nbsp;</span></span>');
-                $('.returnTempPlaceholder', UI.editarea).after('<br />');
-//                $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
-//                console.log('qua');
-//                $('.returnTempPlaceholder', UI.editarea).after('<br /><img>');
 
-//                node = $('.returnTempPlaceholder + br', UI.editarea)[0];
-//                setCursorAfterNode(range, node);
-                saveSelection();
-                $('.returnTempPlaceholder', UI.editarea).remove();
-                restoreSelection();
-            } else {
-//                 $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
-            }
+            if(!UI.defaultBRmanagement) {
+                console.log( 'Enter key is disabled!' );
+                e.preventDefault();
+                return false;
+            };
+
+//            if(!UI.defaultBRmanagement) {
+//                range = window.getSelection().getRangeAt(0);
+////                $('.returnTempPlaceholder', UI.editarea).after('<span class="br"><br /><span class="startRow">&nbsp;</span></span>');
+//                $('.returnTempPlaceholder', UI.editarea).after('<br />');
+////                $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
+////                console.log('qua');
+////                $('.returnTempPlaceholder', UI.editarea).after('<br /><img>');
+//
+////                node = $('.returnTempPlaceholder + br', UI.editarea)[0];
+////                setCursorAfterNode(range, node);
+//                saveSelection();
+//                $('.returnTempPlaceholder', UI.editarea).remove();
+//                restoreSelection();
+//            } else {
+////                 $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
+//            }
+
         }).on('keydown', '.editor .editarea', 'return', function(e) {
             UI.defaultBRmanagement = false;
             if(!$('br', UI.editarea).length) {

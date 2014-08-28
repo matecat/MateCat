@@ -104,7 +104,7 @@ class setTranslationController extends ajaxController {
             }
 
             //add check for job status archived.
-            if ( strtolower( $job_data[ 'status' ] ) == 'archived' ) {
+            if ( strtolower( $job_data[ 'status' ] ) == Constants_JobStatus::STATUS_ARCHIVED ) {
                 $this->result[ 'error' ][ ] = array( "code" => -3, "message" => "job archived" );
             }
 

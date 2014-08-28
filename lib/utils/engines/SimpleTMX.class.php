@@ -18,6 +18,7 @@ class SimpleTMX extends Engine{
 		if(!empty($key)){
 			$postfields['key']=trim($key);
 		}
+
 		//query db
 		$this->doQuery('tmx_import', $postfields,true);
 		return $this->raw_result;

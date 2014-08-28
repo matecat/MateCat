@@ -101,7 +101,7 @@ class changeJobsStatusController extends ajaxController {
         if (isset($_POST['status'])) {
             $this->search_status = $__postInput['status'];
         } else {
-            $this->search_status = 'active';
+            $this->search_status = Constants_JobStatus::STATUS_ACTIVE;
         };
 
         if (isset($_POST['onlycompleted'])) {

@@ -492,7 +492,7 @@ function getArrayOfSuggestionsJSON( $id_segment ) {
 function getJobData( $id_job, $password = null ) {
 
 	$query   = "select source, target, id_mt_engine, id_tms, id_translator, status_owner as status, password,
-		job_first_segment, job_last_segment, 
+		job_first_segment, job_last_segment, create_date, owner,
 		new_words, draft_words, translated_words, approved_words, rejected_words, id_project
 			from jobs
 			where id = %u";
@@ -667,7 +667,7 @@ function getSegmentsInfo( $jid, $password ) {
 	$query = "select j.id as jid, j.id_project as pid,j.source,j.target,
 		j.last_opened_segment, j.id_translator as tid, j.id_tms, j.id_mt_engine,
 		p.id_customer as cid, j.id_translator as tid, j.status_owner as status,
-		j.owner as job_owner,
+		j.owner as job_owner, j.create_date,
 
 		j.job_first_segment, j.job_last_segment,
 		j.new_words, j.draft_words, j.translated_words, j.approved_words, j.rejected_words,
@@ -697,14 +697,14 @@ function getSegmentsInfo( $jid, $password ) {
 
 function getFirstSegmentId( $jid, $password ) {
 
-	$query   = "select s.id as sid
-		from segments s
-		inner join files_job fj on s.id_file = fj.id_file
-		inner join jobs j on j.id=fj.id_job
-		where fj.id_job=$jid and j.password='$password'
-		and s.show_in_cattool=1
-		order by s.id
-		limit 1
+	$query   = "SELECT s.id as sid
+                FROM segments s
+                INNER JOIN files_job fj ON s.id_file = fj.id_file
+                INNER JOIN jobs j ON j.id = fj.id_job
+                WHERE fj.id_job = $jid AND j.password = '$password'
+                AND s.show_in_cattool=1
+                ORDER BY s.id
+                LIMIT 1
 		";
 	$db      = Database::obtain();
 	$results = $db->fetch_array( $query );
@@ -780,7 +780,7 @@ function countThisTranslatedHashInJob( $jid, $jpassword, $sid ){
 
     $results = $db->query_first( $query );
 
-    Log::doLog($query);
+//    Log::doLog($query);
 
     return $results;
 
@@ -790,7 +790,10 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ){
 
 	$db = Database::obtain();
 
-	if( $sid != null ){
+    $st_translated = Constants_TranslationStatus::STATUS_TRANSLATED;
+    $st_approved      = Constants_TranslationStatus::STATUS_APPROVED;
+
+    if( $sid != null ){
 
 		/**
 		 * Get all the available translations for this segment id,
@@ -810,7 +813,7 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ){
 				WHERE segment_hash = (
 					SELECT segment_hash FROM segments WHERE id = %u
 				)
-				AND segment_translations.status IN( 'TRANSLATED' ) -- , 'APPROVED' )
+				AND segment_translations.status IN( '$st_translated' ) -- , '$st_approved' )
 				AND id_job = %u
 				AND id_segment != %u
 				GROUP BY translation, CONCAT( id_job, '-', password )
@@ -838,7 +841,7 @@ function getTranslationsMismatches( $jid, $jpassword, $sid = null ){
 				FROM segment_translations
 				JOIN jobs ON id_job = id AND id_segment between jobs.job_first_segment AND jobs.job_last_segment
 				WHERE id_job = %u
-				AND segment_translations.status IN( 'TRANSLATED' ) -- , 'APPROVED' )
+				AND segment_translations.status IN( '$st_translated' ) -- , '$st_approved' )
 				GROUP BY segment_hash, CONCAT( id_job, '-', password )
 				HAVING translations_available > 1
 		";
@@ -937,7 +940,7 @@ function addTranslation( array $_Translation ){
         return -1;
     }
 
-//    Log::doLog( $query );
+    Log::doLog( $query );
 
     $db->query( $query );
 
@@ -970,16 +973,20 @@ function propagateTranslation( $params, $job_data, $_idSegment, $propagateToTran
 
     $db = Database::obtain();
 
+    $st_translated = Constants_TranslationStatus::STATUS_TRANSLATED;
+    $st_new        = Constants_TranslationStatus::STATUS_NEW;
+    $st_draft      = Constants_TranslationStatus::STATUS_DRAFT;
+
     $q = array();
     foreach ( $params as $key => $value ) {
         if( $key == 'status' ){
 
             if( $propagateToTranslated ){
-                $q[ ]      = $key . " = IF( status = 'TRANSLATED' , 'TRANSLATED', '" . $db->escape( $value ) . "' )";
-                $andStatus = "AND status IN ( 'DRAFT', 'NEW', 'REJECTED', 'TRANSLATED' )";
+                $q[ ]      = $key . " = IF( status = '$st_translated' , '$st_translated', '" . $db->escape( $value ) . "' )";
+                $andStatus = "AND status IN ( '$st_draft', '$st_new', '$st_translated' )";
             } else {
                 $q[ ]      = $key . " = '" . $db->escape( $value ) . "'";
-                $andStatus = "AND status IN ( 'DRAFT', 'NEW', 'REJECTED' )";
+                $andStatus = "AND status IN ( '$st_draft', '$st_new' )";
             }
 
         } elseif ( is_bool( $value ) ) {
@@ -2497,18 +2504,10 @@ function changePassword( $res, $id, $password, $new_password ) {
 function cancelJob( $res, $id ) {
 
 	if ( $res == "prj" ) {
-		$query = "update jobs set status_owner='cancelled' where id_project=" . (int)$id;
+		$query = "update jobs set status_owner = '" . Constants_JobStatus::STATUS_CANCELLED . "' where id_project=" . (int)$id;
 	} else {
-		$query = "update jobs set status_owner='cancelled' where id=" . (int)$id;
+		$query = "update jobs set status_owner = '" . Constants_JobStatus::STATUS_CANCELLED . "' where id=" . (int)$id;
 	}
-	/*
-	   if ($res == "prj") {
-	   $query = "update jobs set status='cancelled' where id_project=$id";
-	   } else {
-	   $query = "update jobs set status='cancelled' where id=$id";
-	   }
-	 */
-	//    $query = "update jobs set disabled=1 where id=$id";
 
 	$db = Database::obtain();
 	$db->query( $query );
@@ -2518,9 +2517,9 @@ function cancelJob( $res, $id ) {
 function archiveJob( $res, $id ) {
 
 	if ( $res == "prj" ) {
-		$query = "update jobs set status='archived' where id_project=" . (int)$id;
+		$query = "update jobs set status='" . Constants_JobStatus::STATUS_ARCHIVED . "' where id_project=" . (int)$id;
 	} else {
-		$query = "update jobs set status='archived' where id=" . (int)$id;
+		$query = "update jobs set status='" . Constants_JobStatus::STATUS_ARCHIVED . "' where id=" . (int)$id;
 	}
 	/*
 	   if ($res == "prj") {
@@ -2558,6 +2557,8 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
 		if ( ( $test > 1 ) && ( $undo == 1 ) ) {
 			$cases = '';
 			$ids   = '';
+
+            //help!!!
 			foreach ( $arStatus as $item ) {
 				$ss = explode( ':', $item );
 				$cases .= " when id=$ss[0] then '$ss[1]'";
@@ -2565,26 +2566,61 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
 			}
 			$ids   = trim( $ids, ',' );
 			$query = "update jobs set status_owner= case $cases end where id in ($ids)" . $status_filter_query;
+            $db->query( $query );
 
 		} else {
+
 			$query = "update jobs set status_owner='$status' where id_project=$id" . $status_filter_query;
-		}
+
+            $db->query( $query );
+
+            //Works on the basis that MAX( id_segment ) is the same for ALL Jobs in the same Project
+            // furthermore, we need a random ID so, don't worry about MySQL stupidity on random MAX
+            //example: http://dev.mysql.com/doc/refman/5.0/en/example-maximum-column-group-row.html
+            $select_max_id = "
+                    SELECT max(id_segment) as id_segment
+					    FROM segment_translations
+						JOIN jobs ON id_job = id
+						WHERE id_project = $id";
+
+            $_id_segment = $db->fetch_array( $select_max_id );
+            $_id_segment = array_pop( $_id_segment );
+            $id_segment = $_id_segment['id_segment'];
+
+            $query_for_translations = "
+                UPDATE segment_translations
+                    SET translation_date = NOW()
+                WHERE id_segment = $id_segment";
+
+            $db->query( $query_for_translations );
+
+        }
 
 
 	} else {
-		$query = "update jobs set status_owner='$status' where id=$id and password = '$jPassword' ";
-	}
-	/*
-	   if ($res == "prj") {
-	   $query = "update jobs set status='cancelled' where id_project=$id";
-	   } else {
-	   $query = "update jobs set status='cancelled' where id=$id";
-	   }
-	 */
-	//    $query = "update jobs set disabled=1 where id=$id";
 
-	//$db = Database::obtain();
-	$db->query( $query );
+		$query = "update jobs set status_owner='$status' where id=$id and password = '$jPassword' ";
+        $db->query( $query );
+
+        $select_max_id = "
+                    SELECT max(id_segment) as id_segment
+					    FROM segment_translations
+						JOIN jobs ON id_job = id
+						WHERE id = $id
+						 AND password = '$jPassword'";
+
+        $_id_segment = $db->fetch_array( $select_max_id );
+        $_id_segment = array_pop( $_id_segment );
+        $id_segment = $_id_segment['id_segment'];
+
+        $query_for_translations = "
+                UPDATE segment_translations
+                    SET translation_date = NOW()
+                WHERE id_segment = $id_segment";
+
+        $db->query( $query_for_translations );
+
+	}
 
 }
 
@@ -2992,26 +3028,31 @@ function setJobCompleteness( $jid, $is_completed ) {
 
 /**
  * Given an array of job IDs, this function returns the IDs of archivable jobs
+ *
+ * USE IN CRON
+ *
  * @param array $jobs
  * @return array
  */
 function getArchivableJobs($jobs = array()){
 	$db    = Database::obtain();
 	$query =
-		"select
-			distinct j.id
-		from
-			jobs j join
-			segment_translations st on j.id = st.id_job
-			and j.create_date < (curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD." day)
-		where
-			(
-			    translation_date < (curdate() - interval ".INIT::$JOB_ARCHIVABILITY_THRESHOLD."  day)
-			    OR translation_date is NULL
-			)
-			and j.status_owner = 'active'
-			and j.status = 'active'
-			and j.id in (%s)";
+		"
+        SELECT j.id, j.password , SBS.translation_date
+            FROM jobs j
+            JOIN (
+                SELECT MAX( translation_date ) AS translation_date, id_job
+                FROM segment_translations
+                    WHERE id_job IN( %s )
+                    GROUP BY id_job
+                ) AS SBS
+                ON SBS.id_job = j.id
+                AND IFNULL( SBS.translation_date, DATE( '1970-01-01' ) ) < ( curdate() - INTERVAL " . INIT::JOB_ARCHIVABILITY_THRESHOLD . " DAY  )
+           WHERE
+                j.status_owner = '" . Constants_JobStatus::STATUS_ACTIVE . "'
+                AND j.create_date < ( curdate() - INTERVAL " . INIT::JOB_ARCHIVABILITY_THRESHOLD . " DAY )
+                AND j.status = '" . Constants_JobStatus::STATUS_ACTIVE . "'
+           GROUP BY j.id, j.password";
 
 	$results = $db->fetch_array(
 	              sprintf(
@@ -3024,7 +3065,7 @@ function getArchivableJobs($jobs = array()){
 	$errno   = $err[ 'error_code' ];
 
 	if ( $errno != 0 ) {
-		log::doLog( "$errno: " . var_export( $err, true ) );
+		Log::doLog( "$errno: " . var_export( $err, true ) );
 
 		return $errno * -1;
 	}
@@ -3032,4 +3073,64 @@ function getArchivableJobs($jobs = array()){
 	return $results;
 }
 
-?>
+function getLastTranslationDate( $jid ){
+    $query = "SELECT
+                IFNULL( MAX(translation_date), DATE('1970-01-01') ) AS last_translation_date
+                FROM segment_translations
+                WHERE id_job = %u";
+    $db    = Database::obtain();
+    $res = $db->query_first( sprintf( $query, $jid ) );
+    return $res['last_translation_date'];
+}
+
+function getMaxJobUntilDaysAgo( $days = INIT::JOB_ARCHIVABILITY_THRESHOLD ){
+
+    $last_id_query = "
+            SELECT
+                MAX(id) AS max
+            FROM jobs
+            WHERE create_date < ( curdate() - interval " . INIT::JOB_ARCHIVABILITY_THRESHOLD . " DAY )
+            AND status_owner = '" . Constants_JobStatus::STATUS_ACTIVE . "'";
+
+    $db = Database::obtain();
+    $last_id = $db->query_first($last_id_query);
+    $last_id = (int)$last_id['max'];
+    return $last_id;
+
+}
+
+function batchArchiveJobs( $jobs = array(), $days = INIT::JOB_ARCHIVABILITY_THRESHOLD ){
+
+    $query_archive_jobs = "
+        UPDATE jobs
+            SET status_owner = '" . Constants_JobStatus::STATUS_ARCHIVED . "'
+            WHERE %s
+            AND create_date < ( curdate() - INTERVAL %u DAY )";
+
+    $tuple_of_double_indexes = array();
+    foreach ( $jobs as $job ){
+        $tuple_of_double_indexes[] = sprintf( "( id = %u AND password = '%s' )", $job['id'], $job['password'] );
+    }
+
+    $q_archive = sprintf(
+            $query_archive_jobs,
+            implode( " OR ", $tuple_of_double_indexes ),
+            $days
+    );
+
+    $db = Database::obtain();
+    $db->query($q_archive);
+
+//    Log::doLog( $q_archive );
+
+    $err     = $db->get_error();
+    $errno   = $err[ 'error_code' ];
+
+    if ( $errno != 0 ) {
+        Log::doLog( "$errno: " . var_export( $err, true ) );
+        return $errno * -1;
+    }
+
+    return $db->affected_rows;
+
+}

@@ -637,21 +637,28 @@ $.extend(UI, {
             console.log('UI.defaultBRmanagement: ', UI.defaultBRmanagement);
 
             if(!UI.defaultBRmanagement) {
-                range = window.getSelection().getRangeAt(0);
-//                $('.returnTempPlaceholder', UI.editarea).after('<span class="br"><br /><span class="startRow">&nbsp;</span></span>');
-                $('.returnTempPlaceholder', UI.editarea).after('<br />');
-//                $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
-//                console.log('qua');
-//                $('.returnTempPlaceholder', UI.editarea).after('<br /><img>');
+                console.log( 'Enter key is disabled!' );
+                e.preventDefault();
+                return false;
+            };
 
-//                node = $('.returnTempPlaceholder + br', UI.editarea)[0];
-//                setCursorAfterNode(range, node);
-                saveSelection();
-                $('.returnTempPlaceholder', UI.editarea).remove();
-                restoreSelection();
-            } else {
-//                 $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
-            }
+//            if(!UI.defaultBRmanagement) {
+//                range = window.getSelection().getRangeAt(0);
+////                $('.returnTempPlaceholder', UI.editarea).after('<span class="br"><br /><span class="startRow">&nbsp;</span></span>');
+//                $('.returnTempPlaceholder', UI.editarea).after('<br />');
+////                $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
+////                console.log('qua');
+////                $('.returnTempPlaceholder', UI.editarea).after('<br /><img>');
+//
+////                node = $('.returnTempPlaceholder + br', UI.editarea)[0];
+////                setCursorAfterNode(range, node);
+//                saveSelection();
+//                $('.returnTempPlaceholder', UI.editarea).remove();
+//                restoreSelection();
+//            } else {
+////                 $('.returnTempPlaceholder', UI.editarea).after('<br /><span class="startRow">&nbsp;</span>');
+//            }
+
         }).on('keydown', '.editor .editarea', 'return', function(e) {
             UI.defaultBRmanagement = false;
             if(!$('br', UI.editarea).length) {
