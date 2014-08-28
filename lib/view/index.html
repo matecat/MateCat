@@ -332,7 +332,7 @@
 </div>
 
 <div class="modal popup-addtm-tr" data-type="view">
-    <div class="popup-outer"></div>
+    <div class="popup-outer closeClickingOutside"></div>
     <div class="popup">
         <a href="#" class="x-popup"></a>
 
@@ -347,10 +347,10 @@
                 <p class="warning-message" style="display: none;"><span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.</span></p>
                 <p class="error-message" style="display: none;"> Error: the errmsg will appear here... </p>
                     <div class="block pull-left">
-                        <input class="mgmt-input" type="text" width="20" id="name" onfocus="this.value='';"  value="Enter a name" />
+                        <input class="mgmt-input" type="text" width="20" id="addtm-tr-name" onfocus="this.value='';"  placeholder="Enter a name" />
                     </div>
                     <div class="block pull-left">
-                        <input class="mgmt-input" type="text" id="key" onfocus="this.value='';"  value="Create new private key" />
+                        <input class="mgmt-input" type="text" id="addtm-tr-key" onfocus="this.value='';"  placeholder="Create new private key" />
                         <a class="btn-ok pull-right">Create</a>
                     </div>
                     <div class="block">
