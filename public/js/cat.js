@@ -243,18 +243,12 @@ UI = {
 					'<div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches">' +
 					'	<div class="overflow"></div>' +
 					'</div>' +
-                    '<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
-                    '   <div class="overflow">' +
-                    ((config.tms_enabled)?
-                            '<div class="cc-search">' +
-                                    '    <div class="input search-source" contenteditable="true" />' +
-                                    '    <div class="input search-target" contenteditable="true" />' +
-                                    '    <div class="results"></div>' +
-                                    '</div>' : '<ul class="graysmall message"><li>Concordance is not available when the TM feature is disabled</li></ul>') +
-
-                    '   </div>' +
-					 '   </div>' +
-                    '</div>' +
+					'<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
+					'	<div class="overflow">' + 
+						((config.tms_enabled)? '<div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div>' : '<ul class="graysmall message"><li>Concordance is not available when the TM feature is disabled</li></ul>') + 
+					'		<div class="results"></div>' +
+					'	</div>' +
+					'</div>' +
 					'<div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary">' +
 					'	<div class="overflow">' + 
 
@@ -288,13 +282,13 @@ UI = {
 		}
 
 	},
-	createHeader: function(forceCreation) {
+    createHeader: function(forceCreation) {
 
         forceCreation = forceCreation || false;
 
-		if ( $('h2.percentuage', this.currentSegment).length && !forceCreation ) {
-			return;
-		}
+        if ( $('h2.percentuage', this.currentSegment).length && !forceCreation ) {
+            return;
+        }
 		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="#" id="segment-' + this.currentSegmentId + '-close" class="close" title="Close this segment"></a><a href="/referenceFile/' + config.job_id + '/' + config.password + '/' + this.currentSegmentId + '" id="segment-' + this.currentSegmentId + '-context" class="context" title="Open context" target="_blank">Context</a>';
 		$('#' + this.currentSegment.attr('id') + '-header').html(header);
 
@@ -1375,8 +1369,8 @@ UI = {
 			this.processErrors(d.error, 'setCurrentSegment');
 		this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
 //		this.nextUntranslatedSegmentIdByServer = d.nextUntranslatedSegmentId;
-		this.getNextSegment(this.currentSegment, 'untranslated');
         this.propagationsAvailable = d.data.prop_available;
+		this.getNextSegment(this.currentSegment, 'untranslated');
 		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
 	},
     detectTranslationAlternatives: function(d) {
@@ -1433,37 +1427,8 @@ UI = {
             tab.trigger('click');
         }
     },
-
-    hexDump: function(data) {
-        var outputString = new String();
-        var addressPadding = "0000000";
-        var line = 0;
-        var countForCurrentLine = 0;
-
-        outputString +=
-                "Address   0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f \n" +
-                        "---------------------------------------------------------\n" +
-                        "00000000  ";
-
-        for (var i=0; i < data.length; i++) {
-            countForCurrentLine++
-            var byteData = data.substr(i, 1);
-
-            var number = data.charCodeAt(i) & 0xff;
-            var byteHex = (number < 16) ? "0" + number.toString(16) : number.toString(16);;
-
-            outputString += byteHex + " ";
-            if (countForCurrentLine == 16) {
-                countForCurrentLine = 0;
-                line++;
-                outputString += "\n" + addressPadding.substr(0, 7 - line.toString(16).length) + line.toString(16) + "0  ";
-            }
-        }
-        return outputString;
-    },
-
     renderAlternatives: function(d) {
-		console.log('renderAlternatives d: ', d);
+        console.log('renderAlternatives d: ', d);
 //		console.log($('.editor .submenu').length);
 //		console.log(UI.currentSegmentId);
         segment = UI.currentSegment;
@@ -2247,7 +2212,7 @@ UI = {
 //			console.log('post process 1: ', $(area).html());
 //			console.log($(area).find( 'br:not([class])' ).length);
 
-			$(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
+            $(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
             $(area).find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
             $(area).find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
             $(area).find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
@@ -2478,7 +2443,6 @@ UI = {
     beforePropagateTranslation: function(segment, status) {
 //        console.log('before propagate');
 
-        //disabled popup and cookie for now
         UI.propagateTranslation(segment, status, false);
         return false;
 
@@ -2492,7 +2456,6 @@ UI = {
                 }
 
             } else {
-
 //            var sid = segment.attr('id').split('-')[1];
                 APP.popup({
                     name: 'confirmPropagation',
@@ -2513,19 +2476,8 @@ UI = {
                             closeOnClick: 'true'
                         }
                     ],
-                    content: "Do you want to extend the autopropagation of this translation even to <span class='auto-propagation-review'>" + UI.propagationsAvailable + " already translated segments?</span>"
+                    content: "Do you want to extend the autopropagation of this translation even to " + UI.propagationsAvailable + " already translated segments?"
                 });
-
-                //set the parameters for search and perform it
-                $('.auto-propagation-review' ).on('click', function(){
-                    APP.closePopup();
-                    $("#filterSwitch").trigger('click');
-                    $("#search-source").val( $( '#' + $( segment ).attr('id') + '-source', segment ).text() );
-                    $('#select-status.search-select').val('translated' ).prop('selected', 'selected');
-                    $('#exact-match').prop('checked', 'checked');
-                    $("#exec-find" ).trigger('click');
-                });
-
             }
 
         }
@@ -3146,7 +3098,6 @@ $.extend(UI, {
 		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.mac, function(e) {
             if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
 		});		
-
 	},
 	unbindShortcuts: function() {
 		$("body").off(".shortcuts").addClass('shortcutsDisabled');
@@ -3230,7 +3181,6 @@ $.extend(UI, {
 			console.log('c: ', UI.editarea.html());
 */
 		});		
-	
 		$("body").bind('keydown', 'Ctrl+c', function() {
 			UI.tagSelection = false;
 		}).bind('keydown', 'Meta+c', function() {
@@ -3258,20 +3208,6 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.unbindShortcuts();
 			$('.popup-settings').show();
-
-		}).on('click', '.open-popup-addtm-tr', function(e) {
-			e.preventDefault();
-			$('.popup-addtm-tr').show();
-		})
-		.on('click', '.addtm-tr-key-open', function(e) {
-			e.preventDefault();
-			$('.addtm-tr').hide();
-			$('.addtm-tr-key').show();
-		})
-		.on('click', '.addtm-tr-back', function(e) {
-			e.preventDefault();
-			$('.addtm-tr').show();
-			$('.addtm-tr-key').hide();
 		}).on('click', '.popup-settings #settings-restore', function(e) {
 			e.preventDefault();
 			APP.closePopup();
@@ -4690,9 +4626,13 @@ $.extend(UI, {
 		this.initEnd = new Date();
 		this.initTime = this.initEnd - this.initStart;
 		if (this.debug)
-			console.log('Init time: ' + this.initTime);		
+			console.log('Init time: ' + this.initTime);
+		
 	}
- });
+});
+
+
+
 /*
 	Component: ui.contribution
  */
@@ -4919,10 +4859,7 @@ console.log('translation 4: ', translation);
                 escapedSegment = UI.decodePlaceholdersToText(this.segment, true, segment_id, 'contribution source');
 				$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + UI.decodePlaceholdersToText( this.translation, true, segment_id, 'contribution translation' ) + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
 //				console.log('dopo: ', $('.sub-editor.matches .overflow .suggestion_source', segment).html());
-
 			});
-				$('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><i class="icon-language"></i><a class="open-popup-addtm-tr">Add your TMX</a></div>');
-
 			UI.markSuggestionTags(segment);
 
 			UI.setDeleteSuggestion(segment);
@@ -7224,3 +7161,7 @@ $.extend(UI, {
 		$('.popup-settings').addClass('modified');
 	}
 });
+
+
+
+
