@@ -1515,8 +1515,8 @@
 				"en":"Turkmen" 
 			}],
 			"isocode":"tk",
-			"enabled":false,
-			"rtl":true,
+			"enabled":true,
+			"rtl":false,
 			"rfc3066code":"tk-TM"
 		}
 	,
