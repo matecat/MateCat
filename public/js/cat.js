@@ -243,18 +243,12 @@ UI = {
 					'<div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches">' +
 					'	<div class="overflow"></div>' +
 					'</div>' +
-                    '<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
-                    '   <div class="overflow">' +
-                    ((config.tms_enabled)?
-                            '<div class="cc-search">' +
-                                    '    <div class="input search-source" contenteditable="true" />' +
-                                    '    <div class="input search-target" contenteditable="true" />' +
-                                    '    <div class="results"></div>' +
-                                    '</div>' : '<ul class="graysmall message"><li>Concordance is not available when the TM feature is disabled</li></ul>') +
-
-                    '   </div>' +
-					 '   </div>' +
-                    '</div>' +
+					'<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
+					'	<div class="overflow">' + 
+						((config.tms_enabled)? '<div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div>' : '<ul class="graysmall message"><li>Concordance is not available when the TM feature is disabled</li></ul>') + 
+					'		<div class="results"></div>' +
+					'	</div>' +
+					'</div>' +
 					'<div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary">' +
 					'	<div class="overflow">' + 
 
@@ -288,13 +282,13 @@ UI = {
 		}
 
 	},
-	createHeader: function(forceCreation) {
+    createHeader: function(forceCreation) {
 
         forceCreation = forceCreation || false;
 
-		if ( $('h2.percentuage', this.currentSegment).length && !forceCreation ) {
-			return;
-		}
+        if ( $('h2.percentuage', this.currentSegment).length && !forceCreation ) {
+            return;
+        }
 		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="#" id="segment-' + this.currentSegmentId + '-close" class="close" title="Close this segment"></a><a href="/referenceFile/' + config.job_id + '/' + config.password + '/' + this.currentSegmentId + '" id="segment-' + this.currentSegmentId + '-context" class="context" title="Open context" target="_blank">Context</a>';
 		$('#' + this.currentSegment.attr('id') + '-header').html(header);
 
@@ -1375,8 +1369,8 @@ UI = {
 			this.processErrors(d.error, 'setCurrentSegment');
 		this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
 //		this.nextUntranslatedSegmentIdByServer = d.nextUntranslatedSegmentId;
-		this.getNextSegment(this.currentSegment, 'untranslated');
         this.propagationsAvailable = d.data.prop_available;
+		this.getNextSegment(this.currentSegment, 'untranslated');
 		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
 	},
     detectTranslationAlternatives: function(d) {
@@ -1463,7 +1457,7 @@ UI = {
     },
 
     renderAlternatives: function(d) {
-		console.log('renderAlternatives d: ', d);
+        console.log('renderAlternatives d: ', d);
 //		console.log($('.editor .submenu').length);
 //		console.log(UI.currentSegmentId);
         segment = UI.currentSegment;
@@ -2247,7 +2241,7 @@ UI = {
 //			console.log('post process 1: ', $(area).html());
 //			console.log($(area).find( 'br:not([class])' ).length);
 
-			$(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
+            $(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
             $(area).find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
             $(area).find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
             $(area).find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
@@ -2492,7 +2486,6 @@ UI = {
                 }
 
             } else {
-
 //            var sid = segment.attr('id').split('-')[1];
                 APP.popup({
                     name: 'confirmPropagation',
@@ -3146,7 +3139,6 @@ $.extend(UI, {
 		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.mac, function(e) {
             if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
 		});		
-
 	},
 	unbindShortcuts: function() {
 		$("body").off(".shortcuts").addClass('shortcutsDisabled');
@@ -3230,7 +3222,6 @@ $.extend(UI, {
 			console.log('c: ', UI.editarea.html());
 */
 		});		
-	
 		$("body").bind('keydown', 'Ctrl+c', function() {
 			UI.tagSelection = false;
 		}).bind('keydown', 'Meta+c', function() {
@@ -3259,19 +3250,59 @@ $.extend(UI, {
 			UI.unbindShortcuts();
 			$('.popup-settings').show();
 
-		}).on('click', '.open-popup-addtm-tr', function(e) {
-			e.preventDefault();
-			$('.popup-addtm-tr').show();
-		})
-		.on('click', '.addtm-tr-key-open', function(e) {
-			e.preventDefault();
-			$('.addtm-tr').hide();
-			$('.addtm-tr-key').show();
-		})
-		.on('click', '.addtm-tr-back', function(e) {
-			e.preventDefault();
-			$('.addtm-tr').show();
-			$('.addtm-tr-key').hide();
+        // start addtmx
+        }).on('click', '.open-popup-addtm-tr', function(e) {
+            e.preventDefault();
+            $('.popup-addtm-tr').show();
+        }).on('click', '.addtm-tr-key-open', function(e) {
+            e.preventDefault();
+            $('.addtm-tr').hide();
+            $('.addtm-tr-key').show();
+        }).on('click', '.addtm-tr-back', function(e) {
+                e.preventDefault();
+                $('.addtm-tr').show();
+                $('.addtm-tr-key').hide();
+        }).on('click', '.addtm-tr .btn-ok', function(e) {
+            e.preventDefault();
+            //prevent double click
+            if($(this).hasClass('disabled')) return false;
+            $(this).addClass('disabled');
+            $(this).attr('disabled','');
+            $.get("http://mymemory.translated.net/api/createranduser",function(data){
+                //parse to appropriate type
+                //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
+                if(typeof data == 'string'){
+                    data=jQuery.parseJSON(data);
+                }
+                //put value into input field
+                $('#addtm-tr-key').val(data.key);
+//                $('#private-tm-user').val(data.id);
+//                $('#private-tm-pass').val(data.pass);
+//                $('#create_private_tm_btn').attr('data-key', data.key);
+                //hide spinner
+//                $('#get-new-tm-spinner').hide();
+                return false;
+            })
+ /*
+            APP.doRequest({
+                data: {
+                    action: 'addTM',
+                    job_id: config.job_id,
+                    job_pass: config.password,
+                    tm_key: $('#addtm-tr-key').val(),
+                    name: $('#addtm-tr-name').val(),
+                    tmx_file: ''
+                },
+                error: function() {
+                    console.log('addTM error!!');
+                },
+                success: function(d) {
+                    console.log('addTM success!!');
+                }
+            });
+*/
+        // end addtmx
+
 		}).on('click', '.popup-settings #settings-restore', function(e) {
 			e.preventDefault();
 			APP.closePopup();
@@ -3733,7 +3764,6 @@ $.extend(UI, {
              */
         }).on('keyup', '.editor .editarea', 'return', function(e) {
             console.log('UI.defaultBRmanagement: ', UI.defaultBRmanagement);
-
 
             if(!UI.defaultBRmanagement) {
                 console.log( 'Enter key is disabled!' );
@@ -4698,9 +4728,13 @@ $.extend(UI, {
 		this.initEnd = new Date();
 		this.initTime = this.initEnd - this.initStart;
 		if (this.debug)
-			console.log('Init time: ' + this.initTime);		
+			console.log('Init time: ' + this.initTime);
+		
 	}
- });
+});
+
+
+
 /*
 	Component: ui.contribution
  */
@@ -4927,11 +4961,11 @@ console.log('translation 4: ', translation);
                 escapedSegment = UI.decodePlaceholdersToText(this.segment, true, segment_id, 'contribution source');
 				$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '" data-id="' + this.id + '"><li class="sugg-source">' + ((disabled) ? '' : ' <a id="' + segment_id + '-tm-' + this.id + '-delete" href="#" class="trash" title="delete this row"></a>') + '<span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">' + UI.suggestionShortcutLabel + (index + 1) + '</span><span id="' + segment_id + '-tm-' + this.id + '-translation" class="translation">' + UI.decodePlaceholdersToText( this.translation, true, segment_id, 'contribution translation' ) + '</span></li><ul class="graysmall-details"><li class="percent ' + cl_suggestion + '">' + (this.match) + '</li><li>' + suggestion_info + '</li><li class="graydesc">Source: <span class="bold">' + cb + '</span></li></ul></ul>');
 //				console.log('dopo: ', $('.sub-editor.matches .overflow .suggestion_source', segment).html());
-
 			});
-				$('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><i class="icon-language"></i><a class="open-popup-addtm-tr">Add your TMX</a></div>');
-
-			UI.markSuggestionTags(segment);
+            // start addtmxTmp
+            $('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><i class="icon-language"></i><a class="open-popup-addtm-tr">Add your TMX</a></div>');
+            // end addtmxTmp
+            UI.markSuggestionTags(segment);
 
 			UI.setDeleteSuggestion(segment);
 			UI.lockTags();
