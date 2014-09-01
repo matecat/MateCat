@@ -504,22 +504,36 @@ function getJobData( $id_job, $password = null ) {
 }
 
 function getEngineData( $id ) {
+
     if ( is_array( $id ) ) {
         $id = explode( ",", $id );
     }
-    $where_clause = " id IN ($id)";
 
-    $query = "select * from engines where $where_clause";
+    $query = "select * from engines where  id IN ($id)";
 
-    $db = Database::obtain();
+    try{
+        $memcacheHandler = MemcacheHandler::getInstance();
+    } catch( Exception $e ){
+        Log::doLog("No Memcache server(s) configured.");
+    }
 
-    $results = $db->fetch_array( $query );
-    $err     = $db->get_error();
-    $errno   = $err[ 'error_code' ];
-    if ( $errno != 0 ) {
-        log::doLog( $err );
+    if( isset( $memcacheHandler ) && !empty( $memcacheHandler ) ){
+        $_existingResult = $memcacheHandler->get( $query );
+        if( !empty( $_existingResult ) ) return $_existingResult;
+    }
 
-        return $errno * -1;
+	$db = Database::obtain();
+
+	$results = $db->fetch_array( $query );
+	$err     = $db->get_error();
+	$errno   = $err[ 'error_code' ];
+	if ( $errno != 0 ) {
+		Log::doLog( $err );
+		return $errno * -1;
+	}
+
+    if( isset( $memcacheHandler ) && !empty( $memcacheHandler ) ){
+        $memcacheHandler->set( $query, @$results[ 0 ], 60 * 5 );
     }
 
     return @$results[ 0 ];

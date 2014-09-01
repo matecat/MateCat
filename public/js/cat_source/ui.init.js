@@ -56,6 +56,8 @@ $.extend(UI, {
 		this.warningStopped = false;
 		this.abortedOperations = [];
         this.propagationsAvailable = false;
+//        this.unsavedSegmentsToRecover = [];
+//        this.recoverUnsavedSegmentsTimer = false;
 
 		/**
 		 * Global Warnings array definition.

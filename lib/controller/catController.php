@@ -326,6 +326,7 @@ class catController extends viewController {
         $this->template->last_job_segment    = $this->last_job_segment;
         $this->template->last_opened_segment = $this->last_opened_segment;
 		$this->template->owner_email         = $this->job_owner;
+        $this->template->ownerIsMe           = ($this->logged_user['email'] == $this->job_owner);
 
         $this->job_stats['STATUS_BAR_NO_DISPLAY'] = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
         $this->job_stats['ANALYSIS_COMPLETE']     = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? true : false );
@@ -345,7 +346,7 @@ class catController extends viewController {
         $this->template->job_not_found          = $this->job_not_found;
         $this->template->job_archived           = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
         $this->template->job_cancelled          = $this->job_cancelled;
-        $this->template->logged_user            = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
+//        $this->template->logged_user            = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
         $this->template->incomingUrl            = '/login?incomingUrl=' . $this->thisUrl;
         $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
         $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
