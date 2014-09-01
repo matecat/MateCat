@@ -1476,7 +1476,7 @@ UI = {
                     .replace( config.crPlaceholderRegex, "\r" )
                     .replace( config.crlfPlaceholderRegex, "\r\n" )
                     .replace( config.tabPlaceholderRegex, "\t" )
-                    .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 16 ) ) );
+                    .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
             diff_obj = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), htmlDecode( _str ) );
             UI.dmp.diff_cleanupEfficiency( diff_obj );
             return diff_obj;
