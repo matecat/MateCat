@@ -131,11 +131,32 @@ class setContributionController extends ajaxController {
         $id_tms = $job_data[ 'id_tms' ];
 
 		if ($id_tms != 0) {
+            //instantiate TMS object
+            $tms = new TMS( $id_tms );
+
+            try{
+                //find all the job's TMs with write grants and make a contribution to them
+                $tm_keys = Utils::getJobTmKeys( $this->id_job, $this->password, 'w');
+
+                if(!empty($tm_keys)) {
+                    unset($config['id_user']);
+
+                    foreach ($tm_keys as $i => $tm_info){
+                        $config['key'] = $tm_info['key'];
+                        $tms->set($config);
+                    }
+                }
+                else{
+                    // fallback to default user's key
+                    $result = $tms->set( $config );
+                }
+            }
+            catch(Exception $e){
+                $this->result['error'][] = array("code" => -6, "message" => "Error while retrieving job's TM.");
+                Log::doLog( __METHOD__ . " -> " . $e->getMessage());
+            }
 
             //if translator_username is empty no key is added to MyMemory API SET query string, so, anonymous by default
-
-            $tms = new TMS( $id_tms );
-            $result = $tms->set( $config );
 
             if( !$result ){
                 $this->result['error'][] = array("code" => -5, "message" => "Connection Error.");

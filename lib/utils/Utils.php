@@ -291,9 +291,13 @@ class Utils {
         if ( is_numeric( $tmKeys ) ) {
             throw new Exception ( __METHOD__ . " -> Sql Error: " . $tmKeys );
         }
+
+        //if the data extracted is null, set it to a json array;
+        if($tmKeys == null) $tmKeys = "[]";
+
         $tmKeys = json_decode( $tmKeys, true );
 
-        if ( $tmKeys == null ) {
+        if ( is_null($tmKeys)) {
             throw new Exception ( __METHOD__ . " -> Invalid JSON " );
         }
 
