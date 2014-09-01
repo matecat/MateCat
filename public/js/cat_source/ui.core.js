@@ -984,7 +984,25 @@ UI = {
 		if (this.debug)
 			console.log('close/open time: ' + ((new Date()) - this.openSegmentStart));
 	},
-	placeCaretAtEnd: function(el) {
+    reactivateJob: function() {
+        APP.doRequest({
+            data: {
+                action:		   "changeJobsStatus",
+                new_status:     "active",
+                res: 		   "job",
+                id:             config.job_id,
+                jpassword:      config.password,
+            },
+            success: function(d){
+                if(d.data == 'OK') {
+                    setTimeout(function() {
+                        UI.reloadPage();
+                    }, 300);
+                }
+            }
+        });
+    },
+    placeCaretAtEnd: function(el) {
 //		console.log(el);
 //		console.log($(el).first().get().className);
 //		var range = document.createRange();
@@ -1946,6 +1964,7 @@ UI = {
 	},
 
     setTranslation: function(id_segment, status, caller, byStatus) {
+        console.log('setTranslation sul segmento ', UI.currentSegmentId);
 		reqArguments = arguments;
 		segment = $('#segment-' + id_segment); 
 		this.lastTranslatedSegmentId = id_segment;
@@ -1958,9 +1977,12 @@ UI = {
 		} else {
 			translation = $('.editarea', segment ).text();
 		}
+        console.log('translation: ', translation);
 
-		if (translation === '') 
-			return false;
+		if (translation === '') {
+            this.unsavedSegmentsToRecover.push(this.currentSegmentId);
+            return false;
+        }
 		var time_to_edit = UI.editTime;
 		var id_translator = config.id_translator;
 		var errors = '';
@@ -2201,7 +2223,6 @@ UI = {
          console.log(txt);
          return txt;
          */
-
         var divs = $( area ).find( 'div' );
         if( divs.length ){
             divs.each(function(){
@@ -2439,6 +2460,13 @@ UI = {
                 this.beforePropagateTranslation(segment, status);
             }
         }
+    /*
+        console.log('setTranslation_success');
+        clearTimeout(this.recoverUnsavedSegmentsTimer);
+        this.recoverUnsavedSegmentsTimer = setTimeout(function() {
+            console.log('segments to recover: ', UI.unsavedSegmentsToRecover);
+        }, 1000);
+     */
     },
     beforePropagateTranslation: function(segment, status) {
 //        console.log('before propagate');

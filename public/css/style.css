@@ -1951,9 +1951,11 @@ footer nav
 .source .original {display:none;}
 .bold {font-weight: bold}
 .per-orange{background:#FF9900 !important;color:#fff !important}
-.per-blue{background:#09beec!important;color:#fff !important}
-.per-green{background:#7cc576!important;color:#fff !important}
-.per-yellow{background:#FFCC00!important;color:#333 !important}
+.per-blue{background:#09beec !important;color:#fff !important}
+.per-green{background:#7cc576 !important;color:#fff !important}
+.per-yellow{background:#FFCC00 !important;color:#333 !important}
+.per-red{background:#ff0000 !important;color:#fff !important}
+.per-gray{background:#aaa !important;color:#333 !important}
 
 .graysmall-details .per-yellow, .graysmall-details .per-blue, .graysmall-details .per-orange, .graysmall-details .per-green {width:26px !important;text-align:center;display:block !important;}
 

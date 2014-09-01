@@ -124,6 +124,7 @@ footer nav li:first-child
     }
 	
 	
+	
 	 footer nav
     {
 	    float: right;
@@ -380,6 +381,7 @@ footer nav li:first-child
 
 .mgmt-panel-tm .tablestats, .mgmt-panel.gl {display:block;}
 
+.mgmt-wrapper {width:92%; text-align:left;}
 
 /*end mgmt panel */
 
@@ -735,6 +737,7 @@ color:#333;}
 .popup p
 {
 	font-size: 18px;
+    padding: 5px;
     }
     .popup h1
     {
@@ -900,10 +903,21 @@ padding-left: 10px;
 
 .searchbox, .mgmt-panel-tm, .mgmt-panel-gl
 {
+	position: fixed;
 	float: left;
 	width: 100%;
 	font-size:12px;
+	border-bottom: 1px solid #666;
 	background:#efefef url(../img/point.gif) 0 0 repeat-x;
+	margin-top: -27px;
+	padding:5px 4% 0px 4%;
+	-moz-box-shadow: 0 1px 3px #666;
+	-webkit-box-shadow: 0 1px 10px #666;
+	-moz-border-radius-bottom-right:2px;
+	-webkit-border-bottom-right-radius:2px;
+	-moz-border-radius-bottomleft:2px;
+	-webkit-border-bottom-left-radius:2px;
+	z-index: 9999;
 }
 
 
@@ -1080,6 +1094,7 @@ display: block;
 .nav>li>a {
 position: relative;
 text-decoration:none;
+display: block;
 padding: 10px 15px;
 }
 
@@ -1318,6 +1333,30 @@ p.surveynotice{
 
 .survey .popup-box{
 	height:inherit;	max-height:inherit;min-height:inherit;overflow-y:auto;
+}
+
+span._0A {
+display: inline;
+margin-left: 6px;
+padding: 1px 2px 3px 40px;
+background-image: url(../img/soft-return1.png);
+background-size: 16px;
+background-repeat: no-repeat;
+background-position: center left;
+width: 20px;
+position: relative;
+}
+
+span._nbsp {
+color: #CCC;
+position: relative;
+left: 4px;
+padding-right: 12px;
+opacity: 0.2;
+top: 3px;
+font-size: 10px;
+background: url(../img/dot.png) 0px 0px no-repeat;
+background-size: 6px;
 }
 
 .error-message, .warning-message {
