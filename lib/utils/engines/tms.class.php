@@ -5,7 +5,6 @@ include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
 include_once INIT::$UTILS_ROOT . "/engines/tms_result.class.php";
 
 
-
 class TMS extends Engine {
 
     private $result = array();
@@ -70,7 +69,8 @@ class TMS extends Engine {
         ( $_config['mt_only']       ? $parameters['mtonly'] = '1' : null );
 
         if ( !empty( $_config['id_user'] ) ) {
-            $parameters['key'] = $this->calculateMyMemoryKey( $_config['id_user'] );
+//            $parameters['key'] = $this->calculateMyMemoryKey( $_config['id_user'] );
+            $parameters['key'] = implode(",", $_config['id_user']);
         }
 
         ( !$_config['isGlossary']   ? $apply = "get" : $apply = "gloss_get" );
@@ -92,8 +92,8 @@ class TMS extends Engine {
         $parameters[ 'de' ]       = $_config[ 'email' ];
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
-            //$parameters['user'] = $id_user;
-            $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
+//            $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
+            $parameters['key'] = implode(",", $_config['id_user']);
         }
 
         ( !$_config['isGlossary']   ? $apply = "set" : $apply = "gloss_set" );
@@ -117,8 +117,8 @@ class TMS extends Engine {
         $parameters[ 'de' ]       = $_config[ 'email' ];
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
-            //$parameters['user'] = $id_user;
-            $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
+//            $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
+            $parameters['key'] = implode(",", $_config['id_user']);
         }
 
         ( !$_config['isGlossary']   ? $apply = "delete" : $apply = "gloss_delete" );
@@ -142,8 +142,8 @@ class TMS extends Engine {
         $parameters[ 'tnote' ]    = $_config[ 'tnote' ];
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
-            //$parameters['user'] = $id_user;
-            $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
+//            $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
+            $parameters['key'] = implode(",", $_config['id_user']);
         }
 
         $this->doQuery( "gloss_update" , $parameters);
@@ -157,12 +157,12 @@ class TMS extends Engine {
 
     }
 
-    private function calculateMyMemoryKey($id_translator) {
-
-        $APIKeySrv = TMSServiceFactory::getAPIKeyService();
-        return $APIKeySrv->calculateMyMemoryKey( $id_translator );
-
-    }
+//    private function calculateMyMemoryKey($id_translator) {
+//
+//        $APIKeySrv = TMSServiceFactory::getAPIKeyService();
+//        return $APIKeySrv->calculateMyMemoryKey( $id_translator );
+//
+//    }
 
 }
 

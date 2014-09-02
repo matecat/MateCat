@@ -310,6 +310,7 @@ class Utils {
                 $tmKeys = array_filter( $tmKeys, array( "Utils", 'filterTmKeysByWriteGrant' ) );
                 break;
             default  :
+                break;
         }
 
         $tmKeys = array_values( $tmKeys );
@@ -318,9 +319,9 @@ class Utils {
     }
 
     /**
-     * @param $job_id int       The job's ID
-     * @param $job_pass string  The job's password
-     * @param $tmKeys array     An array whose elements are arrays with the following keys:<br/>
+     * @param $job_id int           The job's ID
+     * @param $job_password string  The job's password
+     * @param $tmKeys array         An array whose elements are arrays with the following keys:<br/>
      * <pre>
      *          type    : string  - "tmx" or "glossary"
      *          owner   : boolean
