@@ -196,7 +196,7 @@
 
             <p tal:condition="true:conversion_enabled" class="file-drag">
                 <strong>Drag and drop</strong> your file here<br/>
-				<span class="min">You may also import your own translation memories (TMX)</span><br />
+				<span tal:condition="true:isUploadTMXAllowed" class="min">You may also import your own translation memories (TMX)</span><br />
                 or</p>
 
             <p tal:condition="not:conversion_enabled" class="file-drag">
