@@ -70,6 +70,7 @@ class TMS extends Engine {
 
         if ( !empty( $_config['id_user'] ) ) {
 //            $parameters['key'] = $this->calculateMyMemoryKey( $_config['id_user'] );
+            if( ! is_array( $_config['id_user'] ) ) $_config['id_user'] = array( $_config['id_user'] );
             $parameters['key'] = implode(",", $_config['id_user']);
         }
 
@@ -93,6 +94,7 @@ class TMS extends Engine {
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
 //            $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
+            if( ! is_array( $_config['id_user'] ) ) $_config['id_user'] = array( $_config['id_user'] );
             $parameters['key'] = implode(",", $_config['id_user']);
         }
 
@@ -118,6 +120,7 @@ class TMS extends Engine {
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
 //            $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
+            if( ! is_array( $_config['id_user'] ) ) $_config['id_user'] = array( $_config['id_user'] );
             $parameters['key'] = implode(",", $_config['id_user']);
         }
 
@@ -143,6 +146,7 @@ class TMS extends Engine {
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
 //            $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
+            if( ! is_array( $_config['id_user'] ) ) $_config['id_user'] = array( $_config['id_user'] );
             $parameters['key'] = implode(",", $_config['id_user']);
         }
 
