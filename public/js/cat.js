@@ -5164,26 +5164,6 @@ $.extend(UI, {
 		}
 		return(mismatch);
 	},
-	
-	// TAG MARK
-	detectTags: function(area) {console.log('detectTags');
-		//ALL in one
-//		$(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
-//		if(typeof $(area).attr('data-sid') == 'undefined') console.log(area);
-//		if(typeof $(area).attr('data-sid') == 'undefined') console.log('HTML 1: ', $(area).html());
-//		$(area).html($(area).html().replace(/(:?<span[^>]*locked[^>]*>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
-        $(area).html($(area).html().replace(/(:?<span[^>]*locked[^>]*>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s+.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
-//		if(typeof $(area).attr('data-sid') == 'undefined') console.log('HTML 2: ', $(area).html());
-		
-
-//        $(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"true\" class=\"locked\">$2</span>"));
-
-//		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-//      if (!this.firstMarking) {
-//			$(area).html($(area).html().replace(/(<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
-//          console.log( $(area).html() );
-//		}
-	},
     disableTagMark: function() {
 		this.taglockEnabled = false;
 		this.body.addClass('tagmarkDisabled');
@@ -5230,24 +5210,16 @@ $.extend(UI, {
 		if (this.noTagsInSegment(1))
 			return false;
 		$('.source').each(function() {
-			UI.detectTags(this);
-		});
-
-		$('.editarea').each(function() {
-//			if($(this).attr('data-sid') == 13655401) console.log('AAAAAAAAAAA: ', $(this).attr('data-sid'));
-			if ($('#segment-' + $(this).data('sid')).hasClass('mismatch'))
-				return false;
-//			if($(this).attr('data-sid') == 13655401) console.log('prova 1: ', $('#segment-13655401 .editarea').html());
-			UI.detectTags(this);
-//			if($(this).attr('data-sid') == 13655401) console.log('prova 2: ', $('#segment-13655401 .editarea').html());
+			UI.lockTags(this);
 		});
 	},
+
 	markTagsInSearch: function(el) {
 		if (!this.taglockEnabled)
 			return false;
 		var elements = (typeof el == 'undefined') ? $('.editor .cc-search .input') : el;
 		elements.each(function() {
-//			UI.detectTags(this);
+//			UI.lockTags(this);
 		});
 	},
 
@@ -5281,7 +5253,7 @@ $.extend(UI, {
                     .replace(/\&lt;br\>/gi, "<br>")
                     .replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />')
                     .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
-
+;
             if (UI.isFirefox) {
                 tx = tx.replace(/(<span class="[^"]*" contenteditable="false"\>)(:?<span class="[^"]*" contenteditable="false"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
 //                tx = tx.replace(/(<span class="[^"]*" contenteditable="true"\>)(:?<span class="[^"]*" contenteditable="true"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
