@@ -152,10 +152,11 @@ class convertFileController extends ajaxController {
                 $output_content[ 'target' ]         = $single_language;
                 $output_content[ 'content' ]        = $convertResult['xliffContent'];
                 $output_content[ 'filename' ]       = $this->file_name;
-                $back_convertResult                 = $converter->convertToOriginal( $output_content );
+                //$back_convertResult                 = $converter->convertToOriginal( $output_content );
+                $back_convertResult                 = null;
                 /* try to back convert the file */
 
-                if( $back_convertResult['isSuccess'] == false ){
+                if( 0 and  ($back_convertResult['isSuccess'] == false )){
                     //custom error message passed directly to javascript client and displayed as is
                     $convertResult['errorMessage'] = "Error: there is a problem with this file, it cannot be converted back to the original one.";
                     $this->result['code'] = -110;
