@@ -49,7 +49,7 @@ UI = {
         UI.restartConversions();
     },
     errorsBeforeUpload: function(file) {console.log('errorsBeforeUpload');
-//        console.log(file);
+        console.log(file);
         ext = file.name.split('.')[file.name.split('.').length - 1];
 //        console.log(ext);
         msg = 'Format not supported. Convert to DOCX and upload the file again.';
@@ -65,7 +65,10 @@ UI = {
                         ( ext == 'tgz' )
         ) {
                 msg = 'ZIP archives not yet supported. Coming soon.';
-        }
+        }else if (ext=='tmx'){
+                msg = 'TMX importing disabled';
+
+	}
 
         console.log(file.size);
         if((file.size) > config.maxFileSize) {
@@ -116,6 +119,7 @@ UI = {
 	},
 
 	createKeyByTMX: function() {
+		if (!isTMXAllowed()) return false;
 		if($('#create_private_tm_btn[data-key]').length || $('#private-tm-key').val().length ) { // a key has already been created
 			console.log('già cliccato');
 			if($('#private-tm-key').val() == '') {
@@ -862,6 +866,14 @@ isValidFileExtension = function(filename) {
 //        if(this == ext) res = true;
 //    });
     console.log(res);
+    return res;
+}
+
+isTMXAllowed = function() {
+    filename="test.tmx";
+    res = (!filename.match(config.allowedFileTypes))? false : true;
+
+    console.log("function isTMXAllowed return value: " +res);
     return res;
 }
 
