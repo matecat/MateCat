@@ -133,6 +133,23 @@ class newProjectController extends viewController {
 	}
 
 
+
+        private function isUploadTMXAllowed ($default=false){
+		if ($default) return false;
+		foreach (INIT::$SUPPORTED_FILE_TYPES as $k => $v) {
+			foreach ($v as $kk => $vv) {
+				if ($kk=='tmx') {
+				//	echo "true"; 
+				//	exit;
+					return true;
+				}
+			}
+		}
+		//echo "false";exit;
+		return false;
+
+	}
+
 	private function getExtensions($default = false) {
 		$ext_ret = "";
 		foreach (INIT::$SUPPORTED_FILE_TYPES as $k => $v) {
@@ -201,8 +218,11 @@ class newProjectController extends viewController {
 		$this->template->mt_engines         = $this->mt_engines;
 		$this->template->tms_engines        = $this->tms_engines;
 		$this->template->conversion_enabled = INIT::$CONVERSION_ENABLED;
+		
+		$this->template->isUploadTMXAllowed=false;
 		if ( INIT::$CONVERSION_ENABLED ) {
 			$this->template->allowed_file_types = $this->getExtensions( "" );
+			$this->template->isUploadTMXAllowed=$this->isUploadTMXAllowed();
 		} else {
 			$this->template->allowed_file_types = $this->getExtensions( "default" );
 		}

@@ -643,6 +643,13 @@ function getTranslatorPass( $id_translator ) {
     return null;
 }
 
+/**
+ * @param $id_translator
+ *
+ * @return null
+ *
+ * @deprecated
+ */
 function getTranslatorKey( $id_translator ) {
 
     $db = Database::obtain();

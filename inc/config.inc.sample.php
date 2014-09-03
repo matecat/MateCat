@@ -231,7 +231,7 @@ class INIT {
         self::$CONVERSION_ENABLED = false;
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
-		self::$BUILD_NUMBER = '0.4.0';
+		self::$BUILD_NUMBER = '0.4.0.1';
 		self::$VOLUME_ANALYSIS_ENABLED = true;
 
         self::$FORCE_XLIFF_CONVERSION = false;

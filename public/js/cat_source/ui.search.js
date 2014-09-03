@@ -380,8 +380,14 @@ $.extend(UI, {
         searchMarker = (UI.searchMode == 'source&target')? 'searchPreMarker' : 'searchMarker';
 		$(areas).each(function() {
 			if (!testRegex || ($(this).text().match(testRegex) !== null)) {
-				var tt = $(this).html().replace(/&lt;/g, UI.openTagPlaceholder).replace(/&gt;/g, UI.closeTagPlaceholder).replace(regex, '<mark class="' + searchMarker + '">$1</mark>').replace(openTagReg, '&lt;').replace(closeTagReg, '&gt;').replace(/(<span(.*)?>).*?<mark.*?>(.*?)<\/mark>.*?(<\/span>)/gi, "$1$3$4");
-				$(this).html(tt);
+				var tt = $(this).html()
+                    .replace(/&lt;/g, UI.openTagPlaceholder)
+                    .replace(/&gt;/g, UI.closeTagPlaceholder)
+                    .replace(regex, '<mark class="' + searchMarker + '">$1</mark>')
+                    .replace(openTagReg, '&lt;')
+                    .replace(closeTagReg, '&gt;')
+                    .replace(/(<span[^>]+>)[^<]*<mark[^>]*>(.*?)<\/mark>[^<]*(<\/span>?)/gi, "$1$3$4");
+                $(this).html(tt);
 			}
 		});
 	},
