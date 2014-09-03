@@ -1006,6 +1006,10 @@ border: 1px solid #abadb3;
 
 .clear {clear:both;}
 
+header .searchbox {
+	margin-top:28px;
+}
+
 .mgmt-tm th, .mgmt-gl th {background:#f4f4f4;}
 body.filterOpen .searchbox
 {
