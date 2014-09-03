@@ -4994,10 +4994,18 @@ console.log('add class loaded for segment ' + segment_id+ ' in renderContributio
 		reqArguments = arguments;
 		if ((status == 'draft') || (status == 'rejected'))
 			return false;
-		var source = $('.source', segment).text();
+        if( config.brPlaceholdEnabled ) {
+            source = this.postProcessEditarea(segment, '.source');
+            target = this.postProcessEditarea(segment);
+        } else {
+            source = $('.source', segment).text();
+            // Attention: to be modified when we will be able to lock tags.
+            target = $('.editarea', segment).text();
+        }
+//		var source = $('.source', segment).text();
 		source = view2rawxliff(source);
 		// Attention: to be modified when we will be able to lock tags.
-		var target = $('.editarea', segment).text();
+//		var target = $('.editarea', segment).text();
 		if ((target === '') && (byStatus)) {
 			APP.alert({msg: 'Cannot change status on an empty segment. Add a translation first!'});
 		}
