@@ -1459,7 +1459,7 @@ UI = {
                     .replace( config.crPlaceholderRegex, "\r" )
                     .replace( config.crlfPlaceholderRegex, "\r\n" )
                     .replace( config.tabPlaceholderRegex, "\t" )
-                    .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 16 ) ) );
+                    .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
             diff_obj = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), _str );
             UI.dmp.diff_cleanupEfficiency( diff_obj );
             return diff_obj;
@@ -2803,7 +2803,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.4.0";
+		this.version = "0.4.0.1";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
