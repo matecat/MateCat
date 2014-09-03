@@ -312,7 +312,7 @@ class FileFormatConverter {
 		$tmp_name='/tmp/'.sha1($filename).time();
 
 		//write encoded file to temporary location
-		file_put_contents($tmp_name, base64_encode($fileContent));
+		file_put_contents($tmp_name, ($fileContent));
 
 
 		//assign file pointer for POST
@@ -403,7 +403,16 @@ class FileFormatConverter {
 
 		$uid_ext = $this->extractUidandExt($xliffContent);
 		$data['uid'] = $uid_ext[0];
-		$data['xliffContent'] = $xliffContent;
+		
+		//get random name for temporary location
+		$tmp_name='/tmp/'.sha1($filename).time();
+
+		//write encoded file to temporary location
+		file_put_contents($tmp_name, ($xliffContent));
+
+		
+		//$data['xliffContent'] = $xliffContent;
+		$data['xliffContent']= "@$tmp_name";
 
 		$this->conversionObject->ip_machine = $this->ip;
 		$this->conversionObject->ip_client  = Utils::getRealIpAddr();
