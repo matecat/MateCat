@@ -354,10 +354,10 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
 
 .memory-mgmt {
 padding: 8px 10px 2px 10px;
-margin-top: 8px;
+margin-top: 7px;
 color: #333;
 font-weight: bold;
-width: 240px;
+width: 255px;
 }
 
 .memory-mgmt:hover {
@@ -554,7 +554,8 @@ body{font-family:Calibri, Arial, Helvetica, sans-serif}
 .upload-input{width:100%;padding:4px 5px 3px 5px;font-size:22px !important; -moz-border-radius: 2px;border-radius: 2px;border:1px solid #ccc}
 #private-tm-key
 {
-	width:180px;
+	width:235px;
+    height:28px;
 }
 
 
@@ -985,8 +986,8 @@ footer a:hover{text-decoration:none}
 		background-image: none;
 width: 70px;
 margin-left: -30px;
-padding: 4px 0 3px 0;
-margin-top: 9px;
+padding: 4px 0 5px 0;
+margin-top: 6px;
 	}    
 
 #swaplang
