@@ -309,11 +309,10 @@ class FileFormatConverter {
 		}
 
 		//get random name for temporary location
-		$tmp_name='/tmp/'.sha1($filename).time();
+        $tmp_name = tempnam("/tmp", "MAT_FW");
 
 		//write encoded file to temporary location
 		file_put_contents($tmp_name, ($fileContent));
-
 
 		//assign file pointer for POST
 		$data['documentContent'] = "@$tmp_name";
@@ -405,7 +404,7 @@ class FileFormatConverter {
 		$data['uid'] = $uid_ext[0];
 		
 		//get random name for temporary location
-		$tmp_name='/tmp/'.sha1($filename).time();
+        $tmp_name = tempnam("/tmp", "MAT_BW");
 
 		//write encoded file to temporary location
 		file_put_contents($tmp_name, ($xliffContent));
