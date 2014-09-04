@@ -8,6 +8,13 @@ class LocalAPIKeyService {
 
 	}
 
+    /**
+     * @param $id_translator
+     *
+     * @return null
+     *
+     * @deprecated
+     */
     public function calculateMyMemoryKey($id_translator) {
         $key = getTranslatorKey($id_translator);
         return $key;

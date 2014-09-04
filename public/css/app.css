@@ -1029,6 +1029,10 @@ background: #F3F3F3!important;
 
 .clear {clear:both;}
 
+header .searchbox {
+	margin-top:28px;
+}
+
 .mgmt-tm th, .mgmt-gl th {background:#f4f4f4;}
 
 body.filterOpen .searchbox
@@ -1493,7 +1497,7 @@ body
 }
 body.incomingMsg
 {
-	padding-top: 109px;
+	padding-top: 140px;
 }
 body.cattool.editing{/*background: url(../img/loading.gif) 47.5% 241px no-repeat;background-size: 20px 20px;*/}
 
@@ -3435,9 +3439,11 @@ footer nav
 .source .original {display:none;}
 .bold {font-weight: bold}
 .per-orange{background:#FF9900 !important;color:#fff !important}
-.per-blue{background:#09beec!important;color:#fff !important}
-.per-green{background:#7cc576!important;color:#fff !important}
-.per-yellow{background:#FFCC00!important;color:#333 !important}
+.per-blue{background:#09beec !important;color:#fff !important}
+.per-green{background:#7cc576 !important;color:#fff !important}
+.per-yellow{background:#FFCC00 !important;color:#333 !important}
+.per-red{background:#ff0000 !important;color:#fff !important}
+.per-gray{background:#aaa !important;color:#333 !important}
 
 .graysmall-details .per-yellow, .graysmall-details .per-blue, .graysmall-details .per-orange, .graysmall-details .per-green {width:26px !important;text-align:center;display:block !important;}
 

@@ -114,6 +114,12 @@ abstract class Engine {
         }
 
         $this->raw_result = json_decode( $res, true );
+
+        if ( $this->raw_result['responseStatus'] == "503" ){
+            file_put_contents( INIT::$LOG_REPOSITORY . "/maintenance_contributions.txt", "[" . date( 'Y-m-d H:i:s' ) . "] -- " . $uniquid . " - " . Log::$uniqID . " ----- " . $this->url  . "  ----- \n", FILE_APPEND );
+            file_put_contents( INIT::$LOG_REPOSITORY . "/maintenance_contributions.txt", "[" . date( 'Y-m-d H:i:s' ) . "] -- " . $uniquid . " - " . Log::$uniqID . " - " . var_export($parameters,true) . "  -- \n", FILE_APPEND );
+        }
+
         Log::doLog( $uniquid . " ... Received... " . $res );
 
 	}

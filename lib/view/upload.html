@@ -13,8 +13,6 @@
 -->
 <html lang="en">
 <head>
-
-
     <!-- Force latest IE rendering engine or ChromeFrame if installed -->
     <!--[if IE]>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
@@ -33,6 +31,7 @@
     <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="${basepath}public/css/upload.css?build=${build_number}"/>
     <link rel="stylesheet" href="${basepath}public/js/lib/colorbox/colorbox.css?build=${build_number}"/>
+    <link href="${basepath}public/css/sidr.css" rel="stylesheet" type="text/css"/>
 
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]>
@@ -44,6 +43,7 @@
 	<script src="${basepath}public/js/common.js"></script>
 	<script src="${basepath}public/js/upload.js"></script>
 	<script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
+    <script src="${basepath}public/js/lib/jquery.sidr.js"></script>
 
     <script type="text/javascript">
         var config = {
@@ -232,7 +232,7 @@
 
             <p tal:condition="true:conversion_enabled" class="file-drag">
                 <strong>Drag and drop</strong> your file here<br/>
-				<span class="min">You may also import your own translation memories (TMX)</span><br />
+				<span tal:condition="true:isUploadTMXAllowed" class="min">You may also import your own translation memories (TMX)</span><br />
                 or</p>
 
             <p tal:condition="not:conversion_enabled" class="file-drag">
@@ -758,6 +758,30 @@
         </div>
     </div>
 </div>
+ 
+<div id="sidr">
+  <!-- Your content -->
+  <h2>Matecat Help</h2>
+    <p>Browse one of the articles or search our documentation</p>
+  <ul>
+    <li><a href="#">How to create a new project</a></li>
+    <li><a href="#">Machine Translation Engines</a></li>
+    <li><a href="#">Private TM</a></li>
+  </ul>
+  <a href="http://docs.matecat.com/creating-a-project" class="pull-right" target="_blank">more</a>
+  <form>
+    <input type="text" placeholder="Search..."/>
+</form>
+</div>
+ 
+<script>
+$(document).ready(function() {
+  $('#simple-menu').sidr({
+      side: 'right'
+    });
+
+});
+</script>
 
 
 <footer>
@@ -769,6 +793,8 @@
                 <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
                 <li><a tal:attributes="href string:${basepath}api/docs">API</a></li>
 				<li><a href="http://docs.matecat.com" target="_blank">Docs</a></li>
+                <li><a id="simple-menu" href="#sidr">New help</a></li>
+
             </ul>
 
             <tal:block tal:condition="php: empty(logged_user)">
@@ -1154,6 +1180,8 @@ $( ".cat-appear" ).mouseleave(function() {
 
 <script src="${basepath}public/js/lib/snapengage.js"></script>
 <img height='1' width='1' border='0' src='Http://www.clickmeter.com/conversion.aspx?id=5540EC432C934E0FB1EADDBA3A58E8EA&val=0.00&param=empty&com=0.00' />
+
+
 
 </body>
 

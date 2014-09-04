@@ -545,23 +545,31 @@ class ProjectManager {
 
 		//for each language detected, check if it's not equal to the source language
 		$langsDetected = $res['responseData']['translatedText'];
+                log::dolog(__CLASS__. " - DETECT LANG RES:", $langsDetected);
 		if($res !== null &&
 			is_array($langsDetected) &&
 			count($langsDetected) == count($this->projectStructure['array_files'])) {
 
 			$counter = 0;
 			foreach($langsDetected as $fileLang){
+				
 				$currFileName = $this->projectStructure['array_files'][$counter];
 
 				//get language code
-				$sourceLang = array_shift( explode ( "-", $this->projectStructure['source_language']) );
+				if (strpos ($fileLang,"-")===false){
+					$sourceLang = array_shift( explode ( "-", $this->projectStructure['source_language']) );
+				}else{
+					$sourceLang = $this->projectStructure['source_language'];
+				}
 
+                		log::dolog(__CLASS__. " - DETECT LANG COMPARISON:", "$fileLang@@$sourceLang");
 				//get extended language name using google language code
 				$languageExtendedName = langs_GoogleLanguageMapper::getLanguageCode( $fileLang );
 
 				//get extended language name using standard language code
 				$langClass = Languages::getInstance();
 				$sourceLanguageExtendedName = strtolower( $langClass->getLocalizedName($sourceLang) );
+				log::dolog(__CLASS__. " - DETECT LANG NAME COMPARISON:", "$sourceLanguageExtendedName@@$languageExtendedName");
 
 				//Check job's detected language. In case of undefined language, mark it as valid
 				if($fileLang !== 'und' &&

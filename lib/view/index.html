@@ -383,17 +383,16 @@
                 <p>Short description here. <a class="addtm-tr-back">Back</a></p>
                 <p class="warning-message" style="display: none;"><span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.<br />If you do not use a Private TM Key, the content of your TMX will be saved in a public TM</span></p>
                 <p class="error-message" style="display: none;"> Error: the errmsg will appear here... </p>
-                  
                 <p>
-                    <input type="checkbox" name="r" id="addtm-tr-key-read" />
+                    <input type="checkbox" name="r" value="0" id="addtm-tr-key-read" />
                     <label for="addtm-tr-key-read">Readable</label>
 
-                    <input type="checkbox" name="w" id="addtm-tr-key-write" />
+                    <input type="checkbox" name="w" value="0" id="addtm-tr-key-write" />
                     <label for="addtm-tr-key-write">Writable</label>
                 </p>
-                <input class="mgmt-input pull-left" type="text" id="addtm-tr-key-add"
-                       placeholder="Insert your private key" />
-                <a class="btn-ok pull-left">Add tm</a>
+                    
+                        <input class="mgmt-input pull-left" type="text" id="key" onfocus="this.value='';"  value="Insert your private key" />
+                        <a class="btn-ok pull-left">Add tm</a>
                     
                   
                    

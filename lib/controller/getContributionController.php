@@ -183,9 +183,32 @@ class getContributionController extends ajaxController {
             $config[ 'isConcordance' ] = $this->concordance_search;
 
             $tms = new TMS( $_TMS );
-            $tms_match = $tms->get( $config );
-            $tms_match = $tms_match->get_matches_as_array();
+            try{
+                $tm_keys = Utils::getJobTmKeys( $this->id_job, $this->password, 'r');
+                $matches = null;
 
+                if(!empty($tm_keys)) {
+                    unset($config['id_user']);
+                    $tms_match = array();
+                    foreach ($tm_keys as $i => $tm_info){
+                        $config['key'] = $tm_info['key'];
+
+                        $matches = $tms->get($config);
+
+                        $tms_match = array_merge($tms_match, $matches->get_matches_as_array());
+                    }
+                    usort($tms_match, array("getContributionController", 'sortContributionsByMatchDesc'));
+
+                    $tms_match = array_slice($tms_match, 0, 3);
+                }
+                else{
+                    // fallback to default user's key
+                    $tms_match = $tms->get( $config );
+                    $tms_match = $tms_match->get_matches_as_array();
+                }
+            }
+            catch(Exception $e){
+            }
         }
 
 		$mt_res = array();
@@ -320,7 +343,15 @@ class getContributionController extends ajaxController {
 //throw new Exception( '' );
         $this->result['data']['matches'] = $matches;
 
-	}
+        if( in_array( $this->id_translator,
+            array(
+                'MyMemory_962cb49bcbdb2febc9f7'
+            )
+        ) ){
+            $this->result['data']['fieldTest'] = 1;
+        }
+
+    }
 
     private function setSuggestionReport($matches) {
         if (count($matches) > 0) {
@@ -444,6 +475,13 @@ class getContributionController extends ajaxController {
 
         return $regularExpressions;
 
+    }
+
+    private static function sortContributionsByMatchDesc($contrib_1, $contrib_2){
+        $contrib_1 = rtrim($contrib_1['match'], "%");
+        $contrib_2 = rtrim($contrib_2['match'], "%");
+
+        return $contrib_2 >= $contrib_1;
     }
 
 }

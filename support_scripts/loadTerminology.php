@@ -1,5 +1,5 @@
 <?php
-$test = false;
+$test = true;
 $skip = true;
 
 include '/var/www/cattool/inc/config.inc.php';
@@ -18,16 +18,16 @@ $db->connect ();
 
 $glossaries = array(
 
-        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "it-IT" ),
-        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "da-DK" ),
-        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "nl-NL" ),
-        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "fr-FR" ),
-        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "de-DE" ),
-        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "pl-PL" ),
-        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "pt-PT" ),
-        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "ru-RU" ),
-        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "es-ES" ),
-        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "sv-SE" ),
+        array( 'file' => 'new_GlossaryNL2FR.csv', 'source' => "nl-NL", 'target' => "fr-FR" ),
+//        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "da-DK" ),
+//        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "nl-NL" ),
+//        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "fr-FR" ),
+//        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "de-DE" ),
+//        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "pl-PL" ),
+//        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "pt-PT" ),
+//        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "ru-RU" ),
+//        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "es-ES" ),
+//        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "sv-SE" ),
 
 );
 
@@ -41,14 +41,14 @@ foreach ( $glossaries as $gloss ) {
     $config[ 'target_lang' ] = $gloss['target'];
     $config[ 'email' ]       = "demo@matecat.com";
     $config[ 'get_mt' ]      = false;
-    $config[ 'id_user' ]     = "MyMemory_9e21425446e03d9e8952";
+    $config[ 'id_user' ]     = "06d8b80bb2fc5136e8a3";
     $config[ 'num_result' ]  = null;
     $config[ 'isGlossary' ]  = true;
 
 
     $fObject = new SplFileObject( $gloss['file'] );
     $fObject->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE );
-    $fObject->setCsvControl( ",", '\'' );
+    $fObject->setCsvControl( "\t", '"' );
 
 
     $tms = new TMS( 1 );
