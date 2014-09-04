@@ -67,9 +67,8 @@ class FileFormatConverter {
 			self::$Storage_Lookup_IP_Map[ $converter_storage['ip_converter'] ] = $converter_storage['ip_storage'];
 		}
 
-		//self::$converters = array('10.11.0.90' => 1);//for debugging purposes
 		self::$converters = array('10.30.1.114' => 1);//for debugging purposes
-		self::$Storage_Lookup_IP_Map = array('149.7.212.114' => '10.11.0.91');//for debugging purposes
+		self::$Storage_Lookup_IP_Map = array('10.30.1.114' => '10.30.1.114');//for debugging purposes
 
 		$this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
 
@@ -310,11 +309,10 @@ class FileFormatConverter {
 		}
 
 		//get random name for temporary location
-		$tmp_name='/tmp/'.sha1($filename).time();
+        $tmp_name = tempnam("/tmp", "MAT_FW");
 
 		//write encoded file to temporary location
 		file_put_contents($tmp_name, ($fileContent));
-
 
 		//assign file pointer for POST
 		$data['documentContent'] = "@$tmp_name";
@@ -406,7 +404,7 @@ class FileFormatConverter {
 		$data['uid'] = $uid_ext[0];
 		
 		//get random name for temporary location
-		$tmp_name='/tmp/'.sha1($filename).time();
+        $tmp_name = tempnam("/tmp", "MAT_BW");
 
 		//write encoded file to temporary location
 		file_put_contents($tmp_name, ($xliffContent));
