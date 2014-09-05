@@ -502,8 +502,8 @@ class ConvertersMonitor {
             $rebootTime             = new DateTime( $this->resultSet[ $ip_converter ][ 'last_update' ] );
             $thisTimeFailure = new DateTime();
 
-            //if this failure happened 5 minutes after reboot time
-            if( $thisTimeFailure->modify('-5 minutes') >= $rebootTime ){
+            //if this failure happened 10 minutes after reboot time
+            if( $thisTimeFailure->modify('-10 minutes') >= $rebootTime ){
 
                 self::_prettyEcho( "> *** FAILED REBOOT FOUND....", 4 );
 
