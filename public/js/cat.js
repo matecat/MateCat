@@ -243,17 +243,12 @@ UI = {
 					'<div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches">' +
 					'	<div class="overflow"></div>' +
 					'</div>' +
-                    '<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
-                    '   <div class="overflow">' +
-                    ((config.tms_enabled)?
-                            '<div class="cc-search">' +
-                                    '    <div class="input search-source" contenteditable="true" />' +
-                                    '    <div class="input search-target" contenteditable="true" />' +
-                                    '    <div class="results"></div>' +
-                                    '</div>' : '<ul class="graysmall message"><li>Concordance is not available when the TM feature is disabled</li></ul>') +
-
-                    '   </div>' +
-                    '</div>' +
+					'<div class="tab sub-editor concordances" id="segment-' + this.currentSegmentId + '-concordances">' +
+					'	<div class="overflow">' + 
+						((config.tms_enabled)? '<div class="cc-search"><div class="input search-source" contenteditable="true" /><div class="input search-target" contenteditable="true" /></div>' : '<ul class="graysmall message"><li>Concordance is not available when the TM feature is disabled</li></ul>') + 
+					'		<div class="results"></div>' +
+					'	</div>' +
+					'</div>' +
 					'<div class="tab sub-editor glossary" id="segment-' + this.currentSegmentId + '-glossary">' +
 					'	<div class="overflow">' + 
 
@@ -1450,35 +1445,6 @@ UI = {
             tab.trigger('click');
         }
     },
-
-    hexDump: function(data) {
-        var outputString = new String();
-        var addressPadding = "0000000";
-        var line = 0;
-        var countForCurrentLine = 0;
-
-        outputString +=
-                "Address   0  1  2  3  4  5  6  7  8  9  a  b  c  d  e  f \n" +
-                        "---------------------------------------------------------\n" +
-                        "00000000  ";
-
-        for (var i=0; i < data.length; i++) {
-            countForCurrentLine++
-            var byteData = data.substr(i, 1);
-
-            var number = data.charCodeAt(i) & 0xff;
-            var byteHex = (number < 16) ? "0" + number.toString(16) : number.toString(16);;
-
-            outputString += byteHex + " ";
-            if (countForCurrentLine == 16) {
-                countForCurrentLine = 0;
-                line++;
-                outputString += "\n" + addressPadding.substr(0, 7 - line.toString(16).length) + line.toString(16) + "0  ";
-            }
-        }
-        return outputString;
-    },
-
     renderAlternatives: function(d) {
         console.log('renderAlternatives d: ', d);
 //		console.log($('.editor .submenu').length);
@@ -2538,19 +2504,8 @@ UI = {
                             closeOnClick: 'true'
                         }
                     ],
-                    content: "Do you want to extend the autopropagation of this translation even to <span class='auto-propagation-review'>" + UI.propagationsAvailable + " already translated segments?</span>"
+                    content: "Do you want to extend the autopropagation of this translation even to " + UI.propagationsAvailable + " already translated segments?"
                 });
-
-                //set the parameters for search and perform it
-                $('.auto-propagation-review' ).on('click', function(){
-                    APP.closePopup();
-                    $("#filterSwitch").trigger('click');
-                    $("#search-source").val( $( '#' + $( segment ).attr('id') + '-source', segment ).text() );
-                    $('#select-status.search-select').val('translated' ).prop('selected', 'selected');
-                    $('#exact-match').prop('checked', 'checked');
-                    $("#exec-find" ).trigger('click');
-                });
-
             }
 
         }
@@ -2848,7 +2803,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.4.0.1";
+		this.version = "0.4.0.2";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -3297,7 +3252,7 @@ $.extend(UI, {
                 e.preventDefault();
                 $('.addtm-tr').show();
                 $('.addtm-tr-key').hide();
-        }).on('click', '.addtm-tr .btn-ok', function(e) {
+        }).on('click', '#addtm-create-key', function(e) {
             e.preventDefault();
             //prevent double click
             if($(this).hasClass('disabled')) return false;
@@ -3311,13 +3266,145 @@ $.extend(UI, {
                 }
                 //put value into input field
                 $('#addtm-tr-key').val(data.key);
+                $('#addtm-create-key').removeClass('disabled');
 //                $('#private-tm-user').val(data.id);
 //                $('#private-tm-pass').val(data.pass);
 //                $('#create_private_tm_btn').attr('data-key', data.key);
-                //hide spinner
-//                $('#get-new-tm-spinner').hide();
                 return false;
             })
+        }).on('click', '.addtm-tr-key .btn-ok', function(e) {
+            var r = ($('#addtm-tr-key-read').is(':checked'))? 1 : 0;
+            var w = ($('#addtm-tr-key-write').is(':checked'))? 1 : 0;
+            APP.doRequest({
+                data: {
+                    action: 'addTM',
+                    job_id: config.job_id,
+                    job_pass: config.password,
+                    tm_key: $('#addtm-tr-key-add').val(),
+                    r: r,
+                    w: w
+                },
+                error: function() {
+                    console.log('addTM error!!');
+                },
+                success: function(d) {
+                    console.log('addTM success!!');
+                }
+            });
+        }).on('click', '#addtm-add', function(e) {
+            e.preventDefault();
+            $('#addtm-add').addClass('disabled');
+
+            //create an iFrame element
+            var iFrameAddTM = $( document.createElement( 'iframe' ) ).hide().prop({
+                id: 'iFrameAddTM',
+                src: ''
+            });
+
+            //append iFrame to the DOM
+            $("body").append( iFrameAddTM );
+
+
+/*
+            //generate a token addTM
+            var addTMToken = new Date().getTime();
+
+            //set event listner, on ready, attach an interval that check for finished download
+            iFrameAddTM.ready(function () {
+
+                //create a GLOBAL setInterval so in anonymous function it can be disabled
+                addTMTimer = window.setInterval(function () {
+
+                    //check for cookie
+                    var token = $.cookie('addTMToken');
+                    console.log('TOKEN: ', token);
+
+                    //if the cookie is found, download is completed
+                    //remove iframe an re-enable download button
+                    if ( token == addTMToken ) {
+                        $('#addtm-add').removeClass('disabled').val( $('#addtm-add' ).data('oldValue') ).removeData('oldValue');
+                        window.clearInterval( addTMTimer );
+                        $.cookie('addTMToken', null, { path: '/', expires: -1 });
+                        iFrameAddTM.remove();
+                    }
+
+                }, 2000);
+
+            });
+
+            //clone the html form and append a token for download
+            var iFrameAddTMForm = $("#addTMForm").clone().append(
+                $( document.createElement( 'input' ) ).prop({
+                    type: 'hidden',
+                    name: 'addTMToken',
+                    value: addTMToken
+                })
+            );
+*/
+            var iFrameAddTMForm = $("#addTMForm").clone();
+            //append from to newly created iFrame and submit form post
+            iFrameAddTM.contents().find('body').append( iFrameAddTMForm );
+            console.log('vediamo:', iFrameAddTM.contents().find("#addTMForm"));
+            iFrameAddTM.contents().find("#addTMForm").submit();
+
+            /*
+                        //check if we are in download status
+                        if ( !$('#downloadProject').hasClass('disabled') ) {
+
+                            //disable download button
+                            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING...');
+
+                            //create an iFrame element
+                            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
+                                id:'iframeDownload',
+                                src: ''
+                            });
+
+                            //append iFrame to the DOM
+                            $("body").append( iFrameDownload );
+
+                            //generate a token download
+                            var downloadToken = new Date().getTime();
+
+                            //set event listner, on ready, attach an interval that check for finished download
+                            iFrameDownload.ready(function () {
+
+                                //create a GLOBAL setInterval so in anonymous function it can be disabled
+                                downloadTimer = window.setInterval(function () {
+
+                                    //check for cookie
+                                    var token = $.cookie('downloadToken');
+
+                                    //if the cookie is found, download is completed
+                                    //remove iframe an re-enable download button
+                                    if ( token == downloadToken ) {
+                                        $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
+                                        window.clearInterval( downloadTimer );
+                                        $.cookie('downloadToken', null, { path: '/', expires: -1 });
+                                        iFrameDownload.remove();
+                                    }
+
+                                }, 2000);
+
+                            });
+
+                            //clone the html form and append a token for download
+                            var iFrameForm = $("#fileDownload").clone().append(
+                                $( document.createElement( 'input' ) ).prop({
+                                    type:'hidden',
+                                    name:'downloadToken',
+                                    value: downloadToken
+                                })
+                            );
+
+                            //append from to newly created iFrame and submit form post
+                            iFrameDownload.contents().find('body').append( iFrameForm );
+                            iFrameDownload.contents().find("#fileDownload").submit();
+
+                        } else {
+                            //we are in download status
+                        }
+             */
  /*
             APP.doRequest({
                 data: {
@@ -3800,7 +3887,7 @@ $.extend(UI, {
         }).on('keyup', '.editor .editarea', 'return', function(e) {
             console.log('UI.defaultBRmanagement: ', UI.defaultBRmanagement);
 
-//            if(!UI.defaultBRmanagement) {
+ //           if(!UI.defaultBRmanagement) {
                 console.log( 'Enter key is disabled!' );
                 e.preventDefault();
                 return false;
@@ -5319,7 +5406,7 @@ $.extend(UI, {
 		
 		if (this.noTagsInSegment(1))
 			return false;
-		$('.source, .editarea').each(function() {
+		$('.source').each(function() {
 			UI.lockTags(this);
 		});
 	},

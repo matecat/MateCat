@@ -212,7 +212,76 @@
 
         </header>
 
-       
+        <div tal:attributes="class string:searchbox${filtered_class}">
+            <form>
+
+                <div class="search-inputs">
+
+                    <div class="block">
+                        <label for="search-source">Find in source</label>
+                        <input id="search-source" class="search-input" type="text" value=""/>
+                    </div>
+                    <div class="block">
+                        <div class="field">
+                            <label for="search-target">Find in target</label>
+                            <input id="search-target" class="search-input" type="text" value=""/>
+                        </div>
+
+                        <div class="field">
+						<input id="enable-replace" type="checkbox" />
+						<label for="enable-replace">Replace with</label>
+						<input id="replace-target" disabled="disabled" class="search-input" type="text" value=""/>
+                        </div>
+
+                        <!--div class="field">
+                            <label for="replace-target">Replace with</label>
+                            <input id="replace-target" class="search-input" type="text" value=""/>
+                        </div-->
+
+
+                    </div>
+                    <div class="block">
+                        <label for="select-status">Status</label>
+                        <select id="select-status" class="search-select" >
+                            <option value="all" selected="selected">All</option>
+                            <option value="new">New</option>
+                            <option value="draft">Draft</option>
+                            <option value="translated">Translated</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+                    <div class="block right buttons">
+                        <div class="field">
+                            <input id="exec-cancel" type="button" class="btn" value="Cancel" />
+                            <input id="exec-find" type="button" class="btn" data-func="find" value="Find" />
+                        </div>
+
+                        <div class="field">
+                            <input id="exec-replaceall" type="button" class="btn" disabled="disabled" value="Replace all" />
+                            <input id="exec-replace" type="button" class="btn" disabled="disabled" value="Replace" />
+                        </div>
+
+                    </div>
+                </div>
+
+                <div class="search-options">
+                    <div class="block">
+                        <input id="match-case" type="checkbox" />
+                        <label for="match-case">Match case</label>
+                    </div>
+                    <div class="block">
+                        <input id="exact-match" type="checkbox" />
+                        <label for="exact-match">Exact match</label>
+                    </div>
+                </div>
+
+            </form>
+            <div class="search-display">
+                <p class="searching">Searching ...</p>
+                <p class="found"><span class="numbers">Found <span class="results">...</span> results in <span class="segments">...</span> segments</span> having<span class="query">...</span></p>
+            </div>
+        </div>
 
         <div id="outer">
 
@@ -282,19 +351,45 @@
                     </div>
                     <div class="block pull-left">
                         <input class="mgmt-input" type="text" id="addtm-tr-key" onfocus="this.value='';"  placeholder="Create new private key" />
-                        <a class="btn-ok pull-right">Create</a>
+                        <a id="addtm-create-key" class="btn-ok pull-right">Create</a>
                     </div>
                     <div class="block">
                         <label class="fileupload">Select a TMX </label><input type="file" />
                     </div>
-                    <input type="button" value="Add a TM" id="add" class="pull-right add-tm-ok btn-ok" onclick="Javascript:addRow()" />
+                    <p>
+                        <input type="checkbox" name="r" value="0" id="addtm-tr-read" />
+                        <label for="addtm-tr-read">Readable</label>
+
+                        <input type="checkbox" name="w" value="0" id="addtm-tr-write" />
+                        <label for="addtm-tr-write">Writable</label>
+                    </p>
+                    <form metal:define-slot="actions" id="addTMForm" action="${basepath}" method="post">
+                        <input type="hidden" name="action" value="addTM" />
+                        <input type="hidden" name="exec" value="newTM" />
+                        <input type="hidden" name="job_id" value="" tal:attributes="value jid | nothing" />
+                        <input type="hidden" name="job_pass" tal:attributes="value password" />
+                        <input type="hidden" name="tm_key" value="" />
+                        <input type="hidden" name="name" value="" />
+                        <input type="hidden" name="tmx_file" value="" />
+                        <input type="hidden" name="r" value="1" />
+                        <input type="hidden" name="w" value="1" />
+                        <input type="button" name="submit" value="Add a TM" id="addtm-add"
+                               class="pull-right add-tm-ok btn-ok" />
+<!--                        <input id="downloadProject" name="submit1" type="button" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'DOWNLOAD TRANSLATION' : 'PREVIEW'" /> -->
+                    </form>
             </div>
             <div class="addtm-tr-key">
                 <h3>Add a TM key</h3>
                 <p>Short description here. <a class="addtm-tr-back">Back</a></p>
                 <p class="warning-message" style="display: none;"><span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.<br />If you do not use a Private TM Key, the content of your TMX will be saved in a public TM</span></p>
                 <p class="error-message" style="display: none;"> Error: the errmsg will appear here... </p>
-                  
+                <p>
+                    <input type="checkbox" name="r" value="0" id="addtm-tr-key-read" />
+                    <label for="addtm-tr-key-read">Readable</label>
+
+                    <input type="checkbox" name="w" value="0" id="addtm-tr-key-write" />
+                    <label for="addtm-tr-key-write">Writable</label>
+                </p>
                     
                         <input class="mgmt-input pull-left" type="text" id="key" onfocus="this.value='';"  value="Insert your private key" />
                         <a class="btn-ok pull-left">Add tm</a>
