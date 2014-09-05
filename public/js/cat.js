@@ -154,7 +154,7 @@ UI = {
 	},
 	copySource: function() {
 
-		var source_val = $.trim($(".source", this.currentSegment).html());
+		var source_val = $.trim($(".source", this.currentSegment).html() ).replace( /(<mark[^>]+>)|(<\/mark>)/gi, "");
 //		var source_val = $.trim($(".source", this.currentSegment).text());
 		// Test
 		//source_val = source_val.replace(/&quot;/g,'"');
