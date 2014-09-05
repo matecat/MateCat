@@ -182,7 +182,7 @@ class addTMController extends ajaxController {
         );
 
         try{
-            $job_tmKeys = Utils::getJobTmKeys($this->job_id, $this->job_pass, "rw");
+            $job_tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys($this->job_data[ 'tm_keys' ], "rw");
         }
         catch(Exception $e ){
             $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "Could not retrieve TM keys from the database." );
@@ -203,7 +203,7 @@ class addTMController extends ajaxController {
         //link tm key to the job
         $job_tmKeys = self::putTmKey($job_tmKeys, $tmKey_structure);
 
-        Utils::setJobTmKeys($this->job_id, $this->job_pass, $job_tmKeys);
+        TmKeyManagement_TmKeyManagement::setJobTmKeys($this->job_id, $this->job_pass, $job_tmKeys);
     }
 
     /**

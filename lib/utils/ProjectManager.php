@@ -316,7 +316,7 @@ class ProjectManager {
 		//loop again through files to check to check for TMX loading
 		foreach ( $this->projectStructure['array_files'] as $fileName ) {
 
-			//if TMX, 
+			//if TMX,
 			if('tmx'== pathinfo($fileName, PATHINFO_EXTENSION)){
 				//is the TM loaded?
 				$loaded=false;
@@ -324,7 +324,7 @@ class ProjectManager {
 				//wait until current TMX is loaded
 				while(!$loaded){
 					//now we repeatedly scan the list of loaded TMs
-					//this counter is used to get the latest TM in case of duplicates 
+					//this counter is used to get the latest TM in case of duplicates
 					$tmx_max_id=0;
 
 					//check if TM has been loaded
@@ -337,7 +337,7 @@ class ProjectManager {
 
 					}
 
-					//scan through memories 
+					//scan through memories
 					foreach ( $allMemories[ 'responseData' ][ 'tm' ] as $memory ) {
 						//obtain max id
 						$tmx_max_id = max( $tmx_max_id, $memory[ 'id' ] );
@@ -350,7 +350,7 @@ class ProjectManager {
 
 					switch($current_tm['status']){
 						case "0":
-							//wait for the daemon to process it 
+							//wait for the daemon to process it
 							//THIS IS WRONG BY DESIGN, WE SHOULD NOT ACT AS AN ASYNCH DAEMON WHILE WE ARE IN A SYNCH APACHE PROCESS
 							log::doLog("waiting for \"$fileName\" to be loaded into MyMemory");
 							sleep(3);
