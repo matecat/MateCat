@@ -61,7 +61,8 @@ class ProjectManager {
 					'job_to_split_pass'  => null,
 					'split_result'       => null,
 					'job_to_merge'       => null,
-					'lang_detect_files'  => array()
+					'lang_detect_files'  => array(),
+                    'tm_keys'            => array()
 				) );
 		}
 
@@ -498,6 +499,10 @@ class ProjectManager {
 			$job_segments = mysql_fetch_assoc( $res );
 
 			$password = $this->_generatePassword();
+
+            //TODO Refactory in phase 2
+            $projectStructure[ 'tm_keys' ] = json_encode( array( $projectStructure[ 'private_tm_user' ] ) );
+
 			$jid = insertJob( $projectStructure, $password, $target, $job_segments, $owner );
 			$projectStructure['array_jobs']['job_list']->append( $jid );
 			$projectStructure['array_jobs']['job_pass']->append( $password );
