@@ -98,32 +98,28 @@ class TmKeyManagement_TmKeyManagement {
             throw new Exception( "Invalid array" );
         }
 
-        //json_decode each row
-        $tmKeys_array = array_map( 'json_decode', $jsonTmKeys_array,
-            //this workaround passes to array_map an array of true parameters
-            //for each string that will be json_decoded
-            array_fill(
-                0,
-                count( $jsonTmKeys_array ),
-                true )
-        );
-
-        if ( is_null( $tmKeys_array ) || empty( $tmKeys_array ) ) {
-            Log::doLog( __METHOD__ . " -> Invalid JSON." );
-            Log::doLog( var_export( $jsonTmKeys_array, true ) );
-            throw new Exception ( "Invalid JSON" );
-        }
-
         $result_arr = array();
 
-        foreach ( $tmKeys_array as $tmKey_arr ) {
-            //filter tm_keys by ownership
-            array_filter( $tmKey_arr, array( 'self', 'filterTmKeysByOwnerTrue' ) );
+        foreach( $jsonTmKeys_array as $pos => $tmKey ){
 
-            $result_arr = array_merge( $result_arr, $tmKey_arr );
+            $tmKey = json_decode($tmKey, true);
+
+            if ( is_null( $tmKey ) || empty( $tmKey ) ) {
+                Log::doLog( __METHOD__ . " -> Invalid JSON." );
+                Log::doLog( var_export( $tmKey, true ) );
+                throw new Exception ( "Invalid JSON" );
+            }
+
+            $tmKey = array_filter( $tmKey, array( 'self', 'filterTmKeysByOwnerTrue' ) );
+
+            $result_arr[] = $tmKey;
+
         }
 
         $result_arr = array_unique( $result_arr );
+
+        //take only the first Job entries
+        $result_arr = $result_arr[0];
 
         //convert tm keys into TmKeyManagement_TmKeyStruct objects
         $result_arr = array_map( array( 'self', 'getTmKeyStructure' ), $result_arr );
@@ -205,7 +201,7 @@ class TmKeyManagement_TmKeyManagement {
      * @param $tm_key TmKeyManagement_TmKeyStruct
      * @return bool This function returns whether the elements is filtered or not
      */
-    private static function filterTmKeysByOwnerTrue( TmKeyManagement_TmKeyStruct $tm_key ) {
-        return $tm_key->owner == 1;
+    private static function filterTmKeysByOwnerTrue(  $tm_key ) {
+        return $tm_key['owner'] == 1;
     }
 }
