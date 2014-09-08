@@ -180,14 +180,6 @@ $.extend(UI, {
         }).on('click', '.open-popup-addtm-tr', function(e) {
             e.preventDefault();
             $('.popup-addtm-tr').show();
-        }).on('click', '.addtm-tr-key-open', function(e) {
-            e.preventDefault();
-            $('.addtm-tr').hide();
-            $('.addtm-tr-key').show();
-        }).on('click', '.addtm-tr-back', function(e) {
-                e.preventDefault();
-                $('.addtm-tr').show();
-                $('.addtm-tr-key').hide();
         }).on('click', '#addtm-create-key', function(e) {
             e.preventDefault();
             //prevent double click

@@ -337,32 +337,34 @@
         <a href="#" class="x-popup"></a>
 
         <h1>
-            Language Resources
+            Load a TM
         </h1>
 
         <div class="popup-box">
             <div class="addtm-tr">
-                <h3>Add a TM</h3>
-                <p>Short description here. <a class="addtm-tr-key-open">Got a key? Insert it here</a></p>
+                <h2>Add a TM</h2>
+                <p>Short description here.</p>
                 <p class="warning-message" style="display: none;"><span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.</span></p>
                 <p class="error-message" style="display: none;"> Error: the errmsg will appear here... </p>
                     <div class="block pull-left">
                         <input class="mgmt-input" type="text" width="20" id="addtm-tr-name" onfocus="this.value='';"  placeholder="Enter a name" />
                     </div>
-                    <div class="block pull-left">
+
+                    <div class="block block-last pull-left">
                         <input class="mgmt-input" type="text" id="addtm-tr-key" onfocus="this.value='';"  placeholder="Create new private key" />
                         <a id="addtm-create-key" class="btn-ok pull-right">Create</a>
                     </div>
                     <div class="block">
-                        <label class="fileupload">Select a TMX </label><input type="file" />
+                        <label class="fileupload pull-left">Select a TMX </label><input type="file" />
                     </div>
-                    <p>
+                     <br class="clear" />
+                    <div class="pull-left">
                         <input type="checkbox" name="r" value="0" id="addtm-tr-read" />
                         <label for="addtm-tr-read">Readable</label>
 
                         <input type="checkbox" name="w" value="0" id="addtm-tr-write" />
                         <label for="addtm-tr-write">Writable</label>
-                    </p>
+                    </div>
                     <form metal:define-slot="actions" id="addTMForm" action="${basepath}" method="post">
                         <input type="hidden" name="action" value="addTM" />
                         <input type="hidden" name="exec" value="newTM" />
@@ -373,26 +375,29 @@
                         <input type="hidden" name="tmx_file" value="" />
                         <input type="hidden" name="r" value="1" />
                         <input type="hidden" name="w" value="1" />
-                        <input type="button" name="submit" value="Add a TM" id="addtm-add"
+                        <input type="button" name="submit" value="Create a TM" id="addtm-add"
                                class="pull-right add-tm-ok btn-ok" />
 <!--                        <input id="downloadProject" name="submit1" type="button" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'DOWNLOAD TRANSLATION' : 'PREVIEW'" /> -->
                     </form>
             </div>
+            <br class="clear" />
             <div class="addtm-tr-key">
-                <h3>Add a TM key</h3>
-                <p>Short description here. <a class="addtm-tr-back">Back</a></p>
+                <h2>Add a TM key</h2>
+                <p>Short description here.</p>
                 <p class="warning-message" style="display: none;"><span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.<br />If you do not use a Private TM Key, the content of your TMX will be saved in a public TM</span></p>
                 <p class="error-message" style="display: none;"> Error: the errmsg will appear here... </p>
-                <p>
+                
+                    
+                        <input class="mgmt-input pull-left" type="text" id="key" onfocus="this.value='';"  value="Insert your private key" />
+                        
+                        <div class="pull-left clear">
                     <input type="checkbox" name="r" value="0" id="addtm-tr-key-read" />
                     <label for="addtm-tr-key-read">Readable</label>
 
                     <input type="checkbox" name="w" value="0" id="addtm-tr-key-write" />
                     <label for="addtm-tr-key-write">Writable</label>
-                </p>
-                    
-                        <input class="mgmt-input pull-left" type="text" id="key" onfocus="this.value='';"  value="Insert your private key" />
-                        <a class="btn-ok pull-left">Add tm</a>
+                </div>
+                        <a class="btn-ok pull-right">Add Existing TM</a>
                     
                   
                    
@@ -635,10 +640,6 @@
                                 </div>
         -->
         <script src="${basepath}public/js/lib/snapengage.js"></script>
-		<script type="text/javascript">
-		$( ".open-popup-tmx" ).click(function() {
-  $( this ).hide();
-});
-		</script>
+		
     </body>
 </html>
