@@ -466,8 +466,12 @@ UI = {
 //		$('#filterSwitch').show();
 //		this.searchEnabled = true;
 //	},
+    fixHeaderHeightChange: function() {
+        headerHeight = $('header .wrapper').height() + ((this.body.hasClass('filterOpen'))? $('header .searchbox').height() : 0) + ((this.body.hasClass('incomingMsg'))? $('header #messageBar').height() : 0);
+        $('#outer').css('margin-top', headerHeight + 'px');
+    },
 
-	nextUnloadedResultSegment: function() {
+    nextUnloadedResultSegment: function() {
 		var found = '';
 		var last = $('section').last().attr('id').split('-')[1];
 		$.each(this.searchResultsSegments, function() {
@@ -2793,6 +2797,7 @@ $.extend($.expr[":"], {
 });
 
 $(window).resize(function() {
+    UI.fixHeaderHeightChange();
 });
 
 
