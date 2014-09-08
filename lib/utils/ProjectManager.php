@@ -871,6 +871,28 @@ class ProjectManager {
         $first_job[ 'job_first_segment' ] = $job_first_segment; // redundant
         $first_job[ 'job_last_segment' ]  = $job_last_segment;
 
+        //merge TM keys: preserve only owner's keys
+        $tm_keys = array();
+        foreach($rows as $chunk_info){
+            $tm_keys[] = $chunk_info[ 'tm_keys' ];
+        }
+
+        try{
+            $owner_tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys($tm_keys);
+
+            /**
+             * @var $owner_key TmKeyManagement_TmKeyStruct
+             */
+            foreach($owner_tm_keys as $i => $owner_key){
+                $owner_tm_keys[$i] = $owner_key->toArray();
+            }
+
+            $first_job[ 'tm_keys' ] = json_encode($owner_tm_keys);
+        }
+        catch(Exception $e){
+            Log::doLog(__METHOD__ . " -> Merge Jobs error - TM key problem: ".$e->getMessage());
+        }
+
         $oldPassword = $first_job[ 'password' ];
         if ( $renewPassword ) {
             $first_job[ 'password' ] = self::_generatePassword();
