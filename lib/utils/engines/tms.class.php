@@ -83,6 +83,10 @@ class TMS extends Engine {
 
     }
 
+    /**
+     * @param array $_config
+     * @return bool True if set was successful, false otherwise
+     */
     public function set( array $_config ) {
 
         $parameters               = array();

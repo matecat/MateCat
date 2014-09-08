@@ -28,7 +28,7 @@ class TmKeyManagement_TmKeyManagement {
      *
      * @param   $jsonTmKeys  string  A json string representing an array of TmKeyStruct Objects
      * @param   $grant_level string  One of the following strings : "r", "w", "rw"
-     * @return  array|mixed
+     * @return  array|mixed  An array of TmKeyManagement_TmKeyStruct objects
      * @throws  Exception    Throws Exception if grant_level string is wrong
      *
      * @see TmKeyManagement_TmKeyStruct
@@ -65,7 +65,6 @@ class TmKeyManagement_TmKeyManagement {
         }
 
         $tmKeys = array_values( $tmKeys );
-
         $tmKeys = array_map( array( 'self', 'getTmKeyStructure' ), $tmKeys );
 
         return $tmKeys;
@@ -100,7 +99,7 @@ class TmKeyManagement_TmKeyManagement {
         }
 
         //json_decode each row
-        $tmKeys_array = array_map('json_decode', $jsonTmKeys_array,
+        $tmKeys_array = array_map( 'json_decode', $jsonTmKeys_array,
             //this workaround passes to array_map an array of true parameters
             //for each string that will be json_decoded
             array_fill(
@@ -148,7 +147,7 @@ class TmKeyManagement_TmKeyManagement {
                 0,
                 count( $jsonTmKeys_array ),
                 true )
-         );
+        );
 
         if ( is_null( $tmKeys_array ) || empty( $tmKeys_array ) ) {
             Log::doLog( __METHOD__ . " -> Invalid JSON." );
@@ -164,7 +163,7 @@ class TmKeyManagement_TmKeyManagement {
         //eliminate duplicates
         $result_arr = array_unique( $result_arr );
 
-        $result_arr = array_map( array( 'self', 'getTmKeyStructure' ), $result_arr);
+        $result_arr = array_map( array( 'self', 'getTmKeyStructure' ), $result_arr );
 
         return $result_arr;
     }

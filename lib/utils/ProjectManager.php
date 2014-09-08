@@ -493,8 +493,20 @@ class ProjectManager {
 
             $password = $this->_generatePassword();
 
+            $tm_key = array();
             //TODO Refactory in phase 2
-            $projectStructure[ 'tm_keys' ] = json_encode( array( $projectStructure[ 'private_tm_user' ] ) );
+            if ( !empty( $projectStructure[ 'private_tm_key' ] ) ) {
+                $tm_key[] = array(
+                        'type'  => 'tmx',
+                        'owner' => 1,
+                        'name'  => '',
+                        'key'   => $projectStructure[ 'private_tm_key' ],
+                        'r'     => 1,
+                        'w'     => 1
+                );
+            }
+
+            $projectStructure[ 'tm_keys' ] = json_encode( $tm_key );
 
             $jid = insertJob( $projectStructure, $password, $target, $job_segments, $owner );
             $projectStructure['array_jobs']['job_list']->append( $jid );

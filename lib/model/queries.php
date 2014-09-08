@@ -1658,7 +1658,7 @@ function insertJob( ArrayObject $projectStructure, $password, $target_language, 
     $data[ 'owner' ]             = $owner;
     $data[ 'job_first_segment' ] = $job_segments[ 'job_first_segment' ];
     $data[ 'job_last_segment' ]  = $job_segments[ 'job_last_segment' ];
-    $data[ 'tm_keys' ]           = $job_segments[ 'tm_keys' ];
+    $data[ 'tm_keys' ]           = $projectStructure[ 'tm_keys' ];
 
     $query = "SELECT LAST_INSERT_ID() FROM jobs";
 
