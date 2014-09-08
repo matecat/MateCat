@@ -65,18 +65,18 @@ class addTMController extends ajaxController {
         parent::__construct();
 
         $filterArgs = array(
-            'job_id'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'job_pass' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'name'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'tm_key'   => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'exec'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'r'        => array( 'filter' => FILTER_SANITIZE_STRING),
-            'w'        => array( 'filter' => FILTER_SANITIZE_STRING)
+                'job_id'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'job_pass' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+                'name'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+                'tm_key'   => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+                'exec'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+                'r'        => array( 'filter' => FILTER_SANITIZE_STRING ),
+                'w'        => array( 'filter' => FILTER_SANITIZE_STRING )
         );
 
-        $postInput = (object) filter_input_array( INPUT_POST, $filterArgs );
+        $postInput = (object)filter_input_array( INPUT_POST, $filterArgs );
 
-        $this->job_id   = (int) $postInput->job_id;
+        $this->job_id   = (int)$postInput->job_id;
         $this->job_pass = $postInput->job_pass;
         $this->name     = $postInput->name;
         $this->tm_key   = $postInput->tm_key;
@@ -90,7 +90,9 @@ class addTMController extends ajaxController {
 
         //if Engine is not MyMemory, raise an error to the client.
         if ( !$this->job_data[ 'id_mt_engine' ] == 1 ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "MT Engine is not MyMemory. TMX cannot be added." );
+            $this->result[ 'errors' ][ ] = array(
+                    "code" => -1, "message" => "MT Engine is not MyMemory. TMX cannot be added."
+            );
         }
 
         if ( empty( $this->tm_key ) ) {
@@ -109,7 +111,7 @@ class addTMController extends ajaxController {
             $this->result[ 'errors' ][ ] = array( "code" => -5, "message" => "Please specify the read grant." );
         }
 
-        if ( !is_numeric($this->r_grant)) {
+        if ( !is_numeric( $this->r_grant ) ) {
             $this->result[ 'errors' ][ ] = array( "code" => -5, "message" => "Read grant must be 0 or 1." );
         }
 
@@ -117,7 +119,7 @@ class addTMController extends ajaxController {
             $this->result[ 'errors' ][ ] = array( "code" => -6, "message" => "Please specify the write grant." );
         }
 
-        if ( !is_numeric($this->w_grant)) {
+        if ( !is_numeric( $this->w_grant ) ) {
             $this->result[ 'errors' ][ ] = array( "code" => -6, "message" => "Write grant must be 0 or 1." );
         }
 
@@ -136,13 +138,15 @@ class addTMController extends ajaxController {
             $i = 0;
             foreach ( $this->file as $k => $fileInfo ) {
 
-                if ( pathinfo( $fileInfo->name, PATHINFO_EXTENSION ) !== 'tmx' )
+                if ( pathinfo( $fileInfo->name, PATHINFO_EXTENSION ) !== 'tmx' ) {
                     $this->result[ 'errors' ][ ] = array( "code" => -8, "message" => "Please upload a TMX." );
+                }
                 $i++;
             }
 
-            if ( $i == 0 )
+            if ( $i == 0 ) {
                 $this->result[ 'errors' ][ ] = array( "code" => -8, "message" => "Please upload a TMX." );
+            }
         }
     }
 
@@ -153,7 +157,9 @@ class addTMController extends ajaxController {
      */
     public function doAction() {
         //check if there was an error in constructor. If so, stop execution.
-        if ( !empty( $this->result[ 'errors' ] ) ) return false;
+        if ( !empty( $this->result[ 'errors' ] ) ) {
+            return false;
+        }
 
         //validate the key
         $keyExists = $this->apiKeyService->checkCorrectKey( $this->tm_key );
@@ -168,42 +174,48 @@ class addTMController extends ajaxController {
             if ( $this->addTmxInMyMemory() ) {
                 //start loop and wait for the files to be imported in MyMemory
                 //MyMemory parses more or less 80 segments/sec per TMX
-                if ( !$this->checkTmxImportStatus() ) return;
+                if ( !$this->checkTmxImportStatus() ) {
+                    return;
+                }
             }
         }
 
         $tmKey_structure = array(
-            'type'      => "tmx",
-            'owner'     => 0,
-            'name'      => $this->name,
-            'key'       => $this->tm_key,
-            'r'         => $this->r_grant,
-            'w'         => $this->w_grant
+                'type'  => "tmx",
+                'owner' => 0,
+                'name'  => $this->name,
+                'key'   => $this->tm_key,
+                'r'     => $this->r_grant,
+                'w'     => $this->w_grant
         );
 
-        try{
-            $job_tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys($this->job_data[ 'tm_keys' ], "rw");
-        }
-        catch(Exception $e ){
-            $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "Could not retrieve TM keys from the database." );
-            Log::doLog($e->getMessage());
+        try {
+            $job_tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $this->job_data[ 'tm_keys' ], "rw" );
+        } catch ( Exception $e ) {
+            $this->result[ 'errors' ][ ] = array(
+                    "code" => -10, "message" => "Could not retrieve TM keys from the database."
+            );
+            Log::doLog( $e->getMessage() );
+
             return;
         }
 
-        if($job_tmKeys == null) $job_tmKeys = array();
+        if ( $job_tmKeys == null ) {
+            $job_tmKeys = array();
+        }
 
         if ( $this->isLoggedIn() ) {
 
-            if($this->job_data['owner'] == $_SESSION[ 'cid' ]){
-                $tmKey_structure['owner'] = 1;
+            if ( $this->job_data[ 'owner' ] == $_SESSION[ 'cid' ] ) {
+                $tmKey_structure[ 'owner' ] = 1;
             }
             //todo: link tm key to the current user
         }
 
         //link tm key to the job
-        $job_tmKeys = self::putTmKey($job_tmKeys, $tmKey_structure);
+        $job_tmKeys = self::putTmKey( $job_tmKeys, $tmKey_structure );
 
-        TmKeyManagement_TmKeyManagement::setJobTmKeys($this->job_id, $this->job_pass, $job_tmKeys);
+        TmKeyManagement_TmKeyManagement::setJobTmKeys( $this->job_id, $this->job_pass, $job_tmKeys );
     }
 
     /**
@@ -217,7 +229,9 @@ class addTMController extends ajaxController {
 
             $uploadedFiles = $uploadManager->uploadFiles( $_FILES );
         } catch ( Exception $e ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -8, "message" => "Cant't upload TMX files right now, try later." );
+            $this->result[ 'errors' ][ ] = array(
+                    "code" => -8, "message" => "Cant't upload TMX files right now, try later."
+            );
             Log::doLog( $e->getMessage() );
         }
 
@@ -237,14 +251,16 @@ class addTMController extends ajaxController {
             foreach ( $this->file as $k => $fileInfo ) {
 
                 $importStatus = $this->tmxServiceWrapper->import(
-                                                        $fileInfo->file_path,
-                                                            $this->tm_key
+                        $fileInfo->file_path,
+                        $this->tm_key
                 );
 
                 //check for errors during the import
                 switch ( $importStatus ) {
                     case "400" :
-                        $this->result[ 'errors' ][ ] = array( "code" => -15, "message" => "Cant't load TMX files right now, try later" );
+                        $this->result[ 'errors' ][ ] = array(
+                                "code" => -15, "message" => "Can't load TMX files right now, try later"
+                        );
                         $fileImportStarted           = false;
                         break;
                     case "403" :
@@ -284,7 +300,9 @@ class addTMController extends ajaxController {
 
                 if ( "200" != $allMemories[ 'responseStatus' ] || 0 == count( $allMemories[ 'responseData' ][ 'tm' ] ) ) {
                     //what the hell? No memories although I've just loaded some? Eject!
-                    $this->result[ 'errors' ][ ] = array( "code" => -15, "message" => "Cant't load TMX files right now, try later" );
+                    $this->result[ 'errors' ][ ] = array(
+                            "code" => -15, "message" => "Cant't load TMX files right now, try later"
+                    );
 
                     return false;
                 }
@@ -313,7 +331,9 @@ class addTMController extends ajaxController {
                         $loaded = true;
                         break;
                     default:
-                        $this->result[ 'errors' ][ ] = array( "code" => -14, "message" => "Invalid TMX (" . $fileInfo->name . ")" );
+                        $this->result[ 'errors' ][ ] = array(
+                                "code" => -14, "message" => "Invalid TMX (" . $fileInfo->name . ")"
+                        );
 
                         return false;
                         break;
@@ -333,17 +353,19 @@ class addTMController extends ajaxController {
         return ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
     }
 
-    private static function putTmKey($tmKey_arr, $newTmKey){
+    private static function putTmKey( $tmKey_arr, $newTmKey ) {
         $added = false;
 
-        foreach($tmKey_arr as $i => $curr_tm_key){
-            if($curr_tm_key['key'] == $newTmKey['key']){
-                $tmKey_arr[$i] = $newTmKey;
-                $added = true;
+        foreach ( $tmKey_arr as $i => $curr_tm_key ) {
+            if ( $curr_tm_key[ 'key' ] == $newTmKey[ 'key' ] ) {
+                $tmKey_arr[ $i ] = $newTmKey;
+                $added           = true;
             }
         }
 
-        if(!$added) array_push($tmKey_arr, $newTmKey);
+        if ( !$added ) {
+            array_push( $tmKey_arr, $newTmKey );
+        }
 
         return $tmKey_arr;
     }
