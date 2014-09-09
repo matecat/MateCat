@@ -2,6 +2,78 @@
 
 include_once INIT::$MODEL_ROOT . "/queries.php";
 
+/**
+ *
+ * Class addTMController
+ * This class has the responsibility to associate a TM to a job and to check
+ * whether a tm key is valid or not.<br/>
+ *
+ * Handled cases:<br/>
+ * <ul>
+ *  <li>Existing TM        -> tm key provided</li>
+ *  <li>Non-existing TM    -> tmx file uploaded</li>
+ *  <li>Logged user        -> tm associated to the user and to the job</li>
+ *  <li>Non-logged user    -> tm associated to the job</li>
+ * </ul>
+ * <br/>
+ * <b>Error codes and messages:</b><br/>
+ * <table>
+ *  <tr><th>Conditions</th><th>Code</th><th>Message</th></tr>
+ *  <tr>
+ *      <td>Job's id_mt_engine != 1</td>
+ *      <td>-1</td>
+ *      <td>MT Engine is not MyMemory. TMX cannot be added.</td></tr>
+ *  <tr>
+ *      <td>$_POST['tm_key'] not set</td>
+ *      <td>-2</td>
+ *      <td>Please specify a TM key.</td></tr>
+ *  <tr>
+ *      <td>job_id not set</td>
+ *      <td>-3</td>
+ *      <td>Please specify the job id.</td></tr>
+ *  <tr>
+ *      <td>job_pass not set</td>
+ *      <td>-4</td>
+ *      <td>Please specify the job password.</td></tr>
+ *  <tr>
+ *      <td>r specified but is nor 0 or 1</td>
+ *      <td>-5</td>
+ *      <td>Read grant must be 0 or 1.</td></tr>
+ *  <tr>
+ *      <td>w specified but is nor 0 or 1</td>
+ *      <td>-6</td>
+ *      <td>Write grant must be 0 or 1.</td></tr>
+ *  <tr>
+ *      <td>exec specified but different from "addTM", "newTM", "checkTMKey"</td>
+ *      <td>-7</td>
+ *      <td>Action not valid.</td></tr>
+ *  <tr>
+ *      <td>exec = "addTM" and file not provided</td>
+ *      <td>-8</td>
+ *      <td>Please upload a TMX.</td></tr>
+ *  <tr>
+ *      <td>Failed to load TM keys json from the DB or invalid json</td>
+ *      <td>-10</td>
+ *      <td>Could not retrieve TM keys from the database.</td></tr>
+ *  <tr>
+ *      <td>r and w both set to 0</td>
+ *      <td>-11</td>
+ *      <td>Please enable at least one grant flag.</td></tr>
+ *  <tr>
+ *      <td>MyMemory considers the TMX file invalid</td>
+ *      <td>-14</td>
+ *      <td>Invalid TMX (<b>MY_TMX_KEY</b>)</td></tr>
+ *  <tr>
+ *      <td>File upload failed or file import in MyMemory failed</td>
+ *      <td>-15</td>
+ *      <td>Cant't load TMX files right now, try later.</td></tr>
+ *  <tr>
+ *      <td>Invalid key provided while importing a file in MyMemory</td>
+ *      <td>-15</td>
+ *      <td>Invalid key provided</td></tr>
+ * </table>
+ *
+ */
 class addTMController extends ajaxController {
 
     /**
@@ -59,19 +131,33 @@ class addTMController extends ajaxController {
      */
     private $w_grant;
 
+    /**
+     * @var bool Boolean to identify if user is logged or not
+     */
+    private $isLogged = false;
+
+    /**
+     * @var string Project owner's email
+     */
+    private $ownerID = null;
+
     private static $acceptedActions = array( "newTM", "addTM" );
 
+    const DEFAULT_READ    = true;
+    const DEFAULT_WRITE   = true;
+
     public function __construct() {
+
         parent::__construct();
 
         $filterArgs = array(
-                'job_id'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-                'job_pass' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-                'name'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-                'tm_key'   => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-                'exec'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-                'r'        => array( 'filter' => FILTER_SANITIZE_STRING ),
-                'w'        => array( 'filter' => FILTER_SANITIZE_STRING )
+            'job_id'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+            'job_pass' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'name'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'tm_key'   => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'exec'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'r'        => array( 'filter' => FILTER_VALIDATE_BOOLEAN, array( 'flags' => FILTER_NULL_ON_FAILURE ) ),
+            'w'        => array( 'filter' => FILTER_VALIDATE_BOOLEAN, array( 'flags' => FILTER_NULL_ON_FAILURE ) )
         );
 
         $postInput = (object)filter_input_array( INPUT_POST, $filterArgs );
@@ -107,20 +193,18 @@ class addTMController extends ajaxController {
             $this->result[ 'errors' ][ ] = array( "code" => -4, "message" => "Please specify the job password." );
         }
 
-        if ( $this->r_grant != 0 && empty( $this->r_grant ) ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -5, "message" => "Please specify the read grant." );
+        if ( is_null( $this->r_grant ) ) {
+            $this->r_grant = self::DEFAULT_READ;
         }
 
-        if ( !is_numeric( $this->r_grant ) ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -5, "message" => "Read grant must be 0 or 1." );
+        if ( is_null( $this->w_grant ) ) {
+            $this->w_grant = self::DEFAULT_WRITE;
         }
 
-        if ( $this->w_grant != 0 && empty( $this->w_grant ) ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -6, "message" => "Please specify the write grant." );
-        }
-
-        if ( !is_numeric( $this->w_grant ) ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -6, "message" => "Write grant must be 0 or 1." );
+        if ( !$this->r_grant && !$this->w_grant ) {
+            $this->result[ 'errors' ][ ] = array(
+                    "code" => -11, "message" => "Please enable at least one grant flag."
+            );
         }
 
         if ( empty( $this->exec ) || !in_array( $this->exec, self::$acceptedActions ) ) {
@@ -133,6 +217,14 @@ class addTMController extends ajaxController {
         //get MyMemory apiKey service
         $this->apiKeyService = TMSServiceFactory::getAPIKeyService();
 
+        //validate the key
+        //This piece of code need to be executed every time
+        $keyExists = $this->apiKeyService->checkCorrectKey( $this->tm_key );
+        if ( !$keyExists ) {
+            $this->result[ 'errors' ][ ] = array( "code" => -9, "message" => "TM key is not valid." );
+            Log::doLog( __METHOD__ . " -> TM key is not valid." );
+        }
+
         //check if there is a file and if its extension is tmx
         if ( $this->exec == "newTM" ) {
             $i = 0;
@@ -141,13 +233,16 @@ class addTMController extends ajaxController {
                 if ( pathinfo( $fileInfo->name, PATHINFO_EXTENSION ) !== 'tmx' ) {
                     $this->result[ 'errors' ][ ] = array( "code" => -8, "message" => "Please upload a TMX." );
                 }
+
                 $i++;
             }
 
             if ( $i == 0 ) {
                 $this->result[ 'errors' ][ ] = array( "code" => -8, "message" => "Please upload a TMX." );
             }
+
         }
+
     }
 
     /**
@@ -156,17 +251,11 @@ class addTMController extends ajaxController {
      * @return mixed
      */
     public function doAction() {
+
         //check if there was an error in constructor. If so, stop execution.
         if ( !empty( $this->result[ 'errors' ] ) ) {
+            $this->result[ 'success' ] = false;
             return false;
-        }
-
-        //validate the key
-        $keyExists = $this->apiKeyService->checkCorrectKey( $this->tm_key );
-        if ( !$keyExists ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -9, "message" => "TM key is not valid." );
-
-            return;
         }
 
         if ( $this->exec == "newTM" ) {
@@ -178,6 +267,7 @@ class addTMController extends ajaxController {
                     return;
                 }
             }
+
         }
 
         $tmKey_structure = array(
@@ -195,7 +285,7 @@ class addTMController extends ajaxController {
             $this->result[ 'errors' ][ ] = array(
                     "code" => -10, "message" => "Could not retrieve TM keys from the database."
             );
-            Log::doLog( $e->getMessage() );
+            Log::doLog( __METHOD__ . " -> " . $e->getMessage() );
 
             return;
         }
@@ -204,12 +294,13 @@ class addTMController extends ajaxController {
             $job_tmKeys = array();
         }
 
-        if ( $this->isLoggedIn() ) {
+        $this->checkLogin();
+        if ( $this->isLogged ) {
 
-            if ( $this->job_data[ 'owner' ] == $_SESSION[ 'cid' ] ) {
+            if ( $this->job_data[ 'owner' ] == $this->ownerID ) {
                 $tmKey_structure[ 'owner' ] = 1;
             }
-            //todo: link tm key to the current user
+            //TODO: link tm key to the current user
         }
 
         //link tm key to the job
@@ -259,7 +350,7 @@ class addTMController extends ajaxController {
                 switch ( $importStatus ) {
                     case "400" :
                         $this->result[ 'errors' ][ ] = array(
-                                "code" => -15, "message" => "Can't load TMX files right now, try later"
+                                "code" => -15, "message" => "Cant't load TMX files right now, try later"
                         );
                         $fileImportStarted           = false;
                         break;
@@ -349,8 +440,13 @@ class addTMController extends ajaxController {
      *
      * @return bool
      */
-    public function isLoggedIn() {
-        return ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
+    public function checkLogin() {
+        //Warning, sessions enabled, disable them after check, $_SESSION is in read only mode after disable
+        parent::sessionStart();
+        $this->isLogged = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
+        $this->ownerID  = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
+        parent::disableSessions();
+        return $this->isLogged;
     }
 
     private static function putTmKey( $tmKey_arr, $newTmKey ) {

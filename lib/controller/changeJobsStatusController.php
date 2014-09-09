@@ -13,7 +13,8 @@ class changeJobsStatusController extends ajaxController {
 
     public function __construct() {
 
-        $this->disableSessions();
+        //SESSION START
+        parent::sessionStart();
         parent::__construct();
 
         $filterArgs = array(

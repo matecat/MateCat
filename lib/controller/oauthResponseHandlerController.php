@@ -15,6 +15,9 @@ class oauthResponseHandlerController extends viewController{
 	private $user_logged;
 
 	public function __construct(){
+
+        //SESSION ENABLED
+        parent::sessionStart();
 		parent::__construct();
 		parent::makeTemplate("oauth_response_handler.html");
 
