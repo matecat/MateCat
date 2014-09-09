@@ -24,7 +24,7 @@ include_once INIT::$MODEL_ROOT . "/queries.php";
  *      <td>-1</td>
  *      <td>MT Engine is not MyMemory. TMX cannot be added.</td></tr>
  *  <tr>
- *      <td>$_POST['tm_key'] not set</td>
+ *      <td>tm_key not set</td>
  *      <td>-2</td>
  *      <td>Please specify a TM key.</td></tr>
  *  <tr>
@@ -141,23 +141,36 @@ class addTMController extends ajaxController {
      */
     private $ownerID = null;
 
+    /**
+     * @var string An upload token for the uploaded file
+     */
+    private $uploadToken;
+
     private static $acceptedActions = array( "newTM", "addTM" );
 
-    const DEFAULT_READ    = true;
-    const DEFAULT_WRITE   = true;
+    const DEFAULT_READ  = true;
+    const DEFAULT_WRITE = true;
 
     public function __construct() {
 
         parent::__construct();
 
         $filterArgs = array(
-            'job_id'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'job_pass' => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'name'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'tm_key'   => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'exec'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'r'        => array( 'filter' => FILTER_VALIDATE_BOOLEAN, array( 'flags' => FILTER_NULL_ON_FAILURE ) ),
-            'w'        => array( 'filter' => FILTER_VALIDATE_BOOLEAN, array( 'flags' => FILTER_NULL_ON_FAILURE ) )
+                'job_id'   => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'job_pass' => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'name'     => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'tm_key'   => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'exec'     => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'r'        => array( 'filter' => FILTER_VALIDATE_BOOLEAN, array( 'flags' => FILTER_NULL_ON_FAILURE ) ),
+                'w'        => array( 'filter' => FILTER_VALIDATE_BOOLEAN, array( 'flags' => FILTER_NULL_ON_FAILURE ) )
         );
 
         $postInput = (object)filter_input_array( INPUT_POST, $filterArgs );
@@ -181,15 +194,15 @@ class addTMController extends ajaxController {
             );
         }
 
-        if ( empty( $this->tm_key ) ) {
+        if ( !isset( $this->tm_key ) || is_null( $this->tm_key ) || empty( $this->tm_key ) ) {
             $this->result[ 'errors' ][ ] = array( "code" => -2, "message" => "Please specify a TM key." );
         }
 
-        if ( empty( $this->job_id ) ) {
+        if ( is_null( $this->job_id ) || empty( $this->job_id ) ) {
             $this->result[ 'errors' ][ ] = array( "code" => -3, "message" => "Please specify the job id." );
         }
 
-        if ( empty( $this->job_pass ) ) {
+        if ( is_null( $this->job_pass ) || empty( $this->job_pass ) ) {
             $this->result[ 'errors' ][ ] = array( "code" => -4, "message" => "Please specify the job password." );
         }
 
@@ -219,8 +232,9 @@ class addTMController extends ajaxController {
 
         //validate the key
         //This piece of code need to be executed every time
-        $keyExists = $this->apiKeyService->checkCorrectKey( $this->tm_key );
-        if ( !$keyExists ) {
+        try {
+            $this->apiKeyService->checkCorrectKey( $this->tm_key );
+        } catch ( Exception $e ) {
             $this->result[ 'errors' ][ ] = array( "code" => -9, "message" => "TM key is not valid." );
             Log::doLog( __METHOD__ . " -> TM key is not valid." );
         }
@@ -255,6 +269,7 @@ class addTMController extends ajaxController {
         //check if there was an error in constructor. If so, stop execution.
         if ( !empty( $this->result[ 'errors' ] ) ) {
             $this->result[ 'success' ] = false;
+
             return false;
         }
 
@@ -265,6 +280,14 @@ class addTMController extends ajaxController {
                 //MyMemory parses more or less 80 segments/sec per TMX
                 if ( !$this->checkTmxImportStatus() ) {
                     return;
+                }
+
+                if ( isset( $this->uploadToken ) && !empty( $this->uploadToken ) ) {
+                    setcookie(
+                            'uploadToken',
+                            $this->uploadToken,
+                            2147483647 // expires January 1, 2038
+                    );
                 }
             }
 
@@ -317,7 +340,6 @@ class addTMController extends ajaxController {
     private function uploadFile() {
         try {
             $uploadManager = new Upload();
-
             $uploadedFiles = $uploadManager->uploadFiles( $_FILES );
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][ ] = array(
@@ -446,6 +468,7 @@ class addTMController extends ajaxController {
         $this->isLogged = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
         $this->ownerID  = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
         parent::disableSessions();
+
         return $this->isLogged;
     }
 
