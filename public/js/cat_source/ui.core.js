@@ -2175,7 +2175,17 @@ UI = {
 		});
 	},
 
-	
+    checkTMgrants: function(w) {
+        var r = ($(w).find('.r').is(':checked'))? 1 : 0;
+        var w = ($(w).find('.w').is(':checked'))? 1 : 0;
+        if(!r && !w) {
+            $('.addtm-tr-key .error').text('Either read or write must be checked');
+            return false;
+        } else {
+            return true;
+        }
+    },
+
     /**
      * This function is used when a string has to be sent to the server
      * It works over a clone of the editarea ( translation area ) and manage the text()

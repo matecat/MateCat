@@ -208,15 +208,29 @@ $.extend(UI, {
 //                $('#create_private_tm_btn').attr('data-key', data.key);
                 return false;
             })
+        }).on('change', '#addtm-tr-read, #addtm-tr-write', function(e) {
+            if(UI.checkTMgrants($('.addtm-tr'))) {
+                $('.addtm-tr .error').text('');
+            }
+        }).on('change', '#addtm-tr-key-read, #addtm-tr-key-write', function(e) {
+            if(UI.checkTMgrants($('.addtm-tr-key'))) {
+                $('.addtm-tr-key .error').text('');
+            }
         }).on('click', '.addtm-tr-key .btn-ok', function(e) {
+            if(!UI.checkTMgrants($('.addtm-tr-key'))) {
+                return false;
+            } else {
+                $('.addtm-tr-key .error').text('');
+            };
             var r = ($('#addtm-tr-key-read').is(':checked'))? 1 : 0;
             var w = ($('#addtm-tr-key-write').is(':checked'))? 1 : 0;
+
             APP.doRequest({
                 data: {
                     action: 'addTM',
                     job_id: config.job_id,
                     job_pass: config.password,
-                    tm_key: $('#addtm-tr-key-add').val(),
+                    tm_key: $('#addtm-tr-key-key').val(),
                     r: r,
                     w: w
                 },
@@ -225,10 +239,47 @@ $.extend(UI, {
                 },
                 success: function(d) {
                     console.log('addTM success!!');
+                    $('.popup-addtm-tr .x-popup').click();
+                    UI.showMessage({
+                        msg: 'A TM key has been added.'
+                    });
                 }
             });
         }).on('click', '#addtm-add', function(e) {
             e.preventDefault();
+            console.log('e ora?');
+            console.log(UI.checkTMgrants($('.addtm-tr')));
+            if(!UI.checkTMgrants($('.addtm-tr'))) {
+                return false;
+            } else {
+                $('.addtm-tr .error').text('');
+            };
+// iframe implementation
+            fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
+
+/*
+// web worker implementation
+
+            if(typeof(Worker) !== "undefined") {
+                // Yes! Web worker support!
+
+                var worker = new Worker('http://matecat.local/public/js/addtm.js');
+                worker.onmessage = function(e) {
+                    alert(e.data);
+                }
+                worker.onerror =werror;
+
+                // Setup the dnd listeners.
+                var dropZone = document.getElementById('drop_zone');
+                dropZone.addEventListener('dragover', handleDragOver, false);
+                dropZone.addEventListener('drop', handleFileSelect, false);
+                document.getElementById('files').addEventListener('change', handleFileSelect, false);
+            } else {
+                // Sorry! No Web Worker support..
+            }
+*/
+
+/*
             $('#addtm-add').addClass('disabled');
 
             //create an iFrame element
@@ -239,7 +290,7 @@ $.extend(UI, {
 
             //append iFrame to the DOM
             $("body").append( iFrameAddTM );
-
+*/
 
 /*
             //generate a token addTM
@@ -277,12 +328,13 @@ $.extend(UI, {
                 })
             );
 */
+/*
             var iFrameAddTMForm = $("#addTMForm").clone();
             //append from to newly created iFrame and submit form post
             iFrameAddTM.contents().find('body').append( iFrameAddTMForm );
             console.log('vediamo:', iFrameAddTM.contents().find("#addTMForm"));
             iFrameAddTM.contents().find("#addTMForm").submit();
-
+*/
             /*
                         //check if we are in download status
                         if ( !$('#downloadProject').hasClass('disabled') ) {
