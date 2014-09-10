@@ -2206,16 +2206,22 @@ UI = {
                 console.log('d: ', d);
                 console.log('d.success: ', d.success);
                 if(d.success == true) {
+                    console.log('key is good');
                     if(this == 'key') {
+                        console.log('adding a key');
                         UI.execAddTMKey();
                     } else {
+                        console.log('adding a tm');
                         UI.execAddTM();
                     }
                     return true;
                 } else {
+                    console.log('key is bad');
                     if(this == 'key') {
+                        console.log('error adding a key');
                         $('.addtm-tr-key .error-message').text(d.errors[0].message).show();
                     } else {
+                        console.log('error adding a tm');
                         $('.addtm-tr .error-message').text(d.errors[0].message).show();
                     }
                     return false;
