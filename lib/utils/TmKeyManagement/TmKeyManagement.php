@@ -73,7 +73,7 @@ class TmKeyManagement_TmKeyManagement {
     /**
      * @param $id_job int
      * @param $job_pass string
-     * @param $tm_keys string
+     * @param $tm_keys array
      * @return int|null Returns null if all is ok, otherwise it returns the error code of the mysql Query
      */
     public static function setJobTmKeys( $id_job, $job_pass, $tm_keys ) {
