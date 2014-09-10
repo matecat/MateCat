@@ -233,10 +233,17 @@ class addTMController extends ajaxController {
         //validate the key
         //This piece of code need to be executed every time
         try {
-            $this->apiKeyService->checkCorrectKey( $this->tm_key );
+            $keyExists = $this->apiKeyService->checkCorrectKey( $this->tm_key );
         } catch ( Exception $e ) {
-            $this->result[ 'errors' ][ ] = array( "code" => -9, "message" => "TM key is not valid." );
+
+            /* PROVIDED KEY IS NOT VALID OR WRONG, $keyExists IS NOT SET */
+            Log::doLog( $e->getMessage() );
             Log::doLog( __METHOD__ . " -> TM key is not valid." );
+
+        }
+
+        if ( !isset($keyExists) || $keyExists === false ) {
+            $this->result[ 'errors' ][ ] = array( "code" => -9, "message" => "TM key is not valid." );
         }
 
         //check if there is a file and if its extension is tmx
