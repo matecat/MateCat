@@ -2179,7 +2179,79 @@ UI = {
 		});
 	},
 
-	
+    checkTMgrants: function(panel) {console.log('checkTMgrants');
+        var r = ($(panel).find('.r').is(':checked'))? 1 : 0;
+        var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
+        if(!r && !w) {
+            console.log('panel: ', panel);
+            $(panel).find('.error-message').text('Either read or write must be checked').show();
+            return false;
+        } else {
+            return true;
+        }
+    },
+    checkTMKey: function(key, operation) {console.log('checkTMKey');
+        APP.doRequest({
+            data: {
+                action: 'ajaxUtils',
+                exec: 'checkTMKey',
+                tm_key: key
+            },
+            context: operation,
+            error: function() {
+                console.log('checkTMKey error!!');
+            },
+            success: function(d) {
+                console.log('checkTMKey success!!');
+                console.log('d: ', d);
+                console.log('d.success: ', d.success);
+                if(d.success == true) {
+                    if(this == 'key') {
+                        UI.execAddTMKey();
+                    } else {
+                        UI.execAddTM();
+                    }
+                    return true;
+                } else {
+                    if(this == 'key') {
+                        $('.addtm-tr-key .error-message').text(d.errors[0].message).show();
+                    } else {
+                        $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                    }
+                    return false;
+                }
+            }
+        });
+    },
+    execAddTM: function() {
+
+    },
+    execAddTMKey: function() {
+        var r = ($('#addtm-tr-key-read').is(':checked'))? 1 : 0;
+        var w = ($('#addtm-tr-key-write').is(':checked'))? 1 : 0;
+
+        APP.doRequest({
+            data: {
+                action: 'addTM',
+                exec: 'addTM',
+                job_id: config.job_id,
+                job_pass: config.password,
+                tm_key: $('#addtm-tr-key-key').val(),
+                r: r,
+                w: w
+            },
+            error: function() {
+                console.log('addTM error!!');
+            },
+            success: function(d) {
+                console.log('addTM success!!');
+                $('.popup-addtm-tr .x-popup').click();
+                UI.showMessage({
+                    msg: 'A TM key has been added.'
+                });
+            }
+        });
+    },
     /**
      * This function is used when a string has to be sent to the server
      * It works over a clone of the editarea ( translation area ) and manage the text()

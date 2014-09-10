@@ -154,7 +154,7 @@ UI = {
 	},
 	copySource: function() {
 
-		var source_val = $.trim($(".source", this.currentSegment).html() ).replace( /(<mark[^>]+>)|(<\/mark>)/gi, "");
+		var source_val = $.trim($(".source", this.currentSegment).html());
 //		var source_val = $.trim($(".source", this.currentSegment).text());
 		// Test
 		//source_val = source_val.replace(/&quot;/g,'"');
@@ -2179,7 +2179,79 @@ UI = {
 		});
 	},
 
-	
+    checkTMgrants: function(panel) {console.log('checkTMgrants');
+        var r = ($(panel).find('.r').is(':checked'))? 1 : 0;
+        var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
+        if(!r && !w) {
+            console.log('panel: ', panel);
+            $(panel).find('.error-message').text('Either read or write must be checked').show();
+            return false;
+        } else {
+            return true;
+        }
+    },
+    checkTMKey: function(key, operation) {console.log('checkTMKey');
+        APP.doRequest({
+            data: {
+                action: 'ajaxUtils',
+                exec: 'checkTMKey',
+                tm_key: key
+            },
+            context: operation,
+            error: function() {
+                console.log('checkTMKey error!!');
+            },
+            success: function(d) {
+                console.log('checkTMKey success!!');
+                console.log('d: ', d);
+                console.log('d.success: ', d.success);
+                if(d.success == true) {
+                    if(this == 'key') {
+                        UI.execAddTMKey();
+                    } else {
+                        UI.execAddTM();
+                    }
+                    return true;
+                } else {
+                    if(this == 'key') {
+                        $('.addtm-tr-key .error-message').text(d.errors[0].message).show();
+                    } else {
+                        $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                    }
+                    return false;
+                }
+            }
+        });
+    },
+    execAddTM: function() {
+
+    },
+    execAddTMKey: function() {
+        var r = ($('#addtm-tr-key-read').is(':checked'))? 1 : 0;
+        var w = ($('#addtm-tr-key-write').is(':checked'))? 1 : 0;
+
+        APP.doRequest({
+            data: {
+                action: 'addTM',
+                exec: 'addTM',
+                job_id: config.job_id,
+                job_pass: config.password,
+                tm_key: $('#addtm-tr-key-key').val(),
+                r: r,
+                w: w
+            },
+            error: function() {
+                console.log('addTM error!!');
+            },
+            success: function(d) {
+                console.log('addTM success!!');
+                $('.popup-addtm-tr .x-popup').click();
+                UI.showMessage({
+                    msg: 'A TM key has been added.'
+                });
+            }
+        });
+    },
     /**
      * This function is used when a string has to be sent to the server
      * It works over a clone of the editarea ( translation area ) and manage the text()
@@ -3250,14 +3322,6 @@ $.extend(UI, {
         }).on('click', '.open-popup-addtm-tr', function(e) {
             e.preventDefault();
             $('.popup-addtm-tr').show();
-        }).on('click', '.addtm-tr-key-open', function(e) {
-            e.preventDefault();
-            $('.addtm-tr').hide();
-            $('.addtm-tr-key').show();
-        }).on('click', '.addtm-tr-back', function(e) {
-                e.preventDefault();
-                $('.addtm-tr').show();
-                $('.addtm-tr-key').hide();
         }).on('click', '#addtm-create-key', function(e) {
             e.preventDefault();
             //prevent double click
@@ -3278,27 +3342,62 @@ $.extend(UI, {
 //                $('#create_private_tm_btn').attr('data-key', data.key);
                 return false;
             })
+        }).on('change', '#addtm-tr-read, #addtm-tr-write', function(e) {
+            if(UI.checkTMgrants($('.addtm-tr'))) {
+                $('.addtm-tr .error-message').hide();
+            }
+        }).on('change', '#addtm-tr-key-read, #addtm-tr-key-write', function(e) {
+            if(UI.checkTMgrants($('.addtm-tr-key'))) {
+                $('.addtm-tr-key .error-message').hide();
+            }
+        }).on('change', '#addtm-upload-form input', function(e) {
+            console.log('file aggiunto');
+            $('.addtm-tr .warning-message').hide();
+            if($('#addtm-tr-key').val() == '') {
+                console.log("non c'è key");
+                $('#addtm-create-key').click();
+                $('.addtm-tr .warning-message').show();
+            }
         }).on('click', '.addtm-tr-key .btn-ok', function(e) {
-            var r = ($('#addtm-tr-key-read').is(':checked'))? 1 : 0;
-            var w = ($('#addtm-tr-key-write').is(':checked'))? 1 : 0;
-            APP.doRequest({
-                data: {
-                    action: 'addTM',
-                    job_id: config.job_id,
-                    job_pass: config.password,
-                    tm_key: $('#addtm-tr-key-add').val(),
-                    r: r,
-                    w: w
-                },
-                error: function() {
-                    console.log('addTM error!!');
-                },
-                success: function(d) {
-                    console.log('addTM success!!');
-                }
-            });
+            if(!UI.checkTMgrants($('.addtm-tr-key'))) {
+                return false;
+            } else {
+                $('.addtm-tr-key .error-message').text('').hide();
+            };
+            UI.checkTMKey($('#addtm-tr-key-key').val(), 'key');
         }).on('click', '#addtm-add', function(e) {
             e.preventDefault();
+            if(!UI.checkTMgrants($('.addtm-tr'))) {
+                return false;
+            } else {
+                $('.addtm-tr .error-message').text('').hide();
+            };
+            console.log("UI.checkTMKey($('#addtm-tr-key').val(), 'tm'): ", UI.checkTMKey($('#addtm-tr-key').val(), 'tm'));
+            if(UI.checkTMKey($('#addtm-tr-key').val(), 'tm')) fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
+
+/*
+// web worker implementation
+
+            if(typeof(Worker) !== "undefined") {
+                // Yes! Web worker support!
+
+                var worker = new Worker('http://matecat.local/public/js/addtm.js');
+                worker.onmessage = function(e) {
+                    alert(e.data);
+                }
+                worker.onerror =werror;
+
+                // Setup the dnd listeners.
+                var dropZone = document.getElementById('drop_zone');
+                dropZone.addEventListener('dragover', handleDragOver, false);
+                dropZone.addEventListener('drop', handleFileSelect, false);
+                document.getElementById('files').addEventListener('change', handleFileSelect, false);
+            } else {
+                // Sorry! No Web Worker support..
+            }
+*/
+
+/*
             $('#addtm-add').addClass('disabled');
 
             //create an iFrame element
@@ -3309,7 +3408,7 @@ $.extend(UI, {
 
             //append iFrame to the DOM
             $("body").append( iFrameAddTM );
-
+*/
 
 /*
             //generate a token addTM
@@ -3347,12 +3446,13 @@ $.extend(UI, {
                 })
             );
 */
+/*
             var iFrameAddTMForm = $("#addTMForm").clone();
             //append from to newly created iFrame and submit form post
             iFrameAddTM.contents().find('body').append( iFrameAddTMForm );
             console.log('vediamo:', iFrameAddTM.contents().find("#addTMForm"));
             iFrameAddTM.contents().find("#addTMForm").submit();
-
+*/
             /*
                         //check if we are in download status
                         if ( !$('#downloadProject').hasClass('disabled') ) {
@@ -5101,7 +5201,7 @@ console.log('translation 4: ', translation);
 //				console.log('dopo: ', $('.sub-editor.matches .overflow .suggestion_source', segment).html());
 			});
             // start addtmxTmp
-            $('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><i class="icon-language"></i><a class="open-popup-addtm-tr">Add your TMX</a></div>');
+            $('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><i class="icon-upload"></i><a class="open-popup-addtm-tr">Add your TMX</a></div>');
             // end addtmxTmp
             UI.markSuggestionTags(segment);
 
@@ -6998,7 +7098,103 @@ function removeSelectedText() {
 	}
 }
 
+// addTM with iFrame
 
+function fileUpload(form, action_url, div_id) {
+    // Create the iframe...
+    var iframe = document.createElement("iframe");
+    iframe.setAttribute("id", "upload_iframe");
+    iframe.setAttribute("name", "upload_iframe");
+    iframe.setAttribute("width", "0");
+    iframe.setAttribute("height", "0");
+    iframe.setAttribute("border", "0");
+    iframe.setAttribute("style", "width: 0; height: 0; border: none;");
+
+    // Add to document...
+    form.parentNode.appendChild(iframe);
+    window.frames['upload_iframe'].name = "upload_iframe";
+
+    iframeId = document.getElementById("upload_iframe");
+
+    // Add event...
+    var eventHandler = function () {
+
+        if (iframeId.detachEvent) iframeId.detachEvent("onload", eventHandler);
+        else iframeId.removeEventListener("load", eventHandler, false);
+
+        // Message from server...
+        if (iframeId.contentDocument) {
+            content = iframeId.contentDocument.body.innerHTML;
+        } else if (iframeId.contentWindow) {
+            content = iframeId.contentWindow.document.body.innerHTML;
+        } else if (iframeId.document) {
+            content = iframeId.document.body.innerHTML;
+        }
+
+        document.getElementById(div_id).innerHTML = content;
+
+        // Del the iframe...
+//        setTimeout('iframeId.parentNode.removeChild(iframeId)', 250);
+    }
+
+    if (iframeId.addEventListener) iframeId.addEventListener("load", eventHandler, true);
+    if (iframeId.attachEvent) iframeId.attachEvent("onload", eventHandler);
+
+    // Set properties of form...
+    form.setAttribute("target", "upload_iframe");
+    form.setAttribute("action", action_url);
+    form.setAttribute("method", "post");
+    form.setAttribute("enctype", "multipart/form-data");
+    form.setAttribute("encoding", "multipart/form-data");
+    $(form).append('<input type="hidden" name="job_id" value="' + config.job_id + '" />')
+        .append('<input type="hidden" name="exec" value="newTM" />')
+        .append('<input type="hidden" name="job_pass" value="' + config.password + '" />')
+        .append('<input type="hidden" name="tm_key" value="' + $('#addtm-tr-key').val() + '" />')
+        .append('<input type="hidden" name="name" value="' + $('#addtm-tr-name').val() + '" />')
+        .append('<input type="hidden" name="r" value="1" />')
+        .append('<input type="hidden" name="w" value="1" />');
+    console.log('form: ', form);
+    console.log('iframe: ', iframe);
+
+    // Submit the form...
+    form.submit();
+
+    document.getElementById(div_id).innerHTML = "Uploading...";
+}
+
+
+// addTM webworker
+/*
+function werror(e) {
+    console.log('ERROR: Line ', e.lineno, ' in ', e.filename, ': ', e.message);
+}
+
+function handleFileSelect(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+
+    var files = evt.dataTransfer.files||evt.target.files;
+    // FileList object.
+
+    worker.postMessage({
+        'files' : files
+    });
+    //Sending File list to worker
+    // files is a FileList of File objects. List some properties.
+    var output = [];
+    for (var i = 0, f; f = files[i]; i++) {
+        output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ', f.size, ' bytes, last modified: ', f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a', '</li>');
+    }
+    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+}
+
+function handleDragOver(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    evt.dataTransfer.dropEffect = 'copy';
+    // Explicitly show this is a copy.
+}
+*/
 
 
 /* FORMATTING FUNCTION  TO TEST */

@@ -2894,7 +2894,7 @@ background: #fff;
 width: 54% !important;
 margin: 0 !important;
 left: 23% !important;
-top: 10%;
+top: 2%;
 text-align: left;
 }
 
@@ -2915,8 +2915,17 @@ font-weight: bold;
 margin: 10px 0;
 }
 
+.popup-addtm-tr .popup-box {
+	max-height: 550px;
+	overflow: auto;
+}
+
+.addtm-tr-key .btn-ok, .addtm-tr .add-tm-ok{
+	margin-top:-10px!important;
+}
+
 .block-last .mgmt-input {
-width: 67%;
+width: 64%;
 }
 
 .addtm-tr-key .mgmt-input {
@@ -2927,7 +2936,7 @@ width: 67%;
 .addtm-tr-key-open, .addtm-tr-back {cursor:pointer;
 text-decoration: underline;}
 
-.popup-addtm-tr input[type="file"] {font-size:15px;}
+.popup-addtm-tr input[type="file"] {font-size:15px;margin-bottom: 15px;}
 
 .popup-addtm-tr input#key {width: 96%;
 color: #ccc;}

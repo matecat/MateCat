@@ -200,27 +200,62 @@ $.extend(UI, {
 //                $('#create_private_tm_btn').attr('data-key', data.key);
                 return false;
             })
+        }).on('change', '#addtm-tr-read, #addtm-tr-write', function(e) {
+            if(UI.checkTMgrants($('.addtm-tr'))) {
+                $('.addtm-tr .error-message').hide();
+            }
+        }).on('change', '#addtm-tr-key-read, #addtm-tr-key-write', function(e) {
+            if(UI.checkTMgrants($('.addtm-tr-key'))) {
+                $('.addtm-tr-key .error-message').hide();
+            }
+        }).on('change', '#addtm-upload-form input', function(e) {
+            console.log('file aggiunto');
+            $('.addtm-tr .warning-message').hide();
+            if($('#addtm-tr-key').val() == '') {
+                console.log("non c'è key");
+                $('#addtm-create-key').click();
+                $('.addtm-tr .warning-message').show();
+            }
         }).on('click', '.addtm-tr-key .btn-ok', function(e) {
-            var r = ($('#addtm-tr-key-read').is(':checked'))? 1 : 0;
-            var w = ($('#addtm-tr-key-write').is(':checked'))? 1 : 0;
-            APP.doRequest({
-                data: {
-                    action: 'addTM',
-                    job_id: config.job_id,
-                    job_pass: config.password,
-                    tm_key: $('#addtm-tr-key-add').val(),
-                    r: r,
-                    w: w
-                },
-                error: function() {
-                    console.log('addTM error!!');
-                },
-                success: function(d) {
-                    console.log('addTM success!!');
-                }
-            });
+            if(!UI.checkTMgrants($('.addtm-tr-key'))) {
+                return false;
+            } else {
+                $('.addtm-tr-key .error-message').text('').hide();
+            };
+            UI.checkTMKey($('#addtm-tr-key-key').val(), 'key');
         }).on('click', '#addtm-add', function(e) {
             e.preventDefault();
+            if(!UI.checkTMgrants($('.addtm-tr'))) {
+                return false;
+            } else {
+                $('.addtm-tr .error-message').text('').hide();
+            };
+            console.log("UI.checkTMKey($('#addtm-tr-key').val(), 'tm'): ", UI.checkTMKey($('#addtm-tr-key').val(), 'tm'));
+            if(UI.checkTMKey($('#addtm-tr-key').val(), 'tm')) fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
+
+/*
+// web worker implementation
+
+            if(typeof(Worker) !== "undefined") {
+                // Yes! Web worker support!
+
+                var worker = new Worker('http://matecat.local/public/js/addtm.js');
+                worker.onmessage = function(e) {
+                    alert(e.data);
+                }
+                worker.onerror =werror;
+
+                // Setup the dnd listeners.
+                var dropZone = document.getElementById('drop_zone');
+                dropZone.addEventListener('dragover', handleDragOver, false);
+                dropZone.addEventListener('drop', handleFileSelect, false);
+                document.getElementById('files').addEventListener('change', handleFileSelect, false);
+            } else {
+                // Sorry! No Web Worker support..
+            }
+*/
+
+/*
             $('#addtm-add').addClass('disabled');
 
             //create an iFrame element
@@ -231,7 +266,7 @@ $.extend(UI, {
 
             //append iFrame to the DOM
             $("body").append( iFrameAddTM );
-
+*/
 
 /*
             //generate a token addTM
@@ -269,12 +304,13 @@ $.extend(UI, {
                 })
             );
 */
+/*
             var iFrameAddTMForm = $("#addTMForm").clone();
             //append from to newly created iFrame and submit form post
             iFrameAddTM.contents().find('body').append( iFrameAddTMForm );
             console.log('vediamo:', iFrameAddTM.contents().find("#addTMForm"));
             iFrameAddTM.contents().find("#addTMForm").submit();
-
+*/
             /*
                         //check if we are in download status
                         if ( !$('#downloadProject').hasClass('disabled') ) {

@@ -1339,6 +1339,11 @@ text-indent: 40px;
 display: none;
 }
 
+.addtm-tr .error-message, .addtm-tr .warning-message {
+	font-size:14px;
+	}
+
+
 .warning-message {
 background: #FFFA8B !important;
 border-color: #6D6E71;
