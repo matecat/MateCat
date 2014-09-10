@@ -2190,20 +2190,36 @@ UI = {
             return true;
         }
     },
-    checkTMKey: function(key, operation) {
+    checkTMKey: function(key, operation) {console.log('checkTMKey');
         APP.doRequest({
             data: {
                 action: 'ajaxUtils',
                 exec: 'checkTMKey',
-                key: key
+                tm_key: key
             },
+            context: operation,
             error: function() {
                 console.log('checkTMKey error!!');
             },
             success: function(d) {
                 console.log('checkTMKey success!!');
                 console.log('d: ', d);
-                if(!d.errors.length) UI.execAddTMKey();
+                console.log('d.success: ', d.success);
+                if(d.success == true) {
+                    if(this == 'key') {
+                        UI.execAddTMKey();
+                    } else {
+                        UI.execAddTM();
+                    }
+                    return true;
+                } else {
+                    if(this == 'key') {
+                        $('.addtm-tr-key .error-message').text(d.errors[0].message).show();
+                    } else {
+                        $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                    }
+                    return false;
+                }
             }
         });
     },
@@ -2217,6 +2233,7 @@ UI = {
         APP.doRequest({
             data: {
                 action: 'addTM',
+                exec: 'addTM',
                 job_id: config.job_id,
                 job_pass: config.password,
                 tm_key: $('#addtm-tr-key-key').val(),

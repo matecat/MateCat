@@ -220,20 +220,18 @@ $.extend(UI, {
             if(!UI.checkTMgrants($('.addtm-tr-key'))) {
                 return false;
             } else {
-                $('.addtm-tr-key .error').text('');
+                $('.addtm-tr-key .error-message').text('').hide();
             };
             UI.checkTMKey($('#addtm-tr-key-key').val(), 'key');
         }).on('click', '#addtm-add', function(e) {
             e.preventDefault();
-            console.log('e ora?');
-            console.log(UI.checkTMgrants($('.addtm-tr')));
             if(!UI.checkTMgrants($('.addtm-tr'))) {
                 return false;
             } else {
-                $('.addtm-tr .error').text('');
+                $('.addtm-tr .error-message').text('').hide();
             };
-// iframe implementation
-            fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
+            console.log("UI.checkTMKey($('#addtm-tr-key').val(), 'tm'): ", UI.checkTMKey($('#addtm-tr-key').val(), 'tm'));
+            if(UI.checkTMKey($('#addtm-tr-key').val(), 'tm')) fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
 
 /*
 // web worker implementation
