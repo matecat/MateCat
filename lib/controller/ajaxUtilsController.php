@@ -51,14 +51,16 @@ class ajaxUtilsController extends ajaxController {
                 $apiKeyService = TMSServiceFactory::getAPIKeyService();
 
                 //validate the key
-                //This piece of code need to be executed every time
-                $keyExists = $apiKeyService->checkCorrectKey( $this->__postInput['tm_key'] );
-                if ( !$keyExists ) {
+                try {
+                    $keyExists = $apiKeyService->checkCorrectKey( $this->__postInput['tm_key'] );
+                } catch ( Exception $e ){ /* PROVIDED KEY IS NOT VALID OR WRONG, $keyExists IS NOT SET */}
+
+                if ( !isset($keyExists)  ) {
                     $this->result[ 'errors' ][ ] = array( "code" => -9, "message" => "TM key is not valid." );
                     Log::doLog( __METHOD__ . " -> TM key is not valid." );
                     $this->result[ 'success' ] = false;
                 } else {
-                    $this->result[ 'errors' ][ ] = new stdClass();
+                    $this->result[ 'errors' ] = array();
                     $this->result[ 'success' ] = true;
                 }
                 break;

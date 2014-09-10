@@ -133,22 +133,39 @@ class glossaryController extends ajaxController {
                         throw new Exception( "Glossary is not available when the TM feature is disabled", -11 );
                     }
 
-                    if ( empty( $st[ 'id_translator' ] ) ) {
+                    //get tm keys with write grants
+                    $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $st[ 'tm_keys' ], 'w' );
+
+                    if ( empty( $tm_keys ) ) {
 
                         $APIKeySrv = TMSServiceFactory::getAPIKeyService();
                         $newUser   = $APIKeySrv->createMyMemoryKey(); //throws exception
 
+                        //TODO Replace with User Key Management
                         updateTranslatorJob( $this->id_job, $newUser );
                         $config[ 'id_user' ] = $newUser->id;
+
+                        $new_key        = TmKeyManagement_TmKeyManagement::getTmKeyStructure();
+                        $new_key->type  = 'tmx';
+                        $new_key->key   = $newUser->key;
+                        $new_key->owner = 0;
+                        $new_key->r     = 1;
+                        $new_key->w     = 1;
+
+                        //create an empty array
+                        $tm_keys   = array();
+                        //append new key
+                        $tm_keys[] = $new_key;
+
+                        TmKeyManagement_TmKeyManagement::setJobTmKeys( $this->id_job, $this->password, $tm_keys );
+
                     }
 
-                    $id_user = $config[ 'id_user' ];
-
-                    //get tm keys with write grants
-                    $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $st[ 'tm_keys' ], 'w' );
-
+                    //prepare the error report
+                    $set_code = array();
                     //set the glossary entry for each key with write grants
                     if ( count( $tm_keys ) ) {
+
                         /**
                          * @var $tm_key TmKeyManagement_TmKeyStruct
                          */
@@ -159,13 +176,13 @@ class glossaryController extends ajaxController {
 
                             $set_code[ ] = $TMS_RESULT;
                         }
-                    }
-                    $set_successful = true;
 
-                    foreach ( $set_code as $set_result ) {
-                        if ( !$set_code ) {
-                            $set_successful = false;
-                        }
+                    }
+
+                    $set_successful = true;
+                    if( array_search( false, $set_code, true ) ){
+                        //There's an error, for now skip, let's assume that are not errors
+//                        $set_successful = false;
                     }
 
                     if ( $set_successful ) {

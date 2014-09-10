@@ -279,6 +279,7 @@ class addTMController extends ajaxController {
                 //start loop and wait for the files to be imported in MyMemory
                 //MyMemory parses more or less 80 segments/sec per TMX
                 if ( !$this->checkTmxImportStatus() ) {
+                    $this->result[ 'success' ] = false;
                     return;
                 }
 
@@ -308,6 +309,7 @@ class addTMController extends ajaxController {
             $this->result[ 'errors' ][ ] = array(
                     "code" => -10, "message" => "Could not retrieve TM keys from the database."
             );
+            $this->result[ 'success' ] = false;
             Log::doLog( __METHOD__ . " -> " . $e->getMessage() );
 
             return;
@@ -330,6 +332,10 @@ class addTMController extends ajaxController {
         $job_tmKeys = self::putTmKey( $job_tmKeys, $tmKey_structure );
 
         TmKeyManagement_TmKeyManagement::setJobTmKeys( $this->job_id, $this->job_pass, $job_tmKeys );
+
+        $this->result[ 'errors' ] = array();
+        $this->result[ 'success' ] = true;
+
     }
 
     /**
@@ -476,7 +482,7 @@ class addTMController extends ajaxController {
         $added = false;
 
         foreach ( $tmKey_arr as $i => $curr_tm_key ) {
-            if ( $curr_tm_key[ 'key' ] == $newTmKey[ 'key' ] ) {
+            if ( $curr_tm_key->key == $newTmKey->key ) {
                 $tmKey_arr[ $i ] = $newTmKey;
                 $added           = true;
             }
