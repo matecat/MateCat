@@ -43,12 +43,16 @@ class LocalAPIKeyService {
      */
     public function checkCorrectKey( $apiKey ){
 
+        $url = 'http://api.mymemory.translated.net/authkey?key=' . $apiKey;
+
         $defaults = array(
-                CURLOPT_URL => 'http://api.mymemory.translated.net/authkey?key=' . $apiKey,
+                CURLOPT_URL => $url,
                 CURLOPT_HEADER => 0,
                 CURLOPT_RETURNTRANSFER => TRUE,
                 CURLOPT_TIMEOUT => 2
         );
+
+        Log::doLog( "Request: " . $url );
 
         $ch = curl_init();
         curl_setopt_array( $ch, $defaults );
@@ -57,6 +61,8 @@ class LocalAPIKeyService {
         $curl_errno = curl_errno($ch);
         $curl_error = curl_error($ch);
         curl_close($ch);
+
+        Log::doLog( "Response: " . $result );
 
         if( $curl_errno > 0 ) {
             Log::doLog( "Error: The check for MyMemory private key correctness failed: " . $curl_error );
