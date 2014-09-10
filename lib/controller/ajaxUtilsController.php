@@ -58,6 +58,7 @@ class ajaxUtilsController extends ajaxController {
                     Log::doLog( __METHOD__ . " -> TM key is not valid." );
                     $this->result[ 'success' ] = false;
                 } else {
+                    $this->result[ 'errors' ][ ] = new stdClass();
                     $this->result[ 'success' ] = true;
                 }
                 break;
