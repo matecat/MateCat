@@ -2256,7 +2256,7 @@ UI = {
 
     },
     execAddTM: function() {
-
+        fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
     },
     execAddTMKey: function() {
         var r = ($('#addtm-tr-key-read').is(':checked'))? 1 : 0;

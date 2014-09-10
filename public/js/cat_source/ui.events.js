@@ -237,7 +237,8 @@ $.extend(UI, {
             } else {
                 console.log('vediamo qui');
                 $('.addtm-tr .error-message').text('').hide();
-                if(UI.checkTMKey($('#addtm-tr-key').val(), 'tm')) fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
+                UI.checkTMKey($('#addtm-tr-key').val(), 'tm');
+//                if(UI.checkTMKey($('#addtm-tr-key').val(), 'tm')) fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
 
             };
 

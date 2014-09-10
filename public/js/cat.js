@@ -2256,7 +2256,7 @@ UI = {
 
     },
     execAddTM: function() {
-
+        fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
     },
     execAddTMKey: function() {
         var r = ($('#addtm-tr-key-read').is(':checked'))? 1 : 0;
@@ -3411,7 +3411,8 @@ $.extend(UI, {
             } else {
                 console.log('vediamo qui');
                 $('.addtm-tr .error-message').text('').hide();
-                if(UI.checkTMKey($('#addtm-tr-key').val(), 'tm')) fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
+                UI.checkTMKey($('#addtm-tr-key').val(), 'tm');
+//                if(UI.checkTMKey($('#addtm-tr-key').val(), 'tm')) fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
 
             };
 
