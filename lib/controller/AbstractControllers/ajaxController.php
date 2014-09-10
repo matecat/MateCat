@@ -47,34 +47,34 @@ abstract class ajaxController extends controller {
      *
      */
     public function finalize() {
-        $toJson = json_encode($this->result);
+        $toJson = json_encode( $this->result );
 
-	if(function_exists("json_last_error")){
-		switch (json_last_error()) {
-            	case JSON_ERROR_NONE:
+        if ( function_exists( "json_last_error" ) ) {
+            switch ( json_last_error() ) {
+                case JSON_ERROR_NONE:
 //              	  Log::doLog(' - No errors');
-                	break;
-            	case JSON_ERROR_DEPTH:
-                	Log::doLog(' - Maximum stack depth exceeded');
-                break;
-            	case JSON_ERROR_STATE_MISMATCH:
-                	Log::doLog(' - Underflow or the modes mismatch');
-                break;
-            	case JSON_ERROR_CTRL_CHAR:
-                	Log::doLog(' - Unexpected control character found');
-                break;
-            	case JSON_ERROR_SYNTAX:
-                	Log::doLog(' - Syntax error, malformed JSON');
-                break;
-            	case JSON_ERROR_UTF8:
-                	Log::doLog(' - Malformed UTF-8 characters, possibly incorrectly encoded');
-                break;
-            	default:
-                	Log::doLog(' - Unknown error');
-                break;
-        	}
-	}
-        
+                    break;
+                case JSON_ERROR_DEPTH:
+                    Log::doLog( ' - Maximum stack depth exceeded' );
+                    break;
+                case JSON_ERROR_STATE_MISMATCH:
+                    Log::doLog( ' - Underflow or the modes mismatch' );
+                    break;
+                case JSON_ERROR_CTRL_CHAR:
+                    Log::doLog( ' - Unexpected control character found' );
+                    break;
+                case JSON_ERROR_SYNTAX:
+                    Log::doLog( ' - Syntax error, malformed JSON' );
+                    break;
+                case JSON_ERROR_UTF8:
+                    Log::doLog( ' - Malformed UTF-8 characters, possibly incorrectly encoded' );
+                    break;
+                default:
+                    Log::doLog( ' - Unknown error' );
+                    break;
+            }
+        }
+
         echo $toJson;
     }
 
