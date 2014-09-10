@@ -21,6 +21,9 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
      */
     public function __construct(){
 
+        //SESSION ENABLED
+        INIT::sessionStart();
+
         /**
          * @see OutsourceTo_AbstractProvider::$_outsource_login_url_ok
          */

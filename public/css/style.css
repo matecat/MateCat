@@ -826,14 +826,14 @@ body.noGlossary .tab-switcher-gl
 }
 
 .addtmx-tr {
-height: 20px;
+height: 17px;
 width: 120px;
 position: absolute;
-	bottom: -36px;
+	bottom: -30px;
 right: -1px;
 border-radius: 0px 0px 0px 4px;border: 1px solid #58595b;
 color: #fff;
-padding: 10px 4px 4px 4px;
+padding: 7px 4px 4px 4px;
 font-size: 0.8em;
 background: #09beec;
 -webkit-box-shadow: inset 0px 2px 2px #666;
@@ -1601,7 +1601,8 @@ textarea, input, .editarea, .search-editarea, select  {
 	float:left;
     width: 99%;
 	height:100%;
-	padding-bottom:8px
+	padding-bottom:8px;
+	padding-top:15px;
 
 }
 .editor .wrap{padding-bottom:25px; height:87% !important;}
@@ -2402,7 +2403,7 @@ p.percent
 
 body.filterOpen #outer
 {
-    margin-top: 95px;
+/*    margin-top: 95px; */
 }
 
 .save-warning
@@ -2904,11 +2905,32 @@ padding: 0 15px;}
 width: 50%;
 }
 
+.addtm-tr-key {
+margin-top: 15px;
+}
+
+.popup-addtm-tr h2 {
+	font-size: 20px;
+font-weight: bold;
+margin: 10px 0;
+}
+
+.block-last .mgmt-input {
+width: 67%;
+}
+
+.addtm-tr-key .mgmt-input {
+	width:73%;
+}
+
 .open-popup-addtm-tr {cursor: pointer; margin-left: 5px;}
 .addtm-tr-key-open, .addtm-tr-back {cursor:pointer;
 text-decoration: underline;}
 
-.popup-addtm-tr input#key {width:66%;}
+.popup-addtm-tr input[type="file"] {font-size:15px;}
+
+.popup-addtm-tr input#key {width: 96%;
+color: #ccc;}
 
 .popup-addtm-tr .btn-ok {padding: 5px 18px;
 margin: 2px 5px;}
@@ -2917,7 +2939,15 @@ margin: 2px 5px;}
 border: 1px solid #000;
 }
 
-.addtm-tr-key {display: none;}
+.fileupload {
+	margin-right: 10px;
+	font-weight: bold;
+}
+
+.addtm-tr-key {
+	border-top: 1px solid #ccc;
+}
+
 
 .add-tm-ok {
 padding: 10px!important;

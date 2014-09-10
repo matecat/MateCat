@@ -21,7 +21,6 @@ class getSearchController extends ajaxController {
 
     public function __construct() {
 
-        $this->disableSessions();
         parent::__construct();
 
         $filterArgs = array(

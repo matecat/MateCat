@@ -10,6 +10,9 @@ class loginPageController extends viewController {
 	private $authURL;
 
 	public function __construct() {
+
+        //SESSION ENABLED
+        parent::sessionStart();
 		parent::__construct();
 		parent::makeTemplate("login.html");
 
@@ -45,5 +48,3 @@ class loginPageController extends viewController {
 	}
 
 }
-
-?>

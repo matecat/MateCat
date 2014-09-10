@@ -466,8 +466,12 @@ UI = {
 //		$('#filterSwitch').show();
 //		this.searchEnabled = true;
 //	},
+    fixHeaderHeightChange: function() {
+        headerHeight = $('header .wrapper').height() + ((this.body.hasClass('filterOpen'))? $('header .searchbox').height() : 0) + ((this.body.hasClass('incomingMsg'))? $('header #messageBar').height() : 0);
+        $('#outer').css('margin-top', headerHeight + 'px');
+    },
 
-	nextUnloadedResultSegment: function() {
+    nextUnloadedResultSegment: function() {
 		var found = '';
 		var last = $('section').last().attr('id').split('-')[1];
 		$.each(this.searchResultsSegments, function() {
@@ -2175,17 +2179,62 @@ UI = {
 		});
 	},
 
-    checkTMgrants: function(w) {
-        var r = ($(w).find('.r').is(':checked'))? 1 : 0;
-        var w = ($(w).find('.w').is(':checked'))? 1 : 0;
+    checkTMgrants: function(panel) {console.log('checkTMgrants');
+        var r = ($(panel).find('.r').is(':checked'))? 1 : 0;
+        var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
         if(!r && !w) {
-            $('.addtm-tr-key .error').text('Either read or write must be checked');
+            console.log('panel: ', panel);
+            $(panel).find('.error-message').text('Either read or write must be checked').show();
             return false;
         } else {
             return true;
         }
     },
+    checkTMKey: function(key, operation) {
+        APP.doRequest({
+            data: {
+                action: 'ajaxUtils',
+                exec: 'checkTMKey',
+                key: key
+            },
+            error: function() {
+                console.log('checkTMKey error!!');
+            },
+            success: function(d) {
+                console.log('checkTMKey success!!');
+                console.log('d: ', d);
+                if(!d.errors.length) UI.execAddTMKey();
+            }
+        });
+    },
+    execAddTM: function() {
 
+    },
+    execAddTMKey: function() {
+        var r = ($('#addtm-tr-key-read').is(':checked'))? 1 : 0;
+        var w = ($('#addtm-tr-key-write').is(':checked'))? 1 : 0;
+
+        APP.doRequest({
+            data: {
+                action: 'addTM',
+                job_id: config.job_id,
+                job_pass: config.password,
+                tm_key: $('#addtm-tr-key-key').val(),
+                r: r,
+                w: w
+            },
+            error: function() {
+                console.log('addTM error!!');
+            },
+            success: function(d) {
+                console.log('addTM success!!');
+                $('.popup-addtm-tr .x-popup').click();
+                UI.showMessage({
+                    msg: 'A TM key has been added.'
+                });
+            }
+        });
+    },
     /**
      * This function is used when a string has to be sent to the server
      * It works over a clone of the editarea ( translation area ) and manage the text()
@@ -2803,6 +2852,7 @@ $.extend($.expr[":"], {
 });
 
 $(window).resize(function() {
+    UI.fixHeaderHeightChange();
 });
 
 

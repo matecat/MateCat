@@ -39,6 +39,7 @@ $.extend(UI, {
 		this.searchEnabled = true;
 		if (this.searchEnabled)
 			$('#filterSwitch').show();
+            this.fixHeaderHeightChange();
 		this.viewConcordanceInContextMenu = true;
 		if (!this.viewConcordanceInContextMenu)
 			$('#searchConcordance').hide();

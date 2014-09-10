@@ -180,14 +180,6 @@ $.extend(UI, {
         }).on('click', '.open-popup-addtm-tr', function(e) {
             e.preventDefault();
             $('.popup-addtm-tr').show();
-        }).on('click', '.addtm-tr-key-open', function(e) {
-            e.preventDefault();
-            $('.addtm-tr').hide();
-            $('.addtm-tr-key').show();
-        }).on('click', '.addtm-tr-back', function(e) {
-                e.preventDefault();
-                $('.addtm-tr').show();
-                $('.addtm-tr-key').hide();
         }).on('click', '#addtm-create-key', function(e) {
             e.preventDefault();
             //prevent double click
@@ -210,11 +202,19 @@ $.extend(UI, {
             })
         }).on('change', '#addtm-tr-read, #addtm-tr-write', function(e) {
             if(UI.checkTMgrants($('.addtm-tr'))) {
-                $('.addtm-tr .error').text('');
+                $('.addtm-tr .error-message').hide();
             }
         }).on('change', '#addtm-tr-key-read, #addtm-tr-key-write', function(e) {
             if(UI.checkTMgrants($('.addtm-tr-key'))) {
-                $('.addtm-tr-key .error').text('');
+                $('.addtm-tr-key .error-message').hide();
+            }
+        }).on('change', '#addtm-upload-form input', function(e) {
+            console.log('file aggiunto');
+            $('.addtm-tr .warning-message').hide();
+            if($('#addtm-tr-key').val() == '') {
+                console.log("non c'è key");
+                $('#addtm-create-key').click();
+                $('.addtm-tr .warning-message').show();
             }
         }).on('click', '.addtm-tr-key .btn-ok', function(e) {
             if(!UI.checkTMgrants($('.addtm-tr-key'))) {
@@ -222,29 +222,7 @@ $.extend(UI, {
             } else {
                 $('.addtm-tr-key .error').text('');
             };
-            var r = ($('#addtm-tr-key-read').is(':checked'))? 1 : 0;
-            var w = ($('#addtm-tr-key-write').is(':checked'))? 1 : 0;
-
-            APP.doRequest({
-                data: {
-                    action: 'addTM',
-                    job_id: config.job_id,
-                    job_pass: config.password,
-                    tm_key: $('#addtm-tr-key-key').val(),
-                    r: r,
-                    w: w
-                },
-                error: function() {
-                    console.log('addTM error!!');
-                },
-                success: function(d) {
-                    console.log('addTM success!!');
-                    $('.popup-addtm-tr .x-popup').click();
-                    UI.showMessage({
-                        msg: 'A TM key has been added.'
-                    });
-                }
-            });
+            UI.checkTMKey($('#addtm-tr-key-key').val(), 'key');
         }).on('click', '#addtm-add', function(e) {
             e.preventDefault();
             console.log('e ora?');

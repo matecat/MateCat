@@ -127,4 +127,18 @@ abstract class controller {
         return $ret;
     }
 
+    public function sessionStart(){
+        INIT::sessionStart();
+    }
+
+    /**
+     * Explicitly disable sessions for ajax call
+     *
+     * Sessions enabled on INIT Class
+     *
+     */
+    public function disableSessions(){
+        INIT::sessionClose();
+    }
+
 }

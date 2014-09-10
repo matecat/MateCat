@@ -66,7 +66,7 @@ class LocalAPIKeyService {
         $isValidKey = filter_var( $result, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 
         if( $isValidKey === null ){
-            throw new Exception( "Error: The check for correctness of the private TM key failed, service not available.", -3 );
+            throw new Exception( "Error: The check for correctness of the private TM key failed.", -3 );
         }
 
         return $isValidKey;

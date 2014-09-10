@@ -49,6 +49,8 @@ class analyzeController extends viewController {
     private $num_segments_analyzed = 0;
 
     public function __construct() {
+
+        parent::sessionStart();
         parent::__construct( false );
 
         $this->pid      = $this->get_from_get_post( "pid" );

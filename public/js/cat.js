@@ -466,8 +466,12 @@ UI = {
 //		$('#filterSwitch').show();
 //		this.searchEnabled = true;
 //	},
+    fixHeaderHeightChange: function() {
+        headerHeight = $('header .wrapper').height() + ((this.body.hasClass('filterOpen'))? $('header .searchbox').height() : 0) + ((this.body.hasClass('incomingMsg'))? $('header #messageBar').height() : 0);
+        $('#outer').css('margin-top', headerHeight + 'px');
+    },
 
-	nextUnloadedResultSegment: function() {
+    nextUnloadedResultSegment: function() {
 		var found = '';
 		var last = $('section').last().attr('id').split('-')[1];
 		$.each(this.searchResultsSegments, function() {
@@ -2175,17 +2179,62 @@ UI = {
 		});
 	},
 
-    checkTMgrants: function(w) {
-        var r = ($(w).find('.r').is(':checked'))? 1 : 0;
-        var w = ($(w).find('.w').is(':checked'))? 1 : 0;
+    checkTMgrants: function(panel) {console.log('checkTMgrants');
+        var r = ($(panel).find('.r').is(':checked'))? 1 : 0;
+        var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
         if(!r && !w) {
-            $('.addtm-tr-key .error').text('Either read or write must be checked');
+            console.log('panel: ', panel);
+            $(panel).find('.error-message').text('Either read or write must be checked').show();
             return false;
         } else {
             return true;
         }
     },
+    checkTMKey: function(key, operation) {
+        APP.doRequest({
+            data: {
+                action: 'ajaxUtils',
+                exec: 'checkTMKey',
+                key: key
+            },
+            error: function() {
+                console.log('checkTMKey error!!');
+            },
+            success: function(d) {
+                console.log('checkTMKey success!!');
+                console.log('d: ', d);
+                if(!d.errors.length) UI.execAddTMKey();
+            }
+        });
+    },
+    execAddTM: function() {
 
+    },
+    execAddTMKey: function() {
+        var r = ($('#addtm-tr-key-read').is(':checked'))? 1 : 0;
+        var w = ($('#addtm-tr-key-write').is(':checked'))? 1 : 0;
+
+        APP.doRequest({
+            data: {
+                action: 'addTM',
+                job_id: config.job_id,
+                job_pass: config.password,
+                tm_key: $('#addtm-tr-key-key').val(),
+                r: r,
+                w: w
+            },
+            error: function() {
+                console.log('addTM error!!');
+            },
+            success: function(d) {
+                console.log('addTM success!!');
+                $('.popup-addtm-tr .x-popup').click();
+                UI.showMessage({
+                    msg: 'A TM key has been added.'
+                });
+            }
+        });
+    },
     /**
      * This function is used when a string has to be sent to the server
      * It works over a clone of the editarea ( translation area ) and manage the text()
@@ -2803,6 +2852,7 @@ $.extend($.expr[":"], {
 });
 
 $(window).resize(function() {
+    UI.fixHeaderHeightChange();
 });
 
 
@@ -2848,6 +2898,7 @@ $.extend(UI, {
 		this.searchEnabled = true;
 		if (this.searchEnabled)
 			$('#filterSwitch').show();
+            this.fixHeaderHeightChange();
 		this.viewConcordanceInContextMenu = true;
 		if (!this.viewConcordanceInContextMenu)
 			$('#searchConcordance').hide();
@@ -3254,14 +3305,6 @@ $.extend(UI, {
         }).on('click', '.open-popup-addtm-tr', function(e) {
             e.preventDefault();
             $('.popup-addtm-tr').show();
-        }).on('click', '.addtm-tr-key-open', function(e) {
-            e.preventDefault();
-            $('.addtm-tr').hide();
-            $('.addtm-tr-key').show();
-        }).on('click', '.addtm-tr-back', function(e) {
-                e.preventDefault();
-                $('.addtm-tr').show();
-                $('.addtm-tr-key').hide();
         }).on('click', '#addtm-create-key', function(e) {
             e.preventDefault();
             //prevent double click
@@ -3284,11 +3327,19 @@ $.extend(UI, {
             })
         }).on('change', '#addtm-tr-read, #addtm-tr-write', function(e) {
             if(UI.checkTMgrants($('.addtm-tr'))) {
-                $('.addtm-tr .error').text('');
+                $('.addtm-tr .error-message').hide();
             }
         }).on('change', '#addtm-tr-key-read, #addtm-tr-key-write', function(e) {
             if(UI.checkTMgrants($('.addtm-tr-key'))) {
-                $('.addtm-tr-key .error').text('');
+                $('.addtm-tr-key .error-message').hide();
+            }
+        }).on('change', '#addtm-upload-form input', function(e) {
+            console.log('file aggiunto');
+            $('.addtm-tr .warning-message').hide();
+            if($('#addtm-tr-key').val() == '') {
+                console.log("non c'è key");
+                $('#addtm-create-key').click();
+                $('.addtm-tr .warning-message').show();
             }
         }).on('click', '.addtm-tr-key .btn-ok', function(e) {
             if(!UI.checkTMgrants($('.addtm-tr-key'))) {
@@ -3296,29 +3347,7 @@ $.extend(UI, {
             } else {
                 $('.addtm-tr-key .error').text('');
             };
-            var r = ($('#addtm-tr-key-read').is(':checked'))? 1 : 0;
-            var w = ($('#addtm-tr-key-write').is(':checked'))? 1 : 0;
-
-            APP.doRequest({
-                data: {
-                    action: 'addTM',
-                    job_id: config.job_id,
-                    job_pass: config.password,
-                    tm_key: $('#addtm-tr-key-key').val(),
-                    r: r,
-                    w: w
-                },
-                error: function() {
-                    console.log('addTM error!!');
-                },
-                success: function(d) {
-                    console.log('addTM success!!');
-                    $('.popup-addtm-tr .x-popup').click();
-                    UI.showMessage({
-                        msg: 'A TM key has been added.'
-                    });
-                }
-            });
+            UI.checkTMKey($('#addtm-tr-key-key').val(), 'key');
         }).on('click', '#addtm-add', function(e) {
             e.preventDefault();
             console.log('e ora?');
@@ -5157,7 +5186,7 @@ console.log('translation 4: ', translation);
 //				console.log('dopo: ', $('.sub-editor.matches .overflow .suggestion_source', segment).html());
 			});
             // start addtmxTmp
-            $('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><i class="icon-language"></i><a class="open-popup-addtm-tr">Add your TMX</a></div>');
+            $('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><i class="icon-upload"></i><a class="open-popup-addtm-tr">Add your TMX</a></div>');
             // end addtmxTmp
             UI.markSuggestionTags(segment);
 
@@ -6827,6 +6856,7 @@ $.extend(UI, {
 			$('body').addClass('filterOpen');
 			$('#search-source').focus();
 		}
+        this.fixHeaderHeightChange();
 	},
 });
 /*

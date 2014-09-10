@@ -343,13 +343,13 @@
         <div class="popup-box">
             <div class="addtm-tr">
                 <h3>Add a TM</h3>
-                <p>Short description here. <a class="addtm-tr-key-open">Got a key? Insert it here</a></p>
+                <p>Short description here.</p>
                 <p class="warning-message" style="display: none;"><span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.</span></p>
                 <p class="error-message" style="display: none;"> Error: the errmsg will appear here... </p>
                     <div class="block pull-left">
                         <input class="mgmt-input" type="text" width="20" id="addtm-tr-name" onfocus="this.value='';"  placeholder="Enter a name" />
                     </div>
-                    <div class="block pull-left">
+                    <div class="block block-last pull-left">
                         <input class="mgmt-input" type="text" id="addtm-tr-key" placeholder="Create new private key" />
                         <a id="addtm-create-key" class="btn-ok pull-right">Create</a>
                     </div>
@@ -360,13 +360,14 @@
                             <div id="upload"></div>
                         </form>
                     </div>
-                    <p>
+                    <br class="clear" />
+                    <div class="pull-left">
                         <input type="checkbox" name="r" class="r" value="1" checked="checked" id="addtm-tr-read" />
                         <label for="addtm-tr-read">Read</label>
 
                         <input type="checkbox" name="w" class="w" value="1" checked="checked" id="addtm-tr-write" />
                         <label for="addtm-tr-write">Write</label>
-                    </p>
+                    </div>
                     <form metal:define-slot="actions" id="addTMForm" action="${basepath}" method="post">
                         <input type="hidden" name="action" value="addTM" />
                         <input type="hidden" name="exec" value="newTM" />
@@ -377,31 +378,38 @@
                         <input type="hidden" name="tmx_file" value="" />
                         <input type="hidden" name="r" value="1" />
                         <input type="hidden" name="w" value="1" />
-                        <p class="error"></p>
                         <input type="button" name="submit" value="Add a TM" id="addtm-add"
                                class="pull-right add-tm-ok btn-ok" />
 <!--                        <input id="downloadProject" name="submit1" type="button" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'DOWNLOAD TRANSLATION' : 'PREVIEW'" /> -->
                     </form>
             </div>
+            <br class="clear" />
+
             <div class="addtm-tr-key">
-                <h3>Add a TM key</h3>
-                <p>Short description here. <a class="addtm-tr-back">Back</a></p>
-                <p class="warning-message" style="display: none;"><span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.<br />If you do not use a Private TM Key, the content of your TMX will be saved in a public TM</span></p>
+                <h2>Add a TM key</h2>
+
+                <p>Short description here.</p>
+
                 <p class="error-message" style="display: none;"> Error: the errmsg will appear here... </p>
+<!--
                 <p>
-                    <input type="checkbox" name="r" class="r" value="1" checked="checked" id="addtm-tr-key-read" />
+                    <input type="checkbox" name="r" class="r" value="1" checked="checked" id="addtm-tr-key-read"/>
                     <label for="addtm-tr-key-read">Read</label>
 
-                    <input type="checkbox" name="w" class="w" value="1" checked="checked" id="addtm-tr-key-write" />
+-->
+                    <input class="mgmt-input pull-left" type="text" id="addtm-tr-key-key"
+                           placeholder="Insert your private key"/>
+
+                <div class="pull-left clear">
+                    <input type="checkbox" name="r" class="r" value="1" checked="checked" id="addtm-tr-key-read"/>
+                    <label for="addtm-tr-key-read">Read</label>
+
+                    <input type="checkbox" name="w" class="w" value="1" checked="checked" id="addtm-tr-key-write"/>
                     <label for="addtm-tr-key-write">Write</label>
-                </p>
-                <p class="error"></p>
-                <input class="mgmt-input pull-left" type="text" id="addtm-tr-key-key"
-                               placeholder="Insert your private key" />
-                <a class="btn-ok pull-left">Add tm</a>
-                    
-                  
-                   
+                </div>
+                <a class="btn-ok pull-right">Add Existing TM</a>
+
+
             </div>
         </div>
     </div>

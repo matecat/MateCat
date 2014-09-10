@@ -2773,7 +2773,7 @@ function deleteLockSegment( $id_segment, $id_job, $mode = "delete" ) {
 
 function getSegmentForTMVolumeAnalysys( $id_segment, $id_job ) {
     $query = "select s.id as sid ,s.segment ,raw_word_count,
-		st.match_type, j.source, j.target, j.id as jid, j.id_translator,
+		st.match_type, j.source, j.target, j.id as jid, j.id_translator, tm_keys,
 		j.id_tms, j.id_mt_engine, p.id as pid
 			from segments s
 			inner join segment_translations st on st.id_segment=s.id

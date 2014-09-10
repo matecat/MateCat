@@ -17,7 +17,6 @@ class StatusController extends getVolumeAnalysisController {
      */
     public function __construct() {
 
-        $this->disableSessions();
         ajaxController::__construct();
 
         $filterArgs = array(

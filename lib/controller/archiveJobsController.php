@@ -10,7 +10,6 @@ class archiveJobsController extends ajaxController {
 
 	public function __construct() {
 
-        $this->disableSessions();
 		parent::__construct();
 		$this->res_type = $this->get_from_get_post('res');
 		$this->res_id = $this->get_from_get_post('id');

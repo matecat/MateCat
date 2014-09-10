@@ -20,15 +20,6 @@ abstract class ajaxController extends controller {
      */
     protected $result = array("error" => array(), "data" => array());
 
-    /**
-     * Explicitly disable sessions for ajax call
-     *
-     * Sessions enabled on INIT Class
-     *
-     */
-    public function disableSessions(){
-        INIT::sessionClose();
-    }
 
     /**
      * Class constructor, initialize the header content type.
