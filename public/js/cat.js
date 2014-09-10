@@ -2223,6 +2223,32 @@ UI = {
             }
         });
     },
+    checkAddTMEnable: function(button) {console.log('checkAddTMEnable');
+        if(button.attr('id') == 'addtm-add') {
+            if(
+                ($('#addtm-tr-key').val() != '')&&
+                ($('.addtm-tr input:file').val() != '')&&
+                UI.checkTMgrants($('.addtm-tr'))
+            ) {
+                $('#addtm-add').removeAttr('disabled').removeClass('disabled');
+            } else {
+                $('#addtm-add').attr('disabled', 'disabled').addClass('disabled');
+            }
+        } else {
+            console.log('1: ', $('#addtm-tr-key-key').val());
+            console.log('2: ', UI.checkTMgrants($('.addtm-tr-key')));
+            console.log('3: ', button);
+            if(
+                ($('#addtm-tr-key-key').val() != '')&&
+                    UI.checkTMgrants($('.addtm-tr-key'))
+                ) {
+                $(button).removeAttr('disabled').removeClass('disabled');
+            } else {
+                $(button).attr('disabled', 'disabled').addClass('disabled');
+            }
+        }
+
+    },
     execAddTM: function() {
 
     },
@@ -3351,12 +3377,13 @@ $.extend(UI, {
                 $('.addtm-tr-key .error-message').hide();
             }
         }).on('change', '#addtm-upload-form input', function(e) {
-            console.log('file aggiunto');
             $('.addtm-tr .warning-message').hide();
             if($('#addtm-tr-key').val() == '') {
-                console.log("non c'è key");
                 $('#addtm-create-key').click();
                 $('.addtm-tr .warning-message').show();
+                setTimeout(function() {
+                    UI.checkAddTMEnable($('#addtm-add'));
+                }, 500);
             }
         }).on('click', '.addtm-tr-key .btn-ok', function(e) {
             if(!UI.checkTMgrants($('.addtm-tr-key'))) {
@@ -3365,6 +3392,12 @@ $.extend(UI, {
                 $('.addtm-tr-key .error-message').text('').hide();
             };
             UI.checkTMKey($('#addtm-tr-key-key').val(), 'key');
+        }).on('change', '#addtm-tr-key, .addtm-tr input:file, .addtm-tr input.r, .addtm-tr input.w', function(e) {
+            UI.checkAddTMEnable($('#addtm-add'));
+        }).on('change', '#addtm-tr-key-key', function(e) {
+            UI.checkAddTMEnable($('.addtm-tr-key .btn-ok'));
+        }).on('click', '#addtm-tr-key-read, #addtm-tr-key-write', function(e) {
+            UI.checkAddTMEnable($('.addtm-tr-key .btn-ok'));
         }).on('click', '#addtm-add', function(e) {
             e.preventDefault();
             if(!UI.checkTMgrants($('.addtm-tr'))) {
@@ -3372,7 +3405,6 @@ $.extend(UI, {
             } else {
                 $('.addtm-tr .error-message').text('').hide();
             };
-            console.log("UI.checkTMKey($('#addtm-tr-key').val(), 'tm'): ", UI.checkTMKey($('#addtm-tr-key').val(), 'tm'));
             if(UI.checkTMKey($('#addtm-tr-key').val(), 'tm')) fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
 
 /*

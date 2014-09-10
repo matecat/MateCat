@@ -378,8 +378,8 @@
                         <input type="hidden" name="tmx_file" value="" />
                         <input type="hidden" name="r" value="1" />
                         <input type="hidden" name="w" value="1" />
-                        <input type="button" name="submit" value="Add a TM" id="addtm-add"
-                               class="pull-right add-tm-ok btn-ok" />
+                        <input type="button" name="submit" value="Add a TM" disabled="disabled" id="addtm-add"
+                               class="pull-right add-tm-ok btn-ok disabled" />
 <!--                        <input id="downloadProject" name="submit1" type="button" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'DOWNLOAD TRANSLATION' : 'PREVIEW'" /> -->
                     </form>
             </div>
@@ -407,7 +407,8 @@
                     <input type="checkbox" name="w" class="w" value="1" checked="checked" id="addtm-tr-key-write"/>
                     <label for="addtm-tr-key-write">Write</label>
                 </div>
-                <a class="btn-ok pull-right">Add Existing TM</a>
+<!--                <a class="btn-ok pull-right disabled">Add Existing TM</a> -->
+                <input type="button" name="submit" value="Add Existing TM" disabled="disabled" class="btn-ok disabled" />
 
 
             </div>

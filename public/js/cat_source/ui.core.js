@@ -2223,6 +2223,32 @@ UI = {
             }
         });
     },
+    checkAddTMEnable: function(button) {console.log('checkAddTMEnable');
+        if(button.attr('id') == 'addtm-add') {
+            if(
+                ($('#addtm-tr-key').val() != '')&&
+                ($('.addtm-tr input:file').val() != '')&&
+                UI.checkTMgrants($('.addtm-tr'))
+            ) {
+                $('#addtm-add').removeAttr('disabled').removeClass('disabled');
+            } else {
+                $('#addtm-add').attr('disabled', 'disabled').addClass('disabled');
+            }
+        } else {
+            console.log('1: ', $('#addtm-tr-key-key').val());
+            console.log('2: ', UI.checkTMgrants($('.addtm-tr-key')));
+            console.log('3: ', button);
+            if(
+                ($('#addtm-tr-key-key').val() != '')&&
+                    UI.checkTMgrants($('.addtm-tr-key'))
+                ) {
+                $(button).removeAttr('disabled').removeClass('disabled');
+            } else {
+                $(button).attr('disabled', 'disabled').addClass('disabled');
+            }
+        }
+
+    },
     execAddTM: function() {
 
     },
