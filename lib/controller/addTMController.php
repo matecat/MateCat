@@ -143,8 +143,8 @@ class addTMController extends ajaxController {
 
     private static $acceptedActions = array( "newTM", "addTM" );
 
-    const DEFAULT_READ  = true;
-    const DEFAULT_WRITE = true;
+    const DEFAULT_READ  = 1;
+    const DEFAULT_WRITE = 1;
 
     public function __construct() {
 
@@ -324,7 +324,10 @@ class addTMController extends ajaxController {
         }
 
         //link tm key to the job
-        $job_tmKeys = self::putTmKey( $job_tmKeys, $tmKey_structure );
+        $job_tmKeys = self::putTmKey(
+                $job_tmKeys,
+                TmKeyManagement_TmKeyManagement::getTmKeyStructure($tmKey_structure)
+        );
 
         TmKeyManagement_TmKeyManagement::setJobTmKeys( $this->job_id, $this->job_pass, $job_tmKeys );
 
@@ -473,11 +476,24 @@ class addTMController extends ajaxController {
         return $this->isLogged;
     }
 
+    /**
+     * This function adds $newTmKey into $tmKey_arr if it does not exist:
+     * if there's not an other tm key having the same key.
+     *
+     * @param $tmKey_arr Array of TmKeyManagement_TmKeyStruct objects
+     * @param $newTmKey TmKeyManagement_TmKeyStruct the new TM to be added
+     *
+     * @return Array The initial array with the new TM key if it does not exist. <br/>
+     *              Otherwise, it returns the initial array.
+     */
     private static function putTmKey( $tmKey_arr, $newTmKey ) {
         $added = false;
 
         foreach ( $tmKey_arr as $i => $curr_tm_key ) {
-            if ( $curr_tm_key->key == $newTmKey->key ) {
+            /**
+             * @var $curr_tm_key TmKeyManagement_TmKeyStruct
+             */
+            if ( $curr_tm_key->key == $newTmKey->key) {
                 $tmKey_arr[ $i ] = $newTmKey;
                 $added           = true;
             }
