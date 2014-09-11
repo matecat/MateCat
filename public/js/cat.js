@@ -2292,6 +2292,7 @@ UI = {
                 UI.showMessage({
                     msg: 'A TM key has been added.'
                 });
+                UI.clearAddTMpopup();
             }
         });
     },
@@ -2304,6 +2305,7 @@ UI = {
                 UI.showMessage({
                     msg: 'Your TM has been correctly uploaded.'
                 });
+                UI.clearAddTMpopup();
             }
         } else {
             setTimeout(function() {
@@ -2311,6 +2313,13 @@ UI = {
             }, 1000);
         }
 
+    },
+    clearAddTMpopup: function() {
+        $('#addtm-tr-key').val('');
+        $('.addtm-select-file').val('');
+        $('#addtm-tr-read, #addtm-tr-write').prop( "checked", true );
+        $('#uploadTMX').text('').hide();
+        $('.addtm-tr .error-message, .addtm-tr .warning-message').text('').hide();
     },
 
     /**
