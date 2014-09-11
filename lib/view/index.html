@@ -330,7 +330,63 @@
 		</div>
     </div>
 </div>
+        <div class="modal popup-addtm-tr" data-type="view">
+            <div class="popup-outer closeClickingOutside"></div>
+            <div class="popup">
+                <a href="#" class="x-popup"></a>
 
+                <h1>
+                    Language Resources
+                </h1>
+
+                <div class="popup-box">
+                    <div class="addtm-tr">
+                        <h3>Add your private TM</h3>
+                        <p>Your private TM will not be shared with any other person working on the project. It's for your eyes only.</p>
+                        <p class="warning-message" style="display: none;"><span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.</span></p>
+                        <p class="error-message" style="display: none;"> Error: the errmsg will appear here... </p>
+                        <!-- div class="block pull-left">
+                            <input class="mgmt-input" type="text" width="20" id="addtm-tr-name" onfocus="this.value='';"  placeholder="Enter a name" />
+                        </div -->
+                        <div class="block block-last pull-left">
+                            <a id="addtm-create-key" class="btn-ok pull-right">Create</a>
+                            <input class="mgmt-input" type="text" id="addtm-tr-key" placeholder="Create new private key" />
+                        </div>
+                        <div class="block pull-left">
+                            <form id="addtm-upload-form" class="pull-left">
+                                <label class=""> Or </label>
+                                <input type="file" name="datafile" class="addtm-select-file" />
+                                <input onClick="$('.addtm-select-file').click();" type="button" name="select-file" value="Select a TMX" id="addtm-select-file" class="add-tm-ok btn-ok" />
+                                <input type="checkbox" name="r" class="r" value="1" checked="checked" id="addtm-tr-read" />
+                                <label for="addtm-tr-read">Read</label>
+                                <input type="checkbox" name="w" class="w" value="1" checked="checked" id="addtm-tr-write" />
+                                <label for="addtm-tr-write">Write</label>
+                            </form>
+                        </div>
+                        <hr class="addtm-break-2-lines" />
+                        <div id="uploadTMX">Nome File Qui dopo la select ( metti display none all'inizio )</div>
+                        <br />
+                        <form metal:define-slot="actions" id="addTMForm" action="${basepath}" method="post">
+                            <input type="hidden" name="action" value="addTM" />
+                            <input type="hidden" name="exec" value="newTM" />
+                            <input type="hidden" name="job_id" value="" tal:attributes="value jid | nothing" />
+                            <input type="hidden" name="job_pass" tal:attributes="value password" />
+                            <input type="hidden" name="tm_key" value="" />
+                            <input type="hidden" name="name" value="" />
+                            <input type="hidden" name="tmx_file" value="" />
+                            <input type="hidden" name="r" value="1" />
+                            <input type="hidden" name="w" value="1" />
+                            <input type="button" name="submit" value="Add a TM" disabled="disabled" id="addtm-add"
+                                   class="pull-right add-tm-ok btn-ok disabled" />
+                            <!--                        <input id="downloadProject" name="submit1" type="button" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'DOWNLOAD TRANSLATION' : 'PREVIEW'" /> -->
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+<!--
 <div class="modal popup-addtm-tr" data-type="view">
     <div class="popup-outer closeClickingOutside"></div>
     <div class="popup">
@@ -379,7 +435,6 @@
                         <input type="hidden" name="w" value="1" />
                         <input type="button" name="submit" value="Add a TM" disabled="disabled" id="addtm-add"
                                class="pull-right add-tm-ok btn-ok disabled" />
-<!--                        <input id="downloadProject" name="submit1" type="button" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'DOWNLOAD TRANSLATION' : 'PREVIEW'" /> -->
                     </form>
             </div>
             <br class="clear" />
@@ -390,12 +445,6 @@
                 <p>Short description here.</p>
 
                 <p class="error-message" style="display: none;"> Error: the errmsg will appear here... </p>
-<!--
-                <p>
-                    <input type="checkbox" name="r" class="r" value="1" checked="checked" id="addtm-tr-key-read"/>
-                    <label for="addtm-tr-key-read">Read</label>
-
--->
                     <input class="mgmt-input pull-left" type="text" id="addtm-tr-key-key"
                            placeholder="Insert your private key"/>
 
@@ -406,7 +455,6 @@
                     <input type="checkbox" name="w" class="w" value="1" checked="checked" id="addtm-tr-key-write"/>
                     <label for="addtm-tr-key-write">Write</label>
                 </div>
-<!--                <a class="btn-ok pull-right disabled">Add Existing TM</a> -->
                 <input type="button" name="submit" value="Add Existing TM" disabled="disabled" class="btn-ok disabled" />
 
 
@@ -414,7 +462,7 @@
         </div>
     </div>
 </div>
-
+-->
         <footer>
 			<a href="#" id="settingsSwitcher" title="Settings"></a>
 
