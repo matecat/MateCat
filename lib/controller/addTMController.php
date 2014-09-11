@@ -141,11 +141,6 @@ class addTMController extends ajaxController {
      */
     private $ownerID = null;
 
-    /**
-     * @var string An upload token for the uploaded file
-     */
-    private $uploadToken;
-
     private static $acceptedActions = array( "newTM", "addTM" );
 
     const DEFAULT_READ  = true;
@@ -290,13 +285,6 @@ class addTMController extends ajaxController {
                     return;
                 }
 
-                if ( isset( $this->uploadToken ) && !empty( $this->uploadToken ) ) {
-                    setcookie(
-                            'uploadToken',
-                            $this->uploadToken,
-                            2147483647 // expires January 1, 2038
-                    );
-                }
             }
 
         }
