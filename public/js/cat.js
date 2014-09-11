@@ -7176,7 +7176,7 @@ function fileUpload(form, action_url, div_id) {
         document.getElementById(div_id).innerHTML = content;
 
         // Del the iframe...
-//        setTimeout('iframeId.parentNode.removeChild(iframeId)', 250);
+        setTimeout('iframeId.parentNode.removeChild(iframeId)', 250);
     }
 
     if (iframeId.addEventListener) iframeId.addEventListener("load", eventHandler, true);
@@ -7201,7 +7201,11 @@ function fileUpload(form, action_url, div_id) {
     // Submit the form...
     form.submit();
 
-    document.getElementById(div_id).innerHTML = "Uploading...";
+//    document.getElementById(div_id).innerHTML = "Uploading...";
+    $('.popup-addtm-tr .x-popup').click();
+    UI.showMessage({
+        msg: 'Uploading a TM...'
+    });
 }
 
 
