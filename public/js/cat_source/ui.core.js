@@ -2191,6 +2191,7 @@ UI = {
         }
     },
     checkTMKey: function(key, operation) {console.log('checkTMKey');
+        console.log('operation: ', operation);
         APP.doRequest({
             data: {
                 action: 'ajaxUtils',
@@ -2266,11 +2267,11 @@ UI = {
 */
     },
     execAddTM: function() {
-        fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','uploadCallback');
+        fileUpload($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
     },
     execAddTMKey: function() {
-        var r = ($('#addtm-tr-key-read').is(':checked'))? 1 : 0;
-        var w = ($('#addtm-tr-key-write').is(':checked'))? 1 : 0;
+        var r = ($('#addtm-tr-read').is(':checked'))? 1 : 0;
+        var w = ($('#addtm-tr-write').is(':checked'))? 1 : 0;
 
         APP.doRequest({
             data: {
@@ -2278,7 +2279,7 @@ UI = {
                 exec: 'addTM',
                 job_id: config.job_id,
                 job_pass: config.password,
-                tm_key: $('#addtm-tr-key-key').val(),
+                tm_key: $('#addtm-tr-key').val(),
                 r: r,
                 w: w
             },

@@ -255,7 +255,9 @@ $.extend(UI, {
             } else {
                 console.log('vediamo qui');
                 $('.addtm-tr .error-message').text('').hide();
-                UI.checkTMKey($('#addtm-tr-key').val(), 'tm');
+                console.log('CONTROLLO: ', $('#uploadTMX').text());
+                operation = ($('#uploadTMX').text() == '')? 'key' : 'tm';
+                UI.checkTMKey($('#addtm-tr-key').val(), operation);
 //                if(UI.checkTMKey($('#addtm-tr-key').val(), 'tm')) fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
 
             };
