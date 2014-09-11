@@ -116,10 +116,14 @@ class TmKeyManagement_TmKeyManagement {
 
         }
 
-        $result_arr = array_unique( $result_arr );
+        /**
+         *
+         * Note: Take the shortest array of keys, it's like an intersection between owner keys
+         */
+        asort( $result_arr );
 
         //take only the first Job entries
-        $result_arr = $result_arr[0];
+        $result_arr = array_shift( $result_arr );
 
         //convert tm keys into TmKeyManagement_TmKeyStruct objects
         $result_arr = array_map( array( 'self', 'getTmKeyStructure' ), $result_arr );

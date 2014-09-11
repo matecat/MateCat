@@ -143,8 +143,8 @@ class addTMController extends ajaxController {
 
     private static $acceptedActions = array( "newTM", "addTM" );
 
-    const DEFAULT_READ  = true;
-    const DEFAULT_WRITE = true;
+    const DEFAULT_READ  = 1;
+    const DEFAULT_WRITE = 1;
 
     public function __construct() {
 
