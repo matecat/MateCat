@@ -2229,7 +2229,17 @@ UI = {
             }
         });
     },
-    checkAddTMEnable: function(button) {console.log('checkAddTMEnable');
+    checkAddTMEnable: function() {
+        console.log('checkAddTMEnable');
+        if(
+            ($('#addtm-tr-key').val() != '')&&
+                UI.checkTMgrants($('.addtm-tr'))
+            ) {
+            $('#addtm-add').removeAttr('disabled').removeClass('disabled');
+        } else {
+            $('#addtm-add').attr('disabled', 'disabled').addClass('disabled');
+        }
+ /*
         if(button.attr('id') == 'addtm-add') {
             if(
                 ($('#addtm-tr-key').val() != '')&&
@@ -2253,10 +2263,10 @@ UI = {
                 $(button).attr('disabled', 'disabled').addClass('disabled');
             }
         }
-
+*/
     },
     execAddTM: function() {
-        fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
+        fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','uploadCallback');
     },
     execAddTMKey: function() {
         var r = ($('#addtm-tr-key-read').is(':checked'))? 1 : 0;
@@ -2284,6 +2294,24 @@ UI = {
             }
         });
     },
+
+    pollForUploadCallback: function() {
+        if($('#uploadCallback').text() != '') {
+//            console.log("FINITO L'UPLOAD CON MESSAGGIO: ", $.parseJSON($('#uploadCallback pre').text()));
+            msg = $.parseJSON($('#uploadCallback pre').text());
+            if(msg.success == true) {
+                UI.showMessage({
+                    msg: 'Your TM has been correctly uploaded.'
+                });
+            }
+        } else {
+            setTimeout(function() {
+                UI.pollForUploadCallback();
+            }, 1000);
+        }
+
+    },
+
     /**
      * This function is used when a string has to be sent to the server
      * It works over a clone of the editarea ( translation area ) and manage the text()

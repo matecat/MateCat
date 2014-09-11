@@ -222,6 +222,7 @@ function removeSelectedText() {
 // addTM with iFrame
 
 function fileUpload(form, action_url, div_id) {
+    console.log('div_id: ', div_id);
     // Create the iframe...
     var iframe = document.createElement("iframe");
     iframe.setAttribute("id", "upload_iframe");
@@ -285,6 +286,7 @@ function fileUpload(form, action_url, div_id) {
     UI.showMessage({
         msg: 'Uploading a TM...'
     });
+    UI.pollForUploadCallback();
 }
 
 

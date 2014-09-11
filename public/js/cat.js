@@ -2229,7 +2229,17 @@ UI = {
             }
         });
     },
-    checkAddTMEnable: function(button) {console.log('checkAddTMEnable');
+    checkAddTMEnable: function() {
+        console.log('checkAddTMEnable');
+        if(
+            ($('#addtm-tr-key').val() != '')&&
+                UI.checkTMgrants($('.addtm-tr'))
+            ) {
+            $('#addtm-add').removeAttr('disabled').removeClass('disabled');
+        } else {
+            $('#addtm-add').attr('disabled', 'disabled').addClass('disabled');
+        }
+ /*
         if(button.attr('id') == 'addtm-add') {
             if(
                 ($('#addtm-tr-key').val() != '')&&
@@ -2253,10 +2263,10 @@ UI = {
                 $(button).attr('disabled', 'disabled').addClass('disabled');
             }
         }
-
+*/
     },
     execAddTM: function() {
-        fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
+        fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','uploadCallback');
     },
     execAddTMKey: function() {
         var r = ($('#addtm-tr-key-read').is(':checked'))? 1 : 0;
@@ -2284,6 +2294,24 @@ UI = {
             }
         });
     },
+
+    pollForUploadCallback: function() {
+        if($('#uploadCallback').text() != '') {
+//            console.log("FINITO L'UPLOAD CON MESSAGGIO: ", $.parseJSON($('#uploadCallback pre').text()));
+            msg = $.parseJSON($('#uploadCallback pre').text());
+            if(msg.success == true) {
+                UI.showMessage({
+                    msg: 'Your TM has been correctly uploaded.'
+                });
+            }
+        } else {
+            setTimeout(function() {
+                UI.pollForUploadCallback();
+            }, 1000);
+        }
+
+    },
+
     /**
      * This function is used when a string has to be sent to the server
      * It works over a clone of the editarea ( translation area ) and manage the text()
@@ -3369,6 +3397,9 @@ $.extend(UI, {
                 //put value into input field
                 $('#addtm-tr-key').val(data.key);
                 $('#addtm-create-key').removeClass('disabled');
+                setTimeout(function() {
+                    UI.checkAddTMEnable();
+                }, 500);
 //                $('#private-tm-user').val(data.id);
 //                $('#private-tm-pass').val(data.pass);
 //                $('#create_private_tm_btn').attr('data-key', data.key);
@@ -3382,13 +3413,13 @@ $.extend(UI, {
             if(UI.checkTMgrants($('.addtm-tr-key'))) {
                 $('.addtm-tr-key .error-message').hide();
             }
-        }).on('change', '#addtm-upload-form input', function(e) {
+        }).on('change', '.addtm-select-file', function(e) {
             $('.addtm-tr .warning-message').hide();
             if($('#addtm-tr-key').val() == '') {
                 $('#addtm-create-key').click();
                 $('.addtm-tr .warning-message').show();
                 setTimeout(function() {
-                    UI.checkAddTMEnable($('#addtm-add'));
+                    UI.checkAddTMEnable();
                 }, 500);
             }
         }).on('click', '.addtm-tr-key .btn-ok', function(e) {
@@ -3398,12 +3429,27 @@ $.extend(UI, {
                 $('.addtm-tr-key .error-message').text('').hide();
             };
             UI.checkTMKey($('#addtm-tr-key-key').val(), 'key');
+        }).on('click', '#addtm-select-file', function(e) {
+            $('.addtm-select-file').click();
+        }).on('change', '.addtm-select-file', function(e) {
+            console.log($(this).val());
+            if($(this).val() != '') {
+                $('#uploadTMX').text($(this).val().split('\\')[$(this).val().split('\\').length - 1]).show();
+            } else {
+                $('#uploadTMX').hide();
+            }
+        }).on('change', '#addtm-tr-key', function(e) {
+            $('.addtm-tr .warning-message').hide();
+        }).on('change', '#addtm-tr-key, .addtm-select-file, #addtm-tr-read, #addtm-tr-write', function(e) {
+            UI.checkAddTMEnable();
+/*
         }).on('change', '#addtm-tr-key, .addtm-tr input:file, .addtm-tr input.r, .addtm-tr input.w', function(e) {
             UI.checkAddTMEnable($('#addtm-add'));
         }).on('change', '#addtm-tr-key-key', function(e) {
             UI.checkAddTMEnable($('.addtm-tr-key .btn-ok'));
         }).on('click', '#addtm-tr-key-read, #addtm-tr-key-write', function(e) {
             UI.checkAddTMEnable($('.addtm-tr-key .btn-ok'));
+*/
         }).on('click', '#addtm-add', function(e) {
             e.preventDefault();
             if(!UI.checkTMgrants($('.addtm-tr'))) {
@@ -7143,6 +7189,7 @@ function removeSelectedText() {
 // addTM with iFrame
 
 function fileUpload(form, action_url, div_id) {
+    console.log('div_id: ', div_id);
     // Create the iframe...
     var iframe = document.createElement("iframe");
     iframe.setAttribute("id", "upload_iframe");
@@ -7206,6 +7253,7 @@ function fileUpload(form, action_url, div_id) {
     UI.showMessage({
         msg: 'Uploading a TM...'
     });
+    UI.pollForUploadCallback();
 }
 
 

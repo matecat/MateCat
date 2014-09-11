@@ -356,7 +356,7 @@
                             <form id="addtm-upload-form" class="pull-left">
                                 <label class=""> Or </label>
                                 <input type="file" name="datafile" class="addtm-select-file" />
-                                <input onClick="$('.addtm-select-file').click();" type="button" name="select-file" value="Select a TMX" id="addtm-select-file" class="add-tm-ok btn-ok" />
+                                <input type="button" name="select-file" value="Select a TMX" id="addtm-select-file" class="add-tm-ok btn-ok" />
                                 <input type="checkbox" name="r" class="r" value="1" checked="checked" id="addtm-tr-read" />
                                 <label for="addtm-tr-read">Read</label>
                                 <input type="checkbox" name="w" class="w" value="1" checked="checked" id="addtm-tr-write" />
@@ -365,6 +365,7 @@
                         </div>
                         <hr class="addtm-break-2-lines" />
                         <div id="uploadTMX">Nome File Qui dopo la select ( metti display none all'inizio )</div>
+                        <div id="uploadCallback"></div>
                         <br />
                         <form metal:define-slot="actions" id="addTMForm" action="${basepath}" method="post">
                             <input type="hidden" name="action" value="addTM" />

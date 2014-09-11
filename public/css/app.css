@@ -4417,16 +4417,34 @@ margin: 10px 0;
 	overflow: auto;
 }
 
-.addtm-tr-key .btn-ok, .addtm-tr .add-tm-ok{
-	margin-top:-10px!important;
+.addtm-break-2-lines{
+	border:1px solid white;
+    height: 25px;
+}
+#uploadCallback {
+    display: none;
+}
+#uploadTMX {
+    display: none;
+    text-indent: 10px;
+    border: 1px dashed #ccc;
+    padding-bottom: 0px !important;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    background: #fbfbfb;
+    -webkit-transition: all 50ms ease-in;
 }
 
 .block-last .mgmt-input {
-width: 64%;
+width: 62%;
 }
 
 .addtm-tr-key .mgmt-input {
 	width:73%;
+}
+
+.addtm-select-file{
+    display: none;
 }
 
 .open-popup-addtm-tr {cursor: pointer; margin-left: 5px;}
@@ -4438,8 +4456,8 @@ text-decoration: underline;}
 .popup-addtm-tr input#key {width: 96%;
 color: #ccc;}
 
-.popup-addtm-tr .btn-ok {padding: 5px 18px;
-margin: 2px 5px;}
+.popup-addtm-tr .btn-ok {padding: 4px 18px;
+margin: 2px 5px 1px 5px;}
 
 .addtmx-tr:hover {
 border: 1px solid #000;
