@@ -2288,9 +2288,10 @@ UI = {
             },
             success: function(d) {
                 console.log('addTM success!!');
+                txt = (d.success == true)? 'A TM key has been added.' : d.errors[0].message;
                 $('.popup-addtm-tr .x-popup').click();
                 UI.showMessage({
-                    msg: 'A TM key has been added.'
+                    msg: txt
                 });
                 UI.clearAddTMpopup();
             }
@@ -2306,6 +2307,10 @@ UI = {
                     msg: 'Your TM has been correctly uploaded.'
                 });
                 UI.clearAddTMpopup();
+            } else {
+                UI.showMessage({
+                    msg: 'Error: ' + msg.errors[0].message
+                });
             }
         } else {
             setTimeout(function() {
