@@ -2220,7 +2220,7 @@ UI = {
                     console.log('key is bad');
                     if(this == 'key') {
                         console.log('error adding a key');
-                        $('.addtm-tr-key .error-message').text(d.errors[0].message).show();
+                        $('.addtm-tr .error-message').text(d.errors[0].message).show();
                     } else {
                         console.log('error adding a tm');
                         $('.addtm-tr .error-message').text(d.errors[0].message).show();

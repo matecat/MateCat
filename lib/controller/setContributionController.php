@@ -136,10 +136,6 @@ class setContributionController extends ajaxController {
                 //find all the job's TMs with write grants and make a contribution to them
                 $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'tm' );
 
-                Log::doLog("SET");
-                Log::doLog($tm_keys);
-                Log::doLog("___");
-
                 if ( !empty( $tm_keys ) ) {
                     unset($config[ 'id_user' ]);
 

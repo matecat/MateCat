@@ -186,10 +186,6 @@ class getContributionController extends ajaxController {
             try{
                 $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys($this->tm_keys, 'r', 'tm');
 
-                Log::doLog("GET");
-                Log::doLog($tm_keys);
-                Log::doLog("___");
-
                 if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
                     foreach ( $tm_keys as $tm_key ) {
                         $config[ 'id_user' ][ ] = $tm_key->key;

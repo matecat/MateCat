@@ -65,7 +65,7 @@ class LocalAPIKeyService {
         Log::doLog( "Response: " . $result );
 
         if( $curl_errno > 0 ) {
-            Log::doLog( "Error: The check for MyMemory private key correctness failed: " . $curl_error );
+            Log::doLog( "Error: The check for MyMemory private key correctness failed: " . $curl_error . " ErrNum: " . $curl_errno );
             throw new Exception( "Error: The check for correctness of the private TM key failed. Please check you inserted key.", -2 );
         }
 
