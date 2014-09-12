@@ -678,5 +678,6 @@ $.extend(UI, {
 			$('body').addClass('filterOpen');
 			$('#search-source').focus();
 		}
+        this.fixHeaderHeightChange();
 	},
 });

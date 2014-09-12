@@ -1006,6 +1006,10 @@ border: 1px solid #abadb3;
 
 .clear {clear:both;}
 
+header .searchbox {
+	margin-top:28px;
+}
+
 .mgmt-tm th, .mgmt-gl th {background:#f4f4f4;}
 body.filterOpen .searchbox
 {
@@ -1474,7 +1478,7 @@ body
 }
 body.incomingMsg
 {
-	padding-top: 109px;
+	padding-top: 140px;
 }
 body.cattool.editing{/*background: url(../img/loading.gif) 47.5% 241px no-repeat;background-size: 20px 20px;*/}
 
@@ -3849,7 +3853,7 @@ p.percent
 
 body.filterOpen #outer
 {
-    margin-top: 95px;
+/*    margin-top: 95px; */
 }
 
 .save-warning
