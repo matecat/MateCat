@@ -28,16 +28,22 @@ class TmKeyManagement_TmKeyManagement {
      *
      * @param   $jsonTmKeys  string  A json string representing an array of TmKeyStruct Objects
      * @param   $grant_level string  One of the following strings : "r", "w", "rw"
+     * @param   $type string string  One of the following strings : "tm", "glossary", "tm,glossary"
      * @return  array|mixed  An array of TmKeyManagement_TmKeyStruct objects
-     * @throws  Exception    Throws Exception if grant_level string is wrong
+     * @throws  Exception    Throws Exception if grant_level string is wrong or if type string is wrong
      *
      * @see TmKeyManagement_TmKeyStruct
      */
-    public static function getJobTmKeys( $jsonTmKeys, $grant_level = 'rw' ) {
+    public static function getJobTmKeys( $jsonTmKeys, $grant_level = 'rw', $type = "tm") {
         $accepted_grants = array( "r", "w", "rw" );
+        $accepted_types = array( "tm", "glossary", "tm,glossary");
 
         if ( !in_array( $grant_level, $accepted_grants ) ) {
             throw new Exception ( __METHOD__ . " -> Invalid grant string." );
+        }
+
+        if ( !in_array($type, $accepted_types) ) {
+            throw new Exception ( __METHOD__ . " -> Invalid type string." );
         }
 
         $tmKeys = json_decode( $jsonTmKeys, true );
@@ -61,6 +67,23 @@ class TmKeyManagement_TmKeyManagement {
                 );
                 break;
             default  :
+                break;
+        }
+
+        switch( $type ){
+            case 'tm' :
+                $tmKeys = array_filter(
+                        $tmKeys,
+                        array( "TmKeyManagement_TmKeyManagement", 'filterTmKeysByTmType' )
+                );
+                break;
+            case 'glossary':
+                $tmKeys = array_filter(
+                        $tmKeys,
+                        array( "TmKeyManagement_TmKeyManagement", 'filterTmKeysByGlossaryType' )
+                );
+                break;
+            default:
                 break;
         }
 
@@ -170,34 +193,78 @@ class TmKeyManagement_TmKeyManagement {
 
     /**
      * Filters the elements of an array checking if read grant is true
+     *
      * @param $tm_key array An associative array with the following keys:<br/>
      * <pre>
-     *          type    : string  - "tmx" or "glossary"
+     *          tm      : int - 1 if it's a tm key
+     *          glos    : int - 1 if it's a glossary key
      *          owner   : boolean
      *          key     : string
      *          r       : int     - 0 or 1. Read privilege
      *          w       : int     - 0 or 1. Write privilege
      * </pre>
+     *
      * @return bool This function returns whether the element is filtered or not
      */
     private static function filterTmKeysByReadGrant( $tm_key ) {
-        return $tm_key[ 'r' ] == 1;
+        return $tm_key[ 'r' ] == true;
     }
 
     /**
      * Filters the elements of an array checking if write grant is true
+     *
      * @param $tm_key array An associative array with the following keys:<br/>
      * <pre>
-     *          type    : string  - "tmx" or "glossary"
+     *          tm      : int - 1 if it's a tm key
+     *          glos    : int - 1 if it's a glossary key
      *          owner   : boolean
      *          key     : string
      *          r       : int     - 0 or 1. Read privilege
      *          w       : int     - 0 or 1. Write privilege
      * </pre>
+     *
      * @return bool This function returns whether the element is filtered or not
      */
     private static function filterTmKeysByWriteGrant( $tm_key ) {
-        return $tm_key[ 'w' ] == 1;
+        return $tm_key[ 'w' ] == true;
+    }
+
+    /**
+     * Filters the elements of an array checking if tm field is true
+     *
+     * @param $tm_key array An associative array with the following keys:<br/>
+     * <pre>
+     *          tm      : int - 1 if it's a tm key
+     *          glos    : int - 1 if it's a glossary key
+     *          owner   : boolean
+     *          key     : string
+     *          r       : int     - 0 or 1. Read privilege
+     *          w       : int     - 0 or 1. Write privilege
+     * </pre>
+     *
+     * @return bool This function returns whether the element is filtered or not
+     */
+    private static function filterTmKeysByTmType( $tm_key ){
+        return $tm_key[ 'tm' ] == true;
+    }
+
+    /**
+     * Filters the elements of an array checking if glos field is true
+     *
+     * @param $tm_key array An associative array with the following keys:<br/>
+     * <pre>
+     *          tm      : int - 1 if it's a tm key
+     *          glos    : int - 1 if it's a glossary key
+     *          owner   : boolean
+     *          key     : string
+     *          r       : int     - 0 or 1. Read privilege
+     *          w       : int     - 0 or 1. Write privilege
+     * </pre>
+     *
+     * @return bool This function returns whether the element is filtered or not
+     */
+    private static function filterTmKeysByGlossaryType( $tm_key ){
+        return $tm_key[ 'glos' ] == true;
     }
 
     /**
@@ -206,6 +273,6 @@ class TmKeyManagement_TmKeyManagement {
      * @return bool This function returns whether the elements is filtered or not
      */
     private static function filterTmKeysByOwnerTrue(  $tm_key ) {
-        return $tm_key['owner'] == 1;
+        return $tm_key['owner'] == true;
     }
 }

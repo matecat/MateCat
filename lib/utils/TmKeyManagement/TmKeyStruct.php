@@ -5,12 +5,19 @@
  * Date: 02/09/14
  * Time: 13.35
  */
+
+
 class TmKeyManagement_TmKeyStruct extends stdClass {
 
     /**
-     * @var string One of the following: "tmx", "glossary"
+     * @var int This key is for tm. 0 or 1
      */
-    public $type;
+    public $tm;
+
+    /**
+     * @var int This key is for glossary. 0 or 1
+     */
+    public $glos;
 
     /**
      * A flag that indicates whether the key has been created by the owner or not
@@ -41,7 +48,8 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
     /**
      * @param array|null $params An associative array with the following keys:<br/>
      * <pre>
-     *          type    : string  - "tmx" or "glossary"
+     *          tm      : int     - 0 or 1. Tm key
+     *          glos    : int     - 0 or 1. Glossary key
      *          owner   : boolean
      *          key     : string
      *          r       : int     - 0 or 1. Read privilege

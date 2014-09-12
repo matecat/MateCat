@@ -136,7 +136,7 @@ while (1) {
     $config[ 'email' ]         = "tmanalysis@matecat.com";
 
 //    $config[ 'id_user' ]       = $id_translator;
-    $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys($segment[ 'tm_keys' ], 'r');
+    $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys($segment[ 'tm_keys' ], 'r', 'tm' );
     if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
         foreach ( $tm_keys as $tm_key ) {
             $config[ 'id_user' ][ ] = $tm_key->key;

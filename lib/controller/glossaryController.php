@@ -81,7 +81,7 @@ class glossaryController extends ajaxController {
 
                 case 'get':
                     //get TM keys with read grants
-                    $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $st[ 'tm_keys' ], 'r' );
+                    $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $st[ 'tm_keys' ], 'r', 'glossary' );
 
                     if ( count( $tm_keys ) ) {
                         $config[ 'id_user' ] = array();
@@ -134,7 +134,7 @@ class glossaryController extends ajaxController {
                     }
 
                     //get tm keys with write grants
-                    $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $st[ 'tm_keys' ], 'w' );
+                    $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $st[ 'tm_keys' ], 'w', 'glossary' );
 
                     if ( empty( $tm_keys ) ) {
 
@@ -146,7 +146,8 @@ class glossaryController extends ajaxController {
                         $config[ 'id_user' ] = $newUser->id;
 
                         $new_key        = TmKeyManagement_TmKeyManagement::getTmKeyStructure();
-                        $new_key->type  = 'tmx';
+                        $new_key->tm    = 1;
+                        $new_key->glos  = 1;
                         $new_key->key   = $newUser->key;
                         $new_key->owner = 0;
                         $new_key->r     = 1;

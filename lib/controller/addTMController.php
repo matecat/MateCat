@@ -109,7 +109,7 @@ class addTMController extends ajaxController {
     /**
      * @var string
      */
-    private $action;
+    private $exec;
 
     /**
      * @var SimpleTMX
@@ -143,8 +143,10 @@ class addTMController extends ajaxController {
 
     private static $acceptedActions = array( "newTM", "addTM" );
 
-    const DEFAULT_READ  = 1;
-    const DEFAULT_WRITE = 1;
+    const DEFAULT_READ  = true;
+    const DEFAULT_WRITE = true;
+    const DEFAULT_TM    = true;
+    const DEFAULT_GLOS  = true;
 
     public function __construct() {
 
@@ -289,14 +291,17 @@ class addTMController extends ajaxController {
 
         }
 
-        $tmKey_structure = array(
-                'type'  => "tmx",
-                'owner' => 0,
-                'name'  => $this->name,
-                'key'   => $this->tm_key,
-                'r'     => $this->r_grant,
-                'w'     => $this->w_grant
-        );
+        $tmKey_structure = TmKeyManagement_TmKeyManagement::getTmKeyStructure();
+
+        //TODO: tm and glos assignments will take the values from ajax parameters
+        $tmKey_structure->tm     = true;
+        $tmKey_structure->glos   = true;
+        $tmKey_structure->owner  = false;
+        $tmKey_structure->name   = $this->name;
+        $tmKey_structure->key    = $this->tm_key;
+        $tmKey_structure->r      = $this->r_grant;
+        $tmKey_structure->w      = $this->w_grant;
+
 
         try {
             $job_tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $this->job_data[ 'tm_keys' ], "rw" );
@@ -318,7 +323,7 @@ class addTMController extends ajaxController {
         if ( $this->isLogged ) {
 
             if ( $this->job_data[ 'owner' ] == $this->ownerID ) {
-                $tmKey_structure[ 'owner' ] = 1;
+                $tmKey_structure->owner = true;
             }
             //TODO: link tm key to the current user
         }
@@ -326,7 +331,7 @@ class addTMController extends ajaxController {
         //link tm key to the job
         $job_tmKeys = self::putTmKey(
                 $job_tmKeys,
-                TmKeyManagement_TmKeyManagement::getTmKeyStructure($tmKey_structure)
+                $tmKey_structure
         );
 
         TmKeyManagement_TmKeyManagement::setJobTmKeys( $this->job_id, $this->job_pass, $job_tmKeys );

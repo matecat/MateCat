@@ -514,6 +514,7 @@ function getEngineData( $id ) {
     try{
         $memcacheHandler = MemcacheHandler::getInstance();
     } catch( Exception $e ){
+        Log::doLog($e->getMessage());
         Log::doLog("No Memcache server(s) configured.");
     }
 
@@ -564,6 +565,13 @@ function getJobTmKeys( $job_id, $job_password ) {
     return $results[0][ 'tm_keys' ];
 }
 
+/**
+ * @param $job_id       int     The job id
+ * @param $job_password string  The job password
+ * @param $tmKeysString string  A json_encoded array of TmKeyManagement_TmKeyStruct objects
+ *
+ * @return int|null Returns null if everything went ok, otherwise it returns the mysql error code
+ */
 function setJobTmKeys( $job_id, $job_password, $tmKeysString ) {
     $query = "update jobs set tm_keys = '%s' where id = %d and password = '%s'";
 
