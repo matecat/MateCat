@@ -2340,7 +2340,7 @@ UI = {
         $('.addtm-select-file').val('');
         $('#addtm-tr-read, #addtm-tr-write').prop( "checked", true );
         $('#uploadTMX').text('').hide();
-        $('.addtm-tr .error-message, .addtm-tr .warning-message').text('').hide();
+        $('.addtm-tr .error-message, .addtm-tr .warning-message').hide();
     },
 
     /**
