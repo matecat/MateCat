@@ -2344,7 +2344,7 @@ UI = {
         $('.addtm-select-file').val('');
         $('#addtm-tr-read, #addtm-tr-write').prop( "checked", true );
         $('#uploadTMX').text('').hide();
-        $('.addtm-tr .error-message, .addtm-tr .warning-message').hide();
+        $('.addtm-tr .error-message, .addtm-tr .warning-message').text('').hide();
     },
 
     /**
@@ -3468,6 +3468,8 @@ $.extend(UI, {
             }
         }).on('change', '#addtm-tr-key', function(e) {
             $('.addtm-tr .warning-message').hide();
+        }).on('input', '#addtm-tr-key', function(e) {
+            UI.checkAddTMEnable();
         }).on('change', '#addtm-tr-key, .addtm-select-file, #addtm-tr-read, #addtm-tr-write', function(e) {
             UI.checkAddTMEnable();
 /*
