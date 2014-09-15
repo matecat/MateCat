@@ -83,7 +83,7 @@ $.extend(UI, {
 		
 		if (this.noTagsInSegment(1))
 			return false;
-		$('.source').each(function() {
+		$('.source, .editarea').each(function() {
 			UI.lockTags(this);
 		});
 	},
