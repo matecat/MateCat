@@ -36,7 +36,7 @@ class Database {
 	private $user = ""; //database login name
 	private $pass = ""; //database login password
 	private $database = ""; //database name
-	private $error = "";
+	public $error = "";
 	private $errno = 0;
 	private $sql = "";
 

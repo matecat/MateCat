@@ -13,8 +13,6 @@
 -->
 <html lang="en">
 <head>
-
-
     <!-- Force latest IE rendering engine or ChromeFrame if installed -->
     <!--[if IE]>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
@@ -33,6 +31,7 @@
     <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="${basepath}public/css/upload.css?build=${build_number}"/>
     <link rel="stylesheet" href="${basepath}public/js/lib/colorbox/colorbox.css?build=${build_number}"/>
+    <link href="${basepath}public/css/sidr.css" rel="stylesheet" type="text/css"/>
 
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]>
@@ -44,6 +43,7 @@
 	<script src="${basepath}public/js/common.js"></script>
 	<script src="${basepath}public/js/upload.js"></script>
 	<script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
+    <script src="${basepath}public/js/lib/jquery.sidr.js"></script>
 
     <script type="text/javascript">
         var config = {
@@ -64,20 +64,44 @@
 <div metal:use-macro="unsupported_browser.html/unsupported"/>
 </body>
 <body tal:condition="supportedBrowser" class="started">
+<div class="hide learnmore">
+    <span class="open-more pull-right">✕</span>
+    <h1>More matches for your translations</h1>
+    <h2>Use MateCat and get 10% more guaranteed more margin in your translation projects</h2>
+    <div class="col-3">
+        <img src="../public/img/punto1.png" />
+        <p>Collect data to set a fair rate for post-editor and improve MT quality</p>
+    </div>
+    <div class="col-3">
+        <img src="../public/img/punto2.png" />
+        <p>Real-time progress report and quality control for your translations</p>
+    </div>
+    <div class="col-3">
+        <img src="../public/img/punto3.png" />
+        <p>Online adaptation and quality estimation for MT systems based on Moses
+</p>
+    </div>
+    <div class="bottom-lm">
+        <p><a href="http://docs.matecat.com/how-matecat-counts-words" target="_blank">Learn more about the project</a> and lorem ipsum dolor sit amet</p>
+    </div>
 
+</div>
 <header>
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
+        <a class="pull-right open-more cat-appear">About Matecat</a>
     </div>
-    <div class="cl"></div>
-
+<div class="cl"></div>
 </header>
+<div class="cat-appear-div hide">
+    <img src="../public/img/about.png" />
+</div>
 <div class="wrapper-upload">
 <h1 tal:condition="true:conversion_enabled">Translate your files</h1>
 
 <h1 tal:condition="not:conversion_enabled">Translate an XLIFF file</h1>
 
-<h2 class="payoff">Matecat gives you more matches than any other translation tool.</h2>
+<h2 class="payoff">Matecat gives you more matches than any other translation tool. <a class="open-more">Learn more</a>.</h2>
 
 
 <div class="translate-box">
@@ -137,6 +161,7 @@
     <br/>
     <a href="#" id="multiple-link">Multiple languages?</a>
 </div>
+
 <div class="cl"></div>
 <a href="#" class="more">Options</a>
 
@@ -164,13 +189,24 @@
 
     <div class="translate-box">
         <span class="btn btn-success fileinput-button" id="create_private_tm_btn">
-<!--            <i class="icon-plus icon-white"></i> -->
-            <span>Create</span>
+ <span>Create</span>
+
             <input id="private-tm-new" type="file" name="files[]" multiple="multiple" class="multiple-button"/>
         </span>
     </div>
+       
 
-    <div class="translate-box translate-checkbox">
+
+
+  
+     <div class="translate-box">
+     <h2 class="resource" style="display:none;">4 Resources selected</h2>
+
+            <a href="#" class="memory-mgmt btn btn-success pull-left"><i class="icon-language"></i>Manage language resources</a>
+    </div>
+    <div class="cl"></div>
+
+      <div class="translate-checkbox">
         <span class="tms-checkbox" id="disable_tms_checkbox">
             <label class="tms-label" for="disable_tms_engine">Disable TM, Concordance and Glossary</label>
             <input type="checkbox" value="true" id="disable_tms_engine" name="no_tms_engine" />
@@ -679,22 +715,22 @@
     <div class="popup-outer closeClickingOutside"></div>
     <div class="popup">
         <a href="#" class="x-popup"></a>
-
         <h1>Supported file formats</h1>
-
-
         <div class="popup-box">
             <div tal:define="supported php:array()" tal:repeat="supported supported_file_types_array" class="format-box">
                 <h3 tal:content="repeat/supported/key"></h3>
                 <ul tal:define="ext php:array()" tal:repeat="ext supported">
                     <li tal:define="item php:array()" tal:repeat="item ext" tal:content="item">
-
                     </li>
                 </ul>
             </div>
         </div>
     </div>
 </div>
+
+
+
+
 
 <div class="modal popup-languages" data-type="view">
     <div class="popup-outer"></div>
@@ -722,16 +758,43 @@
         </div>
     </div>
 </div>
+ 
+<div id="sidr">
+  <!-- Your content -->
+  <h2>Matecat Help</h2>
+    <p>Browse one of the articles or search our documentation</p>
+  <ul>
+    <li><a href="#">How to create a new project</a></li>
+    <li><a href="#">Machine Translation Engines</a></li>
+    <li><a href="#">Private TM</a></li>
+  </ul>
+  <a href="http://docs.matecat.com/creating-a-project" class="pull-right" target="_blank">more</a>
+  <form>
+    <input type="text" placeholder="Search..."/>
+</form>
+</div>
+ 
+<script>
+$(document).ready(function() {
+  $('#simple-menu').sidr({
+      side: 'right'
+    });
+
+});
+</script>
 
 
 <footer>
     <div class="wrapper">
 
         <nav>
+
             <ul>
                 <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
                 <li><a tal:attributes="href string:${basepath}api/docs">API</a></li>
 				<li><a href="http://docs.matecat.com" target="_blank">Docs</a></li>
+                <li><a id="simple-menu" href="#sidr">New help</a></li>
+
             </ul>
 
             <tal:block tal:condition="php: empty(logged_user)">
@@ -751,8 +814,375 @@
     </div>
 </footer>
 
+
+
+<!-- inizio popup tm mgmt -->
+<div class="modal popup-tm" data-type="view">
+    <div class="popup-outer"></div>
+    <div class="popup">
+        <a href="#" class="x-popup"></a>
+
+        <h1>
+            Language Resources
+        </h1>
+
+        <div class="popup-box">
+
+
+
+<div class="mgmt-panel mgmt-panel-tm">
+	<div class="mgmt-wrapper">
+    	<div class="mgmt-table-tm">
+             <ul id="myTab" class="nav nav-tabs" role="tablist">
+      <li class="active"><a href="#tm">TM Management</a></li>
+      <li class=""><a href="#glossaries" class="mgmt-gl">Glossaries</a></li>
+     
+    </ul>
+             <div class="mgmt-container">
+          		<h3>Match source</h3>
+                <div class="block">
+                <label>MT</label>
+                <select>
+                <option>select</option>
+                </select>
+                </div>
+                <div class="block">
+                <label>Lookup</label>
+                <input type="checkbox" />
+                </div>
+                <div class="clear"></div>
+                <h3>Manage TM</h3>
+                   <p class="pull-left">Drag & drop the entries to change their priority.</p><a class="btn-ok pull-right savebtn">Save</a>
+
+                <table class="mgmt-tm" id="sort">
+                    <thead>
+                      <tr>
+                      	<th class="text-center"  width="7%">Priority</th>
+                        <th width="23%">Translation Memory</th>
+                        <th width="20%">Private Key</th>
+                        <th width="30%">Description</th>
+                        <th width="10%">Lang Pair</th>
+                        <th class="text-center"  width="5%">Lookup</th>
+                        <th class="text-center" width="5%">Update</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="index text-center"><span class="number">1</span><span class="nonumber">disabled</span></td>
+                            <td><a href="#">Google Drive</a></td>
+                            <td>90231291i201i</td>
+                            <td>Inf tech</td>
+                            <td><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
+                            <td  class="text-center" ><input  class="enable checkbox" type="checkbox" checked="checked" /></td>
+                            <td  class="text-center" ><input  class="enable checkbox" type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center index"><span class="number">2</span><span class="nonumber">disabled</span></td>
+                            <td><a href="#">Google Gmail</a></td>
+                            <td>2932938238</td>
+                            <td>Inf tech</td>
+                            <td><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">es-ES</span></td>
+                             <td  class="text-center" ><input  class="enable checkbox" type="checkbox"  checked="checked" /></td>
+                             <td  class="text-center" ><input class="enable checkbox"  type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center index"><span class="number">3</span><span class="nonumber">disabled</span></td>
+                            <td><a href="#">Europarl</a></td>
+                            <td>192819819281981</td>
+                            <td>Legal (amendments)</td>
+                            <td><span class="mgmt-source">es-ES</span> - <span class="mgmt-target">fr-FR</span></td>
+                             <td  class="text-center" ><input  class="enable checkbox" type="checkbox"  checked="checked" /></td>
+                             <td  class="text-center" ><input  class="enable checkbox" type="checkbox" /></td>
+                        </tr>
+                        <tr class="disabled">
+                            <td class="text-center"><span class="number">4</span><span class="nonumber">disabled</span></td>
+                            <td>Google Drive 21</td>
+                            <td>xxxxxxxxxxx</td>
+                            <td>Inf tech</td>
+                            <td><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
+                            <td  class="text-center" ><input class="enable checkbox" type="checkbox" /></td>
+                             <td  class="text-center" ><input class="enable checkbox" type="checkbox" /></td>
+                        </tr>
+                          </tbody>
+                       </table>
+                       <br />
+                            <a href="#" class="btn-ok clear pull-right add-tm">Add a TM</a>
+                       
+                            <div class="addrow-tm">
+              <h3>Add a TM</h3>
+                 <p>Short description here.</p>
+              <div class="block">
+              <input class="mgmt-input" type="text" width="20" id="name" onfocus="this.value='';"  value="Enter a name" />
+              </div>
+              <div class="block">
+                  <input class="mgmt-input" type="text" id="key" onfocus="this.value='';"  value="Create new private key" />
+                  <a class="btn-ok pull-right">Create</a>
+               </div>
+               <div class="block clear">
+               <input class="mgmt-input" type="text" id="description" onfocus="this.value='';"  value="Enter a short description" />
+               </div>
+                <div class="block">
+<label class="fileupload">Select a TMX </label><input type="file" />
+</div>
+				<input type="button" value="Add a TM" id="add" class="pull-right add-tm-ok btn-ok" onclick="Javascript:addRow()" />
+                       </div>
+            </div>
+		</div>
+    </div>
+</div>
+<!-- fine tm mgmt -->
+<!-- inizio glossary mgmt -->
+<div class="mgmt-panel mgmt-panel-gl">
+	<div class="mgmt-wrapper">
+    	<div class="mgmt-table-gl">
+  <ul id="myTab" class="nav nav-tabs" role="tablist">
+      <li ><a href="#tm"  class="mgmt-tm">TM Management</a></li>
+      <li class="active"><a href="#glossaries">Glossaries</a></li>
+     
+    </ul>             
+    
+    <div class="mgmt-container">
+   <h3>Manage Glossaries</h3>
+   <p>Drag & drop the entries to change their priority.</p>
+                <table class="mgmt-gl" id="sort">
+                    <thead>
+                      <tr>
+                      	<th class="text-center"  width="7%">Priority</th>
+                        <th width="23%">Glossary name</th>
+                        <th width="20%">Private Key</th>
+                        <th width="30%">Description</th>
+                        <th width="10%">Lang Pair</th>
+                        <th class="text-center"  width="5%">Lookup</th>
+                        <th class="text-center" width="5%">Update</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td class="index text-center">1</td>
+                            <td><a href="#">Google Drive</a></td>
+                            <td>90231291i201i</td>
+                            <td>Inf tech</td>
+                            <td><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
+                            <td  class="text-center" ><input type="checkbox" /></td>
+                            <td  class="text-center" ><input type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center index">2</td>
+                            <td><a href="#">Google Gmail</a></td>
+                            <td>2932938238</td>
+                            <td>Inf tech</td>
+                            <td><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">es-ES</span></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center index">3</td>
+                            <td><a href="#">Europarl</a></td>
+                            <td>192819819281981</td>
+                            <td>Legal (amendments)</td>
+                            <td><span class="mgmt-source">es-ES</span> - <span class="mgmt-target">fr-FR</span></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
+                        </tr>
+                        <tr>
+                            <td class="text-center index">4</td>
+                            <td>Google Drive 21</td>
+                            <td>xxxxxxxxxxx</td>
+                            <td>Inf tech</td>
+                            <td><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
+                            <td  class="text-center" ><input type="checkbox" /></td>
+                             <td  class="text-center" ><input type="checkbox" /></td>
+                        </tr>
+                          </tbody>
+                       </table>
+                       <br />
+                             <a class="pull-right add-gl btn-ok" href="#"><span>Import glossary</span></a>
+
+        </div>
+    
+    
+    	<div class="addrow-gl">
+        <h3>Import glossary</h3>
+          <p>Upload a CSV file with source and target terms and comments separated by a semicolon. Example: source term; target term; comment.</p>
+            <div>
+           
+            <div class="block">
+                             <select>
+                             	<option>Source language</option>
+                             </select>
+                    </div>
+                    <div class="block">
+                              <select>
+                             	<option>Target language</option>
+                             </select>
+                    </div>
+               <div class="block">
+                             <input type="textarea" class="mgmt-input" value="Enter a short description" />
+                    </div>
+                <div class="block ">
+                    <input class="mgmt-input" id="key" type="text" value="Enter your private key" />
+                     <a class="btn-ok pull-right">Create</a>
+                  </div>
+               
+                    <div class="block clear">
+                                <label>Select a file to upload (.csv)</label>
+                            <input type="file"  />
+                     </div>
+                     <a class="btn-ok pull-right btn-confirm">Upload</a>
+            </div>
+            </div>
+		</div>
+    </div>
+</div>
+</div>
+</div>
+</div>
+<!-- fine popup glossary mgmt -->
+
+<div class="mgmt-popup-outer closeClickingOutside popup-outer"></div>
+
+<script src="${basepath}public/js/lib/snapengage.js"></script>
+
+<script type="text/javascript">
+
+
+
+// script per il funzionamento del dropdown menu del profilo utente 
+
+
+			function DropDown(el) {
+				this.dd = el;
+				this.initEvents();
+			}
+			DropDown.prototype = {
+				initEvents : function() {
+					var obj = this;
+
+					obj.dd.on('click', function(event){
+						$(this).toggleClass('active');
+						event.stopPropagation();
+					});	
+				}
+			}
+
+			$(function() {
+
+				var dd = new DropDown( $('#dd') );
+
+				$(document).click(function() {
+					// all dropdowns
+					$('.wrapper-dropdown-5').removeClass('active');
+				});
+
+			});
+			
+
+$( ".memory-mgmt" ).click(function() {
+  $( ".popup-tm" ).show();
+});
+
+$( ".mgmt-tm" ).click(function() {
+  $( ".mgmt-panel-gl" ).hide();
+  $( ".mgmt-panel-tm" ).show();
+      $( "table.mgmt-tm" ).show();
+  });
+  
+  $( ".mgmt-gl" ).click(function() {
+  $( ".mgmt-panel-tm" ).hide();
+    $( "table.mgmt-tm" ).hide();
+  $( ".mgmt-panel-gl" ).show();
+
+  });
+  
+  $( ".add-tm" ).click(function() {
+  $(this).hide();
+  $( ".addrow-tm" ).show();
+  });
+  
+  
+    $( ".add-gl" ).click(function() {
+  $(this).hide();
+  $( ".addrow-gl" ).show();
+  });
+  
+
+$( "#sign-in" ).click(function() {
+  $( ".loginpopup" ).show();
+});
+
+    	$('#sort td:first').addClass('index');
+
+
+
+// plugin per rendere sortable le tabelle 
+// sorgente: http://www.foliotek.com/devblog/make-table-rows-sortable-using-jquery-ui-sortable/
+
+var fixHelperModified = function(e, tr) {
+    var $originals = tr.children();
+    var $helper = tr.clone();
+    $helper.children().each(function(index) {
+        $(this).width($originals.eq(index).width())
+    });
+    return $helper;
+},
+    updateIndex = function(e, ui) {
+        $('.index', ui.item.parent()).each(function (i) {
+            $(this).html(i + 1);
+        });
+    };
+
+$("#sort tbody").sortable({
+    helper: fixHelperModified,
+    stop: updateIndex
+}).disableSelection();
+
+$('.enable').click(function() {
+  $(this).closest('tr td:first-child').toggleClass('index');
+   	   	$(this).closest("tr").toggleClass('disabled');
+		$('tr.selected .number').show();
+	 	$('tr.selected .nonumber').hide();
+});
+
+
+$('.savebtn').click(function() {
+	$('.resource').show();
+	
+    $('input.checkbox').each(function(){
+        if ($(this).is(':checked')) {
+           	$(this).parent('tr').addClass('selected');
+        } else {
+         	$(this).parent('tr').addClass('disabled');
+        }
+    });
+})
+;$( ".open-more" ).click(function() {
+    $( ".cat-appear-div" ).hide();
+  $( ".learnmore" ).slideToggle( "400", function() {
+
+    // Animation complete.
+  });
+});
+
+
+$( ".cat-appear" ).mouseenter(function() {
+    $('.cat-appear-div').show();
+    $('.cat-appear-div').animate({
+      top: '+48'
+    }, 350);
+  });
+$( ".cat-appear" ).mouseleave(function() {
+    $('.cat-appear-div').animate({
+      top: '-48'
+    }, 200);
+  });
+</script>
+
+
 <script src="${basepath}public/js/lib/snapengage.js"></script>
 <img height='1' width='1' border='0' src='Http://www.clickmeter.com/conversion.aspx?id=5540EC432C934E0FB1EADDBA3A58E8EA&val=0.00&param=empty&com=0.00' />
+
+
+
 </body>
 
 </html>

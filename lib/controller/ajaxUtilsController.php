@@ -13,6 +13,9 @@ class ajaxUtilsController extends ajaxController {
     private $__getInput = null;
 
     public function __construct() {
+
+        //SESSION ENABLED
+        parent::sessionStart();
         parent::__construct();
 
 //        $gets = $_GET;
@@ -43,6 +46,29 @@ class ajaxUtilsController extends ajaxController {
                 $db->query("SELECT 1");
 				$this->result['data'] = array( "OK", time() ); 
 				break;
+            case 'checkTMKey':
+                //get MyMemory apiKey service
+                $apiKeyService = TMSServiceFactory::getAPIKeyService();
+
+                Log::doLog( $this->__postInput['tm_key'] );
+
+                //validate the key
+                try {
+                    $keyExists = $apiKeyService->checkCorrectKey( $this->__postInput['tm_key'] );
+                } catch ( Exception $e ){
+                    /* PROVIDED KEY IS NOT VALID OR WRONG, $keyExists IS NOT SET */
+                    Log::doLog( $e->getMessage() );
+                }
+
+                if ( !isset($keyExists) || $keyExists === false ) {
+                    $this->result[ 'errors' ][ ] = array( "code" => -9, "message" => "TM key is not valid." );
+                    Log::doLog( __METHOD__ . " -> TM key is not valid." );
+                    $this->result[ 'success' ] = false;
+                } else {
+                    $this->result[ 'errors' ] = array();
+                    $this->result[ 'success' ] = true;
+                }
+                break;
         }
 
     }

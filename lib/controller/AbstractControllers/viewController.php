@@ -141,6 +141,8 @@ abstract class viewController extends controller {
 		    exit;
 	    }
 
+        //SESSION ENABLED
+        parent::sessionStart();
         parent::__construct();
 
         //load Template Engine

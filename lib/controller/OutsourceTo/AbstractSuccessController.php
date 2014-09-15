@@ -58,8 +58,9 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
         }
 
         //SESSION ENABLED
+        $this->sessionStart();
+        parent::__construct(false);
 
-		parent::__construct(false);
 
         /**
          * redirectSuccessPage is a white page with a form submitted by javascript

@@ -219,7 +219,109 @@ function removeSelectedText() {
 	}
 }
 
+// addTM with iFrame
 
+function fileUpload(form, action_url, div_id) {
+    console.log('div_id: ', div_id);
+    // Create the iframe...
+    var iframe = document.createElement("iframe");
+    iframe.setAttribute("id", "upload_iframe");
+    iframe.setAttribute("name", "upload_iframe");
+    iframe.setAttribute("width", "0");
+    iframe.setAttribute("height", "0");
+    iframe.setAttribute("border", "0");
+    iframe.setAttribute("style", "width: 0; height: 0; border: none;");
+
+    // Add to document...
+    form.parentNode.appendChild(iframe);
+    window.frames['upload_iframe'].name = "upload_iframe";
+
+    iframeId = document.getElementById("upload_iframe");
+
+    // Add event...
+    var eventHandler = function () {
+
+        if (iframeId.detachEvent) iframeId.detachEvent("onload", eventHandler);
+        else iframeId.removeEventListener("load", eventHandler, false);
+
+        // Message from server...
+        if (iframeId.contentDocument) {
+            content = iframeId.contentDocument.body.innerHTML;
+        } else if (iframeId.contentWindow) {
+            content = iframeId.contentWindow.document.body.innerHTML;
+        } else if (iframeId.document) {
+            content = iframeId.document.body.innerHTML;
+        }
+
+        document.getElementById(div_id).innerHTML = content;
+
+        // Del the iframe...
+        setTimeout('iframeId.parentNode.removeChild(iframeId)', 250);
+    }
+
+    if (iframeId.addEventListener) iframeId.addEventListener("load", eventHandler, true);
+    if (iframeId.attachEvent) iframeId.attachEvent("onload", eventHandler);
+
+    // Set properties of form...
+    form.setAttribute("target", "upload_iframe");
+    form.setAttribute("action", action_url);
+    form.setAttribute("method", "post");
+    form.setAttribute("enctype", "multipart/form-data");
+    form.setAttribute("encoding", "multipart/form-data");
+    $(form).append('<input type="hidden" name="job_id" value="' + config.job_id + '" />')
+        .append('<input type="hidden" name="exec" value="newTM" />')
+        .append('<input type="hidden" name="job_pass" value="' + config.password + '" />')
+        .append('<input type="hidden" name="tm_key" value="' + $('#addtm-tr-key').val() + '" />')
+        .append('<input type="hidden" name="name" value="' + $('#addtm-tr-name').val() + '" />')
+        .append('<input type="hidden" name="r" value="1" />')
+        .append('<input type="hidden" name="w" value="1" />');
+    console.log('form: ', form);
+    console.log('iframe: ', iframe);
+
+    // Submit the form...
+    form.submit();
+
+//    document.getElementById(div_id).innerHTML = "Uploading...";
+    $('.popup-addtm-tr .x-popup').click();
+    UI.showMessage({
+        msg: 'Uploading a TM...'
+    });
+    UI.pollForUploadCallback();
+}
+
+
+// addTM webworker
+/*
+function werror(e) {
+    console.log('ERROR: Line ', e.lineno, ' in ', e.filename, ': ', e.message);
+}
+
+function handleFileSelect(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+
+    var files = evt.dataTransfer.files||evt.target.files;
+    // FileList object.
+
+    worker.postMessage({
+        'files' : files
+    });
+    //Sending File list to worker
+    // files is a FileList of File objects. List some properties.
+    var output = [];
+    for (var i = 0, f; f = files[i]; i++) {
+        output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ', f.size, ' bytes, last modified: ', f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a', '</li>');
+    }
+    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+}
+
+function handleDragOver(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    evt.dataTransfer.dropEffect = 'copy';
+    // Explicitly show this is a copy.
+}
+*/
 
 
 /* FORMATTING FUNCTION  TO TEST */

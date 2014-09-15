@@ -2191,7 +2191,154 @@ UI = {
 		});
 	},
 
-	
+    checkTMgrants: function(panel) {console.log('checkTMgrants');
+        var r = ($(panel).find('.r').is(':checked'))? 1 : 0;
+        var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
+        if(!r && !w) {
+            console.log('panel: ', panel);
+            $(panel).find('.error-message').text('Either read or write must be checked').show();
+            return false;
+        } else {
+            return true;
+        }
+    },
+    checkTMKey: function(key, operation) {console.log('checkTMKey');
+        console.log('operation: ', operation);
+        APP.doRequest({
+            data: {
+                action: 'ajaxUtils',
+                exec: 'checkTMKey',
+                tm_key: key
+            },
+            context: operation,
+            error: function() {
+                console.log('checkTMKey error!!');
+            },
+            success: function(d) {
+                console.log('checkTMKey success!!');
+                console.log('d: ', d);
+                console.log('d.success: ', d.success);
+                if(d.success == true) {
+                    console.log('key is good');
+                    if(this == 'key') {
+                        console.log('adding a key');
+                        UI.execAddTMKey();
+                    } else {
+                        console.log('adding a tm');
+                        UI.execAddTM();
+                    }
+                    return true;
+                } else {
+                    console.log('key is bad');
+                    if(this == 'key') {
+                        console.log('error adding a key');
+                        $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                    } else {
+                        console.log('error adding a tm');
+                        $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                    }
+                    return false;
+                }
+            }
+        });
+    },
+    checkAddTMEnable: function() {
+        console.log('checkAddTMEnable');
+        if(
+            ($('#addtm-tr-key').val() != '')&&
+                UI.checkTMgrants($('.addtm-tr'))
+            ) {
+            $('#addtm-add').removeAttr('disabled').removeClass('disabled');
+        } else {
+            $('#addtm-add').attr('disabled', 'disabled').addClass('disabled');
+        }
+ /*
+        if(button.attr('id') == 'addtm-add') {
+            if(
+                ($('#addtm-tr-key').val() != '')&&
+                ($('.addtm-tr input:file').val() != '')&&
+                UI.checkTMgrants($('.addtm-tr'))
+            ) {
+                $('#addtm-add').removeAttr('disabled').removeClass('disabled');
+            } else {
+                $('#addtm-add').attr('disabled', 'disabled').addClass('disabled');
+            }
+        } else {
+            console.log('1: ', $('#addtm-tr-key-key').val());
+            console.log('2: ', UI.checkTMgrants($('.addtm-tr-key')));
+            console.log('3: ', button);
+            if(
+                ($('#addtm-tr-key-key').val() != '')&&
+                    UI.checkTMgrants($('.addtm-tr-key'))
+                ) {
+                $(button).removeAttr('disabled').removeClass('disabled');
+            } else {
+                $(button).attr('disabled', 'disabled').addClass('disabled');
+            }
+        }
+*/
+    },
+    execAddTM: function() {
+        fileUpload($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
+    },
+    execAddTMKey: function() {
+        var r = ($('#addtm-tr-read').is(':checked'))? 1 : 0;
+        var w = ($('#addtm-tr-write').is(':checked'))? 1 : 0;
+
+        APP.doRequest({
+            data: {
+                action: 'addTM',
+                exec: 'addTM',
+                job_id: config.job_id,
+                job_pass: config.password,
+                tm_key: $('#addtm-tr-key').val(),
+                r: r,
+                w: w
+            },
+            error: function() {
+                console.log('addTM error!!');
+            },
+            success: function(d) {
+                console.log('addTM success!!');
+                txt = (d.success == true)? 'A TM key has been added.' : d.errors[0].message;
+                $('.popup-addtm-tr .x-popup').click();
+                UI.showMessage({
+                    msg: txt
+                });
+                UI.clearAddTMpopup();
+            }
+        });
+    },
+
+    pollForUploadCallback: function() {
+        if($('#uploadCallback').text() != '') {
+//            console.log("FINITO L'UPLOAD CON MESSAGGIO: ", $.parseJSON($('#uploadCallback pre').text()));
+            msg = $.parseJSON($('#uploadCallback pre').text());
+            if(msg.success == true) {
+                UI.showMessage({
+                    msg: 'Your TM has been correctly uploaded.'
+                });
+                UI.clearAddTMpopup();
+            } else {
+                UI.showMessage({
+                    msg: 'Error: ' + msg.errors[0].message
+                });
+            }
+        } else {
+            setTimeout(function() {
+                UI.pollForUploadCallback();
+            }, 1000);
+        }
+
+    },
+    clearAddTMpopup: function() {
+        $('#addtm-tr-key').val('');
+        $('.addtm-select-file').val('');
+        $('#addtm-tr-read, #addtm-tr-write').prop( "checked", true );
+        $('#uploadTMX').text('').hide();
+        $('.addtm-tr .error-message, .addtm-tr .warning-message').text('').hide();
+    },
+
     /**
      * This function is used when a string has to be sent to the server
      * It works over a clone of the editarea ( translation area ) and manage the text()

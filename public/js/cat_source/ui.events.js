@@ -168,6 +168,250 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.unbindShortcuts();
 			$('.popup-settings').show();
+
+        // start addtmx
+        }).on('click', '.open-popup-addtm-tr', function(e) {
+            e.preventDefault();
+            $('.popup-addtm-tr').show();
+        }).on('click', '#addtm-create-key', function(e) {
+            e.preventDefault();
+            //prevent double click
+            if($(this).hasClass('disabled')) return false;
+            $(this).addClass('disabled');
+            $(this).attr('disabled','');
+            $.get("http://mymemory.translated.net/api/createranduser",function(data){
+                //parse to appropriate type
+                //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
+                if(typeof data == 'string'){
+                    data=jQuery.parseJSON(data);
+                }
+                //put value into input field
+                $('#addtm-tr-key').val(data.key);
+                $('#addtm-create-key').removeClass('disabled');
+                setTimeout(function() {
+                    UI.checkAddTMEnable();
+                }, 500);
+//                $('#private-tm-user').val(data.id);
+//                $('#private-tm-pass').val(data.pass);
+//                $('#create_private_tm_btn').attr('data-key', data.key);
+                return false;
+            })
+        }).on('change', '#addtm-tr-read, #addtm-tr-write', function(e) {
+            if(UI.checkTMgrants($('.addtm-tr'))) {
+                $('.addtm-tr .error-message').hide();
+            }
+        }).on('change', '#addtm-tr-key-read, #addtm-tr-key-write', function(e) {
+            if(UI.checkTMgrants($('.addtm-tr-key'))) {
+                $('.addtm-tr-key .error-message').hide();
+            }
+        }).on('change', '.addtm-select-file', function(e) {
+            $('.addtm-tr .warning-message').hide();
+            if($('#addtm-tr-key').val() == '') {
+                $('#addtm-create-key').click();
+                $('.addtm-tr .warning-message').show();
+                setTimeout(function() {
+                    UI.checkAddTMEnable();
+                }, 500);
+            }
+        }).on('click', '.addtm-tr-key .btn-ok', function(e) {
+            if(!UI.checkTMgrants($('.addtm-tr-key'))) {
+                return false;
+            } else {
+                $('.addtm-tr-key .error-message').text('').hide();
+            };
+            UI.checkTMKey($('#addtm-tr-key-key').val(), 'key');
+        }).on('click', '#addtm-select-file', function(e) {
+            $('.addtm-select-file').click();
+        }).on('change', '.addtm-select-file', function(e) {
+            console.log($(this).val());
+            if($(this).val() != '') {
+                $('#uploadTMX').text($(this).val().split('\\')[$(this).val().split('\\').length - 1]).show();
+            } else {
+                $('#uploadTMX').hide();
+            }
+        }).on('change', '#addtm-tr-key', function(e) {
+            $('.addtm-tr .warning-message').hide();
+        }).on('change', '#addtm-tr-key, .addtm-select-file, #addtm-tr-read, #addtm-tr-write', function(e) {
+            UI.checkAddTMEnable();
+/*
+        }).on('change', '#addtm-tr-key, .addtm-tr input:file, .addtm-tr input.r, .addtm-tr input.w', function(e) {
+            UI.checkAddTMEnable($('#addtm-add'));
+        }).on('change', '#addtm-tr-key-key', function(e) {
+            UI.checkAddTMEnable($('.addtm-tr-key .btn-ok'));
+        }).on('click', '#addtm-tr-key-read, #addtm-tr-key-write', function(e) {
+            UI.checkAddTMEnable($('.addtm-tr-key .btn-ok'));
+*/
+        }).on('click', '#addtm-add', function(e) {
+            e.preventDefault();
+            if(!UI.checkTMgrants($('.addtm-tr'))) {
+                return false;
+            } else {
+                console.log('vediamo qui');
+                $('.addtm-tr .error-message').text('').hide();
+                console.log('CONTROLLO: ', $('#uploadTMX').text());
+                operation = ($('#uploadTMX').text() == '')? 'key' : 'tm';
+                UI.checkTMKey($('#addtm-tr-key').val(), operation);
+//                if(UI.checkTMKey($('#addtm-tr-key').val(), 'tm')) fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
+
+            };
+
+
+/*
+// web worker implementation
+
+            if(typeof(Worker) !== "undefined") {
+                // Yes! Web worker support!
+
+                var worker = new Worker('http://matecat.local/public/js/addtm.js');
+                worker.onmessage = function(e) {
+                    alert(e.data);
+                }
+                worker.onerror =werror;
+
+                // Setup the dnd listeners.
+                var dropZone = document.getElementById('drop_zone');
+                dropZone.addEventListener('dragover', handleDragOver, false);
+                dropZone.addEventListener('drop', handleFileSelect, false);
+                document.getElementById('files').addEventListener('change', handleFileSelect, false);
+            } else {
+                // Sorry! No Web Worker support..
+            }
+*/
+
+/*
+            $('#addtm-add').addClass('disabled');
+
+            //create an iFrame element
+            var iFrameAddTM = $( document.createElement( 'iframe' ) ).hide().prop({
+                id: 'iFrameAddTM',
+                src: ''
+            });
+
+            //append iFrame to the DOM
+            $("body").append( iFrameAddTM );
+*/
+
+/*
+            //generate a token addTM
+            var addTMToken = new Date().getTime();
+
+            //set event listner, on ready, attach an interval that check for finished download
+            iFrameAddTM.ready(function () {
+
+                //create a GLOBAL setInterval so in anonymous function it can be disabled
+                addTMTimer = window.setInterval(function () {
+
+                    //check for cookie
+                    var token = $.cookie('addTMToken');
+                    console.log('TOKEN: ', token);
+
+                    //if the cookie is found, download is completed
+                    //remove iframe an re-enable download button
+                    if ( token == addTMToken ) {
+                        $('#addtm-add').removeClass('disabled').val( $('#addtm-add' ).data('oldValue') ).removeData('oldValue');
+                        window.clearInterval( addTMTimer );
+                        $.cookie('addTMToken', null, { path: '/', expires: -1 });
+                        iFrameAddTM.remove();
+                    }
+
+                }, 2000);
+
+            });
+
+            //clone the html form and append a token for download
+            var iFrameAddTMForm = $("#addTMForm").clone().append(
+                $( document.createElement( 'input' ) ).prop({
+                    type: 'hidden',
+                    name: 'addTMToken',
+                    value: addTMToken
+                })
+            );
+*/
+/*
+            var iFrameAddTMForm = $("#addTMForm").clone();
+            //append from to newly created iFrame and submit form post
+            iFrameAddTM.contents().find('body').append( iFrameAddTMForm );
+            console.log('vediamo:', iFrameAddTM.contents().find("#addTMForm"));
+            iFrameAddTM.contents().find("#addTMForm").submit();
+*/
+            /*
+                        //check if we are in download status
+                        if ( !$('#downloadProject').hasClass('disabled') ) {
+
+                            //disable download button
+                            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING...');
+
+                            //create an iFrame element
+                            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
+                                id:'iframeDownload',
+                                src: ''
+                            });
+
+                            //append iFrame to the DOM
+                            $("body").append( iFrameDownload );
+
+                            //generate a token download
+                            var downloadToken = new Date().getTime();
+
+                            //set event listner, on ready, attach an interval that check for finished download
+                            iFrameDownload.ready(function () {
+
+                                //create a GLOBAL setInterval so in anonymous function it can be disabled
+                                downloadTimer = window.setInterval(function () {
+
+                                    //check for cookie
+                                    var token = $.cookie('downloadToken');
+
+                                    //if the cookie is found, download is completed
+                                    //remove iframe an re-enable download button
+                                    if ( token == downloadToken ) {
+                                        $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
+                                        window.clearInterval( downloadTimer );
+                                        $.cookie('downloadToken', null, { path: '/', expires: -1 });
+                                        iFrameDownload.remove();
+                                    }
+
+                                }, 2000);
+
+                            });
+
+                            //clone the html form and append a token for download
+                            var iFrameForm = $("#fileDownload").clone().append(
+                                $( document.createElement( 'input' ) ).prop({
+                                    type:'hidden',
+                                    name:'downloadToken',
+                                    value: downloadToken
+                                })
+                            );
+
+                            //append from to newly created iFrame and submit form post
+                            iFrameDownload.contents().find('body').append( iFrameForm );
+                            iFrameDownload.contents().find("#fileDownload").submit();
+
+                        } else {
+                            //we are in download status
+                        }
+             */
+ /*
+            APP.doRequest({
+                data: {
+                    action: 'addTM',
+                    job_id: config.job_id,
+                    job_pass: config.password,
+                    tm_key: $('#addtm-tr-key').val(),
+                    name: $('#addtm-tr-name').val(),
+                    tmx_file: ''
+                },
+                error: function() {
+                    console.log('addTM error!!');
+                },
+                success: function(d) {
+                    console.log('addTM success!!');
+                }
+            });
+*/
+        // end addtmx
+
 		}).on('click', '.popup-settings #settings-restore', function(e) {
 			e.preventDefault();
 			APP.closePopup();

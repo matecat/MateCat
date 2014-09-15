@@ -84,9 +84,13 @@ class INIT {
 		return self::$instance;
 	}
 
-	public static function sessionClose(){
-		@session_write_close();
-	}
+    public static function sessionClose(){
+        @session_write_close();
+    }
+
+    public static function sessionStart(){
+        @session_start();
+    }
 
     protected static function _setIncludePath( $custom_paths = null ) {
         $def_path = array(
@@ -131,8 +135,7 @@ class INIT {
         register_shutdown_function( 'INIT::fatalErrorHandler' );
 
         if( stripos( PHP_SAPI, 'cli' ) === false ){
-            //access session data
-            @session_start();
+
             register_shutdown_function( 'INIT::sessionClose' );
 
             self::$PROTOCOL = stripos( $_SERVER[ 'SERVER_PROTOCOL' ], "https" ) === false ? "http" : "https";

@@ -11,7 +11,6 @@ class changeInternalLanguageController extends ajaxController {
 
 	public function __construct() {
 
-        $this->disableSessions();
 		parent::__construct();
 
 		$this->source_language = $this->get_from_get_post('source_language');

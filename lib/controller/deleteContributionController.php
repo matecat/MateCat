@@ -20,7 +20,6 @@ class deleteContributionController extends ajaxController {
 
     public function __construct() {
 
-        $this->disableSessions();
         parent::__construct();
 
         $this->source_lang   = $this->get_from_get_post( 'source_lang' );

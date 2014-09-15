@@ -25,6 +25,8 @@ class createProjectController extends ajaxController {
 
     public function __construct() {
 
+        //SESSION ENABLED
+        parent::sessionStart();
         parent::__construct();
 
         $filterArgs = array(

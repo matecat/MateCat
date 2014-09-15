@@ -18,7 +18,8 @@ class getProjectsController extends ajaxController {
 
 	public function __construct() {
 
-        $this->disableSessions();
+        //SESSION ENABLED
+        parent::sessionStart();
 		parent::__construct();
 
 		$this->lang_handler=Languages::getInstance();

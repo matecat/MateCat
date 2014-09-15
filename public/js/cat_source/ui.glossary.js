@@ -185,6 +185,9 @@ $.extend(UI, {
 		}
 		if(smallest.x < 1000000) UI.intervalsUnion.push(smallest);
 //			console.log('intervals 1: ', JSON.stringify(intervals));
+
+        //throws exception when it is undefined
+        ( typeof smallestIndex == 'undefined' ? smallestIndex = 0 : null );
 		intervals.splice(smallestIndex, 1);
 //			console.log('intervals 2: ', JSON.stringify(intervals));
 			if(!intervals.length) return false;

@@ -42,7 +42,6 @@ class NewController extends ajaxController {
 		//limit execution time to 300 seconds
 		set_time_limit( 300 );
 
-		$this->disableSessions();
 		parent::__construct();
 
 		//force client to close connection, avoid UPLOAD_ERR_PARTIAL for keep-alive connections
