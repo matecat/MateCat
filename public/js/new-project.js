@@ -1,22 +1,3 @@
-var skipLangDetectArr = {};
-
-/**
- * TODO: REFACTORING
- * These functions have to be put in some object.
- * @author Roberto
- */
-var addInlineMessage = function (fileName, message){
-	var currDeleteDiv = $('.upload-table td.name:contains("'+fileName+'")').next().next().addClass("error");
-
-	if($(currDeleteDiv).find(".skiplangdetect").length == 0){
-		$(currDeleteDiv).html("")
-			.append(
-				'<span class="label label-important">'+
-					message+
-					'</span>');
-	}
-}
-
 $(document).ready(function() {
 
 	$('#create_private_tm_btn').click(function() {
@@ -95,7 +76,7 @@ $(document).ready(function() {
 				private_tm_key		: 	( !$('#private-tm-key').prop('disabled') ? $('#private-tm-key').val() : "" ),
 				private_tm_user		: 	( !$('#private-tm-user').prop('disabled') ? $('#private-tm-user').val() : "" ),
 				private_tm_pass		: 	( !$('#private-tm-pass').prop('disabled') ? $('#private-tm-pass').val() : "" ),
-				lang_detect_files  	: 	skipLangDetectArr
+				lang_detect_files  	: 	UI.skipLangDetectArr
 			},
 			beforeSend: function (){
 				$('.error-message').hide();
@@ -105,12 +86,12 @@ $(document).ready(function() {
 				console.log('d: ', d);
 
 				if(typeof(d.lang_detect) !== 'undefined'){
-					skipLangDetectArr = d.lang_detect;
+					UI.skipLangDetectArr = d.lang_detect;
 				}
 
-				$.each(skipLangDetectArr, function(file, status){
-					if(status == 'ok') 	skipLangDetectArr[file] = 'skip';
-					else skipLangDetectArr[file] = 'detect';
+				$.each(UI.skipLangDetectArr, function(file, status){
+					if(status == 'ok') 	UI.skipLangDetectArr[file] = 'skip';
+					else UI.skipLangDetectArr[file] = 'detect';
 
 				});
 
@@ -131,7 +112,7 @@ $(document).ready(function() {
 								.replace(/.$/g,"");
 
 								console.log(fileName);
-								addInlineMessage(
+								UI.addInlineMessage(
 									fileName,
 									'Is this a scanned file or image?<br/>Try converting to DOCX using an OCR software '+
 										'(ABBYY FineReader or Nuance PDF Converter)'
@@ -140,7 +121,7 @@ $(document).ready(function() {
 							case -17  :
 								$.each(d.lang_detect, function (fileName, status){
 									if(status == 'detect'){
-										addInlineMessage(
+										UI.addInlineMessage(
 											fileName,
 											'Different source language. <a class="skip_link" id="skip_'+fileName+'">Ignore</a>'
 										);
@@ -228,7 +209,7 @@ $(document).ready(function() {
 	$('.upload-table').on('click', 'a.skip_link', function(){
 		var fname = decodeURIComponent($(this).attr("id").replace("skip_",""));
 
-		skipLangDetectArr[fname] = 'skip';
+		UI.skipLangDetectArr[fname] = 'skip';
 
 		var parentTd_label = $(this).parent(".label");
 
