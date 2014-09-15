@@ -2204,43 +2204,47 @@ UI = {
     },
     checkTMKey: function(key, operation) {console.log('checkTMKey');
         console.log('operation: ', operation);
-        APP.doRequest({
-            data: {
-                action: 'ajaxUtils',
-                exec: 'checkTMKey',
-                tm_key: key
-            },
-            context: operation,
-            error: function() {
-                console.log('checkTMKey error!!');
-            },
-            success: function(d) {
-                console.log('checkTMKey success!!');
-                console.log('d: ', d);
-                console.log('d.success: ', d.success);
-                if(d.success == true) {
-                    console.log('key is good');
-                    if(this == 'key') {
-                        console.log('adding a key');
-                        UI.execAddTMKey();
-                    } else {
+
+        if( operation == 'key' ){
+            console.log('adding a key');
+            UI.execAddTMKey();
+        } else {
+
+            APP.doRequest({
+                data: {
+                    action: 'ajaxUtils',
+                    exec: 'checkTMKey',
+                    tm_key: key
+                },
+                context: operation,
+                error: function() {
+                    console.log('checkTMKey error!!');
+                },
+                success: function(d) {
+                    console.log('checkTMKey success!!');
+                    console.log('d: ', d);
+                    console.log('d.success: ', d.success);
+                    if(d.success == true) {
+                        console.log('key is good');
                         console.log('adding a tm');
                         UI.execAddTM();
-                    }
-                    return true;
-                } else {
-                    console.log('key is bad');
-                    if(this == 'key') {
-                        console.log('error adding a key');
-                        $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                        return true;
                     } else {
-                        console.log('error adding a tm');
-                        $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                        console.log('key is bad');
+                        if(this == 'key') {
+                            console.log('error adding a key');
+                            $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                        } else {
+                            console.log('error adding a tm');
+                            $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                        }
+                        return false;
                     }
-                    return false;
                 }
-            }
-        });
+            });
+
+        }
+
     },
     checkAddTMEnable: function() {
         console.log('checkAddTMEnable');
