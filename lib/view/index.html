@@ -237,7 +237,7 @@
                 <div class="popup-box">
                     <div class="addtm-tr">
                         <h3>Add your private TM</h3>
-                        <p>Your private TM will not be shared with any other person working on the project. It's for your eyes only.</p>
+                        <p>Your private TM will not be shared with any other person working on the project. <br />It's for your eyes only.</p>
                         <p class="warning-message" style="display: none;"><span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.</span></p>
                         <p class="error-message" style="display: none;"> Error: the errmsg will appear here... </p>
                         <!-- div class="block pull-left">
@@ -251,7 +251,8 @@
                             <form id="addtm-upload-form" class="pull-left">
                                 <label class=""> Or </label>
                                 <input type="file" name="datafile" class="addtm-select-file" />
-                                <input type="button" name="select-file" value="Select a TMX" id="addtm-select-file" class="add-tm-ok btn-ok" />
+                                <input type="button" name="select-file" value="Upload a TMX" id="addtm-select-file"
+                                       class="add-tm-ok btn-ok" />
                                 <input type="checkbox" name="r" class="r" value="1" checked="checked" id="addtm-tr-read" />
                                 <label for="addtm-tr-read">Read</label>
                                 <input type="checkbox" name="w" class="w" value="1" checked="checked" id="addtm-tr-write" />
@@ -272,7 +273,7 @@
                             <input type="hidden" name="tmx_file" value="" />
                             <input type="hidden" name="r" value="1" />
                             <input type="hidden" name="w" value="1" />
-                            <input type="button" name="submit" value="Add a TM" disabled="disabled" id="addtm-add"
+                            <input type="button" name="submit" value="Add your TM" disabled="disabled" id="addtm-add"
                                    class="pull-right add-tm-ok btn-ok disabled" />
                             <!--                        <input id="downloadProject" name="submit1" type="button" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'DOWNLOAD TRANSLATION' : 'PREVIEW'" /> -->
                         </form>

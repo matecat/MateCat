@@ -154,7 +154,7 @@ UI = {
 	},
 	copySource: function() {
 
-		var source_val = $.trim($(".source", this.currentSegment).html() ).replace( /(<mark[^>]+>)|(<\/mark>)/gi, "");
+		var source_val = $.trim($(".source", this.currentSegment).html());
 //		var source_val = $.trim($(".source", this.currentSegment).text());
 		// Test
 		//source_val = source_val.replace(/&quot;/g,'"');
@@ -2288,6 +2288,7 @@ UI = {
     execAddTMKey: function() {
         var r = ($('#addtm-tr-read').is(':checked'))? 1 : 0;
         var w = ($('#addtm-tr-write').is(':checked'))? 1 : 0;
+        var TMKey = $('#addtm-tr-key').val();
 
         APP.doRequest({
             data: {
@@ -2295,16 +2296,17 @@ UI = {
                 exec: 'addTM',
                 job_id: config.job_id,
                 job_pass: config.password,
-                tm_key: $('#addtm-tr-key').val(),
+                tm_key: TMKey,
                 r: r,
                 w: w
             },
+            context: TMKey,
             error: function() {
                 console.log('addTM error!!');
             },
             success: function(d) {
                 console.log('addTM success!!');
-                txt = (d.success == true)? 'A TM key has been added.' : d.errors[0].message;
+                txt = (d.success == true)? 'The TM Key ' + this + ' has been added to your translation job.' : d.errors[0].message;
                 $('.popup-addtm-tr .x-popup').click();
                 UI.showMessage({
                     msg: txt
@@ -2314,13 +2316,15 @@ UI = {
         });
     },
 
-    pollForUploadCallback: function() {
+    pollForUploadCallback: function(TMKey) {
+        console.log('TMKey: ', TMKey);
         if($('#uploadCallback').text() != '') {
 //            console.log("FINITO L'UPLOAD CON MESSAGGIO: ", $.parseJSON($('#uploadCallback pre').text()));
             msg = $.parseJSON($('#uploadCallback pre').text());
+            console.log('msg: ', msg);
             if(msg.success == true) {
                 UI.showMessage({
-                    msg: 'Your TM has been correctly uploaded.'
+                    msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
                 });
                 UI.clearAddTMpopup();
             } else {
@@ -2330,7 +2334,7 @@ UI = {
             }
         } else {
             setTimeout(function() {
-                UI.pollForUploadCallback();
+                UI.pollForUploadCallback(TMKey);
             }, 1000);
         }
 
@@ -5990,7 +5994,6 @@ $.extend(UI, {
 	renderConcordances: function(d, in_target) {
 		segment = this.currentSegment;
 		segment_id = this.currentSegmentId;
-
 		$('.sub-editor.concordances .overflow .results', segment).empty();
 		$('.sub-editor.concordances .overflow .message', segment).remove();
 		if (d.data.matches.length) {
@@ -7281,9 +7284,9 @@ function fileUpload(form, action_url, div_id) {
 //    document.getElementById(div_id).innerHTML = "Uploading...";
     $('.popup-addtm-tr .x-popup').click();
     UI.showMessage({
-        msg: 'Uploading a TM...'
+        msg: 'Uploading your TM...'
     });
-    UI.pollForUploadCallback();
+    UI.pollForUploadCallback($('#addtm-tr-key').val());
 }
 
 
