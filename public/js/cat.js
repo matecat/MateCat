@@ -352,7 +352,19 @@ UI = {
 			return false;
 		}
 	},
-	getIconClass: function(ext) {
+    handleReturn: function(e) {
+        if(!this.hiddenTextEnabled) return;
+        e.preventDefault();
+        var node = document.createElement("span");
+        var br = document.createElement("br");
+        node.setAttribute('class', 'monad softReturnw ' + config.lfPlaceholderClass);
+        node.setAttribute('contenteditable', 'false');
+        node.appendChild(br);
+        insertNodeAtCursor(node);
+        this.unnestMarkers();
+    },
+
+    getIconClass: function(ext) {
 		c =		(
 					(ext == 'doc')||
 					(ext == 'dot')||
@@ -3172,16 +3184,9 @@ $.extend(UI, {
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			}
 		}).on('keydown', '.editor .editarea', 'shift+return', function(e) {
-            if(!UI.hiddenTextEnabled) return;
-
-            e.preventDefault();
-			var node = document.createElement("span");
-			var br = document.createElement("br");
-			node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
-			node.setAttribute('contenteditable', 'false');
-			node.appendChild(br);
-			insertNodeAtCursor(node);
-			UI.unnestMarkers();
+            UI.handleReturn(e);
+        }).on('keydown', '.editor .editarea', 'return', function(e) {
+            UI.handleReturn(e);
 		}).on('keydown', '.editor .editarea', 'space', function(e) {
             if(UI.markSpacesEnabled) {
                 if(!UI.hiddenTextEnabled) return;
@@ -3731,6 +3736,9 @@ $.extend(UI, {
 //            }
 
         }).on('keydown', '.editor .editarea', 'return', function(e) {
+            e.preventDefault();
+            console.log('222222');
+/*
             UI.defaultBRmanagement = false;
             if(!$('br', UI.editarea).length) {
                 UI.defaultBRmanagement = true;
@@ -3740,6 +3748,7 @@ $.extend(UI, {
                 restoreSelection();
                 e.preventDefault();
             }
+*/
         }).on('keypress', '.editor .editarea', function(e) {
             console.log('which: ', e.which);
 //			console.log('keypress: ', UI.editarea.html());
@@ -5956,7 +5965,7 @@ $.extend(UI, {
 		this.searchParams['exact-match'] = $('#exact-match').is(':checked');
 		this.searchParams.search = 1;
 		if ((typeof this.searchParams.source == 'undefined') && (typeof this.searchParams.target == 'undefined') && (this.searchParams.status == 'all')) {
-			APP.alert({msg: 'You must specify at least one between source and target<br>or choose a status'});
+			APP.alert({msg: 'Enter text in source or target input boxes<br /> or select a status.'});
 			return false;
 		}
 		this.disableTagMark();
