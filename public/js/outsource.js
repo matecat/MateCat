@@ -87,17 +87,7 @@ $.extend(UI, {
                          * Removed Timezone with Intl because of too much different behaviours on different operating systems
                          *
                          */
-//                        check for international API support on ECMAScript
-                        if ( window.Intl && typeof window.Intl === "object" ){
-                            //Assume it's supported, lets localize
-//                            var timeZone   = Intl.DateTimeFormat().resolved.timeZone.replace('San_Marino', 'Rome');
-//                            var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' ' + timeZone + ' )';
-							$('.outsource.modal .total span.displayprice').text( Intl.NumberFormat('en').format( parseFloat( chunk.price ).toFixed(2) ) );
-                        } else {
-                            $('.outsource.modal .total span.displayprice').text( parseFloat( chunk.price ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
-//                            var extendedTimeZone = '( ' + dd.toString().replace(/^.*GMT.*\(/, "").replace(/\)$/, "") + ' / GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';
-                        }
-
+                        $('.outsource.modal .total span.displayprice').text( parseFloat( chunk.price ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
                         var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';
 
                         $('.outsource.modal .delivery span.zone2').text( extendedTimeZone );
