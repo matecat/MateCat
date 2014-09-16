@@ -627,6 +627,7 @@ table .btn{width:auto !important;padding:5px 20px 0 20px !important; text-align:
 	border:1px dashed #ccc;
 margin-top: 20px;
 	min-height:200px;
+    height: 240px;
 	padding-bottom: 0px !important;
 	-moz-border-radius: 4px;
 	border-radius: 4px;
