@@ -312,7 +312,7 @@ $(function () {
 
 		console.log(UI.skipLangDetectArr, deletedFileName, typeof( UI.skipLangDetectArr[deletedFileName] ));
 
-		if(typeof( skipLangDetectArr[deletedFileName] ) !== 'undefined' ){
+		if(typeof( UI.skipLangDetectArr[deletedFileName] ) !== 'undefined' ){
 			console.log(UI.skipLangDetectArr);
 			delete(UI.skipLangDetectArr[deletedFileName]);
 		}
