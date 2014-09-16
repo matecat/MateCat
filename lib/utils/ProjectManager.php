@@ -715,7 +715,7 @@ class ProjectManager {
         $query = "SELECT
             SUM( raw_word_count ) AS raw_word_count,
             SUM(eq_word_count) AS eq_word_count,
-            job_first_segment, job_last_segment, s.id
+            job_first_segment, job_last_segment, s.id, s.show_in_cattool
                 FROM segments s
                 LEFT  JOIN segment_translations st ON st.id_segment = s.id
                 INNER JOIN jobs j ON j.id = st.id_job
@@ -767,21 +767,26 @@ class ProjectManager {
 
             if ( !array_key_exists( $chunk, $counter ) ) {
                 $counter[ $chunk ] = array(
-                        'eq_word_count'  => 0,
-                        'raw_word_count' => 0,
-                        'segment_start'  => $row[ 'id' ],
-                        'segment_end'    => 0,
+                        'eq_word_count'       => 0,
+                        'raw_word_count'      => 0,
+                        'segment_start'       => $row[ 'id' ],
+                        'segment_end'         => 0,
+                        'last_opened_segment' => 0,
                 );
             }
 
-            $counter[ $chunk ][ 'eq_word_count' ] += $row[ 'eq_word_count' ];
+            $counter[ $chunk ][ 'eq_word_count' ]  += $row[ 'eq_word_count' ];
             $counter[ $chunk ][ 'raw_word_count' ] += $row[ 'raw_word_count' ];
-            $counter[ $chunk ][ 'segment_end' ] = $row[ 'id' ];
+            $counter[ $chunk ][ 'segment_end' ]     = $row[ 'id' ];
 
-            //check for wanted words per job
-            //create a chunk when reach the requested number of words
-            //and we are below the requested number of splits
-            //so we add to the last chunk all rests
+            //if last_opened segment is not set and if that segment can be showed in cattool
+            //set that segment as the default last visited
+            ( $counter[ $chunk ][ 'last_opened_segment' ] == 0 && $row[ 'show_in_cattool' ] == 1 ? $counter[ $chunk ][ 'last_opened_segment' ] = $row[ 'id' ] : null );
+
+            //check for wanted words per job.
+            //create a chunk when we reach the requested number of words
+            //and we are below the requested number of splits.
+            //in this manner, we add to the last chunk all rests
             if ( $counter[ $chunk ][ $count_type ] >= $words_per_job[ $chunk ] && $chunk < $num_split - 1 /* chunk is zero based */ ) {
                 $counter[ $chunk ][ 'eq_word_count' ]  = (int)$counter[ $chunk ][ 'eq_word_count' ];
                 $counter[ $chunk ][ 'raw_word_count' ] = (int)$counter[ $chunk ][ 'raw_word_count' ];
@@ -844,7 +849,7 @@ class ProjectManager {
                 $jobInfo[ 'create_date' ] = date( 'Y-m-d H:i:s' );
             }
 
-            $jobInfo[ 'last_opened_segment' ] = $contents[ 'segment_start' ];
+            $jobInfo[ 'last_opened_segment' ] = $contents[ 'last_opened_segment' ];
             $jobInfo[ 'job_first_segment' ]   = $contents[ 'segment_start' ];
             $jobInfo[ 'job_last_segment' ]    = $contents[ 'segment_end' ];
 
