@@ -357,7 +357,7 @@ UI = {
         e.preventDefault();
         var node = document.createElement("span");
         var br = document.createElement("br");
-        node.setAttribute('class', 'monad softReturnw ' + config.lfPlaceholderClass);
+        node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
         node.appendChild(br);
         insertNodeAtCursor(node);
@@ -2344,7 +2344,7 @@ UI = {
         $('.addtm-select-file').val('');
         $('#addtm-tr-read, #addtm-tr-write').prop( "checked", true );
         $('#uploadTMX').text('').hide();
-        $('.addtm-tr .error-message, .addtm-tr .warning-message').text('').hide();
+        $('.addtm-tr .error-message, .addtm-tr .warning-message').hide();
     },
 
     /**
