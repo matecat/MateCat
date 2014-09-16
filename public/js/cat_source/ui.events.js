@@ -1193,7 +1193,8 @@ $.extend(UI, {
 //                console.log($(':focus'));
                 //              return false;
 			}
-            if (((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8) || (e.which == 46))) { // not arrows, backspace, canc or cmd
+
+            if (((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8))) { // not arrows, backspace, canc
                 UI.saveInUndoStack('arrow');
             }
 
