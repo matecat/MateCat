@@ -2895,7 +2895,7 @@ UI = {
 		this.currentSegment.removeClass('waiting_for_check_result');
 		this.registerQACheck();
 	},
-	saveInUndoStack: function() {
+	saveInUndoStack: function(operation) {
 //		noRestore = (typeof noRestore == 'undefined')? 0 : 1;
 		currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
@@ -2903,9 +2903,9 @@ UI = {
 			if (currentItem.trim() == this.editarea.html().trim())
 				return;
 		}
+        if(this.editarea == '') return;
 
-		if (this.editarea.html() === '')
-			return;
+		if (this.editarea.html() === '') return;
 
 		var ss = this.editarea.html().match(/<span.*?contenteditable\="false".*?\>/gi);
 		var tt = this.editarea.html().match(/&lt;/gi);
