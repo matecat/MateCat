@@ -357,7 +357,7 @@ UI = {
         e.preventDefault();
         var node = document.createElement("span");
         var br = document.createElement("br");
-        node.setAttribute('class', 'monad softReturnw ' + config.lfPlaceholderClass);
+        node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
         node.setAttribute('contenteditable', 'false');
         node.appendChild(br);
         insertNodeAtCursor(node);
