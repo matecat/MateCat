@@ -4,6 +4,8 @@
 	/***********************	PHP MAIN INITIALIZATION	**********************************************/
 	/*************************************************************************************************/
 
+    set_time_limit(0);
+
 	include '../inc/config.inc.php';
 
 	@INIT::obtain();
@@ -35,20 +37,40 @@
 	<head>
 		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 		<title>Load Glossary</title>
+        <style type="text/css">
+            .mandatory { border: 2px solid red; }
+            select, input { float: left; margin: 10px; }
+            hr { clear:both; }
+        </style>
         <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
         <script type="application/javascript">
-            $(document ).ready(function(){
-                if( $('#loadingArea' ).text().trim().length != 0 ) {
-                    $('#loadingArea' ).html("<h3>Complete!!</h3>");
+            $( document ).ready( function () {
+                if ( $( '#loadingArea' ).text().trim().length != 0 ) {
+                    $( '#loadingArea' ).html( "<h3>Complete!!</h3>" );
                 }
-            })
+
+                $( '#upload' ).on( 'click', function ( e ) {
+                    var elem = [ $( '#mymemory_key' ), $('#trg'), $('input[type=file]') ];
+
+                    $(elem).each(function(){
+                        if ( this.prop( 'value' ).length == 0 ) {
+                            e.preventDefault();
+                            this.addClass( 'mandatory' );
+                        } else {
+                            this.form.submit();
+                        }
+                    });
+
+                } );
+
+            } );
         </script>
 	</head>
 	<body>
 		<form action="" method="post" enctype="multipart/form-data">
 			<input type="text" name="loadGlossary" value="1" style="display:none" readonly />
 
-			<select name="source_lang">
+			<select name="source_lang" id="src">
 				<option value="en-US">English US</option>
 				<option value="it-IT">Italian</option>
 				<option class="separator" disabled="">---</option>
@@ -133,7 +155,7 @@
 				<option value="cy-GB">Welsh</option>
 			</select>
 
-			<select name="target_langs[]" multiple="multiple" size="10">
+			<select name="target_langs[]" id="trg" multiple="multiple" size="10">
 				<option value="en-US">English US</option>
 				<option value="it-IT">Italian</option>
 				<option class="separator" disabled="">---</option>
@@ -220,12 +242,12 @@
 
 			<input type="file" name="glossary" />
 
-			<input type="text" name="mymemory_key" placeholder="MyMemory API key" />
+			<input type="text" name="mymemory_key" id="mymemory_key" placeholder="MyMemory API key" />
 
-			<input type="submit" value="Upload" />
+			<input type="button" id="upload" value="Upload" />
 		</form>
 
-		<hr/>
+        <hr/>
 
         <div id="loadingArea" style="height: 650px; overflow: auto;">
 		<?php
