@@ -2951,10 +2951,9 @@ margin: 10px 0;
 #uploadTMX {
     display: none;
     text-indent: 10px;
-    border: 1px dashed #ccc;
+    border: none;
+    float: left;
     padding-bottom: 0px !important;
-    -moz-border-radius: 4px;
-    border-radius: 4px;
     background: #fbfbfb;
     -webkit-transition: all 50ms ease-in;
 }
