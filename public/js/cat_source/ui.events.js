@@ -191,7 +191,7 @@ $.extend(UI, {
                 setTimeout(function() {
                     UI.checkAddTMEnable();
                     UI.checkManageTMEnable();
-                }, 200);
+                }, 100);
 //                $('#private-tm-user').val(data.id);
 //                $('#private-tm-pass').val(data.pass);
 //                $('#create_private_tm_btn').attr('data-key', data.key);

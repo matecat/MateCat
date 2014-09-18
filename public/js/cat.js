@@ -2251,7 +2251,7 @@ UI = {
     checkAddTMEnable: function() {
         console.log('checkAddTMEnable');
         if(
-            ($('#addtm-tr-key').val() != '')&&
+            ($('#addtm-tr-key').val().length > 19)&&
                 UI.checkTMgrants($('.addtm-tr'))
             ) {
             $('#addtm-add').removeAttr('disabled').removeClass('disabled');
@@ -2287,11 +2287,9 @@ UI = {
     checkManageTMEnable: function() {
         console.log($('#addtm-tr-key').val().length);
         if($('#addtm-tr-key').val().length > 19) {
-            console.log('eccolo');
             $('.manageTM').removeClass('disabled');
             $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').removeAttr('disabled');
         } else {
-            console.log('no');
             $('.manageTM').addClass('disabled');
             $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');
         }
@@ -2360,7 +2358,8 @@ UI = {
         $('#addtm-tr-read, #addtm-tr-write').prop( "checked", true );
         $('#uploadTMX').text('').hide();
         $('.addtm-tr .error-message, .addtm-tr .warning-message').hide();
-    },
+        $('.manageTM').addClass('disabled');
+        $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');    },
 
     /**
      * This function is used when a string has to be sent to the server
@@ -3083,7 +3082,7 @@ $.extend(UI, {
 		this.warningStopped = false;
 		this.abortedOperations = [];
         this.propagationsAvailable = false;
-        this.logEnabled = true;
+        this.logEnabled = false;
 //        this.unsavedSegmentsToRecover = [];
 //        this.recoverUnsavedSegmentsTimer = false;
 
@@ -3484,7 +3483,7 @@ $.extend(UI, {
                 setTimeout(function() {
                     UI.checkAddTMEnable();
                     UI.checkManageTMEnable();
-                }, 200);
+                }, 100);
 //                $('#private-tm-user').val(data.id);
 //                $('#private-tm-pass').val(data.pass);
 //                $('#create_private_tm_btn').attr('data-key', data.key);
