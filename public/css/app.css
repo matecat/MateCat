@@ -2324,7 +2324,7 @@ body.noGlossary .tab-switcher-gl
 
 .addtmx-tr {
 height: 17px;
-width: 120px;
+width: 140px;
 position: absolute;
 	bottom: -30px;
 right: -1px;
@@ -4399,9 +4399,30 @@ text-align: left;
 padding: 0 15px;}
 
 .addtm-tr .block {
-width: 50%;
+     width: 50%;
+ }
+.addtm-tr .block.manageTM {
+    float: left;
+    width: 96.6%;
+    border: 1px solid #ccc;
+    padding: 9px;
+    margin-bottom: 10px;
 }
-
+.addtm-tr .block.manageTM h3 {
+    margin: 0 0 0 4px !important;
+}
+.addtm-tr .block.manageTM.disabled h3 {
+    color: #999 !important;
+}
+.addtm-tr .block.manageTM.disabled {
+    /*
+    border: none !important;
+    */
+}
+#addtm-upload-form .block {
+    float: left;
+    width: 100%;
+}
 .addtm-tr-key {
 margin-top: 15px;
 }

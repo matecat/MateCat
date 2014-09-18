@@ -1837,14 +1837,15 @@ UI = {
 		ts = dd.getTime();
 		var seg = (typeof this.currentSegmentId == 'undefined') ? this.startSegmentId : this.currentSegmentId;
 		var token = seg + '-' + ts.toString();
-
+        dataMix = {
+            action: 'getWarning',
+            id_job: config.job_id,
+            password: config.password,
+            token: token
+        };
+        if(UI.logEnabled) dataMix.logs = this.extractLogs();
 		APP.doRequest({
-			data: {
-				action: 'getWarning',
-				id_job: config.job_id,
-				password: config.password,
-				token: token
-			},
+			data: dataMix,
 			error: function() {
 				UI.warningStopped = true;
 				UI.failedConnection(0, 'getWarning');
@@ -2031,6 +2032,7 @@ UI = {
         };
         reqData = this.tempReqArguments;
         reqData.action = 'setTranslation';
+        this.log('setTranslation', reqData);
 
 		APP.doRequest({
             data: reqData,
@@ -2282,6 +2284,19 @@ UI = {
         }
 */
     },
+    checkManageTMEnable: function() {
+        console.log($('#addtm-tr-key').val().length);
+        if($('#addtm-tr-key').val().length > 19) {
+            console.log('eccolo');
+            $('.manageTM').removeClass('disabled');
+            $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').removeAttr('disabled');
+        } else {
+            console.log('no');
+            $('.manageTM').addClass('disabled');
+            $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');
+        }
+    },
+
     execAddTM: function() {
         fileUpload($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
     },
@@ -2384,6 +2399,46 @@ UI = {
 //		return txt.replace(/<br>/g, '').replace(/<div>/g, '<br class="' + config.crPlaceholderClass + '">').replace(/<\/div>/g, '').replace(re, '');
 	},
 */
+
+    log: function(operation, d) {
+        if(!UI.logEnabled) return false;
+        data = d;
+        var dd = new Date();
+//        console.log('stored log-' + operation + '-' + dd.getTime());
+//        console.log('data: ', JSON.stringify(d));
+//        console.log(stackTrace());
+        logValue = {
+            "data": data,
+            "stack": stackTrace()
+        }
+//        console.log('prova: ', prova);
+//        console.log(JSON.stringify(prova));
+        localStorage.setItem('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue));
+
+/*
+        console.log('dopo errore');
+        coso = '{"data":' + JSON.stringify(data) + ', "stack":"' + stackTrace() + '"}';
+        console.log(coso);
+        console.log($.parseJSON(JSON.stringify(data)));
+*/
+//        localStorage.setItem('log-' + operation + '-' + dd, JSON.stringify(d));
+
+    },
+    extractLogs: function() {
+        var pendingLogs = [];
+        inp = 'log';
+        $.each(localStorage, function(k,v) {
+            if(k.substring(0, inp.length) === inp) {
+                console.log('v: ', v);
+//                console.log('$.parseJSON(v): ', $.parseJSON(v));
+                pendingLogs.push('{"operation": "' + k.split('-')[1] + '", "time": "' + k.split('-')[2] + '", "log":' + v + '}');
+            }
+        });
+//        UI.clearStorage('log');
+
+        console.log('pendingLogs Tx: ', pendingLogs);
+        console.log('pendingLogs Ob: ', JSON.stringify(pendingLogs));
+    },
 
     postProcessEditarea: function(context, selector){//console.log('postprocesseditarea');
         selector = (typeof selector === "undefined") ? '.editarea' : selector;

@@ -289,7 +289,10 @@ function fileUpload(form, action_url, div_id) {
     UI.pollForUploadCallback($('#addtm-tr-key').val());
 }
 
-
+function stackTrace() {
+    var err = new Error();
+    return err.stack;
+}
 // addTM webworker
 /*
 function werror(e) {

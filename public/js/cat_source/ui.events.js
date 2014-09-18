@@ -190,7 +190,8 @@ $.extend(UI, {
                 $('#addtm-create-key').removeClass('disabled');
                 setTimeout(function() {
                     UI.checkAddTMEnable();
-                }, 500);
+                    UI.checkManageTMEnable();
+                }, 200);
 //                $('#private-tm-user').val(data.id);
 //                $('#private-tm-pass').val(data.pass);
 //                $('#create_private_tm_btn').attr('data-key', data.key);
@@ -205,6 +206,7 @@ $.extend(UI, {
                 $('.addtm-tr-key .error-message').hide();
             }
         }).on('change', '.addtm-select-file', function(e) {
+/*
             $('.addtm-tr .warning-message').hide();
             if($('#addtm-tr-key').val() == '') {
                 $('#addtm-create-key').click();
@@ -213,6 +215,7 @@ $.extend(UI, {
                     UI.checkAddTMEnable();
                 }, 500);
             }
+*/
         }).on('click', '.addtm-tr-key .btn-ok', function(e) {
             if(!UI.checkTMgrants($('.addtm-tr-key'))) {
                 return false;
@@ -233,6 +236,7 @@ $.extend(UI, {
             $('.addtm-tr .warning-message').hide();
         }).on('input', '#addtm-tr-key', function(e) {
             UI.checkAddTMEnable();
+            UI.checkManageTMEnable();
         }).on('change', '#addtm-tr-key, .addtm-select-file, #addtm-tr-read, #addtm-tr-write', function(e) {
             UI.checkAddTMEnable();
 /*

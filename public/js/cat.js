@@ -1837,14 +1837,15 @@ UI = {
 		ts = dd.getTime();
 		var seg = (typeof this.currentSegmentId == 'undefined') ? this.startSegmentId : this.currentSegmentId;
 		var token = seg + '-' + ts.toString();
-
+        dataMix = {
+            action: 'getWarning',
+            id_job: config.job_id,
+            password: config.password,
+            token: token
+        };
+        if(UI.logEnabled) dataMix.logs = this.extractLogs();
 		APP.doRequest({
-			data: {
-				action: 'getWarning',
-				id_job: config.job_id,
-				password: config.password,
-				token: token
-			},
+			data: dataMix,
 			error: function() {
 				UI.warningStopped = true;
 				UI.failedConnection(0, 'getWarning');
@@ -2031,6 +2032,7 @@ UI = {
         };
         reqData = this.tempReqArguments;
         reqData.action = 'setTranslation';
+        this.log('setTranslation', reqData);
 
 		APP.doRequest({
             data: reqData,
@@ -2282,6 +2284,19 @@ UI = {
         }
 */
     },
+    checkManageTMEnable: function() {
+        console.log($('#addtm-tr-key').val().length);
+        if($('#addtm-tr-key').val().length > 19) {
+            console.log('eccolo');
+            $('.manageTM').removeClass('disabled');
+            $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').removeAttr('disabled');
+        } else {
+            console.log('no');
+            $('.manageTM').addClass('disabled');
+            $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');
+        }
+    },
+
     execAddTM: function() {
         fileUpload($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
     },
@@ -2384,6 +2399,46 @@ UI = {
 //		return txt.replace(/<br>/g, '').replace(/<div>/g, '<br class="' + config.crPlaceholderClass + '">').replace(/<\/div>/g, '').replace(re, '');
 	},
 */
+
+    log: function(operation, d) {
+        if(!UI.logEnabled) return false;
+        data = d;
+        var dd = new Date();
+//        console.log('stored log-' + operation + '-' + dd.getTime());
+//        console.log('data: ', JSON.stringify(d));
+//        console.log(stackTrace());
+        logValue = {
+            "data": data,
+            "stack": stackTrace()
+        }
+//        console.log('prova: ', prova);
+//        console.log(JSON.stringify(prova));
+        localStorage.setItem('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue));
+
+/*
+        console.log('dopo errore');
+        coso = '{"data":' + JSON.stringify(data) + ', "stack":"' + stackTrace() + '"}';
+        console.log(coso);
+        console.log($.parseJSON(JSON.stringify(data)));
+*/
+//        localStorage.setItem('log-' + operation + '-' + dd, JSON.stringify(d));
+
+    },
+    extractLogs: function() {
+        var pendingLogs = [];
+        inp = 'log';
+        $.each(localStorage, function(k,v) {
+            if(k.substring(0, inp.length) === inp) {
+                console.log('v: ', v);
+//                console.log('$.parseJSON(v): ', $.parseJSON(v));
+                pendingLogs.push('{"operation": "' + k.split('-')[1] + '", "time": "' + k.split('-')[2] + '", "log":' + v + '}');
+            }
+        });
+//        UI.clearStorage('log');
+
+        console.log('pendingLogs Tx: ', pendingLogs);
+        console.log('pendingLogs Ob: ', JSON.stringify(pendingLogs));
+    },
 
     postProcessEditarea: function(context, selector){//console.log('postprocesseditarea');
         selector = (typeof selector === "undefined") ? '.editarea' : selector;
@@ -3028,6 +3083,7 @@ $.extend(UI, {
 		this.warningStopped = false;
 		this.abortedOperations = [];
         this.propagationsAvailable = false;
+        this.logEnabled = true;
 //        this.unsavedSegmentsToRecover = [];
 //        this.recoverUnsavedSegmentsTimer = false;
 
@@ -3427,7 +3483,8 @@ $.extend(UI, {
                 $('#addtm-create-key').removeClass('disabled');
                 setTimeout(function() {
                     UI.checkAddTMEnable();
-                }, 500);
+                    UI.checkManageTMEnable();
+                }, 200);
 //                $('#private-tm-user').val(data.id);
 //                $('#private-tm-pass').val(data.pass);
 //                $('#create_private_tm_btn').attr('data-key', data.key);
@@ -3442,6 +3499,7 @@ $.extend(UI, {
                 $('.addtm-tr-key .error-message').hide();
             }
         }).on('change', '.addtm-select-file', function(e) {
+/*
             $('.addtm-tr .warning-message').hide();
             if($('#addtm-tr-key').val() == '') {
                 $('#addtm-create-key').click();
@@ -3450,6 +3508,7 @@ $.extend(UI, {
                     UI.checkAddTMEnable();
                 }, 500);
             }
+*/
         }).on('click', '.addtm-tr-key .btn-ok', function(e) {
             if(!UI.checkTMgrants($('.addtm-tr-key'))) {
                 return false;
@@ -3470,6 +3529,7 @@ $.extend(UI, {
             $('.addtm-tr .warning-message').hide();
         }).on('input', '#addtm-tr-key', function(e) {
             UI.checkAddTMEnable();
+            UI.checkManageTMEnable();
         }).on('change', '#addtm-tr-key, .addtm-select-file, #addtm-tr-read, #addtm-tr-write', function(e) {
             UI.checkAddTMEnable();
 /*
@@ -5331,7 +5391,7 @@ console.log('translation 4: ', translation);
 //				console.log('dopo: ', $('.sub-editor.matches .overflow .suggestion_source', segment).html());
 			});
             // start addtmxTmp
-            $('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><i class="icon-upload"></i><a class="open-popup-addtm-tr">Add your TMX</a></div>');
+            $('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><i class="icon-upload"></i><a class="open-popup-addtm-tr">Add your personal TM</a></div>');
             // end addtmxTmp
             UI.markSuggestionTags(segment);
 
@@ -7297,7 +7357,10 @@ function fileUpload(form, action_url, div_id) {
     UI.pollForUploadCallback($('#addtm-tr-key').val());
 }
 
-
+function stackTrace() {
+    var err = new Error();
+    return err.stack;
+}
 // addTM webworker
 /*
 function werror(e) {
