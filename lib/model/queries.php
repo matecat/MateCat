@@ -1471,12 +1471,25 @@ function getEQWLastHour( $id_job, $estimation_seg_ids ) {
        count(*) from segment_translations
        INNER JOIN segments on id=segment_translations.id_segment WHERE status in ('TRANSLATED','APPROVED') and id_job=$id_job and id_segment in ($estimation_seg_ids)";
      */
+    $query = "
+            SELECT SUM(IF(Ifnull(st.eq_word_count, 0) = 0, raw_word_count,
+                   st.eq_word_count)),
+                   Min(translation_date),
+                   Max(translation_date),
+                   IF(Unix_timestamp(Max(translation_date)) - Unix_timestamp(Min(translation_date)) > 3600
+                      OR Count(*) < 10, 0, 1) AS data_validity,
 
-    $query = "SELECT SUM(IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count)), MIN(translation_date), MAX(translation_date),
-		IF(UNIX_TIMESTAMP(MAX(translation_date))-UNIX_TIMESTAMP(MIN(translation_date))>3600 OR count(*)<10,0,1) as data_validity,
-		ROUND(SUM(IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count))/(UNIX_TIMESTAMP(MAX(translation_date))-UNIX_TIMESTAMP(MIN(translation_date)))*3600) as words_per_hour,
-		count(*) from segment_translations st
-			INNER JOIN segments on id=st.id_segment WHERE status in ('TRANSLATED','APPROVED') and id_job=$id_job and id_segment in ($estimation_seg_ids)";
+                   Round(SUM(IF(Ifnull(st.eq_word_count, 0) = 0, raw_word_count,
+                         st.eq_word_count)) /
+                               ( Unix_timestamp(Max(translation_date)) -
+                                 Unix_timestamp(Min(translation_date)) ) * 3600) AS words_per_hour,
+                   Count(*)
+            FROM   segment_translations st
+                   inner join segments ON id = st.id_segment
+            WHERE  status IN ( 'TRANSLATED', 'APPROVED' )
+                   AND id_job = $id_job
+                   AND id_segment IN ( $estimation_seg_ids )
+    ";
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
