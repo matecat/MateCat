@@ -45,19 +45,23 @@
         <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.1/jquery.min.js"></script>
         <script type="application/javascript">
             $( document ).ready( function () {
+
+                var elem = [ $( '#mymemory_key' ), $('#trg'), $('input[type=file]') ];
+
                 if ( $( '#loadingArea' ).text().trim().length != 0 ) {
                     $( '#loadingArea' ).html( "<h3>Complete!!</h3>" );
+                    $('head').append('<meta http-equiv="refresh" content="3" >');
                 }
 
+
                 $( '#upload' ).on( 'click', function ( e ) {
-                    var elem = [ $( '#mymemory_key' ), $('#trg'), $('input[type=file]') ];
 
                     $(elem).each(function(){
                         if ( this.prop( 'value' ).length == 0 ) {
                             e.preventDefault();
                             this.addClass( 'mandatory' );
                         } else {
-                            this.form.submit();
+                            this[0].form.submit();
                         }
                     });
 
@@ -67,7 +71,7 @@
         </script>
 	</head>
 	<body>
-		<form action="" method="post" enctype="multipart/form-data">
+		<form action="" id="glossaryForm" method="post" enctype="multipart/form-data">
 			<input type="text" name="loadGlossary" value="1" style="display:none" readonly />
 
 			<select name="source_lang" id="src">
@@ -358,7 +362,8 @@
 						$config[ 'tnote' ]       = ( isset( $row[ 2 ] ) ? $row[ 2 ] : null );
 
 						if ( !$test ) {
-							$tms->set( $config );
+//							$tms->set( $config );
+                            usleep(200000);
 						    echo "SET<br/>";
 						}
 
