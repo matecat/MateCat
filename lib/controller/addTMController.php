@@ -185,7 +185,7 @@ class addTMController extends ajaxController {
         $this->job_data = getJobData( $this->job_id, $this->job_pass );
 
         //if Engine is not MyMemory, raise an error to the client.
-        if ( !$this->job_data[ 'id_mt_engine' ] == 1 ) {
+        if ( !$this->job_data[ 'id_tms' ] == 1 ) {
             $this->result[ 'errors' ][ ] = array(
                     "code" => -1, "message" => "MT Engine is not MyMemory. TMX cannot be added."
             );
