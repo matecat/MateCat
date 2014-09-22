@@ -26,8 +26,8 @@ class deleteContributionController extends ajaxController {
         $filterArgs = array(
                 'source_lang'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
                 'target_lang'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'seg'            => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
-                'tra'            => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+                'seg'            => array( 'filter' => FILTER_UNSAFE_RAW ),
+                'tra'            => array( 'filter' => FILTER_UNSAFE_RAW ),
                 'id_translator'  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
                 'password'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
                 'id_job'         => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
