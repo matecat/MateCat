@@ -2411,7 +2411,7 @@ UI = {
             "stack": stackTrace()
         }
 //        console.log('prova: ', prova);
-//        console.log(JSON.stringify(prova));
+        console.log('logValue: ', JSON.stringify(logValue));
         localStorage.setItem('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue));
 
 /*
@@ -2433,10 +2433,12 @@ UI = {
                 pendingLogs.push('{"operation": "' + k.split('-')[1] + '", "time": "' + k.split('-')[2] + '", "log":' + v + '}');
             }
         });
-//        UI.clearStorage('log');
+        logs = JSON.stringify(pendingLogs);
+        this.clearStorage('log');
 
-        console.log('pendingLogs Tx: ', pendingLogs);
-        console.log('pendingLogs Ob: ', JSON.stringify(pendingLogs));
+        console.log('pendingLogs: ', pendingLogs);
+//        console.log('pendingLogs Ob: ', JSON.stringify(pendingLogs));
+        return logs;
     },
 
     postProcessEditarea: function(context, selector){//console.log('postprocesseditarea');
@@ -3083,7 +3085,7 @@ $.extend(UI, {
 		this.abortedOperations = [];
         this.propagationsAvailable = false;
         this.logEnabled = false;
-//        this.unsavedSegmentsToRecover = [];
+        this.unsavedSegmentsToRecover = [];
 //        this.recoverUnsavedSegmentsTimer = false;
 
 		/**
