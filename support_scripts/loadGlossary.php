@@ -362,8 +362,7 @@
 						$config[ 'tnote' ]       = ( isset( $row[ 2 ] ) ? $row[ 2 ] : null );
 
 						if ( !$test ) {
-//							$tms->set( $config );
-                            usleep(200000);
+							$tms->set( $config );
 						    echo "SET<br/>";
 						}
 
