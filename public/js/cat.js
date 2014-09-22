@@ -1997,7 +1997,6 @@ UI = {
         console.log('translation: ', translation);
 
 		if (translation === '') {
-            alert( $(segment).attr('id') );
             this.unsavedSegmentsToRecover.push(this.currentSegmentId);
             return false;
         }
