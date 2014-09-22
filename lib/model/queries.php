@@ -1952,8 +1952,13 @@ function getProjects( $start, $step, $search_in_pname, $search_source, $search_t
     $filter_query = ( $query_tail == '' ) ? '' : 'where ' . $query_tail;
     $filter_query = preg_replace( '/( and)$/i', '', $filter_query );
 
+    /**
+     * the field tm_keys is being converted in HEX
+     * because there were problems while exploding for "," in manageController
+     */
+
     $query = "select p.id as pid, p.name, p.password, j.id_mt_engine, j.id_tms, p.tm_analysis_wc,
-		group_concat(j.id,'##', j.source,'##',j.target,'##',j.create_date,'##',j.password,'##',e.name,'##',if (t.mymemory_api_key is NUll,'',t.mymemory_api_key),'##',j.status_owner,'##',j.job_first_segment,'##',j.job_last_segment) as job
+		group_concat(j.id,'##', j.source,'##',j.target,'##',j.create_date,'##',j.password,'##',e.name,'##',HEX(tm_keys),'##',j.status_owner,'##',j.job_first_segment,'##',j.job_last_segment) as job
 
 			, e.name as mt_engine_name
 
