@@ -1604,7 +1604,11 @@ UI = {
         insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
 		aa = prova.match(/\W$/gi);
         newStr = '';
-        $.each($.parseHTML(str), function(index) {
+        var aa = $("<div/>").html(str);
+        aa.find('.undoCursorPlaceholder').remove();
+        var rightString = aa.html();
+
+        $.each($.parseHTML(rightString), function(index) {
 			if(this.nodeName == '#text') {
 				d = this.data;
 //				console.log(index + ' - ' + d);
@@ -1641,11 +1645,13 @@ UI = {
 //				newStr += this.innerText;					
 			}
 		});
+        console.log('x');
 //        console.log('newStr: ', newStr);
 //		replaceSelectedText(newStr);
 		replaceSelectedHtml(newStr);
-
+        console.log('a: ', UI.editarea.html());
 		UI.lockTags();
+        console.log('b: ', UI.editarea.html());
 		this.saveInUndoStack('formatSelection');
 		saveSelection();
 		$('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
