@@ -1981,6 +1981,8 @@ UI = {
 	},
 
     setTranslation: function(id_segment, status, caller, byStatus) {
+        console.log('id_segment: ', id_segment);
+        console.log('status: ', status);
         console.log('setTranslation sul segmento ', UI.currentSegmentId);
 		reqArguments = arguments;
 		segment = $('#segment-' + id_segment); 
@@ -1997,7 +1999,6 @@ UI = {
         console.log('translation: ', translation);
 
 		if (translation === '') {
-            alert('id: ', id_segment);
             this.unsavedSegmentsToRecover.push(this.currentSegmentId);
             return false;
         }
@@ -2688,14 +2689,34 @@ UI = {
                 this.beforePropagateTranslation(segment, status);
             }
         }
-    /*
-        console.log('setTranslation_success');
+        this.resetRecoverUnsavedSegmentsTimer();
+    },
+    recoverUnsavedSetTranslations: function() {
+//        console.log('AAA recoverUnsavedSetTranslations');
+//        console.log('segments to recover: ', UI.unsavedSegmentsToRecover);
+        $.each(UI.unsavedSegmentsToRecover, function (index) {
+            if($('#segment-' + this + ' .editarea').text() === '') {
+//                console.log(this + ' è ancora vuoto');
+                UI.resetRecoverUnsavedSegmentsTimer();
+            } else {
+//                console.log(this + ' non è più vuoto, si può mandare');
+                UI.setTranslation(this.toString(), 'translated');
+                // elimina l'item dall'array
+                UI.unsavedSegmentsToRecover.splice(index, 1);
+//                console.log('eliminato ' + this.toString());
+            }
+            // se non è vuoto rifai il timeout, clearing l'altro
+        });
+    },
+    resetRecoverUnsavedSegmentsTimer: function () {
+//        console.log('setTranslation_success');
         clearTimeout(this.recoverUnsavedSegmentsTimer);
         this.recoverUnsavedSegmentsTimer = setTimeout(function() {
-            console.log('segments to recover: ', UI.unsavedSegmentsToRecover);
+            UI.recoverUnsavedSetTranslations();
         }, 1000);
-     */
     },
+
+
     beforePropagateTranslation: function(segment, status) {
 //        console.log('before propagate');
 
