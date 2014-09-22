@@ -57,6 +57,7 @@ $.extend(UI, {
 		this.warningStopped = false;
 		this.abortedOperations = [];
         this.propagationsAvailable = false;
+        this.logEnabled = false;
 //        this.unsavedSegmentsToRecover = [];
 //        this.recoverUnsavedSegmentsTimer = false;
 

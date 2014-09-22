@@ -265,6 +265,9 @@ class UploadHandler {
             }
         }
 
+        //remove spaces
+        $file_name = str_replace( array( " ", " " ), "_", $file_name );
+
         //echo "name3 $file_name\n";
         return $file_name;
     }

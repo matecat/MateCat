@@ -235,7 +235,7 @@ console.log('translation 4: ', translation);
 //				console.log('dopo: ', $('.sub-editor.matches .overflow .suggestion_source', segment).html());
 			});
             // start addtmxTmp
-            $('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><i class="icon-upload"></i><a class="open-popup-addtm-tr">Add your TMX</a></div>');
+            $('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><i class="icon-upload"></i><a class="open-popup-addtm-tr">Add your personal TM</a></div>');
             // end addtmxTmp
             UI.markSuggestionTags(segment);
 

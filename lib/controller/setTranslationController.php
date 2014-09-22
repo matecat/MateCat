@@ -347,16 +347,6 @@ class setTranslationController extends ajaxController {
 
         $file_stats = array();
 
-        $is_completed = ( $job_stats[ 'TRANSLATED_PERC' ] == '100' ) ? 1 : 0;
-
-        $update_completed = setJobCompleteness( $this->id_job, $is_completed );
-
-        if ( $update_completed < 0 ) {
-            $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
-            Log::doLog( $msg );
-            Utils::sendErrMailReport( $msg );
-        }
-
         $this->result[ 'stats' ]      = $job_stats;
         $this->result[ 'file_stats' ] = $file_stats;
         $this->result[ 'code' ]       = 1;
@@ -375,6 +365,16 @@ class setTranslationController extends ajaxController {
         }
 
         $db->commit();
+
+        if( $job_stats[ 'TRANSLATED_PERC' ] == '100' ){
+            $update_completed = setJobCompleteness( $this->id_job, 1 );
+        }
+
+        if ( @$update_completed < 0 ) {
+            $msg = "\n\n Error setJobCompleteness \n\n " . var_export( $_POST, true );
+            Log::doLog( $msg );
+            Utils::sendErrMailReport( $msg );
+        }
 
     }
 

@@ -352,7 +352,19 @@ UI = {
 			return false;
 		}
 	},
-	getIconClass: function(ext) {
+    handleReturn: function(e) {
+        if(!this.hiddenTextEnabled) return;
+        e.preventDefault();
+        var node = document.createElement("span");
+        var br = document.createElement("br");
+        node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
+        node.setAttribute('contenteditable', 'false');
+        node.appendChild(br);
+        insertNodeAtCursor(node);
+        this.unnestMarkers();
+    },
+
+    getIconClass: function(ext) {
 		c =		(
 					(ext == 'doc')||
 					(ext == 'dot')||
@@ -1825,14 +1837,15 @@ UI = {
 		ts = dd.getTime();
 		var seg = (typeof this.currentSegmentId == 'undefined') ? this.startSegmentId : this.currentSegmentId;
 		var token = seg + '-' + ts.toString();
-
+        dataMix = {
+            action: 'getWarning',
+            id_job: config.job_id,
+            password: config.password,
+            token: token
+        };
+        if(UI.logEnabled) dataMix.logs = this.extractLogs();
 		APP.doRequest({
-			data: {
-				action: 'getWarning',
-				id_job: config.job_id,
-				password: config.password,
-				token: token
-			},
+			data: dataMix,
 			error: function() {
 				UI.warningStopped = true;
 				UI.failedConnection(0, 'getWarning');
@@ -1984,6 +1997,7 @@ UI = {
         console.log('translation: ', translation);
 
 		if (translation === '') {
+            alert( $(segment).attr('id') );
             this.unsavedSegmentsToRecover.push(this.currentSegmentId);
             return false;
         }
@@ -2019,6 +2033,7 @@ UI = {
         };
         reqData = this.tempReqArguments;
         reqData.action = 'setTranslation';
+        this.log('setTranslation', reqData);
 
 		APP.doRequest({
             data: reqData,
@@ -2192,48 +2207,52 @@ UI = {
     },
     checkTMKey: function(key, operation) {console.log('checkTMKey');
         console.log('operation: ', operation);
-        APP.doRequest({
-            data: {
-                action: 'ajaxUtils',
-                exec: 'checkTMKey',
-                tm_key: key
-            },
-            context: operation,
-            error: function() {
-                console.log('checkTMKey error!!');
-            },
-            success: function(d) {
-                console.log('checkTMKey success!!');
-                console.log('d: ', d);
-                console.log('d.success: ', d.success);
-                if(d.success == true) {
-                    console.log('key is good');
-                    if(this == 'key') {
-                        console.log('adding a key');
-                        UI.execAddTMKey();
-                    } else {
+
+        if( operation == 'key' ){
+            console.log('adding a key');
+            UI.execAddTMKey();
+        } else {
+
+            APP.doRequest({
+                data: {
+                    action: 'ajaxUtils',
+                    exec: 'checkTMKey',
+                    tm_key: key
+                },
+                context: operation,
+                error: function() {
+                    console.log('checkTMKey error!!');
+                },
+                success: function(d) {
+                    console.log('checkTMKey success!!');
+                    console.log('d: ', d);
+                    console.log('d.success: ', d.success);
+                    if(d.success == true) {
+                        console.log('key is good');
                         console.log('adding a tm');
                         UI.execAddTM();
-                    }
-                    return true;
-                } else {
-                    console.log('key is bad');
-                    if(this == 'key') {
-                        console.log('error adding a key');
-                        $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                        return true;
                     } else {
-                        console.log('error adding a tm');
-                        $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                        console.log('key is bad');
+                        if(this == 'key') {
+                            console.log('error adding a key');
+                            $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                        } else {
+                            console.log('error adding a tm');
+                            $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                        }
+                        return false;
                     }
-                    return false;
                 }
-            }
-        });
+            });
+
+        }
+
     },
     checkAddTMEnable: function() {
         console.log('checkAddTMEnable');
         if(
-            ($('#addtm-tr-key').val() != '')&&
+            ($('#addtm-tr-key').val().length > 19)&&
                 UI.checkTMgrants($('.addtm-tr'))
             ) {
             $('#addtm-add').removeAttr('disabled').removeClass('disabled');
@@ -2266,12 +2285,24 @@ UI = {
         }
 */
     },
+    checkManageTMEnable: function() {
+        console.log($('#addtm-tr-key').val().length);
+        if($('#addtm-tr-key').val().length > 19) {
+            $('.manageTM').removeClass('disabled');
+            $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').removeAttr('disabled');
+        } else {
+            $('.manageTM').addClass('disabled');
+            $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');
+        }
+    },
+
     execAddTM: function() {
         fileUpload($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
     },
     execAddTMKey: function() {
         var r = ($('#addtm-tr-read').is(':checked'))? 1 : 0;
         var w = ($('#addtm-tr-write').is(':checked'))? 1 : 0;
+        var TMKey = $('#addtm-tr-key').val();
 
         APP.doRequest({
             data: {
@@ -2279,16 +2310,17 @@ UI = {
                 exec: 'addTM',
                 job_id: config.job_id,
                 job_pass: config.password,
-                tm_key: $('#addtm-tr-key').val(),
+                tm_key: TMKey,
                 r: r,
                 w: w
             },
+            context: TMKey,
             error: function() {
                 console.log('addTM error!!');
             },
             success: function(d) {
                 console.log('addTM success!!');
-                txt = (d.success == true)? 'A TM key has been added.' : d.errors[0].message;
+                txt = (d.success == true)? 'The TM Key ' + this + ' has been added to your translation job.' : d.errors[0].message;
                 $('.popup-addtm-tr .x-popup').click();
                 UI.showMessage({
                     msg: txt
@@ -2298,13 +2330,15 @@ UI = {
         });
     },
 
-    pollForUploadCallback: function() {
+    pollForUploadCallback: function(TMKey) {
+        console.log('TMKey: ', TMKey);
         if($('#uploadCallback').text() != '') {
 //            console.log("FINITO L'UPLOAD CON MESSAGGIO: ", $.parseJSON($('#uploadCallback pre').text()));
             msg = $.parseJSON($('#uploadCallback pre').text());
+            console.log('msg: ', msg);
             if(msg.success == true) {
                 UI.showMessage({
-                    msg: 'Your TM has been correctly uploaded.'
+                    msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
                 });
                 UI.clearAddTMpopup();
             } else {
@@ -2314,7 +2348,7 @@ UI = {
             }
         } else {
             setTimeout(function() {
-                UI.pollForUploadCallback();
+                UI.pollForUploadCallback(TMKey);
             }, 1000);
         }
 
@@ -2324,8 +2358,9 @@ UI = {
         $('.addtm-select-file').val('');
         $('#addtm-tr-read, #addtm-tr-write').prop( "checked", true );
         $('#uploadTMX').text('').hide();
-        $('.addtm-tr .error-message, .addtm-tr .warning-message').text('').hide();
-    },
+        $('.addtm-tr .error-message, .addtm-tr .warning-message').hide();
+        $('.manageTM').addClass('disabled');
+        $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');    },
 
     /**
      * This function is used when a string has to be sent to the server
@@ -2364,6 +2399,48 @@ UI = {
 //		return txt.replace(/<br>/g, '').replace(/<div>/g, '<br class="' + config.crPlaceholderClass + '">').replace(/<\/div>/g, '').replace(re, '');
 	},
 */
+
+    log: function(operation, d) {
+        if(!UI.logEnabled) return false;
+        data = d;
+        var dd = new Date();
+//        console.log('stored log-' + operation + '-' + dd.getTime());
+//        console.log('data: ', JSON.stringify(d));
+//        console.log(stackTrace());
+        logValue = {
+            "data": data,
+            "stack": stackTrace()
+        }
+//        console.log('prova: ', prova);
+        console.log('logValue: ', JSON.stringify(logValue));
+        localStorage.setItem('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue));
+
+/*
+        console.log('dopo errore');
+        coso = '{"data":' + JSON.stringify(data) + ', "stack":"' + stackTrace() + '"}';
+        console.log(coso);
+        console.log($.parseJSON(JSON.stringify(data)));
+*/
+//        localStorage.setItem('log-' + operation + '-' + dd, JSON.stringify(d));
+
+    },
+    extractLogs: function() {
+        var pendingLogs = [];
+        inp = 'log';
+        $.each(localStorage, function(k,v) {
+            if(k.substring(0, inp.length) === inp) {
+                console.log('v: ', v);
+//                console.log('$.parseJSON(v): ', $.parseJSON(v));
+                pendingLogs.push('{"operation": "' + k.split('-')[1] + '", "time": "' + k.split('-')[2] + '", "log":' + v + '}');
+            }
+        });
+        logs = JSON.stringify(pendingLogs);
+        this.clearStorage('log');
+
+        console.log('pendingLogs: ', pendingLogs);
+//        console.log('pendingLogs Ob: ', JSON.stringify(pendingLogs));
+        return logs;
+    },
 
     postProcessEditarea: function(context, selector){//console.log('postprocesseditarea');
         selector = (typeof selector === "undefined") ? '.editarea' : selector;
@@ -2585,7 +2662,7 @@ UI = {
 	},
 	reloadPage: function() {
 		console.log('reloadPage');
-		location.reload();
+		if(UI.body.hasClass('cattool')) location.reload();
 	},
 
 	someSegmentToSave: function() {
@@ -2875,7 +2952,7 @@ UI = {
 		this.currentSegment.removeClass('waiting_for_check_result');
 		this.registerQACheck();
 	},
-	saveInUndoStack: function() {
+	saveInUndoStack: function(operation) {
 //		noRestore = (typeof noRestore == 'undefined')? 0 : 1;
 		currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
@@ -2883,9 +2960,9 @@ UI = {
 			if (currentItem.trim() == this.editarea.html().trim())
 				return;
 		}
+        if(this.editarea == '') return;
 
-		if (this.editarea.html() === '')
-			return;
+		if (this.editarea.html() === '') return;
 
 		var ss = this.editarea.html().match(/<span.*?contenteditable\="false".*?\>/gi);
 		var tt = this.editarea.html().match(/&lt;/gi);
@@ -2955,7 +3032,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.4.0.2";
+		this.version = "0.4.1";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -3008,7 +3085,8 @@ $.extend(UI, {
 		this.warningStopped = false;
 		this.abortedOperations = [];
         this.propagationsAvailable = false;
-//        this.unsavedSegmentsToRecover = [];
+        this.logEnabled = false;
+        this.unsavedSegmentsToRecover = [];
 //        this.recoverUnsavedSegmentsTimer = false;
 
 		/**
@@ -3319,16 +3397,9 @@ $.extend(UI, {
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			}
 		}).on('keydown', '.editor .editarea', 'shift+return', function(e) {
-            if(!UI.hiddenTextEnabled) return;
-
-            e.preventDefault();
-			var node = document.createElement("span");
-			var br = document.createElement("br");
-			node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
-			node.setAttribute('contenteditable', 'false');
-			node.appendChild(br);
-			insertNodeAtCursor(node);
-			UI.unnestMarkers();
+            UI.handleReturn(e);
+        }).on('keydown', '.editor .editarea', 'return', function(e) {
+            UI.handleReturn(e);
 		}).on('keydown', '.editor .editarea', 'space', function(e) {
             if(UI.markSpacesEnabled) {
                 if(!UI.hiddenTextEnabled) return;
@@ -3414,7 +3485,8 @@ $.extend(UI, {
                 $('#addtm-create-key').removeClass('disabled');
                 setTimeout(function() {
                     UI.checkAddTMEnable();
-                }, 500);
+                    UI.checkManageTMEnable();
+                }, 100);
 //                $('#private-tm-user').val(data.id);
 //                $('#private-tm-pass').val(data.pass);
 //                $('#create_private_tm_btn').attr('data-key', data.key);
@@ -3429,6 +3501,7 @@ $.extend(UI, {
                 $('.addtm-tr-key .error-message').hide();
             }
         }).on('change', '.addtm-select-file', function(e) {
+/*
             $('.addtm-tr .warning-message').hide();
             if($('#addtm-tr-key').val() == '') {
                 $('#addtm-create-key').click();
@@ -3437,6 +3510,7 @@ $.extend(UI, {
                     UI.checkAddTMEnable();
                 }, 500);
             }
+*/
         }).on('click', '.addtm-tr-key .btn-ok', function(e) {
             if(!UI.checkTMgrants($('.addtm-tr-key'))) {
                 return false;
@@ -3455,6 +3529,9 @@ $.extend(UI, {
             }
         }).on('change', '#addtm-tr-key', function(e) {
             $('.addtm-tr .warning-message').hide();
+        }).on('input', '#addtm-tr-key', function(e) {
+            UI.checkAddTMEnable();
+            UI.checkManageTMEnable();
         }).on('change', '#addtm-tr-key, .addtm-select-file, #addtm-tr-read, #addtm-tr-write', function(e) {
             UI.checkAddTMEnable();
 /*
@@ -3971,7 +4048,9 @@ $.extend(UI, {
 		}).on('click', '.editarea', function(e, operation, action) {
 			if (typeof operation == 'undefined')
 				operation = 'clicking';
-			this.onclickEditarea = new Date();
+            UI.saveInUndoStack('click');
+
+            this.onclickEditarea = new Date();
 			UI.notYetOpened = false;
 			UI.closeTagAutocompletePanel();
 			if ((!$(this).is(UI.editarea)) || (UI.editarea === '') || (!UI.body.hasClass('editing'))) {
@@ -4122,6 +4201,9 @@ $.extend(UI, {
 //            }
 
         }).on('keydown', '.editor .editarea', 'return', function(e) {
+            e.preventDefault();
+            console.log('222222');
+/*
             UI.defaultBRmanagement = false;
             if(!$('br', UI.editarea).length) {
                 UI.defaultBRmanagement = true;
@@ -4131,6 +4213,7 @@ $.extend(UI, {
                 restoreSelection();
                 e.preventDefault();
             }
+*/
         }).on('keypress', '.editor .editarea', function(e) {
             console.log('which: ', e.which);
 //			console.log('keypress: ', UI.editarea.html());
@@ -4409,6 +4492,10 @@ $.extend(UI, {
 //                console.log($(':focus'));
                 //              return false;
 			}
+
+            if (((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8))) { // not arrows, backspace, canc
+                UI.saveInUndoStack('arrow');
+            }
 
 			if (!((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8) || (e.which == 46) || (e.which == 91))) { // not arrows, backspace, canc or cmd
 				if (UI.body.hasClass('searchActive')) {
@@ -5306,7 +5393,7 @@ console.log('translation 4: ', translation);
 //				console.log('dopo: ', $('.sub-editor.matches .overflow .suggestion_source', segment).html());
 			});
             // start addtmxTmp
-            $('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><i class="icon-upload"></i><a class="open-popup-addtm-tr">Add your TMX</a></div>');
+            $('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><i class="icon-upload"></i><a class="open-popup-addtm-tr">Add your personal TM</a></div>');
             // end addtmxTmp
             UI.markSuggestionTags(segment);
 
@@ -5617,7 +5704,7 @@ $.extend(UI, {
 		
 		if (this.noTagsInSegment(1))
 			return false;
-		$('.source').each(function() {
+		$('.source, .editarea').each(function() {
 			UI.lockTags(this);
 		});
 	},
@@ -5977,7 +6064,6 @@ $.extend(UI, {
 	renderConcordances: function(d, in_target) {
 		segment = this.currentSegment;
 		segment_id = this.currentSegmentId;
-
 		$('.sub-editor.concordances .overflow .results', segment).empty();
 		$('.sub-editor.concordances .overflow .message', segment).remove();
 		if (d.data.matches.length) {
@@ -6353,7 +6439,7 @@ $.extend(UI, {
 		this.searchParams['exact-match'] = $('#exact-match').is(':checked');
 		this.searchParams.search = 1;
 		if ((typeof this.searchParams.source == 'undefined') && (typeof this.searchParams.target == 'undefined') && (this.searchParams.status == 'all')) {
-			APP.alert({msg: 'You must specify at least one between source and target<br>or choose a status'});
+			APP.alert({msg: 'Enter text in source or target input boxes<br /> or select a status.'});
 			return false;
 		}
 		this.disableTagMark();
@@ -7268,12 +7354,15 @@ function fileUpload(form, action_url, div_id) {
 //    document.getElementById(div_id).innerHTML = "Uploading...";
     $('.popup-addtm-tr .x-popup').click();
     UI.showMessage({
-        msg: 'Uploading a TM...'
+        msg: 'Uploading your TM...'
     });
-    UI.pollForUploadCallback();
+    UI.pollForUploadCallback($('#addtm-tr-key').val());
 }
 
-
+function stackTrace() {
+    var err = new Error();
+    return err.stack;
+}
 // addTM webworker
 /*
 function werror(e) {

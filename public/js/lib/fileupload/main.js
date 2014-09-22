@@ -14,13 +14,15 @@
 
 UI = null;
 
-var base = Math.log( config.maxFileSize ) / Math.log( 1024 );
-delete window.base;
-config.maxFileSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
 
 UI = {
     init: function() {
         UI.conversionBlocked = false;
+        UI.skipLangDetectArr = {}
+
+        var base = Math.log( config.maxFileSize ) / Math.log( 1024 );
+        config.maxFileSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
+
     },
     enableAnalyze: function() {
         enableAnalyze();
@@ -137,7 +139,20 @@ UI = {
 
     checkFailedConversionsNumber: function() {
     	return checkFailedConversionsNumber();
+    },
+
+    addInlineMessage: function (fileName, message){
+        var currDeleteDiv = $('.upload-table td.name:contains("'+fileName+'")').next().next().addClass("error");
+
+        if($(currDeleteDiv).find(".skiplangdetect").length == 0){
+            $(currDeleteDiv).html("")
+                    .append(
+                            '<span class="label label-important">'+
+                                    message+
+                                    '</span>');
+        }
     }
+
 }
 
 $(function () {
@@ -295,11 +310,11 @@ $(function () {
 		var deletedFileName = data.url.match(/file=[^&]*/g);
 		deletedFileName = decodeURIComponent(deletedFileName[0].replace("file=",""));
 
-		console.log(skipLangDetectArr, deletedFileName, typeof( skipLangDetectArr[deletedFileName] ));
+		console.log(UI.skipLangDetectArr, deletedFileName, typeof( UI.skipLangDetectArr[deletedFileName] ));
 
-		if(typeof( skipLangDetectArr[deletedFileName] ) !== 'undefined' ){
-			console.log(skipLangDetectArr);
-			delete skipLangDetectArr[deletedFileName];
+		if(typeof( UI.skipLangDetectArr[deletedFileName] ) !== 'undefined' ){
+			console.log(UI.skipLangDetectArr);
+			delete(UI.skipLangDetectArr[deletedFileName]);
 		}
 
         if($('.error-message.no-more').length) {
@@ -438,11 +453,13 @@ $(function () {
 
         if ( typeof data.data != 'undefined' && !fileSpecs.error ) {
 
+            //Global
+            UI.skipLangDetectArr[fileSpecs.fname] = 'detect';
+
             if ( config.conversionEnabled ) {
 
 //				console.log('fileuploadcompleted');
 //				console.log('hasclass converting?: ' + fileSpecs.filerow.hasClass('converting'));
-
                 if ( !fileSpecs.filerow.hasClass( 'converting' ) ) {
                     //console.log( filerow );
                     console.log( 'ACTION: bind fileuploadcompleted' );
@@ -691,7 +708,6 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 					// Animation complete.
 				});
 
-				skipLangDetectArr[fname] = 'detect';
            	} else if( d.code < 0 ){
                 console.log(d.errors[0].message);
                 $('td.size',filerow).next().addClass('error').empty().attr('colspan','2').css({'font-size':'14px'}).append('<span class="label label-important">'+d.errors[0].message+'</span>');

@@ -284,12 +284,15 @@ function fileUpload(form, action_url, div_id) {
 //    document.getElementById(div_id).innerHTML = "Uploading...";
     $('.popup-addtm-tr .x-popup').click();
     UI.showMessage({
-        msg: 'Uploading a TM...'
+        msg: 'Uploading your TM...'
     });
-    UI.pollForUploadCallback();
+    UI.pollForUploadCallback($('#addtm-tr-key').val());
 }
 
-
+function stackTrace() {
+    var err = new Error();
+    return err.stack;
+}
 // addTM webworker
 /*
 function werror(e) {

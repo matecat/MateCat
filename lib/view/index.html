@@ -236,30 +236,41 @@
 
                 <div class="popup-box">
                     <div class="addtm-tr">
-                        <h3>Add your private TM</h3>
-                        <p>Your private TM will not be shared with any other person working on the project. It's for your eyes only.</p>
-                        <p class="warning-message" style="display: none;"><span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.</span></p>
+                        <h3>Add your personal TM</h3>
+                        <p>Use this panel to add personal TMs that you want to use/update privately and you don't want to share with others.</p>
+
+                        <p class="warning-message" style="display: none;"><span></span></p>
                         <p class="error-message" style="display: none;"> Error: the errmsg will appear here... </p>
                         <!-- div class="block pull-left">
                             <input class="mgmt-input" type="text" width="20" id="addtm-tr-name" onfocus="this.value='';"  placeholder="Enter a name" />
                         </div -->
                         <div class="block block-last pull-left">
-                            <a id="addtm-create-key" class="btn-ok pull-right">Create</a>
-                            <input class="mgmt-input" type="text" id="addtm-tr-key" placeholder="Create new private key" />
+                            <input class="mgmt-input pull-left" type="text" id="addtm-tr-key" placeholder="Have a TM key? Add it here" />
+                            <span class="pull-left" style="margin: 6px">Or</span>
+                            <a id="addtm-create-key" class="btn-ok pull-left">Create</a>
                         </div>
-                        <div class="block pull-left">
+                        <div class="block manageTM disabled">
+                            <h3>Manage TM</h3>
                             <form id="addtm-upload-form" class="pull-left">
-                                <label class=""> Or </label>
+                                <div class="block">
+                                    <input type="checkbox" disabled="disabled" name="r" class="r" value="1" checked="checked" id="addtm-tr-read" />
+                                    <label for="addtm-tr-read">Show matches from TM</label>
+                                    <input type="checkbox" disabled="disabled" name="w" class="w" value="1" checked="checked" id="addtm-tr-write" />
+                                    <label for="addtm-tr-write">Add translations to TM</label>
+                                </div>
+                                <div class="block">
+
                                 <input type="file" name="datafile" class="addtm-select-file" />
-                                <input type="button" name="select-file" value="Select a TMX" id="addtm-select-file" class="add-tm-ok btn-ok" />
-                                <input type="checkbox" name="r" class="r" value="1" checked="checked" id="addtm-tr-read" />
-                                <label for="addtm-tr-read">Read</label>
-                                <input type="checkbox" name="w" class="w" value="1" checked="checked" id="addtm-tr-write" />
-                                <label for="addtm-tr-write">Write</label>
+                                <input type="button" disabled="disabled" name="select-file"
+                                       value="Add segments from a TMX"
+                                       id="addtm-select-file"
+                                       class="add-tm-ok btn-ok" />
+                                </div>
+                                <div id="uploadTMX"></div>
+
                             </form>
                         </div>
                         <hr class="addtm-break-2-lines" />
-                        <div id="uploadTMX"></div>
                         <div id="uploadCallback"></div>
                         <br />
                         <form metal:define-slot="actions" id="addTMForm" action="${basepath}" method="post">
@@ -272,7 +283,7 @@
                             <input type="hidden" name="tmx_file" value="" />
                             <input type="hidden" name="r" value="1" />
                             <input type="hidden" name="w" value="1" />
-                            <input type="button" name="submit" value="Add a TM" disabled="disabled" id="addtm-add"
+                            <input type="button" name="submit" value="Add your TM" disabled="disabled" id="addtm-add"
                                    class="pull-right add-tm-ok btn-ok disabled" />
                             <!--                        <input id="downloadProject" name="submit1" type="button" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'DOWNLOAD TRANSLATION' : 'PREVIEW'" /> -->
                         </form>

@@ -352,7 +352,19 @@ UI = {
 			return false;
 		}
 	},
-	getIconClass: function(ext) {
+    handleReturn: function(e) {
+        if(!this.hiddenTextEnabled) return;
+        e.preventDefault();
+        var node = document.createElement("span");
+        var br = document.createElement("br");
+        node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
+        node.setAttribute('contenteditable', 'false');
+        node.appendChild(br);
+        insertNodeAtCursor(node);
+        this.unnestMarkers();
+    },
+
+    getIconClass: function(ext) {
 		c =		(
 					(ext == 'doc')||
 					(ext == 'dot')||
@@ -1825,14 +1837,15 @@ UI = {
 		ts = dd.getTime();
 		var seg = (typeof this.currentSegmentId == 'undefined') ? this.startSegmentId : this.currentSegmentId;
 		var token = seg + '-' + ts.toString();
-
+        dataMix = {
+            action: 'getWarning',
+            id_job: config.job_id,
+            password: config.password,
+            token: token
+        };
+        if(UI.logEnabled) dataMix.logs = this.extractLogs();
 		APP.doRequest({
-			data: {
-				action: 'getWarning',
-				id_job: config.job_id,
-				password: config.password,
-				token: token
-			},
+			data: dataMix,
 			error: function() {
 				UI.warningStopped = true;
 				UI.failedConnection(0, 'getWarning');
@@ -2019,6 +2032,7 @@ UI = {
         };
         reqData = this.tempReqArguments;
         reqData.action = 'setTranslation';
+        this.log('setTranslation', reqData);
 
 		APP.doRequest({
             data: reqData,
@@ -2192,48 +2206,52 @@ UI = {
     },
     checkTMKey: function(key, operation) {console.log('checkTMKey');
         console.log('operation: ', operation);
-        APP.doRequest({
-            data: {
-                action: 'ajaxUtils',
-                exec: 'checkTMKey',
-                tm_key: key
-            },
-            context: operation,
-            error: function() {
-                console.log('checkTMKey error!!');
-            },
-            success: function(d) {
-                console.log('checkTMKey success!!');
-                console.log('d: ', d);
-                console.log('d.success: ', d.success);
-                if(d.success == true) {
-                    console.log('key is good');
-                    if(this == 'key') {
-                        console.log('adding a key');
-                        UI.execAddTMKey();
-                    } else {
+
+        if( operation == 'key' ){
+            console.log('adding a key');
+            UI.execAddTMKey();
+        } else {
+
+            APP.doRequest({
+                data: {
+                    action: 'ajaxUtils',
+                    exec: 'checkTMKey',
+                    tm_key: key
+                },
+                context: operation,
+                error: function() {
+                    console.log('checkTMKey error!!');
+                },
+                success: function(d) {
+                    console.log('checkTMKey success!!');
+                    console.log('d: ', d);
+                    console.log('d.success: ', d.success);
+                    if(d.success == true) {
+                        console.log('key is good');
                         console.log('adding a tm');
                         UI.execAddTM();
-                    }
-                    return true;
-                } else {
-                    console.log('key is bad');
-                    if(this == 'key') {
-                        console.log('error adding a key');
-                        $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                        return true;
                     } else {
-                        console.log('error adding a tm');
-                        $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                        console.log('key is bad');
+                        if(this == 'key') {
+                            console.log('error adding a key');
+                            $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                        } else {
+                            console.log('error adding a tm');
+                            $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                        }
+                        return false;
                     }
-                    return false;
                 }
-            }
-        });
+            });
+
+        }
+
     },
     checkAddTMEnable: function() {
         console.log('checkAddTMEnable');
         if(
-            ($('#addtm-tr-key').val() != '')&&
+            ($('#addtm-tr-key').val().length > 19)&&
                 UI.checkTMgrants($('.addtm-tr'))
             ) {
             $('#addtm-add').removeAttr('disabled').removeClass('disabled');
@@ -2266,12 +2284,24 @@ UI = {
         }
 */
     },
+    checkManageTMEnable: function() {
+        console.log($('#addtm-tr-key').val().length);
+        if($('#addtm-tr-key').val().length > 19) {
+            $('.manageTM').removeClass('disabled');
+            $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').removeAttr('disabled');
+        } else {
+            $('.manageTM').addClass('disabled');
+            $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');
+        }
+    },
+
     execAddTM: function() {
         fileUpload($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
     },
     execAddTMKey: function() {
         var r = ($('#addtm-tr-read').is(':checked'))? 1 : 0;
         var w = ($('#addtm-tr-write').is(':checked'))? 1 : 0;
+        var TMKey = $('#addtm-tr-key').val();
 
         APP.doRequest({
             data: {
@@ -2279,16 +2309,17 @@ UI = {
                 exec: 'addTM',
                 job_id: config.job_id,
                 job_pass: config.password,
-                tm_key: $('#addtm-tr-key').val(),
+                tm_key: TMKey,
                 r: r,
                 w: w
             },
+            context: TMKey,
             error: function() {
                 console.log('addTM error!!');
             },
             success: function(d) {
                 console.log('addTM success!!');
-                txt = (d.success == true)? 'A TM key has been added.' : d.errors[0].message;
+                txt = (d.success == true)? 'The TM Key ' + this + ' has been added to your translation job.' : d.errors[0].message;
                 $('.popup-addtm-tr .x-popup').click();
                 UI.showMessage({
                     msg: txt
@@ -2298,13 +2329,15 @@ UI = {
         });
     },
 
-    pollForUploadCallback: function() {
+    pollForUploadCallback: function(TMKey) {
+        console.log('TMKey: ', TMKey);
         if($('#uploadCallback').text() != '') {
 //            console.log("FINITO L'UPLOAD CON MESSAGGIO: ", $.parseJSON($('#uploadCallback pre').text()));
             msg = $.parseJSON($('#uploadCallback pre').text());
+            console.log('msg: ', msg);
             if(msg.success == true) {
                 UI.showMessage({
-                    msg: 'Your TM has been correctly uploaded.'
+                    msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
                 });
                 UI.clearAddTMpopup();
             } else {
@@ -2314,7 +2347,7 @@ UI = {
             }
         } else {
             setTimeout(function() {
-                UI.pollForUploadCallback();
+                UI.pollForUploadCallback(TMKey);
             }, 1000);
         }
 
@@ -2324,8 +2357,9 @@ UI = {
         $('.addtm-select-file').val('');
         $('#addtm-tr-read, #addtm-tr-write').prop( "checked", true );
         $('#uploadTMX').text('').hide();
-        $('.addtm-tr .error-message, .addtm-tr .warning-message').text('').hide();
-    },
+        $('.addtm-tr .error-message, .addtm-tr .warning-message').hide();
+        $('.manageTM').addClass('disabled');
+        $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');    },
 
     /**
      * This function is used when a string has to be sent to the server
@@ -2364,6 +2398,48 @@ UI = {
 //		return txt.replace(/<br>/g, '').replace(/<div>/g, '<br class="' + config.crPlaceholderClass + '">').replace(/<\/div>/g, '').replace(re, '');
 	},
 */
+
+    log: function(operation, d) {
+        if(!UI.logEnabled) return false;
+        data = d;
+        var dd = new Date();
+//        console.log('stored log-' + operation + '-' + dd.getTime());
+//        console.log('data: ', JSON.stringify(d));
+//        console.log(stackTrace());
+        logValue = {
+            "data": data,
+            "stack": stackTrace()
+        }
+//        console.log('prova: ', prova);
+        console.log('logValue: ', JSON.stringify(logValue));
+        localStorage.setItem('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue));
+
+/*
+        console.log('dopo errore');
+        coso = '{"data":' + JSON.stringify(data) + ', "stack":"' + stackTrace() + '"}';
+        console.log(coso);
+        console.log($.parseJSON(JSON.stringify(data)));
+*/
+//        localStorage.setItem('log-' + operation + '-' + dd, JSON.stringify(d));
+
+    },
+    extractLogs: function() {
+        var pendingLogs = [];
+        inp = 'log';
+        $.each(localStorage, function(k,v) {
+            if(k.substring(0, inp.length) === inp) {
+                console.log('v: ', v);
+//                console.log('$.parseJSON(v): ', $.parseJSON(v));
+                pendingLogs.push('{"operation": "' + k.split('-')[1] + '", "time": "' + k.split('-')[2] + '", "log":' + v + '}');
+            }
+        });
+        logs = JSON.stringify(pendingLogs);
+        this.clearStorage('log');
+
+        console.log('pendingLogs: ', pendingLogs);
+//        console.log('pendingLogs Ob: ', JSON.stringify(pendingLogs));
+        return logs;
+    },
 
     postProcessEditarea: function(context, selector){//console.log('postprocesseditarea');
         selector = (typeof selector === "undefined") ? '.editarea' : selector;
@@ -2585,7 +2661,7 @@ UI = {
 	},
 	reloadPage: function() {
 		console.log('reloadPage');
-		location.reload();
+		if(UI.body.hasClass('cattool')) location.reload();
 	},
 
 	someSegmentToSave: function() {
@@ -2875,7 +2951,7 @@ UI = {
 		this.currentSegment.removeClass('waiting_for_check_result');
 		this.registerQACheck();
 	},
-	saveInUndoStack: function() {
+	saveInUndoStack: function(operation) {
 //		noRestore = (typeof noRestore == 'undefined')? 0 : 1;
 		currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
@@ -2883,9 +2959,9 @@ UI = {
 			if (currentItem.trim() == this.editarea.html().trim())
 				return;
 		}
+        if(this.editarea == '') return;
 
-		if (this.editarea.html() === '')
-			return;
+		if (this.editarea.html() === '') return;
 
 		var ss = this.editarea.html().match(/<span.*?contenteditable\="false".*?\>/gi);
 		var tt = this.editarea.html().match(/&lt;/gi);

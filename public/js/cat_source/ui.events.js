@@ -102,16 +102,9 @@ $.extend(UI, {
 				$('.editor .tab.' + tab + ' .graysmall[data-item=3]').trigger('dblclick');
 			}
 		}).on('keydown', '.editor .editarea', 'shift+return', function(e) {
-            if(!UI.hiddenTextEnabled) return;
-
-            e.preventDefault();
-			var node = document.createElement("span");
-			var br = document.createElement("br");
-			node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
-			node.setAttribute('contenteditable', 'false');
-			node.appendChild(br);
-			insertNodeAtCursor(node);
-			UI.unnestMarkers();
+            UI.handleReturn(e);
+        }).on('keydown', '.editor .editarea', 'return', function(e) {
+            UI.handleReturn(e);
 		}).on('keydown', '.editor .editarea', 'space', function(e) {
             if(UI.markSpacesEnabled) {
                 if(!UI.hiddenTextEnabled) return;
@@ -197,7 +190,8 @@ $.extend(UI, {
                 $('#addtm-create-key').removeClass('disabled');
                 setTimeout(function() {
                     UI.checkAddTMEnable();
-                }, 500);
+                    UI.checkManageTMEnable();
+                }, 100);
 //                $('#private-tm-user').val(data.id);
 //                $('#private-tm-pass').val(data.pass);
 //                $('#create_private_tm_btn').attr('data-key', data.key);
@@ -212,6 +206,7 @@ $.extend(UI, {
                 $('.addtm-tr-key .error-message').hide();
             }
         }).on('change', '.addtm-select-file', function(e) {
+/*
             $('.addtm-tr .warning-message').hide();
             if($('#addtm-tr-key').val() == '') {
                 $('#addtm-create-key').click();
@@ -220,6 +215,7 @@ $.extend(UI, {
                     UI.checkAddTMEnable();
                 }, 500);
             }
+*/
         }).on('click', '.addtm-tr-key .btn-ok', function(e) {
             if(!UI.checkTMgrants($('.addtm-tr-key'))) {
                 return false;
@@ -238,6 +234,9 @@ $.extend(UI, {
             }
         }).on('change', '#addtm-tr-key', function(e) {
             $('.addtm-tr .warning-message').hide();
+        }).on('input', '#addtm-tr-key', function(e) {
+            UI.checkAddTMEnable();
+            UI.checkManageTMEnable();
         }).on('change', '#addtm-tr-key, .addtm-select-file, #addtm-tr-read, #addtm-tr-write', function(e) {
             UI.checkAddTMEnable();
 /*
@@ -754,7 +753,9 @@ $.extend(UI, {
 		}).on('click', '.editarea', function(e, operation, action) {
 			if (typeof operation == 'undefined')
 				operation = 'clicking';
-			this.onclickEditarea = new Date();
+            UI.saveInUndoStack('click');
+
+            this.onclickEditarea = new Date();
 			UI.notYetOpened = false;
 			UI.closeTagAutocompletePanel();
 			if ((!$(this).is(UI.editarea)) || (UI.editarea === '') || (!UI.body.hasClass('editing'))) {
@@ -905,6 +906,9 @@ $.extend(UI, {
 //            }
 
         }).on('keydown', '.editor .editarea', 'return', function(e) {
+            e.preventDefault();
+            console.log('222222');
+/*
             UI.defaultBRmanagement = false;
             if(!$('br', UI.editarea).length) {
                 UI.defaultBRmanagement = true;
@@ -914,6 +918,7 @@ $.extend(UI, {
                 restoreSelection();
                 e.preventDefault();
             }
+*/
         }).on('keypress', '.editor .editarea', function(e) {
             console.log('which: ', e.which);
 //			console.log('keypress: ', UI.editarea.html());
@@ -1192,6 +1197,10 @@ $.extend(UI, {
 //                console.log($(':focus'));
                 //              return false;
 			}
+
+            if (((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8))) { // not arrows, backspace, canc
+                UI.saveInUndoStack('arrow');
+            }
 
 			if (!((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8) || (e.which == 46) || (e.which == 91))) { // not arrows, backspace, canc or cmd
 				if (UI.body.hasClass('searchActive')) {
