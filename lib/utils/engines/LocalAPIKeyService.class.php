@@ -22,7 +22,7 @@ class LocalAPIKeyService {
 
     public function createMyMemoryKey(){
 
-        $newUser = json_decode( file_get_contents( 'http://mymemory.translated.net/api/createranduser' ) );
+        $newUser = json_decode( file_get_contents( 'http://api.mymemory.translated.net/api/createranduser' ) );
         if ( empty( $newUser ) || $newUser->error || $newUser->code != 200 ) {
             throw new Exception( "Private TM key .", -1 );
         }

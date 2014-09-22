@@ -1997,6 +1997,7 @@ UI = {
         console.log('translation: ', translation);
 
 		if (translation === '') {
+            alert( $(segment).attr('id') );
             this.unsavedSegmentsToRecover.push(this.currentSegmentId);
             return false;
         }
@@ -3085,7 +3086,7 @@ $.extend(UI, {
 		this.abortedOperations = [];
         this.propagationsAvailable = false;
         this.logEnabled = false;
-//        this.unsavedSegmentsToRecover = [];
+        this.unsavedSegmentsToRecover = [];
 //        this.recoverUnsavedSegmentsTimer = false;
 
 		/**
