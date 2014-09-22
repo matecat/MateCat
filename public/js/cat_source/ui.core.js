@@ -60,8 +60,8 @@ UI = {
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
 		segment_id = $(segment).attr('id').split('-')[1];
 		$('.percentuage', segment).removeClass('visible');
-		if (!segment.hasClass('saved'))
-			this.setTranslation($(segment).attr('id').split('-')[1], status, false, byStatus);
+//		if (!segment.hasClass('saved'))
+		this.setTranslation($(segment).attr('id').split('-')[1], status, false, byStatus);
 		segment.removeClass('saved');
 		this.setContribution(segment_id, status, byStatus);
 		this.setContributionMT(segment_id, status, byStatus);
@@ -1997,6 +1997,7 @@ UI = {
         console.log('translation: ', translation);
 
 		if (translation === '') {
+            alert('id: ', id_segment);
             this.unsavedSegmentsToRecover.push(this.currentSegmentId);
             return false;
         }
