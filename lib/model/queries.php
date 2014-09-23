@@ -56,6 +56,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
 		AND s.segment LIKE '" . $LIKE . $_regexpEscapedSrc . $LIKE . "'
 			$where_status
 			GROUP BY s.id WITH ROLLUP";
+
     } elseif ( $key == "target" ) {
 
         $query = "SELECT  st.id_segment as id, sum(
@@ -71,6 +72,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
 					( LENGTH( st.translation ) - LENGTH( REPLACE ( $SQL_CASE ( st.translation ), $SQL_CASE ( '$trg' ), '') ) ) / LENGTH('$trg') )
 			> 0
 			GROUP BY st.id_segment WITH ROLLUP";
+
     } elseif ( $key == 'coupled' ) {
 
         $query = "SELECT st.id_segment as id
@@ -83,12 +85,14 @@ function doSearchQuery( ArrayObject $queryParams ) {
 			AND LENGTH( REPLACE ( $SQL_CASE( st.translation ), $SQL_CASE( '$trg' ), '') ) != LENGTH( st.translation )
 			AND st.status != 'NEW'
 			$where_status ";
+
     } elseif ( $key = 'status_only' ) {
 
         $query = "SELECT st.id_segment as id
 			FROM segment_translations as st
 			WHERE st.id_job = {$queryParams['job']}
 		$where_status ";
+
     }
 
 //	Log::doLog($query);
@@ -102,7 +106,6 @@ function doSearchQuery( ArrayObject $queryParams ) {
 
     if ( $errno != 0 ) {
         log::doLog( $err );
-
         return $errno * -1;
     }
 
@@ -2568,26 +2571,6 @@ function cancelJob( $res, $id ) {
     $db->query( $query );
 }
 
-function archiveJob( $res, $id ) {
-
-    if ( $res == "prj" ) {
-        $query = "update jobs set status='" . Constants_JobStatus::STATUS_ARCHIVED . "' where id_project=" . (int) $id;
-    } else {
-        $query = "update jobs set status='" . Constants_JobStatus::STATUS_ARCHIVED . "' where id=" . (int) $id;
-    }
-    /*
-       if ($res == "prj") {
-       $query = "update jobs set disabled=1 where id_project=$id";
-       } else {
-       $query = "update jobs set disabled=1 where id=$id";
-       }
-     */
-    //    $query = "update jobs set disabled=1 where id=$id";
-
-    $db = Database::obtain();
-    $db->query( $query );
-}
-
 function updateProjectOwner( $ownerEmail, $project_id ) {
     $db              = Database::obtain();
     $data            = array();
@@ -3145,7 +3128,7 @@ function batchArchiveJobs( $jobs = array(), $days = INIT::JOB_ARCHIVABILITY_THRE
         UPDATE jobs
             SET status_owner = '" . Constants_JobStatus::STATUS_ARCHIVED . "'
             WHERE %s
-            AND create_date < ( curdate() - INTERVAL %u DAY )";
+            AND last_update < ( curdate() - INTERVAL %u DAY )";
 
     $tuple_of_double_indexes = array();
     foreach ( $jobs as $job ) {
@@ -3160,8 +3143,6 @@ function batchArchiveJobs( $jobs = array(), $days = INIT::JOB_ARCHIVABILITY_THRE
 
     $db = Database::obtain();
     $db->query( $q_archive );
-
-//    Log::doLog( $q_archive );
 
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];
