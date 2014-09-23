@@ -36,77 +36,77 @@ class changeJobsStatusController extends ajaxController {
 
         );
 
-        $__postInput     = filter_input_array( INPUT_POST, $filterArgs );
+        $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
 
-        $this->res_type   = $__postInput['res'];
-        $this->res_id     = $__postInput['id'];
-        $this->new_status = $__postInput['new_status'];
-        $this->undo       = $__postInput['undo'];
+        $this->res_type   = $__postInput[ 'res' ];
+        $this->res_id     = $__postInput[ 'id' ];
+        $this->new_status = $__postInput[ 'new_status' ];
+        $this->undo       = $__postInput[ 'undo' ];
 
         // parameters to select the first item of the next page, to return
-        if (isset($_POST['page'])) {
-            $this->page = ($_POST['page'] == '') ? 1 : $__postInput['page'];
+        if ( isset( $_POST[ 'page' ] ) ) {
+            $this->page = ( $_POST[ 'page' ] == '' ) ? 1 : $__postInput[ 'page' ];
         } else {
             $this->page = 1;
         };
 
-        if (isset($_POST['step'])) {
-            $this->step = $__postInput['step'];
+        if ( isset( $_POST[ 'step' ] ) ) {
+            $this->step = $__postInput[ 'step' ];
         } else {
             $this->step = 100;
         };
 
-        if (isset($_POST['project'])) {
-            $this->project_id = $__postInput['project'];
+        if ( isset( $_POST[ 'project' ] ) ) {
+            $this->project_id = $__postInput[ 'project' ];
         } else {
             $this->project_id = false;
         };
 
-        if (isset($_POST['jpassword'])) {
-            $this->job_password = $__postInput['jpassword'];
+        if ( isset( $_POST[ 'jpassword' ] ) ) {
+            $this->job_password = $__postInput[ 'jpassword' ];
         } else {
             $this->job_password = null;
         };
 
-        if (isset($_POST['only_if'])) {
-            $this->only_if = $__postInput['only_if'];
+        if ( isset( $_POST[ 'only_if' ] ) ) {
+            $this->only_if = $__postInput[ 'only_if' ];
         } else {
             $this->only_if = false;
         };
 
-        if (isset($_POST['filter'])) {
+        if ( isset( $_POST[ 'filter' ] ) ) {
             $this->filter_enabled = true;
         } else {
             $this->filter_enabled = false;
         };
 
-        if (isset($_POST['pn'])) {
-            $this->search_in_pname = $__postInput['pn'];
+        if ( isset( $_POST[ 'pn' ] ) ) {
+            $this->search_in_pname = $__postInput[ 'pn' ];
         } else {
             $this->search_in_pname = false;
         };
 
-        if (isset($_POST['source'])) {
-            $this->search_source = $__postInput['source'];
+        if ( isset( $_POST[ 'source' ] ) ) {
+            $this->search_source = $__postInput[ 'source' ];
         } else {
             $this->search_source = false;
         };
 
-        if (isset($_POST['target'])) {
-            $this->search_target = $__postInput['target'];
+        if ( isset( $_POST[ 'target' ] ) ) {
+            $this->search_target = $__postInput[ 'target' ];
         } else {
             $this->search_target = false;
         };
 
-        if (isset($_POST['status'])) {
-            $this->search_status = $__postInput['status'];
+        if ( isset( $_POST[ 'status' ] ) ) {
+            $this->search_status = $__postInput[ 'status' ];
         } else {
             $this->search_status = Constants_JobStatus::STATUS_ACTIVE;
         };
 
-        if (isset($_POST['onlycompleted'])) {
-            $this->search_onlycompleted = $__postInput['onlycompleted'];
+        if ( isset( $_POST[ 'onlycompleted' ] ) ) {
+            $this->search_onlycompleted = $__postInput[ 'onlycompleted' ];
         } else {
             $this->search_onlycompleted = false;
         }
@@ -114,42 +114,40 @@ class changeJobsStatusController extends ajaxController {
 
     public function doAction() {
 
-        if ($this->res_type == "prj") {
-            $old_status = getProjectJobData($this->res_id);
-            $strOld = '';
-            foreach ($old_status as $item) {
-                $strOld .= $item['id'] . ':' . $item['status_owner'] . ',';
+        if ( $this->res_type == "prj" ) {
+            $old_status = getProjectJobData( $this->res_id );
+            $strOld     = '';
+            foreach ( $old_status as $item ) {
+                $strOld .= $item[ 'id' ] . ':' . $item[ 'status_owner' ] . ',';
             }
-            $strOld = trim($strOld, ',');
+            $strOld = trim( $strOld, ',' );
 
-            $this->result['old_status'] = $strOld;
+            $this->result[ 'old_status' ] = $strOld;
 
-            $st = updateJobsStatus($this->res_type, $this->res_id, $this->new_status, $this->only_if, $this->undo);
+            $st = updateJobsStatus( $this->res_type, $this->res_id, $this->new_status, $this->only_if, $this->undo );
 
-            $start = (($this->page - 1) * $this->step) + $this->step - 1;
+            $start = ( ( $this->page - 1 ) * $this->step ) + $this->step - 1;
 
-            $start = (($this->page - 1) * $this->step) + $this->step - 1;
+            $projects = ManageUtils::queryProjects( $start, 1, $this->search_in_pname, $this->search_source, $this->search_target, $this->search_status, $this->search_onlycompleted, $this->filter_enabled, $this->project_id );
 
-            $projects = ManageUtils::queryProjects($start, 1, $this->search_in_pname, $this->search_source, $this->search_target, $this->search_status, $this->search_onlycompleted, $this->filter_enabled, $this->project_id);
+            $projnum = getProjectsNumber( $start, $this->step, $this->search_in_pname, $this->search_source, $this->search_target, $this->search_status, $this->search_onlycompleted, $this->filter_enabled );
 
-            $projnum = getProjectsNumber($start, $this->step, $this->search_in_pname, $this->search_source, $this->search_target, $this->search_status, $this->search_onlycompleted, $this->filter_enabled);
-
-            $this->result['code'] = 1;
-            $this->result['data'] = "OK";
-            $this->result['status'] = $this->new_status;
-            $this->result['newItem'] = $projects;
-            $this->result['page'] = $this->page;
-            $this->result['pnumber'] = $projnum[0]['c'];
+            $this->result[ 'code' ]    = 1;
+            $this->result[ 'data' ]    = "OK";
+            $this->result[ 'status' ]  = $this->new_status;
+            $this->result[ 'newItem' ] = $projects;
+            $this->result[ 'page' ]    = $this->page;
+            $this->result[ 'pnumber' ] = $projnum[ 0 ][ 'c' ];
         } else {
-   
-            $st = updateJobsStatus($this->res_type, $this->res_id, $this->new_status, $this->only_if, $this->undo, $this->job_password );
-           
-            $this->result['code'] = 1;
-            $this->result['data'] = "OK";            
-            $this->result['status'] = $this->new_status;
 
-            }
-    } 
+            $st = updateJobsStatus( $this->res_type, $this->res_id, $this->new_status, $this->only_if, $this->undo, $this->job_password );
+
+            $this->result[ 'code' ]   = 1;
+            $this->result[ 'data' ]   = "OK";
+            $this->result[ 'status' ] = $this->new_status;
+
+        }
+    }
 
 }
 

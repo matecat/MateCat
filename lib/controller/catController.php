@@ -144,11 +144,11 @@ class catController extends viewController {
          * the check on the last translation only if the job is older than 30 days
          *
          */
-        $createDate = new DateTime( $data[0]['create_date'] );
+        $lastUpdate = new DateTime( $data[0]['last_update'] );
         $oneMonthAgo = new DateTime();
         $oneMonthAgo->modify( '-' . INIT::JOB_ARCHIVABILITY_THRESHOLD . ' days' );
 
-        if( $createDate < $oneMonthAgo  && !$this->job_cancelled ) {
+        if( $lastUpdate < $oneMonthAgo  && !$this->job_cancelled ) {
 
             $lastTranslationInJob = new Datetime( getLastTranslationDate( $this->jid ) );
 
