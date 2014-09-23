@@ -287,7 +287,7 @@ body.manage .meter
 
 body.manage th.create-date
 	{
-	min-width: 150px;
+	width: 140px;
 	}
 	
 body.manage th.job-detail
@@ -296,17 +296,17 @@ body.manage th.job-detail
 	}
 body.manage th.private-tm-key
 	{
-	min-width: 140px;
+	min-width: 180px;
 	}
 
 body.manage th.words
 	{
-	min-width: 130px;
+	width: 110px;
 	}
 	
 body.manage th.progress
 	{
-	width: 12%;
+	width: 10%;
 	}
 
 body.manage th.actions
@@ -322,6 +322,26 @@ body.manage tr.row
 		{
 		display: table-row;
 		}
+
+.tm-key .key,
+.tm-key .rgrant,
+.tm-key .wgrant
+{
+    min-width: 140px;
+    float:left;
+    padding: 6px 4px;
+    display: block;
+}
+
+.tm-key .rgrant,
+.tm-key .wgrant{
+    min-width: 30px;
+    width: 30px;
+}
+
+.tm-key .clear{
+    clear: both;
+}
 
 /*	
 body.manage tr.disabled

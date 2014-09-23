@@ -631,6 +631,15 @@ UI = {
             var ind = 0;
             $.each(this, function() {
                 ind++;
+                var private_tm_keys = '';
+                this.private_tm_key = $.parseJSON(this.private_tm_key);
+                $.each(this.private_tm_key, function(i, tm_key){
+                    console.log(tm_key);
+                    private_tm_keys +=  "<span class='key'>"    + tm_key.key  + "</span>"+
+                                        "<span class='rgrant'>" + tm_key.r    + "</span>"+
+                                        "<span class='wgrant'>" + tm_key.w    + "</span><br class='clear'/>";
+                });
+
 		        var newJob = '    <tr class="row " data-jid="'+this.id+'" data-status="'+this.status+'" data-password="'+this.password+'">'+
 		            '        <td class="create-date" data-date="'+this.create_date+'">'+this.formatted_create_date+'</td>'+
 		            '        <td class="job-detail">'+
@@ -641,7 +650,7 @@ UI = {
 		            '        	</span>'+
 		            '        </td>'+
 		            '        <td class="tm-key">'+
-		            '        	<span>'+ ((typeof this.private_tm_key == 'undefined')? '': this.private_tm_key) + '</span>'+
+		                    	private_tm_keys +
 		            '        </td>';
                 if(config.v_analysis){
                     newJob += '        <td class="words">'+this.stats.TOTAL_FORMATTED+'</td>';

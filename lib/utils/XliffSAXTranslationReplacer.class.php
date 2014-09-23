@@ -320,11 +320,9 @@ class XliffSAXTranslationReplacer{
 	private function prepareSegment($seg,$transunit_translation = ""){
 		$end_tags = "";
 
-//		$seg ['segment'] = CatUtils::restorenbsp ( $seg ['segment'] );
-//		$seg ['translation'] = CatUtils::restorenbsp ( $seg ['translation'] );
-
-        $seg ['segment'] = CatUtils::view2rawxliff( $seg ['segment'] );
-        $seg ['translation'] = CatUtils::view2rawxliff ( $seg ['translation'] );
+//        $seg ['segment'] = CatUtils::view2rawxliff( $seg ['segment'] );
+//        $seg ['translation'] = CatUtils::view2rawxliff ( $seg ['translation'] );
+//        We don't need transform/sanitize from wiew to xliff because the values comes from Database
 
         //QA non sense for source/source check until source can be changed. For now SKIP
 		if (is_null ( $seg ['translation'] ) || $seg ['translation'] == '') {
