@@ -110,7 +110,7 @@ class ManageUtils {
 				$project['id_engine_mt']= $job_array[5];
 
                 $tm_keys_json = self::hexToStr($job_array[6]);
-                $tm_keys_json = TmKeyManagement_TmKeyManagement::getJobTmKeys($tm_keys_json, 'rw', 'tm,glossary');
+                $tm_keys_json = TmKeyManagement_TmKeyManagement::getOwnerKeys( array($tm_keys_json) );
 
 //                $tm_keys = array();
 //
