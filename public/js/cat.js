@@ -3550,7 +3550,7 @@ $.extend(UI, {
         }).on('change', '.addtm-select-file', function(e) {
             console.log($(this).val());
             if($(this).val() != '') {
-                $('#uploadTMX').text($(this).val().split('\\')[$(this).val().split('\\').length - 1]).show();
+                $('#uploadTMX').html($(this).val().split('\\')[$(this).val().split('\\').length - 1] + '<a class="delete"></a>').show();
             } else {
                 $('#uploadTMX').hide();
             }
@@ -3569,6 +3569,10 @@ $.extend(UI, {
         }).on('click', '#addtm-tr-key-read, #addtm-tr-key-write', function(e) {
             UI.checkAddTMEnable($('.addtm-tr-key .btn-ok'));
 */
+        }).on('click', '#uploadTMX .delete', function(e) {
+            e.preventDefault();
+            $('#uploadTMX').html('');
+            $('.addtm-select-file').val('');
         }).on('click', '#addtm-add', function(e) {
             e.preventDefault();
             if(!UI.checkTMgrants($('.addtm-tr'))) {
