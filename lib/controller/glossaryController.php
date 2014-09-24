@@ -210,7 +210,7 @@ class glossaryController extends ajaxController {
         $set_successful = true;
         if( array_search( false, $set_code, true ) ){
             //There's an error, for now skip, let's assume that are not errors
-//          $set_successful = false;
+          $set_successful = false;
         }
 
         if ( $set_successful ) {
@@ -230,6 +230,12 @@ class glossaryController extends ajaxController {
                     )
             );
 
+            if( isset($new_key) ){
+                $this->result[ 'data' ][ 'created_tm_key' ] = true;
+            }
+
+        } else {
+            $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "We got an error, please try again." );
         }
 
     }
