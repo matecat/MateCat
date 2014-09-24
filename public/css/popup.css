@@ -44,13 +44,18 @@
     }
 
 .x-popup{background: url(../img/x-popup.png) center center no-repeat;display:block;height:40px;width:40px;float:right;margin:1px 0px 0 0;background-size:19px 19px;}
-  .x-popup:hover{background: url(../img/x-popup-hover.png) center center no-repeat;background-size:19px 19px;}  
+  .x-popup:hover{background: url(../img/x-popup-hover.png) center center no-repeat;background-size:19px 19px;}
 
+.login-google .outer{
+    margin-top: 10px;
+    position: relative;
+    top: 30px;
+}
 
-
-
-
-
+.login-google .popup-box{
+    width: 100%;
+    min-height: 100px;
+}
 
 
 
