@@ -126,6 +126,9 @@ class glossaryController extends ajaxController {
             }
         }
 
+        //remove tags from requests sent to MyMemory
+        $config[ 'segment' ] = CatUtils::view2rawxliff( preg_replace( '#<(?:/?[^>]+/?)>#', "", $config[ 'segment' ] ) );
+
         $TMS_RESULT = $this->_TMS->get( $config )->get_glossary_matches_as_array();
 
         /**
@@ -191,6 +194,9 @@ class glossaryController extends ajaxController {
 
         }
 
+        $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
+        $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
+
         //prepare the error report
         $set_code = array();
         //set the glossary entry for each key with write grants
@@ -239,6 +245,9 @@ class glossaryController extends ajaxController {
         //get tm keys with write grants
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $this->job_info[ 'tm_keys' ], 'w', 'glossary' );
 
+        $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
+        $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
+
         //prepare the error report
         $set_code = array();
         //set the glossary entry for each key with write grants
@@ -277,6 +286,9 @@ class glossaryController extends ajaxController {
 
         //get tm keys with write grants
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $this->job_info[ 'tm_keys' ], 'w', 'glossary' );
+
+        $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
+        $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
 
         //prepare the error report
         $set_code = array();

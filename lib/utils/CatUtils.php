@@ -210,12 +210,6 @@ class CatUtils {
         $segment = str_replace( '##$_0D$##',"\r", $segment );
         $segment = str_replace( '##$_09$##',"\t", $segment );
 
-        //replace all incoming &nbsp; ( \xA0 ) with normal spaces ( \x20 ) as we accept only ##$_A0$##
-        $segment = str_replace( Utils::unicode2chr(0Xa0) , " ", $segment );
-
-        // now convert the real &nbsp;
-        $segment = str_replace( '##$_A0$##', Utils::unicode2chr(0Xa0) , $segment );
-
         // input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
         // output : <g> bang &amp; olufsen are > 555 </g> <x/>
         // caso controverso <g id="4" x="&lt; dfsd &gt;">
@@ -224,6 +218,12 @@ class CatUtils {
             html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8'),
             ENT_NOQUOTES, 'UTF-8', false
         );
+
+        //replace all incoming &nbsp; ( \xA0 ) with normal spaces ( \x20 ) as we accept only ##$_A0$##
+        $segment = str_replace( Utils::unicode2chr(0Xa0) , " ", $segment );
+
+        // now convert the real &nbsp;
+        $segment = str_replace( '##$_A0$##', Utils::unicode2chr(0Xa0) , $segment );
 
         //encode all not valid XML entities
         $segment = preg_replace('/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,4};)/', '&amp;' , $segment );
