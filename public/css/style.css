@@ -2161,13 +2161,6 @@ footer nav
 @media screen and (max-width: 1580px){
 	/*.buttons{margin:-15px 45px 0 0 !important;}*/
 	.graysmall li{width:43%;}
-
-
-
-
-
-
-
 }
 @media screen and (min-width: 1600px){
 
@@ -2182,6 +2175,9 @@ footer nav
 	/*.buttons{margin:-15px 43px 0 0 !important;}*/
 	.graysmall li{width:42.5%;}
 	.header-menu{margin-right:18px}
+    #stat-completion, #stat-wph {
+         display: none;
+    }
 }
 @media screen and (max-width: 1280px){
 	/*.buttons{margin:-15px 42px 0 0 !important;}*/
