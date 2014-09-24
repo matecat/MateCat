@@ -109,7 +109,34 @@ class ManageUtils {
 
 				$project['id_engine_mt']= $job_array[5];
 
-                $job['private_tm_key'] = $job_array[6];
+                $tm_keys_json = self::hexToStr($job_array[6]);
+                $tm_keys_json = TmKeyManagement_TmKeyManagement::getOwnerKeys( array($tm_keys_json) );
+
+//                $tm_keys = array();
+//
+//                foreach($tm_keys_json as $tm_key_struct) {
+//                    /**
+//                     * @var $tm_key_struct TmKeyManagement_TmKeyStruct
+//                     */
+//                    $tm_keys[] = $tm_key_struct->key;
+//                }
+//
+//                $job['private_tm_key'] = implode(",", $tm_keys);
+
+                $tm_keys = array();
+
+                foreach($tm_keys_json as $tm_key_struct) {
+                    /**
+                     * @var $tm_key_struct TmKeyManagement_TmKeyStruct
+                     */
+                    $tm_keys[] = array(
+                            "key"   =>  $tm_key_struct->key,
+                            "r"     =>  ($tm_key_struct->r) ? 'read' : '&nbsp;',
+                            "w"     =>  ($tm_key_struct->w) ? 'write': ''
+                    );
+                }
+
+                $job['private_tm_key'] = json_encode($tm_keys);
 
 				$job['disabled']= ( $job_array[7] == Constants_JobStatus::STATUS_CANCELLED )?"disabled":"";
 				$job['status']= $job_array[7];
@@ -141,6 +168,14 @@ class ManageUtils {
 		return $projects;
 
 	}
+
+    private static function hexToStr($hex){
+    $string='';
+    for ($i=0; $i < strlen($hex)-1; $i+=2){
+        $string .= chr(hexdec($hex[$i].$hex[$i+1]));
+    }
+    return $string;
+}
 }
 
 

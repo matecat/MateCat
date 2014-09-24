@@ -190,7 +190,8 @@ $.extend(UI, {
                 $('#addtm-create-key').removeClass('disabled');
                 setTimeout(function() {
                     UI.checkAddTMEnable();
-                }, 500);
+                    UI.checkManageTMEnable();
+                }, 100);
 //                $('#private-tm-user').val(data.id);
 //                $('#private-tm-pass').val(data.pass);
 //                $('#create_private_tm_btn').attr('data-key', data.key);
@@ -205,6 +206,7 @@ $.extend(UI, {
                 $('.addtm-tr-key .error-message').hide();
             }
         }).on('change', '.addtm-select-file', function(e) {
+/*
             $('.addtm-tr .warning-message').hide();
             if($('#addtm-tr-key').val() == '') {
                 $('#addtm-create-key').click();
@@ -213,6 +215,7 @@ $.extend(UI, {
                     UI.checkAddTMEnable();
                 }, 500);
             }
+*/
         }).on('click', '.addtm-tr-key .btn-ok', function(e) {
             if(!UI.checkTMgrants($('.addtm-tr-key'))) {
                 return false;
@@ -225,7 +228,7 @@ $.extend(UI, {
         }).on('change', '.addtm-select-file', function(e) {
             console.log($(this).val());
             if($(this).val() != '') {
-                $('#uploadTMX').text($(this).val().split('\\')[$(this).val().split('\\').length - 1]).show();
+                $('#uploadTMX').html($(this).val().split('\\')[$(this).val().split('\\').length - 1] + '<a class="delete"></a>').show();
             } else {
                 $('#uploadTMX').hide();
             }
@@ -233,6 +236,7 @@ $.extend(UI, {
             $('.addtm-tr .warning-message').hide();
         }).on('input', '#addtm-tr-key', function(e) {
             UI.checkAddTMEnable();
+            UI.checkManageTMEnable();
         }).on('change', '#addtm-tr-key, .addtm-select-file, #addtm-tr-read, #addtm-tr-write', function(e) {
             UI.checkAddTMEnable();
 /*
@@ -243,6 +247,10 @@ $.extend(UI, {
         }).on('click', '#addtm-tr-key-read, #addtm-tr-key-write', function(e) {
             UI.checkAddTMEnable($('.addtm-tr-key .btn-ok'));
 */
+        }).on('click', '#uploadTMX .delete', function(e) {
+            e.preventDefault();
+            $('#uploadTMX').html('');
+            $('.addtm-select-file').val('');
         }).on('click', '#addtm-add', function(e) {
             e.preventDefault();
             if(!UI.checkTMgrants($('.addtm-tr'))) {
@@ -551,7 +559,22 @@ $.extend(UI, {
 				UI.writeNewShortcut(c, s, this);
 			}
 			$(s).remove();
-		});
+		} ).on('click', '.authLink', function(e){
+            e.preventDefault();
+
+            $(".login-google").show();
+
+            return false;
+        } ).on('click', '#sign-in', function(e){
+            e.preventDefault();
+
+            var url = $(this).data('oauth');
+
+            var newWindow = window.open(url, 'name', 'height=600,width=900');
+            if (window.focus) {
+                newWindow.focus();
+            }
+        });
 		
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
@@ -1193,7 +1216,8 @@ $.extend(UI, {
 //                console.log($(':focus'));
                 //              return false;
 			}
-            if (((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8) || (e.which == 46))) { // not arrows, backspace, canc or cmd
+
+            if (((e.which == 37) || (e.which == 38) || (e.which == 39) || (e.which == 40) || (e.which == 8))) { // not arrows, backspace, canc
                 UI.saveInUndoStack('arrow');
             }
 

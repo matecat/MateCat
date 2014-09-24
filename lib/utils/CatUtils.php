@@ -107,16 +107,49 @@ class CatUtils {
         $segment = preg_replace('|<(/it)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
         $segment = preg_replace('|<(mrk\s*.*?)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
         $segment = preg_replace('|<(/mrk)>|si', LTPLACEHOLDER . "$1" . GTPLACEHOLDER, $segment);
-        return $segment;
+
+        return self::__encode_tag_attributes( $segment );
+    }
+
+    private static function __encode_tag_attributes( $segment ){
+
+        if( !function_exists( 'callback_encode' ) ){
+            function callback_encode( $matches ) {
+                return LTPLACEHOLDER . base64_encode( $matches[1] ) . GTPLACEHOLDER;
+            }
+        }
+
+        return preg_replace_callback( '/' . LTPLACEHOLDER . '(.*?)' . GTPLACEHOLDER . '/u'
+                , 'callback_encode'
+                , $segment
+        ); //base64 of the tag content to avoid unwanted manipulation
+
+    }
+
+    private static function __decode_tag_attributes( $segment ){
+
+        if( !function_exists( 'callback_decode' ) ){
+            function callback_decode( $matches ) {
+                return LTPLACEHOLDER . base64_decode( $matches[1] ) . GTPLACEHOLDER;
+            }
+        }
+
+        return preg_replace_callback( '/' . LTPLACEHOLDER . '(.*?)' . GTPLACEHOLDER . '/u'
+                , 'callback_decode'
+                , $segment
+        ); //base64 decode of the tag content to avoid unwanted manipulation
+
     }
 
     private static function restore_xliff_tags($segment) {
+        $segment = self::__decode_tag_attributes( $segment );
         $segment = str_replace(LTPLACEHOLDER, "<", $segment);
         $segment = str_replace(GTPLACEHOLDER, ">", $segment);
         return $segment;
     }
 
     private static function restore_xliff_tags_for_wiew($segment) {
+        $segment = self::__decode_tag_attributes( $segment );
         $segment = str_replace(LTPLACEHOLDER, "&lt;", $segment);
         $segment = str_replace(GTPLACEHOLDER, "&gt;", $segment);
         return $segment;
@@ -176,7 +209,6 @@ class CatUtils {
         $segment = str_replace( '##$_0A$##',"\n", $segment );
         $segment = str_replace( '##$_0D$##',"\r", $segment );
         $segment = str_replace( '##$_09$##',"\t", $segment );
-        $segment = str_replace( '##$_A0$##', Utils::unicode2chr(0Xa0) , $segment );
 
         // input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
         // output : <g> bang &amp; olufsen are > 555 </g> <x/>
@@ -186,6 +218,12 @@ class CatUtils {
             html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8'),
             ENT_NOQUOTES, 'UTF-8', false
         );
+
+        //replace all incoming &nbsp; ( \xA0 ) with normal spaces ( \x20 ) as we accept only ##$_A0$##
+        $segment = str_replace( Utils::unicode2chr(0Xa0) , " ", $segment );
+
+        // now convert the real &nbsp;
+        $segment = str_replace( '##$_A0$##', Utils::unicode2chr(0Xa0) , $segment );
 
         //encode all not valid XML entities
         $segment = preg_replace('/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,4};)/', '&amp;' , $segment );
@@ -198,21 +236,23 @@ class CatUtils {
         // input : <g id="43">bang &amp; &lt; 3 olufsen </g>; <x id="33"/>
         //$segment = self::placehold_xml_entities($segment);
         $segment = self::placehold_xliff_tags($segment);
-        
-        
+
+        //replace all outgoing spaces couples to a space and a &nbsp; so they can be displayed to the browser
+        $segment = preg_replace('/\s{2}/', " &nbsp;", $segment);
+
         $segment = html_entity_decode($segment, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8');
         // restore < e >
         $segment = str_replace("<", "&lt;", $segment);
         $segment = str_replace(">", "&gt;", $segment);
-
-
         $segment = preg_replace('|<(.*?)>|si', "&lt;$1&gt;", $segment);
+
         $segment = self::restore_xliff_tags_for_wiew($segment);
+
         $segment = str_replace("\r\n", '##$_0D0A$##', $segment );
         $segment = str_replace("\n", '##$_0A$##', $segment );
         $segment = str_replace("\r", '##$_0D$##', $segment ); //x0D character
         $segment = str_replace("\t", '##$_09$##', $segment ); //x09 character
-        $segment = preg_replace( "/\x{a0}/u", '##$_A0$##', $segment ); //xA0 character ( NBSP )
+        $segment = preg_replace( '/\x{a0}/u', '##$_A0$##', $segment ); //xA0 character ( NBSP )
         return $segment;
     }
 

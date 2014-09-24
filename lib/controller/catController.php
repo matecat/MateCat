@@ -42,7 +42,21 @@ class catController extends viewController {
     private $last_job_segment;
     private $last_opened_segment;
 
+    /**
+     * @var string
+     */
 	private $thisUrl;
+
+    /**
+     * @var Google_Client
+     */
+    private $client;
+
+    /**
+     * @var string
+     */
+    private $authURL;
+
 
 	public function __construct() {
 		$this->start_time = microtime(1) * 1000;
@@ -84,7 +98,9 @@ class catController extends viewController {
         
 		$this->downloadFileName = "";
 
-		$this->thisUrl=$_SERVER['REQUEST_URI'];
+		$this->doAuth();
+
+        $this->generateAuthURL();
 
 	}
 
@@ -107,6 +123,24 @@ class catController extends viewController {
 
 		return array($hours, $minutes, $seconds, $usec);
 	}
+
+    private function doAuth() {
+
+        //if no login set and login is required
+        if ( !$this->isLoggedIn() ) {
+            //take note of url we wanted to go after
+            $this->thisUrl = $_SESSION[ 'incomingUrl' ] = $_SERVER[ 'REQUEST_URI' ];
+        }
+
+    }
+
+    private function generateAuthURL() {
+
+        $this->client = OauthClient::getInstance()->getClient();
+
+        $this->authURL = $this->client->createAuthUrl();
+
+    }
 
 	public function doAction() {
 		$files_found = array();
@@ -144,11 +178,11 @@ class catController extends viewController {
          * the check on the last translation only if the job is older than 30 days
          *
          */
-        $createDate = new DateTime( $data[0]['create_date'] );
+        $lastUpdate = new DateTime( $data[0]['last_update'] );
         $oneMonthAgo = new DateTime();
         $oneMonthAgo->modify( '-' . INIT::JOB_ARCHIVABILITY_THRESHOLD . ' days' );
 
-        if( $createDate < $oneMonthAgo  && !$this->job_cancelled ) {
+        if( $lastUpdate < $oneMonthAgo  && !$this->job_cancelled ) {
 
             $lastTranslationInJob = new Datetime( getLastTranslationDate( $this->jid ) );
 
@@ -321,6 +355,8 @@ class catController extends viewController {
         $this->template->source      = $this->source;
         $this->template->source_rtl  = $this->source_rtl;
         $this->template->target_rtl  = $this->target_rtl;
+
+        $this->template->authURL = $this->authURL;
 
         $this->template->first_job_segment   = $this->first_job_segment;
         $this->template->last_job_segment    = $this->last_job_segment;

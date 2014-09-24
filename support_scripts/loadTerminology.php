@@ -1,5 +1,5 @@
 <?php
-$test = true;
+$test = false;
 $skip = true;
 
 include '/var/www/cattool/inc/config.inc.php';
@@ -18,7 +18,7 @@ $db->connect ();
 
 $glossaries = array(
 
-        array( 'file' => 'new_GlossaryNL2FR.csv', 'source' => "nl-NL", 'target' => "fr-FR" ),
+        array( 'file' => '140905_Copy of 140825_Glossary_Anti-trust-law Chinese Rev1_V01JH_English-Chinese_Trad.csv', 'source' => "en-US", 'target' => "zh-CN" ),
 //        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "da-DK" ),
 //        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "nl-NL" ),
 //        array( 'file' => 'Nuov_Worksheet.csv', 'source' => 'en-US', 'target' => "fr-FR" ),
@@ -41,14 +41,14 @@ foreach ( $glossaries as $gloss ) {
     $config[ 'target_lang' ] = $gloss['target'];
     $config[ 'email' ]       = "demo@matecat.com";
     $config[ 'get_mt' ]      = false;
-    $config[ 'id_user' ]     = "06d8b80bb2fc5136e8a3";
+    $config[ 'id_user' ]     = "32466c3a2be6159e6ae6";
     $config[ 'num_result' ]  = null;
     $config[ 'isGlossary' ]  = true;
 
 
     $fObject = new SplFileObject( $gloss['file'] );
     $fObject->setFlags( SplFileObject::READ_CSV | SplFileObject::SKIP_EMPTY | SplFileObject::DROP_NEW_LINE );
-    $fObject->setCsvControl( "\t", '"' );
+    $fObject->setCsvControl( ",", '"' );
 
 
     $tms = new TMS( 1 );

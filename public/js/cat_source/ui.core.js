@@ -60,8 +60,8 @@ UI = {
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
 		segment_id = $(segment).attr('id').split('-')[1];
 		$('.percentuage', segment).removeClass('visible');
-		if (!segment.hasClass('saved'))
-			this.setTranslation($(segment).attr('id').split('-')[1], status, false, byStatus);
+//		if (!segment.hasClass('saved'))
+		this.setTranslation($(segment).attr('id').split('-')[1], status, false, byStatus);
 		segment.removeClass('saved');
 		this.setContribution(segment_id, status, byStatus);
 		this.setContributionMT(segment_id, status, byStatus);
@@ -1604,7 +1604,11 @@ UI = {
         insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
 		aa = prova.match(/\W$/gi);
         newStr = '';
-        $.each($.parseHTML(str), function(index) {
+        var aa = $("<div/>").html(str);
+        aa.find('.undoCursorPlaceholder').remove();
+        var rightString = aa.html();
+
+        $.each($.parseHTML(rightString), function(index) {
 			if(this.nodeName == '#text') {
 				d = this.data;
 //				console.log(index + ' - ' + d);
@@ -1641,11 +1645,13 @@ UI = {
 //				newStr += this.innerText;					
 			}
 		});
+        console.log('x');
 //        console.log('newStr: ', newStr);
 //		replaceSelectedText(newStr);
 		replaceSelectedHtml(newStr);
-
+        console.log('a: ', UI.editarea.html());
 		UI.lockTags();
+        console.log('b: ', UI.editarea.html());
 		this.saveInUndoStack('formatSelection');
 		saveSelection();
 		$('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
@@ -1837,14 +1843,15 @@ UI = {
 		ts = dd.getTime();
 		var seg = (typeof this.currentSegmentId == 'undefined') ? this.startSegmentId : this.currentSegmentId;
 		var token = seg + '-' + ts.toString();
-
+        dataMix = {
+            action: 'getWarning',
+            id_job: config.job_id,
+            password: config.password,
+            token: token
+        };
+        if(UI.logEnabled) dataMix.logs = this.extractLogs();
 		APP.doRequest({
-			data: {
-				action: 'getWarning',
-				id_job: config.job_id,
-				password: config.password,
-				token: token
-			},
+			data: dataMix,
 			error: function() {
 				UI.warningStopped = true;
 				UI.failedConnection(0, 'getWarning');
@@ -1980,6 +1987,8 @@ UI = {
 	},
 
     setTranslation: function(id_segment, status, caller, byStatus) {
+        console.log('id_segment: ', id_segment);
+        console.log('status: ', status);
         console.log('setTranslation sul segmento ', UI.currentSegmentId);
 		reqArguments = arguments;
 		segment = $('#segment-' + id_segment); 
@@ -2031,6 +2040,7 @@ UI = {
         };
         reqData = this.tempReqArguments;
         reqData.action = 'setTranslation';
+        this.log('setTranslation', reqData);
 
 		APP.doRequest({
             data: reqData,
@@ -2249,7 +2259,7 @@ UI = {
     checkAddTMEnable: function() {
         console.log('checkAddTMEnable');
         if(
-            ($('#addtm-tr-key').val() != '')&&
+            ($('#addtm-tr-key').val().length > 19)&&
                 UI.checkTMgrants($('.addtm-tr'))
             ) {
             $('#addtm-add').removeAttr('disabled').removeClass('disabled');
@@ -2282,6 +2292,17 @@ UI = {
         }
 */
     },
+    checkManageTMEnable: function() {
+        console.log($('#addtm-tr-key').val().length);
+        if($('#addtm-tr-key').val().length > 19) {
+            $('.manageTM').removeClass('disabled');
+            $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').removeAttr('disabled');
+        } else {
+            $('.manageTM').addClass('disabled');
+            $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');
+        }
+    },
+
     execAddTM: function() {
         fileUpload($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
     },
@@ -2345,7 +2366,8 @@ UI = {
         $('#addtm-tr-read, #addtm-tr-write').prop( "checked", true );
         $('#uploadTMX').text('').hide();
         $('.addtm-tr .error-message, .addtm-tr .warning-message').hide();
-    },
+        $('.manageTM').addClass('disabled');
+        $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');    },
 
     /**
      * This function is used when a string has to be sent to the server
@@ -2384,6 +2406,48 @@ UI = {
 //		return txt.replace(/<br>/g, '').replace(/<div>/g, '<br class="' + config.crPlaceholderClass + '">').replace(/<\/div>/g, '').replace(re, '');
 	},
 */
+
+    log: function(operation, d) {
+        if(!UI.logEnabled) return false;
+        data = d;
+        var dd = new Date();
+//        console.log('stored log-' + operation + '-' + dd.getTime());
+//        console.log('data: ', JSON.stringify(d));
+//        console.log(stackTrace());
+        logValue = {
+            "data": data,
+            "stack": stackTrace()
+        }
+//        console.log('prova: ', prova);
+        console.log('logValue: ', JSON.stringify(logValue));
+        localStorage.setItem('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue));
+
+/*
+        console.log('dopo errore');
+        coso = '{"data":' + JSON.stringify(data) + ', "stack":"' + stackTrace() + '"}';
+        console.log(coso);
+        console.log($.parseJSON(JSON.stringify(data)));
+*/
+//        localStorage.setItem('log-' + operation + '-' + dd, JSON.stringify(d));
+
+    },
+    extractLogs: function() {
+        var pendingLogs = [];
+        inp = 'log';
+        $.each(localStorage, function(k,v) {
+            if(k.substring(0, inp.length) === inp) {
+                console.log('v: ', v);
+//                console.log('$.parseJSON(v): ', $.parseJSON(v));
+                pendingLogs.push('{"operation": "' + k.split('-')[1] + '", "time": "' + k.split('-')[2] + '", "log":' + v + '}');
+            }
+        });
+        logs = JSON.stringify(pendingLogs);
+        this.clearStorage('log');
+
+        console.log('pendingLogs: ', pendingLogs);
+//        console.log('pendingLogs Ob: ', JSON.stringify(pendingLogs));
+        return logs;
+    },
 
     postProcessEditarea: function(context, selector){//console.log('postprocesseditarea');
         selector = (typeof selector === "undefined") ? '.editarea' : selector;
@@ -2605,7 +2669,7 @@ UI = {
 	},
 	reloadPage: function() {
 		console.log('reloadPage');
-		location.reload();
+		if(UI.body.hasClass('cattool')) location.reload();
 	},
 
 	someSegmentToSave: function() {
@@ -2631,14 +2695,34 @@ UI = {
                 this.beforePropagateTranslation(segment, status);
             }
         }
-    /*
-        console.log('setTranslation_success');
+        this.resetRecoverUnsavedSegmentsTimer();
+    },
+    recoverUnsavedSetTranslations: function() {
+//        console.log('AAA recoverUnsavedSetTranslations');
+//        console.log('segments to recover: ', UI.unsavedSegmentsToRecover);
+        $.each(UI.unsavedSegmentsToRecover, function (index) {
+            if($('#segment-' + this + ' .editarea').text() === '') {
+//                console.log(this + ' è ancora vuoto');
+                UI.resetRecoverUnsavedSegmentsTimer();
+            } else {
+//                console.log(this + ' non è più vuoto, si può mandare');
+                UI.setTranslation(this.toString(), 'translated');
+                // elimina l'item dall'array
+                UI.unsavedSegmentsToRecover.splice(index, 1);
+//                console.log('eliminato ' + this.toString());
+            }
+            // se non è vuoto rifai il timeout, clearing l'altro
+        });
+    },
+    resetRecoverUnsavedSegmentsTimer: function () {
+//        console.log('setTranslation_success');
         clearTimeout(this.recoverUnsavedSegmentsTimer);
         this.recoverUnsavedSegmentsTimer = setTimeout(function() {
-            console.log('segments to recover: ', UI.unsavedSegmentsToRecover);
+            UI.recoverUnsavedSetTranslations();
         }, 1000);
-     */
     },
+
+
     beforePropagateTranslation: function(segment, status) {
 //        console.log('before propagate');
 

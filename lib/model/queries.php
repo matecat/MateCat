@@ -56,6 +56,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
 		AND s.segment LIKE '" . $LIKE . $_regexpEscapedSrc . $LIKE . "'
 			$where_status
 			GROUP BY s.id WITH ROLLUP";
+
     } elseif ( $key == "target" ) {
 
         $query = "SELECT  st.id_segment as id, sum(
@@ -71,6 +72,7 @@ function doSearchQuery( ArrayObject $queryParams ) {
 					( LENGTH( st.translation ) - LENGTH( REPLACE ( $SQL_CASE ( st.translation ), $SQL_CASE ( '$trg' ), '') ) ) / LENGTH('$trg') )
 			> 0
 			GROUP BY st.id_segment WITH ROLLUP";
+
     } elseif ( $key == 'coupled' ) {
 
         $query = "SELECT st.id_segment as id
@@ -83,12 +85,14 @@ function doSearchQuery( ArrayObject $queryParams ) {
 			AND LENGTH( REPLACE ( $SQL_CASE( st.translation ), $SQL_CASE( '$trg' ), '') ) != LENGTH( st.translation )
 			AND st.status != 'NEW'
 			$where_status ";
+
     } elseif ( $key = 'status_only' ) {
 
         $query = "SELECT st.id_segment as id
 			FROM segment_translations as st
 			WHERE st.id_job = {$queryParams['job']}
 		$where_status ";
+
     }
 
 //	Log::doLog($query);
@@ -102,7 +106,6 @@ function doSearchQuery( ArrayObject $queryParams ) {
 
     if ( $errno != 0 ) {
         log::doLog( $err );
-
         return $errno * -1;
     }
 
@@ -1471,12 +1474,25 @@ function getEQWLastHour( $id_job, $estimation_seg_ids ) {
        count(*) from segment_translations
        INNER JOIN segments on id=segment_translations.id_segment WHERE status in ('TRANSLATED','APPROVED') and id_job=$id_job and id_segment in ($estimation_seg_ids)";
      */
+    $query = "
+            SELECT SUM(IF(Ifnull(st.eq_word_count, 0) = 0, raw_word_count,
+                   st.eq_word_count)),
+                   Min(translation_date),
+                   Max(translation_date),
+                   IF(Unix_timestamp(Max(translation_date)) - Unix_timestamp(Min(translation_date)) > 3600
+                      OR Count(*) < 10, 0, 1) AS data_validity,
 
-    $query = "SELECT SUM(IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count)), MIN(translation_date), MAX(translation_date),
-		IF(UNIX_TIMESTAMP(MAX(translation_date))-UNIX_TIMESTAMP(MIN(translation_date))>3600 OR count(*)<10,0,1) as data_validity,
-		ROUND(SUM(IF( IFNULL( st.eq_word_count, 0 ) = 0, raw_word_count, st.eq_word_count))/(UNIX_TIMESTAMP(MAX(translation_date))-UNIX_TIMESTAMP(MIN(translation_date)))*3600) as words_per_hour,
-		count(*) from segment_translations st
-			INNER JOIN segments on id=st.id_segment WHERE status in ('TRANSLATED','APPROVED') and id_job=$id_job and id_segment in ($estimation_seg_ids)";
+                   Round(SUM(IF(Ifnull(st.eq_word_count, 0) = 0, raw_word_count,
+                         st.eq_word_count)) /
+                               ( Unix_timestamp(Max(translation_date)) -
+                                 Unix_timestamp(Min(translation_date)) ) * 3600) AS words_per_hour,
+                   Count(*)
+            FROM   segment_translations st
+                   inner join segments ON id = st.id_segment
+            WHERE  status IN ( 'TRANSLATED', 'APPROVED' )
+                   AND id_job = $id_job
+                   AND id_segment IN ( $estimation_seg_ids )
+    ";
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );
@@ -1939,8 +1955,13 @@ function getProjects( $start, $step, $search_in_pname, $search_source, $search_t
     $filter_query = ( $query_tail == '' ) ? '' : 'where ' . $query_tail;
     $filter_query = preg_replace( '/( and)$/i', '', $filter_query );
 
+    /**
+     * the field tm_keys is being converted in HEX
+     * because there were problems while exploding for "," in manageController
+     */
+
     $query = "select p.id as pid, p.name, p.password, j.id_mt_engine, j.id_tms, p.tm_analysis_wc,
-		group_concat(j.id,'##', j.source,'##',j.target,'##',j.create_date,'##',j.password,'##',e.name,'##',if (t.mymemory_api_key is NUll,'',t.mymemory_api_key),'##',j.status_owner,'##',j.job_first_segment,'##',j.job_last_segment) as job
+		group_concat(j.id,'##', j.source,'##',j.target,'##',j.create_date,'##',j.password,'##',e.name,'##',HEX(tm_keys),'##',j.status_owner,'##',j.job_first_segment,'##',j.job_last_segment) as job
 
 			, e.name as mt_engine_name
 
@@ -2550,26 +2571,6 @@ function cancelJob( $res, $id ) {
     $db->query( $query );
 }
 
-function archiveJob( $res, $id ) {
-
-    if ( $res == "prj" ) {
-        $query = "update jobs set status='" . Constants_JobStatus::STATUS_ARCHIVED . "' where id_project=" . (int) $id;
-    } else {
-        $query = "update jobs set status='" . Constants_JobStatus::STATUS_ARCHIVED . "' where id=" . (int) $id;
-    }
-    /*
-       if ($res == "prj") {
-       $query = "update jobs set disabled=1 where id_project=$id";
-       } else {
-       $query = "update jobs set disabled=1 where id=$id";
-       }
-     */
-    //    $query = "update jobs set disabled=1 where id=$id";
-
-    $db = Database::obtain();
-    $db->query( $query );
-}
-
 function updateProjectOwner( $ownerEmail, $project_id ) {
     $db              = Database::obtain();
     $data            = array();
@@ -3127,7 +3128,7 @@ function batchArchiveJobs( $jobs = array(), $days = INIT::JOB_ARCHIVABILITY_THRE
         UPDATE jobs
             SET status_owner = '" . Constants_JobStatus::STATUS_ARCHIVED . "'
             WHERE %s
-            AND create_date < ( curdate() - INTERVAL %u DAY )";
+            AND last_update < ( curdate() - INTERVAL %u DAY )";
 
     $tuple_of_double_indexes = array();
     foreach ( $jobs as $job ) {
@@ -3142,8 +3143,6 @@ function batchArchiveJobs( $jobs = array(), $days = INIT::JOB_ARCHIVABILITY_THRE
 
     $db = Database::obtain();
     $db->query( $q_archive );
-
-//    Log::doLog( $q_archive );
 
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];

@@ -123,13 +123,13 @@ class MyMemoryAnalyzer {
 		);
 
 		$mh = new MultiCurlHandler();
-		$tokenHash = $mh->createResource( "http://api-test.mymemory.translated.net/langdetect.php", $options );
-                log::dolog("DETECT LANG TOKENHASH: $tokenHash");
+		$tokenHash = $mh->createResource( "http://api.mymemory.translated.net/langdetect.php", $options );
+        Log::dolog("DETECT LANG TOKENHASH: $tokenHash");
 
 		$mh->multiExec();
 
 		$res = $mh->getAllContents();
-                log::dolog("DETECT LANG RES:", $res);
+        Log::dolog("DETECT LANG RES:", $res);
 
 		return json_decode( $res[ $tokenHash ], true );
 	}
