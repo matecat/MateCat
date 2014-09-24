@@ -126,6 +126,9 @@ class glossaryController extends ajaxController {
             }
         }
 
+        //remove tags from requests sent to MyMemory
+        $config[ 'segment' ] = CatUtils::view2rawxliff( preg_replace( '#<(?:/?[^>]+/?)>#', "", $config[ 'segment' ] ) );
+
         $TMS_RESULT = $this->_TMS->get( $config )->get_glossary_matches_as_array();
 
         /**
@@ -191,6 +194,9 @@ class glossaryController extends ajaxController {
 
         }
 
+        $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
+        $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
+
         //prepare the error report
         $set_code = array();
         //set the glossary entry for each key with write grants
@@ -210,7 +216,7 @@ class glossaryController extends ajaxController {
         $set_successful = true;
         if( array_search( false, $set_code, true ) ){
             //There's an error, for now skip, let's assume that are not errors
-//          $set_successful = false;
+          $set_successful = false;
         }
 
         if ( $set_successful ) {
@@ -230,6 +236,12 @@ class glossaryController extends ajaxController {
                     )
             );
 
+            if( isset($new_key) ){
+                $this->result[ 'data' ][ 'created_tm_key' ] = true;
+            }
+
+        } else {
+            $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "We got an error, please try again." );
         }
 
     }
@@ -238,6 +250,9 @@ class glossaryController extends ajaxController {
 
         //get tm keys with write grants
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $this->job_info[ 'tm_keys' ], 'w', 'glossary' );
+
+        $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
+        $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
 
         //prepare the error report
         $set_code = array();
@@ -277,6 +292,9 @@ class glossaryController extends ajaxController {
 
         //get tm keys with write grants
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $this->job_info[ 'tm_keys' ], 'w', 'glossary' );
+
+        $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
+        $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
 
         //prepare the error report
         $set_code = array();

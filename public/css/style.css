@@ -3007,3 +3007,19 @@ box-shadow: inset 0 0 1px 1px #888;
  .undoCursorPlaceholder {
      display: none;
  }
+
+ #uploadTMX .delete {
+     background: url(../img/sprite.png) 10px -303px no-repeat;
+     display: block;
+     height: 40px;
+     width: 40px;
+     float: right;
+     margin: -5px 0px 0 0;
+     background-size: 22px;
+     cursor: pointer;
+ }
+
+#uploadTMX .delete:hover {
+    background: url(../img/sprite.png) 10px -334px no-repeat;
+    background-size: 22px;
+}
