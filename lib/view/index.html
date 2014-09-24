@@ -5,6 +5,7 @@
         <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
         <title>Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
+        <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
 <!--
         <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
@@ -380,14 +381,21 @@
 
                 <nav>
                     <ul>
-                        <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
+                        <tal:block tal:condition="php: !empty(logged_user)">
+                            <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
+                        </tal:block>
+
+                        <tal:block tal:condition="php: empty(logged_user)">
+                            <li><a href="${authURL}" class="authLink">Manage</a></li>
+                        </tal:block>
+
                         <li><a tal:attributes="href string:${basepath}editlog/${jid}-${password}">Editing Log</a></li>
                         <li><a href="http://docs.matecat.com" target="_blank">Docs</a></li>
                     </ul>
 
                     <tal:block tal:condition="php: empty(logged_user)">
                         <div id='welcomebox'>
-                            <span>Anonymous</span> (<a id='loginlink' tal:attributes="href incomingUrl">login</a>)
+                            <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">login</a>)
                         </div>
                     </tal:block>
 
@@ -609,5 +617,8 @@
   $( this ).hide();
 });
 		</script>
+
+    <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
+
     </body>
 </html>
