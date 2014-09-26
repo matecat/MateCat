@@ -9,7 +9,7 @@ UI = {
         this.isSafari = $.browser.webkit && !window.chrome;
         this.body = $('body');
         this.firstLoad = firstLoad;
-        this.pageStep = 100;
+        this.pageStep = 25;
         this.isMac = (navigator.platform == 'MacIntel')? true : false;
         
         var page = location.pathname.split('/')[2];
@@ -229,7 +229,7 @@ UI = {
 						new_status: new_status,
 						res: 		res,
 						id:			id,
-						jpassword: password,
+						jpassword:  password,
 		                page:		UI.page,
 		                step:		UI.pageStep,
 		                undo:		1
@@ -526,6 +526,8 @@ UI = {
 			success: function(d){
 				UI.body.removeClass('loading');
 				data = $.parseJSON(d.data);
+                UI.pageStep = d.pageStep;
+
 				UI.setPagination(d);
 				UI.renderProjects(data,'all');
 				if((d.pnumber - UI.pageStep) > 0) UI.renderPagination(d.page,0,d.pnumber);
@@ -634,7 +636,7 @@ UI = {
                 var private_tm_keys = '';
                 this.private_tm_key = $.parseJSON(this.private_tm_key);
                 $.each(this.private_tm_key, function(i, tm_key){
-                    console.log(tm_key);
+
                     private_tm_keys +=  "<span class='key'>"    + tm_key.key  + "</span>"+
                                         "<span class='rgrant'>" + tm_key.r    + "</span>"+
                                         "<span class='wgrant'>" + tm_key.w    + "</span><br class='clear'/>";
@@ -695,7 +697,7 @@ UI = {
     }, // renderProjects
 
     setPagination: function(d) {
-		if((d.pnumber - UI.pageStep) > 0) {
+		if((d.pnumber - d.pageStep) > 0) {
 			this.renderPagination(d.page,1,d.pnumber);
 		} else {
 			$('.pagination').empty();
