@@ -430,6 +430,9 @@ class FileFormatConverter {
 
         log::doLog( $this->ip . " start conversion back to original" );
         $start_time  = time();
+
+        //TODO: this helper doesn't help!
+        //How TODO: create a resource handler e return it, so it can be added to a MultiCurl Handler instance
         $curl_result = $this->curl_post( $url, $data, $this->opt );
         $end_time    = time();
         $time_diff   = $end_time - $start_time;
@@ -489,7 +492,6 @@ class FileFormatConverter {
             $this->conversionObject->direction  = 'bw';
             $this->conversionObject->src_lang   = $this->lang_handler->getLangRegionCode( $xliffVector[ 'source' ] );
             $this->conversionObject->trg_lang   = $this->lang_handler->getLangRegionCode( $xliffVector[ 'target' ] );
-
 
             $options = array(
                     CURLOPT_URL            => $url,
