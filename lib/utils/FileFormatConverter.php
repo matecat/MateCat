@@ -28,6 +28,9 @@ class FileFormatConverter {
     public static $Storage_Lookup_IP_Map = array();
     public static $converters = array();
 
+    //http://stackoverflow.com/questions/2222643/php-preg-replace
+    private static $Converter_Regexp = '/=\"\\\\\\\\10\.11\.0\.[1-9][13579]{1,2}\\\\tr/';
+
     /**
      * Set more curl option for conversion call ( fw/bw )
      *
@@ -244,6 +247,7 @@ class FileFormatConverter {
     }
 
     private function curl_post( $url, $data, $opt = array() ) {
+
         if ( !$this->is_assoc( $data ) ) {
             throw new Exception( "The input data to " . __FUNCTION__ . "must be an associative array", -1 );
         }
@@ -440,9 +444,82 @@ class FileFormatConverter {
         return $res;
     }
 
+    public function multiConvertToOriginal( $xliffVector_array, $chosen_by_user_machine = false ) {
 
-    //http://stackoverflow.com/questions/2222643/php-preg-replace
-    private static $Converter_Regexp = '/=\"\\\\\\\\10\.11\.0\.[1-9][13579]{1,2}\\\\tr/';
+        $multiCurlObj = new MultiCurlHandler();
+
+        //iterate files.
+        //For each file prepare a curl resource
+        foreach ( $xliffVector_array as $id_file => $xliffVector ) {
+
+            $xliffContent = $xliffVector[ 'content' ];
+
+            //assign converter
+            if ( !$chosen_by_user_machine ) {
+                $this->ip = $this->pickRandConverter();
+                $storage  = $this->getValidStorage();
+
+                //add replace/regexp pattern because we have more than 1 replacement
+                //http://stackoverflow.com/questions/2222643/php-preg-replace
+                $xliffContent = self::replacedAddress( $storage, $xliffContent );
+            }
+            else {
+                $this->ip = $chosen_by_user_machine;
+            }
+
+            $url = "$this->ip:$this->port/$this->fromXliffFunction";
+
+            $uid_ext       = $this->extractUidandExt( $xliffContent );
+            $data[ 'uid' ] = $uid_ext[ 0 ];
+
+            //get random name for temporary location
+            $tmp_name = tempnam( "/tmp", "MAT_BW" );
+
+            //write encoded file to temporary location
+            file_put_contents( $tmp_name, ( $xliffContent ) );
+
+            $data[ 'xliffContent' ] = "@$tmp_name";
+            $xliffName              = $xliffVector[ 'out_xliff_name' ];
+
+            //prepare conversion object
+            $this->conversionObject->ip_machine = $this->ip;
+            $this->conversionObject->ip_client  = Utils::getRealIpAddr();
+            $this->conversionObject->path_name  = $xliffVector[ 'out_xliff_name' ];
+            $this->conversionObject->file_name  = pathinfo( $xliffName, PATHINFO_BASENAME );
+            $this->conversionObject->direction  = 'bw';
+            $this->conversionObject->src_lang   = $this->lang_handler->getLangRegionCode( $xliffVector[ 'source' ] );
+            $this->conversionObject->trg_lang   = $this->lang_handler->getLangRegionCode( $xliffVector[ 'target' ] );
+
+
+            $options = array(
+                    CURLOPT_URL            => $url,
+                    CURLOPT_HEADER         => 0,
+                    CURLOPT_USERAGENT      => "Matecat-Cattool/v" . INIT::$BUILD_NUMBER,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_POST           => true,
+                    CURLOPT_POSTFIELDS     => $data,
+                    CURLOPT_HTTPHEADER     => $this->opt[ 'httpheader' ]
+            );
+
+            $multiCurlObj->createResource( $url, $options, $id_file );
+        }
+
+        //Perform curl
+        Log::doLog("multicurl_start");
+        $multiCurlObj->multiExec();
+        Log::doLog("multicurl_end");
+
+        $multiResponses = $multiCurlObj->getAllContents();
+
+        //decode response and return the result
+        foreach ( $multiResponses as $hash => $json ) {
+            $multiResponses[ $hash ] = json_decode( $json, true );
+            $multiResponses[ $hash ] = $this->__parseOutput( $multiResponses[ $hash ] );
+        }
+
+        return $multiResponses;
+    }
+
 
     /**
      * Replace the storage address in xliff content with the right associated storage ip
