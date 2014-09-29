@@ -2344,6 +2344,7 @@ UI = {
             msg = $.parseJSON($('#uploadCallback pre').text());
             console.log('msg: ', msg);
             if(msg.success == true) {
+                $('#messageBar .progress').remove();
                 UI.showMessage({
                     msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
                 });
@@ -2360,6 +2361,58 @@ UI = {
         }
 
     },
+    pollForUploadProgress: function(TMKey, TMName, prev) {
+        console.log('pollForUploadProgress: ', pollForUploadProgress);
+        console.log('TMName: ', TMName);
+        // temp
+        prev = prev || 0;
+        // end temp
+        APP.doRequest({
+            data: {
+                action: 'ajaxUtils',
+                exec: 'tmxUploadStatus',
+                tm_key: TMKey,
+                tmx_name: TMName
+            },
+            context: [TMKey, TMName],
+            error: function() {
+            },
+            success: function(d) {
+                d = {
+                    "error":[],
+                    "data":[
+                        {
+                            "done":"10",
+                            "total":"450"
+                        }
+                    ],
+                    "errors":[
+ //                       {
+ //                           "code":-20,
+ //                           "message":"We got an error, please try again."
+ //                       }
+                    ]
+                }
+                if(d.errors.length) {
+                    console.log('errore');
+                } else {
+                    progress = (parseInt(prev)/parseInt(d.data[0].total))*100;
+//                    progress = (parseInt(d.data[0].done)/parseInt(d.data[0].total))*100;
+                    $('#messageBar .progress').css('width', progress + '%');
+                    if(progress == 100) {
+                        console.log('finito');
+                        return false;
+                    } else {
+                        console.log('progress: ', progress);
+                        setTimeout(function() {
+                            UI.pollForUploadProgress(this[0], this[1], prev + 20);
+                        }, 500);
+                    }
+                }
+            }
+        });
+    },
+
     clearAddTMpopup: function() {
         $('#addtm-tr-key').val('');
         $('.addtm-select-file').val('');
@@ -3385,7 +3438,7 @@ $.extend(UI, {
             if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
 		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.mac, function(e) {
             if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
-		});		
+		});
 	},
 	unbindShortcuts: function() {
 		$("body").off(".shortcuts").addClass('shortcutsDisabled');
@@ -4924,6 +4977,27 @@ $.extend(UI, {
 		}).on('click', '.sub-editor .gl-search .comment a', function(e) {
 			e.preventDefault();
 			$(this).parents('.comment').find('.gl-comment').toggle();
+ /*
+        }).on('mousedown', function(e) {
+
+            console.log('mousedown');
+            console.log('prima: ', UI.editarea.is(":focus"));
+            saveSelection();
+            $('.editor .rangySelectionBoundary').addClass('focusOut');
+            hasFocusBefore = UI.editarea.is(":focus");
+            setTimeout(function() {
+                hasFocusAfter = UI.editarea.is(":focus");
+                if(hasFocusBefore && !hasFocusAfter) {
+                    console.log('blurred from editarea');
+                } else if(!hasFocusBefore && hasFocusAfter) {
+                    console.log('focused in editarea');
+                    restoreSelection();
+                } else {
+                    $('.editor .rangySelectionBoundary.focusOut').remove();
+
+                }
+            }, 50);
+            */
 		}).on('paste', '.editarea', function(e) {
 			console.log('paste in editarea');
 
@@ -7377,8 +7451,6 @@ function fileUpload(form, action_url, div_id) {
         .append('<input type="hidden" name="name" value="' + $('#addtm-tr-name').val() + '" />')
         .append('<input type="hidden" name="r" value="1" />')
         .append('<input type="hidden" name="w" value="1" />');
-    console.log('form: ', form);
-    console.log('iframe: ', iframe);
 
     // Submit the form...
     form.submit();
@@ -7388,7 +7460,13 @@ function fileUpload(form, action_url, div_id) {
     UI.showMessage({
         msg: 'Uploading your TM...'
     });
-    UI.pollForUploadCallback($('#addtm-tr-key').val());
+    $('#messageBar .msg').after('<span class="progress"></span>');
+    TMKey = $('#addtm-tr-key').val();
+    TMName = $('#addtm-tr-name').val();
+console.log('TMKey 1: ', TMKey);
+    console.log('TMName 1: ', TMName);
+    UI.pollForUploadProgress(TMKey, TMName);
+    UI.pollForUploadCallback(TMKey);
 }
 
 function stripHTML(dirtyString) {

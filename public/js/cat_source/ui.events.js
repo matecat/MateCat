@@ -63,7 +63,7 @@ $.extend(UI, {
             if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
 		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.mac, function(e) {
             if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
-		});		
+		});
 	},
 	unbindShortcuts: function() {
 		$("body").off(".shortcuts").addClass('shortcutsDisabled');
@@ -1617,6 +1617,27 @@ $.extend(UI, {
 		}).on('click', '.sub-editor .gl-search .comment a', function(e) {
 			e.preventDefault();
 			$(this).parents('.comment').find('.gl-comment').toggle();
+ /*
+        }).on('mousedown', function(e) {
+
+            console.log('mousedown');
+            console.log('prima: ', UI.editarea.is(":focus"));
+            saveSelection();
+            $('.editor .rangySelectionBoundary').addClass('focusOut');
+            hasFocusBefore = UI.editarea.is(":focus");
+            setTimeout(function() {
+                hasFocusAfter = UI.editarea.is(":focus");
+                if(hasFocusBefore && !hasFocusAfter) {
+                    console.log('blurred from editarea');
+                } else if(!hasFocusBefore && hasFocusAfter) {
+                    console.log('focused in editarea');
+                    restoreSelection();
+                } else {
+                    $('.editor .rangySelectionBoundary.focusOut').remove();
+
+                }
+            }, 50);
+            */
 		}).on('paste', '.editarea', function(e) {
 			console.log('paste in editarea');
 

@@ -275,8 +275,6 @@ function fileUpload(form, action_url, div_id) {
         .append('<input type="hidden" name="name" value="' + $('#addtm-tr-name').val() + '" />')
         .append('<input type="hidden" name="r" value="1" />')
         .append('<input type="hidden" name="w" value="1" />');
-    console.log('form: ', form);
-    console.log('iframe: ', iframe);
 
     // Submit the form...
     form.submit();
@@ -286,7 +284,13 @@ function fileUpload(form, action_url, div_id) {
     UI.showMessage({
         msg: 'Uploading your TM...'
     });
-    UI.pollForUploadCallback($('#addtm-tr-key').val());
+    $('#messageBar .msg').after('<span class="progress"></span>');
+    TMKey = $('#addtm-tr-key').val();
+    TMName = $('#addtm-tr-name').val();
+console.log('TMKey 1: ', TMKey);
+    console.log('TMName 1: ', TMName);
+    UI.pollForUploadProgress(TMKey, TMName);
+    UI.pollForUploadCallback(TMKey);
 }
 
 function stripHTML(dirtyString) {

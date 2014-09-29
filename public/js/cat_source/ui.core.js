@@ -2344,6 +2344,7 @@ UI = {
             msg = $.parseJSON($('#uploadCallback pre').text());
             console.log('msg: ', msg);
             if(msg.success == true) {
+                $('#messageBar .progress').remove();
                 UI.showMessage({
                     msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
                 });
@@ -2360,6 +2361,58 @@ UI = {
         }
 
     },
+    pollForUploadProgress: function(TMKey, TMName, prev) {
+        console.log('pollForUploadProgress: ', pollForUploadProgress);
+        console.log('TMName: ', TMName);
+        // temp
+        prev = prev || 0;
+        // end temp
+        APP.doRequest({
+            data: {
+                action: 'ajaxUtils',
+                exec: 'tmxUploadStatus',
+                tm_key: TMKey,
+                tmx_name: TMName
+            },
+            context: [TMKey, TMName],
+            error: function() {
+            },
+            success: function(d) {
+                d = {
+                    "error":[],
+                    "data":[
+                        {
+                            "done":"10",
+                            "total":"450"
+                        }
+                    ],
+                    "errors":[
+ //                       {
+ //                           "code":-20,
+ //                           "message":"We got an error, please try again."
+ //                       }
+                    ]
+                }
+                if(d.errors.length) {
+                    console.log('errore');
+                } else {
+                    progress = (parseInt(prev)/parseInt(d.data[0].total))*100;
+//                    progress = (parseInt(d.data[0].done)/parseInt(d.data[0].total))*100;
+                    $('#messageBar .progress').css('width', progress + '%');
+                    if(progress == 100) {
+                        console.log('finito');
+                        return false;
+                    } else {
+                        console.log('progress: ', progress);
+                        setTimeout(function() {
+                            UI.pollForUploadProgress(this[0], this[1], prev + 20);
+                        }, 500);
+                    }
+                }
+            }
+        });
+    },
+
     clearAddTMpopup: function() {
         $('#addtm-tr-key').val('');
         $('.addtm-select-file').val('');
