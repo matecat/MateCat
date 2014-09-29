@@ -102,19 +102,19 @@ class ajaxUtilsController extends ajaxController {
                     case "0":
                         //wait for the daemon to process it
                         //LOADING
-                        Log::doLog( "waiting for \"" . $current_tm['file_name'] . "\" to be loaded into MyMemory" );
-                        $this->result[ 'data' ] = array(
-                                "temp_seg_ins" => $current_tm[ "temp_seg_ins" ],
-                                "num_seg_tot"  => $current_tm[ "num_seg_tot" ],
+                        Log::doLog( "waiting for \"" . $current_tm[ 'file_name' ] . "\" to be loaded into MyMemory" );
+                        $this->result[ 'data' ]      = array(
+                                "done"  => $current_tm[ "temp_seg_ins" ],
+                                "total" => $current_tm[ "num_seg_tot" ],
                         );
                         $this->result[ 'completed' ] = false;
                         break;
                     case "1":
                         //loaded (or error, in any case go ahead)
-                        Log::doLog( "\"" . $current_tm['file_name'] . "\" has been loaded into MyMemory" );
-                        $this->result['data'] = array(
-                                "temp_seg_ins" => $current_tm["temp_seg_ins"],
-                                "num_seg_tot" => $current_tm["num_seg_tot"]
+                        Log::doLog( "\"" . $current_tm[ 'file_name' ] . "\" has been loaded into MyMemory" );
+                        $this->result[ 'data' ]      = array(
+                                "done"  => $current_tm[ "temp_seg_ins" ],
+                                "total" => $current_tm[ "num_seg_tot" ]
                         );
                         $this->result[ 'completed' ] = true;
                         break;
