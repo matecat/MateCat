@@ -2337,18 +2337,11 @@ UI = {
         });
     },
 
-    pollForUploadCallback: function(TMKey) {
-        console.log('TMKey: ', TMKey);
+    pollForUploadCallback: function(TMKey, TMName) {
         if($('#uploadCallback').text() != '') {
-//            console.log("FINITO L'UPLOAD CON MESSAGGIO: ", $.parseJSON($('#uploadCallback pre').text()));
             msg = $.parseJSON($('#uploadCallback pre').text());
-            console.log('msg: ', msg);
             if(msg.success == true) {
-                $('#messageBar .progress').remove();
-                UI.showMessage({
-                    msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
-                });
-                UI.clearAddTMpopup();
+                UI.pollForUploadProgress(TMKey, TMName);
             } else {
                 UI.showMessage({
                     msg: 'Error: ' + msg.errors[0].message
@@ -2356,17 +2349,12 @@ UI = {
             }
         } else {
             setTimeout(function() {
-                UI.pollForUploadCallback(TMKey);
+                UI.pollForUploadCallback(TMKey, TMName);
             }, 1000);
         }
 
     },
-    pollForUploadProgress: function(TMKey, TMName, prev) {
-        console.log('pollForUploadProgress: ', pollForUploadProgress);
-        console.log('TMName: ', TMName);
-        // temp
-        prev = prev || 0;
-        // end temp
+    pollForUploadProgress: function(TMKey, TMName) {
         APP.doRequest({
             data: {
                 action: 'ajaxUtils',
@@ -2378,34 +2366,30 @@ UI = {
             error: function() {
             },
             success: function(d) {
-                d = {
-                    "error":[],
-                    "data":[
-                        {
-                            "done":"10",
-                            "total":"450"
-                        }
-                    ],
-                    "errors":[
- //                       {
- //                           "code":-20,
- //                           "message":"We got an error, please try again."
- //                       }
-                    ]
-                }
                 if(d.errors.length) {
-                    console.log('errore');
+                    UI.showMessage({
+                        msg: d.errors[0].message,
+                    });
                 } else {
-                    progress = (parseInt(prev)/parseInt(d.data[0].total))*100;
-//                    progress = (parseInt(d.data[0].done)/parseInt(d.data[0].total))*100;
-                    $('#messageBar .progress').css('width', progress + '%');
-                    if(progress == 100) {
-                        console.log('finito');
-                        return false;
-                    } else {
-                        console.log('progress: ', progress);
+                    if(d.data.total == null) {
+                        pollForUploadProgressContext = this;
                         setTimeout(function() {
-                            UI.pollForUploadProgress(this[0], this[1], prev + 20);
+                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1]);
+                        }, 500);
+                    } else {
+                        if(d.completed) {
+                            $('#messageBar .progress').remove();
+                            UI.showMessage({
+                            msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
+                            });
+                            UI.clearAddTMpopup();
+                            return false;
+                        }
+                        progress = (parseInt(d.data.done)/parseInt(d.data.total))*100;
+                        $('#messageBar .progress').css('width', progress + '%');
+                        pollForUploadProgressContext = this;
+                        setTimeout(function() {
+                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1]);
                         }, 500);
                     }
                 }

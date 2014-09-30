@@ -272,7 +272,7 @@ function fileUpload(form, action_url, div_id) {
         .append('<input type="hidden" name="exec" value="newTM" />')
         .append('<input type="hidden" name="job_pass" value="' + config.password + '" />')
         .append('<input type="hidden" name="tm_key" value="' + $('#addtm-tr-key').val() + '" />')
-        .append('<input type="hidden" name="name" value="' + $('#addtm-tr-name').val() + '" />')
+        .append('<input type="hidden" name="name" value="' + $('#uploadTMX').text() + '" />')
         .append('<input type="hidden" name="r" value="1" />')
         .append('<input type="hidden" name="w" value="1" />');
 
@@ -286,11 +286,11 @@ function fileUpload(form, action_url, div_id) {
     });
     $('#messageBar .msg').after('<span class="progress"></span>');
     TMKey = $('#addtm-tr-key').val();
-    TMName = $('#addtm-tr-name').val();
+    TMName = $('#uploadTMX').text();
 console.log('TMKey 1: ', TMKey);
     console.log('TMName 1: ', TMName);
-    UI.pollForUploadProgress(TMKey, TMName);
-    UI.pollForUploadCallback(TMKey);
+//    UI.pollForUploadProgress(TMKey, TMName);
+    UI.pollForUploadCallback(TMKey, TMName);
 }
 
 function stripHTML(dirtyString) {
