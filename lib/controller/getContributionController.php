@@ -325,6 +325,8 @@ class getContributionController extends ajaxController {
             }
         }
 
+        $this->result[ 'data' ][ 'matches' ] = $matches;
+
     }
 
     private function setSuggestionReport( $matches ) {

@@ -143,7 +143,7 @@ class downloadFileController extends downloadController {
                 $original_xliff   = $file[ 'xliff_file' ];
 
                 //get path
-                $path = INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $fileID . '/' . $current_filename . '.sdlxliff';
+                $path = INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $fileID . '/' . $current_filename . "_" . uniqid( '', true ) .'.sdlxliff';
 
                 //make dir if doesn't exist
                 if ( !file_exists( dirname( $path ) ) ) {
@@ -160,9 +160,7 @@ class downloadFileController extends downloadController {
                 //flush file to disk
                 fwrite( $fp, $original_xliff );
 
-
                 //free memory, as we can work with file on disk now
-                fclose( $fp );
                 unset( $original_xliff );
 
 
@@ -186,6 +184,7 @@ class downloadFileController extends downloadController {
 
                 //run parsing
                 $xsp->replaceTranslation();
+                fclose( $fp );
                 unset( $xsp );
 
                 $debug[ 'replace' ][ ] = time();
@@ -257,7 +256,6 @@ class downloadFileController extends downloadController {
         $this->filename = $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "." . $pathinfo[ 'extension' ];
 
         //qui prodest to check download type?
-//        if ( $this->download_type == 'all' && count( $output_content ) > 1 ) {
         if ( count( $output_content ) > 1 ) {
 
             if ( $pathinfo[ 'extension' ] != 'zip' ) {
