@@ -565,7 +565,25 @@ $.extend(UI, {
 			UI.browserScrollPositionRestoreCorrection();
 		}).on('allTranslated', function() {
 			if(config.survey) UI.displaySurvey(config.survey);
-		});
+		}).on('mousedown', function() {
+            console.log('MOUSEDOWN');
+            console.log('prima: ', UI.editarea.is(":focus"));
+            saveSelection();
+            $('.editor .rangySelectionBoundary').addClass('focusOut');
+            hasFocusBefore = UI.editarea.is(":focus");
+            setTimeout(function() {
+                hasFocusAfter = UI.editarea.is(":focus");
+                if(hasFocusBefore && !hasFocusAfter) {
+                    console.log('blurred from editarea');
+                } else if(!hasFocusBefore && hasFocusAfter) {
+                    console.log('focused in editarea');
+                    restoreSelection();
+                } else {
+                    $('.editor .rangySelectionBoundary.focusOut').remove();
+
+                }
+            }, 50);
+        });
 //		window.onbeforeunload = goodbye;
 
 		window.onbeforeunload = function(e) {
