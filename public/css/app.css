@@ -4004,7 +4004,7 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 }
 #messageBar .progress
 {
-    width: 58%;
+    width: 0%;
     background: #F9D164;
     height: 30px;
     position: absolute;

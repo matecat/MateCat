@@ -74,7 +74,8 @@ class ajaxUtilsController extends ajaxController {
 
                 $tmxHandler = TMSServiceFactory::getTMXService( 1 /* MyMemory */ );
                 $allMemories = $tmxHandler->getStatus( $this->__postInput['tm_key'], $this->__postInput['tmx_name'] );
-
+                $this->result[ 'errors' ] = array();
+                Log::doLog($allMemories);
                 if ( "200" != $allMemories[ 'responseStatus' ] || 0 == count( $allMemories[ 'responseData' ][ 'tm' ] ) ) {
                     //what the hell? No memories although I've just loaded some? Eject!
                     $this->result[ 'errors' ][ ] = array(
