@@ -118,7 +118,7 @@ class TmKeyManagement_TmKeyManagement {
             Log::doLog( __METHOD__ . " -> Invalid Array." );
             Log::doLog( var_export( $jsonTmKeys_array, true ) );
 
-            throw new Exception( "Invalid array" );
+            throw new Exception( "Invalid array", -1 );
         }
 
         $result_arr = array();
@@ -127,10 +127,10 @@ class TmKeyManagement_TmKeyManagement {
 
             $tmKey = json_decode($tmKey, true);
 
-            if ( is_null( $tmKey ) || empty( $tmKey ) ) {
+            if ( is_null( $tmKey ) ) {
                 Log::doLog( __METHOD__ . " -> Invalid JSON." );
                 Log::doLog( var_export( $tmKey, true ) );
-                throw new Exception ( "Invalid JSON" );
+                throw new Exception ( "Invalid JSON", -2 );
             }
 
             $tmKey = array_filter( $tmKey, array( 'self', 'filterTmKeysByOwnerTrue' ) );

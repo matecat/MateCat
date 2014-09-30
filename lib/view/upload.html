@@ -32,18 +32,20 @@
 
     <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="${basepath}public/css/upload.css?build=${build_number}"/>
+    <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
     <link rel="stylesheet" href="${basepath}public/js/lib/colorbox/colorbox.css?build=${build_number}"/>
 
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
 
-<!--        <script src="${basepath}public/js/lib/jquery-1.11.0.min.js"></script>
-    <script src="${basepath}public/js/lib/jquery-migrate-1.2.1.js"></script> -->
-	<script src="${basepath}public/js/lib/jquery.js"></script>
-	<script src="${basepath}public/js/common.js"></script>
-	<script src="${basepath}public/js/upload.js"></script>
-	<script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
+    <!--        <script src="${basepath}public/js/lib/jquery-1.11.0.min.js"></script>
+        <script src="${basepath}public/js/lib/jquery-migrate-1.2.1.js"></script> -->
+    <script src="${basepath}public/js/lib/jquery.js"></script>
+    <script src="${basepath}public/js/common.js"></script>
+    <script src="${basepath}public/js/upload.js"></script>
+    <script src="${basepath}public/js/login.js"></script>
+    <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
     <script type="text/javascript">
         var config = {
@@ -147,7 +149,7 @@
     <div class="translate-box">
         <h2>Machine Translation</h2>
         <select name="mt_engine" id="mt_engine" tal:define="mt_engine php:array()">
-            <option value="0" >NONE</option>
+            <option value="0">NONE</option>
             <option value="1" selected="selected">MyMemory (All Pairs)</option>
             <tal:block tal:repeat="mt_engine mt_engines">
                 <option value="--" tal:attributes="value mt_engine/id" tal:content="mt_engine/name">---</option>
@@ -173,7 +175,7 @@
     <div class="translate-box translate-checkbox">
         <span class="tms-checkbox" id="disable_tms_checkbox">
             <label class="tms-label" for="disable_tms_engine">Disable TM, Concordance and Glossary</label>
-            <input type="checkbox" value="true" id="disable_tms_engine" name="no_tms_engine" />
+            <input type="checkbox" value="true" id="disable_tms_engine" name="no_tms_engine"/>
         </span>
     </div>
 
@@ -184,6 +186,7 @@
 
 <div class="cl"></div>
 <p class="warning-message"> Error: the errmsg will appear here... </p>
+
 <p class="error-message"> Error: the errmsg will appear here... </p>
 
 <div class="cl"></div>
@@ -196,7 +199,7 @@
 
             <p tal:condition="true:conversion_enabled" class="file-drag">
                 <strong>Drag and drop</strong> your file here<br/>
-				<span tal:condition="true:isUploadTMXAllowed" class="min">You may also import your own translation memories (TMX)</span><br />
+                <span tal:condition="true:isUploadTMXAllowed" class="min">You may also import your own translation memories (TMX)</span><br/>
                 or</p>
 
             <p tal:condition="not:conversion_enabled" class="file-drag">
@@ -458,6 +461,7 @@
 
     {% } %}
 
+
 </script>
 
 
@@ -594,6 +598,7 @@
 
 
     {% } %}
+
 </script>
 
 <script tal:condition="not:volume_analysis_enabled" id="job-links-list" type="text/x-tmpl">
@@ -630,6 +635,7 @@
         {% } %}
         </tbody>
     </table>
+
 </script>
 
 <script src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
@@ -723,20 +729,28 @@
     </div>
 </div>
 
+<div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
 
 <footer>
     <div class="wrapper">
 
         <nav>
             <ul>
-                <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
+                <tal:block tal:condition="php: !empty(logged_user)">
+                    <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
+                </tal:block>
+
+                <tal:block tal:condition="php: empty(logged_user)">
+                    <li><a href="${authURL}" class="authLink">Manage</a></li>
+                </tal:block>
+
                 <li><a tal:attributes="href string:${basepath}api/docs">API</a></li>
-				<li><a href="http://docs.matecat.com" target="_blank">Docs</a></li>
+                <li><a href="http://docs.matecat.com" target="_blank">Docs</a></li>
             </ul>
 
             <tal:block tal:condition="php: empty(logged_user)">
                 <div id='welcomebox'>
-                    <span>Anonymous</span> (<a id='loginlink' tal:attributes="href incomingUrl">login</a>)
+                    <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">login</a>)
                 </div>
             </tal:block>
 
@@ -752,7 +766,7 @@
 </footer>
 
 <script src="${basepath}public/js/lib/snapengage.js"></script>
-<img height='1' width='1' border='0' src='Http://www.clickmeter.com/conversion.aspx?id=5540EC432C934E0FB1EADDBA3A58E8EA&val=0.00&param=empty&com=0.00' />
+<img height='1' width='1' border='0' src='Http://www.clickmeter.com/conversion.aspx?id=5540EC432C934E0FB1EADDBA3A58E8EA&val=0.00&param=empty&com=0.00'/>
 </body>
 
 </html>

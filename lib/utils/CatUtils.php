@@ -210,12 +210,6 @@ class CatUtils {
         $segment = str_replace( '##$_0D$##',"\r", $segment );
         $segment = str_replace( '##$_09$##',"\t", $segment );
 
-        //replace all incoming &nbsp; ( \xA0 ) with normal spaces ( \x20 ) as we accept only ##$_A0$##
-        $segment = str_replace( Utils::unicode2chr(0Xa0) , " ", $segment );
-
-        // now convert the real &nbsp;
-        $segment = str_replace( '##$_A0$##', Utils::unicode2chr(0Xa0) , $segment );
-
         // input : <g id="43">bang & olufsen < 3 </g> <x id="33"/>; --> valore della funzione .text() in cat.js su source, target, source suggestion,target suggestion
         // output : <g> bang &amp; olufsen are > 555 </g> <x/>
         // caso controverso <g id="4" x="&lt; dfsd &gt;">
@@ -224,6 +218,12 @@ class CatUtils {
             html_entity_decode($segment, ENT_NOQUOTES, 'UTF-8'),
             ENT_NOQUOTES, 'UTF-8', false
         );
+
+        //replace all incoming &nbsp; ( \xA0 ) with normal spaces ( \x20 ) as we accept only ##$_A0$##
+        $segment = str_replace( Utils::unicode2chr(0Xa0) , " ", $segment );
+
+        // now convert the real &nbsp;
+        $segment = str_replace( '##$_A0$##', Utils::unicode2chr(0Xa0) , $segment );
 
         //encode all not valid XML entities
         $segment = preg_replace('/&(?!lt;|gt;|amp;|quot;|apos;|#[x]{0,1}[0-9A-F]{1,4};)/', '&amp;' , $segment );
@@ -237,8 +237,8 @@ class CatUtils {
         //$segment = self::placehold_xml_entities($segment);
         $segment = self::placehold_xliff_tags($segment);
 
-        //replace all outgoing spaces to &nbsp; so they can be displayed to the browser
-        $segment = str_replace(" ", "&nbsp;", $segment);
+        //replace all outgoing spaces couples to a space and a &nbsp; so they can be displayed to the browser
+        $segment = preg_replace('/\s{2}/', " &nbsp;", $segment);
 
         $segment = html_entity_decode($segment, ENT_NOQUOTES | 16 /* ENT_XML1 */, 'UTF-8');
         // restore < e >
@@ -521,59 +521,6 @@ class CatUtils {
             }
         }
         return 0;
-    }
-
-    /**
-     * Public method to access to multiple Job Stats Info
-     * 
-     * @param array $jids
-     * @param bool $estimate_performance
-     * @return mixed
-     * <pre>
-     *   $res_job_stats = array(
-     *      (int)id => 
-     *          array(
-     *              'id'                           => (int),
-     *              'TOTAL'                        => (int),
-     *              'TRANSLATED'                   => (int),
-     *              'APPROVED'                     => (int),
-     *              'REJECTED'                     => (int),
-     *              'DRAFT'                        => (int),
-     *              'ESTIMATED_COMPLETION'         => (int),
-     *              'WORDS_PER_HOUR'               => (int),
-     *          )
-     *   );
-     * </pre>
-     * 
-     */
-    public static function getStatsForMultipleJobs( array $jids, $estimate_performance = false) {
-
-        //get stats for all jids
-        $jobs_stats = getStatsForMultipleJobs($jids);
-
-        //init results
-        $res_job_stats = array();
-        foreach ($jobs_stats as $job_stat) {
-            // this prevent division by zero error when the jobs contains only segment having untranslatable content	
-            if ($job_stat['TOTAL'] == 0) {
-                $job_stat['TOTAL'] = 1;
-            }
-            
-            $job_stat = self::_getStatsForJob($job_stat, $estimate_performance);
-            if ($estimate_performance){
-                $job_stat = self::_performanceEstimationTime($job_stat);
-            }
-            
-            $jid = $job_stat['id'];
-            $jpass = $job_stat['password'];
-            unset($job_stat['id']);
-            unset($job_stat['password']);
-            $res_job_stats[ $jid . "-" . $jpass ] = $job_stat;
-            unset($jid);
-        }
-        
-        return $res_job_stats;
-
     }
 
     /**

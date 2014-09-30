@@ -49,7 +49,7 @@ class setContributionController extends ajaxController {
         //$this->__postInput = filter_var_array( $_POST, $filterArgs );
 
         $this->id_job              = (int) $this->__postInput[ 'id_job' ];
-        $this->translator_username = $this->__postInput[ 'id_translator' ];
+        $this->translator_username = $this->__postInput[ 'id_translator' ]; // No more used
         $this->id_customer         = $this->__postInput[ 'id_customer' ];
         $this->private_customer    = (int) $this->__postInput[ 'private_customer' ];
         $this->private_translator  = (int) $this->__postInput[ 'private_translator' ];
@@ -121,7 +121,7 @@ class setContributionController extends ajaxController {
         $config[ 'source_lang' ] = $this->source_lang;
         $config[ 'target_lang' ] = $this->target_lang;
         $config[ 'email' ]       = "demo@matecat.com";
-        $config[ 'id_user' ]     = $this->translator_username;
+//        $config[ 'id_user' ]     = $this->translator_username; // No more Used
 
         $id_tms  = $job_data[ 'id_tms' ];
         $tm_keys = $job_data[ 'tm_keys' ];
@@ -151,7 +151,21 @@ class setContributionController extends ajaxController {
 
                         }
                     }
+                } else {
+
+                    $res = $tms->set( $config );
+
+                    if ( !$res ) {
+                        $result[ ]                  = $res;
+                        $this->result[ 'error' ][ ] = array(
+                                "code"    => -5,
+                                "message" => "Set contribution error"
+                        );
+
+                    }
+
                 }
+
             } catch ( Exception $e ) {
                 $this->result[ 'error' ][ ] = array( "code" => -6, "message" => "Error while retrieving job's TM." );
                 Log::doLog( __METHOD__ . " -> " . $e->getMessage() );
