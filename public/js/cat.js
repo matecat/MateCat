@@ -20,7 +20,12 @@ UI = {
             var messageBarIsOpen = UI.body.hasClass('incomingMsg');
             messageBarHeight = (messageBarIsOpen)? $('#messageBar').height() + 5 : 0;
             console.log('messageBarHeight: ', messageBarHeight);
-            jobMenu.css('top', (messageBarHeight + 47 - menuHeight) + "px");
+            var searchBoxIsOpen = UI.body.hasClass('filterOpen');
+            console.log('searchBoxIsOpen: ', searchBoxIsOpen);
+            searchBoxHeight = (searchBoxIsOpen)? $('.searchbox').height() - 5 : 0;
+            console.log('searchBoxHeight: ', searchBoxHeight);
+
+            jobMenu.css('top', (messageBarHeight + searchBoxHeight + 47 - menuHeight) + "px");
 //            jobMenu.css('top', (47 - menuHeight) + "px");
 
             if (jobMenu.hasClass('open')) {
@@ -2206,7 +2211,7 @@ UI = {
         var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
         if(!r && !w) {
             console.log('panel: ', panel);
-            $(panel).find('.error-message').text('Either read or write must be checked').show();
+            $(panel).find('.error-message').text('Either "Show matches from TM" or "Add translations to TM" must be checked').show();
             return false;
         } else {
             return true;
