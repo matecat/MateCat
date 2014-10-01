@@ -581,21 +581,13 @@ $.extend(UI, {
 		}).on('allTranslated', function() {
 			if(config.survey) UI.displaySurvey(config.survey);
 		}).on('mousedown', function() {
-            console.log('MOUSEDOWN');
-            console.log('prima: ', UI.editarea.is(":focus"));
-            saveSelection();
+            if(!$('.editor .rangySelectionBoundary.focusOut').length) saveSelection();
             $('.editor .rangySelectionBoundary').addClass('focusOut');
             hasFocusBefore = UI.editarea.is(":focus");
             setTimeout(function() {
                 hasFocusAfter = UI.editarea.is(":focus");
-                if(hasFocusBefore && !hasFocusAfter) {
-                    console.log('blurred from editarea');
-                } else if(!hasFocusBefore && hasFocusAfter) {
-                    console.log('focused in editarea');
-                    restoreSelection();
-                } else {
+                if(hasFocusBefore && hasFocusAfter){
                     $('.editor .rangySelectionBoundary.focusOut').remove();
-
                 }
             }, 50);
         });
@@ -690,6 +682,8 @@ $.extend(UI, {
 			UI.chooseSuggestion($(this).attr('data-item'));
 		}).on('dblclick', '.alternatives .graysmall', function() {
 			UI.chooseAlternative($(this));
+        }).on('dblclick', '.glossary .sugg-target', function() {
+            UI.copyGlossaryItemInEditarea($(this));
 		}).on('blur', '.graysmall .translation', function(e) {
 			e.preventDefault();
 			UI.closeInplaceEditor($(this));
