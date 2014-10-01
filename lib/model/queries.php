@@ -421,7 +421,7 @@ function insertUser( $data ) {
 
     //insert into db
     $db      = Database::obtain();
-    $results = $db->insert( 'users', $data, 'email' );
+    $results = $db->insert( 'users', $data );
 
     return $results;
 }
@@ -433,7 +433,7 @@ function tryInsertUserFromOAuth( $data ) {
     //avoid injection
     $data[ 'email' ] = $db->escape( $data[ 'email' ] );
 
-    $query   = "SELECT email FROM users WHERE email='" . $data[ 'email' ] . "'";
+    $query   = "SELECT uid, email FROM users WHERE email='" . $data[ 'email' ] . "'";
     $results = $db->query_first( $query );
 
     if ( 0 == count( $results ) or false == $results ) {
@@ -441,12 +441,14 @@ function tryInsertUserFromOAuth( $data ) {
         $results = insertUser( $data );
         //check outcome
         if ( $results ) {
-            $cid = $data[ 'email' ];
+            $cid['email'] = $data[ 'email' ];
+            $cid['uid'] = $results;
         } else {
             $cid = false;
         }
     } else {
-        $cid = $data[ 'email' ];
+        $cid['email'] = $data[ 'email' ];
+        $cid['uid'] = $data[ 'uid' ];
     }
 
     return $cid;

@@ -156,7 +156,8 @@ abstract class viewController extends controller {
             //log::doLog(get_class($this)." requires check for login");
             $username_from_cookie = AuthCookie::getCredentials();
             if ( $username_from_cookie ) {
-                $_SESSION[ 'cid' ] = $username_from_cookie;
+                $_SESSION[ 'cid' ] = $username_from_cookie['username'];
+                $_SESSION[ 'uid' ] = $username_from_cookie['uid'];
             }
 
         }

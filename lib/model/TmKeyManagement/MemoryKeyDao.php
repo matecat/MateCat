@@ -10,7 +10,8 @@
  * Class DataAccess_MemoryKeyDao<br/>
  * This class handles the communication with the corresponding table in the database using a CRUD interface
  */
-class DataAccess_MemoryKeyDao extends DataAccess_AbstractDao {
+class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
+
     const TABLE = "memory_keys";
 
     const STRUCT_TYPE = "TmKeyManagement_MemoryKeyStruct";
@@ -483,7 +484,7 @@ class DataAccess_MemoryKeyDao extends DataAccess_AbstractDao {
      * @see DataAccess_AbstractDao::validateNotNullFields
      *
      * @param TmKeyManagement_MemoryKeyStruct $obj
-     *
+     * @return null
      * @throws Exception
      */
     protected function validateNotNullFields( DataAccess_IDaoStruct $obj ) {
