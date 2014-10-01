@@ -40,6 +40,10 @@ class MT extends Engine {
 			$l = 'fr';
 		}
 
+        if (strpos($l, "es") !== false) {
+            $l = 'es';
+        }
+
 		return $l;
 	}
 

@@ -138,12 +138,12 @@ class downloadFileController extends downloadController {
             foreach ( $chunk as $file ) {
 
                 $mime_type        = $file[ 'mime_type' ];
-                $id_file          = $file[ 'id_file' ];
+                $fileID          = $file[ 'id_file' ];
                 $current_filename = $file[ 'filename' ];
                 $original_xliff   = $file[ 'xliff_file' ];
 
                 //get path
-                $path = INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $id_file . '/' . $current_filename . '.sdlxliff';
+                $path = INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $fileID . '/' . $current_filename . "_" . uniqid( '', true ) .'.sdlxliff';
 
                 //make dir if doesn't exist
                 if ( !file_exists( dirname( $path ) ) ) {
@@ -160,14 +160,12 @@ class downloadFileController extends downloadController {
                 //flush file to disk
                 fwrite( $fp, $original_xliff );
 
-
                 //free memory, as we can work with file on disk now
-                fclose( $fp );
                 unset( $original_xliff );
 
 
                 $debug[ 'get_segments' ][ ] = time();
-                $data                       = getSegmentsDownload( $this->id_job, $this->password, $id_file, $nonew );
+                $data                       = getSegmentsDownload( $this->id_job, $this->password, $fileID, $nonew );
                 $debug[ 'get_segments' ][ ] = time();
 
                 //create a secondary indexing mechanism on segments' array; this will be useful
@@ -186,19 +184,20 @@ class downloadFileController extends downloadController {
 
                 //run parsing
                 $xsp->replaceTranslation();
+                fclose( $fp );
                 unset( $xsp );
 
                 $debug[ 'replace' ][ ] = time();
 
                 $output_xliff = file_get_contents( $path . '.out.sdlxliff' );
 
-                $output_content[ $id_file ][ 'content' ]  = $output_xliff;
-                $output_content[ $id_file ][ 'filename' ] = $current_filename;
+                $output_content[ $fileID ][ 'documentContent' ]  = $output_xliff;
+                $output_content[ $fileID ][ 'filename' ] = $current_filename;
                 unset( $output_xliff );
 
                 if ( $this->forceXliff ) {
-                    $file_info_details                        = pathinfo( $output_content[ $id_file ][ 'filename' ] );
-                    $output_content[ $id_file ][ 'filename' ] = $file_info_details[ 'filename' ] . ".out.sdlxliff";
+                    $file_info_details                        = pathinfo( $output_content[ $fileID ][ 'filename' ] );
+                    $output_content[ $fileID ][ 'filename' ] = $file_info_details[ 'filename' ] . ".out.sdlxliff";
                 }
 
                 //TODO set a flag in database when file uploaded to know if this file is a proprietary xlf converted
@@ -231,11 +230,11 @@ class downloadFileController extends downloadController {
 
                 if ( $convertBackToOriginal ) {
 
-                    $output_content[ $id_file ][ 'out_xliff_name' ] = $path . '.out.sdlxliff';
-                    $output_content[ $id_file ][ 'source' ]         = $jobData[ 'source' ];
-                    $output_content[ $id_file ][ 'target' ]         = $jobData[ 'target' ];
+                    $output_content[ $fileID ][ 'out_xliff_name' ] = $path . '.out.sdlxliff';
+                    $output_content[ $fileID ][ 'source' ]         = $jobData[ 'source' ];
+                    $output_content[ $fileID ][ 'target' ]         = $jobData[ 'target' ];
 
-                    $files_buffer [ $id_file ] = $output_content[ $id_file ];
+                    $files_buffer [ $fileID ] = $output_content[ $fileID ];
 
                 }
             }
@@ -244,10 +243,10 @@ class downloadFileController extends downloadController {
             $convertResult               = $converter->multiConvertToOriginal( $files_buffer, $chosen_machine = false );
 
             foreach ( array_keys( $files_buffer ) as $fileID ) {
-                $output_content[ $fileID ][ 'content' ] = $convertResult[ $fileID ] [ 'documentContent' ];
+                $output_content[ $fileID ][ 'documentContent' ] = $convertResult[ $fileID ] [ 'documentContent' ];
             }
 
-//            $output_content[ $id_file ][ 'content' ] = $convertResult[ 'documentContent' ];
+//            $output_content[ $fileID ][ 'documentContent' ] = $convertResult[ 'documentContent' ];
             unset( $convertResult );
             $debug[ 'do_conversion' ][ ] = time();
         }
@@ -257,7 +256,6 @@ class downloadFileController extends downloadController {
         $this->filename = $pathinfo[ 'filename' ] . "_" . $jobData[ 'target' ] . "." . $pathinfo[ 'extension' ];
 
         //qui prodest to check download type?
-//        if ( $this->download_type == 'all' && count( $output_content ) > 1 ) {
         if ( count( $output_content ) > 1 ) {
 
             if ( $pathinfo[ 'extension' ] != 'zip' ) {
@@ -280,7 +278,7 @@ class downloadFileController extends downloadController {
 
         unlink( $path );
         unlink( $path . '.out.sdlxliff' );
-        rmdir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $id_file . '/' );
+        rmdir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $fileID . '/' );
         rmdir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
 
     }
@@ -288,7 +286,7 @@ class downloadFileController extends downloadController {
     protected function setContent( $output_content ) {
 
         $this->filename = $this->sanitizeFileExtension( $output_content[ 'filename' ] );
-        $this->content  = $output_content[ 'content' ];
+        $this->content  = $output_content[ 'documentContent' ];
 
     }
 
@@ -326,7 +324,7 @@ class downloadFileController extends downloadController {
                 $fName = substr( uniqid(), -5 ) . "_" . $fName;
             }
 
-            $zip->addFromString( $fName, $f[ 'content' ] );
+            $zip->addFromString( $fName, $f[ 'documentContent' ] );
 
         }
 

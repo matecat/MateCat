@@ -282,10 +282,12 @@ class addTMController extends ajaxController {
             if ( $this->addTmxInMyMemory() ) {
                 //start loop and wait for the files to be imported in MyMemory
                 //MyMemory parses more or less 80 segments/sec per TMX
-                if ( !$this->checkTmxImportStatus() ) {
-                    $this->result[ 'success' ] = false;
-                    return;
-                }
+
+//comment this, now polling on status is handled by another controller
+//                if ( !$this->checkTmxImportStatus() ) {
+//                    $this->result[ 'success' ] = false;
+//                    return;
+//                }
 
             }
 
