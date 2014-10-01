@@ -3658,13 +3658,6 @@ footer nav
 @media screen and (max-width: 1580px){
 	/*.buttons{margin:-15px 45px 0 0 !important;}*/
 	.graysmall li{width:43%;}
-
-
-
-
-
-
-
 }
 @media screen and (min-width: 1600px){
 
@@ -3679,6 +3672,9 @@ footer nav
 	/*.buttons{margin:-15px 43px 0 0 !important;}*/
 	.graysmall li{width:42.5%;}
 	.header-menu{margin-right:18px}
+    #stat-completion, #stat-wph {
+         display: none;
+    }
 }
 @media screen and (max-width: 1280px){
 	/*.buttons{margin:-15px 42px 0 0 !important;}*/
@@ -3989,21 +3985,37 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 {
 	display: block;
 	height: auto;
-    min-height: 26px;
+    text-align: left;
+    min-height: 30px;
 	background: #FFFA8B;
+/*	-webkit-transition: all 200ms ease-in;
 	padding: 4px 10px;
-/*	-webkit-transition: all 200ms ease-in; 
 	transition: all 200ms ease-in;*/
 }
 #messageBar .msg
 {
-	display: block;
-	margin-top: 2px;
+    display: block;
+    position: absolute;
+    margin: 2px auto 0 auto;
+    width: 100%;
+    z-index: 999999;
+    text-align: center;
+    margin: 7px 0;
+}
+#messageBar .progress
+{
+    width: 0%;
+    background: #F9D164;
+    height: 30px;
+    position: absolute;
+    z-index: 9;
+    transition: width 0.4s ease-in-out;
 }
 #messageBar .close
 {
 	float: right;
 	margin: 6px 6px 0 0;
+    z-index: 9999999;
 }
 #messageBar.fixed .close
 {

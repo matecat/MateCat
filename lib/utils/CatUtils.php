@@ -524,59 +524,6 @@ class CatUtils {
     }
 
     /**
-     * Public method to access to multiple Job Stats Info
-     * 
-     * @param array $jids
-     * @param bool $estimate_performance
-     * @return mixed
-     * <pre>
-     *   $res_job_stats = array(
-     *      (int)id => 
-     *          array(
-     *              'id'                           => (int),
-     *              'TOTAL'                        => (int),
-     *              'TRANSLATED'                   => (int),
-     *              'APPROVED'                     => (int),
-     *              'REJECTED'                     => (int),
-     *              'DRAFT'                        => (int),
-     *              'ESTIMATED_COMPLETION'         => (int),
-     *              'WORDS_PER_HOUR'               => (int),
-     *          )
-     *   );
-     * </pre>
-     * 
-     */
-    public static function getStatsForMultipleJobs( array $jids, $estimate_performance = false) {
-
-        //get stats for all jids
-        $jobs_stats = getStatsForMultipleJobs($jids);
-
-        //init results
-        $res_job_stats = array();
-        foreach ($jobs_stats as $job_stat) {
-            // this prevent division by zero error when the jobs contains only segment having untranslatable content	
-            if ($job_stat['TOTAL'] == 0) {
-                $job_stat['TOTAL'] = 1;
-            }
-            
-            $job_stat = self::_getStatsForJob($job_stat, $estimate_performance);
-            if ($estimate_performance){
-                $job_stat = self::_performanceEstimationTime($job_stat);
-            }
-            
-            $jid = $job_stat['id'];
-            $jpass = $job_stat['password'];
-            unset($job_stat['id']);
-            unset($job_stat['password']);
-            $res_job_stats[ $jid . "-" . $jpass ] = $job_stat;
-            unset($jid);
-        }
-        
-        return $res_job_stats;
-
-    }
-
-    /**
      * Make an estimation on performance
      * 
      * @param mixed $job_stats

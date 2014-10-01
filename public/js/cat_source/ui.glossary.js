@@ -262,7 +262,8 @@ $.extend(UI, {
 					UI.footerMessage('A Private TM Key has been created for this job', this[0]);
 					UI.noGlossary = false;
 				} else {
-					UI.footerMessage('A glossary item has been added', this[0]);					
+                    msg = (d.errors.length)? d.errors[0].message : 'A glossary item has been added';
+					UI.footerMessage(msg, this[0]);
 				}
 				UI.processLoadedGlossary(d, this);
 			},
@@ -271,6 +272,19 @@ $.extend(UI, {
 			}
 		});
 	},
+    copyGlossaryItemInEditarea: function(item) {
+        translation = item.find('.translation').text();
+        $('.editor .editarea .focusOut').before(translation + '<span class="tempCopyGlossaryPlaceholder"></span>').remove();
+        this.lockTags(this.editarea);
+        range = window.getSelection().getRangeAt(0);
+        node = $('.editor .editarea .tempCopyGlossaryPlaceholder')[0];
+        setCursorAfterNode(range, node);
+        $('.editor .editarea .tempCopyGlossaryPlaceholder').remove();
+
+//        this.editarea.focus();
+        this.highlightEditarea();
+    },
+
 });
 
 

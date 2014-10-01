@@ -20,7 +20,12 @@ UI = {
             var messageBarIsOpen = UI.body.hasClass('incomingMsg');
             messageBarHeight = (messageBarIsOpen)? $('#messageBar').height() + 5 : 0;
             console.log('messageBarHeight: ', messageBarHeight);
-            jobMenu.css('top', (messageBarHeight + 47 - menuHeight) + "px");
+            var searchBoxIsOpen = UI.body.hasClass('filterOpen');
+            console.log('searchBoxIsOpen: ', searchBoxIsOpen);
+            searchBoxHeight = (searchBoxIsOpen)? $('.searchbox').height() + 1 : 0;
+            console.log('searchBoxHeight: ', searchBoxHeight);
+
+            jobMenu.css('top', (messageBarHeight + searchBoxHeight + 43 - menuHeight) + "px");
 //            jobMenu.css('top', (47 - menuHeight) + "px");
 
             if (jobMenu.hasClass('open')) {
@@ -2206,7 +2211,7 @@ UI = {
         var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
         if(!r && !w) {
             console.log('panel: ', panel);
-            $(panel).find('.error-message').text('Either read or write must be checked').show();
+            $(panel).find('.error-message').text('Either "Show matches from TM" or "Add translations to TM" must be checked').show();
             return false;
         } else {
             return true;
@@ -2337,17 +2342,11 @@ UI = {
         });
     },
 
-    pollForUploadCallback: function(TMKey) {
-        console.log('TMKey: ', TMKey);
+    pollForUploadCallback: function(TMKey, TMName) {
         if($('#uploadCallback').text() != '') {
-//            console.log("FINITO L'UPLOAD CON MESSAGGIO: ", $.parseJSON($('#uploadCallback pre').text()));
             msg = $.parseJSON($('#uploadCallback pre').text());
-            console.log('msg: ', msg);
             if(msg.success == true) {
-                UI.showMessage({
-                    msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
-                });
-                UI.clearAddTMpopup();
+                UI.pollForUploadProgress(TMKey, TMName);
             } else {
                 UI.showMessage({
                     msg: 'Error: ' + msg.errors[0].message
@@ -2355,11 +2354,54 @@ UI = {
             }
         } else {
             setTimeout(function() {
-                UI.pollForUploadCallback(TMKey);
+                UI.pollForUploadCallback(TMKey, TMName);
             }, 1000);
         }
 
     },
+    pollForUploadProgress: function(TMKey, TMName) {
+        APP.doRequest({
+            data: {
+                action: 'ajaxUtils',
+                exec: 'tmxUploadStatus',
+                tm_key: TMKey,
+                tmx_name: TMName
+            },
+            context: [TMKey, TMName],
+            error: function() {
+            },
+            success: function(d) {
+                if(d.errors.length) {
+                    UI.showMessage({
+                        msg: d.errors[0].message,
+                    });
+                } else {
+                    if(d.data.total == null) {
+                        pollForUploadProgressContext = this;
+                        setTimeout(function() {
+                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1]);
+                        }, 500);
+                    } else {
+                        if(d.completed) {
+                            $('#messageBar .progress').remove();
+                            UI.showMessage({
+                            msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
+                            });
+                            UI.clearAddTMpopup();
+                            return false;
+                        }
+                        progress = (parseInt(d.data.done)/parseInt(d.data.total))*100;
+                        $('#messageBar .progress').css('width', progress + '%');
+                        pollForUploadProgressContext = this;
+                        setTimeout(function() {
+                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1]);
+                        }, 500);
+                    }
+                }
+            }
+        });
+    },
+
     clearAddTMpopup: function() {
         $('#addtm-tr-key').val('');
         $('.addtm-select-file').val('');
@@ -3385,7 +3427,7 @@ $.extend(UI, {
             if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
 		}).on('keydown.shortcuts', null, UI.shortcuts.openSearch.keystrokes.mac, function(e) {
             if((UI.searchEnabled)&&($('#filterSwitch').length)) UI.toggleSearch(e);
-		});		
+		});
 	},
 	unbindShortcuts: function() {
 		$("body").off(".shortcuts").addClass('shortcutsDisabled');
@@ -3881,13 +3923,38 @@ $.extend(UI, {
 				UI.writeNewShortcut(c, s, this);
 			}
 			$(s).remove();
-		});
+		} ).on('click', '.authLink', function(e){
+            e.preventDefault();
+
+            $(".login-google").show();
+
+            return false;
+        } ).on('click', '#sign-in', function(e){
+            e.preventDefault();
+
+            var url = $(this).data('oauth');
+
+            var newWindow = window.open(url, 'name', 'height=600,width=900');
+            if (window.focus) {
+                newWindow.focus();
+            }
+        });
 		
 		$(window).on('scroll', function() {
 			UI.browserScrollPositionRestoreCorrection();
 		}).on('allTranslated', function() {
 			if(config.survey) UI.displaySurvey(config.survey);
-		});
+		}).on('mousedown', function() {
+            if(!$('.editor .rangySelectionBoundary.focusOut').length) saveSelection();
+            $('.editor .rangySelectionBoundary').addClass('focusOut');
+            hasFocusBefore = UI.editarea.is(":focus");
+            setTimeout(function() {
+                hasFocusAfter = UI.editarea.is(":focus");
+                if(hasFocusBefore && hasFocusAfter){
+                    $('.editor .rangySelectionBoundary.focusOut').remove();
+                }
+            }, 50);
+        });
 //		window.onbeforeunload = goodbye;
 
 		window.onbeforeunload = function(e) {
@@ -3979,6 +4046,8 @@ $.extend(UI, {
 			UI.chooseSuggestion($(this).attr('data-item'));
 		}).on('dblclick', '.alternatives .graysmall', function() {
 			UI.chooseAlternative($(this));
+        }).on('dblclick', '.glossary .sugg-target', function() {
+            UI.copyGlossaryItemInEditarea($(this));
 		}).on('blur', '.graysmall .translation', function(e) {
 			e.preventDefault();
 			UI.closeInplaceEditor($(this));
@@ -4924,6 +4993,27 @@ $.extend(UI, {
 		}).on('click', '.sub-editor .gl-search .comment a', function(e) {
 			e.preventDefault();
 			$(this).parents('.comment').find('.gl-comment').toggle();
+ /*
+        }).on('mousedown', function(e) {
+
+            console.log('mousedown');
+            console.log('prima: ', UI.editarea.is(":focus"));
+            saveSelection();
+            $('.editor .rangySelectionBoundary').addClass('focusOut');
+            hasFocusBefore = UI.editarea.is(":focus");
+            setTimeout(function() {
+                hasFocusAfter = UI.editarea.is(":focus");
+                if(hasFocusBefore && !hasFocusAfter) {
+                    console.log('blurred from editarea');
+                } else if(!hasFocusBefore && hasFocusAfter) {
+                    console.log('focused in editarea');
+                    restoreSelection();
+                } else {
+                    $('.editor .rangySelectionBoundary.focusOut').remove();
+
+                }
+            }, 50);
+            */
 		}).on('paste', '.editarea', function(e) {
 			console.log('paste in editarea');
 
@@ -5454,7 +5544,7 @@ console.log('translation 4: ', translation);
 				console.log('no matches');
 console.log('add class loaded for segment ' + segment_id+ ' in renderContribution 2')
 			$(segment).addClass('loaded');
-			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');
+			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
 		}
 	},
 	setContribution: function(segment_id, status, byStatus) {
@@ -6121,7 +6211,7 @@ $.extend(UI, {
 			};
 		} else {
 			console.log('no matches');
-			$('.sub-editor.concordances .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');
+			$('.sub-editor.concordances .overflow', segment).append('<ul class="graysmall message"><li>Can\'t find any matches. Check the language combination.</li></ul>');
 		}
 
 		$('.cc-search', this.currentSegment).removeClass('loading');
@@ -6403,7 +6493,8 @@ $.extend(UI, {
 					UI.footerMessage('A Private TM Key has been created for this job', this[0]);
 					UI.noGlossary = false;
 				} else {
-					UI.footerMessage('A glossary item has been added', this[0]);					
+                    msg = (d.errors.length)? d.errors[0].message : 'A glossary item has been added';
+					UI.footerMessage(msg, this[0]);
 				}
 				UI.processLoadedGlossary(d, this);
 			},
@@ -6412,6 +6503,19 @@ $.extend(UI, {
 			}
 		});
 	},
+    copyGlossaryItemInEditarea: function(item) {
+        translation = item.find('.translation').text();
+        $('.editor .editarea .focusOut').before(translation + '<span class="tempCopyGlossaryPlaceholder"></span>').remove();
+        this.lockTags(this.editarea);
+        range = window.getSelection().getRangeAt(0);
+        node = $('.editor .editarea .tempCopyGlossaryPlaceholder')[0];
+        setCursorAfterNode(range, node);
+        $('.editor .editarea .tempCopyGlossaryPlaceholder').remove();
+
+//        this.editarea.focus();
+        this.highlightEditarea();
+    },
+
 });
 
 
@@ -7373,11 +7477,9 @@ function fileUpload(form, action_url, div_id) {
         .append('<input type="hidden" name="exec" value="newTM" />')
         .append('<input type="hidden" name="job_pass" value="' + config.password + '" />')
         .append('<input type="hidden" name="tm_key" value="' + $('#addtm-tr-key').val() + '" />')
-        .append('<input type="hidden" name="name" value="' + $('#addtm-tr-name').val() + '" />')
+        .append('<input type="hidden" name="name" value="' + $('#uploadTMX').text() + '" />')
         .append('<input type="hidden" name="r" value="1" />')
         .append('<input type="hidden" name="w" value="1" />');
-    console.log('form: ', form);
-    console.log('iframe: ', iframe);
 
     // Submit the form...
     form.submit();
@@ -7387,7 +7489,13 @@ function fileUpload(form, action_url, div_id) {
     UI.showMessage({
         msg: 'Uploading your TM...'
     });
-    UI.pollForUploadCallback($('#addtm-tr-key').val());
+    $('#messageBar .msg').after('<span class="progress"></span>');
+    TMKey = $('#addtm-tr-key').val();
+    TMName = $('#uploadTMX').text();
+console.log('TMKey 1: ', TMKey);
+    console.log('TMName 1: ', TMName);
+//    UI.pollForUploadProgress(TMKey, TMName);
+    UI.pollForUploadCallback(TMKey, TMName);
 }
 
 function stripHTML(dirtyString) {
