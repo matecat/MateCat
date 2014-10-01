@@ -22,10 +22,10 @@ UI = {
             console.log('messageBarHeight: ', messageBarHeight);
             var searchBoxIsOpen = UI.body.hasClass('filterOpen');
             console.log('searchBoxIsOpen: ', searchBoxIsOpen);
-            searchBoxHeight = (searchBoxIsOpen)? $('.searchbox').height() - 5 : 0;
+            searchBoxHeight = (searchBoxIsOpen)? $('.searchbox').height() + 1 : 0;
             console.log('searchBoxHeight: ', searchBoxHeight);
 
-            jobMenu.css('top', (messageBarHeight + searchBoxHeight + 47 - menuHeight) + "px");
+            jobMenu.css('top', (messageBarHeight + searchBoxHeight + 43 - menuHeight) + "px");
 //            jobMenu.css('top', (47 - menuHeight) + "px");
 
             if (jobMenu.hasClass('open')) {
