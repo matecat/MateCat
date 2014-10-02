@@ -31,7 +31,6 @@
     <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="${basepath}public/css/upload.css?build=${build_number}"/>
     <link rel="stylesheet" href="${basepath}public/js/lib/colorbox/colorbox.css?build=${build_number}"/>
-    <link href="${basepath}public/css/sidr.css" rel="stylesheet" type="text/css"/>
 
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]>
@@ -42,8 +41,9 @@
 	<script src="${basepath}public/js/lib/jquery.js"></script>
 	<script src="${basepath}public/js/common.js"></script>
 	<script src="${basepath}public/js/upload.js"></script>
+    <script src="${basepath}public/js/jquery.dataTables.min.js"></script>
+
 	<script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
-    <script src="${basepath}public/js/lib/jquery.sidr.js"></script>
 
     <script type="text/javascript">
         var config = {
@@ -759,29 +759,7 @@
     </div>
 </div>
  
-<div id="sidr">
-  <!-- Your content -->
-  <h2>Matecat Help</h2>
-    <p>Browse one of the articles or search our documentation</p>
-  <ul>
-    <li><a href="#">How to create a new project</a></li>
-    <li><a href="#">Machine Translation Engines</a></li>
-    <li><a href="#">Private TM</a></li>
-  </ul>
-  <a href="http://docs.matecat.com/creating-a-project" class="pull-right" target="_blank">more</a>
-  <form>
-    <input type="text" placeholder="Search..."/>
-</form>
-</div>
- 
-<script>
-$(document).ready(function() {
-  $('#simple-menu').sidr({
-      side: 'right'
-    });
 
-});
-</script>
 
 
 <footer>
@@ -793,7 +771,7 @@ $(document).ready(function() {
                 <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
                 <li><a tal:attributes="href string:${basepath}api/docs">API</a></li>
 				<li><a href="http://docs.matecat.com" target="_blank">Docs</a></li>
-                <li><a id="simple-menu" href="#sidr">New help</a></li>
+                
 
             </ul>
 
@@ -815,226 +793,140 @@ $(document).ready(function() {
 </footer>
 
 
-
+<div class="popup-outer outer-tm hide"></div>
 <!-- inizio popup tm mgmt -->
-<div class="modal popup-tm" data-type="view">
-    <div class="popup-outer"></div>
-    <div class="popup">
+<div class="popup-tm hide" data-type="view">
+    
+   
         <a href="#" class="x-popup"></a>
 
-        <h1>
+        <h1 class="pull-left">
             Language Resources
         </h1>
 
         <div class="popup-box">
 
+           
 
 
 <div class="mgmt-panel mgmt-panel-tm">
 	<div class="mgmt-wrapper">
     	<div class="mgmt-table-tm">
-             <ul id="myTab" class="nav nav-tabs" role="tablist">
+             <!-- <ul id="myTab" class="nav nav-tabs hide" role="tablist">
       <li class="active"><a href="#tm">TM Management</a></li>
-      <li class=""><a href="#glossaries" class="mgmt-gl">Glossaries</a></li>
+      <li class=""><a href="#glossaries">Glossaries</a></li>
      
-    </ul>
-             <div class="mgmt-container">
-          		<h3>Match source</h3>
-                <div class="block">
-                <label>MT</label>
-                <select>
-                <option>select</option>
-                </select>
-                </div>
-                <div class="block">
-                <label>Lookup</label>
-                <input type="checkbox" />
-                </div>
-                <div class="clear"></div>
-                <h3>Manage TM</h3>
-                   <p class="pull-left">Drag & drop the entries to change their priority.</p><a class="btn-ok pull-right savebtn">Save</a>
+    </ul>-->
+    <div class="mgmt-container" id="list-search">
 
-                <table class="mgmt-tm" id="sort">
-                    <thead>
-                      <tr>
-                      	<th class="text-center"  width="7%">Priority</th>
-                        <th width="23%">Translation Memory</th>
-                        <th width="20%">Private Key</th>
-                        <th width="30%">Description</th>
-                        <th width="10%">Lang Pair</th>
-                        <th class="text-center"  width="5%">Lookup</th>
-                        <th class="text-center" width="5%">Update</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="index text-center"><span class="number">1</span><span class="nonumber">disabled</span></td>
-                            <td><a href="#">Google Drive</a></td>
-                            <td>90231291i201i</td>
-                            <td>Inf tech</td>
-                            <td><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
-                            <td  class="text-center" ><input  class="enable checkbox" type="checkbox" checked="checked" /></td>
-                            <td  class="text-center" ><input  class="enable checkbox" type="checkbox" /></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center index"><span class="number">2</span><span class="nonumber">disabled</span></td>
-                            <td><a href="#">Google Gmail</a></td>
-                            <td>2932938238</td>
-                            <td>Inf tech</td>
-                            <td><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">es-ES</span></td>
-                             <td  class="text-center" ><input  class="enable checkbox" type="checkbox"  checked="checked" /></td>
-                             <td  class="text-center" ><input class="enable checkbox"  type="checkbox" /></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center index"><span class="number">3</span><span class="nonumber">disabled</span></td>
-                            <td><a href="#">Europarl</a></td>
-                            <td>192819819281981</td>
-                            <td>Legal (amendments)</td>
-                            <td><span class="mgmt-source">es-ES</span> - <span class="mgmt-target">fr-FR</span></td>
-                             <td  class="text-center" ><input  class="enable checkbox" type="checkbox"  checked="checked" /></td>
-                             <td  class="text-center" ><input  class="enable checkbox" type="checkbox" /></td>
-                        </tr>
-                        <tr class="disabled">
-                            <td class="text-center"><span class="number">4</span><span class="nonumber">disabled</span></td>
-                            <td>Google Drive 21</td>
-                            <td>xxxxxxxxxxx</td>
-                            <td>Inf tech</td>
-                            <td><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
-                            <td  class="text-center" ><input class="enable checkbox" type="checkbox" /></td>
-                             <td  class="text-center" ><input class="enable checkbox" type="checkbox" /></td>
-                        </tr>
-                          </tbody>
-                       </table>
+
+<p class="pull-left">Drag & drop the active TMX (in light blue) to change their priority.</p>
+   <p class="error-message" style="display: none;"> Error: the errmsg will appear here... </p>
+   <p class="warning-message" style="display: none;"><span></span></p>
+
+    <div class="block pull-right ">            
+
+        <a class="btn-ok clear add-tm"><span class="icon-plus"></span> Add a TM</a>
+  
+    </div>
+    <h3 class="pull-left">Active TM</h3>
+        <table class="mgmt-tm" id="activetm">
+            <thead>
+                <tr>
+                    <th class="privatekey">Private Key</th>
+                    <th class="description">Description</th>
+                    <th class="langpair">Lang Pair</th>
+                    <th class="check text-center">Lookup</th>
+                    <th class="check text-center">Update</th>
+                    <th class="action">Action</th>
+                </tr>
+            </thead>
+            <tbody class="list sortable">
+                <tr>
+              
+                                    <td class="privatekey">90231291i201i</td>
+                                    <td class="description">Inf tech</td>
+                                    <td class="langpair"><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
+                                    <td  class="check text-center"><input type="checkbox" checked="checked" /></td>
+                                    <td class="check text-center"><input type="checkbox" /></td>
+                                    <td class="action"> <a class="pull-left btn-grey disabletm"><span class="icon-minus-circle"></span> Stop use</a> <a class="btn-grey pull-left addtmx"><span class="icon-plus-circle"></span> Add TMX</a> </td>
+                                </tr>
+                                <tr>
+                                    <td class="privatekey">2932938238</td>
+                                    <td class="description">General</td>
+                                    <td class="langpair"><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">PT-BR</span></td>
+                                     <td  class="check text-center" ><input type="checkbox"  checked="checked" /></td>
+                                    <td  class="check text-center" ><input type="checkbox" /></td>
+                                     <td class="action"> <a class="pull-left btn-grey disabletm"><span class="icon-minus-circle"></span> Stop use</a> <a class="btn-grey pull-left addtmx"><span class="icon-plus-circle"></span> Add TMX</a> </td>
+                                </tr>
+                                <tr>
+                                    <td class="privatekey">192819819281981</td>
+                                    <td class="description">Legal (amendments)</td>
+                                    <td class="langpair"><span class="mgmt-source">es-ES</span> - <span class="mgmt-target">fr-FR</span></td>
+                                     <td  class="check text-center" ><input type="checkbox"  checked="checked" /></td>
+                                    <td  class="check text-center" ><input type="checkbox" /></td>
+                                     <td class="action"> <a class="pull-left btn-grey disabletm"><span class="icon-minus-circle"></span> Stop use</a> <a class="btn-grey pull-left addtmx"><span class="icon-plus-circle"></span> Add TMX</a> </td>
+                                </tr>
+                                <tr class="new hide">
+                                    <td class="privatekey"> <input class="mgmt-input" type="text" id="key" onfocus="this.value='';"  value="Create new private key" />
+                                    <a class="btn-ok pull-right">Create</a>
+                                    </td>
+                                    <td class="description"><input class="mgmt-input" type="text" id="description" onfocus="this.value='';"  value="Enter a short description" />
+                                    </td>
+                                    <td class="fileupload" colspan="3"><label class="fileupload">Select a TMX </label><input type="file" />
+                                    </td>
+                                   <td class="action"><a class="pull-left btn-grey uploadtm"><span class="icon-upload"></span> Upload</a> <a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a> </td>
+                                </tr>
+                            
+                </tbody>
+            </table>
+            <h3 class="pull-left">Inactive TM</h3>
+            <table class="mgmt-tm mgmt-tm-nested" id="inactivetm">
+                <thead>
+                <tr>
+                    <th class="privatekey">Private Key</th>
+                    <th class="description">Description</th>
+                    <th class="langpair">Lang Pair</th>
+                    <th class="check text-center">Lookup</th>
+                    <th class="check text-center">Update</th>
+                    <th class="action">Action</th>
+                </tr>
+            </thead>
+                            <tbody class="list">
+                                <tr>
+                                    <td class="privatekey">1982128128</td>
+                                    <td class="description">Google tmx</td>
+                                    <td class="langpair"><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
+                                    <td  class="text-center check" ><input type="checkbox" /></td>
+                                    <td  class="text-center check" ><input type="checkbox" /></td>
+                                    <td class="action"><a class="btn-grey pull-left usetm"><span class="icon-play-circle"></span> Use</a> <a class="btn-grey pull-left  addtmx"><span class="icon-plus-circle"></span> Add TMX</a></td>
+                                </tr>
+                                <tr>                         
+                                    <td class="privatekey">2189281281</td>
+                                    <td class="description">Inf and geo</td>
+                                    <td class="langpair"><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
+                                    <td  class="text-center check" ><input type="checkbox" /></td>
+                                    <td  class="text-center check" ><input type="checkbox" /></td>
+                                    <td class="action"><a class="btn-grey pull-left usetm"><span class="icon-play-circle"></span> Use</a><a class="btn-grey pull-left  addtmx"><span class="icon-plus-circle"></span> Add TMX</a></td>
+                                </tr>
+                                
+                            </tbody>
+                        </table>
+                    
+                        
                        <br />
-                            <a href="#" class="btn-ok clear pull-right add-tm">Add a TM</a>
+                       <a class="btn-ok pull-right savebtn">Save</a>
+
+                          
                        
-                            <div class="addrow-tm">
-              <h3>Add a TM</h3>
-                 <p>Short description here.</p>
-              <div class="block">
-              <input class="mgmt-input" type="text" width="20" id="name" onfocus="this.value='';"  value="Enter a name" />
-              </div>
-              <div class="block">
-                  <input class="mgmt-input" type="text" id="key" onfocus="this.value='';"  value="Create new private key" />
-                  <a class="btn-ok pull-right">Create</a>
-               </div>
-               <div class="block clear">
-               <input class="mgmt-input" type="text" id="description" onfocus="this.value='';"  value="Enter a short description" />
-               </div>
-                <div class="block">
-<label class="fileupload">Select a TMX </label><input type="file" />
-</div>
-				<input type="button" value="Add a TM" id="add" class="pull-right add-tm-ok btn-ok" onclick="Javascript:addRow()" />
-                       </div>
+             
             </div>
 		</div>
     </div>
 </div>
 <!-- fine tm mgmt -->
 <!-- inizio glossary mgmt -->
-<div class="mgmt-panel mgmt-panel-gl">
-	<div class="mgmt-wrapper">
-    	<div class="mgmt-table-gl">
-  <ul id="myTab" class="nav nav-tabs" role="tablist">
-      <li ><a href="#tm"  class="mgmt-tm">TM Management</a></li>
-      <li class="active"><a href="#glossaries">Glossaries</a></li>
-     
-    </ul>             
-    
-    <div class="mgmt-container">
-   <h3>Manage Glossaries</h3>
-   <p>Drag & drop the entries to change their priority.</p>
-                <table class="mgmt-gl" id="sort">
-                    <thead>
-                      <tr>
-                      	<th class="text-center"  width="7%">Priority</th>
-                        <th width="23%">Glossary name</th>
-                        <th width="20%">Private Key</th>
-                        <th width="30%">Description</th>
-                        <th width="10%">Lang Pair</th>
-                        <th class="text-center"  width="5%">Lookup</th>
-                        <th class="text-center" width="5%">Update</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                        <tr>
-                            <td class="index text-center">1</td>
-                            <td><a href="#">Google Drive</a></td>
-                            <td>90231291i201i</td>
-                            <td>Inf tech</td>
-                            <td><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
-                            <td  class="text-center" ><input type="checkbox" /></td>
-                            <td  class="text-center" ><input type="checkbox" /></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center index">2</td>
-                            <td><a href="#">Google Gmail</a></td>
-                            <td>2932938238</td>
-                            <td>Inf tech</td>
-                            <td><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">es-ES</span></td>
-                             <td  class="text-center" ><input type="checkbox" /></td>
-                             <td  class="text-center" ><input type="checkbox" /></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center index">3</td>
-                            <td><a href="#">Europarl</a></td>
-                            <td>192819819281981</td>
-                            <td>Legal (amendments)</td>
-                            <td><span class="mgmt-source">es-ES</span> - <span class="mgmt-target">fr-FR</span></td>
-                             <td  class="text-center" ><input type="checkbox" /></td>
-                             <td  class="text-center" ><input type="checkbox" /></td>
-                        </tr>
-                        <tr>
-                            <td class="text-center index">4</td>
-                            <td>Google Drive 21</td>
-                            <td>xxxxxxxxxxx</td>
-                            <td>Inf tech</td>
-                            <td><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
-                            <td  class="text-center" ><input type="checkbox" /></td>
-                             <td  class="text-center" ><input type="checkbox" /></td>
-                        </tr>
-                          </tbody>
-                       </table>
-                       <br />
-                             <a class="pull-right add-gl btn-ok" href="#"><span>Import glossary</span></a>
 
-        </div>
-    
-    
-    	<div class="addrow-gl">
-        <h3>Import glossary</h3>
-          <p>Upload a CSV file with source and target terms and comments separated by a semicolon. Example: source term; target term; comment.</p>
-            <div>
-           
-            <div class="block">
-                             <select>
-                             	<option>Source language</option>
-                             </select>
-                    </div>
-                    <div class="block">
-                              <select>
-                             	<option>Target language</option>
-                             </select>
-                    </div>
-               <div class="block">
-                             <input type="textarea" class="mgmt-input" value="Enter a short description" />
-                    </div>
-                <div class="block ">
-                    <input class="mgmt-input" id="key" type="text" value="Enter your private key" />
-                     <a class="btn-ok pull-right">Create</a>
-                  </div>
-               
-                    <div class="block clear">
-                                <label>Select a file to upload (.csv)</label>
-                            <input type="file"  />
-                     </div>
-                     <a class="btn-ok pull-right btn-confirm">Upload</a>
-            </div>
-            </div>
-		</div>
-    </div>
-</div>
-</div>
 </div>
 </div>
 <!-- fine popup glossary mgmt -->
@@ -1076,10 +968,28 @@ $(document).ready(function() {
 
 			});
 			
+// script per lo slide del pannello di manage tmx 
 
 $( ".memory-mgmt" ).click(function() {
-  $( ".popup-tm" ).show();
+  $( ".popup-tm" ).show("slide", { direction: "right" }, 400);
+  $("#SnapABug_Button").hide();
+  $(".outer-tm").show();
+
 });
+
+
+$(".popup-tm .x-popup").click(function() {
+  $( ".popup-tm" ).hide("slide", { direction: "right" }, 400);
+    $("#SnapABug_Button").show();
+      $(".outer-tm").hide();
+});
+
+$(".outer-tm").click(function() {
+  $( ".popup-tm" ).hide("slide", { direction: "right" }, 400);
+    $("#SnapABug_Button").show();
+      $(".outer-tm").hide();
+});
+
 
 $( ".mgmt-tm" ).click(function() {
   $( ".mgmt-panel-gl" ).hide();
@@ -1093,16 +1003,134 @@ $( ".mgmt-tm" ).click(function() {
   $( ".mgmt-panel-gl" ).show();
 
   });
-  
-  $( ".add-tm" ).click(function() {
+
+// script per fare apparire e scomparire la riga con l'upload della tmx
+
+
+   $(".addtmx").click(function() {
+    $(this).hide();
+    var newRow = '<tr class="addtmxrow"><td colspan="5"><label class="fileupload">Select a TMX </label><input type="file" /></td><td><a class="pull-left btn-grey uploadtm"><span class="icon-upload"></span> Upload</a> <a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a> </td></tr>';
+    $(this).closest("tr").after(newRow);
+})
+
+$('body').on('click', 'a.canceladdtmx', function() {
+   $(".addtmxrow").hide();
+      $(".addtmx").show();
+});
+$('body').on('click', 'a.uploadtm', function() {
+    $('.addtmxrow').hide().fadeOut();
+    $(".clicked td.action").append('progressbar');
+});
+
+
+
+
+// script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
+
+
+<![CDATA[
+    
+$('body').on('click', 'a.usetm', function() {
+     // get the row containing this link 
+    var row = $(this).closest("tr");
+    var x = 0;
+    // find out in which table it resides
+    var table = $(this).closest("table");
+ 
+    // move it
+    row.detach();
+   
+    if (table.is("#activetm") && (x==0)) {
+        $("#inactivetm").append(row);
+    }
+    
+    else {
+        $("#activetm").append(row);
+    }
+    // draw the user's attention to it
+    row.fadeOut();
+    row.fadeIn();
+
+    $(this).addClass("disabletm").removeClass("usetm").text("Stop use").prepend('<span class="icon-minus-circle"></span> ');
+    $('.addtmxrow').hide();
+    $(".addtmx").show();
+   
+});
+
+$('body').on('click', 'a.disabletm', function() {
+     // get the row containing this link 
+    var row = $(this).closest("tr");
+    var x = 0;
+    // find out in which table it resides
+    var table = $(this).closest("table");
+ 
+    // move it
+    row.detach();
+   
+    if (table.is("#inactivetm") && (x==0)) {
+        $("#activetm").append(row);
+    }
+    
+    else {
+        $("#inactivetm").append(row);
+    }
+    // draw the user's attention to it
+    row.fadeOut();
+    row.fadeIn();
+
+    $(this).addClass("usetm").removeClass("disabletm").text("Use").prepend('<span class="icon-play-circle"></span>');
+    $('.addtmxrow').hide();
+    $(".addtmx").show();
+   
+});
+
+]]>
+
+
+    
+// script per filtrare il contenuto dinamicamente, da qui: http://www.datatables.net
+
+
+$(document).ready(function() {
+    $('#inactivetm').dataTable();
+} );
+
+ 
+
+$('tr').click(function(event) {
+        $('tr').not(this).removeClass('clicked');
+        $(this).toggleClass('clicked'); 
+    });    
+    
+    
+
+
+
+
+     $( ".add-tm" ).click(function() {
   $(this).hide();
-  $( ".addrow-tm" ).show();
+  $( "tr.new" ).show();
   });
+
+     $( ".canceladdtmx" ).click(function() {
+  $( "tr.new" ).hide();
+   $( ".add-tm" ).show();
+  });
+
+     
+
   
   
     $( ".add-gl" ).click(function() {
   $(this).hide();
   $( ".addrow-gl" ).show();
+  });
+
+
+
+    $( ".cancel-tm" ).click(function() {
+  $( "tr.new" ).hide();
+  $( ".add-tm" ).show();
   });
   
 
@@ -1110,7 +1138,7 @@ $( "#sign-in" ).click(function() {
   $( ".loginpopup" ).show();
 });
 
-    	$('#sort td:first').addClass('index');
+//    	$('#sort td:first').addClass('index');
 
 
 
@@ -1124,24 +1152,28 @@ var fixHelperModified = function(e, tr) {
         $(this).width($originals.eq(index).width())
     });
     return $helper;
-},
-    updateIndex = function(e, ui) {
-        $('.index', ui.item.parent()).each(function (i) {
-            $(this).html(i + 1);
-        });
-    };
+};
+// codice per incrementare il numero della priority 
+//    updateIndex = function(e, ui) {
+//        $('.index', ui.item.parent()).each(function (i) {
+//            $(this).html(i + 1);
+//        });
+//    };
 
-$("#sort tbody").sortable({
-    helper: fixHelperModified,
-    stop: updateIndex
+$("#activetm tbody.sortable").sortable({
+    helper: fixHelperModified
+ //   stop: updateIndex
 }).disableSelection();
 
-$('.enable').click(function() {
-  $(this).closest('tr td:first-child').toggleClass('index');
-   	   	$(this).closest("tr").toggleClass('disabled');
-		$('tr.selected .number').show();
-	 	$('tr.selected .nonumber').hide();
-});
+//$('.enable').click(function() {
+//  $(this).closest('tr td:first-child').toggleClass('index');
+//   	   	$(this).closest("tr").toggleClass('disabled');
+//		$('tr.selected .number').show();
+//	 	$('tr.selected .nonumber').hide();
+//});
+
+
+
 
 
 $('.savebtn').click(function() {
