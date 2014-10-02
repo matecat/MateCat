@@ -448,7 +448,7 @@ function tryInsertUserFromOAuth( $data ) {
         }
     } else {
         $cid['email'] = $data[ 'email' ];
-        $cid['uid'] = $data[ 'uid' ];
+        $cid['uid'] = $results[ 'uid' ];
     }
 
     return $cid;
@@ -1970,6 +1970,7 @@ function getProjects( $start, $step, $search_in_pname, $search_source, $search_t
 //    $results = $db->query( "SET SESSION group_concat_max_len = 10000000;" );
     $results = $db->fetch_array( $query );
 
+//    Log::doLog( $results );
     return $results;
 }
 
@@ -2025,7 +2026,7 @@ function getJobsFromProjects(array $projectIDs, $search_source, $search_target, 
 				approved_words AS APPROVED,
                 e.name
             FROM jobs j
-            INNER JOIN engines e ON j.id_mt_engine=e.id
+            LEFT JOIN engines e ON j.id_mt_engine=e.id
             WHERE j.id_project IN (%s) AND %s
             ORDER BY j.id DESC,
                      j.job_first_segment ASC";
@@ -2038,6 +2039,7 @@ function getJobsFromProjects(array $projectIDs, $search_source, $search_target, 
 //    $results = $db->query( "SET SESSION group_concat_max_len = 10000000;" );
     $results = $db->fetch_array( $query );
 
+//    Log::doLog( $results );
     return $results;
 }
 
@@ -2082,11 +2084,11 @@ function getProjectsNumber( $start, $step, $search_in_pname, $search_source, $se
 
 		from projects p
 		inner join jobs j on j.id_project=p.id
-		inner join engines e on j.id_mt_engine=e.id
+		left join engines e on j.id_mt_engine=e.id
 		left join translators t on j.id_translator=t.username
 		$jobs_filter_query";
 
-    Log::doLog($query);
+//    Log::doLog($query);
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );

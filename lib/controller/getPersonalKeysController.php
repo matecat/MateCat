@@ -23,12 +23,17 @@ class getPersonalKeysController extends ajaxController {
     public function doAction(){
 
         $con = Database::obtain();
-        $keysList = new TmKeyManagement_MemoryKeyDao($con);
+        $_keyList = new TmKeyManagement_MemoryKeyDao($con);
 
         $dh = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $_SESSION['uid'] ) );
-        Log::doLog( $keysList->read( $dh ) );
 
-        $this->result['data'] = $keysList->read( $dh );
+        $keyList = $_keyList->read( $dh );
+
+        foreach( $keyList as $memKey ){
+            $this->result['data'][] = $memKey->tm_key;
+        }
+
+
 
     }
 

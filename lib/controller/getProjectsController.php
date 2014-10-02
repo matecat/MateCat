@@ -124,6 +124,8 @@ class getProjectsController extends ajaxController {
 
 //        $projnum = count($projects);
 
+//        Log::doLog( $projects );
+
         $projnum = getProjectsNumber( $start, $this->step, $this->search_in_pname, $this->search_source, $this->search_target, $this->search_status, $this->search_onlycompleted, $this->filter_enabled );
 
         $this->result[ 'data' ]     = json_encode( $projects );

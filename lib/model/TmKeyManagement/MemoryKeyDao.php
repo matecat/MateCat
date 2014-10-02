@@ -28,8 +28,8 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $this->validateNotNullFields( $obj );
 
         $query = "INSERT INTO " . self::TABLE .
-                " (gid, uid, owner_uid, key_value, key_name, key_tm, key_glos, group_grants, creation_date)
-                VALUES (%s, %d, %d, '%s', '%s', %s, %s, '%s', NOW())";
+                " (gid, uid, owner_uid, key_value, key_name, key_tm, key_glos, read_grants, write_grants, creation_date)
+                VALUES (%s, %d, %d, '%s', '%s', %s, %s, %d, %d NOW())";
 
         $query = sprintf(
                 $query,
@@ -40,7 +40,8 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                 ( $obj->tm_key->name == null ) ? '' : $obj->tm_key->name,
                 ( $obj->tm_key->tm == null ) ? 1 : $obj->tm_key->tm,
                 ( $obj->tm_key->glos == null ) ? 1 : $obj->tm_key->glos,
-                ( $obj->grants == null ) ? "rw" : $obj->grants
+                ( $obj->r == null ) ? true : $obj->r,
+                ( $obj->w == null ) ? true : $obj->w
         );
 
         $this->con->query( $query );
@@ -70,7 +71,8 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                                     key_name,
                                     key_tm AS tm,
                                     key_glos AS glos,
-                                    group_grants
+                                    read_grants AS r,
+                                    write_grants AS w
                              FROM " . self::TABLE . " WHERE %s";
 
         if ( $obj->uid !== null ) {
@@ -85,9 +87,14 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
             $where_conditions[ ] = "owner_uid = " . $obj->owner_uid;
         }
 
-        if ( $obj->grants !== null ) {
-            $condition           = "group_grants = '%s'";
-            $where_conditions[ ] = sprintf( $condition, $obj->grants );
+        if ( $obj->r !== null ) {
+            $condition           = "read_grants = %d";
+            $where_conditions[ ] = sprintf( $condition, $obj->r );
+        }
+
+        if ( $obj->w !== null ) {
+            $condition           = "write_grants = %d";
+            $where_conditions[ ] = sprintf( $condition, $obj->w );
         }
 
         //tm_key conditions
@@ -152,9 +159,14 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 //            $set_array[ ] = "owner_uid = " . $obj->owner_uid;
 //        }
 
-        if ( $obj->grants !== null ) {
-            $condition    = "group_grants = '%s'";
-            $set_array[ ] = sprintf( $condition, $obj->grants );
+        if ( $obj->r !== null ) {
+            $condition    = "read_grants = %d";
+            $set_array[ ] = sprintf( $condition, $obj->r );
+        }
+
+        if ( $obj->w !== null ) {
+            $condition    = "write_grants = %d";
+            $set_array[ ] = sprintf( $condition, $obj->w );
         }
 
         //tm_key conditions
@@ -208,10 +220,10 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $obj_arr = $this->sanitizeArray( $obj_arr );
 
         $query = "INSERT INTO " . self::TABLE .
-                " (gid, uid, owner_uid, key_value, key_name, key_tm, key_glos, group_grants, creation_date)
+                " (gid, uid, owner_uid, key_value, key_name, key_tm, key_glos, read_grants, write_grants, creation_date)
                 VALUES %s;";
 
-        $tuple_template = "(%s, %d, %d, '%s', '%s', %s, %s, '%s', NOW())";
+        $tuple_template = "(%s, %d, %d, '%s', '%s', %s, %s, %d, %d, NOW())";
 
         $values = array();
 
@@ -235,7 +247,8 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                         ( $obj->tm_key->name == null ) ? '' : $obj->tm_key->name,
                         ( $obj->tm_key->tm == null ) ? 1 : $obj->tm_key->tm,
                         ( $obj->tm_key->glos == null ) ? 1 : $obj->tm_key->glos,
-                        ( $obj->grants == null ) ? "rw" : $obj->grants
+                        ( $obj->r == null ) ? true : $obj->r,
+                        ( $obj->w == null ) ? true : $obj->w
                 );
             }
 
@@ -306,9 +319,14 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
             throw new Exception("You must set at least one field of the following: uid, gid, tm_key->key");
         }
 
-        if ( $obj->grants !== null ) {
-            $condition    = "group_grants = '%s'";
-            $set_array[ ] = sprintf( $condition, $obj->grants );
+        if ( $obj->r !== null ) {
+            $condition    = "read_grants = %d";
+            $set_array[ ] = sprintf( $condition, $obj->r );
+        }
+
+        if ( $obj->w !== null ) {
+            $condition    = "write_grants = %d";
+            $set_array[ ] = sprintf( $condition, $obj->w );
         }
 
         //tm_key settings
@@ -362,7 +380,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $obj_arr = $this->sanitizeArray( $obj_arr );
 
         $query = "INSERT INTO " . self::TABLE .
-                " (gid, uid, owner_uid, key_value, key_name, key_tm, key_glos, group_grants, creation_date)
+                " (gid, uid, owner_uid, key_value, key_name, key_tm, key_glos, read_grants, write_grants, creation_date)
                 VALUES %s
                 ON DUPLICATE KEY UPDATE
                 gid = gid,
@@ -372,10 +390,11 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                 key_name = VALUES(key_name),
                 key_tm = key_tm,
                 key_glos = key_glos,
-                group_grants = VALUES(group_grants),
+                read_grants = VALUES(read_grants),
+                write_grants = VALUES(write_grants),
                 creation_date = NOW();";
 
-        $tuple_template = "(%s, %d, %d, '%s', '%s', %s, %s, '%s', NOW())";
+        $tuple_template = "(%s, %d, %d, '%s', '%s', %s, %s, %d, %d, NOW())";
 
         $values = array();
 
@@ -399,7 +418,8 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                         ( $obj->tm_key->name == null ) ? '' : $obj->tm_key->name,
                         ( $obj->tm_key->tm == null ) ? 1 : $obj->tm_key->tm,
                         ( $obj->tm_key->glos == null ) ? 1 : $obj->tm_key->glos,
-                        ( $obj->grants == null ) ? "rw" : $obj->grants
+                        ( $obj->r == null ) ? true : $obj->r,
+                        ( $obj->w == null ) ? true : $obj->w
                 );
             }
 
@@ -508,13 +528,18 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
             throw new Exception( "Owner uid cannot be null" );
         }
 
-        if ( is_null( $obj->grants ) ) {
+        if ( is_null( $obj->r ) ) {
             throw new Exception( "Group grants cannot be null" );
         }
+
+        if ( is_null( $obj->w ) ) {
+            throw new Exception( "Group grants cannot be null" );
+        }
+
     }
 
     /**
-     * Builds an array with a resultset according to the data structure it handles.
+     * Builds an array with a result set according to the data structure it handles.
      *
      * @param $array_result array A result array obtained by a MySql query
      *
@@ -529,12 +554,15 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                     'uid'       => $item[ 'uid' ],
                     'gid'       => $item[ 'gid' ],
                     'owner_uid' => $item[ 'owner_uid' ],
-                    'grants'    => (string)$item[ 'group_grants' ],
+                    'r'         => (bool)$item[ 'r' ],
+                    'w'         => (bool)$item[ 'w' ],
                     'tm_key'    => array(
                             'key'  => (string)$item[ 'key_value' ],
                             'name' => (string)$item[ 'key_name' ],
                             'tm'   => (bool)$item[ 'tm' ],
-                            'glos' => (bool)$item[ 'glos' ]
+                            'glos' => (bool)$item[ 'glos' ],
+                            'r'    => (bool)$item[ 'r' ],
+                            'w'    => (bool)$item[ 'w' ],
                     )
             );
 

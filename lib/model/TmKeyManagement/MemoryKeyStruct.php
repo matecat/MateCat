@@ -28,9 +28,14 @@ class TmKeyManagement_MemoryKeyStruct extends stdClass implements DataAccess_IDa
     public $owner_uid;
 
     /**
-     * @var string Group grants. One of the following strings: "r", "w", "rw"
+     * @var bool Group Read grants, the atomic value
      */
-    public $grants;
+    public $r;
+
+    /**
+     * @var bool Group Write grants, the atomic value
+     */
+    public $w;
 
     /**
      * @var TmKeyManagement_TmKeyStruct
