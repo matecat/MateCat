@@ -29,8 +29,10 @@ class getPersonalKeysController extends ajaxController {
 
         $keyList = $_keyList->read( $dh );
 
+        $this->result['data']['used'] = array();
         foreach( $keyList as $memKey ){
-            $this->result['data'][] = $memKey->tm_key;
+            //all keys are available in this condition ( we are creating a project
+            $this->result['data']['available'][] = $memKey->tm_key;
         }
 
 
