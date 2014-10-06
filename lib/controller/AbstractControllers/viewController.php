@@ -212,7 +212,7 @@ abstract class viewController extends controller {
      * @return bool
      */
     public function isLoggedIn() {
-        return ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
+        return ( ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) && ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) ) );
     }
 
     /**

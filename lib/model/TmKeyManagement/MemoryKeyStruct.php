@@ -64,7 +64,13 @@ class TmKeyManagement_MemoryKeyStruct extends stdClass implements DataAccess_IDa
         $result = (array)$this;
 
         if ( $this->tm_key !== null ) {
-            $result[ 'tm_key' ] = $this->tm_key->toArray();
+            /*
+             * this should already done by '$result = (array)$this;'
+             * because TmKeyManagement_TmKeyStruct as toArray method too
+             */
+            if( $this->tm_key instanceof TmKeyManagement_TmKeyStruct ){
+                $result[ 'tm_key' ] = $this->tm_key->toArray();
+            }
         }
 
         return $result;
