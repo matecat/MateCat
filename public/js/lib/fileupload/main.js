@@ -151,7 +151,53 @@ UI = {
                                     message+
                                     '</span>');
         }
-    }
+    },
+
+    saveTMdata: function() {
+        numActive = $('#activetm tbody tr:not(.hide)').length;
+        $('.translate-box .numResources').text(numActive);
+        $('.resource').show();
+        activeTMdata = [];
+        $('#activetm tbody tr:not(.hide)').each(function() {
+            item = {};
+            item.key = $(this).find('.privatekey').text();
+            item.tm = $(this).attr('data-tm');
+            item.glos = $(this).attr('data-glos');
+            item.r = $(this).find('.lookup input').is(':checked');
+            item.w = $(this).find('.update input').is(':checked');
+            activeTMdata.push(item);
+        });
+        console.log('activeTMdata; ', activeTMdata);
+        console.log('activeTMdata string; ', JSON.stringify(activeTMdata));
+
+        APP.doRequest({
+            data: {
+                action: 'addTM',
+                job_id: config.job_id,
+                job_pass: config.password,
+                data: JSON.stringify(activeTMdata)
+            },
+            error: function() {
+                console.log('Error saving TM data!!');
+            },
+            success: function(d) {
+                console.log('TM data saved!!');
+            }
+        });
+
+// ???
+        /*
+         $('input.checkbox').each(function(){
+         if ($(this).is(':checked')) {
+         $(this).parent('tr').addClass('selected');
+         } else {
+         $(this).parent('tr').addClass('disabled');
+         }
+         });
+         */
+
+    },
+
 
 }
 

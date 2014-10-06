@@ -1,18 +1,16 @@
-/**
- * Created by andreamartines on 02/10/14.
+/*
+ Component: tm
+ Created by andreamartines on 02/10/14.
+ Loaded by cattool and upload page.
  */
+
 $.extend(UI, {
     initTM: function() {
-        console.log('TM init');
+        console.log('TM init vediamo');
 
 // script per lo slide del pannello di manage tmx
 
-        $(".memory-mgmt").click(function(e) {
-            e.preventDefault();
-            $(".popup-tm").show("slide", { direction: "right" }, 400);
-            $("#SnapABug_Button").hide();
-            $(".outer-tm").show();
-        });
+
 
         $(".popup-tm .x-popup").click(function(e) {
             e.preventDefault();
@@ -111,6 +109,7 @@ $.extend(UI, {
         // script per filtrare il contenuto dinamicamente, da qui: http://www.datatables.net
 
         $(document).ready(function() {
+            console.log("$('#inactivetm'): ", $('#inactivetm'));
             $('#inactivetm').dataTable();
         });
 
@@ -164,10 +163,14 @@ $.extend(UI, {
 //        });
 //    };
 
+
+/*
+// temporary disabled: this has to be realeased without jquery-ui (which is not loaded in the cattool), try to use tablesorter, who is already used in manage page
         $("#activetm tbody.sortable").sortable({
             helper: fixHelperModified
             //   stop: updateIndex
         }).disableSelection();
+*/
 
 //$('.enable').click(function() {
 //  $(this).closest('tr td:first-child').toggleClass('index');
@@ -181,36 +184,19 @@ $.extend(UI, {
 
 
         $('.savebtn').click(function() {
-            $('.resource').show();
-
-            $('input.checkbox').each(function(){
-                if ($(this).is(':checked')) {
-                    $(this).parent('tr').addClass('selected');
-                } else {
-                    $(this).parent('tr').addClass('disabled');
-                }
-            });
-        })
-        ;$( ".open-more" ).click(function() {
-            $( ".cat-appear-div" ).hide();
-            $( ".learnmore" ).slideToggle( "400", function() {
-
-                // Animation complete.
-            });
+            UI.saveTMdata();
         });
 
 
-        $( ".cat-appear" ).mouseenter(function() {
-            $('.cat-appear-div').show();
-            $('.cat-appear-div').animate({
-                top: '+48'
-            }, 350);
-        });
-        $( ".cat-appear" ).mouseleave(function() {
-            $('.cat-appear-div').animate({
-                top: '-48'
-            }, 200);
-        });
+    },
+    openLanguageResourcesPanel: function() {
+        console.log('VEDIAMO');
+        $(".popup-tm").show("slide", { direction: "right" }, 400);
+        console.log('A');
+        $("#SnapABug_Button").hide();
+        console.log('B');
+        $(".outer-tm").show();
+        console.log('C');
     },
 
 });

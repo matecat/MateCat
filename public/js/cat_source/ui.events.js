@@ -143,7 +143,9 @@ $.extend(UI, {
         });
 		$("body").bind('keydown', 'Ctrl+c', function() {
 			UI.tagSelection = false;
-		}).bind('keydown', 'Meta+c', function() {
+		}).bind('keydown', 'Meta+shift+l', function() {
+            UI.openLanguageResourcesPanel();
+        }).bind('keydown', 'Meta+c', function() {
 			UI.tagSelection = false;
 //		}).bind('keydown', 'Backspace', function(e) {
 

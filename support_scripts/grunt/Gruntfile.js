@@ -4,6 +4,7 @@ module.exports = function(grunt) {
 	var conf = grunt.file.read(incPath + 'config.inc.sample.php');
 //	var conf = grunt.file.read(incPath + 'config.inc.php');
 	var version = conf.match(/self\:\:\$BUILD\_NUMBER = \'(.*?)\'/gi)[0].replace(/self\:\:\$BUILD\_NUMBER = \'(.*?)\'/gi, "$1");
+
 	
   // Configuration goes here
 	grunt.initConfig({
@@ -21,6 +22,7 @@ module.exports = function(grunt) {
 					basePath + 'cat_source/ui.search.js',
 					basePath + 'cat_source/functions.js',
 					basePath + 'cat_source/ui.customization.js',
+                    basePath + 'tm.js',
 				],
 				dest: basePath + 'cat.js'
 			},
@@ -29,8 +31,9 @@ module.exports = function(grunt) {
 					basePath + 'lib/jquery-1.11.0.min.js',
 //					basePath + 'lib/jquery-migrate-1.2.1.js',
 					basePath + 'lib/jquery.cookie.js',
-					basePath + 'lib/jquery.hotkeys.min.js',
-					basePath + 'lib/diff_match_patch.js', 
+                    basePath + 'lib/jquery.hotkeys.min.js',
+                    basePath + 'lib/jquery.dataTables.min.js',
+					basePath + 'lib/diff_match_patch.js',
 					basePath + 'lib/rangy-core.js',
 					basePath + 'lib/rangy-selectionsaverestore.js',
 					basePath + 'lib/snapengage.js',
@@ -58,7 +61,7 @@ module.exports = function(grunt) {
 		},
 		watch: {
 			scripts: {
-				files: [basePath + 'cat_source/*.js'],
+				files: [basePath + 'cat_source/*.js', basePath + 'tm.js'],
 				tasks: ['dev-watch'],
 				options: {
 					interrupt: true

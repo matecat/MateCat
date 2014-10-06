@@ -153,8 +153,9 @@ $.extend(UI, {
 		$('#alertConfirmTranslation p').text('To confirm your translation, please press on Translated or use the shortcut ' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+Enter.');
 		APP.initMessageBar();
 		this.checkVersion();
+        this.initTM();
 
-		// SET EVENTS
+        // SET EVENTS
 		this.setEvents();
 		if(this.surveyAlreadyDisplayed()) {
 			this.surveyDisplayed = true;
