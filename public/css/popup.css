@@ -185,7 +185,7 @@ padding-bottom: 10px;
 }*/
 
 .delivery span {
-font-size: 24px;
+font-size: 22px;
 font-weight: bold;
 }
 
@@ -263,7 +263,7 @@ margin:10px 0 10px 30%!important;
 .pricebox .tprice, .pricebox .tprice span, .pricebox .delivery, .pricebox .delivery span, .pricebox .zone, .pricebox .zone2, .pricebox .tprice span {display:block; float:none;}
 .pricebox .tprice .tpricetitle {
 border-bottom: 1px solid #ccc;
-font-size:24px!important;
+font-size:22px!important;
 padding-bottom: 5px;
 margin-bottom: 10px;
 }
