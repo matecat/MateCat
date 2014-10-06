@@ -844,7 +844,7 @@
                 </tr>
             </thead>
             <tbody class="list sortable">
-                <tr>
+                <tr data-tm="1" data-glos="1">
                     <td class="privatekey">90231291i201i</td>
                     <td class="description">Inf tech</td>
                     <td class="langpair"><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
@@ -855,7 +855,7 @@
                         <a class="btn-grey pull-left addtmx"><span class="icon-plus-circle"></span> Add TMX</a>
                     </td>
                 </tr>
-                <tr>
+                <tr data-tm="1" data-glos="1">
                     <td class="privatekey">2932938238</td>
                     <td class="description">General</td>
                     <td class="langpair"><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">PT-BR</span></td>
@@ -866,13 +866,16 @@
                         <a class="btn-grey pull-left addtmx"><span class="icon-plus-circle"></span> Add TMX</a>
                     </td>
                 </tr>
-                <tr>
+                <tr data-tm="1" data-glos="1">
                     <td class="privatekey">4632938238</td>
                     <td class="description">Other</td>
                     <td class="langpair"><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">PT-BR</span></td>
-                     <td  class="check text-center" ><input type="checkbox"  checked="checked" /></td>
-                    <td  class="check text-center" ><input type="checkbox" /></td>
-                     <td class="action"> <a class="pull-left btn-grey disabletm"><span class="icon-minus-circle"></span> Stop use</a> <a class="btn-grey pull-left addtmx"><span class="icon-plus-circle"></span> Add TMX</a> </td>
+                    <td  class="lookup check text-center" ><input type="checkbox" checked="checked" /></td>
+                    <td  class="update check text-center" ><input type="checkbox" /></td>
+                    <td class="action">
+                        <a class="pull-left btn-grey disabletm"><span class="icon-minus-circle"></span> Stop use</a>
+                        <a class="btn-grey pull-left addtmx"><span class="icon-plus-circle"></span> Add TMX</a>
+                    </td>
                 </tr>
 
                 <tr class="new hide">
@@ -892,39 +895,39 @@
             <h3 class="pull-left">Inactive TM</h3>
             <table class="mgmt-tm mgmt-tm-nested" id="inactivetm">
                 <thead>
-                <tr>
-                    <th class="privatekey">Private Key</th>
-                    <th class="description">Description</th>
-                    <th class="langpair">Lang Pair</th>
-                    <th class="check text-center">Lookup</th>
-                    <th class="check text-center">Update</th>
-                    <th class="action">Action</th>
-                </tr>
-            </thead>
-                            <tbody class="list">
-                                <tr>
-                                    <td class="privatekey">1982128128</td>
-                                    <td class="description">Google tmx</td>
-                                    <td class="langpair"><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
-                                    <td  class="text-center check" ><input type="checkbox" /></td>
-                                    <td  class="text-center check" ><input type="checkbox" /></td>
-                                    <td class="action"><a class="btn-grey pull-left usetm"><span class="icon-play-circle"></span> Use</a> <a class="btn-grey pull-left  addtmx"><span class="icon-plus-circle"></span> Add TMX</a></td>
-                                </tr>
-                                <tr>                         
-                                    <td class="privatekey">2189281281</td>
-                                    <td class="description">Inf and geo</td>
-                                    <td class="langpair"><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
-                                    <td  class="text-center check" ><input type="checkbox" /></td>
-                                    <td  class="text-center check" ><input type="checkbox" /></td>
-                                    <td class="action"><a class="btn-grey pull-left usetm"><span class="icon-play-circle"></span> Use</a><a class="btn-grey pull-left  addtmx"><span class="icon-plus-circle"></span> Add TMX</a></td>
-                                </tr>
-                                
-                            </tbody>
-                        </table>
+                    <tr>
+                        <th class="privatekey">Private Key</th>
+                        <th class="description">Description</th>
+                        <th class="langpair">Lang Pair</th>
+                        <th class="check text-center">Lookup</th>
+                        <th class="check text-center">Update</th>
+                        <th class="action">Action</th>
+                    </tr>
+                </thead>
+                <tbody class="list">
+                    <tr data-tm="1" data-glos="1">
+                        <td class="privatekey">1982128128</td>
+                        <td class="description">Google tmx</td>
+                        <td class="langpair"><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
+                        <td class="lookup text-center check" ><input type="checkbox" /></td>
+                        <td class="update text-center check" ><input type="checkbox" /></td>
+                        <td class="action"><a class="btn-grey pull-left usetm"><span class="icon-play-circle"></span> Use</a> <a class="btn-grey pull-left  addtmx"><span class="icon-plus-circle"></span> Add TMX</a></td>
+                    </tr>
+                    <tr data-tm="1" data-glos="1">
+                        <td class="privatekey">2189281281</td>
+                        <td class="description">Inf and geo</td>
+                        <td class="langpair"><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
+                        <td class="lookup text-center check" ><input type="checkbox" /></td>
+                        <td class="update text-center check" ><input type="checkbox" /></td>
+                        <td class="action"><a class="btn-grey pull-left usetm"><span class="icon-play-circle"></span> Use</a><a class="btn-grey pull-left  addtmx"><span class="icon-plus-circle"></span> Add TMX</a></td>
+                    </tr>
+
+                </tbody>
+            </table>
                     
                         
-                       <br />
-                       <a class="btn-ok pull-right savebtn">Save</a>
+            <br />
+            <a class="btn-ok pull-right savebtn">Save</a>
 
                           
                        
