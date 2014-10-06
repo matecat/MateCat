@@ -832,7 +832,7 @@
   
     </div>
     <h3 class="pull-left">Active TM</h3>
-        <table class="mgmt-tm" id="activetm" tal:condition="false">
+        <table class="mgmt-tm" id="activetm" >
             <thead>
                 <tr>
                     <th class="privatekey">Private Key</th>
@@ -844,34 +844,12 @@
                 </tr>
             </thead>
             <tbody class="list sortable">
-                <tr data-tm="1" data-glos="1">
+                <tr data-tm="1" data-glos="1" tal:condition="false">
                     <td class="privatekey">90231291i201i</td>
                     <td class="description">Inf tech</td>
                     <td class="langpair"><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
                     <td class="lookup check text-center"><input type="checkbox" checked="checked" /></td>
                     <td class="update check text-center"><input type="checkbox" /></td>
-                    <td class="action">
-                        <a class="pull-left btn-grey disabletm"><span class="icon-minus-circle"></span> Stop use</a>
-                        <a class="btn-grey pull-left addtmx"><span class="icon-plus-circle"></span> Add TMX</a>
-                    </td>
-                </tr>
-                <tr data-tm="1" data-glos="1">
-                    <td class="privatekey">2932938238</td>
-                    <td class="description">General</td>
-                    <td class="langpair"><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">PT-BR</span></td>
-                    <td class="lookup check text-center"><input type="checkbox" checked="checked" /></td>
-                    <td class="update check text-center"><input type="checkbox" /></td>
-                    <td class="action">
-                        <a class="pull-left btn-grey disabletm"><span class="icon-minus-circle"></span> Stop use</a>
-                        <a class="btn-grey pull-left addtmx"><span class="icon-plus-circle"></span> Add TMX</a>
-                    </td>
-                </tr>
-                <tr data-tm="1" data-glos="1">
-                    <td class="privatekey">4632938238</td>
-                    <td class="description">Other</td>
-                    <td class="langpair"><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">PT-BR</span></td>
-                    <td  class="lookup check text-center" ><input type="checkbox" checked="checked" /></td>
-                    <td  class="update check text-center" ><input type="checkbox" /></td>
                     <td class="action">
                         <a class="pull-left btn-grey disabletm"><span class="icon-minus-circle"></span> Stop use</a>
                         <a class="btn-grey pull-left addtmx"><span class="icon-plus-circle"></span> Add TMX</a>
