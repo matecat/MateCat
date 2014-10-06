@@ -28,7 +28,7 @@ class getPersonalKeysController extends ajaxController {
         $dh = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $_SESSION['uid'] ) );
 
         $keyList = $_keyList->read( $dh );
-
+//todo: 'used' will be the job's ID
         $this->result['data']['used'] = array();
         foreach( $keyList as $memKey ){
             //all keys are available in this condition ( we are creating a project

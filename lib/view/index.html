@@ -12,40 +12,40 @@
         <link href="${basepath}public/css/jquery-ui.css?build=${build_number}" rel="stylesheet" type="text/css" />
 -->
         <script type="text/javascript">
-			/*<![CDATA[*/
-			var config = {
-				basepath: '${basepath | string:/}',
-				id_translator: '${tid | nothing}',
-				private_translator: '${private_translator | string:0}',
-				id_customer: '${id_customer | string:unknown_customer}',
-				private_customer: '${private_customer | string:0}',
-				last_opened_segment: '${last_opened_segment}',
-				first_job_segment: '${first_job_segment}',
-				last_job_segment: '${last_job_segment}',
-				server_load_time: '${load_time}',
-				tms_enabled: ${tms_enabled | string:true},
-				mt_enabled: ${mt_enabled | string:true},
-				job_id: '${jid}',
-				password: '${password}',
-				source_rfc: '${source_code}',
-				target_rfc: '${target_code}',
-				source_lang: '${source}',
-				target_lang: '${target}',
-				time_to_edit_enabled: ${time_to_edit_enabled},
-				build_number: '${build_number}',
-				warningPollingInterval: '${warningPollingInterval}',
-				segmentQACheckInterval: '${segmentQACheckInterval}',
-				firstSegmentOfFiles: ${structure php: firstSegmentOfFiles },
-				fileCounter: ${structure php: fileCounter },
-				taglockEnabled: ${taglockEnabled | string:1},
-				alternativesEnabled: true,
-				brPlaceholdEnabled: '${brPlaceholdEnabled}',
-				//survey: 'https://docs.google.com/a/translated.net/forms/d/1BDOlu7KQ0FU6EpVnf8PTucV4aHf90mZpf2kNM5MD_qg/viewform?embedded=true',
-				survey: false,
-				optimized: false
-			};
-			var renderStart = new Date();
-			/*]]>*/
+            /*<![CDATA[*/
+            var config = {
+                basepath: '${basepath | string:/}',
+                id_translator: '${tid | nothing}',
+                private_translator: '${private_translator | string:0}',
+                id_customer: '${id_customer | string:unknown_customer}',
+                private_customer: '${private_customer | string:0}',
+                last_opened_segment: '${last_opened_segment}',
+                first_job_segment: '${first_job_segment}',
+                last_job_segment: '${last_job_segment}',
+                server_load_time: '${load_time}',
+                tms_enabled: ${tms_enabled | string:true},
+                mt_enabled: ${mt_enabled | string:true},
+                job_id: '${jid}',
+                password: '${password}',
+                source_rfc: '${source_code}',
+                target_rfc: '${target_code}',
+                source_lang: '${source}',
+                target_lang: '${target}',
+                time_to_edit_enabled: ${time_to_edit_enabled},
+                build_number: '${build_number}',
+                warningPollingInterval: '${warningPollingInterval}',
+                segmentQACheckInterval: '${segmentQACheckInterval}',
+                firstSegmentOfFiles: ${structure php: firstSegmentOfFiles },
+                fileCounter: ${structure php: fileCounter },
+                taglockEnabled: ${taglockEnabled | string:1},
+                alternativesEnabled: true,
+                brPlaceholdEnabled: '${brPlaceholdEnabled}',
+                //survey: 'https://docs.google.com/a/translated.net/forms/d/1BDOlu7KQ0FU6EpVnf8PTucV4aHf90mZpf2kNM5MD_qg/viewform?embedded=true',
+                survey: false,
+                optimized: false
+            };
+            var renderStart = new Date();
+            /*]]>*/
         </script>
         <script tal:condition="true:brPlaceholdEnabled" type="text/javascript">
             /*<![CDATA[*/
@@ -66,7 +66,6 @@
             config.nbspPlaceholder       = '${nbspPlaceholder | null}';
             config.nbspPlaceholderClass  = '${nbspPlaceholderClass | null}';
             config.nbspPlaceholderRegex  = ${nbspPlaceholderRegex | null};
-
             /*]]>*/
         </script>
 		<script>

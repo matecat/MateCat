@@ -196,7 +196,7 @@ class Upload  {
         $fileNameChunks = explode( ".", $fileUp->name );
 
         //first Check the extension
-        if( !array_key_exists( $fileNameChunks[count($fileNameChunks) - 1], $this->acceptedExtensions ) ){
+        if( !array_key_exists( strtolower( $fileNameChunks[count($fileNameChunks) - 1] ), $this->acceptedExtensions ) ){
             return false;
         }
 
