@@ -211,7 +211,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
     }
 
     /**
-     * @param $obj_arr An array of TmKeyManagement_MemoryKeyStruct objects
+     * @param $obj_arr TmKeyManagement_MemoryKeyStruct[] An array of TmKeyManagement_MemoryKeyStruct objects
      *
      * @return array|null The input array on success, null otherwise
      * @throws Exception
@@ -544,7 +544,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      *
      * @param $array_result array A result array obtained by a MySql query
      *
-     * @return array An array containing TmKeyManagement_MemoryKeyStruct objects
+     * @return TmKeyManagement_MemoryKeyStruct[] An array containing TmKeyManagement_MemoryKeyStruct objects
      */
     protected function buildResult( $array_result ) {
         $result = array();
