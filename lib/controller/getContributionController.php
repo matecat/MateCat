@@ -324,17 +324,9 @@ class getContributionController extends ajaxController {
                 $match[ 'translation' ] = strip_tags( html_entity_decode( $match[ 'translation' ] ) );
             }
         }
-//throw new Exception( '' );
+
         $this->result[ 'data' ][ 'matches' ] = $matches;
 
-        if ( in_array( $this->id_translator,
-            array(
-                'MyMemory_962cb49bcbdb2febc9f7'
-            )
-        )
-        ) {
-            $this->result[ 'data' ][ 'fieldTest' ] = 1;
-        }
     }
 
     private function setSuggestionReport( $matches ) {
