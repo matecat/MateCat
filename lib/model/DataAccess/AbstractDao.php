@@ -78,7 +78,7 @@ abstract class DataAccess_AbstractDao {
      *                      <li>An array of $type objects</li>
      *                      or
      *                      <li>A DataAccess_IDaoStruct object</li>
-     *                  </ul>.
+     *                  </ul>
      */
     public static function sanitizeArray( $input ) {
         return self::sanitizeInputArray( $input );

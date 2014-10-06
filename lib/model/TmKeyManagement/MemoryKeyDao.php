@@ -315,8 +315,8 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         }
 
         //throw exception if where condition is empty
-        if( !count($where_conditions) ) {
-            throw new Exception("You must set at least one field of the following: uid, gid, tm_key->key");
+        if ( !count( $where_conditions ) ) {
+            throw new Exception( "You must set at least one field of the following: uid, gid, tm_key->key" );
         }
 
         if ( $obj->r !== null ) {
@@ -504,6 +504,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      * @see DataAccess_AbstractDao::validateNotNullFields
      *
      * @param TmKeyManagement_MemoryKeyStruct $obj
+     *
      * @return null
      * @throws Exception
      */
@@ -556,13 +557,14 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                     'owner_uid' => $item[ 'owner_uid' ],
                     'r'         => (bool)$item[ 'r' ],
                     'w'         => (bool)$item[ 'w' ],
-                    'tm_key'    => array(
-                            'key'  => (string)$item[ 'key_value' ],
-                            'name' => (string)$item[ 'key_name' ],
-                            'tm'   => (bool)$item[ 'tm' ],
-                            'glos' => (bool)$item[ 'glos' ],
-                            'r'    => (bool)$item[ 'r' ],
-                            'w'    => (bool)$item[ 'w' ],
+                    'tm_key'    => new TmKeyManagement_TmKeyStruct( array(
+                                    'key'  => (string)$item[ 'key_value' ],
+                                    'name' => (string)$item[ 'key_name' ],
+                                    'tm'   => (bool)$item[ 'tm' ],
+                                    'glos' => (bool)$item[ 'glos' ],
+                                    'r'    => (bool)$item[ 'r' ],
+                                    'w'    => (bool)$item[ 'w' ],
+                            )
                     )
             );
 

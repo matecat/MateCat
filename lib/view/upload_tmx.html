@@ -832,7 +832,7 @@
   
     </div>
     <h3 class="pull-left">Active TM</h3>
-        <table class="mgmt-tm" id="activetm">
+        <table class="mgmt-tm" id="activetm" tal:condition="false">
             <thead>
                 <tr>
                     <th class="privatekey">Private Key</th>
@@ -905,21 +905,17 @@
                     </tr>
                 </thead>
                 <tbody class="list">
-                    <tr data-tm="1" data-glos="1">
-                        <td class="privatekey">1982128128</td>
-                        <td class="description">Google tmx</td>
-                        <td class="langpair"><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
-                        <td class="lookup text-center check" ><input type="checkbox" /></td>
-                        <td class="update text-center check" ><input type="checkbox" /></td>
+
+                    <tr data-tm="1" data-glos="1" tal:repeat="key user_keys">
+
+                        <td class="privatekey">${key/tm_key} </td>
+                        <td class="description">${key/desc}</td>
+                        <td class="langpair"><span class="mgmt-source">${key/source}</span> - <span class="mgmt-target">${key/target}</span></td>
+                        <td class="lookup text-center check" >  <input type="checkbox" tal:condition="key/r" checked="checked"/>
+                                                                <input type="checkbox" tal:condition="not: key/r" /></td>
+                        <td class="update text-center check" >  <input type="checkbox" tal:condition="key/w" checked="checked"/>
+                                                                <input type="checkbox" tal:condition="not: key/w" /></td>
                         <td class="action"><a class="btn-grey pull-left usetm"><span class="icon-play-circle"></span> Use</a> <a class="btn-grey pull-left  addtmx"><span class="icon-plus-circle"></span> Add TMX</a></td>
-                    </tr>
-                    <tr data-tm="1" data-glos="1">
-                        <td class="privatekey">2189281281</td>
-                        <td class="description">Inf and geo</td>
-                        <td class="langpair"><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
-                        <td class="lookup text-center check" ><input type="checkbox" /></td>
-                        <td class="update text-center check" ><input type="checkbox" /></td>
-                        <td class="action"><a class="btn-grey pull-left usetm"><span class="icon-play-circle"></span> Use</a><a class="btn-grey pull-left  addtmx"><span class="icon-plus-circle"></span> Add TMX</a></td>
                     </tr>
 
                 </tbody>
@@ -983,8 +979,6 @@
 
 <script src="${basepath}public/js/lib/snapengage.js"></script>
 <img height='1' width='1' border='0' src='Http://www.clickmeter.com/conversion.aspx?id=5540EC432C934E0FB1EADDBA3A58E8EA&val=0.00&param=empty&com=0.00' />
-
-
 
 </body>
 

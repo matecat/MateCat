@@ -151,7 +151,8 @@ class newProjectController extends viewController {
         try {
 
             if( $this->isLoggedIn() ){
-                $dh = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $_SESSION['uid'] ) );
+                $dh = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => 166 /*$_SESSION['uid']*/ ) );
+
                 $this->keyList = $_keyList->read( $dh ); //throws Exception
             }
 
@@ -309,9 +310,23 @@ class newProjectController extends viewController {
         $this->template->authURL     = $this->authURL;
 
         $_keyList = array();
+
         foreach( $this->keyList as $memKey ){
+            /**
+             * @var $memKey TmKeyManagement_MemoryKeyStruct
+             */
 //            all keys are available in this condition ( we are creating a project )
-            $_keyList[] = $memKey->tm_key;
+            $tmKey = $memKey->tm_key->toArray();
+
+            $_keyList[] = array(
+                'tm_key'    =>  $tmKey['key'],
+                'desc'      =>  $tmKey['name'],
+                'r'         =>  $tmKey['r'],
+                'w'         =>  $tmKey['w'],
+                //these fields will be filled in future
+                'source'    =>  "to-DO",//$tmKey['source'],
+                'target'    =>  "to-DO" //$tmKey['target']
+            );
         }
 
         $this->template->user_keys = $_keyList;
