@@ -13,6 +13,4 @@
 
 interface DataAccess_IDaoStruct {
 
-    public function __construct(Array $array_params = array());
-
-} 
+}

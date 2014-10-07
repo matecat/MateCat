@@ -10,7 +10,7 @@
  * Class MemoryKeyStruct<br>
  * This class represents a row in the table memory_keys.
  */
-class TmKeyManagement_MemoryKeyStruct extends stdClass implements DataAccess_IDaoStruct {
+class TmKeyManagement_MemoryKeyStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
 
     /**
      * @var integer The group's ID
@@ -41,20 +41,6 @@ class TmKeyManagement_MemoryKeyStruct extends stdClass implements DataAccess_IDa
      * @var TmKeyManagement_TmKeyStruct
      */
     public $tm_key;
-
-    public function __construct( Array $array_params = array() ) {
-        if ( $array_params != null ) {
-            foreach ( $array_params as $property => $value ) {
-                $this->$property = $value;
-            }
-        }
-    }
-
-    public function __set( $name, $value ) {
-        if ( !property_exists( $this, $name ) ) {
-            throw new DomainException( 'Unknown property ' . $name );
-        }
-    }
 
     /**
      * Converts the current object into an associative array
