@@ -1286,7 +1286,13 @@ border: 1px solid #ccc;
 {
 	text-transform: uppercase;
 }
-.searchbox .block, .mgmt-panel .block
+.searchbox .block {
+	float: left;
+margin-right: 20px;
+text-align: left;
+margin-top: 2px;
+}
+.mgmt-panel .block
 {
 	margin: 20px 0;
 text-align: right;
