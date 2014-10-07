@@ -1947,7 +1947,7 @@ footer nav
 #box .first{width:40% !important;text-align:left !important;border-left:1px solid #ccc}
 
 
-.hide {display:none !important}
+.hide {display:none}
 .hidden {visibility:hidden !important}
 .source .original {display:none;}
 .bold {font-weight: bold}
