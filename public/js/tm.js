@@ -192,21 +192,16 @@ $.extend(UI, {
 
     },
     openLanguageResourcesPanel: function() {
-        console.log('VEDIAMO');
         $(".popup-tm").show("slide", { direction: "right" }, 400);
         UI.checkTMheights();
-
-        console.log('A');
         $("#SnapABug_Button").hide();
-        console.log('B');
         $(".outer-tm").show();
-        console.log('C');
     },
     uploadTM: function(form, action_url, div_id) {
         console.log('div_id: ', div_id);
 
     },
-    checkTMheights: function() {
+    checkTMheights: function() {return false;
         console.log($('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)'));
         var h = 0;
         $('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)').each(function() {
