@@ -2,19 +2,16 @@
 	Component: ui.tags
  */
 $.extend(UI, {
-	noTagsInSegment: function(starting) {
-		if ((!this.editarea) && (typeof starting == 'undefined'))
-			return true;
-		if (typeof starting != 'undefined')
-			return false;
+	noTagsInSegment: function(options) {
+        editarea = options.area;
+        starting = options.starting;
+        if(starting) return false;
 
-		var a = $('.source', this.currentSegment).html().match(/\&lt;.*?\&gt;/gi);
-		var b = this.editarea.html().match(/\&lt;.*?\&gt;/gi);
-		if (a || b) {
-			return false;
-		} else {
-			return true;
-		}
+        if ($(editarea).html().match(/\&lt;.*?\&gt;/gi)) {
+            return false;
+        } else {
+            return true;
+        }
 	},
 	tagCompare: function(sourceTags, targetTags, prova) {
 
@@ -80,9 +77,14 @@ $.extend(UI, {
 	markTags: function() {
 		if (!this.taglockEnabled) return false;
 //		UI.checkHeaviness(); 
-		
-		if (this.noTagsInSegment(1))
-			return false;
+
+		if(this.noTagsInSegment({
+            area: false,
+            starting: true
+        })) {
+            return false;
+        }
+
 		$('.source, .editarea').each(function() {
 			UI.lockTags(this);
 		});
@@ -103,18 +105,26 @@ $.extend(UI, {
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
+        el = (typeof el == 'undefined') ? UI.editarea : el;
 		if (!this.taglockEnabled)
 			return false;
-		if (this.noTagsInSegment())
+//        console.log('this.noTagsInSegment(): ', this.noTagsInSegment());
+//		console.log('IL SEGMENTO: ', $('#segment-' + el.attr('data-sid')));
+//        console.log('devo interrompere il lockTags?: ', this.noTagsInSegment($(el).parents('section').first()));
+//        console.log('elemento: ', el);
+        if (this.noTagsInSegment({
+            area: el,
+            starting: false
+        }))
 			return false;
-		$(editarea).first().each(function() {
+//        console.log('$(editarea).first(): ', $(editarea).first());
+        $(editarea).first().each(function() {
 			saveSelection();
 			var tx = $(this).html();
 			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
 			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";			
 //			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"true\">$1</pl>" : "<pl contenteditable=\"true\" class=\"locked\">$1</pl>";
 //			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"true\">$1</span>" : "<span contenteditable=\"true\" class=\"locked\">$1</span>";
-
             tx = tx.replace(/<span/gi, "<pl")
                     .replace(/<\/span/gi, "</pl")
                     .replace(/&lt;/gi, "<")
@@ -127,7 +137,7 @@ $.extend(UI, {
                     .replace(/\&lt;br\>/gi, "<br>")
                     .replace(/\&lt;br class=["\'](.*?)["\'][\s]*[\/]*(\&gt;|\>)/gi, '<br class="$1" />')
                     .replace(/(&lt;\s*\/\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*&gt;)/gi, brTx2);
-;
+
             if (UI.isFirefox) {
                 tx = tx.replace(/(<span class="[^"]*" contenteditable="false"\>)(:?<span class="[^"]*" contenteditable="false"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
 //                tx = tx.replace(/(<span class="[^"]*" contenteditable="true"\>)(:?<span class="[^"]*" contenteditable="true"\>)(.*?)(<\/span\>){2}/gi, "$1$3</span>");
