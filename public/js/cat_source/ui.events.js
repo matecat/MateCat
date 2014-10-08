@@ -589,7 +589,7 @@ $.extend(UI, {
                 if(hasFocusBefore && hasFocusAfter){
                     $('.editor .rangySelectionBoundary.focusOut').remove();
                 }
-            }, 50);
+            }, 600);
         });
 //		window.onbeforeunload = goodbye;
 
