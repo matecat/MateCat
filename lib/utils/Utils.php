@@ -271,5 +271,24 @@ class Utils {
     public static function filterLangDetectArray( $arr ) {
         return filter_var( $arr, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW ) );
     }
+
+    public static function deleteDir( $dirPath ) {
+
+        $iterator = new DirectoryIterator( $dirPath );
+
+        foreach ( $iterator as $fileInfo ) {
+            if ( $fileInfo->isDot() ) {
+                continue;
+            }
+            if ( $fileInfo->isDir() ) {
+                self::deleteDir( $fileInfo->getPathname() );
+            } else {
+                unlink( $fileInfo->getPathname() );
+            }
+        }
+        rmdir( $iterator->getPath() );
+
+    }
+
 }
 
