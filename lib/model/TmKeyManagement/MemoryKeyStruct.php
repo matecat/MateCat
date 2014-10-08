@@ -76,4 +76,4 @@ class TmKeyManagement_MemoryKeyStruct extends stdClass implements DataAccess_IDa
         return $result;
     }
 
-} 
+}

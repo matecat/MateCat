@@ -151,7 +151,7 @@ class newProjectController extends viewController {
         try {
 
             if( $this->isLoggedIn() ){
-                $dh = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $_SESSION['uid'] ) );
+                $dh = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => 166 /*$_SESSION['uid']*/ ) );
 
                 $this->keyList = $_keyList->read( $dh ); //throws Exception
             }
