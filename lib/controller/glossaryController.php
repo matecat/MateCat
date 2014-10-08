@@ -165,6 +165,8 @@ class glossaryController extends ajaxController {
 
     protected function _set( $config ){
 
+        $this->result[ 'errors' ] = array();
+
         //get tm keys with write grants
         $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $this->job_info[ 'tm_keys' ], 'w', 'glossary' );
 
