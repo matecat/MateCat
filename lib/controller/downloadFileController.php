@@ -276,10 +276,7 @@ class downloadFileController extends downloadController {
 
         $debug[ 'total' ][ ] = time();
 
-        unlink( $path );
-        unlink( $path . '.out.sdlxliff' );
-        rmdir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' . $fileID . '/' );
-        rmdir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
+        Utils::deleteDir( INIT::$TMP_DOWNLOAD . '/' . $this->id_job . '/' );
 
     }
 

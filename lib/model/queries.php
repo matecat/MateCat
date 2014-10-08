@@ -2084,7 +2084,7 @@ function getProjectsNumber( $start, $step, $search_in_pname, $search_source, $se
 		left join translators t on j.id_translator=t.username
 		$jobs_filter_query";
 
-    Log::doLog($query);
+//    Log::doLog($query);
 
     $db      = Database::obtain();
     $results = $db->fetch_array( $query );

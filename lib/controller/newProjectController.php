@@ -265,7 +265,13 @@ class newProjectController extends viewController {
         $this->template->target_languages = $target_languages;
 
         $this->template->upload_session_id  = $this->guid;
-        $this->template->mt_engines         = $this->mt_engines;
+
+        if( (bool)$_GET['amt'] == true ){
+            $this->template->mt_engines = $this->mt_engines;
+        } else{
+            $this->template->mt_engines = array();
+        }
+        
         $this->template->tms_engines        = $this->tms_engines;
         $this->template->conversion_enabled = INIT::$CONVERSION_ENABLED;
 

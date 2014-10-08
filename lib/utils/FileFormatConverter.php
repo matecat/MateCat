@@ -455,7 +455,7 @@ class FileFormatConverter {
         //For each file prepare a curl resource
         foreach ( $xliffVector_array as $id_file => $xliffVector ) {
 
-            $xliffContent = $xliffVector[ 'content' ];
+            $xliffContent = $xliffVector[ 'documentContent' ];
 
             //assign converter
             if ( !$chosen_by_user_machine ) {
