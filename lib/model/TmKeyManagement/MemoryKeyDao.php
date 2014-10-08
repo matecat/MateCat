@@ -17,15 +17,15 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
     const STRUCT_TYPE = "TmKeyManagement_MemoryKeyStruct";
 
     /**
-     * @param DataAccess_IDaoStruct $obj
+     * @param TmKeyManagement_MemoryKeyStruct $obj
      *
      * @return TmKeyManagement_MemoryKeyStruct|null The inserted object on success, null otherwise
      * @throws Exception
      */
-    public function create( DataAccess_IDaoStruct $obj ) {
+    public function create( TmKeyManagement_MemoryKeyStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
-        $this->validateNotNullFields( $obj );
+        $this->_validateNotNullFields( $obj );
 
         $query = "INSERT INTO " . self::TABLE .
                 " (gid, uid, owner_uid, key_value, key_name, key_tm, key_glos, read_grants, write_grants, creation_date)
@@ -46,7 +46,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $this->con->query( $query );
 
-        $this->checkForErrors();
+        $this->_checkForErrors();
 
         //return the inserted object on success, null otherwise
         if ( $this->con->affected_rows > 0 ) {
@@ -62,7 +62,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      * @return array|void
      * @throws Exception
      */
-    public function read( DataAccess_IDaoStruct $obj ) {
+    public function read( TmKeyManagement_MemoryKeyStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
         $where_conditions = array();
@@ -122,7 +122,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         }
 
         if ( count( $where_conditions ) ) {
-            $where_string = implode( " and ", $where_conditions );
+            $where_string = implode( " AND ", $where_conditions );
         } else {
             throw new Exception( "Where condition needed." );
         }
@@ -131,25 +131,25 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $arr_result = $this->con->fetch_array( $query );
 
-        $this->checkForErrors();
+        $this->_checkForErrors();
 
-        return $this->buildResult( $arr_result );
+        return $this->_buildResult( $arr_result );
     }
 
     /**
-     * @param DataAccess_IDaoStruct $obj
+     * @param TmKeyManagement_MemoryKeyStruct $obj
      *
      * @return bool|void
      * @throws Exception
      */
-    public function update( DataAccess_IDaoStruct $obj ) {
+    public function update( TmKeyManagement_MemoryKeyStruct $obj ) {
         $obj = $this->sanitize( $obj );
 
-        $this->validatePrimaryKey( $obj );
+        $this->_validatePrimaryKey( $obj );
 
         $set_array        = array();
         $where_conditions = array();
-        $query            = "update " . self::TABLE . " set %s where %s";
+        $query            = "UPDATE " . self::TABLE . " SET %s WHERE %s";
 
         $where_conditions[ ] = "uid = " . $obj->uid;
         $where_conditions[ ] = "gid = " . $obj->gid;
@@ -189,7 +189,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         }
 
         $set_string   = null;
-        $where_string = implode( " and ", $where_conditions );
+        $where_string = implode( " AND ", $where_conditions );
 
         if ( count( $set_array ) ) {
             $set_string = implode( ", ", $set_array );
@@ -201,7 +201,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $this->con->query( $query );
 
-        $this->checkForErrors();
+        $this->_checkForErrors();
 
         if ( $this->con->affected_rows > 0 ) {
             return $obj;
@@ -265,7 +265,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         //commit transaction
         $this->con->commit();
 
-        $this->checkForErrors();
+        $this->_checkForErrors();
 
         if ( $this->con->affected_rows > 0 ) {
             return $obj_arr;
@@ -299,7 +299,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $set_array        = array();
         $where_conditions = array();
-        $query            = "update " . self::TABLE . " set %s where %s";
+        $query            = "UPDATE " . self::TABLE . " SET %s WHERE %s";
 
         //compose where condition
         if ( $obj->uid !== null ) {
@@ -349,7 +349,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         }
 
         $set_string   = null;
-        $where_string = implode( " and ", $where_conditions );
+        $where_string = implode( " AND ", $where_conditions );
 
         if ( count( $set_array ) ) {
             $set_string = implode( ", ", $set_array );
@@ -361,7 +361,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $this->con->query( $query );
 
-        $this->checkForErrors();
+        $this->_checkForErrors();
 
         if ( $this->con->affected_rows > 0 ) {
             return $obj;
@@ -377,6 +377,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      * @throws Exception
      */
     private function __updateList( Array $obj_arr ) {
+
         $obj_arr = $this->sanitizeArray( $obj_arr );
 
         $query = "INSERT INTO " . self::TABLE .
@@ -436,7 +437,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         //commit transaction
         $this->con->commit();
 
-        $this->checkForErrors();
+        $this->_checkForErrors();
 
         if ( $this->con->affected_rows > 0 ) {
             return $obj_arr;
@@ -456,7 +457,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      * @throws Exception
      */
     public static function sanitize( $input ) {
-        return parent::sanitizeInput( $input, self::STRUCT_TYPE );
+        return parent::_sanitizeInput( $input, self::STRUCT_TYPE );
     }
 
     /**
@@ -467,57 +468,58 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      *
      * @return array
      */
-    public static function sanitizeArray( $input ) {
-        return parent::sanitizeArray( $input, self::STRUCT_TYPE ); // TODO: Change the autogenerated stub
+    public static function sanitizeArray( Array $input ) {
+        return parent::_sanitizeInputArray( $input, self::STRUCT_TYPE );
     }
 
     /**
      * See in DataAccess_AbstractDao::validatePrimaryKey
-     * @see DataAccess_AbstractDao::validatePrimaryKey
+     * @see DataAccess_AbstractDao::_validatePrimaryKey
      *
      * @param TmKeyManagement_MemoryKeyStruct $obj
      *
+     * @return void
      * @throws Exception
      */
-    protected function validatePrimaryKey( DataAccess_IDaoStruct $obj ) {
+    protected function _validatePrimaryKey( TmKeyManagement_MemoryKeyStruct $obj ) {
 
         /**
          * @var $obj TmKeyManagement_MemoryKeyStruct
          */
 
-        if ( is_null( $obj->gid ) ) {
-            throw new Exception( "Gid cannot be null" );
+        if ( is_null( $obj->gid ) || !is_numeric( $obj->gid ) ) {
+            throw new Exception( "Invalid Gid" );
         }
 
-        if ( is_null( $obj->uid ) ) {
-            throw new Exception( "Uid cannot be null" );
+        if ( is_null( $obj->uid ) || empty( $obj->uid ) ) {
+            throw new Exception( "Invalid Uid" );
         }
 
         if ( is_null( $obj->tm_key->key ) ) {
-            throw new Exception( "Key value cannot be null" );
+            throw new Exception( "Invalid Key value" );
         }
 
     }
 
     /**
      * See in DataAccess_AbstractDao::validateNotNullFields
-     * @see DataAccess_AbstractDao::validateNotNullFields
+     * @see DataAccess_AbstractDao::_validateNotNullFields
      *
      * @param TmKeyManagement_MemoryKeyStruct $obj
      *
      * @return null
      * @throws Exception
      */
-    protected function validateNotNullFields( DataAccess_IDaoStruct $obj ) {
+    protected function _validateNotNullFields( TmKeyManagement_MemoryKeyStruct $obj ) {
         /**
          * @var $obj TmKeyManagement_MemoryKeyStruct
          */
 
-        if ( is_null( $obj->gid ) ) {
+        if ( is_null( $obj->gid ) || !is_numeric( $obj->gid ) ) {
             throw new Exception( "Gid cannot be null" );
         }
 
-        if ( is_null( $obj->uid ) ) {
+        if ( is_null( $obj->uid ) || empty( $obj->uid ) ) {
             throw new Exception( "Uid cannot be null" );
         }
 
@@ -525,7 +527,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
             throw new Exception( "Key value cannot be null" );
         }
 
-        if ( is_null( $obj->owner_uid ) ) {
+        if ( is_null( $obj->owner_uid ) || empty( $obj->uid ) ) {
             throw new Exception( "Owner uid cannot be null" );
         }
 
@@ -546,7 +548,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
      *
      * @return TmKeyManagement_MemoryKeyStruct[] An array containing TmKeyManagement_MemoryKeyStruct objects
      */
-    protected function buildResult( $array_result ) {
+    protected function _buildResult( $array_result ) {
         $result = array();
 
         foreach ( $array_result as $item ) {
