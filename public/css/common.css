@@ -867,7 +867,12 @@ width: 801px;
 	    background: -moz-linear-gradient(top,  #09beec,  #119ec4);
 	    background: linear-gradient(top,  #09beec,  #119ec4);
 }
-
+.hide {
+    display: none;
+}
+.popup-tm.open tr.hide {
+    display: none !important;
+}
 .btn-grey {
 border: 1px solid #848689;
 font-weight: bold;

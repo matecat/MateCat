@@ -14,13 +14,13 @@ $.extend(UI, {
 
         $(".popup-tm .x-popup").click(function(e) {
             e.preventDefault();
-            $( ".popup-tm" ).hide("slide", { direction: "right" }, 400);
+            $( ".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
             $("#SnapABug_Button").show();
             $(".outer-tm").hide();
         });
 
         $(".outer-tm").click(function() {
-            $(".popup-tm").hide("slide", { direction: "right" }, 400);
+            $(".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
             $("#SnapABug_Button").show();
             $(".outer-tm").hide();
         });
@@ -37,6 +37,28 @@ $.extend(UI, {
             $(".mgmt-panel-gl").show();
         });
 
+        $("#activetm .new .privatekey .btn-ok").click(function(e) {
+            e.preventDefault();
+            //prevent double click
+            if($(this).hasClass('disabled')) return false;
+            $(this).addClass('disabled');
+            $(this).attr('disabled','');
+            $.get("http://mymemory.translated.net/api/createranduser",function(data){
+                //parse to appropriate type
+                //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
+                if(typeof data == 'string'){
+                    data=jQuery.parseJSON(data);
+                }
+                //put value into input field
+                $('#activetm .new .privatekey input').val(data.key);
+                $('#activetm .new .privatekey .btn-ok').removeClass('disabled');
+                setTimeout(function() {
+//                    UI.checkAddTMEnable();
+//                    UI.checkManageTMEnable();
+                }, 100);
+                return false;
+            })
+        });
         // script per fare apparire e scomparire la riga con l'upload della tmx
 
 
@@ -53,7 +75,8 @@ $.extend(UI, {
             $(".addtmx").show();
         }).on('click', 'a.uploadtm', function() {
             $('.addtmxrow').hide().fadeOut();
-            $(".clicked td.action").append('progressbar');
+//            $(".clicked td.action").append('progressbar');
+
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
         }).on('click', 'a.usetm', function() {
             // get the row containing this link
@@ -70,7 +93,7 @@ $.extend(UI, {
             }
 
             else {
-                $("#activetm").append(row);
+                $("#activetm .new").before(row);
             }
             // draw the user's attention to it
             row.fadeOut();
@@ -122,7 +145,7 @@ $.extend(UI, {
 
         $(".add-tm").click(function() {
             $(this).hide();
-            $("tr.new").show();
+            $("tr.new").removeClass('hide').show();
         });
 
         $(".canceladdtmx").click(function() {
@@ -192,7 +215,7 @@ $.extend(UI, {
 
     },
     openLanguageResourcesPanel: function() {
-        $(".popup-tm").show("slide", { direction: "right" }, 400);
+        $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
         UI.checkTMheights();
         $("#SnapABug_Button").hide();
         $(".outer-tm").show();
