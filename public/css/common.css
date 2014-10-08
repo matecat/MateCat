@@ -734,19 +734,28 @@ color:#333;}
 }
 
 
-
 .popup-tm {
-min-height: 108%;
-width: 1100px;
-margin: 0 auto;
-overflow: hidden;
-position: absolute;
-z-index: 10000000000000;
-top: 0;
-right: 0;
-background: #fff;
-box-shadow: -2px 5px 7px #7B7B7B;
+    min-height: 108%;
+    width: 1100px;
+    margin: 0 auto;
+    overflow: hidden;
+    position: absolute;
+    z-index: 10000000000000;
+    top: 0;
+    right: 0;
+    background: #fff;
+    box-shadow: -2px 5px 7px #7B7B7B;
 }
+
+.editing .popup-tm {
+    top:20px;
+
+}
+
+td.addtmxtd {
+width: 801px;
+}
+
 
 .popup p
 {
@@ -979,27 +988,33 @@ margin:0 auto; overflow:hidden; width:100%;
 
 
 .mgmt-tm .priority {
-	width:5%!important;
+	/*width:5%!important;*/
+
 }
 
 .mgmt-tm .privatekey {
-	width:19%!important;
+	/*width:19%!important;*/
+	width:194px!important;
 }
 
 .mgmt-tm .description {
-	width:34%!important;
+	/*width:32%!important;*/
+	width:300px!important;
 }
 
 .mgmt-tm .langpair {
-	width:14%!important;
+	/*width:14%!important;*/
+	width:144px!important;
 }
 
 .mgmt-tm .check {
-		width:6%!important;
+		/*width:6%!important;*/
+		width:55px!important;
 }
 
 .mgmt-tm .action {
-		width:22%!important;
+		/*width:22%!important;*/
+		width: 220px!important;
 }
 
 .mgmt-tm .fileupload {
@@ -1068,6 +1083,18 @@ margin-top: 10px;
 margin: 2px 2px 0px;}
 
 #activetm {cursor: move; margin-bottom: 15px;}
+#activetm thead {
+  /*  display: table-header-group !important;*/
+  background: #6d6e71;
+}
+#activetm tbody {
+    display: block;
+}
+#activetm tr:not(.new) {
+    display: block;
+    width: 100%;
+}
+
 #inactivetm {cursor: initial; float:left;}
 td.no-gutter {padding:0!important;}
 

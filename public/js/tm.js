@@ -42,8 +42,10 @@ $.extend(UI, {
 
         $(".addtmx").click(function() {
             $(this).hide();
-            var newRow = '<tr class="addtmxrow"><td colspan="5"><label class="fileupload">Select a TMX </label><input type="file" /></td><td><a class="pull-left btn-grey uploadtm"><span class="icon-upload"></span> Upload</a> <a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a> </td></tr>';
+            var newRow = '<tr class="addtmxrow"><td class="addtmxtd" colspan="5"><label class="fileupload">Select a TMX </label><input type="file" /></td><td><a class="pull-left btn-grey uploadtm"><span class="icon-upload"></span> Upload</a> <a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a> </td></tr>';
             $(this).closest("tr").after(newRow);
+            UI.uploadTM($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
+            UI.checkTMheights();
         })
 
         $('body').on('click', 'a.canceladdtmx', function() {
@@ -190,13 +192,25 @@ $.extend(UI, {
 
     },
     openLanguageResourcesPanel: function() {
-        console.log('VEDIAMO');
         $(".popup-tm").show("slide", { direction: "right" }, 400);
-        console.log('A');
+        UI.checkTMheights();
         $("#SnapABug_Button").hide();
-        console.log('B');
         $(".outer-tm").show();
-        console.log('C');
+    },
+    uploadTM: function(form, action_url, div_id) {
+        console.log('div_id: ', div_id);
+
+    },
+    checkTMheights: function() {return false;
+        console.log($('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)'));
+        var h = 0;
+        $('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)').each(function() {
+            h += $(this).height();
+        })
+        $('#activetm tbody').css('height', h + 'px');
+        console.log(h);
+
+
     },
 
 });
