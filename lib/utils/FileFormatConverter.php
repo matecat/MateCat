@@ -70,8 +70,8 @@ class FileFormatConverter {
             self::$Storage_Lookup_IP_Map[ $converter_storage[ 'ip_converter' ] ] = $converter_storage[ 'ip_storage' ];
         }
 
-//		self::$converters = array('10.30.1.114' => 1);//for debugging purposes
-//		self::$Storage_Lookup_IP_Map = array('10.30.1.114' => '10.30.1.114');//for debugging purposes
+//		self::$converters = array('10.11.0.146' => 1);//for debugging purposes
+//		self::$Storage_Lookup_IP_Map = array('10.11.0.146' => '10.11.0.147');//for debugging purposes
 
         $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
 
@@ -455,7 +455,7 @@ class FileFormatConverter {
         //For each file prepare a curl resource
         foreach ( $xliffVector_array as $id_file => $xliffVector ) {
 
-            $xliffContent = $xliffVector[ 'content' ];
+            $xliffContent = $xliffVector[ 'documentContent' ];
 
             //assign converter
             if ( !$chosen_by_user_machine ) {

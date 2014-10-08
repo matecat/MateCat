@@ -17,7 +17,7 @@ abstract class DataAccess_AbstractDao {
      * @var string This property will be overridden in the sub-classes.
      *             This means that const assignment cannot be done. We don't have PHP>5.3
      */
-    const STRUCT_TYPE = "DataAccess_IDaoStruct";
+    const STRUCT_TYPE = '';
 
     /**
      * @var int The maximum number of tuples that can be inserted for a single query
@@ -66,7 +66,7 @@ abstract class DataAccess_AbstractDao {
      * @throws Exception This function throws exception input is not a DataAccess_IDaoStruct object
      */
     public static function sanitize( $input ) {
-        return self::sanitizeInput( $input );
+        throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
 
     /**
@@ -81,7 +81,7 @@ abstract class DataAccess_AbstractDao {
      *                  </ul>
      */
     public static function sanitizeArray( $input ) {
-        return self::sanitizeInputArray( $input );
+        throw new Exception( "Abstract method " . __METHOD__ . " must be overridden " );
     }
 
     /**
@@ -96,26 +96,10 @@ abstract class DataAccess_AbstractDao {
      *                      <li>A $type object</li>
      *                  </ul>.
      */
-    protected static function sanitizeInputArray( $input, $type = self::STRUCT_TYPE ) {
-        //if null is passed, throw exception
-        if ( is_null( $input ) ) {
-            throw new Exception( "Invalid input. Expected array of " . $type, -1 );
-        }
+    protected static function _sanitizeInputArray( Array $input, $type ) {
 
-        //if an object is passed but it's not of the proper $type, throw Exception
-        if ( !is_array( $input ) ) {
-            if ( !$input instanceof $type ) {
-                throw new Exception( "Invalid input. Expected array of " . $type, -1 );
-            } else {
-                $input = array( $input );
-            }
-        }
-
-        //if an array is passed, sanitize its elements
-        if ( is_array( $input ) ) {
-            foreach ( $input as $i => $elem ) {
-                $input[ $i ] = self::sanitizeInput( $elem );
-            }
+        foreach ( $input as $i => $elem ) {
+            $input[ $i ] = self::_sanitizeInput( $elem, $type );
         }
 
         return $input;
@@ -128,11 +112,7 @@ abstract class DataAccess_AbstractDao {
      * @return DataAccess_IDaoStruct The input object if sanitize was successful, otherwise this function throws exception.
      * @throws Exception This function throws exception input is not an object of type $type
      */
-    protected static function sanitizeInput( $input, $type = self::STRUCT_TYPE ) {
-        //if null is passed, throw exception
-        if ( is_null( $input ) ) {
-            throw new Exception( "Invalid input", -1 );
-        }
+    protected static function _sanitizeInput( $input, $type ) {
 
         //if something diffferent from $type is passed, throw exception
         if ( !( $input instanceof $type ) ) {
@@ -146,7 +126,7 @@ abstract class DataAccess_AbstractDao {
      * Check for MySql errors and eventually throw exception
      * @throws Exception
      */
-    protected function checkForErrors() {
+    protected function _checkForErrors() {
         $err = $this->con->get_error();
 
         if ( $err[ 'error_code' ] != 0 ) {
@@ -161,7 +141,7 @@ abstract class DataAccess_AbstractDao {
      *
      * @return bool True if object is valid, false otherwise
      */
-    protected function validatePrimaryKey( DataAccess_IDaoStruct $obj ) {
+    protected function _validatePrimaryKey( DataAccess_IDaoStruct $obj ) {
         //to be overridden in sub-classes
         return true;
     }
@@ -173,11 +153,11 @@ abstract class DataAccess_AbstractDao {
      *
      * @return bool True if object is valid, false otherwise
      */
-    protected function validateNotNullFields( DataAccess_IDaoStruct $obj ){
+    protected function _validateNotNullFields( DataAccess_IDaoStruct $obj ){
         //to be overridden in sub-classes
         return true;
     }
 
-    protected abstract function buildResult( $array_result );
+    protected abstract function _buildResult( $array_result );
 
 }
