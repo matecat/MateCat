@@ -42,7 +42,9 @@ class XliffSAXTranslationReplacer{
     }
 
     public function __destruct() {
-        fclose( $this->originalFP );
+        //this stream can be closed outside the class
+        //to permit multiple concurrent downloads, so suppress warnings
+        @fclose( $this->originalFP );
         fclose( $this->outputFP );
     }
 
