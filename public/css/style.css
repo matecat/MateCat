@@ -1947,7 +1947,11 @@ footer nav
 #box .first{width:40% !important;text-align:left !important;border-left:1px solid #ccc}
 
 
+<<<<<<< HEAD
+.hide {display:none;}
+=======
 .hide {display:none}
+>>>>>>> 5b8e4876120fe2fde317d523d933b474cd124c3a
 .hidden {visibility:hidden !important}
 .source .original {display:none;}
 .bold {font-weight: bold}
@@ -2489,7 +2493,7 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 	display: block;
 	height: auto;
     text-align: left;
-    min-height: 30px;
+    min-height: 34px;
 	background: #FFFA8B;
 /*	-webkit-transition: all 200ms ease-in;
 	padding: 4px 10px;
