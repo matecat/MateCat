@@ -498,6 +498,7 @@
         <!-- inizio popup tm mgmt -->
         <div class="popup-tm hide" data-type="view">
 
+            
             <a href="#" class="x-popup"></a>
 
             <h1 class="pull-left">
@@ -505,6 +506,8 @@
             </h1>
 
             <div class="popup-box">
+
+
 
                 <div class="mgmt-panel mgmt-panel-tm">
                     <div class="mgmt-wrapper">
@@ -527,15 +530,15 @@
 
                                 </div>
                                 <h3 class="pull-left">Active TM</h3>
-                                <table class="mgmt-tm" id="activetm">
+                                <table class="mgmt-tm scroll" id="activetm">
                                     <thead>
                                     <tr>
-                                        <th class="privatekey">Private Key</th>
-                                        <th class="description">Description</th>
-                                        <th class="langpair">Lang Pair</th>
-                                        <th class="check text-center">Lookup</th>
-                                        <th class="check text-center">Update</th>
-                                        <th class="action">Action</th>
+                                        <th>Private Key</th>
+                                        <th>Description</th>
+                                        <th>Lang Pair</th>
+                                        <th>Lookup</th>
+                                        <th>Update</th>
+                                        <th>Action</th>
                                     </tr>
                                     </thead>
                                     <tbody class="list sortable">
@@ -588,15 +591,15 @@
                                 </table>
 
                                 <h3 class="pull-left">Inactive TM</h3>
-                                <table class="mgmt-tm mgmt-tm-nested" id="inactivetm">
+                                <table class="mgmt-tm mgmt-tm-nested scroll" id="inactivetm">
                                     <thead>
                                     <tr>
-                                        <th class="privatekey">Private Key</th>
-                                        <th class="description">Description</th>
-                                        <th class="langpair">Lang Pair</th>
-                                        <th class="check text-center">Lookup</th>
-                                        <th class="check text-center">Update</th>
-                                        <th class="action">Action</th>
+                                          <th>Private Key</th>
+                                        <th>Description</th>
+                                        <th>Lang Pair</th>
+                                        <th>Lookup</th>
+                                        <th>Update</th>
+                                        <th>Action</th>
                                     </tr>
                                     </thead>
                                     <tbody class="list">
@@ -760,7 +763,67 @@
 		$( ".open-popup-tmx" ).click(function() {
   $( this ).hide();
 });
+
+</script>
+
+<script>
+$( document ).ready(function() {
+
+
+        // Change the selector if needed
+var $table = $('table.scroll'),
+    $bodyCells = $table.find('tbody tr:first').children(),
+    colWidth;
+
+// Adjust the width of thead cells when window resizes
+$(window).resize(function() {
+    // Get the tbody columns width array
+    colWidth = $bodyCells.map(function() {
+        return $(this).width();
+    }).get();
+    
+    // Set the width of thead columns
+    $table.find('thead tr').children().each(function(i, v) {
+        $(v).width(colWidth[i]);
+    });    
+}).resize(); // Trigger resize handler
+
+});
 		</script>
+
+
+<style type="text/css">
+table.scroll {
+    /* width: 100%; */ /* Optional */
+    /* border-collapse: collapse; */
+    border-spacing: 0;
+}
+
+table.scroll tbody,
+table.scroll thead { display: block; }
+
+thead tr th { 
+    height: 30px;
+    line-height: 30px;
+    /* text-align: left; */
+}
+
+table.scroll tbody {
+    height: auto;
+    overflow-y: auto;
+    overflow-x: hidden;
+}
+
+
+tbody td, thead th {
+    /* width: 20%; */ /* Optional */
+    /* white-space: nowrap; */
+}
+
+tbody td:last-child, thead th:last-child {
+    border-right: none;
+}
+</style>
 
     <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
 

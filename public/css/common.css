@@ -734,9 +734,7 @@ color:#333;}
 }
 
 
-
 .popup-tm {
-    position: fixed;
     min-height: 108%;
     width: 1100px;
     margin: 0 auto;
@@ -748,6 +746,16 @@ color:#333;}
     background: #fff;
     box-shadow: -2px 5px 7px #7B7B7B;
 }
+
+.editing .popup-tm {
+    top:20px;
+
+}
+
+td.addtmxtd {
+width: 801px;
+}
+
 
 .popup p
 {
@@ -980,27 +988,33 @@ margin:0 auto; overflow:hidden; width:100%;
 
 
 .mgmt-tm .priority {
-	width:5%!important;
+	/*width:5%!important;*/
+
 }
 
 .mgmt-tm .privatekey {
-	width:19%!important;
+	/*width:19%!important;*/
+	width:194px!important;
 }
 
 .mgmt-tm .description {
-	width:32%!important;
+	/*width:32%!important;*/
+	width:300px!important;
 }
 
 .mgmt-tm .langpair {
-	width:14%!important;
+	/*width:14%!important;*/
+	width:144px!important;
 }
 
 .mgmt-tm .check {
-		width:6%!important;
+		/*width:6%!important;*/
+		width:55px!important;
 }
 
 .mgmt-tm .action {
-		width:22%!important;
+		/*width:22%!important;*/
+		width: 220px!important;
 }
 
 .mgmt-tm .fileupload {
@@ -1070,7 +1084,8 @@ margin: 2px 2px 0px;}
 
 #activetm {cursor: move; margin-bottom: 15px;}
 #activetm thead {
-    display: table-header-group !important;
+  /*  display: table-header-group !important;*/
+  background: #6d6e71;
 }
 #activetm tbody {
     display: block;
@@ -1298,7 +1313,13 @@ border: 1px solid #ccc;
 {
 	text-transform: uppercase;
 }
-.searchbox .block, .mgmt-panel .block
+.searchbox .block {
+	float: left;
+margin-right: 20px;
+text-align: left;
+margin-top: 2px;
+}
+.mgmt-panel .block
 {
 	margin: 20px 0;
 text-align: right;
