@@ -494,9 +494,9 @@ class ProjectManager {
             return false;
         }
 
-        self::_deleteDir( $uploadDir );
+        Utils::deleteDir( $uploadDir );
         if ( is_dir( $uploadDir . '_converted' ) ) {
-            self::_deleteDir( $uploadDir . '_converted' );
+            Utils::deleteDir( $uploadDir . '_converted' );
         }
 
         $this->projectStructure[ 'status' ] = ( INIT::$VOLUME_ANALYSIS_ENABLED ) ? Constants_ProjectStatus::STATUS_NEW : Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;
@@ -1347,24 +1347,6 @@ class ProjectManager {
         $r    = array( 'prec' => $prec, 'seg' => $a, 'succ' => $succ );
 
         return $r;
-    }
-
-    protected static function _deleteDir( $dirPath ) {
-        return true;
-        $iterator = new DirectoryIterator( $dirPath );
-
-        foreach ( $iterator as $fileInfo ) {
-            if ( $fileInfo->isDot() ) {
-                continue;
-            }
-            if ( $fileInfo->isDir() ) {
-                self::_deleteDir( $fileInfo->getPathname() );
-            } else {
-                unlink( $fileInfo->getPathname() );
-            }
-        }
-        rmdir( $iterator->getPath() );
-
     }
 
     public static function getExtensionFromMimeType( $mime_type ) {
