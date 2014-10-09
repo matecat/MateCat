@@ -739,7 +739,7 @@ color:#333;}
     width: 1100px;
     margin: 0 auto;
     overflow: hidden;
-    position: absolute;
+    position: fixed;
     z-index: 10000000000000;
     top: 0;
     right: 0;
@@ -1334,7 +1334,7 @@ clear: both;
 .addrow-gl {
 padding: 0 25px;
 }
-input#key {width:55%;}
+input#new-tm-key {width:55%;}
 
 .addrow-tm .block, .addrow-gl .block {width: 46%;}
 .addrow-gl select {height: 32px; margin-bottom:20px;}

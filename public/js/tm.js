@@ -50,7 +50,7 @@ $.extend(UI, {
                     data=jQuery.parseJSON(data);
                 }
                 //put value into input field
-                $('#activetm .new .privatekey input').val(data.key);
+                $('#new-tm-key').val(data.key);
                 $('#activetm .new .privatekey .btn-ok').removeClass('disabled');
                 setTimeout(function() {
 //                    UI.checkAddTMEnable();
@@ -73,8 +73,14 @@ $.extend(UI, {
         $('body').on('click', 'a.canceladdtmx', function() {
             $(".addtmxrow").hide();
             $(".addtmx").show();
+            UI.clearAddTMRow();
         }).on('click', 'a.uploadtm', function() {
-            $('.addtmxrow').hide().fadeOut();
+            operation = ($("#activetm .new td.fileupload input").val() == '')? 'key' : 'tm';
+//            $('.addtmxrow').hide().fadeOut();
+            UI.checkTMKey(operation);
+
+//            operation = ($('#uploadTMX').text() == '')? 'key' : 'tm';
+//            UI.checkTMKey($('#addtm-tr-key').val(), operation);
 //            $(".clicked td.action").append('progressbar');
 
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
@@ -234,6 +240,182 @@ $.extend(UI, {
         console.log(h);
 
 
+    },
+    checkTMKey: function(operation) {
+        console.log('checkTMKey');
+        console.log('operation: ', operation);
+
+        if( operation == 'key' ){
+            console.log('adding a key');
+            if(APP.isCattool) {
+                UI.execAddTMKey();
+            } else {
+                UI.registerTMX();
+            }
+
+        } else {
+            console.log('adding a tm');
+            APP.doRequest({
+                data: {
+                    action: 'ajaxUtils',
+                    exec: 'checkTMKey',
+                    tm_key: $('#new-tm-key').val()
+                },
+                context: operation,
+                error: function() {
+                    console.log('checkTMKey error!!');
+                },
+                success: function(d) {
+                    console.log('checkTMKey success!!');
+                    console.log('d: ', d);
+                    console.log('d.success: ', d.success);
+                    if(d.success == true) {
+                        console.log('key is good');
+                        console.log('adding a tm');
+                        UI.execAddTM();
+                        return true;
+                    } else {
+                        console.log('key is bad');
+                        return false;
+                        if(this == 'key') {
+                            console.log('error adding a key');
+                            $('#activetm tr.new .message').text(d.errors[0].message);
+                        } else {
+                            console.log('error adding a tm');
+                            $('#activetm tr.new .message').text(d.errors[0].message);
+                        }
+                        return false;
+                    }
+                }
+            });
+
+        }
+
+    },
+    registerTMX: function () {
+        if(!UI.TMKeysToAdd) UI.TMKeysToAdd = [];
+        item = {};
+        item.key = $('#new-tm-key').val();
+        item.description = $('#new-tm-description').val();
+        UI.TMKeysToAdd.push(item);
+        $(".canceladdtmx").click();
+    },
+    execAddTM: function() {
+        this.TMFileUpload($('#activetm .new .add-TM-Form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback', $('#activetm .new td.fileupload input').val());
+    },
+    execAddTMKey: function() {
+//        var r = ($('#addtm-tr-read').is(':checked'))? 1 : 0;
+//        var w = ($('#addtm-tr-write').is(':checked'))? 1 : 0;
+        var TMKey = $('#new-tm-key').val();
+
+        APP.doRequest({
+            data: {
+                action: 'addTM',
+                exec: 'addTM',
+                job_id: config.job_id,
+                job_pass: config.password,
+                tm_key: TMKey
+//                r: r,
+//                w: w
+            },
+            context: TMKey,
+            error: function() {
+                console.log('addTM error!!');
+                $('#activetm tr.new .message').text('Error adding your TM!');
+            },
+            success: function(d) {
+                console.log('addTM success!!');
+                $('#activetm tr.new .message').text('The key ' + this + ' has been added!');
+/*
+                txt = (d.success == true)? 'The TM Key ' + this + ' has been added to your translation job.' : d.errors[0].message;
+                $('.popup-addtm-tr .x-popup').click();
+                UI.showMessage({
+                    msg: txt
+                });
+                UI.clearAddTMpopup();
+*/
+            }
+        });
+    },
+    clearAddTMRow: function() {
+        $('#new-tm-key, #new-tm-description').val('');
+        $('#activetm .fileupload').val('');
+//        $('#uploadTMX').text('').hide();
+        $('#activetm tr.new .message').text('');
+    },
+    TMFileUpload: function(form, action_url, div_id, tmName) {
+        console.log('div_id: ', div_id);
+        console.log('form: ', form);
+        // Create the iframe...
+        var iframe = document.createElement("iframe");
+        iframe.setAttribute("id", "upload_iframe");
+        iframe.setAttribute("name", "upload_iframe");
+        iframe.setAttribute("width", "0");
+        iframe.setAttribute("height", "0");
+        iframe.setAttribute("border", "0");
+        iframe.setAttribute("style", "width: 0; height: 0; border: none;");
+
+        // Add to document...
+        form.parentNode.appendChild(iframe);
+        window.frames['upload_iframe'].name = "upload_iframe";
+
+        iframeId = document.getElementById("upload_iframe");
+
+        // Add event...
+        var eventHandler = function () {
+
+            if (iframeId.detachEvent) iframeId.detachEvent("onload", eventHandler);
+            else iframeId.removeEventListener("load", eventHandler, false);
+
+            // Message from server...
+            if (iframeId.contentDocument) {
+                content = iframeId.contentDocument.body.innerHTML;
+            } else if (iframeId.contentWindow) {
+                content = iframeId.contentWindow.document.body.innerHTML;
+            } else if (iframeId.document) {
+                content = iframeId.document.body.innerHTML;
+            }
+
+            document.getElementById(div_id).innerHTML = content;
+
+            // Del the iframe...
+            setTimeout('iframeId.parentNode.removeChild(iframeId)', 250);
+        }
+
+        if (iframeId.addEventListener) iframeId.addEventListener("load", eventHandler, true);
+        if (iframeId.attachEvent) iframeId.attachEvent("onload", eventHandler);
+
+        // Set properties of form...
+        form.setAttribute("target", "upload_iframe");
+        form.setAttribute("action", action_url);
+        form.setAttribute("method", "post");
+        form.setAttribute("enctype", "multipart/form-data");
+        form.setAttribute("encoding", "multipart/form-data");
+        $(form).append('<input type="hidden" name="exec" value="newTM" />')
+            .append('<input type="hidden" name="tm_key" value="' + $('#new-tm-key').val() + '" />')
+            .append('<input type="hidden" name="name" value="' + tmName + '" />')
+            .append('<input type="hidden" name="r" value="1" />')
+            .append('<input type="hidden" name="w" value="1" />');
+        if(APP.isCattool) {
+            $(form).append('<input type="hidden" name="job_id" value="' + config.job_id + '" />')
+                .append('<input type="hidden" name="job_pass" value="' + config.password + '" />')
+        }
+
+        // Submit the form...
+        form.submit();
+
+//    document.getElementById(div_id).innerHTML = "Uploading...";
+        $('.popup-addtm-tr .x-popup').click();
+        UI.showMessage({
+            msg: 'Uploading your TM...'
+        });
+        $('#messageBar .msg').after('<span class="progress"></span>');
+        TMKey = $('#addtm-tr-key').val();
+        TMName = $('#uploadTMX').text();
+        console.log('TMKey 1: ', TMKey);
+        console.log('TMName 1: ', TMName);
+//    UI.pollForUploadProgress(TMKey, TMName);
+        UI.pollForUploadCallback(TMKey, TMName);
     },
 
 });
