@@ -280,6 +280,7 @@ class INIT {
                 'txt'  => array( '','','exttxt'),
                 'csv'  => array( '','','extxls'),
                 'xml'  => array( '','','extxml'),
+                'rtf'  => array( '','','extrtf'),
                 //                'vxd' => array("Try converting to XML")
             ),
             'Web'                 => array(
