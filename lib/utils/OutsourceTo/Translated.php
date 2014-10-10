@@ -146,7 +146,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
              *   1
              */
 
-            Log::doLog($quote);
+//            Log::doLog($quote);
 
             $result_quote = explode( "\n", $quote );
             $itemCart                     = new Shop_ItemHTSQuoteJob();
@@ -161,6 +161,8 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $itemCart[ 'target' ]        = $_jobLangs[ $jpid ]['target']; //get the right language
             $itemCart[ 'show_info' ]     = $result_quote[ 6 ];
             $cache_cart->addItem( $itemCart );
+
+            Log::doLog($itemCart);
 
             //Oops we got an error
             if( $itemCart[ 'price' ] == 0 && empty( $itemCart[ 'words' ] ) ) $failures[$jpid] = $jpid;
