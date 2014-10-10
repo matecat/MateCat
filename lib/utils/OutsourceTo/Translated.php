@@ -117,7 +117,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'source' ] = $source;
             $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'target' ] = $target;
 
-            $url = "http://www.translated.net/hts/?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target&pn=MATECAT_{$job[ 'jid' ]}-{$job['jpassword']}&w=$job_payableWords&df=matecat&matecat_pid=" . $this->pid . "&matecat_ppass=" . $this->ppassword;
+            $url = "http://www.translated.net/hts/?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target&pn=MATECAT_{$job[ 'jid' ]}-{$job['jpassword']}&w=$job_payableWords&df=matecat&matecat_pid=" . $this->pid . "&matecat_ppass=" . $this->ppassword . "&matecat_pname=" . $volAnalysis['summary'][ 'NAME' ];
 
             if( !$cache_cart->itemExists( $job[ 'jid' ] . "-" . $job['jpassword'] ) ){
                 Log::doLog( "Not Found in Cache. Call url for Quote:  " . $url );
@@ -151,6 +151,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $result_quote = explode( "\n", $quote );
             $itemCart                     = new Shop_ItemHTSQuoteJob();
             $itemCart[ 'id' ]            = $jpid;
+            $itemCart[ 'project_name' ]  = $volAnalysis['summary'][ 'NAME' ];
             $itemCart[ 'name' ]          = "MATECAT_$jpid";
             $itemCart[ 'delivery_date' ] = $result_quote[ 2 ];
             $itemCart[ 'words' ]         = $result_quote[ 3 ];
