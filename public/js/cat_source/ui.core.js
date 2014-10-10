@@ -2217,6 +2217,7 @@ UI = {
             return true;
         }
     },
+/*
     checkTMKey: function(key, operation) {console.log('checkTMKey');
         console.log('operation: ', operation);
 
@@ -2261,6 +2262,7 @@ UI = {
         }
 
     },
+*/
     checkAddTMEnable: function() {
         console.log('checkAddTMEnable');
         if(
@@ -2307,10 +2309,12 @@ UI = {
             $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');
         }
     },
-
+/*
     execAddTM: function() {
         fileUpload($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
     },
+*/
+/*
     execAddTMKey: function() {
         var r = ($('#addtm-tr-read').is(':checked'))? 1 : 0;
         var w = ($('#addtm-tr-write').is(':checked'))? 1 : 0;
@@ -2341,7 +2345,7 @@ UI = {
             }
         });
     },
-
+*/
     pollForUploadCallback: function(TMKey, TMName) {
         if($('#uploadCallback').text() != '') {
             msg = $.parseJSON($('#uploadCallback pre').text());

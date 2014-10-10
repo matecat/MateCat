@@ -4,6 +4,7 @@ APP = {
     init: function() {
 //        this.waitingConfirm = false;
 //        this.confirmValue = null;
+        this.isCattool = $('body').hasClass('cattool');
         $("body").on('click', '.modal .x-popup', function(e) {
             e.preventDefault();
             APP.closePopup();
@@ -16,7 +17,7 @@ APP = {
                     APP.confirmValue = true;
                 }
             }
-	  }).on('click', '.modal[data-type=confirm] .btn-ok', function(e) {
+	    }).on('click', '.modal[data-type=confirm] .btn-ok', function(e) {
             e.preventDefault();
             APP.closePopup();
             if($(this).attr('data-callback')) {

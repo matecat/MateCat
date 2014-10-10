@@ -577,14 +577,36 @@
                                     </tr>
 
                                     <tr class="new hide">
-                                        <td class="privatekey"> <input class="mgmt-input" type="text" id="key" onfocus="this.value='';"  value="Create new private key" />
+                                        <td class="privatekey"> <input class="mgmt-input" type="text" id="new-tm-key"
+                                                                       placeholder="Create new private key" />
                                             <a class="btn-ok pull-right">Create</a>
                                         </td>
-                                        <td class="description"><input class="mgmt-input" type="text" id="description" onfocus="this.value='';"  value="Enter a short description" />
+                                        <td class="description">
+                                            <input class="mgmt-input" type="text" id="new-tm-description" placeholder="Enter a short description" />
                                         </td>
-                                        <td class="fileupload" colspan="3"><label class="fileupload">Select a TMX </label><input type="file" />
+                                        <td class="fileupload" colspan="3">
+                                            <label class="fileupload">Select a TMX </label><input type="file" />
                                         </td>
-                                        <td class="action"><a class="pull-left btn-grey uploadtm"><span class="icon-upload"></span> Upload</a> <a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a> </td>
+                                        <td class="action">
+                                            <a class="pull-left btn-grey uploadtm"><span class="icon-upload"></span> Upload</a>
+
+                                            <form class="add-TM-Form" action="/" method="post">
+                                                <input type="hidden" name="action" value="addTM" />
+                                                <input type="hidden" name="exec" value="newTM" />
+                                                <input type="hidden" name="job_id" value="38424" />
+                                                <input type="hidden" name="job_pass" value="48a757e3d46c" />
+                                                <input type="hidden" name="tm_key" value="" />
+                                                <input type="hidden" name="name" value="" />
+                                                <input type="hidden" name="tmx_file" value="" />
+                                                <input type="hidden" name="r" value="1" />
+                                                <input type="hidden" name="w" value="1" />
+
+                                                <input type="button" name="submit" value="Add your TM" disabled="" id="addtm-add" class="pull-left btn-grey uploadtm" style="display: none" />
+                                            </form>
+
+                                            <a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a>
+                                            <span class="message"></span>
+                                        </td>
                                     </tr>
 
                                     </tbody>

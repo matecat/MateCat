@@ -739,7 +739,7 @@ color:#333;}
     width: 1100px;
     margin: 0 auto;
     overflow: hidden;
-    position: absolute;
+    position: fixed;
     z-index: 10000000000000;
     top: 0;
     right: 0;
@@ -867,7 +867,12 @@ width: 801px;
 	    background: -moz-linear-gradient(top,  #09beec,  #119ec4);
 	    background: linear-gradient(top,  #09beec,  #119ec4);
 }
-
+.hide {
+    display: none;
+}
+.popup-tm.open tr.hide {
+    display: none !important;
+}
 .btn-grey {
 border: 1px solid #848689;
 font-weight: bold;
@@ -1330,7 +1335,7 @@ clear: both;
 .addrow-gl {
 padding: 0 25px;
 }
-input#key {width:55%;}
+input#new-tm-key {width:55%;}
 
 .addrow-tm .block, .addrow-gl .block {width: 46%;}
 .addrow-gl select {height: 32px; margin-bottom:20px;}
