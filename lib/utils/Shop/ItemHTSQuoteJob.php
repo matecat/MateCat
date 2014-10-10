@@ -25,6 +25,7 @@ class Shop_ItemHTSQuoteJob extends Shop_AbstractItem {
     protected $__storage = array(
             'id'             => null,
             'quantity'       => 1,
+            'project_name'   => null,
             'name'           => null,
             'quote_pid'      => null,
             'source'         => null,
