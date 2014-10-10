@@ -146,7 +146,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
              *   1
              */
 
-//            Log::doLog($quote);
+            Log::doLog($quote);
 
             $result_quote = explode( "\n", $quote );
             $itemCart                     = new Shop_ItemHTSQuoteJob();
