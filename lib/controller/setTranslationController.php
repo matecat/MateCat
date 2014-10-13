@@ -52,6 +52,9 @@ class setTranslationController extends ajaxController {
         $this->chosen_suggestion_index = $this->__postInput[ 'chosen_suggestion_index' ];
         $this->status                  = strtoupper( $this->__postInput[ 'status' ] );
 
+        //TODO FIX FOR CLIENT BOM INSERTIONS, THIS IS A TEMPORARY PATCH
+        $this->translation = str_replace("\xEF\xBB\xBF",'',$this->translation);
+
     }
 
     protected function _checkData( $logName = 'log.txt' ) {
