@@ -13,11 +13,6 @@
 class TmKeyManagement_MemoryKeyStruct extends DataAccess_AbstractDaoObjectStruct implements DataAccess_IDaoStruct {
 
     /**
-     * @var integer The group's ID
-     */
-    public $gid;
-
-    /**
      * @var integer The user's ID
      */
     public $uid;
@@ -26,16 +21,6 @@ class TmKeyManagement_MemoryKeyStruct extends DataAccess_AbstractDaoObjectStruct
      * @var integer The owner's ID
      */
     public $owner_uid;
-
-    /**
-     * @var bool Group Read grants, the atomic value
-     */
-    public $r;
-
-    /**
-     * @var bool Group Write grants, the atomic value
-     */
-    public $w;
 
     /**
      * @var TmKeyManagement_TmKeyStruct
@@ -62,4 +47,4 @@ class TmKeyManagement_MemoryKeyStruct extends DataAccess_AbstractDaoObjectStruct
         return $result;
     }
 
-} 
+}

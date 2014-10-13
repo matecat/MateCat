@@ -13,9 +13,11 @@ class TmKeyManagement_TmKeyManagement {
      * Returns a TmKeyManagement_TmKeyStruct object. <br/>
      * If a proper associative array is passed, it fills the fields
      * with the array values.
+     *
      * @param array|null $tmKey_arr An associative array having
      *                              the same keys of a
      *                              TmKeyManagement_TmKeyStruct object
+     *
      * @return TmKeyManagement_TmKeyStruct The converted object
      */
     public static function getTmKeyStructure( $tmKey_arr = null ) {
@@ -28,23 +30,16 @@ class TmKeyManagement_TmKeyManagement {
      *
      * @param   $jsonTmKeys  string  A json string representing an array of TmKeyStruct Objects
      * @param   $grant_level string  One of the following strings : "r", "w", "rw"
-     * @param   $type string string  One of the following strings : "tm", "glossary", "tm,glossary"
+     * @param   $type        string  One of the following strings : "tm", "glossary", "tm,glossary"
+     * @param   $user_role   string  A constant string of one of the following: TmKeyManagement_Filter::ROLE_TRANSLATOR, TmKeyManagement_Filter::ROLE_REVISOR
+     * @param   $uid         int     The user ID, used to retrieve the personal keys
+     *
      * @return  array|mixed  An array of TmKeyManagement_TmKeyStruct objects
      * @throws  Exception    Throws Exception if grant_level string is wrong or if type string is wrong
      *
      * @see TmKeyManagement_TmKeyStruct
      */
-    public static function getJobTmKeys( $jsonTmKeys, $grant_level = 'rw', $type = "tm") {
-        $accepted_grants = array( "r", "w", "rw" );
-        $accepted_types = array( "tm", "glossary", "tm,glossary");
-
-        if ( !in_array( $grant_level, $accepted_grants ) ) {
-            throw new Exception ( __METHOD__ . " -> Invalid grant string." );
-        }
-
-        if ( !in_array($type, $accepted_types) ) {
-            throw new Exception ( __METHOD__ . " -> Invalid type string." );
-        }
+    public static function getJobTmKeys( $jsonTmKeys, $grant_level = 'rw', $type = "tm", $user_role = TmKeyManagement_Filter::ROLE_TRANSLATOR, $uid = null ) {
 
         $tmKeys = json_decode( $jsonTmKeys, true );
 
@@ -52,38 +47,19 @@ class TmKeyManagement_TmKeyManagement {
             throw new Exception ( __METHOD__ . " -> Invalid JSON " );
         }
 
-        //filter results by grants
-        switch ( $grant_level ) {
-            case 'r' :
-                $tmKeys = array_filter(
-                    $tmKeys,
-                    array( "TmKeyManagement_TmKeyManagement", 'filterTmKeysByReadGrant' )
-                );
-                break;
-            case 'w' :
-                $tmKeys = array_filter(
-                    $tmKeys,
-                    array( "TmKeyManagement_TmKeyManagement", 'filterTmKeysByWriteGrant' )
-                );
-                break;
-            default  :
-                break;
-        }
+        $filter = new TmKeyManagement_Filter( $uid );
+        $filter->setGrants( $grant_level )
+               ->setTmType( $type );
 
-        switch( $type ){
-            case 'tm' :
-                $tmKeys = array_filter(
-                        $tmKeys,
-                        array( "TmKeyManagement_TmKeyManagement", 'filterTmKeysByTmType' )
-                );
+        switch( $user_role ){
+            case TmKeyManagement_Filter::ROLE_TRANSLATOR:
+                $tmKeys = array_filter( $tmKeys, array( $filter, 'byTranslator' ) );
                 break;
-            case 'glossary':
-                $tmKeys = array_filter(
-                        $tmKeys,
-                        array( "TmKeyManagement_TmKeyManagement", 'filterTmKeysByGlossaryType' )
-                );
+            case TmKeyManagement_Filter::ROLE_REVISOR:
+                $tmKeys = array_filter( $tmKeys, array( $filter, 'byRevisor' ) );
                 break;
             default:
+                throw new Exception( "Filter type $user_role not allowed." );
                 break;
         }
 
@@ -94,9 +70,10 @@ class TmKeyManagement_TmKeyManagement {
     }
 
     /**
-     * @param $id_job int
+     * @param $id_job   int
      * @param $job_pass string
-     * @param $tm_keys array
+     * @param $tm_keys  array
+     *
      * @return int|null Returns null if all is ok, otherwise it returns the error code of the mysql Query
      */
     public static function setJobTmKeys( $id_job, $job_pass, $tm_keys ) {
@@ -108,24 +85,18 @@ class TmKeyManagement_TmKeyManagement {
      * of TmKeyManagement_TmKeyStruct objects into the corresponding array.
      *
      * @param $jsonTmKeys_array array An array of strings representing a json_encoded array of TmKeyManagement_TmKeyStruct objects
+     *
      * @return array                  An array of TmKeyManagement_TmKeyStruct objects
      * @throws Exception              Throws Exception if the input is not an array or if a string is not a valid json
      * @see TmKeyManagement_TmKeyStruct
      */
-    public static function getOwnerKeys( $jsonTmKeys_array ) {
-
-        if ( !is_array( $jsonTmKeys_array ) || is_null( $jsonTmKeys_array ) ) {
-            Log::doLog( __METHOD__ . " -> Invalid Array." );
-            Log::doLog( var_export( $jsonTmKeys_array, true ) );
-
-            throw new Exception( "Invalid array", -1 );
-        }
+    public static function getOwnerKeys( Array $jsonTmKeys_array ) {
 
         $result_arr = array();
 
-        foreach( $jsonTmKeys_array as $pos => $tmKey ){
+        foreach ( $jsonTmKeys_array as $pos => $tmKey ) {
 
-            $tmKey = json_decode($tmKey, true);
+            $tmKey = json_decode( $tmKey, true );
 
             if ( is_null( $tmKey ) ) {
                 Log::doLog( __METHOD__ . " -> Invalid JSON." );
@@ -133,9 +104,10 @@ class TmKeyManagement_TmKeyManagement {
                 throw new Exception ( "Invalid JSON", -2 );
             }
 
-            $tmKey = array_filter( $tmKey, array( 'self', 'filterTmKeysByOwnerTrue' ) );
+            $filter = new TmKeyManagement_Filter();
+            $tmKey = array_filter( $tmKey, array( $filter, 'byOwner' ) );
 
-            $result_arr[] = $tmKey;
+            $result_arr[ ] = $tmKey;
 
         }
 
@@ -156,123 +128,164 @@ class TmKeyManagement_TmKeyManagement {
 
     /**
      * Converts an array of strings representing a json_encoded array
-     * of TmKeyManagement_TmKeyStruct objects into an array of TmKeyManagement_TmKeyStruct objects
-     * @param $jsonTmKeys_array
+     * of TmKeyManagement_TmKeyStruct objects into an array of TmKeyManagement_TmKeyStruct objects. <br/>
+     * In case of duplicate keys, it will be returned the key with the highest grants.
+     *
+     * @param $jsonTmKeys_array Array
+     *
      * @return mixed
      * @throws Exception
      */
-    public static function array2TmKeyStructs( $jsonTmKeys_array ) {
+    public static function array2TmKeyStructs( Array $jsonTmKeys_array ) {
 
-        $tmKeys_array = array_map( 'json_decode', $jsonTmKeys_array,
-            //this workaround passes to array_map an array of true parameters
-            //for each string that will be json_decoded
-            array_fill(
-                0,
-                count( $jsonTmKeys_array ),
-                true )
-        );
+        $result_arr_withDuplicates = array();
 
-        if ( is_null( $tmKeys_array ) || empty( $tmKeys_array ) ) {
-            Log::doLog( __METHOD__ . " -> Invalid JSON." );
-            Log::doLog( var_export( $jsonTmKeys_array, true ) );
-            throw new Exception( "Invalid JSON" );
+        //decode json arrays into arrays
+        foreach ( $jsonTmKeys_array as $i => $jsonTmKey ) {
+            $jsonTmKey = json_decode( $jsonTmKey, true );
+
+            if ( is_null( $jsonTmKey ) || ( count( $jsonTmKey ) && empty( $jsonTmKey ) ) ) {
+                Log::doLog( __METHOD__ . " -> Invalid JSON." );
+                Log::doLog( var_export( $jsonTmKey, true ) );
+                throw new Exception( "Invalid JSON" );
+            }
+            $result_arr_withDuplicates = array_merge( $result_arr_withDuplicates, $jsonTmKey );
         }
 
-        $result_arr = array();
-        foreach ( $tmKeys_array as $tmKey_arr ) {
-            $result_arr = array_merge( $result_arr, $tmKey_arr );
+        //convert arrays into TmKeyManagement_TmKeyStruct objects
+        $result_arr_withDuplicates = array_map( array( 'self', 'getTmKeyStructure' ), $result_arr_withDuplicates );
+
+        //eliminate duplicates.
+        $result = array();
+        foreach ( $result_arr_withDuplicates as $tmKey ) {
+            /**
+             * @var $tmKey TmKeyManagement_TmKeyStruct
+             */
+
+            //check if element is present in result array.
+            $found = false;
+            foreach ( $result as $i => $resElem ) {
+                /**
+                 * @var $resElem TmKeyManagement_TmKeyStruct
+                 */
+
+                //If so, choose element with the most generic type and purpose
+                //
+                if ( $tmKey->equals( $resElem ) ) {
+
+                    $resElem->tm   = filter_var( $resElem->tm, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $tmKey->tm     = filter_var( $tmKey->tm, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $resElem->glos = filter_var( $resElem->glos, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $tmKey->glos   = filter_var( $tmKey->glos, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+
+                    $resElem->transl = filter_var( $resElem->transl, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $tmKey->transl   = filter_var( $tmKey->transl, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $resElem->rev    = filter_var( $resElem->rev, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $tmKey->rev      = filter_var( $tmKey->rev, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+
+                    //override grants
+                    $resElem->r = $tmKey->r;
+                    $resElem->w = $tmKey->w;
+
+                    //choose element with the most generic type (tm, glos)
+                    $resElem->tm   = (bool)$resElem->tm | (bool)$tmKey->tm;
+                    $resElem->glos = (bool)$resElem->glos | (bool)$tmKey->glos;
+
+                    //choose element with the most generic purpose (transl, rev)
+                    $resElem->transl = (bool)$resElem->transl | (bool)$tmKey->transl;
+                    $resElem->rev    = (bool)$resElem->rev | (bool)$tmKey->rev;
+
+                    //choose a name instead of null
+                    if ( $resElem->name === null ) {
+                        $resElem->name = $tmKey->name;
+                    }
+
+                    //choose an owner instead of null
+                    if ( $resElem->owner === null ) {
+                        $resElem->owner = $tmKey->owner;
+                    }
+
+                    $result[ $i ] = $resElem;
+                    $found        = true;
+                }
+            }
+            if ( !$found ) {
+                $result[ ] = $tmKey;
+            }
         }
 
-        //eliminate duplicates
-        $result_arr = array_unique( $result_arr );
-
-        $result_arr = array_map( array( 'self', 'getTmKeyStructure' ), $result_arr );
-
-        return $result_arr;
+        return $result;
     }
 
     /**
-     * Filters the elements of an array checking if read grant is true
+     * Checks if a given array has the same structure of a TmKeyManagement_TmKeyStruct object
      *
-     * @param $tm_key array An associative array with the following keys:<br/>
-     * <pre>
-     *          tm      : int - 1 if it's a tm key
-     *          glos    : int - 1 if it's a glossary key
-     *          owner   : boolean
-     *          key     : string
-     *          r       : int     - 0 or 1. Read privilege
-     *          w       : int     - 0 or 1. Write privilege
-     * </pre>
+     * @param $arr array The array whose structure has to be tested
      *
-     * @return bool This function returns whether the element is filtered or not
+     * @return TmKeyManagement_TmKeyStruct|bool True if the structure is compliant to a TmKeyManagement_TmKeyStruct object. False otherwise.
      */
-    private static function filterTmKeysByReadGrant( $tm_key ) {
-        return $tm_key[ 'r' ] == true;
+    public static function isValidStructure( $arr ) {
+        $myObj = new TmKeyManagement_TmKeyStruct( $arr );
+
+        return $myObj;
     }
 
     /**
-     * Filters the elements of an array checking if write grant is true
+     * This function adds $newTmKey into $tmKey_arr if it does not exist:
+     * if there's not an other tm key having the same key.
      *
-     * @param $tm_key array An associative array with the following keys:<br/>
-     * <pre>
-     *          tm      : int - 1 if it's a tm key
-     *          glos    : int - 1 if it's a glossary key
-     *          owner   : boolean
-     *          key     : string
-     *          r       : int     - 0 or 1. Read privilege
-     *          w       : int     - 0 or 1. Write privilege
-     * </pre>
+     * @param $tmKey_arr Array of TmKeyManagement_TmKeyStruct objects
+     * @param $newTmKey  TmKeyManagement_TmKeyStruct the new TM to be added
+     * @param $user_role string Filter Role
      *
-     * @return bool This function returns whether the element is filtered or not
+     * @return Array The initial array with the new TM key if it does not exist. <br/>
+     *              Otherwise, it returns the initial array.
      */
-    private static function filterTmKeysByWriteGrant( $tm_key ) {
-        return $tm_key[ 'w' ] == true;
+    public static function putTmKey( Array $tmKey_arr, TmKeyManagement_TmKeyStruct $newTmKey, $user_role = TmKeyManagement_Filter::OWNER ) {
+
+        $added = false;
+
+        foreach ( $tmKey_arr as $i => $curr_tm_key ) {
+            /**
+             * @var $curr_tm_key TmKeyManagement_TmKeyStruct
+             */
+            if ( $curr_tm_key->key == $newTmKey->key ) {
+                switch( $user_role ){
+
+                    case TmKeyManagement_Filter::ROLE_TRANSLATOR:
+                        $curr_tm_key->r_transl = $newTmKey->r_transl;
+                        $curr_tm_key->w_transl = $newTmKey->w_transl;
+                        $curr_tm_key->uid_transl = $newTmKey->uid_transl;
+                        break;
+
+                    case TmKeyManagement_Filter::ROLE_REVISOR:
+                        $curr_tm_key->r_rev = $newTmKey->r_rev;
+                        $curr_tm_key->w_rev = $newTmKey->w_rev;
+                        $curr_tm_key->uid_rev = $newTmKey->uid_rev;
+                        break;
+
+                    case TmKeyManagement_Filter::OWNER:
+                        $curr_tm_key->owner = $newTmKey->owner;
+                        $curr_tm_key->r = $newTmKey->r;
+                        $curr_tm_key->w = $newTmKey->w;
+                        break;
+
+                    case null:
+                        break;
+
+                    default:
+                        break;
+                }
+                $tmKey_arr[ $i ] = $curr_tm_key;
+                $added           = true;
+            }
+        }
+
+        if ( !$added ) {
+            array_push( $tmKey_arr, $newTmKey );
+        }
+
+        return $tmKey_arr;
     }
 
-    /**
-     * Filters the elements of an array checking if tm field is true
-     *
-     * @param $tm_key array An associative array with the following keys:<br/>
-     * <pre>
-     *          tm      : int - 1 if it's a tm key
-     *          glos    : int - 1 if it's a glossary key
-     *          owner   : boolean
-     *          key     : string
-     *          r       : int     - 0 or 1. Read privilege
-     *          w       : int     - 0 or 1. Write privilege
-     * </pre>
-     *
-     * @return bool This function returns whether the element is filtered or not
-     */
-    private static function filterTmKeysByTmType( $tm_key ){
-        return $tm_key[ 'tm' ] == true;
-    }
-
-    /**
-     * Filters the elements of an array checking if glos field is true
-     *
-     * @param $tm_key array An associative array with the following keys:<br/>
-     * <pre>
-     *          tm      : int - 1 if it's a tm key
-     *          glos    : int - 1 if it's a glossary key
-     *          owner   : boolean
-     *          key     : string
-     *          r       : int     - 0 or 1. Read privilege
-     *          w       : int     - 0 or 1. Write privilege
-     * </pre>
-     *
-     * @return bool This function returns whether the element is filtered or not
-     */
-    private static function filterTmKeysByGlossaryType( $tm_key ){
-        return $tm_key[ 'glos' ] == true;
-    }
-
-    /**
-     * Filters the elements of an array checking if owner flag is true
-     * @param $tm_key TmKeyManagement_TmKeyStruct
-     * @return bool This function returns whether the elements is filtered or not
-     */
-    private static function filterTmKeysByOwnerTrue(  $tm_key ) {
-        return $tm_key['owner'] == true;
-    }
 }

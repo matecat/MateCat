@@ -271,7 +271,7 @@
                             </form>
                         </div>
                         <hr class="addtm-break-2-lines" />
-                        <div id="uploadCallback"></div>
+<!--                        <div id="uploadCallback"></div> -->
                         <br />
                         <form metal:define-slot="actions" id="addTMForm" action="${basepath}" method="post">
                             <input type="hidden" name="action" value="addTM" />
@@ -292,6 +292,7 @@
                 </div>
             </div>
         </div>
+        <div id="uploadCallback"></div>
 
 <!--
 <div class="modal popup-addtm-tr" data-type="view">
@@ -577,14 +578,35 @@
                                     </tr>
 
                                     <tr class="new hide">
-                                        <td class="privatekey"> <input class="mgmt-input" type="text" id="key" onfocus="this.value='';"  value="Create new private key" />
+                                        <td class="privatekey"> <input class="mgmt-input" type="text" id="new-tm-key"
+                                                                       placeholder="Create new private key" />
                                             <a class="btn-ok pull-right">Create</a>
                                         </td>
-                                        <td class="description"><input class="mgmt-input" type="text" id="description" onfocus="this.value='';"  value="Enter a short description" />
+                                        <td class="description">
+                                            <input class="mgmt-input" type="text" id="new-tm-description" placeholder="Enter a short description" />
                                         </td>
-                                        <td class="fileupload" colspan="3"><label class="fileupload">Select a TMX </label><input type="file" />
+                                        <td class="fileupload" colspan="3">
+                                            <label class="fileupload">Select a TMX </label><input type="file" />
                                         </td>
-                                        <td class="action"><a class="pull-left btn-grey uploadtm"><span class="icon-upload"></span> Upload</a> <a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a> </td>
+                                        <td class="action">
+                                            <a class="pull-left btn-grey uploadtm"><span class="icon-upload"></span> Upload</a>
+
+                                            <form class="add-TM-Form" action="/" method="post">
+                                                <input type="hidden" name="action" value="addTM" />
+                                                <input type="hidden" name="exec" value="newTM" />
+                                                <input type="hidden" name="job_id" value="38424" />
+                                                <input type="hidden" name="job_pass" value="48a757e3d46c" />
+                                                <input type="hidden" name="tm_key" value="" />
+                                                <input type="hidden" name="name" value="" />
+                                                <input type="hidden" name="tmx_file" value="" />
+                                                <input type="hidden" name="r" value="1" />
+                                                <input type="hidden" name="w" value="1" />
+                                                <input type="submit" id="addtm-add-submit" style="display: none" />
+                                            </form>
+
+                                            <a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a>
+                                            <span class="message"></span>
+                                        </td>
                                     </tr>
 
                                     </tbody>
@@ -603,23 +625,24 @@
                                     </tr>
                                     </thead>
                                     <tbody class="list">
-                                    <tr data-tm="1" data-glos="1">
-                                        <td class="privatekey">1982128128</td>
-                                        <td class="description">Google tmx</td>
-                                        <td class="langpair"><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
-                                        <td class="lookup text-center check" ><input type="checkbox" /></td>
-                                        <td class="update text-center check" ><input type="checkbox" /></td>
-                                        <td class="action"><a class="btn-grey pull-left usetm"><span class="icon-play-circle"></span> Use</a> <a class="btn-grey pull-left  addtmx"><span class="icon-plus-circle"></span> Add TMX</a></td>
-                                    </tr>
-                                    <tr data-tm="1" data-glos="1">
-                                        <td class="privatekey">2189281281</td>
-                                        <td class="description">Inf and geo</td>
-                                        <td class="langpair"><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
-                                        <td class="lookup text-center check" ><input type="checkbox" /></td>
-                                        <td class="update text-center check" ><input type="checkbox" /></td>
-                                        <td class="action"><a class="btn-grey pull-left usetm"><span class="icon-play-circle"></span> Use</a><a class="btn-grey pull-left  addtmx"><span class="icon-plus-circle"></span> Add TMX</a></td>
-                                    </tr>
-
+                                    <tal:block tal:repeat="key user_keys">
+                                        <tr data-tm="1" data-glos="1">
+                                            <td class="privatekey">${key/key}</td>
+                                            <td class="description">${key/name}</td>
+                                            <td class="langpair"><span class="mgmt-source">en-US</span> -
+                                                <span class="mgmt-target">es-ES</span></td>
+                                            <td class="lookup text-center check"><input type="checkbox" checked="${key/r}"/></td>
+                                            <td class="update text-center check"><input type="checkbox" checked="${key/w}"/></td>
+                                            <td class="action">
+                                                <a class="btn-grey pull-left usetm">
+                                                    <span class="icon-play-circle"></span> Use
+                                                </a>
+                                                <a class="btn-grey pull-left  addtmx">
+                                                    <span class="icon-plus-circle"></span> Add TMX
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tal:block>
                                     </tbody>
                                 </table>
 

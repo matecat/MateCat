@@ -2217,6 +2217,7 @@ UI = {
             return true;
         }
     },
+/*
     checkTMKey: function(key, operation) {console.log('checkTMKey');
         console.log('operation: ', operation);
 
@@ -2261,6 +2262,7 @@ UI = {
         }
 
     },
+*/
     checkAddTMEnable: function() {
         console.log('checkAddTMEnable');
         if(
@@ -2307,10 +2309,12 @@ UI = {
             $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');
         }
     },
-
+/*
     execAddTM: function() {
         fileUpload($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
     },
+*/
+/*
     execAddTMKey: function() {
         var r = ($('#addtm-tr-read').is(':checked'))? 1 : 0;
         var w = ($('#addtm-tr-write').is(':checked'))? 1 : 0;
@@ -2341,10 +2345,13 @@ UI = {
             }
         });
     },
-
+*/
+/*
     pollForUploadCallback: function(TMKey, TMName) {
+        console.log('aaa: ', $('#uploadCallback').text());
         if($('#uploadCallback').text() != '') {
             msg = $.parseJSON($('#uploadCallback pre').text());
+            console.log('msg: ', msg);
             if(msg.success == true) {
                 UI.pollForUploadProgress(TMKey, TMName);
             } else {
@@ -2359,48 +2366,8 @@ UI = {
         }
 
     },
-    pollForUploadProgress: function(TMKey, TMName) {
-        APP.doRequest({
-            data: {
-                action: 'ajaxUtils',
-                exec: 'tmxUploadStatus',
-                tm_key: TMKey,
-                tmx_name: TMName
-            },
-            context: [TMKey, TMName],
-            error: function() {
-            },
-            success: function(d) {
-                if(d.errors.length) {
-                    UI.showMessage({
-                        msg: d.errors[0].message,
-                    });
-                } else {
-                    if(d.data.total == null) {
-                        pollForUploadProgressContext = this;
-                        setTimeout(function() {
-                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1]);
-                        }, 500);
-                    } else {
-                        if(d.completed) {
-                            $('#messageBar .progress').remove();
-                            UI.showMessage({
-                            msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
-                            });
-                            UI.clearAddTMpopup();
-                            return false;
-                        }
-                        progress = (parseInt(d.data.done)/parseInt(d.data.total))*100;
-                        $('#messageBar .progress').css('width', progress + '%');
-                        pollForUploadProgressContext = this;
-                        setTimeout(function() {
-                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1]);
-                        }, 500);
-                    }
-                }
-            }
-        });
-    },
+*/
+
 
     clearAddTMpopup: function() {
         $('#addtm-tr-key').val('');

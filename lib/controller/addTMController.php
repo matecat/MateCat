@@ -139,14 +139,23 @@ class addTMController extends ajaxController {
     /**
      * @var string Project owner's email
      */
-    private $ownerID = null;
+    private $sessionUserEmail = null;
+
+    /**
+     * @var string Project owner's UID
+     */
+    private $sessionUserID = null;
+    /**
+     * @var string The user type. It can be "translator", "revisor" or "owner"
+     */
+    private $userRole;
 
     private static $acceptedActions = array( "newTM", "addTM" );
 
-    const DEFAULT_READ  = true;
+    const DEFAULT_READ = true;
     const DEFAULT_WRITE = true;
-    const DEFAULT_TM    = true;
-    const DEFAULT_GLOS  = true;
+    const DEFAULT_TM = true;
+    const DEFAULT_GLOS = true;
 
     public function __construct() {
 
@@ -180,6 +189,14 @@ class addTMController extends ajaxController {
         $this->r_grant  = $postInput->r;
         $this->w_grant  = $postInput->w;
 
+        $_from_url = parse_url( $_SERVER['HTTP_REFERER'] );
+        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
+        if ( $url_request ) {
+            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+        } else {
+            $this->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+        }
+
         $this->file = $this->uploadFile();
 
         $this->job_data = getJobData( $this->job_id, $this->job_pass );
@@ -187,7 +204,7 @@ class addTMController extends ajaxController {
         //if Engine is not MyMemory, raise an error to the client.
         if ( !$this->job_data[ 'id_tms' ] == 1 ) {
             $this->result[ 'errors' ][ ] = array(
-                    "code" => -1, "message" => "MT Engine is not MyMemory. TMX cannot be added."
+                    "code" => -1, "message" => "MT Engine not valid. TMX cannot be added."
             );
         }
 
@@ -239,7 +256,7 @@ class addTMController extends ajaxController {
 
         }
 
-        if ( !isset($keyExists) || $keyExists === false ) {
+        if ( !isset( $keyExists ) || $keyExists === false ) {
             $this->result[ 'errors' ][ ] = array( "code" => -9, "message" => "TM key is not valid." );
         }
 
@@ -279,39 +296,28 @@ class addTMController extends ajaxController {
 
         if ( $this->exec == "newTM" ) {
 
-            if ( $this->addTmxInMyMemory() ) {
-                //start loop and wait for the files to be imported in MyMemory
-                //MyMemory parses more or less 80 segments/sec per TMX
-
-//comment this, now polling on status is handled by another controller
-//                if ( !$this->checkTmxImportStatus() ) {
-//                    $this->result[ 'success' ] = false;
-//                    return;
-//                }
-
-            }
+            $this->addTmxInMyMemory();
 
         }
 
         $tmKey_structure = TmKeyManagement_TmKeyManagement::getTmKeyStructure();
 
         //TODO: tm and glos assignments will take the values from ajax parameters
-        $tmKey_structure->tm     = true;
-        $tmKey_structure->glos   = true;
-        $tmKey_structure->owner  = false;
-        $tmKey_structure->name   = $this->name;
-        $tmKey_structure->key    = $this->tm_key;
-        $tmKey_structure->r      = $this->r_grant;
-        $tmKey_structure->w      = $this->w_grant;
+        $tmKey_structure->tm    = true;
+        $tmKey_structure->glos  = true;
+        $tmKey_structure->owner = false;
+        $tmKey_structure->name  = $this->name;
+        $tmKey_structure->key   = $this->tm_key;
 
+        $_userRole = $this->getUserRole();
 
         try {
-            $job_tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $this->job_data[ 'tm_keys' ], "rw" );
+            $job_tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $this->job_data[ 'tm_keys' ], "rw", "tm", $_userRole );
         } catch ( Exception $e ) {
             $this->result[ 'errors' ][ ] = array(
                     "code" => -10, "message" => "Could not retrieve TM keys from the database."
             );
-            $this->result[ 'success' ] = false;
+            $this->result[ 'success' ]   = false;
             Log::doLog( __METHOD__ . " -> " . $e->getMessage() );
 
             return;
@@ -321,24 +327,41 @@ class addTMController extends ajaxController {
             $job_tmKeys = array();
         }
 
-        $this->checkLogin();
         if ( $this->isLogged ) {
 
-            if ( $this->job_data[ 'owner' ] == $this->ownerID ) {
-                $tmKey_structure->owner = true;
+            //assign different grants in the key depending on the use role
+            switch ( $_userRole ) {
+                case TmKeyManagement_Filter::OWNER :
+                    $tmKey_structure->owner   = true;
+                    $tmKey_structure->r = $this->r_grant;
+                    $tmKey_structure->w = $this->w_grant;
+                    break;
+
+                case TmKeyManagement_Filter::ROLE_TRANSLATOR:
+                    $tmKey_structure->uid_transl = $this->sessionUserID;
+                    $tmKey_structure->r_transl = $this->r_grant;
+                    $tmKey_structure->w_transl = $this->w_grant;
+                    break;
+                case TmKeyManagement_Filter::ROLE_REVISOR:
+                    $tmKey_structure->uid_rev = $this->sessionUserID;
+                    $tmKey_structure->r_rev = $this->r_grant;
+                    $tmKey_structure->w_rev = $this->w_grant;
+                    break;
+                default:
+                    break;
             }
             //TODO: link tm key to the current user
         }
 
         //link tm key to the job
-        $job_tmKeys = self::putTmKey(
+        $job_tmKeys = TmKeyManagement_TmKeyManagement::putTmKey(
                 $job_tmKeys,
                 $tmKey_structure
         );
 
         TmKeyManagement_TmKeyManagement::setJobTmKeys( $this->job_id, $this->job_pass, $job_tmKeys );
 
-        $this->result[ 'errors' ] = array();
+        $this->result[ 'errors' ]  = array();
         $this->result[ 'success' ] = true;
 
     }
@@ -408,7 +431,7 @@ class addTMController extends ajaxController {
     private function checkTmxImportStatus() {
         /**
          * todo: refactor this method and the block in
-         * ProjectManager::createProject() into one external method
+         * todo: ProjectManager::createProject() into one external method
          */
 
         foreach ( $this->file as $k => $fileInfo ) {
@@ -473,43 +496,50 @@ class addTMController extends ajaxController {
      *
      * @return bool
      */
-    public function checkLogin() {
+    public function setLoginUserParams() {
         //Warning, sessions enabled, disable them after check, $_SESSION is in read only mode after disable
         parent::sessionStart();
-        $this->isLogged = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
-        $this->ownerID  = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
+        $this->isLogged      = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
+        $this->sessionUserEmail = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'cid' ] : null );
+        $this->sessionUserID = ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) ? $_SESSION[ 'uid' ] : null );
+
         parent::disableSessions();
 
         return $this->isLogged;
     }
 
     /**
-     * This function adds $newTmKey into $tmKey_arr if it does not exist:
-     * if there's not an other tm key having the same key.
-     *
-     * @param $tmKey_arr Array of TmKeyManagement_TmKeyStruct objects
-     * @param $newTmKey TmKeyManagement_TmKeyStruct the new TM to be added
-     *
-     * @return Array The initial array with the new TM key if it does not exist. <br/>
-     *              Otherwise, it returns the initial array.
+     * Returns The current user role. <br>
+     * If user is logged, it can be:<br/>
+     * <ul>
+     * <li>The owner of the job -> return "owner"</li>
+     * <li>A translator -> return "translator"</li>
+     * <li>A revisor -> return "revisor"</li>
+     * </ul>
+     * For an anonymous user, this method returns null
+     * @return null|string
      */
-    private static function putTmKey( $tmKey_arr, $newTmKey ) {
-        $added = false;
+    public function getUserRole() { //TODO this method should not be here
 
-        foreach ( $tmKey_arr as $i => $curr_tm_key ) {
-            /**
-             * @var $curr_tm_key TmKeyManagement_TmKeyStruct
-             */
-            if ( $curr_tm_key->key == $newTmKey->key) {
-                $tmKey_arr[ $i ] = $newTmKey;
-                $added           = true;
+        $this->setLoginUserParams();
+
+        if ( $this->isLogged ) {
+            //CASE 1: current user is the owner of the job
+
+            if ( $this->sessionUserEmail == $this->job_data[ TmKeyManagement_Filter::OWNER ] ) {
+                return TmKeyManagement_Filter::OWNER;
             }
+
+            //CASE 2: current user has been declared as translator
+            if ( !empty( $this->userRole ) ) {
+                return $this->userRole;
+            }
+
+            return TmKeyManagement_Filter::ROLE_TRANSLATOR;
+
+        } else {
+            return null;
         }
 
-        if ( !$added ) {
-            array_push( $tmKey_arr, $newTmKey );
-        }
-
-        return $tmKey_arr;
     }
 }

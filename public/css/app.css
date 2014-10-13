@@ -734,20 +734,34 @@ color:#333;}
 }
 
 
-
 .popup-tm {
-min-height: 108%;
-width: 1100px;
-margin: 0 auto;
-overflow: hidden;
-position: absolute;
-z-index: 10000000000000;
-top: 0;
-right: 0;
-background: #fff;
-box-shadow: -2px 5px 7px #7B7B7B;
+    min-height: 108%;
+    width: 1100px;
+    margin: 0 auto;
+    overflow: hidden;
+    position: fixed;
+    z-index: 10000000000000;
+    top: 0;
+    right: 0;
+    background: #fff;
+    box-shadow: -2px 5px 7px #7B7B7B;
 }
 
+.editing .popup-tm {
+    top:20px;
+
+}
+
+td.addtmxtd {
+width: 801px;
+}
+
+form.add-TM-Form {
+    display: none;
+}
+#uploadCallback {
+    display: none;
+}
 .popup p
 {
 	font-size: 18px;
@@ -858,7 +872,12 @@ box-shadow: -2px 5px 7px #7B7B7B;
 	    background: -moz-linear-gradient(top,  #09beec,  #119ec4);
 	    background: linear-gradient(top,  #09beec,  #119ec4);
 }
-
+.hide {
+    display: none;
+}
+.popup-tm.open tr.hide {
+    display: none !important;
+}
 .btn-grey {
 border: 1px solid #848689;
 font-weight: bold;
@@ -979,27 +998,33 @@ margin:0 auto; overflow:hidden; width:100%;
 
 
 .mgmt-tm .priority {
-	width:5%!important;
+	/*width:5%!important;*/
+
 }
 
 .mgmt-tm .privatekey {
-	width:19%!important;
+	/*width:19%!important;*/
+	width:194px!important;
 }
 
 .mgmt-tm .description {
-	width:32%!important;
+	/*width:32%!important;*/
+	width:300px!important;
 }
 
 .mgmt-tm .langpair {
-	width:14%!important;
+	/*width:14%!important;*/
+	width:144px!important;
 }
 
 .mgmt-tm .check {
-		width:6%!important;
+		/*width:6%!important;*/
+		width:55px!important;
 }
 
 .mgmt-tm .action {
-		width:22%!important;
+		/*width:22%!important;*/
+		width: 220px!important;
 }
 
 .mgmt-tm .fileupload {
@@ -1069,7 +1094,8 @@ margin: 2px 2px 0px;}
 
 #activetm {cursor: move; margin-bottom: 15px;}
 #activetm thead {
-    display: table-header-group !important;
+  /*  display: table-header-group !important;*/
+  background: #6d6e71;
 }
 #activetm tbody {
     display: block;
@@ -1282,9 +1308,10 @@ border-top: 1px solid #666;
 
 .mgmt-input {
 width: 90%;
-padding: 5px;
-font-size: 12px !important;
-margin-top:0px;
+padding: 12px;
+font-size: 15px !important;
+margin-top: 0px;
+margin-bottom: 20px;
 -moz-border-radius: 2px;
 border-radius: 2px;
 border: 1px solid #ccc;
@@ -1297,7 +1324,13 @@ border: 1px solid #ccc;
 {
 	text-transform: uppercase;
 }
-.searchbox .block, .mgmt-panel .block
+.searchbox .block {
+	float: left;
+margin-right: 20px;
+text-align: left;
+margin-top: 2px;
+}
+.mgmt-panel .block
 {
 	margin: 20px 0;
 text-align: right;
@@ -1307,7 +1340,7 @@ clear: both;
 .addrow-gl {
 padding: 0 25px;
 }
-input#key {width:55%;}
+input#new-tm-key {width:55%;}
 
 .addrow-tm .block, .addrow-gl .block {width: 46%;}
 .addrow-gl select {height: 32px; margin-bottom:20px;}
@@ -4174,7 +4207,7 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 	display: block;
 	height: auto;
     text-align: left;
-    min-height: 30px;
+    min-height: 34px;
 	background: #FFFA8B;
 /*	-webkit-transition: all 200ms ease-in;
 	padding: 4px 10px;
@@ -4642,16 +4675,17 @@ margin: 10px 0;
 	border:1px solid white;
     height: 25px;
 }
-#uploadCallback {
-    display: none;
-}
+
+
 #uploadTMX {
     display: none;
+    background: #f4f4f4;
     text-indent: 10px;
-    border: none;
+    border: 1px solid #E4E4E4;
+    margin: 15px 5px 10px 6px;
+    box-shadow: 1px 1px 1px #ccc;
     float: left;
     padding-bottom: 0px !important;
-    background: #fbfbfb;
     -webkit-transition: all 50ms ease-in;
 }
 
@@ -4705,18 +4739,18 @@ box-shadow: inset 0 0 1px 1px #888;
      display: none;
  }
 
- #uploadTMX .delete {
-     background: url(../img/sprite.png) 10px -303px no-repeat;
-     display: block;
-     height: 40px;
-     width: 40px;
-     float: right;
-     margin: -5px 0px 0 0;
-     background-size: 22px;
-     cursor: pointer;
- }
+#uploadTMX .delete {
+    background: url(../img/sprite2x.png) 0px -88px no-repeat;
+    display: block;
+    height: 25px;
+    width: 40px;
+    float: right;
+    margin: 0;
+    background-size: 50px;
+    cursor: pointer;
+}
 
 #uploadTMX .delete:hover {
-    background: url(../img/sprite.png) 10px -334px no-repeat;
-    background-size: 22px;
+    background: url(../img/sprite2x.png) 0px -90px no-repeat;
+    background-size: 50px;
 }

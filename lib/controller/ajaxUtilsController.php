@@ -50,8 +50,6 @@ class ajaxUtilsController extends ajaxController {
                 //get MyMemory apiKey service
                 $apiKeyService = TMSServiceFactory::getAPIKeyService();
 
-                Log::doLog( $this->__postInput['tm_key'] );
-
                 //validate the key
                 try {
                     $keyExists = $apiKeyService->checkCorrectKey( $this->__postInput['tm_key'] );
