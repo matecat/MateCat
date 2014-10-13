@@ -23,16 +23,6 @@ class TmKeyManagement_MemoryKeyStruct extends DataAccess_AbstractDaoObjectStruct
     public $owner_uid;
 
     /**
-     * @var bool Group Read grants, the atomic value
-     */
-    public $r;
-
-    /**
-     * @var bool Group Write grants, the atomic value
-     */
-    public $w;
-
-    /**
      * @var TmKeyManagement_TmKeyStruct
      */
     public $tm_key;

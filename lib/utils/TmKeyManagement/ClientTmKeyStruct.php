@@ -6,7 +6,7 @@
  * Time: 15.52
  */
 
-class ClientTmKeyStruct extends TmKeyManagement_TmKeyStruct {
+class TmKeyManagement_ClientTmKeyStruct extends TmKeyManagement_TmKeyStruct {
 
     /**
      * Flag that tells wether the key is editable or not by the current user.
@@ -18,16 +18,28 @@ class ClientTmKeyStruct extends TmKeyManagement_TmKeyStruct {
      * This function obfuscates the key.<br />
      * A key is obfuscated by replacing all the characters except the last 4 ones with "*" characters.<br /><br />
      *
+     * @param $uid
+     * @return TmKeyManagement_ClientTmKeyStruct
+     *
      * <b>Example</b><br />
      * 1234abcd1a2b  -->  ********1a2b
      */
-    public function hideKey(){
-        //pre: $this->key is a string of length greater than 1
+    public function hideKey( $uid ){
 
-        $keyLength = strlen($this->key);
-        $last4digits = substr($this->key, -4);
+        if( $uid != $this->uid_transl && $uid != $this->uid_rev ){
+            //pre: $this->key is a string of length greater than 1
 
-        $this->key = str_repeat("*", $keyLength) . $last4digits;
+            $keyLength = strlen($this->key);
+            $last4digits = substr($this->key, -4);
+
+            $this->key = str_repeat("*", $keyLength) . $last4digits;
+
+            $this->edit = false;
+
+        }
+
+        return $this;
+
     }
 
-} 
+}

@@ -93,22 +93,25 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
      */
     public $target;
 
-
-
     /**
      * @param array|null $params An associative array with the following keys:<br/>
-     *                           <pre>
-     *                           tm      : int     - 0 or 1. Tm key
-     *                           glos    : int     - 0 or 1. Glossary key
-     *                           owner   : boolean
-     *                           transl  : int     - 0 or 1. Translation key
-     *                           rev     : int     - 0 or 1. Revision key
-     *                           key     : string
-     *                           r       : int     - 0 or 1. Read privilege
-     *                           w       : int     - 0 or 1. Write privilege
-     *                           source  : string
-     *                           target  : string
-     *                           </pre>
+     * <pre>
+     *    tm         : boolean - Tm key
+     *    glos       : boolean - Glossary key
+     *    owner      : boolean - The key is set by the Project creator
+     *    uid_transl : int     - User ID
+     *    uid_rev    : int     - User ID
+     *    name       : string
+     *    key        : string
+     *    r          : boolean - Read privilege
+     *    w          : boolean - Write privilege
+     *    r_transl   : boolean - Translator Read privilege
+     *    w_transl   : boolean - Translator Write privilege
+     *    r_rev      : boolean - Revisor Read privilege
+     *    w_rev      : boolean - Translator Write privilege
+     *    source     : string  - Source languages
+     *    target     : string  - Target languages
+     * </pre>
      */
     public function __construct( $params = null ) {
         if ( $params != null ) {

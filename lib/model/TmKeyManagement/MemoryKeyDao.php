@@ -28,8 +28,8 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $this->_validateNotNullFields( $obj );
 
         $query = "INSERT INTO " . self::TABLE .
-                " (uid, key_value, key_name, key_tm, key_glos, read_grants, write_grants, creation_date)
-                VALUES ( %d, %d, '%s', '%s', %s, %s, %d, %d NOW())";
+                " (uid, key_value, key_name, key_tm, key_glos, creation_date)
+                VALUES ( %d, %d, '%s', '%s', %s, %s, NOW())";
 
         $query = sprintf(
                 $query,
@@ -37,9 +37,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                 $obj->tm_key->key,
                 ( $obj->tm_key->name == null ) ? '' : $obj->tm_key->name,
                 ( $obj->tm_key->tm == null ) ? 1 : $obj->tm_key->tm,
-                ( $obj->tm_key->glos == null ) ? 1 : $obj->tm_key->glos,
-                ( $obj->r == null ) ? true : $obj->r,
-                ( $obj->w == null ) ? true : $obj->w
+                ( $obj->tm_key->glos == null ) ? 1 : $obj->tm_key->glos
         );
 
         $this->con->query( $query );
@@ -65,26 +63,15 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $where_conditions = array();
         $query            = "SELECT uid,
+                                    owner_uid,
                                     key_value,
                                     key_name,
                                     key_tm AS tm,
-                                    key_glos AS glos,
-                                    read_grants AS r,
-                                    write_grants AS w
+                                    key_glos AS glos
                              FROM " . self::TABLE . " WHERE %s";
 
         if ( $obj->uid !== null ) {
             $where_conditions[ ] = "uid = " . $obj->uid;
-        }
-
-        if ( $obj->r !== null ) {
-            $condition           = "read_grants = %d";
-            $where_conditions[ ] = sprintf( $condition, $obj->r );
-        }
-
-        if ( $obj->w !== null ) {
-            $condition           = "write_grants = %d";
-            $where_conditions[ ] = sprintf( $condition, $obj->w );
         }
 
         //tm_key conditions
@@ -527,15 +514,13 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
             $build_arr = array(
                     'uid'       => $item[ 'uid' ],
                     'owner_uid' => $item[ 'owner_uid' ],
-                    'r'         => (bool)$item[ 'r' ],
-                    'w'         => (bool)$item[ 'w' ],
                     'tm_key'    => new TmKeyManagement_TmKeyStruct( array(
                                     'key'  => (string)$item[ 'key_value' ],
                                     'name' => (string)$item[ 'key_name' ],
                                     'tm'   => (bool)$item[ 'tm' ],
                                     'glos' => (bool)$item[ 'glos' ],
-                                    'r'    => (bool)$item[ 'r' ],
-                                    'w'    => (bool)$item[ 'w' ],
+                                    'r'    => true,
+                                    'w'    => true,
                             )
                     )
             );

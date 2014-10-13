@@ -8368,7 +8368,7 @@ $.extend(UI, {
         }
 
         // Submit the form...
-        form.submit();
+        $(form).submit();
 
 //    document.getElementById(div_id).innerHTML = "Uploading...";
         $('.popup-addtm-tr .x-popup').click();

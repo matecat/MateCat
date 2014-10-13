@@ -625,23 +625,24 @@
                                     </tr>
                                     </thead>
                                     <tbody class="list">
-                                    <tr data-tm="1" data-glos="1">
-                                        <td class="privatekey">1982128128</td>
-                                        <td class="description">Google tmx</td>
-                                        <td class="langpair"><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
-                                        <td class="lookup text-center check" ><input type="checkbox" /></td>
-                                        <td class="update text-center check" ><input type="checkbox" /></td>
-                                        <td class="action"><a class="btn-grey pull-left usetm"><span class="icon-play-circle"></span> Use</a> <a class="btn-grey pull-left  addtmx"><span class="icon-plus-circle"></span> Add TMX</a></td>
-                                    </tr>
-                                    <tr data-tm="1" data-glos="1">
-                                        <td class="privatekey">2189281281</td>
-                                        <td class="description">Inf and geo</td>
-                                        <td class="langpair"><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
-                                        <td class="lookup text-center check" ><input type="checkbox" /></td>
-                                        <td class="update text-center check" ><input type="checkbox" /></td>
-                                        <td class="action"><a class="btn-grey pull-left usetm"><span class="icon-play-circle"></span> Use</a><a class="btn-grey pull-left  addtmx"><span class="icon-plus-circle"></span> Add TMX</a></td>
-                                    </tr>
-
+                                    <tal:block tal:repeat="key user_keys">
+                                        <tr data-tm="1" data-glos="1">
+                                            <td class="privatekey">${key/key}</td>
+                                            <td class="description">${key/name}</td>
+                                            <td class="langpair"><span class="mgmt-source">en-US</span> -
+                                                <span class="mgmt-target">es-ES</span></td>
+                                            <td class="lookup text-center check"><input type="checkbox" checked="${key/r}"/></td>
+                                            <td class="update text-center check"><input type="checkbox" checked="${key/w}"/></td>
+                                            <td class="action">
+                                                <a class="btn-grey pull-left usetm">
+                                                    <span class="icon-play-circle"></span> Use
+                                                </a>
+                                                <a class="btn-grey pull-left  addtmx">
+                                                    <span class="icon-plus-circle"></span> Add TMX
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tal:block>
                                     </tbody>
                                 </table>
 
