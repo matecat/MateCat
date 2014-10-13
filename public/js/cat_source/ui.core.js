@@ -2522,7 +2522,7 @@ UI = {
         $(area).find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
         $(area).find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
         $(area).find('span.space-marker').replaceWith(' ');
-
+        $(area).find('span.rangySelectionBoundary').remove();
 
 //        Now commented, but valid for future purposes when the user will choose what type of carriage return
 //        $('br', area).each(function() {
