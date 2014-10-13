@@ -271,7 +271,7 @@
                             </form>
                         </div>
                         <hr class="addtm-break-2-lines" />
-                        <div id="uploadCallback"></div>
+<!--                        <div id="uploadCallback"></div> -->
                         <br />
                         <form metal:define-slot="actions" id="addTMForm" action="${basepath}" method="post">
                             <input type="hidden" name="action" value="addTM" />
@@ -292,6 +292,7 @@
                 </div>
             </div>
         </div>
+        <div id="uploadCallback"></div>
 
 <!--
 <div class="modal popup-addtm-tr" data-type="view">
@@ -601,8 +602,6 @@
                                                 <input type="hidden" name="r" value="1" />
                                                 <input type="hidden" name="w" value="1" />
                                                 <input type="submit" id="addtm-add-submit" style="display: none" />
-
- <!--                                               <input type="button" name="oldsubmit" value="Add your TM" disabled="" id="addtm-add" class="pull-left btn-grey uploadtm" style="display: none" /> -->
                                             </form>
 
                                             <a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a>

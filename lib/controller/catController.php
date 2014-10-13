@@ -386,7 +386,7 @@ class catController extends viewController {
 
 //        Log::doLog( $this->job_stats );
 
-//        $this->template->user_keys              = $this->_keyList;
+        $this->template->user_keys              = $this->_keyList;
         $this->template->job_stats              = $this->job_stats;
 
         $end_time                               = microtime( true ) * 1000;

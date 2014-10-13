@@ -756,7 +756,12 @@ td.addtmxtd {
 width: 801px;
 }
 
-
+form.add-TM-Form {
+    display: none;
+}
+#uploadCallback {
+    display: none;
+}
 .popup p
 {
 	font-size: 18px;
@@ -4670,9 +4675,7 @@ margin: 10px 0;
 	border:1px solid white;
     height: 25px;
 }
-#uploadCallback {
-    display: none;
-}
+
 
 #uploadTMX {
     display: none;
