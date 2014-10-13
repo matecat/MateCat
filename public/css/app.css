@@ -1303,9 +1303,10 @@ border-top: 1px solid #666;
 
 .mgmt-input {
 width: 90%;
-padding: 5px;
-font-size: 12px !important;
-margin-top:0px;
+padding: 12px;
+font-size: 15px !important;
+margin-top: 0px;
+margin-bottom: 20px;
 -moz-border-radius: 2px;
 border-radius: 2px;
 border: 1px solid #ccc;
@@ -3659,11 +3660,7 @@ footer nav
 #box .first{width:40% !important;text-align:left !important;border-left:1px solid #ccc}
 
 
-<<<<<<< HEAD
-.hide {display:none;}
-=======
 .hide {display:none}
->>>>>>> 5b8e4876120fe2fde317d523d933b474cd124c3a
 .hidden {visibility:hidden !important}
 .source .original {display:none;}
 .bold {font-weight: bold}
@@ -4676,13 +4673,16 @@ margin: 10px 0;
 #uploadCallback {
     display: none;
 }
+
 #uploadTMX {
     display: none;
+    background: #f4f4f4;
     text-indent: 10px;
-    border: none;
+    border: 1px solid #E4E4E4;
+    margin: 15px 5px 10px 6px;
+    box-shadow: 1px 1px 1px #ccc;
     float: left;
     padding-bottom: 0px !important;
-    background: #fbfbfb;
     -webkit-transition: all 50ms ease-in;
 }
 
