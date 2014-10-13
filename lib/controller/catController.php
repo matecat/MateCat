@@ -42,6 +42,8 @@ class catController extends viewController {
     private $last_job_segment;
     private $last_opened_segment;
 
+    private $_keyList = array();
+
     /**
      * @var string
      */
@@ -326,6 +328,21 @@ class catController extends viewController {
         $this->firstSegmentOfFiles = json_encode( $fileInfo );
         $this->fileCounter         = json_encode( $TotalPayable );
 
+
+//        $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+//        $dh = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $_SESSION['uid'] ) );
+//
+//        $_list = array();
+//
+//        $keyList = $_keyList->read( $dh );
+//        foreach( $keyList as $memKey ){
+//            //all keys are available in this condition ( we are creating a project
+//            $_key = new TmKeyManagement_ClientTmKeyStruct( $memKey->tm_key );
+//            $this->_keyList[] = $_key->hideKey( $_SESSION['uid'] );
+//        }
+//
+//        Log::doLog( $this->_keyList );
+
     }
 
 	public function setTemplateVars() {
@@ -369,6 +386,7 @@ class catController extends viewController {
 
 //        Log::doLog( $this->job_stats );
 
+//        $this->template->user_keys              = $this->_keyList;
         $this->template->job_stats              = $this->job_stats;
 
         $end_time                               = microtime( true ) * 1000;

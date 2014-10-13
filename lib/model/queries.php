@@ -736,7 +736,7 @@ function getSegmentsInfo( $jid, $password ) {
     $query = "select j.id as jid, j.id_project as pid,j.source,j.target,
 		j.last_opened_segment, j.id_translator as tid, j.id_tms, j.id_mt_engine,
 		p.id_customer as cid, j.id_translator as tid, j.status_owner as status,
-		j.owner as job_owner, j.create_date,
+		j.owner as job_owner, j.create_date, j.last_update, j.tm_keys,
 
 		j.job_first_segment, j.job_last_segment,
 		j.new_words, j.draft_words, j.translated_words, j.approved_words, j.rejected_words,

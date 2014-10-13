@@ -146,17 +146,20 @@ class newProjectController extends viewController {
         $this->mt_engines  = getEngines( 'MT' );
         $this->tms_engines = getEngines( 'TM' );
 
-        //Key Management Panel, retrieve user keys
-        $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
         try {
 
-            if( $this->isLoggedIn() ){
-                $dh = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $_SESSION['uid'] ) );
+            $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+            $dh       = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $_SESSION[ 'uid' ] ) );
 
-                $this->keyList = $_keyList->read( $dh ); //throws Exception
+            $keyList = $_keyList->read( $dh );
+            foreach ( $keyList as $memKey ) {
+                //all keys are available in this condition ( we are creating a project
+                $this->keyList[ ] = $memKey->tm_key;
             }
 
-        } catch( Exception $e ){ Log::doLog( $e->getMessage() ); }
+            Log::doLog( $this->keyList );
+
+        } catch ( Exception $e ) { Log::doLog( $e->getMessage() ); }
 
     }
 
@@ -281,7 +284,7 @@ class newProjectController extends viewController {
 
         $this->template->upload_session_id  = $this->guid;
 
-        if( (bool)$_GET['amt'] == true ){
+        if( @(bool)$_GET['amt'] == true ){
             $this->template->mt_engines = $this->mt_engines;
         } else{
             $this->template->mt_engines = array();
@@ -315,27 +318,7 @@ class newProjectController extends viewController {
         $this->template->incomingURL = $this->incomingUrl;
         $this->template->authURL     = $this->authURL;
 
-        $_keyList = array();
-
-        foreach( $this->keyList as $memKey ){
-            /**
-             * @var $memKey TmKeyManagement_MemoryKeyStruct
-             */
-//            all keys are available in this condition ( we are creating a project )
-            $tmKey = $memKey->tm_key->toArray();
-
-            $_keyList[] = array(
-                'tm_key'    =>  $tmKey['key'],
-                'desc'      =>  $tmKey['name'],
-                'r'         =>  $tmKey['r'],
-                'w'         =>  $tmKey['w'],
-                //these fields will be filled in future
-                'source'    =>  "to-DO",//$tmKey['source'],
-                'target'    =>  "to-DO" //$tmKey['target']
-            );
-        }
-
-        $this->template->user_keys = $_keyList;
+        $this->template->user_keys = $this->keyList;
 
     }
 
