@@ -1605,7 +1605,7 @@ function insertTranslator( ArrayObject $projectStructure ) {
     //this is because we allow to start a project with the bare key
 
     $private_tm_key = ( is_array($projectStructure[ 'private_tm_key' ] ) ) ?
-            $projectStructure[ 'private_tm_key' ][0] :
+            $projectStructure[ 'private_tm_key' ][0]['key'] :
             $projectStructure[ 'private_tm_key' ];
 
     $query   = "SELECT username FROM translators WHERE mymemory_api_key='" . $db->escape( $private_tm_key ) . "'";
@@ -1620,11 +1620,12 @@ function insertTranslator( ArrayObject $projectStructure ) {
         $data[ 'password' ]         = $projectStructure[ 'private_tm_pass' ];
         $data[ 'first_name' ]       = '';
         $data[ 'last_name' ]        = '';
-        $data[ 'mymemory_api_key' ] = $projectStructure[ 'private_tm_key' ];
+        $data[ 'mymemory_api_key' ] = $private_tm_key;
 
         $db->insert( 'translators', $data );
 
         $user_id = $projectStructure[ 'private_tm_user' ];
+
     }
 
     $projectStructure[ 'private_tm_user' ] = $user_id;

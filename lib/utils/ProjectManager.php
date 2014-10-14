@@ -119,7 +119,7 @@ class ProjectManager {
                 $APIKeySrv = TMSServiceFactory::getAPIKeyService();
 
                 try {
-                    if ( !$APIKeySrv->checkCorrectKey( $_tmKey ) ) {
+                    if ( !$APIKeySrv->checkCorrectKey( $_tmKey[ 'key' ] ) ) {
                         throw new Exception( "Error: The private TM key provided is not valid.", -3 );
                     }
                 } catch ( Exception $e ) {
@@ -155,22 +155,22 @@ class ProjectManager {
 
                 foreach ( $this->projectStructure[ 'private_tm_key' ] as $_tmKey ) {
 
-                    if(!in_array($_tmKey, $userTmKeys)) {
-                        Log::doLog("entro");
-                        $newMemoryKey  = new TmKeyManagement_MemoryKeyStruct();
-                        $newTmKey      = new TmKeyManagement_TmKeyStruct();
-                        $newTmKey->key = $_tmKey;
-                        $newTmKey->tm = true;
+                    if ( !in_array( $_tmKey['key'], $userTmKeys ) ) {
+                        $newMemoryKey   = new TmKeyManagement_MemoryKeyStruct();
+                        $newTmKey       = new TmKeyManagement_TmKeyStruct();
+                        $newTmKey->key  = $_tmKey[ 'key' ];
+                        $newTmKey->tm   = true;
                         $newTmKey->glos = true;
                         //TODO: take this from input
-                        $newTmKey->name = null;
+                        $newTmKey->name = $_tmKey[ 'name' ];
 
                         $newMemoryKey->tm_key = $newTmKey;
-                        $newMemoryKey->uid = $this->projectStructure['uid'];
+                        $newMemoryKey->uid    = $this->projectStructure[ 'uid' ];
 
                         $memoryKeysToBeInserted[ ] = $newMemoryKey;
+                    } else {
+                        Log::doLog( 'skip insertion' );
                     }
-                    else Log::doLog('skip insertion');
 
                 }
 
@@ -182,8 +182,8 @@ class ProjectManager {
             //a (user, pass, key) tuple is generated and can be inserted
             //if it comes with it's own key without querying the creation API, create a (key,key,key) user
             if ( empty( $this->projectStructure[ 'private_tm_user' ] ) ) {
-                $this->projectStructure[ 'private_tm_user' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ];
-                $this->projectStructure[ 'private_tm_pass' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ];
+                $this->projectStructure[ 'private_tm_user' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
+                $this->projectStructure[ 'private_tm_pass' ] = $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
             }
 
             insertTranslator( $this->projectStructure );
@@ -599,10 +599,10 @@ class ProjectManager {
                     $newTmKey->tm    = true;
                     $newTmKey->glos  = true;
                     $newTmKey->owner = true;
-                    $newTmKey->name  = '';
-                    $newTmKey->key   = $tmKeyObj;
-                    $newTmKey->r     = true;
-                    $newTmKey->w     = true;
+                    $newTmKey->name  = $tmKeyObj[ 'name' ];
+                    $newTmKey->key   = $tmKeyObj[ 'key' ];
+                    $newTmKey->r     = $tmKeyObj[ 'r' ];
+                    $newTmKey->w     = $tmKeyObj[ 'w' ];
 
                     $tm_key[ ] = $newTmKey;
                 }
@@ -612,7 +612,7 @@ class ProjectManager {
 
                 Log::doLog( $projectStructure[ 'private_tm_key' ] );
 
-                $projectStructure[ 'private_tm_key' ] = $projectStructure[ 'private_tm_key' ][ 0 ];
+                $projectStructure[ 'private_tm_key' ] = $projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
             }
 
             $projectStructure[ 'tm_keys' ] = json_encode( $tm_key );
