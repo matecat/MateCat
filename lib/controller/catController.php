@@ -329,19 +329,26 @@ class catController extends viewController {
         $this->fileCounter         = json_encode( $TotalPayable );
 
 
-//        $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-//        $dh = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $_SESSION['uid'] ) );
-//
-//        $_list = array();
-//
-//        $keyList = $_keyList->read( $dh );
-//        foreach( $keyList as $memKey ){
-//            //all keys are available in this condition ( we are creating a project
-//            $_key = new TmKeyManagement_ClientTmKeyStruct( $memKey->tm_key );
-//            $this->_keyList[] = $_key->hideKey( $_SESSION['uid'] );
-//        }
-//
-//        Log::doLog( $this->_keyList );
+        try {
+
+            //TODO Better use of this, for now hide warning
+            $uid = @$_SESSION['uid'];
+
+            $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+            $dh = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $uid ) );
+
+            $keyList = $_keyList->read( $dh );
+            foreach( $keyList as $memKey ){
+                //all keys are available in this condition ( we are creating a project
+                $_key = new TmKeyManagement_ClientTmKeyStruct( $memKey->tm_key );
+                $this->_keyList[] = $_key->hideKey( $uid );
+            }
+
+            Log::doLog( $this->_keyList );
+
+        } catch( Exception $e ){
+            Log::doLog( $e->getMessage() );
+        }
 
     }
 
