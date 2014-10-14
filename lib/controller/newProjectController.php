@@ -146,20 +146,26 @@ class newProjectController extends viewController {
         $this->mt_engines  = getEngines( 'MT' );
         $this->tms_engines = getEngines( 'TM' );
 
-        try {
+        if ( $this->isLoggedIn() ) {
 
-            $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-            $dh       = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $_SESSION[ 'uid' ] ) );
+            try {
 
-            $keyList = $_keyList->read( $dh );
-            foreach ( $keyList as $memKey ) {
-                //all keys are available in this condition ( we are creating a project
-                $this->keyList[ ] = $memKey->tm_key;
+                $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+                $dh       = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => @$_SESSION[ 'uid' ] ) );
+
+                $keyList = $_keyList->read( $dh );
+                foreach ( $keyList as $memKey ) {
+                    //all keys are available in this condition ( we are creating a project
+                    $this->keyList[ ] = $memKey->tm_key;
+                }
+
+                Log::doLog( $this->keyList );
+
+            } catch ( Exception $e ) {
+                Log::doLog( $e->getMessage() );
             }
 
-            Log::doLog( $this->keyList );
-
-        } catch ( Exception $e ) { Log::doLog( $e->getMessage() ); }
+        }
 
     }
 
