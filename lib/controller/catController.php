@@ -329,19 +329,26 @@ class catController extends viewController {
         $this->fileCounter         = json_encode( $TotalPayable );
 
 
-//        $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-//        $dh = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $_SESSION['uid'] ) );
-//
-//        $_list = array();
-//
-//        $keyList = $_keyList->read( $dh );
-//        foreach( $keyList as $memKey ){
-//            //all keys are available in this condition ( we are creating a project
-//            $_key = new TmKeyManagement_ClientTmKeyStruct( $memKey->tm_key );
-//            $this->_keyList[] = $_key->hideKey( $_SESSION['uid'] );
-//        }
-//
-//        Log::doLog( $this->_keyList );
+        try {
+
+            //TODO Better use of this, for now hide warning
+            $uid = @$_SESSION['uid'];
+
+            $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+            $dh = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $uid ) );
+
+            $keyList = $_keyList->read( $dh );
+            foreach( $keyList as $memKey ){
+                //all keys are available in this condition ( we are creating a project
+                $_key = new TmKeyManagement_ClientTmKeyStruct( $memKey->tm_key );
+                $this->_keyList[] = $_key->hideKey( $uid );
+            }
+
+            Log::doLog( $this->_keyList );
+
+        } catch( Exception $e ){
+            Log::doLog( $e->getMessage() );
+        }
 
     }
 
@@ -383,8 +390,6 @@ class catController extends viewController {
 
         $this->job_stats['STATUS_BAR_NO_DISPLAY'] = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
         $this->job_stats['ANALYSIS_COMPLETE']     = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? true : false );
-
-//        Log::doLog( $this->job_stats );
 
         $this->template->user_keys              = $this->_keyList;
         $this->template->job_stats              = $this->job_stats;

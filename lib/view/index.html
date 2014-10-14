@@ -589,10 +589,18 @@
                                             <textarea class="mgmt-input" type="text" id="new-tm-description" placeholder="Enter a short description" />
                                         </td>
                                         <td class="fileupload" colspan="3">
+                                            <input id="new-tm-read" type="checkbox" name="r" class="r" value="1" checked="" />
+                                            <label for="new-tm-read">Show matches from TM</label><br />
+                                            <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
+                                            <label for="new-tm-write">Add translations to TM</label>
+
                                             <label class="fileupload">Select a TMX </label><input type="file" />
                                         </td>
                                         <td class="action">
-                                            <a class="pull-left btn-grey uploadtm"><span class="icon-upload"></span> Upload</a>
+                                            <a class="pull-left btn-grey uploadtm">
+                                                <span class="icon-upload"></span>
+                                                <span class="text">Add a key</span>
+                                            </a>
 
                                             <form class="add-TM-Form" action="/" method="post">
                                                 <input type="hidden" name="action" value="addTM" />
@@ -607,7 +615,9 @@
                                                 <input type="submit" id="addtm-add-submit" style="display: none" />
                                             </form>
 
-                                            <a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a>
+                                            <a class="pull-right canceladdtmx">
+                                                <span class="icon-times-circle"></span>
+                                            </a>
                                             <span class="message"></span>
                                         </td>
                                     </tr>
@@ -649,13 +659,6 @@
                                     </tal:block>
                                     </tbody>
                                 </table>
-
-
-                                <br />
-                                <a class="btn-ok pull-right savebtn">Save</a>
-
-
-
 
                             </div>
                         </div>

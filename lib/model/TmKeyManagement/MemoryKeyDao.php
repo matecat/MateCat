@@ -63,7 +63,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $where_conditions = array();
         $query            = "SELECT uid,
-                                    owner_uid,
                                     key_value,
                                     key_name,
                                     key_tm AS tm,
@@ -131,10 +130,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $where_conditions[ ] = "uid = " . $obj->uid;
         $where_conditions[ ] = "key_value = '" . $obj->tm_key->key . "'";
 
-//        if ( $obj->owner_uid !== null ) {
-//            $set_array[ ] = "owner_uid = " . $obj->owner_uid;
-//        }
-
         if ( $obj->r !== null ) {
             $condition    = "read_grants = %d";
             $set_array[ ] = sprintf( $condition, $obj->r );
@@ -196,10 +191,10 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
         $obj_arr = $this->sanitizeArray( $obj_arr );
 
         $query = "INSERT INTO " . self::TABLE .
-                " ( uid, key_value, key_name, key_tm, key_glos, read_grants, write_grants, creation_date)
+                " ( uid, key_value, key_name, key_tm, key_glos, creation_date)
                 VALUES %s;";
 
-        $tuple_template = "(%d, '%s', '%s', %s, %s, %d, %d, NOW())";
+        $tuple_template = "(%d, '%s', '%s', %d, %d, NOW())";
 
         $values = array();
 
@@ -220,9 +215,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                         $obj->tm_key->key,
                         ( $obj->tm_key->name == null ) ? '' : $obj->tm_key->name,
                         ( $obj->tm_key->tm == null ) ? 1 : $obj->tm_key->tm,
-                        ( $obj->tm_key->glos == null ) ? 1 : $obj->tm_key->glos,
-                        ( $obj->r == null ) ? true : $obj->r,
-                        ( $obj->w == null ) ? true : $obj->w
+                        ( $obj->tm_key->glos == null ) ? 1 : $obj->tm_key->glos
                 );
             }
 
@@ -355,7 +348,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                 VALUES %s
                 ON DUPLICATE KEY UPDATE
                 uid = uid,
-                owner_uid = owner_uid,
                 key_value = key_value,
                 key_name = VALUES(key_name),
                 key_tm = key_tm,
@@ -382,7 +374,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                 $values[ ] = sprintf(
                         $tuple_template,
                         (int)$obj->uid,
-                        (int)$obj->owner_uid,
                         $obj->tm_key->key,
                         ( $obj->tm_key->name == null ) ? '' : $obj->tm_key->name,
                         ( $obj->tm_key->tm == null ) ? 1 : $obj->tm_key->tm,
@@ -513,7 +504,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
             $build_arr = array(
                     'uid'       => $item[ 'uid' ],
-                    'owner_uid' => $item[ 'owner_uid' ],
                     'tm_key'    => new TmKeyManagement_TmKeyStruct( array(
                                     'key'  => (string)$item[ 'key_value' ],
                                     'name' => (string)$item[ 'key_name' ],
