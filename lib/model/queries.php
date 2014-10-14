@@ -1603,7 +1603,12 @@ function insertTranslator( ArrayObject $projectStructure ) {
     $db = Database::obtain();
     //if this user already exists, return without inserting again ( do nothing )
     //this is because we allow to start a project with the bare key
-    $query   = "SELECT username FROM translators WHERE mymemory_api_key='" . $db->escape( $projectStructure[ 'private_tm_key' ] ) . "'";
+
+    $private_tm_key = ( is_array($projectStructure[ 'private_tm_key' ] ) ) ?
+            $projectStructure[ 'private_tm_key' ][0] :
+            $projectStructure[ 'private_tm_key' ];
+
+    $query   = "SELECT username FROM translators WHERE mymemory_api_key='" . $db->escape( $private_tm_key ) . "'";
     $user_id = $db->query_first( $query );
     $user_id = $user_id[ 'username' ];
 

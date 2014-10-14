@@ -18,11 +18,6 @@ class TmKeyManagement_MemoryKeyStruct extends DataAccess_AbstractDaoObjectStruct
     public $uid;
 
     /**
-     * @var integer The owner's ID
-     */
-    public $owner_uid;
-
-    /**
      * @var TmKeyManagement_TmKeyStruct
      */
     public $tm_key;
