@@ -101,7 +101,7 @@ $.extend(UI, {
 						var words = $( ".title-words" ).text();
 						$( "#price_p_word" ).text( parseFloat( price / words ).toFixed(3).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
 
-						var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' Rome, Paris)';
+						var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';
 
                         $('.outsource.modal .delivery span.zone2').text( extendedTimeZone );
 						$('.outsource.modal .continuebtn').removeClass('disabled');
