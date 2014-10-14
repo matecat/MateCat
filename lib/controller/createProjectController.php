@@ -69,7 +69,7 @@ class createProjectController extends ajaxController {
 
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
-        //$__postInput = filter_var_array( $_POST, $filterArgs );
+//        $__postInput = filter_var_array( $_POST, $filterArgs );
 
         $this->file_name               = $__postInput[ 'file_name' ];       // da cambiare, FA SCHIFO la serializzazione
         $this->project_name            = $__postInput[ 'project_name' ];
@@ -88,7 +88,7 @@ class createProjectController extends ajaxController {
 
         //json_decode the tm_key array if it has been passed
         if( !empty($this->private_tm_key )){
-//            $this->private_tm_key = json_decode($this->private_tm_key);
+            $this->private_tm_key = json_decode($this->private_tm_key);
 
             if($this->private_tm_key === null ){
                 $this->result[ 'errors' ][ ] = array( "code" => -5, "message" => "Invalid tm key passed." );
