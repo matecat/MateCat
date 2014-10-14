@@ -8020,7 +8020,7 @@ $.extend(UI, {
             $(".addtmx").show();
             UI.clearAddTMRow();
         }).on('click', '#activetm tr.new a.uploadtm', function() {
-            operation = ($("#activetm .new td.fileupload input").val() == '')? 'key' : 'tm';
+            operation = ($('#activetm .new td.fileupload input[type="file"]').val() == '')? 'key' : 'tm';
 //            $('.addtmxrow').hide().fadeOut();
             UI.checkTMKey(operation);
 
@@ -8157,13 +8157,13 @@ $.extend(UI, {
 //    };
 
 
-
+/*
 // temporary disabled: this has to be realeased without jquery-ui (which is not loaded in the cattool), try to use tablesorter, who is already used in manage page
         $("#activetm tbody.sortable").sortable({
             helper: fixHelperModified
             //   stop: updateIndex
         }).disableSelection();
-/**/
+*/
 
 //$('.enable').click(function() {
 //  $(this).closest('tr td:first-child').toggleClass('index');
@@ -8298,6 +8298,23 @@ $.extend(UI, {
             },
             success: function(d) {
                 console.log('addTM success!!');
+                newTr = '<tr class="ui-sortable-handle">' +
+                        '    <td class="privatekey">4632938238</td>' +
+                        '    <td class="description">Other</td>' +
+                        '    <td class="langpair"><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">PT-BR</span></td>' +
+                        '    <td class="lookup check text-center"><input type="checkbox" checked=""></td>' +
+                        '        <td class="update check text-center"><input type="checkbox"></td>' +
+                        '            <td class="action">' +
+                        '                <a class="pull-left btn-grey disabletm"><span class="icon-minus-circle"></span> Stop use</a>' +
+                        '                <a class="btn-grey pull-left addtmx"><span class="icon-plus-circle"></span> Add TMX</a>' +
+                        '            </td>' +
+                        '        </tr>';
+                $('#activetm tr.new').before(newTr);
+                row = $('#activetm tr.new').prev();
+                row.fadeOut();
+                row.fadeIn();
+                $('#activetm tr.new .canceladdtmx').click();
+
                 $('#activetm tr.new .message').text('The key ' + this + ' has been added!');
 /*
                 txt = (d.success == true)? 'The TM Key ' + this + ' has been added to your translation job.' : d.errors[0].message;
