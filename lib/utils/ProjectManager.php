@@ -785,7 +785,7 @@ class ProjectManager {
 
         $query = sprintf( $query,
                 $projectStructure[ 'job_to_split' ],
-                $projectStructure[ 'job_to_split_pass' ]
+                $this->dbHandler->escape( $projectStructure[ 'job_to_split_pass' ] )
         );
 
         $rows = $this->dbHandler->fetch_array( $query );

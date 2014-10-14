@@ -873,6 +873,18 @@
                             </td>
                            <td class="action">
                                <a class="pull-left btn-grey uploadtm"><span class="icon-upload"></span> Upload</a>
+                               <form class="add-TM-Form" action="/" method="post">
+                                   <input type="hidden" name="action" value="addTM" />
+                                   <input type="hidden" name="exec" value="newTM" />
+                                   <input type="hidden" name="job_id" value="38424" />
+                                   <input type="hidden" name="job_pass" value="48a757e3d46c" />
+                                   <input type="hidden" name="tm_key" value="" />
+                                   <input type="hidden" name="name" value="" />
+                                   <input type="hidden" name="tmx_file" value="" />
+                                   <input type="hidden" name="r" value="1" />
+                                   <input type="hidden" name="w" value="1" />
+                                   <input type="submit" id="addtm-add-submit" style="display: none" />
+                               </form>
 
                                <a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a>
                            </td>
@@ -933,6 +945,8 @@
 <!-- fine popup glossary mgmt -->
 
 <div class="mgmt-popup-outer closeClickingOutside popup-outer"></div>
+
+<div id="uploadCallback"></div>
 
 <script src="${basepath}public/js/lib/snapengage.js"></script>
 

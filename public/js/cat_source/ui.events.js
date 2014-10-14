@@ -174,7 +174,8 @@ $.extend(UI, {
         // start addtmx
         }).on('click', '.open-popup-addtm-tr', function(e) {
             e.preventDefault();
-            $('.popup-addtm-tr').show();
+            UI.openLanguageResourcesPanel();
+//            $('.popup-addtm-tr').show();
         }).on('click', '#addtm-create-key', function(e) {
             e.preventDefault();
             //prevent double click

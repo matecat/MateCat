@@ -2346,9 +2346,12 @@ UI = {
         });
     },
 */
+/*
     pollForUploadCallback: function(TMKey, TMName) {
+        console.log('aaa: ', $('#uploadCallback').text());
         if($('#uploadCallback').text() != '') {
             msg = $.parseJSON($('#uploadCallback pre').text());
+            console.log('msg: ', msg);
             if(msg.success == true) {
                 UI.pollForUploadProgress(TMKey, TMName);
             } else {
@@ -2363,48 +2366,8 @@ UI = {
         }
 
     },
-    pollForUploadProgress: function(TMKey, TMName) {
-        APP.doRequest({
-            data: {
-                action: 'ajaxUtils',
-                exec: 'tmxUploadStatus',
-                tm_key: TMKey,
-                tmx_name: TMName
-            },
-            context: [TMKey, TMName],
-            error: function() {
-            },
-            success: function(d) {
-                if(d.errors.length) {
-                    UI.showMessage({
-                        msg: d.errors[0].message,
-                    });
-                } else {
-                    if(d.data.total == null) {
-                        pollForUploadProgressContext = this;
-                        setTimeout(function() {
-                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1]);
-                        }, 500);
-                    } else {
-                        if(d.completed) {
-                            $('#messageBar .progress').remove();
-                            UI.showMessage({
-                            msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
-                            });
-                            UI.clearAddTMpopup();
-                            return false;
-                        }
-                        progress = (parseInt(d.data.done)/parseInt(d.data.total))*100;
-                        $('#messageBar .progress').css('width', progress + '%');
-                        pollForUploadProgressContext = this;
-                        setTimeout(function() {
-                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1]);
-                        }, 500);
-                    }
-                }
-            }
-        });
-    },
+*/
+
 
     clearAddTMpopup: function() {
         $('#addtm-tr-key').val('');
@@ -3543,7 +3506,8 @@ $.extend(UI, {
         // start addtmx
         }).on('click', '.open-popup-addtm-tr', function(e) {
             e.preventDefault();
-            $('.popup-addtm-tr').show();
+            UI.openLanguageResourcesPanel();
+//            $('.popup-addtm-tr').show();
         }).on('click', '#addtm-create-key', function(e) {
             e.preventDefault();
             //prevent double click
@@ -8030,7 +7994,21 @@ $.extend(UI, {
 
         $(".addtmx").click(function() {
             $(this).hide();
-            var newRow = '<tr class="addtmxrow"><td class="addtmxtd" colspan="5"><label class="fileupload">Select a TMX </label><input type="file" /></td><td><a class="pull-left btn-grey uploadtm"><span class="icon-upload"></span> Upload</a> <a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a> </td></tr>';
+            var newRow = '<tr class="addtmxrow"><td class="addtmxtd" colspan="5"><label class="fileupload">Select a TMX </label><input type="file" /></td><td><a class="pull-left btn-grey uploadtm"><span class="icon-upload"></span> Upload</a>'+
+                '<form class="add-TM-Form" action="/" method="post">' +
+                '    <input type="hidden" name="action" value="addTM" />' +
+                '    <input type="hidden" name="exec" value="newTM" />' +
+                '    <input type="hidden" name="job_id" value="38424" />' +
+                '    <input type="hidden" name="job_pass" value="48a757e3d46c" />' +
+                '    <input type="hidden" name="tm_key" value="" />' +
+                '    <input type="hidden" name="name" value="" />' +
+                '    <input type="hidden" name="tmx_file" value="" />' +
+                '    <input type="hidden" name="r" value="1" />' +
+                '    <input type="hidden" name="w" value="1" />' +
+                '    <input type="submit" style="display: none" />' +
+                '</form>' +
+
+            '<a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a> </td></tr>';
             $(this).closest("tr").after(newRow);
             UI.uploadTM($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
             UI.checkTMheights();
@@ -8040,7 +8018,7 @@ $.extend(UI, {
             $(".addtmxrow").hide();
             $(".addtmx").show();
             UI.clearAddTMRow();
-        }).on('click', 'a.uploadtm', function() {
+        }).on('click', '#activetm tr.new a.uploadtm', function() {
             operation = ($("#activetm .new td.fileupload input").val() == '')? 'key' : 'tm';
 //            $('.addtmxrow').hide().fadeOut();
             UI.checkTMKey(operation);
@@ -8050,6 +8028,8 @@ $.extend(UI, {
 //            $(".clicked td.action").append('progressbar');
 
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
+        }).on('click', '#activetm tr.addtmxrow a.uploadtm', function() {
+            UI.execAddTM(this);
         }).on('click', 'a.usetm', function() {
             // get the row containing this link
             var row = $(this).closest("tr");
@@ -8218,7 +8198,6 @@ $.extend(UI, {
             } else {
                 UI.registerTMX();
             }
-
         } else {
             console.log('adding a tm');
             APP.doRequest({
@@ -8238,7 +8217,7 @@ $.extend(UI, {
                     if(d.success == true) {
                         console.log('key is good');
                         console.log('adding a tm');
-                        UI.execAddTM();
+                        UI.execAddTM('new');
                         return true;
                     } else {
                         console.log('key is bad');
@@ -8255,6 +8234,7 @@ $.extend(UI, {
                 }
             });
 
+//            this.addTMXToKey('new');
         }
 
     },
@@ -8266,8 +8246,19 @@ $.extend(UI, {
         UI.TMKeysToAdd.push(item);
         $(".canceladdtmx").click();
     },
-    execAddTM: function() {
-        this.TMFileUpload($('#activetm .new .add-TM-Form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback', $('#activetm .new td.fileupload input').val());
+    execAddTM: function(el) {
+        if(el == 'new') {
+            form = $('#activetm .new .add-TM-Form')[0];
+            file = $('#activetm .new td.fileupload input').val();
+        } else {
+            tr = $(el).parents('tr');
+            form = tr.find('.add-TM-Form')[0];
+            file = tr.find('input[type="file"]').val();
+            console.log('form: ', form);
+            console.log('file: ', file);
+        }
+        this.TMFileUpload(form, 'http://' + window.location.hostname + '/?action=addTM','uploadCallback', file);
+
     },
     execAddTMKey: function() {
 //        var r = ($('#addtm-tr-read').is(':checked'))? 1 : 0;
@@ -8295,7 +8286,7 @@ $.extend(UI, {
 /*
                 txt = (d.success == true)? 'The TM Key ' + this + ' has been added to your translation job.' : d.errors[0].message;
                 $('.popup-addtm-tr .x-popup').click();
-                UI.showMessage({
+                APP.showMessage({
                     msg: txt
                 });
                 UI.clearAddTMpopup();
@@ -8324,7 +8315,6 @@ $.extend(UI, {
         // Add to document...
         form.parentNode.appendChild(iframe);
         window.frames['upload_iframe'].name = "upload_iframe";
-
         iframeId = document.getElementById("upload_iframe");
 
         // Add event...
@@ -8368,11 +8358,11 @@ $.extend(UI, {
         }
 
         // Submit the form...
-        $(form).submit();
+        form.submit();
 
 //    document.getElementById(div_id).innerHTML = "Uploading...";
         $('.popup-addtm-tr .x-popup').click();
-        UI.showMessage({
+        APP.showMessage({
             msg: 'Uploading your TM...'
         });
         $('#messageBar .msg').after('<span class="progress"></span>');
@@ -8383,5 +8373,64 @@ $.extend(UI, {
 //    UI.pollForUploadProgress(TMKey, TMName);
         UI.pollForUploadCallback(TMKey, TMName);
     },
+    pollForUploadCallback: function(TMKey, TMName) {
+        if($('#uploadCallback').text() != '') {
+            msg = $.parseJSON($('#uploadCallback pre').text());
+            if(msg.success == true) {
+                UI.pollForUploadProgress(TMKey, TMName);
+            } else {
+                APP.showMessage({
+                    msg: 'Error: ' + msg.errors[0].message
+                });
+            }
+        } else {
+            setTimeout(function() {
+                UI.pollForUploadCallback(TMKey, TMName);
+            }, 1000);
+        }
 
+    },
+
+    pollForUploadProgress: function(TMKey, TMName) {
+        APP.doRequest({
+            data: {
+                action: 'ajaxUtils',
+                exec: 'tmxUploadStatus',
+                tm_key: TMKey,
+                tmx_name: TMName
+            },
+            context: [TMKey, TMName],
+            error: function() {
+            },
+            success: function(d) {
+                if(d.errors.length) {
+                    APP.showMessage({
+                        msg: d.errors[0].message,
+                    });
+                } else {
+                    if(d.data.total == null) {
+                        pollForUploadProgressContext = this;
+                        setTimeout(function() {
+                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1]);
+                        }, 500);
+                    } else {
+                        if(d.completed) {
+                            $('#messageBar .progress').remove();
+                            APP.showMessage({
+                                msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
+                            });
+                            UI.clearAddTMpopup();
+                            return false;
+                        }
+                        progress = (parseInt(d.data.done)/parseInt(d.data.total))*100;
+                        $('#messageBar .progress').css('width', progress + '%');
+                        pollForUploadProgressContext = this;
+                        setTimeout(function() {
+                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1]);
+                        }, 500);
+                    }
+                }
+            }
+        });
+    },
 });

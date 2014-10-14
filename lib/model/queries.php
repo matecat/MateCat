@@ -2664,15 +2664,15 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
             //help!!!
             foreach ( $arStatus as $item ) {
                 $ss = explode( ':', $item );
-                $cases .= " when id=$ss[0] then '$ss[1]'";
-                $ids .= "$ss[0],";
+                $cases .= " when id=" . $db->escape( $ss[0] ) . " then '" . $db->escape( $ss[1] ) . "'";
+                $ids .= $db->escape( $ss[0] ) . ",";
             }
             $ids   = trim( $ids, ',' );
             $query = "update jobs set status_owner= case $cases end where id in ($ids)" . $status_filter_query;
             $db->query( $query );
         } else {
 
-            $query = "update jobs set status_owner='$status' where id_project=$id" . $status_filter_query;
+            $query = "update jobs set status_owner='" . $db->escape( $status ) . "' where id_project=" . (int)$id . $status_filter_query;
 
             $db->query( $query );
 
@@ -2683,7 +2683,7 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
                     SELECT max(id_segment) as id_segment
 					    FROM segment_translations
 						JOIN jobs ON id_job = id
-						WHERE id_project = $id";
+						WHERE id_project = " . (int)$id;
 
             $_id_segment = $db->fetch_array( $select_max_id );
             $_id_segment = array_pop( $_id_segment );
@@ -2698,7 +2698,7 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
         }
     } else {
 
-        $query = "update jobs set status_owner='$status' where id=$id and password = '$jPassword' ";
+        $query = "update jobs set status_owner='" . $db->escape( $status ) . "' where id=" . (int)$id . " and password = '" . $db->escape( $jPassword ) . "' ";
         $db->query( $query );
 
         $select_max_id = "
@@ -2706,7 +2706,7 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
 					    FROM segment_translations
 						JOIN jobs ON id_job = id
 						WHERE id = $id
-						 AND password = '$jPassword'";
+						 AND password = '" . $db->escape( $jPassword ) . "'";
 
         $_id_segment = $db->fetch_array( $select_max_id );
         $_id_segment = array_pop( $_id_segment );
