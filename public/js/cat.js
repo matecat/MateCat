@@ -8157,13 +8157,13 @@ $.extend(UI, {
 //    };
 
 
-/*
+
 // temporary disabled: this has to be realeased without jquery-ui (which is not loaded in the cattool), try to use tablesorter, who is already used in manage page
         $("#activetm tbody.sortable").sortable({
             helper: fixHelperModified
             //   stop: updateIndex
         }).disableSelection();
-*/
+/**/
 
 //$('.enable').click(function() {
 //  $(this).closest('tr td:first-child').toggleClass('index');
