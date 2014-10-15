@@ -81,6 +81,11 @@ class TmKeyManagement_Filter {
         $this->__uid = (int)$uid;
     }
 
+    /**
+     * @param $tm_key
+     *
+     * @return bool
+     */
     public function byTranslator( $tm_key ) {
 
         if ( $tm_key[ 'owner' ] == true ) {
@@ -105,6 +110,11 @@ class TmKeyManagement_Filter {
                 && $this->_isTheRightType( $tm_key );
     }
 
+    /**
+     * @param $tm_key
+     *
+     * @return bool
+     */
     public function byRevisor( $tm_key ) {
 
         if ( $tm_key[ 'owner' ] == true ) {
@@ -240,7 +250,7 @@ class TmKeyManagement_Filter {
         $_type = true;
         foreach( $this->_type as $type ){
             //trim for not well formatted required types
-            //    Ex: "tm , gloss " instead of "tm,gloss"
+            //    Ex: "tm , glos " instead of "tm,glos"
             $_type = $_type && ( $tm_key[ trim($type) ] == true );
         }
 

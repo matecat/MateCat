@@ -35,7 +35,12 @@ class TmKeyManagement_TmKeyManagement {
      * @param   $uid         int     The user ID, used to retrieve the personal keys
      *
      * @return  array|mixed  An array of TmKeyManagement_TmKeyStruct objects
-     * @throws  Exception    Throws Exception if grant_level string is wrong or if type string is wrong
+     * @throws  Exception    Throws Exception if :<br/>
+     *                   <ul>
+     *                      <li>grant_level string is wrong</li>
+     *                      <li>if type string is wrong</li>
+     *                      <li>if user role string is wrong</li>
+     *                  </ul>
      *
      * @see TmKeyManagement_TmKeyStruct
      */
@@ -192,6 +197,7 @@ class TmKeyManagement_TmKeyManagement {
                     $resElem->glos = (bool)$resElem->glos | (bool)$tmKey->glos;
 
                     //choose element with the most generic purpose (transl, rev)
+                    //TODO: change this: these fields doesn't exist anymore
                     $resElem->transl = (bool)$resElem->transl | (bool)$tmKey->transl;
                     $resElem->rev    = (bool)$resElem->rev | (bool)$tmKey->rev;
 
@@ -286,6 +292,69 @@ class TmKeyManagement_TmKeyManagement {
         }
 
         return $tmKey_arr;
+    }
+
+    /**
+     * Removes a tm key from an array of tm keys for a specific user type. <br/>
+     * If the tm key is still linked to some other user, the result will be the same input array,
+     * except for the tm key wo be removed, whose attributes are properly changed according to the user that wanted to
+     * remove it.<br/>
+     * If user type is wrong, this function will return the input array.
+     *
+     * @param array                       $tmKey_arr
+     * @param TmKeyManagement_TmKeyStruct $newTmKey
+     * @param string                      $user_role
+     *
+     * @return array
+     */
+    public static function deleteTmKey( Array $tmKey_arr, TmKeyManagement_TmKeyStruct $newTmKey, $user_role = TmKeyManagement_Filter::OWNER ) {
+        $result = array();
+
+        foreach ( $tmKey_arr as $i => $curr_tm_key ) {
+            /**
+             * @var $curr_tm_key TmKeyManagement_TmKeyStruct
+             */
+            if ( $curr_tm_key->key == $newTmKey->key ) {
+                switch ( $user_role ) {
+
+                    case TmKeyManagement_Filter::ROLE_TRANSLATOR:
+                        $curr_tm_key->uid_transl = null;
+                        $curr_tm_key->r_transl = null;
+                        $curr_tm_key->w_transl = null;
+                        break;
+
+                    case TmKeyManagement_Filter::ROLE_REVISOR:
+                        $curr_tm_key->uid_rev= null;
+                        $curr_tm_key->r_rev = null;
+                        $curr_tm_key->w_rev = null;
+                        break;
+
+                    case TmKeyManagement_Filter::OWNER:
+                        $curr_tm_key->owner = false;
+                        $curr_tm_key->r = null;
+                        $curr_tm_key->w = null;
+                        break;
+
+                    case null:
+                        break;
+
+                    default:
+                        break;
+                }
+
+                //if the key is still linked to someone, add it to the result.
+                if($curr_tm_key->owner ||
+                        !is_null($curr_tm_key->uid_transl) ||
+                        !is_null($curr_tm_key->uid_rev)){
+                    $result[ ] = $curr_tm_key;
+                }
+            }
+            else {
+                $result[ ] = $curr_tm_key;
+            }
+        }
+
+        return $result;
     }
 
 }

@@ -144,4 +144,22 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
         return $this->key == $obj->key;
     }
 
+    /**
+     * @param TmKeyManagement_TmKeyStruct $obj
+     *
+     * @return TmKeyManagement_TmKeyStruct
+     */
+    public function mergeWith( TmKeyManagement_TmKeyStruct $obj){
+        //pre: $obj->key == $this->key
+
+        //TODO: cancellare sta monnezza
+        //Se $obj ha un campo not null allora vince $obj.
+        //Se $obj ha un campo null e $this ha lo stesso campo not null, allora vince $this.
+        //NOTA: $obj può essere (per esempio) una chiave del client
+
+
+        //TODO: change this.
+        return new TmKeyManagement_TmKeyStruct();
+    }
+
 } 
