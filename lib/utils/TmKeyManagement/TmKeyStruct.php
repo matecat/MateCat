@@ -94,7 +94,7 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
     public $target;
 
     /**
-     * @param array|null $params An associative array with the following keys:<br/>
+     * @param array|TmKeyManagement_TmKeyStruct|null $params An associative array with the following keys:<br/>
      * <pre>
      *    tm         : boolean - Tm key
      *    glos       : boolean - Glossary key

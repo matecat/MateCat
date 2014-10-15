@@ -371,7 +371,7 @@ class addTMController extends ajaxController {
      *
      * @return stdClass
      */
-    private function uploadFile() {
+    protected function uploadFile() {
         try {
             $uploadManager = new Upload();
             $uploadedFiles = $uploadManager->uploadFiles( $_FILES );

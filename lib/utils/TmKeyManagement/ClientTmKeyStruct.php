@@ -12,7 +12,7 @@ class TmKeyManagement_ClientTmKeyStruct extends TmKeyManagement_TmKeyStruct {
      * Flag that tells wether the key is editable or not by the current user.
      * @var int 0 or 1.
      */
-    public $edit;
+    public $edit = true;
 
     /**
      * This function obfuscates the key.<br />

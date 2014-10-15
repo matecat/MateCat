@@ -44,6 +44,8 @@ class catController extends viewController {
 
     private $_keyList = array();
 
+    private $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+
     /**
      * @var string
      */
@@ -331,20 +333,58 @@ class catController extends viewController {
 
         try {
 
-            //TODO Better use of this, for now hide warning
-            $uid = @$_SESSION['uid'];
+            list( $uid, $owner_email ) = $this->getLoginUserParams();
 
+            /*
+             * Take the keys of the user
+             */
             $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
             $dh = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $uid ) );
 
-            $keyList = $_keyList->read( $dh );
-            foreach( $keyList as $memKey ){
-                //all keys are available in this condition ( we are creating a project
-                $_key = new TmKeyManagement_ClientTmKeyStruct( $memKey->tm_key );
-                $this->_keyList[] = $_key->hideKey( $uid );
+            $keyList  = $_keyList->read( $dh );
+
+            /**
+             * Set these keys as editable for the client
+             *
+             * @var $keyList TmKeyManagement_MemoryKeyStruct[]
+             */
+            foreach( $keyList as $key ){
+                $this->_keyList['totals'][] = new TmKeyManagement_ClientTmKeyStruct( $key->tm_key );
             }
 
-            Log::doLog( $this->_keyList );
+
+            /*
+             * Now take the JOB keys
+             */
+            $job_keyList = json_decode( $data[0]['tm_keys'], true );
+
+            /**
+             * Start this N^2 cycle from keys of the job,
+             * these should be statistically lesser than the keys of the user
+             *
+             * @var $keyList array
+             */
+            foreach( $job_keyList as $jobKey ){
+
+                $jobKey = new TmKeyManagement_ClientTmKeyStruct( $jobKey );
+
+                //PATCH for old data structs
+                foreach ( $this->_keyList[ 'totals' ] as $key ) {
+
+                    /*
+                     * Cycle ALL my user Key and if one of there are in job set this key as my key
+                     */
+                    if ( !$jobKey->equals( $key ) ) {
+                        $this->_keyList['job_keys'][] = $jobKey->hideKey( $uid );
+                    } else {
+                        $this->_keyList['job_keys'][] = $key;
+                    }
+
+                }
+
+            }
+
+            Log::doLog($this->_keyList);
 
         } catch( Exception $e ){
             Log::doLog( $e->getMessage() );

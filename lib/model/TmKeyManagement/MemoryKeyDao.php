@@ -508,9 +508,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
                                     'key'  => (string)$item[ 'key_value' ],
                                     'name' => (string)$item[ 'key_name' ],
                                     'tm'   => (bool)$item[ 'tm' ],
-                                    'glos' => (bool)$item[ 'glos' ],
-                                    'r'    => true,
-                                    'w'    => true,
+                                    'glos' => (bool)$item[ 'glos' ]
                             )
                     )
             );
