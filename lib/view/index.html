@@ -543,39 +543,25 @@
                                     </tr>
                                     </thead>
                                     <tbody class="list sortable">
-                                    <tr data-tm="1" data-glos="1">
-                                        <td class="privatekey">90231291i201i</td>
-                                        <td class="description">Inf tech</td>
-                                        <td class="langpair"><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
-                                        <td class="lookup check text-center"><input type="checkbox" checked="checked" /></td>
-                                        <td class="update check text-center"><input type="checkbox" /></td>
-                                        <td class="action">
-                                            <a class="pull-left btn-grey disabletm"><span class="icon-minus-circle"></span> Stop use</a>
-                                            <a class="btn-grey pull-left addtmx"><span class="icon-plus-circle"></span> Add TMX</a>
-                                        </td>
-                                    </tr>
-                                    <tr data-tm="1" data-glos="1">
-                                        <td class="privatekey">2932938238</td>
-                                        <td class="description">General</td>
-                                        <td class="langpair"><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">PT-BR</span></td>
-                                        <td class="lookup check text-center"><input type="checkbox" checked="checked" /></td>
-                                        <td class="update check text-center"><input type="checkbox" /></td>
-                                        <td class="action">
-                                            <a class="pull-left btn-grey disabletm"><span class="icon-minus-circle"></span> Stop use</a>
-                                            <a class="btn-grey pull-left addtmx"><span class="icon-plus-circle"></span> Add TMX</a>
-                                        </td>
-                                    </tr>
-                                    <tr data-tm="1" data-glos="1">
-                                        <td class="privatekey">4632938238</td>
-                                        <td class="description">Other</td>
-                                        <td class="langpair"><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">PT-BR</span></td>
-                                        <td  class="lookup check text-center" ><input type="checkbox" checked="checked" /></td>
-                                        <td  class="update check text-center" ><input type="checkbox" /></td>
-                                        <td class="action">
-                                            <a class="pull-left btn-grey disabletm"><span class="icon-minus-circle"></span> Stop use</a>
-                                            <a class="btn-grey pull-left addtmx"><span class="icon-plus-circle"></span> Add TMX</a>
-                                        </td>
-                                    </tr>
+
+                                    <tal:block tal:repeat="key user_keys/job_keys">
+                                        <tr data-tm="1" data-glos="1">
+                                            <td class="privatekey">${key/key}</td>
+                                            <td class="description">${key/name}</td>
+                                            <td class="langpair"><span class="mgmt-source">en-US</span> -
+                                                <span class="mgmt-target">es-ES</span></td>
+                                            <td class="lookup text-center check"><input type="checkbox" checked="${key/r}"/></td>
+                                            <td class="update text-center check"><input type="checkbox" checked="${key/w}"/></td>
+                                            <td class="action">
+                                                <a class="btn-grey pull-left usetm">
+                                                    <span class="icon-play-circle"></span> Use
+                                                </a>
+                                                <a class="btn-grey pull-left  addtmx">
+                                                    <span class="icon-plus-circle"></span> Add TMX
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    </tal:block>
 
                                     <tr class="new hide">
                                         <td class="privatekey"> <input class="mgmt-input" type="text" id="new-tm-key"
@@ -625,7 +611,7 @@
                                     </tr>
                                     </thead>
                                     <tbody class="list">
-                                    <tal:block tal:repeat="key user_keys">
+                                    <tal:block tal:repeat="key user_keys/totals">
                                         <tr data-tm="1" data-glos="1">
                                             <td class="privatekey">${key/key}</td>
                                             <td class="description">${key/name}</td>

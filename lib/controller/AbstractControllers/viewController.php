@@ -216,6 +216,18 @@ abstract class viewController extends controller {
     }
 
     /**
+     * GatUser Login Info
+     *
+     * @return bool
+     */
+    public function getLoginUserParams() {
+        if ( $this->isLoggedIn() ){
+            return array( $_SESSION['uid'], $_SESSION['cid'] );
+        }
+        return array( null, null );
+    }
+
+    /**
      * Check for browser support
      *
      * @return bool
