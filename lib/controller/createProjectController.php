@@ -39,10 +39,7 @@ class createProjectController extends ajaxController {
                 'target_language'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
                 'mt_engine'          => array( 'filter' => FILTER_VALIDATE_INT ),
                 'disable_tms_engine' => array( 'filter' => FILTER_VALIDATE_BOOLEAN ),
-                'private_tm_key'     => array(
-                        'filter' => FILTER_CALLBACK,
-                        'options' => array( "self", "sanitizeTmKeyArr" )
-                ),
+
                 'private_tm_user'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
                 'private_tm_pass'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
                 'lang_detect_files'  => array(
@@ -53,17 +50,34 @@ class createProjectController extends ajaxController {
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
+        //TODO: when client will be changed, remove this statement.
+        //TODO: It's not necessary to be elastic with respect to the client
+        //if a string is sent by the client, transform it into a valid array
+
+        if( !is_array($_POST['private_tm_key']) && !empty($_POST['private_tm_key'])) {
+            $_POST[ 'private_tm_key' ] = array(
+                    array(
+                        'key'  => $_POST[ 'private_tm_key' ],
+                        'name' => null,
+                        'r'    => true,
+                        'w'    => true
+                    )
+            );
+        }
+
+        $__postPrivateTmKey = array_filter($_POST['private_tm_key'], array( "self", "sanitizeTmKeyArr" ));
+
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
-        //$__postInput = filter_var_array( $_POST, $filterArgs );
+//        $__postInput = filter_var_array( $_POST, $filterArgs );
 
-        $this->file_name               = $__postInput[ 'file_name' ]; // da cambiare, FA SCHIFO la serializzazione
+        $this->file_name               = $__postInput[ 'file_name' ];       // da cambiare, FA SCHIFO la serializzazione
         $this->project_name            = $__postInput[ 'project_name' ];
         $this->source_language         = $__postInput[ 'source_language' ];
         $this->target_language         = $__postInput[ 'target_language' ];
-        $this->mt_engine               = $__postInput[ 'mt_engine' ]; // null è ammesso
+        $this->mt_engine               = $__postInput[ 'mt_engine' ];       // null è ammesso
         $this->disable_tms_engine_flag = $__postInput[ 'disable_tms_engine' ]; // se false allora MyMemory
-        $this->private_tm_key          = $__postInput[ 'private_tm_key' ];
+        $this->private_tm_key          = $__postPrivateTmKey;
         $this->private_tm_user         = $__postInput[ 'private_tm_user' ];
         $this->private_tm_pass         = $__postInput[ 'private_tm_pass' ];
         $this->lang_detect_files       = $__postInput[ 'lang_detect_files' ];
@@ -74,7 +88,7 @@ class createProjectController extends ajaxController {
 
         //json_decode the tm_key array if it has been passed
         if( !empty($this->private_tm_key )){
-//            $this->private_tm_key = json_decode($this->private_tm_key);
+            $this->private_tm_key = json_decode($this->private_tm_key);
 
             if($this->private_tm_key === null ){
                 $this->result[ 'errors' ][ ] = array( "code" => -5, "message" => "Invalid tm key passed." );
@@ -213,7 +227,12 @@ class createProjectController extends ajaxController {
     }
 
     private static function sanitizeTmKeyArr( $elem ){
-        return filter_var( $elem, FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW ) );
+        return array(
+            'key'  => filter_var( $elem['key'], FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW ) ),
+            'name' => filter_var( $elem['name'], FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW ) ),
+            'r' => filter_var( $elem['r'], FILTER_VALIDATE_BOOLEAN, array( 'flags' => FILTER_NULL_ON_FAILURE ) ),
+            'w' => filter_var( $elem['w'], FILTER_VALIDATE_BOOLEAN, array( 'flags' => FILTER_NULL_ON_FAILURE ) )
+        );
     }
 
     public function checkLogin() {
@@ -229,11 +248,3 @@ class createProjectController extends ajaxController {
 }
 
 ?>
-
- SELECT uid,
-    key_value,
-    key_name,
-    key_tm AS tm,
-    key_glos AS glos
-FROM memory_keys WHERE uid = 560
-

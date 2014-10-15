@@ -6,6 +6,7 @@
         <title>Translate - <span tal:replace="pname">Project_Name</span> - <span tal:replace="jid">Job_ID</span> </title>
         <link rel="icon" href="${basepath}public/img/favicon.ico" />
         <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
+
 <!--
         <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css" />
         <link href="${basepath}public/css/style.css?build=${build_number}" rel="stylesheet" type="text/css" />
@@ -82,6 +83,8 @@
 			}
             /*]]>*/
 		</script>
+
+
 <!--        <script src="${basepath}public/js/addtm.js?build=${build_number}"></script> -->
 <!--        <script src="${basepath}public/js/loader.js?build=${build_number}"></script> 
         <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>-->
@@ -569,13 +572,21 @@
                                             <a class="btn-ok pull-right">Create</a>
                                         </td>
                                         <td class="description">
-                                            <input class="mgmt-input" type="text" id="new-tm-description" placeholder="Enter a short description" />
+                                            <textarea class="mgmt-input" type="text" id="new-tm-description" placeholder="Enter a short description" />
                                         </td>
                                         <td class="fileupload" colspan="3">
+                                            <input id="new-tm-read" type="checkbox" name="r" class="r" value="1" checked="" />
+                                            <label for="new-tm-read">Show matches from TM</label><br />
+                                            <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
+                                            <label for="new-tm-write">Add translations to TM</label>
+
                                             <label class="fileupload">Select a TMX </label><input type="file" />
                                         </td>
                                         <td class="action">
-                                            <a class="pull-left btn-grey uploadtm"><span class="icon-upload"></span> Upload</a>
+                                            <a class="pull-left btn-grey uploadtm">
+                                                <span class="icon-upload"></span>
+                                                <span class="text">Add a key</span>
+                                            </a>
 
                                             <form class="add-TM-Form" action="/" method="post">
                                                 <input type="hidden" name="action" value="addTM" />
@@ -590,7 +601,9 @@
                                                 <input type="submit" id="addtm-add-submit" style="display: none" />
                                             </form>
 
-                                            <a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a>
+                                            <a class="pull-right canceladdtmx">
+                                                <span class="icon-times-circle"></span>
+                                            </a>
                                             <span class="message"></span>
                                         </td>
                                     </tr>
@@ -602,12 +615,12 @@
                                 <table class="mgmt-tm mgmt-tm-nested scroll" id="inactivetm">
                                     <thead>
                                     <tr>
-                                          <th>Private Key</th>
-                                        <th>Description</th>
-                                        <th>Lang Pair</th>
-                                        <th>Lookup</th>
-                                        <th>Update</th>
-                                        <th>Action</th>
+                                          <th class="privatekey">Private Key</th>
+                                        <th class="description">Description</th>
+                                        <th class="langpair">Lang Pair</th>
+                                        <th class="check">Lookup</th>
+                                        <th class="check">Update</th>
+                                        <th class="action">Action</th>
                                     </tr>
                                     </thead>
                                     <tbody class="list">
@@ -631,13 +644,6 @@
                                     </tal:block>
                                     </tbody>
                                 </table>
-
-
-                                <br />
-                                <a class="btn-ok pull-right savebtn">Save</a>
-
-
-
 
                             </div>
                         </div>
@@ -837,4 +843,6 @@ tbody td:last-child, thead th:last-child {
     <div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
 
     </body>
+
+
 </html>

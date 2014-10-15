@@ -2205,7 +2205,7 @@ UI = {
 			}
 		});
 	},
-
+/*
     checkTMgrants: function(panel) {console.log('checkTMgrants');
         var r = ($(panel).find('.r').is(':checked'))? 1 : 0;
         var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
@@ -2217,6 +2217,7 @@ UI = {
             return true;
         }
     },
+*/
 /*
     checkTMKey: function(key, operation) {console.log('checkTMKey');
         console.log('operation: ', operation);
@@ -2476,7 +2477,6 @@ UI = {
         } else {
 //			console.log('post process 1: ', $(area).html());
 //			console.log($(area).find( 'br:not([class])' ).length);
-
             $(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
             $(area).find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
             $(area).find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
@@ -2489,6 +2489,7 @@ UI = {
         $(area).find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
         $(area).find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
         $(area).find('span.space-marker').replaceWith(' ');
+        $(area).find( '.rangySelectionBoundary' ).remove();
 
 
 //        Now commented, but valid for future purposes when the user will choose what type of carriage return
@@ -8019,7 +8020,7 @@ $.extend(UI, {
             $(".addtmx").show();
             UI.clearAddTMRow();
         }).on('click', '#activetm tr.new a.uploadtm', function() {
-            operation = ($("#activetm .new td.fileupload input").val() == '')? 'key' : 'tm';
+            operation = ($('#activetm .new td.fileupload input[type="file"]').val() == '')? 'key' : 'tm';
 //            $('.addtmxrow').hide().fadeOut();
             UI.checkTMKey(operation);
 
@@ -8046,6 +8047,7 @@ $.extend(UI, {
 
             else {
                 $("#activetm .new").before(row);
+                if(!$('#inactivetm tbody tr:not(.odd)').length) $('#inactivetm tr.odd').show();
             }
             // draw the user's attention to it
             row.fadeOut();
@@ -8071,6 +8073,7 @@ $.extend(UI, {
 
             else {
                 $("#inactivetm").append(row);
+                $('#inactivetm tr.odd').hide();
             }
             // draw the user's attention to it
             row.fadeOut();
@@ -8079,7 +8082,20 @@ $.extend(UI, {
             $(this).addClass("usetm").removeClass("disabletm").text("Use").prepend('<span class="icon-play-circle"></span>');
             $('.addtmxrow').hide();
             $(".addtmx").show();
+            UI.updateTM($(this).parents('tr'));
+        }).on('change', '#new-tm-read, #new-tm-write', function(e) {
+            if(UI.checkTMgrants($('.addtm-tr'))) {
+//                $('.addtm-tr .error-message').hide();
+            }
+        }).on('change', '#activetm td.lookup input, #activetm td.update input', function(e) {
+            UI.updateTM($(this).parents('tr'));
+        }).on('change', '#activetm .new td.fileupload input[type="file"]', function(e) {
+            if($(this).val() == '') {
+                $('#activetm .new .uploadtm .text').text('Add a key');
+            } else {
+                $('#activetm .new .uploadtm .text').text('Upload');
 
+            }
         });
 
 
@@ -8282,6 +8298,23 @@ $.extend(UI, {
             },
             success: function(d) {
                 console.log('addTM success!!');
+                newTr = '<tr class="ui-sortable-handle">' +
+                        '    <td class="privatekey">4632938238</td>' +
+                        '    <td class="description">Other</td>' +
+                        '    <td class="langpair"><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">PT-BR</span></td>' +
+                        '    <td class="lookup check text-center"><input type="checkbox" checked=""></td>' +
+                        '        <td class="update check text-center"><input type="checkbox"></td>' +
+                        '            <td class="action">' +
+                        '                <a class="pull-left btn-grey disabletm"><span class="icon-minus-circle"></span> Stop use</a>' +
+                        '                <a class="btn-grey pull-left addtmx"><span class="icon-plus-circle"></span> Add TMX</a>' +
+                        '            </td>' +
+                        '        </tr>';
+                $('#activetm tr.new').before(newTr);
+                row = $('#activetm tr.new').prev();
+                row.fadeOut();
+                row.fadeIn();
+                $('#activetm tr.new .canceladdtmx').click();
+
                 $('#activetm tr.new .message').text('The key ' + this + ' has been added!');
 /*
                 txt = (d.success == true)? 'The TM Key ' + this + ' has been added to your translation job.' : d.errors[0].message;
@@ -8433,4 +8466,74 @@ $.extend(UI, {
             }
         });
     },
+    checkTMgrants: function() {console.log('checkTMgrants');
+        panel = $('#activetm tr.new');
+        var r = ($(panel).find('.r').is(':checked'))? 1 : 0;
+        var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
+        if(!r && !w) {
+            console.log('checkTMgrants NEGATIVE');
+            $(panel).find('.action .message').text('Either "Show matches from TM" or "Add translations to TM" must be checked');
+            return false;
+        } else {
+            console.log('checkTMgrants POSITIVE');
+            $(panel).find('.action .message').text('');
+            return true;
+        }
+    },
+    updateTM: function (tr) {
+        TMKey = tr.find('.privatekey').text();
+        TMName = tr.find('.description').text();
+        var r = (tr.find('.lookup input').is(':checked'))? 1 : 0;
+        var w = (tr.find('.update input').is(':checked'))? 1 : 0;
+        dataMix = {
+            action: 'addTM',
+            exec: 'updateTM',
+            tm_key: TMKey,
+            tmx_name: TMName,
+            r: r,
+            w: w
+        };
+        if(APP.isCattool) {
+            dataMix.job_id = config.job_id;
+            dataMix.job_pass = config.password;
+        }
+        APP.doRequest({
+            data: dataMix,
+            context: [TMKey, TMName],
+            error: function() {
+            },
+            success: function(d) {
+/*
+                if(d.errors.length) {
+                    APP.showMessage({
+                        msg: d.errors[0].message,
+                    });
+                } else {
+                    if(d.data.total == null) {
+                        pollForUploadProgressContext = this;
+                        setTimeout(function() {
+                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1]);
+                        }, 500);
+                    } else {
+                        if(d.completed) {
+                            $('#messageBar .progress').remove();
+                            APP.showMessage({
+                                msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
+                            });
+                            UI.clearAddTMpopup();
+                            return false;
+                        }
+                        progress = (parseInt(d.data.done)/parseInt(d.data.total))*100;
+                        $('#messageBar .progress').css('width', progress + '%');
+                        pollForUploadProgressContext = this;
+                        setTimeout(function() {
+                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1]);
+                        }, 500);
+                    }
+                }
+                */
+            }
+        });
+    },
+
 });

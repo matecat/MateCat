@@ -2205,7 +2205,7 @@ UI = {
 			}
 		});
 	},
-
+/*
     checkTMgrants: function(panel) {console.log('checkTMgrants');
         var r = ($(panel).find('.r').is(':checked'))? 1 : 0;
         var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
@@ -2217,6 +2217,7 @@ UI = {
             return true;
         }
     },
+*/
 /*
     checkTMKey: function(key, operation) {console.log('checkTMKey');
         console.log('operation: ', operation);
@@ -2476,7 +2477,6 @@ UI = {
         } else {
 //			console.log('post process 1: ', $(area).html());
 //			console.log($(area).find( 'br:not([class])' ).length);
-
             $(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
             $(area).find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
             $(area).find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
@@ -2489,6 +2489,7 @@ UI = {
         $(area).find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
         $(area).find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
         $(area).find('span.space-marker').replaceWith(' ');
+        $(area).find( '.rangySelectionBoundary' ).remove();
 
 
 //        Now commented, but valid for future purposes when the user will choose what type of carriage return

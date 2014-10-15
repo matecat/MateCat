@@ -261,18 +261,14 @@ footer nav li:first-child
     {
 	    width: 800px;
 	    margin: 0 auto;
-	    position: fixed;
 	    padding: 30px 0 30px 0;
 	    display: block;
-	    top: 50%;
-	    left: 50%;
-	    margin: -230px 0 0 -400px;
 	    z-index: 999999;
 	    background: #fff;
-	    box-shadow: 0px 0px 25px #000;
+	    box-shadow: 0px 0px 5px #ccc;
 	    border-radius: 2px;
 	    font-size: 18px;
-	    border: 1px solid #666;
+	    border: 1px solid #ccc;
     }
 
     .iepopup img
@@ -753,7 +749,7 @@ color:#333;}
 }
 
 td.addtmxtd {
-width: 801px;
+width: 804px;
 }
 
 form.add-TM-Form {
@@ -896,7 +892,6 @@ font-size: 18px;
 .mgmt-panel-tm .btn-ok, .mgmt-panel-gl .btn-ok {
 		    padding: 4px 18px;
 		    margin-top:10px;
-		    clear: both;
 }
 .popup h1 .btn-ok,
 .popup h1 .btn-cancel 
@@ -911,6 +906,8 @@ font-size: 18px;
 	    background: -moz-linear-gradient(top,  #f6f6f6,  #e2e3e5);
 	    background: linear-gradient(top,  #f6f6f6,  #e2e3e5);
 }
+
+
 .mgmt-panel-tm .btn-ok:hover,
 .mgmt-panel-gl .btn-ok:hover,
 .popup .btn-ok:hover, 
@@ -1107,7 +1104,9 @@ margin: 2px 2px 0px;}
 
 #inactivetm {cursor: initial; float:left;}
 td.no-gutter {padding:0!important;}
-
+.dataTables_empty {
+width: 1042px;
+}
 .mgmt-container .icon-search {
 margin-top: 2px;
 margin-left: 5px;
@@ -1124,7 +1123,7 @@ margin-bottom: 10px;
 #activetm td {background: #c4f3ff;}
 #inactivetm td {background: #f3f3f3;}
 .mgmt-tm td, .mgmt-tm th, .mgmt-gl td, .mgmt-gl th {
-border: 1px solid #ccc;
+border-bottom: 1px solid #ccc;
 padding: 5px 8px;
 background: #fff;
 margin: 1px 0;
@@ -1340,8 +1339,26 @@ clear: both;
 .addrow-gl {
 padding: 0 25px;
 }
-input#new-tm-key {width:55%;}
+input#new-tm-key {width: 85%;
+	margin:0 0 10px 0;
+height: 0px;}
+input#new-tm-description {height:20px;
 
+}
+tr.new {
+vertical-align: top;
+}
+
+tr.new .message {
+line-height: 20px;
+margin-top: 12px;
+float: left;
+color: green;
+}
+
+tr.new td {
+	padding:15px 8px 0;
+}
 .addrow-tm .block, .addrow-gl .block {width: 46%;}
 .addrow-gl select {height: 32px; margin-bottom:20px;}
 .searchbox .block .field
@@ -1404,8 +1421,8 @@ section.currSearchSegment mark.searchMarker
 	padding-top:70px;
 }
 .offline .cat {
-	height:300px;
-	background:url(../img/offline.jpg) no-repeat center center;
+	height:215px;
+	background:url(../img/offline.png) no-repeat center center;
 }
 
 .offline header {

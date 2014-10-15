@@ -64,13 +64,21 @@
 <div metal:use-macro="unsupported_browser.html/unsupported"/>
 </body>
 <body tal:condition="supportedBrowser" class="started">
+
+<header>
+    <div class="wrapper">
+        <a href="${basepath}" class="logo"></a>
+        <a class="pull-right open-more cat-appear hide">About Matecat</a>
+    </div>
+<div class="cl"></div>
+</header>
 <div class="hide learnmore">
     <span class="open-more pull-right">✕</span>
     <h1>Post-editing and outsourcing made easy</h1>
     
     <div class="col-3">
         <h2>State-of-the-art MT <br />and public TMs</h2>
-        <p>Translation and post-editing in 80 languages with zero start-up time</p>
+        <p>Translation and post-editing <br />in 80 languages with zero start-up time</p>
         <img src="/public/img/box1.jpg" />
 
     </div>
@@ -81,7 +89,7 @@
 
     </div>
     <div class="col-3">
-        <h2><strong>It’s free. </strong><br />The whole package, for good</h2>
+        <h2><strong>It’s free</strong><br />and always will be</h2>
         <p>A free CAT tool for professional translators, LSPs and customers</p>
         <img src="/public/img/box3.jpg" />
 
@@ -91,13 +99,6 @@
     </div>
 
 </div>
-<header>
-    <div class="wrapper">
-        <a href="${basepath}" class="logo"></a>
-        <a class="pull-right open-more cat-appear hide">About Matecat</a>
-    </div>
-<div class="cl"></div>
-</header>
 <div class="cat-appear-div hide">
     <img src="../public/img/about.png" />
 </div>
@@ -106,7 +107,7 @@
 
 <h1 tal:condition="not:conversion_enabled">Translate an XLIFF file</h1>
 
-<h2 class="payoff">MateCat gives you more matches than any other translation tool. <a class="open-more">Learn more</a>.</h2>
+<h2 class="payoff">MateCat gives you more matches than any other CAT tool. <a class="open-more">Learn more</a>.</h2>
 </div>
 <div class="wrapper-upload">
 
@@ -674,8 +675,8 @@
     </table>
 </script>
 
-<script src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
-
+<link rel="stylesheet" href="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/themes/smoothness/jquery-ui.css" />
+<script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script>
 <!-- The Templates plugin is included to render the upload/download listings -->
 <script src="${basepath}public/js/lib/fileupload/tmpl.min.js"></script>
 
@@ -869,10 +870,19 @@
                                                            id="new-tm-description"
                                                            placeholder="Enter a short description" />
                             </td>
-                            <td class="fileupload" colspan="3"><label class="fileupload">Select a TMX </label><input type="file" />
+                            <td class="fileupload" colspan="3">
+                                <input id="new-tm-read" type="checkbox" name="r" class="r" value="1" checked="" />
+                                <label for="new-tm-read">Show matches from TM</label><br />
+                                <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
+                                <label for="new-tm-write">Add translations to TM</label>
+
+                                <label class="fileupload">Select a TMX </label><input type="file" />
                             </td>
                            <td class="action">
-                               <a class="pull-left btn-grey uploadtm"><span class="icon-upload"></span> Upload</a>
+                               <a class="pull-left btn-grey uploadtm">
+                                   <span class="icon-upload"></span>
+                                   <span class="text">Add a key</span>
+                               </a>
                                <form class="add-TM-Form" action="/" method="post">
                                    <input type="hidden" name="action" value="addTM" />
                                    <input type="hidden" name="exec" value="newTM" />
@@ -886,7 +896,9 @@
                                    <input type="submit" id="addtm-add-submit" style="display: none" />
                                </form>
 
-                               <a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a>
+                               <a class="pull-right canceladdtmx">
+                                   <span class="icon-times-circle"></span>
+                               </a>
                            </td>
                         </tr>
 
@@ -930,9 +942,6 @@
                         </tbody>
                     </table>
 
-                    <br />
-                    <a class="btn-ok pull-right savebtn">Save</a>
-
                     </div>
                 </div>
             </div>
@@ -971,7 +980,7 @@
 
     $(".open-more").click(function() {
         $( ".cat-appear-div" ).hide();
-        $( ".learnmore" ).slideToggle( "400", function() {
+        $( ".learnmore" ).slideToggle( "700", function() {
 
             // Animation complete.
         });
