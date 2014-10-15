@@ -8157,13 +8157,22 @@ $.extend(UI, {
 //    };
 
 
-/*
+
 // temporary disabled: this has to be realeased without jquery-ui (which is not loaded in the cattool), try to use tablesorter, who is already used in manage page
         $("#activetm tbody.sortable").sortable({
-            helper: fixHelperModified
+            helper: fixHelperModified,
+            stop: function( event, tr ) {
+
+                $('#activetm tbody tr:not(.new)').each(function () {
+                    console.log($(this).find('.privatekey').text())
+                })
+                UI.updateTM($('#activetm tbody tr:not(.new)'));
+
+//                console.log($('#activetm').html());
+            }
             //   stop: updateIndex
         }).disableSelection();
-*/
+ /**/
 
 //$('.enable').click(function() {
 //  $(this).closest('tr td:first-child').toggleClass('index');
@@ -8480,26 +8489,34 @@ $.extend(UI, {
             return true;
         }
     },
+    extractTMdataFromRow: function (tr) {
+        data = {
+            tm_key: tr.find('.privatekey').text(),
+            key: this.tm_key,
+            tmx_name: tr.find('.description').text(),
+            name: this.tmx_name,
+            r: ((tr.find('.lookup input').is(':checked'))? 1 : 0),
+            w: ((tr.find('.update input').is(':checked'))? 1 : 0)
+        }
+        return data;
+    },
+
     updateTM: function (tr) {
-        TMKey = tr.find('.privatekey').text();
-        TMName = tr.find('.description').text();
-        var r = (tr.find('.lookup input').is(':checked'))? 1 : 0;
-        var w = (tr.find('.update input').is(':checked'))? 1 : 0;
         dataMix = {
             action: 'addTM',
-            exec: 'updateTM',
-            tm_key: TMKey,
-            tmx_name: TMName,
-            r: r,
-            w: w
+            exec: 'updateTM'
         };
+        console.log('tr: ', tr);
+        console.log('tr length: ', tr.length);
+        TMdata = this.extractTMdataFromRow(tr);
+        $.extend(dataMix, TMdata);
         if(APP.isCattool) {
             dataMix.job_id = config.job_id;
             dataMix.job_pass = config.password;
         }
         APP.doRequest({
             data: dataMix,
-            context: [TMKey, TMName],
+            context: [TMdata],
             error: function() {
             },
             success: function(d) {
