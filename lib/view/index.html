@@ -548,7 +548,7 @@
                                     <tbody class="list sortable">
 
                                     <tal:block tal:repeat="key user_keys/job_keys">
-                                        <tr data-tm="1" data-glos="1">
+                                        <tr data-tm="1" data-glos="1" data-editable="${key/edit}">
                                             <td class="privatekey">${key/key}</td>
                                             <td class="description">${key/name}</td>
                                             <td class="langpair"><span class="mgmt-source">en-US</span> -

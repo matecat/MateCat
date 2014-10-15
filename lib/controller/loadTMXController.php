@@ -7,7 +7,7 @@
  * 
  */
 
-class loadTMXController extends addTMController {
+class loadTMXController extends ajaxController {
 
 
     /**
@@ -36,7 +36,7 @@ class loadTMXController extends addTMController {
 
     public function __construct() {
 
-        ajaxController::__construct();
+        parent::__construct();
 
         $filterArgs = array(
                 'name'   => array(
@@ -101,7 +101,8 @@ class loadTMXController extends addTMController {
 
             } else {
 
-                $this->TMLoader->tmxUploadStatus();
+                $status = $this->TMLoader->tmxUploadStatus();
+                $this->result[ 'data' ] = $status['data'];
 
             }
 
