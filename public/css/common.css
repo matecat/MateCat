@@ -1041,9 +1041,9 @@ width: auto;
 	border-bottom:40px;
 	border-collapse:collapse;
 	font-size: 15px;
-float: left;
-table-layout: fixed;
-width: 100%;
+    float: left;
+    table-layout: fixed;
+    width: 100%;
 }
 
 .mgmt-tm .btn-ok, .mgmt-tm .btn-grey {margin:0 3px;
@@ -1058,7 +1058,15 @@ font-size:14px;}
 .mgmt-tm .action .btn-grey, .addtmxrow .btn-grey {width: 75px;
 text-align: center;
 }
-
+.mgmt-tm.mine thead,
+.mgmt-tm.new thead,
+.mgmt-tm.anonymous thead
+{
+    display: none;
+}
+#activetm {
+    
+}
 
 .dataTables_length, .dataTables_info {display: none;}
 .dataTables_filter {
@@ -1089,7 +1097,9 @@ margin-top: 10px;
 .mgmt-tm .btn-grey span {float: left;
 margin: 2px 2px 0px;}
 
-#activetm {cursor: move; margin-bottom: 15px;}
+/*
+#activetm {margin-bottom: 15px;}
+*/
 #activetm thead {
   /*  display: table-header-group !important;*/
   background: #6d6e71;
@@ -1100,6 +1110,15 @@ margin: 2px 2px 0px;}
 #activetm tr:not(.new) {
     display: block;
     width: 100%;
+}
+#activetm tbody tr.mine {
+    cursor: move;
+}
+table.owner tbody td {
+    background: #fff !important;
+}
+table.anonymous tbody td {
+    background: #f6f6f6 !important;
 }
 
 #inactivetm {cursor: initial; float:left;}

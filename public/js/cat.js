@@ -8012,7 +8012,7 @@ $.extend(UI, {
             '<a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a> </td></tr>';
             $(this).closest("tr").after(newRow);
             UI.uploadTM($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
-            UI.checkTMheights();
+//            UI.checkTMheights();
         })
 
         $('body').on('click', 'a.canceladdtmx', function() {
@@ -8031,6 +8031,8 @@ $.extend(UI, {
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
         }).on('click', '#activetm tr.addtmxrow a.uploadtm', function() {
             UI.execAddTM(this);
+        }).on('click', '.popup-tm .savebtn', function() {
+            UI.saveTMdata();
         }).on('click', 'a.usetm', function() {
             // get the row containing this link
             var row = $(this).closest("tr");
@@ -8161,6 +8163,8 @@ $.extend(UI, {
 // temporary disabled: this has to be realeased without jquery-ui (which is not loaded in the cattool), try to use tablesorter, who is already used in manage page
         $("#activetm tbody.sortable").sortable({
             helper: fixHelperModified,
+            items: ".mine",
+ /*
             stop: function( event, tr ) {
 
                 $('#activetm tbody tr:not(.new)').each(function () {
@@ -8170,7 +8174,7 @@ $.extend(UI, {
 
 //                console.log($('#activetm').html());
             }
-            //   stop: updateIndex
+*/
         }).disableSelection();
  /**/
 
@@ -8185,9 +8189,7 @@ $.extend(UI, {
 
 
 
-        $('.savebtn').click(function() {
-            UI.saveTMdata();
-        });
+
 
 
     },
@@ -8201,15 +8203,24 @@ $.extend(UI, {
         console.log('div_id: ', div_id);
 
     },
-    checkTMheights: function() {return false;
-        console.log($('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)'));
+    checkTMheights: function() {
+//        var h = $('#activetm tbody tr').first().height();
+//        var h = $('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)').height();
         var h = 0;
         $('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)').each(function() {
             h += $(this).height();
         })
         $('#activetm tbody').css('height', h + 'px');
-        console.log(h);
 
+        /*
+                console.log($('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)'));
+                var h = 0;
+                $('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)').each(function() {
+                    h += $(this).height();
+                })
+                $('#activetm tbody').css('height', h + 'px');
+                console.log(h);
+        */
 
     },
     checkTMKey: function(operation) {
@@ -8489,6 +8500,20 @@ $.extend(UI, {
             return true;
         }
     },
+    extractTMdataFromTable: function () {
+        tt = $('#activetm tbody tr.mine');
+        dataOb = [];
+        $(tt).each(function () {
+            dd = {
+                key: $(this).find('.privatekey').text(),
+                tmx_name: $(this).find('.description').text(),
+                r: (($(this).find('.lookup input').is(':checked'))? 1 : 0),
+                w: (($(this).find('.update input').is(':checked'))? 1 : 0)
+            }
+            dataOb.push(dd);
+        })
+        return JSON.stringify(dataOb);
+    },
     extractTMdataFromRow: function (tr) {
         data = {
             tm_key: tr.find('.privatekey').text(),
@@ -8499,6 +8524,68 @@ $.extend(UI, {
             w: ((tr.find('.update input').is(':checked'))? 1 : 0)
         }
         return data;
+    },
+
+    saveTMdata: function() {
+        data = this.extractTMdataFromTable();
+        console.log('VEDIAMO: ', data);
+        APP.doRequest({
+            data: {
+                action: 'updateJobKeysController',
+                job_id: config.job_id,
+                job_pass: config.password,
+                data: data
+            },
+            error: function() {
+                console.log('Error saving TM data!!');
+            },
+            success: function(d) {
+                console.log('TM data saved!!');
+            }
+        });
+        /*
+         numActive = $('#activetm tbody tr:not(.hide)').length;
+         $('.translate-box .numResources').text(numActive);
+         $('.resource').show();
+         activeTMdata = [];
+         $('#activetm tbody tr:not(.hide)').each(function() {
+         item = {};
+         item.key = $(this).find('.privatekey').text();
+         item.tm = $(this).attr('data-tm');
+         item.glos = $(this).attr('data-glos');
+         item.r = $(this).find('.lookup input').is(':checked');
+         item.w = $(this).find('.update input').is(':checked');
+         activeTMdata.push(item);
+         });
+         console.log('activeTMdata; ', activeTMdata);
+         console.log('activeTMdata string; ', JSON.stringify(activeTMdata));
+
+         APP.doRequest({
+         data: {
+         action: 'addTM',
+         job_id: config.job_id,
+         job_pass: config.password,
+         data: JSON.stringify(activeTMdata)
+         },
+         error: function() {
+         console.log('Error saving TM data!!');
+         },
+         success: function(d) {
+         console.log('TM data saved!!');
+         }
+         });
+         */
+// ???
+        /*
+         $('input.checkbox').each(function(){
+         if ($(this).is(':checked')) {
+         $(this).parent('tr').addClass('selected');
+         } else {
+         $(this).parent('tr').addClass('disabled');
+         }
+         });
+         */
+
     },
 
     updateTM: function (tr) {
