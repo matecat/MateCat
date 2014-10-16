@@ -1022,7 +1022,6 @@ margin-top: 6px;
 /* tendina home */
 
 .learnmore {
-background-color: rgb(255, 255, 255);
 padding: 20px 40px 30px;
 margin: -20px auto 0px;
 overflow: hidden;
@@ -1139,69 +1138,6 @@ background: #ca2a2e url(../img/sprite2x.png) 12px -1115px no-repeat !important;
     cursor: pointer;
 }
 
-header .open-more {
-	color:#fff;
-	padding:10px 5px;
-	font-size:16px;
-}
-.open-more {
-		cursor: pointer;
-	text-decoration: underline;
 
-}
-
-.learnmore h1 {
-	color: white;
-font-size: 45px;
-font-weight: 800;
-margin: 0;
-}
-
-.col-3 {
-width: 17.33333333333333%;
-float:left;
-padding:0 8%;
-}
-
-.learnmore h2 {
-	color: #fff;
-margin-bottom: 50px;
-margin-top: 10px;
-font-weight: 400;
-font-size: 32px;
-}
-
-.learnmore .open-more {
-	font-size:20px;
-	text-decoration: none;
-	font-weight: bold;
-	color:#fff;
-}
-
-.learnmore a {
-	color:white;
-}
-.bottom-lm {
-	margin-top: 20px;
-float: left;
-width: 100%;
-}
-
-.learnmore {
-	background-color: #09beec;
-	padding:20px 40px;
-	margin: 0 auto;
-overflow: hidden;
-color:white;
-font-size:20px;
-
-}
-
-
-.cat-appear-div {
-position: absolute;
-right: 0;
-z-index: -1000;
-}
 
 .text-center {text-align: center;}
