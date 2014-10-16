@@ -56,7 +56,7 @@ class TmKeyManagement_Filter {
      *
      * @var array
      */
-    protected $_grants_map = array(
+    public static $GRANTS_MAP = array(
             self::ROLE_TRANSLATOR => array( "r" => 'r_transl', "w" => 'w_transl' ),
             self::ROLE_REVISOR    => array( "r" => 'r_rev', "w" => 'w_rev' ),
             self::OWNER           => array( 'r' => 'r', 'w' => 'w' )
@@ -209,10 +209,10 @@ class TmKeyManagement_Filter {
         }
 
         if( $this->_required_grant == 'rw' ) {
-            $has_required_grants = $tm_key[ $this->_grants_map[ $role ][ 'r' ] ] == true;
-            $has_required_grants = $has_required_grants && $tm_key[ $this->_grants_map[ $role ][ 'w' ] ] == true;
+            $has_required_grants = $tm_key[ self::$GRANTS_MAP[ $role ][ 'r' ] ] == true;
+            $has_required_grants = $has_required_grants && $tm_key[ self::$GRANTS_MAP[ $role ][ 'w' ] ] == true;
         } else {
-            $has_required_grants = $tm_key[ $this->_grants_map[ $role ][ $this->_required_grant ] ] == true;
+            $has_required_grants = $tm_key[ self::$GRANTS_MAP[ $role ][ $this->_required_grant ] ] == true;
         }
 
         return $has_required_grants;
