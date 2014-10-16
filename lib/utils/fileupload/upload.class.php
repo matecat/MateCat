@@ -221,12 +221,12 @@ class UploadHandler {
     protected function upcount_name_callback($matches) {
         $index = isset($matches[1]) ? intval($matches[1]) + 1 : 1;
         $ext = isset($matches[2]) ? $matches[2] : '';
-        return ' (' . $index . ')' . $ext;
+        return '_(' . $index . ')' . $ext;
     }
 
     protected function upcount_name($name) {
         return preg_replace_callback(
-                '/(?:(?: \(([\d]+)\))?(\.[^.]+))?$/', array($this, 'upcount_name_callback'), $name, 1
+                '/(?:(?:_\(([\d]+)\))?(\.[^.]+))?$/', array($this, 'upcount_name_callback'), $name, 1
         );
     }
 
@@ -243,11 +243,12 @@ class UploadHandler {
         }
     }
 
+    /**
+     * Remove path information and dots around the filename, to prevent uploading
+     * into different directories or replacing hidden system files.
+     * Also remove control characters and spaces (\x00..\x20) around the filename:
+     */
     protected function trim_file_name($name, $type, $index) {
-        // Remove path information and dots around the filename, to prevent uploading
-        // into different directories or replacing hidden system files.
-        // Also remove control characters and spaces (\x00..\x20) around the filename:
-        //echo "name0 $name\n";
         $name = stripslashes($name);
         //echo "name01 $name\n";
         $file_name = trim($this->my_basename($name), ".\x00..\x20");
@@ -258,7 +259,9 @@ class UploadHandler {
             $file_name .= '.' . $matches[1];
         }
 
-        //echo "name2 $file_name\n";
+        //remove spaces
+        $file_name = str_replace( array( " ", " " ), "_", $file_name );
+
         if ($this->options['discard_aborted_uploads']) {
             while (is_file($this->options['upload_dir'] . $file_name)) {
                 $file_name = $this->upcount_name($file_name);
@@ -380,35 +383,11 @@ class UploadHandler {
         }
 
         /**
-         * Conversion Enforce
          *
-         * Check on extensions no more sufficient, we want check content
-         * if this is an idiom.inc xlf file type, enforce conversion
-         * $file->convert = true;
+         * OLD
+         * Conversion check are now made server side
          */
         $file->convert = true;
-        try {
-
-            $fileType = DetectProprietaryXliff::getInfo( $file_path );
-            if( DetectProprietaryXliff::isXliffExtension() ){
-
-                if ( $fileType['proprietary'] ){
-
-                    if ( !INIT::$CONVERSION_ENABLED ) {
-                        $file->convert = false;
-                        unlink($file_path);
-                        $file->error = 'Matecat Open-Source does not support ' . ucwords($fileType['proprietary_name']) . '. Use MatecatPro.';
-                    }
-
-                } else {
-                    $file->convert = false;
-                }
-
-            }
-
-        } catch (Exception $e) {
-            Log::doLog($e->getMessage());
-        }
 
         return $file;
     }

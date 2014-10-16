@@ -94,12 +94,25 @@ while (1) {
         continue;
     }
 
+    //reset vectors
+    $matches   = array();
+    $tms_match = array();
+    $mt_res    = array();
+
     $config = TMS::getConfigStruct();
     $config[ 'segment' ]       = $text;
     $config[ 'source_lang' ]   = $source;
     $config[ 'target_lang' ]   = $target;
-    $config[ 'email' ]         = "demo@matecat.com";
-    $config[ 'id_user' ]       = $id_translator;
+    $config[ 'email' ]         = "tmanalysis@matecat.com";
+
+//    $config[ 'id_user' ]       = $id_translator;
+    $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys($segment[ 'tm_keys' ], 'r', 'tm' );
+    if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
+        foreach ( $tm_keys as $tm_key ) {
+            $config[ 'id_user' ][ ] = $tm_key->key;
+        }
+    }
+    
     $config[ 'num_result' ]    = 3;
 
     $id_mt_engine    = $segment[ 'id_mt_engine' ];
@@ -159,7 +172,6 @@ while (1) {
     /**
      * Call External MT engine if it is a custom one ( mt not requested from MyMemory )
      */
-    $mt_res = array();
     $mt_match = "";
     if ( $id_mt_engine > 1 /* Request MT Directly */ ) {
         $mt = new MT($id_mt_engine);
@@ -180,8 +192,6 @@ while (1) {
 
         }
     }
-
-    $matches = array();
 
     if (!empty($tms_match)) {
         $matches = $tms_match;
@@ -305,7 +315,7 @@ function tryToCloseProject( $pid ){
     $pid_standard_words = $analyzed_report['st_wc'];
     if ($segs_in_project - $segs_analyzed == 0) {
         echo "--- (child $my_pid) : analysis project $pid finished : change status to DONE\n";
-        $change_res = changeProjectStatus($pid, "DONE");
+        $change_res = changeProjectStatus($pid, Constants_ProjectStatus::STATUS_DONE );
         $tm_wc_res = changeTmWc($pid, $pid_eq_words, $pid_standard_words);
     }
     echo "\n\n";
@@ -363,4 +373,3 @@ function compareScore($a, $b) {
     return ( floatval($a['match']) < floatval($b['match']) ? 1 : -1); //SORT DESC !!!!!!! INVERT MINUS SIGN
     //this is necessary since usort sorts is ascending order, thus inverting the ranking
 }
-?>

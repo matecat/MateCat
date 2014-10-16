@@ -1,8 +1,8 @@
 <?php
-require_once 'inc/config.inc.php';
+if( !@include_once 'inc/config.inc.php')
+	header("Location: configMissing");
 
 INIT::obtain();
-
 require_once INIT::$UTILS_ROOT . '/Log.php';
 require_once INIT::$UTILS_ROOT . '/Utils.php';
 require_once INIT::$MODEL_ROOT . '/Database.class.php';
@@ -18,6 +18,3 @@ $controller = controller::getInstance ();
 $controller->doAction ();
 $controller->finalize ();
 $db->close ();
-
-
-?>

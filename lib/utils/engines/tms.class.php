@@ -5,7 +5,6 @@ include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
 include_once INIT::$UTILS_ROOT . "/engines/tms_result.class.php";
 
 
-
 class TMS extends Engine {
 
     private $result = array();
@@ -61,14 +60,6 @@ class TMS extends Engine {
         $parameters = array();
         $parameters['q'] =  $_config['segment'] ;
 
-        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX : it
-        //does not handle properly iso code (en-US)-- COMMIT BUT MUST BE FIXED IN MYMEMORY
-        if ( $_config['isConcordance'] || $_config['isGlossary'] ) {
-            list( $_config['source_lang'], $trash ) = explode('-', $_config['source_lang'] );
-            list( $_config['target_lang'], $trash ) = explode('-', $_config['target_lang'] );
-        }
-        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX --
-
         $parameters[ 'langpair' ] = $_config['source_lang'] . "|" . $_config['target_lang'];
         $parameters[ 'de' ]       = $_config[ 'email' ];
         $parameters[ 'mt' ]       = $_config[ 'get_mt' ];
@@ -78,7 +69,9 @@ class TMS extends Engine {
         ( $_config['mt_only']       ? $parameters['mtonly'] = '1' : null );
 
         if ( !empty( $_config['id_user'] ) ) {
-            $parameters['key'] = $this->calculateMyMemoryKey( $_config['id_user'] );
+//            $parameters['key'] = $this->calculateMyMemoryKey( $_config['id_user'] );
+            if( ! is_array( $_config['id_user'] ) ) $_config['id_user'] = array( $_config['id_user'] );
+            $parameters['key'] = implode(",", $_config['id_user']);
         }
 
         ( !$_config['isGlossary']   ? $apply = "get" : $apply = "gloss_get" );
@@ -90,15 +83,11 @@ class TMS extends Engine {
 
     }
 
+    /**
+     * @param array $_config
+     * @return bool True if set was successful, false otherwise
+     */
     public function set( array $_config ) {
-
-        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX : it
-        //does not handle properly iso code (en-US)-- COMMIT BUT MUST BE FIXED IN MYMEMORY
-        if ( $_config['isGlossary'] ) {
-            list( $_config['source_lang'], $trash ) = explode('-', $_config['source_lang'] );
-            list( $_config['target_lang'], $trash ) = explode('-', $_config['target_lang'] );
-        }
-        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX --
 
         $parameters               = array();
         $parameters[ 'seg' ]      = $_config[ 'segment' ];
@@ -108,8 +97,9 @@ class TMS extends Engine {
         $parameters[ 'de' ]       = $_config[ 'email' ];
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
-            //$parameters['user'] = $id_user;
-            $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
+//            $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
+            if( ! is_array( $_config['id_user'] ) ) $_config['id_user'] = array( $_config['id_user'] );
+            $parameters['key'] = implode(",", $_config['id_user']);
         }
 
         ( !$_config['isGlossary']   ? $apply = "set" : $apply = "gloss_set" );
@@ -126,14 +116,6 @@ class TMS extends Engine {
 
     public function delete( array $_config ) {
 
-        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX : it
-        //does not handle properly iso code (en-US)-- COMMIT BUT MUST BE FIXED IN MYMEMORY
-        if ( $_config['isGlossary'] ) {
-            list( $_config['source_lang'], $trash ) = explode('-', $_config['source_lang'] );
-            list( $_config['target_lang'], $trash ) = explode('-', $_config['target_lang'] );
-        }
-        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX --
-
         $parameters               = array();
         $parameters[ 'seg' ]      = $_config[ 'segment' ];
         $parameters[ 'tra' ]      = $_config[ 'translation' ];
@@ -141,8 +123,9 @@ class TMS extends Engine {
         $parameters[ 'de' ]       = $_config[ 'email' ];
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
-            //$parameters['user'] = $id_user;
-            $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
+//            $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
+            if( ! is_array( $_config['id_user'] ) ) $_config['id_user'] = array( $_config['id_user'] );
+            $parameters['key'] = implode(",", $_config['id_user']);
         }
 
         ( !$_config['isGlossary']   ? $apply = "delete" : $apply = "gloss_delete" );
@@ -159,14 +142,6 @@ class TMS extends Engine {
 
     public function update( array $_config ){
 
-        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX : it
-        //does not handle properly iso code (en-US)-- COMMIT BUT MUST BE FIXED IN MYMEMORY
-        if ( $_config['isGlossary'] ) {
-            list( $_config['source_lang'], $trash ) = explode('-', $_config['source_lang'] );
-            list( $_config['target_lang'], $trash ) = explode('-', $_config['target_lang'] );
-        }
-        //TODO REMOVE THIS PATCH AFTER MyMEMORY Concordance/Glossary FIX --
-
         $parameters               = array();
         $parameters[ 'seg' ]      = $_config[ 'segment' ];
         $parameters[ 'tra' ]      = $_config[ 'translation' ];
@@ -174,8 +149,9 @@ class TMS extends Engine {
         $parameters[ 'tnote' ]    = $_config[ 'tnote' ];
 
         if ( !empty( $_config[ 'id_user' ] ) ) {
-            //$parameters['user'] = $id_user;
-            $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
+//            $parameters[ 'key' ] = $this->calculateMyMemoryKey( $_config[ 'id_user' ] );
+            if( ! is_array( $_config['id_user'] ) ) $_config['id_user'] = array( $_config['id_user'] );
+            $parameters['key'] = implode(",", $_config['id_user']);
         }
 
         $this->doQuery( "gloss_update" , $parameters);
@@ -189,21 +165,12 @@ class TMS extends Engine {
 
     }
 
-    private function calculateMyMemoryKey($id_translator) {
-        $key = getTranslatorKey($id_translator);
-        return $key;
-    }
-
-    public static function createMyMemoryKey(){
-
-        $newUser = json_decode( file_get_contents( 'http://mymemory.translated.net/api/createranduser' ) );
-        if ( empty( $newUser ) || $newUser->error || $newUser->code != 200 ) {
-            throw new Exception( "User private key failure.", -1 );
-        }
-
-        return $newUser;
-
-    }
+//    private function calculateMyMemoryKey($id_translator) {
+//
+//        $APIKeySrv = TMSServiceFactory::getAPIKeyService();
+//        return $APIKeySrv->calculateMyMemoryKey( $id_translator );
+//
+//    }
 
 }
 

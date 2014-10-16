@@ -23,7 +23,7 @@ Client side requirements
 
 Instructions (based on a Debian distro)
 1) create database using the file matecat.sql in lib/model folder
-2) edit the file inc/config.ini.sample with 
+2) edit the file inc/config.ini.sample.php with
     - the right parameters for the connection to the database
       [db]
       hostname = "@ip address or hostname of the database" 
@@ -33,7 +33,7 @@ Instructions (based on a Debian distro)
     - the right basepath
       if your url is http://www.yourhost.com/matecat --> baseurl="/matecat/"
       if your url is http://matecat.yourhost.com/ --> baseurl="/"
-   save and rename to config.ini
+   save and rename to config.ini.php
 
 
 3) create a user matecat and add it a the www-data group
@@ -86,3 +86,25 @@ Instructions (based on a Debian distro)
 10) enable pcntl in php5 CLI php.ini by removing pcntl functions from
     disable_functions in /etc/php5/cli/php.ini
 
+11)If you don't have a client id and client secret, please visit
+   Google Developers Console (https://console.developers.google.com/)
+   and follow these instructions:
+   - click "Create Project" button and specify project name
+   - In the sidebar on the left, select APIs & auth.
+   - In the displayed list of APIs, make sure "Google+ API" show a status of ON. If it doesn't, enable it.
+   - In the sidebar on the left, select "Credentials" under "APIs & auth" menu.
+   - Click "Create new client ID" button
+   - under APPLICATION TYPE, select "web application" option
+   - under AUTHORIZED JAVASCRIPT ORIGINS, insert the domain on which you installed MateCat
+   - under REDIRECT URIs, insert "http://<domain>/oauth/response" , where <domain> is the same that you specified in the previous step
+   - click "Create client ID"
+   Your client ID and client secret are now available.
+
+12)Edit the file inc/oauth_config.ini.sample with the right parameters obtained in the previous step of this guide.
+   set:
+   OAUTH_CLIENT_ID with your client ID
+   OAUTH_CLIENT_SECRET with your client secret
+   OAUTH_CLIENT_APP_NAME with your custom app name, if you want, or leave Matecat
+
+   save and rename to oauth_config.ini file.
+   Done!

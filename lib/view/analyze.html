@@ -17,14 +17,17 @@
 			totalAnalyzed: '${num_segments_analyzed}',
 			isLoggedIn: '${isLoggedIn}',
 			showModalBoxLogin: '${showModalBoxLogin}',
-			enable_outsource: ${enable_outsource}
+			enable_outsource: ${enable_outsource},
+            daemon_warning: ${daemon_misconfiguration}
         };
     </script>
 
     <script type="text/javascript" src="${basepath}public/js/lib/jquery.js"></script>
     <script type="text/javascript" src="${basepath}public/js/lib/jquery-ui.js"></script>
+    <script type="text/javascript" src="${basepath}public/js/lib/jquery-dateFormat.min.js"></script>
     <script type="text/javascript" src="${basepath}public/js/common.js?build=${build_number}"></script>
     <script type="text/javascript" src="${basepath}public/js/analyze.js?build=${build_number}"></script>
+    <script type="text/javascript" src="${basepath}public/js/outsource.js?build=${build_number}"></script>
     <script type='text/javascript' src="${basepath}public/js/login.js?build=${build_number}"></script>
     <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
@@ -130,12 +133,12 @@
         </ul>
         <div class="cl"></div>
 
-        <p class="short-message">MateCat lets you re-use repeated content better. <br/>
-            MateCat leverages MyMemory, Professional Machine Translation and internal fuzzy matches to make you save
-            money and have a faster turnaround.
-            <br/>*Weighted words is how the industry count words after discounting repetition and matches against a
-            desktop translation memory. Like Trados would have done. <!--<a href="">Learn More</a>.-->
+        <p class="short-message">MateCat lets you re-use repeated content better. <br />It leverages MyMemory, Professional Machine Translation and internal fuzzy matches
+            to make you save money and have a faster turnaround. <a href="http://docs.matecat.com/how-matecat-counts-words" target="_blank"> Find out more.</a>
+            <br/><span class="sub-short-message">(*Weighted words is how the industry counts words after discounting repetitions
+                and matches against a desktop translation memory, like any other CAT tool would.)</span>
         </p>
+
 
         <br/>
         <br/>
@@ -333,7 +336,7 @@
                                 <td class="stat_tmic">0</td>
                                 <td class="stat_mt">0</td>
                                 <td class="empty">
-                                    <a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${job/jid}-${job/jpassword}" href="#" target="_blank" class="uploadbtn">Translate</a>
+                                    <a tal:attributes="href string:${basepath}translate/${pname}/${job/source_short}-${job/target_short}/${job/jid}-${job/jpassword}" href="#" target="_blank" class="uploadbtn translate">Translate</a>
                                 </td>
                             </tr>
                             <tal:block tal:define="files job/files; f php:array()" tal:repeat="f files">
@@ -383,36 +386,10 @@
     <div class="cl"></div>
 </div>
 
-<div class="modal outsourcemodal" data-type="view">
-	<div class="popup-outer"></div>
-	<div class="popup">
-		<a href="#" class="x-popup"></a>
-
-		<h1>Here is the link to your new translation job</h1>
-
-		<div class="popup-box">
-			<section class="choose">
-				<p>Select the link below and share it with your translators or with your client</p>
-				<div class="out-link"><code>http://matecat.local/translate/prova/en-US-fr-FR/19153-bd17c71da22f#11143640</code></div>
-				<a class="uploadbtn in-popup" target="_blank">Translate</a>
-				<div class="outsourceto">
-					<h2>Outsource to Translated.net</h2>
-					<div class="copytext">
-						<p>Commit your project to a network of more than 98128 translators trusted by 19021 clients.<br />
-						Payment within 5 days of translation delivery, by credit card, bank transfer or PayPal.</p>
-					</div>
-					<a class="uploadbtn">Show prices</a>
-				</div>
-			</section>
-			<section class="outs">
-				<p>Logo + intro Translated</p>
-				<table class="chunks">
-				</table>
-			</section>
-		</div>
-
-	</div>
+<div metal:use-macro="outsourceModal.html/outsource_modal">
+    <!-- Outsource Modal Popup goes here -->
 </div>
+ 
 
 <div class="modal popup-split" data-type="view">
     <div class="popup-outer"></div>
@@ -480,22 +457,7 @@
 
 </content>
 
-<div class="modal outsource" data-type="view">
-    <div class="popup-outer"></div>
-    <div class="popup">
-        <a href="#" class="x-popup"></a>
 
-        <h1>
-            Outsource to Translated
-        </h1>
-
-        <div class="popup-box">
-			<p>Logo + intro Translated</p>
-			<table class="chunks">
-			</table>
-		</div>
-    </div>
-</div>
 
 <footer>
     <div class="wrapper">
@@ -503,6 +465,7 @@
         <nav>
             <ul>
                 <li><a tal:attributes="href string:${basepath}manage/">Manage</a></li>
+				<li><a href="http://docs.matecat.com" target="_blank">Docs</a></li>
             </ul>
 
             <tal:block tal:condition="php: empty(logged_user)">
@@ -539,8 +502,7 @@
         <div class="outer">
             <div class="inner">
                 <button id="sign-in" name="" type="button" class="login-button"
-                        data-oauth="${hostpath}/oauth/request?v2">Sign
-                    in using Google
+                        tal:attributes='data-oauth oauthFormUrl'>Sign in using Google
                 </button>
             </div>
         </div>
@@ -550,14 +512,6 @@
     </div>
 </div>
 <!-- FINE POPUP LOGIN -->
-<!-- JS SPLIT JOB  -->
-<script type="text/javascript">
-$( ".outsource" ).click(function() {
-  $( ".outsourcemodal" ).show();
-});
-</script>
-
-<!-- FINE JS SPLIT JOB -->
 <script src="${basepath}public/js/lib/snapengage.js"></script>
 
 </body>

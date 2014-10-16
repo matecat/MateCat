@@ -6,40 +6,45 @@ header("Pragma: no-cache");
 
 class loginPageController extends viewController {
 
-	private $oauthFormUrl;
 	private $incomingUrl;
+	private $authURL;
 
-    public function __construct() {
-        parent::__construct();
-        parent::makeTemplate("login.html");
+	public function __construct() {
 
-        //set url forpopup to oauth
-        $this->oauthFormUrl=INIT::$HTTPHOST.'/oauth/request';
+        //SESSION ENABLED
+        parent::sessionStart();
+		parent::__construct();
+		parent::makeTemplate("login.html");
 
-        //try to see if user specified some url
-        $this->incomingUrl =$this->get_from_get_post("incomingUrl");
-        //if nothing is specified by user
-        if(empty($this->incomingUrl)){
-            //open session to pull put information about incoming url
-            $this->incomingUrl=$_SESSION['incomingUrl'];
-        }else{
-            //else, update session
-            $_SESSION['incomingUrl']=$this->incomingUrl;
-        }
+		$filterArgs = array(
+			'incomingUrl'  => array( 'filter' => FILTER_SANITIZE_URL )
+		);
 
-    }
+		$__postInput = filter_input_array( INPUT_GET, $filterArgs );
 
-    public function doAction() {
+		$this->incomingUrl = $__postInput[ 'incomingUrl' ];
 
-    }
+		//if nothing is specified by user
+		if(empty($this->incomingUrl)){
+			//open session to pull put information about incoming url
+			$this->incomingUrl=$_SESSION['incomingUrl'];
+		}else{
+			//else, update session
+			$_SESSION['incomingUrl']=$this->incomingUrl;
+		}
+	}
 
-    public function setTemplateVars() {
-	$this->template->oauthFormUrl=$this->oauthFormUrl;
-	$this->template->incomingUrl=$this->incomingUrl;
-	$this->template->build_number = INIT::$BUILD_NUMBER;
-	
-	    }
+	public function doAction() {
+		$this->client = OauthClient::getInstance()->getClient();
+
+		$this->authURL = $this->client->createAuthUrl();
+
+	}
+
+	public function setTemplateVars() {
+		$this->template->oauthFormUrl   = $this->authURL;
+		$this->template->incomingUrl    = $this->incomingUrl;
+		$this->template->build_number   = INIT::$BUILD_NUMBER;
+	}
 
 }
-
-?>

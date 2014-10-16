@@ -6,6 +6,9 @@ class formLoginController extends ajaxController{
 	private $pass='';	
 
 	public function  __construct() {
+
+        //SESSION ENABLED
+        parent::sessionStart();
 		parent::__construct();
 
 		//set parameters

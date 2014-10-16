@@ -26,6 +26,9 @@ class splitJobController extends ajaxController {
     private $project_data;
 
     public function __construct() {
+
+        //SESSION ENABLED
+        parent::sessionStart();
         parent::__construct();
 
         $filterArgs = array(

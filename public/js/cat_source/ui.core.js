@@ -4,34 +4,47 @@
 UI = null;
 
 UI = {
-	toggleFileMenu: function() {
-
-		if ($('#jobMenu').is(':animated')) {
+	toggleFileMenu: function() {console.log('ddd');
+        jobMenu = $('#jobMenu');
+		if (jobMenu.is(':animated')) {
 			return false;
-		}
-		if (this.body.hasClass('editing')) {
-			$('#jobMenu .currSegment').show();
 		} else {
-			$('#jobMenu .currSegment').hide();
-		}
-		var menuHeight = $('#jobMenu').height();
+            currSegment = jobMenu.find('.currSegment');
+            if (this.body.hasClass('editing')) {
+                currSegment.show();
+            } else {
+                currSegment.hide();
+            }
+            var menuHeight = jobMenu.height();
 //		var startTop = 47 - menuHeight;
-		$('#jobMenu').css('top', (47 - menuHeight) + "px");
+            var messageBarIsOpen = UI.body.hasClass('incomingMsg');
+            messageBarHeight = (messageBarIsOpen)? $('#messageBar').height() + 5 : 0;
+            console.log('messageBarHeight: ', messageBarHeight);
+            var searchBoxIsOpen = UI.body.hasClass('filterOpen');
+            console.log('searchBoxIsOpen: ', searchBoxIsOpen);
+            searchBoxHeight = (searchBoxIsOpen)? $('.searchbox').height() + 1 : 0;
+            console.log('searchBoxHeight: ', searchBoxHeight);
 
-		if ($('#jobMenu').hasClass('open')) {
-			$('#jobMenu').animate({top: "-=" + menuHeight + "px"}, 500).removeClass('open');
-		} else {
-			$('#jobMenu').animate({top: "+=" + menuHeight + "px"}, 300, function() {
-				$('body').on('click', function() {
-					if ($('#jobMenu').hasClass('open')) {
-						UI.toggleFileMenu();
-					}
-				});
-			}).addClass('open');
-		}
+            jobMenu.css('top', (messageBarHeight + searchBoxHeight + 43 - menuHeight) + "px");
+//            jobMenu.css('top', (47 - menuHeight) + "px");
+
+            if (jobMenu.hasClass('open')) {
+                jobMenu.animate({top: "-=" + menuHeight + "px"}, 500).removeClass('open');
+            } else {
+                jobMenu.animate({top: "+=" + menuHeight + "px"}, 300, function() {
+                    $('body').on('click', function() {
+                        if (jobMenu.hasClass('open')) {
+                            UI.toggleFileMenu();
+                        }
+                    });
+                }).addClass('open');
+            }
+            return true;
+        }
+
 	},
-	activateSegment: function() {
-		this.createFooter(this.currentSegment);
+	activateSegment: function(isNotSimilar) {
+		this.createFooter(this.currentSegment, isNotSimilar);
 		this.createButtons();
 		this.createHeader();
 	},
@@ -48,11 +61,12 @@ UI = {
 		this.sourceTags = sourceTags || [];
 	},
 	changeStatus: function(ob, status, byStatus) {
+        console.log('byStatus: ', byStatus);
 		var segment = (byStatus) ? $(ob).parents("section") : $('#' + $(ob).data('segmentid'));
 		segment_id = $(segment).attr('id').split('-')[1];
 		$('.percentuage', segment).removeClass('visible');
-		if (!segment.hasClass('saved'))
-			this.setTranslation($(segment).attr('id').split('-')[1], status);
+//		if (!segment.hasClass('saved'))
+		this.setTranslation($(segment).attr('id').split('-')[1], status, false, byStatus);
 		segment.removeClass('saved');
 		this.setContribution(segment_id, status, byStatus);
 		this.setContributionMT(segment_id, status, byStatus);
@@ -107,43 +121,46 @@ UI = {
 		}
 	},
 */
-	closeSegment: function(segment, byButton, operation) {
+	closeSegment: function(segment, byButton, operation) {//console.log('CLOSE SEGMENT');
 		if ((typeof segment == 'undefined') || (typeof UI.toSegment != 'undefined')) {
 			this.toSegment = undefined;
 			return true;
-		}
+		} else {
+//		    var closeStart = new Date();
+            this.autoSave = false;
 
-//		var closeStart = new Date();
-		this.autoSave = false;
+            $(window).trigger({
+                type: "segmentClosed",
+                segment: segment
+            });
 
-		$(window).trigger({
-			type: "segmentClosed",
-			segment: segment
-		});
+            clearTimeout(this.liveConcordanceSearchReq);
 
-		clearTimeout(this.liveConcordanceSearchReq); 
+            var saveBrevior = true;
+            if (operation != 'noSave') {
+                if ((operation == 'translated') || (operation == 'Save'))
+                    saveBrevior = false;
+            }
+            if ((segment.hasClass('modified')) && (saveBrevior)) {
+                this.saveSegment(segment);
+            }
+            this.deActivateSegment(byButton);
+            this.removeGlossaryMarksFormSource();
 
-		var saveBrevior = true;
-		if (operation != 'noSave') {
-			if ((operation == 'translated') || (operation == 'Save'))
-				saveBrevior = false;
-		}
-		if ((segment.hasClass('modified')) && (saveBrevior)) {
-			this.saveSegment(segment);
-		}
-		this.deActivateSegment(byButton);
-
-		this.lastOpenedEditarea.attr('contenteditable', 'false');
-		this.body.removeClass('editing');
-		$(segment).removeClass("editor");
-		$('span.locked.mismatch', segment).removeClass('mismatch');
-		if (!this.opening) {
-			this.checkIfFinished(1);
-		}
+            this.lastOpenedEditarea.attr('contenteditable', 'false');
+            this.body.removeClass('editing');
+            $(segment).removeClass("editor");
+            $('span.locked.mismatch', segment).removeClass('mismatch');
+            if (!this.opening) {
+                this.checkIfFinished(1);
+            }
+            return true;
+        }
 	},
 	copySource: function() {
 
-		var source_val = $.trim($(".source", this.currentSegment).text());
+		var source_val = $.trim($(".source", this.currentSegment).html());
+//		var source_val = $.trim($(".source", this.currentSegment).text());
 		// Test
 		//source_val = source_val.replace(/&quot;/g,'"');
 
@@ -151,7 +168,8 @@ UI = {
 		// I hope it still works.
 
 		this.saveInUndoStack('copysource');
-		$(".editarea", this.currentSegment).text(source_val).keyup().focus();
+		$(".editarea", this.currentSegment).html(source_val).keyup().focus();
+//		$(".editarea", this.currentSegment).text(source_val).keyup().focus();
 		this.saveInUndoStack('copysource');
 //		$(".editarea", this.currentSegment).effect("highlight", {}, 1000);
 		$(window).trigger({
@@ -164,13 +182,14 @@ UI = {
 		this.setChosenSuggestion(0);
 		this.lockTags(this.editarea);
 	},
-	highlightEditarea: function() {
-		this.currentSegment.addClass('highlighted1');
+	highlightEditarea: function(seg) {
+		segment = seg || this.currentSegment;
+		segment.addClass('highlighted1');
 		setTimeout(function() {
-			UI.currentSegment.addClass('modified highlighted2');
-		}, 100);
+			$('.highlighted1').addClass('modified highlighted2');
+		}, 300);
 		setTimeout(function() {
-			UI.currentSegment.removeClass('highlighted1 highlighted2');
+			$('.highlighted1, .highlighted2').removeClass('highlighted1 highlighted2');
 		}, 2000);		
 	},
 
@@ -195,24 +214,35 @@ UI = {
 	createButtons: function() {
 		var disabled = (this.currentSegment.hasClass('loaded')) ? '' : ' disabled="disabled"';
 		var buttons = '<li><a id="segment-' + this.currentSegmentId + '-nextuntranslated" href="#" class="btn next-untranslated" data-segmentid="segment-' + this.currentSegmentId + '" title="Translate and go to next untranslated">T+&gt;&gt;</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+SHIFT+ENTER</p></li><li><a id="segment-' + this.currentSegmentId + '-button-translated" data-segmentid="segment-' + this.currentSegmentId + '" href="#" class="translated"' + disabled + ' >TRANSLATED</a><p>' + ((UI.isMac) ? 'CMD' : 'CTRL') + '+ENTER</p></li>';
-		$('#segment-' + this.currentSegmentId + '-buttons').empty().append(buttons);
-		$('#segment-' + this.currentSegmentId + '-buttons').before('<p class="warnings"></p>');
+		var buttonsOb = $('#segment-' + this.currentSegmentId + '-buttons');
+        buttonsOb.empty().append(buttons);
+        buttonsOb.before('<p class="warnings"></p>');
 	},
-	createFooter: function(segment) {
-		if ($('.matches .overflow', segment).text() !== '')
-			return false;
+	createFooter: function(segment, emptyContributions) {
+//		isNotSimilar = emptyContributions;
+//		console.log('emptyContributions: ', emptyContributions);
+		emptyContributions = (typeof emptyContributions == 'undefined')? true : emptyContributions;
+		if ($('.matches .overflow', segment).text() !== '') {
+			if(!emptyContributions) {
+				$('.matches .overflow', segment).empty();
+				return false;
+			}
+		}
 		if ($('.footer', segment).text() !== '')
 			return false; 
 
 		var footer =	'<ul class="submenu">' +
 					'	<li class="active tab-switcher-tm" id="segment-' + this.currentSegmentId + '-tm">' +
-					'		<a tabindex="-1" href="#">Translation matches</a>' +
+					'		<a tabindex="-1" href="#">Translation matches' + ((config.mt_enabled)? '' : ' (No MT)') + '</a>' +
 					'	</li>' +
 					'	<li class="tab-switcher-cc" id="segment-' + this.currentSegmentId + '-cc">' +
 					'		<a tabindex="-1" href="#">Concordance</a>' +
 					'	</li>' +
 					'	<li class="tab-switcher-gl" id="segment-' + this.currentSegmentId + '-gl">' +
 					'		<a tabindex="-1" href="#">Glossary&nbsp;<span class="number"></span></a>' +
+					'	</li>' +
+					'	<li class="tab-switcher-al" id="segment-' + this.currentSegmentId + '-al">' +
+					'		<a tabindex="-1" href="#">Translation conflicts&nbsp;<span class="number"></span></a>' +
 					'	</li>' +
 					'</ul>' +
 					'<div class="tab sub-editor matches" id="segment-' + this.currentSegmentId + '-matches">' +
@@ -241,10 +271,13 @@ UI = {
 					'			</div>' +
 					'		</div>' : '<ul class="graysmall message"><li>Glossary is not available when the TM feature is disabled</li></ul>') +
 					'	</div>' +
+					'</div>'+
+					'<div class="tab sub-editor alternatives" id="segment-' + this.currentSegmentId + '-alternatives">' +
+					'	<div class="overflow"></div>' +
 					'</div>';
 		$('.footer', segment).html(footer);
-
 		if (($(segment).hasClass('loaded')) && (segment === this.currentSegment) && ($(segment).find('.matches .overflow').text() === '')) {
+//			if(isNotSimilar) return false;
 			var d = JSON.parse(localStorage.getItem('contribution-' + config.job_id + '-' + $(segment).attr('id').split('-')[1]));
 //			console.log('li prendo dal local storage');
 			UI.processContributions(d, segment);
@@ -254,13 +287,21 @@ UI = {
 		}
 
 	},
-	createHeader: function() {
-		if ($('h2.percentuage', this.currentSegment).length) {
-			return;
-		}
+    createHeader: function(forceCreation) {
+
+        forceCreation = forceCreation || false;
+
+        if ( $('h2.percentuage', this.currentSegment).length && !forceCreation ) {
+            return;
+        }
 		var header = '<h2 title="" class="percentuage"><span></span></h2><a href="#" id="segment-' + this.currentSegmentId + '-close" class="close" title="Close this segment"></a><a href="/referenceFile/' + config.job_id + '/' + config.password + '/' + this.currentSegmentId + '" id="segment-' + this.currentSegmentId + '-context" class="context" title="Open context" target="_blank">Context</a>';
 		$('#' + this.currentSegment.attr('id') + '-header').html(header);
-	},
+
+        if ( this.currentSegment.data( 'autopropagated' ) && !$( '.header .repetition', this.currentSegment ).length ) {
+            $( '.header', this.currentSegment ).prepend( '<span class="repetition">Autopropagated</span>' );
+        }
+
+    },
 	createJobMenu: function() {
 		var menu = '<nav id="jobMenu" class="topMenu">' +
 				'    <ul>';
@@ -309,12 +350,26 @@ UI = {
 					}
 				});
 				return found;
-			}
+			} else {
+                return true;
+            }
 		} else {
 			return false;
 		}
 	},
-	getIconClass: function(ext) {
+    handleReturn: function(e) {
+        if(!this.hiddenTextEnabled) return;
+        e.preventDefault();
+        var node = document.createElement("span");
+        var br = document.createElement("br");
+        node.setAttribute('class', 'monad softReturn ' + config.lfPlaceholderClass);
+        node.setAttribute('contenteditable', 'false');
+        node.appendChild(br);
+        insertNodeAtCursor(node);
+        this.unnestMarkers();
+    },
+
+    getIconClass: function(ext) {
 		c =		(
 					(ext == 'doc')||
 					(ext == 'dot')||
@@ -397,8 +452,10 @@ UI = {
 				return adjacent;
 			} else {
 				this.detectAdjacentSegment(adjacent, direction, times - 1);
+                return true;
 			}
 		} else {
+            return true;
 		}
 	},
 	detectFirstLast: function() {
@@ -408,7 +465,8 @@ UI = {
 	},
 	detectRefSegId: function(where) {
 //		var step = this.moreSegNum;
-		var seg = (where == 'after') ? $('section').last() : (where == 'before') ? $('section').first() : '';
+		var section = $('section');
+        var seg = (where == 'after') ? section.last() : (where == 'before') ? section.first() : '';
 		var segId = (seg.length) ? seg.attr('id').split('-')[1] : 0;
 		return segId;
 	},
@@ -425,8 +483,12 @@ UI = {
 //		$('#filterSwitch').show();
 //		this.searchEnabled = true;
 //	},
+    fixHeaderHeightChange: function() {
+        headerHeight = $('header .wrapper').height() + ((this.body.hasClass('filterOpen'))? $('header .searchbox').height() : 0) + ((this.body.hasClass('incomingMsg'))? $('header #messageBar').height() : 0);
+        $('#outer').css('margin-top', headerHeight + 'px');
+    },
 
-	nextUnloadedResultSegment: function() {
+    nextUnloadedResultSegment: function() {
 		var found = '';
 		var last = $('section').last().attr('id').split('-')[1];
 		$.each(this.searchResultsSegments, function() {
@@ -502,9 +564,10 @@ UI = {
 		if (d.error.length)
 			this.processErrors(d.error, 'getMoreSegments');
 		where = d.data.where;
+        section = $('section');
 		if (typeof d.data.files != 'undefined') {
-			firstSeg = $('section').first();
-			lastSeg = $('section').last();
+			firstSeg = section.first();
+			lastSeg = section.last();
 			var numsegToAdd = 0;
 			$.each(d.data.files, function() {
 				numsegToAdd = numsegToAdd + this.segments.length;
@@ -675,10 +738,16 @@ UI = {
 			}
 		}
 		$('#outer').removeClass('loading loadingBefore');
+		if(options.highlight) {
+			UI.highlightEditarea($('#segment-' + options.segmentToScroll));
+		}
 		this.loadingMore = false;
 		this.setWaypoints();
+//		console.log('prova a: ', $('#segment-13655401 .editarea').html());
 		this.markTags();
+//		console.log('prova b: ', $('#segment-13655401 .editarea').html());
 		this.checkPendingOperations();
+
 	},
 	getSegmentSource: function(seg) {
 		segment = (typeof seg == 'undefined') ? this.currentSegment : seg;
@@ -741,6 +810,7 @@ UI = {
 			$('.editarea', next).trigger("click", "moving");
 		} else {
 			next = this.currentFile.next().find('section:first');
+            console.log('next: ', next);
 			if (next.length) {
 				this.scrollSegment(next);
 				$('.editarea', next).trigger("click", "moving");
@@ -832,6 +902,8 @@ UI = {
 		$('#spellCheck .words').remove();
 	},
 	openSegment: function(editarea, operation) {
+//        console.log('open segment - editarea: ', UI.currentSegmentId);
+//        console.log('operation: ', operation);
 //		if(UI.body.hasClass('archived')) return;
 		segment_id = $(editarea).attr('data-sid');
 		var segment = $('#segment-' + segment_id);
@@ -857,9 +929,39 @@ UI = {
 		this.clearUndoStack();
 		this.saveInUndoStack('open');
 		this.autoSave = true;
-		this.activateSegment();
+
+		var s1 = $('#segment-' + this.lastTranslatedSegmentId + ' .source').text();
+		var s2 = $('.source', segment).text();
+		var isNotSimilar = lev(s1,s2)/Math.max(s1.length,s2.length)*100 >50;
+		var isEqual = (s1 == s2);
+		
+		getNormally = isNotSimilar || isEqual;
+//		console.log('getNormally: ', getNormally);
+		this.activateSegment(getNormally);
 		this.getNextSegment(this.currentSegment, 'untranslated');
+
+		if ((!this.readonly)&&(!getNormally)) {
+			$('#segment-' + segment_id + ' .alternatives .overflow').hide();
+		}
 		this.setCurrentSegment();
+		
+		if (!this.readonly) {
+ //           console.log('getNormally: ', getNormally);
+			if(getNormally) {
+				this.getContribution(segment, 0);
+			} else {
+				console.log('riprova dopo 3 secondi');
+				$(segment).removeClass('loaded');
+				$(".loader", segment).addClass('loader_on');
+				setTimeout(function() {
+					$('.alternatives .overflow', segment).show();
+					UI.getContribution(segment, 0);
+				}, 3000);				
+			};	
+		}		
+		
+		
+//		if(!isNotSimilar) $('.editor .alternatives .overflow').hide();
 		this.currentSegment.addClass('opened');
 
 		this.currentSegment.attr('data-searchItems', ($('mark.searchMarker', this.editarea).length));
@@ -873,9 +975,10 @@ UI = {
 		}, 100);
 		this.currentIsLoaded = false;
 		this.nextIsLoaded = false;
-		if (!this.readonly)
-			this.getContribution(segment, 0);
-			if(!this.noGlossary) this.getGlossary(segment, true, 0);
+
+
+
+		if(!this.noGlossary) this.getGlossary(segment, true, 0);
 		this.opening = true;
 		if (!(this.currentSegment.is(this.lastOpenedSegment))) {
 			var lastOpened = $(this.lastOpenedSegment).attr('id');
@@ -895,13 +998,32 @@ UI = {
 		if (!this.readonly) {
 			this.getContribution(segment, 1);
 			this.getContribution(segment, 2);
+//			if(this.nextSegmentId != this.nextUntranslatedSegmentId) this.getContribution(segment, 2);
 			if(!this.noGlossary) this.getGlossary(segment, true, 1);
 			if(!this.noGlossary) this.getGlossary(segment, true, 2);
 		}
 		if (this.debug)
 			console.log('close/open time: ' + ((new Date()) - this.openSegmentStart));
 	},
-	placeCaretAtEnd: function(el) {
+    reactivateJob: function() {
+        APP.doRequest({
+            data: {
+                action:		   "changeJobsStatus",
+                new_status:     "active",
+                res: 		   "job",
+                id:             config.job_id,
+                jpassword:      config.password,
+            },
+            success: function(d){
+                if(d.data == 'OK') {
+                    setTimeout(function() {
+                        UI.reloadPage();
+                    }, 300);
+                }
+            }
+        });
+    },
+    placeCaretAtEnd: function(el) {
 //		console.log(el);
 //		console.log($(el).first().get().className);
 //		var range = document.createRange();
@@ -979,6 +1101,7 @@ UI = {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
 		$('#' + segment.attr('id') + '-buttons').empty();
 		$('p.warnings', segment).remove();
+//		$('p.alternatives', segment).remove();
 	},
 	removeFooter: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;		
@@ -1018,9 +1141,9 @@ UI = {
 						'			<strong>' + this.source + '</strong> [<span class="source-lang">' + this.source_code + '</span>]&nbsp;>&nbsp;<strong>' + this.target + '</strong> [<span class="target-lang">' + this.target_code + '</span>]' +
 						'		</li>' +
 						'		<li class="wordcounter">' +
-						'			Payable Words: <strong>' + fs.TOTAL_FORMATTED + '</strong>' +
+                        '			Payable Words: <strong>' + config.fileCounter[fid].TOTAL_FORMATTED + '</strong>' +
 //                '			To-do: <strong>' + fs['DRAFT_FORMATTED'] + '</strong>'+
-						'			<span id="rejected" class="hidden">Rejected: <strong>' + fs.REJECTED_FORMATTED + '</strong></span>' +
+//						'			<span id="rejected" class="hidden">Rejected: <strong>' + fs.REJECTED_FORMATTED + '</strong></span>' +
 						'		</li>' +
 						'	</ul>';
 			}
@@ -1029,16 +1152,22 @@ UI = {
 			$.each(this.segments, function() {
 //                this.readonly = true;
 				var readonly = ((this.readonly == 'true')||(UI.body.hasClass('archived'))) ? true : false;
+                var autoPropagated = this.autopropagated_from != 0;
 				var escapedSegment = htmlEncode(this.segment.replace(/\"/g, "&quot;"));
+//				if(this.sid == '13735228') console.log('escapedsegment: ', escapedSegment);
 
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
                 escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
                 escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
                 escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
+//				console.log('vediamo perché: ', UI.decodePlaceholdersToText(this.segment, true, this.sid, 'prova'));
+				
+				/* tab placeholders replacement */
+ //               escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "<span class=" );
+				
                 /* see also replacement made in source content below */
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
-
-				newFile += '<section id="segment-' + this.sid + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '">' +
+                newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
 						'	<span class="sid">' + this.sid + '</span>' +
 						'	<div class="body">' +
@@ -1049,7 +1178,7 @@ UI = {
 						'		</div>' +
 						'		<div class="text">' +
 						'			<div class="wrap">' +               /* this is to show line feed in source too, because server side we replace \n with placeholders */
-						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment) + '</div>' +
+						'				<div class="outersource"><div class="source item" tabindex="0" id="segment-' + this.sid + '-source" data-original="' + escapedSegment + '">' + UI.decodePlaceholdersToText(this.segment, true, this.sid, 'source') + '</div>' +
 						'				<div class="copy" title="Copy source to target">' +
 						'                   <a href="#"></a>' +
 						'                   <p>ALT+CTRL+I</p>' +
@@ -1061,7 +1190,12 @@ UI = {
 						'					</span>' +
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
-						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation)) + '</div>' +
+						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
+						'						<ul class="editToolbar">' +
+						'							<li class="uppercase" title="Uppercase"></li>' +
+						'							<li class="lowercase" title="Lowercase"></li>' +
+						'							<li class="capitalize" title="Capitalized"></li>' +
+						'						</ul>' +
 						'						<p class="save-warning" title="Segment modified but not saved"></p>' +
 						'					</div> <!-- .textarea-container -->' +
 						'				</div> <!-- .target -->' +
@@ -1080,7 +1214,6 @@ UI = {
 						'	<ul class="statusmenu"></ul>' +
 						'</section> ';
 			});
-
 			if (articleToAdd) {
 				newFile += '</article>';
 			}
@@ -1129,7 +1262,8 @@ UI = {
 		});
 //        this.render(false, segment.selector.split('-')[1]);
 	},
-	scrollSegment: function(segment) {
+	scrollSegment: function(segment, highlight) {
+		highlight = highlight || false;
 //		console.log(segment);
 //        segment = (noOpen)? $('#segment-'+segment) : segment;
 //        noOpen = (typeof noOpen == 'undefined')? false : noOpen;
@@ -1137,7 +1271,8 @@ UI = {
 			$('#outer').empty();
 			this.render({
 				firstLoad: false,
-				segmentToOpen: segment.selector.split('-')[1]
+				segmentToScroll: segment.selector.split('-')[1],
+				highlight: highlight
 			});
 		}
 		var spread = 23;
@@ -1273,7 +1408,111 @@ UI = {
 			this.processErrors(d.error, 'setCurrentSegment');
 		this.nextUntranslatedSegmentIdByServer = d.nextSegmentId;
 //		this.nextUntranslatedSegmentIdByServer = d.nextUntranslatedSegmentId;
+        this.propagationsAvailable = d.data.prop_available;
 		this.getNextSegment(this.currentSegment, 'untranslated');
+		if(config.alternativesEnabled) this.detectTranslationAlternatives(d);
+	},
+    detectTranslationAlternatives: function(d) {
+
+        /**
+         *
+         * the three rows below are commented because business logic has changed, now auto-propagation info
+         * is sent as response in getMoreSegments and added as data in the "section" Tag and
+         * rendered/prepared in renderSegments/createHeader
+         * and managed in propagateTranslation
+         *
+         * TODO
+         * I leave them here but they should be removed
+         *
+         * @see renderSegments
+         * @see createHeader
+         * @see propagateTranslation
+         *
+         */
+//		if(d.data.editable.length + d.data.not_editable.length) {
+//			if(!$('.header .repetition', UI.currentSegment).length) $('.header', UI.currentSegment).prepend('<span class="repetition">Autopropagated</span>');
+//		}
+        sameContentIndex = -1;
+        $.each(d.data.editable, function(ind) {
+            //Remove trailing spaces for string comparison
+//            console.log( "PostProcessEditArea: " + UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' ) );
+//            console.log( "SetCurrSegmentValue: " + this.translation );
+            if( this.translation == UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' ) ) {
+                sameContentIndex = ind;
+            }
+        });
+        if(sameContentIndex != -1) d.data.editable.splice(sameContentIndex, 1);
+
+        sameContentIndex1 = -1;
+        $.each(d.data.not_editable, function(ind) {
+            //Remove trailing spaces for string comparison
+            if( this.translation == UI.postProcessEditarea( UI.currentSegment ).replace( /[ \xA0]+$/ , '' ) ) sameContentIndex1 = ind;
+        });
+        if(sameContentIndex1 != -1) d.data.not_editable.splice(sameContentIndex1, 1);
+
+        numAlt = d.data.editable.length + d.data.not_editable.length;
+        numSeg = 0;
+        $.each(d.data.editable, function() {
+            numSeg += this.involved_id.length;
+        });
+//		console.log('numAlt: ', numAlt);
+//		console.log('numSeg: ', numSeg);
+        if(numAlt) {
+//            UI.currentSegment.find('.status-container').after('<p class="alternatives"><a href="#">Already translated in ' + ((numAlt > 1)? 'other ' + numAlt + ' different' : 'another') + ' way' + ((numAlt > 1)? 's' : '') + '</a></p>');
+            tab = UI.currentSegment.find('.tab-switcher-al');
+            tab.find('.number').text('(' + numAlt + ')');
+            UI.renderAlternatives(d);
+            tab.show();
+            tab.trigger('click');
+        }
+    },
+    renderAlternatives: function(d) {
+        console.log('renderAlternatives d: ', d);
+//		console.log($('.editor .submenu').length);
+//		console.log(UI.currentSegmentId);
+        segment = UI.currentSegment;
+        segment_id = UI.currentSegmentId;
+        escapedSegment = UI.decodePlaceholdersToText(UI.currentSegment.find('.source').html(), false, segment_id, 'render alternatives');
+        console.log('escapedSegment: ', escapedSegment);
+
+        function prepareTranslationDiff( translation ){
+            _str = translation.replace( config.lfPlaceholderRegex, "\n" )
+                    .replace( config.crPlaceholderRegex, "\r" )
+                    .replace( config.crlfPlaceholderRegex, "\r\n" )
+                    .replace( config.tabPlaceholderRegex, "\t" )
+                    .replace( config.nbspPlaceholderRegex, String.fromCharCode( parseInt( 0xA0, 10 ) ) );
+            diff_obj = UI.dmp.diff_main( UI.currentSegment.find('.editarea').text(), _str );
+            UI.dmp.diff_cleanupEfficiency( diff_obj );
+            return diff_obj;
+        }
+
+        $.each(d.data.editable, function(index) {
+            diff_obj = prepareTranslationDiff( this.translation );
+            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall" data-item="' + (index + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+        });
+
+        $.each(d.data.not_editable, function(index1) {
+            diff_obj = prepareTranslationDiff( this.translation );
+            $('.sub-editor.alternatives .overflow', segment).append('<ul class="graysmall notEditable" data-item="' + (index1 + d.data.editable.length + 1) + '"><li class="sugg-source"><span id="' + segment_id + '-tm-' + this.id + '-source" class="suggestion_source">' + escapedSegment + '</span></li><li class="b sugg-target"><!-- span class="switch-editing">Edit</span --><span class="graysmall-message">CTRL+' + (index1 + d.data.editable.length + 1) + '</span><span class="translation">' + UI.dmp.diff_prettyHtml(diff_obj) + '</span><span class="realData hide">' + this.translation + '</span></li><li class="goto"><a href="#" data-goto="' + this.involved_id[0]+ '">View</a></li></ul>');
+        });
+
+    },
+    chooseAlternative: function(w) {console.log('chooseAlternative');
+//        console.log( $('.sugg-target .realData', w ) );
+        this.copyAlternativeInEditarea( UI.decodePlaceholdersToText( $('.sugg-target .realData', w ).text(), true, UI.currentSegmentId, 'choose alternative' ) );
+        this.lockTags(this.editarea);
+        this.editarea.focus();
+        this.highlightEditarea();
+    },
+	copyAlternativeInEditarea: function(translation) {
+		console.log('translation: ', translation);
+		if ($.trim(translation) !== '') {
+			if (this.body.hasClass('searchActive'))
+				this.addWarningToSearchDisplay();
+			this.saveInUndoStack('copyalternative');
+			$(UI.editarea).html(translation).addClass('fromAlternative');
+			this.saveInUndoStack('copyalternative');
+		}
 	},
 	setDownloadStatus: function(stats) {
 		var t = 'approved';
@@ -1354,6 +1593,76 @@ UI = {
 	chunkedSegmentsLoaded: function() {
 		return $('section.readonly').length;
 	},
+	showEditToolbar: function() {
+		$('.editor .editToolbar').addClass('visible');
+	},
+	hideEditToolbar: function() {
+		$('.editor .editToolbar').removeClass('visible');
+	},
+
+	formatSelection: function(op) {
+		selection = window.getSelection();
+		range = selection.getRangeAt(0);
+
+		prova = $(range.commonAncestorContainer).text().charAt(range.startOffset - 1);
+        str = getSelectionHtml();
+        insertHtmlAfterSelection('<span class="formatSelection-placeholder"></span>');
+		aa = prova.match(/\W$/gi);
+        newStr = '';
+        var aa = $("<div/>").html(str);
+        aa.find('.undoCursorPlaceholder').remove();
+        var rightString = aa.html();
+
+        $.each($.parseHTML(rightString), function(index) {
+			if(this.nodeName == '#text') {
+				d = this.data;
+//				console.log(index + ' - ' + d);
+//				console.log(!index);
+//				console.log(!aa);
+				jump = ((!index)&&(!aa));
+//				console.log(d.charAt(0));
+				capStr = toTitleCase(d);
+				if(jump) {
+					capStr = d.charAt(0) + toTitleCase(d).slice(1);
+				}
+/*
+				if(op == 'uppercase') {
+					toAdd = d.toUpperCase();
+				} else if(op == 'lowercase') {
+					toAdd = d.toLowerCase();
+				} else if(op == 'capitalize') {
+					console.log(index + ' - ' + d);
+					if(index == 0) {
+						if(!aa) {
+							toAdd = d;
+						} else {
+							toAdd = toTitleCase(d);
+						}
+					} else {
+						toAdd = toTitleCase(d);
+					}
+				}
+*/
+				toAdd = (op == 'uppercase')? d.toUpperCase() : (op == 'lowercase')? d.toLowerCase() : (op == 'capitalize')? capStr : d;
+				newStr += toAdd;
+			} else {
+				newStr += this.outerHTML;					
+//				newStr += this.innerText;					
+			}
+		});
+        console.log('x');
+//        console.log('newStr: ', newStr);
+//		replaceSelectedText(newStr);
+		replaceSelectedHtml(newStr);
+        console.log('a: ', UI.editarea.html());
+		UI.lockTags();
+        console.log('b: ', UI.editarea.html());
+		this.saveInUndoStack('formatSelection');
+		saveSelection();
+		$('.editor .editarea .formatSelection-placeholder').after($('.editor .editarea .rangySelectionBoundary'));
+		$('.editor .editarea .formatSelection-placeholder').remove();
+	},
+
 	setStatus: function(segment, status) {
 		segment.removeClass("status-draft status-translated status-approved status-rejected status-new").addClass("status-" + status);
 	},
@@ -1368,8 +1677,8 @@ UI = {
 		if (config.time_to_edit_enabled) {
 			var editSec = $('.timetoedit .edit-sec', segment);
 			var editMin = $('.timetoedit .edit-min', segment);
-			editMin.text(this.zerofill(editedTime[0], 2));
-			editSec.text(this.zerofill(editedTime[1], 2));
+			editMin.text(APP.zerofill(editedTime[0], 2));
+			editSec.text(APP.zerofill(editedTime[1], 2));
 		}
 		tte.data('raw_time_to_edit', this.totalTime);
 		var statusSwitcher = $(".status", segment);
@@ -1466,15 +1775,18 @@ UI = {
 	setNextWarnedSegment: function(sid) {
 		sid = sid || UI.currentSegmentId;
 		idList = UI.globalWarnings;
+		idList.sort();
+		found = false;
 		$.each(idList, function() {
 			if (this > sid) {
 				$('#point2seg').attr('href', '#' + this);
+				found = true;
 				return false;
 			}
-			if (this == idList[idList.length - 1]) {
-				$('#point2seg').attr('href', '#' + idList[0]);
-			}
 		});
+		if(!found) {
+			$('#point2seg').attr('href', '#' + UI.firstWarnedSegment);
+		}
 	},
 	fillWarnings: function(segment, warnings) {
 		//console.log( 'fillWarnings' );
@@ -1525,7 +1837,8 @@ UI = {
 		return i1;
 	},
 	startWarning: function() {
-		setTimeout(function() {
+		clearTimeout(UI.startWarningTimeout);
+		UI.startWarningTimeout = setTimeout(function() {
 			UI.checkWarnings(false);
 		}, config.warningPollingInterval);		
 	},
@@ -1535,14 +1848,15 @@ UI = {
 		ts = dd.getTime();
 		var seg = (typeof this.currentSegmentId == 'undefined') ? this.startSegmentId : this.currentSegmentId;
 		var token = seg + '-' + ts.toString();
-
+        dataMix = {
+            action: 'getWarning',
+            id_job: config.job_id,
+            password: config.password,
+            token: token
+        };
+        if(UI.logEnabled) dataMix.logs = this.extractLogs();
 		APP.doRequest({
-			data: {
-				action: 'getWarning',
-				id_job: config.job_id,
-				password: config.password,
-				token: token
-			},
+			data: dataMix,
 			error: function() {
 				UI.warningStopped = true;
 				UI.failedConnection(0, 'getWarning');
@@ -1550,14 +1864,9 @@ UI = {
 			success: function(data) {//console.log('check warnings success');
 				UI.startWarning();
 				var warningPosition = '';
-				UI.globalWarnings = data.details;
-//				console.log(data.messages);
-//				console.log($.parseJSON(data.messages));
-//				data.messages = {
-//						msg: "messaggio di prova"
-//					};
-//		
-//				messages = ["Something happened! This is simply a fake message to inform you."];
+				UI.globalWarnings = data.details.sort();
+				UI.firstWarnedSegment = UI.globalWarnings[0];
+				UI.translationMismatches = data.translation_mismatches;
 
 				//check for errors
 				if (UI.globalWarnings.length > 0) {
@@ -1568,7 +1877,7 @@ UI = {
 						UI.fillCurrentSegmentWarnings(data.details, true);
 			
 					//switch to css for warning
-					$('#notifbox').attr('class', 'warningbox').attr("title", "Some translations seems to have TAGS and/or other untraslatables that do not match the source").find('.numbererror').text(UI.globalWarnings.length);
+					$('#notifbox').attr('class', 'warningbox').attr("title", "Click to see the segments with potential issues").find('.numbererror').text(UI.globalWarnings.length);
 
 				} else {
 					//if everything is ok, switch css to ok
@@ -1594,17 +1903,17 @@ UI = {
 	},
 	displayMessage: function(messages) {
 		if($('body').hasClass('incomingMsg')) return false;
-		$.each(messages, function(index) {
-			if(typeof $.cookie('msg-' + this.token) == 'undefined') {
-				UI.showMessage({
-					msg: this.msg,
-					token: this.token,
-					showOnce: true,
-					cookieExpire: this.expire
-				});
-				return false;
-			}
-		});
+        $.each(messages, function(index) {
+            if(typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date( this.expire ) > ( new Date ) )  ) {
+                UI.showMessage({
+                    msg: this.msg,
+                    token: this.token,
+                    showOnce: true,
+                    expire: this.expire
+                });
+                return false;
+            }
+        });
 	},
 	showMessage: function(options) {
 		APP.showMessage(options);
@@ -1648,17 +1957,31 @@ UI = {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
+                console.log('getwarning local success');
 				if (UI.currentSegment.hasClass('waiting_for_check_result')) {
-
 					// check conditions for results discard
 					if (!d.total) {
 						$('p.warnings', UI.currentSegment).empty();
 						$('span.locked.mismatch', UI.currentSegment).removeClass('mismatch');
 						return;
 					}
-					if (UI.editarea.text().trim() != UI.checkSegmentsArray[d.token].trim().replace(config.crlfPlaceholderRegex, ''))
-						return;
+/*
+                    escapedSegment = UI.checkSegmentsArray[d.token].trim().replace( config.lfPlaceholderRegex, "\n" );
+                    escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
+                    escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
+                    escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "\t" );
+                    escapedSegment = escapedSegment.replace( config.nbspPlaceholderRegex, $( document.createElement('span') ).html('&nbsp;').text() );
 
+
+                    if (UI.editarea.text().trim() != escapedSegment ){
+                        console.log('ecco qua');
+
+//                        console.log( UI.editarea.text().trim() );
+//                        console.log( UI.checkSegmentsArray[d.token].trim() );
+//                        console.log( escapedSegment  );
+                        return;
+                    }
+*/
 					UI.fillCurrentSegmentWarnings(d.details, false); // update warnings
 					UI.markTagMismatch(d.details);
 					delete UI.checkSegmentsArray[d.token]; // delete the token from the tail
@@ -1667,9 +1990,14 @@ UI = {
 			}
 		}, 'local');
 	},
-	setTranslation: function(id_segment, status, caller) {
+
+    setTranslation: function(id_segment, status, caller, byStatus) {
+        console.log('id_segment: ', id_segment);
+        console.log('status: ', status);
+        console.log('setTranslation sul segmento ', UI.currentSegmentId);
 		reqArguments = arguments;
 		segment = $('#segment-' + id_segment); 
+		this.lastTranslatedSegmentId = id_segment;
 		caller = (typeof caller == 'undefined') ? false : caller;
 		var file = $(segment).parents('article');
 
@@ -1679,9 +2007,12 @@ UI = {
 		} else {
 			translation = $('.editarea', segment ).text();
 		}
+        console.log('translation: ', translation);
 
-		if (translation === '')
-			return false;
+		if (translation === '') {
+            this.unsavedSegmentsToRecover.push(this.currentSegmentId);
+            return false;
+        }
 		var time_to_edit = UI.editTime;
 		var id_translator = config.id_translator;
 		var errors = '';
@@ -1699,8 +2030,26 @@ UI = {
 //			}
 //		}
 		autosave = (caller == 'autosave') ? true : false;
+        this.tempReqArguments = {
+            id_segment: id_segment,
+            id_job: config.job_id,
+            id_first_file: file.attr('id').split('-')[1],
+            password: config.password,
+            status: status,
+            translation: translation,
+            time_to_edit: time_to_edit,
+            id_translator: id_translator,
+            errors: errors,
+            chosen_suggestion_index: chosen_suggestion,
+            autosave: autosave
+        };
+        reqData = this.tempReqArguments;
+        reqData.action = 'setTranslation';
+        this.log('setTranslation', reqData);
 
 		APP.doRequest({
+            data: reqData,
+/*
 			data: {
 				action: 'setTranslation',
 				id_segment: id_segment,
@@ -1715,12 +2064,13 @@ UI = {
 				chosen_suggestion_index: chosen_suggestion,
 				autosave: autosave
 			},
+*/
 			context: [reqArguments, segment, status],
 			error: function() {
 				UI.failedConnection(this[0], 'setTranslation');
 			},
 			success: function(d) {
-				UI.setTranslation_success(d, this[1], this[2]);
+				UI.setTranslation_success(d, this[1], this[2], this[0][3]);
 			}
 		});
 	},
@@ -1856,7 +2206,211 @@ UI = {
 		});
 	},
 
-	
+    checkTMgrants: function(panel) {console.log('checkTMgrants');
+        var r = ($(panel).find('.r').is(':checked'))? 1 : 0;
+        var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
+        if(!r && !w) {
+            console.log('panel: ', panel);
+            $(panel).find('.error-message').text('Either "Show matches from TM" or "Add translations to TM" must be checked').show();
+            return false;
+        } else {
+            return true;
+        }
+    },
+    checkTMKey: function(key, operation) {console.log('checkTMKey');
+        console.log('operation: ', operation);
+
+        if( operation == 'key' ){
+            console.log('adding a key');
+            UI.execAddTMKey();
+        } else {
+
+            APP.doRequest({
+                data: {
+                    action: 'ajaxUtils',
+                    exec: 'checkTMKey',
+                    tm_key: key
+                },
+                context: operation,
+                error: function() {
+                    console.log('checkTMKey error!!');
+                },
+                success: function(d) {
+                    console.log('checkTMKey success!!');
+                    console.log('d: ', d);
+                    console.log('d.success: ', d.success);
+                    if(d.success == true) {
+                        console.log('key is good');
+                        console.log('adding a tm');
+                        UI.execAddTM();
+                        return true;
+                    } else {
+                        console.log('key is bad');
+                        if(this == 'key') {
+                            console.log('error adding a key');
+                            $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                        } else {
+                            console.log('error adding a tm');
+                            $('.addtm-tr .error-message').text(d.errors[0].message).show();
+                        }
+                        return false;
+                    }
+                }
+            });
+
+        }
+
+    },
+    checkAddTMEnable: function() {
+        console.log('checkAddTMEnable');
+        if(
+            ($('#addtm-tr-key').val().length > 19)&&
+                UI.checkTMgrants($('.addtm-tr'))
+            ) {
+            $('#addtm-add').removeAttr('disabled').removeClass('disabled');
+        } else {
+            $('#addtm-add').attr('disabled', 'disabled').addClass('disabled');
+        }
+ /*
+        if(button.attr('id') == 'addtm-add') {
+            if(
+                ($('#addtm-tr-key').val() != '')&&
+                ($('.addtm-tr input:file').val() != '')&&
+                UI.checkTMgrants($('.addtm-tr'))
+            ) {
+                $('#addtm-add').removeAttr('disabled').removeClass('disabled');
+            } else {
+                $('#addtm-add').attr('disabled', 'disabled').addClass('disabled');
+            }
+        } else {
+            console.log('1: ', $('#addtm-tr-key-key').val());
+            console.log('2: ', UI.checkTMgrants($('.addtm-tr-key')));
+            console.log('3: ', button);
+            if(
+                ($('#addtm-tr-key-key').val() != '')&&
+                    UI.checkTMgrants($('.addtm-tr-key'))
+                ) {
+                $(button).removeAttr('disabled').removeClass('disabled');
+            } else {
+                $(button).attr('disabled', 'disabled').addClass('disabled');
+            }
+        }
+*/
+    },
+    checkManageTMEnable: function() {
+        console.log($('#addtm-tr-key').val().length);
+        if($('#addtm-tr-key').val().length > 19) {
+            $('.manageTM').removeClass('disabled');
+            $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').removeAttr('disabled');
+        } else {
+            $('.manageTM').addClass('disabled');
+            $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');
+        }
+    },
+
+    execAddTM: function() {
+        fileUpload($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
+    },
+    execAddTMKey: function() {
+        var r = ($('#addtm-tr-read').is(':checked'))? 1 : 0;
+        var w = ($('#addtm-tr-write').is(':checked'))? 1 : 0;
+        var TMKey = $('#addtm-tr-key').val();
+
+        APP.doRequest({
+            data: {
+                action: 'addTM',
+                exec: 'addTM',
+                job_id: config.job_id,
+                job_pass: config.password,
+                tm_key: TMKey,
+                r: r,
+                w: w
+            },
+            context: TMKey,
+            error: function() {
+                console.log('addTM error!!');
+            },
+            success: function(d) {
+                console.log('addTM success!!');
+                txt = (d.success == true)? 'The TM Key ' + this + ' has been added to your translation job.' : d.errors[0].message;
+                $('.popup-addtm-tr .x-popup').click();
+                UI.showMessage({
+                    msg: txt
+                });
+                UI.clearAddTMpopup();
+            }
+        });
+    },
+
+    pollForUploadCallback: function(TMKey, TMName) {
+        if($('#uploadCallback').text() != '') {
+            msg = $.parseJSON($('#uploadCallback pre').text());
+            if(msg.success == true) {
+                UI.pollForUploadProgress(TMKey, TMName);
+            } else {
+                UI.showMessage({
+                    msg: 'Error: ' + msg.errors[0].message
+                });
+            }
+        } else {
+            setTimeout(function() {
+                UI.pollForUploadCallback(TMKey, TMName);
+            }, 1000);
+        }
+
+    },
+    pollForUploadProgress: function(TMKey, TMName) {
+        APP.doRequest({
+            data: {
+                action: 'ajaxUtils',
+                exec: 'tmxUploadStatus',
+                tm_key: TMKey,
+                tmx_name: TMName
+            },
+            context: [TMKey, TMName],
+            error: function() {
+            },
+            success: function(d) {
+                if(d.errors.length) {
+                    UI.showMessage({
+                        msg: d.errors[0].message,
+                    });
+                } else {
+                    if(d.data.total == null) {
+                        pollForUploadProgressContext = this;
+                        setTimeout(function() {
+                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1]);
+                        }, 500);
+                    } else {
+                        if(d.completed) {
+                            $('#messageBar .progress').remove();
+                            UI.showMessage({
+                            msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
+                            });
+                            UI.clearAddTMpopup();
+                            return false;
+                        }
+                        progress = (parseInt(d.data.done)/parseInt(d.data.total))*100;
+                        $('#messageBar .progress').css('width', progress + '%');
+                        pollForUploadProgressContext = this;
+                        setTimeout(function() {
+                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1]);
+                        }, 500);
+                    }
+                }
+            }
+        });
+    },
+
+    clearAddTMpopup: function() {
+        $('#addtm-tr-key').val('');
+        $('.addtm-select-file').val('');
+        $('#addtm-tr-read, #addtm-tr-write').prop( "checked", true );
+        $('#uploadTMX').text('').hide();
+        $('.addtm-tr .error-message, .addtm-tr .warning-message').hide();
+        $('.manageTM').addClass('disabled');
+        $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');    },
+
     /**
      * This function is used when a string has to be sent to the server
      * It works over a clone of the editarea ( translation area ) and manage the text()
@@ -1895,30 +2449,80 @@ UI = {
 	},
 */
 
-	postProcessEditarea: function(context, selector){
-		selector = (typeof selector === "undefined") ? '.editarea' : selector;
-		area = $( selector, context ).clone();
-/*
-		console.log($(area).html());
-		var txt = this.fixBR($(area).html());
-		console.log(txt);
-		return txt;
-*/
+    log: function(operation, d) {
+        if(!UI.logEnabled) return false;
+        data = d;
+        var dd = new Date();
+//        console.log('stored log-' + operation + '-' + dd.getTime());
+//        console.log('data: ', JSON.stringify(d));
+//        console.log(stackTrace());
+        logValue = {
+            "data": data,
+            "stack": stackTrace()
+        }
+//        console.log('prova: ', prova);
+        console.log('logValue: ', JSON.stringify(logValue));
+        localStorage.setItem('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue));
 
-		var divs = $( area ).find( 'div' );
-		if( divs.length ){
-			divs.each(function(){
-				$(this).find( 'br:not([class])' ).remove();
-				$(this).prepend( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
-			});
-		} else {
+/*
+        console.log('dopo errore');
+        coso = '{"data":' + JSON.stringify(data) + ', "stack":"' + stackTrace() + '"}';
+        console.log(coso);
+        console.log($.parseJSON(JSON.stringify(data)));
+*/
+//        localStorage.setItem('log-' + operation + '-' + dd, JSON.stringify(d));
+
+    },
+    extractLogs: function() {
+        var pendingLogs = [];
+        inp = 'log';
+        $.each(localStorage, function(k,v) {
+            if(k.substring(0, inp.length) === inp) {
+                console.log('v: ', v);
+//                console.log('$.parseJSON(v): ', $.parseJSON(v));
+                pendingLogs.push('{"operation": "' + k.split('-')[1] + '", "time": "' + k.split('-')[2] + '", "log":' + v + '}');
+            }
+        });
+        logs = JSON.stringify(pendingLogs);
+        this.clearStorage('log');
+
+        console.log('pendingLogs: ', pendingLogs);
+//        console.log('pendingLogs Ob: ', JSON.stringify(pendingLogs));
+        return logs;
+    },
+
+    postProcessEditarea: function(context, selector){//console.log('postprocesseditarea');
+        selector = (typeof selector === "undefined") ? '.editarea' : selector;
+        area = $( selector, context ).clone();
+        /*
+         console.log($(area).html());
+         var txt = this.fixBR($(area).html());
+         console.log(txt);
+         return txt;
+         */
+        var divs = $( area ).find( 'div' );
+        if( divs.length ){
+            divs.each(function(){
+                $(this).find( 'br:not([class])' ).remove();
+                $(this).prepend( $('<span class="placeholder">' + config.crPlaceholder + '</span>' ) ).replaceWith( $(this).html() );
+            });
+        } else {
 //			console.log('post process 1: ', $(area).html());
 //			console.log($(area).find( 'br:not([class])' ).length);
-//			$(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crlfPlaceholder + '</span>') );
-			$(area).find('br:not([class]), br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
+
+            $(area).find( 'br:not([class])' ).replaceWith( $('<span class="placeholder">' + config.crPlaceholder + '</span>') );
+            $(area).find('br.' + config.crlfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crlfPlaceholder + '</span>' );
+            $(area).find('span.' + config.lfPlaceholderClass).replaceWith( '<span class="placeholder">' + config.lfPlaceholder + '</span>' );
+            $(area).find('span.' + config.crPlaceholderClass).replaceWith( '<span class="placeholder">' + config.crPlaceholder + '</span>' );
+
 //			$(area).find( 'br:not([class])' ).replaceWith( $('[BR]') );
 //			console.log('post process 2: ', $(area).html());
-		}
+        }
+
+        $(area).find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
+        $(area).find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
+        $(area).find('span.space-marker').replaceWith(' ');
+        $(area).find('span.rangySelectionBoundary').remove();
 
 //        Now commented, but valid for future purposes when the user will choose what type of carriage return
 //        $('br', area).each(function() {
@@ -1948,9 +2552,26 @@ UI = {
 //            }
 //
 //        });
+//		return area.text();
 
-		return area.text();
 
+/*      //trim last br if it is present and if after that element there's nothing
+        //check if a node with placeholdr class exists and take the last one
+        var lastPlacehold = $( 'span.placeholder:last', area ).get(0);
+        if( typeof lastPlacehold != 'undefined' ){
+            //if there are NOT something after
+            if( lastPlacehold.nextSibling == null ) {
+                $( 'span.placeholder:last', area ).remove();
+            }
+        }
+*/
+        //same as preeceding commented but with regular expression, better because remove ALL trailing BR not only one
+        /* trim all last br if it is present and if after that element there's nothing */
+//        console.log( $( area ).text() );
+//        console.log( $( area ).text().replace( /(:?[ \xA0]*##\$_[0-9A-F]{2,4}\$##[ \xA0]*)+$/, "" ) );
+        return $(area).text();
+
+//        return $( area ).text().replace( /(:?[ \xA0]*##\$_[0-9A-F]{2,4}\$##[ \xA0]*)+$/, "" );
 
 
     },
@@ -1960,15 +2581,107 @@ UI = {
      * @param str
      * @returns {XML|string}
      */
-    decodePlaceholdersToText: function ( str ) {
-        var _str = str.replace( config.lfPlaceholderRegex, '<br class="' + config.lfPlaceholderClass +'" />' )
-                      .replace( config.crPlaceholderRegex, '<br class="' + config.crPlaceholderClass +'" />' )
-                      .replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' );
-        return _str;
+    decodePlaceholdersToText: function (str, jumpSpacesEncode, sid, operation) {
+//		toLog = (sid == '13735228');
+//		toLog = ((operation == 'contribution source'));
+//		if(toLog) console.log('decodePH operation: ', operation);
+//		if(operation == 'source') {
+//			if(toLog) console.log('SOURCE STR: ', str);
+//		}
+        if(!UI.hiddenTextEnabled) return str;
+		jumpSpacesEncode = jumpSpacesEncode || false;
+		var _str = str;
+        if(UI.markSpacesEnabled) {
+            if(jumpSpacesEncode) {
+                _str = this.encodeSpacesAsPlaceholders(htmlDecode(_str), true);
+//			_str = this.encodeSpacesAsPlaceholders(_str);
+            }
+        }
+
+		_str = _str.replace( config.lfPlaceholderRegex, '<span class="monad marker softReturn ' + config.lfPlaceholderClass +'" contenteditable="false"><br /></span>' )
+					.replace( config.crPlaceholderRegex, '<span class="monad marker ' + config.crPlaceholderClass +'" contenteditable="false"><br /></span>' )
+					.replace( config.crlfPlaceholderRegex, '<br class="' + config.crlfPlaceholderClass +'" />' )
+					.replace( config.tabPlaceholderRegex, '<span class="tab-marker monad marker ' + config.tabPlaceholderClass +'" contenteditable="false">&#8677;</span>' )
+					.replace( config.nbspPlaceholderRegex, '<span class="nbsp-marker monad marker ' + config.nbspPlaceholderClass +'" contenteditable="false">&nbsp;</span>' );
+
+//		if(toLog) console.log('_str: ', _str);
+		return _str;
     },
+	encodeSpacesAsPlaceholders: function(str, root) {
+        if(!UI.hiddenTextEnabled) return str;
+
+		var newStr = '';
+		$.each($.parseHTML(str), function(index) {
+
+			if(this.nodeName == '#text') {
+				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker marker monad" contenteditable="false"> </span>');
+			} else {
+				match = this.outerHTML.match(/<.*?>/gi);
+				if(match.length == 1) { // se è 1 solo, è un tag inline
+					
+				} else if(match.length == 2) { // se sono due, non ci sono tag innestati
+					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker#@-space-@#marker#@-space-@#monad"#@-space-@#contenteditable="false"#@-gt-@# #@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+//					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+				} else {
+
+					newStr += htmlEncode(match[0]) + UI.encodeSpacesAsPlaceholders(this.innerHTML) + htmlEncode(match[1], false);
+					
+//					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);
+					
+//					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);					
+				}
+				
+				
+				// se sono più di due, ci sono tag innestati
+			}
+		});
+		if(root) {
+			newStr = newStr.replace(/#@-lt-@#/gi, '<').replace(/#@-gt-@#/gi, '>').replace(/#@-space-@#/gi, ' ');
+		}
+		return newStr;
+	},
+/*
+	prova: function(str, root) {
+		var newStr = '';
+		$.each($.parseHTML(str), function(index) {
+			if(this.nodeName == '#text') {
+				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker" contenteditable="false">.</span>');
+			} else {
+				match = this.outerHTML.match(/<.*?>/gi);
+				console.log('match: ', match);
+				if(match.length == 1) { // se è 1 solo, è un tag inline
+					
+				} else if(match.length == 2) { // se sono due, non ci sono tag innestati
+					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+//					newStr += htmlEncode(match[0]) + this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#') + htmlEncode(match[1]);
+				} else {
+					console.log('vediamo: ', $.parseHTML(this.outerHTML));
+
+					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML) + htmlEncode(match[1], false);
+					
+//					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span#@-space-@#class="space-marker"#@-space-@#contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);
+					
+//					newStr += htmlEncode(match[0]) + UI.prova(this.innerHTML.replace(/\s/gi, '#@-lt-@#span class="space-marker" contenteditable="false"#@-gt-@#.#@-lt-@#/span#@-gt-@#')) + htmlEncode(match[1], false);					
+				}
+				
+				
+				// se sono più di due, ci sono tag innestati
+			}
+		});
+		if(root) {
+			newStr = newStr.replace(/#@-lt-@#/gi, '<').replace(/#@-gt-@#/gi, '>').replace(/#@-space-@#/gi, ' ');
+		}
+		return newStr;
+	},
+*/
+
+	unnestMarkers: function() {
+		$('.editor .editarea .marker .marker').each(function() {
+			$(this).parents('.marker').after($(this));
+		})
+	},
 
 	processErrors: function(err, operation) {
-		console.log('processErrors: ', err);
 		$.each(err, function() {
 			if (operation == 'setTranslation') {
 				if (this.code != '-10') { // is not a password error
@@ -1998,7 +2711,7 @@ UI = {
 	},
 	reloadPage: function() {
 		console.log('reloadPage');
-		location.reload();
+		if(UI.body.hasClass('cattool')) location.reload();
 	},
 
 	someSegmentToSave: function() {
@@ -2011,7 +2724,7 @@ UI = {
 		$('#contextMenu .shortcut .alt').html(alt);
 		$('#contextMenu .shortcut .cmd').html(cmd);
 	},
-	setTranslation_success: function(d, segment, status) {
+	setTranslation_success: function(d, segment, status, byStatus) {
 		if (d.error.length)
 			this.processErrors(d.error, 'setTranslation');
 		if (d.data == 'OK') {
@@ -2020,9 +2733,169 @@ UI = {
 			this.setProgress(d.stats);
 			//check status of global warnings
 			this.checkWarnings(false);
-		}
-	},
-	setWaypoints: function() {
+            if(!byStatus) {
+                this.beforePropagateTranslation(segment, status);
+            }
+        }
+        this.resetRecoverUnsavedSegmentsTimer();
+    },
+    recoverUnsavedSetTranslations: function() {
+//        console.log('AAA recoverUnsavedSetTranslations');
+//        console.log('segments to recover: ', UI.unsavedSegmentsToRecover);
+        $.each(UI.unsavedSegmentsToRecover, function (index) {
+            if($('#segment-' + this + ' .editarea').text() === '') {
+//                console.log(this + ' è ancora vuoto');
+                UI.resetRecoverUnsavedSegmentsTimer();
+            } else {
+//                console.log(this + ' non è più vuoto, si può mandare');
+                UI.setTranslation(this.toString(), 'translated');
+                // elimina l'item dall'array
+                UI.unsavedSegmentsToRecover.splice(index, 1);
+//                console.log('eliminato ' + this.toString());
+            }
+            // se non è vuoto rifai il timeout, clearing l'altro
+        });
+    },
+    resetRecoverUnsavedSegmentsTimer: function () {
+//        console.log('setTranslation_success');
+        clearTimeout(this.recoverUnsavedSegmentsTimer);
+        this.recoverUnsavedSegmentsTimer = setTimeout(function() {
+            UI.recoverUnsavedSetTranslations();
+        }, 1000);
+    },
+
+
+    beforePropagateTranslation: function(segment, status) {
+//        console.log('before propagate');
+
+        UI.propagateTranslation(segment, status, false);
+        return false;
+
+        if ( UI.propagationsAvailable ){
+
+            if ( typeof $.cookie('_auto-propagation-' + config.job_id + '-' + config.password) != 'undefined' ) { // cookie already set
+                if($.cookie('_auto-propagation-' + config.job_id + '-' + config.password) == '1') {
+                    UI.propagateTranslation(segment, status, true);
+                } else {
+                    UI.propagateTranslation(segment, status, false);
+                }
+
+            } else {
+//            var sid = segment.attr('id').split('-')[1];
+                APP.popup({
+                    name: 'confirmPropagation',
+                    title: 'Warning',
+                    buttons: [
+                        {
+                            type: 'ok',
+                            text: 'Yes',
+                            callback: 'doPropagate',
+                            params: 'true',
+                            closeOnClick: 'true'
+                        },
+                        {
+                            type: 'cancel',
+                            text: 'No, thanks',
+                            callback: 'doPropagate',
+                            params: 'false',
+                            closeOnClick: 'true'
+                        }
+                    ],
+                    content: "Do you want to extend the autopropagation of this translation even to " + UI.propagationsAvailable + " already translated segments?"
+                });
+            }
+
+        }
+
+  /*
+        if ($.cookie('_auto-propagation-' + config.job_id + '-' + config.password)) {
+            console.log('cookie already set');
+
+        } else {
+            console.log('cookie not yet set');
+            APP.popup({
+                name: 'confirmPropagation',
+                title: 'Warning',
+                buttons: [
+                    {
+                        type: 'ok',
+                        text: 'Yes',
+                        callback: 'doPropagate',
+                        params: 'true',
+                        closeOnClick: 'true'
+                    },
+                    {
+                        type: 'cancel',
+                        text: 'No, thanks',
+                        callback: 'doPropagate',
+                        params: 'false',
+                        closeOnClick: 'true'
+                    }
+                ],
+                content: "Dou you want to extend the autopropagation of this translation even to already translated segments?"
+            });
+        }
+        checkBefore = false;
+        if(checkBefore) {
+
+        } else {
+            this.propagateTranslation(segment, status);
+        }
+        */
+    },
+
+    propagateTranslation: function(segment, status, evenTranslated) {
+//        console.log($(segment).attr('data-hash'));
+        this.tempReqArguments = null;
+
+        if( status == 'translated' ){
+
+            plusTranslated = (evenTranslated)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated': '';
+
+            //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
+            $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + plusTranslated ).not( segment ), function(index) {
+                $('.editarea', this).html( $('.editarea', segment).html() );
+
+                // if status is not set to draft, the segment content is not displayed
+                UI.setStatus($(this), 'draft');
+                //set segment as autoPropagated
+                $( this ).data( 'autopropagated', true );
+            });
+
+            //unset actual segment as autoPropagated because now it is translated
+            $( segment ).data( 'autopropagated', false );
+
+            //update current Header of Just Opened Segment
+            //NOTE: because this method is called after OpenSegment
+            // AS callback return for setTranslation ( whe are here now ),
+            // currentSegment pointer was already advanced by openSegment and header already created
+            //Needed because two consecutives segments can have the same hash
+            this.createHeader(true);
+
+        }
+//        $('section[data-hash=' + $(segment).attr('data-hash') + ']');
+    },
+    doPropagate: function (trans) {
+        reqData = this.tempReqArguments;
+        reqData.action = 'setAutoPropagation';
+        reqData.propagateAll = trans;
+
+        this.tempReqArguments = null;
+
+        APP.doRequest({
+            data: reqData,
+            context: [reqData, trans],
+            error: function() {
+            },
+            success: function() {
+                console.log('success setAutoPropagation');
+                UI.propagateTranslation($('#segment-' + this[0].id_segment), this[0].status, this[1]);
+            }
+        });
+
+    },
+
+    setWaypoints: function() {
 		this.firstSegment.waypoint('remove');
 		this.lastSegment.waypoint('remove');
 		this.detectFirstLast();
@@ -2148,7 +3021,7 @@ UI = {
 		this.currentSegment.removeClass('waiting_for_check_result');
 		this.registerQACheck();
 	},
-	saveInUndoStack: function() {
+	saveInUndoStack: function(operation) {
 //		noRestore = (typeof noRestore == 'undefined')? 0 : 1;
 		currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
@@ -2156,9 +3029,9 @@ UI = {
 			if (currentItem.trim() == this.editarea.html().trim())
 				return;
 		}
+        if(this.editarea == '') return;
 
-		if (this.editarea.html() === '')
-			return;
+		if (this.editarea.html() === '') return;
 
 		var ss = this.editarea.html().match(/<span.*?contenteditable\="false".*?\>/gi);
 		var tt = this.editarea.html().match(/&lt;/gi);
@@ -2178,7 +3051,7 @@ UI = {
 		}
 		saveSelection();
 		$('.undoCursorPlaceholder').remove();
-		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder"></span>');
+		$('.rangySelectionBoundary').after('<span class="undoCursorPlaceholder monad" contenteditable="false"></span>');
 		restoreSelection();
 		this.undoStack.push(this.editarea.html().replace(/(<.*?)\s?selected\s?(.*?\>)/gi, '$1$2'));
 	},
@@ -2192,70 +3065,6 @@ UI = {
 				$(this).addClass('current');
 		});
 		$('#jobMenu li.currSegment').attr('data-segment', UI.currentSegmentId);
-	},
-	loadCustomization: function() {
-		if ($.cookie('user_customization')) {
-			this.custom = $.parseJSON($.cookie('user_customization'));
-		} else {
-			this.custom = {
-				"extended_concordance": false
-			}
-			this.saveCustomization();
-		}
-	},
-	saveCustomization: function() {
-		$.cookie('user_customization', JSON.stringify(this.custom), { expires: 3650 });
-	},
-	setShortcuts: function() {
-		if($('#settings-shortcuts .list').length) return;
-		$('#settings-shortcuts #default-shortcuts').before('<table class="list"></table>');
-		$.each(this.shortcuts, function() {
-			$('#settings-shortcuts .list').append('<tr><td class="label">' + this.label + '</td><td class="combination"><span contenteditable="true" class="keystroke">' + ((UI.isMac) ? ((typeof this.keystrokes.mac == 'undefined')? UI.viewShortcutSymbols(this.keystrokes.standard) : UI.viewShortcutSymbols(this.keystrokes.mac)) : UI.viewShortcutSymbols(this.keystrokes.standard)) + '</span></td></tr>');
-		});
-	},
-	viewShortcutSymbols: function(txt) {
-		txt = txt.replace(/meta/gi, '&#8984').replace(/return/gi, '&#8629').replace(/alt/gi, '&#8997').replace(/shift/gi, '&#8679').replace(/up/gi, '&#8593').replace(/down/gi, '&#8595').replace(/left/gi, '&#8592').replace(/right/gi, '&#8594');
-		return txt;
-	},
-	writeNewShortcut: function(c, s, k) {
-		$(k).html(s.html().substring(0, s.html().length - 1)).removeClass('changing').addClass('modified').blur();
-		$(s).remove();
-		$('.msg', c).remove();
-		$('#settings-shortcuts.modifying').removeClass('modifying');
-		$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').addClass('modified');
-		$('.popup-settings').addClass('modified');
-	},
-
-	
-//	beforeExit: function() {
-//		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
-//		var leave_message = 'You are sure that you want to leave?'
-//		if(dont_confirm_leave!==1) {
-//			if(!e) e = window.event;
-//			//e.cancelBubble is supported by IE - this will kill the bubbling process.
-//			e.cancelBubble = true;
-//			e.returnValue = leave_message;
-//			//e.stopPropagation works in Firefox.
-//			if (e.stopPropagation) 
-//			{
-//				e.stopPropagation();
-//				e.preventDefault();
-//			}
-//
-//			//return works for Chrome and Safari
-//			return leave_message;
-//		}		
-//	},
-
-	zerofill: function(i, l, s) {
-		var o = i.toString();
-		if (!s) {
-			s = '0';
-		}
-		while (o.length < l) {
-			o = s + o;
-		}
-		return o;
 	}
 };
 
@@ -2281,5 +3090,7 @@ $.extend($.expr[":"], {
 });
 
 $(window).resize(function() {
+    UI.fixHeaderHeightChange();
 });
+
 

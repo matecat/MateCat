@@ -4,6 +4,8 @@ include_once INIT::$UTILS_ROOT . '/QA.php';
 class XliffSAXTranslationReplacer{
 
 	private $filename; //source filename
+    private $originalFP;
+
 	private $inTU=false;//flag to check wether we are in a <trans-unit>
 	private $inTarget=false;//flag to check wether we are in a <target>, to ignore everything
 	private $isEmpty=false; //flag to check wether we are in an empty tag (<tag/>)
@@ -12,7 +14,7 @@ class XliffSAXTranslationReplacer{
 	private $bufferIsActive = false; //buffer for special tag
 
 	private $offset=0;//offset for SAX pointer
-	private $ofp;//output stream pointer
+	private $outputFP;//output stream pointer
 	private $currentBuffer;//the current piece of text it's been parsed
 	private $len;//length of the currentBuffer
 	private $segments; //array of translations
@@ -20,81 +22,111 @@ class XliffSAXTranslationReplacer{
 
     private $target_lang;
 
-	public function __construct( $filename,$segments, $trg_lang = null ){
-		$this->filename=$filename;
-		$this->ofp=fopen($this->filename.'.out.sdlxliff','w+');
-		$this->segments=$segments;
+    public function __construct( $filename, $segments, $trg_lang = null, $filePointer = null ) {
+
+        $this->filename    = $filename;
+
+        if ( is_resource( $filePointer ) ) {
+            $this->originalFP = $filePointer;
+            rewind( $this->originalFP );
+        } else {
+            if ( !( $this->originalFP = fopen( $this->filename, "r" ) ) ) {
+                die( "could not open XML input" );
+            }
+        }
+
+        $this->outputFP    = fopen( $this->filename . '.out.sdlxliff', 'w+' );
+        $this->segments    = $segments;
         $this->target_lang = $trg_lang;
-	}
 
-	/*
-	   public function __destruct(){
-	   fclose($this->ofp);
-	   }
-	 */
+    }
 
+    public function __destruct() {
+        //this stream can be closed outside the class
+        //to permit multiple concurrent downloads, so suppress warnings
+        @fclose( $this->originalFP );
+        fclose( $this->outputFP );
+    }
 
-	public function replaceTranslation(){
-		//open file
-		if (!($fp = fopen($this->filename, "r"))) {
-			die("could not open XML input");
-		}
-		//write xml header
-		fwrite($this->ofp,'<?xml version="1.0" encoding="utf-8"?>');
+    public function replaceTranslation() {
 
-		//create parser
-		$xml_parser = xml_parser_create('UTF-8');
+        //write xml header
+        fwrite( $this->outputFP, '<?xml version="1.0" encoding="utf-8"?>' );
 
-		//configure parser
-		//pass this object to parser to make its variables and functions visible inside callbacks
-		xml_set_object($xml_parser,$this);
-		//avoid uppercasing all tags name
-		xml_parser_set_option($xml_parser, XML_OPTION_CASE_FOLDING, false);
-		//define callbacks for tags
-		xml_set_element_handler($xml_parser, "tagOpen", "tagClose");
-		//define callback for data
-		xml_set_character_data_handler($xml_parser, "characterData");
+        //create parser
+        $xml_parser = xml_parser_create( 'UTF-8' );
 
-		//read a chunk of text
-		while ($this->currentBuffer = fread($fp, 4096)) {
-			/*
-			   preprocess file
-			 */
+        //configure parser
+        //pass this object to parser to make its variables and functions visible inside callbacks
+        xml_set_object( $xml_parser, $this );
+        //avoid uppercasing all tags name
+        xml_parser_set_option( $xml_parser, XML_OPTION_CASE_FOLDING, false );
+        //define callbacks for tags
+        xml_set_element_handler( $xml_parser, "tagOpen", "tagClose" );
+        //define callback for data
+        xml_set_character_data_handler( $xml_parser, "characterData" );
+
+        //read a chunk of text
+        while ( $this->currentBuffer = fread( $this->originalFP, 4096 ) ) {
+            /*
+               preprocess file
+             */
             // obfuscate entities because sax automatically does html_entity_decode
-			$temporary_check_buffer = preg_replace("/&(.*?);/", '##$1##', $this->currentBuffer);
+            $temporary_check_buffer = preg_replace( "/&(.*?);/", '#%$1#%', $this->currentBuffer );
 
-            $lastByte = $temporary_check_buffer[strlen($temporary_check_buffer) -1];
+            $lastByte = $temporary_check_buffer[ strlen( $temporary_check_buffer ) - 1 ];
 
-			//avoid cutting entities in half: 
-			//the last fread could have truncated an entity (say, '&lt;' in '&l'), thus invalidating the escaping
-			while( strpos( $temporary_check_buffer, '&' ) !== FALSE ) {
-				//if an entity is still present, fetch some more and repeat the escaping
-				$this->currentBuffer.=fread($fp,64);
-				$temporary_check_buffer = preg_replace("/&(.*?);/", '##$1##', $this->currentBuffer);
-			}
-			//free stuff outside the loop
-			unset($temporary_check_buffer);
+            //avoid cutting entities in half:
+            //the last fread could have truncated an entity (say, '&lt;' in '&l'), thus invalidating the escaping
+            //***** and if there is an & that it is not an entity, this is an infinite loop !!!!!
 
-            $this->currentBuffer = preg_replace("/&(.*?);/", '##$1##', $this->currentBuffer);
+            $escape_AMP = false;
+
+            // 9 is the max length of an entity. So, suppose that the & is at the end of buffer,
+            // add 9 Bytes and substitute the entities, if the & is present and it is not at the end
+            //it can't be a entity, exit the loop
+
+            while ( true ) {
+
+                $_ampPos = strpos( $temporary_check_buffer, '&' );
+
+                //check for real entity or escape it to safely exit from the loop!!!
+                if ( $_ampPos === false || strlen( substr( $temporary_check_buffer, $_ampPos ) ) > 9 ) {
+                    $escape_AMP = true;
+                    break;
+                }
+
+                //if an entity is still present, fetch some more and repeat the escaping
+                $this->currentBuffer .= fread( $this->originalFP, 9 );
+                $temporary_check_buffer = preg_replace( "/&(.*?);/", '#%$1#%', $this->currentBuffer );
+
+            }
+
+            //free stuff outside the loop
+            unset( $temporary_check_buffer );
+
+            $this->currentBuffer = preg_replace( "/&(.*?);/", '#%$1#%', $this->currentBuffer );
+            if ( $escape_AMP ) {
+                $this->currentBuffer = str_replace( "&", '#%amp#%', $this->currentBuffer );
+            }
 
             //get lenght of chunk
             $this->len = strlen( $this->currentBuffer );
 
             //parse chunk of text
-			if (!xml_parse($xml_parser, $this->currentBuffer, feof($fp))) {
-				//if unable, die
-				die(sprintf("XML error: %s at line %d",
-							xml_error_string(xml_get_error_code($xml_parser)),
-							xml_get_current_line_number($xml_parser)));
-			}
-			//get accumulated this->offset in document: as long as SAX pointer advances, we keep track of total bytes it has seen so far; this way, we can translate its global pointer in an address local to the current buffer of text to retrieve last char of tag
+            if ( !xml_parse( $xml_parser, $this->currentBuffer, feof( $this->originalFP ) ) ) {
+                //if unable, die
+                die( sprintf( "XML error: %s at line %d",
+                        xml_error_string( xml_get_error_code( $xml_parser ) ),
+                        xml_get_current_line_number( $xml_parser ) ) );
+            }
+            //get accumulated this->offset in document: as long as SAX pointer advances, we keep track of total bytes it has seen so far; this way, we can translate its global pointer in an address local to the current buffer of text to retrieve last char of tag
             $this->offset += $this->len;
-		}
-		//close parser
-		xml_parser_free($xml_parser);
-		//close file pointer
-		fclose($fp);
-	}
+        }
+        //close parser
+        xml_parser_free( $xml_parser );
+
+    }
 
 
 	/*
@@ -136,11 +168,17 @@ class XliffSAXTranslationReplacer{
 			}
 
 			//this logic helps detecting empty tags
-			//get current position of SAX pointer in all the stream of data is has read so far: it points at the end of current tag
+			//get current position of SAX pointer in all the stream of data is has read so far:
+            //it points at the end of current tag
             $idx = xml_get_current_byte_index( $parser );
-            //check wether the bounds of current tag are entirely in current buffer or the end of the current tag is outside current buffer (in the latter case, it's in next buffer to be read by the while loop); this check is necessary because we may have truncated a tag in half with current read, and the other half may be encountered in the next buffer it will be passed
+
+            //check wether the bounds of current tag are entirely in current buffer or the end of the current tag
+            //is outside current buffer (in the latter case, it's in next buffer to be read by the while loop);
+            //this check is necessary because we may have truncated a tag in half with current read,
+            //and the other half may be encountered in the next buffer it will be passed
             if ( isset( $this->currentBuffer[ $idx - $this->offset ] ) ) {
-                //if this tag entire lenght fitted in the buffer, the last char must be the last symbol before the '>'; if it's an empty tag, it is assumed that it's a '/'
+                //if this tag entire lenght fitted in the buffer, the last char must be the last
+                //symbol before the '>'; if it's an empty tag, it is assumed that it's a '/'
                 $tmp_offset = $idx - $this->offset;
                 $lastChar = $this->currentBuffer[ $idx - $this->offset ];
             } else {
@@ -166,7 +204,7 @@ class XliffSAXTranslationReplacer{
                 $this->bufferIsActive = true;
                 $this->CDATABuffer .= $tag;
             } else {
-                $this->postProcAndflush( $this->ofp, $tag );
+                $this->postProcAndflush( $this->outputFP, $tag );
             }
 
 		}
@@ -213,7 +251,7 @@ class XliffSAXTranslationReplacer{
 
                 //signal we are leaving a target
                 $this->inTarget = false;
-                $this->postProcAndflush( $this->ofp, $tag, $treatAsCDATA = true );
+                $this->postProcAndflush( $this->outputFP, $tag, $treatAsCDATA = true );
 
             } elseif ( 'source' == $name || 'seg-source' == $name ) { // we are closing a critical CDATA section
 
@@ -221,7 +259,7 @@ class XliffSAXTranslationReplacer{
                 $tag                  = $this->CDATABuffer . "</$name>";
                 $this->CDATABuffer    = "";
                 //flush to pointer
-                $this->postProcAndflush( $this->ofp, $tag );
+                $this->postProcAndflush( $this->outputFP, $tag );
 
             } elseif ( $this->bufferIsActive ) { // this is a tag ( <g | <mrk ) inside a seg or seg-source tag
                 $this->CDATABuffer .= "</$name>";
@@ -229,7 +267,7 @@ class XliffSAXTranslationReplacer{
 
             } else { //generic tag closure do Nothing
                 //flush to pointer
-                $this->postProcAndflush( $this->ofp, $tag );
+                $this->postProcAndflush( $this->outputFP, $tag );
             }
 
 
@@ -253,7 +291,7 @@ class XliffSAXTranslationReplacer{
 		if(!$this->inTarget && !$this->bufferIsActive ){
 
 			//flush to pointer
-			$this->postProcAndflush($this->ofp,$data);
+			$this->postProcAndflush($this->outputFP,$data);
 
 		} elseif( $this->bufferIsActive ) {
             $this->CDATABuffer .= $data;
@@ -266,9 +304,10 @@ class XliffSAXTranslationReplacer{
 	 */
     private function postProcAndFlush( $fp, $data, $treatAsCDATA = false ) {
         //postprocess string
-        $data = preg_replace( "/##(.*?)##/", '&$1;', $data );
+        $data = preg_replace( "/#%(.*?)#%/", '&$1;', $data );
         $data = str_replace( '&nbsp;', ' ', $data );
         if ( !$treatAsCDATA ) {
+            //unix2dos
             $data = str_replace( "\r\n", "\r", $data );
             $data = str_replace( "\n", "\r", $data );
             $data = str_replace( "\r", "\r\n", $data );
@@ -283,11 +322,9 @@ class XliffSAXTranslationReplacer{
 	private function prepareSegment($seg,$transunit_translation = ""){
 		$end_tags = "";
 
-		$seg ['segment'] = CatUtils::restorenbsp ( $seg ['segment'] );
-		$seg ['translation'] = CatUtils::restorenbsp ( $seg ['translation'] );
-
-        $seg ['segment'] = CatUtils::view2rawxliff( $seg ['segment'] );
-        $seg ['translation'] = CatUtils::view2rawxliff ( $seg ['translation'] );
+//        $seg ['segment'] = CatUtils::view2rawxliff( $seg ['segment'] );
+//        $seg ['translation'] = CatUtils::view2rawxliff ( $seg ['translation'] );
+//        We don't need transform/sanitize from wiew to xliff because the values comes from Database
 
         //QA non sense for source/source check until source can be changed. For now SKIP
 		if (is_null ( $seg ['translation'] ) || $seg ['translation'] == '') {
@@ -307,30 +344,13 @@ class XliffSAXTranslationReplacer{
 
 		}
 
-        //already useful after QA implementation?? Log to see if it is executed some times
-		@$xml_valid = simplexml_load_string("<placeholder>$translation</placeholder>");
-		if (!$xml_valid) {
-			$temp = preg_split("|\<|si", $translation);
-			$item = end($temp);
-			if (preg_match('|/.*?>\W*$|si', $item)) {
-				$end_tags.="<$item";
-			}
-			while ($item = prev($temp)) {
-				if (preg_match('|/.*?>\W*$|si', $item)) {
-					$end_tags = "<$item$end_tags"; //insert at the top of the string
-				}
-			}
-            Log::doLog( "simplexml_load_string validation of $translation" );
-			$translation = str_replace($end_tags, "", $translation);
-		}
-        //already useful after QA implementation??
-
-
 		if (!empty($seg['mrk_id'])) {
 			$translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">".$seg['mrk_prev_tags'].$translation.$seg['mrk_succ_tags']."</mrk>";
 		}
+
 		$transunit_translation.=$seg['prev_tags'] . $translation . $end_tags . $seg['succ_tags'];
 		return $transunit_translation;
+
 	}
 
 }

@@ -67,8 +67,9 @@
 			}],
 			"isocode":"az",
 			"enabled":false,
-			"rtl":true,
-			"rfc3066code":"az-AZ"
+			"rtl":false,
+			"rfc3066code":"az-AZ",
+            "languageRegionCode":"az-Latn-AZ"
 		}
 	,
 		{
@@ -207,9 +208,10 @@
 				"en":"Cebuano" 
 			}],
 			"isocode":"cb",
-			"enabled":false,
+			"enabled":true,
 			"rtl":false,
-			"rfc3066code":"cb-PH"
+			"rfc3066code":"cb-PH",
+            "languageRegionCode":"fil-PH"
 		}
 	,
 		{
@@ -932,6 +934,17 @@
 			"rfc3066code":"mn-MN"
 		}
 	,
+        {
+            "localized":[{
+                "en":"Montenegrin"
+            }],
+            "isocode":"me",
+            "enabled":true,
+            "rtl":false,
+            "rfc3066code":"sr-ME",
+            "languageRegionCode":"sr-Latn-RS"
+        }
+    ,
 		{
 			"localized":[{
 				"en":"Morisyen" 
@@ -1207,7 +1220,7 @@
 			"enabled":true,
 			"rtl":false,
 			"rfc3066code":"sr-Latn-RS",
-                        "languageRegionCode":"sr-Latn-RS"
+            "languageRegionCode":"sr-Latn-RS"
 		}
 	,
         {
@@ -1218,10 +1231,9 @@
 			"enabled":true,
 			"rtl":false,
 			"rfc3066code":"sr-Cyrl-RS",
-                        "languageRegionCode":"sr-Cyrl-RS"
+            "languageRegionCode":"sr-Cyrl-RS"
 		}
 	,
-        
 		{
 			"localized":[{
 				"en":"Seselwa Creole French" 
@@ -1329,9 +1341,10 @@
 				"en":"Swahili"
 			}],
 			"isocode":"sw",
-			"enabled":false,
+			"enabled":true,
 			"rtl":false,
-			"rfc3066code":"sw-SZ"
+			"rfc3066code":"sw-SZ",
+			"languageRegionCode":"sw-KE"
 		}
 	,
 		{
@@ -1365,15 +1378,16 @@
 			"rfc3066code":"syc-TR"
 		}
 	,
-		{
-			"localized":[{
-				"en":"Tagalog"
-			}],
-			"isocode":"tl",
-			"enabled":false,
-			"rtl":false,
-			"rfc3066code":"tl-PH"
-		}
+        {
+            "localized":[{
+                "en":"Tagalog"
+            }],
+            "isocode":"tl",
+            "enabled":true,
+            "rtl":false,
+            "languageRegionCode":"fil-PH",
+            "rfc3066code":"tl-PH"
+        }
 	,
 		{
 			"localized":[{
@@ -1403,7 +1417,7 @@
 			"enabled":true,
 			"rtl":false,
 			"languageRegionCode":"ta-IN",
-			"rfc3066code":"ta-LK"
+			"rfc3066code":"ta-IN"
 		}
 	,
 		{
@@ -1511,9 +1525,9 @@
 				"en":"Turkmen" 
 			}],
 			"isocode":"tk",
-			"enabled":false,
-			"rtl":true,
-			"rfc3066code":"tk-TK"
+			"enabled":true,
+			"rtl":false,
+			"rfc3066code":"tk-TM"
 		}
 	,
 		{

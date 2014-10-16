@@ -3,8 +3,12 @@ UI = null;
 UI = {
 	init: function() {
 		this.stopPolling = false;
+        this.pollingTime = 1000;
+        this.segmentsThreshold = 50000;
 		this.noProgressTail = 0;
 		this.lastProgressSegments = 0;
+
+        this.quoteResponse = [];
 
 		this.previousQueueSize = 0;
 
@@ -24,41 +28,8 @@ UI = {
 
 		//        fit_text_to_container($("#pname"));
 
-		$(".more").click(function(e) {
-			e.preventDefault();
-			$(".content").toggle();
-		});
-		$(".more-table").click(function(e) {
-			e.preventDefault();
-			$(".content-table").toggle();
-		});
-		$(".outsourceto .uploadbtn").click(function(e) {
-			e.preventDefault();
-//			$('.outsourcemodal .x-popup').trigger('click');
-			UI.showPrices();
-		});
 
-		$(".uploadbtn:not(.in-popup)").click(function(e) {
-			if(config.enable_outsource) {
-				e.preventDefault();
-				$('.outsourcemodal code').text(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
-				$('.outsourcemodal .uploadbtn').attr('href', $(this).attr('href'));
-				$('.outsourcemodal').show();
-				
-				return false;
-			}
-		});
-		$(".outsourcemodal").on('click', '.chunks input', function(e) {
-//			e.preventDefault();
-			console.log('cliccato');
-			total = 0;
-			console.log($('.outsourcemodal .chunks tr:not(.thead) input:checked').length)
-			$('.outsourcemodal .chunks tr:not(.thead):has(input:checked)').each(function() {
-				console.log($(this).attr('data-price'));
-				total += parseFloat($(this).attr('data-price'));
-			})
-			$('.outsourcemodal .total').text(total);
-		});
+
 		/*        
 		 $(".part1").click(function(e){
 		 e.preventDefault();
@@ -174,6 +145,8 @@ UI = {
 		}).on('click', '.popup-split #exec-split-confirm', function(e) {
 			e.preventDefault();
 			UI.confirmSplit();
+		}).on('click', '.out-link', function(e) {
+			this.select();
 		}).on('click', '.mergebtn:not(.disabled)', function(e) {
 			e.preventDefault();
 			APP.confirm({
@@ -268,70 +241,6 @@ UI = {
 			$('.popup-split #exec-split').removeClass('disabled');
 			$('.popup-split').removeClass('error-number');
 		}
-	},
-	showPrices: function() {
-		$('.outsourcemodal h1').text('Outsource to Translated');
-		$('.outsourcemodal section.choose').hide();
-		$('.outsourcemodal section.outs').show();
-		console.log($('.outsourcemodal .popup-box .chunks tr').length);
-//				if(!$('.outsourcemodal .popup-box .chunks tr').length) console.log('questo');
-		if(!$('.outsourcemodal .popup-box .chunks tr').length) {
-			$('.outsourcemodal .popup-box .chunks').empty();
-			rows = '<tr class="thead"><th>Source</th><th>Target</th><th>ID</th><th># words</th><th>Outsource</th></tr>';
-			$('.jobcontainer').each(function() {
-				source_lang = $(this).find('h3 .source_lang').text();
-				target_lang = $(this).find('h3 .target_lang').text();
-				$(this).find('.totaltable').each(function() {
-					rows += '<tr data-cid="' + $(this).find('.splitnum').text() + '" data-price=""><td class="source">' + source_lang + '</td><td class="target">' + target_lang + '</td><td class="cid">' + $(this).find('.splitnum').text() + '</td><td class="words">' + $(this).find('.stat-payable').text() + '</td><td class="outs"><input type="checkbox" checked="checked" /></td></tr>';
-				})					
-			})
-			$('.outsourcemodal .chunks').append(rows);
-		}
-
-		// temp, outsourceToTranslated response simulation
-		var d = {
-			chunks: [],
-			delivery_date: "2014-04-01 11:30"
-		};
-		$('.outsourcemodal .chunks tr:not(.thead)').each(function() {
-			chunk_id = $(this).find('.cid').text();
-			chunk = {
-				"id" : chunk_id,
-				"price" : 20.12
-			}
-			d.chunks.push(chunk);
-		})
-		// end temp
-
-		$.each(d.chunks, function(index) {
-			$('.outsourcemodal .chunks tr[data-cid=' + this.id + ']').attr('data-price', this.price);
-		});
-		total = 0;
-		$('.outsourcemodal .chunks tr:not(.thead):has(input[checked=checked])').each(function() {
-			total += parseFloat($(this).attr('data-price'));
-		})
-
-		$('.outsourcemodal .chunks').after('<p>Delivery at: <span class="delivery">' + d.delivery_date + '</span></p><p>€ <span class="total">' + total + '</span></p>');
-
-
-		UI.showOutsourceData(d);
-/*
-		APP.doRequest({
-			data: {
-				action: 'outsourceToTranslated',
-				pid: $('#pid').attr('data-pid')
-			},
-			error: function() {
-//						UI.failedConnection(0, 'outsourceToTranslated');
-			},
-			success: function(d) {
-				UI.showOutsourceData(d);
-			}
-		});
-*/
-//		$('.outsourcemodal').show();
-
-		
 	},
 
 	checkStatus: function(status) {
@@ -504,9 +413,6 @@ UI = {
 			});
 		}
 	},
-	showOutsourceData: function(d) {
-		console.log(d);
-	},
 	pollData: function() {
 		if (this.stopPolling)
 			return;
@@ -517,7 +423,6 @@ UI = {
         }
 
 		var ppassword = $("#pid").attr("data-pwd");
-
 		APP.doRequest({
 			data: {
 				action: 'getVolumeAnalysis',
@@ -528,10 +433,19 @@ UI = {
 			success: function(d) {
 				if (d.data) {
 					var s = d.data.summary;
-					console.log(s);
+					//temp 
+//					config.daemon_warning = false;
+//					s.IN_QUEUE_BEFORE = 10;
+					//end temp					
 					if ((s.STATUS == 'NEW') || (s.STATUS == '') || s.IN_QUEUE_BEFORE > 0) {
 						$('.loadingbar').addClass('open');
-						if (s.IN_QUEUE_BEFORE > 0) {
+
+                        if( config.daemon_warning ){
+                            UI.displayError('The analysis seems not to be running. Contact <a href="mailto:antonio@translated.net">support@matecat.com</a>');
+                            $('#standard-equivalent-words .word-number' ).removeClass('loading').text( $('#raw-words .word-number' ).text() );
+                            $('#matecat-equivalent-words .word-number' ).removeClass('loading').text( $('#raw-words .word-number' ).text() );
+                            return false;
+                        } else if (s.IN_QUEUE_BEFORE > 0) {
 							//increasing number of segments ( fast analysis on another project )
 							if ( UI.previousQueueSize <= s.IN_QUEUE_BEFORE ) {
                                 $('#shortloading' ).show().html('<p class="label">There are other project in queue. Please wait...</p>');
@@ -560,7 +474,7 @@ UI = {
 							UI.noProgressTail = 0;
 						} else {
 							UI.noProgressTail++;
-							if (UI.noProgressTail > 9) {
+                            if (UI.noProgressTail > 9) {
 								//$('#longloading .meter').hide();
 								//$('#longloading p').html('The analyzer seems to have a problem. Contact <a href="mailto:antonio@translated.net">antonio@translated.net</a> or try refreshing the page.');
 								UI.displayError('The analyzer seems to have a problem. Contact <a href="mailto:antonio@translated.net">antonio@translated.net</a> or try refreshing the page.');
@@ -577,7 +491,7 @@ UI = {
 					old_standard_words = standard_words.text();
 
 					newSText = '';
-					if (s.TOTAL_STANDARD_WC > 0) {
+					if ( s.STATUS == 'DONE' || s.TOTAL_STANDARD_WC > 0 ) {
 						standard_words.removeClass('loading');
 						$('#standard-equivalent-words .days').show();
 						newSText = s.TOTAL_STANDARD_WC_PRINT;
@@ -594,7 +508,7 @@ UI = {
 					var matecat_words = $('#matecat-equivalent-words .word-number');
 					old_matecat_words = matecat_words.text();
 					newMText = '';
-					if (s.TOTAL_PAYABLE > 0) {
+					if ( s.STATUS == 'DONE' || s.TOTAL_PAYABLE > 0) {
 						matecat_words.removeClass('loading');
 						$('#matecat-equivalent-words .days').show();
 						newMText = s.TOTAL_PAYABLE_PRINT;
@@ -608,13 +522,14 @@ UI = {
 					$('#matecat-equivalent-words .workDays').text(s.PAYABLE_WC_TIME);
 					$('#matecat-equivalent-words .unit').text(s.PAYABLE_WC_UNIT);
 
-					if (s.DISCOUNT_WC > 0) {
-						$('.promo-text span').text(s.DISCOUNT_WC);
-						$('.promo-text').show();
-					} else {
-						$('.promo-text').hide();
-						$('.promo-text span').text(s.DISCOUNT_WC);
-					}
+//					if ( s.DISCOUNT_WC > 0) {
+//						$('.promo-text span').text(s.DISCOUNT_WC);
+//						$('.promo-text').show();
+//					} else {
+//						$('.promo-text').hide();
+//						$('.promo-text span').text(s.DISCOUNT_WC);s
+//					}
+
 					$('#usageFee').text(s.USAGE_FEE);
 					$('#pricePerWord').text(s.PRICE_PER_WORD);
 					$('#discount').text(s.DISCOUNT);
@@ -747,9 +662,13 @@ UI = {
 
 					if (d.data.summary.STATUS != 'DONE') {
 						$('.dosplit').addClass('disabled');
+                        if( d.data.summary.TOTAL_SEGMENTS > UI.segmentsThreshold  ){
+                            UI.pollingTime = parseInt( d.data.summary.TOTAL_SEGMENTS / 20 ) ;
+                            console.log( 'Polling time: ' + UI.pollingTime );
+                        }
 						setTimeout(function() {
 							UI.pollData();
-						}, 1000);
+						}, UI.pollingTime );
 					} else {
 						$('.dosplit').removeClass('disabled');
 						$('#longloading .approved-bar').css('width', '100%');
@@ -844,4 +763,5 @@ $(document).ready(function() {
 		gopopup($(e.target).data('oauth'));
 	});
 	UI.init();
+	UI.outsourceInit();
 });

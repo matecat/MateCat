@@ -19,7 +19,8 @@ Loader = {
 		'ui.concordance',
 		'ui.glossary',
 		'ui.search',
-		'functions'
+		'functions',
+		'ui.customization'
 	),
 	forkComponents: new Array (
 	),

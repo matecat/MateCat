@@ -118,30 +118,27 @@ function truncate_filename(n, len) {
 	return filename + '.' + ext;
 }
 
-function insertNodeAtCursor(node) {console.log('insertNodeAtCursor');
+function insertNodeAtCursor(node) {
 	var range, html;
 	if (window.getSelection && window.getSelection().getRangeAt) {
-
-		console.log('window.getSelection().isCollapsed: ', window.getSelection().isCollapsed);
-		console.log('window.getSelection().rangeCount: ', window.getSelection().rangeCount);
-		console.log('window.getSelection(): ', window.getSelection());
-
-//		if ((window.getSelection().isCollapsed)||(UI.isFirefox)) {
-//		if (window.getSelection().type == 'Caret') { console.log('a');
 		if ((window.getSelection().type == 'Caret')||(UI.isFirefox)) {
 			range = window.getSelection().getRangeAt(0);
-			console.log('range: ', range);
-			console.log('1: ', UI.editarea.html());
 			range.insertNode(node);
-			console.log('2: ', UI.editarea.html());
+			setCursorAfterNode(range, node);
 		} else {
 		}
-
 	} else if (document.selection && document.selection.createRange) {
 		range = document.selection.createRange();
 		html = (node.nodeType == 3) ? node.data : node.outerHTML;
 		range.pasteHTML(html);
 	}
+}
+
+function setCursorAfterNode(range, node) {
+	range.setStartAfter(node);
+	range.setEndAfter(node); 
+	window.getSelection().removeAllRanges();
+	window.getSelection().addRange(range);
 }
 
 function pasteHtmlAtCaret(html, selectPastedContent) {
@@ -191,7 +188,7 @@ function pasteHtmlAtCaret(html, selectPastedContent) {
     }
 }
 
-function setCursorPosition(el, pos) {
+function setCursorPosition(el, pos) {console.log('el: ', el);
 	pos = pos || 0;
 	var range = document.createRange();
 	var sel = window.getSelection();
@@ -222,7 +219,122 @@ function removeSelectedText() {
 	}
 }
 
+// addTM with iFrame
 
+function fileUpload(form, action_url, div_id) {
+    console.log('div_id: ', div_id);
+    // Create the iframe...
+    var iframe = document.createElement("iframe");
+    iframe.setAttribute("id", "upload_iframe");
+    iframe.setAttribute("name", "upload_iframe");
+    iframe.setAttribute("width", "0");
+    iframe.setAttribute("height", "0");
+    iframe.setAttribute("border", "0");
+    iframe.setAttribute("style", "width: 0; height: 0; border: none;");
+
+    // Add to document...
+    form.parentNode.appendChild(iframe);
+    window.frames['upload_iframe'].name = "upload_iframe";
+
+    iframeId = document.getElementById("upload_iframe");
+
+    // Add event...
+    var eventHandler = function () {
+
+        if (iframeId.detachEvent) iframeId.detachEvent("onload", eventHandler);
+        else iframeId.removeEventListener("load", eventHandler, false);
+
+        // Message from server...
+        if (iframeId.contentDocument) {
+            content = iframeId.contentDocument.body.innerHTML;
+        } else if (iframeId.contentWindow) {
+            content = iframeId.contentWindow.document.body.innerHTML;
+        } else if (iframeId.document) {
+            content = iframeId.document.body.innerHTML;
+        }
+
+        document.getElementById(div_id).innerHTML = content;
+
+        // Del the iframe...
+        setTimeout('iframeId.parentNode.removeChild(iframeId)', 250);
+    }
+
+    if (iframeId.addEventListener) iframeId.addEventListener("load", eventHandler, true);
+    if (iframeId.attachEvent) iframeId.attachEvent("onload", eventHandler);
+
+    // Set properties of form...
+    form.setAttribute("target", "upload_iframe");
+    form.setAttribute("action", action_url);
+    form.setAttribute("method", "post");
+    form.setAttribute("enctype", "multipart/form-data");
+    form.setAttribute("encoding", "multipart/form-data");
+    $(form).append('<input type="hidden" name="job_id" value="' + config.job_id + '" />')
+        .append('<input type="hidden" name="exec" value="newTM" />')
+        .append('<input type="hidden" name="job_pass" value="' + config.password + '" />')
+        .append('<input type="hidden" name="tm_key" value="' + $('#addtm-tr-key').val() + '" />')
+        .append('<input type="hidden" name="name" value="' + $('#uploadTMX').text() + '" />')
+        .append('<input type="hidden" name="r" value="1" />')
+        .append('<input type="hidden" name="w" value="1" />');
+
+    // Submit the form...
+    form.submit();
+
+//    document.getElementById(div_id).innerHTML = "Uploading...";
+    $('.popup-addtm-tr .x-popup').click();
+    UI.showMessage({
+        msg: 'Uploading your TM...'
+    });
+    $('#messageBar .msg').after('<span class="progress"></span>');
+    TMKey = $('#addtm-tr-key').val();
+    TMName = $('#uploadTMX').text();
+console.log('TMKey 1: ', TMKey);
+    console.log('TMName 1: ', TMName);
+//    UI.pollForUploadProgress(TMKey, TMName);
+    UI.pollForUploadCallback(TMKey, TMName);
+}
+
+function stripHTML(dirtyString) {
+    var container = document.createElement('div');
+    container.innerHTML = dirtyString;
+    return container.textContent || container.innerText;
+}
+
+function stackTrace() {
+    var err = new Error();
+    return err.stack;
+}
+// addTM webworker
+/*
+function werror(e) {
+    console.log('ERROR: Line ', e.lineno, ' in ', e.filename, ': ', e.message);
+}
+
+function handleFileSelect(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+
+    var files = evt.dataTransfer.files||evt.target.files;
+    // FileList object.
+
+    worker.postMessage({
+        'files' : files
+    });
+    //Sending File list to worker
+    // files is a FileList of File objects. List some properties.
+    var output = [];
+    for (var i = 0, f; f = files[i]; i++) {
+        output.push('<li><strong>', escape(f.name), '</strong> (', f.type || 'n/a', ') - ', f.size, ' bytes, last modified: ', f.lastModifiedDate ? f.lastModifiedDate.toLocaleDateString() : 'n/a', '</li>');
+    }
+    document.getElementById('list').innerHTML = '<ul>' + output.join('') + '</ul>';
+}
+
+function handleDragOver(evt) {
+    evt.stopPropagation();
+    evt.preventDefault();
+    evt.dataTransfer.dropEffect = 'copy';
+    // Explicitly show this is a copy.
+}
+*/
 
 
 /* FORMATTING FUNCTION  TO TEST */
@@ -308,7 +420,6 @@ function saveSelection() {
 	UI.savedSel = rangy.saveSelection();
 	// this is just to prevent the addiction of a couple of placeholders who may sometimes occur for a Rangy bug
 	editarea.html(editarea.html().replace(UI.cursorPlaceholder, ''));
-
 	UI.savedSelActiveElement = document.activeElement;
 }
 
@@ -346,7 +457,7 @@ function getSelectionHtml() {
 		if (sel.rangeCount) {
 			var container = document.createElement("div");
 			for (var i = 0, len = sel.rangeCount; i < len; ++i) {
-				container.appendChild(sel.getRangeAt(i).cloneContents());
+                container.appendChild(sel.getRangeAt(i).cloneContents());
 			}
 			html = container.innerHTML;
 		}
@@ -356,6 +467,31 @@ function getSelectionHtml() {
 		}
 	}
 	return html;
+}
+
+function insertHtmlAfterSelection(html) {
+    var sel, range, node;
+    if (window.getSelection) {
+        sel = window.getSelection();
+        if (sel.getRangeAt && sel.rangeCount) {
+            range = window.getSelection().getRangeAt(0);
+            range.collapse(false);
+
+            // Range.createContextualFragment() would be useful here but is
+            // non-standard and not supported in all browsers (IE9, for one)
+            var el = document.createElement("div");
+            el.innerHTML = html;
+            var frag = document.createDocumentFragment(), node, lastNode;
+            while ( (node = el.firstChild) ) {
+                lastNode = frag.appendChild(node);
+            }
+            range.insertNode(frag);
+        }
+    } else if (document.selection && document.selection.createRange) {
+        range = document.selection.createRange();
+        range.collapse(false);
+        range.pasteHTML(html);
+    }
 }
 
 function setBrowserHistoryBehavior() {
@@ -447,3 +583,114 @@ Object.size = function(obj) {
     return size;
 };
 
+String.prototype.splice = function( idx, rem, s ) {
+    return (this.slice(0,idx) + s + this.slice(idx + Math.abs(rem)));
+};
+
+function lev(s1, s2) {
+  //       discuss at: http://phpjs.org/functions/levenshtein/
+  //      original by: Carlos R. L. Rodrigues (http://www.jsfromhell.com)
+  //      bugfixed by: Onno Marsman
+  //       revised by: Andrea Giammarchi (http://webreflection.blogspot.com)
+  // reimplemented by: Brett Zamir (http://brett-zamir.me)
+  // reimplemented by: Alexander M Beedie
+  //        example 1: levenshtein('Kevin van Zonneveld', 'Kevin van Sommeveld');
+  //        returns 1: 3
+
+  if (s1 == s2) {
+    return 0;
+  }
+
+  var s1_len = s1.length;
+  var s2_len = s2.length;
+  if (s1_len === 0) {
+    return s2_len;
+  }
+  if (s2_len === 0) {
+    return s1_len;
+  }
+
+  // BEGIN STATIC
+  var split = false;
+  try {
+    split = !('0')[0];
+  } catch (e) {
+    split = true; // Earlier IE may not support access by string index
+  }
+  // END STATIC
+  if (split) {
+    s1 = s1.split('');
+    s2 = s2.split('');
+  }
+
+  var v0 = new Array(s1_len + 1);
+  var v1 = new Array(s1_len + 1);
+
+  var s1_idx = 0,
+    s2_idx = 0,
+    cost = 0;
+  for (s1_idx = 0; s1_idx < s1_len + 1; s1_idx++) {
+    v0[s1_idx] = s1_idx;
+  }
+  var char_s1 = '',
+    char_s2 = '';
+  for (s2_idx = 1; s2_idx <= s2_len; s2_idx++) {
+    v1[0] = s2_idx;
+    char_s2 = s2[s2_idx - 1];
+
+    for (s1_idx = 0; s1_idx < s1_len; s1_idx++) {
+      char_s1 = s1[s1_idx];
+      cost = (char_s1 == char_s2) ? 0 : 1;
+      var m_min = v0[s1_idx + 1] + 1;
+      var b = v1[s1_idx] + 1;
+      var c = v0[s1_idx] + cost;
+      if (b < m_min) {
+        m_min = b;
+      }
+      if (c < m_min) {
+        m_min = c;
+      }
+      v1[s1_idx + 1] = m_min;
+    }
+    var v_tmp = v0;
+    v0 = v1;
+    v1 = v_tmp;
+  }
+  return v0[s1_len];
+}
+function replaceSelectedText(replacementText) {
+    var sel, range;
+    if (window.getSelection) {
+        sel = window.getSelection();
+        if (sel.rangeCount) {
+            range = sel.getRangeAt(0);
+            range.deleteContents();
+            range.insertNode(document.createTextNode(replacementText));
+        }
+    } else if (document.selection && document.selection.createRange) {console.log('c');
+        range = document.selection.createRange();
+        range.text = replacementText;
+    }
+}
+function replaceSelectedHtml(replacementHtml) {
+    var sel, range;
+    if (window.getSelection) {
+        sel = window.getSelection();
+        if (sel.rangeCount) {
+            range = sel.getRangeAt(0);
+            range.deleteContents();
+			pasteHtmlAtCaret(replacementHtml);
+        }
+    } else if (document.selection && document.selection.createRange) {console.log('c');
+        range = document.selection.createRange();
+        range.text = replacementText;
+    }
+}
+function capitaliseFirstLetter(string)
+{
+    return string.charAt(0).toUpperCase() + string.slice(1);
+}
+function toTitleCase(str)
+{
+    return str.replace(/\w\S*/g, function(txt){return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();});
+}

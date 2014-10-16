@@ -8,22 +8,49 @@ include_once INIT::$MODEL_ROOT . "/queries.php";
 
 class oauthResponseHandlerController extends viewController{
 
-	private $openid;
+	private $client;
 	private $redirectUrl;
-	private $userdata=array();
+	private $userData=array();
+
+	private $user_logged;
 
 	public function __construct(){
+
+        //SESSION ENABLED
+        parent::sessionStart();
 		parent::__construct();
 		parent::makeTemplate("oauth_response_handler.html");
 
-		//instantiate openid client
-		$this->openid = new LightOpenID(INIT::$HTTPHOST);
+		$this->user_logged = true;
 
-		//get response from third-party
-		$this->openid_mode = $this->get_from_get_post("openid_mode");
-		$this->userdata['email'] = $this->get_from_get_post("openid_ext1_value_contact_email");
-		$this->userdata['first_name'] = $this->get_from_get_post("openid_ext1_value_namePerson_first");
-		$this->userdata['last_name'] = $this->get_from_get_post("openid_ext1_value_namePerson_last");
+		$this->client = OauthClient::getInstance()->getClient();
+
+		$plus = new Google_Service_Oauth2($this->client);
+
+		$filterArgs = array(
+			'code'          => array( 'filter' => FILTER_SANITIZE_STRING),
+			'error'         => array( 'filter' => FILTER_SANITIZE_STRING)
+		);
+
+		$__postInput = filter_input_array( INPUT_GET, $filterArgs );
+
+		$code         = $__postInput[ 'code' ];
+		$error        = $__postInput[ 'error' ];
+
+		if(isset($code) && $code){
+			$this->client->authenticate($code);
+
+			$_SESSION['access_token'] = $this->client->getAccessToken();
+			$user = $plus->userinfo->get();
+
+			//get response from third-party
+			$this->userData['email']        = $user['email'];
+			$this->userData['first_name']   = $user['givenName'];
+			$this->userData['last_name']    = $user['familyName'];
+		}
+		else if (isset($error)){
+			$this->user_logged = false;
+		}
 
 		//get url to redirect to
 		//add default if not set
@@ -38,40 +65,32 @@ class oauthResponseHandlerController extends viewController{
 	}
 
 	public function doAction(){
-		if('cancel'!=$this->openid_mode) {
-			//validate incoming data
-			$result = $this->openid->validate();
-			if($result !== false) {
-				//user has been validated, data was by Google
 
-				//check if user exists in db; if not, create 
-				$result=tryInsertUserFromOAuth($this->userdata);
+		if($this->user_logged && !empty($this->userData)){
+			//user has been validated, data was by Google
+			//check if user exists in db; if not, create
+			$result=tryInsertUserFromOAuth($this->userData);
 
-				if(false==$result){
-					die("error in insert");
-				}
-				//send mail to new customer
-				//$this->sendNotifyMail($this->userdata);
+			if(false==$result){
+				die("error in insert");
+			}
 
-				//ok mail sent, set stuff
-				AuthCookie::setCredentials($this->userdata['email'],INIT::$AUTHCOOKIEDURATION);
-				//$_SESSION['cid'] = $this->userdata['email'];
+			//set stuff
+			AuthCookie::setCredentials($this->userData['email'],INIT::$AUTHCOOKIEDURATION);
+			//$_SESSION['cid'] = $this->userdata['email'];
 
-				$_theresAnonymousProject = ( isset($_SESSION['_anonym_pid']) && !empty($_SESSION['_anonym_pid']) );
-				$_incomingFromNewProject = ( isset($_SESSION['_newProject']) && !empty($_SESSION['_newProject']) );
+			$_theresAnonymousProject = ( isset($_SESSION['_anonym_pid']) && !empty($_SESSION['_anonym_pid']) );
+			$_incomingFromNewProject = ( isset($_SESSION['_newProject']) && !empty($_SESSION['_newProject']) );
 
-				if( $_theresAnonymousProject && $_incomingFromNewProject ){
-					//update anonymous project with user credentials
-					$result = updateProjectOwner( $this->userdata['email'], $_SESSION['_anonym_pid'] );
-				}
-
+			if( $_theresAnonymousProject && $_incomingFromNewProject ){
+				//update anonymous project with user credentials
+				$result = updateProjectOwner( $this->userData['email'], $_SESSION['_anonym_pid'] );
 			}
 		}
 
 		//destroy session info of last anonymous project
 		unset($_SESSION['_anonym_pid']);
 		unset($_SESSION['_newProject']);
-
 	}
 
 	public function setTemplateVars() {

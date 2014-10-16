@@ -1,24 +1,55 @@
 <?php
-
 /**
  * Created by PhpStorm.
- * User: domenico
+ */
+
+
+/**
+ * Abstract class for all html views
+ *
  * Date: 27/01/14
  * Time: 18.56
  *
  */
 abstract class viewController extends controller {
 
+    /**
+     * Template Engine Instance
+     *
+     * @var PHPTAL
+     */
     protected $template = null;
+
+    /**
+     * Flag to get info about browser support
+     *
+     * @var bool
+     */
     protected $supportedBrowser = false;
-    protected $isAuthRequired;
+
+    /**
+     * Flag to get info about user authentication
+     *
+     * @var bool
+     */
     protected $logged_user = false;
 
+    /**
+     * tell the children to set the template vars
+     *
+     * @return mixed
+     */
     abstract function setTemplateVars();
 
+    /**
+     * Try to identify the browser of users
+     *
+     * @return array
+     */
     private function getBrowser() {
         $u_agent  = $_SERVER[ 'HTTP_USER_AGENT' ];
-        $bname    = 'Unknown';
+
+	    $bname    = 'Unknown';
         $platform = 'Unknown';
         $version  = "";
 
@@ -43,13 +74,19 @@ abstract class viewController extends controller {
             $ub    = "Chrome";
         } elseif ( preg_match( '/Safari/i', $u_agent ) ) {
             $bname = 'Apple Safari';
-            $ub    = "Safari";
+	        $ub    = "Safari";
+	    } elseif ( preg_match( '/AppleWebKit/i', $u_agent ) ) {
+	        $bname = 'Apple Safari';
+	        $ub    = "Safari";
         } elseif ( preg_match( '/Opera/i', $u_agent ) ) {
             $bname = 'Opera';
             $ub    = "Opera";
         } elseif ( preg_match( '/Netscape/i', $u_agent ) ) {
             $bname = 'Netscape';
             $ub    = "Netscape";
+        } elseif ( preg_match( '/Mozilla/i', $u_agent ) ) {
+            $bname = 'Mozilla Generic';
+            $ub    = "Mozillageneric";
         } else {
             $bname = 'Unknown';
             $ub    = "Unknown";
@@ -89,24 +126,65 @@ abstract class viewController extends controller {
                 'platform'  => $platform,
                 'pattern'   => $pattern
         );
+
     }
 
+    /**
+     * Class constructor
+     *
+     * @param bool $isAuthRequired
+     */
     public function __construct( $isAuthRequired = false ) {
-        parent::__construct();
-        $this->supportedBrowser = $this->isSupportedWebBrowser();
-        $this->isAuthRequired   = $isAuthRequired;
 
-        //if auth is required, stat procedure
-        $this->doAuth();
+	    if( !parent::isRightVersion() ) {
+		    header("Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "badConfiguration" , true, 303);
+		    exit;
+	    }
+
+        //SESSION ENABLED
+        parent::sessionStart();
+        parent::__construct();
+
+        //load Template Engine
+        require_once INIT::$ROOT . '/inc/PHPTAL/PHPTAL.php';
+
+        $this->supportedBrowser = $this->isSupportedWebBrowser();
+
+        //try to get user name from cookie if it is not present and put it in session
+        if ( empty( $_SESSION[ 'cid' ] ) ) {
+
+            //log::doLog(get_class($this)." requires check for login");
+            $username_from_cookie = AuthCookie::getCredentials();
+            if ( $username_from_cookie ) {
+                $_SESSION[ 'cid' ] = $username_from_cookie;
+            }
+
+        }
+
+        //even if no login in required, if user data is present, pull it out
+        if ( !empty( $_SESSION[ 'cid' ] ) ){
+            $this->logged_user = getUserData( $_SESSION[ 'cid' ] );
+        }
+
+        if( $isAuthRequired  ) {
+            //if auth is required, stat procedure
+            $this->doAuth();
+        }
+
     }
 
+    /**
+     * Perform Authentication Requests and set incoming url
+     *
+     * @return bool
+     */
     private function doAuth() {
 
         //prepare redirect flag
         $mustRedirectToLogin = false;
 
         //if no login set and login is required
-        if ( !$this->isLoggedIn() and $this->isAuthRequired ) {
+        if ( !$this->isLoggedIn() ) {
             //take note of url we wanted to go after
             $_SESSION[ 'incomingUrl' ] = $_SERVER[ 'REQUEST_URI' ];
             parse_str( $_SERVER[ 'QUERY_STRING' ], $queryStringArray );
@@ -116,10 +194,6 @@ abstract class viewController extends controller {
 
             //signal redirection
             $mustRedirectToLogin = true;
-        }
-        //even if no login in required, if user data is present, pull it out
-        if ( !empty( $_SESSION[ 'cid' ] ) ) {
-            $this->logged_user = getUserData( $_SESSION[ 'cid' ] );
         }
 
         if ( $mustRedirectToLogin ) {
@@ -131,79 +205,46 @@ abstract class viewController extends controller {
         return true;
     }
 
+    /**
+     * Check user logged
+     *
+     * @return bool
+     */
     public function isLoggedIn() {
-        //log::doLog(get_class($this)." requires check for login");
-        $username_from_cookie = AuthCookie::getCredentials();
-        if ( $username_from_cookie ) {
-            $_SESSION[ 'cid' ] = $username_from_cookie;
-        }
-
         return ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
     }
 
+    /**
+     * Check for browser support
+     *
+     * @return bool
+     */
     private function isSupportedWebBrowser() {
         $browser_info = $this->getBrowser();
         $browser_name = strtolower( $browser_info[ 'name' ] );
 
         foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
             if ( stripos( $browser_name, $enabled_browser ) !== false ) {
-                return true;
+                return 1;
             }
         }
 
-        return false;
+        foreach ( INIT::$UNTESTED_BROWSERS as $untested_browser ) {
+            if ( stripos( $browser_name, $untested_browser ) !== false ) {
+                return -1;
+            }
+        }
+
+
+        return 0;
     }
 
-    protected function postback( $additionalPostData = array() ) {
-        $url = $_SERVER[ 'REQUEST_URI' ];
-        if ( !is_array( $additionalPostData ) ) {
-            $additionalPostData = array();
-        }
-        echo "
-			<html>
-			<head>
-			<script type='text/javascript' language='javascript'>
-			function submitForm(){
-				document.forms[0].submit();
-			}
-		</script>
-			</head>
-			<body onload='submitForm()'>
-			<form id='form' name='form' action='$url' method='post'>
-			<noscript>
-			<div align='center'>
-			<h3>Clicca per continuare </h3>
-			<input type='submit' value='Clicca qui'>
-			</div>
-			</noscript>
-			";
-        foreach ( $_POST as $k => $v ) {
-            if ( $k != 'action' ) {
-                //$v=urlencode($v);
-                $v = stripslashes( $v );
-                echo "<input type='hidden' name='$k' value='$v'> ";
-            }
-        }
-
-        foreach ( $additionalPostData as $k => $v ) {
-            if ( $k != 'action' ) {
-                //$v=urlencode($v);
-                echo "<input type='hidden'name='$k' value='$v'> ";
-            }
-        }
-        if ( isset( $additionalPostData[ 'action' ] ) ) {
-            $act = $additionalPostData[ 'action' ];
-        } else {
-            $act = $_POST[ 'action' ];
-        }
-        echo "<input type='hidden'name='action' value='$act'> ";
-        echo "</form>
-			</body>
-			</html>
-			";
-        exit;
-    }
-
+    /**
+     * Create an instance of skeleton PHPTAL template
+     *
+     * @param $skeleton_file
+     *
+     */
     protected function makeTemplate( $skeleton_file ) {
         try {
             $this->template                   = new PHPTAL( INIT::$TEMPLATE_ROOT . "/$skeleton_file" ); // create a new template object
@@ -222,16 +263,35 @@ abstract class viewController extends controller {
         }
     }
 
+    /**
+     * Return the content in the right format, it tell to the child class to execute template vars inflating
+     *
+     * @see controller::finalize
+     *
+     * @return mixed|void
+     */
     public function finalize() {
+
+        /**
+         * Call child for template vars fill
+         *
+         */
         $this->setTemplateVars();
+
         try {
+
             $buffer = ob_get_contents();
             ob_get_clean();
             ob_start( "ob_gzhandler" ); // compress page before sending
             $this->nocache();
 
             header( 'Content-Type: text/html; charset=utf-8' );
+
+            /**
+             * Execute Template Rendering
+             */
             echo $this->template->execute();
+
         } catch ( Exception $e ) {
             echo "<pre>";
             print_r( $e );
@@ -239,6 +299,7 @@ abstract class viewController extends controller {
             echo "</pre>";
             exit;
         }
+
     }
 
 }

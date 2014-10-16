@@ -1,68 +1,86 @@
 <?php
 /**
  * Created by PhpStorm.
- * User: domenico
  * Date: 27/01/14
  * Time: 18.57
- * 
+ *
  */
 
-require_once INIT::$ROOT . '/inc/errors.inc.php';
-require_once INIT::$MODEL_ROOT . '/queries.php';
-require_once INIT::$UTILS_ROOT .'/AuthCookie.php';
-
+/**
+ * Abstract Class controller
+ */
 abstract class controller {
 
-//    public static function sanitizeString( &$value, $item ){
-//        $value = urldecode( $value );
-//        $value = filter_var( $value, FILTER_SANITIZE_STRING, array( 'flags' => /* FILTER_FLAG_STRIP_HIGH | */ FILTER_FLAG_STRIP_LOW ) );
-//    }
-
     /**
-     * TODO refactoring
+     * Controllers Factory
+     *
+     * Initialize the Controller Instance and route the
+     * API Calls to the right Controller
+     *
      * @return mixed
      */
     public static function getInstance() {
 
         if( isset( $_REQUEST['api'] ) && filter_input( INPUT_GET, 'api', FILTER_VALIDATE_BOOLEAN ) ){
 
-//            array_walk_recursive( $_REQUEST , 'controller::sanitizeString' );
-
             if( !isset( $_REQUEST['action'] ) || empty( $_REQUEST['action'] ) ){
-                header( "HTTP/1.1 200 OK" );
-                echo "OK";
+                header( "Location: " . INIT::$HTTPHOST . INIT::$BASEURL . "api/docs", true, 303 ); //Redirect 303 See Other
                 die();
             }
 
             $_REQUEST[ 'action' ][0] = strtoupper( $_REQUEST[ 'action' ][ 0 ] );
-            $func                 = create_function( '$c', 'return strtoupper($c[1]);' ); //PHP 5.2 compatibility, don't use a lambda function
+
+            //PHP 5.2 compatibility, don't use a lambda function
+            $func                 = create_function( '$c', 'return strtoupper($c[1]);' );
+
             $_REQUEST[ 'action' ] = preg_replace_callback( '/_([a-z])/', $func, $_REQUEST[ 'action' ] );
             $_POST[ 'action' ]    = $_REQUEST[ 'action' ];
 
+            //set the log to the API Log
             Log::$fileName = 'API.log';
 
-            @ob_get_clean();
-            header('Content-Type: application/json; charset=utf-8');
-
-        } else {
-            //load Template Engine
-            require_once INIT::$ROOT . '/inc/PHPTAL/PHPTAL.php';
         }
 
-
-        //Default :  cat
+        //Default :  catController
         $action = ( isset( $_POST[ 'action' ] ) ) ? $_POST[ 'action' ] : ( isset( $_GET[ 'action' ] ) ? $_GET[ 'action' ] : 'cat' );
         $className = $action . "Controller";
         return new $className();
 
     }
 
-    protected $errors;
+	/**
+	 *
+	 * @return bool true if version is up to date, false otherwise
+	 */
 
+	public static function isRightVersion(){
+		$version_config = parse_ini_file(INIT::$ROOT."/inc/version.ini");
+		$version = $version_config['version'];
+
+//		Log::doLog("Same version number? ".($version == INIT::$BUILD_NUMBER));
+
+		return $version == INIT::$BUILD_NUMBER;
+
+	}
+
+    /**
+     * When Called it perform the controller action to retrieve/manipulate data
+     *
+     * @return mixed
+     */
     abstract function doAction();
 
+    /**
+     * Called to get the result values in the right format
+     *
+     * @return mixed
+     */
     abstract function finalize();
 
+    /**
+     * Set No Cache headers
+     *
+     */
     protected function nocache() {
         header("Expires: Tue, 03 Jul 2001 06:00:00 GMT");
         header("Last-Modified: " . gmdate("D, d M Y H:i:s") . " GMT");
@@ -71,23 +89,56 @@ abstract class controller {
         header("Pragma: no-cache");
     }
 
+    /**
+     * Class constructor
+     *
+     */
     protected function __construct() {
 
         try {
-            //$this->errors = ERRORS::obtain();
-        } catch (Exception $e) {
+
+            //Put here all actions we want to be performed by ALL controllers
+
+            require_once INIT::$MODEL_ROOT . '/queries.php';
+            require_once INIT::$UTILS_ROOT . '/AuthCookie.php';
+
+        } catch ( Exception $e ) {
             echo "<pre>";
             print_r($e);
             echo "\n\n\n";
             echo "</pre>";
             exit;
         }
+
     }
 
+    /**
+     * Get the values from GET OR POST global Vars
+     *
+     * @deprecated
+     *
+     * @param $varname
+     *
+     * @return null
+     */
     protected function get_from_get_post($varname) {
         $ret = null;
         $ret = isset($_GET[$varname]) ? $_GET[$varname] : (isset($_POST[$varname]) ? $_POST[$varname] : null);
         return $ret;
+    }
+
+    public function sessionStart(){
+        INIT::sessionStart();
+    }
+
+    /**
+     * Explicitly disable sessions for ajax call
+     *
+     * Sessions enabled on INIT Class
+     *
+     */
+    public function disableSessions(){
+        INIT::sessionClose();
     }
 
 }

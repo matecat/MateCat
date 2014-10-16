@@ -25,7 +25,6 @@ class getSegmentsController extends ajaxController {
 
     public function __construct() {
 
-        $this->disableSessions();
         parent::__construct();
 
         $filterArgs = array(
@@ -172,7 +171,7 @@ class getSegmentsController extends ajaxController {
                 $this->data["$id_file"]['source_code'] = $seg['source'];
                 $this->data["$id_file"]['target_code'] = $seg['target'];
 //                $time = microtime(true);
-                $this->data["$id_file"]['file_stats'] = CatUtils::getStatsForJob( $seg['jid'], $id_file, $this->password );
+//                $this->data["$id_file"]['file_stats'] = CatUtils::getStatsForJob( $seg['jid'], $id_file, $this->password );
 //                Log::doLog( microtime(true) - $time );
                 $this->data["$id_file"]['segments'] = array();
             }

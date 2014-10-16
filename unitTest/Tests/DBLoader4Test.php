@@ -19,7 +19,7 @@ class Tests_DBLoader4Test {
     public static $db;
 
     public static function resetDB(){
-        $cmd = "mysql -u root -padmin < " . dirname( __FILE__ ) . "/unitTest_matecat_local.sql 2>&1";
+        $cmd = "mysql -u root < " . dirname( __FILE__ ) . "/unitTest_matecat_local.sql 2>&1";
         $res = shell_exec( $cmd );
         if( !is_null($res) ){
             $msg = 'Shell Exec Command Failed: ' . $cmd;

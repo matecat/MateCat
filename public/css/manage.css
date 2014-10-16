@@ -93,7 +93,7 @@ body.manage .field .value
 body.manage .urls
 	{
 	float: left;
-	width: 80%;
+	width: 100%;
 	text-align: left;
 	}
 
@@ -287,26 +287,26 @@ body.manage .meter
 
 body.manage th.create-date
 	{
-	min-width: 150px;
+	width: 140px;
 	}
 	
 body.manage th.job-detail
 	{
-	width: 45%;
+	width: 37%;
 	}
 body.manage th.private-tm-key
 	{
-	min-width: 120px;
+	min-width: 180px;
 	}
 
 body.manage th.words
 	{
-	min-width: 130px;
+	width: 110px;
 	}
 	
 body.manage th.progress
 	{
-	width: 15%;
+	width: 10%;
 	}
 
 body.manage th.actions
@@ -322,6 +322,26 @@ body.manage tr.row
 		{
 		display: table-row;
 		}
+
+.tm-key .key,
+.tm-key .rgrant,
+.tm-key .wgrant
+{
+    min-width: 140px;
+    float:left;
+    padding: 6px 4px;
+    display: block;
+}
+
+.tm-key .rgrant,
+.tm-key .wgrant{
+    min-width: 30px;
+    width: 30px;
+}
+
+.tm-key .clear{
+    clear: both;
+}
 
 /*	
 body.manage tr.disabled
@@ -447,7 +467,6 @@ body.manage .pagination a:hover
 body.manage header .filter
 	{
 	display: block !important;
-	margin-top: -2px !important;
 	}
 
 body.manage .search
@@ -751,7 +770,9 @@ margin-top: 10px;}
 .logosmall {background: url(../img/sprite.png) 1px -1403px no-repeat;padding-top: 30px;}
 
 
-.block { min-height:600px;height: auto;
+.block
+{
+	height: auto;
 }
 
 
@@ -799,7 +820,7 @@ only screen and (min-resolution: 192dpi),
 only screen and (in-resolution: 2dppx) { 
 
 .filter {
-	background: url(../img/sprite2x.png) 2px -218px no-repeat;
+	background: url(../img/sprite2x.png) 2px -214px no-repeat;
 }
 body.manage a.cancel-project, body.manage a.archive-project, body.manage a.resume-project, body.manage a.unarchive-project {
 	background: url(../img/sprite2x.png) -13px -78px no-repeat;

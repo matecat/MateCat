@@ -2,19 +2,16 @@
 	Component: ui.tags
  */
 $.extend(UI, {
-	noTagsInSegment: function(starting) {
-		if ((!this.editarea) && (typeof starting == 'undefined'))
-			return true;
-		if (typeof starting != 'undefined')
-			return false;
+	noTagsInSegment: function(options) {
+        editarea = options.area;
+        starting = options.starting;
+        if(starting) return false;
 
-		var a = $('.source', this.currentSegment).html().match(/\&lt;.*?\&gt;/gi);
-		var b = this.editarea.html().match(/\&lt;.*?\&gt;/gi);
-		if (a || b) {
-			return false;
-		} else {
-			return true;
-		}
+        if ($(editarea).html().match(/\&lt;.*?\&gt;/gi)) {
+            return false;
+        } else {
+            return true;
+        }
 	},
 	tagCompare: function(sourceTags, targetTags, prova) {
 
@@ -38,21 +35,7 @@ $.extend(UI, {
 		}
 		return(mismatch);
 	},
-	
-	// TAG MARK
-	detectTags: function(area) {
-		
-        //ALL in one
-        $(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
-//        $(area).html($(area).html().replace(/(:?<span.*?>)?(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph[^a-z]|it|mrk)\s*.*?&gt;)(:?<\/span>)?/gi, "<span contenteditable=\"true\" class=\"locked\">$2</span>"));
-
-//		$(area).html($(area).html().replace(/(&lt;\s*\/*\s*(g|x|bx|ex|bpt|ept|ph|it|mrk)\s*.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
-//      if (!this.firstMarking) {
-//			$(area).html($(area).html().replace(/(<span contenteditable=\"false\" class=\".*?locked.*?\"\>){2,}(.*?)(<\/span\>){2,}/gi, "<span contenteditable=\"false\" class=\"locked\">$2</span>"));
-//          console.log( $(area).html() );
-//		}
-	},
-	disableTagMark: function() {
+    disableTagMark: function() {
 		this.taglockEnabled = false;
 		this.body.addClass('tagmarkDisabled');
 		$('.source span.locked').each(function() {
@@ -73,15 +56,17 @@ $.extend(UI, {
 		if (!this.taglockEnabled)
 			return false;
 		$('.footer .suggestion_source', segment).each(function() {
-			$(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+            $(this).html($(this).html().replace(/(&lt;[\/]*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+           // $(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 			if (UI.isFirefox) {
 				$(this).html($(this).html().replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			} else {
 				$(this).html($(this).html().replace(/(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(<span contenteditable=\"false\" class=\"(.*?locked.*?)\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			}
-		});
+        });
 		$('.footer .translation').each(function() {
-			$(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+            $(this).html($(this).html().replace(/(&lt;[\/]*(g|x|bx|ex|bpt|ept|ph|it|mrk).*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
+//			$(this).html($(this).html().replace(/(&lt;(g|x|bx|ex|bpt|ept|ph|it|mrk)\sid.*?&gt;)/gi, "<span contenteditable=\"false\" class=\"locked\">$1</span>"));
 			if (UI.isFirefox) {
 				$(this).html($(this).html().replace(/(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(<span class=\"(.*?locked.*?)\" contenteditable=\"false\"\>)(.*?)(<\/span\>){2,}/gi, "$1$5</span>"));
 			} else {
@@ -92,46 +77,54 @@ $.extend(UI, {
 	markTags: function() {
 		if (!this.taglockEnabled) return false;
 //		UI.checkHeaviness(); 
-		
-		if (this.noTagsInSegment(1))
-			return false;
-		$('.source').each(function() {
-			UI.detectTags(this);
-		});
 
-		$('.editarea').each(function() {
-			if ($('#segment-' + $(this).data('sid')).hasClass('mismatch'))
-				return false;
-			UI.detectTags(this);
+		if(this.noTagsInSegment({
+            area: false,
+            starting: true
+        })) {
+            return false;
+        }
+
+		$('.source, .editarea').each(function() {
+			UI.lockTags(this);
 		});
 	},
+
 	markTagsInSearch: function(el) {
 		if (!this.taglockEnabled)
 			return false;
 		var elements = (typeof el == 'undefined') ? $('.editor .cc-search .input') : el;
 		elements.each(function() {
-//			UI.detectTags(this);
+//			UI.lockTags(this);
 		});
 	},
 
 	// TAG LOCK
 	lockTags: function(el) {
-//		console.log('lock tags');
+//		console.log('lock tags: ', el);
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
+        el = (typeof el == 'undefined') ? UI.editarea : el;
 		if (!this.taglockEnabled)
 			return false;
-		if (this.noTagsInSegment())
+//        console.log('this.noTagsInSegment(): ', this.noTagsInSegment());
+//		console.log('IL SEGMENTO: ', $('#segment-' + el.attr('data-sid')));
+//        console.log('devo interrompere il lockTags?: ', this.noTagsInSegment($(el).parents('section').first()));
+//        console.log('elemento: ', el);
+        if (this.noTagsInSegment({
+            area: el,
+            starting: false
+        }))
 			return false;
-		$(editarea).first().each(function() {
+//        console.log('$(editarea).first(): ', $(editarea).first());
+        $(editarea).first().each(function() {
 			saveSelection();
 			var tx = $(this).html();
 			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
 			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";			
 //			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"true\">$1</pl>" : "<pl contenteditable=\"true\" class=\"locked\">$1</pl>";
 //			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"true\">$1</span>" : "<span contenteditable=\"true\" class=\"locked\">$1</span>";
-
             tx = tx.replace(/<span/gi, "<pl")
                     .replace(/<\/span/gi, "</pl")
                     .replace(/&lt;/gi, "<")
@@ -181,7 +174,7 @@ $.extend(UI, {
 	
 	// TAG CLEANING
 	cleanDroppedTag: function(area, beforeDropHTML) {
-		if (area == this.editarea) {
+ //       if (area == this.editarea) {
 			this.droppingInEditarea = false;
 
 			diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
@@ -224,7 +217,7 @@ $.extend(UI, {
 			area.html(area.html().replace(this.cursorPlaceholder, phcode));
 			restoreSelection();
 			area.html(area.html().replace(this.cursorPlaceholder, '').replace(/\[\*\*\[(.*?)\]\*\*\]/gi, "<$1>"));
-
+/*
 		} else {
 	// old cleaning code to be evaluated
 			diff = this.dmp.diff_main(beforeDropHTML, $(area).html());
@@ -254,46 +247,58 @@ $.extend(UI, {
 			restoreSelection();
 			area.html(area.html().replace(this.cursorPlaceholder, ''));			
 		}
+*/
 	},
 	
 	// TAG MISMATCH
 	markTagMismatch: function(d) {
-		if(typeof d.tag_mismatch.source != 'undefined') {
-			$.each(d.tag_mismatch.source, function(index) {
-				$('#segment-' + d.id_segment + ' .source span.locked:not(.temp)').filter(function() {
-					return $(this).text() === d.tag_mismatch.source[index];
-				}).last().addClass('temp');							
-			});			
-		}
-		if(typeof d.tag_mismatch.target != 'undefined') {
-			$.each(d.tag_mismatch.target, function(index) {
-				$('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').filter(function() {
-					return $(this).text() === d.tag_mismatch.target[index];
-				}).last().addClass('temp');							
-			});			
-		}
+        // temp
+//        d.tag_mismatch.order = 2;
+        if((typeof d.tag_mismatch.order == 'undefined')||(d.tag_mismatch.order == '')) {
+            if(typeof d.tag_mismatch.source != 'undefined') {
+                $.each(d.tag_mismatch.source, function(index) {
+                    $('#segment-' + d.id_segment + ' .source span.locked:not(.temp)').filter(function() {
+                        return $(this).text() === d.tag_mismatch.source[index];
+                    }).last().addClass('temp');
+                });
+            }
+            if(typeof d.tag_mismatch.target != 'undefined') {
+                $.each(d.tag_mismatch.target, function(index) {
+                    $('#segment-' + d.id_segment + ' .editarea span.locked:not(.temp)').filter(function() {
+                        return $(this).text() === d.tag_mismatch.target[index];
+                    }).last().addClass('temp');
+                });
+            }
 
-		$('#segment-' + d.id_segment + ' span.locked.mismatch').addClass('mismatch-old').removeClass('mismatch');
-		$('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
-		$('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
+            $('#segment-' + d.id_segment + ' span.locked.mismatch').addClass('mismatch-old').removeClass('mismatch');
+            $('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
+            $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
+        } else {
+            $('#segment-' + d.id_segment + ' .editarea .locked' ).filter(function() {
+                return $(this).text() === d.tag_mismatch.order[0];
+            }).addClass('order-error');
+        }
+
 	},	
 
 	// TAG AUTOCOMPLETE
-	checkAutocompleteTags: function() {console.log('checkAutocompleteTags');
+	checkAutocompleteTags: function() {//console.log('checkAutocompleteTags');
+//        console.log('checkAutocompleteTags: ', UI.editarea.html() );
 		added = this.getPartialTagAutocomplete();
 //		console.log('added: "', added + '"');
-		console.log('aa: ', UI.editarea.html());
+//		console.log('aa: ', UI.editarea.html());
 		$('.tag-autocomplete li.hidden').removeClass('hidden');
 		$('.tag-autocomplete li').each(function() {
 			var str = $(this).text();
+//            console.log('"' + str.substring(0, added.length) + '" == "' + added + '"');
 			if( str.substring(0, added.length) === added ) {
 				$(this).removeClass('hidden');
 			} else {
 				$(this).addClass('hidden');	
 			}
 		});
-		console.log('bb: ', UI.editarea.html());
-		if(!$('.tag-autocomplete li:not(.hidden)').length) {
+//		console.log('bb: ', UI.editarea.html());
+		if(!$('.tag-autocomplete li:not(.hidden)').length) { // no tags matching what the user is writing
 
 			$('.tag-autocomplete').addClass('empty');
 			if(UI.preCloseTagAutocomplete) {
@@ -302,12 +307,12 @@ $.extend(UI, {
 			}
 			UI.preCloseTagAutocomplete = true;
 		} else {
-			console.log('dd: ', UI.editarea.html());
+//			console.log('dd: ', UI.editarea.html());
 
 			$('.tag-autocomplete li.current').removeClass('current');
 			$('.tag-autocomplete li:not(.hidden)').first().addClass('current');
 			$('.tag-autocomplete').removeClass('empty');		
-			console.log('ee: ', UI.editarea.html());
+//			console.log('ee: ', UI.editarea.html());
 			UI.preCloseTagAutocomplete = false;
 		}
 	},
@@ -316,15 +321,16 @@ $.extend(UI, {
 		UI.preCloseTagAutocomplete = false;
 	},
 	getPartialTagAutocomplete: function() {
-		console.log('inizio di getPartialTagAutocomplete: ', UI.editarea.html());
+//		console.log('inizio di getPartialTagAutocomplete: ', UI.editarea.html());
 //		var added = UI.editarea.html().match(/&lt;([&;"\w\s\/=]*?)<span class="tag-autocomplete-endcursor">/gi);
 		var added = UI.editarea.html().match(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?<span class="tag-autocomplete-endcursor">/gi);
-//		console.log(added);
+//        console.log('prova: ', UI.editarea.html().match(/&lt;(?:[a-z]*(?:&nbsp;)*["\w\s\/=]*)?<span class="tag-autocomplete-endcursor">\&/gi));
+//		console.log('added 1: ', added);
 		added = (added === null)? '' : htmlDecode(added[0].replace(/<span class="tag-autocomplete-endcursor"\>/gi, '')).replace(/\xA0/gi," ");
-		console.log('added: ', added);
+//        console.log('added 2: ', added);
 		return added;
 	},
-	openTagAutocompletePanel: function() {console.log('openTagAutocompletePanel');
+	openTagAutocompletePanel: function() {//console.log('openTagAutocompletePanel');
 		if(!UI.sourceTags.length) return false;
 		$('.tag-autocomplete-marker').remove();
 
@@ -333,8 +339,9 @@ $.extend(UI, {
 		insertNodeAtCursor(node);
 		var endCursor = document.createElement("span");
 		endCursor.setAttribute('class', 'tag-autocomplete-endcursor');
+//        console.log('prima di inserire endcursor: ', UI.editarea.html());
 		insertNodeAtCursor(endCursor);
-		console.log('inserito endcursor: ', UI.editarea.html());
+//		console.log('inserito endcursor: ', UI.editarea.html());
 		var offset = $('.tag-autocomplete-marker').offset();
 		var addition = ($(':first-child', UI.editarea).hasClass('tag-autocomplete-endcursor'))? 30 : 20;
 		$('.tag-autocomplete-marker').remove();
@@ -352,8 +359,18 @@ $.extend(UI, {
 		
 		$('.tag-autocomplete').css('top', offset.top + addition);
 		$('.tag-autocomplete').css('left', offset.left);
-		this.checkAutocompleteTags();	
+		this.checkAutocompleteTags();
 	},
+	jumpTag: function(range, where) {
+//		console.log('range: ', range);
+//		console.log(range.endContainer.data.length);
+//		console.log(range.endOffset);
+		if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) { 
+//			console.log('da saltare');
+			setCursorAfterNode(range, range.endContainer.nextElementSibling);
+		}
+	},
+
 });
 
 

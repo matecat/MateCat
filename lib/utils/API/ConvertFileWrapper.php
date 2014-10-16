@@ -46,7 +46,7 @@ class ConvertFileWrapper extends convertFileController {
             if( $res['code'] < 0 ) { $failure = true; }
         }
 
-        $result = array();
+        $result = array( 'errors' => array() );
         if( $failure ) $result = end( $this->resultStack );
         $this->resultStack = $result['errors'];
         return $this->resultStack;

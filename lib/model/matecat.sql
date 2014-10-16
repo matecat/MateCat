@@ -1,8 +1,5 @@
--- MySQL dump 10.13  Distrib 5.5.35, for debian-linux-gnu (x86_64)
---
--- Host: 10.30.1.225    Database: matecat_sandbox
--- ------------------------------------------------------
--- Server version	5.5.35-0+wheezy1-log
+/*
+Navicat MySQL Data Transfer
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -15,16 +12,19 @@
 /*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
-CREATE SCHEMA IF NOT EXISTS `matecat` /*!40100 DEFAULT CHARACTER SET utf8 */;
-USE `matecat`;
+Target Server Type    : MYSQL
+Target Server Version : 50538
+File Encoding         : 65001
 
---
--- Table structure for table `converters`
---
+Date: 2014-09-16 12:29:42
+*/
 
+SET FOREIGN_KEY_CHECKS=0;
+
+-- ----------------------------
+-- Table structure for converters
+-- ----------------------------
 DROP TABLE IF EXISTS `converters`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `converters` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `ip_converter` varchar(45) NOT NULL,
@@ -38,22 +38,17 @@ CREATE TABLE `converters` (
   `status_offline` tinyint(4) NOT NULL DEFAULT '0',
   `status_reboot` tinyint(4) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `id_UNIQUE` (`id`),
   UNIQUE KEY `ip_converter_UNIQUE` (`ip_converter`),
   UNIQUE KEY `ip_storage_UNIQUE` (`ip_storage`),
   KEY `status_active` (`status_active`),
   KEY `status_offline` (`status_offline`),
   KEY `status_reboot` (`status_reboot`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8;
 
---
--- Table structure for table `converters_log`
---
-
+-- ----------------------------
+-- Table structure for converters_log
+-- ----------------------------
 DROP TABLE IF EXISTS `converters_log`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `converters_log` (
   `id_log` int(11) NOT NULL AUTO_INCREMENT,
   `id_converter` int(11) NOT NULL,
@@ -63,16 +58,12 @@ CREATE TABLE `converters_log` (
   KEY `timestamp_idx` (`check_time`),
   KEY `outcome_idx` (`test_passed`),
   KEY `id_converter_idx` (`id_converter`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB AUTO_INCREMENT=1050319 DEFAULT CHARSET=utf8;
 
---
--- Table structure for table `engines`
---
-
+-- ----------------------------
+-- Table structure for engines
+-- ----------------------------
 DROP TABLE IF EXISTS `engines`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `engines` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `name` varchar(200) DEFAULT 'no_name_engine',
@@ -94,27 +85,23 @@ CREATE TABLE `engines` (
   `active` tinyint(4) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   KEY `type` (`type`),
-  KEY `active_idx` (`active`) USING BTREE,
-  KEY `name` (`name`),
-  KEY `base_url` (`base_url`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
-INSERT INTO `engines` (`id`,`name`,`type`,`description`,`base_url`,`translate_relative_url`,`contribute_relative_url`,`delete_relative_url`,`gloss_get_relative_url`,`gloss_set_relative_url`,`gloss_update_relative_url`,`gloss_delete_relative_url`,`tmx_import_relative_url`,`tmx_status_relative_url`,`extra_parameters`,`google_api_compliant_version`,`penalty`,`active`) VALUES (0,'NONE - PLACEHOLDER','NONE','No MT','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,100,1);
-INSERT INTO `engines` (`id`,`name`,`type`,`description`,`base_url`,`translate_relative_url`,`contribute_relative_url`,`delete_relative_url`,`gloss_get_relative_url`,`gloss_set_relative_url`,`gloss_update_relative_url`,`gloss_delete_relative_url`,`tmx_import_relative_url`,`tmx_status_relative_url`,`extra_parameters`,`google_api_compliant_version`,`penalty`,`active`) VALUES (1,'MyMemory (All Pairs)','TM','MyMemory: next generation Translation Memory technology','http://api-proxied.mymemory.translated.net','get','set','delete','glossary/get','glossary/set','glossary/update','glossary/delete','tmx/import','tmx/status',NULL,'1',0,1);
-INSERT INTO `engines` (`id`,`name`,`type`,`description`,`base_url`,`translate_relative_url`,`contribute_relative_url`,`delete_relative_url`,`gloss_get_relative_url`,`gloss_set_relative_url`,`gloss_update_relative_url`,`gloss_delete_relative_url`,`tmx_import_relative_url`,`tmx_status_relative_url`,`extra_parameters`,`google_api_compliant_version`,`penalty`,`active`) VALUES (2,'FBK Legal (EN->IT) - Ad.','MT','FBK (EN->IT) Moses Legal engine','http://hlt-services2.fbk.eu:8888','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1);
-INSERT INTO `engines` (`id`,`name`,`type`,`description`,`base_url`,`translate_relative_url`,`contribute_relative_url`,`delete_relative_url`,`gloss_get_relative_url`,`gloss_set_relative_url`,`gloss_update_relative_url`,`gloss_delete_relative_url`,`tmx_import_relative_url`,`tmx_status_relative_url`,`extra_parameters`,`google_api_compliant_version`,`penalty`,`active`) VALUES (3,'LIUM-IT (EN->DE)','MT','Lium (EN->FR) Moses Information Technology engine','http://193.52.29.52:8001','translate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1);
-INSERT INTO `engines` (`id`,`name`,`type`,`description`,`base_url`,`translate_relative_url`,`contribute_relative_url`,`delete_relative_url`,`gloss_get_relative_url`,`gloss_set_relative_url`,`gloss_update_relative_url`,`gloss_delete_relative_url`,`tmx_import_relative_url`,`tmx_status_relative_url`,`extra_parameters`,`google_api_compliant_version`,`penalty`,`active`) VALUES (4,'FBK Legal (EN>FR) - Ad.','MT','FBK (EN->FR) Moses Legal engine','http://hlt-services2.fbk.eu:8988','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1);
-INSERT INTO `engines` (`id`,`name`,`type`,`description`,`base_url`,`translate_relative_url`,`contribute_relative_url`,`delete_relative_url`,`gloss_get_relative_url`,`gloss_set_relative_url`,`gloss_update_relative_url`,`gloss_delete_relative_url`,`tmx_import_relative_url`,`tmx_status_relative_url`,`extra_parameters`,`google_api_compliant_version`,`penalty`,`active`) VALUES (5,'LIUM-LEGAL (EN->DE)','MT','Lium (EN->FR) Moses Legal engine','http://193.52.29.52:8002','translate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,14,1);
-INSERT INTO `engines` (`id`,`name`,`type`,`description`,`base_url`,`translate_relative_url`,`contribute_relative_url`,`delete_relative_url`,`gloss_get_relative_url`,`gloss_set_relative_url`,`gloss_update_relative_url`,`gloss_delete_relative_url`,`tmx_import_relative_url`,`tmx_status_relative_url`,`extra_parameters`,`google_api_compliant_version`,`penalty`,`active`) VALUES (6,'FBK TED (IT>EN)','MT','FBK (IT->EN) Moses Information Technology engine','http://hlt-services2.fbk.eu:8788','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1);
+  KEY `active_idx` (`active`) USING BTREE
+) ENGINE=InnoDB AUTO_INCREMENT=64 DEFAULT CHARSET=utf8;
 
 --
--- Table structure for table `file_references`
+-- Dumping data for table `engines`
 --
 
+LOCK TABLES `engines` WRITE;
+/*!40000 ALTER TABLE `engines` DISABLE KEYS */;
+INSERT INTO `engines` VALUES (1,'MyMemory (All Pairs)','TM','MyMemory: next generation Translation Memory technology','http://api.mymemory.translated.net','get','set','delete','glossary/get','glossary/set','glossary/update','glossary/delete','tmx/import','tmx/status',NULL,'1',0,1),(2,'FBK Legal (EN->IT) - Ad.','MT','FBK (EN->IT) Moses Legal engine','http://hlt-services2.fbk.eu:8888','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(3,'LIUM-IT (EN->DE)','MT','Lium (EN->FR) Moses Information Technology engine','http://193.52.29.52:8001','translate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(4,'FBK Legal (EN>FR) - Ad.','MT','FBK (EN->FR) Moses Legal engine','http://hlt-services2.fbk.eu:8988','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(5,'LIUM-LEGAL (EN->DE)','MT','Lium (EN->FR) Moses Legal engine','http://193.52.29.52:8002','translate',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,14,1),(0,'NONE - PLACEHOLDER','NONE','No MT','','',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,100,1),(6,'FBK TED (IT>EN)','MT','FBK (IT->EN) Moses Information Technology engine','http://hlt-services2.fbk.eu:8788','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(29,'MyMemory (All Pairs) - proxy','TM','MyMemory: next generation Translation Memory technology','http://api.mymemory.translated.net','get','set','delete','glossary/get','glossary/set','glossary/update','glossary/delete',NULL,NULL,NULL,'1',0,1),(30,'FBK Legal (EN->IT) AdaTest01','MT','FBK Legal (EN->IT) AdaTest01 - Used for field test for online learning - March 2014','http://hlt-services2.fbk.eu:8721','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(31,'FBK Legal (EN->IT) AdaTest02','MT','FBK Legal (EN->IT) AdaTest02 - Used for field test for online learning - March 2014','http://hlt-services2.fbk.eu:8722','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(32,'FBK Legal (EN->IT) AdaTest03','MT','FBK Legal (EN->IT) AdaTest03 - Used for field test for online learning - March 2014','http://hlt-services2.fbk.eu:8723','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(33,'FBK Legal (EN->IT) AdaTest04','MT','FBK Legal (EN->IT) AdaTest04 - Used for field test for online learning - March 2014','http://hlt-services2.fbk.eu:8724','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(34,'FBK Legal (EN>IT) StatTest','MT',NULL,'http://hlt-services2.fbk.eu:8720','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(35,'FBK Legal (EN>FR) AdaTest01','MT','FBK Legal (EN>FR) AdaTest01 - Used for field test for online learning - April 2014','http://hlt-services2.fbk.eu:8521','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(36,'FBK Legal (EN>FR) AdaTest02','MT','FBK Legal (EN>FR) AdaTest02 - Used for field test for online learning - April 2014','http://hlt-services2.fbk.eu:8522','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(37,'FBK Legal (EN>FR) AdaTest03','MT','FBK Legal (EN>FR) AdaTest03 - Used for field test for online learning - April 2014','http://hlt-services2.fbk.eu:8523','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1),(38,'FBK Legal (EN>FR) AdaTest04','MT','FBK Legal (EN>FR) AdaTest01 - Used for field test for online learning - April 2014','http://hlt-services2.fbk.eu:8524','translate','update',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL,'2',14,1);
+/*!40000 ALTER TABLE `engines` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for file_references
+-- ----------------------------
 DROP TABLE IF EXISTS `file_references`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `file_references` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_project` bigint(20) NOT NULL,
@@ -124,16 +111,12 @@ CREATE TABLE `file_references` (
   `serialized_reference_binaries` longblob,
   PRIMARY KEY (`id`),
   KEY `id_file` (`id_file`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8;
 
---
--- Table structure for table `files`
---
-
+-- ----------------------------
+-- Table structure for files
+-- ----------------------------
 DROP TABLE IF EXISTS `files`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `files` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_project` int(11) NOT NULL,
@@ -147,16 +130,12 @@ CREATE TABLE `files` (
   KEY `id_project` (`id_project`),
   KEY `sha1` (`sha1_original_file`) USING HASH,
   KEY `filename` (`filename`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+) ENGINE=MyISAM AUTO_INCREMENT=55647 DEFAULT CHARSET=utf8;
 
---
--- Table structure for table `files_job`
---
-
+-- ----------------------------
+-- Table structure for files_job
+-- ----------------------------
 DROP TABLE IF EXISTS `files_job`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `files_job` (
   `id_job` int(11) NOT NULL,
   `id_file` int(11) NOT NULL,
@@ -169,15 +148,11 @@ CREATE TABLE `files_job` (
   PRIMARY KEY (`id_job`,`id_file`),
   KEY `id_file` (`id_file`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Table structure for table `jobs`
---
-
+-- ----------------------------
+-- Table structure for jobs
+-- ----------------------------
 DROP TABLE IF EXISTS `jobs`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `jobs` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `password` varchar(45) NOT NULL,
@@ -185,6 +160,7 @@ CREATE TABLE `jobs` (
   `job_first_segment` bigint(20) unsigned NOT NULL,
   `job_last_segment` bigint(20) unsigned NOT NULL,
   `id_translator` varchar(100) NOT NULL DEFAULT 'generic_translator',
+  `tm_keys` varchar(4096) NOT NULL DEFAULT '[]',
   `job_type` varchar(45) DEFAULT NULL,
   `source` varchar(45) DEFAULT NULL,
   `target` varchar(45) DEFAULT NULL,
@@ -195,6 +171,7 @@ CREATE TABLE `jobs` (
   `id_tms` int(11) DEFAULT '1',
   `id_mt_engine` int(11) DEFAULT '1',
   `create_date` datetime NOT NULL,
+  `last_update` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `disabled` tinyint(4) NOT NULL,
   `owner` varchar(100) DEFAULT NULL,
   `status_owner` varchar(100) NOT NULL DEFAULT 'active',
@@ -213,17 +190,15 @@ CREATE TABLE `jobs` (
   KEY `id_translator` (`id_translator`),
   KEY `first_last_segment_idx` (`job_first_segment`,`job_last_segment`),
   KEY `id` (`id`) USING BTREE,
-  KEY `password` (`password`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  KEY `password` (`password`),
+  KEY `source` (`source`),
+  KEY `target` (`target`)
+) ENGINE=InnoDB AUTO_INCREMENT=41528 DEFAULT CHARSET=utf8;
 
---
--- Table structure for table `notifications`
---
-
+-- ----------------------------
+-- Table structure for notifications
+-- ----------------------------
 DROP TABLE IF EXISTS `notifications`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `notifications` (
   `id` int(11) NOT NULL,
   `id_comment` int(11) NOT NULL,
@@ -232,15 +207,11 @@ CREATE TABLE `notifications` (
   PRIMARY KEY (`id`),
   KEY `id_comment` (`id_comment`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Table structure for table `original_files_map`
---
-
+-- ----------------------------
+-- Table structure for original_files_map
+-- ----------------------------
 DROP TABLE IF EXISTS `original_files_map`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `original_files_map` (
   `sha1` varchar(100) NOT NULL,
   `source` varchar(50) NOT NULL,
@@ -250,15 +221,11 @@ CREATE TABLE `original_files_map` (
   `creation_date` date DEFAULT NULL,
   PRIMARY KEY (`sha1`,`source`,`target`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Table structure for table `projects`
---
-
+-- ----------------------------
+-- Table structure for projects
+-- ----------------------------
 DROP TABLE IF EXISTS `projects`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `projects` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `password` varchar(45) DEFAULT NULL,
@@ -276,24 +243,24 @@ CREATE TABLE `projects` (
   PRIMARY KEY (`id`),
   KEY `id_customer` (`id_customer`),
   KEY `status_analysis` (`status_analysis`),
-  KEY `for_debug` (`for_debug`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  KEY `for_debug` (`for_debug`),
+  KEY `remote_ip_address` (`remote_ip_address`),
+  KEY `name` (`name`)
+) ENGINE=InnoDB AUTO_INCREMENT=34338 DEFAULT CHARSET=utf8;
 
---
--- Table structure for table `segment_translations`
---
-
+-- ----------------------------
+-- Table structure for segment_translations
+-- ----------------------------
 DROP TABLE IF EXISTS `segment_translations`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `segment_translations` (
   `id_segment` bigint(20) NOT NULL,
   `id_job` bigint(20) NOT NULL,
+  `segment_hash` varchar(45) NOT NULL,
+  `autopropagated_from` bigint(20) DEFAULT NULL,
   `status` varchar(45) DEFAULT 'NEW',
   `translation` text,
   `translation_date` datetime DEFAULT NULL,
-  `time_to_edit` int(11) DEFAULT '0',
+  `time_to_edit` int(11) NOT NULL DEFAULT '0',
   `match_type` varchar(45) DEFAULT 'NEW',
   `context_hash` blob,
   `eq_word_count` double(20,2) DEFAULT NULL,
@@ -315,35 +282,15 @@ CREATE TABLE `segment_translations` (
   KEY `tm_analysis_status` (`tm_analysis_status`) USING BTREE,
   KEY `locked` (`locked`) USING BTREE,
   KEY `id_segment` (`id_segment`) USING BTREE,
-  KEY `warning` (`warning`)
+  KEY `warning` (`warning`),
+  KEY `segment_hash` (`segment_hash`) USING HASH,
+  KEY `auto_idx` (`autopropagated_from`) USING BTREE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Table structure for table `segment_translations_analysis_queue`
---
-
-DROP TABLE IF EXISTS `segment_translations_analysis_queue`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
-CREATE TABLE `segment_translations_analysis_queue` (
-  `id_segment` int(11) NOT NULL,
-  `id_job` int(11) NOT NULL,
-  `locked` int(11) DEFAULT '0',
-  `pid` int(11) DEFAULT NULL,
-  `date_insert` datetime DEFAULT NULL,
-  PRIMARY KEY (`id_segment`,`id_job`),
-  KEY `locked` (`locked`) USING BTREE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
-
---
--- Table structure for table `segments`
---
-
+-- ----------------------------
+-- Table structure for segments
+-- ----------------------------
 DROP TABLE IF EXISTS `segments`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `segments` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `id_file` bigint(20) NOT NULL,
@@ -353,6 +300,7 @@ CREATE TABLE `segments` (
   `xliff_ext_prec_tags` text,
   `xliff_mrk_ext_prec_tags` text,
   `segment` text,
+  `segment_hash` varchar(45) NOT NULL,
   `xliff_mrk_ext_succ_tags` text,
   `xliff_ext_succ_tags` text,
   `raw_word_count` double(20,2) DEFAULT NULL,
@@ -363,17 +311,14 @@ CREATE TABLE `segments` (
   KEY `mrk_id` (`xliff_mrk_id`) USING BTREE,
   KEY `show_in_cat` (`show_in_cattool`) USING BTREE,
   KEY `raw_word_count` (`raw_word_count`) USING BTREE,
-  KEY `id_file_part_idx` (`id_file_part`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
+  KEY `id_file_part_idx` (`id_file_part`),
+  KEY `segment_hash` (`segment_hash`) USING HASH COMMENT 'MD5 hash of segment content'
+) ENGINE=InnoDB AUTO_INCREMENT=20858422 DEFAULT CHARSET=utf8;
 
---
--- Table structure for table `segments_comments`
---
-
+-- ----------------------------
+-- Table structure for segments_comments
+-- ----------------------------
 DROP TABLE IF EXISTS `segments_comments`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `segments_comments` (
   `id` int(11) NOT NULL,
   `id_segment` int(11) NOT NULL,
@@ -383,15 +328,11 @@ CREATE TABLE `segments_comments` (
   PRIMARY KEY (`id`),
   KEY `id_segment` (`id_segment`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Table structure for table `translators`
---
-
+-- ----------------------------
+-- Table structure for translators
+-- ----------------------------
 DROP TABLE IF EXISTS `translators`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `translators` (
   `username` varchar(100) NOT NULL,
   `email` varchar(45) DEFAULT NULL,
@@ -402,15 +343,11 @@ CREATE TABLE `translators` (
   PRIMARY KEY (`username`),
   KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-/*!40101 SET character_set_client = @saved_cs_client */;
 
---
--- Table structure for table `users`
---
-
+-- ----------------------------
+-- Table structure for users
+-- ----------------------------
 DROP TABLE IF EXISTS `users`;
-/*!40101 SET @saved_cs_client     = @@character_set_client */;
-/*!40101 SET character_set_client = utf8 */;
 CREATE TABLE `users` (
   `email` varchar(50) NOT NULL,
   `salt` varchar(50) NOT NULL,
@@ -425,6 +362,34 @@ CREATE TABLE `users` (
 /*!40101 SET character_set_client = @saved_cs_client */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
+--
+-- Current Database: `matecat_analysis`
+--
+
+CREATE DATABASE /*!32312 IF NOT EXISTS*/ `matecat_analysis` /*!40100 DEFAULT CHARACTER SET latin1 */;
+
+USE `matecat_analysis`;
+
+--
+-- Table structure for table `segment_translations_analysis_queue`
+--
+
+DROP TABLE IF EXISTS `segment_translations_analysis_queue`;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+CREATE TABLE `segment_translations_analysis_queue` (
+  `id_segment` int(11) NOT NULL,
+  `id_job` int(11) NOT NULL,
+  `locked` int(11) DEFAULT '0',
+  `pid` int(11) DEFAULT NULL,
+  `date_insert` datetime DEFAULT NULL,
+  PRIMARY KEY (`id_segment`,`id_job`),
+  KEY `locked` (`locked`) USING BTREE,
+  KEY `pid` (`pid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+SET character_set_client = @saved_cs_client;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
@@ -433,4 +398,8 @@ CREATE TABLE `users` (
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2014-03-28 11:05:49
+-- Dump completed on 2014-06-16 19:19:31
+CREATE USER 'matecat'@'localhost' IDENTIFIED BY 'matecat01';
+GRANT ALL ON matecat.* TO 'matecat'@'localhost';
+GRANT ALL ON matecat_analysis.* TO 'matecat'@'localhost';
+FLUSH PRIVILEGES;

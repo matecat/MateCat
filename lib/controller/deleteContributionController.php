@@ -17,19 +17,31 @@ class deleteContributionController extends ajaxController {
     private $target_lang;
     private $id_translator;
     private $password;
+    private $tm_keys;
 
     public function __construct() {
 
-        $this->disableSessions();
         parent::__construct();
 
-        $this->source_lang   = $this->get_from_get_post( 'source_lang' );
-        $this->target_lang   = $this->get_from_get_post( 'target_lang' );
-        $this->source        = trim( $this->get_from_get_post( 'seg' ) );
-        $this->target        = trim( $this->get_from_get_post( 'tra' ) );
-        $this->id_translator = trim( $this->get_from_get_post( 'id_translator' ) );
-        $this->password      = trim( $this->get_from_get_post( 'password' ) );
-        $this->id_job        = trim( $this->get_from_get_post( 'id_job' ) );
+        $filterArgs = array(
+                'source_lang'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+                'target_lang'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+                'seg'            => array( 'filter' => FILTER_UNSAFE_RAW ),
+                'tra'            => array( 'filter' => FILTER_UNSAFE_RAW ),
+                'id_translator'  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+                'password'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+                'id_job'         => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+        );
+
+        $__postInput = filter_input_array( INPUT_POST, $filterArgs );
+
+        $this->source_lang   = $__postInput[ 'source_lang' ];
+        $this->target_lang   = $__postInput[ 'target_lang' ];
+        $this->source        = trim( $__postInput[ 'seg' ] );
+        $this->target        = trim( $__postInput[ 'tra' ] );
+        $this->id_translator = trim( $__postInput[ 'id_translator' ] ); //no more used
+        $this->password      = trim( $__postInput[ 'password' ] );
+        $this->id_job        = $__postInput[ 'id_job' ];
 
     }
 
@@ -62,6 +74,8 @@ class deleteContributionController extends ajaxController {
             return;
         }
 
+        $this->tm_keys      = $job_data[ 'tm_keys' ];
+
         $config = TMS::getConfigStruct();
 
         $config[ 'segment' ]       = CatUtils::view2rawxliff( $this->source );
@@ -69,14 +83,48 @@ class deleteContributionController extends ajaxController {
         $config[ 'source_lang' ]   = $this->source_lang;
         $config[ 'target_lang' ]   = $this->target_lang;
         $config[ 'email' ]         = "demo@matecat.com";
-        $config[ 'id_user' ]       = $this->id_translator;
+        $config[ 'id_user' ]       = array();
+
 
         $tms = new TMS( $job_data['id_tms'] );
 
-        $result = $tms->delete( $config );
+        //get job's TM keys
+        try{
+            $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys($this->tm_keys, 'r', 'tm');
 
-        $this->result[ 'code' ] = $result;
-        $this->result[ 'data' ] = "OK";
+            if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
+                foreach ( $tm_keys as $tm_key ) {
+                    $config[ 'id_user' ][ ] = $tm_key->key;
+                }
+            }
+
+        }
+        catch(Exception $e){
+            $this->result[ 'error' ][ ] = array( "code" => -11, "message" => "Cannot retrieve TM keys info." );
+            return;
+        }
+
+        //prepare the error report
+        $set_code = array();
+
+        /**
+         * @var $tm_key TmKeyManagement_TmKeyStruct
+         */
+        foreach ( $tm_keys as $tm_key ) {
+            $config[ 'id_user' ] = $tm_key->key;
+            $TMS_RESULT = $tms->delete( $config );
+            $set_code[ ] = $TMS_RESULT;
+        }
+
+        $set_successful = true;
+        if( array_search( false, $set_code, true ) ){
+            //There's an error
+            $set_successful = false;
+        }
+
+        $this->result[ 'data' ] = ( $set_successful ? "OK" : null );
+        $this->result[ 'code' ] = $set_successful;
+
     }
 
 

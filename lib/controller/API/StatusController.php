@@ -15,13 +15,12 @@ class StatusController extends getVolumeAnalysisController {
      * 'ppassword'          => (string) Project Password
      *
      */
-
     public function __construct() {
 
-        $this->disableSessions();
+        ajaxController::__construct();
 
         $filterArgs = array(
-                'id_project' => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'id_project'    => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'project_pass'  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
 

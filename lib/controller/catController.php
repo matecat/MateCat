@@ -29,28 +29,53 @@ class catController extends viewController {
 	private $job_stats = array();
 	private $source_rtl = false;
 	private $target_rtl = false;
+	private $job_owner = "";
 
 	private $job_not_found = false;
 	private $job_archived = false;
 	private $job_cancelled = false;
 
     private $firstSegmentOfFiles = '[]';
+    private $fileCounter = '[]';
 
     private $first_job_segment;
     private $last_job_segment;
     private $last_opened_segment;
 
+    /**
+     * @var string
+     */
 	private $thisUrl;
+
+    /**
+     * @var Google_Client
+     */
+    private $client;
+
+    /**
+     * @var string
+     */
+    private $authURL;
+
 
 	public function __construct() {
 		$this->start_time = microtime(1) * 1000;
 
 		parent::__construct(false);
 		parent::makeTemplate("index.html");
-		$this->jid = $this->get_from_get_post("jid");
-		$this->password = $this->get_from_get_post("password");
-		$this->start_from = $this->get_from_get_post("start");
-		$this->page = $this->get_from_get_post("page");
+		
+		$filterArgs = array(
+			'jid'           => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+			'password'      => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+			'start'         => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+			'page'          => array( 'filter' => FILTER_SANITIZE_NUMBER_INT )
+		);
+		$getInput = (object)filter_input_array( INPUT_GET, $filterArgs );
+
+		$this->jid = $getInput->jid;
+		$this->password = $getInput->password;
+		$this->start_from = $getInput->start;
+		$this->page = $getInput->page;
 
 		if (isset($_GET['step'])) {
 			$this->step = $_GET['step'];
@@ -73,7 +98,9 @@ class catController extends viewController {
         
 		$this->downloadFileName = "";
 
-		$this->thisUrl=$_SERVER['REQUEST_URI'];
+		$this->doAuth();
+
+        $this->generateAuthURL();
 
 	}
 
@@ -97,6 +124,24 @@ class catController extends viewController {
 		return array($hours, $minutes, $seconds, $usec);
 	}
 
+    private function doAuth() {
+
+        //if no login set and login is required
+        if ( !$this->isLoggedIn() ) {
+            //take note of url we wanted to go after
+            $this->thisUrl = $_SESSION[ 'incomingUrl' ] = $_SERVER[ 'REQUEST_URI' ];
+        }
+
+    }
+
+    private function generateAuthURL() {
+
+        $this->client = OauthClient::getInstance()->getClient();
+
+        $this->authURL = $this->client->createAuthUrl();
+
+    }
+
 	public function doAction() {
 		$files_found = array();
 		$lang_handler = Languages::getInstance();
@@ -108,58 +153,94 @@ class catController extends viewController {
             return;
 		}
 
-        if ($data[0]['status'] == 'cancelled') {
+		//retrieve job owner. It will be useful also if the job is archived or cancelled
+		$this->job_owner = ($data[0]['job_owner'] != "") ? $data[0]['job_owner'] : "support@matecat.com" ;
+
+		if ( $data[0]['status'] == Constants_JobStatus::STATUS_CANCELLED ) {
             $this->job_cancelled = true;
             //stop execution
             return;
         }
 
-		foreach ($data as $i => $prj) {
+		if ( $data[0]['status'] == Constants_JobStatus::STATUS_ARCHIVED ) {
+			$this->job_archived = true;
+//			$this->setTemplateVars();
+			//stop execution
+			return;
+		}
 
-            $this->project_status = $prj; // get one row values for the project are the same for every row
+        /*
+         * I prefer to use a programmatic approach to the check for the archive date instead of a pure query
+         * because the query to check "Utils::getArchivableJobs($this->jid)" should be
+         * executed every time a job is loaded ( F5 or CTRL+R on browser ) and it cost some milliseconds ( ~0.1s )
+         * and it is little heavy for the database.
+         * We use the data we already have from last query and perform
+         * the check on the last translation only if the job is older than 30 days
+         *
+         */
+        $lastUpdate = new DateTime( $data[0]['last_update'] );
+        $oneMonthAgo = new DateTime();
+        $oneMonthAgo->modify( '-' . INIT::JOB_ARCHIVABILITY_THRESHOLD . ' days' );
+
+        if( $lastUpdate < $oneMonthAgo  && !$this->job_cancelled ) {
+
+            $lastTranslationInJob = new Datetime( getLastTranslationDate( $this->jid ) );
+
+            if( $lastTranslationInJob < $oneMonthAgo ){
+                $res = "job";
+                $new_status = Constants_JobStatus::STATUS_ARCHIVED;
+                updateJobsStatus( $res, $this->jid, $new_status, null, null, $this->password );
+                $this->job_archived = true;
+            }
+
+		}
+
+		foreach ($data as $i => $job) {
+
+            $this->project_status = $job; // get one row values for the project are the same for every row
 
 			if (empty($this->pname)) {
-				$this->pname = $prj['pname'];
-				$this->downloadFileName = $prj['pname'] . ".zip"; // will be overwritten below in case of one file job
+				$this->pname = $job['pname'];
+				$this->downloadFileName = $job['pname'] . ".zip"; // will be overwritten below in case of one file job
 			}
 
-			if (empty($this->last_opened_segment)) {
-				$this->last_opened_segment = $prj['last_opened_segment'];
-			}
+            if ( empty( $this->last_opened_segment ) ) {
+                $this->last_opened_segment = $job[ 'last_opened_segment' ];
+            }
 
 			if (empty($this->cid)) {
-				$this->cid = $prj['cid'];
+				$this->cid = $job['cid'];
 			}
 
 			if (empty($this->pid)) {
-				$this->pid = $prj['pid'];
+				$this->pid = $job['pid'];
 			}
 
 			if (empty($this->tid)) {
-				$this->tid = $prj['tid'];
+				$this->tid = $job['tid'];
 			}
 
 			if (empty($this->create_date)) {
-				$this->create_date = $prj['create_date'];
+				$this->create_date = $job['create_date'];
 			}
 
 			if (empty($this->source_code)) {
-				$this->source_code = $prj['source'];
+				$this->source_code = $job['source'];
 			}
 
 			if (empty($this->target_code)) {
-				$this->target_code = $prj['target'];
+				$this->target_code = $job['target'];
 			}
 
 			if (empty($this->source)) {
-				$s = explode("-", $prj['source']);
+				$s = explode("-", $job['source']);
 				$source = strtoupper($s[0]);
 				$this->source = $source;
 				$this->source_rtl= ($lang_handler->isRTL(strtolower($this->source)))? ' rtl-source' : '';
 			}
 
 			if (empty($this->target)) {
-				$t = explode("-", $prj['target']);
+				$t = explode("-", $job['target']);
 				$target = strtoupper($t[0]);
 				$this->target = $target;
 				$this->target_rtl= ($lang_handler->isRTL(strtolower($this->target)))? ' rtl-target' : '';
@@ -167,80 +248,62 @@ class catController extends viewController {
 			//check if language belongs to supported right-to-left languages
 
 
-			if ($prj['status'] == 'archived') {
+			if ( $job['status'] == Constants_JobStatus::STATUS_ARCHIVED ) {
 				$this->job_archived = true;
+				$this->job_owner = $data[0]['job_owner'];
 			}
 
-			$id_file = $prj['id_file'];
+			$id_file = $job['id_file'];
 
-
-			if (!isset($this->data["$id_file"])) {
-				$files_found[] = $prj['filename'];
-//				$file_stats = CatUtils::getStatsForFile($id_file);
-//
-//				$this->data["$id_file"]['jid'] = $seg['jid'];
-//				$this->data["$id_file"]["filename"] = $seg['filename'];
-//				$this->data["$id_file"]["mime_type"] = $seg['mime_type'];
-////				$this->data["$id_file"]['id_segment_start'] = @$seg['id_segment_start'];
-////				$this->data["$id_file"]['id_segment_end'] = @$seg['id_segment_end'];
-//				$this->data["$id_file"]['source'] = $lang_handler->getLocalizedName($seg['source'],'en');
-//				$this->data["$id_file"]['target'] = $lang_handler->getLocalizedName($seg['target'],'en');
-//				$this->data["$id_file"]['source_code'] = $seg['source'];
-//				$this->data["$id_file"]['target_code'] = $seg['target'];
-//				$this->data["$id_file"]['last_opened_segment'] = $seg['last_opened_segment'];
-//				$this->data["$id_file"]['file_stats'] = $file_stats;
-			}
-			//$this->filetype_handler = new filetype($seg['mime_type']);
+            if ( !isset( $this->data[ "$id_file" ] ) ) {
+                $files_found[ ] = $job[ 'filename' ];
+            }
 
             $wStruct = new WordCount_Struct();
 
             $wStruct->setIdJob( $this->jid );
             $wStruct->setJobPassword( $this->password );
-            $wStruct->setNewWords( $prj['new_words'] );
-            $wStruct->setDraftWords( $prj['draft_words'] );
-            $wStruct->setTranslatedWords( $prj['translated_words'] );
-            $wStruct->setApprovedWords( $prj['approved_words'] );
-            $wStruct->setRejectedWords( $prj['rejected_words'] );
+            $wStruct->setNewWords( $job[ 'new_words' ] );
+            $wStruct->setDraftWords( $job[ 'draft_words' ] );
+            $wStruct->setTranslatedWords( $job[ 'translated_words' ] );
+            $wStruct->setApprovedWords( $job[ 'approved_words' ] );
+            $wStruct->setRejectedWords( $job[ 'rejected_words' ] );
 
-			unset($prj['id_file']);
-			unset($prj['source']);
-			unset($prj['target']);
-			unset($prj['source_code']);
-			unset($prj['target_code']);
-			unset($prj['mime_type']);
-			unset($prj['filename']);
-			unset($prj['jid']);
-			unset($prj['pid']);
-			unset($prj['cid']);
-			unset($prj['tid']);
-			unset($prj['pname']);
-			unset($prj['create_date']);
-//			unset($seg['id_segment_end']);
-//			unset($seg['id_segment_start']);
-			unset($prj['last_opened_segment']);
+            unset( $job[ 'id_file' ] );
+            unset( $job[ 'source' ] );
+            unset( $job[ 'target' ] );
+            unset( $job[ 'source_code' ] );
+            unset( $job[ 'target_code' ] );
+            unset( $job[ 'mime_type' ] );
+            unset( $job[ 'filename' ] );
+            unset( $job[ 'jid' ] );
+            unset( $job[ 'pid' ] );
+            unset( $job[ 'cid' ] );
+            unset( $job[ 'tid' ] );
+            unset( $job[ 'pname' ] );
+            unset( $job[ 'create_date' ] );
+            unset( $job[ 'owner' ] );
 
-            unset( $prj[ 'new_words' ] );
-            unset( $prj[ 'draft_words' ] );
-            unset( $prj[ 'translated_words' ] );
-            unset( $prj[ 'approved_words' ] );
-            unset( $prj[ 'rejected_words' ] );
+            unset( $job[ 'last_opened_segment' ] );
 
-            //BackWard Compatibility, for projects created with old versions
-            if( $wStruct->getTotal() == 0 && $prj['status_analysis'] == 'DONE' ){
+            unset( $job[ 'new_words' ] );
+            unset( $job[ 'draft_words' ] );
+            unset( $job[ 'translated_words' ] );
+            unset( $job[ 'approved_words' ] );
+            unset( $job[ 'rejected_words' ] );
+
+            //For projects created with No tm analysis enabled
+            if ( $wStruct->getTotal() == 0 && ( $job[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_DONE || $job[ 'status_analysis' ] == Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE ) ) {
                 $wCounter = new WordCount_Counter();
-                $wStruct = $wCounter->initializeJobWordCount( $this->jid, $this->password );
+                $wStruct  = $wCounter->initializeJobWordCount( $this->jid, $this->password );
                 Log::doLog( "BackWard compatibility set Counter." );
             }
 
             $this->job_stats = CatUtils::getFastStatsForJob( $wStruct );
 
-//            Log::doLog( $this->job_stats );
-
-            //$this->job_stats = CatUtils::getStatsForJob( $this->jid, null, $this->password );
-
         }
 
-        //TODO check and improve, this is not needed
+        //Needed because a just created job has last_opened segment NULL
 		if (empty($this->last_opened_segment)) {
 			$this->last_opened_segment = getFirstSegmentId($this->jid, $this->password);
 		}
@@ -255,9 +318,15 @@ class catController extends viewController {
         /**
          * get first segment of every file
          */
-         $this->firstSegmentOfFiles = json_encode( getFirstSegmentOfFilesInJob( $this->jid ) );
+        $fileInfo = getFirstSegmentOfFilesInJob( $this->jid );
+        $TotalPayable = array();
+        foreach( $fileInfo as $file ){
+            $TotalPayable[ $file['id_file'] ]['TOTAL_FORMATTED'] = $file['TOTAL_FORMATTED'];
+        }
+        $this->firstSegmentOfFiles = json_encode( $fileInfo );
+        $this->fileCounter         = json_encode( $TotalPayable );
 
-	}
+    }
 
 	public function setTemplateVars() {
 
@@ -266,13 +335,15 @@ class catController extends viewController {
             $this->template->target              = null;
             $this->template->source_code         = null;
             $this->template->target_code         = null;
-            $this->template->firstSegmentOfFiles = null;
+            $this->template->firstSegmentOfFiles = 0;
+            $this->template->fileCounter         = 0;
         } else {
             $this->template->pid                 = $this->pid;
             $this->template->target              = $this->target;
             $this->template->source_code         = $this->source_code;
             $this->template->target_code         = $this->target_code;
             $this->template->firstSegmentOfFiles = $this->firstSegmentOfFiles;
+            $this->template->fileCounter         = $this->fileCounter;
         }
 
         $this->template->jid         = $this->jid;
@@ -285,56 +356,60 @@ class catController extends viewController {
         $this->template->source_rtl  = $this->source_rtl;
         $this->template->target_rtl  = $this->target_rtl;
 
+        $this->template->authURL = $this->authURL;
+
         $this->template->first_job_segment   = $this->first_job_segment;
         $this->template->last_job_segment    = $this->last_job_segment;
         $this->template->last_opened_segment = $this->last_opened_segment;
-        //$this->template->data                = $this->data;
+		$this->template->owner_email         = $this->job_owner;
+        $this->template->ownerIsMe           = ($this->logged_user['email'] == $this->job_owner);
 
-        $this->job_stats['STATUS_BAR_NO_DISPLAY'] = ( $this->project_status['status_analysis'] == 'DONE' ? '' : 'display:none;' );
-        $this->job_stats['ANALYSIS_COMPLETE']   = ( $this->project_status['status_analysis'] == 'DONE' ? true : false );
+        $this->job_stats['STATUS_BAR_NO_DISPLAY'] = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? '' : 'display:none;' );
+        $this->job_stats['ANALYSIS_COMPLETE']     = ( $this->project_status['status_analysis'] == Constants_ProjectStatus::STATUS_DONE ? true : false );
 
 //        Log::doLog( $this->job_stats );
 
-        $this->template->job_stats = $this->job_stats;
+        $this->template->job_stats              = $this->job_stats;
 
         $end_time                               = microtime( true ) * 1000;
         $load_time                              = $end_time - $this->start_time;
         $this->template->load_time              = $load_time;
-        $this->template->tms_enabled            = var_export( (bool)$this->project_status['id_tms'], true );
+        $this->template->tms_enabled            = var_export( (bool)$this->project_status[ 'id_tms' ], true );
+        $this->template->mt_enabled             = var_export( (bool)$this->project_status[ 'id_mt_engine' ], true );
         $this->template->time_to_edit_enabled   = INIT::$TIME_TO_EDIT_ENABLED;
         $this->template->build_number           = INIT::$BUILD_NUMBER;
         $this->template->downloadFileName       = $this->downloadFileName;
         $this->template->job_not_found          = $this->job_not_found;
-        $this->template->job_archived           = ( $this->job_archived ) ? ' archived' : '';
+        $this->template->job_archived           = ( $this->job_archived ) ? INIT::JOB_ARCHIVABILITY_THRESHOLD : '';
         $this->template->job_cancelled          = $this->job_cancelled;
         $this->template->logged_user            = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
         $this->template->incomingUrl            = '/login?incomingUrl=' . $this->thisUrl;
         $this->template->warningPollingInterval = 1000 * ( INIT::$WARNING_POLLING_INTERVAL );
         $this->template->segmentQACheckInterval = 1000 * ( INIT::$SEGMENT_QA_CHECK_INTERVAL );
-		$this->template->filtered = $this->filter_enabled;
-		$this->template->filtered_class = ($this->filter_enabled) ? ' open' : '';
+        $this->template->filtered               = $this->filter_enabled;
+        $this->template->filtered_class         = ( $this->filter_enabled ) ? ' open' : '';
 
 		( INIT::$VOLUME_ANALYSIS_ENABLED        ? $this->template->analysis_enabled = true : null );
 
 		//check if it is a composite language, for cjk check that accepts only ISO 639 code
-		if(strpos($this->target_code,'-')!==FALSE){
-			//pick only first part
-			$tmp_lang=explode('-',$this->target_code);
-			$target_code_no_country=$tmp_lang[0];
-			unset($tmp_lang);
-		}else{
-			//not a RFC code, it's fine
-			$target_code_no_country=$this->target_code;
-		}
+        if ( strpos( $this->target_code, '-' ) !== false ) {
+            //pick only first part
+            $tmp_lang               = explode( '-', $this->target_code );
+            $target_code_no_country = $tmp_lang[ 0 ];
+            unset( $tmp_lang );
+        } else {
+            //not a RFC code, it's fine
+            $target_code_no_country = $this->target_code;
+        }
 
-		//check if cjk
-		if( array_key_exists( $target_code_no_country, CatUtils::$cjk ) ){
-			$this->template->taglockEnabled = 0;
-		}
+        //check if cjk
+        if ( array_key_exists( $target_code_no_country, CatUtils::$cjk ) ) {
+            $this->template->taglockEnabled = 0;
+        }
 
-		/*
-		 * Line Feed PlaceHolding System
-		 */
+        /*
+         * Line Feed PlaceHolding System
+         */
 		$this->template->brPlaceholdEnabled = $placeHoldingEnabled = true;
 
 		if( $placeHoldingEnabled ){
@@ -348,6 +423,14 @@ class catController extends viewController {
 			$this->template->lfPlaceholderRegex   = CatUtils::lfPlaceholderRegex;
 			$this->template->crPlaceholderRegex   = CatUtils::crPlaceholderRegex;
 			$this->template->crlfPlaceholderRegex = CatUtils::crlfPlaceholderRegex;
+
+            $this->template->tabPlaceholder       = CatUtils::tabPlaceholder;
+            $this->template->tabPlaceholderClass  = CatUtils::tabPlaceholderClass;
+            $this->template->tabPlaceholderRegex  = CatUtils::tabPlaceholderRegex;
+
+            $this->template->nbspPlaceholder       = CatUtils::nbspPlaceholder;
+            $this->template->nbspPlaceholderClass  = CatUtils::nbspPlaceholderClass;
+            $this->template->nbspPlaceholderRegex  = CatUtils::nbspPlaceholderRegex;
 
 		}
 

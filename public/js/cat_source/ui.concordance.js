@@ -65,9 +65,9 @@ $.extend(UI, {
 			$('.sub-editor.concordances .overflow').css('height', $('.sub-editor.concordances').height() + 'px');
 			$('.sub-editor.concordances').addClass('extended');
 			if($('.sub-editor.concordances .more').length) {
-				$('.sub-editor.concordances .more').text('Less');
+				$('.sub-editor.concordances .more').text('Fewer');
 			} else {
-				$('.sub-editor.concordances', segment).append('<a href="#" class="more">Less</a>');				
+				$('.sub-editor.concordances', segment).append('<a href="#" class="more">Fewer</a>');
 			}
 			this.custom.extended_concordance = true;
 			this.saveCustomization();
@@ -76,7 +76,6 @@ $.extend(UI, {
 	renderConcordances: function(d, in_target) {
 		segment = this.currentSegment;
 		segment_id = this.currentSegmentId;
-
 		$('.sub-editor.concordances .overflow .results', segment).empty();
 		$('.sub-editor.concordances .overflow .message', segment).remove();
 		if (d.data.matches.length) {
@@ -103,7 +102,7 @@ $.extend(UI, {
 			};
 		} else {
 			console.log('no matches');
-			$('.sub-editor.concordances .overflow', segment).append('<ul class="graysmall message"><li>Sorry. Can\'t help you this time. Check the language pair if you feel this is weird.</li></ul>');
+			$('.sub-editor.concordances .overflow', segment).append('<ul class="graysmall message"><li>Can\'t find any matches. Check the language combination.</li></ul>');
 		}
 
 		$('.cc-search', this.currentSegment).removeClass('loading');

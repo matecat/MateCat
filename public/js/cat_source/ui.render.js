@@ -7,6 +7,7 @@ $.extend(UI, {
 		segmentToOpen = (options.segmentToOpen || false);
 		segmentToScroll = (options.segmentToScroll || false);
 		scrollToFile = (options.scrollToFile || false);
+		highlight = (options.highlight || false);
 		seg = (segmentToOpen || false);
 		this.segmentToScrollAtRender = (seg) ? seg : false;
 //		this.isWebkit = $.browser.webkit;
@@ -52,23 +53,28 @@ $.extend(UI, {
 		this.tagSelection = false;
 		this.nextUntranslatedSegmentIdByServer = 0;
 		this.cursorPlaceholder = '[[placeholder]]';
-		this.openTagPlaceholder = 'åå';
-		this.closeTagPlaceholder = 'ΩΩ';
+		this.openTagPlaceholder = 'MATECAT-openTagPlaceholder-MATECAT';
+		this.closeTagPlaceholder = 'MATECAT-closeTagPlaceholder-MATECAT';
 		this.tempViewPoint = '';
 		this.checkUpdatesEvery = 180000;
 		this.autoUpdateEnabled = true;
 		this.goingToNext = false;
 		this.preCloseTagAutocomplete = false;
+        this.hiddenTextEnabled = true;
+        this.markSpacesEnabled = false;
 
-		/**
-		 * Global Warnings array definition.
-		 */
-		this.globalWarnings = [];
 
-		this.downOpts = {offset: '130%'};
+
+        /**
+         * Global Translation mismatches array definition.
+         */
+        this.translationMismatches = [];
+
+        this.downOpts = {offset: '130%'};
 		this.upOpts = {offset: '-40%'};
 		this.readonly = (this.body.hasClass('archived')) ? true : false;
-		this.suggestionShortcutLabel = 'ALT+' + ((UI.isMac) ? "CMD" : "CTRL") + '+';
+//		this.suggestionShortcutLabel = 'ALT+' + ((UI.isMac) ? "CMD" : "CTRL") + '+';
+		this.suggestionShortcutLabel = 'CTRL+';
 
 		this.taglockEnabled = config.taglockEnabled;
 		this.debug = false;
@@ -78,6 +84,11 @@ $.extend(UI, {
 		UI.detectStartSegment(); 
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
 		UI.getSegments(options);
+//		if(highlight) {
+//			console.log('HIGHLIGHT');
+//			UI.highlightEditarea();
+//		}
+
 		if (this.firstLoad && this.autoUpdateEnabled) {
 			this.lastUpdateRequested = new Date();
 			setTimeout(function() {

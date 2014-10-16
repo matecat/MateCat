@@ -9,95 +9,136 @@ include_once INIT::$UTILS_ROOT . "/langs/languages.class.php";
  *
  * @author andrea
  */
-
 class getProjectsController extends ajaxController {
 
-	private $jid = "";
-	private $pid = "";
-	public $notAllCancelled = 0;
+    /**
+     * @var Languages
+     */
+    private $lang_handler;
 
-	public function __construct() {
+    /**
+     * @var int
+     */
+    private $page;
 
-        $this->disableSessions();
-		parent::__construct();
+    /**
+     * @var int
+     */
+    private $step;
 
-		$this->lang_handler=Languages::getInstance();
-		if (isset($_POST['page'])) {
-			$this->page = ($_POST['page'] == '')? 1 : $_POST['page'];
-		} else {
-			$this->page = 1;
-		};
+    /**
+     * @var bool
+     */
+    private $project_id;
 
-		if (isset($_POST['step'])) {
-			$this->step = $_POST['step'];
-		} else {
-			$this->step = 100;
-		};
+    /**
+     * @var bool
+     */
+    private $filter_enabled;
 
-		if (isset($_POST['project'])) {
-			$this->project_id = $_POST['project'];
-		} else {
-			$this->project_id = false;
-		};
+    /**
+     * @var string|bool
+     */
+    private $search_in_pname;
 
-		if (isset($_POST['filter'])) {
-			$this->filter_enabled = true;
-		} else {
-			$this->filter_enabled = false;
-		};
+    /**
+     * @var string|bool
+     */
+    private $search_source;
 
-		if (isset($_POST['pn'])) {
-			$this->search_in_pname = $_POST['pn'];
-		} else {
-			$this->search_in_pname = false;
-		};
+    /**
+     * @var string|bool
+     */
+    private $search_target;
 
-		if (isset($_POST['source'])) {
-			$this->search_source = $_POST['source'];
-		} else {
-			$this->search_source = false;
-		};
+    /**
+     * @var string
+     */
+    private $search_status;
 
-		if (isset($_POST['target'])) {
-			$this->search_target = $_POST['target'];
-		} else {
-			$this->search_target = false;
-		};
+    /**
+     * @var bool
+     */
+    private $search_onlycompleted;
 
-		if (isset($_POST['status'])) {
-			$this->search_status = $_POST['status'];
-		} else {
-			$this->search_status = 'active';
-		};
+    /**
+     * @var int
+     */
+    private $notAllCancelled = 0;
 
-		if (isset($_POST['onlycompleted'])) {
-			$this->search_onlycompleted = $_POST['onlycompleted'];
-		} else {
-			$this->search_onlycompleted = false;
-		};	
-	}
+    public function __construct() {
 
-	public function doAction() {
+        //SESSION ENABLED
+        parent::sessionStart();
+        parent::__construct();
 
-		$start = (($this->page - 1) * $this->step);
+        $filterArgs = array(
+                'page'          => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'step'          => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'project'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'filter'        => array( 'filter' => FILTER_VALIDATE_BOOLEAN,
+                                          'options' => array( FILTER_NULL_ON_FAILURE ) ),
+                'pn'            => array( 'filter'  => FILTER_SANITIZE_STRING,
+                                          'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW ) ),
+                'source'        => array( 'filter'  => FILTER_SANITIZE_STRING,
+                                          'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW ) ),
+                'target'        => array( 'filter'  => FILTER_SANITIZE_STRING,
+                                          'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW ) ),
+                'status'        => array( 'filter'  => FILTER_SANITIZE_STRING,
+                                          'options' => array( FILTER_FLAG_STRIP_HIGH, FILTER_FLAG_STRIP_LOW ) ),
+                'onlycompleted' => array( 'filter' => FILTER_VALIDATE_BOOLEAN,
+                                          'options' => array( FILTER_NULL_ON_FAILURE )
+                )
+        );
 
-		$projects = ManageUtils::queryProjects($start,$this->step,$this->search_in_pname,$this->search_source,$this->search_target,$this->search_status,$this->search_onlycompleted,$this->filter_enabled,$this->project_id);
+        $postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-		$projnum = getProjectsNumber($start,$this->step,$this->search_in_pname,$this->search_source,$this->search_target,$this->search_status,$this->search_onlycompleted,$this->filter_enabled);
+        // assigning default values
+        if ( is_null( $postInput[ 'page' ] ) || empty( $postInput[ 'page' ] ) ) {
+            $postInput[ 'page' ] = 1;
+        }
+        if ( is_null( $postInput[ 'step' ] ) || empty( $postInput[ 'step' ] ) ) {
+            $postInput[ 'step' ] = 25;
+        }
+        if ( is_null( $postInput[ 'status' ] ) || empty( $postInput[ 'status' ] ) ) {
+            $postInput[ 'status' ] = Constants_JobStatus::STATUS_ACTIVE;
+        }
 
-		$this->result['data'] = json_encode($projects);
-		$this->result['page'] = $this->page;
-		$this->result['pnumber'] = $projnum[0]['c'];
+        $this->lang_handler = Languages::getInstance();
+        $this->page                 = (int) $postInput[ 'page' ];
+        $this->step                 = (int) $postInput[ 'step' ];
+        $this->project_id           = $postInput[ 'project' ];
+        $this->filter_enabled       = (int) $postInput[ 'filter' ];
+        $this->search_in_pname      = (string) $postInput[ 'pn' ];
+        $this->search_source        = (string) $postInput[ 'source' ];
+        $this->search_target        = (string) $postInput[ 'target' ];
+        $this->search_status        = (string) $postInput[ 'status' ];
+        $this->search_onlycompleted = $postInput[ 'onlycompleted' ];
+    }
 
-	}
+    public function doAction() {
+
+        $start = ( ( $this->page - 1 ) * $this->step );
+
+        $projects = ManageUtils::queryProjects( $start, $this->step, $this->search_in_pname, $this->search_source, $this->search_target, $this->search_status, $this->search_onlycompleted, $this->filter_enabled, $this->project_id );
+
+//        $projnum = count($projects);
+
+        $projnum = getProjectsNumber( $start, $this->step, $this->search_in_pname, $this->search_source, $this->search_target, $this->search_status, $this->search_onlycompleted, $this->filter_enabled );
+
+        $this->result[ 'data' ]     = json_encode( $projects );
+        $this->result[ 'page' ]     = $this->page;
+        $this->result[ 'pnumber' ]  = $projnum[ 0 ][ 'c' ];
+        $this->result[ 'pageStep' ] = $this->step;
+    }
 
 
-	public function cmp($a, $b) {
-		return strcmp($a["id"], $b["id"]);
-	}
-
-
+    public function cmp( $a, $b ) {
+        return strcmp( $a[ "id" ], $b[ "id" ] );
+    }
 
 }
+
+
 
 ?>

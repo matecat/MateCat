@@ -9,7 +9,7 @@ UI = {
         this.isSafari = $.browser.webkit && !window.chrome;
         this.body = $('body');
         this.firstLoad = firstLoad;
-        this.pageStep = 100;
+        this.pageStep = 25;
         this.isMac = (navigator.platform == 'MacIntel')? true : false;
         
         var page = location.pathname.split('/')[2];
@@ -222,12 +222,14 @@ UI = {
 				var new_status = $(undo).data('status');
 				var res = $(undo).data('res');
 				var id = $(undo).data('id');
+				var password = $(undo).data('password');
 				var ob = (res=='job')? $('tr.row[data-jid=' + id + ']') : $('.article[data-pid=' + id + ']');
 				var d = {
 						action:		"changeJobsStatus",
 						new_status: new_status,
 						res: 		res,
 						id:			id,
+						jpassword:  password,
 		                page:		UI.page,
 		                step:		UI.pageStep,
 		                undo:		1
@@ -263,32 +265,38 @@ UI = {
     },
     
     balanceAction: function(res,ob,d,undo,project) {
-    	// check if the project have to be hidden
-    	filterStatus = this.body.attr('data-filter-status');
-    	rowsInFilter = $('.article[data-pid='+project.attr('data-pid')+'] tr.row[data-status='+filterStatus+']').length;
-    	if(!rowsInFilter) {
-    		project.addClass('invisible')
-    	} else {
-    		project.removeClass('invisible');
-    	}
-    	// check if there is need to append or delete items
-    	numItem = $('.article:not(.invisible)').length;
-    	if(numItem < this.pageStep) {
-    		this.renderProjects(d.newItem,'append');
-    	} else if(numItem > this.pageStep) {
-    		$('.article:not(.invisible)').last().remove();
-    	}
+        console.log('d prima: ', d);
+		// check if the project have to be hidden
+		filterStatus = this.body.attr('data-filter-status');
+		rowsInFilter = $('.article[data-pid='+project.attr('data-pid')+'] tr.row[data-status='+filterStatus+']').length;
+		if(!rowsInFilter) {
+			project.addClass('invisible')
+		} else {
+			project.removeClass('invisible');
+		}
+		// check if there is need to append or delete items
+		numItem = $('.article:not(.invisible)').length;
+        console.log('numItem: ', numItem);
+		if(numItem < this.pageStep) {
+//            d.newItem = d.newItem || [];
+			if(typeof d != 'undefined') this.renderProjects(d.newItem,'append');
+		} else if(numItem > this.pageStep) {
+			$('.article:not(.invisible)').last().remove();
+		}
 
     },
 
     changeJobsStatus: function(res,ob,status,only_if) {
+		console.log('ob: ', ob);
         if(typeof only_if == 'undefined') only_if = 0;
 
         if(res=='job') {
         	UI.lastJobStatus = ob.data('status');
         	id        = ob.data('jid');
         	jpassword = ob.data('password');
-        } else {
+		console.log('jpassword: ', jpassword);
+
+		} else {
 		    var arJobs = '';
 		    $("tr.row",ob).each(function(){
 		        arJobs += $(this).data('jid')+':'+$(this).data('status')+',';
@@ -316,7 +324,7 @@ UI = {
 			data: ar,
 			context: ob,
 			success: function(d){
-				if(d.data == 'OK') {
+				if(d.data == 'OK') {console.log('dd: ', d);
 					res = ($(this).hasClass('row'))? 'job':'prj';
 					if(res=='prj') {
 						UI.getProject(this.data('pid'));
@@ -342,7 +350,7 @@ UI = {
 				} else if(d.status == 'active') {
 					msg = 'A job has been resumed as active.';
 				}
-				ob.attr('data-status',d.status);
+				ob.attr('data-status',d.status).attr('data-password',ob.data('password'));
 			}
 
 		} else {
@@ -518,6 +526,8 @@ UI = {
 			success: function(d){
 				UI.body.removeClass('loading');
 				data = $.parseJSON(d.data);
+                UI.pageStep = d.pageStep;
+
 				UI.setPagination(d);
 				UI.renderProjects(data,'all');
 				if((d.pnumber - UI.pageStep) > 0) UI.renderPagination(d.page,0,d.pnumber);
@@ -623,6 +633,15 @@ UI = {
             var ind = 0;
             $.each(this, function() {
                 ind++;
+                var private_tm_keys = '';
+                this.private_tm_key = $.parseJSON(this.private_tm_key);
+                $.each(this.private_tm_key, function(i, tm_key){
+
+                    private_tm_keys +=  "<span class='key'>"    + tm_key.key  + "</span>"+
+                                        "<span class='rgrant'>" + tm_key.r    + "</span>"+
+                                        "<span class='wgrant'>" + tm_key.w    + "</span><br class='clear'/>";
+                });
+
 		        var newJob = '    <tr class="row " data-jid="'+this.id+'" data-status="'+this.status+'" data-password="'+this.password+'">'+
 		            '        <td class="create-date" data-date="'+this.create_date+'">'+this.formatted_create_date+'</td>'+
 		            '        <td class="job-detail">'+
@@ -633,7 +652,7 @@ UI = {
 		            '        	</span>'+
 		            '        </td>'+
 		            '        <td class="tm-key">'+
-		            '        	<span>'+ ((typeof this.private_tm_key == 'undefined')? '': this.private_tm_key) + '</span>'+
+		                    	private_tm_keys +
 		            '        </td>';
                 if(config.v_analysis){
                     newJob += '        <td class="words">'+this.stats.TOTAL_FORMATTED+'</td>';
@@ -678,7 +697,7 @@ UI = {
     }, // renderProjects
 
     setPagination: function(d) {
-		if((d.pnumber - UI.pageStep) > 0) {
+		if((d.pnumber - d.pageStep) > 0) {
 			this.renderPagination(d.page,1,d.pnumber);
 		} else {
 			$('.pagination').empty();

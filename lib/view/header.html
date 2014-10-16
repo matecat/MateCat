@@ -7,7 +7,11 @@
     <body>
 
         <header metal:define-macro="main_header">
-			<div id="messageBar"><span class="msg"></span><a href="#" class="close"></a></div>
+            <p class="warning" tal:condition="php:supportedBrowser EQ -1" >
+                MateCAT was not tested with this browser.<br/>
+                Please, use Google Chrome or Mozilla Firefox
+            </p>
+            <div id="messageBar"><span class="msg"></span><a href="#" class="close"></a></div>
             <div class="wrapper">   
 
           <ul class="header-menu" tal:condition="php: !job_archived ">
@@ -135,7 +139,76 @@
                 </div>
 
             </div>   <!-- .wrapper -->
+             <div tal:attributes="class string:searchbox${filtered_class}">
+            <form>
 
+                <div class="search-inputs">
+
+                    <div class="block">
+                        <label for="search-source">Find in source</label>
+                        <input id="search-source" class="search-input" type="text" value=""/>               
+                    </div>
+                    <div class="block">
+                        <div class="field">
+                            <label for="search-target">Find in target</label>
+                            <input id="search-target" class="search-input" type="text" value=""/>
+                        </div>
+
+                        <div class="field">
+                        <input id="enable-replace" type="checkbox" />
+                        <label for="enable-replace">Replace with</label>
+                        <input id="replace-target" disabled="disabled" class="search-input" type="text" value=""/>
+                        </div>
+
+                        <!--div class="field">
+                            <label for="replace-target">Replace with</label>
+                            <input id="replace-target" class="search-input" type="text" value=""/>
+                        </div-->
+
+
+                    </div>                    
+                    <div class="block">
+                        <label for="select-status">Status</label>
+                        <select id="select-status" class="search-select" >
+                            <option value="all" selected="selected">All</option>
+                            <option value="new">New</option>
+                            <option value="draft">Draft</option>
+                            <option value="translated">Translated</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>   
+                    </div>
+                    <div class="block right buttons">
+                        <div class="field">
+                            <input id="exec-cancel" type="button" class="btn" value="Cancel" />         
+                            <input id="exec-find" type="button" class="btn" data-func="find" value="Find" />            
+                        </div>
+
+                        <div class="field">
+                            <input id="exec-replaceall" type="button" class="btn" disabled="disabled" value="Replace all" />
+                            <input id="exec-replace" type="button" class="btn" disabled="disabled" value="Replace" />   
+                        </div>
+
+                    </div>          
+                </div>
+
+                <div class="search-options">
+                    <div class="block">
+                        <input id="match-case" type="checkbox" />
+                        <label for="match-case">Match case</label>
+                    </div>
+                    <div class="block">
+                        <input id="exact-match" type="checkbox" />
+                        <label for="exact-match">Exact match</label>
+                    </div>                    
+                </div>
+
+            </form>
+            <div class="search-display">
+                <p class="searching">Searching ...</p>
+                <p class="found"><span class="numbers">Found <span class="results">...</span> results in <span class="segments">...</span> segments</span> having<span class="query">...</span></p>
+            </div>
+        </div>
 
         </header>
     </body>

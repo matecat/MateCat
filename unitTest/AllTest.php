@@ -34,6 +34,8 @@ class Framework_AllTests {
         $suite->addTestSuite('Tests_ServerCheckTest');
         $suite->addTestSuite('Tests_PostProcessTest');
         $suite->addTestSuite('Tests_MemcacheHandlerTest');
+        $suite->addTestSuite('Tests_MultiCurlHandlerTest');
+        $suite->addTestSuite('Tests_TagPositionTest');
         // ...
 
         return $suite;

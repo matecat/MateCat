@@ -9,7 +9,6 @@ class checkFileConversionController extends ajaxController {
 
       public function __construct() {
 
-            $this->disableSessions();
             parent::__construct();
             $this->file_name = $this->get_from_get_post('file_name');
       }

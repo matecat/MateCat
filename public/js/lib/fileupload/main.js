@@ -14,13 +14,15 @@
 
 UI = null;
 
-var base = Math.log( config.maxFileSize ) / Math.log( 1024 );
-delete window.base;
-config.maxFileSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
 
 UI = {
     init: function() {
         UI.conversionBlocked = false;
+        UI.skipLangDetectArr = {}
+
+        var base = Math.log( config.maxFileSize ) / Math.log( 1024 );
+        config.maxFileSizePrint = parseInt( Math.pow( 1024, ( base - Math.floor( base ) ) ) + 0.5 ) + ' MB';
+
     },
     enableAnalyze: function() {
         enableAnalyze();
@@ -49,7 +51,7 @@ UI = {
         UI.restartConversions();
     },
     errorsBeforeUpload: function(file) {console.log('errorsBeforeUpload');
-//        console.log(file);
+        console.log(file);
         ext = file.name.split('.')[file.name.split('.').length - 1];
 //        console.log(ext);
         msg = 'Format not supported. Convert to DOCX and upload the file again.';
@@ -65,7 +67,10 @@ UI = {
                         ( ext == 'tgz' )
         ) {
                 msg = 'ZIP archives not yet supported. Coming soon.';
-        }
+        }else if (ext=='tmx'){
+                msg = 'TMX importing disabled';
+
+	}
 
         console.log(file.size);
         if((file.size) > config.maxFileSize) {
@@ -110,30 +115,44 @@ UI = {
 	},
 
 	TMXloaded: function() {
+        console.log('ecco: ', $('#private-tm-key').val());
 		$('#disable_tms_engine').trigger('click');
 		this.createKeyByTMX();
 	},
 
 	createKeyByTMX: function() {
-		if($('#create_private_tm_btn[data-key]').length) { // a key has already been created
+		if (!isTMXAllowed()) return false;
+		if($('#create_private_tm_btn[data-key]').length || $('#private-tm-key').val().length ) { // a key has already been created
 			console.log('già cliccato');
-			if($('#private-tm-key').text() == '') {
+			if($('#private-tm-key').val() == '') {
 				$('#private-tm-key').val($('#create_private_tm_btn').attr('data-key'));
 			}
 		} else {
+            console.log('questo');
 		   if(!$(".more").hasClass('minus')) $(".more").trigger('click');
-//		   $('#create_private_tm_btn').trigger('click');
+		   $('#create_private_tm_btn').trigger('click');
+           $('.warning-message').html('<span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.<br/>If you do not use a Private TM Key, the content of your TMX will be saved in a public TM</span>').show();
 //		   $('#private-tm-key').addClass('selected');			 
 //		   $('#private-tm-key').addClass('selected').effect( "pulsate", "slow" );			 
 		}
-
-		$('.warning-message').html('<span>You are uploading a translation memory. To keep it private, generate a private TM key or enter an existing key. If you do not provide a private TM key, the content of your TMX file and project will be available to all MateCat users.</span>').show();
-		
 	},
 
     checkFailedConversionsNumber: function() {
     	return checkFailedConversionsNumber();
+    },
+
+    addInlineMessage: function (fileName, message){
+        var currDeleteDiv = $('.upload-table td.name:contains("'+fileName+'")').next().next().addClass("error");
+
+        if($(currDeleteDiv).find(".skiplangdetect").length == 0){
+            $(currDeleteDiv).html("")
+                    .append(
+                            '<span class="label label-important">'+
+                                    message+
+                                    '</span>');
+        }
     }
+
 }
 
 $(function () {
@@ -186,7 +205,7 @@ $(function () {
         console.log(data.files[0].type);
          console.log(data.files[0].name.split('.')[data.files[0].name.split('.').length - 1]);
 		 var extension = data.files[0].name.split('.')[data.files[0].name.split('.').length - 1];
-		 if(extension == 'tmx') {
+		 if( extension == 'tmx' && config.conversionEnabled ) {
 			 var tmDisabled = (typeof $('#disable_tms_engine').attr("checked") == 'undefined')? false : true;
 			 if(tmDisabled)  {
 				APP.alert({
@@ -194,7 +213,7 @@ $(function () {
 					callback: 'TMXloaded'
 				});						 
 			 } else {
-				 UI.createKeyByTMX();			
+				 UI.createKeyByTMX();
 			 };
 
 //			 return false;
@@ -287,6 +306,17 @@ $(function () {
 	}).bind('fileuploaddestroyed', function (e,data) {
 //		var err = $.parseJSON(data.jqXHR.responseText)[0].error;
         console.log('file deleted');
+
+		var deletedFileName = data.url.match(/file=[^&]*/g);
+		deletedFileName = decodeURIComponent(deletedFileName[0].replace("file=",""));
+
+		console.log(UI.skipLangDetectArr, deletedFileName, typeof( UI.skipLangDetectArr[deletedFileName] ));
+
+		if(typeof( UI.skipLangDetectArr[deletedFileName] ) !== 'undefined' ){
+			console.log(UI.skipLangDetectArr);
+			delete(UI.skipLangDetectArr[deletedFileName]);
+		}
+
         if($('.error-message.no-more').length) {
 
 			if($('.upload-table tr').length < (config.maxNumberFiles)) {
@@ -423,11 +453,13 @@ $(function () {
 
         if ( typeof data.data != 'undefined' && !fileSpecs.error ) {
 
+            //Global
+            UI.skipLangDetectArr[fileSpecs.fname] = 'detect';
+
             if ( config.conversionEnabled ) {
 
 //				console.log('fileuploadcompleted');
 //				console.log('hasclass converting?: ' + fileSpecs.filerow.hasClass('converting'));
-
                 if ( !fileSpecs.filerow.hasClass( 'converting' ) ) {
                     //console.log( filerow );
                     console.log( 'ACTION: bind fileuploadcompleted' );
@@ -579,7 +611,7 @@ userLangName = function(t, userLangCode) {
 progressBar = function(filerow,start,filesize) {
 	var ob = $('.ui-progressbar-value', filerow);
 	if(ob.hasClass('completed')) return;
-	
+
 //	console.log('file size: ' + filesize);
 //	var step = filesize/100000;
 //	console.log('step: ' + step);
@@ -658,7 +690,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
        		return false;
         },
         success: function(d){
-//              console.log(this.context);
+
 //			falsePositive = ((typeof this.context == 'undefined')||(!this.context))? false : true; // suggested solution
 			falsePositive = (typeof this.context == 'undefined')? false : true; // old solution
             filerow.removeClass('converting');
@@ -675,6 +707,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
 				$('.progress',filerow).fadeOut('slow', function() {
 					// Animation complete.
 				});
+
            	} else if( d.code < 0 ){
                 console.log(d.errors[0].message);
                 $('td.size',filerow).next().addClass('error').empty().attr('colspan','2').css({'font-size':'14px'}).append('<span class="label label-important">'+d.errors[0].message+'</span>');
@@ -748,7 +781,9 @@ testProgress = function(filerow,filesize,session,progress) {
 //	var step = 50000/filesize;
 	var step = 1;
 	var stepWait = Math.pow(1.2,Math.log(filesize/1000)/Math.LN10 - 1)/10;
-	
+
+	stepWait *= 2;
+
 	progress = progress+step;
 //	console.log(progress);
 
@@ -847,6 +882,14 @@ isValidFileExtension = function(filename) {
 //        if(this == ext) res = true;
 //    });
     console.log(res);
+    return res;
+}
+
+isTMXAllowed = function() {
+    filename="test.tmx";
+    res = (!filename.match(config.allowedFileTypes))? false : true;
+
+    console.log("function isTMXAllowed return value: " +res);
     return res;
 }
 
