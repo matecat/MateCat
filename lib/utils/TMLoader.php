@@ -51,9 +51,14 @@ class TMLoader {
     private $tm_key;
 
     /**
-     * @var stdClass
+     * @var
      */
     private $file;
+
+    /**
+     * @var stdClass
+     */
+    private $_file;
 
     /**
      * @var SimpleTMX
@@ -76,6 +81,15 @@ class TMLoader {
 
         //get MyMemory apiKey service
         $this->apiKeyService = TMSServiceFactory::getAPIKeyService();
+
+    }
+
+    /**
+     * Check for key correctness
+     *
+     * @throws Exception
+     */
+    public function checkCorrectKey(){
 
         //validate the key
         //This piece of code need to be executed every time
@@ -102,13 +116,13 @@ class TMLoader {
     public function uploadFile() {
         try {
             $uploadManager = new Upload();
-            $uploadedFiles = $uploadManager->uploadFiles( $_FILES );
+            $uploadedFiles = $uploadManager->uploadFiles( $_FILES ); Log::doLog( $_FILES );
         } catch ( Exception $e ) {
             Log::doLog( $e->getMessage() );
             throw new Exception( $e->getMessage(), -8);
         }
 
-        return $uploadedFiles;
+        return $this->file = $uploadedFiles;
     }
 
     /**
@@ -117,6 +131,10 @@ class TMLoader {
      * @throws Exception
      */
     public function addTmxInMyMemory() {
+
+        $this->checkCorrectKey();
+
+        Log::doLog($this->file);
 
         //if there are files, add them into MyMemory
         if ( count( $this->file ) > 0 ) {
