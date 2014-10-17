@@ -211,7 +211,6 @@
         <span class="btn btn-success fileinput-button" id="create_private_tm_btn">
 <!--            <i class="icon-plus icon-white"></i> -->
             <span>Create</span>
-            <input id="private-tm-new" type="file" name="files[]" multiple="multiple" class="multiple-button"/>
         </span>
     </div>
 
@@ -788,7 +787,9 @@
                 </tal:block>
 
                 <li><a tal:attributes="href string:${basepath}api/docs">API</a></li>
+
                 <li><a href="/support" target="_blank">Support</a></li>
+
             </ul>
 
             <tal:block tal:condition="php: empty(logged_user)">

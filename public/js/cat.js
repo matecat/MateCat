@@ -2264,7 +2264,7 @@ UI = {
     checkAddTMEnable: function() {
         console.log('checkAddTMEnable');
         if(
-            ($('#addtm-tr-key').val().length > 19)&&
+            ($('#addtm-tr-key').val().length > 12)&&
                 UI.checkTMgrants($('.addtm-tr'))
             ) {
             $('#addtm-add').removeAttr('disabled').removeClass('disabled');

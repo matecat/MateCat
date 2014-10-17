@@ -1,4 +1,8 @@
-User-agent: * 
-Disallow: /manage/ 
-Disallow: /translate/ 
-Disallow: /editlog/ 
+# robots.txt generated at http://www.mcanerin.com
+User-agent: *
+Disallow: /translate/
+Disallow: /manage/
+Disallow: /analyze/
+Disallow: /jobanalysis/
+Disallow: /editlog/
+

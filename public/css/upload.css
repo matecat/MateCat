@@ -473,7 +473,7 @@ float: left;
 .translate-box{float:left;margin:20px 30px 0px 0px}
 .translate-box.source{margin-right:0px}
 
-.translate-checkbox{float:left;}
+.translate-checkbox{float:left;padding-top: 11px; }
 .tms-checkbox{width: 150px;height: 26px;}
 .tms-label{float:right;margin-left:4px; margin-top: 2px;}
 
@@ -779,7 +779,7 @@ margin: 0;
 .supported-formats .popup
     {
     top: 41%;
-    left: 38%;
+    left: 44%;
     width: auto;
     }
 .popup-languages .popup
