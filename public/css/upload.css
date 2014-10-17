@@ -1153,7 +1153,7 @@ background: #ca2a2e url(../img/sprite2x.png) 12px -1115px no-repeat !important;
 
 
 .nobrowser {display: none;}
-.nobrowser2 {dislay:block!important;}
+.nobrowser2 {display:block!important;}
 .text-center {text-align: center;}
 
 @media only screen and (min-device-width : 320px) and (max-device-width : 480px) { 
@@ -1161,7 +1161,7 @@ background: #ca2a2e url(../img/sprite2x.png) 12px -1115px no-repeat !important;
 	.nobrowser {display: block;}
 	.iepopup.nobrowser {width:100%;}
 	.iepopup .col-2 {
-width: 90%;
+width: 300px;
 margin-left: 5%;}
 .iepopup h3 {
 font-size: 40px;
