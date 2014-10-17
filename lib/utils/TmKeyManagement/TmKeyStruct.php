@@ -145,21 +145,21 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
     }
 
     /**
-     * @param TmKeyManagement_TmKeyStruct $obj
-     *
-     * @return TmKeyManagement_TmKeyStruct
+     * @var int How much readable chars for hashed keys
      */
-    public function mergeWith( TmKeyManagement_TmKeyStruct $obj){
-        //pre: $obj->key == $this->key
+    protected $readable_chars = 5;
 
-        //TODO: cancellare sta monnezza
-        //Se $obj ha un campo not null allora vince $obj.
-        //Se $obj ha un campo null e $this ha lo stesso campo not null, allora vince $this.
-        //NOTA: $obj può essere (per esempio) una chiave del client
+    /**
+     * When a key return back from the client we have to compare with these in the job
+     *
+     * @return bool
+     */
+    public function isAnHashedKey(){
 
+        $keyLength = strlen($this->key);
 
-        //TODO: change this.
-        return new TmKeyManagement_TmKeyStruct();
+        return substr( $this->key, 0, $keyLength - $this->readable_chars ) ==  str_repeat("*", $keyLength - $this->readable_chars );
+
     }
 
 } 

@@ -15,14 +15,14 @@ class TmKeyManagement_ClientTmKeyStruct extends TmKeyManagement_TmKeyStruct {
     public $edit = true;
 
     /**
-     * This function obfuscates the key.<br />
+     * This function obfuscates the key before to send it to the client.<br />
      * A key is obfuscated by replacing all the characters except the last 4 ones with "*" characters.<br /><br />
      *
      * @param $uid
      * @return TmKeyManagement_ClientTmKeyStruct
      *
      * <b>Example</b><br />
-     * 1234abcd1a2b  -->  ********1a2b
+     * 1234abcd1a2b  -->  *******d1a2b
      */
     public function hideKey( $uid ){
 
@@ -30,9 +30,9 @@ class TmKeyManagement_ClientTmKeyStruct extends TmKeyManagement_TmKeyStruct {
             //pre: $this->key is a string of length greater than 1
 
             $keyLength = strlen($this->key);
-            $last4digits = substr($this->key, -4);
+            $last_digits = substr($this->key, - $this->readable_chars );
 
-            $this->key = str_repeat("*", $keyLength) . $last4digits;
+            $this->key = str_repeat("*", $keyLength - $this->readable_chars ) . $last_digits;
 
             $this->edit = false;
 

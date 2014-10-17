@@ -17,13 +17,20 @@ class updateJobKeysController extends ajaxController {
 
     private $tm_keys;
 
-    private $user_type;
+    private $userMail;
 
     private $userIsLogged;
 
+    private $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+
     private $uid;
 
+    private $jobData = array();
+
     public function __construct() {
+
+        //Session Enabled
+
         //define input filters
         $filterArgs = array(
                 'job_id'   => array(
@@ -34,10 +41,6 @@ class updateJobKeysController extends ajaxController {
                         'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
                 ),
                 'tm_keys'  => array(
-                        'filter' => FILTER_SANITIZE_STRING,
-                        'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
-                ),
-                'user_type' => array(
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
                 )
@@ -66,43 +69,41 @@ class updateJobKeysController extends ajaxController {
             );
         }
 
-        if ( !empty( $this->tm_keys ) ) {
+//        if ( !empty( $this->tm_keys ) ) {
+//
+//            //TODO:remove next line. This is for debug purposes
+//            $this->tm_keys = html_entity_decode( $this->tm_keys );
+//            $this->tm_keys = json_decode( $this->tm_keys, true );
+//
+//        } else {
+//            $this->result[ 'errors' ][ ] = array(
+//                    'code'    => -3,
+//                    'message' => "Tm keys missing"
+//            );
+//        }
 
-            //TODO:remove next line. This is for debug purposes
-            $this->tm_keys = html_entity_decode( $this->tm_keys );
-            $this->tm_keys = json_decode( $this->tm_keys, true );
-            if ( !isset( $this->tm_keys[ 'update' ] ) || !isset( $this->tm_keys[ 'delete' ] ) ) {
-                $this->result[ 'errors' ][ ] = array(
-                        'code'    => -3,
-                        'message' => "Malformed tm_keys array. It must contain 'update' and 'delete' keys."
-                );
-            }
-        } else {
-            $this->result[ 'errors' ][ ] = array(
-                    'code'    => -3,
-                    'message' => "Tm keys missing"
-            );
+
+        //get job data
+        $this->jobData = getJobData( $this->job_id, $this->job_pass );
+
+        //Check if user can access the job
+        $pCheck = new AjaxPasswordCheck();
+
+        //check for Password correctness
+        if ( empty( $this->jobData ) || !$pCheck->grantJobAccessByJobData( $this->jobData, $this->job_pass ) ) {
+            $this->result[ 'errors' ][ ] = array( "code" => -10, "message" => "Wrong password" );
         }
 
-        //check if user is logged. If not, send an error
         $this->checkLogin();
 
-        if ( !$this->userIsLogged ) {
-            $this->result[ 'errors' ][ ] = array(
-                    'code'    => -4,
-                    'message' => "Please login to use this feature."
-            );
+        $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
+        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
+        if ( $url_request ) {
+            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+        } elseif( $this->userMail == $this->jobData['owner'] ){
+            $this->userRole = TmKeyManagement_Filter::OWNER;
         }
 
-        if( $this->user_type != TmKeyManagement_Filter::OWNER &&
-            $this->user_type != TmKeyManagement_Filter::ROLE_TRANSLATOR &&
-            $this->user_type != TmKeyManagement_Filter::ROLE_REVISOR
-        ){
-            $this->result[ 'errors' ][ ] = array(
-                    'code'    => -5,
-                    'message' => "Invalid user type."
-            );
-        }
     }
 
 
@@ -112,82 +113,31 @@ class updateJobKeysController extends ajaxController {
      * @return mixed
      */
     function doAction() {
+
         //if some error occured, stop execution.
-        if ( count( $this->result[ 'errors' ] ) ) {
+        if ( count( @$this->result[ 'errors' ] ) ) {
             return false;
         }
 
-        //get job data
-        $jobData = getJobData( $this->job_id, $this->job_pass );
+        $totalTmKeys = TmKeyManagement_TmKeyManagement::mergeJsonKeys( $this->tm_keys, $this->jobData['tm_keys'], $this->userRole, $this->uid );
 
-        //parse job's tm_keys
-        $_jobTmKeys = TmKeyManagement_TmKeyManagement::array2TmKeyStructs(
-                array( ( $jobData[ 'tm_keys' ] ) )
-        );
+        Log::doLog('Before:');
+        Log::doLog($this->jobData['tm_keys']);
+        Log::doLog('After:');
+        Log::doLog(json_encode($totalTmKeys));
+        TmKeyManagement_TmKeyManagement::setJobTmKeys( $this->job_id, $this->job_pass, $totalTmKeys );
 
-        //extract the IDs of the the tm_keys that have to be deleted
-        $_tmKeysToBeDeleted = array();
-
-        foreach ( $this->tm_keys[ 'delete' ] as $tmKey_arr ) {
-            $_tmKey                = TmKeyManagement_TmKeyManagement::getTmKeyStructure( $tmKey_arr );
-            $_tmKeysToBeDeleted[ ] = $_tmKey->key;
-        }
-
-
-        $resultTmKeys = array();
-
-        //delete tm_keys
-        foreach ( $_jobTmKeys as $jobTmKey){
-            /**
-             * @var $jobTmKey TmKeyManagement_TmKeyStruct
-             */
-            $key = $jobTmKey->key;
-
-            if(in_array($key, $_tmKeysToBeDeleted)){
-
-            }
-        }
-
-
-        //
     }
 
     public function checkLogin() {
         //Warning, sessions enabled, disable them after check, $_SESSION is in read only mode after disable
         parent::sessionStart();
         $this->userIsLogged = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
+        $this->userMail     = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ? $_SESSION[ 'uid' ] : null );
         $this->uid          = ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) ? $_SESSION[ 'uid' ] : null );
         parent::disableSessions();
 
         return $this->userIsLogged;
     }
-
-    /**
-     * @param array $jobTmKeys      An array of TmKeyManagement_TmKeyStruct objects extracted from the job
-     * @param array $clientTmKeys    An array of TmKeyManagement_TmKeyStruct objects from the client
-     *
-     * @return array
-     */
-    private static function _matchKeys(Array $jobTmKeys, Array $clientTmKeys){
-        //iterate over client tm keys
-        foreach ( $clientTmKeys as $clientTmKey ) {
-            /**
-             * @var $clientTmKey TmKeyManagement_TmKeyStruct
-             */
-            //iterate over job's tm keys
-            foreach ( $jobTmKeys as $jobTmKey ) {
-                /**
-                 * @var $jobTmKey TmKeyManagement_TmKeyStruct
-                 */
-            }
-
-        }
-
-
-        //TODO: change this
-        return array();
-    }
-
-
 
 } 

@@ -82,6 +82,7 @@ class TmKeyManagement_Filter {
     }
 
     /**
+     * I have to get all owner keys that match required filters and all translator keys that match these filters too
      * @param $tm_key
      *
      * @return bool
@@ -101,8 +102,16 @@ class TmKeyManagement_Filter {
          *      WARNING: Undefined index: uid_transl
          */
         $i_can_see_the_key = false;
-        if( isset( $tm_key[ 'uid_transl' ] ) ){
-            $i_can_see_the_key = ( is_null( $tm_key[ 'uid_transl' ] ) ? true : $this->__uid == $tm_key[ 'uid_transl' ] );
+        if( isset( $tm_key[ 'uid_transl' ] ) ){ // this is a new key type
+
+            if( is_null( $tm_key[ 'uid_transl' ] ) && is_null( $tm_key[ 'uid_rev' ] ) ){
+                //this is an owner key or anonymous one, so i can use it
+                $i_can_see_the_key = true;
+            } else {
+                //it's mine???
+                $i_can_see_the_key = $this->__uid == $tm_key[ 'uid_transl' ];
+            }
+
         }
 
         return ( $is_an_owner_key || $i_can_see_the_key )
@@ -130,8 +139,16 @@ class TmKeyManagement_Filter {
          *      WARNING: Undefined index: uid_transl
          */
         $i_can_see_the_key = false;
-        if( isset( $tm_key[ 'uid_transl' ] ) ){
-            $i_can_see_the_key = ( is_null( $tm_key[ 'uid_rev' ] ) ? true : $this->__uid == $tm_key[ 'uid_rev' ] );
+        if( isset( $tm_key[ 'uid_transl' ] ) ){ // this is a new key type
+
+            if( is_null( $tm_key[ 'uid_transl' ] ) && is_null( $tm_key[ 'uid_rev' ] ) ){
+                //this is an owner key or anonymous one, so i can use it
+                $i_can_see_the_key = true;
+            } else {
+                //it's mine???
+                $i_can_see_the_key = $this->__uid == $tm_key[ 'uid_rev' ];
+            }
+
         }
 
         return ( $is_an_owner_key || $i_can_see_the_key )

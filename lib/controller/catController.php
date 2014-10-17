@@ -409,7 +409,7 @@ class catController extends viewController {
 
             } else {
                 /*
-                 * This user is anonymous
+                 * This user is anonymous, obfuscate all
                  */
                 $this->_keyList[ 'job_keys' ][ ] = $jobKey->hideKey( -1 );
 
