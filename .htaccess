@@ -82,7 +82,7 @@ Header append Vary User-Agent env=!dont-vary
 <IfModule mod_headers.c>
 Header append Vary User-Agent env=!dont-vary
 </IfModule>
-
+Header set Access-Control-Allow-Origin "*"
 php_value display_errors 0
 php_value log_errors 1
 php_value error_log storage/log_archive/php_errors.txt
