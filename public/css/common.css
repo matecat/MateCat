@@ -24,23 +24,7 @@ body
 		    min-width: 0 !important;
 		    width: 100%;
     }
-    .iepopup
-    {
-	      width: 800px;
-   margin: 0 auto;
-   padding: 30px 0 30px 0;
-   display: block;
-   z-index: 999999;
-   background: #fff;
-   box-shadow: 0px 0px 5px #ccc;
-   border-radius: 2px;
-   font-size: 18px;
-   border: 1px solid #ccc;
-    }
-    .iepopup img
-    {
-	    width: 20% !important;
-    }
+    
 }
 ul
 {
@@ -119,6 +103,25 @@ footer li
 	    padding-top: 0px;
 	    border-right: 1px solid #fff;
 	    margin-top: 5px;
+}
+
+
+
+#menu-site li {
+display: inline-block;
+padding-top: 10px;
+}
+
+#menu-site li a {
+color:#fff;
+text-decoration: none;
+line-height: 22px;
+padding: 10px 15px;
+font-weight: 200;
+font-size:18px;
+}
+#menu-site li a:hover {
+color:#3aa9dd;
 }
 
 
@@ -263,26 +266,81 @@ footer nav li:first-child
 
     .iepopup
     {
-	    width: 800px;
-	    margin: 0 auto;
-	    position: fixed;
-	    padding: 30px 0 30px 0;
-	    display: block;
-	    top: 50%;
-	    left: 50%;
-	    margin: -230px 0 0 -400px;
-	    z-index: 999999;
-	    background: #fff;
-	    box-shadow: 0px 0px 25px #000;
-	    border-radius: 2px;
-	    font-size: 18px;
-	    border: 1px solid #666;
+	      width: 800px;
+   margin: 0 auto;
+   padding: 30px 0 30px 0;
+   display: block;
+   z-index: 999999;
+   background: #fff;
+   box-shadow: 0px 0px 5px #ccc;
+   border-radius: 2px;
+   font-size: 18px;
+   border: 1px solid #ccc;
+    }
+    
+
+    .iepopup.nobrowser {
+    	width: 1200px;
+margin: 0 auto;
+overflow: hidden;
+box-shadow: none;
+border: none;
     }
 
-    .iepopup img
-    {
-	    border: 0;
+    .iepopup .col-2 {
+    	
+width: 46%;
+padding: 0%;
+margin-top: 50px;
+min-height: 400px;
+margin-right: 4%;
+    	line-height: 40px;
+    	   box-shadow: 0px 0px 5px #ccc;
+   border-radius: 2px;
+   border: 1px solid #ccc;
+
     }
+
+    .iepopup.nobrowser p {
+line-height: 10px;
+margin-bottom: 40px;
+}
+
+    .iepopup .col-2:last-child {
+    	margin-right:0;
+    }
+
+    .iepopup.hide {
+    	display: none;
+    }
+
+    .iepopup .logoblack {
+    	background-size: 200px;
+    	width: 200px;
+    	height:50px;
+    }
+
+
+.titleie h1 {
+font-size: 44px;
+margin: 0;
+}
+
+.titleie h2 {
+margin: 0;
+font-weight: normal;
+}
+
+
+    .col-2.col-b img {
+width: 400px;
+/* display: block; */
+}
+
+    .iepopup.nobrowser ul li {
+display: inline-block;
+margin: 20px;
+}
 
     .iepopup ul a
     {
