@@ -82,7 +82,6 @@
             <li><a href="/open-source/">Open source</a></li>
             <li><a href="/release-notes/">Release Notes</a></li>
             <li><a href="/support">Support</a></li>
-            <li><a href="/contact-us">Contact Us</a></li>
         </ul>
 
     </div>
@@ -121,7 +120,7 @@
 
 <h1 tal:condition="not:conversion_enabled">Translate an XLIFF file</h1>
 
-<h2 class="payoff">MateCat gives you more matches than any other CAT tool. <a class="open-more">Learn more</a>.</h2>
+<h2 class="payoff">MateCat gives you more matches than any other CAT tool. <a class="open-more">Learn more.</a></h2>
 </div>
 <div class="wrapper-upload">
 
@@ -789,7 +788,7 @@
 
                 <li><a tal:attributes="href string:${basepath}api/docs">API</a></li>
 
-                <li><a href="/support" target="_blank">Support</a></li>
+                <li><a href="/terms" target="_blank">Terms</a></li>
 
             </ul>
 
@@ -842,7 +841,7 @@
 <script type="text/javascript">
 $(".open-more").click(function() {
         $( ".cat-appear-div" ).hide();
-        $( ".payoff .open-more").html($('.payoff .open-more').text() == 'Close window' ? 'Learn more' : 'Close window');
+        $( ".payoff .open-more").html($('.payoff .open-more').text() == '' ? 'Learn more.' : '');
         $( ".learnmore" ).slideToggle( "700", function() {
             // Animation complete.
         });
