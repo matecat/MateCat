@@ -1105,7 +1105,6 @@ float: left;
 padding: 0px 4%;
 }
 .bottom-lm {
-margin-top: 20px;
 float: left;
 width: 100%;
 }
@@ -1154,11 +1153,13 @@ background: #ca2a2e url(../img/sprite2x.png) 12px -1115px no-repeat !important;
 
 
 .nobrowser {display: none;}
+.nobrowser2 {dislay:block!important;}
 .text-center {text-align: center;}
 
 @media only screen and (min-device-width : 320px) and (max-device-width : 480px) { 
 	header, .wrapper-claim, .wrapper-upload, footer, #SnapABug_Button {display: none;}
 	.nobrowser {display: block;}
+	.iepopup.nobrowser {width:100%;}
 	.iepopup .col-2 {
 width: 90%;
 margin-left: 5%;}
