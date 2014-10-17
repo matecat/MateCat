@@ -220,11 +220,11 @@ abstract class viewController extends controller {
      * @return bool
      */
     private function isSupportedWebBrowser() {
+//echo $_SERVER[ 'REQUEST_URI' ]; exit;
         $browser_info = $this->getBrowser();
         $browser_name = strtolower( $browser_info[ 'name' ] );
-
         foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
-            if ( stripos( $browser_name, $enabled_browser ) !== false ) {
+            if ( (stripos( $browser_name, $enabled_browser ) !== false) or ($borwser_name=="msie" and  $_SERVER[ 'REQUEST_URI' ]=="/" )) {
                 return 1;
             }
         }
