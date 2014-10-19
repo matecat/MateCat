@@ -41,6 +41,8 @@ RewriteRule ^(api)[/]?([^/]*)?[/]?$ index.php?api=true&action=$2 [QSA,L]
 
 </IfModule>
 
+ErrorDocument 404 /support/404.php
+
 <IfModule mod_expires.c>
 ExpiresActive On
 ExpiresByType text/html "access plus 1 hour"
