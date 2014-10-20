@@ -52,6 +52,7 @@ class TmKeyManagement_TmKeyManagement {
      * @return  array|mixed  An array of TmKeyManagement_TmKeyStruct objects
      * @throws  Exception    Throws Exception if :<br/>
      *                   <ul>
+     *                      <li>Json string is malformed</li>
      *                      <li>grant_level string is wrong</li>
      *                      <li>if type string is wrong</li>
      *                      <li>if user role string is wrong</li>
