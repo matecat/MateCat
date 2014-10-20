@@ -524,7 +524,7 @@ h2.payoff
 
 
 /*UI buttons*/
-.fileinput-button {  font-size: 1.1em;overflow: hidden;  margin: 0 auto;  width:200px;  cursor:pointer;padding:8px 0 6px 0;background: #09beec url(../img/sprite.png) -4px -516px no-repeat;color:#fff;font-weight:bold;margin-bottom:30px !important}
+.fileinput-button {  font-size: 1.1em;overflow: hidden;  margin: 0 auto;  width:200px;  cursor:pointer;padding:10px 0 6px 0;background: #09beec url(../img/sprite.png) -4px -516px no-repeat;color:#fff;font-weight:bold;margin-bottom:30px !important}
 .upload-footer .fileinput-button 
 	{
 	position: relative;
@@ -986,8 +986,8 @@ footer a:hover{text-decoration:none}
 		background-image: none;
 width: 70px;
 margin-left: -30px;
-padding: 4px 0 5px 0;
-margin-top: 6px;
+padding: 8px 0 1px 0;
+margin-top: 4px;
 	}    
 
 #swaplang
@@ -1173,20 +1173,42 @@ padding: 0px 2%;
 	.nobrowser {display: block;}
 	.iepopup.nobrowser {width:100%;}
 	.iepopup .col-2 {
-width: 92%;
-margin: 5% 3%;
-padding: 1%;
+width: 90%;
+margin: 8% 3% 5% 3%;
+padding: 1% 2%;
+min-height: 100px!important;
+box-shadow: 0px 2px 3px #E9E9E9;
+border: 1px solid #E6E6E6;
+border-top: 3px solid #3aa9dd;
+
+}
+
+.iepopup .col-2 a {
+	font-size: 24px;
 }
 .iepopup.nobrowser p {
 line-height: 30px;
 margin-bottom: 40px;
+font-size:24px;
 }
+.button-learn {
+	width: 100%!important;
+	padding: 2% 4%;
+font-size: 28px!important;
+background: #3aa9dd;
+border: none!important;
+border-radius: 4px;
+text-decoration: none;
+color: #fff!important;
+border-bottom: 3px solid #1B5D7B!important;
+}
+
 .iepopup h3 {
-font-size: 40px;
-margin-bottom: 21px;
+font-size: 30px;
+margin-bottom: 20px;
 }
 .nobrowser .col-a img {
-width: 40px;
+width: 100px;
 }
 .nobrowser .col-b img {
 width: 250px;

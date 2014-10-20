@@ -115,6 +115,7 @@ padding-top: 10px;
 #menu-site li a {
 color:#fff;
 text-decoration: none;
+-webkit-font-smoothing: antialiased;
 line-height: 22px;
 padding: 10px 15px;
 font-weight: 200;
