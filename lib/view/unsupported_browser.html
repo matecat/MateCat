@@ -1,3 +1,4 @@
+<!-- msg to show in all the other pages -->
 <div class="iepopup nobrowser nobrowser2" metal:define-macro="unsupported">
 	<a href="${basepath}" class="logoblack"></a>
 	<script>
@@ -5,6 +6,7 @@
 
 
 <!-- // <script>document.write(browser); < /script> -->
+<!-- // questo comando non funziona nelle pagine interne di ff e ie, viene fuori un messaggio undefined. Quando funzionerà va inserito al posto di "this browser" -->
 <!-- //${basepath}public/img/ff -->
 	</script>
 	<div class="titleie">
@@ -30,7 +32,8 @@
     </div>
    
 </div>
-
+<!-- end -->
+<!-- msg to show in homepage -->
 
 <div class="iepopup nobrowser" metal:define-macro="indexie">
     <style type="text/css">
@@ -62,7 +65,7 @@
     </div>
 </div>
 
-
+<!-- end -->
 
 
 
