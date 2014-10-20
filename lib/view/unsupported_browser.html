@@ -1,24 +1,21 @@
-
 <div class="iepopup nobrowser nobrowser2" metal:define-macro="unsupported">
 	<a href="${basepath}" class="logoblack"></a>
 	<script>
 		var browser = ($.browser.msie)? 'Internet Explorer' : ($.browser.opera)? 'Opera' : 'Your browser';
 
 
-<!-- // ${basepath}public/img/ff -->
+<!-- // <script>document.write(browser); < /script> -->
+<!-- //${basepath}public/img/ff -->
 	</script>
 	<div class="titleie">
-        <h1>Sorry, <script>document.write(browser);</script> is currently not supported.</h1><br />
+        <h1>Sorry, this browser is currently not supported.</h1><br />
     
     </div>
     <div>
     	<!-- Currently MateCat works great with the following browsers: -->
         <p>MateCat works great with the following browsers</p>
     	<ul>
-            <tal:block tal:condition="php: in_array('firefox', enabledBrowsers)">
-    		<li><a href="http://www.mozilla.org/en-US/firefox/new/" target="_blank"><img src="/public/img/ff.jpg" width="140" /><br />
-    Firefox</a></li>
-            </tal:block>
+           
 
             <tal:block tal:condition="php: in_array('chrome', enabledBrowsers)">
     		<li><a href="https://www.google.com/intl/en/chrome/browser/" target="_blank"><img src="/public/img/chrome.jpg" width="140" /><br />
@@ -49,9 +46,7 @@
         <h3>1 - Use the tool by visiting MateCat.com from your desktop</h3>
         <p>MateCat works great with the following browsers</p>
         <ul>
-            <li><a href="http://www.mozilla.org/en-US/firefox/new/" target="_blank"><img src="/public/img/ff.jpg" width="140" /><br />
-    Firefox</a></li>
-
+         
             <li><a href="https://www.google.com/intl/en/chrome/browser/" target="_blank"><img src="/public/img/chrome.jpg" width="140" /><br />
     Chrome</a></li>
 
@@ -61,8 +56,9 @@
     </div>
     <div class="col-2 pull-left col-b">
         <h3>2 - Learn more about MateCat</h3>
-        <p><a href="http://www.matecat.com/features">Visit the website</a></p>
-        <a href="http://www.matecat.com/features"><img src="/public/img/tool.jpg" /></a>
+        <br />
+        <p>       
+<a class="button-learn" href="http://www.matecat.com/features"><img src="/public/img/master_matecat.png" />Visit the website</a></p>
     </div>
 </div>
 
