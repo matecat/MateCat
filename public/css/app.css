@@ -1058,8 +1058,10 @@ font-size:14px;}
 .mgmt-tm .action .btn-grey, .addtmxrow .btn-grey {width: 75px;
 text-align: center;
 }
-.mgmt-tm.mine thead,
-.mgmt-tm.anonymous thead{
+body.cattool .mgmt-tm.mine thead,
+.mgmt-tm.new thead,
+.mgmt-tm.anonymous thead
+{
     display: none;
 }
 #activetm {
