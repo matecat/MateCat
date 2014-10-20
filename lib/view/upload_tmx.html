@@ -836,7 +836,83 @@
             </div>
             <h3 class="pull-left">Active TM</h3>
                 <div>
-                <table class="mgmt-tm" id="activetm">
+                    <table class="mgmt-tm scroll mine" id="activetm">
+                        <thead>
+                        <tr>
+                            <th>Private Key</th>
+                            <th>Description</th>
+                            <th>Lang Pair</th>
+                            <th>Lookup</th>
+                            <th>Update</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody class="list sortable">
+
+
+                        </tbody>
+                    </table>
+
+                    <table class="mgmt-tm scroll new" >
+                        <thead>
+                        <tr>
+                            <th>Private Key</th>
+                            <th>Description</th>
+                            <th>Lang Pair</th>
+                            <th>Lookup</th>
+                            <th>Update</th>
+                            <th>Action</th>
+                        </tr>
+                        </thead>
+                        <tbody class="list">
+
+                        <tr class="new hide">
+                            <td class="privatekey">
+                                <input class="mgmt-input" type="text" id="new-tm-key" placeholder="Create new private key" />
+                                <a class="btn-ok pull-right">Create</a>
+                            </td>
+                            <td class="description">
+                                <input class="mgmt-input" type="text" id="new-tm-description" placeholder="Enter a short description" />
+                            </td>
+                            <td class="fileupload" colspan="3">
+                                <input id="new-tm-read" type="checkbox" name="r" class="r" value="1" checked="" />
+                                <label for="new-tm-read">Show matches from TM</label><br />
+                                <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
+                                <label for="new-tm-write">Add translations to TM</label>
+
+                                <label class="fileupload">Select a TMX </label><input type="file" />
+                            </td>
+                            <td class="action">
+                                <a class="pull-left btn-grey uploadtm">
+                                    <span class="icon-upload"></span>
+                                    <span class="text">Add a key</span>
+                                </a>
+                                <form class="add-TM-Form" action="/" method="post">
+                                    <input type="hidden" name="action" value="addTM" />
+                                    <input type="hidden" name="exec" value="newTM" />
+                                    <input type="hidden" name="job_id" value="38424" />
+                                    <input type="hidden" name="job_pass" value="48a757e3d46c" />
+                                    <input type="hidden" name="tm_key" value="" />
+                                    <input type="hidden" name="name" value="" />
+                                    <input type="hidden" name="tmx_file" value="" />
+                                    <input type="hidden" name="r" value="1" />
+                                    <input type="hidden" name="w" value="1" />
+                                    <input type="submit" id="addtm-add-submit" style="display: none" />
+                                </form>
+
+                                <a class="pull-right canceladdtmx">
+                                    <span class="icon-times-circle"></span>
+                                </a>
+                            </td>
+                        </tr>
+
+
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3 class="pull-left">Inactive TM</h3>
+                <table class="mgmt-tm mgmt-tm-nested" id="inactivetm">
                     <thead>
                         <tr>
                             <th class="privatekey">Private Key</th>
@@ -847,101 +923,35 @@
                             <th class="action">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="list sortable" style="overflow-y: auto; width: 100%">
+                    <tbody class="list">
 
-                        <!-- tr data-tm="1" data-glos="1">
-                            <td class="privatekey">90231291i201i</td>
-                            <td class="description">Inf tech</td>
-                            <td class="langpair"><span class="mgmt-source">en-US</span> - <span class="mgmt-target">es-ES</span></td>
-                            <td class="lookup check text-center"><input type="checkbox" checked="checked" /></td>
-                            <td class="update check text-center"><input type="checkbox" /></td>
-                            <td class="action">
-                                <a class="pull-left btn-grey disabletm"><span class="icon-minus-circle"></span> Stop use</a>
-                                <a class="btn-grey pull-left addtmx"><span class="icon-plus-circle"></span> Add TMX</a>
-                            </td>
-                        </tr -->
-
-                        <tr class="new hide">
-                            <td class="privatekey"> <input class="mgmt-input" type="text" id="new-tm-key"
-                                                           placeholder="Create new private key" />
-                            <a class="btn-ok pull-right">Create</a>
-                            </td>
-                            <td class="description"><input class="mgmt-input" type="text"
-                                                           id="new-tm-description"
-                                                           placeholder="Enter a short description" />
-                            </td>
-                            <td class="fileupload" colspan="3">
-                                <input id="new-tm-read" type="checkbox" name="r" class="r" value="1" checked="" />
-                                <label for="new-tm-read">Show matches from TM</label><br />
-                                <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
-                                <label for="new-tm-write">Add translations to TM</label>
-
-                                <label class="fileupload">Select a TMX </label><input type="file" />
-                            </td>
-                           <td class="action">
-                               <a class="pull-left btn-grey uploadtm">
-                                   <span class="icon-upload"></span>
-                                   <span class="text">Add a key</span>
-                               </a>
-                               <form class="add-TM-Form" action="/" method="post">
-                                   <input type="hidden" name="action" value="addTM" />
-                                   <input type="hidden" name="exec" value="newTM" />
-                                   <input type="hidden" name="job_id" value="38424" />
-                                   <input type="hidden" name="job_pass" value="48a757e3d46c" />
-                                   <input type="hidden" name="tm_key" value="" />
-                                   <input type="hidden" name="name" value="" />
-                                   <input type="hidden" name="tmx_file" value="" />
-                                   <input type="hidden" name="r" value="1" />
-                                   <input type="hidden" name="w" value="1" />
-                                   <input type="submit" id="addtm-add-submit" style="display: none" />
-                               </form>
-
-                               <a class="pull-right canceladdtmx">
-                                   <span class="icon-times-circle"></span>
-                               </a>
-                           </td>
-                        </tr>
-
-                        </tbody>
-                    </table>
-                    </div>
-
-                    <h3 class="pull-left">Inactive TM</h3>
-                    <table class="mgmt-tm mgmt-tm-nested" id="inactivetm">
-                        <thead>
-                            <tr>
-                                <th class="privatekey">Private Key</th>
-                                <th class="description">Description</th>
-                                <th class="langpair">Lang Pair</th>
-                                <th class="check text-center">Lookup</th>
-                                <th class="check text-center">Update</th>
-                                <th class="action">Action</th>
+                        <tal:block tal:repeat="key user_keys">
+                            <tr data-tm="1" data-glos="1">
+                                <td class="privatekey">${key/key}</td>
+                                <td class="description">${key/name}</td>
+                                <td class="langpair"><span class="mgmt-source">en-US</span> -
+                                    <span class="mgmt-target">es-ES</span></td>
+                                <td class="lookup text-center check"><input type="checkbox" checked="${key/r}"/></td>
+                                <td class="update text-center check"><input type="checkbox" checked="${key/w}"/></td>
+                                <td class="action">
+                                    <a class="btn-grey pull-left usetm">
+                                        <span class="icon icon-play-circle"></span>
+                                        <span class="text">Use</span>
+                                    </a>
+                                    <a class="btn-grey pull-left  addtmx">
+                                        <span class="icon icon-plus-circle"></span>
+                                        <span class="text">Add TMX</span>
+                                    </a>
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody class="list">
+                        </tal:block>
 
-                            <tal:block tal:repeat="key user_keys">
-                                <tr data-tm="1" data-glos="1">
-                                    <td class="privatekey">${key/key}</td>
-                                    <td class="description">${key/name}</td>
-                                    <td class="langpair"><span class="mgmt-source">en-US</span> -
-                                        <span class="mgmt-target">es-ES</span></td>
-                                    <td class="lookup text-center check"><input type="checkbox" checked="${key/r}"/></td>
-                                    <td class="update text-center check"><input type="checkbox" checked="${key/w}"/></td>
-                                    <td class="action">
-                                        <a class="btn-grey pull-left usetm">
-                                            <span class="icon-play-circle"></span> Use
-                                        </a>
-                                        <a class="btn-grey pull-left  addtmx">
-                                            <span class="icon-plus-circle"></span> Add TMX
-                                        </a>
-                                    </td>
-                                </tr>
-                            </tal:block>
+                    </tbody>
+                </table>
 
-                        </tbody>
-                    </table>
-
+                <div class="block pull-right ">
+                    <a class="btn-ok clear savebtn">Save</a>
+                </div>
                     </div>
                 </div>
             </div>
