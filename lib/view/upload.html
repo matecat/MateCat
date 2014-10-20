@@ -35,12 +35,6 @@
     <link rel="stylesheet" href="${basepath}public/css/upload.css?build=${build_number}"/>
     <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
     <link rel="stylesheet" href="${basepath}public/js/lib/colorbox/colorbox.css?build=${build_number}"/>
-    <!--[if IE]>
-    <style type="text/css">
-        header, .wrapper-claim, .wrapper-upload, footer {display: none;}
-        .nobrowser {display: block;}
-    </style>
-    <![endif]-->
     
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]>
@@ -73,7 +67,12 @@
 <body tal:condition="not:supportedBrowser">
 <div metal:use-macro="unsupported_browser.html/unsupported"/>
 </body>
-<body tal:condition="supportedBrowser" class="started">
+
+<body tal:condition="php:supportedBrowser EQ -2">
+<div metal:use-macro="unsupported_browser.html/indexie"/>
+</body>
+
+<body tal:condition="php:supportedBrowser EQ 1" class="started">
 
 <header>
     <div class="wrapper">
@@ -810,34 +809,6 @@
 
     </div>
 </footer>
-
-<div class="iepopup nobrowser">
-    <a href="${basepath}" class="logoblack"></a>
-    
-    <div class="titleie">
-        <h1>Welcome to MateCat!</h1>
-        <h2>There are 2 options for you</h2>
-    </div>
-    <div class="col-2 pull-left col-a">
-        <h3>1 - Use the tool by visiting MateCat.com from your desktop</h3>
-        <p>MateCat works great with the following browsers</p>
-        <ul>
-            <li><a href="http://www.mozilla.org/en-US/firefox/new/" target="_blank"><img src="/public/img/ff.jpg" width="140" /><br />
-    Firefox</a></li>
-
-            <li><a href="https://www.google.com/intl/en/chrome/browser/" target="_blank"><img src="/public/img/chrome.jpg" width="140" /><br />
-    Chrome</a></li>
-
-            <li><a href="http://appldnld.apple.com/Safari5/041-5487.20120509.INU8B/SafariSetup.exe"><img src="/public/img/safari.jpg" width="140" /><br />
-    Safari</a></li>
-        </ul>
-    </div>
-    <div class="col-2 pull-left col-b">
-        <h3>2 - Learn more about MateCat</h3>
-        <p><a href="http://www.matecat.com/features">Visit the website</a></p>
-        <a href="http://www.matecat.com/features"><img src="/public/img/tool.jpg" /></a>
-    </div>
-</div>
 
 <script src="${basepath}public/js/lib/snapengage.js"></script>
 <script type="text/javascript">

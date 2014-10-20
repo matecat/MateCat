@@ -222,8 +222,13 @@ abstract class viewController extends controller {
         $browser_info = $this->getBrowser();
         $browser_name = strtolower( $browser_info[ 'name' ] );
 
+
+        if (  $browser_name=="internet explorer" and  $_SERVER[ 'REQUEST_URI' ]=="/" ) {
+                return -2;
+         }
+
         foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
-            if ( (stripos( $browser_name, $enabled_browser ) !== false) or ($browser_name=="internet explorer" and  $_SERVER[ 'REQUEST_URI' ]=="/" )) {
+            if ( stripos( $browser_name, $enabled_browser ) !== false ) {
 		return 1;
             }
         }
