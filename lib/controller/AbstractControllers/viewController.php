@@ -63,8 +63,8 @@ abstract class viewController extends controller {
         }
 
         // Next get the name of the useragent yes seperately and for good reason
-        if ( preg_match( '/MSIE/i', $u_agent ) && !preg_match( '/Opera/i', $u_agent ) ) {
-            $bname = 'Internet Explorer';
+        if ( ( (preg_match( '/MSIE/i', $u_agent)) or  (preg_match( '/Trident/i', $u_agent))  ) && !preg_match( '/Opera/i', $u_agent ) ) {
+	    $bname = 'Internet Explorer';
             $ub    = "MSIE";
         } elseif ( preg_match( '/Firefox/i', $u_agent ) ) {
             $bname = 'Mozilla Firefox';
@@ -91,7 +91,6 @@ abstract class viewController extends controller {
             $bname = 'Unknown';
             $ub    = "Unknown";
         }
-
         // finally get the correct version number
         $known   = array( 'Version', $ub, 'other' );
         $pattern = '#(?<browser>' . join( '|', $known ) .
@@ -220,12 +219,12 @@ abstract class viewController extends controller {
      * @return bool
      */
     private function isSupportedWebBrowser() {
-//echo $_SERVER[ 'REQUEST_URI' ]; exit;
         $browser_info = $this->getBrowser();
         $browser_name = strtolower( $browser_info[ 'name' ] );
+
         foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
-            if ( (stripos( $browser_name, $enabled_browser ) !== false) or ($borwser_name=="msie" and  $_SERVER[ 'REQUEST_URI' ]=="/" )) {
-                return 1;
+            if ( (stripos( $browser_name, $enabled_browser ) !== false) or ($browser_name=="internet explorer" and  $_SERVER[ 'REQUEST_URI' ]=="/" )) {
+		return 1;
             }
         }
 
