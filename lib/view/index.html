@@ -552,10 +552,8 @@
                                         <td class="description"></td>
                                         <td class="langpair"><span class="mgmt-source">en-US</span> -
                                             <span class="mgmt-target">es-ES</span></td>
-                                        <td class="lookup text-center check"><input type="checkbox"
-                                                                                    disabled="disabled" checked="" /></td>
-                                        <td class="update text-center check"><input type="checkbox"
-                                                                                    disabled="disabled" checked="" /></td>
+                                        <td class="lookup text-center check"><input type="checkbox" disabled="disabled" checked="" /></td>
+                                        <td class="update text-center check"><input type="checkbox" disabled="disabled" checked="" /></td>
                                         <td class="action">
                                         </td>
                                     </tr>
@@ -578,14 +576,16 @@
                                     <tbody class="list sortable">
 
                                     <tal:block tal:repeat="key user_keys/job_keys">
-                                        <tr class="mine" data-tm="1" data-glos="1" data-editable="${key/edit}">
+                                        <tr data-tm="${key/tm}" class="" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
                                             <td class="privatekey">${key/key}</td>
                                             <td class="description">${key/name}</td>
                                             <td class="langpair"><span class="mgmt-source">en-US</span> -
                                                 <span class="mgmt-target">es-ES</span></td>
-                                            <td class="lookup text-center check"><input type="checkbox" checked="${key/r}"/></td>
-                                            <td class="update text-center check"><input type="checkbox" checked="${key/w}"/></td>
-                                            <td class="action">
+
+                                            <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit; checked key/r" /></td>
+                                            <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit; checked key/w" /></td>
+
+                                            <td tal:condition="key/edit" class="action">
                                                 <a class="btn-grey pull-left usetm">
                                                     <span class="icon icon-minus-circle"></span>
                                                     <span class="text">Stop Use</span>
@@ -595,6 +595,9 @@
                                                     <span class="text">Add TMX</span>
                                                 </a>
                                             </td>
+
+                                            <td tal:condition="php: !key.edit" class="action"></td>
+
                                         </tr>
                                     </tal:block>
 
@@ -678,12 +681,9 @@
                                         <td class="description"></td>
                                         <td class="langpair"><span class="mgmt-source">en-US</span> -
                                             <span class="mgmt-target">es-ES</span></td>
-                                        <td class="lookup text-center check"><input type="checkbox"
-                                                                                    disabled="disabled" checked="" /></td>
-                                        <td class="update text-center check"><input type="checkbox"
-                                                                                    disabled="disabled" checked="" /></td>
-                                        <td class="action">
-                                        </td>
+                                        <td class="lookup text-center check"><input type="checkbox" disabled="disabled" checked="" /></td>
+                                        <td class="update text-center check"><input type="checkbox" disabled="disabled" checked="" /></td>
+                                        <td class="action"></td>
                                     </tr>
                                     <!-- end temporary simulation of anonymous key -->
 

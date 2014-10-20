@@ -144,4 +144,22 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
         return $this->key == $obj->key;
     }
 
+    /**
+     * @var int How much readable chars for hashed keys
+     */
+    protected $readable_chars = 5;
+
+    /**
+     * When a key return back from the client we have to compare with these in the job
+     *
+     * @return bool
+     */
+    public function isAnHashedKey(){
+
+        $keyLength = strlen($this->key);
+
+        return substr( $this->key, 0, $keyLength - $this->readable_chars ) ==  str_repeat("*", $keyLength - $this->readable_chars );
+
+    }
+
 } 
