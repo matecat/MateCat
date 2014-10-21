@@ -19,11 +19,15 @@
     <!--[if IE]>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
     <meta charset="utf-8"/>
-    <title tal:condition="true:conversion_enabled">Translate a file with Matecat</title>
-    <title tal:condition="not:conversion_enabled">Translate an XLIFF file with Matecat</title>
+    <title tal:condition="true:conversion_enabled">Translate a file with MateCat</title>
+    <title tal:condition="not:conversion_enabled">Translate an XLIFF file with MateCat</title>
 
-    <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
+    <meta name="description" content="Matecat is a free, web-based open source software that gives you more matches than any other CAT tool"/>
     <meta name="viewport" content="width=device-width"/>
+    <meta property="og:title" content="Translate a file with MateCat" />
+    <meta property="og:description" content="Matecat is a free, web-based open source software that gives you more matches than any other CAT tool. Use it now!" />
+    <meta property="og:url" content="http://www.matecat.com" />
+    <meta property="og:image" content="${basepath}public/img/fbimg.jpg" />
     <!-- jQuery UI styles -->
     <!--
     <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/themes/base/jquery-ui.css" id="theme"/>
@@ -843,6 +847,16 @@ $(".open-more").click(function() {
             // Animation complete.
         });
     });
+</script>
+<script>
+  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+  ga('create', 'UA-28800161-1', 'auto');
+  ga('send', 'pageview');
+
 </script>
 <img height='1' width='1' border='0' src='Http://www.clickmeter.com/conversion.aspx?id=5540EC432C934E0FB1EADDBA3A58E8EA&val=0.00&param=empty&com=0.00'/>
 </body>
