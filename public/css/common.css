@@ -338,23 +338,28 @@ color: #fff!important;
 border-bottom: 3px solid #1B5D7B!important;
 }
 
-.col-b .button-learn {
+.button-learn-2 {
 background: #f4f4f4;
+padding: 2% 4%;
 position: relative;
 border: 1px solid #E4E4E4!important;
 color: #333!important;
+font-size: 28px!important;
+text-decoration: none;
 width: 280px!important;
 border-bottom: 3px solid #ccc!important;
 padding: 20px 75px;
 height: 30px;
+border-radius: 4px;
+
 }
 
-.col-b .button-learn:hover {
+.col-b .button-learn-2:hover {
 color: #3aa9dd!important;
 
 }
 
-.col-2.col-b img {
+.col-2.col-b .button-learn-2 img {
 width: 100px;
 /* display: block; */
 position: absolute;
