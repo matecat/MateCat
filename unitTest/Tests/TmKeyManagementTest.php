@@ -35,6 +35,23 @@ class TmKeyManagementTest extends Tests_AbstractTest {
     private static $validTmKeyStructArr;
     private static $invalidTmKeyStructArr;
 
+    //test set for mergeKeys
+    private static $srv_json_ABC;
+    private static $srv_json_GHI;
+    private static $srv_json_ABC_GHI_DEF;
+    private static $client_json_ABC_DEF;
+    private static $client_json_GHI_DEF;
+    private static $client_json_ABC;
+    private static $client_json_DEF;
+    private static $client_json_ABC_GHI_JKL;
+
+
+    PUBLIC FUNCTION __construct(){
+       $db = Database::obtain ( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
+       $db->connect ();
+    }
+
+
     public function setUp() {
         parent::setUp();
 //        MemcacheHandler::getInstance( array( '127.0.0.1:11211' => 1 ) )->flush();
@@ -53,10 +70,10 @@ class TmKeyManagementTest extends Tests_AbstractTest {
         self::$invalidJsonTmKeyArr                = '[{tm":true,"glos":true"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
         self::$validJsonTmKeyArrWithUidTranslator = '[{"tm":true,"glos":false,"owner":false,"uid_transl":123,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":"1","w_transl":"1","r_rev":null,"w_rev":null,"source":null,"target":null}]';
         self::$invalidClientJson                  = '[{name""My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0"}]';
-        self::$validClientJson                  = '[{"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0"},{"name":"My second Key","key":"testclientKey","r":"1","w":"1"}]';
+        self::$validClientJson                    = '[{"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0"},{"name":"My second Key","key":"testclientKey","r":"1","w":"1"}]';
 
-        self::$invalidServerJson  = '[{tm":true,"glos":true"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
-        self::$validServerJson    = '[{"tm":true,"glos":true"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
+        self::$invalidServerJson = '[{tm":true,"glos":true"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
+        self::$validServerJson   = '[{"tm":true,"glos":true,"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
 
         self::$invalidGrantString = "invalidGrantString";
         self::$invalidTypeString  = "invalidTypeString";
@@ -66,7 +83,7 @@ class TmKeyManagementTest extends Tests_AbstractTest {
         $newTm[ 'key' ]            = sha1( chr( rand( 97, 122 ) ) );
         $newTm[ 'owner' ]          = $newTm[ 'key' ] & 1;
         $newTm[ 'r' ]              = $newTm[ 'key' ][ 5 ] & 1;
-        $newTm[ 'w' ]              = $newTm[ 'key' ][ 7 ] & 1;
+        $newTm[ 'w' ]              = $newTm[ 'key' ][ 12 ] & 1;
         $newTm[ 'r_transl' ]       = $newTm[ 'key' ][ 2 ] & 1;
         $newTm[ 'w_transl' ]       = $newTm[ 'key' ][ 4 ] & 1;
         $newTm[ 'uid_transl' ]     = rand( 1, 1024 );
@@ -74,6 +91,22 @@ class TmKeyManagementTest extends Tests_AbstractTest {
 
         self::$invalidTmKeyStructArr                   = self::$validTmKeyStructArr;
         self::$invalidTmKeyStructArr[ 'invalidField' ] = 'invalidField';
+
+        self::$srv_json_ABC            = '[{"tm":true,"glos":false,"owner":true,"key":"0000123ABC","name":"My ABC","r":"1","w":"1","uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":0,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
+        self::$srv_json_GHI            = '[{"tm":true,"glos":false,"owner":true,"key":"0000123GHI","name":"My GHI","r":"1","w":"1","uid_transl":null,"uid_rev":null,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
+        self::$srv_json_ABC_GHI_DEF    = '[{"tm":true,"glos":false,"owner":true,"key":"0000123ABC","name":"My ABC","r":"1","w":"1","uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":0,"r_rev":null,"w_rev":null,"source":null,"target":null},' .
+                '{"tm":true,"glos":false,"owner":true,"key":"0000123GHI","name":"My GHI","r":"1","w":"1","uid_transl":null,"uid_rev":null,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null},' .
+                '{"tm":true,"glos":false,"owner":false,"key":"0000123DEF","name":"My DEF","r":null,"w":null,"uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":1,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
+        self::$client_json_ABC         = '[{"key":"0000123ABC","name":"My DEF","r":1,"w":1}]';
+        self::$client_json_ABC_DEF     = '[{"key":"0000123ABC","name":"My ABC","r":1,"w":1},' .
+                '{"key":"0000123DEF","name":"My DEF","r":1,"w":0}]';
+        self::$client_json_DEF         = '[{"key":"0000123DEF","name":"My DEF","r":1,"w":0}]';
+        self::$client_json_GHI_DEF     = '[{"key":"*****23GHI","name":"My GHI","r":1,"w":1},' .
+                '{"key":"0000123DEF","name":"My DEF","r":1,"w":0}]';
+        self::$client_json_ABC_GHI_JKL = '[{"key":"0000123ABC","name":"My DEF","r":1,"w":1},' .
+                '{"key":"*****23GHI","name":"My GHI","r":1,"w":1},' .
+                '{"key":"0000123JKL","name":"My JKL","r":1,"w":0}]';
+
     }
 
     public function tearDown() {
@@ -343,38 +376,187 @@ class TmKeyManagementTest extends Tests_AbstractTest {
 
     /** TEST mergeJsonKeys */
     public function testMergeJsonKeys_invalidClientJson() {
-        try{
-            $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(self::$invalidClientJson, self::$validServerJson);
-        }
-        catch(Exception $e){
+        try {
+            $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys( self::$invalidClientJson, self::$validServerJson );
+        } catch ( Exception $e ) {
             $this->assertTrue( $e->getCode() > 0 );
         }
     }
 
     public function testMergeJsonKeys_invalidServerJson() {
-        try{
-            $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(self::$validClientJson, self::$invalidServerJson);
-        }
-        catch(Exception $e){
+        try {
+            $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys( self::$validClientJson, self::$invalidServerJson );
+        } catch ( Exception $e ) {
             $this->assertTrue( $e->getCode() > 0 );
         }
     }
 
-    public function testMergeJsonKeys_invalidUserRole() {
-        try{
-            $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
-                    self::$validClientJson,
-                    self::$validServerJson,
-                    self::$invalidRoleString
-            );
-        }
-        catch(Exception $e){
-            $this->assertEquals( 1, $e->getCode() );
-            $this->assertEquals( "Invalid grant string.", $e->getMessage());
-        }
+    public function testMergeJsonKeys_validInput_clientABCDEF_serverABC() {
+        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+                self::$client_json_ABC_DEF,
+                self::$srv_json_ABC
+        );
+
+        $this->assertTrue( is_array( $resultMerge ) );
+        $this->assertEquals( 2, count( $resultMerge ) );
+
+        /**
+         * @var $firstKey TmKeyManagement_TmKeyStruct
+         */
+        $firstKey = $resultMerge[ 0 ];
+
+        /**
+         * @var $secondKey TmKeyManagement_TmKeyStruct
+         */
+        $secondKey = $resultMerge[ 1 ];
+
+        $this->assertEquals( "0000123ABC", $firstKey->key );
+        $this->assertEquals( 1, $firstKey->r_transl );
+        $this->assertEquals( 1, $firstKey->w_transl );
+        $this->assertEquals( 1, $firstKey->owner );
+        $this->assertEquals( 1, $firstKey->r );
+        $this->assertEquals( 1, $firstKey->w );
+
+        $this->assertEquals( "0000123DEF", $secondKey->key );
+        $this->assertEquals( 1, $secondKey->r_transl );
+        $this->assertEquals( 0, $secondKey->w_transl );
+        $this->assertEquals( 0, $secondKey->owner );
+        $this->assertNull( $secondKey->r );
+        $this->assertNull( $secondKey->w );
     }
 
-    public function testMergeJsonKeys_validInput() {
+    public function testMergeJsonKeys_validInput_clientGHIDEF_serverGHI(){
+        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+                self::$client_json_GHI_DEF,
+                self::$srv_json_GHI
+        );
+
+        $this->assertTrue( is_array( $resultMerge ) );
+        $this->assertEquals( 2, count( $resultMerge ) );
+
+        /**
+         * @var $firstKey TmKeyManagement_TmKeyStruct
+         */
+        $firstKey = $resultMerge[ 0 ];
+
+        /**
+         * @var $secondKey TmKeyManagement_TmKeyStruct
+         */
+        $secondKey = $resultMerge[ 1 ];
+
+        $this->assertEquals( "0000123GHI", $firstKey->key );
+        $this->assertNull( $firstKey->r_transl );
+        $this->assertNull( $firstKey->w_transl );
+        $this->assertEquals( 1, $firstKey->owner );
+        $this->assertEquals( 1, $firstKey->r );
+        $this->assertEquals( 1, $firstKey->w );
+
+        $this->assertEquals( "0000123DEF", $secondKey->key );
+        $this->assertEquals( 1, $secondKey->r_transl );
+        $this->assertEquals( 0, $secondKey->w_transl );
+        $this->assertEquals( 0, $secondKey->owner );
+        $this->assertNull( $secondKey->r );
+        $this->assertNull( $secondKey->w );
+    }
+
+    public function testMergeJsonKeys_validInput_clientABC_serverABC(){
+        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+                self::$client_json_ABC,
+                self::$srv_json_ABC
+        );
+
+        $this->assertTrue( is_array( $resultMerge ) );
+        $this->assertEquals( 1, count( $resultMerge ) );
+
+        /**
+         * @var $firstKey TmKeyManagement_TmKeyStruct
+         */
+        $firstKey = $resultMerge[ 0 ];
+
+        $this->assertEquals( "0000123ABC", $firstKey->key );
+        $this->assertEquals( 1, $firstKey->r_transl );
+        $this->assertEquals( 1, $firstKey->w_transl );
+        $this->assertEquals( 1, $firstKey->owner );
+        $this->assertEquals( 1, $firstKey->r );
+        $this->assertEquals( 1, $firstKey->w );
+    }
+
+    public function testMergeJsonKeys_validInput_clientDEF_serverABC(){
+        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+                self::$client_json_DEF,
+                self::$srv_json_ABC,
+                TmKeyManagement_Filter::ROLE_TRANSLATOR,
+                123
+        );
+
+        $this->assertTrue( is_array( $resultMerge ) );
+        $this->assertEquals( 2, count( $resultMerge ) );
+
+        /**
+         * @var $firstKey TmKeyManagement_TmKeyStruct
+         */
+        $firstKey = $resultMerge[ 0 ];
+
+        /**
+         * @var $secondKey TmKeyManagement_TmKeyStruct
+         */
+        $secondKey = $resultMerge[ 1 ];
+
+        $this->assertEquals( "0000123ABC", $firstKey->key );
+        $this->assertNull( $firstKey->r_transl );
+        $this->assertNull( $firstKey->w_transl );
+        $this->assertEquals( 1, $firstKey->owner );
+        $this->assertEquals( 1, $firstKey->r );
+        $this->assertEquals( 1, $firstKey->w );
+
+        $this->assertEquals( "0000123DEF", $secondKey->key );
+        $this->assertEquals( 1, $secondKey->r_transl );
+        $this->assertEquals( 0, $secondKey->w_transl );
+        $this->assertEquals( 0, $secondKey->owner );
+        $this->assertNull( $secondKey->r );
+        $this->assertNull( $secondKey->w );
+    }
+
+    public function testMergeJsonKeys_validInput_clientABCGHIJKL_serverABCGHIDEF(){
+
+        $this->markTestIncomplete(
+                'This test has not been implemented yet.'
+        );
+
+        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+                self::$client_json_ABC_GHI_JKL,
+                self::$srv_json_ABC_GHI_DEF
+        );
+
+        $this->assertTrue( is_array( $resultMerge ) );
+        $this->assertEquals( 3, count( $resultMerge ) );
+
+        /**
+         * @var $firstKey TmKeyManagement_TmKeyStruct
+         */
+        $firstKey = $resultMerge[ 0 ];
+
+        /**
+         * @var $secondKey TmKeyManagement_TmKeyStruct
+         */
+        $secondKey = $resultMerge[ 1 ];
+
+        /**
+         * @var $thirdKey TmKeyManagement_TmKeyStruct
+         */
+        $thirdKey = $resultMerge[ 2 ];
+
+
+        $this->assertEquals( "0000123ABC", $firstKey->key );
+        $this->assertNull( $firstKey->r_transl );
+        $this->assertNull( $firstKey->w_transl );
+        $this->assertEquals( 1, $firstKey->owner );
+        $this->assertEquals( 1, $firstKey->r );
+        $this->assertEquals( 1, $firstKey->w );
+
+        $this->assertEquals( "0000123GHI", $secondKey->key );
+
+        $this->assertEquals( "123JKL", $secondKey->key );
 
     }
 }

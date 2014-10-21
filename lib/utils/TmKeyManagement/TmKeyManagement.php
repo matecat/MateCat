@@ -325,16 +325,17 @@ class TmKeyManagement_TmKeyManagement {
                 $_job_Key->tm   = filter_var( $client_not_hashed_keys[ 'elements' ][ $_index_position ]->tm, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
                 $_job_Key->glos = filter_var( $client_not_hashed_keys[ 'elements' ][ $_index_position ]->glos, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 
-                if ( $userRole != TmKeyManagement_Filter::OWNER ) {
-
-                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'r' ]} = filter_var( $client_not_hashed_keys[ 'elements' ][ $_index_position ]->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'w' ]} = filter_var( $client_not_hashed_keys[ 'elements' ][ $_index_position ]->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-
-                } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR || $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ){
+                if ( $userRole == TmKeyManagement_Filter::OWNER ) {
 
                     //override grants
                     $_job_Key->r = filter_var( $client_not_hashed_keys[ 'elements' ][ $_index_position ]->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
                     $_job_Key->w = filter_var( $client_not_hashed_keys[ 'elements' ][ $_index_position ]->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+
+                } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR || $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ){
+
+                    //override role specific grants
+                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'r' ]} = filter_var( $client_not_hashed_keys[ 'elements' ][ $_index_position ]->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'w' ]} = filter_var( $client_not_hashed_keys[ 'elements' ][ $_index_position ]->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 
                 } else{
                     throw new Exception ("Invalid Role Type string.", 1);
@@ -348,21 +349,41 @@ class TmKeyManagement_TmKeyManagement {
                 //set as owner if it is but should be already set
 //                $_job_Key->owner = ( $userRole == TmKeyManagement_Filter::OWNER );
 
+                //reduce the stack
+                unset( $client_not_hashed_keys[ 'pos' ][ $_index_position ] );
+                unset( $client_not_hashed_keys[ 'elements' ][ $_index_position ] );
+
             } elseif ( array_search( $_job_Key->getHash(), $client_not_hashed_keys[ 'pos' ] ) !== false ){
                 //DO NOTHING
                 //PASS
+                //reduce the stack
+                unset( $client_not_hashed_keys[ 'pos' ][ $_index_position ] );
+                unset( $client_not_hashed_keys[ 'elements' ][ $_index_position ] );
 
-            } else{
+            } else {
 
                 //Add to TO BE DELETED the key. Why not check if user is the owner of the key??????
                 //Nooooo let the client do it for you!!!! It's more safe you don't???
-                unset( $job_tm_keys[$i] );
+
+                if ( $userRole == TmKeyManagement_Filter::OWNER ) {
+
+                    //override grants
+                    $_job_Key->r = null;
+                    $_job_Key->w = null;
+
+                } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR || $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ){
+
+                    //override role specific grants
+                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'r' ]} = null;
+                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'w' ]} = null;
+
+                } else{
+                    throw new Exception ("Invalid Role Type string.", 1);
+                }
+
+                //TODO rimuovere la chiave se non ha più permessi
 
             }
-
-            //reduce the stack
-            unset( $client_not_hashed_keys[ 'pos' ][ $_index_position ] );
-            unset( $client_not_hashed_keys[ 'elements' ][ $_index_position ] );
 
         }
 
@@ -412,31 +433,40 @@ class TmKeyManagement_TmKeyManagement {
                 //finally append to the job keys!!
                 $job_tm_keys[ ] = $justCreatedKey;
 
-                //if user is logged, check for key and try to add to
-                try {
+                if( $uid != null ){
 
-                    /*
-                     * Take the keys of the user
-                     */
-                    $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-                    $dh       = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $uid, 'tm_key' => array( 'key' => $justCreatedKey->key ) ) );
+                    //if uid is provided, check for key and try to add to it's memory key ring
+                    try {
 
-                    $keyList = $_keyDao->read( $dh );
+                        /*
+                         * Take the keys of the user
+                         */
+                        $_keyDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+                        $dh = new TmKeyManagement_MemoryKeyStruct( array(
+                                'uid' => $uid,
+                                'tm_key' => new TmKeyManagement_TmKeyStruct( array(
+                                        'key' => $justCreatedKey->key
+                                ) )
+                        ) );
 
-                    if( empty( $keyList ) ){
+                        $keyList = $_keyDao->read( $dh );
 
-                        // add the key to a new row struct
-                        $dh->uid = $uid;
-                        $dh->tm_key = $justCreatedKey;
+                        if( empty( $keyList ) ){
 
-                        $_keyDao->create( $dh );
+                            // add the key to a new row struct
+                            $dh->uid = $uid;
+                            $dh->tm_key = $justCreatedKey;
+
+                            $_keyDao->create( $dh );
+
+                        }
+
+                    } catch ( Exception $e ) {
+
+                        $keyList = array();
+                        Log::doLog( $e->getMessage() );
 
                     }
-
-                } catch ( Exception $e ) {
-
-                    $keyList = array();
-                    Log::doLog( $e->getMessage() );
 
                 }
 

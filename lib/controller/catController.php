@@ -173,15 +173,6 @@ class catController extends viewController {
 			return;
 		}
 
-        //TODO: IMPROVE
-        $_from_url = parse_url( $_SERVER['REQUEST_URI'] );
-        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
-        if ( $url_request ) {
-            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } else {
-            $this->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
-        }
-
         /*
          * I prefer to use a programmatic approach to the check for the archive date instead of a pure query
          * because the query to check "Utils::getArchivableJobs($this->jid)" should be
@@ -340,7 +331,19 @@ class catController extends viewController {
         $this->fileCounter         = json_encode( $TotalPayable );
 
 
-        list( $uid, $owner_email ) = $this->getLoginUserParams();
+        list( $uid, $user_email ) = $this->getLoginUserParams();
+
+        //TODO: IMPROVE
+        $_from_url = parse_url( $_SERVER['REQUEST_URI'] );
+        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
+        if ( $url_request ) {
+            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+        } elseif( $user_email == $data[ 0 ]['owner'] ) {
+            $this->userRole = TmKeyManagement_Filter::OWNER;
+        } else {
+            $this->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+        }
+
         try {
 
             /*
