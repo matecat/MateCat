@@ -70,9 +70,9 @@ class TmKeyManagement_TmKeyManagement {
 
         $filter = new TmKeyManagement_Filter( $uid );
         $filter->setGrants( $grant_level )
-               ->setTmType( $type );
+                ->setTmType( $type );
 
-        switch( $user_role ){
+        switch ( $user_role ) {
             case TmKeyManagement_Filter::ROLE_TRANSLATOR:
                 $tmKeys = array_filter( $tmKeys, array( $filter, 'byTranslator' ) );
                 break;
@@ -126,7 +126,7 @@ class TmKeyManagement_TmKeyManagement {
             }
 
             $filter = new TmKeyManagement_Filter();
-            $tmKey = array_filter( $tmKey, array( $filter, 'byOwner' ) );
+            $tmKey  = array_filter( $tmKey, array( $filter, 'byOwner' ) );
 
             $result_arr[ ] = $tmKey;
 
@@ -155,7 +155,11 @@ class TmKeyManagement_TmKeyManagement {
      * @return TmKeyManagement_TmKeyStruct|bool True if the structure is compliant to a TmKeyManagement_TmKeyStruct object. False otherwise.
      */
     public static function isValidStructure( $arr ) {
-        $myObj = new TmKeyManagement_TmKeyStruct( $arr );
+        try {
+            $myObj = new TmKeyManagement_TmKeyStruct( $arr );
+        } catch ( Exception $e ) {
+            return false;
+        }
 
         return $myObj;
     }
@@ -258,29 +262,45 @@ class TmKeyManagement_TmKeyManagement {
     /**
      * Merge the keys from CLIENT with those from DATABASE ( jobData )
      *
-     * @param string $Json_clientKeys
-     * @param string $Json_jobKeys
-     * @param string $userRole
+     * @param string $Json_clientKeys A json_encoded array of objects having the following structure:<br />
+     *                                <pre>
+     *                                array(
+     *                                'key'  => &lt;private_tm_key>,
+     *                                'name' => &lt;tm_name>,
+     *                                'r'    => true,
+     *                                'w'    => true
+     *                                )
+     *                                </pre>
+     * @param string $Json_jobKeys    A json_encoded array of TmKeyManagement_TmKeyStruct objects
+     * @param string $userRole        One of the following strings: "owner", "translator", "revisor"
+     * @param int    $uid
      *
-     * @return TmKeyManagement_TmKeyStruct[]
+     * @see TmKeyManagement_TmKeyStruct
+     *
+     * @return array TmKeyManagement_TmKeyStruct[]
      */
-    public static function mergeJsonKeys( $Json_clientKeys, $Json_jobKeys, $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR, $uid = null ){
+    public static function mergeJsonKeys( $Json_clientKeys, $Json_jobKeys, $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR, $uid = null ) {
 
-        //we put the already present job keys so they can be checked against the client keys when cycle advance
+        //we put the already present job keys so they can be checked against the client keys when cycle advances
         //( jobs has more elements than the client objects )
-        $client_tm_keys = array_map( array( 'self', 'getTmKeyStructure' ), json_decode( $Json_clientKeys, true ) );
-        $job_tm_keys    = array_map( array( 'self', 'getTmKeyStructure' ), json_decode( $Json_jobKeys, true ) );
+        $clientDecodedJson = json_decode( $Json_clientKeys, true );
+        Utils::jsonError();
+        $serverDecodedJson = json_decode( $Json_jobKeys, true );
+        Utils::jsonError();
+
+        $client_tm_keys = array_map( array( 'self', 'getTmKeyStructure' ), $clientDecodedJson );
+        $job_tm_keys    = array_map( array( 'self', 'getTmKeyStructure' ), $serverDecodedJson );
 
         $client_not_hashed_keys = array( 'pos' => array(), 'elements' => array() );
-        foreach( $client_tm_keys as $_j => $_client_tm_key ) {
+        foreach ( $client_tm_keys as $_j => $_client_tm_key ) {
 
             /**
              * @var $_client_tm_key TmKeyManagement_TmKeyStruct
              */
 
             //remove hashed keys
-            if( $_client_tm_key->isAnHashedKey() ){
-                unset( $client_tm_keys[$_j] );
+            if ( $_client_tm_key->isAnHashedKey() ) {
+                unset( $client_tm_keys[ $_j ] );
                 continue;
             }
 
@@ -291,38 +311,43 @@ class TmKeyManagement_TmKeyManagement {
         }
 
         //update existing keys
-        foreach( $job_tm_keys as $i => $_job_Key ){
+        foreach ( $job_tm_keys as $i => $_job_Key ) {
             /**
              * @var $_job_Key TmKeyManagement_TmKeyStruct
              */
 
-            $_index_position = array_search( $_job_Key->key, $client_not_hashed_keys['pos'] );
-            if( $_index_position !== false ){ // so, here the key exists in client
+            $_index_position = array_search( $_job_Key->key, $client_not_hashed_keys[ 'pos' ] );
+            if ( $_index_position !== false ) { // so, here the key exists in client
 
                 //override the static values
-                $_job_Key->tm   = filter_var( $client_not_hashed_keys['elements'][$_index_position]->tm, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-                $_job_Key->glos = filter_var( $client_not_hashed_keys['elements'][$_index_position]->glos, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                $_job_Key->tm   = filter_var( $client_not_hashed_keys[ 'elements' ][ $_index_position ]->tm, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                $_job_Key->glos = filter_var( $client_not_hashed_keys[ 'elements' ][ $_index_position ]->glos, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
 
                 if ( $userRole != TmKeyManagement_Filter::OWNER ) {
-                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'r' ]} = filter_var( $client_not_hashed_keys['elements'][$_index_position]->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'w' ]} = filter_var( $client_not_hashed_keys['elements'][$_index_position]->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-                } else {
+                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'r' ]} = filter_var( $client_not_hashed_keys[ 'elements' ][ $_index_position ]->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $_job_Key->{TmKeyManagement_Filter::$GRANTS_MAP[ $userRole ][ 'w' ]} = filter_var( $client_not_hashed_keys[ 'elements' ][ $_index_position ]->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                } else if (
+                        $userRole == TmKeyManagement_Filter::ROLE_REVISOR ||
+                        $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR){
                     //override grants
-                    $_job_Key->r = filter_var( $client_not_hashed_keys['elements'][$_index_position]->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
-                    $_job_Key->w = filter_var( $client_not_hashed_keys['elements'][$_index_position]->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $_job_Key->r = filter_var( $client_not_hashed_keys[ 'elements' ][ $_index_position ]->r, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                    $_job_Key->w = filter_var( $client_not_hashed_keys[ 'elements' ][ $_index_position ]->w, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+                }
+                else{
+                    throw new Exception ("Invalid grant string.", 1);
                 }
 
                 //choose a name instead of null
                 if ( $_job_Key->name === null ) {
-                    $_job_Key->name = $client_not_hashed_keys['elements'][$_index_position]->name;
+                    $_job_Key->name = $client_not_hashed_keys[ 'elements' ][ $_index_position ]->name;
                 }
 
                 //set as owner if it is but should be already set
 //                $_job_Key->owner = ( $userRole == TmKeyManagement_Filter::OWNER );
 
                 //reduce the stack
-                unset( $client_not_hashed_keys['pos'][$_index_position] );
-                unset( $client_not_hashed_keys['elements'][$_index_position] );
+                unset( $client_not_hashed_keys[ 'pos' ][ $_index_position ] );
+                unset( $client_not_hashed_keys[ 'elements' ][ $_index_position ] );
 
             }
 
@@ -331,11 +356,11 @@ class TmKeyManagement_TmKeyManagement {
         /*
          * There are some new keys from client? Add them
          */
-        if( !empty( $client_not_hashed_keys['pos'] ) ){
+        if ( !empty( $client_not_hashed_keys[ 'pos' ] ) ) {
 
             $justCreatedKey = new TmKeyManagement_TmKeyStruct();
 
-            foreach( $client_not_hashed_keys['elements'] as $_pos => $newClientKey ){
+            foreach ( $client_not_hashed_keys[ 'elements' ] as $_pos => $newClientKey ) {
 
                 /**
                  * @var $newClientKey TmKeyManagement_TmKeyStruct
@@ -358,9 +383,9 @@ class TmKeyManagement_TmKeyManagement {
                 }
 
                 //set the uid property
-                if( $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ){
+                if ( $userRole == TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
                     $justCreatedKey->uid_transl = $uid;
-                } elseif( $userRole == TmKeyManagement_Filter::ROLE_REVISOR ) {
+                } elseif ( $userRole == TmKeyManagement_Filter::ROLE_REVISOR ) {
                     $justCreatedKey->uid_rev = $uid;
                 }
 
@@ -372,7 +397,7 @@ class TmKeyManagement_TmKeyManagement {
 
 
                 //finally append to the job keys!!
-                $job_tm_keys[] = $justCreatedKey;
+                $job_tm_keys[ ] = $justCreatedKey;
 
             }
 
@@ -402,24 +427,24 @@ class TmKeyManagement_TmKeyManagement {
              * @var $curr_tm_key TmKeyManagement_TmKeyStruct
              */
             if ( $curr_tm_key->key == $newTmKey->key ) {
-                switch( $user_role ){
+                switch ( $user_role ) {
 
                     case TmKeyManagement_Filter::ROLE_TRANSLATOR:
-                        $curr_tm_key->r_transl = $newTmKey->r_transl;
-                        $curr_tm_key->w_transl = $newTmKey->w_transl;
+                        $curr_tm_key->r_transl   = $newTmKey->r_transl;
+                        $curr_tm_key->w_transl   = $newTmKey->w_transl;
                         $curr_tm_key->uid_transl = $newTmKey->uid_transl;
                         break;
 
                     case TmKeyManagement_Filter::ROLE_REVISOR:
-                        $curr_tm_key->r_rev = $newTmKey->r_rev;
-                        $curr_tm_key->w_rev = $newTmKey->w_rev;
+                        $curr_tm_key->r_rev   = $newTmKey->r_rev;
+                        $curr_tm_key->w_rev   = $newTmKey->w_rev;
                         $curr_tm_key->uid_rev = $newTmKey->uid_rev;
                         break;
 
                     case TmKeyManagement_Filter::OWNER:
                         $curr_tm_key->owner = $newTmKey->owner;
-                        $curr_tm_key->r = $newTmKey->r;
-                        $curr_tm_key->w = $newTmKey->w;
+                        $curr_tm_key->r     = $newTmKey->r;
+                        $curr_tm_key->w     = $newTmKey->w;
                         break;
 
                     case null:
@@ -465,20 +490,20 @@ class TmKeyManagement_TmKeyManagement {
 
                     case TmKeyManagement_Filter::ROLE_TRANSLATOR:
                         $curr_tm_key->uid_transl = null;
-                        $curr_tm_key->r_transl = null;
-                        $curr_tm_key->w_transl = null;
+                        $curr_tm_key->r_transl   = null;
+                        $curr_tm_key->w_transl   = null;
                         break;
 
                     case TmKeyManagement_Filter::ROLE_REVISOR:
-                        $curr_tm_key->uid_rev= null;
-                        $curr_tm_key->r_rev = null;
-                        $curr_tm_key->w_rev = null;
+                        $curr_tm_key->uid_rev = null;
+                        $curr_tm_key->r_rev   = null;
+                        $curr_tm_key->w_rev   = null;
                         break;
 
                     case TmKeyManagement_Filter::OWNER:
                         $curr_tm_key->owner = false;
-                        $curr_tm_key->r = null;
-                        $curr_tm_key->w = null;
+                        $curr_tm_key->r     = null;
+                        $curr_tm_key->w     = null;
                         break;
 
                     case null:
@@ -489,13 +514,13 @@ class TmKeyManagement_TmKeyManagement {
                 }
 
                 //if the key is still linked to someone, add it to the result.
-                if($curr_tm_key->owner ||
-                        !is_null($curr_tm_key->uid_transl) ||
-                        !is_null($curr_tm_key->uid_rev)){
+                if ( $curr_tm_key->owner ||
+                        !is_null( $curr_tm_key->uid_transl ) ||
+                        !is_null( $curr_tm_key->uid_rev )
+                ) {
                     $result[ ] = $curr_tm_key;
                 }
-            }
-            else {
+            } else {
                 $result[ ] = $curr_tm_key;
             }
         }

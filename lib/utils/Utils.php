@@ -290,5 +290,51 @@ class Utils {
 
     }
 
+    /**
+     * Call the output in JSON format
+     *
+     */
+    public static function jsonError() {
+
+        if ( function_exists( "json_last_error" ) ) {
+            switch ( json_last_error() ) {
+                case JSON_ERROR_NONE:
+//              	  Log::doLog(' - No errors');
+                    break;
+                case JSON_ERROR_DEPTH:
+                    $msg = ' - Maximum stack depth exceeded';
+                    Log::doLog( $msg );
+                    throw new Exception( $msg, JSON_ERROR_DEPTH);
+                    break;
+                case JSON_ERROR_STATE_MISMATCH:
+                    $msg = ' - Underflow or the modes mismatch';
+                    Log::doLog( $msg );
+                    throw new Exception( $msg, JSON_ERROR_STATE_MISMATCH);
+                    break;
+                case JSON_ERROR_CTRL_CHAR:
+                    $msg =  ' - Unexpected control character found' ;
+                    Log::doLog( $msg );
+                    throw new Exception( $msg, JSON_ERROR_CTRL_CHAR);
+                    break;
+                case JSON_ERROR_SYNTAX:
+                    $msg = ' - Syntax error, malformed JSON' ;
+                    Log::doLog( $msg );
+                    throw new Exception( $msg, JSON_ERROR_SYNTAX);
+                    break;
+                case JSON_ERROR_UTF8:
+                    $msg =  ' - Malformed UTF-8 characters, possibly incorrectly encoded';
+                    Log::doLog( $msg );
+                    throw new Exception( $msg, JSON_ERROR_UTF8);
+                    break;
+                default:
+                    $msg =  ' - Unknown error';
+                    Log::doLog( $msg );
+                    throw new Exception( $msg, 6);
+                    break;
+            }
+        }
+
+    }
+
 }
 

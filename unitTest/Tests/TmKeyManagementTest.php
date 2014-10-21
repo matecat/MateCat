@@ -8,29 +8,72 @@
 
 include_once( "AbstractTest.php" );
 
-class TmKeyManagement_TmKeyManagementTest extends Tests_AbstractTest {
+class TmKeyManagementTest extends Tests_AbstractTest {
 
-    private static $dummyTmKey_key = "fookey";
-    private static $dummyTmKey_owner = 1;
-    private static $dummyTmKey_r = 1;
-    private static $dummyTmKey_w = 0;
-    private static $dummyTmKey_uid_transl = 123;
-    private static $dummyTmKey_r_transl = 0;
-    private static $dummyTmKey_w_transl = 1;
-    private static $dummyTmKey_edit = true;
-    private static $uid_translator = 123;
+    private static $dummyTmKey_key;
+    private static $dummyTmKey_owner;
+    private static $dummyTmKey_r;
+    private static $dummyTmKey_w;
+    private static $dummyTmKey_uid_transl;
+    private static $dummyTmKey_r_transl;
+    private static $dummyTmKey_w_transl;
+    private static $dummyTmKey_edit;
+    private static $uid_translator;
 
-    private static $validJsonTmKeyArr = '[{"tm":true,"glos":false,"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
-    private static $invalidJsonTmKeyArr = '[{tm":true,"glos":true"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
-    private static $validJsonTmKeyArrWithUidTranslator = '[{"tm":true,"glos":false,"owner":false,"uid_transl":123,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":"1","w_transl":"1","r_rev":null,"w_rev":null,"source":null,"target":null}]';
+    private static $validJsonTmKeyArr;
+    private static $invalidJsonTmKeyArr;
+    private static $validJsonTmKeyArrWithUidTranslator;
+    private static $invalidClientJson;
+    private static $validClientJson;
+    private static $invalidServerJson;
+    private static $validServerJson;
 
-    private static $invalidGrantString = "invalidGrantString";
-    private static $invalidTypeString = "invalidTypeString";
-    private static $invalidRoleString = "invalidRoleString";
+    private static $invalidGrantString;
+    private static $invalidTypeString;
+    private static $invalidRoleString;
+
+    private static $validTmKeyStructArr;
+    private static $invalidTmKeyStructArr;
 
     public function setUp() {
         parent::setUp();
 //        MemcacheHandler::getInstance( array( '127.0.0.1:11211' => 1 ) )->flush();
+
+        self::$dummyTmKey_key        = "fookey";
+        self::$dummyTmKey_owner      = 1;
+        self::$dummyTmKey_r          = 1;
+        self::$dummyTmKey_w          = 0;
+        self::$dummyTmKey_uid_transl = 123;
+        self::$dummyTmKey_r_transl   = 0;
+        self::$dummyTmKey_w_transl   = 1;
+        self::$dummyTmKey_edit       = true;
+        self::$uid_translator        = 123;
+
+        self::$validJsonTmKeyArr                  = '[{"tm":true,"glos":false,"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
+        self::$invalidJsonTmKeyArr                = '[{tm":true,"glos":true"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
+        self::$validJsonTmKeyArrWithUidTranslator = '[{"tm":true,"glos":false,"owner":false,"uid_transl":123,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":"1","w_transl":"1","r_rev":null,"w_rev":null,"source":null,"target":null}]';
+        self::$invalidClientJson                  = '[{name""My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0"}]';
+        self::$validClientJson                  = '[{"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0"},{"name":"My second Key","key":"testclientKey","r":"1","w":"1"}]';
+
+        self::$invalidServerJson  = '[{tm":true,"glos":true"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
+        self::$validServerJson    = '[{"tm":true,"glos":true"owner":true,"uid_transl":null,"uid_rev":null,"name":"My personal Key","key":"993dddb1c603b4e57f69","r":"1","w":"0","r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
+
+        self::$invalidGrantString = "invalidGrantString";
+        self::$invalidTypeString  = "invalidTypeString";
+        self::$invalidRoleString  = "invalidRoleString";
+
+        $newTm                     = array();
+        $newTm[ 'key' ]            = sha1( chr( rand( 97, 122 ) ) );
+        $newTm[ 'owner' ]          = $newTm[ 'key' ] & 1;
+        $newTm[ 'r' ]              = $newTm[ 'key' ][ 5 ] & 1;
+        $newTm[ 'w' ]              = $newTm[ 'key' ][ 7 ] & 1;
+        $newTm[ 'r_transl' ]       = $newTm[ 'key' ][ 2 ] & 1;
+        $newTm[ 'w_transl' ]       = $newTm[ 'key' ][ 4 ] & 1;
+        $newTm[ 'uid_transl' ]     = rand( 1, 1024 );
+        self::$validTmKeyStructArr = $newTm;
+
+        self::$invalidTmKeyStructArr                   = self::$validTmKeyStructArr;
+        self::$invalidTmKeyStructArr[ 'invalidField' ] = 'invalidField';
     }
 
     public function tearDown() {
@@ -176,98 +219,94 @@ class TmKeyManagement_TmKeyManagementTest extends Tests_AbstractTest {
 
     /** TEST getJobTmKeys */
 
-    public function testGetJobTmKeys_validJson_rwGrant_tmType_defaultRole_uidNull() {
+    public function testGetJobTmKeys_validInput() {
+        $tmKeys = null;
 
-        try{
-            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(self::$validJsonTmKeyArr);
-        }
-        catch(Exception $e){
+        try {
+            $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys( self::$validJsonTmKeyArr );
+        } catch ( Exception $e ) {
             //An error occurred: test failed
-            $this->assertTrue(false);
+            $this->assertTrue( false );
         }
 
-        $this->assertNotNull($tmKeys);
-        $this->assertTrue(is_array($tmKeys));
+        $this->assertNotNull( $tmKeys );
+        $this->assertTrue( is_array( $tmKeys ) );
 
         foreach ( $tmKeys as $tm_key ) {
-            $this->assertInstanceOf("TmKeyManagement_TmKeyStruct", $tm_key);
+            $this->assertInstanceOf( "TmKeyManagement_TmKeyStruct", $tm_key );
         }
 
     }
 
-    public function testGetJobTmKeys_invalidJson_rwGrant_tmType_defaultRole_uidNull() {
+    public function testGetJobTmKeys_invalidJson() {
         try {
             $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys( self::$invalidJsonTmKeyArr );
-        }
-        catch(Exception $e){
-            $invalidJSONposition = strpos($e->getMessage(), "Invalid JSON");
+        } catch ( Exception $e ) {
+            $invalidJSONposition = strpos( $e->getMessage(), "Invalid JSON" );
 
-            $this->assertTrue($invalidJSONposition > -1);
+            $this->assertTrue( $invalidJSONposition > -1 );
         }
     }
 
-    public function testGetJobTmKeys_validJson_wGrant_tmType_defaultRole_uidNull() {
+    public function testGetJobTmKeys_wGrant() {
 
         $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys( self::$validJsonTmKeyArr, 'w' );
 
         $this->assertNotNull( $tmKeys );
         $this->assertTrue( is_array( $tmKeys ) );
 
-        $this->assertTrue( empty($tmKeys) );
+        $this->assertTrue( empty( $tmKeys ) );
     }
 
-    public function testGetJobTmKeys_validJson_invalidGrant_tmType_defaultRole_uidNull() {
+    public function testGetJobTmKeys_invalidGrant() {
         try {
             $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys( self::$validJsonTmKeyArr, self::$invalidGrantString );
-        }
-        catch(Exception $e){
-            $invalidGrantPosition = strpos($e->getMessage(), "Invalid grant string.");
+        } catch ( Exception $e ) {
+            $invalidGrantPosition = strpos( $e->getMessage(), "Invalid grant string." );
 
-            $this->assertTrue($invalidGrantPosition > -1);
+            $this->assertTrue( $invalidGrantPosition > -1 );
         }
     }
 
-    public function testGetJobTmKeys_validJson_rwGrant_glosType_translatorRole_uidNull() {
+    public function testGetJobTmKeys_glosType() {
         $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys( self::$validJsonTmKeyArr, 'rw', 'glos', TmKeyManagement_Filter::ROLE_TRANSLATOR );
 
         $this->assertNotNull( $tmKeys );
         $this->assertTrue( is_array( $tmKeys ) );
 
-        $this->assertTrue( empty($tmKeys) );
+        $this->assertTrue( empty( $tmKeys ) );
     }
 
-    public function testGetJobTmKeys_validJson_rwGrant_glosType_revisorRole_uidNull() {
+    public function testGetJobTmKeys_revisorRole() {
         $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys( self::$validJsonTmKeyArr, 'rw', 'glos', TmKeyManagement_Filter::ROLE_REVISOR );
 
         $this->assertNotNull( $tmKeys );
         $this->assertTrue( is_array( $tmKeys ) );
 
-        $this->assertTrue( empty($tmKeys) );
+        $this->assertTrue( empty( $tmKeys ) );
     }
 
-    public function testGetJobTmKeys_validJson_rwGrant_invalidType_defaultRole_uidNull() {
+    public function testGetJobTmKeys_invalidType() {
         try {
             $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys( self::$validJsonTmKeyArr, 'rw', self::$invalidTypeString );
-        }
-        catch(Exception $e){
-            $invalidGrantPosition = strpos($e->getMessage(), "Invalid type string.");
+        } catch ( Exception $e ) {
+            $invalidGrantPosition = strpos( $e->getMessage(), "Invalid type string." );
 
-            $this->assertTrue($invalidGrantPosition > -1);
+            $this->assertTrue( $invalidGrantPosition > -1 );
         }
     }
 
-    public function testGetJobTmKeys_validJson_rwGrant_tmType_invalidRole_uidNull() {
+    public function testGetJobTmKeys_invalidRole() {
         try {
             $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys( self::$validJsonTmKeyArr, 'rw', 'tm', self::$invalidRoleString );
-        }
-        catch(Exception $e){
-            $invalidFilterPosition = strpos($e->getMessage(), "Filter type");
+        } catch ( Exception $e ) {
+            $invalidFilterPosition = strpos( $e->getMessage(), "Filter type" );
 
-            $this->assertTrue($invalidFilterPosition > -1);
+            $this->assertTrue( $invalidFilterPosition > -1 );
         }
     }
 
-    public function testGetJobTmKeys_validJson_rwGrant_tmType_defaultRole_uidNotNull() {
+    public function testGetJobTmKeys_uidNotNull() {
         $tmKeys = TmKeyManagement_TmKeyManagement::getJobTmKeys(
                 self::$validJsonTmKeyArrWithUidTranslator,
                 'rw',
@@ -278,12 +317,65 @@ class TmKeyManagement_TmKeyManagementTest extends Tests_AbstractTest {
         $this->assertNotNull( $tmKeys );
         $this->assertTrue( is_array( $tmKeys ) );
 
-        $this->assertFalse( empty($tmKeys) );
-        $this->assertInstanceOf( "TmKeyManagement_TmKeyStruct", $tmKeys[0] );
+        $this->assertFalse( empty( $tmKeys ) );
+        $this->assertInstanceOf( "TmKeyManagement_TmKeyStruct", $tmKeys[ 0 ] );
     }
 
-    /** TEST getOwnerKeys */
-    
+    /** TEST isValidStructure */
+    public function testIsValidStructure_validStructure() {
+        $validObj = TmKeyManagement_TmKeyManagement::isValidStructure( self::$validTmKeyStructArr );
 
+        $this->assertInstanceOf( 'TmKeyManagement_TmKeyStruct', $validObj );
+        $this->assertEquals( self::$validTmKeyStructArr[ 'key' ], $validObj->key );
+        $this->assertEquals( self::$validTmKeyStructArr[ 'owner' ], $validObj->owner );
+        $this->assertEquals( self::$validTmKeyStructArr[ 'r' ], $validObj->r );
+        $this->assertEquals( self::$validTmKeyStructArr[ 'w' ], $validObj->w );
+        $this->assertEquals( self::$validTmKeyStructArr[ 'r_transl' ], $validObj->r_transl );
+        $this->assertEquals( self::$validTmKeyStructArr[ 'w_transl' ], $validObj->w_transl );
+        $this->assertEquals( self::$validTmKeyStructArr[ 'uid_transl' ], $validObj->uid_transl );
+    }
+
+    public function testIsValidStructure_invalidStructure() {
+        $validObj = TmKeyManagement_TmKeyManagement::isValidStructure( self::$invalidTmKeyStructArr );
+
+        $this->assertFalse( $validObj );
+    }
+
+    /** TEST mergeJsonKeys */
+    public function testMergeJsonKeys_invalidClientJson() {
+        try{
+            $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(self::$invalidClientJson, self::$validServerJson);
+        }
+        catch(Exception $e){
+            $this->assertTrue( $e->getCode() > 0 );
+        }
+    }
+
+    public function testMergeJsonKeys_invalidServerJson() {
+        try{
+            $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(self::$validClientJson, self::$invalidServerJson);
+        }
+        catch(Exception $e){
+            $this->assertTrue( $e->getCode() > 0 );
+        }
+    }
+
+    public function testMergeJsonKeys_invalidUserRole() {
+        try{
+            $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+                    self::$validClientJson,
+                    self::$validServerJson,
+                    self::$invalidRoleString
+            );
+        }
+        catch(Exception $e){
+            $this->assertEquals( 1, $e->getCode() );
+            $this->assertEquals( "Invalid grant string.", $e->getMessage());
+        }
+    }
+
+    public function testMergeJsonKeys_validInput() {
+
+    }
 }
  
