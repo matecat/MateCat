@@ -27,15 +27,8 @@ class TmKeyManagement_ClientTmKeyStruct extends TmKeyManagement_TmKeyStruct {
     public function hideKey( $uid ){
 
         if( $uid != $this->uid_transl && $uid != $this->uid_rev ){
-            //pre: $this->key is a string of length greater than 1
-
-            $keyLength = strlen($this->key);
-            $last_digits = substr($this->key, - $this->readable_chars );
-
-            $this->key = str_repeat("*", $keyLength - $this->readable_chars ) . $last_digits;
-
+            $this->key = $this->getHash();
             $this->edit = false;
-
         }
 
         return $this;
