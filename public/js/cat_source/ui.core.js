@@ -66,7 +66,7 @@ UI = {
 		segment_id = $(segment).attr('id').split('-')[1];
 		$('.percentuage', segment).removeClass('visible');
 //		if (!segment.hasClass('saved'))
-		this.setTranslation($(segment).attr('id').split('-')[1], status, false, byStatus);
+		this.setTranslation($(segment).attr('id').split('-')[1], status, false);
 		segment.removeClass('saved');
 		this.setContribution(segment_id, status, byStatus);
 		this.setContributionMT(segment_id, status, byStatus);
@@ -957,7 +957,7 @@ UI = {
 					$('.alternatives .overflow', segment).show();
 					UI.getContribution(segment, 0);
 				}, 3000);				
-			};	
+			}
 		}		
 		
 		
@@ -1008,9 +1008,9 @@ UI = {
     reactivateJob: function() {
         APP.doRequest({
             data: {
-                action:		   "changeJobsStatus",
+                action:         "changeJobsStatus",
                 new_status:     "active",
-                res: 		   "job",
+                res:            "job",
                 id:             config.job_id,
                 jpassword:      config.password,
             },
@@ -1117,7 +1117,6 @@ UI = {
 	renderSegments: function(files, where, starting) {
 		$.each(files, function(k) {
 			var newFile = '';
-			var fs = this.file_stats;
 //            var fid = fs['ID_FILE'];
 			var fid = k;
 			var articleToAdd = ((where == 'center') || (!$('#file-' + fid).length)) ? true : false;
@@ -1160,8 +1159,7 @@ UI = {
                 escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
                 escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
                 escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
-//				console.log('vediamo perché: ', UI.decodePlaceholdersToText(this.segment, true, this.sid, 'prova'));
-				
+
 				/* tab placeholders replacement */
  //               escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "<span class=" );
 				
@@ -1903,8 +1901,8 @@ UI = {
 	},
 	displayMessage: function(messages) {
 		if($('body').hasClass('incomingMsg')) return false;
-        $.each(messages, function(index) {
-            if(typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date( this.expire ) > ( new Date ) )  ) {
+        $.each(messages, function() {
+            if(typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date( this.expire ) > ( new Date() ) )  ) {
                 UI.showMessage({
                     msg: this.msg,
                     token: this.token,
@@ -1991,7 +1989,7 @@ UI = {
 		}, 'local');
 	},
 
-    setTranslation: function(id_segment, status, caller, byStatus) {
+    setTranslation: function(id_segment, status, caller) {
         console.log('id_segment: ', id_segment);
         console.log('status: ', status);
         console.log('setTranslation sul segmento ', UI.currentSegmentId);
@@ -2186,11 +2184,11 @@ UI = {
 	checkPendingOperations: function() {
 		if(this.checkInStorage('pending')) {
 			UI.execAbortedOperations();
-		};
+		}
 	},
 	checkInStorage: function(what) {
 		var found = false;
-		$.each(localStorage, function(k,v) {
+		$.each(localStorage, function(k) {
 			if(k.substring(0, what.length) === what) {
 				found = true;
 			}
@@ -2199,7 +2197,7 @@ UI = {
 	},
 
 	clearStorage: function(what) {
-		$.each(localStorage, function(k,v) {
+		$.each(localStorage, function(k) {
 			if(k.substring(0, what.length) === what) {
 				localStorage.removeItem(k);
 			}
@@ -2427,7 +2425,7 @@ UI = {
         logValue = {
             "data": data,
             "stack": stackTrace()
-        }
+        };
 //        console.log('prova: ', prova);
         console.log('logValue: ', JSON.stringify(logValue));
         localStorage.setItem('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue));
@@ -2549,13 +2547,7 @@ UI = {
      * @param str
      * @returns {XML|string}
      */
-    decodePlaceholdersToText: function (str, jumpSpacesEncode, sid, operation) {
-//		toLog = (sid == '13735228');
-//		toLog = ((operation == 'contribution source'));
-//		if(toLog) console.log('decodePH operation: ', operation);
-//		if(operation == 'source') {
-//			if(toLog) console.log('SOURCE STR: ', str);
-//		}
+    decodePlaceholdersToText: function (str, jumpSpacesEncode) {
         if(!UI.hiddenTextEnabled) return str;
 		jumpSpacesEncode = jumpSpacesEncode || false;
 		var _str = str;
@@ -2579,7 +2571,7 @@ UI = {
         if(!UI.hiddenTextEnabled) return str;
 
 		var newStr = '';
-		$.each($.parseHTML(str), function(index) {
+		$.each($.parseHTML(str), function() {
 
 			if(this.nodeName == '#text') {
 				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker marker monad" contenteditable="false"> </span>');
@@ -2646,7 +2638,7 @@ UI = {
 	unnestMarkers: function() {
 		$('.editor .editarea .marker .marker').each(function() {
 			$(this).parents('.marker').after($(this));
-		})
+		});
 	},
 
 	processErrors: function(err, operation) {
@@ -2737,6 +2729,7 @@ UI = {
 //        console.log('before propagate');
 
         UI.propagateTranslation(segment, status, false);
+/*
         return false;
 
         if ( UI.propagationsAvailable ){
@@ -2774,7 +2767,7 @@ UI = {
             }
 
         }
-
+*/
   /*
         if ($.cookie('_auto-propagation-' + config.job_id + '-' + config.password)) {
             console.log('cookie already set');
@@ -2821,7 +2814,7 @@ UI = {
             plusTranslated = (evenTranslated)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated': '';
 
             //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
-            $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + plusTranslated ).not( segment ), function(index) {
+            $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + plusTranslated ).not( segment ), function() {
                 $('.editarea', this).html( $('.editarea', segment).html() );
 
                 // if status is not set to draft, the segment content is not displayed
@@ -2989,7 +2982,7 @@ UI = {
 		this.currentSegment.removeClass('waiting_for_check_result');
 		this.registerQACheck();
 	},
-	saveInUndoStack: function(operation) {
+	saveInUndoStack: function() {
 //		noRestore = (typeof noRestore == 'undefined')? 0 : 1;
 		currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
@@ -2997,7 +2990,7 @@ UI = {
 			if (currentItem.trim() == this.editarea.html().trim())
 				return;
 		}
-        if(this.editarea == '') return;
+        if(this.editarea === '') return;
 
 		if (this.editarea.html() === '') return;
 

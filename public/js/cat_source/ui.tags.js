@@ -254,7 +254,7 @@ $.extend(UI, {
 	markTagMismatch: function(d) {
         // temp
 //        d.tag_mismatch.order = 2;
-        if((typeof d.tag_mismatch.order == 'undefined')||(d.tag_mismatch.order == '')) {
+        if((typeof d.tag_mismatch.order == 'undefined')||(d.tag_mismatch.order === '')) {
             if(typeof d.tag_mismatch.source != 'undefined') {
                 $.each(d.tag_mismatch.source, function(index) {
                     $('#segment-' + d.id_segment + ' .source span.locked:not(.temp)').filter(function() {
@@ -361,10 +361,7 @@ $.extend(UI, {
 		$('.tag-autocomplete').css('left', offset.left);
 		this.checkAutocompleteTags();
 	},
-	jumpTag: function(range, where) {
-//		console.log('range: ', range);
-//		console.log(range.endContainer.data.length);
-//		console.log(range.endOffset);
+	jumpTag: function(range) {
 		if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) { 
 //			console.log('da saltare');
 			setCursorAfterNode(range, range.endContainer.nextElementSibling);

@@ -257,7 +257,7 @@ function fileUpload(form, action_url, div_id) {
 
         // Del the iframe...
         setTimeout('iframeId.parentNode.removeChild(iframeId)', 250);
-    }
+    };
 
     if (iframeId.addEventListener) iframeId.addEventListener("load", eventHandler, true);
     if (iframeId.attachEvent) iframeId.attachEvent("onload", eventHandler);
