@@ -8112,7 +8112,9 @@ $.extend(UI, {
 
         $(document).ready(function() {
             console.log("$('#inactivetm'): ", $('#inactivetm'));
+            UI.setTMsortable();
             $('#inactivetm').dataTable();
+
         });
 
         $('tr').click(function(event) {
@@ -8150,14 +8152,7 @@ $.extend(UI, {
 // plugin per rendere sortable le tabelle
 // sorgente: http://www.foliotek.com/devblog/make-table-rows-sortable-using-jquery-ui-sortable/
 
-        var fixHelperModified = function(e, tr) {
-            var $originals = tr.children();
-            var $helper = tr.clone();
-            $helper.children().each(function(index) {
-                $(this).width($originals.eq(index).width())
-            });
-            return $helper;
-        };
+
 // codice per incrementare il numero della priority
 //    updateIndex = function(e, ui) {
 //        $('.index', ui.item.parent()).each(function (i) {
@@ -8167,23 +8162,8 @@ $.extend(UI, {
 
 
 
-// temporary disabled: this has to be realeased without jquery-ui (which is not loaded in the cattool), try to use tablesorter, who is already used in manage page
-        $("#activetm tbody.sortable").sortable({
-            helper: fixHelperModified,
-            items: ".mine",
- /*
-            stop: function( event, tr ) {
 
-                $('#activetm tbody tr:not(.new)').each(function () {
-                    console.log($(this).find('.privatekey').text())
-                })
-                UI.updateTM($('#activetm tbody tr:not(.new)'));
 
-//                console.log($('#activetm').html());
-            }
-*/
-        }).disableSelection();
- /**/
 
 //$('.enable').click(function() {
 //  $(this).closest('tr td:first-child').toggleClass('index');
@@ -8210,6 +8190,21 @@ $.extend(UI, {
         console.log('div_id: ', div_id);
 
     },
+    setTMsortable: function () {
+        var fixHelperModified = function(e, tr) {
+            var $originals = tr.children();
+            var $helper = tr.clone();
+            $helper.children().each(function(index) {
+                $(this).width($originals.eq(index).width())
+            });
+            return $helper;
+        };
+        $("#activetm tbody.sortable").sortable({
+            helper: fixHelperModified,
+            items: ".mine"
+        }).disableSelection();
+    },
+
     checkTMheights: function() {
 //        var h = $('#activetm tbody tr').first().height();
 //        var h = $('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)').height();
@@ -8352,6 +8347,7 @@ $.extend(UI, {
                 $('#activetm').append(newTr);
                 $('.mgmt-tm tr.new .canceladdtmx').click();
                 UI.pulseTMadded($('#activetm tr').last());
+                UI.setTMsortable();
             }
         });
     },
