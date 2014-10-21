@@ -48,7 +48,7 @@ abstract class viewController extends controller {
      */
     private function getBrowser() {
         $u_agent  = $_SERVER[ 'HTTP_USER_AGENT' ];
-
+log::doLog ("bname uagent " . $_SERVER[ 'HTTP_USER_AGENT' ]);
 	    $bname    = 'Unknown';
         $platform = 'Unknown';
         $version  = "";
@@ -69,18 +69,18 @@ abstract class viewController extends controller {
         } elseif ( preg_match( '/Firefox/i', $u_agent ) ) {
             $bname = 'Mozilla Firefox';
             $ub    = "Firefox";
-        } elseif ( preg_match( '/Chrome/i', $u_agent ) ) {
+        } elseif ( preg_match( '/Chrome/i', $u_agent ) and !preg_match( '/OPR/i', $u_agent ) ) {
             $bname = 'Google Chrome';
             $ub    = "Chrome";
+        } elseif ( preg_match( '/Opera/i', $u_agent ) or preg_match( '/OPR/i', $u_agent ) ) {
+            $bname = 'Opera';
+            $ub    = "Opera";
         } elseif ( preg_match( '/Safari/i', $u_agent ) ) {
             $bname = 'Apple Safari';
 	        $ub    = "Safari";
-	    } elseif ( preg_match( '/AppleWebKit/i', $u_agent ) ) {
+	} elseif ( preg_match( '/AppleWebKit/i', $u_agent ) ) {
 	        $bname = 'Apple Safari';
 	        $ub    = "Safari";
-        } elseif ( preg_match( '/Opera/i', $u_agent ) ) {
-            $bname = 'Opera';
-            $ub    = "Opera";
         } elseif ( preg_match( '/Netscape/i', $u_agent ) ) {
             $bname = 'Netscape';
             $ub    = "Netscape";
@@ -222,12 +222,12 @@ abstract class viewController extends controller {
         $browser_info = $this->getBrowser();
         $browser_name = strtolower( $browser_info[ 'name' ] );
 
-	//log::doLog ("bname $browser_name");
+	log::doLog ("bname $browser_name");
 
-        if (  ($browser_name=="internet explorer" or $browser_name=="mozilla firefox")  and  $_SERVER[ 'REQUEST_URI' ]=="/" ) {
+/*        if (  ($browser_name=="internet explorer" or $browser_name=="mozilla firefox")  and  $_SERVER[ 'REQUEST_URI' ]=="/" ) {
                 return -2;
          }
-
+*/
         foreach ( INIT::$ENABLED_BROWSERS as $enabled_browser ) {
             if ( stripos( $browser_name, $enabled_browser ) !== false ) {
 		return 1;
@@ -240,6 +240,8 @@ abstract class viewController extends controller {
             }
         }
 
+	//unsupported browsers: hack for home page
+        if ($_SERVER[ 'REQUEST_URI' ]=="/") return -2;
 
         return 0;
     }
