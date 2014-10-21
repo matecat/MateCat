@@ -163,5 +163,14 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
     }
 
 
+    public function getHash() {
+
+        $keyLength   = strlen( $this->key );
+        $last_digits = substr( $this->key, -$this->readable_chars );
+        $key         = str_repeat( "*", $keyLength - $this->readable_chars ) . $last_digits;
+
+        return $key;
+
+    }
 
 } 

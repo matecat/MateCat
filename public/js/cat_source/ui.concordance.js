@@ -99,7 +99,7 @@ $.extend(UI, {
 				UI.setExtendedConcordances(true);			
 			} else {
 				UI.setExtendedConcordances(false);
-			};
+			}
 		} else {
 			console.log('no matches');
 			$('.sub-editor.concordances .overflow', segment).append('<ul class="graysmall message"><li>Can\'t find any matches. Check the language combination.</li></ul>');

@@ -7,7 +7,7 @@
 $.extend(UI, {
     initTM: function() {
         console.log('TM init vediamo');
-
+        $('.popup-tm').height($(window).height());
 // script per lo slide del pannello di manage tmx
 
 
@@ -17,6 +17,7 @@ $.extend(UI, {
             $( ".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
             $("#SnapABug_Button").show();
             $(".outer-tm").hide();
+            $('body').removeClass('side-popup');
         });
 
         $(".outer-tm").click(function() {
@@ -24,6 +25,7 @@ $.extend(UI, {
             $("#SnapABug_Button").show();
             $(".outer-tm").hide();
 
+            $('body').removeClass('side-popup');
         });
 
         $(".mgmt-tm").click(function() {
@@ -162,13 +164,11 @@ $.extend(UI, {
             $('.addtmxrow').hide();
             $(".addtmx").show();
 //            UI.updateTM($(this).parents('tr'));
-        }).on('change', '#new-tm-read, #new-tm-write', function(e) {
+        }).on('change', '#new-tm-read, #new-tm-write', function() {
             if(UI.checkTMgrants($('.addtm-tr'))) {
 //                $('.addtm-tr .error-message').hide();
             }
-        }).on('change', '#activetm td.lookup input, #activetm td.update input', function(e) {
-//            UI.updateTM($(this).parents('tr'));
-        }).on('change', '.mgmt-tm tr.new td.fileupload input[type="file"]', function(e) {
+        }).on('change', '.mgmt-tm tr.new td.fileupload input[type="file"]', function() {
             if($(this).val() == '') {
                 $('.mgmt-tm tr.new .uploadtm .text').text('Add a key');
             } else {
@@ -187,7 +187,7 @@ $.extend(UI, {
 
         });
 
-        $('tr').click(function(event) {
+        $('tr').click(function() {
             $('tr').not(this).removeClass('clicked');
             $(this).toggleClass('clicked');
         });
@@ -251,6 +251,7 @@ $.extend(UI, {
 
     },
     openLanguageResourcesPanel: function() {
+        $('body').addClass('side-popup');
         $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
         UI.checkTMheights();
         $("#SnapABug_Button").hide();
@@ -322,7 +323,7 @@ $.extend(UI, {
                     console.log('checkTMKey success!!');
                     console.log('d: ', d);
                     console.log('d.success: ', d.success);
-                    if(d.success == true) {
+                    if(d.success === true) {
                         console.log('key is good');
                         console.log('adding a tm');
                         UI.execAddTM('new');
@@ -330,6 +331,7 @@ $.extend(UI, {
                     } else {
                         console.log('key is bad');
                         return false;
+/*
                         if(this == 'key') {
                             console.log('error adding a key');
                             $('.mgmt-tm tr.new .message').text(d.errors[0].message);
@@ -338,6 +340,7 @@ $.extend(UI, {
                             $('.mgmt-tm tr.new .message').text(d.errors[0].message);
                         }
                         return false;
+*/
                     }
                 }
             });
@@ -395,7 +398,7 @@ $.extend(UI, {
                 console.log('addTM error!!');
                 $('.mgmt-tm tr.new .message').text('Error adding your TM!');
             },
-            success: function(d) {
+            success: function() {
                 console.log('addTM success!!');
                 newTr = '<tr class="ui-sortable-handle">' +
                         '    <td class="privatekey">' + this.tm_key + '</td>' +
@@ -495,8 +498,9 @@ $.extend(UI, {
         }
 
         // Submit the form...
-        form.submit(); return false;
-
+        form.submit();
+        return false;
+/*
 //    document.getElementById(div_id).innerHTML = "Uploading...";
         $('.popup-addtm-tr .x-popup').click();
         APP.showMessage({
@@ -509,11 +513,12 @@ $.extend(UI, {
         console.log('TMName 1: ', TMName);
 //    UI.pollForUploadProgress(TMKey, TMName);
         UI.pollForUploadCallback(TMKey, TMName);
+*/
     },
     pollForUploadCallback: function(TMKey, TMName) {
         if($('#uploadCallback').text() != '') {
             msg = $.parseJSON($('#uploadCallback pre').text());
-            if(msg.success == true) {
+            if(msg.success === true) {
                 UI.pollForUploadProgress(TMKey, TMName);
             } else {
                 APP.showMessage({
@@ -623,7 +628,7 @@ $.extend(UI, {
             error: function() {
                 console.log('Error saving TM data!!');
             },
-            success: function(d) {
+            success: function() {
                 console.log('TM data saved!!');
             }
         });
@@ -691,6 +696,7 @@ $.extend(UI, {
             error: function() {
             },
             success: function(d) {
+                console.log(d);
 /*
                 if(d.errors.length) {
                     APP.showMessage({

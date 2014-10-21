@@ -114,7 +114,7 @@ $.extend(UI, {
 			$('.tab-switcher-gl a .number', segment).text('').attr('data-num', 0);	
 		}		
 	},
-	markGlossaryItemsInSource: function(d, context) {
+	markGlossaryItemsInSource: function(d) {
 		if (Object.size(d.data.matches)) {
 			i = 0;	
 			cleanString = $('.source', UI.currentSegment).html();
@@ -131,7 +131,7 @@ $.extend(UI, {
 				int = {
 					x: coso.indexOf('<mark>'), 
 					y: coso.indexOf('</mark>') - 6
-				} 
+				};
 				intervals.push(int);
 			});
 			UI.intervalsUnion = [];
@@ -151,7 +151,7 @@ $.extend(UI, {
 	removeGlossaryMarksFormSource: function() {
 		$('.editor mark.inGlossary').each(function() {
 			$(this).replaceWith($(this).html());
-		})
+		});
 	},
 
 	checkIntervalsUnions: function(intervals) {
@@ -200,8 +200,8 @@ $.extend(UI, {
 		smallest = {
 					x: 1000000, 
 					y: 2000000
-				} 
-		$.each(ar, function(index) {
+				};
+		$.each(ar, function() {
 			if(this.x < smallest.x) smallest = this;
 		});
 		return smallest;
