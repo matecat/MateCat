@@ -146,7 +146,7 @@ $.extend(UI, {
 					"mac": "alt+meta+c",
 				}
 			},
-		}
+		};
 		this.setShortcuts();
 		this.setContextMenu();
 		this.createJobMenu();

@@ -734,7 +734,8 @@ color:#333;}
     min-height: 108%;
     width: 1100px;
     margin: 0 auto;
-    overflow: hidden;
+    overflow-x: hidden;
+    overflow-y: auto;
     position: fixed;
     z-index: 10000000000000;
     top: 0;
@@ -743,11 +744,12 @@ color:#333;}
     box-shadow: -2px 5px 7px #7B7B7B;
 }
 
+/*
 .editing .popup-tm {
     top:20px;
 
 }
-
+*/
 td.addtmxtd {
 width: 804px;
 }
@@ -762,7 +764,7 @@ form.add-TM-Form {
 {
 	font-size: 18px;
     }
-    .popup h1
+    .popup h1, .popup-tm h1
     {
 	    overflow: visible;
 	    max-height: inherit;
@@ -773,6 +775,9 @@ form.add-TM-Form {
 	    color: #fff;
 	    margin: 0 !important;
 	    text-align: left;
+    }
+    .popup-tm h1 {
+    	height: 30px;
     }
     .popup h2
     {
@@ -853,7 +858,9 @@ form.add-TM-Form {
 	.mgmt-panel-tm .btn-ok,
 	.mgmt-panel-gl .btn-ok,
     .popup .btn-ok,
-    .popup .btn-cancel 
+    .popup .btn-cancel,
+    .popup-tm .btn-ok,
+    .popup-tm .btn-cancel 
     {
 	    color: #fff;
 	    background: #09beec;
@@ -894,11 +901,11 @@ font-size: 18px;
 		    margin-top:10px;
 }
 .popup h1 .btn-ok,
-.popup h1 .btn-cancel 
+.popup h1 .btn-cancel
 {
 	padding: 1px 18px;
     }
-    .popup .btn-cancel, .btn-grey
+    .popup .btn-cancel, .btn-grey, .popup-tm .btn-cancel, .btn-grey
     {
 	    color: #333;
 	    background: #f6f6f6;
@@ -907,11 +914,18 @@ font-size: 18px;
 	    background: linear-gradient(top,  #f6f6f6,  #e2e3e5);
 }
 
+ .popup-tm h1 .btn-ok,
+ .popup-tm h1 .btn-cancel
+{
+	padding: 4px 18px;
+    }
 
 .mgmt-panel-tm .btn-ok:hover,
 .mgmt-panel-gl .btn-ok:hover,
 .popup .btn-ok:hover, 
-.popup .btn-cancel:hover
+.popup .btn-cancel:hover,
+.popup-tm .btn-ok:hover, 
+.popup-tm .btn-cancel:hover
 {
 	cursor: pointer;
 	-webkit-box-shadow: 0 1px 2px #ccc;
@@ -921,7 +935,9 @@ font-size: 18px;
 		.mgmt-panel-gl .btn-ok:active,
 	.mgmt-panel-tm .btn-ok:active,
     .popup .btn-ok:active,
-    .popup .btn-cancel:active
+    .popup .btn-cancel:active,
+     .popup-tm .btn-ok:active,
+    .popup-tm .btn-cancel:active
     {
 	    -moz-box-shadow: inset 0 0 1px 1px #888;
 	    -webkit-box-shadow: inset 0 0 1px 1px #888;
@@ -930,7 +946,9 @@ font-size: 18px;
 	
 
     .popup .btn-ok.right,
-    .popup .btn-cancel.right
+    .popup .btn-cancel.right,
+    .popup-tm .btn-ok.right,
+    .popup-tm .btn-cancel.right
     {
 	    float: right;
     }    
@@ -1024,12 +1042,22 @@ margin:0 auto; overflow:hidden; width:100%;
 		width: 220px!important;
 }
 
-.mgmt-tm .fileupload {
-	width:28%;
+.new td.action {
+width: 330px!important;
 }
 
+.new td.fileupload {
+width: 18%;
+}
 
-.popup-tm h1 {padding:0 20px; margin:10px 0;}
+.new td.description {
+width: 290px!important;
+}
+
+.mgmt-tm .fileupload {
+width: 22%;
+}
+
 
  .back-mgmt {padding:20px; margin-right:20px;}
 
@@ -1055,7 +1083,11 @@ font-size:14px;}
 	border:1px solid #333;
 }
 
-.mgmt-tm .action .btn-grey, .addtmxrow .btn-grey {width: 75px;
+.btn-grey.uploadtm, .btn-grey.addtmxfile {
+width: 100px!important;
+}
+
+.mgmt-tm .action .btn-grey, .addtmxrow .btn-grey {width: 80px;
 text-align: center;
 }
 body.cattool .mgmt-tm.mine thead,
@@ -1095,7 +1127,7 @@ margin-top: 10px;
 
 .dataTables_paginate {float:right; margin-top:10px;}
 .mgmt-tm .btn-grey span {float: left;
-margin: 2px 2px 0px;}
+margin: 2px 6px 2px 0px;}
 
 /*
 #activetm {margin-bottom: 15px;}
@@ -1361,7 +1393,7 @@ padding: 0 25px;
 input#new-tm-key {width: 85%;
 	margin:0 0 10px 0;
 height: 0px;}
-input#new-tm-description {height:20px;
+input#new-tm-description {height:40px;
 
 }
 tr.new {
@@ -1545,8 +1577,8 @@ only screen and (in-resolution: 2dppx) {
 	background: #09beec url(../img/sprite2x.png) -4px -516px no-repeat;
 }
 
-.popup h1 {
-	background: #6d6e71 url(../img/sprite2x.png) 10px 10px no-repeat;	
+.popup h1, .popup-tm h1 {
+	background: #4D4D4D url(../img/sprite2x.png) 10px 10px no-repeat;	
 	background-size: 42px;
 
 }
@@ -1615,6 +1647,10 @@ color: #000;
 [class^="icon-"], [class*=" icon-"],
 .sorting_desc:after,
 .sorting_asc:after,
+.add-tm:before,
+.stopuse:before,
+.addtmxfile .text:before,
+.uploadkey:before,
 .sorting:after {
 	font-family: 'icomoon';
 	speak: none;
@@ -1629,6 +1665,27 @@ color: #000;
 	-moz-osx-font-smoothing: grayscale;
 }
 
+.add-tm:before {
+	content: "\f067";
+	padding: 0 10px 0 0;
+}
+
+.uploadkey:before {
+		content: "\f055";
+	padding-right: 5px;
+}
+
+
+.stopuse:before {
+	content: "\f056";
+	padding-right: 5px;
+}
+
+.addtmxfile .text:before {
+	content: "\e601";
+
+	padding-right: 5px;
+}
 
 .icon-search:before {
 	content: "\f002";
@@ -1751,3 +1808,7 @@ color: #000;
 	content: "\e600";
 }
 
+/* side-popup adjustments */
+body.side-popup {
+    overflow: hidden !important;
+}

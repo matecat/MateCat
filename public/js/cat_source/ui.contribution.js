@@ -78,9 +78,9 @@ console.log('translation 4: ', translation);
 		var id_segment = id.split('-')[1];
 
         if( config.brPlaceholdEnabled ) {
-            var txt = this.postProcessEditarea(n, '.source');
+            txt = this.postProcessEditarea(n, '.source');
         } else {
-            var txt = $('.source', n).text();
+            txt = $('.source', n).text();
         }
 
 //		var txt = $('.source', n).text();
@@ -263,7 +263,7 @@ console.log('translation 4: ', translation);
 		} else {
 			if (UI.debug)
 				console.log('no matches');
-console.log('add class loaded for segment ' + segment_id+ ' in renderContribution 2')
+//            console.log('add class loaded for segment ' + segment_id+ ' in renderContribution 2')
 			$(segment).addClass('loaded');
 			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
 		}

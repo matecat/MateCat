@@ -8,7 +8,7 @@ $.extend(UI, {
 		} else {
 			this.custom = {
 				"extended_concordance": false
-			}
+			};
 			this.saveCustomization();
 		}
 	},

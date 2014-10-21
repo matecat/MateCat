@@ -66,7 +66,7 @@ UI = {
 		segment_id = $(segment).attr('id').split('-')[1];
 		$('.percentuage', segment).removeClass('visible');
 //		if (!segment.hasClass('saved'))
-		this.setTranslation($(segment).attr('id').split('-')[1], status, false, byStatus);
+		this.setTranslation($(segment).attr('id').split('-')[1], status, false);
 		segment.removeClass('saved');
 		this.setContribution(segment_id, status, byStatus);
 		this.setContributionMT(segment_id, status, byStatus);
@@ -957,7 +957,7 @@ UI = {
 					$('.alternatives .overflow', segment).show();
 					UI.getContribution(segment, 0);
 				}, 3000);				
-			};	
+			}
 		}		
 		
 		
@@ -1008,9 +1008,9 @@ UI = {
     reactivateJob: function() {
         APP.doRequest({
             data: {
-                action:		   "changeJobsStatus",
+                action:         "changeJobsStatus",
                 new_status:     "active",
-                res: 		   "job",
+                res:            "job",
                 id:             config.job_id,
                 jpassword:      config.password,
             },
@@ -1117,7 +1117,6 @@ UI = {
 	renderSegments: function(files, where, starting) {
 		$.each(files, function(k) {
 			var newFile = '';
-			var fs = this.file_stats;
 //            var fid = fs['ID_FILE'];
 			var fid = k;
 			var articleToAdd = ((where == 'center') || (!$('#file-' + fid).length)) ? true : false;
@@ -1160,8 +1159,7 @@ UI = {
                 escapedSegment = escapedSegment.replace( config.lfPlaceholderRegex, "\n" );
                 escapedSegment = escapedSegment.replace( config.crPlaceholderRegex, "\r" );
                 escapedSegment = escapedSegment.replace( config.crlfPlaceholderRegex, "\r\n" );
-//				console.log('vediamo perché: ', UI.decodePlaceholdersToText(this.segment, true, this.sid, 'prova'));
-				
+
 				/* tab placeholders replacement */
  //               escapedSegment = escapedSegment.replace( config.tabPlaceholderRegex, "<span class=" );
 				
@@ -1903,8 +1901,8 @@ UI = {
 	},
 	displayMessage: function(messages) {
 		if($('body').hasClass('incomingMsg')) return false;
-        $.each(messages, function(index) {
-            if(typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date( this.expire ) > ( new Date ) )  ) {
+        $.each(messages, function() {
+            if(typeof $.cookie('msg-' + this.token) == 'undefined' && ( new Date( this.expire ) > ( new Date() ) )  ) {
                 UI.showMessage({
                     msg: this.msg,
                     token: this.token,
@@ -1991,7 +1989,7 @@ UI = {
 		}, 'local');
 	},
 
-    setTranslation: function(id_segment, status, caller, byStatus) {
+    setTranslation: function(id_segment, status, caller) {
         console.log('id_segment: ', id_segment);
         console.log('status: ', status);
         console.log('setTranslation sul segmento ', UI.currentSegmentId);
@@ -2186,11 +2184,11 @@ UI = {
 	checkPendingOperations: function() {
 		if(this.checkInStorage('pending')) {
 			UI.execAbortedOperations();
-		};
+		}
 	},
 	checkInStorage: function(what) {
 		var found = false;
-		$.each(localStorage, function(k,v) {
+		$.each(localStorage, function(k) {
 			if(k.substring(0, what.length) === what) {
 				found = true;
 			}
@@ -2199,7 +2197,7 @@ UI = {
 	},
 
 	clearStorage: function(what) {
-		$.each(localStorage, function(k,v) {
+		$.each(localStorage, function(k) {
 			if(k.substring(0, what.length) === what) {
 				localStorage.removeItem(k);
 			}
@@ -2427,7 +2425,7 @@ UI = {
         logValue = {
             "data": data,
             "stack": stackTrace()
-        }
+        };
 //        console.log('prova: ', prova);
         console.log('logValue: ', JSON.stringify(logValue));
         localStorage.setItem('log-' + operation + '-' + dd.getTime(), JSON.stringify(logValue));
@@ -2549,13 +2547,7 @@ UI = {
      * @param str
      * @returns {XML|string}
      */
-    decodePlaceholdersToText: function (str, jumpSpacesEncode, sid, operation) {
-//		toLog = (sid == '13735228');
-//		toLog = ((operation == 'contribution source'));
-//		if(toLog) console.log('decodePH operation: ', operation);
-//		if(operation == 'source') {
-//			if(toLog) console.log('SOURCE STR: ', str);
-//		}
+    decodePlaceholdersToText: function (str, jumpSpacesEncode) {
         if(!UI.hiddenTextEnabled) return str;
 		jumpSpacesEncode = jumpSpacesEncode || false;
 		var _str = str;
@@ -2579,7 +2571,7 @@ UI = {
         if(!UI.hiddenTextEnabled) return str;
 
 		var newStr = '';
-		$.each($.parseHTML(str), function(index) {
+		$.each($.parseHTML(str), function() {
 
 			if(this.nodeName == '#text') {
 				newStr += $(this).text().replace(/\s/gi, '<span class="space-marker marker monad" contenteditable="false"> </span>');
@@ -2646,7 +2638,7 @@ UI = {
 	unnestMarkers: function() {
 		$('.editor .editarea .marker .marker').each(function() {
 			$(this).parents('.marker').after($(this));
-		})
+		});
 	},
 
 	processErrors: function(err, operation) {
@@ -2737,6 +2729,7 @@ UI = {
 //        console.log('before propagate');
 
         UI.propagateTranslation(segment, status, false);
+/*
         return false;
 
         if ( UI.propagationsAvailable ){
@@ -2774,7 +2767,7 @@ UI = {
             }
 
         }
-
+*/
   /*
         if ($.cookie('_auto-propagation-' + config.job_id + '-' + config.password)) {
             console.log('cookie already set');
@@ -2821,7 +2814,7 @@ UI = {
             plusTranslated = (evenTranslated)? ', section[data-hash=' + $(segment).attr('data-hash') + '].status-translated': '';
 
             //NOTE: i've added filter .not( segment ) to exclude current segment from list to be set as draft
-            $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + plusTranslated ).not( segment ), function(index) {
+            $.each($('section[data-hash=' + $(segment).attr('data-hash') + '].status-new, section[data-hash=' + $(segment).attr('data-hash') + '].status-draft, section[data-hash=' + $(segment).attr('data-hash') + '].status-rejected' + plusTranslated ).not( segment ), function() {
                 $('.editarea', this).html( $('.editarea', segment).html() );
 
                 // if status is not set to draft, the segment content is not displayed
@@ -2989,7 +2982,7 @@ UI = {
 		this.currentSegment.removeClass('waiting_for_check_result');
 		this.registerQACheck();
 	},
-	saveInUndoStack: function(operation) {
+	saveInUndoStack: function() {
 //		noRestore = (typeof noRestore == 'undefined')? 0 : 1;
 		currentItem = this.undoStack[this.undoStack.length - 1 - this.undoStackPosition];
 
@@ -2997,7 +2990,7 @@ UI = {
 			if (currentItem.trim() == this.editarea.html().trim())
 				return;
 		}
-        if(this.editarea == '') return;
+        if(this.editarea === '') return;
 
 		if (this.editarea.html() === '') return;
 
@@ -3211,7 +3204,7 @@ $.extend(UI, {
 					"mac": "alt+meta+c",
 				}
 			},
-		}
+		};
 		this.setShortcuts();
 		this.setContextMenu();
 		this.createJobMenu();
@@ -3532,16 +3525,16 @@ $.extend(UI, {
 //                $('#private-tm-pass').val(data.pass);
 //                $('#create_private_tm_btn').attr('data-key', data.key);
                 return false;
-            })
-        }).on('change', '#addtm-tr-read, #addtm-tr-write', function(e) {
+            });
+        }).on('change', '#addtm-tr-read, #addtm-tr-write', function() {
             if(UI.checkTMgrants($('.addtm-tr'))) {
                 $('.addtm-tr .error-message').hide();
             }
-        }).on('change', '#addtm-tr-key-read, #addtm-tr-key-write', function(e) {
+        }).on('change', '#addtm-tr-key-read, #addtm-tr-key-write', function() {
             if(UI.checkTMgrants($('.addtm-tr-key'))) {
                 $('.addtm-tr-key .error-message').hide();
             }
-        }).on('change', '.addtm-select-file', function(e) {
+        }).on('change', '.addtm-select-file', function() {
 /*
             $('.addtm-tr .warning-message').hide();
             if($('#addtm-tr-key').val() == '') {
@@ -3552,28 +3545,28 @@ $.extend(UI, {
                 }, 500);
             }
 */
-        }).on('click', '.addtm-tr-key .btn-ok', function(e) {
+        }).on('click', '.addtm-tr-key .btn-ok', function() {
             if(!UI.checkTMgrants($('.addtm-tr-key'))) {
                 return false;
             } else {
                 $('.addtm-tr-key .error-message').text('').hide();
-            };
+            }
             UI.checkTMKey($('#addtm-tr-key-key').val(), 'key');
-        }).on('click', '#addtm-select-file', function(e) {
+        }).on('click', '#addtm-select-file', function() {
             $('.addtm-select-file').click();
-        }).on('change', '.addtm-select-file', function(e) {
+        }).on('change', '.addtm-select-file', function() {
             console.log($(this).val());
-            if($(this).val() != '') {
+            if($(this).val() !== '') {
                 $('#uploadTMX').html($(this).val().split('\\')[$(this).val().split('\\').length - 1] + '<a class="delete"></a>').show();
             } else {
                 $('#uploadTMX').hide();
             }
-        }).on('change', '#addtm-tr-key', function(e) {
+        }).on('change', '#addtm-tr-key', function() {
             $('.addtm-tr .warning-message').hide();
-        }).on('input', '#addtm-tr-key', function(e) {
+        }).on('input', '#addtm-tr-key', function() {
             UI.checkAddTMEnable();
             UI.checkManageTMEnable();
-        }).on('change', '#addtm-tr-key, .addtm-select-file, #addtm-tr-read, #addtm-tr-write', function(e) {
+        }).on('change', '#addtm-tr-key, .addtm-select-file, #addtm-tr-read, #addtm-tr-write', function() {
             UI.checkAddTMEnable();
 /*
         }).on('change', '#addtm-tr-key, .addtm-tr input:file, .addtm-tr input.r, .addtm-tr input.w', function(e) {
@@ -3595,11 +3588,11 @@ $.extend(UI, {
                 console.log('vediamo qui');
                 $('.addtm-tr .error-message').text('').hide();
                 console.log('CONTROLLO: ', $('#uploadTMX').text());
-                operation = ($('#uploadTMX').text() == '')? 'key' : 'tm';
+                operation = ($('#uploadTMX').text() === '')? 'key' : 'tm';
                 UI.checkTMKey($('#addtm-tr-key').val(), operation);
 //                if(UI.checkTMKey($('#addtm-tr-key').val(), 'tm')) fileUpload($('#addtm-upload-form')[0],'http://matecat.local/?action=addTM','upload');
 
-            };
+            }
 
 
 /*
@@ -3764,11 +3757,11 @@ $.extend(UI, {
 		}).on('click', '.popup-settings #settings-save', function(e) {
 			e.preventDefault();
 			APP.closePopup();
-        }).on('click', '.modal .x-popup', function(e) {
+        }).on('click', '.modal .x-popup', function() {
 			if($('body').hasClass('shortcutsDisabled')) {
 				UI.bindShortcuts();
 			}
-		}).on('click', '.popup-settings .x-popup', function(e) {
+		}).on('click', '.popup-settings .x-popup', function() {
 			console.log('close');
 		}).on('click', '.popup-settings .submenu li', function(e) {
 			e.preventDefault();
@@ -3779,7 +3772,7 @@ $.extend(UI, {
 //			console.log($(this).attr('data-tab'));
 		}).on('click', '.popup-settings .submenu li a', function(e) {
 			e.preventDefault();
-		}).on('click', '#settings-shortcuts .list .combination .keystroke', function(e) {
+		}).on('click', '#settings-shortcuts .list .combination .keystroke', function() {
 			$('#settings-shortcuts .list .combination .msg').remove();
 			$('#settings-shortcuts .list .combination .keystroke.changing').removeClass('changing');
 			$(this).toggleClass('changing').after('<span class="msg">New: </span>');
@@ -3797,7 +3790,7 @@ $.extend(UI, {
 			e.preventDefault();
 			UI.closeContextMenu();
 			UI.addWord(UI.selectedMisspelledElement.text());
-		}).on('click', '.reloadPage', function(e) {
+		}).on('click', '.reloadPage', function() {
 			location.reload(true);
 		}).on('click', '.tag-autocomplete li', function(e) {
 			e.preventDefault();
@@ -3850,7 +3843,7 @@ $.extend(UI, {
 			var n = e.which;
 			var c = $(this).parents('.combination');
 			if(!(c.find('.new').length)) {
-				$(c).append('<span class="new"></span>')
+				$(c).append('<span class="new"></span>');
 			}
 			var s = $('.new', c);
 			console.log(n);
@@ -3887,7 +3880,7 @@ $.extend(UI, {
 //				$('#settings-shortcuts.modifying').removeClass('modifying');
 //				$('.popup-settings .submenu li[data-tab="settings-shortcuts"]').addClass('modified');
 			}				
-		}).on('keyup', '#settings-shortcuts.modifying .keystroke', function(e) {
+		}).on('keyup', '#settings-shortcuts.modifying .keystroke', function() {
 			console.log('keyup');
 			var c = $(this).parents('.combination');
 			var s = $('.new', c);
@@ -4103,19 +4096,19 @@ $.extend(UI, {
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();
 			e.stopPropagation();			
-		}).on('mouseup', '.editarea', function(e) {
+		}).on('mouseup', '.editarea', function() {
 			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
 				if(!UI.isFirefox) UI.showEditToolbar();
-			};
-		}).on('mousedown', '.editarea', function(e) {
+			}
+		}).on('mousedown', '.editarea', function() {
 			UI.hideEditToolbar();
-		}).on('mousedown', '.editToolbar .uppercase', function(e) {
+		}).on('mousedown', '.editToolbar .uppercase', function() {
 			UI.formatSelection('uppercase');
-		}).on('mousedown', '.editToolbar .lowercase', function(e) {
+		}).on('mousedown', '.editToolbar .lowercase', function() {
 			UI.formatSelection('lowercase');
-		}).on('mousedown', '.editToolbar .capitalize', function(e) {
+		}).on('mousedown', '.editToolbar .capitalize', function() {
 			UI.formatSelection('capitalize');
-		}).on('mouseup', '.editToolbar li', function(e) {
+		}).on('mouseup', '.editToolbar li', function() {
 			restoreSelection();
 		}).on('click', '.editarea', function(e, operation, action) {
 			if (typeof operation == 'undefined')
@@ -4162,90 +4155,6 @@ $.extend(UI, {
 		}).on('keydown', '.editor .source, .editor .editarea', UI.shortcuts.searchInConcordance.keystrokes.standard, function(e) {
 			e.preventDefault();
 			UI.preOpenConcordance();
-        }).on('keydown', '.editor .editarea', function(e) {
-//            saveSelection();
-//            console.log('KEYDOWN: ', UI.editarea.html());
-//            restoreSelection();
-        }).on('keypress', '.editor .editarea', function(e) {
-//            saveSelection();
-//            console.log('KEYPRESS: ', UI.editarea.html());
-//            restoreSelection();
-        }).on('keyup', '.editor .editarea', function(e) {
-/*
-            saveSelection();
-            insideBr = $('.editor .editarea .br .rangySelectionBoundary').length;
-//            if(insideBr) console.log('is inside BR');
-
-            currentBr = $('.br:has(.rangySelectionBoundary)', UI.editarea);
-//            startRow = $('.br:has(.rangySelectionBoundary) .startRow', UI.editarea);
-            pastedContent = currentBr.text().trim();
-
-//            pastedContent = startRow.text().trim();
-            restoreSelection();
-//            console.log('startRow: ', startRow);
-//            console.log('startRow text: ', startRow.text().trim());
-            currentBr.html('<br /><span class="startRow">&nbsp;</span>');
-//            console.log('currentBr: ', currentBr);
-//            console.log('pastedContent: ', pastedContent);
-            $(currentBr).after(pastedContent + '<span class="pointCursorHere"></span>');
-//            setCursorPosition($('.pointCursorHere', UI.editarea)[0]);
-            $('.pointCursorHere', UI.editarea).remove();
-*/
-//            setCursorAfterNode(window.getSelection().getRangeAt(0), $('.pointCursorHere', UI.editarea)[0]);
-
-//            console.log('ecco: ', UI.editarea.html());
-//      $('.editor .editarea .startRow').replaceWith('<span class="startRow">&nbsp;</span>' + pastedContent);
-
-            /*
-                        saveSelection();
-                        insideStartRow = $('.editor .editarea .startRow .rangySelectionBoundary').length;
-                        startRow = $('.startRow:has(.rangySelectionBoundary)', UI.editarea);
-                        pastedContent = startRow.text().trim();
-
-            //            console.log('cursore dentro a uno span? ', insideStartRow);
-                        restoreSelection();
-            //            console.log('insideStartRow: ', insideStartRow);
-            //            console.log('startRow: ', '"' + startRow.text() + '"');
-            //            console.log('startRow: ', '"' + startRow.text().trim() + '"');
-            //            $(startRow).html()
-            //            $('.editor .editarea .startRow')[0].innerHTML = '&nbsp;';
-            //            console.log('pastedContent: ', pastedContent);
-                        $('.editor .editarea .startRow').replaceWith(pastedContent);
-
-            //            $('.editor .editarea .startRow').html('&nbsp;').after(startRow.text().trim());
-            //            $('.editor .editarea .startRow').text('COSO').after(startRow.text().trim());
-            */
-
-//            saveSelection();
-//            console.log('KEYUP: ', UI.editarea.html());
-//            restoreSelection();
-/*
-            // are the cursor inside of a span tag?
-            saveSelection();
-            insideSpan = $('.editor .editarea span .rangySelectionBoundary').length;
-            console.log('cursore dentro a uno span? ', insideSpan);
-            restoreSelection();
-            console.log('insideSpan: ', insideSpan);
-            if(insideSpan) {
-                console.log('vediamo insideSpan');
-                e.preventDefault();
-            }
-*/
-            /*
-                        console.log('KEYDOWN ON EDITAREA');
-                        saveSelection();
-                        console.log('html: ', UI.editarea.html());
-                        insideSpan = $('.editor .editarea span .rangySelectionBoundary').length;
-                        console.log('cursore dentro a uno span? ', insideSpan);
-                        range = window.getSelection().getRangeAt(0);
-                        node = $('.editor .editarea span:has(.rangySelectionBoundary)')[0];
-                        if(insideSpan) {
-                            console.log(node);
-                            setCursorPosition(node, 'end');
-            //                setCursorAfterNode(range, node);
-                        }
-                        restoreSelection();
-             */
         }).on('keyup', '.editor .editarea', 'return', function(e) {
             console.log('UI.defaultBRmanagement: ', UI.defaultBRmanagement);
 
@@ -4311,7 +4220,7 @@ $.extend(UI, {
 //					console.log('prima del replace: ', UI.editarea.html());
                     // if tag-autocomplete-endcursor is inserted before the &lt; then it is moved after it
                     UI.stripAngular = (UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi).length)? true : false;
-                    UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"\></span>'));
+                    UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
 //                    console.log(UI.editarea.html().replace(/&lt;<span class="tag-autocomplete-endcursor"\><\/span>/gi, '<span class="tag-autocomplete-endcursor"\>XXX/span>&lt;'));
 //                    console.log(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"\>XXX/span>'));
 
@@ -4691,7 +4600,7 @@ $.extend(UI, {
 			UI.tagToDelete = $(this);
 //		}).on('drop', '.editor .editarea .locked', function() {
 //			console.log('dropped tag: ', $(this));
-		}).on('drag', '.editarea .locked, .source .locked', function(e) {
+		}).on('drag', '.editarea .locked, .source .locked', function() {
 //			console.log('a tag is dragged');
 //			console.log('e: ', $(this).text());
 			UI.draggingTagIsOpening = ($(this).text().match(/^<\//gi))? false : true;
@@ -4725,13 +4634,13 @@ $.extend(UI, {
 				UI.draggingTagIsOpening = null;
 				UI.editarea.html(UI.editarea.html().replace(/&nbsp;(<span contenteditable\="false" class\="locked)/gi, toAddBefore + '$1').replace(/(&gt;<\/span>)&nbsp;/gi, '$1' + toAddAfter));
 				var nn = 0;
-				$('.locked', UI.editarea).each(function(index) {
+				$('.locked', UI.editarea).each(function() {
 					if($(this).text() == UI.draggingTagText) {
 						uniqueEl = $(this);
 						nn++;
 						return false;
 					}
-				})
+				});
 				if(nn > 0) {
 					setCursorPosition(uniqueEl[0].nextSibling, 0);
 				}
@@ -5013,7 +4922,7 @@ $.extend(UI, {
 			setTimeout(function() {
 				UI.saveInUndoStack('paste');
 			}, 100);
- 			UI.lockTags(UI.editarea);
+            UI.lockTags(UI.editarea);
 			UI.currentSegmentQA();
  */
 		}).on('click', 'a.close', function(e, param) {
@@ -5082,7 +4991,7 @@ $.extend(UI, {
 			$(this).parents('section').find('.close').focus();
 		});
 
-		$("#point2seg").bind('mousedown', function(e) {
+		$("#point2seg").bind('mousedown', function() {
 			UI.setNextWarnedSegment();
 		});
 		
@@ -5335,9 +5244,9 @@ console.log('translation 4: ', translation);
 		var id_segment = id.split('-')[1];
 
         if( config.brPlaceholdEnabled ) {
-            var txt = this.postProcessEditarea(n, '.source');
+            txt = this.postProcessEditarea(n, '.source');
         } else {
-            var txt = $('.source', n).text();
+            txt = $('.source', n).text();
         }
 
 //		var txt = $('.source', n).text();
@@ -5520,7 +5429,7 @@ console.log('translation 4: ', translation);
 		} else {
 			if (UI.debug)
 				console.log('no matches');
-console.log('add class loaded for segment ' + segment_id+ ' in renderContribution 2')
+//            console.log('add class loaded for segment ' + segment_id+ ' in renderContribution 2')
 			$(segment).addClass('loaded');
 			$('.sub-editor.matches .overflow', segment).append('<ul class="graysmall message"><li>No matches could be found for this segment. Please, contact <a href="mailto:support@matecat.com">support@matecat.com</a> if you think this is an error.</li></ul>');
 		}
@@ -5974,7 +5883,7 @@ $.extend(UI, {
 	markTagMismatch: function(d) {
         // temp
 //        d.tag_mismatch.order = 2;
-        if((typeof d.tag_mismatch.order == 'undefined')||(d.tag_mismatch.order == '')) {
+        if((typeof d.tag_mismatch.order == 'undefined')||(d.tag_mismatch.order === '')) {
             if(typeof d.tag_mismatch.source != 'undefined') {
                 $.each(d.tag_mismatch.source, function(index) {
                     $('#segment-' + d.id_segment + ' .source span.locked:not(.temp)').filter(function() {
@@ -6081,10 +5990,7 @@ $.extend(UI, {
 		$('.tag-autocomplete').css('left', offset.left);
 		this.checkAutocompleteTags();
 	},
-	jumpTag: function(range, where) {
-//		console.log('range: ', range);
-//		console.log(range.endContainer.data.length);
-//		console.log(range.endOffset);
+	jumpTag: function(range) {
 		if((range.endContainer.data.length == range.endOffset)&&(range.endContainer.nextElementSibling.className == 'monad')) { 
 //			console.log('da saltare');
 			setCursorAfterNode(range, range.endContainer.nextElementSibling);
@@ -6196,7 +6102,7 @@ $.extend(UI, {
 				UI.setExtendedConcordances(true);			
 			} else {
 				UI.setExtendedConcordances(false);
-			};
+			}
 		} else {
 			console.log('no matches');
 			$('.sub-editor.concordances .overflow', segment).append('<ul class="graysmall message"><li>Can\'t find any matches. Check the language combination.</li></ul>');
@@ -6333,7 +6239,7 @@ $.extend(UI, {
 			$('.tab-switcher-gl a .number', segment).text('').attr('data-num', 0);	
 		}		
 	},
-	markGlossaryItemsInSource: function(d, context) {
+	markGlossaryItemsInSource: function(d) {
 		if (Object.size(d.data.matches)) {
 			i = 0;	
 			cleanString = $('.source', UI.currentSegment).html();
@@ -6350,7 +6256,7 @@ $.extend(UI, {
 				int = {
 					x: coso.indexOf('<mark>'), 
 					y: coso.indexOf('</mark>') - 6
-				} 
+				};
 				intervals.push(int);
 			});
 			UI.intervalsUnion = [];
@@ -6370,7 +6276,7 @@ $.extend(UI, {
 	removeGlossaryMarksFormSource: function() {
 		$('.editor mark.inGlossary').each(function() {
 			$(this).replaceWith($(this).html());
-		})
+		});
 	},
 
 	checkIntervalsUnions: function(intervals) {
@@ -6419,8 +6325,8 @@ $.extend(UI, {
 		smallest = {
 					x: 1000000, 
 					y: 2000000
-				} 
-		$.each(ar, function(index) {
+				};
+		$.each(ar, function() {
 			if(this.x < smallest.x) smallest = this;
 		});
 		return smallest;
@@ -7450,7 +7356,7 @@ function fileUpload(form, action_url, div_id) {
 
         // Del the iframe...
         setTimeout('iframeId.parentNode.removeChild(iframeId)', 250);
-    }
+    };
 
     if (iframeId.addEventListener) iframeId.addEventListener("load", eventHandler, true);
     if (iframeId.attachEvent) iframeId.attachEvent("onload", eventHandler);
@@ -7897,7 +7803,7 @@ $.extend(UI, {
 		} else {
 			this.custom = {
 				"extended_concordance": false
-			}
+			};
 			this.saveCustomization();
 		}
 	},
@@ -7938,7 +7844,7 @@ $.extend(UI, {
 $.extend(UI, {
     initTM: function() {
         console.log('TM init vediamo');
-
+        $('.popup-tm').height($(window).height());
 // script per lo slide del pannello di manage tmx
 
 
@@ -7948,12 +7854,14 @@ $.extend(UI, {
             $( ".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
             $("#SnapABug_Button").show();
             $(".outer-tm").hide();
+            $('body').removeClass('side-popup');
         });
 
         $(".outer-tm").click(function() {
             $(".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
             $("#SnapABug_Button").show();
             $(".outer-tm").hide();
+            $('body').removeClass('side-popup');
         });
 
         $(".mgmt-tm").click(function() {
@@ -8092,13 +8000,11 @@ $.extend(UI, {
             $('.addtmxrow').hide();
             $(".addtmx").show();
 //            UI.updateTM($(this).parents('tr'));
-        }).on('change', '#new-tm-read, #new-tm-write', function(e) {
+        }).on('change', '#new-tm-read, #new-tm-write', function() {
             if(UI.checkTMgrants($('.addtm-tr'))) {
 //                $('.addtm-tr .error-message').hide();
             }
-        }).on('change', '#activetm td.lookup input, #activetm td.update input', function(e) {
-//            UI.updateTM($(this).parents('tr'));
-        }).on('change', '.mgmt-tm tr.new td.fileupload input[type="file"]', function(e) {
+        }).on('change', '.mgmt-tm tr.new td.fileupload input[type="file"]', function() {
             if($(this).val() == '') {
                 $('.mgmt-tm tr.new .uploadtm .text').text('Add a key');
             } else {
@@ -8117,7 +8023,7 @@ $.extend(UI, {
 
         });
 
-        $('tr').click(function(event) {
+        $('tr').click(function() {
             $('tr').not(this).removeClass('clicked');
             $(this).toggleClass('clicked');
         });
@@ -8181,6 +8087,7 @@ $.extend(UI, {
 
     },
     openLanguageResourcesPanel: function() {
+        $('body').addClass('side-popup');
         $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
         UI.checkTMheights();
         $("#SnapABug_Button").hide();
@@ -8252,7 +8159,7 @@ $.extend(UI, {
                     console.log('checkTMKey success!!');
                     console.log('d: ', d);
                     console.log('d.success: ', d.success);
-                    if(d.success == true) {
+                    if(d.success === true) {
                         console.log('key is good');
                         console.log('adding a tm');
                         UI.execAddTM('new');
@@ -8260,6 +8167,7 @@ $.extend(UI, {
                     } else {
                         console.log('key is bad');
                         return false;
+/*
                         if(this == 'key') {
                             console.log('error adding a key');
                             $('.mgmt-tm tr.new .message').text(d.errors[0].message);
@@ -8268,6 +8176,7 @@ $.extend(UI, {
                             $('.mgmt-tm tr.new .message').text(d.errors[0].message);
                         }
                         return false;
+*/
                     }
                 }
             });
@@ -8325,7 +8234,7 @@ $.extend(UI, {
                 console.log('addTM error!!');
                 $('.mgmt-tm tr.new .message').text('Error adding your TM!');
             },
-            success: function(d) {
+            success: function() {
                 console.log('addTM success!!');
                 newTr = '<tr class="ui-sortable-handle">' +
                         '    <td class="privatekey">' + this.tm_key + '</td>' +
@@ -8427,8 +8336,9 @@ $.extend(UI, {
         }
 
         // Submit the form...
-        form.submit(); return false;
-
+        form.submit();
+        return false;
+/*
 //    document.getElementById(div_id).innerHTML = "Uploading...";
         $('.popup-addtm-tr .x-popup').click();
         APP.showMessage({
@@ -8441,11 +8351,12 @@ $.extend(UI, {
         console.log('TMName 1: ', TMName);
 //    UI.pollForUploadProgress(TMKey, TMName);
         UI.pollForUploadCallback(TMKey, TMName);
+*/
     },
     pollForUploadCallback: function(TMKey, TMName) {
         if($('#uploadCallback').text() != '') {
             msg = $.parseJSON($('#uploadCallback pre').text());
-            if(msg.success == true) {
+            if(msg.success === true) {
                 UI.pollForUploadProgress(TMKey, TMName);
             } else {
                 APP.showMessage({
@@ -8555,7 +8466,7 @@ $.extend(UI, {
             error: function() {
                 console.log('Error saving TM data!!');
             },
-            success: function(d) {
+            success: function() {
                 console.log('TM data saved!!');
             }
         });
@@ -8623,6 +8534,7 @@ $.extend(UI, {
             error: function() {
             },
             success: function(d) {
+                console.log(d);
 /*
                 if(d.errors.length) {
                     APP.showMessage({

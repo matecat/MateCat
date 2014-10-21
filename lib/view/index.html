@@ -233,8 +233,10 @@
             <div class="popup">
                 <a href="#" class="x-popup"></a>
 
-                <h1>
-                    Language Resources
+                 <h1>
+                    <a  href="#" class="btn-ok right">Save</a>
+                    <a href="#" class="btn-cancel right">Cancel</a>
+                    Language Resources 
                 </h1>
 
                 <div class="popup-box">
@@ -257,9 +259,9 @@
                             <form id="addtm-upload-form" class="pull-left">
                                 <div class="block">
                                     <input type="checkbox" disabled="disabled" name="r" class="r" value="1" checked="checked" id="addtm-tr-read" />
-                                    <label for="addtm-tr-read">Show matches from TM</label>
+                                    <label for="addtm-tr-read">Lookup</label>
                                     <input type="checkbox" disabled="disabled" name="w" class="w" value="1" checked="checked" id="addtm-tr-write" />
-                                    <label for="addtm-tr-write">Add translations to TM</label>
+                                    <label for="addtm-tr-write">Update</label>
                                 </div>
                                 <div class="block">
 
@@ -505,8 +507,10 @@
             
             <a href="#" class="x-popup"></a>
 
-            <h1 class="pull-left">
-                Language Resources
+             <h1>
+                <a  href="#" class="btn-ok right">Save</a>
+                <a href="#" class="btn-cancel right">Cancel</a>
+                Language Resources 
             </h1>
 
             <div class="popup-box">
@@ -529,26 +533,26 @@
                                 <p class="warning-message" style="display: none;"><span></span></p>
 
                                 <div class="block pull-right ">
-                                    <a class="btn-ok clear add-tm"><span class="icon-plus"></span> Add a TM</a>
+                                    <a class="btn-ok clear add-tm">Add a TM</a>
                                 </div>
                                 <h3 class="pull-left">Active TM</h3>
 
                                 <table class="mgmt-tm scroll owner">
                                     <thead>
                                     <tr>
-                                        <th>Private Key</th>
-                                        <th>Description</th>
-                                        <th>Lang Pair</th>
-                                        <th>Lookup</th>
-                                        <th>Update</th>
-                                        <th>Action</th>
+                                        <th class="privatekey">Private Key</th>
+                                        <th class="description">Description</th>
+                                        <th class="langpair">Lang Pair</th>
+                                        <th class="check">Lookup</th>
+                                        <th class="check">Update</th>
+                                        <th class="action">Action</th>
                                     </tr>
                                     </thead>
                                     <tbody class="list sortable">
 
                                     <!-- temporary simulation of owner key -->
                                     <tr class="owner ui-sortable-handle clicked" data-tm="1" data-glos="1" data-editable="0">
-                                        <td class="privatekey">********************1234</td>
+                                        <td class="privatekey">***************1234</td>
                                         <td class="description"></td>
                                         <td class="langpair"><span class="mgmt-source">en-US</span> -
                                             <span class="mgmt-target">es-ES</span></td>
@@ -565,12 +569,12 @@
                                 <table class="mgmt-tm scroll mine" id="activetm">
                                     <thead>
                                     <tr>
-                                        <th>Private Key</th>
-                                        <th>Description</th>
-                                        <th>Lang Pair</th>
-                                        <th>Lookup</th>
-                                        <th>Update</th>
-                                        <th>Action</th>
+                                         <th class="privatekey">Private Key</th>
+                                        <th class="description">Description</th>
+                                        <th class="langpair">Lang Pair</th>
+                                        <th class="check">Lookup</th>
+                                        <th class="check">Update</th>
+                                        <th class="action">Action</th>
                                     </tr>
                                     </thead>
                                     <tbody class="list sortable">
@@ -587,12 +591,12 @@
 
                                             <td tal:condition="key/edit" class="action">
                                                 <a class="btn-grey pull-left usetm">
-                                                    <span class="icon icon-minus-circle"></span>
-                                                    <span class="text">Stop Use</span>
+                                                   
+                                                    <span class="icon-minus-circle text">Stop Use</span>
                                                 </a>
                                                 <a class="btn-grey pull-left addtmx">
-                                                    <span class="icon icon-plus-circle"></span>
-                                                    <span class="text">Add TMX</span>
+                                                    
+                                                    <span class="text icon-plus-circle">Add TMX</span>
                                                 </a>
                                             </td>
 
@@ -607,37 +611,40 @@
                                 <table class="mgmt-tm scroll new" >
                                     <thead>
                                     <tr>
-                                        <th>Private Key</th>
-                                        <th>Description</th>
-                                        <th>Lang Pair</th>
-                                        <th>Lookup</th>
-                                        <th>Update</th>
-                                        <th>Action</th>
+                                        <th class="privatekey">Private Key</th>
+                                        <th class="description">Description</th>
+                                        <th class="langpair">Lang Pair</th>
+                                        <th class="check">Lookup</th>
+                                        <th class="check">Update</th>
+                                        <th class="action">Action</th>
                                     </tr>
                                     </thead>
                                     <tbody class="list">
 
                                     <tr class="new hide">
+
                                         <td class="privatekey"> <input class="mgmt-input" type="text" id="new-tm-key"
                                                                        placeholder="Create new private key" />
                                             <a class="btn-ok pull-right">Create</a>
                                         </td>
-                                        <td class="description"><input class="mgmt-input" type="text"
+                                        <td class="description"><input class="mgmt-input" type="textarea"
                                                                        id="new-tm-description"
                                                                        placeholder="Enter a short description" />
                                         </td>
                                         <td class="fileupload" colspan="3">
                                             <input id="new-tm-read" type="checkbox" name="r" class="r" value="1" checked="" />
-                                            <label for="new-tm-read">Show matches from TM</label><br />
+                                            <label for="new-tm-read">Lookup</label>
                                             <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
-                                            <label for="new-tm-write">Add translations to TM</label>
-
-                                            <label class="fileupload">Select a TMX </label><input type="file" />
+                                            <label for="new-tm-write">Update</label>
+                                            
+                                            
                                         </td>
                                         <td class="action">
                                             <a class="pull-left btn-grey uploadtm">
-                                                <span class="icon-upload"></span>
-                                                <span class="text">Add a key</span>
+                                                <span class="text uploadkey">Add a key</span>
+                                            </a>
+                                            <a class="pull-left btn-grey addtmxfile">
+                                                <span class="text">Upload TMX</span>
                                             </a>
                                             <form class="add-TM-Form" action="/" method="post">
                                                 <input type="hidden" name="action" value="addTM" />
@@ -656,9 +663,13 @@
                                                 <span class="icon-times-circle"></span>
                                             </a>
                                         </td>
+                                    
                                     </tr>
-
-
+                                   <tr class="uploadfile">
+                                        <td colspan="3">
+                                        <label class="fileupload">Select a TMX </label><input type="file" />
+                                    </td>
+                                </tr>
                                     </tbody>
                                 </table>
 
@@ -677,7 +688,7 @@
 
                                     <!-- temporary simulation of anonymous key -->
                                     <tr class="anonymous ui-sortable-handle clicked" data-tm="1" data-glos="1" data-editable="0">
-                                        <td class="privatekey">********************1234</td>
+                                        <td class="privatekey">**************1234</td>
                                         <td class="description"></td>
                                         <td class="langpair"><span class="mgmt-source">en-US</span> -
                                             <span class="mgmt-target">es-ES</span></td>
@@ -713,12 +724,12 @@
                                             <td class="update text-center check"><input type="checkbox" checked="${key/w}"/></td>
                                             <td class="action">
                                                 <a class="btn-grey pull-left usetm">
-                                                    <span class="icon icon-play-circle"></span>
-                                                    <span class="text">Use</span>
+                                                   
+                                                    <span class="text icon-play-circle">Use</span>
                                                 </a>
                                                 <a class="btn-grey pull-left  addtmx">
-                                                    <span class="icon icon-plus-circle"></span>
-                                                    <span class="text">Add TMX</span>
+                                                    
+                                                    <span class="text icon-plus-circle">Add TMX</span>
                                                 </a>
                                             </td>
                                         </tr>
@@ -726,9 +737,12 @@
                                     </tbody>
                                 </table>
 
+
                                 <div class="block pull-right ">
                                     <a class="btn-ok clear savebtn">Save</a>
                                 </div>
+                                <div class="block pull-left " style="height: 3000px; background: red">vediamo</div>
+
                             </div>
                         </div>
                     </div>
