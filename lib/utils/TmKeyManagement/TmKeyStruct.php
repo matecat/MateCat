@@ -94,6 +94,24 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
     public $target;
 
     /**
+     * @var int How much readable chars for hashed keys
+     */
+    protected $readable_chars = 5;
+
+    /**
+     * When a key return back from the client we have to compare with these in the job
+     *
+     * @return bool
+     */
+    public function isAnHashedKey(){
+
+        $keyLength = strlen($this->key);
+
+        return substr( $this->key, 0, $keyLength - $this->readable_chars ) ==  str_repeat("*", $keyLength - $this->readable_chars );
+
+    }
+
+    /**
      * @param array|TmKeyManagement_TmKeyStruct|null $params An associative array with the following keys:<br/>
      * <pre>
      *    tm         : boolean - Tm key
@@ -143,5 +161,7 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
     public function equals( TmKeyManagement_TmKeyStruct $obj ) {
         return $this->key == $obj->key;
     }
+
+
 
 } 

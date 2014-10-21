@@ -56,7 +56,7 @@ class TmKeyManagement_Filter {
      *
      * @var array
      */
-    protected $_grants_map = array(
+    public static $GRANTS_MAP = array(
             self::ROLE_TRANSLATOR => array( "r" => 'r_transl', "w" => 'w_transl' ),
             self::ROLE_REVISOR    => array( "r" => 'r_rev', "w" => 'w_rev' ),
             self::OWNER           => array( 'r' => 'r', 'w' => 'w' )
@@ -81,6 +81,12 @@ class TmKeyManagement_Filter {
         $this->__uid = (int)$uid;
     }
 
+    /**
+     * I have to get all owner keys that match required filters and all translator keys that match these filters too
+     * @param $tm_key
+     *
+     * @return bool
+     */
     public function byTranslator( $tm_key ) {
 
         if ( $tm_key[ 'owner' ] == true ) {
@@ -96,8 +102,16 @@ class TmKeyManagement_Filter {
          *      WARNING: Undefined index: uid_transl
          */
         $i_can_see_the_key = false;
-        if( isset( $tm_key[ 'uid_transl' ] ) ){
-            $i_can_see_the_key = ( is_null( $tm_key[ 'uid_transl' ] ) ? true : $this->__uid == $tm_key[ 'uid_transl' ] );
+        if( isset( $tm_key[ 'uid_transl' ] ) ){ // this is a new key type
+
+            if( is_null( $tm_key[ 'uid_transl' ] ) && is_null( $tm_key[ 'uid_rev' ] ) ){
+                //this is an owner key or anonymous one, so i can use it
+                $i_can_see_the_key = true;
+            } else {
+                //it's mine???
+                $i_can_see_the_key = $this->__uid == $tm_key[ 'uid_transl' ];
+            }
+
         }
 
         return ( $is_an_owner_key || $i_can_see_the_key )
@@ -105,6 +119,11 @@ class TmKeyManagement_Filter {
                 && $this->_isTheRightType( $tm_key );
     }
 
+    /**
+     * @param $tm_key
+     *
+     * @return bool
+     */
     public function byRevisor( $tm_key ) {
 
         if ( $tm_key[ 'owner' ] == true ) {
@@ -120,8 +139,16 @@ class TmKeyManagement_Filter {
          *      WARNING: Undefined index: uid_transl
          */
         $i_can_see_the_key = false;
-        if( isset( $tm_key[ 'uid_transl' ] ) ){
-            $i_can_see_the_key = ( is_null( $tm_key[ 'uid_rev' ] ) ? true : $this->__uid == $tm_key[ 'uid_rev' ] );
+        if( isset( $tm_key[ 'uid_transl' ] ) ){ // this is a new key type
+
+            if( is_null( $tm_key[ 'uid_transl' ] ) && is_null( $tm_key[ 'uid_rev' ] ) ){
+                //this is an owner key or anonymous one, so i can use it
+                $i_can_see_the_key = true;
+            } else {
+                //it's mine???
+                $i_can_see_the_key = $this->__uid == $tm_key[ 'uid_rev' ];
+            }
+
         }
 
         return ( $is_an_owner_key || $i_can_see_the_key )
@@ -209,10 +236,10 @@ class TmKeyManagement_Filter {
         }
 
         if( $this->_required_grant == 'rw' ) {
-            $has_required_grants = $tm_key[ $this->_grants_map[ $role ][ 'r' ] ] == true;
-            $has_required_grants = $has_required_grants && $tm_key[ $this->_grants_map[ $role ][ 'w' ] ] == true;
+            $has_required_grants = $tm_key[ self::$GRANTS_MAP[ $role ][ 'r' ] ] == true;
+            $has_required_grants = $has_required_grants && $tm_key[ self::$GRANTS_MAP[ $role ][ 'w' ] ] == true;
         } else {
-            $has_required_grants = $tm_key[ $this->_grants_map[ $role ][ $this->_required_grant ] ] == true;
+            $has_required_grants = $tm_key[ self::$GRANTS_MAP[ $role ][ $this->_required_grant ] ] == true;
         }
 
         return $has_required_grants;
@@ -240,7 +267,7 @@ class TmKeyManagement_Filter {
         $_type = true;
         foreach( $this->_type as $type ){
             //trim for not well formatted required types
-            //    Ex: "tm , gloss " instead of "tm,gloss"
+            //    Ex: "tm , glos " instead of "tm,glos"
             $_type = $_type && ( $tm_key[ trim($type) ] == true );
         }
 

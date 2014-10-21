@@ -42,7 +42,7 @@ class catController extends viewController {
     private $last_job_segment;
     private $last_opened_segment;
 
-    private $_keyList = array();
+    private $_keyList = array( 'totals' => array(), 'job_keys' => array() );
 
     private $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
 
@@ -172,6 +172,15 @@ class catController extends viewController {
 			//stop execution
 			return;
 		}
+
+        //TODO: IMPROVE
+        $_from_url = parse_url( $_SERVER['REQUEST_URI'] );
+        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
+        if ( $url_request ) {
+            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+        } else {
+            $this->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+        }
 
         /*
          * I prefer to use a programmatic approach to the check for the archive date instead of a pure query
@@ -331,64 +340,84 @@ class catController extends viewController {
         $this->fileCounter         = json_encode( $TotalPayable );
 
 
+        list( $uid, $owner_email ) = $this->getLoginUserParams();
         try {
-
-            list( $uid, $owner_email ) = $this->getLoginUserParams();
 
             /*
              * Take the keys of the user
              */
             $_keyList = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
-            $dh = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $uid ) );
+            $dh       = new TmKeyManagement_MemoryKeyStruct( array( 'uid' => $uid ) );
 
-            $keyList  = $_keyList->read( $dh );
+            $keyList = $_keyList->read( $dh );
 
-            /**
-             * Set these keys as editable for the client
-             *
-             * @var $keyList TmKeyManagement_MemoryKeyStruct[]
-             */
-            foreach( $keyList as $key ){
-                $this->_keyList['totals'][] = new TmKeyManagement_ClientTmKeyStruct( $key->tm_key );
-            }
+        } catch ( Exception $e ) {
 
+            $keyList = array();
+            Log::doLog( $e->getMessage() );
 
-            /*
-             * Now take the JOB keys
-             */
-            $job_keyList = json_decode( $data[0]['tm_keys'], true );
+        }
 
-            /**
-             * Start this N^2 cycle from keys of the job,
-             * these should be statistically lesser than the keys of the user
-             *
-             * @var $keyList array
-             */
-            foreach( $job_keyList as $jobKey ){
+        /**
+         * Set these keys as editable for the client
+         *
+         * @var $keyList TmKeyManagement_MemoryKeyStruct[]
+         */
+        foreach ( $keyList as $key ) {
+            $this->_keyList[ 'totals' ][ ] = new TmKeyManagement_ClientTmKeyStruct( $key->tm_key );
+        }
 
-                $jobKey = new TmKeyManagement_ClientTmKeyStruct( $jobKey );
+        /*
+         * Now take the JOB keys
+         */
+        $job_keyList = json_decode( $data[ 0 ][ 'tm_keys' ], true );
 
-                //PATCH for old data structs
+        /**
+         * Start this N^2 cycle from keys of the job,
+         * these should be statistically lesser than the keys of the user
+         *
+         * @var $keyList array
+         */
+        foreach ( $job_keyList as $jobKey ) {
+
+            $jobKey = new TmKeyManagement_ClientTmKeyStruct( $jobKey );
+
+            if( $this->isLoggedIn() && !empty( $this->_keyList[ 'totals' ] ) ){
+
+                /*
+                 * If user has some personal keys check for keys present in job and obfuscate them
+                 * if they are not in this list
+                 */
                 foreach ( $this->_keyList[ 'totals' ] as $key ) {
 
                     /*
                      * Cycle ALL my user Key and if one of there are in job set this key as my key
                      */
                     if ( !$jobKey->equals( $key ) ) {
-                        $this->_keyList['job_keys'][] = $jobKey->hideKey( $uid );
+                        $this->_keyList[ 'job_keys' ][ ] = $jobKey->hideKey( $uid );
                     } else {
-                        $this->_keyList['job_keys'][] = $key;
+                        $this->_keyList[ 'job_keys' ][ ] = $key;
+                    }
+
+                    //Take the right permissions from user key
+                    if ( !$jobKey->owner ) {
+                        $jobKey->r = $jobKey->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'r' ]};
+                        $jobKey->w = $jobKey->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'w' ]};
                     }
 
                 }
 
+            } else {
+                /*
+                 * This user is anonymous, obfuscate all
+                 */
+                $this->_keyList[ 'job_keys' ][ ] = $jobKey->hideKey( -1 );
+
             }
 
-            Log::doLog($this->_keyList);
-
-        } catch( Exception $e ){
-            Log::doLog( $e->getMessage() );
         }
+
+//        Log::doLog( $this->_keyList );
 
     }
 

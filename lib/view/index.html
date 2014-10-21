@@ -529,12 +529,40 @@
                                 <p class="warning-message" style="display: none;"><span></span></p>
 
                                 <div class="block pull-right ">
-
                                     <a class="btn-ok clear add-tm"><span class="icon-plus"></span> Add a TM</a>
-
                                 </div>
                                 <h3 class="pull-left">Active TM</h3>
-                                <table class="mgmt-tm scroll" id="activetm">
+
+                                <table class="mgmt-tm scroll owner">
+                                    <thead>
+                                    <tr>
+                                        <th>Private Key</th>
+                                        <th>Description</th>
+                                        <th>Lang Pair</th>
+                                        <th>Lookup</th>
+                                        <th>Update</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="list sortable">
+
+                                    <!-- temporary simulation of owner key -->
+                                    <tr class="owner ui-sortable-handle clicked" data-tm="1" data-glos="1" data-editable="0">
+                                        <td class="privatekey">********************1234</td>
+                                        <td class="description"></td>
+                                        <td class="langpair"><span class="mgmt-source">en-US</span> -
+                                            <span class="mgmt-target">es-ES</span></td>
+                                        <td class="lookup text-center check"><input type="checkbox" disabled="disabled" checked="" /></td>
+                                        <td class="update text-center check"><input type="checkbox" disabled="disabled" checked="" /></td>
+                                        <td class="action">
+                                        </td>
+                                    </tr>
+                                    <!-- end temporary simulation of owner key -->
+
+                                    </tbody>
+                                </table>
+
+                                <table class="mgmt-tm scroll mine" id="activetm">
                                     <thead>
                                     <tr>
                                         <th>Private Key</th>
@@ -548,31 +576,55 @@
                                     <tbody class="list sortable">
 
                                     <tal:block tal:repeat="key user_keys/job_keys">
-                                        <tr data-tm="1" data-glos="1" data-editable="${key/edit}">
+                                        <tr data-tm="${key/tm}" class="" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
                                             <td class="privatekey">${key/key}</td>
                                             <td class="description">${key/name}</td>
                                             <td class="langpair"><span class="mgmt-source">en-US</span> -
                                                 <span class="mgmt-target">es-ES</span></td>
-                                            <td class="lookup text-center check"><input type="checkbox" checked="${key/r}"/></td>
-                                            <td class="update text-center check"><input type="checkbox" checked="${key/w}"/></td>
-                                            <td class="action">
+
+                                            <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit; checked key/r" /></td>
+                                            <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit; checked key/w" /></td>
+
+                                            <td tal:condition="key/edit" class="action">
                                                 <a class="btn-grey pull-left usetm">
-                                                    <span class="icon-play-circle"></span> Use
+                                                    <span class="icon icon-minus-circle"></span>
+                                                    <span class="text">Stop Use</span>
                                                 </a>
-                                                <a class="btn-grey pull-left  addtmx">
-                                                    <span class="icon-plus-circle"></span> Add TMX
+                                                <a class="btn-grey pull-left addtmx">
+                                                    <span class="icon icon-plus-circle"></span>
+                                                    <span class="text">Add TMX</span>
                                                 </a>
                                             </td>
+
+                                            <td tal:condition="php: !key.edit" class="action"></td>
+
                                         </tr>
                                     </tal:block>
+
+                                    </tbody>
+                                </table>
+
+                                <table class="mgmt-tm scroll new" >
+                                    <thead>
+                                    <tr>
+                                        <th>Private Key</th>
+                                        <th>Description</th>
+                                        <th>Lang Pair</th>
+                                        <th>Lookup</th>
+                                        <th>Update</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="list">
 
                                     <tr class="new hide">
                                         <td class="privatekey"> <input class="mgmt-input" type="text" id="new-tm-key"
                                                                        placeholder="Create new private key" />
                                             <a class="btn-ok pull-right">Create</a>
                                         </td>
-                                        <td class="description">
-                                            <textarea class="mgmt-input" type="text" id="new-tm-description" placeholder="Enter a short description" />
+                                        <td class="description"><input class="mgmt-input" type="text"
+                                                                       id="new-tm-description"
+                                                                       placeholder="Enter a short description" />
                                         </td>
                                         <td class="fileupload" colspan="3">
                                             <input id="new-tm-read" type="checkbox" name="r" class="r" value="1" checked="" />
@@ -587,7 +639,6 @@
                                                 <span class="icon-upload"></span>
                                                 <span class="text">Add a key</span>
                                             </a>
-
                                             <form class="add-TM-Form" action="/" method="post">
                                                 <input type="hidden" name="action" value="addTM" />
                                                 <input type="hidden" name="exec" value="newTM" />
@@ -604,9 +655,37 @@
                                             <a class="pull-right canceladdtmx">
                                                 <span class="icon-times-circle"></span>
                                             </a>
-                                            <span class="message"></span>
                                         </td>
                                     </tr>
+
+
+                                    </tbody>
+                                </table>
+
+                                <table class="mgmt-tm scroll anonymous">
+                                    <thead>
+                                    <tr>
+                                        <th>Private Key</th>
+                                        <th>Description</th>
+                                        <th>Lang Pair</th>
+                                        <th>Lookup</th>
+                                        <th>Update</th>
+                                        <th>Action</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody class="list sortable">
+
+                                    <!-- temporary simulation of anonymous key -->
+                                    <tr class="anonymous ui-sortable-handle clicked" data-tm="1" data-glos="1" data-editable="0">
+                                        <td class="privatekey">********************1234</td>
+                                        <td class="description"></td>
+                                        <td class="langpair"><span class="mgmt-source">en-US</span> -
+                                            <span class="mgmt-target">es-ES</span></td>
+                                        <td class="lookup text-center check"><input type="checkbox" disabled="disabled" checked="" /></td>
+                                        <td class="update text-center check"><input type="checkbox" disabled="disabled" checked="" /></td>
+                                        <td class="action"></td>
+                                    </tr>
+                                    <!-- end temporary simulation of anonymous key -->
 
                                     </tbody>
                                 </table>
@@ -634,10 +713,12 @@
                                             <td class="update text-center check"><input type="checkbox" checked="${key/w}"/></td>
                                             <td class="action">
                                                 <a class="btn-grey pull-left usetm">
-                                                    <span class="icon-play-circle"></span> Use
+                                                    <span class="icon icon-play-circle"></span>
+                                                    <span class="text">Use</span>
                                                 </a>
                                                 <a class="btn-grey pull-left  addtmx">
-                                                    <span class="icon-plus-circle"></span> Add TMX
+                                                    <span class="icon icon-plus-circle"></span>
+                                                    <span class="text">Add TMX</span>
                                                 </a>
                                             </td>
                                         </tr>
@@ -645,6 +726,9 @@
                                     </tbody>
                                 </table>
 
+                                <div class="block pull-right ">
+                                    <a class="btn-ok clear savebtn">Save</a>
+                                </div>
                             </div>
                         </div>
                     </div>

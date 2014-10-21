@@ -7968,7 +7968,7 @@ $.extend(UI, {
             $(".mgmt-panel-gl").show();
         });
 
-        $("#activetm .new .privatekey .btn-ok").click(function(e) {
+        $(".mgmt-tm .new .privatekey .btn-ok").click(function(e) {
             e.preventDefault();
             //prevent double click
             if($(this).hasClass('disabled')) return false;
@@ -7982,7 +7982,7 @@ $.extend(UI, {
                 }
                 //put value into input field
                 $('#new-tm-key').val(data.key);
-                $('#activetm .new .privatekey .btn-ok').removeClass('disabled');
+                $('.mgmt-tm .new .privatekey .btn-ok').removeClass('disabled');
                 setTimeout(function() {
 //                    UI.checkAddTMEnable();
 //                    UI.checkManageTMEnable();
@@ -7993,7 +7993,11 @@ $.extend(UI, {
         // script per fare apparire e scomparire la riga con l'upload della tmx
 
 
-        $(".addtmx").click(function() {
+        $('body').on('click', 'a.canceladdtmx', function() {
+            $(".addtmxrow").hide();
+            $(".addtmx").show();
+            UI.clearAddTMRow();
+        }).on('click', '.addtmx', function() {
             $(this).hide();
             var newRow = '<tr class="addtmxrow"><td class="addtmxtd" colspan="5"><label class="fileupload">Select a TMX </label><input type="file" /></td><td><a class="pull-left btn-grey uploadtm"><span class="icon-upload"></span> Upload</a>'+
                 '<form class="add-TM-Form" action="/" method="post">' +
@@ -8009,18 +8013,12 @@ $.extend(UI, {
                 '    <input type="submit" style="display: none" />' +
                 '</form>' +
 
-            '<a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a> </td></tr>';
+                '<a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a> </td></tr>';
             $(this).closest("tr").after(newRow);
             UI.uploadTM($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
-            UI.checkTMheights();
-        })
-
-        $('body').on('click', 'a.canceladdtmx', function() {
-            $(".addtmxrow").hide();
-            $(".addtmx").show();
-            UI.clearAddTMRow();
-        }).on('click', '#activetm tr.new a.uploadtm', function() {
-            operation = ($('#activetm .new td.fileupload input[type="file"]').val() == '')? 'key' : 'tm';
+//            UI.checkTMheights();
+        }).on('click', '.mgmt-tm tr.new a.uploadtm', function() {
+            operation = ($('.mgmt-tm tr.new td.fileupload input[type="file"]').val() == '')? 'key' : 'tm';
 //            $('.addtmxrow').hide().fadeOut();
             UI.checkTMKey(operation);
 
@@ -8031,29 +8029,35 @@ $.extend(UI, {
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
         }).on('click', '#activetm tr.addtmxrow a.uploadtm', function() {
             UI.execAddTM(this);
+        }).on('click', '.popup-tm .savebtn', function() {
+            UI.saveTMdata();
         }).on('click', 'a.usetm', function() {
             // get the row containing this link
             var row = $(this).closest("tr");
             var x = 0;
             // find out in which table it resides
             var table = $(this).closest("table");
-
             // move it
             row.detach();
 
             if (table.is("#activetm") && (x==0)) {
                 $("#inactivetm").append(row);
+                row.find('a.usetm .text').text('Use');
+                row.find('a.usetm .icon').attr('class', 'icon icon-play-circle');
             }
 
             else {
-                $("#activetm .new").before(row);
+                $("#activetm").append(row);
                 if(!$('#inactivetm tbody tr:not(.odd)').length) $('#inactivetm tr.odd').show();
+                row.find('a.usetm .text').text('Stop Use');
+                row.find('a.usetm .icon').attr('class', 'icon icon-minus-circle');
             }
             // draw the user's attention to it
             row.fadeOut();
             row.fadeIn();
 
-            $(this).addClass("disabletm").removeClass("usetm").text("Stop use").prepend('<span class="icon-minus-circle"></span> ');
+//            $(this).addClass("disabletm").removeClass("usetm").text("Stop use").prepend('<span class="icon-minus-circle"></span> ');
+            $(this).addClass("disabletm").removeClass("usetm");
             $('.addtmxrow').hide();
             $(".addtmx").show();
 
@@ -8069,31 +8073,36 @@ $.extend(UI, {
 
             if (table.is("#inactivetm") && (x==0)) {
                 $("#activetm").append(row);
+                row.find('a.disabletm .text').text('Stop Use');
+                row.find('a.disabletm .icon').attr('class', 'icon icon-minus-circle');
             }
 
             else {
                 $("#inactivetm").append(row);
                 $('#inactivetm tr.odd').hide();
+                row.find('a.disabletm .text').text('Use');
+                row.find('a.disabletm .icon').attr('class', 'icon icon-play-circle');
             }
             // draw the user's attention to it
             row.fadeOut();
             row.fadeIn();
 
-            $(this).addClass("usetm").removeClass("disabletm").text("Use").prepend('<span class="icon-play-circle"></span>');
+//            $(this).addClass("usetm").removeClass("disabletm").text("Use").prepend('<span class="icon-play-circle"></span>');
+            $(this).addClass("usetm").removeClass("disabletm");
             $('.addtmxrow').hide();
             $(".addtmx").show();
-            UI.updateTM($(this).parents('tr'));
+//            UI.updateTM($(this).parents('tr'));
         }).on('change', '#new-tm-read, #new-tm-write', function(e) {
             if(UI.checkTMgrants($('.addtm-tr'))) {
 //                $('.addtm-tr .error-message').hide();
             }
         }).on('change', '#activetm td.lookup input, #activetm td.update input', function(e) {
-            UI.updateTM($(this).parents('tr'));
-        }).on('change', '#activetm .new td.fileupload input[type="file"]', function(e) {
+//            UI.updateTM($(this).parents('tr'));
+        }).on('change', '.mgmt-tm tr.new td.fileupload input[type="file"]', function(e) {
             if($(this).val() == '') {
-                $('#activetm .new .uploadtm .text').text('Add a key');
+                $('.mgmt-tm tr.new .uploadtm .text').text('Add a key');
             } else {
-                $('#activetm .new .uploadtm .text').text('Upload');
+                $('.mgmt-tm tr.new .uploadtm .text').text('Upload');
 
             }
         });
@@ -8103,7 +8112,9 @@ $.extend(UI, {
 
         $(document).ready(function() {
             console.log("$('#inactivetm'): ", $('#inactivetm'));
+            UI.setTMsortable();
             $('#inactivetm').dataTable();
+
         });
 
         $('tr').click(function(event) {
@@ -8113,11 +8124,11 @@ $.extend(UI, {
 
         $(".add-tm").click(function() {
             $(this).hide();
-            $("tr.new").removeClass('hide').show();
+            $(".mgmt-tm tr.new").removeClass('hide').show();
         });
 
         $(".canceladdtmx").click(function() {
-            $("tr.new").hide();
+            $(".mgmt-tm tr.new").hide();
             $(".add-tm").show();
         });
 
@@ -8127,7 +8138,7 @@ $.extend(UI, {
         });
 
         $(".cancel-tm").click(function() {
-            $("tr.new").hide();
+            $(".mgmt-tm tr.new").hide();
             $(".add-tm").show();
         });
 
@@ -8141,14 +8152,7 @@ $.extend(UI, {
 // plugin per rendere sortable le tabelle
 // sorgente: http://www.foliotek.com/devblog/make-table-rows-sortable-using-jquery-ui-sortable/
 
-        var fixHelperModified = function(e, tr) {
-            var $originals = tr.children();
-            var $helper = tr.clone();
-            $helper.children().each(function(index) {
-                $(this).width($originals.eq(index).width())
-            });
-            return $helper;
-        };
+
 // codice per incrementare il numero della priority
 //    updateIndex = function(e, ui) {
 //        $('.index', ui.item.parent()).each(function (i) {
@@ -8157,13 +8161,9 @@ $.extend(UI, {
 //    };
 
 
-/*
-// temporary disabled: this has to be realeased without jquery-ui (which is not loaded in the cattool), try to use tablesorter, who is already used in manage page
-        $("#activetm tbody.sortable").sortable({
-            helper: fixHelperModified
-            //   stop: updateIndex
-        }).disableSelection();
-*/
+
+
+
 
 //$('.enable').click(function() {
 //  $(this).closest('tr td:first-child').toggleClass('index');
@@ -8176,9 +8176,7 @@ $.extend(UI, {
 
 
 
-        $('.savebtn').click(function() {
-            UI.saveTMdata();
-        });
+
 
 
     },
@@ -8192,15 +8190,39 @@ $.extend(UI, {
         console.log('div_id: ', div_id);
 
     },
-    checkTMheights: function() {return false;
-        console.log($('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)'));
+    setTMsortable: function () {
+        var fixHelperModified = function(e, tr) {
+            var $originals = tr.children();
+            var $helper = tr.clone();
+            $helper.children().each(function(index) {
+                $(this).width($originals.eq(index).width())
+            });
+            return $helper;
+        };
+        $("#activetm tbody.sortable").sortable({
+            helper: fixHelperModified,
+            items: ".mine"
+        }).disableSelection();
+    },
+
+    checkTMheights: function() {
+//        var h = $('#activetm tbody tr').first().height();
+//        var h = $('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)').height();
         var h = 0;
         $('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)').each(function() {
             h += $(this).height();
         })
         $('#activetm tbody').css('height', h + 'px');
-        console.log(h);
 
+        /*
+                console.log($('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)'));
+                var h = 0;
+                $('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)').each(function() {
+                    h += $(this).height();
+                })
+                $('#activetm tbody').css('height', h + 'px');
+                console.log(h);
+        */
 
     },
     checkTMKey: function(operation) {
@@ -8240,10 +8262,10 @@ $.extend(UI, {
                         return false;
                         if(this == 'key') {
                             console.log('error adding a key');
-                            $('#activetm tr.new .message').text(d.errors[0].message);
+                            $('.mgmt-tm tr.new .message').text(d.errors[0].message);
                         } else {
                             console.log('error adding a tm');
-                            $('#activetm tr.new .message').text(d.errors[0].message);
+                            $('.mgmt-tm tr.new .message').text(d.errors[0].message);
                         }
                         return false;
                     }
@@ -8264,8 +8286,8 @@ $.extend(UI, {
     },
     execAddTM: function(el) {
         if(el == 'new') {
-            form = $('#activetm .new .add-TM-Form')[0];
-            file = $('#activetm .new td.fileupload input').val();
+            form = $('.mgmt-tm tr.new .add-TM-Form')[0];
+            file = $('.mgmt-tm tr.new td.fileupload input').val();
         } else {
             tr = $(el).parents('tr');
             form = tr.find('.add-TM-Form')[0];
@@ -8277,8 +8299,9 @@ $.extend(UI, {
 
     },
     execAddTMKey: function() {
-//        var r = ($('#addtm-tr-read').is(':checked'))? 1 : 0;
-//        var w = ($('#addtm-tr-write').is(':checked'))? 1 : 0;
+        var r = ($('#new-tm-read').is(':checked'))? 1 : 0;
+        var w = ($('#new-tm-write').is(':checked'))? 1 : 0;
+        var desc = $('#new-tm-description').val();
         var TMKey = $('#new-tm-key').val();
 
         APP.doRequest({
@@ -8287,51 +8310,64 @@ $.extend(UI, {
                 exec: 'addTM',
                 job_id: config.job_id,
                 job_pass: config.password,
-                tm_key: TMKey
-//                r: r,
-//                w: w
+                tm_key: TMKey,
+                name: desc,
+                r: r,
+                w: w
             },
-            context: TMKey,
+            context: {
+                tm_key: TMKey,
+                name: desc,
+                r: r,
+                w: w
+            },
             error: function() {
                 console.log('addTM error!!');
-                $('#activetm tr.new .message').text('Error adding your TM!');
+                $('.mgmt-tm tr.new .message').text('Error adding your TM!');
             },
             success: function(d) {
                 console.log('addTM success!!');
                 newTr = '<tr class="ui-sortable-handle">' +
-                        '    <td class="privatekey">4632938238</td>' +
-                        '    <td class="description">Other</td>' +
+                        '    <td class="privatekey">' + this.tm_key + '</td>' +
+                        '    <td class="description">' + this.name + '</td>' +
                         '    <td class="langpair"><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">PT-BR</span></td>' +
-                        '    <td class="lookup check text-center"><input type="checkbox" checked=""></td>' +
-                        '        <td class="update check text-center"><input type="checkbox"></td>' +
-                        '            <td class="action">' +
-                        '                <a class="pull-left btn-grey disabletm"><span class="icon-minus-circle"></span> Stop use</a>' +
-                        '                <a class="btn-grey pull-left addtmx"><span class="icon-plus-circle"></span> Add TMX</a>' +
-                        '            </td>' +
-                        '        </tr>';
-                $('#activetm tr.new').before(newTr);
-                row = $('#activetm tr.new').prev();
-                row.fadeOut();
-                row.fadeIn();
-                $('#activetm tr.new .canceladdtmx').click();
-
-                $('#activetm tr.new .message').text('The key ' + this + ' has been added!');
-/*
-                txt = (d.success == true)? 'The TM Key ' + this + ' has been added to your translation job.' : d.errors[0].message;
-                $('.popup-addtm-tr .x-popup').click();
-                APP.showMessage({
-                    msg: txt
-                });
-                UI.clearAddTMpopup();
-*/
+                        '    <td class="lookup check text-center"><input type="checkbox"' + ((this.r)? ' checked="checked"' : '') + '></td>' +
+                        '    <td class="update check text-center"><input type="checkbox"' + ((this.w)? ' checked="checked"' : '') + '></td>' +
+                        '    <td class="action">' +
+                        '        <a class="btn-grey pull-left usetm">' +
+                        '            <span class="icon icon-minus-circle"></span>' +
+                        '            <span class="text">Stop Use</span>' +
+                        '        </a>' +
+                        '        <a class="btn-grey pull-left addtmx">' +
+                        '            <span class="icon icon-plus-circle"></span>' +
+                        '            <span class="text">Add TMX</span>' +
+                        '        </a>' +
+                        '    </td>' +
+                        '</tr>';
+                $('#activetm').append(newTr);
+                $('.mgmt-tm tr.new .canceladdtmx').click();
+                UI.pulseTMadded($('#activetm tr').last());
+                UI.setTMsortable();
             }
         });
     },
+    pulseTMadded: function (row) {
+        setTimeout(function() {
+            $("#activetm tbody").animate({scrollTop: 5000}, 0);
+            row.fadeOut();
+            row.fadeIn();
+        }, 10);
+        setTimeout(function() {
+            $("#activetm tbody").animate({scrollTop: 5000}, 0);
+        }, 1000);
+//        $('.mgmt-tm tr.new .message').text('The key ' + this + ' has been added!');
+    },
+
     clearAddTMRow: function() {
         $('#new-tm-key, #new-tm-description').val('');
         $('#activetm .fileupload').val('');
 //        $('#uploadTMX').text('').hide();
-        $('#activetm tr.new .message').text('');
+        $('.mgmt-tm tr.new .message').text('');
     },
     TMFileUpload: function(form, action_url, div_id, tmName) {
         console.log('div_id: ', div_id);
@@ -8391,7 +8427,7 @@ $.extend(UI, {
         }
 
         // Submit the form...
-        form.submit();
+        form.submit(); return false;
 
 //    document.getElementById(div_id).innerHTML = "Uploading...";
         $('.popup-addtm-tr .x-popup').click();
@@ -8399,8 +8435,8 @@ $.extend(UI, {
             msg: 'Uploading your TM...'
         });
         $('#messageBar .msg').after('<span class="progress"></span>');
-        TMKey = $('#addtm-tr-key').val();
-        TMName = $('#uploadTMX').text();
+        TMKey = $('#new-tm-key').val();
+        TMName = $('.mgmt-tm tr.new td.fileupload input[type="file"]').val();
         console.log('TMKey 1: ', TMKey);
         console.log('TMName 1: ', TMName);
 //    UI.pollForUploadProgress(TMKey, TMName);
@@ -8467,7 +8503,7 @@ $.extend(UI, {
         });
     },
     checkTMgrants: function() {console.log('checkTMgrants');
-        panel = $('#activetm tr.new');
+        panel = $('.mgmt-tm tr.new');
         var r = ($(panel).find('.r').is(':checked'))? 1 : 0;
         var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
         if(!r && !w) {
@@ -8480,26 +8516,110 @@ $.extend(UI, {
             return true;
         }
     },
+    extractTMdataFromTable: function () {
+        tt = $('#activetm tbody tr.mine');
+        dataOb = [];
+        $(tt).each(function () {
+            dd = {
+                key: $(this).find('.privatekey').text(),
+                tmx_name: $(this).find('.description').text(),
+                r: (($(this).find('.lookup input').is(':checked'))? 1 : 0),
+                w: (($(this).find('.update input').is(':checked'))? 1 : 0)
+            }
+            dataOb.push(dd);
+        })
+        return JSON.stringify(dataOb);
+    },
+    extractTMdataFromRow: function (tr) {
+        data = {
+            tm_key: tr.find('.privatekey').text(),
+            key: this.tm_key,
+            tmx_name: tr.find('.description').text(),
+            name: this.tmx_name,
+            r: ((tr.find('.lookup input').is(':checked'))? 1 : 0),
+            w: ((tr.find('.update input').is(':checked'))? 1 : 0)
+        }
+        return data;
+    },
+
+    saveTMdata: function() {
+        data = this.extractTMdataFromTable();
+        console.log('VEDIAMO: ', data);
+        APP.doRequest({
+            data: {
+                action: 'updateJobKeysController',
+                job_id: config.job_id,
+                job_pass: config.password,
+                data: data
+            },
+            error: function() {
+                console.log('Error saving TM data!!');
+            },
+            success: function(d) {
+                console.log('TM data saved!!');
+            }
+        });
+        /*
+         numActive = $('#activetm tbody tr:not(.hide)').length;
+         $('.translate-box .numResources').text(numActive);
+         $('.resource').show();
+         activeTMdata = [];
+         $('#activetm tbody tr:not(.hide)').each(function() {
+         item = {};
+         item.key = $(this).find('.privatekey').text();
+         item.tm = $(this).attr('data-tm');
+         item.glos = $(this).attr('data-glos');
+         item.r = $(this).find('.lookup input').is(':checked');
+         item.w = $(this).find('.update input').is(':checked');
+         activeTMdata.push(item);
+         });
+         console.log('activeTMdata; ', activeTMdata);
+         console.log('activeTMdata string; ', JSON.stringify(activeTMdata));
+
+         APP.doRequest({
+         data: {
+         action: 'addTM',
+         job_id: config.job_id,
+         job_pass: config.password,
+         data: JSON.stringify(activeTMdata)
+         },
+         error: function() {
+         console.log('Error saving TM data!!');
+         },
+         success: function(d) {
+         console.log('TM data saved!!');
+         }
+         });
+         */
+// ???
+        /*
+         $('input.checkbox').each(function(){
+         if ($(this).is(':checked')) {
+         $(this).parent('tr').addClass('selected');
+         } else {
+         $(this).parent('tr').addClass('disabled');
+         }
+         });
+         */
+
+    },
+
     updateTM: function (tr) {
-        TMKey = tr.find('.privatekey').text();
-        TMName = tr.find('.description').text();
-        var r = (tr.find('.lookup input').is(':checked'))? 1 : 0;
-        var w = (tr.find('.update input').is(':checked'))? 1 : 0;
         dataMix = {
             action: 'addTM',
-            exec: 'updateTM',
-            tm_key: TMKey,
-            tmx_name: TMName,
-            r: r,
-            w: w
+            exec: 'updateTM'
         };
+        console.log('tr: ', tr);
+        console.log('tr length: ', tr.length);
+        TMdata = this.extractTMdataFromRow(tr);
+        $.extend(dataMix, TMdata);
         if(APP.isCattool) {
             dataMix.job_id = config.job_id;
             dataMix.job_pass = config.password;
         }
         APP.doRequest({
             data: dataMix,
-            context: [TMKey, TMName],
+            context: [TMdata],
             error: function() {
             },
             success: function(d) {
