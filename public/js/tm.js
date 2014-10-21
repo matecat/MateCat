@@ -23,6 +23,7 @@ $.extend(UI, {
             $(".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
             $("#SnapABug_Button").show();
             $(".outer-tm").hide();
+
         });
 
         $(".mgmt-tm").click(function() {
@@ -404,12 +405,10 @@ $.extend(UI, {
                         '    <td class="update check text-center"><input type="checkbox"' + ((this.w)? ' checked="checked"' : '') + '></td>' +
                         '    <td class="action">' +
                         '        <a class="btn-grey pull-left usetm">' +
-                        '            <span class="icon icon-minus-circle"></span>' +
-                        '            <span class="text">Stop Use</span>' +
+                        '            <span class="text stopuse">Stop Use</span>' +
                         '        </a>' +
                         '        <a class="btn-grey pull-left addtmx">' +
-                        '            <span class="icon icon-plus-circle"></span>' +
-                        '            <span class="text">Add TMX</span>' +
+                        '            <span class="text addtmxbtn">Add TMX</span>' +
                         '        </a>' +
                         '    </td>' +
                         '</tr>';
