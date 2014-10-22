@@ -343,7 +343,7 @@ class ProjectManager {
         }
 
         //check if the files language equals the source language. If not, set an error message.
-        if (!$this->projectStructure['skip_lang_validatio']) $this->validateFilesLanguages();
+        if (!$this->projectStructure['skip_lang_validation']) $this->validateFilesLanguages();
 
         /****************/
         //loop again through files to check to check for TMX loading
