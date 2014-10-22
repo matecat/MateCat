@@ -294,7 +294,7 @@ class Utils {
      * Call the output in JSON format
      *
      */
-    public static function jsonExceptionError() {
+    public static function raiseJsonExceptionError() {
 
         if ( function_exists( "json_last_error" ) ) {
             switch ( json_last_error() ) {

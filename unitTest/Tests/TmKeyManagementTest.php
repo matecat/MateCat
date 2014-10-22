@@ -44,16 +44,18 @@ class TmKeyManagementTest extends Tests_AbstractTest {
     private static $client_json_ABC;
     private static $client_json_DEF;
     private static $client_json_ABC_GHI_JKL;
+    private static $client_json_GHI;
+    private static $client_json_INVALID_GHI;
 
 
-    PUBLIC FUNCTION __construct(){
-       $db = Database::obtain ( INIT::$DB_SERVER, INIT::$DB_USER, INIT::$DB_PASS, INIT::$DB_DATABASE );
-       $db->connect ();
-    }
+    public function __construct(){}
 
 
     public function setUp() {
         parent::setUp();
+
+        Tests_DBLoader4Test::getUp();
+
 //        MemcacheHandler::getInstance( array( '127.0.0.1:11211' => 1 ) )->flush();
 
         self::$dummyTmKey_key        = "fookey";
@@ -92,7 +94,7 @@ class TmKeyManagementTest extends Tests_AbstractTest {
         self::$invalidTmKeyStructArr                   = self::$validTmKeyStructArr;
         self::$invalidTmKeyStructArr[ 'invalidField' ] = 'invalidField';
 
-        self::$srv_json_ABC            = '[{"tm":true,"glos":false,"owner":true,"key":"0000123ABC","name":"My ABC","r":"1","w":"1","uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":0,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
+        self::$srv_json_ABC            = '[{"tm":true,"glos":false,"owner":true,"key":"0000123ABC","name":"","r":"1","w":"1","uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":0,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
         self::$srv_json_GHI            = '[{"tm":true,"glos":false,"owner":true,"key":"0000123GHI","name":"My GHI","r":"1","w":"1","uid_transl":null,"uid_rev":null,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}]';
         self::$srv_json_ABC_GHI_DEF    = '[{"tm":true,"glos":false,"owner":true,"key":"0000123ABC","name":"My ABC","r":"1","w":"1","uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":0,"r_rev":null,"w_rev":null,"source":null,"target":null},' .
                 '{"tm":true,"glos":false,"owner":true,"key":"0000123GHI","name":"My GHI","r":"1","w":"1","uid_transl":null,"uid_rev":null,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null},' .
@@ -103,9 +105,15 @@ class TmKeyManagementTest extends Tests_AbstractTest {
         self::$client_json_DEF         = '[{"key":"0000123DEF","name":"My DEF","r":1,"w":0}]';
         self::$client_json_GHI_DEF     = '[{"key":"*****23GHI","name":"My GHI","r":1,"w":1},' .
                 '{"key":"0000123DEF","name":"My DEF","r":1,"w":0}]';
+
+        //the second key is invalid, we expect unchanged in server side
         self::$client_json_ABC_GHI_JKL = '[{"key":"0000123ABC","name":"My ABC","r":1,"w":1},' .
-                '{"key":"*****23GHI","name":"My GHI","r":1,"w":1},' .
+                '{"key":"*****23GHI","name":"My GHI","r":1,"w":0},' .
                 '{"key":"0000123JKL","name":"My JKL","r":1,"w":0}]';
+
+        self::$client_json_GHI = '[{"key":"0000123GHI","name":"My GHI","r":0,"w":1}]';
+
+        self::$client_json_INVALID_GHI = '[{"key":"0000123GHI","name":"My GHI","r":0,"w":0}]';
 
     }
 
@@ -394,8 +402,23 @@ class TmKeyManagementTest extends Tests_AbstractTest {
     public function testMergeJsonKeys_validInput_clientABCDEF_serverABC() {
         $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
                 self::$client_json_ABC_DEF,
-                self::$srv_json_ABC
+                self::$srv_json_ABC,
+                TmKeyManagement_Filter::ROLE_TRANSLATOR,
+                123
         );
+
+        /*
+         * We expect this result
+         *
+         *   [
+         *
+         *   {"tm":true,"glos":false,"owner":true,"key":"0000123ABC","name":"My ABC","r":"1","w":"1","uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":1,"r_rev":null,"w_rev":null,"source":null,"target":null},
+         *
+         *   {"tm":true,"glos":false,"owner":false,"key":"0000123DEF","name":"My DEF","r":null,"w":null,"uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":0,"r_rev":null,"w_rev":null,"source":null,"target":null}
+         *
+         *   ]
+         *
+         */
 
         $this->assertTrue( is_array( $resultMerge ) );
         $this->assertEquals( 2, count( $resultMerge ) );
@@ -411,6 +434,7 @@ class TmKeyManagementTest extends Tests_AbstractTest {
         $secondKey = $resultMerge[ 1 ];
 
         $this->assertEquals( "0000123ABC", $firstKey->key );
+        $this->assertEquals( 123, $firstKey->uid_transl );
         $this->assertEquals( 1, $firstKey->r_transl );
         $this->assertEquals( 1, $firstKey->w_transl );
         $this->assertEquals( 1, $firstKey->owner );
@@ -418,11 +442,139 @@ class TmKeyManagementTest extends Tests_AbstractTest {
         $this->assertEquals( 1, $firstKey->w );
 
         $this->assertEquals( "0000123DEF", $secondKey->key );
+        $this->assertEquals( 123, $secondKey->uid_transl );
         $this->assertEquals( 1, $secondKey->r_transl );
         $this->assertEquals( 0, $secondKey->w_transl );
         $this->assertEquals( 0, $secondKey->owner );
         $this->assertNull( $secondKey->r );
         $this->assertNull( $secondKey->w );
+
+    }
+
+    /**
+     * Same as preceding but anonymous
+     *
+     * @throws Exception
+     */
+    public function testMergeJsonKeys_validInput_clientGHI_Anonymous_serverGHI() {
+
+        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+                self::$client_json_GHI,
+                self::$srv_json_GHI,
+                TmKeyManagement_Filter::ROLE_TRANSLATOR
+        );
+
+        /*
+         * We expect this result
+         *
+         *   [
+         *
+         *   {"tm":true,"glos":false,"owner":true,"key":"0000123GHI","name":"My GHI","r":"1","w":"1","uid_transl":null,"uid_rev":null,"r_transl":false,"w_transl":true,"r_rev":null,"w_rev":null,"source":null,"target":null}
+         *
+         *   ]
+         *
+         */
+
+        $this->assertTrue( is_array( $resultMerge ) );
+        $this->assertEquals( 1, count( $resultMerge ) );
+
+        /**
+         * @var $firstKey TmKeyManagement_TmKeyStruct
+         */
+        $firstKey = $resultMerge[ 0 ];
+
+        $this->assertEquals( "0000123GHI", $firstKey->key );
+        $this->assertNull( $firstKey->uid_transl );
+        $this->assertEquals( 0, $firstKey->r_transl );
+        $this->assertEquals( 1, $firstKey->w_transl );
+        $this->assertEquals( 1, $firstKey->owner );
+        $this->assertEquals( 1, $firstKey->r );
+        $this->assertEquals( 1, $firstKey->w );
+
+    }
+
+    public function testMergeJsonKeys_validInput_clientGHI_INVALID_serverGHI() {
+
+        $this->setExpectedException( 'Exception', "Read and Write grants can not be both empty" );
+        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+                self::$client_json_INVALID_GHI,
+                self::$srv_json_GHI
+        );
+
+    }
+
+    public function testMergeJsonKeys_InvalidRole() {
+
+        $this->setExpectedException( 'Exception', "Invalid Role Type string." );
+        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+                self::$client_json_GHI,
+                self::$srv_json_GHI,
+                'invalid role!',
+                123
+        );
+
+    }
+
+    public function testMergeJsonKeys_InvalidAnonymousOWNER() {
+
+        $this->setExpectedException( 'Exception', "Anonymous user can not be OWNER" );
+        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+                self::$client_json_GHI,
+                self::$srv_json_GHI,
+                TmKeyManagement_Filter::OWNER
+        );
+
+    }
+
+    public function testMergeJsonKeys_OWNER_DELETE_key() {
+
+        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+                '[]',
+                self::$srv_json_GHI,
+                TmKeyManagement_Filter::OWNER,
+                123
+        );
+
+        $this->assertTrue( is_array( $resultMerge ) );
+        $this->assertEquals( 0, count( $resultMerge ) );
+
+    }
+
+    public function testMergeJsonKeys_OWNER_clientGHI_serverGHI() {
+
+        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+                self::$client_json_GHI,
+                self::$srv_json_GHI,
+                TmKeyManagement_Filter::OWNER,
+                123
+        );
+
+        /*
+         * Expected results
+         *   [
+         *
+         *   {"tm":true,"glos":false,"owner":true,"key":"0000123GHI","name":"My GHI","r":"0","w":"1","uid_transl":null,"uid_rev":null,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null}
+         *
+         *   ]
+         *
+         */
+
+        $this->assertTrue( is_array( $resultMerge ) );
+        $this->assertEquals( 1, count( $resultMerge ) );
+
+        /**
+         * @var $firstKey TmKeyManagement_TmKeyStruct
+         */
+        $firstKey = $resultMerge[ 0 ];
+
+
+        $this->assertEquals( "0000123GHI", $firstKey->key );
+        $this->assertNull( $firstKey->r_transl );
+        $this->assertNull( $firstKey->w_transl );
+        $this->assertEquals( 1, $firstKey->owner );
+        $this->assertEquals( 0, $firstKey->r );
+        $this->assertEquals( 1, $firstKey->w );
+
     }
 
     public function testMergeJsonKeys_validInput_clientGHIDEF_serverGHI(){
@@ -462,7 +614,9 @@ class TmKeyManagementTest extends Tests_AbstractTest {
     public function testMergeJsonKeys_validInput_clientABC_serverABC(){
         $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
                 self::$client_json_ABC,
-                self::$srv_json_ABC
+                self::$srv_json_ABC,
+                TmKeyManagement_Filter::ROLE_TRANSLATOR,
+                123
         );
 
         $this->assertTrue( is_array( $resultMerge ) );
@@ -482,6 +636,9 @@ class TmKeyManagementTest extends Tests_AbstractTest {
     }
 
     public function testMergeJsonKeys_validInput_clientDEF_serverABC(){
+
+        Tests_DBLoader4Test::resetDB();
+
         $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
                 self::$client_json_DEF,
                 self::$srv_json_ABC,
@@ -491,6 +648,17 @@ class TmKeyManagementTest extends Tests_AbstractTest {
 
         $this->assertTrue( is_array( $resultMerge ) );
         $this->assertEquals( 2, count( $resultMerge ) );
+
+        $MemoryDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+        $dh = new TmKeyManagement_MemoryKeyStruct( array(
+                'uid' => 123
+        ) );
+
+        $insertedKeys = $MemoryDao->read( $dh );
+
+        $this->assertEquals( 1, count( $insertedKeys ) );
+        $this->assertEquals( '0000123DEF', $insertedKeys[0]->tm_key->key );
+        $this->assertEquals( '123', $insertedKeys[0]->uid );
 
         /**
          * @var $firstKey TmKeyManagement_TmKeyStruct
@@ -517,16 +685,58 @@ class TmKeyManagementTest extends Tests_AbstractTest {
         $this->assertNull( $secondKey->w );
     }
 
-    public function testMergeJsonKeys_validInput_clientABCGHIJKL_serverABCGHIDEF(){
+    public function testMergeJsonKeys_validInput_clientABCGHIJKL_serverABCGHIDEF_anonymous() {
 
-        $this->markTestIncomplete(
-                'This test has not been implemented yet.'
-        );
+        //ABC Key and GHI key already present in job, they can not be modified by an anonymous user
+        $this->setExpectedException( 'Exception', "Anonymous user can not modify existent keys." );
 
+        //this should not to be, because a client can not send not hashed keys
+        //already present in job as an anonymous user
         $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
                 self::$client_json_ABC_GHI_JKL,
                 self::$srv_json_ABC_GHI_DEF
         );
+
+    }
+
+    public function testMergeJsonKeys_validInput_clientABCGHIJKL_serverABCGHIDEF() {
+
+        Tests_DBLoader4Test::resetDB();
+
+        //this should not to be, because a client can not send not hashed keys
+        //already present in job as an anonymous user
+        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+                self::$client_json_ABC_GHI_JKL,
+                self::$srv_json_ABC_GHI_DEF,
+                TmKeyManagement_Filter::ROLE_TRANSLATOR,
+                123
+        );
+
+        $MemoryDao = new TmKeyManagement_MemoryKeyDao( Database::obtain() );
+        $dh = new TmKeyManagement_MemoryKeyStruct( array(
+                'uid' => 123
+        ) );
+
+        $insertedKeys = $MemoryDao->read( $dh );
+
+        $this->assertEquals( 1, count( $insertedKeys ) );
+        $this->assertEquals( '0000123JKL', $insertedKeys[0]->tm_key->key );
+        $this->assertEquals( '123', $insertedKeys[0]->uid );
+
+        /*
+         * we expect this result
+         *
+         *   [
+         *
+         *   {"tm":true,"glos":false,"owner":true,"key":"0000123ABC","name":"My ABC","r":"1","w":"1","uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":1,"r_rev":null,"w_rev":null,"source":null,"target":null},
+         *
+         *   {"tm":true,"glos":false,"owner":true,"key":"0000123GHI","name":"My GHI","r":"1","w":"1","uid_transl":null,"uid_rev":null,"r_transl":null,"w_transl":null,"r_rev":null,"w_rev":null,"source":null,"target":null},
+         *
+         *   {"tm":true,"glos":false,"owner":false,"key":"0000123JKL","name":"My JKL","r":null,"w":null,"uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":0,"r_rev":null,"w_rev":null,"source":null,"target":null}
+         *
+         *   ]
+         *
+         */
 
         $this->assertTrue( is_array( $resultMerge ) );
         $this->assertEquals( 3, count( $resultMerge ) );
@@ -548,16 +758,32 @@ class TmKeyManagementTest extends Tests_AbstractTest {
 
 
         $this->assertEquals( "0000123ABC", $firstKey->key );
-        $this->assertNull( $firstKey->r_transl );
-        $this->assertNull( $firstKey->w_transl );
+        $this->assertTrue( $firstKey->r_transl );
+        $this->assertTrue( $firstKey->w_transl );
+        $this->assertEquals( 123, $firstKey->uid_transl );
         $this->assertEquals( 1, $firstKey->owner );
         $this->assertEquals( 1, $firstKey->r );
         $this->assertEquals( 1, $firstKey->w );
 
-        $this->assertEquals( "0000123GHI", $secondKey->key );
 
-        $this->assertEquals( "123JKL", $secondKey->key );
+        //This key must be untouched because client sent hashed
+        $this->assertEquals( "0000123GHI", $secondKey->key );
+        $this->assertNull( $secondKey->r_transl );
+        $this->assertNull( $secondKey->w_transl );
+        $this->assertNull( $secondKey->uid_transl );
+        $this->assertEquals( 1, $secondKey->owner );
+        $this->assertEquals( 1, $secondKey->r );
+        $this->assertEquals( 1, $secondKey->w );
+
+        $this->assertEquals( "0000123JKL", $thirdKey->key );
+        $this->assertTrue( $thirdKey->r_transl );
+        $this->assertFalse( $thirdKey->w_transl );
+        $this->assertEquals( 123, $thirdKey->uid_transl );
+        $this->assertFalse( $thirdKey->owner );
+        $this->assertNull( $thirdKey->r );
+        $this->assertNull( $thirdKey->w );
 
     }
+
 }
  

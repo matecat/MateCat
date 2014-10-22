@@ -29,7 +29,7 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         $query = "INSERT INTO " . self::TABLE .
                 " (uid, key_value, key_name, key_tm, key_glos, creation_date)
-                VALUES ( %d, %d, '%s', '%s', %s, %s, NOW())";
+                VALUES ( %d, '%s', '%s', '%s', %s, NOW())";
 
         $query = sprintf(
                 $query,
@@ -474,18 +474,6 @@ class TmKeyManagement_MemoryKeyDao extends DataAccess_AbstractDao {
 
         if ( is_null( $obj->tm_key->key ) ) {
             throw new Exception( "Key value cannot be null" );
-        }
-
-        if ( is_null( $obj->owner_uid ) || empty( $obj->uid ) ) {
-            throw new Exception( "Owner uid cannot be null" );
-        }
-
-        if ( is_null( $obj->r ) ) {
-            throw new Exception( "Group grants cannot be null" );
-        }
-
-        if ( is_null( $obj->w ) ) {
-            throw new Exception( "Group grants cannot be null" );
         }
 
     }
