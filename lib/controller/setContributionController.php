@@ -59,6 +59,9 @@ class setContributionController extends ajaxController {
         $this->source_lang         = $this->__postInput[ 'source_lang' ];
         $this->target_lang         = $this->__postInput[ 'target_lang' ];
 
+	//TODO FIX FOR CLIENT BOM INSERTIONS
+	$this->target = str_replace("\xEF\xBB\xBF",'',$this->target);
+
         if ( empty( $this->id_customer ) ) {
             $this->id_customer = "Anonymous";
         }

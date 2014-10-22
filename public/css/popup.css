@@ -267,6 +267,41 @@ font-size:22px!important;
 padding-bottom: 5px;
 margin-bottom: 10px;
 }
+
+.tpricedesc{
+margin-top: -10px;
+}
+
+.references {
+margin-top: 35px;
+text-align: center;
+}
+
+.references > img {
+width: 23%;
+padding-left: 1.5%;
+padding-right: 1.5%;
+-webkit-filter: grayscale(100%);
+-moz-filter: grayscale(100%);
+filter: grayscale(100%);
+}
+
+.references > img:hover {
+width: 23%;
+padding-left: 1.5%;
+padding-right: 1.5%;
+-webkit-filter: grayscale(0%);
+-moz-filter: grayscale(0%);
+filter: grayscale(0%);
+}
+
+
+.displaypriceperword {
+   font-weight: normal!important;
+   margin-top: -15px;
+}
+
+
 span.zone, span.zone2 {
 font-size: 14px;
 font-weight:normal;

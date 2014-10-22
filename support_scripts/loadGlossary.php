@@ -349,11 +349,14 @@
 
 						if ( $test || $skip ) {
 						    if ( !isset( $row[ 1 ] ) || empty( $row[ 1 ] ) ) {
-						        echo "<br/>Failed at Row: ";
+						        echo "<br/>*********************";
+						        echo "***** Failed at Row: ";
 						        print_r( ( $fObject->key() + 1 ) . "<br/>" );
 						        echo $row[ 0 ] . "<br/>";
-								flush();
-						        continue;
+						        echo "*********************<br/>";
+							flush();
+						        sleep(1);
+                                                        continue;
 						    }
 						}
 
