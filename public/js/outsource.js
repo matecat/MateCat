@@ -24,6 +24,14 @@ $.extend(UI, {
         //Added .translate class in html button because of double call to
         //API when displaying prices on showprices button ( class .in-popup was removed and .uploadbtn was too much widely used... )
 		$(".translate").click(function(e) {
+			var linkPieces = $( this ).attr( "href" ).split( "/" );
+			var jPieces = linkPieces[ linkPieces.length - 1 ].split( "-" );
+			var words = $( ".tablestats[data-pwd='" + jPieces[ 1 ] + "'] .stat-payable" ).text();
+
+			$( ".title-source" ).text( $( "div[data-jid='" + jPieces[ 0 ] + "'] .source_lang" ).text() );
+			$( ".title-target" ).text( $( "div[data-jid='" + jPieces[ 0 ] + "'] .target_lang" ).text() );
+			$( ".title-words" ).text( words );
+
 			if(config.enable_outsource) {
 				e.preventDefault();
 				chunkId = $(this).parents('.totaltable').find('.languages .splitnum').text();
@@ -88,7 +96,12 @@ $.extend(UI, {
                          *
                          */
                         $('.outsource.modal .total span.displayprice').text( parseFloat( chunk.price ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
-                        var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';
+						
+						var price = parseFloat( chunk.price ).toFixed(3).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+						var words = $( ".title-words" ).text();
+						$( "#price_p_word" ).text( parseFloat( price / words ).toFixed(3).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
+
+						var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';
 
                         $('.outsource.modal .delivery span.zone2').text( extendedTimeZone );
 						$('.outsource.modal .continuebtn').removeClass('disabled');
