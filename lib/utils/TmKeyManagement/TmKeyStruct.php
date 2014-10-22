@@ -99,7 +99,7 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
     protected $readable_chars = 5;
 
     /**
-     * When a key return back from the client we have to compare with these in the job
+     * When a key return back from the client we have to know if it is hashed
      *
      * @return bool
      */

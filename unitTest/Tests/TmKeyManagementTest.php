@@ -103,7 +103,7 @@ class TmKeyManagementTest extends Tests_AbstractTest {
         self::$client_json_DEF         = '[{"key":"0000123DEF","name":"My DEF","r":1,"w":0}]';
         self::$client_json_GHI_DEF     = '[{"key":"*****23GHI","name":"My GHI","r":1,"w":1},' .
                 '{"key":"0000123DEF","name":"My DEF","r":1,"w":0}]';
-        self::$client_json_ABC_GHI_JKL = '[{"key":"0000123ABC","name":"My DEF","r":1,"w":1},' .
+        self::$client_json_ABC_GHI_JKL = '[{"key":"0000123ABC","name":"My ABC","r":1,"w":1},' .
                 '{"key":"*****23GHI","name":"My GHI","r":1,"w":1},' .
                 '{"key":"0000123JKL","name":"My JKL","r":1,"w":0}]';
 
