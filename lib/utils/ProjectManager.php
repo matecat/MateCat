@@ -65,7 +65,8 @@ class ProjectManager {
                             'split_result'       => null,
                             'job_to_merge'       => null,
                             'lang_detect_files'  => array(),
-                            'tm_keys'            => array()
+                            'tm_keys'            => array(),
+			    'skip_lang_validation' => false
                     ) );
         }
 
@@ -342,7 +343,7 @@ class ProjectManager {
         }
 
         //check if the files language equals the source language. If not, set an error message.
-        $this->validateFilesLanguages();
+        if (!$this->projectStructure['skip_lang_validatio']) $this->validateFilesLanguages();
 
         /****************/
         //loop again through files to check to check for TMX loading
