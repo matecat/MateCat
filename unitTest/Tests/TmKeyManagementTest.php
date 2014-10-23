@@ -639,6 +639,21 @@ class TmKeyManagementTest extends Tests_AbstractTest {
 
         Tests_DBLoader4Test::resetDB();
 
+        /*
+         * client: '[{"key":"0000123DEF","name":"My DEF","r":1,"w":0}]'
+         * server: '[{"tm":true,"glos":false,"owner":true,"key":"0000123ABC","name":"","r":"1","w":"1","uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":0,"r_rev":null,"w_rev":null,"source":null,"target":null}]'
+         */
+
+        /*
+         * Expected Result because we can't change the owner key position
+         *
+         * [
+         *      {"tm":true,"glos":false,"owner":true,"key":"0000123ABC","name":"","r":"1","w":"1","uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":0,"r_rev":null,"w_rev":null,"source":null,"target":null}
+         *      {"tm":true,"glos":false,"owner":false,"key":"0000123DEF","name":"","r":null,"w":null,"uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":0,"r_rev":null,"w_rev":null,"source":null,"target":null}
+         * ]
+         *
+         */
+
         $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
                 self::$client_json_DEF,
                 self::$srv_json_ABC,
@@ -782,6 +797,110 @@ class TmKeyManagementTest extends Tests_AbstractTest {
         $this->assertFalse( $thirdKey->owner );
         $this->assertNull( $thirdKey->r );
         $this->assertNull( $thirdKey->w );
+
+    }
+
+    public function testOrdering_1(){
+
+        //CLIENT changes the position of a key upward and remove a key, also change permissions, add a name
+        $client_json = '[
+                            {"key":"0000123MNO","name":"My MNO","r":1,"w":0},
+                            {"key":"0000123ABC","name":"My ABC","r":0,"w":1},
+                            {"key":"0000123GHI","name":"My GHI","r":0,"w":1}
+                        ]';
+
+        $server_json = '[
+                            {"tm":true,"glos":false,"owner":true,"key":"0000123MNO","name":"My MNO","r":"1","w":"1","uid_transl":123,"uid_rev":null,"r_transl":0,"w_transl":1,"r_rev":null,"w_rev":null,"source":null,"target":null},
+                            {"tm":true,"glos":false,"owner":false,"key":"0000123GHI","name":"My GHI","r":null,"w":null,"uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":0,"r_rev":null,"w_rev":null,"source":null,"target":null},
+                            {"tm":true,"glos":false,"owner":false,"key":"0000123DEF","name":"My DEF","r":null,"w":null,"uid_transl":123,"uid_rev":456,"r_transl":1,"w_transl":1,"r_rev":1,"w_rev":1,"source":null,"target":null},
+                            {"tm":true,"glos":false,"owner":false,"key":"0000123ABC","name":"","r":null,"w":null,"uid_transl":123,"uid_rev":456,"r_transl":1,"w_transl":0,"r_rev":1,"w_rev":1,"source":null,"target":null}
+                        ]';
+
+        /*
+         * Expected behaviour
+         *
+         *   [
+         *       {"tm":true,"glos":false,"owner":true,"key":"0000123MNO","name":"My MNO","r":"1","w":"1","uid_transl":123,"uid_rev":null,"r_transl":1,"w_transl":0,"r_rev":null,"w_rev":null,"source":null,"target":null},
+         *       {"tm":true,"glos":false,"owner":false,"key":"0000123ABC","name":"My ABC","r":null,"w":null,"uid_transl":123,"uid_rev":null,"r_transl":0,"w_transl":1,"r_rev":null,"w_rev":null,"source":null,"target":null}
+         *       {"tm":true,"glos":false,"owner":false,"key":"0000123GHI","name":"My GHI","r":null,"w":null,"uid_transl":123,"uid_rev":null,"r_transl":0,"w_transl":1,"r_rev":null,"w_rev":null,"source":null,"target":null},
+         *       {"tm":true,"glos":false,"owner":false,"key":"0000123DEF","name":"My DEF","r":null,"w":null,"uid_transl":null,"uid_rev":456,"r_transl":null,"w_transl":null,"r_rev":1,"w_rev":1,"source":null,"target":null},
+         *   ]
+         *
+         */
+
+        //this should not to be, because a client can not send not hashed keys
+        //already present in job as an anonymous user
+        $resultMerge = TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+                $client_json,
+                $server_json,
+                TmKeyManagement_Filter::ROLE_TRANSLATOR,
+                123
+        );
+
+        $this->assertTrue( is_array( $resultMerge ) );
+        $this->assertEquals( 4, count( $resultMerge ) );
+
+        /**
+         * @var $firstKey TmKeyManagement_TmKeyStruct
+         */
+        $firstKey = $resultMerge[ 0 ];
+
+        /**
+         * @var $secondKey TmKeyManagement_TmKeyStruct
+         */
+        $secondKey = $resultMerge[ 1 ];
+
+        /**
+         * @var $thirdKey TmKeyManagement_TmKeyStruct
+         */
+        $thirdKey = $resultMerge[ 2 ];
+
+        /**
+         * @var $thirdKey TmKeyManagement_TmKeyStruct
+         */
+        $fourthKey = $resultMerge[ 3 ];
+
+        $this->assertEquals( "0000123MNO", $firstKey->key );
+        $this->assertTrue( $firstKey->r_transl );
+        $this->assertFalse( $firstKey->w_transl );
+        $this->assertEquals( "My MNO", $firstKey->name );
+        $this->assertEquals( 123, $firstKey->uid_transl );
+        $this->assertEquals( 1, $firstKey->owner );
+        $this->assertEquals( 1, $firstKey->r );
+        $this->assertEquals( 1, $firstKey->w );
+
+
+        //This key must be untouched because client sent hashed
+        $this->assertEquals( "0000123ABC", $secondKey->key );
+        $this->assertFalse( $secondKey->r_transl );
+        $this->assertTrue( $secondKey->w_transl );
+        $this->assertEquals( 123, $secondKey->uid_transl );
+        $this->assertEquals( "My ABC", $secondKey->name );
+        $this->assertEquals( 0, $secondKey->owner );
+        $this->assertEquals( 0, $secondKey->r );
+        $this->assertEquals( 0, $secondKey->w );
+
+        $this->assertEquals( "0000123GHI", $thirdKey->key );
+        $this->assertFalse( $thirdKey->r_transl );
+        $this->assertTrue( $thirdKey->w_transl );
+        $this->assertEquals( 123, $thirdKey->uid_transl );
+        $this->assertEquals( "My GHI", $thirdKey->name );
+        $this->assertEquals( 0, $thirdKey->owner );
+        $this->assertEquals( 0, $thirdKey->r );
+        $this->assertEquals( 0, $thirdKey->w );
+
+        $this->assertEquals( "0000123DEF", $fourthKey->key );
+        $this->assertNull( $fourthKey->r_transl );
+        $this->assertNull( $fourthKey->w_transl );
+        $this->assertNull( $fourthKey->uid_transl );
+        $this->assertEquals( "My DEF", $fourthKey->name );
+        $this->assertEquals( 0, $fourthKey->owner );
+        $this->assertEquals( 0, $fourthKey->r );
+        $this->assertEquals( 0, $fourthKey->w );
+        $this->assertEquals( 456, $fourthKey->uid_rev );
+        $this->assertEquals( 1, $fourthKey->r_rev );
+        $this->assertEquals( 1, $fourthKey->w_rev );
+
 
     }
 
