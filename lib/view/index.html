@@ -542,7 +542,6 @@
                                     <tr>
                                          <th class="privatekey">Private Key</th>
                                         <th class="description">Description</th>
-                                        <th class="langpair">Lang Pair</th>
                                         <th class="check">Lookup</th>
                                         <th class="check">Update</th>
                                         <th class="action">Action</th>
@@ -554,8 +553,6 @@
                                         <tr class="owner ui-sortable-handle clicked" data-tm="1" data-glos="1" data-editable="0">
                                             <td class="privatekey">***************1234</td>
                                             <td class="description"></td>
-                                            <td class="langpair"><span class="mgmt-source">en-US</span> -
-                                                <span class="mgmt-target">es-ES</span></td>
                                             <td class="lookup text-center check"><input type="checkbox" disabled="disabled" checked="" /></td>
                                             <td class="update text-center check"><input type="checkbox" disabled="disabled" checked="" /></td>
                                             <td class="action">
@@ -568,10 +565,6 @@
                                         <tr class="mine" data-tm="1" data-glos="1">
                                             <td class="privatekey">Ae01bafb688229b33bde</td>
                                             <td class="description">Fake key 1</td>
-                                            <td class="langpair">
-                                                <span class="mgmt-source">en-US</span> -
-                                                <span class="mgmt-target">es-ES</span>
-                                            </td>
                                             <td class="lookup text-center check">
                                                 <input type="checkbox" checked="checked" />
                                             </td>
@@ -580,11 +573,9 @@
                                             </td>
                                             <td class="action">
                                                 <a class="btn-grey pull-left usetm">
-
-                                                    <span class="text icon-play-circle">Use</span>
+                                                    <span class="text icon-minus-circle">Stop Use</span>
                                                 </a>
                                                 <a class="btn-grey pull-left addtmx">
-
                                                     <span class="text icon-plus-circle">Add TMX</span>
                                                 </a>
                                             </td>
@@ -593,10 +584,6 @@
                                         <tr class="mine" data-tm="1" data-glos="1">
                                             <td class="privatekey">Be01bafb688229b33bde</td>
                                             <td class="description">Fake key 2</td>
-                                            <td class="langpair">
-                                                <span class="mgmt-source">en-US</span> -
-                                                <span class="mgmt-target">es-ES</span>
-                                            </td>
                                             <td class="lookup text-center check">
                                                 <input type="checkbox" checked="checked" />
                                             </td>
@@ -605,11 +592,9 @@
                                             </td>
                                             <td class="action">
                                                 <a class="btn-grey pull-left usetm">
-
-                                                    <span class="text icon-play-circle">Use</span>
+                                                    <span class="text icon-minus-circle">Stop Use</span>
                                                 </a>
                                                 <a class="btn-grey pull-left addtmx">
-
                                                     <span class="text icon-plus-circle">Add TMX</span>
                                                 </a>
                                             </td>
@@ -618,10 +603,6 @@
                                         <tr class="mine" data-tm="1" data-glos="1">
                                             <td class="privatekey">Ce01bafb688229b33bde</td>
                                             <td class="description">Fake key 3</td>
-                                            <td class="langpair">
-                                                <span class="mgmt-source">en-US</span> -
-                                                <span class="mgmt-target">es-ES</span>
-                                            </td>
                                             <td class="lookup text-center check">
                                                 <input type="checkbox" checked="checked" />
                                             </td>
@@ -630,11 +611,9 @@
                                             </td>
                                             <td class="action">
                                                 <a class="btn-grey pull-left usetm">
-
-                                                    <span class="text icon-play-circle">Use</span>
+                                                    <span class="text icon-minus-circle">Stop Use</span>
                                                 </a>
                                                 <a class="btn-grey pull-left addtmx">
-
                                                     <span class="text icon-plus-circle">Add TMX</span>
                                                 </a>
                                             </td>
@@ -646,19 +625,14 @@
                                         <tr data-tm="${key/tm}" class="" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
                                             <td class="privatekey">${key/key}</td>
                                             <td class="description">${key/name}</td>
-                                            <td class="langpair"><span class="mgmt-source">en-US</span> -
-                                                <span class="mgmt-target">es-ES</span></td>
-
                                             <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit; checked key/r" /></td>
                                             <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit; checked key/w" /></td>
 
                                             <td tal:condition="key/edit" class="action">
                                                 <a class="btn-grey pull-left usetm">
-                                                   
                                                     <span class="icon-minus-circle text">Stop Use</span>
                                                 </a>
                                                 <a class="btn-grey pull-left addtmx">
-                                                    
                                                     <span class="text icon-plus-circle">Add TMX</span>
                                                 </a>
                                             </td>
@@ -680,7 +654,7 @@
                                                                            id="new-tm-description"
                                                                            placeholder="Enter a short description" />
                                             </td>
-                                            <td class="fileupload" colspan="3">
+                                            <td class="fileupload" colspan="2">
                                                 <input id="new-tm-read" type="checkbox" name="r" class="r" value="1" checked="" />
                                                 <label for="new-tm-read">Lookup</label>
                                                 <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
@@ -715,7 +689,7 @@
                                         </tr>
 
                                         <tr class="uploadpanel hide">
-                                            <td class="uploadfile" colspan="7">
+                                            <td class="uploadfile" colspan="6">
                                                 <label class="fileupload">Select a TMX </label>
                                                 <input type="file" />
                                             </td>
@@ -725,8 +699,6 @@
                                         <tr class="anonymous ui-sortable-handle clicked" data-tm="1" data-glos="1" data-editable="0">
                                             <td class="privatekey">**************1234</td>
                                             <td class="description"></td>
-                                            <td class="langpair"><span class="mgmt-source">en-US</span> -
-                                                <span class="mgmt-target">es-ES</span></td>
                                             <td class="lookup text-center check"><input type="checkbox" disabled="disabled" checked="" /></td>
                                             <td class="update text-center check"><input type="checkbox" disabled="disabled" checked="" /></td>
                                             <td class="action"></td>
@@ -742,7 +714,6 @@
                                     <tr>
                                           <th class="privatekey">Private Key</th>
                                         <th class="description">Description</th>
-                                        <th class="langpair">Lang Pair</th>
                                         <th class="check">Lookup</th>
                                         <th class="check">Update</th>
                                         <th class="action">Action</th>
@@ -753,8 +724,6 @@
                                         <tr data-tm="1" data-glos="1">
                                             <td class="privatekey">${key/key}</td>
                                             <td class="description">${key/name}</td>
-                                            <td class="langpair"><span class="mgmt-source">en-US</span> -
-                                                <span class="mgmt-target">es-ES</span></td>
                                             <td class="lookup text-center check"><input type="checkbox" checked="${key/r}"/></td>
                                             <td class="update text-center check"><input type="checkbox" checked="${key/w}"/></td>
                                             <td class="action">

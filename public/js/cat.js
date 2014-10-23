@@ -7954,9 +7954,10 @@ $.extend(UI, {
 //            UI.uploadTM($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
 //            UI.checkTMheights();
         }).on('click', '.mgmt-tm tr.new a.uploadtm', function() {
-            operation = ($('.mgmt-tm tr.new td.fileupload input[type="file"]').val() == '')? 'key' : 'tm';
-//            $('.addtmxrow').hide().fadeOut();
-            UI.checkTMKey(operation);
+//            operation = ($('.mgmt-tm tr.new td.fileupload input[type="file"]').val() == '')? 'key' : 'tm';
+//            UI.checkTMKey('key');
+//            UI.execAddTMKey();
+            UI.addTMKeyToList();
 
 //            operation = ($('#uploadTMX').text() == '')? 'key' : 'tm';
 //            UI.checkTMKey($('#addtm-tr-key').val(), operation);
@@ -8176,6 +8177,7 @@ $.extend(UI, {
 
         if( operation == 'key' ){
             console.log('adding a key');
+
             if(APP.isCattool) {
                 UI.execAddTMKey();
             } else {
@@ -8296,6 +8298,29 @@ $.extend(UI, {
             }
         });
     },
+    addTMKeyToList: function () {
+        var r = ($('#new-tm-read').is(':checked'))? 1 : 0;
+        var w = ($('#new-tm-write').is(':checked'))? 1 : 0;
+        var desc = $('#new-tm-description').val();
+        var TMKey = $('#new-tm-key').val();
+
+        newTr = '<tr class="mine" data-tm="1" data-glos="1">' +
+                '    <td class="privatekey">' + TMKey + '</td>' +
+                '    <td class="description">' + desc + '</td>' +
+                '    <td class="langpair"><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">PT-BR</span></td>' +
+                '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + '></td>' +
+                '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + '></td>' +
+                '    <td class="action">' +
+                '        <a class="btn-grey pull-left usetm">' +
+                '            <span class="text stopuse">Stop Use</span>' +
+                '        </a>' +
+                '        <a class="btn-grey pull-left addtmx">' +
+                '            <span class="text addtmxbtn">Add TMX</span>' +
+                '        </a>' +
+                '    </td>' +
+                '</tr>';
+    },
+
     pulseTMadded: function (row) {
         setTimeout(function() {
             $("#activetm tbody").animate({scrollTop: 5000}, 0);
