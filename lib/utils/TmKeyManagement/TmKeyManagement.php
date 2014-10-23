@@ -168,14 +168,14 @@ class TmKeyManagement_TmKeyManagement {
      * Merge the keys from CLIENT with those from DATABASE ( jobData )
      *
      * @param string $Json_clientKeys A json_encoded array of objects having the following structure:<br />
-     *                                <pre>
-     *                                array(
-     *                                'key'  => &lt;private_tm_key>,
-     *                                'name' => &lt;tm_name>,
-     *                                'r'    => true,
-     *                                'w'    => true
-     *                                )
-     *                                </pre>
+     * <pre>
+     * array(
+     *    'key'  => &lt;private_tm_key>,
+     *    'name' => &lt;tm_name>,
+     *    'r'    => true,
+     *    'w'    => true
+     * )
+     * </pre>
      * @param string $Json_jobKeys    A json_encoded array of TmKeyManagement_TmKeyStruct objects
      * @param string $userRole        One of the following strings: "owner", "translator", "revisor"
      * @param int    $uid
