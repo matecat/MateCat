@@ -4,7 +4,7 @@
 */
 
 Loader = {
-	concatSources: true, // set to true if you want to load all the js source components instead of the whole cat.js
+	concatSources: false, // set to true if you want to load all the js source components instead of the whole cat.js
 //	components: new Array (
 //		'common',
 //		'cat'
@@ -28,8 +28,8 @@ Loader = {
 	forkComponents: new Array (
 	),
 	libraries: new Array (
-//		'jquery-1.11.0.min',
-		'jquery',
+		'jquery-1.11.0.min',
+//		'jquery',
         'jquery-ui',
 		'jquery.hotkeys.min',
 //		'jquery-migrate-1.2.1',

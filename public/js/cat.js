@@ -2487,8 +2487,7 @@ UI = {
         $(area).find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
         $(area).find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
         $(area).find('span.space-marker').replaceWith(' ');
-        $(area).find( '.rangySelectionBoundary' ).remove();
-
+        $(area).find('span.rangySelectionBoundary').remove();
 
 //        Now commented, but valid for future purposes when the user will choose what type of carriage return
 //        $('br', area).each(function() {
@@ -7861,6 +7860,7 @@ $.extend(UI, {
             $(".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
             $("#SnapABug_Button").show();
             $(".outer-tm").hide();
+
             $('body').removeClass('side-popup');
         });
 
@@ -7901,29 +7901,57 @@ $.extend(UI, {
         // script per fare apparire e scomparire la riga con l'upload della tmx
 
 
-        $('body').on('click', 'a.canceladdtmx', function() {
-            $(".addtmxrow").hide();
-            $(".addtmx").show();
-            UI.clearAddTMRow();
+        $('body').on('click', '#activetm tr.mine a.canceladdtmx', function() {
+            $(this).parents('tr').find('.action .addtmx').show();
+            $(this).parents('td.uploadfile').remove();
+
+            /*
+                        $(".addtmxrow").hide();
+                        $(".addtmx").show();
+                        UI.clearAddTMRow();
+                        */
         }).on('click', '.addtmx', function() {
             $(this).hide();
-            var newRow = '<tr class="addtmxrow"><td class="addtmxtd" colspan="5"><label class="fileupload">Select a TMX </label><input type="file" /></td><td><a class="pull-left btn-grey uploadtm"><span class="icon-upload"></span> Upload</a>'+
-                '<form class="add-TM-Form" action="/" method="post">' +
-                '    <input type="hidden" name="action" value="addTM" />' +
-                '    <input type="hidden" name="exec" value="newTM" />' +
-                '    <input type="hidden" name="job_id" value="38424" />' +
-                '    <input type="hidden" name="job_pass" value="48a757e3d46c" />' +
-                '    <input type="hidden" name="tm_key" value="" />' +
-                '    <input type="hidden" name="name" value="" />' +
-                '    <input type="hidden" name="tmx_file" value="" />' +
-                '    <input type="hidden" name="r" value="1" />' +
-                '    <input type="hidden" name="w" value="1" />' +
-                '    <input type="submit" style="display: none" />' +
-                '</form>' +
+            var nr = '<td class="uploadfile">' +
+                     '  <label class="fileupload">Select a TMX </label>' +
+                     '  <input type="file" />' +
+                     '  <a class="pull-right canceladdtmx">' +
+                     '      <span class="icon-times-circle"></span>' +
+                     '  </a>' +
+                    '   <a class="pull-right btn-grey addtmxfile">' +
+                    '       <span class="text">Upload TMX</span>' +
+                    '   </a>' +
+                     '</td>';
+/*
+            var nr = '<tr class="addtmxrow">' +
+                    '   <td class="addtmxtd" colspan="5">' +
+                    '       <label class="fileupload">Select a TMX </label>' +
+                    '       <input type="file" />' +
+                    '   </td>' +
+                    '   <td>' +
+                    '       <a class="pull-left btn-grey uploadtm">' +
+                    '           <span class="icon-upload"></span> Upload</a>'+
+                    '       <form class="add-TM-Form" action="/" method="post">' +
+                    '           <input type="hidden" name="action" value="addTM" />' +
+                    '           <input type="hidden" name="exec" value="newTM" />' +
+                    '           <input type="hidden" name="job_id" value="38424" />' +
+                    '           <input type="hidden" name="job_pass" value="48a757e3d46c" />' +
+                    '           <input type="hidden" name="tm_key" value="" />' +
+                    '           <input type="hidden" name="name" value="" />' +
+                    '           <input type="hidden" name="tmx_file" value="" />' +
+                    '           <input type="hidden" name="r" value="1" />' +
+                    '           <input type="hidden" name="w" value="1" />' +
+                    '           <input type="submit" style="display: none" />' +
+                    '       </form>' +
 
-                '<a class="btn-grey pull-left canceladdtmx"><span class="icon-times-circle"></span> Cancel</a> </td></tr>';
-            $(this).closest("tr").after(newRow);
-            UI.uploadTM($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
+                    '       <a class="btn-grey pull-left canceladdtmx">' +
+                    '           <span class="icon-times-circle"></span> Cancel</a>' +
+                    '   </td>' +
+                    '</tr>';
+            $(this).closest("tr").after(nr);
+*/
+            $(this).parents('tr').append(nr);
+//            UI.uploadTM($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
 //            UI.checkTMheights();
         }).on('click', '.mgmt-tm tr.new a.uploadtm', function() {
             operation = ($('.mgmt-tm tr.new td.fileupload input[type="file"]').val() == '')? 'key' : 'tm';
@@ -7939,6 +7967,8 @@ $.extend(UI, {
             UI.execAddTM(this);
         }).on('click', '.popup-tm .savebtn', function() {
             UI.saveTMdata();
+        }).on('click', '#activetm tr.new a.addtmxfile', function() {
+            $('#activetm tr.uploadpanel').removeClass('hide');
         }).on('click', 'a.usetm', function() {
             // get the row containing this link
             var row = $(this).closest("tr");
@@ -8004,6 +8034,12 @@ $.extend(UI, {
             if(UI.checkTMgrants($('.addtm-tr'))) {
 //                $('.addtm-tr .error-message').hide();
             }
+        }).on('change', '#activetm tr.mine td.uploadfile input[type="file"]', function() {
+            if($(this).val() == '') {
+                $(this).parents('.uploadfile').find('.addtmxfile').hide();
+            } else {
+                $(this).parents('.uploadfile').find('.addtmxfile').show();
+            }
         }).on('change', '.mgmt-tm tr.new td.fileupload input[type="file"]', function() {
             if($(this).val() == '') {
                 $('.mgmt-tm tr.new .uploadtm .text').text('Add a key');
@@ -8033,8 +8069,9 @@ $.extend(UI, {
             $(".mgmt-tm tr.new").removeClass('hide').show();
         });
 
-        $(".canceladdtmx").click(function() {
-            $(".mgmt-tm tr.new").hide();
+        $(".mgmt-tm tr.new .canceladdtmx").click(function() {
+            $("#activetm tr.new").hide();
+            $("#activetm tr.uploadpanel").addClass('hide');
             $(".add-tm").show();
         });
 
@@ -8089,7 +8126,7 @@ $.extend(UI, {
     openLanguageResourcesPanel: function() {
         $('body').addClass('side-popup');
         $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
-        UI.checkTMheights();
+//        UI.checkTMheights();
         $("#SnapABug_Button").hide();
         $(".outer-tm").show();
     },
@@ -8098,6 +8135,8 @@ $.extend(UI, {
 
     },
     setTMsortable: function () {
+
+ /*       console.log('setTMsortable');
         var fixHelperModified = function(e, tr) {
             var $originals = tr.children();
             var $helper = tr.clone();
@@ -8106,10 +8145,9 @@ $.extend(UI, {
             });
             return $helper;
         };
-        $("#activetm tbody.sortable").sortable({
-            helper: fixHelperModified,
-            items: ".mine"
-        }).disableSelection();
+        console.log('fixHelperModified: ', fixHelperModified);
+        */
+        $("#activetm tbody.sortable").sortable({ items: ".mine" }).disableSelection();
     },
 
     checkTMheights: function() {
@@ -8244,12 +8282,10 @@ $.extend(UI, {
                         '    <td class="update check text-center"><input type="checkbox"' + ((this.w)? ' checked="checked"' : '') + '></td>' +
                         '    <td class="action">' +
                         '        <a class="btn-grey pull-left usetm">' +
-                        '            <span class="icon icon-minus-circle"></span>' +
-                        '            <span class="text">Stop Use</span>' +
+                        '            <span class="text stopuse">Stop Use</span>' +
                         '        </a>' +
                         '        <a class="btn-grey pull-left addtmx">' +
-                        '            <span class="icon icon-plus-circle"></span>' +
-                        '            <span class="text">Add TMX</span>' +
+                        '            <span class="text addtmxbtn">Add TMX</span>' +
                         '        </a>' +
                         '    </td>' +
                         '</tr>';
