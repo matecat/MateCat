@@ -202,6 +202,7 @@ class TmKeyManagement_TmKeyManagement {
         $client_tm_keys = array_map( array( 'self', 'getTmKeyStructure' ), $clientDecodedJson );
         $job_tm_keys    = array_map( array( 'self', 'getTmKeyStructure' ), $serverDecodedJson );
 
+        $server_reorder_position = array( );
         $reverse_lookup_client_json = array( 'pos' => array(), 'elements' => array() );
         foreach ( $client_tm_keys as $_j => $_client_tm_key ) {
 
@@ -278,6 +279,9 @@ class TmKeyManagement_TmKeyManagement {
                 unset( $reverse_lookup_client_json[ 'pos' ][ $_index_position ] );
                 unset( $reverse_lookup_client_json[ 'elements' ][ $_index_position ] );
 
+                //take the new order
+                $server_reorder_position[ $_index_position ] = $_job_Key;
+
             } elseif ( array_search( $_job_Key->getHash(), $reverse_lookup_client_json[ 'pos' ] ) !== false ) {
                 //DO NOTHING
                 //reduce the stack
@@ -287,9 +291,12 @@ class TmKeyManagement_TmKeyManagement {
                 unset( $reverse_lookup_client_json[ 'elements' ][ $hashPosition ] );
                 //PASS
 
+                //take the new order
+                $server_reorder_position[ $hashPosition ] = $_job_Key;
+
             } else {
 
-                //the key has to be deleted
+                //the key must be deleted
                 if ( $userRole == TmKeyManagement_Filter::OWNER ) {
 
                     //override grants
@@ -312,9 +319,20 @@ class TmKeyManagement_TmKeyManagement {
                     $_job_Key->uid_rev = null;
                 }
 
-                //if the key is no more linked to someone, delete it.
-                if ( !$_job_Key->owner && is_null( $_job_Key->uid_transl ) && is_null( $_job_Key->uid_rev ) ) {
-                    unset( $job_tm_keys[ $i ] );
+                //if the key is no more linked to someone, don't add to the resultset, else reorder if it is not an owner key.
+                if ( $_job_Key->owner || !is_null( $_job_Key->uid_transl ) || !is_null( $_job_Key->uid_rev ) ) {
+
+                    if ( !$_job_Key->owner ){
+
+                        //take the new order, put the deleted key at the end of the array
+                        //a position VERY LOW ( 1 Million )
+                        $server_reorder_position[ 1000000 + $i ] = $_job_Key;
+
+                    } else {
+                        //place on top of the owner keys, preserve the order of owner keys by adding it's normal index position
+                        $server_reorder_position[ -1000000 + $i ] = $_job_Key;
+                    }
+
                 }
 
             }
@@ -365,7 +383,9 @@ class TmKeyManagement_TmKeyManagement {
 
 
                 //finally append to the job keys!!
-                $job_tm_keys[ ] = $justCreatedKey;
+                //take the new order, put the deleted key at the end of the array
+                //a position VERY LOW, but before the deleted keys, so it goes not to the end ( 100 hundred thousand )
+                $server_reorder_position[ 100000 + $_pos ] = $justCreatedKey;
 
                 if ( $uid != null ) {
 
@@ -405,7 +425,8 @@ class TmKeyManagement_TmKeyManagement {
 
         }
 
-        return array_values( $job_tm_keys );
+        ksort( $server_reorder_position, SORT_NUMERIC );
+        return array_values( $server_reorder_position );
 
     }
 
