@@ -155,35 +155,41 @@ class createProjectController extends ajaxController {
         setcookie("targetLang", $newCookieVal, time() + (86400 * 365));
 
         $projectStructure = new RecursiveArrayObject(
-            array(
-                'id_project'         => null,
-                'id_customer'        => null,
-                'user_ip'            => null,
-                'project_name'       => $this->project_name,
-                'result'             => $this->result,
-                'private_tm_key'     => $this->private_tm_key,
-                'private_tm_user'    => $this->private_tm_user,
-                'private_tm_pass'    => $this->private_tm_pass,
-                'uploadToken'        => $_COOKIE['upload_session'],
-                'array_files'        => $arFiles, //list of file names
-                'file_id_list'       => array(),
-                'file_references'    => array(),
-                'source_language'    => $this->source_language,
-                'target_language'    => explode( ',', $this->target_language ),
-                'mt_engine'          => $this->mt_engine,
-                'tms_engine'         => $this->tms_engine,
-                'ppassword'          => null, //project password
-                'array_jobs'         => array( 'job_list' => array(), 'job_pass' => array(), 'job_segments' => array(  ) ),
-                'job_segments'       => array(), //array of job_id => array( min_seg, max_seg )
-                'segments'           => array(), //array of files_id => segmentsArray()
-                'translations'       => array(), //one translation for every file because translations are files related
-                'query_translations' => array(),
-                'status'             => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
-                'job_to_split'       => null,
-                'job_to_split_pass'  => null,
-                'split_result'       => null,
-	            'lang_detect_files'  => $this->lang_detect_files
-            ) );
+                array(
+                        'id_project'           => null,
+                        'id_customer'          => null,
+                        'user_ip'              => null,
+                        'project_name'         => $this->project_name,
+                        'result'               => $this->result,
+                        'private_tm_key'       => $this->private_tm_key,
+                        'private_tm_user'      => $this->private_tm_user,
+                        'private_tm_pass'      => $this->private_tm_pass,
+                        'uploadToken'          => $_COOKIE[ 'upload_session' ],
+                        'array_files'          => $arFiles, //list of file names
+                        'file_id_list'         => array(),
+                        'file_references'      => array(),
+                        'source_language'      => $this->source_language,
+                        'target_language'      => explode( ',', $this->target_language ),
+                        'mt_engine'            => $this->mt_engine,
+                        'tms_engine'           => $this->tms_engine,
+                        'ppassword'            => null, //project password
+                        'array_jobs'           => array(
+                                'job_list'     => array(),
+                                'job_pass'     => array(),
+                                'job_segments' => array()
+                        ),
+                        'job_segments'         => array(), //array of job_id => array( min_seg, max_seg )
+                        'segments'             => array(), //array of files_id => segmentsArray()
+                        'translations'         => array(),
+                    //one translation for every file because translations are files related
+                        'query_translations'   => array(),
+                        'status'               => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
+                        'job_to_split'         => null,
+                        'job_to_split_pass'    => null,
+                        'split_result'         => null,
+                        'lang_detect_files'    => $this->lang_detect_files,
+                        'skip_lang_validation' => false
+                ) );
 
         $projectManager = new ProjectManager( $projectStructure );
 
