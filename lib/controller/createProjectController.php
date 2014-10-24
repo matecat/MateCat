@@ -132,8 +132,8 @@ class createProjectController extends ajaxController {
         }
         $sourceLangAr = explode( '||', urldecode( $sourceLangHistory ) );
 
-        if ( ( $key = array_search( $this->source_language, $sourceLangAr ) ) !== false ) {
-            unset( $sourceLangAr[ $key ] );
+        if (($key = array_search($this->source_language, $sourceLangAr)) !== false) {
+            unset($sourceLangAr[$key]);
         }
         array_unshift( $sourceLangAr, $this->source_language );
         if ( $sourceLangAr == '_EMPTY_' ) {
@@ -156,7 +156,7 @@ class createProjectController extends ajaxController {
         }
 
         setcookie( "sourceLang", $newCookieVal, time() + ( 86400 * 365 ) );
-
+        
         // SET TARGET COOKIE
 
         if ( $targetLangHistory == '_EMPTY_' ) {

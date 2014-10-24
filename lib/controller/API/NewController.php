@@ -224,6 +224,7 @@ class NewController extends ajaxController {
 					'job_to_split'       => null,
 					'job_to_split_pass'  => null,
 					'split_result'       => null,
+					'skip_lang_validation' => true
 					) );
 
 		$projectManager = new ProjectManager( $projectStructure );

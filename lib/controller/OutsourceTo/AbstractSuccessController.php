@@ -62,12 +62,6 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
         parent::__construct(false);
 
 
-        /**
-         * redirectSuccessPage is a white page with a form submitted by javascript
-         *
-         */
-        parent::makeTemplate("redirectSuccessPage.html");
-
         $filterArgs = array(
                 $this->tokenName => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
@@ -104,6 +98,23 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
 
         $shop_cart = Shop_Cart::getInstance('outsource_to_external');
 
+        if ( !$shop_cart->countItems() ){
+            /**
+             * redirectFailurePage is a white page with an error for session expired
+             *
+             */
+            parent::makeTemplate("redirectFailurePage.html");
+
+            return null;
+
+        } else {
+            /**
+             * redirectSuccessPage is a white page with a form submitted by javascript
+             *
+             */
+            parent::makeTemplate("redirectSuccessPage.html");
+        }
+
         //we need a list not an hashmap
         $item_list = array();
         foreach( $shop_cart->getCart() as $item ){
@@ -113,6 +124,9 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
         $this->template->tokenAuth = $this->tokenAuth;
         $this->template->data = json_encode( $item_list );
         $this->template->redirect_url = $this->review_order_page;
+
+        //clear the cart after redirection
+        $shop_cart->emptyCart();
 
     }
 

@@ -1785,6 +1785,9 @@ function getProjectJobData( $pid ) {
 		projects.name AS pname,
 		projects.password AS ppassword,
 		projects.status_analysis,
+		projects.standard_analysis_wc,
+		projects.fast_analysis_wc,
+		projects.tm_analysis_wc,
 		jobs.id AS jid,
 		jobs.password AS jpassword,
 		job_first_segment,
@@ -2390,15 +2393,15 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
     $data[ 'eq_word_count' ]       = null;
     $data[ 'standard_word_count' ] = null;
 
-    $data_innodb[ 'id_job' ]      = null;
-    $data_innodb[ 'id_segment' ]  = null;
-    $data_innodb[ 'pid' ]         = null;
-    $data_innodb[ 'date_insert' ] = null;
+    $data_queue[ 'id_job' ]      = null;
+    $data_queue[ 'id_segment' ]  = null;
+    $data_queue[ 'pid' ]         = null;
+    $data_queue[ 'date_insert' ] = null;
 
     $segment_translations = "INSERT INTO `segment_translations` ( " . implode( ", ", array_keys( $data ) ) . " ) VALUES ";
     $st_values            = array();
 
-    $segment_translations_queue = "INSERT IGNORE INTO matecat_analysis.segment_translations_analysis_queue ( " . implode( ", ", array_keys( $data_innodb ) ) . " ) VALUES ";
+    $segment_translations_queue = "INSERT IGNORE INTO matecat_analysis.segment_translations_analysis_queue ( " . implode( ", ", array_keys( $data_queue ) ) . " ) VALUES ";
     $st_queue_values            = array();
 
     foreach ( $fastReport as $k => $v ) {
@@ -2441,12 +2444,12 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
 
             if ( $data[ 'eq_word_count' ] > 0 && $perform_Tms_Analysis ) {
 
-                $data_innodb[ 'id_job' ] = (int)$id_job;;
-                $data_innodb[ 'id_segment' ]  = (int)$id_segment;
-                $data_innodb[ 'pid' ]         = (int)$pid;
-                $data_innodb[ 'date_insert' ] = date_create()->format( 'Y-m-d H:i:s' );
+                $data_queue[ 'id_job' ] = (int)$id_job;;
+                $data_queue[ 'id_segment' ]  = (int)$id_segment;
+                $data_queue[ 'pid' ]         = (int)$pid;
+                $data_queue[ 'date_insert' ] = date_create()->format( 'Y-m-d H:i:s' );
 
-                $st_queue_values[ ] = " ( '" . implode( "', '", array_values( $data_innodb ) ) . "' )";
+                $st_queue_values[ ] = " ( '" . implode( "', '", array_values( $data_queue ) ) . "' )";
             } else {
                 Log::doLog( 'Skipped Fast Segment: ' . var_export( $data, true ) );
             }
@@ -2545,7 +2548,7 @@ function insertFastAnalysis( $pid, $fastReport, $equivalentWordMapping, $perform
     }
 
     $data2[ 'fast_analysis_wc' ]     = $total_eq_wc;
-    $data2[ 'standard_analysis_wc' ] = $total_standard_wc;
+//    $data2[ 'standard_analysis_wc' ] = $total_standard_wc;
 
     $where = " id = $pid";
     $db->update( 'projects', $data2, $where );
@@ -2984,11 +2987,11 @@ function lockUnlockSegment( $sid, $jid, $value ) {
 function countSegments( $pid ) {
     $db = Database::obtain();
 
-    $query = "select  count(s.id) as num_segments
-		from segments s 
-		inner join files_job fj on fj.id_file=s.id_file
-		inner join jobs j on j.id= fj.id_job
-		where id_project=$pid
+    $query = "SELECT  COUNT(s.id) AS num_segments
+		FROM segments s
+		INNER JOIN files_job fj ON fj.id_file=s.id_file
+		INNER JOIN jobs j ON j.id= fj.id_job
+		WHERE id_project = $pid
 		";
 
     //-- and raw_word_count>0 -- removed, count ALL segments

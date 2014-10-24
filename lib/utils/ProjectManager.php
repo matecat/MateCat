@@ -34,25 +34,27 @@ class ProjectManager {
         if ( $projectStructure == null ) {
             $projectStructure = new RecursiveArrayObject(
                     array(
-                            'id_project'         => null,
-                            'id_customer'        => null,
-                            'user_ip'            => null,
-                            'project_name'       => null,
-                            'result'             => null,
-                            'private_tm_key'     => 0,
-                            'private_tm_user'    => null,
-                            'private_tm_pass'    => null,
-                            'uploadToken'        => null,
-                            'array_files'        => array(), //list of file names
-                            'file_id_list'       => array(),
-                            'file_references'    => array(),
-                            'source_language'    => null,
-                            'target_language'    => null,
-                            'mt_engine'          => null,
-                            'tms_engine'         => null,
-                            'ppassword'          => null,
-                            'array_jobs'         => array(
-                                    'job_list' => array(), 'job_pass' => array(), 'job_segments' => array()
+                            'id_project'           => null,
+                            'id_customer'          => null,
+                            'user_ip'              => null,
+                            'project_name'         => null,
+                            'result'               => null,
+                            'private_tm_key'       => 0,
+                            'private_tm_user'      => null,
+                            'private_tm_pass'      => null,
+                            'uploadToken'          => null,
+                            'array_files'          => array(), //list of file names
+                            'file_id_list'         => array(),
+                            'file_references'      => array(),
+                            'source_language'      => null,
+                            'target_language'      => null,
+                            'mt_engine'            => null,
+                            'tms_engine'           => null,
+                            'ppassword'            => null,
+                            'array_jobs'           => array(
+                                    'job_list'     => array(),
+                                    'job_pass'     => array(),
+                                    'job_segments' => array()
                             ),
                             'job_segments'       => array(), //array of job_id => array( min_seg, max_seg )
                             'segments'           => array(), //array of files_id => segmentsArray()
@@ -67,7 +69,8 @@ class ProjectManager {
                             'lang_detect_files'  => array(),
                             'tm_keys'            => array(),
                             'userIsLogged'       => false,
-                            'uid'                => null
+                            'uid'                => null,
+                            'skip_lang_validation' => false
                     ) );
         }
 
@@ -338,14 +341,22 @@ class ProjectManager {
                 );
             }
 
-            $contents = file_get_contents( $filePathName );
-
             try {
+
+                $info = pathinfo( $filePathName );
+
+                if ( ( $info[ 'extension' ] == 'xliff' ) || ( $info[ 'extension' ] == 'sdlxliff' ) || ( $info[ 'extension' ] == 'xlf' ) ) {
+                    $contents = file_get_contents( $filePathName );
+                } else {
+                    throw new Exception( "Failed to find Xliff - no segments found", -3 );
+                }
 
                 $fid = insertFile( $this->projectStructure, $fileName, $mimeType, $contents, $sha1_original, $original_content );
                 $this->projectStructure[ 'file_id_list' ]->append( $fid );
 
-                $this->_extractSegments( $filePathName, $fid );
+                $this->_extractSegments( $contents, $fid );
+
+                unset($contents); //free memory
 
                 //Log::doLog( $this->projectStructure['segments'] );
 
@@ -389,7 +400,7 @@ class ProjectManager {
         }
 
         //check if the files language equals the source language. If not, set an error message.
-        $this->validateFilesLanguages();
+        if (!$this->projectStructure['skip_lang_validation']) $this->validateFilesLanguages();
 
         /****************/
         //loop again through files to check to check for TMX loading
@@ -510,7 +521,6 @@ class ProjectManager {
         $isEmptyProject = false;
         //Throws exception
         try {
-            Log::doLog( $this->projectStructure );
             $this->_createJobs( $this->projectStructure, $owner );
 
             //FIXME for project with pre translation this query is not enough,
@@ -552,7 +562,7 @@ class ProjectManager {
             $this->projectStructure[ 'status' ] = Constants_ProjectStatus::STATUS_EMPTY;
         }
 
-        changeProjectStatus( $this->projectStructure[ 'id_project' ], $this->projectStructure[ 'status' ] );
+
         $this->projectStructure[ 'result' ][ 'code' ]            = 1;
         $this->projectStructure[ 'result' ][ 'data' ]            = "OK";
         $this->projectStructure[ 'result' ][ 'ppassword' ]       = $this->projectStructure[ 'ppassword' ];
@@ -565,6 +575,42 @@ class ProjectManager {
         $this->projectStructure[ 'result' ][ 'target_language' ] = $this->projectStructure[ 'target_language' ];
         $this->projectStructure[ 'result' ][ 'status' ]          = $this->projectStructure[ 'status' ];
         $this->projectStructure[ 'result' ][ 'lang_detect' ]     = $this->projectStructure[ 'lang_detect_files' ];
+
+
+        $query_project_summary = "
+            SELECT
+                 COUNT( s.id ) AS project_segments,
+                 SUM( IF( IFNULL( st.eq_word_count, -1 ) = -1, s.raw_word_count, st.eq_word_count ) ) AS project_raw_wordcount
+            FROM segments s
+            INNER JOIN files_job fj ON fj.id_file = s.id_file
+            INNER JOIN jobs j ON j.id= fj.id_job
+            LEFT JOIN segment_translations st ON s.id = st.id_segment
+            WHERE j.id_project = %u
+        ";
+
+        $query_project_summary = sprintf( $query_project_summary, $this->projectStructure[ 'id_project' ] );
+
+        $project_summary = $this->dbHandler->fetch_array( $query_project_summary );
+
+        $update_project_count = "
+            UPDATE projects
+              SET
+                standard_analysis_wc = %.2F,
+                status_analysis = '%s'
+            WHERE id = %u
+        ";
+
+        $update_project_count = sprintf(
+                $update_project_count,
+                $project_summary[0]['project_raw_wordcount'],
+                $this->projectStructure[ 'status' ],
+                $this->projectStructure[ 'id_project' ]
+        );
+
+        $this->dbHandler->query( $update_project_count );
+
+//    var_dump($this->projectStructure);
+//        exit;
 
     }
 
@@ -682,7 +728,9 @@ class ProjectManager {
 
                 //get language code
                 if ( strpos( $fileLang, "-" ) === false ) {
-                    $sourceLang = array_shift( explode( "-", $this->projectStructure[ 'source_language' ] ) );
+                    //PHP Strict: Only variables should be passed by reference
+                    $_tmp = explode( "-", $this->projectStructure[ 'source_language' ] );
+                    $sourceLang = array_shift( $_tmp );
                 } else {
                     $sourceLang = $this->projectStructure[ 'source_language' ];
                 }
@@ -834,9 +882,9 @@ class ProjectManager {
                 );
             }
 
-            $counter[ $chunk ][ 'eq_word_count' ] += $row[ 'eq_word_count' ];
+            $counter[ $chunk ][ 'eq_word_count' ]  += $row[ 'eq_word_count' ];
             $counter[ $chunk ][ 'raw_word_count' ] += $row[ 'raw_word_count' ];
-            $counter[ $chunk ][ 'segment_end' ] = $row[ 'id' ];
+            $counter[ $chunk ][ 'segment_end' ]     = $row[ 'id' ];
 
             //if last_opened segment is not set and if that segment can be showed in cattool
             //set that segment as the default last visited
@@ -1046,22 +1094,21 @@ class ProjectManager {
 
     }
 
-    protected function _extractSegments( $files_path_name, $fid ) {
-
-        $info = pathinfo( $files_path_name );
+    /**
+     * Extract sources and pre-translations from sdlxliff file and put them in Database
+     *
+     * @param $xliff_file_content
+     * @param $fid
+     *
+     * @throws Exception
+     */
+    protected function _extractSegments( $xliff_file_content, $fid ) {
 
         //create Structure fro multiple files
         $this->projectStructure[ 'segments' ]->offsetSet( $fid, new ArrayObject( array() ) );
 
-        // Checking Extentions
-        if ( ( $info[ 'extension' ] == 'xliff' ) || ( $info[ 'extension' ] == 'sdlxliff' ) || ( $info[ 'extension' ] == 'xlf' ) ) {
-            $content = file_get_contents( $files_path_name );
-        } else {
-            throw new Exception( "Failed to find Xliff - no segments found", -3 );
-        }
-
         $xliff_obj = new Xliff_Parser();
-        $xliff     = $xliff_obj->Xliff2Array( $content );
+        $xliff     = $xliff_obj->Xliff2Array( $xliff_file_content );
 
         // Checking that parsing went well
         if ( isset( $xliff[ 'parser-errors' ] ) or !isset( $xliff[ 'files' ] ) ) {
