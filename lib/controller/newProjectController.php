@@ -266,7 +266,7 @@ class newProjectController extends viewController {
 
         $this->template->upload_session_id  = $this->guid;
 
-        if( (bool)$_GET['amt'] == true ){
+        if( @(bool)$_GET['amt'] == true ){
             $this->template->mt_engines = $this->mt_engines;
         } else{
             $this->template->mt_engines = array();

@@ -231,12 +231,37 @@ class getVolumeAnalysisController extends ajaxController {
             }
         }
 
-        if ( $this->total_wc_standard_analysis == 0  and $this->status_project == "FAST_OK" ) {
+        if ( $this->total_wc_standard_analysis == 0 AND $this->status_project == Constants_ProjectStatus::STATUS_FAST_OK ) {
+
             $this->total_wc_standard_analysis = $this->total_wc_standard_fast_analysis;
+
+        } elseif( $this->segments_analyzed == 0 && $this->status_project == Constants_ProjectStatus::STATUS_NEW ){
+
+            //Outsource Quote issue
+            //fast analysis not done, return the number of raw word count
+            //needed because the "getProjectStatsVolumeAnalysis" query based on segment_translations always returns null
+            //( no segment_translations )
+            $project_data_fallback = getProjectJobData( $this->id_project );
+
+            foreach( $project_data_fallback as $i => $_job_fallback ){
+                $this->return_data[ 'jobs' ][ $_job_fallback['jid'] ][ 'totals' ][ $_job_fallback['jpassword'] ][ "TOTAL_PAYABLE" ][ 0 ] = $_job_fallback['standard_analysis_wc'];
+
+                //format numbers after sum
+                $this->return_data[ 'jobs' ][ $_job_fallback['jid'] ][ 'totals' ][ $_job_fallback['jpassword'] ][ "TOTAL_PAYABLE" ][ 1 ] = number_format( $_job_fallback['standard_analysis_wc'], 0, ".", "," );
+            }
+
+            $this->total_wc_standard_analysis
+                    = $this->total_wc_tm_analysis
+                    = $this->total_raw_wc
+                    = $project_data_fallback[0]['standard_analysis_wc'];
+
         }
 
         // if fast quote has been done and tm analysis has not produced any result yet
-        if ( $this->total_wc_tm_analysis == 0 and $this->status_project == "FAST_OK" and $this->total_wc_fast_analysis > 0 ) {
+        if ( $this->total_wc_tm_analysis == 0
+                AND $this->status_project == Constants_ProjectStatus::STATUS_FAST_OK
+                AND $this->total_wc_fast_analysis > 0
+        ) {
             $this->total_wc_tm_analysis = $this->total_wc_fast_analysis;
         }
 
@@ -303,7 +328,7 @@ class getVolumeAnalysisController extends ajaxController {
 
         // THIS IS A PATCH (WORKAROUND): not a good pratice. Try solution. the tm analysis fail in set the status to done
         //TODO: ADDENDUM, the previous described bug should already be solved, try to remove workaround
-        if ( $this->segments_analyzed > 0 and $this->total_segments == $this->segments_analyzed ) {
+        if ( $this->segments_analyzed > 0 AND $this->total_segments == $this->segments_analyzed ) {
             $this->status_project = "DONE";
         }
 

@@ -320,16 +320,7 @@
 				$config[ 'isGlossary' ]  = true;
 
 
-				$db = Database::obtain();
-				$result = $db->query_first( "SELECT username FROM translators WHERE mymemory_api_key = '" . $db->escape( $input[ "myMemoryKey" ] ) . "'" );
-
-				$config[ 'id_user' ] = $result[ 'username' ];
-
-				if ( empty( $config[ 'id_user' ] ) )
-				{
-					echo "Error: No translator found associated to MyMemory Key: " . $input[ "myMemoryKey" ];
-					return;
-				}
+				$config[ 'id_user' ] = $input[ "myMemoryKey" ] ;//$result[ 'username' ];
 
 
 				echo "Begin importing the glossary into MyMemory. It might take a loooooong time. Please wait...<br/><br/><pre>";
