@@ -338,7 +338,7 @@ class catController extends viewController {
         $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
         if ( $url_request ) {
             $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-        } elseif( $user_email == $data[ 0 ]['owner'] ) {
+        } elseif( $user_email == $data[ 0 ]['job_owner'] ) {
             $this->userRole = TmKeyManagement_Filter::OWNER;
         } else {
             $this->userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;

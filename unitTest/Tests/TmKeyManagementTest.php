@@ -8,7 +8,7 @@
 
 include_once( "AbstractTest.php" );
 
-class TmKeyManagementTest extends Tests_AbstractTest {
+class Tests_TmKeyManagementTest extends Tests_AbstractTest {
 
     private static $dummyTmKey_key;
     private static $dummyTmKey_owner;
