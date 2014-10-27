@@ -550,7 +550,7 @@
                                     <tbody class="list sortable">
 
 <!-- fake keys -->
-                                    <tr class="owner" data-glos="1" data-editable="1" data-owner="1">
+                                    <!-- tr class="owner" data-glos="1" data-editable="1" data-owner="1">
                                         <td class="privatekey">5e01bafb688229b33bde</td>
                                         <td class="description">fake owner 1</td>
 
@@ -614,37 +614,25 @@
                                             </a>
                                         </td>
 
-                                    </tr>
-
-
+                                    </tr -->
 <!-- end fake keys -->
 
-
-
-
                                     <tal:block tal:repeat="key user_keys/job_keys">
-                                        <tr tal:attributes="class php: key.edit ? ( key.owner ? 'owner mine' : 'mine' ) : 'anonymous'" data-tm="${key/tm}" class="owner" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
+                                        <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? 'owner' : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
                                             <td class="privatekey">${key/key}</td>
                                             <td class="description">${key/name}</td>
-
-                                            <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit; checked key/r" /></td>
-                                            <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit; checked key/w" /></td>
-
-                                            <td tal:condition="key/edit" class="action">
+                                            <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/r" /></td>
+                                            <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/w" /></td>
+                                            <td tal:condition="php: key.edit && ( !key.owner || ownerIsMe )" class="action">
                                                 <a class="btn-grey pull-left usetm">
-
                                                     <span class="icon-minus-circle text">Stop Use</span>
                                                 </a>
                                                 <a class="btn-grey pull-left addtmx">
-
                                                     <span class="text icon-plus-circle">Add TMX</span>
                                                 </a>
                                             </td>
-
-                                            <td tal:condition="php: !key.edit" class="action"></td>
-
+                                            <td tal:condition="php: !key.edit || ( key.owner && !ownerIsMe )" class="action"> &nbsp;</td>
                                         </tr>
-
                                     </tal:block>
 
 
@@ -692,31 +680,40 @@
                                             </td>
                                         </tr>
 
-                                        <tr class="uploadpanel hide">
-                                            <td class="uploadfile" colspan="6">
-                                                <label class="fileupload">Select a TMX </label>
-                                                <input type="file" />
-                                                <a class="pull-right btn-grey addtmxfile">
-                                                    <span class="text">Upload TMX</span>
-                                                </a>
-                                            </td>
+                                    <tr class="uploadpanel hide">
+                                        <td class="uploadfile" colspan="6">
+                                            <label class="fileupload">Select a TMX </label>
+                                            <input type="file" />
+                                            <a class="pull-right btn-grey addtmxfile">
+                                                <span class="text">Upload TMX</span>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tal:block tal:repeat="key user_keys/job_keys">
+                                        <tr tal:condition="php: !key.edit && !key.owner" class="anonymous" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
+                                            <td class="privatekey">${key/key}</td>
+                                            <td class="description">${key/name}</td>
+                                            <td class="lookup text-center check"><input type="checkbox" disabled="disabled" tal:attributes="checked key/r" /></td>
+                                            <td class="update text-center check"><input type="checkbox" disabled="disabled" tal:attributes="checked key/w" /></td>
+                                            <td class="action"></td>
                                         </tr>
+                                    </tal:block>
 
-                                        <!-- fake keys anonymous -->
-                                        <tr class="anonymous" data-glos="1" data-editable="1" data-owner="1">
-                                            <td class="privatekey">5e01bafb688229b33bde</td>
-                                            <td class="description">fake anonymous 1</td>
-
-                                            <td class="lookup text-center check"><input type="checkbox" checked="checked" /></td>
-                                            <td class="update text-center check"><input type="checkbox" checked="checked" /></td>
-
-                                            <td class="action">
-                                            </td>
-
-                                        </tr>
-                                        <!-- end fake keys anonymous -->
-
-
+                                    <!-- fake keys anonymous -->
+                                    <!-- tr class="anonymous" data-glos="1" data-editable="1" data-owner="1">
+                                        <td class="privatekey">5e01bafb688229b33bde</td>
+                                        <td class="description">fake anonymous 1</td>
+                                    
+                                        <td class="lookup text-center check"><input type="checkbox" checked="checked" /></td>
+                                        <td class="update text-center check"><input type="checkbox" checked="checked" /></td>
+                                    
+                                        <td class="action">
+                                        </td>
+                                    
+                                    </tr -->
+                                    <!-- end fake keys anonymous -->
+                                    
                                     </tbody>
                                 </table>
 
@@ -741,8 +738,8 @@
                                         <tr data-tm="1" data-glos="1">
                                             <td class="privatekey">${key/key}</td>
                                             <td class="description">${key/name}</td>
-                                            <td class="lookup text-center check"><input type="checkbox" checked="${key/r}" disabled="disabled" /></td>
-                                            <td class="update text-center check"><input type="checkbox" checked="${key/w}" disabled="disabled" /></td>
+                                            <td class="lookup text-center check"><input disabled="disabled" type="checkbox" checked="${key/r}"/></td>
+                                            <td class="update text-center check"><input disabled="disabled" type="checkbox" checked="${key/w}"/></td>
                                             <td class="action">
                                                 <a class="btn-grey pull-left usetm">
                                                     <span class="text icon-play-circle">Use</span>
