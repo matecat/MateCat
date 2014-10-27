@@ -1130,7 +1130,7 @@ margin-top: 10px;
     float: left;
     margin: 2px 3px 2px 0px;
 }
-.mgmt-tm td.uploadfile .btn-grey {
+#activetm td.uploadfile .btn-grey {
     display: none;
     margin-top: -3px;
     margin-right: 79px;

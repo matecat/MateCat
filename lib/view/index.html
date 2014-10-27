@@ -549,13 +549,86 @@
                                     </thead>
                                     <tbody class="list sortable">
 
+<!-- fake keys -->
+                                    <tr class="owner" data-glos="1" data-editable="1" data-owner="1">
+                                        <td class="privatekey">5e01bafb688229b33bde</td>
+                                        <td class="description">fake owner 1</td>
+
+                                        <td class="lookup text-center check"><input type="checkbox" checked="checked" /></td>
+                                        <td class="update text-center check"><input type="checkbox" checked="checked" /></td>
+
+                                        <td class="action">
+                                        </td>
+
+                                    </tr>
+
+                                    <tr class="mine" data-glos="1" data-editable="1" data-owner="1">
+                                        <td class="privatekey">5e01bafb688229b33bde</td>
+                                        <td class="description">fake mine 1</td>
+
+                                        <td class="lookup text-center check"><input type="checkbox" checked="checked" /></td>
+                                        <td class="update text-center check"><input type="checkbox" checked="checked" /></td>
+
+                                        <td class="action">
+                                            <a class="btn-grey pull-left disabletm">
+                                                <span class="icon-minus-circle text">Stop Use</span>
+                                            </a>
+                                            <a class="btn-grey pull-left addtmx">
+                                                <span class="text icon-plus-circle">Add TMX</span>
+                                            </a>
+                                        </td>
+
+                                    </tr>
+
+                                    <tr class="mine" data-glos="1" data-editable="1" data-owner="1">
+                                        <td class="privatekey">5e01bafb688229b33bde</td>
+                                        <td class="description">fake mine 2</td>
+
+                                        <td class="lookup text-center check"><input type="checkbox" checked="checked" /></td>
+                                        <td class="update text-center check"><input type="checkbox" checked="checked" /></td>
+
+                                        <td class="action">
+                                            <a class="btn-grey pull-left disabletm">
+                                                <span class="icon-minus-circle text">Stop Use</span>
+                                            </a>
+                                            <a class="btn-grey pull-left addtmx">
+                                                <span class="text icon-plus-circle">Add TMX</span>
+                                            </a>
+                                        </td>
+
+                                    </tr>
+
+                                    <tr class="mine" data-glos="1" data-editable="1" data-owner="1">
+                                        <td class="privatekey">5e01bafb688229b33bde</td>
+                                        <td class="description">fake mine 3</td>
+
+                                        <td class="lookup text-center check"><input type="checkbox" checked="checked" /></td>
+                                        <td class="update text-center check"><input type="checkbox" checked="checked" /></td>
+
+                                        <td class="action">
+                                            <a class="btn-grey pull-left disabletm">
+                                                <span class="icon-minus-circle text">Stop Use</span>
+                                            </a>
+                                            <a class="btn-grey pull-left addtmx">
+                                                <span class="text icon-plus-circle">Add TMX</span>
+                                            </a>
+                                        </td>
+
+                                    </tr>
+
+
+<!-- end fake keys -->
+
+
+
+
                                     <tal:block tal:repeat="key user_keys/job_keys">
                                         <tr tal:attributes="class php: key.edit ? ( key.owner ? 'owner mine' : 'mine' ) : 'anonymous'" data-tm="${key/tm}" class="owner" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
                                             <td class="privatekey">${key/key}</td>
                                             <td class="description">${key/name}</td>
 
                                             <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit; checked key/r" /></td>
-                                            <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit; checked key/w" /></td>
+                                            <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit; checked key/w" /></td>
 
                                             <td tal:condition="key/edit" class="action">
                                                 <a class="btn-grey pull-left usetm">
@@ -598,7 +671,7 @@
                                                     <span class="text uploadkey">Add a key</span>
                                                 </a>
                                                 <a class="pull-left btn-grey addtmxfile">
-                                                    <span class="text">Upload TMX</span>
+                                                    <span class="text">Add TMX</span>
                                                 </a>
                                                 <form class="add-TM-Form" action="/" method="post">
                                                     <input type="hidden" name="action" value="addTM" />
@@ -623,8 +696,26 @@
                                             <td class="uploadfile" colspan="6">
                                                 <label class="fileupload">Select a TMX </label>
                                                 <input type="file" />
+                                                <a class="pull-right btn-grey addtmxfile">
+                                                    <span class="text">Upload TMX</span>
+                                                </a>
                                             </td>
                                         </tr>
+
+                                        <!-- fake keys anonymous -->
+                                        <tr class="anonymous" data-glos="1" data-editable="1" data-owner="1">
+                                            <td class="privatekey">5e01bafb688229b33bde</td>
+                                            <td class="description">fake anonymous 1</td>
+
+                                            <td class="lookup text-center check"><input type="checkbox" checked="checked" /></td>
+                                            <td class="update text-center check"><input type="checkbox" checked="checked" /></td>
+
+                                            <td class="action">
+                                            </td>
+
+                                        </tr>
+                                        <!-- end fake keys anonymous -->
+
 
                                     </tbody>
                                 </table>
@@ -641,6 +732,11 @@
                                     </tr>
                                     </thead>
                                     <tbody class="list">
+                                    <!--
+                                    <tr class="noresults">
+                                        <td colspan="7">No keys actually</td>
+                                    </tr>
+                                    -->
                                     <tal:block tal:repeat="key user_keys/totals">
                                         <tr data-tm="1" data-glos="1">
                                             <td class="privatekey">${key/key}</td>

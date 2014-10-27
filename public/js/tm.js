@@ -119,9 +119,9 @@ $.extend(UI, {
 //            UI.checkTMheights();
         }).on('click', '.mgmt-tm tr.new a.uploadtm', function() {
 //            operation = ($('.mgmt-tm tr.new td.fileupload input[type="file"]').val() == '')? 'key' : 'tm';
-//            UI.checkTMKey('key');
+            UI.checkTMKey('key');
 //            UI.execAddTMKey();
-            UI.addTMKeyToList();
+//            UI.addTMKeyToList();
 
 //            operation = ($('#uploadTMX').text() == '')? 'key' : 'tm';
 //            UI.checkTMKey($('#addtm-tr-key').val(), operation);
@@ -150,8 +150,8 @@ $.extend(UI, {
             }
 
             else {
-                $("#activetm").append(row);
-                if(!$('#inactivetm tbody tr:not(.odd)').length) $('#inactivetm tr.odd').show();
+                $("#activetm tr.new").before(row);
+                if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
                 row.find('a.usetm .text').text('Stop Use');
                 row.find('a.usetm .icon').attr('class', 'icon icon-minus-circle');
             }
@@ -176,15 +176,23 @@ $.extend(UI, {
 
             if (table.is("#inactivetm") && (x==0)) {
                 $("#activetm").append(row);
+                console.log(row);
+                console.log(row.find('.lookup input[type="checkbox"]'));
+
                 row.find('a.disabletm .text').text('Stop Use');
                 row.find('a.disabletm .icon').attr('class', 'icon icon-minus-circle');
+                row.find('.lookup input[type="checkbox"]').first().attr('checked', 'checked');
+                row.find('.update input[type="checkbox"]').first().attr('checked', 'checked');
             }
 
             else {
                 $("#inactivetm").append(row);
-                $('#inactivetm tr.odd').hide();
+                $('#inactivetm tr.noresults').hide();
+
                 row.find('a.disabletm .text').text('Use');
                 row.find('a.disabletm .icon').attr('class', 'icon icon-play-circle');
+                row.find('.lookup input[type="checkbox"]').first().removeAttr('checked');
+                row.find('.update input[type="checkbox"]').first().removeAttr('checked');
             }
             // draw the user's attention to it
             row.fadeOut();
@@ -205,12 +213,11 @@ $.extend(UI, {
             } else {
                 $(this).parents('.uploadfile').find('.addtmxfile').show();
             }
-        }).on('change', '.mgmt-tm tr.new td.fileupload input[type="file"]', function() {
+        }).on('change', '.mgmt-tm tr.uploadpanel td.uploadfile input[type="file"]', function() {
             if($(this).val() == '') {
-                $('.mgmt-tm tr.new .uploadtm .text').text('Add a key');
+                $(this).parents('.uploadfile').find('.addtmxfile').hide();
             } else {
-                $('.mgmt-tm tr.new .uploadtm .text').text('Upload');
-
+                $(this).parents('.uploadfile').find('.addtmxfile').show();
             }
         });
 
@@ -338,7 +345,31 @@ $.extend(UI, {
     checkTMKey: function(operation) {
         console.log('checkTMKey');
         console.log('operation: ', operation);
+        APP.doRequest({
+            data: {
+                action: 'ajaxUtils',
+                exec: 'checkTMKey',
+                tm_key: $('#new-tm-key').val()
+            },
+            context: operation,
+            error: function() {
+                console.log('checkTMKey error!!');
+            },
+            success: function(d) {
+                console.log('checkTMKey success!!');
+                console.log('d: ', d);
+                console.log('d.success: ', d.success);
+                if(d.success === true) {
+                    console.log('key is good');
+                    console.log('adding a tm');
+                    UI.addTMKeyToList();
+                } else {
+                    console.log('key is bad');
+                }
+            }
+        });
 
+/*
         if( operation == 'key' ){
             console.log('adding a key');
 
@@ -371,23 +402,13 @@ $.extend(UI, {
                     } else {
                         console.log('key is bad');
                         return false;
-/*
-                        if(this == 'key') {
-                            console.log('error adding a key');
-                            $('.mgmt-tm tr.new .message').text(d.errors[0].message);
-                        } else {
-                            console.log('error adding a tm');
-                            $('.mgmt-tm tr.new .message').text(d.errors[0].message);
-                        }
-                        return false;
-*/
                     }
                 }
             });
 
 //            this.addTMXToKey('new');
         }
-
+*/
     },
     registerTMX: function () {
         if(!UI.TMKeysToAdd) UI.TMKeysToAdd = [];
@@ -468,14 +489,13 @@ $.extend(UI, {
         var desc = $('#new-tm-description').val();
         var TMKey = $('#new-tm-key').val();
 
-        newTr = '<tr class="mine" data-tm="1" data-glos="1">' +
+        newTr = '<tr class="mine" data-tm="1" data-glos="1" data-owner="1">' +
                 '    <td class="privatekey">' + TMKey + '</td>' +
                 '    <td class="description">' + desc + '</td>' +
-                '    <td class="langpair"><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">PT-BR</span></td>' +
-                '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + '></td>' +
-                '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + '></td>' +
+                '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + ' /></td>' +
+                '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="action">' +
-                '        <a class="btn-grey pull-left usetm">' +
+                '        <a class="btn-grey pull-left disabletm">' +
                 '            <span class="text stopuse">Stop Use</span>' +
                 '        </a>' +
                 '        <a class="btn-grey pull-left addtmx">' +
@@ -483,6 +503,10 @@ $.extend(UI, {
                 '        </a>' +
                 '    </td>' +
                 '</tr>';
+        $('#activetm tr.new').before(newTr);
+        $('.mgmt-tm tr.new .canceladdtmx').click();
+        UI.pulseTMadded($('#activetm tr.mine').last());
+        UI.setTMsortable();
     },
 
     pulseTMadded: function (row) {
