@@ -1024,7 +1024,7 @@ margin:0 auto; overflow:hidden; width:100%;
 
 .mgmt-tm .description {
 	/*width:32%!important;*/
-	width:444px!important;
+	width:452px!important;
 }
 
 .mgmt-tm .langpair {
@@ -1054,6 +1054,10 @@ width: 18%;
 width: 290px!important;
 }
 
+#new-tm-description {
+padding: 5px 12px;
+}
+
 .mgmt-tm .fileupload {
 width: 22%;
 }
@@ -1072,6 +1076,7 @@ width: auto;
     float: left;
     table-layout: fixed;
     width: 100%;
+    margin-bottom: 20px;
 }
 
 .mgmt-tm .btn-ok, .mgmt-tm .btn-grey {margin:0 3px;
@@ -1098,6 +1103,10 @@ body.cattool .mgmt-tm.mine thead,
 }
 .canceladdtmx {
     cursor: pointer;
+}
+
+.canceladdtmx:hover {
+	color:red;
 }
 
 .dataTables_length, .dataTables_info {display: none;}
@@ -1666,6 +1675,7 @@ color: #000;
 .sorting_desc:after,
 .sorting_asc:after,
 .add-tm:before,
+.addtmx .text:before,
 .stopuse:before,
 .addtmxfile .text:before,
 .uploadkey:before,
@@ -1692,16 +1702,18 @@ color: #000;
 		content: "\f055";
 	padding-right: 5px;
 }
-
+#inactivetm_filter input {
+margin-left: 10px;
+}
 
 .stopuse:before {
 	content: "\f056";
 	padding-right: 5px;
 }
 
-.addtmxfile .text:before {
+.addtmxfile .text:before, .addtmx .text:before
+ {
 	content: "\e601";
-
 	padding-right: 5px;
 }
 
