@@ -753,7 +753,12 @@ color:#333;}
 td.addtmxtd {
 width: 804px;
 }
-
+#activetm td.action .addtmx {
+    display: block;
+}
+#inactivetm td.action .addtmx {
+    display: none;
+}
 form.add-TM-Form {
     display: none;
 }

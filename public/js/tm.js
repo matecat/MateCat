@@ -134,75 +134,41 @@ $.extend(UI, {
             UI.saveTMdata();
         }).on('click', '#activetm tr.new a.addtmxfile', function() {
             $('#activetm tr.uploadpanel').removeClass('hide');
-        }).on('click', 'a.usetm', function() {
-            // get the row containing this link
-            var row = $(this).closest("tr");
-            var x = 0;
-            // find out in which table it resides
-            var table = $(this).closest("table");
-            // move it
-            row.detach();
-
-            if (table.is("#activetm") && (x==0)) {
-                $("#inactivetm").append(row);
-                row.find('a.usetm .text').text('Use');
-                row.find('a.usetm .icon').attr('class', 'icon icon-play-circle');
-            }
-
-            else {
-                $("#activetm tr.new").before(row);
-                if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
-                row.find('a.usetm .text').text('Stop Use');
-                row.find('a.usetm .icon').attr('class', 'icon icon-minus-circle');
-            }
-            // draw the user's attention to it
-            row.fadeOut();
-            row.fadeIn();
-
-//            $(this).addClass("disabletm").removeClass("usetm").text("Stop use").prepend('<span class="icon-minus-circle"></span> ');
-            $(this).addClass("disabletm").removeClass("usetm");
-            $('.addtmxrow').hide();
-            $(".addtmx").show();
-
         }).on('click', 'a.disabletm', function() {
-            // get the row containing this link
             var row = $(this).closest("tr");
-            var x = 0;
-            // find out in which table it resides
-            var table = $(this).closest("table");
-
-            // move it
+            if(row.find('td.uploadfile').length) {
+                row.find('td.uploadfile .canceladdtmx').click();
+                row.find('.addtmx').removeAttr('style');
+            }
             row.detach();
+            $("#inactivetm").append(row);
+            $('#inactivetm tr.noresults').hide();
+            row.find('a.disabletm .text').text('Use').attr('class', 'text icon-play-circle');
+            row.find('.lookup input[type="checkbox"]').first().removeAttr('checked').attr('disabled', 'disabled');
+            row.find('.update input[type="checkbox"]').first().removeAttr('checked').attr('disabled', 'disabled');
+            row.css('display', 'block');
 
-            if (table.is("#inactivetm") && (x==0)) {
-                $("#activetm").append(row);
-                console.log(row);
-                console.log(row.find('.lookup input[type="checkbox"]'));
-
-                row.find('a.disabletm .text').text('Stop Use');
-                row.find('a.disabletm .icon').attr('class', 'icon icon-minus-circle');
-                row.find('.lookup input[type="checkbox"]').first().attr('checked', 'checked');
-                row.find('.update input[type="checkbox"]').first().attr('checked', 'checked');
-            }
-
-            else {
-                $("#inactivetm").append(row);
-                $('#inactivetm tr.noresults').hide();
-
-                row.find('a.disabletm .text').text('Use');
-                row.find('a.disabletm .icon').attr('class', 'icon icon-play-circle');
-                row.find('.lookup input[type="checkbox"]').first().removeAttr('checked');
-                row.find('.update input[type="checkbox"]').first().removeAttr('checked');
-            }
             // draw the user's attention to it
             row.fadeOut();
             row.fadeIn();
-
-//            $(this).addClass("usetm").removeClass("disabletm").text("Use").prepend('<span class="icon-play-circle"></span>');
             $(this).addClass("usetm").removeClass("disabletm");
             $('.addtmxrow').hide();
-            $(".addtmx").show();
-//            UI.updateTM($(this).parents('tr'));
+        }).on('click', 'a.usetm', function() {
+            var row = $(this).closest("tr");
+            row.detach();
+            $("#activetm tr.new").before(row);
+            if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
+            row.addClass('mine');
+            row.find('a.usetm .text').text('Stop Use').attr('class', 'text icon-minus-circle');
+            row.find('.lookup input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
+            row.find('.update input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
+            row.css('display', 'block');
+
+            // draw the user's attention to it
+            row.fadeOut();
+            row.fadeIn();
+            $(this).addClass("disabletm").removeClass("usetm");
+            $('.addtmxrow').hide();
         }).on('change', '#new-tm-read, #new-tm-write', function() {
             if(UI.checkTMgrants($('.addtm-tr'))) {
 //                $('.addtm-tr .error-message').hide();
