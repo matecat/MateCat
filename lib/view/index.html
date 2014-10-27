@@ -643,21 +643,29 @@
                                             </td>
                                             <td class="description"><textarea rows="3" cols="50" name="comment" class="mgmt-input" id="new-tm-description" placeholder="Enter a short description"></textarea>
                                             </td>
-                                            <td class="fileupload" colspan="2">
+                                            <td class="fileupload check text-center">
                                                 <input id="new-tm-read" type="checkbox" name="r" class="r" value="1" checked="" />
-                                                <label for="new-tm-read">Lookup</label>
+                                            </td>
+                                            <td class="fileupload check text-center">
                                                 <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
-                                                <label for="new-tm-write">Update</label>
 
 
                                             </td>
                                             <td class="action">
+                                                
+                                                <a class="pull-right canceladdtmx">
+                                                    <span class="icon-times-circle"></span>
+                                                </a>
                                                 <a class="pull-left btn-grey uploadtm">
                                                     <span class="text uploadkey">Add a key</span>
                                                 </a>
+                                                
                                                 <a class="pull-left btn-grey addtmxfile">
                                                     <span class="text">Add TMX</span>
                                                 </a>
+                                                
+                                                
+
                                                 <form class="add-TM-Form" action="/" method="post">
                                                     <input type="hidden" name="action" value="addTM" />
                                                     <input type="hidden" name="exec" value="newTM" />
@@ -671,19 +679,19 @@
                                                     <input type="submit" id="addtm-add-submit" style="display: none" />
                                                 </form>
 
-                                                <a class="pull-right canceladdtmx">
-                                                    <span class="icon-times-circle"></span>
-                                                </a>
+                                               
                                             </td>
                                         </tr>
 
                                     <tr class="uploadpanel hide">
                                         <td class="uploadfile" colspan="6">
+
                                             <label class="fileupload">Select a TMX </label>
                                             <input type="file" />
                                             <a class="pull-right btn-grey addtmxfile">
                                                 <span class="text">Upload TMX</span>
                                             </a>
+
                                         </td>
                                     </tr>
                                     
