@@ -8239,12 +8239,14 @@ $.extend(UI, {
         console.log('execAddTM el: ', el);
         if(el == 'new') {
             form = $('.mgmt-tm tr.new .add-TM-Form')[0];
-            file = $('.mgmt-tm tr.new td.fileupload input').val();
+            path = $('.mgmt-tm tr.new td.fileupload input').val();
         } else {
 //            tr = $(el).parents('tr');
 //            form = tr.find('.add-TM-Form')[0];
-            form = $('#activetm tr.new .add-TM-Form')[0];
-            file = $(el).parents('.uploadfile').find('input[type="file"]').val();
+            form = $('#activetm tr.uploadpanel .add-TM-Form')[0];
+            path = $(el).parents('.uploadfile').find('input[type="file"]').val();
+            file = path.split('\\')[path.split('\\').length-1];
+
 //            file = tr.find('input[type="file"]').val();
             console.log('form: ', form);
             console.log('file: ', file);
@@ -8382,7 +8384,7 @@ $.extend(UI, {
             document.getElementById(div_id).innerHTML = content;
 
             // Del the iframe...
-            setTimeout('iframeId.parentNode.removeChild(iframeId)', 250);
+//            setTimeout('iframeId.parentNode.removeChild(iframeId)', 250);
         }
 
         if (iframeId.addEventListener) iframeId.addEventListener("load", eventHandler, true);
@@ -8537,7 +8539,7 @@ $.extend(UI, {
         console.log('VEDIAMO: ', data);
         APP.doRequest({
             data: {
-                action: 'updateJobKeysController',
+                action: 'updateJobKeys',
                 job_id: config.job_id,
                 job_pass: config.password,
                 data: data

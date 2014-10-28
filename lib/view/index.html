@@ -488,20 +488,6 @@
                                                 </a>
                                                 <div id="uploadCallback"></div>
 
-                                                <form class="add-TM-Form" action="/" method="post">
-                                                    <input type="hidden" name="action" value="loadTMX" />
-                                                    <input type="hidden" name="exec" value="newTM" />
-<!--                                                    <input type="hidden" name="job_id" value="38424" />
-                                                    <input type="hidden" name="job_pass" value="48a757e3d46c"                                                   <input type="hidden" name="r" value="1" />
-                                                    <input type="hidden" name="w" value="1" /> />
--->
-                                                    <input type="hidden" name="tm_key" value="" />
-                                                    <input type="hidden" name="name" value="" />
-                                                    <input type="hidden" name="tmx_file" value="" />
-
-                                                    <input type="submit" id="addtm-add-submit" style="display: none" />
-                                                </form>
-
                                                 <a class="pull-right canceladdtmx">
                                                     <span class="icon-times-circle"></span>
                                                 </a>
@@ -511,7 +497,17 @@
                                     <tr class="uploadpanel hide">
                                         <td class="uploadfile" colspan="6">
                                             <label class="fileupload">Select a TMX </label>
-                                            <input type="file" />
+
+                                            <form class="add-TM-Form" action="/" method="post">
+                                                <input type="hidden" name="action" value="loadTMX" />
+                                                <input type="hidden" name="exec" value="newTM" />
+                                                <input type="hidden" name="tm_key" value="" />
+                                                <input type="hidden" name="name" value="" />
+                                                <input type="hidden" name="tmx_file" value="" />
+                                                <input type="submit" id="addtm-add-submit" style="display: none" />
+                                                <input type="file" />
+                                            </form>
+
                                             <a class="pull-right btn-grey addtmxfile">
                                                 <span class="text">Upload TMX</span>
                                             </a>

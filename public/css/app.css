@@ -760,10 +760,10 @@ width: 804px;
     display: none;
 }
 form.add-TM-Form {
-    display: none;
+    display: inline;
 }
 #uploadCallback {
-    display: none;
+    display: block;
 }
 .popup p
 {
