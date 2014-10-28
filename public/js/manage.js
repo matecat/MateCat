@@ -543,6 +543,9 @@ UI = {
 				}
 				UI.compileDisplay();
 
+					UI.outsourceElements = $( ".missing-outsource-data" );
+					UI.getAllOutsourceQuotes();
+
 		        $("html,body").animate({
 		            scrollTop: 0
 		        }, 500 );
@@ -729,16 +732,68 @@ UI = {
     },
 
 	getAllOutsourceQuotes: function() {
-		startingpoint = $.Deferred();
-		startingpoint.resolve();
+		if ( UI.outsourceElements.length == 0 ) { return; }
 
-		$( ".missing-outsource-data" ).each( function() {
-			var currentTableElement = $( this );
+		var tableElement = $( UI.outsourceElements[0] );
+		UI.outsourceElements.splice(0, 1);
 
-			startingpoint = startingpoint.pipe( function()
+		var pid_data = tableElement.parents( "table" ).attr( "id" ).split( "-" );
+		var pid = pid_data[ 1 ];
+
+		var url_data = $( "div[data-pid='" + pid + "'] div.project-details > a" ).attr( "href" ).split( "/" );
+		var psw_data = url_data[ url_data.length - 1 ].split( "-" );
+		var psw = psw_data[ 1 ];
+
+		var jid = tableElement.parent( "tr" ).attr( "data-jid" );
+		var jsw = tableElement.parent( "tr" ).attr( "data-password" );
+
+		if ( $( "div[data-pid='" + pid + "'] div.project-details > a" ).text().charAt( 0 ) == '0' )
+		{
+			tableElement.html( "0 words found.<br/>Unable to quote." );
+			tableElement.removeClass( "missing-outsource-data" );
+
+			UI.getAllOutsourceQuotes();
+			return;
+		}
+	
+		$.ajax({
+			async: true,
+	  		type: "POST",
+			url : "/?action=outsourceTo",
+			data:
 			{
-				UI.getSingleOutsourceQuote( currentTableElement );
-			});
+				action: 'outsourceTo',
+				pid: pid,
+				ppassword: psw,
+				jobs:
+				[{
+					jid: jid,
+					jpassword: jsw
+				}]
+			},
+			success : function ( data )
+			{
+				if ( ( data.data[0]["price"] > 0 ) && ( data.data[0]["delivery_date"] != "" ) )
+				{
+					var price = data.data[0]["price"];
+					var date = new Date( data.data[0]["delivery_date"] );
+					var delivery = "<b>" + date.getDate() + "/" + ( date.getMonth() + 1 ) + "</b> at <b>" + date.getHours() + ":" + ( ( date.getMinutes() != 0 ) ? date.getMinutes() : "00" ) + "</b>";
+
+					var raw_data = JSON.stringify( data.data );
+
+					var form = 	"<form class='submit-outsource-data' action='http://signin.translated.net/' method='POST' target='_blank'>" +
+                               		"<input type='hidden' name='url_ok' value='" + data.return_url.url_ok + "'>" +
+                            		"<input type='hidden' name='url_ko' value='" + data.return_url.url_ko + "'>" +
+									"<input type='hidden' name='quoteData' value='" + JSON.stringify( data.data ) + "'>" +
+ 	                            	"<button type='submit' style='background-color:#7eaf3e; border:1px solid #666; border-radius:2px; color:white; opacity:0.9; padding:5px 10px!important;'>Price: <b>" + price + "€</b><br>Delivery: " + delivery + "</button>" +
+                                "</form>";
+
+					tableElement.html( form );
+					tableElement.removeClass( "missing-outsource-data" );
+
+					UI.getAllOutsourceQuotes();
+				}
+			}
 		});
 	},
 
@@ -792,7 +847,7 @@ UI = {
  	                            	"<button type='submit' style='background-color:#7eaf3e; border:1px solid #666; border-radius:2px; color:white; opacity:0.9; padding:5px 10px!important;'>Price: <b>" + price + "€</b><br>Delivery: " + delivery + "</button>" +
                                 "</form>";
 
-					tableElement.html( /*"Price: " + price + " €<br/>" + delivery + */ form );
+					tableElement.html( form );
 					tableElement.removeClass( "missing-outsource-data" );
 				}
 			}
@@ -828,11 +883,3 @@ $(document).ready(function(){
 	});
 
 });
-
-$(window).bind("load", function() {
-
-   UI.getAllOutsourceQuotes();
-
-});
-
-
