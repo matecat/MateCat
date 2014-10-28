@@ -2375,7 +2375,8 @@ UI = {
         $('#uploadTMX').text('').hide();
         $('.addtm-tr .error-message, .addtm-tr .warning-message').hide();
         $('.manageTM').addClass('disabled');
-        $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');    },
+        $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');
+    },
 
     /**
      * This function is used when a string has to be sent to the server

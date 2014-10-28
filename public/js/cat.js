@@ -2375,7 +2375,8 @@ UI = {
         $('#uploadTMX').text('').hide();
         $('.addtm-tr .error-message, .addtm-tr .warning-message').hide();
         $('.manageTM').addClass('disabled');
-        $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');    },
+        $('#addtm-tr-read, #addtm-tr-write, #addtm-select-file').attr('disabled', 'disabled');
+    },
 
     /**
      * This function is used when a string has to be sent to the server
@@ -7891,10 +7892,8 @@ $.extend(UI, {
                 //put value into input field
                 $('#new-tm-key').val(data.key);
                 $('.mgmt-tm .new .privatekey .btn-ok').removeClass('disabled');
-                setTimeout(function() {
-//                    UI.checkAddTMEnable();
-//                    UI.checkManageTMEnable();
-                }, 100);
+                $('#activetm tr.new .error').text('').hide();
+
                 return false;
             });
         });
@@ -7914,24 +7913,19 @@ $.extend(UI, {
             $(this).hide();
             var nr = '<td class="uploadfile">' +
                      '  <label class="fileupload">Select a TMX </label>' +
-                     '  <input type="file" />' +
                      '  <a class="pull-right canceladdtmx">' +
                      '      <span class="icon-times-circle"></span>' +
                      '  </a>' +
-                    '   <a class="pull-right btn-grey addtmxfile">' +
+                    '   <a class="existingKey pull-right btn-grey addtmxfile">' +
                     '       <span class="text">Upload TMX</span>' +
                     '   </a>' +
-                    '<form class="add-TM-Form" action="/" method="post">' +
+                    '<form class="existing add-TM-Form" action="/" method="post">' +
                     '    <input type="hidden" name="action" value="loadTMX" />' +
                     '    <input type="hidden" name="exec" value="newTM" />' +
-                    '    <input type="hidden" name="job_id" value="38424" />' +
-                    '    <input type="hidden" name="job_pass" value="48a757e3d46c" />' +
                     '    <input type="hidden" name="tm_key" value="" />' +
                     '    <input type="hidden" name="name" value="" />' +
-                    '    <input type="hidden" name="tmx_file" value="" />' +
-                    '    <input type="hidden" name="r" value="1" />' +
-                    '    <input type="hidden" name="w" value="1" />' +
-                    '    <input type="submit" id="addtm-add-submit" style="display: none" />' +
+                    '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
+                    '    <input type="file" name="tmx_file" />' +
                     '</form>' +
                     '</td>';
 /*
@@ -7965,10 +7959,11 @@ $.extend(UI, {
             $(this).parents('tr').append(nr);
 //            UI.uploadTM($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
 //            UI.checkTMheights();
+        }).on('change', '#new-tm-key', function() {
+            UI.checkTMKey('change');
         }).on('click', '.mgmt-tm tr.new a.uploadtm', function() {
 //            operation = ($('.mgmt-tm tr.new td.fileupload input[type="file"]').val() == '')? 'key' : 'tm';
             UI.checkTMKey('key');
-//            UI.execAddTMKey();
 //            UI.addTMKeyToList();
 
 //            operation = ($('#uploadTMX').text() == '')? 'key' : 'tm';
@@ -7984,6 +7979,8 @@ $.extend(UI, {
             UI.saveTMdata();
         }).on('click', '#activetm tr.new a.addtmxfile', function() {
             console.log('upload file');
+            UI.checkTMKey('tm');
+
             $('#activetm tr.uploadpanel').removeClass('hide');
         }).on('click', 'a.disabletm', function() {
             var row = $(this).closest("tr");
@@ -8173,60 +8170,22 @@ $.extend(UI, {
                 console.log('checkTMKey error!!');
             },
             success: function(d) {
-                console.log('checkTMKey success!!');
-                console.log('d: ', d);
-                console.log('d.success: ', d.success);
                 if(d.success === true) {
                     console.log('key is good');
                     console.log('adding a tm');
-                    UI.addTMKeyToList();
+                    $('#activetm tr.new .error').text('').hide();
+                    if(this != 'change') {
+                        UI.addTMKeyToList();
+                        UI.clearTMUploadPanel();
+                    }
                 } else {
                     console.log('key is bad');
+                    $('#activetm tr.new .error').text('The key is not valid').show();
                 }
             }
         });
-
-/*
-        if( operation == 'key' ){
-            console.log('adding a key');
-
-            if(APP.isCattool) {
-                UI.execAddTMKey();
-            } else {
-                UI.registerTMX();
-            }
-        } else {
-            console.log('adding a tm');
-            APP.doRequest({
-                data: {
-                    action: 'ajaxUtils',
-                    exec: 'checkTMKey',
-                    tm_key: $('#new-tm-key').val()
-                },
-                context: operation,
-                error: function() {
-                    console.log('checkTMKey error!!');
-                },
-                success: function(d) {
-                    console.log('checkTMKey success!!');
-                    console.log('d: ', d);
-                    console.log('d.success: ', d.success);
-                    if(d.success === true) {
-                        console.log('key is good');
-                        console.log('adding a tm');
-                        UI.execAddTM('new');
-                        return true;
-                    } else {
-                        console.log('key is bad');
-                        return false;
-                    }
-                }
-            });
-
-//            this.addTMXToKey('new');
-        }
-*/
     },
+/*
     registerTMX: function () {
         if(!UI.TMKeysToAdd) UI.TMKeysToAdd = [];
         item = {};
@@ -8235,75 +8194,14 @@ $.extend(UI, {
         UI.TMKeysToAdd.push(item);
         $(".canceladdtmx").click();
     },
+*/
     execAddTM: function(el) {
-        console.log('execAddTM el: ', el);
-        if(el == 'new') {
-            form = $('.mgmt-tm tr.new .add-TM-Form')[0];
-            path = $('.mgmt-tm tr.new td.fileupload input').val();
-        } else {
-//            tr = $(el).parents('tr');
-//            form = tr.find('.add-TM-Form')[0];
-            form = $('#activetm tr.uploadpanel .add-TM-Form')[0];
-            path = $(el).parents('.uploadfile').find('input[type="file"]').val();
-            file = path.split('\\')[path.split('\\').length-1];
-
-//            file = tr.find('input[type="file"]').val();
-            console.log('form: ', form);
-            console.log('file: ', file);
-        }
+        existing = ($(el).hasClass('existingKey'))? true : false;
+        var trClass = (existing)? 'mine' : 'uploadpanel';
+        form = $('#activetm tr.' + trClass + ' .add-TM-Form')[0];
+        path = $(el).parents('.uploadfile').find('input[type="file"]').val();
+        file = path.split('\\')[path.split('\\').length-1];
         this.TMFileUpload(form, 'http://' + window.location.hostname + '/?action=loadTMX','uploadCallback', file);
-
-    },
-    execAddTMKey: function() {
-        var r = ($('#new-tm-read').is(':checked'))? 1 : 0;
-        var w = ($('#new-tm-write').is(':checked'))? 1 : 0;
-        var desc = $('#new-tm-description').val();
-        var TMKey = $('#new-tm-key').val();
-
-        APP.doRequest({
-            data: {
-                action: 'loadTMX',
-                exec: 'addTM',
-                job_id: config.job_id,
-                job_pass: config.password,
-                tm_key: TMKey,
-                name: desc,
-                r: r,
-                w: w
-            },
-            context: {
-                tm_key: TMKey,
-                name: desc,
-                r: r,
-                w: w
-            },
-            error: function() {
-                console.log('addTM error!!');
-                $('.mgmt-tm tr.new .message').text('Error adding your TM!');
-            },
-            success: function() {
-                console.log('addTM success!!');
-                newTr = '<tr class="ui-sortable-handle">' +
-                        '    <td class="privatekey">' + this.tm_key + '</td>' +
-                        '    <td class="description">' + this.name + '</td>' +
-                        '    <td class="langpair"><span class="mgmt-source">it-IT</span> - <span class="mgmt-target">PT-BR</span></td>' +
-                        '    <td class="lookup check text-center"><input type="checkbox"' + ((this.r)? ' checked="checked"' : '') + '></td>' +
-                        '    <td class="update check text-center"><input type="checkbox"' + ((this.w)? ' checked="checked"' : '') + '></td>' +
-                        '    <td class="action">' +
-                        '        <a class="btn-grey pull-left usetm">' +
-                        '            <span class="text stopuse">Stop Use</span>' +
-                        '        </a>' +
-                        '        <a class="btn-grey pull-left addtmx">' +
-                        '            <span class="text addtmxbtn">Add TMX</span>' +
-                        '        </a>' +
-                        '    </td>' +
-                        '</tr>';
-                $('#activetm').append(newTr);
-                $('.mgmt-tm tr.new .canceladdtmx').click();
-                UI.pulseTMadded($('#activetm tr').last());
-                UI.setTMsortable();
-            }
-        });
     },
     addTMKeyToList: function () {
         var r = ($('#new-tm-read').is(':checked'))? 1 : 0;
@@ -8342,7 +8240,10 @@ $.extend(UI, {
         }, 1000);
 //        $('.mgmt-tm tr.new .message').text('The key ' + this + ' has been added!');
     },
-
+    clearTMUploadPanel: function () {
+        $('#new-tm-key, #new-tm-description').val('');
+        $('#new-tm-read, #new-tm-write').prop('checked', true);
+    },
     clearAddTMRow: function() {
         $('#new-tm-key, #new-tm-description').val('');
         $('#activetm .fileupload').val('');
@@ -8389,6 +8290,9 @@ $.extend(UI, {
 
         if (iframeId.addEventListener) iframeId.addEventListener("load", eventHandler, true);
         if (iframeId.attachEvent) iframeId.attachEvent("onload", eventHandler);
+        console.log('form classname: ', $(form).attr('class'));
+        existing = ($(form).hasClass('existing'))? true : false;
+        TMKey = (existing)? $(form).parents('.mine').find('.privatekey').text() : $('#new-tm-key').val();
 
         // Set properties of form...
         form.setAttribute("target", "upload_iframe");
@@ -8397,7 +8301,7 @@ $.extend(UI, {
         form.setAttribute("enctype", "multipart/form-data");
         form.setAttribute("encoding", "multipart/form-data");
         $(form).append('<input type="hidden" name="exec" value="newTM" />')
-            .append('<input type="hidden" name="tm_key" value="' + $('#new-tm-key').val() + '" />')
+            .append('<input type="hidden" name="tm_key" value="' + TMKey + '" />')
             .append('<input type="hidden" name="name" value="' + tmName + '" />')
             .append('<input type="hidden" name="r" value="1" />')
             .append('<input type="hidden" name="w" value="1" />');
@@ -8410,11 +8314,12 @@ $.extend(UI, {
         form.submit();
 
         document.getElementById(div_id).innerHTML = "";
-        TMKey = $('#new-tm-key').val();
-        TMPath = $('.mgmt-tm tr.uploadpanel td.uploadfile input[type="file"]').val();
+        TMPath = (existing)? $(form).find('input[type="file"]').val(): $('.mgmt-tm tr.uploadpanel td.uploadfile input[type="file"]').val();
         TMName = TMPath.split('\\')[TMPath.split('\\').length-1];
 //        console.log('vediamolo: ', TMName.split('\\')[TMName.split('\\').length-1]);
-        UI.pollForUploadCallback(TMKey, TMName);
+        TRcaller = (existing)? $(form).parents('.uploadfile') : $('#activetm .uploadpanel .uploadfile');
+
+        UI.pollForUploadCallback(TMKey, TMName, existing, TRcaller);
 
         return false;
 /*
@@ -8432,11 +8337,11 @@ $.extend(UI, {
         UI.pollForUploadCallback(TMKey, TMName);
 */
     },
-    pollForUploadCallback: function(TMKey, TMName) {
+    pollForUploadCallback: function(TMKey, TMName, existing, TRcaller) {
         if($('#uploadCallback').text() != '') {
             msg = $.parseJSON($('#uploadCallback pre').text());
             if(msg.success === true) {
-                UI.pollForUploadProgress(TMKey, TMName);
+                UI.pollForUploadProgress(TMKey, TMName, existing, TRcaller);
             } else {
                 APP.showMessage({
                     msg: 'Error: ' + msg.errors[0].message
@@ -8444,13 +8349,14 @@ $.extend(UI, {
             }
         } else {
             setTimeout(function() {
-                UI.pollForUploadCallback(TMKey, TMName);
+                UI.pollForUploadCallback(TMKey, TMName, existing, TRcaller);
             }, 1000);
         }
 
     },
 
-    pollForUploadProgress: function(TMKey, TMName) {
+    pollForUploadProgress: function(TMKey, TMName, existing, TRcaller) {
+        console.log('TMName appena entrati in pollForUploadProgress: ', TMName);
         APP.doRequest({
             data: {
                 action: 'loadTMX',
@@ -8458,37 +8364,39 @@ $.extend(UI, {
                 tm_key: TMKey,
                 name: TMName
             },
-            context: [TMKey, TMName],
+            context: [TMKey, TMName, existing, TRcaller],
             error: function() {
             },
             success: function(d) {
                 console.log('progress success data: ', d);
-                return false;
                 if(d.errors.length) {
                     APP.showMessage({
                         msg: d.errors[0].message,
                     });
                 } else {
+                    existing = this[2];
+                    TRcaller = this[3];
+                    $(TRcaller).html('<span class="progress" style="display: block; height: 5px; background: #fff"><span class="inner" style="float: left; height: 5px; width: 0%; background: #09BEEC"></span></span><span class="msgText">Uploading ' + this[1]+ '...</span>');
                     if(d.data.total == null) {
                         pollForUploadProgressContext = this;
                         setTimeout(function() {
-                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1]);
-                        }, 500);
+                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1], pollForUploadProgressContext[2], pollForUploadProgressContext[3]);
+                        }, 1000);
                     } else {
                         if(d.completed) {
-                            $('#messageBar .progress').remove();
-                            APP.showMessage({
-                                msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
-                            });
-                            UI.clearAddTMpopup();
+                            $(TRcaller).remove();
+//                            APP.showMessage({
+//                                msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
+//                            });
+//                            UI.clearAddTMpopup();
                             return false;
                         }
                         progress = (parseInt(d.data.done)/parseInt(d.data.total))*100;
-                        $('#messageBar .progress').css('width', progress + '%');
+                        $(TRcaller).find('.progress .inner').css('width', progress + '%');
                         pollForUploadProgressContext = this;
                         setTimeout(function() {
-                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1]);
-                        }, 500);
+                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1], pollForUploadProgressContext[2], pollForUploadProgressContext[3]);
+                        }, 1000);
                     }
                 }
             }
@@ -8549,102 +8457,6 @@ $.extend(UI, {
             },
             success: function() {
                 console.log('TM data saved!!');
-            }
-        });
-        /*
-         numActive = $('#activetm tbody tr:not(.hide)').length;
-         $('.translate-box .numResources').text(numActive);
-         $('.resource').show();
-         activeTMdata = [];
-         $('#activetm tbody tr:not(.hide)').each(function() {
-         item = {};
-         item.key = $(this).find('.privatekey').text();
-         item.tm = $(this).attr('data-tm');
-         item.glos = $(this).attr('data-glos');
-         item.r = $(this).find('.lookup input').is(':checked');
-         item.w = $(this).find('.update input').is(':checked');
-         activeTMdata.push(item);
-         });
-         console.log('activeTMdata; ', activeTMdata);
-         console.log('activeTMdata string; ', JSON.stringify(activeTMdata));
-
-         APP.doRequest({
-         data: {
-         action: 'addTM',
-         job_id: config.job_id,
-         job_pass: config.password,
-         data: JSON.stringify(activeTMdata)
-         },
-         error: function() {
-         console.log('Error saving TM data!!');
-         },
-         success: function(d) {
-         console.log('TM data saved!!');
-         }
-         });
-         */
-// ???
-        /*
-         $('input.checkbox').each(function(){
-         if ($(this).is(':checked')) {
-         $(this).parent('tr').addClass('selected');
-         } else {
-         $(this).parent('tr').addClass('disabled');
-         }
-         });
-         */
-
-    },
-
-    updateTM: function (tr) {
-        dataMix = {
-            action: 'loadTMX',
-            exec: 'updateTM'
-        };
-        console.log('tr: ', tr);
-        console.log('tr length: ', tr.length);
-        TMdata = this.extractTMdataFromRow(tr);
-        $.extend(dataMix, TMdata);
-        if(APP.isCattool) {
-            dataMix.job_id = config.job_id;
-            dataMix.job_pass = config.password;
-        }
-        APP.doRequest({
-            data: dataMix,
-            context: [TMdata],
-            error: function() {
-            },
-            success: function(d) {
-                console.log(d);
-/*
-                if(d.errors.length) {
-                    APP.showMessage({
-                        msg: d.errors[0].message,
-                    });
-                } else {
-                    if(d.data.total == null) {
-                        pollForUploadProgressContext = this;
-                        setTimeout(function() {
-                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1]);
-                        }, 500);
-                    } else {
-                        if(d.completed) {
-                            $('#messageBar .progress').remove();
-                            APP.showMessage({
-                                msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
-                            });
-                            UI.clearAddTMpopup();
-                            return false;
-                        }
-                        progress = (parseInt(d.data.done)/parseInt(d.data.total))*100;
-                        $('#messageBar .progress').css('width', progress + '%');
-                        pollForUploadProgressContext = this;
-                        setTimeout(function() {
-                            UI.pollForUploadProgress(pollForUploadProgressContext[0], pollForUploadProgressContext[1]);
-                        }, 500);
-                    }
-                }
-                */
             }
         });
     },

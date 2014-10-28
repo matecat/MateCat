@@ -375,7 +375,7 @@
                                     <tbody class="list sortable">
 
 <!-- fake keys -->
-                                    <!-- tr class="owner" data-glos="1" data-editable="1" data-owner="1">
+                                    <tr class="owner" data-glos="1" data-editable="1" data-owner="1">
                                         <td class="privatekey">5e01bafb688229b33bde</td>
                                         <td class="description">fake owner 1</td>
 
@@ -439,7 +439,7 @@
                                             </a>
                                         </td>
 
-                                    </tr -->
+                                    </tr>
 <!-- end fake keys -->
 
                                     <tal:block tal:repeat="key user_keys/job_keys">
@@ -473,9 +473,7 @@
                                             </td>
                                             <td class="fileupload" colspan="2">
                                                 <input id="new-tm-read" type="checkbox" name="r" class="r" value="1" checked="" />
-                                                <label for="new-tm-read">Lookup</label>
                                                 <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
-                                                <label for="new-tm-write">Update</label>
 
 
                                             </td>
@@ -487,6 +485,7 @@
                                                     <span class="text">Add TMX</span>
                                                 </a>
                                                 <div id="uploadCallback"></div>
+                                                <div class="error"></div>
 
                                                 <a class="pull-right canceladdtmx">
                                                     <span class="icon-times-circle"></span>
@@ -503,9 +502,8 @@
                                                 <input type="hidden" name="exec" value="newTM" />
                                                 <input type="hidden" name="tm_key" value="" />
                                                 <input type="hidden" name="name" value="" />
-                                                <input type="hidden" name="tmx_file" value="" />
                                                 <input type="submit" id="addtm-add-submit" style="display: none" />
-                                                <input type="file" />
+                                                <input type="file" name="tmx_file" />
                                             </form>
 
                                             <a class="pull-right btn-grey addtmxfile">
