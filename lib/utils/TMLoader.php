@@ -149,7 +149,7 @@ class TMLoader {
                 //check for errors during the import
                 switch ( $importStatus ) {
                     case "400" :
-                        throw new Exception( "Cant't load TMX files right now, try later", -15);
+                        throw new Exception( "Can't load TMX files right now, try later", -15);
                         break;
                     case "403" :
                         throw new Exception( "Invalid key provided", -15);
@@ -159,9 +159,11 @@ class TMLoader {
             }
 
             return true;
+            
+        } else {
+            throw new Exception( "Can't find uploaded TMX files", -15);
         }
 
-        return false;
     }
 
     /**
@@ -176,7 +178,7 @@ class TMLoader {
 
         if ( "200" != $allMemories[ 'responseStatus' ] || 0 == count( $allMemories[ 'responseData' ][ 'tm' ] ) ) {
             //what the hell? No memories although I've just loaded some? Eject!
-            throw new Exception( "Cant't load TMX files right now, try later", -15);
+            throw new Exception( "Can't find TMX files to check for status", -15);
         }
 
         $tmx_max_id = 0;
