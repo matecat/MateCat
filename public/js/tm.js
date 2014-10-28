@@ -85,7 +85,19 @@ $.extend(UI, {
                     '   <a class="pull-right btn-grey addtmxfile">' +
                     '       <span class="text">Upload TMX</span>' +
                     '   </a>' +
-                     '</td>';
+                    '<form class="add-TM-Form" action="/" method="post">' +
+                    '    <input type="hidden" name="action" value="loadTMX" />' +
+                    '    <input type="hidden" name="exec" value="newTM" />' +
+                    '    <input type="hidden" name="job_id" value="38424" />' +
+                    '    <input type="hidden" name="job_pass" value="48a757e3d46c" />' +
+                    '    <input type="hidden" name="tm_key" value="" />' +
+                    '    <input type="hidden" name="name" value="" />' +
+                    '    <input type="hidden" name="tmx_file" value="" />' +
+                    '    <input type="hidden" name="r" value="1" />' +
+                    '    <input type="hidden" name="w" value="1" />' +
+                    '    <input type="submit" id="addtm-add-submit" style="display: none" />' +
+                    '</form>' +
+                    '</td>';
 /*
             var nr = '<tr class="addtmxrow">' +
                     '   <td class="addtmxtd" colspan="5">' +
@@ -128,81 +140,50 @@ $.extend(UI, {
 //            $(".clicked td.action").append('progressbar');
 
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
-        }).on('click', '#activetm tr.addtmxrow a.uploadtm', function() {
+        }).on('click', '#activetm tr.mine .uploadfile .addtmxfile', function() {
+            UI.execAddTM(this);
+        }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile', function() {
             UI.execAddTM(this);
         }).on('click', '.popup-tm .savebtn', function() {
             UI.saveTMdata();
         }).on('click', '#activetm tr.new a.addtmxfile', function() {
+            console.log('upload file');
             $('#activetm tr.uploadpanel').removeClass('hide');
-        }).on('click', 'a.usetm', function() {
-            // get the row containing this link
-            var row = $(this).closest("tr");
-            var x = 0;
-            // find out in which table it resides
-            var table = $(this).closest("table");
-            // move it
-            row.detach();
-
-            if (table.is("#activetm") && (x==0)) {
-                $("#inactivetm").append(row);
-                row.find('a.usetm .text').text('Use');
-                row.find('a.usetm .icon').attr('class', 'icon icon-play-circle');
-            }
-
-            else {
-                $("#activetm tr.new").before(row);
-                if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
-                row.find('a.usetm .text').text('Stop Use');
-                row.find('a.usetm .icon').attr('class', 'icon icon-minus-circle');
-            }
-            // draw the user's attention to it
-            row.fadeOut();
-            row.fadeIn();
-
-//            $(this).addClass("disabletm").removeClass("usetm").text("Stop use").prepend('<span class="icon-minus-circle"></span> ');
-            $(this).addClass("disabletm").removeClass("usetm");
-            $('.addtmxrow').hide();
-            $(".addtmx").show();
-
         }).on('click', 'a.disabletm', function() {
-            // get the row containing this link
             var row = $(this).closest("tr");
-            var x = 0;
-            // find out in which table it resides
-            var table = $(this).closest("table");
-
-            // move it
+            if(row.find('td.uploadfile').length) {
+                row.find('td.uploadfile .canceladdtmx').click();
+                row.find('.addtmx').removeAttr('style');
+            }
             row.detach();
+            $("#inactivetm").append(row);
+            $('#inactivetm tr.noresults').hide();
+            row.find('a.disabletm .text').text('Use').attr('class', 'text icon-play-circle');
+            row.find('.lookup input[type="checkbox"]').first().removeAttr('checked').attr('disabled', 'disabled');
+            row.find('.update input[type="checkbox"]').first().removeAttr('checked').attr('disabled', 'disabled');
+            row.css('display', 'block');
 
-            if (table.is("#inactivetm") && (x==0)) {
-                $("#activetm").append(row);
-                console.log(row);
-                console.log(row.find('.lookup input[type="checkbox"]'));
-
-                row.find('a.disabletm .text').text('Stop Use');
-                row.find('a.disabletm .icon').attr('class', 'icon icon-minus-circle');
-                row.find('.lookup input[type="checkbox"]').first().attr('checked', 'checked');
-                row.find('.update input[type="checkbox"]').first().attr('checked', 'checked');
-            }
-
-            else {
-                $("#inactivetm").append(row);
-                $('#inactivetm tr.noresults').hide();
-
-                row.find('a.disabletm .text').text('Use');
-                row.find('a.disabletm .icon').attr('class', 'icon icon-play-circle');
-                row.find('.lookup input[type="checkbox"]').first().removeAttr('checked');
-                row.find('.update input[type="checkbox"]').first().removeAttr('checked');
-            }
             // draw the user's attention to it
             row.fadeOut();
             row.fadeIn();
-
-//            $(this).addClass("usetm").removeClass("disabletm").text("Use").prepend('<span class="icon-play-circle"></span>');
             $(this).addClass("usetm").removeClass("disabletm");
             $('.addtmxrow').hide();
-            $(".addtmx").show();
-//            UI.updateTM($(this).parents('tr'));
+        }).on('click', 'a.usetm', function() {
+            var row = $(this).closest("tr");
+            row.detach();
+            $("#activetm tr.new").before(row);
+            if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
+            row.addClass('mine');
+            row.find('a.usetm .text').text('Stop Use').attr('class', 'text icon-minus-circle');
+            row.find('.lookup input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
+            row.find('.update input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
+            row.css('display', 'block');
+
+            // draw the user's attention to it
+            row.fadeOut();
+            row.fadeIn();
+            $(this).addClass("disabletm").removeClass("usetm");
+            $('.addtmxrow').hide();
         }).on('change', '#new-tm-read, #new-tm-write', function() {
             if(UI.checkTMgrants($('.addtm-tr'))) {
 //                $('.addtm-tr .error-message').hide();
@@ -419,17 +400,20 @@ $.extend(UI, {
         $(".canceladdtmx").click();
     },
     execAddTM: function(el) {
+        console.log('execAddTM el: ', el);
         if(el == 'new') {
             form = $('.mgmt-tm tr.new .add-TM-Form')[0];
             file = $('.mgmt-tm tr.new td.fileupload input').val();
         } else {
-            tr = $(el).parents('tr');
-            form = tr.find('.add-TM-Form')[0];
-            file = tr.find('input[type="file"]').val();
+//            tr = $(el).parents('tr');
+//            form = tr.find('.add-TM-Form')[0];
+            form = $('#activetm tr.new .add-TM-Form')[0];
+            file = $(el).parents('.uploadfile').find('input[type="file"]').val();
+//            file = tr.find('input[type="file"]').val();
             console.log('form: ', form);
             console.log('file: ', file);
         }
-        this.TMFileUpload(form, 'http://' + window.location.hostname + '/?action=addTM','uploadCallback', file);
+        this.TMFileUpload(form, 'http://' + window.location.hostname + '/?action=loadTMX','uploadCallback', file);
 
     },
     execAddTMKey: function() {
@@ -440,7 +424,7 @@ $.extend(UI, {
 
         APP.doRequest({
             data: {
-                action: 'addTM',
+                action: 'loadTMX',
                 exec: 'addTM',
                 job_id: config.job_id,
                 job_pass: config.password,
@@ -586,6 +570,12 @@ $.extend(UI, {
 
         // Submit the form...
         form.submit();
+
+        document.getElementById(div_id).innerHTML = "";
+        TMKey = $('#new-tm-key').val();
+        TMName = $('.mgmt-tm tr.uploadpanel td.uploadfile input[type="file"]').val();
+        UI.pollForUploadCallback(TMKey, TMName);
+
         return false;
 /*
 //    document.getElementById(div_id).innerHTML = "Uploading...";
@@ -623,15 +613,16 @@ $.extend(UI, {
     pollForUploadProgress: function(TMKey, TMName) {
         APP.doRequest({
             data: {
-                action: 'ajaxUtils',
-                exec: 'tmxUploadStatus',
+                action: 'loadTMX',
+                exec: 'uploadStatus',
                 tm_key: TMKey,
-                tmx_name: TMName
+                name: TMName
             },
             context: [TMKey, TMName],
             error: function() {
             },
             success: function(d) {
+                console.log('progress success data: ', d);
                 if(d.errors.length) {
                     APP.showMessage({
                         msg: d.errors[0].message,
@@ -766,7 +757,7 @@ $.extend(UI, {
 
     updateTM: function (tr) {
         dataMix = {
-            action: 'addTM',
+            action: 'loadTMX',
             exec: 'updateTM'
         };
         console.log('tr: ', tr);

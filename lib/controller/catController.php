@@ -402,6 +402,8 @@ class catController extends viewController {
                         $this->_keyList[ 'job_keys' ][ ] = $key;
                     }
 
+                    Log::doLog($this->userRole);
+
                     //Take the right permissions from user key
                     if ( !$jobKey->owner ) {
                         $jobKey->r = $jobKey->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'r' ]};
@@ -420,7 +422,7 @@ class catController extends viewController {
 
         }
 
-//        Log::doLog( $this->_keyList );
+        Log::doLog( $this->_keyList );
 
     }
 

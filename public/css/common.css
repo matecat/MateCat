@@ -753,7 +753,12 @@ color:#333;}
 td.addtmxtd {
 width: 804px;
 }
-
+#activetm td.action .addtmx {
+    display: block;
+}
+#inactivetm td.action .addtmx {
+    display: none;
+}
 form.add-TM-Form {
     display: none;
 }
@@ -1024,7 +1029,7 @@ margin:0 auto; overflow:hidden; width:100%;
 
 .mgmt-tm .description {
 	/*width:32%!important;*/
-	width:444px!important;
+	width:452px!important;
 }
 
 .mgmt-tm .langpair {
@@ -1042,23 +1047,31 @@ margin:0 auto; overflow:hidden; width:100%;
 		width: 220px!important;
 }
 
+/*.btn-grey.uploadtm, .btn-grey.addtmxfile {
+width: 100px!important;
+}
+
 .new td.action {
 width: 330px!important;
 }
 
-.new td.fileupload {
-width: 18%;
-}
+
 
 .new td.description {
 width: 290px!important;
 }
 
-.mgmt-tm .fileupload {
-width: 22%;
+#new-tm-description {
+padding: 5px 12px;
 }
 
+.mgmt-tm .fileupload {
+width: 22%;
+}*/
 
+.new td.fileupload {
+width: 100px;
+}
  .back-mgmt {padding:20px; margin-right:20px;}
 
 .memory-mgmt.btn {
@@ -1072,6 +1085,8 @@ width: auto;
     float: left;
     table-layout: fixed;
     width: 100%;
+    margin-bottom: 20px;
+    border: 1px solid #DDD;
 }
 
 .mgmt-tm .btn-ok, .mgmt-tm .btn-grey {margin:0 3px;
@@ -1079,16 +1094,29 @@ padding:4px 10px;
 cursor:pointer!important;
 font-size:14px;}
 
+.btn-grey.uploadtm {
+clear: right;
+}
+
 .btn-grey:active {
 	border:1px solid #333;
 }
 
-.btn-grey.uploadtm, .btn-grey.addtmxfile {
-width: 100px!important;
-}
+
+
+.btn-grey:active:active {
+-moz-box-shadow: inset 0 0 1px 1px #888;
+-webkit-box-shadow: inset 0 0 1px 1px #888;
+box-shadow: inset 0 0 1px 1px #888;}
 
 .mgmt-tm .action .btn-grey, .addtmxrow .btn-grey {width: 80px;
 text-align: center;
+}
+.btn-grey:hover {
+cursor: pointer;
+-webkit-box-shadow: 0 1px 2px #ccc;
+box-shadow: 0 1px 2px #ccc;
+border: 1px solid #000;
 }
 body.cattool .mgmt-tm.mine thead,
 .mgmt-tm.new thead,
@@ -1098,6 +1126,11 @@ body.cattool .mgmt-tm.mine thead,
 }
 .canceladdtmx {
     cursor: pointer;
+    margin-bottom: 30px;
+}
+
+.canceladdtmx:hover {
+	color:red;
 }
 
 .dataTables_length, .dataTables_info {display: none;}
@@ -1133,7 +1166,6 @@ margin-top: 10px;
 #activetm td.uploadfile .btn-grey {
     display: none;
     margin-top: -3px;
-    margin-right: 79px;
 }
 .mgmt-tm td.uploadfile .btn-grey span {
     margin: 0px;
@@ -1157,6 +1189,8 @@ margin-top: 10px;
 #activetm td.uploadfile {
     display: block;
     background: #fff;
+    padding: 10px;
+    border-top: 1px solid #D5D5D5;
 }
 #activetm tbody tr.mine {
     cursor: move;
@@ -1190,10 +1224,8 @@ margin-bottom: 10px;
 #activetm tr.uploadfile td {background: #fff;}
 #inactivetm td {background: #f3f3f3;}
 .mgmt-tm td, .mgmt-tm th, .mgmt-gl td, .mgmt-gl th {
-    border-bottom: 1px solid #ccc;
     padding: 5px 8px;
     background: #fff;
-    margin: 1px 0;
 }
 
 .addtmxrow td, .new td {
@@ -1413,6 +1445,10 @@ input#new-tm-key {width: 85%;
 height: 0px;}
 input#new-tm-description {height:40px;
 
+}
+
+.description textarea {
+resize: none;
 }
 tr.new {
 vertical-align: top;
@@ -1666,6 +1702,7 @@ color: #000;
 .sorting_desc:after,
 .sorting_asc:after,
 .add-tm:before,
+.addtmx .text:before,
 .stopuse:before,
 .addtmxfile .text:before,
 .uploadkey:before,
@@ -1686,23 +1723,29 @@ color: #000;
 .add-tm:before {
 	content: "\f067";
 	padding: 0 10px 0 0;
+	vertical-align: text-top;
 }
 
 .uploadkey:before {
 		content: "\f055";
 	padding-right: 5px;
+	vertical-align: text-top;
 }
-
+#inactivetm_filter input {
+margin-left: 10px;
+}
 
 .stopuse:before {
 	content: "\f056";
 	padding-right: 5px;
+	vertical-align: text-top;
 }
 
-.addtmxfile .text:before {
+.addtmxfile .text:before, .addtmx .text:before
+ {
 	content: "\e601";
-
 	padding-right: 5px;
+	vertical-align: text-top;
 }
 
 .icon-search:before {

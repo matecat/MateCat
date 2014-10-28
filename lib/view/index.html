@@ -119,35 +119,6 @@
                 </form>
                 <a href="#" class="filter"> <span class="arrow-top "></span></a>
 
-                <!-- edit/view notifiche globali -->
-                <div class="notification-box">
-                    <a href="#" class="arrow-notification"></a>
-                    <div class="h-notification">Notifications  </div>
-                    <ul>
-                        <li>
-                            <a href="#">
-                                <b>Luca</b> 
-                                <br/>
-                                "parts" va tradotto con "componenti" e non con "pezzi"
-                            </a>
-                        </li>
-                        <li>
-                            <b>Lucia</b>
-                            <br/>      
-                            questa frase è lunga e risulta illeggibile
-                        </li>
-                        <li>
-                            <b>Antonio</b>
-                            <br/>
-                            attenzione ai doppi spazi
-                        </li>
-                    </ul>
-                </div>
-                <!-- END edit/view notifiche globali -->
-                <!--div class="release">Release <span id="rel_version">0.1b</span> <span id="rel_date">2012-07-15</span></div-->
-
-
-
                 <a href="${basepath}" class="logo">                 
                 </a>
                 <div class="breadcrumbs">    
@@ -228,154 +199,8 @@
 		</div>
     </div>
 </div>
-        <div class="modal popup-addtm-tr" data-type="view">
-            <div class="popup-outer closeClickingOutside"></div>
-            <div class="popup">
-                <a href="#" class="x-popup"></a>
-
-                 <h1>
-                    <a  href="#" class="btn-ok right">Save</a>
-                    <a href="#" class="btn-cancel right">Cancel</a>
-                    Language Resources 
-                </h1>
-
-                <div class="popup-box">
-                    <div class="addtm-tr">
-                        <h3>Add your personal TM</h3>
-                        <p>Use this panel to add personal TMs that you want to use/update privately and you don't want to share with others.</p>
-
-                        <p class="warning-message" style="display: none;"><span></span></p>
-                        <p class="error-message" style="display: none;"> Error: the errmsg will appear here... </p>
-                        <!-- div class="block pull-left">
-                            <input class="mgmt-input" type="text" width="20" id="addtm-tr-name" onfocus="this.value='';"  placeholder="Enter a name" />
-                        </div -->
-                        <div class="block block-last pull-left">
-                            <input class="mgmt-input pull-left" type="text" id="addtm-tr-key" placeholder="Have a TM key? Add it here" />
-                            <span class="pull-left" style="margin: 6px">Or</span>
-                            <a id="addtm-create-key" class="btn-ok pull-left">Create</a>
-                        </div>
-                        <div class="block manageTM disabled">
-                            <h3>Manage TM</h3>
-                            <form id="addtm-upload-form" class="pull-left">
-                                <div class="block">
-                                    <input type="checkbox" disabled="disabled" name="r" class="r" value="1" checked="checked" id="addtm-tr-read" />
-                                    <label for="addtm-tr-read">Lookup</label>
-                                    <input type="checkbox" disabled="disabled" name="w" class="w" value="1" checked="checked" id="addtm-tr-write" />
-                                    <label for="addtm-tr-write">Update</label>
-                                </div>
-                                <div class="block">
-
-                                <input type="file" name="datafile" class="addtm-select-file" />
-                                <input type="button" disabled="disabled" name="select-file"
-                                       value="Add segments from a TMX"
-                                       id="addtm-select-file"
-                                       class="add-tm-ok btn-ok" />
-                                </div>
-                                <div id="uploadTMX"></div>
-
-                            </form>
-                        </div>
-                        <hr class="addtm-break-2-lines" />
-<!--                        <div id="uploadCallback"></div> -->
-                        <br />
-                        <form metal:define-slot="actions" id="addTMForm" action="${basepath}" method="post">
-                            <input type="hidden" name="action" value="addTM" />
-                            <input type="hidden" name="exec" value="newTM" />
-                            <input type="hidden" name="job_id" value="" tal:attributes="value jid | nothing" />
-                            <input type="hidden" name="job_pass" tal:attributes="value password" />
-                            <input type="hidden" name="tm_key" value="" />
-                            <input type="hidden" name="name" value="" />
-                            <input type="hidden" name="tmx_file" value="" />
-                            <input type="hidden" name="r" value="1" />
-                            <input type="hidden" name="w" value="1" />
-                            <input type="button" name="submit" value="Add your TM" disabled="disabled" id="addtm-add"
-                                   class="pull-right add-tm-ok btn-ok disabled" />
-                            <!--                        <input id="downloadProject" name="submit1" type="button" tal:attributes="class string:downloadtr-button  ${job_stats/DOWNLOAD_STATUS};value php:(job_stats['TODO_FORMATTED'] == 0 && job_stats['ANALYSIS_COMPLETE'] )? 'DOWNLOAD TRANSLATION' : 'PREVIEW'" /> -->
-                        </form>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-        <div id="uploadCallback"></div>
-
-<!--
-<div class="modal popup-addtm-tr" data-type="view">
-    <div class="popup-outer closeClickingOutside"></div>
-    <div class="popup">
-        <a href="#" class="x-popup"></a>
-
-        <h1>
-            Language Resources
-        </h1>
-
-        <div class="popup-box">
-            <div class="addtm-tr">
-                <h3>Add a TM</h3>
-                <p>Short description here.</p>
-                <p class="warning-message" style="display: none;"><span>A Private TM Key has been generated for the TMX you uploaded. You can replace the generated Key with a different one.</span></p>
-                <p class="error-message" style="display: none;"> Error: the errmsg will appear here... </p>
-                    <div class="block pull-left">
-                        <input class="mgmt-input" type="text" width="20" id="addtm-tr-name" onfocus="this.value='';"  placeholder="Enter a name" />
-                    </div>
-                    <div class="block block-last pull-left">
-                        <input class="mgmt-input" type="text" id="addtm-tr-key" placeholder="Create new private key" />
-                        <a id="addtm-create-key" class="btn-ok pull-right">Create</a>
-                    </div>
-                    <div class="block">
-                        <form id="addtm-upload-form">
-                            <label class="fileupload">Select a TMX </label>
-                            <input type="file" name="datafile" /><br />
-                            <div id="upload"></div>
-                        </form>
-                    </div>
-                    <div class="pull-left">
-                        <input type="checkbox" name="r" class="r" value="1" checked="checked" id="addtm-tr-read" />
-                        <label for="addtm-tr-read">Read</label>
-
-                        <input type="checkbox" name="w" class="w" value="1" checked="checked" id="addtm-tr-write" />
-                        <label for="addtm-tr-write">Write</label>
-                    </div>
-                    <form metal:define-slot="actions" id="addTMForm" action="${basepath}" method="post">
-                        <input type="hidden" name="action" value="addTM" />
-                        <input type="hidden" name="exec" value="newTM" />
-                        <input type="hidden" name="job_id" value="" tal:attributes="value jid | nothing" />
-                        <input type="hidden" name="job_pass" tal:attributes="value password" />
-                        <input type="hidden" name="tm_key" value="" />
-                        <input type="hidden" name="name" value="" />
-                        <input type="hidden" name="tmx_file" value="" />
-                        <input type="hidden" name="r" value="1" />
-                        <input type="hidden" name="w" value="1" />
-                        <input type="button" name="submit" value="Add a TM" disabled="disabled" id="addtm-add"
-                               class="pull-right add-tm-ok btn-ok disabled" />
-                    </form>
-            </div>
-            <br class="clear" />
-
-            <div class="addtm-tr-key">
-                <h2>Add a TM key</h2>
-
-                <p>Short description here.</p>
-
-                <p class="error-message" style="display: none;"> Error: the errmsg will appear here... </p>
-                    <input class="mgmt-input pull-left" type="text" id="addtm-tr-key-key"
-                           placeholder="Insert your private key"/>
-
-                <div class="pull-left clear">
-                    <input type="checkbox" name="r" class="r" value="1" checked="checked" id="addtm-tr-key-read"/>
-                    <label for="addtm-tr-key-read">Read</label>
-
-                    <input type="checkbox" name="w" class="w" value="1" checked="checked" id="addtm-tr-key-write"/>
-                    <label for="addtm-tr-key-write">Write</label>
-                </div>
-                <input type="button" name="submit" value="Add Existing TM" disabled="disabled" class="btn-ok disabled" />
 
 
-            </div>
-        </div>
-    </div>
-</div>
--->
         <footer>
 			<a href="#" id="settingsSwitcher" title="Settings"></a>
 
@@ -550,7 +375,7 @@
                                     <tbody class="list sortable">
 
 <!-- fake keys -->
-                                    <tr class="owner" data-glos="1" data-editable="1" data-owner="1">
+                                    <!-- tr class="owner" data-glos="1" data-editable="1" data-owner="1">
                                         <td class="privatekey">5e01bafb688229b33bde</td>
                                         <td class="description">fake owner 1</td>
 
@@ -614,37 +439,25 @@
                                             </a>
                                         </td>
 
-                                    </tr>
-
-
+                                    </tr -->
 <!-- end fake keys -->
 
-
-
-
                                     <tal:block tal:repeat="key user_keys/job_keys">
-                                        <tr tal:attributes="class php: key.edit ? ( key.owner ? 'owner mine' : 'mine' ) : 'anonymous'" data-tm="${key/tm}" class="owner" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
+                                        <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? 'owner' : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
                                             <td class="privatekey">${key/key}</td>
                                             <td class="description">${key/name}</td>
-
-                                            <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit; checked key/r" /></td>
-                                            <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit; checked key/w" /></td>
-
-                                            <td tal:condition="key/edit" class="action">
+                                            <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/r" /></td>
+                                            <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/w" /></td>
+                                            <td tal:condition="php: key.edit && ( !key.owner || ownerIsMe )" class="action">
                                                 <a class="btn-grey pull-left usetm">
-
                                                     <span class="icon-minus-circle text">Stop Use</span>
                                                 </a>
                                                 <a class="btn-grey pull-left addtmx">
-
                                                     <span class="text icon-plus-circle">Add TMX</span>
                                                 </a>
                                             </td>
-
-                                            <td tal:condition="php: !key.edit" class="action"></td>
-
+                                            <td tal:condition="php: !key.edit || ( key.owner && !ownerIsMe )" class="action"> &nbsp;</td>
                                         </tr>
-
                                     </tal:block>
 
 
@@ -673,16 +486,19 @@
                                                 <a class="pull-left btn-grey addtmxfile">
                                                     <span class="text">Add TMX</span>
                                                 </a>
+                                                <div id="uploadCallback"></div>
+
                                                 <form class="add-TM-Form" action="/" method="post">
-                                                    <input type="hidden" name="action" value="addTM" />
+                                                    <input type="hidden" name="action" value="loadTMX" />
                                                     <input type="hidden" name="exec" value="newTM" />
-                                                    <input type="hidden" name="job_id" value="38424" />
-                                                    <input type="hidden" name="job_pass" value="48a757e3d46c" />
+<!--                                                    <input type="hidden" name="job_id" value="38424" />
+                                                    <input type="hidden" name="job_pass" value="48a757e3d46c"                                                   <input type="hidden" name="r" value="1" />
+                                                    <input type="hidden" name="w" value="1" /> />
+-->
                                                     <input type="hidden" name="tm_key" value="" />
                                                     <input type="hidden" name="name" value="" />
                                                     <input type="hidden" name="tmx_file" value="" />
-                                                    <input type="hidden" name="r" value="1" />
-                                                    <input type="hidden" name="w" value="1" />
+
                                                     <input type="submit" id="addtm-add-submit" style="display: none" />
                                                 </form>
 
@@ -692,31 +508,40 @@
                                             </td>
                                         </tr>
 
-                                        <tr class="uploadpanel hide">
-                                            <td class="uploadfile" colspan="6">
-                                                <label class="fileupload">Select a TMX </label>
-                                                <input type="file" />
-                                                <a class="pull-right btn-grey addtmxfile">
-                                                    <span class="text">Upload TMX</span>
-                                                </a>
-                                            </td>
+                                    <tr class="uploadpanel hide">
+                                        <td class="uploadfile" colspan="6">
+                                            <label class="fileupload">Select a TMX </label>
+                                            <input type="file" />
+                                            <a class="pull-right btn-grey addtmxfile">
+                                                <span class="text">Upload TMX</span>
+                                            </a>
+                                        </td>
+                                    </tr>
+                                    
+                                    <tal:block tal:repeat="key user_keys/job_keys">
+                                        <tr tal:condition="php: !key.edit && !key.owner" class="anonymous" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
+                                            <td class="privatekey">${key/key}</td>
+                                            <td class="description">${key/name}</td>
+                                            <td class="lookup text-center check"><input type="checkbox" disabled="disabled" tal:attributes="checked key/r" /></td>
+                                            <td class="update text-center check"><input type="checkbox" disabled="disabled" tal:attributes="checked key/w" /></td>
+                                            <td class="action"></td>
                                         </tr>
+                                    </tal:block>
 
-                                        <!-- fake keys anonymous -->
-                                        <tr class="anonymous" data-glos="1" data-editable="1" data-owner="1">
-                                            <td class="privatekey">5e01bafb688229b33bde</td>
-                                            <td class="description">fake anonymous 1</td>
-
-                                            <td class="lookup text-center check"><input type="checkbox" checked="checked" /></td>
-                                            <td class="update text-center check"><input type="checkbox" checked="checked" /></td>
-
-                                            <td class="action">
-                                            </td>
-
-                                        </tr>
-                                        <!-- end fake keys anonymous -->
-
-
+                                    <!-- fake keys anonymous -->
+                                    <tr class="anonymous" data-glos="1" data-editable="1" data-owner="1">
+                                        <td class="privatekey">5e01bafb688229b33bde</td>
+                                        <td class="description">fake anonymous 1</td>
+                                    
+                                        <td class="lookup text-center check"><input type="checkbox" checked="checked" /></td>
+                                        <td class="update text-center check"><input type="checkbox" checked="checked" /></td>
+                                    
+                                        <td class="action">
+                                        </td>
+                                    
+                                    </tr>
+                                    <!-- end fake keys anonymous -->
+                                    
                                     </tbody>
                                 </table>
 
@@ -741,8 +566,8 @@
                                         <tr data-tm="1" data-glos="1">
                                             <td class="privatekey">${key/key}</td>
                                             <td class="description">${key/name}</td>
-                                            <td class="lookup text-center check"><input type="checkbox" checked="${key/r}"/></td>
-                                            <td class="update text-center check"><input type="checkbox" checked="${key/w}"/></td>
+                                            <td class="lookup text-center check"><input disabled="disabled" type="checkbox" checked="${key/r}"/></td>
+                                            <td class="update text-center check"><input disabled="disabled" type="checkbox" checked="${key/w}"/></td>
                                             <td class="action">
                                                 <a class="btn-grey pull-left usetm">
                                                     <span class="text icon-play-circle">Use</span>

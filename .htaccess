@@ -34,8 +34,6 @@ RewriteRule ^(configMissing)[/]?$ lib/view/configMissing.html [L]
 
 RewriteRule ^(oauth)/(response)[/]?$ index.php?action=oauthResponseHandler [L,QSA]
 
-RewriteRule ^(addTM)[/]?$ index.php?action=addTM [L,QSA]
-
 RewriteRule ^(manage)[/]?$ /manage/1 [R]
 RewriteRule ^(manage)/([^/]*)/?$ index.php?action=manage&page=$2 [QSA,L]
 
