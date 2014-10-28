@@ -755,6 +755,13 @@ UI = {
 		var jid = tableElement.parent( "tr" ).attr( "data-jid" );
 		var jsw = tableElement.parent( "tr" ).attr( "data-password" );
 
+		if ( $( "div[data-pid='" + pid + "'] div.project-details > a" ).text().charAt( 0 ) == '0' )
+		{
+			tableElement.html( "Zero words found.<br/>Unable to quote." );
+			tableElement.removeClass( "missing-outsource-data" );
+			return;
+		}
+	
 		$.ajax({
 			async: true,
 	  		type: "POST",
