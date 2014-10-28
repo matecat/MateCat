@@ -88,7 +88,7 @@ $.extend(UI, {
                          *
                          */
                         $('.outsource.modal .total span.displayprice').text( parseFloat( chunk.price_currency ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
-                        if (chunk.currency=="EUR") currency="€" else currency=chunk.currency;
+                        if (chunk.currency=="EUR") {currency="€"} else {currency=chunk.currency};
                         $('.outsource.modal .total span.euro').text(currency );
                         var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';
 
