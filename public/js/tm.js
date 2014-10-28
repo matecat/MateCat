@@ -573,7 +573,9 @@ $.extend(UI, {
 
         document.getElementById(div_id).innerHTML = "";
         TMKey = $('#new-tm-key').val();
-        TMName = $('.mgmt-tm tr.uploadpanel td.uploadfile input[type="file"]').val();
+        TMPath = $('.mgmt-tm tr.uploadpanel td.uploadfile input[type="file"]').val();
+        TMName = TMPath.split('\\')[TMPath.split('\\').length-1];
+//        console.log('vediamolo: ', TMName.split('\\')[TMName.split('\\').length-1]);
         UI.pollForUploadCallback(TMKey, TMName);
 
         return false;
@@ -623,6 +625,7 @@ $.extend(UI, {
             },
             success: function(d) {
                 console.log('progress success data: ', d);
+                return false;
                 if(d.errors.length) {
                     APP.showMessage({
                         msg: d.errors[0].message,
