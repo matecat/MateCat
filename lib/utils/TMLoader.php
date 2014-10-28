@@ -116,11 +116,9 @@ class TMLoader {
     public function uploadFile() {
         try {
 
-            if ( empty($_FILES) ) throw new Exception ( "No files uploaded." );
-
             $uploadManager = new Upload();
             $uploadedFiles = $uploadManager->uploadFiles( $_FILES ); Log::doLog( $_FILES );
-            
+
         } catch ( Exception $e ) {
             Log::doLog( $e->getMessage() );
             throw new Exception( $e->getMessage(), -8);
