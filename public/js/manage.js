@@ -624,7 +624,7 @@ UI = {
             }
 
             newProject += '                <th class="progress header">Progress</th>'+
-				'	<th class="progress header">Outsource</th>' +
+				'	<th class="progress header">Need outsource?</th>' +
 			    '                <th class="actions">Actions</th>'+
 			    '            </tr>'+
 		        '        </thead>'+
@@ -781,7 +781,7 @@ UI = {
 				{
 					var price = data.data[0]["price"];
 					var date = new Date( data.data[0]["delivery_date"] );
-					var delivery = date.getDate() + "/" + ( date.getMonth() + 1 ) + " at " + date.getHours() + ":" + ( ( date.getMinutes() != 0 ) ? date.getMinutes() : "00" );
+					var delivery = "<b>" + date.getDate() + "/" + ( date.getMonth() + 1 ) + "</b> at <b>" + date.getHours() + ":" + ( ( date.getMinutes() != 0 ) ? date.getMinutes() : "00" ) + "</b>";
 
 					var raw_data = JSON.stringify( data.data );
 
@@ -789,10 +789,10 @@ UI = {
                                		"<input type='hidden' name='url_ok' value='" + data.return_url.url_ok + "'>" +
                             		"<input type='hidden' name='url_ko' value='" + data.return_url.url_ko + "'>" +
 									"<input type='hidden' name='quoteData' value='" + JSON.stringify( data.data ) + "'>" +
- 	                            	"<input type='submit' value='Order Now'>" +
+ 	                            	"<button type='submit' style='background-color:#7eaf3e; border:1px solid #666; border-radius:2px; color:white; opacity:0.9; padding:5px 10px!important;'>Price: <b>" + price + "€</b><br>Delivery: " + delivery + "</button>" +
                                 "</form>";
 
-					tableElement.html( "Price: " + price + " €<br/>" + delivery + form );
+					tableElement.html( /*"Price: " + price + " €<br/>" + delivery + */ form );
 					tableElement.removeClass( "missing-outsource-data" );
 				}
 			}
