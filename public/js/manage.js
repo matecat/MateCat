@@ -543,8 +543,6 @@ UI = {
 				}
 				UI.compileDisplay();
 
-				UI.getAllOutsourceQuotes();
-
 		        $("html,body").animate({
 		            scrollTop: 0
 		        }, 500 );
@@ -830,4 +828,11 @@ $(document).ready(function(){
 	});
 
 });
+
+$(window).bind("load", function() {
+
+   UI.getAllOutsourceQuotes();
+
+});
+
 
