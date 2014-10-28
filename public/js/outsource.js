@@ -87,7 +87,9 @@ $.extend(UI, {
                          * Removed Timezone with Intl because of too much different behaviours on different operating systems
                          *
                          */
-                        $('.outsource.modal .total span.displayprice').text( parseFloat( chunk.price ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
+                        $('.outsource.modal .total span.displayprice').text( parseFloat( chunk.price_currency ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
+                        if (chunk.currency=="EUR") currency="€" else currency=chunk.currency;
+                        $('.outsource.modal .total span.euro').text(currency );
                         var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';
 
                         $('.outsource.modal .delivery span.zone2').text( extendedTimeZone );
