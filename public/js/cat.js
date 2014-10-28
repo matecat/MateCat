@@ -2264,7 +2264,7 @@ UI = {
     checkAddTMEnable: function() {
         console.log('checkAddTMEnable');
         if(
-            ($('#addtm-tr-key').val().length > 19)&&
+            ($('#addtm-tr-key').val().length > 12)&&
                 UI.checkTMgrants($('.addtm-tr'))
             ) {
             $('#addtm-add').removeAttr('disabled').removeClass('disabled');
@@ -2522,6 +2522,7 @@ UI = {
         $(area).find('span.' + config.tabPlaceholderClass).replaceWith(config.tabPlaceholder);
         $(area).find('span.' + config.nbspPlaceholderClass).replaceWith(config.nbspPlaceholder);
         $(area).find('span.space-marker').replaceWith(' ');
+        $(area).find('span.rangySelectionBoundary').remove();
 
 
 //        Now commented, but valid for future purposes when the user will choose what type of carriage return

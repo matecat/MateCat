@@ -17,7 +17,7 @@ input, textarea{font-family:calibri, Arial, Helvetica, sans-serif;font-size:16px
 /*header*/
 header
 {
-	background:#6d6e71;top:0;left:0;width:100%;position:fixed;z-index:999999999;border-bottom:1px solid #333;padding:0; 
+	background-color: #4D4D4D;top:0;left:0;width:100%;position:fixed;z-index:999999999;border-bottom:1px solid #5F5F5F;padding:0; 
 	margin-top: -34px;
 	transition: margin-top 200ms ease-out;
 	-webkit-transition: margin-top 200ms ease-out;
@@ -37,7 +37,7 @@ header .wrapper{height:20px; padding:0px 0 0 0;}
 .header-menu li{
     /*border-left:1px solid #000;*/
     float:left;height:37px;padding:5px 0px;}
-.header-menu li a{padding:2px 15px;}
+.header-menu li a{padding:2px 15px; font-weight: 200;}
 #notifbox
 {
     /*border-right:1px solid #000;*/
