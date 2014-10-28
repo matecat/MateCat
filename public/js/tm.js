@@ -85,7 +85,19 @@ $.extend(UI, {
                     '   <a class="pull-right btn-grey addtmxfile">' +
                     '       <span class="text">Upload TMX</span>' +
                     '   </a>' +
-                     '</td>';
+                    '<form class="add-TM-Form" action="/" method="post">' +
+                    '    <input type="hidden" name="action" value="loadTMX" />' +
+                    '    <input type="hidden" name="exec" value="newTM" />' +
+                    '    <input type="hidden" name="job_id" value="38424" />' +
+                    '    <input type="hidden" name="job_pass" value="48a757e3d46c" />' +
+                    '    <input type="hidden" name="tm_key" value="" />' +
+                    '    <input type="hidden" name="name" value="" />' +
+                    '    <input type="hidden" name="tmx_file" value="" />' +
+                    '    <input type="hidden" name="r" value="1" />' +
+                    '    <input type="hidden" name="w" value="1" />' +
+                    '    <input type="submit" id="addtm-add-submit" style="display: none" />' +
+                    '</form>' +
+                    '</td>';
 /*
             var nr = '<tr class="addtmxrow">' +
                     '   <td class="addtmxtd" colspan="5">' +
@@ -128,11 +140,14 @@ $.extend(UI, {
 //            $(".clicked td.action").append('progressbar');
 
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
-        }).on('click', '#activetm tr.addtmxrow a.uploadtm', function() {
+        }).on('click', '#activetm tr.mine .uploadfile .addtmxfile', function() {
+            UI.execAddTM(this);
+        }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile', function() {
             UI.execAddTM(this);
         }).on('click', '.popup-tm .savebtn', function() {
             UI.saveTMdata();
         }).on('click', '#activetm tr.new a.addtmxfile', function() {
+            console.log('upload file');
             $('#activetm tr.uploadpanel').removeClass('hide');
         }).on('click', 'a.disabletm', function() {
             var row = $(this).closest("tr");
@@ -385,17 +400,20 @@ $.extend(UI, {
         $(".canceladdtmx").click();
     },
     execAddTM: function(el) {
+        console.log('execAddTM el: ', el);
         if(el == 'new') {
             form = $('.mgmt-tm tr.new .add-TM-Form')[0];
             file = $('.mgmt-tm tr.new td.fileupload input').val();
         } else {
-            tr = $(el).parents('tr');
-            form = tr.find('.add-TM-Form')[0];
-            file = tr.find('input[type="file"]').val();
+//            tr = $(el).parents('tr');
+//            form = tr.find('.add-TM-Form')[0];
+            form = $('#activetm tr.new .add-TM-Form')[0];
+            file = $(el).parents('.uploadfile').find('input[type="file"]').val();
+//            file = tr.find('input[type="file"]').val();
             console.log('form: ', form);
             console.log('file: ', file);
         }
-        this.TMFileUpload(form, 'http://' + window.location.hostname + '/?action=addTM','uploadCallback', file);
+        this.TMFileUpload(form, 'http://' + window.location.hostname + '/?action=loadTMX','uploadCallback', file);
 
     },
     execAddTMKey: function() {
@@ -406,7 +424,7 @@ $.extend(UI, {
 
         APP.doRequest({
             data: {
-                action: 'addTM',
+                action: 'loadTMX',
                 exec: 'addTM',
                 job_id: config.job_id,
                 job_pass: config.password,
@@ -552,6 +570,12 @@ $.extend(UI, {
 
         // Submit the form...
         form.submit();
+
+        document.getElementById(div_id).innerHTML = "";
+        TMKey = $('#new-tm-key').val();
+        TMName = $('.mgmt-tm tr.uploadpanel td.uploadfile input[type="file"]').val();
+        UI.pollForUploadCallback(TMKey, TMName);
+
         return false;
 /*
 //    document.getElementById(div_id).innerHTML = "Uploading...";
@@ -589,15 +613,16 @@ $.extend(UI, {
     pollForUploadProgress: function(TMKey, TMName) {
         APP.doRequest({
             data: {
-                action: 'ajaxUtils',
-                exec: 'tmxUploadStatus',
+                action: 'loadTMX',
+                exec: 'uploadStatus',
                 tm_key: TMKey,
-                tmx_name: TMName
+                name: TMName
             },
             context: [TMKey, TMName],
             error: function() {
             },
             success: function(d) {
+                console.log('progress success data: ', d);
                 if(d.errors.length) {
                     APP.showMessage({
                         msg: d.errors[0].message,
@@ -732,7 +757,7 @@ $.extend(UI, {
 
     updateTM: function (tr) {
         dataMix = {
-            action: 'addTM',
+            action: 'loadTMX',
             exec: 'updateTM'
         };
         console.log('tr: ', tr);
