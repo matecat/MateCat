@@ -757,7 +757,7 @@ UI = {
 
 		if ( $( "div[data-pid='" + pid + "'] div.project-details > a" ).text().charAt( 0 ) == '0' )
 		{
-			tableElement.html( "Zero words found.<br/>Unable to quote." );
+			tableElement.html( "0 words found.<br/>Unable to quote." );
 			tableElement.removeClass( "missing-outsource-data" );
 			return;
 		}
@@ -783,7 +783,7 @@ UI = {
 				{
 					var price = data.data[0]["price"];
 					var date = new Date( data.data[0]["delivery_date"] );
-					var delivery = date.getDate() + "/" + ( date.getMonth() + 1 ) + " at " + date.getHours() + ":" + date.getMinutes();
+					var delivery = date.getDate() + "/" + ( date.getMonth() + 1 ) + " at " + date.getHours() + ":" + ( ( date.getMinutes() != 0 ) ? date.getMinutes() : "00" );
 
 					var raw_data = JSON.stringify( data.data );
 
