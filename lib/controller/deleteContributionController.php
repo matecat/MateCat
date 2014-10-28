@@ -19,6 +19,8 @@ class deleteContributionController extends ajaxController {
     private $password;
     private $tm_keys;
 
+    private $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+
     public function __construct() {
 
         parent::__construct();
@@ -75,6 +77,7 @@ class deleteContributionController extends ajaxController {
         }
 
         $this->tm_keys      = $job_data[ 'tm_keys' ];
+        $this->checkLogin();
 
         $config = TMS::getConfigStruct();
 
@@ -90,7 +93,21 @@ class deleteContributionController extends ajaxController {
 
         //get job's TM keys
         try{
-            $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys($this->tm_keys, 'r', 'tm');
+
+            $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
+            $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
+
+            $tm_keys = $this->tm_keys;
+
+            if ( $url_request ) {
+                $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+            } elseif( $this->userMail == $job_data['owner'] ){
+                $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array($tm_keys), 'r', 'tm' );
+                $tm_keys = json_encode( $tm_keys );
+            }
+
+            //get TM keys with read grants
+            $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'r', 'tm', $this->uid, $this->userRole );
 
             if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
                 foreach ( $tm_keys as $tm_key ) {

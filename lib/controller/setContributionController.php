@@ -25,6 +25,8 @@ class setContributionController extends ajaxController {
 
     private $__postInput;
 
+    private $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+
     public function __construct() {
 
         parent::__construct();
@@ -58,9 +60,6 @@ class setContributionController extends ajaxController {
         $this->target              = $this->__postInput[ 'target' ];
         $this->source_lang         = $this->__postInput[ 'source_lang' ];
         $this->target_lang         = $this->__postInput[ 'target_lang' ];
-
-	//TODO FIX FOR CLIENT BOM INSERTIONS
-	$this->target = str_replace("\xEF\xBB\xBF",'',$this->target);
 
         if ( empty( $this->id_customer ) ) {
             $this->id_customer = "Anonymous";
@@ -135,9 +134,22 @@ class setContributionController extends ajaxController {
             $tms    = new TMS( $id_tms );
             $result = array();
 
+            $this->checkLogin();
+
             try {
+
+                $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
+                $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
+
+                if ( $url_request ) {
+                    $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+                } elseif( $this->userMail == $job_data['owner'] ){
+                    $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array($tm_keys), 'w' );
+                    $tm_keys = json_encode( $tm_keys );
+                }
+
                 //find all the job's TMs with write grants and make a contribution to them
-                $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'tm' );
+                $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'tm', $this->uid, $this->userRole  );
 
                 if ( !empty( $tm_keys ) ) {
                     unset($config[ 'id_user' ]);
@@ -168,6 +180,7 @@ class setContributionController extends ajaxController {
                     }
 
                 }
+
 
             } catch ( Exception $e ) {
                 $this->result[ 'error' ][ ] = array( "code" => -6, "message" => "Error while retrieving job's TM." );

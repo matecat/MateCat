@@ -24,6 +24,8 @@ class glossaryController extends ajaxController {
     private $_TMS;
     private $job_info;
 
+    private $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+
     public function __construct() {
 
         parent::__construct();
@@ -63,6 +65,8 @@ class glossaryController extends ajaxController {
          *
          */
         $this->_TMS = new TMS( 1 /* MyMemory */ );
+
+        $this->checkLogin();
 
         try {
 
@@ -113,8 +117,20 @@ class glossaryController extends ajaxController {
 
     protected function _get( $config ){
 
+        $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
+        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
+
+        $tm_keys = $this->job_info['tm_keys'];
+
+        if ( $url_request ) {
+            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+        } elseif( $this->userMail == $this->job_info['owner'] ){
+            $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array($tm_keys), 'r', 'glos' );
+            $tm_keys = json_encode( $tm_keys );
+        }
+
         //get TM keys with read grants
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $this->job_info[ 'tm_keys' ], 'r', 'glossary' );
+        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'r', 'glos', $this->uid, $this->userRole );
 
         if ( count( $tm_keys ) ) {
             $config[ 'id_user' ] = array();
@@ -167,8 +183,20 @@ class glossaryController extends ajaxController {
 
         $this->result[ 'errors' ] = array();
 
-        //get tm keys with write grants
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $this->job_info[ 'tm_keys' ], 'w', 'glossary' );
+        $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
+        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
+
+        $tm_keys = $this->job_info['tm_keys'];
+
+        if ( $url_request ) {
+            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+        } elseif( $this->userMail == $this->job_info['owner'] ){
+            $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array($tm_keys), 'w', 'glos' );
+            $tm_keys = json_encode( $tm_keys );
+        }
+
+        //get TM keys with read grants
+        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $this->uid, $this->userRole );
 
         if ( empty( $tm_keys ) ) {
 
@@ -250,8 +278,20 @@ class glossaryController extends ajaxController {
 
     protected function _update( $config ){
 
-        //get tm keys with write grants
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $this->job_info[ 'tm_keys' ], 'w', 'glossary' );
+        $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
+        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
+
+        $tm_keys = $this->job_info['tm_keys'];
+
+        if ( $url_request ) {
+            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+        } elseif( $this->userMail == $this->job_info['owner'] ){
+            $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array($tm_keys), 'w', 'glos' );
+            $tm_keys = json_encode( $tm_keys );
+        }
+
+        //get TM keys with read grants
+        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $this->uid, $this->userRole );
 
         $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
         $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
@@ -292,8 +332,20 @@ class glossaryController extends ajaxController {
 
     protected function _delete( $config ){
 
-        //get tm keys with write grants
-        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $this->job_info[ 'tm_keys' ], 'w', 'glossary' );
+        $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
+        $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
+
+        $tm_keys = $this->job_info['tm_keys'];
+
+        if ( $url_request ) {
+            $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+        } elseif( $this->userMail == $this->job_info['owner'] ){
+            $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array($tm_keys), 'w', 'glos' );
+            $tm_keys = json_encode( $tm_keys );
+        }
+
+        //get TM keys with read grants
+        $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys( $tm_keys, 'w', 'glos', $this->uid, $this->userRole );
 
         $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
         $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );

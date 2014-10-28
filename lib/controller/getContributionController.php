@@ -24,6 +24,8 @@ class getContributionController extends ajaxController {
 
     private $__postInput = array();
 
+    private $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
+
     public function __construct() {
 
         parent::__construct();
@@ -87,11 +89,11 @@ class getContributionController extends ajaxController {
         }
 
         //get Job Infos, we need only a row of jobs ( split )
-        $st = getJobData( $this->id_job, $this->password );
+        $jobData = getJobData( $this->id_job, $this->password );
 
         $pCheck = new AjaxPasswordCheck();
         //check for Password correctness
-        if ( empty( $st ) || !$pCheck->grantJobAccessByJobData( $st, $this->password ) ) {
+        if ( empty( $jobData ) || !$pCheck->grantJobAccessByJobData( $jobData, $this->password ) ) {
             $this->result[ 'error' ][ ] = array( "code" => -10, "message" => "wrong password" );
 
             return -1;
@@ -104,8 +106,8 @@ class getContributionController extends ajaxController {
         if ( !$this->concordance_search ) {
             //
             $this->text   = CatUtils::view2rawxliff( $this->text );
-            $this->source = $st[ 'source' ];
-            $this->target = $st[ 'target' ];
+            $this->source = $jobData[ 'source' ];
+            $this->target = $jobData[ 'target' ];
         } else {
 
             $regularExpressions = $this->tokenizeSourceSearch();
@@ -123,18 +125,18 @@ class getContributionController extends ajaxController {
                  * we want result in italian from german source
                  *
                  */
-                $this->source = $st[ 'target' ];
-                $this->target = $st[ 'source' ];
+                $this->source = $jobData[ 'target' ];
+                $this->target = $jobData[ 'source' ];
             } else {
-                $this->source = $st[ 'source' ];
-                $this->target = $st[ 'target' ];
+                $this->source = $jobData[ 'source' ];
+                $this->target = $jobData[ 'target' ];
             }
         }
 
-        $this->id_mt_engine = $st[ 'id_mt_engine' ];
-        $this->id_tms       = $st[ 'id_tms' ];
+        $this->id_mt_engine = $jobData[ 'id_mt_engine' ];
+        $this->id_tms       = $jobData[ 'id_tms' ];
 
-        $this->tm_keys      = $st[ 'tm_keys' ];
+        $this->tm_keys      = $jobData[ 'tm_keys' ];
 
         $config = TMS::getConfigStruct();
 
@@ -183,8 +185,21 @@ class getContributionController extends ajaxController {
             $tms = new TMS( $_TMS );
 
             //get job's TM keys
+            $this->checkLogin();
+
             try{
-                $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys($this->tm_keys, 'r', 'tm');
+
+                $_from_url = parse_url( @$_SERVER['HTTP_REFERER'] );
+                $url_request = strpos( $_from_url['path'] , "/revise" ) === 0;
+
+                if ( $url_request ) {
+                    $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
+                } elseif( $this->userMail == $jobData['owner'] ){
+                    $this->tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array($this->tm_keys), 'r', 'tm' );
+                    $this->tm_keys = json_encode( $this->tm_keys );
+                }
+
+                $tm_keys = TmKeyManagement_TmKeyManagement::getJobTmKeys($this->tm_keys, 'r', 'tm', $this->uid, $this->userRole );
 
                 if ( is_array( $tm_keys ) && !empty( $tm_keys ) ) {
                     foreach ( $tm_keys as $tm_key ) {
