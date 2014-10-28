@@ -811,6 +811,22 @@ border-radius: 4px;}
 
 .api p {margin:0;}
 
+
+.missing-outsource-data {
+	background: url(../img/loading-black.gif) 40px 10px no-repeat;
+	background-size: 32px;
+}
+
+.submit-outsource-data > input[type='submit'] {
+	color: blue;
+	background-color: white;
+	border: none;
+	text-decoration: underline;
+	cursor: pointer;
+	margin-top: 5px;
+}
+
+
 /* retina display query */
 @media only screen and (-webkit-min-device-pixel-ratio: 2),
 only screen and (min--moz-device-pixel-ratio: 2),
