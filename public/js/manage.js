@@ -758,7 +758,7 @@ UI = {
 		$.ajax({
 			async: true,
 	  		type: "POST",
-			url : "http://localhost/?action=outsourceTo",
+			url : "/?action=outsourceTo",
 			data:
 			{
 				action: 'outsourceTo',
