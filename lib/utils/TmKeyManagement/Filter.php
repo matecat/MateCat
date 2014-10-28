@@ -102,15 +102,15 @@ class TmKeyManagement_Filter {
          *      WARNING: Undefined index: uid_transl
          */
         $i_can_see_the_key = false;
-        if( isset( $tm_key[ 'uid_transl' ] ) ){ // this is a new key type
+        if( array_key_exists( 'uid_transl', $tm_key ) ){ // this is a new key type
 
-            if( is_null( $tm_key[ 'uid_transl' ] ) && is_null( $tm_key[ 'uid_rev' ] ) ){
-                //this is an owner key or anonymous one, so i can use it
-                $i_can_see_the_key = true;
-            } else {
+//            if( is_null( $tm_key[ 'uid_transl' ] ) && is_null( $tm_key[ 'uid_rev' ] ) ){
+//                //this is an owner key or anonymous one, so i can use it
+//                $i_can_see_the_key = true;
+//            } else {
                 //it's mine???
                 $i_can_see_the_key = $this->__uid == $tm_key[ 'uid_transl' ];
-            }
+//            }
 
         }
 
@@ -139,7 +139,7 @@ class TmKeyManagement_Filter {
          *      WARNING: Undefined index: uid_transl
          */
         $i_can_see_the_key = false;
-        if( isset( $tm_key[ 'uid_transl' ] ) ){ // this is a new key type
+        if( array_key_exists( 'uid_transl', $tm_key ) ){ // this is a new key type
 
             if( is_null( $tm_key[ 'uid_transl' ] ) && is_null( $tm_key[ 'uid_rev' ] ) ){
                 //this is an owner key or anonymous one, so i can use it
@@ -237,7 +237,12 @@ class TmKeyManagement_Filter {
 
         if( $this->_required_grant == 'rw' ) {
             $has_required_grants = $tm_key[ self::$GRANTS_MAP[ $role ][ 'r' ] ] == true;
-            $has_required_grants = $has_required_grants && $tm_key[ self::$GRANTS_MAP[ $role ][ 'w' ] ] == true;
+            /**
+             * Using the logic OR allows us to take all the possible keys.
+             * this means what if we want to select the keys that are readable AND writable,
+             * then we must apply two filters in sequence: one with R flag, the other with the W flag.
+             **/
+            $has_required_grants = $has_required_grants || $tm_key[ self::$GRANTS_MAP[ $role ][ 'w' ] ] == true;
         } else {
             $has_required_grants = $tm_key[ self::$GRANTS_MAP[ $role ][ $this->_required_grant ] ] == true;
         }

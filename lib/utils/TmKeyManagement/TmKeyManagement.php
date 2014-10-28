@@ -60,7 +60,7 @@ class TmKeyManagement_TmKeyManagement {
      *
      * @see TmKeyManagement_TmKeyStruct
      */
-    public static function getJobTmKeys( $jsonTmKeys, $grant_level = 'rw', $type = "tm", $user_role = TmKeyManagement_Filter::ROLE_TRANSLATOR, $uid = null ) {
+    public static function getJobTmKeys( $jsonTmKeys, $grant_level = 'rw', $type = "tm", $uid = null, $user_role = TmKeyManagement_Filter::ROLE_TRANSLATOR ) {
 
         $tmKeys = json_decode( $jsonTmKeys, true );
 
@@ -107,11 +107,11 @@ class TmKeyManagement_TmKeyManagement {
      *
      * @param $jsonTmKeys_array array An array of strings representing a json_encoded array of TmKeyManagement_TmKeyStruct objects
      *
-     * @return array                  An array of TmKeyManagement_TmKeyStruct objects
+     * @return TmKeyManagement_TmKeyStruct[] An array of TmKeyManagement_TmKeyStruct objects
      * @throws Exception              Throws Exception if the input is not an array or if a string is not a valid json
      * @see TmKeyManagement_TmKeyStruct
      */
-    public static function getOwnerKeys( Array $jsonTmKeys_array ) {
+    public static function getOwnerKeys( Array $jsonTmKeys_array, $grant_level = 'rw', $type = "tm" ) {
 
         $result_arr = array();
 
@@ -126,6 +126,8 @@ class TmKeyManagement_TmKeyManagement {
             }
 
             $filter = new TmKeyManagement_Filter();
+            $filter->setGrants( $grant_level )
+                    ->setTmType( $type );
             $tmKey  = array_filter( $tmKey, array( $filter, 'byOwner' ) );
 
             $result_arr[ ] = $tmKey;

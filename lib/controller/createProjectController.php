@@ -132,8 +132,8 @@ class createProjectController extends ajaxController {
         }
         $sourceLangAr = explode( '||', urldecode( $sourceLangHistory ) );
 
-        if (($key = array_search($this->source_language, $sourceLangAr)) !== false) {
-            unset($sourceLangAr[$key]);
+        if ( ( $key = array_search( $this->source_language, $sourceLangAr ) ) !== false ) {
+            unset( $sourceLangAr[ $key ] );
         }
         array_unshift( $sourceLangAr, $this->source_language );
         if ( $sourceLangAr == '_EMPTY_' ) {
@@ -156,7 +156,7 @@ class createProjectController extends ajaxController {
         }
 
         setcookie( "sourceLang", $newCookieVal, time() + ( 86400 * 365 ) );
-        
+
         // SET TARGET COOKIE
 
         if ( $targetLangHistory == '_EMPTY_' ) {
@@ -233,16 +233,6 @@ class createProjectController extends ajaxController {
             'r' => filter_var( $elem['r'], FILTER_VALIDATE_BOOLEAN, array( 'flags' => FILTER_NULL_ON_FAILURE ) ),
             'w' => filter_var( $elem['w'], FILTER_VALIDATE_BOOLEAN, array( 'flags' => FILTER_NULL_ON_FAILURE ) )
         );
-    }
-
-    public function checkLogin() {
-        //Warning, sessions enabled, disable them after check, $_SESSION is in read only mode after disable
-        parent::sessionStart();
-        $this->isLogged = ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) );
-        $this->uid  = ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) ? $_SESSION[ 'uid' ] : null );
-        parent::disableSessions();
-
-        return $this->isLogged;
     }
 
 }
