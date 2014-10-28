@@ -60,6 +60,8 @@ class Upload  {
 
         $result = new stdClass();
 
+        if ( empty($filesToUpload) ) throw new Exception ( "No files received." );
+
         foreach( $filesToUpload as $inputName => $file ) {
             $result->$inputName = $this->_uploadFile($file);
         }

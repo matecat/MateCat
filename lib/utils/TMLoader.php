@@ -115,8 +115,10 @@ class TMLoader {
      */
     public function uploadFile() {
         try {
+
             $uploadManager = new Upload();
             $uploadedFiles = $uploadManager->uploadFiles( $_FILES ); Log::doLog( $_FILES );
+
         } catch ( Exception $e ) {
             Log::doLog( $e->getMessage() );
             throw new Exception( $e->getMessage(), -8);
@@ -159,7 +161,7 @@ class TMLoader {
             }
 
             return true;
-            
+
         } else {
             throw new Exception( "Can't find uploaded TMX files", -15);
         }
