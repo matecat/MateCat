@@ -623,11 +623,11 @@ UI = {
 			    '                <th class="private-tm-key">Private TM Key</th>';
 
             if(config.v_analysis){
-                newProject += '                <th class="words header">Payable Words</th>';
+                newProject += '                <th class="words header">Words</th>';
             }
 
             newProject += '                <th class="progress header">Progress</th>'+
-				'	<th class="progress header">Need outsource?</th>' +
+				'	<th class="progress header">Outsource</th>' +
 			    '                <th class="actions">Actions</th>'+
 			    '            </tr>'+
 		        '        </thead>'+
@@ -785,7 +785,7 @@ UI = {
                                		"<input type='hidden' name='url_ok' value='" + data.return_url.url_ok + "'>" +
                             		"<input type='hidden' name='url_ko' value='" + data.return_url.url_ko + "'>" +
 									"<input type='hidden' name='quoteData' value='" + JSON.stringify( data.data ) + "'>" +
- 	                            	"<button type='submit' style='background-color:#7eaf3e; border:1px solid #666; border-radius:2px; color:white; opacity:0.9; padding:5px 10px!important;'>Price: <b>" + price + "€</b><br>Delivery: " + delivery + "</button>" +
+ 	                            	"<button type='submit' class='outsource-btn'><span class='outsource-price'>€ " + price + "</span><span class='outsource-delivery'><strong>Delivery</strong><br> " + delivery + "</span></button>" +
                                 "</form>";
 
 					tableElement.html( form );
@@ -844,7 +844,7 @@ UI = {
                                		"<input type='hidden' name='url_ok' value='" + data.return_url.url_ok + "'>" +
                             		"<input type='hidden' name='url_ko' value='" + data.return_url.url_ko + "'>" +
 									"<input type='hidden' name='quoteData' value='" + JSON.stringify( data.data ) + "'>" +
- 	                            	"<button type='submit' style='background-color:#7eaf3e; border:1px solid #666; border-radius:2px; color:white; opacity:0.9; padding:5px 10px!important;'>Price: <b>" + price + "€</b><br>Delivery: " + delivery + "</button>" +
+ 	                            	"<button type='submit' class='outsource-btn'><span class='outsource-price'>€ " + price + "</span><span class='outsource-delivery'><strong>Delivery</strong><br> " + delivery + "</span></button>" +
                                 "</form>";
 
 					tableElement.html( form );
