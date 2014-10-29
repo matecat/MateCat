@@ -217,7 +217,7 @@ class TmKeyManagement_TmKeyManagement {
             $reverse_lookup_client_json[ 'elements' ][ $_j ] = $_client_tm_key;
 
             if( empty( $_client_tm_key->r ) && empty( $_client_tm_key->w ) ){
-                throw new Exception( "Read and Write grants can not be both empty" );
+                throw new Exception( "Read and Write grants can not be both empty", 4 );
             }
 
         }
