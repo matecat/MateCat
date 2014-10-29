@@ -3545,6 +3545,7 @@ $.extend(UI, {
                 }, 500);
             }
 */
+/*
         }).on('click', '.addtm-tr-key .btn-ok', function() {
             if(!UI.checkTMgrants($('.addtm-tr-key'))) {
                 return false;
@@ -3552,6 +3553,7 @@ $.extend(UI, {
                 $('.addtm-tr-key .error-message').text('').hide();
             }
             UI.checkTMKey($('#addtm-tr-key-key').val(), 'key');
+*/
         }).on('click', '#addtm-select-file', function() {
             $('.addtm-select-file').click();
         }).on('change', '.addtm-select-file', function() {
@@ -7976,7 +7978,9 @@ $.extend(UI, {
             UI.execAddTM(this);
         }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
             UI.execAddTM(this);
-        }).on('click', '.popup-tm .savebtn', function() {
+//        }).on('click', '.popup-tm .savebtn', function() {
+        }).on('click', '.popup-tm h1 .btn-ok', function(e) {
+            e.preventDefault();
             UI.saveTMdata();
         }).on('click', '#activetm tr.new a.addtmxfile:not(.disabled)', function() {
             console.log('upload file');
@@ -8455,7 +8459,7 @@ $.extend(UI, {
         $(tt).each(function () {
             dd = {
                 key: $(this).find('.privatekey').text(),
-                tmx_name: $(this).find('.description').text(),
+                name: $(this).find('.description').text(),
                 r: (($(this).find('.lookup input').is(':checked'))? 1 : 0),
                 w: (($(this).find('.update input').is(':checked'))? 1 : 0)
             }
@@ -8478,7 +8482,6 @@ $.extend(UI, {
 
     saveTMdata: function() {
         data = this.extractTMdataFromTable();
-        console.log('VEDIAMO: ', data);
         APP.doRequest({
             data: {
                 action: 'updateJobKeys',

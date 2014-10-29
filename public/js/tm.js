@@ -139,7 +139,9 @@ $.extend(UI, {
             UI.execAddTM(this);
         }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
             UI.execAddTM(this);
-        }).on('click', '.popup-tm .savebtn', function() {
+//        }).on('click', '.popup-tm .savebtn', function() {
+        }).on('click', '.popup-tm h1 .btn-ok', function(e) {
+            e.preventDefault();
             UI.saveTMdata();
         }).on('click', '#activetm tr.new a.addtmxfile:not(.disabled)', function() {
             console.log('upload file');
@@ -618,7 +620,7 @@ $.extend(UI, {
         $(tt).each(function () {
             dd = {
                 key: $(this).find('.privatekey').text(),
-                tmx_name: $(this).find('.description').text(),
+                name: $(this).find('.description').text(),
                 r: (($(this).find('.lookup input').is(':checked'))? 1 : 0),
                 w: (($(this).find('.update input').is(':checked'))? 1 : 0)
             }
@@ -641,7 +643,6 @@ $.extend(UI, {
 
     saveTMdata: function() {
         data = this.extractTMdataFromTable();
-        console.log('VEDIAMO: ', data);
         APP.doRequest({
             data: {
                 action: 'updateJobKeys',
