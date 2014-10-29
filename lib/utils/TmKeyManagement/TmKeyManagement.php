@@ -217,7 +217,7 @@ class TmKeyManagement_TmKeyManagement {
             $reverse_lookup_client_json[ 'elements' ][ $_j ] = $_client_tm_key;
 
             if( empty( $_client_tm_key->r ) && empty( $_client_tm_key->w ) ){
-                throw new Exception( "Read and Write grants can not be both empty" );
+                throw new Exception( "Read and Write grants can not be both empty", 4 );
             }
 
         }
@@ -385,8 +385,8 @@ class TmKeyManagement_TmKeyManagement {
 
 
                 //finally append to the job keys!!
-                //take the new order, put the deleted key at the end of the array
-                //a position VERY LOW, but before the deleted keys, so it goes not to the end ( 100 hundred thousand )
+                //take the new order, put the new key at the end of the array
+                //a position VERY LOW, but BEFORE the deleted keys, so it goes not to the end ( 100 hundred thousand )
                 $server_reorder_position[ 100000 + $_pos ] = $justCreatedKey;
 
                 if ( $uid != null ) {

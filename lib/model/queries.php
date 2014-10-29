@@ -592,8 +592,7 @@ function setJobTmKeys( $job_id, $job_password, $tmKeysString ) {
     $errno = $err[ 'error_code' ];
     if ( $errno != 0 ) {
         log::doLog( $err );
-
-        return $errno * -1;
+        throw new Exception( $err, -$errno );
     }
 }
 
