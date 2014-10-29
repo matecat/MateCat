@@ -769,11 +769,18 @@ form.add-TM-Form {
     float: right;
 }
 #activetm tr.new .error {
-    display: none;
+    display: block;
     float: left;
     width: 80%;
     color: #F00;
     padding: 2px 10px;
+}
+#activetm tr.new .error span {
+    display: none;
+    width: 100%;
+    line-height: 100%;
+    float: left;
+    margin-bottom: 6px;
 }
 .popup p
 {
@@ -1153,7 +1160,9 @@ body.cattool .mgmt-tm.mine thead,
     cursor: pointer;
     margin-bottom: 30px;
 }
-
+td.uploadfile .canceladdtmx {
+    margin-bottom: 0px;
+}
 .canceladdtmx:hover {
 	color:red;
 }
@@ -1468,13 +1477,21 @@ clear: both;
 .addrow-gl {
 padding: 0 25px;
 }
-input#new-tm-key {width: 85%;
+input#new-tm-key {
+    width: 85%;
 	margin:0 0 10px 0;
-height: 0px;}
-input#new-tm-description {height:40px;
-
+    height: 0px;
 }
-
+.badkey input#new-tm-key {
+    border: 3px solid red;
+}
+input#new-tm-description {
+    height:40px;
+}
+tr.new.badgrants .fileupload
+{
+    border: 3px solid red;
+}
 .description textarea {
 resize: none;
 }

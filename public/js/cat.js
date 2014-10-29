@@ -7892,7 +7892,9 @@ $.extend(UI, {
                 //put value into input field
                 $('#new-tm-key').val(data.key);
                 $('.mgmt-tm .new .privatekey .btn-ok').removeClass('disabled');
-                $('#activetm tr.new .error').text('').hide();
+                $('#activetm tr.new').removeClass('badkey');
+                $('#activetm tr.new .error .tm-error-key').text('').hide();
+                UI.checkTMAddAvailability();
 
                 return false;
             });
@@ -7958,10 +7960,9 @@ $.extend(UI, {
 */
             $(this).parents('tr').append(nr);
 //            UI.uploadTM($('#addtm-upload-form')[0],'http://' + window.location.hostname + '/?action=addTM','uploadCallback');
-//            UI.checkTMheights();
         }).on('change', '#new-tm-key', function() {
             UI.checkTMKey('change');
-        }).on('click', '.mgmt-tm tr.new a.uploadtm', function() {
+        }).on('click', '.mgmt-tm tr.new a.uploadtm:not(.disabled)', function() {
 //            operation = ($('.mgmt-tm tr.new td.fileupload input[type="file"]').val() == '')? 'key' : 'tm';
             UI.checkTMKey('key');
 //            UI.addTMKeyToList();
@@ -7971,17 +7972,18 @@ $.extend(UI, {
 //            $(".clicked td.action").append('progressbar');
 
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
-        }).on('click', '#activetm tr.mine .uploadfile .addtmxfile', function() {
+        }).on('click', '#activetm tr.mine .uploadfile .addtmxfile:not(.disabled)', function() {
             UI.execAddTM(this);
-        }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile', function() {
+        }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
             UI.execAddTM(this);
         }).on('click', '.popup-tm .savebtn', function() {
             UI.saveTMdata();
-        }).on('click', '#activetm tr.new a.addtmxfile', function() {
+        }).on('click', '#activetm tr.new a.addtmxfile:not(.disabled)', function() {
             console.log('upload file');
             UI.checkTMKey('tm');
 
             $('#activetm tr.uploadpanel').removeClass('hide');
+            $(this).hide();
         }).on('click', 'a.disabletm', function() {
             var row = $(this).closest("tr");
             if(row.find('td.uploadfile').length) {
@@ -7990,8 +7992,7 @@ $.extend(UI, {
             }
             row.detach();
             $("#inactivetm").append(row);
-            $('#inactivetm tr.noresults').hide();
-            row.find('a.disabletm .text').text('Use').attr('class', 'text icon-play-circle');
+            row.find('a.disabletm .text').text('Use').attr('class', 'text');
             row.find('.lookup input[type="checkbox"]').first().removeAttr('checked').attr('disabled', 'disabled');
             row.find('.update input[type="checkbox"]').first().removeAttr('checked').attr('disabled', 'disabled');
             row.css('display', 'block');
@@ -8001,13 +8002,15 @@ $.extend(UI, {
             row.fadeIn();
             $(this).addClass("usetm").removeClass("disabletm");
             $('.addtmxrow').hide();
+            // draft of hack for nodata row management from datatables plugin
+//            $('#inactivetm tr.odd:not(.mine)').hide();
         }).on('click', 'a.usetm', function() {
             var row = $(this).closest("tr");
             row.detach();
             $("#activetm tr.new").before(row);
             if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
             row.addClass('mine');
-            row.find('a.usetm .text').text('Stop Use').attr('class', 'text icon-minus-circle');
+            row.find('a.usetm .text').text('Stop Use').attr('class', 'text');
             row.find('.lookup input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
             row.find('.update input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
             row.css('display', 'block');
@@ -8017,10 +8020,18 @@ $.extend(UI, {
             row.fadeIn();
             $(this).addClass("disabletm").removeClass("usetm");
             $('.addtmxrow').hide();
-        }).on('change', '#new-tm-read, #new-tm-write', function() {
-            if(UI.checkTMgrants($('.addtm-tr'))) {
-//                $('.addtm-tr .error-message').hide();
+            // draft of hack for nodata row management from datatables plugin
+ /*
+            if(!$('#inactivetm tbody tr.mine, #inactivetm tbody tr.inactive').length) {
+                console.log('aaa: ', $('#inactivetm tbody tr.odd'));
+                if(!$('#inactivetm tbody tr.odd').length) {
+                    $('#inactivetm tbody').append('<tr class="odd"><td valign="top" colspan="5" class="dataTables_empty">No data available in table</td></tr>');
+                }
+                $('#inactivetm tbody tr.odd').show();
             }
+  */
+        }).on('change', '#new-tm-read, #new-tm-write', function() {
+            UI.checkTMgrants();
         }).on('change', '#activetm tr.mine td.uploadfile input[type="file"]', function() {
             if($(this).val() == '') {
                 $(this).parents('.uploadfile').find('.addtmxfile').hide();
@@ -8059,6 +8070,7 @@ $.extend(UI, {
             $("#activetm tr.new").hide();
             $("#activetm tr.uploadpanel").addClass('hide');
             $(".add-tm").show();
+            UI.clearAddTMRow();
         });
 
         $(".add-gl").click(function() {
@@ -8112,7 +8124,6 @@ $.extend(UI, {
     openLanguageResourcesPanel: function() {
         $('body').addClass('side-popup');
         $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
-//        UI.checkTMheights();
         $("#SnapABug_Button").hide();
         $(".outer-tm").show();
     },
@@ -8135,27 +8146,6 @@ $.extend(UI, {
         */
         $("#activetm tbody.sortable").sortable({ items: ".mine" }).disableSelection();
     },
-
-    checkTMheights: function() {
-//        var h = $('#activetm tbody tr').first().height();
-//        var h = $('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)').height();
-        var h = 0;
-        $('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)').each(function() {
-            h += $(this).height();
-        })
-        $('#activetm tbody').css('height', h + 'px');
-
-        /*
-                console.log($('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)'));
-                var h = 0;
-                $('#activetm tbody tr:not(.new, .addtmxrow):nth-child(-n+4)').each(function() {
-                    h += $(this).height();
-                })
-                $('#activetm tbody').css('height', h + 'px');
-                console.log(h);
-        */
-
-    },
     checkTMKey: function(operation) {
         console.log('checkTMKey');
         console.log('operation: ', operation);
@@ -8173,17 +8163,58 @@ $.extend(UI, {
                 if(d.success === true) {
                     console.log('key is good');
                     console.log('adding a tm');
-                    $('#activetm tr.new .error').text('').hide();
+                    $('#activetm tr.new').removeClass('badkey');
+                    $('#activetm tr.new .error .tm-error-key').text('').hide();
+                    UI.checkTMAddAvailability();
+
                     if(this != 'change') {
                         UI.addTMKeyToList();
                         UI.clearTMUploadPanel();
+                    } else {
+
                     }
+
                 } else {
                     console.log('key is bad');
-                    $('#activetm tr.new .error').text('The key is not valid').show();
+                    $('#activetm tr.new').addClass('badkey');
+                    $('#activetm tr.new .error .tm-error-key').text('The key is not valid').show();
+                    UI.checkTMAddAvailability();
                 }
             }
         });
+    },
+    checkTMAddAvailability: function () {
+        console.log('checkTMAddAvailability');
+        if(($('#activetm tr.new').hasClass('badkey'))||($('#activetm tr.new').hasClass('badgrants'))) {
+            $('#activetm tr.new .uploadtm').addClass('disabled');
+            $('#activetm tr.uploadpanel .addtmxfile').addClass('disabled');
+        } else {
+            $('#activetm tr.new .uploadtm').removeClass('disabled');
+            $('#activetm tr.uploadpanel .addtmxfile').removeClass('disabled');
+
+        }
+    },
+
+    checkTMgrants: function() {
+        console.log('checkTMgrants');
+        panel = $('.mgmt-tm tr.new');
+        var r = ($(panel).find('.r').is(':checked'))? 1 : 0;
+        var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
+        if(!r && !w) {
+            console.log('checkTMgrants NEGATIVE');
+            $('#activetm tr.new').addClass('badgrants');
+            $(panel).find('.action .error .tm-error-grants').text('Either "Lookup" or "Update" must be checked').show();
+            UI.checkTMAddAvailability();
+
+            return false;
+        } else {
+            console.log('checkTMgrants POSITIVE');
+            $('#activetm tr.new').removeClass('badgrants');
+            $(panel).find('.action .error .tm-error-grants').text('').hide();
+            UI.checkTMAddAvailability();
+
+            return true;
+        }
     },
 /*
     registerTMX: function () {
@@ -8247,8 +8278,9 @@ $.extend(UI, {
     clearAddTMRow: function() {
         $('#new-tm-key, #new-tm-description').val('');
         $('#activetm .fileupload').val('');
-//        $('#uploadTMX').text('').hide();
         $('.mgmt-tm tr.new .message').text('');
+        $('.mgmt-tm tr.new .error span').text('').hide();
+        $('.mgmt-tm tr.new .addtmxfile').show();
     },
     TMFileUpload: function(form, action_url, div_id, tmName) {
         console.log('div_id: ', div_id);
@@ -8356,7 +8388,6 @@ $.extend(UI, {
     },
 
     pollForUploadProgress: function(TMKey, TMName, existing, TRcaller) {
-        console.log('TMName appena entrati in pollForUploadProgress: ', TMName);
         APP.doRequest({
             data: {
                 action: 'loadTMX',
@@ -8376,7 +8407,7 @@ $.extend(UI, {
                 } else {
                     existing = this[2];
                     TRcaller = this[3];
-                    $(TRcaller).html('<span class="progress" style="display: block; height: 5px; background: #fff"><span class="inner" style="float: left; height: 5px; width: 0%; background: #09BEEC"></span></span><span class="msgText">Uploading ' + this[1]+ '...</span>');
+                    $(TRcaller).html('<span class="progress"><span class="inner" style="float: left; height: 5px; width: 0%; background: #09BEEC"></span></span><span class="msgText">Uploading ' + this[1]+ '...</span>');
                     if(d.data.total == null) {
                         pollForUploadProgressContext = this;
                         setTimeout(function() {
@@ -8384,7 +8415,13 @@ $.extend(UI, {
                         }, 1000);
                     } else {
                         if(d.completed) {
+                            if(existing) {
+                                var tr = $(TRcaller).parents('tr.mine');
+                                $(tr).find('.addtmx').show();
+                                UI.pulseTMadded(tr);
+                            }
                             $(TRcaller).remove();
+
 //                            APP.showMessage({
 //                                msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
 //                            });
@@ -8402,22 +8439,18 @@ $.extend(UI, {
             }
         });
     },
-    checkTMgrants: function() {console.log('checkTMgrants');
-        panel = $('.mgmt-tm tr.new');
-        var r = ($(panel).find('.r').is(':checked'))? 1 : 0;
-        var w = ($(panel).find('.w').is(':checked'))? 1 : 0;
-        if(!r && !w) {
-            console.log('checkTMgrants NEGATIVE');
-            $(panel).find('.action .message').text('Either "Show matches from TM" or "Add translations to TM" must be checked');
-            return false;
-        } else {
-            console.log('checkTMgrants POSITIVE');
-            $(panel).find('.action .message').text('');
-            return true;
-        }
-    },
+
     extractTMdataFromTable: function () {
-        tt = $('#activetm tbody tr.mine');
+        categories = ['owner', 'mine', 'anonymous'];
+        var newArray = {};
+        $.each(categories, function (index, value) {
+            data = UI.extractTMDataFromRowCategory(this);
+            newArray[value] = data;
+        });
+        return JSON.stringify(newArray);
+    },
+    extractTMDataFromRowCategory: function(cat) {
+        tt = $('#activetm tbody tr.' + cat);
         dataOb = [];
         $(tt).each(function () {
             dd = {
@@ -8428,8 +8461,9 @@ $.extend(UI, {
             }
             dataOb.push(dd);
         })
-        return JSON.stringify(dataOb);
+        return dataOb;
     },
+
     extractTMdataFromRow: function (tr) {
         data = {
             tm_key: tr.find('.privatekey').text(),
