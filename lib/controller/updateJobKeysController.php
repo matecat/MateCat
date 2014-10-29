@@ -17,13 +17,7 @@ class updateJobKeysController extends ajaxController {
 
     private $tm_keys;
 
-    private $userMail;
-
-    private $userIsLogged;
-
     private $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
-
-    private $uid;
 
     private $jobData = array();
 
@@ -40,7 +34,7 @@ class updateJobKeysController extends ajaxController {
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
                 ),
-                'tm_keys'  => array(
+                'data'  => array(
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
                 )
@@ -52,7 +46,7 @@ class updateJobKeysController extends ajaxController {
         //assign variables
         $this->job_id   = $_postInput[ 'job_id' ];
         $this->job_pass = $_postInput[ 'job_pass' ];
-        $this->tm_keys  = $_postInput[ 'tm_keys' ];
+        $this->tm_keys  = $_postInput[ 'data' ];
 
         //check for eventual errors on the input passed
         if ( empty( $this->job_id ) ) {
@@ -69,19 +63,7 @@ class updateJobKeysController extends ajaxController {
             );
         }
 
-//        if ( !empty( $this->tm_keys ) ) {
-//
-//            //TODO:remove next line. This is for debug purposes
-//            $this->tm_keys = html_entity_decode( $this->tm_keys );
-//            $this->tm_keys = json_decode( $this->tm_keys, true );
-//
-//        } else {
-//            $this->result[ 'errors' ][ ] = array(
-//                    'code'    => -3,
-//                    'message' => "Tm keys missing"
-//            );
-//        }
-
+        $this->tm_keys = html_entity_decode( $this->tm_keys );
 
         //get job data
         $this->jobData = getJobData( $this->job_id, $this->job_pass );
