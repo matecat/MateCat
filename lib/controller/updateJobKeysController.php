@@ -49,6 +49,7 @@ class updateJobKeysController extends ajaxController {
         $this->tm_keys  = $_postInput[ 'data' ];
 
         //check for eventual errors on the input passed
+        $this->result[ 'errors' ] = array();
         if ( empty( $this->job_id ) ) {
             $this->result[ 'errors' ][ ] = array(
                     'code'    => -1,
@@ -97,7 +98,7 @@ class updateJobKeysController extends ajaxController {
     function doAction() {
 
         //if some error occured, stop execution.
-        if ( count( @$this->result[ 'derrors' ] ) ) {
+        if ( count( @$this->result[ 'errors' ] ) ) {
             return false;
         }
 
@@ -147,7 +148,6 @@ class updateJobKeysController extends ajaxController {
         */
         $tm_keys = json_decode( $this->tm_keys, true );
         $this->tm_keys = json_encode( array_merge( $tm_keys['owner'], $tm_keys['mine'],$tm_keys['anonymous'] ) );
-
 
         try {
             $totalTmKeys = TmKeyManagement_TmKeyManagement::mergeJsonKeys( $this->tm_keys, $this->jobData['tm_keys'], $this->userRole, $this->uid );
