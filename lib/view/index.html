@@ -449,7 +449,7 @@
                                             <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/r" /></td>
                                             <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/w" /></td>
                                             <td tal:condition="php: key.edit && ( !key.owner || ownerIsMe )" class="action">
-                                                <a class="btn-grey pull-left usetm">
+                                                <a class="btn-grey pull-left disabletm">
                                                     <span class="text">Stop Use</span>
                                                 </a>
                                                 <a class="btn-grey pull-left addtmx">
