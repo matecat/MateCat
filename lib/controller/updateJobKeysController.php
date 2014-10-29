@@ -165,8 +165,6 @@ class updateJobKeysController extends ajaxController {
             $this->result[ 'errors' ][ ] = array( "code" => $e->getCode(), "message" => $e->getMessage() );
         }
 
-
-
     }
 
 } 
