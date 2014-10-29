@@ -8491,9 +8491,20 @@ $.extend(UI, {
             },
             error: function() {
                 console.log('Error saving TM data!!');
+                $('.mgmt-panel-tm .warning-message').text('').hide();
+                $('.mgmt-panel-tm .error-message').text('There was an error saving your data. Please retry!').show();
             },
-            success: function() {
-                console.log('TM data saved!!');
+            success: function(d) {
+//                d.errors = [];
+                if(d.errors.length) {
+                    $('.mgmt-panel-tm .warning-message').text('').hide();
+                    $('.mgmt-panel-tm .error-message').text(d.errors[0].message).show();
+                } else {
+                    console.log('TM data saved!!');
+                    $('.mgmt-panel-tm .error-message').text('').hide();
+                    $('.mgmt-panel-tm .warning-message').text('Your data has been saved.').show();
+                }
+
             }
         });
     },
