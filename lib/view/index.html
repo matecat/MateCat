@@ -396,10 +396,10 @@
 
                                         <td class="action">
                                             <a class="btn-grey pull-left disabletm">
-                                                <span class="icon-minus-circle text">Stop Use</span>
+                                                <span class="text">Stop Use</span>
                                             </a>
                                             <a class="btn-grey pull-left addtmx">
-                                                <span class="text icon-plus-circle">Add TMX</span>
+                                                <span class="text">Add TMX</span>
                                             </a>
                                         </td>
 
@@ -414,10 +414,10 @@
 
                                         <td class="action">
                                             <a class="btn-grey pull-left disabletm">
-                                                <span class="icon-minus-circle text">Stop Use</span>
+                                                <span class="text">Stop Use</span>
                                             </a>
                                             <a class="btn-grey pull-left addtmx">
-                                                <span class="text icon-plus-circle">Add TMX</span>
+                                                <span class="text">Add TMX</span>
                                             </a>
                                         </td>
 
@@ -432,10 +432,10 @@
 
                                         <td class="action">
                                             <a class="btn-grey pull-left disabletm">
-                                                <span class="icon-minus-circle text">Stop Use</span>
+                                                <span class="text">Stop Use</span>
                                             </a>
                                             <a class="btn-grey pull-left addtmx">
-                                                <span class="text icon-plus-circle">Add TMX</span>
+                                                <span class="text">Add TMX</span>
                                             </a>
                                         </td>
 
@@ -450,10 +450,10 @@
                                             <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/w" /></td>
                                             <td tal:condition="php: key.edit && ( !key.owner || ownerIsMe )" class="action">
                                                 <a class="btn-grey pull-left usetm">
-                                                    <span class="icon-minus-circle text">Stop Use</span>
+                                                    <span class="text">Stop Use</span>
                                                 </a>
                                                 <a class="btn-grey pull-left addtmx">
-                                                    <span class="text icon-plus-circle">Add TMX</span>
+                                                    <span class="text">Add TMX</span>
                                                 </a>
                                             </td>
                                             <td tal:condition="php: !key.edit || ( key.owner && !ownerIsMe )" class="action"> &nbsp;</td>
@@ -467,9 +467,9 @@
                                                                            placeholder="Create new private key" />
                                                 <a class="btn-ok pull-right">Create</a>
                                             </td>
-                                            <td class="description"><input class="mgmt-input" type="textarea"
+                                            <td class="description"><textarea rows="3" cols="50" class="mgmt-input" 
                                                                            id="new-tm-description"
-                                                                           placeholder="Enter a short description" />
+                                                                           placeholder="Enter a short description" ></textarea>
                                             </td>
                                             <td class="fileupload" colspan="2">
                                                 <input id="new-tm-read" type="checkbox" name="r" class="r" value="1" checked="" />
@@ -478,6 +478,10 @@
 
                                             </td>
                                             <td class="action">
+                                                <div class="error"></div>
+                                                <a class="pull-right canceladdtmx">
+                                                    <span class="icon-times-circle"></span>
+                                                </a>
                                                 <a class="pull-left btn-grey uploadtm">
                                                     <span class="text uploadkey">Add a key</span>
                                                 </a>
@@ -485,11 +489,9 @@
                                                     <span class="text">Add TMX</span>
                                                 </a>
                                                 <div id="uploadCallback"></div>
-                                                <div class="error"></div>
+                                                
 
-                                                <a class="pull-right canceladdtmx">
-                                                    <span class="icon-times-circle"></span>
-                                                </a>
+                                                
                                             </td>
                                         </tr>
 
@@ -564,10 +566,10 @@
                                             <td class="update text-center check"><input disabled="disabled" type="checkbox" checked="${key/w}"/></td>
                                             <td class="action">
                                                 <a class="btn-grey pull-left usetm">
-                                                    <span class="text icon-play-circle">Use</span>
+                                                    <span class="text">Use</span>
                                                 </a>
                                                 <a class="btn-grey pull-left  addtmx">
-                                                    <span class="text icon-plus-circle">Add TMX</span>
+                                                    <span class="text">Add TMX</span>
                                                 </a>
                                             </td>
                                         </tr>

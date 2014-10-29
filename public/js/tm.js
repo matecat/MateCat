@@ -77,7 +77,7 @@ $.extend(UI, {
             var nr = '<td class="uploadfile">' +
                      '  <label class="fileupload">Select a TMX </label>' +
                      '  <a class="pull-right canceladdtmx">' +
-                     '      <span class="icon-times-circle"></span>' +
+                     '      <span class="text"></span>' +
                      '  </a>' +
                     '   <a class="existingKey pull-right btn-grey addtmxfile">' +
                     '       <span class="text">Upload TMX</span>' +
@@ -154,7 +154,7 @@ $.extend(UI, {
             row.detach();
             $("#inactivetm").append(row);
             $('#inactivetm tr.noresults').hide();
-            row.find('a.disabletm .text').text('Use').attr('class', 'text icon-play-circle');
+            row.find('a.disabletm .text').text('Use').attr('class', 'text');
             row.find('.lookup input[type="checkbox"]').first().removeAttr('checked').attr('disabled', 'disabled');
             row.find('.update input[type="checkbox"]').first().removeAttr('checked').attr('disabled', 'disabled');
             row.css('display', 'block');
@@ -170,7 +170,7 @@ $.extend(UI, {
             $("#activetm tr.new").before(row);
             if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
             row.addClass('mine');
-            row.find('a.usetm .text').text('Stop Use').attr('class', 'text icon-minus-circle');
+            row.find('a.usetm .text').text('Stop Use').attr('class', 'text');
             row.find('.lookup input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
             row.find('.update input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
             row.css('display', 'block');
@@ -539,7 +539,7 @@ $.extend(UI, {
                 } else {
                     existing = this[2];
                     TRcaller = this[3];
-                    $(TRcaller).html('<span class="progress" style="display: block; height: 5px; background: #fff"><span class="inner" style="float: left; height: 5px; width: 0%; background: #09BEEC"></span></span><span class="msgText">Uploading ' + this[1]+ '...</span>');
+                    $(TRcaller).html('<span class="progress"><span class="inner" style="float: left; height: 5px; width: 0%; background: #09BEEC"></span></span><span class="msgText">Uploading ' + this[1]+ '...</span>');
                     if(d.data.total == null) {
                         pollForUploadProgressContext = this;
                         setTimeout(function() {

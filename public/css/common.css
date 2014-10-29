@@ -770,11 +770,9 @@ form.add-TM-Form {
 }
 #activetm tr.new .error {
     display: none;
-    margin-top: 10px;
     float: left;
-    background: #F00;
     width: 80%;
-    color: #FFF;
+    color: #F00;
     padding: 2px 10px;
 }
 .popup p
@@ -1041,7 +1039,7 @@ margin:0 auto; overflow:hidden; width:100%;
 
 .mgmt-tm .description {
 	/*width:32%!important;*/
-	width:452px!important;
+	width:454px!important;
 }
 
 .mgmt-tm .langpair {
@@ -1056,8 +1054,23 @@ margin:0 auto; overflow:hidden; width:100%;
 
 .mgmt-tm .action {
 		/*width:22%!important;*/
-		width: 220px!important;
+		width: 233px!important;
 }
+
+.new .privatekey {
+	width: 183px!important;
+}
+
+.new .description {
+	width:465px!important;
+}
+
+.new .action {
+			width: 229px!important;
+padding-left: 20px;
+}
+
+.mgmt-tm .progress {display: block; height: 10px; background: #fff}
 
 /*.btn-grey.uploadtm, .btn-grey.addtmxfile {
 width: 100px!important;
@@ -1082,7 +1095,7 @@ width: 22%;
 }*/
 
 .new td.fileupload {
-width: 100px;
+width: 86px;
 }
  .back-mgmt {padding:20px; margin-right:20px;}
 
@@ -1236,8 +1249,11 @@ margin-bottom: 10px;
 #activetm tr.uploadfile td {background: #fff;}
 #inactivetm td {background: #f3f3f3;}
 .mgmt-tm td, .mgmt-tm th, .mgmt-gl td, .mgmt-gl th {
-    padding: 5px 8px;
+    padding: 8px 5px;
     background: #fff;
+}
+.mgmt-tm td,  .mgmt-gl td {
+    border-top: 1px solid #ddd;
 }
 
 .addtmxrow td, .new td {
@@ -1715,8 +1731,9 @@ color: #000;
 .sorting_asc:after,
 .add-tm:before,
 .addtmx .text:before,
-.stopuse:before,
+.disabletm .text:before,
 .addtmxfile .text:before,
+.usetm .text:before,
 .uploadkey:before,
 .sorting:after {
 	font-family: 'icomoon';
@@ -1730,6 +1747,13 @@ color: #000;
 	/* Better Font Rendering =========== */
 	-webkit-font-smoothing: antialiased;
 	-moz-osx-font-smoothing: grayscale;
+}
+
+.usetm .text:before {
+	content: "\f144";
+		padding: 0 10px 0 0;
+	vertical-align: text-top;
+
 }
 
 .add-tm:before {
@@ -1747,7 +1771,7 @@ color: #000;
 margin-left: 10px;
 }
 
-.stopuse:before {
+.disabletm .text:before {
 	content: "\f056";
 	padding-right: 5px;
 	vertical-align: text-top;
