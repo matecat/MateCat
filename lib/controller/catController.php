@@ -399,11 +399,10 @@ class catController extends viewController {
                     if ( !$jobKey->equals( $key ) ) {
                         $this->_keyList[ 'job_keys' ][ ] = $jobKey->hideKey( $uid );
                     } else {
-                        $this->_keyList[ 'job_keys' ][ ] = $key;
+                        $this->_keyList[ 'job_keys' ][ ] = $jobKey;
+                        //remove already present key
                         unset( $this->_keyList[ 'totals' ][$_pos] );
                     }
-
-                    Log::doLog($this->userRole);
 
                     //Take the right permissions from user key
                     if ( !$jobKey->owner ) {
