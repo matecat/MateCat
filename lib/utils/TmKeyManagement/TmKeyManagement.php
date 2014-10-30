@@ -331,8 +331,15 @@ class TmKeyManagement_TmKeyManagement {
                         $server_reorder_position[ 1000000 + $i ] = $_job_Key;
 
                     } else {
-                        //place on top of the owner keys, preserve the order of owner keys by adding it's normal index position
-                        $server_reorder_position[ -1000000 + $i ] = $_job_Key;
+
+                        if( $userRole != TmKeyManagement_Filter::OWNER ) {
+                            //place on top of the owner keys, preserve the order of owner keys by adding it's normal index position
+                            $server_reorder_position[ -1000000 + $i ] = $_job_Key;
+                        } else {
+                            // Remove the key!!!
+                            //only the owner can remove it's keys
+                        }
+
                     }
 
                 }
