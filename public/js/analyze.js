@@ -536,129 +536,134 @@ UI = {
 					$('#totalFastWC').text(s.TOTAL_FAST_WC_PRINT);
 					$('#totalTMWC').text(s.TOTAL_PAYABLE_PRINT);
 
+                    try {
+                        
+                        $.each( d.data.jobs, function ( job_id, group ) {
 
-					$.each(d.data.jobs, function(job_id, group) {
+                            var files_group = group.chunks;
+                            var total_group = group.totals;
 
-						var files_group = group.chunks;
-						var total_group = group.totals;
+                            global_context = $( '#job-' + job_id );
 
-						global_context = $('#job-' + job_id);
+                            $.each( total_group, function ( jPassword, tot ) {
 
-						$.each(total_group, function(jPassword, tot) {
+                                context = $( global_context ).find( ".tablestats[data-pwd='" + jPassword + "']" ).find( '.totaltable' );
 
-							context = $(global_context).find(".tablestats[data-pwd='" + jPassword + "']").find('.totaltable');
+                                var s_total = $( '.stat-payable', context );
+                                s_total_txt = s_total.text();
+                                s_total.text( tot.TOTAL_PAYABLE[1] );
+                                if ( s_total_txt != s.TOTAL_TM_WC_PRINT )
+                                    s_total.effect( "highlight", {}, 1000 );
 
-							var s_total = $('.stat-payable', context);
-							s_total_txt = s_total.text();
-							s_total.text(tot.TOTAL_PAYABLE[1]);
-							if (s_total_txt != s.TOTAL_TM_WC_PRINT)
-								s_total.effect("highlight", {}, 1000);
+                                var s_new = $( '.stat_new', context );
+                                var s_new_txt = s_new.text();
+                                s_new.text( tot.NEW[1] );
+                                if ( s_new_txt != tot.NEW[1] )
+                                    s_new.effect( "highlight", {}, 1000 );
 
-							var s_new = $('.stat_new', context);
-							var s_new_txt = s_new.text();
-							s_new.text(tot.NEW[1]);
-							if (s_new_txt != tot.NEW[1])
-								s_new.effect("highlight", {}, 1000);
+                                var s_rep = $( '.stat_rep', context );
+                                s_rep_txt = s_rep.text();
+                                s_rep.text( tot.REPETITIONS[1] );
+                                if ( s_rep_txt != tot.REPETITIONS[1] )
+                                    s_rep.effect( "highlight", {}, 1000 );
 
-							var s_rep = $('.stat_rep', context);
-							s_rep_txt = s_rep.text();
-							s_rep.text(tot.REPETITIONS[1]);
-							if (s_rep_txt != tot.REPETITIONS[1])
-								s_rep.effect("highlight", {}, 1000);
+                                var s_int = $( '.stat_int', context );
+                                s_int_txt = s_int.text();
+                                s_int.text( tot.INTERNAL_MATCHES[1] );
+                                if ( s_int_txt != tot.INTERNAL_MATCHES[1] )
+                                    s_int.effect( "highlight", {}, 1000 );
 
-							var s_int = $('.stat_int', context);
-							s_int_txt = s_int.text();
-							s_int.text(tot.INTERNAL_MATCHES[1]);
-							if (s_int_txt != tot.INTERNAL_MATCHES[1])
-								s_int.effect("highlight", {}, 1000);
+                                var s_tm75 = $( '.stat_tm75', context );
+                                s_tm75_txt = s_tm75.text();
+                                s_tm75.text( tot.TM_75_99[1] );
+                                if ( s_tm75_txt != tot.TM_75_99[1] )
+                                    s_tm75.effect( "highlight", {}, 1000 );
 
-							var s_tm75 = $('.stat_tm75', context);
-							s_tm75_txt = s_tm75.text();
-							s_tm75.text(tot.TM_75_99[1]);
-							if (s_tm75_txt != tot.TM_75_99[1])
-								s_tm75.effect("highlight", {}, 1000);
+                                var s_tm100 = $( '.stat_tm100', context );
+                                s_tm100_txt = s_tm100.text();
+                                s_tm100.text( tot.TM_100[1] );
+                                if ( s_tm100_txt != tot.TM_100[1] )
+                                    s_tm100.effect( "highlight", {}, 1000 );
 
-							var s_tm100 = $('.stat_tm100', context);
-							s_tm100_txt = s_tm100.text();
-							s_tm100.text(tot.TM_100[1]);
-							if (s_tm100_txt != tot.TM_100[1])
-								s_tm100.effect("highlight", {}, 1000);
+                                var s_tmic = $( '.stat_tmic', context );
+                                s_tmic_txt = s_tmic.text();
+                                s_tmic.text( tot.ICE[1] );
+                                if ( s_tmic_txt != tot.ICE[1] )
+                                    s_tmic.effect( "highlight", {}, 1000 );
 
-							var s_tmic = $('.stat_tmic', context);
-							s_tmic_txt = s_tmic.text();
-							s_tmic.text(tot.ICE[1]);
-							if (s_tmic_txt != tot.ICE[1])
-								s_tmic.effect("highlight", {}, 1000);
-
-							var s_mt = $('.stat_mt', context);
-							s_mt_txt = s_mt.text();
-							s_mt.text(tot.MT[1]);
-							if (s_mt_txt != tot.MT[1])
-								s_mt.effect("highlight", {}, 1000);
-
-
-						});
-
-						$.each(files_group, function(jobpassword, files_object) {
-
-							$.each(files_object, function(id_file, file_details) {
-
-								context = $(global_context).find('#file_' + job_id + '_' + jobpassword + '_' + id_file);
-
-                                var s_payable = $('.stat_payable strong', context );
-                                var s_payable_txt = s_payable.text();
-                                s_payable.text( file_details.TOTAL_PAYABLE[1] );
-                                if ( s_payable_txt != file_details.TOTAL_PAYABLE[1] )
-                                    s_payable.effect( "highlight", {}, 1000 );
-
-								var s_new = $('.stat_new', context);
-								var s_new_txt = s_new.text();
-								s_new.text(file_details.NEW[1]);
-								if (s_new_txt != file_details.NEW[1])
-									s_new.effect("highlight", {}, 1000);
-
-								var s_rep = $('.stat_rep', context);
-								s_rep_txt = s_rep.text();
-								s_rep.text(file_details.REPETITIONS[1]);
-								if (s_rep_txt != file_details.REPETITIONS[1])
-									s_rep.effect("highlight", {}, 1000);
-
-								var s_int = $('.stat_int', context);
-								s_int_txt = s_int.text();
-								s_int.text(file_details.INTERNAL_MATCHES[1]);
-								if (s_int_txt != file_details.INTERNAL_MATCHES[1])
-									s_int.effect("highlight", {}, 1000);
-
-								var s_tm75 = $('.stat_tm75', context);
-								s_tm75_txt = s_tm75.text();
-								s_tm75.text(file_details.TM_75_99[1]);
-								if (s_tm75_txt != file_details.TM_75_99[1])
-									s_tm75.effect("highlight", {}, 1000);
-
-								var s_tm100 = $('.stat_tm100', context);
-								s_tm100_txt = s_tm100.text();
-								s_tm100.text(file_details.TM_100[1]);
-								if (s_tm100_txt != file_details.TM_100[1])
-									s_tm100.effect("highlight", {}, 1000);
-
-								var s_tmic = $('.stat_tmic', context);
-								s_tmic_txt = s_tmic.text();
-								s_tmic.text(file_details.ICE[1]);
-								if (s_tmic_txt != file_details.ICE[1])
-									s_tmic.effect("highlight", {}, 1000);
-
-								var s_mt = $('.stat_mt', context);
-								s_mt_txt = s_mt.text();
-								s_mt.text(file_details.MT[1]);
-								if (s_mt_txt != file_details.MT[1])
-									s_mt.effect("highlight", {}, 1000);
+                                var s_mt = $( '.stat_mt', context );
+                                s_mt_txt = s_mt.text();
+                                s_mt.text( tot.MT[1] );
+                                if ( s_mt_txt != tot.MT[1] )
+                                    s_mt.effect( "highlight", {}, 1000 );
 
 
-							});
+                            } );
 
-						});
+                            $.each( files_group, function ( jobpassword, files_object ) {
 
-					});
+                                $.each( files_object, function ( id_file, file_details ) {
+
+                                    context = $( global_context ).find( '#file_' + job_id + '_' + jobpassword + '_' + id_file );
+
+                                    var s_payable = $( '.stat_payable strong', context );
+                                    var s_payable_txt = s_payable.text();
+                                    s_payable.text( file_details.TOTAL_PAYABLE[1] );
+                                    if ( s_payable_txt != file_details.TOTAL_PAYABLE[1] )
+                                        s_payable.effect( "highlight", {}, 1000 );
+
+                                    var s_new = $( '.stat_new', context );
+                                    var s_new_txt = s_new.text();
+                                    s_new.text( file_details.NEW[1] );
+                                    if ( s_new_txt != file_details.NEW[1] )
+                                        s_new.effect( "highlight", {}, 1000 );
+
+                                    var s_rep = $( '.stat_rep', context );
+                                    s_rep_txt = s_rep.text();
+                                    s_rep.text( file_details.REPETITIONS[1] );
+                                    if ( s_rep_txt != file_details.REPETITIONS[1] )
+                                        s_rep.effect( "highlight", {}, 1000 );
+
+                                    var s_int = $( '.stat_int', context );
+                                    s_int_txt = s_int.text();
+                                    s_int.text( file_details.INTERNAL_MATCHES[1] );
+                                    if ( s_int_txt != file_details.INTERNAL_MATCHES[1] )
+                                        s_int.effect( "highlight", {}, 1000 );
+
+                                    var s_tm75 = $( '.stat_tm75', context );
+                                    s_tm75_txt = s_tm75.text();
+                                    s_tm75.text( file_details.TM_75_99[1] );
+                                    if ( s_tm75_txt != file_details.TM_75_99[1] )
+                                        s_tm75.effect( "highlight", {}, 1000 );
+
+                                    var s_tm100 = $( '.stat_tm100', context );
+                                    s_tm100_txt = s_tm100.text();
+                                    s_tm100.text( file_details.TM_100[1] );
+                                    if ( s_tm100_txt != file_details.TM_100[1] )
+                                        s_tm100.effect( "highlight", {}, 1000 );
+
+                                    var s_tmic = $( '.stat_tmic', context );
+                                    s_tmic_txt = s_tmic.text();
+                                    s_tmic.text( file_details.ICE[1] );
+                                    if ( s_tmic_txt != file_details.ICE[1] )
+                                        s_tmic.effect( "highlight", {}, 1000 );
+
+                                    var s_mt = $( '.stat_mt', context );
+                                    s_mt_txt = s_mt.text();
+                                    s_mt.text( file_details.MT[1] );
+                                    if ( s_mt_txt != file_details.MT[1] )
+                                        s_mt.effect( "highlight", {}, 1000 );
+
+
+                                } );
+
+                            } );
+
+                        } );
+
+                    } catch ( e ){
+                        //do Nothing and try again in next poll
+                    }
 
 					if (d.data.summary.STATUS != 'DONE') {
 						$('.dosplit').addClass('disabled');
