@@ -219,6 +219,7 @@ $.extend(UI, {
                 }, 500);
             }
 */
+/*
         }).on('click', '.addtm-tr-key .btn-ok', function() {
             if(!UI.checkTMgrants($('.addtm-tr-key'))) {
                 return false;
@@ -226,6 +227,7 @@ $.extend(UI, {
                 $('.addtm-tr-key .error-message').text('').hide();
             }
             UI.checkTMKey($('#addtm-tr-key-key').val(), 'key');
+*/
         }).on('click', '#addtm-select-file', function() {
             $('.addtm-select-file').click();
         }).on('change', '.addtm-select-file', function() {

@@ -391,7 +391,7 @@ class catController extends viewController {
                  * If user has some personal keys check for keys present in job and obfuscate them
                  * if they are not in this list
                  */
-                foreach ( $this->_keyList[ 'totals' ] as $key ) {
+                foreach ( $this->_keyList[ 'totals' ] as $_pos => $key ) {
 
                     /*
                      * Cycle ALL my user Key and if one of there are in job set this key as my key
@@ -399,10 +399,10 @@ class catController extends viewController {
                     if ( !$jobKey->equals( $key ) ) {
                         $this->_keyList[ 'job_keys' ][ ] = $jobKey->hideKey( $uid );
                     } else {
-                        $this->_keyList[ 'job_keys' ][ ] = $key;
+                        $this->_keyList[ 'job_keys' ][ ] = $jobKey;
+                        //remove already present key
+                        unset( $this->_keyList[ 'totals' ][$_pos] );
                     }
-
-                    Log::doLog($this->userRole);
 
                     //Take the right permissions from user key
                     if ( !$jobKey->owner ) {

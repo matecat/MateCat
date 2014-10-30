@@ -334,7 +334,9 @@
 
              <h1>
                 <a href="#" class="btn-ok right">Save</a>
+<!--
                 <a href="#" class="btn-cancel right">Cancel</a>
+                -->
                 Language Resources 
             </h1>
 
@@ -375,7 +377,7 @@
                                     <tbody class="list sortable">
 
 <!-- fake keys -->
-                                    <tr class="owner" data-glos="1" data-editable="1" data-owner="1">
+                                    <!-- tr class="owner" data-glos="1" data-editable="1" data-owner="1">
                                         <td class="privatekey">5e01bafb688229b33bde</td>
                                         <td class="description">fake owner 1</td>
 
@@ -439,7 +441,7 @@
                                             </a>
                                         </td>
 
-                                    </tr>
+                                    </tr -->
 <!-- end fake keys -->
 
                                     <tal:block tal:repeat="key user_keys/job_keys">
@@ -456,10 +458,9 @@
                                                     <span class="text">Add TMX</span>
                                                 </a>
                                             </td>
-                                            <td tal:condition="php: !key.edit || ( key.owner && !ownerIsMe )" class="action"> &nbsp;</td>
+                                            <td tal:condition="php: !key.edit || ( key.owner && !ownerIsMe )" class="action"></td>
                                         </tr>
                                     </tal:block>
-
 
                                         <tr class="new hide">
 
@@ -478,11 +479,14 @@
 
                                             </td>
                                             <td class="action">
-                                                <div class="error"></div>
+                                                <div class="error">
+                                                    <span class="tm-error-key"></span>
+                                                    <span class="tm-error-grants"></span>
+                                                </div>
                                                 <a class="pull-right canceladdtmx">
                                                     <span class="icon-times-circle"></span>
                                                 </a>
-                                                <a class="pull-left btn-grey uploadtm">
+                                                <a class="pull-left btn-grey uploadtm disabled">
                                                     <span class="text uploadkey">Add a key</span>
                                                 </a>
                                                 <a class="pull-left btn-grey addtmxfile">
@@ -525,7 +529,7 @@
                                     </tal:block>
 
                                     <!-- fake keys anonymous -->
-                                    <tr class="anonymous" data-glos="1" data-editable="1" data-owner="1">
+                                    <!-- tr class="anonymous" data-glos="1" data-editable="1" data-owner="1">
                                         <td class="privatekey">5e01bafb688229b33bde</td>
                                         <td class="description">fake anonymous 1</td>
                                     
@@ -535,7 +539,7 @@
                                         <td class="action">
                                         </td>
                                     
-                                    </tr>
+                                    </tr -->
                                     <!-- end fake keys anonymous -->
                                     
                                     </tbody>
@@ -558,8 +562,9 @@
                                         <td colspan="7">No keys actually</td>
                                     </tr>
                                     -->
+
                                     <tal:block tal:repeat="key user_keys/totals">
-                                        <tr data-tm="1" data-glos="1">
+                                        <tr class="inactive" data-tm="1" data-glos="1">
                                             <td class="privatekey">${key/key}</td>
                                             <td class="description">${key/name}</td>
                                             <td class="lookup text-center check"><input disabled="disabled" type="checkbox" checked="${key/r}"/></td>
@@ -574,13 +579,9 @@
                                             </td>
                                         </tr>
                                     </tal:block>
+
                                     </tbody>
                                 </table>
-
-
-                                <div class="block pull-right ">
-                                    <a class="btn-ok clear savebtn">Save</a>
-                                </div>
 
                             </div>
                         </div>
