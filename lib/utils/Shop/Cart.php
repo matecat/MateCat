@@ -148,7 +148,6 @@ class Shop_Cart {
      * @param $item_id
      */
     public function delItem( $item_id ) {
-        $item_id = intval( $item_id );
 
         foreach ( $this->cart as $key => $item ) {
             if ( $item[ 'id' ] == $item_id ) {
