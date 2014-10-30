@@ -7851,7 +7851,7 @@ $.extend(UI, {
 
 
 
-        $(".popup-tm .x-popup").click(function(e) {
+        $(".popup-tm .x-popup, .popup-tm h1 .continue").click(function(e) {
             e.preventDefault();
             $( ".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
             $("#SnapABug_Button").show();
@@ -8240,6 +8240,11 @@ $.extend(UI, {
 */
     execAddTM: function(el) {
         existing = ($(el).hasClass('existingKey'))? true : false;
+        if(existing) {
+            $(el).parents('.uploadfile').addClass('uploading');
+        } else {
+            $('#activetm tr.uploadpanel .uploadfile').addClass('uploading');
+        }
         var trClass = (existing)? 'mine' : 'uploadpanel';
         form = $('#activetm tr.' + trClass + ' .add-TM-Form')[0];
         path = $(el).parents('.uploadfile').find('input[type="file"]').val();
@@ -8397,9 +8402,11 @@ $.extend(UI, {
                 TRcaller.removeClass('startUploading');
                 UI.pollForUploadProgress(TMKey, TMName, existing, TRcaller);
             } else {
+/*
                 APP.showMessage({
                     msg: 'Error: ' + msg.errors[0].message
                 });
+*/
             }
         } else {
             setTimeout(function() {
@@ -8419,17 +8426,21 @@ $.extend(UI, {
             },
             context: [TMKey, TMName, existing, TRcaller],
             error: function() {
+                existing = this[2];
+                if(!existing) $('#activetm tr.uploadpanel .uploadfile').removeClass('uploading');
             },
             success: function(d) {
                 console.log('progress success data: ', d);
+                existing = this[2];
                 if(d.errors.length) {
- /*
-                    APP.showMessage({
-                        msg: d.errors[0].message,
-                    });
-                    */
+                    if(!existing) $('#activetm tr.uploadpanel .uploadfile').removeClass('uploading');
+
+                    /*
+                                       APP.showMessage({
+                                           msg: d.errors[0].message,
+                                       });
+                                       */
                 } else {
-                    existing = this[2];
                     TRcaller = this[3];
                     $(TRcaller).find('.uploadprogress .msgText').text('Uploading ' + this[1]);
                     $(TRcaller).find('.standard').hide();
@@ -8458,6 +8469,7 @@ $.extend(UI, {
                             } else {
                                 $('.mgmt-tm tr.new .canceladdtmx').click();
                                 $('.mgmt-tm tr.new').removeClass('hide');
+                                $('#activetm tr.uploadpanel .uploadfile').removeClass('uploading');
                             }
 
 
@@ -8477,6 +8489,14 @@ $.extend(UI, {
                 }
             }
         });
+    },
+    allTMUploadsCompleted: function () {
+        if($('#activetm .uploadfile.uploading').length) {
+            APP.alert({msg: 'There is one or more TM uploads in progress. Try again when all uploads are completed!'});
+            return false;
+        } else {
+            return true;
+        }
     },
 
     extractTMdataFromTable: function () {
@@ -8500,7 +8520,7 @@ $.extend(UI, {
                 name: $(this).find('.description').text(),
                 r: (($(this).find('.lookup input').is(':checked'))? 1 : 0),
                 w: (($(this).find('.update input').is(':checked'))? 1 : 0)
-            };
+            }
             dataOb.push(dd);
         })
         return dataOb;

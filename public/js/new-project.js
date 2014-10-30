@@ -58,13 +58,17 @@ $(document).ready(function() {
 	});
 
 	$("input.uploadbtn").click(function(e) {
+        if(!UI.allTMUploadsCompleted()) {
+            return false;
+        }
 		$('body').addClass('creating');
 		var files = '';
 		$('.upload-table tr:not(.failed) td.name').each(function () {
 			files += '@@SEP@@' + $(this).text();
 		});
 
-        var private_tm_key = ( !$('#private-tm-key').prop('disabled') ? $('#private-tm-key').val() : "" );
+//        var private_tm_key = ( !$('#private-tm-key').prop('disabled') ? $('#private-tm-key').val() : "" );
+        tm_data = UI.extractTMdataFromTable();
 
 		APP.doRequest({
 			data: {
@@ -75,7 +79,7 @@ $(document).ready(function() {
 				target_language		: 	$('#target-lang').val(),
 				disable_tms_engine	: 	( $('#disable_tms_engine').prop('checked') ) ? $('#disable_tms_engine').val() : false,
 				mt_engine			: 	$('#mt_engine').val(),
-				private_tm_key		: 	private_tm_key,
+				private_tm_key		: 	tm_data,
 				private_tm_user		: 	( !$('#private-tm-user').prop('disabled') ? $('#private-tm-user').val() : "" ),
 				private_tm_pass		: 	( !$('#private-tm-pass').prop('disabled') ? $('#private-tm-pass').val() : "" ),
 				lang_detect_files  	: 	UI.skipLangDetectArr
