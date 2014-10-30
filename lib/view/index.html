@@ -501,20 +501,29 @@
 
                                     <tr class="uploadpanel hide">
                                         <td class="uploadfile" colspan="6">
-                                            <label class="fileupload">Select a TMX </label>
+                                            <div class="standard">
+                                                <label class="fileupload">Select a TMX </label>
 
-                                            <form class="add-TM-Form" action="/" method="post">
-                                                <input type="hidden" name="action" value="loadTMX" />
-                                                <input type="hidden" name="exec" value="newTM" />
-                                                <input type="hidden" name="tm_key" value="" />
-                                                <input type="hidden" name="name" value="" />
-                                                <input type="submit" id="addtm-add-submit" style="display: none" />
-                                                <input type="file" name="tmx_file" />
-                                            </form>
+                                                <form class="add-TM-Form" action="/" method="post">
+                                                    <input type="hidden" name="action" value="loadTMX" />
+                                                    <input type="hidden" name="exec" value="newTM" />
+                                                    <input type="hidden" name="tm_key" value="" />
+                                                    <input type="hidden" name="name" value="" />
+                                                    <input type="submit" id="addtm-add-submit" style="display: none" />
+                                                    <input type="file" name="tmx_file" />
+                                                </form>
 
-                                            <a class="pull-right btn-grey addtmxfile">
-                                                <span class="text">Upload TMX</span>
-                                            </a>
+                                                <a class="pull-right btn-grey addtmxfile">
+                                                    <span class="text">Upload TMX</span>
+                                                </a>
+                                            </div>
+                                            <div class="uploadprogress">
+                                                <span class="progress">
+                                                    <span class="inner"></span>
+                                                </span>
+                                                <span class="msgText">Uploading</span>
+                                            </div>
+
                                         </td>
                                     </tr>
                                     

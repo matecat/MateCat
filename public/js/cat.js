@@ -7916,6 +7916,7 @@ $.extend(UI, {
         }).on('click', '.addtmx', function() {
             $(this).hide();
             var nr = '<td class="uploadfile">' +
+                     '  <div class="standard">' +
                      '  <label class="fileupload">Select a TMX </label>' +
                      '  <a class="pull-right canceladdtmx">' +
                      '      <span class="icon-times-circle"></span>' +
@@ -7931,6 +7932,13 @@ $.extend(UI, {
                     '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
                     '    <input type="file" name="tmx_file" />' +
                     '</form>' +
+                    '  </div>' +
+                    '  <div class="uploadprogress">' +
+                    '       <span class="progress">' +
+                    '           <span class="inner"></span>' +
+                    '       </span>' +
+                    '       <span class="msgText">Uploading</span>' +
+                    '  </div>' +
                     '</td>';
 /*
             var nr = '<tr class="addtmxrow">' +
@@ -8171,8 +8179,8 @@ $.extend(UI, {
                     $('#activetm tr.new .error .tm-error-key').text('').hide();
                     UI.checkTMAddAvailability();
 
-                    if(this != 'change') {
-                        UI.addTMKeyToList();
+                    if(this == 'key') {
+                        UI.addTMKeyToList(false);
                         UI.clearTMUploadPanel();
                     } else {
 
@@ -8238,7 +8246,7 @@ $.extend(UI, {
         file = path.split('\\')[path.split('\\').length-1];
         this.TMFileUpload(form, 'http://' + window.location.hostname + '/?action=loadTMX','uploadCallback', file);
     },
-    addTMKeyToList: function () {
+    addTMKeyToList: function (uploading) {
         var r = ($('#new-tm-read').is(':checked'))? 1 : 0;
         var w = ($('#new-tm-write').is(':checked'))? 1 : 0;
         var desc = $('#new-tm-description').val();
@@ -8259,7 +8267,11 @@ $.extend(UI, {
                 '    </td>' +
                 '</tr>';
         $('#activetm tr.new').before(newTr);
-        $('.mgmt-tm tr.new .canceladdtmx').click();
+        if(uploading) {
+            $('.mgmt-tm tr.new').addClass('hide');
+        } else {
+            $('.mgmt-tm tr.new .canceladdtmx').click();
+        }
         UI.pulseTMadded($('#activetm tr.mine').last());
         UI.setTMsortable();
     },
@@ -8282,6 +8294,7 @@ $.extend(UI, {
     clearAddTMRow: function() {
         $('#new-tm-key, #new-tm-description').val('');
         $('#activetm .fileupload').val('');
+        $('.mgmt-tm tr.new').removeClass('badkey badgrants');
         $('.mgmt-tm tr.new .message').text('');
         $('.mgmt-tm tr.new .error span').text('').hide();
         $('.mgmt-tm tr.new .addtmxfile').show();
@@ -8354,7 +8367,11 @@ $.extend(UI, {
         TMName = TMPath.split('\\')[TMPath.split('\\').length-1];
 //        console.log('vediamolo: ', TMName.split('\\')[TMName.split('\\').length-1]);
         TRcaller = (existing)? $(form).parents('.uploadfile') : $('#activetm .uploadpanel .uploadfile');
-
+        TRcaller.addClass('startUploading');
+        if(!existing) {
+            UI.addTMKeyToList(true);
+            $('.popup-tm h1 .btn-ok').click();
+        }
         UI.pollForUploadCallback(TMKey, TMName, existing, TRcaller);
 
         return false;
@@ -8377,6 +8394,7 @@ $.extend(UI, {
         if($('#uploadCallback').text() != '') {
             msg = $.parseJSON($('#uploadCallback pre').text());
             if(msg.success === true) {
+                TRcaller.removeClass('startUploading');
                 UI.pollForUploadProgress(TMKey, TMName, existing, TRcaller);
             } else {
                 APP.showMessage({
@@ -8405,13 +8423,19 @@ $.extend(UI, {
             success: function(d) {
                 console.log('progress success data: ', d);
                 if(d.errors.length) {
+ /*
                     APP.showMessage({
                         msg: d.errors[0].message,
                     });
+                    */
                 } else {
                     existing = this[2];
                     TRcaller = this[3];
-                    $(TRcaller).html('<span class="progress"><span class="inner" style="float: left; height: 5px; width: 0%; background: #09BEEC"></span></span><span class="msgText">Uploading ' + this[1]+ '...</span>');
+                    $(TRcaller).find('.uploadprogress .msgText').text('Uploading ' + this[1]);
+                    $(TRcaller).find('.standard').hide();
+                    $(TRcaller).find('.uploadprogress').show();
+
+//                    $(TRcaller).html('<span class="progress"><span class="inner" style="float: left; height: 5px; width: 0%; background: #09BEEC"></span></span><span class="msgText">Uploading ' + this[1]+ '...</span>');
                     if(d.data.total == null) {
                         pollForUploadProgressContext = this;
                         setTimeout(function() {
@@ -8424,7 +8448,18 @@ $.extend(UI, {
                                 $(tr).find('.addtmx').show();
                                 UI.pulseTMadded(tr);
                             }
-                            $(TRcaller).remove();
+//                            $(TRcaller).empty();
+
+                            $(TRcaller).find('.uploadprogress').hide();
+                            $(TRcaller).find('.uploadprogress .msgText').text('Uploading');
+                            $(TRcaller).find('.standard').show();
+                            if(existing) {
+                                $(TRcaller).remove();
+                            } else {
+                                $('.mgmt-tm tr.new .canceladdtmx').click();
+                                $('.mgmt-tm tr.new').removeClass('hide');
+                            }
+
 
 //                            APP.showMessage({
 //                                msg: 'Your TM has been correctly uploaded. The private TM key is ' + TMKey + '. Store it somewhere safe to use it again.'
@@ -8458,6 +8493,9 @@ $.extend(UI, {
         dataOb = [];
         $(tt).each(function () {
             dd = {
+                tm: $(this).attr('data-tm'),
+                glos: $(this).attr('data-glos'),
+                owner: $(this).attr('data-owner'),
                 key: $(this).find('.privatekey').text(),
                 name: $(this).find('.description').text(),
                 r: (($(this).find('.lookup input').is(':checked'))? 1 : 0),
