@@ -205,6 +205,10 @@ font-size: 40px!important;
 padding-top:10px;
 }
 
+.tprice span.currency_per_word {
+	font-size: 15px!important;
+    font-weight: normal!important;
+}
 
 .tprice {
 /*margin:20px 0;*/
@@ -296,8 +300,9 @@ filter: grayscale(0%);
 }
 
 
-.displaypriceperword {
+.tprice span.displaypriceperword {
    font-weight: normal!important;
+   font-size: 15px!important;
    margin-top: -15px;
 }
 

@@ -31,9 +31,11 @@ class Shop_ItemHTSQuoteJob extends Shop_AbstractItem {
             'source'         => null,
             'target'         => null,
             'price'          => 0,
+            'price_currency' => 0,
             'words'          => 0,
             'show_info'      => null,
-            'delivery_date'  => null
+            'delivery_date'  => null,
+            'currency'       =>  'EUR' 
     );
 
     /**
