@@ -79,7 +79,7 @@ $(document).ready(function() {
 				target_language		: 	$('#target-lang').val(),
 				disable_tms_engine	: 	( $('#disable_tms_engine').prop('checked') ) ? $('#disable_tms_engine').val() : false,
 				mt_engine			: 	$('#mt_engine').val(),
-				private_tm_key		: 	tm_data,
+                private_keys_list		: 	tm_data,
 				private_tm_user		: 	( !$('#private-tm-user').prop('disabled') ? $('#private-tm-user').val() : "" ),
 				private_tm_pass		: 	( !$('#private-tm-pass').prop('disabled') ? $('#private-tm-pass').val() : "" ),
 				lang_detect_files  	: 	UI.skipLangDetectArr
