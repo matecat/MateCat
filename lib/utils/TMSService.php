@@ -38,7 +38,7 @@ include_once INIT::$MODEL_ROOT . "/queries.php";
  * </table>
  *
  */
-class TMLoader {
+class TMSService {
 
     /**
      * @var string The name of the uploaded TMX
@@ -56,17 +56,12 @@ class TMLoader {
     private $file;
 
     /**
-     * @var stdClass
-     */
-    private $_file;
-
-    /**
-     * @var SimpleTMX
+     * @var TmKeyManagement_SimpleTMX
      */
     private $tmxServiceWrapper;
 
     /**
-     * @var LocalAPIKeyService
+     * @var TmKeyManagement_LocalAPIKeyService
      */
     private $apiKeyService;
 
@@ -77,10 +72,10 @@ class TMLoader {
     public function __construct() {
 
         //get MyMemory service
-        $this->tmxServiceWrapper = TMSServiceFactory::getTMXService( 1 );
+        $this->tmxServiceWrapper = new TmKeyManagement_SimpleTMX( 1 );
 
         //get MyMemory apiKey service
-        $this->apiKeyService = TMSServiceFactory::getAPIKeyService();
+        $this->apiKeyService = new TmKeyManagement_LocalAPIKeyService();
 
     }
 
@@ -108,6 +103,25 @@ class TMLoader {
     }
 
     /**
+     * Create a new MyMemory Key
+     *
+     * @return stdClass
+     * @throws Exception
+     */
+    public function createMyMemoryKey(){
+
+        try {
+            $newUser =  $this->apiKeyService->createMyMemoryKey();
+        } catch ( Exception $e ){
+            //            Log::doLog( $e->getMessage() );
+            throw new Exception( $e->getMessage(), -7);
+        }
+
+        return $newUser;
+
+    }
+
+    /**
      * Saves the uploaded file and returns the file info.
      *
      * @return stdClass
@@ -117,10 +131,10 @@ class TMLoader {
         try {
 
             $uploadManager = new Upload();
-            $uploadedFiles = $uploadManager->uploadFiles( $_FILES ); Log::doLog( $_FILES );
+            $uploadedFiles = $uploadManager->uploadFiles( $_FILES );
 
         } catch ( Exception $e ) {
-            Log::doLog( $e->getMessage() );
+//            Log::doLog( $e->getMessage() );
             throw new Exception( $e->getMessage(), -8);
         }
 
@@ -136,7 +150,7 @@ class TMLoader {
 
         $this->checkCorrectKey();
 
-        Log::doLog($this->file);
+//        Log::doLog($this->file);
 
         //if there are files, add them into MyMemory
         if ( count( $this->file ) > 0 ) {
@@ -176,7 +190,7 @@ class TMLoader {
 
         $allMemories              = $this->tmxServiceWrapper ->getStatus( $this->tm_key, $this->name );
 
-        Log::doLog( $allMemories );
+//        Log::doLog( $allMemories );
 
         if ( "200" != $allMemories[ 'responseStatus' ] || 0 == count( $allMemories[ 'responseData' ][ 'tm' ] ) ) {
             //what the hell? No memories although I've just loaded some? Eject!
@@ -240,7 +254,12 @@ class TMLoader {
     }
 
     /**
-     * @param stdClass $file
+     * @param stdClass[] $file
+     *
+     * <code>
+     *   //required
+     *   $file->file_path
+     * </code>
      *
      * @return $this
      */

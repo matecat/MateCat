@@ -2,23 +2,11 @@
 include_once INIT::$UTILS_ROOT."/CatUtils.php";
 
 
-class LocalAPIKeyService {
+class TmKeyManagement_LocalAPIKeyService {
 
 	public function __construct(){
 
 	}
-
-    /**
-     * @param $id_translator
-     *
-     * @return null
-     *
-     * @deprecated
-     */
-    public function calculateMyMemoryKey($id_translator) {
-        $key = getTranslatorKey($id_translator);
-        return $key;
-    }
 
     public function createMyMemoryKey(){
 

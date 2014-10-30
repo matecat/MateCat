@@ -200,7 +200,7 @@ class glossaryController extends ajaxController {
 
         if ( empty( $tm_keys ) ) {
 
-            $APIKeySrv = TMSServiceFactory::getAPIKeyService();
+            $APIKeySrv = new TMSService();
             $newUser   = $APIKeySrv->createMyMemoryKey(); //throws exception
 
             //TODO Replace with User Key Management

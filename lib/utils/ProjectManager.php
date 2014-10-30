@@ -114,25 +114,34 @@ class ProjectManager {
 
         $this->projectStructure[ 'id_project' ] = insertProject( $this->projectStructure );
 
+
         //create user (Massidda 2013-01-24)
         //check if all the keys are valid MyMemory keys
         if ( !empty( $this->projectStructure[ 'private_tm_key' ] ) ) {
 
+            $APIKeySrv = new TMSService();
             foreach ( $this->projectStructure[ 'private_tm_key' ] as $i => $_tmKey ) {
-                $APIKeySrv = TMSServiceFactory::getAPIKeyService();
+
+                $APIKeySrv->setTmKey(  $_tmKey[ 'key' ] );
 
                 try {
-                    if ( !$APIKeySrv->checkCorrectKey( $_tmKey[ 'key' ] ) ) {
-                        throw new Exception( "Error: The private TM key provided is not valid.", -3 );
-                    }
+
+                    $APIKeySrv->checkCorrectKey();
+
                 } catch ( Exception $e ) {
+
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => $e->getCode(), "message" => $e->getMessage()
                     );
 
                     return false;
                 }
+
+                //set the first key as primary
+                $APIKeySrv->setTmKey( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] );
+
             }
+
 
             //check if the MyMemory keys provided by the user are already associated to him.
             if ( $this->projectStructure[ 'userIsLogged' ] ) {
@@ -215,22 +224,17 @@ class ProjectManager {
 
             //if TMX,
             if ( 'tmx' == pathinfo( $fileName, PATHINFO_EXTENSION ) ) {
-                //import the TMX, the check is deferred after this loop
-                Log::doLog( "loading \"$fileName\"" );
-                $import_outcome = $this->tmxServiceWrapper->import( "$uploadDir/$fileName", $this->projectStructure[ 'private_tm_key' ] );
-                if ( '400' == $import_outcome[ 'responseStatus' ] ) {
-                    $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                            "code" => -15, "message" => "Cant't load TMX files right now, try later"
-                    );
 
-                    return false;
-                }
-                if ( '403' == $import_outcome[ "responseStatus" ] ) {
-                    $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                            "code"    => -15,
-                            "message" => "Invalid key provided (" . $this->projectStructure[ 'private_tm_key' ] . ")"
-                    );
+                $file = new stdClass();
+                $file->file_path = "$uploadDir/$fileName";
+                $APIKeySrv->setFile( array( $file ) );
 
+                try {
+                    $APIKeySrv->addTmxInMyMemory();
+                } catch ( Exception $e ){
+                    $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
+                            "code" => $e->getCode(), "message" => $e->getMessage()
+                    );
                     return false;
                 }
 
@@ -418,7 +422,7 @@ class ProjectManager {
                     $tmx_max_id = 0;
 
                     //check if TM has been loaded
-                    $allMemories = $this->tmxServiceWrapper->getStatus( $this->projectStructure[ 'private_tm_key' ], $fileName );
+                    $allMemories = $this->tmxServiceWrapper->getStatus( $this->projectStructure[ 'private_tm_key' ][0]['key'], $fileName );
 
                     if ( "200" != $allMemories[ 'responseStatus' ] or 0 == count( $allMemories[ 'responseData' ][ 'tm' ] ) ) {
                         //what the hell? No memories although I've just loaded some? Eject!

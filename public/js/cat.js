@@ -8458,11 +8458,14 @@ $.extend(UI, {
         dataOb = [];
         $(tt).each(function () {
             dd = {
+                tm: $(this).attr('data-tm'),
+                glos: $(this).attr('data-glos'),
+                owner: $(this).attr('data-owner'),
                 key: $(this).find('.privatekey').text(),
                 name: $(this).find('.description').text(),
                 r: (($(this).find('.lookup input').is(':checked'))? 1 : 0),
                 w: (($(this).find('.update input').is(':checked'))? 1 : 0)
-            }
+            };
             dataOb.push(dd);
         })
         return dataOb;

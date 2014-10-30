@@ -32,7 +32,7 @@ class loadTMXController extends ajaxController {
 
     private static $acceptedActions = array( "newTM", "uploadStatus" );
 
-    protected $TMLoader;
+    protected $TMService;
 
     public function __construct() {
 
@@ -81,29 +81,29 @@ class loadTMXController extends ajaxController {
 
         $this->result[ 'errors' ]  = array();
 
-        $this->TMLoader = new TMLoader();
-        $this->TMLoader->setTmKey( $this->tm_key );
+        $this->TMService = new TMSService();
+        $this->TMService->setTmKey( $this->tm_key );
 
         try {
 
             if ( $this->exec == "newTM" ) {
 
-                $this->file = $this->TMLoader->uploadFile();
+                $this->file = $this->TMService->uploadFile();
 
                 foreach( $this->file as $fileInfo ){
                     if ( pathinfo( strtolower( $fileInfo->name ), PATHINFO_EXTENSION ) !== 'tmx' ) {
                         throw new Exception( "Please upload a TMX.", -8 );
                     }
 
-                    $this->TMLoader->setName( $fileInfo->name );
-                    $this->TMLoader->addTmxInMyMemory();
+                    $this->TMService->setName( $fileInfo->name );
+                    $this->TMService->addTmxInMyMemory();
                 }
 
 
             } else {
 
-                $this->TMLoader->setName( $this->name );
-                $status                      = $this->TMLoader->tmxUploadStatus();
+                $this->TMService->setName( $this->name );
+                $status                      = $this->TMService->tmxUploadStatus();
                 $this->result[ 'data' ]      = $status[ 'data' ];
                 $this->result[ 'completed' ] = $status[ 'completed' ];
 
