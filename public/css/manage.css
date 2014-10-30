@@ -811,6 +811,68 @@ border-radius: 4px;}
 
 .api p {margin:0;}
 
+
+.missing-outsource-data {
+	background: url(../img/loading-black.gif) 40px 10px no-repeat;
+	background-size: 20px;
+background-position: center;
+}
+
+.outsource-btn {
+	border:1px solid #666; 
+	border-radius:4px; 
+	color:white; 
+	outline: 0;
+	opacity:0.9; 
+	padding:0px!important;
+	border:1px solid #ccc;
+	cursor: pointer;
+}
+
+.outsource-btn:hover {
+	-moz-box-shadow: 0 0px 2px #666;
+-webkit-box-shadow: 0 0px 2px #666;
+box-shadow: 0 0px 2px #666;
+}
+
+.outsource-btn:active .outsource-price {
+-moz-box-shadow: inset 0 0 5px 2px #888;
+-webkit-box-shadow: inset 0 0 5px 2px #888;
+box-shadow: inset 0 0 5px 2px #888;
+}
+
+.outsource-btn:active .outsource-delivery {
+-moz-box-shadow: inset 0 -1px 2px 1px #888;
+-webkit-box-shadow: inset 0 -1px 2px 1px #888;
+box-shadow: inset 0 -1px 2px 1px #888;
+}
+
+.outsource-price {
+text-align: center;
+display: block;
+font-size: 18px;
+background: #7eaf3e;
+font-weight: bold;
+padding: 10px;
+}
+
+.outsource-delivery {
+	background: #f4f4f4;
+display: block;
+padding: 5px;
+margin-top: -5px;
+line-height: 18px;
+font-size:12px;
+	border-radius:4px; 
+	color:#333;
+
+		border-top:1px solid #ccc;
+
+}
+.outsource-delivery strong {
+font-size: 14px;
+}
+
 /* retina display query */
 @media only screen and (-webkit-min-device-pixel-ratio: 2),
 only screen and (min--moz-device-pixel-ratio: 2),
