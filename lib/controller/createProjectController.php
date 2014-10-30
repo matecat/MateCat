@@ -44,30 +44,32 @@ class createProjectController extends ajaxController {
                         'options' => "Utils::filterLangDetectArray"
                 ),
                 'private_keys_list'  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+                'private_tm_key'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
 
-        //TODO: when client will be changed, remove this statement.
-        //TODO: It's not necessary to be elastic with respect to the client
         //if a string is sent by the client, transform it into a valid array
-
-        if( !is_array($_POST['private_tm_key']) && !empty($_POST['private_tm_key'])) {
-            $_POST[ 'private_tm_key' ] = array(
+        if( !empty($__postInput['private_tm_key'])) {
+            $__postInput[ 'private_tm_key' ] = array(
                     array(
-                        'key'  => $_POST[ 'private_tm_key' ],
+                        'key'  => $__postInput[ 'private_tm_key' ],
                         'name' => null,
                         'r'    => true,
                         'w'    => true
                     )
             );
+        } else {
+            $__postInput[ 'private_tm_key' ] = array();
         }
 
-        $array_keys = json_decode( $__postInput['private_keys_list'], true );
+        $array_keys = json_decode( html_entity_decode( $__postInput['private_keys_list'] ), true );
+        $array_keys = array_merge( $array_keys['owner'], $array_keys['mine'],$array_keys['anonymous'] );
+
         if ( $array_keys ) {
-            $private_keyList = array_merge( $_POST[ 'private_tm_key' ], json_decode( $__postInput[ 'private_keys_list' ], true ) );
+            $private_keyList = array_merge( $__postInput[ 'private_tm_key' ], $array_keys );
         } else {
-            $private_keyList = $_POST[ 'private_tm_key' ];
+            $private_keyList = $__postInput[ 'private_tm_key' ];
         }
 
         $__postPrivateTmKey = array_filter($private_keyList, array( "self", "sanitizeTmKeyArr" ));
