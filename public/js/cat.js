@@ -8344,9 +8344,8 @@ $.extend(UI, {
 
         if (iframeId.addEventListener) iframeId.addEventListener("load", eventHandler, true);
         if (iframeId.attachEvent) iframeId.attachEvent("onload", eventHandler);
-        console.log('form classname: ', $(form).attr('class'));
         existing = ($(form).hasClass('existing'))? true : false;
-        TMKey = (existing)? $(form).parents('.mine').find('.privatekey').text() : $('#new-tm-key').val();
+        TMKey = (existing)? $(form).parents('.mine').find('.privatekey').first().text() : $('#new-tm-key').val();
 
         // Set properties of form...
         form.setAttribute("target", "upload_iframe");
