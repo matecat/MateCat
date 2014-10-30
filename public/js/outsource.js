@@ -95,12 +95,21 @@ $.extend(UI, {
                          * Removed Timezone with Intl because of too much different behaviours on different operating systems
                          *
                          */
-                        $('.outsource.modal .total span.displayprice').text( parseFloat( chunk.price ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
-						
-						var price = parseFloat( chunk.price ).toFixed(3).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-                        if (chunk.currency=="EUR") {currency="€"} else {currency=chunk.currency};
-                        var words = $( ".title-words" ).text();
-						$( "#price_p_word" ).text( parseFloat( price / words ).toFixed(3).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
+
+                        var _price = chunk.price_currency;
+                        $('.outsource.modal .total span.displayprice').text(parseFloat(_price).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'));
+
+                        var price = parseFloat(_price).toFixed(3).replace(/\d(?=(\d{3})+\.)/g, '$&,');
+                        if (chunk.currency == "EUR") {
+                            var currency = "€"
+                        } else {
+                            var currency = chunk.currency;
+                        }
+
+                        $('.outsource.modal .total span.euro').text(currency);
+
+                        var words = $(".title-words").text();
+                        $("#price_p_word").text(parseFloat( price / words ).toFixed(3).replace(/\d(?=(\d{3})+\.)/g, '$&,'));
 
 						var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';
 
