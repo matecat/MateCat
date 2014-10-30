@@ -1492,6 +1492,23 @@ tr.new.badgrants .fileupload
 {
     border: 3px solid red;
 }
+#inactivetm .dataTables_empty {
+    display: none;
+}
+#activetm .startUploading
+{
+    background: url(../img/loading.gif) 48% 5px no-repeat !important;
+    background-size: 3% !important;
+}
+#activetm .uploadprogress {
+    display: none;
+}
+#activetm .uploadprogress .progress .inner {
+    float: left;
+    height: 5px;
+    width: 0%;
+    background: #09BEEC;
+}
 .description textarea {
 resize: none;
 }
