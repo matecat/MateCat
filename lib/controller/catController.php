@@ -361,13 +361,25 @@ class catController extends viewController {
 
         }
 
+
+        $reverse_lookup_user_personal_keys = array( 'pos' => array(), 'elements' => array() );
         /**
          * Set these keys as editable for the client
          *
          * @var $keyList TmKeyManagement_MemoryKeyStruct[]
          */
-        foreach ( $keyList as $key ) {
-            $this->_keyList[ 'totals' ][ ] = new TmKeyManagement_ClientTmKeyStruct( $key->tm_key );
+        foreach ( $keyList as $_j => $key ) {
+
+            /**
+             * @var $_client_tm_key TmKeyManagement_TmKeyStruct
+             */
+
+            //create a reverse lookup
+            $reverse_lookup_user_personal_keys[ 'pos' ][ $_j ]      = $key->tm_key->key;
+            $reverse_lookup_user_personal_keys[ 'elements' ][ $_j ] = $key;
+
+            $this->_keyList[ 'totals' ][ $_j ] = new TmKeyManagement_ClientTmKeyStruct( $key->tm_key );
+
         }
 
         /*
@@ -385,42 +397,56 @@ class catController extends viewController {
 
             $jobKey = new TmKeyManagement_ClientTmKeyStruct( $jobKey );
 
-            if( $this->isLoggedIn() && !empty( $this->_keyList[ 'totals' ] ) ){
+            if( $this->isLoggedIn() && count( $reverse_lookup_user_personal_keys[ 'pos' ] ) ){
 
                 /*
-                 * If user has some personal keys check for keys present in job and obfuscate them
-                 * if they are not in this list
+                 * If user has some personal keys, check for the job keys if they are present, and obfuscate
+                 * when they are not
                  */
-                foreach ( $this->_keyList[ 'totals' ] as $_pos => $key ) {
+                $_index_position = array_search( $jobKey->key, $reverse_lookup_user_personal_keys[ 'pos' ] );
+                if( $_index_position !== false ){
 
-                    /*
-                     * Cycle ALL my user Key and if one of there are in job set this key as my key
-                     */
-                    if ( !$jobKey->equals( $key ) ) {
-                        $this->_keyList[ 'job_keys' ][ ] = $jobKey->hideKey( $uid );
-                    } else {
-                        $this->_keyList[ 'job_keys' ][ ] = $jobKey;
-                        //remove already present key
-                        unset( $this->_keyList[ 'totals' ][$_pos] );
-                    }
-
-                    //Take the right permissions from user key
-                    if ( !$jobKey->owner ) {
+                    //i found a key in the job that is present in my database
+                    //i'm owner?? and the key is an owner type key?
+                    if ( !$jobKey->owner && $this->userRole != TmKeyManagement_Filter::OWNER ) {
                         $jobKey->r = $jobKey->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'r' ]};
                         $jobKey->w = $jobKey->{TmKeyManagement_Filter::$GRANTS_MAP[ $this->userRole ][ 'w' ]};
+                        $jobKey = $jobKey->hideKey( $uid );
                     }
+
+                    else if( $jobKey->owner && $this->userRole != TmKeyManagement_Filter::OWNER ){
+                        $jobKey = $jobKey->hideKey( -1 );
+                    }
+
+                    else if( $jobKey->owner && $this->userRole == TmKeyManagement_Filter::OWNER ){
+                        //do Nothing
+                    }
+
+                    unset( $this->_keyList[ 'totals' ][ $_index_position ] );
+
+                } else {
+
+                    /*
+                     * This is not a key of that user, obfuscate
+                     */
+                    $jobKey = $jobKey->hideKey( -1 );
 
                 }
 
+                $this->_keyList[ 'job_keys' ][ ] = $jobKey;
+
             } else {
                 /*
-                 * This user is anonymous, obfuscate all
+                 * This user is anonymous or it has no keys in its keyring, obfuscate all
                  */
                 $this->_keyList[ 'job_keys' ][ ] = $jobKey->hideKey( -1 );
 
             }
 
         }
+
+        //clean unordered keys
+        $this->_keyList[ 'totals' ] = array_values( $this->_keyList[ 'totals' ] );
 
         Log::doLog( $this->_keyList );
 
