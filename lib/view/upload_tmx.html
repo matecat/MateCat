@@ -917,7 +917,6 @@
                         <tr>
                             <th class="privatekey">Private Key</th>
                             <th class="description">Description</th>
-                            <th class="langpair">Lang Pair</th>
                             <th class="check text-center">Lookup</th>
                             <th class="check text-center">Update</th>
                             <th class="action">Action</th>
@@ -925,7 +924,7 @@
                     </thead>
                     <tbody class="list">
 
-                    <tal:block tal:repeat="key user_keys/totals">
+                    <tal:block tal:repeat="key user_keys">
                         <tr class="inactive" data-tm="1" data-glos="1">
                             <td class="privatekey">${key/key}</td>
                             <td class="description">${key/name}</td>
