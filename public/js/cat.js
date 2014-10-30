@@ -8500,7 +8500,7 @@ $.extend(UI, {
                 name: $(this).find('.description').text(),
                 r: (($(this).find('.lookup input').is(':checked'))? 1 : 0),
                 w: (($(this).find('.update input').is(':checked'))? 1 : 0)
-            }
+            };
             dataOb.push(dd);
         })
         return dataOb;

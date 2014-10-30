@@ -177,7 +177,7 @@ class NewController extends ajaxController {
 
             try {
 
-                $APIKeySrv = TMSServiceFactory::getAPIKeyService();
+                $APIKeySrv = new TMSService();
 
                 $newUser = $APIKeySrv->createMyMemoryKey();
 

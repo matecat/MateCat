@@ -23,9 +23,6 @@ class createProjectController extends ajaxController {
 
     private $disable_tms_engine_flag;
 
-    private $isLogged;
-    private $uid;
-
     public function __construct() {
 
         //SESSION ENABLED
@@ -45,7 +42,8 @@ class createProjectController extends ajaxController {
                 'lang_detect_files'  => array(
                         'filter'  => FILTER_CALLBACK,
                         'options' => "Utils::filterLangDetectArray"
-                )
+                ),
+                'private_keys_list'  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -65,7 +63,14 @@ class createProjectController extends ajaxController {
             );
         }
 
-        $__postPrivateTmKey = array_filter($_POST['private_tm_key'], array( "self", "sanitizeTmKeyArr" ));
+        $array_keys = json_decode( $__postInput['private_keys_list'], true );
+        if ( $array_keys ) {
+            $private_keyList = array_merge( $_POST[ 'private_tm_key' ], json_decode( $__postInput[ 'private_keys_list' ], true ) );
+        } else {
+            $private_keyList = $_POST[ 'private_tm_key' ];
+        }
+
+        $__postPrivateTmKey = array_filter($private_keyList, array( "self", "sanitizeTmKeyArr" ));
 
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI
@@ -87,13 +92,13 @@ class createProjectController extends ajaxController {
         }
 
         //json_decode the tm_key array if it has been passed
-        if( !empty($this->private_tm_key )){
-            $this->private_tm_key = json_decode($this->private_tm_key);
-
-            if($this->private_tm_key === null ){
-                $this->result[ 'errors' ][ ] = array( "code" => -5, "message" => "Invalid tm key passed." );
-            }
-        }
+//        if( !empty($this->private_tm_key )){
+//            $this->private_tm_key = json_decode($this->private_tm_key);
+//
+//            if($this->private_tm_key === null ){
+//                $this->result[ 'errors' ][ ] = array( "code" => -5, "message" => "Invalid tm key passed." );
+//            }
+//        }
 
         if ( empty( $this->file_name ) ) {
             $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "Missing file name." );
@@ -110,7 +115,7 @@ class createProjectController extends ajaxController {
 
     public function doAction() {
         //check for errors. If there are, stop execution and return errors.
-        if(count($this->result[ 'errors' ] ) ) return false;
+        if( count( @$this->result[ 'errors' ] ) ) return false;
 
         $arFiles              = explode( '@@SEP@@', html_entity_decode( $this->file_name, ENT_QUOTES, 'UTF-8' ) );
         $default_project_name = $arFiles[ 0 ];
@@ -210,7 +215,7 @@ class createProjectController extends ajaxController {
         //if user is logged in, set the uid and the userIsLogged flag
         $this->checkLogin();
 
-        if($this->isLogged) {
+        if($this->userIsLogged) {
             $projectStructure[ 'userIsLogged' ] = true;
             $projectStructure[ 'uid' ]          = $this->uid;
         }
@@ -220,7 +225,7 @@ class createProjectController extends ajaxController {
 
         $this->result = $projectStructure[ 'result' ];
 
-        if ( !empty( $this->projectStructure[ 'result' ][ 'errors' ] ) ) {
+        if ( !empty( $this->result[ 'errors' ] ) ) {
             setcookie( "upload_session", "", time() - 10000 );
         }
 

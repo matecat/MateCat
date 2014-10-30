@@ -2,7 +2,7 @@
 
 include_once INIT::$UTILS_ROOT . "/engines/engine.class.php";
 
-class SimpleTMX extends Engine{
+class TmKeyManagement_SimpleTMX extends Engine{
 
 
 	public function __construct($id){

@@ -376,76 +376,8 @@
                                     </thead>
                                     <tbody class="list sortable">
 
-<!-- fake keys -->
-                                    <!-- tr class="owner" data-glos="1" data-editable="1" data-owner="1">
-                                        <td class="privatekey">5e01bafb688229b33bde</td>
-                                        <td class="description">fake owner 1</td>
-
-                                        <td class="lookup text-center check"><input type="checkbox" checked="checked" /></td>
-                                        <td class="update text-center check"><input type="checkbox" checked="checked" /></td>
-
-                                        <td class="action">
-                                        </td>
-
-                                    </tr>
-
-                                    <tr class="mine" data-glos="1" data-editable="1" data-owner="1">
-                                        <td class="privatekey">5e01bafb688229b33bde</td>
-                                        <td class="description">fake mine 1</td>
-
-                                        <td class="lookup text-center check"><input type="checkbox" checked="checked" /></td>
-                                        <td class="update text-center check"><input type="checkbox" checked="checked" /></td>
-
-                                        <td class="action">
-                                            <a class="btn-grey pull-left disabletm">
-                                                <span class="text">Stop Use</span>
-                                            </a>
-                                            <a class="btn-grey pull-left addtmx">
-                                                <span class="text">Add TMX</span>
-                                            </a>
-                                        </td>
-
-                                    </tr>
-
-                                    <tr class="mine" data-glos="1" data-editable="1" data-owner="1">
-                                        <td class="privatekey">5e01bafb688229b33bde</td>
-                                        <td class="description">fake mine 2</td>
-
-                                        <td class="lookup text-center check"><input type="checkbox" checked="checked" /></td>
-                                        <td class="update text-center check"><input type="checkbox" checked="checked" /></td>
-
-                                        <td class="action">
-                                            <a class="btn-grey pull-left disabletm">
-                                                <span class="text">Stop Use</span>
-                                            </a>
-                                            <a class="btn-grey pull-left addtmx">
-                                                <span class="text">Add TMX</span>
-                                            </a>
-                                        </td>
-
-                                    </tr>
-
-                                    <tr class="mine" data-glos="1" data-editable="1" data-owner="1">
-                                        <td class="privatekey">5e01bafb688229b33bde</td>
-                                        <td class="description">fake mine 3</td>
-
-                                        <td class="lookup text-center check"><input type="checkbox" checked="checked" /></td>
-                                        <td class="update text-center check"><input type="checkbox" checked="checked" /></td>
-
-                                        <td class="action">
-                                            <a class="btn-grey pull-left disabletm">
-                                                <span class="text">Stop Use</span>
-                                            </a>
-                                            <a class="btn-grey pull-left addtmx">
-                                                <span class="text">Add TMX</span>
-                                            </a>
-                                        </td>
-
-                                    </tr -->
-<!-- end fake keys -->
-
                                     <tal:block tal:repeat="key user_keys/job_keys">
-                                        <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( ownerIsMe ? 'owner mine' : 'owner' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
+                                        <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( ownerIsMe ? 'mine' : 'owner' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
                                             <td class="privatekey">${key/key}</td>
                                             <td class="description">${key/name}</td>
                                             <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/r" /></td>
@@ -537,20 +469,6 @@
                                         </tr>
                                     </tal:block>
 
-                                    <!-- fake keys anonymous -->
-                                    <!-- tr class="anonymous" data-glos="1" data-editable="1" data-owner="1">
-                                        <td class="privatekey">5e01bafb688229b33bde</td>
-                                        <td class="description">fake anonymous 1</td>
-                                    
-                                        <td class="lookup text-center check"><input type="checkbox" checked="checked" /></td>
-                                        <td class="update text-center check"><input type="checkbox" checked="checked" /></td>
-                                    
-                                        <td class="action">
-                                        </td>
-                                    
-                                    </tr -->
-                                    <!-- end fake keys anonymous -->
-                                    
                                     </tbody>
                                 </table>
 
