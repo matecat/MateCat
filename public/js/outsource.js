@@ -98,7 +98,8 @@ $.extend(UI, {
                         $('.outsource.modal .total span.displayprice').text( parseFloat( chunk.price ).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
 						
 						var price = parseFloat( chunk.price ).toFixed(3).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-						var words = $( ".title-words" ).text();
+                        if (chunk.currency=="EUR") {currency="€"} else {currency=chunk.currency};
+                        var words = $( ".title-words" ).text();
 						$( "#price_p_word" ).text( parseFloat( price / words ).toFixed(3).replace(/\d(?=(\d{3})+\.)/g, '$&,') );
 
 						var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';
