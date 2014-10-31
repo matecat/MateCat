@@ -105,48 +105,65 @@ class updateJobKeysController extends ajaxController {
         /*
          * The client send data as structured json, for now take it as a plain structure
          *
-        *   $clientDecodedJson = stdClass Object
-        *   (
-        *       [owner] => Array
-        *           (
-        *               [0] => stdClass Object
-        *                   (
-        *                       [key] => ***************b273b
-        *                       [name] =>
-        *                       [r] => 1
-        *                       [w] => 1
-        *                   )
-        *
-        *               [1] => stdClass Object
-        *                   (
-        *                       [key] => ***************57f69
-        *                       [name] => My personal Key
-        *                       [r] => 1
-        *                       [w] => 0
-        *                   )
-        *
-        *           )
-        *
-        *       [mine] => Array
-        *           (
-        *               [0] => stdClass Object
-        *                   (
-        *                       [key] => 5e01bafb688229b33bde
-        *                       [name] => La chiave
-        *                       [r] => 1
-        *                       [w] => 1
-        *                   )
-        *
-        *           )
-        *
-        *       [anonymous] => Array
-        *           (
-        *           )
-        *
-        *   )
-        *
-        */
+         *   $clientDecodedJson = Array
+         *       (
+         *           [owner] => Array
+         *               (
+         *                   [0] => Array
+         *                       (
+         *                           [tm] => 1
+         *                           [glos] => 1
+         *                           [owner] => 1
+         *                           [key] => ***************da9a9
+         *                           [name] =>
+         *                           [r] => 1
+         *                           [w] => 1
+         *                       )
+         *
+         *               )
+         *
+         *           [mine] => Array
+         *               (
+         *                   [0] => Array
+         *                       (
+         *                           [tm] => 1
+         *                           [glos] => 1
+         *                           [owner] => 0
+         *                           [key] => 952681baffb9c147b346
+         *                           [name] => cgjhkmfgdcjkfh
+         *                           [r] => 1
+         *                           [w] => 1
+         *                       )
+         *
+         *               )
+         *
+         *           [anonymous] => Array
+         *               (
+         *                   [0] => Array
+         *                       (
+         *                           [tm] => 1
+         *                           [glos] => 1
+         *                           [owner] => 0
+         *                           [key] => ***************882eb
+         *                           [name] => Chiave di anonimo
+         *                           [r] => 0
+         *                           [w] => 0
+         *                       )
+         *
+         *               )
+         *
+         *       )
+         *
+         */
         $tm_keys = json_decode( $this->tm_keys, true );
+
+        /*
+         * sanitize owner role key type
+         */
+        foreach( $tm_keys['mine'] as $k => $val ){
+            $tm_keys['mine'][$k]['owner'] = ( $this->userRole == TmKeyManagement_Filter::OWNER );
+        }
+
         $this->tm_keys = json_encode( array_merge( $tm_keys['owner'], $tm_keys['mine'],$tm_keys['anonymous'] ) );
 
         try {
