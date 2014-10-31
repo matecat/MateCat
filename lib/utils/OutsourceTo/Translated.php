@@ -187,18 +187,21 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         }
 
         $shopping_cart = Shop_Cart::getInstance( 'outsource_to_external' );
-        $shopping_cart->emptyCart();
 
         //now get the right contents
         foreach ( $this->jobList as $job ){
+            $shopping_cart->delItem( $job[ 'jid' ] . "-" . $job['jpassword'] );
             $shopping_cart->addItem( $cache_cart->getItem( $job[ 'jid' ] . "-" . $job['jpassword'] ) );
+            $this->_quote_result = array( $shopping_cart->getItem( $job[ 'jid' ] . "-" . $job['jpassword'] ) );
         }
 
-        $this->_quote_result = $shopping_cart->getCart();
+        $this->_outsource_login_url_ok .= '&extra=' . urlencode( $this->_quote_result[0]['id'] );
 
         //check for failures.. destroy the cache
         if( !empty( $failures ) ){
-            $cache_cart->emptyCart();
+            foreach ( $failures as $jpid ){
+                $cache_cart->delItem( $jpid );
+            }
         }
 
     }
