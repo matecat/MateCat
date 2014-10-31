@@ -32,4 +32,12 @@ class OutsourceTo_TranslatedSuccessController extends OutsourceTo_AbstractSucces
      */
     protected $tokenName = 'tk';
 
+    /**
+     * Key that holds extra info
+     *
+     * @see extraInfoName::$extra_info
+     * @var string
+     */
+    protected $extraInfoName = 'extra';
+
 } 

@@ -856,8 +856,8 @@ UI = {
                     }
 
 					var form = 	"<form class='submit-outsource-data' action='http://signin.translated.net/' method='POST' target='_blank'>" +
-                               		"<input type='hidden' name='url_ok' value='" + data.return_url.url_ok + "'>" +
-                            		"<input type='hidden' name='url_ko' value='" + data.return_url.url_ko + "'>" +
+                               		"<input type='hidden' name='url_ok' value='" + encodeURIComponent( data.return_url.url_ok ) + "'>" +
+                            		"<input type='hidden' name='url_ko' value='" + encodeURIComponent( data.return_url.url_ko ) + "'>" +
 									"<input type='hidden' name='quoteData' value='" + JSON.stringify( data.data ) + "'>" +
  	                            	"<button type='submit' class='outsource-btn'><span class='outsource-price'> " + currency + " " + price + "</span><span class='outsource-delivery'><strong>Delivery</strong><br> " + delivery + "</span></button>" +
                                 "</form>";
