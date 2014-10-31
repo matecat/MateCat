@@ -126,7 +126,7 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
         $this->template->redirect_url = $this->review_order_page;
 
         //clear the cart after redirection
-        $shop_cart->emptyCart();
+        //$shop_cart->emptyCart();
 
     }
 
