@@ -542,6 +542,10 @@ UI = {
 					history.replaceState(stateObj, "page "+d.page, d.page+UI.filters2hash());
 				}
 				UI.compileDisplay();
+
+					UI.outsourceElements = $( ".missing-outsource-data" );
+					UI.getAllOutsourceQuotes();
+
 		        $("html,body").animate({
 		            scrollTop: 0
 		        }, 500 );
@@ -619,10 +623,11 @@ UI = {
 			    '                <th class="private-tm-key">Private TM Key</th>';
 
             if(config.v_analysis){
-                newProject += '                <th class="words header">Payable Words</th>';
+                newProject += '                <th class="words header">Words</th>';
             }
 
             newProject += '                <th class="progress header">Progress</th>'+
+				'	<th class="progress header">Outsource</th>' +
 			    '                <th class="actions">Actions</th>'+
 			    '            </tr>'+
 		        '        </thead>'+
@@ -666,6 +671,7 @@ UI = {
 				    '                <a href="#" class="draft-bar" title="Draft '+this.stats.DRAFT_PERC_FORMATTED+'%" style="width:'+this.stats.DRAFT_PERC+'%"></a>'+
 				    '            </div>'+
 		            '        </td>'+
+					'		<td class="missing-outsource-data"></td>'+
 		            '        <td class="actions">'+
 		            '            <a class="change" href="#" title="Change job password">Change</a>'+
 		            '            <a class="cancel" href="#" title="Cancel Job">Cancel</a>'+
@@ -723,7 +729,145 @@ UI = {
 	            } 
 	        }			    	
 	    });
-    }
+    },
+
+	getAllOutsourceQuotes: function() {
+		if ( UI.outsourceElements.length == 0 ) { return; }
+
+		var tableElement = $( UI.outsourceElements[0] );
+		UI.outsourceElements.splice(0, 1);
+
+		var pid_data = tableElement.parents( "table" ).attr( "id" ).split( "-" );
+		var pid = pid_data[ 1 ];
+
+		var url_data = $( "div[data-pid='" + pid + "'] div.project-details > a" ).attr( "href" ).split( "/" );
+		var psw_data = url_data[ url_data.length - 1 ].split( "-" );
+		var psw = psw_data[ 1 ];
+
+		var jid = tableElement.parent( "tr" ).attr( "data-jid" );
+		var jsw = tableElement.parent( "tr" ).attr( "data-password" );
+
+		if ( $( "div[data-pid='" + pid + "'] div.project-details > a" ).text().charAt( 0 ) == '0' )
+		{
+			tableElement.html( "0 words found.<br/>Unable to quote." );
+			tableElement.removeClass( "missing-outsource-data" );
+
+			UI.getAllOutsourceQuotes();
+			return;
+		}
+	
+		$.ajax({
+			async: true,
+	  		type: "POST",
+			url : "/?action=outsourceTo",
+			data:
+			{
+				action: 'outsourceTo',
+				pid: pid,
+				ppassword: psw,
+				jobs:
+				[{
+					jid: jid,
+					jpassword: jsw
+				}]
+			},
+			success : function ( data )
+			{
+				if ( ( data.data[0]["price"] > 0 ) && ( data.data[0]["delivery_date"] != "" ) )
+				{
+					var price = data.data[0]["price_currency"];
+					
+					price=parseFloat(price).toFixed(2);
+					var date = new Date( data.data[0]["delivery_date"] );
+					var delivery = "<b>" + date.getDate() + "/" + ( date.getMonth() + 1 ) + "</b> at <b>" + date.getHours() + ":" + ( ( date.getMinutes() != 0 ) ? date.getMinutes() : "00" ) + "</b>";
+
+					var raw_data = JSON.stringify( data.data );
+
+                    if (data.data[0].currency == "EUR") {
+                        var currency = "€"
+                    } else {
+                        var currency = data.data[0].currency;
+                    }
+
+					var form = 	"<form class='submit-outsource-data' action='http://signin.translated.net/' method='POST' target='_blank'>" +
+                               		"<input type='hidden' name='url_ok' value='" + data.return_url.url_ok + "'>" +
+                            		"<input type='hidden' name='url_ko' value='" + data.return_url.url_ko + "'>" +
+									"<input type='hidden' name='quoteData' value='" + JSON.stringify( data.data ) + "'>" +
+ 	                            	"<button type='submit' class='outsource-btn'><span class='outsource-price'> " + currency + " " + price + "</span><span class='outsource-delivery'><strong>Delivery</strong><br> " + delivery + "</span></button>" +
+                                "</form>";
+
+					tableElement.html( form );
+					tableElement.removeClass( "missing-outsource-data" );
+
+					UI.getAllOutsourceQuotes();
+				}
+			}
+		});
+	},
+
+	getSingleOutsourceQuote: function( tableElement ) {
+		var pid_data = tableElement.parents( "table" ).attr( "id" ).split( "-" );
+		var pid = pid_data[ 1 ];
+
+		var url_data = $( "div[data-pid='" + pid + "'] div.project-details > a" ).attr( "href" ).split( "/" );
+		var psw_data = url_data[ url_data.length - 1 ].split( "-" );
+		var psw = psw_data[ 1 ];
+
+		var jid = tableElement.parent( "tr" ).attr( "data-jid" );
+		var jsw = tableElement.parent( "tr" ).attr( "data-password" );
+
+		if ( $( "div[data-pid='" + pid + "'] div.project-details > a" ).text().charAt( 0 ) == '0' )
+		{
+			tableElement.html( "0 words found.<br/>Unable to quote." );
+			tableElement.removeClass( "missing-outsource-data" );
+			return;
+		}
+	
+		$.ajax({
+			async: true,
+	  		type: "POST",
+			url : "/?action=outsourceTo",
+			data:
+			{
+				action: 'outsourceTo',
+				pid: pid,
+				ppassword: psw,
+				jobs:
+				[{
+					jid: jid,
+					jpassword: jsw
+				}]
+			},
+			success : function ( data )
+			{
+				if ( ( data.data[0]["price"] > 0 ) && ( data.data[0]["delivery_date"] != "" ) )
+				{
+					var price = data.data[0]["price_currency"];
+					price=parseFloat(price).toFixed(2);
+					var date = new Date( data.data[0]["delivery_date"] );
+					var delivery = "<b>" + date.getDate() + "/" + ( date.getMonth() + 1 ) + "</b> at <b>" + date.getHours() + ":" + ( ( date.getMinutes() != 0 ) ? date.getMinutes() : "00" ) + "</b>";
+
+					var raw_data = JSON.stringify( data.data );
+
+                    if (data.data[0].currency == "EUR") {
+                        var currency = "€"
+                    } else {
+                        var currency = data.data[0].currency;
+                    }
+
+					var form = 	"<form class='submit-outsource-data' action='http://signin.translated.net/' method='POST' target='_blank'>" +
+                               		"<input type='hidden' name='url_ok' value='" + encodeURIComponent( data.return_url.url_ok ) + "'>" +
+                            		"<input type='hidden' name='url_ko' value='" + encodeURIComponent( data.return_url.url_ko ) + "'>" +
+									"<input type='hidden' name='quoteData' value='" + JSON.stringify( data.data ) + "'>" +
+ 	                            	"<button type='submit' class='outsource-btn'><span class='outsource-price'> " + currency + " " + price + "</span><span class='outsource-delivery'><strong>Delivery</strong><br> " + delivery + "</span></button>" +
+                                "</form>";
+
+					tableElement.html( form );
+					tableElement.removeClass( "missing-outsource-data" );
+				}
+			}
+		});
+	}
 
 } // UI
 
@@ -743,9 +887,14 @@ function setBrowserHistoryBehavior() {
 	};
 }
 
+
 $(document).ready(function(){
     setBrowserHistoryBehavior();
     UI.render(true);
     UI.init();
-});
 
+	$( "#projects" ).on( "submit", ".submit-outsource-data", function( e ) {
+		UI.getSingleOutsourceQuote( $( this ).parent( "td" ) );
+	});
+
+});
