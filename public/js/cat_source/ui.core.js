@@ -1017,7 +1017,7 @@ UI = {
             success: function(d){
                 if(d.data == 'OK') {
                     setTimeout(function() {
-                        UI.reloadPage();
+                        location.reload(true);
                     }, 300);
                 }
             }

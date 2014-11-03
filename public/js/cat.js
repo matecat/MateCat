@@ -1017,7 +1017,7 @@ UI = {
             success: function(d){
                 if(d.data == 'OK') {
                     setTimeout(function() {
-                        UI.reloadPage();
+                        location.reload(true);
                     }, 300);
                 }
             }
@@ -3912,6 +3912,14 @@ $.extend(UI, {
 		}).on('allTranslated', function() {
 			if(config.survey) UI.displaySurvey(config.survey);
 		}).on('mousedown', function() {
+
+            //when the catoool is not loaded because of the job is archived,
+            // saveSelection leads to a javascript error
+            //so, add a check to see if the cattool page is really created/loaded
+            if( $('body' ).hasClass( '.job_archived' ) || $('body' ).hasClass( '.job_cancelled' ) ){
+                return false;
+            }
+
             if(!$('.editor .rangySelectionBoundary.focusOut').length) saveSelection();
             $('.editor .rangySelectionBoundary').addClass('focusOut');
             hasFocusBefore = UI.editarea.is(":focus");
