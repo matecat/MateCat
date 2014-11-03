@@ -544,7 +544,7 @@ UI = {
 				UI.compileDisplay();
 
 				UI.outsourceElements = $( ".missing-outsource-data" );
-				UI.getAllOutsourceQuotes();
+				UI.getOutsourceQuotes();
 
 		        $("html,body").animate({
 		            scrollTop: 0
@@ -731,17 +731,8 @@ UI = {
 	    });
     },
 
-	getAllOutsourceQuotes: function() {
-
+    getOutsourceQuotes: function() {
         if ( UI.outsourceElements.length == 0 ) {
-
-            $( "#projects" ).off( "submit", ".submit-outsource-data" );
-            $( "#projects" ).on( "submit", ".submit-outsource-data", function( e ) {
-
-                UI.outsourceElements = [ $( this ).parent( "td" ) ];
-                UI.getAllOutsourceQuotes();
-            });
-
             return;
         }
 
@@ -763,7 +754,7 @@ UI = {
 			tableElement.html( "0 words found.<br/>Unable to quote." );
 			tableElement.removeClass( "missing-outsource-data" );
 
-			UI.getAllOutsourceQuotes();
+			UI.getOutsourceQuotes();
 			return;
 		}
 	
@@ -799,14 +790,15 @@ UI = {
 					var form = 	"<form class='submit-outsource-data' action='http://translated_openid/' method='POST' target='_blank'>" +
                                		"<input type='hidden' name='url_ok' value='" + data.return_url.url_ok + "'>" +
                             		"<input type='hidden' name='url_ko' value='" + data.return_url.url_ko + "'>" +
-									"<input type='hidden' name='quoteData' value='" + JSON.stringify( data.data ) + "'>" +
+                                    "<input type='hidden' name='data_key' value='" + jid + "-" + jsw + "'>" +
+									"<input type='hidden' name='quote_data' value='" + JSON.stringify( data.data ) + "'>" +
  	                            	"<button type='submit' class='outsource-btn'><span class='outsource-price'> " + currency + " " + price + "</span><span class='outsource-delivery'><strong>Delivery</strong><br> " + delivery + "</span></button>" +
                                 "</form>";
 
 					tableElement.html( form );
 					tableElement.removeClass( "missing-outsource-data" );
 
-					UI.getAllOutsourceQuotes();
+					UI.getOutsourceQuotes();
 				}
 			}
 		});
@@ -835,9 +827,4 @@ $(document).ready(function(){
     setBrowserHistoryBehavior();
     UI.render(true);
     UI.init();
-
-//    $( "#projects" ).on( "submit", ".submit-outsource-data", function( e ) {
-//        e.preventDefault();
-//    });
-
 });

@@ -72,6 +72,7 @@ $.extend(UI, {
 
                         UI.url_ok = d.return_url.url_ok;
                         UI.url_ko = d.return_url.url_ko;
+                        UI.data_key = row.attr('data-jid') + "-" + row.attr('data-pwd');
 
                         if( chunk.price == 0 && chunk.words == '' ){
                             console.log('Oops we got an error...');
@@ -159,6 +160,7 @@ $.extend(UI, {
 			
 			$('#continueForm input[name=url_ok]').attr('value', UI.url_ok);
 			$('#continueForm input[name=url_ko]').attr('value', UI.url_ko);
+            $('#continueForm input[name=data_key]').attr('value', UI.data_key);
 
             //IMPORTANT post out the quotes
 			$('#continueForm input[name=quoteData]').attr('value', JSON.stringify( UI.quoteResponse ) );
@@ -196,7 +198,7 @@ $.extend(UI, {
         }
 
 		return $.format.date(farthest, "D MMMM") + ' at ' + $.format.date(farthest, "hh:mm a") + ' ' + extendedTimeZone;
-	},
+	}
 //	showOutsourceChoice: function() {
 //		$('.outsourcemodal h1').text('Here is the link to your new translation job');
 //		$('.outsourcemodal section.outs').hide();

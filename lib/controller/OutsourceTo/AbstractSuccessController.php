@@ -46,14 +46,14 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
      *
      * @var mixed|string
      */
-    protected $extraInfoName;
+    protected $dataKeyName;
 
     /**
      * Extra info as the project id
      *
      * @var mixed|string
      */
-    protected $extra_info_content;
+    protected $data_key_content;
 
     /**
      * Class Constructor
@@ -78,7 +78,7 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
 
         $filterArgs = array(
                 $this->tokenName  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-                $this->extraInfoName => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+                $this->dataKeyName => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
 
         $__getInput = filter_input_array( INPUT_GET, $filterArgs );
@@ -92,7 +92,7 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
          */
         $this->tokenAuth = $__getInput[ $this->tokenName ];
 
-        $this->extra_info_content = $__getInput[ $this->extraInfoName ];
+        $this->data_key_content = $__getInput[ $this->dataKeyName ];
 
         Log::doLog( $_GET );
         Log::doLog( $_SERVER['QUERY_STRING'] );
@@ -134,13 +134,14 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
 
         //we need a list not an hashmap
         $item_list = array();
-        foreach( array( $shop_cart->getItem( $this->extra_info_content ) ) as $item ){
+        foreach( array( $shop_cart->getItem( $this->data_key_content ) ) as $item ){
             $item_list[ ] = $item;
         }
 
         $this->template->tokenAuth = $this->tokenAuth;
         $this->template->data = json_encode( $item_list );
         $this->template->redirect_url = $this->review_order_page;
+        $this->template->data_key = $this->data_key_content;
 
         //clear the cart after redirection
         //$shop_cart->emptyCart();
