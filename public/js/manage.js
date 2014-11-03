@@ -775,7 +775,9 @@ UI = {
 			{
 				if ( ( data.data[0]["price"] > 0 ) && ( data.data[0]["delivery_date"] != "" ) )
 				{
-					var price = data.data[0]["price"];
+					var price = data.data[0]["price_currency"];
+					
+					price=parseFloat(price).toFixed(2);
 					var date = new Date( data.data[0]["delivery_date"] );
 					var delivery = "<b>" + date.getDate() + "/" + ( date.getMonth() + 1 ) + "</b> at <b>" + date.getHours() + ":" + ( ( date.getMinutes() != 0 ) ? date.getMinutes() : "00" ) + "</b>";
 
@@ -840,7 +842,8 @@ UI = {
 			{
 				if ( ( data.data[0]["price"] > 0 ) && ( data.data[0]["delivery_date"] != "" ) )
 				{
-					var price = data.data[0]["price"];
+					var price = data.data[0]["price_currency"];
+					price=parseFloat(price).toFixed(2);
 					var date = new Date( data.data[0]["delivery_date"] );
 					var delivery = "<b>" + date.getDate() + "/" + ( date.getMonth() + 1 ) + "</b> at <b>" + date.getHours() + ":" + ( ( date.getMinutes() != 0 ) ? date.getMinutes() : "00" ) + "</b>";
 
