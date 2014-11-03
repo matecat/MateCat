@@ -305,6 +305,8 @@ class downloadFileController extends downloadController {
         $zip  = new ZipArchive();
         $zip->open( $file, ZipArchive::OVERWRITE );
 
+        $rev_index_name = array();
+
         // Staff with content
         foreach ( $output_content as $f ) {
 
@@ -320,6 +322,12 @@ class downloadFileController extends downloadController {
             if ( strlen( $_name ) < 3 ) {
                 $fName = substr( uniqid(), -5 ) . "_" . $fName;
             }
+
+            if( array_key_exists( $fName, $rev_index_name ) ){
+                $fName = uniqid() . $fName;
+            }
+
+            $rev_index_name[$fName] = $fName;
 
             $zip->addFromString( $fName, $f[ 'documentContent' ] );
 

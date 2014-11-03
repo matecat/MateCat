@@ -787,7 +787,7 @@ UI = {
                         var currency = data.data[0].currency;
                     }
 
-					var form = 	"<form class='submit-outsource-data' action='http://translated_openid/' method='POST' target='_blank'>" +
+					var form = 	"<form class='submit-outsource-data' action='http://signin.translated.net/' method='POST' target='_blank'>" +
                                		"<input type='hidden' name='url_ok' value='" + data.return_url.url_ok + "'>" +
                             		"<input type='hidden' name='url_ko' value='" + data.return_url.url_ko + "'>" +
                                     "<input type='hidden' name='data_key' value='" + jid + "-" + jsw + "'>" +
