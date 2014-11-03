@@ -926,6 +926,7 @@ font-size: 18px;
 .popup h1 .btn-cancel
 {
 	padding: 1px 18px;
+	margin-left: 20px;
     }
     .popup .btn-cancel, .btn-grey, .popup-tm .btn-cancel, .btn-grey
     {
