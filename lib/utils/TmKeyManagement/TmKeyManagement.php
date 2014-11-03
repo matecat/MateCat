@@ -205,7 +205,7 @@ class TmKeyManagement_TmKeyManagement {
         $job_tm_keys    = array_map( array( 'self', 'getTmKeyStructure' ), $serverDecodedJson );
 
         $server_reorder_position = array( );
-        $reverse_lookup_client_json = array( 'pos' => array(), 'elements' => array() );
+        $reverse_lookup_client_json = array( 'pos' => array(), 'elements' => array(), 'unique' => array() );
         foreach ( $client_tm_keys as $_j => $_client_tm_key ) {
 
             /**
@@ -215,12 +215,17 @@ class TmKeyManagement_TmKeyManagement {
             //create a reverse lookup
             $reverse_lookup_client_json[ 'pos' ][ $_j ]      = $_client_tm_key->key;
             $reverse_lookup_client_json[ 'elements' ][ $_j ] = $_client_tm_key;
+            $reverse_lookup_client_json[ 'unique' ][ $_j ] = $_client_tm_key->getCrypt();
 
             if( empty( $_client_tm_key->r ) && empty( $_client_tm_key->w ) ){
                 throw new Exception( "Read and Write grants can not be both empty", 4 );
             }
 
         }
+
+        $uniq_num = count( array_unique( $reverse_lookup_client_json[ 'unique' ] ) );
+
+        if( $uniq_num != count( $reverse_lookup_client_json[ 'pos' ] ) )  throw new Exception( "A key is already present in this project.", 5 );
 
         //update existing job keys
         foreach ( $job_tm_keys as $i => $_job_Key ) {
@@ -229,7 +234,20 @@ class TmKeyManagement_TmKeyManagement {
              */
 
             $_index_position = array_search( $_job_Key->key, $reverse_lookup_client_json[ 'pos' ] );
-            if ( $_index_position !== false ) { // so, here the key exists in client
+
+            if ( array_search( $_job_Key->getCrypt(), $reverse_lookup_client_json[ 'pos' ] ) !== false ) {
+                //DO NOTHING
+                //reduce the stack
+                $hashPosition = array_search( $_job_Key->getCrypt(), $reverse_lookup_client_json[ 'pos' ] );
+
+                unset( $reverse_lookup_client_json[ 'pos' ][ $hashPosition ] );
+                unset( $reverse_lookup_client_json[ 'elements' ][ $hashPosition ] );
+                //PASS
+
+                //take the new order
+                $server_reorder_position[ $hashPosition ] = $_job_Key;
+
+            } elseif ( $_index_position !== false ) { // so, here the key exists in client
 
                 //this is an anonymous user, and a key exists in job
                 if( $_index_position !== false && $uid == null ){
@@ -283,18 +301,6 @@ class TmKeyManagement_TmKeyManagement {
 
                 //take the new order
                 $server_reorder_position[ $_index_position ] = $_job_Key;
-
-            } elseif ( array_search( $_job_Key->getHash(), $reverse_lookup_client_json[ 'pos' ] ) !== false ) {
-                //DO NOTHING
-                //reduce the stack
-                $hashPosition = array_search( $_job_Key->getHash(), $reverse_lookup_client_json[ 'pos' ] );
-
-                unset( $reverse_lookup_client_json[ 'pos' ][ $hashPosition ] );
-                unset( $reverse_lookup_client_json[ 'elements' ][ $hashPosition ] );
-                //PASS
-
-                //take the new order
-                $server_reorder_position[ $hashPosition ] = $_job_Key;
 
             } else {
 
