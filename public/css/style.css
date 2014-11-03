@@ -37,6 +37,7 @@ header .wrapper{height:20px; padding:0px 0 0 0;}
 .header-menu li{
     /*border-left:1px solid #000;*/
     float:left;height:37px;padding:5px 0px;}
+.editing .header-menu li {padding: 7px 0px 3px 0;}
 .header-menu li a{padding:2px 15px;}
 #notifbox
 {
@@ -831,7 +832,7 @@ body.noGlossary .tab-switcher-gl
 	display: block;
 }
 
-.addtmx-tr {
+.addtmx-tr .open-popup-addtm-tr {
 height: 17px;
 width: 140px;
 position: absolute;
@@ -2902,12 +2903,17 @@ body.editlog .breadcrumbs #pname {
 
 }
 
-.addtmx-tr.white-tx {
+.addtmx-tr.white-tx .open-popup-addtm-tr {
 
 color: #333;
 background: #fff;
 
-/* -webkit-box-shadow: inset 0px 2px 2px #666; */
+}
+
+.addtmx-tr.white-tx .open-popup-addtm-tr:hover {
+	-webkit-box-shadow:  inset 0px 2px 5px #666;
+	box-shadow:  inset 0px 2px 5px #666;
+
 }
 
 .popup-addtm-tr .popup {

@@ -861,7 +861,7 @@ form.add-TM-Form {
 	    height: 40px;
 	    width: 40px;
 	    float: right;
-	    margin: 1px 0px 0 0;
+	    margin: 0 10px 0 0;
 	    background-size: 22px;
     }
 	
@@ -890,7 +890,7 @@ form.add-TM-Form {
 	    font-weight: bold;
 	    text-decoration: none;
 	    padding: 8px 18px;
-	    margin: 0 5px;
+/*	    margin: 0 5px;*/
 	    border-radius: 2px;
 	    font-size: 18px;
 	    background: -webkit-gradient(linear, left top, left bottom, from(#09beec), to(#119ec4));
@@ -1057,11 +1057,12 @@ margin:0 auto; overflow:hidden; width:100%;
 .mgmt-tm .check {
 		/*width:6%!important;*/
 		width:55px!important;
+		text-align: center;
 }
 
 .mgmt-tm .action {
 		/*width:22%!important;*/
-		width: 233px!important;
+		width: 246px!important;
 }
 
 .new .privatekey {
@@ -1069,11 +1070,11 @@ margin:0 auto; overflow:hidden; width:100%;
 }
 
 .new .description {
-	width:465px!important;
+	width:456px!important;
 }
 
 .new .action {
-			width: 229px!important;
+			width: 239px!important;
 padding-left: 20px;
 }
 
@@ -1102,7 +1103,7 @@ width: 22%;
 }*/
 
 .new td.fileupload {
-width: 86px;
+width: 92px;
 }
  .back-mgmt {padding:20px; margin-right:20px;}
 
@@ -1118,7 +1119,7 @@ width: auto;
     table-layout: fixed;
     width: 100%;
     margin-bottom: 20px;
-    border: 1px solid #DDD;
+    border: 1px solid #ccc;
 }
 
 .mgmt-tm .btn-ok, .mgmt-tm .btn-grey {margin:0 3px;
@@ -1224,7 +1225,8 @@ margin-top: 10px;
     display: block;
     background: #fff;
     padding: 10px;
-    border-top: 1px solid #D5D5D5;
+    border-top: 1px solid #E7E7E7;
+	box-shadow: inset 0px 3px 4px 0px #f4f4f4;
 }
 #activetm tbody tr.mine {
     cursor: move;
@@ -1260,9 +1262,10 @@ margin-bottom: 10px;
 .mgmt-tm td, .mgmt-tm th, .mgmt-gl td, .mgmt-gl th {
     padding: 8px 5px;
     background: #fff;
+
 }
 .mgmt-tm td,  .mgmt-gl td {
-    border-top: 1px solid #ddd;
+    border-top: 1px solid #ccc;
 }
 
 .addtmxrow td, .new td {
@@ -1350,7 +1353,10 @@ header .searchbox {
 }
 
 .mgmt-tm th, .mgmt-gl th {background: #6d6e71;
-color: #fff;}
+color: #fff;
+    height: 20px;
+line-height: 15px;
+}
 
 body.filterOpen .searchbox
 {
@@ -1361,7 +1367,7 @@ body.filterOpen .searchbox
 	{
 		display: inline;
 		width: auto !important;
-		margin-right: 5px;
+/*		margin-right: 5px;*/
 		text-transform: uppercase;
 }
 
@@ -1769,6 +1775,7 @@ color: #000;
 .addtmxfile .text:before,
 .usetm .text:before,
 .uploadkey:before,
+.open-popup-addtm-tr:before,
 .sorting:after {
 	font-family: 'icomoon';
 	speak: none;
@@ -1811,7 +1818,7 @@ margin-left: 10px;
 	vertical-align: text-top;
 }
 
-.addtmxfile .text:before, .addtmx .text:before
+.addtmxfile .text:before, .addtmx .text:before, .open-popup-addtm-tr:before
  {
 	content: "\e601";
 	padding-right: 5px;
