@@ -1181,19 +1181,19 @@ margin-top: 10px;
 .sorting_asc:after {
 	content: "\f0dd";
 	float:right;
-    margin-top: 6px;
+    margin-top: -4px;
 }
 
 .sorting_desc:after {
 	content: "\f0de";
 	float:right;
-    margin-top: 11px;
+    line-height: 1px !important;
+    margin-top: 10px;
 }
 
 .sorting:after{
 	content: "\f0dc";
 	float:right;
-    margin-top: 7px;
 }
 
 .dataTables_paginate {float:right; margin-top:10px;}
