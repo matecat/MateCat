@@ -166,8 +166,8 @@ $.extend(UI, {
             row.detach();
             $("#inactivetm").append(row);
             row.find('a.disabletm .text').text('Use').attr('class', 'text');
-            row.find('.lookup input[type="checkbox"]').first().removeAttr('checked').attr('disabled', 'disabled');
-            row.find('.update input[type="checkbox"]').first().removeAttr('checked').attr('disabled', 'disabled');
+            row.find('.lookup input[type="checkbox"]').first().attr('disabled', 'disabled');
+            row.find('.update input[type="checkbox"]').first().attr('disabled', 'disabled');
             row.css('display', 'block');
 
             // draw the user's attention to it
@@ -187,6 +187,9 @@ $.extend(UI, {
             row.find('.lookup input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
             row.find('.update input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
             row.css('display', 'block');
+
+            //update datatable struct
+            $('#inactivetm' ).DataTable().row(row).remove().draw(false);
 
             // draw the user's attention to it
             row.fadeOut();
@@ -225,7 +228,9 @@ $.extend(UI, {
         $(document).ready(function() {
             console.log("$('#inactivetm'): ", $('#inactivetm'));
             UI.setTMsortable();
-            $('#inactivetm').dataTable();
+            $('#inactivetm').dataTable({
+                "columnDefs":  [ { targets: [0,2,3,4], orderable: false } ]
+            });
 
         });
 
