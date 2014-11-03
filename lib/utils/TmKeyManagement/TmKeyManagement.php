@@ -98,6 +98,7 @@ class TmKeyManagement_TmKeyManagement {
      * @return int|null Returns null if all is ok, otherwise it returns the error code of the mysql Query
      */
     public static function setJobTmKeys( $id_job, $job_pass, $tm_keys ) {
+        $tm_keys = str_replace("\"","'", $tm_keys);
         return setJobTmKeys( $id_job, $job_pass, json_encode( $tm_keys ) );
     }
 

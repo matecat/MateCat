@@ -743,10 +743,37 @@ $.extend(UI, {
                     console.log('TM data saved!!');
                     $('.mgmt-panel-tm .error-message').text('').hide();
                     $('.mgmt-panel-tm .warning-message').text('Your data has been saved.').show();
-                }
 
+                    setTimeout(function(){
+                        $('.mgmt-panel-tm .warning-message').animate({
+                            opacity: 0
+                        },300);
+
+                        setTimeout(function(){
+                            $('.mgmt-panel-tm .warning-message' )
+                                    .animate({
+                                        height:0,
+                                        padding:0,
+                                        margin:0
+                                    },300);
+
+                            setTimeout(function(){
+                                $('.mgmt-panel-tm .warning-message' )
+                                        .text("")
+                                        .animate({
+                                            opacity : 1,
+                                            height: 'auto',
+                                            padding: 'auto',
+                                            margin: 'auto'
+                                        },0 )
+                                        .hide()
+                            },300);
+
+                        }, 300);
+                    }, 2000);
+                }
             }
         });
-    },
+    }
 
 });
