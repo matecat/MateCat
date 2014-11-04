@@ -1017,7 +1017,7 @@ UI = {
             success: function(d){
                 if(d.data == 'OK') {
                     setTimeout(function() {
-                        UI.reloadPage();
+                        location.reload(true);
                     }, 300);
                 }
             }
@@ -1184,7 +1184,7 @@ UI = {
 						'				</div>' +
 						'				<div class="target item" id="segment-' + this.sid + '-target">' +
 						'					<span class="hide toggle"> ' +
-						'						<a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>' +
+						'						<!-- a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a -->' +
 						'					</span>' +
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
@@ -3912,6 +3912,14 @@ $.extend(UI, {
 		}).on('allTranslated', function() {
 			if(config.survey) UI.displaySurvey(config.survey);
 		}).on('mousedown', function() {
+
+            //when the catoool is not loaded because of the job is archived,
+            // saveSelection leads to a javascript error
+            //so, add a check to see if the cattool page is really created/loaded
+            if( $('body' ).hasClass( '.job_archived' ) || $('body' ).hasClass( '.job_cancelled' ) ){
+                return false;
+            }
+
             if(!$('.editor .rangySelectionBoundary.focusOut').length) saveSelection();
             $('.editor .rangySelectionBoundary').addClass('focusOut');
             hasFocusBefore = UI.editarea.is(":focus");
@@ -5403,7 +5411,7 @@ console.log('translation 4: ', translation);
 //				console.log('dopo: ', $('.sub-editor.matches .overflow .suggestion_source', segment).html());
 			});
             // start addtmxTmp
-            $('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><i class="icon-upload"></i><a class="open-popup-addtm-tr">Add your personal TM</a></div>');
+            $('.sub-editor.matches .overflow', segment).append('<div class="addtmx-tr white-tx"><a class="open-popup-addtm-tr">Add your personal TM</a></div>');
             // end addtmxTmp
             UI.markSuggestionTags(segment);
 
@@ -8167,6 +8175,23 @@ $.extend(UI, {
     checkTMKey: function(operation) {
         console.log('checkTMKey');
         console.log('operation: ', operation);
+
+        //check if the key already exists, it can not be sent nor added twice
+        var keys_of_the_job = $('#activetm tbody tr:not(".new") .privatekey' );
+        var keyIsAlreadyPresent = false;
+        $( keys_of_the_job ).each( function(){
+            if( $(this).text().slice(-5) == $('#new-tm-key').val().slice(-5) ){
+                console.log('key is bad');
+                $('#activetm tr.new').addClass('badkey');
+                $('#activetm tr.new .error .tm-error-key').text('The key is already present.').show();
+                UI.checkTMAddAvailability(); //some enable/disable stuffs
+                keyIsAlreadyPresent = true;
+                return false;
+            }
+        } );
+        if( keyIsAlreadyPresent ){ return false; }
+        //check if the key already exists, it can not be sent nor added twice
+
         APP.doRequest({
             data: {
                 action: 'ajaxUtils',
