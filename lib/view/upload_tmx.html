@@ -168,6 +168,24 @@
     <a href="#" id="multiple-link">Multiple languages?</a>
 </div>
 
+<div class="translate-box subject">
+    <h2>Subject</h2>
+    <select name="subject" id="subject">
+
+        <tal:block tal:repeat="subject subjects">
+            <option tal:condition="php: subject['key'] NE '----'" tal:attributes="value subject/key" tal:content="subject/display">
+                ---
+            </option>
+            <option tal:condition="php: subject['key'] EQ '----' " disabled="disabled" tal:attributes="value subject/key" tal:content="subject/display">
+                ---
+            </option>
+
+        </tal:block>
+
+    </select>
+</div>
+
+
 <div class="cl"></div>
 <a href="#" class="more">Options</a>
 

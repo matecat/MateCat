@@ -1641,6 +1641,7 @@ function insertJob( ArrayObject $projectStructure, $password, $target_language, 
     $data[ 'id_tms' ]            = $projectStructure[ 'tms_engine' ];
     $data[ 'id_mt_engine' ]      = $projectStructure[ 'mt_engine' ];
     $data[ 'create_date' ]       = date( "Y-m-d H:i:s" );
+    $data[ 'subject' ]           = $projectStructure[ 'job_subject' ];
     $data[ 'owner' ]             = $owner;
     $data[ 'job_first_segment' ] = $job_segments[ 'job_first_segment' ];
     $data[ 'job_last_segment' ]  = $job_segments[ 'job_last_segment' ];
@@ -2028,6 +2029,7 @@ function getJobsFromProjects(array $projectIDs, $search_source, $search_target, 
 				 j.job_last_segment,
 				 j.id_mt_engine,
 				 j.id_tms,
+				 j.subject,
 				(draft_words + new_words) AS DRAFT,
 				rejected_words AS REJECT,
 				translated_words AS TRANSLATED,

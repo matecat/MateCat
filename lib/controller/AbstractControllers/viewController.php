@@ -179,7 +179,6 @@ log::doLog ("bname uagent " . $_SERVER[ 'HTTP_USER_AGENT' ]);
      * @return bool
      */
     private function doAuth() {
-
         //prepare redirect flag
         $mustRedirectToLogin = false;
 
@@ -211,7 +210,10 @@ log::doLog ("bname uagent " . $_SERVER[ 'HTTP_USER_AGENT' ]);
      * @return bool
      */
     public function isLoggedIn() {
-        return ( ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) && ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) ) );
+        return (
+                ( isset( $_SESSION[ 'cid' ] ) && !empty( $_SESSION[ 'cid' ] ) ) &&
+                ( isset( $_SESSION[ 'uid' ] ) && !empty( $_SESSION[ 'uid' ] ) )
+        );
     }
 
     /**

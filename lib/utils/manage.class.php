@@ -51,6 +51,7 @@ class ManageUtils {
             $job[ 'password' ]              = $job_array[ 'password' ];
             $job[ 'source' ]                = $job_array[ 'source' ];
             $job[ 'target' ]                = $job_array[ 'target' ];
+            $job[ 'subject' ]                = $job_array[ 'subject' ];
             $job[ 'sourceTxt' ]             = $lang_handler->getLocalizedName( $job[ 'source' ] );
             $job[ 'targetTxt' ]             = $lang_handler->getLocalizedName( $job[ 'target' ] );
             $job[ 'create_date' ]           = $job_array[ 'create_date' ];
