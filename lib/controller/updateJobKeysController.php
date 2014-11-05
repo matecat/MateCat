@@ -34,10 +34,6 @@ class updateJobKeysController extends ajaxController {
                         'filter' => FILTER_SANITIZE_STRING,
                         'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
                 ),
-                'data'  => array(
-                        'filter' => FILTER_SANITIZE_STRING,
-                        'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
-                )
         );
 
         //filter input
@@ -46,7 +42,7 @@ class updateJobKeysController extends ajaxController {
         //assign variables
         $this->job_id   = $_postInput[ 'job_id' ];
         $this->job_pass = $_postInput[ 'job_pass' ];
-        $this->tm_keys  = $_postInput[ 'data' ];
+        $this->tm_keys  = $_POST[ 'data' ]; // this will be filtered inside the TmKeyManagement class
 
         //check for eventual errors on the input passed
         $this->result[ 'errors' ] = array();
@@ -63,8 +59,6 @@ class updateJobKeysController extends ajaxController {
                     'message' => "Job pass missing"
             );
         }
-
-        $this->tm_keys = html_entity_decode( $this->tm_keys );
 
         //get job data
         $this->jobData = getJobData( $this->job_id, $this->job_pass );
@@ -164,7 +158,8 @@ class updateJobKeysController extends ajaxController {
             $tm_keys['mine'][$k]['owner'] = ( $this->userRole == TmKeyManagement_Filter::OWNER );
         }
 
-        $this->tm_keys = json_encode( array_merge( $tm_keys['owner'], $tm_keys['mine'], $tm_keys['anonymous'] ) );
+        $tm_keys = array_merge( $tm_keys['owner'], $tm_keys['mine'], $tm_keys['anonymous'] );
+        $this->tm_keys = json_encode( $tm_keys );
 
         try {
             $totalTmKeys = TmKeyManagement_TmKeyManagement::mergeJsonKeys( $this->tm_keys, $this->jobData['tm_keys'], $this->userRole, $this->uid );

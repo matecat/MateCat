@@ -43,8 +43,12 @@ class createProjectController extends ajaxController {
                         'filter'  => FILTER_CALLBACK,
                         'options' => "Utils::filterLangDetectArray"
                 ),
-                'private_keys_list'  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
                 'private_tm_key'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW ),
+
+//            This will be sanitized inside the TmKeyManagement class
+//            SKIP
+//            'private_keys_list'  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_NO_ENCODE_QUOTES ),
+
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -63,7 +67,7 @@ class createProjectController extends ajaxController {
             $__postInput[ 'private_tm_key' ] = array();
         }
 
-        $array_keys = json_decode( html_entity_decode( $__postInput['private_keys_list'] ), true );
+        $array_keys = json_decode( $__postInput['private_keys_list'], true );
         $array_keys = array_merge( $array_keys['owner'], $array_keys['mine'],$array_keys['anonymous'] );
 
         if ( $array_keys ) {
@@ -92,15 +96,6 @@ class createProjectController extends ajaxController {
         if ( $this->disable_tms_engine_flag ) {
             $this->tms_engine = 0; //remove default MyMemory
         }
-
-        //json_decode the tm_key array if it has been passed
-//        if( !empty($this->private_tm_key )){
-//            $this->private_tm_key = json_decode($this->private_tm_key);
-//
-//            if($this->private_tm_key === null ){
-//                $this->result[ 'errors' ][ ] = array( "code" => -5, "message" => "Invalid tm key passed." );
-//            }
-//        }
 
         if ( empty( $this->file_name ) ) {
             $this->result[ 'errors' ][ ] = array( "code" => -1, "message" => "Missing file name." );
@@ -234,12 +229,10 @@ class createProjectController extends ajaxController {
     }
 
     private static function sanitizeTmKeyArr( $elem ){
-        return array(
-            'key'  => filter_var( $elem['key'], FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW ) ),
-            'name' => filter_var( $elem['name'], FILTER_SANITIZE_STRING, array( 'flags' => FILTER_FLAG_STRIP_LOW ) ),
-            'r' => filter_var( $elem['r'], FILTER_VALIDATE_BOOLEAN, array( 'flags' => FILTER_NULL_ON_FAILURE ) ),
-            'w' => filter_var( $elem['w'], FILTER_VALIDATE_BOOLEAN, array( 'flags' => FILTER_NULL_ON_FAILURE ) )
-        );
+
+        $elem = TmKeyManagement_TmKeyManagement::sanitize( new TmKeyManagement_TmKeyStruct( $elem ) );
+        return $elem->toArray();
+
     }
 
 }

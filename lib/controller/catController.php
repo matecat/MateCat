@@ -427,8 +427,10 @@ class catController extends viewController {
                 } else {
 
                     /*
-                     * This is not a key of that user, obfuscate
+                     * This is not a key of that user, set right and obfuscate
                      */
+                    $jobKey->r = true;
+                    $jobKey->w = true;
                     $jobKey = $jobKey->hideKey( -1 );
 
                 }

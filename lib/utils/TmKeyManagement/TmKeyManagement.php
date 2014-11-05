@@ -21,7 +21,8 @@ class TmKeyManagement_TmKeyManagement {
      * @return TmKeyManagement_TmKeyStruct The converted object
      */
     public static function getTmKeyStructure( $tmKey_arr = null ) {
-        return new TmKeyManagement_TmKeyStruct( $tmKey_arr );
+        $tmKeyStruct = new TmKeyManagement_TmKeyStruct( $tmKey_arr );
+        return $tmKeyStruct;
     }
 
     /**
@@ -168,6 +169,79 @@ class TmKeyManagement_TmKeyManagement {
     }
 
     /**
+     * This method sanitize fields received with struct
+     *
+     * @param TmKeyManagement_TmKeyStruct $obj
+     *
+     * @return TmKeyManagement_TmKeyStruct
+     */
+    public static function sanitize( TmKeyManagement_TmKeyStruct $obj ){
+
+        if( !is_null( $obj->tm ) ){
+            $obj->tm = true && filter_var( $obj->tm, FILTER_VALIDATE_BOOLEAN, array('flags' => FILTER_NULL_ON_FAILURE) );
+        }
+
+        if( !is_null( $obj->glos ) ){
+            $obj->glos = true && filter_var( $obj->glos, FILTER_VALIDATE_BOOLEAN, array('flags' => FILTER_NULL_ON_FAILURE) );
+        }
+
+        if( !is_null( $obj->owner ) ){
+            $obj->owner = true && filter_var( $obj->owner, FILTER_VALIDATE_BOOLEAN, array('flags' => FILTER_NULL_ON_FAILURE) );
+        }
+
+        if( !is_null( $obj->uid_transl ) ){
+            $obj->uid_transl = filter_var( $obj->uid_transl, FILTER_SANITIZE_NUMBER_INT );
+        }
+
+        if( !is_null( $obj->uid_rev ) ){
+            $obj->uid_rev = filter_var( $obj->uid_rev, FILTER_SANITIZE_NUMBER_INT );
+        }
+
+        if( !is_null( $obj->name ) ){
+            $obj->name = filter_var( $obj->name, FILTER_SANITIZE_STRING, array('flags' => FILTER_FLAG_STRIP_LOW ) );
+        }
+
+        if( !is_null( $obj->key ) ){
+            $obj->key = filter_var( $obj->key, FILTER_SANITIZE_STRING, array('flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ) );
+        }
+
+        if( !is_null( $obj->r ) ){
+            $obj->r = true && filter_var( $obj->r, FILTER_VALIDATE_BOOLEAN, array('flags' => FILTER_NULL_ON_FAILURE) );
+        }
+
+        if( !is_null( $obj->w ) ){
+            $obj->w = true && filter_var( $obj->w, FILTER_VALIDATE_BOOLEAN, array('flags' => FILTER_NULL_ON_FAILURE) );
+        }
+
+        if( !is_null( $obj->r_transl ) ){
+            $obj->r_transl = true && filter_var( $obj->r_transl, FILTER_VALIDATE_BOOLEAN, array('flags' => FILTER_NULL_ON_FAILURE) );
+        }
+
+        if( !is_null( $obj->w_transl ) ){
+            $obj->w_transl = true && filter_var( $obj->w_transl, FILTER_VALIDATE_BOOLEAN, array('flags' => FILTER_NULL_ON_FAILURE) );
+        }
+
+        if( !is_null( $obj->r_rev ) ){
+            $obj->r_rev = true && filter_var( $obj->r_rev, FILTER_VALIDATE_BOOLEAN, array('flags' => FILTER_NULL_ON_FAILURE) );
+        }
+
+        if( !is_null( $obj->w_rev ) ){
+            $obj->w_rev = true && filter_var( $obj->w_rev, FILTER_VALIDATE_BOOLEAN, array('flags' => FILTER_NULL_ON_FAILURE) );
+        }
+
+        if( !is_null( $obj->source ) ){
+            $obj->source = filter_var( $obj->source, FILTER_SANITIZE_STRING, array('flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ) );
+        }
+
+        if( !is_null( $obj->target ) ){
+            $obj->target = filter_var( $obj->target, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH );
+        }
+
+        return $obj;
+
+    }
+
+    /**
      * Merge the keys from CLIENT with those from DATABASE ( jobData )
      *
      * @param string $Json_clientKeys A json_encoded array of objects having the following structure:<br />
@@ -203,6 +277,7 @@ class TmKeyManagement_TmKeyManagement {
         }
 
         $client_tm_keys = array_map( array( 'self', 'getTmKeyStructure' ), $clientDecodedJson );
+        $client_tm_keys = array_map( array( 'self', 'sanitize' ), $client_tm_keys );
         $job_tm_keys    = array_map( array( 'self', 'getTmKeyStructure' ), $serverDecodedJson );
 
         $server_reorder_position = array( );

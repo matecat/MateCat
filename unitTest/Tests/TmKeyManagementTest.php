@@ -1896,5 +1896,34 @@ class Tests_TmKeyManagementTest extends Tests_AbstractTest {
 
     }
 
+    public function testUniqueKeys(){
+
+        $client_json = '[
+                            {"key":"0000123MNO","name":"My MNO","r":1,"w":0},
+                            {"key":"0000123ABC","name":"My ABC","r":0,"w":1},
+                            {"key":"*****23ABC","name":"My ABC","r":0,"w":1}
+                        ]';
+
+        $server_json = '[
+                            {"tm":true,"glos":false,"owner":true,"key":"0000123MNO","name":"My MNO","r":"1","w":"1","uid_transl":123,"uid_rev":null,"r_transl":0,"w_transl":1,"r_rev":null,"w_rev":null,"source":null,"target":null},
+                            {"tm":true,"glos":false,"owner":false,"key":"0000123ABC","name":"","r":null,"w":null,"uid_transl":123,"uid_rev":456,"r_transl":1,"w_transl":0,"r_rev":1,"w_rev":1,"source":null,"target":null}
+                        ]';
+
+        /*
+         * Expected Exception because the same key can not be sent twice
+         *
+         */
+
+        $this->setExpectedException( 'Exception', "A key is already present in this project.", 5);
+
+        TmKeyManagement_TmKeyManagement::mergeJsonKeys(
+                $client_json,
+                $server_json,
+                TmKeyManagement_Filter::ROLE_TRANSLATOR,
+                123
+        );
+
+    }
+
 }
  

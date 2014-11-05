@@ -122,7 +122,7 @@ class ProjectManager {
             $APIKeySrv = new TMSService();
             foreach ( $this->projectStructure[ 'private_tm_key' ] as $i => $_tmKey ) {
 
-                $APIKeySrv->setTmKey(  $_tmKey[ 'key' ] );
+                $APIKeySrv->setTmKey( $_tmKey[ 'key' ] );
 
                 try {
 
