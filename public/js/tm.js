@@ -339,6 +339,23 @@ $.extend(UI, {
     checkTMKey: function(operation) {
         console.log('checkTMKey');
         console.log('operation: ', operation);
+
+        //check if the key already exists, it can not be sent nor added twice
+        var keys_of_the_job = $('#activetm tbody tr:not(".new") .privatekey' );
+        var keyIsAlreadyPresent = false;
+        $( keys_of_the_job ).each( function(){
+            if( $(this).text().slice(-5) == $('#new-tm-key').val().slice(-5) ){
+                console.log('key is bad');
+                $('#activetm tr.new').addClass('badkey');
+                $('#activetm tr.new .error .tm-error-key').text('The key is already present.').show();
+                UI.checkTMAddAvailability(); //some enable/disable stuffs
+                keyIsAlreadyPresent = true;
+                return false;
+            }
+        } );
+        if( keyIsAlreadyPresent ){ return false; }
+        //check if the key already exists, it can not be sent nor added twice
+
         APP.doRequest({
             data: {
                 action: 'ajaxUtils',

@@ -103,7 +103,7 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
      *
      * @return bool
      */
-    public function isAnHashedKey(){
+    public function isEncryptedKey(){
 
         $keyLength = strlen($this->key);
 
@@ -163,7 +163,7 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
     }
 
 
-    public function getHash() {
+    public function getCrypt() {
 
         $keyLength   = strlen( $this->key );
         $last_digits = substr( $this->key, -$this->readable_chars );

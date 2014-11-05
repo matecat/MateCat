@@ -586,7 +586,7 @@ function setJobTmKeys( $job_id, $job_password, $tmKeysString ) {
     $query = "UPDATE jobs SET tm_keys = '%s' WHERE id = %d AND password = '%s'";
 
     $db = Database::obtain();
-    $db->query( sprintf( $query, $tmKeysString, (int)$job_id, $job_password ) );
+    $db->query( sprintf( $query, $db->escape($tmKeysString), (int)$job_id, $job_password ) );
 
     $err   = $db->get_error();
     $errno = $err[ 'error_code' ];

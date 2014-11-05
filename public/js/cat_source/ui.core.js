@@ -1017,7 +1017,7 @@ UI = {
             success: function(d){
                 if(d.data == 'OK') {
                     setTimeout(function() {
-                        UI.reloadPage();
+                        location.reload(true);
                     }, 300);
                 }
             }
@@ -1184,7 +1184,7 @@ UI = {
 						'				</div>' +
 						'				<div class="target item" id="segment-' + this.sid + '-target">' +
 						'					<span class="hide toggle"> ' +
-						'						<a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a>' +
+						'						<!-- a href="#" class="warning normalTip exampleTip" title="Warning: as">!</a -->' +
 						'					</span>' +
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
