@@ -4,6 +4,7 @@
  Loaded by cattool and upload page.
  */
 
+
 $.extend(UI, {
     initTM: function() {
         console.log('TM init vediamo');
@@ -78,14 +79,7 @@ $.extend(UI, {
             $(this).hide();
             var nr = '<td class="uploadfile">' +
                      '  <div class="standard">' +
-                     '  <label class="fileupload">Select a TMX </label>' +
-                     '  <a class="pull-right canceladdtmx">' +
-                     '      <span class="icon-times-circle"></span>' +
-                     '  </a>' +
-                    '   <a class="existingKey pull-right btn-grey addtmxfile">' +
-                    '       <span class="text">Upload TMX</span>' +
-                    '   </a>' +
-                    '<form class="existing add-TM-Form" action="/" method="post">' +
+                    '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
                     '    <input type="hidden" name="action" value="loadTMX" />' +
                     '    <input type="hidden" name="exec" value="newTM" />' +
                     '    <input type="hidden" name="tm_key" value="" />' +
@@ -93,6 +87,12 @@ $.extend(UI, {
                     '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
                     '    <input type="file" name="tmx_file" />' +
                     '</form>' +
+                     '  <a class="pull-left btn-grey canceladdtmx">' +
+                     '      <span class="text">Cancel</span>' +
+                     '  </a>' +
+                    '   <a class="existingKey pull-left btn-grey addtmxfile">' +
+                    '       <span class="text">Confirm</span>' +
+                    '   </a>' +
                     '  </div>' +
                     '  <div class="uploadprogress">' +
                     '       <span class="progress">' +
@@ -322,8 +322,20 @@ $.extend(UI, {
         };
         console.log('fixHelperModified: ', fixHelperModified);
         */
-        $("#activetm tbody.sortable").sortable({ items: ".mine" }).disableSelection();
+        $(".dragrow" ).mouseover(function() {
+            $("#activetm tbody.sortable").sortable({ items: ".mine" }).sortable('enable').disableSelection();
+        });
+        $(".dragrow" ).mouseout(function() {
+            $("#activetm tbody.sortable").sortable('disable');
+        });
+
     },
+
+
+
+
+
+
     checkTMKey: function(operation) {
         console.log('checkTMKey');
         console.log('operation: ', operation);
@@ -441,7 +453,9 @@ $.extend(UI, {
         var TMKey = $('#new-tm-key').val();
 
         newTr = '<tr class="mine" data-tm="1" data-glos="1" data-owner="' + config.ownerIsMe + '">' +
+                '    <td class="dragrow"></td>' +
                 '    <td class="privatekey">' + TMKey + '</td>' +
+                '    <td class="owner">Me</td>' +
                 '    <td class="description">' + desc + '</td>' +
                 '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + ' /></td>' +
@@ -450,8 +464,9 @@ $.extend(UI, {
                 '            <span class="text stopuse">Stop Use</span>' +
                 '        </a>' +
                 '        <a class="btn-grey pull-left addtmx">' +
-                '            <span class="text addtmxbtn">Add TMX</span>' +
+                '            <span class="text addtmxbtn">Import TMX</span>' +
                 '        </a>' +
+                ' <a class="btn-grey pull-left downloadtmx"><span class="text">Download</span></a>' +
                 '    </td>' +
                 '</tr>';
         $('#activetm tr.new').before(newTr);
