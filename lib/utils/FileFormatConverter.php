@@ -70,8 +70,8 @@ class FileFormatConverter {
             self::$Storage_Lookup_IP_Map[ $converter_storage[ 'ip_converter' ] ] = $converter_storage[ 'ip_storage' ];
         }
 
-//		self::$converters = array('10.30.1.114' => 1);//for debugging purposes
-//		self::$Storage_Lookup_IP_Map = array('10.30.1.114' => '10.30.1.114');//for debugging purposes
+		self::$converters = array('10.11.0.106' => 1);//for debugging purposes
+		self::$Storage_Lookup_IP_Map = array('10.11.0.106' => '10.11.0.107');//for debugging purposes
 
         $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
 
@@ -181,7 +181,7 @@ class FileFormatConverter {
     private function extractUidandExt( &$content ) {
         $pattern = '|<file original=".+?([a-f\-0-9]{36}).+?\.(.*)".*?>|';
         $matches = array();
-        preg_match( $pattern, $content, $matches );
+        preg_match( $pattern, substr( $content, 0, 2048 ), $matches );
 
         return array( $matches[ 1 ], $matches[ 2 ] );
     }
@@ -258,7 +258,7 @@ class FileFormatConverter {
 
             curl_setopt( $ch, CURLOPT_URL, $url );
             curl_setopt( $ch, CURLOPT_HEADER, 0 );
-            curl_setopt( $ch, CURLOPT_USERAGENT, "Matecat-Cattool/v" . INIT::$BUILD_NUMBER );
+            curl_setopt( $ch, CURLOPT_USERAGENT, INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER );
             curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
             //curl_setopt($ch, CURLOPT_VERBOSE, true);
             curl_setopt( $ch, CURLOPT_POST, true );
@@ -496,7 +496,7 @@ class FileFormatConverter {
             $options = array(
                     CURLOPT_URL            => $url,
                     CURLOPT_HEADER         => 0,
-                    CURLOPT_USERAGENT      => "Matecat-Cattool/v" . INIT::$BUILD_NUMBER,
+                    CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
                     CURLOPT_RETURNTRANSFER => true,
                     CURLOPT_POST           => true,
                     CURLOPT_POSTFIELDS     => $data,

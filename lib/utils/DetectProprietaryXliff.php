@@ -68,10 +68,10 @@ class DetectProprietaryXliff {
 			return false;
 		}
 
-		preg_match( '|<xliff\s.*?version\s?=\s?["\'](.*?)["\'](.*?)>|si', $stringData, $tmp );
+//		preg_match( '|<xliff\s.*?version\s?=\s?["\'](.*?)["\'](.*?)>|si', $stringData, $tmp );
 
-		if ( !empty( $tmp ) ) {
-			return $tmp;
+		if ( !empty( $stringData ) ) {
+			return array( $stringData );
 		}
 
 		return false;
@@ -81,8 +81,8 @@ class DetectProprietaryXliff {
 	protected static function _checkIdiom( $tmp ){
 
 		//idiom Check
-		if( isset($tmp[2]) ){
-			if( stripos( $tmp[2], 'idiominc.com' ) !== false ) {
+		if( isset($tmp[0]) ){
+			if( stripos( $tmp[0], 'idiominc.com' ) !== false ) {
                 self::$fileType[ 'proprietary' ]            = true;
                 self::$fileType[ 'proprietary_name' ]       = 'idiom world server';
                 self::$fileType[ 'proprietary_short_name' ] = 'idiom';
@@ -105,6 +105,16 @@ class DetectProprietaryXliff {
 
     }
 
+    protected static function _checkGlobalSight( $tmp ){
+        if( isset($tmp[0]) ){
+            if( stripos( $tmp[0], 'globalsight' ) !== false ) {
+                self::$fileType[ 'proprietary' ]            = true;
+                self::$fileType[ 'proprietary_name' ]       = 'GlobalSight Download File';
+                self::$fileType[ 'proprietary_short_name' ] = 'globalsight';
+            }
+        }
+    }
+
     public static function getInfoByStringData( $stringData ) {
 
 		self::_reset();
@@ -114,15 +124,20 @@ class DetectProprietaryXliff {
 		//idiom Check
 		self::_checkIdiom( $tmp );
         self::_checkSDL( $tmp );
+        self::_checkGlobalSight( $tmp );
 		return self::$fileType;
 
 	}
 
-	public static function isXliffExtension(){
+	public static function isXliffExtension( $pathInfo = array() ){
 
-		if ( empty( self::$fileType['info'] ) ) return false;
+        if( empty( $pathInfo ) ){
+            if ( empty( self::$fileType['info'] ) ) return false;
+        } else {
+            self::$fileType['info'] = $pathInfo;
+        }
 
-		switch( self::$fileType['info']['extension'] ){
+        switch( self::$fileType['info']['extension'] ){
 			case 'xliff':
 			case 'sdlxliff':
 			case 'tmx':
