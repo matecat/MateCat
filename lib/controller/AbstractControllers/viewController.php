@@ -235,7 +235,7 @@ log::doLog ("bname uagent " . $_SERVER[ 'HTTP_USER_AGENT' ]);
         $browser_info = $this->getBrowser();
         $browser_name = strtolower( $browser_info[ 'name' ] );
 
-	log::doLog ("bname $browser_name");
+//	    log::doLog ("bname $browser_name");
 
 /*        if (  ($browser_name=="internet explorer" or $browser_name=="mozilla firefox")  and  $_SERVER[ 'REQUEST_URI' ]=="/" ) {
                 return -2;

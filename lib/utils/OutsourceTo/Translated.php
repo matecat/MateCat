@@ -95,7 +95,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                 CURLOPT_HEADER => false,
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_HEADER => 0,
-                CURLOPT_USERAGENT => "Matecat-Cattool/v" . INIT::$BUILD_NUMBER,
+                CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 2
         );
 
@@ -194,8 +194,6 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $shopping_cart->addItem( $cache_cart->getItem( $job[ 'jid' ] . "-" . $job['jpassword'] ) );
             $this->_quote_result = array( $shopping_cart->getItem( $job[ 'jid' ] . "-" . $job['jpassword'] ) );
         }
-
-        $this->_outsource_login_url_ok .= '&extra=' . urlencode( $this->_quote_result[0]['id'] );
 
         //check for failures.. destroy the cache
         if( !empty( $failures ) ){
