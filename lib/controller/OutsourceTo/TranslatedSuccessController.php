@@ -22,7 +22,8 @@ class OutsourceTo_TranslatedSuccessController extends OutsourceTo_AbstractSucces
      * @see OutsourceTo_AbstractSuccessController::$review_order_page
      * @var string
      */
-    protected $review_order_page = 'http://signin.translated.net/review.php';
+//    protected $review_order_page = 'http://signin.translated.net/review.php';
+    protected $review_order_page = 'http://translated_openid/review.php';
 
     /**
      * Token key name for the authentication return
@@ -38,6 +39,6 @@ class OutsourceTo_TranslatedSuccessController extends OutsourceTo_AbstractSucces
      * @see extraInfoName::$extra_info
      * @var string
      */
-    protected $extraInfoName = 'extra';
+    protected $dataKeyName = 'data_key';
 
 } 

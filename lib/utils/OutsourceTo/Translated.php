@@ -195,8 +195,6 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $this->_quote_result = array( $shopping_cart->getItem( $job[ 'jid' ] . "-" . $job['jpassword'] ) );
         }
 
-        $this->_outsource_login_url_ok .= '&extra=' . urlencode( $this->_quote_result[0]['id'] );
-
         //check for failures.. destroy the cache
         if( !empty( $failures ) ){
             foreach ( $failures as $jpid ){
