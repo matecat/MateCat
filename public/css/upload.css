@@ -901,12 +901,13 @@ top: 5%;
 	padding:1px 0 1px 0;
 	overflow:hidden !important;
 	border-bottom:1px dotted #ccc;
+	line-height:20px;
 	}
 	.listlang li.on
 		{
 		font-weight:bold;
 font-size:18px;
-line-height:28px;
+line-height:20px;
 padding-bottom:3px;
 		}		
 
@@ -917,6 +918,7 @@ padding-bottom:3px;
     cursor: pointer;
     width: 88%;
     padding-left: 0%;
+    padding-top:4px;
     }
 
 .listlang input

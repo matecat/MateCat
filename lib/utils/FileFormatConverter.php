@@ -70,8 +70,8 @@ class FileFormatConverter {
             self::$Storage_Lookup_IP_Map[ $converter_storage[ 'ip_converter' ] ] = $converter_storage[ 'ip_storage' ];
         }
 
-		self::$converters = array('10.11.0.106' => 1);//for debugging purposes
-		self::$Storage_Lookup_IP_Map = array('10.11.0.106' => '10.11.0.107');//for debugging purposes
+//		self::$converters = array('10.11.0.106' => 1);//for debugging purposes
+//		self::$Storage_Lookup_IP_Map = array('10.11.0.106' => '10.11.0.107');//for debugging purposes
 
         $this->storage_lookup_map = self::$Storage_Lookup_IP_Map;
 
