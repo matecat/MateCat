@@ -833,6 +833,47 @@ class CatUtils {
 
     }
 
+    /**
+     *
+     * This function works only on unix machines. For BSD based change parameter of command file to Uppercase I
+     * <pre>
+     *      shell_exec( "file -I $tmpOrigFName" );
+     * </pre>
+     *
+     * @param $toEncoding
+     * @param $documentContent string Reference to the string document
+     *
+     * @return string
+     * @throws Exception
+     */
+    public static function convertEncoding( $toEncoding, &$documentContent ) {
+
+        //Example: The file is UTF-16 Encoded
+
+        $tmpOrigFName = tempnam( "/tmp", mt_rand( 0, 1000000000 ) . uniqid( "", true ) );
+        file_put_contents( $tmpOrigFName, $documentContent );
+
+        $cmd = "file -i $tmpOrigFName";
+        Log::doLog( $cmd );
+
+        $file_info = shell_exec( $cmd );
+        list( $file_info, $charset ) = explode( "=", $file_info );
+        $charset = trim( $charset );
+
+        if ( $charset == 'utf-16le' ) {
+            $charset = 'Unicode';
+        }
+
+        //do nothing if "from" and "to" parameters are the equals
+        if ( strtolower( $charset ) == strtolower( $toEncoding ) ) {
+            return array( 'charset' => $charset, 'document' => $documentContent );
+        }
+
+        $converted = iconv( $charset, $toEncoding . "//IGNORE", $documentContent );
+
+        return array( $charset, $converted );
+
+    }
+
 }
 
-?>

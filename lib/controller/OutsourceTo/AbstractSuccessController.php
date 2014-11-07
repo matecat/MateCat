@@ -42,6 +42,20 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
     protected $tokenAuth;
 
     /**
+     * Key that holds extra info
+     *
+     * @var mixed|string
+     */
+    protected $extraInfoName;
+
+    /**
+     * Extra info as the project id
+     *
+     * @var mixed|string
+     */
+    protected $extra_info_content;
+
+    /**
      * Class Constructor
      *
      * @throws LogicException
@@ -63,7 +77,8 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
 
 
         $filterArgs = array(
-                $this->tokenName => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+                $this->tokenName  => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+                $this->extraInfoName => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
 
         $__getInput = filter_input_array( INPUT_GET, $filterArgs );
@@ -75,7 +90,9 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
          *  $__getInput['tk']
          *
          */
-        $this->tokenAuth = $__getInput['tk'];
+        $this->tokenAuth = $__getInput[ $this->tokenName ];
+
+        $this->extra_info_content = $__getInput[ $this->extraInfoName ];
 
         Log::doLog( $_GET );
         Log::doLog( $_SERVER['QUERY_STRING'] );
@@ -117,7 +134,7 @@ abstract class OutsourceTo_AbstractSuccessController extends viewController {
 
         //we need a list not an hashmap
         $item_list = array();
-        foreach( $shop_cart->getCart() as $item ){
+        foreach( array( $shop_cart->getItem( $this->extra_info_content ) ) as $item ){
             $item_list[ ] = $item;
         }
 

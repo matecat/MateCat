@@ -138,7 +138,7 @@ class downloadFileController extends downloadController {
             foreach ( $chunk as $file ) {
 
                 $mime_type        = $file[ 'mime_type' ];
-                $fileID          = $file[ 'id_file' ];
+                $fileID           = $file[ 'id_file' ];
                 $current_filename = $file[ 'filename' ];
                 $original_xliff   = $file[ 'xliff_file' ];
 
@@ -243,7 +243,9 @@ class downloadFileController extends downloadController {
             $convertResult               = $converter->multiConvertToOriginal( $files_buffer, $chosen_machine = false );
 
             foreach ( array_keys( $files_buffer ) as $fileID ) {
-                $output_content[ $fileID ][ 'documentContent' ] = $convertResult[ $fileID ] [ 'documentContent' ];
+
+                $output_content[ $fileID ][ 'documentContent' ] = $this->removeTargetMarks( $convertResult[ $fileID ] [ 'documentContent' ], $output_content[ $fileID ][ 'out_xliff_name' ] );
+
             }
 
 //            $output_content[ $fileID ][ 'documentContent' ] = $convertResult[ 'documentContent' ];
@@ -305,6 +307,8 @@ class downloadFileController extends downloadController {
         $zip  = new ZipArchive();
         $zip->open( $file, ZipArchive::OVERWRITE );
 
+        $rev_index_name = array();
+
         // Staff with content
         foreach ( $output_content as $f ) {
 
@@ -321,6 +325,12 @@ class downloadFileController extends downloadController {
                 $fName = substr( uniqid(), -5 ) . "_" . $fName;
             }
 
+            if( array_key_exists( $fName, $rev_index_name ) ){
+                $fName = uniqid() . $fName;
+            }
+
+            $rev_index_name[$fName] = $fName;
+
             $zip->addFromString( $fName, $f[ 'documentContent' ] );
 
         }
@@ -331,6 +341,72 @@ class downloadFileController extends downloadController {
         unlink( $file );
 
         $this->content = $zip_content;
+
+    }
+
+    /**
+     * Remove the tag mrk if the file is an xlif and if the file is a globalsight file
+     *
+     * Also, check for encoding and transform utf16 to utf8 and back
+     *
+     * @param $documentContent
+     * @param $path
+     *
+     * @return string
+     */
+    public function removeTargetMarks( $documentContent, $path ){
+
+        $extension = pathinfo( $path );
+        if ( !DetectProprietaryXliff::isXliffExtension( $extension ) ){
+            return $documentContent;
+        }
+
+        $is_utf8 = true;
+        $original_charset = 'utf-8'; //not used, useful only to avoid IDE warning for not used variable
+
+        //The file is UTF-16 Encoded
+        if ( stripos( substr( $documentContent, 0, 100 ), "<?xml " ) === false ) {
+
+            $is_utf8 = false;
+            list( $original_charset, $documentContent ) = CatUtils::convertEncoding( 'UTF-8', $documentContent );
+
+        }
+
+        //avoid in memory copy of very large files if possible
+        $detect_result = DetectProprietaryXliff::getInfoByStringData( substr( $documentContent, 0, 1024 ) );
+
+        //clean mrk tags for GlobalSight application compatibility
+        //this should be a sax parser instead of in memory copy for every trans-unit
+        if( $detect_result['proprietary_short_name'] == 'globalsight' ){
+
+            // Getting Trans-units
+            $trans_units = explode( '<trans-unit', $documentContent );
+
+            foreach ($trans_units as $pos => $trans_unit) {
+
+                // First element in the XLIFF split is the header, not the first file
+                if ($pos > 0) {
+
+                    //remove seg-source tags
+                    $trans_unit = preg_replace('|<seg-source.*?</seg-source>|si', '', $trans_unit );
+                    //take the target content
+                    $trans_unit = preg_replace('#<mrk[^>]+>|</mrk>#si', '', $trans_unit );
+
+                    $trans_units[ $pos ] = $trans_unit;
+
+                }
+
+            } // End of trans-units
+
+            $documentContent = implode('<trans-unit',$trans_units);
+
+        }
+
+        if( !$is_utf8 ){
+            list( $__utf8, $documentContent ) = CatUtils::convertEncoding( $original_charset, $documentContent );
+        }
+
+        return $documentContent;
 
     }
 
