@@ -543,8 +543,8 @@ UI = {
 				}
 				UI.compileDisplay();
 
-				UI.outsourceElements = $( ".missing-outsource-data" );
-				UI.getOutsourceQuotes();
+					//UI.outsourceElements = $( ".missing-outsource-data" );
+					//UI.getOutsourceQuotes();
 
 		        $("html,body").animate({
 		            scrollTop: 0
@@ -627,7 +627,7 @@ UI = {
             }
 
             newProject += '                <th class="progress header">Progress</th>'+
-				'	<th class="progress header">Outsource</th>' +
+				'	<!-- th class="progress header">Outsource</th -->' +
 			    '                <th class="actions">Actions</th>'+
 			    '            </tr>'+
 		        '        </thead>'+
@@ -671,7 +671,7 @@ UI = {
 				    '                <a href="#" class="draft-bar" title="Draft '+this.stats.DRAFT_PERC_FORMATTED+'%" style="width:'+this.stats.DRAFT_PERC+'%"></a>'+
 				    '            </div>'+
 		            '        </td>'+
-					'		<td class="missing-outsource-data"></td>'+
+					'		<!--td class="missing-outsource-data"></td-->'+
 		            '        <td class="actions">'+
 		            '            <a class="change" href="#" title="Change job password">Change</a>'+
 		            '            <a class="cancel" href="#" title="Cancel Job">Cancel</a>'+
@@ -754,7 +754,7 @@ UI = {
 			tableElement.html( "0 words found.<br/>Unable to quote." );
 			tableElement.removeClass( "missing-outsource-data" );
 
-			UI.getOutsourceQuotes();
+			//UI.getOutsourceQuotes();
 			return;
 		}
 	
@@ -798,7 +798,7 @@ UI = {
 					tableElement.html( form );
 					tableElement.removeClass( "missing-outsource-data" );
 
-					UI.getOutsourceQuotes();
+					//UI.getOutsourceQuotes();
 				}
 			}
 		});
