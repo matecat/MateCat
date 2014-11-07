@@ -244,7 +244,7 @@ class downloadFileController extends downloadController {
 
             foreach ( array_keys( $files_buffer ) as $fileID ) {
 
-                $output_content[ $fileID ][ 'documentContent' ] = $this->removeTargetMarks( $convertResult[ $fileID ] [ 'documentContent' ], $output_content[ $fileID ][ 'out_xliff_name' ] );
+                $output_content[ $fileID ][ 'documentContent' ] = $this->removeTargetMarks( $convertResult[ $fileID ] [ 'documentContent' ], $files_buffer[ $fileID ][ 'filename' ] );
 
             }
 
