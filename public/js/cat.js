@@ -7851,6 +7851,7 @@ $.extend(UI, {
  Loaded by cattool and upload page.
  */
 
+
 $.extend(UI, {
     initTM: function() {
         console.log('TM init vediamo');
@@ -7861,18 +7862,11 @@ $.extend(UI, {
 
         $(".popup-tm .x-popup, .popup-tm h1 .continue").click(function(e) {
             e.preventDefault();
-            $( ".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
-            $("#SnapABug_Button").show();
-            $(".outer-tm").hide();
-            $('body').removeClass('side-popup');
+            UI.closeTMPanel();
         });
 
         $(".outer-tm").click(function() {
-            $(".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
-            $("#SnapABug_Button").show();
-            $(".outer-tm").hide();
-
-            $('body').removeClass('side-popup');
+            UI.saveTMdata();
         });
 
         $(".mgmt-tm").click(function() {
@@ -7905,7 +7899,6 @@ $.extend(UI, {
                 $('#activetm tr.new').removeClass('badkey');
                 $('#activetm tr.new .error .tm-error-key').text('').hide();
                 UI.checkTMAddAvailability();
-
                 return false;
             });
         });
@@ -7921,18 +7914,14 @@ $.extend(UI, {
                         $(".addtmx").show();
                         UI.clearAddTMRow();
                         */
+        }).on('click', '#activetm tr.uploadpanel a.canceladdtmx', function() {
+            $('#activetm tr.uploadpanel').addClass('hide');
+            $('#activetm tr.new .action .addtmxfile').show();
         }).on('click', '.addtmx', function() {
             $(this).hide();
             var nr = '<td class="uploadfile">' +
                      '  <div class="standard">' +
-                     '  <label class="fileupload">Select a TMX </label>' +
-                     '  <a class="pull-right canceladdtmx">' +
-                     '      <span class="icon-times-circle"></span>' +
-                     '  </a>' +
-                    '   <a class="existingKey pull-right btn-grey addtmxfile">' +
-                    '       <span class="text">Upload TMX</span>' +
-                    '   </a>' +
-                    '<form class="existing add-TM-Form" action="/" method="post">' +
+                    '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
                     '    <input type="hidden" name="action" value="loadTMX" />' +
                     '    <input type="hidden" name="exec" value="newTM" />' +
                     '    <input type="hidden" name="tm_key" value="" />' +
@@ -7940,6 +7929,12 @@ $.extend(UI, {
                     '    <input type="submit" class="addtm-add-submit" style="display: none" />' +
                     '    <input type="file" name="tmx_file" />' +
                     '</form>' +
+                     '  <a class="pull-left btn-grey canceladdtmx">' +
+                     '      <span class="text">Cancel</span>' +
+                     '  </a>' +
+                    '   <a class="existingKey pull-left btn-ok addtmxfile">' +
+                    '       <span class="text">Confirm</span>' +
+                    '   </a>' +
                     '  </div>' +
                     '  <div class="uploadprogress">' +
                     '       <span class="progress">' +
@@ -7992,6 +7987,15 @@ $.extend(UI, {
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
         }).on('click', '#activetm tr.mine .uploadfile .addtmxfile:not(.disabled)', function() {
             UI.execAddTM(this);
+        }).on('click', '.popup-tm td.description .edit-desc', function() {
+            $('.popup-tm tr.mine td.description .edit-desc').removeAttr('contenteditable');
+            $(this).attr('contenteditable', true);
+        }).on('focusout', '.popup-tm td.description .edit-desc', function() {
+            $(this).removeAttr('contenteditable');
+//            $('.popup-tm tr.mine td.description .edit-desc').removeAttr('contenteditable');
+        }).on('keydown', '.popup-tm td.description .edit-desc', 'return', function(e) {
+            e.preventDefault();
+            $(this).removeAttr('contenteditable');
         }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
             UI.execAddTM(this);
 //        }).on('click', '.popup-tm .savebtn', function() {
@@ -8005,55 +8009,11 @@ $.extend(UI, {
             $('#activetm tr.uploadpanel').removeClass('hide');
             $(this).hide();
         }).on('click', 'a.disabletm', function() {
-            var row = $(this).closest("tr");
-            if(row.find('td.uploadfile').length) {
-                row.find('td.uploadfile .canceladdtmx').click();
-                row.find('.addtmx').removeAttr('style');
-            }
-            row.detach();
-            $("#inactivetm").append(row);
-            row.find('a.disabletm .text').text('Use').attr('class', 'text');
-            row.find('.lookup input[type="checkbox"]').first().attr('disabled', 'disabled');
-            row.find('.update input[type="checkbox"]').first().attr('disabled', 'disabled');
-            row.css('display', 'block');
-
-            // draw the user's attention to it
-            row.fadeOut();
-            row.fadeIn();
-            $(this).addClass("usetm").removeClass("disabletm");
-            $('.addtmxrow').hide();
-            // draft of hack for nodata row management from datatables plugin
-//            $('#inactivetm tr.odd:not(.mine)').hide();
+            UI.disableTM(this);
+        }).on('change', 'tr.mine .lookup input, tr.mine .update input', function() {
+            UI.checkTMGrantsModifications(this);
         }).on('click', 'a.usetm', function() {
-            var row = $(this).closest("tr");
-            row.detach();
-            $("#activetm tr.new").before(row);
-            if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
-
-            //update datatable struct
-            $('#inactivetm' ).DataTable().row(row).remove().draw(false);
-
-            row.addClass('mine');
-            row.find('a.usetm .text').text('Stop Use').attr('class', 'text');
-            row.find('.lookup input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
-            row.find('.update input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
-            row.css('display', 'block');
-
-            // draw the user's attention to it
-            row.fadeOut();
-            row.fadeIn();
-            $(this).addClass("disabletm").removeClass("usetm");
-            $('.addtmxrow').hide();
-            // draft of hack for nodata row management from datatables plugin
- /*
-            if(!$('#inactivetm tbody tr.mine, #inactivetm tbody tr.inactive').length) {
-                console.log('aaa: ', $('#inactivetm tbody tr.odd'));
-                if(!$('#inactivetm tbody tr.odd').length) {
-                    $('#inactivetm tbody').append('<tr class="odd"><td valign="top" colspan="5" class="dataTables_empty">No data available in table</td></tr>');
-                }
-                $('#inactivetm tbody tr.odd').show();
-            }
-  */
+            UI.useTM(this);
         }).on('change', '#new-tm-read, #new-tm-write', function() {
             UI.checkTMgrants();
         }).on('change', '#activetm tr.mine td.uploadfile input[type="file"]', function() {
@@ -8170,8 +8130,20 @@ $.extend(UI, {
         };
         console.log('fixHelperModified: ', fixHelperModified);
         */
-        $("#activetm tbody.sortable").sortable({ items: ".mine" }).disableSelection();
+        $(".dragrow" ).mouseover(function() {
+            $("#activetm tbody.sortable").sortable({ items: ".mine" }).sortable('enable').disableSelection();
+        });
+        $(".dragrow" ).mouseout(function() {
+            $("#activetm tbody.sortable").sortable('disable');
+        });
+
     },
+
+
+
+
+
+
     checkTMKey: function(operation) {
         console.log('checkTMKey');
         console.log('operation: ', operation);
@@ -8259,16 +8231,71 @@ $.extend(UI, {
             return true;
         }
     },
-/*
-    registerTMX: function () {
-        if(!UI.TMKeysToAdd) UI.TMKeysToAdd = [];
-        item = {};
-        item.key = $('#new-tm-key').val();
-        item.description = $('#new-tm-description').val();
-        UI.TMKeysToAdd.push(item);
-        $(".canceladdtmx").click();
+    checkTMGrantsModifications: function (el) {
+        tr = $(el).parents('tr.mine');
+        isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
+        if((!tr.find('.lookup input').is(':checked')) && (!tr.find('.update input').is(':checked'))) {
+            if(isActive) UI.disableTM(el);
+        } else {
+            if(!isActive) UI.useTM(el);
+        }
+        console.log('lookup: ', tr.find('.lookup input').is(':checked'));
+        console.log('update: ', tr.find('.update input').is(':checked'));
     },
-*/
+
+    disableTM: function (el) {
+        var row = $(el).closest("tr");
+        if(row.find('td.uploadfile').length) {
+            row.find('td.uploadfile .canceladdtmx').click();
+            row.find('.addtmx').removeAttr('style');
+        }
+        row.detach();
+        $("#inactivetm").append(row);
+//        row.find('a.disabletm .text').text('Use').attr('class', 'text');
+//        row.find('.lookup input[type="checkbox"]').first().attr('disabled', 'disabled');
+//        row.find('.update input[type="checkbox"]').first().attr('disabled', 'disabled');
+        row.css('display', 'block');
+
+        // draw the user's attention to it
+        row.fadeOut();
+        row.fadeIn();
+//        $(el).addClass("usetm").removeClass("disabletm");
+        $('.addtmxrow').hide();
+        // draft of hack for nodata row management from datatables plugin
+//            $('#inactivetm tr.odd:not(.mine)').hide();
+    },
+
+    useTM: function (el) {
+        var row = $(el).closest("tr");
+        row.detach();
+        $("#activetm tr.new").before(row);
+        if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
+        row.addClass('mine');
+//        row.find('a.usetm .text').text('Stop Use').attr('class', 'text');
+//        row.find('.lookup input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
+//        row.find('.update input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
+        row.css('display', 'block');
+
+        //update datatable struct
+        $('#inactivetm' ).DataTable().row(row).remove().draw(false);
+
+        // draw the user's attention to it
+        row.fadeOut();
+        row.fadeIn();
+//        $(el).addClass("disabletm").removeClass("usetm");
+        $('.addtmxrow').hide();
+    },
+
+    /*
+        registerTMX: function () {
+            if(!UI.TMKeysToAdd) UI.TMKeysToAdd = [];
+            item = {};
+            item.key = $('#new-tm-key').val();
+            item.description = $('#new-tm-description').val();
+            UI.TMKeysToAdd.push(item);
+            $(".canceladdtmx").click();
+        },
+    */
     execAddTM: function(el) {
         existing = ($(el).hasClass('existingKey'))? true : false;
         if(existing) {
@@ -8289,7 +8316,9 @@ $.extend(UI, {
         var TMKey = $('#new-tm-key').val();
 
         newTr = '<tr class="mine" data-tm="1" data-glos="1" data-owner="' + config.ownerIsMe + '">' +
+                '    <td class="dragrow"></td>' +
                 '    <td class="privatekey">' + TMKey + '</td>' +
+                '    <td class="owner">You</td>' +
                 '    <td class="description">' + desc + '</td>' +
                 '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + ' /></td>' +
@@ -8298,8 +8327,9 @@ $.extend(UI, {
                 '            <span class="text stopuse">Stop Use</span>' +
                 '        </a>' +
                 '        <a class="btn-grey pull-left addtmx">' +
-                '            <span class="text addtmxbtn">Add TMX</span>' +
+                '            <span class="text addtmxbtn">Import TMX</span>' +
                 '        </a>' +
+                ' <a class="btn-grey pull-left downloadtmx"><span class="text">Download</span></a>' +
                 '    </td>' +
                 '</tr>';
         $('#activetm tr.new').before(newTr);
@@ -8335,6 +8365,11 @@ $.extend(UI, {
         $('.mgmt-tm tr.new .error span').text('').hide();
         $('.mgmt-tm tr.new .addtmxfile').show();
     },
+    clearTMPanel: function () {
+        $('.mgmt-container .error-message').hide();
+        $('.mgmt-container .warning-message').hide();
+    },
+
     TMFileUpload: function(form, action_url, div_id, tmName) {
         console.log('div_id: ', div_id);
         console.log('form: ', form);
@@ -8591,37 +8626,50 @@ $.extend(UI, {
                     console.log('TM data saved!!');
                     $('.mgmt-panel-tm .error-message').text('').hide();
                     $('.mgmt-panel-tm .warning-message').text('Your data has been saved.').show();
-
-                    //set opacity to 0, then set height to 0
-                    //when the div is completely disappeared, reset css values to the default
                     setTimeout(function(){
-                        $('.mgmt-panel-tm .warning-message').animate({
-                            opacity: 0
-                        },300);
+                        UI.closeTMPanel();
+                        UI.clearTMPanel();
+                    },1000);
+                    /*
+                                        setTimeout(function(){
+                                            $('.mgmt-panel-tm .warning-message').animate({
+                                                opacity: 0
+                                            },300);
+                                            UI.closeTMPanel();
 
-                        setTimeout(function(){
-                            $('.mgmt-panel-tm .warning-message' )
-                                    .animate({
-                                        height:0,
-                                        padding:0,
-                                        margin:0
-                                    },300);
+                                            setTimeout(function(){
+                                                $('.mgmt-panel-tm .warning-message' )
+                                                        .animate({
+                                                            height:0,
+                                                            padding:0,
+                                                            margin:0
+                                                        },300);
 
-                            setTimeout(function(){
-                                $('.mgmt-panel-tm .warning-message' )
-                                        .text("")
-                                        .animate({
-                                            opacity : 1,
-                                            height: 'auto',
-                                            padding: 'auto',
-                                            margin: 'auto'
-                                        },0 )
-                                        .hide()
-                            },300);
-                        }, 300);
-                    }, 2000);
+                                                setTimeout(function(){
+                                                    $('.mgmt-panel-tm .warning-message' )
+                                                        .text("")
+                                                        .animate({
+                                                            opacity : 1,
+                                                            height: 'auto',
+                                                            padding: 'auto',
+                                                            margin: 'auto'
+                                                        },0 )
+                                                        .hide()
+                                                },300);
+
+                                            }, 300);
+                                            console.log('ORA');
+                                        }, 2000);
+                    */
                 }
             }
         });
+    },
+    closeTMPanel: function () {
+        $( ".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
+        $("#SnapABug_Button").show();
+        $(".outer-tm").hide();
+        $('body').removeClass('side-popup');
     }
+
 });

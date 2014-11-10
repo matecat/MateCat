@@ -792,7 +792,7 @@ form.add-TM-Form {
 	    overflow: visible;
 	    max-height: inherit;
 	    font-size: 24px;
-	    background: #6d6e71 url(../img/sprite.png) 10px 10px no-repeat;
+	    background: #4D4D4D url(../img/sprite.png) 10px 10px no-repeat;
 	    padding: 10px 10px 7px 58px;
 	    border-bottom: 1px solid #000;
 	    color: #fff;
@@ -1082,7 +1082,7 @@ margin:0 auto; overflow:hidden; width:100%;
 padding-left: 20px;
 }
 
-.mgmt-tm .progress {display: block; height: 10px; background: #fff}
+.mgmt-tm .progress {display: block; height: 10px; background: #d0d1d1; margin-bottom: 4px; position: relative;}
 
 .new td.fileupload {
 width: 92px;
@@ -1092,6 +1092,8 @@ width: 92px;
 .memory-mgmt.btn {
 width: auto;
 }
+
+
 
 .mgmt-tm, .mgmt-gl, .mgmt-tm-nested {
 	border-bottom:40px;
@@ -1117,7 +1119,10 @@ clear: right;
 	border:1px solid #333;
 }
 
-
+span.asterisk {
+	line-height: 10px;
+vertical-align: bottom;
+}
 
 .btn-grey:active:active {
 -moz-box-shadow: inset 0 0 1px 1px #888;
@@ -1143,6 +1148,31 @@ body.cattool .mgmt-tm.mine thead,
     cursor: pointer;
     margin-bottom: 30px;
 }
+
+.canceladdtmx.btn-grey .text, .addtmxfile.btn-ok .text {color: #fff;}
+
+.addtmxfile.btn-ok  {
+	padding: 4px 27px 7px 13px;
+margin-top: -3px;
+}
+ .canceladdtmx.btn-grey {
+ 	width: 80px!important; 
+background:#f26522 url(../img/sprite.png) -4px -1162px no-repeat !Important;
+margin-top: 22px;
+padding: 3px 3px 5px 32px;
+
+}
+
+.popup-tm td.description .edit-desc[contenteditable='true'] {
+    border: 1px solid #999;
+    background: #fff;
+    padding: 2px;
+    margin-left: -3px;
+}
+ 
+ .canceladdtmx.btn-grey:hover{background:#d1581c url(../img/sprite.png)  -4px -1162px no-repeat !Important}
+.addtmxfile.btn-ok:hover {background:#00A8D2;}
+
 td.uploadfile .canceladdtmx {
     margin-bottom: 0px;
 }
@@ -1186,9 +1216,7 @@ margin-top: 10px;
 #activetm td.uploadfile .btn-grey {
     margin-top: -3px;
 }
-.mgmt-tm td.uploadfile .btn-grey span {
-    margin: 0px;
-}
+
 
 /*
 #activetm {margin-bottom: 15px;}
@@ -1215,6 +1243,10 @@ margin-top: 10px;
 }
 #activetm td.dragrow{
     cursor: move;
+}
+
+#inactivetm td.dragrow {
+display: none;
 }
 td.dragrow {
 background-image: url(../img/grip.png)!important;
@@ -1514,11 +1546,35 @@ tr.new.badgrants .fileupload
     display: none;
 }
 #activetm .uploadprogress .progress .inner {
-    float: left;
-    height: 5px;
+    display: block;
+    height: 10px;
+    margin-bottom:5px;
     width: 0%;
     background: #09BEEC;
+    border-radius: 0;
 }
+
+#activetm .uploadprogress .progress:after {
+content: "";
+position: absolute;
+top: 0;
+left: 0;
+bottom: 0;
+right: 0;
+background-image: -webkit-gradient(linear, 0 0, 100% 100%, color-stop(.25, rgba(255, 255, 255, .2)), color-stop(.25, transparent), color-stop(.5, transparent), color-stop(.5, rgba(255, 255, 255, .2)), color-stop(.75, rgba(255, 255, 255, .2)), color-stop(.75, transparent), to(transparent) );
+background-image: -webkit-linear-gradient( -45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent );
+background-image: -moz-linear-gradient( -45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent );
+background-image: -ms-linear-gradient( -45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent );
+background-image: -o-linear-gradient( -45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent );
+z-index: 1;
+-webkit-background-size: 50px 50px;
+-moz-background-size: 50px 50px;
+background-size: 50px 50px;
+-webkit-animation: move 2s linear infinite;
+overflow: hidden;
+}
+
+
 .description textarea {
 resize: none;
 }
@@ -1828,6 +1884,10 @@ margin-left: 10px;
 	content: "\e601";
 	padding-right: 5px;
 	vertical-align: text-top;
+}
+
+.addtmxfile .text:before {
+	padding-right: 15px;
 }
 
 
