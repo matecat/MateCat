@@ -20,7 +20,7 @@ class analyzeController extends viewController {
      *
      * @var string
      */
-    protected $_outsource_login_API = 'http://signin.translated.net/';
+    protected $_outsource_login_API =  '//signin.translated.net/';
 
     private $pid;
     private $ppassword;
