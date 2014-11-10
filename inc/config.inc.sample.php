@@ -144,7 +144,7 @@ class INIT {
 
             register_shutdown_function( 'INIT::sessionClose' );
 
-            self::$PROTOCOL = stripos( $_SERVER[ 'SERVER_PROTOCOL' ], "https" ) === false ? "http" : "https";
+            self::$PROTOCOL = isset($_SERVER['HTTPS']) ? "https" : "http";
             self::$HTTPHOST = self::$PROTOCOL . "://" . $_SERVER['HTTP_HOST'];
 
         } else {
