@@ -140,13 +140,13 @@ $.extend(UI, {
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
         }).on('click', '#activetm tr.mine .uploadfile .addtmxfile:not(.disabled)', function() {
             UI.execAddTM(this);
-        }).on('click', '.popup-tm td.description .edit-desc', function() {
-            $('.popup-tm tr.mine td.description .edit-desc').removeAttr('contenteditable');
+        }).on('click', '#activetm td.description .edit-desc', function() {
+            $('#activetm tr.mine td.description .edit-desc').removeAttr('contenteditable');
             $(this).attr('contenteditable', true);
-        }).on('focusout', '.popup-tm td.description .edit-desc', function() {
+        }).on('focusout', '#activetm td.description .edit-desc', function() {
             $(this).removeAttr('contenteditable');
 //            $('.popup-tm tr.mine td.description .edit-desc').removeAttr('contenteditable');
-        }).on('keydown', '.popup-tm td.description .edit-desc', 'return', function(e) {
+        }).on('keydown', '#activetm td.description .edit-desc', 'return', function(e) {
             e.preventDefault();
             $(this).removeAttr('contenteditable');
         }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
@@ -187,12 +187,13 @@ $.extend(UI, {
         // script per filtrare il contenuto dinamicamente, da qui: http://www.datatables.net
 
         $(document).ready(function() {
-            console.log("$('#inactivetm'): ", $('#inactivetm'));
+//            console.log("$('#inactivetm'): ", $('#inactivetm'));
             UI.setTMsortable();
+/*
             $('#inactivetm').dataTable({
                 "columnDefs":  [ { targets: [0,2,3,4], orderable: false } ]
             });
-
+*/
         });
 
         $('tr').click(function() {
@@ -272,6 +273,50 @@ $.extend(UI, {
     },
     setTMsortable: function () {
 
+        $("#inactivetm").tablesorter({
+/*
+            textExtraction: function(node) {
+            // extract data from markup and return it
+                if($(node).hasClass('description')) {
+                    console.log('a: ', $(node).find('.edit-desc').text());
+                    return $(node).find('.edit-desc').text();
+                } else {
+                    console.log('b: ', $(node).text());
+                    return $(node).text();
+                }
+            }
+*/
+
+            headers: {
+                4: {
+                    sorter: false
+                },
+                5: {
+                    sorter: false
+                },
+                6: {
+                    sorter: false
+                },
+                7: {
+                    sorter: false
+                }
+            }
+
+        });
+
+        var fixHelper = function(e, ui) {
+            ui.children().each(function() {
+                $(this).width($(this).width());
+            });
+            return ui;
+        };
+
+        $('#activetm tbody').sortable({
+            helper: fixHelper,
+            handle: '.dragrow',
+            items: '.mine'
+        }).disableSelection();
+
  /*       console.log('setTMsortable');
         var fixHelperModified = function(e, tr) {
             var $originals = tr.children();
@@ -283,13 +328,14 @@ $.extend(UI, {
         };
         console.log('fixHelperModified: ', fixHelperModified);
         */
+ /*
         $(".dragrow" ).mouseover(function() {
             $("#activetm tbody.sortable").sortable({ items: ".mine" }).sortable('enable').disableSelection();
         });
         $(".dragrow" ).mouseout(function() {
             $("#activetm tbody.sortable").sortable('disable');
         });
-
+*/
     },
 
 
@@ -430,7 +476,7 @@ $.extend(UI, {
         row.css('display', 'block');
 
         //update datatable struct
-        $('#inactivetm' ).DataTable().row(row).remove().draw(false);
+//        $('#inactivetm' ).DataTable().row(row).remove().draw(false);
 
         // draw the user's attention to it
         row.fadeOut();

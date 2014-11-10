@@ -837,7 +837,7 @@ form.add-TM-Form {
 {
 	width: 45px;
 	border-right: 1px solid #003366;
-	background: transparent url(http://d1gwm4cf8hecp4.cloudfront.net/images/home/g.png) 0 5px no-repeat;
+	background: transparent url(../img/g.png) 0 5px no-repeat;
 	border-radius: 0 0 0 6px;
     }
 
@@ -1243,9 +1243,12 @@ margin-top: 10px;
     cursor: move;
 }
 td.dragrow {
-background-image: url(../img/grip.png)!important;
-background-repeat: no-repeat!important;
-background-position: center center!important;
+    background-image: url(../img/grip.png)!important;
+    background-repeat: no-repeat!important;
+    background-position: center center!important;
+    }
+#inactivetm td.dragrow {
+/*    display: none; */
 }
 #activetm tr.owner td {
     background: #fff !important;

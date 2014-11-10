@@ -479,9 +479,13 @@
                                 </table>
 
                                 <h3 class="pull-left">Inactive TM</h3>
+
+
+
                                 <table class="mgmt-tm mgmt-tm-nested scroll" id="inactivetm">
                                     <thead>
                                     <tr>
+                                        <th class="fake" style="display: none"></th>
                                         <th class="privatekey">Private Key</th>
                                         <th class="owner">Owner</th>
                                         <th class="description">Description</th>
@@ -496,6 +500,71 @@
                                         <td colspan="7">No keys actually</td>
                                     </tr>
                                     -->
+
+<!-- fake items -->
+<!--
+                                    <tr data-tm="1" data-glos="1" data-editable="1" data-owner="0" class="mine clicked" style="display: block;">
+                                        <td class="dragrow ui-sortable-handle"></td>
+                                        <td class="privatekey">3992122c0593ffdae8d6</td>
+                                        <td class="owner">222</td>
+                                        <td class="description"><div class="edit-desc">aaa</div></td>
+                                        <td class="lookup text-center check"><input type="checkbox" /></td>
+                                        <td class="update text-center check"><input type="checkbox" checked="" /></td>
+                                        <td class="action">
+                                            <a class="btn-grey pull-left disabletm">
+                                                <span class="text">Stop Use</span>
+                                            </a>
+                                            <a class="btn-grey pull-left addtmx">
+                                                <span class="text">Import TMX</span>
+                                            </a>
+                                            <a class="btn-grey pull-left downloadtmx">
+                                                <span class="text">Download</span>
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <tr data-tm="1" data-glos="1" data-editable="1" data-owner="0" class="mine clicked" style="display: block;">
+                                        <td class="dragrow ui-sortable-handle"></td>
+                                        <td class="privatekey">1992122c0593ffdae8d6</td>
+                                        <td class="owner">111</td>
+                                        <td class="description"><div class="edit-desc">bbb</div></td>
+                                        <td class="lookup text-center check"><input type="checkbox" /></td>
+                                        <td class="update text-center check"><input type="checkbox" checked="" /></td>
+                                        <td class="action">
+                                            <a class="btn-grey pull-left disabletm">
+                                                <span class="text">Stop Use</span>
+                                            </a>
+                                            <a class="btn-grey pull-left addtmx">
+                                                <span class="text">Import TMX</span>
+                                            </a>
+                                            <a class="btn-grey pull-left downloadtmx">
+                                                <span class="text">Download</span>
+                                            </a>
+                                        </td>
+                                    </tr>
+
+                                    <tr data-tm="1" data-glos="1" data-editable="1" data-owner="0" class="mine clicked" style="display: block;">
+                                        <td class="dragrow ui-sortable-handle"></td>
+                                        <td class="privatekey">2992122c0593ffdae8d6</td>
+                                        <td class="owner">333</td>
+                                        <td class="description"><div class="edit-desc">ccc</div></td>
+                                        <td class="lookup text-center check"><input type="checkbox" /></td>
+                                        <td class="update text-center check"><input type="checkbox" checked="" /></td>
+                                        <td class="action">
+                                            <a class="btn-grey pull-left disabletm">
+                                                <span class="text">Stop Use</span>
+                                            </a>
+                                            <a class="btn-grey pull-left addtmx">
+                                                <span class="text">Import TMX</span>
+                                            </a>
+                                            <a class="btn-grey pull-left downloadtmx">
+                                                <span class="text">Download</span>
+                                            </a>
+                                        </td>
+                                    </tr>
+
+-->
+<!-- end fake items -->
 
                                     <tal:block tal:repeat="key user_keys/totals">
                                         <tr class="inactive" data-tm="1" data-glos="1">
