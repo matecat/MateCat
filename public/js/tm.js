@@ -90,7 +90,7 @@ $.extend(UI, {
                      '  <a class="pull-left btn-grey canceladdtmx">' +
                      '      <span class="text">Cancel</span>' +
                      '  </a>' +
-                    '   <a class="existingKey pull-left btn-grey addtmxfile">' +
+                    '   <a class="existingKey pull-left btn-ok addtmxfile">' +
                     '       <span class="text">Confirm</span>' +
                     '   </a>' +
                     '  </div>' +

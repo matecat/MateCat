@@ -792,7 +792,7 @@ form.add-TM-Form {
 	    overflow: visible;
 	    max-height: inherit;
 	    font-size: 24px;
-	    background: #6d6e71 url(../img/sprite.png) 10px 10px no-repeat;
+	    background: #4D4D4D url(../img/sprite.png) 10px 10px no-repeat;
 	    padding: 10px 10px 7px 58px;
 	    border-bottom: 1px solid #000;
 	    color: #fff;
@@ -1117,7 +1117,10 @@ clear: right;
 	border:1px solid #333;
 }
 
-
+span.asterisk {
+	line-height: 10px;
+vertical-align: bottom;
+}
 
 .btn-grey:active:active {
 -moz-box-shadow: inset 0 0 1px 1px #888;
@@ -1143,6 +1146,26 @@ body.cattool .mgmt-tm.mine thead,
     cursor: pointer;
     margin-bottom: 30px;
 }
+
+.canceladdtmx.btn-grey .text, .addtmxfile.btn-ok .text {color: #fff;}
+
+.addtmxfile.btn-ok  {
+	padding: 6px 20px 6px 13px;
+margin-top: -5px;
+}
+ .canceladdtmx.btn-grey {
+ 	width: 80px!important; 
+background:#f26522 url(../img/sprite.png) -4px -1160px no-repeat !Important;
+margin-top: 22px;
+padding: 6px 30px 6px 13px;
+
+}
+
+
+ 
+ .canceladdtmx.btn-grey:hover{background:#d1581c url(../img/sprite.png)  -4px -1160px no-repeat !Important}
+
+
 td.uploadfile .canceladdtmx {
     margin-bottom: 0px;
 }
@@ -1184,11 +1207,9 @@ margin-top: 10px;
     margin: 2px 3px 2px 0px;
 }
 #activetm td.uploadfile .btn-grey {
-    margin-top: -3px;
+    margin-top: -5px;
 }
-.mgmt-tm td.uploadfile .btn-grey span {
-    margin: 0px;
-}
+
 
 /*
 #activetm {margin-bottom: 15px;}
@@ -1828,6 +1849,10 @@ margin-left: 10px;
 	content: "\e601";
 	padding-right: 5px;
 	vertical-align: text-top;
+}
+
+.addtmxfile .text:before {
+	padding-right: 15px;
 }
 
 
