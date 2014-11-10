@@ -422,8 +422,8 @@
                                                 <a class="pull-left btn-grey addtmxfile">
                                                     <span class="text">Add TMX</span>
                                                 </a>
-                                                <a class="pull-right canceladdtmx">
-                                                    <span class="icon-times-circle"></span>
+                                                <a class="pull-right btn-grey canceladdtmx">
+                                                    <span class="text">Cancel</span>
                                                 </a>
                                                 <div class="error">
                                                     <span class="tm-error-key"></span>
@@ -449,7 +449,7 @@
                                                     <input type="file" name="tmx_file" />
                                                 </form>
 
-                                                <a class="pull-right btn-grey addtmxfile">
+                                                <a class="pull-right btn-ok addtmxfile">
                                                     <span class="text">Confirm</span>
                                                 </a>
                                             </div>
@@ -498,7 +498,7 @@
                                     <tal:block tal:repeat="key user_keys/totals">
                                         <tr class="inactive" data-tm="1" data-glos="1">
                                             <td class="privatekey">${key/key}</td>
-                                            <td class="owner">owner</td>
+                                            <td class="owner">Owner</td>
                                             <td class="description">${key/name}</td>
                                             <td class="lookup text-center check"><input disabled="disabled" type="checkbox" checked="${key/r}"/></td>
                                             <td class="update text-center check"><input disabled="disabled" type="checkbox" checked="${key/w}"/></td>
@@ -507,7 +507,7 @@
                                                     <span class="text">Use</span>
                                                 </a>
                                                 <a class="btn-grey pull-left  addtmx">
-                                                    <span class="text">Add TMX</span>
+                                                    <span class="text">Import TMX</span>
                                                 </a>
                                             </td>
                                         </tr>
