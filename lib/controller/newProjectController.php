@@ -159,8 +159,6 @@ class newProjectController extends viewController {
                     $this->keyList[ ] = $memKey->tm_key;
                 }
 
-                Log::doLog( $this->keyList );
-
             } catch ( Exception $e ) {
                 Log::doLog( $e->getMessage() );
             }
