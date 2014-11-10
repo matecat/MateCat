@@ -1157,11 +1157,16 @@ margin-top: -5px;
  	width: 80px!important; 
 background:#f26522 url(../img/sprite.png) -4px -1160px no-repeat !Important;
 margin-top: 22px;
-padding: 6px 30px 6px 13px;
+padding: 6px 3px 6px 33px;
 
 }
 
-
+.popup-tm td.description .edit-desc[contenteditable='true'] {
+    border: 1px solid #999;
+    background: #fff;
+    padding: 2px;
+    margin-left: -3px;
+}
  
  .canceladdtmx.btn-grey:hover{background:#d1581c url(../img/sprite.png)  -4px -1160px no-repeat !Important}
 

@@ -15,18 +15,11 @@ $.extend(UI, {
 
         $(".popup-tm .x-popup, .popup-tm h1 .continue").click(function(e) {
             e.preventDefault();
-            $( ".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
-            $("#SnapABug_Button").show();
-            $(".outer-tm").hide();
-            $('body').removeClass('side-popup');
+            UI.closeTMPanel();
         });
 
         $(".outer-tm").click(function() {
-            $(".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
-            $("#SnapABug_Button").show();
-            $(".outer-tm").hide();
-
-            $('body').removeClass('side-popup');
+            UI.saveTMdata();
         });
 
         $(".mgmt-tm").click(function() {
@@ -59,7 +52,6 @@ $.extend(UI, {
                 $('#activetm tr.new').removeClass('badkey');
                 $('#activetm tr.new .error .tm-error-key').text('').hide();
                 UI.checkTMAddAvailability();
-
                 return false;
             });
         });
@@ -75,6 +67,9 @@ $.extend(UI, {
                         $(".addtmx").show();
                         UI.clearAddTMRow();
                         */
+        }).on('click', '#activetm tr.uploadpanel a.canceladdtmx', function() {
+            $('#activetm tr.uploadpanel').addClass('hide');
+            $('#activetm tr.new .action .addtmxfile').show();
         }).on('click', '.addtmx', function() {
             $(this).hide();
             var nr = '<td class="uploadfile">' +
@@ -145,6 +140,15 @@ $.extend(UI, {
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
         }).on('click', '#activetm tr.mine .uploadfile .addtmxfile:not(.disabled)', function() {
             UI.execAddTM(this);
+        }).on('click', '.popup-tm td.description .edit-desc', function() {
+            $('.popup-tm tr.mine td.description .edit-desc').removeAttr('contenteditable');
+            $(this).attr('contenteditable', true);
+        }).on('focusout', '.popup-tm td.description .edit-desc', function() {
+            $(this).removeAttr('contenteditable');
+//            $('.popup-tm tr.mine td.description .edit-desc').removeAttr('contenteditable');
+        }).on('keydown', '.popup-tm td.description .edit-desc', 'return', function(e) {
+            e.preventDefault();
+            $(this).removeAttr('contenteditable');
         }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
             UI.execAddTM(this);
 //        }).on('click', '.popup-tm .savebtn', function() {
@@ -382,6 +386,12 @@ $.extend(UI, {
     },
     checkTMGrantsModifications: function (el) {
         tr = $(el).parents('tr.mine');
+        isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
+        if((!tr.find('.lookup input').is(':checked')) && (!tr.find('.update input').is(':checked'))) {
+            if(isActive) UI.disableTM(el);
+        } else {
+            if(!isActive) UI.useTM(el);
+        }
         console.log('lookup: ', tr.find('.lookup input').is(':checked'));
         console.log('update: ', tr.find('.update input').is(':checked'));
     },
@@ -394,15 +404,15 @@ $.extend(UI, {
         }
         row.detach();
         $("#inactivetm").append(row);
-        row.find('a.disabletm .text').text('Use').attr('class', 'text');
-        row.find('.lookup input[type="checkbox"]').first().attr('disabled', 'disabled');
-        row.find('.update input[type="checkbox"]').first().attr('disabled', 'disabled');
+//        row.find('a.disabletm .text').text('Use').attr('class', 'text');
+//        row.find('.lookup input[type="checkbox"]').first().attr('disabled', 'disabled');
+//        row.find('.update input[type="checkbox"]').first().attr('disabled', 'disabled');
         row.css('display', 'block');
 
         // draw the user's attention to it
         row.fadeOut();
         row.fadeIn();
-        $(el).addClass("usetm").removeClass("disabletm");
+//        $(el).addClass("usetm").removeClass("disabletm");
         $('.addtmxrow').hide();
         // draft of hack for nodata row management from datatables plugin
 //            $('#inactivetm tr.odd:not(.mine)').hide();
@@ -414,9 +424,9 @@ $.extend(UI, {
         $("#activetm tr.new").before(row);
         if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
         row.addClass('mine');
-        row.find('a.usetm .text').text('Stop Use').attr('class', 'text');
-        row.find('.lookup input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
-        row.find('.update input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
+//        row.find('a.usetm .text').text('Stop Use').attr('class', 'text');
+//        row.find('.lookup input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
+//        row.find('.update input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
         row.css('display', 'block');
 
         //update datatable struct
@@ -425,7 +435,7 @@ $.extend(UI, {
         // draw the user's attention to it
         row.fadeOut();
         row.fadeIn();
-        $(el).addClass("disabletm").removeClass("usetm");
+//        $(el).addClass("disabletm").removeClass("usetm");
         $('.addtmxrow').hide();
     },
 
@@ -461,7 +471,7 @@ $.extend(UI, {
         newTr = '<tr class="mine" data-tm="1" data-glos="1" data-owner="' + config.ownerIsMe + '">' +
                 '    <td class="dragrow"></td>' +
                 '    <td class="privatekey">' + TMKey + '</td>' +
-                '    <td class="owner">Me</td>' +
+                '    <td class="owner">You</td>' +
                 '    <td class="description">' + desc + '</td>' +
                 '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + ' /></td>' +
@@ -508,6 +518,11 @@ $.extend(UI, {
         $('.mgmt-tm tr.new .error span').text('').hide();
         $('.mgmt-tm tr.new .addtmxfile').show();
     },
+    clearTMPanel: function () {
+        $('.mgmt-container .error-message').hide();
+        $('.mgmt-container .warning-message').hide();
+    },
+
     TMFileUpload: function(form, action_url, div_id, tmName) {
         console.log('div_id: ', div_id);
         console.log('form: ', form);
@@ -764,37 +779,50 @@ $.extend(UI, {
                     console.log('TM data saved!!');
                     $('.mgmt-panel-tm .error-message').text('').hide();
                     $('.mgmt-panel-tm .warning-message').text('Your data has been saved.').show();
-
                     setTimeout(function(){
-                        $('.mgmt-panel-tm .warning-message').animate({
-                            opacity: 0
-                        },300);
+                        UI.closeTMPanel();
+                        UI.clearTMPanel();
+                    },1000);
+                    /*
+                                        setTimeout(function(){
+                                            $('.mgmt-panel-tm .warning-message').animate({
+                                                opacity: 0
+                                            },300);
+                                            UI.closeTMPanel();
 
-                        setTimeout(function(){
-                            $('.mgmt-panel-tm .warning-message' )
-                                    .animate({
-                                        height:0,
-                                        padding:0,
-                                        margin:0
-                                    },300);
+                                            setTimeout(function(){
+                                                $('.mgmt-panel-tm .warning-message' )
+                                                        .animate({
+                                                            height:0,
+                                                            padding:0,
+                                                            margin:0
+                                                        },300);
 
-                            setTimeout(function(){
-                                $('.mgmt-panel-tm .warning-message' )
-                                        .text("")
-                                        .animate({
-                                            opacity : 1,
-                                            height: 'auto',
-                                            padding: 'auto',
-                                            margin: 'auto'
-                                        },0 )
-                                        .hide()
-                            },300);
+                                                setTimeout(function(){
+                                                    $('.mgmt-panel-tm .warning-message' )
+                                                        .text("")
+                                                        .animate({
+                                                            opacity : 1,
+                                                            height: 'auto',
+                                                            padding: 'auto',
+                                                            margin: 'auto'
+                                                        },0 )
+                                                        .hide()
+                                                },300);
 
-                        }, 300);
-                    }, 2000);
+                                            }, 300);
+                                            console.log('ORA');
+                                        }, 2000);
+                    */
                 }
             }
         });
+    },
+    closeTMPanel: function () {
+        $( ".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
+        $("#SnapABug_Button").show();
+        $(".outer-tm").hide();
+        $('body').removeClass('side-popup');
     }
 
 });
