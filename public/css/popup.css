@@ -25,7 +25,7 @@
     {
     width: 45px;
     border-right: 1px solid #003366;
-    background: transparent url(http://d1gwm4cf8hecp4.cloudfront.net/images/home/g.png) 0 5px no-repeat;
+    background: transparent url(https://d1gwm4cf8hecp4.cloudfront.net/images/home/g.png) 0 5px no-repeat;
     border-radius: 0 0 0 6px;
     }
 
@@ -393,3 +393,37 @@ padding: 4px 0px 0px;
 max-height: 525px;
 }
 */
+
+
+@media screen and ( max-height: 750px ) and (min-height: 650px) {
+    .outsource.modal .popup {
+top: 20px;
+margin: 0 0 0 -400px;
+}
+
+.pricebox .total {
+    margin-top:-30px;
+}
+}
+
+@media screen and (max-height: 650px) {
+   .outsource.modal .popup p {
+font-size: 16px;
+line-height: 26px;
+}
+.outsource.modal h2 {
+font-size: 18px;
+font-weight: bold;
+margin: 10px 0;
+}
+
+ .outsource.modal .popup {
+top: 0px;
+margin: 0 0 0 -400px;
+}
+
+.pricebox .total {
+    margin-top:-40px;
+}
+}
+

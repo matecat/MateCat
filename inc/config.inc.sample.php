@@ -61,6 +61,12 @@ class INIT {
 	public static $CONFIG_VERSION_ERR_MESSAGE;
 
     /**
+     * Default Matecat user agent string
+     *
+     */
+    const MATECAT_USER_AGENT = 'Matecat-Cattool/v';
+
+    /**
 	 * @const JOB_ARCHIVABILITY_THRESHOLD int number of days of inactivity for a job before it's automatically archived
 	 */
 	const JOB_ARCHIVABILITY_THRESHOLD = 30;
@@ -138,7 +144,7 @@ class INIT {
 
             register_shutdown_function( 'INIT::sessionClose' );
 
-            self::$PROTOCOL = stripos( $_SERVER[ 'SERVER_PROTOCOL' ], "https" ) === false ? "http" : "https";
+            self::$PROTOCOL = isset($_SERVER['HTTPS']) ? "https" : "http";
             self::$HTTPHOST = self::$PROTOCOL . "://" . $_SERVER['HTTP_HOST'];
 
         } else {

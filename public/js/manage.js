@@ -543,8 +543,8 @@ UI = {
 				}
 				UI.compileDisplay();
 
-					UI.outsourceElements = $( ".missing-outsource-data" );
-					UI.getAllOutsourceQuotes();
+					//UI.outsourceElements = $( ".missing-outsource-data" );
+					//UI.getAllOutsourceQuotes();
 
 		        $("html,body").animate({
 		            scrollTop: 0
@@ -627,7 +627,7 @@ UI = {
             }
 
             newProject += '                <th class="progress header">Progress</th>'+
-				'	<th class="progress header">Outsource</th>' +
+				'	<!-- th class="progress header">Outsource</th -->' +
 			    '                <th class="actions">Actions</th>'+
 			    '            </tr>'+
 		        '        </thead>'+
@@ -671,13 +671,14 @@ UI = {
 				    '                <a href="#" class="draft-bar" title="Draft '+this.stats.DRAFT_PERC_FORMATTED+'%" style="width:'+this.stats.DRAFT_PERC+'%"></a>'+
 				    '            </div>'+
 		            '        </td>'+
-					'		<td class="missing-outsource-data"></td>'+
+					'		<!--td class="missing-outsource-data"></td-->'+
 		            '        <td class="actions">'+
 		            '            <a class="change" href="#" title="Change job password">Change</a>'+
 		            '            <a class="cancel" href="#" title="Cancel Job">Cancel</a>'+
 		            '            <a class="archive" href="#" title="Archive Job">Archive</a>'+
 		            '            <a class="resume" href="#" title="Resume Job">Resume</a>'+
 		            '            <a class="unarchive" href="#" title="Unarchive Job">Unarchive</a>'+
+		            '            <a class="sdlxliff" target="_blank" href="/?action=downloadFile&id_job=' + this.id + '&password=' + this.password + '&forceXliff=1" title="Bilingual Trados file. Ideal to run QA or finish the work offline">Export SDLXLIFF</a>'+
 		            '        </td>'+
 		            '    </tr>';
 
@@ -752,7 +753,7 @@ UI = {
 			tableElement.html( "0 words found.<br/>Unable to quote." );
 			tableElement.removeClass( "missing-outsource-data" );
 
-			UI.getAllOutsourceQuotes();
+			//UI.getAllOutsourceQuotes();
 			return;
 		}
 	
@@ -775,9 +776,7 @@ UI = {
 			{
 				if ( ( data.data[0]["price"] > 0 ) && ( data.data[0]["delivery_date"] != "" ) )
 				{
-					var price = data.data[0]["price_currency"];
-					
-					price=parseFloat(price).toFixed(2);
+					var price = data.data[0]["price"];
 					var date = new Date( data.data[0]["delivery_date"] );
 					var delivery = "<b>" + date.getDate() + "/" + ( date.getMonth() + 1 ) + "</b> at <b>" + date.getHours() + ":" + ( ( date.getMinutes() != 0 ) ? date.getMinutes() : "00" ) + "</b>";
 
@@ -799,7 +798,7 @@ UI = {
 					tableElement.html( form );
 					tableElement.removeClass( "missing-outsource-data" );
 
-					UI.getAllOutsourceQuotes();
+					//UI.getAllOutsourceQuotes();
 				}
 			}
 		});
@@ -842,8 +841,7 @@ UI = {
 			{
 				if ( ( data.data[0]["price"] > 0 ) && ( data.data[0]["delivery_date"] != "" ) )
 				{
-					var price = data.data[0]["price_currency"];
-					price=parseFloat(price).toFixed(2);
+					var price = data.data[0]["price"];
 					var date = new Date( data.data[0]["delivery_date"] );
 					var delivery = "<b>" + date.getDate() + "/" + ( date.getMonth() + 1 ) + "</b> at <b>" + date.getHours() + ":" + ( ( date.getMinutes() != 0 ) ? date.getMinutes() : "00" ) + "</b>";
 
