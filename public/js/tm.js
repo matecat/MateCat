@@ -158,54 +158,11 @@ $.extend(UI, {
             $('#activetm tr.uploadpanel').removeClass('hide');
             $(this).hide();
         }).on('click', 'a.disabletm', function() {
-            var row = $(this).closest("tr");
-            if(row.find('td.uploadfile').length) {
-                row.find('td.uploadfile .canceladdtmx').click();
-                row.find('.addtmx').removeAttr('style');
-            }
-            row.detach();
-            $("#inactivetm").append(row);
-            row.find('a.disabletm .text').text('Use').attr('class', 'text');
-            row.find('.lookup input[type="checkbox"]').first().attr('disabled', 'disabled');
-            row.find('.update input[type="checkbox"]').first().attr('disabled', 'disabled');
-            row.css('display', 'block');
-
-            // draw the user's attention to it
-            row.fadeOut();
-            row.fadeIn();
-            $(this).addClass("usetm").removeClass("disabletm");
-            $('.addtmxrow').hide();
-            // draft of hack for nodata row management from datatables plugin
-//            $('#inactivetm tr.odd:not(.mine)').hide();
+            UI.disableTM(this);
+        }).on('change', 'tr.mine .lookup input, tr.mine .update input', function() {
+            UI.checkTMGrantsModifications(this);
         }).on('click', 'a.usetm', function() {
-            var row = $(this).closest("tr");
-            row.detach();
-            $("#activetm tr.new").before(row);
-            if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
-            row.addClass('mine');
-            row.find('a.usetm .text').text('Stop Use').attr('class', 'text');
-            row.find('.lookup input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
-            row.find('.update input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
-            row.css('display', 'block');
-
-            //update datatable struct
-            $('#inactivetm' ).DataTable().row(row).remove().draw(false);
-
-            // draw the user's attention to it
-            row.fadeOut();
-            row.fadeIn();
-            $(this).addClass("disabletm").removeClass("usetm");
-            $('.addtmxrow').hide();
-            // draft of hack for nodata row management from datatables plugin
- /*
-            if(!$('#inactivetm tbody tr.mine, #inactivetm tbody tr.inactive').length) {
-                console.log('aaa: ', $('#inactivetm tbody tr.odd'));
-                if(!$('#inactivetm tbody tr.odd').length) {
-                    $('#inactivetm tbody').append('<tr class="odd"><td valign="top" colspan="5" class="dataTables_empty">No data available in table</td></tr>');
-                }
-                $('#inactivetm tbody tr.odd').show();
-            }
-  */
+            UI.useTM(this);
         }).on('change', '#new-tm-read, #new-tm-write', function() {
             UI.checkTMgrants();
         }).on('change', '#activetm tr.mine td.uploadfile input[type="file"]', function() {
@@ -423,16 +380,65 @@ $.extend(UI, {
             return true;
         }
     },
-/*
-    registerTMX: function () {
-        if(!UI.TMKeysToAdd) UI.TMKeysToAdd = [];
-        item = {};
-        item.key = $('#new-tm-key').val();
-        item.description = $('#new-tm-description').val();
-        UI.TMKeysToAdd.push(item);
-        $(".canceladdtmx").click();
+    checkTMGrantsModifications: function (el) {
+        tr = $(el).parents('tr.mine');
+        console.log('lookup: ', tr.find('.lookup input').is(':checked'));
+        console.log('update: ', tr.find('.update input').is(':checked'));
     },
-*/
+
+    disableTM: function (el) {
+        var row = $(el).closest("tr");
+        if(row.find('td.uploadfile').length) {
+            row.find('td.uploadfile .canceladdtmx').click();
+            row.find('.addtmx').removeAttr('style');
+        }
+        row.detach();
+        $("#inactivetm").append(row);
+        row.find('a.disabletm .text').text('Use').attr('class', 'text');
+        row.find('.lookup input[type="checkbox"]').first().attr('disabled', 'disabled');
+        row.find('.update input[type="checkbox"]').first().attr('disabled', 'disabled');
+        row.css('display', 'block');
+
+        // draw the user's attention to it
+        row.fadeOut();
+        row.fadeIn();
+        $(el).addClass("usetm").removeClass("disabletm");
+        $('.addtmxrow').hide();
+        // draft of hack for nodata row management from datatables plugin
+//            $('#inactivetm tr.odd:not(.mine)').hide();
+    },
+
+    useTM: function (el) {
+        var row = $(el).closest("tr");
+        row.detach();
+        $("#activetm tr.new").before(row);
+        if(!$('#inactivetm tbody tr:not(.noresults)').length) $('#inactivetm tr.noresults').show();
+        row.addClass('mine');
+        row.find('a.usetm .text').text('Stop Use').attr('class', 'text');
+        row.find('.lookup input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
+        row.find('.update input[type="checkbox"]').prop('checked', true).removeAttr('disabled');
+        row.css('display', 'block');
+
+        //update datatable struct
+        $('#inactivetm' ).DataTable().row(row).remove().draw(false);
+
+        // draw the user's attention to it
+        row.fadeOut();
+        row.fadeIn();
+        $(el).addClass("disabletm").removeClass("usetm");
+        $('.addtmxrow').hide();
+    },
+
+    /*
+        registerTMX: function () {
+            if(!UI.TMKeysToAdd) UI.TMKeysToAdd = [];
+            item = {};
+            item.key = $('#new-tm-key').val();
+            item.description = $('#new-tm-description').val();
+            UI.TMKeysToAdd.push(item);
+            $(".canceladdtmx").click();
+        },
+    */
     execAddTM: function(el) {
         existing = ($(el).hasClass('existingKey'))? true : false;
         if(existing) {
