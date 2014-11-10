@@ -7906,7 +7906,7 @@ $.extend(UI, {
 
 
         $('body').on('click', '#activetm tr.mine a.canceladdtmx', function() {
-            $(this).parents('tr').find('.action .addtmx').show();
+            $(this).parents('tr').find('.action .addtmx').removeClass('disabled');
             $(this).parents('td.uploadfile').remove();
 
             /*
@@ -7916,9 +7916,9 @@ $.extend(UI, {
                         */
         }).on('click', '#activetm tr.uploadpanel a.canceladdtmx', function() {
             $('#activetm tr.uploadpanel').addClass('hide');
-            $('#activetm tr.new .action .addtmxfile').show();
-        }).on('click', '.addtmx', function() {
-            $(this).hide();
+            $('#activetm tr.new .action .addtmxfile').removeClass('disabled');
+        }).on('click', '.addtmx:not(.disabled)', function() {
+            $(this).addClass('disabled');
             var nr = '<td class="uploadfile">' +
                      '  <div class="standard">' +
                     '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
@@ -8007,7 +8007,7 @@ $.extend(UI, {
             UI.checkTMKey('tm');
 
             $('#activetm tr.uploadpanel').removeClass('hide');
-            $(this).hide();
+            $(this).addClass('disabled');
         }).on('click', 'a.disabletm', function() {
             UI.disableTM(this);
         }).on('change', 'tr.mine .lookup input, tr.mine .update input', function() {
@@ -8055,6 +8055,7 @@ $.extend(UI, {
 
         $(".mgmt-tm tr.new .canceladdtmx").click(function() {
             $("#activetm tr.new").hide();
+            $("#activetm tr.new .addtmxfile").removeClass('disabled');
             $("#activetm tr.uploadpanel").addClass('hide');
             $(".add-tm").show();
             UI.clearAddTMRow();
@@ -8567,7 +8568,7 @@ $.extend(UI, {
                         if(d.completed) {
                             if(existing) {
                                 var tr = $(TRcaller).parents('tr.mine');
-                                $(tr).find('.addtmx').show();
+                                $(tr).find('.addtmx').removeClass('disabled');
                                 UI.pulseTMadded(tr);
                             }
 //                            $(TRcaller).empty();
