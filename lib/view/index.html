@@ -377,7 +377,7 @@
                                     <tbody class="list sortable">
 
                                     <tal:block tal:repeat="key user_keys/job_keys">
-                                        <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( ownerIsMe ? 'mine' : 'owner' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
+                                        <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( ownerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
                                             <td class="dragrow"></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">Owner</td>
@@ -416,6 +416,10 @@
 
                                             </td>
                                             <td class="action">
+                                                 <div class="error">
+                                                    <span class="tm-error-key"></span>
+                                                    <span class="tm-error-grants"></span>
+                                                </div>
                                                 <a class="pull-left btn-grey uploadtm disabled">
                                                     <span class="text uploadkey">Add a key</span>
                                                 </a>
@@ -425,10 +429,7 @@
                                                 <a class="pull-right btn-grey canceladdtmx">
                                                     <span class="text">Cancel</span>
                                                 </a>
-                                                <div class="error">
-                                                    <span class="tm-error-key"></span>
-                                                    <span class="tm-error-grants"></span>
-                                                </div>
+                                               
                                                 <div id="uploadCallback"></div>
                                                 
 
