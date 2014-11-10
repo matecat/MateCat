@@ -24,20 +24,20 @@ class TMS_RESULT {
                     $match['raw_translation'] = $match['translation'];
                     $match['translation'] = CatUtils::rawxliff2view($match['translation']);
 
-                    $a = new TMS_GET_MATCHES($match);
-                    $this->matches[] = $a;
+                    $currMatch = new TMS_GET_MATCHES($match);
+                    $this->matches[] = $currMatch;
                 }
             }
         }
     }
 
     public function get_matches_as_array() {
-        $a = array();
+        $matchesArray = array();
         foreach ($this->matches as $match) {
             $item = $match->get_as_array();
-            $a[] = $item;
+            $matchesArray[] = $item;
         }
-        return $a;
+        return $matchesArray;
     }
 
     /**
