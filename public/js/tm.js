@@ -140,8 +140,13 @@ $.extend(UI, {
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
         }).on('click', '#activetm tr.mine .uploadfile .addtmxfile:not(.disabled)', function() {
             UI.execAddTM(this);
+//        }).on('click', '#activetm td.description', function() {
+//            console.log($(this).find())
         }).on('click', '#activetm td.description .edit-desc', function() {
-            $('#activetm tr.mine td.description .edit-desc').removeAttr('contenteditable');
+            console.log('.edit-desc');
+//            $(this).addClass('current');
+            $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
+//            $(this).removeClass('current');
             $(this).attr('contenteditable', true);
         }).on('focusout', '#activetm td.description .edit-desc', function() {
             $(this).removeAttr('contenteditable');

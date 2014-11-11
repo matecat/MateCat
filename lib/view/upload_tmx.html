@@ -921,10 +921,12 @@
                         <table class="mgmt-tm mgmt-tm-nested" id="inactivetm">
                             <thead>
                             <tr>
+                                <th class="fake" style="display: none"></th>
                                 <th class="privatekey">Private Key</th>
+                                <th class="owner">Owner</th>
                                 <th class="description">Description</th>
-                                <th class="check text-center">Lookup</th>
-                                <th class="check text-center">Update</th>
+                                <th class="check">Lookup</th>
+                                <th class="check">Update</th>
                                 <th class="action">Action</th>
                             </tr>
                             </thead>
@@ -932,7 +934,9 @@
 
                             <tal:block tal:repeat="key user_keys">
                                 <tr class="inactive" data-tm="1" data-glos="1">
+                                    <td class="dragrow ui-sortable-handle"></td>
                                     <td class="privatekey">${key/key}</td>
+                                    <td class="owner">Owner</td>
                                     <td class="description">${key/name}</td>
                                     <td class="lookup text-center check">
                                         <input disabled="disabled" type="checkbox" checked="${key/r}"/></td>
@@ -943,7 +947,7 @@
                                             <span class="text">Use</span>
                                         </a>
                                         <a class="btn-grey pull-left  addtmx">
-                                            <span class="text">Add TMX</span>
+                                            <span class="text">Import TMX</span>
                                         </a>
                                     </td>
                                 </tr>

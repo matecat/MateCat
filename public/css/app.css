@@ -1162,7 +1162,11 @@ margin-top: 22px;
 padding: 3px 3px 5px 32px;
 
 }
+.popup-tm td.description .edit-desc {
 
+/*    width: 100%;
+    height: 18px; */
+}
 .popup-tm td.description .edit-desc[contenteditable='true'] {
     border: 1px solid #999;
     background: #fff;
@@ -1353,7 +1357,7 @@ border: 1px solid #abadb3;
 -moz-transition: all 100ms ease-in;
 }
 #inactivetm.filtering tbody tr:not(.found) {
-    display: none
+    display: none !important;
 }
 
 .nonumber {display:none;}
