@@ -801,6 +801,7 @@ form.add-TM-Form {
     }
     .popup-tm h1 {
     	height: 30px;
+    	padding: 10px 23px 7px 58px;
     }
     .popup h2
     {
@@ -1158,7 +1159,7 @@ margin-top: -3px;
  .canceladdtmx.btn-grey {
  	width: 80px!important; 
 background:#f26522 url(../img/sprite.png) -4px -1162px no-repeat !Important;
-margin-top: 22px;
+margin-top: 12px;
 padding: 3px 3px 5px 32px;
 
 }
