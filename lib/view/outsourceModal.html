@@ -55,7 +55,7 @@
 											<span class="tpricedesc" style="font-size:15px!important;">1 translator + quality control</span>
 										</span>
 					                    <span class="euro">€</span>
-                                        <span class="displayprice"></span>
+                                        <span class="displayprice" data-currency="EUR" data-rawprice="0.00"></span>
 										<span class="displaypriceperword">about <span class="euro currency_per_word">€</span> <a id="price_p_word">0.10</a> / word</span>
                                     </div>
                                     <div class="delivery">Delivery guaranteed by:
@@ -68,6 +68,22 @@
                                         <input type="hidden" name="quoteData" value=""/>
                                         <a href="#" class="continuebtn disabled">Order</a>
                                     </form>
+                                    <select id="changecurrency">
+                                        <option value="EUR" data-symbol="€">Euro (EUR)</option>
+                                        <option value="USD" data-symbol="US$">US dollar (USD)</option>
+                                        <option value="AUD" data-symbol="$">Australian dollar (AUD)</option>
+                                        <option value="CAD" data-symbol="$">Canadian dollar (CAD)</option>
+                                        <option value="NZD" data-symbol="$">New Zealand dollar (NZD)</option>
+                                        <option value="GBP" data-symbol="£">Pound sterling (GBP)</option>
+                                        <option value="BRL" data-symbol="R$">Real (BRL)</option>
+                                        <option value="RUB" data-symbol="руб">Russian ruble (RUB)</option>
+                                        <option value="SEK" data-symbol="kr">Swedish krona (SEK)</option>
+                                        <option value="CHF" data-symbol="Fr.">Swiss franc (CHF)</option>
+                                        <option value="TRY" data-symbol="TL">Turkish lira (TL)</option>
+                                        <option value="KRW" data-symbol="￦">Won (KRW)</option>
+                                        <option value="JPY" data-symbol="￥">Yen (JPY)</option>
+                                        <option value="PLN" data-symbol="zł">Złoty (PLN)</option>
+                                    </select>
                                 </div>
                             </div>
                             <!-- end total-->

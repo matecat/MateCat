@@ -12,8 +12,6 @@
  * 
  */
 class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
-    private $currency;
-    private $change_rate;
     /**
      * Class constructor
      *
@@ -25,21 +23,11 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         //SESSION ENABLED
         INIT::sessionStart();
 
-
-        //$this->currency="EUR";
-        //$this->change_rate= 1;
-
-
-        // FORCE TO USD -- CHANGE RATE AT 2014-10-28
-        $this->currency="US$";
-        $this->change_rate= 1.2679;
-
         /**
          * @see OutsourceTo_AbstractProvider::$_outsource_login_url_ok
          */
         $this->_outsource_login_url_ok = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedSuccess";
         $this->_outsource_login_url_ko = INIT::$HTTPHOST . INIT::$BASEURL . "index.php?action=OutsourceTo_TranslatedError";
-
     }
 
     /**
@@ -134,6 +122,12 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                 $tokenHash = $mh->createResource( $url, $options, $job[ 'jid' ] . "-" .$job['jpassword'] );
             }
 
+            else{
+                $cartElem = $cache_cart->getItem( $job[ 'jid' ] . "-" . $job['jpassword'] );
+                $cartElem[ "currency" ] = $this->currency;
+                $cache_cart->delItem( $job[ 'jid' ] . "-" . $job['jpassword'] );
+                $cache_cart->addItem( $cartElem );
+            }
         }
 
         $mh->multiExec();
@@ -166,16 +160,11 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $itemCart[ 'delivery_date' ] = $result_quote[ 2 ];
             $itemCart[ 'words' ]         = $result_quote[ 3 ];
             $itemCart[ 'price' ]         = ( $result_quote[ 4 ] ? $result_quote[ 4 ] : 0 );
-            $itemCart[ 'price_currency' ]= ( $result_quote[ 4 ] ? $result_quote[ 4 ] : 0 );
             $itemCart[ 'currency' ]      = $this->currency;
             $itemCart[ 'quote_pid' ]     = $result_quote[ 5 ];
             $itemCart[ 'source' ]        = $_jobLangs[ $jpid ]['source']; //get the right language
             $itemCart[ 'target' ]        = $_jobLangs[ $jpid ]['target']; //get the right language
             $itemCart[ 'show_info' ]     = $result_quote[ 6 ];
-
-            if ($this->currency!="EUR"){
-                $itemCart[ 'price_currency' ]=$itemCart[ 'price' ]*$this->change_rate;
-            }
 
             $cache_cart->addItem( $itemCart );
 

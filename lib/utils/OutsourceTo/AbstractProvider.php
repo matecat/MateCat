@@ -67,6 +67,9 @@ abstract class OutsourceTo_AbstractProvider {
      */
     protected $ppassword = '';
 
+
+    protected $currency = "EUR";
+
     /**
      * List of job Ids and relative passwords that will be sent to the provider for quoting
      *
@@ -147,6 +150,15 @@ abstract class OutsourceTo_AbstractProvider {
      */
     public function setPpassword( $ppassword ) {
         $this->ppassword = $ppassword;
+
+        return $this;
+    }
+
+
+    public function setCurrency( $currency ) {
+        if ( !empty( $currency ) ) {
+            $this->currency = $currency;
+        }
 
         return $this;
     }

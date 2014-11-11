@@ -5,7 +5,7 @@ $.extend(UI, {
 		});
 		$(".outsource").click(function() {
 			$( ".outsourcemodal" ).show();
-		});		
+		});
 
 		$(".more").click(function(e) {
 			e.preventDefault();
@@ -97,20 +97,9 @@ $.extend(UI, {
                          *
                          */
 
-                        var _price = chunk.price_currency;
-                        $('.outsource.modal .total span.displayprice').text(parseFloat(_price).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'));
-
-                        var price = parseFloat(_price).toFixed(3).replace(/\d(?=(\d{3})+\.)/g, '$&,');
-                        if (chunk.currency == "EUR") {
-                            var currency = "€"
-                        } else {
-                            var currency = chunk.currency;
-                        }
-
-                        $('.outsource.modal .total span.euro').text(currency);
-
-                        var words = $(".title-words").text();
-                        $("#price_p_word").text(parseFloat( price / words ).toFixed(3).replace(/\d(?=(\d{3})+\.)/g, '$&,'));
+                        $('.outsource.modal .total span.displayprice').text(parseFloat(chunk.price).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'));
+                        $('.outsource.modal .total span.displayprice').attr( "data-currency", chunk.currency );
+                        $('.outsource.modal .total span.displayprice').attr( "data-rawprice", chunk.price );
 
 						var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';
 
@@ -118,7 +107,7 @@ $.extend(UI, {
 						$('.outsource.modal .continuebtn').removeClass('disabled');
 //						console.log( chunk );
 						$('.modal.outsource .outsourceto h2').removeClass('loading');
-						
+
 						//this tell to the ui if price box sould be displayed immediately
 						if( chunk.show_info == '1' ){
 							$(".showprices" ).click();
@@ -126,7 +115,15 @@ $.extend(UI, {
 							$(".showprices" ).show();
 						}
 
-					}
+                        // look for cookies
+                        var currToShow = readCookie( "matecat_currency" );
+                        if ( currToShow == "" ) {
+                            currToShow = $( ".displayprice").attr( "data-currency" );
+                        }
+
+                        changeCurrency( $( ".displayprice").attr( "data-rawprice" ), "EUR", currToShow );
+                        $( "#changecurrency option[value='" + currToShow + "']").attr( "selected", "selected" );
+                    }
 				});
 				$('.outsource.modal input.out-link').val(window.location.protocol + '//' + window.location.host + $(this).attr('href'));
 				$('.outsource.modal .uploadbtn').attr('href', $(this).attr('href'));
@@ -157,12 +154,15 @@ $.extend(UI, {
 
 		$(".outsource.modal").on('click', '.continuebtn:not(.disabled)', function(e) {
 			e.preventDefault();
-			
+
+            updateCartCurrency();
+
 			$('#continueForm input[name=url_ok]').attr('value', UI.url_ok);
 			$('#continueForm input[name=url_ko]').attr('value', UI.url_ko);
             $('#continueForm input[name=data_key]').attr('value', UI.data_key);
 
             //IMPORTANT post out the quotes
+            // UI.quoteResponse[0]["currency"] = $( "#changecurrency option:selected").val();
 			$('#continueForm input[name=quoteData]').attr('value', JSON.stringify( UI.quoteResponse ) );
 			$('#continueForm').submit();
             $('#continueForm input[name=quoteData]').attr('value', '' );
@@ -176,6 +176,12 @@ $.extend(UI, {
 			$('.modal.outsource .revealprices, .modal.outsource .showprices').hide();
 		});
 
+        $( "#changecurrency" ).change( function(){
+            var amount      = $( ".displayprice").attr( "data-rawprice" );
+            var currencyFrom = $( ".displayprice").attr( "data-currency" );
+            var currencyTo  = $( "#changecurrency option:selected" ).val();
+            changeCurrency( amount, currencyFrom, currencyTo );
+        });
 	},
 	getFarthestDate: function() {
 		farthest = new Date(0);
@@ -207,3 +213,58 @@ $.extend(UI, {
 });
 
 
+
+function changeCurrency( amount, currencyFrom, currencyTo ) {
+    APP.doRequest({
+        data: {
+            action: 'changeCurrency',
+            amount: amount,
+            currencyFrom: currencyFrom,
+            currencyTo: currencyTo
+        },
+        success: function (d) {
+            $( ".euro" ).text( $( "#changecurrency" ).find( "option[value='" + currencyTo + "']" ).attr( "data-symbol" ) );
+            $( ".displayprice" ).text( parseFloat( d.data).toFixed( 2 ) );
+            $( ".displayprice" ).attr( "data-rawprice", d.data );
+            $( ".displayprice" ).attr( "data-currency", currencyTo );
+
+            var numWords = parseFloat( $(".title-words").text().replace( ",", "" ) );
+            $( "#price_p_word").text( ( parseFloat( d.data ) / numWords ).toFixed( 3 ) );
+
+            document.cookie = "matecat_currency=" + currencyTo + "; path=/";
+        }
+    });
+}
+
+function readCookie( cookieName ) {
+    cookieName += "=";
+    var cookies = document.cookie.split(';');
+
+    for ( var i = 0; i < cookies.length; i++ ) {
+        var cookie = cookies[i].trim();
+
+        if ( cookie.indexOf( cookieName ) == 0 )
+            return cookie.substring( cookieName.length, cookie.length );
+    }
+    return "";
+}
+
+function updateCartCurrency() {
+    var linkPieces = $( "a.uploadbtn.in-popup").attr( "href").split( "/" );
+    var jobData = linkPieces[ linkPieces.length - 1].split( "-" );
+
+    APP.doRequest({
+        data: {
+            action: 'outsourceTo',
+            pid: $('#pid').attr('data-pid'),
+            ppassword: $("#pid").attr("data-pwd"),
+            jobs: [
+                {
+                    jid: jobData[0],
+                    jpassword: jobData[1]
+                }
+            ]
+        },
+        success: function () {}
+    });
+}

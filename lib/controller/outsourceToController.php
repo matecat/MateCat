@@ -20,6 +20,9 @@ class outsourceToController extends ajaxController {
      */
     private $ppassword;
 
+
+    private $currency;
+
     /**
      * A list of job_id/job_password for quote request
      *
@@ -50,6 +53,7 @@ class outsourceToController extends ajaxController {
         $filterArgs = array(
                 'pid'             => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'ppassword'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+                'currency'        => array( 'filter' => FILTER_SANITIZE_STRING ),
                 'jobs'            => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_REQUIRE_ARRAY  | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
 
@@ -61,6 +65,7 @@ class outsourceToController extends ajaxController {
 
         $this->pid       = $__postInput[ 'pid' ];
         $this->ppassword = $__postInput[ 'ppassword' ];
+        $this->currency  = $__postInput[ 'currency' ];
         $this->jobList   = $__postInput[ 'jobs' ];
 
         if( empty( $this->pid ) ){
@@ -71,7 +76,9 @@ class outsourceToController extends ajaxController {
             $this->result[ 'errors' ][] = array( "code" => -2, "message" => "No project Password Provided" );
         }
 
-
+        if ( empty( $this->currency ) ) {
+            $this->currency = $_COOKIE[ "matecat_currency" ];
+        }
         //        Log::doLog(  $this->jobList  );
         /**
          * The Job List form
@@ -106,6 +113,7 @@ class outsourceToController extends ajaxController {
         $outsourceTo = new OutsourceTo_Translated();
         $outsourceTo->setPid( $this->pid )
                     ->setPpassword( $this->ppassword )
+                    ->setCurrency( $this->currency )
                     ->setJobList( $this->jobList )
                     ->performQuote();
 
