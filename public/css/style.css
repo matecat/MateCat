@@ -1342,7 +1342,7 @@ section.status-new.opened .editarea
 	text-indent:0;
 }
 
-section.opened {
+section.editor {
 z-index: 10000;
 }
 

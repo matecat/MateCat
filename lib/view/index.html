@@ -380,7 +380,7 @@
                                         <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( ownerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
                                             <td class="dragrow"></td>
                                             <td class="privatekey">${key/key}</td>
-                                            <td class="owner">Owner</td>
+                                            <td class="owner">You</td>
                                             <td class="description"><div class="edit-desc">${key/name}</div></td>
                                             <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/r" /></td>
                                             <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/w" /></td>
@@ -438,7 +438,7 @@
                                         <td class="uploadfile" colspan="6">
                                             <div class="standard">
 
-                                                <form class="add-TM-Form" action="/" method="post">
+                                                <form class="add-TM-Form pull-left" action="/" method="post">
                                                     <input type="hidden" name="action" value="loadTMX" />
                                                     <input type="hidden" name="exec" value="newTM" />
                                                     <input type="hidden" name="tm_key" value="" />
@@ -446,12 +446,13 @@
                                                     <input type="submit" id="addtm-add-submit" style="display: none" />
                                                     <input type="file" name="tmx_file" />
                                                 </form>
-                                                <a class="pull-right btn-ok addtmxfile">
-                                                    <span class="text">Confirm</span>
-                                                </a>
-                                                <a class="pull-right btn-grey canceladdtmx">
+                                                <a class="pull-left btn-grey canceladdtmx">
                                                     <span class="text">Cancel</span>
                                                 </a>
+                                                <a class="pull-left btn-ok addtmxfile">
+                                                    <span class="text">Confirm</span>
+                                                </a>
+                                               
                                             </div>
                                             <div class="uploadprogress">
                                                 <span class="progress">
@@ -507,7 +508,7 @@
                                         <tr class="mine" data-tm="1" data-glos="1">
                                             <td class="dragrow"></td>
                                             <td class="privatekey">${key/key}</td>
-                                            <td class="owner">You</td>
+                                            <td class="owner">Owner</td>
                                             <td class="description">${key/name}</td>
                                             <td class="lookup text-center check"><input type="checkbox" /></td>
                                             <td class="update text-center check"><input type="checkbox" /></td>

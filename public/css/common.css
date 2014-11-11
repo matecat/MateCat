@@ -801,6 +801,7 @@ form.add-TM-Form {
     }
     .popup-tm h1 {
     	height: 30px;
+    	padding: 10px 23px 7px 58px;
     }
     .popup h2
     {
@@ -1082,10 +1083,19 @@ margin:0 auto; overflow:hidden; width:100%;
 padding-left: 20px;
 }
 
-.mgmt-tm .progress {display: block; height: 10px; background: #d0d1d1; margin-bottom: 4px; position: relative;}
+.mgmt-tm .progress {
+	display: block;
+	height: 15px;
+	background: #d0d1d1;
+	border: 1px solid #ccc;
+	position: relative;
+	border-radius: 4px;
+	float: left;
+	width: 235px;
+}
 
 .new td.fileupload {
-width: 92px;
+	width: 92px;
 }
  .back-mgmt {padding:20px; margin-right:20px;}
 
@@ -1159,7 +1169,7 @@ body.cattool .mgmt-tm.mine thead,
  .canceladdtmx.btn-grey {
  	width: 80px!important; 
 background:#f26522 url(../img/sprite.png) -4px -1162px no-repeat !Important;
-margin-top: 22px;
+margin-top: 12px;
 padding: 3px 3px 5px 32px;
 
 }
@@ -1242,16 +1252,13 @@ margin-top: 10px;
     background: #fff;
     padding: 15px 5px;
     height: 20px;
-    border-top: 1px solid #E7E7E7;
-	box-shadow: inset 0px 3px 4px 0px #f4f4f4;
+    border-top: 1px solid #E1E1E1;
+	box-shadow: inset 0px 2px 5px 0px #E4E4E4;
 }
 #activetm td.dragrow{
     cursor: move;
 }
 
-#inactivetm td.dragrow {
-display: none;
-}
 td.dragrow {
     background-image: url(../img/grip.png)!important;
     background-repeat: no-repeat!important;
@@ -1267,6 +1274,12 @@ td.dragrow {
 #activetm tr.anonymous td {
     background: #f6f6f6 !important;
 }
+
+#inactivetm td.dragrow, .anonymous td.dragrow {
+background-image: none;
+cursor: initial;
+}
+
 
 #activetm th.privatekey, #inactivetm .privatekey {
 	padding-left:15px;
@@ -1549,18 +1562,27 @@ tr.new.badgrants .fileupload
 }
 #activetm .startUploading
 {
-    background: url(../img/loading.gif) 48% 5px no-repeat !important;
-    background-size: 3% !important;
+    background: url(../img/loading.gif) 54% 16px no-repeat !important;
+background-size: 2% !important;
 }
 #activetm .uploadprogress {
     display: none;
+    margin-right: 8px;
+	margin-top: -5px;
+	float: right;
 }
+
+#activetm .uploadprogress .msgText {
+	display: block;
+}
+
 #activetm .uploadprogress .progress .inner {
     display: block;
-    height: 10px;
+    height: 15px;
     margin-bottom:5px;
     width: 0%;
-    background: #09BEEC;
+    background: #58B551;
+	border-right: 1px solid #58B551 !important;
     border-radius: 0;
 }
 
