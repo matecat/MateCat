@@ -7986,6 +7986,7 @@ $.extend(UI, {
 
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
         }).on('click', '#activetm tr.mine .uploadfile .addtmxfile:not(.disabled)', function() {
+            $(this).addClass('disabled');
             UI.execAddTM(this);
 //        }).on('click', '#activetm td.description', function() {
 //            console.log($(this).find())
@@ -8022,9 +8023,12 @@ $.extend(UI, {
         }).on('change', '#new-tm-read, #new-tm-write', function() {
             UI.checkTMgrants();
         }).on('change', '#activetm tr.mine td.uploadfile input[type="file"]', function() {
+            console.log('AAA');
             if($(this).val() == '') {
+                console.log('BBB');
                 $(this).parents('.uploadfile').find('.addtmxfile').hide();
             } else {
+                console.log('CCC');
                 $(this).parents('.uploadfile').find('.addtmxfile').show();
             }
         }).on('change', '.mgmt-tm tr.uploadpanel td.uploadfile input[type="file"]', function() {
@@ -8670,6 +8674,7 @@ $.extend(UI, {
     },
 
     saveTMdata: function() {
+        UI.closeTMPanel();
         data = this.extractTMdataFromTable();
         APP.doRequest({
             data: {
@@ -8680,22 +8685,25 @@ $.extend(UI, {
             },
             error: function() {
                 console.log('Error saving TM data!!');
-                $('.mgmt-panel-tm .warning-message').text('').hide();
-                $('.mgmt-panel-tm .error-message').text('There was an error saving your data. Please retry!').show();
+                APP.showMessage({msg: 'There was an error saving your data. Please retry!'});
+//                $('.mgmt-panel-tm .warning-message').text('').hide();
+//                $('.mgmt-panel-tm .error-message').text('There was an error saving your data. Please retry!').show();
             },
             success: function(d) {
 //                d.errors = [];
                 if(d.errors.length) {
-                    $('.mgmt-panel-tm .warning-message').text('').hide();
-                    $('.mgmt-panel-tm .error-message').text(d.errors[0].message).show();
+                    APP.showMessage({msg: d.errors[0].message});
+//                    $('.mgmt-panel-tm .warning-message').text('').hide();
+//                    $('.mgmt-panel-tm .error-message').text(d.errors[0].message).show();
                 } else {
                     console.log('TM data saved!!');
+/*
                     $('.mgmt-panel-tm .error-message').text('').hide();
                     $('.mgmt-panel-tm .warning-message').text('Your data has been saved.').show();
                     setTimeout(function(){
-                        UI.closeTMPanel();
                         UI.clearTMPanel();
                     },1000);
+*/
                     /*
                                         setTimeout(function(){
                                             $('.mgmt-panel-tm .warning-message').animate({
@@ -8732,6 +8740,7 @@ $.extend(UI, {
         });
     },
     closeTMPanel: function () {
+        $('.mgmt-tm tr.uploadpanel').hide();
         $( ".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
         $("#SnapABug_Button").show();
         $(".outer-tm").hide();
@@ -8739,7 +8748,7 @@ $.extend(UI, {
     },
     filterInactiveTM: function (txt) {
         $('#inactivetm tbody tr').removeClass('found');
-        $('#inactivetm tbody td:contains("' + txt + '")').parents('tr').addClass('found');
+        $('#inactivetm tbody td.privatekey:containsNC("' + txt + '"), #inactivetm tbody td.description:containsNC("' + txt + '")').parents('tr').addClass('found');
     }
 
 
