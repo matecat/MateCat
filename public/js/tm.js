@@ -788,7 +788,7 @@ $.extend(UI, {
     },
 
     extractTMdataFromTable: function () {
-        categories = ['owner', 'mine', 'anonymous'];
+        categories = ['ownergroup', 'mine', 'anonymous'];
         var newArray = {};
         $.each(categories, function (index, value) {
             data = UI.extractTMDataFromRowCategory(this);
