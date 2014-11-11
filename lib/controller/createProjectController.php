@@ -68,7 +68,7 @@ class createProjectController extends ajaxController {
         }
 
         $array_keys = json_decode( $__postInput['private_keys_list'], true );
-        $array_keys = array_merge( $array_keys['owner'], $array_keys['mine'],$array_keys['anonymous'] );
+        $array_keys = array_merge( $array_keys['ownergroup'], $array_keys['mine'],$array_keys['anonymous'] );
 
         if ( $array_keys ) {
             $private_keyList = array_merge( $__postInput[ 'private_tm_key' ], $array_keys );

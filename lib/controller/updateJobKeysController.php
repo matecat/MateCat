@@ -158,7 +158,7 @@ class updateJobKeysController extends ajaxController {
             $tm_keys['mine'][$k]['owner'] = ( $this->userRole == TmKeyManagement_Filter::OWNER );
         }
 
-        $tm_keys = array_merge( $tm_keys['owner'], $tm_keys['mine'], $tm_keys['anonymous'] );
+        $tm_keys = array_merge( $tm_keys['ownergroup'], $tm_keys['mine'], $tm_keys['anonymous'] );
         $this->tm_keys = json_encode( $tm_keys );
 
         try {
