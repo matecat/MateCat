@@ -22,7 +22,7 @@ class LocalAPIKeyService {
 
     public function createMyMemoryKey(){
 
-        $newUser = json_decode( file_get_contents( 'http://api.mymemory.translated.net/api/createranduser' ) );
+        $newUser = json_decode( file_get_contents( 'https://api.mymemory.translated.net/createranduser' ) );
         if ( empty( $newUser ) || $newUser->error || $newUser->code != 200 ) {
             throw new Exception( "Private TM key .", -1 );
         }
@@ -43,7 +43,7 @@ class LocalAPIKeyService {
      */
     public function checkCorrectKey( $apiKey ){
 
-        $url = 'http://api.mymemory.translated.net/authkey?key=' . $apiKey;
+        $url = 'https://api.mymemory.translated.net/authkey?key=' . $apiKey;
 
         $defaults = array(
                 CURLOPT_URL => $url,
