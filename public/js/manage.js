@@ -507,9 +507,17 @@ UI = {
 			data: ar,
 			success: function(d){
 				data = $.parseJSON(d.data);
+
+                if( typeof d.errors != 'undefined' && d.errors.length ){
+                    window.location = '/manage';
+                }
+
 				UI.renderProjects(data,'single');
 				UI.setTablesorter();
-			}
+			},
+            error: function(d){
+                window.location = '/manage';
+            }
 		});
 	},
 
@@ -526,6 +534,11 @@ UI = {
 			success: function(d){
 				UI.body.removeClass('loading');
 				data = $.parseJSON(d.data);
+
+                if( typeof d.errors != 'undefined' && d.errors.length ){
+                    window.location = '/manage';
+                }
+
                 UI.pageStep = d.pageStep;
 
 				UI.setPagination(d);
@@ -549,7 +562,10 @@ UI = {
 		        $("html,body").animate({
 		            scrollTop: 0
 		        }, 500 );
-			}
+			},
+            error: function(d){
+                window.location = '/manage';
+            }
 		});
 	},
 

@@ -385,9 +385,6 @@
                                             <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/r" /></td>
                                             <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/w" /></td>
                                             <td tal:condition="php: key.edit && ( !key.owner || ownerIsMe )" class="action">
-                                                <a class="btn-grey pull-left disabletm">
-                                                    <span class="text">Stop Use</span>
-                                                </a>
                                                 <a class="btn-grey pull-left addtmx">
                                                     <span class="text">Import TMX</span>
                                                 </a>
@@ -468,6 +465,7 @@
                                     
                                     <tal:block tal:repeat="key user_keys/job_keys">
                                         <tr tal:condition="php: !key.edit && !key.owner" class="anonymous" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
+                                            <td class="dragrow"></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="description">${key/name}</td>
                                             <td class="lookup text-center check"><input type="checkbox" disabled="disabled" tal:attributes="checked key/r" /></td>
@@ -505,83 +503,20 @@
                                     </tr>
                                     -->
 
-<!-- fake items -->
-<!--
-                                    <tr data-tm="1" data-glos="1" data-editable="1" data-owner="0" class="mine clicked" style="display: block;">
-                                        <td class="dragrow ui-sortable-handle"></td>
-                                        <td class="privatekey">3992122c0593ffdae8d6</td>
-                                        <td class="owner">222</td>
-                                        <td class="description"><div class="edit-desc">aaa</div></td>
-                                        <td class="lookup text-center check"><input type="checkbox" /></td>
-                                        <td class="update text-center check"><input type="checkbox" checked="" /></td>
-                                        <td class="action">
-                                            <a class="btn-grey pull-left disabletm">
-                                                <span class="text">Stop Use</span>
-                                            </a>
-                                            <a class="btn-grey pull-left addtmx">
-                                                <span class="text">Import TMX</span>
-                                            </a>
-                                            <a class="btn-grey pull-left downloadtmx">
-                                                <span class="text">Download</span>
-                                            </a>
-                                        </td>
-                                    </tr>
-
-                                    <tr data-tm="1" data-glos="1" data-editable="1" data-owner="0" class="mine clicked" style="display: block;">
-                                        <td class="dragrow ui-sortable-handle"></td>
-                                        <td class="privatekey">1992122c0593ffdae8d6</td>
-                                        <td class="owner">111</td>
-                                        <td class="description"><div class="edit-desc">bbb</div></td>
-                                        <td class="lookup text-center check"><input type="checkbox" /></td>
-                                        <td class="update text-center check"><input type="checkbox" checked="" /></td>
-                                        <td class="action">
-                                            <a class="btn-grey pull-left disabletm">
-                                                <span class="text">Stop Use</span>
-                                            </a>
-                                            <a class="btn-grey pull-left addtmx">
-                                                <span class="text">Import TMX</span>
-                                            </a>
-                                            <a class="btn-grey pull-left downloadtmx">
-                                                <span class="text">Download</span>
-                                            </a>
-                                        </td>
-                                    </tr>
-
-                                    <tr data-tm="1" data-glos="1" data-editable="1" data-owner="0" class="mine clicked" style="display: block;">
-                                        <td class="dragrow ui-sortable-handle"></td>
-                                        <td class="privatekey">2992122c0593ffdae8d6</td>
-                                        <td class="owner">333</td>
-                                        <td class="description"><div class="edit-desc">ccc</div></td>
-                                        <td class="lookup text-center check"><input type="checkbox" /></td>
-                                        <td class="update text-center check"><input type="checkbox" checked="" /></td>
-                                        <td class="action">
-                                            <a class="btn-grey pull-left disabletm">
-                                                <span class="text">Stop Use</span>
-                                            </a>
-                                            <a class="btn-grey pull-left addtmx">
-                                                <span class="text">Import TMX</span>
-                                            </a>
-                                            <a class="btn-grey pull-left downloadtmx">
-                                                <span class="text">Download</span>
-                                            </a>
-                                        </td>
-                                    </tr>
--->
-<!-- end fake items -->
-
                                     <tal:block tal:repeat="key user_keys/totals">
                                         <tr class="inactive" data-tm="1" data-glos="1">
+                                            <td class="dragrow"></td>
                                             <td class="privatekey">${key/key}</td>
-                                            <td class="owner">Owner</td>
+                                            <td class="owner">You</td>
                                             <td class="description">${key/name}</td>
-                                            <td class="lookup text-center check"><input disabled="disabled" type="checkbox" checked="${key/r}"/></td>
-                                            <td class="update text-center check"><input disabled="disabled" type="checkbox" checked="${key/w}"/></td>
+                                            <td class="lookup text-center check"><input type="checkbox" /></td>
+                                            <td class="update text-center check"><input type="checkbox" /></td>
                                             <td class="action">
-                                                <a class="btn-grey pull-left usetm">
-                                                    <span class="text">Use</span>
-                                                </a>
                                                 <a class="btn-grey pull-left  addtmx">
                                                     <span class="text">Import TMX</span>
+                                                </a>
+                                                <a class="btn-grey pull-left downloadtmx">
+                                                    <span class="text">Download</span>
                                                 </a>
                                             </td>
                                         </tr>

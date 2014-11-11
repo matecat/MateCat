@@ -3062,7 +3062,7 @@ $(window).resize(function() {
 $.extend(UI, {
 	init: function() {
 		this.initStart = new Date();
-		this.version = "0.4.1.1";
+		this.version = "0.4.1.1b";
 		if (this.debug)
 			console.log('Render time: ' + (this.initStart - renderStart));
 		this.numContributionMatchesResults = 3;
@@ -7987,8 +7987,13 @@ $.extend(UI, {
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
         }).on('click', '#activetm tr.mine .uploadfile .addtmxfile:not(.disabled)', function() {
             UI.execAddTM(this);
+//        }).on('click', '#activetm td.description', function() {
+//            console.log($(this).find())
         }).on('click', '#activetm td.description .edit-desc', function() {
-            $('#activetm tr.mine td.description .edit-desc').removeAttr('contenteditable');
+            console.log('.edit-desc');
+//            $(this).addClass('current');
+            $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
+//            $(this).removeClass('current');
             $(this).attr('contenteditable', true);
         }).on('focusout', '#activetm td.description .edit-desc', function() {
             $(this).removeAttr('contenteditable');
@@ -8045,6 +8050,16 @@ $.extend(UI, {
 //            console.log("$('#inactivetm'): ", $('#inactivetm'));
             UI.setTMsortable();
             $("#inactivetm").tablesorter({
+                textExtraction: function(node) {
+                    // extract data from markup and return it
+                    if($(node).hasClass('privatekey')) {
+                        console.log('privatekey: ', $(node).text());
+                        return $(node).text();
+                    } else {
+                        console.log('not: ', $(node).text());
+                        return $(node).text();
+                    }
+                },
                 headers: {
                     4: {
                         sorter: false
@@ -8158,7 +8173,7 @@ $.extend(UI, {
             helper: fixHelper,
             handle: '.dragrow',
             items: '.mine'
-        }).disableSelection();
+        });
 
  /*       console.log('setTMsortable');
         var fixHelperModified = function(e, tr) {
@@ -8416,6 +8431,9 @@ $.extend(UI, {
     clearTMPanel: function () {
         $('.mgmt-container .error-message').hide();
         $('.mgmt-container .warning-message').hide();
+        $('#activetm .edit-desc').removeAttr('contenteditable');
+        $('#activetm td.uploadfile').remove();
+        $('#activetm td.action .addtmx').removeClass('disabled');
     },
 
     TMFileUpload: function(form, action_url, div_id, tmName) {
