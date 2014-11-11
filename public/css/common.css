@@ -1352,6 +1352,9 @@ border: 1px solid #abadb3;
 -webkit-transition: all 100ms ease-in;
 -moz-transition: all 100ms ease-in;
 }
+#inactivetm.filtering tbody tr:not(.found) {
+    display: none !important;
+}
 
 .nonumber {display:none;}
 .disabled .nonumber {display:block!important;}

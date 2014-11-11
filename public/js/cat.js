@@ -8028,6 +8028,14 @@ $.extend(UI, {
             } else {
                 $(this).parents('.uploadfile').find('.addtmxfile').show();
             }
+        }).on('keyup', '#filterInactive', function() {
+            if($(this).val() == '') {
+                $('#inactivetm').removeClass('filtering');
+                $('#inactivetm tbody tr.found').removeClass('found');
+            } else {
+                $('#inactivetm').addClass('filtering');
+                UI.filterInactiveTM($('#filterInactive').val());
+            }
         });
 
 
@@ -8036,11 +8044,28 @@ $.extend(UI, {
         $(document).ready(function() {
 //            console.log("$('#inactivetm'): ", $('#inactivetm'));
             UI.setTMsortable();
-/*
-            $('#inactivetm').dataTable({
-                "columnDefs":  [ { targets: [0,2,3,4], orderable: false } ]
+            $("#inactivetm").tablesorter({
+                headers: {
+                    4: {
+                        sorter: false
+                    },
+                    5: {
+                        sorter: false
+                    },
+                    6: {
+                        sorter: false
+                    },
+                    7: {
+                        sorter: false
+                    }
+                }
             });
-*/
+
+            /*
+                        $('#inactivetm').dataTable({
+                            "columnDefs":  [ { targets: [0,2,3,4], orderable: false } ]
+                        });
+            */
         });
 
         $('tr').click(function() {
@@ -8121,36 +8146,6 @@ $.extend(UI, {
     },
     setTMsortable: function () {
 
-        $("#inactivetm").tablesorter({
-/*
-            textExtraction: function(node) {
-            // extract data from markup and return it
-                if($(node).hasClass('description')) {
-                    console.log('a: ', $(node).find('.edit-desc').text());
-                    return $(node).find('.edit-desc').text();
-                } else {
-                    console.log('b: ', $(node).text());
-                    return $(node).text();
-                }
-            }
-*/
-
-            headers: {
-                4: {
-                    sorter: false
-                },
-                5: {
-                    sorter: false
-                },
-                6: {
-                    sorter: false
-                },
-                7: {
-                    sorter: false
-                }
-            }
-
-        });
 
         var fixHelper = function(e, ui) {
             ui.children().each(function() {
@@ -8282,12 +8277,18 @@ $.extend(UI, {
         tr = $(el).parents('tr.mine');
         isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
         if((!tr.find('.lookup input').is(':checked')) && (!tr.find('.update input').is(':checked'))) {
-            if(isActive) UI.disableTM(el);
+            if(isActive) {
+                UI.disableTM(el);
+                $("#inactivetm").trigger("update");
+            }
         } else {
-            if(!isActive) UI.useTM(el);
+            if(!isActive) {
+                UI.useTM(el);
+                $("#inactivetm").trigger("update");
+            }
         }
-        console.log('lookup: ', tr.find('.lookup input').is(':checked'));
-        console.log('update: ', tr.find('.update input').is(':checked'));
+//        console.log('lookup: ', tr.find('.lookup input').is(':checked'));
+//        console.log('update: ', tr.find('.update input').is(':checked'));
     },
 
     disableTM: function (el) {
@@ -8717,6 +8718,11 @@ $.extend(UI, {
         $("#SnapABug_Button").show();
         $(".outer-tm").hide();
         $('body').removeClass('side-popup');
+    },
+    filterInactiveTM: function (txt) {
+        $('#inactivetm tbody tr').removeClass('found');
+        $('#inactivetm tbody td:contains("' + txt + '")').parents('tr').addClass('found');
     }
+
 
 });
