@@ -1170,7 +1170,7 @@ padding: 0px 2%;
 }
 }
 
-@media only screen and (min-device-width : 320px) and (max-device-width : 480px) { 
+@media only screen and (min-device-width : 320px) and (max-device-width : 1024px) { 
 	header, .wrapper-claim, .wrapper-upload, footer, #SnapABug_Button {display: none;}
 	.nobrowser {display: block;}
 	.iepopup.nobrowser {width:100%;}

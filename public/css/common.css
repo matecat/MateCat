@@ -846,7 +846,7 @@ color:#333;}
 	    overflow: visible;
 	    max-height: inherit;
 	    font-size: 24px;
-	    background: #6d6e71 url(../img/sprite.png) 10px 10px no-repeat;
+	    background: #4D4D4D url(../img/sprite.png) 10px 10px no-repeat;
 	    padding: 10px 10px 7px 58px;
 	    border-bottom: 1px solid #000;
 	    color: #fff;
@@ -1408,7 +1408,7 @@ only screen and (in-resolution: 2dppx) {
 }
 
 .popup h1 {
-	background: #6d6e71 url(../img/sprite2x.png) 10px 10px no-repeat;	
+	background: #4D4D4D url(../img/sprite2x.png) 10px 10px no-repeat;	
 	background-size: 42px;
 
 }
