@@ -38,6 +38,10 @@ header .wrapper{height:20px; padding:0px 0 0 0;}
     /*border-left:1px solid #000;*/
     float:left;height:37px;padding:5px 0px;}
 .header-menu li a{padding:2px 15px; font-weight: 200;}
+
+.editing .header-menu li {
+	padding: 8px 0 2px 0;
+}
 #notifbox
 {
     /*border-right:1px solid #000;*/
