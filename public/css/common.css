@@ -1163,9 +1163,8 @@ padding: 3px 3px 5px 32px;
 
 }
 .popup-tm td.description .edit-desc {
-
-/*    width: 100%;
-    height: 18px; */
+    width: 100%;
+    height: 18px;
 }
 .popup-tm td.description .edit-desc[contenteditable='true'] {
     border: 1px solid #999;

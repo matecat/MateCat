@@ -8050,6 +8050,16 @@ $.extend(UI, {
 //            console.log("$('#inactivetm'): ", $('#inactivetm'));
             UI.setTMsortable();
             $("#inactivetm").tablesorter({
+                textExtraction: function(node) {
+                    // extract data from markup and return it
+                    if($(node).hasClass('privatekey')) {
+                        console.log('privatekey: ', $(node).text());
+                        return $(node).text();
+                    } else {
+                        console.log('not: ', $(node).text());
+                        return $(node).text();
+                    }
+                },
                 headers: {
                     4: {
                         sorter: false
@@ -8163,7 +8173,7 @@ $.extend(UI, {
             helper: fixHelper,
             handle: '.dragrow',
             items: '.mine'
-        }).disableSelection();
+        });
 
  /*       console.log('setTMsortable');
         var fixHelperModified = function(e, tr) {
@@ -8421,6 +8431,9 @@ $.extend(UI, {
     clearTMPanel: function () {
         $('.mgmt-container .error-message').hide();
         $('.mgmt-container .warning-message').hide();
+        $('#activetm .edit-desc').removeAttr('contenteditable');
+        $('#activetm td.uploadfile').remove();
+        $('#activetm td.action .addtmx').removeClass('disabled');
     },
 
     TMFileUpload: function(form, action_url, div_id, tmName) {
