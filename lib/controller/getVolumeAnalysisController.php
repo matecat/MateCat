@@ -40,21 +40,22 @@ class getVolumeAnalysisController extends ajaxController {
             'jobs'    => array(),
             'summary' =>
                     array(
-                            "IN_QUEUE_BEFORE"         => 0, "STATUS" => "",
-                            "TOTAL_SEGMENTS"          => 0, "SEGMENTS_ANALYZED" => 0,
-                            "TOTAL_FAST_WC"           => 0, "TOTAL_TM_WC" => 0,
-                            "TOTAL_STANDARD_WC"       => 0,
-                            "STANDARD_WC_TIME"        => 0, "FAST_WC_TIME" => 0, "TM_WC_TIME" => 0,
-                            "STANDARD_WC_UNIT"        => "", "TM_WC_UNIT" => "", "FAST_WC_UNIT" => "",
-                            "USAGE_FEE"               => 0.00,
-                            "PRICE_PER_WORD"          => 0.00, "DISCOUNT" => 0.00
+                            "IN_QUEUE_BEFORE"   => 0, "STATUS" => "",
+                            "TOTAL_SEGMENTS"    => 0, "SEGMENTS_ANALYZED" => 0,
+                            "TOTAL_FAST_WC"     => 0, "TOTAL_TM_WC" => 0,
+                            "TOTAL_STANDARD_WC" => 0,
+                            "STANDARD_WC_TIME"  => 0, "FAST_WC_TIME" => 0, "TM_WC_TIME" => 0,
+                            "STANDARD_WC_UNIT"  => "", "TM_WC_UNIT" => "", "FAST_WC_UNIT" => "",
+                            "USAGE_FEE"         => 0.00,
+                            "PRICE_PER_WORD"    => 0.00, "DISCOUNT" => 0.00
                     )
     );
 
     protected $total_init = array(
-            "TOTAL_PAYABLE"    => array( 0, "0" ), "REPETITIONS" => array( 0, "0" ), "MT" => array( 0, "0" ),
-            "NEW"              => array( 0, "0" ), "TM_100" => array( 0, "0" ), "TM_75_99" => array( 0, "0" ),
-            "INTERNAL_MATCHES" => array( 0, "0" ), "ICE" => array( 0, "0" ), "NUMBERS_ONLY" => array( 0, "0" )
+            "TOTAL_PAYABLE" => array( 0, "0" ), "REPETITIONS" => array( 0, "0" ), "MT" => array( 0, "0" ),
+            "NEW"           => array( 0, "0" ), "TM_100" => array( 0, "0" ), "TM_75_99" => array( 0, "0" ),
+            "TM_50_74"      => array( 0, "0" ), "INTERNAL_MATCHES" => array( 0, "0" ), "ICE" => array( 0, "0" ),
+            "NUMBERS_ONLY"  => array( 0, "0" )
     );
 
     protected $_resultSet = array();
@@ -66,9 +67,13 @@ class getVolumeAnalysisController extends ajaxController {
         parent::__construct();
 
         $filterArgs = array(
-            'pid'                 => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'ppassword'           => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
-            'jpassword'           => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+                'pid'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'ppassword' => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
+                'jpassword' => array(
+                        'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH
+                ),
         );
 
         $__postInput = filter_input_array( INPUT_POST, $filterArgs );
@@ -83,12 +88,12 @@ class getVolumeAnalysisController extends ajaxController {
         $this->formatWebData();
     }
 
-    public function formatApiData(){
+    public function formatApiData() {
         $this->_fetchProjectData( $this->_api_data_struct );
         $this->_formatData( false );
     }
 
-    public function formatWebData(){
+    public function formatWebData() {
         $this->_fetchProjectData( $this->_data_struct );
         $this->_formatData( true );
     }
@@ -97,16 +102,18 @@ class getVolumeAnalysisController extends ajaxController {
 
         if ( empty( $this->id_project ) ) {
             $this->result[ 'errors' ] = array( -1, "No id project provided" );
+
             return -1;
         }
 
         $this->_project_data = getProjectJobData( $this->id_project );
 
         $passCheck = new AjaxPasswordCheck();
-        $access = $passCheck->grantProjectAccess( $this->_project_data, $this->ppassword ) || $passCheck->grantProjectJobAccessOnJobPass( $this->_project_data, null, $this->jpassword );
+        $access    = $passCheck->grantProjectAccess( $this->_project_data, $this->ppassword ) || $passCheck->grantProjectJobAccessOnJobPass( $this->_project_data, null, $this->jpassword );
 
-        if( !$access ){
+        if ( !$access ) {
             $this->result[ 'errors' ] = array( -10, "Wrong Password. Access denied" );
+
             return -1;
         }
 
@@ -118,38 +125,38 @@ class getVolumeAnalysisController extends ajaxController {
         //get status of project
         $this->status_project = $this->_project_data[ 0 ][ 'status_analysis' ];
 
-        $this->return_data    = $return_data;
+        $this->return_data = $return_data;
 
     }
 
-    protected function _formatData( $_forWEB = true ){
+    protected function _formatData( $_forWEB = true ) {
 
-        //array of totals per job-file
+        //array of totals per job-files
         $total_payable = array();
 
         //VERY Expensive cycle ± 0.7 s for 27650 segments ( 150k words )
-        foreach ( $this->_resultSet as $r ) {
+        foreach ( $this->_resultSet as $segInfo ) {
 
-            if ( $r[ 'st_status_analysis' ] == 'DONE' ) {
+            if ( $segInfo[ 'st_status_analysis' ] == 'DONE' ) {
                 $this->segments_analyzed += 1;
             }
 
-            if ( $this->total_wc_fast_analysis == 0 and $r[ 'fast_analysis_wc' ] > 0 ) {
-                $this->total_wc_fast_analysis = $r[ 'fast_analysis_wc' ];
+            if ( $this->total_wc_fast_analysis == 0 and $segInfo[ 'fast_analysis_wc' ] > 0 ) {
+                $this->total_wc_fast_analysis = $segInfo[ 'fast_analysis_wc' ];
             }
 
-            if ( $this->total_wc_standard_fast_analysis == 0 and $r[ 'fast_analysis_wc' ] > 0 ) {
-                $this->total_wc_standard_fast_analysis = $r[ 'fast_analysis_wc' ];
+            if ( $this->total_wc_standard_fast_analysis == 0 and $segInfo[ 'fast_analysis_wc' ] > 0 ) {
+                $this->total_wc_standard_fast_analysis = $segInfo[ 'fast_analysis_wc' ];
             }
 
 
-            $jid           = $r[ 'jid' ];
-            $jpassword     = $r[ 'jpassword' ];
-            $words         = $r[ 'raw_word_count' ];
-            $eq_words      = $r[ 'eq_word_count' ];
-            $st_word_count = $r[ 'standard_word_count' ];
+            $jid           = $segInfo[ 'jid' ];
+            $jpassword     = $segInfo[ 'jpassword' ];
+            $words         = $segInfo[ 'raw_word_count' ];
+            $eq_words      = $segInfo[ 'eq_word_count' ];
+            $st_word_count = $segInfo[ 'standard_word_count' ];
 
-            $this->total_raw_wc += $r['raw_word_count'];
+            $this->total_raw_wc += $segInfo[ 'raw_word_count' ];
             $this->total_wc_tm_analysis += $eq_words;
             $this->total_wc_standard_analysis += $st_word_count;
 
@@ -158,62 +165,69 @@ class getVolumeAnalysisController extends ajaxController {
                 $this->return_data[ 'jobs' ][ $jid ]             = array();
                 $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ] = array();
                 $this->return_data[ 'jobs' ][ $jid ][ 'totals' ] = array();
-                $total_payable[ $jid ]                     = array();
+                $total_payable[ $jid ]                           = array();
             }
 
-            if ( !array_key_exists( $jpassword, $this->return_data[ 'jobs' ][$jid]['chunks'] ) ) {
+            if ( !array_key_exists( $jpassword, $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ] ) ) {
                 $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ] = array();
-                $total_payable[ $jid ][ $jpassword ] = array();
+                $total_payable[ $jid ][ $jpassword ]                           = array();
             }
 
-            if( !array_key_exists( $jpassword, $this->return_data[ 'jobs' ][ $jid ][ 'totals' ] ) ){
+            if ( !array_key_exists( $jpassword, $this->return_data[ 'jobs' ][ $jid ][ 'totals' ] ) ) {
                 $this->return_data[ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ] = $this->total_init;
             }
 
-            if ( !isset( $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ] ) ) {
-                $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ] = $this->total_init;
+            if ( !isset( $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ] ) ) {
+                $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ] = $this->total_init;
             }
             //END init indexes
 
 
-            if ( $r[ 'match_type' ] == "INTERNAL" ) {
+            if ( $segInfo[ 'match_type' ] == "INTERNAL" ) {
                 $keyValue = 'INTERNAL_MATCHES';
-            } elseif ( $r[ 'match_type' ] == "MT" ) {
+            } elseif ( $segInfo[ 'match_type' ] == "MT" ) {
                 $keyValue = 'MT';
-            } elseif ( $r[ 'match_type' ] == "100%" ) {
+            } elseif ( $segInfo[ 'match_type' ] == "100%" ) {
                 $keyValue = 'TM_100';
-            } elseif ( $r[ 'match_type' ] == "75%-99%" or $r[ 'match_type' ] == "75%-84%" or $r[ 'match_type' ] == "85%-94%" or $r[ 'match_type' ] == "95%-99%" ) {
+            } elseif ( $segInfo[ 'match_type' ] == "75%-99%" or $segInfo[ 'match_type' ] == "75%-84%" or $segInfo[ 'match_type' ] == "85%-94%" or $segInfo[ 'match_type' ] == "95%-99%" ) {
                 $keyValue = 'TM_75_99';
-            } elseif ( $r[ 'match_type' ] == "50%-74%" or $r[ 'match_type' ] == "NO_MATCH" or $r[ 'match_type' ] == "NEW" ) {
+            } elseif ( $segInfo[ 'match_type' ] == "50%-74%" ) {
+                $keyValue = 'TM_50_74';
+            } elseif ( $segInfo[ 'match_type' ] == "NO_MATCH" or $segInfo[ 'match_type' ] == "NEW" ) {
                 $keyValue = 'NEW';
-            } elseif( $r[ 'match_type' ] == "ICE" ){
+            } elseif ( $segInfo[ 'match_type' ] == "ICE" ) {
                 $keyValue = "ICE";
-            } elseif ( $r[ 'match_type' ] == "REPETITIONS" ) {
+            } elseif ( $segInfo[ 'match_type' ] == "REPETITIONS" ) {
                 $keyValue = 'REPETITIONS';
             } else {
                 $keyValue = 'NUMBERS_ONLY';
             }
 
-            $w           = $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ $keyValue ][ 0 ] + $words;
+            $w           = $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ $keyValue ][ 0 ] + $words;
             $words_print = number_format( $w, 0, ".", "," );
 
-            $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ $keyValue ] = array( $w, $words_print );
+            $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ $keyValue ] = array(
+                    $w, $words_print
+            );
 
-            $tmp_tot = $this->return_data[ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ][0];
+            $tmp_tot = $this->return_data[ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ][ 0 ];
             $tmp_tot += $words;
-            $words_print = number_format( $tmp_tot, 0, ".", "," );
-            $this->return_data[ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ] = array( $tmp_tot, $words_print );
-
+            $words_print                                                                = number_format( $tmp_tot, 0, ".", "," );
+            $this->return_data[ 'jobs' ][ $jid ][ 'totals' ][ $jpassword ][ $keyValue ] = array(
+                    $tmp_tot, $words_print
+            );
 
             //SUM WITH PREVIOUS ( Accumulator )
-            $eq_words       = $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ "TOTAL_PAYABLE" ][ 0 ] + $eq_words;
-            $eq_words_print = number_format( $eq_words, 0, ".", "," );
-            $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ "TOTAL_PAYABLE" ] = array( $eq_words, $eq_words_print );
+            $eq_words                                                                                                  = $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ "TOTAL_PAYABLE" ][ 0 ] + $eq_words;
+            $eq_words_print                                                                                            = number_format( $eq_words, 0, ".", "," );
+            $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ "TOTAL_PAYABLE" ] = array(
+                    $eq_words, $eq_words_print
+            );
 
             //take note of payable words for job/file combination
-            $total_payable[ $jid ][ $jpassword ][ $r[ 'id_file' ] ] = $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ "TOTAL_PAYABLE" ][ 0 ];
+            $total_payable[ $jid ][ $jpassword ][ $segInfo[ 'id_file' ] ] = $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ "TOTAL_PAYABLE" ][ 0 ];
 
-            $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $r[ 'id_file' ] ][ 'FILENAME' ] = $r[ 'filename' ];
+            $this->return_data[ 'jobs' ][ $jid ][ 'chunks' ][ $jpassword ][ $segInfo[ 'id_file' ] ][ 'FILENAME' ] = $segInfo[ 'filename' ];
 
         }
 
@@ -222,7 +236,7 @@ class getVolumeAnalysisController extends ajaxController {
         foreach ( $total_payable as $jid => $chunks ) {
 
             foreach ( $chunks as $_jpassword => $files ) {
-                foreach( $files as $fid => $v ){
+                foreach ( $files as $fid => $v ) {
                     $this->return_data[ 'jobs' ][ $jid ][ 'totals' ][ $_jpassword ][ "TOTAL_PAYABLE" ][ 0 ] += $v;
 
                     //format numbers after sum
@@ -235,7 +249,7 @@ class getVolumeAnalysisController extends ajaxController {
 
             $this->total_wc_standard_analysis = $this->total_wc_standard_fast_analysis;
 
-        } elseif( $this->segments_analyzed == 0 && $this->status_project == Constants_ProjectStatus::STATUS_NEW ){
+        } elseif ( $this->segments_analyzed == 0 && $this->status_project == Constants_ProjectStatus::STATUS_NEW ) {
 
             //Outsource Quote issue
             //fast analysis not done, return the number of raw word count
@@ -243,17 +257,17 @@ class getVolumeAnalysisController extends ajaxController {
             //( no segment_translations )
             $project_data_fallback = getProjectJobData( $this->id_project );
 
-            foreach( $project_data_fallback as $i => $_job_fallback ){
-                $this->return_data[ 'jobs' ][ $_job_fallback['jid'] ][ 'totals' ][ $_job_fallback['jpassword'] ][ "TOTAL_PAYABLE" ][ 0 ] = $_job_fallback['standard_analysis_wc'];
+            foreach ( $project_data_fallback as $i => $_job_fallback ) {
+                $this->return_data[ 'jobs' ][ $_job_fallback[ 'jid' ] ][ 'totals' ][ $_job_fallback[ 'jpassword' ] ][ "TOTAL_PAYABLE" ][ 0 ] = $_job_fallback[ 'standard_analysis_wc' ];
 
                 //format numbers after sum
-                $this->return_data[ 'jobs' ][ $_job_fallback['jid'] ][ 'totals' ][ $_job_fallback['jpassword'] ][ "TOTAL_PAYABLE" ][ 1 ] = number_format( $_job_fallback['standard_analysis_wc'], 0, ".", "," );
+                $this->return_data[ 'jobs' ][ $_job_fallback[ 'jid' ] ][ 'totals' ][ $_job_fallback[ 'jpassword' ] ][ "TOTAL_PAYABLE" ][ 1 ] = number_format( $_job_fallback[ 'standard_analysis_wc' ], 0, ".", "," );
             }
 
             $this->total_wc_standard_analysis
                     = $this->total_wc_tm_analysis
                     = $this->total_raw_wc
-                    = $project_data_fallback[0]['standard_analysis_wc'];
+                    = $project_data_fallback[ 0 ][ 'standard_analysis_wc' ];
 
         }
 
@@ -363,7 +377,7 @@ class getVolumeAnalysisController extends ajaxController {
         $this->return_data[ 'summary' ][ 'DISCOUNT_WC' ]      = number_format( $discount_wc, 0, ".", "," );
 
         //aggregate Extra Infos
-        if ( $_forWEB ){
+        if ( $_forWEB ) {
 
             $this->return_data[ 'summary' ][ 'IN_QUEUE_BEFORE_PRINT' ]   = number_format( $this->_others_in_queue, 0, ".", "," );
             $this->return_data[ 'summary' ][ 'TOTAL_SEGMENTS_PRINT' ]    = number_format( $this->total_segments, 0, ".", "," );
@@ -382,26 +396,26 @@ class getVolumeAnalysisController extends ajaxController {
                 case 'NEW':
                 case 'FAST_OK':
                 case 'NOT_READY_FOR_ANALYSIS':
-                    $this->result['status']  = 'ANALYZING';
+                    $this->result[ 'status' ] = 'ANALYZING';
                     break;
                 case 'EMPTY':
-                    $this->result['status']  = 'NO_SEGMENTS_FOUND';
+                    $this->result[ 'status' ] = 'NO_SEGMENTS_FOUND';
                     break;
                 case 'NOT_TO_ANALYZE':
-                    $this->result['status']  = 'ANALYSIS_NOT_ENABLED';
+                    $this->result[ 'status' ] = 'ANALYSIS_NOT_ENABLED';
                     break;
                 case 'DONE':
-                    $this->result['status']  = 'DONE';
+                    $this->result[ 'status' ] = 'DONE';
                     break;
                 default: //this can not be
-                    $this->result['status']  = 'FAIL';
+                    $this->result[ 'status' ] = 'FAIL';
                     break;
             }
 
-            $this->result['analyze'] = "/analyze/" . $this->_project_data[0]['pname'] . "/" . $this->_project_data[0]['pid'] . "-" . $this->_project_data[0]['ppassword'];
-            $this->result['jobs']   = array();
+            $this->result[ 'analyze' ] = "/analyze/" . $this->_project_data[ 0 ][ 'pname' ] . "/" . $this->_project_data[ 0 ][ 'pid' ] . "-" . $this->_project_data[ 0 ][ 'ppassword' ];
+            $this->result[ 'jobs' ]    = array();
 
-            foreach( $this->_project_data as $job ){
+            foreach ( $this->_project_data as $job ) {
                 $this->result[ 'jobs' ][ 'langpairs' ][ $job[ 'jid_jpassword' ] ] = $job[ 'lang_pair' ];
                 $this->result[ 'jobs' ][ 'job-url' ][ $job[ 'jid_jpassword' ] ]   = "/translate/" . $job[ 'job_url' ];
             }

@@ -69,7 +69,7 @@ class downloadFileController extends downloadController {
                 'forceXliff'    => array()
         );
 
-        $__postInput = filter_input_array( INPUT_POST, $filterArgs );
+        $__postInput = filter_var_array( $_REQUEST, $filterArgs );
 
         //NOTE: This is for debug purpose only,
         //NOTE: Global $_POST Overriding from CLI Test scripts

@@ -1342,6 +1342,10 @@ section.status-new.opened .editarea
 	text-indent:0;
 }
 
+section.editor {
+z-index: 10000;
+}
+
 .source{line-height:30px;padding-top:9px !important;}
 .editor .source
 {

@@ -59,7 +59,7 @@ $.extend(UI, {
 
 
         $('body').on('click', '#activetm tr.mine a.canceladdtmx', function() {
-            $(this).parents('tr').find('.action .addtmx').show();
+            $(this).parents('tr').find('.action .addtmx').removeClass('disabled');
             $(this).parents('td.uploadfile').remove();
 
             /*
@@ -69,9 +69,9 @@ $.extend(UI, {
                         */
         }).on('click', '#activetm tr.uploadpanel a.canceladdtmx', function() {
             $('#activetm tr.uploadpanel').addClass('hide');
-            $('#activetm tr.new .action .addtmxfile').show();
-        }).on('click', '.addtmx', function() {
-            $(this).hide();
+            $('#activetm tr.new .action .addtmxfile').removeClass('disabled');
+        }).on('click', '.addtmx:not(.disabled)', function() {
+            $(this).addClass('disabled');
             var nr = '<td class="uploadfile">' +
                      '  <div class="standard">' +
                     '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
@@ -139,14 +139,20 @@ $.extend(UI, {
 
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
         }).on('click', '#activetm tr.mine .uploadfile .addtmxfile:not(.disabled)', function() {
+            $(this).addClass('disabled');
             UI.execAddTM(this);
-        }).on('click', '.popup-tm td.description .edit-desc', function() {
-            $('.popup-tm tr.mine td.description .edit-desc').removeAttr('contenteditable');
+//        }).on('click', '#activetm td.description', function() {
+//            console.log($(this).find())
+        }).on('click', '#activetm td.description .edit-desc', function() {
+            console.log('.edit-desc');
+//            $(this).addClass('current');
+            $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
+//            $(this).removeClass('current');
             $(this).attr('contenteditable', true);
-        }).on('focusout', '.popup-tm td.description .edit-desc', function() {
+        }).on('focusout', '#activetm td.description .edit-desc', function() {
             $(this).removeAttr('contenteditable');
 //            $('.popup-tm tr.mine td.description .edit-desc').removeAttr('contenteditable');
-        }).on('keydown', '.popup-tm td.description .edit-desc', 'return', function(e) {
+        }).on('keydown', '#activetm td.description .edit-desc', 'return', function(e) {
             e.preventDefault();
             $(this).removeAttr('contenteditable');
         }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
@@ -160,7 +166,7 @@ $.extend(UI, {
             UI.checkTMKey('tm');
 
             $('#activetm tr.uploadpanel').removeClass('hide');
-            $(this).hide();
+            $(this).addClass('disabled');
         }).on('click', 'a.disabletm', function() {
             UI.disableTM(this);
         }).on('change', 'tr.mine .lookup input, tr.mine .update input', function() {
@@ -170,9 +176,12 @@ $.extend(UI, {
         }).on('change', '#new-tm-read, #new-tm-write', function() {
             UI.checkTMgrants();
         }).on('change', '#activetm tr.mine td.uploadfile input[type="file"]', function() {
+            console.log('AAA');
             if($(this).val() == '') {
+                console.log('BBB');
                 $(this).parents('.uploadfile').find('.addtmxfile').hide();
             } else {
+                console.log('CCC');
                 $(this).parents('.uploadfile').find('.addtmxfile').show();
             }
         }).on('change', '.mgmt-tm tr.uploadpanel td.uploadfile input[type="file"]', function() {
@@ -181,18 +190,54 @@ $.extend(UI, {
             } else {
                 $(this).parents('.uploadfile').find('.addtmxfile').show();
             }
+        }).on('keyup', '#filterInactive', function() {
+            if($(this).val() == '') {
+                $('#inactivetm').removeClass('filtering');
+                $('#inactivetm tbody tr.found').removeClass('found');
+            } else {
+                $('#inactivetm').addClass('filtering');
+                UI.filterInactiveTM($('#filterInactive').val());
+            }
         });
 
 
         // script per filtrare il contenuto dinamicamente, da qui: http://www.datatables.net
 
         $(document).ready(function() {
-            console.log("$('#inactivetm'): ", $('#inactivetm'));
+//            console.log("$('#inactivetm'): ", $('#inactivetm'));
             UI.setTMsortable();
-            $('#inactivetm').dataTable({
-                "columnDefs":  [ { targets: [0,2,3,4], orderable: false } ]
+            $("#inactivetm").tablesorter({
+                textExtraction: function(node) {
+                    // extract data from markup and return it
+                    if($(node).hasClass('privatekey')) {
+                        console.log('privatekey: ', $(node).text());
+                        return $(node).text();
+                    } else {
+                        console.log('not: ', $(node).text());
+                        return $(node).text();
+                    }
+                },
+                headers: {
+                    4: {
+                        sorter: false
+                    },
+                    5: {
+                        sorter: false
+                    },
+                    6: {
+                        sorter: false
+                    },
+                    7: {
+                        sorter: false
+                    }
+                }
             });
 
+            /*
+                        $('#inactivetm').dataTable({
+                            "columnDefs":  [ { targets: [0,2,3,4], orderable: false } ]
+                        });
+            */
         });
 
         $('tr').click(function() {
@@ -207,6 +252,7 @@ $.extend(UI, {
 
         $(".mgmt-tm tr.new .canceladdtmx").click(function() {
             $("#activetm tr.new").hide();
+            $("#activetm tr.new .addtmxfile").removeClass('disabled');
             $("#activetm tr.uploadpanel").addClass('hide');
             $(".add-tm").show();
             UI.clearAddTMRow();
@@ -272,6 +318,20 @@ $.extend(UI, {
     },
     setTMsortable: function () {
 
+
+        var fixHelper = function(e, ui) {
+            ui.children().each(function() {
+                $(this).width($(this).width());
+            });
+            return ui;
+        };
+
+        $('#activetm tbody').sortable({
+            helper: fixHelper,
+            handle: '.dragrow',
+            items: '.mine'
+        });
+
  /*       console.log('setTMsortable');
         var fixHelperModified = function(e, tr) {
             var $originals = tr.children();
@@ -283,13 +343,14 @@ $.extend(UI, {
         };
         console.log('fixHelperModified: ', fixHelperModified);
         */
+ /*
         $(".dragrow" ).mouseover(function() {
             $("#activetm tbody.sortable").sortable({ items: ".mine" }).sortable('enable').disableSelection();
         });
         $(".dragrow" ).mouseout(function() {
             $("#activetm tbody.sortable").sortable('disable');
         });
-
+*/
     },
 
 
@@ -388,12 +449,18 @@ $.extend(UI, {
         tr = $(el).parents('tr.mine');
         isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
         if((!tr.find('.lookup input').is(':checked')) && (!tr.find('.update input').is(':checked'))) {
-            if(isActive) UI.disableTM(el);
+            if(isActive) {
+                UI.disableTM(el);
+                $("#inactivetm").trigger("update");
+            }
         } else {
-            if(!isActive) UI.useTM(el);
+            if(!isActive) {
+                UI.useTM(el);
+                $("#inactivetm").trigger("update");
+            }
         }
-        console.log('lookup: ', tr.find('.lookup input').is(':checked'));
-        console.log('update: ', tr.find('.update input').is(':checked'));
+//        console.log('lookup: ', tr.find('.lookup input').is(':checked'));
+//        console.log('update: ', tr.find('.update input').is(':checked'));
     },
 
     disableTM: function (el) {
@@ -430,7 +497,7 @@ $.extend(UI, {
         row.css('display', 'block');
 
         //update datatable struct
-        $('#inactivetm' ).DataTable().row(row).remove().draw(false);
+//        $('#inactivetm' ).DataTable().row(row).remove().draw(false);
 
         // draw the user's attention to it
         row.fadeOut();
@@ -521,6 +588,9 @@ $.extend(UI, {
     clearTMPanel: function () {
         $('.mgmt-container .error-message').hide();
         $('.mgmt-container .warning-message').hide();
+        $('#activetm .edit-desc').removeAttr('contenteditable');
+        $('#activetm td.uploadfile').remove();
+        $('#activetm td.action .addtmx').removeClass('disabled');
     },
 
     TMFileUpload: function(form, action_url, div_id, tmName) {
@@ -674,7 +744,7 @@ $.extend(UI, {
                         if(d.completed) {
                             if(existing) {
                                 var tr = $(TRcaller).parents('tr.mine');
-                                $(tr).find('.addtmx').show();
+                                $(tr).find('.addtmx').removeClass('disabled');
                                 UI.pulseTMadded(tr);
                             }
 //                            $(TRcaller).empty();
@@ -718,7 +788,7 @@ $.extend(UI, {
     },
 
     extractTMdataFromTable: function () {
-        categories = ['owner', 'mine', 'anonymous'];
+        categories = ['ownergroup', 'mine', 'anonymous'];
         var newArray = {};
         $.each(categories, function (index, value) {
             data = UI.extractTMDataFromRowCategory(this);
@@ -757,6 +827,7 @@ $.extend(UI, {
     },
 
     saveTMdata: function() {
+        UI.closeTMPanel();
         data = this.extractTMdataFromTable();
         APP.doRequest({
             data: {
@@ -767,22 +838,25 @@ $.extend(UI, {
             },
             error: function() {
                 console.log('Error saving TM data!!');
-                $('.mgmt-panel-tm .warning-message').text('').hide();
-                $('.mgmt-panel-tm .error-message').text('There was an error saving your data. Please retry!').show();
+                APP.showMessage({msg: 'There was an error saving your data. Please retry!'});
+//                $('.mgmt-panel-tm .warning-message').text('').hide();
+//                $('.mgmt-panel-tm .error-message').text('There was an error saving your data. Please retry!').show();
             },
             success: function(d) {
 //                d.errors = [];
                 if(d.errors.length) {
-                    $('.mgmt-panel-tm .warning-message').text('').hide();
-                    $('.mgmt-panel-tm .error-message').text(d.errors[0].message).show();
+                    APP.showMessage({msg: d.errors[0].message});
+//                    $('.mgmt-panel-tm .warning-message').text('').hide();
+//                    $('.mgmt-panel-tm .error-message').text(d.errors[0].message).show();
                 } else {
                     console.log('TM data saved!!');
+/*
                     $('.mgmt-panel-tm .error-message').text('').hide();
                     $('.mgmt-panel-tm .warning-message').text('Your data has been saved.').show();
                     setTimeout(function(){
-                        UI.closeTMPanel();
                         UI.clearTMPanel();
                     },1000);
+*/
                     /*
                                         setTimeout(function(){
                                             $('.mgmt-panel-tm .warning-message').animate({
@@ -819,10 +893,16 @@ $.extend(UI, {
         });
     },
     closeTMPanel: function () {
+        $('.mgmt-tm tr.uploadpanel').hide();
         $( ".popup-tm").removeClass('open').hide("slide", { direction: "right" }, 400);
         $("#SnapABug_Button").show();
         $(".outer-tm").hide();
         $('body').removeClass('side-popup');
+    },
+    filterInactiveTM: function (txt) {
+        $('#inactivetm tbody tr').removeClass('found');
+        $('#inactivetm tbody td.privatekey:containsNC("' + txt + '"), #inactivetm tbody td.description:containsNC("' + txt + '")').parents('tr').addClass('found');
     }
+
 
 });

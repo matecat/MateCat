@@ -4,7 +4,7 @@
 */
 
 Loader = {
-	concatSources: false, // set to true if you want to load all the js source components instead of the whole cat.js
+	concatSources: true, // set to true if you want to load all the js source components instead of the whole cat.js
 //	components: new Array (
 //		'common',
 //		'cat'
@@ -34,7 +34,8 @@ Loader = {
 		'jquery.hotkeys.min',
 //		'jquery-migrate-1.2.1',
 		'jquery.cookie',
-        'jquery.dataTables.min',
+        'jquery.tablesorter-fork-mottie',
+//        'jquery.dataTables.min',
 		'diff_match_patch',
 		'waypoints',
 		'rangy-core',

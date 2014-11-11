@@ -20,7 +20,7 @@ class analyzeController extends viewController {
      *
      * @var string
      */
-    protected $_outsource_login_API =  'http://signin.translated.net/';
+    protected $_outsource_login_API =  '//signin.translated.net/';
 
     private $pid;
     private $ppassword;
@@ -53,11 +53,22 @@ class analyzeController extends viewController {
         parent::sessionStart();
         parent::__construct( false );
 
-        $this->pid      = $this->get_from_get_post( "pid" );
-        $this->jid      = $this->get_from_get_post( "jid" );
-        $pass = $this->get_from_get_post( "password" );
+        $filterArgs = array(
+                'pid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'jid'      => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
+                'password' => array(
+                        'filter' => FILTER_SANITIZE_STRING,
+                        'flags'  => array( FILTER_FLAG_STRIP_LOW, FILTER_FLAG_STRIP_HIGH )
+                )
+        );
 
-        if( !empty( $this->jid ) ){
+        $postInput = filter_input_array( INPUT_GET, $filterArgs );
+
+        $this->pid = $postInput['pid'];
+        $this->jid = $postInput['jid'];
+        $pass      = $postInput['password'];
+
+        if ( !empty( $this->jid ) ) {
             parent::makeTemplate( "jobAnalysis.html" );
             $this->jpassword = $pass;
             $this->ppassword = null;
@@ -180,7 +191,7 @@ class analyzeController extends viewController {
             $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count' ] += $p_jdata[ 'file_eq_word_count' ];
             $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count_print' ] = number_format( $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_eq_word_count' ], 0, ".", "," );
 
-            $p_jdata[ 'file_eq_word_count' ] = number_format( $p_jdata[ 'file_eq_word_count' ], 0, ".", "," );
+            $p_jdata[ 'file_eq_word_count' ]  = number_format( $p_jdata[ 'file_eq_word_count' ], 0, ".", "," );
             $p_jdata[ 'file_raw_word_count' ] = number_format( $p_jdata[ 'file_raw_word_count' ], 0, ".", "," );
 
             $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'files' ][ $p_jdata[ 'id_file' ] ] = $p_jdata;
@@ -305,8 +316,8 @@ class analyzeController extends viewController {
         $this->template->num_segments_analyzed      = $this->num_segments_analyzed;
         $this->template->logged_user                = trim( $this->logged_user[ 'first_name' ] . " " . $this->logged_user[ 'last_name' ] );
         $this->template->build_number               = INIT::$BUILD_NUMBER;
-	    $this->template->enable_outsource           = INIT::$ENABLE_OUTSOURCE;
-	    $this->template->outsource_service_login    = $this->_outsource_login_API;
+        $this->template->enable_outsource           = INIT::$ENABLE_OUTSOURCE;
+        $this->template->outsource_service_login    = $this->_outsource_login_API;
 
         $this->template->isLoggedIn = $this->isLoggedIn();
 
@@ -318,15 +329,15 @@ class analyzeController extends viewController {
             $this->template->showModalBoxLogin = false;
         }
 
-	    //url to which to send data in case of login
-	    $client = OauthClient::getInstance()->getClient();
-	    $this->template->oauthFormUrl = $client->createAuthUrl();
+        //url to which to send data in case of login
+        $client                       = OauthClient::getInstance()->getClient();
+        $this->template->oauthFormUrl = $client->createAuthUrl();
 
         $this->template->incomingUrl = '/login?incomingUrl=' . $_SERVER[ 'REQUEST_URI' ];
 
         //perform check on running daemons and send a mail randomly
         $misconfiguration = Daemons_Manager::thereIsAMisconfiguration();
-        if( $misconfiguration && mt_rand( 1, 3 ) == 1 ){
+        if ( $misconfiguration && mt_rand( 1, 3 ) == 1 ) {
             $msg = "<strong>The analysis daemons seem not to be running despite server configuration.</strong><br />Change the application configuration or start analysis daemons.";
             Utils::sendErrMailReport( $msg, "Matecat Misconfiguration" );
         }

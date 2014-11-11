@@ -362,7 +362,7 @@ function getNewMatchType($tm_match_type, $fast_match_type, $equivalentWordMappin
         }
     }
 
-    if ($tm_rate_paid < $fast_rate_paid) {
+    if ($tm_rate_paid <= $fast_rate_paid) {
         return $tm_match_cat;
     }
     return $fast_match_type;

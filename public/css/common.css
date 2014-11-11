@@ -801,6 +801,7 @@ form.add-TM-Form {
     }
     .popup-tm h1 {
     	height: 30px;
+    	padding: 10px 23px 7px 58px;
     }
     .popup h2
     {
@@ -837,7 +838,7 @@ form.add-TM-Form {
 {
 	width: 45px;
 	border-right: 1px solid #003366;
-	background: transparent url(http://d1gwm4cf8hecp4.cloudfront.net/images/home/g.png) 0 5px no-repeat;
+	background: transparent url(../img/g.png) 0 5px no-repeat;
 	border-radius: 0 0 0 6px;
     }
 
@@ -1082,16 +1083,27 @@ margin:0 auto; overflow:hidden; width:100%;
 padding-left: 20px;
 }
 
-.mgmt-tm .progress {display: block; height: 10px; background: #fff}
+.mgmt-tm .progress {
+	display: block;
+	height: 15px;
+	background: #d0d1d1;
+	border: 1px solid #ccc;
+	position: relative;
+	border-radius: 4px;
+	float: left;
+	width: 235px;
+}
 
 .new td.fileupload {
-width: 92px;
+	width: 92px;
 }
  .back-mgmt {padding:20px; margin-right:20px;}
 
 .memory-mgmt.btn {
 width: auto;
 }
+
+
 
 .mgmt-tm, .mgmt-gl, .mgmt-tm-nested {
 	border-bottom:40px;
@@ -1150,17 +1162,21 @@ body.cattool .mgmt-tm.mine thead,
 .canceladdtmx.btn-grey .text, .addtmxfile.btn-ok .text {color: #fff;}
 
 .addtmxfile.btn-ok  {
-	padding: 6px 20px 6px 13px;
-margin-top: -5px;
+    display: none;
+	padding: 4px 27px 7px 13px;
+    margin-top: -3px;
 }
  .canceladdtmx.btn-grey {
  	width: 80px!important; 
-background:#f26522 url(../img/sprite.png) -4px -1160px no-repeat !Important;
-margin-top: 22px;
-padding: 6px 3px 6px 33px;
+background:#f26522 url(../img/sprite.png) -4px -1162px no-repeat !Important;
+margin-top: 12px;
+padding: 3px 3px 5px 32px;
 
 }
-
+.popup-tm td.description .edit-desc {
+    width: 100%;
+    height: 18px;
+}
 .popup-tm td.description .edit-desc[contenteditable='true'] {
     border: 1px solid #999;
     background: #fff;
@@ -1168,8 +1184,8 @@ padding: 6px 3px 6px 33px;
     margin-left: -3px;
 }
  
- .canceladdtmx.btn-grey:hover{background:#d1581c url(../img/sprite.png)  -4px -1160px no-repeat !Important}
-
+ .canceladdtmx.btn-grey:hover{background:#d1581c url(../img/sprite.png)  -4px -1162px no-repeat !Important}
+.addtmxfile.btn-ok:hover {background:#00A8D2;}
 
 td.uploadfile .canceladdtmx {
     margin-bottom: 0px;
@@ -1212,7 +1228,7 @@ margin-top: 10px;
     margin: 2px 3px 2px 0px;
 }
 #activetm td.uploadfile .btn-grey {
-    margin-top: -5px;
+    margin-top: -3px;
 }
 
 
@@ -1236,16 +1252,20 @@ margin-top: 10px;
     background: #fff;
     padding: 15px 5px;
     height: 20px;
-    border-top: 1px solid #E7E7E7;
-	box-shadow: inset 0px 3px 4px 0px #f4f4f4;
+    border-top: 1px solid #E1E1E1;
+	box-shadow: inset 0px 2px 5px 0px #E4E4E4;
 }
 #activetm td.dragrow{
     cursor: move;
 }
+
 td.dragrow {
-background-image: url(../img/grip.png)!important;
-background-repeat: no-repeat!important;
-background-position: center center!important;
+    background-image: url(../img/grip.png)!important;
+    background-repeat: no-repeat!important;
+    background-position: center center!important;
+    }
+#inactivetm td.dragrow {
+/*    display: none; */
 }
 #activetm tr.owner td {
     background: #fff !important;
@@ -1254,6 +1274,12 @@ background-position: center center!important;
 #activetm tr.anonymous td {
     background: #f6f6f6 !important;
 }
+
+#inactivetm td.dragrow, .anonymous td.dragrow {
+background-image: none;
+cursor: initial;
+}
+
 
 #activetm th.privatekey, #inactivetm .privatekey {
 	padding-left:15px;
@@ -1342,6 +1368,9 @@ padding: 5px 10px;
 border: 1px solid #abadb3;
 -webkit-transition: all 100ms ease-in;
 -moz-transition: all 100ms ease-in;
+}
+#inactivetm.filtering tbody tr:not(.found) {
+    display: none !important;
 }
 
 .nonumber {display:none;}
@@ -1533,18 +1562,51 @@ tr.new.badgrants .fileupload
 }
 #activetm .startUploading
 {
-    background: url(../img/loading.gif) 48% 5px no-repeat !important;
-    background-size: 3% !important;
+    background: url(../img/loading.gif) 54% 16px no-repeat !important;
+background-size: 2% !important;
 }
 #activetm .uploadprogress {
     display: none;
+    margin-right: 8px;
+	margin-top: -5px;
+	float: right;
 }
+
+#activetm .uploadprogress .msgText {
+	display: block;
+}
+
 #activetm .uploadprogress .progress .inner {
-    float: left;
-    height: 5px;
+    display: block;
+    height: 15px;
+    margin-bottom:5px;
     width: 0%;
-    background: #09BEEC;
+    background: #58B551;
+	border-right: 1px solid #58B551 !important;
+    border-radius: 0;
 }
+
+#activetm .uploadprogress .progress:after {
+content: "";
+position: absolute;
+top: 0;
+left: 0;
+bottom: 0;
+right: 0;
+background-image: -webkit-gradient(linear, 0 0, 100% 100%, color-stop(.25, rgba(255, 255, 255, .2)), color-stop(.25, transparent), color-stop(.5, transparent), color-stop(.5, rgba(255, 255, 255, .2)), color-stop(.75, rgba(255, 255, 255, .2)), color-stop(.75, transparent), to(transparent) );
+background-image: -webkit-linear-gradient( -45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent );
+background-image: -moz-linear-gradient( -45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent );
+background-image: -ms-linear-gradient( -45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent );
+background-image: -o-linear-gradient( -45deg, rgba(255, 255, 255, .2) 25%, transparent 25%, transparent 50%, rgba(255, 255, 255, .2) 50%, rgba(255, 255, 255, .2) 75%, transparent 75%, transparent );
+z-index: 1;
+-webkit-background-size: 50px 50px;
+-moz-background-size: 50px 50px;
+background-size: 50px 50px;
+-webkit-animation: move 2s linear infinite;
+overflow: hidden;
+}
+
+
 .description textarea {
 resize: none;
 }
@@ -1807,6 +1869,11 @@ color: #000;
 .downloadtmx .text:before,
 .uploadkey:before,
 .open-popup-addtm-tr:before,
+.tablesorter-headerDesc .tablesorter-header-inner:after,
+.tablesorter-headerAsc .tablesorter-header-inner:after,
+.privatekey.tablesorter-header .tablesorter-header-inner:after,
+.owner.tablesorter-header .tablesorter-header-inner:after,
+.description.tablesorter-header .tablesorter-header-inner:after,
 .sorting:after {
 	font-family: 'icomoon';
 	speak: none;
@@ -1828,6 +1895,31 @@ color: #000;
 
 }
 
+.privatekey.tablesorter-header .tablesorter-header-inner:after,
+.owner.tablesorter-header .tablesorter-header-inner:after,
+.description.tablesorter-header .tablesorter-header-inner:after
+{
+content: "\f0dc";
+float: right;
+}
+
+
+.privatekey.tablesorter-headerDesc .tablesorter-header-inner:after,
+.owner.tablesorter-headerDesc .tablesorter-header-inner:after,
+.description.tablesorter-headerDesc .tablesorter-header-inner:after {
+content: "\f0de";
+float: right;
+}
+
+.privatekey.tablesorter-headerAsc .tablesorter-header-inner:after,
+.owner.tablesorter-headerAsc .tablesorter-header-inner:after,
+.description.tablesorter-headerAsc .tablesorter-header-inner:after {
+content: "\f0dd";
+float: right;
+
+}
+
+
 .add-tm:before {
 	content: "\f067";
 	padding: 0 10px 0 0;
@@ -1841,6 +1933,14 @@ color: #000;
 }
 #inactivetm_filter input {
 margin-left: 10px;
+}
+
+th.privatekey.tablesorter-header:hover, 
+th.owner.tablesorter-header:hover,
+th.description.tablesorter-header:hover {
+box-shadow: inset 0px 0px 8px #333;
+/* border-right: 1px solid #ccc; */
+cursor: pointer;
 }
 
 .disabletm .text:before {

@@ -377,17 +377,14 @@
                                     <tbody class="list sortable">
 
                                     <tal:block tal:repeat="key user_keys/job_keys">
-                                        <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( ownerIsMe ? 'mine' : 'owner' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
+                                        <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( ownerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
                                             <td class="dragrow"></td>
                                             <td class="privatekey">${key/key}</td>
-                                            <td class="owner">Owner</td>
-                                            <td class="description"><div class="edit-desc">${key/name}</div></td>
+                                            <td class="owner">${php: key.owner ? ( ownerIsMe ? 'You' : '*****' ) : 'You'}</td>
+                                            <td class="description"><div class="edit-desc">${php: key.owner ? ( ownerIsMe ? key.name : '**********' ) : key.name}</div></td>
                                             <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/r" /></td>
                                             <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/w" /></td>
                                             <td tal:condition="php: key.edit && ( !key.owner || ownerIsMe )" class="action">
-                                                <a class="btn-grey pull-left disabletm">
-                                                    <span class="text">Stop Use</span>
-                                                </a>
                                                 <a class="btn-grey pull-left addtmx">
                                                     <span class="text">Import TMX</span>
                                                 </a>
@@ -416,6 +413,10 @@
 
                                             </td>
                                             <td class="action">
+                                                 <div class="error">
+                                                    <span class="tm-error-key"></span>
+                                                    <span class="tm-error-grants"></span>
+                                                </div>
                                                 <a class="pull-left btn-grey uploadtm disabled">
                                                     <span class="text uploadkey">Add a key</span>
                                                 </a>
@@ -425,10 +426,7 @@
                                                 <a class="pull-right btn-grey canceladdtmx">
                                                     <span class="text">Cancel</span>
                                                 </a>
-                                                <div class="error">
-                                                    <span class="tm-error-key"></span>
-                                                    <span class="tm-error-grants"></span>
-                                                </div>
+                                               
                                                 <div id="uploadCallback"></div>
                                                 
 
@@ -440,7 +438,7 @@
                                         <td class="uploadfile" colspan="6">
                                             <div class="standard">
 
-                                                <form class="add-TM-Form" action="/" method="post">
+                                                <form class="add-TM-Form pull-left" action="/" method="post">
                                                     <input type="hidden" name="action" value="loadTMX" />
                                                     <input type="hidden" name="exec" value="newTM" />
                                                     <input type="hidden" name="tm_key" value="" />
@@ -448,12 +446,13 @@
                                                     <input type="submit" id="addtm-add-submit" style="display: none" />
                                                     <input type="file" name="tmx_file" />
                                                 </form>
-                                                <a class="pull-right btn-ok addtmxfile">
-                                                    <span class="text">Confirm</span>
-                                                </a>
-                                                <a class="pull-right btn-grey canceladdtmx">
+                                                <a class="pull-left btn-grey canceladdtmx">
                                                     <span class="text">Cancel</span>
                                                 </a>
+                                                <a class="pull-left btn-ok addtmxfile">
+                                                    <span class="text">Confirm</span>
+                                                </a>
+                                               
                                             </div>
                                             <div class="uploadprogress">
                                                 <span class="progress">
@@ -467,8 +466,10 @@
                                     
                                     <tal:block tal:repeat="key user_keys/job_keys">
                                         <tr tal:condition="php: !key.edit && !key.owner" class="anonymous" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
+                                            <td class="dragrow"></td>
                                             <td class="privatekey">${key/key}</td>
-                                            <td class="description">${key/name}</td>
+                                            <td class="owner">*****</td>
+                                            <td class="description">**********</td>
                                             <td class="lookup text-center check"><input type="checkbox" disabled="disabled" tal:attributes="checked key/r" /></td>
                                             <td class="update text-center check"><input type="checkbox" disabled="disabled" tal:attributes="checked key/w" /></td>
                                             <td class="action"></td>
@@ -479,9 +480,16 @@
                                 </table>
 
                                 <h3 class="pull-left">Inactive TM</h3>
+
+                                <div style="float: right">
+                                    <label for="filterInactive">Search: </label>
+                                    <input id="filterInactive" type="text"/>
+                                </div>
+
                                 <table class="mgmt-tm mgmt-tm-nested scroll" id="inactivetm">
                                     <thead>
                                     <tr>
+                                        <th class="fake" style="display: none"></th>
                                         <th class="privatekey">Private Key</th>
                                         <th class="owner">Owner</th>
                                         <th class="description">Description</th>
@@ -498,18 +506,19 @@
                                     -->
 
                                     <tal:block tal:repeat="key user_keys/totals">
-                                        <tr class="inactive" data-tm="1" data-glos="1">
+                                        <tr class="mine" data-tm="1" data-glos="1">
+                                            <td class="dragrow"></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">Owner</td>
                                             <td class="description">${key/name}</td>
-                                            <td class="lookup text-center check"><input disabled="disabled" type="checkbox" checked="${key/r}"/></td>
-                                            <td class="update text-center check"><input disabled="disabled" type="checkbox" checked="${key/w}"/></td>
+                                            <td class="lookup text-center check"><input type="checkbox" /></td>
+                                            <td class="update text-center check"><input type="checkbox" /></td>
                                             <td class="action">
-                                                <a class="btn-grey pull-left usetm">
-                                                    <span class="text">Use</span>
-                                                </a>
-                                                <a class="btn-grey pull-left  addtmx">
+                                                <a class="btn-grey pull-left addtmx">
                                                     <span class="text">Import TMX</span>
+                                                </a>
+                                                <a class="btn-grey pull-left downloadtmx">
+                                                    <span class="text">Download</span>
                                                 </a>
                                             </td>
                                         </tr>
