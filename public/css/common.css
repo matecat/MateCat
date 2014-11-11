@@ -1152,8 +1152,9 @@ body.cattool .mgmt-tm.mine thead,
 .canceladdtmx.btn-grey .text, .addtmxfile.btn-ok .text {color: #fff;}
 
 .addtmxfile.btn-ok  {
+    display: none;
 	padding: 4px 27px 7px 13px;
-margin-top: -3px;
+    margin-top: -3px;
 }
  .canceladdtmx.btn-grey {
  	width: 80px!important; 

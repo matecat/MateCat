@@ -504,7 +504,7 @@
                                     -->
 
                                     <tal:block tal:repeat="key user_keys/totals">
-                                        <tr class="inactive" data-tm="1" data-glos="1">
+                                        <tr class="mine" data-tm="1" data-glos="1">
                                             <td class="dragrow"></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">You</td>
@@ -512,7 +512,7 @@
                                             <td class="lookup text-center check"><input type="checkbox" /></td>
                                             <td class="update text-center check"><input type="checkbox" /></td>
                                             <td class="action">
-                                                <a class="btn-grey pull-left  addtmx">
+                                                <a class="btn-grey pull-left addtmx">
                                                     <span class="text">Import TMX</span>
                                                 </a>
                                                 <a class="btn-grey pull-left downloadtmx">
