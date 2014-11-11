@@ -1843,6 +1843,11 @@ color: #000;
 .downloadtmx .text:before,
 .uploadkey:before,
 .open-popup-addtm-tr:before,
+.tablesorter-headerDesc .tablesorter-header-inner:after,
+.tablesorter-headerAsc .tablesorter-header-inner:after,
+.privatekey.tablesorter-header .tablesorter-header-inner:after,
+.owner.tablesorter-header .tablesorter-header-inner:after,
+.description.tablesorter-header .tablesorter-header-inner:after,
 .sorting:after {
 	font-family: 'icomoon';
 	speak: none;
@@ -1863,6 +1868,31 @@ color: #000;
 	vertical-align: text-top;
 
 }
+
+.privatekey.tablesorter-header .tablesorter-header-inner:after,
+.owner.tablesorter-header .tablesorter-header-inner:after,
+.description.tablesorter-header .tablesorter-header-inner:after
+{
+content: "\f0dc";
+float: right;
+}
+
+
+.privatekey.tablesorter-headerDesc .tablesorter-header-inner:after,
+.owner.tablesorter-headerDesc .tablesorter-header-inner:after,
+.description.tablesorter-headerDesc .tablesorter-header-inner:after {
+content: "\f0de";
+float: right;
+}
+
+.privatekey.tablesorter-headerAsc .tablesorter-header-inner:after,
+.owner.tablesorter-headerAsc .tablesorter-header-inner:after,
+.description.tablesorter-headerAsc .tablesorter-header-inner:after {
+content: "\f0dd";
+float: right;
+
+}
+
 
 .add-tm:before {
 	content: "\f067";
