@@ -1935,6 +1935,14 @@ float: right;
 margin-left: 10px;
 }
 
+th.privatekey.tablesorter-header:hover, 
+th.owner.tablesorter-header:hover,
+th.description.tablesorter-header:hover {
+box-shadow: inset 0px 0px 8px #333;
+/* border-right: 1px solid #ccc; */
+cursor: pointer;
+}
+
 .disabletm .text:before {
 	content: "\f056";
 	padding-right: 5px;
