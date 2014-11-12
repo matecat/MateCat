@@ -1077,11 +1077,11 @@ margin:0 auto; overflow:hidden; width:100%;
 }
 
 .new .description {
-	width:379px!important;
+	width:388px!important;
 }
 
 .new .action {
-			width: 244px!important;
+			width: 246px!important;
 padding-left: 20px;
 }
 
@@ -1097,7 +1097,7 @@ padding-left: 20px;
 }
 
 .new td.fileupload {
-	width: 92px;
+	width: 99px;
 }
  .back-mgmt {padding:20px; margin-right:20px;}
 
@@ -1167,6 +1167,12 @@ body.cattool .mgmt-tm.mine thead,
 {
     display: none;
 }
+
+#activetm tr.ownergroup td,
+#activetm tr.anonymous td
+{
+    color: #999;
+}
 .canceladdtmx {
     cursor: pointer;
     margin-bottom: 30px;
@@ -1220,6 +1226,18 @@ cursor: text;
 td.uploadfile .canceladdtmx {
     margin-bottom: 0px;
 }
+
+td.uploadfile .error {
+    display: none;
+    float: right;
+    margin-right: 14px;
+    color: red;
+}
+td.uploadfile .uploadprogress .error {
+    float: left;
+    margin-right: 0px;
+}
+
 .canceladdtmx:hover {
 	color:red;
 }
@@ -1301,8 +1319,9 @@ margin-top: 10px;
 }
 
 .anonymous td.dragrow {
-background-image: none;
-cursor: initial;
+
+    background-image: none !important;
+    cursor: initial;
 }
 
 
