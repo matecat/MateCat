@@ -156,6 +156,7 @@ $.extend(UI, {
             e.preventDefault();
             $(this).removeAttr('contenteditable');
         }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
+            $(this).addClass('disabled');
             UI.execAddTM(this);
 //        }).on('click', '.popup-tm .savebtn', function() {
         }).on('click', '.popup-tm h1 .btn-ok', function(e) {
@@ -176,12 +177,9 @@ $.extend(UI, {
         }).on('change', '#new-tm-read, #new-tm-write', function() {
             UI.checkTMgrants();
         }).on('change', '#activetm tr.mine td.uploadfile input[type="file"]', function() {
-            console.log('AAA');
             if($(this).val() == '') {
-                console.log('BBB');
                 $(this).parents('.uploadfile').find('.addtmxfile').hide();
             } else {
-                console.log('CCC');
                 $(this).parents('.uploadfile').find('.addtmxfile').show();
             }
         }).on('change', '.mgmt-tm tr.uploadpanel td.uploadfile input[type="file"]', function() {
@@ -591,6 +589,7 @@ $.extend(UI, {
         $('#activetm .edit-desc').removeAttr('contenteditable');
         $('#activetm td.uploadfile').remove();
         $('#activetm td.action .addtmx').removeClass('disabled');
+        $('#activetm tr.new .canceladdtmx').click();
     },
 
     TMFileUpload: function(form, action_url, div_id, tmName) {
@@ -663,7 +662,7 @@ $.extend(UI, {
         TRcaller.addClass('startUploading');
         if(!existing) {
             UI.addTMKeyToList(true);
-            $('.popup-tm h1 .btn-ok').click();
+//            $('.popup-tm h1 .btn-ok').click();
         }
         UI.pollForUploadCallback(TMKey, TMName, existing, TRcaller);
 
@@ -828,6 +827,8 @@ $.extend(UI, {
 
     saveTMdata: function() {
         UI.closeTMPanel();
+        UI.clearTMPanel();
+
         data = this.extractTMdataFromTable();
         APP.doRequest({
             data: {

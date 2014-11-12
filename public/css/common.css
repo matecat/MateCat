@@ -1275,9 +1275,10 @@ td.dragrow {
     background: #f6f6f6 !important;
 }
 
-#inactivetm td.dragrow, .anonymous td.dragrow {
-background-image: none;
-cursor: initial;
+#inactivetm td.dragrow,
+.anonymous td.dragrow {
+    background-image: none !important;
+    cursor: initial;
 }
 
 
