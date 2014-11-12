@@ -380,8 +380,8 @@
                                         <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( ownerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
                                             <td class="dragrow"></td>
                                             <td class="privatekey">${key/key}</td>
-                                            <td class="owner">You</td>
-                                            <td class="description"><div class="edit-desc">${key/name}</div></td>
+                                            <td class="owner">${php: key.owner ? ( ownerIsMe ? 'You' : '*****' ) : 'You'}</td>
+                                            <td class="description"><div class="edit-desc">${php: key.owner ? ( ownerIsMe ? key.name : '**********' ) : key.name}</div></td>
                                             <td class="lookup text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/r" /></td>
                                             <td class="update text-center check"><input type="checkbox" tal:attributes="disabled php: !key.edit || ( key.owner && !ownerIsMe ); checked key/w" /></td>
                                             <td tal:condition="php: key.edit && ( !key.owner || ownerIsMe )" class="action">
@@ -468,7 +468,8 @@
                                         <tr tal:condition="php: !key.edit && !key.owner" class="anonymous" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
                                             <td class="dragrow"></td>
                                             <td class="privatekey">${key/key}</td>
-                                            <td class="description">${key/name}</td>
+                                            <td class="owner">*****</td>
+                                            <td class="description">**********</td>
                                             <td class="lookup text-center check"><input type="checkbox" disabled="disabled" tal:attributes="checked key/r" /></td>
                                             <td class="update text-center check"><input type="checkbox" disabled="disabled" tal:attributes="checked key/w" /></td>
                                             <td class="action"></td>
