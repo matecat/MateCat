@@ -774,7 +774,8 @@ form.add-TM-Form {
     float: left;
     width: 80%;
     color: #F00;
-    padding: 2px 10px;
+    margin-top: 15px;
+	padding: 2px 5px;
 }
 #activetm tr.new .error span {
     display: none;
@@ -1071,15 +1072,16 @@ margin:0 auto; overflow:hidden; width:100%;
 }
 
 .new .privatekey {
-	width: 183px!important;
+	width: 260px!important;
+	padding: 15px 0px 15px 10px;
 }
 
 .new .description {
-	width:460px!important;
+	width:388px!important;
 }
 
 .new .action {
-			width: 247px!important;
+			width: 246px!important;
 padding-left: 20px;
 }
 
@@ -1095,7 +1097,7 @@ padding-left: 20px;
 }
 
 .new td.fileupload {
-	width: 92px;
+	width: 99px;
 }
  .back-mgmt {padding:20px; margin-right:20px;}
 
@@ -1134,6 +1136,17 @@ span.asterisk {
 vertical-align: bottom;
 }
 
+span.text-or {
+text-align: right;
+width: 22px;
+}
+
+span.text-req {
+/* margin-top: 0px; */
+clear: left;
+color: #bbb;
+}
+
 .btn-grey:active:active {
 -moz-box-shadow: inset 0 0 1px 1px #888;
 -webkit-box-shadow: inset 0 0 1px 1px #888;
@@ -1165,18 +1178,25 @@ body.cattool .mgmt-tm.mine thead,
     margin-bottom: 30px;
 }
 
-.canceladdtmx.btn-grey .text, .addtmxfile.btn-ok .text {color: #fff;}
+.canceladdtmx.btn-grey .text, 
+.addtmxfile.btn-ok .text, 
+.uploadtm.btn-ok .text
 
-.addtmxfile.btn-ok  {
+ {color: #fff;}
+
+.addtmxfile.btn-ok {
     display: none;
-	padding: 4px 27px 7px 13px;
-    margin-top: -3px;
+}
+
+.addtmxfile.btn-ok, .uploadtm.btn-ok {
+	padding: 4px 36px 7px 12px;
+    margin: -3px 0 0;
 }
  .canceladdtmx.btn-grey {
- 	width: 80px!important; 
-background:#f26522 url(../img/sprite.png) -4px -1161px no-repeat !Important;
-margin-top: 12px;
-padding: 4px 3px 4px 32px;
+ 	width: 65px!important; 
+background:#f26522;
+margin-top: -3px;
+padding: 4px 38px 4px 12px;
 
 }
 .popup-tm td.description .edit-desc {
@@ -1200,7 +1220,7 @@ outline: 1px solid #ccc;
 cursor: text;
 }
  
- .canceladdtmx.btn-grey:hover{background:#d1581c url(../img/sprite.png)  -4px -1161px no-repeat !Important}
+ .canceladdtmx.btn-grey:hover{background:#d1581c;}
 .addtmxfile.btn-ok:hover {background:#00A8D2;}
 
 td.uploadfile .canceladdtmx {
@@ -1256,7 +1276,7 @@ margin-top: 10px;
     margin: 2px 3px 2px 0px;
 }
 #activetm td.uploadfile .btn-grey {
-    margin-top: -3px;
+    margin-right: 8px;
 }
 
 
@@ -1285,16 +1305,11 @@ margin-top: 10px;
 }
 #activetm td.dragrow{
     cursor: move;
-}
-
-td.dragrow {
     background-image: url(../img/grip.png)!important;
     background-repeat: no-repeat!important;
     background-position: center center!important;
     }
-#inactivetm td.dragrow {
-/*    display: none; */
-}
+
 #activetm tr.owner td {
     background: #fff !important;
     color: #999!important;
@@ -1303,14 +1318,14 @@ td.dragrow {
     background: #f6f6f6 !important;
 }
 
-#inactivetm td.dragrow,
 .anonymous td.dragrow {
+
     background-image: none !important;
     cursor: initial;
 }
 
 
-#activetm th.privatekey, #inactivetm .privatekey {
+#activetm th.privatekey, #inactivetm th.privatekey {
 	padding-left:15px;
 }
 
@@ -1318,6 +1333,12 @@ td.dragrow {
 
 .mine .downloadtmx {
 	display: block!important;
+}
+
+tr.mine.ui-sortable-helper {
+border-bottom: 1px solid #ccc;
+border-left:1px solid #ccc;
+border-right:1px solid #ccc;
 }
 
 /* provvisorio */
@@ -1546,10 +1567,10 @@ border-top: 1px solid #666;
 
 .mgmt-input {
 width: 90%;
-padding: 12px;
+padding: 5px 10px;
 font-size: 15px !important;
 margin-top: 0px;
-margin-bottom: 20px;
+margin-bottom: 15px;
 -moz-border-radius: 2px;
 border-radius: 2px;
 border: 1px solid #ccc;
@@ -1581,8 +1602,18 @@ input#new-tm-key {
 	margin:0 0 10px 0;
     height: 0px;
 }
+
+#activetm input#new-tm-key {
+	width: 155px;
+	padding: 12px 5px;
+	margin: 0 0 10px 0;
+	height: 0px;
+	box-shadow: inset 0 1px 2px #ddd;
+-webkit-box-shadow: inset 0 1px 2px #ddd;
+}
+
 .badkey input#new-tm-key {
-    border: 3px solid red;
+    outline: 2px solid red!important;
 }
 input#new-tm-description {
     height:40px;
@@ -1596,7 +1627,7 @@ tr.new.badgrants .fileupload
 }
 #activetm .startUploading
 {
-    background: url(../img/loading.gif) 54% 16px no-repeat !important;
+    background: url(../img/loading.gif) 77.5% 16px no-repeat !important;
 background-size: 2% !important;
 }
 #activetm .uploadprogress {
@@ -1643,6 +1674,8 @@ overflow: hidden;
 
 .description textarea {
 resize: none;
+box-shadow: inset 0 1px 2px #ddd;
+-webkit-box-shadow: inset 0 1px 2px #ddd;
 }
 tr.new {
 vertical-align: top;
@@ -1908,6 +1941,7 @@ color: #000;
 .privatekey.tablesorter-header .tablesorter-header-inner:after,
 .owner.tablesorter-header .tablesorter-header-inner:after,
 .description.tablesorter-header .tablesorter-header-inner:after,
+.canceladdtmx.btn-grey .text:before,
 .sorting:after {
 	font-family: 'icomoon';
 	speak: none;
@@ -1925,6 +1959,13 @@ color: #000;
 .usetm .text:before {
 	content: "\f144";
 		padding: 0 10px 0 0;
+	vertical-align: text-top;
+
+}
+
+.canceladdtmx.btn-grey .text:before {
+	content: "\f00d";
+	padding-right: 8px;
 	vertical-align: text-top;
 
 }
@@ -1961,8 +2002,8 @@ float: right;
 }
 
 .uploadkey:before {
-		content: "\f055";
-	padding-right: 5px;
+		content: "\f00c";
+	padding-right: 7px;
 	vertical-align: text-top;
 }
 #inactivetm_filter input {
@@ -1991,7 +2032,7 @@ cursor: pointer;
 }
 
 .addtmxfile .text:before {
-	padding-right: 15px;
+	padding-right: 7px;
 }
 
 
