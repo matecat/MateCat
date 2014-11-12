@@ -88,12 +88,14 @@ $.extend(UI, {
                     '   <a class="existingKey pull-left btn-ok addtmxfile">' +
                     '       <span class="text">Confirm</span>' +
                     '   </a>' +
+                    '   <span class="error"></span>' +
                     '  </div>' +
                     '  <div class="uploadprogress">' +
                     '       <span class="progress">' +
                     '           <span class="inner"></span>' +
                     '       </span>' +
                     '       <span class="msgText">Uploading</span>' +
+                    '       <span class="error"></span>' +
                     '  </div>' +
                     '</td>';
 /*
@@ -140,6 +142,8 @@ $.extend(UI, {
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
         }).on('click', '#activetm tr.mine .uploadfile .addtmxfile:not(.disabled)', function() {
             $(this).addClass('disabled');
+            $(this).parents('.uploadfile').find('.standard .error').text('').hide();
+
             UI.execAddTM(this);
 //        }).on('click', '#activetm td.description', function() {
 //            console.log($(this).find())
@@ -157,6 +161,7 @@ $.extend(UI, {
             $(this).removeAttr('contenteditable');
         }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
             $(this).addClass('disabled');
+
             UI.execAddTM(this);
 //        }).on('click', '.popup-tm .savebtn', function() {
         }).on('click', '.popup-tm h1 .btn-ok', function(e) {
@@ -685,15 +690,13 @@ $.extend(UI, {
     pollForUploadCallback: function(TMKey, TMName, existing, TRcaller) {
         if($('#uploadCallback').text() != '') {
             msg = $.parseJSON($('#uploadCallback pre').text());
+            TRcaller.removeClass('startUploading');
             if(msg.success === true) {
-                TRcaller.removeClass('startUploading');
                 UI.pollForUploadProgress(TMKey, TMName, existing, TRcaller);
             } else {
-/*
-                APP.showMessage({
-                    msg: 'Error: ' + msg.errors[0].message
-                });
-*/
+                console.log('error');
+                $(TRcaller).find('.standard .error').text(msg.errors[0].message).show();
+                $(TRcaller).find('.addtmxfile').removeClass('disabled');
             }
         } else {
             setTimeout(function() {
@@ -714,13 +717,28 @@ $.extend(UI, {
             context: [TMKey, TMName, existing, TRcaller],
             error: function() {
                 existing = this[2];
-                if(!existing) $('#activetm tr.uploadpanel .uploadfile').removeClass('uploading');
+                if(existing) {
+                    console.log('error');
+                } else {
+                    $('#activetm tr.uploadpanel .uploadfile').removeClass('uploading');
+                }
             },
             success: function(d) {
                 console.log('progress success data: ', d);
                 existing = this[2];
+                TRcaller = this[3];
+                d.errors = [{message: 'questo è un errore'}];
                 if(d.errors.length) {
-                    if(!existing) $('#activetm tr.uploadpanel .uploadfile').removeClass('uploading');
+                    if(existing) {
+                        console.log('error');
+                        console.log($(TRcaller));
+                        $(TRcaller).find('.standard').hide();
+                        $(TRcaller).find('.uploadprogress').show();
+                        $(TRcaller).find('.uploadprogress .error').text(d.errors[0].message).show();
+//                        $(TRcaller).find('.addtmxfile').removeClass('disabled');
+                    } else {
+                        $('#activetm tr.uploadpanel .uploadfile').removeClass('uploading');
+                    }
 
                     /*
                                        APP.showMessage({
@@ -728,7 +746,6 @@ $.extend(UI, {
                                        });
                                        */
                 } else {
-                    TRcaller = this[3];
                     $(TRcaller).find('.uploadprogress .msgText').text('Uploading ' + this[1]);
                     $(TRcaller).find('.standard').hide();
                     $(TRcaller).find('.uploadprogress').show();
