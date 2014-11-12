@@ -125,6 +125,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             else{
                 $cartElem = $cache_cart->getItem( $job[ 'jid' ] . "-" . $job['jpassword'] );
                 $cartElem[ "currency" ] = $this->currency;
+                $cartElem[ "timezone" ] = $this->timezone;
                 $cache_cart->delItem( $job[ 'jid' ] . "-" . $job['jpassword'] );
                 $cache_cart->addItem( $cartElem );
             }
@@ -161,6 +162,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $itemCart[ 'words' ]         = $result_quote[ 3 ];
             $itemCart[ 'price' ]         = ( $result_quote[ 4 ] ? $result_quote[ 4 ] : 0 );
             $itemCart[ 'currency' ]      = $this->currency;
+            $itemCart[ 'timezone' ]      = $this->timezone;
             $itemCart[ 'quote_pid' ]     = $result_quote[ 5 ];
             $itemCart[ 'source' ]        = $_jobLangs[ $jpid ]['source']; //get the right language
             $itemCart[ 'target' ]        = $_jobLangs[ $jpid ]['target']; //get the right language

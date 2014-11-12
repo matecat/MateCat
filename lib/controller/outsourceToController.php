@@ -20,8 +20,17 @@ class outsourceToController extends ajaxController {
      */
     private $ppassword;
 
-
+    /**
+     * The currency the customer is viewing the outsource price in
+     * @var string
+     */
     private $currency;
+
+    /**
+     * The timezone the customer is viewing the outsource delivery date in
+     * @var string
+     */
+    private $timezone;
 
     /**
      * A list of job_id/job_password for quote request
@@ -54,6 +63,7 @@ class outsourceToController extends ajaxController {
                 'pid'             => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
                 'ppassword'       => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
                 'currency'        => array( 'filter' => FILTER_SANITIZE_STRING ),
+                'timezone'        => array( 'filter' => FILTER_SANITIZE_STRING ),
                 'jobs'            => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_REQUIRE_ARRAY  | FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
         );
 
@@ -66,6 +76,7 @@ class outsourceToController extends ajaxController {
         $this->pid       = $__postInput[ 'pid' ];
         $this->ppassword = $__postInput[ 'ppassword' ];
         $this->currency  = $__postInput[ 'currency' ];
+        $this->timezone  = $__postInput[ 'timezone' ];
         $this->jobList   = $__postInput[ 'jobs' ];
 
         if( empty( $this->pid ) ){
@@ -78,6 +89,10 @@ class outsourceToController extends ajaxController {
 
         if ( empty( $this->currency ) ) {
             $this->currency = $_COOKIE[ "matecat_currency" ];
+        }
+
+        if ( empty( $this->timezone ) && $this->timezone !== "0" ) {
+            $this->timezone = $_COOKIE[ "matecat_timezone" ];
         }
         //        Log::doLog(  $this->jobList  );
         /**
@@ -114,6 +129,7 @@ class outsourceToController extends ajaxController {
         $outsourceTo->setPid( $this->pid )
                     ->setPpassword( $this->ppassword )
                     ->setCurrency( $this->currency )
+                    ->setTimezone( $this->timezone )
                     ->setJobList( $this->jobList )
                     ->performQuote();
 

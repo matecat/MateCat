@@ -87,23 +87,22 @@ $.extend(UI, {
                             return false;
                         }
 
-						dd = new Date(chunk.delivery_date);
-						$('.outsource.modal .delivery span.time').text( $.format.date(dd, "D MMMM") + ' at ' + $.format.date(dd, "hh:mm a") );
+                        // if the customer has a timezone in the cookie, then use it
+                        // otherwise attemp to guess it from his browser infos
+                        var timezoneToShow = readCookie( "matecat_timezone" );
+                        if ( timezoneToShow == "" ) {
+                            timezoneToShow = -1 * ( new Date().getTimezoneOffset() / 60 );
+                        }
 
-                        var timeOffset = ( -dd.getTimezoneOffset() / 60 );
+                        // update the timezone (both the displayed and the stored ones)
+                        changeTimezone( chunk.delivery_date, "0", timezoneToShow );
+                        $( "#changeTimezone option[value='" + timezoneToShow + "']").attr( "selected", "selected" );
 
                         /**
                          * Removed Timezone with Intl because of too much different behaviours on different operating systems
                          *
                          */
 
-                        $('.outsource.modal .total span.displayprice').text(parseFloat(chunk.price).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'));
-                        $('.outsource.modal .total span.displayprice').attr( "data-currency", chunk.currency );
-                        $('.outsource.modal .total span.displayprice').attr( "data-rawprice", chunk.price );
-
-						var extendedTimeZone = '( GMT ' + ( timeOffset > 0 ? '+' : '' ) + timeOffset + ' )';
-
-                        $('.outsource.modal .delivery span.zone2').text( extendedTimeZone );
 						$('.outsource.modal .continuebtn').removeClass('disabled');
 //						console.log( chunk );
 						$('.modal.outsource .outsourceto h2').removeClass('loading');
@@ -115,13 +114,15 @@ $.extend(UI, {
 							$(".showprices" ).show();
 						}
 
-                        // look for cookies
+                        // if the customer has a currency in the cookie, then use it
+                        // otherwise use the default one
                         var currToShow = readCookie( "matecat_currency" );
                         if ( currToShow == "" ) {
-                            currToShow = $( ".displayprice").attr( "data-currency" );
+                            currToShow = "EUR";
                         }
 
-                        changeCurrency( $( ".displayprice").attr( "data-rawprice" ), "EUR", currToShow );
+                        // update the currency (both the displayed and the stored ones)
+                        changeCurrency( chunk.price, "EUR", currToShow );
                         $( "#changecurrency option[value='" + currToShow + "']").attr( "selected", "selected" );
                     }
 				});
@@ -155,14 +156,13 @@ $.extend(UI, {
 		$(".outsource.modal").on('click', '.continuebtn:not(.disabled)', function(e) {
 			e.preventDefault();
 
-            updateCartCurrency();
+            updateCartParameters();
 
 			$('#continueForm input[name=url_ok]').attr('value', UI.url_ok);
 			$('#continueForm input[name=url_ko]').attr('value', UI.url_ko);
             $('#continueForm input[name=data_key]').attr('value', UI.data_key);
 
             //IMPORTANT post out the quotes
-            // UI.quoteResponse[0]["currency"] = $( "#changecurrency option:selected").val();
 			$('#continueForm input[name=quoteData]').attr('value', JSON.stringify( UI.quoteResponse ) );
 			$('#continueForm').submit();
             $('#continueForm input[name=quoteData]').attr('value', '' );
@@ -181,6 +181,13 @@ $.extend(UI, {
             var currencyFrom = $( ".displayprice").attr( "data-currency" );
             var currencyTo  = $( "#changecurrency option:selected" ).val();
             changeCurrency( amount, currencyFrom, currencyTo );
+        });
+
+        $( "#changeTimezone" ).change( function(){
+            var date = $( "span.time").attr( "data-rawtime" );
+            var timezoneFrom = $( "span.time").attr( "data-timezone" );
+            var timezoneTo = $( "#changeTimezone option:selected" ).val();
+            changeTimezone( date, timezoneFrom, timezoneTo );
         });
 	},
 	getFarthestDate: function() {
@@ -236,6 +243,17 @@ function changeCurrency( amount, currencyFrom, currencyTo ) {
     });
 }
 
+function changeTimezone( date, timezoneFrom, timezoneTo ){
+    var dd = new Date(date);
+    dd.setMinutes( dd.getMinutes() + (timezoneTo - timezoneFrom) * 60 );
+    $('.outsource.modal .delivery span.time').text( $.format.date(dd, "D MMMM") + ' at ' + dd.getUTCHours() + ":" + $.format.date(dd, "mm a") );
+
+    $( "span.time").attr("data-timezone", timezoneTo);
+    $( "span.time").attr("data-rawtime", dd.toUTCString());
+
+    document.cookie = "matecat_timezone=" + timezoneTo + "; path=/";
+}
+
 function readCookie( cookieName ) {
     cookieName += "=";
     var cookies = document.cookie.split(';');
@@ -249,7 +267,7 @@ function readCookie( cookieName ) {
     return "";
 }
 
-function updateCartCurrency() {
+function updateCartParameters() {
     var linkPieces = $( "a.uploadbtn.in-popup").attr( "href").split( "/" );
     var jobData = linkPieces[ linkPieces.length - 1].split( "-" );
 
