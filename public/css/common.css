@@ -1168,9 +1168,9 @@ body.cattool .mgmt-tm.mine thead,
 }
  .canceladdtmx.btn-grey {
  	width: 80px!important; 
-background:#f26522 url(../img/sprite.png) -4px -1162px no-repeat !Important;
+background:#f26522 url(../img/sprite.png) -4px -1161px no-repeat !Important;
 margin-top: 12px;
-padding: 3px 3px 5px 32px;
+padding: 4px 3px 4px 32px;
 
 }
 .popup-tm td.description .edit-desc {
@@ -1181,10 +1181,20 @@ padding: 3px 3px 5px 32px;
     border: 1px solid #999;
     background: #fff;
     padding: 2px;
-    margin-left: -3px;
+}
+
+.popup-tm td.description .edit-desc {
+width: 99%;
+height: 18px;
+padding: 2px;
+}
+
+td.description .edit-desc:hover {
+outline: 1px solid #ccc;
+cursor: text;
 }
  
- .canceladdtmx.btn-grey:hover{background:#d1581c url(../img/sprite.png)  -4px -1162px no-repeat !Important}
+ .canceladdtmx.btn-grey:hover{background:#d1581c url(../img/sprite.png)  -4px -1161px no-repeat !Important}
 .addtmxfile.btn-ok:hover {background:#00A8D2;}
 
 td.uploadfile .canceladdtmx {
@@ -1315,6 +1325,11 @@ margin-bottom: 10px;
 }
 
 #activetm td {background: #e4f2fb;}
+#activetm tr.ownergroup td {background: #f4f4f4;
+color: #999;}
+#activetm tr.ownergroup td.dragrow {background-image: none!important;
+background-color: #f4f4f4!important;
+cursor: auto;}
 #activetm tr.uploadfile td {background: #fff;}
 #inactivetm td {background: #f3f3f3;}
 .mgmt-tm td, .mgmt-tm th, .mgmt-gl td, .mgmt-gl th {
