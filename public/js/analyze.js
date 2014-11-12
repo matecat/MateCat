@@ -576,7 +576,7 @@ UI = {
                                 var s_tm50 = $( '.stat_tm50', context );
                                 s_tm50_txt = s_tm50.text();
                                 s_tm50.text( tot.TM_50_74[1] );
-                                if ( s_tm75_txt != tot.TM_50_74[1] )
+                                if ( s_tm50_txt != tot.TM_50_74[1] )
                                     s_tm50.effect( "highlight", {}, 1000 );
 
                                 var s_tm75 = $( '.stat_tm75', context );
