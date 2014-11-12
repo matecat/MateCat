@@ -8579,7 +8579,7 @@ $.extend(UI, {
                 console.log('progress success data: ', d);
                 existing = this[2];
                 TRcaller = this[3];
-                d.errors = [{message: 'questo è un errore'}];
+//                d.errors = [{message: 'questo è un errore'}];
                 if(d.errors.length) {
                     if(existing) {
                         console.log('error');
