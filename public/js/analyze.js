@@ -573,12 +573,6 @@ UI = {
                                 if ( s_int_txt != tot.INTERNAL_MATCHES[1] )
                                     s_int.effect( "highlight", {}, 1000 );
 
-                                var s_tm50 = $( '.stat_tm50', context );
-                                s_tm50_txt = s_tm50.text();
-                                s_tm50.text( tot.TM_50_74[1] );
-                                if ( s_tm75_txt != tot.TM_50_74[1] )
-                                    s_tm50.effect( "highlight", {}, 1000 );
-
                                 var s_tm75 = $( '.stat_tm75', context );
                                 s_tm75_txt = s_tm75.text();
                                 s_tm75.text( tot.TM_75_99[1] );
@@ -606,11 +600,11 @@ UI = {
 
                             } );
 
-                            $.each( files_group, function ( jPassword, files_object ) {
+                            $.each( files_group, function ( jobpassword, files_object ) {
 
                                 $.each( files_object, function ( id_file, file_details ) {
 
-                                    context = $( global_context ).find( '#file_' + job_id + '_' + jPassword + '_' + id_file );
+                                    context = $( global_context ).find( '#file_' + job_id + '_' + jobpassword + '_' + id_file );
 
                                     var s_payable = $( '.stat_payable strong', context );
                                     var s_payable_txt = s_payable.text();
@@ -635,12 +629,6 @@ UI = {
                                     s_int.text( file_details.INTERNAL_MATCHES[1] );
                                     if ( s_int_txt != file_details.INTERNAL_MATCHES[1] )
                                         s_int.effect( "highlight", {}, 1000 );
-
-                                    var s_tm50 = $( '.stat_tm50', context );
-                                    s_tm50_txt = s_tm50.text();
-                                    s_tm50.text( file_details.TM_50_74[1] );
-                                    if ( s_tm75_txt != file_details.TM_50_74[1] )
-                                        s_tm50.effect( "highlight", {}, 1000 );
 
                                     var s_tm75 = $( '.stat_tm75', context );
                                     s_tm75_txt = s_tm75.text();
