@@ -398,9 +398,11 @@
 
                                         <tr class="new hide">
 
-                                            <td class="privatekey"> <input class="mgmt-input" type="text" id="new-tm-key"
-                                                                           placeholder="Have a Key? Add it here" />
-                                                <a class="btn-ok pull-right">Create</a><span class="pull-right">or  </span>
+                                            <td class="privatekey"> <input class="mgmt-input pull-left" type="text" id="new-tm-key"
+                                                                           placeholder="Have a Key? Add it here*" />
+                                                                           <span class="text-or pull-left">or</span>
+                                                <a class="btn-ok pull-right">Create</a>
+                                                <span class="text pull-left text-req">*required</span>
                                             </td>
                                             <td class="description"><textarea rows="3" cols="50" class="mgmt-input" 
                                                                            id="new-tm-description"
@@ -413,19 +415,20 @@
 
                                             </td>
                                             <td class="action">
-                                                 <div class="error">
-                                                    <span class="tm-error-key"></span>
-                                                    <span class="tm-error-grants"></span>
-                                                </div>
-                                                <a class="pull-left btn-grey uploadtm disabled">
-                                                    <span class="text uploadkey">Add a key</span>
+                                                 
+                                                <a class="pull-left btn-ok uploadtm disabled">
+                                                    <span class="text uploadkey">Confirm</span>
                                                 </a>
-                                                <a class="pull-left btn-grey addtmxfile">
+                                                <!-- <a class="pull-left btn-grey addtmxfile">
                                                     <span class="text">Add TMX</span>
-                                                </a>
+                                                </a>-->
                                                 <a class="pull-right btn-grey canceladdtmx">
                                                     <span class="text">Cancel</span>
                                                 </a>
+                                                <div class="error">
+                                                    <span class="tm-error-key"></span>
+                                                    <span class="tm-error-grants"></span>
+                                                </div>
                                                
                                                 <div id="uploadCallback"></div>
                                                 
