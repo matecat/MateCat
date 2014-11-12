@@ -801,6 +801,7 @@ form.add-TM-Form {
     }
     .popup-tm h1 {
     	height: 30px;
+    	padding: 10px 23px 7px 58px;
     }
     .popup h2
     {
@@ -1082,10 +1083,19 @@ margin:0 auto; overflow:hidden; width:100%;
 padding-left: 20px;
 }
 
-.mgmt-tm .progress {display: block; height: 10px; background: #d0d1d1; margin-bottom: 4px; position: relative;}
+.mgmt-tm .progress {
+	display: block;
+	height: 15px;
+	background: #d0d1d1;
+	border: 1px solid #ccc;
+	position: relative;
+	border-radius: 4px;
+	float: left;
+	width: 235px;
+}
 
 .new td.fileupload {
-width: 92px;
+	width: 92px;
 }
  .back-mgmt {padding:20px; margin-right:20px;}
 
@@ -1144,6 +1154,12 @@ body.cattool .mgmt-tm.mine thead,
 {
     display: none;
 }
+
+#activetm tr.ownergroup td,
+#activetm tr.anonymous td
+{
+    color: #999;
+}
 .canceladdtmx {
     cursor: pointer;
     margin-bottom: 30px;
@@ -1158,9 +1174,9 @@ body.cattool .mgmt-tm.mine thead,
 }
  .canceladdtmx.btn-grey {
  	width: 80px!important; 
-background:#f26522 url(../img/sprite.png) -4px -1162px no-repeat !Important;
-margin-top: 22px;
-padding: 3px 3px 5px 32px;
+background:#f26522 url(../img/sprite.png) -4px -1161px no-repeat !Important;
+margin-top: 12px;
+padding: 4px 3px 4px 32px;
 
 }
 .popup-tm td.description .edit-desc {
@@ -1171,15 +1187,37 @@ padding: 3px 3px 5px 32px;
     border: 1px solid #999;
     background: #fff;
     padding: 2px;
-    margin-left: -3px;
+}
+
+.popup-tm td.description .edit-desc {
+width: 99%;
+height: 18px;
+padding: 2px;
+}
+
+td.description .edit-desc:hover {
+outline: 1px solid #ccc;
+cursor: text;
 }
  
- .canceladdtmx.btn-grey:hover{background:#d1581c url(../img/sprite.png)  -4px -1162px no-repeat !Important}
+ .canceladdtmx.btn-grey:hover{background:#d1581c url(../img/sprite.png)  -4px -1161px no-repeat !Important}
 .addtmxfile.btn-ok:hover {background:#00A8D2;}
 
 td.uploadfile .canceladdtmx {
     margin-bottom: 0px;
 }
+
+td.uploadfile .error {
+    display: none;
+    float: right;
+    margin-right: 14px;
+    color: red;
+}
+td.uploadfile .uploadprogress .error {
+    float: left;
+    margin-right: 0px;
+}
+
 .canceladdtmx:hover {
 	color:red;
 }
@@ -1242,16 +1280,13 @@ margin-top: 10px;
     background: #fff;
     padding: 15px 5px;
     height: 20px;
-    border-top: 1px solid #E7E7E7;
-	box-shadow: inset 0px 3px 4px 0px #f4f4f4;
+    border-top: 1px solid #E1E1E1;
+	box-shadow: inset 0px 2px 5px 0px #E4E4E4;
 }
 #activetm td.dragrow{
     cursor: move;
 }
 
-#inactivetm td.dragrow {
-display: none;
-}
 td.dragrow {
     background-image: url(../img/grip.png)!important;
     background-repeat: no-repeat!important;
@@ -1267,6 +1302,13 @@ td.dragrow {
 #activetm tr.anonymous td {
     background: #f6f6f6 !important;
 }
+
+#inactivetm td.dragrow,
+.anonymous td.dragrow {
+    background-image: none !important;
+    cursor: initial;
+}
+
 
 #activetm th.privatekey, #inactivetm .privatekey {
 	padding-left:15px;
@@ -1302,6 +1344,11 @@ margin-bottom: 10px;
 }
 
 #activetm td {background: #e4f2fb;}
+#activetm tr.ownergroup td {background: #f4f4f4;
+color: #999;}
+#activetm tr.ownergroup td.dragrow {background-image: none!important;
+background-color: #f4f4f4!important;
+cursor: auto;}
 #activetm tr.uploadfile td {background: #fff;}
 #inactivetm td {background: #f3f3f3;}
 .mgmt-tm td, .mgmt-tm th, .mgmt-gl td, .mgmt-gl th {
@@ -1549,18 +1596,27 @@ tr.new.badgrants .fileupload
 }
 #activetm .startUploading
 {
-    background: url(../img/loading.gif) 48% 5px no-repeat !important;
-    background-size: 3% !important;
+    background: url(../img/loading.gif) 54% 16px no-repeat !important;
+background-size: 2% !important;
 }
 #activetm .uploadprogress {
     display: none;
+    margin-right: 8px;
+	margin-top: -5px;
+	float: right;
 }
+
+#activetm .uploadprogress .msgText {
+	display: block;
+}
+
 #activetm .uploadprogress .progress .inner {
     display: block;
-    height: 10px;
+    height: 15px;
     margin-bottom:5px;
     width: 0%;
-    background: #09BEEC;
+    background: #58B551;
+	border-right: 1px solid #58B551 !important;
     border-radius: 0;
 }
 
@@ -1911,6 +1967,14 @@ float: right;
 }
 #inactivetm_filter input {
 margin-left: 10px;
+}
+
+th.privatekey.tablesorter-header:hover, 
+th.owner.tablesorter-header:hover,
+th.description.tablesorter-header:hover {
+box-shadow: inset 0px 0px 8px #333;
+/* border-right: 1px solid #ccc; */
+cursor: pointer;
 }
 
 .disabletm .text:before {
@@ -3416,7 +3480,7 @@ section.status-new.opened .editarea
 	text-indent:0;
 }
 
-section.opened {
+section.editor {
 z-index: 10000;
 }
 

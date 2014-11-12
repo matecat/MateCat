@@ -1154,6 +1154,12 @@ body.cattool .mgmt-tm.mine thead,
 {
     display: none;
 }
+
+#activetm tr.ownergroup td,
+#activetm tr.anonymous td
+{
+    color: #999;
+}
 .canceladdtmx {
     cursor: pointer;
     margin-bottom: 30px;
@@ -1200,6 +1206,18 @@ cursor: text;
 td.uploadfile .canceladdtmx {
     margin-bottom: 0px;
 }
+
+td.uploadfile .error {
+    display: none;
+    float: right;
+    margin-right: 14px;
+    color: red;
+}
+td.uploadfile .uploadprogress .error {
+    float: left;
+    margin-right: 0px;
+}
+
 .canceladdtmx:hover {
 	color:red;
 }
@@ -1285,9 +1303,10 @@ td.dragrow {
     background: #f6f6f6 !important;
 }
 
-#inactivetm td.dragrow, .anonymous td.dragrow {
-background-image: none;
-cursor: initial;
+#inactivetm td.dragrow,
+.anonymous td.dragrow {
+    background-image: none !important;
+    cursor: initial;
 }
 
 
