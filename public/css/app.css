@@ -4278,6 +4278,10 @@ footer nav
 	cursor: move !important;
 }
 
+
+
+
+
 /*.source ::selection
 	{
      color:#ff0000;
@@ -4948,6 +4952,44 @@ del.diff
 {
 	width: 0px;
     float: left;
+}
+
+
+body.tagModes section[data-tagmode='crunched'] .editarea .locked,
+body.tagModes section[data-tagmode='crunched'] .source .locked
+{
+    text-indent: -9999px;
+    display: inline-block;
+    width: 12px;
+    background: url(../img/crunchedtag.png) 1px 12px no-repeat;
+    background-size: 80%;
+    opacity: 0.2;
+}
+
+.textarea-container .tagMode {
+    position: absolute;
+    display: none;
+    width: 100%;
+    text-align: right;
+    margin-top: -23px;
+}
+.editor .textarea-container .tagMode {
+    display: block;
+}
+.textarea-container .tagMode li {
+    display: inline-block;
+    width: 40px;
+    height: 20px;
+    text-align: center;
+    font-weight: bold;
+    opacity: 0.3;
+    cursor: pointer
+}
+
+.editor[data-tagmode='crunched'] .textarea-container .tagMode li.crunched,
+.editor[data-tagmode='extended'] .textarea-container .tagMode li.extended,
+.textarea-container .tagMode li:hover {
+    opacity: 1;
 }
 
 
