@@ -1288,6 +1288,17 @@ margin-top: 10px;
   /*  display: table-header-group !important;*/
   background: #6d6e71;
 }
+
+/* TEMPORARY FIX */
+.mgmt-tm tr.mine .btn-grey.addtmx {
+    padding: 4px 5px;
+    width: 105px;
+}
+.mgmt-tm tr.mine .btn-grey.addtmx span {
+    width: 100px;
+}
+/* TEMPORARY FIX */
+
 #activetm tbody {
     display: block;
 }
