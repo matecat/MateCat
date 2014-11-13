@@ -8073,10 +8073,8 @@ $.extend(UI, {
                 textExtraction: function(node) {
                     // extract data from markup and return it
                     if($(node).hasClass('privatekey')) {
-                        console.log('privatekey: ', $(node).text());
                         return $(node).text();
                     } else {
-                        console.log('not: ', $(node).text());
                         return $(node).text();
                     }
                 },
@@ -8707,8 +8705,12 @@ $.extend(UI, {
     saveTMdata: function() {
         UI.closeTMPanel();
         UI.clearTMPanel();
+        if(!APP.isCattool) {
+            return false;
+        }
 
-        data = this.extractTMdataFromTable();
+
+            data = this.extractTMdataFromTable();
         APP.doRequest({
             data: {
                 action: 'updateJobKeys',
