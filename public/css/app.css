@@ -1210,9 +1210,10 @@ padding: 4px 38px 4px 12px;
 }
 
 .popup-tm td.description .edit-desc {
-width: 99%;
-height: 18px;
-padding: 2px;
+    width: 99%;
+    height: auto;
+    min-height: 18px;
+    padding: 2px;
 }
 
 td.description .edit-desc:hover {

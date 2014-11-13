@@ -8007,7 +8007,7 @@ $.extend(UI, {
             UI.execAddTM(this);
 //        }).on('click', '#activetm td.description', function() {
 //            console.log($(this).find())
-        }).on('click', '#activetm td.description .edit-desc', function() {
+        }).on('click', '#activetm tr.mine td.description .edit-desc', function() {
             console.log('.edit-desc');
 //            $(this).addClass('current');
             $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');

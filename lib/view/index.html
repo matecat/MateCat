@@ -477,6 +477,13 @@
 
                                 <h3 class="pull-left">Inactive TM</h3>
 
+
+                                <tal:block tal:condition="php: empty(logged_user)">
+                                    <p>Log in to see your keys!</p>
+                                </tal:block>
+
+                                <tal:block tal:condition="php: !empty(logged_user)">
+
                                 <div style="float: right">
                                     <label for="filterInactive">Search: </label>
                                     <input id="filterInactive" type="text"/>
@@ -522,6 +529,8 @@
 
                                     </tbody>
                                 </table>
+
+                                </tal:block>
 
                             </div>
                         </div>
