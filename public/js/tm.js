@@ -372,7 +372,7 @@ $.extend(UI, {
             if( $(this).text().slice(-5) == $('#new-tm-key').val().slice(-5) ){
                 console.log('key is bad');
                 $('#activetm tr.new').addClass('badkey');
-                $('#activetm tr.new .error .tm-error-key').text('The key is already present.').show();
+                $('#activetm tr.new .error .tm-error-key').text('The key is already present in this project.').show();
                 UI.checkTMAddAvailability(); //some enable/disable stuffs
                 keyIsAlreadyPresent = true;
                 return false;
