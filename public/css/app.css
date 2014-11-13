@@ -1203,7 +1203,7 @@ padding: 4px 38px 4px 12px;
     width: 100%;
     height: 18px;
 }
-.popup-tm td.description .edit-desc[contenteditable='true'] {
+.popup-tm tr.mine td.description .edit-desc[contenteditable='true'] {
     border: 1px solid #999;
     background: #fff;
     padding: 2px;
@@ -1216,9 +1216,9 @@ padding: 4px 38px 4px 12px;
     padding: 2px;
 }
 
-td.description .edit-desc:hover {
-outline: 1px solid #ccc;
-cursor: text;
+.popup-tm tr.mine td.description .edit-desc:hover {
+    outline: 1px solid #ccc;
+    cursor: text;
 }
  
  .canceladdtmx.btn-grey:hover{background:#d1581c;}
@@ -1351,6 +1351,10 @@ display: none;
 td.no-gutter {padding:0!important;}
 .dataTables_empty {
 width: 1042px;
+}
+#inactivetm tbody,
+#inactivetm thead {
+    display: block;
 }
 .mgmt-container .icon-search {
 margin-top: 2px;

@@ -320,10 +320,10 @@ $(function () {
 			delete(UI.skipLangDetectArr[deletedFileName]);
 		}
 
-        if($('.error-message.no-more').length) {
+        if($('.wrapper-upload .error-message.no-more').length) {
 
 			if($('.upload-table tr').length < (config.maxNumberFiles)) {
-				$('.error-message').empty().hide();
+				$('.wrapper-upload .error-message').empty().hide();
 		    	$('#fileupload').fileupload('option', 'dropZone', $('.drag'));
 		    	$('#add-files').removeClass('disabled');
 		    	$('#add-files input').removeAttr('disabled');
@@ -354,10 +354,10 @@ $(function () {
 	}).on('click', '.template-upload .cancel button', function (e,data) {
 //		var err = $.parseJSON(data.jqXHR.responseText)[0].error;
         console.log('file canceled');
-        if($('.error-message.no-more').length) {
+        if($('.wrapper-upload .error-message.no-more').length) {
 
 			if($('.upload-table tr').length < (config.maxNumberFiles)) {
-				$('.error-message').empty().hide();
+				$('.wrapper-upload .error-message').empty().hide();
 		    	$('#fileupload').fileupload('option', 'dropZone', $('.drag'));
 		    	$('#add-files').removeClass('disabled');
 		    	$('#add-files input').removeAttr('disabled');
@@ -387,7 +387,7 @@ $(function () {
 		var maxnum = config.maxNumberFiles;
 		if($('.upload-table tr').length > (maxnum-1)) {
 			console.log('10 files loaded');
-			$('.error-message').addClass('no-more').text('No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).').show();
+			$('.wrapper-upload .error-message').addClass('no-more').text('No more files can be loaded (the limit of ' + maxnum + ' has been exceeded).').show();
 		    $('#fileupload').fileupload('option', 'dropZone', null);
 		    $('#add-files').addClass('disabled');
 		    $('#add-files input').attr('disabled', 'disabled');
@@ -475,7 +475,7 @@ $(function () {
 
         } else if ( fileSpecs.error ) {
             disableAnalyze();
-            $( '.error-message' ).addClass( 'no-more' ).text( 'An error occurred during upload.' ).show();
+            $( '.wrapper-upload .error-message' ).addClass( 'no-more' ).text( 'An error occurred during upload.' ).show();
             $( '#fileupload' ).fileupload( 'option', 'dropZone', null );
             $( '#add-files' ).addClass( 'disabled' );
             $( '#add-files input' ).attr( 'disabled', 'disabled' );
@@ -533,7 +533,7 @@ $(function () {
 
     $('#clear-all-files').bind('click', function (e) {
         e.preventDefault();
-        $('.error-message').hide();
+        $('.wrapper-upload .error-message').hide();
         $('.template-download .delete button, .template-upload .cancel button').click();
 	});
 
