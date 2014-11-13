@@ -1352,6 +1352,10 @@ td.no-gutter {padding:0!important;}
 .dataTables_empty {
 width: 1042px;
 }
+#inactivetm tbody,
+#inactivetm thead {
+    display: block;
+}
 .mgmt-container .icon-search {
 margin-top: 2px;
 margin-left: 5px;

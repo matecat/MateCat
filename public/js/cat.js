@@ -3055,12 +3055,6 @@ $(document).ready(function() {
 	UI.checkWarnings(true);
 });
 
-$.extend($.expr[":"], {
-	"containsNC": function(elem, i, match) {
-		return (elem.textContent || elem.innerText || "").toLowerCase().indexOf((match[3] || "").toLowerCase()) >= 0;
-	}
-});
-
 $(window).resize(function() {
     UI.fixHeaderHeightChange();
 });
