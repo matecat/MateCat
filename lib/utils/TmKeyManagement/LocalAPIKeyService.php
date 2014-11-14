@@ -10,7 +10,7 @@ class TmKeyManagement_LocalAPIKeyService {
 
     public function createMyMemoryKey(){
 
-        $newUser = json_decode( file_get_contents( 'http://api.mymemory.translated.net/api/createranduser' ) );
+        $newUser = json_decode( file_get_contents( 'http://api.mymemory.translated.net/createranduser' ) );
         if ( empty( $newUser ) || $newUser->error || $newUser->code != 200 ) {
             throw new Exception( "Private TM key .", -1 );
         }
@@ -31,39 +31,51 @@ class TmKeyManagement_LocalAPIKeyService {
      */
     public function checkCorrectKey( $apiKey ){
 
-        $url = 'http://api.mymemory.translated.net/authkey?key=' . $apiKey;
+	    $url = 'http://api.mymemory.translated.net/authkey?key=' . $apiKey;
+	    $ch = curl_init();
 
-        $defaults = array(
-                CURLOPT_URL => $url,
-                CURLOPT_HEADER => 0,
-                CURLOPT_RETURNTRANSFER => TRUE,
-                CURLOPT_TIMEOUT => 2
-        );
+	    curl_setopt($ch, CURLOPT_URL, $url);
+	    curl_setopt($ch, CURLOPT_HEADER, 0);
+	    curl_setopt($ch, CURLOPT_USERAGENT, "user agent");
+	    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
-        Log::doLog( "Request: " . $url );
+	    curl_setopt( $ch, CURLOPT_HTTPGET, true );
+	    curl_setopt( $ch, CURLOPT_TIMEOUT, 5 ); //we can wait max 5 seconds
 
-        $ch = curl_init();
-        curl_setopt_array( $ch, $defaults );
-        $result = curl_exec( $ch );
+	    //if it's an HTTPS call
+	    if(strpos(trim($url),'https',0)===0){
+		    //verify CA in certificate
+		    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+/*
+		    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 
-        $curl_errno = curl_errno($ch);
-        $curl_error = curl_error($ch);
-        curl_close($ch);
+		    //verify that the common name exists and that it matches the host name of the server
+		    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+		    //use these certificates as chain of trust
+		    curl_setopt($ch, CURLOPT_CAPATH, '/etc/ssl/certs/');
+*/
+	    }
 
-        Log::doLog( "Response: " . $result );
+	    $result = curl_exec( $ch );
 
-        if( $curl_errno > 0 ) {
-            Log::doLog( "Error: The check for MyMemory private key correctness failed: " . $curl_error . " ErrNum: " . $curl_errno );
-            throw new Exception( "Error: The check for correctness of the private TM key failed. Please check you inserted key.", -2 );
-        }
+	    $curl_errno = curl_errno($ch);
+	    $curl_error = curl_error($ch);
+	    curl_close($ch);
 
-        $isValidKey = filter_var( $result, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+	    Log::doLog( "Response KEY VALIDATION $url ->'$result'");
 
-        if( $isValidKey === null ){
-            throw new Exception( "Error: The check for correctness of the private TM key failed.", -3 );
-        }
+	    if( $curl_errno > 0 ) {
+		    Log::doLog( "Error: The check for MyMemory private key correctness failed: " . $curl_error . " ErrNum: " . $curl_errno );
+		    throw new Exception( "Error: The check for correctness of the private TM key failed. Please check you inserted key.", -2 );
+	    }
 
-        return $isValidKey;
+	    $isValidKey = filter_var( $result, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE );
+
+	    if( $isValidKey === null ){
+		    throw new Exception( "Error: The check for correctness of the private TM key failed.", -3 );
+	    }
+
+	    return $isValidKey;
 
     }
 
