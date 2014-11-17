@@ -1320,7 +1320,11 @@ margin-top: 10px;
 
 #activetm tbody {
     display: block;
+    background: #e4f2fb;
+
 }
+
+
 #activetm tr:not(.new) {
     display: block;
     width: 100%;
