@@ -18,6 +18,9 @@ class Utils {
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 		curl_setopt($ch, CURLOPT_POST, true);
 		curl_setopt($ch, CURLOPT_POSTFIELDS, $d);
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+
 		if (self::is_assoc($opt) and !empty($opt)) {
 			foreach ($opt as $k => $v) {
 

@@ -67,7 +67,20 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                 //Use the shop cart to add Projects info
                 //to the cache cart because of taking advantage of the cart cache invalidation on project split/merge
                 Log::doLog( "Project Not Found in Cache. Call API url for STATUS: " . $project_url_api );
-                $raw_volAnalysis = file_get_contents( $project_url_api );
+
+                $ch = curl_init();
+
+                curl_setopt($ch, CURLOPT_URL, $project_url_api);
+                curl_setopt($ch, CURLOPT_HEADER, 0);
+                curl_setopt($ch, CURLOPT_USERAGENT, "user agent");
+                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+                curl_setopt( $ch, CURLOPT_TIMEOUT, 5 ); //we can wait max 5 seconds
+                //if it's an HTTPS call
+                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+
+		$raw_volAnalysis = curl_exec( $ch );
+                curl_close($ch);
 
                 $itemCart                = new Shop_ItemHTSQuoteJob();
                 $itemCart[ 'id' ]        = $project_url_api;
@@ -96,7 +109,9 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_HEADER => 0,
                 CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
-                CURLOPT_CONNECTTIMEOUT => 2
+                CURLOPT_CONNECTTIMEOUT => 2,
+		CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYHOST => 2
         );
 
         //prepare handlers for curl to quote service
@@ -127,7 +142,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'source' ] = $source;
             $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'target' ] = $target;
 
-            $url = "http://www.translated.net/hts/?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target&pn=MATECAT_{$job[ 'jid' ]}-{$job['jpassword']}&w=$job_payableWords&df=matecat&matecat_pid=" . $this->pid . "&matecat_ppass=" . $this->ppassword . "&matecat_pname=" . $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ];
+            $url = "https://www.translated.net/hts/?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target&pn=MATECAT_{$job[ 'jid' ]}-{$job['jpassword']}&w=$job_payableWords&df=matecat&matecat_pid=" . $this->pid . "&matecat_ppass=" . $this->ppassword . "&matecat_pname=" . $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ];
 
             if( !$cache_cart->itemExists( $job[ 'jid' ] . "-" . $job['jpassword'] ) ){
                 Log::doLog( "Not Found in Cache. Call url for Quote:  " . $url );

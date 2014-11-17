@@ -76,15 +76,10 @@ abstract class Engine {
 	}
 
 	//if it's an HTTPS call
-	if(strpos(trim($url),'https',0)===0){
-		//verify CA in certificate
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-
-		//verify that the common name exists and that it matches the host name of the server
-		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-		//use these certificates as chain of trust
-		curl_setopt($ch, CURLOPT_CAPATH, '/etc/ssl/certs/');
-	}
+        //verify CA in certificate
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+	//verify that the common name exists and that it matches the host name of the server
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 
 	$output = curl_exec($ch);
 	$curl_errno = curl_errno($ch);

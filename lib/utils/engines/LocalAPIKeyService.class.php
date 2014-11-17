@@ -55,18 +55,9 @@ class LocalAPIKeyService {
 	    curl_setopt( $ch, CURLOPT_TIMEOUT, 5 ); //we can wait max 5 seconds
 
 	    //if it's an HTTPS call
-	    if(strpos(trim($url),'https',0)===0){
-		    //verify CA in certificate
-		    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-/*
-		    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-
-		    //verify that the common name exists and that it matches the host name of the server
-		    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
-		    //use these certificates as chain of trust
-		    curl_setopt($ch, CURLOPT_CAPATH, '/etc/ssl/certs/');
-*/
-	    }
+            //verify CA in certificate
+	    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 
 	    $result = curl_exec( $ch );
 
