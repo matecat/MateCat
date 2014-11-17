@@ -592,6 +592,18 @@ class CatUtils {
         $job_stats[ 'TRANSLATED_PERC' ] = ( $job_stats[ 'TRANSLATED' ] / $job_stats[ 'TOTAL' ] * 100 );
         $job_stats[ 'PROGRESS_PERC' ]   = ( $job_stats[ 'PROGRESS' ] / $job_stats[ 'TOTAL' ] ) * 100;
 
+        if($job_stats[ 'TRANSLATED_PERC' ] > 100) {
+            $job_stats[ 'TRANSLATED_PERC' ] = 100;
+        }
+
+        if($job_stats[ 'PROGRESS_PERC' ] > 100) {
+            $job_stats[ 'PROGRESS_PERC' ] = 100;
+        }
+
+        if($job_stats[ 'DRAFT_PERC' ] < 0) {
+            $job_stats[ 'DRAFT_PERC' ] = 0;
+        }
+
         $temp = array(
                 $job_stats[ 'TRANSLATED_PERC' ],
                 $job_stats[ 'DRAFT_PERC' ],
@@ -677,6 +689,11 @@ class CatUtils {
         $job_stats[ 'TRANSLATED' ] = $wCount->getTranslatedWords();
         $job_stats[ 'APPROVED' ]   = $wCount->getApprovedWords();
         $job_stats[ 'REJECTED' ]   = $wCount->getRejectedWords();
+
+        //sometimes new_words + draft_words < 0 (why?). If it happens, set draft words to 0
+        if($job_stats[ 'DRAFT' ] < 0 ) {
+            $job_stats[ 'DRAFT' ] = 0;
+        }
 
         //avoid division by zero warning
         $total = $wCount->getTotal();
