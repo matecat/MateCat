@@ -866,7 +866,7 @@ class CatUtils {
 
         //do nothing if "from" and "to" parameters are the equals
         if ( strtolower( $charset ) == strtolower( $toEncoding ) ) {
-            return array( 'charset' => $charset, 'document' => $documentContent );
+            return array( $charset, $documentContent );
         }
 
         $converted = iconv( $charset, $toEncoding . "//IGNORE", $documentContent );

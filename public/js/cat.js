@@ -4545,7 +4545,9 @@ $.extend(UI, {
 			}
 			if (!UI.body.hasClass('searchActive'))
 				setTimeout(function() {
-					UI.lockTags(UI.editarea);
+				//FIX HERE
+				    console.log("Log Lock Tags in 'input in editarea'" ); 	
+				    UI.lockTags(UI.editarea);
 				}, 10);
 			UI.registerQACheck();
 		}).on('input', '.editor .cc-search .input', function() {
@@ -5805,6 +5807,8 @@ $.extend(UI, {
 			tx = tx.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
 			var prevNumTags = $('span.locked', this).length;
 			$(this).html(tx);
+
+
 			restoreSelection();
 
 			if($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
