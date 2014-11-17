@@ -772,9 +772,7 @@ form.add-TM-Form {
 #uploadCallback {
     display: none;
 }
-#new-tm-write {
-    float: right;
-}
+
 #activetm tr.new .error {
     display: block;
     float: left;
@@ -1074,22 +1072,14 @@ margin:0 auto; overflow:hidden; width:100%;
 
 .mgmt-tm .action {
 		/*width:22%!important;*/
-		width: 260px!important;
+		width: 254px!important;
 }
 
 .new .privatekey {
-	width: 260px!important;
+	width: 270px!important;
 	padding: 15px 0px 15px 10px;
 }
 
-.new .description {
-	width:388px!important;
-}
-
-.new .action {
-			width: 253px!important;
-padding-left: 20px;
-}
 
 .mgmt-tm .progress {
 	display: block;
@@ -1105,6 +1095,8 @@ padding-left: 20px;
 .new td.fileupload {
 	width: 99px;
 }
+
+
  .back-mgmt {padding:20px; margin-right:20px;}
 
 .memory-mgmt.btn {
@@ -1124,15 +1116,10 @@ width: auto;
     border: 1px solid #ccc;
 }
 
-.mgmt-tm .btn-ok, .mgmt-tm .btn-grey {margin:0 3px;
-padding:4px 10px;
-cursor:pointer!important;
-margin: -3px 5px 3px 3px;
-font-size:14px;
-}
+
 
 .privatekey .btn-ok {
-margin: 0;
+margin: 0!important
 }
 .btn-grey.uploadtm {
 clear: right;
@@ -1148,8 +1135,8 @@ vertical-align: bottom;
 }
 
 span.text-or {
-text-align: right;
-width: 22px;
+text-align: center;
+width: 21px;
 }
 
 span.text-req {
@@ -1163,9 +1150,18 @@ color: #bbb;
 -webkit-box-shadow: inset 0 0 1px 1px #888;
 box-shadow: inset 0 0 1px 1px #888;}
 
-.mgmt-tm .action .btn-grey, .addtmxrow .btn-grey {width: 95px;
-text-align: center;
+.mgmt-tm .action .btn-grey, .addtmxrow .btn-grey, .canceladdtmx {
+	width: 95px;
+	text-align: center;
 }
+
+.mgmt-tm .btn-ok, .mgmt-tm .btn-grey {
+padding:4px 7px;
+cursor:pointer!important;
+margin: -5px 7px 2px 0px;
+font-size:14px;
+}
+
 .btn-grey:hover {
 cursor: pointer;
 -webkit-box-shadow: 0 1px 2px #ccc;
@@ -1200,18 +1196,20 @@ body.cattool .mgmt-tm.mine thead,
 }
 
 .addtmxfile.btn-ok, .uploadtm.btn-ok {
-	padding: 4px 36px 7px 12px;
+	padding: 4px 34px 7px 8px;
+}
+
+.uploadtm.btn-ok {
+	margin-left: -6px;
 }
  .canceladdtmx.btn-grey {
- 	width: 65px!important; 
+
 background:#f26522;
-margin-top: -3px;
-padding: 4px 38px 4px 12px;
 
 }
 .popup-tm td.description .edit-desc {
     height: 18px;
-    width: 355px;
+    width: 350px;
 
 height: 18px;
 padding: 2px 5px;
@@ -1308,15 +1306,6 @@ margin-top: 10px;
   background: #6d6e71;
 }
 
-/* TEMPORARY FIX */
-.mgmt-tm tr.mine .btn-grey.addtmx {
-    padding: 4px 5px;
-    width: 105px;
-}
-.mgmt-tm tr.mine .btn-grey.addtmx span {
-    width: 100px;
-}
-/* TEMPORARY FIX */
 
 #activetm tbody {
     display: block;
@@ -1637,9 +1626,8 @@ border: 1px solid #999;
 }
 
 .description .mgmt-input {
-	width: 355px;
+width: 350px;
 margin-left: 6px;
-
 }
 
 
