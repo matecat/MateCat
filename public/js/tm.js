@@ -537,7 +537,7 @@ $.extend(UI, {
         var TMKey = $('#new-tm-key').val();
 
         newTr = '<tr class="mine" data-tm="1" data-glos="1" data-owner="' + config.ownerIsMe + '">' +
-                '    <td class="dragrow"></td>' +
+                '    <td class="dragrow"><div class="status"></div></td>' +
                 '    <td class="privatekey">' + TMKey + '</td>' +
                 '    <td class="owner">You</td>' +
                 '    <td class="description">' + desc + '</td>' +

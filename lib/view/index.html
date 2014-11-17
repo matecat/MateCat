@@ -378,7 +378,7 @@
 
                                     <tal:block tal:repeat="key user_keys/job_keys">
                                         <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( ownerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
-                                            <td class="dragrow"></td>
+                                            <td class="dragrow"><div class="status"></div></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">${php: key.owner ? ( ownerIsMe ? 'You' : '*****' ) : 'You'}</td>
                                             <td class="description"><div class="edit-desc">${php: key.owner ? ( ownerIsMe ? key.name : '**********' ) : key.name}</div></td>
@@ -418,7 +418,7 @@
                                                     <span class="text uploadkey">Confirm</span>
                                                 </a>
 
-                                                <a class="pull-right btn-grey canceladdtmx">
+                                                <a class="pull-left btn-grey canceladdtmx">
                                                     <span class="text">Cancel</span>
                                                 </a>
                                                 <div class="error">
@@ -462,7 +462,7 @@
 -->
                                     <tal:block tal:repeat="key user_keys/job_keys">
                                         <tr tal:condition="php: !key.edit && !key.owner" class="anonymous" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
-                                            <td class="dragrow"></td>
+                                            <td class="dragrow"><div class="status"></div></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">*****</td>
                                             <td class="description">**********</td>
@@ -510,7 +510,7 @@
 
                                     <tal:block tal:repeat="key user_keys/totals">
                                         <tr class="mine" data-tm="1" data-glos="1">
-                                            <td class="dragrow"></td>
+                                            <td class="dragrow"><div class="status"></div></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">You</td>
                                             <td class="description">${key/name}</td>
