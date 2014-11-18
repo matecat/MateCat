@@ -2942,8 +2942,15 @@ UI = {
 	 });
 	 },
 	 */
+    storeClientInfo: function () {
+        clientInfo = {
+            xRes: window.screen.availWidth,
+            yRes: window.screen.availHeight
+        };
+        $.cookie('client_info', JSON.stringify(clientInfo), { expires: 3650 });
+    },
 
-	topReached: function() {
+    topReached: function() {
 //        var jumpto = $(this.currentSegment).offset().top;
 //        $("html,body").animate({
 //            scrollTop: 0
@@ -3213,6 +3220,7 @@ $.extend(UI, {
 		APP.initMessageBar();
 		this.checkVersion();
         this.initTM();
+        this.storeClientInfo();
 
         // SET EVENTS
 		this.setEvents();
