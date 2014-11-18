@@ -7873,7 +7873,7 @@ $.extend(UI, {
 
 $.extend(UI, {
     initTM: function() {
-        $('.popup-tm').height($(window).height());
+//        $('.popup-tm').height($(window).height());
 // script per lo slide del pannello di manage tmx
 
 
