@@ -345,7 +345,9 @@ class XliffSAXTranslationReplacer {
 
         }
 
-        $translation = "<mrk mtype=\"seg\" mid=\"" . $seg[ 'mrk_id' ] . "\">" . $seg[ 'mrk_prev_tags' ] . $translation . $seg[ 'mrk_succ_tags' ] . "</mrk>";
+        if (!empty($seg['mrk_id'])) {
+            $translation = "<mrk mtype=\"seg\" mid=\"" . $seg['mrk_id'] . "\">".$seg['mrk_prev_tags'].$translation.$seg['mrk_succ_tags']."</mrk>";
+        }
 
         $transunit_translation .= $seg[ 'prev_tags' ] . $translation . $end_tags . $seg[ 'succ_tags' ];
 

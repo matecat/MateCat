@@ -25,14 +25,8 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         //SESSION ENABLED
         INIT::sessionStart();
 
-
-        //$this->currency="EUR";
-        //$this->change_rate= 1;
-
-
-        // FORCE TO USD -- CHANGE RATE AT 2014-10-28
-        $this->currency="US$";
-        $this->change_rate= 1.2679;
+        $this->currency="EUR";
+        $this->change_rate= 1;
 
         /**
          * @see OutsourceTo_AbstractProvider::$_outsource_login_url_ok
