@@ -5034,7 +5034,7 @@ body.tagModes section[data-tagmode='crunched'] .source .locked
     text-align: right;
     margin-top: -23px;
 }
-.editor .textarea-container .tagMode {
+.editor.hasTags .textarea-container .tagMode {
     display: block;
 }
 .textarea-container .tagMode li {
