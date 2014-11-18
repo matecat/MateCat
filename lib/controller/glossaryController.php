@@ -202,11 +202,11 @@ class glossaryController extends ajaxController {
 
             $APIKeySrv = new TMSService();
             $newUser   = $APIKeySrv->createMyMemoryKey(); //throws exception
-
+Log::doLo( $newUser );
             //TODO Replace with User Key Management
             updateTranslatorJob( $this->id_job, $newUser );
             $config[ 'id_user' ] = $newUser->id;
-
+            
             $new_key        = TmKeyManagement_TmKeyManagement::getTmKeyStructure();
             $new_key->tm    = 1;
             $new_key->glos  = 1;

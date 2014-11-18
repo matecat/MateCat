@@ -11,7 +11,7 @@ include_once (INIT::$UTILS_ROOT."/Utils.php"); //only for testing purpose
 
 class MyMemoryAnalyzer {
 
-	private $url = "http://api.mymemory.translated.net";
+	private $url = "https://api.mymemory.translated.net";
 
 	public function __construct() {
 
@@ -119,11 +119,13 @@ class MyMemoryAnalyzer {
 			CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
 			CURLOPT_CONNECTTIMEOUT => 2,
 			CURLOPT_POST => true,
-			CURLOPT_POSTFIELDS => $curl_parameters
+			CURLOPT_POSTFIELDS => $curl_parameters,
+                        CURLOPT_SSL_VERIFYPEER => true,
+                        CURLOPT_SSL_VERIFYHOST => 2
 		);
 
 		$mh = new MultiCurlHandler();
-		$tokenHash = $mh->createResource( "http://api.mymemory.translated.net/langdetect.php", $options );
+		$tokenHash = $mh->createResource( "https://api.mymemory.translated.net/langdetect.php", $options );
         Log::dolog("DETECT LANG TOKENHASH: $tokenHash");
 
 		$mh->multiExec();
