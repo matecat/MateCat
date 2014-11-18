@@ -75,7 +75,7 @@ class TMSService {
         $this->tmxServiceWrapper = new TmKeyManagement_SimpleTMX( 1 );
 
         //get MyMemory apiKey service
-        $this->apiKeyService = new TmKeyManagement_LocalAPIKeyService();
+        $this->apiKeyService = new TmKeyManagement_LocalAPIKeyService( 1 );
 
     }
 
@@ -86,11 +86,13 @@ class TMSService {
      */
     public function checkCorrectKey(){
 
+        $isValid = false;
+
         //validate the key
         //This piece of code need to be executed every time
         try {
 
-            $this->apiKeyService->checkCorrectKey( $this->tm_key );
+           $isValid = $this->apiKeyService->checkCorrectKey( $this->tm_key );
 
         } catch ( Exception $e ) {
 
@@ -99,6 +101,8 @@ class TMSService {
             throw $e;
 
         }
+
+        return $isValid;
 
     }
 
@@ -193,6 +197,9 @@ class TMSService {
 //        Log::doLog( $allMemories );
 
         if ( "200" != $allMemories[ 'responseStatus' ] || 0 == count( $allMemories[ 'responseData' ][ 'tm' ] ) ) {
+
+            Log::doLog( "Can't find TMX files to check for status" );
+
             //what the hell? No memories although I've just loaded some? Eject!
             throw new Exception( "Can't find TMX files to check for status", -15);
         }
@@ -219,17 +226,21 @@ class TMSService {
                 //LOADING
                 Log::doLog( "waiting for \"" . $current_tm[ 'file_name' ] . "\" to be loaded into MyMemory" );
                 $result[ 'data' ]      = array(
-                        "done"  => $current_tm[ "temp_seg_ins" ],
-                        "total" => $current_tm[ "num_seg_tot" ],
+                        "done"        => $current_tm[ "temp_seg_ins" ],
+                        "total"       => $current_tm[ "num_seg_tot" ],
+                        "source_lang" => $current_tm[ "source_lang" ],
+                        "target_lang" => $current_tm[ "target_lang" ]
                 );
                 $result[ 'completed' ] = false;
                 break;
             case "1":
                 //loaded (or error, in any case go ahead)
                 Log::doLog( "\"" . $current_tm[ 'file_name' ] . "\" has been loaded into MyMemory" );
-                $result[ 'data' ]      = array(
-                        "done"  => $current_tm[ "temp_seg_ins" ],
-                        "total" => $current_tm[ "num_seg_tot" ]
+                $result[ 'data' ] = array(
+                        "done"        => $current_tm[ "temp_seg_ins" ],
+                        "total"       => $current_tm[ "num_seg_tot" ],
+                        "source_lang" => $current_tm[ "source_lang" ],
+                        "target_lang" => $current_tm[ "target_lang" ]
                 );
                 $result[ 'completed' ] = true;
                 break;

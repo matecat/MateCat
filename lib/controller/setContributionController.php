@@ -143,9 +143,6 @@ class setContributionController extends ajaxController {
 
                 if ( $url_request ) {
                     $this->userRole = TmKeyManagement_Filter::ROLE_REVISOR;
-                } elseif( $this->userMail == $job_data['owner'] ){
-                    $tm_keys = TmKeyManagement_TmKeyManagement::getOwnerKeys( array($tm_keys), 'w' );
-                    $tm_keys = json_encode( $tm_keys );
                 }
 
                 //find all the job's TMs with write grants and make a contribution to them

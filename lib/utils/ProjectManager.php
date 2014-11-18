@@ -77,7 +77,7 @@ class ProjectManager {
         $this->projectStructure = $projectStructure;
 
         //get the TMX management component from the factory
-        $this->tmxServiceWrapper = TMSServiceFactory::getTMXService( $this->projectStructure[ 'tms_engine' ] );
+        $this->tmxServiceWrapper = new TMSService();
 
         $this->langService = Languages::getInstance();
 
@@ -119,14 +119,13 @@ class ProjectManager {
         //check if all the keys are valid MyMemory keys
         if ( !empty( $this->projectStructure[ 'private_tm_key' ] ) ) {
 
-            $APIKeySrv = new TMSService();
             foreach ( $this->projectStructure[ 'private_tm_key' ] as $i => $_tmKey ) {
 
-                $APIKeySrv->setTmKey( $_tmKey[ 'key' ] );
+                $this->tmxServiceWrapper->setTmKey( $_tmKey[ 'key' ] );
 
                 try {
 
-                    $APIKeySrv->checkCorrectKey();
+                    $this->tmxServiceWrapper->checkCorrectKey();
 
                 } catch ( Exception $e ) {
 
@@ -138,7 +137,7 @@ class ProjectManager {
                 }
 
                 //set the first key as primary
-                $APIKeySrv->setTmKey( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] );
+                $this->tmxServiceWrapper->setTmKey( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ] );
 
             }
 
@@ -227,10 +226,10 @@ class ProjectManager {
 
                 $file = new stdClass();
                 $file->file_path = "$uploadDir/$fileName";
-                $APIKeySrv->setFile( array( $file ) );
+                $this->tmxServiceWrapper->setFile( array( $file ) );
 
                 try {
-                    $APIKeySrv->addTmxInMyMemory();
+                    $this->tmxServiceWrapper->addTmxInMyMemory();
                 } catch ( Exception $e ){
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => $e->getCode(), "message" => $e->getMessage()
@@ -412,66 +411,50 @@ class ProjectManager {
 
             //if TMX,
             if ( 'tmx' == pathinfo( $fileName, PATHINFO_EXTENSION ) ) {
+
+                $this->tmxServiceWrapper->setName( $fileName );
+
+                $result = array();
+
                 //is the TM loaded?
-                $loaded = false;
-
                 //wait until current TMX is loaded
-                while ( !$loaded ) {
-                    //now we repeatedly scan the list of loaded TMs
-                    //this counter is used to get the latest TM in case of duplicates
-                    $tmx_max_id = 0;
+                while ( true ) {
 
-                    //check if TM has been loaded
-                    $allMemories = $this->tmxServiceWrapper->getStatus( $this->projectStructure[ 'private_tm_key' ][0]['key'], $fileName );
+                    try {
 
-                    if ( "200" != $allMemories[ 'responseStatus' ] or 0 == count( $allMemories[ 'responseData' ][ 'tm' ] ) ) {
-                        //what the hell? No memories although I've just loaded some? Eject!
+                        $result = $this->tmxServiceWrapper->tmxUploadStatus();
+
+                        if ( $result[ 'completed' ] ) {
+
+                            //"$fileName" has been loaded into MyMemory"
+                            //exit the loop
+                            break;
+
+                        }
+
+                        //"waiting for "$fileName" to be loaded into MyMemory"
+                        sleep( 3 );
+
+                    } catch ( Exception $e ) {
+
                         $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                                "code" => -15, "message" => "Cant't load TMX files right now, try later"
+                                "code" => $e->getCode(), "message" => $e->getMessage()
                         );
 
+                        Log::doLog( $e->getMessage() . "\n" . $e->getTraceAsString() );
+
+                        //exit project creation
                         return false;
 
-                    }
-
-                    //scan through memories
-                    foreach ( $allMemories[ 'responseData' ][ 'tm' ] as $memory ) {
-                        //obtain max id
-                        $tmx_max_id = max( $tmx_max_id, $memory[ 'id' ] );
-
-                        //if maximum is current, pick it (it means that, among duplicates, it's the latest)
-                        if ( $tmx_max_id == $memory[ 'id' ] ) {
-                            $current_tm = $memory;
-                        }
-                    }
-
-                    switch ( $current_tm[ 'status' ] ) {
-                        case "0":
-                            //wait for the daemon to process it
-                            //THIS IS WRONG BY DESIGN, WE SHOULD NOT ACT AS AN ASYNCH DAEMON WHILE WE ARE IN A SYNCH APACHE PROCESS
-                            Log::doLog( "waiting for \"$fileName\" to be loaded into MyMemory" );
-                            sleep( 3 );
-                            break;
-                        case "1":
-                            //loaded (or error, in any case go ahead)
-                            Log::doLog( "\"$fileName\" has been loaded into MyMemory" );
-                            $loaded = true;
-                            break;
-                        default:
-                            $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                                    "code" => -14, "message" => "Invalid TMX ($fileName)"
-                            );
-
-                            return false;
-                            break;
                     }
 
                 }
 
                 //once the language is loaded, check if language is compliant (unless something useful has already been found)
                 if ( 1 == $this->checkTMX ) {
+
                     //get localized target languages of TM (in case it's a multilingual TM)
-                    $tmTargets = explode( ';', $current_tm[ 'target_lang' ] );
+                    $tmTargets = explode( ';', $result['data'][ 'target_lang' ] );
 
                     //indicates if something has been found for current memory
                     $found = false;
@@ -486,12 +469,15 @@ class ProjectManager {
                     }
 
                     //if this TM matches the project lagpair and something has been found
-                    if ( $found and $current_tm[ 'source_lang' ] == $this->langService->getLocalizedName( $this->projectStructure[ 'source_language' ] ) ) {
+                    if ( $found and $result['data'][ 'source_lang' ] == $this->langService->getLocalizedName( $this->projectStructure[ 'source_language' ] ) ) {
                         //the TMX is good to go
                         $this->checkTMX = 0;
                     }
+
                 }
+
             }
+
         }
 
         if ( 1 == $this->checkTMX ) {
@@ -499,6 +485,8 @@ class ProjectManager {
             $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                     "code" => -16, "message" => "No usable segment found in TMXs for the language pairs of this project"
             );
+
+            Log::doLog( $this->projectStructure['result'] );
 
             return false;
         }

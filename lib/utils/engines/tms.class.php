@@ -165,12 +165,5 @@ class TMS extends Engine {
 
     }
 
-//    private function calculateMyMemoryKey($id_translator) {
-//
-//        $APIKeySrv = TMSServiceFactory::getAPIKeyService();
-//        return $APIKeySrv->calculateMyMemoryKey( $id_translator );
-//
-//    }
-
 }
 

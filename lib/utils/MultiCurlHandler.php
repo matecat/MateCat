@@ -186,7 +186,7 @@ class MultiCurlHandler {
     public function getError( $tokenHash ){
         $res = array();
         $res['httpcode'] = curl_getinfo( $this->curl_handlers[ $tokenHash ], CURLINFO_HTTP_CODE );
-        $res['error']    =  curl_error( $this->curl_handlers[ $tokenHash ] );
+        $res['error']    = curl_error( $this->curl_handlers[ $tokenHash ] );
         return $res;
     }
 
