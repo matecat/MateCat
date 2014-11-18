@@ -512,6 +512,16 @@
 
     </div>
 </div>
+<script>
+$(".deliverychange").click(function() {
+    $(this).hide();
+    $("#changeTimezone").removeClass("noselect");
+});
+$(".currencychange").click(function() {
+    $(this).hide();
+    $("#changecurrency").show();
+});
+</script>
 <!-- FINE POPUP LOGIN -->
 <script src="${basepath}public/js/lib/snapengage.js"></script>
 

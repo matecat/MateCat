@@ -394,6 +394,20 @@ max-height: 525px;
 }
 */
 
+.noselect {
+    -webkit-appearance: none;
+    border: none;
+    pointer-events: none;
+}
+
+.deliverychange, .currencychange {
+font-size: 12px;
+text-decoration: underline;
+color: blue;
+display: block;
+cursor: pointer;
+}
+
 @media screen and ( max-height: 750px ) and (min-height: 650px) {
     .outsource.modal .popup {
 top: 20px;
