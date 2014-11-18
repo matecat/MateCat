@@ -378,7 +378,7 @@
 
                                     <tal:block tal:repeat="key user_keys/job_keys">
                                         <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( ownerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
-                                            <td class="dragrow"></td>
+                                            <td class="dragrow"><div class="status"></div></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">${php: key.owner ? ( ownerIsMe ? 'You' : '*****' ) : 'You'}</td>
                                             <td class="description"><div class="edit-desc">${php: key.owner ? ( ownerIsMe ? key.name : '**********' ) : key.name}</div></td>
@@ -401,24 +401,25 @@
                                             <td class="privatekey">
                                                 <input class="mgmt-input pull-left" type="text" id="new-tm-key" placeholder="Have a Key? Add it here*" />
                                                 <span class="text-or pull-left">or</span>
-                                                <a class="btn-ok pull-right">Create</a>
+                                                <a class="btn-ok pull-left">Create</a>
                                                 <span class="text pull-left text-req">*required</span>
                                             </td>
                                             <td class="description">
                                                 <textarea rows="3" cols="50" class="mgmt-input" id="new-tm-description" placeholder="Enter a short description" ></textarea>
                                             </td>
-                                            <td class="fileupload" colspan="2">
+                                            <td class="lookup text-center check">
                                                 <input id="new-tm-read" type="checkbox" name="r" class="r" value="1" checked="" />
-                                                <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
-
-
                                             </td>
+                                            <td class="update text-center check">
+                                                <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked="" />
+                                            </td>
+                                            
                                             <td class="action">
                                                 <a class="pull-left btn-ok uploadtm disabled">
                                                     <span class="text uploadkey">Confirm</span>
                                                 </a>
 
-                                                <a class="pull-right btn-grey canceladdtmx">
+                                                <a class="pull-left btn-grey canceladdtmx">
                                                     <span class="text">Cancel</span>
                                                 </a>
                                                 <div class="error">
@@ -462,7 +463,7 @@
 -->
                                     <tal:block tal:repeat="key user_keys/job_keys">
                                         <tr tal:condition="php: !key.edit && !key.owner" class="anonymous" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
-                                            <td class="dragrow"></td>
+                                            <td class="dragrow"><div class="status"></div></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">*****</td>
                                             <td class="description">**********</td>
@@ -510,10 +511,10 @@
 
                                     <tal:block tal:repeat="key user_keys/totals">
                                         <tr class="mine" data-tm="1" data-glos="1">
-                                            <td class="dragrow"></td>
+                                            <td class="dragrow"><div class="status"></div></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">You</td>
-                                            <td class="description">${key/name}</td>
+                                            <td class="description"><div class="edit-desc">${key/name}</div></td>
                                             <td class="lookup text-center check"><input type="checkbox" /></td>
                                             <td class="update text-center check"><input type="checkbox" /></td>
                                             <td class="action">

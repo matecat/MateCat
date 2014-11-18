@@ -2449,9 +2449,9 @@ body.searchActive:not(.filterOpen) #filterSwitch .numbererror:empty
 }
 .tag-autocomplete
 {
-	display: b	lock;
+	display: block;
 	position: absolute;
-	z-index: 999;
+	z-index: 99999;
 	background: #eee;
 	border: 1px solid #999;
 	min-width: 100px;
@@ -2794,7 +2794,7 @@ body.tagModes section[data-tagmode='crunched'] .source .locked
     text-align: right;
     margin-top: -23px;
 }
-.editor .textarea-container .tagMode {
+.editor.hasTags .textarea-container .tagMode {
     display: block;
 }
 .textarea-container .tagMode li {

@@ -1168,13 +1168,10 @@ UI = {
 				
                 /* see also replacement made in source content below */
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
-                console.log('UI.tagModesEnabled: ', UI.tagModesEnabled);
                 tagModes = (UI.tagModesEnabled)?                         '						<ul class="tagMode">' +
                     '						   <li class="crunched">&lt;&gt;</li>' +
                     '						   <li class="extended">&lt;...&gt;</li>' +
                     '						</ul>' : '';
-                console.log('tagModes: ', tagModes);
-
                 newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
 						'	<span class="sid">' + this.sid + '</span>' +
@@ -1966,7 +1963,6 @@ UI = {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
-                console.log('getwarning local success');
 				if (UI.currentSegment.hasClass('waiting_for_check_result')) {
 					// check conditions for results discard
 					if (!d.total) {
@@ -2946,8 +2942,15 @@ UI = {
 	 });
 	 },
 	 */
+    storeClientInfo: function () {
+        clientInfo = {
+            xRes: window.screen.availWidth,
+            yRes: window.screen.availHeight
+        };
+        $.cookie('client_info', JSON.stringify(clientInfo), { expires: 3650 });
+    },
 
-	topReached: function() {
+    topReached: function() {
 //        var jumpto = $(this.currentSegment).offset().top;
 //        $("html,body").animate({
 //            scrollTop: 0
@@ -3217,6 +3220,7 @@ $.extend(UI, {
 		APP.initMessageBar();
 		this.checkVersion();
         this.initTM();
+        this.storeClientInfo();
 
         // SET EVENTS
 		this.setEvents();
@@ -3403,7 +3407,6 @@ $.extend(UI, {
 	},
 	setEvents: function() {
 		this.bindShortcuts();
-        console.log('SET EVENTS');
 		$("body").on('keydown', null, 'ctrl+1', function(e) {
 			e.preventDefault();
 			active = $('.editor .submenu li.active');
@@ -3515,7 +3518,7 @@ $.extend(UI, {
             if($(this).hasClass('disabled')) return false;
             $(this).addClass('disabled');
             $(this).attr('disabled','');
-            $.get("https://api.mymemory.translated.net/createranduser",function(data){
+            $.get("http://mymemory.translated.net/api/createranduser",function(data){
                 //parse to appropriate type
                 //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
                 if(typeof data == 'string'){
@@ -4117,7 +4120,11 @@ $.extend(UI, {
 			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
 				if(!UI.isFirefox) UI.showEditToolbar();
 			}
-		}).on('mousedown', '.editarea', function() {
+		}).on('mousedown', '.editarea', function(e) {
+            if(e.which == 3) {
+                e.preventDefault();
+                return false;
+            }
 			UI.hideEditToolbar();
 		}).on('mousedown', '.editToolbar .uppercase', function() {
 			UI.formatSelection('uppercase');
@@ -4213,7 +4220,6 @@ $.extend(UI, {
             }
 */
         }).on('keypress', '.editor .editarea', function(e) {
-            console.log('which: ', e.which);
 //			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
@@ -4236,8 +4242,12 @@ $.extend(UI, {
 //					console.log('ecco');
 //					console.log('prima del replace: ', UI.editarea.html());
                     // if tag-autocomplete-endcursor is inserted before the &lt; then it is moved after it
-                    UI.stripAngular = (UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi).length)? true : false;
-                    UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
+
+                    tempStr = UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi);
+                    UI.stripAngular = (!tempStr)? false : (!tempStr.length)? false : true;
+
+//                    UI.stripAngular = (UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi).length)? true : false;
+//                    UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
 //                    console.log(UI.editarea.html().replace(/&lt;<span class="tag-autocomplete-endcursor"\><\/span>/gi, '<span class="tag-autocomplete-endcursor"\>XXX/span>&lt;'));
 //                    console.log(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"\>XXX/span>'));
 
@@ -4248,7 +4258,7 @@ $.extend(UI, {
 					}
 					UI.checkAutocompleteTags();
 				}
-			}, 50);			
+			}, 50);
 		}).on('keydown', '.editor .editarea', function(e) {
 //			console.log('keydown: ', UI.editarea.html());
 /*
@@ -4633,7 +4643,7 @@ $.extend(UI, {
 				type: "droppedInEditarea",
 				segment: UI.currentSegment
 			});
-			UI.saveInUndoStack('drop');
+//			UI.saveInUndoStack('drop');
 //			UI.beforeDropEditareaHTMLtreated = UI.editarea.html();
 			$(this).css('float', 'left');
 			setTimeout(function() {
@@ -4986,7 +4996,13 @@ $.extend(UI, {
 //                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
 //                }
 			}
-		});
+		}).on('click', '.tagMode .crunched', function(e) {
+            e.preventDefault();
+            UI.currentSegment.attr('data-tagMode', 'crunched');
+        }).on('click', '.tagMode .extended', function(e) {
+            e.preventDefault();
+            UI.currentSegment.attr('data-tagMode', 'extended');
+        });
 		UI.toSegment = true;
 		if (!this.segmentToScrollAtRender)
 			UI.gotoSegment(this.startSegmentId);
@@ -5808,6 +5824,14 @@ $.extend(UI, {
 			restoreSelection();
 
 			if($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
+            segment = $(this).parents('section');
+            if($('span.locked', this).length) {
+                segment.addClass('hasTags');
+            } else {
+                segment.removeClass('hasTags');
+            }
+
+//            UI.checkTagsInSegment();
 		});
 
 	},
@@ -5895,9 +5919,32 @@ $.extend(UI, {
 		}
 */
 	},
-	
-	// TAG MISMATCH
+    setExtendedTagMode: function (el) {
+        console.log('setExtendedTagMode');
+        segment = el || UI.currentSegment;
+        $(segment).attr('data-tagMode', 'extended');
+    },
+    setCrunchedTagMode: function (el) {
+        segment = el || UI.currentSegment;
+        $(segment).attr('data-tagMode', 'crunched');
+    },
+    checkTagsInSegment: function (el) {
+        segment = el || UI.currentSegment;
+        hasTags = ($(segment).find('.wrap span.locked').length)? true : false;
+        if(hasTags) {
+            this.setExtendedTagMode(el);
+        } else {
+            this.setCrunchedTagMode(el);
+        }
+    },
+
+    // TAG MISMATCH
 	markTagMismatch: function(d) {
+        console.log('markTagMismatch: ', d);
+        console.log('warnings: ', $.parseJSON(d.warnings).length);
+        if($.parseJSON(d.warnings).length) $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
+//        $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
+//        this.setExtendedTagMode($('#segment-' + d.id_segment));
         // temp
 //        d.tag_mismatch.order = 2;
         if((typeof d.tag_mismatch.order == 'undefined')||(d.tag_mismatch.order === '')) {
@@ -5920,6 +5967,7 @@ $.extend(UI, {
             $('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
             $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
         } else {
+            console.log('222');
             $('#segment-' + d.id_segment + ' .editarea .locked' ).filter(function() {
                 return $(this).text() === d.tag_mismatch.order[0];
             }).addClass('order-error');
@@ -5976,7 +6024,7 @@ $.extend(UI, {
 //        console.log('added 2: ', added);
 		return added;
 	},
-	openTagAutocompletePanel: function() {//console.log('openTagAutocompletePanel');
+	openTagAutocompletePanel: function() {
 		if(!UI.sourceTags.length) return false;
 		$('.tag-autocomplete-marker').remove();
 
@@ -7861,8 +7909,7 @@ $.extend(UI, {
 
 $.extend(UI, {
     initTM: function() {
-        console.log('TM init vediamo');
-        $('.popup-tm').height($(window).height());
+//        $('.popup-tm').height($(window).height());
 // script per lo slide del pannello di manage tmx
 
 
@@ -8224,7 +8271,7 @@ $.extend(UI, {
             if( $(this).text().slice(-5) == $('#new-tm-key').val().slice(-5) ){
                 console.log('key is bad');
                 $('#activetm tr.new').addClass('badkey');
-                $('#activetm tr.new .error .tm-error-key').text('The key is already present.').show();
+                $('#activetm tr.new .error .tm-error-key').text('The key is already present in this project.').show();
                 UI.checkTMAddAvailability(); //some enable/disable stuffs
                 keyIsAlreadyPresent = true;
                 return false;
@@ -8391,10 +8438,10 @@ $.extend(UI, {
         var TMKey = $('#new-tm-key').val();
 
         newTr = '<tr class="mine" data-tm="1" data-glos="1" data-owner="' + config.ownerIsMe + '">' +
-                '    <td class="dragrow"></td>' +
+                '    <td class="dragrow"><div class="status"></div></td>' +
                 '    <td class="privatekey">' + TMKey + '</td>' +
                 '    <td class="owner">You</td>' +
-                '    <td class="description">' + desc + '</td>' +
+                '    <td class="description"><div class="edit-desc">' + desc + '</div></td>' +
                 '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="action">' +

@@ -162,6 +162,14 @@ $.extend(UI, {
 			restoreSelection();
 
 			if($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
+            segment = $(this).parents('section');
+            if($('span.locked', this).length) {
+                segment.addClass('hasTags');
+            } else {
+                segment.removeClass('hasTags');
+            }
+
+//            UI.checkTagsInSegment();
 		});
 
 	},
@@ -249,9 +257,32 @@ $.extend(UI, {
 		}
 */
 	},
-	
-	// TAG MISMATCH
+    setExtendedTagMode: function (el) {
+        console.log('setExtendedTagMode');
+        segment = el || UI.currentSegment;
+        $(segment).attr('data-tagMode', 'extended');
+    },
+    setCrunchedTagMode: function (el) {
+        segment = el || UI.currentSegment;
+        $(segment).attr('data-tagMode', 'crunched');
+    },
+    checkTagsInSegment: function (el) {
+        segment = el || UI.currentSegment;
+        hasTags = ($(segment).find('.wrap span.locked').length)? true : false;
+        if(hasTags) {
+            this.setExtendedTagMode(el);
+        } else {
+            this.setCrunchedTagMode(el);
+        }
+    },
+
+    // TAG MISMATCH
 	markTagMismatch: function(d) {
+        console.log('markTagMismatch: ', d);
+        console.log('warnings: ', $.parseJSON(d.warnings).length);
+        if($.parseJSON(d.warnings).length) $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
+//        $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
+//        this.setExtendedTagMode($('#segment-' + d.id_segment));
         // temp
 //        d.tag_mismatch.order = 2;
         if((typeof d.tag_mismatch.order == 'undefined')||(d.tag_mismatch.order === '')) {
@@ -274,6 +305,7 @@ $.extend(UI, {
             $('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
             $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
         } else {
+            console.log('222');
             $('#segment-' + d.id_segment + ' .editarea .locked' ).filter(function() {
                 return $(this).text() === d.tag_mismatch.order[0];
             }).addClass('order-error');
@@ -330,7 +362,7 @@ $.extend(UI, {
 //        console.log('added 2: ', added);
 		return added;
 	},
-	openTagAutocompletePanel: function() {//console.log('openTagAutocompletePanel');
+	openTagAutocompletePanel: function() {
 		if(!UI.sourceTags.length) return false;
 		$('.tag-autocomplete-marker').remove();
 
