@@ -154,6 +154,7 @@ $.extend(UI, {
 		APP.initMessageBar();
 		this.checkVersion();
         this.initTM();
+        this.storeClientInfo();
 
         // SET EVENTS
 		this.setEvents();

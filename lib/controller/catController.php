@@ -452,7 +452,7 @@ class catController extends viewController {
         //clean unordered keys
         $this->_keyList[ 'totals' ] = array_values( $this->_keyList[ 'totals' ] );
 
-        Log::doLog( $this->_keyList );
+//        Log::doLog( $this->_keyList );
 
     }
 

@@ -1293,6 +1293,14 @@ margin-top: 10px;
     float: left;
     margin: 2px 3px 2px 0px;
 }
+.mgmt-tm tr.mine .btn-grey.addtmx {
+    padding: 4px 5px;
+    width: 105px;
+}
+.mgmt-tm tr.mine .btn-grey.addtmx span {
+    width: 100px;
+}
+
 #activetm td.uploadfile .btn-grey {
     margin-right: 8px;
 }

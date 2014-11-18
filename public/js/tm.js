@@ -7,7 +7,6 @@
 
 $.extend(UI, {
     initTM: function() {
-        console.log('TM init vediamo');
         $('.popup-tm').height($(window).height());
 // script per lo slide del pannello di manage tmx
 
@@ -540,7 +539,7 @@ $.extend(UI, {
                 '    <td class="dragrow"><div class="status"></div></td>' +
                 '    <td class="privatekey">' + TMKey + '</td>' +
                 '    <td class="owner">You</td>' +
-                '    <td class="description">' + desc + '</td>' +
+                '    <td class="description"><div class="edit-desc">' + desc + '</div></td>' +
                 '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="action">' +
