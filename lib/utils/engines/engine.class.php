@@ -71,56 +71,66 @@ abstract class Engine {
             curl_setopt( $ch, CURLOPT_POSTFIELDS, $postfields );
             curl_setopt( $ch, CURLOPT_TIMEOUT, 120 ); //wait max 2 mins
         } else {
-            curl_setopt( $ch, CURLOPT_HTTPGET, true );
-            curl_setopt( $ch, CURLOPT_TIMEOUT, 10 ); //we can wait max 10 seconds
-        }
+		curl_setopt( $ch, CURLOPT_HTTPGET, true );
+		curl_setopt( $ch, CURLOPT_TIMEOUT, 10 ); //we can wait max 10 seconds
+	}
 
+	//if it's an HTTPS call
+	if(strpos(trim($url),'https',0)===0){
+		//verify CA in certificate
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
 
-        $output = curl_exec($ch);
-        $curl_errno = curl_errno($ch);
-        $curl_error = curl_error($ch);
+		//verify that the common name exists and that it matches the host name of the server
+		curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+		//use these certificates as chain of trust
+		curl_setopt($ch, CURLOPT_CAPATH, '/etc/ssl/certs/');
+	}
 
-        if( $curl_errno > 0 ){
-            Log::doLog('Curl Error: ' . $curl_errno . " - " . $curl_error . " " . var_export( parse_url( $url ) ,true) );
-            $output = json_encode( array( 'error' => array( 'code' => - $curl_errno , 'message' => " Server Not Available" ) ) ); //return negative number
-        }
+	$output = curl_exec($ch);
+	$curl_errno = curl_errno($ch);
+	$curl_error = curl_error($ch);
 
-        // Chiude la risorsa curl
-        curl_close($ch);
-		return $output;
+	if( $curl_errno > 0 ){
+		Log::doLog('Curl Error: ' . $curl_errno . " - " . $curl_error . " " . var_export( parse_url( $url ) ,true) );
+		$output = json_encode( array( 'error' => array( 'code' => - $curl_errno , 'message' => " Server Not Available" ) ) ); //return negative number
+	}
+
+	// Chiude la risorsa curl
+	curl_close($ch);
+	return $output;
 	}
 
 	protected function doQuery($function, $parameters = array(),$isPost=false) {
 
-        $this->error = array(); // reset last error
-        if ( !$this->existsFunction( $function ) ) {
-            Log::doLog( 'Requested method ' . $function . ' not Found.' );
-            return false;
-        }
+		$this->error = array(); // reset last error
+		if ( !$this->existsFunction( $function ) ) {
+			Log::doLog( 'Requested method ' . $function . ' not Found.' );
+			return false;
+		}
 
-        $uniquid = uniqid();
+		$uniquid = uniqid();
 
-        //DO NOT REMOVE LOGS
-        if ( $isPost ) {
-            //compose the POST
-            $this->buildPostQuery( $function );
-            Log::doLog( $uniquid . " ... " . $this->url );
-            $res = $this->curl( $this->url, $parameters );
-        } else {
-            //compose the GET string
-            $this->buildGetQuery( $function, $parameters );
-            Log::doLog( $uniquid . " ... " . $this->url );
-            $res = $this->curl( $this->url );
-        }
+		//DO NOT REMOVE LOGS
+		if ( $isPost ) {
+			//compose the POST
+			$this->buildPostQuery( $function );
+			Log::doLog( $uniquid . " ... " . $this->url );
+			$res = $this->curl( $this->url, $parameters );
+		} else {
+			//compose the GET string
+			$this->buildGetQuery( $function, $parameters );
+			Log::doLog( $uniquid . " ... " . $this->url );
+			$res = $this->curl( $this->url );
+		}
 
-        $this->raw_result = json_decode( $res, true );
+		$this->raw_result = json_decode( $res, true );
 
-        if ( $this->raw_result['responseStatus'] == "503" ){
-            file_put_contents( INIT::$LOG_REPOSITORY . "/maintenance_contributions.txt", "[" . date( 'Y-m-d H:i:s' ) . "] -- " . $uniquid . " - " . Log::$uniqID . " ----- " . $this->url  . "  ----- \n", FILE_APPEND );
-            file_put_contents( INIT::$LOG_REPOSITORY . "/maintenance_contributions.txt", "[" . date( 'Y-m-d H:i:s' ) . "] -- " . $uniquid . " - " . Log::$uniqID . " - " . var_export($parameters,true) . "  -- \n", FILE_APPEND );
-        }
+		if ( $this->raw_result['responseStatus'] == "503" ){
+			file_put_contents( INIT::$LOG_REPOSITORY . "/maintenance_contributions.txt", "[" . date( 'Y-m-d H:i:s' ) . "] -- " . $uniquid . " - " . Log::$uniqID . " ----- " . $this->url  . "  ----- \n", FILE_APPEND );
+			file_put_contents( INIT::$LOG_REPOSITORY . "/maintenance_contributions.txt", "[" . date( 'Y-m-d H:i:s' ) . "] -- " . $uniquid . " - " . Log::$uniqID . " - " . var_export($parameters,true) . "  -- \n", FILE_APPEND );
+		}
 
-        Log::doLog( $uniquid . " ... Received... " . $res );
+		Log::doLog( $uniquid . " ... Received... " . $res );
 
 	}
 

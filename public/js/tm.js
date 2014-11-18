@@ -73,7 +73,7 @@ $.extend(UI, {
         }).on('click', '.addtmx:not(.disabled)', function() {
             $(this).addClass('disabled');
             var nr = '<td class="uploadfile">' +
-                     '  <div class="standard">' +
+//                     '  <div class="standard">' +
                     '<form class="existing add-TM-Form pull-left" action="/" method="post">' +
                     '    <input type="hidden" name="action" value="loadTMX" />' +
                     '    <input type="hidden" name="exec" value="newTM" />' +
@@ -88,12 +88,14 @@ $.extend(UI, {
                     '   <a class="existingKey pull-left btn-ok addtmxfile">' +
                     '       <span class="text">Confirm</span>' +
                     '   </a>' +
-                    '  </div>' +
+                    '   <span class="error"></span>' +
+//                    '  </div>' +
                     '  <div class="uploadprogress">' +
                     '       <span class="progress">' +
                     '           <span class="inner"></span>' +
                     '       </span>' +
                     '       <span class="msgText">Uploading</span>' +
+                    '       <span class="error"></span>' +
                     '  </div>' +
                     '</td>';
 /*
@@ -140,10 +142,12 @@ $.extend(UI, {
             // script per appendere le tmx fra quelle attive e inattive, preso da qui: https://stackoverflow.com/questions/24355817/move-table-rows-that-are-selected-to-another-table-javscript
         }).on('click', '#activetm tr.mine .uploadfile .addtmxfile:not(.disabled)', function() {
             $(this).addClass('disabled');
+            $(this).parents('.uploadfile').find('.error').text('').hide();
+
             UI.execAddTM(this);
 //        }).on('click', '#activetm td.description', function() {
 //            console.log($(this).find())
-        }).on('click', '#activetm td.description .edit-desc', function() {
+        }).on('click', '#activetm tr.mine td.description .edit-desc', function() {
             console.log('.edit-desc');
 //            $(this).addClass('current');
             $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
@@ -156,6 +160,8 @@ $.extend(UI, {
             e.preventDefault();
             $(this).removeAttr('contenteditable');
         }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
+            $(this).addClass('disabled');
+
             UI.execAddTM(this);
 //        }).on('click', '.popup-tm .savebtn', function() {
         }).on('click', '.popup-tm h1 .btn-ok', function(e) {
@@ -176,12 +182,9 @@ $.extend(UI, {
         }).on('change', '#new-tm-read, #new-tm-write', function() {
             UI.checkTMgrants();
         }).on('change', '#activetm tr.mine td.uploadfile input[type="file"]', function() {
-            console.log('AAA');
             if($(this).val() == '') {
-                console.log('BBB');
                 $(this).parents('.uploadfile').find('.addtmxfile').hide();
             } else {
-                console.log('CCC');
                 $(this).parents('.uploadfile').find('.addtmxfile').show();
             }
         }).on('change', '.mgmt-tm tr.uploadpanel td.uploadfile input[type="file"]', function() {
@@ -210,10 +213,8 @@ $.extend(UI, {
                 textExtraction: function(node) {
                     // extract data from markup and return it
                     if($(node).hasClass('privatekey')) {
-                        console.log('privatekey: ', $(node).text());
                         return $(node).text();
                     } else {
-                        console.log('not: ', $(node).text());
                         return $(node).text();
                     }
                 },
@@ -369,7 +370,7 @@ $.extend(UI, {
             if( $(this).text().slice(-5) == $('#new-tm-key').val().slice(-5) ){
                 console.log('key is bad');
                 $('#activetm tr.new').addClass('badkey');
-                $('#activetm tr.new .error .tm-error-key').text('The key is already present.').show();
+                $('#activetm tr.new .error .tm-error-key').text('The key is already present in this project.').show();
                 UI.checkTMAddAvailability(); //some enable/disable stuffs
                 keyIsAlreadyPresent = true;
                 return false;
@@ -536,7 +537,7 @@ $.extend(UI, {
         var TMKey = $('#new-tm-key').val();
 
         newTr = '<tr class="mine" data-tm="1" data-glos="1" data-owner="' + config.ownerIsMe + '">' +
-                '    <td class="dragrow"></td>' +
+                '    <td class="dragrow"><div class="status"></div></td>' +
                 '    <td class="privatekey">' + TMKey + '</td>' +
                 '    <td class="owner">You</td>' +
                 '    <td class="description">' + desc + '</td>' +
@@ -591,6 +592,7 @@ $.extend(UI, {
         $('#activetm .edit-desc').removeAttr('contenteditable');
         $('#activetm td.uploadfile').remove();
         $('#activetm td.action .addtmx').removeClass('disabled');
+        $('#activetm tr.new .canceladdtmx').click();
     },
 
     TMFileUpload: function(form, action_url, div_id, tmName) {
@@ -663,7 +665,7 @@ $.extend(UI, {
         TRcaller.addClass('startUploading');
         if(!existing) {
             UI.addTMKeyToList(true);
-            $('.popup-tm h1 .btn-ok').click();
+//            $('.popup-tm h1 .btn-ok').click();
         }
         UI.pollForUploadCallback(TMKey, TMName, existing, TRcaller);
 
@@ -686,15 +688,15 @@ $.extend(UI, {
     pollForUploadCallback: function(TMKey, TMName, existing, TRcaller) {
         if($('#uploadCallback').text() != '') {
             msg = $.parseJSON($('#uploadCallback pre').text());
+            TRcaller.removeClass('startUploading');
+//            msg.success = false;
+//            msg.errors = [{message: 'questo è un errore'}];
             if(msg.success === true) {
-                TRcaller.removeClass('startUploading');
                 UI.pollForUploadProgress(TMKey, TMName, existing, TRcaller);
             } else {
-/*
-                APP.showMessage({
-                    msg: 'Error: ' + msg.errors[0].message
-                });
-*/
+                console.log('error');
+                $(TRcaller).find('.error').text(msg.errors[0].message).show();
+//                $(TRcaller).find('.addtmxfile').removeClass('disabled');
             }
         } else {
             setTimeout(function() {
@@ -715,13 +717,28 @@ $.extend(UI, {
             context: [TMKey, TMName, existing, TRcaller],
             error: function() {
                 existing = this[2];
-                if(!existing) $('#activetm tr.uploadpanel .uploadfile').removeClass('uploading');
+                if(existing) {
+                    console.log('error');
+                } else {
+                    $('#activetm tr.uploadpanel .uploadfile').removeClass('uploading');
+                }
             },
             success: function(d) {
                 console.log('progress success data: ', d);
                 existing = this[2];
+                TRcaller = this[3];
+//                d.errors = [{message: 'questo è un errore'}];
                 if(d.errors.length) {
-                    if(!existing) $('#activetm tr.uploadpanel .uploadfile').removeClass('uploading');
+                    if(existing) {
+                        console.log('error');
+                        console.log($(TRcaller));
+//                        $(TRcaller).find('.standard').hide();
+//                        $(TRcaller).find('.uploadprogress').show();
+                        $(TRcaller).find('.error').text(d.errors[0].message).show();
+//                        $(TRcaller).find('.addtmxfile').removeClass('disabled');
+                    } else {
+                        $('#activetm tr.uploadpanel .uploadfile').removeClass('uploading');
+                    }
 
                     /*
                                        APP.showMessage({
@@ -729,9 +746,8 @@ $.extend(UI, {
                                        });
                                        */
                 } else {
-                    TRcaller = this[3];
                     $(TRcaller).find('.uploadprogress .msgText').text('Uploading ' + this[1]);
-                    $(TRcaller).find('.standard').hide();
+//                    $(TRcaller).find('.standard').hide();
                     $(TRcaller).find('.uploadprogress').show();
 
 //                    $(TRcaller).html('<span class="progress"><span class="inner" style="float: left; height: 5px; width: 0%; background: #09BEEC"></span></span><span class="msgText">Uploading ' + this[1]+ '...</span>');
@@ -751,7 +767,7 @@ $.extend(UI, {
 
                             $(TRcaller).find('.uploadprogress').hide();
                             $(TRcaller).find('.uploadprogress .msgText').text('Uploading');
-                            $(TRcaller).find('.standard').show();
+//                            $(TRcaller).find('.standard').show();
                             if(existing) {
                                 $(TRcaller).remove();
                             } else {
@@ -828,7 +844,13 @@ $.extend(UI, {
 
     saveTMdata: function() {
         UI.closeTMPanel();
-        data = this.extractTMdataFromTable();
+        UI.clearTMPanel();
+        if(!APP.isCattool) {
+            return false;
+        }
+
+
+            data = this.extractTMdataFromTable();
         APP.doRequest({
             data: {
                 action: 'updateJobKeys',

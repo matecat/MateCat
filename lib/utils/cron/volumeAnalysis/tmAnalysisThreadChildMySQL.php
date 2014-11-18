@@ -141,7 +141,7 @@ while (1) {
 
         $tms_enabled = true;
 
-    } else if ( $id_tms == 0 && $id_mt_engine == 1 ) {
+    } elseif ( $id_tms == 0 && $id_mt_engine == 1 ) {
         /**
          * MyMemory disabled but MT Enabled and it is NOT a Custom one
          * So tell to MyMemory to get MT only
@@ -346,23 +346,23 @@ function getNewMatchType($tm_match_type, $fast_match_type, $equivalentWordMappin
             $tm_rate_paid = $equivalentWordMapping[$tm_match_cat];
         }
 
-        if ($ind < 50) {
+        elseif ($ind < 50) {
             $tm_match_cat = "NO_MATCH";
             $tm_rate_paid = $equivalentWordMapping["NO_MATCH"];
         }
 
-        if ($ind >= 50 and $ind <= 74) {
+        elseif ($ind >= 50 and $ind < 75) {
             $tm_match_cat = "50%-74%";
             $tm_rate_paid = $equivalentWordMapping["50%-74%"];
         }
 
-        if ($ind >= 75 and $ind <= 99) {
+        elseif ($ind >= 75 and $ind <= 99) {
             $tm_match_cat = "75%-99%";
             $tm_rate_paid = $equivalentWordMapping["75%-99%"];
         }
     }
-
-    if ($tm_rate_paid <= $fast_rate_paid) {
+    //this is because 50%-74% is never returned because it's rate equals NO_MATCH
+    if ($tm_rate_paid < $fast_rate_paid || $fast_match_type == "NO_MATCH" ) {
         return $tm_match_cat;
     }
     return $fast_match_type;
