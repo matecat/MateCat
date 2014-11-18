@@ -1168,13 +1168,10 @@ UI = {
 				
                 /* see also replacement made in source content below */
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
-                console.log('UI.tagModesEnabled: ', UI.tagModesEnabled);
                 tagModes = (UI.tagModesEnabled)?                         '						<ul class="tagMode">' +
                     '						   <li class="crunched">&lt;&gt;</li>' +
                     '						   <li class="extended">&lt;...&gt;</li>' +
                     '						</ul>' : '';
-                console.log('tagModes: ', tagModes);
-
                 newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
 						'	<span class="sid">' + this.sid + '</span>' +
@@ -1966,7 +1963,6 @@ UI = {
 				UI.failedConnection(0, 'getWarning');
 			},
 			success: function(d) {
-                console.log('getwarning local success');
 				if (UI.currentSegment.hasClass('waiting_for_check_result')) {
 					// check conditions for results discard
 					if (!d.total) {
@@ -3403,7 +3399,6 @@ $.extend(UI, {
 	},
 	setEvents: function() {
 		this.bindShortcuts();
-        console.log('SET EVENTS');
 		$("body").on('keydown', null, 'ctrl+1', function(e) {
 			e.preventDefault();
 			active = $('.editor .submenu li.active');
@@ -7861,7 +7856,6 @@ $.extend(UI, {
 
 $.extend(UI, {
     initTM: function() {
-        console.log('TM init vediamo');
         $('.popup-tm').height($(window).height());
 // script per lo slide del pannello di manage tmx
 

@@ -7,7 +7,6 @@
 
 $.extend(UI, {
     initTM: function() {
-        console.log('TM init vediamo');
         $('.popup-tm').height($(window).height());
 // script per lo slide del pannello di manage tmx
 
