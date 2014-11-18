@@ -731,7 +731,7 @@ color:#333;}
 
 
 .popup-tm {
-    min-height: 108%;
+    height: 100%!important;
     width: 1100px;
     margin: 0 auto;
     overflow-x: hidden;
@@ -5034,7 +5034,7 @@ body.tagModes section[data-tagmode='crunched'] .source .locked
     text-align: right;
     margin-top: -23px;
 }
-.editor .textarea-container .tagMode {
+.editor.hasTags .textarea-container .tagMode {
     display: block;
 }
 .textarea-container .tagMode li {

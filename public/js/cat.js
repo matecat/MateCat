@@ -4120,7 +4120,11 @@ $.extend(UI, {
 			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
 				if(!UI.isFirefox) UI.showEditToolbar();
 			}
-		}).on('mousedown', '.editarea', function() {
+		}).on('mousedown', '.editarea', function(e) {
+            if(e.which == 3) {
+                e.preventDefault();
+                return false;
+            }
 			UI.hideEditToolbar();
 		}).on('mousedown', '.editToolbar .uppercase', function() {
 			UI.formatSelection('uppercase');
@@ -4216,7 +4220,6 @@ $.extend(UI, {
             }
 */
         }).on('keypress', '.editor .editarea', function(e) {
-            console.log('which: ', e.which);
 //			console.log('keypress: ', UI.editarea.html());
 
 			if((e.which == 60)&&(UI.taglockEnabled)) { // opening tag sign
@@ -4552,9 +4555,7 @@ $.extend(UI, {
 			}
 			if (!UI.body.hasClass('searchActive'))
 				setTimeout(function() {
-				//FIX HERE
-				    console.log("Log Lock Tags in 'input in editarea'" ); 	
-				    UI.lockTags(UI.editarea);
+					UI.lockTags(UI.editarea);
 				}, 10);
 			UI.registerQACheck();
 		}).on('input', '.editor .cc-search .input', function() {
@@ -4642,7 +4643,7 @@ $.extend(UI, {
 				type: "droppedInEditarea",
 				segment: UI.currentSegment
 			});
-			UI.saveInUndoStack('drop');
+//			UI.saveInUndoStack('drop');
 //			UI.beforeDropEditareaHTMLtreated = UI.editarea.html();
 			$(this).css('float', 'left');
 			setTimeout(function() {
@@ -4995,7 +4996,13 @@ $.extend(UI, {
 //                    $(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
 //                }
 			}
-		});
+		}).on('click', '.tagMode .crunched', function(e) {
+            e.preventDefault();
+            UI.currentSegment.attr('data-tagMode', 'crunched');
+        }).on('click', '.tagMode .extended', function(e) {
+            e.preventDefault();
+            UI.currentSegment.attr('data-tagMode', 'extended');
+        });
 		UI.toSegment = true;
 		if (!this.segmentToScrollAtRender)
 			UI.gotoSegment(this.startSegmentId);
@@ -5814,11 +5821,17 @@ $.extend(UI, {
 			tx = tx.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
 			var prevNumTags = $('span.locked', this).length;
 			$(this).html(tx);
-
-
 			restoreSelection();
 
 			if($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
+            segment = $(this).parents('section');
+            if($('span.locked', this).length) {
+                segment.addClass('hasTags');
+            } else {
+                segment.removeClass('hasTags');
+            }
+
+//            UI.checkTagsInSegment();
 		});
 
 	},
@@ -5906,9 +5919,32 @@ $.extend(UI, {
 		}
 */
 	},
-	
-	// TAG MISMATCH
+    setExtendedTagMode: function (el) {
+        console.log('setExtendedTagMode');
+        segment = el || UI.currentSegment;
+        $(segment).attr('data-tagMode', 'extended');
+    },
+    setCrunchedTagMode: function (el) {
+        segment = el || UI.currentSegment;
+        $(segment).attr('data-tagMode', 'crunched');
+    },
+    checkTagsInSegment: function (el) {
+        segment = el || UI.currentSegment;
+        hasTags = ($(segment).find('.wrap span.locked').length)? true : false;
+        if(hasTags) {
+            this.setExtendedTagMode(el);
+        } else {
+            this.setCrunchedTagMode(el);
+        }
+    },
+
+    // TAG MISMATCH
 	markTagMismatch: function(d) {
+        console.log('markTagMismatch: ', d);
+        console.log('warnings: ', $.parseJSON(d.warnings).length);
+        if($.parseJSON(d.warnings).length) $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
+//        $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
+//        this.setExtendedTagMode($('#segment-' + d.id_segment));
         // temp
 //        d.tag_mismatch.order = 2;
         if((typeof d.tag_mismatch.order == 'undefined')||(d.tag_mismatch.order === '')) {
@@ -5931,6 +5967,7 @@ $.extend(UI, {
             $('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
             $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
         } else {
+            console.log('222');
             $('#segment-' + d.id_segment + ' .editarea .locked' ).filter(function() {
                 return $(this).text() === d.tag_mismatch.order[0];
             }).addClass('order-error');
@@ -5987,8 +6024,7 @@ $.extend(UI, {
 //        console.log('added 2: ', added);
 		return added;
 	},
-	openTagAutocompletePanel: function() {console.log('openTagAutocompletePanel');
-        console.log(UI.sourceTags.length);
+	openTagAutocompletePanel: function() {
 		if(!UI.sourceTags.length) return false;
 		$('.tag-autocomplete-marker').remove();
 
@@ -7873,7 +7909,7 @@ $.extend(UI, {
 
 $.extend(UI, {
     initTM: function() {
-        $('.popup-tm').height($(window).height());
+//        $('.popup-tm').height($(window).height());
 // script per lo slide del pannello di manage tmx
 
 

@@ -731,7 +731,7 @@ color:#333;}
 
 
 .popup-tm {
-    min-height: 108%;
+    height: 100%!important;
     width: 1100px;
     margin: 0 auto;
     overflow-x: hidden;

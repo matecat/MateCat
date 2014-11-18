@@ -166,7 +166,7 @@ class ProjectManager {
 
                 foreach ( $this->projectStructure[ 'private_tm_key' ] as $_tmKey ) {
 
-                    if ( !in_array( $_tmKey['key'], $userTmKeys ) ) {
+                    if ( !in_array( $_tmKey[ 'key' ], $userTmKeys ) ) {
                         $newMemoryKey   = new TmKeyManagement_MemoryKeyStruct();
                         $newTmKey       = new TmKeyManagement_TmKeyStruct();
                         $newTmKey->key  = $_tmKey[ 'key' ];
@@ -224,7 +224,7 @@ class ProjectManager {
             //if TMX,
             if ( 'tmx' == pathinfo( $fileName, PATHINFO_EXTENSION ) ) {
 
-                $file = new stdClass();
+                $file            = new stdClass();
                 $file->file_path = "$uploadDir/$fileName";
                 $this->tmxServiceWrapper->setFile( array( $file ) );
 
@@ -234,6 +234,7 @@ class ProjectManager {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => $e->getCode(), "message" => $e->getMessage()
                     );
+
                     return false;
                 }
 
@@ -359,7 +360,7 @@ class ProjectManager {
 
                 $this->_extractSegments( $contents, $fid );
 
-                unset($contents); //free memory
+                unset( $contents ); //free memory
 
                 //Log::doLog( $this->projectStructure['segments'] );
 
@@ -403,7 +404,9 @@ class ProjectManager {
         }
 
         //check if the files language equals the source language. If not, set an error message.
-        if (!$this->projectStructure['skip_lang_validation']) $this->validateFilesLanguages();
+        if ( !$this->projectStructure[ 'skip_lang_validation' ] ) {
+            $this->validateFilesLanguages();
+        }
 
         /****************/
         //loop again through files to check to check for TMX loading
@@ -594,7 +597,7 @@ class ProjectManager {
 
         $update_project_count = sprintf(
                 $update_project_count,
-                $project_summary[0]['project_raw_wordcount'],
+                $project_summary[ 0 ][ 'project_raw_wordcount' ],
                 $this->projectStructure[ 'status' ],
                 $this->projectStructure[ 'id_project' ]
         );
@@ -609,6 +612,13 @@ class ProjectManager {
     protected function _createJobs( ArrayObject $projectStructure, $owner ) {
 
         foreach ( $projectStructure[ 'target_language' ] as $target ) {
+
+            //shorten languages and get payable rates
+            $shortSourceLang = substr( $projectStructure[ 'source_language' ], 0, 2 );
+            $shortTargetLang = substr( $target, 0, 2 );
+
+            //get payable rates
+            $projectStructure[ 'payable_rates' ] = CatUtils::getPayableRates( $shortSourceLang, $shortTargetLang );
 
             $query_min_max = "SELECT MIN( id ) AS job_first_segment , MAX( id ) AS job_last_segment
                 FROM segments WHERE id_file IN ( %s )";
@@ -721,7 +731,7 @@ class ProjectManager {
                 //get language code
                 if ( strpos( $fileLang, "-" ) === false ) {
                     //PHP Strict: Only variables should be passed by reference
-                    $_tmp = explode( "-", $this->projectStructure[ 'source_language' ] );
+                    $_tmp       = explode( "-", $this->projectStructure[ 'source_language' ] );
                     $sourceLang = array_shift( $_tmp );
                 } else {
                     $sourceLang = $this->projectStructure[ 'source_language' ];
@@ -874,9 +884,9 @@ class ProjectManager {
                 );
             }
 
-            $counter[ $chunk ][ 'eq_word_count' ]  += $row[ 'eq_word_count' ];
+            $counter[ $chunk ][ 'eq_word_count' ] += $row[ 'eq_word_count' ];
             $counter[ $chunk ][ 'raw_word_count' ] += $row[ 'raw_word_count' ];
-            $counter[ $chunk ][ 'segment_end' ]     = $row[ 'id' ];
+            $counter[ $chunk ][ 'segment_end' ] = $row[ 'id' ];
 
             //if last_opened segment is not set and if that segment can be showed in cattool
             //set that segment as the default last visited

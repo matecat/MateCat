@@ -97,7 +97,6 @@ $.extend(UI, {
                         // update the timezone (both the displayed and the stored ones)
                         changeTimezone( chunk.delivery_date, "0", timezoneToShow );
                         $( "#changeTimezone option[value='" + timezoneToShow + "']").attr( "selected", "selected" );
-
                         /**
                          * Removed Timezone with Intl because of too much different behaviours on different operating systems
                          *
@@ -285,4 +284,5 @@ function updateCartParameters() {
         },
         success: function () {}
     });
+
 }
