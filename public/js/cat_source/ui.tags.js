@@ -330,7 +330,8 @@ $.extend(UI, {
 //        console.log('added 2: ', added);
 		return added;
 	},
-	openTagAutocompletePanel: function() {//console.log('openTagAutocompletePanel');
+	openTagAutocompletePanel: function() {console.log('openTagAutocompletePanel');
+        console.log(UI.sourceTags.length);
 		if(!UI.sourceTags.length) return false;
 		$('.tag-autocomplete-marker').remove();
 

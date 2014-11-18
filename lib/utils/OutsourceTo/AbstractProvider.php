@@ -68,6 +68,16 @@ abstract class OutsourceTo_AbstractProvider {
     protected $ppassword = '';
 
     /**
+     * @var string currency
+     */
+    protected $currency = "EUR";
+
+    /**
+     * @var string timezone
+     */
+    protected $timezone = "0";
+
+    /**
      * List of job Ids and relative passwords that will be sent to the provider for quoting
      *
      * <pre>
@@ -147,6 +157,36 @@ abstract class OutsourceTo_AbstractProvider {
      */
     public function setPpassword( $ppassword ) {
         $this->ppassword = $ppassword;
+
+        return $this;
+    }
+
+    /**
+     * Set the currency for the project
+     *
+     * @param string $currency
+     *
+     * @return $this
+     */
+    public function setCurrency( $currency ) {
+        if ( !empty( $currency ) ) {
+            $this->currency = $currency;
+        }
+
+        return $this;
+    }
+
+    /**
+     * Set the timezone for the project
+     *
+     * @param string $timezone
+     *
+     * @return $this
+     */
+    public function setTimezone( $timezone ) {
+        if ( !empty( $timezone ) || $timezone === "0" ) {
+            $this->timezone = $timezone;
+        }
 
         return $this;
     }
