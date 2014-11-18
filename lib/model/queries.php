@@ -1645,6 +1645,7 @@ function insertJob( ArrayObject $projectStructure, $password, $target_language, 
     $data[ 'job_first_segment' ] = $job_segments[ 'job_first_segment' ];
     $data[ 'job_last_segment' ]  = $job_segments[ 'job_last_segment' ];
     $data[ 'tm_keys' ]           = $projectStructure[ 'tm_keys' ];
+    $data[ 'payable_rates' ]     = json_encode($projectStructure[ 'payable_rates' ]);
 
     $query = "SELECT LAST_INSERT_ID() FROM jobs";
 
@@ -1818,7 +1819,7 @@ function getProjectJobData( $pid ) {
 function getProjectData( $pid, $project_password = null, $jid = null, $jpassword = null ) {
 
     $query = "
-		SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, f.id, f.id AS id_file,f.filename, p.status_analysis,
+		SELECT p.name, j.id AS jid, j.password AS jpassword, j.source, j.target, j.payable_rates, f.id, f.id AS id_file,f.filename, p.status_analysis,
 
 			   SUM(s.raw_word_count) AS file_raw_word_count,
 			   SUM(st.eq_word_count) AS file_eq_word_count,
@@ -1857,7 +1858,7 @@ function getProjectData( $pid, $project_password = null, $jid = null, $jpassword
     }
 
     if ( !empty( $jpassword ) ) {
-        $and_2 = " and j.password = '" . $db->escape( $jpassword ) . "' ";
+        $and_3 = " and j.password = '" . $db->escape( $jpassword ) . "' ";
     }
 
     $query = sprintf( $query, $and_1, $and_2, $and_3 );
@@ -2853,7 +2854,7 @@ function deleteLockSegment( $id_segment, $id_job, $mode = "delete" ) {
 function getSegmentForTMVolumeAnalysys( $id_segment, $id_job ) {
     $query = "select s.id as sid ,s.segment ,raw_word_count,
 		st.match_type, j.source, j.target, j.id as jid, j.id_translator, tm_keys,
-		j.id_tms, j.id_mt_engine, p.id as pid
+		j.id_tms, j.id_mt_engine, j.payable_rates, p.id as pid
 			from segments s
 			inner join segment_translations st on st.id_segment=s.id
 			inner join jobs j on j.id=st.id_job

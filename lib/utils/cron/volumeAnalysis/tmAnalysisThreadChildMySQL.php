@@ -86,6 +86,7 @@ while (1) {
     $id_translator   = $segment[ 'id_translator' ];
     $raw_wc          = $segment[ 'raw_word_count' ];
     $fast_match_type = $segment[ 'match_type' ];
+    $payable_rates   = $segment[ 'payable_rates' ];
 
     $text            = $segment[ 'segment' ];
 
@@ -263,6 +264,8 @@ while (1) {
     $suggestion_match = $matches[0]['match'];
     $suggestion_json = json_encode($matches);
     $suggestion_source = $matches[0]['created_by'];
+
+    $equivalentWordMapping = json_decode($payable_rates, true);
 
     $new_match_type = getNewMatchType($tm_match_type, $fast_match_type, $equivalentWordMapping);
     //echo "sid is $sid ";

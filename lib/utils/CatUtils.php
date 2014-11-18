@@ -32,6 +32,200 @@ class CatUtils {
 
     public static $cjk = array( 'zh' => 1.8, 'ja' => 2.5, 'ko' => 2.5, 'km' => 5 );
 
+    private static $langPair2MTpayableRates = array(
+            "en" => array(
+                    "it" => array(
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            '75%-99%'     => 60,
+                            '100%'        => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 80
+                    ),
+                    "fr" => array(
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            '75%-99%'     => 60,
+                            '100%'        => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 80
+                    ),
+                    "pt" => array(
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            '75%-99%'     => 60,
+                            '100%'        => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 80
+                    ),
+                    "es" => array(
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            '75%-99%'     => 60,
+                            '100%'        => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 80
+                    ),
+                    "nl" => array(
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            '75%-99%'     => 60,
+                            '100%'        => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 80
+                    ),
+                    "pl" => array(
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            '75%-99%'     => 60,
+                            '100%'        => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 80
+                    ),
+                    "uk" => array(
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            '75%-99%'     => 60,
+                            '100%'        => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 80
+                    ),
+                    "hi" => array(
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            '75%-99%'     => 60,
+                            '100%'        => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 80
+                    ),
+                    "fi" => array(
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            '75%-99%'     => 60,
+                            '100%'        => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 80
+                    ),
+                    "tr" => array(
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            '75%-99%'     => 60,
+                            '100%'        => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 80
+                    ),
+                    "ru" => array(
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            '75%-99%'     => 60,
+                            '100%'        => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 80
+                    ),
+                    "zh" => array(
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            '75%-99%'     => 60,
+                            '100%'        => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 80
+                    ),
+                    "ar" => array(
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            '75%-99%'     => 60,
+                            '100%'        => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 80
+                    ),
+                    "ko" => array(
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            '75%-99%'     => 60,
+                            '100%'        => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 80
+                    ),
+                    "lt" => array(
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            '75%-99%'     => 60,
+                            '100%'        => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 80
+                    ),
+                    "jp" => array(
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            '75%-99%'     => 60,
+                            '100%'        => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 80
+                    ),
+                    "he" => array(
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            '75%-99%'     => 60,
+                            '100%'        => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 80
+                    ),
+                    "sr" => array(
+                            'NO_MATCH'    => 100,
+                            '50%-74%'     => 100,
+                            '75%-99%'     => 60,
+                            '100%'        => 30,
+                            'REPETITIONS' => 30,
+                            'INTERNAL'    => 60,
+                            'MT'          => 80
+                    )
+            )
+    );
+
+    /**
+     * Get the payable rate for a given langpair.
+     * NB: the map is supposed to be symmetric. If there is the need to make it asymmetric, please change this method
+     * and the corresponding map.
+     *
+     * @param $source string The first two chars of the source language name in RFC3066<br/>
+     *                       Example: <i>en-US</i> --> <b>en</b>
+     * @param $target string The first two chars of the target language name in RFC3066<br/>
+     *                       Example: <i>en-US</i> --> <b>en</b>
+     * @return string
+     */
+    public static function getPayableRates( $source, $target ) {
+
+        $ret = INIT::$DEFAULT_PAYABLE_RATES;
+
+        //search source -> target pair
+        if ( isset( self::$langPair2MTpayableRates[ $source ][ $target ] ) ) {
+            $ret = self::$langPair2MTpayableRates[ $source ][ $target ];
+
+        } elseif ( isset( self::$langPair2MTpayableRates[ $target ][ $source ] ) ) { //search target -> source pair
+            $ret = self::$langPair2MTpayableRates[ $target ][ $source ];
+        }
+
+        return $ret;
+
+    }
+
     // ----------------------------------------------------------------
 
     public static function placeholdamp($s) {
@@ -71,17 +265,17 @@ class CatUtils {
         $dosString = str_replace( "\r","\n", $dosString );
         return $dosString;
     }
-    
+
     private static function placehold_xml_entities($segment) {
         $pattern ="|&#(.*?);|";
         $res=preg_replace($pattern,"<x id=\"XMLENT$1\"/>",$segment);
         return $res;
     }
-    
+
     public static function restore_xml_entities($segment) {
         return preg_replace ("|<x id=\"XMLENT(.*?)\"/>|","&#$1",$segment);
     }
-    
+
     public static function placehold_xliff_tags($segment) {
 
         //remove not existent </x> tags
@@ -154,18 +348,18 @@ class CatUtils {
         $segment = str_replace(GTPLACEHOLDER, "&gt;", $segment);
         return $segment;
     }
-    
-    
-    
+
+
+
      private static function get_xliff_tags($segment) {
 
         //remove not existent </x> tags
         $segment = preg_replace('|(</x>)|si', "", $segment);
-        
+
         $matches=array();
         $match=array();
 
-        
+
         $res=preg_match('|(<g\s*id=["\']+.*?["\']+\s*[^<>]*?>)|si',$segment, $match);
         if ($res and isset($match[0])){
             $matches[]=$match[0];
@@ -525,7 +719,7 @@ class CatUtils {
 
     /**
      * Make an estimation on performance
-     * 
+     *
      * @param mixed $job_stats
      * @return mixed
      */
@@ -552,14 +746,14 @@ class CatUtils {
                 $job_stats['ESTIMATED_COMPLETION'] = date("G\h i\m", ($job_stats['DRAFT'] + $job_stats['REJECTED']) / ( !empty( $estimation_temp[0]['words_per_hour'] ) ? $estimation_temp[0]['words_per_hour'] : 1 )* 3600 - 3600);
             }
         }
-        
+
         return $job_stats;
-        
+
     }
-    
+
     /**
      * Perform analysis on single Job
-     *  
+     *
      * <pre>
      *      $job_stats = array(
      *          'id'                           => (int),
@@ -572,7 +766,7 @@ class CatUtils {
      *          'WORDS_PER_HOUR'               => (int),
      *      );
      * </pre>
-     *  
+     *
      * @param mixed $job_stats
      * @return mixed $job_stats
      */
@@ -644,13 +838,13 @@ class CatUtils {
         $job_stats['DOWNLOAD_STATUS'] = $t;
 
         return $job_stats;
-        
+
     }
-    
+
     /**
      * Public interface to single Job Stats Info
-     * 
-     * 
+     *
+     *
      * @param int $jid
      * @param int $fid
      * @param string $jPassword
@@ -668,16 +862,16 @@ class CatUtils {
      *          'WORDS_PER_HOUR'               => (int),
      *      );
      * </pre>
-     * 
+     *
      */
     public static function getStatsForJob( $jid, $fid = null, $jPassword = null ) {
-        
+
         $job_stats = getStatsForJob($jid, $fid, $jPassword);
         $job_stats = $job_stats[0];
 
         $job_stats = self::_getStatsForJob($job_stats, true); //true set estimation check if present
         return self::_performanceEstimationTime($job_stats);
-        
+
     }
 
     public static function getFastStatsForJob( WordCount_Struct $wCount ){
@@ -724,7 +918,7 @@ class CatUtils {
         if ( $app == "" ) {
             return '';
         }
-		
+
 		if(strpos($source_lang,'-')!==FALSE){
 			$tmp_lang=explode('-',$source_lang);
 			$source_lang=$tmp_lang[0];

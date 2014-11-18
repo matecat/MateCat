@@ -56,20 +56,20 @@ class ProjectManager {
                                     'job_pass'     => array(),
                                     'job_segments' => array()
                             ),
-                            'job_segments'       => array(), //array of job_id => array( min_seg, max_seg )
-                            'segments'           => array(), //array of files_id => segmentsArray()
-                            'translations'       => array(),
+                            'job_segments'         => array(), //array of job_id => array( min_seg, max_seg )
+                            'segments'             => array(), //array of files_id => segmentsArray()
+                            'translations'         => array(),
                             //one translation for every file because translations are files related
-                            'query_translations' => array(),
-                            'status'             => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
-                            'job_to_split'       => null,
-                            'job_to_split_pass'  => null,
-                            'split_result'       => null,
-                            'job_to_merge'       => null,
-                            'lang_detect_files'  => array(),
-                            'tm_keys'            => array(),
-                            'userIsLogged'       => false,
-                            'uid'                => null,
+                            'query_translations'   => array(),
+                            'status'               => Constants_ProjectStatus::STATUS_NOT_READY_FOR_ANALYSIS,
+                            'job_to_split'         => null,
+                            'job_to_split_pass'    => null,
+                            'split_result'         => null,
+                            'job_to_merge'         => null,
+                            'lang_detect_files'    => array(),
+                            'tm_keys'              => array(),
+                            'userIsLogged'         => false,
+                            'uid'                  => null,
                             'skip_lang_validation' => false
                     ) );
         }
@@ -167,7 +167,7 @@ class ProjectManager {
 
                 foreach ( $this->projectStructure[ 'private_tm_key' ] as $_tmKey ) {
 
-                    if ( !in_array( $_tmKey['key'], $userTmKeys ) ) {
+                    if ( !in_array( $_tmKey[ 'key' ], $userTmKeys ) ) {
                         $newMemoryKey   = new TmKeyManagement_MemoryKeyStruct();
                         $newTmKey       = new TmKeyManagement_TmKeyStruct();
                         $newTmKey->key  = $_tmKey[ 'key' ];
@@ -225,16 +225,17 @@ class ProjectManager {
             //if TMX,
             if ( 'tmx' == pathinfo( $fileName, PATHINFO_EXTENSION ) ) {
 
-                $file = new stdClass();
+                $file            = new stdClass();
                 $file->file_path = "$uploadDir/$fileName";
                 $APIKeySrv->setFile( array( $file ) );
 
                 try {
                     $APIKeySrv->addTmxInMyMemory();
-                } catch ( Exception $e ){
+                } catch ( Exception $e ) {
                     $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
                             "code" => $e->getCode(), "message" => $e->getMessage()
                     );
+
                     return false;
                 }
 
@@ -360,7 +361,7 @@ class ProjectManager {
 
                 $this->_extractSegments( $contents, $fid );
 
-                unset($contents); //free memory
+                unset( $contents ); //free memory
 
                 //Log::doLog( $this->projectStructure['segments'] );
 
@@ -404,7 +405,9 @@ class ProjectManager {
         }
 
         //check if the files language equals the source language. If not, set an error message.
-        if (!$this->projectStructure['skip_lang_validation']) $this->validateFilesLanguages();
+        if ( !$this->projectStructure[ 'skip_lang_validation' ] ) {
+            $this->validateFilesLanguages();
+        }
 
         /****************/
         //loop again through files to check to check for TMX loading
@@ -422,7 +425,7 @@ class ProjectManager {
                     $tmx_max_id = 0;
 
                     //check if TM has been loaded
-                    $allMemories = $this->tmxServiceWrapper->getStatus( $this->projectStructure[ 'private_tm_key' ][0]['key'], $fileName );
+                    $allMemories = $this->tmxServiceWrapper->getStatus( $this->projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ], $fileName );
 
                     if ( "200" != $allMemories[ 'responseStatus' ] or 0 == count( $allMemories[ 'responseData' ][ 'tm' ] ) ) {
                         //what the hell? No memories although I've just loaded some? Eject!
@@ -606,7 +609,7 @@ class ProjectManager {
 
         $update_project_count = sprintf(
                 $update_project_count,
-                $project_summary[0]['project_raw_wordcount'],
+                $project_summary[ 0 ][ 'project_raw_wordcount' ],
                 $this->projectStructure[ 'status' ],
                 $this->projectStructure[ 'id_project' ]
         );
@@ -621,6 +624,13 @@ class ProjectManager {
     protected function _createJobs( ArrayObject $projectStructure, $owner ) {
 
         foreach ( $projectStructure[ 'target_language' ] as $target ) {
+
+            //shorten languages and get payable rates
+            $shortSourceLang = substr( $projectStructure[ 'source_language' ], 0, 2 );
+            $shortTargetLang = substr( $target, 0, 2 );
+
+            //get payable rates
+            $projectStructure[ 'payable_rates' ] = CatUtils::getPayableRates( $shortSourceLang, $shortTargetLang );
 
             $query_min_max = "SELECT MIN( id ) AS job_first_segment , MAX( id ) AS job_last_segment
                 FROM segments WHERE id_file IN ( %s )";
@@ -733,7 +743,7 @@ class ProjectManager {
                 //get language code
                 if ( strpos( $fileLang, "-" ) === false ) {
                     //PHP Strict: Only variables should be passed by reference
-                    $_tmp = explode( "-", $this->projectStructure[ 'source_language' ] );
+                    $_tmp       = explode( "-", $this->projectStructure[ 'source_language' ] );
                     $sourceLang = array_shift( $_tmp );
                 } else {
                     $sourceLang = $this->projectStructure[ 'source_language' ];
@@ -886,9 +896,9 @@ class ProjectManager {
                 );
             }
 
-            $counter[ $chunk ][ 'eq_word_count' ]  += $row[ 'eq_word_count' ];
+            $counter[ $chunk ][ 'eq_word_count' ] += $row[ 'eq_word_count' ];
             $counter[ $chunk ][ 'raw_word_count' ] += $row[ 'raw_word_count' ];
-            $counter[ $chunk ][ 'segment_end' ]     = $row[ 'id' ];
+            $counter[ $chunk ][ 'segment_end' ] = $row[ 'id' ];
 
             //if last_opened segment is not set and if that segment can be showed in cattool
             //set that segment as the default last visited
