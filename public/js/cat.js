@@ -4116,11 +4116,11 @@ $.extend(UI, {
 		$("#outer").on('click', 'a.percentuage', function(e) {
 			e.preventDefault();
 			e.stopPropagation();			
-		}).on('mouseup', '.editarea', function() {
+		}).on('mouseup', '.editarea', function() {console.log('mouseup on editarea');
 			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
 				if(!UI.isFirefox) UI.showEditToolbar();
 			}
-		}).on('mousedown', '.editarea', function(e) {
+		}).on('mousedown', '.editarea', function(e) {console.log('mousedown on editarea');
             if(e.which == 3) {
                 e.preventDefault();
                 return false;
@@ -4644,7 +4644,7 @@ $.extend(UI, {
 				type: "droppedInEditarea",
 				segment: UI.currentSegment
 			});
-			UI.saveInUndoStack('drop');
+//			UI.saveInUndoStack('drop');
 //			UI.beforeDropEditareaHTMLtreated = UI.editarea.html();
 			$(this).css('float', 'left');
 			setTimeout(function() {
