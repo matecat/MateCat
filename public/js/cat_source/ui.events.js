@@ -783,7 +783,11 @@ $.extend(UI, {
 			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
 				if(!UI.isFirefox) UI.showEditToolbar();
 			}
-		}).on('mousedown', '.editarea', function() {
+		}).on('mousedown', '.editarea', function(e) {
+            if(e.which == 3) {
+                e.preventDefault();
+                return false;
+            }
 			UI.hideEditToolbar();
 		}).on('mousedown', '.editToolbar .uppercase', function() {
 			UI.formatSelection('uppercase');

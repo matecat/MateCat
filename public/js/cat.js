@@ -4120,7 +4120,11 @@ $.extend(UI, {
 			if(!$(window.getSelection().getRangeAt(0))[0].collapsed) { // there's something selected
 				if(!UI.isFirefox) UI.showEditToolbar();
 			}
-		}).on('mousedown', '.editarea', function() {
+		}).on('mousedown', '.editarea', function(e) {
+            if(e.which == 3) {
+                e.preventDefault();
+                return false;
+            }
 			UI.hideEditToolbar();
 		}).on('mousedown', '.editToolbar .uppercase', function() {
 			UI.formatSelection('uppercase');
@@ -4552,9 +4556,7 @@ $.extend(UI, {
 			}
 			if (!UI.body.hasClass('searchActive'))
 				setTimeout(function() {
-				//FIX HERE
-				    console.log("Log Lock Tags in 'input in editarea'" ); 	
-				    UI.lockTags(UI.editarea);
+					UI.lockTags(UI.editarea);
 				}, 10);
 			UI.registerQACheck();
 		}).on('input', '.editor .cc-search .input', function() {
@@ -5814,8 +5816,6 @@ $.extend(UI, {
 			tx = tx.replace(/(<\/span\>\s)$/gi, "</span><br class=\"end\">");
 			var prevNumTags = $('span.locked', this).length;
 			$(this).html(tx);
-
-
 			restoreSelection();
 
 			if($('span.locked', this).length != prevNumTags) UI.closeTagAutocompletePanel();
