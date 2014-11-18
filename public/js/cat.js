@@ -3510,7 +3510,7 @@ $.extend(UI, {
             if($(this).hasClass('disabled')) return false;
             $(this).addClass('disabled');
             $(this).attr('disabled','');
-            $.get("https://api.mymemory.translated.net/createranduser",function(data){
+            $.get("http://mymemory.translated.net/api/createranduser",function(data){
                 //parse to appropriate type
                 //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
                 if(typeof data == 'string'){
@@ -4231,8 +4231,12 @@ $.extend(UI, {
 //					console.log('ecco');
 //					console.log('prima del replace: ', UI.editarea.html());
                     // if tag-autocomplete-endcursor is inserted before the &lt; then it is moved after it
-                    UI.stripAngular = (UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi).length)? true : false;
-                    UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
+
+                    tempStr = UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi);
+                    UI.stripAngular = (!tempStr)? false : (!tempStr.length)? false : true;
+
+//                    UI.stripAngular = (UI.editarea.html().match(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi).length)? true : false;
+//                    UI.editarea.html(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"></span>'));
 //                    console.log(UI.editarea.html().replace(/&lt;<span class="tag-autocomplete-endcursor"\><\/span>/gi, '<span class="tag-autocomplete-endcursor"\>XXX/span>&lt;'));
 //                    console.log(UI.editarea.html().replace(/<span class="tag-autocomplete-endcursor"\><\/span>&lt;/gi, '&lt;<span class="tag-autocomplete-endcursor"\>XXX/span>'));
 
@@ -4243,7 +4247,7 @@ $.extend(UI, {
 					}
 					UI.checkAutocompleteTags();
 				}
-			}, 50);			
+			}, 50);
 		}).on('keydown', '.editor .editarea', function(e) {
 //			console.log('keydown: ', UI.editarea.html());
 /*
@@ -5971,7 +5975,8 @@ $.extend(UI, {
 //        console.log('added 2: ', added);
 		return added;
 	},
-	openTagAutocompletePanel: function() {//console.log('openTagAutocompletePanel');
+	openTagAutocompletePanel: function() {console.log('openTagAutocompletePanel');
+        console.log(UI.sourceTags.length);
 		if(!UI.sourceTags.length) return false;
 		$('.tag-autocomplete-marker').remove();
 
@@ -8218,7 +8223,7 @@ $.extend(UI, {
             if( $(this).text().slice(-5) == $('#new-tm-key').val().slice(-5) ){
                 console.log('key is bad');
                 $('#activetm tr.new').addClass('badkey');
-                $('#activetm tr.new .error .tm-error-key').text('The key is already present.').show();
+                $('#activetm tr.new .error .tm-error-key').text('The key is already present in this project.').show();
                 UI.checkTMAddAvailability(); //some enable/disable stuffs
                 keyIsAlreadyPresent = true;
                 return false;
@@ -8385,7 +8390,7 @@ $.extend(UI, {
         var TMKey = $('#new-tm-key').val();
 
         newTr = '<tr class="mine" data-tm="1" data-glos="1" data-owner="' + config.ownerIsMe + '">' +
-                '    <td class="dragrow"></td>' +
+                '    <td class="dragrow"><div class="status"></div></td>' +
                 '    <td class="privatekey">' + TMKey + '</td>' +
                 '    <td class="owner">You</td>' +
                 '    <td class="description">' + desc + '</td>' +
