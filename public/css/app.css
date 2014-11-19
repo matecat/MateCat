@@ -2604,7 +2604,7 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
     position: absolute;
     top: 0px;
     left: -2.8%;
-    background: url(../img/start-job-marker.png) 0 0 no-repeat;
+    /* background: url(../img/start-job-marker.png) 0 0 no-repeat; */
     display: block;
     height: 10px;
     opacity: 0.3;
