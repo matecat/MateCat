@@ -695,6 +695,9 @@ margin-top: 20px;
 
 
 .error-content {padding-left: 45px; padding-right: 10px;}
+.error-content a {
+color: white;
+}
 .error-message,
 .warning-message
 {
@@ -844,6 +847,9 @@ top: 5%;
 	float:left;
 	list-style:none;
 	font-size:14px;
+	}
+	.format-box ul {
+		width: 90px;
 	}
 	.popup-languages ul
 		{

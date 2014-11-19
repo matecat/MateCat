@@ -150,6 +150,16 @@ text-align: left;
 padding: 10px 20px;
 }
 
+
+#changeTimezone, #changecurrency {
+width: auto;
+height: 20px;
+padding: 5px;
+font-size: 10px;
+border: 1px solid #ccc;
+margin: 1px 0 5px 0;
+}
+
 /*.outsourceto:hover, .onyourown:hover {
 	border: 1px solid #000;
 	-moz-box-shadow: 0 0px 6px #888;
@@ -185,7 +195,7 @@ padding-bottom: 10px;
 }*/
 
 .delivery span {
-font-size: 22px;
+font-size: 20px;
 font-weight: bold;
 }
 
@@ -303,7 +313,7 @@ filter: grayscale(0%);
 .tprice span.displaypriceperword {
    font-weight: normal!important;
    font-size: 15px!important;
-   margin-top: -15px;
+   margin: -15px 0 -5px;
 }
 
 
@@ -419,10 +429,11 @@ margin: 0 0 0 -400px;
 }
 }
 
-@media screen and (max-height: 650px) {
+@media screen and (max-height: 650px) and (min-height: 581px){
    .outsource.modal .popup p {
-font-size: 16px;
-line-height: 26px;
+font-size: 15px;
+line-height: 22px;
+background: none;
 }
 .outsource.modal h2 {
 font-size: 18px;
@@ -435,6 +446,21 @@ top: 0px;
 margin: 0 0 0 -400px;
 }
 
+.pricebox .total {
+    margin-top:-40px;
+}
+}
+
+
+@media screen and (max-height: 580px) {
+ .outsource.modal .popup  {
+zoom: 0.8;
+top: 0px;
+margin: 0 0 0 -400px;
+}
+.outsource.modal .popup p {
+background: none;
+}
 .pricebox .total {
     margin-top:-40px;
 }

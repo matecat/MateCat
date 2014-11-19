@@ -57,8 +57,8 @@
 					                    <span class="euro">€</span>
                                         <span class="displayprice" data-currency="EUR" data-rawprice="0.00"></span>
 										<span class="displaypriceperword">about <span class="euro currency_per_word">€</span> <a id="price_p_word">0.10</a> / word</span>
-                                        <a class="currencychange">(Change Value)</a>
-                                    <select id="changecurrency" style="display:none;">
+                                        
+                                    <select id="changecurrency">
                                         <option value="EUR" data-symbol="€">Euro (EUR)</option>
                                         <option value="USD" data-symbol="US$">US dollar (USD)</option>
                                         <option value="AUD" data-symbol="$">Australian dollar (AUD)</option>
@@ -78,7 +78,7 @@
                                     <div class="delivery">Delivery guaranteed by:
                                         <span class="time" data-timezone="" data-rawtime=""></span>
                                         <span class="zone2">
-                                            <select id="changeTimezone" class="noselect" style="width:100%;">
+                                            <select id="changeTimezone" style="width:100%;">
                                                 <option value="-11">(UTC -11:00 ) Midway Islands, American Samoa</option>
                                                 <option value="-10">(UTC -10:00 ) Hawaii, Tahiti, Cook Islands</option>
                                                 <option value="-9">(UTC -9:00 ) Alaska</option>
@@ -111,7 +111,7 @@
                                                 <option value="13">(UTC +13:00 ) Samoa</option>
                                             </select>
                                         </span>
-                                        <a class="deliverychange">(Change Timezone)</a>
+                                      
                                     </div>
                                     <div class="ilmiodiv"></div>
                                     <form id="continueForm" action="${outsource_service_login}" method="POST" target="_blank">
