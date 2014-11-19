@@ -152,13 +152,16 @@ $.extend(UI, {
             $('#activetm tr.mine td.description .edit-desc:not(.current)').removeAttr('contenteditable');
 //            $(this).removeClass('current');
             $(this).attr('contenteditable', true);
-        }).on('focusout', '#activetm td.description .edit-desc', function() {
+        }).on('blur', '#activetm td.description .edit-desc', function() {
+            console.log('blur');
             $(this).removeAttr('contenteditable');
 //            $('.popup-tm tr.mine td.description .edit-desc').removeAttr('contenteditable');
         }).on('keydown', '#activetm td.description .edit-desc', 'return', function(e) {
-            e.preventDefault();
-            $(this).removeAttr('contenteditable');
-        }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
+            if(e.which == 13) {
+                e.preventDefault();
+                $(this).removeAttr('contenteditable');
+            }
+         }).on('click', '#activetm tr.uploadpanel .uploadfile .addtmxfile:not(.disabled)', function() {
             $(this).addClass('disabled');
 
             UI.execAddTM(this);
