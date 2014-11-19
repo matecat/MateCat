@@ -60,6 +60,7 @@ $.extend(UI, {
         this.logEnabled = false;
         this.unsavedSegmentsToRecover = [];
         this.recoverUnsavedSegmentsTimer = false;
+        this.savingMemoryErrorNotificationEnabled = true;
 
 		/**
 		 * Global Warnings array definition.

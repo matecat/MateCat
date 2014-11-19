@@ -1379,7 +1379,12 @@ top: 17%;
 
 
 .mine .downloadtmx {
-	display: block!important;
+	display: block !important;
+}
+
+
+.mgmt-tm .downloadtmx {
+    display: none !important; /* temp */
 }
 
 tr.mine.ui-sortable-helper {
@@ -5034,7 +5039,7 @@ body.tagModes section[data-tagmode='crunched'] .source .locked
     text-align: right;
     margin-top: -23px;
 }
-.editor.hasTags .textarea-container .tagMode {
+body.tagModes .editor.hasTags .textarea-container .tagMode {
     display: block;
 }
 .textarea-container .tagMode li {

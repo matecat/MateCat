@@ -2776,8 +2776,8 @@ del.diff
 }
 
 
-body.tagModes section[data-tagmode='crunched'] .editarea .locked,
-body.tagModes section[data-tagmode='crunched'] .source .locked
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked
 {
     text-indent: -9999px;
     display: inline-block;
@@ -2794,7 +2794,7 @@ body.tagModes section[data-tagmode='crunched'] .source .locked
     text-align: right;
     margin-top: -23px;
 }
-.editor.hasTags .textarea-container .tagMode {
+body.tagModes .editor.hasTags .textarea-container .tagMode {
     display: block;
 }
 .textarea-container .tagMode li {
@@ -2807,11 +2807,13 @@ body.tagModes section[data-tagmode='crunched'] .source .locked
     cursor: pointer
 }
 
-.editor[data-tagmode='crunched'] .textarea-container .tagMode li.crunched,
+body:not(.tagmode-default-extended) .editor[data-tagmode='crunched'] .textarea-container .tagMode li.crunched,
+body.tagmode-default-extended .textarea-container .tagMode li.extended,
 .editor[data-tagmode='extended'] .textarea-container .tagMode li.extended,
 .textarea-container .tagMode li:hover {
     opacity: 1;
 }
+
 
 
 @keyframes fadein {
