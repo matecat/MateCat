@@ -88,11 +88,11 @@ class outsourceToController extends ajaxController {
         }
 
         if ( empty( $this->currency ) ) {
-            $this->currency = $_COOKIE[ "matecat_currency" ];
+            $this->currency = @$_COOKIE[ "matecat_currency" ];
         }
 
         if ( empty( $this->timezone ) && $this->timezone !== "0" ) {
-            $this->timezone = $_COOKIE[ "matecat_timezone" ];
+            $this->timezone = @$_COOKIE[ "matecat_timezone" ];
         }
         //        Log::doLog(  $this->jobList  );
         /**

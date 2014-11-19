@@ -70,7 +70,8 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                 curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
                 curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
 
-		$raw_volAnalysis = curl_exec( $ch );
+		        $raw_volAnalysis = curl_exec( $ch );
+
                 curl_close($ch);
 
                 $itemCart                = new Shop_ItemHTSQuoteJob();
@@ -101,7 +102,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                 CURLOPT_HEADER => 0,
                 CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 2,
-		CURLOPT_SSL_VERIFYPEER => true,
+		        CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2
         );
 
