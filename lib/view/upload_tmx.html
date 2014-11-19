@@ -22,6 +22,14 @@
 
     <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width"/>
+    <meta property="og:title" content="Translate a file with MateCat" />
+    <meta property="og:description" content="Matecat is a free, web-based open source software that gives you more matches than any other CAT tool. Use it now!" />
+    <meta property="og:url" content="https://www.matecat.com" />
+    <meta property="og:image" content="https://www.matecat.com/public/img/fbimg.jpg" />
+    <!-- jQuery UI styles -->
+    <!--
+    <link rel="stylesheet" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.18/themes/base/jquery-ui.css" id="theme"/>
+    -->
 
 
     <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
@@ -56,16 +64,50 @@
     </script>
 
 
+
+<!-- Codice remarketing FB -->
+
+<script>(function() {
+  var _fbq = window._fbq || (window._fbq = []);
+  if (!_fbq.loaded) {
+    var fbds = document.createElement('script');
+    fbds.async = true;
+    fbds.src = '//connect.facebook.net/en_US/fbds.js';
+    var s = document.getElementsByTagName('script')[0];
+    s.parentNode.insertBefore(fbds, s);
+    _fbq.loaded = true;
+  }
+  _fbq.push(['addPixelId', '1445002372422861']);
+})();
+window._fbq = window._fbq || [];
+window._fbq.push(['track', 'PixelInitialized', {}]);
+</script>
+<noscript><img height="1" width="1" alt="" style="display:none" src="https://www.facebook.com/tr?id=1445002372422861&amp;ev=PixelInitialized" /></noscript>
+
+
+
+
 </head>
 <body tal:condition="not:supportedBrowser">
 <div metal:use-macro="unsupported_browser.html/unsupported"/>
 </body>
-<body tal:condition="supportedBrowser" class="started">
+
+<body tal:condition="php:supportedBrowser EQ -2">
+<div metal:use-macro="unsupported_browser.html/indexie"/>
+</body>
+
+<body tal:condition="php:supportedBrowser EQ 1" class="started">
 
 <header>
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
-        <a class="pull-right open-more cat-appear hide">About Matecat</a>
+        <ul class="pull-right" id="menu-site">
+            <li><a href="/features/">Features</a></li>
+            <li><a href="/about/">About</a></li>
+            <li><a href="/open-source/">Open source</a></li>
+            <li><a href="/release-notes/">Release Notes</a></li>
+            <li><a href="/support">Support</a></li>
+        </ul>
     </div>
     <div class="cl"></div>
 </header>
@@ -774,16 +816,24 @@
         <nav>
 
             <ul>
-                <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
+                <tal:block tal:condition="php: !empty(logged_user)">
+                    <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
+                </tal:block>
+
+                <tal:block tal:condition="php: empty(logged_user)">
+                    <li><a href="${authURL}" class="authLink">Manage</a></li>
+                </tal:block>
+
                 <li><a tal:attributes="href string:${basepath}api/docs">API</a></li>
                 <li><a href="http://docs.matecat.com" target="_blank">Docs</a></li>
 
+                <li><a href="/terms" target="_blank">Terms</a></li>
 
             </ul>
 
             <tal:block tal:condition="php: empty(logged_user)">
                 <div id='welcomebox'>
-                    <span>Anonymous</span> (<a id='loginlink' tal:attributes="href incomingUrl">login</a>)
+                    <span>Anonymous</span> (<a id='loginlink' class="authLink" href="${authURL}">login</a>)
                 </div>
             </tal:block>
 
@@ -1025,11 +1075,36 @@
 
 
 </script>
+<!-- Google Code per il tag di remarketing -->
 
+<script type="text/javascript">
+    <!-- /* <![CDATA[*/ -->
+    var google_conversion_id = 961218439;
+    var google_custom_params = window.google_tag_params;
+    var google_remarketing_only = true;
+    <!-- /*]]> */ -->
+</script>
+<script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
+</script>
+<noscript>
+    <div style="display:inline;">
+        <img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/961218439/?value=0&amp;guid=ON&amp;script=0"/>
+    </div>
+</noscript>
 
-<script src="${basepath}public/js/lib/snapengage.js"></script>
+<!-- Google Analytics -->
+<script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-28800161-1', 'auto');
+    ga('send', 'pageview');
+
+</script>
+
 <img height='1' width='1' border='0' src='https://www.clickmeter.com/conversion.aspx?id=5540EC432C934E0FB1EADDBA3A58E8EA&val=0.00&param=empty&com=0.00'/>
-
 
 </body>
 
