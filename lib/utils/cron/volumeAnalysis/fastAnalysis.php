@@ -18,7 +18,7 @@ if ( !file_exists( Constants_Daemons::PID_FOLDER ) ) {
 file_put_contents( Constants_Daemons::PID_FOLDER . "/" . Constants_Daemons::FAST_PID_FILE, $my_pid );
 /**/
 
-$ws = new MyMemoryAnalyzer();
+$ws = new MyMemoryAnalyzer( 1 /* MyMemory */ );
 
 Log::$fileName = "fastAnalysis.log";
 

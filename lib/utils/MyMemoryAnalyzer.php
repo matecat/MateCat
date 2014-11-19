@@ -9,13 +9,7 @@ include_once( INIT::$UTILS_ROOT . "/Utils.php" ); //only for testing purpose
    Thank you for keeping is confidential.
  */
 
-class MyMemoryAnalyzer {
-
-    private $url = "https://api.mymemory.translated.net";
-
-    public function __construct() {
-
-    }
+class MyMemoryAnalyzer extends Engine {
 
     public function fastAnalysis( $segs_array ) {
         if ( !is_array( $segs_array ) ) {
@@ -28,11 +22,10 @@ class MyMemoryAnalyzer {
         $d[ 'df' ]   = "matecat_array";
         $d[ 'segs' ] = $json_segs;
 
-        $countwordReport = Utils::curl_post( "$this->url/analyze", $d );
+        $this->doQuery( "analyze", $d, true );
 
-        $reportDecoded = json_decode( $countwordReport, true );
+        return $this->raw_result;
 
-        return $reportDecoded;
     }
 
     /**
@@ -130,8 +123,10 @@ class MyMemoryAnalyzer {
                 CURLOPT_SSL_VERIFYHOST => 2
         );
 
+        $this->buildPostQuery( 'detect_language' );
+
         $mh        = new MultiCurlHandler();
-        $tokenHash = $mh->createResource( "https://api.mymemory.translated.net/langdetect.php", $options );
+        $tokenHash = $mh->createResource( $this->url, $options );
         Log::dolog( "DETECT LANG TOKENHASH: $tokenHash" );
 
         $mh->multiExec();

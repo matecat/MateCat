@@ -27,6 +27,8 @@ abstract class Engine {
 
     protected $api_key_create_user_url;
     protected $api_key_check_auth_url;
+    protected $detect_language_url;
+    protected $analyze_url;
 
 
     public function __construct( $id ) {
@@ -67,6 +69,9 @@ abstract class Engine {
         $this->api_key_create_user_url = $extra_data[ 'api_key_create_user_url' ];
         $this->api_key_check_auth_url  = $extra_data[ 'api_key_check_auth_url' ];
 
+        $this->detect_language_url     = $extra_data[ 'detect_language_url' ];
+        $this->analyze_url             = $extra_data[ 'analyze_url' ];
+
     }
 
     protected function curl( $url, $postfields = false ) {
@@ -102,7 +107,7 @@ abstract class Engine {
             Log::doLog( 'Curl Error: ' . $curl_errno . " - " . $curl_error . " " . var_export( parse_url( $url ), true ) );
             $output = json_encode( array(
                     'error' => array(
-                            'code' => -$curl_errno, 'message' => " Server Not Available"
+                            'code' => -$curl_errno, 'message' => " $curl_error. Server Not Available"
                     )
             ) ); //return negative number
         }
@@ -148,12 +153,12 @@ abstract class Engine {
 
     }
 
-    private function buildPostQuery( $function ) {
+    protected function buildPostQuery( $function ) {
         $function  = strtolower( trim( $function ) );
         $this->url = "$this->base_url/" . $this->{$function . "_url"}; //why _url ???? is a key value, so call it by key!!
     }
 
-    private function buildGetQuery( $function, $parameters ) {
+    protected function buildGetQuery( $function, $parameters ) {
         $function  = strtolower( trim( $function ) );
         $this->url = "$this->base_url/" . $this->{$function . "_url"} . "?"; //why _url ???? is a key value, so call it by key!!
         if ( is_array( $this->extra_parameters ) and !empty( $this->extra_parameters ) ) {
@@ -163,7 +168,7 @@ abstract class Engine {
         $this->url .= $parameters_query_string;
     }
 
-    private function existsFunction( $type ) {
+    protected function existsFunction( $type ) {
 
         $type = strtolower( trim( $type ) );
         if ( empty( $type ) ) {
