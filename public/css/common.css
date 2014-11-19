@@ -1379,7 +1379,12 @@ top: 17%;
 
 
 .mine .downloadtmx {
-	display: block!important;
+	display: block !important;
+}
+
+
+.mgmt-tm .downloadtmx {
+    display: none !important; /* temp */
 }
 
 tr.mine.ui-sortable-helper {

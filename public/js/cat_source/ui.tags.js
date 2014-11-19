@@ -275,6 +275,16 @@ $.extend(UI, {
             this.setCrunchedTagMode(el);
         }
     },
+    enableTagMode: function () {
+        UI.render(
+            {tagModesEnabled: true}
+        )
+    },
+    disableTagMode: function () {
+        UI.render(
+            {tagModesEnabled: false}
+        )
+    },
 
     // TAG MISMATCH
 	markTagMismatch: function(d) {

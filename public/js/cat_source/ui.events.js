@@ -146,6 +146,9 @@ $.extend(UI, {
             UI.openLanguageResourcesPanel();
         }).bind('keydown', 'Meta+c', function() {
 			UI.tagSelection = false;
+        }).bind('keydown', 'Meta+shift+s', function(e) {
+//            e.preventDefault();
+            UI.body.toggleClass('tagmode-default-extended');
 //		}).bind('keydown', 'Backspace', function(e) {
 
 //		}).on('click', '#messageBar .close', function(e) {

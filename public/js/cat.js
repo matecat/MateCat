@@ -2656,7 +2656,7 @@ UI = {
 				}
 			}
 
-			if (operation == 'setContribution' && this.code != '-10') { // is not a password error
+			if (operation == 'setContribution' && this.code != '-10' && UI.savingMemoryErrorNotificationEnabled) { // is not a password error
 				APP.alert({msg: "Error in saving the translation memory.<br />Try to save again the segment.<br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
 			}
 
@@ -3126,6 +3126,7 @@ $.extend(UI, {
         this.logEnabled = false;
         this.unsavedSegmentsToRecover = [];
         this.recoverUnsavedSegmentsTimer = false;
+        this.savingMemoryErrorNotificationEnabled = true;
 
 		/**
 		 * Global Warnings array definition.
@@ -3237,6 +3238,7 @@ $.extend(UI, {
  */
 $.extend(UI, {
 	render: function(options) {
+        options = options || {};
 		firstLoad = (options.firstLoad || false);
 		segmentToOpen = (options.segmentToOpen || false);
 		segmentToScroll = (options.segmentToScroll || false);
@@ -3296,8 +3298,17 @@ $.extend(UI, {
 		this.preCloseTagAutocomplete = false;
         this.hiddenTextEnabled = true;
         this.markSpacesEnabled = false;
-        this.tagModesEnabled = false;
-        if(this.tagModesEnabled) UI.body.addClass('tagModes');
+        console.log('options: ', options);
+        console.log('options.tagModesEnabled: ', options.tagModesEnabled);
+        console.log('1: ', this.tagModesEnabled);
+        this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
+        console.log('2: ', this.tagModesEnabled);
+
+        if(this.tagModesEnabled) {
+            UI.body.addClass('tagModes');
+        } else {
+            UI.body.removeClass('tagModes');
+        }
 
 
 
@@ -3483,6 +3494,9 @@ $.extend(UI, {
             UI.openLanguageResourcesPanel();
         }).bind('keydown', 'Meta+c', function() {
 			UI.tagSelection = false;
+        }).bind('keydown', 'Meta+shift+s', function(e) {
+//            e.preventDefault();
+            UI.body.toggleClass('tagmode-default-extended');
 //		}).bind('keydown', 'Backspace', function(e) {
 
 //		}).on('click', '#messageBar .close', function(e) {
@@ -5936,6 +5950,16 @@ $.extend(UI, {
         } else {
             this.setCrunchedTagMode(el);
         }
+    },
+    enableTagMode: function () {
+        UI.render(
+            {tagModesEnabled: true}
+        )
+    },
+    disableTagMode: function () {
+        UI.render(
+            {tagModesEnabled: false}
+        )
     },
 
     // TAG MISMATCH
