@@ -150,15 +150,19 @@ text-align: left;
 padding: 10px 20px;
 }
 
+#changecurrency {
+    display: none;
+}
 
-#changeTimezone, #changecurrency {
+
+/* #changeTimezone, #changecurrency {
 width: auto;
 height: 20px;
 padding: 5px;
 font-size: 10px;
 border: 1px solid #ccc;
 margin: 1px 0 5px 0;
-}
+} */
 
 /*.outsourceto:hover, .onyourown:hover {
 	border: 1px solid #000;
@@ -408,6 +412,7 @@ max-height: 525px;
     -webkit-appearance: none;
     border: none;
     pointer-events: none;
+    background: transparent!important;
 }
 
 .deliverychange, .currencychange {
