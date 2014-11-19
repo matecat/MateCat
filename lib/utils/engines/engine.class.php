@@ -27,6 +27,8 @@ abstract class Engine {
 
     protected $api_key_create_user_url;
     protected $api_key_check_auth_url;
+    protected $detect_language_url;
+    protected $analyze_url;
 
 
     public function __construct( $id ) {
@@ -66,6 +68,9 @@ abstract class Engine {
         $this->tmx_status_url          = $extra_data[ 'tmx_status_relative_url' ];
         $this->api_key_create_user_url = $extra_data[ 'api_key_create_user_url' ];
         $this->api_key_check_auth_url  = $extra_data[ 'api_key_check_auth_url' ];
+
+        $this->detect_language_url     = $extra_data[ 'detect_language_url' ];
+        $this->analyze_url             = $extra_data[ 'analyze_url' ];
 
     }
 
