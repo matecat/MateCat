@@ -184,7 +184,7 @@ $.extend(UI, {
             if($(this).hasClass('disabled')) return false;
             $(this).addClass('disabled');
             $(this).attr('disabled','');
-            $.get("http://mymemory.translated.net/api/createranduser",function(data){
+            $.get("https://mymemory.translated.net/api/createranduser",function(data){
                 //parse to appropriate type
                 //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
                 if(typeof data == 'string'){
