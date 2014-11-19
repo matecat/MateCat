@@ -92,7 +92,8 @@ $.extend(UI, {
 		this.debug = false;
 //		this.debug = Loader.detect('debug');
 //		this.checkTutorialNeed();
-
+        this.findCommonPartInSegmentIds();
+        console.log(UI.commonPartInSegmentIds);
 		UI.detectStartSegment(); 
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
 		UI.getSegments(options);

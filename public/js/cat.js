@@ -1174,7 +1174,9 @@ UI = {
                     '						</ul>' : '';
                 newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
-						'	<span class="sid">' + this.sid + '</span>' +
+						'	<span class="sid" title="' + this.sid + '">' + UI.shortenId(this.sid) + '</span>' +
+((this.sid == config.first_job_segment)? '	<span class="start-job-marker"></span>' : '') +
+((this.sid == config.last_job_segment)? '	<span class="end-job-marker"></span>' : '') +
 						'	<div class="body">' +
 						'		<div class="header toggle" id="segment-' + this.sid + '-header">' +
 //						'			<h2 title="" class="percentuage"><span></span></h2>' + 
@@ -3040,7 +3042,27 @@ UI = {
 				$(this).addClass('current');
 		});
 		$('#jobMenu li.currSegment').attr('data-segment', UI.currentSegmentId);
-	}
+	},
+    findCommonPartInSegmentIds: function () {
+        var a = config.first_job_segment;
+        var b = config.last_job_segment;
+        for(x=0;x<a.length;x++){
+            console.log(a[x] + ' - ' + b[x]);
+            if(a[x] != b[x]) {
+                n = x;
+                break;
+            }
+        }
+//        console.log('n: ' + x);
+//        console.log(a.substring(0,n));
+//        var coso = a.substring(0,n);
+        this.commonPartInSegmentIds = a.substring(0,n);
+//        console.log(a.replace(coso, '<span class="implicit">' + coso + '</span>'))
+    },
+    shortenId: function(id) {
+        return id.replace(UI.commonPartInSegmentIds, '<span class="implicit">' + UI.commonPartInSegmentIds + '</span>');
+    }
+
 };
 
 $(document).ready(function() {
@@ -3327,7 +3349,8 @@ $.extend(UI, {
 		this.debug = false;
 //		this.debug = Loader.detect('debug');
 //		this.checkTutorialNeed();
-
+        this.findCommonPartInSegmentIds();
+        console.log(UI.commonPartInSegmentIds);
 		UI.detectStartSegment(); 
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
 		UI.getSegments(options);

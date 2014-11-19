@@ -2584,10 +2584,10 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 
 .sid
 {
-	width: 50px !important;
+	width: auto !important;
 	position: absolute;	
 	top: 18px;
-	left: -55px;
+	left: -2.8%;
 	text-align: center;
 	display: block;
 	height: 10px;
@@ -2596,6 +2596,24 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 	color: #999;
 	text-decoration: none;
 	cursor: default;
+}
+.start-job-marker,
+.end-job-marker
+{
+    width: 20px !important;
+    position: absolute;
+    top: 0px;
+    left: -2.8%;
+    background: url(../img/start-job-marker.png) 0 0 no-repeat;
+    display: block;
+    height: 10px;
+    opacity: 0.3;
+}
+.end-job-marker
+{
+    top: auto;
+    bottom: 0px;
+    background: url(../img/end-job-marker.png) 0 0 no-repeat;
 }
 section:hover .sid{color:#6d6e71}		
 section.currSearchSegment .sid
@@ -2608,7 +2626,9 @@ section.currSearchSegment .sid
 .editor .sid{
 	top:43px !Important;}
 
-
+span.sid .implicit {
+    display: none;
+}
 /*.comment{position:absolute;right:0;}*/
 /*
 .editor .status-container{display:none;}
@@ -2863,8 +2883,8 @@ article
 	border-radius: 2px;
 	-moz-box-shadow: 0 1px 3px #ccc;
 	-webkit-box-shadow: 0 1px 3px #ccc;
-	position:relative;margin-left:4%;
-	width:90.5%;
+	position:relative;margin-left:3%;
+	width:91.5%;
 	float:left;
 }
 
@@ -5021,8 +5041,8 @@ del.diff
 }
 
 
-body.tagModes section[data-tagmode='crunched'] .editarea .locked,
-body.tagModes section[data-tagmode='crunched'] .source .locked
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked
 {
     text-indent: -9999px;
     display: inline-block;
@@ -5052,11 +5072,13 @@ body.tagModes .editor.hasTags .textarea-container .tagMode {
     cursor: pointer
 }
 
-.editor[data-tagmode='crunched'] .textarea-container .tagMode li.crunched,
+body:not(.tagmode-default-extended) .editor[data-tagmode='crunched'] .textarea-container .tagMode li.crunched,
+body.tagmode-default-extended .textarea-container .tagMode li.extended,
 .editor[data-tagmode='extended'] .textarea-container .tagMode li.extended,
 .textarea-container .tagMode li:hover {
     opacity: 1;
 }
+
 
 
 @keyframes fadein {
