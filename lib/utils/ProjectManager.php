@@ -486,7 +486,7 @@ class ProjectManager {
         if ( 1 == $this->checkTMX ) {
             //this means that noone of uploaded TMX were usable for this project. Warn the user.
             $this->projectStructure[ 'result' ][ 'errors' ][ ] = array(
-                    "code" => -16, "message" => "No usable segment found in TMXs for the language pairs of this project"
+                    "code" => -16, "message" => "The TMX did not contain any usable segment. Check that the languages in the TMX file match the languages of your project."
             );
 
             Log::doLog( $this->projectStructure['result'] );
@@ -712,7 +712,7 @@ class ProjectManager {
         $filename2SourceLangCheck = array();
 
         //istantiate MyMemory analyzer and detect languages for each file uploaded
-        $mma = new MyMemoryAnalyzer();
+        $mma = new MyMemoryAnalyzer( 1 /* MyMemory */ );
         $res = $mma->detectLanguage( $filesSegments, $this->projectStructure[ 'lang_detect_files' ] );
 
         //for each language detected, check if it's not equal to the source language

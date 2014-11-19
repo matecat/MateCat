@@ -102,7 +102,7 @@ abstract class Engine {
             Log::doLog( 'Curl Error: ' . $curl_errno . " - " . $curl_error . " " . var_export( parse_url( $url ), true ) );
             $output = json_encode( array(
                     'error' => array(
-                            'code' => -$curl_errno, 'message' => " Server Not Available"
+                            'code' => -$curl_errno, 'message' => " $curl_error. Server Not Available"
                     )
             ) ); //return negative number
         }
@@ -148,12 +148,12 @@ abstract class Engine {
 
     }
 
-    private function buildPostQuery( $function ) {
+    protected function buildPostQuery( $function ) {
         $function  = strtolower( trim( $function ) );
         $this->url = "$this->base_url/" . $this->{$function . "_url"}; //why _url ???? is a key value, so call it by key!!
     }
 
-    private function buildGetQuery( $function, $parameters ) {
+    protected function buildGetQuery( $function, $parameters ) {
         $function  = strtolower( trim( $function ) );
         $this->url = "$this->base_url/" . $this->{$function . "_url"} . "?"; //why _url ???? is a key value, so call it by key!!
         if ( is_array( $this->extra_parameters ) and !empty( $this->extra_parameters ) ) {
@@ -163,7 +163,7 @@ abstract class Engine {
         $this->url .= $parameters_query_string;
     }
 
-    private function existsFunction( $type ) {
+    protected function existsFunction( $type ) {
 
         $type = strtolower( trim( $type ) );
         if ( empty( $type ) ) {
