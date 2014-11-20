@@ -8479,7 +8479,7 @@ $.extend(UI, {
         form = $('#activetm tr.' + trClass + ' .add-TM-Form')[0];
         path = $(el).parents('.uploadfile').find('input[type="file"]').val();
         file = path.split('\\')[path.split('\\').length-1];
-        this.TMFileUpload(form, 'http://' + window.location.hostname + '/?action=loadTMX','uploadCallback', file);
+        this.TMFileUpload(form, '/?action=loadTMX','uploadCallback', file);
     },
     addTMKeyToList: function (uploading) {
         var r = ($('#new-tm-read').is(':checked'))? 1 : 0;
