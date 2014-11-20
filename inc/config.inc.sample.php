@@ -225,8 +225,6 @@ class INIT {
 			}
 		}
 
-		self::$AUTHCOOKIENAME='matecat_login';
-		self::$AUTHCOOKIEDURATION=86400*60;
 		self::$ENABLED_BROWSERS = array('applewebkit','chrome', 'safari', 'firefox');
 
         // sometimes the browser declare to be Mozilla but does not provide a valid Name (e.g. Safari).
@@ -251,7 +249,10 @@ class INIT {
 
         self::$ANALYSIS_WORDS_PER_DAYS = 3000;
 		self::$BUILD_NUMBER = '0.4.2';
-		self::$VOLUME_ANALYSIS_ENABLED = true;
+        self::$VOLUME_ANALYSIS_ENABLED = true;
+
+        self::$AUTHCOOKIENAME='matecat_login_v' . self::$BUILD_NUMBER;
+        self::$AUTHCOOKIEDURATION=86400*60;
 
         self::$FORCE_XLIFF_CONVERSION = false;
 		self::$WARNING_POLLING_INTERVAL = 20; //seconds
