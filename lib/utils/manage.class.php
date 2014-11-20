@@ -88,8 +88,8 @@ class ManageUtils {
                  */
                 $tm_keys[ ] = array(
                         "key" => $tm_key_struct->key,
-                        "r"   => ( $tm_key_struct->r ) ? 'read' : '&nbsp;',
-                        "w"   => ( $tm_key_struct->w ) ? 'write' : ''
+                        "r"   => ( $tm_key_struct->r ) ? 'Lookup' : '&nbsp;',
+                        "w"   => ( $tm_key_struct->w ) ? 'Update' : ''
                 );
             }
 

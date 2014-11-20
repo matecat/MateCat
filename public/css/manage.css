@@ -300,7 +300,7 @@ body.manage th.create-date
 	
 body.manage th.job-detail
 	{
-	width: 37%;
+	width: 33%;
 	}
 body.manage th.private-tm-key
 	{
@@ -339,12 +339,14 @@ body.manage tr.row
     float:left;
     padding: 6px 4px;
     display: block;
+    font-family: "Lucida Console", Monaco, monospace;
+    font-size: 12px;
 }
 
 .tm-key .rgrant,
 .tm-key .wgrant{
-    min-width: 30px;
-    width: 30px;
+    min-width: 40px;
+    width: 40px;
 }
 
 .tm-key .clear{

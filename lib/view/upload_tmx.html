@@ -34,6 +34,7 @@
 
     <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
     <link rel="stylesheet" href="${basepath}public/css/upload.css?build=${build_number}"/>
+    <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
     <link rel="stylesheet" href="${basepath}public/js/lib/colorbox/colorbox.css?build=${build_number}"/>
 
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
@@ -46,7 +47,7 @@
     <script src="${basepath}public/js/common.js"></script>
     <script src="${basepath}public/js/upload.js"></script>
     <script src="${basepath}public/js/lib/jquery.tablesorter-fork-mottie.js"></script>
-
+    <script src="${basepath}public/js/login.js"></script>
     <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
     <script type="text/javascript">
@@ -246,7 +247,7 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
 
     <div class="translate-box">
         <h2 class="resource" style="display:none;"><span class="numResources">4</span> Resources selected</h2>
-        <a href="#" class="memory-mgmt btn btn-success pull-left"><i class="icon-language"></i>Manage language resources</a>
+        <a href="#" class="memory-mgmt">Manage language resources</a>
     </div>
     <div class="cl"></div>
 
@@ -809,6 +810,7 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
     </div>
 </div>
 
+<div metal:use-macro="popup_google_login.html/googleLoginPopup"/>
 
 <footer>
     <div class="wrapper">
@@ -825,8 +827,6 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
                 </tal:block>
 
                 <li><a tal:attributes="href string:${basepath}api/docs">API</a></li>
-                <li><a href="http://docs.matecat.com" target="_blank">Docs</a></li>
-
                 <li><a href="/terms" target="_blank">Terms</a></li>
 
             </ul>
@@ -1057,7 +1057,7 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
         }, 200 );
     } );
 
-    $( ".memory-mgmt" ).click( function ( e ) {
+    $( ".memory-mgmt" ).on("click", function ( e ) {
         e.preventDefault();
         UI.openLanguageResourcesPanel();
     } );
