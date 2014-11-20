@@ -35,7 +35,7 @@ class newProjectController extends viewController {
     public function __construct() {
 
         parent::__construct( false );
-        parent::makeTemplate( "upload_tmx.html" );
+        parent::makeTemplate( "upload.html" );
 
         $this->guid         = Utils::create_guid();
         $this->lang_handler = Languages::getInstance();

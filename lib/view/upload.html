@@ -13,16 +13,14 @@
 -->
 <html lang="en">
 <head>
-
-
     <!-- Force latest IE rendering engine or ChromeFrame if installed -->
     <!--[if IE]>
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1"><![endif]-->
     <meta charset="utf-8"/>
-    <title tal:condition="true:conversion_enabled">Translate a file with MateCat</title>
-    <title tal:condition="not:conversion_enabled">Translate an XLIFF file with MateCat</title>
+    <title tal:condition="true:conversion_enabled">Translate a file with Matecat</title>
+    <title tal:condition="not:conversion_enabled">Translate an XLIFF file with Matecat</title>
 
-    <meta name="description" content="Matecat is a free, web-based open source software that gives you more matches than any other CAT tool"/>
+    <meta name="description" content="Matecat allows you to get more matches than any other CAT tool."/>
     <meta name="viewport" content="width=device-width"/>
     <meta property="og:title" content="Translate a file with MateCat" />
     <meta property="og:description" content="Matecat is a free, web-based open source software that gives you more matches than any other CAT tool. Use it now!" />
@@ -35,22 +33,21 @@
 
 
     <link href="${basepath}public/css/common.css?build=${build_number}" rel="stylesheet" type="text/css"/>
-
     <link rel="stylesheet" href="${basepath}public/css/upload.css?build=${build_number}"/>
     <link rel="stylesheet" href="${basepath}public/css/popup.css?build=${build_number}"/>
     <link rel="stylesheet" href="${basepath}public/js/lib/colorbox/colorbox.css?build=${build_number}"/>
-    
+
     <!-- Shim to make HTML5 elements usable in older Internet Explorer versions -->
     <!--[if lt IE 9]>
-    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
-    
+    <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+
     <!--        <script src="${basepath}public/js/lib/jquery-1.11.0.min.js"></script>
         <script src="${basepath}public/js/lib/jquery-migrate-1.2.1.js"></script> -->
     <script src="${basepath}public/js/lib/jquery.js"></script>
     <script src="${basepath}public/js/common.js"></script>
     <script src="${basepath}public/js/upload.js"></script>
-    <script src="${basepath}public/js/login.js"></script>
+    <script src="${basepath}public/js/lib/jquery.tablesorter-fork-mottie.js"></script>
+    <!-- script src="${basepath}public/js/login.js"></script -->
     <script type='text/javascript' src="${basepath}public/js/logout.js?build=${build_number}"></script>
 
     <script type="text/javascript">
@@ -62,7 +59,8 @@
             conversionEnabled: ${conversion_enabled},
             analysisEnabled: ${volume_analysis_enabled},
             maxFileSize: ${maxFileSize},
-            maxNumberFiles: ${maxNumberFiles}
+            maxNumberFiles: ${maxNumberFiles},
+            ownerIsMe: true
         };
     </script>
 
@@ -111,44 +109,49 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
             <li><a href="/release-notes/">Release Notes</a></li>
             <li><a href="/support">Support</a></li>
         </ul>
-
     </div>
     <div class="cl"></div>
-
 </header>
 <div class="hide learnmore">
     <span class="open-more pull-right">✕</span>
+
     <h1>Post-editing and outsourcing made easy</h1>
-    
+
     <div class="col-3">
-        <h2>State-of-the-art MT <br />and public TMs</h2>
-        <p>Translation and post-editing <br />in 80 languages with zero <br/>start-up time</p>
-        <img src="/public/img/box1.jpg" />
+        <h2>State-of-the-art MT <br/>and public TMs</h2>
+
+        <p>Translation and post-editing <br/>in 80 languages with zero <br/>start-up time</p>
+        <img src="/public/img/box1.jpg"/>
 
     </div>
     <div class="col-3">
-        <h2>Outsource your extra <br/>projects in one click</h2>
+        <h2>Outsource your extra projects <br/>in one click</h2>
+
         <p>Take on any projects,<br/>even in languages<br/>that you do not cover yourself</p>
-        <img src="/public/img/box2.jpg" />
+        <img src="/public/img/box2.jpg"/>
 
     </div>
     <div class="col-3">
-        <h2>Independent technology <br />and no vendor lock-in</h2>
-        <p>Open source and open access means <br />you keep control of your data <br />and the technology you use</p>
-        <img src="/public/img/box3.jpg" />
+        <h2><strong>It’s free</strong><br/>and always will be</h2>
+
+        <p>A free CAT tool for LSPs, <br/> professional translators <br/>and customers</p>
+        <img src="/public/img/box3.jpg"/>
 
     </div>
     <div class="bottom-lm">
-        <p><a href="http://www.matecat.com/features" target="_blank"><strong>Discover all MateCat features</strong></a> or <a class="open-more">close this window</a></p>
+        <p><a href="https://www.matecat.com/features" target="_blank">Learn more about MateCat</a></p>
     </div>
 
 </div>
+<div class="cat-appear-div hide">
+    <img src="../public/img/about.png"/>
+</div>
 <div class="wrapper-claim">
-<h1 tal:condition="true:conversion_enabled">Translate your files</h1>
+    <h1 tal:condition="true:conversion_enabled">Translate your files</h1>
 
-<h1 tal:condition="not:conversion_enabled">Translate an XLIFF file</h1>
+    <h1 tal:condition="not:conversion_enabled">Translate an XLIFF file</h1>
 
-<h2 class="payoff">MateCat gives you more matches than any other CAT tool. <a class="open-more">Learn more.</a></h2>
+    <h2 class="payoff">MateCat gives you more matches than any other CAT tool. <a class="open-more">Learn more</a>.</h2>
 </div>
 <div class="wrapper-upload">
 
@@ -210,6 +213,51 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
     <br/>
     <a href="#" id="multiple-link">Multiple languages?</a>
 </div>
+
+<div class="translate-box subject">
+    <h2>Subject</h2>
+    <select name="subject" id="subject">
+        <option value="general">General</option>
+        <option disabled="disabled" value="----">----</option>
+        <option value="accounting_finance">Accounting &amp; Finance</option>
+        <option value="aerospace_defence">Aerospace / Defence</option>
+        <option value="architecture">Architecture</option>
+        <option value="art">Art</option>
+        <option value="automotive">Automotive</option>
+        <option value="certificates_diplomas_licences_cv_etc">Certificates, diplomas, licences, cv's, etc</option>
+        <option value="chemical">Chemical</option>
+        <option value="civil_engineering_construction">Civil Engineering / Construction</option>
+        <option value="corporate_social_responsibility">Corporate Social Responsibility</option>
+        <option value="cosmetics">Cosmetics</option>
+        <option value="culinary">Culinary</option>
+        <option value="electronics_electrical_engineering">Electronics /  Electrical Engineering</option>
+        <option value="energy_power_generation_oil_gas">Energy / Power generation / Oil &amp; Gas</option>
+        <option value="environment">Environment</option>
+        <option value="fashion">Fashion</option>
+        <option value="games_viseogames_casino">Games / Video Games / Casino</option>
+        <option value="general_business_commerce">General Business / Commerce</option>
+        <option value="history_archaeology">History / Archaeology</option>
+        <option value="information_technology">Information Technology</option>
+        <option value="insurance">Insurance</option>
+        <option value="internet_e-commerce">Internet, e-commerce</option>
+        <option value="legal_documents_contracts">Legal documents / Contracts</option>
+        <option value="literary_translations">Literary Translations</option>
+        <option value="marketing_advertising_material_public_relations">Marketing &amp; Advertising material / Public Relations</option>
+        <option value="matematics_and_physics">Mathematics and Physics</option>
+        <option value="mechanical_manufacturing">Mechanical / Manufacturing</option>
+        <option value="media_journalism_publishing">Media / Journalism / Publishing</option>
+        <option value="medical_pharmaceutical">Medical / Pharmaceutical</option>
+        <option value="music">Music</option>
+        <option value="private_correspondence_letters">Private Correspondence, Letters</option>
+        <option value="religion">Religion</option>
+        <option value="science">Science</option>
+        <option value="shipping_sailing_maritime">Shipping / Sailing / Maritime</option>
+        <option value="social_science">Social Science</option>
+        <option value="telecommunications">Telecommunications</option>
+        <option value="travel_tourism">Travel &amp; Tourism</option>
+    </select>
+</div>
+
 <div class="cl"></div>
 <a href="#" class="more">Options</a>
 
@@ -237,19 +285,28 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
 
     <div class="translate-box">
         <span class="btn btn-success fileinput-button" id="create_private_tm_btn">
-<!--            <i class="icon-plus icon-white"></i> -->
-            <span>Create</span>
+ <span>Create</span>
         </span>
     </div>
 
-    <div class="translate-box translate-checkbox">
+    <div class="translate-box">
+        <h2 class="resource" style="display:none;"><span class="numResources">4</span> Resources selected</h2>
+        <a href="#" class="memory-mgmt">
+            <span class="text">Manage language resources</span>
+            <span class="tm-added">(<span class="num"></span> TM added)</span>
+        </a>
+
+    </div>
+    <div class="cl"></div>
+
+    <!-- div class="translate-checkbox">
         <span class="tms-checkbox" id="disable_tms_checkbox">
             <label class="tms-label" for="disable_tms_engine">Disable TM, Concordance and Glossary</label>
             <input type="checkbox" value="true" id="disable_tms_engine" name="no_tms_engine"/>
         </span>
-    </div>
+    </div -->
 
-    <img id='get-new-tm-spinner' alt="Loading..." src="public/img/loader.gif" class="tm-button"/>
+    <!-- img id='get-new-tm-spinner' alt="Loading..." src="public/img/loader.gif" class="tm-button"/ -->
 
 </div>
 
@@ -708,6 +765,7 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
 
 </script>
 
+<!-- <script src="//ajax.googleapis.com/ajax/libs/jqueryui/1.11.1/jquery-ui.min.js"></script> -->
 <script src="${basepath}public/js/lib/jquery-ui-1.8.20.custom.min.js"></script>
 
 <!-- The Templates plugin is included to render the upload/download listings -->
@@ -744,6 +802,8 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
 <script src="${basepath}public/js/lib/jquery.colorbox-min.js"></script>
 
 <script src="${basepath}public/js/new-project.js"></script>
+<script src="${basepath}public/js/tm.js"></script>
+
 <!--
         <div style='display:none'>
             <div id='inline_content' style='padding:10px; background:#fff;'></div>
@@ -758,19 +818,18 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
 
         <h1>Supported file formats</h1>
 
-
         <div class="popup-box">
             <div tal:define="supported php:array()" tal:repeat="supported supported_file_types_array" class="format-box">
                 <h3 tal:content="repeat/supported/key"></h3>
                 <ul tal:define="ext php:array()" tal:repeat="ext supported">
                     <li tal:define="item php:array()" tal:repeat="item ext" tal:content="item">
-
                     </li>
                 </ul>
             </div>
         </div>
     </div>
 </div>
+
 
 <div class="modal popup-languages" data-type="view">
     <div class="popup-outer"></div>
@@ -805,6 +864,7 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
     <div class="wrapper">
 
         <nav>
+
             <ul>
                 <tal:block tal:condition="php: !empty(logged_user)">
                     <li><a tal:attributes="href string:${basepath}manage/?new=1">Manage</a></li>
@@ -815,8 +875,7 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
                 </tal:block>
 
                 <li><a tal:attributes="href string:${basepath}api/docs">API</a></li>
-
-                <li><a href="/terms" target="_blank">Terms</a></li>
+                <li><a href="https://www.matecat.com/terms" target="_blank">Terms</a></li>
 
             </ul>
 
@@ -837,69 +896,270 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
     </div>
 </footer>
 
-<div class="iepopup nobrowser">
-    
-    <a href="${basepath}" class="logoblack"></a>
 
-    <div class="titleie">
-        <h1>Welcome to MateCat!</h1>
-        <h2>There are 2 options for you</h2>
-    </div>
-    <div class="col-2 pull-left col-a">
-        <h3>1 - Use the tool by visiting MateCat.com from your desktop</h3>
-        <p>MateCat works great with the following browsers</p>
-        <ul>
-            <li><a href="https://www.google.com/intl/en/chrome/browser/" target="_blank"><img src="/public/img/chrome.jpg" width="140" /><br />
-    Chrome</a></li>
+<div class="popup-outer outer-tm hide"></div>
+<!-- inizio popup tm mgmt -->
+<div class="popup-tm hide" data-type="view">
 
-            <li><a href="http://appldnld.apple.com/Safari5/041-5487.20120509.INU8B/SafariSetup.exe"><img src="/public/img/safari.jpg" width="140" /><br />
-    Safari</a></li>
-        </ul>
-    </div>
-    <div class="col-2 pull-left col-b">
-        <h3>2 - Learn more about MateCat</h3>
-        <p><a class="button-learn" href="http://www.matecat.com/features">Visit the website</a></p>
+    <h1>
+        <a href="#" class="btn-ok right">Close</a>
+        Language Resources
+    </h1>
+
+    <div class="popup-box">
+
+        <div class="mgmt-panel mgmt-panel-tm">
+            <div class="mgmt-wrapper">
+                <div class="mgmt-table-tm">
+                    <!-- <ul id="myTab" class="nav nav-tabs hide" role="tablist">
+             <li class="active"><a href="#tm">TM Management</a></li>
+             <li class=""><a href="#glossaries">Glossaries</a></li>
+
+           </ul>-->
+                    <div class="mgmt-container" id="list-search">
+
+                        <p class="error-message" style="display: none;"> Error: the errmsg will appear here... </p>
+                        <p class="warning-message" style="display: none;"><span></span></p>
+
+                        <div class="block pull-right ">
+
+                            <a class="btn-ok clear add-tm">Add a TM</a>
+
+                        </div>
+                        <h3 class="pull-left">Active TM</h3>
+
+                        <table class="mgmt-tm scroll" id="activetm">
+                            <thead>
+                            <tr>
+                                <th class="privatekey">Private Key</th>
+                                <th class="owner">Owner</th>
+                                <th class="description">Description</th>
+                                <th class="check">Lookup</th>
+                                <th class="check">Update</th>
+                                <th class="action">Action</th>
+                            </tr>
+                            </thead>
+
+                            <tbody class="list sortable">
+
+                            <tr class="new hide">
+
+                                <td class="privatekey">
+                                    <input class="mgmt-input pull-left" type="text" id="new-tm-key" placeholder="Have a Key? Add it here*" />
+                                    <span class="text-or pull-left">or</span>
+                                    <a class="btn-ok pull-right">Create</a>
+                                    <span class="text pull-left text-req">*required</span>
+                                </td>
+                                <td class="description">
+                                    <textarea rows="3" cols="50" class="mgmt-input" id="new-tm-description" placeholder="Enter a short description" ></textarea>
+                                </td>
+                                <td class="fileupload" colspan="2">
+                                    <input id="new-tm-read" type="checkbox" name="r" class="r" value="1" checked=""/>
+                                    <input id="new-tm-write" type="checkbox" name="w" class="w" value="1" checked=""/>
+                                </td>
+                                <td class="action">
+                                    <a class="pull-left btn-ok uploadtm disabled">
+                                        <span class="text uploadkey">Confirm</span>
+                                    </a>
+
+                                    <a class="pull-right btn-grey canceladdtmx">
+                                        <span class="text">Cancel</span>
+                                    </a>
+                                    <div class="error">
+                                        <span class="tm-error-key"></span>
+                                        <span class="tm-error-grants"></span>
+                                    </div>
+
+                                    <div id="uploadCallback"></div>
+                                </td>
+                            </tr>
+<!--
+                            <tr class="uploadpanel hide">
+                                <td class="uploadfile" colspan="6">
+                                    <div class="standard">
+                                        <label class="fileupload">Select a TMX </label>
+
+                                        <form class="add-TM-Form" action="/" method="post">
+                                            <input type="hidden" name="action" value="loadTMX"/>
+                                            <input type="hidden" name="exec" value="newTM"/>
+                                            <input type="hidden" name="tm_key" value=""/>
+                                            <input type="hidden" name="name" value=""/>
+                                            <input type="submit" id="addtm-add-submit" style="display: none"/>
+                                            <input type="file" name="tmx_file"/>
+                                        </form>
+
+                                        <a class="pull-right btn-grey addtmxfile">
+                                            <span class="text">Upload TMX</span>
+                                        </a>
+                                    </div>
+                                    <div class="uploadprogress">
+                                        <span class="progress">
+                                            <span class="inner"></span>
+                                        </span>
+                                        <span class="msgText">Uploading</span>
+                                    </div>
+
+                                </td>
+                            </tr>
+-->
+                            </tbody>
+                        </table>
+
+                        <h3 class="pull-left">Inactive TM</h3>
+
+                        <tal:block tal:condition="php: empty(logged_user)">
+                            <p><a id='sign-in-o' tal:attributes="data-oauth authURL" href="#" >Login in to see your keys!</a></p>
+                        </tal:block>
+
+                        <tal:block tal:condition="php: !empty(logged_user)">
+
+                        <div style="float: right">
+                            <label for="filterInactive">Search: </label>
+                            <input id="filterInactive" type="text"/>
+                        </div>
+
+                        <table class="mgmt-tm mgmt-tm-nested" id="inactivetm">
+                            <thead>
+                            <tr>
+                                <th class="fake" style="display: none"></th>
+                                <th class="privatekey">Private Key</th>
+                                <th class="owner">Owner</th>
+                                <th class="description">Description</th>
+                                <th class="check">Lookup</th>
+                                <th class="check">Update</th>
+                                <th class="action">Action</th>
+                            </tr>
+                            </thead>
+                            <tbody class="list">
+
+                            <tal:block tal:repeat="key user_keys">
+                                <tr class="mine" data-tm="1" data-glos="1">
+                                    <td class="dragrow"><div class="status">&nbsp;</div></td>
+                                    <td class="privatekey">${key/key}</td>
+                                    <td class="owner">You</td>
+                                    <td class="description"><div class="edit-desc">${key/name}</div></td>
+                                    <td class="lookup text-center check"><input type="checkbox" /></td>
+                                    <td class="update text-center check"><input type="checkbox" /></td>
+                                    <td class="action">
+                                        <a class="btn-grey pull-left addtmx">
+                                            <span class="text">Import TMX</span>
+                                        </a>
+                                        <a class="btn-grey pull-left downloadtmx">
+                                            <span class="text">Download</span>
+                                        </a>
+                                    </td>
+                                </tr>
+                            </tal:block>
+
+                            </tbody>
+                        </table>
+                        </tal:block>
+
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- fine tm mgmt -->
+        <!-- inizio glossary mgmt -->
+
     </div>
 </div>
+<!-- fine popup glossary mgmt -->
+
+<div class="mgmt-popup-outer closeClickingOutside popup-outer"></div>
+
+<div id="uploadCallback"></div>
+
 <script src="${basepath}public/js/lib/snapengage.js"></script>
+
 <script type="text/javascript">
-$(".open-more").click(function() {
+
+    // script per il funzionamento del dropdown menu del profilo utente
+
+    function DropDown( el ) {
+        this.dd = el;
+        this.initEvents();
+    }
+    DropDown.prototype = {
+        initEvents: function () {
+            var obj = this;
+
+            obj.dd.on( 'click', function ( event ) {
+                $( this ).toggleClass( 'active' );
+                event.stopPropagation();
+            } );
+        }
+    }
+
+    $( ".open-more" ).click( function () {
         $( ".cat-appear-div" ).hide();
-        $( ".payoff .open-more").html($('.payoff .open-more').text() == '' ? 'Learn more.' : '');
-        $( ".learnmore" ).slideToggle( "700", function() {
+        $( ".learnmore" ).slideToggle( "700", function () {
+
             // Animation complete.
-        });
-    });
+        } );
+    } );
+    $( ".cat-appear" ).mouseenter( function () {
+        $( '.cat-appear-div' ).show();
+        $( '.cat-appear-div' ).animate( {
+            top: '+48'
+        }, 350 );
+    } );
+    $( ".cat-appear" ).mouseleave( function () {
+        $( '.cat-appear-div' ).animate( {
+            top: '-48'
+        }, 200 );
+    } );
+
+    $( ".memory-mgmt" ).on("click", function ( e ) {
+        e.preventDefault();
+        UI.openLanguageResourcesPanel();
+    } );
+
+    $( function () {
+
+        var dd = new DropDown( $( '#dd' ) );
+
+        $( document ).click( function () {
+            // all dropdowns
+            $( '.wrapper-dropdown-5' ).removeClass( 'active' );
+        } );
+
+    } );
+
+
 </script>
 <!-- Google Code per il tag di remarketing -->
 
 <script type="text/javascript">
-<!-- /* <![CDATA[*/ -->
-var google_conversion_id = 961218439;
-var google_custom_params = window.google_tag_params;
-var google_remarketing_only = true;
-<!-- /*]]> */ -->
+    <!-- /* <![CDATA[*/ -->
+    var google_conversion_id = 961218439;
+    var google_custom_params = window.google_tag_params;
+    var google_remarketing_only = true;
+    <!-- /*]]> */ -->
 </script>
 <script type="text/javascript" src="//www.googleadservices.com/pagead/conversion.js">
 </script>
 <noscript>
-<div style="display:inline;">
-<img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/961218439/?value=0&amp;guid=ON&amp;script=0"/>
-</div>
+    <div style="display:inline;">
+        <img height="1" width="1" style="border-style:none;" alt="" src="//googleads.g.doubleclick.net/pagead/viewthroughconversion/961218439/?value=0&amp;guid=ON&amp;script=0"/>
+    </div>
 </noscript>
 
 <!-- Google Analytics -->
 <script>
-  (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
-  (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
-  m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
-  })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+        (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+            m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
 
-  ga('create', 'UA-28800161-1', 'auto');
-  ga('send', 'pageview');
+    ga('create', 'UA-28800161-1', 'auto');
+    ga('send', 'pageview');
 
 </script>
+
 <img height='1' width='1' border='0' src='https://www.clickmeter.com/conversion.aspx?id=5540EC432C934E0FB1EADDBA3A58E8EA&val=0.00&param=empty&com=0.00'/>
+
 </body>
 
 </html>
