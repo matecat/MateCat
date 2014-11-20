@@ -4,7 +4,7 @@ $(document).ready(function() {
 		//prevent double click
 		if($(this).hasClass('disabled')) return false;
 		//show spinner
-		$('#get-new-tm-spinner').show();
+		//$('#get-new-tm-spinner').show();
 		//disable button
 		$(this).addClass('disabled');
 		$(this).attr('disabled','');
@@ -22,7 +22,7 @@ $(document).ready(function() {
 				$('#private-tm-pass').val(data.pass);
 				$('#create_private_tm_btn').attr('data-key', data.key);
 				//hide spinner
-				$('#get-new-tm-spinner').hide();
+				//$('#get-new-tm-spinner').hide();
 				return false;
 			})
 		} else {
