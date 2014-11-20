@@ -848,6 +848,7 @@ $.extend(UI, {
         UI.closeTMPanel();
         UI.clearTMPanel();
         if(!APP.isCattool) {
+            UI.updateTMAddedMsg();
             return false;
         }
 

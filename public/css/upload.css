@@ -353,15 +353,21 @@ button.ui-button::-moz-focus-inner { border: 0; padding: 0; } /* reset extra pad
 
 
 .memory-mgmt {
-padding: 8px 10px 1px 10px;
-margin-top: 7px;
-/*
-color: #333;
-font-weight: bold;
-*/
-width: 255px;
+    padding: 8px 10px 1px 10px;
+    margin-top: 7px;
+    /*
+    color: #333;
+    font-weight: bold;
+    */
+    width: 300px;
+    text-decoration: none;
 }
-
+.memory-mgmt .text {
+    text-decoration: underline;
+}
+.memory-mgmt .tm-added {
+    display: none;
+}
 .memory-mgmt:hover {
 /* background:#F7F7F7; */
 }
