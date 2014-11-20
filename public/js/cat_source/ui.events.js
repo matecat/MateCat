@@ -184,24 +184,45 @@ $.extend(UI, {
             if($(this).hasClass('disabled')) return false;
             $(this).addClass('disabled');
             $(this).attr('disabled','');
-            $.get("https://mymemory.translated.net/api/createranduser",function(data){
-                //parse to appropriate type
-                //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
-                if(typeof data == 'string'){
-                    data=jQuery.parseJSON(data);
+//            $.get("https://mymemory.translated.net/api/createranduser",function(data){
+//                //parse to appropriate type
+//                //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
+//                if(typeof data == 'string'){
+//                    data=jQuery.parseJSON(data);
+//                }
+//                //put value into input field
+//                $('#addtm-tr-key').val(data.key);
+//                $('#addtm-create-key').removeClass('disabled');
+//                setTimeout(function() {
+//                    UI.checkAddTMEnable();
+//                    UI.checkManageTMEnable();
+//                }, 100);
+////                $('#private-tm-user').val(data.id);
+////                $('#private-tm-pass').val(data.pass);
+////                $('#create_private_tm_btn').attr('data-key', data.key);
+//                return false;
+//            });
+
+            //call API
+            APP.doRequest({
+                data: {
+                    action: 'createRandUser'
+                },
+                success: function(d) {
+                    //put value into input field
+                    $('#addtm-tr-key').val( d.data.key);
+                    $('#addtm-create-key').removeClass('disabled');
+                    setTimeout(function() {
+                        UI.checkAddTMEnable();
+                        UI.checkManageTMEnable();
+                    }, 100);
+                    //$('#private-tm-user').val(data.id);
+                    //$('#private-tm-pass').val(data.pass);
+                    //$('#create_private_tm_btn').attr('data-key', data.key);
+                    return false;
                 }
-                //put value into input field
-                $('#addtm-tr-key').val(data.key);
-                $('#addtm-create-key').removeClass('disabled');
-                setTimeout(function() {
-                    UI.checkAddTMEnable();
-                    UI.checkManageTMEnable();
-                }, 100);
-//                $('#private-tm-user').val(data.id);
-//                $('#private-tm-pass').val(data.pass);
-//                $('#create_private_tm_btn').attr('data-key', data.key);
-                return false;
             });
+
         }).on('change', '#addtm-tr-read, #addtm-tr-write', function() {
             if(UI.checkTMgrants($('.addtm-tr'))) {
                 $('.addtm-tr .error-message').hide();

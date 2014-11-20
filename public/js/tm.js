@@ -39,20 +39,38 @@ $.extend(UI, {
             if($(this).hasClass('disabled')) return false;
             $(this).addClass('disabled');
             $(this).attr('disabled','');
-            $.get("https://mymemory.translated.net/api/createranduser", function(data){
-                //parse to appropriate type
-                //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
-                if(typeof data == 'string'){
-                    data=jQuery.parseJSON(data);
+            //$.get("https://mymemory.translated.net/api/createranduser", function(data){
+            //    //parse to appropriate type
+            //    //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
+            //    if(typeof data == 'string'){
+            //        data=jQuery.parseJSON(data);
+            //    }
+            //    //put value into input field
+            //    $('#new-tm-key').val(data.key);
+            //    $('.mgmt-tm .new .privatekey .btn-ok').removeClass('disabled');
+            //    $('#activetm tr.new').removeClass('badkey');
+            //    $('#activetm tr.new .error .tm-error-key').text('').hide();
+            //    UI.checkTMAddAvailability();
+            //    return false;
+            //});
+
+            //call API
+            APP.doRequest( {
+                data: {
+                    action: 'createRandUser'
+                },
+                success: function ( d ) {
+                    data = d.data;
+                    //put value into input field
+                    $('#new-tm-key').val(data.key);
+                    $('.mgmt-tm .new .privatekey .btn-ok').removeClass('disabled');
+                    $('#activetm tr.new').removeClass('badkey');
+                    $('#activetm tr.new .error .tm-error-key').text('').hide();
+                    UI.checkTMAddAvailability();
+                    return false;
                 }
-                //put value into input field
-                $('#new-tm-key').val(data.key);
-                $('.mgmt-tm .new .privatekey .btn-ok').removeClass('disabled');
-                $('#activetm tr.new').removeClass('badkey');
-                $('#activetm tr.new .error .tm-error-key').text('').hide();
-                UI.checkTMAddAvailability();
-                return false;
-            });
+            } );
+
         });
         // script per fare apparire e scomparire la riga con l'upload della tmx
 
