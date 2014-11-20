@@ -834,6 +834,12 @@ form.add-TM-Form {
 	    width: 330px;
 	    border: 1px solid #222;
 }
+
+.popup-confirm .btn-ok {
+float: left;
+margin-left: 10px;
+}
+
 .popup .outer:hover
 {
 	background: url(../img/bg_login_button_hover.gif) 0 0 repeat;
@@ -1049,7 +1055,7 @@ margin:0 auto; overflow:hidden; width:100%;
 
 .mgmt-tm .privatekey {
 	/*width:19%!important;*/
-	width:194px!important;
+	width:188px!important;
 }
 
 .mgmt-tm .description {
@@ -1423,9 +1429,7 @@ margin-bottom: 10px;
 #activetm td {background: #e4f2fb;}
 #activetm tr.ownergroup td {background: #f4f4f4;
 color: #999;}
-#activetm tr.ownergroup td.dragrow {background-image: none!important;
-background-color: #f4f4f4!important;
-cursor: auto;}
+#activetm tr.ownergroup td.dragrow .status {border: none; cursor:auto;}
 #activetm tr.uploadfile td {background: #fff;}
 #inactivetm td {background: #f3f3f3;}
 .mgmt-tm th, .mgmt-gl th {
@@ -1640,7 +1644,6 @@ border: 1px solid #999;
 
 .description .mgmt-input {
 width: 350px;
-margin-left: 6px;
 }
 
 
@@ -2243,6 +2246,43 @@ body.side-popup {
     overflow: hidden !important;
 }
 
+@font-face {
+    font-family: Calibri;
+    src: local(Calibri),
+    url('calibri-webfont.woff') format('woff'),
+    url('calibri-webfont.ttf') format('truetype'),
+    url('calibri-webfont.eot'),
+    url('calibri-webfont.eot?#iefix') format('embedded-opentype');
+}
+
+@font-face {
+    font-family: Calibri;
+    font-weight: bold;
+    src: local('Calibri Bold'),
+    url('calibri_bold-webfont.woff') format('woff'),
+    url('calibri_bold-webfont.ttf') format('truetype'),
+    url('calibri_bold-webfont.eot'),
+    url('calibri_bold-webfont.eot?#iefix') format('embedded-opentype');
+}
+
+#menu-site li {
+    display: inline-block;
+    padding-top: 10px;
+}
+
+#menu-site li a {
+    color: #fff;
+    text-decoration: none;
+    -webkit-font-smoothing: antialiased;
+    line-height: 22px;
+    padding: 10px 15px;
+    font-weight: 200;
+    font-size: 18px;
+}
+
+#menu-site li a:hover {
+    color: #3aa9dd;
+}
 /*body {min-width:980px;position:relative;text-align:center;margin:0;padding:75px 0 120px 0;font-family:calibri, Arial, Helvetica, sans-serif;-webkit-transition: all  100ms ease-in; -moz-transition: all  100ms ease-in; }*/
 /*
 body.cattool{background: url(../img/loading.gif) 47.5% 241px no-repeat;background-size: 20px 20px;}

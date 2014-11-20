@@ -152,8 +152,16 @@ UI = {
                                     '</span>');
         }
     },
-
-
+    updateTMAddedMsg: function () {
+        var numTM = $('#activetm tr.mine').length;
+        if(numTM) {
+            $('.tm-added .num').text(numTM);
+            $('.tm-added').show();
+        } else {
+            $('.tm-added').hide();
+            $('.tm-added .num').text('');
+        }
+    },
 
 
 }
