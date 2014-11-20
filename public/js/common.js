@@ -47,7 +47,17 @@ APP = {
         }).on('click', '.popup-outer.closeClickingOutside', function(e) {
 			e.preventDefault();
 			$(this).parents('.modal').find('.x-popup').click();
-        })
+        });
+
+        $('#sign-in').click(function(e){
+            e.preventDefault();
+            APP.googole_popup($(this).data('oauth'));
+        });
+
+        $('#sign-in-o').click(function(e){
+            $('#sign-in' ).trigger('click');
+        });
+
     },
     alert: function(options) {
         //FIXME
@@ -67,6 +77,14 @@ APP = {
 			title: 'Warning',
 			content: content
 		});
+    },
+    googole_popup: function ( url ) {
+        //var rid=$('#rid').text();
+        //url=url+'&rid='+rid;
+        var newWindow = window.open( url, 'name', 'height=600,width=900' );
+        if ( window.focus ) {
+            newWindow.focus();
+        }
     },
     confirm: function(options) {
         this.waitingConfirm = true;
