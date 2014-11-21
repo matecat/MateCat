@@ -59,20 +59,31 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                 //to the cache cart because of taking advantage of the cart cache invalidation on project split/merge
                 Log::doLog( "Project Not Found in Cache. Call API url for STATUS: " . $project_url_api );
 
-                $ch = curl_init();
 
-                curl_setopt($ch, CURLOPT_URL, $project_url_api);
-                curl_setopt($ch, CURLOPT_HEADER, 0);
-                curl_setopt($ch, CURLOPT_USERAGENT, "user agent");
-                curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-                curl_setopt( $ch, CURLOPT_TIMEOUT, 5 ); //we can wait max 5 seconds
-                //if it's an HTTPS call
-                curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, true);
-                curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 2);
+                $options = array(
+                        CURLOPT_HEADER => false,
+                        CURLOPT_RETURNTRANSFER => true,
+                        CURLOPT_HEADER => 0,
+                        CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                        CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
+                        CURLOPT_SSL_VERIFYPEER => true,
+                        CURLOPT_SSL_VERIFYHOST => 2
+                );
 
-		        $raw_volAnalysis = curl_exec( $ch );
+                //prepare handlers for curl to quote service
+                $mh = new MultiCurlHandler();
+                $resourceHash = $mh->createResource( $project_url_api, $options );
+                $mh->multiExec();
 
-                curl_close($ch);
+                if( $mh->hasError( $resourceHash ) ){
+                    Log::doLog( $mh->getError( $resourceHash ) );
+                }
+
+                $raw_volAnalysis = $mh->getSingleContent( $resourceHash );
+
+                $mh->multiCurlCloseAll();
+
+//                Log::doLog( "CURL RETRIEVED STATUS: " . $raw_volAnalysis );
 
                 $itemCart                = new Shop_ItemHTSQuoteJob();
                 $itemCart[ 'id' ]        = $project_url_api;
@@ -101,7 +112,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                 CURLOPT_RETURNTRANSFER => true,
                 CURLOPT_HEADER => 0,
                 CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
-                CURLOPT_CONNECTTIMEOUT => 2,
+                CURLOPT_CONNECTTIMEOUT => 10,
 		        CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2
         );
@@ -158,6 +169,10 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
         //fetch contents and store in cache if there are
         foreach( $res as $jpid => $quote ){
+
+            if( $mh->hasError( $jpid ) ){
+                Log::doLog( $mh->getError( $jpid ) );
+            }
 
             /*
              * Quotes are plain text line feed separated fields in the form:
