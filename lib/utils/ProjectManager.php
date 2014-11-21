@@ -404,7 +404,7 @@ class ProjectManager {
         }
 
         //check if the files language equals the source language. If not, set an error message.
-        if ( !$this->projectStructure[ 'skip_lang_validation' ] ) {
+        if ( 0 && !$this->projectStructure[ 'skip_lang_validation' ] ) {
             $this->validateFilesLanguages();
         }
 

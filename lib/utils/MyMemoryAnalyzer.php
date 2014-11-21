@@ -41,7 +41,7 @@ class MyMemoryAnalyzer extends Engine {
 
 
         /**
-         * @var $arrayIterator ArrayIterator
+         * @var $segs_array ArrayObject
          */
         $arrayIterator = $segs_array->getIterator();
 
