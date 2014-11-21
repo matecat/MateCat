@@ -686,6 +686,7 @@ UI = {
 				UI.failedConnection(0, 'getSegments');
 			},
 			success: function(d) {
+                if($.cookie('tmpanel-open') == '1') UI.openLanguageResourcesPanel();
 				UI.getSegments_success(d, options);
 			}
 		});
@@ -2659,7 +2660,7 @@ UI = {
 			}
 
 			if (operation == 'setContribution' && this.code != '-10' && UI.savingMemoryErrorNotificationEnabled) { // is not a password error
-				APP.alert({msg: "Error in saving the translation memory.<br />Try to save again the segment.<br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
+				APP.alert({msg: "Error in saving the segment to the translation memory.<br />Try refreshing the page and click on Translated again.<br />Contact <b>support@matecat.com</b> if this happens often."});
 			}
 
 			if (this.code == '-10') {
