@@ -1892,12 +1892,7 @@ section.modified.editor .status
 .r{border-right:9px solid #dc2e34}
 .f{border-right:9px solid #dddedf}
 
-#new-tm-read {
-    margin-left: -3px;
-}
-#new-tm-write {
-    margin-left: -8px;
-}
+
 /*joblist*/
 .joblist {	display:none;	background:#f3f3f3;	position:absolute;width:auto;min-width:200px;	z-index:100;	border:1px solid #000;	text-align:left;	padding:0;	top: 35px; 	text-shadow:none;	margin:5px 0 0 0px;margin-right: -1px;	color:#000;	font-size:14px;	-moz-box-shadow: 0 0 5px #888;-webkit-box-shadow: 0 0 5px #000;box-shadow: 0 0 5px #000;}
 .joblist .arrow-notification{margin:-7px 0 0 12px;background:url(../img/arrow-menucolor.png) 0 0 no-repeat;}

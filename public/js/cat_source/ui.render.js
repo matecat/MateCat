@@ -63,11 +63,11 @@ $.extend(UI, {
 		this.preCloseTagAutocomplete = false;
         this.hiddenTextEnabled = true;
         this.markSpacesEnabled = false;
-        console.log('options: ', options);
-        console.log('options.tagModesEnabled: ', options.tagModesEnabled);
-        console.log('1: ', this.tagModesEnabled);
+//        console.log('options: ', options);
+//        console.log('options.tagModesEnabled: ', options.tagModesEnabled);
+//        console.log('1: ', this.tagModesEnabled);
         this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
-        console.log('2: ', this.tagModesEnabled);
+//        console.log('2: ', this.tagModesEnabled);
 
         if(this.tagModesEnabled) {
             UI.body.addClass('tagModes');
@@ -93,7 +93,7 @@ $.extend(UI, {
 //		this.debug = Loader.detect('debug');
 //		this.checkTutorialNeed();
         this.findCommonPartInSegmentIds();
-        console.log(UI.commonPartInSegmentIds);
+//        console.log(UI.commonPartInSegmentIds);
 		UI.detectStartSegment(); 
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
 		UI.getSegments(options);
