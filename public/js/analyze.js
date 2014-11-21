@@ -777,7 +777,7 @@ $(document).ready(function() {
 	}
 	$('#sign-in').click(function(e) {
 		e.preventDefault();
-		gopopup($(e.target).data('oauth'));
+		APP.googole_popup($(e.target).data('oauth'));
 	});
 	UI.init();
 	UI.outsourceInit();

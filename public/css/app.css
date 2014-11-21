@@ -2654,7 +2654,7 @@ body.editing .grayed,body.virtualEditing .grayed{display:block;}
 {
     top: auto;
     bottom: 0px;
-    background: url(../img/end-job-marker.png) 0 0 no-repeat;
+    /*background: url(../img/end-job-marker.png) 0 0 no-repeat;*/
 }
 section:hover .sid{color:#6d6e71}		
 section.currSearchSegment .sid
