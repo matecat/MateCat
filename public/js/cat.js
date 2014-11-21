@@ -686,6 +686,7 @@ UI = {
 				UI.failedConnection(0, 'getSegments');
 			},
 			success: function(d) {
+                if($.cookie('tmpanel-open') == '1') UI.openLanguageResourcesPanel();
 				UI.getSegments_success(d, options);
 			}
 		});
@@ -2659,7 +2660,7 @@ UI = {
 			}
 
 			if (operation == 'setContribution' && this.code != '-10' && UI.savingMemoryErrorNotificationEnabled) { // is not a password error
-				APP.alert({msg: "Error in saving the translation memory.<br />Try to save again the segment.<br />If the solutions above does not resolve the issue, please stop the translation and report the problem to <b>support@matecat.com</b>"});
+				APP.alert({msg: "Error in saving the segment to the translation memory.<br />Try refreshing the page and click on Translated again.<br />Contact <b>support@matecat.com</b> if this happens often."});
 			}
 
 			if (this.code == '-10') {
@@ -3320,11 +3321,11 @@ $.extend(UI, {
 		this.preCloseTagAutocomplete = false;
         this.hiddenTextEnabled = true;
         this.markSpacesEnabled = false;
-        console.log('options: ', options);
-        console.log('options.tagModesEnabled: ', options.tagModesEnabled);
-        console.log('1: ', this.tagModesEnabled);
+//        console.log('options: ', options);
+//        console.log('options.tagModesEnabled: ', options.tagModesEnabled);
+//        console.log('1: ', this.tagModesEnabled);
         this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
-        console.log('2: ', this.tagModesEnabled);
+//        console.log('2: ', this.tagModesEnabled);
 
         if(this.tagModesEnabled) {
             UI.body.addClass('tagModes');
@@ -3350,7 +3351,7 @@ $.extend(UI, {
 //		this.debug = Loader.detect('debug');
 //		this.checkTutorialNeed();
         this.findCommonPartInSegmentIds();
-        console.log(UI.commonPartInSegmentIds);
+//        console.log(UI.commonPartInSegmentIds);
 		UI.detectStartSegment(); 
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
 		UI.getSegments(options);
@@ -8302,6 +8303,7 @@ $.extend(UI, {
         $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
         $("#SnapABug_Button").hide();
         $(".outer-tm").show();
+        $.cookie('tmpanel-open', 1);
     },
     uploadTM: function(form, action_url, div_id) {
         console.log('div_id: ', div_id);
@@ -8911,6 +8913,7 @@ $.extend(UI, {
         $("#SnapABug_Button").show();
         $(".outer-tm").hide();
         $('body').removeClass('side-popup');
+        $.cookie('tmpanel-open', 0);
     },
     filterInactiveTM: function (txt) {
         $('#inactivetm tbody tr').removeClass('found');
