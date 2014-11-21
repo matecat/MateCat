@@ -223,7 +223,19 @@ class createProjectController extends ajaxController {
         $this->result = $projectStructure[ 'result' ];
 
         if ( !empty( $this->result[ 'errors' ] ) ) {
-            setcookie( "upload_session", "", time() - 10000 );
+
+
+            //FIXME THIS IS A WORKAROUND, AN WARNING LEVEL MESSAGE SHOULD BE RAISED INSTEAD OF ERROR
+            $delete_session = true;
+            foreach( $this->result[ 'errors' ] as $err ){
+                if( $err['code'] == -17 ){
+                    $delete_session = false;
+                }
+            }
+
+            if( $delete_session ){
+                setcookie( "upload_session", "", time() - 10000 );
+            }
         }
 
     }
