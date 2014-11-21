@@ -8030,14 +8030,12 @@ $.extend(UI, {
                 },
                 success: function ( d ) {
                     data = d.data;
-
                     //put value into input field
                     $('#new-tm-key').val(data.key);
                     $('.mgmt-tm .new .privatekey .btn-ok').removeClass('disabled');
                     $('#activetm tr.new').removeClass('badkey');
                     $('#activetm tr.new .error .tm-error-key').text('').hide();
                     UI.checkTMAddAvailability();
-
                     return false;
                 }
             } );
