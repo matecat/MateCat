@@ -190,4 +190,16 @@ class MultiCurlHandler {
         return $res;
     }
 
+    /**
+     * Check for error in curl resource by passing it's unique index
+     *
+     * @param string $tokenHash
+     *
+     * @return bool
+     */
+    public function hasError( $tokenHash ){
+        $err_str = curl_error( $this->curl_handlers[ $tokenHash ] );
+        return !empty( $err_str );
+    }
+
 } 
