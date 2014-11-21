@@ -8009,7 +8009,7 @@ $.extend(UI, {
             //prevent double click
             if($(this).hasClass('disabled')) return false;
             $(this).addClass('disabled');
-            $(this).attr('disabled','');
+            $('#new-tm-key').attr('disabled','disabled');
             //$.get("https://mymemory.translated.net/api/createranduser", function(data){
             //    //parse to appropriate type
             //    //this is to avoid a curious bug in Chrome, that causes 'data' to be already an Object and not a json string
@@ -8034,7 +8034,7 @@ $.extend(UI, {
                     data = d.data;
                     //put value into input field
                     $('#new-tm-key').val(data.key);
-                    $('.mgmt-tm .new .privatekey .btn-ok').removeClass('disabled');
+//                    $('.mgmt-tm .new .privatekey .btn-ok').removeClass('disabled');
                     $('#activetm tr.new').removeClass('badkey');
                     $('#activetm tr.new .error .tm-error-key').text('').hide();
                     UI.checkTMAddAvailability();
