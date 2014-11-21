@@ -3047,7 +3047,7 @@ UI = {
         var a = config.first_job_segment;
         var b = config.last_job_segment;
         for(x=0;x<a.length;x++){
-            //console.log(a[x] + ' - ' + b[x]);
+            console.log(a[x] + ' - ' + b[x]);
             if(a[x] != b[x]) {
                 n = x;
                 break;
@@ -3320,9 +3320,9 @@ $.extend(UI, {
 		this.preCloseTagAutocomplete = false;
         this.hiddenTextEnabled = true;
         this.markSpacesEnabled = false;
-        //console.log('options: ', options);
-        //console.log('options.tagModesEnabled: ', options.tagModesEnabled);
-        //console.log('1: ', this.tagModesEnabled);
+        console.log('options: ', options);
+        console.log('options.tagModesEnabled: ', options.tagModesEnabled);
+        console.log('1: ', this.tagModesEnabled);
         this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
         console.log('2: ', this.tagModesEnabled);
 
@@ -3350,7 +3350,7 @@ $.extend(UI, {
 //		this.debug = Loader.detect('debug');
 //		this.checkTutorialNeed();
         this.findCommonPartInSegmentIds();
-        //console.log(UI.commonPartInSegmentIds);
+        console.log(UI.commonPartInSegmentIds);
 		UI.detectStartSegment(); 
 		options.openCurrentSegmentAfter = ((!seg) && (!this.firstLoad)) ? true : false;
 		UI.getSegments(options);
@@ -5268,7 +5268,7 @@ $.extend(UI, {
 		this.highlightEditarea();
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
-//console.log('translation 1: ', translation);
+console.log('translation 1: ', translation);
 		if (typeof (decode) == "undefined") {
 			decode = false;
 		}
@@ -5287,10 +5287,10 @@ $.extend(UI, {
 			this.saveInUndoStack('copysuggestion');
 //			translation = UI.decodePlaceholdersToText(translation, true);
 //			translation = UI.decodePlaceholdersToText(htmlEncode(translation), true);
-//console.log('translation 3: ', translation);
+console.log('translation 3: ', translation);
 			if(!which) translation = UI.encodeSpacesAsPlaceholders(translation, true);
 //			translation = UI.encodeSpacesAsPlaceholders(translation);
-//console.log('translation 4: ', translation);
+console.log('translation 4: ', translation);
 			$(editarea).html(translation).addClass('fromSuggestion');
 			this.saveInUndoStack('copysuggestion');
 			$('.percentuage', segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
@@ -5499,11 +5499,11 @@ $.extend(UI, {
 			UI.setDeleteSuggestion(segment);
 			UI.lockTags();
 			if (editareaLength === 0) {
-				//console.log('translation AA: ', translation);
+				console.log('translation AA: ', translation);
 //				translation = UI.decodePlaceholdersToText(translation, true, segment_id, 'translation');
 				translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
-				//console.log($('#' + segment_id + ' .matches .graysmall'));
-				//console.log('translation BB: ', translation);
+				console.log($('#' + segment_id + ' .matches .graysmall'));
+				console.log('translation BB: ', translation);
 				UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
 				if (UI.body.hasClass('searchActive'))
 					UI.addWarningToSearchDisplay();
@@ -6008,8 +6008,8 @@ $.extend(UI, {
 
     // TAG MISMATCH
 	markTagMismatch: function(d) {
-        //console.log('markTagMismatch: ', d);
-        //console.log('warnings: ', $.parseJSON(d.warnings).length);
+        console.log('markTagMismatch: ', d);
+        console.log('warnings: ', $.parseJSON(d.warnings).length);
         if($.parseJSON(d.warnings).length) $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
 //        $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
 //        this.setExtendedTagMode($('#segment-' + d.id_segment));
@@ -6035,6 +6035,7 @@ $.extend(UI, {
             $('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
             $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
         } else {
+            console.log('222');
             $('#segment-' + d.id_segment + ' .editarea .locked' ).filter(function() {
                 return $(this).text() === d.tag_mismatch.order[0];
             }).addClass('order-error');
@@ -8030,14 +8031,12 @@ $.extend(UI, {
                 },
                 success: function ( d ) {
                     data = d.data;
-
                     //put value into input field
                     $('#new-tm-key').val(data.key);
                     $('.mgmt-tm .new .privatekey .btn-ok').removeClass('disabled');
                     $('#activetm tr.new').removeClass('badkey');
                     $('#activetm tr.new .error .tm-error-key').text('').hide();
                     UI.checkTMAddAvailability();
-
                     return false;
                 }
             } );

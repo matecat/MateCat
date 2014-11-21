@@ -755,6 +755,7 @@ width: 804px;
 }
 #activetm td.action .addtmx {
     display: block;
+    float: right !important;
 }
 #inactivetm td.action .addtmx {
     display: none;
@@ -1210,20 +1211,19 @@ body.cattool .mgmt-tm.mine thead,
 	margin-left: -6px;
 }
  .canceladdtmx.btn-grey {
-
-background:#f26522;
-
+    background:#f26522;
+    padding-top: 3px;
+    padding-bottom: 5px;
 }
 .popup-tm td.description .edit-desc {
     height: 18px;
     width: 350px;
-
-height: 18px;
-padding: 2px 5px;
-border-radius: 2px;
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
+    height: 18px;
+    padding: 2px 5px;
+    border-radius: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 .popup-tm tr.mine td.description .edit-desc[contenteditable='true'] {
     border: 1px solid #999;
@@ -1413,6 +1413,9 @@ width: 1042px;
 #inactivetm tbody,
 #inactivetm thead {
     display: block;
+}
+#inactivetm thead {
+    background: #6D6E71;
 }
 .mgmt-container .icon-search {
 margin-top: 2px;

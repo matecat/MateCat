@@ -836,7 +836,8 @@ form.add-TM-Form {
 }
 
 .popup-confirm .btn-ok {
-float: left;
+    /* TODO REVIEW  this rule breaks the popup button alignment in confirm change language after file conversion */
+/*float: left;*/
 margin-left: 10px;
 }
 
