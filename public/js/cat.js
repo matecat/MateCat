@@ -3323,7 +3323,7 @@ $.extend(UI, {
 //        console.log('options: ', options);
 //        console.log('options.tagModesEnabled: ', options.tagModesEnabled);
 //        console.log('1: ', this.tagModesEnabled);
-        this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
+        this.tagModesEnabled = false; //(typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
 //        console.log('2: ', this.tagModesEnabled);
 
         if(this.tagModesEnabled) {
