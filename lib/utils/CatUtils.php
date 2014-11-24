@@ -86,7 +86,7 @@ class CatUtils {
                             '100%'        => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 80
+                            'MT'          => 90
                     ),
                     "uk" => array(
                             'NO_MATCH'    => 100,
@@ -95,7 +95,7 @@ class CatUtils {
                             '100%'        => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 80
+                            'MT'          => 90
                     ),
                     "hi" => array(
                             'NO_MATCH'    => 100,
@@ -104,7 +104,7 @@ class CatUtils {
                             '100%'        => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 80
+                            'MT'          => 90
                     ),
                     "fi" => array(
                             'NO_MATCH'    => 100,
@@ -113,7 +113,7 @@ class CatUtils {
                             '100%'        => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 80
+                            'MT'          => 90
                     ),
                     "tr" => array(
                             'NO_MATCH'    => 100,
@@ -122,7 +122,7 @@ class CatUtils {
                             '100%'        => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 80
+                            'MT'          => 90
                     ),
                     "ru" => array(
                             'NO_MATCH'    => 100,
@@ -131,7 +131,7 @@ class CatUtils {
                             '100%'        => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 80
+                            'MT'          => 90
                     ),
                     "zh" => array(
                             'NO_MATCH'    => 100,
@@ -140,7 +140,7 @@ class CatUtils {
                             '100%'        => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 80
+                            'MT'          => 90
                     ),
                     "ar" => array(
                             'NO_MATCH'    => 100,
@@ -149,7 +149,7 @@ class CatUtils {
                             '100%'        => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 80
+                            'MT'          => 90
                     ),
                     "ko" => array(
                             'NO_MATCH'    => 100,
@@ -158,7 +158,7 @@ class CatUtils {
                             '100%'        => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 80
+                            'MT'          => 90
                     ),
                     "lt" => array(
                             'NO_MATCH'    => 100,
@@ -167,16 +167,16 @@ class CatUtils {
                             '100%'        => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 80
+                            'MT'          => 90
                     ),
-                    "jp" => array(
+                    "ja" => array(
                             'NO_MATCH'    => 100,
                             '50%-74%'     => 100,
                             '75%-99%'     => 60,
                             '100%'        => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 80
+                            'MT'          => 90
                     ),
                     "he" => array(
                             'NO_MATCH'    => 100,
@@ -185,7 +185,7 @@ class CatUtils {
                             '100%'        => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 80
+                            'MT'          => 90
                     ),
                     "sr" => array(
                             'NO_MATCH'    => 100,
@@ -194,7 +194,7 @@ class CatUtils {
                             '100%'        => 30,
                             'REPETITIONS' => 30,
                             'INTERNAL'    => 60,
-                            'MT'          => 80
+                            'MT'          => 90
                     )
             )
     );
