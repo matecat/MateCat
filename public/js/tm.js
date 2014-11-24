@@ -332,7 +332,7 @@ $.extend(UI, {
         $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
         $("#SnapABug_Button").hide();
         $(".outer-tm").show();
-        $.cookie('tmpanel-open', 1);
+        $.cookie('tmpanel-open', 1, { path: '/' });
     },
     uploadTM: function(form, action_url, div_id) {
         console.log('div_id: ', div_id);
@@ -942,7 +942,7 @@ $.extend(UI, {
         $("#SnapABug_Button").show();
         $(".outer-tm").hide();
         $('body').removeClass('side-popup');
-        $.cookie('tmpanel-open', 0);
+        $.cookie('tmpanel-open', 0, { path: '/' });
     },
     filterInactiveTM: function (txt) {
         $('#inactivetm tbody tr').removeClass('found');

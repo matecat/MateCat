@@ -288,8 +288,6 @@ $.extend(UI, {
 
     // TAG MISMATCH
 	markTagMismatch: function(d) {
-        console.log('markTagMismatch: ', d);
-        console.log('warnings: ', $.parseJSON(d.warnings).length);
         if($.parseJSON(d.warnings).length) $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
 //        $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
 //        this.setExtendedTagMode($('#segment-' + d.id_segment));
@@ -315,7 +313,6 @@ $.extend(UI, {
             $('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
             $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
         } else {
-            console.log('222');
             $('#segment-' + d.id_segment + ' .editarea .locked' ).filter(function() {
                 return $(this).text() === d.tag_mismatch.order[0];
             }).addClass('order-error');

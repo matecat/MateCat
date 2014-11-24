@@ -894,7 +894,6 @@ $.extend(UI, {
 
         }).on('keydown', '.editor .editarea', 'return', function(e) {
             e.preventDefault();
-            console.log('222222');
 /*
             UI.defaultBRmanagement = false;
             if(!$('br', UI.editarea).length) {

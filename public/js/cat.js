@@ -3048,7 +3048,6 @@ UI = {
         var a = config.first_job_segment;
         var b = config.last_job_segment;
         for(x=0;x<a.length;x++){
-            console.log(a[x] + ' - ' + b[x]);
             if(a[x] != b[x]) {
                 n = x;
                 break;
@@ -4266,7 +4265,6 @@ $.extend(UI, {
 
         }).on('keydown', '.editor .editarea', 'return', function(e) {
             e.preventDefault();
-            console.log('222222');
 /*
             UI.defaultBRmanagement = false;
             if(!$('br', UI.editarea).length) {
@@ -6009,8 +6007,6 @@ $.extend(UI, {
 
     // TAG MISMATCH
 	markTagMismatch: function(d) {
-        console.log('markTagMismatch: ', d);
-        console.log('warnings: ', $.parseJSON(d.warnings).length);
         if($.parseJSON(d.warnings).length) $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
 //        $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
 //        this.setExtendedTagMode($('#segment-' + d.id_segment));
@@ -6036,7 +6032,6 @@ $.extend(UI, {
             $('#segment-' + d.id_segment + ' span.locked.temp').addClass('mismatch').removeClass('temp');
             $('#segment-' + d.id_segment + ' span.locked.mismatch-old').removeClass('mismatch-old');
         } else {
-            console.log('222');
             $('#segment-' + d.id_segment + ' .editarea .locked' ).filter(function() {
                 return $(this).text() === d.tag_mismatch.order[0];
             }).addClass('order-error');
@@ -8303,7 +8298,7 @@ $.extend(UI, {
         $(".popup-tm").addClass('open').show("slide", { direction: "right" }, 400);
         $("#SnapABug_Button").hide();
         $(".outer-tm").show();
-        $.cookie('tmpanel-open', 1);
+        $.cookie('tmpanel-open', 1, { path: '/' });
     },
     uploadTM: function(form, action_url, div_id) {
         console.log('div_id: ', div_id);
@@ -8913,7 +8908,7 @@ $.extend(UI, {
         $("#SnapABug_Button").show();
         $(".outer-tm").hide();
         $('body').removeClass('side-popup');
-        $.cookie('tmpanel-open', 0);
+        $.cookie('tmpanel-open', 0, { path: '/' });
     },
     filterInactiveTM: function (txt) {
         $('#inactivetm tbody tr').removeClass('found');
