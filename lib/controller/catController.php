@@ -473,7 +473,7 @@ class catController extends viewController {
             $this->template->firstSegmentOfFiles = $this->firstSegmentOfFiles;
             $this->template->fileCounter         = $this->fileCounter;
         }
-
+        $this->template->page = 'cattool';
         $this->template->jid         = $this->jid;
         $this->template->password    = $this->password;
         $this->template->cid         = $this->cid;
