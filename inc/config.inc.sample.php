@@ -225,7 +225,7 @@ class INIT {
 			}
 		}
 
-		self::$ENABLED_BROWSERS = array('applewebkit','chrome', 'safari', 'firefox');
+		self::$ENABLED_BROWSERS = array('applewebkit','chrome', 'safari'); //, 'firefox');
 
         // sometimes the browser declare to be Mozilla but does not provide a valid Name (e.g. Safari).
         // This occurs especially in mobile environment. As an example, when you try to open a link from within
