@@ -131,11 +131,6 @@ class newProjectController extends viewController {
         $intDir = INIT::$UPLOAD_REPOSITORY . '/' . $this->guid . '/';
         if ( !is_dir( $intDir ) ) {
             mkdir( $intDir, 0775, true );
-
-            // ANTONIO: le due istruzioni seguenti non funzionano
-            // ma sarebbe opportuno che i permessi fossero quelli indicati nelle istruzioni in oggetto
-            //chown($intDir, "matecat");
-            //chgrp($intDir, "matecat");
         }
 
         // check if user is logged and generate authURL for logging in
@@ -165,12 +160,6 @@ class newProjectController extends viewController {
 
         }
 
-    }
-
-    public function sortByOrder( $a, $b ) {
-        return strcmp( $a[ "name" ], $b[ "name" ] );
-
-        //    	return $b['name'] - $a['name'];
     }
 
     public function array_sort_by_column( &$arr, $col, $dir = SORT_ASC ) {

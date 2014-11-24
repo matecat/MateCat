@@ -3,5 +3,4 @@
 
 See the complete installation guide here:
 
-http://docs.matecat.com/general-information/installation-guide
-
+http://www.matecat.com/support/
