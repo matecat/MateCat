@@ -545,7 +545,7 @@ h2.payoff
 
 
 /*UI buttons*/
-.fileinput-button {  font-size: 1.1em;overflow: hidden;  margin: 0 auto;  width:200px;  cursor:pointer;padding:8px 0 6px 0;background: #09beec url(../img/sprite.png) -4px -516px no-repeat;color:#fff;font-weight:bold;margin-bottom:30px !important}
+.fileinput-button {  font-size: 1.1em;overflow: hidden;  margin: 0 auto;  width:200px;  cursor:pointer;padding:12px 0px 4px 0;background: #09beec url(../img/sprite.png) -4px -516px no-repeat;color:#fff;font-weight:bold;margin-bottom:30px !important}
 .upload-footer .fileinput-button 
 	{
 	position: relative;
@@ -1012,7 +1012,7 @@ footer a:hover{text-decoration:none}
 		background-image: none;
 width: 70px;
 margin-left: -30px;
-padding: 5px 0 4px 0;
+padding: 8px 0 1px 0;
 margin-top: 7px;
 	}    
 
