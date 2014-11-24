@@ -449,7 +449,7 @@
                                 <h3 class="pull-left">Inactive TM</h3>
 
                                 <tal:block tal:condition="php: empty(logged_user)">
-                                    <p><a id='sign-in-o' tal:attributes="data-oauth authURL" href="#" >Login to Manage your TMs</a></p>
+                                    <p><a id='sign-in-o' class="btn btn-grey pull-left" tal:attributes="data-oauth authURL" href="#" >Login to Manage your TMs</a></p>
                                 </tal:block>
 
                                 <tal:block tal:condition="php: !empty(logged_user)">
