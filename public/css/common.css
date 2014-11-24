@@ -2322,7 +2322,7 @@ body.side-popup {
 
 @media only screen and (min-device-width : 320px) and (max-device-width : 480px) { 
 header, .wrapper-claim, .wrapper-upload, footer, #SnapABug_Button {display: none;}
-.nobrowser {display: block;}
+.nobrowser {display: block!important;}
 .iepopup.nobrowser {width:100%;}
 .iepopup .col-2 {
 width: 90%;
