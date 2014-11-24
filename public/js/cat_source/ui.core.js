@@ -3048,7 +3048,6 @@ UI = {
         var a = config.first_job_segment;
         var b = config.last_job_segment;
         for(x=0;x<a.length;x++){
-            console.log(a[x] + ' - ' + b[x]);
             if(a[x] != b[x]) {
                 n = x;
                 break;

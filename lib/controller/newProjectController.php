@@ -283,6 +283,7 @@ class newProjectController extends viewController {
 //            }
 //        }
 
+        $this->template->page = 'home';
         $this->template->source_languages = $source_languages;
         $this->template->target_languages = $target_languages;
 
