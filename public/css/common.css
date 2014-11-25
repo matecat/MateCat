@@ -2058,7 +2058,7 @@ p.surveynotice{
 	height:inherit;	max-height:inherit;min-height:inherit;overflow-y:auto;
 }
 
-.error-message, .warning-message {
+.tm-error-message, .tm-warning-message {
 background: #d65757 url(../img/error-symbol.png) 10px center no-repeat;
 color: #fff;
 padding: 10px 0;
@@ -2073,13 +2073,13 @@ text-indent: 40px;
 display: none;
 }
 
-.addtm-tr .error-message, .addtm-tr .warning-message, .mgmt-panel .error-message, .mgmt-panel .warning-message {
+.addtm-tr .tm-error-message, .addtm-tr .tm-warning-message, .mgmt-panel .tm-error-message, .mgmt-panel .tm-warning-message {
 	font-size:14px;
 	display: block;
 	}
 
 
-.warning-message {
+.warning-message, .tm-warning-message {
 background: #FFFA8B !important;
 border-color: #6D6E71;
 padding: 10px 0 10px 1%;
