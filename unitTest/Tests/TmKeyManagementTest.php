@@ -1925,5 +1925,18 @@ class Tests_TmKeyManagementTest extends Tests_AbstractTest {
 
     }
 
+    public function testJsonSerialization(){
+
+        $client_json = '[{"key":"0000123MNO","name":"My MNO","r":1,"w":0}]';
+        $result_arr = array_map( array( 'TmKeyManagement_TmKeyManagement', 'getTmKeyStructure' ), json_decode( $client_json ) );
+
+        $this->assertNotContains( 'u0000readable_chars',json_encode($result_arr) );
+
+        $this->assertNotContains( 'u0000readable_chars', json_encode( $result_arr[0]->toArray() ) );
+
+
+
+    }
+
 }
  
