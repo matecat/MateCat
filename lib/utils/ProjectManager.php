@@ -660,7 +660,7 @@ class ProjectManager {
 
                 Log::doLog( $projectStructure[ 'private_tm_key' ] );
 
-                $projectStructure[ 'private_tm_key' ] = $projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
+//                $projectStructure[ 'private_tm_key' ] = $projectStructure[ 'private_tm_key' ][ 0 ][ 'key' ];
             }
 
             $projectStructure[ 'tm_keys' ] = json_encode( $tm_key );

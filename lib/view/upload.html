@@ -103,11 +103,11 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
     <div class="wrapper">
         <a href="${basepath}" class="logo"></a>
         <ul class="pull-right" id="menu-site">
-            <li><a href="/features/">Features</a></li>
-            <li><a href="/about/">About</a></li>
-            <li><a href="/open-source/">Open source</a></li>
-            <li><a href="/release-notes/">Release Notes</a></li>
-            <li><a href="/support">Support</a></li>
+            <li><a href="https://www.matecat.com/features/">Features</a></li>
+            <li><a href="https://www.matecat.com/about/">About</a></li>
+            <li><a href="https://www.matecat.com/open-source/">Open source</a></li>
+            <li><a href="https://www.matecat.com/release-notes/">Release Notes</a></li>
+            <li><a href="https://www.matecat.com/support">Support</a></li>
         </ul>
     </div>
     <div class="cl"></div>
@@ -562,12 +562,12 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
             {%=locale.fileupload.errors[file.error] || file.error%}
         </td>
         {% } else if (!i) { %}
-        <td>
+        <td colspan="2">
             <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                 <div class="bar" style="width:0%;"></div>
             </div>
         </td>
-        <td class="start">{% if (!o.options.autoUpload) { %}
+        <td class="start hide">{% if (!o.options.autoUpload) { %}
             <button class="btn btn-primary">
                 <i class="icon-upload icon-white"></i>
                 <span>{%=locale.fileupload.start%}</span>
