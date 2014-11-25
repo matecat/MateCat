@@ -1039,7 +1039,10 @@ font-size: 18px;
 
 #sign-in-o {
 padding: 10px 10px 5px;
-margin: 0;
+margin: 0 auto;
+width: 200px;
+text-align: center;
+float: none!important;
 }
 
 .mgmt-panel-tm .btn-ok, .mgmt-panel-gl .btn-ok {
