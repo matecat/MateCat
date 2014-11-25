@@ -562,12 +562,12 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
             {%=locale.fileupload.errors[file.error] || file.error%}
         </td>
         {% } else if (!i) { %}
-        <td>
+        <td colspan="2">
             <div class="progress progress-success progress-striped active" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
                 <div class="bar" style="width:0%;"></div>
             </div>
         </td>
-        <td class="start">{% if (!o.options.autoUpload) { %}
+        <td class="start hide">{% if (!o.options.autoUpload) { %}
             <button class="btn btn-primary">
                 <i class="icon-upload icon-white"></i>
                 <span>{%=locale.fileupload.start%}</span>
