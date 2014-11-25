@@ -143,15 +143,13 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
     </div>
 
 </div>
-<div class="cat-appear-div hide">
-    <img src="../public/img/about.png"/>
-</div>
+
 <div class="wrapper-claim">
     <h1 tal:condition="true:conversion_enabled">Translate your files</h1>
 
     <h1 tal:condition="not:conversion_enabled">Translate an XLIFF file</h1>
 
-    <h2 class="payoff">MateCat gives you more matches than any other CAT tool. <a class="open-more">Learn more</a>.</h2>
+    <h2 class="payoff">MateCat gives you more matches than any other CAT tool. <span class="hide-payoff"><a class="open-more">Learn more</a>.</span></h2>
 </div>
 <div class="wrapper-upload">
 
@@ -949,23 +947,17 @@ window._fbq.push(['track', 'PixelInitialized', {}]);
     }
 
     $( ".open-more" ).click( function () {
-        $( ".cat-appear-div" ).hide();
+        $(".hide-payoff").hide();
         $( ".learnmore" ).slideToggle( "700", function () {
-
             // Animation complete.
         } );
     } );
-    $( ".cat-appear" ).mouseenter( function () {
-        $( '.cat-appear-div' ).show();
-        $( '.cat-appear-div' ).animate( {
-            top: '+48'
-        }, 350 );
+    $( ".learnmore .open-more" ).click( function () {
+        $(".hide-payoff").show();
+       
     } );
-    $( ".cat-appear" ).mouseleave( function () {
-        $( '.cat-appear-div' ).animate( {
-            top: '-48'
-        }, 200 );
-    } );
+
+    
 
     $( ".memory-mgmt" ).on("click", function ( e ) {
         e.preventDefault();
