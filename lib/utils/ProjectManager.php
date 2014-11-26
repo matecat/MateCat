@@ -188,6 +188,13 @@ class ProjectManager {
                     $mkDao->createList( $memoryKeysToBeInserted );
                 } catch( Exception $e ){
                     Log::doLog( $e->getMessage() );
+
+                    # Here we handle the error, displaying HTML, logging, ...
+                    $output = "<pre>\n";
+                    $output .= $e->getMessage() . "\n\t";
+                    $output .= "</pre>";
+                    Utils::sendErrMailReport( $output );
+
                 }
 
             }
