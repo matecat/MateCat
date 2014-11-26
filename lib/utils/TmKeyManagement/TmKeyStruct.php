@@ -150,7 +150,7 @@ class TmKeyManagement_TmKeyStruct extends stdClass {
      * @return array
      */
     public function toArray() {
-        return (array)$this;
+        return json_decode( json_encode( $this ), true );
     }
 
     /**
