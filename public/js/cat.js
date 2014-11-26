@@ -3320,10 +3320,10 @@ $.extend(UI, {
 		this.preCloseTagAutocomplete = false;
         this.hiddenTextEnabled = true;
         this.markSpacesEnabled = false;
-//        console.log('options: ', options);
+         console.log('options: ', options);
 //        console.log('options.tagModesEnabled: ', options.tagModesEnabled);
 //        console.log('1: ', this.tagModesEnabled);
-        this.tagModesEnabled = false; //(typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
+        this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
 //        console.log('2: ', this.tagModesEnabled);
 
         if(this.tagModesEnabled) {
@@ -8574,8 +8574,8 @@ $.extend(UI, {
         $('.mgmt-tm tr.new .addtmxfile').show();
     },
     clearTMPanel: function () {
-        $('.mgmt-container .error-message').hide();
-        $('.mgmt-container .warning-message').hide();
+        $('.mgmt-container .tm-error-message').hide();
+        $('.mgmt-container .tm-warning-message').hide();
         $('#activetm .edit-desc').removeAttr('contenteditable');
         $('#activetm td.uploadfile').remove();
         $('#activetm td.action .addtmx').removeClass('disabled');
