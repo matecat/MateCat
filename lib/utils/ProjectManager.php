@@ -184,8 +184,12 @@ class ProjectManager {
                     }
 
                 }
+                try {
+                    $mkDao->createList( $memoryKeysToBeInserted );
+                } catch( Exception $e ){
+                    Log::doLog( $e->getMessage() );
+                }
 
-                $mkDao->createList( $memoryKeysToBeInserted );
             }
 
 
