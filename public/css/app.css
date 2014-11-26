@@ -1039,7 +1039,10 @@ font-size: 18px;
 
 #sign-in-o {
 padding: 10px 10px 5px;
-margin: 0;
+margin: 0 auto;
+width: 200px;
+text-align: center;
+float: none!important;
 }
 
 .mgmt-panel-tm .btn-ok, .mgmt-panel-gl .btn-ok {
@@ -1915,12 +1918,14 @@ section .graysmall mark
 }
 section mark.searchMarker
 {
-	background: #9ef5f5;
+    background: yellow;
+/*	background: #9ef5f5; */
 }
 section mark.searchMarker.currSearchItem,
 section.currSearchSegment mark.searchMarker
 {
-	background: #00c1e6;
+    background: #F7D315;
+/*	background: #00c1e6; */
 }
 
 .offline {padding:0;}

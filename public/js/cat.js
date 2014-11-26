@@ -3061,7 +3061,16 @@ UI = {
     },
     shortenId: function(id) {
         return id.replace(UI.commonPartInSegmentIds, '<span class="implicit">' + UI.commonPartInSegmentIds + '</span>');
+    },
+    isCJK: function () {
+        var l = config.target_rfc;
+        if( (l=='zh-CN') || (l=='zh-TW') || (l=='ja-JP') || (l=='ko-KR') ) {
+            return true;
+        } else {
+            return false;
+        }
     }
+
 
 };
 
@@ -3320,7 +3329,7 @@ $.extend(UI, {
 		this.preCloseTagAutocomplete = false;
         this.hiddenTextEnabled = true;
         this.markSpacesEnabled = false;
-         console.log('options: ', options);
+//        console.log('options: ', options);
 //        console.log('options.tagModesEnabled: ', options.tagModesEnabled);
 //        console.log('1: ', this.tagModesEnabled);
         this.tagModesEnabled = (typeof options.tagModesEnabled != 'undefined')? options.tagModesEnabled : true;
@@ -4316,6 +4325,15 @@ $.extend(UI, {
 					UI.checkAutocompleteTags();
 				}
 			}, 50);
+            if (!UI.body.hasClass('searchActive')) {
+                console.log('vediamo: ', e.which);
+                if(UI.isCJK && ( (e.which == '60') || (e.which == '62') ) ) {
+                } else {
+                    setTimeout(function() {
+                        UI.lockTags(UI.editarea);
+                    }, 10);
+                }
+            }
 		}).on('keydown', '.editor .editarea', function(e) {
 //			console.log('keydown: ', UI.editarea.html());
 /*
@@ -4610,10 +4628,12 @@ $.extend(UI, {
 			if (UI.droppingInEditarea) {
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
 			}
+/*
 			if (!UI.body.hasClass('searchActive'))
 				setTimeout(function() {
 					UI.lockTags(UI.editarea);
 				}, 10);
+*/
 			UI.registerQACheck();
 		}).on('input', '.editor .cc-search .input', function() {
 			UI.markTagsInSearch($(this));
@@ -8531,9 +8551,9 @@ $.extend(UI, {
                 '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="action">' +
-                '        <a class="btn-grey pull-left disabletm">' +
-                '            <span class="text stopuse">Stop Use</span>' +
-                '        </a>' +
+//                '        <a class="btn-grey pull-left disabletm">' +
+//                '            <span class="text stopuse">Stop Use</span>' +
+//                '        </a>' +
                 '        <a class="btn-grey pull-left addtmx">' +
                 '            <span class="text addtmxbtn">Import TMX</span>' +
                 '        </a>' +
@@ -8563,6 +8583,9 @@ $.extend(UI, {
     },
     clearTMUploadPanel: function () {
         $('#new-tm-key, #new-tm-description').val('');
+        $('#new-tm-key').removeAttr('disabled');
+        $('.mgmt-tm tr.new .privatekey .btn-ok').removeClass('disabled');
+
         $('#new-tm-read, #new-tm-write').prop('checked', true);
     },
     clearAddTMRow: function() {
@@ -8746,6 +8769,11 @@ $.extend(UI, {
                     } else {
                         if(d.completed) {
                             if(existing) {
+                                if(APP.isAnonymousUser()) {
+                                    console.log('anonimo');
+                                } else {
+                                    console.log('loggato');
+                                }
                                 var tr = $(TRcaller).parents('tr.mine');
                                 $(tr).find('.addtmx').removeClass('disabled');
                                 UI.pulseTMadded(tr);

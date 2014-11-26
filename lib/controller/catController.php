@@ -531,7 +531,7 @@ class catController extends viewController {
 
         //check if cjk
         if ( array_key_exists( $target_code_no_country, CatUtils::$cjk ) ) {
-            $this->template->taglockEnabled = 0;
+//            $this->template->taglockEnabled = 0;
         }
 
         /*
