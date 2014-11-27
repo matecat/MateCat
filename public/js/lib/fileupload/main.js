@@ -158,6 +158,11 @@ UI = {
         var numTM = $('#activetm tr.mine').length;
         if(numTM) {
             $('.tm-added .num').text(numTM);
+            if(numTM > 1) {
+                $('.tm-added .msg').text(' TMs added');
+            } else {
+                $('.tm-added .msg').text(' TM added');
+            }
             $('.tm-added').show();
         } else {
             $('.tm-added').hide();

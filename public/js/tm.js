@@ -565,9 +565,9 @@ $.extend(UI, {
                 '    <td class="lookup check text-center"><input type="checkbox"' + ((r)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="update check text-center"><input type="checkbox"' + ((w)? ' checked="checked"' : '') + ' /></td>' +
                 '    <td class="action">' +
-                '        <a class="btn-grey pull-left disabletm">' +
-                '            <span class="text stopuse">Stop Use</span>' +
-                '        </a>' +
+//                '        <a class="btn-grey pull-left disabletm">' +
+//                '            <span class="text stopuse">Stop Use</span>' +
+//                '        </a>' +
                 '        <a class="btn-grey pull-left addtmx">' +
                 '            <span class="text addtmxbtn">Import TMX</span>' +
                 '        </a>' +
@@ -597,6 +597,9 @@ $.extend(UI, {
     },
     clearTMUploadPanel: function () {
         $('#new-tm-key, #new-tm-description').val('');
+        $('#new-tm-key').removeAttr('disabled');
+        $('.mgmt-tm tr.new .privatekey .btn-ok').removeClass('disabled');
+
         $('#new-tm-read, #new-tm-write').prop('checked', true);
     },
     clearAddTMRow: function() {
@@ -780,6 +783,11 @@ $.extend(UI, {
                     } else {
                         if(d.completed) {
                             if(existing) {
+                                if(APP.isAnonymousUser()) {
+                                    console.log('anonimo');
+                                } else {
+                                    console.log('loggato');
+                                }
                                 var tr = $(TRcaller).parents('tr.mine');
                                 $(tr).find('.addtmx').removeClass('disabled');
                                 UI.pulseTMadded(tr);
