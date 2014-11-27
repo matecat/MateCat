@@ -3053,6 +3053,11 @@ UI = {
                 break;
             }
         }
+
+        if( typeof n === 'undefined' ) {
+            n = a.length -1;
+        }
+
 //        console.log('n: ' + x);
 //        console.log(a.substring(0,n));
 //        var coso = a.substring(0,n);
