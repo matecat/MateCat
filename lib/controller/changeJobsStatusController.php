@@ -21,7 +21,7 @@ class changeJobsStatusController extends ajaxController {
             'res'           => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'id'            => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
             'project'       => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
-            'jpassword'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
+            'password'     => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'new_status'    => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'status'        => array( 'filter' => FILTER_SANITIZE_STRING, 'flags' => FILTER_FLAG_STRIP_LOW | FILTER_FLAG_STRIP_HIGH ),
             'page'          => array( 'filter' => FILTER_SANITIZE_NUMBER_INT ),
@@ -40,6 +40,25 @@ class changeJobsStatusController extends ajaxController {
 
 
         $this->res_type   = $__postInput[ 'res' ];
+
+        if( $this->res_id != 'prj' ){
+
+            if ( isset( $_POST[ 'password' ] ) ) {
+                $this->proj_password = $__postInput[ 'password' ];
+            } else {
+                $this->proj_password = null;
+            };
+
+        } else {
+
+            if ( isset( $_POST[ 'password' ] ) ) {
+                $this->job_password = $__postInput[ 'password' ];
+            } else {
+                $this->job_password = null;
+            };
+
+        }
+
         $this->res_id     = $__postInput[ 'id' ];
         $this->new_status = $__postInput[ 'new_status' ];
         $this->undo       = $__postInput[ 'undo' ];
@@ -61,12 +80,6 @@ class changeJobsStatusController extends ajaxController {
             $this->project_id = $__postInput[ 'project' ];
         } else {
             $this->project_id = false;
-        };
-
-        if ( isset( $_POST[ 'jpassword' ] ) ) {
-            $this->job_password = $__postInput[ 'jpassword' ];
-        } else {
-            $this->job_password = null;
         };
 
         if ( isset( $_POST[ 'only_if' ] ) ) {
@@ -114,8 +127,23 @@ class changeJobsStatusController extends ajaxController {
 
     public function doAction() {
 
+        if( empty( $_SESSION['cid'] ) ){
+            //user not logged
+            throw new Exception( "User Not Logged." );
+        }
+
         if ( $this->res_type == "prj" ) {
+
             $old_status = getProjectJobData( $this->res_id );
+
+            $passCheck = new AjaxPasswordCheck();
+            $access    = $passCheck->grantProjectAccess( $old_status, $this->proj_password ) ;
+
+            if ( !$access ) {
+                $this->result[ 'errors' ] = array( -10, "Wrong Password. Access denied" );
+                return -1;
+            }
+
             $strOld     = '';
             foreach ( $old_status as $item ) {
                 $strOld .= $item[ 'id' ] . ':' . $item[ 'status_owner' ] . ',';
@@ -124,7 +152,7 @@ class changeJobsStatusController extends ajaxController {
 
             $this->result[ 'old_status' ] = $strOld;
 
-            $st = updateJobsStatus( $this->res_type, $this->res_id, $this->new_status, $this->only_if, $this->undo );
+            updateJobsStatus( $this->res_type, $this->res_id, $this->new_status, $this->only_if, $this->undo );
 
             $start = ( ( $this->page - 1 ) * $this->step ) + $this->step - 1;
 
@@ -138,9 +166,19 @@ class changeJobsStatusController extends ajaxController {
             $this->result[ 'newItem' ] = $projects;
             $this->result[ 'page' ]    = $this->page;
             $this->result[ 'pnumber' ] = $projnum[ 0 ][ 'c' ];
+
         } else {
 
-            $st = updateJobsStatus( $this->res_type, $this->res_id, $this->new_status, $this->only_if, $this->undo, $this->job_password );
+            $job_data = getJobData( (int)$this->res_id, $this->job_password );
+
+            $pCheck = new AjaxPasswordCheck();
+            //check for Password correctness
+            if ( empty( $job_data ) || !$pCheck->grantJobAccessByJobData( $job_data, $this->job_password ) ) {
+                $this->result[ 'error' ][ ] = array( "code" => -10, "message" => "wrong password" );
+                return -1;
+            }
+
+            updateJobsStatus( $this->res_type, $this->res_id, $this->new_status, $this->only_if, $this->undo, $this->job_password );
 
             $this->result[ 'code' ]   = 1;
             $this->result[ 'data' ]   = "OK";

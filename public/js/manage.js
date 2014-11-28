@@ -229,7 +229,7 @@ UI = {
 						new_status: new_status,
 						res: 		res,
 						id:			id,
-						jpassword:  password,
+						password:   password,
 		                page:		UI.page,
 		                step:		UI.pageStep,
 		                undo:		1
@@ -290,21 +290,21 @@ UI = {
 		console.log('ob: ', ob);
         if(typeof only_if == 'undefined') only_if = 0;
 
-        if(res=='job') {
-        	UI.lastJobStatus = ob.data('status');
-        	id        = ob.data('jid');
-        	jpassword = ob.data('password');
-		console.log('jpassword: ', jpassword);
+        if ( res == 'job' ) {
+            UI.lastJobStatus = ob.data( 'status' );
+            id = ob.data( 'jid' );
+            password = ob.data( 'password' );
+            console.log( 'password: ', password );
 
-		} else {
-		    var arJobs = '';
-		    $("tr.row",ob).each(function(){
-		        arJobs += $(this).data('jid')+':'+$(this).data('status')+',';
-		    })
-		    arJobs = arJobs.substring(0, arJobs.length - 1);
-		    UI.lastJobStatus = arJobs;
-		    id = ob.data('pid');
-            jpassword = null;
+        } else {
+            var arJobs = '';
+            $( "tr.row", ob ).each( function () {
+                arJobs += $( this ).data( 'jid' ) + "-" + $( this ).data( 'password' ) + ':' + $( this ).data( 'status' ) + ',';
+            } );
+            arJobs = arJobs.substring( 0, arJobs.length - 1 );
+            UI.lastJobStatus = arJobs;
+            id = ob.data( 'pid' );
+            password = ob.data('password');
         }
 
         var d = {
@@ -312,7 +312,7 @@ UI = {
 				new_status: status,
 				res: 		res,
 				id:			id,
-                jpassword:  jpassword,
+                password:   password,
                 page:		UI.page,
                 step:		UI.pageStep,
                 only_if:	only_if,
@@ -332,7 +332,10 @@ UI = {
 					UI.changeJobsStatus_success(res,$(this),d,0);
 					UI.setPagination(d);
 				}
-			}
+			},
+            error: function(d){
+                document.location = '/';
+            }
 		});
     },
 
@@ -358,7 +361,8 @@ UI = {
 			if(undo) {
 				$.each(d.status.split(','), function() {
 					var s = this.split(':');
-					$('tr.row[data-jid='+s[0]+']').attr('data-status',s[1]);
+                    var job_info = s[0].split('-'); //123-abc534f001
+                    $( 'tr.row[data-jid=' + job_info[0] + ']' ).attr( 'data-status', s[1] );
 				})
 			} else {
 				id = ob.data('pid');
@@ -376,8 +380,12 @@ UI = {
 		}
 		if(!undo) {
 			var token =  new Date();
-			var resData = (res == 'prj')? 'pid':'jid';
-			$('.message').attr('data-token',token.getTime()).html(msg + ' <a href="#" class="undo" data-res="' + res + '" data-id="' + ob.data(resData)+ '" data-password="' + ob.data('password') + '" data-operation="changeStatus" data-status="' + ((res == 'prj')? d.old_status : this.lastJobStatus) + '">Undo</a>').show();
+            var resData = (res == 'prj') ? 'pid' : 'jid';
+            $( '.message' ).attr( 'data-token', token.getTime() ).html( msg +
+            ' <a href="#" class="undo" data-res="' + res +
+            '" data-id="' + ob.data( resData ) +
+            '" data-password="' + ob.data( 'password' ) +
+            '" data-operation="changeStatus" data-status="' + ((res == 'prj') ? d.old_status : this.lastJobStatus) + '">Undo</a>' ).show();
 			setTimeout(function(){
 				$('.message[data-token='+token.getTime()+']').hide();
 			},5000);
@@ -509,14 +517,14 @@ UI = {
 				data = $.parseJSON(d.data);
 
                 if( typeof d.errors != 'undefined' && d.errors.length ){
-                    window.location = '/manage';
+                    window.location = '/';
                 }
 
 				UI.renderProjects(data,'single');
 				UI.setTablesorter();
 			},
             error: function(d){
-                window.location = '/manage';
+                window.location = '/';
             }
 		});
 	},
@@ -536,7 +544,7 @@ UI = {
 				data = $.parseJSON(d.data);
 
                 if( typeof d.errors != 'undefined' && d.errors.length ){
-                    window.location = '/manage';
+                    window.location = '/';
                 }
 
                 UI.pageStep = d.pageStep;
@@ -564,7 +572,7 @@ UI = {
 		        }, 500 );
 			},
             error: function(d){
-                window.location = '/manage';
+                window.location = '/';
             }
 		});
 	},
@@ -603,7 +611,7 @@ UI = {
             var project = this;
             var newProject = '';
 
-			newProject += '<div data-pid="'+this.id+'" class="article">'+
+			newProject += '<div data-pid="'+this.id+'" data-password="' + this.password + '" class="article">'+
 	            '	<div class="head">'+
 		        '	    <h2>'+this.name+'</h2>'+
 		        '	    <div class="project-details">';
@@ -711,7 +719,7 @@ UI = {
         if(action == 'append') {
 	        $('#projects').append(projects);  	
         } else if(action == 'single') {
-        	$('.article[data-pid='+d[0].id+']').replaceWith(projects);
+            $( '.article[data-pid=' + d[0].id + ']' ).replaceWith( projects );
         } else {
 	        if(projects == '') projects = '<p class="article msg">No projects found for these filter parameters.<p>';
 	        $('#projects').html(projects);        	        	
