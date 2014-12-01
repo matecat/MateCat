@@ -3054,6 +3054,7 @@ UI = {
             }
         }
 
+        //when the job has one segment only
         if( typeof n === 'undefined' ) {
             n = a.length -1;
         }
@@ -8596,6 +8597,8 @@ $.extend(UI, {
     },
     clearAddTMRow: function() {
         $('#new-tm-key, #new-tm-description').val('');
+        $('#new-tm-key').removeAttr('disabled');
+        $('.mgmt-tm tr.new .privatekey .btn-ok').removeClass('disabled');
         $('#activetm .fileupload').val('');
         $('.mgmt-tm tr.new').removeClass('badkey badgrants');
         $('.mgmt-tm tr.new .message').text('');
