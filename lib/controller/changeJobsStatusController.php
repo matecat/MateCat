@@ -114,6 +114,11 @@ class changeJobsStatusController extends ajaxController {
 
     public function doAction() {
 
+        if ( empty( $_SESSION[ 'cid' ] ) ) {
+            //user not logged
+            throw new Exception( "User Not Logged." );
+        }
+
         if ( $this->res_type == "prj" ) {
             $old_status = getProjectJobData( $this->res_id );
             $strOld     = '';
