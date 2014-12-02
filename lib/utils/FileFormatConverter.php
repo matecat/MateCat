@@ -262,7 +262,7 @@ class FileFormatConverter {
             curl_setopt( $ch, CURLOPT_RETURNTRANSFER, true );
             //curl_setopt($ch, CURLOPT_VERBOSE, true);
             curl_setopt( $ch, CURLOPT_POST, true );
-            curl_setopt( $ch, CURLOPT_POSTFIELDS, $data );
+            @curl_setopt( $ch, CURLOPT_POSTFIELDS, $data );
 
             if ( $this->is_assoc( $opt ) and !empty( $opt ) ) {
                 foreach ( $opt as $k => $v ) {

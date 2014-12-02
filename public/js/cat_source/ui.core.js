@@ -843,9 +843,10 @@ UI = {
 				segmentToOpen: this.currentSegmentId
 			});
 		}
+        console.log('segment: ', segment);
 		$(window).trigger({
 			type: "scrolledToOpenSegment",
-			segment: segment
+			segment: this.currentSegment
 		});
 	},
 	gotoPreviousSegment: function() {
@@ -3053,6 +3054,12 @@ UI = {
                 break;
             }
         }
+
+        //when the job has one segment only
+        if( typeof n === 'undefined' ) {
+            n = a.length -1;
+        }
+
 //        console.log('n: ' + x);
 //        console.log(a.substring(0,n));
 //        var coso = a.substring(0,n);
@@ -3061,7 +3068,16 @@ UI = {
     },
     shortenId: function(id) {
         return id.replace(UI.commonPartInSegmentIds, '<span class="implicit">' + UI.commonPartInSegmentIds + '</span>');
+    },
+    isCJK: function () {
+        var l = config.target_rfc;
+        if( (l=='zh-CN') || (l=='zh-TW') || (l=='ja-JP') || (l=='ko-KR') ) {
+            return true;
+        } else {
+            return false;
+        }
     }
+
 
 };
 

@@ -1950,6 +1950,7 @@ function getProjects( $start, $step, $search_in_pname, $search_source, $search_t
         $projects_filter_query[ ] = "j.id_project = " . $project_id;
     }
 
+    //FIXME: SESSION CALL SHOULD NOT BE THERE!!!
     $jobs_filter_query [ ]    = "j.owner = '" . $_SESSION[ 'cid' ] . "' and j.id_project in (%s)";
     $projects_filter_query[ ] = "j.owner = '" . $_SESSION[ 'cid' ] . "'";
 
@@ -2674,6 +2675,7 @@ function updateJobsStatus( $res, $id, $status, $only_if, $undo, $jPassword = nul
             $ids   = trim( $ids, ',' );
             $query = "update jobs set status_owner= case $cases end where id in ($ids)" . $status_filter_query;
             $db->query( $query );
+
         } else {
 
             $query = "update jobs set status_owner='" . $db->escape( $status ) . "' where id_project=" . (int)$id . $status_filter_query;

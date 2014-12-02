@@ -354,11 +354,8 @@ class UploadHandler {
             }
             $file->size = $file_size;
             $this->set_file_delete_url($file);
-            //			$file->prova = $file_path;
-            //			$fileContent = file_get_contents('http://www.repubblica.it/');
 
-
-
+            
             $fileContent = file_get_contents($file_path);
             $preg_file_html = '|<file original="(.*?)" source-language="(.*?)" datatype="(.*?)" target-language="(.*?)">|m';
             $res = array();

@@ -1921,12 +1921,14 @@ section .graysmall mark
 }
 section mark.searchMarker
 {
-	background: #9ef5f5;
+    background: yellow;
+/*	background: #9ef5f5; */
 }
 section mark.searchMarker.currSearchItem,
 section.currSearchSegment mark.searchMarker
 {
-	background: #00c1e6;
+    background: #F7D315;
+/*	background: #00c1e6; */
 }
 
 .offline {padding:0;}
