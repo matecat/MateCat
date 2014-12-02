@@ -996,12 +996,17 @@ margin-left: 10px;
 	    background-size: 22px;
     }  
 	
+    .uploadtm.disabled {
+    	background: #09beec!important;
+    }
+
 	.mgmt-panel-tm .btn-ok,
 	.mgmt-panel-gl .btn-ok,
     .popup .btn-ok,
     .popup .btn-cancel,
     .popup-tm .btn-ok,
-    .popup-tm .btn-cancel 
+    .popup-tm .btn-cancel,
+    .uploadtm.disabled 
     {
 	    color: #fff;
 	    background: #09beec;
