@@ -843,9 +843,10 @@ UI = {
 				segmentToOpen: this.currentSegmentId
 			});
 		}
+        console.log('segment: ', segment);
 		$(window).trigger({
 			type: "scrolledToOpenSegment",
-			segment: segment
+			segment: this.currentSegment
 		});
 	},
 	gotoPreviousSegment: function() {
@@ -3130,6 +3131,7 @@ $.extend(UI, {
 			UI.blockGetMoreSegments = false;
 		}, 200);
 		this.loadCustomization();
+        this.setTagMode();
 		this.detectFirstLast();
 //		this.reinitMMShortcuts();
 		this.initSegmentNavBar();
@@ -5064,6 +5066,10 @@ $.extend(UI, {
 //				UI.saveCustomization();
 			}
 			$(this).parents('.matches').toggleClass('extended');
+        }).on('click', '.showExtendedTags', function(e) {
+            e.preventDefault();
+            UI.setExtendedTagMode();
+            $(this).remove();
 		}).on('keyup', '.editor .editarea', function(e) {
 			if ( e.which == 13 ){
 //				$(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
@@ -5081,10 +5087,12 @@ $.extend(UI, {
 			}
 		}).on('click', '.tagMode .crunched', function(e) {
             e.preventDefault();
-            UI.currentSegment.attr('data-tagMode', 'crunched');
+            UI.setCrunchedTagMode();
+//            UI.currentSegment.attr('data-tagMode', 'crunched');
         }).on('click', '.tagMode .extended', function(e) {
             e.preventDefault();
-            UI.currentSegment.attr('data-tagMode', 'extended');
+            UI.setExtendedTagMode();
+//            UI.currentSegment.attr('data-tagMode', 'extended');
         });
 		UI.toSegment = true;
 		if (!this.segmentToScrollAtRender)
@@ -5293,7 +5301,7 @@ $.extend(UI, {
 		this.highlightEditarea();
 	},
 	copySuggestionInEditarea: function(segment, translation, editarea, match, decode, auto, which) {
-console.log('translation 1: ', translation);
+// console.log('translation 1: ', translation);
 		if (typeof (decode) == "undefined") {
 			decode = false;
 		}
@@ -5303,7 +5311,7 @@ console.log('translation 1: ', translation);
 			//ANTONIO 20121205 editarea.text(translation).addClass('fromSuggestion');
 
 			if (decode) {
-				console.log('translation 2: ', translation);
+//				console.log('translation 2: ', translation);
 				translation = htmlDecode(translation);
 			}
 			if (this.body.hasClass('searchActive'))
@@ -5312,10 +5320,10 @@ console.log('translation 1: ', translation);
 			this.saveInUndoStack('copysuggestion');
 //			translation = UI.decodePlaceholdersToText(translation, true);
 //			translation = UI.decodePlaceholdersToText(htmlEncode(translation), true);
-console.log('translation 3: ', translation);
+// console.log('translation 3: ', translation);
 			if(!which) translation = UI.encodeSpacesAsPlaceholders(translation, true);
 //			translation = UI.encodeSpacesAsPlaceholders(translation);
-console.log('translation 4: ', translation);
+// console.log('translation 4: ', translation);
 			$(editarea).html(translation).addClass('fromSuggestion');
 			this.saveInUndoStack('copysuggestion');
 			$('.percentuage', segment).text(match).removeClass('per-orange per-green per-blue per-yellow').addClass(percentageClass).addClass('visible');
@@ -5524,11 +5532,11 @@ console.log('translation 4: ', translation);
 			UI.setDeleteSuggestion(segment);
 			UI.lockTags();
 			if (editareaLength === 0) {
-				console.log('translation AA: ', translation);
+//				console.log('translation AA: ', translation);
 //				translation = UI.decodePlaceholdersToText(translation, true, segment_id, 'translation');
 				translation = $('#' + segment_id + ' .matches ul.graysmall').first().find('.translation').html();
-				console.log($('#' + segment_id + ' .matches .graysmall'));
-				console.log('translation BB: ', translation);
+//				console.log($('#' + segment_id + ' .matches .graysmall'));
+//				console.log('translation BB: ', translation);
 				UI.copySuggestionInEditarea(segment, translation, editarea, match, false, true, 1);
 				if (UI.body.hasClass('searchActive'))
 					UI.addWarningToSearchDisplay();
@@ -5846,7 +5854,7 @@ $.extend(UI, {
 
 	// TAG LOCK
 	lockTags: function(el) {
-		console.log('lock tags');
+//		console.log('lock tags');
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
@@ -6002,6 +6010,7 @@ $.extend(UI, {
 		}
 */
 	},
+/*
     setExtendedTagMode: function (el) {
         console.log('setExtendedTagMode');
         segment = el || UI.currentSegment;
@@ -6011,15 +6020,40 @@ $.extend(UI, {
         segment = el || UI.currentSegment;
         $(segment).attr('data-tagMode', 'crunched');
     },
-    checkTagsInSegment: function (el) {
-        segment = el || UI.currentSegment;
-        hasTags = ($(segment).find('.wrap span.locked').length)? true : false;
-        if(hasTags) {
-            this.setExtendedTagMode(el);
+*/
+    setTagMode: function () {
+        if(this.custom.extended_tagmode) {
+            this.setExtendedTagMode();
         } else {
-            this.setCrunchedTagMode(el);
+            this.setCrunchedTagMode();
         }
     },
+    setExtendedTagMode: function () {
+        this.body.addClass('tagmode-default-extended');
+//        console.log('segment: ', segment);
+        if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
+        this.custom.extended_tagmode = true;
+        this.saveCustomization();
+    },
+    setCrunchedTagMode: function () {
+        this.body.removeClass('tagmode-default-extended');
+//        console.log('segment: ', segment);
+        if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
+        this.custom.extended_tagmode = false;
+        this.saveCustomization();
+    },
+
+    /*
+        checkTagsInSegment: function (el) {
+            segment = el || UI.currentSegment;
+            hasTags = ($(segment).find('.wrap span.locked').length)? true : false;
+            if(hasTags) {
+                this.setExtendedTagMode(el);
+            } else {
+                this.setCrunchedTagMode(el);
+            }
+        },
+    */
     enableTagMode: function () {
         UI.render(
             {tagModesEnabled: true}
@@ -6033,7 +6067,10 @@ $.extend(UI, {
 
     // TAG MISMATCH
 	markTagMismatch: function(d) {
-        if($.parseJSON(d.warnings).length) $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
+        if($.parseJSON(d.warnings).length) {
+            $('#segment-' + d.id_segment + ' .text p.warnings').last().after('<a href="#" class="showExtendedTags">Show</a>');
+//            $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
+        }
 //        $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
 //        this.setExtendedTagMode($('#segment-' + d.id_segment));
         // temp
@@ -7957,7 +7994,8 @@ $.extend(UI, {
 			this.custom = $.parseJSON($.cookie('user_customization'));
 		} else {
 			this.custom = {
-				"extended_concordance": false
+				"extended_concordance": false,
+                "extended_tagmode": false
 			};
 			this.saveCustomization();
 		}

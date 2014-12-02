@@ -1678,6 +1678,10 @@ $.extend(UI, {
 //				UI.saveCustomization();
 			}
 			$(this).parents('.matches').toggleClass('extended');
+        }).on('click', '.showExtendedTags', function(e) {
+            e.preventDefault();
+            UI.setExtendedTagMode();
+            $(this).remove();
 		}).on('keyup', '.editor .editarea', function(e) {
 			if ( e.which == 13 ){
 //				$(this).find( 'br:not([class])' ).replaceWith( $('<br class="' + config.crPlaceholderClass + '" />') );
@@ -1695,10 +1699,12 @@ $.extend(UI, {
 			}
 		}).on('click', '.tagMode .crunched', function(e) {
             e.preventDefault();
-            UI.currentSegment.attr('data-tagMode', 'crunched');
+            UI.setCrunchedTagMode();
+//            UI.currentSegment.attr('data-tagMode', 'crunched');
         }).on('click', '.tagMode .extended', function(e) {
             e.preventDefault();
-            UI.currentSegment.attr('data-tagMode', 'extended');
+            UI.setExtendedTagMode();
+//            UI.currentSegment.attr('data-tagMode', 'extended');
         });
 		UI.toSegment = true;
 		if (!this.segmentToScrollAtRender)
