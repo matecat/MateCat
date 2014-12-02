@@ -553,9 +553,9 @@ UI = {
                                 s_total_txt = s_total.text();
 //                                s_total_txt = "0";
                                 if(parseFloat(s_total_txt) < 1) {
-                                    $(context.parents('.jobcontainer').find('.splitbtn')).addClass('disabled');
+                                    $(context.parents('.jobcontainer').find('.splitbtn')).addClass('disabled').attr('title', 'You cannot split a job with 1 or 0 payable words.');
                                 } else {
-                                    $(context.parents('.jobcontainer').find('.splitbtn')).removeClass('disabled');
+                                    $(context.parents('.jobcontainer').find('.splitbtn')).removeClass('disabled').attr('title', '');
                                 }
                                 s_total.text( tot.TOTAL_PAYABLE[1] );
                                 if ( s_total_txt != s.TOTAL_TM_WC_PRINT )
