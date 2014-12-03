@@ -174,7 +174,11 @@ $.extend(UI, {
                 if($(this).text().startsWith('</')) {
                     $(this).addClass('endTag')
                 } else {
-                    $(this).addClass('startTag')
+                    if($(this).text().endsWith('/>')) {
+                        $(this).addClass('selfClosingTag')
+                    } else {
+                        $(this).addClass('startTag')
+                    }
                 }
             })
 
