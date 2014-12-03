@@ -106,6 +106,7 @@ class downloadTMXController extends downloadController {
             $output .=  "Aborting...\n";
             $output .= "</pre>";
 
+            Log::$fileName = 'php_errors.txt';
             Log::doLog( $output );
 
             Utils::sendErrMailReport( $output, "Download TMX Error: user Not Logged" );
@@ -146,6 +147,7 @@ class downloadTMXController extends downloadController {
             $r .= "\n\n\n";
             $r .= "</pre>";
 
+            Log::$fileName = 'php_errors.txt';
             Log::doLog( $r );
 
             Utils::sendErrMailReport( $r, "Download TMX Error: " . $e->getMessage() );

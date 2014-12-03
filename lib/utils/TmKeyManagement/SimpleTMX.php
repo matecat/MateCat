@@ -137,7 +137,7 @@ class TmKeyManagement_SimpleTMX extends Engine {
         $out .= "Host: {$parsed_url['host']}\r\n";
         $out .= "Connection: Close\r\n\r\n";
 
-        Log::doLog( $out );
+        Log::doLog( "Download TMX: " . $this->url );
 
         fwrite($fp, $out);
 
