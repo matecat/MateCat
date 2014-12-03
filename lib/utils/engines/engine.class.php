@@ -30,6 +30,10 @@ abstract class Engine {
     protected $detect_language_url;
     protected $analyze_url;
 
+    protected $tmx_export_list_url;
+    protected $tmx_export_download_url;
+    protected $tmx_export_check_url;
+    protected $tmx_export_create_url;
 
     public function __construct( $id ) {
 
@@ -68,6 +72,11 @@ abstract class Engine {
         $this->tmx_status_url          = $extra_data[ 'tmx_status_relative_url' ];
         $this->api_key_create_user_url = $extra_data[ 'api_key_create_user_url' ];
         $this->api_key_check_auth_url  = $extra_data[ 'api_key_check_auth_url' ];
+
+        $this->tmx_export_list_url     = $extra_data[ 'tmx_export_list_url' ];
+        $this->tmx_export_download_url = $extra_data[ 'tmx_export_download_url' ];
+        $this->tmx_export_check_url    = $extra_data[ 'tmx_export_check_url' ];
+        $this->tmx_export_create_url   = $extra_data[ 'tmx_export_create_url' ];
 
         $this->detect_language_url     = $extra_data[ 'detect_language_url' ];
         $this->analyze_url             = $extra_data[ 'analyze_url' ];
