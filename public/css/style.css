@@ -2957,6 +2957,17 @@ body.editlog .breadcrumbs #pname {
 .warnings {
 	background: url(../img/sprite2x.png) -13px -1360px no-repeat;	
 }
+a.showExtendedTags {
+    position: relative;
+    display: block;
+    float: left;
+    clear: left;
+    left: 52%;
+    top: -20px;
+}
+body.tagmode-default-extended a.showExtendedTags {
+    display: none;
+}
 .close {
 	background: url(../img/sprite2x.png) -11px -156px no-repeat;
 }

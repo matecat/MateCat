@@ -287,8 +287,11 @@ $.extend(UI, {
 			console.log('source & target');
 			status = (p.status == 'all') ? '' : '.status-' + p.status;
 			q = (singleSegment) ? '#' + $(singleSegment).attr('id') : "section" + status + ':not(.status-new)';
-			var regSource = new RegExp('(' + htmlEncode(p.source).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
-			var regTarget = new RegExp('(' + htmlEncode(p.target).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
+            psource = p.source.replace(/(\W)/gi, "\\$1");
+            ptarget = p.target.replace(/(\W)/gi, "\\$1");
+
+			var regSource = new RegExp('(' + htmlEncode(psource).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
+			var regTarget = new RegExp('(' + htmlEncode(ptarget).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
 			txtSrc = p.source;
 			txtTrg = p.target;
 			srcHasTags = (txtSrc.match(/<.*?\>/gi) !== null) ? true : false;
@@ -338,7 +341,10 @@ $.extend(UI, {
 				q = "section" + status + what;
 			}
 			hasTags = (txt.match(/<.*?\>/gi) !== null) ? true : false;
-			var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder);
+            var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder);
+            regTxt = regTxt.replace(/(\W)/gi, "\\$1");
+//            console.log('regTxt: ', regTxt);
+//			var regTxt = txt.replace('<', UI.openTagPlaceholder).replace('>', UI.closeTagPlaceholder).replace(/\W/gi, "$1" );
 			var reg = new RegExp('(' + htmlEncode(regTxt).replace(/\(/g, '\\(').replace(/\)/g, '\\)') + ')', "g" + ignoreCase);
 //			var reg = new RegExp('(' + htmlEncode(regTxt) + ')', "g" + ignoreCase);
 

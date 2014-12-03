@@ -843,9 +843,10 @@ UI = {
 				segmentToOpen: this.currentSegmentId
 			});
 		}
+        console.log('segment: ', segment);
 		$(window).trigger({
 			type: "scrolledToOpenSegment",
-			segment: segment
+			segment: this.currentSegment
 		});
 	},
 	gotoPreviousSegment: function() {

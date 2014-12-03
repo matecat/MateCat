@@ -101,7 +101,7 @@ $.extend(UI, {
 
 	// TAG LOCK
 	lockTags: function(el) {
-		console.log('lock tags');
+		console.log('lock tags: ', UI.editarea.html());
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
@@ -122,7 +122,7 @@ $.extend(UI, {
 			saveSelection();
 			var tx = $(this).html();
 			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"false\">$1</pl>" : "<pl contenteditable=\"false\" class=\"locked\">$1</pl>";
-			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";			
+			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"false\">$1</span>" : "<span contenteditable=\"false\" class=\"locked\">$1</span>";
 //			brTx1 = (UI.isFirefox)? "<pl class=\"locked\" contenteditable=\"true\">$1</pl>" : "<pl contenteditable=\"true\" class=\"locked\">$1</pl>";
 //			brTx2 = (UI.isFirefox)? "<span class=\"locked\" contenteditable=\"true\">$1</span>" : "<span contenteditable=\"true\" class=\"locked\">$1</span>";
             tx = tx.replace(/<span/gi, "<pl")
@@ -168,6 +168,16 @@ $.extend(UI, {
             } else {
                 segment.removeClass('hasTags');
             }
+            $('span.locked', this).each(function () {
+//                console.log(segment.attr('id') + ' - ' + $(this).text());
+//                console.log($(this).text().startsWith('</'));
+                if($(this).text().startsWith('</')) {
+                    $(this).addClass('endTag')
+                } else {
+                    $(this).addClass('startTag')
+                }
+            })
+
 
 //            UI.checkTagsInSegment();
 		});
@@ -257,6 +267,7 @@ $.extend(UI, {
 		}
 */
 	},
+/*
     setExtendedTagMode: function (el) {
         console.log('setExtendedTagMode');
         segment = el || UI.currentSegment;
@@ -266,15 +277,40 @@ $.extend(UI, {
         segment = el || UI.currentSegment;
         $(segment).attr('data-tagMode', 'crunched');
     },
-    checkTagsInSegment: function (el) {
-        segment = el || UI.currentSegment;
-        hasTags = ($(segment).find('.wrap span.locked').length)? true : false;
-        if(hasTags) {
-            this.setExtendedTagMode(el);
+*/
+    setTagMode: function () {
+        if(this.custom.extended_tagmode) {
+            this.setExtendedTagMode();
         } else {
-            this.setCrunchedTagMode(el);
+            this.setCrunchedTagMode();
         }
     },
+    setExtendedTagMode: function () {
+        this.body.addClass('tagmode-default-extended');
+//        console.log('segment: ', segment);
+        if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
+        this.custom.extended_tagmode = true;
+        this.saveCustomization();
+    },
+    setCrunchedTagMode: function () {
+        this.body.removeClass('tagmode-default-extended');
+//        console.log('segment: ', segment);
+        if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
+        this.custom.extended_tagmode = false;
+        this.saveCustomization();
+    },
+
+    /*
+        checkTagsInSegment: function (el) {
+            segment = el || UI.currentSegment;
+            hasTags = ($(segment).find('.wrap span.locked').length)? true : false;
+            if(hasTags) {
+                this.setExtendedTagMode(el);
+            } else {
+                this.setCrunchedTagMode(el);
+            }
+        },
+    */
     enableTagMode: function () {
         UI.render(
             {tagModesEnabled: true}
@@ -288,7 +324,10 @@ $.extend(UI, {
 
     // TAG MISMATCH
 	markTagMismatch: function(d) {
-        if($.parseJSON(d.warnings).length) $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
+        if($.parseJSON(d.warnings).length) {
+            $('#segment-' + d.id_segment + ' .text p.warnings').last().after('<a href="#" class="showExtendedTags">Show</a>');
+//            $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
+        }
 //        $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
 //        this.setExtendedTagMode($('#segment-' + d.id_segment));
         // temp
