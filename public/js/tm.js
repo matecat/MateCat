@@ -468,10 +468,29 @@ $.extend(UI, {
         }
     },
     checkTMGrantsModifications: function (el) {
+        console.log('el: ', el);
         tr = $(el).parents('tr.mine');
         isActive = ($(tr).parents('table').attr('id') == 'activetm')? true : false;
         if((!tr.find('.lookup input').is(':checked')) && (!tr.find('.update input').is(':checked'))) {
             if(isActive) {
+                if(APP.isAnonymousUser()) {
+                    var data = {
+                        grant: ($(el).parents('td').hasClass('lookup')? 'lookup' : 'update'),
+                        key: $(tr).find('.privatekey').text()
+                    }
+//                    $('.popup-tm .tm-warning-message').html('If you confirm this action, your Private TM key will be lost. If you want to avoid this, please, log in with your account now. <a href="#" class="continue-disable-tm">Continue</a> or <a href="#" class="cancel-disable-tm">Cancel</a>').show();
+                    APP.confirm({
+                        name: 'confirmTMDisable',
+                        cancelTxt: 'Cancel',
+                        onCancel: 'cancelTMDisable',
+                        callback: 'continueTMDisable',
+                        okTxt: 'Continue',
+//                        context: ($(el).parents('td').hasClass('lookup')? 'lookup' : 'update'),
+                        context: JSON.stringify(data),
+                        msg: "If you confirm this action, your Private TM key will be lost. <br />If you want to avoid this, please, log in with your account now."
+                    });
+                    return false;
+                }
                 UI.disableTM(el);
                 $("#inactivetm").trigger("update");
             }
@@ -483,6 +502,16 @@ $.extend(UI, {
         }
 //        console.log('lookup: ', tr.find('.lookup input').is(':checked'));
 //        console.log('update: ', tr.find('.update input').is(':checked'));
+    },
+    cancelTMDisable: function (context) {
+        options = $.parseJSON(context);
+        $('.mgmt-tm tr.mine[data-key="' + options.key + '"] td.' + options.grant + ' input').click();
+    },
+    continueTMDisable: function (context) {
+        options = $.parseJSON(context);
+        el = $('.mgmt-tm tr.mine[data-key="' + options.key + '"] td.' + options.grant + ' input');
+        UI.disableTM(el);
+        $("#inactivetm").trigger("update");
     },
 
     disableTM: function (el) {
@@ -557,7 +586,7 @@ $.extend(UI, {
         var desc = $('#new-tm-description').val();
         var TMKey = $('#new-tm-key').val();
 
-        newTr = '<tr class="mine" data-tm="1" data-glos="1" data-owner="' + config.ownerIsMe + '">' +
+        newTr = '<tr class="mine" data-tm="1" data-glos="1" data-key="' + TMKey + '" data-owner="' + config.ownerIsMe + '">' +
                 '    <td class="dragrow"><div class="status"></div></td>' +
                 '    <td class="privatekey">' + TMKey + '</td>' +
                 '    <td class="owner">You</td>' +

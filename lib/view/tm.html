@@ -54,7 +54,7 @@
                                 <tbody class="list sortable">
 
                                 <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
-                                    <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( ownerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
+                                    <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( ownerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-key="${key/key}" data-editable="${key/edit}" data-owner="${key/owner}">
                                         <td class="dragrow"><div class="status"></div></td>
                                         <td class="privatekey">${key/key}</td>
                                         <td class="owner">${php: key.owner ? ( ownerIsMe ? 'You' : '*****' ) : 'You'}</td>
@@ -108,7 +108,7 @@
                                 </tr>
 
                                 <tal:block tal:repeat="key user_keys/job_keys">
-                                    <tr tal:condition="php: !key.edit && !key.owner" class="anonymous" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
+                                    <tr tal:condition="php: !key.edit && !key.owner" class="anonymous" data-tm="${key/tm}" data-glos="${key/glos}" data-key="${key/key}" data-editable="${key/edit}" data-owner="${key/owner}">
                                         <td class="dragrow"><div class="status"></div></td>
                                         <td class="privatekey">${key/key}</td>
                                         <td class="owner">*****</td>
@@ -155,7 +155,7 @@
                                     -->
 
                                     <tal:block tal:repeat="key user_keys/totals">
-                                        <tr class="mine" data-tm="1" data-glos="1">
+                                        <tr class="mine" data-tm="1" data-glos="1" data-key="${key/key}">
                                             <td class="dragrow"><div class="status"></div></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">You</td>
@@ -235,7 +235,7 @@
                                 <tbody class="list sortable">
 
                                 <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
-                                    <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( ownerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
+                                    <tr tal:condition="php: key.edit || key.owner" tal:attributes="class php: key.owner ? ( ownerIsMe ? 'mine' : 'ownergroup' ) : 'mine'" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-key="${key/key}" data-owner="${key/owner}">
                                         <td class="dragrow"><div class="status"></div></td>
                                         <td class="privatekey">${key/key}</td>
                                         <td class="owner">${php: key.owner ? ( ownerIsMe ? 'You' : '*****' ) : 'You'}</td>
@@ -290,7 +290,7 @@
                                 </tr>
 
                                 <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/job_keys">
-                                    <tr tal:condition="php: !key.edit && !key.owner" class="anonymous" data-tm="${key/tm}" data-glos="${key/glos}" data-editable="${key/edit}" data-owner="${key/owner}">
+                                    <tr tal:condition="php: !key.edit && !key.owner" class="anonymous" data-tm="${key/tm}" data-glos="${key/glos}" data-key="${key/key}" data-editable="${key/edit}" data-owner="${key/owner}">
                                         <td class="dragrow"><div class="status"></div></td>
                                         <td class="privatekey">${key/key}</td>
                                         <td class="owner">*****</td>
@@ -332,7 +332,7 @@
                                     <tbody class="list">
 
                                     <tal:block tal:condition="php: page == 'cattool'" tal:repeat="key user_keys/totals">
-                                        <tr class="mine" data-tm="1" data-glos="1">
+                                        <tr class="mine" data-tm="1" data-glos="1" data-key="${key/key}">
                                             <td class="dragrow"><div class="status"></div></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">You</td>
@@ -351,7 +351,7 @@
                                     </tal:block>
 
                                     <tal:block tal:condition="php: page == 'home'" tal:repeat="key user_keys">
-                                        <tr class="mine" data-tm="1" data-glos="1">
+                                        <tr class="mine" data-tm="1" data-glos="1" data-key="${key/key}">
                                             <td class="dragrow"><div class="status">&nbsp;</div></td>
                                             <td class="privatekey">${key/key}</td>
                                             <td class="owner">You</td>

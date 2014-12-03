@@ -558,9 +558,28 @@ class ProjectManager {
             return false;
         }
 
-        Utils::deleteDir( $uploadDir );
-        if ( is_dir( $uploadDir . '_converted' ) ) {
-            Utils::deleteDir( $uploadDir . '_converted' );
+        try {
+
+            Utils::deleteDir( $uploadDir );
+            if ( is_dir( $uploadDir . '_converted' ) ) {
+                Utils::deleteDir( $uploadDir . '_converted' );
+            }
+
+        } catch( Exception $e ){
+
+            $output = "<pre>\n";
+            $output .=  " - Exception: " . print_r( $e->getMessage(), true ) . "\n";
+            $output .=  " - REQUEST URI: " . print_r( @$_SERVER['REQUEST_URI'], true ) . "\n";
+            $output .=  " - REQUEST Message: " . print_r( $_REQUEST, true ) . "\n";
+            $output .=  " - Trace: \n" . print_r( $e->getTraceAsString(), true ) . "\n";
+            $output .=  "\n\t";
+            $output .=  "Aborting...\n";
+            $output .= "</pre>";
+
+            Log::doLog( $output );
+
+            Utils::sendErrMailReport( $output, $e->getMessage() );
+
         }
 
         $this->projectStructure[ 'status' ] = ( INIT::$VOLUME_ANALYSIS_ENABLED ) ? Constants_ProjectStatus::STATUS_NEW : Constants_ProjectStatus::STATUS_NOT_TO_ANALYZE;

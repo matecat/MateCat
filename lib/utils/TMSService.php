@@ -291,6 +291,45 @@ class TMSService {
         return $this;
     }
 
+    /**
+     * Send a request for download
+     *
+     * First basic implementation
+     * TODO  in the future we would send a mail with link for direct prepared download
+     */
+    public function downloadTMX(){
+
+        $result = $this->tmxServiceWrapper->createExport( $this->tm_key );
+
+        if( @$result['status'] == 'QUEUED' && $result['responseStatus'] == 202 ){
+
+            do {
+
+                $result = $this->tmxServiceWrapper->checkExport( $this->tm_key );
+
+                usleep(1500000); // 1.5 seconds
+
+            } while( isset( $result['status'] ) && $result['status'] != 'READY' && $result['status'] != 'NO SEGMENTS' );
+
+            if( !isset( $result['status'] ) ) throw new Exception( "Status check failed. Export broken.", -16 );
+
+            if( $result['status'] == 'NO SEGMENTS' ) throw new DomainException( "No translation memories found to download.", -17 );
+
+            $_download_url = parse_url( $result['resourceLink'] );
+            parse_str( $_download_url['query'], $secrets );
+            list( $_key, $pass ) = array_values( $secrets );
+
+        } else {
+
+            throw new Exception( "Critical. Export Creation Failed.", -18 );
+
+        }
+
+        $resource_pointer = $this->tmxServiceWrapper->downloadExport( $this->tm_key, $pass );
+
+        return $resource_pointer;
+
+    }
 
 
 }
