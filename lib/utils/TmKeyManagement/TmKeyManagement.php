@@ -81,7 +81,7 @@ class TmKeyManagement_TmKeyManagement {
                 $tmKeys = array_filter( $tmKeys, array( $filter, 'byRevisor' ) );
                 break;
             default:
-                throw new Exception( "Filter type $user_role not allowed." );
+                throw new Exception( "Filter type '$user_role' not allowed." );
                 break;
         }
 

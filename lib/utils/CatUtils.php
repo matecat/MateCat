@@ -239,7 +239,7 @@ class CatUtils {
         return $s;
     }
 
-    private static function parse_time_to_edit($ms) {
+    public static function parse_time_to_edit($ms) {
         if ($ms <= 0) {
             return array("00", "00", "00", "00");
         }
