@@ -206,8 +206,9 @@ $.extend(UI, {
         }).on('change', '#new-tm-read, #new-tm-write', function() {
             UI.checkTMgrants();
         }).on('change', '#activetm tr.mine td.uploadfile input[type="file"]', function() {
-            if(this.files[0].size > 60000000) {
-                APP.alert('File too big.<br/>The maximum allowed size is 60Mb.');
+            if(this.files[0].size > config.maxFileSize) {
+                numMb = config.maxFileSize/(1024*1024);
+                APP.alert('File too big.<br/>The maximuxm allowed size is ' + numMb + 'Mb.');
                 return false;
             };
             if($(this).val() == '') {
