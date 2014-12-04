@@ -9019,7 +9019,10 @@ $.extend(UI, {
                             $(TRcaller).find('.uploadprogress .msgText').text('Uploading');
 //                            $(TRcaller).find('.standard').show();
                             if(existing) {
-                                $(TRcaller).remove();
+                                $(TRcaller).addClass('tempTRcaller').append('<span class="msg">Import Complete</span>');
+                                setTimeout(function() {
+                                    $('.tempTRcaller').remove();
+                                }, 3000);
                             } else {
                                 $('.mgmt-tm tr.new .canceladdtmx').click();
                                 $('.mgmt-tm tr.new').removeClass('hide');
