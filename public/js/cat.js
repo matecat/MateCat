@@ -8387,6 +8387,10 @@ $.extend(UI, {
         }).on('change', '#new-tm-read, #new-tm-write', function() {
             UI.checkTMgrants();
         }).on('change', '#activetm tr.mine td.uploadfile input[type="file"]', function() {
+            if(this.files[0].size > 60000000) {
+                APP.alert('File too big.<br/>The maximum allowed size is 60Mb.');
+                return false;
+            };
             if($(this).val() == '') {
                 $(this).parents('.uploadfile').find('.addtmxfile').hide();
             } else {
