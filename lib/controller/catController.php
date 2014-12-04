@@ -494,6 +494,8 @@ class catController extends viewController {
         $this->template->filtered               = $this->filter_enabled;
         $this->template->filtered_class         = ( $this->filter_enabled ) ? ' open' : '';
 
+        $this->template->maxFileSize            = INIT::$MAX_UPLOAD_FILE_SIZE;
+
 		( INIT::$VOLUME_ANALYSIS_ENABLED        ? $this->template->analysis_enabled = true : null );
 
 		//check if it is a composite language, for cjk check that accepts only ISO 639 code
