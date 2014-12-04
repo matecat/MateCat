@@ -843,7 +843,6 @@ UI = {
 				segmentToOpen: this.currentSegmentId
 			});
 		}
-        console.log('segment: ', segment);
 		$(window).trigger({
 			type: "scrolledToOpenSegment",
 			segment: this.currentSegment
@@ -1170,10 +1169,14 @@ UI = {
 				
                 /* see also replacement made in source content below */
                 /* this is to show line feed in source too, because server side we replace \n with placeholders */
+/*
                 tagModes = (UI.tagModesEnabled)?                         '						<ul class="tagMode">' +
-                    '						   <li class="crunched">&lt;&gt;</li>' +
-                    '						   <li class="extended">&lt;...&gt;</li>' +
+                    '						   <li class="toggle" style="font-size: 60%">&lt;&rarr;<span style="font-size: 150%">&gt;</span>' +
+                    '</li>' +
+//                    '						   <li class="crunched">&lt;&gt;</li>' +
+//                    '						   <li class="extended">&lt;...&gt;</li>' +
                     '						</ul>' : '';
+*/
                 newFile += '<section id="segment-' + this.sid + '" data-hash="' + this.segment_hash + '" data-autopropagated="' + autoPropagated + '" class="' + ((readonly) ? 'readonly ' : '') + 'status-' + ((!this.status) ? 'new' : this.status.toLowerCase()) + ((this.has_reference == 'true')? ' has-reference' : '') + '" data-tagmode="crunched">' +
 						'	<a tabindex="-1" href="#' + this.sid + '"></a>' +
 						'	<span class="sid" title="' + this.sid + '">' + UI.shortenId(this.sid) + '</span>' +
@@ -1199,13 +1202,16 @@ UI = {
 						'					</span>' +
 						'					<div class="textarea-container">' +
 						'						<span class="loader"></span>' +
-                        tagModes +
+//                        tagModes +
 						'						<div class="' + ((readonly) ? 'area' : 'editarea') + ' targetarea invisible" ' + ((readonly) ? '' : 'contenteditable="false" ') + 'spellcheck="true" lang="' + config.target_lang.toLowerCase() + '" id="segment-' + this.sid + '-editarea" data-sid="' + this.sid + '">' + ((!this.translation) ? '' : UI.decodePlaceholdersToText(this.translation, true, this.sid, 'translation')) + '</div>' +
-						'						<ul class="editToolbar">' +
-						'							<li class="uppercase" title="Uppercase"></li>' +
-						'							<li class="lowercase" title="Lowercase"></li>' +
-						'							<li class="capitalize" title="Capitalized"></li>' +
-						'						</ul>' +
+                        '                       <div class="toolbar">' +
+((UI.tagModesEnabled)?    '                           <a href="#" class="tagModeToggle">&lt;&rarr;<span>&gt;</span></a>' : '') +
+						'                           <ul class="editToolbar">' +
+						'                               <li class="uppercase" title="Uppercase"></li>' +
+						'                               <li class="lowercase" title="Lowercase"></li>' +
+						'                               <li class="capitalize" title="Capitalized"></li>' +
+						'                           </ul>' +
+                        '                       </div>' +
 						'						<p class="save-warning" title="Segment modified but not saved"></p>' +
 						'					</div> <!-- .textarea-container -->' +
 						'				</div> <!-- .target -->' +
@@ -1715,7 +1721,114 @@ UI = {
 	goToFirstError: function() {
 		location.href = $('#point2seg').attr('href');
 	},
-	continueDownload: function() {
+    downloadTM: function(tm) {
+        console.log('eccoci');
+
+        //create an iFrame element
+        var iFrameDownloadTM = $( document.createElement( 'iframe' ) ).hide().prop({
+            id:'iframeDownloadTM',
+            src: ''
+        });
+        $("body").append( iFrameDownloadTM );
+        var downloadTMToken = new Date().getTime();
+        iFrameDownloadTM.ready(function () {
+
+            //create a GLOBAL setInterval so in anonymous function it can be disabled
+            downloadTMTimer = window.setInterval(function () {
+
+                //check for cookie
+                var token = $.cookie('downloadTMToken');
+
+                //if the cookie is found, download is completed
+                //remove iframe an re-enable download button
+                if ( token == downloadTMToken ) {
+//                    $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
+                    window.clearInterval( downloadTMTimer );
+                    $.cookie('downloadTMToken', null, { path: '/', expires: -1 });
+//                    iFrameDownloadTM.remove();
+                }
+
+            }, 2000);
+        });
+        //clone the html form and append a token for download
+        var iFrameForm = $("#downloadTM").clone().append(
+            $( document.createElement( 'input' ) ).prop({
+                type:'hidden',
+                name:'downloadTMToken',
+                value: downloadTMToken
+            })
+        );
+
+        //append from to newly created iFrame and submit form post
+        iFrameDownloadTM.contents().find('body').append( iFrameForm );
+        console.log(iFrameDownloadTM.contents().find("#downloadTM"));
+        iFrameDownloadTM.contents().find("#downloadTM").submit();
+    },
+
+    continueDownload1: function() {
+
+        //check if we are in download status
+        if ( !$('#downloadProject').hasClass('disabled') ) {
+
+            //disable download button
+            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING...');
+
+            //create an iFrame element
+            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
+                id:'iframeDownload',
+                src: ''
+            });
+
+            //append iFrame to the DOM
+            $("body").append( iFrameDownload );
+
+            //generate a token download
+            var downloadToken = new Date().getTime();
+
+            //set event listner, on ready, attach an interval that check for finished download
+            iFrameDownload.ready(function () {
+
+                //create a GLOBAL setInterval so in anonymous function it can be disabled
+                downloadTimer = window.setInterval(function () {
+
+                    //check for cookie
+                    var token = $.cookie('downloadToken');
+
+                    //if the cookie is found, download is completed
+                    //remove iframe an re-enable download button
+                    if ( token == downloadToken ) {
+                        $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
+                        window.clearInterval( downloadTimer );
+                        $.cookie('downloadToken', null, { path: '/', expires: -1 });
+                        iFrameDownload.remove();
+                    }
+
+                }, 2000);
+
+            });
+
+            //clone the html form and append a token for download
+            var iFrameForm = $("#downloadTM").clone().append(
+                $( document.createElement( 'input' ) ).prop({
+                    type:'hidden',
+                    name:'downloadToken',
+                    value: downloadToken
+                })
+            );
+
+            //append from to newly created iFrame and submit form post
+            iFrameDownload.contents().find('body').append( iFrameForm );
+            iFrameDownload.contents().find("#downloadTM").submit();
+
+        } else {
+            //we are in download status
+        }
+
+    },
+
+
+
+    continueDownload: function() {
 
         //check if we are in download status
         if ( !$('#downloadProject').hasClass('disabled') ) {

@@ -2712,7 +2712,15 @@ del.diff
 	top: -4px;
 */
 }
-
+section .toolbar .tagModeToggle {
+    float: left;
+    display: none;
+    font-size: 60%;
+    margin-right: 10px;
+}
+section .toolbar span {
+    font-size: 150%;
+}
 .editToolbar
 {
 	/*float: left;*/	
@@ -2813,9 +2821,14 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .s
     text-align: right;
     margin-top: -23px;
 }
+
 body.tagModes .editor.hasTags .textarea-container .tagMode {
     display: block;
 }
+body.tagModes .editor.hasTags .toolbar .tagModeToggle {
+    display: block;
+}
+
 .textarea-container .tagMode li {
     display: inline-block;
     width: 40px;

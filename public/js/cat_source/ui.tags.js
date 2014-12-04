@@ -101,7 +101,7 @@ $.extend(UI, {
 
 	// TAG LOCK
 	lockTags: function(el) {
-		console.log('lock tags: ', UI.editarea.html());
+//		console.log('lock tags: ', UI.editarea.html());
 		if (this.body.hasClass('tagmarkDisabled'))
 			return false;
 		editarea = (typeof el == 'undefined') ? UI.editarea : el;
@@ -174,7 +174,11 @@ $.extend(UI, {
                 if($(this).text().startsWith('</')) {
                     $(this).addClass('endTag')
                 } else {
-                    $(this).addClass('startTag')
+                    if($(this).text().endsWith('/>')) {
+                        $(this).addClass('selfClosingTag')
+                    } else {
+                        $(this).addClass('startTag')
+                    }
                 }
             })
 

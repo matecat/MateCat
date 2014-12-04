@@ -996,12 +996,17 @@ margin-left: 10px;
 	    background-size: 22px;
     }  
 	
+    .uploadtm.disabled {
+    	background: #09beec!important;
+    }
+
 	.mgmt-panel-tm .btn-ok,
 	.mgmt-panel-gl .btn-ok,
     .popup .btn-ok,
     .popup .btn-cancel,
     .popup-tm .btn-ok,
-    .popup-tm .btn-cancel 
+    .popup-tm .btn-cancel,
+    .uploadtm.disabled 
     {
 	    color: #fff;
 	    background: #09beec;
@@ -1450,6 +1455,11 @@ margin-top: 10px;
     height: 20px;
     border-top: 1px solid #E1E1E1;
 	box-shadow: inset 0px 2px 5px 0px #E4E4E4;
+}
+#activetm td.uploadfile .msg{
+    float: right;
+    margin-right: 100px;
+    color: green;
 }
 #activetm td.dragrow{
    position: relative;
@@ -3149,7 +3159,6 @@ article
 .popup-tm .text, .popup-tm .text:hover {
 	background:transparent;
 	box-shadow: none;
-	width: auto;
 }
 
 
@@ -5150,7 +5159,15 @@ del.diff
 	top: -4px;
 */
 }
-
+section .toolbar .tagModeToggle {
+    float: left;
+    display: none;
+    font-size: 60%;
+    margin-right: 10px;
+}
+section .toolbar span {
+    font-size: 150%;
+}
 .editToolbar
 {
 	/*float: left;*/	
@@ -5251,9 +5268,14 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .s
     text-align: right;
     margin-top: -23px;
 }
+
 body.tagModes .editor.hasTags .textarea-container .tagMode {
     display: block;
 }
+body.tagModes .editor.hasTags .toolbar .tagModeToggle {
+    display: block;
+}
+
 .textarea-container .tagMode li {
     display: inline-block;
     width: 40px;
