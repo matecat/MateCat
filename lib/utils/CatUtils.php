@@ -239,7 +239,7 @@ class CatUtils {
         return $s;
     }
 
-    private static function parse_time_to_edit($ms) {
+    public static function parse_time_to_edit($ms) {
         if ($ms <= 0) {
             return array("00", "00", "00", "00");
         }
@@ -965,7 +965,7 @@ class CatUtils {
 
             // 08/02/2011 CONCORDATO CON MARCO : sostituire tutti i numeri con un segnaposto, in modo che il conteggio
             // parole consideri i segmenti che differiscono per soli numeri some ripetizioni (come TRADOS)
-            $string = preg_replace( "/[0-9]+([\.,][0-9]+)*/", "<TRANSLATED_NUMBER>", $string );
+            $string = preg_replace( "/[0-9]+([\.,][0-9]+)*/", "TRANSLATED_NUMBER", $string );
 
         }
 

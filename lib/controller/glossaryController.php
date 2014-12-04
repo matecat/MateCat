@@ -24,8 +24,6 @@ class glossaryController extends ajaxController {
     private $_TMS;
     private $job_info;
 
-    private $userRole = TmKeyManagement_Filter::ROLE_TRANSLATOR;
-
     public function __construct() {
 
         parent::__construct();
