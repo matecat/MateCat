@@ -1721,7 +1721,114 @@ UI = {
 	goToFirstError: function() {
 		location.href = $('#point2seg').attr('href');
 	},
-	continueDownload: function() {
+    downloadTM: function(tm) {
+        console.log('eccoci');
+
+        //create an iFrame element
+        var iFrameDownloadTM = $( document.createElement( 'iframe' ) ).hide().prop({
+            id:'iframeDownloadTM',
+            src: ''
+        });
+        $("body").append( iFrameDownloadTM );
+        var downloadTMToken = new Date().getTime();
+        iFrameDownloadTM.ready(function () {
+
+            //create a GLOBAL setInterval so in anonymous function it can be disabled
+            downloadTMTimer = window.setInterval(function () {
+
+                //check for cookie
+                var token = $.cookie('downloadTMToken');
+
+                //if the cookie is found, download is completed
+                //remove iframe an re-enable download button
+                if ( token == downloadTMToken ) {
+//                    $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
+                    window.clearInterval( downloadTMTimer );
+                    $.cookie('downloadTMToken', null, { path: '/', expires: -1 });
+//                    iFrameDownloadTM.remove();
+                }
+
+            }, 2000);
+        });
+        //clone the html form and append a token for download
+        var iFrameForm = $("#downloadTM").clone().append(
+            $( document.createElement( 'input' ) ).prop({
+                type:'hidden',
+                name:'downloadTMToken',
+                value: downloadTMToken
+            })
+        );
+
+        //append from to newly created iFrame and submit form post
+        iFrameDownloadTM.contents().find('body').append( iFrameForm );
+        console.log(iFrameDownloadTM.contents().find("#downloadTM"));
+        iFrameDownloadTM.contents().find("#downloadTM").submit();
+    },
+
+    continueDownload1: function() {
+
+        //check if we are in download status
+        if ( !$('#downloadProject').hasClass('disabled') ) {
+
+            //disable download button
+            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING...');
+
+            //create an iFrame element
+            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
+                id:'iframeDownload',
+                src: ''
+            });
+
+            //append iFrame to the DOM
+            $("body").append( iFrameDownload );
+
+            //generate a token download
+            var downloadToken = new Date().getTime();
+
+            //set event listner, on ready, attach an interval that check for finished download
+            iFrameDownload.ready(function () {
+
+                //create a GLOBAL setInterval so in anonymous function it can be disabled
+                downloadTimer = window.setInterval(function () {
+
+                    //check for cookie
+                    var token = $.cookie('downloadToken');
+
+                    //if the cookie is found, download is completed
+                    //remove iframe an re-enable download button
+                    if ( token == downloadToken ) {
+                        $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
+                        window.clearInterval( downloadTimer );
+                        $.cookie('downloadToken', null, { path: '/', expires: -1 });
+                        iFrameDownload.remove();
+                    }
+
+                }, 2000);
+
+            });
+
+            //clone the html form and append a token for download
+            var iFrameForm = $("#downloadTM").clone().append(
+                $( document.createElement( 'input' ) ).prop({
+                    type:'hidden',
+                    name:'downloadToken',
+                    value: downloadToken
+                })
+            );
+
+            //append from to newly created iFrame and submit form post
+            iFrameDownload.contents().find('body').append( iFrameForm );
+            iFrameDownload.contents().find("#downloadTM").submit();
+
+        } else {
+            //we are in download status
+        }
+
+    },
+
+
+
+    continueDownload: function() {
 
         //check if we are in download status
         if ( !$('#downloadProject').hasClass('disabled') ) {
