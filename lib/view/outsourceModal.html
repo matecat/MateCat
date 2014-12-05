@@ -27,8 +27,7 @@
             <div class="popup-box pricebox">
                 <div class="choose">
                     <div class="onyourown">
-                        <h2>Option #1 - Translate with your team</h2>
-                        <p>Share the following link with your translator.</p>
+                        <h2>Option #1 - Share the following link with your translator.</h2>
                         <input class="out-link" type="text" value="http://matecat.local/translate/prova/en-US-fr-FR/19153-bd17c71da22f#11143640" readonly="readonly"/>
                         <a class="uploadbtn in-popup" target="_blank">Open</a>
                     </div>
@@ -40,11 +39,27 @@
                             <div class="copytext">
                                 <img src="/public/img/logo_translated.png"/>
 
-                                <p>Translated, since 1999, provides professional translation services with a team of more
-                                    than 100,000 translators and is trusted by more than 40,000 customers. </p>
+                                <p>Translated uses <a href="http://www.translated.net/en/T-Rank" target="_blank">T-Rank</a> to select our best translator in this field (<strong>${subject | string:IT}</strong>)
+                                    and keep using the <strong>same translator</strong> for your next projects.
+                                </p>
 
-                                <p class="paybox">You can pay within 5 days of translation delivery, by <strong>credit
-                                    card</strong>, <strong>bank transfer</strong> or <strong>PayPal</strong>.</p>
+                                <p class="paybox">
+                                    <strong>Payment Terms: Monthly invoice</strong> that you can pay within 5 days by
+                                    credit card, bank transfer or PayPal
+                                </p>
+
+                                <p class="paybox">
+                                    <strong>About:</strong> Translated, since 1999, provides professional translation services
+                                    with a team of more than 100,000 translators and is trusted by more than 40,000 customers.
+                                </p>
+
+                                <p class="paybox">
+                                    <strong>Contact: </strong>
+                                    <a href="http://www.translated.net/en/contact-us" target="_blank">http://www.translated.net/en/contact-us</a>
+                                </p>
+
+
+
 
                                 <p><!-- a href="#" target="_blank">
                                     <small>Why outsourcing is good for you and Matecat.</small>
@@ -60,7 +75,9 @@
                                 <div class="offer">
                                     <div class="tprice">
                                         <span class="tpricetitle">Professional Translation<br/>
-											<span class="tpricedesc" style="font-size:15px!important;">1 translator + quality control</span>
+											<span class="tpricedesc" style="font-size:15px!important;">
+                                                Subject: ${subject | string:Information Technology}
+                                            </span>
 										</span>
 					                    <span class="euro">€</span>
                                         <span class="displayprice" data-currency="EUR" data-rawprice="0.00"></span>
