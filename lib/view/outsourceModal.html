@@ -6,6 +6,14 @@
 <body>
 
 <div metal:define-macro="outsource_modal">
+    <!--ClickMeter.com code for on click conversion: hanno cliccato su show prizes -->
+    <script type='text/javascript'>
+        var ClickMeter_conversion_id = '5647F8BD60574A36AD75968F397774F5';
+        var ClickMeter_conversion_value = '0.00';
+        var ClickMeter_conversion_commission = '0.00';
+        var ClickMeter_conversion_parameter = 'empty';
+    </script>
+    <script type='text/javascript' id='cmconvscript' src='//www.clickmeter.com/js/conversionOnClick.js'></script>
 
     <div class="modal outsource" data-type="view">
         <div class="popup-outer closeClickingOutside"></div>
@@ -25,7 +33,7 @@
                         <a class="uploadbtn in-popup" target="_blank">Open</a>
                     </div>
                     <div class="outsourceto">
-                        <h2>Option #2 - Outsource to a translation company</h2>  <a class="uploadbtn showprices">Show
+                        <h2>Option #2 - Outsource to a translation company</h2>  <a  href='javascript:void(0)' onclick='trackConversion("#"); return false;' class="uploadbtn showprices">Show
                         prices</a>
 
                         <div class="revealprices">
