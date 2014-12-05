@@ -168,7 +168,7 @@ class downloadTMXController extends downloadController {
 
         list( $file_name, $mx_domain) = explode( "@", $this->userMail );
 
-        $file_name .= "_" . uniqid() . ".tmx";
+        $file_name .= "_" . uniqid() . ".zip";
 
         $buffer = ob_get_contents();
         ob_get_clean();
