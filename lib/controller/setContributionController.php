@@ -128,8 +128,9 @@ class setContributionController extends ajaxController {
             $config[ 'source_lang' ] = $this->source_lang;
             $config[ 'target_lang' ] = $this->target_lang;
             $config[ 'email' ]       = "demo@matecat.com";
-//          $config[ 'id_user' ]     = $this->translator_username; // No more Used
 
+            //Props
+            $config[ 'prop' ] = json_encode( CatUtils::getTMProps( $job_data ) );
 
             //instantiate TMS object
             $tms    = new TMS( $id_tms );
@@ -204,6 +205,7 @@ class setContributionController extends ajaxController {
             $this->result[ 'data' ] = "NOCONTRIB_OK";
         }
     }
+
 }
 
 

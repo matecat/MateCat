@@ -248,6 +248,7 @@ class glossaryController extends ajaxController {
 
         $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
         $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
+        $config[ 'prop' ]        = json_encode( CatUtils::getTMProps( $this->job_info ) );
 
         //prepare the error report
         $set_code = array();
@@ -314,6 +315,7 @@ class glossaryController extends ajaxController {
 
         $config[ 'segment' ]     = CatUtils::view2rawxliff( $config[ 'segment' ] );
         $config[ 'translation' ] = CatUtils::view2rawxliff( $config[ 'translation' ] );
+        $config[ 'prop' ]        = json_encode( CatUtils::getTMProps( $this->job_info ) );
 
         //prepare the error report
         $set_code = array();

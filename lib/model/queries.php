@@ -488,7 +488,7 @@ function getArrayOfSuggestionsJSON( $id_segment ) {
  */
 function getJobData( $id_job, $password = null ) {
 
-    $query = "SELECT source, target, id_mt_engine, id_tms, id_translator, tm_keys, status_owner AS status, password,
+    $query = "SELECT id, source, target, id_mt_engine, id_tms, id_translator, tm_keys, status_owner AS status, password,
 		job_first_segment, job_last_segment, create_date, owner,
 		new_words, draft_words, translated_words, approved_words, rejected_words, id_project
 			FROM jobs
