@@ -346,7 +346,7 @@ background-size: 170px;
 }
 
 
-.paybox{
+.paybox, .trustbox{
     font-size: 13px !important;
     margin-bottom: 0;
     margin-top: 0;
