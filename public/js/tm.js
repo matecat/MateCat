@@ -230,6 +230,9 @@ $.extend(UI, {
                 $('#inactivetm').addClass('filtering');
                 UI.filterInactiveTM($('#filterInactive').val());
             }
+        } ).on('click', '.mgmt-tm .downloadtmx', function(){
+            UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
+            $(this).addClass('disabled' ).addClass('downloading');
         });
 
 
@@ -871,6 +874,9 @@ $.extend(UI, {
         if($('#activetm .uploadfile.uploading').length) {
             APP.alert({msg: 'There is one or more TM uploads in progress. Try again when all uploads are completed!'});
             return false;
+        } else if( $( 'tr td a.downloading' ).length ){
+            APP.alert({msg: 'There is one or more TM downloads in progress. Try again when all downloads are completed or open another browser tab.'});
+            return false;
         } else {
             return true;
         }
@@ -1005,7 +1011,82 @@ $.extend(UI, {
     filterInactiveTM: function (txt) {
         $('#inactivetm tbody tr').removeClass('found');
         $('#inactivetm tbody td.privatekey:containsNC("' + txt + '"), #inactivetm tbody td.description:containsNC("' + txt + '")').parents('tr').addClass('found');
-    }
+    },
+    downloadTM: function( tm, button_class ) {
 
+        if ( !$( tm ).find( '.' + button_class ).hasClass( 'disabled' ) ) {
+
+            //add a random string to avoid collision for concurrent javascript requests
+            //in the same milli second, and also, because a string is needed for token and not number....
+            var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
+
+            //create a random Frame ID and form ID to get it uniquely
+            var iFrameID = 'iframeDownload_' + downloadToken;
+            var formID = 'form_' + downloadToken;
+
+            //create an iFrame element
+            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {
+                id: iFrameID,
+                src: ''
+            } );
+
+            $( "body" ).append( iFrameDownload );
+
+            iFrameDownload.ready( function () {
+
+                //create a GLOBAL setInterval so in anonymous function it can be disabled
+                downloadTimer = window.setInterval( function () {
+
+                    //check for cookie equals to it's value.
+                    //This is unique by definition and we can do multiple downloads
+                    var token = $.cookie( downloadToken );
+
+                    //if the cookie is found, download is completed
+                    //remove iframe an re-enable download button
+                    if ( token == downloadToken ) {
+                        $( tm ).find( '.' + button_class ).removeClass('disabled' ).removeClass('downloading');
+                        window.clearInterval( downloadTimer );
+                        $.cookie( downloadToken, null, {path: '/', expires: -1} );
+                        $( '#' + iFrameID ).remove();
+                    }
+
+                }, 2000 );
+            } );
+
+            //create the html form and append a token for download
+            var iFrameForm = $( document.createElement( 'form' ) ).attr( {
+                'id': formID,
+                'action': '/',
+                'method': 'POST'
+            } ).append(
+                    //action to call
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'action',
+                        value: 'downloadTMX'
+                    } ),
+                    //we tell to the controller to check a field in the post named downloadToken
+                    // and to set a cookie named as it's value with it's value ( equals )
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'downloadToken',
+                        value: downloadToken
+                    } ),
+                    //set other values
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'tm_key',
+                        value: $( '.privatekey', tm ).text()
+                    } )
+            );
+
+            //append from to newly created iFrame and submit form post
+            iFrameDownload.contents().find( 'body' ).append( iFrameForm );
+            console.log( iFrameDownload.contents().find( "#" + formID ) );
+            iFrameDownload.contents().find( "#" + formID ).submit();
+
+        }
+
+    }
 
 });

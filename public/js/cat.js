@@ -1721,112 +1721,82 @@ UI = {
 	goToFirstError: function() {
 		location.href = $('#point2seg').attr('href');
 	},
-    downloadTM: function(tm) {
-        console.log('eccoci');
+    downloadTM: function( tm, button_class ) {
 
-        //create an iFrame element
-        var iFrameDownloadTM = $( document.createElement( 'iframe' ) ).hide().prop({
-            id:'iframeDownloadTM',
-            src: ''
-        });
-        $("body").append( iFrameDownloadTM );
-        var downloadTMToken = new Date().getTime();
-        iFrameDownloadTM.ready(function () {
+        if ( !$( tm ).find( '.' + button_class ).hasClass( 'disabled' ) ) {
 
-            //create a GLOBAL setInterval so in anonymous function it can be disabled
-            downloadTMTimer = window.setInterval(function () {
+            //add a random string to avoid collision for concurrent javascript requests
+            //in the same milli second, and also, because a string is needed for token and not number....
+            var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
 
-                //check for cookie
-                var token = $.cookie('downloadTMToken');
-
-                //if the cookie is found, download is completed
-                //remove iframe an re-enable download button
-                if ( token == downloadTMToken ) {
-//                    $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
-                    window.clearInterval( downloadTMTimer );
-                    $.cookie('downloadTMToken', null, { path: '/', expires: -1 });
-//                    iFrameDownloadTM.remove();
-                }
-
-            }, 2000);
-        });
-        //clone the html form and append a token for download
-        var iFrameForm = $("#downloadTM").clone().append(
-            $( document.createElement( 'input' ) ).prop({
-                type:'hidden',
-                name:'downloadTMToken',
-                value: downloadTMToken
-            })
-        );
-
-        //append from to newly created iFrame and submit form post
-        iFrameDownloadTM.contents().find('body').append( iFrameForm );
-        console.log(iFrameDownloadTM.contents().find("#downloadTM"));
-        iFrameDownloadTM.contents().find("#downloadTM").submit();
-    },
-
-    continueDownload1: function() {
-
-        //check if we are in download status
-        if ( !$('#downloadProject').hasClass('disabled') ) {
-
-            //disable download button
-            $('#downloadProject').addClass('disabled' ).data( 'oldValue', $('#downloadProject' ).val() ).val('DOWNLOADING...');
+            //create a random Frame ID and form ID to get it uniquely
+            var iFrameID = 'iframeDownload_' + downloadToken;
+            var formID = 'form_' + downloadToken;
 
             //create an iFrame element
-            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop({
-                id:'iframeDownload',
+            var iFrameDownload = $( document.createElement( 'iframe' ) ).hide().prop( {
+                id: iFrameID,
                 src: ''
-            });
+            } );
 
-            //append iFrame to the DOM
-            $("body").append( iFrameDownload );
+            $( "body" ).append( iFrameDownload );
 
-            //generate a token download
-            var downloadToken = new Date().getTime();
-
-            //set event listner, on ready, attach an interval that check for finished download
-            iFrameDownload.ready(function () {
+            iFrameDownload.ready( function () {
 
                 //create a GLOBAL setInterval so in anonymous function it can be disabled
-                downloadTimer = window.setInterval(function () {
+                downloadTimer = window.setInterval( function () {
 
-                    //check for cookie
-                    var token = $.cookie('downloadToken');
+                    //check for cookie equals to it's value.
+                    //This is unique by definition and we can do multiple downloads
+                    var token = $.cookie( downloadToken );
 
                     //if the cookie is found, download is completed
                     //remove iframe an re-enable download button
                     if ( token == downloadToken ) {
-                        $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
+                        $( tm ).find( '.' + button_class ).removeClass('disabled' ).removeClass('downloading');
                         window.clearInterval( downloadTimer );
-                        $.cookie('downloadToken', null, { path: '/', expires: -1 });
-                        iFrameDownload.remove();
+                        $.cookie( downloadToken, null, {path: '/', expires: -1} );
+                        $( '#' + iFrameID ).remove();
                     }
 
-                }, 2000);
+                }, 2000 );
+            } );
 
-            });
-
-            //clone the html form and append a token for download
-            var iFrameForm = $("#downloadTM").clone().append(
-                $( document.createElement( 'input' ) ).prop({
-                    type:'hidden',
-                    name:'downloadToken',
-                    value: downloadToken
-                })
+            //create the html form and append a token for download
+            var iFrameForm = $( document.createElement( 'form' ) ).attr( {
+                'id': formID,
+                'action': '/',
+                'method': 'POST'
+            } ).append(
+                    //action to call
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'action',
+                        value: 'downloadTMX'
+                    } ),
+                    //we tell to the controller to check a field in the post named downloadToken
+                    // and to set a cookie named as it's value with it's value ( equals )
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'downloadToken',
+                        value: downloadToken
+                    } ),
+                    //set other values
+                    $( document.createElement( 'input' ) ).prop( {
+                        type: 'hidden',
+                        name: 'tm_key',
+                        value: $( '.privatekey', tm ).text()
+                    } )
             );
 
             //append from to newly created iFrame and submit form post
-            iFrameDownload.contents().find('body').append( iFrameForm );
-            iFrameDownload.contents().find("#downloadTM").submit();
+            iFrameDownload.contents().find( 'body' ).append( iFrameForm );
+            console.log( iFrameDownload.contents().find( "#" + formID ) );
+            iFrameDownload.contents().find( "#" + formID ).submit();
 
-        } else {
-            //we are in download status
         }
 
     },
-
-
 
     continueDownload: function() {
 
@@ -1846,7 +1816,7 @@ UI = {
             $("body").append( iFrameDownload );
 
             //generate a token download
-            var downloadToken = new Date().getTime();
+            var downloadToken = new Date().getTime() + "_" + parseInt( Math.random( 0, 1 ) * 10000000 );
 
             //set event listner, on ready, attach an interval that check for finished download
             iFrameDownload.ready(function () {
@@ -1855,14 +1825,14 @@ UI = {
                 downloadTimer = window.setInterval(function () {
 
                     //check for cookie
-                    var token = $.cookie('downloadToken');
+                    var token = $.cookie( downloadToken );
 
                     //if the cookie is found, download is completed
                     //remove iframe an re-enable download button
                     if ( token == downloadToken ) {
                         $('#downloadProject').removeClass('disabled').val( $('#downloadProject' ).data('oldValue') ).removeData('oldValue');
                         window.clearInterval( downloadTimer );
-                        $.cookie('downloadToken', null, { path: '/', expires: -1 });
+                        $.cookie( downloadToken, null, { path: '/', expires: -1 });
                         iFrameDownload.remove();
                     }
 
@@ -7945,7 +7915,7 @@ function setBrowserHistoryBehavior() {
 }
 
 function goodbye(e) {
-	if ($('#downloadProject').hasClass('disabled')) {
+	if ($('#downloadProject').hasClass('disabled') || $( 'tr td a.downloading' ).length ) {
 		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
 		var leave_message = 'You have a pending download. Are you sure you want to quit?';
 		if(dont_confirm_leave!==1) {
@@ -8417,7 +8387,10 @@ $.extend(UI, {
                 $('#inactivetm').addClass('filtering');
                 UI.filterInactiveTM($('#filterInactive').val());
             }
-        });
+        }).on('click', '.mgmt-tm .downloadtmx', function(e){
+            UI.downloadTM( $(this).parentsUntil('tbody', 'tr'), 'downloadtmx' );
+            $(this).addClass('disabled' ).addClass('downloading');
+        });;
 
 
         // script per filtrare il contenuto dinamicamente, da qui: http://www.datatables.net

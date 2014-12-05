@@ -152,9 +152,9 @@ class downloadTMXController extends downloadController {
 
             Utils::sendErrMailReport( $r, "Download TMX Error: " . $e->getMessage() );
 
-            $this->unlockToken();
 
-            header("HTTP/1.0 404 Not Found");
+            $this->unlockToken();
+            header("HTTP/1.0 403 Forbidden");
 
             exit;
 
