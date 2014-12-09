@@ -1048,7 +1048,7 @@ $.extend(UI, {
                         $( tm ).find( '.' + button_class ).removeClass('disabled' ).removeClass('downloading');
                         window.clearInterval( downloadTimer );
                         $.cookie( downloadToken, null, {path: '/', expires: -1} );
-                        console.log('msg: ', $('#' + iFrameID) );
+                        console.log('msg: ', $('#' + iFrameID).html() );
 
 //                        $( '#' + iFrameID ).remove();
                     }
