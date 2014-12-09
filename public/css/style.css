@@ -2142,7 +2142,8 @@ footer nav
 	color: #767676 !important;
 	font-size: 13px;
 	font-style: italic;
-	padding-bottom: 3px;
+	margin-top: -2px;
+	height: 32px;
 	vertical-align: middle;
 }
 .editor .footer .locked
@@ -2823,6 +2824,28 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .s
 {
     background-image: url(../img/crunchedtagclose.png);
 }
+
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab.order-error,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab.order-error
+{
+    background-image: url(../img/crunchedtag-oe.png);
+    opacity: 1;
+}
+
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag.order-error,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag.order-error
+{
+    background-image: url(../img/crunchedtagopen-oe.png);
+    opacity: 1;
+}
+
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag.order-error,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag.order-error
+{
+    background-image: url(../img/crunchedtagclose-oe.png);
+    opacity: 1;
+}
+
 
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag,
 body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag,

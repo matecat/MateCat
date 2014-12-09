@@ -2111,11 +2111,11 @@ color: #000;
 
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-b6jcjs');
-	src:url('fonts/icomoon.eot?#iefix-b6jcjs') format('embedded-opentype'),
-		url('fonts/icomoon.woff?-b6jcjs') format('woff'),
-		url('fonts/icomoon.ttf?-b6jcjs') format('truetype'),
-		url('fonts/icomoon.svg?-b6jcjs#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?-uz2gvx');
+	src:url('fonts/icomoon.eot?#iefix-uz2gvx') format('embedded-opentype'),
+		url('fonts/icomoon.woff?-uz2gvx') format('woff'),
+		url('fonts/icomoon.ttf?-uz2gvx') format('truetype'),
+		url('fonts/icomoon.svg?-uz2gvx#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -2314,6 +2314,9 @@ cursor: pointer;
 }
 .icon-warning:before {
 	content: "\f071";
+}
+.icon-play:before {
+	content: "\f04b";
 }
 .icon-sign-in:before {
 	content: "\f090";
