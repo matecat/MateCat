@@ -2859,7 +2859,7 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .s
     width: 12px;
     background-size: 100%;
     opacity: 0.4;
-    background-position: 1px 9px;
+    background-position: 0px 9px;
     background-repeat: no-repeat;
 }
 
