@@ -1749,7 +1749,8 @@ UI = {
                     //check for cookie equals to it's value.
                     //This is unique by definition and we can do multiple downloads
                     var token = $.cookie( downloadToken );
-
+                    console.log( token );
+                    console.log( token );
                     //if the cookie is found, download is completed
                     //remove iframe an re-enable download button
                     if ( token == downloadToken ) {
