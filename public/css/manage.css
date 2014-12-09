@@ -126,33 +126,29 @@ body.manage a.copy
 
 body.manage .actions a
 	{
-	display: block;
+	display: inline-block;
 	width: 18px;
 	height: 18px;
-	margin: -17px 0 0 16px !important;
+	float: left;
 	text-indent: -10000px;
-	position: absolute;
-	}
+margin-left: 4px	}
 
 	body.manage .actions a.change
 		{
-		margin-left: 8px !important;
+		margin-left:10px!important;
 		background: url(../img/sprite.png) -13px -136px no-repeat;
 		}
 		
 	body.manage .actions a.cancel
 		{
-		margin-left: 35px !important;
 		background: url(../img/sprite.png) -13px -78px no-repeat;
 		}
 	body.manage .actions a.archive
 		{
-		margin-left: 63px !important;
 		background: url(../img/sprite.png) -13px -59px no-repeat;
 		}
 	body.manage .actions a.resume
 		{
-		margin-left: 35px !important;
 		background: url(../img/sprite.png) -13px -98px no-repeat;
 		}
 	body.manage .actions a.unarchive
@@ -163,10 +159,8 @@ body.manage .actions a
 
     body.manage .actions a.sdlxliff {
         text-indent: 0;
-        width: 94px;
-        height: auto;
-        position: absolute;
-        margin: 2px 4px 0 -3px !important;
+text-decoration: none;
+color: #999;
     }
 
 	body.manage tr[data-status=active] .actions a.resume,
