@@ -21,8 +21,6 @@ abstract class downloadController extends controller {
                     2147483647            // expires January 1, 2038
             );
 
-//            Log::doLog( "******* $this->downloadToken " );
-
         }
 
     }
