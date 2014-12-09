@@ -833,9 +833,11 @@ UI = {
 		}
 	},
 	
-	gotoOpenSegment: function() {
-		if ($('#segment-' + this.currentSegmentId).length) {
-			this.scrollSegment(this.currentSegment);
+	gotoOpenSegment: function(quick) {
+        quick = quick || false;
+
+        if ($('#segment-' + this.currentSegmentId).length) {
+			this.scrollSegment(this.currentSegment, false, quick);
 		} else {
 			$('#outer').empty();
 			this.render({
@@ -1099,7 +1101,7 @@ UI = {
 		}
 	},
 	pointToOpenSegment: function() {
-		this.gotoOpenSegment();
+        this.gotoOpenSegment(true);
 	},
 	removeButtons: function(byButton) {
 		var segment = (byButton) ? this.currentSegment : this.lastOpenedSegment;
@@ -1278,7 +1280,8 @@ UI = {
 		});
 //        this.render(false, segment.selector.split('-')[1]);
 	},
-	scrollSegment: function(segment, highlight) {
+	scrollSegment: function(segment, highlight, quick) {
+        quick = quick || false;
 		highlight = highlight || false;
 //		console.log(segment);
 //        segment = (noOpen)? $('#segment-'+segment) : segment;
@@ -1323,12 +1326,13 @@ UI = {
 		}
 
 		$("html,body").stop();
+        pointSpeed = (quick)? 0 : 500;
 		$("html,body").animate({
 			scrollTop: destinationTop - 20
-		}, 500);
+		}, pointSpeed);
 		setTimeout(function() {
 			UI.goingToNext = false;
-		}, 500);
+		}, pointSpeed);
 	},
 	segmentIsLoaded: function(segmentId) {
 		if ($('#segment-' + segmentId).length) {
@@ -3549,6 +3553,7 @@ $.extend(UI, {
             console.log('click su tagMode toggle');
             $(this).toggleClass('active');
             UI.body.toggleClass('tagmode-default-extended');
+            console.log(typeof UI.currentSegment);
             if(typeof UI.currentSegment != 'undefined') UI.pointToOpenSegment();
 
 //		}).bind('keydown', 'Backspace', function(e) {
@@ -7840,7 +7845,7 @@ function setBrowserHistoryBehavior() {
 }
 
 function goodbye(e) {
-	if ($('#downloadProject').hasClass('disabled') || $( 'tr td a.downloading' ).length ) {
+    if ($('#downloadProject').hasClass('disabled') || $( 'tr td a.downloading' ).length ) {
 		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
 		var leave_message = 'You have a pending download. Are you sure you want to quit?';
 		if(dont_confirm_leave!==1) {
@@ -9117,7 +9122,7 @@ $.extend(UI, {
             iFrameDownload.ready( function () {
 
                 //create a GLOBAL setInterval so in anonymous function it can be disabled
-                downloadTimer = window.setInterval( function () {
+                var downloadTimer = window.setInterval( function () {
 
                     //check for cookie equals to it's value.
                     //This is unique by definition and we can do multiple downloads
