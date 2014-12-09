@@ -1047,6 +1047,12 @@ $.extend(UI, {
                         $( tm ).find( '.' + button_class ).removeClass('disabled' ).removeClass('downloading');
                         window.clearInterval( downloadTimer );
                         $.cookie( downloadToken, null, {path: '/', expires: -1} );
+                        errorMsg = $('#' + iFrameID).contents().find('body').text();
+                        errorKey = $(tm).attr('data-key');
+                        if(errorMsg != '') {
+                            APP.alert('Error on downloading a TM with key ' + errorKey + ':<br />' + errorMsg);
+                        }
+
                         $( '#' + iFrameID ).remove();
                     }
 

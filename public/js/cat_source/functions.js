@@ -509,7 +509,7 @@ function setBrowserHistoryBehavior() {
 }
 
 function goodbye(e) {
-	if ($('#downloadProject').hasClass('disabled')) {
+    if ($('#downloadProject').hasClass('disabled') || $( 'tr td a.downloading' ).length ) {
 		var dont_confirm_leave = 0; //set dont_confirm_leave to 1 when you want the user to be able to leave withou confirmation
 		var leave_message = 'You have a pending download. Are you sure you want to quit?';
 		if(dont_confirm_leave!==1) {
