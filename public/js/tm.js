@@ -1040,7 +1040,6 @@ $.extend(UI, {
                     //check for cookie equals to it's value.
                     //This is unique by definition and we can do multiple downloads
                     var token = $.cookie( downloadToken );
-                    console.log('token: ', token);
 
                     //if the cookie is found, download is completed
                     //remove iframe an re-enable download button
@@ -1048,9 +1047,13 @@ $.extend(UI, {
                         $( tm ).find( '.' + button_class ).removeClass('disabled' ).removeClass('downloading');
                         window.clearInterval( downloadTimer );
                         $.cookie( downloadToken, null, {path: '/', expires: -1} );
-                        console.log('msg: ', $('#' + iFrameID).html() );
+                        errorMsg = $('#' + iFrameID).contents().find('body').text();
+                        errorKey = $(tm).attr('data-key');
+                        if(errorMsg != '') {
+                            APP.alert('Error on downloading a TM with key ' + errorKey + ':<br />' + errorMsg);
+                        }
 
-//                        $( '#' + iFrameID ).remove();
+                        $( '#' + iFrameID ).remove();
                     }
 
                 }, 2000 );
