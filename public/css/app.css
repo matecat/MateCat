@@ -893,6 +893,9 @@ form.add-TM-Form {
     float: left;
     margin-bottom: 6px;
 }
+
+
+
 .popup p
 {
 	font-size: 18px;
@@ -2108,11 +2111,11 @@ color: #000;
 
 @font-face {
 	font-family: 'icomoon';
-	src:url('fonts/icomoon.eot?-s96yw7');
-	src:url('fonts/icomoon.eot?#iefix-s96yw7') format('embedded-opentype'),
-		url('fonts/icomoon.woff?-s96yw7') format('woff'),
-		url('fonts/icomoon.ttf?-s96yw7') format('truetype'),
-		url('fonts/icomoon.svg?-s96yw7#icomoon') format('svg');
+	src:url('fonts/icomoon.eot?-b6jcjs');
+	src:url('fonts/icomoon.eot?#iefix-b6jcjs') format('embedded-opentype'),
+		url('fonts/icomoon.woff?-b6jcjs') format('woff'),
+		url('fonts/icomoon.ttf?-b6jcjs') format('truetype'),
+		url('fonts/icomoon.svg?-b6jcjs#icomoon') format('svg');
 	font-weight: normal;
 	font-style: normal;
 }
@@ -2154,6 +2157,12 @@ color: #000;
 		padding: 0 10px 0 0;
 	vertical-align: text-top;
 
+}
+
+.icon-tag-expand:before {
+content: "...";
+margin-top: -5px;
+float: left;
 }
 
 .canceladdtmx.btn-grey .text:before {
@@ -2273,6 +2282,9 @@ cursor: pointer;
 .icon-chevron-right:before {
 	content: "\f054";
 }
+.icon-chevron-left:before {
+	content: "\f053";
+}
 .icon-plus-circle:before {
 	content: "\f055";
 }
@@ -2350,6 +2362,12 @@ cursor: pointer;
 }
 .icon-language:before {
 	content: "\f1ab";
+}
+.icon-chevron-right:before {
+	content: "\f054";
+}
+.icon-code:before {
+	content: "\f121";
 }
 .icon-paw:before {
 	content: "\f1b0";
@@ -5168,6 +5186,9 @@ section .toolbar .tagModeToggle {
 section .toolbar span {
     font-size: 150%;
 }
+.tagModeToggle span:before {
+float: left;
+}
 .editToolbar
 {
 	/*float: left;*/	
@@ -5175,6 +5196,7 @@ section .toolbar span {
 	display: block;
 	visibility: hidden;
 	margin-top: -6px;
+	padding-top:10px;
 }
 .editToolbar.visible
 {
@@ -5249,16 +5271,70 @@ section .toolbar span {
     float: left;
 }
 
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab
+{
+    background-image: url(../img/crunchedtag.png);
+}
 
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked,
-body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag
+{
+    background-image: url(../img/crunchedtagopen.png);
+}
+
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag
+{
+    background-image: url(../img/crunchedtagclose.png);
+}
+
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.startTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.selfClosingTab,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .editarea .locked.endTag,
+body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .source .locked.endTag
 {
     text-indent: -9999px;
     display: inline-block;
     width: 12px;
-    background: url(../img/crunchedtag.png) 1px 12px no-repeat;
-    background-size: 80%;
-    opacity: 0.2;
+    background-size: 100%;
+    opacity: 0.4;
+    background-position: 1px 9px;
+    background-repeat: no-repeat;
+}
+
+
+
+.tagModeToggle {
+padding: 10px 2px;
+border: 1px solid #fff;
+color: #444!important;
+}
+
+.tagModeToggle:hover, .tagModeToggle.active {
+	color:#808080!important;
+}
+
+.icon-tag-expand {
+	display: none;
+}
+
+.tagModeToggle span {
+	float: left;
+}
+
+.tagModeToggle span.icon-chevron-right {
+margin-left: 12px;
+}
+
+.tagModeToggle.active span.icon-chevron-right {
+	margin-left: 0px;
+}
+
+.tagModeToggle.active .icon-tag-expand {
+	display: inline-block;
 }
 
 .textarea-container .tagMode {
@@ -5274,6 +5350,13 @@ body.tagModes .editor.hasTags .textarea-container .tagMode {
 }
 body.tagModes .editor.hasTags .toolbar .tagModeToggle {
     display: block;
+}
+
+.tagModeToggle span.icon-expand, .tagModeToggle span.icon-compress {
+-ms-transform: rotate(45deg);
+-webkit-transform: rotate(45deg);
+transform: rotate(45deg);
+display: inline-block;
 }
 
 .textarea-container .tagMode li {
