@@ -43,7 +43,7 @@ class newProjectController extends viewController {
         $this->lang_handler    = Languages::getInstance();
         $this->subject_handler = langs_LanguageDomains::getInstance();
 
-        $this->subjectArray = $this->subject_handler->getEnabledLanguages();
+        $this->subjectArray = $this->subject_handler->getEnabledDomains();
     }
 
     public function doAction() {

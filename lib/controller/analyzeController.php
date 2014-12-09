@@ -48,6 +48,7 @@ class analyzeController extends viewController {
     private $num_segments = 0;
     private $num_segments_analyzed = 0;
     private $proj_payable_rates;
+    private $subject;
 
     public function __construct() {
 
@@ -90,6 +91,11 @@ class analyzeController extends viewController {
 
         if ( empty( $project_by_jobs_data ) ) {
             $this->project_not_found = true;
+        }
+
+        //pick the project subject from the first job
+        if ( count( $project_by_jobs_data ) > 0 ) {
+            $this->subject = $project_by_jobs_data[ 0 ][ 'subject' ];
         }
 
         foreach ( $project_by_jobs_data as &$p_jdata ) {
@@ -157,6 +163,7 @@ class analyzeController extends viewController {
             $target_short = $p_jdata[ 'target' ];
             $password     = $p_jdata[ 'jpassword' ];
 
+
             unset( $p_jdata[ 'name' ] );
             unset( $p_jdata[ 'source' ] );
             unset( $p_jdata[ 'target' ] );
@@ -176,7 +183,7 @@ class analyzeController extends viewController {
                 $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'jpassword' ]    = $password;
                 $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'source_short' ] = $source_short;
                 $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'target_short' ] = $target_short;
-                $this->jobs[ $p_jdata[ 'jid' ] ][ 'rates' ] = $p_jdata[ 'payable_rates' ];
+                $this->jobs[ $p_jdata[ 'jid' ] ][ 'rates' ]                                 = $p_jdata[ 'payable_rates' ];
 
                 if ( !array_key_exists( "total_raw_word_count", $this->jobs[ $p_jdata[ 'jid' ] ] ) ) {
                     $this->jobs[ $p_jdata[ 'jid' ] ][ 'chunks' ][ $password ][ 'total_raw_word_count' ] = 0;
@@ -295,7 +302,6 @@ class analyzeController extends viewController {
     public function setTemplateVars() {
 
 
-
         $this->template->jobs                       = $this->jobs;
         $this->template->fast_analysis_wc           = $this->fast_analysis_wc;
         $this->template->fast_analysis_wc_print     = $this->fast_analysis_wc_print;
@@ -324,6 +330,10 @@ class analyzeController extends viewController {
         $this->template->build_number               = INIT::$BUILD_NUMBER;
         $this->template->enable_outsource           = INIT::$ENABLE_OUTSOURCE;
         $this->template->outsource_service_login    = $this->_outsource_login_API;
+
+        $langDomains = langs_LanguageDomains::getInstance();
+        $this->subject = $langDomains::getDisplayDomain($this->subject);
+        $this->template->subject                    = $this->subject;
 
         $this->template->isLoggedIn = $this->isLoggedIn();
 

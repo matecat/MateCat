@@ -87,7 +87,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
                 $jobData = getJobData( $this->jobList[ 0 ][ 'jid' ], $this->jobList[ 0 ][ 'jpassword' ] );
                 $subject = $jobData[ 'subject' ];
 
-                $itemCart                = new Shop_ItemHTSQuoteJob();
+                $itemCarokt                = new Shop_ItemHTSQuoteJob();
                 $itemCart[ 'id' ]        = $project_url_api;
                 $itemCart[ 'show_info' ] = $raw_volAnalysis;
 

@@ -37,8 +37,15 @@ class langs_LanguageDomains{
 	}
 
 	//get list of languages, as RFC3066
-	public static function getEnabledLanguages(){
+	public static function getEnabledDomains(){
 		return self::$subjectMap;
 	}
+
+    public static function getDisplayDomain($domainID){
+        foreach (self::$subjectMap as $domain){
+            if($domain['key'] == $domainID) return $domain['display'];
+        }
+        return "Generic";
+    }
 }
 ?>
