@@ -684,7 +684,8 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
             action: 'convertFile',
             file_name: fname,
             source_lang: $('#source-lang').val(),
-            target_lang: $('#target-lang').val()
+            target_lang: $('#target-lang').val(),
+            segmentation_rule: $('#segm_rule' ).val()
         },
         type: 'POST',
         dataType: 'json',
@@ -710,7 +711,7 @@ convertFile = function(fname,filerow,filesize, enforceConversion) {
         success: function(d){
 
 //			falsePositive = ((typeof this.context == 'undefined')||(!this.context))? false : true; // suggested solution
-			falsePositive = (typeof this.context == 'undefined')? false : true; // old solution
+			falsePositive = (typeof this.context == 'undefined') ? false : true; // old solution
             filerow.removeClass('converting');
 			filerow.addClass('ready');
            	if( d.code == 1 ) {
