@@ -1035,7 +1035,7 @@ $.extend(UI, {
             iFrameDownload.ready( function () {
 
                 //create a GLOBAL setInterval so in anonymous function it can be disabled
-                downloadTimer = window.setInterval( function () {
+                var downloadTimer = window.setInterval( function () {
 
                     //check for cookie equals to it's value.
                     //This is unique by definition and we can do multiple downloads
