@@ -9,7 +9,7 @@
  * @author domenico domenico@translated.net / ostico@gmail.com
  * Date: 29/04/14
  * Time: 10.48
- * 
+ *
  */
 class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
     /**
@@ -18,14 +18,14 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
      * There will be defined the callback urls for success or failure on login system
      *
      */
-    public function __construct(){
+    public function __construct() {
 
         //SESSION ENABLED
         INIT::sessionStart();
 
-        $this->currency="EUR";
-        $this->change_rate= 1;
-        
+        $this->currency    = "EUR";
+        $this->change_rate = 1;
+
         /**
          * @see OutsourceTo_AbstractProvider::$_outsource_login_url_ok
          */
@@ -40,7 +40,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
      *
      * @param array|null $volAnalysis
      */
-    public function performQuote( $volAnalysis = null ){
+    public function performQuote( $volAnalysis = null ) {
 
         /**
          * cache this job info for 20 minutes ( session duration )
@@ -61,21 +61,21 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
 
                 $options = array(
-                        CURLOPT_HEADER => false,
+                        CURLOPT_HEADER         => false,
                         CURLOPT_RETURNTRANSFER => true,
-                        CURLOPT_HEADER => 0,
-                        CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                        CURLOPT_HEADER         => 0,
+                        CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
                         CURLOPT_CONNECTTIMEOUT => 5, // a timeout to call itself should not be too much higher :D
                         CURLOPT_SSL_VERIFYPEER => true,
                         CURLOPT_SSL_VERIFYHOST => 2
                 );
 
                 //prepare handlers for curl to quote service
-                $mh = new MultiCurlHandler();
+                $mh           = new MultiCurlHandler();
                 $resourceHash = $mh->createResource( $project_url_api, $options );
                 $mh->multiExec();
 
-                if( $mh->hasError( $resourceHash ) ){
+                if ( $mh->hasError( $resourceHash ) ) {
                     Log::doLog( $mh->getError( $resourceHash ) );
                 }
 
@@ -83,11 +83,15 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
                 $mh->multiCurlCloseAll();
 
-//                Log::doLog( "CURL RETRIEVED STATUS: " . $raw_volAnalysis );
+                //retrieve the project subject: pick the project's first job and get the subject
+                $jobData = getJobData( $this->jobList[ 0 ][ 'jid' ], $this->jobList[ 0 ][ 'jpassword' ] );
+                $subject = $jobData[ 'subject' ];
 
                 $itemCart                = new Shop_ItemHTSQuoteJob();
                 $itemCart[ 'id' ]        = $project_url_api;
                 $itemCart[ 'show_info' ] = $raw_volAnalysis;
+
+                $itemCart[ 'subject' ] = $subject;
 
                 $cache_cart->addItem( $itemCart );
 
@@ -95,6 +99,7 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
 
                 $tmp_project_cache = $cache_cart->getItem( $project_url_api );
                 $raw_volAnalysis   = $tmp_project_cache[ 'show_info' ];
+                $subject = $tmp_project_cache['subject'];
 
             }
 
@@ -105,24 +110,24 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         }
 
 //        Log::doLog( $volAnalysis );
-        $_jobLangs  = array();
+        $_jobLangs = array();
 
         $options = array(
-                CURLOPT_HEADER => false,
+                CURLOPT_HEADER         => false,
                 CURLOPT_RETURNTRANSFER => true,
-                CURLOPT_HEADER => 0,
-                CURLOPT_USERAGENT => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
+                CURLOPT_HEADER         => 0,
+                CURLOPT_USERAGENT      => INIT::MATECAT_USER_AGENT . INIT::$BUILD_NUMBER,
                 CURLOPT_CONNECTTIMEOUT => 10,
-		        CURLOPT_SSL_VERIFYPEER => true,
+                CURLOPT_SSL_VERIFYPEER => true,
                 CURLOPT_SSL_VERIFYHOST => 2
         );
 
         //prepare handlers for curl to quote service
         $mh = new MultiCurlHandler();
-        foreach( $this->jobList as $job ){
+        foreach ( $this->jobList as $job ) {
 
             //trim decimals to int
-            $job_payableWords =  (int)$volAnalysis[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ][ $job['jpassword'] ]['TOTAL_PAYABLE'][0];
+            $job_payableWords = (int)$volAnalysis[ 'data' ][ 'jobs' ][ $job[ 'jid' ] ][ 'totals' ][ $job[ 'jpassword' ] ][ 'TOTAL_PAYABLE' ][ 0 ];
 
             /*
              * //languages are in the form:
@@ -135,28 +140,29 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
              *   },
              *
              */
-            $langPairs = $volAnalysis[ 'jobs' ][ 'langpairs' ][ $job[ 'jid' ] . "-" .$job['jpassword'] ];
+            $langPairs = $volAnalysis[ 'jobs' ][ 'langpairs' ][ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ];
 
             $_langPairs_array = explode( "|", $langPairs );
-            $source = $_langPairs_array[0];
-            $target = $_langPairs_array[1];
+            $source           = $_langPairs_array[ 0 ];
+            $target           = $_langPairs_array[ 1 ];
 
             //save langpairs of the jobs
             $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'source' ] = $source;
             $_jobLangs[ $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ][ 'target' ] = $target;
 
-            $url = "https://www.translated.net/hts/?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target&pn=MATECAT_{$job[ 'jid' ]}-{$job['jpassword']}&w=$job_payableWords&df=matecat&matecat_pid=" . $this->pid . "&matecat_ppass=" . $this->ppassword . "&matecat_pname=" . $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ];
+            $url = "https://www.translated.net/hts/?f=quote&cid=htsdemo&p=htsdemo5&s=$source&t=$target&pn=MATECAT_{$job['jid']}-{$job['jpassword']}&w=$job_payableWords&df=matecat&matecat_pid=" . $this->pid .
+                    "&matecat_ppass=" . $this->ppassword .
+                    "&matecat_pname=" . $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ] .
+                    "&subject=" . $subject;
 
-            if( !$cache_cart->itemExists( $job[ 'jid' ] . "-" . $job['jpassword'] ) ){
+            if ( !$cache_cart->itemExists( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ) ) {
                 Log::doLog( "Not Found in Cache. Call url for Quote:  " . $url );
-                $tokenHash = $mh->createResource( $url, $options, $job[ 'jid' ] . "-" .$job['jpassword'] );
-            }
-
-            else{
-                $cartElem = $cache_cart->getItem( $job[ 'jid' ] . "-" . $job['jpassword'] );
+                $tokenHash = $mh->createResource( $url, $options, $job[ 'jid' ] . "-" . $job[ 'jpassword' ] );
+            } else {
+                $cartElem               = $cache_cart->getItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] );
                 $cartElem[ "currency" ] = $this->currency;
                 $cartElem[ "timezone" ] = $this->timezone;
-                $cache_cart->delItem( $job[ 'jid' ] . "-" . $job['jpassword'] );
+                $cache_cart->delItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] );
                 $cache_cart->addItem( $cartElem );
             }
         }
@@ -168,9 +174,9 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
         $failures = array();
 
         //fetch contents and store in cache if there are
-        foreach( $res as $jpid => $quote ){
+        foreach ( $res as $jpid => $quote ) {
 
-            if( $mh->hasError( $jpid ) ){
+            if ( $mh->hasError( $jpid ) ) {
                 Log::doLog( $mh->getError( $jpid ) );
             }
 
@@ -185,9 +191,9 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
              *   1
              */
 
-            Log::doLog($quote);
+            Log::doLog( $quote );
 
-            $result_quote = explode( "\n", $quote );
+            $result_quote                = explode( "\n", $quote );
             $itemCart                    = new Shop_ItemHTSQuoteJob();
             $itemCart[ 'id' ]            = $jpid;
             $itemCart[ 'project_name' ]  = $volAnalysis[ 'data' ][ 'summary' ][ 'NAME' ];
@@ -198,31 +204,34 @@ class OutsourceTo_Translated extends OutsourceTo_AbstractProvider {
             $itemCart[ 'currency' ]      = $this->currency;
             $itemCart[ 'timezone' ]      = $this->timezone;
             $itemCart[ 'quote_pid' ]     = $result_quote[ 5 ];
-            $itemCart[ 'source' ]        = $_jobLangs[ $jpid ]['source']; //get the right language
-            $itemCart[ 'target' ]        = $_jobLangs[ $jpid ]['target']; //get the right language
+            $itemCart[ 'source' ]        = $_jobLangs[ $jpid ][ 'source' ]; //get the right language
+            $itemCart[ 'target' ]        = $_jobLangs[ $jpid ][ 'target' ]; //get the right language
             $itemCart[ 'show_info' ]     = $result_quote[ 6 ];
+            $itemCart[ 'subject' ]       = $subject;
 
             $cache_cart->addItem( $itemCart );
 
-            Log::doLog($itemCart);
+            Log::doLog( $itemCart );
 
             //Oops we got an error
-            if( $itemCart[ 'price' ] == 0 && empty( $itemCart[ 'words' ] ) ) $failures[$jpid] = $jpid;
+            if ( $itemCart[ 'price' ] == 0 && empty( $itemCart[ 'words' ] ) ) {
+                $failures[ $jpid ] = $jpid;
+            }
 
         }
 
         $shopping_cart = Shop_Cart::getInstance( 'outsource_to_external' );
 
         //now get the right contents
-        foreach ( $this->jobList as $job ){
-            $shopping_cart->delItem( $job[ 'jid' ] . "-" . $job['jpassword'] );
-            $shopping_cart->addItem( $cache_cart->getItem( $job[ 'jid' ] . "-" . $job['jpassword'] ) );
-            $this->_quote_result = array( $shopping_cart->getItem( $job[ 'jid' ] . "-" . $job['jpassword'] ) );
+        foreach ( $this->jobList as $job ) {
+            $shopping_cart->delItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] );
+            $shopping_cart->addItem( $cache_cart->getItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ) );
+            $this->_quote_result = array( $shopping_cart->getItem( $job[ 'jid' ] . "-" . $job[ 'jpassword' ] ) );
         }
 
         //check for failures.. destroy the cache
-        if( !empty( $failures ) ){
-            foreach ( $failures as $jpid ){
+        if ( !empty( $failures ) ) {
+            foreach ( $failures as $jpid ) {
                 $cache_cart->delItem( $jpid );
             }
         }

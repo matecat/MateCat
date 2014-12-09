@@ -4655,6 +4655,9 @@ $.extend(UI, {
 			if (UI.droppingInEditarea) {
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
 			}
+            if(!UI.editarea.find('.locked').length) {
+                UI.currentSegment.removeClass('hasTags');
+            }
 /*
 			if (!UI.body.hasClass('searchActive'))
 				setTimeout(function() {
@@ -6106,7 +6109,7 @@ $.extend(UI, {
 
     // TAG MISMATCH
 	markTagMismatch: function(d) {
-        if($.parseJSON(d.warnings).length) {
+        if(($.parseJSON(d.warnings).length)&&(!$('#segment-' + d.id_segment + ' .text .showExtendedTags').length)) {
             $('#segment-' + d.id_segment + ' .text p.warnings').last().after('<a href="#" class="showExtendedTags">Show</a>');
 //            $('#segment-' + d.id_segment).attr('data-tagMode', 'extended');
         }

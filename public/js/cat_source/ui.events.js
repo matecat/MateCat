@@ -1256,6 +1256,9 @@ $.extend(UI, {
 			if (UI.droppingInEditarea) {
 				UI.cleanDroppedTag(UI.editarea, UI.beforeDropEditareaHTML);
 			}
+            if(!UI.editarea.find('.locked').length) {
+                UI.currentSegment.removeClass('hasTags');
+            }
 /*
 			if (!UI.body.hasClass('searchActive'))
 				setTimeout(function() {
