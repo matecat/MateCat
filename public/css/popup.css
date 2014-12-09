@@ -328,11 +328,7 @@ font-weight:normal;
 .pricebox .tprice .euro, .pricebox .tprice .displayprice {display:inline;}
 .pricebox .tprice {line-height:30px; margin-bottom:10px;}
 .pricebox delivery {line-height:30px;}
-.pricebox .paybox {
-    border-radius: 4px;
-    background: url(../img/card.png) no-repeat 250px 37px;
-    background-size: 170px;
-}
+
 .uploadbtn.showprices  
 {
 	display: none;
@@ -341,7 +337,7 @@ font-weight:normal;
 }
 .pricebox .paybox {
 border-radius: 4px;
-background: url(../img/card.png) no-repeat 250px 37px;
+background: url(../img/card.png) no-repeat 330px 37px;
 background-size: 170px;
 }
 
@@ -432,9 +428,9 @@ display: block;
 cursor: pointer;
 }
 
-@media screen and ( max-height: 750px ) and (min-height: 650px) {
+@media screen and ( max-height: 770px ) and (min-height: 650px) {
     .outsource.modal .popup {
-top: 20px;
+top: 0px;
 margin: 0 0 0 -400px;
 }
 
@@ -447,7 +443,8 @@ margin: 0 0 0 -400px;
    .outsource.modal .popup p {
 font-size: 18px;
 line-height: 22px;
-background: none;
+background-size: 150px;
+background-position: 345px 25px;
 }
 .outsource.modal h2 {
 font-size: 18px;
@@ -472,8 +469,20 @@ zoom: 0.8;
 top: 0px;
 margin: 0 0 0 -400px;
 }
+
+.popup .x-popup, .mgmt-panel .x-popup, .popup-tm .x-popup {
+background: url(../img/sprite.png) 10px -299px no-repeat;
+background-size: 22px;
+}
+
+.popup .x-popup:hover, .popup-tm .x-popup:hover {
+background: url(../img/sprite.png) 10px -328px no-repeat;
+background-size: 22px;
+}
+
 .outsource.modal .popup p {
-background: none;
+background-size: 200px;
+background-position: 300px 35px;
 }
 .pricebox .total {
     margin-top:-40px;
