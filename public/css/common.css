@@ -2189,8 +2189,8 @@ body.tagModes:not(.tagmode-default-extended) section[data-tagmode='crunched'] .s
 content: "\f04b";
 visibility: visible;
 position: absolute;
-font-size: 8px;
-top: 13px;
+font-size: 7px;
+top: 10px;
 transform: scaleY(1.4);
  -webkit-transform: scaleY(1.4);
  -ms-transform: scaleY(1.4);
